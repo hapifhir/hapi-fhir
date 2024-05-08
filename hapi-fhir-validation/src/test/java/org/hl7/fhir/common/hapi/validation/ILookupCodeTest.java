@@ -23,7 +23,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hl7.fhir.common.hapi.validation.support.RemoteTerminologyServiceValidationSupport.createConceptProperty;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 public interface ILookupCodeTest {
@@ -56,7 +56,7 @@ public interface ILookupCodeTest {
 		default void testLookupCode_forCodeSystemWithBlankCode_throwsException() {
 			try {
 				getService().lookupCode(null, new LookupCodeRequest(CODE_SYSTEM, ""));
-				fail("");			} catch (IllegalArgumentException e) {
+				fail();			} catch (IllegalArgumentException e) {
 				assertEquals("theCode must be provided", e.getMessage());
 			}
 		}
@@ -73,7 +73,7 @@ public interface ILookupCodeTest {
 
 			try {
 				getService().lookupCode(null, new LookupCodeRequest(CODE_SYSTEM, CODE, LANGUAGE, null));
-				fail("");			} catch (InternalErrorException e) {
+				fail();			} catch (InternalErrorException e) {
 				assertThat(e.getMessage()).contains("HAPI-1739: Don't know how to handle ");
 			}
 		}

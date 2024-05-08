@@ -41,7 +41,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class MdmProviderQueryLinkR4Test extends BaseLinkR4Test {
@@ -467,7 +467,7 @@ public class MdmProviderQueryLinkR4Test extends BaseLinkR4Test {
 	public void testNotDuplicateBadId() {
 		try {
 			myMdmProvider.notDuplicate(myGoldenResource1Id, new StringType("Patient/notAnId123"), myRequestDetails);
-			fail("");
+			fail();
 		} catch (ResourceNotFoundException e) {
 			assertEquals(Msg.code(2001) + "Resource Patient/notAnId123 is not known", e.getMessage());
 		}

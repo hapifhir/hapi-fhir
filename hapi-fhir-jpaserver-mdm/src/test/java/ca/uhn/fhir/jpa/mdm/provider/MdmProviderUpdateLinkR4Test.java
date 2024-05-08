@@ -24,7 +24,7 @@ import java.io.IOException;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class MdmProviderUpdateLinkR4Test extends BaseLinkR4Test {
@@ -111,7 +111,7 @@ public class MdmProviderUpdateLinkR4Test extends BaseLinkR4Test {
 		assertLinkCount(1);
 		try {
 			myMdmProvider.updateLink(sourcePatientId, patientId, MATCH_RESULT, myRequestDetails);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage()).endsWith("This operation is only available for resources on the same partition.");
 		}
@@ -125,7 +125,7 @@ public class MdmProviderUpdateLinkR4Test extends BaseLinkR4Test {
 
 		try {
 			myMdmProvider.updateLink(mySourcePatientId, myPatientId, NO_MATCH_RESULT, myRequestDetails);
-			fail("");
+			fail();
 		} catch (ResourceVersionConflictException e) {
 			assertThat(e.getMessage()).matches(Msg.code(1501) + "Requested resource Patient/\\d+/_history/1 is not the latest version.  Latest version is Patient/\\d+/_history/2");
 		}
@@ -158,7 +158,7 @@ public class MdmProviderUpdateLinkR4Test extends BaseLinkR4Test {
 
 		try {
 			myMdmProvider.updateLink(mySourcePatientId, myPatientId, MATCH_RESULT, myRequestDetails);
-			fail("");
+			fail();
 		} catch (ResourceVersionConflictException e) {
 			assertThat(e.getMessage()).matches(Msg.code(1501) + "Requested resource Patient/\\d+/_history/1 is not the latest version.  Latest version is Patient/\\d+/_history/2");
 		}
@@ -168,7 +168,7 @@ public class MdmProviderUpdateLinkR4Test extends BaseLinkR4Test {
 	public void testUpdateIllegalResultForPossibleMatch() {
 		try {
 			myMdmProvider.updateLink(mySourcePatientId, myPatientId, POSSIBLE_MATCH_RESULT, myRequestDetails);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(1495) + "$mdm-update-link illegal matchResult value 'POSSIBLE_MATCH'.  Must be NO_MATCH or MATCH", e.getMessage());
 		}
@@ -178,7 +178,7 @@ public class MdmProviderUpdateLinkR4Test extends BaseLinkR4Test {
 	public void testUpdateIllegalResultPD() {
 		try {
 			myMdmProvider.updateLink(mySourcePatientId, myPatientId, POSSIBLE_DUPLICATE_RESULT, myRequestDetails);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(1495) + "$mdm-update-link illegal matchResult value 'POSSIBLE_DUPLICATE'.  Must be NO_MATCH or MATCH", e.getMessage());
 		}
@@ -188,7 +188,7 @@ public class MdmProviderUpdateLinkR4Test extends BaseLinkR4Test {
 	public void testUpdateIllegalSecondArg() {
 		try {
 			myMdmProvider.updateLink(myVersionlessGodlenResourceId, new StringType(""), NO_MATCH_RESULT, myRequestDetails);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage()).endsWith(" must have form <resourceType>/<id>  where <id> is the id of the resource and <resourceType> is the type of the resource");
 		}
@@ -198,7 +198,7 @@ public class MdmProviderUpdateLinkR4Test extends BaseLinkR4Test {
 	public void testUpdateIllegalFirstArg() {
 		try {
 			myMdmProvider.updateLink(new StringType(""), myPatientId, NO_MATCH_RESULT, myRequestDetails);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage()).endsWith(" must have form <resourceType>/<id> where <id> is the id of the resource");
 		}
@@ -208,7 +208,7 @@ public class MdmProviderUpdateLinkR4Test extends BaseLinkR4Test {
 	public void testAttemptingToModifyANonExistentLinkFails() {
 		try {
 			myMdmProvider.updateLink(mySourcePatientId, mySourcePatientId, NO_MATCH_RESULT, myRequestDetails);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage()).startsWith(Msg.code(738) + "No link");
 		}
@@ -219,7 +219,7 @@ public class MdmProviderUpdateLinkR4Test extends BaseLinkR4Test {
 		Patient patient = createPatient();
 		try {
 			myMdmProvider.updateLink(new StringType(patient.getIdElement().getValue()), myPatientId, NO_MATCH_RESULT, myRequestDetails);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			String expectedMessage = myMessageHelper.getMessageForFailedGoldenResourceLoad("goldenResourceId", patient.getIdElement().getValue());
 			assertEquals(Msg.code(1502) + expectedMessage, e.getMessage());
@@ -233,7 +233,7 @@ public class MdmProviderUpdateLinkR4Test extends BaseLinkR4Test {
 		createPatient(patient);
 		try {
 			myMdmProvider.updateLink(mySourcePatientId, new StringType(patient.getIdElement().getValue()), NO_MATCH_RESULT, myRequestDetails);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(744) + myMessageHelper.getMessageForUnsupportedSourceResource(), e.getMessage());
 		}

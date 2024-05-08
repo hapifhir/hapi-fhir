@@ -30,7 +30,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class ClientHeadersR4Test {
@@ -141,7 +141,7 @@ public class ClientHeadersR4Test {
 		protected void service(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 
 			if (ourHeaders != null) {
-				fail("");			}
+				fail();			}
 			ourHeaders = new HashMap<>();
 			ourParams = new HashMap<>(req.getParameterMap());
 			ourMethod = req.getMethod();

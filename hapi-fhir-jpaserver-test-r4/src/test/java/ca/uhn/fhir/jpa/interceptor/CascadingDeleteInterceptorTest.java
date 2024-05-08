@@ -36,8 +36,8 @@ import java.io.IOException;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -157,7 +157,7 @@ public class CascadingDeleteInterceptorTest extends BaseResourceProviderR4Test {
 
 		try {
 			myClient.delete().resourceById(myPatientId).execute();
-			fail("");
+			fail();
 		} catch (ResourceVersionConflictException e) {
 			// good
 			ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
@@ -172,7 +172,7 @@ public class CascadingDeleteInterceptorTest extends BaseResourceProviderR4Test {
 
 		try {
 			myPatientDao.delete(myPatientId);
-			fail("");
+			fail();
 		} catch (ResourceVersionConflictException e) {
 			assertThat(e.getMessage()).contains("because at least one resource has a reference to this resource");
 		} finally {
@@ -188,7 +188,7 @@ public class CascadingDeleteInterceptorTest extends BaseResourceProviderR4Test {
 
 		try {
 			myClient.delete().resourceById(myPatientId).execute();
-			fail("");
+			fail();
 		} catch (ResourceVersionConflictException e) {
 			String output = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome());
 			ourLog.info(output);
@@ -218,7 +218,7 @@ public class CascadingDeleteInterceptorTest extends BaseResourceProviderR4Test {
 		try {
 			ourLog.info("Reading {}", myPatientId);
 			myClient.read().resource(Patient.class).withId(myPatientId).execute();
-			fail("");
+			fail();
 		} catch (ResourceGoneException e) {
 			// good
 		}
@@ -249,7 +249,7 @@ public class CascadingDeleteInterceptorTest extends BaseResourceProviderR4Test {
 			try {
 				ourLog.info("Reading {}", myPatientId);
 				myClient.read().resource(Patient.class).withId(myPatientId).execute();
-				fail("");
+				fail();
 			} catch (ResourceGoneException e) {
 				// good
 			}
@@ -288,14 +288,14 @@ public class CascadingDeleteInterceptorTest extends BaseResourceProviderR4Test {
 		try {
 			ourLog.info("Reading {}", o0id);
 			myClient.read().resource(Organization.class).withId(o0id).execute();
-			fail("");
+			fail();
 		} catch (ResourceGoneException e) {
 			// good
 		}
 		try {
 			ourLog.info("Reading {}", o1id);
 			myClient.read().resource(Organization.class).withId(o1id).execute();
-			fail("");
+			fail();
 		} catch (ResourceGoneException e) {
 			// good
 		}
@@ -324,7 +324,7 @@ public class CascadingDeleteInterceptorTest extends BaseResourceProviderR4Test {
 		try {
 			ourLog.info("Reading {}", myPatientId);
 			myClient.read().resource(Patient.class).withId(myPatientId).execute();
-			fail("");
+			fail();
 		} catch (ResourceGoneException e) {
 			// good
 		}

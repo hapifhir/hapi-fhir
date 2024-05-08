@@ -35,7 +35,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -148,7 +148,7 @@ public class PartitionManagementProviderTest {
 				.withNoParameters(Parameters.class)
 				.encodedXml()
 				.execute();
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("HTTP 400 Bad Request: " + Msg.code(1314) + "No Partition ID supplied", e.getMessage());
 		}
@@ -191,7 +191,7 @@ public class PartitionManagementProviderTest {
 				.withNoParameters(Parameters.class)
 				.encodedXml()
 				.execute();
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("HTTP 400 Bad Request: " + Msg.code(1314) + "No Partition ID supplied", e.getMessage());
 		}
@@ -232,7 +232,7 @@ public class PartitionManagementProviderTest {
 				.withNoParameters(Parameters.class)
 				.encodedXml()
 				.execute();
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("HTTP 400 Bad Request: " + Msg.code(1314) + "No Partition ID supplied", e.getMessage());
 		}
@@ -268,7 +268,7 @@ public class PartitionManagementProviderTest {
 				.withNoParameters(Parameters.class)
 				.encodedXml()
 				.execute();
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("HTTP 400 Bad Request: " + Msg.code(1314) + "No Partition ID supplied", e.getMessage());
 		}

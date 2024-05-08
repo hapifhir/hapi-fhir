@@ -29,7 +29,7 @@ import java.io.IOException;
 import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class FhirResourceDaoDstu2ValidateTest extends BaseJpaDstu2Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDstu2ValidateTest.class);
@@ -195,7 +195,7 @@ public class FhirResourceDaoDstu2ValidateTest extends BaseJpaDstu2Test {
 		} catch (PreconditionFailedException e) {
 			// should not happen
 			IBaseOperationOutcome oo = e.getOperationOutcome();
-			fail("", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+			fail(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
 		}
 		pat.setId("");
 
@@ -253,7 +253,7 @@ public class FhirResourceDaoDstu2ValidateTest extends BaseJpaDstu2Test {
 			}
 		}
 		if (retVal == null) {
-			fail("", "Can't find VS: " + name);
+			fail("Can't find VS: " + name);
 		}
 		return retVal;
 	}

@@ -184,7 +184,7 @@ import static ca.uhn.fhir.util.DateUtils.convertDateToIso8601String;
 import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.apache.commons.lang3.StringUtils.leftPad;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
@@ -192,7 +192,7 @@ import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -247,7 +247,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		SearchParameterMap map = SearchParameterMap.newSynchronous("name", new StringParam("FAMILY"));
 		try {
 			myPatientDao.search(map, mySrd);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			// good
 		}
@@ -653,7 +653,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		map.add(Encounter.SP_SUBJECT, new ReferenceParam("subject", "Organization").setChain(PARAM_TYPE));
 		try {
 			myEncounterDao.search(map);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(2495) + "Resource type \"Organization\" is not a valid target type for reference search parameter: Encounter:subject", e.getMessage());
 		}
@@ -663,7 +663,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		map.add(Encounter.SP_SUBJECT, new ReferenceParam("subject", "HelpImABug").setChain(PARAM_TYPE));
 		try {
 			myEncounterDao.search(map);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(1250) + "Invalid/unsupported resource type: \"HelpImABug\"", e.getMessage());
 		}
@@ -1212,7 +1212,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		params.add(PARAM_HAS, new HasParam("Observation__", "subject", "identifier", "urn:system|FOO"));
 		try {
 			myPatientDao.search(params);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(1208) + "Invalid resource type: Observation__", e.getMessage());
 		}
@@ -1225,7 +1225,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		params.add(PARAM_HAS, new HasParam("Observation", "subject", "IIIIDENFIEYR", "urn:system|FOO"));
 		try {
 			myPatientDao.search(params);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(1209) + "Unknown parameter name: Observation:IIIIDENFIEYR", e.getMessage());
 		}
@@ -1238,7 +1238,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		params.add(PARAM_HAS, new HasParam("Observation", "soooooobject", "identifier", "urn:system|FOO"));
 		try {
 			myPatientDao.search(params);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(1209) + "Unknown parameter name: Observation:soooooobject", e.getMessage());
 		}
@@ -1517,7 +1517,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 		Bundle bundleResponse = mySystemDao.transaction(new SystemRequestDetails(), firstBundle);
 		bundleResponse.getEntry()
-			.forEach(entry -> assertEquals("201 Created"), entry.getResponse().getStatus());
+			.forEach(entry -> assertEquals("201 Created", entry.getResponse().getStatus()));
 
 		IBundleProvider search = myOrganizationDao.search(new SearchParameterMap().setLoadSynchronous(true));
 		assertThat(search.getAllResources()).hasSize(1);
@@ -3138,14 +3138,14 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 		try {
 			myObservationDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Observation.SP_CODE, new TokenParam(null, "111-1").setModifier(TokenParamModifier.BELOW)));
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(1240) + "Invalid token specified for parameter code - No code specified: (missing)|111-1", e.getMessage());
 		}
 
 		try {
 			myObservationDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Observation.SP_CODE, new TokenParam("111-1", null).setModifier(TokenParamModifier.BELOW)));
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(1239) + "Invalid token specified for parameter code - No system specified: 111-1|(missing)", e.getMessage());
 		}
@@ -4195,7 +4195,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		params.add(Constants.PARAM_CONTENT, new StringParam("fulltext"));
 		try {
 			myPatientDao.search(params).getAllResources();
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(1192) + "Fulltext search is not enabled on this service, can not process parameter: _content", e.getMessage());
 		}
@@ -4207,7 +4207,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		params.add(Constants.PARAM_TEXT, new StringParam("fulltext"));
 		try {
 			myPatientDao.search(params).getAllResources();
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(1192) + "Fulltext search is not enabled on this service, can not process parameter: _text", e.getMessage());
 		}
@@ -4410,7 +4410,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 		try {
 			myPatientDao.search(map);
-			fail("");
+			fail();
 		} catch (MethodNotAllowedException e) {
 			assertEquals(Msg.code(1258) + ":contains modifier is disabled on this server", e.getMessage());
 		}
@@ -4952,7 +4952,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		value = myDeviceDao.search(new SearchParameterMap());
 		if (value.size() > 0) {
 			ourLog.info("Found: " + (value.getResources(0, 1).get(0).getIdElement()));
-			fail("", myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(value.getResources(0, 1).get(0)));
+			fail(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(value.getResources(0, 1).get(0)));
 		}
 		assertEquals(0, value.size().intValue());
 
@@ -5374,7 +5374,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 				.setModifier(TokenParamModifier.OF_TYPE);
 			SearchParameterMap map = SearchParameterMap.newSynchronous("identifier", param);
 			myPatientDao.search(map, mySrd);
-			fail("");
+			fail();
 		} catch (MethodNotAllowedException e) {
 			assertEquals(Msg.code(2012) + "The :of-type modifier is not enabled on this server", e.getMessage());
 		}
@@ -5691,7 +5691,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			SearchParameterMap map = new SearchParameterMap()
 				.addInclude(new Include("Patient:" + longString));
 			myPatientDao.search(map, mySrd);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(2015) + "Invalid _include parameter value: \"Patient:" + longString + "\". Unknown search parameter \"" + longString + "\" for resource type \"Patient\". Valid search parameters for this search are: [general-practitioner, link, organization]", e.getMessage());
 		}
@@ -5701,7 +5701,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			SearchParameterMap map = new SearchParameterMap()
 				.addInclude(new Include(":"));
 			myPatientDao.search(map, mySrd);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(2018) + "Invalid _include parameter value: \":\". ", e.getMessage());
 		}
@@ -5711,7 +5711,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			SearchParameterMap map = new SearchParameterMap()
 				.addInclude(new Include("Foo:patient"));
 			myPatientDao.search(map, mySrd);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(2017) + "Invalid _include parameter value: \"Foo:patient\". Invalid/unsupported resource type: \"Foo\"", e.getMessage());
 		}
@@ -5721,7 +5721,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			SearchParameterMap map = new SearchParameterMap()
 				.addInclude(new Include("Patient:foo"));
 			myPatientDao.search(map, mySrd);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(2015) + "Invalid _include parameter value: \"Patient:foo\". Unknown search parameter \"foo\" for resource type \"Patient\". Valid search parameters for this search are: [general-practitioner, link, organization]", e.getMessage());
 		}
@@ -5731,7 +5731,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			SearchParameterMap map = new SearchParameterMap()
 				.addInclude(new Include("Patient:organization:Foo"));
 			myPatientDao.search(map, mySrd);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(2016) + "Invalid _include parameter value: \"Patient:organization:Foo\". Invalid/unsupported resource type: \"Foo\"", e.getMessage());
 		}

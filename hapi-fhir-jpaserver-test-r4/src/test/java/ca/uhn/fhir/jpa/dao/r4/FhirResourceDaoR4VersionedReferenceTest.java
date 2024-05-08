@@ -52,8 +52,8 @@ import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.util.HapiExtensions.EXTENSION_AUTO_VERSION_REFERENCES_AT_PATH;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {

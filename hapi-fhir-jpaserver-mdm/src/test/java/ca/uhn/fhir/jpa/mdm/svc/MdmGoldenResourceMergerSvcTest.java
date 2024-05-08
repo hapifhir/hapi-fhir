@@ -42,7 +42,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 
@@ -349,7 +349,7 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 
 		try {
 			mergeGoldenPatients();
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(752) + "A MANUAL NO_MATCH link may not be merged into a MANUAL MATCH link for the same target", e.getMessage());
 		}
@@ -369,7 +369,7 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 
 		try {
 			mergeGoldenPatients();
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(752) + "A MANUAL MATCH link may not be merged into a MANUAL NO_MATCH link for the same target", e.getMessage());
 		}

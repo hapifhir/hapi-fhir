@@ -97,7 +97,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.either;
 import static org.hamcrest.Matchers.equalTo;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -222,7 +222,7 @@ public class ClientR4Test {
 
 		try {
 			ourCtx.newRestfulClient(ITestClient.class, "http://foo").createPatient(patient);
-			fail("");		} catch (InvalidRequestException e) {
+			fail();		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage(), StringContains.containsString("foobar"));
 		}
 	}
@@ -336,7 +336,7 @@ public class ClientR4Test {
 
 		try {
 			ourCtx.newRestfulClient(ITestClientWithCreateWithInvalidParameterType.class, "http://foo");
-			fail("");		} catch (ConfigurationException e) {
+			fail();		} catch (ConfigurationException e) {
 			assertEquals(Msg.code(1435) + "Method 'createPatient' is annotated with @ResourceParam but has a type that is not an implementation of org.hl7.fhir.instance.model.api.IBaseResource", e.getMessage());
 		}
 	}
@@ -357,7 +357,7 @@ public class ClientR4Test {
 
 		try {
 			ourCtx.newRestfulClient(ITestClientWithCreateWithValidAndInvalidParameterType.class, "http://foo");
-			fail("");		} catch (ConfigurationException e) {
+			fail();		} catch (ConfigurationException e) {
 			assertEquals(Msg.code(1438) + "Parameter #2/2 of method 'createPatient' on type 'ca.uhn.fhir.rest.client.ClientR4Test.ITestClientWithCreateWithValidAndInvalidParameterType' has no recognized FHIR interface parameter annotations. Don't know how to handle this parameter", e.getMessage());
 		}
 	}
@@ -538,7 +538,7 @@ public class ClientR4Test {
 
 		try {
 			client.read(new IdType("8"));
-			fail("");		} catch (UnsupportedOperationException e) {
+			fail();		} catch (UnsupportedOperationException e) {
 			assertThat(e.getMessage()).contains("annotation");
 		}
 
@@ -603,7 +603,7 @@ public class ClientR4Test {
 		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
 		try {
 			client.getPatientById(new IdType("111"));
-			fail("");		} catch (InternalErrorException e) {
+			fail();		} catch (InternalErrorException e) {
 			assertThat(e.getMessage()).contains("INTERNAL");
 			assertThat(e.getResponseBody()).contains("Internal Failure");
 		}
@@ -629,7 +629,7 @@ public class ClientR4Test {
 		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
 		try {
 			client.getPatientById(new IdType("111"));
-			fail("");		} catch (ResourceNotFoundException e) {
+			fail();		} catch (ResourceNotFoundException e) {
 			// good
 		}
 
@@ -705,7 +705,7 @@ public class ClientR4Test {
 
 		try {
 			client.getPatientByCompartmentAndDob(new IdType(""), new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, "2011-01-02"));
-			fail("");		} catch (InvalidRequestException e) {
+			fail();		} catch (InvalidRequestException e) {
 			assertThat(e.toString()).contains("null or empty for compartment");
 		}
 
@@ -1108,7 +1108,7 @@ public class ClientR4Test {
 		ITestClientWithUnannotatedMethod client = ourCtx.newRestfulClient(ITestClientWithUnannotatedMethod.class, "http://foo");
 		try {
 			client.getPatientWithAt(new InstantType("2010-10-01T01:02:03.0Z"));
-			fail("");		} catch (UnsupportedOperationException e) {
+			fail();		} catch (UnsupportedOperationException e) {
 			assertEquals(Msg.code(1403) + "The method 'getPatientWithAt' in type ITestClientWithUnannotatedMethod has no handler. Did you forget to annotate it with a RESTful method annotation?", e.getMessage());
 		}
 
@@ -1278,7 +1278,7 @@ public class ClientR4Test {
 
 			ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
 			client.updatePatient(new IdType("Patient/100/_history/200"), patient);
-			fail("");		} catch (ResourceVersionConflictException e) {
+			fail();		} catch (ResourceVersionConflictException e) {
 			assertEquals("HTTP 409 Conflict", e.getMessage());
 		}
 	}
@@ -1346,7 +1346,7 @@ public class ClientR4Test {
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://testValidateServerBaseWithInvalidResponse");
 		try {
 			client.read().resource("Patient").withId("1").execute();
-			fail("");		} catch (FhirClientConnectionException e) {
+			fail();		} catch (FhirClientConnectionException e) {
 			assertEquals(Msg.code(1357) + "Failed to retrieve the server metadata statement during client initialization. URL used was http://testValidateServerBaseWithInvalidResponse/metadata", e.getMessage());
 		}
 

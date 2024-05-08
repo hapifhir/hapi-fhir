@@ -33,7 +33,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOf
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.either;
 import static org.hamcrest.Matchers.endsWith;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class BaseDateTimeDtDstu2Test {
@@ -248,12 +248,12 @@ public class BaseDateTimeDtDstu2Test {
 	public void testConstructorRejectsInvalidPrecision() {
 		try {
 			new DateDt("2001-01-02T11:13:33");
-			fail("");		} catch (DataFormatException e) {
+			fail();		} catch (DataFormatException e) {
 			assertThat(e.getMessage()).contains("precision");
 		}
 		try {
 			new InstantDt("2001-01-02");
-			fail("");		} catch (DataFormatException e) {
+			fail();		} catch (DataFormatException e) {
 			assertThat(e.getMessage()).contains("precision");
 		}
 	}
@@ -509,7 +509,7 @@ public class BaseDateTimeDtDstu2Test {
 	public void testParseInvalidZoneOffset() {
 		try {
 			new DateTimeDt("2010-01-01T00:00:00.1234-09:00Z");
-			fail("");		} catch (DataFormatException e) {
+			fail();		} catch (DataFormatException e) {
 			assertEquals(Msg.code(1882) + "Invalid date/time format: \"2010-01-01T00:00:00.1234-09:00Z\"", e.getMessage());
 		}
 	}
@@ -584,7 +584,7 @@ public class BaseDateTimeDtDstu2Test {
 		DateTimeDt dt = new DateTimeDt();
 		try {
 			dt.setValueAsString("2013-02-03T11:22");
-			fail("");		} catch (DataFormatException e) {
+			fail();		} catch (DataFormatException e) {
 			assertEquals(e.getMessage(), Msg.code(1885) + "Invalid date/time string (datatype DateTimeDt does not support MINUTE precision): 2013-02-03T11:22");
 		}
 	}
@@ -594,7 +594,7 @@ public class BaseDateTimeDtDstu2Test {
 		DateTimeDt dt = new DateTimeDt();
 		try {
 			dt.setValueAsString("2013-02-03T11:22Z");
-			fail("");		} catch (DataFormatException e) {
+			fail();		} catch (DataFormatException e) {
 			assertEquals(e.getMessage(), Msg.code(1885) + "Invalid date/time string (datatype DateTimeDt does not support MINUTE precision): 2013-02-03T11:22Z");
 		}
 	}
@@ -815,7 +815,7 @@ public class BaseDateTimeDtDstu2Test {
 		try {
 			DateTimeDt dt = new DateTimeDt();
 			dt.setValueAsString(input);
-			fail("");		} catch (ca.uhn.fhir.parser.DataFormatException e) {
+			fail();		} catch (ca.uhn.fhir.parser.DataFormatException e) {
 			assertThat(e.getMessage()).contains("Invalid date/time format: \"" + input + "\"");
 		}
 	}

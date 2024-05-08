@@ -12,7 +12,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class FhirSystemDaoTransactionDstu3Test extends BaseJpaDstu3SystemTest {
 	public static final int TEST_MAXIMUM_TRANSACTION_BUNDLE_SIZE = 5;

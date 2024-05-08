@@ -74,8 +74,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static ca.uhn.fhir.batch2.config.BaseBatch2Config.CHANNEL_NAME;
 import static ca.uhn.fhir.batch2.coordinator.WorkChunkProcessor.MAX_CHUNK_ERROR_COUNT;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 @ContextConfiguration(classes = {
@@ -213,7 +213,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 	@Test
 	public void testFirstStepNoSink() throws InterruptedException {
 		IJobStepWorker<TestJobParameters, VoidModel, FirstStepOutput> firstStep = (step, sink) -> callLatch(myFirstStepLatch, step);
-		IJobStepWorker<TestJobParameters, FirstStepOutput, VoidModel> lastStep = (step, sink) -> fail("");
+		IJobStepWorker<TestJobParameters, FirstStepOutput, VoidModel> lastStep = (step, sink) -> fail();
 
 		String jobId = getMethodNameForJobId();
 		JobDefinition<? extends IModelJson> definition = buildGatedJobDefinition(jobId, firstStep, lastStep);
@@ -715,7 +715,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		IJobStepWorker<TestJobParameters, VoidModel, FirstStepOutput> firstStep = (step, sink) -> {
 			throw new JobExecutionFailedException("Expected Test Exception");
 		};
-		IJobStepWorker<TestJobParameters, FirstStepOutput, VoidModel> lastStep = (step, sink) -> fail("");
+		IJobStepWorker<TestJobParameters, FirstStepOutput, VoidModel> lastStep = (step, sink) -> fail();
 
 		String jobDefId = getMethodNameForJobId();
 		JobDefinition<? extends IModelJson> definition = buildGatedJobDefinition(jobDefId, firstStep, lastStep);
@@ -745,7 +745,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 				callLatch(myFirstStepLatch, step);
 				throw new RuntimeException("Expected Test Exception");
 			};
-		IJobStepWorker<TestJobParameters, FirstStepOutput, VoidModel> lastStep = (step, sink) -> fail("");
+		IJobStepWorker<TestJobParameters, FirstStepOutput, VoidModel> lastStep = (step, sink) -> fail();
 
 			String jobDefId = getMethodNameForJobId();
 			JobDefinition<? extends IModelJson> definition = buildGatedJobDefinition(jobDefId, firstStep, lastStep);

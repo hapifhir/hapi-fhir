@@ -50,7 +50,7 @@ import java.util.List;
 
 import static ca.uhn.fhir.util.HapiExtensions.EXT_VALUESET_EXPANSION_MESSAGE;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {TestR4Config.class, TestHSearchAddInConfig.NoFT.class})
@@ -117,7 +117,7 @@ public class FhirResourceDaoR4SearchWithHSearchDisabledTest extends BaseJpaTest 
 		map.add(ca.uhn.fhir.rest.api.Constants.PARAM_CONTENT, new StringParam(methodName));
 		try {
 			myOrganizationDao.search(map).size();
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(1192) + "Fulltext search is not enabled on this service, can not process parameter: _content", e.getMessage());
 		}
@@ -149,7 +149,7 @@ public class FhirResourceDaoR4SearchWithHSearchDisabledTest extends BaseJpaTest 
 		map.add(ca.uhn.fhir.rest.api.Constants.PARAM_TEXT, new StringParam(methodName));
 		try {
 			myOrganizationDao.search(map).size();
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(1192) + "Fulltext search is not enabled on this service, can not process parameter: _text", e.getMessage());
 		}

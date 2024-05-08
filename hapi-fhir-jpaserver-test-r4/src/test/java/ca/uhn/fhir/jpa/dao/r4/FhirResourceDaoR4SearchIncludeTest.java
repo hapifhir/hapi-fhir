@@ -38,10 +38,10 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 @SuppressWarnings({"unchecked", "Duplicates"})
@@ -107,7 +107,7 @@ public class FhirResourceDaoR4SearchIncludeTest extends BaseJpaR4Test {
 			.addInclude(new Include("CarePlan.patient"));
 		try {
 			myCarePlanDao.search(map);
-			fail("");
+			fail();
 		} catch (Exception e) {
 			// good
 		}
@@ -120,7 +120,7 @@ public class FhirResourceDaoR4SearchIncludeTest extends BaseJpaR4Test {
 			List<String> ids = toUnqualifiedVersionlessIdValues(results);
 			assertThat(ids).as(ids.toString()).containsExactlyInAnyOrder("CarePlan/CP-1", "Patient/PAT-1");
 		} catch (Exception e) {
-			fail("");
+			fail();
 		}
 	}
 

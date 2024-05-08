@@ -14,8 +14,8 @@ import java.sql.SQLException;
 import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class ModifyColumnTest extends BaseTest {
@@ -300,7 +300,7 @@ public class ModifyColumnTest extends BaseTest {
 
 		try {
 			getMigrator().migrate();
-			fail("");
+			fail();
 		} catch (HapiMigrationException e) {
 			// expected
 		}

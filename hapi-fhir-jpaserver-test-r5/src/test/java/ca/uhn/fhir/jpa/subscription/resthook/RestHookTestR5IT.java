@@ -42,7 +42,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.awaitility.Awaitility.await;
 
@@ -656,7 +656,7 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 	public void testRestHookTopicSubscriptionInvalidTopic() throws Exception {
 		try {
 			createTopicSubscription(OBS_CODE);
-			fail("");
+			fail();
 		} catch (UnprocessableEntityException e) {
 			assertEquals("HTTP 422 Unprocessable Entity: " + Msg.code(2322) + "No SubscriptionTopic exists with topic: " + SUBSCRIPTION_TOPIC_TEST_URL + OBS_CODE, e.getMessage());
 		}
@@ -748,7 +748,7 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 
 		try {
 			createSubscriptionTopic(subscriptionTopic);
-			fail("");
+			fail();
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage()).contains("Can not process submitted SubscriptionTopic - SubscriptionTopic.status must be populated on this server");
 		}

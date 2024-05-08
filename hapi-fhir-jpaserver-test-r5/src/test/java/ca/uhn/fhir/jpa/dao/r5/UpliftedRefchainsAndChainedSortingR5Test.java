@@ -36,7 +36,7 @@ import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ContextConfiguration(classes = TestHSearchAddInConfig.NoFT.class)
@@ -185,7 +185,7 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		// Test
 		try {
 			createEncounter(ENCOUNTER_E1, PATIENT_P1);
-			fail("");
+			fail();
 		} catch (ResourceNotFoundException e) {
 
 			// Verify
@@ -209,7 +209,7 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 
 		try {
 			mySystemDao.transaction(mySrd, requestBundle);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 
 			// Verify
@@ -840,7 +840,7 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 				.newSynchronous()
 				.setSort(new SortSpec("focus.name"));
 			myObservationDao.search(map, mySrd);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage()).contains("Unable to sort on a chained parameter from 'focus' as this parameter has multiple target types. Please specify the target type.");
 		}
@@ -860,7 +860,7 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 				.newSynchronous()
 				.setSort(new SortSpec("date.name"));
 			myObservationDao.search(map, mySrd);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage()).contains("Invalid chain, date is not a reference SearchParameter");
 		}
@@ -878,7 +878,7 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 				.setSort(new SortSpec("subject.name"));
 			myCaptureQueriesListener.clear();
 			myEncounterDao.search(map, mySrd);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 
 			// Verify
@@ -898,7 +898,7 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 				.setSort(new SortSpec("patient.organization.name"));
 			myCaptureQueriesListener.clear();
 			myEncounterDao.search(map, mySrd);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 
 			// Verify
@@ -918,7 +918,7 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 				.setSort(new SortSpec("foo.name"));
 			myCaptureQueriesListener.clear();
 			myEncounterDao.search(map, mySrd);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 
 			// Verify
@@ -938,7 +938,7 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 				.setSort(new SortSpec("patient.foo"));
 			myCaptureQueriesListener.clear();
 			myEncounterDao.search(map, mySrd);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 
 			// Verify
@@ -958,7 +958,7 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 				.setSort(new SortSpec("result.value-quantity"));
 			myCaptureQueriesListener.clear();
 			myDiagnosticReportDao.search(map, mySrd);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 
 			// Verify

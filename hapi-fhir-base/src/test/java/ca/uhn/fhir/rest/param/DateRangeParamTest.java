@@ -10,7 +10,7 @@ import org.mockito.Mockito;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -52,7 +52,7 @@ public class DateRangeParamTest {
 		DateRangeParam dateRangeParam = new DateRangeParam();
 		try {
 			dateRangeParam.setValuesAsQueryTokens(fhirContext, "_lastUpdated", params);
-			fail("");
+			fail();
 		} catch (DataFormatException e) {
 			// good
 		}
@@ -71,7 +71,7 @@ public class DateRangeParamTest {
 		DateRangeParam dateRangeParam = new DateRangeParam();
 		try {
 			dateRangeParam.setValuesAsQueryTokens(fhirContext, "_lastUpdated", params);
-			fail("");
+			fail();
 		} catch (DataFormatException e) {
 			// good
 		}

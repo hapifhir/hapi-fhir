@@ -91,12 +91,12 @@ import java.util.stream.Stream;
 import static ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4TagsInlineTest.createSearchParameterForInlineSecurity;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -1120,7 +1120,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 					await().atMost(400, TimeUnit.MILLISECONDS)
 						.until(gate::get);
 				} catch (IOException e) {
-					fail("", e.toString());
+					fail(e.toString());
 				}
 			}
 		}
@@ -1143,7 +1143,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		// Test
 		try {
 			startNewJob(options);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 
 			// Verify
@@ -1160,7 +1160,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		// Test
 		try {
 			startNewJob(options);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 
 			// Verify
@@ -1177,7 +1177,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		// Test
 		try {
 			startNewJob(options);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 
 			// Verify
@@ -1194,7 +1194,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		// Test
 		try {
 			startNewJob(options);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 
 			// Verify
@@ -1211,7 +1211,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		// Test
 		try {
 			startNewJob(options);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 
 			// Verify

@@ -39,7 +39,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 
 /*
@@ -151,7 +151,7 @@ public class ResourceProviderR4RemoteTerminologyTest extends BaseResourceProvide
 				.andParameter("url", new UriType("http://hl7.org/fhir/ValueSet/list-example-codes"))
 				.andParameter("system", new UriType(INVALID_CODE_SYSTEM_URI))
 				.execute();
-			fail("");
+			fail();
 		} catch (InvalidRequestException exception) {
 			assertThat(exception.getMessage()).isEqualTo("HTTP 400 Bad Request: HAPI-2352: Coding.system '" + CODE_SYSTEM_V2_0247_URI + "' " +
 				"does not equal param system '" + INVALID_CODE_SYSTEM_URI + "'. Unable to validate-code.");

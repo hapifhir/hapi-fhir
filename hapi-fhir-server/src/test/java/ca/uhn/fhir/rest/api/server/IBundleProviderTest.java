@@ -7,7 +7,7 @@ import com.google.common.collect.Lists;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -53,7 +53,7 @@ public class IBundleProviderTest {
 		};
 		try {
 			provider.getAllResources();
-			fail("");		} catch (ConfigurationException e) {
+			fail();		} catch (ConfigurationException e) {
 			assertEquals(Msg.code(464) + "Attempt to request all resources from an asynchronous search result.  The SearchParameterMap for this search probably should have been synchronous.", e.getMessage());
 		}
 	}

@@ -47,6 +47,8 @@ import static ca.uhn.fhir.jpa.model.util.JpaConstants.HEADER_META_SNAPSHOT_MODE;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Test the rest-hook subscriptions
@@ -228,7 +230,7 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 		boolean wasDeleted = transactionTemplate.execute(tx -> myResourceModifiedMessagePersistenceSvc.deleteByPK(persistedResourceModifiedMessage.getPersistedResourceModifiedMessagePk()));
 
 		// then
-		assertEquals(Boolean.TRUE, wasDeleted);
+		assertTrue(wasDeleted);
 		assertThat(myResourceModifiedMessagePersistenceSvc.findAllOrderedByCreatedTime()).hasSize(0);
 	}
 
@@ -244,7 +246,7 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 		boolean wasDeleted = transactionTemplate.execute(tx -> myResourceModifiedMessagePersistenceSvc.deleteByPK(nonExistentResourceWithPk));
 
 		// then
-		assertEquals(Boolean.FALSE, wasDeleted);
+		assertFalse(wasDeleted);
 	}
 
 	@Test
@@ -284,18 +286,6 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 		retVal.setPartitionId(RequestPartitionId.allPartitions());
 		return retVal;
 	}
-
-	private static void assertEquals(ResourceModifiedMessage theMsg, ResourceModifiedMessage theComparedTo){
-		assertEquals(theComparedTo.getPayloadId(), theMsg.getPayloadId());
-		assertEquals(theComparedTo.getOperationType(), theMsg.getOperationType());
-		assertEquals(theComparedTo.getPayloadString(), theMsg.getPayloadString());
-		assertEquals(theComparedTo.getSubscriptionId(), theMsg.getSubscriptionId());
-		assertEquals(theComparedTo.getMediaType(), theMsg.getMediaType());
-		assertEquals(theComparedTo.getMessageKeyOrNull(), theMsg.getMessageKeyOrNull());
-		assertEquals(theComparedTo.getTransactionId(), theMsg.getTransactionId());
-		assertEquals(theComparedTo.getAttributes(), theMsg.getAttributes());
-	}
-
 	private void maybeAddHeaderInterceptor(IGenericClient theClient, List<Header> theHeaders) {
 		if(theHeaders.isEmpty()){
 			return;
@@ -333,10 +323,6 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 		IBaseResource resource = myFhirContext.newJsonParser().parseResource(payloadString);
 		handler.clearMessages();
 		return (T) resource;
-	}
-
-	private static void assertEquals(String theMsg, String theComparedTo){
-		assertEquals(theComparedTo, theMsg);
 	}
 
 	private static String toJson(Object theRequest) {

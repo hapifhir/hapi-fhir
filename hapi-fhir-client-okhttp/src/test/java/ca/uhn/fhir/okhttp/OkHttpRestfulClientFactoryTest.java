@@ -21,8 +21,8 @@ import javax.net.ssl.SSLHandshakeException;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class OkHttpRestfulClientFactoryTest extends BaseFhirVersionParameterizedTest {
@@ -102,7 +102,7 @@ public class OkHttpRestfulClientFactoryTest extends BaseFhirVersionParameterized
 				.url(fhirVersionParams.getSecuredPatientEndpoint())
 				.build();
 			unauthenticatedClient.newCall(request).execute();
-			fail("");
+			fail();
 		} catch (Exception e) {
 			assertEquals(SSLHandshakeException.class, e.getClass());
 		}
@@ -128,7 +128,7 @@ public class OkHttpRestfulClientFactoryTest extends BaseFhirVersionParameterized
 		context.setRestfulClientFactory(new OkHttpRestfulClientFactory(context));
 		try {
 			context.newRestfulGenericClient(secureBase).search().forResource("Patient").execute();
-			fail("");
+			fail();
 		} catch (Exception e) {
 			assertThat(e.getMessage()).contains("HAPI-1357: Failed to retrieve the server metadata statement during client initialization");
 			assertEquals(SSLHandshakeException.class, e.getCause().getCause().getClass());

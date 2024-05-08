@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -71,7 +71,7 @@ public class BaseBatchJobParametersTest {
 		} else {
 			try {
 				parameters.setUserData(key, testValue);
-				fail("");
+				fail();
 			} catch (IllegalArgumentException ex) {
 				String dataType = testValue.getClass().getName();
 				assertThat(ex.getMessage().contains("Invalid data type provided " + dataType)).as(ex.getMessage()).isTrue();
@@ -89,7 +89,7 @@ public class BaseBatchJobParametersTest {
 		for (String key : new String[] { null, "" }) {
 			try {
 				parameters.setUserData(key, "test");
-				fail("");
+				fail();
 			} catch (IllegalArgumentException ex) {
 				assertThat(ex.getMessage().contains("Invalid key; key must be non-empty, non-null")).as(ex.getMessage()).isTrue();
 			}

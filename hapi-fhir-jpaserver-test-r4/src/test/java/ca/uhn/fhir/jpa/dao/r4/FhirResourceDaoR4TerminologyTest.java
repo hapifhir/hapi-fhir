@@ -50,7 +50,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -220,7 +220,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 		codeSystem.setContent(CodeSystemContentMode.COMPLETE);
 		try {
 			myCodeSystemDao.create(codeSystem, mySrd);
-			fail("");
+			fail();
 		} catch (UnprocessableEntityException e) {
 			assertEquals(Msg.code(848) + "Can not create multiple CodeSystem resources with CodeSystem.url \"http://example.com/my_code_system\", already have one with resource ID: CodeSystem/" + id.getIdPart(), e.getMessage());
 		}
@@ -238,7 +238,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 		codeSystem.setContent(CodeSystemContentMode.COMPLETE);
 		try {
 			myCodeSystemDao.create(codeSystem, mySrd);
-			fail("");
+			fail();
 		} catch (UnprocessableEntityException e) {
 			assertEquals(Msg.code(848) + "Can not create multiple CodeSystem resources with CodeSystem.url \"http://example.com/my_code_system\" and CodeSystem.version \"1\", already have one with resource ID: CodeSystem/" + id.getIdPart(), e.getMessage());
 		}
@@ -299,7 +299,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 
 		try {
 			myValueSetDao.expand(vs, null);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(891) + "Invalid filter, must have fields populated: property op value", e.getMessage());
 		}
@@ -561,7 +561,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 		exclude.addConcept().setCode("childAAA");
 		try {
 			myValueSetDao.expand(vs, null);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(890) + "ValueSet contains exclude criteria with no system defined", e.getMessage());
 		}
@@ -650,7 +650,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 
 		try {
 			myValueSetDao.expand(vs, null);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("Unable to find code 'ZZZZ' in code system http://example.com/my_code_system", e.getMessage());
 		}
@@ -883,7 +883,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 		params.add(AuditEvent.SP_TYPE, new TokenParam(null, "http://hl7.org/fhir/ValueSet/audit-event-type").setModifier(TokenParamModifier.IN));
 		try {
 			myAuditEventDao.search(params);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("", e.getMessage());
 		}
@@ -898,7 +898,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 		params.add(Observation.SP_CODE, new TokenParam(TermTestUtil.URL_MY_CODE_SYSTEM, "AAA").setModifier(TokenParamModifier.ABOVE));
 		try {
 			myObservationDao.search(params).size();
-			fail("");
+			fail();
 		} catch (InternalErrorException e) {
 			assertThat(e.getMessage()).contains(Msg.code(885) + "Expansion of ValueSet produced too many codes (maximum 1) - Operation aborted!");
 		}

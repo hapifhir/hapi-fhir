@@ -14,7 +14,7 @@ import java.io.IOException;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class ValueSetExpansionR4BTest extends BaseJpaR4BTest {
 
@@ -53,7 +53,7 @@ public class ValueSetExpansionR4BTest extends BaseJpaR4BTest {
 			.filter(entry -> theFullUrl.equals(entry.getFullUrl()))
 			.findFirst();
 		if (bundleEntry.isEmpty()) {
-			fail("", "Can't find resource: " + theFullUrl);
+			fail("Can't find resource: " + theFullUrl);
 		}
 		return bundleEntry.get().getResource();
 	}

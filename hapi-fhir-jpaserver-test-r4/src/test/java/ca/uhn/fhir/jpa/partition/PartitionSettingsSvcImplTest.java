@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class PartitionSettingsSvcImplTest extends BaseJpaR4Test {
 
@@ -70,7 +70,7 @@ public class PartitionSettingsSvcImplTest extends BaseJpaR4Test {
 
 		try {
 			myPartitionConfigSvc.getPartitionById(123);
-			fail("");
+			fail();
 		} catch (ResourceNotFoundException e) {
 			assertEquals("No partition exists with ID 123", e.getMessage());
 		}
@@ -98,7 +98,7 @@ public class PartitionSettingsSvcImplTest extends BaseJpaR4Test {
 		partition.setDescription("A description");
 		try {
 			myPartitionConfigSvc.updatePartition(partition);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(1309) + "Partition name \"NAME123\" is already defined", e.getMessage());
 		}
@@ -133,7 +133,7 @@ public class PartitionSettingsSvcImplTest extends BaseJpaR4Test {
 		partition.setDescription("A description");
 		try {
 			myPartitionConfigSvc.updatePartition(partition);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(1310) + "Partition must have an ID and a Name", e.getMessage());
 		}
@@ -170,7 +170,7 @@ public class PartitionSettingsSvcImplTest extends BaseJpaR4Test {
 		partition.setDescription("A description");
 		try {
 			myPartitionConfigSvc.createPartition(partition, null);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(1312) + "Partition name \"NAME 123\" is not valid", e.getMessage());
 		}
@@ -185,7 +185,7 @@ public class PartitionSettingsSvcImplTest extends BaseJpaR4Test {
 		partition.setDescription("A description");
 		try {
 			myPartitionConfigSvc.updatePartition(partition);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(1307) + "No partition exists with ID 123", e.getMessage());
 		}

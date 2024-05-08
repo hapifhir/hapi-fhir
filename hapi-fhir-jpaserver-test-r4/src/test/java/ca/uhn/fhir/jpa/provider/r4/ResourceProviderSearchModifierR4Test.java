@@ -28,7 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4Test {
@@ -226,7 +226,7 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 		try {
 			String uri = myServerBase + "/Patient?identifier:of-type=A";
 			myClient.search().byUrl(uri).execute();
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("HTTP 400 Bad Request: " + Msg.code(2013) + "Invalid parameter value for :of-type query", e.getMessage());
 		}
@@ -234,7 +234,7 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 		try {
 			String uri = myServerBase + "/Patient?identifier:of-type=A|B";
 			myClient.search().byUrl(uri).execute();
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("HTTP 400 Bad Request: " + Msg.code(2014) + "Invalid parameter value for :of-type query", e.getMessage());
 		}
@@ -242,7 +242,7 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 		try {
 			String uri = myServerBase + "/Patient?identifier:of-type=A|B|";
 			myClient.search().byUrl(uri).execute();
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("HTTP 400 Bad Request: " + Msg.code(2014) + "Invalid parameter value for :of-type query", e.getMessage());
 		}
@@ -250,7 +250,7 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 		try {
 			String uri = myServerBase + "/Patient?identifier:of-type=|B|C";
 			myClient.search().byUrl(uri).execute();
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("HTTP 400 Bad Request: " + Msg.code(2013) + "Invalid parameter value for :of-type query", e.getMessage());
 		}
@@ -258,7 +258,7 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 		try {
 			String uri = myServerBase + "/Patient?identifier:of-type=||C";
 			myClient.search().byUrl(uri).execute();
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("HTTP 400 Bad Request: " + Msg.code(2013) + "Invalid parameter value for :of-type query", e.getMessage());
 		}
@@ -266,7 +266,7 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 		try {
 			String uri = myServerBase + "/Patient?identifier:of-type=|B|";
 			myClient.search().byUrl(uri).execute();
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("HTTP 400 Bad Request: " + Msg.code(2013) + "Invalid parameter value for :of-type query", e.getMessage());
 		}
@@ -274,7 +274,7 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 		try {
 			String uri = myServerBase + "/Patient?identifier:of-type=A||";
 			myClient.search().byUrl(uri).execute();
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("HTTP 400 Bad Request: " + Msg.code(2014) + "Invalid parameter value for :of-type query", e.getMessage());
 		}
@@ -282,7 +282,7 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 		try {
 			String uri = myServerBase + "/Patient?identifier:of-type=||";
 			myClient.search().byUrl(uri).execute();
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("HTTP 400 Bad Request: " + Msg.code(2013) + "Invalid parameter value for :of-type query", e.getMessage());
 		}

@@ -27,7 +27,7 @@ import jakarta.annotation.Nonnull;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 class MdmClearStepTest extends BaseMdmR4Test {
@@ -86,7 +86,7 @@ class MdmClearStepTest extends BaseMdmR4Test {
 
 		try {
 			mdmClearGoldenResource();
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage()).isEqualTo(String.format("HAPI-0822: DELETE with _expunge=true failed.  Unable to delete %s because %s refers to it via the path Patient.link.other",
 				myGoldenId,

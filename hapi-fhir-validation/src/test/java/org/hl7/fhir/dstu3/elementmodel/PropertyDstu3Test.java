@@ -18,7 +18,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 /**
@@ -65,7 +65,7 @@ public class PropertyDstu3Test extends BaseValidationTestWithInlineMocks {
 			final ElementDefinition ed = sd.getSnapshot().getElement().get(7);
 			property = new Property(workerContext, ed, sd);
 			property.getChildProperties("birthdate", null);
-			fail("");		} catch (Error e) {
+			fail();		} catch (Error e) {
 				assertEquals("types == 0, and no children found", e.getMessage());
 		}
     }

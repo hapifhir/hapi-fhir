@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -85,12 +85,12 @@ public class MdmResourceFieldMatcherR4Test extends BaseMdmRulesR4Test {
 
 		try {
 			myComparator.match(encounter, myJohny);
-			fail("");		} catch (IllegalArgumentException e) {
+			fail();		} catch (IllegalArgumentException e) {
 			assertEquals("Expecting resource type Patient got resource type Encounter", e.getMessage());
 		}
 		try {
 			myComparator.match(myJohn, encounter);
-			fail("");		} catch (IllegalArgumentException e) {
+			fail();		} catch (IllegalArgumentException e) {
 			assertEquals("Expecting resource type Patient got resource type Encounter", e.getMessage());
 		}
 	}

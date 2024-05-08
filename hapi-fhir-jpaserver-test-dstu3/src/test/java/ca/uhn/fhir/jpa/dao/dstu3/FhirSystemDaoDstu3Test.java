@@ -87,8 +87,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
@@ -1410,7 +1410,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		try {
 			input = IOUtils.toString(getClass().getResourceAsStream("/cdr-bundle.json"), StandardCharsets.UTF_8);
 		} catch (IOException e) {
-			fail("", e.toString());
+			fail(e.toString());
 			return;
 		}
 		Bundle bundle = myFhirContext.newJsonParser().parseResource(Bundle.class, input);

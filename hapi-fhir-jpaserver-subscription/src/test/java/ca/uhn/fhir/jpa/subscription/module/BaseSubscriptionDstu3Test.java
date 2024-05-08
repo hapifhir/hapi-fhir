@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
 
 @ContextConfiguration(classes = {TestSubscriptionDstu3Config.class})
@@ -48,7 +48,7 @@ public abstract class BaseSubscriptionDstu3Test extends BaseSubscriptionTest {
 					return t.toString();
 				})
 				.collect(Collectors.joining(", "));
-			fail("", "Size " + theList.size() + " is != target " + theTarget + " - Got: " + describeResults);
+			fail("Size " + theList.size() + " is != target " + theTarget + " - Got: " + describeResults);
 		}
 	}
 

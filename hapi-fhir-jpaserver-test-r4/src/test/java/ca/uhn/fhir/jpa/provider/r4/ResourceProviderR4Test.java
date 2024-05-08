@@ -203,7 +203,7 @@ import static ca.uhn.fhir.test.utilities.CustomMatchersUtil.assertDoesNotContain
 import static ca.uhn.fhir.util.TestUtil.sleepAtLeast;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
@@ -745,7 +745,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		try {
 			myClient.read().resource("Patient").withId(id.toUnqualifiedVersionless()).execute();
-			fail("");
+			fail();
 		} catch (ResourceGoneException e) {
 			// good
 		}
@@ -769,7 +769,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		try {
 			myClient.read().resource("Patient").withId(id.toUnqualifiedVersionless()).execute();
-			fail("");
+			fail();
 		} catch (ResourceGoneException e) {
 			// good
 		}
@@ -963,7 +963,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		resBody = resBody.replace("\"type\": \"document\"", "\"type\": \"transaction\"");
 		try {
 			client.create().resource(resBody).execute();
-			fail("");
+			fail();
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage()).contains("Unable to store a Bundle resource on this server with a Bundle.type value of: transaction. Note that if you are trying to perform a FHIR transaction or batch operation you should POST the Bundle resource to the Base URL of the server, not to the /Bundle endpoint.");
 		}
@@ -1688,7 +1688,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 				.where(Patient.IDENTIFIER.exactly().code(methodName))
 				.execute();
 			//@formatter:on
-			fail("");
+			fail();
 		} catch (PreconditionFailedException e) {
 			assertEquals("HTTP 412 Precondition Failed: " + Msg.code(962) + "Failed to DELETE resource with match URL \"Patient?identifier=testDeleteConditionalMultiple\" because this search matched 2 resources", e.getMessage());
 		}
@@ -1710,13 +1710,13 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertThat(encoded).contains("Successfully deleted 2 resource(s). Took ");
 		try {
 			myClient.read().resource("Patient").withId(id1).execute();
-			fail("");
+			fail();
 		} catch (ResourceGoneException e) {
 			// good
 		}
 		try {
 			myClient.read().resource("Patient").withId(id2).execute();
-			fail("");
+			fail();
 		} catch (ResourceGoneException e) {
 			// good
 		}
@@ -1763,7 +1763,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		try {
 			myClient.read().resource(Patient.class).withId(id).execute();
-			fail("");
+			fail();
 		} catch (ResourceGoneException e) {
 			// good
 		}
@@ -4937,7 +4937,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 				.prettyPrint()
 				.returnBundle(Bundle.class)
 				.execute();
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage()).contains("Unable to handle number prefix \"eb\" for value: eb100");
 		}
@@ -4950,7 +4950,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 				.prettyPrint()
 				.returnBundle(Bundle.class)
 				.execute();
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage()).contains("Unable to handle number prefix \"sa\" for value: sa100");
 		}
@@ -4971,7 +4971,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 				.returnBundle(Bundle.class)
 				.execute();
 			//@formatter:on
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage()).contains("Unable to handle quantity prefix \"eb\" for value: eb100||");
 		}
@@ -5315,7 +5315,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 				.byUrl("Patient?" + searchParam + "=someSystem|")
 				.returnBundle(Bundle.class)
 				.execute();
-			fail("");
+			fail();
 		} catch (InvalidRequestException ex) {
 			assertEquals(Constants.STATUS_HTTP_400_BAD_REQUEST, ex.getStatusCode());
 		}
@@ -5597,7 +5597,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		try {
 			myClient.create().resource(p1).execute();
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage()).contains("Organization/99999999999");
 		}
@@ -5734,14 +5734,14 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		p2.getNameElement().setValue("testUpdateRejectsInvalidTypes");
 		try {
 			myClient.update().resource(p2).withId("Organization/" + p1id.getIdPart()).execute();
-			fail("");
+			fail();
 		} catch (UnprocessableEntityException e) {
 			// good
 		}
 
 		try {
 			myClient.update().resource(p2).withId("Patient/" + p1id.getIdPart()).execute();
-			fail("");
+			fail();
 		} catch (UnprocessableEntityException e) {
 			// good
 		}
@@ -6506,14 +6506,14 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		try {
 			myClient.update().resource(p).historyRewrite().withId(id).execute();
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage()).contains("ID must contain a history version");
 		}
 
 		try {
 			myClient.update().resource(p).historyRewrite().withId("1234").execute();
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage()).contains("ID must contain a history version");
 		}
@@ -6521,7 +6521,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		p.setId(id);
 		try {
 			myClient.update().resource(p).historyRewrite().execute();
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage()).contains("ID must contain a history version");
 		}
@@ -6542,21 +6542,21 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		try {
 			myClient.update().resource(p).historyRewrite().withId((IIdType) null).execute();
-			fail("");
+			fail();
 		} catch (NullPointerException e) {
 			assertThat(e.getMessage()).contains("can not be null");
 		}
 
 		try {
 			myClient.update().resource(p).historyRewrite().withId((String) null).execute();
-			fail("");
+			fail();
 		} catch (NullPointerException e) {
 			assertThat(e.getMessage()).contains("can not be null");
 		}
 
 		try {
 			myClient.update().resource(p).historyRewrite().execute();
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage()).contains("No ID supplied for resource to update");
 		}
@@ -6578,14 +6578,14 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		IIdType noIdPartId = new IdDt();
 		try {
 			myClient.update().resource(p).historyRewrite().withId(noIdPartId).execute();
-			fail("");
+			fail();
 		} catch (NullPointerException e) {
 			assertThat(e.getMessage()).contains("must not be blank and must contain an ID");
 		}
 
 		try {
 			myClient.update().resource(p).historyRewrite().withId("").execute();
-			fail("");
+			fail();
 		} catch (NullPointerException e) {
 			assertThat(e.getMessage()).contains("must not be blank and must contain an ID");
 		}
@@ -6593,7 +6593,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		p.setId(noIdPartId);
 		try {
 			myClient.update().resource(p).historyRewrite().execute();
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage()).contains("No ID supplied for resource to update");
 		}

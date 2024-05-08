@@ -52,7 +52,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 /**
@@ -223,7 +223,7 @@ public class BulkDataErrorAbuseTest extends BaseResourceProviderR4Test {
 		String report = jobInfo.getReport();
 		ourLog.debug("Export job {} report: {}", theInstanceId, report);
 		if (!theContainedList.isEmpty()) {
-			assertThat("report for instance " + theInstanceId + " is empty", report, not(emptyOrNullString()));
+			assertThat(report).as("report for instance " + theInstanceId + " is empty").isNotBlank();
 		}
 		BulkExportJobResults results = JsonUtil.deserialize(report, BulkExportJobResults.class);
 
@@ -262,7 +262,7 @@ public class BulkDataErrorAbuseTest extends BaseResourceProviderR4Test {
 			assertThat(foundIds).as("export has expected ids").contains(containedString);
 		}
 		for (String excludedString : theExcludedList) {
-			assertThat("export doesn't have expected ids", foundIds, not(hasItem(excludedString)));
+			assertThat(foundIds).as("export doesn't have expected ids").doesNotContain(excludedString);
 		}
 
 		assertEquals(2, jobInfo.getCombinedRecordsProcessed());

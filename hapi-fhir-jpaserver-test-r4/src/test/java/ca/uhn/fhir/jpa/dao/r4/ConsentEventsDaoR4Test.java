@@ -39,9 +39,9 @@ import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.leftPad;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import static org.mockito.Mockito.when;
 
@@ -352,13 +352,13 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 
 		try {
 			myObservationDao.read(new IdType(myObservationIdsOddOnly.get(0)), mySrd);
-			fail("");
+			fail();
 		} catch (ResourceNotFoundException e) {
 			// good
 		}
 		try {
 			myObservationDao.read(new IdType(myObservationIdsOddOnly.get(1)), mySrd);
-			fail("");
+			fail();
 		} catch (ResourceNotFoundException e) {
 			// good
 		}

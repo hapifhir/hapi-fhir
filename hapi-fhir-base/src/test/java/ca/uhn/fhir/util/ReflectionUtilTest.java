@@ -8,7 +8,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -36,7 +36,7 @@ public class ReflectionUtilTest {
 	public void testNewInstanceOrReturnNullWrong2() {
 		try {
 			ReflectionUtil.newInstanceOrReturnNull("java.lang.String", List.class);
-			fail("");
+			fail();
 		} catch (ConfigurationException e) {
 			assertEquals(Msg.code(1787) + "java.lang.String is not assignable to interface java.util.List", e.getMessage());
 		}
@@ -46,7 +46,7 @@ public class ReflectionUtilTest {
 	public void testNewInstanceFail() {
 		try {
 			ReflectionUtil.newInstance(List.class);
-			fail("");
+			fail();
 		} catch (ConfigurationException e) {
 			assertEquals(Msg.code(1784) + "Failed to instantiate java.util.List", e.getMessage());
 		}

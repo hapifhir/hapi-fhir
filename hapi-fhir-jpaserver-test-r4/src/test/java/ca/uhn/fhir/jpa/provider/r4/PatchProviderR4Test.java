@@ -35,7 +35,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 
@@ -129,7 +129,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 				.withId(pid1)
 				.withAdditionalHeader(Constants.HEADER_IF_MATCH, "W/\"1\"")
 				.execute();
-			fail("");
+			fail();
 		} catch (ResourceVersionConflictException e) {
 			// good
 		}
@@ -252,7 +252,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 				.transaction()
 				.withBundle(input)
 				.execute();
-			fail("");
+			fail();
 		} catch (ResourceVersionConflictException e) {
 			// good
 		}
@@ -326,14 +326,14 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 
 		try {
 			myClient.patch().withFhirPatch(patch).withId(id).execute();
-			fail("");
+			fail();
 		} catch (ResourceGoneException e) {
 			assertEquals(Constants.STATUS_HTTP_410_GONE, e.getStatusCode());
 		}
 
 		try {
 			myClient.read().resource(Patient.class).withId(id).execute();
-			fail("");
+			fail();
 		} catch (ResourceGoneException e) {
 			assertEquals(Constants.STATUS_HTTP_410_GONE, e.getStatusCode());
 		}

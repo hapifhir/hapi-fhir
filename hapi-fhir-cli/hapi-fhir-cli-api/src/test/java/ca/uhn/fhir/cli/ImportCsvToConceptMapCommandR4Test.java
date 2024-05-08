@@ -24,7 +24,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import java.io.File;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -481,7 +481,7 @@ public class ImportCsvToConceptMapCommandR4Test {
 				},
 				"-t", true, myRestServerR4Helper
 			));
-			fail("");		} catch (Error e) {
+			fail();		} catch (Error e) {
 			assertThat(e.getMessage()).contains("Missing required option: s");
 		}
 	}

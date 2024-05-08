@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class HfqlLexerTest {
 
@@ -210,7 +210,7 @@ public class HfqlLexerTest {
 			while (lexer.hasNextToken(theOptions)) {
 				lexer.consumeNextToken();
 			}
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage()).contains("Unexpected end of string");
 		}

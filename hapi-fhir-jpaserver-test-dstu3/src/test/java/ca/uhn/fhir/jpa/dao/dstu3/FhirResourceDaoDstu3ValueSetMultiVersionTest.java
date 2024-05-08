@@ -20,8 +20,8 @@ import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class FhirResourceDaoDstu3ValueSetMultiVersionTest extends BaseJpaDstu3Test {
@@ -204,7 +204,7 @@ public class FhirResourceDaoDstu3ValueSetMultiVersionTest extends BaseJpaDstu3Te
 		}
 		optionalTermValueSet = runInTransaction(()->myTermValueSetDao.findTermValueSetByUrlAndVersion(URL_MY_VALUE_SET, "v2"));
 		if (!optionalTermValueSet.isPresent()) {
-			fail("", "No TerValueSet found for " + URL_MY_VALUE_SET + " version v2");
+			fail("No TerValueSet found for " + URL_MY_VALUE_SET + " version v2");
 		}
 
 		myValueSetDao.delete(myValueSets.get(ValueSetVersions.V2).getResource().getIdElement());

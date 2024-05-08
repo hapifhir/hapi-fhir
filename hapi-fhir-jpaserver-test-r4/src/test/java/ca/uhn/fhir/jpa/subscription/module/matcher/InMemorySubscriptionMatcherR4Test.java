@@ -89,8 +89,8 @@ import java.util.List;
 import java.util.TimeZone;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 @ExtendWith(SpringExtension.class)
@@ -657,7 +657,7 @@ public class InMemorySubscriptionMatcherR4Test {
 			msg.setSubscriptionId("123");
 			msg.setId(new IdType("Patient/ABC"));
 			InMemoryMatchResult result = myInMemorySubscriptionMatcher.match(subscription, msg);
-			fail("");
+			fail();
 		} catch (AssertionError e) {
 			assertEquals(Msg.code(320) + "Reference at managingOrganization is invalid: urn:uuid:13720262-b392-465f-913e-54fb198ff954", e.getMessage());
 		}

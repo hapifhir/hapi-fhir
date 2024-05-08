@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -137,7 +137,7 @@ public class MdmLinkSvcTest extends BaseMdmR4Test {
 		myMdmLinkSvc.updateLink(goldenPatient, patient, MdmMatchOutcome.NO_MATCH, MdmLinkSourceEnum.MANUAL, createContextForCreate("Patient"));
 		try {
 			myMdmLinkSvc.updateLink(goldenPatient, patient, MdmMatchOutcome.NEW_GOLDEN_RESOURCE_MATCH, MdmLinkSourceEnum.AUTO, null);
-			fail("");
+			fail();
 		} catch (InternalErrorException e) {
 			assertEquals(Msg.code(760) + "MDM system is not allowed to modify links on manually created links", e.getMessage());
 		}
@@ -151,7 +151,7 @@ public class MdmLinkSvcTest extends BaseMdmR4Test {
 		// Test: it should be impossible to have a AUTO NO_MATCH record.  The only NO_MATCH records in the system must be MANUAL.
 		try {
 			myMdmLinkSvc.updateLink(goldenPatient, patient, MdmMatchOutcome.NO_MATCH, MdmLinkSourceEnum.AUTO, createContextForUpdate("Patient"));
-			fail("");
+			fail();
 		} catch (InternalErrorException e) {
 			assertEquals(Msg.code(761) + "MDM system is not allowed to automatically NO_MATCH a resource", e.getMessage());
 		}

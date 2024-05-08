@@ -28,7 +28,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.hl7.fhir.r5.model.Enumerations.PublicationStatus.ACTIVE;
 import static org.hl7.fhir.r5.model.Enumerations.SearchParamType.COMPOSITE;
 import static org.hl7.fhir.r5.model.Enumerations.SearchParamType.DATE;

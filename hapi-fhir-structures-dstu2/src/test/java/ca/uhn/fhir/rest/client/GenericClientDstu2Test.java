@@ -90,7 +90,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.either;
 import static org.hamcrest.Matchers.equalTo;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -556,31 +556,31 @@ public class GenericClientDstu2Test {
 
 		try {
 			client.delete().resource(pat).execute();
-			fail("");		} catch (IllegalArgumentException e) {
+			fail();		} catch (IllegalArgumentException e) {
 			assertEquals(Msg.code(1369) + "theResource.getId() must contain a resource type and logical ID at a minimum (e.g. Patient/1234), found: 123", e.getMessage());
 		}
 
 		try {
 			client.delete().resourceById(new IdDt("123")).execute();
-			fail("");		} catch (IllegalArgumentException e) {
+			fail();		} catch (IllegalArgumentException e) {
 			assertEquals(Msg.code(1370) + "theId must contain a resource type and logical ID at a minimum (e.g. Patient/1234)found: 123", e.getMessage());
 		}
 
 		try {
 			client.delete().resourceById("", "123").execute();
-			fail("");		} catch (IllegalArgumentException e) {
+			fail();		} catch (IllegalArgumentException e) {
 			assertEquals("theResourceType can not be blank/null", e.getMessage());
 		}
 
 		try {
 			client.delete().resourceById("Patient", "").execute();
-			fail("");		} catch (IllegalArgumentException e) {
+			fail();		} catch (IllegalArgumentException e) {
 			assertEquals("theLogicalId can not be blank/null", e.getMessage());
 		}
 
 		try {
 			client.delete().resourceConditionalByType("InvalidType");
-			fail("");		} catch (DataFormatException e) {
+			fail();		} catch (DataFormatException e) {
 			assertEquals(Msg.code(1684) + "Unknown resource name \"InvalidType\" (this name is not known in FHIR version \"DSTU2\")", e.getMessage());
 		}
 	}
@@ -757,7 +757,7 @@ public class GenericClientDstu2Test {
 	public void testInvalidClient() {
 		try {
 			ourCtx.getRestfulClientFactory().newClient(RestfulClientInstance.class, "http://foo");
-			fail("");		} catch (ConfigurationException e) {
+			fail();		} catch (ConfigurationException e) {
 			assertEquals("ca.uhn.fhir.context.ConfigurationException: " + Msg.code(1354) + "ca.uhn.fhir.rest.client.GenericClientDstu2Test.RestfulClientInstance is not an interface", e.toString());
 		}
 	}
@@ -1245,7 +1245,7 @@ public class GenericClientDstu2Test {
 				.named("$SOMEOPERATION")
 				.withParameter(Parameters.class, "name1", weirdBase)
 				.execute();
-			fail("");		} catch (IllegalArgumentException e) {
+			fail();		} catch (IllegalArgumentException e) {
 			assertEquals(Msg.code(1380) + "Don't know how to handle parameter of type class ca.uhn.fhir.rest.client.GenericClientDstu2Test$22", e.getMessage());
 		}
 	}
@@ -1588,7 +1588,7 @@ public class GenericClientDstu2Test {
 
 		try {
 			ourCtx.newRestfulGenericClient("http://localhost:8080/fhir");
-			fail("");		} catch (IllegalStateException e) {
+			fail();		} catch (IllegalStateException e) {
 			assertEquals(Msg.code(1355) + "ApacheRestfulClientFactory does not have FhirContext defined. This must be set via ApacheRestfulClientFactory#setFhirContext(FhirContext)", e.getMessage());
 		}
 	}
@@ -1656,13 +1656,13 @@ public class GenericClientDstu2Test {
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 		try {
 			client.read(new UriDt("1"));
-			fail("");		} catch (IllegalArgumentException e) {
+			fail();		} catch (IllegalArgumentException e) {
 			assertEquals(Msg.code(1365) + "The given URI is not an absolute URL and is not usable for this operation: 1", e.getMessage());
 		}
 
 		try {
 			client.read(new UriDt("http://example.com/InvalidResource/1"));
-			fail("");		} catch (DataFormatException e) {
+			fail();		} catch (DataFormatException e) {
 			assertEquals(Msg.code(1684) + "Unknown resource name \"InvalidResource\" (this name is not known in FHIR version \"DSTU2\")", e.getMessage());
 		}
 	}
@@ -1758,7 +1758,7 @@ public class GenericClientDstu2Test {
 				.withId("123")
 				.summaryMode(SummaryEnum.TEXT)
 				.execute();
-			fail("");		} catch (InvalidResponseException e) {
+			fail();		} catch (InvalidResponseException e) {
 			assertThat(e.getMessage()).contains("String does not appear to be valid");
 		}
 		//@formatter:on

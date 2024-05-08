@@ -11,7 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import static org.mockito.Mockito.*;
 
@@ -38,7 +38,7 @@ class BaseRestfulValidatorTest {
 		TestRestfulValidator val = new TestRestfulValidator(responseEntity);
 		try {
 			assertNotNull(val.isValid(new Address(), FhirContext.forR4()));
-			fail("");		} catch (Exception e) {
+			fail();		} catch (Exception e) {
 		}
 	}
 

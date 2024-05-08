@@ -49,14 +49,14 @@ import java.util.Optional;
 import static ca.uhn.fhir.jpa.term.TermTestUtil.URL_MY_CODE_SYSTEM;
 import static ca.uhn.fhir.jpa.term.TermTestUtil.URL_MY_VALUE_SET;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class ResourceProviderR5ValueSetVersionedTest extends BaseResourceProviderR5Test {
@@ -1436,7 +1436,7 @@ public class ResourceProviderR5ValueSetVersionedTest extends BaseResourceProvide
 		createExternalCsAndLocalVs();
 		try {
 			persistLocalVs(createLocalVs(URL_MY_CODE_SYSTEM, "1"));
-			fail("");
+			fail();
 		} catch (UnprocessableEntityException theE) {
 			assertThat(theE.getMessage()).contains("Can not create multiple ValueSet resources with ValueSet.url \"" + URL_MY_VALUE_SET + "\" and ValueSet.version \"1\", already have one with resource ID: ");
 		}

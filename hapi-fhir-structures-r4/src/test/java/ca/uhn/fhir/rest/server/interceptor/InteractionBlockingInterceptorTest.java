@@ -27,7 +27,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class InteractionBlockingInterceptorTest implements ITestDataBuilder {
@@ -93,7 +93,7 @@ public class InteractionBlockingInterceptorTest implements ITestDataBuilder {
 	private void verifyReadEncounterFails() {
 		try {
 			myServer.getFhirClient().read().resource("Encounter").withId("E0").execute();
-			fail("");		} catch (ResourceNotFoundException e) {
+			fail();		} catch (ResourceNotFoundException e) {
 			assertThat(e.getMessage()).contains("Unknown resource type");
 		}
 	}
@@ -118,7 +118,7 @@ public class InteractionBlockingInterceptorTest implements ITestDataBuilder {
 	private void verifyCreateObservationFails() {
 		try {
 			myServer.getFhirClient().create().resource(new Observation()).execute();
-			fail("");		} catch (ResourceNotFoundException e) {
+			fail();		} catch (ResourceNotFoundException e) {
 			assertThat(e.getMessage()).contains("Unknown resource type");
 		}
 	}

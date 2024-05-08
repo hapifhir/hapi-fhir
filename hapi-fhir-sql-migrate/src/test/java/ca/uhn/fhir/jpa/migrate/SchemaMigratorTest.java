@@ -21,8 +21,8 @@ import java.util.Set;
 import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class SchemaMigratorTest extends BaseTest {
@@ -38,7 +38,7 @@ public class SchemaMigratorTest extends BaseTest {
 
 		try {
 			schemaMigrator.validate();
-			fail("");
+			fail();
 		} catch (ConfigurationException e) {
 			assertThat(e.getMessage()).startsWith(Msg.code(27) + "The database schema for ");
 			assertThat(e.getMessage()).endsWith(" is out of date.  Current database schema version is unknown.  Schema version required by application is 1.1.  Please run the database migrator.");
@@ -57,7 +57,7 @@ public class SchemaMigratorTest extends BaseTest {
 		SchemaMigrator schemaMigrator = createSchemaMigrator("SOMETABLE", "create fable SOMETABLE (PID bigint not null, TEXTCOL varchar(255))", "1");
 		try {
 			schemaMigrator.migrate();
-			fail("");
+			fail();
 		} catch (HapiMigrationException e) {
 			assertEquals(org.springframework.jdbc.BadSqlGrammarException.class, e.getCause().getCause().getClass());
 			MigrationResult failedResult = e.getResult();

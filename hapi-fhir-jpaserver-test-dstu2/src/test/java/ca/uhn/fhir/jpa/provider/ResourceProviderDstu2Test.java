@@ -118,7 +118,7 @@ import java.util.Set;
 
 import static ca.uhn.fhir.test.utilities.CustomMatchersUtil.assertDoesNotContainAnyOf;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {

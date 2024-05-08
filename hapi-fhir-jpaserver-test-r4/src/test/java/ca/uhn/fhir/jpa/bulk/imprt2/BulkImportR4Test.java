@@ -39,7 +39,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -50,7 +50,7 @@ import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class BulkImportR4Test extends BaseJpaR4Test {
@@ -363,7 +363,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 
 		try {
 			myJobCoordinator.startInstance(request);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 
 			// Verify
@@ -386,7 +386,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 
 		try {
 			myJobCoordinator.startInstance(request);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 
 			// Verify
@@ -413,7 +413,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 
 		try {
 			myJobCoordinator.startInstance(request);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 
 			// Verify

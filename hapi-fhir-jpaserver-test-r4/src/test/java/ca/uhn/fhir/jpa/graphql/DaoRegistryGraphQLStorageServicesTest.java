@@ -42,7 +42,7 @@ import java.util.Optional;
 import static ca.uhn.fhir.jpa.graphql.DaoRegistryGraphQLStorageServices.SEARCH_ID_PARAM;
 import static ca.uhn.fhir.jpa.graphql.DaoRegistryGraphQLStorageServices.SEARCH_OFFSET_PARAM;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.when;
 
 @ContextConfiguration(classes = {TestR4Config.class})

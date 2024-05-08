@@ -28,7 +28,7 @@ import static ca.uhn.fhir.rest.api.RequestTypeEnum.GET;
 import static ca.uhn.fhir.rest.api.RequestTypeEnum.POST;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -118,7 +118,7 @@ public class RestfulServerUtilsTest {
 		if (theExpectedMaxRounds != null && theExpectedMaxRounds == -1) {
 			try {
 				RestfulServerUtils.extractDeleteCascadeParameter(myRequestDetails);
-				fail("");			} catch (InvalidRequestException e) {
+				fail();			} catch (InvalidRequestException e) {
 				// good
 			}
 		} else {

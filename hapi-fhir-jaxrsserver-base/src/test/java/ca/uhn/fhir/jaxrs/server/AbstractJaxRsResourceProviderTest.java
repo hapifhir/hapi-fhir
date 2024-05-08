@@ -53,8 +53,8 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
@@ -356,7 +356,7 @@ public class AbstractJaxRsResourceProviderTest {
 		when(mock.update(idCaptor.capture(), patientCaptor.capture(), conditionalCaptor.capture())).thenThrow(ResourceNotFoundException.class);
 		try {
 			client.update("1", createPatient(2));
-			fail("");
+			fail();
 		} catch (ResourceNotFoundException e) {
 			// good
 		}
@@ -398,7 +398,7 @@ public class AbstractJaxRsResourceProviderTest {
 			JaxRsResponseException notFoundException = new JaxRsResponseException(new ResourceNotFoundException(new IdDt("999955541264")));
 			when(mock.find(idCaptor.capture())).thenThrow(notFoundException);
 			client.read(Patient.class, "999955541264");
-			fail("");
+			fail();
 		} catch (final ResourceNotFoundException e) {
 			assertEquals(ResourceNotFoundException.STATUS_CODE, e.getStatusCode());
 			assertThat(e.getMessage()).contains("999955541264");

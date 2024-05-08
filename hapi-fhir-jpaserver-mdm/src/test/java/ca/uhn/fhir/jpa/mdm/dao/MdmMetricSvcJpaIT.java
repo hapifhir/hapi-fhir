@@ -33,7 +33,7 @@ import org.springframework.test.context.ContextConfiguration;
 
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 @ContextConfiguration(classes = {
@@ -167,7 +167,7 @@ public class MdmMetricSvcJpaIT extends BaseMdmR4Test implements IMdmMetricSvcTes
 			return myObjectMapper.writeValueAsString(theMetrics);
 		} catch (JsonProcessingException ex) {
 			// we've failed anyway - we might as well display the exception
-			fail("", ex);
+			fail(ex);
 			return "NOT PARSEABLE!";
 		}
 	}

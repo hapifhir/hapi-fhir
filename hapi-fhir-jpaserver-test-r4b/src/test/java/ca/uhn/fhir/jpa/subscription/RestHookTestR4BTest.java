@@ -44,7 +44,7 @@ import java.util.concurrent.TimeUnit;
 
 import static ca.uhn.fhir.util.HapiExtensions.EX_SEND_DELETE_MESSAGES;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.awaitility.Awaitility.await;
 
@@ -1000,7 +1000,7 @@ public class RestHookTestR4BTest extends BaseSubscriptionsR4BTest {
 
 		try {
 			createSubscription(criteria1, Constants.CT_FHIR_JSON_NEW);
-			fail("");
+			fail();
 		} catch (UnprocessableEntityException e) {
 			assertEquals("HTTP 422 Unprocessable Entity: " + Msg.code(9) + "Invalid subscription criteria submitted: Observation?codeeeee=SNOMED-CT " + Msg.code(488) + "Failed to parse match URL[Observation?codeeeee=SNOMED-CT] - Resource type Observation does not have a parameter with name: codeeeee", e.getMessage());
 		}
@@ -1132,7 +1132,7 @@ public class RestHookTestR4BTest extends BaseSubscriptionsR4BTest {
 
 		try {
 			myClient.create().resource(subscription).execute();
-			fail("");
+			fail();
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage()).contains("Can not process submitted Subscription - Subscription.status must be populated on this server");
 		}

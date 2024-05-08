@@ -17,7 +17,7 @@ import java.util.HashMap;
 
 import static ca.uhn.fhir.rest.server.interceptor.validation.fields.FieldValidatingInterceptor.VALIDATION_DISABLED_HEADER;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -48,7 +48,7 @@ class FieldValidatingInterceptorTest {
 			myInterceptor.resourcePreCreate(null, null);
 			myInterceptor.resourcePreUpdate(null, null, null);
 		} catch (Exception ex) {
-			fail("");		}
+			fail();		}
 	}
 
 	@Test
@@ -71,7 +71,7 @@ class FieldValidatingInterceptorTest {
 		try {
 			myInterceptor.handleRequest(newRequestDetails(), person);
 		} catch (Exception e) {
-			fail("");		}
+			fail();		}
 	}
 
 	@Test
@@ -83,7 +83,7 @@ class FieldValidatingInterceptorTest {
 		try {
 			myInterceptor.handleRequest(newRequestDetails(), person);
 		} catch (Exception e) {
-			fail("");		}
+			fail();		}
 
 		ourLog.debug("Resource looks like {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(person));
 
@@ -101,7 +101,7 @@ class FieldValidatingInterceptorTest {
 		myInterceptor.getConfig().put("telecom.where(system='phone')", "ClassThatDoesntExist");
 		try {
 			myInterceptor.handleRequest(newRequestDetails(), new Person());
-			fail("");		} catch (Exception e) {
+			fail();		} catch (Exception e) {
 		}
 	}
 
@@ -115,20 +115,20 @@ class FieldValidatingInterceptorTest {
 		try {
 			myInterceptor.handleRequest(newRequestDetails(), person);
 		} catch (Exception e) {
-			fail("");		}
+			fail();		}
 
 		person.addTelecom().setSystem(ContactPoint.ContactPointSystem.PHONE).setValue("123456");
 		try {
 			myInterceptor.handleRequest(newRequestDetails(), person);
 		} catch (Exception e) {
-			fail("");		}
+			fail();		}
 
 		person = new Person();
 		person.addTelecom().setSystem(ContactPoint.ContactPointSystem.PHONE).setValue(" ");
 		try {
 			myInterceptor.handleRequest(newRequestDetails(), person);
 		} catch (Exception e) {
-			fail("");		}
+			fail();		}
 	}
 
 	public static class EmptyValidator implements IValidator {

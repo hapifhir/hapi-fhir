@@ -33,8 +33,8 @@ import java.util.TimeZone;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
@@ -845,7 +845,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 		try {
 			UUID.fromString(result);
 		} catch (IllegalArgumentException exception){
-			fail("", "Result id is not a UUID. Instead, it was: " + result);
+			fail("Result id is not a UUID. Instead, it was: " + result);
 		}
 	}
 

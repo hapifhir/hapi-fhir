@@ -26,7 +26,7 @@ import java.util.UUID;
 
 import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -538,7 +538,7 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 
 		try {
 			mySystemDao.transaction(mySrd, createBundleWithConditionalDeleteAndConditionalUpdateOnSameResource(myFhirContext));
-			fail("");
+			fail();
 		} catch (PreconditionFailedException e) {
 
 			// Verify

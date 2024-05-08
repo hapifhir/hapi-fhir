@@ -34,7 +34,7 @@ import java.io.IOException;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -130,7 +130,7 @@ public class MdmProviderBatchR4Test extends BaseLinkR4Test {
 		clearMdmLinks();
 		try {
 			myMdmProvider.mdmBatchPractitionerInstance(new IdType("Practitioner/999"), null);
-			fail("");
+			fail();
 		} catch (ResourceNotFoundException e) {
 		}
 	}
@@ -159,7 +159,7 @@ public class MdmProviderBatchR4Test extends BaseLinkR4Test {
 		clearMdmLinks();
 		try {
 			myMdmProvider.mdmBatchPatientInstance(new IdType("Patient/999"), null);
-			fail("");
+			fail();
 		} catch (ResourceNotFoundException e) {
 		}
 	}
@@ -185,7 +185,7 @@ public class MdmProviderBatchR4Test extends BaseLinkR4Test {
 
 		try {
 			myMdmProvider.mdmBatchOnAllSourceResources(null, criteria , null, theSyncOrAsyncRequest);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage())
 				.overridingErrorMessage("Expected error message to contain specific codes and messages")

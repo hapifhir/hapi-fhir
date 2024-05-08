@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.jpa.test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexAppCtx;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
@@ -40,8 +39,8 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class PatientReindexTestHelper {
@@ -164,7 +163,7 @@ public class PatientReindexTestHelper {
 			if(theExpectedVersion != actualVersion){
 				String failureMessage = String.format("Failure for Resource [%s] with index [%s]. Expected version: %s, Actual version: %s",
 					patient.getId(), resources.indexOf(resource), theExpectedVersion, actualVersion);
-				fail("", failureMessage);
+				fail(failureMessage);
 			}
 		}
 	}

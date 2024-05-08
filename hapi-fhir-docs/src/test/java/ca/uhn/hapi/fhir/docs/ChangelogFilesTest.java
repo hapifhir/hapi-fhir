@@ -18,7 +18,7 @@ import java.util.Collection;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class ChangelogFilesTest {
 
@@ -43,7 +43,7 @@ public class ChangelogFilesTest {
 			}
 
 			if (!nextFilename.matches("[a-zA-Z0-9]+-[a-zA-Z0-9_-]+\\.yaml")) {
-				fail("", "Invalid changelog filename: " + next);
+				fail("Invalid changelog filename: " + next);
 			}
 
 			ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
@@ -77,7 +77,7 @@ public class ChangelogFilesTest {
 				try {
 					Integer.parseInt(issue);
 				} catch (NumberFormatException e) {
-					fail("", "Invalid issue value in " + next);
+					fail("Invalid issue value in " + next);
 				}
 			}
 		}

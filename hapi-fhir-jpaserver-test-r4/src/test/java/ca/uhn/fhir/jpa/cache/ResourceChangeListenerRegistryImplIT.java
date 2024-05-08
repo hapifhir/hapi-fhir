@@ -29,8 +29,8 @@ import java.util.Collection;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class ResourceChangeListenerRegistryImplIT extends BaseJpaR4Test {
@@ -97,7 +97,7 @@ public class ResourceChangeListenerRegistryImplIT extends BaseJpaR4Test {
 			SearchParameterMap map = new SearchParameterMap();
 			map.setLastUpdated(new DateRangeParam("1965", "1970"));
 			myResourceChangeListenerRegistry.registerResourceResourceChangeListener(RESOURCE_NAME, map, myMaleTestCallback, TEST_REFRESH_INTERVAL);
-			fail("");
+			fail();
 		} catch (IllegalArgumentException e) {
 			assertEquals(Msg.code(482) + "SearchParameterMap SearchParameterMap[] cannot be evaluated in-memory: Parameter: <_lastUpdated> Reason: Standard parameters not supported.  Only search parameter maps that can be evaluated in-memory may be registered.", e.getMessage());
 		}

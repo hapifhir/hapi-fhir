@@ -114,7 +114,7 @@ import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 @SuppressWarnings({"unchecked"})
@@ -450,7 +450,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 			} else if (next instanceof OperationDefinition) {
 				myOperationDefinitionDao.update((OperationDefinition) next, mySrd);
 			} else {
-				fail("", next.getClass().getName());
+				fail(next.getClass().getName());
 			}
 
 		}

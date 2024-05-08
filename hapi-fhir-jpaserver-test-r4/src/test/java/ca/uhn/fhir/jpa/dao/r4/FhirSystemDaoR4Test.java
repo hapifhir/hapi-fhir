@@ -110,7 +110,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -252,7 +252,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 				count++;
 			}
 		}
-		fail("");
+		fail();
 		return null;
 	}
 
@@ -447,7 +447,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		// Make sure a single one can't be deleted
 		try {
 			myEncounterDao.delete(encId);
-			fail("");
+			fail();
 		} catch (ResourceVersionConflictException e) {
 			// good
 		}
@@ -477,7 +477,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		// They should now be deleted
 		try {
 			myEncounterDao.read(encId.toUnqualifiedVersionless());
-			fail("");
+			fail();
 		} catch (ResourceGoneException e) {
 			// good
 		}
@@ -553,13 +553,13 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		myPatientDao.read(new IdType("Patient/A/_history/1"));
 		try {
 			myPatientDao.read(new IdType("Patient/A/_history/2"));
-			fail("");
+			fail();
 		} catch (ResourceNotFoundException e) {
 			// good
 		}
 		try {
 			myPatientDao.read(new IdType("Patient/A/_history/3"));
-			fail("");
+			fail();
 		} catch (ResourceNotFoundException e) {
 			// good
 		}
@@ -850,7 +850,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			runInTransaction(() -> {
 				mySystemDao.transactionNested(mySrd, request);
 			});
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(530) + "Can not invoke read operation on nested transaction", e.getMessage());
 		}
@@ -1093,7 +1093,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		try {
 			mySystemDao.transaction(mySrd, request);
-			fail("");
+			fail();
 		} catch (ResourceNotFoundException e) {
 			assertEquals(Msg.code(1091) + "Invalid match URL \"Patient?identifier=urn%3Asystem%7CtestTransactionCreateInlineMatchUrlWithNoMatches\" - No resources match this search", e.getMessage());
 		}
@@ -1112,7 +1112,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		try {
 			mySystemDao.transaction(mySrd, request);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(2282) + "Inline match URLs are not supported on this server. Cannot process reference: \"Patient?identifier=urn%3Asystem%7C\"", e.getMessage());
 		}
@@ -1131,7 +1131,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		try {
 			mySystemDao.transaction(mySrd, request);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(543) + "Missing required resource in Bundle.entry[0].resource for operation POST", e.getMessage());
 		}
@@ -1150,7 +1150,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		try {
 			mySystemDao.transaction(mySrd, request);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(543) + "Missing required resource in Bundle.entry[0].resource for operation PUT", e.getMessage());
 		}
@@ -1277,7 +1277,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		try {
 			mySystemDao.transaction(null, transactionBundle);
-			fail("");
+			fail();
 		} catch (PreconditionFailedException e) {
 			assertEquals(Msg.code(539) + "Invalid conditional URL \"Patient?identifier=http://example.com/mrns|" + conditionalUrlIdentifierValue + "\". The given resource is not matched by this URL.", e.getMessage());
 		}
@@ -1340,7 +1340,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		try {
 			mySystemDao.transaction(mySrd, request);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage()).contains("Transaction bundle contains multiple resources with ID: Patient/ABC");
 		}
@@ -1539,7 +1539,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			mySystemDao.transaction(mySrd, request);
 
 			// verify
-			fail("");
+			fail();
 		} catch (ResourceNotFoundException e) {
 			assertEquals(Msg.code(1091) + "Invalid match URL \"Observation?patient=Patient/J&code=http://loinc.org|94505-5\" - No resources match this search", e.getMessage());
 		} finally {
@@ -1598,7 +1598,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			mySystemDao.transaction(mySrd, request2);
 
 			// verify
-			fail("");
+			fail();
 		} catch (ResourceNotFoundException e) {
 			assertEquals(Msg.code(1091) + "Invalid match URL \"Patient?identifier=urn%3Asystem%7C" + patientId + "\" - No resources match this search", e.getMessage());
 		} finally {
@@ -1885,7 +1885,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		try {
 			mySystemDao.transaction(mySrd, inputBundle);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(2008) + "Unable to process Transaction - Request contains multiple anonymous entries (Bundle.entry.fullUrl not populated) with conditional URL: \"Encounter?identifier=urn:foo|12345\". Does transaction request contain duplicates?", e.getMessage());
 		}
@@ -1915,7 +1915,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		try {
 			mySystemDao.transaction(mySrd, request);
-			fail("");
+			fail();
 		} catch (PreconditionFailedException e) {
 			assertEquals(Msg.code(2207) + "Invalid match URL \"Patient?identifier=urn%3Asystem%7CtestTransactionCreateInlineMatchUrlWithTwoMatches\" - Multiple resources match this search", e.getMessage());
 		}
@@ -1991,7 +1991,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		try {
 			mySystemDao.transaction(mySrd, request);
-			fail("");
+			fail();
 		} catch (PreconditionFailedException e) {
 			assertThat(e.getMessage()).contains("Multiple resources match this search");
 		}
@@ -2026,7 +2026,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		try {
 			mySystemDao.transaction(mySrd, request);
-			fail("");
+			fail();
 		} catch (PreconditionFailedException e) {
 			assertThat(e.getMessage()).contains("Multiple resources match this search");
 		}
@@ -2195,7 +2195,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		try {
 			mySystemDao.transaction(mySrd, request);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals(e.getMessage(), Msg.code(542) + "Unable to process Transaction - Request would cause multiple resources to match URL: \"Patient?identifier=urn%3Asystem%7CtestTransactionCreateWithDuplicateMatchUrl02\". Does transaction request contain duplicates?");
 		}
@@ -2214,7 +2214,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		try {
 			entry.setIfNoneExist("Patient?identifier   identifier" + methodName);
 			mySystemDao.transaction(mySrd, request);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(1744) + "Failed to parse match URL[Patient?identifier   identifiertestTransactionCreateWithInvalidMatchUrl] - URL is invalid (must not contain spaces)", e.getMessage());
 		}
@@ -2222,7 +2222,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		try {
 			entry.setIfNoneExist("Patient?identifier=");
 			mySystemDao.transaction(mySrd, request);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(518) + "Invalid match URL[Patient?identifier=] - URL has no search parameters", e.getMessage());
 		}
@@ -2230,7 +2230,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		try {
 			entry.setIfNoneExist("Patient?foo=bar");
 			mySystemDao.transaction(mySrd, request);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(488) + "Failed to parse match URL[Patient?foo=bar] - Resource type Patient does not have a parameter with name: foo", e.getMessage());
 		}
@@ -2249,7 +2249,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		try {
 			mySystemDao.transaction(mySrd, request);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage()).contains("Resource Organization/9999999999999999 not found, specified in path: Patient.managingOrganization");
 		}
@@ -2268,7 +2268,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		try {
 			mySystemDao.transaction(mySrd, request);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage()).contains("Resource Organization/" + methodName + " not found, specified in path: Patient.managingOrganization");
 		}
@@ -2289,7 +2289,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		try {
 			mySystemDao.transaction(mySrd, request);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(518) + "Invalid match URL[Observation?Observation] - URL has no search parameters", e.getMessage());
 		}
@@ -2353,14 +2353,14 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		try {
 			myPatientDao.read(id1.toVersionless(), mySrd);
-			fail("");
+			fail();
 		} catch (ResourceGoneException e) {
 			// good
 		}
 
 		try {
 			myPatientDao.read(id2.toVersionless(), mySrd);
-			fail("");
+			fail();
 		} catch (ResourceGoneException e) {
 			// good
 		}
@@ -2405,21 +2405,21 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		try {
 			myPatientDao.read(pid, mySrd);
-			fail("");
+			fail();
 		} catch (ResourceGoneException e) {
 			// good
 		}
 
 		try {
 			myObservationDao.read(oid1, mySrd);
-			fail("");
+			fail();
 		} catch (ResourceGoneException e) {
 			// good
 		}
 
 		try {
 			myObservationDao.read(oid2, mySrd);
-			fail("");
+			fail();
 		} catch (ResourceGoneException e) {
 			// good
 		}
@@ -2464,21 +2464,21 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		try {
 			myPatientDao.read(pid, mySrd);
-			fail("");
+			fail();
 		} catch (ResourceGoneException e) {
 			// good
 		}
 
 		try {
 			myObservationDao.read(oid1, mySrd);
-			fail("");
+			fail();
 		} catch (ResourceGoneException e) {
 			// good
 		}
 
 		try {
 			myObservationDao.read(oid2, mySrd);
-			fail("");
+			fail();
 		} catch (ResourceGoneException e) {
 			// good
 		}
@@ -2505,14 +2505,14 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		try {
 			myPatientDao.read(id.toVersionless(), mySrd);
-			fail("");
+			fail();
 		} catch (ResourceGoneException e) {
 			// ok
 		}
 
 		try {
 			myPatientDao.read(new IdType("Patient/" + methodName), mySrd);
-			fail("");
+			fail();
 		} catch (ResourceNotFoundException e) {
 			// ok
 		}
@@ -2550,7 +2550,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		try {
 			mySystemDao.transaction(mySrd, request);
-			fail("");
+			fail();
 		} catch (PreconditionFailedException e) {
 			assertThat(e.getMessage()).contains("resource with match URL \"Patient?");
 		}
@@ -2568,7 +2568,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		assertThat(resp.getEntry()).hasSize(1);
 		assertEquals("204 No Content", resp.getEntry().get(0).getResponse().getStatus());
 
-		// fail("");		// } catch (ResourceNotFoundException e) {
+		// fail();		// } catch (ResourceNotFoundException e) {
 		// assertThat(e.getMessage()).contains("resource matching URL \"Patient?"));
 		// }
 	}
@@ -2593,7 +2593,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		try {
 			myPatientDao.read(id.toVersionless(), mySrd);
-			fail("");
+			fail();
 		} catch (ResourceGoneException e) {
 			// ok
 		}
@@ -2605,7 +2605,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		try {
 			input = IOUtils.toString(getClass().getResourceAsStream("/cdr-bundle.json"), StandardCharsets.UTF_8);
 		} catch (IOException e) {
-			fail("", e.toString());
+			fail(e.toString());
 			return;
 		}
 		Bundle bundle = myFhirContext.newJsonParser().parseResource(Bundle.class, input);
@@ -2853,7 +2853,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		try {
 			mySystemDao.transaction(mySrd, inputBundle);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(2008) + "Unable to process Transaction - Request contains multiple anonymous entries (Bundle.entry.fullUrl not populated) with conditional URL: \"Encounter?identifier=urn:foo|12345\". Does transaction request contain duplicates?", e.getMessage());
 		}
@@ -3172,7 +3172,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		try {
 			input = createBundleWithConditionalCreateReferenceByResource();
 			mySystemDao.transaction(mySrd, input);
-			fail("");
+			fail();
 		} catch (InternalErrorException e) {
 			assertEquals("References by resource with no reference ID are not supported in DAO layer", e.getMessage());
 		}
@@ -3251,7 +3251,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		try {
 			mySystemDao.transaction(mySrd, b);
-			fail("");
+			fail();
 		} catch (ResourceVersionConflictException e) {
 			// good, transaction should not succeed because DiagnosticReport has a reference to the obs2
 		}
@@ -3283,7 +3283,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			// transaction should succeed because the DiagnosticReport which references obs2 is also deleted
 			mySystemDao.transaction(mySrd, b);
 		} catch (ResourceVersionConflictException e) {
-			fail("");
+			fail();
 		}
 	}
 
@@ -3337,7 +3337,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		try {
 			mySystemDao.transaction(mySrd, request);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage()).matches(Msg.code(541) + "Unable to satisfy placeholder ID urn:uuid:[0-9a-z-]+ found in element named 'managingOrganization' within resource of type: Patient");
 		}
@@ -3399,7 +3399,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		try {
 			mySystemDao.transaction(mySrd, request);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(527) + "Unable to process transaction where incoming Bundle.type = searchset", e.getMessage());
 		}
@@ -3506,7 +3506,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		try {
 			mySystemDao.transaction(mySrd, request);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage()).contains("2279");
 		}
@@ -3541,7 +3541,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		try {
 			mySystemDao.transaction(mySrd, request);
-			fail("");
+			fail();
 		} catch (PreconditionFailedException e) {
 			assertThat(e.getMessage()).contains("Multiple resources match this search");
 		}
@@ -3669,7 +3669,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		try {
 			mySystemDao.transaction(mySrd, res);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(533) + "Invalid placeholder ID found: cid:observation1 - Must be of the form 'urn:uuid:[uuid]' or 'urn:oid:[oid]'", e.getMessage());
 		}
@@ -3701,7 +3701,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		try {
 			mySystemDao.transaction(mySrd, input);
-			fail("");
+			fail();
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage()).contains("Resource type 'Practicioner' is not valid for this path");
 		}
@@ -4087,7 +4087,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		try {
 			mySystemDao.transaction(mySrd, bundle);
-			fail("");
+			fail();
 		} catch (PreconditionFailedException e) {
 			assertEquals(Msg.code(2207) + "Invalid match URL \"Patient?identifier=http://www.ghh.org/identifiers|condreftestpatid1\" - Multiple resources match this search", e.getMessage());
 		}
@@ -4138,7 +4138,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		try {
 			mySystemDao.transaction(mySrd, bundle);
-			fail("");
+			fail();
 		} catch (ResourceNotFoundException e) {
 			assertEquals(Msg.code(1091) + "Invalid match URL \"Patient?identifier=http://www.ghh.org/identifiers|condreftestpatid1\" - No resources match this search", e.getMessage());
 		}
@@ -4154,7 +4154,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		try {
 			mySystemDao.transaction(mySrd, request);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(527) + "Unable to process transaction where incoming Bundle.type = searchset", e.getMessage());
 		}
@@ -4172,7 +4172,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		try {
 			mySystemDao.transaction(mySrd, bundle);
-			fail("");
+			fail();
 		} catch (ResourceNotFoundException e) {
 			// expected
 		}
@@ -5038,7 +5038,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		try {
 			myAllergyIntoleranceDao.read(ai.getIdElement().toUnqualifiedVersionless());
-			fail("");
+			fail();
 		} catch (ResourceGoneException e) {
 			// good
 		}

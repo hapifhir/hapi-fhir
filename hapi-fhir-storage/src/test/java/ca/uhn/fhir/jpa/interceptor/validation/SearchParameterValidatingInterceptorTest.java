@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -97,7 +97,7 @@ public class SearchParameterValidatingInterceptorTest {
 
 		try {
 			mySearchParamValidatingInterceptor.resourcePreCreate(newSearchParam, myRequestDetails);
-			fail("");
+			fail();
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage()).contains("2196");
 		}
@@ -111,7 +111,7 @@ public class SearchParameterValidatingInterceptorTest {
 		upliftRefChain.addExtension(HapiExtensions.EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN_ELEMENT_NAME, new StringType("element1"));
 		try {
 			mySearchParamValidatingInterceptor.resourcePreCreate(sp, myRequestDetails);
-			fail("");
+			fail();
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage()).contains("2284");
 		}
@@ -125,7 +125,7 @@ public class SearchParameterValidatingInterceptorTest {
 		upliftRefChain.addExtension(HapiExtensions.EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN_ELEMENT_NAME, new StringType("element1"));
 		try {
 			mySearchParamValidatingInterceptor.resourcePreCreate(sp, myRequestDetails);
-			fail("");
+			fail();
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage()).contains("2283");
 		}
@@ -167,7 +167,7 @@ public class SearchParameterValidatingInterceptorTest {
 
 		try {
 			mySearchParamValidatingInterceptor.resourcePreUpdate(null, newSearchParam, myRequestDetails);
-			fail("");
+			fail();
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage()).contains("2125");
 		}

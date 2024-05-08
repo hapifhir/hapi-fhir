@@ -20,7 +20,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * <p>Multitenant test version of {@link OverridePathBasedReferentialIntegrityForDeletesInterceptorTest}.</p>
@@ -79,7 +79,7 @@ public class MultitenantOverridePathBasedReferentialIntegrityForDeletesIntercept
 		// Make sure we're deleted
 		try {
 			myPatientDao.read(new IdType("Patient/P"), requestDetails);
-			fail("");
+			fail();
 		} catch (ResourceGoneException e) {
 			// good
 		}
@@ -108,7 +108,7 @@ public class MultitenantOverridePathBasedReferentialIntegrityForDeletesIntercept
 		// Delete should proceed
 		try {
 			myPatientDao.delete(new IdType("Patient/P"), requestDetails);
-			fail("");
+			fail();
 		} catch (ResourceVersionConflictException e) {
 			// good
 		}

@@ -64,8 +64,8 @@ import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import static org.mockito.AdditionalMatchers.not;
 import static org.mockito.ArgumentMatchers.any;
@@ -267,7 +267,7 @@ public class JpaBulkExportProcessorTest {
 		// test
 		try {
 			myProcessor.getResourcePidIterator(parameters);
-			fail("");
+			fail();
 		} catch (InternalErrorException ex) {
 			assertThat(ex.getMessage()).contains("You attempted to start a Patient Bulk Export,");
 		}

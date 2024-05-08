@@ -51,7 +51,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
@@ -362,7 +362,7 @@ public class BaseHapiFhirDaoTest {
 		// test
 		try {
 			myTestDao.getTagOrNull(transactionDetails, tagType, scheme, term, label, version, userSelected);
-			fail("");
+			fail();
 		} catch (Exception ex) {
 			// verify
 			assertThat(ex.getMessage()).contains("Tag get/create failed after 10 attempts with error(s): " + exMsg);

@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class FhirPatchCoreTest extends BaseTest {
@@ -43,7 +43,7 @@ public class FhirPatchCoreTest extends BaseTest {
 			assertEquals(expected, actual);
 
 		} else {
-			fail("", "Unknown mode: " + myMode);
+			fail("Unknown mode: " + myMode);
 		}
 
 	}

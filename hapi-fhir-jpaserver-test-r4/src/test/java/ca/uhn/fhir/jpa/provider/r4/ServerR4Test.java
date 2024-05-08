@@ -30,8 +30,8 @@ import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class ServerR4Test extends BaseResourceProviderR4Test {
@@ -56,7 +56,7 @@ public class ServerR4Test extends BaseResourceProviderR4Test {
 				myCapabilityStatementDao.validate(cs, null, respString, EncodingEnum.JSON, null, null, null);
 			} catch (PreconditionFailedException e) {
 				ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
-				fail("");
+				fail();
 			}
 		}
 	}
@@ -83,12 +83,12 @@ public class ServerR4Test extends BaseResourceProviderR4Test {
 				Set<String> sps = new HashSet<String>();
 				for (CapabilityStatementRestResourceSearchParamComponent nextSp : nextResource.getSearchParam()) {
 					if (sps.add(nextSp.getName()) == false) {
-						fail("", "Duplicate search parameter " + nextSp.getName() + " for resource " + nextResource.getType());
+						fail("Duplicate search parameter " + nextSp.getName() + " for resource " + nextResource.getType());
 					}
 				}
 
 				if (!sps.contains("_id")) {
-					fail("", "No search parameter _id for resource " + nextResource.getType());
+					fail("No search parameter _id for resource " + nextResource.getType());
 				}
 			}
 		} finally {

@@ -154,9 +154,9 @@ import java.util.stream.Stream;
 import static ca.uhn.fhir.util.TestUtil.doRandomizeLocaleAndTimezone;
 import static java.util.stream.Collectors.joining;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
@@ -290,7 +290,7 @@ public abstract class BaseJpaTest extends BaseTest {
 					return t.toString();
 				})
 				.collect(Collectors.joining(", "));
-			fail("", "Size " + theList.size() + " is != target " + theTarget + " - Got: " + describeResults);
+			fail("Size " + theList.size() + " is != target " + theTarget + " - Got: " + describeResults);
 		}
 	}
 
@@ -318,12 +318,12 @@ public abstract class BaseJpaTest extends BaseTest {
 			} catch (Exception e) {
 				if (count >= 3) {
 					ourLog.error("Failed during expunge", e);
-					fail("", e.toString());
+					fail(e.toString());
 				} else {
 					try {
 						Thread.sleep(1000);
 					} catch (InterruptedException e2) {
-						fail("", e2.toString());
+						fail(e2.toString());
 					}
 				}
 			}
@@ -799,7 +799,7 @@ public abstract class BaseJpaTest extends BaseTest {
 		Optional<TermValueSetConcept> first = stream.findFirst();
 		if (!first.isPresent()) {
 			String failureMessage = String.format("Expanded ValueSet %s did not contain concept [%s|%s|%s] with [%d] designations", theValueSet.getId(), theSystem, theCode, theDisplay, theDesignationCount);
-			fail("", failureMessage);
+			fail(failureMessage);
 			return null;
 		} else {
 			TermValueSetConcept termValueSetConcept = first.get();
@@ -829,7 +829,7 @@ public abstract class BaseJpaTest extends BaseTest {
 		Optional<TermValueSetConceptDesignation> first = stream.findFirst();
 		if (!first.isPresent()) {
 			String failureMessage = String.format("Concept %s did not contain designation [%s|%s|%s|%s|%s] ", theConcept, theLanguage, theUseSystem, theUseCode, theUseDisplay, theDesignationValue);
-			fail("", failureMessage);
+			fail(failureMessage);
 			return null;
 		} else {
 			return first.get();

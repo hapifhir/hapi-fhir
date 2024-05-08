@@ -50,7 +50,7 @@ import java.io.IOException;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.eq;
@@ -353,7 +353,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 
 		try {
 			myClient.create().resource(dr).execute();
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage()).contains("Can not find the requested binary content. It may have been deleted.");
 		}
@@ -722,7 +722,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 		myClient.delete().resourceById(id).execute();
 		try {
 			myClient.read().resource("DocumentReference").withId(id).execute();
-			fail("");
+			fail();
 		} catch (ResourceGoneException e) {
 			// good
 		}

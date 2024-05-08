@@ -30,12 +30,12 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -1136,7 +1136,7 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 
 		try {
 			createAndPersistConceptMap();
-			fail("");
+			fail();
 		} catch (UnprocessableEntityException e) {
 			assertEquals(Msg.code(840) + "Can not create multiple ConceptMap resources with ConceptMap.url \"http://example.com/my_concept_map\", already have one with resource ID: ConceptMap/" + myConceptMapId.getIdPart(), e.getMessage());
 		}
@@ -1149,7 +1149,7 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 
 		try {
 			createAndPersistConceptMap("v1");
-			fail("");
+			fail();
 		} catch (UnprocessableEntityException e) {
 			assertEquals(Msg.code(841) + "Can not create multiple ConceptMap resources with ConceptMap.url \"http://example.com/my_concept_map\" and ConceptMap.version \"v1\", already have one with resource ID: ConceptMap/" + myConceptMapId.getIdPart(), e.getMessage());
 		}

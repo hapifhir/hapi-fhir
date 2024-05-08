@@ -19,7 +19,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ResourceProviderExpungeR4Test extends BaseResourceProviderR4Test {
@@ -42,7 +42,7 @@ public class ResourceProviderExpungeR4Test extends BaseResourceProviderR4Test {
 	private void assertExpunged(IIdType theId) {
 		try {
 			getDao(theId).read(theId);
-			fail("");
+			fail();
 		} catch (ResourceNotFoundException e) {
 			// good
 		}
@@ -121,7 +121,7 @@ public class ResourceProviderExpungeR4Test extends BaseResourceProviderR4Test {
 				dao = myOrganizationDao;
 				break;
 			default:
-				fail("", "Restype: " + theId.getResourceType());
+				fail("Restype: " + theId.getResourceType());
 				dao = myPatientDao;
 		}
 		return dao;
@@ -188,7 +188,7 @@ public class ResourceProviderExpungeR4Test extends BaseResourceProviderR4Test {
 				.named("expunge")
 				.withParameters(input)
 				.execute();
-			fail("");
+			fail();
 		} catch (MethodNotAllowedException e){
 			assertEquals("HTTP 405 Method Not Allowed: " + Msg.code(968) + "$expunge is not enabled on this server", e.getMessage());
 		}

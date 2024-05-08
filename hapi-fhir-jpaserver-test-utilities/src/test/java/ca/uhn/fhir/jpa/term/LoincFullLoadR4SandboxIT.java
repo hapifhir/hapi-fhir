@@ -80,7 +80,7 @@ import static ca.uhn.fhir.jpa.term.loinc.LoincCodingPropertiesHandler.ASSOCIATED
 import static java.util.stream.Collectors.mapping;
 import static java.util.stream.Collectors.toSet;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -311,7 +311,7 @@ public class LoincFullLoadR4SandboxIT extends BaseJpaTest {
 
 		String recordCode = getRecordCode(theRecordMap);
 		if (!theTermConcept.getCode().equals(recordCode)) {
-			fail("", "Received non matching inputs code from file: " + recordCode + ", code from DB: " + theTermConcept.getCode());
+			fail("Received non matching inputs code from file: " + recordCode + ", code from DB: " + theTermConcept.getCode());
 		}
 
 		ourLog.trace("Validating new properties for TC with code: {}", theTermConcept.getCode());
@@ -547,10 +547,10 @@ public class LoincFullLoadR4SandboxIT extends BaseJpaTest {
 			return IOUtils.toString(zipFile.getInputStream(zipEntry), StandardCharsets.UTF_8);
 
 		} catch (IOException e) {
-			fail("", e.getMessage());
+			fail(e.getMessage());
 		}
 
-		fail("", "Couldn't find " + theFilePath + "/" + theZipFileEntryPath);
+		fail("Couldn't find " + theFilePath + "/" + theZipFileEntryPath);
 		return null;
 	}
 

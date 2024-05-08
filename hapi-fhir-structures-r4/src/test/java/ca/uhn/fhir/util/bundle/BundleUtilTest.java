@@ -45,7 +45,7 @@ import static org.hl7.fhir.r4.model.Bundle.HTTPVerb.GET;
 import static org.hl7.fhir.r4.model.Bundle.HTTPVerb.POST;
 import static org.hl7.fhir.r4.model.Bundle.HTTPVerb.PUT;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class BundleUtilTest {
@@ -286,7 +286,7 @@ public class BundleUtilTest {
 		bundleEntryComponent.getRequest().setMethod(POST).setUrl("Observation");
 		try {
 			BundleUtil.sortEntriesIntoProcessingOrder(ourCtx, b);
-			fail("");		} catch (IllegalStateException ignored) {
+			fail();		} catch (IllegalStateException ignored) {
 
 		}
 	}

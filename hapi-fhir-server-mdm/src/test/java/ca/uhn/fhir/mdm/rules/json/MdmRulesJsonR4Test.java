@@ -15,7 +15,7 @@ import java.io.IOException;
 import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
@@ -69,7 +69,7 @@ public class MdmRulesJsonR4Test extends BaseMdmRulesR4Test {
 		assertEquals(3, vectorMatchResultMap.getVector(String.join(", \n ", PATIENT_GIVEN, PATIENT_FAMILY)));
 		try {
 			vectorMatchResultMap.getVector("bad");
-			fail("");		} catch (ConfigurationException e) {
+			fail();		} catch (ConfigurationException e) {
 			assertEquals(Msg.code(1523) + "There is no matchField with name bad", e.getMessage());
 		}
 	}

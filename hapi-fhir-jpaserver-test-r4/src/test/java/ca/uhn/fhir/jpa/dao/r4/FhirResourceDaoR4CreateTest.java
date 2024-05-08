@@ -77,7 +77,7 @@ import java.util.stream.Collectors;
 
 import static java.time.temporal.ChronoUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -371,7 +371,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		obs.addIdentifier().setValue("A+B");
 		try {
 			myObservationDao.create(obs, "identifier=A%20B", new SystemRequestDetails());
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(929) + "Failed to process conditional create. The supplied resource did not satisfy the conditional URL.", e.getMessage());
 		}
@@ -396,7 +396,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 		try {
 			mySystemDao.transaction(new SystemRequestDetails(), (Bundle) bb.getBundle());
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(929) + "Failed to process conditional create. The supplied resource did not satisfy the conditional URL.", e.getMessage());
 		}
@@ -527,7 +527,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		p.addName().setFamily("FAM");
 		try {
 			myPatientDao.update(p);
-			fail("");
+			fail();
 		} catch (ResourceNotFoundException e) {
 			assertEquals(Msg.code(959) + "No resource exists on this server resource with ID[AAA], and client-assigned IDs are not enabled.", e.getMessage());
 		}
@@ -579,7 +579,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		p.setActive(false);
 		try {
 			myPatientDao.create(p);
-			fail("");
+			fail();
 		} catch (ResourceVersionConflictException e) {
 			// good
 		}
@@ -758,7 +758,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		sp.addBase("Patient");
 		try {
 			mySearchParameterDao.update(sp);
-			fail("");
+			fail();
 		} catch (UnprocessableEntityException e) {
 			assertEquals(Msg.code(1111) + "Can not override built-in search parameter Patient:birthdate because overriding is disabled on this server", e.getMessage());
 		}
@@ -1145,7 +1145,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 			for (Future<String> next : futures) {
 				String nextError = next.get();
 				if (StringUtils.isNotBlank(nextError)) {
-					fail("", nextError);
+					fail(nextError);
 				}
 			}
 

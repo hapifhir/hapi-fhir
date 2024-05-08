@@ -27,7 +27,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 class HapiMigratorIT {
 	private static final Logger ourLog = LoggerFactory.getLogger(HapiMigratorIT.class);
@@ -157,7 +157,7 @@ class HapiMigratorIT {
 
 		try {
 			migrator.migrate();
-			fail("");
+			fail();
 		} catch (HapiMigrationException e) {
 			assertEquals("HAPI-2153: Unable to obtain table lock - another database migration may be running.  If no other database migration is running, then the previous migration did not shut down properly and the lock record needs to be deleted manually.  The lock record is located in the TEST_MIGRATOR_TABLE table with INSTALLED_RANK = -100 and DESCRIPTION = " + description, e.getMessage());
 		}

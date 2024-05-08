@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class MdmProviderNotDuplicateGoldenResourceR4Test extends BaseProviderR4Test {
@@ -65,7 +65,7 @@ public class MdmProviderNotDuplicateGoldenResourceR4Test extends BaseProviderR4T
 	public void testNotDuplicateGoldenResourceNoLinkBetweenResources() {
 		try {
 			myMdmProvider.notDuplicate(myGoldenPatientId, myTargetPatientId, myRequestDetails);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage()).startsWith("HAPI-0745: No link exists between");
 		}
@@ -77,7 +77,7 @@ public class MdmProviderNotDuplicateGoldenResourceR4Test extends BaseProviderR4T
 		assertLinkCount(1);
 		try {
 			myMdmProvider.notDuplicate(myGoldenPatientId, myTargetPatientId, myRequestDetails);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage()).endsWith("are not linked as POSSIBLE_DUPLICATE.");
 		}
@@ -117,7 +117,7 @@ public class MdmProviderNotDuplicateGoldenResourceR4Test extends BaseProviderR4T
 
 		try {
 			myMdmProvider.notDuplicate(goldenPatientId, targetPatientId, myRequestDetails);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage()).startsWith("HAPI-0745: No link exists between");
 		}

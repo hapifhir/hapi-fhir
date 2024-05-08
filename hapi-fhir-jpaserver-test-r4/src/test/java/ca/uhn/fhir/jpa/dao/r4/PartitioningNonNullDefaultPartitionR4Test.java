@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SuppressWarnings({"unchecked", "ConstantConditions"})
@@ -188,7 +188,7 @@ public class PartitioningNonNullDefaultPartitionR4Test extends BasePartitioningR
 		addReadPartition(2);
 		try {
 			myPatientDao.read(new IdType("Patient/" + id), mySrd);
-			fail("");
+			fail();
 		} catch (ResourceNotFoundException e) {
 			// good
 		}

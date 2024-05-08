@@ -97,7 +97,7 @@ import java.util.UUID;
 
 import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -146,7 +146,7 @@ public class JsonParserDstu3Test {
 		p.setParserErrorHandler(new StrictErrorHandler());
 		try {
 			p.parseResource(input);
-			fail("");		} catch (DataFormatException e) {
+			fail();		} catch (DataFormatException e) {
 			assertThat(e.getMessage()).isEqualTo(Msg.code(1861) + "Failed to parse JSON encoded FHIR content: Unexpected character ('=' (code 61)): was expecting a colon to separate field name and value\n" +
 				" at [line: 4, column: 18]");
 		}
@@ -163,7 +163,7 @@ public class JsonParserDstu3Test {
 		p.setParserErrorHandler(new StrictErrorHandler());
 		try {
 			p.parseResource(input);
-			fail("");		} catch (DataFormatException e) {
+			fail();		} catch (DataFormatException e) {
 			assertEquals(Msg.code(1820) + "Found incorrect type for element context - Expected OBJECT and found SCALAR (STRING)", e.getMessage());
 		}
 	}
@@ -736,7 +736,7 @@ public class JsonParserDstu3Test {
 		ourLog.info(encoded);
 
 		assertThat(encoded).contains("123");
-		assertNotNull(encoded).doesNotContain("\"\"");
+		assertThat(encoded).doesNotContain("\"\"");
 	}
 
 	@Test
@@ -1473,7 +1473,7 @@ public class JsonParserDstu3Test {
 		p.setParserErrorHandler(new StrictErrorHandler());
 		try {
 			p.parseResource(IOUtils.toString(JsonParserDstu3Test.class.getResourceAsStream("/Patient.json.txt"), Charsets.UTF_8));
-			fail("");		} catch (DataFormatException e) {
+			fail();		} catch (DataFormatException e) {
 			assertEquals(Msg.code(1820) + "Found incorrect type for element assigner - Expected OBJECT and found SCALAR (STRING)", e.getMessage());
 		}
 
@@ -2032,12 +2032,12 @@ public class JsonParserDstu3Test {
 	public void testParseInvalid() {
 		try {
 			ourCtx.newJsonParser().parseResource("FOO");
-			fail("");		} catch (DataFormatException e) {
+			fail();		} catch (DataFormatException e) {
 			assertEquals(Msg.code(1861) + "Failed to parse JSON encoded FHIR content: " + Msg.code(1859) + "Content does not appear to be FHIR JSON, first non-whitespace character was: 'F' (must be '{')", e.getMessage());
 		}
 		try {
 			ourCtx.newJsonParser().parseResource("[\"aaa\"]");
-			fail("");		} catch (DataFormatException e) {
+			fail();		} catch (DataFormatException e) {
 			assertEquals(Msg.code(1861) + "Failed to parse JSON encoded FHIR content: " + Msg.code(1859) + "Content does not appear to be FHIR JSON, first non-whitespace character was: '[' (must be '{')", e.getMessage());
 		}
 
@@ -2068,7 +2068,7 @@ public class JsonParserDstu3Test {
 			parser = ourCtx.newJsonParser();
 			parser.setParserErrorHandler(new StrictErrorHandler());
 			parser.parseResource(input);
-			fail("");		} catch (DataFormatException e) {
+			fail();		} catch (DataFormatException e) {
 			assertEquals(Msg.code(1822) + "Resource is missing required element 'url' in parent element 'extension'", e.getMessage());
 		}
 
@@ -2097,7 +2097,7 @@ public class JsonParserDstu3Test {
 			parser = ourCtx.newJsonParser();
 			parser.setParserErrorHandler(new StrictErrorHandler());
 			parser.parseResource(input);
-			fail("");		} catch (DataFormatException e) {
+			fail();		} catch (DataFormatException e) {
 			assertEquals(Msg.code(1822) + "Resource is missing required element 'url' in parent element 'modifierExtension'", e.getMessage());
 		}
 
@@ -2250,7 +2250,7 @@ public class JsonParserDstu3Test {
 		IParser jsonParser = ourCtx.newJsonParser().setPrettyPrint(true);
 		try {
 			jsonParser.parseResource(input);
-			fail("");		} catch (DataFormatException e) {
+			fail();		} catch (DataFormatException e) {
 			assertEquals(Msg.code(1843) + "Missing required element 'resourceType' from JSON resource object, unable to parse", e.getMessage());
 		}
 	}
@@ -2293,7 +2293,7 @@ public class JsonParserDstu3Test {
 
 		try {
 			ourCtx.newJsonParser().parseResource(Bundle.class, bundle);
-			fail("");		} catch (DataFormatException e) {
+			fail();		} catch (DataFormatException e) {
 			// I'm hoping at some point we can get rid of the REDACTED message entirely.
 			// Request filed with Jackson: https://github.com/FasterXML/jackson-core/issues/1158
 			assertThat(e.getMessage()).isEqualTo(Msg.code(1861) + "Failed to parse JSON encoded FHIR content: Unexpected close marker '}': expected ']' (for root starting at [line: 1])\n" +
@@ -2307,7 +2307,7 @@ public class JsonParserDstu3Test {
 		String input = IOUtils.toString(getClass().getResourceAsStream("/invalid_metadata.json"), Charsets.UTF_8);
 		try {
 			ourCtx.newJsonParser().parseResource(CapabilityStatement.class, input);
-			fail("");		} catch (DataFormatException e) {
+			fail();		} catch (DataFormatException e) {
 			assertEquals("Syntax error parsing JSON FHIR structure: Expected ARRAY at element 'modifierExtension', found 'OBJECT'", e.getMessage());
 		}
 	}
@@ -2332,13 +2332,13 @@ public class JsonParserDstu3Test {
 
 		try {
 			p.parseResource(encoded.replace("Observation", "observation"));
-			fail("");		} catch (DataFormatException e) {
+			fail();		} catch (DataFormatException e) {
 			assertEquals(Msg.code(1815) + "Unknown resource type 'observation': Resource names are case sensitive, found similar name: 'Observation'", e.getMessage());
 		}
 
 		try {
 			p.parseResource(encoded.replace("valueSampledData", "valueSampleddata"));
-			fail("");		} catch (DataFormatException e) {
+			fail();		} catch (DataFormatException e) {
 			assertEquals(Msg.code(1825) + "Unknown element 'valueSampleddata' found during parse", e.getMessage());
 		}
 	}

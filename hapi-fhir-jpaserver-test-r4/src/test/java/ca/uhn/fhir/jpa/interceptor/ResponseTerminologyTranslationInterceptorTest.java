@@ -32,9 +32,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class ResponseTerminologyTranslationInterceptorTest extends BaseResourceProviderR4Test {
@@ -223,7 +223,7 @@ public class ResponseTerminologyTranslationInterceptorTest extends BaseResourceP
 						assertThat(contents).contains(code);
 					}
 				} else {
-					fail("", resourceTypeInFile);
+					fail(resourceTypeInFile);
 				}
 			}
 		}

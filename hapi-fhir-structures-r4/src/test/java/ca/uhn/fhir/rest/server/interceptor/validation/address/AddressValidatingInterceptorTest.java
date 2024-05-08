@@ -28,7 +28,7 @@ import static ca.uhn.fhir.rest.server.interceptor.validation.address.AddressVali
 import static ca.uhn.fhir.rest.server.interceptor.validation.address.IAddressValidator.ADDRESS_VALIDATION_EXTENSION_URL;
 import static ca.uhn.fhir.rest.server.interceptor.validation.address.impl.BaseRestfulValidator.PROPERTY_SERVICE_KEY;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -84,7 +84,7 @@ class AddressValidatingInterceptorTest {
 		props.setProperty(PROPERTY_VALIDATOR_CLASS, "RandomService");
 		try {
 			new AddressValidatingInterceptor(props);
-			fail("");		} catch (Exception e) {
+			fail();		} catch (Exception e) {
 			// expected
 		}
 
@@ -98,13 +98,13 @@ class AddressValidatingInterceptorTest {
 		try {
 			myInterceptor.handleRequest(null, null);
 		} catch (Exception ex) {
-			fail("");		}
+			fail();		}
 
 		try {
 			myInterceptor.setAddressValidator(null);
 			myInterceptor.handleRequest(null, null);
 		} catch (Exception ex) {
-			fail("");		}
+			fail();		}
 	}
 
 	@BeforeEach

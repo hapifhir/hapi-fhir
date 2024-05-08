@@ -10,7 +10,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.lang.reflect.Method;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -33,7 +33,7 @@ public class CreateMethodBindingTest {
 		Method method = MyClass.class.getMethod("create");
 		try {
 			new CreateMethodBinding(method, myCtx, new MyClass());
-			fail("");		} catch (ConfigurationException e) {
+			fail();		} catch (ConfigurationException e) {
 			assertThat(e.getMessage()).contains("is a @Create method but it does not return class ca.uhn.fhir.rest.api.MethodOutcome");
 		}
 	}

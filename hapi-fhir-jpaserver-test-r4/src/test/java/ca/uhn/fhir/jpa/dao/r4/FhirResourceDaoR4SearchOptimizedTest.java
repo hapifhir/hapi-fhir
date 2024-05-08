@@ -69,12 +69,12 @@ import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.leftPad;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 
@@ -730,7 +730,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 			Throwable t = next.get();
 			if (t != null) {
 				String stackTrace = ExceptionUtils.getStackTrace(t);
-				fail("", t + "\n" + stackTrace);
+				fail(t + "\n" + stackTrace);
 			}
 		}
 		executor.shutdownNow();

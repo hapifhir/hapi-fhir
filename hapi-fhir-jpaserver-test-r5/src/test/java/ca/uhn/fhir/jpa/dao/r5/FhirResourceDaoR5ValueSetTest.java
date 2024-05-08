@@ -38,7 +38,7 @@ import java.io.IOException;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.stringContainsInOrder;
@@ -86,7 +86,7 @@ public class FhirResourceDaoR5ValueSetTest extends BaseJpaR5Test {
 		CodeableConcept codeableConcept = null;
 		try {
 			myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(901) + "Either ValueSet ID or ValueSet identifier or system and code must be provided. Unable to validate.", e.getMessage());
 		}
@@ -313,7 +313,7 @@ public class FhirResourceDaoR5ValueSetTest extends BaseJpaR5Test {
 
 		try {
 			myValueSetDao.expand(vs, null);
-			fail("");
+			fail();
 		} catch (InternalErrorException e) {
 			assertThat(e.getMessage()).contains(Msg.code(832) + "Expansion of ValueSet produced too many codes (maximum 50) - Operation aborted!");
 		}

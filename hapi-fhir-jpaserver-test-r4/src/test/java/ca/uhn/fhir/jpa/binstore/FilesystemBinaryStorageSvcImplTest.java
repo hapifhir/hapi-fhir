@@ -24,7 +24,7 @@ import java.io.File;
 import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class FilesystemBinaryStorageSvcImplTest {
 
@@ -97,7 +97,7 @@ public class FilesystemBinaryStorageSvcImplTest {
 	public void testFetchBinaryContentUnknown() throws IOException {
 		try {
 			mySvc.fetchBinaryContent(new IdType("Patient/123"), "1111111");
-			fail("");
+			fail();
 		} catch (ResourceNotFoundException e) {
 			assertEquals(Msg.code(1327) + "Unknown blob ID: 1111111 for resource ID Patient/123", e.getMessage());
 		}
@@ -135,7 +135,7 @@ public class FilesystemBinaryStorageSvcImplTest {
 		String contentType = "image/png";
 		try {
 			mySvc.storeBinaryContent(id, null, contentType, new ByteArrayInputStream(SOME_BYTES), new ServletRequestDetails());
-			fail("");
+			fail();
 		} catch (PayloadTooLargeException e) {
 			assertEquals(Msg.code(1343) + "Binary size exceeds maximum: 5", e.getMessage());
 		}

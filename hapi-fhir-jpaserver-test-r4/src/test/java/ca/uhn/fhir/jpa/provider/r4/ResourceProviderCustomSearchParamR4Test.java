@@ -61,9 +61,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProviderR4Test {
@@ -120,7 +120,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 
 		try {
 			myClient.create().resource(sp).execute();
-			fail("");
+			fail();
 		} catch (UnprocessableEntityException e) {
 			assertEquals("HTTP 422 Unprocessable Entity: " + Msg.code(1112) + "SearchParameter.status is missing or invalid", e.getMessage());
 		}
@@ -137,7 +137,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 
 		try {
 			myClient.create().resource(sp).execute();
-			fail("");
+			fail();
 		} catch (UnprocessableEntityException e) {
 			assertEquals("HTTP 422 Unprocessable Entity: " + Msg.code(1120) + "SearchParameter.expression value \"Patient\" is invalid due to missing/incorrect path", e.getMessage());
 		}

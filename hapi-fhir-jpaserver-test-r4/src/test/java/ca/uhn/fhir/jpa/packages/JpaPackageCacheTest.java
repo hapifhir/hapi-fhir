@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Locale;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -68,7 +68,7 @@ public class JpaPackageCacheTest extends BaseJpaR4Test {
 
 		try {
 			myPackageCacheManager.loadPackage("basisprofil.de", "99");
-			fail("");
+			fail();
 		} catch (ResourceNotFoundException e) {
 			assertEquals(Msg.code(1301) + "Unable to locate package basisprofil.de#99", e.getMessage());
 		}
@@ -96,7 +96,7 @@ public class JpaPackageCacheTest extends BaseJpaR4Test {
 
 			try {
 				myPackageCacheManager.loadPackage("basisprofil.de", "99");
-				fail("");
+				fail();
 			} catch (ResourceNotFoundException e) {
 				assertEquals(Msg.code(1301) + "Unable to locate package basisprofil.de#99", e.getMessage());
 			}
@@ -136,7 +136,7 @@ public class JpaPackageCacheTest extends BaseJpaR4Test {
 
 			try {
 				myPackageCacheManager.loadPackage("hl7.fhir.uv.shorthand", "99");
-				fail("");
+				fail();
 			} catch (ResourceNotFoundException e) {
 				assertEquals(Msg.code(1301) + "Unable to locate package hl7.fhir.uv.shorthand#99", e.getMessage());
 			}

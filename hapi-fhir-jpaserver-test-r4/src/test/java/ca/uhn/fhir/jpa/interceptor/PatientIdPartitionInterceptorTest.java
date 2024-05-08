@@ -54,7 +54,7 @@ import java.util.Locale;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.either;
@@ -128,7 +128,7 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 		patient.setActive(true);
 		try {
 			myPatientDao.create(patient);
-			fail("");
+			fail();
 		} catch (MethodNotAllowedException e) {
 			assertEquals(Msg.code(1321) + "Patient resource IDs must be client-assigned in patient compartment mode", e.getMessage());
 		}
@@ -453,7 +453,7 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 
 		try {
 			mySystemDao.transaction(mySrd, (Bundle) tx.getBundle());
-			fail("");
+			fail();
 		} catch (MethodNotAllowedException e) {
 			assertEquals("HAPI-1321: Patient resource IDs must be client-assigned in patient compartment mode", e.getMessage());
 		}

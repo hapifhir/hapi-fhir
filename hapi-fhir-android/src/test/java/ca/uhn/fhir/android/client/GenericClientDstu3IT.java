@@ -38,7 +38,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -221,14 +221,14 @@ public class GenericClientDstu3IT {
 
 		try {
 			client.read().resource(Patient.class).withId("1").execute();
-			fail("");
+			fail();
 		} catch (FhirClientConnectionException e) {
 			// good
 		}
 
 		try {
 			client.read().resource(Patient.class).withId("1").execute();
-			fail("");
+			fail();
 		} catch (RuntimeException e) {
 			// good
 		}

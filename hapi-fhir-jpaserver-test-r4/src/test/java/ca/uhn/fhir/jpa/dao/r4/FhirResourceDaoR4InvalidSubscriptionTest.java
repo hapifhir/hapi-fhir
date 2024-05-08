@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class FhirResourceDaoR4InvalidSubscriptionTest extends BaseJpaR4Test {
 
@@ -52,7 +52,7 @@ public class FhirResourceDaoR4InvalidSubscriptionTest extends BaseJpaR4Test {
 		s.setStatus(Subscription.SubscriptionStatus.REQUESTED);
 		try {
 			mySubscriptionDao.update(s);
-			fail("");
+			fail();
 		} catch (UnprocessableEntityException e) {
 			assertEquals(Msg.code(13) + "Subscription.criteria contains invalid/unsupported resource type: FOO", e.getMessage());
 		}

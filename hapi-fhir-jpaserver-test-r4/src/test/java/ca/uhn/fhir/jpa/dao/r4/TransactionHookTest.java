@@ -27,7 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.hl7.fhir.r4.model.Bundle.HTTPVerb.DELETE;
 import static org.hl7.fhir.r4.model.Bundle.HTTPVerb.POST;
 import static org.hl7.fhir.r4.model.Bundle.HTTPVerb.PUT;
@@ -134,7 +134,7 @@ public class TransactionHookTest extends BaseJpaR4SystemTest {
 			// transaction should succeed because the DiagnosticReport which references obs2 is also deleted
 			callTransaction(b);
 		} catch (ResourceVersionConflictException e) {
-			fail("");
+			fail();
 		}
 	}
 
@@ -169,7 +169,7 @@ public class TransactionHookTest extends BaseJpaR4SystemTest {
 		myObservationDao.read(obs1id);
 		try {
 			myObservationDao.read(obs2id);
-			fail("");
+			fail();
 		} catch (ResourceGoneException e) {
 			// good
 		}
@@ -214,7 +214,7 @@ public class TransactionHookTest extends BaseJpaR4SystemTest {
 		myDiagnosticReportDao.read(rptId);
 		try {
 			myObservationDao.read(obs1id);
-			fail("");
+			fail();
 		} catch (ResourceGoneException e) {
 			// good
 		}
@@ -250,7 +250,7 @@ public class TransactionHookTest extends BaseJpaR4SystemTest {
 		b.addEntry().setResource(rpt).getRequest().setMethod(PUT).setUrl("DiagnosticReport?identifier=foo|IDENTIFIER");
 		try {
 			callTransaction(b);
-			fail("");
+			fail();
 		} catch (ResourceVersionConflictException e ) {
 			assertThat(e.getMessage()).matches(Msg.code(550) + Msg.code(515) + "Unable to delete Observation/[0-9]+ because at least one resource has a reference to this resource. First reference found was resource DiagnosticReport/[0-9]+ in path DiagnosticReport.result");
 		}

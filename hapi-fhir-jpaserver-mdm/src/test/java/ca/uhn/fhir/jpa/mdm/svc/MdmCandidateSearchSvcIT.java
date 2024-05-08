@@ -25,7 +25,7 @@ import java.util.Collections;
 import java.util.Date;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 
@@ -148,7 +148,7 @@ public class MdmCandidateSearchSvcIT extends BaseMdmR4Test {
 		try {
 			createActivePatient();
 			myMdmCandidateSearchSvc.findCandidates("Patient", newJane, RequestPartitionId.allPartitions());
-			fail("");
+			fail();
 		} catch (TooManyCandidatesException e) {
 			assertEquals("HAPI-0762: More than 3 candidate matches found for Patient?identifier=http%3A%2F%2Fa.tv%2F%7CID.JANE.123&active=true.  Aborting mdm matching. Updating the candidate search parameters is strongly recommended for better performance of MDM.", e.getMessage());
 		}

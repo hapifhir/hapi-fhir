@@ -42,9 +42,9 @@ import java.util.HashSet;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 @SuppressWarnings({"ConstantConditions"})
@@ -70,7 +70,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		o.getSubject().setReference("Patient/FOO");
 		try {
 			myObservationDao.create(o, mySrd);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage()).startsWith(Msg.code(1094) + "Resource Patient/FOO not found, specified in path: Observation.subject");
 		}
@@ -138,7 +138,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 
 		try {
 			myPatientDao.read(new IdType("Patient/FOO"));
-			fail("");
+			fail();
 		} catch (ResourceNotFoundException e) {
 			// good
 		}
@@ -174,7 +174,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 
 		try {
 			myPatientDao.read(new IdType("Patient/999999999999999"));
-			fail("");
+			fail();
 		} catch (ResourceNotFoundException e) {
 			// good
 		}

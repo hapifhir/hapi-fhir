@@ -21,7 +21,7 @@ import java.net.URI;
 import java.util.HashMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doReturn;
@@ -57,7 +57,7 @@ public class JaxRsExceptionInterceptorTest {
 		when(context.proceed()).thenThrow(thrownException);
 		try {
 			interceptor.intercept(context);
-			fail("");
+			fail();
 		} catch (BaseServerResponseException e) {
 			assertEquals(e.getMessage(), thrownException.getMessage());
 		}
@@ -72,7 +72,7 @@ public class JaxRsExceptionInterceptorTest {
 		when(context.proceed()).thenThrow(new ServletException());
 		try {
 			interceptor.intercept(context);
-			fail("");
+			fail();
 		} catch (BaseServerResponseException e) {
 			assertThat(e.getMessage()).contains("someMessage");
 		}

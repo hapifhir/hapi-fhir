@@ -35,9 +35,9 @@ import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.leftPad;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
@@ -93,7 +93,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 
 		try {
 			myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo/cs", delta);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(926) + "Cycle detected around code Root", e.getMessage());
 		}
@@ -269,7 +269,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 
 		try {
 			myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo", new CustomTerminologySet());
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage()).contains("can not apply a delta - wrong content mode");
 		}

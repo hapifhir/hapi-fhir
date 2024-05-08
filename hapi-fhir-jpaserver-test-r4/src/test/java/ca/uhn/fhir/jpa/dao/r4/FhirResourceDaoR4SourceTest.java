@@ -26,8 +26,8 @@ import org.junit.jupiter.api.Test;
 
 import static ca.uhn.fhir.rest.api.Constants.PARAM_SOURCE;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import static org.mockito.Mockito.when;
 
@@ -182,7 +182,7 @@ public class FhirResourceDaoR4SourceTest extends BaseJpaR4Test {
 			SearchParameterMap searchParameter = SearchParameterMap.newSynchronous();
 			searchParameter.add(Constants.PARAM_SOURCE, uriParam);
 			myPatientDao.search(searchParameter);
-			fail("");
+			fail();
 		} catch (MethodNotAllowedException e) {
 			assertEquals(Msg.code(2417) + ":contains modifier is disabled on this server", e.getMessage());
 		}

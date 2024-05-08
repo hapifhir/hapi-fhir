@@ -18,7 +18,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class UrlUtilTest {
@@ -195,7 +195,7 @@ public class UrlUtilTest {
 	public void testGetAboveUriCandidates_withInvalidURI_throwsException(String theUri) {
 		try {
 			UrlUtil.getAboveUriCandidates(theUri);
-			fail("");		} catch (InvalidRequestException e) {
+			fail();		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(2419) + "Provided URI is not valid: " + theUri, e.getMessage());
 		}
 	}

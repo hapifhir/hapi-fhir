@@ -19,7 +19,7 @@ import javax.xml.transform.TransformerException;
 import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class XmlUtilDstu3Test {
@@ -42,7 +42,7 @@ public class XmlUtilDstu3Test {
 	public void testParseMalformed() {
 		try {
 			ourCtx.newXmlParser().parseResource("AAAAA");
-			fail("");		} catch (DataFormatException e) {
+			fail();		} catch (DataFormatException e) {
 			// good
 		}
 	}
@@ -53,12 +53,12 @@ public class XmlUtilDstu3Test {
 		
 		try {
 			ourCtx.newXmlParser().parseResource("AAAAA");
-			fail("");		} catch (DataFormatException e) {
+			fail();		} catch (DataFormatException e) {
 			// good
 		}
 		try {
 			ourCtx.newXmlParser().encodeResourceToString(myPatient);
-			fail("");		} catch (ConfigurationException e) {
+			fail();		} catch (ConfigurationException e) {
 			// good
 		}
 	}
@@ -69,7 +69,7 @@ public class XmlUtilDstu3Test {
 		
 		try {
 			ourCtx.newXmlParser().parseResource("AAAAA");
-			fail("");		} catch (ConfigurationException e) {
+			fail();		} catch (ConfigurationException e) {
 			// good
 		}
 	}

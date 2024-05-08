@@ -43,7 +43,7 @@ import java.nio.charset.Charset;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -157,7 +157,7 @@ public class OperationClientR4Test {
 				.named("nonrepeating")
 				.withSearchParameter(Parameters.class, "valstr", new StringParam("str"))
 				.execute();
-			fail("");		} catch (IllegalArgumentException e) {
+			fail();		} catch (IllegalArgumentException e) {
 			assertEquals("Can not invoke operation \"$nonrepeating\" on instance \"123\" - No resource type specified", e.getMessage());
 		}
 	}

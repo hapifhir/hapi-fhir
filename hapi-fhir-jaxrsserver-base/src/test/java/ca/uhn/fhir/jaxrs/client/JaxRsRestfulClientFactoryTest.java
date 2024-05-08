@@ -22,11 +22,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsNot.not;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 /**
@@ -101,7 +101,7 @@ public class JaxRsRestfulClientFactoryTest extends BaseFhirVersionParameterizedT
 				.target(fhirVersionParams.getSecuredPatientEndpoint())
 				.request(MediaType.JSON_UTF_8.toString())
 				.get(Response.class);
-			fail("");
+			fail();
 		} catch (Exception e) {
 			assertTrue(e.getCause() instanceof SSLException);
 		}

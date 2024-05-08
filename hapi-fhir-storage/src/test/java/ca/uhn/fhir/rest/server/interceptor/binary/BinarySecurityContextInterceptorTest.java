@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -68,7 +68,7 @@ class BinarySecurityContextInterceptorTest {
 				.resource(Binary.class)
 				.withId("A")
 				.execute();
-			fail("");
+			fail();
 		} catch (ForbiddenOperationException e) {
 			assertEquals("HTTP 403 Forbidden: HAPI-2369: Security context not permitted", e.getMessage());
 		}
@@ -140,7 +140,7 @@ class BinarySecurityContextInterceptorTest {
 				.update()
 				.resource(newBinary)
 				.execute();
-			fail("");
+			fail();
 		} catch (ForbiddenOperationException e) {
 			assertEquals("HTTP 403 Forbidden: HAPI-2369: Security context not permitted", e.getMessage());
 		}

@@ -14,7 +14,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class FhirResourceDaoR4ReferentialIntegrityTest extends BaseJpaR4Test {
 
@@ -32,7 +32,7 @@ public class FhirResourceDaoR4ReferentialIntegrityTest extends BaseJpaR4Test {
 		p.setManagingOrganization(new Reference("Organization/AAA"));
 		try {
 			myPatientDao.create(p);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(1094) + "Resource Organization/AAA not found, specified in path: Patient.managingOrganization", e.getMessage());
 		}
@@ -78,7 +78,7 @@ public class FhirResourceDaoR4ReferentialIntegrityTest extends BaseJpaR4Test {
 
 		try {
 			myOrganizationDao.delete(oid);
-			fail("");
+			fail();
 		} catch (ResourceVersionConflictException e) {
 			assertEquals(Msg.code(550) + Msg.code(515) + "Unable to delete Organization/" + oid.getIdPart() + " because at least one resource has a reference to this resource. First reference found was resource Patient/" + pid.getIdPart() + " in path Patient.managingOrganization", e.getMessage());
 		}

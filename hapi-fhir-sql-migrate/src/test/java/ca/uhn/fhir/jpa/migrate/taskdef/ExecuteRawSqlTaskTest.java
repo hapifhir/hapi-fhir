@@ -16,7 +16,7 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class ExecuteRawSqlTaskTest extends BaseTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(ExecuteRawSqlTaskTest.class);
@@ -200,7 +200,7 @@ public class ExecuteRawSqlTaskTest extends BaseTest {
 				 .executeRawSql("2024.02", someFakeUpdateSql)
 				 .onlyIf(someFakeSelectSql, someReason);
 
-			fail("");
+			fail();
 		} catch (IllegalArgumentException exception) {
 			assertEquals("HAPI-2455: Only SELECT statements (including CTEs) are allowed here.  Please check your SQL: [UPDATE SOMETABLE SET PID = 1]", exception.getMessage());
 		}
@@ -231,7 +231,7 @@ public class ExecuteRawSqlTaskTest extends BaseTest {
 		getMigrator().addTasks(tasks.getTaskList(VersionEnum.V0_1, VersionEnum.V4_0_0));
 		try {
 			getMigrator().migrate();
-			fail("");
+			fail();
 		} catch (IllegalArgumentException exception) {
 			assertEquals("HAPI-2474: Failure due to query returning more than one result: [true, true] for SQL: [SELECT PID != 0 FROM SOMETABLE].", exception.getMessage());
 		}

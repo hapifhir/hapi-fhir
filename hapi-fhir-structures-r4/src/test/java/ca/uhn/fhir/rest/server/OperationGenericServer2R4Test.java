@@ -42,7 +42,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class OperationGenericServer2R4Test {
@@ -269,7 +269,7 @@ public class OperationGenericServer2R4Test {
 		try {
 			PatientProvider provider = new PatientProvider();
 			ourServer.registerProvider(provider);
-			fail("");		} catch (ConfigurationException e) {
+			fail();		} catch (ConfigurationException e) {
 			ConfigurationException ce = (ConfigurationException) e.getCause();
 			assertThat(ce.getMessage()).contains(Msg.code(405) + "Non assignable parameter typeName=\"code\" specified on method public org.hl7.fhir.r4.model.Parameters ca.uhn.fhir.rest.server.OperationGenericServer2R4Test");
 		}
@@ -328,7 +328,7 @@ public class OperationGenericServer2R4Test {
 		PlainProvider provider = new PlainProvider();
 		try {
 			ourServer.registerProvider(provider);
-			fail("");		} catch (ConfigurationException e) {
+			fail();		} catch (ConfigurationException e) {
 			Throwable cause = e.getCause();
 			assertEquals(Msg.code(423) + "Failed to bind method public org.hl7.fhir.r4.model.Parameters ca.uhn.fhir.rest.server.OperationGenericServer2R4Test$2PlainProvider.opInstance() - " + Msg.code(1684) + "Unknown resource name \"FOO\" (this name is not known in FHIR version \"R4\")", cause.getMessage());
 		}

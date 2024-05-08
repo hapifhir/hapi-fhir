@@ -58,10 +58,10 @@ import java.util.TimeZone;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -97,7 +97,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 				p.getMaritalStatus().setText("123");
 				return myPatientDao.update(p, mySrd).getId().toUnqualified();
 			});
-			fail("");
+			fail();
 		} catch (ResourceVersionConflictException e) {
 			assertThat(e.getMessage()).contains("It can also happen when a request disables the Upsert Existence Check.");
 		}
@@ -166,7 +166,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 
 		try {
 			myPatientDao.read(id.toVersionless(), mySrd);
-			fail("");
+			fail();
 		} catch (ResourceGoneException e) {
 			// nothing
 		}
@@ -504,7 +504,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 			patient.setActive(true);
 			try {
 				myPatientDao.create(patient, mySrd);
-				fail("");
+				fail();
 			} catch (UnprocessableEntityException e) {
 				assertEquals(Msg.code(932) + "Resource contains 4 meta entries (tag/profile/security label), maximum is 3", e.getMessage());
 			}
@@ -530,7 +530,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 			meta.addTag().setSystem("http://foo").setCode("4");
 			try {
 				myPatientDao.metaAddOperation(id, meta, null);
-				fail("");
+				fail();
 			} catch (UnprocessableEntityException e) {
 				assertEquals(Msg.code(932) + "Resource contains 4 meta entries (tag/profile/security label), maximum is 3", e.getMessage());
 			}
@@ -566,13 +566,13 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 		myPatientDao.read(new IdType("Patient/A/_history/1"), mySrd);
 		try {
 			myPatientDao.read(new IdType("Patient/A/_history/2"), mySrd);
-			fail("");
+			fail();
 		} catch (ResourceNotFoundException e) {
 			// good
 		}
 		try {
 			myPatientDao.read(new IdType("Patient/A/_history/3"), mySrd);
-			fail("");
+			fail();
 		} catch (ResourceNotFoundException e) {
 			// good
 		}
@@ -995,7 +995,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 		try {
 			p2.setId(new IdType("Organization/" + p1id.getIdPart()));
 			myOrganizationDao.update(p2, mySrd);
-			fail("");
+			fail();
 		} catch (UnprocessableEntityException e) {
 			// good
 		}
@@ -1003,7 +1003,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 		try {
 			p2.setId(new IdType("Patient/" + p1id.getIdPart()));
 			myOrganizationDao.update(p2, mySrd);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			ourLog.error("Good", e);
 		}
@@ -1018,7 +1018,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 		p.setId("Patient/9999999999999999");
 		try {
 			myPatientDao.update(p, mySrd);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage()).contains("Can not create resource with ID[9999999999999999], no resource with this ID exists and clients may only");
 		}
@@ -1032,7 +1032,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 		p.setId("Patient/123:456");
 		try {
 			myPatientDao.update(p, mySrd);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(521) + "Can not process entity with ID[123:456], this is not a valid FHIR ID", e.getMessage());
 		}
@@ -1201,7 +1201,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 		p.setId("Patient/123");
 		try {
 			myPatientDao.update(p, mySrd);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage()).contains("clients may only assign IDs which contain at least one non-numeric");
 		}
@@ -1233,7 +1233,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 		p.addName().setFamily("FAM");
 		try {
 			myPatientDao.update(p, mySrd);
-			fail("");
+			fail();
 		} catch (ResourceNotFoundException e) {
 			assertThat(e.getMessage()).matches(Msg.code(959) + "No resource exists on this server resource with ID.*, and client-assigned IDs are not enabled.");
 		}
@@ -1256,7 +1256,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 		try {
 			UUID.fromString(result);
 		} catch (IllegalArgumentException exception){
-			fail("", "Result id is not a UUID. Instead, it was: " + result);
+			fail("Result id is not a UUID. Instead, it was: " + result);
 		}
 	}
 

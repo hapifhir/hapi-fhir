@@ -33,7 +33,7 @@ import java.io.StringReader;
 import java.nio.charset.Charset;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -116,7 +116,7 @@ public class ClientServerValidationDstu2_1Test {
 		myCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.ONCE);
 		try {
 			myCtx.newRestfulGenericClient("http://foo").read(new UriDt("http://foo/Patient/1"));
-			fail("");		} catch (FhirClientInappropriateForServerException e) {
+			fail();		} catch (FhirClientInappropriateForServerException e) {
 			assertThat(e.toString()).contains("The server at base URL \"http://foo/metadata\" returned a conformance statement indicating that it supports FHIR version \"1.0.2\" which corresponds to DSTU2, but this client is configured to use DSTU2_1 (via the FhirContext)");
 		}
 	}

@@ -19,7 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class MdmProviderCreateLinkR4Test extends BaseLinkR4Test {
@@ -87,7 +87,7 @@ public class MdmProviderCreateLinkR4Test extends BaseLinkR4Test {
 
 		try {
 			myMdmProvider.createLink(sourcePatientId, patientId, MATCH_RESULT, myRequestDetails);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage()).endsWith("This operation is only available for resources on the same partition.");
 		}
@@ -128,7 +128,7 @@ public class MdmProviderCreateLinkR4Test extends BaseLinkR4Test {
 
 		try {
 			myMdmProvider.createLink(sourcePatientId2, patientId, MATCH_RESULT, myRequestDetails);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage()).endsWith("Use $mdm-query-links to see more details.");
 		}
@@ -162,7 +162,7 @@ public class MdmProviderCreateLinkR4Test extends BaseLinkR4Test {
 		assertLinkCount(1);
 		try {
 			myMdmProvider.createLink(mySourcePatientId, myPatientId, MATCH_RESULT,myRequestDetails);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage()).startsWith(Msg.code(753) + "Link already exists");
 		}
@@ -173,7 +173,7 @@ public class MdmProviderCreateLinkR4Test extends BaseLinkR4Test {
 	public void testCreateIllegalResultPD() {
 		try {
 			myMdmProvider.createLink(mySourcePatientId, myPatientId, POSSIBLE_DUPLICATE_RESULT, myRequestDetails);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(1496) + "$mdm-create-link illegal matchResult value 'POSSIBLE_DUPLICATE'.  Must be NO_MATCH, MATCH or POSSIBLE_MATCH", e.getMessage());
 		}
@@ -183,7 +183,7 @@ public class MdmProviderCreateLinkR4Test extends BaseLinkR4Test {
 	public void testCreateIllegalFirstArg() {
 		try {
 			myMdmProvider.createLink(new StringType(""), myPatientId, MATCH_RESULT, myRequestDetails);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage()).endsWith(" must have form <resourceType>/<id> where <id> is the id of the resource");
 		}
@@ -193,7 +193,7 @@ public class MdmProviderCreateLinkR4Test extends BaseLinkR4Test {
 	public void testCreateIllegalSecondArg() {
 		try {
 			myMdmProvider.createLink(myVersionlessGodlenResourceId, new StringType(""), MATCH_RESULT, myRequestDetails);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage()).endsWith(" must have form <resourceType>/<id>  where <id> is the id of the resource and <resourceType> is the type of the resource");
 		}
@@ -204,7 +204,7 @@ public class MdmProviderCreateLinkR4Test extends BaseLinkR4Test {
 		Patient patient = createPatient();
 		try {
 			myMdmProvider.createLink(new StringType(patient.getIdElement().getValue()), myPatientId, MATCH_RESULT, myRequestDetails);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			String expectedMessage = myMessageHelper.getMessageForFailedGoldenResourceLoad("goldenResourceId", patient.getId());
 			assertEquals(Msg.code(1502) + expectedMessage, e.getMessage());
@@ -218,7 +218,7 @@ public class MdmProviderCreateLinkR4Test extends BaseLinkR4Test {
 		createPatient(patient);
 		try {
 			myMdmProvider.createLink(mySourcePatientId, new StringType(patient.getIdElement().getValue()), MATCH_RESULT, myRequestDetails);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(759) + myMessageHelper.getMessageForUnsupportedSourceResource(), e.getMessage());
 		}

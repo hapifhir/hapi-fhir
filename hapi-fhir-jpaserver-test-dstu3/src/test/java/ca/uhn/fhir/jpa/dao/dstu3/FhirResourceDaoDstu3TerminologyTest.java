@@ -50,7 +50,7 @@ import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 
@@ -230,7 +230,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 
 		if (!result.isSuccessful()) {
 			ourLog.info(parser.encodeResourceToString(result.toOperationOutcome()));
-			fail("", parser.encodeResourceToString(result.toOperationOutcome()));
+			fail(parser.encodeResourceToString(result.toOperationOutcome()));
 		}
 	}
 

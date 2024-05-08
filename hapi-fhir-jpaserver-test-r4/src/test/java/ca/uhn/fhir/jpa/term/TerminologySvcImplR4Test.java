@@ -38,12 +38,12 @@ import java.util.Set;
 
 import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class TerminologySvcImplR4Test extends BaseTermR4Test {
@@ -80,7 +80,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 			runInTransaction(() -> {
 				myConceptMapDao.create(conceptMap);
 			});
-			fail("");
+			fail();
 		} catch (UnprocessableEntityException e) {
 			assertEquals(Msg.code(838) + "ConceptMap[url='http://example.com/my_concept_map'] contains at least one group without a value in ConceptMap.group.source", e.getMessage());
 		}
@@ -105,7 +105,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 			runInTransaction(() -> {
 				myConceptMapDao.create(conceptMap);
 			});
-			fail("");
+			fail();
 		} catch (UnprocessableEntityException e) {
 			assertEquals(Msg.code(839) + "ConceptMap[url='http://example.com/my_concept_map'] contains at least one group without a value in ConceptMap.group.target", e.getMessage());
 		}
@@ -129,7 +129,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 			runInTransaction(() -> {
 				myConceptMapDao.create(conceptMap);
 			});
-			fail("");
+			fail();
 		} catch (UnprocessableEntityException e) {
 			assertEquals(Msg.code(1766) + "ConceptMap has no value for ConceptMap.url", e.getMessage());
 		}
@@ -223,7 +223,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 
 		try {
 			loadAndPersistCodeSystem();
-			fail("");
+			fail();
 		} catch (UnprocessableEntityException e) {
 			assertEquals(Msg.code(848) + "Can not create multiple CodeSystem resources with CodeSystem.url \"http://acme.org\", already have one with resource ID: CodeSystem/" + myExtensionalCsId.getIdPart(), e.getMessage());
 		}
@@ -239,7 +239,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 
 		try {
 			loadAndPersistValueSet(HttpVerb.POST);
-			fail("");
+			fail();
 		} catch (UnprocessableEntityException e) {
 			assertEquals(Msg.code(902) + "Can not create multiple ValueSet resources with ValueSet.url \"http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2\", already have one with resource ID: ValueSet/" + myExtensionalVsId.getIdPart(), e.getMessage());
 		}

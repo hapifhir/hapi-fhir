@@ -29,7 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
@@ -536,7 +536,7 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 				Patient clientAssignedPatient = new Patient();
 				clientAssignedPatient.setId("Patient/custom-id");
 				myPatientDao.update(clientAssignedPatient, mySrd);
-				fail("");
+				fail();
 			} catch (ForbiddenOperationException e) {
 				assertEquals("Client assigned id rejected.", e.getMessage());
 			}

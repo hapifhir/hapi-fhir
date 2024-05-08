@@ -74,11 +74,11 @@ import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.not;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
@@ -363,7 +363,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		fooSp.addBase("Patient");
 		try {
 			mySearchParameterDao.create(fooSp, mySrd);
-			fail("");
+			fail();
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage()).contains("The token : is not expected here");
 		}
@@ -382,7 +382,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		fooSp.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
 		try {
 			mySearchParameterDao.create(fooSp, mySrd);
-			fail("");
+			fail();
 		} catch (UnprocessableEntityException e) {
 			assertEquals(Msg.code(1113) + "SearchParameter.base is missing", e.getMessage());
 		}
@@ -401,7 +401,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		fooSp.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
 		try {
 			mySearchParameterDao.create(fooSp, mySrd);
-			fail("");
+			fail();
 		} catch (UnprocessableEntityException e) {
 			assertEquals("Invalid SearchParameter.expression value \"PatientFoo.gender\": Unknown resource name \"PatientFoo\" (this name is not known in FHIR version \"R4\")", e.getMessage());
 		}
@@ -418,7 +418,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		fooSp.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
 		try {
 			mySearchParameterDao.create(fooSp, mySrd);
-			fail("");
+			fail();
 		} catch (UnprocessableEntityException e) {
 			assertEquals(Msg.code(1114) + "SearchParameter.expression is missing", e.getMessage());
 		}
@@ -437,7 +437,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		fooSp.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
 		try {
 			mySearchParameterDao.create(fooSp, mySrd);
-			fail("");
+			fail();
 		} catch (UnprocessableEntityException e) {
 			assertEquals("Invalid SearchParameter.expression value \"gender\". Must start with a resource name.", e.getMessage());
 		}
@@ -456,7 +456,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		fooSp.setStatus(null);
 		try {
 			mySearchParameterDao.create(fooSp, mySrd);
-			fail("");
+			fail();
 		} catch (UnprocessableEntityException e) {
 			assertEquals(Msg.code(1112) + "SearchParameter.status is missing or invalid", e.getMessage());
 		}
@@ -644,7 +644,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		memberSp.setStatus(Enumerations.PublicationStatus.RETIRED);
 		try {
 			mySearchParameterDao.create(memberSp, mySrd);
-			fail("");
+			fail();
 		} catch (UnprocessableEntityException e) {
 			assertEquals(Msg.code(1111) + "Can not override built-in search parameter Group:member because overriding is disabled on this server", e.getMessage());
 		}
@@ -773,7 +773,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		threadIdSp.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		try {
 			mySearchParameterDao.create(threadIdSp, mySrd);
-			fail("");
+			fail();
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage()).startsWith(Msg.code(1121) + "Invalid FHIRPath format for SearchParameter.expression \"Communication.payload[1].contentAttachment is not null\"");
 		}
@@ -1601,7 +1601,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		map.add("foo", new TokenParam(null, "male"));
 		try {
 			myPatientDao.search(map).size();
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(1223) + "Unknown search parameter \"foo\" for resource type \"Patient\". Valid search parameters for this search are: [_content, _id, _lastUpdated, _profile, _security, _source, _tag, _text, active, address, address-city, address-country, address-postalcode, address-state, address-use, birthdate, death-date, deceased, email, family, gender, general-practitioner, given, identifier, language, link, name, organization, phone, phonetic, telecom]", e.getMessage());
 		}
@@ -1617,7 +1617,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		map.add("foo", new TokenParam(null, "male"));
 		try {
 			myPatientDao.search(map).size();
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(1223) + "Unknown search parameter \"foo\" for resource type \"Patient\". Valid search parameters for this search are: [_content, _id, _lastUpdated, _profile, _security, _source, _tag, _text, active, address, address-city, address-country, address-postalcode, address-state, address-use, birthdate, death-date, deceased, email, family, gender, general-practitioner, given, identifier, language, link, name, organization, phone, phonetic, telecom]", e.getMessage());
 		}
@@ -1694,7 +1694,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		map.add("foo", new TokenParam(null, "male"));
 		try {
 			myPatientDao.search(map).size();
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(1223) + "Unknown search parameter \"foo\" for resource type \"Patient\". Valid search parameters for this search are: [_content, _id, _lastUpdated, _profile, _security, _source, _tag, _text, active, address, address-city, address-country, address-postalcode, address-state, address-use, birthdate, death-date, deceased, email, family, gender, general-practitioner, given, identifier, language, link, name, organization, phone, phonetic, telecom]", e.getMessage());
 		}

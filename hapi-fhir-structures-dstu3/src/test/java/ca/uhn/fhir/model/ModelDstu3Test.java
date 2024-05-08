@@ -30,7 +30,7 @@ import java.util.Date;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class ModelDstu3Test {
@@ -162,7 +162,7 @@ public class ModelDstu3Test {
 		new InstantType("2019-01-01T00:00:00.000Z");
 		try {
 			new InstantType("2019-01-01T00:00Z");
-			fail("");		} catch (IllegalArgumentException e) {
+			fail();		} catch (IllegalArgumentException e) {
 			// good
 		}
 	}

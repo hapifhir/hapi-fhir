@@ -38,7 +38,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import static org.mockito.Mockito.mock;
 
@@ -93,7 +93,7 @@ public class RestfulServerTest {
 	public void testFailRegisterInterfaceProviderWithoutRestfulMethod() {
 		try {
 			myRestfulServer.registerProvider(new MyClassWithoutRestInterface());
-			fail("");
+			fail();
 		} catch (ConfigurationException e) {
 			assertEquals(Msg.code(289) + "Did not find any annotated RESTful methods on provider class ca.uhn.fhir.rest.server.RestfulServerTest$MyClassWithoutRestInterface", e.getMessage());
 		}

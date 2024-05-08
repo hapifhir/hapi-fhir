@@ -104,7 +104,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.hamcrest.core.IsNot.not;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -186,7 +186,7 @@ public class XmlParserDstu2Test {
 			parser = ourCtx.newXmlParser();
 			parser.setParserErrorHandler(new StrictErrorHandler());
 			parser.parseResource(input);
-			fail("");		} catch (DataFormatException e) {
+			fail();		} catch (DataFormatException e) {
 			assertEquals(Msg.code(1822) + "Resource is missing required element 'url' in parent element 'extension'", e.getCause().getMessage());
 		}
 
@@ -216,7 +216,7 @@ public class XmlParserDstu2Test {
 			parser = ourCtx.newXmlParser();
 			parser.setParserErrorHandler(new StrictErrorHandler());
 			parser.parseResource(input);
-			fail("");		} catch (DataFormatException e) {
+			fail();		} catch (DataFormatException e) {
 			assertEquals(Msg.code(1822) + "Resource is missing required element 'url' in parent element 'modifierExtension'", e.getCause().getMessage());
 		}
 
@@ -250,7 +250,7 @@ public class XmlParserDstu2Test {
 			IParser parser = ourCtx.newXmlParser();
 			parser.setParserErrorHandler(new StrictErrorHandler());
 			parser.parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, string);
-			fail("");		} catch (DataFormatException e) {
+			fail();		} catch (DataFormatException e) {
 			assertEquals(Msg.code(1851) + "DataFormatException at [[row,col {unknown-source}]: [49,11]]: " + Msg.code(1819) + "Resource has contained child resource with no ID", e.getMessage());
 		}
 	}
@@ -313,7 +313,7 @@ public class XmlParserDstu2Test {
 			IParser parser = ourCtx.newXmlParser();
 			parser.setParserErrorHandler(new StrictErrorHandler());
 			parser.parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, string);
-			fail("");		} catch (DataFormatException e) {
+			fail();		} catch (DataFormatException e) {
 			assertEquals(Msg.code(1851) + "DataFormatException at [[row,col {unknown-source}]: [47,7]]: " + Msg.code(1826) + "Resource has invalid reference: #1", e.getMessage());
 		}
 	}
@@ -2613,7 +2613,7 @@ public class XmlParserDstu2Test {
 			IParser parser = ourCtx.newXmlParser();
 			parser.setParserErrorHandler(new StrictErrorHandler());
 			parser.parseResource(resource);
-			fail("");		} catch (DataFormatException e) {
+			fail();		} catch (DataFormatException e) {
 			assertEquals(Msg.code(1851) + "DataFormatException at [[row,col {unknown-source}]: [2,4]]: " + Msg.code(1821) + "[element=\"active\"] Invalid attribute value \"1\": " + Msg.code(1872) + "Invalid boolean string: '1'", e.getMessage());
 		}
 	}
@@ -2776,7 +2776,7 @@ public class XmlParserDstu2Test {
 
 		try {
 			ourCtx.newXmlParser().parseResource(Patient.class, input);
-			fail("");		} catch (DataFormatException e) {
+			fail();		} catch (DataFormatException e) {
 			assertThat(e.getMessage()).contains("Extension (URL='http://my.fancy.extension.url') must not have both a value and other contained extensions");
 		}
 	}

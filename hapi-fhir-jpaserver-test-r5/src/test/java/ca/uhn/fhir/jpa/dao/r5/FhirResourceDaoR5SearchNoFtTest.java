@@ -39,7 +39,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -329,7 +329,7 @@ public class FhirResourceDaoR5SearchNoFtTest extends BaseJpaR5Test {
 
         try {
             myObservationDao.search(params, new SystemRequestDetails());
-			fail("");
+			fail();
         } catch (InvalidRequestException e) {
 			assertEquals("HAPI-2305: Reference field does not exist: " + referenceFieldName, e.getMessage());
         }

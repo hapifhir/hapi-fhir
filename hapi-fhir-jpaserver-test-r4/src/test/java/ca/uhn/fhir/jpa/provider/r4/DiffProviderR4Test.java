@@ -19,7 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class DiffProviderR4Test extends BaseResourceProviderR4Test {
 
@@ -242,7 +242,7 @@ public class DiffProviderR4Test extends BaseResourceProviderR4Test {
 				.withParameter(Parameters.class, ProviderConstants.DIFF_FROM_PARAMETER, new IdType("Patient/123"))
 				.andParameter(ProviderConstants.DIFF_TO_PARAMETER, new IdType("Observation/456"))
 				.execute();
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("HTTP 400 Bad Request: " + Msg.code(1129) + "Unable to diff two resources of different types", e.getMessage());
 		}

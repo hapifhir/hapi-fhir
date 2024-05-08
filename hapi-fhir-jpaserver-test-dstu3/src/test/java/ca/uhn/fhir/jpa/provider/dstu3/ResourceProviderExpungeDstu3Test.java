@@ -23,7 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class ResourceProviderExpungeDstu3Test extends BaseResourceProviderDstu3Test {
 
@@ -120,7 +120,7 @@ public class ResourceProviderExpungeDstu3Test extends BaseResourceProviderDstu3T
 				dao = myObservationDao;
 				break;
 			default:
-				fail("", "Restype: " + theId.getResourceType());
+				fail("Restype: " + theId.getResourceType());
 				dao = myPatientDao;
 		}
 		return dao;

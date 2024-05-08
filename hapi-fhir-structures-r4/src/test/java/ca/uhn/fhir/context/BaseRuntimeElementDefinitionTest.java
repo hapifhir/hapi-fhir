@@ -7,7 +7,7 @@ import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class BaseRuntimeElementDefinitionTest {
@@ -21,7 +21,7 @@ public class BaseRuntimeElementDefinitionTest {
 
 		try {
 			def.newInstance(123);
-			fail("");		} catch (ConfigurationException e) {
+			fail();		} catch (ConfigurationException e) {
 			assertEquals(Msg.code(1696) + "Failed to instantiate type:org.hl7.fhir.r4.model.StringType", e.getMessage());
 		}
 	}
@@ -53,7 +53,7 @@ public class BaseRuntimeElementDefinitionTest {
 		BaseRuntimeChildDefinition.IMutator mutator = child.getMutator();
 		try {
 			mutator.remove(patient, 0);
-			fail("");		} catch (UnsupportedOperationException e) {
+			fail();		} catch (UnsupportedOperationException e) {
 			assertEquals("HAPI-2142: Remove by index can only be called on a list-valued field.  'gender' is a single-valued field.", e.getMessage());
 		}
 	}

@@ -5,7 +5,7 @@ import ca.uhn.fhir.batch2.model.JobDefinition;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 class JobDefinitionTest {
@@ -16,7 +16,7 @@ class JobDefinitionTest {
 	public void emptyBuilder_fails() {
 		try {
 			JobDefinition.newBuilder().build();
-			fail("");
+			fail();
 		} catch (NullPointerException e) {
 			assertEquals("No job parameters type was supplied", e.getMessage());
 		}
@@ -31,7 +31,7 @@ class JobDefinitionTest {
 				.setJobDefinitionVersion(1)
 				.setParametersType(TestJobParameters.class)
 				.build();
-			fail("");
+			fail();
 		} catch (IllegalArgumentException e) {
 			assertEquals("At least 2 steps must be supplied", e.getMessage());
 		}

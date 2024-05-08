@@ -129,7 +129,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 
 @ExtendWith(SpringExtension.class)
@@ -460,7 +460,7 @@ public abstract class BaseJpaR4BTest extends BaseJpaTest implements ITestDataBui
 		validatorModule.registerValidatorModule(instanceValidator);
 		ValidationResult result = validatorModule.validateWithResult(theResource);
 		if (!result.isSuccessful()) {
-			fail("", myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome()));
+			fail(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome()));
 		}
 	}
 
@@ -493,7 +493,7 @@ public abstract class BaseJpaR4BTest extends BaseJpaTest implements ITestDataBui
 		Optional<ValueSet.ValueSetExpansionContainsComponent> first = stream.findFirst();
 		if (!first.isPresent()) {
 			String failureMessage = String.format("Expanded ValueSet %s did not contain concept [%s|%s|%s] with [%d] designations", theValueSet.getId(), theSystem, theCode, theDisplay, theDesignationCount);
-			fail("", failureMessage);
+			fail(failureMessage);
 			return null;
 		} else {
 			return first.get();

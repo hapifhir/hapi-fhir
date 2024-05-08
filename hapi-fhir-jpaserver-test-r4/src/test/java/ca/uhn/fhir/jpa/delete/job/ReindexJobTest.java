@@ -39,13 +39,13 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.blankOrNullString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class ReindexJobTest extends BaseJpaR4Test {
@@ -271,7 +271,7 @@ public class ReindexJobTest extends BaseJpaR4Test {
 
 		try {
 			myPatientDao.read(patientId, mySrd);
-			fail("");
+			fail();
 		} catch (ResourceGoneException e) {
 			// good
 		}

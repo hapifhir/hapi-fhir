@@ -37,7 +37,7 @@ import java.io.StringReader;
 import java.nio.charset.Charset;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -151,7 +151,7 @@ public class ThreadLocalCapturingInterceptorR4Test {
 				.forResource("Device")
 				.returnBundle(Bundle.class)
 				.execute();
-			fail("");		} catch (InvalidRequestException e) {
+			fail();		} catch (InvalidRequestException e) {
 			// good
 		}
 

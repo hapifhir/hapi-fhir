@@ -23,7 +23,7 @@ import org.springframework.context.ApplicationContext;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 @ExtendWith(MockitoExtension.class)
 public class JpaResourceDaoSearchParameterTest {
@@ -92,7 +92,7 @@ public class JpaResourceDaoSearchParameterTest {
 
 		try {
 			myDao.validateResourceForStorage(nextSearchParameter, null);
-			fail("");
+			fail();
 		} catch (UnprocessableEntityException e) {
 			assertEquals(Msg.code(1121) + "Invalid FHIRPath format for SearchParameter.expression \"Patient.ex[[[\": Error in ?? at 1, 1: Found [ expecting a token name", e.getMessage());
 		}

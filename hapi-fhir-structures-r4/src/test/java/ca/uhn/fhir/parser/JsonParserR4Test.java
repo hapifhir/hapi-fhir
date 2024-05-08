@@ -73,7 +73,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.hamcrest.core.IsNot.not;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class JsonParserR4Test extends BaseTest {
@@ -134,7 +134,7 @@ public class JsonParserR4Test extends BaseTest {
 
 		try {
 			ourCtx.newJsonParser().encodeResourceToString(p);
-			fail("");		} catch (ConfigurationException e) {
+			fail();		} catch (ConfigurationException e) {
 			assertEquals(Msg.code(1844) + "Unable to encode extension, unrecognized child element type: ca.uhn.fhir.parser.JsonParserR4Test.MyUnknownPrimitiveType", e.getMessage());
 		}
 	}
@@ -493,7 +493,7 @@ public class JsonParserR4Test extends BaseTest {
 		try {
 			parser.setParserErrorHandler(new StrictErrorHandler());
 			parser.encodeResourceToString(p);
-			fail("");		} catch (DataFormatException e) {
+			fail();		} catch (DataFormatException e) {
 			assertEquals(Msg.code(1822) + "Resource is missing required element 'url' in parent element 'Patient(res).extension'", e.getMessage());
 		}
 
@@ -515,7 +515,7 @@ public class JsonParserR4Test extends BaseTest {
 		IParser parser = ourCtx.newJsonParser();
 		try {
 			parser.encodeResourceToString(p);
-			fail("");		} catch (DataFormatException e) {
+			fail();		} catch (DataFormatException e) {
 			assertEquals(Msg.code(1827) + "[element=\"Patient(res).extension\"] Extension contains both a value and nested extensions", e.getMessage());
 		}
 
@@ -523,7 +523,7 @@ public class JsonParserR4Test extends BaseTest {
 		try {
 			parser.setParserErrorHandler(new StrictErrorHandler());
 			parser.encodeResourceToString(p);
-			fail("");		} catch (DataFormatException e) {
+			fail();		} catch (DataFormatException e) {
 			assertEquals(Msg.code(1827) + "[element=\"Patient(res).extension\"] Extension contains both a value and nested extensions", e.getMessage());
 		}
 
@@ -786,7 +786,7 @@ public class JsonParserR4Test extends BaseTest {
 		jsonParser.setParserErrorHandler(new StrictErrorHandler());
 		try {
 			jsonParser.parseResource(Patient.class, input);
-			fail("");		} catch (DataFormatException e) {
+			fail();		} catch (DataFormatException e) {
 			assertEquals(Msg.code(1821) + "[element=\"value\"] Invalid attribute value \"\": Attribute value must not be empty (\"\")", e.getMessage());
 		}
 

@@ -40,11 +40,11 @@ import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.rest.api.Constants.PARAM_TAG;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
@@ -368,7 +368,7 @@ public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 				next.get(5, TimeUnit.SECONDS);
 			} catch (Exception e) {
 				ourLog.error("Failure", e);
-				fail("", e.toString());
+				fail(e.toString());
 			}
 		}
 

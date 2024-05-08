@@ -78,7 +78,7 @@ public class MailConfigTest {
 		// setup
 		final MailConfig other = withMainConfig();
 		// execute & validate
-		assertNotNull(fixture).isEqualTo(fixture);
+		assertNotNull(fixture);
 		assertThat(fixture).isSameAs(fixture);
 		assertEquals(fixture, other);
 		assertNotSame(fixture, other);

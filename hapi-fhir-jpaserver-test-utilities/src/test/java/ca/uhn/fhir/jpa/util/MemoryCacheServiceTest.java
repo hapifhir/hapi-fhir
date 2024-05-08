@@ -25,7 +25,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.function.Predicate;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -218,7 +218,7 @@ class MemoryCacheServiceTest {
 				try {
 					return future.get(60, TimeUnit.SECONDS);
 				} catch (TimeoutException e) {
-					fail("", theMessage);
+					fail(theMessage);
 					return null;
 				}
 			}

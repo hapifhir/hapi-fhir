@@ -55,13 +55,13 @@ import java.util.stream.Collectors;
 import static ca.uhn.fhir.jpa.dao.BaseHapiFhirDao.INDEX_STATUS_INDEXED;
 import static ca.uhn.fhir.jpa.dao.BaseHapiFhirDao.INDEX_STATUS_INDEXING_FAILED;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.either;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
@@ -344,7 +344,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 
 		try {
 			mySearchParameterDao.create(sp);
-			fail("");
+			fail();
 		} catch (UnprocessableEntityException e) {
 			assertEquals(Msg.code(1115) + "SearchParameter is marked as unique but has no components", e.getMessage());
 		}
@@ -366,7 +366,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 
 		try {
 			mySearchParameterDao.create(sp);
-			fail("");
+			fail();
 		} catch (UnprocessableEntityException e) {
 			assertEquals(Msg.code(1116) + "SearchParameter is marked as unique but is missing component.definition", e.getMessage());
 		}
@@ -747,7 +747,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 
 		try {
 			myPatientDao.create(pt1).getId().toUnqualifiedVersionless();
-			fail("");
+			fail();
 		} catch (ResourceVersionConflictException e) {
 			assertEquals(Msg.code(550) + Msg.code(824) + "The operation has failed with a unique index constraint failure. This probably means that the operation was trying to create/update a resource that would have resulted in a duplicate value for a unique index.", e.getMessage());
 		}
@@ -764,7 +764,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 
 		try {
 			myPatientDao.create(pt1).getId().toUnqualifiedVersionless();
-			fail("");
+			fail();
 		} catch (ResourceVersionConflictException e) {
 			assertThat(e.getMessage()).contains("new unique index created by SearchParameter/patient-gender-birthdate");
 		}
@@ -784,7 +784,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		pt.addIdentifier().setSystem("urn").setValue("222");
 		try {
 			myPatientDao.create(pt);
-			fail("");
+			fail();
 		} catch (ResourceVersionConflictException e) {
 			// good
 		}
@@ -1542,7 +1542,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 
 		try {
 			myPatientDao.create(pt1).getId().toUnqualifiedVersionless();
-			fail("");
+			fail();
 		} catch (ResourceVersionConflictException e) {
 			assertThat(e.getMessage()).contains("new unique index created by SearchParameter/patient-gender-birthdate");
 		}
@@ -1557,7 +1557,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		pt2.setBirthDateElement(new DateType("2011-01-01"));
 		try {
 			myPatientDao.update(pt2);
-			fail("");
+			fail();
 		} catch (ResourceVersionConflictException e) {
 			assertThat(e.getMessage()).contains("new unique index created by SearchParameter/patient-gender-birthdate");
 		}

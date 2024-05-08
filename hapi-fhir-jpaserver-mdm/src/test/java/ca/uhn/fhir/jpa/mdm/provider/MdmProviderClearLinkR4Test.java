@@ -45,7 +45,7 @@ import java.util.regex.Pattern;
 
 import static ca.uhn.fhir.mdm.api.MdmMatchOutcome.POSSIBLE_MATCH;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -203,7 +203,7 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 
 		try {
 			myPatientDao.read(redirectedGoldenPatientId, myRequestDetails);
-			fail("");
+			fail();
 		} catch (ResourceNotFoundException e) {
 			assertEquals(Constants.STATUS_HTTP_404_NOT_FOUND, e.getStatusCode());
 			assertNoGoldenPatientsExist();
@@ -240,7 +240,7 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 		assertNoPatientLinksExist();
 		try {
 			myPatientDao.read(new IdDt(mySourcePatientId.getValueAsString()).toVersionless());
-			fail("");
+			fail();
 		} catch (ResourceNotFoundException e) {
 			// Expected exception
 		}
@@ -344,7 +344,7 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 		assertNoPractitionerLinksExist();
 		try {
 			myPractitionerDao.read(new IdDt(myPractitionerGoldenResourceId.getValueAsString()).toVersionless());
-			fail("");
+			fail();
 		} catch (ResourceNotFoundException e) {
 		}
 	}
@@ -353,7 +353,7 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 	public void testClearInvalidTargetType() {
 		try {
 			myMdmProvider.clearMdmLinks(getResourceNames("Observation"), null, myRequestDetails);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("HAPI-1500: $mdm-clear does not support resource type: Observation", e.getMessage());
 		}

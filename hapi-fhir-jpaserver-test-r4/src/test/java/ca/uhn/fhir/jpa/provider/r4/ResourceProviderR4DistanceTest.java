@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
@@ -279,7 +279,7 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 				.byUrl(myServerBase + "/" + url)
 				.returnBundle(Bundle.class)
 				.execute();
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage()).contains("Can not sort on coordinate parameter \"near\" unless this parameter is also specified as a search parameter");
 		}
@@ -306,7 +306,7 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 				.byUrl(myServerBase + "/" + url)
 				.returnBundle(Bundle.class)
 				.execute();
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage()).contains("Can not sort on coordinate parameter \"near\" unless this parameter is also specified");
 		}
@@ -338,7 +338,7 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 				.byUrl(myServerBase + "/" + url)
 				.returnBundle(Bundle.class)
 				.execute();
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage()).contains(theExpectedErrorMessageContains);
 		}

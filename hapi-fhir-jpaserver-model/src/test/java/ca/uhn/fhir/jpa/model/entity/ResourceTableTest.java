@@ -9,7 +9,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class ResourceTableTest {
 
@@ -17,7 +17,7 @@ public class ResourceTableTest {
 	public void testResourceLength() {
 		for (String nextName : FhirContext.forR4().getResourceTypes()) {
 			if (nextName.length() > ResourceTable.RESTYPE_LEN) {
-				fail("", "Name " + nextName + " length of " + nextName.length() + " is > " + ResourceTable.RESTYPE_LEN);
+				fail("Name " + nextName + " length of " + nextName.length() + " is > " + ResourceTable.RESTYPE_LEN);
 			}
 		}
 	}

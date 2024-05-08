@@ -48,7 +48,7 @@ public class AsyncMemoryQueueBackedFhirClientBalpSinkTest {
 				}
 			}
 
-			await().untilAsserted(() -> assertEquals(1000), myAuditEventProvider.getStoredResources().size());
+			await().until(() -> myAuditEventProvider.getStoredResources().size() == 1000);
 
 		} finally {
 			sink.stop();

@@ -48,7 +48,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDstu3ValidateTest.class);
@@ -79,7 +79,7 @@ public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 			ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(results.getOperationOutcome()));
 		} catch (PreconditionFailedException e) {
 			ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
-			fail("", e.toString());
+			fail(e.toString());
 		}
 
 
@@ -436,7 +436,7 @@ public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 			}
 		}
 		if (retVal == null) {
-			fail("", "Can't find VS: " + name);
+			fail("Can't find VS: " + name);
 		}
 		return retVal;
 	}
@@ -480,7 +480,7 @@ public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 		} catch (PreconditionFailedException e) {
 			// not expected, but let's log the error
 			ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
-			fail("", e.toString());
+			fail(e.toString());
 		}
 	}
 

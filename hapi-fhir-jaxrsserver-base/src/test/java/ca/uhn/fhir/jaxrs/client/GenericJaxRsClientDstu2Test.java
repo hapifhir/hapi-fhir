@@ -51,7 +51,7 @@ import java.util.Date;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.either;
@@ -224,7 +224,7 @@ public class GenericJaxRsClientDstu2Test {
 
 		try {
 			ourCtx.newRestfulGenericClient(ourServer.getBaseUrl() + "/fhir");
-			fail("");
+			fail();
 		} catch (IllegalStateException e) {
 			assertEquals(Msg.code(1355) + "JaxRsRestfulClientFactory does not have FhirContext defined. This must be set via JaxRsRestfulClientFactory#setFhirContext(FhirContext)", e.getMessage());
 		}
@@ -1278,7 +1278,7 @@ public class GenericJaxRsClientDstu2Test {
 				.withId("123")
 				.summaryMode(SummaryEnum.TEXT)
 				.execute();
-			fail("");
+			fail();
 		} catch (InvalidResponseException e) {
 			assertThat(e.getMessage()).contains("String does not appear to be valid");
 		}

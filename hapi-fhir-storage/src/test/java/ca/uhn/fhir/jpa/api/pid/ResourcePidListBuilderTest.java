@@ -8,7 +8,7 @@ import java.util.Date;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -49,7 +49,7 @@ class ResourcePidListBuilderTest {
 		assertNull(emptyList.getLastDate());
 		try {
 			emptyList.getResourceType(0);
-			fail("");
+			fail();
 		} catch (ArrayIndexOutOfBoundsException e) {
 			assertEquals("HAPI-2095: Attempting to get resource type from an empty resource pid list", e.getMessage());
 			// expected exception

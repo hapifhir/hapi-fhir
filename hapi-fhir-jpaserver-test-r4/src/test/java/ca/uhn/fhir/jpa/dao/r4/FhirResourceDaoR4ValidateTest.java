@@ -63,12 +63,12 @@ import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.rest.api.Constants.JAVA_VALIDATOR_DETAILS_SYSTEM;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
 import static org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService.CURRENCIES_CODESYSTEM_URL;
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_LOW;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -451,7 +451,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 		try {
 			myStructureDefinitionDao.generateSnapshot(sd, null, null, null);
-			fail("");
+			fail();
 		} catch (PreconditionFailedException e) {
 			assertEquals(Msg.code(704) + "StructureDefinition[id=null, url=http://sd] has no base", e.getMessage());
 		}
@@ -473,7 +473,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		obs.setValue(new Quantity().setSystem("http://cs").setCode("code1").setValue(123));
 		try {
 			myObservationDao.validate(obs, null, null, null, ValidationModeEnum.CREATE, null, mySrd);
-			fail("");
+			fail();
 		} catch (PreconditionFailedException e) {
 			assertEquals(Msg.code(704) + "StructureDefinition[id=null, url=http://sd] has no base", e.getMessage());
 		}
@@ -1425,7 +1425,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 				encoded = myFhirContext.newJsonParser().encodeResourceToString(input);
 				try {
 					myObservationDao.validate(input, null, encoded, EncodingEnum.JSON, mode, null, mySrd);
-					fail("");
+					fail();
 				} catch (PreconditionFailedException e) {
 					return (OperationOutcome) e.getOperationOutcome();
 				}
@@ -1434,7 +1434,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 				encoded = myFhirContext.newXmlParser().encodeResourceToString(input);
 				try {
 					myObservationDao.validate(input, null, encoded, EncodingEnum.XML, mode, null, mySrd);
-					fail("");
+					fail();
 				} catch (PreconditionFailedException e) {
 					return (OperationOutcome) e.getOperationOutcome();
 				}
@@ -1640,7 +1640,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 		try {
 			myPatientDao.validate(pat, null, null, null, ValidationModeEnum.CREATE, null, mySrd);
-			fail("");
+			fail();
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage()).contains("ID must not be populated");
 		}
@@ -1663,7 +1663,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 		try {
 			myPatientDao.validate(pat, null, null, null, ValidationModeEnum.UPDATE, null, mySrd);
-			fail("");
+			fail();
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage()).contains("ID must be populated");
 		}
@@ -1692,7 +1692,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		String rawResource = myFhirContext.newJsonParser().encodeResourceToString(params);
 		try {
 			myPatientDao.validate(pat, null, rawResource, EncodingEnum.JSON, ValidationModeEnum.UPDATE, null, mySrd);
-			fail("");
+			fail();
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage()).contains("ID must be populated");
 		}
@@ -1715,7 +1715,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 		try {
 			myPatientDao.validate(pat, null, null, null, ValidationModeEnum.UPDATE, null, mySrd);
-			fail("");
+			fail();
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage()).contains("ID must be populated");
 		}
@@ -1738,7 +1738,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		OperationOutcome outcome = null;
 		try {
 			myOrganizationDao.validate(null, orgId, null, null, ValidationModeEnum.DELETE, null, mySrd);
-			fail("");
+			fail();
 		} catch (ResourceVersionConflictException e) {
 			outcome = (OperationOutcome) e.getOperationOutcome();
 		}
@@ -1777,7 +1777,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		myStorageSettings.setEnforceReferentialIntegrityOnDelete(true);
 		try {
 			myOrganizationDao.validate(null, orgId, null, null, ValidationModeEnum.DELETE, null, mySrd);
-			fail("");
+			fail();
 		} catch (ResourceVersionConflictException e) {
 			// good
 		}
@@ -1791,7 +1791,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 		try {
 			myOrganizationDao.read(orgId);
-			fail("");
+			fail();
 		} catch (ResourceGoneException e) {
 			// good
 		}
@@ -1918,7 +1918,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 			OperationOutcome oo = (OperationOutcome) validationOutcome.getOperationOutcome();
 			assertEquals("The questionnaire 'http://foo/Questionnaire/DOES_NOT_EXIST' could not be resolved, so no validation can be performed against the base questionnaire", oo.getIssueFirstRep().getDiagnostics());
 		} catch (PreconditionFailedException e) {
-			fail("", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
+			fail(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
 		}
 	}
 
@@ -1943,7 +1943,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 			}
 		}
 		if (retVal == null) {
-			fail("", "Can't find VS: " + name);
+			fail("Can't find VS: " + name);
 		}
 		return retVal;
 	}

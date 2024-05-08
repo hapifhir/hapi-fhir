@@ -22,8 +22,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class PackageLoaderSvcIT {
@@ -96,7 +96,7 @@ public class PackageLoaderSvcIT {
 		// loadPackageFromCacheOnly
 		try {
 			myPackageLoaderSvc.loadPackageFromCacheOnly("id", "versionId");
-			fail("");
+			fail();
 		} catch (UnsupportedOperationException ex) {
 			assertThat(ex.getMessage()).contains("Cannot load from cache.");
 		}
@@ -104,7 +104,7 @@ public class PackageLoaderSvcIT {
 		// addPackageToCache
 		try {
 			myPackageLoaderSvc.addPackageToCache("id", "version", Mockito.mock(InputStream.class), "description or url");
-			fail("");
+			fail();
 		} catch (UnsupportedOperationException ex) {
 			assertThat(ex.getMessage()).contains("Cannot add to cache.");
 		}
@@ -112,7 +112,7 @@ public class PackageLoaderSvcIT {
 		// loadPackage
 		try {
 			myPackageLoaderSvc.loadPackage("id", "version");
-			fail("");
+			fail();
 		} catch (UnsupportedOperationException ex) {
 			assertThat(ex.getMessage()).contains("No packages are cached;");
 		}

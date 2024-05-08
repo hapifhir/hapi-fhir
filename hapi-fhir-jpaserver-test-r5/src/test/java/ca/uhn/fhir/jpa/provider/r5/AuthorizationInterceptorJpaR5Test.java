@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class AuthorizationInterceptorJpaR5Test extends BaseResourceProviderR5Test {
 
@@ -64,7 +64,7 @@ public class AuthorizationInterceptorJpaR5Test extends BaseResourceProviderR5Tes
 
 		try {
 			myClient.delete().resourceById(obsNotInCompartmentId.toUnqualifiedVersionless()).execute();
-			fail("");
+			fail();
 		} catch (ForbiddenOperationException e) {
 			// good
 		}
@@ -110,7 +110,7 @@ public class AuthorizationInterceptorJpaR5Test extends BaseResourceProviderR5Tes
 			bundle.setType(Bundle.BundleType.TRANSACTION);
 			bundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.DELETE).setUrl(obsNotInCompartmentId.toUnqualifiedVersionless().getValue());
 			myClient.transaction().withBundle(bundle).execute();
-			fail("");
+			fail();
 		} catch (ForbiddenOperationException e) {
 			// good
 		}

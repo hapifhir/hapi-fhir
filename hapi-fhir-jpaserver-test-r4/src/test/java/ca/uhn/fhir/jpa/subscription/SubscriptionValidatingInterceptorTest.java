@@ -31,7 +31,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -78,7 +78,7 @@ public class SubscriptionValidatingInterceptorTest {
 
 		try {
 			mySvc.resourcePreCreate(subscription, null, null);
-			fail("");
+			fail();
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage()).contains("Subscription.status must be populated on this server");
 		}
@@ -111,7 +111,7 @@ public class SubscriptionValidatingInterceptorTest {
 
 		try {
 			mySvc.resourcePreCreate(subscription, null, null);
-			fail("");
+			fail();
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage()).contains("Subscription.criteria contains invalid/unsupported resource type: Patient");
 		}
@@ -130,7 +130,7 @@ public class SubscriptionValidatingInterceptorTest {
 
 		try {
 			mySvc.resourcePreCreate(subscription, null, null);
-			fail("");
+			fail();
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage()).contains("Subscription.criteria contains invalid/unsupported resource type: Patient");
 		}
@@ -148,7 +148,7 @@ public class SubscriptionValidatingInterceptorTest {
 
 		try {
 			mySvc.resourcePreCreate(subscription, null, null);
-			fail("");
+			fail();
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage()).contains("Rest-hook subscriptions must have Subscription.channel.endpoint defined");
 		}
@@ -167,7 +167,7 @@ public class SubscriptionValidatingInterceptorTest {
 
 		try {
 			mySvc.resourcePreCreate(subscription, null, null);
-			fail("");
+			fail();
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage()).contains("Subscription.channel.type must be populated");
 		}
@@ -196,7 +196,7 @@ public class SubscriptionValidatingInterceptorTest {
 
 		try {
 			mySvc.resourcePreCreate(subscription, null, null);
-			fail("");
+			fail();
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage()).contains("Subscription.criteria must be populated");
 		}
@@ -245,7 +245,7 @@ public class SubscriptionValidatingInterceptorTest {
 
 		try {
 			mySvc.resourcePreCreate(subscription, requestDetails, null);
-			fail("");
+			fail();
 		} catch (UnprocessableEntityException theUnprocessableEntityException) {
 			assertEquals(Msg.code(2010) + "Cross partition subscription must be created on the default partition", theUnprocessableEntityException.getMessage());
 		}
@@ -268,7 +268,7 @@ public class SubscriptionValidatingInterceptorTest {
 
 		try {
 			mySvc.resourcePreCreate(subscription, requestDetails, null);
-			fail("");
+			fail();
 		} catch (UnprocessableEntityException theUnprocessableEntityException) {
 			assertEquals(Msg.code(2009) + "Cross partition subscription is not enabled on this server", theUnprocessableEntityException.getMessage());
 		}

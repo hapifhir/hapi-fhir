@@ -21,7 +21,7 @@ import java.util.Date;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -134,7 +134,7 @@ public class FhirResourceDaoR4HistoryRewriteTest extends BaseJpaR4Test {
 
 		try {
 			myPatientDao.update(p, mySrd);
-			fail("");
+			fail();
 		} catch (ResourceVersionConflictException e) {
 			assertThat(e.getMessage()).contains("but this is not the current version");
 		}
@@ -157,7 +157,7 @@ public class FhirResourceDaoR4HistoryRewriteTest extends BaseJpaR4Test {
 
 		try {
 			myPatientDao.update(p, mySrd);
-			fail("");
+			fail();
 		} catch (ResourceNotFoundException e) {
 			assertThat(e.getMessage()).contains("Doesn't exist");
 		}
@@ -180,7 +180,7 @@ public class FhirResourceDaoR4HistoryRewriteTest extends BaseJpaR4Test {
 
 		try {
 			myPatientDao.update(p, mySrd);
-			fail("");
+			fail();
 		} catch (ResourceNotFoundException e) {
 			assertThat(e.getMessage()).contains("Doesn't exist");
 		}
@@ -203,7 +203,7 @@ public class FhirResourceDaoR4HistoryRewriteTest extends BaseJpaR4Test {
 
 		try {
 			myPatientDao.update(p, mySrd);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage()).contains("Invalid resource ID, ID must contain a history version");
 		}

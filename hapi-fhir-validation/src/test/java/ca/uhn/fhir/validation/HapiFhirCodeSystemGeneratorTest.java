@@ -18,7 +18,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class HapiFhirCodeSystemGeneratorTest extends BaseValidationTestWithInlineMocks {

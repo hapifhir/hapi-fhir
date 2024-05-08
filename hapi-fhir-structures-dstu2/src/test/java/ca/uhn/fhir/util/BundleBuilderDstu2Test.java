@@ -21,7 +21,7 @@ import java.util.GregorianCalendar;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class BundleBuilderDstu2Test {
@@ -73,14 +73,14 @@ public class BundleBuilderDstu2Test {
 		BundleBuilder builder = new BundleBuilder(myFhirContext);
 		try {
 			builder.setBundleField("id", uuid);
-			fail("");		} catch (NullPointerException e) {
+			fail();		} catch (NullPointerException e) {
 			assertEquals("Unable to find field id", e.getMessage());
 
 		}
 
 		try {
 		builder.setMetaField("lastUpdated", builder.newPrimitive("instant", myCheckDate));
-			fail("");		} catch (IllegalArgumentException e) {
+			fail();		} catch (IllegalArgumentException e) {
 			assertEquals("This method may only be called for FHIR version DSTU3 and above", e.getMessage());
 		}
 
@@ -115,7 +115,7 @@ public class BundleBuilderDstu2Test {
 
 		try {
 			builder.addSearch(entry);
-			fail("");		} catch (IllegalArgumentException e) {
+			fail();		} catch (IllegalArgumentException e) {
 			assertEquals("This method may only be called for FHIR version DSTU3 and above", e.getMessage());
 		}
 	}

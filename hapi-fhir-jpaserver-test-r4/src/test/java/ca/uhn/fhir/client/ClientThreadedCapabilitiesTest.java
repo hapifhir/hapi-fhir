@@ -38,7 +38,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Test supporting https://github.com/hapifhir/hapi-fhir/issues/3299
@@ -114,7 +114,7 @@ public class ClientThreadedCapabilitiesTest {
 			} else {
 				// metadata request must always be first
 				if (counter.get() == 0) {
-					fail("", "A non-metadata request was executed before metadata request: " + theRequest.getUri() + " counter: " + counter.get());
+					fail("A non-metadata request was executed before metadata request: " + theRequest.getUri() + " counter: " + counter.get());
 				}
 			}
 		}

@@ -9,8 +9,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 class JobWorkCursorTest extends BaseBatch2Test {
@@ -59,7 +59,7 @@ class JobWorkCursorTest extends BaseBatch2Test {
 			JobWorkCursor.fromJobDefinitionAndRequestedStepId(myDefinition, targetStepId);
 
 			// verify
-			fail("");
+			fail();
 		} catch (InternalErrorException e) {
 			assertEquals("HAPI-2042: Unknown step[" + targetStepId + "] for job definition ID[JOB_DEFINITION_ID] version[1]", e.getMessage());
 		}

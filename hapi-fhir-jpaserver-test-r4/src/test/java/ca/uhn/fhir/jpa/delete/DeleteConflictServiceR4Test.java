@@ -27,8 +27,8 @@ import java.util.List;
 import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class DeleteConflictServiceR4Test extends BaseJpaR4Test {
@@ -63,7 +63,7 @@ public class DeleteConflictServiceR4Test extends BaseJpaR4Test {
 		myDeleteInterceptor.deleteConflictFunction = t -> new DeleteConflictOutcome().setShouldRetryCount(0);
 		try {
 			myOrganizationDao.delete(organizationId);
-			fail("");
+			fail();
 		} catch (ResourceVersionConflictException e) {
 			assertEquals(Msg.code(550) + Msg.code(515) + "Unable to delete Organization/" + organizationId.getIdPart() + " because at least one resource has a reference to this resource. First reference found was resource Patient/" + patientId.getIdPart() + " in path Patient.managingOrganization", e.getMessage());
 		}
@@ -160,7 +160,7 @@ public class DeleteConflictServiceR4Test extends BaseJpaR4Test {
 		try {
 			myOrganizationDao.delete(organizationId);
 			// Needs a fourth and final pass to ensure that all conflicts are now gone.
-			fail("");
+			fail();
 		} catch (ResourceVersionConflictException e) {
 			assertEquals(Msg.code(550) + Msg.code(821) + DeleteConflictService.MAX_RETRY_ATTEMPTS_EXCEEDED_MSG, e.getMessage());
 		}
@@ -173,7 +173,7 @@ public class DeleteConflictServiceR4Test extends BaseJpaR4Test {
 		try {
 			myOrganizationDao.delete(organizationId);
 		} catch (ResourceVersionConflictException e) {
-			fail("");
+			fail();
 		}
 
 		assertNotNull(myDeleteInterceptor.myDeleteConflictList);
@@ -197,7 +197,7 @@ public class DeleteConflictServiceR4Test extends BaseJpaR4Test {
 
 		try {
 			myOrganizationDao.delete(organizationId);
-			fail("");
+			fail();
 		} catch (ResourceVersionConflictException e) {
 			assertEquals(Msg.code(550) + Msg.code(821) + DeleteConflictService.MAX_RETRY_ATTEMPTS_EXCEEDED_MSG, e.getMessage());
 		}
@@ -225,7 +225,7 @@ public class DeleteConflictServiceR4Test extends BaseJpaR4Test {
 
 		try {
 			myPatientDao.delete(patientId);
-			fail("");
+			fail();
 		} catch (ResourceVersionConflictException e) {
 			// good
 		}

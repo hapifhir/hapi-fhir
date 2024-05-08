@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.blankOrNullString;
 import static org.hamcrest.Matchers.not;
@@ -58,7 +58,7 @@ public class AuthorizationInterceptorMultitenantJpaR4Test extends BaseMultitenan
 		myTenantClientInterceptor.setTenantId(TENANT_B);
 		try {
 			myClient.read().resource(Patient.class).withId(idB).execute();
-			fail("");
+			fail();
 		} catch (ForbiddenOperationException e) {
 			// good
 		}
@@ -90,7 +90,7 @@ public class AuthorizationInterceptorMultitenantJpaR4Test extends BaseMultitenan
 		myTenantClientInterceptor.setTenantId(TENANT_B);
 		try {
 			myClient.read().resource(Patient.class).withId(idB).execute();
-			fail("");
+			fail();
 		} catch (ForbiddenOperationException e) {
 			// good
 		}
@@ -120,7 +120,7 @@ public class AuthorizationInterceptorMultitenantJpaR4Test extends BaseMultitenan
 		myTenantClientInterceptor.setTenantId(TENANT_A);
 		try {
 			myClient.read().resource(Patient.class).withId(idA).execute();
-			fail("");
+			fail();
 		} catch (ForbiddenOperationException e) {
 			// good
 		}
@@ -168,7 +168,7 @@ public class AuthorizationInterceptorMultitenantJpaR4Test extends BaseMultitenan
 				.include(IBaseResource.INCLUDE_ALL)
 				.returnBundle(Bundle.class)
 				.execute();
-			fail("");
+			fail();
 		} catch (ForbiddenOperationException e) {
 			// good
 		}
@@ -220,7 +220,7 @@ public class AuthorizationInterceptorMultitenantJpaR4Test extends BaseMultitenan
 				.loadPage()
 				.next(bundle)
 				.execute();
-			fail("");
+			fail();
 		} catch (ForbiddenOperationException e) {
 			// good
 		}
@@ -262,7 +262,7 @@ public class AuthorizationInterceptorMultitenantJpaR4Test extends BaseMultitenan
 
 		try {
 			Bundle resp2 = myClient.search().byUrl(nextLink).returnBundle(Bundle.class).execute();
-			fail("");
+			fail();
 		} catch (ForbiddenOperationException e) {
 			assertEquals("HTTP 403 Forbidden: HAPI-0334: Access denied by default policy (no applicable rules)", e.getMessage());
 		}

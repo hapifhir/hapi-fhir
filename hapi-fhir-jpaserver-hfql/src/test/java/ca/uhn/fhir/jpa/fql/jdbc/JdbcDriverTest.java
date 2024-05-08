@@ -43,7 +43,7 @@ import java.util.Map;
 
 import static ca.uhn.fhir.jpa.fql.jdbc.HfqlRestClientTest.createFakeStatement;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -139,7 +139,7 @@ public class JdbcDriverTest {
 
 		try {
 			jdbcTemplate.query(input, new ColumnMapRowMapper());
-			fail("");
+			fail();
 		} catch (UncategorizedSQLException e) {
 			assertEquals(SQLException.class, e.getCause().getClass());
 			assertEquals(Msg.code(2395) + "this is an error!", e.getCause().getMessage());

@@ -100,7 +100,7 @@ import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -547,7 +547,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 				.inCompartmentWithAdditionalSearchParams("Patient", new IdType("Patient/123"), additionalCompartmentSearchParameters)
 				.andThen().denyAll()
 				.build();
-			fail("");		} catch (IllegalArgumentException e) {
+			fail();		} catch (IllegalArgumentException e) {
 			assertEquals(Msg.code(342) + "too:many:colons is not a valid search parameter. Search parameters must be in the form resourcetype:parametercode, e.g. 'Device:patient'", e.getMessage());
 		}
 
@@ -561,7 +561,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 				.inCompartmentWithAdditionalSearchParams("Patient", new IdType("Patient/123"), additionalCompartmentSearchParameters)
 				.andThen().denyAll()
 				.build();
-			fail("");		} catch (IllegalArgumentException e) {
+			fail();		} catch (IllegalArgumentException e) {
 			assertEquals(Msg.code(341) + "no-colons is not a valid search parameter. Search parameters must be in the form resourcetype:parametercode, e.g. 'Device:patient'", e.getMessage());
 		}
 	}
@@ -1718,32 +1718,32 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 	public void testInvalidInstanceIds() {
 		try {
 			new RuleBuilder().allow("Rule 1").write().instance((String) null);
-			fail("");		} catch (NullPointerException e) {
+			fail();		} catch (NullPointerException e) {
 			assertEquals("theId must not be null or empty", e.getMessage());
 		}
 		try {
 			new RuleBuilder().allow("Rule 1").write().instance("");
-			fail("");		} catch (IllegalArgumentException e) {
+			fail();		} catch (IllegalArgumentException e) {
 			assertEquals("theId must not be null or empty", e.getMessage());
 		}
 		try {
 			new RuleBuilder().allow("Rule 1").write().instance("Observation/");
-			fail("");		} catch (IllegalArgumentException e) {
+			fail();		} catch (IllegalArgumentException e) {
 			assertEquals("theId must contain an ID part", e.getMessage());
 		}
 		try {
 			new RuleBuilder().allow("Rule 1").write().instance(new IdType());
-			fail("");		} catch (NullPointerException e) {
+			fail();		} catch (NullPointerException e) {
 			assertEquals("theId.getValue() must not be null or empty", e.getMessage());
 		}
 		try {
 			new RuleBuilder().allow("Rule 1").write().instance(new IdType(""));
-			fail("");		} catch (NullPointerException e) {
+			fail();		} catch (NullPointerException e) {
 			assertEquals("theId.getValue() must not be null or empty", e.getMessage());
 		}
 		try {
 			new RuleBuilder().allow("Rule 1").write().instance(new IdType("Observation", (String) null));
-			fail("");		} catch (NullPointerException e) {
+			fail();		} catch (NullPointerException e) {
 			assertEquals("theId must contain an ID part", e.getMessage());
 		}
 	}

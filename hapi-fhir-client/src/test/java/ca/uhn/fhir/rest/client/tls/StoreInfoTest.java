@@ -7,7 +7,7 @@ import ca.uhn.fhir.tls.PathType;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -32,7 +32,7 @@ public class StoreInfoTest {
 	public void testPathTypeInvalid(){
 		try {
 			new KeyStoreInfo("invalid:///my-file.p12", "storePassword" , "keyPassword", "alias");
-			fail("");		} catch (Exception e) {
+			fail();		} catch (Exception e) {
 			assertEquals(Msg.code(2117) + "Invalid path prefix", e.getMessage());
 		}
 	}
@@ -53,7 +53,7 @@ public class StoreInfoTest {
 	public void testFileTypeInvalid(){
 		try {
 			new KeyStoreInfo("file:///my-file.invalid", "storePassword" , "keyPassword", "alias");
-			fail("");		} catch (Exception e) {
+			fail();		} catch (Exception e) {
 			assertEquals(Msg.code(2121) + "Invalid KeyStore Type", e.getMessage());
 		}
 	}

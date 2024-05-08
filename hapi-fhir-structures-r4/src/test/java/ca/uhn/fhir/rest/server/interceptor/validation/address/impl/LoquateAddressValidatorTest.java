@@ -27,7 +27,7 @@ import java.util.Properties;
 import static ca.uhn.fhir.rest.server.interceptor.validation.address.impl.LoquateAddressValidator.PROPERTY_GEOCODE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -151,7 +151,7 @@ class LoquateAddressValidatorTest {
 	public void testInvalidInit() {
 		try {
 			new LoquateAddressValidator(new Properties());
-			fail("");		} catch (Exception e) {
+			fail();		} catch (Exception e) {
 		}
 	}
 
@@ -160,7 +160,7 @@ class LoquateAddressValidatorTest {
 		try {
 			AddressValidationResult res = myValidator.getValidationResult(new AddressValidationResult(),
 				new ObjectMapper().readTree(RESPONSE_INVALID), ourCtx);
-			fail("");		} catch (Exception e) {
+			fail();		} catch (Exception e) {
 		}
 	}
 
@@ -169,7 +169,7 @@ class LoquateAddressValidatorTest {
 		try {
 			assertEquals(clear(REQUEST), clear(myValidator.getRequestBody(ourCtx, getAddress())));
 		} catch (JsonProcessingException e) {
-			fail("");		}
+			fail();		}
 	}
 
 	private String clear(String theString) {
@@ -194,7 +194,7 @@ class LoquateAddressValidatorTest {
 		try {
 			val.getResponseEntity(address, ourCtx);
 		} catch (Exception e) {
-			fail("");		}
+			fail();		}
 
 		verify(template, times(1)).postForEntity(any(String.class), any(HttpEntity.class), eq(String.class));
 	}

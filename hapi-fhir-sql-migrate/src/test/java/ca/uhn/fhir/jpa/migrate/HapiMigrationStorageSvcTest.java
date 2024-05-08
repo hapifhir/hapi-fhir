@@ -18,7 +18,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 class HapiMigrationStorageSvcTest extends BaseMigrationTest {
 	private static final String RELEASE = "V5_5_0";
@@ -81,7 +81,7 @@ class HapiMigrationStorageSvcTest extends BaseMigrationTest {
 		assertTrue(ourHapiMigrationStorageSvc.insertLockRecord(otherLock));
 		try {
 			ourHapiMigrationStorageSvc.verifyNoOtherLocksPresent(thisLock);
-			fail("");
+			fail();
 		} catch (HapiMigrationException e) {
 			assertEquals("HAPI-2152: Internal error: on unlocking, a competing lock was found", e.getMessage());
 		}

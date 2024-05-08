@@ -40,7 +40,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourceProviderR4Test {
 
@@ -112,7 +112,7 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 		qr1.addItem().setLinkId("link1").addAnswer().setValue(new DecimalType(123));
 		try {
 			myClient.create().resource(qr1).execute();
-			fail("");
+			fail();
 		} catch (UnprocessableEntityException e) {
 			assertThat(myFhirContext.newJsonParser().encodeResourceToString(e.getOperationOutcome())).contains("Answer value must be of the type string");
 		}

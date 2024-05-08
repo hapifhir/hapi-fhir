@@ -101,8 +101,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class SystemProviderR4Test extends BaseJpaR4Test {
@@ -443,7 +443,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 
 			try {
 				myPatientDao.read(new IdType("Patient/Patient1063259"));
-				fail("");
+				fail();
 			} catch (ResourceGoneException e) {
 				// good
 			}
@@ -498,7 +498,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 
 		try {
 			myClient.read().resource(Patient.class).withId(id).execute();
-			fail("");
+			fail();
 		} catch (ResourceGoneException e) {
 			// good
 		}
@@ -686,7 +686,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		String bundle = IOUtils.toString(bundleRes, StandardCharsets.UTF_8);
 		try {
 			myClient.transaction().withBundle(bundle).prettyPrint().execute();
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			OperationOutcome oo = (OperationOutcome) e.getOperationOutcome();
 			assertEquals(Msg.code(533) + "Invalid placeholder ID found: uri:uuid:bb0cd4bc-1839-4606-8c46-ba3069e69b1d - Must be of the form 'urn:uuid:[uuid]' or 'urn:oid:[oid]'", oo.getIssue().get(0).getDiagnostics());
@@ -725,7 +725,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		String bundle = IOUtils.toString(bundleRes, StandardCharsets.UTF_8);
 		myClient.transaction().withBundle(bundle).prettyPrint().execute();
 		// try {
-		// fail("");		// } catch (InvalidRequestException e) {
+		// fail();		// } catch (InvalidRequestException e) {
 		// OperationOutcome oo = (OperationOutcome) e.getOperationOutcome();
 		// assertEquals("Invalid placeholder ID found: uri:uuid:bb0cd4bc-1839-4606-8c46-ba3069e69b1d - Must be of the form 'urn:uuid:[uuid]' or 'urn:oid:[oid]'", oo.getIssue().get(0).getDiagnostics());
 		// assertEquals("processing", oo.getIssue().get(0).getCode());
@@ -767,7 +767,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 
 		try {
 			myClient.transaction().withBundle(bundle).prettyPrint().execute();
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.toString()).contains("missing or invalid HTTP Verb");
 		}

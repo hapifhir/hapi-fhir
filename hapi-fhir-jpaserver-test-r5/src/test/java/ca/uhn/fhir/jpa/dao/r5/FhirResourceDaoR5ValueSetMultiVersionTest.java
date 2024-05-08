@@ -20,8 +20,8 @@ import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class FhirResourceDaoR5ValueSetMultiVersionTest extends BaseJpaR5Test {
@@ -187,7 +187,7 @@ public class FhirResourceDaoR5ValueSetMultiVersionTest extends BaseJpaR5Test {
 		assertEquals(2, runInTransaction(() -> myTermValueSetDao.findTermValueSetByUrl(PageRequest.of(0, 10), URL_MY_VALUE_SET).size()));
 		Optional<TermValueSet> optionalTermValueSet = runInTransaction(()->myTermValueSetDao.findTermValueSetByUrlAndNullVersion(URL_MY_VALUE_SET));
 		if (optionalTermValueSet.isPresent()) {
-			fail("");
+			fail();
 		}
 		assertNotNull(runInTransaction(() -> myTermValueSetDao.findTermValueSetByUrlAndVersion(URL_MY_VALUE_SET, "v1").orElseThrow(() -> new IllegalArgumentException("No TerValueSet found for " + URL_MY_VALUE_SET + " version v1"))));
 		assertNotNull(runInTransaction(() -> myTermValueSetDao.findTermValueSetByUrlAndVersion(URL_MY_VALUE_SET, "v2").orElseThrow(() -> new IllegalArgumentException("No TerValueSet found for " + URL_MY_VALUE_SET + " version v2"))));
@@ -196,11 +196,11 @@ public class FhirResourceDaoR5ValueSetMultiVersionTest extends BaseJpaR5Test {
 		assertEquals(1, runInTransaction(() -> myTermValueSetDao.findTermValueSetByUrl(PageRequest.of(0, 10), URL_MY_VALUE_SET).size()));
 		optionalTermValueSet = runInTransaction(()->myTermValueSetDao.findTermValueSetByUrlAndNullVersion(URL_MY_VALUE_SET));
 		if (optionalTermValueSet.isPresent()) {
-			fail("");
+			fail();
 		}
 		optionalTermValueSet = runInTransaction(()->myTermValueSetDao.findTermValueSetByUrlAndVersion(URL_MY_VALUE_SET, "v1"));
 		if (optionalTermValueSet.isPresent()) {
-			fail("");
+			fail();
 		}
 		assertNotNull(runInTransaction(() -> myTermValueSetDao.findTermValueSetByUrlAndVersion(URL_MY_VALUE_SET, "v2").orElseThrow(() -> new IllegalArgumentException("No TerValueSet found for " + URL_MY_VALUE_SET + " version v2"))));
 
@@ -208,15 +208,15 @@ public class FhirResourceDaoR5ValueSetMultiVersionTest extends BaseJpaR5Test {
 		assertEquals(0, runInTransaction(() -> myTermValueSetDao.findTermValueSetByUrl(PageRequest.of(0, 10), URL_MY_VALUE_SET).size()));
 		optionalTermValueSet = runInTransaction(()->myTermValueSetDao.findTermValueSetByUrlAndNullVersion(URL_MY_VALUE_SET));
 		if (optionalTermValueSet.isPresent()) {
-			fail("");
+			fail();
 		}
 		optionalTermValueSet = runInTransaction(()->myTermValueSetDao.findTermValueSetByUrlAndVersion(URL_MY_VALUE_SET, "v1"));
 		if (optionalTermValueSet.isPresent()) {
-			fail("");
+			fail();
 		}
 		optionalTermValueSet = runInTransaction(()->myTermValueSetDao.findTermValueSetByUrlAndVersion(URL_MY_VALUE_SET, "v2"));
 		if (optionalTermValueSet.isPresent()) {
-			fail("");
+			fail();
 		}
 
 	}

@@ -33,7 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class SearchPreferHandlingInterceptorTest {
@@ -66,7 +66,7 @@ public class SearchPreferHandlingInterceptorTest {
 				.returnBundle(Bundle.class)
 				.encodedJson()
 				.execute();
-			fail("");		} catch (InvalidRequestException e) {
+			fail();		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage()).contains("Unknown search parameter \"foo\" for resource type \"Patient\". Valid search parameters for this search are: [identifier]");
 		}
 
@@ -95,7 +95,7 @@ public class SearchPreferHandlingInterceptorTest {
 				.returnBundle(Bundle.class)
 				.encodedJson()
 				.execute();
-			fail("");		} catch (InvalidRequestException e) {
+			fail();		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage()).contains("Unknown search parameter \"foo\" for resource type \"Patient\". Valid search parameters for this search are: [identifier]");
 		}
 
@@ -113,7 +113,7 @@ public class SearchPreferHandlingInterceptorTest {
 				.returnBundle(Bundle.class)
 				.encodedJson()
 				.execute();
-			fail("");		} catch (InvalidRequestException e) {
+			fail();		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage()).contains("Unknown search parameter \"foo\" for resource type \"Patient\". Valid search parameters for this search are: [identifier]");
 		}
 

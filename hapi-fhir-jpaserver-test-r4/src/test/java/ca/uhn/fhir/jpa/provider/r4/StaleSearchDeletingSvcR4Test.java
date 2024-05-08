@@ -28,12 +28,12 @@ import java.util.UUID;
 
 import static ca.uhn.fhir.util.TestUtil.sleepAtLeast;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.blankOrNullString;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class StaleSearchDeletingSvcR4Test extends BaseResourceProviderR4Test {
@@ -102,7 +102,7 @@ public class StaleSearchDeletingSvcR4Test extends BaseResourceProviderR4Test {
 
 		try {
 			myClient.search().byUrl(nextLinkUrl).returnBundle(Bundle.class).execute();
-			fail("");
+			fail();
 		} catch (ResourceGoneException e) {
 			assertThat(e.getMessage()).contains("does not exist and may have expired");
 		}

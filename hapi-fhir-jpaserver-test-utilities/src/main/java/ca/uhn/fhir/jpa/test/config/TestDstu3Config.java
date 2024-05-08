@@ -57,7 +57,7 @@ import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 import static ca.uhn.fhir.jpa.test.config.TestR5Config.SELECT_QUERY_INCLUSION_CRITERIA_EXCLUDING_SEQUENCE_QUERIES;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 @Configuration
 @Import({
@@ -96,7 +96,7 @@ public class TestDstu3Config {
 					ourLog.error("Exceeded maximum wait for connection", e);
 					logGetConnectionStackTrace();
 //					if ("true".equals(System.getStringProperty("ci"))) {
-					fail("", "Exceeded maximum wait for connection: " + e);
+					fail("Exceeded maximum wait for connection: " + e);
 //					}
 //					System.exit(1);
 					retVal = null;

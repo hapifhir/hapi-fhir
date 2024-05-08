@@ -41,7 +41,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 @SuppressWarnings({"Duplicates"})
 public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
@@ -70,7 +70,7 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 		map.add(Constants.PARAM_FILTER, new StringParam("name eq smith))"));
 		try {
 			myPatientDao.search(map);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(1221) + "Error parsing _filter syntax: " + Msg.code(1056) + "Expression did not terminate at 13", e.getMessage());
 		}

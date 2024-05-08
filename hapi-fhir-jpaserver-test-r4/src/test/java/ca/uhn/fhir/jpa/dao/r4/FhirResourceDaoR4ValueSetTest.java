@@ -37,10 +37,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
@@ -315,7 +315,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		CodeableConcept codeableConcept = null;
 		try {
 			myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(901) + "Either ValueSet ID or ValueSet identifier or system and code must be provided. Unable to validate.", e.getMessage());
 		}
@@ -450,7 +450,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 	public void testExpandById_UnknownId() {
 		try {
 			myValueSetDao.expand(new IdType("http://foo"), null, mySrd);
-			fail("");
+			fail();
 		} catch (ResourceNotFoundException e) {
 			assertEquals("HAPI-2001: Resource ValueSet/foo is not known", e.getMessage());
 		}
@@ -510,7 +510,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 
 		try {
 			myValueSetDao.expand(vs, null);
-			fail("");
+			fail();
 		} catch (InternalErrorException e) {
 			assertThat(e.getMessage()).contains(Msg.code(832) + "Expansion of ValueSet produced too many codes (maximum 50) - Operation aborted!");
 			assertThat(e.getMessage()).contains("Performing in-memory expansion");

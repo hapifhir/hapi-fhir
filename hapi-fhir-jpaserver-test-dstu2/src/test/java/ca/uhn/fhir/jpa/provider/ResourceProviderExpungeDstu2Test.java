@@ -16,7 +16,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class ResourceProviderExpungeDstu2Test extends BaseResourceProviderDstu2Test {
 	private IIdType myOneVersionPatientId;
@@ -111,7 +111,7 @@ public class ResourceProviderExpungeDstu2Test extends BaseResourceProviderDstu2T
 				dao = myObservationDao;
 				break;
 			default:
-				fail("", "Restype: " + theId.getResourceType());
+				fail("Restype: " + theId.getResourceType());
 				dao = myPatientDao;
 		}
 		return dao;

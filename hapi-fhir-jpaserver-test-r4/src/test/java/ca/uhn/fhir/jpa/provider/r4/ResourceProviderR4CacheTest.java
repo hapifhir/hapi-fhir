@@ -24,7 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.Date;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -123,7 +123,7 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 				.returnBundle(Bundle.class)
 				.cacheControl(new CacheControlDirective().setNoStore(true).setMaxResults(5000))
 				.execute();
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("HTTP 400 Bad Request: " + Msg.code(1165) + "Cache-Control header max-results value must not exceed 123", e.getMessage());
 		}

@@ -71,7 +71,7 @@ import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.leftPad;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
@@ -80,7 +80,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.blankOrNullString;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -348,13 +348,13 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 
 		try {
 			myClient.read().resource("Observation").withId(new IdType(myObservationIdsOddOnly.get(0))).execute();
-			fail("");
+			fail();
 		} catch (ResourceNotFoundException e) {
 			// good
 		}
 		try {
 			myClient.read().resource("Observation").withId(new IdType(myObservationIdsOddOnly.get(1))).execute();
-			fail("");
+			fail();
 		} catch (ResourceNotFoundException e) {
 			// good
 		}
@@ -609,7 +609,7 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 				break;
 			}
 			if (sw.getMillis() > 60000) {
-				fail("", "Status is still " + status);
+				fail("Status is still " + status);
 			}
 		}
 
@@ -629,7 +629,7 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 		String next = BundleUtil.getLinkUrlOfType(myFhirContext, response, "next");
 		if (next != null) {
 			response = myClient.loadPage().next(response).execute();
-			fail("", myFhirContext.newJsonParser().encodeResourceToString(response));
+			fail(myFhirContext.newJsonParser().encodeResourceToString(response));
 		}
 
 	}
@@ -690,7 +690,7 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 
 		try {
 			myClient.search().forResource(Patient.class).where(new StringClientParam("INVALID_PARAM").matchesExactly().value("value")).returnBundle(Bundle.class).execute();
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage()).contains("INVALID_PARAM");
 		}

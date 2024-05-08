@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
 
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -107,7 +107,7 @@ class TimeoutManagerTest {
 		// execute
 		try {
 			mySvc.checkTimeout();
-			fail("");
+			fail();
 		} catch (TimeoutException e) {
 			assertEquals("HAPI-2133: TEST TIMEOUT timed out after running for 20 days", e.getMessage());
 		}

@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 class ExpungeEverythingServiceTest extends BaseJpaR4Test {
 	@Autowired
@@ -42,13 +42,13 @@ class ExpungeEverythingServiceTest extends BaseJpaR4Test {
 		assertThat(myPartitionLookupSvc.listPartitions()).hasSize(0);
 		try {
 			myPartitionLookupSvc.getPartitionById(123);
-			fail("");
+			fail();
 		} catch (ResourceNotFoundException e) {
 			assertEquals("No partition exists with ID 123", e.getMessage());
 		}
 		try {
 			myPartitionLookupSvc.getPartitionByName("PART");
-			fail("");
+			fail();
 		} catch (ResourceNotFoundException e) {
 			assertEquals("Partition name \"PART\" is not valid", e.getMessage());
 		}

@@ -20,7 +20,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class DeleteExpungeJobTest extends BaseJpaR4Test {
@@ -226,7 +226,7 @@ public class DeleteExpungeJobTest extends BaseJpaR4Test {
 		// execute
 		try {
 			myJobCoordinator.startInstance(startRequest);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 
 			// validate

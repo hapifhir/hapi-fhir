@@ -30,11 +30,11 @@ import java.util.List;
 
 import static ca.uhn.fhir.test.utilities.CustomMatchersUtil.*;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.not;
 import static org.hl7.fhir.r4.model.Observation.SP_VALUE_QUANTITY;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import static org.mockito.Mockito.mock;
 

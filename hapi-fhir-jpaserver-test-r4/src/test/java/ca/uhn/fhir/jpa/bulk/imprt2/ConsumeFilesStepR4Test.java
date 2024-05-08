@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.either;
@@ -226,7 +226,7 @@ public class ConsumeFilesStepR4Test extends BasePartitioningR4Test {
 		try {
 
 			mySvc.storeResources(resources, null);
-			fail("");
+			fail();
 
 		} catch (JobExecutionFailedException e) {
 

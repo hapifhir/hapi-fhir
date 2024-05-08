@@ -65,14 +65,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -501,7 +501,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		spec.setInstallResourceTypes(resourceList);
 		try {
 			PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(spec);
-			fail("", outcome.toString());
+			fail(outcome.toString());
 		} catch (ImplementationGuideInstallationException theE) {
 			assertThat(theE.getMessage()).contains("Resources in a package must have a url or identifier to be loaded by the package installer.");
 		}

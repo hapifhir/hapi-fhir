@@ -51,14 +51,14 @@ import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.util.HapiExtensions.EXT_VALUESET_EXPANSION_MESSAGE;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class ValueSetExpansionR4Test extends BaseTermR4Test {
@@ -363,7 +363,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		options.setCount(4);
 		try {
 			myTermSvc.expandValueSet(options, input);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(887) + "ValueSet expansion can not combine \"offset\" with \"ValueSet.compose.exclude\" unless the ValueSet has been pre-expanded. ValueSet \"Unidentified ValueSet\" must be pre-expanded for this operation to work.", e.getMessage());
 		}
@@ -923,7 +923,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		// In memory expansion
 		try {
 			myValueSetDao.expand(vs, new ValueSetExpansionOptions());
-			fail("");
+			fail();
 		} catch (InternalErrorException e) {
 			assertEquals(Msg.code(888) + "org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport$ExpansionCouldNotBeCompletedInternallyException: " + Msg.code(702) + "Unable to expand ValueSet because CodeSystem could not be found: http://unknown-system", e.getMessage());
 		}
@@ -956,7 +956,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		// Try expansion again
 		try {
 			myValueSetDao.expand(vs, new ValueSetExpansionOptions());
-			fail("");
+			fail();
 		} catch (InternalErrorException e) {
 			assertEquals(Msg.code(888) + "org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport$ExpansionCouldNotBeCompletedInternallyException: " + Msg.code(702) + "Unable to expand ValueSet because CodeSystem could not be found: http://unknown-system", e.getMessage());
 		}
@@ -1034,7 +1034,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 			.filter(entry -> theFullUrl.equals(entry.getFullUrl()))
 			.findFirst();
 		if (bundleEntry.isEmpty()) {
-			fail("", "Can't find resource: " + theFullUrl);
+			fail("Can't find resource: " + theFullUrl);
 		}
 		return bundleEntry.get().getResource();
 	}

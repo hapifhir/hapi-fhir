@@ -15,7 +15,7 @@ import static ca.uhn.fhir.rest.param.ParamPrefixEnum.EQUAL;
 import static ca.uhn.fhir.rest.param.ParamPrefixEnum.NOT_EQUAL;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
@@ -41,7 +41,7 @@ public class DateParamTest {
 	public void testBadDateFormat() {
 		try {
 			new DateParam("09-30-1960");
-			fail("");
+			fail();
 		} catch (DataFormatException e) {
 			// expected
 		}
@@ -81,7 +81,7 @@ public class DateParamTest {
 		// https://github.com/hapifhir/hapi-fhir/issues/2361
 		try {
 			new DateParam("junk");
-			fail("");
+			fail();
 		} catch (DataFormatException e) {
 			// expected
 		}

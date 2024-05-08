@@ -109,7 +109,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -373,7 +373,7 @@ public class XmlParserDstu3Test {
 			IParser parser = ourCtx.newXmlParser();
 			parser.setParserErrorHandler(new StrictErrorHandler());
 			parser.parseResource(Bundle.class, string);
-			fail("");		} catch (DataFormatException e) {
+			fail();		} catch (DataFormatException e) {
 			assertEquals(Msg.code(1851) + "DataFormatException at [[row,col {unknown-source}]: [49,11]]: " + Msg.code(1819) + "Resource has contained child resource with no ID", e.getMessage());
 		}
 	}
@@ -1586,7 +1586,7 @@ public class XmlParserDstu3Test {
 		try {
 			parser.setParserErrorHandler(new StrictErrorHandler());
 			parser.encodeResourceToString(p);
-			fail("");		} catch (DataFormatException e) {
+			fail();		} catch (DataFormatException e) {
 			assertEquals(Msg.code(1822) + "Resource is missing required element 'url' in parent element 'Patient(res).extension'", e.getMessage());
 		}
 
@@ -1617,7 +1617,7 @@ public class XmlParserDstu3Test {
 		try {
 			parser.setParserErrorHandler(new StrictErrorHandler());
 			parser.encodeResourceToString(p);
-			fail("");		} catch (DataFormatException e) {
+			fail();		} catch (DataFormatException e) {
 			assertEquals(Msg.code(1827) + "[element=\"Patient(res).extension\"] Extension contains both a value and nested extensions", e.getMessage());
 		}
 
@@ -3145,7 +3145,7 @@ public class XmlParserDstu3Test {
 	public void testParseInvalid() {
 		try {
 			ourCtx.newXmlParser().parseResource("FOO");
-			fail("");		} catch (DataFormatException e) {
+			fail();		} catch (DataFormatException e) {
 			assertThat(e.getMessage()).contains("Unexpected character 'F'");
 		}
 	}
@@ -3164,7 +3164,7 @@ public class XmlParserDstu3Test {
 
 		try {
 			p.parseResource(resource);
-			fail("");		} catch (DataFormatException e) {
+			fail();		} catch (DataFormatException e) {
 			assertEquals(Msg.code(1851) + "DataFormatException at [[row,col {unknown-source}]: [2,4]]: " + Msg.code(1821) + "[element=\"active\"] Invalid attribute value \"1\": Invalid boolean string: '1'", e.getMessage());
 		}
 
@@ -3325,7 +3325,7 @@ public class XmlParserDstu3Test {
 
 		try {
 			ourCtx.newXmlParser().parseResource(Patient.class, input);
-			fail("");		} catch (DataFormatException e) {
+			fail();		} catch (DataFormatException e) {
 			assertThat(e.getMessage()).contains("Extension (URL='http://my.fancy.extension.url') must not have both a value and other contained extensions");
 		}
 	}
@@ -3368,7 +3368,7 @@ public class XmlParserDstu3Test {
 			IParser parser = ourCtx.newXmlParser();
 			parser.setParserErrorHandler(new StrictErrorHandler());
 			parser.parseResource(Bundle.class, string);
-			fail("");		} catch (DataFormatException e) {
+			fail();		} catch (DataFormatException e) {
 			assertEquals(Msg.code(1851) + "DataFormatException at [[row,col {unknown-source}]: [39,9]]: " + Msg.code(1825) + "Unknown element 'encounter' found during parse", e.getMessage());
 		}
 	}
@@ -3425,7 +3425,7 @@ public class XmlParserDstu3Test {
 			parser = ourCtx.newXmlParser();
 			parser.setParserErrorHandler(new StrictErrorHandler());
 			parser.parseResource(input);
-			fail("");		} catch (DataFormatException e) {
+			fail();		} catch (DataFormatException e) {
 			assertEquals(Msg.code(1822) + "Resource is missing required element 'url' in parent element 'extension'", e.getCause().getMessage());
 		}
 
@@ -3454,7 +3454,7 @@ public class XmlParserDstu3Test {
 			parser = ourCtx.newXmlParser();
 			parser.setParserErrorHandler(new StrictErrorHandler());
 			parser.parseResource(input);
-			fail("");		} catch (DataFormatException e) {
+			fail();		} catch (DataFormatException e) {
 			assertEquals(Msg.code(1822) + "Resource is missing required element 'url' in parent element 'modifierExtension'", e.getCause().getMessage());
 		}
 
@@ -3480,13 +3480,13 @@ public class XmlParserDstu3Test {
 
 		try {
 			p.parseResource(encoded.replace("Observation", "observation"));
-			fail("");		} catch (DataFormatException e) {
+			fail();		} catch (DataFormatException e) {
 			assertEquals(Msg.code(1851) + "DataFormatException at [[row,col {unknown-source}]: [1,1]]: " + Msg.code(1815) + "Unknown resource type 'observation': Resource names are case sensitive, found similar name: 'Observation'", e.getMessage());
 		}
 
 		try {
 			p.parseResource(encoded.replace("valueSampledData", "valueSampleddata"));
-			fail("");		} catch (DataFormatException e) {
+			fail();		} catch (DataFormatException e) {
 			assertEquals(Msg.code(1851) + "DataFormatException at [[row,col {unknown-source}]: [2,4]]: " + Msg.code(1825) + "Unknown element 'valueSampleddata' found during parse", e.getMessage());
 		}
 	}
@@ -3553,7 +3553,7 @@ public class XmlParserDstu3Test {
 
 		try {
 			ourCtx.newXmlParser().parseResource(Patient.class, input);
-			fail("");		} catch (DataFormatException e) {
+			fail();		} catch (DataFormatException e) {
 			assertThat(e.toString()).contains("Undeclared general entity");
 		}
 

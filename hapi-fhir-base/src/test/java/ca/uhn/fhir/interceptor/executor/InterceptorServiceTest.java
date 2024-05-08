@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
@@ -56,7 +56,7 @@ public class InterceptorServiceTest {
 
 		try {
 			svc.callHooks(Pointcut.TEST_RB, new HookParams("A MESSAGE", "B"));
-			fail("");
+			fail();
 		} catch (AuthenticationException e) {
 			assertEquals("A MESSAGE", e.getMessage());
 		}
@@ -130,7 +130,7 @@ public class InterceptorServiceTest {
 
 		try {
 			svc.callHooks(Pointcut.TEST_RB, new HookParams("A MESSAGE", "B"));
-			fail("");
+			fail();
 		} catch (AuthenticationException e) {
 			assertEquals("A MESSAGE", e.getMessage());
 		}
@@ -156,7 +156,7 @@ public class InterceptorServiceTest {
 
 		try {
 			svc.callHooks(Pointcut.TEST_RB, new HookParams("A MESSAGE", "B"));
-			fail("");
+			fail();
 		} catch (AuthenticationException e) {
 			assertEquals("A MESSAGE", e.getMessage());
 		}
@@ -183,7 +183,7 @@ public class InterceptorServiceTest {
 
 		try {
 			svc.registerInterceptor(new InterceptorThatFailsOnRegister());
-			fail("");
+			fail();
 		} catch (InternalErrorException e) {
 			// good
 		}
@@ -421,7 +421,7 @@ public class InterceptorServiceTest {
 
 		try {
 			svc.callHooks(Pointcut.TEST_RB, params);
-			fail("");
+			fail();
 		} catch (NullPointerException e) {
 			assertEquals("AAA", e.getMessage());
 		}
@@ -441,7 +441,7 @@ public class InterceptorServiceTest {
 		HookParams params = new HookParams(msg, subs);
 		try {
 			svc.callHooks(Pointcut.TEST_RB, params);
-			fail("");
+			fail();
 		} catch (IllegalArgumentException e) {
 			assertThat(e.getMessage()).contains("Invalid params for pointcut " + Pointcut.TEST_RB + " - Wanted java.lang.String,java.lang.String but found ");
 		}
@@ -466,7 +466,7 @@ public class InterceptorServiceTest {
 		params.add(String.class, "A");
 		try {
 			svc.haveAppropriateParams(Pointcut.TEST_RB, params);
-			fail("");
+			fail();
 		} catch (IllegalArgumentException e) {
 			assertEquals(Msg.code(1909) + "Wrong number of params for pointcut " + Pointcut.TEST_RB + " - Wanted java.lang.String,java.lang.String but found [String]", e.getMessage());
 		}
@@ -486,7 +486,7 @@ public class InterceptorServiceTest {
 		params.add(String.class, "G");
 		try {
 			svc.haveAppropriateParams(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED, params);
-			fail("");
+			fail();
 		} catch (IllegalArgumentException e) {
 			assertEquals(Msg.code(1909) + "Wrong number of params for pointcut STORAGE_PRECOMMIT_RESOURCE_UPDATED - Wanted ca.uhn.fhir.rest.api.InterceptorInvocationTimingEnum,ca.uhn.fhir.rest.api.server.RequestDetails,ca.uhn.fhir.rest.api.server.storage.TransactionDetails,ca.uhn.fhir.rest.server.servlet.ServletRequestDetails,org.hl7.fhir.instance.model.api.IBaseResource,org.hl7.fhir.instance.model.api.IBaseResource but found [String, String, String, String, String, String, String]", e.getMessage());
 		}
@@ -506,7 +506,7 @@ public class InterceptorServiceTest {
 		params.add((Class) String.class, 6);
 		try {
 			svc.haveAppropriateParams(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED, params);
-			fail("");
+			fail();
 		} catch (IllegalArgumentException e) {
 			assertEquals("Invalid params for pointcut " + Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED + " - class java.lang.Integer is not of type class java.lang.String", e.getMessage());
 		}

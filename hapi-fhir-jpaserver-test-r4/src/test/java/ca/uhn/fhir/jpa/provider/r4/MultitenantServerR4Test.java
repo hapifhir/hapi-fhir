@@ -61,10 +61,10 @@ import java.util.HashMap;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -126,7 +126,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		myTenantClientInterceptor.setTenantId(TENANT_B);
 		try {
 			myClient.read().resource(Patient.class).withId(idA).execute();
-			fail("");
+			fail();
 		} catch (ResourceNotFoundException e) {
 			// good
 		}
@@ -166,7 +166,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		myTenantClientInterceptor.setTenantId(TENANT_B);
 		try {
 			myClient.read().resource(Patient.class).withId(idA).execute();
-			fail("");
+			fail();
 		} catch (ResourceNotFoundException e) {
 			// good
 		}
@@ -376,7 +376,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		patientA.setActive(true);
 		try {
 			myClient.create().resource(patientA).execute();
-			fail("");
+			fail();
 		} catch (ResourceNotFoundException e) {
 			assertThat(e.getMessage()).contains("Partition name \"TENANT-ZZZ\" is not valid");
 		}
@@ -529,7 +529,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		requestDetails.setTenantId(TENANT_B);
 		try {
 			myPatientDao.update((Patient) patientA, requestDetails);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(2079) + "Resource " + ((Patient) patientA).getResourceType() + "/" + ((Patient) patientA).getIdElement().getIdPart() + " is not known", e.getMessage());
 		}
@@ -638,7 +638,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 			RequestDetails requestDetails = new SystemRequestDetails();
 			requestDetails.setTenantId(TENANT_A);
 			mySystemDao.transaction(requestDetails, input);
-			fail("");
+			fail();
 		} catch (MethodNotAllowedException e) {
 			assertEquals(Msg.code(531) + "Can not call transaction GET methods from this context", e.getMessage());
 		}

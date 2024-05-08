@@ -25,7 +25,7 @@ import java.util.TreeSet;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class BuiltJarDstu2IT {
@@ -58,7 +58,7 @@ public class BuiltJarDstu2IT {
 
 		try {
 			ctx.newXmlParser().encodeResourceToString(p);
-			fail("");
+			fail();
 		} catch (ca.uhn.fhir.context.ConfigurationException e) {
 			assertEquals(Msg.code(1754) + "Unable to initialize StAX - XML processing is disabled", e.getMessage());
 		}

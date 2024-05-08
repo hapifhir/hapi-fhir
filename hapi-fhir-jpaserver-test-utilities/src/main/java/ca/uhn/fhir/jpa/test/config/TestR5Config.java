@@ -55,7 +55,7 @@ import java.util.Locale;
 import java.util.Properties;
 import java.util.function.Predicate;
 
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 @Configuration
 @Import({
@@ -118,7 +118,7 @@ public class TestR5Config {
 				} catch (Exception e) {
 					ourLog.error("Exceeded maximum wait for connection", e);
 					logGetConnectionStackTrace();
-					fail("", "Exceeded maximum wait for connection: " + e.toString());
+					fail("Exceeded maximum wait for connection: " + e.toString());
 					retVal = null;
 				}
 

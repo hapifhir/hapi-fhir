@@ -50,8 +50,8 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -393,7 +393,7 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 
 		try {
 			myWorkChannelReceiver.send(new JobWorkNotificationJsonMessage(createWorkNotification(STEP_2)));
-			fail("");
+			fail();
 		} catch (MessageDeliveryException e) {
 
 			// Verify
@@ -499,7 +499,7 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 
 		try {
 			mySvc.startInstance(startRequest);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 
 			// Verify
@@ -534,7 +534,7 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 
 		try {
 			mySvc.startInstance(startRequest);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 
 			// Verify

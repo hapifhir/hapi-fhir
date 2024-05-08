@@ -9,7 +9,7 @@ import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceRequestContextJson;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 class PrefetchTemplateUtilTest {
 	private static final String TEST_PATIENT_ID = "P2401";
@@ -35,7 +35,7 @@ class PrefetchTemplateUtilTest {
 		context.put("patientId", TEST_PATIENT_ID);
 		try {
 			PrefetchTemplateUtil.substituteTemplate(template, context, FhirContext.forR4());
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("HAPI-2375: Either request context was empty or it did not provide a value for key <userId>.  Please make sure you are including a context with valid keys.", e.getMessage());
 		}
@@ -49,7 +49,7 @@ class PrefetchTemplateUtilTest {
 
 		try {
 			PrefetchTemplateUtil.substituteTemplate(template, context, FhirContext.forR4());
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("HAPI-2375: Either request context was empty or it did not provide a value for key <userId>.  Please make sure you are including a context with valid keys.", e.getMessage());
 		}
@@ -62,7 +62,7 @@ class PrefetchTemplateUtilTest {
 		context.put("patientId", TEST_PATIENT_ID);
 		try {
 			PrefetchTemplateUtil.substituteTemplate(template, context, FhirContext.forR4());
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("HAPI-2372: Request context did not provide a value for key <draftOrders>.  Available keys in context are: [patientId]", e.getMessage());
 		}
@@ -133,7 +133,7 @@ class PrefetchTemplateUtilTest {
 		context.put("draftOrders", new org.hl7.fhir.r4.model.Observation().setId(OBSERVATION_ID));
 		try {
 			PrefetchTemplateUtil.substituteTemplate(template, context, FhirContext.forR4());
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("HAPI-2374: Request context did not provide valid " + fhirContextR4.getVersion().getVersion() + " Bundle resource for template key <draftOrders>", e.getMessage());
 		}

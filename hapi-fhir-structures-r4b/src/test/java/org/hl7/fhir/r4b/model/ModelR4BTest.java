@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class ModelR4BTest {
@@ -27,7 +27,7 @@ public class ModelR4BTest {
 		new InstantType("2019-01-01T00:00:00.000Z");
 		try {
 			new InstantType("2019-01-01T00:00Z");
-			fail("");		} catch (IllegalArgumentException e) {
+			fail();		} catch (IllegalArgumentException e) {
 			// good
 		}
 	}

@@ -30,7 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProviderR4Test {
 
@@ -288,7 +288,7 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 				.andParameter("system", new UriType("http://hl7.org/fhir/v2/0203"))
 				.andParameter("version", new StringType("2.8"))
 				.execute();
-			fail("");
+			fail();
 		} catch (ResourceNotFoundException e) {
 			ourLog.info("Lookup failed as expected");
 		}
@@ -373,7 +373,7 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 				.andParameter("system", new UriType("http://acme.org"))
 				.andParameter("version", new StringType("3"))
 				.execute();
-			fail("");
+			fail();
 		} catch (ResourceNotFoundException e) {
 			ourLog.info("Lookup failed as expected");
 		}
@@ -623,7 +623,7 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 				.withParameter(Parameters.class, "codingA", new Coding().setSystem(SYSTEM_PARENTCHILD).setCode("ChildAA").setVersion("1"))
 				.andParameter("codingB", new Coding().setSystem(SYSTEM_PARENTCHILD).setCode("ParentA").setVersion("2"))
 				.execute();
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("HTTP 400 Bad Request: " + Msg.code(904) + "Unable to test subsumption across different code system versions", e.getMessage());
 		}

@@ -50,11 +50,11 @@ import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_PART_LI
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_PART_LINK_FILE_SUPPLEMENTARY_DEFAULT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_UPLOAD_PROPERTIES_FILE;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_ALL_VALUESET_ID;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -134,7 +134,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 
 		try {
 			mySvc.loadLoinc(myFiles.getFiles(), mySrd);
-			fail("");
+			fail();
 		} catch (UnprocessableEntityException e) {
 			assertEquals(Msg.code(863) + "Could not find any of the PartLink files: [AccessoryFiles/PartFile/LoincPartLink_Primary.csv, AccessoryFiles/PartFile/LoincPartLink_Supplementary.csv] nor [AccessoryFiles/PartFile/LoincPartLink.csv]", e.getMessage());
 		}
@@ -143,7 +143,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		myFiles.addFileZip("/loinc/", LOINC_PART_LINK_FILE_PRIMARY_DEFAULT.getCode());
 		try {
 			mySvc.loadLoinc(myFiles.getFiles(), mySrd);
-			fail("");
+			fail();
 		} catch (UnprocessableEntityException e) {
 			assertEquals(Msg.code(863) + "Could not find any of the PartLink files: [AccessoryFiles/PartFile/LoincPartLink_Supplementary.csv] nor [AccessoryFiles/PartFile/LoincPartLink.csv]", e.getMessage());
 		}
@@ -153,7 +153,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		myFiles.addFileZip("/loinc/", LOINC_PART_LINK_FILE_DEFAULT.getCode());
 		try {
 			mySvc.loadLoinc(myFiles.getFiles(), mySrd);
-			fail("");
+			fail();
 		} catch (UnprocessableEntityException e) {
 			assertEquals(Msg.code(863) + "Only either the single PartLink file or the split PartLink files can be present. Found both the single PartLink file, AccessoryFiles/PartFile/LoincPartLink.csv, and the split PartLink files: [AccessoryFiles/PartFile/LoincPartLink_Primary.csv, AccessoryFiles/PartFile/LoincPartLink_Supplementary.csv]", e.getMessage());
 		}
@@ -636,7 +636,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		// Actually do the load
 		try {
 			mySvc.loadLoinc(myFiles.getFiles(), mySrd);
-			fail("");
+			fail();
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage()).contains("Could not find the following mandatory files in input:");
 			assertThat(e.getMessage()).contains("Loinc.csv");

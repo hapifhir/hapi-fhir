@@ -28,7 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourceProviderDstu3Test {
 

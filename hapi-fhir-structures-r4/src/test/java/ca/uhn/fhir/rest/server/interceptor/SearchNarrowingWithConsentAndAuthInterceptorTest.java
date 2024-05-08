@@ -46,7 +46,7 @@ import java.util.Set;
 
 import static ca.uhn.fhir.test.utilities.SearchTestUtil.toUnqualifiedVersionlessIdValues;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -453,7 +453,7 @@ public class SearchNarrowingWithConsentAndAuthInterceptorTest {
 				.withNoParameters(Parameters.class)
 				.returnResourceType(Bundle.class)
 				.execute();
-			fail("");		} catch (ForbiddenOperationException e) {
+			fail();		} catch (ForbiddenOperationException e) {
 
 			// Verify
 			assertThat(e.getMessage()).contains("Access denied by");

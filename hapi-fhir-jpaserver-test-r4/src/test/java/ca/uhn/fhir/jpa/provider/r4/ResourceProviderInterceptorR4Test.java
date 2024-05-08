@@ -58,10 +58,10 @@ import java.util.concurrent.TimeUnit;
 import static java.util.Arrays.asList;
 import static org.apache.commons.lang3.time.DateUtils.MILLIS_PER_SECOND;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.equalTo;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.eq;
@@ -457,7 +457,7 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 				.resource(searchParameter)
 				.execute();
 
-			fail("");
+			fail();
 		}catch (UnprocessableEntityException e){
 			// all is good
 			assertThat(e.getMessage()).contains("2196");
@@ -534,7 +534,7 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 
 		try {
 			myClient.update(overlappingSearchParamId, overlappingSearchParameter);
-			fail("");
+			fail();
 		} catch (UnprocessableEntityException e){
 			// this is good
 			assertThat(e.getMessage()).contains("2196");

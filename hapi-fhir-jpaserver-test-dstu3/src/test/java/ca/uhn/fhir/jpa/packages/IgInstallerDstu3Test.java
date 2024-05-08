@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.util.ClasspathUtil.loadResourceAsByteArray;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 

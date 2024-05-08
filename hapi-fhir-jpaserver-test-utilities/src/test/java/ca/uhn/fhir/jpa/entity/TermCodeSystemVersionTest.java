@@ -13,7 +13,7 @@ public class TermCodeSystemVersionTest {
 		TermCodeSystemVersion csv1 = new TermCodeSystemVersion().setCodeSystemVersionId("1").setCodeSystemPidForUnitTest(123L);
 		TermCodeSystemVersion csv2 = new TermCodeSystemVersion().setCodeSystemVersionId("1").setCodeSystemPidForUnitTest(123L);
 		TermCodeSystemVersion csv3 = new TermCodeSystemVersion().setCodeSystemVersionId("1").setCodeSystemPidForUnitTest(124L);
-		assertNotNull(csv2).isEqualTo(csv1);
+		assertThat(csv2).isNotNull().isEqualTo(csv1);
 		assertThat(csv3).isNotEqualTo(csv1);
 		assertThat("").isNotEqualTo(csv1);
 	}

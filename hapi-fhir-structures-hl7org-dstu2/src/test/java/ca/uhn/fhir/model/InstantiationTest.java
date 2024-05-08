@@ -14,7 +14,7 @@ import java.util.HashSet;
 import java.util.Map.Entry;
 import java.util.Properties;
 
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class InstantiationTest {

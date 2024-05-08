@@ -38,7 +38,7 @@ import static org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTermi
 import static org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService.UCUM_VALUESET_URL;
 import static org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService.USPS_CODESYSTEM_URL;
 import static org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService.USPS_VALUESET_URL;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class CommonCodeSystemsTerminologyServiceTest extends BaseValidationTestWithInlineMocks {
@@ -295,7 +295,7 @@ public class CommonCodeSystemsTerminologyServiceTest extends BaseValidationTestW
 	public void testGetCodeSystemUrl_forDSTU3_throwsException() {
 		try {
 			CommonCodeSystemsTerminologyService.getCodeSystemUrl(myCtx, new org.hl7.fhir.dstu3.model.CodeSystem());
-			fail("");		} catch (IllegalArgumentException e) {
+			fail();		} catch (IllegalArgumentException e) {
 			assertEquals(Msg.code(696) + "Can not handle version: DSTU3", e.getMessage());
 		}
 	}

@@ -16,7 +16,7 @@ import java.util.ArrayList;
 
 import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TermCodeSystemStorageSvcTest extends BaseJpaR4Test {
@@ -118,7 +118,7 @@ public class TermCodeSystemStorageSvcTest extends BaseJpaR4Test {
 		Long originalResId = codeSystemResourceEntity.getId();
 		try {
 			myCodeSystemDao.create(theDuplicate, mySrd);
-			fail("");
+			fail();
 		} catch (UnprocessableEntityException e) {
 			assertEquals(theDuplicateErrorBaseMsg + originalResId, e.getMessage());
 		}

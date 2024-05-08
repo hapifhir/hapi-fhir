@@ -35,7 +35,7 @@ import java.lang.reflect.Type;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -90,7 +90,7 @@ public class FhirTerserDstu2Test {
 
 		try {
 			ourCtx.newTerser().cloneInto(source, target, false);
-			fail("");		} catch (DataFormatException e) {
+			fail();		} catch (DataFormatException e) {
 			// good
 		}
 }
@@ -134,7 +134,7 @@ public class FhirTerserDstu2Test {
 
 		try {
 			ourCtx.newTerser().cloneInto(source, target, false);
-			fail("");		} catch (DataFormatException e) {
+			fail();		} catch (DataFormatException e) {
 			// good
 		}
 

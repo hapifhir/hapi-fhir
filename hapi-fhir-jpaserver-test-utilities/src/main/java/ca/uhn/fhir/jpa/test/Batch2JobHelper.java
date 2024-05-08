@@ -45,7 +45,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
 
 public class Batch2JobHelper {
@@ -140,7 +140,7 @@ public class Batch2JobHelper {
 				.map(t -> t.getJobDefinitionId() + "/" + t.getStatus().name())
 				.collect(Collectors.joining("\n"));
 			String currentStatus = myJobCoordinator.getInstance(theBatchJobId).getStatus().name();
-			fail("", "Job still has status " + currentStatus + " - All statuses:\n" + statuses);
+			fail("Job still has status " + currentStatus + " - All statuses:\n" + statuses);
 		}
 		return myJobCoordinator.getInstance(theBatchJobId);
 	}
@@ -264,7 +264,7 @@ public class Batch2JobHelper {
 						.append(" has status ")
 						.append(instance.getStatus());
 				}
-				fail("", msg.toString());
+				fail(msg.toString());
 			}
 		}
 	}

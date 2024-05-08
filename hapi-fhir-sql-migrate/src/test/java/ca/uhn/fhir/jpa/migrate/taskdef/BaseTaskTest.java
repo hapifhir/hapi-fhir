@@ -5,7 +5,7 @@ import ca.uhn.fhir.i18n.Msg;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class BaseTaskTest {
 
@@ -20,7 +20,7 @@ public class BaseTaskTest {
 		DropTableTask task = new DropTableTask("1", "123.4");
 		try {
 			task.validateVersion();
-			fail("");
+			fail();
 		} catch (IllegalStateException e) {
 			assertEquals(Msg.code(62) + "The version 123.4 does not match the expected pattern " + BaseTask.MIGRATION_VERSION_PATTERN, e.getMessage());
 		}
@@ -31,7 +31,7 @@ public class BaseTaskTest {
 		DropTableTask task = new DropTableTask("1", "123456789");
 		try {
 			task.validateVersion();
-			fail("");
+			fail();
 		} catch (IllegalStateException e) {
 			assertEquals(Msg.code(62) + "The version 123456789 does not match the expected pattern " + BaseTask.MIGRATION_VERSION_PATTERN, e.getMessage());
 		}
@@ -42,7 +42,7 @@ public class BaseTaskTest {
 		DropTableTask task = new DropTableTask("1", "12345678.9.1");
 		try {
 			task.validateVersion();
-			fail("");
+			fail();
 		} catch (IllegalStateException e) {
 			assertEquals(Msg.code(62) + "The version 12345678.9.1 does not match the expected pattern " + BaseTask.MIGRATION_VERSION_PATTERN, e.getMessage());
 		}

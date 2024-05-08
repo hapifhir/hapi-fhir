@@ -24,7 +24,7 @@ import java.io.IOException;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 
@@ -159,7 +159,7 @@ public class MdmProviderMergeGoldenResourcesR4Test extends BaseProviderR4Test {
 
 		try {
 			myMdmProvider.mergeGoldenResources(fromGoldenPatientId, toGoldenPatientId, null, myRequestDetails);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage()).endsWith("This operation is only available for resources on the same partition.");
 		}
@@ -200,7 +200,7 @@ public class MdmProviderMergeGoldenResourcesR4Test extends BaseProviderR4Test {
 		StringType toGoldenResourceId = new StringType(createPatient().getIdElement().getValue());
 		try {
 			myMdmProvider.mergeGoldenResources(fromGoldenResourceId, toGoldenResourceId, null, myRequestDetails);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			String message = myMessageHelper.getMessageForFailedGoldenResourceLoad("fromGoldenResourceId", fromGoldenResourceId.getValue());
 			assertEquals(e.getMessage(), Msg.code(1502) + message);
@@ -211,19 +211,19 @@ public class MdmProviderMergeGoldenResourcesR4Test extends BaseProviderR4Test {
 	public void testNullParams() {
 		try {
 			myMdmProvider.mergeGoldenResources(null, null, null, myRequestDetails);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(1494) + "fromGoldenResourceId cannot be null", e.getMessage());
 		}
 		try {
 			myMdmProvider.mergeGoldenResources(null, myToGoldenPatientId, null, myRequestDetails);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(1494) + "fromGoldenResourceId cannot be null", e.getMessage());
 		}
 		try {
 			myMdmProvider.mergeGoldenResources(myFromGoldenPatientId, null, null, myRequestDetails);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(1494) + "toGoldenResourceId cannot be null", e.getMessage());
 		}
@@ -233,35 +233,35 @@ public class MdmProviderMergeGoldenResourcesR4Test extends BaseProviderR4Test {
 	public void testBadParams() {
 		try {
 			myMdmProvider.mergeGoldenResources(new StringType("Patient/1"), new StringType("Patient/1"), null, myRequestDetails);
-			fail("");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(1493) + "fromGoldenResourceId must be different from toGoldenResourceId", e.getMessage());
 		}
 
 		try {
 			myMdmProvider.mergeGoldenResources(new StringType("Patient/abc"), myToGoldenPatientId, null, myRequestDetails);
-			fail("");
+			fail();
 		} catch (ResourceNotFoundException e) {
 			assertEquals(Msg.code(2001) + "Resource Patient/abc is not known", e.getMessage());
 		}
 
 		try {
 			myMdmProvider.mergeGoldenResources(new StringType("Patient/abc"), myToGoldenPatientId, null, myRequestDetails);
-			fail("");
+			fail();
 		} catch (ResourceNotFoundException e) {
 			assertEquals(Msg.code(2001) + "Resource Patient/abc is not known", e.getMessage());
 		}
 
 		try {
 			myMdmProvider.mergeGoldenResources(new StringType("Organization/abc"), myToGoldenPatientId, null, myRequestDetails);
-			fail("");
+			fail();
 		} catch (ResourceNotFoundException e) {
 			assertEquals(Msg.code(2001) + "Resource Organization/abc is not known", e.getMessage());
 		}
 
 		try {
 			myMdmProvider.mergeGoldenResources(myFromGoldenPatientId, new StringType("Patient/abc"), null, myRequestDetails);
-			fail("");
+			fail();
 		} catch (ResourceNotFoundException e) {
 			assertEquals(Msg.code(2001) + "Resource Patient/abc is not known", e.getMessage());
 		}

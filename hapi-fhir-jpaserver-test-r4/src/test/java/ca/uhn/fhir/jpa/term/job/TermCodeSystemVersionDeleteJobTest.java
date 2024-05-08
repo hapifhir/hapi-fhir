@@ -74,7 +74,7 @@ import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_UNIVERS
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_UPLOAD_PROPERTIES_FILE;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_XML_FILE;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -234,7 +234,7 @@ public class TermCodeSystemVersionDeleteJobTest extends BaseJpaR4Test {
 				return "/loinc-ver/v269/";
 		}
 
-		fail("", "Setup failed. Unexpected version: " + theVersion);
+		fail("Setup failed. Unexpected version: " + theVersion);
 		return null;
 	}
 

@@ -19,7 +19,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.StringContains.containsString;
 
@@ -62,7 +62,7 @@ public class MdmExpungeTest extends BaseMdmR4Test {
 		expungeOptions.setExpungeDeletedResources(true);
 		try {
 			myPatientDao.expunge(myTargetId.toVersionless(), expungeOptions, null);
-			fail("");
+			fail();
 		} catch (PreconditionFailedException e) {
 			assertThat(e.getMessage()).contains("ViolationException");
 			assertThat(e.getMessage()).contains("FK_EMPI_LINK_TARGET");

@@ -38,7 +38,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.concurrent.TimeUnit;
 
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 @Configuration
 @Import({
@@ -69,7 +69,7 @@ public class TestR4WithDelayConfig extends TestR4Config {
 				} catch (Exception e) {
 					ourLog.error("Exceeded maximum wait for connection (" + ourMaxThreads + " max)", e);
 					logGetConnectionStackTrace();
-					fail("", "Exceeded maximum wait for connection (" + ourMaxThreads + " max): " + e);
+					fail("Exceeded maximum wait for connection (" + ourMaxThreads + " max): " + e);
 					retVal = null;
 				}
 

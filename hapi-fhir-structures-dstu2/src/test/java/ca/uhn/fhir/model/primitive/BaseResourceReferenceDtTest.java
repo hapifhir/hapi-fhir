@@ -33,7 +33,7 @@ import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -119,31 +119,31 @@ public class BaseResourceReferenceDtTest {
 
 		try {
 			new ResourceReferenceDt().loadResource(client);
-			fail("");		} catch (IllegalStateException e) {
+			fail();		} catch (IllegalStateException e) {
 			assertEquals(Msg.code(1905) + "Reference has no resource ID defined", e.getMessage());
 		}
 
 		try {
 			new ResourceReferenceDt("123").loadResource(client);
-			fail("");		} catch (IllegalStateException e) {
+			fail();		} catch (IllegalStateException e) {
 			assertEquals(Msg.code(1906) + "Reference is not complete (must be in the form [baseUrl]/[resource type]/[resource ID]) - Reference is: 123", e.getMessage());
 		}
 
 		try {
 			new ResourceReferenceDt("Patient/123").loadResource(client);
-			fail("");		} catch (IllegalStateException e) {
+			fail();		} catch (IllegalStateException e) {
 			assertEquals(Msg.code(1906) + "Reference is not complete (must be in the form [baseUrl]/[resource type]/[resource ID]) - Reference is: Patient/123", e.getMessage());
 		}
 
 		try {
 			new ResourceReferenceDt("http://foo/123123").loadResource(client);
-			fail("");		} catch (DataFormatException e) {
+			fail();		} catch (DataFormatException e) {
 			assertEquals(Msg.code(1684) + "Unknown resource name \"123123\" (this name is not known in FHIR version \"DSTU2\")", e.getMessage());
 		}
 
 		try {
 			new ResourceReferenceDt("http://foo/Sometype/123123").loadResource(client);
-			fail("");		} catch (DataFormatException e) {
+			fail();		} catch (DataFormatException e) {
 			e.printStackTrace();
 			assertEquals(Msg.code(1684) + "Unknown resource name \"Sometype\" (this name is not known in FHIR version \"DSTU2\")", e.getMessage());
 		}

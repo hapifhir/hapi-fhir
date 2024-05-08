@@ -66,7 +66,7 @@ import java.util.concurrent.Future;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.leftPad;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.not;
 
@@ -657,7 +657,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		int total = 0;
 		for (BaseTask next : tasks) {
 			if (next.getError() != null) {
-				fail("", next.getError().toString());
+				fail(next.getError().toString());
 			}
 			total += next.getTaskCount();
 		}

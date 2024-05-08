@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.util.function.Consumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import static org.mockito.Mockito.*;
 
@@ -46,7 +46,7 @@ public class ApacheRestfulClientFactoryTest {
 		factory.setFhirContext(FhirContext.forDstu2());
 		try {
 			factory.setFhirContext(FhirContext.forDstu2());
-			fail("");		} catch (IllegalStateException e) {
+			fail();		} catch (IllegalStateException e) {
 			assertEquals("java.lang.IllegalStateException: " + Msg.code(1356) + "RestfulClientFactory instance is already associated with one FhirContext. RestfulClientFactory instances can not be shared.", e.toString());
 		}
 	}
@@ -59,7 +59,7 @@ public class ApacheRestfulClientFactoryTest {
 		factory.setConnectTimeout(1);
 		try {
 			factory.validateServerBase("http://127.0.0.1:22225", factory.getHttpClient("http://foo"), (BaseClient) ctx.newRestfulGenericClient("http://foo"));
-			fail("");		} catch (FhirClientConnectionException e) {
+			fail();		} catch (FhirClientConnectionException e) {
 			assertEquals(Msg.code(1357) + "Failed to retrieve the server metadata statement during client initialization. URL used was http://127.0.0.1:22225metadata", e.getMessage());
 		}
 	}

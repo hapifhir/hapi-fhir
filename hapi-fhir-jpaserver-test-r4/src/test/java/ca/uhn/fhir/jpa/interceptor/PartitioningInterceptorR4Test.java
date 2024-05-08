@@ -49,9 +49,9 @@ import java.util.function.Consumer;
 
 import static ca.uhn.fhir.jpa.dao.r4.PartitioningSqlR4Test.assertLocalDateFromDbMatches;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -188,7 +188,7 @@ public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 		sd.setUrl("http://foo");
 		try {
 			myStructureDefinitionDao.create(sd, new ServletRequestDetails());
-			fail("");
+			fail();
 		} catch (UnprocessableEntityException e) {
 			assertEquals(Msg.code(1318) + "Resource type StructureDefinition can not be partitioned", e.getMessage());
 		}
@@ -203,7 +203,7 @@ public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 			SearchParameterMap map = new SearchParameterMap();
 			map.setLoadSynchronous(true);
 			myPatientDao.search(map);
-			fail("");
+			fail();
 		} catch (InternalErrorException e) {
 			assertEquals(Msg.code(1319) + "No interceptor provided a value for pointcut: STORAGE_PARTITION_IDENTIFY_READ", e.getMessage());
 		}

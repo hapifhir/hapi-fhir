@@ -216,7 +216,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -721,7 +721,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	protected void validate(IBaseResource theResource) {
 		ValidationResult result = validateWithResult(theResource);
 		if (!result.isSuccessful()) {
-			fail("", myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome()));
+			fail(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome()));
 		}
 	}
 
@@ -772,7 +772,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		Optional<ValueSet.ConceptReferenceDesignationComponent> first = stream.findFirst();
 		if (!first.isPresent()) {
 			String failureMessage = String.format("Concept %s did not contain designation [%s|%s|%s|%s|%s] ", theConcept, theLanguage, theUseSystem, theUseCode, theUseDisplay, theDesignationValue);
-			fail("", failureMessage);
+			fail(failureMessage);
 			return null;
 		} else {
 			return first.get();
@@ -800,7 +800,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		if (!first.isPresent()) {
 			String expandedValueSetString = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(theValueSet);
 			String failureMessage = String.format("Expanded ValueSet %s did not contain concept [%s|%s|%s] with [%d] designations. Outcome:\n%s", theValueSet.getId(), theSystem, theCode, theDisplay, theDesignationCount, expandedValueSetString);
-			fail("", failureMessage);
+			fail(failureMessage);
 			return null;
 		} else {
 			return first.get();

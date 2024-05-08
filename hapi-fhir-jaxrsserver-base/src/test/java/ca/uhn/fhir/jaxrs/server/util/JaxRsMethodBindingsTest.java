@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 
 public class JaxRsMethodBindingsTest {
@@ -85,7 +85,7 @@ public class JaxRsMethodBindingsTest {
 		}
 		try {
 			new TestDoubleSearchProvider();
-			fail("");
+			fail();
 		} catch (IllegalArgumentException e) {
 			assertThat(e.getMessage()).contains("search1");
 			assertThat(e.getMessage()).contains("search2");
@@ -122,7 +122,7 @@ public class JaxRsMethodBindingsTest {
 		assertEquals("secondMethod", bindings.getBinding(RestOperationTypeEnum.EXTENDED_OPERATION_TYPE, "$secondMethod").getMethod().getName());
 		try {
 			bindings.getBinding(RestOperationTypeEnum.EXTENDED_OPERATION_TYPE, "$thirdMethod");
-			fail("");
+			fail();
 		} catch (NotImplementedOperationException e) {
 		}
 	}

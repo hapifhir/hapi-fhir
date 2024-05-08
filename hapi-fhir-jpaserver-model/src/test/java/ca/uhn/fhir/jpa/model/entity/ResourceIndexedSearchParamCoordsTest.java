@@ -21,7 +21,7 @@ public class ResourceIndexedSearchParamCoordsTest {
 			.setLongitude(10);
 		val2.setPartitionSettings(new PartitionSettings());
 		val2.calculateHashes();
-		assertNotNull(val1).isEqualTo(val1);
+		assertNotNull(val1);
 		assertEquals(val1, val2);
 		assertThat("").isNotEqualTo(val1);
 	}

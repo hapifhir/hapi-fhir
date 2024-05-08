@@ -20,7 +20,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class SnapshotGeneratorR4Test extends BaseValidationTestWithInlineMocks {

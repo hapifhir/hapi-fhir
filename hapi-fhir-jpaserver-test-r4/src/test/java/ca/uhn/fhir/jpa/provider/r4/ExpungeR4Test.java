@@ -68,7 +68,7 @@ import java.util.List;
 
 import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_DELETE_JOB_NAME;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
@@ -77,7 +77,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class ExpungeR4Test extends BaseResourceProviderR4Test {
@@ -120,7 +120,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 	private void assertExpunged(IIdType theId) {
 		try {
 			getDao(theId).read(theId);
-			fail("");
+			fail();
 		} catch (ResourceNotFoundException e) {
 			// good
 		}
@@ -129,7 +129,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 	private void assertNotExpunged(IIdType theId) {
 		try {
 			getDao(theId).read(theId);
-			fail("");
+			fail();
 		} catch (ResourceGoneException e) {
 			// good
 		}
@@ -271,7 +271,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 				dao = myCodeSystemDao;
 				break;
 			default:
-				fail("", "Restype: " + theId.getResourceType());
+				fail("Restype: " + theId.getResourceType());
 				dao = myPatientDao;
 		}
 		return dao;
@@ -431,7 +431,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 			myPatientDao.expunge(myTwoVersionPatientId.withVersion("2"), new ExpungeOptions()
 				.setExpungeDeletedResources(true)
 				.setExpungeOldVersions(true), null);
-			fail("");
+			fail();
 		} catch (PreconditionFailedException e) {
 			assertEquals(Msg.code(969) + "Can not perform version-specific expunge of resource Patient/PT-TWOVERSION/_history/2 as this is the current version", e.getMessage());
 		}
@@ -797,7 +797,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		try {
 			myPatientDao.expunge(myOneVersionPatientId,
 				new ExpungeOptions().setExpungeOldVersions(true), null);
-			fail("");
+			fail();
 		} catch (MethodNotAllowedException e) {
 			assertEquals("HAPI-0968: $expunge is not enabled on this server", e.getMessage());
 		}
@@ -805,7 +805,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		try {
 			myPatientDao.expunge(myOneVersionPatientId.toVersionless(),
 				new ExpungeOptions().setExpungeOldVersions(true), null);
-			fail("");
+			fail();
 		} catch (MethodNotAllowedException e) {
 			assertEquals("HAPI-0968: $expunge is not enabled on this server", e.getMessage());
 		}
@@ -813,14 +813,14 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		try {
 			myPatientDao.expunge(null,
 				new ExpungeOptions().setExpungeOldVersions(true), null);
-			fail("");
+			fail();
 		} catch (MethodNotAllowedException e) {
 			assertEquals("HAPI-0968: $expunge is not enabled on this server", e.getMessage());
 		}
 
 		try {
 			mySystemDao.expunge(new ExpungeOptions().setExpungeEverything(true), null);
-			fail("");
+			fail();
 		} catch (MethodNotAllowedException e) {
 			assertEquals("HAPI-2080: $expunge is not enabled on this server", e.getMessage());
 		}
@@ -828,7 +828,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		myStorageSettings.setExpungeEnabled(true);
 		try {
 			mySystemDao.expunge(new ExpungeOptions().setExpungeEverything(true), null);
-			fail("");
+			fail();
 		} catch (MethodNotAllowedException e) {
 			assertEquals("HAPI-2081: Multiple delete is not enabled on this server", e.getMessage());
 		}
@@ -913,7 +913,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 			myCodeSystemDao.expunge(new ExpungeOptions()
 				.setExpungeDeletedResources(true)
 				.setExpungeOldVersions(true), null);
-			fail("");
+			fail();
 		} catch (PreconditionFailedException preconditionFailedException){
 			// verify
 			assertThat(preconditionFailedException.getMessage()).startsWith("HAPI-2415: The resource could not be expunged. It is likely due to unfinished asynchronous deletions, please try again later");
@@ -1008,7 +1008,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		List<TermConcept> existingCodeSystemConcepts = myTermConceptDao.findAll();
 		for (TermConcept tc : existingCodeSystemConcepts) {
 			if (tc.getCode().charAt(0) == 'C' || tc.getCode().charAt(0) == 'D') {
-				fail("");
+				fail();
 			}
 		}
 	}
@@ -1040,7 +1040,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 				return csv;
 			}
 		}
-		fail("");
+		fail();
 		return null;
 	}
 
