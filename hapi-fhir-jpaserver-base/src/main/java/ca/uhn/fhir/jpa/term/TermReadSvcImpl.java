@@ -2135,10 +2135,15 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 
 	private CodeValidationResult createFailureCodeValidationResult(
 			String theSystem, String theCode, String theCodeSystemVersion, String theAppend) {
+		String theMessage = "Unable to validate code " + theSystem + "#" + theCode + theAppend;
 		return new CodeValidationResult()
 				.setSeverity(IssueSeverity.ERROR)
 				.setCodeSystemVersion(theCodeSystemVersion)
-				.setMessage("Unable to validate code " + theSystem + "#" + theCode + theAppend);
+				.setMessage(theMessage).addCodeValidationIssue(
+					new CodeValidationIssue(theMessage,
+						IssueSeverity.ERROR,
+						CodeValidationIssueCode.CODE_INVALID,
+						CodeValidationIssueCoding.INVALID_CODE));
 	}
 
 	private List<TermValueSetConcept> findByValueSetResourcePidSystemAndCode(

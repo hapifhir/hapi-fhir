@@ -94,13 +94,16 @@ public class ValidationMessageSuppressingInterceptorTest extends BaseResourcePro
 			} catch (UnprocessableEntityException e) {
 				String encode = encode(e.getOperationOutcome());
 				ourLog.info(encode);
-				assertThat(encode, containsString("Unknown code 'http://loinc.org#59408-5'"));
+				assertThat(encode, containsString("Slice 'Observation.code.coding:PulseOx': a matching slice is required, but not found"));
 			}
 		}
 
 		// With suppression
 		ValidationMessageSuppressingInterceptor interceptor = new ValidationMessageSuppressingInterceptor();
-		interceptor.addMessageSuppressionPatterns("Unknown code 'http://loinc.org#59408-5'");
+		interceptor.addMessageSuppressionPatterns("Unable to validate code http://loinc.org#not-a-real-code - Code is not found in CodeSystem: http://loinc.org",
+		"Slice 'Observation.code.coding:PulseOx': a matching slice is required, but not found (from http://hl7.org/fhir/us/core/StructureDefinition/us-core-pulse-oximetry|3.1.1)",
+		"This element does not match any known slice defined in the profile http://hl7.org/fhir/us/core/StructureDefinition/us-core-pulse-oximetry|3.1.1");
+
 		myInterceptorRegistry.registerInterceptor(interceptor);
 		{
 			Observation inputObs = loadResource(myFhirContext, Observation.class, "/r4/uscore/observation-pulseox.json");
