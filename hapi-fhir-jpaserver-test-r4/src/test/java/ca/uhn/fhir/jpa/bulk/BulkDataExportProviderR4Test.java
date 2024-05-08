@@ -45,7 +45,6 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -97,10 +96,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class BulkDataExportProviderTest {
+public class BulkDataExportProviderR4Test {
 
 	private static final String A_JOB_ID = "0000000-AAAAAA";
-	private static final Logger ourLog = LoggerFactory.getLogger(BulkDataExportProviderTest.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(BulkDataExportProviderR4Test.class);
 	private static final String GROUP_ID = "Group/G2401";
 	private static final String G_JOB_ID = "0000000-GGGGGG";
 	@Spy
@@ -874,6 +873,7 @@ public class BulkDataExportProviderTest {
 		assertThat(bp.getResourceTypes(), containsInAnyOrder("Immunization", "Observation"));
 		assertThat(bp.getSince(), notNullValue());
 		assertThat(bp.getFilters(), containsInAnyOrder("Immunization?vaccine-code=foo"));
+		assertThat(bp.getResourceTypes(), contains("Immunization", "Observation"));
 	}
 
 	@Test
@@ -1298,7 +1298,7 @@ public class BulkDataExportProviderTest {
 
 	private class MyRequestPartitionHelperSvc extends RequestPartitionHelperSvc {
 		@Override
-		public @NotNull RequestPartitionId determineReadPartitionForRequest(@Nonnull RequestDetails theRequest, @Nonnull ReadPartitionIdRequestDetails theDetails) {
+		public @Nonnull RequestPartitionId determineReadPartitionForRequest(@Nonnull RequestDetails theRequest, @Nonnull ReadPartitionIdRequestDetails theDetails) {
 			assert theRequest != null;
 			if (myPartitionName.equals(theRequest.getTenantId())) {
 				return myRequestPartitionId;

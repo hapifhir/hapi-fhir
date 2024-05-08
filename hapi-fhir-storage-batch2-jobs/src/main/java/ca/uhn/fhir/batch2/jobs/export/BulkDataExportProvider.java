@@ -348,8 +348,7 @@ public class BulkDataExportProvider {
 		if (myCompartmentResources == null) {
 			myCompartmentResources =
 					new HashSet<>(SearchParameterUtil.getAllResourceTypesThatAreInPatientCompartment(myFhirContext));
-			// LUKETODO:  unit test this
-			if (FhirVersionEnum.R4 == myFhirContext.getVersion().getVersion()) {
+			if (FhirVersionEnum.R5 != myFhirContext.getVersion().getVersion()) {
 				myCompartmentResources.add("Device");
 			}
 		}

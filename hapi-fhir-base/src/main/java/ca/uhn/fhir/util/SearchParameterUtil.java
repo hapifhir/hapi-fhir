@@ -29,8 +29,6 @@ import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,7 +37,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class SearchParameterUtil {
-	private static final Logger ourLog = LoggerFactory.getLogger(SearchParameterUtil.class);
 
 	public static List<String> getBaseAsStrings(FhirContext theContext, IBaseResource theResource) {
 		Validate.notNull(theContext, "theContext must not be null");
@@ -86,29 +83,16 @@ public class SearchParameterUtil {
 			FhirContext theFhirContext, String theResourceType) {
 		RuntimeResourceDefinition runtimeResourceDefinition = theFhirContext.getResourceDefinition(theResourceType);
 
-		// LUKETODO:  myCompartmentNameToSearchParams is EMPTY!!!! for resourceType Device
 		List<RuntimeSearchParam> searchParams =
 				new ArrayList<>(runtimeResourceDefinition.getSearchParamsForCompartmentName("Patient"));
-		if ("Device".equals(theResourceType)) {
-			ourLog.info("5697: version: {}, getPatientSearchParamsForResourceType(): Device, 1) searchParams: {}", theFhirContext.getVersion().getVersion(), searchParams);
-		}
 		// add patient search parameter for resources that's not in the compartment
 		RuntimeSearchParam myPatientSearchParam = runtimeResourceDefinition.getSearchParam("patient");
-		if ("Device".equals(theResourceType)) {
-			ourLog.info("5697: version: {}, getPatientSearchParamsForResourceType(): Device, myPatientSearchParam: {}", theFhirContext.getVersion().getVersion(), myPatientSearchParam);
-		}
 		if (myPatientSearchParam != null) {
 			searchParams.add(myPatientSearchParam);
 		}
 		RuntimeSearchParam mySubjectSearchParam = runtimeResourceDefinition.getSearchParam("subject");
-		if ("Device".equals(theResourceType)) {
-			ourLog.info("5697: version: {}, getPatientSearchParamsForResourceType(): Device, mySubjectSearchParam: {}", theFhirContext.getVersion().getVersion(), mySubjectSearchParam);
-		}
 		if (mySubjectSearchParam != null) {
 			searchParams.add(mySubjectSearchParam);
-		}
-		if ("Device".equals(theResourceType)) {
-			ourLog.info("5697: version: {}, getPatientSearchParamsForResourceType(): Device, 2) searchParams: {}", theFhirContext.getVersion().getVersion(), searchParams);
 		}
 		if (searchParams == null || searchParams.size() == 0) {
 			String errorMessage = String.format(
