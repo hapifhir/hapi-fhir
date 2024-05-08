@@ -873,7 +873,6 @@ public class BulkDataExportProviderR4Test {
 		assertThat(bp.getResourceTypes(), containsInAnyOrder("Immunization", "Observation"));
 		assertThat(bp.getSince(), notNullValue());
 		assertThat(bp.getFilters(), containsInAnyOrder("Immunization?vaccine-code=foo"));
-		assertThat(bp.getResourceTypes(), contains("Immunization", "Observation"));
 	}
 
 	@Test
