@@ -84,7 +84,7 @@ public class RuleBulkExportImpl extends BaseRule {
 			}
 			for (String next : inboundBulkExportRequestOptions.getResourceTypes()) {
 				if (!myResourceTypes.contains(next)) { // fixme - should abstain return null;
-					return new AuthorizationInterceptor.Verdict(PolicyEnum.DENY, this);
+					return null;
 				}
 			}
 		}
@@ -122,7 +122,6 @@ public class RuleBulkExportImpl extends BaseRule {
 		// 1. If each of the requested resource IDs in the parameters are present in the users permissions, Approve
 		// 2. If any requested ID is not present in the users permissions, Deny.
 		if (myWantExportStyle == BulkExportJobParameters.ExportStyle.PATIENT)
-
 			// Unfiltered Type Level
 			if (myAppliesToAllPatients) {
 				return allowVerdict;

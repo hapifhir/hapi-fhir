@@ -46,7 +46,7 @@ public class RuleBulkExportImplTest {
 		when(myRequestDetails.getAttribute(any())).thenReturn(options);
 
 		AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
-		assertEquals(PolicyEnum.DENY, verdict.getDecision());
+		assertAbstain(verdict);
 	}
 
 	@Test
@@ -254,7 +254,7 @@ public class RuleBulkExportImplTest {
 	}
 
 	@Test
-	public void testPatientExportRulesOnTypeLevelExportPermittedPatient() {
+	public void testPatientExport_ruleAllowsId_requestsId_allow() {
 		//Given
 		final RuleBulkExportImpl myRule = new RuleBulkExportImpl("b");
 		myRule.setAppliesToPatientExport("Patient/123");
@@ -273,7 +273,7 @@ public class RuleBulkExportImplTest {
 	}
 
 	@Test
-	public void testPatientExportRulesOnTypeLevelExportPermittedPatients() {
+	public void testPatientExport_ruleAllowsIds_requestsIds_allow() {
 		//Given
 		final RuleBulkExportImpl myRule = new RuleBulkExportImpl("b");
 		myRule.setAppliesToPatientExport("Patient/123");
@@ -293,7 +293,7 @@ public class RuleBulkExportImplTest {
 	}
 
 	@Test
-	public void testPatientExportRulesOnTypeLevelExportWithPermittedAndUnpermittedPatients() {
+	public void testPatientExport_ruleAllowsId_requestsTooManyIds_abstain() {
 		//Given
 		final RuleBulkExportImpl myRule = new RuleBulkExportImpl("b");
 		myRule.setAppliesToPatientExport("Patient/123");
@@ -309,7 +309,60 @@ public class RuleBulkExportImplTest {
 
 		//Then: There are unpermitted patients in the request so this is not permitted.
 		assertAbstain(verdict);
+	}  //
+
+	@Test
+	public void testPatientExport_RuleAllowsAll_RequestId_allows() {
+		final RuleBulkExportImpl myRule = new RuleBulkExportImpl("b");
+		myRule.setAppliesToPatientExportAllPatients();
+		myRule.setMode(PolicyEnum.ALLOW);
+
+		final BulkExportJobParameters options = new BulkExportJobParameters();
+		options.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
+		options.setPatientIds(Set.of("Patient/123"));
+		when(myRequestDetails.getAttribute(any())).thenReturn(options);
+
+		//When
+		final AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
+
+		//Then
+		assertAllow(verdict);
 	}
+
+	@Test
+	public void testPatientExport_RuleAllowsAll_RequestAll_allows() {
+		final RuleBulkExportImpl myRule = new RuleBulkExportImpl("b");
+		myRule.setAppliesToPatientExportAllPatients();
+		myRule.setMode(PolicyEnum.ALLOW);
+
+		final BulkExportJobParameters options = new BulkExportJobParameters();
+		options.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
+		when(myRequestDetails.getAttribute(any())).thenReturn(options);
+
+		//When
+		final AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
+
+		//Then
+		assertAllow(verdict);
+	}
+
+	@Test
+	public void testPatientExport_RuleAllowsExplicitPatient_RequestAll_abstain() {
+		final RuleBulkExportImpl myRule = new RuleBulkExportImpl("b");
+		myRule.setAppliesToPatientExport("Patient/123");
+		myRule.setMode(PolicyEnum.ALLOW);
+
+		final BulkExportJobParameters options = new BulkExportJobParameters();
+		options.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
+		when(myRequestDetails.getAttribute(any())).thenReturn(options);
+
+		//When
+		final AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
+
+		//Then
+		assertAbstain(verdict);
+	}
+
 	@Test
 	public void testPatientExportRulesOnTypeLevelExportWithPermittedAndUnpermittedPatientFilters() {
 		//Given
