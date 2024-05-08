@@ -895,7 +895,6 @@ public class RuleBuilder implements IAuthRuleBuilder {
 				return new RuleBuilderBulkExportWithTarget(rule);
 			}
 
-
 			@Override
 			public IAuthRuleBuilderRuleBulkExportWithTarget patientExportOnAllPatients() {
 				if (ruleBulkExport == null) {

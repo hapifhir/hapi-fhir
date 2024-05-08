@@ -83,21 +83,22 @@ public class RuleBulkExportImpl extends BaseRule {
 				return null;
 			}
 			for (String next : inboundBulkExportRequestOptions.getResourceTypes()) {
-				if (!myResourceTypes.contains(next)) {  // fixme - should abstain return null;
+				if (!myResourceTypes.contains(next)) { // fixme - should abstain return null;
 					return new AuthorizationInterceptor.Verdict(PolicyEnum.DENY, this);
 				}
 			}
 		}
 
-		// system only supports filtering by resource type.  So if we are system, or any(), then allow, since we have done resource type checking
+		// system only supports filtering by resource type.  So if we are system, or any(), then allow, since we have
+		// done resource type checking
 		// above
 		AuthorizationInterceptor.Verdict allowVerdict = newVerdict(
-			theOperation,
-			theRequestDetails,
-			theInputResource,
-			theInputResourceId,
-			theOutputResource,
-			theRuleApplier);
+				theOperation,
+				theRequestDetails,
+				theInputResource,
+				theInputResourceId,
+				theOutputResource,
+				theRuleApplier);
 
 		if (myWantAnyStyle || myWantExportStyle == BulkExportJobParameters.ExportStyle.SYSTEM) {
 			return allowVerdict;
@@ -107,47 +108,48 @@ public class RuleBulkExportImpl extends BaseRule {
 		if (isNotBlank(myGroupId) && inboundBulkExportRequestOptions.getGroupId() != null) {
 			String expectedGroupId =
 					new IdDt(myGroupId).toUnqualifiedVersionless().getValue();
-			String actualGroupId =
-					new IdDt(inboundBulkExportRequestOptions.getGroupId()).toUnqualifiedVersionless().getValue();
+			String actualGroupId = new IdDt(inboundBulkExportRequestOptions.getGroupId())
+					.toUnqualifiedVersionless()
+					.getValue();
 			if (Objects.equals(expectedGroupId, actualGroupId)) {
 				return allowVerdict;
 			}
 		}
-// patient export mode - instance or type.  type can have 0..n patient ids.
-		//myPatientIds == the rules built by the auth interceptor rule builder
-		//options.getPatientIds() == the requested IDs in the export job.
+		// patient export mode - instance or type.  type can have 0..n patient ids.
+		// myPatientIds == the rules built by the auth interceptor rule builder
+		// options.getPatientIds() == the requested IDs in the export job.
 
 		// 1. If each of the requested resource IDs in the parameters are present in the users permissions, Approve
 		// 2. If any requested ID is not present in the users permissions, Deny.
 		if (myWantExportStyle == BulkExportJobParameters.ExportStyle.PATIENT)
 
-			//Unfiltered Type Level
+			// Unfiltered Type Level
 			if (myAppliesToAllPatients) {
 				return allowVerdict;
 			}
 
-			//Instance level, or filtered type level
-			if (isNotEmpty(myPatientIds)) {
-				//If bulk export options defines no patient IDs, return null.
-				if (inboundBulkExportRequestOptions.getPatientIds().isEmpty()) {
-					return null;
-				} else {
-					ourLog.debug("options.getPatientIds() != null");
-					Set<String> requestedPatientIds = sanitizeIds(inboundBulkExportRequestOptions.getPatientIds());
-					Set<String> permittedPatientIds = sanitizeIds(myPatientIds);
-					if (permittedPatientIds.containsAll(requestedPatientIds)) {
-						return allowVerdict;
-					}
-					return null;
+		// Instance level, or filtered type level
+		if (isNotEmpty(myPatientIds)) {
+			// If bulk export options defines no patient IDs, return null.
+			if (inboundBulkExportRequestOptions.getPatientIds().isEmpty()) {
+				return null;
+			} else {
+				ourLog.debug("options.getPatientIds() != null");
+				Set<String> requestedPatientIds = sanitizeIds(inboundBulkExportRequestOptions.getPatientIds());
+				Set<String> permittedPatientIds = sanitizeIds(myPatientIds);
+				if (permittedPatientIds.containsAll(requestedPatientIds)) {
+					return allowVerdict;
 				}
+				return null;
 			}
+		}
 		return null;
 	}
 
 	private Set<String> sanitizeIds(Collection<String> myPatientIds) {
 		return myPatientIds.stream()
-			.map(id -> new IdDt(id).toUnqualifiedVersionless().getValue())
-			.collect(Collectors.toSet());
+				.map(id -> new IdDt(id).toUnqualifiedVersionless().getValue())
+				.collect(Collectors.toSet());
 	}
 
 	public void setAppliesToGroupExportOnGroup(String theGroupId) {
