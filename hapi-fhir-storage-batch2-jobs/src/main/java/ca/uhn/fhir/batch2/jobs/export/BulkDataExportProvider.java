@@ -100,7 +100,13 @@ public class BulkDataExportProvider {
 	public static final String UNSUPPORTED_BINARY_TYPE = "Binary";
 
 	private static final Logger ourLog = getLogger(BulkDataExportProvider.class);
-	private static final Set<FhirVersionEnum> PATIENT_COMPARTMENT_FHIR_VERSIONS_SUPPORT_DEVICE = Set.of(FhirVersionEnum.DSTU2, FhirVersionEnum.DSTU2_1, FhirVersionEnum.DSTU2_HL7ORG, FhirVersionEnum.DSTU3, FhirVersionEnum.R4, FhirVersionEnum.R4B);
+	private static final Set<FhirVersionEnum> PATIENT_COMPARTMENT_FHIR_VERSIONS_SUPPORT_DEVICE = Set.of(
+			FhirVersionEnum.DSTU2,
+			FhirVersionEnum.DSTU2_1,
+			FhirVersionEnum.DSTU2_HL7ORG,
+			FhirVersionEnum.DSTU3,
+			FhirVersionEnum.R4,
+			FhirVersionEnum.R4B);
 
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
@@ -346,10 +352,16 @@ public class BulkDataExportProvider {
 	}
 
 	private Set<String> getPatientCompartmentResources() {
+		return getPatientCompartmentResources(myFhirContext);
+	}
+
+	@VisibleForTesting
+	Set<String> getPatientCompartmentResources(FhirContext theFhirContext) {
 		if (myCompartmentResources == null) {
 			myCompartmentResources =
-					new HashSet<>(SearchParameterUtil.getAllResourceTypesThatAreInPatientCompartment(myFhirContext));
-			if (isDeviceResourceSupportedForPatientCompartmentForFhirVersion(myFhirContext.getVersion().getVersion())) {
+					new HashSet<>(SearchParameterUtil.getAllResourceTypesThatAreInPatientCompartment(theFhirContext));
+			if (isDeviceResourceSupportedForPatientCompartmentForFhirVersion(
+					theFhirContext.getVersion().getVersion())) {
 				myCompartmentResources.add("Device");
 			}
 		}
@@ -808,7 +820,8 @@ public class BulkDataExportProvider {
 		}
 	}
 
-	private static boolean isDeviceResourceSupportedForPatientCompartmentForFhirVersion(FhirVersionEnum theFhirVersionEnum) {
+	private static boolean isDeviceResourceSupportedForPatientCompartmentForFhirVersion(
+			FhirVersionEnum theFhirVersionEnum) {
 		return PATIENT_COMPARTMENT_FHIR_VERSIONS_SUPPORT_DEVICE.contains(theFhirVersionEnum);
 	}
 }
