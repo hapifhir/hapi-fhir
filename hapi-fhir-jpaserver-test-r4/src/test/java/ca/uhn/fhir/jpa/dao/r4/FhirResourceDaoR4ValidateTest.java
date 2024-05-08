@@ -1233,8 +1233,8 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 		OperationOutcome oo = validateAndReturnOutcome(obs);
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
-		assertEquals("Error MY ERROR validating Coding: java.lang.NullPointerException: MY ERROR", oo.getIssueFirstRep().getDiagnostics());
-		assertEquals(OperationOutcome.IssueSeverity.ERROR, oo.getIssueFirstRep().getSeverity());
+		assertEquals("Error MY ERROR validating CodeableConcept", oo.getIssueFirstRep().getDiagnostics());
+		assertEquals(OperationOutcome.IssueSeverity.WARNING, oo.getIssueFirstRep().getSeverity());
 	}
 
 	@Test
@@ -1656,7 +1656,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		assertEquals(15, ((IntegerType)oo.getIssue().get(0).getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line").getValue()).getValue());
 		assertEquals(4, ((IntegerType)oo.getIssue().get(0).getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col").getValue()).getValue());
 		assertEquals("Terminology_PassThrough_TX_Message", ((StringType)oo.getIssue().get(0).getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id").getValue()).getValue());
-		assertEquals("Unknown code 'urn:iso:std:iso:4217#blah' (for 'urn:iso:std:iso:4217#blah')", oo.getIssue().get(0).getDiagnostics());
+		assertEquals("Unknown code 'urn:iso:std:iso:4217#blah'", oo.getIssue().get(0).getDiagnostics());
 		assertEquals(OperationOutcome.IssueType.PROCESSING, oo.getIssue().get(0).getCode());
 		assertEquals(OperationOutcome.IssueSeverity.ERROR, oo.getIssue().get(0).getSeverity());
 		assertEquals(2, oo.getIssue().get(0).getLocation().size());
