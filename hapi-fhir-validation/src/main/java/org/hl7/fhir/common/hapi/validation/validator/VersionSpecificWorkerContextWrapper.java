@@ -312,6 +312,9 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 							.setCode(getIssueTypeFromCodeValidationIssue(codeValidationIssue))
 							.setDetails(codeableConcept);
 			issue.getDetails().setText(codeValidationIssue.getMessage());
+			issue.addExtension()
+					.setUrl("http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id")
+					.setValue(new org.hl7.fhir.r5.model.StringType("Terminology_PassThrough_TX_Message"));
 			issues.add(issue);
 		}
 		return issues;
