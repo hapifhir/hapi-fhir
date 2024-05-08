@@ -37,6 +37,17 @@ public interface IHapiScheduler {
 
 	void logStatusForUnitTest();
 
+	/**
+	 * Pauses this scheduler (and thus all scheduled jobs).
+	 * To restart call {@link #unpause()}
+	 */
+	void pause();
+
+	/**
+	 * Restarts this scheduler after {@link #pause()}
+	 */
+	void unpause();
+
 	void scheduleJob(long theIntervalMillis, ScheduledJobDefinition theJobDefinition);
 
 	Set<JobKey> getJobKeysForUnitTest() throws SchedulerException;

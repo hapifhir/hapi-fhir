@@ -82,6 +82,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -440,8 +441,9 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		}.setValidationSupport(myValidationSupport));
 
 		// Should be ok
-		myClient.read().resource(Observation.class).withId("Observation/allowed").execute();
+		Observation result = myClient.read().resource(Observation.class).withId("Observation/allowed").execute();
 
+		assertNotNull(result);
 	}
 
 	@Test
@@ -463,8 +465,10 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		}.setValidationSupport(myValidationSupport));
 
 		// Should be ok
-		myClient.read().resource(Patient.class).withId("Patient/P").execute();
-		myClient.read().resource(Observation.class).withId("Observation/O").execute();
+		Patient pat = myClient.read().resource(Patient.class).withId("Patient/P").execute();
+		Observation obs = myClient.read().resource(Observation.class).withId("Observation/O").execute();
+		assertNotNull(pat);
+		assertNotNull(obs);
 	}
 
 	/**

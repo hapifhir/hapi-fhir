@@ -123,6 +123,8 @@ class JobInstanceUtil {
 		retVal.setErrorMessage(theEntity.getErrorMessage());
 		retVal.setErrorCount(theEntity.getErrorCount());
 		retVal.setRecordsProcessed(theEntity.getRecordsProcessed());
+		retVal.setNextPollTime(theEntity.getNextPollTime());
+		retVal.setPollAttempts(theEntity.getPollAttempts());
 		// note: may be null out if queried NoData
 		retVal.setData(theEntity.getSerializedData());
 		retVal.setWarningMessage(theEntity.getWarningMessage());

@@ -31,7 +31,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public interface IWorkChunkErrorActionsTests extends IWorkChunkCommon, WorkChunkTestConstants {
 
-
 	/**
 	 * The consumer will retry after a retryable error is thrown
 	 */
