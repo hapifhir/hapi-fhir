@@ -57,6 +57,9 @@ public interface IAuthRuleBuilderRuleBulkExport {
 
 	IAuthRuleBuilderRuleBulkExportWithTarget patientExportOnPatient(@Nonnull String theFocusResourceId);
 
+	IAuthRuleBuilderRuleBulkExportWithTarget patientExportOnAllPatients();
+
+
 	default IAuthRuleBuilderRuleBulkExportWithTarget patientExportOnPatient(@Nonnull IIdType theFocusResourceId) {
 		return patientExportOnPatient(theFocusResourceId.getValue());
 	}

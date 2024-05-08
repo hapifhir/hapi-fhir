@@ -895,6 +895,24 @@ public class RuleBuilder implements IAuthRuleBuilder {
 				return new RuleBuilderBulkExportWithTarget(rule);
 			}
 
+
+			@Override
+			public IAuthRuleBuilderRuleBulkExportWithTarget patientExportOnAllPatients() {
+				if (ruleBulkExport == null) {
+					RuleBulkExportImpl rule = new RuleBulkExportImpl(myRuleName);
+					rule.setMode(myRuleMode);
+					ruleBulkExport = rule;
+				}
+				ruleBulkExport.setAppliesToPatientExportAllPatients();
+
+				// prevent duplicate rules being added
+				if (!myRules.contains(ruleBulkExport)) {
+					myRules.add(ruleBulkExport);
+				}
+
+				return new RuleBuilderBulkExportWithTarget(ruleBulkExport);
+			}
+
 			@Override
 			public IAuthRuleBuilderRuleBulkExportWithTarget patientExportOnPatient(@Nonnull String theFocusResourceId) {
 				if (ruleBulkExport == null) {

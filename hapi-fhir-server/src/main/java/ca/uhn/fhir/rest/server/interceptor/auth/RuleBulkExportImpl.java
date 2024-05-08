@@ -30,7 +30,6 @@ import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -43,6 +42,7 @@ public class RuleBulkExportImpl extends BaseRule {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RuleBulkExportImpl.class);
 	private String myGroupId;
 	private final Collection<String> myPatientIds;
+	private boolean myAppliesToAllPatients;
 	private BulkExportJobParameters.ExportStyle myWantExportStyle;
 	private Collection<String> myResourceTypes;
 	private boolean myWantAnyStyle;
@@ -70,113 +70,84 @@ public class RuleBulkExportImpl extends BaseRule {
 			return null;
 		}
 
-		BulkExportJobParameters options = (BulkExportJobParameters)
+		BulkExportJobParameters inboundBulkExportRequestOptions = (BulkExportJobParameters)
 				theRequestDetails.getAttribute(AuthorizationInterceptor.REQUEST_ATTRIBUTE_BULK_DATA_EXPORT_OPTIONS);
-
-		if (!myWantAnyStyle && options.getExportStyle() != myWantExportStyle) {
+		// if style doesn't match - abstain
+		if (!myWantAnyStyle && inboundBulkExportRequestOptions.getExportStyle() != myWantExportStyle) {
 			return null;
 		}
 
+		// Do we only authorize some types?  If so, make sure requested types are a subset
 		if (isNotEmpty(myResourceTypes)) {
-			if (isEmpty(options.getResourceTypes())) {
+			if (isEmpty(inboundBulkExportRequestOptions.getResourceTypes())) {
 				return null;
 			}
-			for (String next : options.getResourceTypes()) {
-				if (!myResourceTypes.contains(next)) {
+			for (String next : inboundBulkExportRequestOptions.getResourceTypes()) {
+				if (!myResourceTypes.contains(next)) {  // fixme - should abstain return null;
 					return new AuthorizationInterceptor.Verdict(PolicyEnum.DENY, this);
 				}
 			}
 		}
 
+		// system only supports filtering by resource type.  So if we are system, or any(), then allow, since we have done resource type checking
+		// above
+		AuthorizationInterceptor.Verdict allowVerdict = newVerdict(
+			theOperation,
+			theRequestDetails,
+			theInputResource,
+			theInputResourceId,
+			theOutputResource,
+			theRuleApplier);
+
 		if (myWantAnyStyle || myWantExportStyle == BulkExportJobParameters.ExportStyle.SYSTEM) {
-			return newVerdict(
-					theOperation,
-					theRequestDetails,
-					theInputResource,
-					theInputResourceId,
-					theOutputResource,
-					theRuleApplier);
+			return allowVerdict;
 		}
 
-		if (isNotBlank(myGroupId) && options.getGroupId() != null) {
+		// assume myGroupId not empty->myStyle is group.  If target group matches, then allow.
+		if (isNotBlank(myGroupId) && inboundBulkExportRequestOptions.getGroupId() != null) {
 			String expectedGroupId =
 					new IdDt(myGroupId).toUnqualifiedVersionless().getValue();
 			String actualGroupId =
-					new IdDt(options.getGroupId()).toUnqualifiedVersionless().getValue();
+					new IdDt(inboundBulkExportRequestOptions.getGroupId()).toUnqualifiedVersionless().getValue();
 			if (Objects.equals(expectedGroupId, actualGroupId)) {
-				return newVerdict(
-						theOperation,
-						theRequestDetails,
-						theInputResource,
-						theInputResourceId,
-						theOutputResource,
-						theRuleApplier);
+				return allowVerdict;
 			}
 		}
+// patient export mode - instance or type.  type can have 0..n patient ids.
+		//myPatientIds == the rules built by the auth interceptor rule builder
+		//options.getPatientIds() == the requested IDs in the export job.
 
 		// 1. If each of the requested resource IDs in the parameters are present in the users permissions, Approve
 		// 2. If any requested ID is not present in the users permissions, Deny.
-		if (myWantExportStyle == BulkExportJobParameters.ExportStyle.PATIENT && isNotEmpty(myPatientIds)) {
-			List<String> permittedPatientIds = myPatientIds.stream()
-					.map(id -> new IdDt(id).toUnqualifiedVersionless().getValue())
-					.collect(Collectors.toList());
-			if (!options.getPatientIds().isEmpty()) {
-				ourLog.debug("options.getPatientIds() != null");
-				List<String> requestedPatientIds = options.getPatientIds().stream()
-						.map(t -> new IdDt(t).toUnqualifiedVersionless().getValue())
-						.collect(Collectors.toList());
-				boolean requestedPatientsPermitted = true;
-				for (String requestedPatientId : requestedPatientIds) {
-					if (!permittedPatientIds.contains(requestedPatientId)) {
-						requestedPatientsPermitted = false;
-						break;
-					}
-				}
-				if (requestedPatientsPermitted) {
-					return newVerdict(
-							theOperation,
-							theRequestDetails,
-							theInputResource,
-							theInputResourceId,
-							theOutputResource,
-							theRuleApplier);
-				}
+		if (myWantExportStyle == BulkExportJobParameters.ExportStyle.PATIENT)
 
-				return new AuthorizationInterceptor.Verdict(PolicyEnum.DENY, this);
+			//Unfiltered Type Level
+			if (myAppliesToAllPatients) {
+				return allowVerdict;
 			}
 
-			final List<String> filters = options.getFilters();
-
-			if (!filters.isEmpty()) {
-				ourLog.debug("filters not empty");
-				final Set<String> patientIdsInFilters = filters.stream()
-						.filter(filter -> filter.startsWith("Patient?_id="))
-						.map(filter -> filter.replace("?_id=", "/"))
-						.collect(Collectors.toUnmodifiableSet());
-
-				boolean filteredPatientIdsPermitted = true;
-				for (String patientIdInFilters : patientIdsInFilters) {
-					if (!permittedPatientIds.contains(patientIdInFilters)) {
-						filteredPatientIdsPermitted = false;
-						break;
+			//Instance level, or filtered type level
+			if (isNotEmpty(myPatientIds)) {
+				//If bulk export options defines no patient IDs, return null.
+				if (inboundBulkExportRequestOptions.getPatientIds().isEmpty()) {
+					return null;
+				} else {
+					ourLog.debug("options.getPatientIds() != null");
+					Set<String> requestedPatientIds = sanitizeIds(inboundBulkExportRequestOptions.getPatientIds());
+					Set<String> permittedPatientIds = sanitizeIds(myPatientIds);
+					if (permittedPatientIds.containsAll(requestedPatientIds)) {
+						return allowVerdict;
 					}
+					return null;
 				}
-
-				if (filteredPatientIdsPermitted) {
-					return newVerdict(
-							theOperation,
-							theRequestDetails,
-							theInputResource,
-							theInputResourceId,
-							theOutputResource,
-							theRuleApplier);
-				}
-
-				return new AuthorizationInterceptor.Verdict(PolicyEnum.DENY, this);
 			}
-			ourLog.debug("patientIds and filters both empty");
-		}
 		return null;
+	}
+
+	private Set<String> sanitizeIds(Collection<String> myPatientIds) {
+		return myPatientIds.stream()
+			.map(id -> new IdDt(id).toUnqualifiedVersionless().getValue())
+			.collect(Collectors.toSet());
 	}
 
 	public void setAppliesToGroupExportOnGroup(String theGroupId) {
@@ -197,6 +168,11 @@ public class RuleBulkExportImpl extends BaseRule {
 	public void setAppliesToPatientExport(Collection<String> thePatientIds) {
 		myWantExportStyle = BulkExportJobParameters.ExportStyle.PATIENT;
 		myPatientIds.addAll(thePatientIds);
+	}
+
+	public void setAppliesToPatientExportAllPatients() {
+		myWantExportStyle = BulkExportJobParameters.ExportStyle.PATIENT;
+		myAppliesToAllPatients = true;
 	}
 
 	public void setAppliesToSystem() {
