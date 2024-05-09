@@ -8,11 +8,10 @@ import ca.uhn.fhir.model.dstu2.resource.Organization;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.valueset.QuantityComparatorEnum;
 import ca.uhn.fhir.util.TestUtil;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -32,8 +31,7 @@ public class MultiVersionXmlParserTest {
 		String str;
 		str = ourCtxDstu2.newXmlParser().encodeResourceToString(p);
 		ourLog.info(str);
-		assertThat(str, Matchers.stringContainsInOrder("<extension url=\"http://foo#ext\"><valueQuantity><value value=\"2.2\"", "<comparator value=\"&lt;\"", "<unit value=\"g/L\"",
-			"</valueQuantity></extension>"));
+		assertThat(str).matches("<extension url=\"http://foo#ext\"><valueQuantity><value value=\"2.2\".*<comparator value=\"&lt;\".*<unit value=\"g/L\".*</valueQuantity></extension>");
 
 		try {
 			FhirContext.forDstu3().newXmlParser().encodeResourceToString(p);
