@@ -11,6 +11,7 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import org.assertj.core.api.AssertionsForInterfaceTypes;
 import org.hl7.fhir.dstu3.model.Device;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
@@ -26,7 +27,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.List;
 
-import static ca.uhn.fhir.test.utilities.CustomMatchersUtil.assertDoesNotContainAnyOf;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
@@ -415,9 +415,10 @@ public class FhirResourceDaoDstu3SearchFtTest extends BaseJpaDstu3Test {
 		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map))).containsExactly(idArray);
 		map = new SearchParameterMap();
 		map.add(Constants.PARAM_CONTENT, new StringParam("NAMEBBB"));
-		assertDoesNotContainAnyOf(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), Arrays.asList(idArray));
+        List<String> actual = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
+        AssertionsForInterfaceTypes.assertThat(actual).doesNotContainAnyElementsOf(Arrays.asList(idArray));
 
-		myPatientDao.update(patient, null, true, mockSrd());
+        myPatientDao.update(patient, null, true, mockSrd());
 
 		map = new SearchParameterMap();
 		map.add(Constants.PARAM_CONTENT, new StringParam("NAMEAAA"));

@@ -47,10 +47,10 @@ import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.param.UriParamQualifierEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.test.utilities.CustomMatchersUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.assertj.core.api.AssertionsForInterfaceTypes;
 import org.hl7.fhir.dstu3.model.Appointment;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
@@ -117,7 +117,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-import static ca.uhn.fhir.test.utilities.CustomMatchersUtil.assertDoesNotContainAnyOf;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -1286,8 +1285,8 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 			List<IIdType> patients = toUnqualifiedVersionlessIds(myPatientDao.search(params));
 			myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
 			assertThat(patients).contains(id2);
-			assertDoesNotContainAnyOf(patients, List.of(id1a, id1b));
-		}
+            AssertionsForInterfaceTypes.assertThat(patients).doesNotContainAnyElementsOf(List.of(id1a, id1b));
+        }
 		{
 			SearchParameterMap params = new SearchParameterMap();
 			params.setLastUpdated(new DateRangeParam(beforeAny, beforeR2));
@@ -1309,8 +1308,8 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 			SearchParameterMap params = new SearchParameterMap();
 			params.setLastUpdated(new DateRangeParam(new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, beforeR2)));
 			List<IIdType> patients = toUnqualifiedVersionlessIds(myPatientDao.search(params));
-			CustomMatchersUtil.assertDoesNotContainAnyOf(patients, List.of(id1a, id1b));
-			assertThat(patients).contains(id2);
+            AssertionsForInterfaceTypes.assertThat(patients).doesNotContainAnyElementsOf(List.of(id1a, id1b));
+            assertThat(patients).contains(id2);
 		}
 		{
 			SearchParameterMap params = new SearchParameterMap();

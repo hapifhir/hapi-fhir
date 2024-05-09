@@ -68,6 +68,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
+import org.assertj.core.api.AssertionsForInterfaceTypes;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -179,7 +180,6 @@ import static ca.uhn.fhir.rest.param.ParamPrefixEnum.GREATERTHAN_OR_EQUALS;
 import static ca.uhn.fhir.rest.param.ParamPrefixEnum.LESSTHAN;
 import static ca.uhn.fhir.rest.param.ParamPrefixEnum.LESSTHAN_OR_EQUALS;
 import static ca.uhn.fhir.rest.param.ParamPrefixEnum.NOT_EQUAL;
-import static ca.uhn.fhir.test.utilities.CustomMatchersUtil.assertDoesNotContainAnyOf;
 import static ca.uhn.fhir.util.DateUtils.convertDateToIso8601String;
 import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.apache.commons.lang3.StringUtils.leftPad;
@@ -2754,7 +2754,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 		result = performSearchLastUpdatedAndReturnIds(new DateRangeParam(beforeR2, null));
 		assertThat(result).contains(id2);
-		assertDoesNotContainAnyOf(result, List.of(id1a, id1b));
+		AssertionsForInterfaceTypes.assertThat(result).doesNotContainAnyElementsOf(List.of(id1a, id1b));
 
 		result = performSearchLastUpdatedAndReturnIds(new DateRangeParam(beforeAny, beforeR2));
 		assertThat(result.toString(), result, not(hasItem(id2)));
@@ -2765,7 +2765,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		assertThat(result, not(hasItem(id2)));
 
 		result = performSearchLastUpdatedAndReturnIds(new DateRangeParam(new DateParam(GREATERTHAN_OR_EQUALS, beforeR2)));
-		assertDoesNotContainAnyOf(result, List.of(id1a, id1b));
+		AssertionsForInterfaceTypes.assertThat(result).doesNotContainAnyElementsOf(List.of(id1a, id1b));
 		assertThat(result, (hasItems(id2)));
 
 		result = performSearchLastUpdatedAndReturnIds(new DateRangeParam(new DateParam(LESSTHAN_OR_EQUALS, beforeR2)));
@@ -2842,7 +2842,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		dateRange = new DateRangeParam(new DateParam(EQUAL, p0LastUpdated), new DateParam(EQUAL, p0LastUpdated));
 		result = performSearchLastUpdatedAndReturnIds(dateRange);
 		assertThat(result).containsExactlyInAnyOrder(id0);
-		assertDoesNotContainAnyOf(result, List.of(id1a, id1b));
+		AssertionsForInterfaceTypes.assertThat(result).doesNotContainAnyElementsOf(List.of(id1a, id1b));
 
 		DateTimeType p0LastUpdatedDay = new DateTimeType(p0LastUpdated.getValue(), TemporalPrecisionEnum.DAY);
 		dateRange = new DateRangeParam(new DateParam(EQUAL, p0LastUpdatedDay), new DateParam(EQUAL, p0LastUpdatedDay));

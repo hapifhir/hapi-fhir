@@ -38,10 +38,6 @@ import java.util.Set;
 import static ca.uhn.fhir.jpa.model.util.UcumServiceUtil.UCUM_CODESYSTEM_URL;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.not;
 
 public abstract class QuantitySearchParameterTestCases implements ITestDataBuilder.WithSupport {
 
@@ -308,10 +304,9 @@ public abstract class QuantitySearchParameterTestCases implements ITestDataBuild
 				{
 					String theUrl = "/Observation?component-value-quantity=107&component-value-quantity=60";
 					List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
-					assertThat(
-							"when same component with qtys 107 and 60",
-							resourceIds,
-							hasItem(equalTo(obs1Id.getIdPart())));
+					assertThat(resourceIds)
+							.as("when same component with qtys 107 and 60")
+							.contains(obs1Id.getIdPart());
 				}
 				{
 					String theUrl = "/Observation?component-value-quantity=107&component-value-quantity=260";
@@ -325,10 +320,9 @@ public abstract class QuantitySearchParameterTestCases implements ITestDataBuild
 				{
 					String theUrl = "/Observation?component-value-quantity=107&component-value-quantity=gt50,lt70";
 					List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
-					assertThat(
-							"when same component with qtys 107 and lt70,gt80",
-							resourceIds,
-							hasItem(equalTo(obs1Id.getIdPart())));
+					assertThat(resourceIds)
+							.as("when same component with qtys 107 and lt70,gt80")
+							.contains(obs1Id.getIdPart());
 				}
 				{
 					String theUrl = "/Observation?component-value-quantity=50,70&component-value-quantity=260";
@@ -342,10 +336,9 @@ public abstract class QuantitySearchParameterTestCases implements ITestDataBuild
 				{
 					String theUrl = "/Observation?component-value-quantity=50,60&component-value-quantity=105,107";
 					List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
-					assertThat(
-							"when same component with qtys 50,60 and 105,107",
-							resourceIds,
-							hasItem(equalTo(obs1Id.getIdPart())));
+					assertThat(resourceIds)
+							.as("when same component with qtys 50,60 and 105,107")
+							.contains(obs1Id.getIdPart());
 				}
 				{
 					String theUrl = "/Observation?component-value-quantity=50,60&component-value-quantity=250,260";
@@ -671,12 +664,12 @@ public abstract class QuantitySearchParameterTestCases implements ITestDataBuild
 
 	private void assertFind(String theMessage, String theUrl) {
 		List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
-		assertThat(theMessage, resourceIds, hasItem(equalTo(myResourceId.getIdPart())));
+		assertThat(resourceIds).as(theMessage).contains(myResourceId.getIdPart());
 	}
 
 	private void assertNotFind(String theMessage, String theUrl) {
 		List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
-		assertThat(theMessage, resourceIds, not(hasItem(equalTo(myResourceId.getIdPart()))));
+		assertThat(resourceIds).as(theMessage).doesNotContain(myResourceId.getIdPart());
 	}
 
 	private IIdType withObservationWithQuantity(double theValue, String theSystem, String theCode) {

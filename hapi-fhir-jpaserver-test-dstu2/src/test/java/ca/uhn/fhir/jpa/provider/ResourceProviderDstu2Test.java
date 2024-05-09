@@ -93,6 +93,7 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+import org.assertj.core.api.AssertionsForInterfaceTypes;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.AfterEach;
@@ -116,7 +117,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static ca.uhn.fhir.test.utilities.CustomMatchersUtil.assertDoesNotContainAnyOf;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -2035,8 +2035,8 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 				.execute();
 			List<IIdType> patients = toIdListUnqualifiedVersionless(found);
 			assertThat(patients).contains(id2);
-			assertDoesNotContainAnyOf(patients, List.of(id1a, id1b));
-		}
+            AssertionsForInterfaceTypes.assertThat(patients).doesNotContainAnyElementsOf(List.<IIdType>of(id1a, id1b));
+        }
 		{
 			Bundle found = myClient.search()
 				.forResource(Patient.class)
