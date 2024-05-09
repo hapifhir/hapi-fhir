@@ -136,7 +136,7 @@ public abstract class BaseSchedulerServiceImpl implements ISchedulerService {
 		return retval;
 	}
 
-	private boolean isSchedulingDisabled() {
+	public boolean isSchedulingDisabled() {
 		return !isLocalSchedulingEnabled() || isSchedulingDisabledForUnitTests();
 	}
 
@@ -196,6 +196,18 @@ public abstract class BaseSchedulerServiceImpl implements ISchedulerService {
 	public void logStatusForUnitTest() {
 		myLocalScheduler.logStatusForUnitTest();
 		myClusteredScheduler.logStatusForUnitTest();
+	}
+
+	@Override
+	public void pause() {
+		myLocalScheduler.pause();
+		myClusteredScheduler.pause();
+	}
+
+	@Override
+	public void unpause() {
+		myLocalScheduler.unpause();
+		myClusteredScheduler.unpause();
 	}
 
 	@Override

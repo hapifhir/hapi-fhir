@@ -1,0 +1,9 @@
+---
+type: add
+issue: 5767
+title: "Added new `POLL_WAITING` state for WorkChunks in batch jobs.
+        Also added RetryChunkLaterException for jobs that have steps that
+        need to be retried at a later time (can be provided optionally to exception).
+        If a step throws this new exception, it will be set with the new
+        `POLL_WAITING` status and retried at a later time.
+"

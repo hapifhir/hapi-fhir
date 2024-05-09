@@ -24,7 +24,9 @@ public interface WorkChunkTestConstants {
 	// we use a separate id for gated jobs because these job definitions might not
 	// be cleaned up after any given test run
 	String GATED_JOB_DEFINITION_ID = "gated_job_def_id";
-	public static final String TARGET_STEP_ID = "step-id";
+	public static final String FIRST_STEP_ID = "step-id";
+	public static final String SECOND_STEP_ID = "2nd-step-id";
+	public static final String LAST_STEP_ID = "last-step-id";
 	public static final String DEF_CHUNK_ID = "definition-chunkId";
 	public static final int JOB_DEF_VER = 1;
 	public static final int SEQUENCE_NUMBER = 1;

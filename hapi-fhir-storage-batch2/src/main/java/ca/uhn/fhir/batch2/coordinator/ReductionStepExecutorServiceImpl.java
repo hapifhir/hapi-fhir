@@ -217,7 +217,7 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 		try {
 			processChunksAndCompleteJob(theJobWorkCursor, step, instance, parameters, reductionStepWorker, response);
 		} catch (Exception ex) {
-			ourLog.error("Job completion failed for Job {}", instance.getInstanceId());
+			ourLog.error("Job completion failed for Job {}", instance.getInstanceId(), ex);
 
 			executeInTransactionWithSynchronization(() -> {
 				myJobPersistence.updateInstance(instance.getInstanceId(), theInstance -> {
@@ -337,10 +337,13 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 			ReductionStepChunkProcessingResponse theResponseObject,
 			JobWorkCursor<PT, IT, OT> theJobWorkCursor) {
 
-		if (!theChunk.getStatus().isIncomplete()) {
+		/*
+		 * Reduction steps are done inline and only on gated jobs.
+		 */
+		if (theChunk.getStatus() == WorkChunkStatusEnum.COMPLETED) {
 			// This should never happen since jobs with reduction are required to be gated
 			ourLog.error(
-					"Unexpected chunk {} with status {} found while reducing {}.  No chunks feeding into a reduction step should be complete.",
+					"Unexpected chunk {} with status {} found while reducing {}.  No chunks feeding into a reduction step should be in a state other than READY.",
 					theChunk.getId(),
 					theChunk.getStatus(),
 					theInstance);

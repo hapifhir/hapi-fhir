@@ -38,10 +38,14 @@ public class LogbackLevelOverrideExtension implements AfterEachCallback {
 
 	public void setLogLevel(Class theClass, Level theLevel) {
 		String name = theClass.getName();
-		Logger logger = getClassicLogger(name);
-		if (!mySavedLevels.containsKey(name)) {
+		setLogLevel(name, theLevel);
+	}
+
+	public void setLogLevel(String theName, Level theLevel) {
+		Logger logger = getClassicLogger(theName);
+		if (!mySavedLevels.containsKey(theName)) {
 			// level can be null
-			mySavedLevels.put(name, logger.getLevel());
+			mySavedLevels.put(theName, logger.getLevel());
 		}
 		logger.setLevel(theLevel);
 	}

@@ -3,9 +3,11 @@ package ca.uhn.fhir.jpa.provider.r4;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
+import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
@@ -24,18 +26,31 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletionService;
+import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import static org.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderR4BundleTest.class);
+
+	private static final int DESIRED_MAX_THREADS = 5;
+
+	static {
+		if (TestR4Config.ourMaxThreads == null || TestR4Config.ourMaxThreads < DESIRED_MAX_THREADS) {
+			TestR4Config.ourMaxThreads = DESIRED_MAX_THREADS;
+		}
+	}
 
 	@BeforeEach
 	@Override
@@ -52,6 +67,7 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 		myStorageSettings.setBundleBatchPoolSize(JpaStorageSettings.DEFAULT_BUNDLE_BATCH_POOL_SIZE);
 		myStorageSettings.setBundleBatchMaxPoolSize(JpaStorageSettings.DEFAULT_BUNDLE_BATCH_MAX_POOL_SIZE);
 	}
+
 	/**
 	 * See #401
 	 */
@@ -69,14 +85,13 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 
 		Bundle retBundle = myClient.read().resource(Bundle.class).withId(id).execute();
 
-    ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(retBundle));
+    	ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(retBundle));
 
 		assertEquals("http://foo/", bundle.getEntry().get(0).getFullUrl());
 	}
 
 	@Test
 	public void testProcessMessage() {
-
 		Bundle bundle = new Bundle();
 		bundle.setType(BundleType.MESSAGE);
 
@@ -117,22 +132,41 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 
 	}
 
-
 	@Test
-	public void testHighConcurrencyWorks() throws IOException, InterruptedException {
+	public void testHighConcurrencyWorks() throws IOException {
 		List<Bundle> bundles = new ArrayList<>();
 		for (int i =0 ; i < 10; i ++) {
 			bundles.add(myFhirContext.newJsonParser().parseResource(Bundle.class, IOUtils.toString(getClass().getResourceAsStream("/r4/identical-tags-batch.json"), Charsets.UTF_8)));
 		}
 
-		ExecutorService tpe = Executors.newFixedThreadPool(4);
-		for (Bundle bundle :bundles) {
-			tpe.execute(() -> myClient.transaction().withBundle(bundle).execute());
-		}
-		tpe.shutdown();
-		tpe.awaitTermination(100, TimeUnit.SECONDS);
-	}
+		int desiredMaxThreads = DESIRED_MAX_THREADS - 1;
+		int maxThreads = TestR4Config.getMaxThreads();
+		// we want strictly > because we want at least 1 extra thread hanging around for
+		// any spun off processes needed internally during the transaction
+		assertTrue(maxThreads > desiredMaxThreads, String.format("Wanted > %d threads, but we only have %d available", desiredMaxThreads, maxThreads));
+		ExecutorService tpe = Executors.newFixedThreadPool(desiredMaxThreads);
+		CompletionService<Bundle> completionService = new ExecutorCompletionService<>(tpe);
 
+		for (Bundle bundle : bundles) {
+			completionService.submit(() -> myClient.transaction().withBundle(bundle).execute());
+		}
+
+		int count = 0;
+		int expected = bundles.size();
+		while (count < expected) {
+			try {
+				completionService.take();
+				count++;
+			} catch (Exception ex) {
+				ourLog.error(ex.getMessage());
+				fail(ex.getMessage());
+			}
+		}
+
+		tpe.shutdown();
+		await().atMost(100, TimeUnit.SECONDS)
+			.until(tpe::isShutdown);
+	}
 
 	@Test
 	public void testBundleBatchWithSingleThread() {
@@ -144,8 +178,9 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 		Bundle input = new Bundle();
 		input.setType(BundleType.BATCH);
 
-		for (String id : ids)
-		    input.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl(id);
+		for (String id : ids) {
+			input.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl(id);
+		}
 
 		Bundle output = myClient.transaction().withBundle(input).execute();
 
@@ -158,9 +193,8 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 		for (BundleEntryComponent bundleEntry : bundleEntries) {
 			assertEquals(ids.get(i++),  bundleEntry.getResource().getIdElement().toUnqualifiedVersionless().getValueAsString());
 		}
-
-
 	}
+
 	@Test
 	public void testBundleBatchWithError() {
 		List<String> ids = createPatients(5);
@@ -351,7 +385,8 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 		bundle.getEntry().forEach(entry -> carePlans.add((CarePlan) entry.getResource()));
 
 		// Post CarePlans should not get: HAPI-2006: Unable to perform PUT, URL provided is invalid...
-		myClient.transaction().withResources(carePlans).execute();
+		List<IBaseResource> result = myClient.transaction().withResources(carePlans).execute();
+		assertFalse(result.isEmpty());
 	}
 
 }

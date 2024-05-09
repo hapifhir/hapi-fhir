@@ -262,6 +262,7 @@ public class ConsentInterceptorTest {
 		verify(myConsentSvc, timeout(2000).times(0)).willSeeResource(any(), any(), any());
 		verify(myConsentSvc, timeout(2000).times(0)).startOperation(any(), any());
 		verify(myConsentSvc, timeout(2000).times(2)).completeOperationSuccess(any(), any());
+		verifyNoMoreInteractions(myConsentSvc);
 	}
 
 
@@ -887,7 +888,8 @@ public class ConsentInterceptorTest {
 		assertEquals(2, response.getTotal());
 	}
 
-	@Nested class CacheUsage {
+	@Nested
+	class CacheUsage {
 		@Mock ICachedSearchDetails myCachedSearchDetails;
 		ServletRequestDetails myRequestDetails = new ServletRequestDetails();
 
