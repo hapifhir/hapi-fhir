@@ -31,6 +31,7 @@ import ca.uhn.fhir.jpa.term.ZipCollectionBuilder;
 import ca.uhn.fhir.jpa.term.models.TermCodeSystemDeleteJobParameters;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.JsonUtil;
@@ -127,7 +128,7 @@ public class TermCodeSystemDeleteJobTest extends BaseJpaR4Test {
 		JobInstanceStartRequest request = new JobInstanceStartRequest();
 		request.setJobDefinitionId(TERM_CODE_SYSTEM_DELETE_JOB_NAME);
 		request.setParameters(JsonUtil.serialize(parameters));
-		Batch2JobStartResponse response = myJobCoordinator.startInstance(request);
+		Batch2JobStartResponse response = myJobCoordinator.startInstance(new SystemRequestDetails(), request);
 
 		myBatch2JobHelper.awaitJobCompletion(response);
 
@@ -147,7 +148,7 @@ public class TermCodeSystemDeleteJobTest extends BaseJpaR4Test {
 		request.setParameters(new TermCodeSystemDeleteJobParameters()); // no pid
 
 		InvalidRequestException exception = assertThrows(InvalidRequestException.class, () -> {
-			myJobCoordinator.startInstance(request);
+			myJobCoordinator.startInstance(new SystemRequestDetails(), request);
 		});
 		assertTrue(exception.getMessage().contains("Invalid Term Code System PID 0"), exception.getMessage());
 	}

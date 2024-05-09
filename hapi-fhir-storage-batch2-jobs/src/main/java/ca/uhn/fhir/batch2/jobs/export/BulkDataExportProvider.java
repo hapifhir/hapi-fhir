@@ -25,6 +25,7 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
@@ -99,6 +100,13 @@ public class BulkDataExportProvider {
 	public static final String UNSUPPORTED_BINARY_TYPE = "Binary";
 
 	private static final Logger ourLog = getLogger(BulkDataExportProvider.class);
+	private static final Set<FhirVersionEnum> PATIENT_COMPARTMENT_FHIR_VERSIONS_SUPPORT_DEVICE = Set.of(
+			FhirVersionEnum.DSTU2,
+			FhirVersionEnum.DSTU2_1,
+			FhirVersionEnum.DSTU2_HL7ORG,
+			FhirVersionEnum.DSTU3,
+			FhirVersionEnum.R4,
+			FhirVersionEnum.R4B);
 
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
@@ -344,10 +352,18 @@ public class BulkDataExportProvider {
 	}
 
 	private Set<String> getPatientCompartmentResources() {
+		return getPatientCompartmentResources(myFhirContext);
+	}
+
+	@VisibleForTesting
+	Set<String> getPatientCompartmentResources(FhirContext theFhirContext) {
 		if (myCompartmentResources == null) {
 			myCompartmentResources =
-					new HashSet<>(SearchParameterUtil.getAllResourceTypesThatAreInPatientCompartment(myFhirContext));
-			myCompartmentResources.add("Device");
+					new HashSet<>(SearchParameterUtil.getAllResourceTypesThatAreInPatientCompartment(theFhirContext));
+			if (isDeviceResourceSupportedForPatientCompartmentForFhirVersion(
+					theFhirContext.getVersion().getVersion())) {
+				myCompartmentResources.add("Device");
+			}
 		}
 		return myCompartmentResources;
 	}
@@ -802,5 +818,10 @@ public class BulkDataExportProvider {
 		if (!prefer.getRespondAsync()) {
 			throw new InvalidRequestException(Msg.code(513) + "Must request async processing for " + theOperationName);
 		}
+	}
+
+	private static boolean isDeviceResourceSupportedForPatientCompartmentForFhirVersion(
+			FhirVersionEnum theFhirVersionEnum) {
+		return PATIENT_COMPARTMENT_FHIR_VERSIONS_SUPPORT_DEVICE.contains(theFhirVersionEnum);
 	}
 }

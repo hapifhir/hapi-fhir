@@ -488,7 +488,7 @@ public class WorkChunkProcessorTest {
 		WorkChunk chunk = new WorkChunk();
 		chunk.setInstanceId(INSTANCE_ID);
 		chunk.setId(theId);
-		chunk.setStatus(WorkChunkStatusEnum.QUEUED);
+		chunk.setStatus(WorkChunkStatusEnum.READY);
 		chunk.setData(JsonUtil.serialize(
 			new StepInputData()
 		));
