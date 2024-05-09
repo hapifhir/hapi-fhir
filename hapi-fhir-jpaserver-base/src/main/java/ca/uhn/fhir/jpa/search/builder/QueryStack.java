@@ -353,7 +353,7 @@ public class QueryStack {
 			throw new InvalidRequestException(Msg.code(2289) + msg);
 		}
 
-		// add a left-outer join to a predicate for the target type, then sort on them.
+		// add a left-outer join to a predicate for the target type, then sort on value columns(s).
 		switch (targetSearchParameter.getParamType()) {
 			case STRING:
 				StringPredicateBuilder stringPredicateBuilder = mySqlBuilder.createStringPredicateBuilder();
