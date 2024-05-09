@@ -20,10 +20,6 @@
 package ca.uhn.fhir.test.utilities;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.both;
-import static org.hamcrest.Matchers.greaterThanOrEqualTo;
-import static org.hamcrest.Matchers.lessThanOrEqualTo;
 
 public class RangeTestHelper {
 
@@ -37,7 +33,10 @@ public class RangeTestHelper {
 	public static void checkInRange(double theBase, double theRange, double theValue) {
 		double lowerBound = theBase - theRange;
 		double upperBound = theBase + theRange;
-		checkWithinBounds(lowerBound, upperBound, theValue);
+		assertThat(theValue)
+			.isGreaterThanOrEqualTo(lowerBound)
+			.isLessThanOrEqualTo(upperBound);
+
 	}
 
 	public static void checkInRange(String theBase, String theValue) {
@@ -62,10 +61,6 @@ public class RangeTestHelper {
 		checkInRange(base, theRange, value);
 	}
 
-	public static void checkWithinBounds(double theLowerBound, double theUpperBound, double theValue) {
-		assertThat(theValue, both(greaterThanOrEqualTo(theLowerBound)).and(lessThanOrEqualTo(theUpperBound)));
-	}
-
 	public static void checkWithinBounds(String theLowerBound, String theUpperBound, String theValue) {
 		assertThat(theLowerBound).as("theLowerBound").isNotNull();
 		assertThat(theUpperBound).as("theUpperBound").isNotNull();
@@ -73,7 +68,10 @@ public class RangeTestHelper {
 		double lowerBound = Double.parseDouble(theLowerBound);
 		double upperBound = Double.parseDouble(theUpperBound);
 		double value = Double.parseDouble(theValue);
-		checkWithinBounds(lowerBound, upperBound, value);
+		assertThat(value)
+			.isGreaterThanOrEqualTo(lowerBound)
+			.isLessThanOrEqualTo(upperBound);
+
 	}
 
 

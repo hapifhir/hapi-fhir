@@ -3,6 +3,7 @@ package ca.uhn.fhir.test.utilities;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class RangeTestHelperTest {
@@ -37,14 +38,19 @@ class RangeTestHelperTest {
 
 			@Test
 			void checkInRange() {
-				RangeTestHelper.checkWithinBounds(.91001, .91002, .910013);
-			}
+                assertThat(.910013)
+                    .isGreaterThanOrEqualTo(.91001)
+                    .isLessThanOrEqualTo(.91002);
+
+            }
 
 			@Test
 			void checkLower() {
 				AssertionError thrown = assertThrows(
 					AssertionError.class,
-					() -> RangeTestHelper.checkWithinBounds(.91001, .91002, .9013)
+					() -> assertThat(.9013)
+                        .isGreaterThanOrEqualTo(.91001)
+                        .isLessThanOrEqualTo(.91002)
 				);
 			}
 
@@ -52,7 +58,9 @@ class RangeTestHelperTest {
 			void checkHigher() {
 				AssertionError thrown = assertThrows(
 					AssertionError.class,
-					() -> RangeTestHelper.checkWithinBounds(.87, .88, .9)
+					() -> assertThat(.9)
+                        .isGreaterThanOrEqualTo(.87)
+                        .isLessThanOrEqualTo(.88)
 				);
 			}
 
