@@ -21,10 +21,9 @@ package ca.uhn.test.util;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.spi.ILoggingEvent;
-import org.hamcrest.CustomTypeSafeMatcher;
-
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import org.hamcrest.CustomTypeSafeMatcher;
 
 /**
  * A Hamcrest matcher for junit assertions.

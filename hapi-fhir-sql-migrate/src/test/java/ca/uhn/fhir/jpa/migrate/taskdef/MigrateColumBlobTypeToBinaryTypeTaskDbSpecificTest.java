@@ -1,7 +1,5 @@
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
-import static ca.uhn.fhir.jpa.migrate.DriverTypeEnum.*;
-
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -9,6 +7,14 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.stream.Stream;
 
+import static ca.uhn.fhir.jpa.migrate.DriverTypeEnum.COCKROACHDB_21_1;
+import static ca.uhn.fhir.jpa.migrate.DriverTypeEnum.DERBY_EMBEDDED;
+import static ca.uhn.fhir.jpa.migrate.DriverTypeEnum.H2_EMBEDDED;
+import static ca.uhn.fhir.jpa.migrate.DriverTypeEnum.MARIADB_10_1;
+import static ca.uhn.fhir.jpa.migrate.DriverTypeEnum.MSSQL_2012;
+import static ca.uhn.fhir.jpa.migrate.DriverTypeEnum.MYSQL_5_7;
+import static ca.uhn.fhir.jpa.migrate.DriverTypeEnum.ORACLE_12C;
+import static ca.uhn.fhir.jpa.migrate.DriverTypeEnum.POSTGRES_9_4;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class MigrateColumBlobTypeToBinaryTypeTaskDbSpecificTest {

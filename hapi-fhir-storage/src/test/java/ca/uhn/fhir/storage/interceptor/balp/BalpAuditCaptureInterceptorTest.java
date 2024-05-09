@@ -65,9 +65,9 @@ import static ca.uhn.fhir.storage.interceptor.balp.BalpConstants.CS_OBJECT_ROLE_
 import static ca.uhn.fhir.storage.interceptor.balp.BalpConstants.CS_OBJECT_ROLE_4_DOMAIN_RESOURCE;
 import static ca.uhn.fhir.storage.interceptor.balp.BalpConstants.CS_RESTFUL_INTERACTION;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;

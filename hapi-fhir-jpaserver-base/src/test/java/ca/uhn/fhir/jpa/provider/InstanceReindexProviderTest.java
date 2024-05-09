@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.provider;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.search.reindex.IInstanceReindexService;
 import ca.uhn.fhir.test.utilities.server.HashMapResourceProviderExtension;
@@ -22,6 +21,7 @@ import java.util.Set;
 
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_REINDEX_DRYRUN;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;

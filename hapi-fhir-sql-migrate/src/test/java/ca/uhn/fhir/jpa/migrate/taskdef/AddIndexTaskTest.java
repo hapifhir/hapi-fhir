@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,6 +18,7 @@ import java.sql.SQLException;
 import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @MockitoSettings(strictness = Strictness.LENIENT)
 public class AddIndexTaskTest extends BaseTest {

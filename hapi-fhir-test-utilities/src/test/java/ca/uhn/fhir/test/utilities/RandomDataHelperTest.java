@@ -1,6 +1,5 @@
 package ca.uhn.fhir.test.utilities;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import org.junit.jupiter.api.Test;
 
@@ -11,6 +10,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.blankOrNullString;
 import static org.hamcrest.Matchers.not;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class RandomDataHelperTest {
 

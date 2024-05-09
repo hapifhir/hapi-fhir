@@ -1,6 +1,5 @@
 package org.hl7.fhir.r4.validation;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
 import ca.uhn.fhir.util.TestUtil;
@@ -20,6 +19,7 @@ import java.security.CodeSource;
 import java.text.MessageFormat;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 public class SchemaValidationR4Test extends BaseValidationTestWithInlineMocks {
 	private static final Logger ourLog = LoggerFactory.getLogger(SchemaValidationR4Test.class);

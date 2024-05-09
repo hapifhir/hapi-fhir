@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.mdm.svc;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.mdm.svc.testmodels.BlockRuleTestCase;
 import ca.uhn.fhir.mdm.blocklist.json.BlockListJson;
@@ -25,6 +24,7 @@ import java.util.Collection;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.Mockito.when;
 import static org.slf4j.LoggerFactory.getLogger;
 

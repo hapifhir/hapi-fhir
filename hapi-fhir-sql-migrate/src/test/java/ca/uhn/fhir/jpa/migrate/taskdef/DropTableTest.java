@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import ca.uhn.fhir.jpa.migrate.MigrationResult;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -14,6 +13,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.core.IsNot.not;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class DropTableTest extends BaseTest {
 

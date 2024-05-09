@@ -20,13 +20,12 @@
 
 package ca.uhn.fhir.test.utilities;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.StatisticsHandler;
-
-import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
 
 public class JettyUtil {
     

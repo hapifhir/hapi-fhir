@@ -1,7 +1,5 @@
 package org.hl7.fhir.r4.validation;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
@@ -40,7 +38,8 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class LookupCodeR4Test {
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();

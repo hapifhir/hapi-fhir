@@ -4,8 +4,8 @@ import ca.uhn.fhir.i18n.Msg;
 import org.junit.jupiter.api.Test;
 import org.quartz.SchedulerException;
 
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class BaseHapiSchedulerTest {
 

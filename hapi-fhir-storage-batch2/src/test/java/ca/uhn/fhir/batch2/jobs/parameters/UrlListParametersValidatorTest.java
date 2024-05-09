@@ -1,7 +1,6 @@
 package ca.uhn.fhir.batch2.jobs.parameters;
 
 import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

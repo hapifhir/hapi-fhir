@@ -1,7 +1,5 @@
 package org.hl7.fhir.dstu3.hapi.validation;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport.ConceptDesignation;
@@ -45,7 +43,8 @@ import java.util.stream.Stream;
 import static ca.uhn.fhir.context.support.IValidationSupport.BaseConceptProperty;
 import static ca.uhn.fhir.context.support.IValidationSupport.CodingConceptProperty;
 import static ca.uhn.fhir.context.support.IValidationSupport.StringConceptProperty;
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class LookupCodeDstu3Test {
 	private static final FhirContext ourCtx = FhirContext.forDstu3Cached();

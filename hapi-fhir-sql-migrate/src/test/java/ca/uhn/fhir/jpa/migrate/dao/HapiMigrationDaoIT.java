@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.migrate.dao;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.jpa.migrate.BaseMigrationTest;
 import ca.uhn.fhir.jpa.migrate.entity.HapiMigrationEntity;
 import org.flywaydb.core.api.MigrationVersion;
@@ -9,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class HapiMigrationDaoIT extends BaseMigrationTest {
 

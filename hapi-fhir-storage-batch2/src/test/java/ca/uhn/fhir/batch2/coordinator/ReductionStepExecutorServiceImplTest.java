@@ -1,8 +1,5 @@
 package ca.uhn.fhir.batch2.coordinator;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.batch2.api.ChunkExecutionDetails;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
@@ -46,6 +43,9 @@ import static ca.uhn.fhir.batch2.coordinator.WorkChunkProcessorTest.getTestJobIn
 import static ca.uhn.fhir.batch2.model.StatusEnum.ERRORED;
 import static ca.uhn.fhir.batch2.model.StatusEnum.IN_PROGRESS;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;

@@ -1,15 +1,13 @@
 package ca.uhn.test.concurrency;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import com.github.seregamorph.hamcrest.OrderMatchers;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.tuple.Pair;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jakarta.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -27,6 +25,7 @@ import static ca.uhn.test.concurrency.LockstepEnumPhaserTest.Stages.THREE;
 import static ca.uhn.test.concurrency.LockstepEnumPhaserTest.Stages.TWO;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 // All of these should run pretty quickly - 5s should be lots.
 // But if they deadlock, they will hang forever.  Need @Timeout.

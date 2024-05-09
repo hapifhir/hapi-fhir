@@ -1,6 +1,5 @@
 package ca.uhn.fhir.rest.client.interceptor;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.BaseGenericClientR4Test;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
@@ -11,7 +10,7 @@ import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class UrlTenantSelectionInterceptorTest extends BaseGenericClientR4Test {
 

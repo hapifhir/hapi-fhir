@@ -90,7 +90,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.search.builder.QueryStack.SearchForIdsParams.with;
-import static ca.uhn.fhir.rest.api.Constants.*;
+import static ca.uhn.fhir.rest.api.Constants.PARAM_TYPE;
+import static ca.uhn.fhir.rest.api.Constants.VALID_MODIFIERS;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 

@@ -31,8 +31,8 @@ import static ca.uhn.fhir.jpa.migrate.HapiMigrationLock.LOCK_PID;
 import static ca.uhn.fhir.jpa.migrate.HapiMigrationStorageSvc.LOCK_TYPE;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class HapiClearMigrationLockCommandTest extends ConsoleOutputCapturingBaseTest {

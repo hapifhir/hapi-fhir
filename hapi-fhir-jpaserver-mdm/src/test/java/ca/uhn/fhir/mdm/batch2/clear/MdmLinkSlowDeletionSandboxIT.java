@@ -1,6 +1,5 @@
 package ca.uhn.fhir.mdm.batch2.clear;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
@@ -29,7 +28,7 @@ import static ca.uhn.fhir.mdm.api.MdmConstants.CODE_GOLDEN_RECORD;
 import static ca.uhn.fhir.mdm.api.MdmConstants.CODE_HAPI_MDM_MANAGED;
 import static ca.uhn.fhir.mdm.api.MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS;
 import static ca.uhn.fhir.mdm.api.MdmConstants.SYSTEM_MDM_MANAGED;
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Disabled("Keeping as a sandbox to be used whenever we need a lot of MdmLinks in DB for performance testing")
 @ContextConfiguration(classes = {MdmLinkSlowDeletionSandboxIT.TestDataSource.class})
