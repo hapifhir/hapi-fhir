@@ -1794,12 +1794,12 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 	public boolean shouldAttemptToSplitPath(String thePath) {
 		if (getContext().getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.R4)) {
-            return thePath.contains("|");
+			return thePath.contains("|");
 		} else {
 			// DSTU 3 and below used "or" as well as "|"
-            return thePath.contains("|") || thePath.contains(" or ");
+			return thePath.contains("|") || thePath.contains(" or ");
 		}
-    }
+	}
 
 	/**
 	 * Iteratively splits a string on any ` or ` or | that is ** not** contained inside a set of parentheses. e.g.
@@ -1814,8 +1814,9 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	 */
 	private String[] splitOutOfParensOrs(String thePaths) {
 		List<String> topLevelOrExpressions = splitOutOfParensToken(thePaths, " or ");
-        return topLevelOrExpressions.stream()
-                .flatMap(s -> splitOutOfParensToken(s, " |").stream()).toArray(String[]::new);
+		return topLevelOrExpressions.stream()
+				.flatMap(s -> splitOutOfParensToken(s, " |").stream())
+				.toArray(String[]::new);
 	}
 
 	private List<String> splitOutOfParensToken(String thePath, String theToken) {
