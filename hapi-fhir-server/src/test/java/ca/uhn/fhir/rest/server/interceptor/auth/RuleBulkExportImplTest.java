@@ -49,7 +49,7 @@ public class RuleBulkExportImplTest {
 		when(myRequestDetails.getAttribute(any())).thenReturn(options);
 
 		AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
-		assertAbstain(verdict);
+		assertDeny(verdict);
 	}
 
 
@@ -68,7 +68,7 @@ public class RuleBulkExportImplTest {
 		when(myRequestDetails.getAttribute(any())).thenReturn(options);
 
 		AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
-		assertAbstain(verdict);
+		assertDeny(verdict);
 	}
 
 	@Test
@@ -106,7 +106,7 @@ public class RuleBulkExportImplTest {
 
 		AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
 
-		assertAbstain(verdict);
+		assertDeny(verdict);
 	}
 	@Nested
 	class StyleChecks {
@@ -316,7 +316,7 @@ public class RuleBulkExportImplTest {
 		AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
 
 		//Then: abstain
-		assertAbstain(verdict);
+		assertDeny(verdict);
 	}
 
 	@Test
@@ -426,7 +426,7 @@ public class RuleBulkExportImplTest {
 		final AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
 
 		//Then: We do not have permissions on the requested patient so we abstain
-		assertAbstain(verdict);
+		assertDeny(verdict);
 	}
 
 	@Test
@@ -484,7 +484,7 @@ public class RuleBulkExportImplTest {
 		final AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
 
 		//Then: There are unpermitted patients in the request so this is not permitted.
-		assertAbstain(verdict);
+		assertDeny(verdict);
 	}  //
 
 	@Test
@@ -566,5 +566,10 @@ public class RuleBulkExportImplTest {
 	private static void assertAllow(AuthorizationInterceptor.Verdict verdict) {
 		Assertions.assertNotNull(verdict, "Expect ALLOW, got abstain");
 		Assertions.assertEquals(PolicyEnum.ALLOW, verdict.getDecision(), "Expect ALLOW");
+	}
+
+	private static void assertDeny(AuthorizationInterceptor.Verdict verdict) {
+		Assertions.assertNotNull(verdict, "Expect DENY, got abstain");
+		Assertions.assertEquals(PolicyEnum.DENY, verdict.getDecision(), "Expect DENY");
 	}
 }

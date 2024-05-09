@@ -80,10 +80,10 @@ public class RuleBulkExportImpl extends BaseRule {
 		// Do we only authorize some types?  If so, make sure requested types are a subset
 		if (isNotEmpty(myResourceTypes)) {
 			if (isEmpty(inboundBulkExportRequestOptions.getResourceTypes())) {
-				return null;
+				return new AuthorizationInterceptor.Verdict(PolicyEnum.DENY, this);
 			}
 			if (!myResourceTypes.containsAll(inboundBulkExportRequestOptions.getResourceTypes())) {
-				return null;
+				return new AuthorizationInterceptor.Verdict(PolicyEnum.DENY, this);
 			}
 		}
 
@@ -136,8 +136,9 @@ public class RuleBulkExportImpl extends BaseRule {
 				Set<String> permittedPatientIds = sanitizeIds(myPatientIds);
 				if (permittedPatientIds.containsAll(requestedPatientIds)) {
 					return allowVerdict;
+				} else {
+					return new AuthorizationInterceptor.Verdict(PolicyEnum.DENY, this);
 				}
-				return null;
 			}
 		}
 		return null;
