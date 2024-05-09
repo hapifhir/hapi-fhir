@@ -353,26 +353,39 @@ public class QueryStack {
 			throw new InvalidRequestException(Msg.code(2289) + msg);
 		}
 
-		BaseSearchParamPredicateBuilder chainedPredicateBuilder;
-		DbColumn[] sortColumn;
+		// add a left-outer join to a predicate for the target type, then sort on value columns(s).
 		switch (targetSearchParameter.getParamType()) {
 			case STRING:
 				StringPredicateBuilder stringPredicateBuilder = mySqlBuilder.createStringPredicateBuilder();
-				sortColumn = new DbColumn[] {stringPredicateBuilder.getColumnValueNormalized()};
-				chainedPredicateBuilder = stringPredicateBuilder;
-				break;
+				addSortCustomJoin(
+						resourceLinkPredicateBuilder.getColumnTargetResourceId(),
+						stringPredicateBuilder,
+						stringPredicateBuilder.createHashIdentityPredicate(targetType, theChain));
+
+				mySqlBuilder.addSortString(
+						stringPredicateBuilder.getColumnValueNormalized(), theAscending, myUseAggregate);
+				return;
+
 			case TOKEN:
 				TokenPredicateBuilder tokenPredicateBuilder = mySqlBuilder.createTokenPredicateBuilder();
-				sortColumn =
-						new DbColumn[] {tokenPredicateBuilder.getColumnSystem(), tokenPredicateBuilder.getColumnValue()
-						};
-				chainedPredicateBuilder = tokenPredicateBuilder;
-				break;
+				addSortCustomJoin(
+						resourceLinkPredicateBuilder.getColumnTargetResourceId(),
+						tokenPredicateBuilder,
+						tokenPredicateBuilder.createHashIdentityPredicate(targetType, theChain));
+
+				mySqlBuilder.addSortString(tokenPredicateBuilder.getColumnSystem(), theAscending, myUseAggregate);
+				mySqlBuilder.addSortString(tokenPredicateBuilder.getColumnValue(), theAscending, myUseAggregate);
+				return;
+
 			case DATE:
 				DatePredicateBuilder datePredicateBuilder = mySqlBuilder.createDatePredicateBuilder();
-				sortColumn = new DbColumn[] {datePredicateBuilder.getColumnValueLow()};
-				chainedPredicateBuilder = datePredicateBuilder;
-				break;
+				addSortCustomJoin(
+						resourceLinkPredicateBuilder.getColumnTargetResourceId(),
+						datePredicateBuilder,
+						datePredicateBuilder.createHashIdentityPredicate(targetType, theChain));
+
+				mySqlBuilder.addSortDate(datePredicateBuilder.getColumnValueLow(), theAscending, myUseAggregate);
+				return;
 
 				/*
 				 * Note that many of the options below aren't implemented because they
@@ -416,16 +429,6 @@ public class QueryStack {
 				throw new InvalidRequestException(Msg.code(2290) + "Unable to sort on a chained parameter "
 						+ theParamName + "." + theChain + " as this parameter. Can not sort on chains of target type: "
 						+ targetSearchParameter.getParamType().name());
-		}
-
-		addSortCustomJoin(resourceLinkPredicateBuilder.getColumnTargetResourceId(), chainedPredicateBuilder, null);
-		// Support chained sort - when there is no data to sort, the outer join will produce null columns.  We need to
-		// include those too.
-		Condition predicate = chainedPredicateBuilder.createHashIdentityOrNullPredicate(targetType, theChain);
-		mySqlBuilder.addPredicate(predicate);
-
-		for (DbColumn next : sortColumn) {
-			mySqlBuilder.addSortNumeric(next, theAscending, myUseAggregate);
 		}
 	}
 

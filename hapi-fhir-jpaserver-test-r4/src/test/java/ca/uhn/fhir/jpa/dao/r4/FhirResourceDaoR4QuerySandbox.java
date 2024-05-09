@@ -54,10 +54,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @TestExecutionListeners(listeners = {
 	DependencyInjectionTestExecutionListener.class
-	, FhirResourceDaoR4QuerySandboxTest.TestDirtiesContextTestExecutionListener.class
+	, FhirResourceDaoR4QuerySandbox.TestDirtiesContextTestExecutionListener.class
 })
-public class FhirResourceDaoR4QuerySandboxTest extends BaseJpaTest {
-	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoR4QuerySandboxTest.class);
+public class FhirResourceDaoR4QuerySandbox extends BaseJpaTest {
+	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoR4QuerySandbox.class);
 
 	@Autowired
 	PlatformTransactionManager myTxManager;
