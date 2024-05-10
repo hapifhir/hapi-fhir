@@ -98,9 +98,6 @@ import java.util.stream.Collectors;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.fail;
 
 
@@ -518,7 +515,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 			myPatientDao.create(patient, mySrd);
 			fail("");
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), StringContains.containsString("99999 not found"));
+			assertThat(e.getMessage()).contains("99999 not found");
 		}
 
 	}

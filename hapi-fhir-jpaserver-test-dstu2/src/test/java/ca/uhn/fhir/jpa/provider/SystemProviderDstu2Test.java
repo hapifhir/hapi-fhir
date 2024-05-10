@@ -54,10 +54,6 @@ import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.emptyOrNullString;
-import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.fail;
 
 
@@ -169,7 +165,7 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 	@Test
 	public void testConformanceImplementationDescriptionGetsPopulated() {
 		Conformance conf = ourClient.capabilities().ofType(Conformance.class).execute();
-		assertThat(conf.getImplementation().getDescription(), not(emptyOrNullString()));
+		assertThat(conf.getImplementation().getDescription()).isNotBlank();
 	}
 
 

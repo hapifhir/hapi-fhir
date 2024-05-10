@@ -22,8 +22,6 @@ import java.io.IOException;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.stringContainsInOrder;
 
 
 public class FhirResourceDaoValueSetDstu2Test extends BaseJpaDstu2Test {
@@ -159,8 +157,8 @@ public class FhirResourceDaoValueSetDstu2Test extends BaseJpaDstu2Test {
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		// @formatter:off
-		assertThat(resp,
-			stringContainsInOrder("<ValueSet xmlns=\"http://hl7.org/fhir\">",
+		assertThat(resp).
+			containsSubsequence("<ValueSet xmlns=\"http://hl7.org/fhir\">",
 				"<expansion>",
 				"<contains>",
 				"<system value=\"http://acme.org\"/>",
@@ -173,7 +171,7 @@ public class FhirResourceDaoValueSetDstu2Test extends BaseJpaDstu2Test {
 				"<display value=\"Systolic blood pressure--expiration\"/>",
 				"</contains>",
 				"</expansion>"
-			));
+			);
 		//@formatter:on
 
 		/*

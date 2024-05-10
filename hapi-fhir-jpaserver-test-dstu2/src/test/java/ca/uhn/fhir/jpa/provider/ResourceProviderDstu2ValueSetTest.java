@@ -24,8 +24,6 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.jupiter.api.Assertions.fail;
 
 
@@ -178,8 +176,7 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 
 			String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 			ourLog.info(resp);
-			assertThat(resp,
-				stringContainsInOrder("<ValueSet xmlns=\"http://hl7.org/fhir\">",
+			assertThat(resp).containsSubsequence("<ValueSet xmlns=\"http://hl7.org/fhir\">",
 					"<expansion>",
 					"<contains>",
 					"<system value=\"http://acme.org\"/>",
@@ -192,7 +189,7 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 					"<display value=\"Systolic blood pressure--expiration\"/>",
 					"</contains>",
 					"</expansion>"
-				));
+				);
 
 		/*
 		 * Filter with display name
