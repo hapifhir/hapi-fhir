@@ -27,9 +27,6 @@ import java.util.List;
 
 import static ca.uhn.fhir.jpa.fql.util.HfqlConstants.ORDER_AND_GROUP_LIMIT;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.CoreMatchers.hasItem;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -235,9 +232,7 @@ public class HfqlExecutorTest extends BaseHfqlExecutorTest {
 
 		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
 		assertThat(result.getStatement().toSelectedColumnAliases()).as(result.getStatement().toSelectedColumnAliases().toString()).contains("id", "active", "address", "birthDate");
-		assertThat(result.getStatement().toSelectedColumnAliases().toString(), result.getStatement().toSelectedColumnAliases(), not(hasItem(
-			"extension"
-		)));
+		assertThat(result.getStatement().toSelectedColumnAliases()).as(result.getStatement().toSelectedColumnAliases().toString()).doesNotContain("extension");
 	}
 
 	@Test
