@@ -112,7 +112,7 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 			if (theExpectMatchFlag) {
 				assertThat(foundIds).as(theDescription).contains(id.getIdPart());
 			} else {
-				assertThat(theDescription, foundIds, not(hasItem(id.getIdPart())));
+				assertThat(foundIds).as(theDescription).doesNotContain(id.getIdPart());
 			}
 		}
 
@@ -213,7 +213,7 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 
 			private void assertNotFind(String theMessage, String theUrl) {
 				List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
-				assertThat(theMessage, resourceIds, not(hasItem(equalTo(myObservationId.getIdPart()))));
+				assertThat(resourceIds).as(theMessage).doesNotContain(equalTo(myObservationId.getIdPart()));
 			}
 
 			@Nested
@@ -362,7 +362,7 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 
 			private void assertNotFind(String theMessage, String theUrl) {
 				List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
-				assertThat(theMessage, resourceIds, not(hasItem(equalTo(myResourceId.getIdPart()))));
+				assertThat(resourceIds).as(theMessage).doesNotContain(equalTo(myResourceId.getIdPart()));
 			}
 		}
 
@@ -485,7 +485,7 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 
 			private void assertNotFind(String theMessage, String theUrl) {
 				List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
-				assertThat(theMessage, resourceIds, not(hasItem(equalTo(myResourceId.getIdPart()))));
+				assertThat(resourceIds).as(theMessage).doesNotContain(equalTo(myResourceId.getIdPart()));
 			}
 		}
 

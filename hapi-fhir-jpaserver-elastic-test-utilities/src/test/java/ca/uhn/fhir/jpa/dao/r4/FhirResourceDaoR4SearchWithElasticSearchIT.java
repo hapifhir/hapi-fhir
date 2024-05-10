@@ -1375,11 +1375,11 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 //
 //			observations = myTestDaoSearch.searchForResources("Observation?code=theCode");
 //
-//			assertThat(observations, hasSize(1));
+//			assertThat(observations).hasSize(1);
 //			IBaseMetaType newMeta = observations.get(0).getMeta();
-//			assertThat(newMeta.getProfile(), hasSize(1));
-//			assertThat(newMeta.getSecurity(), hasSize(1));
-//			assertThat(newMeta.getTag(), hasSize(2));
+//			assertThat(newMeta.getProfile()).hasSize(1);
+//			assertThat(newMeta.getSecurity()).hasSize(1);
+//			assertThat(newMeta.getTag()).hasSize(2);
 		}
 
 		@Test

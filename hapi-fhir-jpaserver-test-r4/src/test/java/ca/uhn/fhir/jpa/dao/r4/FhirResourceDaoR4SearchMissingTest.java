@@ -221,8 +221,8 @@ public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 			param.setMissing(false);
 			params.add(Patient.SP_BIRTHDATE, param);
 			List<IIdType> patients = toUnqualifiedVersionlessIds(myPatientDao.search(params));
-			assertThat(patients, containsInRelativeOrder(notMissing));
-			assertThat(patients, not(containsInRelativeOrder(missing)));
+			assertThat(patients).containsSubsequence(notMissing);
+			assertThat(patients).doesNotContainSubsequence(missing);
 		}
 		{
 			SearchParameterMap params = new SearchParameterMap();
@@ -231,8 +231,8 @@ public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 			param.setMissing(true);
 			params.add(Patient.SP_BIRTHDATE, param);
 			List<IIdType> patients = toUnqualifiedVersionlessIds(myPatientDao.search(params));
-			assertThat(patients, containsInRelativeOrder(missing));
-			assertThat(patients, not(containsInRelativeOrder(notMissing)));
+			assertThat(patients).containsSubsequence(missing);
+			assertThat(patients).doesNotContainSubsequence(notMissing);
 		}
 	}
 
@@ -254,8 +254,8 @@ public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 			myCaptureQueriesListener.clear();
 			List<String> patients = toUnqualifiedVersionlessIdValues(myLocationDao.search(params));
 			myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
-			assertThat(patients, containsInRelativeOrder(locId));
-			assertThat(patients, not(containsInRelativeOrder(locId2)));
+			assertThat(patients).containsSubsequence(locId);
+			assertThat(patients).doesNotContainSubsequence(locId2);
 		}
 		{
 			SearchParameterMap params = new SearchParameterMap();
@@ -264,8 +264,8 @@ public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 			param.setMissing(false);
 			params.add(Location.SP_NEAR, param);
 			List<String> patients = toUnqualifiedVersionlessIdValues(myLocationDao.search(params));
-			assertThat(patients, containsInRelativeOrder(locId2));
-			assertThat(patients, not(containsInRelativeOrder(locId)));
+			assertThat(patients).containsSubsequence(locId2);
+			assertThat(patients).doesNotContainSubsequence(locId);
 		}
 	}
 
@@ -312,8 +312,8 @@ public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 			param.setMissing(false);
 			params.add(Observation.SP_VALUE_QUANTITY, param);
 			List<IIdType> patients = toUnqualifiedVersionlessIds(myObservationDao.search(params));
-			assertThat(patients, not(containsInRelativeOrder(missing)));
-			assertThat(patients, containsInRelativeOrder(notMissing));
+			assertThat(patients).doesNotContainSubsequence(missing);
+			assertThat(patients).containsSubsequence(notMissing);
 		}
 		{
 			SearchParameterMap params = new SearchParameterMap();
@@ -322,8 +322,8 @@ public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 			param.setMissing(true);
 			params.add(Observation.SP_VALUE_QUANTITY, param);
 			List<IIdType> patients = toUnqualifiedVersionlessIds(myObservationDao.search(params));
-			assertThat(patients, containsInRelativeOrder(missing));
-			assertThat(patients, not(containsInRelativeOrder(notMissing)));
+			assertThat(patients).containsSubsequence(missing);
+			assertThat(patients).doesNotContainSubsequence(notMissing);
 		}
 	}
 
@@ -358,8 +358,8 @@ public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 			param.setMissing(false);
 			params.add(Observation.SP_VALUE_QUANTITY, param);
 			List<IIdType> patients = toUnqualifiedVersionlessIds(myObservationDao.search(params));
-			assertThat(patients, not(containsInRelativeOrder(missing)));
-			assertThat(patients, containsInRelativeOrder(notMissing));
+			assertThat(patients).doesNotContainSubsequence(missing);
+			assertThat(patients).containsSubsequence(notMissing);
 		}
 		{
 			SearchParameterMap params = new SearchParameterMap();
@@ -370,8 +370,8 @@ public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 			myCaptureQueriesListener.clear();
 			List<IIdType> patients = toUnqualifiedVersionlessIds(myObservationDao.search(params));
 			myCaptureQueriesListener.logSelectQueries();
-			assertThat(patients, containsInRelativeOrder(missing));
-			assertThat(patients, not(containsInRelativeOrder(notMissing)));
+			assertThat(patients).containsSubsequence(missing);
+			assertThat(patients).doesNotContainSubsequence(notMissing);
 		}
 
 	}
@@ -401,8 +401,8 @@ public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 			param.setMissing(false);
 			params.add(Observation.SP_VALUE_QUANTITY, param);
 			List<IIdType> patients = toUnqualifiedVersionlessIds(myObservationDao.search(params));
-			assertThat(patients, not(containsInRelativeOrder(missing)));
-			assertThat(patients, containsInRelativeOrder(notMissing));
+			assertThat(patients).doesNotContainSubsequence(missing);
+			assertThat(patients).containsSubsequence(notMissing);
 		}
 		{
 			SearchParameterMap params = new SearchParameterMap();
@@ -411,8 +411,8 @@ public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 			param.setMissing(true);
 			params.add(Observation.SP_VALUE_QUANTITY, param);
 			List<IIdType> patients = toUnqualifiedVersionlessIds(myObservationDao.search(params));
-			assertThat(patients, containsInRelativeOrder(missing));
-			assertThat(patients, not(containsInRelativeOrder(notMissing)));
+			assertThat(patients).containsSubsequence(missing);
+			assertThat(patients).doesNotContainSubsequence(notMissing);
 		}
 
 	}
@@ -444,8 +444,8 @@ public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 			param.setMissing(false);
 			params.add(Patient.SP_ORGANIZATION, param);
 			List<IIdType> patients = toUnqualifiedVersionlessIds(myPatientDao.search(params));
-			assertThat(patients, not(containsInRelativeOrder(missing)));
-			assertThat(patients, containsInRelativeOrder(notMissing));
+			assertThat(patients).doesNotContainSubsequence(missing);
+			assertThat(patients).containsSubsequence(notMissing);
 		}
 		{
 			SearchParameterMap params = new SearchParameterMap();
@@ -454,9 +454,9 @@ public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 			param.setMissing(true);
 			params.add(Patient.SP_ORGANIZATION, param);
 			List<IIdType> patients = toUnqualifiedVersionlessIds(myPatientDao.search(params));
-			assertThat(patients, containsInRelativeOrder(missing));
-			assertThat(patients, not(containsInRelativeOrder(notMissing)));
-			assertThat(patients, not(containsInRelativeOrder(orgId)));
+			assertThat(patients).containsSubsequence(missing);
+			assertThat(patients).doesNotContainSubsequence(notMissing);
+			assertThat(patients).doesNotContainSubsequence(orgId);
 		}
 	}
 
@@ -486,8 +486,8 @@ public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 			param.setMissing(false);
 			params.add(Patient.SP_FAMILY, param);
 			List<IIdType> patients = toUnqualifiedVersionlessIds(myPatientDao.search(params));
-			assertThat(patients, not(containsInRelativeOrder(missing)));
-			assertThat(patients, containsInRelativeOrder(notMissing));
+			assertThat(patients).doesNotContainSubsequence(missing);
+			assertThat(patients).containsSubsequence(notMissing);
 		}
 		{
 			SearchParameterMap params = new SearchParameterMap();
@@ -496,8 +496,8 @@ public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 			param.setMissing(true);
 			params.add(Patient.SP_FAMILY, param);
 			List<IIdType> patients = toUnqualifiedVersionlessIds(myPatientDao.search(params));
-			assertThat(patients, containsInRelativeOrder(missing));
-			assertThat(patients, not(containsInRelativeOrder(notMissing)));
+			assertThat(patients).containsSubsequence(missing);
+			assertThat(patients).doesNotContainSubsequence(notMissing);
 		}
 	}
 
@@ -524,8 +524,8 @@ public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 			param.setMissing(false);
 			params.add(Observation.SP_CODE, param);
 			List<IIdType> patients = toUnqualifiedVersionlessIds(myObservationDao.search(params));
-			assertThat(patients, not(containsInRelativeOrder(missing)));
-			assertThat(patients, containsInRelativeOrder(notMissing));
+			assertThat(patients).doesNotContainSubsequence(missing);
+			assertThat(patients).containsSubsequence(notMissing);
 		}
 		{
 			SearchParameterMap params = new SearchParameterMap();
@@ -534,8 +534,8 @@ public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 			param.setMissing(true);
 			params.add(Observation.SP_CODE, param);
 			List<IIdType> patients = toUnqualifiedVersionlessIds(myObservationDao.search(params));
-			assertThat(patients, containsInRelativeOrder(missing));
-			assertThat(patients, not(containsInRelativeOrder(notMissing)));
+			assertThat(patients).containsSubsequence(missing);
+			assertThat(patients).doesNotContainSubsequence(notMissing);
 		}
 	}
 

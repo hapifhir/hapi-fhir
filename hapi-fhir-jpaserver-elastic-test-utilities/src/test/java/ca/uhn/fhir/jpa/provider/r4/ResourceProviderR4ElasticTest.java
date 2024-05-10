@@ -93,7 +93,7 @@ public class ResourceProviderR4ElasticTest extends BaseResourceProviderR4Test {
 			List<ValueSet.ValueSetExpansionContainsComponent> expansions = valueSet.getExpansion().getContains();
 			// FIXME KHS
 //			assertThat(expansions, hasItem(valueSetExpansionMatching(mean_blood_pressure)));
-//			assertThat(expansions, not(hasItem(valueSetExpansionMatching(blood_count))));
+//			assertThat(expansions).doesNotContain(valueSetExpansionMatching(blood_count));
 		}
 
 	}

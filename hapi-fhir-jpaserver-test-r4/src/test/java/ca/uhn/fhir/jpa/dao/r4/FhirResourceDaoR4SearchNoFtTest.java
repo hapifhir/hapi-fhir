@@ -2757,12 +2757,12 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		AssertionsForInterfaceTypes.assertThat(result).doesNotContainAnyElementsOf(List.of(id1a, id1b));
 
 		result = performSearchLastUpdatedAndReturnIds(new DateRangeParam(beforeAny, beforeR2));
-		assertThat(result.toString(), result, not(hasItem(id2)));
+		assertThat(result).as(result.toString()).doesNotContain(id2);
 		assertThat(result.toString(), result, (hasItems(id1a, id1b)));
 
 		result = performSearchLastUpdatedAndReturnIds(new DateRangeParam(null, beforeR2));
 		assertThat(result, (hasItems(id1a, id1b)));
-		assertThat(result, not(hasItem(id2)));
+		assertThat(result).doesNotContain(id2);
 
 		result = performSearchLastUpdatedAndReturnIds(new DateRangeParam(new DateParam(GREATERTHAN_OR_EQUALS, beforeR2)));
 		AssertionsForInterfaceTypes.assertThat(result).doesNotContainAnyElementsOf(List.of(id1a, id1b));
@@ -2770,7 +2770,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 		result = performSearchLastUpdatedAndReturnIds(new DateRangeParam(new DateParam(LESSTHAN_OR_EQUALS, beforeR2)));
 		assertThat(result, (hasItems(id1a, id1b)));
-		assertThat(result, not(hasItem(id2)));
+		assertThat(result).doesNotContain(id2);
 	}
 
 	@Test
@@ -2852,7 +2852,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		dateRange = new DateRangeParam(new DateParam(NOT_EQUAL, p0LastUpdated), new DateParam(NOT_EQUAL, p0LastUpdated));
 		result = performSearchLastUpdatedAndReturnIds(dateRange);
 		assertThat(result).containsExactlyInAnyOrder(id1a, id1b);
-		assertThat(result, not(hasItem(id0)));
+		assertThat(result).doesNotContain(id0);
 
 		dateRange = new DateRangeParam(new DateParam(NOT_EQUAL, p0LastUpdatedDay), new DateParam(NOT_EQUAL, p0LastUpdatedDay));
 		result = performSearchLastUpdatedAndReturnIds(dateRange);
@@ -3178,7 +3178,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		params.setLoadSynchronous(true);
 		params.add(Patient.SP_FAMILY, new StringParam(name));
 		patients = toUnqualifiedVersionlessIds(myPatientDao.search(params));
-		assertThat(patients, not(hasItem(id)));
+		assertThat(patients).doesNotContain(id);
 
 	}
 
@@ -3727,7 +3727,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		params.add(Patient.SP_FAMILY, new StringParam("HELLO"));
 		patients = toUnqualifiedVersionlessIds(myPatientDao.search(params));
 		assertThat(patients).containsExactlyInAnyOrder(pid1);
-		assertThat(patients, not(hasItem(pid2)));
+		assertThat(patients).doesNotContain(pid2);
 	}
 
 	@Test
@@ -3759,7 +3759,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		IBundleProvider found = myPatientDao.search(params);
 		assertThat(toList(found)).hasSize(1);
 		assertThat(toUnqualifiedVersionlessIds(found)).containsExactly(longId);
-		assertThat(toUnqualifiedVersionlessIds(found), not(hasItem(shortId)));
+		assertThat(toUnqualifiedVersionlessIds(found)).doesNotContain(shortId);
 
 	}
 
@@ -5139,7 +5139,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			List<IIdType> patients = toUnqualifiedVersionlessIds(myOrganizationDao.search(params));
 			myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
 			assertThat(patients).containsExactlyInAnyOrder(tag2id);
-			assertThat(patients, not(hasItem(tag1id)));
+			assertThat(patients).doesNotContain(tag1id);
 		}
 		{
 			// Non existant tag

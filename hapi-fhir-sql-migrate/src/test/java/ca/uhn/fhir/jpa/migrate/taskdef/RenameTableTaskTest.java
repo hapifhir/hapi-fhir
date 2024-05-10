@@ -36,7 +36,7 @@ public class RenameTableTaskTest extends BaseTest {
 		// then
 		Set<String> tableNames = JdbcUtils.getTableNames(getConnectionProperties());
 		assertThat(tableNames, hasItem(newTableName));
-		assertThat(tableNames, not(hasItem(oldTableName)));
+		assertThat(tableNames).doesNotContain(oldTableName);
 	}
 
 	@ParameterizedTest(name = "{index}: {0}")

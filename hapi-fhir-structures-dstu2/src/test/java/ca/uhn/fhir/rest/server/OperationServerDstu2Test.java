@@ -94,7 +94,7 @@ public class OperationServerDstu2Test {
 		assertThat(def.getCode(), not(blankOrNullString()));
 
 		List<String> opNames = toOpNames(ops);
-		assertThat(opNames, containsInRelativeOrder("OP_TYPE"));
+		assertThat(opNames).containsSubsequence("OP_TYPE");
 
 		assertEquals("OperationDefinition/Patient-t-OP_TYPE", ops.get(opNames.indexOf("OP_TYPE")).getDefinition().getReference().getValue());
 	}

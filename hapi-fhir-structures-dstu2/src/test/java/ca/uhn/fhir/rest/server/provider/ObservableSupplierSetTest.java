@@ -38,11 +38,11 @@ class ObservableSupplierSetTest {
 		myObservableSupplierSet.addSupplier(supplier);
 		myObserver.assertCalls(1, 0);
 		assertEquals(0, myCounter.get());
-		assertThat(myObservableSupplierSet.getSupplierResults(), hasSize(1));
+		assertThat(myObservableSupplierSet.getSupplierResults()).hasSize(1);
 		assertEquals(1, myCounter.get());
 		myObservableSupplierSet.removeSupplier(supplier);
 		myObserver.assertCalls(1, 1);
-		assertThat(myObservableSupplierSet.getSupplierResults(), hasSize(0));
+		assertThat(myObservableSupplierSet.getSupplierResults()).hasSize(0);
 	}
 
 	@Test
@@ -50,15 +50,15 @@ class ObservableSupplierSetTest {
         myObservableSupplierSet.addSupplier(myCounter::incrementAndGet);
 		myObserver.assertCalls(1, 0);
 		assertEquals(0, myCounter.get());
-		assertThat(myObservableSupplierSet.getSupplierResults(), hasSize(1));
+		assertThat(myObservableSupplierSet.getSupplierResults()).hasSize(1);
 		assertEquals(1, myCounter.get());
 
 		// You might expect this to remove our supplier, but in fact it is a different lambda, so it fails and logs a stack trace
 		myObservableSupplierSet.removeSupplier(myCounter::incrementAndGet);
 		myObserver.assertCalls(1, 0);
-		assertThat(myObservableSupplierSet.getSupplierResults(), hasSize(1));
+		assertThat(myObservableSupplierSet.getSupplierResults()).hasSize(1);
 		List<ILoggingEvent> events = myLogger.filterLoggingEventsWithMessageContaining("Failed to remove supplier");
-		assertThat(events, hasSize(1));
+		assertThat(events).hasSize(1);
 		assertEquals(Level.WARN, events.get(0).getLevel());
 	}
 
@@ -66,18 +66,18 @@ class ObservableSupplierSetTest {
 	public void testDetach() {
 		myObservableSupplierSet.addSupplier(myCounter::incrementAndGet);
 		myObserver.assertCalls(1, 0);
-		assertThat(myObservableSupplierSet.getSupplierResults(), hasSize(1));
+		assertThat(myObservableSupplierSet.getSupplierResults()).hasSize(1);
 
 		myObservableSupplierSet.addSupplier(myCounter::incrementAndGet);
 		myObserver.assertCalls(2, 0);
-		assertThat(myObservableSupplierSet.getSupplierResults(), hasSize(2));
+		assertThat(myObservableSupplierSet.getSupplierResults()).hasSize(2);
 
 		myObservableSupplierSet.detach(myObserver);
 
 		// We now have a third supplier but the observer has been detached, so it was not notified of the third supplier
 		myObservableSupplierSet.addSupplier(myCounter::incrementAndGet);
 		myObserver.assertCalls(2, 0);
-		assertThat(myObservableSupplierSet.getSupplierResults(), hasSize(3));
+		assertThat(myObservableSupplierSet.getSupplierResults()).hasSize(3);
 	}
 
 	private static class TestObserver implements IObservableSupplierSetObserver {

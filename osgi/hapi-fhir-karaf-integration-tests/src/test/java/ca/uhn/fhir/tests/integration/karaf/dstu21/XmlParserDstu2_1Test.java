@@ -1674,7 +1674,7 @@ public class XmlParserDstu2_1Test {
 		p.setId("123");
 		p.addName().addFamily("ABC");
 
-		assertThat(ourCtx.newXmlParser().encodeResourceToString(p), stringContainsInOrder("123", "ABC"));
+		assertThat(ourCtx.newXmlParser().encodeResourceToString(p)).containsSubsequence("123", "ABC"));
 		assertThat(ourCtx.newXmlParser().setOmitResourceId(true).encodeResourceToString(p)).contains("ABC"));
 		assertThat(ourCtx.newXmlParser().setOmitResourceId(true).encodeResourceToString(p), not(containsString("123")));
 	}

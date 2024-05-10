@@ -138,7 +138,7 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 		Bundle b = (Bundle) output.getParameter().get(0).getResource();
 		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 		assertThat(ids).containsExactlyInAnyOrder(patientId, encId, orgId1, orgId2, orgId1parent, locPId, locCId, obsId, devId);
-		assertThat(ids, not(containsInRelativeOrder(encUId)));
+		assertThat(ids).doesNotContainSubsequence(encUId);
 
 		ourLog.info(ids.toString());
 	}
@@ -448,7 +448,7 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 
 		assertThat(ids).containsExactlyInAnyOrder(o1Id, o2Id, p1Id, p2Id, c1Id, c2Id);
-		assertThat(ids, not(containsInRelativeOrder(c3Id)));
+		assertThat(ids).doesNotContainSubsequence(c3Id);
 	}
 
 	@Test
@@ -492,8 +492,8 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 
 			assertThat(ids).containsExactlyInAnyOrder(o1Id, p1Id, c1Id);
 			assertThat(ids).isNotEqualTo((o2Id));
-			assertThat(ids, not(hasItem(c2Id)));
-			assertThat(ids, not(hasItem(p2Id)));
+			assertThat(ids).doesNotContain(c2Id);
+			assertThat(ids).doesNotContain(p2Id);
 		}
 
 		{
@@ -525,7 +525,7 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 			List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 
 			assertThat(ids).containsExactlyInAnyOrder(o1Id, p1Id, c1Id, o2Id, c2Id, p2Id);
-			assertThat(ids, not(hasItem(c5Id)));
+			assertThat(ids).doesNotContain(c5Id);
 		}
 
 		{
@@ -543,7 +543,7 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 			List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 
 			assertThat(ids).containsExactlyInAnyOrder(o1Id, p1Id, c1Id, o2Id, c2Id, p2Id, p3Id, o3Id, c3Id, p4Id, c4Id, o4Id);
-			assertThat(ids, not(hasItem(c5Id)));
+			assertThat(ids).doesNotContain(c5Id);
 		}
 
 		{
@@ -571,7 +571,7 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 			allresults.addAll(secondBundle);
 
 			assertThat(allresults).containsExactlyInAnyOrder(o1Id, p1Id, c1Id, o2Id, c2Id, p2Id, p3Id, o3Id, c3Id, p4Id, c4Id, o4Id);
-			assertThat(allresults, not(hasItem(c5Id)));
+			assertThat(allresults).doesNotContain(c5Id);
 		}
 	}
 
@@ -602,8 +602,8 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 
 		assertThat(ids).containsExactlyInAnyOrder(p1Id, c1Id, obs1Id);
-		assertThat(ids, not(hasItem(o1Id)));
-		assertThat(ids, not(hasItem(m1Id)));
+		assertThat(ids).doesNotContain(o1Id);
+		assertThat(ids).doesNotContain(m1Id);
 	}
 
 	@Test
@@ -633,8 +633,8 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 
 		assertThat(ids).containsExactlyInAnyOrder(p1Id, c1Id, obs1Id);
-		assertThat(ids, not(hasItem(o1Id)));
-		assertThat(ids, not(hasItem(m1Id)));
+		assertThat(ids).doesNotContain(o1Id);
+		assertThat(ids).doesNotContain(m1Id);
 	}
 
 	@Test
@@ -672,10 +672,10 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 
 		assertThat(ids).containsExactlyInAnyOrder(p1Id, c1Id, obs1Id);
-		assertThat(ids, not(hasItem(o1Id)));
-		assertThat(ids, not(hasItem(m1Id)));
-		assertThat(ids, not(hasItem(p2Id)));
-		assertThat(ids, not(hasItem(o2Id)));
+		assertThat(ids).doesNotContain(o1Id);
+		assertThat(ids).doesNotContain(m1Id);
+		assertThat(ids).doesNotContain(p2Id);
+		assertThat(ids).doesNotContain(o2Id);
 	}
 
 	@Test
@@ -713,7 +713,7 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 			assertEquals(Bundle.BundleType.SEARCHSET, b.getType());
 			List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 			assertThat(ids).containsExactlyInAnyOrder(o1Id, pabcId, c1Id, pdefId, o2Id, c2Id);
-			assertThat(ids, not(hasItem(c3Id)));
+			assertThat(ids).doesNotContain(c3Id);
 		}
 
 

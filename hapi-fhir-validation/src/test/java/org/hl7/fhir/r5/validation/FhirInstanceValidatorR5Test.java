@@ -991,7 +991,7 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 		for (String msg : messages) {
 			messages.add(msg);
 		}
-		assertThat(messages, not(hasItem("All observations should have a performer")));
+		assertThat(messages).doesNotContain("All observations should have a performer");
 	}
 
 	@Test

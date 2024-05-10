@@ -1129,7 +1129,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 			assertThat(foundIds).as("Didn't find expected ID " + containedString + " in IDS: " + foundIds).contains(containedString);
 		}
 		for (String excludedString : theExcludedList) {
-			assertThat("Didn't want unexpected ID " + excludedString + " in IDS: " + foundIds, foundIds, not(hasItem(excludedString)));
+			assertThat(foundIds).as("Didn't want unexpected ID " + excludedString + " in IDS: " + foundIds).doesNotContain(excludedString);
 		}
 		return jobInstance;
 	}

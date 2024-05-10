@@ -89,7 +89,7 @@ public class TerminologyLoaderSvcSnomedCtTest extends BaseLoaderTest {
 		ourLog.info(allCodes.toString());
 
 		assertThat(allCodes).contains("116680003");
-		assertThat(allCodes, not(hasItem("207527008")));
+		assertThat(allCodes).doesNotContain("207527008");
 
 		allCodes = toCodes(csv, false);
 		ourLog.info(allCodes.toString());
@@ -112,7 +112,7 @@ public class TerminologyLoaderSvcSnomedCtTest extends BaseLoaderTest {
 		ourLog.info(allCodes.toString());
 
 		assertThat(allCodes).contains("116680003");
-		assertThat(allCodes, not(hasItem("207527008")));
+		assertThat(allCodes).doesNotContain("207527008");
 
 		allCodes = toCodes(csv, false);
 		ourLog.info(allCodes.toString());

@@ -261,7 +261,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		}
 		{
 			List<JpaPid> found = myObservationDao.searchForIds(new SearchParameterMap(Observation.SP_DATE, new DateParam(">2016-01-02")), null);
-			assertThat(JpaPid.toLongList(found), not(hasItem(id2.getIdPartAsLong())));
+			assertThat(JpaPid.toLongList(found)).doesNotContain(id2.getIdPartAsLong());
 		}
 	}
 

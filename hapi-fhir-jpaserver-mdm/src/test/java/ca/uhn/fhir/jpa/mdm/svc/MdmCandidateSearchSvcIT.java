@@ -24,8 +24,6 @@ import java.util.Collections;
 import java.util.Date;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -131,7 +129,7 @@ public class MdmCandidateSearchSvcIT extends BaseMdmR4Test {
 		incomingPatient.setGeneralPractitioner(Collections.singletonList(new Reference(practitionerAndUpdateLinks.getId())));
 
 		Collection<IAnyResource> patient = myMdmCandidateSearchSvc.findCandidates("Patient", incomingPatient, RequestPartitionId.allPartitions());
-		assertThat(patient, hasSize(1));
+		assertThat(patient).hasSize(1);
 	}
 
 	@Test

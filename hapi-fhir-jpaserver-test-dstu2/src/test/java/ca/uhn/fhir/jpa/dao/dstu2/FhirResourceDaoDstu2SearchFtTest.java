@@ -21,9 +21,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.not;
 import static org.mockito.Mockito.mock;
 
 public class FhirResourceDaoDstu2SearchFtTest extends BaseJpaDstu2Test {
@@ -323,7 +320,7 @@ public class FhirResourceDaoDstu2SearchFtTest extends BaseJpaDstu2Test {
 		assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(map))).containsExactly(pId1);
 		map = new SearchParameterMap();
 		map.add(Constants.PARAM_CONTENT, new StringParam("NAMEBBB"));
-		assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(map)), not(hasItem(pId1)));
+		assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(map))).doesNotContain(pId1);
 
 		myPatientDao.update(patient, null, true, mySrd);
 

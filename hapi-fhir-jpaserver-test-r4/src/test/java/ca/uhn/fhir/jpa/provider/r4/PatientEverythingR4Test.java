@@ -186,8 +186,8 @@ public class PatientEverythingR4Test extends BaseResourceProviderR4Test {
 		assertThat(actual).contains(orgId);
 		assertThat(actual).contains(taskId);
 		assertThat(actual).contains(myObsIds.toArray(new String[0]));
-		assertThat(actual, not(hasItem(myWrongPatId)));
-		assertThat(actual, not(hasItem(myWrongEnc1)));
+		assertThat(actual).doesNotContain(myWrongPatId);
+		assertThat(actual).doesNotContain(myWrongEnc1);
 	}
 
 	/**
@@ -213,8 +213,8 @@ public class PatientEverythingR4Test extends BaseResourceProviderR4Test {
 		assertThat(actual).contains(encId2);
 		assertThat(actual).contains(orgId);
 		assertThat(actual).contains(myObsIds.toArray(new String[0]));
-		assertThat(actual, not(hasItem(myWrongPatId)));
-		assertThat(actual, not(hasItem(myWrongEnc1)));
+		assertThat(actual).doesNotContain(myWrongPatId);
+		assertThat(actual).doesNotContain(myWrongEnc1);
 	}
 
 	/**

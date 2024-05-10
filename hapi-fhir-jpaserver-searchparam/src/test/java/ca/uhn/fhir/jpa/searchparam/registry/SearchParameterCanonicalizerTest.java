@@ -24,9 +24,6 @@ import org.slf4j.LoggerFactory;
 import static ca.uhn.fhir.util.HapiExtensions.EXTENSION_SEARCHPARAM_CUSTOM_BASE_RESOURCE;
 import static ca.uhn.fhir.util.HapiExtensions.EXTENSION_SEARCHPARAM_CUSTOM_TARGET_RESOURCE;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.not;
 
 @ExtendWith(MockitoExtension.class)
 public class SearchParameterCanonicalizerTest {
@@ -193,8 +190,8 @@ public class SearchParameterCanonicalizerTest {
 			assertThat(output.getBase()).containsExactlyInAnyOrder("Meal", "Patient");
 		}
 		assertThat(output.getTargets()).containsExactlyInAnyOrder("Chef", "Observation");
-		assertThat(output.getBase(), not(contains("Resource")));
-		assertThat(output.getTargets(), not(contains("Resource")));
+		assertThat(output.getBase()).doesNotContain("Resource");
+		assertThat(output.getTargets()).doesNotContain("Resource");
 	}
 
 }

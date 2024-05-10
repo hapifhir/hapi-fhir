@@ -76,8 +76,8 @@ class StatusEnumTest {
 			assertThat(StatusEnum.ourFromStates.get(newStatus)).contains(origStatus);
 			assertThat(StatusEnum.ourToStates.get(origStatus)).contains(newStatus);
 		} else {
-			assertThat(StatusEnum.ourFromStates.get(newStatus), not(hasItem(origStatus)));
-			assertThat(StatusEnum.ourToStates.get(origStatus), not(hasItem(newStatus)));
+			assertThat(StatusEnum.ourFromStates.get(newStatus)).doesNotContain(origStatus);
+			assertThat(StatusEnum.ourToStates.get(origStatus)).doesNotContain(newStatus);
 		}
 	}
 

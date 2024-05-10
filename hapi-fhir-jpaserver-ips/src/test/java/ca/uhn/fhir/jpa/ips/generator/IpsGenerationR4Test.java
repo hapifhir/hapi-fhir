@@ -46,8 +46,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -234,9 +232,9 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 
 		Composition composition = findCompositionSectionByDisplay(output, "History of Immunization Narrative");
 		// Should be newest first
-		assertThat(composition.getText().getDivAsString(), stringContainsInOrder(
+		assertThat(composition.getText().getDivAsString()).containsSubsequence(
 			"Vax 2015", "Vax 2010", "Vax 2005"
-		));
+		);
 
 		List<String> resourceDates = output
 			.getEntry()

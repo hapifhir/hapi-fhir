@@ -30,7 +30,7 @@ public class WorkChunkStatusEnumTest {
 			if (nextPrior.getNextStates().contains(theEnum)) {
 				assertThat(theEnum.getPriorStates()).as("is prior").contains(nextPrior);
 			} else {
-				assertThat("is not prior", theEnum.getPriorStates(), not(hasItem(nextPrior)));
+				assertThat(theEnum.getPriorStates()).as("is not prior").doesNotContain(nextPrior);
 			}
 		});
 	}
