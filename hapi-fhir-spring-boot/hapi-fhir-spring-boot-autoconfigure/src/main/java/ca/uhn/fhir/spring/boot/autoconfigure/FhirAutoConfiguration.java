@@ -75,9 +75,9 @@ import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.util.CollectionUtils;
 
-import javax.sql.DataSource;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
+import javax.sql.DataSource;
 
 /**
  * {@link EnableAutoConfiguration Auto-configuration} for HAPI FHIR.

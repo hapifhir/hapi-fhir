@@ -25,10 +25,10 @@ import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
 import ca.uhn.fhir.util.ICallable;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import javax.annotation.concurrent.NotThreadSafe;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import javax.annotation.concurrent.NotThreadSafe;
 
 /**
  * THIS CLASS IS NOT THREAD SAFE

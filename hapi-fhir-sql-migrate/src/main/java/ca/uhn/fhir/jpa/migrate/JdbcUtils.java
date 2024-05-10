@@ -50,7 +50,6 @@ import org.springframework.jdbc.core.ColumnMapRowMapper;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 
-import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -64,6 +63,7 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.sql.DataSource;
 
 public class JdbcUtils {
 	private static final Logger ourLog = LoggerFactory.getLogger(JdbcUtils.class);

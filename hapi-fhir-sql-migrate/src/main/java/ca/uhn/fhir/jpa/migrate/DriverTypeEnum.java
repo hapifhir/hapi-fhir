@@ -33,10 +33,10 @@ import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import javax.sql.DataSource;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import javax.sql.DataSource;
 
 public enum DriverTypeEnum {
 	H2_EMBEDDED("org.h2.Driver", false),
