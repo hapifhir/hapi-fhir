@@ -1,6 +1,5 @@
 package ca.uhn.fhir.rest.server.provider.dstu2;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.api.BundleInclusionRule;
 import ca.uhn.fhir.model.api.IResource;
@@ -26,6 +25,7 @@ import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class Dstu2BundleFactoryTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(Dstu2BundleFactoryTest.class);

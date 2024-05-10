@@ -1,6 +1,5 @@
 package ca.uhn.hapi.fhir.cdshooks.svc.prefetch;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -8,7 +7,7 @@ import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceRequestContextJson;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 class PrefetchTemplateUtilTest {

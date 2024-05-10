@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.subscription.module;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelRegistry;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.module.config.TestSubscriptionDstu3Config;
@@ -13,9 +12,9 @@ import org.springframework.test.context.ContextConfiguration;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 @ContextConfiguration(classes = {TestSubscriptionDstu3Config.class})
 public abstract class BaseSubscriptionDstu3Test extends BaseSubscriptionTest {

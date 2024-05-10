@@ -1,12 +1,9 @@
 package ca.uhn.fhir.jpa.subscription.module;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
-import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
+import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
 import ca.uhn.fhir.util.HapiExtensions;
@@ -28,6 +25,9 @@ import java.util.HashMap;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class CanonicalSubscriptionTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(CanonicalSubscriptionTest.class);

@@ -1,8 +1,5 @@
 package ca.uhn.hapi.fhir.cdshooks.svc;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsMethod;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceRequestJson;
@@ -12,16 +9,19 @@ import ca.uhn.test.util.LogEventIterableAssert;
 import ca.uhn.test.util.LogbackCaptureTestExtension;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
+import jakarta.annotation.Nonnull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import jakarta.annotation.Nonnull;
 import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
 class CdsServiceCacheTest {

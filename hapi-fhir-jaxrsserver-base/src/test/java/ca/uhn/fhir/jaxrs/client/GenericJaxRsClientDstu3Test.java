@@ -1,7 +1,5 @@
 package ca.uhn.fhir.jaxrs.client;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.Include;
@@ -13,7 +11,6 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.api.SearchStyleEnum;
 import ca.uhn.fhir.rest.api.SummaryEnum;
-import ca.uhn.fhir.rest.client.api.Header;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.exceptions.InvalidResponseException;
@@ -22,7 +19,6 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.test.utilities.server.HttpServletExtension;
 import ca.uhn.fhir.test.utilities.server.RequestCaptureServlet;
-import com.google.common.collect.ArrayListMultimap;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
@@ -49,17 +45,17 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class GenericJaxRsClientDstu3Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(GenericJaxRsClientDstu3Test.class);

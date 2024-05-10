@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jaxrs.server.util;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jaxrs.server.test.TestJaxRsDummyPatientProvider;
 import ca.uhn.fhir.model.dstu2.resource.Parameters;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
@@ -23,8 +22,9 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class JaxRsMethodBindingsTest {
 

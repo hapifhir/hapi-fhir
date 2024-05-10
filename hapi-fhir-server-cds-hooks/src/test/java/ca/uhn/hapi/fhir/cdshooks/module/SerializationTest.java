@@ -1,7 +1,5 @@
 package ca.uhn.hapi.fhir.cdshooks.module;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceRequestContextJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceRequestJson;
@@ -30,7 +28,9 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalToCompressingWhiteSpace;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 @ExtendWith(SpringExtension.class)
 class SerializationTest {

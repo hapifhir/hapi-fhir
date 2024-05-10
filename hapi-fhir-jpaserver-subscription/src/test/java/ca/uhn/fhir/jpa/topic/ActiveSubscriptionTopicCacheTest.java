@@ -1,12 +1,12 @@
 package ca.uhn.fhir.jpa.topic;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.hl7.fhir.r5.model.SubscriptionTopic;
 import org.junit.jupiter.api.Test;
 
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ActiveSubscriptionTopicCacheTest {
 	@Test

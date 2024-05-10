@@ -1,7 +1,5 @@
 package ca.uhn.fhir.jpa.migrate;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.jpa.migrate.entity.HapiMigrationEntity;
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.ColumnTypeEnum;
@@ -18,6 +16,8 @@ import java.util.Set;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 class HapiMigrationStorageSvcTest extends BaseMigrationTest {

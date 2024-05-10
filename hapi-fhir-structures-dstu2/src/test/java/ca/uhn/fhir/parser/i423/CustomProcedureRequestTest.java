@@ -1,10 +1,9 @@
 package ca.uhn.fhir.parser.i423;
 
 
-import org.junit.jupiter.api.Test;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.primitive.IntegerDt;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 

@@ -1,6 +1,5 @@
 package ca.uhn.fhir.model.primitive;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
@@ -33,8 +32,8 @@ import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
-
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 

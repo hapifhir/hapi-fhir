@@ -1,7 +1,5 @@
 package ca.uhn.fhir.rest.server.messaging.json;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
@@ -11,13 +9,13 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.messaging.BaseResourceMessage;
 import ca.uhn.fhir.rest.server.messaging.ResourceOperationMessage;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
 
-import jakarta.annotation.Nonnull;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 class BaseJsonMessageTest {
 	FhirContext ourFhirContext = FhirContext.forR4Cached();

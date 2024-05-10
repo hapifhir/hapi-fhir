@@ -1,7 +1,5 @@
 package ca.uhn.fhir.jpa.cache;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.jpa.cache.config.RegisteredResourceListenerFactoryConfig;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -17,7 +15,8 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.Collections;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;

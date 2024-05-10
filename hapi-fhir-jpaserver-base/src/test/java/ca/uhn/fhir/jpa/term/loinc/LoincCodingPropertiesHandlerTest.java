@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.term.loinc;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ch.qos.logback.classic.Level;
@@ -26,6 +25,7 @@ import static ca.uhn.fhir.jpa.term.loinc.LoincCodingPropertiesHandler.ASK_AT_ORD
 import static ca.uhn.fhir.jpa.term.loinc.LoincCodingPropertiesHandler.ASSOCIATED_OBSERVATIONS_PROP_NAME;
 import static ca.uhn.fhir.jpa.term.loinc.LoincCodingPropertiesHandler.LOINC_NUM;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;

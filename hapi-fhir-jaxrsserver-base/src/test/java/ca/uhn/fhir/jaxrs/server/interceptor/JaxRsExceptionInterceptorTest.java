@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jaxrs.server.interceptor;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jaxrs.server.AbstractJaxRsProvider;
 import ca.uhn.fhir.jaxrs.server.test.TestJaxRsDummyPatientProvider;
 import ca.uhn.fhir.jaxrs.server.util.JaxRsRequest;
@@ -21,6 +20,7 @@ import java.net.URI;
 import java.util.HashMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isNull;

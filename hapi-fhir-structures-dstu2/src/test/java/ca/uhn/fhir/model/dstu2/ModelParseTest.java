@@ -1,6 +1,5 @@
 package ca.uhn.fhir.model.dstu2;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.parser.IParser;
@@ -13,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ModelParseTest {
 	static final Logger ourLog = LoggerFactory.getLogger(ModelParseTest.class);

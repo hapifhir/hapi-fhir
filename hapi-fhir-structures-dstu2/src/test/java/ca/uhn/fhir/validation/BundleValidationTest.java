@@ -1,6 +1,5 @@
 package ca.uhn.fhir.validation;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu2.resource.Appointment;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
@@ -14,6 +13,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 /**
  * @author Bill de Beaubien on 11/30/2015.

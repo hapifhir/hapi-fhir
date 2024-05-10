@@ -25,7 +25,11 @@ import ca.uhn.fhir.util.StopWatch;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
+import java.io.StringReader;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;

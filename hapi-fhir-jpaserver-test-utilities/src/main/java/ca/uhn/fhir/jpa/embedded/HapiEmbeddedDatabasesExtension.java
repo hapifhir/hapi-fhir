@@ -31,6 +31,7 @@ import org.junit.jupiter.params.provider.ArgumentsProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.sql.DataSource;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -39,7 +40,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
-import javax.sql.DataSource;
 
 public class HapiEmbeddedDatabasesExtension implements AfterAllCallback {
 

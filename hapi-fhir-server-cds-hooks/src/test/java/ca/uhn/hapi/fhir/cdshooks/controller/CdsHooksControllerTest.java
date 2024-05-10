@@ -1,13 +1,4 @@
-package ca.uhn.hapi.fhir.cdshooks.controller;import static org.junit.jupiter.api.Assertions.assertEquals;
-/*-
- * #%L
- * Smile CDR - CDR
- * %%
- * Copyright (C) 2016 - 2017 Simpatico Intelligent Systems Inc
- * %%
- * All rights reserved.
- * #L%
- */
+package ca.uhn.hapi.fhir.cdshooks.controller;
 
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsServiceRegistry;
@@ -22,6 +13,7 @@ import ca.uhn.hapi.fhir.cdshooks.config.TestCdsHooksConfig;
 import ca.uhn.hapi.fhir.cdshooks.svc.prefetch.CdsPrefetchFhirClientSvc;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.annotation.Nonnull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,11 +27,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import jakarta.annotation.Nonnull;
 import java.util.UUID;
 import java.util.function.Function;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;

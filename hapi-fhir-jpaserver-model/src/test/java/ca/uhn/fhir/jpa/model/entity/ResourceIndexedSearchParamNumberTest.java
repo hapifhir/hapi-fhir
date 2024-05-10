@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.model.entity;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -8,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import java.math.BigDecimal;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ResourceIndexedSearchParamNumberTest {
 	private static final String GRITTSCORE = "grittscore";

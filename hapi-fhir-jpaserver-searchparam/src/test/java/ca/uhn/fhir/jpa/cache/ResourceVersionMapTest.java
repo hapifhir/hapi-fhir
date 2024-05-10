@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.cache;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.model.primitive.IdDt;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.Test;
@@ -8,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.Set;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class ResourceVersionMapTest {
 

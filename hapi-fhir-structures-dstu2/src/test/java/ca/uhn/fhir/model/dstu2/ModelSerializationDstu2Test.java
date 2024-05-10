@@ -1,7 +1,5 @@
 package ca.uhn.fhir.model.dstu2;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.dstu2.composite.AddressDt;
@@ -22,7 +20,8 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Date;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ModelSerializationDstu2Test {
 

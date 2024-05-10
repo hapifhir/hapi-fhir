@@ -1,19 +1,18 @@
 package ca.uhn.fhir.jpa.migrate;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.DropIndexTask;
+import jakarta.annotation.Nonnull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import jakarta.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class MigrationTaskSkipperTest {
 	public static final String RELEASE = "4.1.0";

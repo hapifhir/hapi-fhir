@@ -1,7 +1,5 @@
 package ca.uhn.fhir.jpa.searchparam.registry;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.ComboSearchParamType;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -15,6 +13,8 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 

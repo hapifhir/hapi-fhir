@@ -1,8 +1,7 @@
 package ca.uhn.fhir.jpa.dao;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import com.google.common.collect.Lists;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Coding;
@@ -11,10 +10,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import jakarta.annotation.Nonnull;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 class CodingSpyTest {
 

@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.subscription.submit.interceptor;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -14,6 +13,7 @@ import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.subscription.SubscriptionConstants;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.r4b.model.CanonicalType;
 import org.hl7.fhir.r4b.model.Enumerations;
 import org.hl7.fhir.r4b.model.Subscription;
@@ -30,13 +30,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import jakarta.annotation.Nonnull;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;

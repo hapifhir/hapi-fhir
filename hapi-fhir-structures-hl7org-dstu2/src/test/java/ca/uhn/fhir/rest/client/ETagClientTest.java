@@ -1,6 +1,5 @@
 package ca.uhn.fhir.rest.client;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
@@ -18,9 +17,9 @@ import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicStatusLine;
 import org.hamcrest.core.StringContains;
 import org.hl7.fhir.dstu2.model.Patient;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
 
@@ -29,8 +28,8 @@ import java.nio.charset.Charset;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
-
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 

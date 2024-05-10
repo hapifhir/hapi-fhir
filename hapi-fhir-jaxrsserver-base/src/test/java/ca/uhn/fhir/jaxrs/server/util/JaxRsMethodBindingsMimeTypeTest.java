@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jaxrs.server.util;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jaxrs.server.test.AbstractDummyPatientProvider;
 import ca.uhn.fhir.jaxrs.server.test.TestJaxRsDummyPatientProviderR4;
 import ca.uhn.fhir.jaxrs.server.test.TestJaxRsDummyPatientProviderR4MimeType;
@@ -8,7 +7,7 @@ import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class JaxRsMethodBindingsMimeTypeTest {
 

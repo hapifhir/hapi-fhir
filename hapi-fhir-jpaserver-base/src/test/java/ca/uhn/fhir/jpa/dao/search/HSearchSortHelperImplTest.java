@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.dao.search;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
@@ -23,6 +22,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;

@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.searchparam.registry;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.model.api.ExtensionDt;
@@ -24,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import static ca.uhn.fhir.util.HapiExtensions.EXTENSION_SEARCHPARAM_CUSTOM_BASE_RESOURCE;
 import static ca.uhn.fhir.util.HapiExtensions.EXTENSION_SEARCHPARAM_CUSTOM_TARGET_RESOURCE;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockitoExtension.class)
 public class SearchParameterCanonicalizerTest {

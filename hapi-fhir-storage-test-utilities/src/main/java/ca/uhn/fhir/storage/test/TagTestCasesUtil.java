@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.storage.test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
@@ -38,7 +37,7 @@ import static ca.uhn.fhir.test.utilities.TagTestUtil.assertCodingsEqualAndInOrde
 import static ca.uhn.fhir.test.utilities.TagTestUtil.createMeta;
 import static ca.uhn.fhir.test.utilities.TagTestUtil.generateAllCodingPairs;
 import static ca.uhn.fhir.test.utilities.TagTestUtil.toStringList;
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Contains some test case helper functions for testing the storage of meta properties: tag, security and profile

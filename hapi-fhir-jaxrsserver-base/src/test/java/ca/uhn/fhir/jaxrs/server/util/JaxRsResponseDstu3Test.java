@@ -1,16 +1,10 @@
 package ca.uhn.fhir.jaxrs.server.util;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.Collections;
-import java.util.Set;
-
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.SummaryEnum;
+import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import jakarta.ws.rs.core.Response;
-
 import org.hl7.fhir.dstu3.model.Binary;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.IdType;
@@ -19,10 +13,14 @@ import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.api.SummaryEnum;
-import ca.uhn.fhir.rest.server.RestfulServerUtils;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.Collections;
+import java.util.Set;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class JaxRsResponseDstu3Test {
 	

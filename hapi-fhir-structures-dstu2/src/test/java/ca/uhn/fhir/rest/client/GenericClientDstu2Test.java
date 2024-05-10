@@ -1,7 +1,5 @@
 package ca.uhn.fhir.rest.client;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
@@ -50,6 +48,7 @@ import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.util.TestUtil;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.ReaderInputStream;
 import org.apache.http.Header;
@@ -74,7 +73,6 @@ import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
-import jakarta.annotation.Nonnull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
@@ -90,8 +88,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.either;
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
-
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 

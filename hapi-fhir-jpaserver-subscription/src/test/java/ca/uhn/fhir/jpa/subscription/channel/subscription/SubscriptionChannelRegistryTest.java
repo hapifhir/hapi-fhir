@@ -1,7 +1,5 @@
 package ca.uhn.fhir.jpa.subscription.channel.subscription;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.jpa.subscription.channel.api.BaseChannelSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
@@ -22,7 +20,8 @@ import org.springframework.messaging.MessageHandler;
 
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;

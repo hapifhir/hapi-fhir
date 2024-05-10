@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.migrate;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.entity.HapiMigrationEntity;
@@ -9,11 +8,10 @@ import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTest;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import org.hamcrest.Matchers;
+import jakarta.annotation.Nonnull;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import jakarta.annotation.Nonnull;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Properties;
@@ -21,7 +19,7 @@ import java.util.Set;
 import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 

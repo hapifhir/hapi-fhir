@@ -1,6 +1,5 @@
 package ca.uhn.hapi.fhir.cdshooks.svc.prefetch;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.hapi.fhir.cdshooks.api.CdsResolutionStrategyEnum;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceRequestJson;
@@ -11,7 +10,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class CdsResolutionStrategySvcTest {
 	private static final String TEST_FHIR_SERVER = "http://example.com/fhir";

@@ -1,10 +1,9 @@
 package ca.uhn.fhir.jpa.subscription.log;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.i18n.Msg;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class MsgTest {
 	@Test

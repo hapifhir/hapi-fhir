@@ -1,12 +1,11 @@
 package ca.uhn.fhir.jpa.topic;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.r4b.model.Enumerations;
 import org.hl7.fhir.r4b.model.SubscriptionTopic;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class SubscriptionTopicCanonicalizerTest {
 	@Test

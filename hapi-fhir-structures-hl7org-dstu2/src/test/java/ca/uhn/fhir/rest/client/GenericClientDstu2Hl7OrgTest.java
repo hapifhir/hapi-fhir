@@ -1,6 +1,5 @@
 package ca.uhn.fhir.rest.client;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.parser.IParser;
@@ -25,9 +24,9 @@ import org.hl7.fhir.dstu2.model.Parameters;
 import org.hl7.fhir.dstu2.model.Patient;
 import org.hl7.fhir.dstu2.model.StringType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
 import org.mockito.invocation.InvocationOnMock;
@@ -41,6 +40,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 

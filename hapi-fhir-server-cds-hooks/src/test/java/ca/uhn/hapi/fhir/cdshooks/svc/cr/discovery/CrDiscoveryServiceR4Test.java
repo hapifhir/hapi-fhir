@@ -1,6 +1,5 @@
 package ca.uhn.hapi.fhir.cdshooks.svc.cr.discovery;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceJson;
 import ca.uhn.hapi.fhir.cdshooks.module.CdsHooksObjectMapperFactory;
@@ -13,7 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CrDiscoveryServiceR4Test extends BaseCrTest {
 	@Test

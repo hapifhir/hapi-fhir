@@ -29,9 +29,9 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
+import javax.annotation.CheckReturnValue;
 import java.util.List;
 import java.util.Objects;
-import javax.annotation.CheckReturnValue;
 
 public class ServerInterceptorUtil {
 

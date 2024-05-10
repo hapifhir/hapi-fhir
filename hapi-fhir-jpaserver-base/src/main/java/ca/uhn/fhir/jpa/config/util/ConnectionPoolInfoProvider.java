@@ -24,9 +24,9 @@ import org.apache.commons.dbcp2.BasicDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.util.Optional;
-import javax.sql.DataSource;
 
 /**
  * Utility to hide complexity involved in obtaining connection pool information

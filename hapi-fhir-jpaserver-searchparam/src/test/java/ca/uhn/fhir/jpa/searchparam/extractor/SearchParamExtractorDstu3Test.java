@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.searchparam.extractor;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.ComboSearchParamType;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -10,7 +9,6 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.cache.ResourceChangeResult;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
-import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamCoords;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamNumber;
@@ -18,6 +16,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistryController;
 import ca.uhn.fhir.jpa.searchparam.registry.ReadOnlySearchParamCache;
@@ -28,7 +27,7 @@ import ca.uhn.fhir.util.StringUtil;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import org.hamcrest.Matchers;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.dstu3.model.Duration;
 import org.hl7.fhir.dstu3.model.Encounter;
 import org.hl7.fhir.dstu3.model.Location;
@@ -39,7 +38,6 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
-import jakarta.annotation.Nullable;
 import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.List;
@@ -50,6 +48,7 @@ import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SearchParamExtractorDstu3Test {
 

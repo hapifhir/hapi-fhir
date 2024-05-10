@@ -1,24 +1,24 @@
 package ca.uhn.fhir.jaxrs.server;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jaxrs.server.test.TestJaxRsDummyPatientProviderDstu2_1;
 import ca.uhn.fhir.jaxrs.server.test.TestJaxRsMockPatientRestProviderDstu2_1;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.IResourceProvider;
-import org.jboss.resteasy.specimpl.ResteasyHttpHeaders;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
 import jakarta.ws.rs.core.MultivaluedHashMap;
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
+import org.jboss.resteasy.specimpl.ResteasyHttpHeaders;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import java.net.URI;
 import java.util.Arrays;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 

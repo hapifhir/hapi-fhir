@@ -1,8 +1,5 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.annotation.Description;
@@ -32,6 +29,8 @@ import ca.uhn.fhir.rest.server.method.SearchMethodBinding;
 import ca.uhn.fhir.rest.server.method.SearchParameter;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.system.HapiSystemProperties;
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.http.HttpServletRequest;
 import org.hl7.fhir.dstu2.hapi.rest.server.ServerConformanceProvider;
 import org.hl7.fhir.dstu2.model.Conformance;
 import org.hl7.fhir.dstu2.model.Conformance.ConditionalDeleteStatus;
@@ -48,13 +47,14 @@ import org.hl7.fhir.dstu2.model.StringType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.Test;
 
-import jakarta.servlet.ServletConfig;
-import jakarta.servlet.http.HttpServletRequest;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 

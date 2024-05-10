@@ -1,7 +1,5 @@
 package ca.uhn.fhir.jpa.searchparam;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.Include;
@@ -23,6 +21,8 @@ import java.util.List;
 import static ca.uhn.fhir.jpa.searchparam.SearchParameterMap.compare;
 import static ca.uhn.fhir.rest.param.TokenParamModifier.TEXT;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 class SearchParameterMapTest {
 	static FhirContext ourFhirContext = FhirContext.forR4Cached();

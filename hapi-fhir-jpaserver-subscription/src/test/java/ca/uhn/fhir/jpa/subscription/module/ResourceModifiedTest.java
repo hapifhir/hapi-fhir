@@ -1,7 +1,5 @@
 package ca.uhn.fhir.jpa.subscription.module;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
@@ -10,7 +8,8 @@ import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class ResourceModifiedTest {
 	private FhirContext myFhirContext = FhirContext.forR4();

@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.model.search;
 
-import org.hamcrest.Matchers;
 import org.hibernate.search.engine.backend.document.DocumentElement;
 import org.hibernate.search.engine.backend.document.IndexFieldReference;
 import org.hibernate.search.engine.backend.document.IndexObjectFieldReference;

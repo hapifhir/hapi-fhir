@@ -1,9 +1,5 @@
 package ca.uhn.fhir.model.primitive;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
@@ -13,7 +9,6 @@ import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.ValidationResult;
 import org.apache.commons.lang3.time.FastDateFormat;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,6 +28,10 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOf
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.either;
 import static org.hamcrest.Matchers.endsWith;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 

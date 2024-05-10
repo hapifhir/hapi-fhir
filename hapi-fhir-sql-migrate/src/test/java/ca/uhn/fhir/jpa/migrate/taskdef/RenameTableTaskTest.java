@@ -9,9 +9,7 @@ import java.util.Set;
 import java.util.function.Supplier;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class RenameTableTaskTest extends BaseTest {

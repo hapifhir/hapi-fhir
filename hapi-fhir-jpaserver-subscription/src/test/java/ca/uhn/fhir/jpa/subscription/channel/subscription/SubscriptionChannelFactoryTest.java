@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.subscription.channel.subscription;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannelFactory;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,7 +16,7 @@ import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.GenericMessage;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;

@@ -1,15 +1,16 @@
 package ca.uhn.fhir.jpa.searchparam.registry;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
-import ca.uhn.fhir.jpa.cache.*;
+import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
+import ca.uhn.fhir.jpa.cache.IResourceVersionSvc;
+import ca.uhn.fhir.jpa.cache.ResourceChangeListenerCacheFactory;
+import ca.uhn.fhir.jpa.cache.ResourceChangeListenerCacheRefresherImpl;
+import ca.uhn.fhir.jpa.cache.ResourceChangeListenerRegistryImpl;
+import ca.uhn.fhir.jpa.cache.ResourceChangeResult;
+import ca.uhn.fhir.jpa.cache.ResourceVersionMap;
 import ca.uhn.fhir.jpa.cache.config.RegisteredResourceListenerFactoryConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
@@ -26,9 +27,14 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
 import ca.uhn.fhir.util.HapiExtensions;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.SearchParameter;
+import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,15 +47,24 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.testcontainers.shaded.com.google.common.collect.Sets;
 
-import jakarta.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
 public class SearchParamRegistryImplTest {

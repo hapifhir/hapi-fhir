@@ -1,8 +1,5 @@
 package ca.uhn.hapi.fhir.cdshooks.svc.cr.resolution;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.util.ClasspathUtil;
@@ -26,7 +23,9 @@ import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 
 import java.io.IOException;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class CdsCrServiceR4Test extends BaseCrTest {
 	private ObjectMapper myObjectMapper;
