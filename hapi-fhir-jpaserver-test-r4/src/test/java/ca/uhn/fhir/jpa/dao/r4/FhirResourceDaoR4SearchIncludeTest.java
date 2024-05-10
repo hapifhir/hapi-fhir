@@ -74,10 +74,16 @@ public class FhirResourceDaoR4SearchIncludeTest extends BaseJpaR4Test {
 			.addRevInclude(new Include("*").setRecurse(true));
 		IBundleProvider results = myOrganizationDao.search(map);
 		List<String> ids = toUnqualifiedVersionlessIdValues(results);
-		Collection<Matcher<String>> expected = IntStream.range(0, 10).mapToObj(t -> equalTo("EpisodeOfCare/EOC-" + t)).collect(Collectors.toList());
-		expected.add(equalTo("Organization/ORG-0"));
-		expected.add(equalTo("Organization/ORG-P"));
-		assertThat(ids.toString(), ids, new IsIterableContainingInAnyOrder(expected));
+
+		List<String> expected = IntStream.range(0, 10)
+			.mapToObj(t -> "EpisodeOfCare/EOC-" + t)
+			.collect(Collectors.toList());
+		expected.add("Organization/ORG-0");
+		expected.add("Organization/ORG-P");
+
+		assertThat(ids)
+			.as("Check ids list contains all expected elements in any order")
+			.containsExactlyInAnyOrderElementsOf(expected);
 	}
 
 	@Test

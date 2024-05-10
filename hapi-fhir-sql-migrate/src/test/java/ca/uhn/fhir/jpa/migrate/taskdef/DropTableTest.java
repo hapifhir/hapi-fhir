@@ -31,7 +31,7 @@ public class DropTableTest extends BaseTest {
 		task.setTableName("SOMETABLE");
 		getMigrator().addTask(task);
 
-		assertThat(JdbcUtils.getTableNames(getConnectionProperties()), (hasItems("SOMETABLE")));
+		assertThat(JdbcUtils.getTableNames(getConnectionProperties())).contains("SOMETABLE");
 
 		getMigrator().migrate();
 
@@ -51,7 +51,7 @@ public class DropTableTest extends BaseTest {
 		task.setTableName("SOMETABLE");
 		getMigrator().addTask(task);
 
-		assertThat(JdbcUtils.getTableNames(getConnectionProperties()), (hasItems("SOMETABLE")));
+		assertThat(JdbcUtils.getTableNames(getConnectionProperties())).contains("SOMETABLE");
 
 		getMigrator().migrate();
 
@@ -83,7 +83,7 @@ public class DropTableTest extends BaseTest {
 		task.setTableName("SOMETABLE");
 		getMigrator().addTask(task);
 
-		assertThat(JdbcUtils.getTableNames(getConnectionProperties()), (hasItems("SOMETABLE")));
+		assertThat(JdbcUtils.getTableNames(getConnectionProperties())).contains("SOMETABLE");
 
 		MigrationResult result = getMigrator().migrate();
 		assertEquals(0, result.changes);

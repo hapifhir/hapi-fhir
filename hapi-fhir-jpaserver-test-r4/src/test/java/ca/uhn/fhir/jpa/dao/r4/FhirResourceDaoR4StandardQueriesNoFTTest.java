@@ -35,10 +35,6 @@ import org.springframework.transaction.PlatformTransactionManager;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.not;
 
 /**
  * Verify that our query behaviour matches the spec.
@@ -208,12 +204,12 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 
 			private void assertFind(String theMessage, String theUrl) {
 				List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
-				assertThat(theMessage, resourceIds, hasItem(equalTo(myObservationId.getIdPart())));
+				assertThat(resourceIds).as(theMessage).contains(myObservationId.getIdPart());
 			}
 
 			private void assertNotFind(String theMessage, String theUrl) {
 				List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
-				assertThat(resourceIds).as(theMessage).doesNotContain(equalTo(myObservationId.getIdPart()));
+				assertThat(resourceIds).as(theMessage).doesNotContain(myObservationId.getIdPart());
 			}
 
 			@Nested
@@ -357,12 +353,12 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 
 			private void assertFind(String theMessage, String theUrl) {
 				List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
-				assertThat(theMessage, resourceIds, hasItem(equalTo(myResourceId.getIdPart())));
+				assertThat(resourceIds).as(theMessage).contains(myResourceId.getIdPart());
 			}
 
 			private void assertNotFind(String theMessage, String theUrl) {
 				List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
-				assertThat(resourceIds).as(theMessage).doesNotContain(equalTo(myResourceId.getIdPart()));
+				assertThat(resourceIds).as(theMessage).doesNotContain(myResourceId.getIdPart());
 			}
 		}
 
@@ -480,12 +476,12 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 
 			private void assertFind(String theMessage, String theUrl) {
 				List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
-				assertThat(theMessage, resourceIds, hasItem(equalTo(myResourceId.getIdPart())));
+				assertThat(resourceIds).as(theMessage).contains(myResourceId.getIdPart());
 			}
 
 			private void assertNotFind(String theMessage, String theUrl) {
 				List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
-				assertThat(resourceIds).as(theMessage).doesNotContain(equalTo(myResourceId.getIdPart()));
+				assertThat(resourceIds).as(theMessage).doesNotContain(myResourceId.getIdPart());
 			}
 		}
 

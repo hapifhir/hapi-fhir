@@ -185,10 +185,6 @@ import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.apache.commons.lang3.StringUtils.leftPad;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.hasItems;
-import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -2758,18 +2754,18 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 		result = performSearchLastUpdatedAndReturnIds(new DateRangeParam(beforeAny, beforeR2));
 		assertThat(result).as(result.toString()).doesNotContain(id2);
-		assertThat(result.toString(), result, (hasItems(id1a, id1b)));
+		assertThat(result).as(result.toString()).contains(id1a, id1b);
 
 		result = performSearchLastUpdatedAndReturnIds(new DateRangeParam(null, beforeR2));
-		assertThat(result, (hasItems(id1a, id1b)));
+		assertThat(result).contains(id1a, id1b);
 		assertThat(result).doesNotContain(id2);
 
 		result = performSearchLastUpdatedAndReturnIds(new DateRangeParam(new DateParam(GREATERTHAN_OR_EQUALS, beforeR2)));
 		AssertionsForInterfaceTypes.assertThat(result).doesNotContainAnyElementsOf(List.of(id1a, id1b));
-		assertThat(result, (hasItems(id2)));
+		assertThat(result).contains(id2);
 
 		result = performSearchLastUpdatedAndReturnIds(new DateRangeParam(new DateParam(LESSTHAN_OR_EQUALS, beforeR2)));
-		assertThat(result, (hasItems(id1a, id1b)));
+		assertThat(result).contains(id1a, id1b);
 		assertThat(result).doesNotContain(id2);
 	}
 
