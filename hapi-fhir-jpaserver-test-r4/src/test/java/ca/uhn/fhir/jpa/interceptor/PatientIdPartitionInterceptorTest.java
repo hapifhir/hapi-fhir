@@ -55,9 +55,6 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.either;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Test {
@@ -399,7 +396,7 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 			.filter(t -> !t.contains("FROM HFJ_TAG_DEF"))
 			.collect(Collectors.toList());
 		for (String next : selectQueryStrings) {
-			assertThat(next, either(containsString("PARTITION_ID =")).or(containsString("PARTITION_ID IN")));
+			assertThat(next).isIn("PARTITION_ID =", "PARTITION_ID IN");
 		}
 
 		ListMultimap<String, String> resourceIds = outcome
