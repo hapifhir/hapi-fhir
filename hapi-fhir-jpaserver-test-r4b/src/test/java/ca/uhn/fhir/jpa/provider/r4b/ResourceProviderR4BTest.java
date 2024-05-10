@@ -39,8 +39,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasItem;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SuppressWarnings("Duplicates")
@@ -363,8 +361,8 @@ public class ResourceProviderR4BTest extends BaseResourceProviderR4BTest {
 		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 
 		assertThat(ids).containsExactlyInAnyOrder(p1Id, c1Id, obs1Id);
-		assertThat(ids, Matchers.not(hasItem(o1Id)));
-		assertThat(ids, Matchers.not(hasItem(m1Id)));
+		assertThat(ids).doesNotContain(o1Id);
+		assertThat(ids).doesNotContain(m1Id);
 	}
 
 	@Test
@@ -394,8 +392,8 @@ public class ResourceProviderR4BTest extends BaseResourceProviderR4BTest {
 		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 
 		assertThat(ids).containsExactlyInAnyOrder(p1Id, c1Id, obs1Id);
-		assertThat(ids, Matchers.not(hasItem(o1Id)));
-		assertThat(ids, Matchers.not(hasItem(m1Id)));
+		assertThat(ids).doesNotContain(o1Id);
+		assertThat(ids).doesNotContain(m1Id);
 	}
 
 	@Test
@@ -448,10 +446,10 @@ public class ResourceProviderR4BTest extends BaseResourceProviderR4BTest {
 		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 
 		assertThat(ids).containsExactlyInAnyOrder(p1Id, c1Id, obs1Id);
-		assertThat(ids, Matchers.not(hasItem(o1Id)));
-		assertThat(ids, Matchers.not(hasItem(m1Id)));
-		assertThat(ids, Matchers.not(hasItem(p2Id)));
-		assertThat(ids, Matchers.not(hasItem(o2Id)));
+		assertThat(ids).doesNotContain(o1Id);
+		assertThat(ids).doesNotContain(m1Id);
+		assertThat(ids).doesNotContain(p2Id);
+		assertThat(ids).doesNotContain(o2Id);
 	}
 
 	@Test

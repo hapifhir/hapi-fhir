@@ -23,8 +23,6 @@ import org.junit.jupiter.api.Test;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.matchesPattern;
 
 @SuppressWarnings("Duplicates")
 public class ResourceProviderMeaningfulOutcomeMessageR4Test extends BaseResourceProviderR4Test {

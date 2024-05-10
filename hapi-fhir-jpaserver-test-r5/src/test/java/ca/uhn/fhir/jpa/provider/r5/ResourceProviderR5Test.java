@@ -402,8 +402,8 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 
 		assertThat(ids).containsExactlyInAnyOrder(p1Id, c1Id, obs1Id);
-		assertThat(ids, Matchers.not(hasItem(o1Id)));
-		assertThat(ids, Matchers.not(hasItem(m1Id)));
+		assertThat(ids).doesNotContain(o1Id);
+		assertThat(ids).doesNotContain(m1Id);
 	}
 
 	@Test
@@ -433,8 +433,8 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 
 		assertThat(ids).containsExactlyInAnyOrder(p1Id, c1Id, obs1Id);
-		assertThat(ids, Matchers.not(hasItem(o1Id)));
-		assertThat(ids, Matchers.not(hasItem(m1Id)));
+		assertThat(ids).doesNotContain(o1Id);
+		assertThat(ids).doesNotContain(m1Id);
 	}
 
 	@Test
@@ -472,10 +472,10 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 
 		assertThat(ids).containsExactlyInAnyOrder(p1Id, c1Id, obs1Id);
-		assertThat(ids, Matchers.not(hasItem(o1Id)));
-		assertThat(ids, Matchers.not(hasItem(m1Id)));
-		assertThat(ids, Matchers.not(hasItem(p2Id)));
-		assertThat(ids, Matchers.not(hasItem(o2Id)));
+		assertThat(ids).doesNotContain(o1Id);
+		assertThat(ids).doesNotContain(m1Id);
+		assertThat(ids).doesNotContain(p2Id);
+		assertThat(ids).doesNotContain(o2Id);
 	}
 
 

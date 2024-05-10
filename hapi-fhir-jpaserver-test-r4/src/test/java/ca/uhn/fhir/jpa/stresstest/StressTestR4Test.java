@@ -67,8 +67,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.leftPad;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.not;
 
 @TestPropertySource(properties = {
 	"max_db_connections=10"
@@ -465,7 +463,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		}
 
 		ourLog.info("Results: {}", results);
-		assertThat(results, not(Matchers.empty()));
+		assertThat(results).isNotEmpty();
 		assertThat(results.get(0)).contains("HTTP 409 Conflict");
 		assertThat(results.get(0)).contains("Error flushing transaction with resource types: [Patient]");
 	}
@@ -517,7 +515,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		}
 
 		ourLog.info("Results: {}", results);
-		assertThat(results, not(Matchers.empty()));
+		assertThat(results).isNotEmpty();
 		assertThat(results.get(0)).contains("HTTP 409 Conflict");
 		assertThat(results.get(0)).contains("Error flushing transaction with resource types: [Patient]");
 	}
