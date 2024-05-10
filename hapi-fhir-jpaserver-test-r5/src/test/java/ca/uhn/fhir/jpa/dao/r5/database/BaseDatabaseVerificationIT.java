@@ -162,18 +162,6 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
         assertThat(values.toString(), values, containsInAnyOrder(expectedIds.toArray(new String[0])));
     }
 
-	@Test
-	void testChainedSort() {
-		SearchParameterMap map = SearchParameterMap
-			.newSynchronous()
-			.setSort(new SortSpec("Practitioner:general-practitioner.family"));
-		myCaptureQueriesListener.clear();
-	    // given
-
-	    // when
-		assertDoesNotThrow(()->myPatientDao.search(map, mySrd));
-	}
-
 	@ParameterizedTest
 	@CsvSource(textBlock = """
 			query string,			Patient?name=smith
@@ -184,6 +172,7 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
 			sort token, 			Patient?_sort=active
 			sort chained date, 		Observation?_sort=patient.birthdate
 			sort chained string, 	Observation?_sort=patient.name
+			sort chained qualified, Patient?_sort=Practitioner:general-practitioner.family
 			sort chained token, 	Observation?_sort=patient.active
 			""")
 	void testSyntaxForVariousQueries(String theMessage, String theQuery) {
