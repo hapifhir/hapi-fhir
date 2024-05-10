@@ -449,7 +449,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 
 			Collection<ResourceIndexedSearchParamComposite> c = myExtractor.extractSearchParamComposites(resource);
 
-			assertThat(c, not(empty()));
+			assertThat(c).isNotEmpty();
 			assertThat(c).as("Extracts standard R4 composite sp")
 				.extracting("searchParamName")
 				.contains("component-code-value-concept");

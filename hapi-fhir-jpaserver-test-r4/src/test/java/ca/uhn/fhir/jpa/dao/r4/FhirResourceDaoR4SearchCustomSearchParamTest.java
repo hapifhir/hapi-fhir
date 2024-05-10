@@ -75,9 +75,6 @@ import java.util.stream.Collectors;
 import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import static org.mockito.Mockito.any;
@@ -547,7 +544,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		IBundleProvider outcome = myBundleDao.search(params);
 		List<String> ids = toUnqualifiedVersionlessIdValues(outcome);
 		ourLog.info("IDS: " + ids);
-		assertThat(ids, not(empty()));
+		assertThat(ids).isNotEmpty();
 	}
 
 

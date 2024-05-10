@@ -64,6 +64,8 @@ import org.springframework.data.domain.PageRequest;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -78,7 +80,6 @@ import java.util.stream.Collectors;
 import static java.time.temporal.ChronoUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -410,6 +411,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		Observation obs = new Observation();
 		obs.addIdentifier().setValue(identifierCode);
 		// when
+		Instant now = Instant.now();
 		DaoMethodOutcome outcome = myObservationDao.create(obs, matchUrl, new SystemRequestDetails());
 
 		// then
@@ -420,13 +422,15 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		ResourceSearchUrlEntity searchUrlEntity = myResourceSearchUrlDao.findAll().get(0);
 		assertNotNull(searchUrlEntity);
 		assertEquals(expectedResId, searchUrlEntity.getResourcePid());
-		assertThat(searchUrlEntity.getCreatedTime(), DateMatchers.within(1, SECONDS, new Date()));
+		assertThat(searchUrlEntity.getCreatedTime())
+			.as("Check that the creation time of the URL is within the last second")
+			.isBetween(now.minus(1, ChronoUnit.SECONDS), now);
 		assertEquals(expectedNormalizedMatchUrl, searchUrlEntity.getSearchUrl());
 
 	}
 
 	@Test
-	public void testCreateResourceWithKoreanText() throws IOException {
+	public void testCreateResourceWithKoreanText() {
 		String input = ClasspathUtil.loadResource("/r4/bug832-korean-text.xml");
 		Patient p = myFhirContext.newXmlParser().parseResource(Patient.class, input);
 		String id = myPatientDao.create(p).getId().toUnqualifiedVersionless().getValue();

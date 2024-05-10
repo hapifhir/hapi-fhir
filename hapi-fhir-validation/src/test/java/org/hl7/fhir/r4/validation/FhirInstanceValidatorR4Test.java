@@ -1160,7 +1160,7 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 
 		results = myFhirValidator.validateWithResult(rp);
 		outcome = logResultsAndReturnNonInformationalOnes(results);
-		assertThat(outcome, not(empty()));
+		assertThat(outcome).isNotEmpty();
 
 	}
 

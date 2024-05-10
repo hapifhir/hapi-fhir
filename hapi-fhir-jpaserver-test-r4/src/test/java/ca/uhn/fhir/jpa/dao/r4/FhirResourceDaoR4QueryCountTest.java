@@ -106,10 +106,6 @@ import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -219,8 +215,8 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		myStorageSettings.setExpungeEnabled(true);
 
-		runInTransaction(() -> assertThat(myResourceTableDao.findAll(), not(empty())));
-		runInTransaction(() -> assertThat(myResourceHistoryTableDao.findAll(), not(empty())));
+		runInTransaction(() -> assertThat(myResourceTableDao.findAll()).isNotEmpty());
+		runInTransaction(() -> assertThat(myResourceHistoryTableDao.findAll()).isNotEmpty());
 
 		logAllResources();
 
@@ -243,12 +239,12 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(0, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(80, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 
-		runInTransaction(() -> assertThat(myResourceTableDao.findAll(), empty()));
-		runInTransaction(() -> assertThat(myResourceHistoryTableDao.findAll(), empty()));
+		runInTransaction(() -> assertThat(myResourceTableDao.findAll()).isEmpty());
+		runInTransaction(() -> assertThat(myResourceHistoryTableDao.findAll()).isEmpty());
 
 	}
 
-	/**
+	/*
 	 * See the class javadoc before changing the counts in this test!
 	 */
 	@Test

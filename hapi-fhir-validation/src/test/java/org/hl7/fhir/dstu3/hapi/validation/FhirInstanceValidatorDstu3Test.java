@@ -1093,7 +1093,7 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 
 		results = myVal.validateWithResult(rp);
 		outcome = logResultsAndReturnNonInformationalOnes(results);
-		assertThat(outcome, not(empty()));
+		assertThat(outcome).isNotEmpty();
 
 	}
 

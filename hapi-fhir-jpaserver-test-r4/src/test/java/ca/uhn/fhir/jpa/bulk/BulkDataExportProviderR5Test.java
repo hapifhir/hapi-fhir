@@ -347,7 +347,7 @@ public class BulkDataExportProviderR5Test {
 			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
 			assertEquals("120", response.getFirstHeader(Constants.HEADER_RETRY_AFTER).getValue());
 			assertThat(response.getFirstHeader(Constants.HEADER_X_PROGRESS).getValue()).
-				contains("Build in progress - Status set to " + info.getStatus() + " at 20"));
+				contains("Build in progress - Status set to " + info.getStatus() + " at 20");
 		}
 	}
 
@@ -686,7 +686,7 @@ public class BulkDataExportProviderR5Test {
 		assertEquals(Constants.CT_FHIR_NDJSON, bp.getOutputFormat());
 		assertThat(bp.getResourceTypes()).as(bp.getResourceTypes().toString()).contains(
 			"DiagnosticReport", "Group", "Observation", "Device", "Patient", "Encounter"
-		));
+		);
 		assertNotNull(bp.getSince());
 		assertNotNull(bp.getFilters());
 		assertEquals(GROUP_ID, bp.getGroupId());
