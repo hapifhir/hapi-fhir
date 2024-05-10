@@ -36,6 +36,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,6 +58,7 @@ import java.util.Set;
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_EVERYTHING;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -162,19 +164,31 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
 
 	@Test
 	void testChainedSort() {
-	    // given
-
-	    // when
 		SearchParameterMap map = SearchParameterMap
 			.newSynchronous()
 			.setSort(new SortSpec("Practitioner:general-practitioner.family"));
 		myCaptureQueriesListener.clear();
-		myPatientDao.search(map, mySrd);
+	    // given
 
+	    // when
+		assertDoesNotThrow(()->myPatientDao.search(map, mySrd));
 	}
 
-
-
+	@ParameterizedTest
+	@CsvSource(textBlock = """
+			query string,			Patient?name=smith
+			query date,				Observation?date=2021
+			query token,			Patient?active=true
+			sort string, 			Patient?_sort=name
+			sort date, 				Observation?_sort=date
+			sort token, 			Patient?_sort=active
+			sort chained date, 		Observation?_sort=patient.birthdate
+			sort chained string, 	Observation?_sort=patient.name
+			sort chained token, 	Observation?_sort=patient.active
+			""")
+	void testSyntaxForVariousQueries(String theMessage, String theQuery) {
+		assertDoesNotThrow(()->myTestDaoSearch.searchForBundleProvider(theQuery), theMessage);
+	}
 
 	@Configuration
 	public static class TestConfig extends TestR5Config {
