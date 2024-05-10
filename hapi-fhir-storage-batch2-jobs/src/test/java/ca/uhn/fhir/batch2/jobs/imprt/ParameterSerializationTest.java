@@ -19,6 +19,6 @@ public class ParameterSerializationTest {
 
 		BulkImportJobParameters readBackParameters = startRequest.getParameters(BulkImportJobParameters.class);
 
-		assertThat(readBackParameters.getHttpBasicCredentials(), is(equalTo("username:password")));
+		assertThat(readBackParameters.getHttpBasicCredentials()).isEqualTo("username:password");
 	}
 }

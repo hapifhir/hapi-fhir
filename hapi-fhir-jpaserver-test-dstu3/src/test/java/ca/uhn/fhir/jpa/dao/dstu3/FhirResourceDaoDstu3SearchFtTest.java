@@ -62,7 +62,7 @@ public class FhirResourceDaoDstu3SearchFtTest extends BaseJpaDstu3Test {
 
 //		map = new SearchParameterMap();
 //		map.add(Observation.SP_CODE, new TokenParam(null, "blood").setModifier(TokenParamModifier.TEXT));
-//		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id1, id2)));
+//		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map))).contains(toValues(id1, id2));
 //
 //		map = new SearchParameterMap();
 //		map.add(Observation.SP_CODE, new TokenParam(null, "blood").setModifier(TokenParamModifier.TEXT));
@@ -71,7 +71,7 @@ public class FhirResourceDaoDstu3SearchFtTest extends BaseJpaDstu3Test {
 //		map = new SearchParameterMap();
 //		map.add(Observation.SP_CODE, new TokenParam(null, "blood").setModifier(TokenParamModifier.TEXT));
 //		map.add(Constants.PARAM_CONTENT, new StringParam("obs1"));
-//		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id1)));
+//		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map))).contains(toValues(id1));
 
 	}
 

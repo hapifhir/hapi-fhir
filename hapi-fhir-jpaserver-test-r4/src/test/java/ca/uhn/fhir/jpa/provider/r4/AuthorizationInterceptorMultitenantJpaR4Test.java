@@ -22,9 +22,6 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.blankOrNullString;
-import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SuppressWarnings("Duplicates")
@@ -252,7 +249,7 @@ public class AuthorizationInterceptorMultitenantJpaR4Test extends BaseMultitenan
 		assertTrue(patientBundle.hasLink());
 		assertTrue(patientBundle.getLink().stream().anyMatch(link -> link.hasRelation() && link.getRelation().equals("next")));
 		String nextLink = patientBundle.getLink().stream().filter(link -> link.hasRelation() && link.getRelation().equals("next")).findFirst().get().getUrl();
-		assertThat(nextLink, not(blankOrNullString()));
+		assertThat(nextLink).isNotBlank();
 
 		// Now come in as an imposter from a diff tenant with a stolen next link
 		// Request as a user with only access to TENANT_B

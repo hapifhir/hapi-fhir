@@ -56,7 +56,7 @@ public class RenameTableTaskTest extends BaseTest {
 			fail();
 		} catch (Exception e){
 			// then
-			assertThat(e.getMessage(), containsString("2516"));
+			assertThat(e.getMessage()).contains("2516");
 		}
 
 	}

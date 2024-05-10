@@ -29,7 +29,7 @@ class RandomDataHelperTest {
 
 		RandomDataHelper.fillFieldsRandomly(object);
 
-		assertThat(object.myString, not(blankOrNullString()));
+		assertThat(object.myString).isNotBlank();
 		assertThat(object.myInt).isNotEqualTo(0);
 		assertNotNull(object.myBoxedLong);
 		assertNotNull(object.myDate);

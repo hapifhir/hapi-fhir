@@ -397,7 +397,7 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 			assertEquals(201, status.getStatusLine().getStatusCode());
 			assertNotNull(status.getEntity());
 			String responseString = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-			assertThat(responseString, not(blankOrNullString()));
+			assertThat(responseString).isNotBlank();
 			assertThat(status.getEntity().getContentType().getValue().toLowerCase()).matches(".*json.*");
 		}
 
@@ -448,7 +448,7 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			assertNotNull(status.getEntity());
 			String responseString = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-			assertThat(responseString, not(blankOrNullString()));
+			assertThat(responseString).isNotBlank();
 			assertThat(status.getEntity().getContentType().getValue().toLowerCase()).matches(".*json.*");
 		}
 

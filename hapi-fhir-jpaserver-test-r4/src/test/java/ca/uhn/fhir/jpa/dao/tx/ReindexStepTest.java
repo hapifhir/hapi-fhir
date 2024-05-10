@@ -60,7 +60,7 @@ public class ReindexStepTest {
 		HapiTransactionService.ExecutionBuilder methodArgumentExceptionBuilder = builderArgumentCaptor.getValue();
 		RequestPartitionId methodArgumentRequestPartitionId = methodArgumentExceptionBuilder.getRequestPartitionIdForTesting();
 
-		assertThat(methodArgumentRequestPartitionId, notNullValue());
+		assertNotNull(methodArgumentRequestPartitionId);
 		assertEquals(theExpectedPartitionId, methodArgumentRequestPartitionId.getFirstPartitionIdOrNull());
 	}
 }

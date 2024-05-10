@@ -91,7 +91,7 @@ public class OperationServerDstu2Test {
 		assertThat(ops.get(0).getDefinition().getReference().getValue()).startsWith("OperationDefinition/");
 
 		OperationDefinition def = ourServer.getFhirClient().read().resource(OperationDefinition.class).withId(ops.get(0).getDefinition().getReference()).execute();
-		assertThat(def.getCode(), not(blankOrNullString()));
+		assertThat(def.getCode()).isNotBlank();
 
 		List<String> opNames = toOpNames(ops);
 		assertThat(opNames).containsSubsequence("OP_TYPE");

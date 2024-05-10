@@ -61,6 +61,6 @@ public class ResourceProviderLanguageParamR4BTest extends BaseResourceProviderR4
 				.returnBundle(Bundle.class)
 				.execute();
 		});
-		assertThat(exception.getMessage(), containsString(Msg.code(1223)));
+		assertThat(exception.getMessage()).contains(Msg.code(1223));
 	}
 }

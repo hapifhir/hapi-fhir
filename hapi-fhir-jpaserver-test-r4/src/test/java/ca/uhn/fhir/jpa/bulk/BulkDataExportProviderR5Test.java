@@ -74,18 +74,12 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -236,7 +230,7 @@ public class BulkDataExportProviderR5Test {
 		assertEquals(Constants.CT_FHIR_NDJSON, params.getOutputFormat());
 		assertNotNull(params.getSince());
 		assertTrue(params.getFilters().contains(filter));
-		assertThat(params.getPostFetchFilterUrls(), contains("Patient?_tag=foo"));
+		assertThat(params.getPostFetchFilterUrls().contains("Patient?_tag=foo"));
 	}
 
 	@Test
@@ -292,9 +286,9 @@ public class BulkDataExportProviderR5Test {
 
 		BulkExportJobParameters params = verifyJobStartAndReturnParameters();
 		assertEquals(Constants.CT_FHIR_NDJSON, params.getOutputFormat());
-		assertThat(params.getResourceTypes(), containsInAnyOrder("Patient", "Practitioner"));
-		assertThat(params.getSince(), notNullValue());
-		assertThat(params.getFilters(), containsInAnyOrder("Patient?identifier=foo"));
+		assertThat(params.getResourceTypes()).contains("Patient", "Practitioner");
+		assertNotNull(params.getSince());
+		assertThat(params.getFilters()).contains("Patient?identifier=foo");
 	}
 
 	@Test
@@ -321,9 +315,9 @@ public class BulkDataExportProviderR5Test {
 
 		BulkExportJobParameters params = verifyJobStartAndReturnParameters();
 		assertEquals(Constants.CT_FHIR_NDJSON, params.getOutputFormat());
-		assertThat(params.getResourceTypes(), containsInAnyOrder("Patient", "EpisodeOfCare"));
-		assertThat(params.getSince(), nullValue());
-		assertThat(params.getFilters(), containsInAnyOrder("Patient?_id=P999999990", "EpisodeOfCare?patient=P999999990"));
+		assertThat(params.getResourceTypes()).contains("Patient", "EpisodeOfCare");
+		assertNull(params.getSince());
+		assertThat(params.getFilters()).contains("Patient?_id=P999999990", "EpisodeOfCare?patient=P999999990");
 	}
 
 	@Test
@@ -352,8 +346,8 @@ public class BulkDataExportProviderR5Test {
 			assertEquals(202, response.getStatusLine().getStatusCode());
 			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
 			assertEquals("120", response.getFirstHeader(Constants.HEADER_RETRY_AFTER).getValue());
-			assertThat(response.getFirstHeader(Constants.HEADER_X_PROGRESS).getValue(),
-				containsString("Build in progress - Status set to " + info.getStatus() + " at 20"));
+			assertThat(response.getFirstHeader(Constants.HEADER_X_PROGRESS).getValue()).
+				contains("Build in progress - Status set to " + info.getStatus() + " at 20"));
 		}
 	}
 
@@ -386,7 +380,7 @@ public class BulkDataExportProviderR5Test {
 
 			String responseContent = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response content: {}", responseContent);
-			assertThat(responseContent, containsString("\"diagnostics\": \"Some Error Message\""));
+			assertThat(responseContent).contains("\"diagnostics\": \"Some Error Message\"");
 		}
 	}
 
@@ -576,7 +570,7 @@ public class BulkDataExportProviderR5Test {
 
 			assertEquals(404, response.getStatusLine().getStatusCode());
 			assertEquals(Constants.CT_FHIR_JSON_NEW, response.getEntity().getContentType().getValue().replaceAll(";.*", "").trim());
-			assertThat(responseContent, containsString("\"diagnostics\": \"Unknown job: AAA\""));
+			assertThat(responseContent).contains("\"diagnostics\": \"Unknown job: AAA\"");
 		}
 	}
 
@@ -623,11 +617,11 @@ public class BulkDataExportProviderR5Test {
 		BulkExportJobParameters bp = verifyJobStartAndReturnParameters();
 
 		assertEquals(Constants.CT_FHIR_NDJSON, bp.getOutputFormat());
-		assertThat(bp.getResourceTypes(), containsInAnyOrder("Observation", "DiagnosticReport"));
-		assertThat(bp.getSince(), notNullValue());
-		assertThat(bp.getFilters(), notNullValue());
+		assertThat(bp.getResourceTypes()).contains("Observation", "DiagnosticReport");
+		assertNotNull(bp.getSince());
+		assertNotNull(bp.getFilters());
 		assertEquals(GROUP_ID, bp.getGroupId());
-		assertThat(bp.isExpandMdm(), is(equalTo(true)));
+		assertThat(bp.isExpandMdm()).isEqualTo(true);
 	}
 
 	@Test
@@ -658,11 +652,11 @@ public class BulkDataExportProviderR5Test {
 
 		BulkExportJobParameters bp = verifyJobStartAndReturnParameters();
 		assertEquals(Constants.CT_FHIR_NDJSON, bp.getOutputFormat());
-		assertThat(bp.getResourceTypes(), containsInAnyOrder("Patient", "Practitioner"));
-		assertThat(bp.getSince(), notNullValue());
-		assertThat(bp.getFilters(), notNullValue());
+		assertThat(bp.getResourceTypes()).contains("Patient", "Practitioner");
+		assertNotNull(bp.getSince());
+		assertNotNull(bp.getFilters());
 		assertEquals(GROUP_ID, bp.getGroupId());
-		assertThat(bp.isExpandMdm(), is(equalTo(true)));
+		assertThat(bp.isExpandMdm()).isEqualTo(true);
 	}
 
 	@Test
@@ -690,13 +684,13 @@ public class BulkDataExportProviderR5Test {
 
 		BulkExportJobParameters bp = verifyJobStartAndReturnParameters();
 		assertEquals(Constants.CT_FHIR_NDJSON, bp.getOutputFormat());
-		assertThat(bp.getResourceTypes().toString(), bp.getResourceTypes(), containsInAnyOrder(
+		assertThat(bp.getResourceTypes()).as(bp.getResourceTypes().toString()).contains(
 			"DiagnosticReport", "Group", "Observation", "Device", "Patient", "Encounter"
 		));
-		assertThat(bp.getSince(), notNullValue());
-		assertThat(bp.getFilters(), notNullValue());
+		assertNotNull(bp.getSince());
+		assertNotNull(bp.getFilters());
 		assertEquals(GROUP_ID, bp.getGroupId());
-		assertThat(bp.isExpandMdm(), is(equalTo(false)));
+		assertThat(bp.isExpandMdm()).isEqualTo(false);
 	}
 
 	@Test
@@ -730,7 +724,7 @@ public class BulkDataExportProviderR5Test {
 		try (CloseableHttpResponse ignored = myClient.execute(get)) {
 			// verify
 			BulkExportJobParameters bp = verifyJobStartAndReturnParameters();
-			assertThat(bp.getFilters(), containsInAnyOrder(immunizationTypeFilter1, immunizationTypeFilter2, observationFilter1));
+			assertThat(bp.getFilters()).contains(immunizationTypeFilter1, immunizationTypeFilter2, observationFilter1);
 		}
 	}
 
@@ -748,8 +742,8 @@ public class BulkDataExportProviderR5Test {
 			String responseBody = IOUtils.toString(execute.getEntity().getContent(), StandardCharsets.UTF_8);
 
 			// verify
-			assertThat(execute.getStatusLine().getStatusCode(), is(equalTo(400)));
-			assertThat(responseBody, is(containsString("Resource types [StructureDefinition] are invalid for this type of export, as they do not contain search parameters that refer to patients.")));
+			assertThat(execute.getStatusLine().getStatusCode()).isEqualTo(400);
+			assertThat(responseBody).contains("Resource types [StructureDefinition] are invalid for this type of export, as they do not contain search parameters that refer to patients.");
 		}
 	}
 
@@ -767,7 +761,7 @@ public class BulkDataExportProviderR5Test {
 		try (CloseableHttpResponse execute = myClient.execute(get)) {
 
 			// verify
-			assertThat(execute.getStatusLine().getStatusCode(), is(equalTo(202)));
+			assertThat(execute.getStatusLine().getStatusCode()).isEqualTo(202);
 			final BulkExportJobParameters BulkExportJobParameters = verifyJobStartAndReturnParameters();
 
 			assertAll(
@@ -806,8 +800,8 @@ public class BulkDataExportProviderR5Test {
 		// verify
 		BulkExportJobParameters bp = verifyJobStartAndReturnParameters();
 		assertEquals(Constants.CT_FHIR_NDJSON, bp.getOutputFormat());
-		assertThat(bp.getResourceTypes(), containsInAnyOrder("Patient"));
-		assertThat(bp.getFilters(), containsInAnyOrder("Patient?gender=male", "Patient?gender=female"));
+		assertThat(bp.getResourceTypes()).contains("Patient");
+		assertThat(bp.getFilters()).contains("Patient?gender=male", "Patient?gender=female");
 	}
 
 	@ParameterizedTest
@@ -836,7 +830,7 @@ public class BulkDataExportProviderR5Test {
 		Set<String> expectedResourceTypes = new HashSet<>(SearchParameterUtil.getAllResourceTypesThatAreInPatientCompartment(myCtx));
 		BulkExportJobParameters bp = verifyJobStartAndReturnParameters();
 		assertEquals(Constants.CT_FHIR_NDJSON, bp.getOutputFormat());
-		assertThat(bp.getResourceTypes(), containsInAnyOrder(expectedResourceTypes.toArray()));
+		assertThat(bp.getResourceTypes()).containsAll(expectedResourceTypes);
 	}
 
 	@Test
@@ -869,10 +863,10 @@ public class BulkDataExportProviderR5Test {
 
 		BulkExportJobParameters bp = verifyJobStartAndReturnParameters();
 		assertEquals(Constants.CT_FHIR_NDJSON, bp.getOutputFormat());
-		assertThat(bp.getResourceTypes(), containsInAnyOrder("Immunization", "Observation"));
-		assertThat(bp.getSince(), notNullValue());
-		assertThat(bp.getFilters(), containsInAnyOrder("Immunization?vaccine-code=foo"));
-		assertThat(bp.getResourceTypes(), contains("Immunization", "Observation"));
+		assertThat(bp.getResourceTypes()).contains("Immunization", "Observation");
+		assertNotNull(bp.getSince());
+		assertThat(bp.getFilters()).contains("Immunization?vaccine-code=foo");
+		assertThat(bp.getResourceTypes()).contains("Immunization", "Observation");
 	}
 
 	@Test
@@ -1007,7 +1001,7 @@ public class BulkDataExportProviderR5Test {
 			verify(myJobCoordinator, times(1)).cancelInstance(A_JOB_ID);
 			String responseContent = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response content: {}", responseContent);
-			assertThat(responseContent, containsString("successfully cancelled."));
+			assertThat(responseContent).contains("successfully cancelled.");
 		}
 	}
 
@@ -1040,7 +1034,7 @@ public class BulkDataExportProviderR5Test {
 			String responseContent = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
 			// content would be blank, since the job is cancelled, so no
 			ourLog.info("Response content: {}", responseContent);
-			assertThat(responseContent, containsString("was already cancelled or has completed."));
+			assertThat(responseContent).contains("was already cancelled or has completed.");
 		}
 	}
 

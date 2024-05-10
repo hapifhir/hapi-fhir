@@ -47,10 +47,6 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.blankOrNullString;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.spy;
@@ -394,7 +390,7 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 		assertThat(encoded).contains(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID);
 		assertThat(encoded).doesNotContain("\"data\"");
 		String binaryId = docRef.getContentFirstRep().getAttachment().getDataElement().getExtensionString(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID);
-		assertThat(binaryId, not(blankOrNullString()));
+		assertThat(binaryId).isNotBlank();
 
 		// Now update
 		docRef = new DocumentReference();
@@ -497,7 +493,7 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 		assertThat(encoded).contains(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID);
 		assertThat(encoded).doesNotContain("\"data\"");
 		String binaryId = docRef.getContentFirstRep().getAttachment().getDataElement().getExtensionString(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID);
-		assertThat(binaryId, not(blankOrNullString()));
+		assertThat(binaryId).isNotBlank();
 
 		// Now update
 		docRef = new DocumentReference();

@@ -88,7 +88,7 @@ public class BulkImportWithPatientIdPartitioningTest extends BaseJpaR4Test {
 
 		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(request);
 		String instanceId = startResponse.getInstanceId();
-		assertThat(instanceId, not(blankOrNullString()));
+		assertThat(instanceId).isNotBlank();
 		ourLog.info("Execution got ID: {}", instanceId);
 
 		// Verify

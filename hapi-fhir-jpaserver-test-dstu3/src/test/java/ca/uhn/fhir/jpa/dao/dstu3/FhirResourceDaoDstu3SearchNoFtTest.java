@@ -796,7 +796,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 
 		SearchParameterMap params = new SearchParameterMap();
 //		params.add("_id", new StringOrListParam().addOr(new StringParam(id1.getIdPart())).addOr(new StringParam(id2.getIdPart())));
-//		assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(params)), containsInAnyOrder(id1, id2));
+//		assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(params))).contains(id1, id2);
 
 		params = new SearchParameterMap();
 		params.add("_id", new StringOrListParam().addOr(new StringParam(id1.getIdPart())).addOr(new StringParam(id1.getIdPart())));

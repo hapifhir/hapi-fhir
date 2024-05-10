@@ -97,7 +97,7 @@ public class MdmProviderMergeGoldenResourcesR4Test extends BaseProviderR4Test {
 
 		//TODO GGG eventually this will need to check a redirect... this is a hack which doesnt work
 		// Optional<Identifier> redirect = fromSourcePatient.getIdentifier().stream().filter(theIdentifier -> theIdentifier.getSystem().equals("REDIRECT")).findFirst();
-		// assertThat(redirect.get().getValue(), is(equalTo(myToSourcePatient.getIdElement().toUnqualified().getValue())));
+		// assertThat(redirect.get().getValue()).isEqualTo(myToSourcePatient.getIdElement().toUnqualified().getValue());
 
 		List<MdmLink> links = (List<MdmLink>) myMdmLinkDaoSvc.findMdmLinksBySourceResource(myToGoldenPatient);
 		assertThat(links).hasSize(1);

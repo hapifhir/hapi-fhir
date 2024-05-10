@@ -291,7 +291,7 @@ public class MdmMatchLinkSvcTest {
 			Patient targetPatient = getTargetResourceFromMdmLink(mdmLink, "Patient");
 			Identifier identifierFirstRep = targetPatient.getIdentifierFirstRep();
 			assertEquals(MdmConstants.HAPI_ENTERPRISE_IDENTIFIER_SYSTEM, identifierFirstRep.getSystem());
-			assertThat(identifierFirstRep.getValue(), not(blankOrNullString()));
+			assertThat(identifierFirstRep.getValue()).isNotBlank();
 		}
 
 		@Test

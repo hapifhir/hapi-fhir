@@ -86,7 +86,7 @@ public class StaleSearchDeletingSvcR4Test extends BaseResourceProviderR4Test {
 		BundleLinkComponent nextLink = resp1.getLink("next");
 		assertNotNull(nextLink);
 		String nextLinkUrl = nextLink.getUrl();
-		assertThat(nextLinkUrl, not(blankOrNullString()));
+		assertThat(nextLinkUrl).isNotBlank();
 
 		Bundle resp2 = myClient.search().byUrl(nextLinkUrl).returnBundle(Bundle.class).execute();
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp2));
