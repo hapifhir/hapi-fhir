@@ -60,9 +60,6 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.either;
-import static org.hamcrest.Matchers.equalTo;
 
 public class GenericJaxRsClientDstu3Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(GenericJaxRsClientDstu3Test.class);
@@ -494,7 +491,8 @@ public class GenericJaxRsClientDstu3Test {
 			.since(new InstantType("2001-01-02T11:22:33Z"))
 			.execute();
 		//@formatter:on
-		assertThat(MY_SERVLET.ourRequestUri, either(equalTo(ourServer.getBaseUrl() + "/fhir/Patient/123/_history?_since=2001-01-02T11:22:33Z&_count=123")).or(equalTo(ourServer.getBaseUrl() + "/fhir/Patient/123/_history?_count=123&_since=2001-01-02T11:22:33Z")));
+		assertThat(MY_SERVLET.ourRequestUri).isIn(ourServer.getBaseUrl() + "/fhir/Patient/123/_history?_since=2001-01-02T11:22:33Z&_count=123",
+			ourServer.getBaseUrl() + "/fhir/Patient/123/_history?_count=123&_since=2001-01-02T11:22:33Z");
 		assertThat(response.getEntry()).hasSize(1);
 
 
@@ -1321,7 +1319,8 @@ public class GenericJaxRsClientDstu3Test {
 			.execute();
 		//@formatter:on
 
-		assertThat(MY_SERVLET.ourRequestUri, either(equalTo(ourServer.getBaseUrl() + "/fhir/Patient/123?_elements=name%2Cidentifier")).or(equalTo(ourServer.getBaseUrl() + "/fhir/Patient/123?_elements=identifier%2Cname")));
+		assertThat(MY_SERVLET.ourRequestUri).isIn(ourServer.getBaseUrl() + "/fhir/Patient/123?_elements=name%2Cidentifier",
+			ourServer.getBaseUrl() + "/fhir/Patient/123?_elements=identifier%2Cname");
 		assertEquals(Patient.class, response.getClass());
 
 	}
@@ -1524,7 +1523,8 @@ public class GenericJaxRsClientDstu3Test {
 			.execute();
 		//@formatter:on
 
-		assertThat(MY_SERVLET.ourRequestUri, either(equalTo(ourServer.getBaseUrl() + "/fhir/Patient?name=james&_elements=name%2Cidentifier")).or(equalTo(ourServer.getBaseUrl() + "/fhir/Patient?name=james&_elements=identifier%2Cname")));
+		assertThat(MY_SERVLET.ourRequestUri).isIn(ourServer.getBaseUrl() + "/fhir/Patient?name=james&_elements=name%2Cidentifier",
+			ourServer.getBaseUrl() + "/fhir/Patient?name=james&_elements=identifier%2Cname");
 		assertEquals(Patient.class, response.getEntry().get(0).getResource().getClass());
 
 	}

@@ -2,6 +2,7 @@ package ca.uhn.fhir.jaxrs.client;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.Include;
@@ -53,9 +54,6 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.either;
-import static org.hamcrest.Matchers.equalTo;
 
 public class GenericJaxRsClientDstu2Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(GenericJaxRsClientDstu2Test.class);
@@ -460,7 +458,9 @@ public class GenericJaxRsClientDstu2Test {
 			.since(new InstantDt("2001-01-02T11:22:33Z"))
 			.execute();
 
-		assertThat(CAPTURE_SERVLET.ourRequestUri, either(equalTo(ourServer.getBaseUrl() + "/fhir/Patient/123/_history?_since=2001-01-02T11:22:33Z&_count=123")).or(equalTo(ourServer.getBaseUrl() + "/fhir/Patient/123/_history?_count=123&_since=2001-01-02T11:22:33Z")));
+		assertThat(CAPTURE_SERVLET.ourRequestUri).isIn(
+			ourServer.getBaseUrl() + "/fhir/Patient/123/_history?_since=2001-01-02T11:22:33Z&_count=123",
+			ourServer.getBaseUrl() + "/fhir/Patient/123/_history?_count=123&_since=2001-01-02T11:22:33Z");
 		assertThat(response.getEntry()).hasSize(1);
 
 
@@ -1255,7 +1255,8 @@ public class GenericJaxRsClientDstu2Test {
 			.elementsSubset("name", "identifier")
 			.execute();
 
-		assertThat(CAPTURE_SERVLET.ourRequestUri, either(equalTo(ourServer.getBaseUrl() + "/fhir/Patient/123?_elements=name%2Cidentifier")).or(equalTo(ourServer.getBaseUrl() + "/fhir/Patient/123?_elements=identifier%2Cname")));
+		assertThat(CAPTURE_SERVLET.ourRequestUri).isIn(ourServer.getBaseUrl() + "/fhir/Patient/123?_elements=name%2Cidentifier",
+			ourServer.getBaseUrl() + "/fhir/Patient/123?_elements=identifier%2Cname");
 		assertEquals(Patient.class, response.getClass());
 
 	}
@@ -1448,7 +1449,8 @@ public class GenericJaxRsClientDstu2Test {
 			.execute();
 
 
-		assertThat(CAPTURE_SERVLET.ourRequestUri, either(equalTo(ourServer.getBaseUrl() + "/fhir/Patient?name=james&_elements=name%2Cidentifier")).or(equalTo(ourServer.getBaseUrl() + "/fhir/Patient?name=james&_elements=identifier%2Cname")));
+		assertThat(CAPTURE_SERVLET.ourRequestUri).isIn(ourServer.getBaseUrl() + "/fhir/Patient?name=james&_elements=name%2Cidentifier",
+			ourServer.getBaseUrl() + "/fhir/Patient?name=james&_elements=identifier%2Cname");
 		assertEquals(Patient.class, response.getEntry().get(0).getResource().getClass());
 
 	}

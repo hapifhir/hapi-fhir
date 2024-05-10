@@ -23,9 +23,6 @@ import java.util.Arrays;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.hamcrest.CoreMatchers.hasItem;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.IsNot.not;
 import static org.junit.jupiter.api.Assertions.fail;
 
 
@@ -59,7 +56,7 @@ public class JaxRsRestfulClientFactoryTest extends BaseFhirVersionParameterizedT
 		final Client result = factory.getNativeClientClient();
 		assertNotNull(result);
 		ourLog.info("Classes: {}", result.getConfiguration().getClasses());
-		assertThat(result.getConfiguration().getClasses(), not(hasItem(ca.uhn.fhir.jaxrs.client.MyFilter.class)));
+		assertThat(result.getConfiguration().getClasses()).doesNotContain(ca.uhn.fhir.jaxrs.client.MyFilter.class)));
 	}
 
 	@Test
