@@ -25,9 +25,6 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.either;
 
 @TestMethodOrder(MethodOrderer.MethodName.class)
 public class ConsumeFilesStepR4Test extends BasePartitioningR4Test {
@@ -187,9 +184,9 @@ public class ConsumeFilesStepR4Test extends BasePartitioningR4Test {
 		// Validate
 
 		assertThat(myCaptureQueriesListener.logSelectQueries()).hasSize(1);
-		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false),
-			either(containsString("rt1_0.RES_TYPE='Patient' and rt1_0.FHIR_ID='B' and rt1_0.PARTITION_ID is null or rt1_0.RES_TYPE='Patient' and rt1_0.FHIR_ID='A' and rt1_0.PARTITION_ID is null"))
-				.or(containsString("rt1_0.RES_TYPE='Patient' and rt1_0.FHIR_ID='A' and rt1_0.PARTITION_ID is null or rt1_0.RES_TYPE='Patient' and rt1_0.FHIR_ID='B' and rt1_0.PARTITION_ID is null")));
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false)).isIn(
+			"rt1_0.RES_TYPE='Patient' and rt1_0.FHIR_ID='B' and rt1_0.PARTITION_ID is null or rt1_0.RES_TYPE='Patient' and rt1_0.FHIR_ID='A' and rt1_0.PARTITION_ID is null",
+			"rt1_0.RES_TYPE='Patient' and rt1_0.FHIR_ID='A' and rt1_0.PARTITION_ID is null or rt1_0.RES_TYPE='Patient' and rt1_0.FHIR_ID='B' and rt1_0.PARTITION_ID is null");
 		assertEquals(50, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());

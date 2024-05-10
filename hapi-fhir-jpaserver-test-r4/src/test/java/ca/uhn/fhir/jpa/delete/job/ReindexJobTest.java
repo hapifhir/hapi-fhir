@@ -215,8 +215,8 @@ public class ReindexJobTest extends BaseJpaR4Test {
 				assertEquals("http://foo", next.getSourceUri());
 			}
 			for (var next : myResourceHistoryTableDao.findAll()) {
-				assertThat(next.getRequestId(), blankOrNullString());
-				assertThat(next.getSourceUri(), blankOrNullString());
+				assertThat(next.getRequestId()).isBlank();
+				assertThat(next.getSourceUri()).isBlank();
 			}
 		});
 

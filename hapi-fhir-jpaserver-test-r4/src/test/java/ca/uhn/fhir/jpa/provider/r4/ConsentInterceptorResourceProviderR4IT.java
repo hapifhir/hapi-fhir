@@ -73,12 +73,6 @@ import static org.apache.commons.lang3.StringUtils.leftPad;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.blankOrNullString;
-import static org.hamcrest.Matchers.matchesPattern;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -243,7 +237,9 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 
 	private static void assertResponseIsFromCache(String theContext, IHttpResponse lastResponse) {
 		List<String> cacheOutcome = lastResponse.getHeaders(Constants.HEADER_X_CACHE);
-		assertThat(theContext + " - Response came from cache", cacheOutcome, hasItem(matchesPattern("^HIT from .*")));
+		assertThat(cacheOutcome)
+			.as(theContext + " - Response came from cache")
+			.anyMatch(item -> item.matches("^HIT from .*"));
 	}
 
 	private List<String> searchForObservations() {
@@ -382,7 +378,7 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 			assertThat(id).matches("^.*/Patient/[0-9]+/_history/[0-9]+$");
 			assertEquals(201, status.getStatusLine().getStatusCode());
 			String responseString = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-			assertThat(responseString, blankOrNullString());
+			assertThat(responseString).isBlank();
 			assertNull(status.getEntity().getContentType());
 		}
 
@@ -429,7 +425,7 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 			assertThat(idVal).matches("^.*/Patient/[0-9]+/_history/[0-9]+$");
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			String responseString = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-			assertThat(responseString, blankOrNullString());
+			assertThat(responseString).isBlank();
 			assertNull(status.getEntity().getContentType());
 		}
 
@@ -663,8 +659,8 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 
 		await()
 			.until(
-				() -> runInTransaction(() -> mySearchEntityDao.findByUuidAndFetchIncludes(searchId).orElseThrow(() -> new IllegalStateException()).getStatus()),
-				equalTo(SearchStatusEnum.FINISHED)
+				() -> runInTransaction(() -> mySearchEntityDao.findByUuidAndFetchIncludes(searchId).orElseThrow(() -> new IllegalStateException()).getStatus()) ==
+				SearchStatusEnum.FINISHED
 			);
 
 		runInTransaction(() -> {

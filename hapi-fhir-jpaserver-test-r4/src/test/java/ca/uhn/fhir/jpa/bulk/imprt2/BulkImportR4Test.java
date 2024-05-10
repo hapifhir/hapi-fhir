@@ -41,16 +41,9 @@ import java.util.stream.Collectors;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.blankOrNullString;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class BulkImportR4Test extends BaseJpaR4Test {
@@ -237,8 +230,8 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 			await().atMost(120, TimeUnit.SECONDS).until(() -> {
 				myJobCleanerService.runMaintenancePass();
 				JobInstance instance = myJobCoordinator.getInstance(instanceId);
-				return instance.getErrorCount();
-			}, greaterThan(0)); // This should hit 3, but concurrency can lead it to only hitting 1-2
+				return instance.getErrorCount() > 0;
+			}); // This should hit 3, but concurrency can lead it to only hitting 1-2
 
 			runInTransaction(() -> {
 				JobInstance instance = myJobCoordinator.getInstance(instanceId);
