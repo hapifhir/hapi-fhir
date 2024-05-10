@@ -129,7 +129,7 @@ public class MatchUrlService {
 					String totalModeEnumStr = paramList.get(0).get(0);
 					SearchTotalModeEnum searchTotalMode = SearchTotalModeEnum.fromCode(totalModeEnumStr);
 					if (searchTotalMode == null) {
-						// We had a legacy oops here supporting the UPPER CASE enum instead of the FHIR code for _total.
+						// We had an oops here supporting the UPPER CASE enum instead of the FHIR code for _total.
 						// Keep supporting it in case someone is using it.
 						try {
 							paramMap.setSearchTotalMode(SearchTotalModeEnum.valueOf(totalModeEnumStr));
