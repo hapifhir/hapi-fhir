@@ -70,9 +70,6 @@ import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TER
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -376,8 +373,8 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 
 		myPatientDao.delete(new IdType("Patient/TEST"));
 
-		runInTransaction(() -> assertThat(myResourceTableDao.findAll(), not(empty())));
-		runInTransaction(() -> assertThat(myResourceHistoryTableDao.findAll(), not(empty())));
+		runInTransaction(() -> assertThat(myResourceTableDao.findAll()).isNotEmpty());
+		runInTransaction(() -> assertThat(myResourceHistoryTableDao.findAll()).isNotEmpty());
 
 		myPatientDao.expunge(new ExpungeOptions()
 			.setExpungeDeletedResources(true)
@@ -403,8 +400,8 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 
 		myPatientDao.delete(new IdType("Patient/TEST"));
 
-		runInTransaction(() -> assertThat(myResourceTableDao.findAll(), not(empty())));
-		runInTransaction(() -> assertThat(myResourceHistoryTableDao.findAll(), not(empty())));
+		runInTransaction(() -> assertThat(myResourceTableDao.findAll()).isNotEmpty());
+		runInTransaction(() -> assertThat(myResourceHistoryTableDao.findAll()).isNotEmpty());
 
 		// Test
 		myCaptureQueriesListener.clear();
@@ -935,8 +932,8 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 
 		myPatientDao.delete(patientId);
 
-		runInTransaction(() -> assertThat(myResourceTableDao.findAll(), not(empty())));
-		runInTransaction(() -> assertThat(myResourceHistoryTableDao.findAll(), not(empty())));
+		runInTransaction(() -> assertThat(myResourceTableDao.findAll()).isNotEmpty());
+		runInTransaction(() -> assertThat(myResourceHistoryTableDao.findAll()).isNotEmpty());
 
 		// execute & verify
 		MethodNotAllowedException exception = null;

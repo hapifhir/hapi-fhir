@@ -33,10 +33,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.lessThanOrEqualTo;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.times;
@@ -104,7 +101,7 @@ public class ExpandResourcesAndWriteBinaryStepJpaTest extends BaseJpaR4Test {
 			String nextNdJsonString = new String(nextBinary.getContent(), StandardCharsets.UTF_8);
 
 			// This is the most important check here
-			assertThat(nextNdJsonString.length(), lessThanOrEqualTo(maxFileSize));
+			assertThat(nextNdJsonString.length()).isLessThanOrEqualTo(maxFileSize);
 
 			Arrays.stream(nextNdJsonString.split("\\n"))
 				.filter(StringUtils::isNotBlank)
