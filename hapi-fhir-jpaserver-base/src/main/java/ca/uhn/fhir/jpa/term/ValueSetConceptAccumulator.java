@@ -48,8 +48,6 @@ public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 	private int myDesignationsSaved;
 	private int myConceptsExcluded;
 
-	private boolean mySupportLegacyLob = false;
-
 	public ValueSetConceptAccumulator(
 			@Nonnull TermValueSet theTermValueSet,
 			@Nonnull ITermValueSetDao theValueSetDao,
@@ -186,10 +184,6 @@ public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 		concept.setSourceConceptPid(theSourceConceptPid);
 		concept.setSourceConceptDirectParentPids(theSourceConceptDirectParentPids);
 
-		if (!mySupportLegacyLob) {
-			concept.clearSourceConceptDirectParentPidsLob();
-		}
-
 		myValueSetConceptDao.save(concept);
 		myValueSetDao.save(myTermValueSet.incrementTotalConcepts());
 
@@ -259,9 +253,4 @@ public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 	// TODO: DM 2019-07-16 - If so, we should also populate TermValueSetConceptProperty entities here.
 	// TODO: DM 2019-07-30 - Expansions don't include the properties themselves; they may be needed to facilitate
 	// filters and parameterized expansions.
-
-	public ValueSetConceptAccumulator setSupportLegacyLob(boolean theSupportLegacyLob) {
-		mySupportLegacyLob = theSupportLegacyLob;
-		return this;
-	}
 }

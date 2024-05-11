@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.cli;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
@@ -32,7 +31,6 @@ import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.util.AttachmentUtil;
 import ca.uhn.fhir.util.FileUtil;
 import ca.uhn.fhir.util.ParametersUtil;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Charsets;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
@@ -267,7 +265,7 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 				"Response:\n{}", myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(response));
 	}
 
-	protected void addFileToRequestBundle(IBaseParameters theInputParameters, String theFileName, byte[] theBytes) {
+	private void addFileToRequestBundle(IBaseParameters theInputParameters, String theFileName, byte[] theBytes) {
 
 		byte[] bytes = theBytes;
 		String fileName = theFileName;
@@ -279,7 +277,7 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 					FileUtil.formatFileSize(ourTransferSizeLimit));
 
 			try {
-				File tempFile = File.createTempFile("hapi-fhir-cli", "." + suffix);
+				File tempFile = File.createTempFile("hapi-fhir-cli", suffix);
 				tempFile.deleteOnExit();
 				try (OutputStream fileOutputStream = new FileOutputStream(tempFile, false)) {
 					fileOutputStream.write(bytes);
@@ -364,10 +362,5 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 			retVal = retVal.substring(retVal.lastIndexOf("/"));
 		}
 		return retVal;
-	}
-
-	@VisibleForTesting
-	void setFhirContext(FhirContext theFhirContext) {
-		myFhirCtx = theFhirContext;
 	}
 }
