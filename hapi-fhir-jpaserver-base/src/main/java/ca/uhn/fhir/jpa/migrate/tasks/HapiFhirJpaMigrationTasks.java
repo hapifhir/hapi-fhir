@@ -207,7 +207,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 				.modifyColumn("20240511.16", "ERROR_COUNT")
 				.nonNullable()
 				.failureAllowed()
-				.withType(ColumnTypeEnum.DOUBLE);
+				.withType(ColumnTypeEnum.INT);
 	}
 
 	protected void init720() {
