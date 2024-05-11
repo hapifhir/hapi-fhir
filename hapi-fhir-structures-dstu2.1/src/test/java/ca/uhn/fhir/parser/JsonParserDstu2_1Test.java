@@ -1207,7 +1207,7 @@ public class JsonParserDstu2_1Test {
 		p.setId("123");
 		p.addName().addFamily("ABC");
 
-		assertThat(ourCtx.newJsonParser().encodeResourceToString(p)).containsSubsequence("123", "ABC"));
+		assertThat(ourCtx.newJsonParser().encodeResourceToString(p)).containsSubsequence("123", "ABC");
 		assertThat(ourCtx.newJsonParser().setOmitResourceId(true).encodeResourceToString(p)).contains("ABC");
 		assertThat(ourCtx.newJsonParser().setOmitResourceId(true).encodeResourceToString(p)).doesNotContain("123");
 	}

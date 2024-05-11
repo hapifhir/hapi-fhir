@@ -8,8 +8,7 @@ import java.sql.SQLException;
 import java.util.Set;
 import java.util.function.Supplier;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasItem;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class RenameTableTaskTest extends BaseTest {
@@ -33,7 +32,7 @@ public class RenameTableTaskTest extends BaseTest {
 
 		// then
 		Set<String> tableNames = JdbcUtils.getTableNames(getConnectionProperties());
-		assertThat(tableNames, hasItem(newTableName));
+		assertThat(tableNames).contains(newTableName);
 		assertThat(tableNames).doesNotContain(oldTableName);
 	}
 

@@ -60,13 +60,9 @@ import static ca.uhn.fhir.jpa.term.TermTestUtil.URL_MY_CODE_SYSTEM;
 import static ca.uhn.fhir.jpa.term.TermTestUtil.URL_MY_VALUE_SET;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
@@ -1394,7 +1390,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		
-		assertThat(resp, not(stringContainsInOrder("<code value=\"11378-7\"/>","<display value=\"Systolic blood pressure at First encounter\"/>")));
+		assertThat(resp).containsSubsequence("<code value=\"11378-7\"/>","<display value=\"Systolic blood pressure at First encounter\"/>");
 	}
 	
 	@Test
@@ -1415,7 +1411,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		
-		assertThat(resp, not(stringContainsInOrder("<code value=\"11378-7\"/>","<display value=\"Systolic blood pressure at First encounter\"/>")));
+		assertThat(resp).containsSubsequence("<code value=\"11378-7\"/>","<display value=\"Systolic blood pressure at First encounter\"/>");
 	}
 
 	@Test

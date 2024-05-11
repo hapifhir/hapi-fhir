@@ -55,7 +55,7 @@ public class JaxRsRestfulClientFactoryTest extends BaseFhirVersionParameterizedT
 		final Client result = factory.getNativeClientClient();
 		assertNotNull(result);
 		ourLog.info("Classes: {}", result.getConfiguration().getClasses());
-		assertThat(result.getConfiguration().getClasses()).doesNotContain(ca.uhn.fhir.jaxrs.client.MyFilter.class)));
+		assertThat(result.getConfiguration().getClasses()).doesNotContain(ca.uhn.fhir.jaxrs.client.MyFilter.class);
 	}
 
 	@Test
