@@ -187,7 +187,8 @@ public class JpaModelScannerAndVerifier {
 			scan(nextField, theNames, theIsSuperClass, isView);
 
 			Id id = nextField.getAnnotation(Id.class);
-			if (id != null) {
+			boolean isId = id != null;
+			if (isId) {
 				Validate.isTrue(!foundId, "Multiple fields annotated with @Id");
 				foundId = true;
 
@@ -241,12 +242,24 @@ public class JpaModelScannerAndVerifier {
 
 				int columnLength = 16;
 				String columnName = null;
+				boolean nullable = false;
 				if (hasColumn) {
-					columnName = nextField.getAnnotation(Column.class).name();
-					columnLength = nextField.getAnnotation(Column.class).length();
+					Column column = nextField.getAnnotation(Column.class);
+					columnName = column.name();
+					columnLength = column.length();
+					nullable = column.nullable();
 				}
 				if (hasJoinColumn) {
-					columnName = nextField.getAnnotation(JoinColumn.class).name();
+					JoinColumn joinColumn = nextField.getAnnotation(JoinColumn.class);
+					columnName = joinColumn.name();
+					nullable = joinColumn.nullable();
+				}
+				if (isId) {
+					nullable = false;
+				}
+
+				if (nullable && !isView) {
+					Validate.isTrue(!nextField.getType().isPrimitive(), "Field [%s] has a nullable primitive type: %s", nextField.getName(), nextField.getType());
 				}
 
 				if (columnName != null) {

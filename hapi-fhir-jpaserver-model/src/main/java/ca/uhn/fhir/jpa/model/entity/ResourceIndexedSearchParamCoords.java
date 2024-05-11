@@ -56,11 +56,11 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 
 	private static final long serialVersionUID = 1L;
 
-	@Column(name = "SP_LATITUDE")
+	@Column(name = "SP_LATITUDE", nullable = false)
 	// @FullTextField
 	public double myLatitude;
 
-	@Column(name = "SP_LONGITUDE")
+	@Column(name = "SP_LONGITUDE", nullable = false)
 	// @FullTextField
 	public double myLongitude;
 

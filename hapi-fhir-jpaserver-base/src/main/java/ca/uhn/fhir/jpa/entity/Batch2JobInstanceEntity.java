@@ -119,13 +119,13 @@ public class Batch2JobInstanceEntity implements Serializable {
 	@Column(name = "WORK_CHUNKS_PURGED", nullable = false)
 	private boolean myWorkChunksPurged;
 
-	@Column(name = "PROGRESS_PCT")
+	@Column(name = "PROGRESS_PCT", nullable = false)
 	private double myProgress;
 
 	@Column(name = "ERROR_MSG", length = ERROR_MSG_MAX_LENGTH, nullable = true)
 	private String myErrorMessage;
 
-	@Column(name = "ERROR_COUNT")
+	@Column(name = "ERROR_COUNT", nullable = false)
 	private int myErrorCount;
 
 	@Column(name = "EST_REMAINING", length = TIME_REMAINING_LENGTH, nullable = true)

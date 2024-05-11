@@ -46,6 +46,7 @@ import ca.uhn.fhir.jpa.model.entity.SearchParamPresentEntity;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.VersionEnum;
+import net.sourceforge.plantuml.bpm.Col;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
@@ -121,6 +122,46 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init680_Part2();
 		init700();
 		init720();
+		init740();
+	}
+
+	protected void init740() {
+		Builder version = forVersion(VersionEnum.V7_4_0);
+
+		version.onTable("HFJ_SPIDX_COORDS")
+			.modifyColumn("20240511.1", "SP_LATITUDE").nonNullable().failureAllowed().withType(ColumnTypeEnum.DOUBLE);
+		version.onTable("HFJ_SPIDX_COORDS")
+			.modifyColumn("20240511.2", "SP_LONGITUDE").nonNullable().failureAllowed().withType(ColumnTypeEnum.DOUBLE);
+		version.onTable("HFJ_BINARY_STORAGE_BLOB")
+			.modifyColumn("20240511.3", "BLOB_SIZE").nonNullable().failureAllowed().withType(ColumnTypeEnum.LONG);
+
+		version.onTable("HFJ_RESOURCE")
+			.modifyColumn("20240511.4", "SP_HAS_LINKS").nonNullable().failureAllowed().withType(ColumnTypeEnum.BOOLEAN);
+		version.onTable("HFJ_RESOURCE")
+			.modifyColumn("20240511.5", "SP_COORDS_PRESENT").nonNullable().failureAllowed().withType(ColumnTypeEnum.BOOLEAN);
+		version.onTable("HFJ_RESOURCE")
+			.modifyColumn("20240511.6", "SP_DATE_PRESENT").nonNullable().failureAllowed().withType(ColumnTypeEnum.BOOLEAN);
+		version.onTable("HFJ_RESOURCE")
+			.modifyColumn("20240511.7", "SP_NUMBER_PRESENT").nonNullable().failureAllowed().withType(ColumnTypeEnum.BOOLEAN);
+		version.onTable("HFJ_RESOURCE")
+			.modifyColumn("20240511.8", "SP_QUANTITY_PRESENT").nonNullable().failureAllowed().withType(ColumnTypeEnum.BOOLEAN);
+		version.onTable("HFJ_RESOURCE")
+			.modifyColumn("20240511.9", "SP_QUANTITY_NRML_PRESENT").nonNullable().failureAllowed().withType(ColumnTypeEnum.BOOLEAN);
+		version.onTable("HFJ_RESOURCE")
+			.modifyColumn("20240511.10", "SP_STRING_PRESENT").nonNullable().failureAllowed().withType(ColumnTypeEnum.BOOLEAN);
+		version.onTable("HFJ_RESOURCE")
+			.modifyColumn("20240511.11", "SP_TOKEN_PRESENT").nonNullable().failureAllowed().withType(ColumnTypeEnum.BOOLEAN);
+		version.onTable("HFJ_RESOURCE")
+			.modifyColumn("20240511.12", "SP_URI_PRESENT").nonNullable().failureAllowed().withType(ColumnTypeEnum.BOOLEAN);
+		version.onTable("HFJ_RESOURCE")
+			.modifyColumn("20240511.13", "RES_VER").nonNullable().failureAllowed().withType(ColumnTypeEnum.LONG);
+		version.onTable("TRM_CONCEPT")
+			.modifyColumn("20240511.14", "CODESYSTEM_PID").nonNullable().failureAllowed().withType(ColumnTypeEnum.LONG);
+		version.onTable("BT2_JOB_INSTANCE")
+			.modifyColumn("20240511.15", "PROGRESS_PCT").nonNullable().failureAllowed().withType(ColumnTypeEnum.DOUBLE);
+		version.onTable("BT2_JOB_INSTANCE")
+			.modifyColumn("20240511.16", "ERROR_COUNT").nonNullable().failureAllowed().withType(ColumnTypeEnum.DOUBLE);
+
 	}
 
 	protected void init720() {

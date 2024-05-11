@@ -140,7 +140,7 @@ public class Batch2WorkChunkEntity implements Serializable {
 	 * The number of times the work chunk has had its state set back to POLL_WAITING.
 	 */
 	@Column(name = "POLL_ATTEMPTS", nullable = true)
-	private int myPollAttempts;
+	private Integer myPollAttempts;
 
 	/**
 	 * Default constructor for Hibernate.
@@ -353,7 +353,7 @@ public class Batch2WorkChunkEntity implements Serializable {
 	}
 
 	public int getPollAttempts() {
-		return myPollAttempts;
+		return myPollAttempts != null ? myPollAttempts : 0;
 	}
 
 	public void setPollAttempts(int thePollAttempts) {
