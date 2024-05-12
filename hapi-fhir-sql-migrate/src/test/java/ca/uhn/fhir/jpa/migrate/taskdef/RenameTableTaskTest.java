@@ -41,4 +41,26 @@ public class RenameTableTaskTest extends BaseTest {
 		assertThat(tableNames, not(hasItem(oldTableName)));
 	}
 
+	@ParameterizedTest(name = "{index}: {0}")
+	@MethodSource("data")
+	public void testRenameTableTask_whenTableDoesNotExists_willRaiseException(Supplier<TestDatabaseDetails> theTestDatabaseDetails) throws SQLException {
+		// given
+		before(theTestDatabaseDetails);
+		final String newTableName = "NEWTABLE";
+		final String oldTableName = "SOMETABLE";
+
+		RenameTableTask task = new RenameTableTask("1", "1", oldTableName, newTableName);
+		getMigrator().addTask(task);
+
+		// when
+		try {
+			getMigrator().migrate();
+			fail();
+		} catch (Exception e){
+			// then
+			assertThat(e.getMessage(), containsString("2516"));
+		}
+
+	}
+
 }

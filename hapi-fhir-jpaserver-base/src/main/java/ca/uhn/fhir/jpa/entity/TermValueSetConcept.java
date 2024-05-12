@@ -20,7 +20,6 @@
 package ca.uhn.fhir.jpa.entity;
 
 import ca.uhn.fhir.util.ValidateUtil;
-import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -47,7 +46,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.left;
 import static org.apache.commons.lang3.StringUtils.length;
@@ -297,14 +295,5 @@ public class TermValueSetConcept implements Serializable {
 		return isNotEmpty(mySourceConceptDirectParentPidsVc)
 				? mySourceConceptDirectParentPidsVc
 				: mySourceConceptDirectParentPids;
-	}
-
-	public void clearSourceConceptDirectParentPidsLob() {
-		mySourceConceptDirectParentPids = null;
-	}
-
-	@VisibleForTesting
-	public boolean hasSourceConceptDirectParentPidsLob() {
-		return nonNull(mySourceConceptDirectParentPids);
 	}
 }

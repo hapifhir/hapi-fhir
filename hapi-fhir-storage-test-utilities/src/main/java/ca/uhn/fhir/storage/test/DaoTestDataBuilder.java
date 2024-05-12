@@ -102,9 +102,7 @@ public class DaoTestDataBuilder implements ITestDataBuilder.WithSupport, ITestDa
 	public void cleanup() {
 		ourLog.info("cleanup {}", myIds);
 
-		myIds.keySet().stream()
-			.sorted() // Hack to ensure Patients are deleted before Practitioners.  This may need to be refined.
-			.forEach(nextType->{
+		myIds.keySet().forEach(nextType->{
 			// todo do this in a bundle for perf.
 			IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(nextType);
 			myIds.get(nextType).forEach(dao::delete);

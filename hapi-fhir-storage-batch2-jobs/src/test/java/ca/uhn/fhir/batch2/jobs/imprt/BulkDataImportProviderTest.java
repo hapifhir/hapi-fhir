@@ -436,16 +436,6 @@ public class BulkDataImportProviderTest {
 		public boolean isResourcePartitionable(String theResourceType) {
 			return false;
 		}
-
-		@Override
-		public RequestPartitionId validateAndNormalizePartitionIds(RequestPartitionId theRequestPartitionId) {
-			return null;
-		}
-
-		@Override
-		public RequestPartitionId validateAndNormalizePartitionNames(RequestPartitionId theRequestPartitionId) {
-			return null;
-		}
 	}
 
 	private Date parseDate(String theString) {

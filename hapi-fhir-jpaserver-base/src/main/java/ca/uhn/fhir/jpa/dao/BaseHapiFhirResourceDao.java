@@ -1410,20 +1410,19 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	@Override
+	@Transactional
 	public <MT extends IBaseMetaType> MT metaGetOperation(Class<MT> theType, IIdType theId, RequestDetails theRequest) {
-		return myTransactionService.withRequest(theRequest).execute(() -> {
-			Set<TagDefinition> tagDefs = new HashSet<>();
-			BaseHasResource entity = readEntity(theId, theRequest);
-			for (BaseTag next : entity.getTags()) {
-				tagDefs.add(next.getTag());
-			}
-			MT retVal = toMetaDt(theType, tagDefs);
+		Set<TagDefinition> tagDefs = new HashSet<>();
+		BaseHasResource entity = readEntity(theId, theRequest);
+		for (BaseTag next : entity.getTags()) {
+			tagDefs.add(next.getTag());
+		}
+		MT retVal = toMetaDt(theType, tagDefs);
 
-			retVal.setLastUpdated(entity.getUpdatedDate());
-			retVal.setVersionId(Long.toString(entity.getVersion()));
+		retVal.setLastUpdated(entity.getUpdatedDate());
+		retVal.setVersionId(Long.toString(entity.getVersion()));
 
-			return retVal;
-		});
+		return retVal;
 	}
 
 	@Override
