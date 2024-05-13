@@ -48,7 +48,7 @@ import java.util.Set;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public final class HapiWorkerContext extends I18nBase implements IWorkerContext {
-	public static final List<String> PRIMITIVE_TYPES = List.of(
+	private static final List<String> PRIMITIVE_TYPES = Arrays.asList(
 			"boolean",
 			"integer",
 			"integer64",
@@ -70,6 +70,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 			"xhtml",
 			"url",
 			"canonical");
+
 	private final FhirContext myCtx;
 	private final Cache<String, Resource> myFetchedResourceCache;
 	private IValidationSupport myValidationSupport;
