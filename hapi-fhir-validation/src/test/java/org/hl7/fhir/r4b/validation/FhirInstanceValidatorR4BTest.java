@@ -265,7 +265,7 @@ public class FhirInstanceValidatorR4BTest extends BaseValidationTestWithInlineMo
 			if (myValidConcepts.contains(system + "___" + code)) {
 				return new IValidationSupport.LookupCodeResult().setFound(true);
 			} else {
-				return null; //return new IValidationSupport.LookupCodeResult().setFound(false);
+				return null;
 			}
 		});
 		when(myMockSupport.validateCodeInValueSet(any(), any(), any(), any(), any(), any())).thenAnswer(t -> {
@@ -1351,8 +1351,6 @@ public class FhirInstanceValidatorR4BTest extends BaseValidationTestWithInlineMo
 
 	@Test
 	public void testValidateResourceWithValuesetExpansionBad() {
-
-		//addValidConcept("http://example.com/foo/bar", "bar");
 
 		Patient p = new Patient();
 		p.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);

@@ -607,7 +607,6 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 	@Override
 	public boolean isDataType(String s) {
-		// List<StructureDefinition> allStructures = new ArrayList<>(allStructures());
 		return !isPrimitiveType(s);
 	}
 
@@ -870,8 +869,6 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 								.setDiagnostics(message)
 								.setDetails(new CodeableConcept().setText(message));
 
-				// return new ValidationResult(
-				//		ValidationMessage.IssueSeverity.ERROR, null, Collections.singletonList(issue));
 				issues.add(issue);
 			}
 			ValidationResult retVal = validateCode(theOptions, next, theVs);
@@ -882,20 +879,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 					return retVal;
 				}
 			} else {
-				/*
-				final String message = "Unknown code (for '" + next.getSystem() + "#" + next.getCode() + "')";
-				final String txIssueTypeCode = getTxIssueTypeCode(next.getSystem(), theVs);
-				OperationOutcome.OperationOutcomeIssueComponent issue = getOperationOutcomeTxIssueComponent(
-						message, OperationOutcome.IssueType.CODEINVALID, txIssueTypeCode);
-				if (myValidationSupportContext.isEnabledValidationForCodingsLogicalAnd()) {
-					issue.setSeverity(OperationOutcome.IssueSeverity.INFORMATION);
-				}*/
 				for (OperationOutcome.OperationOutcomeIssueComponent issue : retVal.getIssues()) {
-					// if ((issue.getSeverity().equals(OperationOutcome.IssueSeverity.ERROR)
-					//	|| issue.getSeverity().equals(OperationOutcome.IssueSeverity.WARNING))
-					//	&& myValidationSupportContext.isEnabledValidationForCodingsLogicalAnd()) {
-					//	issue.setSeverity(OperationOutcome.IssueSeverity.INFORMATION);
-					// }
 					issues.add(issue);
 				}
 			}
@@ -906,15 +890,6 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 			return validationResultsOk.get(0);
 		}
 
-		/*
-				if (theVs == null) {
-					String message = "Unknown code (for '" + code.getCodingFirstRep().getSystem() + "#"
-							+ code.getCodingFirstRep().getCode() + "')";
-					OperationOutcome.OperationOutcomeIssueComponent issue = getOperationOutcomeTxIssueComponent(
-							message, OperationOutcome.IssueType.CODEINVALID, OperationOutcome.IssueType.CODEINVALID.toCode());
-					issues.add(issue);
-				}
-		*/
 		return new ValidationResult(ValidationMessage.IssueSeverity.ERROR, null, issues);
 	}
 

@@ -1769,16 +1769,6 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 			"blah"
 		));
 
-
-/*
-		input.setValue(new Quantity(
-			null,
-			123,
-			"http://unitsofmeasure.org",
-			"MG/DL",
-			"MG/DL"
-		));
-*/
 		String inputString = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input);
 		ourLog.info("Results:\n{}", inputString);
 

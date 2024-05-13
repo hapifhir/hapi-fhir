@@ -203,33 +203,7 @@ public class VersionSpecificWorkerContextWrapperCoreTest {
 		} else if (setup.getTest().asString("operation").equals("cs-validate-code")) {
 			String diff = TxServiceTestHelper.getDiffForValidation(setup.getTest().str("name"), wrapper, setup.getTest().asString("name"), req, resp, setup.getTest().asString("Content-Language"), fp, ext, true);
 			assertNull(diff, diff);
-		} else {
-			//Assertions.fail("Unknown Operation "+ setup.getTest().asString("operation"));
 		}
-		/*String testContents = loadTestResource("test-cases.json");
-
-		JsonElement testElements = JsonParser.parseString(testContents);
-		JsonArray suites  = testElements.getAsJsonObject().getAsJsonArray("suites");
-		for (JsonElement suiteElement : suites) {
-			JsonObject suiteObject = suiteElement.getAsJsonObject();
-			System.out.println("Suite: " + suiteObject.get("name").getAsString());
-
-			for (JsonElement testElement : suiteObject.getAsJsonArray("tests")) {
-				JsonObject testObject = testElement.getAsJsonObject();
-
-
-
-
-				if (testObject.has("operation") && testObject.get("operation").getAsString().equals(VALIDATE_CODE_OPERATION)) {
-					System.out.println("\tTest: " + testObject.get("name").getAsString());
-					Parameters request = loadResource(testObject.get("request").getAsString(),Parameters.class);
-
-
-				}
-			}
-		}
-		*/
-
 	}
 
 	public Resource loadResource(String filename) throws IOException, FHIRFormatError, FileNotFoundException, FHIRException, DefinitionException {

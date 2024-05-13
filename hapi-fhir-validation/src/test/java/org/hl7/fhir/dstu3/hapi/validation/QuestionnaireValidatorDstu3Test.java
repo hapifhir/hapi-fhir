@@ -116,9 +116,6 @@ public class QuestionnaireValidatorDstu3Test extends BaseValidationTestWithInlin
 				.setUrl(extensionDomainToTest)
 				.setValue(new CodeableConcept().addCoding(new Coding(null, "text-box", null)));
 
-			ourCtx.newJsonParser().encodeResourceToString(q);
-
-
 			ValidationResult errors = myVal.validateWithResult(q);
 			ourLog.info(errors.toString());
 			assertThat(errors.isSuccessful(), Matchers.is(true));
