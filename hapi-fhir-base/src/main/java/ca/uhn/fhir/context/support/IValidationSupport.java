@@ -656,8 +656,6 @@ public interface IValidationSupport {
 		private String myDisplay;
 		private String mySourceDetails;
 
-		// List<OperationOutcomeIssueComponent>
-
 		private List<CodeValidationIssue> myCodeValidationIssues;
 
 		public CodeValidationResult() {
