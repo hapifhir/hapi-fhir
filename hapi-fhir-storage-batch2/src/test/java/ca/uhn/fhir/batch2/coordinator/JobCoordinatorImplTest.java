@@ -357,9 +357,7 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testPerformStep_FinalStep_PreventChunkWriting() {
-
 		// Setup
-
 		when(myJobInstancePersister.onWorkChunkDequeue(eq(CHUNK_ID))).thenReturn(Optional.of(createWorkChunk(STEP_3, new TestJobStep3InputType().setData3(DATA_3_VALUE).setData4(DATA_4_VALUE))));
 		doReturn(createJobDefinition()).when(myJobDefinitionRegistry).getJobDefinitionOrThrowException(eq(JOB_DEFINITION_ID), eq(1));
 		when(myJobInstancePersister.fetchInstance(eq(INSTANCE_ID))).thenReturn(Optional.of(createInstance()));
@@ -371,11 +369,9 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 		mySvc.start();
 
 		// Execute
-
 		myWorkChannelReceiver.send(new JobWorkNotificationJsonMessage(createWorkNotification(STEP_3)));
 
 		// Verify
-
 		verify(myStep3Worker, times(1)).run(myStep3ExecutionDetailsCaptor.capture(), any());
 		verify(myJobInstancePersister, times(1)).onWorkChunkFailed(eq(CHUNK_ID), any());
 	}

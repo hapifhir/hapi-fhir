@@ -33,6 +33,7 @@ import ca.uhn.fhir.batch2.model.JobWorkCursor;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
+import ca.uhn.fhir.batch2.util.Batch2Utils;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.IHasScheduledJobs;
@@ -264,7 +265,7 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 				ReductionStepDataSink<PT, IT, OT> dataSink = new ReductionStepDataSink<>(
 						instance.getInstanceId(), theJobWorkCursor, myJobPersistence, myJobDefinitionRegistry);
 				StepExecutionDetails<PT, IT> chunkDetails =
-						new StepExecutionDetails<>(parameters, null, instance, "REDUCTION");
+						Batch2Utils.createReductionStepDetails(parameters, null, instance);
 
 				if (response.isSuccessful()) {
 					reductionStepWorker.run(chunkDetails, dataSink);
