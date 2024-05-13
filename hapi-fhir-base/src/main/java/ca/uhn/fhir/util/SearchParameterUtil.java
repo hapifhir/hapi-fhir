@@ -26,6 +26,7 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.i18n.Msg;
 import jakarta.annotation.Nullable;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -36,6 +37,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class SearchParameterUtil {
 
@@ -71,11 +73,34 @@ public class SearchParameterUtil {
 		if (myPatientSearchParam == null) {
 			myPatientSearchParam = runtimeResourceDefinition.getSearchParam("subject");
 			if (myPatientSearchParam == null) {
-				final RuntimeResourceDefinition runtimeResourceDefinitionToUse =
-					FhirVersionEnum.R4 == theFhirContext.getVersion().getVersion()
-						? runtimeResourceDefinition
-						: FhirContext.forR4Cached().getResourceDefinition(theResourceType);
-				myPatientSearchParam = getOnlyPatientCompartmentRuntimeSearchParam(runtimeResourceDefinitionToUse);
+				if (FhirVersionEnum.R4 == theFhirContext.getVersion().getVersion()) {
+					myPatientSearchParam = getOnlyPatientCompartmentRuntimeSearchParam(runtimeResourceDefinition);
+				} else {
+					final RuntimeResourceDefinition runtimeResourceDefinitionForR4 =
+						FhirContext.forR4Cached().getResourceDefinition(theResourceType);
+
+					final RuntimeSearchParam patientSearchParamForR4 = runtimeResourceDefinitionForR4.getSearchParam("patient");
+
+					final List<RuntimeSearchParam> searchParamsFromNonR4 =
+						runtimeResourceDefinition.getSearchParamsForCompartmentName("Patient")
+							.stream()
+							.filter(searchParam -> patientSearchParamForR4.getPath().equals(searchParam.getPath()))
+							.collect(Collectors.toList());
+
+					if (CollectionUtils.isEmpty(searchParamsFromNonR4)) {
+						String errorMessage = String.format(
+							"Resource type [%s] is not eligible for this type of export, as it contains no Patient compartment, and no `patient` or `subject` search parameter",
+							runtimeResourceDefinition.getId());
+						throw new IllegalArgumentException(Msg.code(1774) + errorMessage);
+					} else if (searchParamsFromNonR4.size() == 1) {
+						myPatientSearchParam = searchParamsFromNonR4.get(0);
+					} else {
+						String errorMessage = String.format(
+							"Resource type %s has more than one Search Param which references a patient compartment. We are unable to disambiguate which patient search parameter we should be searching by.",
+							runtimeResourceDefinition.getId());
+						throw new IllegalArgumentException(Msg.code(1775) + errorMessage);
+					}
+				}
 			}
 		}
 		return Optional.ofNullable(myPatientSearchParam);
@@ -122,7 +147,7 @@ public class SearchParameterUtil {
 			RuntimeResourceDefinition runtimeResourceDefinition) {
 		RuntimeSearchParam patientSearchParam;
 		List<RuntimeSearchParam> searchParams = runtimeResourceDefinition.getSearchParamsForCompartmentName("Patient");
-		if (searchParams == null || searchParams.size() == 0) {
+		if (CollectionUtils.isEmpty(searchParams)) {
 			String errorMessage = String.format(
 					"Resource type [%s] is not eligible for this type of export, as it contains no Patient compartment, and no `patient` or `subject` search parameter",
 					runtimeResourceDefinition.getId());
