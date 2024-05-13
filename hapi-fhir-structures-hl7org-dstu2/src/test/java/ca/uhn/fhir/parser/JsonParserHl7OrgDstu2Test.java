@@ -439,7 +439,7 @@ public class JsonParserHl7OrgDstu2Test {
 		encoded = jsonParser.encodeResourceToString(patient);
 		ourLog.info(encoded);
 		assertThat(encoded).containsSubsequence(Arrays.asList("\"contained\": [", "\"id\": \"1\"", "\"identifier\"", "\"reference\": \"#1\""));
-		assertThat(encoded).doesNotContainPattern("(?s)\"contained\":.*[.*\"contained\":");
+		assertThat(encoded).doesNotContainPattern("(?s)\"contained\":.*\\[.*\"contained\":");
 
 		// And re-encode once more, with the references cleared
 		patient.getContained().clear();
@@ -447,7 +447,7 @@ public class JsonParserHl7OrgDstu2Test {
 		encoded = jsonParser.encodeResourceToString(patient);
 		ourLog.info(encoded);
 		assertThat(encoded).containsSubsequence(Arrays.asList("\"contained\": [", "\"id\": \"1\"", "\"identifier\"", "\"reference\": \"#1\""));
-    assertThat(encoded).doesNotContainPattern("(?s).*\"contained\":.*[.*\"contained\":");
+    assertThat(encoded).doesNotContainPattern("(?s).*\"contained\":.*\\[.*\"contained\":");
 
 		// And re-encode once more, with the references cleared and a manually set local ID
 		patient.getContained().clear();
@@ -456,7 +456,7 @@ public class JsonParserHl7OrgDstu2Test {
 		encoded = jsonParser.encodeResourceToString(patient);
 		ourLog.info(encoded);
 		assertThat(encoded).containsSubsequence(Arrays.asList("\"contained\": [", "\"id\": \"333\"", "\"identifier\"", "\"reference\": \"#333\""));
-    assertThat(encoded).doesNotContainPattern("(?s).*\"contained\":.*[.*\"contained\":");
+    assertThat(encoded).doesNotContainPattern("(?s).*\"contained\":.*\\[.*\"contained\":");
 
 	}
 	
