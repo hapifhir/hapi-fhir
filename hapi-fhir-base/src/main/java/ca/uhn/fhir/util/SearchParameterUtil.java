@@ -21,6 +21,7 @@ package ca.uhn.fhir.util;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.i18n.Msg;
@@ -70,7 +71,11 @@ public class SearchParameterUtil {
 		if (myPatientSearchParam == null) {
 			myPatientSearchParam = runtimeResourceDefinition.getSearchParam("subject");
 			if (myPatientSearchParam == null) {
-				myPatientSearchParam = getOnlyPatientCompartmentRuntimeSearchParam(FhirContext.forR4Cached().getResourceDefinition(theResourceType));
+				final RuntimeResourceDefinition runtimeResourceDefinitionToUse =
+					FhirVersionEnum.R4 == theFhirContext.getVersion().getVersion()
+						? runtimeResourceDefinition
+						: FhirContext.forR4Cached().getResourceDefinition(theResourceType);
+				myPatientSearchParam = getOnlyPatientCompartmentRuntimeSearchParam(runtimeResourceDefinitionToUse);
 			}
 		}
 		return Optional.ofNullable(myPatientSearchParam);
