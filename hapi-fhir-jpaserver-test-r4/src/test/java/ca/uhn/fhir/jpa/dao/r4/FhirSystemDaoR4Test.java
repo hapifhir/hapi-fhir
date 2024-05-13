@@ -3641,7 +3641,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		BundleEntryComponent nextEntry = resp.getEntry().get(0);
 		assertEquals("200 OK", nextEntry.getResponse().getStatus());
 
-		assertThat(nextEntry.getResponse().getLocation(), (containsString("test")));
+		assertThat(nextEntry.getResponse().getLocation()).contains("test");
 		assertEquals(id.toVersionless(), new IdType(nextEntry.getResponse().getLocation()).toVersionless());
 		assertThat(nextEntry.getResponse().getLocation()).endsWith("/_history/2");
 		assertThat(new IdType(nextEntry.getResponse().getLocation())).isNotEqualTo(id);

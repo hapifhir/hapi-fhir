@@ -711,7 +711,9 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		runInTransaction(() -> {
 			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
 			assertEquals(1, uniques.size(), uniques.toString());
-			assertThat(uniques.get(0).getResource().getIdDt().toUnqualifiedVersionless().getValue(), either(equalTo("Observation/" + id2.getIdPart())).or(equalTo("Observation/" + id3.getIdPart())));
+			assertThat(uniques.get(0).getResource().getIdDt().toUnqualifiedVersionless().getValue()).isIn(
+				"Observation/" + id2.getIdPart(),
+				"Observation/" + id3.getIdPart());
 			assertEquals("Observation?code=foo%7Cbar&date=2011-01-01&subject=Patient%2F" + id1.getIdPart(), uniques.get(0).getIndexString());
 
 			myResourceIndexedCompositeStringUniqueDao.deleteAll();
@@ -724,7 +726,9 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		runInTransaction(() -> {
 			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
 			assertEquals(1, uniques.size(), uniques.toString());
-			assertThat(uniques.get(0).getResource().getIdDt().toUnqualifiedVersionless().getValue(), either(equalTo("Observation/" + id2.getIdPart())).or(equalTo("Observation/" + id3.getIdPart())));
+			assertThat(uniques.get(0).getResource().getIdDt().toUnqualifiedVersionless().getValue()).isIn(
+				"Observation/" + id2.getIdPart(),
+				"Observation/" + id3.getIdPart());
 			assertEquals("Observation?code=foo%7Cbar&date=2011-01-01&subject=Patient%2F" + id1.getIdPart(), uniques.get(0).getIndexString());
 		});
 

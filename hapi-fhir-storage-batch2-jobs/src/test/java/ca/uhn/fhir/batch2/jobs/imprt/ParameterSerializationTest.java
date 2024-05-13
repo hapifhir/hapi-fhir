@@ -7,6 +7,8 @@ import org.junit.jupiter.api.Test;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 public class ParameterSerializationTest {
 
 	@Test
@@ -19,6 +21,6 @@ public class ParameterSerializationTest {
 
 		BulkImportJobParameters readBackParameters = startRequest.getParameters(BulkImportJobParameters.class);
 
-		assertThat(readBackParameters.getHttpBasicCredentials()).isEqualTo("username:password");
+		assertEquals("username:password", readBackParameters.getHttpBasicCredentials());
 	}
 }

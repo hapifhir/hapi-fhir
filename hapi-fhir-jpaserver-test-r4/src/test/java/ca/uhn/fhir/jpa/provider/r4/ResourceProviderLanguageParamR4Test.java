@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ResourceProviderLanguageParamR4Test extends BaseResourceProviderR4Test {
@@ -42,7 +43,7 @@ public class ResourceProviderLanguageParamR4Test extends BaseResourceProviderR4T
 			.execute();
 
 		foundResources = toUnqualifiedVersionlessIdValues(result);
-		assertThat(foundResources, contains(patId.getValue()));
+		assertThat(foundResources).contains(patId.getValue());
 	}
 
 	@SuppressWarnings("unused")

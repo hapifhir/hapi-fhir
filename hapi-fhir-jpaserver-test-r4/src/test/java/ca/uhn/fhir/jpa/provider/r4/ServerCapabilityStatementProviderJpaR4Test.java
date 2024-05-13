@@ -205,9 +205,9 @@ public class ServerCapabilityStatementProviderJpaR4Test extends BaseResourceProv
 
 		List<String> revIncludes = findRevIncludes(cs, "Patient");
 		assertThat(revIncludes).as(revIncludes.toString()).contains("Account:patient", "Observation:foo", "Provenance:entity");
-		assertThat(revIncludes.toString(), revIncludes, not(hasItem(
+		assertThat(revIncludes).as(revIncludes.toString()).doesNotContain(
 			"CarePlan:based-on" // Standard SP reference with non-matching target
-		)));
+		);
 
 	}
 
