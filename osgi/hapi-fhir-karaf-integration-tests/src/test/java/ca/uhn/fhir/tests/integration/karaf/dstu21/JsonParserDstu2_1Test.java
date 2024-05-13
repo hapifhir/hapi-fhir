@@ -126,8 +126,8 @@ public class JsonParserDstu2_1Test {
 		ourLog.info(encoded);
 
 		assertThat(encoded).containsSubsequence("123");
-		assertThat(encoded, not(stringContainsInOrder("\"\"")));
-		assertThat(encoded, not(stringContainsInOrder("null")));
+		assertThat(encoded).doesNotContainPattern("(?s)"\"\"")));
+		assertThat(encoded).doesNotContainPattern("(?s)"null")));
 	}
 
 
@@ -538,7 +538,7 @@ public class JsonParserDstu2_1Test {
 			"\"valueString\": \"ext_url_value\"",
 			"\"code\":"
 		));
-		assertThat(output, not(stringContainsInOrder(
+		assertThat(output).doesNotContainPattern("(?s)
 			"\"url\": \"http://exturl\"",
 			",",
 			"\"url\": \"http://exturl\""
@@ -580,7 +580,7 @@ public class JsonParserDstu2_1Test {
 			"\"valueString\": \"sub_ext_value\"",
 			"\"code\":"
 		));
-		assertThat(output, not(stringContainsInOrder(
+		assertThat(output).doesNotContainPattern("(?s)
 			"\"url\": \"http://exturl\"",
 			",",
 			"\"url\": \"http://exturl\""

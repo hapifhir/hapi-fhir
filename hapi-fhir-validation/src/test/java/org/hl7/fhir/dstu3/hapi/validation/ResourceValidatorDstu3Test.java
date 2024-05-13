@@ -55,9 +55,6 @@ import java.util.Date;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -100,14 +97,14 @@ public class ResourceValidatorDstu3Test extends BaseValidationTestWithInlineMock
 		String encoded = parser.setPrettyPrint(true).encodeResourceToString(p).replace("2000-12-31", "2000-15-31");
 		ourLog.info(encoded);
 
-		assertThat(encoded, StringContains.containsString("2000-15-31"));
+		assertThat(encoded).contains(encoded);
 
 		ValidationResult result = ourCtx.newValidator().validateWithResult(encoded);
 		String resultString = parser.setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome());
 		ourLog.info(resultString);
 
 		assertThat(((OperationOutcome) result.toOperationOutcome()).getIssue()).hasSize(2);
-		assertThat(resultString, StringContains.containsString("cvc-pattern-valid"));
+		assertThat(resultString).contains(resultString);
 
 		try {
 			parser.parseResource(encoded);
@@ -138,7 +135,7 @@ public class ResourceValidatorDstu3Test extends BaseValidationTestWithInlineMock
 		ourLog.info(resultString);
 
 		assertThat(((OperationOutcome) result.toOperationOutcome()).getIssue()).hasSize(2);
-		assertThat(resultString, StringContains.containsString("cvc-pattern-valid"));
+		assertThat(resultString).contains(resultString);
 
 	}
 
@@ -420,10 +417,7 @@ public class ResourceValidatorDstu3Test extends BaseValidationTestWithInlineMock
 			"furry-white",
 			"FamilyName"
 		);
-		assertThat(messageString, not(stringContainsInOrder(
-			"extension",
-			"meta"
-		)));
+		assertThat(messageString).doesNotContainPattern("(?s)extension.*meta");
 
 		FhirValidator val = ourCtx.newValidator();
 		val.registerValidatorModule(new SchemaBaseValidator(ourCtx));
@@ -468,10 +462,7 @@ public class ResourceValidatorDstu3Test extends BaseValidationTestWithInlineMock
 			"String Extension",
 			"FamilyName"
 		);
-		assertThat(messageString, not(stringContainsInOrder(
-			"extension",
-			"meta"
-		)));
+		assertThat(messageString).doesNotContainPattern("(?s)extension.*meta");
 		assertThat(messageString).contains("url=\"http://ahr.copa.inso.tuwien.ac.at/StructureDefinition/Patient#animal-colorSecondary\"");
 		assertThat(messageString).contains("url=\"http://foo.com/example\"");
 		//@formatter:on

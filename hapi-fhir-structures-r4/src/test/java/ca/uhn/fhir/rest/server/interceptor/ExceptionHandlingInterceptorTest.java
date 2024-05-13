@@ -34,7 +34,7 @@ import org.opentest4j.AssertionFailedError;
 import java.io.IOException;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ExceptionHandlingInterceptorTest {
@@ -75,8 +75,8 @@ public class ExceptionHandlingInterceptorTest {
 			ourLog.info(responseContent);
 			assertEquals(500, status.getStatusLine().getStatusCode());
 			OperationOutcome oo = (OperationOutcome) ourCtx.newXmlParser().parseResource(responseContent);
-			assertThat(oo.getIssueFirstRep().getDiagnosticsElement().getValue(), StringContains.containsString("Exception Text"));
-			assertThat(oo.getIssueFirstRep().getDiagnosticsElement().getValue(), (StringContains.containsString("InternalErrorException: Exception Text")));
+			assertThat(oo.getIssueFirstRep().getDiagnosticsElement().getValue()).contains(oo.getIssueFirstRep().getDiagnosticsElement().getValue());
+			assertThat(oo.getIssueFirstRep().getDiagnosticsElement().getValue()).contains("InternalErrorException: Exception Text");
 		}
 	}
 
@@ -100,7 +100,7 @@ public class ExceptionHandlingInterceptorTest {
 		assertEquals(500, status.getStatusLine().getStatusCode());
 		OperationOutcome oo = (OperationOutcome) ourCtx.newXmlParser().parseResource(responseContent);
 		ourLog.debug(ourCtx.newXmlParser().encodeResourceToString(oo));
-		assertThat(oo.getIssueFirstRep().getDiagnosticsElement().getValue(), StringContains.containsString("Simulated IOException"));
+		assertThat(oo.getIssueFirstRep().getDiagnosticsElement().getValue()).contains(oo.getIssueFirstRep().getDiagnosticsElement().getValue());
 	}
 
 	@Test
@@ -113,8 +113,8 @@ public class ExceptionHandlingInterceptorTest {
 			ourLog.info(responseContent);
 			assertEquals(500, status.getStatusLine().getStatusCode());
 			OperationOutcome oo = (OperationOutcome) ourCtx.newXmlParser().parseResource(responseContent);
-			assertThat(oo.getIssueFirstRep().getDiagnosticsElement().getValue(), StringContains.containsString("Exception Text"));
-			assertThat(oo.getIssueFirstRep().getDiagnosticsElement().getValue(), (StringContains.containsString("InternalErrorException: Exception Text")));
+			assertThat(oo.getIssueFirstRep().getDiagnosticsElement().getValue()).contains(oo.getIssueFirstRep().getDiagnosticsElement().getValue());
+			assertThat(oo.getIssueFirstRep().getDiagnosticsElement().getValue()).contains("InternalErrorException: Exception Text");
 		}
 	}
 

@@ -521,7 +521,7 @@ public class ResponseHighlighterInterceptorTest {
 		ourLog.info("Resp: {}", responseContent);
 		assertEquals(404, status.getStatusLine().getStatusCode());
 
-		assertThat(responseContent, not(stringContainsInOrder("<span class='hlTagName'>OperationOutcome</span>", "Unknown resource type 'Foobar' - Server knows how to handle")));
+		assertThat(responseContent).doesNotContainPattern("(?s)<span class='hlTagName'>OperationOutcome</span>.*Unknown resource type 'Foobar' - Server knows how to handle");
 		assertThat(responseContent, (stringContainsInOrder("Unknown resource type 'Foobar'")));
 		assertEquals(Constants.CT_FHIR_XML_NEW + ";charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase());
 
@@ -862,7 +862,7 @@ public class ResponseHighlighterInterceptorTest {
 		status.close();
 		ourLog.info(responseContent);
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, not(stringContainsInOrder("<body>", "<pre>", "\n", "</pre>")));
+		assertThat(responseContent).doesNotContainPattern("(?s)<body>.*<pre>.*\n.*</pre>");
 	}
 
 	/**

@@ -573,7 +573,7 @@ public class XmlParserDstu3Test {
 		assertThat(encoded).contains(Arrays.asList("<contained>", "<id value=\"1\"/>", "</contained>"));
 		assertThat(encoded).contains("<reference value=\"#1\"/>");
 		assertThat(encoded).contains(Arrays.asList("<entry>", "</entry>"));
-		assertThat(encoded).doesNotContainPattern("<entry>.*</entry>.*<entry>");
+		assertThat(encoded).doesNotContainPattern("(?s)<entry>.*</entry>.*<entry>");
 
 		// Re-parse the bundle
 		patient = (Patient) xmlParser.parseResource(xmlParser.encodeResourceToString(patient));
@@ -588,7 +588,7 @@ public class XmlParserDstu3Test {
 		encoded = xmlParser.encodeResourceToString(patient);
 		ourLog.info(encoded);
 		assertThat(encoded).contains(Arrays.asList("<contained>", "<Organization ", "<id value=\"1\"/>", "</Organization", "</contained>", "<reference value=\"#1\"/>"));
-		assertThat(encoded).doesNotContainPattern("<contained>.*<Org.*<contained>");
+		assertThat(encoded).doesNotContainPattern("(?s)<contained>.*<Org.*<contained>");
 		assertThat(encoded).contains("<reference value=\"#1\"/>");
 
 		// And re-encode once more, with the references cleared
@@ -597,7 +597,7 @@ public class XmlParserDstu3Test {
 		encoded = xmlParser.encodeResourceToString(patient);
 		ourLog.info(encoded);
 		assertThat(encoded).contains(Arrays.asList("<contained>", "<Organization ", "<id value=\"1\"/>", "</Organization", "</contained>", "<reference value=\"#1\"/>"));
-		assertThat(encoded).doesNotContainPattern("<contained>.*<Org.*<contained>");
+		assertThat(encoded).doesNotContainPattern("(?s)<contained>.*<Org.*<contained>");
 		assertThat(encoded).contains("<reference value=\"#1\"/>");
 
 		// And re-encode once more, with the references cleared and a manually set local ID
@@ -607,7 +607,7 @@ public class XmlParserDstu3Test {
 		encoded = xmlParser.encodeResourceToString(patient);
 		ourLog.info(encoded);
 		assertThat(encoded).contains(Arrays.asList("<contained>", "<Organization ", "<id value=\"333\"/>", "</Organization", "</contained>", "<reference value=\"#333\"/>"));
-		assertThat(encoded).doesNotContainPattern("<contained>.*<Org.*<contained>");
+		assertThat(encoded).doesNotContainPattern("(?s)<contained>.*<Org.*<contained>");
 
 	}
 
@@ -1215,7 +1215,7 @@ public class XmlParserDstu3Test {
 		ourLog.info(encoded);
 
 		assertThat(encoded).contains("<DiagnosticReport", "<contained", "<Observation", "<text value=\"Sharp1\"", "</DiagnosticReport");
-		assertThat(encoded).doesNotContainPattern("<DiagnosticReport.*<contained.*<Observation.*<contained.*<Observation.*</DiagnosticReport");
+		assertThat(encoded).doesNotContainPattern("(?s)<DiagnosticReport.*<contained.*<Observation.*<contained.*<Observation.*</DiagnosticReport");
 	}
 
 	@Test
@@ -3509,7 +3509,7 @@ public class XmlParserDstu3Test {
 		ourLog.info(encoded);
 
 		assertThat(encoded).containsSubsequence(Arrays.asList("<contained>", "<Observation", "</Observation>", "</contained>"));
-		assertThat(encoded).doesNotContainPattern("<contained>.*<Observation.*</Observation>.*<Observation.*</contained>");
+		assertThat(encoded).doesNotContainPattern("(?s)<contained>.*<Observation.*</Observation>.*<Observation.*</contained>");
 	}
 	/**
 	 * See #551

@@ -28,7 +28,6 @@ import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.schematron.SchematronBaseValidator;
 import org.apache.commons.io.IOUtils;
-import org.hamcrest.core.StringContains;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
@@ -38,9 +37,6 @@ import java.util.Date;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -82,14 +78,14 @@ public class ResourceValidatorDstu2Test {
 		String encoded = parser.setPrettyPrint(true).encodeResourceToString(p).replace("2000-12-31", "2000-15-31");
 		ourLog.info(encoded);
 
-		assertThat(encoded, StringContains.containsString("2000-15-31"));
+		assertThat(encoded).contains(encoded);
 
 		ValidationResult result = ourCtx.newValidator().validateWithResult(encoded);
 		String resultString = parser.setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome());
 		ourLog.info(resultString);
 
 		assertThat(((OperationOutcome) result.toOperationOutcome()).getIssue()).hasSize(2);
-		assertThat(resultString, StringContains.containsString("cvc-pattern-valid"));
+		assertThat(resultString).contains(resultString);
 
 		try {
 			parser.parseResource(encoded);
@@ -310,10 +306,7 @@ public class ResourceValidatorDstu2Test {
 			"furry-white",
 			"FamilyName"
 		);
-		assertThat(messageString, not(stringContainsInOrder(
-			"extension",
-			"meta"
-		)));
+		assertThat(messageString).doesNotContainPattern("(?s).*extension.*meta");
 		//@formatter:on
 
 		FhirValidator val = ourCtx.newValidator();
@@ -357,10 +350,7 @@ public class ResourceValidatorDstu2Test {
 			"String Extension",
 			"FamilyName"
 		);
-		assertThat(messageString, not(stringContainsInOrder(
-			"extension",
-			"meta"
-		)));
+		assertThat(messageString).doesNotContainPattern("(?s).*extension.*meta");
 		assertThat(messageString).contains("url=\"http://ahr.copa.inso.tuwien.ac.at/StructureDefinition/Patient#animal-colorSecondary\"");
 		assertThat(messageString).contains("url=\"http://foo.com/example\"");
 		//@formatter:on

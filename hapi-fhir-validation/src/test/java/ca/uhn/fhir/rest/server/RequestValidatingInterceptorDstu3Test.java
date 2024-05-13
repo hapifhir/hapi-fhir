@@ -47,7 +47,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 
@@ -178,7 +177,7 @@ public class RequestValidatingInterceptorDstu3Test extends BaseValidationTestWit
 		ourLog.trace("Response was:\n{}", responseContent);
 
 		assertEquals(201, status.getStatusLine().getStatusCode());
-		assertThat(status.toString(), (Matchers.containsString("X-FHIR-Request-Validation: NO ISSUES")));
+		assertThat(status.toString()).contains("X-FHIR-Request-Validation: NO ISSUES");
 	}
 
 	@Test

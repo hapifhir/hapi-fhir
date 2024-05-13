@@ -297,8 +297,7 @@ public class CustomTypeDstu3Test {
 		//@formatter:on
 
 		//@formatter:off
-		assertThat(messageString).doesNotContainPattern(
-			"<meta>.*<profile value=\"http://example.com/foo\".*/>.*<profile value=\"http://example.com/foo\"/>.*</meta>");
+		assertThat(messageString).doesNotContainPattern("(?s)<meta>.*<profile value=\"http://example.com/foo\".*/>.*<profile value=\"http://example.com/foo\"/>.*</meta>");
 		//@formatter:on
 	}
 
@@ -337,8 +336,7 @@ public class CustomTypeDstu3Test {
 		//@formatter:on
 
 		//@formatter:off
-		assertThat(messageString).doesNotContainPattern(
-			"<meta>.*<profile value=\"http://example.com/foo\".*/>.*<profile value=\"http://example.com/foo\"/>.*</meta>");
+		assertThat(messageString).doesNotContainPattern("(?s)<meta>.*<profile value=\"http://example.com/foo\".*/>.*<profile value=\"http://example.com/foo\"/>.*</meta>");
 		//@formatter:on
 	}
 

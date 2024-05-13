@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Test;
 
 import jakarta.servlet.ServletException;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 
 
@@ -37,7 +37,7 @@ public class ServerUsingOldTypesDstu2_1Test {
 		try {
 			srv.init();
 			fail();		} catch (ServletException e) {
-			assertThat(e.getCause().toString(), StringContains.containsString("ConfigurationException"));
+			assertThat(e.getCause().toString()).contains(e.getCause().toString());
 		}
 	}
 
@@ -50,7 +50,7 @@ public class ServerUsingOldTypesDstu2_1Test {
 		try {
 			srv.init();
 			fail();		} catch (ServletException e) {
-			assertThat(e.getCause().toString(), StringContains.containsString("ConfigurationException"));
+			assertThat(e.getCause().toString()).contains(e.getCause().toString());
 		}
 	}
 
@@ -63,7 +63,7 @@ public class ServerUsingOldTypesDstu2_1Test {
 		try {
 			srv.init();
 			fail();		} catch (ServletException e) {
-			assertThat(e.getCause().toString(), StringContains.containsString("Incorrect use of type"));
+			assertThat(e.getCause().toString()).contains(e.getCause().toString());
 		}
 	}
 

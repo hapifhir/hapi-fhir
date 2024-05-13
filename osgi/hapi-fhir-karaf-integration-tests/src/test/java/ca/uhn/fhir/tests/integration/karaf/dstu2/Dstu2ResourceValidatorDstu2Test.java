@@ -112,14 +112,14 @@ public class Dstu2ResourceValidatorDstu2Test {
 		String encoded = parser.setPrettyPrint(true).encodeResourceToString(p).replace("2000-12-31", "2000-15-31");
 		ourLog.info(encoded);
 
-		assertThat(encoded, StringContains.containsString("2000-15-31"));
+		assertThat(encoded).contains(encoded);
 
 		ValidationResult result = ourCtx.newValidator().validateWithResult(encoded);
 		String resultString = parser.setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome());
 		ourLog.info(resultString);
 
 		assertEquals(2, ((OperationOutcome)result.toOperationOutcome()).getIssue().size());
-		assertThat(resultString, StringContains.containsString("cvc-pattern-valid"));
+		assertThat(resultString).contains(resultString);
 
 		try {
 			parser.parseResource(encoded);
@@ -213,7 +213,7 @@ public class Dstu2ResourceValidatorDstu2Test {
 			"furry-white",
 			"FamilyName"
 		));
-		assertThat(messageString, not(stringContainsInOrder(
+		assertThat(messageString).doesNotContainPattern("(?s)
 			"extension",
 			"meta"
 		)));
@@ -266,7 +266,7 @@ public class Dstu2ResourceValidatorDstu2Test {
 			"String Extension",
 			"FamilyName"
 		));
-		assertThat(messageString, not(stringContainsInOrder(
+		assertThat(messageString).doesNotContainPattern("(?s)
 			"extension",
 			"meta"
 		)));

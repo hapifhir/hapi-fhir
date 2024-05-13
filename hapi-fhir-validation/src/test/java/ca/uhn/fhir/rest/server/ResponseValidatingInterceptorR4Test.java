@@ -36,8 +36,6 @@ import org.mockito.Mockito;
 import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 
@@ -314,8 +312,8 @@ public class ResponseValidatingInterceptorR4Test extends BaseValidationTestWithI
 		ourLog.trace("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(status.toString(), (containsString(
-			"X-FHIR-Response-Validation: {\"resourceType\":\"OperationOutcome\",\"issue\":[{\"severity\":\"information\",\"code\":\"informational\",\"diagnostics\":\"No issues detected\"}]}")));
+		assertThat(status.toString()).contains(
+			"X-FHIR-Response-Validation: {\"resourceType\":\"OperationOutcome\",\"issue\":[{\"severity\":\"information\",\"code\":\"informational\",\"diagnostics\":\"No issues detected\"}]}");
 	}
 
 	@Test
@@ -384,7 +382,7 @@ public class ResponseValidatingInterceptorR4Test extends BaseValidationTestWithI
 		ourLog.trace("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(status.toString(), (containsString("X-FHIR-Response-Validation: NO ISSUES")));
+		assertThat(status.toString()).contains("X-FHIR-Response-Validation: NO ISSUES");
 	}
 
 	@Test
@@ -498,7 +496,7 @@ public class ResponseValidatingInterceptorR4Test extends BaseValidationTestWithI
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(status.toString(), (containsString("X-FHIR-Response-Validation")));
+		assertThat(status.toString()).contains("X-FHIR-Response-Validation");
 	}
 
 }

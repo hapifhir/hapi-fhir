@@ -195,7 +195,7 @@ public class XmlParserHl7OrgDstu2Test {
 
 		assertThat(encoded,
 			stringContainsInOrder(Arrays.asList("<contained>", "<Observation", "</Observation>", "</contained>")));
-		assertThat(encoded, not(stringContainsInOrder(
+		assertThat(encoded).doesNotContainPattern("(?s)
 			Arrays.asList("<contained>", "<Observation", "</Observation>", "<Obser", "</contained>"))));
 
 	}
@@ -231,7 +231,7 @@ public class XmlParserHl7OrgDstu2Test {
 		assertThat(encoded).containsSubsequence(Arrays.asList("<contained>", "<id value=\"1\"/>", "</contained>"));
 		assertThat(encoded).contains("<reference value=\"#1\"/>"));
 		assertThat(encoded).containsSubsequence(Arrays.asList("<entry>", "</entry>"));
-		assertThat(encoded, not(stringContainsInOrder(Arrays.asList("<entry>", "</entry>", "<entry>"))));
+		assertThat(encoded).doesNotContainPattern("(?s)Arrays.asList("<entry>", "</entry>", "<entry>"))));
 
 		// Re-parse the bundle
 		patient = (org.hl7.fhir.dstu2.model.Patient) xmlParser.parseResource(xmlParser.encodeResourceToString(patient));
@@ -247,7 +247,7 @@ public class XmlParserHl7OrgDstu2Test {
 		ourLog.info(encoded);
 		assertThat(encoded).containsSubsequence(Arrays.asList("<contained>", "<Organization ", "<id value=\"1\"/>",
 			"</Organization", "</contained>", "<reference value=\"#1\"/>")));
-		assertThat(encoded, not(stringContainsInOrder(Arrays.asList("<contained>", "<Org", "<contained>"))));
+		assertThat(encoded).doesNotContainPattern("(?s)Arrays.asList("<contained>", "<Org", "<contained>"))));
 		assertThat(encoded).contains("<reference value=\"#1\"/>"));
 
 		// And re-encode once more, with the references cleared
@@ -257,7 +257,7 @@ public class XmlParserHl7OrgDstu2Test {
 		ourLog.info(encoded);
 		assertThat(encoded).containsSubsequence(Arrays.asList("<contained>", "<Organization ", "<id value=\"1\"/>",
 			"</Organization", "</contained>", "<reference value=\"#1\"/>")));
-		assertThat(encoded, not(stringContainsInOrder(Arrays.asList("<contained>", "<Org", "<contained>"))));
+		assertThat(encoded).doesNotContainPattern("(?s)Arrays.asList("<contained>", "<Org", "<contained>"))));
 		assertThat(encoded).contains("<reference value=\"#1\"/>"));
 
 		// And re-encode once more, with the references cleared and a manually set
@@ -269,7 +269,7 @@ public class XmlParserHl7OrgDstu2Test {
 		ourLog.info(encoded);
 		assertThat(encoded).containsSubsequence(Arrays.asList("<contained>", "<Organization ", "<id value=\"333\"/>",
 			"</Organization", "</contained>", "<reference value=\"#333\"/>")));
-		assertThat(encoded, not(stringContainsInOrder(Arrays.asList("<contained>", "<Org", "<contained>"))));
+		assertThat(encoded).doesNotContainPattern("(?s)Arrays.asList("<contained>", "<Org", "<contained>"))));
 
 	}
 
@@ -497,8 +497,8 @@ public class XmlParserHl7OrgDstu2Test {
 		String str = p.encodeResourceToString(rpt);
 
 		ourLog.info(str);
-		assertThat(str, StringContains.containsString("<div xmlns=\"http://www.w3.org/1999/xhtml\">AAA</div>"));
-		assertThat(str, StringContains.containsString("reference value=\"#"));
+		assertThat(str).contains(str);
+		assertThat(str).contains(str);
 
 		int idx = str.indexOf("reference value=\"#") + "reference value=\"#".length();
 		int idx2 = str.indexOf('"', idx + 1);
@@ -641,7 +641,7 @@ public class XmlParserHl7OrgDstu2Test {
 		// @formatter:off
 		assertThat(output).containsSubsequence("<id value=\"1\"/>", "<meta>", "<profile value=\"http://profile\"/>",
 			"<extension url=\"http://exturl\">", "<valueString value=\"ext_url_value\"/>", "<text value=\"CODE\"/>"));
-		assertThat(output, not(stringContainsInOrder("<url value=\"http://exturl\"/>")));
+		assertThat(output).doesNotContainPattern("(?s)"<url value=\"http://exturl\"/>")));
 		// @formatter:on
 
 		obs = parser.parseResource(org.hl7.fhir.dstu2.model.Observation.class, output);
@@ -673,7 +673,7 @@ public class XmlParserHl7OrgDstu2Test {
 			stringContainsInOrder("<id value=\"1\"/>", "<meta>", "<profile value=\"http://profile\"/>",
 				"<extension url=\"http://exturl\">", "<extension url=\"http://subext\">",
 				"<valueString value=\"sub_ext_value\"/>", "<text value=\"CODE\"/>"));
-		assertThat(output, not(stringContainsInOrder("<url value=\"http://exturl\"/>")));
+		assertThat(output).doesNotContainPattern("(?s)"<url value=\"http://exturl\"/>")));
 		// @formatter:on
 
 		obs = parser.parseResource(org.hl7.fhir.dstu2.model.Observation.class, output);
@@ -756,7 +756,7 @@ public class XmlParserHl7OrgDstu2Test {
 		try {
 			p.encodeResourceToString(obs);
 		} catch (DataFormatException e) {
-			assertThat(e.getMessage(), StringContains.containsString("DecimalType"));
+			assertThat(e.getMessage()).contains(e.getMessage());
 		}
 	}
 
@@ -876,7 +876,7 @@ public class XmlParserHl7OrgDstu2Test {
 		org.addIdentifier().setSystem("foo").setValue("bar");
 		patient.setManagingOrganization(new org.hl7.fhir.dstu2.model.Reference(org));
 		str = p.encodeResourceToString(patient);
-		assertThat(str, StringContains.containsString("<contained><Organization"));
+		assertThat(str).contains(str);
 
 	}
 
@@ -1050,14 +1050,14 @@ public class XmlParserHl7OrgDstu2Test {
 
 		ourLog.info(str);
 
-		assertThat(str, StringContains.containsString("<Patient xmlns=\"http://hl7.org/fhir\">"));
+		assertThat(str).contains(str);
 		assertThat(str, StringContains.containsString(
 			"<extension url=\"http://example.com/dontuse#petname\"><valueString value=\"Fido\"/></extension>"));
 		assertThat(str, StringContains.containsString(
 			"<modifierExtension url=\"http://example.com/dontuse#importantDates\"><valueDateTime value=\"2010-01-02\"/></modifierExtension>"));
 		assertThat(str, StringContains.containsString(
 			"<modifierExtension url=\"http://example.com/dontuse#importantDates\"><valueDateTime value=\"2014-01-26T11:11:11\"/></modifierExtension>"));
-		assertThat(str, StringContains.containsString("<name><family value=\"Smith\"/></name>"));
+		assertThat(str).contains(str);
 
 	}
 

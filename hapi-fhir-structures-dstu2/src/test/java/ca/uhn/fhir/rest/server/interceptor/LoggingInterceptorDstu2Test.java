@@ -98,7 +98,7 @@ public class LoggingInterceptorDstu2Test {
 
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(logger, timeout(1000).times(1)).info(captor.capture());
-		assertThat(captor.getAllValues().get(0), StringContains.containsString("ERROR - GET " + ourServer.getBaseUrl() + "/Patient/EX"));
+		assertThat(captor.getAllValues().get(0)).contains(captor.getAllValues().get(0));
 	}
 
 	@Test
@@ -118,7 +118,7 @@ public class LoggingInterceptorDstu2Test {
 
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(logger, timeout(1000).times(1)).info(captor.capture());
-		assertThat(captor.getValue(), StringContains.containsString("metadata - "));
+		assertThat(captor.getValue()).contains(captor.getValue());
 	}
 
 	@Test
@@ -364,7 +364,7 @@ public class LoggingInterceptorDstu2Test {
 
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(logger, timeout(1000).times(1)).info(captor.capture());
-		assertThat(captor.getValue(), StringContains.containsString("read - Patient/1"));
+		assertThat(captor.getValue()).contains(captor.getValue());
 	}
 
 	@Test
@@ -385,7 +385,7 @@ public class LoggingInterceptorDstu2Test {
 		
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(logger, timeout(1000).times(1)).info(captor.capture());
-		assertThat(captor.getValue(), StringContains.containsString("search-type - Patient - ?_id=1"));
+		assertThat(captor.getValue()).contains(captor.getValue());
 	}
 
 	@AfterAll

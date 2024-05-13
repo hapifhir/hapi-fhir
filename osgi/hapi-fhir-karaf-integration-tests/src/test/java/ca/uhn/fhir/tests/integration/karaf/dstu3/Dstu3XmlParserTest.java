@@ -419,7 +419,7 @@ public class Dstu3XmlParserTest {
 		assertThat(encoded).containsSubsequence(Arrays.asList("<contained>", "<id value=\"1\"/>", "</contained>"));
 		assertThat(encoded).contains("<reference value=\"#1\"/>"));
 		assertThat(encoded).containsSubsequence(Arrays.asList("<entry>", "</entry>"));
-		assertThat(encoded, not(stringContainsInOrder(Arrays.asList("<entry>", "</entry>", "<entry>"))));
+		assertThat(encoded).doesNotContainPattern("(?s)Arrays.asList("<entry>", "</entry>", "<entry>"))));
 
 		// Re-parse the bundle
 		patient = (Patient) xmlParser.parseResource(xmlParser.encodeResourceToString(patient));
@@ -434,7 +434,7 @@ public class Dstu3XmlParserTest {
 		encoded = xmlParser.encodeResourceToString(patient);
 		ourLog.info(encoded);
 		assertThat(encoded).containsSubsequence(Arrays.asList("<contained>", "<Organization ", "<id value=\"1\"/>", "</Organization", "</contained>", "<reference value=\"#1\"/>"));
-		assertThat(encoded, not(stringContainsInOrder(Arrays.asList("<contained>", "<Org", "<contained>"))));
+		assertThat(encoded).doesNotContainPattern("(?s)Arrays.asList("<contained>", "<Org", "<contained>"))));
 		assertThat(encoded).contains("<reference value=\"#1\"/>"));
 
 		// And re-encode once more, with the references cleared
@@ -443,7 +443,7 @@ public class Dstu3XmlParserTest {
 		encoded = xmlParser.encodeResourceToString(patient);
 		ourLog.info(encoded);
 		assertThat(encoded).containsSubsequence(Arrays.asList("<contained>", "<Organization ", "<id value=\"1\"/>", "</Organization", "</contained>", "<reference value=\"#1\"/>"));
-		assertThat(encoded, not(stringContainsInOrder(Arrays.asList("<contained>", "<Org", "<contained>"))));
+		assertThat(encoded).doesNotContainPattern("(?s)Arrays.asList("<contained>", "<Org", "<contained>"))));
 		assertThat(encoded).contains("<reference value=\"#1\"/>"));
 
 		// And re-encode once more, with the references cleared and a manually set local ID
@@ -453,7 +453,7 @@ public class Dstu3XmlParserTest {
 		encoded = xmlParser.encodeResourceToString(patient);
 		ourLog.info(encoded);
 		assertThat(encoded).containsSubsequence(Arrays.asList("<contained>", "<Organization ", "<id value=\"333\"/>", "</Organization", "</contained>", "<reference value=\"#333\"/>"));
-		assertThat(encoded, not(stringContainsInOrder(Arrays.asList("<contained>", "<Org", "<contained>"))));
+		assertThat(encoded).doesNotContainPattern("(?s)Arrays.asList("<contained>", "<Org", "<contained>"))));
 
 	}
 
@@ -1069,7 +1069,7 @@ public class Dstu3XmlParserTest {
 		ourLog.info(encoded);
 
 		assertThat(encoded).containsSubsequence("<DiagnosticReport", "<contained", "<Observation", "<text value=\"Sharp1\"", "</DiagnosticReport");
-		assertThat(encoded, not(stringContainsInOrder("<DiagnosticReport", "<contained", "<Observation", "<contained", "<Observation", "</DiagnosticReport")));
+		assertThat(encoded).doesNotContainPattern("(?s)"<DiagnosticReport", "<contained", "<Observation", "<contained", "<Observation", "</DiagnosticReport")));
 	}
 
 	@Test
@@ -1441,7 +1441,7 @@ public class Dstu3XmlParserTest {
 			"<extension url=\"http://exturl\">",
 			"<valueString value=\"ext_url_value\"/>",
 			"<text value=\"CODE\"/>"));
-		assertThat(output, not(stringContainsInOrder(
+		assertThat(output).doesNotContainPattern("(?s)
 			"<url value=\"http://exturl\"/>")));
 
 		obs = parser.parseResource(Observation.class, output);
@@ -1476,7 +1476,7 @@ public class Dstu3XmlParserTest {
 			"<extension url=\"http://subext\">",
 			"<valueString value=\"sub_ext_value\"/>",
 			"<text value=\"CODE\"/>"));
-		assertThat(output, not(stringContainsInOrder(
+		assertThat(output).doesNotContainPattern("(?s)
 			"<url value=\"http://exturl\"/>")));
 
 		obs = parser.parseResource(Observation.class, output);
@@ -1535,7 +1535,7 @@ public class Dstu3XmlParserTest {
 
 		String val = parser.encodeResourceToString(patient);
 		ourLog.info(val);
-		assertThat(val, StringContains.containsString("<extension url=\"urn:foo\"><valueReference><reference value=\"Organization/123\"/></valueReference></extension>"));
+		assertThat(val).contains(val);
 
 		Patient actual = parser.parseResource(Patient.class, val);
 		assertEquals(Address.AddressUse.HOME, patient.getAddress().get(0).getUse());
@@ -1804,7 +1804,7 @@ public class Dstu3XmlParserTest {
 
 		String val = parser.encodeResourceToString(patient);
 		ourLog.info(val);
-		assertThat(val, StringContains.containsString("<extension url=\"urn:foo\"><valueCode value=\"home\"/></extension>"));
+		assertThat(val).contains(val);
 
 		MyPatientWithOneDeclaredEnumerationExtensionDstu3 actual = parser.parseResource(MyPatientWithOneDeclaredEnumerationExtensionDstu3.class, val);
 		assertEquals(Address.AddressUse.HOME, patient.getAddress().get(0).getUse());

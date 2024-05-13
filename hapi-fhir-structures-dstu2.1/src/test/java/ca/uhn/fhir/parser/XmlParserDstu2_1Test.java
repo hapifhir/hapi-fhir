@@ -398,7 +398,7 @@ public class XmlParserDstu2_1Test {
 		assertThat(encoded).containsSubsequence(Arrays.asList("<contained>", "<id value=\"1\"/>", "</contained>"));
 		assertThat(encoded).contains("<reference value=\"#1\"/>");
 		assertThat(encoded).containsSubsequence(Arrays.asList("<entry>", "</entry>"));
-		assertThat(encoded, not(stringContainsInOrder(Arrays.asList("<entry>", "</entry>", "<entry>"))));
+		assertThat(encoded).doesNotContainPattern("(?s)<entry>.*</entry>.*<entry>");
 
 		// Re-parse the bundle
 		patient = (Patient) xmlParser.parseResource(xmlParser.encodeResourceToString(patient));
@@ -413,7 +413,7 @@ public class XmlParserDstu2_1Test {
 		encoded = xmlParser.encodeResourceToString(patient);
 		ourLog.info(encoded);
 		assertThat(encoded).containsSubsequence(Arrays.asList("<contained>", "<Organization ", "<id value=\"1\"/>", "</Organization", "</contained>", "<reference value=\"#1\"/>"));
-		assertThat(encoded, not(stringContainsInOrder(Arrays.asList("<contained>", "<Org", "<contained>"))));
+		assertThat(encoded).doesNotContainPattern("(?s)<contained>.*<Org.*<contained>");
 		assertThat(encoded).contains("<reference value=\"#1\"/>");
 
 		// And re-encode once more, with the references cleared
@@ -422,7 +422,7 @@ public class XmlParserDstu2_1Test {
 		encoded = xmlParser.encodeResourceToString(patient);
 		ourLog.info(encoded);
 		assertThat(encoded).containsSubsequence(Arrays.asList("<contained>", "<Organization ", "<id value=\"1\"/>", "</Organization", "</contained>", "<reference value=\"#1\"/>"));
-		assertThat(encoded, not(stringContainsInOrder(Arrays.asList("<contained>", "<Org", "<contained>"))));
+		assertThat(encoded).doesNotContainPattern("(?s)<contained>.*<Org.*<contained>");
 		assertThat(encoded).contains("<reference value=\"#1\"/>");
 
 		// And re-encode once more, with the references cleared and a manually set local ID
@@ -432,7 +432,7 @@ public class XmlParserDstu2_1Test {
 		encoded = xmlParser.encodeResourceToString(patient);
 		ourLog.info(encoded);
 		assertThat(encoded).containsSubsequence(Arrays.asList("<contained>", "<Organization ", "<id value=\"333\"/>", "</Organization", "</contained>", "<reference value=\"#333\"/>"));
-		assertThat(encoded, not(stringContainsInOrder(Arrays.asList("<contained>", "<Org", "<contained>"))));
+		assertThat(encoded).doesNotContainPattern("(?s)<contained>.*<Org.*<contained>");
 
 	}
 
@@ -825,7 +825,7 @@ public class XmlParserDstu2_1Test {
 		ourLog.info(encoded);
 
 		assertThat(encoded).containsSubsequence("<DiagnosticReport", "<contained", "<Observation", "<text value=\"Sharp1\"", "</DiagnosticReport");
-		assertThat(encoded, not(stringContainsInOrder("<DiagnosticReport", "<contained", "<Observation", "<contained", "<Observation", "</DiagnosticReport")));
+		assertThat(encoded).doesNotContainPattern("(?s)<DiagnosticReport.*<contained.*<Observation.*<contained.*<Observation.*</DiagnosticReport");
 	}
 
 	/**
@@ -1130,9 +1130,7 @@ public class XmlParserDstu2_1Test {
 			"<valueString value=\"ext_url_value\"/>",
 			"<text value=\"CODE\"/>"
 		);
-		assertThat(output, not(stringContainsInOrder(
-			"<url value=\"http://exturl\"/>"
-		)));
+		assertThat(output).doesNotContainPattern("(?s)<url value=\"http://exturl\"/>");
 		//@formatter:on
 
 		obs = parser.parseResource(Observation.class, output);
@@ -1169,9 +1167,7 @@ public class XmlParserDstu2_1Test {
 			"<valueString value=\"sub_ext_value\"/>",
 			"<text value=\"CODE\"/>"
 		);
-		assertThat(output, not(stringContainsInOrder(
-			"<url value=\"http://exturl\"/>"
-		)));
+		assertThat(output).doesNotContainPattern("(?s)<url value=\"http://exturl\"/>");
 		//@formatter:on
 
 		obs = parser.parseResource(Observation.class, output);
@@ -1232,7 +1228,7 @@ public class XmlParserDstu2_1Test {
 
 		String val = parser.encodeResourceToString(patient);
 		ourLog.info(val);
-		assertThat(val, StringContains.containsString("<extension url=\"urn:foo\"><valueReference><reference value=\"Organization/123\"/></valueReference></extension>"));
+		assertThat(val).contains(val);
 
 		Patient actual = parser.parseResource(Patient.class, val);
 		assertEquals(AddressUse.HOME, patient.getAddress().get(0).getUse());

@@ -828,7 +828,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result);
 		ourLog.info(resp);
 
-		assertThat(resp).doesNotContainPattern("<code value=\"childCA\"/>.*<display value=\"Child CA\"/>");
+		assertThat(resp).doesNotContainPattern("(?s)<code value=\"childCA\"/>.*<display value=\"Child CA\"/>");
 	}
 
 	@Test
