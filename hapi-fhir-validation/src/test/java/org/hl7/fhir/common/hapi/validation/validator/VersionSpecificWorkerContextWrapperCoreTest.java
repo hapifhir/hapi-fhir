@@ -64,6 +64,41 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
 
+/**
+ This test class is included as useful debugging code.
+
+ It is not currently intended to pass.
+
+ It will remain disabled so as not to impede the build, but can be enabled in order to debug issues relating to the
+ validation of codes and code systems.
+
+ This test class was derived from an original test in org.hl7.fhir.core:
+
+ https://github.com/hapifhir/org.hl7.fhir.core/blob/6.3.7/org.hl7.fhir.validation/src/test/java/org/hl7/fhir/terminology/tests/TerminologyServiceTests.java
+
+ The original series of tests is loaded from the fhir-test-cases repository:
+
+ https://github.com/FHIR/fhir-test-cases/tree/1.5.7/tx
+
+ In the original test cases were executed using the core implementation of IWorkerContext, which is passed to this
+ utility method:
+
+ https://github.com/hapifhir/org.hl7.fhir.core/blob/d81fc5d82d0297d1a6f4b38bd9b81e52f859eb4f/org.hl7.fhir.validation/src/main/java/org/hl7/fhir/validation/special/TxServiceTestHelper.java#L25
+
+ This executes a diff of the actual and expected results. In the core implementation of IWorkerContext, an actual server
+ is used for terminology expansion and validation, and actual test results are meant to equal the expected ones.
+
+ In HAPI,  we use a completely different implementation of IWorkerContext, with error messages that differ from the core
+ implementation. InMemoryTerminologyServerValidationSupport for example, should not produce the same error code as a
+ FHIR terminology server. Thus, these tests will produce different error messages, and will almost always fail. However,
+ they can be used to debug the validation process, as well as to compare our validation results to the core.
+
+ You can produce diffs in a local directory by setting the TX_SERVICE_TEST_DIFF_TARGET environment variable.
+
+ The code below is left in the last 'working' state, but may have to be updated to suit a particular debugging task. The
+ documentation above is meant to provide some guidance on how to derive similar debugging code from the
+ org.hl7.fhir.core test cases.
+ */
 public class VersionSpecificWorkerContextWrapperCoreTest {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(VersionSpecificWorkerContextWrapperCoreTest.class);
