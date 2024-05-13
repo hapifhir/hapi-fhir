@@ -570,44 +570,44 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	}
 
 	@Override
-	public Set<String> getResourceNamesAsSet(FhirPublication fhirVersion) {
+	public Set<String> getResourceNamesAsSet(FhirPublication theFhirVersion) {
 		return null;
 	}
 
 	@Override
-	public StructureDefinition fetchTypeDefinition(String typeName) {
-		return fetchResource(StructureDefinition.class, "http://hl7.org/fhir/StructureDefinition/" + typeName);
+	public StructureDefinition fetchTypeDefinition(String theTypeName) {
+		return fetchResource(StructureDefinition.class, "http://hl7.org/fhir/StructureDefinition/" + theTypeName);
 	}
 
 	@Override
-	public StructureDefinition fetchTypeDefinition(String typeName, FhirPublication fhirVersion) {
+	public StructureDefinition fetchTypeDefinition(String theTypeName, FhirPublication theFhirVersion) {
 		return null;
 	}
 
 	@Override
-	public List<StructureDefinition> fetchTypeDefinitions(String typeName) {
+	public List<StructureDefinition> fetchTypeDefinitions(String theTypeName) {
 		List<StructureDefinition> allStructures = new ArrayList<>(allStructures());
-		allStructures.removeIf(sd -> !sd.hasType() || !sd.getType().equals(typeName));
+		allStructures.removeIf(sd -> !sd.hasType() || !sd.getType().equals(theTypeName));
 		return allStructures;
 	}
 
 	@Override
-	public List<StructureDefinition> fetchTypeDefinitions(String n, FhirPublication fhirVersion) {
+	public List<StructureDefinition> fetchTypeDefinitions(String theTypeName, FhirPublication theFhirVersion) {
 		return null;
 	}
 
 	@Override
-	public boolean isPrimitiveType(String s) {
+	public boolean isPrimitiveType(String theType) {
 		List<StructureDefinition> allStructures = new ArrayList<>(allStructures());
 		return allStructures.stream()
 				.filter(structureDefinition ->
 						structureDefinition.getKind() == StructureDefinition.StructureDefinitionKind.PRIMITIVETYPE)
-				.anyMatch(structureDefinition -> s.equals(structureDefinition.getName()));
+				.anyMatch(structureDefinition -> theType.equals(structureDefinition.getName()));
 	}
 
 	@Override
-	public boolean isDataType(String s) {
-		return !isPrimitiveType(s);
+	public boolean isDataType(String theType) {
+		return !isPrimitiveType(theType);
 	}
 
 	@Override
