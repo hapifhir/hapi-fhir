@@ -411,7 +411,6 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		Observation obs = new Observation();
 		obs.addIdentifier().setValue(identifierCode);
 		// when
-		Instant now = Instant.now();
 		DaoMethodOutcome outcome = myObservationDao.create(obs, matchUrl, new SystemRequestDetails());
 
 		// then
@@ -422,6 +421,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		ResourceSearchUrlEntity searchUrlEntity = myResourceSearchUrlDao.findAll().get(0);
 		assertNotNull(searchUrlEntity);
 		assertEquals(expectedResId, searchUrlEntity.getResourcePid());
+		Instant now = Instant.now();
 		assertThat(searchUrlEntity.getCreatedTime())
 			.as("Check that the creation time of the URL is within the last second")
 			.isBetween(now.minus(1, ChronoUnit.SECONDS), now);
