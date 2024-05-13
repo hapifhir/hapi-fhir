@@ -396,7 +396,8 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 			.filter(t -> !t.contains("FROM HFJ_TAG_DEF"))
 			.collect(Collectors.toList());
 		for (String next : selectQueryStrings) {
-			assertThat(next).isIn("PARTITION_ID =", "PARTITION_ID IN");
+			assertThat(next).satisfiesAnyOf(s -> assertThat(s).contains("PARTITION_ID ="),
+				s -> assertThat(s).contains("PARTITION_ID IN"));
 		}
 
 		ListMultimap<String, String> resourceIds = outcome
