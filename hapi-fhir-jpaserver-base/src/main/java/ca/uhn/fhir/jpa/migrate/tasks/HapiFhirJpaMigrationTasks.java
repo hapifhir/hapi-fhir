@@ -204,11 +204,10 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 				.failureAllowed()
 				.withType(ColumnTypeEnum.INT);
 		version.onTable("HFJ_BINARY_STORAGE")
-			.modifyColumn("20240511.17", "CONTENT_SIZE")
-			.nonNullable()
-			.failureAllowed()
-			.withType(ColumnTypeEnum.LONG);
-
+				.modifyColumn("20240511.17", "CONTENT_SIZE")
+				.nonNullable()
+				.failureAllowed()
+				.withType(ColumnTypeEnum.LONG);
 	}
 
 	protected void init720() {
