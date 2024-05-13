@@ -70,7 +70,18 @@ public class SearchParameterUtil {
 		if (myPatientSearchParam == null) {
 			myPatientSearchParam = runtimeResourceDefinition.getSearchParam("subject");
 			if (myPatientSearchParam == null) {
-				myPatientSearchParam = getOnlyPatientCompartmentRuntimeSearchParam(runtimeResourceDefinition);
+				final RuntimeResourceDefinition runtimeResourceDefinitionForR4 =
+						FhirContext.forR4Cached().getResourceDefinition(theResourceType);
+				final RuntimeSearchParam patientSearchParam = runtimeResourceDefinitionForR4.getSearchParam("patient");
+				final List<RuntimeSearchParam> searchParams =
+						runtimeResourceDefinition.getSearchParamsForCompartmentName("Patient");
+				myPatientSearchParam = searchParams.stream()
+						.filter(searchParam -> patientSearchParam.getPath().equals(searchParam.getPath()))
+						.findFirst()
+						.orElse(null);
+				if (myPatientSearchParam == null) {
+					myPatientSearchParam = getOnlyPatientCompartmentRuntimeSearchParam(runtimeResourceDefinition);
+				}
 			}
 		}
 		return Optional.ofNullable(myPatientSearchParam);
