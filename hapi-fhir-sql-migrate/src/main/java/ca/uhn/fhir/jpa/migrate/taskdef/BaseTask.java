@@ -308,14 +308,6 @@ public abstract class BaseTask {
 		}
 	}
 
-	public void doNothing() {
-		setDoNothing(true);
-	}
-
-	public void failureAllowed() {
-		setFailureAllowed(true);
-	}
-
 	public boolean isDoNothing() {
 		return myDoNothing;
 	}

@@ -156,30 +156,4 @@ public interface IRequestPartitionHelperSvc {
 	Set<Integer> toReadPartitions(@Nonnull RequestPartitionId theRequestPartitionId);
 
 	boolean isResourcePartitionable(String theResourceType);
-
-	/**
-	 * <b>No interceptors should be invoked by this method. It should ONLY be used when partition ids are
-	 * known, but partition names are not.</b>
-	 * <br/><br/>
-	 * Ensures the list of partition ids inside the given {@link RequestPartitionId} correctly map to the
-	 * list of partition names. If the list of partition names is empty, this method will map the correct
-	 * partition names and return a normalized {@link RequestPartitionId}.
-	 * <br/><br/>
-	 * @param theRequestPartitionId - An unvalidated and unnormalized {@link RequestPartitionId}.
-	 * @return - A {@link RequestPartitionId} with a normalized list of partition ids and partition names.
-	 */
-	RequestPartitionId validateAndNormalizePartitionIds(RequestPartitionId theRequestPartitionId);
-
-	/**
-	 * <b>No interceptors should be invoked by this method. It should ONLY be used when partition names are
-	 * known, but partition ids are not.</b>
-	 * <br/><br/>
-	 * Ensures the list of partition names inside the given {@link RequestPartitionId} correctly map to the
-	 * list of partition ids. If the list of partition ids is empty, this method will map the correct
-	 * partition ids and return a normalized {@link RequestPartitionId}.
-	 * <br/><br/>
-	 * @param theRequestPartitionId - An unvalidated and unnormalized {@link RequestPartitionId}.
-	 * @return - A {@link RequestPartitionId} with a normalized list of partition ids and partition names.
-	 */
-	RequestPartitionId validateAndNormalizePartitionNames(RequestPartitionId theRequestPartitionId);
 }

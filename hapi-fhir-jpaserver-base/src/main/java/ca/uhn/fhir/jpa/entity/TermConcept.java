@@ -24,7 +24,6 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
 import ca.uhn.fhir.jpa.search.DeferConceptIndexingRoutingBinder;
 import ca.uhn.fhir.util.ValidateUtil;
-import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -59,7 +58,10 @@ import org.hibernate.search.mapper.pojo.bridge.mapping.annotation.RoutingBinderR
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexingDependency;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.ObjectPath;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.PropertyBinding;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.PropertyValue;
 import org.hl7.fhir.r4.model.Coding;
 
 import java.io.Serializable;
@@ -176,11 +178,6 @@ public class TermConcept implements Serializable {
 	@Column(name = "PARENT_PIDS", nullable = true)
 	private String myParentPids;
 
-	@FullTextField(
-			name = "myParentPids",
-			searchable = Searchable.YES,
-			projectable = Projectable.YES,
-			analyzer = "conceptParentPidsAnalyzer")
 	@Column(name = "PARENT_PIDS_VC", nullable = true, length = Length.LONG32)
 	private String myParentPidsVc;
 
@@ -192,9 +189,6 @@ public class TermConcept implements Serializable {
 
 	@Column(name = "CODE_SEQUENCE", nullable = true)
 	private Integer mySequence;
-
-	@Transient
-	private boolean mySupportLegacyLob = false;
 
 	public TermConcept() {
 		super();
@@ -369,6 +363,13 @@ public class TermConcept implements Serializable {
 		return this;
 	}
 
+	@Transient
+	@FullTextField(
+			name = "myParentPids",
+			searchable = Searchable.YES,
+			projectable = Projectable.YES,
+			analyzer = "conceptParentPidsAnalyzer")
+	@IndexingDependency(derivedFrom = @ObjectPath({@PropertyValue(propertyName = "myParentPidsVc")}))
 	public String getParentPidsAsString() {
 		return nonNull(myParentPidsVc) ? myParentPidsVc : myParentPids;
 	}
@@ -458,10 +459,6 @@ public class TermConcept implements Serializable {
 
 			ourLog.trace("Code {}/{} has parents {}", entity.getId(), entity.getCode(), entity.getParentPidsAsString());
 		}
-
-		if (!mySupportLegacyLob) {
-			clearParentPidsLob();
-		}
 	}
 
 	private void setParentPids(Set<Long> theParentPids) {
@@ -522,18 +519,5 @@ public class TermConcept implements Serializable {
 	 */
 	public List<TermConcept> getChildCodes() {
 		return getChildren().stream().map(TermConceptParentChildLink::getChild).collect(Collectors.toList());
-	}
-
-	public void flagForLegacyLobSupport(boolean theSupportLegacyLob) {
-		mySupportLegacyLob = theSupportLegacyLob;
-	}
-
-	private void clearParentPidsLob() {
-		myParentPids = null;
-	}
-
-	@VisibleForTesting
-	public boolean hasParentPidsLobForTesting() {
-		return nonNull(myParentPids);
 	}
 }

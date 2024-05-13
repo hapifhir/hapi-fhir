@@ -46,8 +46,6 @@ public class TermConceptDaoSvc {
 	@Autowired
 	protected ITermConceptDesignationDao myConceptDesignationDao;
 
-	private boolean mySupportLegacyLob = false;
-
 	public int saveConcept(TermConcept theConcept) {
 		int retVal = 0;
 
@@ -72,11 +70,9 @@ public class TermConceptDaoSvc {
 			retVal++;
 			theConcept.setIndexStatus(BaseHapiFhirDao.INDEX_STATUS_INDEXED);
 			theConcept.setUpdated(new Date());
-			theConcept.flagForLegacyLobSupport(mySupportLegacyLob);
 			myConceptDao.save(theConcept);
 
 			for (TermConceptProperty next : theConcept.getProperties()) {
-				next.performLegacyLobSupport(mySupportLegacyLob);
 				myConceptPropertyDao.save(next);
 			}
 
@@ -89,11 +85,6 @@ public class TermConceptDaoSvc {
 		return retVal;
 	}
 
-	public TermConceptDaoSvc setSupportLegacyLob(boolean theSupportLegacyLob) {
-		mySupportLegacyLob = theSupportLegacyLob;
-		return this;
-	}
-
 	private int ensureParentsSaved(Collection<TermConceptParentChildLink> theParents) {
 		ourLog.trace("Checking {} parents", theParents.size());
 		int retVal = 0;
@@ -104,7 +95,6 @@ public class TermConceptDaoSvc {
 				retVal += ensureParentsSaved(nextParent.getParents());
 				if (nextParent.getId() == null) {
 					nextParent.setUpdated(new Date());
-					nextParent.flagForLegacyLobSupport(mySupportLegacyLob);
 					myConceptDao.saveAndFlush(nextParent);
 					retVal++;
 					ourLog.debug("Saved parent code {} and got id {}", nextParent.getCode(), nextParent.getId());

@@ -37,7 +37,7 @@ public class RequestPartitionHelperSvc extends BaseRequestPartitionHelperSvc {
 	IPartitionLookupSvc myPartitionConfigSvc;
 
 	@Override
-	public RequestPartitionId validateAndNormalizePartitionIds(RequestPartitionId theRequestPartitionId) {
+	protected RequestPartitionId validateAndNormalizePartitionIds(RequestPartitionId theRequestPartitionId) {
 		List<String> names = null;
 		for (int i = 0; i < theRequestPartitionId.getPartitionIds().size(); i++) {
 
@@ -59,7 +59,7 @@ public class RequestPartitionHelperSvc extends BaseRequestPartitionHelperSvc {
 				}
 			}
 
-			if (theRequestPartitionId.hasPartitionNames()) {
+			if (theRequestPartitionId.getPartitionNames() != null) {
 				if (partition == null) {
 					Validate.isTrue(
 							theRequestPartitionId.getPartitionIds().get(i) == null,
@@ -68,8 +68,8 @@ public class RequestPartitionHelperSvc extends BaseRequestPartitionHelperSvc {
 				} else {
 					Validate.isTrue(
 							Objects.equals(
-									theRequestPartitionId.getPartitionNames().get(i), partition.getName()),
-							"Partition name %s does not match ID %s",
+									theRequestPartitionId.getPartitionIds().get(i), partition.getId()),
+							"Partition name %s does not match ID %n",
 							theRequestPartitionId.getPartitionNames().get(i),
 							theRequestPartitionId.getPartitionIds().get(i));
 				}
@@ -94,7 +94,7 @@ public class RequestPartitionHelperSvc extends BaseRequestPartitionHelperSvc {
 	}
 
 	@Override
-	public RequestPartitionId validateAndNormalizePartitionNames(RequestPartitionId theRequestPartitionId) {
+	protected RequestPartitionId validateAndNormalizePartitionNames(RequestPartitionId theRequestPartitionId) {
 		List<Integer> ids = null;
 		for (int i = 0; i < theRequestPartitionId.getPartitionNames().size(); i++) {
 
@@ -122,9 +122,9 @@ public class RequestPartitionHelperSvc extends BaseRequestPartitionHelperSvc {
 					Validate.isTrue(
 							Objects.equals(
 									theRequestPartitionId.getPartitionIds().get(i), partition.getId()),
-							"Partition ID %s does not match name %s",
-							theRequestPartitionId.getPartitionIds().get(i),
-							theRequestPartitionId.getPartitionNames().get(i));
+							"Partition name %s does not match ID %n",
+							theRequestPartitionId.getPartitionNames().get(i),
+							theRequestPartitionId.getPartitionIds().get(i));
 				}
 			} else {
 				if (ids == null) {

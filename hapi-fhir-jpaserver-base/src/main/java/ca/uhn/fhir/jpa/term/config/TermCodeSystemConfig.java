@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.jpa.term.config;
 
-import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.term.TermConceptDaoSvc;
 import ca.uhn.fhir.jpa.term.TermDeferredStorageSvcImpl;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemDeleteJobSvc;
@@ -42,7 +41,7 @@ public class TermCodeSystemConfig {
 	}
 
 	@Bean
-	public TermConceptDaoSvc termConceptDaoSvc(JpaStorageSettings theJpaStorageSettings) {
-		return new TermConceptDaoSvc().setSupportLegacyLob(theJpaStorageSettings.isWriteToLegacyLobColumns());
+	public TermConceptDaoSvc termConceptDaoSvc() {
+		return new TermConceptDaoSvc();
 	}
 }
