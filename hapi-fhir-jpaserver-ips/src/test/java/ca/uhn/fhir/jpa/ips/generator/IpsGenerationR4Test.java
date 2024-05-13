@@ -343,100 +343,57 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 	 */
 	private class IpsTerminologySvc implements IValidationSupport {
 
-		final Set<String> loincValueSetCodes = new HashSet<>(Arrays.asList(
+		final Set<String> loincValueSetCodes = Set.of(
 			"60591-5",
 			"75326-9",
 			"94306-8"
-		));
+		);
 
-		final Set<String> snomedValueSetCodes = new HashSet<>(Arrays.asList(
+		final Set<String> snomedValueSetCodes = Set.of(
 			"14657009",
 			"255604002",
 			"38341003",
 			"1208807009"
-		));
+		);
 
-		final Set<String> loincCodes = new HashSet<>(Arrays.asList(
-			// Tiny patient summary
-			"48765-2",
+		final Set<String> loincCodes = Set.of(
 			"10160-0",
-			"11450-4",
-
-			// Large patient summary
-
 			"11369-6",
-			"30954-2",
-			"8094-5",
-			"8076-2",
-			"8093-7",
-			"31627-3",
-			"8091-1",
-			"8092-9",
-			"1988-5",
-			"26484-6",
-			"26449-9",
-			"30449-3",
-			"28539-5",
-			"30428-7",
-			"26474-7",
-			"26464-8",
-			"26444-0",
-			"718-7",
-			"26515-7",
-			"20570-8",
-			"2157-6",
-			"14933-6",
-			"26464-8",
-			"30428-7",
-			"26449-9",
-			"26474-7",
-			"26515-7",
-			"26484-6",
-			"26444-0",
-			"28539-5",
-			"30449-3",
-			"718-7",
-			"20570-8",
+			"11450-4",
 			"14682-9",
 			"14933-6",
+			"1988-5",
+			"20570-8",
+			"2157-6",
+			"26444-0",
+			"26449-9",
+			"26464-8",
+			"26474-7",
+			"26484-6",
+			"26515-7",
 			"2823-3",
-			"62238-1",
+			"28539-5",
 			"2951-2",
-			"1988-5",
-			"8061-4",
 			"29953-7",
-			"14933-6",
-			"1988-5",
-			"28539-5",
-			"718-7",
-			"30449-3",
-			"26474-7",
 			"30428-7",
-			"26444-0",
-			"26484-6",
-			"20570-8",
-			"26449-9",
-			"26464-8",
-			"26515-7",
-			"32677-7",
+			"30449-3",
+			"30954-2",
 			"31348-6",
-			"14933-6",
-			"26449-9",
+			"31627-3",
+			"32677-7",
+			"48765-2",
+			"62238-1",
 			"718-7",
-			"26474-7",
-			"20570-8",
-			"26484-6",
-			"26444-0",
-			"30449-3",
-			"30428-7",
-			"26515-7",
-			"28539-5",
-			"26464-8",
-			"1988-5",
+			"8061-4",
+			"8076-2",
+			"8091-1",
+			"8092-9",
+			"8093-7",
+			"8094-5",
 			"94500-6"
-		));
+		);
 
-		final Set<String> snomedCodes = new HashSet<>(Arrays.asList(
+		final Set<String> snomedCodes = Set.of(
 			// Tiny patient summary
 			"38341003",
 			"1208807009",
@@ -450,7 +407,7 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 			"16217701000119102",
 			"72098002",
 			"260415000"
-		));
+		);
 
 		@Override
 		public boolean isValueSetSupported(ValidationSupportContext theValidationSupportContext, String theValueSetUrl) {

@@ -48,6 +48,28 @@ import java.util.Set;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public final class HapiWorkerContext extends I18nBase implements IWorkerContext {
+	public static final List<String> PRIMITIVE_TYPES = List.of(
+			"boolean",
+			"integer",
+			"integer64",
+			"string",
+			"decimal",
+			"uri",
+			"base64Binary",
+			"instant",
+			"date",
+			"dateTime",
+			"time",
+			"code",
+			"oid",
+			"id",
+			"markdown",
+			"unsignedInt",
+			"positiveInt",
+			"uuid",
+			"xhtml",
+			"url",
+			"canonical");
 	private final FhirContext myCtx;
 	private final Cache<String, Resource> myFetchedResourceCache;
 	private IValidationSupport myValidationSupport;
@@ -463,28 +485,6 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 
 	@Override
 	public boolean isPrimitiveType(String theType) {
-		return Arrays.asList(
-						"boolean",
-						"integer",
-						"integer64",
-						"string",
-						"decimal",
-						"uri",
-						"base64Binary",
-						"instant",
-						"date",
-						"dateTime",
-						"time",
-						"code",
-						"oid",
-						"id",
-						"markdown",
-						"unsignedInt",
-						"positiveInt",
-						"uuid",
-						"xhtml",
-						"url",
-						"canonical")
-				.contains(theType);
+		return PRIMITIVE_TYPES.contains(theType);
 	}
 }
