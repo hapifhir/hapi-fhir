@@ -73,7 +73,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
@@ -683,26 +682,6 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		if (next.getId() == null) {
 			myConceptParentChildLinkDao.save(next);
 		}
-	}
-
-	private int ensureParentsSaved(Collection<TermConceptParentChildLink> theParents) {
-		ourLog.trace("Checking {} parents", theParents.size());
-		int retVal = 0;
-
-		for (TermConceptParentChildLink nextLink : theParents) {
-			if (nextLink.getRelationshipType() == TermConceptParentChildLink.RelationshipTypeEnum.ISA) {
-				TermConcept nextParent = nextLink.getParent();
-				retVal += ensureParentsSaved(nextParent.getParents());
-				if (nextParent.getId() == null) {
-					nextParent.setUpdated(new Date());
-					myConceptDao.saveAndFlush(nextParent);
-					retVal++;
-					ourLog.debug("Saved parent code {} and got id {}", nextParent.getCode(), nextParent.getId());
-				}
-			}
-		}
-
-		return retVal;
 	}
 
 	@Nonnull

@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 5917
+title: "Fix chained sorts on strings when using MS Sql"
