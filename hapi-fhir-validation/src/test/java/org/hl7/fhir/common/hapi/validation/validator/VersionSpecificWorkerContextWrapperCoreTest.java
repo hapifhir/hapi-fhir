@@ -95,10 +95,11 @@ import static org.mockito.Mockito.withSettings;
 
  You can produce diffs in a local directory by setting the TX_SERVICE_TEST_DIFF_TARGET environment variable.
 
- The code below is left in the last 'working' state, but may have to be updated to suit a particular debugging task. The
- documentation above is meant to provide some guidance on how to derive similar debugging code from the
- org.hl7.fhir.core test cases.
+ The code below is left in the last 'working' state. It may contain dead code and other artifacts of being derived from
+ the core library. It may have to be updated to suit a particular debugging task. The documentation above is meant to
+ provide some guidance on how to derive similar debugging code from the org.hl7.fhir.core test cases.
  */
+@Disabled
 public class VersionSpecificWorkerContextWrapperCoreTest {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(VersionSpecificWorkerContextWrapperCoreTest.class);
@@ -204,7 +205,6 @@ public class VersionSpecificWorkerContextWrapperCoreTest {
 				Arguments.of(entry[0], data, entry[1]));
 	}
 
-	@Disabled
 	@ParameterizedTest(name = "{0}")
 	@MethodSource("argumentSource")
 	public void fhirTestCasesCodeValidationTest(String name, TxTestData testData, TxTestSetup setup) throws IOException {
