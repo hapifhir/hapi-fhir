@@ -61,12 +61,12 @@ public class SearchParameterUtil {
 	 * 1. Attempt to find one called 'patient'
 	 * 2. If that fails, find one called 'subject'
 	 * 3. If that fails, find one by Patient Compartment.
-	 * 3.1 If that returns exactly 1 result then return 1
+	 * 3.1 If that returns exactly 1 result then return it
 	 * 3.2 If that doesn't return exactly 1 result and is R4, fall to 3.3, otherwise, 3.5
 	 * 3.3 If that returns >1 result, throw an error
 	 * 3.4 If that returns 1 result, return it
 	 * 3.5 Find the search parameters by patient compartment using the R4 FHIR path, and return it if there is 1 result,
-	 *     otherwise, fall to 3.3 or 3.4
+	 *     otherwise, fall to 3.3
 	 */
 	public static Optional<RuntimeSearchParam> getOnlyPatientSearchParamForResourceType(
 			FhirContext theFhirContext, String theResourceType) {
