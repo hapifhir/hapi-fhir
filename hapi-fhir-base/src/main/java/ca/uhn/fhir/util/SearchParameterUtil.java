@@ -25,6 +25,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.i18n.Msg;
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.Validate;
@@ -86,25 +87,30 @@ public class SearchParameterUtil {
 						|| searchParamsForCurrentVersion.size() == 1) {
 					searchParamsToUse = searchParamsForCurrentVersion;
 				} else {
-					final RuntimeSearchParam patientSearchParamForR4 = FhirContext.forR4Cached()
-							.getResourceDefinition(theResourceType)
-							.getSearchParam("patient");
-
-					searchParamsToUse = Optional.ofNullable(patientSearchParamForR4)
-							.map(patientSearchParamForR4NonNull ->
-									runtimeResourceDefinition.getSearchParamsForCompartmentName("Patient").stream()
-											.filter(searchParam -> searchParam.getPath() != null)
-											.filter(searchParam -> searchParam
-													.getPath()
-													.equals(patientSearchParamForR4NonNull.getPath()))
-											.collect(Collectors.toList()))
-							.orElse(List.of());
+					searchParamsToUse =
+							checkR4PatientCompartmentForMatchingSearchParam(runtimeResourceDefinition, theResourceType);
 				}
 				myPatientSearchParam =
 						validateSearchParamsAndReturnOnlyOne(runtimeResourceDefinition, searchParamsToUse);
 			}
 		}
-		return Optional.ofNullable(myPatientSearchParam);
+		return Optional.of(myPatientSearchParam);
+	}
+
+	@Nonnull
+	private static List<RuntimeSearchParam> checkR4PatientCompartmentForMatchingSearchParam(
+			RuntimeResourceDefinition theRuntimeResourceDefinition, String theResourceType) {
+		final RuntimeSearchParam patientSearchParamForR4 =
+				FhirContext.forR4Cached().getResourceDefinition(theResourceType).getSearchParam("patient");
+
+		return Optional.ofNullable(patientSearchParamForR4)
+				.map(patientSearchParamForR4NonNull ->
+						theRuntimeResourceDefinition.getSearchParamsForCompartmentName("Patient").stream()
+								.filter(searchParam -> searchParam.getPath() != null)
+								.filter(searchParam ->
+										searchParam.getPath().equals(patientSearchParamForR4NonNull.getPath()))
+								.collect(Collectors.toList()))
+				.orElse(List.of());
 	}
 
 	/**
@@ -155,6 +161,7 @@ public class SearchParameterUtil {
 		return validateSearchParamsAndReturnOnlyOne(runtimeResourceDefinition, theSearchParams);
 	}
 
+	@Nonnull
 	private static RuntimeSearchParam validateSearchParamsAndReturnOnlyOne(
 			RuntimeResourceDefinition theRuntimeResourceDefinition, List<RuntimeSearchParam> theSearchParams) {
 		final RuntimeSearchParam patientSearchParam;

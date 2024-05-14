@@ -20,7 +20,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * That's why we're testing the class from this module.
  */
 class SearchParameterUtilTest {
-	private static final Logger ourLog = LoggerFactory.getLogger(SearchParameterUtilTest.class);
 	private static final String COVERAGE_BENEFICIARY = "Coverage.beneficiary";
 	private static final String PATIENT_LINK_OTHER = "Patient.link.other";
 	private static final String RESEARCH_SUBJECT_INDIVIDUAL = "ResearchSubject.individual";
@@ -46,12 +45,11 @@ class SearchParameterUtilTest {
 
 	@ParameterizedTest
 	@MethodSource("fhirVersionAndResourceType")
-	void paramsR4(FhirVersionEnum theFhirVersion, String theResourceType, String theExpectedPath) {
+	void getOnlyPatientSearchParamForResourceType(FhirVersionEnum theFhirVersion, String theResourceType, String theExpectedPath) {
 		final Optional<RuntimeSearchParam> optRuntimeSearchParam = SearchParameterUtil.getOnlyPatientSearchParamForResourceType(FhirContext.forCached(theFhirVersion), theResourceType);
-		ourLog.info("optRuntimeSearchParam: {}", optRuntimeSearchParam);
+
 		assertTrue(optRuntimeSearchParam.isPresent());
 		final RuntimeSearchParam runtimeSearchParam = optRuntimeSearchParam.get();
-
 		assertEquals(theExpectedPath, runtimeSearchParam.getPath());
 	}
 }
