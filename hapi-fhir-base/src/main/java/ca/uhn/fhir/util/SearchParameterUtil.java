@@ -34,6 +34,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -110,7 +111,7 @@ public class SearchParameterUtil {
 								.filter(searchParam ->
 										searchParam.getPath().equals(patientSearchParamForR4NonNull.getPath()))
 								.collect(Collectors.toList()))
-				.orElse(List.of());
+				.orElse(Collections.emptyList());
 	}
 
 	/**
