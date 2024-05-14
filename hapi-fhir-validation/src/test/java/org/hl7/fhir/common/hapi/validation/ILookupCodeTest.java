@@ -1,23 +1,25 @@
 package org.hl7.fhir.common.hapi.validation;
 
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport.BaseConceptProperty;
+import ca.uhn.fhir.context.support.IValidationSupport.CodingConceptProperty;
+import ca.uhn.fhir.context.support.IValidationSupport.ConceptDesignation;
+import ca.uhn.fhir.context.support.IValidationSupport.GroupConceptProperty;
 import ca.uhn.fhir.context.support.IValidationSupport.LookupCodeResult;
+import ca.uhn.fhir.context.support.IValidationSupport.StringConceptProperty;
 import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import org.hl7.fhir.common.hapi.validation.support.RemoteTerminologyServiceValidationSupport;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
 
+import static ca.uhn.fhir.context.support.IValidationSupport.TYPE_CODING;
+import static ca.uhn.fhir.context.support.IValidationSupport.TYPE_GROUP;
+import static ca.uhn.fhir.context.support.IValidationSupport.TYPE_STRING;
+import static java.util.stream.IntStream.range;
 import static org.hl7.fhir.common.hapi.validation.support.RemoteTerminologyServiceValidationSupport.createConceptProperty;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -25,6 +27,11 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+/**
+ * This contains generic tests for performing the $lookupCode operation against a
+ * {@link org.hl7.fhir.dstu3.model.CodeSystem}.
+ * These tests can potentially be run against different provider implementations.
+ */
 public interface ILookupCodeTest {
 	String DISPLAY = "DISPLAY";
 	String LANGUAGE = "en";
@@ -33,195 +40,189 @@ public interface ILookupCodeTest {
 	String CODE_SYSTEM_NAME = "Code System";
 	String CODE = "CODE";
 
-	interface IValidationTest {
+	IValidationSupport getService();
+	IMyCodeSystemProvider getCodeSystemProvider();
 
-		RemoteTerminologyServiceValidationSupport getService();
-		IResourceProvider getCodeSystemProvider();
-	}
-
-	@Nested
-	interface ILookupCodeSupportedPropertyTest extends IValidationTest {
-		IMyCodeSystemProvider getCodeSystemProvider();
-
-		Stream<Arguments> getEmptyPropertyValues();
-
-		Stream<Arguments> getPropertyValues();
-
-		Stream<Arguments> getDesignations();
-
-		void verifyProperty(IValidationSupport.BaseConceptProperty theConceptProperty, String theExpectedPropertName, IBaseDatatype theExpectedValue);
-
-		@Test
-		default void testLookupCode_forCodeSystemWithBlankCode_throwsException() {
-			try {
-				getService().lookupCode(null, new LookupCodeRequest(CODE_SYSTEM, ""));
-				fail();
-			} catch (IllegalArgumentException e) {
-				assertEquals("theCode must be provided", e.getMessage());
-			}
-		}
-
-		@Test
-		default void testLookupCode_forCodeSystemWithPropertyInvalidType_throwsException() {
-			LookupCodeResult result = new LookupCodeResult();
-			result.getProperties().add(new IValidationSupport.BaseConceptProperty("someProperty") {
-				public String getType() {
-					return "someUnsupportedType";
-				}
-			});
-			getCodeSystemProvider().setLookupCodeResult(result);
-
-			try {
-				getService().lookupCode(null, new LookupCodeRequest(CODE_SYSTEM, CODE, LANGUAGE, null));
-				fail();
-			} catch (InternalErrorException e) {
-				assertTrue(e.getMessage().contains("HAPI-1739: Don't know how to handle "));
-			}
-		}
-
-		@ParameterizedTest
-		@MethodSource(value = "getEmptyPropertyValues")
-		default void testLookupCode_forCodeSystemWithPropertyEmptyValue_returnsCorrectParameters(IBaseDatatype thePropertyValue) {
-			// setup
-			final String propertyName = "someProperty";
-			IValidationSupport.BaseConceptProperty property = createConceptProperty(propertyName, thePropertyValue);
-			LookupCodeResult result = new LookupCodeResult();
-			result.getProperties().add(property);
-			getCodeSystemProvider().setLookupCodeResult(result);
-
-			// test
-			LookupCodeResult outcome = getService().lookupCode(null, new LookupCodeRequest(CODE_SYSTEM, CODE, LANGUAGE, List.of(propertyName)));
-
-			// verify
-			assertNotNull(outcome);
-			Optional<IValidationSupport.BaseConceptProperty> propertyOptional = outcome.getProperties().stream().findFirst().filter(a -> propertyName.equals(a.getPropertyName()));
-			assertFalse(propertyOptional.isPresent());
-		}
-
-		@Test
-		default void testLookupCode_forCodeSystemWithParameters_returnsCorrectParameters() {
-			// setup
-			LookupCodeResult result = new LookupCodeResult().setFound(true).setSearchedForCode(CODE).setSearchedForSystem(CODE_SYSTEM);
-			result.setCodeIsAbstract(false);
-			result.setCodeSystemVersion(CODE_SYSTEM_VERSION);
-			result.setCodeSystemDisplayName(CODE_SYSTEM_NAME);
-			result.setCodeDisplay(DISPLAY);
-			getCodeSystemProvider().setLookupCodeResult(result);
-
-			// test
-			LookupCodeResult outcome = getService().lookupCode(null, new LookupCodeRequest(CODE_SYSTEM, CODE, LANGUAGE, null));
-
-			// verify
-			assertNotNull(outcome);
-			assertEquals(CODE, getCodeSystemProvider().getCode());
-			assertEquals(CODE_SYSTEM, getCodeSystemProvider().getSystem());
-			assertEquals(result.getCodeSystemDisplayName(), outcome.getCodeSystemDisplayName());
-			assertEquals(result.getCodeDisplay(), outcome.getCodeDisplay());
-			assertEquals(result.getCodeSystemVersion(), outcome.getCodeSystemVersion());
-			assertEquals(result.isCodeIsAbstract(), outcome.isCodeIsAbstract());
-		}
-
-		@ParameterizedTest
-		@MethodSource(value = "getPropertyValues")
-		default void testLookupCode_forCodeSystemWithProperty_returnsCorrectProperty(IBaseDatatype thePropertyValue) {
-			// setup
-			final String propertyName = "someProperty";
-			LookupCodeResult result = new LookupCodeResult()
-				.setFound(true).setSearchedForCode(CODE).setSearchedForSystem(CODE_SYSTEM);
-			result.setCodeIsAbstract(false);
-			result.setCodeSystemVersion(CODE_SYSTEM_VERSION);
-			result.setCodeSystemDisplayName(CODE_SYSTEM_NAME);
-			result.setCodeDisplay(DISPLAY);
-			IValidationSupport.BaseConceptProperty property = createConceptProperty(propertyName, thePropertyValue);
-			result.getProperties().add(property);
-			getCodeSystemProvider().setLookupCodeResult(result);
-
-			// test
-			LookupCodeResult outcome = getService().lookupCode(null, new LookupCodeRequest(CODE_SYSTEM, CODE, LANGUAGE, List.of(propertyName)));
-
-			// verify
-			assertNotNull(outcome);
-			assertEquals(CODE, getCodeSystemProvider().getCode());
-			assertEquals(CODE_SYSTEM, getCodeSystemProvider().getSystem());
-			assertEquals(result.getCodeSystemDisplayName(), outcome.getCodeSystemDisplayName());
-			assertEquals(result.getCodeDisplay(), outcome.getCodeDisplay());
-			assertEquals(result.getCodeSystemVersion(), outcome.getCodeSystemVersion());
-			assertEquals(result.isCodeIsAbstract(), outcome.isCodeIsAbstract());
-
-			Optional<IValidationSupport.BaseConceptProperty> propertyOptional = outcome.getProperties().stream().findFirst().filter(a -> propertyName.equals(a.getPropertyName()));
-			assertTrue(propertyOptional.isPresent());
-			IValidationSupport.BaseConceptProperty outputProperty = propertyOptional.get();
-
-			verifyProperty(outputProperty, propertyName, thePropertyValue);
-		}
-
-		@ParameterizedTest
-		@MethodSource(value = "getDesignations")
-		default void testLookupCode_withCodeSystemWithDesignation_returnsCorrectDesignation(final IValidationSupport.ConceptDesignation theConceptDesignation) {
-			// setup
-			LookupCodeResult result = new LookupCodeResult();
-			result.getDesignations().add(theConceptDesignation);
-			getCodeSystemProvider().setLookupCodeResult(result);
-
-			// test
-			LookupCodeResult outcome = getService().lookupCode(null, new LookupCodeRequest(CODE_SYSTEM, CODE, LANGUAGE, null));
-
-			// verify
-			assertNotNull(outcome);
-
-			Collection<IValidationSupport.ConceptDesignation> designations = outcome.getDesignations();
-			assertEquals(1, designations.size());
-
-			IValidationSupport.ConceptDesignation designation = designations.iterator().next();
-			assertEquals(theConceptDesignation.getValue(), designation.getValue());
-			assertEquals(theConceptDesignation.getLanguage(), designation.getLanguage());
-			assertEquals(theConceptDesignation.getUseCode(), designation.getUseCode());
-			assertEquals(theConceptDesignation.getUseSystem(), designation.getUseSystem());
-			assertEquals(theConceptDesignation.getUseDisplay(), designation.getUseDisplay());
-		}
-
-		@Test
-		default void testLookupCode_withCodeSystemWithMultipleDesignations_returnsCorrectDesignations() {
-			// setup
-			final String code1 = "code1";
-			final String code2 = "code2";
-
-			IValidationSupport.ConceptDesignation designation1 = new IValidationSupport.ConceptDesignation().setUseCode(code1).setUseSystem("system1").setValue("value1").setLanguage("en");
-			IValidationSupport.ConceptDesignation designation2 = new IValidationSupport.ConceptDesignation().setUseCode(code2).setUseSystem("system2").setValue("value2").setLanguage("es");
-			LookupCodeResult result = new LookupCodeResult();
-			result.getDesignations().add(designation1);
-			result.getDesignations().add(designation2);
-			getCodeSystemProvider().setLookupCodeResult(result);
-
-			// test
-			LookupCodeResult outcome = getService().lookupCode(null, new LookupCodeRequest(CODE_SYSTEM, CODE, LANGUAGE, null));
-
-			// verify
-			assertNotNull(outcome);
-
-			Collection<IValidationSupport.ConceptDesignation> designations = outcome.getDesignations();
-			assertEquals(2, designations.size());
-
-			for (IValidationSupport.ConceptDesignation designation : designations) {
-				IValidationSupport.ConceptDesignation expectedDesignation = code1.equals(designation.getUseCode()) ? designation1 : designation2;
-				assertEquals(expectedDesignation.getValue(), designation.getValue());
-				assertEquals(expectedDesignation.getLanguage(), designation.getLanguage());
-				assertEquals(expectedDesignation.getUseCode(), designation.getUseCode());
-				assertEquals(expectedDesignation.getUseSystem(), designation.getUseSystem());
-				assertEquals(expectedDesignation.getUseDisplay(), designation.getUseDisplay());
-			}
+	@Test
+	default void lookupCode_forCodeSystemWithBlankCode_throwsException() {
+		try {
+			getService().lookupCode(null, new LookupCodeRequest(CODE_SYSTEM, ""));
+			fail();
+		} catch (IllegalArgumentException e) {
+			assertEquals("theCode must be provided", e.getMessage());
 		}
 	}
 
+	@Test
+	default void lookupCode_forCodeSystemWithPropertyInvalidType_throwsException() {
+		LookupCodeResult result = new LookupCodeResult();
+		result.getProperties().add(new BaseConceptProperty("someProperty") {
+			public String getType() {
+				return "someUnsupportedType";
+			}
+		});
+		getCodeSystemProvider().setLookupCodeResult(result);
+
+		try {
+			LookupCodeRequest request = new LookupCodeRequest(CODE_SYSTEM, CODE, LANGUAGE, null);
+			getService().lookupCode(null, request);
+			fail();
+		} catch (InternalErrorException e) {
+			assertTrue(e.getMessage().contains("HAPI-1739: Don't know how to handle "));
+		}
+	}
+
+	@Test
+	default void lookupCode_forCodeSystem_returnsCorrectResult() {
+		LookupCodeResult result = new LookupCodeResult().setFound(true).setSearchedForCode(CODE).setSearchedForSystem(CODE_SYSTEM);
+		result.setCodeIsAbstract(false);
+		result.setCodeSystemVersion(CODE_SYSTEM_VERSION);
+		result.setCodeSystemDisplayName(CODE_SYSTEM_NAME);
+		result.setCodeDisplay(DISPLAY);
+		getCodeSystemProvider().setLookupCodeResult(result);
+
+		LookupCodeRequest request =  new LookupCodeRequest(CODE_SYSTEM, CODE, LANGUAGE, null);
+		verifyLookupCodeResult(request, result);
+	}
+
+	@Test
+	default void lookupCode_withCodeSystemWithMultipleDesignations_returnsCorrectDesignations() {
+		// setup
+		final String code1 = "code1";
+		final String code2 = "code2";
+
+		ConceptDesignation designation1 = new ConceptDesignation().setUseCode(code1).setUseSystem("system1").setValue("value1").setLanguage("en");
+		ConceptDesignation designation2 = new ConceptDesignation().setUseCode(code2).setUseSystem("system2").setValue("value2").setLanguage("es");
+		LookupCodeResult result = new LookupCodeResult();
+		result.getDesignations().add(designation1);
+		result.getDesignations().add(designation2);
+		getCodeSystemProvider().setLookupCodeResult(result);
+
+		LookupCodeRequest request = new LookupCodeRequest(CODE_SYSTEM, CODE, LANGUAGE, null);
+		verifyLookupCodeResult(request, result);
+	}
+
+	default void verifyLookupWithEmptyPropertyValue(IBaseDatatype thePropertyValue) {
+		// setup
+		final String propertyName = "someProperty";
+		BaseConceptProperty property = createConceptProperty(propertyName, thePropertyValue);
+		LookupCodeResult result = new LookupCodeResult();
+		result.getProperties().add(property);
+		getCodeSystemProvider().setLookupCodeResult(result);
+
+		// test
+		LookupCodeRequest request = new LookupCodeRequest(CODE_SYSTEM, CODE, LANGUAGE, List.of(propertyName));
+		LookupCodeResult outcome = getService().lookupCode(null, request);
+
+		// verify
+		assertNotNull(outcome);
+		Optional<BaseConceptProperty> propertyOptional = outcome.getProperties().stream().findFirst().filter(a -> propertyName.equals(a.getPropertyName()));
+		assertFalse(propertyOptional.isPresent());
+	}
+
+	default void verifyLookupWithPropertyValue(IBaseDatatype thePropertyValue) {
+		// setup
+		final String propertyName = "someProperty";
+		LookupCodeResult result = new LookupCodeResult().setFound(true).setSearchedForCode(CODE).setSearchedForSystem(CODE_SYSTEM);
+		result.setCodeIsAbstract(false);
+		result.setCodeSystemVersion(CODE_SYSTEM_VERSION);
+		result.setCodeSystemDisplayName(CODE_SYSTEM_NAME);
+		result.setCodeDisplay(DISPLAY);
+		BaseConceptProperty property = createConceptProperty(propertyName, thePropertyValue);
+		result.getProperties().add(property);
+		getCodeSystemProvider().setLookupCodeResult(result);
+
+		LookupCodeRequest request = new LookupCodeRequest(CODE_SYSTEM, CODE, LANGUAGE, List.of(propertyName));
+		verifyLookupCodeResult(request, result);
+	}
+
+	default void verifyLookupWithSubPropertyValue(IBaseDatatype thePropertyValue) {
+		// setup
+		final String groupName = "group";
+		final String propertyName = "someProperty";
+		LookupCodeResult result = new LookupCodeResult().setFound(true).setSearchedForCode(CODE).setSearchedForSystem(CODE_SYSTEM);
+		result.setCodeIsAbstract(false);
+		result.setCodeSystemVersion(CODE_SYSTEM_VERSION);
+		result.setCodeSystemDisplayName(CODE_SYSTEM_NAME);
+		result.setCodeDisplay(DISPLAY);
+		GroupConceptProperty group = new GroupConceptProperty(groupName);
+		group.addSubProperty(createConceptProperty(propertyName, thePropertyValue));
+		result.getProperties().add(group);
+		getCodeSystemProvider().setLookupCodeResult(result);
+
+		LookupCodeRequest request = new LookupCodeRequest(CODE_SYSTEM, CODE, LANGUAGE, List.of(groupName));
+		verifyLookupCodeResult(request, result);
+	}
+
+	default void verifyLookupCodeResult(LookupCodeRequest theRequest, LookupCodeResult theExpectedResult) {
+		// test
+		LookupCodeResult outcome = getService().lookupCode(null, theRequest);
+		assertNotNull(outcome);
+
+		// verify
+		assertNotNull(outcome);
+		assertEquals(theRequest.getCode(), getCodeSystemProvider().getCode());
+		assertEquals(theRequest.getSystem(), getCodeSystemProvider().getSystem());
+		assertEquals(theExpectedResult.getCodeSystemDisplayName(), outcome.getCodeSystemDisplayName());
+		assertEquals(theExpectedResult.getCodeDisplay(), outcome.getCodeDisplay());
+		assertEquals(theExpectedResult.getCodeSystemVersion(), outcome.getCodeSystemVersion());
+		assertEquals(theExpectedResult.isCodeIsAbstract(), outcome.isCodeIsAbstract());
+
+		assertEquals(theExpectedResult.getProperties().size(), outcome.getProperties().size());
+		range(0, outcome.getProperties().size()).forEach(i -> assertEqualConceptProperty(theExpectedResult.getProperties().get(i), outcome.getProperties().get(i)));
+
+		assertEquals(theExpectedResult.getDesignations().size(), outcome.getDesignations().size());
+		range(0, outcome.getDesignations().size()).forEach(i -> assertConceptDesignation(theExpectedResult.getDesignations().get(i), outcome.getDesignations().get(i)));
+	}
+
+	default void verifyLookupWithConceptDesignation(final ConceptDesignation theConceptDesignation) {
+		// setup
+		LookupCodeResult result = new LookupCodeResult();
+		result.getDesignations().add(theConceptDesignation);
+		getCodeSystemProvider().setLookupCodeResult(result);
+
+		LookupCodeRequest request = new LookupCodeRequest(CODE_SYSTEM, CODE, LANGUAGE, null);
+		verifyLookupCodeResult(request, result);
+	}
+
+	private void assertEqualConceptProperty(BaseConceptProperty theProperty, BaseConceptProperty theExpectedProperty) {
+		assertEquals(theExpectedProperty.getPropertyName(), theProperty.getPropertyName());
+		assertEquals(theExpectedProperty.getType(), theProperty.getType());
+		switch (theProperty.getType()) {
+			case TYPE_STRING -> {
+				StringConceptProperty expected = (StringConceptProperty) theExpectedProperty;
+				StringConceptProperty actual = (StringConceptProperty) theProperty;
+				assertEquals(expected.getValue(), actual.getValue());
+			}
+			case TYPE_CODING -> {
+				CodingConceptProperty expected = (CodingConceptProperty) theExpectedProperty;
+				CodingConceptProperty actual = (CodingConceptProperty) theProperty;
+				assertEquals(expected.getCode(), actual.getCode());
+				assertEquals(expected.getCodeSystem(), actual.getCodeSystem());
+				assertEquals(expected.getDisplay(), actual.getDisplay());
+			}
+			case TYPE_GROUP -> {
+				GroupConceptProperty expected = (GroupConceptProperty) theExpectedProperty;
+				GroupConceptProperty actual = (GroupConceptProperty) theProperty;
+				assertEquals(expected.getSubProperties().size(), actual.getSubProperties().size());
+				range(0, actual.getSubProperties().size()).forEach(i -> assertEqualConceptProperty(expected.getSubProperties().get(i), actual.getSubProperties().get(i)));
+			}
+			default -> fail();
+		}
+	}
+
+	default void assertConceptDesignation(final ConceptDesignation theActualDesignation, final ConceptDesignation theExpectedDesignation) {
+		assertEquals(theActualDesignation.getValue(), theExpectedDesignation.getValue());
+		assertEquals(theActualDesignation.getLanguage(), theExpectedDesignation.getLanguage());
+		assertEquals(theActualDesignation.getUseCode(), theExpectedDesignation.getUseCode());
+		assertEquals(theActualDesignation.getUseSystem(), theExpectedDesignation.getUseSystem());
+		assertEquals(theActualDesignation.getUseDisplay(), theExpectedDesignation.getUseDisplay());
+	}
 
 	interface IMyCodeSystemProvider extends IResourceProvider {
 		String getCode();
 		String getSystem();
 
 		void setLookupCodeResult(LookupCodeResult theLookupCodeResult);
-	}
-
-	interface IMySimpleCodeSystemProvider extends IResourceProvider {
-		IBaseDatatype getPropertyValue();
 	}
 }

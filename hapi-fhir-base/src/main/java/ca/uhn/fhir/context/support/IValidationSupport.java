@@ -532,6 +532,7 @@ public interface IValidationSupport {
 
 	String TYPE_STRING = "string";
 	String TYPE_CODING = "Coding";
+	String TYPE_GROUP = "group";
 
 	class StringConceptProperty extends BaseConceptProperty {
 		private final String myValue;
@@ -586,6 +587,31 @@ public interface IValidationSupport {
 
 		public String getType() {
 			return TYPE_CODING;
+		}
+	}
+
+	class GroupConceptProperty extends BaseConceptProperty {
+		public GroupConceptProperty(String thePropertyName) {
+			super(thePropertyName);
+		}
+
+		private List<BaseConceptProperty> subProperties;
+
+		public BaseConceptProperty addSubProperty(BaseConceptProperty theProperty) {
+			if (subProperties == null) {
+				subProperties = new ArrayList<>();
+			}
+			subProperties.add(theProperty);
+			return this;
+		}
+
+		public List<BaseConceptProperty> getSubProperties() {
+			return subProperties != null ? subProperties : Collections.emptyList();
+		}
+
+		@Override
+		public String getType() {
+			return TYPE_GROUP;
 		}
 	}
 
@@ -894,42 +920,16 @@ public interface IValidationSupport {
 				}
 
 				for (BaseConceptProperty next : myProperties) {
-					String propertyName = next.getPropertyName();
-
-					if (!properties.isEmpty() && !properties.contains(propertyName)) {
+					if (!properties.isEmpty() && !properties.contains(next.getPropertyName())) {
 						continue;
 					}
-
 					IBase property = ParametersUtil.addParameterToParameters(theContext, retVal, "property");
-					ParametersUtil.addPartCode(theContext, property, "code", propertyName);
-
-					String propertyType = next.getType();
-					switch (propertyType) {
-						case TYPE_STRING:
-							StringConceptProperty stringConceptProperty = (StringConceptProperty) next;
-							ParametersUtil.addPartString(
-									theContext, property, "value", stringConceptProperty.getValue());
-							break;
-						case TYPE_CODING:
-							CodingConceptProperty codingConceptProperty = (CodingConceptProperty) next;
-							ParametersUtil.addPartCoding(
-									theContext,
-									property,
-									"value",
-									codingConceptProperty.getCodeSystem(),
-									codingConceptProperty.getCode(),
-									codingConceptProperty.getDisplay());
-							break;
-						default:
-							throw new IllegalStateException(
-									Msg.code(1739) + "Don't know how to handle " + next.getClass());
-					}
+					populateProperty(theContext, property, next);
 				}
 			}
 
 			if (myDesignations != null) {
 				for (ConceptDesignation next : myDesignations) {
-
 					IBase property = ParametersUtil.addParameterToParameters(theContext, retVal, "designation");
 					ParametersUtil.addPartCode(theContext, property, "language", next.getLanguage());
 					ParametersUtil.addPartCoding(
@@ -939,6 +939,41 @@ public interface IValidationSupport {
 			}
 
 			return retVal;
+		}
+
+		private void populateProperty(
+				FhirContext theContext, IBase theProperty, BaseConceptProperty theConceptProperty) {
+			ParametersUtil.addPartCode(theContext, theProperty, "code", theConceptProperty.getPropertyName());
+			String propertyType = theConceptProperty.getType();
+			switch (propertyType) {
+				case TYPE_STRING:
+					StringConceptProperty stringConceptProperty = (StringConceptProperty) theConceptProperty;
+					ParametersUtil.addPartString(theContext, theProperty, "value", stringConceptProperty.getValue());
+					break;
+				case TYPE_CODING:
+					CodingConceptProperty codingConceptProperty = (CodingConceptProperty) theConceptProperty;
+					ParametersUtil.addPartCoding(
+							theContext,
+							theProperty,
+							"value",
+							codingConceptProperty.getCodeSystem(),
+							codingConceptProperty.getCode(),
+							codingConceptProperty.getDisplay());
+					break;
+				case TYPE_GROUP:
+					GroupConceptProperty groupConceptProperty = (GroupConceptProperty) theConceptProperty;
+					if (groupConceptProperty.getSubProperties().isEmpty()) {
+						break;
+					}
+					groupConceptProperty.getSubProperties().forEach(p -> {
+						IBase subProperty = ParametersUtil.addPart(theContext, theProperty, "subproperty", null);
+						populateProperty(theContext, subProperty, p);
+					});
+					break;
+				default:
+					throw new IllegalStateException(
+							Msg.code(1739) + "Don't know how to handle " + theConceptProperty.getClass());
+			}
 		}
 
 		public void setErrorMessage(String theErrorMessage) {
