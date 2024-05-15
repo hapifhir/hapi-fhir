@@ -352,6 +352,8 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	private OperationOutcome.IssueSeverity getIssueSeverityFromCodeValidationIssue(
 			IValidationSupport.CodeValidationIssue codeValidationIssue) {
 		switch (codeValidationIssue.getSeverity()) {
+			case FATAL:
+				return OperationOutcome.IssueSeverity.FATAL;
 			case ERROR:
 				return OperationOutcome.IssueSeverity.ERROR;
 			case WARNING:
