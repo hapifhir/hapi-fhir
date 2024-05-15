@@ -59,7 +59,6 @@ public class ResourceSearchUrlEntity {
 	@Column(name = RES_SEARCH_URL_COLUMN_NAME, length = RES_SEARCH_URL_LENGTH, nullable = false)
 	private String mySearchUrl;
 
-	// LUKETODO:   Column 'RES_ID' is duplicated in mapping for entity 'ca.uhn.fhir.jpa.model.entity.ResourceSearchUrlEntity' (use '@Column(insertable=false, updatable=false)' when mapping multiple properties to the same column)
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(
 			name = "RES_ID",
