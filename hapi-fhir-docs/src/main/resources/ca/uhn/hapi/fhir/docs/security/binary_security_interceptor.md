@@ -14,4 +14,9 @@ This interceptor is intended to be subclassed. A simple example is shown below:
 
 ## Combining with Bulk Export
 
-The `setBinarySecurityContextIdentifierSystem(..)` and `setBinarySecurityContextIdentifierValue(..)` properties on the `BulkExportJobParameters` object can be used to automatically populate the security context on Binary resources created by Bulk Export jobs with values that can be verified by this interceptor. An interceptor on the `STORAGE_INITIATE_BULK_EXPORT` pointcut is the easiest way to set these properties when a new Bulk Export job is being kicked off. 
+The `setBinarySecurityContextIdentifierSystem(..)` and `setBinarySecurityContextIdentifierValue(..)` properties on the `BulkExportJobParameters` object can be used to automatically populate the security context on Binary resources created by Bulk Export jobs with values that can be verified by this interceptor.
+An interceptor on the `STORAGE_PRE_INITIATE_BULK_EXPORT` pointcut is the recommended way to set these properties when a new Bulk Export job is being kicked off.
+
+NB: Previous versions recommended using the `STORAGE_INITIATE_BULK_EXPORT` pointcut, but this is no longer the recommended way.
+`STORAGE_PRE_INITIATE_BULK_EXPORT` pointcut is called before `STORAGE_INITIATE_BULK_EXPORT` and is thus guaranteed to be called before
+any AuthorizationInterceptors.

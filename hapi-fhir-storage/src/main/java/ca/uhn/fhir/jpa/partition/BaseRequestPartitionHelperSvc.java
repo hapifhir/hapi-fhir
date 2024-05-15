@@ -333,10 +333,6 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 		return !myNonPartitionableResourceNames.contains(theResourceType);
 	}
 
-	protected abstract RequestPartitionId validateAndNormalizePartitionIds(RequestPartitionId theRequestPartitionId);
-
-	protected abstract RequestPartitionId validateAndNormalizePartitionNames(RequestPartitionId theRequestPartitionId);
-
 	private void validateSinglePartitionForCreate(
 			RequestPartitionId theRequestPartitionId, @Nonnull String theResourceName, Pointcut thePointcut) {
 		validateRequestPartitionNotNull(theRequestPartitionId, thePointcut);
