@@ -146,7 +146,7 @@ public class FhirResourceDaoR4ConcurrentCreateTest extends BaseJpaR4Test {
 
 		// then
 		List<Long> resourcesPids = getStoredResourceSearchUrlEntitiesPids();
-		assertThat(resourcesPids, containsInAnyOrder(3l, 4l));
+		assertThat(resourcesPids, containsInAnyOrder(resTable3.getResourceId(), resTable4.getResourceId()));
 	}
 
 	@Test
