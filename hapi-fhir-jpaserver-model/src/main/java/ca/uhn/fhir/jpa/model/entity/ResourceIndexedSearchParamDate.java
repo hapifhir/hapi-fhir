@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.listener.IndexStorageOptimizationListener;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.primitive.InstantDt;
@@ -29,6 +30,7 @@ import ca.uhn.fhir.util.DateUtils;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
@@ -55,6 +57,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 @Embeddable
+@EntityListeners(IndexStorageOptimizationListener.class)
 @Entity
 @Table(
 		name = "HFJ_SPIDX_DATE",
@@ -264,6 +267,7 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 		}
 		ResourceIndexedSearchParamDate obj = (ResourceIndexedSearchParamDate) theObj;
 		EqualsBuilder b = new EqualsBuilder();
+		b.append(getUpdated(), obj.getUpdated());
 		b.append(getResourceType(), obj.getResourceType());
 		b.append(getParamName(), obj.getParamName());
 		b.append(getTimeFromDate(getValueHigh()), getTimeFromDate(obj.getValueHigh()));

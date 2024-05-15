@@ -135,7 +135,7 @@ public class FhirResourceDaoR4IndexStorageOptimizedTest extends BaseJpaR4Test {
 	@ValueSource(booleans = {true, false})
 	public void testTokenIndexedSearchParam_searchAndReindex_searchParamUpdatedCorrectly(boolean theIsIndexStorageOptimized) {
 		// setup
-		myStorageSettings.setIndexStorageOptimized(true);
+		myStorageSettings.setIndexStorageOptimized(theIsIndexStorageOptimized);
 		Observation observation = new Observation();
 		observation.setStatus(Observation.ObservationStatus.FINAL);
 		IIdType id = myObservationDao.create(observation, mySrd).getId().toUnqualifiedVersionless();
@@ -148,7 +148,7 @@ public class FhirResourceDaoR4IndexStorageOptimizedTest extends BaseJpaR4Test {
 	@ValueSource(booleans = {true, false})
 	public void testUriIndexedSearchParam_searchAndReindex_searchParamUpdatedCorrectly(boolean theIsIndexStorageOptimized) {
 		// setup
-		myStorageSettings.setIndexStorageOptimized(true);
+		myStorageSettings.setIndexStorageOptimized(theIsIndexStorageOptimized);
 		ValueSet valueSet = new ValueSet();
 		valueSet.setUrl("http://vs");
 		IIdType id = myValueSetDao.create(valueSet, mySrd).getId().toUnqualifiedVersionless();

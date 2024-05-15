@@ -63,18 +63,18 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 	private boolean myMissing = false;
 
 	@FullTextField
-	@Column(name = "SP_NAME", length = MAX_SP_NAME, nullable = false)
+	@Column(name = "SP_NAME", length = MAX_SP_NAME)
 	private String myParamName;
 
 	@Column(name = "RES_ID", insertable = false, updatable = false, nullable = false)
 	private Long myResourcePid;
 
 	@FullTextField
-	@Column(name = "RES_TYPE", updatable = false, nullable = false, length = Constants.MAX_RESOURCE_NAME_LENGTH)
+	@Column(name = "RES_TYPE", length = Constants.MAX_RESOURCE_NAME_LENGTH)
 	private String myResourceType;
 
 	@GenericField
-	@Column(name = "SP_UPDATED", nullable = true) // TODO: make this false after HAPI 2.3
+	@Column(name = "SP_UPDATED")
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date myUpdated;
 
@@ -98,6 +98,13 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 		}
 	}
 
+	/**
+	 * Set SP_NAME to null without clearing hashes
+	 */
+	public void clearParamName() {
+		myParamName = null;
+	}
+
 	// MB pushed these down to the individual SP classes so we could name the FK in the join annotation
 	/**
 	 * Get the Resource this SP indexes
@@ -111,6 +118,7 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 		BaseResourceIndexedSearchParam source = (BaseResourceIndexedSearchParam) theSource;
 		myMissing = source.myMissing;
 		myParamName = source.myParamName;
+		myResourceType = source.myResourceType;
 		myUpdated = source.myUpdated;
 		myStorageSettings = source.myStorageSettings;
 		myPartitionSettings = source.myPartitionSettings;

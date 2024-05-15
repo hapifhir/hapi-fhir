@@ -22,12 +22,14 @@ package ca.uhn.fhir.jpa.model.entity;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.listener.IndexStorageOptimizationListener;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.util.StringUtil;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -46,6 +48,7 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 
 // @formatter:off
 @Embeddable
+@EntityListeners(IndexStorageOptimizationListener.class)
 @Entity
 @Table(
 		name = "HFJ_SPIDX_STRING",
@@ -180,6 +183,7 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 		}
 		ResourceIndexedSearchParamString obj = (ResourceIndexedSearchParamString) theObj;
 		EqualsBuilder b = new EqualsBuilder();
+		b.append(getUpdated(), obj.getUpdated());
 		b.append(getResourceType(), obj.getResourceType());
 		b.append(getParamName(), obj.getParamName());
 		b.append(getValueExact(), obj.getValueExact());

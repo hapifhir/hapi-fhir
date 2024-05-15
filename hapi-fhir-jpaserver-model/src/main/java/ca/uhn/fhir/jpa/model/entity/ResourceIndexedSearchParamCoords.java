@@ -20,10 +20,12 @@
 package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.listener.IndexStorageOptimizationListener;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
@@ -40,6 +42,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 @Embeddable
+@EntityListeners(IndexStorageOptimizationListener.class)
 @Entity
 @Table(
 		name = "HFJ_SPIDX_COORDS",
@@ -131,6 +134,7 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 		}
 		ResourceIndexedSearchParamCoords obj = (ResourceIndexedSearchParamCoords) theObj;
 		EqualsBuilder b = new EqualsBuilder();
+		b.append(getUpdated(), obj.getUpdated());
 		b.append(getResourceType(), obj.getResourceType());
 		b.append(getParamName(), obj.getParamName());
 		b.append(getLatitude(), obj.getLatitude());

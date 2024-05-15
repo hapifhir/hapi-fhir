@@ -20,11 +20,13 @@
 package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.listener.IndexStorageOptimizationListener;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
@@ -48,6 +50,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 
 // @formatter:off
 @Embeddable
+@EntityListeners(IndexStorageOptimizationListener.class)
 @Entity
 @Table(
 		name = "HFJ_SPIDX_QUANTITY",
@@ -173,6 +176,7 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 		}
 		ResourceIndexedSearchParamQuantity obj = (ResourceIndexedSearchParamQuantity) theObj;
 		EqualsBuilder b = new EqualsBuilder();
+		b.append(getUpdated(), obj.getUpdated());
 		b.append(getResourceType(), obj.getResourceType());
 		b.append(getParamName(), obj.getParamName());
 		b.append(getHashIdentity(), obj.getHashIdentity());
