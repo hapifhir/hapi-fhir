@@ -75,15 +75,18 @@ public class ResourceSearchUrlEntity {
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date myCreatedTime;
 
-	public static ResourceSearchUrlEntity from(String theUrl, Long theId) {
+	public static ResourceSearchUrlEntity from(String theUrl, ResourceTable theResourceTable) {
 		return new ResourceSearchUrlEntity()
-				.setResourcePid(theId)
+				.setResourceTable(theResourceTable)
 				.setSearchUrl(theUrl)
 				.setCreatedTime(new Date());
 	}
 
 	public Long getResourcePid() {
-		return myResourcePid;
+		if (myResourcePid != null) {
+			return myResourcePid;
+		}
+		return myResourceTable.getResourceId();
 	}
 
 	public ResourceSearchUrlEntity setResourcePid(Long theResourcePid) {
@@ -95,8 +98,9 @@ public class ResourceSearchUrlEntity {
 		return myResourceTable;
 	}
 
-	public void setResourceTable(ResourceTable myResourceTable) {
+	public ResourceSearchUrlEntity setResourceTable(ResourceTable myResourceTable) {
 		this.myResourceTable = myResourceTable;
+		return this;
 	}
 
 	public Date getCreatedTime() {
