@@ -56,8 +56,7 @@ public class DeleteExpungeSvcImpl implements IDeleteExpungeSvc<JpaPid> {
 		ourLog.debug("Executing {} delete expunge sql commands", sqlList.size());
 		long totalDeleted = 0;
 		for (String sql : sqlList) {
-			//			ourLog.trace("Executing sql " + sql);
-			ourLog.info("5822:  Executing sql " + sql);
+			ourLog.trace("Executing sql " + sql);
 			totalDeleted += myEntityManager.createNativeQuery(sql).executeUpdate();
 		}
 

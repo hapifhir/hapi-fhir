@@ -475,13 +475,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 							Long version = myMemoryCacheService.getIfPresent(
 									MemoryCacheService.CacheEnum.RESOURCE_CONDITIONAL_CREATE_VERSION, pid.getId());
 							if (version == null) {
-								ourLog.info(
-										"5822: BEGIN myResourceTableDao.findCurrentVersionByPid(pid.getId()) for PID: {}",
-										pid);
 								version = myResourceTableDao.findCurrentVersionByPid(pid.getId());
-								ourLog.info(
-										"5822: END myResourceTableDao.findCurrentVersionByPid(pid.getId()) for PID: {}",
-										pid);
 								if (version != null) {
 									myMemoryCacheService.putAfterCommit(
 											MemoryCacheService.CacheEnum.RESOURCE_CONDITIONAL_CREATE_VERSION,
