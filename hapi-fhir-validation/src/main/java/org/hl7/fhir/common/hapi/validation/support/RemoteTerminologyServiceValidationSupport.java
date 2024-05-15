@@ -457,7 +457,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 		// we already retrieved the property name (group name) as first element, next will be the sub-properties.
 		// there is no dedicated value for a property group as it is an aggregate
 		for (int i = 1; i < values.size(); i++) {
-			ParametersParameterComponent nextPart = (ParametersParameterComponent)values.get(i);
+			ParametersParameterComponent nextPart = (ParametersParameterComponent) values.get(i);
 			BaseConceptProperty subProperty = createConceptPropertyR4(nextPart);
 			if (subProperty != null) {
 				groupConceptProperty.addSubProperty(subProperty);

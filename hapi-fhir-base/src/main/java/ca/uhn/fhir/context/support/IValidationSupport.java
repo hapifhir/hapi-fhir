@@ -931,7 +931,9 @@ public interface IValidationSupport {
 					Set<String> propertyNameList = thePropertyNamesToFilter.stream()
 							.map(IPrimitiveType::getValueAsString)
 							.collect(Collectors.toSet());
-					propertiesToReturn = myProperties.stream().filter(p -> propertyNameList.contains(p.getPropertyName())).collect(Collectors.toList());
+					propertiesToReturn = myProperties.stream()
+							.filter(p -> propertyNameList.contains(p.getPropertyName()))
+							.collect(Collectors.toList());
 				} else {
 					propertiesToReturn = myProperties;
 				}
