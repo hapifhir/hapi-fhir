@@ -15,6 +15,7 @@ import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.ClasspathUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import org.hl7.fhir.common.hapi.validation.support.RemoteTerminologyServiceValidationSupport;
+import org.hl7.fhir.dstu3.hapi.validation.RemoteTerminologyServiceResourceProviderDstu3Test;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.BooleanType;
@@ -39,10 +40,15 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/*
- * This set of Unit Tests simulates the call to a remote server and therefore, only tests the code in the
- * {@link org.hl7.fhir.common.hapi.validation.support.RemoteTerminologyServiceValidationSupport#invokeRemoteValidateCode}
- * method, before and after it makes that remote client call.
+/**
+ * Version specific tests for validation using RemoteTerminologyValidationSupport.
+ * The tests in this class simulate the call to a remote server and therefore, only tests the code in
+ * the RemoteTerminologyServiceValidationSupport itself. The remote client call is simulated using the test providers.
+ * @see RemoteTerminologyServiceValidationSupport
+ *
+ * Other operations are tested separately.
+ * @see RemoteTerminologyLookupCodeR4Test
+ * @see RemoteTerminologyServiceValidationSupportR4Test
  */
 public class RemoteTerminologyServiceResourceProviderR4Test {
 	private static final String DISPLAY = "DISPLAY";

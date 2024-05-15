@@ -28,9 +28,15 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**
- * This contains generic tests for performing the $lookupCode operation against a
- * {@link org.hl7.fhir.dstu3.model.CodeSystem}.
- * These tests can potentially be run against different provider implementations.
+ * Contains basic test setup for the $lookup operation against a {@link org.hl7.fhir.dstu3.model.CodeSystem}.
+ * The provider for CodeSystem and the validation service needs to be configured by the implementing class.
+ * This test interface contains the following:
+ * (1) basic tests which are version independent, without any parameters, declared as default with @Test annotation
+ * e.g. lookupCode_forCodeSystemWithBlankCode_throwsException
+ * (2) test template methods for running version dependent tests with parameters, declared as default, without annotations
+ * e.g. @see #verifyLookupCodeResult
+ * (3) methods which help to assert part of the output (designation, property), declared as private
+ * e.g. assertEqualConceptProperty
  */
 public interface ILookupCodeTest {
 	String DISPLAY = "DISPLAY";
@@ -172,7 +178,7 @@ public interface ILookupCodeTest {
 		range(0, outcome.getProperties().size()).forEach(i -> assertEqualConceptProperty(theExpectedResult.getProperties().get(i), outcome.getProperties().get(i)));
 
 		assertEquals(theExpectedResult.getDesignations().size(), outcome.getDesignations().size());
-		range(0, outcome.getDesignations().size()).forEach(i -> assertConceptDesignation(theExpectedResult.getDesignations().get(i), outcome.getDesignations().get(i)));
+		range(0, outcome.getDesignations().size()).forEach(i -> assertEqualConceptDesignation(theExpectedResult.getDesignations().get(i), outcome.getDesignations().get(i)));
 	}
 
 	default void verifyLookupWithConceptDesignation(final ConceptDesignation theConceptDesignation) {
@@ -211,7 +217,7 @@ public interface ILookupCodeTest {
 		}
 	}
 
-	default void assertConceptDesignation(final ConceptDesignation theActualDesignation, final ConceptDesignation theExpectedDesignation) {
+	private void assertEqualConceptDesignation(final ConceptDesignation theActualDesignation, final ConceptDesignation theExpectedDesignation) {
 		assertEquals(theActualDesignation.getValue(), theExpectedDesignation.getValue());
 		assertEquals(theActualDesignation.getLanguage(), theExpectedDesignation.getLanguage());
 		assertEquals(theActualDesignation.getUseCode(), theExpectedDesignation.getUseCode());

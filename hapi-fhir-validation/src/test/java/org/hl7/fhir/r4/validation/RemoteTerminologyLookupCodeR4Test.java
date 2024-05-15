@@ -38,6 +38,10 @@ import java.util.stream.Stream;
 import static ca.uhn.fhir.context.support.IValidationSupport.ConceptDesignation;
 import static ca.uhn.fhir.context.support.IValidationSupport.LookupCodeResult;
 
+/**
+ * Version specific tests for CodeSystem $lookup against RemoteTerminologyValidationSupport.
+ * @see RemoteTerminologyServiceValidationSupport
+ */
 public class RemoteTerminologyLookupCodeR4Test implements ILookupCodeTest {
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
 	@RegisterExtension

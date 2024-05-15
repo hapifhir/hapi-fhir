@@ -37,6 +37,10 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.stream.Stream;
 
+/**
+ * Version specific tests for CodeSystem $lookup against RemoteTerminologyValidationSupport.
+ * @see RemoteTerminologyServiceValidationSupport
+ */
 public class RemoteTerminologyLookupCodeDstu3Test implements ILookupCodeTest {
 	private static final FhirContext ourCtx = FhirContext.forDstu3Cached();
 	@RegisterExtension

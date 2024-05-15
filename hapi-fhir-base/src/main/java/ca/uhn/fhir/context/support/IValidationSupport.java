@@ -530,6 +530,10 @@ public interface IValidationSupport {
 		public abstract String getType();
 	}
 
+	// The reason these cannot be declared within an enum is because a Remote Terminology Service
+	// can support arbitrary types. We do not restrict against the types in the spec.
+	// Some of the types in the spec are not yet implemented as well.
+	// @see https://github.com/hapifhir/hapi-fhir/issues/5700
 	String TYPE_STRING = "string";
 	String TYPE_CODING = "Coding";
 	String TYPE_GROUP = "group";
@@ -897,8 +901,15 @@ public interface IValidationSupport {
 			}
 		}
 
+		/**
+		 * Converts the current LookupCodeResult instance into a IBaseParameters instance which is returned
+		 * to the client of the $lookup operation.
+		 * @param theContext the FHIR context used for running the operation
+		 * @param thePropertyNamesToFilter the properties which are passed as parameter to filter the result.
+		 * @return the output for the lookup operation.
+		 */
 		public IBaseParameters toParameters(
-				FhirContext theContext, List<? extends IPrimitiveType<String>> thePropertyNames) {
+				FhirContext theContext, List<? extends IPrimitiveType<String>> thePropertyNamesToFilter) {
 
 			IBaseParameters retVal = ParametersUtil.newInstance(theContext);
 			if (isNotBlank(getCodeSystemDisplayName())) {
@@ -912,17 +923,20 @@ public interface IValidationSupport {
 
 			if (myProperties != null) {
 
-				Set<String> properties = Collections.emptySet();
-				if (thePropertyNames != null) {
-					properties = thePropertyNames.stream()
+				final List<BaseConceptProperty> propertiesToReturn;
+				if (thePropertyNamesToFilter != null) {
+					// TODO MM: The logic to filter of properties could actually be moved to the lookupCode provider.
+					// That is where the rest of the lookupCode input parameter handling is done.
+					// This was left as is for now but can be done with next opportunity.
+					Set<String> propertyNameList = thePropertyNamesToFilter.stream()
 							.map(IPrimitiveType::getValueAsString)
 							.collect(Collectors.toSet());
+					propertiesToReturn = myProperties.stream().filter(p -> propertyNameList.contains(p.getPropertyName())).collect(Collectors.toList());
+				} else {
+					propertiesToReturn = myProperties;
 				}
 
-				for (BaseConceptProperty next : myProperties) {
-					if (!properties.isEmpty() && !properties.contains(next.getPropertyName())) {
-						continue;
-					}
+				for (BaseConceptProperty next : propertiesToReturn) {
 					IBase property = ParametersUtil.addParameterToParameters(theContext, retVal, "property");
 					populateProperty(theContext, property, next);
 				}
