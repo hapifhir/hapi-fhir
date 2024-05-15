@@ -155,6 +155,15 @@ public class StorageSettings {
 	private boolean myValidateResourceStatusForPackageUpload = true;
 
 	/**
+	 * If set to <code>true</code>, the server will not write data to the <code>SP_NAME, RES_TYPE, SP_UPDATED</code>
+	 * columns for all HFJ_SPIDX tables.
+	 *
+	 * @since 7.4.0
+	 */
+	// TODO: make it false by default
+	private boolean myIndexStorageOptimized = true;
+
+	/**
 	 * If set to true, the server will prevent the creation of Subscriptions which cannot be evaluated IN-MEMORY. This can improve
 	 * overall server performance.
 	 *
@@ -357,6 +366,45 @@ public class StorageSettings {
 	public void setIndexMissingFields(IndexEnabledEnum theIndexMissingFields) {
 		Validate.notNull(theIndexMissingFields, "theIndexMissingFields must not be null");
 		myIndexMissingFieldsEnabled = theIndexMissingFields;
+	}
+
+	/**
+	 * If set to <code>true</code> (default is false), the server will not write data
+	 * to the <code>SP_NAME, RES_TYPE, SP_UPDATED</code> columns for all HFJ_SPIDX tables.
+	 * <p>
+	 * This feature may be enabled on servers where HFJ_SPIDX tables are expected
+	 * to have a large amount of data (millions of rows) in order to reduce overall storage size.
+	 * </p>
+	 * <p>
+	 * Note that this setting only applies to newly inserted and updated rows in HFJ_SPIDX tables.
+	 * In order to apply this optimization setting to existing HFJ_SPIDX index rows,
+	 * <code>$reindex</code> operation should be executed at the instance or server level.
+	 * <p>
+	 *
+	 * @since 7.4.0
+	 */
+	public boolean isIndexStorageOptimized() {
+		return myIndexStorageOptimized;
+	}
+
+	/**
+	 * If set to <code>true</code> (default is false), the server will not write data
+	 * to the <code>SP_NAME, RES_TYPE, SP_UPDATED</code> columns for all HFJ_SPIDX tables.
+	 * <p>
+	 * This feature may be enabled on servers where HFJ_SPIDX tables are expected
+	 * to have a large amount of data (millions of rows) in order to reduce overall storage size.
+	 * </p>
+	 * <p>
+	 * Note that this setting only applies to newly inserted and updated rows in HFJ_SPIDX tables.
+	 * In order to apply this optimization setting to existing HFJ_SPIDX index rows,
+	 * <code>$reindex</code> operation should be executed at the instance or server level.
+	 * <p>
+	 *
+	 * @since 7.4.0
+	 */
+	public void setIndexStorageOptimized(boolean theIndexStorageOptimized) {
+		Validate.notNull(theIndexStorageOptimized, "theIndexStorageOptimized must not be null");
+		myIndexStorageOptimized = theIndexStorageOptimized;
 	}
 
 	/**
