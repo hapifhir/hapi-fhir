@@ -26,7 +26,7 @@ import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.subscription.async.AsyncResourceModifiedProcessingSchedulerSvc;
 import ca.uhn.fhir.jpa.subscription.async.AsyncResourceModifiedSubmitterSvc;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
-import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyEvaluator;
+import ca.uhn.fhir.jpa.subscription.config.SubscriptionConfig;
 import ca.uhn.fhir.jpa.subscription.model.config.SubscriptionModelConfig;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionMatcherInterceptor;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionQueryValidator;
@@ -50,18 +50,12 @@ import org.springframework.context.annotation.Lazy;
  * matching queue for processing
  */
 @Configuration
-@Import({SubscriptionModelConfig.class, SubscriptionMatcherInterceptorConfig.class})
+@Import({SubscriptionModelConfig.class, SubscriptionMatcherInterceptorConfig.class, SubscriptionConfig.class})
 public class SubscriptionSubmitterConfig {
 
 	@Bean
 	public SubscriptionValidatingInterceptor subscriptionValidatingInterceptor() {
 		return new SubscriptionValidatingInterceptor();
-	}
-
-	@Bean
-	public SubscriptionQueryValidator subscriptionQueryValidator(
-			DaoRegistry theDaoRegistry, SubscriptionStrategyEvaluator theSubscriptionStrategyEvaluator) {
-		return new SubscriptionQueryValidator(theDaoRegistry, theSubscriptionStrategyEvaluator);
 	}
 
 	@Bean

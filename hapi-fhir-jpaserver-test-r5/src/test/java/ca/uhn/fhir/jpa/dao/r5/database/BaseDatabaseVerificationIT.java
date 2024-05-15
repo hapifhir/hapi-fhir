@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.dao.r5.database;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
+import ca.uhn.fhir.jpa.dao.TestDaoSearch;
 import ca.uhn.fhir.jpa.embedded.JpaEmbeddedDatabase;
 import ca.uhn.fhir.jpa.migrate.HapiMigrationStorageSvc;
 import ca.uhn.fhir.jpa.migrate.MigrationTaskList;
@@ -10,9 +11,11 @@ import ca.uhn.fhir.jpa.migrate.SchemaMigrator;
 import ca.uhn.fhir.jpa.migrate.dao.HapiMigrationDao;
 import ca.uhn.fhir.jpa.migrate.tasks.HapiFhirJpaMigrationTasks;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaTest;
 import ca.uhn.fhir.jpa.test.config.TestR5Config;
 import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
@@ -59,7 +62,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(SpringExtension.class)
 @EnableJpaRepositories(repositoryFactoryBeanClass = EnversRevisionRepositoryFactoryBean.class)
-@ContextConfiguration(classes = {BaseDatabaseVerificationIT.TestConfig.class})
+@ContextConfiguration(classes = {BaseDatabaseVerificationIT.TestConfig.class, TestDaoSearch.Config.class})
 public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements ITestDataBuilder {
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseDatabaseVerificationIT.class);
 	private static final String MIGRATION_TABLENAME = "MIGRATIONS";
@@ -87,6 +90,9 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
 
 	@Autowired
 	private DatabaseBackedPagingProvider myPagingProvider;
+
+	@Autowired
+	TestDaoSearch myTestDaoSearch;
 
 	@RegisterExtension
 	protected RestfulServerExtension myServer = new RestfulServerExtension(FhirContext.forR5Cached());
@@ -154,6 +160,20 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
         assertThat(values.toString(), values, containsInAnyOrder(expectedIds.toArray(new String[0])));
     }
 
+	@Test
+	void testChainedSort() {
+	    // given
+
+	    // when
+		SearchParameterMap map = SearchParameterMap
+			.newSynchronous()
+			.setSort(new SortSpec("Practitioner:general-practitioner.family"));
+		myCaptureQueriesListener.clear();
+		myPatientDao.search(map, mySrd);
+
+	}
+
+
 
 
 	@Configuration
@@ -201,8 +221,8 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
 	}
 
 	public static class JpaDatabaseContextConfigParamObject {
-		private JpaEmbeddedDatabase myJpaEmbeddedDatabase;
-		private String myDialect;
+		final JpaEmbeddedDatabase myJpaEmbeddedDatabase;
+		final String myDialect;
 
 		public JpaDatabaseContextConfigParamObject(JpaEmbeddedDatabase theJpaEmbeddedDatabase, String theDialect) {
 			myJpaEmbeddedDatabase = theJpaEmbeddedDatabase;

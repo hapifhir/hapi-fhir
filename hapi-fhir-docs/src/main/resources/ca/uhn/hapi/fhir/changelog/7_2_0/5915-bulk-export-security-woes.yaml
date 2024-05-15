@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 5915
+title: "Previously, in some edge case scenarios the Bulk Export Rule Applier could accidentally permit a Patient type level bulk export request, even if the calling user only had permissions to a subset of patients. This has been corrected."

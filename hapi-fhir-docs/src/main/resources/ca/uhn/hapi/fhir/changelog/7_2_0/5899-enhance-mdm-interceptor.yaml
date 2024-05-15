@@ -1,0 +1,4 @@
+---
+type: add
+issue: 5899
+title: "The `MDM_POST_MERGE_GOLDEN_RESOURCES` now supports an additional parameter, of type `ca.uhn.fhir.mdm.model.MdmTransactionContext`. Thanks to Jens Villadsen for the contribution."
