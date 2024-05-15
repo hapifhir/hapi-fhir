@@ -126,7 +126,7 @@ public interface ILookupCodeTest {
 		assertFalse(propertyOptional.isPresent());
 	}
 
-	default void verifyLookupWithPropertyValue(IBaseDatatype thePropertyValue) {
+	default void verifyLookupWithProperty(IBaseDatatype thePropertyValue) {
 		// setup
 		final String propertyName = "someProperty";
 		LookupCodeResult result = new LookupCodeResult().setFound(true).setSearchedForCode(CODE).setSearchedForSystem(CODE_SYSTEM);
@@ -142,17 +142,19 @@ public interface ILookupCodeTest {
 		verifyLookupCodeResult(request, result);
 	}
 
-	default void verifyLookupWithSubPropertyValue(IBaseDatatype thePropertyValue) {
+	default void verifyLookupWithSubProperties(List<IBaseDatatype> thePropertyValues) {
 		// setup
 		final String groupName = "group";
-		final String propertyName = "someProperty";
 		LookupCodeResult result = new LookupCodeResult().setFound(true).setSearchedForCode(CODE).setSearchedForSystem(CODE_SYSTEM);
 		result.setCodeIsAbstract(false);
 		result.setCodeSystemVersion(CODE_SYSTEM_VERSION);
 		result.setCodeSystemDisplayName(CODE_SYSTEM_NAME);
 		result.setCodeDisplay(DISPLAY);
+		final String subPropertyName = "someSubProperty";
 		GroupConceptProperty group = new GroupConceptProperty(groupName);
-		group.addSubProperty(createConceptProperty(propertyName, thePropertyValue));
+		for (int i = 0; i < thePropertyValues.size(); i++) {
+			group.addSubProperty(createConceptProperty(subPropertyName + i, thePropertyValues.get(i)));
+		}
 		result.getProperties().add(group);
 		getCodeSystemProvider().setLookupCodeResult(result);
 

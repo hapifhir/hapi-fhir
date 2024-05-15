@@ -36,7 +36,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 
@@ -293,34 +292,35 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 			return null;
 		}
 
-		Iterator<org.hl7.fhir.dstu3.model.Base> compIt = property.getValues().iterator();
+		List<org.hl7.fhir.dstu3.model.Base> values = property.getValues();
 		org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent firstPart =
-				(org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent) compIt.next();
+				(org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent) values.get(0);
 		String propertyName = ((org.hl7.fhir.dstu3.model.CodeType) firstPart.getValue()).getValue();
 
-		org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent nextPart =
-				(org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent) compIt.next();
-		org.hl7.fhir.dstu3.model.Type value = nextPart.getValue();
+		org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent secondPart =
+				(org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent) values.get(1);
+		org.hl7.fhir.dstu3.model.Type value = secondPart.getValue();
 
 		if (value != null) {
 			return createConceptPropertyDstu3(propertyName, value);
 		}
 
-		// handle property group (a property containing sub-properties)
-		String groupName = nextPart.getName();
-		if (!"subproperty".equals(groupName) || nextPart.getPart().isEmpty()) {
+		String groupName = secondPart.getName();
+		if (!"subproperty".equals(groupName)) {
 			return null;
 		}
+
+		// handle property group (a property containing sub-properties)
 		GroupConceptProperty groupConceptProperty = new GroupConceptProperty(propertyName);
-		while (nextPart != null) {
+
+		// we already retrieved the property name (group name) as first element, next will be the sub-properties.
+		// there is no dedicated value for a property group as it is an aggregate
+		for (int i = 1; i < values.size(); i++) {
+			org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent nextPart =
+					(org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent) values.get(i);
 			BaseConceptProperty subProperty = createConceptPropertyDstu3(nextPart);
 			if (subProperty != null) {
 				groupConceptProperty.addSubProperty(subProperty);
-			}
-			if (compIt.hasNext()) {
-				nextPart = (org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent) compIt.next();
-			} else {
-				nextPart = null;
 			}
 		}
 		return groupConceptProperty;
@@ -435,32 +435,32 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 			return null;
 		}
 
-		Iterator<Base> compIt = property.getValues().iterator();
-		ParametersParameterComponent firstPart = (ParametersParameterComponent) compIt.next();
+		List<Base> values = property.getValues();
+		ParametersParameterComponent firstPart = (ParametersParameterComponent) values.get(0);
 		String propertyName = ((CodeType) firstPart.getValue()).getValue();
 
-		ParametersParameterComponent nextPart = (ParametersParameterComponent) compIt.next();
-		Type value = nextPart.getValue();
+		ParametersParameterComponent secondPart = (ParametersParameterComponent) values.get(1);
+		Type value = secondPart.getValue();
 
 		if (value != null) {
 			return createConceptPropertyR4(propertyName, value);
 		}
 
-		// handle property group (a property containing sub-properties)
-		String groupName = nextPart.getName();
-		if (!"subproperty".equals(groupName) || nextPart.getPart().isEmpty()) {
+		String groupName = secondPart.getName();
+		if (!"subproperty".equals(groupName)) {
 			return null;
 		}
+
+		// handle property group (a property containing sub-properties)
 		GroupConceptProperty groupConceptProperty = new GroupConceptProperty(propertyName);
-		while (nextPart != null) {
+
+		// we already retrieved the property name (group name) as first element, next will be the sub-properties.
+		// there is no dedicated value for a property group as it is an aggregate
+		for (int i = 1; i < values.size(); i++) {
+			ParametersParameterComponent nextPart = (ParametersParameterComponent)values.get(i);
 			BaseConceptProperty subProperty = createConceptPropertyR4(nextPart);
 			if (subProperty != null) {
 				groupConceptProperty.addSubProperty(subProperty);
-			}
-			if (compIt.hasNext()) {
-				nextPart = (ParametersParameterComponent) compIt.next();
-			} else {
-				nextPart = null;
 			}
 		}
 		return groupConceptProperty;

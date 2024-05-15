@@ -110,16 +110,24 @@ public class RemoteTerminologyLookupCodeR4Test implements ILookupCodeTest {
 		);
 	}
 
-	@ParameterizedTest
-	@MethodSource(value = "getPropertyValues")
-	public void lookupCode_forCodeSystemWithProperty_returnsCorrectProperty(IBaseDatatype thePropertyValue) {
-		verifyLookupWithPropertyValue(thePropertyValue);
+	public static Stream<Arguments> getSubPropertyValues() {
+		return Stream.of(
+				Arguments.arguments(),
+				Arguments.arguments(List.of(new StringType("value1")), new StringType("value2")),
+				Arguments.arguments(List.of(new StringType("value1")), new Coding("code", "system", "display"))
+		);
 	}
 
 	@ParameterizedTest
 	@MethodSource(value = "getPropertyValues")
-	public void lookupCode_forCodeSystemWithPropertyGroup_returnsCorrectProperty(IBaseDatatype thePropertyValue) {
-		verifyLookupWithSubPropertyValue(thePropertyValue);
+	public void lookupCode_forCodeSystemWithProperty_returnsCorrectProperty(IBaseDatatype thePropertyValue) {
+		verifyLookupWithProperty(thePropertyValue);
+	}
+
+	@ParameterizedTest
+	@MethodSource(value = "getSubPropertyValues")
+	public void lookupCode_forCodeSystemWithPropertyGroup_returnsCorrectProperty(List<IBaseDatatype> thePropertyValues) {
+		verifyLookupWithSubProperties(thePropertyValues);
 	}
 
 	public static Stream<Arguments> getDesignations() {
