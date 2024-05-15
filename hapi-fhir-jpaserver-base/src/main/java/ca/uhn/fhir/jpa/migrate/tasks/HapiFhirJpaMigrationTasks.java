@@ -121,6 +121,45 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init680_Part2();
 		init700();
 		init720();
+		init740();
+	}
+
+	protected void init740() {
+		// Start of migrations from 7.2 to 7.4
+		Builder version = forVersion(VersionEnum.V7_4_0);
+
+		// allow null values in SP_NAME, RES_TYPE columns for all HFJ_SPIDX_* tables
+		Builder.BuilderWithTableName spidxCoords = version.onTable("HFJ_SPIDX_COORDS");
+		spidxCoords.modifyColumn("20240508.1", "SP_NAME").nullable().withType(ColumnTypeEnum.STRING, 100);
+		spidxCoords.modifyColumn("20240508.2", "RES_TYPE").nullable().withType(ColumnTypeEnum.STRING, 100);
+
+		Builder.BuilderWithTableName spidxDate = version.onTable("HFJ_SPIDX_DATE");
+		spidxDate.modifyColumn("20240508.3", "SP_NAME").nullable().withType(ColumnTypeEnum.STRING, 100);
+		spidxDate.modifyColumn("20240508.4", "RES_TYPE").nullable().withType(ColumnTypeEnum.STRING, 100);
+
+		Builder.BuilderWithTableName spidxNumber = version.onTable("HFJ_SPIDX_NUMBER");
+		spidxNumber.modifyColumn("20240508.5", "SP_NAME").nullable().withType(ColumnTypeEnum.STRING, 100);
+		spidxNumber.modifyColumn("20240508.6", "RES_TYPE").nullable().withType(ColumnTypeEnum.STRING, 100);
+
+		Builder.BuilderWithTableName spidxQuantity = version.onTable("HFJ_SPIDX_QUANTITY");
+		spidxQuantity.modifyColumn("20240508.7", "SP_NAME").nullable().withType(ColumnTypeEnum.STRING, 100);
+		spidxQuantity.modifyColumn("20240508.8", "RES_TYPE").nullable().withType(ColumnTypeEnum.STRING, 100);
+
+		Builder.BuilderWithTableName spidxQuantityNorm = version.onTable("HFJ_SPIDX_QUANTITY_NRML");
+		spidxQuantityNorm.modifyColumn("20240508.9", "SP_NAME").nullable().withType(ColumnTypeEnum.STRING, 100);
+		spidxQuantityNorm.modifyColumn("20240508.10", "RES_TYPE").nullable().withType(ColumnTypeEnum.STRING, 100);
+
+		Builder.BuilderWithTableName spidxString = version.onTable("HFJ_SPIDX_STRING");
+		spidxString.modifyColumn("20240508.11", "SP_NAME").nullable().withType(ColumnTypeEnum.STRING, 100);
+		spidxString.modifyColumn("20240508.12", "RES_TYPE").nullable().withType(ColumnTypeEnum.STRING, 100);
+
+		Builder.BuilderWithTableName spidxToken = version.onTable("HFJ_SPIDX_TOKEN");
+		spidxToken.modifyColumn("20240508.13", "SP_NAME").nullable().withType(ColumnTypeEnum.STRING, 100);
+		spidxToken.modifyColumn("20240508.14", "RES_TYPE").nullable().withType(ColumnTypeEnum.STRING, 100);
+
+		Builder.BuilderWithTableName spidxUri = version.onTable("HFJ_SPIDX_URI");
+		spidxUri.modifyColumn("20240508.15", "SP_NAME").nullable().withType(ColumnTypeEnum.STRING, 100);
+		spidxUri.modifyColumn("20240508.16", "RES_TYPE").nullable().withType(ColumnTypeEnum.STRING, 100);
 	}
 
 	protected void init720() {
