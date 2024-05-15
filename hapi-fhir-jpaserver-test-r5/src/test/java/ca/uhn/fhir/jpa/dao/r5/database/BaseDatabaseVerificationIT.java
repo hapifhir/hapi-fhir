@@ -11,11 +11,9 @@ import ca.uhn.fhir.jpa.migrate.SchemaMigrator;
 import ca.uhn.fhir.jpa.migrate.dao.HapiMigrationDao;
 import ca.uhn.fhir.jpa.migrate.tasks.HapiFhirJpaMigrationTasks;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
-import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaTest;
 import ca.uhn.fhir.jpa.test.config.TestR5Config;
 import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
@@ -36,6 +34,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,6 +56,7 @@ import java.util.Set;
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_EVERYTHING;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -160,21 +160,22 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
         assertThat(values.toString(), values, containsInAnyOrder(expectedIds.toArray(new String[0])));
     }
 
-	@Test
-	void testChainedSort() {
-	    // given
-
-	    // when
-		SearchParameterMap map = SearchParameterMap
-			.newSynchronous()
-			.setSort(new SortSpec("Practitioner:general-practitioner.family"));
-		myCaptureQueriesListener.clear();
-		myPatientDao.search(map, mySrd);
-
+	@ParameterizedTest
+	@CsvSource(textBlock = """
+			query string,			Patient?name=smith
+			query date,				Observation?date=2021
+			query token,			Patient?active=true
+			sort string, 			Patient?_sort=name
+			sort date, 				Observation?_sort=date
+			sort token, 			Patient?_sort=active
+			sort chained date, 		Observation?_sort=patient.birthdate
+			sort chained string, 	Observation?_sort=patient.name
+			sort chained qualified, Patient?_sort=Practitioner:general-practitioner.family
+			sort chained token, 	Observation?_sort=patient.active
+			""")
+	void testSyntaxForVariousQueries(String theMessage, String theQuery) {
+		assertDoesNotThrow(()->myTestDaoSearch.searchForBundleProvider(theQuery), theMessage);
 	}
-
-
-
 
 	@Configuration
 	public static class TestConfig extends TestR5Config {
@@ -238,11 +239,13 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public IIdType doCreateResource(IBaseResource theResource) {
 		return myDaoRegistry.getResourceDao(myFhirContext.getResourceType(theResource)).create(theResource, new SystemRequestDetails()).getId();
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public IIdType doUpdateResource(IBaseResource theResource) {
 		return myDaoRegistry.getResourceDao(myFhirContext.getResourceType(theResource)).update(theResource, new SystemRequestDetails()).getId();
