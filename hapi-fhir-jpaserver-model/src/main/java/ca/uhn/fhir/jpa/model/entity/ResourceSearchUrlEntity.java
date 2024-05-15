@@ -21,8 +21,12 @@ package ca.uhn.fhir.jpa.model.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
@@ -55,7 +59,16 @@ public class ResourceSearchUrlEntity {
 	@Column(name = RES_SEARCH_URL_COLUMN_NAME, length = RES_SEARCH_URL_LENGTH, nullable = false)
 	private String mySearchUrl;
 
-	@Column(name = "RES_ID", updatable = false, nullable = false)
+	// LUKETODO:   Column 'RES_ID' is duplicated in mapping for entity 'ca.uhn.fhir.jpa.model.entity.ResourceSearchUrlEntity' (use '@Column(insertable=false, updatable=false)' when mapping multiple properties to the same column)
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(
+			name = "RES_ID",
+			nullable = false,
+			updatable = false,
+			foreignKey = @ForeignKey(name = "FK_RES_SEARCH_URL_RESOURCE"))
+	private ResourceTable myResourceTable;
+
+	@Column(name = "RES_ID", updatable = false, nullable = false, insertable = false)
 	private Long myResourcePid;
 
 	@Column(name = "CREATED_TIME", nullable = false)
@@ -76,6 +89,14 @@ public class ResourceSearchUrlEntity {
 	public ResourceSearchUrlEntity setResourcePid(Long theResourcePid) {
 		myResourcePid = theResourcePid;
 		return this;
+	}
+
+	public ResourceTable getResourceTable() {
+		return myResourceTable;
+	}
+
+	public void setResourceTable(ResourceTable myResourceTable) {
+		this.myResourceTable = myResourceTable;
 	}
 
 	public Date getCreatedTime() {
