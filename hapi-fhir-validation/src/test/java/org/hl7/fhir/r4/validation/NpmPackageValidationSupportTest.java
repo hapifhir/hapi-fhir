@@ -115,6 +115,6 @@ public class NpmPackageValidationSupportTest extends BaseValidationTestWithInlin
 			.encodeResourceToString(validationResult.toOperationOutcome());
 		ourLog.info(outcomeSerialized);
 
-		assertThat(outcomeSerialized).contains("Terminology_TX_ValueSet_NotFound"));
+		assertThat(outcomeSerialized).contains("Terminology_TX_ValueSet_NotFound");
 	}
 }
