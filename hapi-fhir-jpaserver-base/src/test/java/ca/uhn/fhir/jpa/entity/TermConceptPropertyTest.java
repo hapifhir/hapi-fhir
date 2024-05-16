@@ -6,6 +6,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TermConceptPropertyTest {
@@ -21,8 +22,8 @@ public class TermConceptPropertyTest {
 		termConceptProperty.setValue(ourVeryLongString);
 
 		// then
-		assertTrue(termConceptProperty.getValueBlobForTesting());
-		assertTrue(termConceptProperty.getValueBinForTesting());
+		assertTrue(termConceptProperty.hasValueBlobForTesting());
+		assertTrue(termConceptProperty.hasValueBinForTesting());
 	}
 
 	@Test
@@ -89,8 +90,8 @@ public class TermConceptPropertyTest {
 		termConceptProperty.performLegacyLobSupport(theSupportLegacyLob);
 
 		// then
-		assertThat(termConceptProperty.hasValueBinForTesting(), equalTo(true));
-		assertThat(termConceptProperty.hasValueBlobForTesting(), equalTo(theSupportLegacyLob));
+		assertTrue(termConceptProperty.hasValueBinForTesting());
+		assertEquals(theSupportLegacyLob, termConceptProperty.hasValueBlobForTesting());
 	}
 
 }
