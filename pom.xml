@@ -913,6 +913,10 @@
 			<id>thetrueoneshots</id>
 			<name>Gijs Groenewegen</name>
 		</developer>
+		<developer>
+			<id>subigre</id>
+			<name>Renaud Subiger</name>
+		</developer>
 	</developers>
 
 	<licenses>
