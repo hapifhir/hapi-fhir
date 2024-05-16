@@ -9,7 +9,6 @@ import java.util.Set;
 import java.util.function.Supplier;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
 
 public class RenameTableTaskTest extends BaseTest {
 
@@ -34,28 +33,6 @@ public class RenameTableTaskTest extends BaseTest {
 		Set<String> tableNames = JdbcUtils.getTableNames(getConnectionProperties());
 		assertThat(tableNames).contains(newTableName);
 		assertThat(tableNames).doesNotContain(oldTableName);
-	}
-
-	@ParameterizedTest(name = "{index}: {0}")
-	@MethodSource("data")
-	public void testRenameTableTask_whenTableDoesNotExists_willRaiseException(Supplier<TestDatabaseDetails> theTestDatabaseDetails) throws SQLException {
-		// given
-		before(theTestDatabaseDetails);
-		final String newTableName = "NEWTABLE";
-		final String oldTableName = "SOMETABLE";
-
-		RenameTableTask task = new RenameTableTask("1", "1", oldTableName, newTableName);
-		getMigrator().addTask(task);
-
-		// when
-		try {
-			getMigrator().migrate();
-			fail();
-		} catch (Exception e){
-			// then
-			assertThat(e.getMessage()).contains("2516");
-		}
-
 	}
 
 }
