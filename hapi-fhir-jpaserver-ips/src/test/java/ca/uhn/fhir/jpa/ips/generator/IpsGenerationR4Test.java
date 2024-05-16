@@ -97,9 +97,9 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 		ourLog.info("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 
 		// Verify
-		assertThat(output.getMeta().getProfile().stream().map(PrimitiveType::getValue).toList(), contains(
+		assertThat(output.getMeta().getProfile().stream().map(PrimitiveType::getValue).toList()).contains(
 			"http://hl7.org/fhir/uv/ips/StructureDefinition/Bundle-uv-ips"
-		));
+		);
 		validateDocument(output);
 		assertEquals(117, output.getEntry().size());
 		String patientId = findFirstEntryResource(output, Patient.class, 1).getIdElement().toUnqualifiedVersionless().getValue();
