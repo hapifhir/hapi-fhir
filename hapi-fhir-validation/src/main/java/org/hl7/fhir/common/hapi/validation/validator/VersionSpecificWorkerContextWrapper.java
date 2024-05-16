@@ -398,7 +398,8 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 			org.hl7.fhir.r5.model.ElementDefinition.ElementDefinitionBindingComponent binding,
 			boolean cacheOk,
 			boolean Hierarchical) {
-		throw new UnsupportedOperationException(Msg.code(663));
+		ValueSet valueSet = fetchResource(ValueSet.class, binding.getValueSet(), src);
+		return expandVS(valueSet, cacheOk, Hierarchical);
 	}
 
 	@Override
