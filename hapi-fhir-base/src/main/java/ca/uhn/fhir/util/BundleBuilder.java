@@ -626,6 +626,16 @@ public class BundleBuilder {
 		terser.setElement(myBundle, "Bundle.timestamp", theTimestamp.getValueAsString());
 	}
 
+	/**
+	 * Adds a profile URL to <code>Bundle.meta.profile</code>
+	 *
+	 * @since 7.4.0
+	 */
+	public void addProfile(String theProfile) {
+		FhirTerser terser = myContext.newTerser();
+		terser.addElement(myBundle, "Bundle.meta.profile", theProfile);
+	}
+
 	public class DeleteBuilder extends BaseOperationBuilder {
 
 		// nothing yet
