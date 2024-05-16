@@ -21,7 +21,9 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.Map;
 
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class NpmPackageValidationSupportTest extends BaseValidationTestWithInlineMocks {
 
@@ -113,6 +115,6 @@ public class NpmPackageValidationSupportTest extends BaseValidationTestWithInlin
 			.encodeResourceToString(validationResult.toOperationOutcome());
 		ourLog.info(outcomeSerialized);
 
-		assertThat(outcomeSerialized, containsString("Terminology_TX_ValueSet_NotFound"));
+		assertThat(outcomeSerialized).contains("Terminology_TX_ValueSet_NotFound"));
 	}
 }
