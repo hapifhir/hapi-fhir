@@ -282,6 +282,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				continue;
 			}
 			List<List<IQueryParameterType>> andOrParams = myParams.get(nextParamName);
+			// LUKETODO:  setResourceName appears NOT to work here?!?!?!??!??!?!
 			Condition predicate = theQueryStack.searchForIdsWithAndOr(with().setResourceName(myResourceName)
 					.setParamName(nextParamName)
 					.setAndOrParams(andOrParams)
@@ -673,6 +674,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		// If we haven't added any predicates yet, we're doing a search for all resources. Make sure we add the
 		// partition ID predicate in that case.
 		if (!sqlBuilder.haveAtLeastOnePredicate()) {
+			// LUKETODO: this is where we add the RES_TYPE clause
+			// LUKETODO: we skip this in the failing case because there's no predicate??????
 			Condition partitionIdPredicate = sqlBuilder
 					.getOrCreateResourceTablePredicateBuilder()
 					.createPartitionIdPredicate(myRequestPartitionId);
@@ -739,6 +742,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		 * Now perform the search
 		 */
 		GeneratedSql generatedSql = sqlBuilder.generate(theOffset, myMaxResultsToFetch);
+		ourLog.info("6086: generatedSql:\n{}\nparams:\n{}", generatedSql.getSql(), generatedSql.getBindVariables());
 		if (!generatedSql.isMatchNothing()) {
 			SearchQueryExecutor executor =
 					mySqlBuilderFactory.newSearchQueryExecutor(generatedSql, myMaxResultsToFetch);
