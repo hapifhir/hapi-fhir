@@ -1,20 +1,26 @@
-package ca.uhn.fhir.jpa.provider.r4;
+package org.hl7.fhir.r4.validation;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.LookupCodeRequest;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
+import ca.uhn.fhir.util.ClasspathUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import org.hl7.fhir.common.hapi.validation.support.RemoteTerminologyServiceValidationSupport;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
@@ -25,15 +31,23 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/*
- * This set of Unit Tests simulates the call to a remote server and therefore, only tests the code in the
- * {@link org.hl7.fhir.common.hapi.validation.support.RemoteTerminologyServiceValidationSupport#invokeRemoteValidateCode}
- * method, before and after it makes that remote client call.
+/**
+ * Version specific tests for validation using RemoteTerminologyValidationSupport.
+ * The tests in this class simulate the call to a remote server and therefore, only tests the code in
+ * the RemoteTerminologyServiceValidationSupport itself. The remote client call is simulated using the test providers.
+ * @see RemoteTerminologyServiceValidationSupport
+ *
+ * Other operations are tested separately.
+ * @see RemoteTerminologyLookupCodeR4Test
+ * @see RemoteTerminologyServiceValidationSupportR4Test
  */
 public class RemoteTerminologyServiceResourceProviderR4Test {
 	private static final String DISPLAY = "DISPLAY";
@@ -79,8 +93,8 @@ public class RemoteTerminologyServiceResourceProviderR4Test {
 			.validateCode(null, null, CODE_SYSTEM, CODE, null, null);
 		assertNotNull(outcome);
 		assertEquals(CODE, outcome.getCode());
-        assertNull(outcome.getSeverity());
-        assertNull(outcome.getMessage());
+		assertNull(outcome.getSeverity());
+		assertNull(outcome.getMessage());
 
 		assertEquals(CODE, ourCodeSystemProvider.myLastCode.getCode());
 		assertEquals(CODE_SYSTEM, ourCodeSystemProvider.myLastUrl.getValueAsString());
@@ -114,7 +128,7 @@ public class RemoteTerminologyServiceResourceProviderR4Test {
 		assertEquals(IValidationSupport.IssueSeverity.ERROR, outcome.getSeverity());
 		assertEquals(SAMPLE_MESSAGE, outcome.getMessage());
 
-        assertFalse(((BooleanType) ourCodeSystemProvider.myNextReturnParams.getParameterValue("result")).booleanValue());
+		assertFalse(((BooleanType) ourCodeSystemProvider.myNextReturnParams.getParameterValue("result")).booleanValue());
 	}
 
 	@Test
@@ -143,13 +157,34 @@ public class RemoteTerminologyServiceResourceProviderR4Test {
 		assertNotNull(outcome);
 		assertEquals(CODE, outcome.getCode());
 		assertEquals(DISPLAY, outcome.getDisplay());
-        assertNull(outcome.getSeverity());
+		assertNull(outcome.getSeverity());
 		assertNull(outcome.getMessage());
 
 		assertEquals(CODE, ourValueSetProvider.myLastCode.getCode());
 		assertEquals(DISPLAY, ourValueSetProvider.myLastDisplay.getValue());
 		assertEquals(VALUE_SET_URL, ourValueSetProvider.myLastUrl.getValueAsString());
 		assertEquals(SAMPLE_MESSAGE, ourValueSetProvider.myNextReturnParams.getParameterValue("message").toString());
+	}
+
+	@Test
+	public void lookupCode_withParametersOutput_convertsCorrectly() {
+		String paramsAsString = ClasspathUtil.loadResource("/r4/CodeSystem-lookup-output-with-subproperties.json");
+		IBaseResource baseResource = ourCtx.newJsonParser().parseResource(paramsAsString);
+		assertTrue(baseResource instanceof Parameters);
+		Parameters resultParameters = (Parameters) baseResource;
+		ourCodeSystemProvider.myNextReturnParams = resultParameters;
+
+		LookupCodeRequest request = new LookupCodeRequest(CODE_SYSTEM, CODE, null, List.of("interfaces"));
+
+		// test
+		IValidationSupport.LookupCodeResult outcome = mySvc.lookupCode(null, request);
+		assertNotNull(outcome);
+
+		IBaseParameters theActualParameters = outcome.toParameters(ourCtx, request.getPropertyNames().stream().map(StringType::new).toList());
+		String actual = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(theActualParameters);
+		String expected = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resultParameters);
+
+		assertEquals(expected, actual);
 	}
 
 	private void createNextCodeSystemReturnParameters(boolean theResult, String theDisplay, String theMessage) {
@@ -184,6 +219,27 @@ public class RemoteTerminologyServiceResourceProviderR4Test {
 			myLastDisplay = theDisplay;
 			return myNextReturnParams;
 
+		}
+
+		@Operation(name = JpaConstants.OPERATION_LOOKUP, idempotent = true, returnParameters= {
+				@OperationParam(name = "name", type = StringType.class, min = 1),
+				@OperationParam(name = "version", type = StringType.class),
+				@OperationParam(name = "display", type = StringType.class, min = 1),
+				@OperationParam(name = "abstract", type = BooleanType.class, min = 1),
+				@OperationParam(name = "property", type = StringType.class, min = 0, max = OperationParam.MAX_UNLIMITED)
+		})
+		public IBaseParameters lookup(
+				HttpServletRequest theServletRequest,
+				@OperationParam(name = "code", max = 1) CodeType theCode,
+				@OperationParam(name = "system",max = 1) UriType theSystem,
+				@OperationParam(name = "coding", max = 1) Coding theCoding,
+				@OperationParam(name = "version", max = 1) StringType theVersion,
+				@OperationParam(name = "displayLanguage", max = 1) CodeType theDisplayLanguage,
+				@OperationParam(name = "property", max = OperationParam.MAX_UNLIMITED) List<CodeType> thePropertyNames,
+				RequestDetails theRequestDetails
+		) {
+			myLastCode = theCode;
+			return myNextReturnParams;
 		}
 
 		@Override
