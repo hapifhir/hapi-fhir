@@ -27,8 +27,6 @@ import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.validation.RemoteTerminologyLookupCodeR4Test;
-import org.hl7.fhir.r4.validation.RemoteTerminologyServiceValidationSupportR4Test;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -179,7 +177,7 @@ public class RemoteTerminologyServiceResourceProviderDstu3Test {
 		Parameters resultParameters = (Parameters) baseResource;
 		ourCodeSystemProvider.myNextReturnParams = resultParameters;
 
-		LookupCodeRequest request = new LookupCodeRequest(CODE_SYSTEM, CODE);
+		LookupCodeRequest request = new LookupCodeRequest(CODE_SYSTEM, CODE, null, List.of("interfaces"));
 
 		// test
 		IValidationSupport.LookupCodeResult outcome = mySvc.lookupCode(null, request);

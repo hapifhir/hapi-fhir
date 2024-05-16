@@ -924,7 +924,7 @@ public interface IValidationSupport {
 			if (myProperties != null) {
 
 				final List<BaseConceptProperty> propertiesToReturn;
-				if (thePropertyNamesToFilter != null) {
+				if (thePropertyNamesToFilter != null && !thePropertyNamesToFilter.isEmpty()) {
 					// TODO MM: The logic to filter of properties could actually be moved to the lookupCode provider.
 					// That is where the rest of the lookupCode input parameter handling is done.
 					// This was left as is for now but can be done with next opportunity.

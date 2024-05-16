@@ -13,6 +13,7 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -61,6 +62,7 @@ public interface ILookupCodeTest {
 
 	@Test
 	default void lookupCode_forCodeSystemWithPropertyInvalidType_throwsException() {
+		// test
 		LookupCodeResult result = new LookupCodeResult();
 		result.getProperties().add(new BaseConceptProperty("someProperty") {
 			public String getType() {
@@ -69,6 +71,7 @@ public interface ILookupCodeTest {
 		});
 		getCodeSystemProvider().setLookupCodeResult(result);
 
+		// test and verify
 		try {
 			LookupCodeRequest request = new LookupCodeRequest(CODE_SYSTEM, CODE, LANGUAGE, null);
 			getService().lookupCode(null, request);
@@ -87,6 +90,7 @@ public interface ILookupCodeTest {
 		result.setCodeDisplay(DISPLAY);
 		getCodeSystemProvider().setLookupCodeResult(result);
 
+		// test and verify
 		LookupCodeRequest request =  new LookupCodeRequest(CODE_SYSTEM, CODE, LANGUAGE, null);
 		verifyLookupCodeResult(request, result);
 	}
@@ -104,6 +108,7 @@ public interface ILookupCodeTest {
 		result.getDesignations().add(designation2);
 		getCodeSystemProvider().setLookupCodeResult(result);
 
+		// test and verify
 		LookupCodeRequest request = new LookupCodeRequest(CODE_SYSTEM, CODE, LANGUAGE, null);
 		verifyLookupCodeResult(request, result);
 	}
@@ -126,7 +131,7 @@ public interface ILookupCodeTest {
 		assertFalse(propertyOptional.isPresent());
 	}
 
-	default void verifyLookupWithProperty(IBaseDatatype thePropertyValue) {
+	default void verifyLookupWithProperty(List<IBaseDatatype> thePropertyValues, List<Integer> thePropertyIndexesToFilter) {
 		// setup
 		final String propertyName = "someProperty";
 		LookupCodeResult result = new LookupCodeResult().setFound(true).setSearchedForCode(CODE).setSearchedForSystem(CODE_SYSTEM);
@@ -134,11 +139,21 @@ public interface ILookupCodeTest {
 		result.setCodeSystemVersion(CODE_SYSTEM_VERSION);
 		result.setCodeSystemDisplayName(CODE_SYSTEM_NAME);
 		result.setCodeDisplay(DISPLAY);
-		BaseConceptProperty property = createConceptProperty(propertyName, thePropertyValue);
-		result.getProperties().add(property);
+		List<String> propertyNamesToFilter = new ArrayList<>();
+		for (int i = 0; i < thePropertyValues.size(); i++) {
+			String currentPropertyName = propertyName + i;
+			result.getProperties().add(createConceptProperty(currentPropertyName, thePropertyValues.get(i)));
+			if (thePropertyIndexesToFilter.contains(i)) {
+				propertyNamesToFilter.add(currentPropertyName);
+			}
+		}
 		getCodeSystemProvider().setLookupCodeResult(result);
 
-		LookupCodeRequest request = new LookupCodeRequest(CODE_SYSTEM, CODE, LANGUAGE, List.of(propertyName));
+		// test
+		LookupCodeRequest request = new LookupCodeRequest(CODE_SYSTEM, CODE, LANGUAGE, propertyNamesToFilter);
+
+		// verify
+		result.getProperties().removeIf(p -> !propertyNamesToFilter.contains(p.getPropertyName()));
 		verifyLookupCodeResult(request, result);
 	}
 
@@ -158,6 +173,7 @@ public interface ILookupCodeTest {
 		result.getProperties().add(group);
 		getCodeSystemProvider().setLookupCodeResult(result);
 
+		// test and verify
 		LookupCodeRequest request = new LookupCodeRequest(CODE_SYSTEM, CODE, LANGUAGE, List.of(groupName));
 		verifyLookupCodeResult(request, result);
 	}
@@ -189,6 +205,7 @@ public interface ILookupCodeTest {
 		result.getDesignations().add(theConceptDesignation);
 		getCodeSystemProvider().setLookupCodeResult(result);
 
+		// test and verify
 		LookupCodeRequest request = new LookupCodeRequest(CODE_SYSTEM, CODE, LANGUAGE, null);
 		verifyLookupCodeResult(request, result);
 	}

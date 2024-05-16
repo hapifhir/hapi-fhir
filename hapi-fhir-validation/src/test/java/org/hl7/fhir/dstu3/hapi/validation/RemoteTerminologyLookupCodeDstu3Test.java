@@ -69,12 +69,12 @@ public class RemoteTerminologyLookupCodeDstu3Test implements ILookupCodeTest {
 
 	public static Stream<Arguments> getEmptyPropertyValues() {
 		return Stream.of(
-			Arguments.arguments(new StringType()),
-			Arguments.arguments(new StringType("")),
-			Arguments.arguments(new Coding()),
-			Arguments.arguments(new Coding("", null, null)),
-			Arguments.arguments(new Coding("", "", null)),
-			Arguments.arguments(new Coding(null, "", null))
+			Arguments.of(new StringType()),
+			Arguments.of(new StringType("")),
+			Arguments.of(new Coding()),
+			Arguments.of(new Coding("", null, null)),
+			Arguments.of(new Coding("", "", null)),
+			Arguments.of(new Coding(null, "", null))
 		);
 	}
 
@@ -84,58 +84,65 @@ public class RemoteTerminologyLookupCodeDstu3Test implements ILookupCodeTest {
 		verifyLookupWithEmptyPropertyValue(thePropertyValue);
 	}
 
-	public static Stream<Arguments> getPropertyValues() {
+	public static Stream<Arguments> getPropertyValueArguments() {
 		return Stream.of(
-			// FHIR DSTU3 spec types
-			Arguments.arguments(new StringType("value")),
-			Arguments.arguments(new Coding("code", "system", "display")),
-			Arguments.arguments(new CodeType("code")),
-			Arguments.arguments(new BooleanType(true)),
-			Arguments.arguments(new IntegerType(1)),
-			Arguments.arguments(new DateTimeType(Calendar.getInstance())),
-			// other types will also not fail for Remote Terminology
-			Arguments.arguments(new DecimalType(1.1)),
-			Arguments.arguments(new InstantType(Calendar.getInstance())),
-			Arguments.arguments(new Type() {
-				@Override
-				protected Type typedCopy() {
-					return this;
-				}
+				// FHIR DSTU3 spec types
+				Arguments.of(new StringType("value")),
+				Arguments.of(new Coding("code", "system", "display")),
+				Arguments.of(new CodeType("code")),
+				Arguments.of(new BooleanType(true)),
+				Arguments.of(new IntegerType(1)),
+				Arguments.of(new DateTimeType(Calendar.getInstance())),
+				// other types will also not fail for Remote Terminology
+				Arguments.of(new DecimalType(1.1)),
+				Arguments.of(new InstantType(Calendar.getInstance())),
+				Arguments.of(new Type() {
+					@Override
+					protected Type typedCopy() {
+						return this;
+					}
 
-				@Override
-				public String toString() {
-					return "randomType";
-				}
-			})
+					@Override
+					public String toString() {
+						return "randomType";
+					}
+				})
 		);
 	}
 
-	public static Stream<Arguments> getSubPropertyValues() {
+	public static Stream<Arguments> getPropertyValueListArguments() {
 		return Stream.of(
-				Arguments.arguments(List.of(new StringType("value1")), new StringType("value2")),
-				Arguments.arguments(List.of(new StringType("value1")), new Coding("code", "system", "display"))
+				Arguments.of(List.of(new StringType("value1")), new StringType("value2")),
+				Arguments.of(List.of(new StringType("value1")), new Coding("code", "system", "display"))
 		);
 	}
 
 	@ParameterizedTest
-	@MethodSource(value = "getPropertyValues")
+	@MethodSource(value = "getPropertyValueArguments")
 	public void lookupCode_forCodeSystemWithProperty_returnsCorrectProperty(IBaseDatatype thePropertyValue) {
-		verifyLookupWithProperty(thePropertyValue);
+		verifyLookupWithProperty(List.of(thePropertyValue), List.of());
 	}
 
 	@ParameterizedTest
-	@MethodSource(value = "getSubPropertyValues")
+	@MethodSource(value = "getPropertyValueListArguments")
+	public void lookupCode_forCodeSystemWithPropertyFilter_returnsCorrectProperty(List<IBaseDatatype> thePropertyValues) {
+		verifyLookupWithProperty(thePropertyValues, List.of());
+		verifyLookupWithProperty(thePropertyValues, List.of(thePropertyValues.size() - 1));
+	}
+
+	@ParameterizedTest
+	@MethodSource(value = "getPropertyValueListArguments")
 	public void lookupCode_forCodeSystemWithPropertyGroup_returnsCorrectProperty(List<IBaseDatatype> thePropertyValues) {
 		verifyLookupWithSubProperties(thePropertyValues);
 	}
 
 	public static Stream<Arguments> getDesignations() {
 		return Stream.of(
-			Arguments.arguments(new ConceptDesignation().setLanguage("en").setUseCode("code1").setUseSystem("system-1").setUseDisplay("display").setValue("some value")),
-			Arguments.arguments(new ConceptDesignation().setUseCode("code2").setUseSystem("system1").setUseDisplay("display").setValue("someValue")),
-			Arguments.arguments(new ConceptDesignation().setUseCode("code2").setUseSystem("system1").setValue("someValue")),
-			Arguments.arguments(new ConceptDesignation().setUseCode("code2").setUseSystem("system1")),
-			Arguments.arguments(new ConceptDesignation().setUseCode("code2"))
+			Arguments.of(new ConceptDesignation().setLanguage("en").setUseCode("code1").setUseSystem("system-1").setUseDisplay("display").setValue("some value")),
+			Arguments.of(new ConceptDesignation().setUseCode("code2").setUseSystem("system1").setUseDisplay("display").setValue("someValue")),
+			Arguments.of(new ConceptDesignation().setUseCode("code2").setUseSystem("system1").setValue("someValue")),
+			Arguments.of(new ConceptDesignation().setUseCode("code2").setUseSystem("system1")),
+			Arguments.of(new ConceptDesignation().setUseCode("code2"))
 		);
 	}
 

@@ -15,7 +15,6 @@ import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.ClasspathUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import org.hl7.fhir.common.hapi.validation.support.RemoteTerminologyServiceValidationSupport;
-import org.hl7.fhir.dstu3.hapi.validation.RemoteTerminologyServiceResourceProviderDstu3Test;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.BooleanType;
@@ -175,7 +174,7 @@ public class RemoteTerminologyServiceResourceProviderR4Test {
 		Parameters resultParameters = (Parameters) baseResource;
 		ourCodeSystemProvider.myNextReturnParams = resultParameters;
 
-		LookupCodeRequest request = new LookupCodeRequest(CODE_SYSTEM, CODE);
+		LookupCodeRequest request = new LookupCodeRequest(CODE_SYSTEM, CODE, null, List.of("interfaces"));
 
 		// test
 		IValidationSupport.LookupCodeResult outcome = mySvc.lookupCode(null, request);
