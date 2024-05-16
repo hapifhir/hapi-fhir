@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
+import ca.uhn.fhir.jpa.dao.TestDaoSearch;
 import ca.uhn.fhir.jpa.embedded.JpaEmbeddedDatabase;
 import ca.uhn.fhir.jpa.migrate.HapiMigrationStorageSvc;
 import ca.uhn.fhir.jpa.migrate.MigrationTaskList;
@@ -34,6 +35,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,10 +57,11 @@ import java.util.Set;
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_EVERYTHING;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 @ExtendWith(SpringExtension.class)
 @EnableJpaRepositories(repositoryFactoryBeanClass = EnversRevisionRepositoryFactoryBean.class)
-@ContextConfiguration(classes = {BaseDatabaseVerificationIT.TestConfig.class})
+@ContextConfiguration(classes = {BaseDatabaseVerificationIT.TestConfig.class, TestDaoSearch.Config.class})
 public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements ITestDataBuilder {
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseDatabaseVerificationIT.class);
 	private static final String MIGRATION_TABLENAME = "MIGRATIONS";
@@ -86,6 +89,9 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
 
 	@Autowired
 	private DatabaseBackedPagingProvider myPagingProvider;
+
+	@Autowired
+	TestDaoSearch myTestDaoSearch;
 
 	@RegisterExtension
 	protected RestfulServerExtension myServer = new RestfulServerExtension(FhirContext.forR5Cached());
@@ -153,7 +159,22 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
 		assertThat(values).as(values.toString()).containsExactlyInAnyOrder(expectedIds.toArray(new String[0]));
     }
 
-
+	@ParameterizedTest
+	@CsvSource(textBlock = """
+			query string,			Patient?name=smith
+			query date,				Observation?date=2021
+			query token,			Patient?active=true
+			sort string, 			Patient?_sort=name
+			sort date, 				Observation?_sort=date
+			sort token, 			Patient?_sort=active
+			sort chained date, 		Observation?_sort=patient.birthdate
+			sort chained string, 	Observation?_sort=patient.name
+			sort chained qualified, Patient?_sort=Practitioner:general-practitioner.family
+			sort chained token, 	Observation?_sort=patient.active
+			""")
+	void testSyntaxForVariousQueries(String theMessage, String theQuery) {
+		assertDoesNotThrow(()->myTestDaoSearch.searchForBundleProvider(theQuery), theMessage);
+	}
 
 	@Configuration
 	public static class TestConfig extends TestR5Config {
@@ -200,8 +221,8 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
 	}
 
 	public static class JpaDatabaseContextConfigParamObject {
-		private JpaEmbeddedDatabase myJpaEmbeddedDatabase;
-		private String myDialect;
+		final JpaEmbeddedDatabase myJpaEmbeddedDatabase;
+		final String myDialect;
 
 		public JpaDatabaseContextConfigParamObject(JpaEmbeddedDatabase theJpaEmbeddedDatabase, String theDialect) {
 			myJpaEmbeddedDatabase = theJpaEmbeddedDatabase;
@@ -217,11 +238,13 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public IIdType doCreateResource(IBaseResource theResource) {
 		return myDaoRegistry.getResourceDao(myFhirContext.getResourceType(theResource)).create(theResource, new SystemRequestDetails()).getId();
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public IIdType doUpdateResource(IBaseResource theResource) {
 		return myDaoRegistry.getResourceDao(myFhirContext.getResourceType(theResource)).update(theResource, new SystemRequestDetails()).getId();

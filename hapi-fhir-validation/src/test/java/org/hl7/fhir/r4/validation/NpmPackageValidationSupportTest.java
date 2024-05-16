@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.Map;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 public class NpmPackageValidationSupportTest extends BaseValidationTestWithInlineMocks {
 
@@ -86,5 +86,33 @@ public class NpmPackageValidationSupportTest extends BaseValidationTestWithInlin
 			byte[] actualBytes = npmPackageSupport.fetchBinary(entry.getKey());
 			assertThat(actualBytes).containsExactly(expectedBytes);
 		}
+	}
+
+	@Test
+	public void testValidateIheMhdPackage() throws IOException {
+		ValidationSupportChain validationSupportChain = new ValidationSupportChain();
+		validationSupportChain.addValidationSupport(getNpmPackageValidationSupport("classpath:package/ihe.iti.mhd.tgz"));
+		validationSupportChain.addValidationSupport(new DefaultProfileValidationSupport(myFhirContext));
+		validationSupportChain.addValidationSupport(new CommonCodeSystemsTerminologyService(myFhirContext));
+		validationSupportChain.addValidationSupport(new InMemoryTerminologyServerValidationSupport(myFhirContext));
+		validationSupportChain.addValidationSupport(new SnapshotGeneratingValidationSupport(myFhirContext));
+
+		CachingValidationSupport validationSupport = new CachingValidationSupport(validationSupportChain);
+
+		FhirValidator validator = myFhirContext.newValidator();
+		FhirInstanceValidator instanceValidator = new FhirInstanceValidator(validationSupport);
+		validator.registerValidatorModule(instanceValidator);
+
+		String bundle = loadResource("/r4/mhd_minimal_provide_document_bundle.json");
+		ValidationResult validationResult = validator.validateWithResult(bundle);
+
+		assertEquals(1, validationResult.getMessages().size());
+
+		String outcomeSerialized = myFhirContext.newJsonParser()
+			.setPrettyPrint(true)
+			.encodeResourceToString(validationResult.toOperationOutcome());
+		ourLog.info(outcomeSerialized);
+
+		assertThat(outcomeSerialized, containsString("Terminology_TX_ValueSet_NotFound"));
 	}
 }

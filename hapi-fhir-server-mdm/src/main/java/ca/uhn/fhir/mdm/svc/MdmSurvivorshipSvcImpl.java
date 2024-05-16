@@ -31,17 +31,22 @@ import ca.uhn.fhir.mdm.api.params.MdmQuerySearchParameters;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.model.mdmevents.MdmLinkJson;
 import ca.uhn.fhir.mdm.util.GoldenResourceHelper;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.util.TerserUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.data.domain.Page;
 
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 public class MdmSurvivorshipSvcImpl implements IMdmSurvivorshipService {
+	private static final Pattern IS_UUID =
+			Pattern.compile("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}");
 
 	protected final FhirContext myFhirContext;
 
@@ -133,16 +138,30 @@ public class MdmSurvivorshipSvcImpl implements IMdmSurvivorshipService {
 			String sourceId = link.getSourceId();
 
 			// +1 because of "/" in id: "ResourceType/Id"
-			IResourcePersistentId<?> pid = getResourcePID(sourceId.substring(resourceType.length() + 1), resourceType);
+			final String sourceIdUnqualified = sourceId.substring(resourceType.length() + 1);
 
-			// this might be a bit unperformant
-			// but it depends how many links there are
-			// per golden resource (unlikely to be thousands)
-			return dao.readByPid(pid);
+			// myMdmLinkQuerySvc.queryLinks populates sourceId with the FHIR_ID, not the RES_ID, so if we don't
+			// add this conditional logic, on JPA, myIIdHelperService.newPidFromStringIdAndResourceName will fail with
+			// NumberFormatException
+			if (isNumericOrUuid(sourceIdUnqualified)) {
+				IResourcePersistentId<?> pid = getResourcePID(sourceIdUnqualified, resourceType);
+
+				// this might be a bit unperformant
+				// but it depends how many links there are
+				// per golden resource (unlikely to be thousands)
+				return dao.readByPid(pid);
+			} else {
+				return dao.read(new IdDt(sourceId), new SystemRequestDetails());
+			}
 		});
 	}
 
 	private IResourcePersistentId<?> getResourcePID(String theId, String theResourceType) {
 		return myIIdHelperService.newPidFromStringIdAndResourceName(theId, theResourceType);
+	}
+
+	private boolean isNumericOrUuid(String theLongCandidate) {
+		return StringUtils.isNumeric(theLongCandidate)
+				|| IS_UUID.matcher(theLongCandidate).matches();
 	}
 }

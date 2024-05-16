@@ -7,8 +7,12 @@ import ca.uhn.fhir.jpa.model.entity.BinaryStorageEntity;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import jakarta.persistence.EntityManager;
+import org.hibernate.LobHelper;
+import org.hibernate.Session;
 import org.hl7.fhir.r4.model.IdType;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -30,6 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -271,7 +276,7 @@ public class DatabaseBinaryContentStorageSvcImplTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testStoreBinaryContent_writesBlobAndByteArray() throws IOException {
+	public void testStoreBinaryContent_byDefault_writesByteArrayOnly() throws IOException {
 		// given
 		ByteArrayInputStream inputStream = new ByteArrayInputStream(SOME_BYTES);
 		String contentType = "image/png";
@@ -286,9 +291,39 @@ public class DatabaseBinaryContentStorageSvcImplTest extends BaseJpaR4Test {
 
 			// then
 			assertTrue(binaryStorageEntity.hasStorageContent());
-			assertTrue(binaryStorageEntity.hasBlob());
+			assertFalse(binaryStorageEntity.hasBlob());
 		});
 
+	}
+
+	@Test
+	public void testStoreBinaryContent_whenSupportingLegacyBlobServer_willStoreToBlobAndBinaryArray() throws IOException {
+		ArgumentCaptor<BinaryStorageEntity> captor = ArgumentCaptor.forClass(BinaryStorageEntity.class);
+		EntityManager mockedEntityManager = mock(EntityManager.class);
+		Session mockedSession = mock(Session.class);
+		LobHelper mockedLobHelper = mock(LobHelper.class);
+		when(mockedEntityManager.getDelegate()).thenReturn(mockedSession);
+		when(mockedSession.getLobHelper()).thenReturn(mockedLobHelper);
+		when(mockedLobHelper.createBlob(any())).thenReturn(mock(Blob.class));
+
+		// given
+		DatabaseBinaryContentStorageSvcImpl svc = new DatabaseBinaryContentStorageSvcImpl()
+			.setSupportLegacyLobServer(true)
+			.setEntityManagerForTesting(mockedEntityManager);
+
+		ByteArrayInputStream inputStream = new ByteArrayInputStream(SOME_BYTES);
+		String contentType = "image/png";
+		IdType resourceId = new IdType("Binary/123");
+
+		// when
+		svc.storeBinaryContent(resourceId, null, contentType, inputStream, new ServletRequestDetails());
+
+		// then
+		verify(mockedEntityManager, times(1)).persist(captor.capture());
+		BinaryStorageEntity capturedBinaryStorageEntity = captor.getValue();
+
+		assertThat(capturedBinaryStorageEntity.hasBlob(), equalTo(true));
+		assertThat(capturedBinaryStorageEntity.hasStorageContent(), equalTo(true));
 	}
 
 	@Configuration

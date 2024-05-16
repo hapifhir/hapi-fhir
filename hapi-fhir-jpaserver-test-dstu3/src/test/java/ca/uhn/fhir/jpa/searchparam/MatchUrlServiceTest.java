@@ -8,6 +8,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.searchparam.util.Dstu3DistanceHelper;
 import ca.uhn.fhir.jpa.test.BaseJpaTest;
 import ca.uhn.fhir.jpa.test.config.TestDstu3Config;
+import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
@@ -99,6 +100,26 @@ public class MatchUrlServiceTest extends BaseJpaTest {
 		} catch (IllegalArgumentException e) {
 			assertEquals(Msg.code(495) + "Only one " + Location.SP_NEAR_DISTANCE + " parameter may be present", e.getMessage());
 		}
+	}
+
+	@Test
+	void testTotal_fromStandardLowerCase() {
+	    // given
+	    // when
+		var map = myMatchUrlService.translateMatchUrl("Patient?family=smith&_total=none", ourCtx.getResourceDefinition("Patient"));
+
+	    // then
+	    assertEquals(SearchTotalModeEnum.NONE, map.getSearchTotalMode());
+	}
+
+	@Test
+	void testTotal_fromUpperCase() {
+		// given
+		// when
+		var map = myMatchUrlService.translateMatchUrl("Patient?family=smith&_total=none", ourCtx.getResourceDefinition("Patient"));
+
+		// then
+		assertEquals(SearchTotalModeEnum.NONE, map.getSearchTotalMode());
 	}
 
 	@Override

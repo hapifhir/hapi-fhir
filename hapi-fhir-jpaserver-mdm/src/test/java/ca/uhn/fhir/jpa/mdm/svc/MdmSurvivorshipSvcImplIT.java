@@ -2,12 +2,16 @@ package ca.uhn.fhir.jpa.mdm.svc;
 
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.mdm.api.IMdmSurvivorshipService;
+import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
+import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.assertj.core.api.Assertions.assertThat;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -55,5 +59,22 @@ class MdmSurvivorshipSvcImplIT extends BaseMdmR4Test {
 
 		assertThat(p1.getTelecom()).hasSize(p1.getTelecom().size());
 		assertTrue(p2.getTelecomFirstRep().equalsDeep(p1.getTelecomFirstRep()));
+	}
+
+	@Test
+	public void matchingPatientsWith_NON_Numeric_Ids_matches_doesNotThrow_NumberFormatException() {
+		final Patient frankPatient1 = buildFrankPatient();
+		frankPatient1.setId("patA");
+		myPatientDao.update(frankPatient1, new SystemRequestDetails());
+		final Patient frankPatient2 = buildFrankPatient();
+		frankPatient2.setId("patB");
+		myPatientDao.update(frankPatient2, new SystemRequestDetails());
+		final Patient goldenPatient = buildFrankPatient();
+		myPatientDao.create(goldenPatient, new SystemRequestDetails());
+
+		myMdmLinkDaoSvc.createOrUpdateLinkEntity(goldenPatient, frankPatient1, MdmMatchOutcome.NEW_GOLDEN_RESOURCE_MATCH, MdmLinkSourceEnum.MANUAL, createContextForCreate("Patient"));
+		myMdmLinkDaoSvc.createOrUpdateLinkEntity(goldenPatient, frankPatient2, MdmMatchOutcome.NEW_GOLDEN_RESOURCE_MATCH, MdmLinkSourceEnum.MANUAL, createContextForCreate("Patient"));
+
+		myMdmSurvivorshipService.rebuildGoldenResourceWithSurvivorshipRules(goldenPatient, new MdmTransactionContext(MdmTransactionContext.OperationType.UPDATE_LINK));
 	}
 }

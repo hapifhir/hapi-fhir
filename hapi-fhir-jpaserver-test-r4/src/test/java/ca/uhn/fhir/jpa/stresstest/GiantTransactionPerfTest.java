@@ -884,6 +884,16 @@ public class GiantTransactionPerfTest {
 			return true;
 		}
 
+		@Override
+		public RequestPartitionId validateAndNormalizePartitionIds(RequestPartitionId theRequestPartitionId) {
+			return RequestPartitionId.defaultPartition();
+		}
+
+		@Override
+		public RequestPartitionId validateAndNormalizePartitionNames(RequestPartitionId theRequestPartitionId) {
+			return RequestPartitionId.defaultPartition();
+		}
+
 
 	}
 

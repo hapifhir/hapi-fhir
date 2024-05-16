@@ -2,11 +2,11 @@ package ca.uhn.fhir.jpa.entity;
 
 import com.google.common.base.Strings;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
 
 public class TermConceptPropertyTest {
 
@@ -21,8 +21,8 @@ public class TermConceptPropertyTest {
 		termConceptProperty.setValue(ourVeryLongString);
 
 		// then
-		assertNotNull(termConceptProperty.getValueBlobForTesting());
-		assertNotNull(termConceptProperty.getValueBinForTesting());
+		assertTrue(termConceptProperty.getValueBlobForTesting());
+		assertTrue(termConceptProperty.getValueBinForTesting());
 	}
 
 	@Test
@@ -76,6 +76,21 @@ public class TermConceptPropertyTest {
 
 		// then
 		assertThat(value).startsWith("a");
+	}
+
+	@ParameterizedTest
+	@ValueSource(booleans = {false, true})
+	public void testSetValue_withSupportLegacyLob(boolean theSupportLegacyLob){
+		// given
+		TermConceptProperty termConceptProperty = new TermConceptProperty();
+
+		// when
+		termConceptProperty.setValue(ourVeryLongString);
+		termConceptProperty.performLegacyLobSupport(theSupportLegacyLob);
+
+		// then
+		assertThat(termConceptProperty.hasValueBinForTesting(), equalTo(true));
+		assertThat(termConceptProperty.hasValueBlobForTesting(), equalTo(theSupportLegacyLob));
 	}
 
 }
