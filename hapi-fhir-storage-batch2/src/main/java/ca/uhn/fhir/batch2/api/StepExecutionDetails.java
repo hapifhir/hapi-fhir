@@ -39,13 +39,15 @@ public class StepExecutionDetails<PT extends IModelJson, IT extends IModelJson> 
 	 */
 	@Deprecated
 	public StepExecutionDetails(
-		@Nonnull PT theParameters,
-		@Nullable IT theData,
-		@Nonnull JobInstance theInstance,
-		String theChunkId
-	) {
-		this(theParameters, theData, theInstance,
-			new WorkChunk().setId(theChunkId).setInstanceId(theInstance.getInstanceId()).setData(theData));
+			@Nonnull PT theParameters, @Nullable IT theData, @Nonnull JobInstance theInstance, String theChunkId) {
+		this(
+				theParameters,
+				theData,
+				theInstance,
+				new WorkChunk()
+						.setId(theChunkId)
+						.setInstanceId(theInstance.getInstanceId())
+						.setData(theData));
 	}
 
 	public StepExecutionDetails(
