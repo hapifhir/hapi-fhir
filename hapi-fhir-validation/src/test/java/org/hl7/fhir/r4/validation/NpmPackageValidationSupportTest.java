@@ -25,6 +25,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class NpmPackageValidationSupportTest extends BaseValidationTestWithInlineMocks {
 
@@ -109,7 +110,9 @@ public class NpmPackageValidationSupportTest extends BaseValidationTestWithInlin
 		String bundle = loadResource("/r4/mhd_minimal_provide_document_bundle.json");
 		ValidationResult validationResult = validator.validateWithResult(bundle);
 
-		assertEquals(1, validationResult.getMessages().size());
+		assertEquals(3, validationResult.getMessages().size());
+
+		assertTrue(validationResult.isSuccessful());
 
 		String outcomeSerialized = myFhirContext.newJsonParser()
 			.setPrettyPrint(true)
