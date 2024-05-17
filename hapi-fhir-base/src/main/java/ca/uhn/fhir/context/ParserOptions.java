@@ -20,6 +20,8 @@
 package ca.uhn.fhir.context;
 
 import ca.uhn.fhir.parser.IParser;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -42,6 +44,8 @@ public class ParserOptions {
 	private Set<String> myDontStripVersionsFromReferencesAtPaths = Collections.emptySet();
 	private boolean myOverrideResourceIdWithBundleEntryFullUrl = true;
 	private boolean myAutoContainReferenceTargetsWithNoId = true;
+	private Set<String> myEncodeElementsForSummaryMode = null;
+	private Set<String> myDontEncodeElementsForSummaryMode = null;
 
 	/**
 	 * If set to {@literal true} (which is the default), contained resources may be specified by
@@ -205,4 +209,41 @@ public class ParserOptions {
 		myOverrideResourceIdWithBundleEntryFullUrl = theOverrideResourceIdWithBundleEntryFullUrl;
 		return this;
 	}
+
+    @SuppressWarnings("UnusedReturnValue")
+	public ParserOptions setEncodeElementsForSummaryMode(@Nonnull String... theEncodeElements) {
+		return setEncodeElementsForSummaryMode(Set.of(theEncodeElements));
+    }
+
+	public ParserOptions setEncodeElementsForSummaryMode(@Nullable Collection<String> theEncodeElements) {
+		Set<String> encodeElements = null;
+		if (theEncodeElements != null && !theEncodeElements.isEmpty()) {
+			encodeElements = Set.copyOf(theEncodeElements);
+		}
+		myEncodeElementsForSummaryMode = encodeElements;
+		return this;
+	}
+
+	public Set<String> getEncodeElementsForSummaryMode() {
+		return myEncodeElementsForSummaryMode;
+	}
+
+	@SuppressWarnings("UnusedReturnValue")
+	public ParserOptions setDontEncodeElementsForSummaryMode(@Nonnull String... theEncodeElements) {
+		return setDontEncodeElementsForSummaryMode(Set.of(theEncodeElements));
+	}
+
+	public ParserOptions setDontEncodeElementsForSummaryMode(@Nullable Collection<String> theDontEncodeElements) {
+		Set<String> dontEncodeElements = null;
+		if (theDontEncodeElements != null && !theDontEncodeElements.isEmpty()) {
+			dontEncodeElements = Set.copyOf(theDontEncodeElements);
+		}
+		myDontEncodeElementsForSummaryMode = dontEncodeElements;
+		return this;
+	}
+
+	public Set<String> getDontEncodeElementsForSummaryMode() {
+		return myDontEncodeElementsForSummaryMode;
+	}
+
 }

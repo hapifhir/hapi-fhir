@@ -372,7 +372,7 @@ public class XmlParser extends BaseParser {
 				case RESOURCE: {
 					IBaseResource resource = (IBaseResource) theElement;
 					String resourceName = getContext().getResourceType(resource);
-					if (!super.shouldEncodeResource(resourceName)) {
+					if (!super.shouldEncodeResource(resourceName, theEncodeContext)) {
 						break;
 					}
 					theEventWriter.writeStartElement(theChildName);
@@ -736,14 +736,14 @@ public class XmlParser extends BaseParser {
 
 			TagList tags = getMetaTagsForEncoding((resource), theEncodeContext);
 
-			if (super.shouldEncodeResourceMeta(resource)
+			if (super.shouldEncodeResourceMeta(resource, theEncodeContext)
 					&& ElementUtil.isEmpty(versionIdPart, updated, securityLabels, tags, profiles) == false) {
 				theEventWriter.writeStartElement("meta");
-				if (shouldEncodePath(resource, "meta.versionId")) {
+				if (shouldEncodePath(resource, "meta.versionId", theEncodeContext)) {
 					writeOptionalTagWithValue(theEventWriter, "versionId", versionIdPart);
 				}
 				if (updated != null) {
-					if (shouldEncodePath(resource, "meta.lastUpdated")) {
+					if (shouldEncodePath(resource, "meta.lastUpdated", theEncodeContext)) {
 						writeOptionalTagWithValue(theEventWriter, "lastUpdated", updated.getValueAsString());
 					}
 				}

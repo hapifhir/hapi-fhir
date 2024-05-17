@@ -345,12 +345,12 @@ public class RDFParser extends BaseParser {
 			final BaseRuntimeElementDefinition<?> childDef,
 			final boolean includedResource,
 			final CompositeChildElement parent,
-			final EncodeContext encodeContext,
+			final EncodeContext theEncodeContext,
 			final Integer cardinalityIndex) {
 
 		String childGenericName = childDefinition.getElementName();
 
-		encodeContext.pushPath(childGenericName, false);
+		theEncodeContext.pushPath(childGenericName, false);
 		try {
 
 			if (element == null || element.isEmpty()) {
@@ -412,8 +412,8 @@ public class RDFParser extends BaseParser {
 												rdfModel,
 												extensionResource,
 												false,
-												new CompositeChildElement(resDef, encodeContext),
-												encodeContext);
+												new CompositeChildElement(resDef, theEncodeContext),
+												theEncodeContext);
 									}
 								}
 							}
@@ -429,7 +429,7 @@ public class RDFParser extends BaseParser {
 					String idPredicate = null;
 					if (element instanceof IBaseResource) {
 						idPredicate = FHIR_NS + RESOURCE_ID;
-						IIdType resourceId = processResourceID((IBaseResource) element, encodeContext);
+						IIdType resourceId = processResourceID((IBaseResource) element, theEncodeContext);
 						if (resourceId != null) {
 							idString = resourceId.getIdPart();
 						}
@@ -444,7 +444,7 @@ public class RDFParser extends BaseParser {
 								rdfModel.createProperty(idPredicate), createFhirValueBlankNode(rdfModel, idString));
 					}
 					rdfModel = encodeCompositeElementToStreamWriter(
-							resource, element, rdfModel, rdfResource, includedResource, parent, encodeContext);
+							resource, element, rdfModel, rdfResource, includedResource, parent, theEncodeContext);
 					break;
 				}
 				case CONTAINED_RESOURCE_LIST:
@@ -465,7 +465,7 @@ public class RDFParser extends BaseParser {
 								rdfModel,
 								true,
 								super.fixContainedResourceId(resourceId.getValue()),
-								encodeContext,
+								theEncodeContext,
 								false,
 								containedResource);
 					}
@@ -474,13 +474,13 @@ public class RDFParser extends BaseParser {
 				case RESOURCE: {
 					IBaseResource baseResource = (IBaseResource) element;
 					String resourceName = getContext().getResourceType(baseResource);
-					if (!super.shouldEncodeResource(resourceName)) {
+					if (!super.shouldEncodeResource(resourceName, theEncodeContext)) {
 						break;
 					}
-					encodeContext.pushPath(resourceName, true);
-					IIdType resourceId = processResourceID(resource, encodeContext);
-					encodeResourceToRDFStreamWriter(resource, rdfModel, false, resourceId, encodeContext, false, null);
-					encodeContext.popPath();
+					theEncodeContext.pushPath(resourceName, true);
+					IIdType resourceId = processResourceID(resource, theEncodeContext);
+					encodeResourceToRDFStreamWriter(resource, rdfModel, false, resourceId, theEncodeContext, false, null);
+					theEncodeContext.popPath();
 					break;
 				}
 				case PRIMITIVE_XHTML:
@@ -502,7 +502,7 @@ public class RDFParser extends BaseParser {
 				}
 			}
 		} finally {
-			encodeContext.popPath();
+			theEncodeContext.popPath();
 		}
 
 		return rdfModel;

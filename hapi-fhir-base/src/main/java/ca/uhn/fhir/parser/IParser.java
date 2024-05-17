@@ -24,6 +24,8 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.ParserOptions;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.rest.api.EncodingEnum;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -199,14 +201,30 @@ public interface IParser {
 	/**
 	 * Is the parser in "summary mode"? See {@link #setSummaryMode(boolean)} for information
 	 *
-	 * @see {@link #setSummaryMode(boolean)} for information
+	 * @see #setSummaryMode(boolean) for information
 	 */
 	boolean isSummaryMode();
 
 	/**
 	 * If set to <code>true</code> (default is <code>false</code>) only elements marked by the FHIR specification as
 	 * being "summary elements" will be included.
-	 *
+	 * <p>
+	 * It is possible to modify the default summary mode element inclusions
+	 * for this parser instance by invoking {@link #setEncodeElements(Set)} 
+	 * or {@link #setDontEncodeElements(Collection)}. It is also possible to
+	 * modify the default summary mode element inclusions for all parsers
+	 * generated for a given {@link FhirContext} by accessing 
+	 * {@link FhirContext#getParserOptions()} followed by
+	 * {@link ParserOptions#setEncodeElementsForSummaryMode(Collection)} and/or
+	 * {@link ParserOptions#setDontEncodeElementsForSummaryMode(Collection)}. 
+	 * </p>
+	 * <p>
+	 * For compatibility reasons with other frameworks, when encoding a
+	 * <code>CapabilityStatement</code> resource in summary mode, extensions
+	 * are always encoded, even though the FHIR Specification does not consider
+	 * them to be summary elements.
+	 * </p>
+	 * 
 	 * @return Returns a reference to <code>this</code> parser so that method calls can be chained together
 	 */
 	IParser setSummaryMode(boolean theSummaryMode);
@@ -287,16 +305,49 @@ public interface IParser {
 	 * wildcard)</li>
 	 * </ul>
 	 * <p>
+	 * Note: If {@link #setSummaryMode(boolean)} is set to <code>true</code>, then any
+	 * elements specified using this method will be excluded even if they are
+	 * summary elements.
+	 * </p>
+	 * <p>
 	 * DSTU2 note: Note that values including meta, such as <code>Patient.meta</code>
 	 * will work for DSTU2 parsers, but values with subelements on meta such
 	 * as <code>Patient.meta.lastUpdated</code> will only work in
 	 * DSTU3+ mode.
 	 * </p>
 	 *
-	 * @param theDontEncodeElements The elements to encode
+	 * @param theDontEncodeElements The elements to not encode, or <code>null</code>
 	 * @see #setEncodeElements(Set)
+	 * @see ParserOptions#setDontEncodeElementsForSummaryMode(Collection)
 	 */
-	IParser setDontEncodeElements(Collection<String> theDontEncodeElements);
+	IParser setDontEncodeElements(@Nullable Collection<String> theDontEncodeElements);
+
+	/**
+	 * If provided, specifies the elements which should NOT be encoded. Valid values for this
+	 * field would include:
+	 * <ul>
+	 * <li><b>Patient</b> - Don't encode patient and all its children</li>
+	 * <li><b>Patient.name</b> - Don't encode the patient's name</li>
+	 * <li><b>Patient.name.family</b> - Don't encode the patient's family name</li>
+	 * <li><b>*.text</b> - Don't encode the text element on any resource (only the very first position may contain a
+	 * wildcard)</li>
+	 * </ul>
+	 * <p>
+	 * DSTU2 note: Note that values including meta, such as <code>Patient.meta</code>
+	 * will work for DSTU2 parsers, but values with subelements on meta such
+	 * as <code>Patient.meta.lastUpdated</code> will only work in
+	 * DSTU3+ mode.
+	 * </p>
+	 *
+	 * @param theDontEncodeElements The elements to not encode. Can be an empty list, but must not be <code>null</code>.
+	 * @see #setDontEncodeElements(Collection)
+	 * @see ParserOptions#setDontEncodeElementsForSummaryMode(Collection)
+	 * @since 7.4.0
+	 */
+	default IParser setDontEncodeElements(@Nonnull String... theDontEncodeElements) {
+		return setDontEncodeElements(Set.of(theDontEncodeElements));
+	}
+
 
 	/**
 	 * If provided, specifies the elements which should be encoded, to the exclusion of all others. Valid values for this
@@ -309,11 +360,44 @@ public interface IParser {
 	 * wildcard)</li>
 	 * <li><b>*.(mandatory)</b> - This is a special case which causes any mandatory fields (min > 0) to be encoded</li>
 	 * </ul>
+	 * <p>
+	 * Note: If {@link #setSummaryMode(boolean)} is set to <code>true</code>, then any
+	 * elements specified using this method will be included even if they are not
+	 * summary elements.
+	 * </p>
 	 *
-	 * @param theEncodeElements The elements to encode
+	 * @param theEncodeElements The elements to encode, or <code>null</code>
 	 * @see #setDontEncodeElements(Collection)
+	 * @see #setEncodeElements(String...)
+	 * @see ParserOptions#setEncodeElementsForSummaryMode(Collection)
 	 */
-	IParser setEncodeElements(Set<String> theEncodeElements);
+	IParser setEncodeElements(@Nullable Set<String> theEncodeElements);
+
+	/**
+	 * If provided, specifies the elements which should be encoded, to the exclusion of all others. Valid values for this
+	 * field would include:
+	 * <ul>
+	 * <li><b>Patient</b> - Encode patient and all its children</li>
+	 * <li><b>Patient.name</b> - Encode only the patient's name</li>
+	 * <li><b>Patient.name.family</b> - Encode only the patient's family name</li>
+	 * <li><b>*.text</b> - Encode the text element on any resource (only the very first position may contain a
+	 * wildcard)</li>
+	 * <li><b>*.(mandatory)</b> - This is a special case which causes any mandatory fields (min > 0) to be encoded</li>
+	 * </ul>
+	 * <p>
+	 * Note: If {@link #setSummaryMode(boolean)} is set to <code>true</code>, then any
+	 * elements specified using this method will be included even if they are not
+	 * summary elements.
+	 * </p>
+	 *
+	 * @param theEncodeElements The elements to encode. Can be an empty list, but must not be <code>null</code>.
+	 * @since 7.4.0
+	 * @see #setEncodeElements(Set)
+	 * @see ParserOptions#setEncodeElementsForSummaryMode(String...)
+	 */
+	default IParser setEncodeElements(@Nonnull String... theEncodeElements) {
+		return setEncodeElements(Set.of(theEncodeElements));
+	}
 
 	/**
 	 * If set to <code>true</code> (default is false), the values supplied
@@ -351,7 +435,7 @@ public interface IParser {
 	 * Sets the server's base URL used by this parser. If a value is set, resource references will be turned into
 	 * relative references if they are provided as absolute URLs but have a base matching the given base.
 	 *
-	 * @param theUrl The base URL, e.g. "http://example.com/base"
+	 * @param theUrl The base URL, e.g. "<a href="http://example.com/base">http://example.com/base</a>"
 	 * @return Returns an instance of <code>this</code> parser so that method calls can be chained together
 	 */
 	IParser setServerBaseUrl(String theUrl);
@@ -427,4 +511,5 @@ public interface IParser {
 	 * @see ParserOptions
 	 */
 	IParser setDontStripVersionsFromReferencesAtPaths(Collection<String> thePaths);
+
 }
