@@ -99,10 +99,12 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 	}
 
 	/**
-	 * Set SP_NAME to null without clearing hashes
+	 * Set SP_NAME, RES_TYPE, SP_UPDATED to null without clearing hashes
 	 */
-	public void clearParamName() {
+	public void optimizeIndexStorage() {
 		myParamName = null;
+		myResourceType = null;
+		myUpdated = null;
 	}
 
 	// MB pushed these down to the individual SP classes so we could name the FK in the join annotation

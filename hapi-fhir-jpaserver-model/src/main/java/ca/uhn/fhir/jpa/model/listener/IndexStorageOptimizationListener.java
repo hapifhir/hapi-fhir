@@ -45,11 +45,7 @@ public class IndexStorageOptimizationListener {
 	public void updateEntityFields(Object theEntity) {
 		if (theEntity instanceof BaseResourceIndexedSearchParam && myStorageSettings.isIndexStorageOptimized()) {
 			BaseResourceIndexedSearchParam resourceIndexedSearchParam = (BaseResourceIndexedSearchParam) theEntity;
-
-			// as setParamName() clears hashes, calling clearParamName() so generated hashes remain intact
-			resourceIndexedSearchParam.clearParamName();
-			resourceIndexedSearchParam.setResourceType(null);
-			resourceIndexedSearchParam.setUpdated(null);
+			resourceIndexedSearchParam.optimizeIndexStorage();
 		}
 	}
 }
