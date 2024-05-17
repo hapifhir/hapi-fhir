@@ -58,6 +58,16 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/**
+ * Version specific tests for validation using RemoteTerminologyValidationSupport.
+ * The tests in this class simulate the call to a remote server and therefore, only tests the code in
+ * the RemoteTerminologyServiceValidationSupport itself. The remote client call is simulated using the test providers.
+ * @see RemoteTerminologyServiceValidationSupport
+ *
+ * Other operations are tested separately.
+ * @see RemoteTerminologyLookupCodeR4Test
+ * @see RemoteTerminologyServiceResourceProviderR4Test
+ */
 public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidationTestWithInlineMocks {
 	private static final String DISPLAY = "DISPLAY";
 	private static final String CODE_SYSTEM = "CODE_SYS";
