@@ -261,6 +261,8 @@ public class ParserOptions {
 	/**
 	 * @return Returns the values provided to {@link #setEncodeElementsForSummaryMode(Collection)}
 	 * or <code>null</code>
+	 *
+	 * @since 7.4.0
 	 */
 	@Nullable
 	public Set<String> getEncodeElementsForSummaryMode() {
@@ -280,6 +282,7 @@ public class ParserOptions {
 	 *
 	 * @see IParser#setSummaryMode(boolean)
 	 * @see IParser#setDontEncodeElements(Collection) Can be used to specify these values for an individual parser instance.
+	 * @since 7.4.0
 	 */
 	@SuppressWarnings("UnusedReturnValue")
 	@Nonnull
@@ -300,6 +303,7 @@ public class ParserOptions {
 	 *
 	 * @see IParser#setSummaryMode(boolean)
 	 * @see IParser#setDontEncodeElements(Collection) Can be used to specify these values for an individual parser instance.
+	 * @since 7.4.0
 	 */
 	@Nonnull
 	public ParserOptions setDontEncodeElementsForSummaryMode(@Nullable Collection<String> theDontEncodeElements) {
@@ -314,6 +318,7 @@ public class ParserOptions {
 	/**
 	 * @return Returns the values provided to {@link #setDontEncodeElementsForSummaryMode(Collection)}
 	 * or <code>null</code>
+	 * @since 7.4.0
 	 */
 	@Nullable
 	public Set<String> getDontEncodeElementsForSummaryMode() {
