@@ -479,7 +479,8 @@ public class RDFParser extends BaseParser {
 					}
 					theEncodeContext.pushPath(resourceName, true);
 					IIdType resourceId = processResourceID(resource, theEncodeContext);
-					encodeResourceToRDFStreamWriter(resource, rdfModel, false, resourceId, theEncodeContext, false, null);
+					encodeResourceToRDFStreamWriter(
+							resource, rdfModel, false, resourceId, theEncodeContext, false, null);
 					theEncodeContext.popPath();
 					break;
 				}

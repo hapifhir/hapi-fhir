@@ -182,7 +182,6 @@ public class Parser {
 
 		}
 
-
 		{
 			IBaseResource patient = new Patient();
 
@@ -197,8 +196,7 @@ public class Parser {
 			// Never strip resource reference versions for the following
 			// paths
 			parserOptions.setDontStripVersionsFromReferencesAtPaths(
-				"AuditEvent.entity.reference", "Patient.managingOrganization"
-			);
+					"AuditEvent.entity.reference", "Patient.managingOrganization");
 
 			// Never strip any resource reference versions (setting this
 			// to false would make the setting above redundant since this
@@ -215,6 +213,5 @@ public class Parser {
 			// END SNIPPET: globalParserConfig
 
 		}
-
 	}
 }

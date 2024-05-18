@@ -226,11 +226,11 @@ public class ParserOptions {
 	 * @see IParser#setEncodeElements(Set) Can be used to specify these values for an individual parser instance.
 	 * @since 7.4.0
 	 */
-    @SuppressWarnings("UnusedReturnValue")
+	@SuppressWarnings("UnusedReturnValue")
 	@Nonnull
 	public ParserOptions setEncodeElementsForSummaryMode(@Nonnull String... theEncodeElements) {
 		return setEncodeElementsForSummaryMode(Set.of(theEncodeElements));
-    }
+	}
 
 	/**
 	 * This option specifies one or more elements that should be included when the parser is encoding
@@ -319,5 +319,4 @@ public class ParserOptions {
 	public Set<String> getDontEncodeElementsForSummaryMode() {
 		return myDontEncodeElementsForSummaryMode;
 	}
-
 }

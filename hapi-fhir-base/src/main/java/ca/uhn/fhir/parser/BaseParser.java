@@ -911,7 +911,8 @@ public abstract class BaseParser implements IParser {
 		} else {
 			if (theEncodeContext.myDontEncodeElementPaths != null) {
 				String resourceName = myContext.getResourceType(theResource);
-				if (theEncodeContext.myDontEncodeElementPaths.stream().anyMatch(t -> t.equalsPath(resourceName + ".id"))) {
+				if (theEncodeContext.myDontEncodeElementPaths.stream()
+						.anyMatch(t -> t.equalsPath(resourceName + ".id"))) {
 					retVal = false;
 				} else if (theEncodeContext.myDontEncodeElementPaths.stream().anyMatch(t -> t.equalsPath("*.id"))) {
 					retVal = false;
@@ -937,7 +938,8 @@ public abstract class BaseParser implements IParser {
 	protected boolean shouldEncodePath(IResource theResource, String thePath, EncodeContext theEncodeContext) {
 		if (theEncodeContext.myDontEncodeElementPaths != null) {
 			String resourceName = myContext.getResourceType(theResource);
-			if (theEncodeContext.myDontEncodeElementPaths.stream().anyMatch(t -> t.equalsPath(resourceName + "." + thePath))) {
+			if (theEncodeContext.myDontEncodeElementPaths.stream()
+					.anyMatch(t -> t.equalsPath(resourceName + "." + thePath))) {
 				return false;
 			} else {
 				return theEncodeContext.myDontEncodeElementPaths.stream().noneMatch(t -> t.equalsPath("*." + thePath));
@@ -1037,24 +1039,27 @@ public abstract class BaseParser implements IParser {
 			Collection<String> encodeElements = theParser.myEncodeElements;
 			Collection<String> dontEncodeElements = theParser.myDontEncodeElements;
 			if (isSummaryMode()) {
-				encodeElements = CollectionUtil.nullSafeUnion(encodeElements, theParserOptions.getEncodeElementsForSummaryMode());
-				dontEncodeElements = CollectionUtil.nullSafeUnion(dontEncodeElements, theParserOptions.getDontEncodeElementsForSummaryMode());
+				encodeElements = CollectionUtil.nullSafeUnion(
+						encodeElements, theParserOptions.getEncodeElementsForSummaryMode());
+				dontEncodeElements = CollectionUtil.nullSafeUnion(
+						dontEncodeElements, theParserOptions.getDontEncodeElementsForSummaryMode());
 			}
 
 			if (encodeElements == null || encodeElements.isEmpty()) {
 				myEncodeElementPaths = null;
 			} else {
 				myEncodeElementPaths =
-					encodeElements.stream().map(EncodeContextPath::new).collect(Collectors.toList());
+						encodeElements.stream().map(EncodeContextPath::new).collect(Collectors.toList());
 			}
 			if (dontEncodeElements == null || dontEncodeElements.isEmpty()) {
 				myDontEncodeElementPaths = null;
 			} else {
 				myDontEncodeElementPaths =
-					dontEncodeElements.stream().map(EncodeContextPath::new).collect(Collectors.toList());
+						dontEncodeElements.stream().map(EncodeContextPath::new).collect(Collectors.toList());
 			}
 
-			myEncodeElementsAppliesToResourceTypes = ParserUtil.determineApplicableResourceTypesForTerserPaths(myEncodeElementPaths);
+			myEncodeElementsAppliesToResourceTypes =
+					ParserUtil.determineApplicableResourceTypesForTerserPaths(myEncodeElementPaths);
 		}
 
 		private Map<Key, List<BaseParser.CompositeChildElement>> getCompositeChildrenCache() {

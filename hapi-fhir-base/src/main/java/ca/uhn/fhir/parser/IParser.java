@@ -210,13 +210,13 @@ public interface IParser {
 	 * being "summary elements" will be included.
 	 * <p>
 	 * It is possible to modify the default summary mode element inclusions
-	 * for this parser instance by invoking {@link #setEncodeElements(Set)} 
+	 * for this parser instance by invoking {@link #setEncodeElements(Set)}
 	 * or {@link #setDontEncodeElements(Collection)}. It is also possible to
 	 * modify the default summary mode element inclusions for all parsers
-	 * generated for a given {@link FhirContext} by accessing 
+	 * generated for a given {@link FhirContext} by accessing
 	 * {@link FhirContext#getParserOptions()} followed by
 	 * {@link ParserOptions#setEncodeElementsForSummaryMode(Collection)} and/or
-	 * {@link ParserOptions#setDontEncodeElementsForSummaryMode(Collection)}. 
+	 * {@link ParserOptions#setDontEncodeElementsForSummaryMode(Collection)}.
 	 * </p>
 	 * <p>
 	 * For compatibility reasons with other frameworks, when encoding a
@@ -224,7 +224,7 @@ public interface IParser {
 	 * are always encoded, even though the FHIR Specification does not consider
 	 * them to be summary elements.
 	 * </p>
-	 * 
+	 *
 	 * @return Returns a reference to <code>this</code> parser so that method calls can be chained together
 	 */
 	IParser setSummaryMode(boolean theSummaryMode);
@@ -347,7 +347,6 @@ public interface IParser {
 	default IParser setDontEncodeElements(@Nonnull String... theDontEncodeElements) {
 		return setDontEncodeElements(Set.of(theDontEncodeElements));
 	}
-
 
 	/**
 	 * If provided, specifies the elements which should be encoded, to the exclusion of all others. Valid values for this
@@ -511,5 +510,4 @@ public interface IParser {
 	 * @see ParserOptions
 	 */
 	IParser setDontStripVersionsFromReferencesAtPaths(Collection<String> thePaths);
-
 }

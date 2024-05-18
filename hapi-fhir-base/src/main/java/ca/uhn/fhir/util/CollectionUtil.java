@@ -53,7 +53,8 @@ public class CollectionUtil {
 	 * @since 7.4.0
 	 */
 	@Nonnull
-	public static <T> Collection<T> nullSafeUnion(@Nullable Collection<T> theCollection0, @Nullable Collection<T> theCollection1) {
+	public static <T> Collection<T> nullSafeUnion(
+			@Nullable Collection<T> theCollection0, @Nullable Collection<T> theCollection1) {
 		Collection<T> collection0 = theCollection0;
 		if (collection0 != null && collection0.isEmpty()) {
 			collection0 = null;
@@ -73,5 +74,4 @@ public class CollectionUtil {
 		}
 		return CollectionUtils.union(collection0, collection1);
 	}
-
 }

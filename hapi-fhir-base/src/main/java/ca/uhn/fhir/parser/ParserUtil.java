@@ -13,7 +13,8 @@ public class ParserUtil {
 	/** Non instantiable */
 	private ParserUtil() {}
 
-	public static @Nullable Set<String> determineApplicableResourceTypesForTerserPaths(@Nullable List<EncodeContextPath> encodeElements) {
+	public static @Nullable Set<String> determineApplicableResourceTypesForTerserPaths(
+			@Nullable List<EncodeContextPath> encodeElements) {
 		Set<String> encodeElementsAppliesToResourceTypes = null;
 		if (encodeElements != null) {
 			encodeElementsAppliesToResourceTypes = new HashSet<>();
