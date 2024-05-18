@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 5867
+title: "Previously, when adding multiple resources and defining a golden resource using MDM, the golden resource's tags were removed. This has been fixed"

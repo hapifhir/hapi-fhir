@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 5865
+title: "Moving the Hibernate.Search annotation for text indexing from the lob column to the column added as part of the
+  PostgreSql LOB migration."

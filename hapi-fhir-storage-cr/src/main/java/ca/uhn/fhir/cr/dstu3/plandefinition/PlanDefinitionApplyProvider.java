@@ -88,7 +88,7 @@ public class PlanDefinitionApplyProvider {
 	@Operation(name = ProviderConstants.CR_OPERATION_APPLY, idempotent = true, type = PlanDefinition.class)
 	public IBaseResource apply(
 			@IdParam IdType theId,
-			@OperationParam(name = "planDefinition") org.hl7.fhir.r4.model.PlanDefinition thePlanDefinition,
+			@OperationParam(name = "planDefinition") PlanDefinition thePlanDefinition,
 			@OperationParam(name = "canonical") String theCanonical,
 			@OperationParam(name = "url") String theUrl,
 			@OperationParam(name = "version") String theVersion,
@@ -134,7 +134,7 @@ public class PlanDefinitionApplyProvider {
 
 	@Operation(name = ProviderConstants.CR_OPERATION_APPLY, idempotent = true, type = PlanDefinition.class)
 	public IBaseResource apply(
-			@OperationParam(name = "planDefinition") org.hl7.fhir.r4.model.PlanDefinition thePlanDefinition,
+			@OperationParam(name = "planDefinition") PlanDefinition thePlanDefinition,
 			@OperationParam(name = "canonical") String theCanonical,
 			@OperationParam(name = "url") String theUrl,
 			@OperationParam(name = "version") String theVersion,

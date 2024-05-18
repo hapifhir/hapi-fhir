@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.dao.r5;
 
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.dao.TestDaoSearch;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
@@ -12,6 +13,8 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.HapiExtensions;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.Composition;
 import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.Bundle;
@@ -29,6 +32,7 @@ import org.hl7.fhir.r5.model.SearchParameter;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 
 import jakarta.annotation.Nonnull;
@@ -41,9 +45,10 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-@ContextConfiguration(classes = TestHSearchAddInConfig.NoFT.class)
+@ContextConfiguration(classes = { TestHSearchAddInConfig.NoFT.class, TestDaoSearch.Config.class })
 @SuppressWarnings({"Duplicates"})
 public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 	public static final String PRACTITIONER_PR1 = "Practitioner/PR1";
@@ -54,6 +59,8 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 	public static final String ENCOUNTER_E2 = "Encounter/E2";
 	public static final String ENCOUNTER_E3 = "Encounter/E3";
 	public static final String ORGANIZATION_O1 = "Organization/O1";
+	@Autowired
+	protected TestDaoSearch myTestDaoSearch;
 
 	@Override
 	@BeforeEach
@@ -865,6 +872,47 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		assertEquals(0, countMatches(querySql, "HASH_NORM_PREFIX"), querySql);
 		assertEquals(1, countMatches(querySql, "HASH_IDENTITY"), querySql);
 		assertEquals(1, countMatches(querySql, "HFJ_RES_LINK"), querySql);
+	}
+
+
+	@Test
+	void testChainedSortWithNulls() {
+		final IIdType practitionerId1 = createPractitioner(withFamily("Chan"));
+		final IIdType practitionerId2 = createPractitioner(withFamily("Jones"));
+
+		final String id1 = createPatient(withFamily("Smithy")).getIdPart();
+		final String id2 = createPatient(withFamily("Smithwick"),
+			withReference("generalPractitioner", practitionerId2)).getIdPart();
+		final String id3 = createPatient(
+			withFamily("Smith"),
+			withReference("generalPractitioner", practitionerId1)).getIdPart();
+
+
+		final IBundleProvider iBundleProvider = myTestDaoSearch.searchForBundleProvider("Patient?_total=ACCURATE&_sort=Practitioner:general-practitioner.family");
+		final List<IBaseResource> allResources = iBundleProvider.getAllResources();
+		assertEquals(3, iBundleProvider.size());
+		assertEquals(3, allResources.size());
+
+		final List<String> actualIds = allResources.stream().map(IBaseResource::getIdElement).map(IIdType::getIdPart).toList();
+		assertTrue(actualIds.containsAll(List.of(id1, id2, id3)));
+	}
+
+	@Test
+	void testChainedReverseStringSort() {
+		final IIdType practitionerId = createPractitioner(withFamily("Jones"));
+
+		final String id1 = createPatient(withFamily("Smithy")).getIdPart();
+		final String id2 = createPatient(withFamily("Smithwick")).getIdPart();
+		final String id3 = createPatient(
+			withFamily("Smith"),
+			withReference("generalPractitioner", practitionerId)).getIdPart();
+
+		final IBundleProvider iBundleProvider = myTestDaoSearch.searchForBundleProvider("Patient?_total=ACCURATE&_sort=-Practitioner:general-practitioner.family");
+		assertEquals(3, iBundleProvider.size());
+
+		final List<IBaseResource> allResources = iBundleProvider.getAllResources();
+		final List<String> actualIds = allResources.stream().map(IBaseResource::getIdElement).map(IIdType::getIdPart).toList();
+		assertTrue(actualIds.containsAll(List.of(id3, id2, id1)));
 	}
 
 	/**

@@ -24,6 +24,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
 import ca.uhn.fhir.jpa.search.DeferConceptIndexingRoutingBinder;
 import ca.uhn.fhir.util.ValidateUtil;
+import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -43,12 +44,14 @@ import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+import jakarta.persistence.Transient;
 import jakarta.persistence.UniqueConstraint;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hibernate.Length;
 import org.hibernate.search.engine.backend.types.Projectable;
 import org.hibernate.search.engine.backend.types.Searchable;
 import org.hibernate.search.mapper.pojo.bridge.mapping.annotation.PropertyBinderRef;
@@ -68,6 +71,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.left;
 import static org.apache.commons.lang3.StringUtils.length;
 
@@ -165,14 +170,18 @@ public class TermConcept implements Serializable {
 	@Column(name = "INDEX_STATUS", nullable = true)
 	private Long myIndexStatus;
 
+	@Deprecated(since = "7.2.0")
 	@Lob
 	@Column(name = "PARENT_PIDS", nullable = true)
+	private String myParentPids;
+
 	@FullTextField(
 			name = "myParentPids",
 			searchable = Searchable.YES,
 			projectable = Projectable.YES,
 			analyzer = "conceptParentPidsAnalyzer")
-	private String myParentPids;
+	@Column(name = "PARENT_PIDS_VC", nullable = true, length = Length.LONG32)
+	private String myParentPidsVc;
 
 	@OneToMany(
 			cascade = {},
@@ -182,6 +191,9 @@ public class TermConcept implements Serializable {
 
 	@Column(name = "CODE_SEQUENCE", nullable = true)
 	private Integer mySequence;
+
+	@Transient
+	private boolean mySupportLegacyLob = false;
 
 	public TermConcept() {
 		super();
@@ -357,7 +369,7 @@ public class TermConcept implements Serializable {
 	}
 
 	public String getParentPidsAsString() {
-		return myParentPids;
+		return nonNull(myParentPidsVc) ? myParentPidsVc : myParentPids;
 	}
 
 	public List<TermConceptParentChildLink> getParents() {
@@ -437,13 +449,17 @@ public class TermConcept implements Serializable {
 	@PreUpdate
 	@PrePersist
 	public void prePersist() {
-		if (myParentPids == null) {
+		if (isNull(myParentPids) && isNull(myParentPidsVc)) {
 			Set<Long> parentPids = new HashSet<>();
 			TermConcept entity = this;
 			parentPids(entity, parentPids);
 			entity.setParentPids(parentPids);
 
 			ourLog.trace("Code {}/{} has parents {}", entity.getId(), entity.getCode(), entity.getParentPidsAsString());
+		}
+
+		if (!mySupportLegacyLob) {
+			clearParentPidsLob();
 		}
 	}
 
@@ -464,6 +480,7 @@ public class TermConcept implements Serializable {
 	}
 
 	public TermConcept setParentPids(String theParentPids) {
+		myParentPidsVc = theParentPids;
 		myParentPids = theParentPids;
 		return this;
 	}
@@ -504,5 +521,18 @@ public class TermConcept implements Serializable {
 	 */
 	public List<TermConcept> getChildCodes() {
 		return getChildren().stream().map(TermConceptParentChildLink::getChild).collect(Collectors.toList());
+	}
+
+	public void flagForLegacyLobSupport(boolean theSupportLegacyLob) {
+		mySupportLegacyLob = theSupportLegacyLob;
+	}
+
+	private void clearParentPidsLob() {
+		myParentPids = null;
+	}
+
+	@VisibleForTesting
+	public boolean hasParentPidsLobForTesting() {
+		return nonNull(myParentPids);
 	}
 }

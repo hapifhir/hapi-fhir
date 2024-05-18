@@ -25,6 +25,7 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
@@ -99,6 +100,13 @@ public class BulkDataExportProvider {
 	public static final String UNSUPPORTED_BINARY_TYPE = "Binary";
 
 	private static final Logger ourLog = getLogger(BulkDataExportProvider.class);
+	private static final Set<FhirVersionEnum> PATIENT_COMPARTMENT_FHIR_VERSIONS_SUPPORT_DEVICE = Set.of(
+			FhirVersionEnum.DSTU2,
+			FhirVersionEnum.DSTU2_1,
+			FhirVersionEnum.DSTU2_HL7ORG,
+			FhirVersionEnum.DSTU3,
+			FhirVersionEnum.R4,
+			FhirVersionEnum.R4B);
 
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
@@ -161,17 +169,38 @@ public class BulkDataExportProvider {
 	}
 
 	private void startJob(ServletRequestDetails theRequestDetails, BulkExportJobParameters theOptions) {
+		// parameter massaging
+		expandParameters(theRequestDetails, theOptions);
+
 		// permission check
-		HookParams params = (new HookParams())
+		HookParams initiateBulkExportHookParams = (new HookParams())
 				.add(BulkExportJobParameters.class, theOptions)
 				.add(RequestDetails.class, theRequestDetails)
 				.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
 		CompositeInterceptorBroadcaster.doCallHooks(
-				this.myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_INITIATE_BULK_EXPORT, params);
+				this.myInterceptorBroadcaster,
+				theRequestDetails,
+				Pointcut.STORAGE_INITIATE_BULK_EXPORT,
+				initiateBulkExportHookParams);
 
 		// get cache boolean
 		boolean useCache = shouldUseCache(theRequestDetails);
 
+		// start job
+		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
+		startRequest.setParameters(theOptions);
+		startRequest.setUseCache(useCache);
+		startRequest.setJobDefinitionId(Batch2JobDefinitionConstants.BULK_EXPORT);
+		Batch2JobStartResponse response = myJobCoordinator.startInstance(theRequestDetails, startRequest);
+
+		writePollingLocationToResponseHeaders(theRequestDetails, response.getInstanceId());
+	}
+
+	/**
+	 * This method changes any parameters (limiting the _type parameter, for instance)
+	 * so that later steps in the export do not have to handle them.
+	 */
+	private void expandParameters(ServletRequestDetails theRequestDetails, BulkExportJobParameters theOptions) {
 		// Set the original request URL as part of the job information, as this is used in the poll-status-endpoint, and
 		// is needed for the report.
 		theOptions.setOriginalRequestUrl(theRequestDetails.getCompleteUrl());
@@ -190,14 +219,16 @@ public class BulkDataExportProvider {
 		myRequestPartitionHelperService.validateHasPartitionPermissions(theRequestDetails, "Binary", partitionId);
 		theOptions.setPartitionId(partitionId);
 
-		// start job
-		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
-		startRequest.setParameters(theOptions);
-		startRequest.setUseCache(useCache);
-		startRequest.setJobDefinitionId(Batch2JobDefinitionConstants.BULK_EXPORT);
-		Batch2JobStartResponse response = myJobCoordinator.startInstance(theRequestDetails, startRequest);
-
-		writePollingLocationToResponseHeaders(theRequestDetails, response.getInstanceId());
+		// call hook so any other parameter manipulation can be done
+		HookParams preInitiateBulkExportHookParams = new HookParams();
+		preInitiateBulkExportHookParams.add(BulkExportJobParameters.class, theOptions);
+		preInitiateBulkExportHookParams.add(RequestDetails.class, theRequestDetails);
+		preInitiateBulkExportHookParams.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
+		CompositeInterceptorBroadcaster.doCallHooks(
+				myInterceptorBroadcaster,
+				theRequestDetails,
+				Pointcut.STORAGE_PRE_INITIATE_BULK_EXPORT,
+				preInitiateBulkExportHookParams);
 	}
 
 	private boolean shouldUseCache(ServletRequestDetails theRequestDetails) {
@@ -321,10 +352,18 @@ public class BulkDataExportProvider {
 	}
 
 	private Set<String> getPatientCompartmentResources() {
+		return getPatientCompartmentResources(myFhirContext);
+	}
+
+	@VisibleForTesting
+	Set<String> getPatientCompartmentResources(FhirContext theFhirContext) {
 		if (myCompartmentResources == null) {
 			myCompartmentResources =
-					new HashSet<>(SearchParameterUtil.getAllResourceTypesThatAreInPatientCompartment(myFhirContext));
-			myCompartmentResources.add("Device");
+					new HashSet<>(SearchParameterUtil.getAllResourceTypesThatAreInPatientCompartment(theFhirContext));
+			if (isDeviceResourceSupportedForPatientCompartmentForFhirVersion(
+					theFhirContext.getVersion().getVersion())) {
+				myCompartmentResources.add("Device");
+			}
 		}
 		return myCompartmentResources;
 	}
@@ -779,5 +818,10 @@ public class BulkDataExportProvider {
 		if (!prefer.getRespondAsync()) {
 			throw new InvalidRequestException(Msg.code(513) + "Must request async processing for " + theOperationName);
 		}
+	}
+
+	private static boolean isDeviceResourceSupportedForPatientCompartmentForFhirVersion(
+			FhirVersionEnum theFhirVersionEnum) {
+		return PATIENT_COMPARTMENT_FHIR_VERSIONS_SUPPORT_DEVICE.contains(theFhirVersionEnum);
 	}
 }

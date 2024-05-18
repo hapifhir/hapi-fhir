@@ -56,7 +56,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.awt.*;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -129,7 +128,7 @@ public class BinaryStorageInterceptor<T extends IPrimitiveType<byte[]>> {
 				.collect(Collectors.toList());
 
 		for (String next : attachmentIds) {
-			myBinaryStorageSvc.expungeBlob(theResource.getIdElement(), next);
+			myBinaryStorageSvc.expungeBinaryContent(theResource.getIdElement(), next);
 			theCounter.incrementAndGet();
 
 			ourLog.info(
@@ -232,38 +231,39 @@ public class BinaryStorageInterceptor<T extends IPrimitiveType<byte[]>> {
 				long nextPayloadLength = data.length;
 				String nextContentType = nextTarget.getContentType();
 				boolean shouldStoreBlob =
-						myBinaryStorageSvc.shouldStoreBlob(nextPayloadLength, resourceId, nextContentType);
+						myBinaryStorageSvc.shouldStoreBinaryContent(nextPayloadLength, resourceId, nextContentType);
 				if (shouldStoreBlob) {
 
-					String newBlobId;
+					String newBinaryContentId;
 					if (thePointcut == Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED) {
 						ByteArrayInputStream inputStream = new ByteArrayInputStream(data);
-						StoredDetails storedDetails = myBinaryStorageSvc.storeBlob(
+						StoredDetails storedDetails = myBinaryStorageSvc.storeBinaryContent(
 								resourceId, null, nextContentType, inputStream, theRequestDetails);
-						newBlobId = storedDetails.getBlobId();
+						newBinaryContentId = storedDetails.getBinaryContentId();
 					} else {
 						assert thePointcut == Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED : thePointcut.name();
-						newBlobId = myBinaryStorageSvc.newBlobId();
+						newBinaryContentId = myBinaryStorageSvc.newBinaryContentId();
 
-						String prefix = invokeAssignBlobPrefix(theRequestDetails, theResource);
+						String prefix = invokeAssignBinaryContentPrefix(theRequestDetails, theResource);
 						if (isNotBlank(prefix)) {
-							newBlobId = prefix + newBlobId;
+							newBinaryContentId = prefix + newBinaryContentId;
 						}
-						if (myBinaryStorageSvc.isValidBlobId(newBlobId)) {
+						if (myBinaryStorageSvc.isValidBinaryContentId(newBinaryContentId)) {
 							List<DeferredBinaryTarget> deferredBinaryTargets =
 									getOrCreateDeferredBinaryStorageList(theResource);
 							DeferredBinaryTarget newDeferredBinaryTarget =
-									new DeferredBinaryTarget(newBlobId, nextTarget, data);
+									new DeferredBinaryTarget(newBinaryContentId, nextTarget, data);
 							deferredBinaryTargets.add(newDeferredBinaryTarget);
 							newDeferredBinaryTarget.setBlobIdPrefixHookApplied(true);
 						} else {
 							throw new InternalErrorException(Msg.code(2341)
-									+ "Invalid blob ID for backing storage service.[blobId=" + newBlobId + ",service="
+									+ "Invalid binaryContent ID for backing storage service.[binaryContentId="
+									+ newBinaryContentId + ",service="
 									+ myBinaryStorageSvc.getClass().getName() + "]");
 						}
 					}
 
-					myBinaryAccessProvider.replaceDataWithExtension(nextTarget, newBlobId);
+					myBinaryAccessProvider.replaceDataWithExtension(nextTarget, newBinaryContentId);
 				}
 			}
 		}
@@ -273,19 +273,32 @@ public class BinaryStorageInterceptor<T extends IPrimitiveType<byte[]>> {
 	 * This invokes the {@link Pointcut#STORAGE_BINARY_ASSIGN_BLOB_ID_PREFIX} hook and returns the prefix to use for the blob ID, or null if there are no implementers.
 	 * @return A string, which will be used to prefix the blob ID. May be null.
 	 */
-	private String invokeAssignBlobPrefix(RequestDetails theRequest, IBaseResource theResource) {
-		if (!CompositeInterceptorBroadcaster.hasHooks(
-				Pointcut.STORAGE_BINARY_ASSIGN_BLOB_ID_PREFIX, myInterceptorBroadcaster, theRequest)) {
+	private String invokeAssignBinaryContentPrefix(RequestDetails theRequest, IBaseResource theResource) {
+		// TODO: to be removed when pointcut STORAGE_BINARY_ASSIGN_BLOB_ID_PREFIX has exceeded the grace period
+		boolean hasStorageBinaryAssignBlobIdPrefixHooks = CompositeInterceptorBroadcaster.hasHooks(
+				Pointcut.STORAGE_BINARY_ASSIGN_BLOB_ID_PREFIX, myInterceptorBroadcaster, theRequest);
+
+		boolean hasStorageBinaryAssignBinaryContentIdPrefixHooks = CompositeInterceptorBroadcaster.hasHooks(
+				Pointcut.STORAGE_BINARY_ASSIGN_BINARY_CONTENT_ID_PREFIX, myInterceptorBroadcaster, theRequest);
+
+		if (!(hasStorageBinaryAssignBlobIdPrefixHooks || hasStorageBinaryAssignBinaryContentIdPrefixHooks)) {
 			return null;
 		}
 
 		HookParams params =
 				new HookParams().add(RequestDetails.class, theRequest).add(IBaseResource.class, theResource);
 
-		BaseBinaryStorageSvcImpl.setBlobIdPrefixApplied(theRequest);
+		BaseBinaryStorageSvcImpl.setBinaryContentIdPrefixApplied(theRequest);
+
+		Pointcut pointcutToInvoke = Pointcut.STORAGE_BINARY_ASSIGN_BINARY_CONTENT_ID_PREFIX;
+
+		// TODO: to be removed when pointcut STORAGE_BINARY_ASSIGN_BLOB_ID_PREFIX has exceeded the grace period
+		if (hasStorageBinaryAssignBlobIdPrefixHooks) {
+			pointcutToInvoke = Pointcut.STORAGE_BINARY_ASSIGN_BLOB_ID_PREFIX;
+		}
 
 		return (String) CompositeInterceptorBroadcaster.doCallHooksAndReturnObject(
-				myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_BINARY_ASSIGN_BLOB_ID_PREFIX, params);
+				myInterceptorBroadcaster, theRequest, pointcutToInvoke, params);
 	}
 
 	@Nonnull
@@ -317,7 +330,7 @@ public class BinaryStorageInterceptor<T extends IPrimitiveType<byte[]>> {
 				InputStream dataStream = next.getDataStream();
 				String contentType = target.getContentType();
 				RequestDetails requestDetails = initRequestDetails(next);
-				myBinaryStorageSvc.storeBlob(resourceId, blobId, contentType, dataStream, requestDetails);
+				myBinaryStorageSvc.storeBinaryContent(resourceId, blobId, contentType, dataStream, requestDetails);
 			}
 		}
 	}
@@ -325,7 +338,7 @@ public class BinaryStorageInterceptor<T extends IPrimitiveType<byte[]>> {
 	private RequestDetails initRequestDetails(DeferredBinaryTarget theDeferredBinaryTarget) {
 		ServletRequestDetails requestDetails = new ServletRequestDetails();
 		if (theDeferredBinaryTarget.isBlobIdPrefixHookApplied()) {
-			BaseBinaryStorageSvcImpl.setBlobIdPrefixApplied(requestDetails);
+			BaseBinaryStorageSvcImpl.setBinaryContentIdPrefixApplied(requestDetails);
 		}
 		return requestDetails;
 	}
@@ -374,14 +387,15 @@ public class BinaryStorageInterceptor<T extends IPrimitiveType<byte[]>> {
 			Optional<String> attachmentId = nextTarget.getAttachmentId();
 			if (attachmentId.isPresent()) {
 
-				StoredDetails blobDetails = myBinaryStorageSvc.fetchBlobDetails(resourceId, attachmentId.get());
+				StoredDetails blobDetails =
+						myBinaryStorageSvc.fetchBinaryContentDetails(resourceId, attachmentId.get());
 				if (blobDetails == null) {
 					String msg = myCtx.getLocalizer().getMessage(BinaryAccessProvider.class, "unknownBlobId");
 					throw new InvalidRequestException(Msg.code(1330) + msg);
 				}
 
 				if ((theCumulativeInflatedBytes + blobDetails.getBytes()) < myAutoInflateBinariesMaximumBytes) {
-					byte[] bytes = myBinaryStorageSvc.fetchBlob(resourceId, attachmentId.get());
+					byte[] bytes = myBinaryStorageSvc.fetchBinaryContent(resourceId, attachmentId.get());
 					nextTarget.setData(bytes);
 					theCumulativeInflatedBytes += blobDetails.getBytes();
 				}

@@ -127,12 +127,18 @@ public class MatchUrlService {
 						&& !paramList.isEmpty()
 						&& !paramList.get(0).isEmpty()) {
 					String totalModeEnumStr = paramList.get(0).get(0);
-					try {
-						paramMap.setSearchTotalMode(SearchTotalModeEnum.valueOf(totalModeEnumStr));
-					} catch (IllegalArgumentException e) {
-						throw new InvalidRequestException(Msg.code(2078) + "Invalid "
-								+ Constants.PARAM_SEARCH_TOTAL_MODE + " value: " + totalModeEnumStr);
+					SearchTotalModeEnum searchTotalMode = SearchTotalModeEnum.fromCode(totalModeEnumStr);
+					if (searchTotalMode == null) {
+						// We had an oops here supporting the UPPER CASE enum instead of the FHIR code for _total.
+						// Keep supporting it in case someone is using it.
+						try {
+							paramMap.setSearchTotalMode(SearchTotalModeEnum.valueOf(totalModeEnumStr));
+						} catch (IllegalArgumentException e) {
+							throw new InvalidRequestException(Msg.code(2078) + "Invalid "
+									+ Constants.PARAM_SEARCH_TOTAL_MODE + " value: " + totalModeEnumStr);
+						}
 					}
+					paramMap.setSearchTotalMode(searchTotalMode);
 				}
 			} else if (Constants.PARAM_OFFSET.equals(nextParamName)) {
 				if (paramList != null

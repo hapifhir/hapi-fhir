@@ -1,3 +1,22 @@
+/*-
+ * #%L
+ * HAPI FHIR JPA Server - Batch2 specification tests
+ * %%
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package ca.uhn.hapi.fhir.batch2.test;
 
 import ca.uhn.fhir.batch2.api.IJobPersistence;
@@ -7,6 +26,8 @@ import ca.uhn.fhir.batch2.maintenance.JobInstanceProcessor;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
+import ca.uhn.fhir.batch2.model.WorkChunk;
+import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -15,6 +36,9 @@ import org.slf4j.LoggerFactory;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.emptyString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -22,6 +46,31 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 public interface IInstanceStateTransitions extends IWorkChunkCommon, WorkChunkTestConstants {
 	Logger ourLog = LoggerFactory.getLogger(IInstanceStateTransitions.class);
+
+	@Test
+	default void createInstance_createsInQueuedWithChunkInReady() {
+		// given
+		JobDefinition<?> jd = getTestManager().withJobDefinition(false);
+
+		// when
+		IJobPersistence.CreateResult createResult =
+			getTestManager().newTxTemplate().execute(status->
+				getTestManager().getSvc().onCreateWithFirstChunk(jd, "{}"));
+
+		// then
+		ourLog.info("job and chunk created {}", createResult);
+		assertNotNull(createResult);
+		assertThat(createResult.jobInstanceId, not(emptyString()));
+		assertThat(createResult.workChunkId, not(emptyString()));
+
+		JobInstance jobInstance = getTestManager().freshFetchJobInstance(createResult.jobInstanceId);
+		assertThat(jobInstance.getStatus(), equalTo(StatusEnum.QUEUED));
+		assertThat(jobInstance.getParameters(), equalTo("{}"));
+
+		WorkChunk firstChunk = getTestManager().freshFetchWorkChunk(createResult.workChunkId);
+		assertThat(firstChunk.getStatus(), equalTo(WorkChunkStatusEnum.READY));
+		assertNull(firstChunk.getData(), "First chunk data is null - only uses parameters");
+	}
 
 	@Test
 	default void testCreateInstance_firstChunkDequeued_movesToInProgress() {

@@ -31,6 +31,7 @@ public abstract class BaseTag extends BasePartitionable implements Serializable 
 
 	private static final long serialVersionUID = 1L;
 
+	// many baseTags -> one tag definition
 	@ManyToOne(cascade = {})
 	@JoinColumn(name = "TAG_ID", nullable = false)
 	private TagDefinition myTag;

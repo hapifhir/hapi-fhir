@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.entity;
 
 import ca.uhn.fhir.util.ValidateUtil;
+import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -41,6 +42,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hibernate.Length;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.search.engine.backend.types.Projectable;
 import org.hibernate.search.engine.backend.types.Searchable;
@@ -52,6 +54,7 @@ import org.hibernate.validator.constraints.NotBlank;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 
+import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.left;
 import static org.apache.commons.lang3.StringUtils.length;
 
@@ -68,7 +71,7 @@ import static org.apache.commons.lang3.StringUtils.length;
 public class TermConceptProperty implements Serializable {
 	public static final int MAX_PROPTYPE_ENUM_LENGTH = 6;
 	private static final long serialVersionUID = 1L;
-	private static final int MAX_LENGTH = 500;
+	public static final int MAX_LENGTH = 500;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(
@@ -106,9 +109,13 @@ public class TermConceptProperty implements Serializable {
 	@GenericField(name = "myValueString", searchable = Searchable.YES)
 	private String myValue;
 
+	@Deprecated(since = "7.2.0")
 	@Column(name = "PROP_VAL_LOB")
 	@Lob()
 	private byte[] myValueLob;
+
+	@Column(name = "PROP_VAL_BIN", nullable = true, length = Length.LONG32)
+	private byte[] myValueBin;
 
 	@Enumerated(EnumType.ORDINAL)
 	@Column(name = "PROP_TYPE", nullable = false, length = MAX_PROPTYPE_ENUM_LENGTH)
@@ -196,8 +203,8 @@ public class TermConceptProperty implements Serializable {
 	 * property, and the code for a {@link TermConceptPropertyTypeEnum#CODING coding} property.
 	 */
 	public String getValue() {
-		if (hasValueLob()) {
-			return getValueLobAsString();
+		if (hasValueBin()) {
+			return getValueBinAsString();
 		}
 		return myValue;
 	}
@@ -208,36 +215,41 @@ public class TermConceptProperty implements Serializable {
 	 */
 	public TermConceptProperty setValue(String theValue) {
 		if (theValue.length() > MAX_LENGTH) {
-			setValueLob(theValue);
+			setValueBin(theValue);
 		} else {
 			myValueLob = null;
+			myValueBin = null;
 		}
 		myValue = left(theValue, MAX_LENGTH);
 		return this;
 	}
 
-	public boolean hasValueLob() {
+	public boolean hasValueBin() {
+		if (myValueBin != null && myValueBin.length > 0) {
+			return true;
+		}
+
 		if (myValueLob != null && myValueLob.length > 0) {
 			return true;
 		}
 		return false;
 	}
 
-	public byte[] getValueLob() {
-		return myValueLob;
-	}
-
-	public TermConceptProperty setValueLob(byte[] theValueLob) {
-		myValueLob = theValueLob;
+	public TermConceptProperty setValueBin(byte[] theValueBin) {
+		myValueBin = theValueBin;
+		myValueLob = theValueBin;
 		return this;
 	}
 
-	public TermConceptProperty setValueLob(String theValueLob) {
-		myValueLob = theValueLob.getBytes(StandardCharsets.UTF_8);
-		return this;
+	public TermConceptProperty setValueBin(String theValueBin) {
+		return setValueBin(theValueBin.getBytes(StandardCharsets.UTF_8));
 	}
 
-	public String getValueLobAsString() {
+	public String getValueBinAsString() {
+		if (myValueBin != null && myValueBin.length > 0) {
+			return new String(myValueBin, StandardCharsets.UTF_8);
+		}
+
 		return new String(myValueLob, StandardCharsets.UTF_8);
 	}
 
@@ -294,5 +306,31 @@ public class TermConceptProperty implements Serializable {
 
 	public Long getPid() {
 		return myId;
+	}
+
+	public void performLegacyLobSupport(boolean theSupportLegacyLob) {
+		if (!theSupportLegacyLob) {
+			myValueLob = null;
+		}
+	}
+
+	@VisibleForTesting
+	public boolean hasValueBlobForTesting() {
+		return nonNull(myValueLob);
+	}
+
+	@VisibleForTesting
+	public void setValueBlobForTesting(byte[] theValueLob) {
+		myValueLob = theValueLob;
+	}
+
+	@VisibleForTesting
+	public boolean hasValueBinForTesting() {
+		return nonNull(myValueBin);
+	}
+
+	@VisibleForTesting
+	public void setValueBinForTesting(byte[] theValuebin) {
+		myValueBin = theValuebin;
 	}
 }

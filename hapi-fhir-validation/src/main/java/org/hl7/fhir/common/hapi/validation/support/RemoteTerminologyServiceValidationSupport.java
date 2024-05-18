@@ -216,7 +216,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 					ParametersUtil.addParameterToParametersString(fhirContext, params, "language", displayLanguage);
 				}
 				for (String propertyName : theLookupCodeRequest.getPropertyNames()) {
-					ParametersUtil.addParameterToParametersString(fhirContext, params, "property", propertyName);
+					ParametersUtil.addParameterToParametersCode(fhirContext, params, "property", propertyName);
 				}
 				Class<? extends IBaseResource> codeSystemClass =
 						myCtx.getResourceDefinition("CodeSystem").getImplementingClass();
@@ -229,7 +229,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 				if (outcome != null && !outcome.isEmpty()) {
 					switch (fhirVersion) {
 						case DSTU3:
-							return generateLookupCodeResultDSTU3(
+							return generateLookupCodeResultDstu3(
 									code, system, (org.hl7.fhir.dstu3.model.Parameters) outcome);
 						case R4:
 							return generateLookupCodeResultR4(code, system, (Parameters) outcome);
@@ -243,10 +243,10 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 		return null;
 	}
 
-	private LookupCodeResult generateLookupCodeResultDSTU3(
+	private LookupCodeResult generateLookupCodeResultDstu3(
 			String theCode, String theSystem, org.hl7.fhir.dstu3.model.Parameters outcomeDSTU3) {
 		// NOTE: I wanted to put all of this logic into the IValidationSupport Class, but it would've required adding
-		//       several new dependencies on version-specific libraries and that is explicitly forbidden (see comment in
+		// several new dependencies on version-specific libraries and that is explicitly forbidden (see comment in
 		// POM).
 		LookupCodeResult result = new LookupCodeResult();
 		result.setSearchedForCode(theCode);
@@ -257,13 +257,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 			String parameterTypeAsString = Objects.toString(parameterComponent.getValue(), null);
 			switch (parameterComponent.getName()) {
 				case "property":
-					org.hl7.fhir.dstu3.model.Property part = parameterComponent.getChildByName("part");
-					// The assumption here is that we may only have 2 elements in this part, and if so, these 2 will be
-					// saved
-					if (part == null || part.getValues().size() < 2) {
-						continue;
-					}
-					BaseConceptProperty conceptProperty = createBaseConceptPropertyDstu3(part.getValues());
+					BaseConceptProperty conceptProperty = createConceptPropertyDstu3(parameterComponent);
 					if (conceptProperty != null) {
 						result.getProperties().add(conceptProperty);
 					}
@@ -289,36 +283,47 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 		return result;
 	}
 
-	private static BaseConceptProperty createBaseConceptPropertyDstu3(List<org.hl7.fhir.dstu3.model.Base> theValues) {
-		org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent part1 =
-				(org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent) theValues.get(0);
-		String propertyName = ((org.hl7.fhir.dstu3.model.CodeType) part1.getValue()).getValue();
+	private static BaseConceptProperty createConceptPropertyDstu3(
+			org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent theParameterComponent) {
+		org.hl7.fhir.dstu3.model.Property property = theParameterComponent.getChildByName("part");
 
-		BaseConceptProperty conceptProperty = null;
-		org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent part2 =
-				(org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent) theValues.get(1);
+		// The assumption here is that we may at east 2 elements in this part
+		if (property == null || property.getValues().size() < 2) {
+			return null;
+		}
 
-		org.hl7.fhir.dstu3.model.Type value = part2.getValue();
-		if (value == null) {
-			return conceptProperty;
+		List<org.hl7.fhir.dstu3.model.Base> values = property.getValues();
+		org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent firstPart =
+				(org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent) values.get(0);
+		String propertyName = ((org.hl7.fhir.dstu3.model.CodeType) firstPart.getValue()).getValue();
+
+		org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent secondPart =
+				(org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent) values.get(1);
+		org.hl7.fhir.dstu3.model.Type value = secondPart.getValue();
+
+		if (value != null) {
+			return createConceptPropertyDstu3(propertyName, value);
 		}
-		String fhirType = value.fhirType();
-		switch (fhirType) {
-			case TYPE_STRING:
-				org.hl7.fhir.dstu3.model.StringType stringType = (org.hl7.fhir.dstu3.model.StringType) part2.getValue();
-				conceptProperty = new StringConceptProperty(propertyName, stringType.getValue());
-				break;
-			case TYPE_CODING:
-				org.hl7.fhir.dstu3.model.Coding coding = (org.hl7.fhir.dstu3.model.Coding) part2.getValue();
-				conceptProperty = new CodingConceptProperty(
-						propertyName, coding.getSystem(), coding.getCode(), coding.getDisplay());
-				break;
-				// TODO: add other property types as per FHIR spec https://github.com/hapifhir/hapi-fhir/issues/5699
-			default:
-				// other types will not fail for Remote Terminology
-				conceptProperty = new StringConceptProperty(propertyName, value.toString());
+
+		String groupName = secondPart.getName();
+		if (!"subproperty".equals(groupName)) {
+			return null;
 		}
-		return conceptProperty;
+
+		// handle property group (a property containing sub-properties)
+		GroupConceptProperty groupConceptProperty = new GroupConceptProperty(propertyName);
+
+		// we already retrieved the property name (group name) as first element, next will be the sub-properties.
+		// there is no dedicated value for a property group as it is an aggregate
+		for (int i = 1; i < values.size(); i++) {
+			org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent nextPart =
+					(org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent) values.get(i);
+			BaseConceptProperty subProperty = createConceptPropertyDstu3(nextPart);
+			if (subProperty != null) {
+				groupConceptProperty.addSubProperty(subProperty);
+			}
+		}
+		return groupConceptProperty;
 	}
 
 	public static BaseConceptProperty createConceptProperty(final String theName, final IBaseDatatype theValue) {
@@ -396,13 +401,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 			String parameterTypeAsString = Objects.toString(parameterComponent.getValue(), null);
 			switch (parameterComponent.getName()) {
 				case "property":
-					Property part = parameterComponent.getChildByName("part");
-					// The assumption here is that we may only have 2 elements in this part, and if so, these 2 will be
-					// saved
-					if (part == null || part.getValues().size() < 2) {
-						continue;
-					}
-					BaseConceptProperty conceptProperty = createBaseConceptPropertyR4(part.getValues());
+					BaseConceptProperty conceptProperty = createConceptPropertyR4(parameterComponent);
 					if (conceptProperty != null) {
 						result.getProperties().add(conceptProperty);
 					}
@@ -428,34 +427,43 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 		return result;
 	}
 
-	private static BaseConceptProperty createBaseConceptPropertyR4(List<Base> values) {
-		ParametersParameterComponent part1 = (ParametersParameterComponent) values.get(0);
-		String propertyName = ((CodeType) part1.getValue()).getValue();
+	private static BaseConceptProperty createConceptPropertyR4(ParametersParameterComponent thePropertyComponent) {
+		Property property = thePropertyComponent.getChildByName("part");
 
-		ParametersParameterComponent part2 = (ParametersParameterComponent) values.get(1);
-
-		Type value = part2.getValue();
-		if (value == null) {
+		// The assumption here is that we may at east 2 elements in this part
+		if (property == null || property.getValues().size() < 2) {
 			return null;
 		}
-		BaseConceptProperty conceptProperty;
-		String fhirType = value.fhirType();
-		switch (fhirType) {
-			case IValidationSupport.TYPE_STRING:
-				StringType stringType = (StringType) part2.getValue();
-				conceptProperty = new StringConceptProperty(propertyName, stringType.getValue());
-				break;
-			case IValidationSupport.TYPE_CODING:
-				Coding coding = (Coding) part2.getValue();
-				conceptProperty = new CodingConceptProperty(
-						propertyName, coding.getSystem(), coding.getCode(), coding.getDisplay());
-				break;
-				// TODO: add other property types as per FHIR spec https://github.com/hapifhir/hapi-fhir/issues/5699
-			default:
-				// other types will not fail for Remote Terminology
-				conceptProperty = new StringConceptProperty(propertyName, value.toString());
+
+		List<Base> values = property.getValues();
+		ParametersParameterComponent firstPart = (ParametersParameterComponent) values.get(0);
+		String propertyName = ((CodeType) firstPart.getValue()).getValue();
+
+		ParametersParameterComponent secondPart = (ParametersParameterComponent) values.get(1);
+		Type value = secondPart.getValue();
+
+		if (value != null) {
+			return createConceptPropertyR4(propertyName, value);
 		}
-		return conceptProperty;
+
+		String groupName = secondPart.getName();
+		if (!"subproperty".equals(groupName)) {
+			return null;
+		}
+
+		// handle property group (a property containing sub-properties)
+		GroupConceptProperty groupConceptProperty = new GroupConceptProperty(propertyName);
+
+		// we already retrieved the property name (group name) as first element, next will be the sub-properties.
+		// there is no dedicated value for a property group as it is an aggregate
+		for (int i = 1; i < values.size(); i++) {
+			ParametersParameterComponent nextPart = (ParametersParameterComponent) values.get(i);
+			BaseConceptProperty subProperty = createConceptPropertyR4(nextPart);
+			if (subProperty != null) {
+				groupConceptProperty.addSubProperty(subProperty);
+			}
+		}
+		return groupConceptProperty;
 	}
 
 	private static BaseConceptProperty createConceptPropertyR4(final String theName, final Type theValue) {
