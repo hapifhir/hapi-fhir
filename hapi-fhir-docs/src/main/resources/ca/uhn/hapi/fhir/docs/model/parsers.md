@@ -42,7 +42,7 @@ There are plenty of other options too, that can be used to control the output by
 
 ## Summary Mode
 
-For each resource type, the FHIR specification defines a collection of elements which are considered "summary elements". These are marked on the individual resource views using a Sigma (SIGMA) symbol next to the element names. See the [Patient Resource Definition](https://hl7.org/fhir/patient.html) for an example, looking for
+For each resource type, the FHIR specification defines a collection of elements which are considered "summary elements". These are marked on the individual resource views using a Sigma (&Sigma;) symbol next to the element names. See the [Patient Resource Definition](https://hl7.org/fhir/patient.html) for an example, looking for
 this symbol on the page.
 
 If the parser is configured as shown below, only the summary mode elements will be included in the encoded resource. 

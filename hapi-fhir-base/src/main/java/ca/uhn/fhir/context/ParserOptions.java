@@ -210,11 +210,45 @@ public class ParserOptions {
 		return this;
 	}
 
+	/**
+	 * This option specifies one or more elements that should be included when the parser is encoding
+	 * a resource in {@link IParser#setSummaryMode(boolean) summary mode}, even if the element is not
+	 * a part of the base FHIR specification's list of summary elements. Examples of valid values
+	 * include:
+	 * <ul>
+	 * <li><b>Patient.maritalStatus</b> - Encode the entire maritalStatus CodeableConcept, even though Patient.maritalStatus is not a summary element</li>
+	 * <li><b>Patient.maritalStatus.text</b> - Encode only the text component of the patient's maritalStatus</li>
+	 * <li><b>*.text</b> - Encode the text element on any resource (only the very first position may contain a
+	 * wildcard)</li>
+	 * </ul>
+	 *
+	 * @see IParser#setSummaryMode(boolean)
+	 * @see IParser#setEncodeElements(Set) Can be used to specify these values for an individual parser instance.
+	 * @since 7.4.0
+	 */
     @SuppressWarnings("UnusedReturnValue")
+	@Nonnull
 	public ParserOptions setEncodeElementsForSummaryMode(@Nonnull String... theEncodeElements) {
 		return setEncodeElementsForSummaryMode(Set.of(theEncodeElements));
     }
 
+	/**
+	 * This option specifies one or more elements that should be included when the parser is encoding
+	 * a resource in {@link IParser#setSummaryMode(boolean) summary mode}, even if the element is not
+	 * a part of the base FHIR specification's list of summary elements. Examples of valid values
+	 * include:
+	 * <ul>
+	 * <li><b>Patient.maritalStatus</b> - Encode the entire maritalStatus CodeableConcept, even though Patient.maritalStatus is not a summary element</li>
+	 * <li><b>Patient.maritalStatus.text</b> - Encode only the text component of the patient's maritalStatus</li>
+	 * <li><b>*.text</b> - Encode the text element on any resource (only the very first position may contain a
+	 * wildcard)</li>
+	 * </ul>
+	 *
+	 * @see IParser#setSummaryMode(boolean)
+	 * @see IParser#setEncodeElements(Set) Can be used to specify these values for an individual parser instance.
+	 * @since 7.4.0
+	 */
+	@Nonnull
 	public ParserOptions setEncodeElementsForSummaryMode(@Nullable Collection<String> theEncodeElements) {
 		Set<String> encodeElements = null;
 		if (theEncodeElements != null && !theEncodeElements.isEmpty()) {
@@ -224,15 +258,50 @@ public class ParserOptions {
 		return this;
 	}
 
+	/**
+	 * @return Returns the values provided to {@link #setEncodeElementsForSummaryMode(Collection)}
+	 * or <code>null</code>
+	 */
+	@Nullable
 	public Set<String> getEncodeElementsForSummaryMode() {
 		return myEncodeElementsForSummaryMode;
 	}
 
+	/**
+	 * This option specifies one or more elements that should be excluded when the parser is encoding
+	 * a resource in {@link IParser#setSummaryMode(boolean) summary mode}, even if the element is
+	 * a part of the base FHIR specification's list of summary elements. Examples of valid values
+	 * include:
+	 * <ul>
+	 * <li><b>Patient.name</b> - Do not include the patient's name</li>
+	 * <li><b>Patient.name.family</b> - Do not include the patient's family name</li>
+	 * <li><b>*.name</b> - Do not include the name element on any resource type</li>
+	 * </ul>
+	 *
+	 * @see IParser#setSummaryMode(boolean)
+	 * @see IParser#setDontEncodeElements(Collection) Can be used to specify these values for an individual parser instance.
+	 */
 	@SuppressWarnings("UnusedReturnValue")
+	@Nonnull
 	public ParserOptions setDontEncodeElementsForSummaryMode(@Nonnull String... theEncodeElements) {
 		return setDontEncodeElementsForSummaryMode(Set.of(theEncodeElements));
 	}
 
+	/**
+	 * This option specifies one or more elements that should be excluded when the parser is encoding
+	 * a resource in {@link IParser#setSummaryMode(boolean) summary mode}, even if the element is
+	 * a part of the base FHIR specification's list of summary elements. Examples of valid values
+	 * include:
+	 * <ul>
+	 * <li><b>Patient.name</b> - Do not include the patient's name</li>
+	 * <li><b>Patient.name.family</b> - Do not include the patient's family name</li>
+	 * <li><b>*.name</b> - Do not include the name element on any resource type</li>
+	 * </ul>
+	 *
+	 * @see IParser#setSummaryMode(boolean)
+	 * @see IParser#setDontEncodeElements(Collection) Can be used to specify these values for an individual parser instance.
+	 */
+	@Nonnull
 	public ParserOptions setDontEncodeElementsForSummaryMode(@Nullable Collection<String> theDontEncodeElements) {
 		Set<String> dontEncodeElements = null;
 		if (theDontEncodeElements != null && !theDontEncodeElements.isEmpty()) {
@@ -242,6 +311,11 @@ public class ParserOptions {
 		return this;
 	}
 
+	/**
+	 * @return Returns the values provided to {@link #setDontEncodeElementsForSummaryMode(Collection)}
+	 * or <code>null</code>
+	 */
+	@Nullable
 	public Set<String> getDontEncodeElementsForSummaryMode() {
 		return myDontEncodeElementsForSummaryMode;
 	}
