@@ -374,7 +374,8 @@ public class BundleUtil {
 	 *                           <code>null</code>, resource IDs are unchanged.
 	 * @since 7.4.0
 	 */
-	public static <T extends IBaseBundle> T convertBundleIntoTransaction(@Nonnull FhirContext theContext, @Nonnull T theBundle, @Nullable String thePrefixIdsOrNull) {
+	public static <T extends IBaseBundle> T convertBundleIntoTransaction(
+			@Nonnull FhirContext theContext, @Nonnull T theBundle, @Nullable String thePrefixIdsOrNull) {
 		String prefix = defaultString(thePrefixIdsOrNull);
 
 		BundleBuilder bb = new BundleBuilder(theContext);
@@ -385,7 +386,8 @@ public class BundleUtil {
 			IBaseResource resource = terser.getSingleValueOrNull(entry, "resource", IBaseResource.class);
 			if (resource != null) {
 				Validate.isTrue(resource.getIdElement().hasIdPart(), "Resource in bundle has no ID");
-				String newId = theContext.getResourceType(resource) + "/" + prefix + resource.getIdElement().getIdPart();
+				String newId = theContext.getResourceType(resource) + "/" + prefix
+						+ resource.getIdElement().getIdPart();
 
 				IBaseResource resourceClone = terser.clone(resource);
 				resourceClone.setId(newId);
@@ -393,7 +395,8 @@ public class BundleUtil {
 				if (isNotBlank(prefix)) {
 					for (var ref : terser.getAllResourceReferences(resourceClone)) {
 						var refElement = ref.getResourceReference().getReferenceElement();
-						ref.getResourceReference().setReference(refElement.getResourceType() + "/" + prefix + refElement.getIdPart());
+						ref.getResourceReference()
+								.setReference(refElement.getResourceType() + "/" + prefix + refElement.getIdPart());
 					}
 				}
 
@@ -403,7 +406,6 @@ public class BundleUtil {
 
 		return bb.getBundleTyped();
 	}
-
 
 	private static void validatePartsNotNull(LinkedHashSet<IBase> theDeleteParts) {
 		if (theDeleteParts == null) {
