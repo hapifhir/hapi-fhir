@@ -1,0 +1,6 @@
+---
+type: add
+issue: 5945
+title: "A new utility method has been added to `BundleUtil` which converts a FHIR Bundle
+  containing resources (e.g. a search result bundle) into a FHIR transaction bundle which
+  could be used to upload those resources to a server."
