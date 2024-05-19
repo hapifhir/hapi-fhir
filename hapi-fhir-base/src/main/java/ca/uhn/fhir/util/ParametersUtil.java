@@ -433,7 +433,7 @@ public class ParametersUtil {
 		addPart(theContext, theParameter, theName, coding);
 	}
 
-	public static void addPart(FhirContext theContext, IBase theParameter, String theName, IBase theValue) {
+	public static IBase addPart(FhirContext theContext, IBase theParameter, String theName, @Nullable IBase theValue) {
 		BaseRuntimeElementCompositeDefinition<?> def =
 				(BaseRuntimeElementCompositeDefinition<?>) theContext.getElementDefinition(theParameter.getClass());
 		BaseRuntimeChildDefinition partChild = def.getChildByName("part");
@@ -448,11 +448,14 @@ public class ParametersUtil {
 		name.setValue(theName);
 		partChildElem.getChildByName("name").getMutator().addValue(part, name);
 
-		if (theValue instanceof IBaseResource) {
-			partChildElem.getChildByName("resource").getMutator().addValue(part, theValue);
-		} else {
-			partChildElem.getChildByName("value[x]").getMutator().addValue(part, theValue);
+		if (theValue != null) {
+			if (theValue instanceof IBaseResource) {
+				partChildElem.getChildByName("resource").getMutator().addValue(part, theValue);
+			} else {
+				partChildElem.getChildByName("value[x]").getMutator().addValue(part, theValue);
+			}
 		}
+		return part;
 	}
 
 	public static void addPartResource(
