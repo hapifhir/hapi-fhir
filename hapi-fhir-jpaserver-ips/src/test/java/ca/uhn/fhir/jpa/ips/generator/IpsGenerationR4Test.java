@@ -177,7 +177,7 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void testGenerateTinyPatientSummary() {
+	public void testGenerateTinyPatientSummary() throws IOException {
 		myStorageSettings.setResourceClientIdStrategy(JpaStorageSettings.ClientIdStrategyEnum.ANY);
 
 		Bundle sourceData = ClasspathUtil.loadCompressedResource(myFhirContext, Bundle.class, "/tiny-patient-everything.json.gz");
