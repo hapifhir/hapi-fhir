@@ -47,6 +47,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.util.BundleUtil.convertBundleIntoTransaction;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.stringContainsInOrder;
@@ -81,11 +82,7 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 	@Test
 	public void testGenerateLargePatientSummary() throws IOException {
 		Bundle sourceData = ClasspathUtil.loadCompressedResource(myFhirContext, Bundle.class, "/large-patient-everything.json.gz");
-		sourceData.setType(Bundle.BundleType.TRANSACTION);
-		for (Bundle.BundleEntryComponent nextEntry : sourceData.getEntry()) {
-			nextEntry.getRequest().setMethod(Bundle.HTTPVerb.PUT);
-			nextEntry.getRequest().setUrl(nextEntry.getResource().getIdElement().toUnqualifiedVersionless().getValue());
-		}
+		sourceData = convertBundleIntoTransaction(myFhirContext, sourceData, null);
 		Bundle outcome = mySystemDao.transaction(mySrd, sourceData);
 		ourLog.info("Created {} resources", outcome.getEntry().size());
 
@@ -119,11 +116,7 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 		myStorageSettings.setResourceClientIdStrategy(JpaStorageSettings.ClientIdStrategyEnum.ANY);
 
 		Bundle sourceData = ClasspathUtil.loadCompressedResource(myFhirContext, Bundle.class, "/large-patient-everything-2.json.gz");
-		sourceData.setType(Bundle.BundleType.TRANSACTION);
-		for (Bundle.BundleEntryComponent nextEntry : sourceData.getEntry()) {
-			nextEntry.getRequest().setMethod(Bundle.HTTPVerb.PUT);
-			nextEntry.getRequest().setUrl(nextEntry.getResource().getIdElement().toUnqualifiedVersionless().getValue());
-		}
+		sourceData = convertBundleIntoTransaction(myFhirContext, sourceData, null);
 		Bundle outcome = mySystemDao.transaction(mySrd, sourceData);
 		ourLog.info("Created {} resources", outcome.getEntry().size());
 
@@ -145,11 +138,7 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 		myStorageSettings.setResourceClientIdStrategy(JpaStorageSettings.ClientIdStrategyEnum.ANY);
 
 		Bundle sourceData = ClasspathUtil.loadCompressedResource(myFhirContext, Bundle.class, "/large-patient-everything-3.json.gz");
-		sourceData.setType(Bundle.BundleType.TRANSACTION);
-		for (Bundle.BundleEntryComponent nextEntry : sourceData.getEntry()) {
-			nextEntry.getRequest().setMethod(Bundle.HTTPVerb.PUT);
-			nextEntry.getRequest().setUrl(nextEntry.getResource().getIdElement().toUnqualifiedVersionless().getValue());
-		}
+		sourceData = convertBundleIntoTransaction(myFhirContext, sourceData, null);
 		Bundle outcome = mySystemDao.transaction(mySrd, sourceData);
 		ourLog.info("Created {} resources", outcome.getEntry().size());
 
@@ -167,15 +156,32 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
+	public void testGenerateLargePatientSummary4() {
+		Bundle sourceData = ClasspathUtil.loadCompressedResource(myFhirContext, Bundle.class, "/large-patient-everything-4.json.gz");
+		sourceData = convertBundleIntoTransaction(myFhirContext, sourceData, "EPD");
+
+		Bundle outcome = mySystemDao.transaction(mySrd, sourceData);
+		ourLog.info("Created {} resources", outcome.getEntry().size());
+
+		Bundle output = myClient
+			.operation()
+			.onInstance("Patient/EPD2223")
+			.named(JpaConstants.OPERATION_SUMMARY)
+			.withNoParameters(Parameters.class)
+			.returnResourceType(Bundle.class)
+			.execute();
+		ourLog.info("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+
+		// Verify
+		assertEquals(55, output.getEntry().size());
+	}
+
+	@Test
 	public void testGenerateTinyPatientSummary() throws IOException {
 		myStorageSettings.setResourceClientIdStrategy(JpaStorageSettings.ClientIdStrategyEnum.ANY);
 
 		Bundle sourceData = ClasspathUtil.loadCompressedResource(myFhirContext, Bundle.class, "/tiny-patient-everything.json.gz");
-		sourceData.setType(Bundle.BundleType.TRANSACTION);
-		for (Bundle.BundleEntryComponent nextEntry : sourceData.getEntry()) {
-			nextEntry.getRequest().setMethod(Bundle.HTTPVerb.PUT);
-			nextEntry.getRequest().setUrl(nextEntry.getResource().getIdElement().toUnqualifiedVersionless().getValue());
-		}
+		sourceData = convertBundleIntoTransaction(myFhirContext, sourceData, null);
 		Bundle outcome = mySystemDao.transaction(mySrd, sourceData);
 		ourLog.info("Created {} resources", outcome.getEntry().size());
 
