@@ -674,6 +674,56 @@ public class BundleUtilTest {
 		assertNull(BundleUtil.getBundleTypeEnum(ourCtx, bundle));
 	}
 
+	@Test
+	public void testConvertBundleIntoTransaction() {
+		Bundle input = createBundleWithPatientAndObservation();
+
+		Bundle output = BundleUtil.convertBundleIntoTransaction(ourCtx, input, null);
+		assertEquals(Bundle.BundleType.TRANSACTION, output.getType());
+		assertEquals("Patient/123", output.getEntry().get(0).getFullUrl());
+		assertEquals("Patient/123", output.getEntry().get(0).getRequest().getUrl());
+		assertEquals(Bundle.HTTPVerb.PUT, output.getEntry().get(0).getRequest().getMethod());
+		assertTrue(((Patient) output.getEntry().get(0).getResource()).getActive());
+		assertEquals("Observation/456", output.getEntry().get(1).getFullUrl());
+		assertEquals("Observation/456", output.getEntry().get(1).getRequest().getUrl());
+		assertEquals(Bundle.HTTPVerb.PUT, output.getEntry().get(1).getRequest().getMethod());
+		assertEquals("Patient/123", ((Observation)output.getEntry().get(1).getResource()).getSubject().getReference());
+		assertEquals(Observation.ObservationStatus.AMENDED, ((Observation)output.getEntry().get(1).getResource()).getStatus());
+	}
+
+	@Test
+	public void testConvertBundleIntoTransaction_WithPrefix() {
+		Bundle input = createBundleWithPatientAndObservation();
+
+		Bundle output = BundleUtil.convertBundleIntoTransaction(ourCtx, input, "A");
+		assertEquals(Bundle.BundleType.TRANSACTION, output.getType());
+		assertEquals("Patient/A123", output.getEntry().get(0).getFullUrl());
+		assertEquals("Patient/A123", output.getEntry().get(0).getRequest().getUrl());
+		assertEquals(Bundle.HTTPVerb.PUT, output.getEntry().get(0).getRequest().getMethod());
+		assertTrue(((Patient) output.getEntry().get(0).getResource()).getActive());
+		assertEquals("Observation/A456", output.getEntry().get(1).getFullUrl());
+		assertEquals("Observation/A456", output.getEntry().get(1).getRequest().getUrl());
+		assertEquals(Bundle.HTTPVerb.PUT, output.getEntry().get(1).getRequest().getMethod());
+		assertEquals("Patient/A123", ((Observation)output.getEntry().get(1).getResource()).getSubject().getReference());
+		assertEquals(Observation.ObservationStatus.AMENDED, ((Observation)output.getEntry().get(1).getResource()).getStatus());
+	}
+
+	private static @Nonnull Bundle createBundleWithPatientAndObservation() {
+		Bundle input = new Bundle();
+		input.setType(Bundle.BundleType.COLLECTION);
+		Patient patient = new Patient();
+		patient.setActive(true);
+		patient.setId("123");
+		input.addEntry().setResource(patient);
+		Observation observation = new Observation();
+		observation.setId("456");
+		observation.setStatus(Observation.ObservationStatus.AMENDED);
+		observation.setSubject(new Reference("Patient/123"));
+		input.addEntry().setResource(observation);
+		return input;
+	}
+
+
 	@Nonnull
 	private static Bundle withBundle(Resource theResource) {
 		final Bundle bundle = new Bundle();
