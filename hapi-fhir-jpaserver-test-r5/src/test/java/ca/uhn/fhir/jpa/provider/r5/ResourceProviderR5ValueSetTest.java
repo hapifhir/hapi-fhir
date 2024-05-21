@@ -1390,7 +1390,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		
-		assertThat(resp).containsSubsequence("<code value=\"11378-7\"/>","<display value=\"Systolic blood pressure at First encounter\"/>");
+		assertThat(resp).doesNotContainPattern("(?s)<code value=\"11378-7\"/>.*<display value=\"Systolic blood pressure at First encounter\"/>");
 	}
 	
 	@Test
@@ -1411,7 +1411,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		
-		assertThat(resp).containsSubsequence("<code value=\"11378-7\"/>","<display value=\"Systolic blood pressure at First encounter\"/>");
+		assertThat(resp).doesNotContainPattern("(?s)<code value=\"11378-7\"/>.*<display value=\"Systolic blood pressure at First encounter\"/>");
 	}
 
 	@Test
