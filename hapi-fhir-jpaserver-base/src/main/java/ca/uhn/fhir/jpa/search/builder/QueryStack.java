@@ -356,6 +356,7 @@ public class QueryStack {
 		// add a left-outer join to a predicate for the target type, then sort on value columns(s).
 		switch (targetSearchParameter.getParamType()) {
 			case STRING:
+				// LUKETODO:  presentation:  https://github.com/hapifhir/hapi-fhir/pull/5917
 				StringPredicateBuilder stringPredicateBuilder = mySqlBuilder.createStringPredicateBuilder();
 				addSortCustomJoin(
 						resourceLinkPredicateBuilder.getColumnTargetResourceId(),
@@ -1110,6 +1111,12 @@ public class QueryStack {
 			List<List<IQueryParameterType>> theHasParameters,
 			RequestDetails theRequest,
 			RequestPartitionId theRequestPartitionId) {
+		// LUKETODO:  find the chain equivalent?
+		ourLog.info(
+				"PRESENTATION: createPredicateHas(): theSourceJoinColumn: {}, theResourceType: {},  theHasParameters: {}",
+				theSourceJoinColumn,
+				theResourceType,
+				theHasParameters);
 
 		List<Condition> andPredicates = new ArrayList<>();
 		for (List<? extends IQueryParameterType> nextOrList : theHasParameters) {
@@ -1182,6 +1189,7 @@ public class QueryStack {
 
 			// Handle internal chain inside the has.
 			if (parameterName.contains(".")) {
+				// LUKETODO:  presentation
 				// Previously, for some unknown reason, we were calling getChainedPart() twice.  This broke the _has
 				// then chain, then _has use case by effectively cutting off the second part of the chain and
 				// missing one iteration of the recursive call to build the query.
@@ -1193,12 +1201,15 @@ public class QueryStack {
 				// However, after running the pipeline,  I've concluded there's no use case at all for the
 				// double call to "getChainedPart()", which is why there's no conditional logic at all to make a double
 				// call to getChainedPart().
-				final String chainedPart = getChainedPart(parameterName);
+				final String chainedPart = getChainedPart(parameterName); // GOOD
+				//				final String chainedPart = getChainedPart(getChainedPart(parameterName)); // BAD
 
 				orValues.stream()
 						.filter(qp -> qp instanceof ReferenceParam)
 						.map(qp -> (ReferenceParam) qp)
 						.forEach(rp -> rp.setChain(chainedPart));
+
+				ourLog.info("PRESENTATION: createPredicateHas(): chainedPart: {} orValues: {}", chainedPart, orValues);
 
 				parameterName = parameterName.substring(0, parameterName.indexOf('.'));
 			}
