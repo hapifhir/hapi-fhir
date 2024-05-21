@@ -67,9 +67,6 @@ public class ResourceSearchUrlEntity {
 			foreignKey = @ForeignKey(name = "FK_RES_SEARCH_URL_RESOURCE"))
 	private ResourceTable myResourceTable;
 
-	@Column(name = "RES_ID", updatable = false, nullable = false, insertable = false)
-	private Long myResourcePid;
-
 	@Column(name = "CREATED_TIME", nullable = false)
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date myCreatedTime;
@@ -82,15 +79,7 @@ public class ResourceSearchUrlEntity {
 	}
 
 	public Long getResourcePid() {
-		if (myResourcePid != null) {
-			return myResourcePid;
-		}
 		return myResourceTable.getResourceId();
-	}
-
-	public ResourceSearchUrlEntity setResourcePid(Long theResourcePid) {
-		myResourcePid = theResourcePid;
-		return this;
 	}
 
 	public ResourceTable getResourceTable() {

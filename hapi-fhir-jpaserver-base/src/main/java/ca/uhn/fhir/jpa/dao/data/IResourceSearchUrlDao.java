@@ -34,6 +34,6 @@ public interface IResourceSearchUrlDao extends JpaRepository<ResourceSearchUrlEn
 	int deleteAllWhereCreatedBefore(@Param("cutoff") Date theCutoff);
 
 	@Modifying
-	@Query("DELETE FROM ResourceSearchUrlEntity s WHERE (s.myResourcePid = :resID)")
+	@Query("DELETE FROM ResourceSearchUrlEntity s WHERE (s.myResourceTable.myId = :resID)")
 	int deleteByResId(@Param("resID") long resId);
 }
