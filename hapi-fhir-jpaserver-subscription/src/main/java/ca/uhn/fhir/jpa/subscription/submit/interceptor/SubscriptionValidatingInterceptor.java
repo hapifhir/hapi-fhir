@@ -150,6 +150,7 @@ public class SubscriptionValidatingInterceptor {
 
 		if (!finished) {
 
+			// LUKETODO:  we're not going into the else which is why the crtieria is not being validated
 			if (subscription.isTopicSubscription()) {
 				if (myFhirContext.getVersion().getVersion()
 						!= FhirVersionEnum
@@ -160,7 +161,13 @@ public class SubscriptionValidatingInterceptor {
 						throw new UnprocessableEntityException(
 								Msg.code(2322) + "No SubscriptionTopic exists with topic: " + subscription.getTopic());
 					}
+				} else {
+//					validateQuery(subscription.getCriteriaString(), "Subscription.criteria");
+					// LUKETODO:  where do we stored the criteria in the backport?
+					// LUKETODO:  read the R4 subscription backport tests and see what they're doing... there may be MULTIPLE URLS
+					validateQuery(subscription.getCriteriaString(), "Subscription.criteria");
 				}
+				// LUKETODO:  this is the branch we're executing namely nothing
 			} else {
 				validateQuery(subscription.getCriteriaString(), "Subscription.criteria");
 
@@ -290,6 +297,19 @@ public class SubscriptionValidatingInterceptor {
 
 	@SuppressWarnings("WeakerAccess")
 	protected void validateChannelEndpoint(CanonicalSubscription theResource) {
+		// LUKETODO:  this is valid as per the spec
+		// LUKETODO:  check for URL valid that is conformant for rest hooks (http or https) spec:  regex \s*
+
+		/*
+      	1) Missing and wrong criteria should be validated.  Subscription.critieria contains a canonical URL for the SubscriptionTopic that is valid and supported by the server >>> valid
+      	2) Subscription.channel.endpoint is valid for the channel type provided (e.g. valid URL excluding handshake to validate connectivity) >> invalid
+      	3) Validate mandatory elements of R4 backport subscription resource
+			reason is NOT mandatory:  https://hl7.org/fhir/subscription.html  (look for 1.. as opposed to 0...)
+			subscription topic query criteria IS mandatory according to spec
+				criteria in R4 is 1-1
+
+
+		 */
 		if (isBlank(theResource.getEndpointUrl())) {
 			throw new UnprocessableEntityException(
 					Msg.code(21) + "Rest-hook subscriptions must have Subscription.channel.endpoint defined");
