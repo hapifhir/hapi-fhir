@@ -78,10 +78,6 @@ public class ResourceSearchUrlEntity {
 				.setCreatedTime(new Date());
 	}
 
-	public Long getResourcePid() {
-		return myResourceTable.getResourceId();
-	}
-
 	public ResourceTable getResourceTable() {
 		return myResourceTable;
 	}

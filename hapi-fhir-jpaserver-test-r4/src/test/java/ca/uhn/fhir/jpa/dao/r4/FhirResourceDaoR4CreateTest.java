@@ -426,9 +426,9 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		String expectedNormalizedMatchUrl = obs.fhirType() + "?" + matchUrl;
 
 		assertTrue(outcome.getCreated());
-		ResourceSearchUrlEntity searchUrlEntity = myResourceSearchUrlDao.findAll().get(0);
+		ResourceSearchUrlEntity searchUrlEntity = getStoredResourceSearchUrlEntities().get(0);
 		assertThat(searchUrlEntity, is(notNullValue()) );
-		assertThat(searchUrlEntity.getResourcePid(), equalTo(expectedResId));
+		assertThat(searchUrlEntity.getResourceTable().getResourceId(), equalTo(expectedResId));
 		assertThat(searchUrlEntity.getCreatedTime(), DateMatchers.within(1, SECONDS, new Date()));
 		assertThat(searchUrlEntity.getSearchUrl(), equalTo(expectedNormalizedMatchUrl));
 
@@ -1340,11 +1340,13 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		}
 
 		private void assertRemainingTasks(Task... theExpectedTasks) {
-			final List<ResourceSearchUrlEntity> searchUrlsPreDelete = myResourceSearchUrlDao.findAll();
+			final List<ResourceSearchUrlEntity> searchUrlsPreDelete = getStoredResourceSearchUrlEntities();
 
 			assertEquals(theExpectedTasks.length, searchUrlsPreDelete.size());
 			assertEquals(Arrays.stream(theExpectedTasks).map(Resource::getIdElement).map(IdType::getIdPartAsLong).toList(),
-						 searchUrlsPreDelete.stream().map(ResourceSearchUrlEntity::getResourcePid).toList());
+						 searchUrlsPreDelete.stream()
+							 .map(ResourceSearchUrlEntity::getResourceTable)
+							 .map(ResourceTable::getId).toList());
 		}
 
 		private void deleteExpunge(Task theTask) {

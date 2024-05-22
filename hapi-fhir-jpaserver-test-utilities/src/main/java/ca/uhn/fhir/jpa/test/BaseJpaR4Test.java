@@ -85,6 +85,7 @@ import ca.uhn.fhir.jpa.interceptor.PerformanceTracingLoggingInterceptor;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
+import ca.uhn.fhir.jpa.model.entity.ResourceSearchUrlEntity;
 import ca.uhn.fhir.jpa.packages.IPackageInstallerSvc;
 import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
 import ca.uhn.fhir.jpa.provider.JpaSystemProvider;
@@ -208,6 +209,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.util.AopTestUtils;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -852,6 +854,11 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		valueSet.setUrl(URL_MY_VALUE_SET);
 		valueSet.getCompose().addInclude().setSystem(codeSystem.getUrl());
 		myValueSetDao.update(valueSet, mySrd);
+	}
+
+	protected List<ResourceSearchUrlEntity> getStoredResourceSearchUrlEntities(){
+		final TransactionTemplate transactionTemplate = new TransactionTemplate(getTxManager());
+		return transactionTemplate.execute(x -> myResourceSearchUrlDao.findAllWithFetchJoin());
 	}
 
 	@AfterEach
