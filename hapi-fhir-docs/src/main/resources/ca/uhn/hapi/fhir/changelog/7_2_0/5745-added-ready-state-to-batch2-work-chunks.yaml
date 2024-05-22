@@ -1,0 +1,10 @@
+---
+type: add
+issue: 5745
+title: "Added another state to the Batch2 work chunk state machine: `READY`.
+        This work chunk state will be the initial state on creation.
+        Once queued for delivery, they will transition to `QUEUED`.
+        The exception is for ReductionStep chunks (because reduction steps
+        are not read off of the queue, but executed by the maintenance job
+        inline.
+"

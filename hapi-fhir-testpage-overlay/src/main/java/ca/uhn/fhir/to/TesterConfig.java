@@ -152,7 +152,7 @@ public class TesterConfig {
 
 			if (nextSplit.length < 3) {
 				throw new IllegalArgumentException(
-						Msg.code(195) + "Invalid serveer line '" + nextRaw + "' - Must be comma separated");
+						Msg.code(195) + "Invalid server line '" + nextRaw + "' - Must be comma separated");
 			} else {
 				Validate.notBlank(nextSplit[0], "theId can not be blank");
 				Validate.notBlank(nextSplit[1], "theVersion can not be blank");
