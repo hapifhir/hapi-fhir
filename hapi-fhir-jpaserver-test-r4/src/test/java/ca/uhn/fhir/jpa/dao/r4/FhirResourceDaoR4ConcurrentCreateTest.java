@@ -36,6 +36,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -169,7 +170,7 @@ public class FhirResourceDaoR4ConcurrentCreateTest extends BaseJpaR4Test {
 		myResourceSearchUrlDao.saveAll(asList(entry1, entry2));
 
 		// when
-		myResourceSearchUrlSvc.deleteByResId(entry1.getResourceTable().getResourceId());
+		myResourceSearchUrlSvc.deleteByResId(entry1.getResourcePid());
 		myResourceSearchUrlSvc.deleteByResId(nonExistentResourceId);
 
 		// then
@@ -178,6 +179,10 @@ public class FhirResourceDaoR4ConcurrentCreateTest extends BaseJpaR4Test {
 
 	}
 
+	private List<Long> getStoredResourceSearchUrlEntitiesPids(){
+		List<ResourceSearchUrlEntity> remainingSearchUrlEntities = myResourceSearchUrlDao.findAll();
+		return remainingSearchUrlEntities.stream().map(ResourceSearchUrlEntity::getResourcePid).collect(Collectors.toList());
+	}
 
 	private Date cutOffTimePlus(long theAdjustment) {
 		long currentTimeMillis = System.currentTimeMillis();
@@ -218,13 +223,6 @@ public class FhirResourceDaoR4ConcurrentCreateTest extends BaseJpaR4Test {
 			return null;
 		};
 		
-	}
-
-	private List<Long> getStoredResourceSearchUrlEntitiesPids() {
-		return getStoredResourceSearchUrlEntities().stream()
-			.map(ResourceSearchUrlEntity::getResourceTable)
-			.map(ResourceTable::getResourceId)
-			.toList();
 	}
 
 	/**

@@ -20,14 +20,12 @@
 package ca.uhn.fhir.jpa.dao.data;
 
 import ca.uhn.fhir.jpa.model.entity.ResourceSearchUrlEntity;
-import com.google.common.annotations.VisibleForTesting;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.Date;
-import java.util.List;
 
 public interface IResourceSearchUrlDao extends JpaRepository<ResourceSearchUrlEntity, Long>, IHapiFhirJpaRepository {
 
@@ -36,10 +34,6 @@ public interface IResourceSearchUrlDao extends JpaRepository<ResourceSearchUrlEn
 	int deleteAllWhereCreatedBefore(@Param("cutoff") Date theCutoff);
 
 	@Modifying
-	@Query("DELETE FROM ResourceSearchUrlEntity s WHERE (s.myResourceTable.myId = :resID)")
+	@Query("DELETE FROM ResourceSearchUrlEntity s WHERE (s.myResourcePid = :resID)")
 	int deleteByResId(@Param("resID") long resId);
-
-	@VisibleForTesting
-	@Query("SELECT u FROM ResourceSearchUrlEntity u JOIN FETCH u.myResourceTable r")
-	List<ResourceSearchUrlEntity> findAllWithFetchJoin();
 }
