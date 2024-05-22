@@ -31,7 +31,10 @@ public class MultiVersionXmlParserTest {
 		String str;
 		str = ourCtxDstu2.newXmlParser().encodeResourceToString(p);
 		ourLog.info(str);
-		assertThat(str).matches("<extension url=\"http://foo#ext\"><valueQuantity><value value=\"2.2\".*<comparator value=\"&lt;\".*<unit value=\"g/L\".*</valueQuantity></extension>");
+		assertThat(str).containsSubsequence("<extension url=\"http://foo#ext\"><valueQuantity><value value=\"2.2\"",
+			"<comparator value=\"&lt;\"",
+			"<unit value=\"g/L\"",
+			"</valueQuantity></extension>");
 
 		try {
 			FhirContext.forDstu3().newXmlParser().encodeResourceToString(p);
