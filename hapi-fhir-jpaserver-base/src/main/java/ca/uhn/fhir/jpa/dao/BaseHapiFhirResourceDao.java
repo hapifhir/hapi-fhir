@@ -575,7 +575,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		// Pre-cache the match URL, and create an entry in the HFJ_RES_SEARCH_URL table to
 		// protect against concurrent writes to the same conditional URL
 		if (theMatchUrl != null) {
-			myResourceSearchUrlSvc.enforceMatchUrlResourceUniqueness(getResourceName(), theMatchUrl, jpaPid);
+			myResourceSearchUrlSvc.enforceMatchUrlResourceUniqueness(getResourceName(), theMatchUrl, updatedEntity);
 			myMatchResourceUrlService.matchUrlResolved(theTransactionDetails, getResourceName(), theMatchUrl, jpaPid);
 		}
 
