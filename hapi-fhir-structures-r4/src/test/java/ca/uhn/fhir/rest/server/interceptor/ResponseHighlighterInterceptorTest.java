@@ -71,10 +71,6 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsStringIgnoringCase;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -522,7 +518,7 @@ public class ResponseHighlighterInterceptorTest {
 		assertEquals(404, status.getStatusLine().getStatusCode());
 
 		assertThat(responseContent).doesNotContainPattern("(?s)<span class='hlTagName'>OperationOutcome</span>.*Unknown resource type 'Foobar' - Server knows how to handle");
-		assertThat(responseContent, (stringContainsInOrder("Unknown resource type 'Foobar'")));
+		assertThat(responseContent).contains("Unknown resource type 'Foobar'");
 		assertEquals(Constants.CT_FHIR_XML_NEW + ";charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase());
 
 	}
@@ -844,7 +840,7 @@ public class ResponseHighlighterInterceptorTest {
 		status.close();
 		ourLog.info(responseContent);
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, (stringContainsInOrder("<body>", "<pre>", "<div", "</pre>")));
+		assertThat(responseContent).containsSubsequence("<body>", "<pre>", "<div", "</pre>");
 	}
 
 	/**
@@ -880,7 +876,7 @@ public class ResponseHighlighterInterceptorTest {
 		status.close();
 		ourLog.info(responseContent);
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, (stringContainsInOrder("<body>", "<pre>", "<div", "</pre>")));
+		assertThat(responseContent).containsSubsequence("<body>", "<pre>", "<div", "</pre>");
 	}
 
 	@Test
@@ -926,7 +922,7 @@ public class ResponseHighlighterInterceptorTest {
 		ourLog.info(responseContent);
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertEquals("text/html;charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase());
-		assertThat(responseContent, (containsStringIgnoringCase("Accept")));
+		assertThat(responseContent).containsIgnoringCase("Accept");
 		assertThat(responseContent).doesNotContainIgnoringCase("Content-Type");
 	}
 
@@ -943,8 +939,8 @@ public class ResponseHighlighterInterceptorTest {
 		ourLog.info(responseContent);
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertEquals("text/html;charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase());
-		assertThat(responseContent, (containsStringIgnoringCase("Accept")));
-		assertThat(responseContent, (containsStringIgnoringCase("Content-Type")));
+		assertThat(responseContent).containsIgnoringCase("Accept");
+		assertThat(responseContent).containsIgnoringCase("Content-Type");
 	}
 
 	@Test
@@ -960,7 +956,7 @@ public class ResponseHighlighterInterceptorTest {
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertEquals("text/html;charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase());
 		assertThat(responseContent).doesNotContainIgnoringCase("Accept");
-		assertThat(responseContent, (containsStringIgnoringCase("Content-Type")));
+		assertThat(responseContent).containsIgnoringCase("Content-Type");
 	}
 
 	@Test
