@@ -19,11 +19,6 @@
  */
 package ca.uhn.fhir.batch2.util;
 
-import ca.uhn.fhir.batch2.api.StepExecutionDetails;
-import ca.uhn.fhir.batch2.model.JobInstance;
-import ca.uhn.fhir.batch2.model.WorkChunk;
-import ca.uhn.fhir.model.api.IModelJson;
-import jakarta.annotation.Nonnull;
 import org.hl7.fhir.r4.model.InstantType;
 
 import java.util.Date;
@@ -42,24 +37,4 @@ public class Batch2Utils {
 	 * used in the message handling
 	 */
 	public static final String REDUCTION_STEP_CHUNK_ID_PLACEHOLDER = "REDUCTION";
-
-	/**
-	 * Create and returns a step execution details for a reduction job
-	 */
-	public static <P1 extends IModelJson, I1 extends IModelJson>
-			StepExecutionDetails<P1, I1> createReductionStepDetails(
-					P1 theP, I1 theIntermediateParams, JobInstance theInstance) {
-		WorkChunk reductionChunk = new WorkChunk().setId(REDUCTION_STEP_CHUNK_ID_PLACEHOLDER);
-
-		return new StepExecutionDetails<>(theP, theIntermediateParams, theInstance, reductionChunk);
-	}
-
-	/**
-	 * Returns true if the workchunk is a reduction workchunk; false otherwise
-	 * @param theChunk the reduction work chunk.
-	 * @return true if reduction workchunk, false otherwise.
-	 */
-	public static boolean isReductionWorkChunk(@Nonnull WorkChunk theChunk) {
-		return theChunk.getId() != null && theChunk.getId().equals(REDUCTION_STEP_CHUNK_ID_PLACEHOLDER);
-	}
 }

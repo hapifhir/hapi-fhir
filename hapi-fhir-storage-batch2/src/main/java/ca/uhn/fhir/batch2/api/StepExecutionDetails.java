@@ -21,11 +21,12 @@ package ca.uhn.fhir.batch2.api;
 
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunk;
-import ca.uhn.fhir.batch2.util.Batch2Utils;
 import ca.uhn.fhir.model.api.IModelJson;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
+
+import static ca.uhn.fhir.batch2.util.Batch2Utils.REDUCTION_STEP_CHUNK_ID_PLACEHOLDER;
 
 public class StepExecutionDetails<PT extends IModelJson, IT extends IModelJson> {
 
@@ -33,6 +34,17 @@ public class StepExecutionDetails<PT extends IModelJson, IT extends IModelJson> 
 	private final IT myData;
 	private final IJobInstance myInstance;
 	private final WorkChunk myChunk;
+
+	/**
+	 * Create and returns a step execution details for a reduction job
+	 */
+	public static <P1 extends IModelJson, I1 extends IModelJson>
+	StepExecutionDetails<P1, I1> createReductionStepDetails(
+		P1 theParameters, I1 theIntermediateParams, JobInstance theInstance) {
+		WorkChunk reductionChunk = new WorkChunk().setId(REDUCTION_STEP_CHUNK_ID_PLACEHOLDER);
+
+		return new StepExecutionDetails<>(theParameters, theIntermediateParams, theInstance, reductionChunk);
+	}
 
 	/**
 	 * Deprecated in 7.3
@@ -114,6 +126,6 @@ public class StepExecutionDetails<PT extends IModelJson, IT extends IModelJson> 
 	 * 			false if the output goes to the jobinstance instead
 	 */
 	public boolean hasAssociatedWorkChunk() {
-		return myChunk != null && !Batch2Utils.isReductionWorkChunk(myChunk);
+		return myChunk != null && !myChunk.isReductionWorkChunk();
 	}
 }
