@@ -3,6 +3,8 @@ package ca.uhn.fhir.jpa.provider.r4;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.param.HasParam;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -12,11 +14,13 @@ import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Group;
+import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.ListResource;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
+import org.hl7.fhir.r4.model.PractitionerRole;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,6 +28,8 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
@@ -352,15 +358,58 @@ public class ResourceProviderR4SearchVariousScenariosTest extends BaseResourcePr
 		}
 	}
 
+	@Nested
+	class Sorting {
+		@Test
+		void practitionersAndRoles() {
+			final Practitioner pra1 = createPractitioner("pra1", "A_Family");
+			final Practitioner pra2 = createPractitioner("pra2", "B_Family");
+			final Practitioner pra3 = createPractitioner("pra3", "C_Family");
+
+			final PractitionerRole praRole1 = createPractitionerRole("praRole1", pra1.getId());
+			final PractitionerRole praRole2 = createPractitionerRole("praRole2", pra2.getId());
+			final PractitionerRole praRole3 = createPractitionerRole("praRole3", pra3.getId());
+
+
+//			runQueryAndGetBundle("")
+		}
+
+		private Practitioner createPractitioner(String theId, String theFamilyName) {
+			final Practitioner practitioner = (Practitioner) new Practitioner()
+				.setActive(true)
+				.setName(List.of(new HumanName().setFamily(theFamilyName)))
+				.setId(theId);
+
+			myPractitionerDao.update(practitioner, new SystemRequestDetails());
+
+			return practitioner;
+		}
+
+		private PractitionerRole createPractitionerRole(String theId, String thePractitionerId) {
+			final PractitionerRole practitionerRole = (PractitionerRole) new PractitionerRole()
+				.setActive(true)
+				.setPractitioner(new Reference(thePractitionerId))
+				.setId(theId);
+
+			myPractitionerRoleDao.update(practitionerRole, new SystemRequestDetails());
+
+			return practitionerRole;
+		}
+	}
+
 	private void runAndAssert(String theQueryString) {
 		ourLog.info("queryString:\n{}", theQueryString);
 
-		final Bundle outcome = myClient.search()
-			.byUrl(theQueryString)
-			.returnBundle(Bundle.class)
-			.execute();
+		final Bundle outcome = runQueryAndGetBundle(theQueryString, myClient);
 
 		assertFalse(outcome.getEntry().isEmpty());
 		ourLog.info("result:\n{}", theQueryString);
+	}
+
+	private static Bundle runQueryAndGetBundle(String theTheQueryString, IGenericClient theClient) {
+		return theClient.search()
+			.byUrl(theTheQueryString)
+			.returnBundle(Bundle.class)
+			.execute();
 	}
 }

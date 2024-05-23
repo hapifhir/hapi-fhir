@@ -142,6 +142,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 
 	@Override
 	public boolean supportsSomeOf(SearchParameterMap myParams) {
+		// LUKETODO:  this logic won't work with all of because it's totally different
 
 		// keep this in sync with the guts of doSearch
 		boolean requiresHibernateSearchAccess = myParams.containsKey(Constants.PARAM_CONTENT)
@@ -495,6 +496,13 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	@Override
 	public boolean supportsAllOf(SearchParameterMap theParams) {
 		return myAdvancedIndexQueryBuilder.isSupportsAllOf(theParams);
+	}
+
+	@Override
+	public boolean supportsAllSortTerms(String theResourceType, SearchParameterMap theParams) {
+		// LUKETODO:  go through search types and if any are NOT supported, return false
+		final boolean output = myExtendedFulltextSortHelper.newThingee(theResourceType, theParams);
+		return false;
 	}
 
 	private void dispatchEvent(IHSearchEventListener.HSearchEventType theEventType) {

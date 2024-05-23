@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.dao.search;
 
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.SortSpec;
 import org.hibernate.search.engine.search.sort.dsl.SearchSortFactory;
 import org.hibernate.search.engine.search.sort.dsl.SortFinalStep;
@@ -29,4 +30,7 @@ import org.hibernate.search.engine.search.sort.dsl.SortFinalStep;
 public interface IHSearchSortHelper {
 
 	SortFinalStep getSortClauses(SearchSortFactory theSortFactory, SortSpec theSort, String theResourceType);
+
+	// LUKETODO:  add method "do we support these" and keep in sync with the other code
+	boolean newThingee(String theResourceType, SearchParameterMap theParams);
 }

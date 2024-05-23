@@ -120,4 +120,7 @@ public interface IFulltextSearchSvc {
 	 * @param theGivenIds The list of IDs for the given document type. Note that while this is a List<Object>, the type must match the type of the `@Id` field on the given class.
 	 */
 	void deleteIndexedDocumentsByTypeAndId(Class theClazz, List<Object> theGivenIds);
+
+	// LUKETODO:  javadoc
+	boolean supportsAllSortTerms(String theResourceName, SearchParameterMap theParams);
 }

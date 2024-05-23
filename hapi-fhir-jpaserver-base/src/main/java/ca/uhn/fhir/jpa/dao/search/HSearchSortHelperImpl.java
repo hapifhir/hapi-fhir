@@ -20,6 +20,8 @@
 package ca.uhn.fhir.jpa.dao.search;
 
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
@@ -94,6 +96,34 @@ public class HSearchSortHelperImpl implements IHSearchSortHelper {
 		return sortStep;
 	}
 
+	@Override
+	public boolean newThingee(String theResourceType, SearchParameterMap theParams) {
+		//		if ("SearchParameter".equals(theResourceType) || "Subscription".equals(theResourceType)) {
+		//			return false;
+		//		}
+		//		// LUKETODO:  "practitioner.family" returns nothing from the active search params because this is a chain
+		//		final ResourceSearchParams activeSearchParams =
+		// mySearchParamRegistry.getActiveSearchParams(theResourceType);
+		//		// LUKETODO:  get rid of this experiment:
+		//		// LUKETODO:  what is the affirmative case here?
+		//		final RuntimeSearchParam runtimeSearchParam = activeSearchParams.get("practitioner");
+		//
+		//		final RestSearchParameterTypeEnum paramType = runtimeSearchParam.getParamType();
+		//
+		//		final List<String> sortPropertyList;
+		//		SortSpec sort;
+		//
+
+		for (SortSpec s = theParams.getSort(); s != null; s = s.getChain()) {
+			Optional<RestSearchParameterTypeEnum> paramTypeOpt = getParamType(theResourceType, s.getParamName());
+			if (paramTypeOpt.isEmpty()) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
 	/**
 	 * Builds sort clauses for the received SortSpec by
 	 *  _ finding out the corresponding RestSearchParameterTypeEnum for the parameter
@@ -104,9 +134,9 @@ public class HSearchSortHelperImpl implements IHSearchSortHelper {
 	Optional<SortFinalStep> getSortClause(SearchSortFactory theF, SortSpec theSortSpec, String theResourceType) {
 		Optional<RestSearchParameterTypeEnum> paramTypeOpt = getParamType(theResourceType, theSortSpec.getParamName());
 		if (paramTypeOpt.isEmpty()) {
-			ourLog.warn("Sprt parameter type couldn't be determined for parameter: " + theSortSpec.getParamName()
-					+ ". Result will not be properly sorted");
-			return Optional.empty();
+			// LUKETODO:  new error code
+			throw new IllegalArgumentException(
+					Msg.code(9999) + "Invalid sort specification: " + theSortSpec.getParamName());
 		}
 		List<String> paramFieldNameList = getSortPropertyList(paramTypeOpt.get(), theSortSpec.getParamName());
 		if (paramFieldNameList.isEmpty()) {
@@ -128,6 +158,8 @@ public class HSearchSortHelperImpl implements IHSearchSortHelper {
 			sortFinalStep.add(sortStep.missing().last());
 		}
 
+		// LUKETODO:  hapi-fhir docs:  chained sorting NOT supported:  combination of sort and _text searching
+		// regular sorting is supported
 		return Optional.of(sortFinalStep);
 	}
 
