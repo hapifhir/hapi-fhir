@@ -41,7 +41,6 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
@@ -75,8 +74,8 @@ public class PlainProviderR4Test {
 		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 		assertThat(bundle.getEntry()).hasSize(3);
 		
-		assertThat(provider.myLastSince.getValueAsString(), StringStartsWith.startsWith("2012-01-02T00:01:02"));
-		assertThat(provider.myLastCount.getValueAsString(), IsEqual.equalTo("12"));
+		assertThat(provider.myLastSince.getValueAsString()).startsWith("2012-01-02T00:01:02");
+		assertEquals("12", provider.myLastCount.getValueAsString());
 
 		status = ourClient.execute(new HttpGet(baseUri + "/_history?&_count=12"));
 		responseContent = IOUtils.toString(status.getEntity().getContent());
@@ -85,7 +84,7 @@ public class PlainProviderR4Test {
 		bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 		assertThat(bundle.getEntry()).hasSize(3);
 		assertNull(provider.myLastSince);
-		assertThat(provider.myLastCount.getValueAsString(), IsEqual.equalTo("12"));
+		assertEquals("12", provider.myLastCount.getValueAsString());
 		
 		status =ourClient.execute(new HttpGet(baseUri + "/_history?_since=2012-01-02T00%3A01%3A02"));
 		responseContent = IOUtils.toString(status.getEntity().getContent());
@@ -93,7 +92,7 @@ public class PlainProviderR4Test {
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 		assertThat(bundle.getEntry()).hasSize(3);
-		assertThat(provider.myLastSince.getValueAsString(), StringStartsWith.startsWith("2012-01-02T00:01:02"));
+		assertThat(provider.myLastSince.getValueAsString()).startsWith("2012-01-02T00:01:02");
 		assertNull(provider.myLastCount);
 	}
 
