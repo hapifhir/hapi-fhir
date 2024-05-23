@@ -478,22 +478,22 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					failIfUsedWithChainedSort(Constants.PARAM_CONTENT);
 				}
 			}
-//			final Optional<SortSpec> optSort = Optional.ofNullable(myParams.getSort());
-//			if (optSort.isPresent()) {
-//				final SortSpec sortSpec = optSort.get();
-//				final String paramName = sortSpec.getParamName();
-//				if (paramName.contains(".")) {
-//					failIfUsedWithChainedSort(Constants.PARAM_TEXT);
-//					failIfUsedWithChainedSort(Constants.PARAM_CONTENT);
-//				}
-//			}
+			//			final Optional<SortSpec> optSort = Optional.ofNullable(myParams.getSort());
+			//			if (optSort.isPresent()) {
+			//				final SortSpec sortSpec = optSort.get();
+			//				final String paramName = sortSpec.getParamName();
+			//				if (paramName.contains(".")) {
+			//					failIfUsedWithChainedSort(Constants.PARAM_TEXT);
+			//					failIfUsedWithChainedSort(Constants.PARAM_CONTENT);
+			//				}
+			//			}
 
-//			if (Optional.ofNullable(myParams.getSort())
-//				.map(SortSpec::getChain)
-////				.map(SortSpec::getChain)
-//				.isPresent()) {
-//				failIfUsed(Constants.PARAM_TEXT);
-//			}
+			//			if (Optional.ofNullable(myParams.getSort())
+			//				.map(SortSpec::getChain)
+			////				.map(SortSpec::getChain)
+			//				.isPresent()) {
+			//				failIfUsed(Constants.PARAM_TEXT);
+			//			}
 		}
 
 		final boolean supportsSomeOf = myFulltextSearchSvc.supportsSomeOf(myParams);
@@ -526,7 +526,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		if (myParams.containsKey(theParamName)) {
 			// LUKETODO:  msg code
 			throw new InvalidRequestException(Msg.code(9999)
-				+ "Fulltext search combined with chained sorts are not supported, can not process parameter: " + theParamName);
+					+ "Fulltext search combined with chained sorts are not supported, can not process parameter: "
+					+ theParamName);
 		}
 	}
 

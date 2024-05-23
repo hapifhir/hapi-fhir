@@ -101,7 +101,8 @@ public class HSearchSortHelperImpl implements IHSearchSortHelper {
 		// LUKETODO:  capture this in some kind of algorithm
 		// LUKETODO:  use recursion
 		for (SortSpec sortSpec = theParams.getSort(); sortSpec != null; sortSpec = sortSpec.getChain()) {
-			final Optional<RestSearchParameterTypeEnum> paramTypeOpt = getParamType(theResourceType, sortSpec.getParamName());
+			final Optional<RestSearchParameterTypeEnum> paramTypeOpt =
+					getParamType(theResourceType, sortSpec.getParamName());
 			if (paramTypeOpt.isEmpty()) {
 				return false;
 			}
