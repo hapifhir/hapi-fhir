@@ -531,7 +531,7 @@ public class AuthorizationInterceptor implements IRuleApplier {
 			case EXTENDED_OPERATION_TYPE:
 			case EXTENDED_OPERATION_INSTANCE: {
 				if (theResponseObject != null) {
-					resources = toListOfResourcesAndExcludeContainer(theRequestDetails, theResponseObject, fhirContext);
+					resources = toListOfResourcesAndExcludeContainer(theResponseObject, fhirContext);
 				}
 				break;
 			}
@@ -579,21 +579,14 @@ public class AuthorizationInterceptor implements IRuleApplier {
 	}
 
 	public static List<IBaseResource> toListOfResourcesAndExcludeContainer(
-			RequestDetails theRequestDetails, IBaseResource theResponseObject, FhirContext fhirContext) {
+			IBaseResource theResponseObject, FhirContext fhirContext) {
 		if (theResponseObject == null) {
 			return Collections.emptyList();
 		}
 
 		List<IBaseResource> retVal;
 
-		boolean shouldExamineChildResources = false;
-		if (theResponseObject instanceof IBaseBundle) {
-			IBaseBundle bundle = (IBaseBundle) theResponseObject;
-			shouldExamineChildResources = shouldExamineBundleChildResources(theRequestDetails, fhirContext, bundle);
-		} else if (theResponseObject instanceof IBaseParameters) {
-			shouldExamineChildResources = true;
-		}
-
+		boolean shouldExamineChildResources = shouldExamineChildResources(fhirContext, theResponseObject);
 		if (!shouldExamineChildResources) {
 			return Collections.singletonList(theResponseObject);
 		}
@@ -601,7 +594,7 @@ public class AuthorizationInterceptor implements IRuleApplier {
 		retVal = fhirContext.newTerser().getAllPopulatedChildElementsOfType(theResponseObject, IBaseResource.class);
 
 		// Exclude the container
-		if (retVal.size() > 0 && retVal.get(0) == theResponseObject) {
+		if (!retVal.isEmpty() && retVal.get(0) == theResponseObject) {
 			retVal = retVal.subList(1, retVal.size());
 		}
 
@@ -612,23 +605,22 @@ public class AuthorizationInterceptor implements IRuleApplier {
 	}
 
 	/**
-	 * This method determines if the given Bundle should have permissions applied to the resources inside or
-	 * to the Bundle itself.
-	 *
-	 * This distinction is important in Bundle requests where a user has permissions to view all Bundles. In
-	 * this scenario we want to apply permissions to the Bundle itself and not the resources inside if
-	 * the Bundle is of type document, collection, or message.
+	 * This method determines if the given Resource should have permissions applied to the resources inside or
+	 * to the Resource itself.
+	 * For Parameters resources, we include child resources when checking the permissions.
+	 * For Bundle resources, we only look at resources inside if the Bundle is of type document, collection, or message.
 	 */
-	public static boolean shouldExamineBundleChildResources(
-			RequestDetails theRequestDetails, FhirContext theFhirContext, IBaseBundle theBundle) {
-		boolean isBundleRequest = theRequestDetails != null && BUNDLE.equals(theRequestDetails.getResourceName());
-		if (!isBundleRequest) {
+	public static boolean shouldExamineChildResources(FhirContext theFhirContext, IBaseResource theResource) {
+		if (theResource instanceof IBaseParameters) {
 			return true;
 		}
-		BundleTypeEnum bundleType = BundleUtil.getBundleTypeEnum(theFhirContext, theBundle);
-		boolean isStandaloneBundleResource =
-				bundleType != null && STANDALONE_BUNDLE_RESOURCE_TYPES.contains(bundleType);
-		return !isStandaloneBundleResource;
+		if (theResource instanceof IBaseBundle) {
+			BundleTypeEnum bundleType = BundleUtil.getBundleTypeEnum(theFhirContext, ((IBaseBundle) theResource));
+			boolean isStandaloneBundleResource =
+					bundleType != null && STANDALONE_BUNDLE_RESOURCE_TYPES.contains(bundleType);
+			return !isStandaloneBundleResource;
+		}
+		return false;
 	}
 
 	public static class Verdict {
