@@ -4,6 +4,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
@@ -48,6 +49,7 @@ import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.SampledData;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.StructureDefinition;
@@ -60,10 +62,12 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -85,7 +89,7 @@ import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -1294,17 +1298,18 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		public void testConditionalCreateDependsOnFirstEntryExisting(boolean theHasQuestionMark) {
 			final BundleBuilder bundleBuilder = new BundleBuilder(myFhirContext);
 
-			bundleBuilder.addTransactionCreateEntry(myTask1, "urn:uuid:59cda086-4763-4ef0-8e36-8c90058686ea")
-				.conditional("identifier=http://tempuri.org|1");
-
+			final String firstMatchUrl = "identifier=http://tempuri.org|1";
 			final String secondEntryConditionalTemplate = "%sidentifier=http://tempuri.org|2&based-on=urn:uuid:59cda086-4763-4ef0-8e36-8c90058686ea";
 			final String secondMatchUrl = String.format(secondEntryConditionalTemplate, theHasQuestionMark ? "?" : "");
+
+			bundleBuilder.addTransactionCreateEntry(myTask1, "urn:uuid:59cda086-4763-4ef0-8e36-8c90058686ea")
+				.conditional(firstMatchUrl);
 
 			bundleBuilder.addTransactionCreateEntry(myTask2)
 				.conditional(secondMatchUrl);
 
 			final IBaseBundle requestBundle = bundleBuilder.getBundle();
-			assertTrue(requestBundle instanceof Bundle);
+			assertInstanceOf(Bundle.class, requestBundle);
 
 			final List<Bundle.BundleEntryComponent> responseEntries = sendBundleAndGetResponse(requestBundle);
 
@@ -1324,6 +1329,30 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 			assertEquals(1, task2BasedOn.size());
 			final Reference task2BasedOnReference = task2BasedOn.get(0);
 			assertEquals(taskPostBundle1.getIdElement().toUnqualifiedVersionless().asStringValue(), task2BasedOnReference.getReference());
+
+			assertRemainingTasks(myTask1, myTask2);
+
+			deleteExpunge(myTask2);
+			assertRemainingTasks(myTask1);
+
+			deleteExpunge(myTask1);
+			assertRemainingTasks();
+		}
+
+		private void assertRemainingTasks(Task... theExpectedTasks) {
+			final List<ResourceSearchUrlEntity> searchUrlsPreDelete = myResourceSearchUrlDao.findAll();
+
+			assertEquals(theExpectedTasks.length, searchUrlsPreDelete.size());
+			assertEquals(Arrays.stream(theExpectedTasks).map(Resource::getIdElement).map(IdType::getIdPartAsLong).toList(),
+						 searchUrlsPreDelete.stream().map(ResourceSearchUrlEntity::getResourcePid).toList());
+		}
+
+		private void deleteExpunge(Task theTask) {
+			final JpaPid pidOrThrowException = myIdHelperService.getPidOrThrowException(theTask);
+			final List<JpaPid> pidOrThrowException1 = List.of(pidOrThrowException);
+
+			final TransactionTemplate transactionTemplate = new TransactionTemplate(getTxManager());
+			transactionTemplate.execute(x -> myDeleteExpungeSvc.deleteExpunge(pidOrThrowException1, true, 10));
 		}
 	}
 

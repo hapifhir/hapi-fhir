@@ -126,7 +126,15 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 	protected void init740() {
 		// Start of migrations from 7.2 to 7.4
+
 		Builder version = forVersion(VersionEnum.V7_4_0);
+
+		{
+			version.onTable("HFJ_RES_SEARCH_URL")
+					.addForeignKey("20240515.1", "FK_RES_SEARCH_URL_RESOURCE")
+					.toColumn("RES_ID")
+					.references("HFJ_RESOURCE", "RES_ID");
+		}
 
 		// allow null values in SP_NAME, RES_TYPE columns for all HFJ_SPIDX_* tables
 		Builder.BuilderWithTableName spidxCoords = version.onTable("HFJ_SPIDX_COORDS");
