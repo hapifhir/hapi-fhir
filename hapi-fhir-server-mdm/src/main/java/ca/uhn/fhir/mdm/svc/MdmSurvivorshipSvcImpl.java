@@ -20,6 +20,7 @@
 package ca.uhn.fhir.mdm.svc;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
@@ -31,7 +32,7 @@ import ca.uhn.fhir.mdm.api.params.MdmQuerySearchParameters;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.model.mdmevents.MdmLinkJson;
 import ca.uhn.fhir.mdm.util.GoldenResourceHelper;
-import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.util.TerserUtil;
@@ -108,7 +109,7 @@ public class MdmSurvivorshipSvcImpl implements IMdmSurvivorshipService {
 				(IAnyResource) goldenResource,
 				theMdmTransactionContext,
 				null // we don't want to apply survivorship - just create a new GoldenResource
-				);
+		);
 
 		toSave.setId(goldenResource.getIdElement().toUnqualifiedVersionless());
 
@@ -118,7 +119,15 @@ public class MdmSurvivorshipSvcImpl implements IMdmSurvivorshipService {
 
 		// save it
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(goldenResource.fhirType());
-		dao.update(toSave, new SystemRequestDetails());
+
+		SystemRequestDetails requestDetails = new SystemRequestDetails();
+		// if using partitions, we should save to the correct partition
+		Object resourcePartitionIdObj = toSave.getUserData(Constants.RESOURCE_PARTITION_ID);
+		if (resourcePartitionIdObj instanceof RequestPartitionId) {
+			RequestPartitionId partitionId = (RequestPartitionId) resourcePartitionIdObj;
+			requestDetails.setRequestPartitionId(partitionId);
+		}
+		dao.update(toSave, requestDetails);
 
 		return (T) toSave;
 	}
@@ -135,24 +144,8 @@ public class MdmSurvivorshipSvcImpl implements IMdmSurvivorshipService {
 		Page<MdmLinkJson> linksQuery = myMdmLinkQuerySvc.queryLinks(searchParameters, theMdmTransactionContext);
 
 		return linksQuery.get().map(link -> {
-			String sourceId = link.getSourceId();
-
-			// +1 because of "/" in id: "ResourceType/Id"
-			final String sourceIdUnqualified = sourceId.substring(resourceType.length() + 1);
-
-			// myMdmLinkQuerySvc.queryLinks populates sourceId with the FHIR_ID, not the RES_ID, so if we don't
-			// add this conditional logic, on JPA, myIIdHelperService.newPidFromStringIdAndResourceName will fail with
-			// NumberFormatException
-			if (isNumericOrUuid(sourceIdUnqualified)) {
-				IResourcePersistentId<?> pid = getResourcePID(sourceIdUnqualified, resourceType);
-
-				// this might be a bit unperformant
-				// but it depends how many links there are
-				// per golden resource (unlikely to be thousands)
-				return dao.readByPid(pid);
-			} else {
-				return dao.read(new IdDt(sourceId), new SystemRequestDetails());
-			}
+			IResourcePersistentId<?> pid = link.getSourcePid();
+			return dao.readByPid(pid);
 		});
 	}
 

@@ -22,6 +22,7 @@ package ca.uhn.fhir.mdm.model.mdmevents;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Date;
@@ -29,15 +30,39 @@ import java.util.Objects;
 
 public class MdmLinkJson implements IModelJson {
 
+	/**
+	 * Golden resource FhirId
+	 */
 	@JsonProperty("goldenResourceId")
 	private String myGoldenResourceId;
 
+	/**
+	 * Source resource FhirId
+	 */
 	@JsonProperty("sourceId")
 	private String mySourceId;
 
+	/**
+	 * Golden resource PID
+	 */
+	@JsonProperty("goldenPid")
+	private IResourcePersistentId<?> myGoldenPid;
+
+	/**
+	 * Source PID
+	 */
+	@JsonProperty("sourcePid")
+	private IResourcePersistentId<?> mySourcePid;
+
+	/**
+	 * Kind of link (MATCH, etc)
+	 */
 	@JsonProperty("matchResult")
 	private MdmMatchResultEnum myMatchResult;
 
+	/**
+	 * How the link was constructed (AUTO - by the system, MANUAL - by a user)
+	 */
 	@JsonProperty("linkSource")
 	private MdmLinkSourceEnum myLinkSource;
 
@@ -178,6 +203,22 @@ public class MdmLinkJson implements IModelJson {
 		myRuleCount = theRuleCount;
 	}
 
+	public IResourcePersistentId<?> getGoldenPid() {
+		return myGoldenPid;
+	}
+
+	public void setGoldenPid(IResourcePersistentId<?> theGoldenPid) {
+		myGoldenPid = theGoldenPid;
+	}
+
+	public IResourcePersistentId<?> getSourcePid() {
+		return mySourcePid;
+	}
+
+	public void setSourcePid(IResourcePersistentId<?> theSourcePid) {
+		mySourcePid = theSourcePid;
+	}
+
 	@Override
 	public boolean equals(Object theO) {
 		if (this == theO) return true;
@@ -185,6 +226,8 @@ public class MdmLinkJson implements IModelJson {
 		final MdmLinkJson that = (MdmLinkJson) theO;
 		return Objects.equals(myGoldenResourceId, that.myGoldenResourceId)
 				&& Objects.equals(mySourceId, that.mySourceId)
+				&& mySourcePid.equals(that.mySourcePid)
+				&& myGoldenPid.equals(that.myGoldenPid)
 				&& myMatchResult == that.myMatchResult
 				&& myLinkSource == that.myLinkSource
 				&& Objects.equals(myCreated, that.myCreated)
@@ -202,6 +245,8 @@ public class MdmLinkJson implements IModelJson {
 		return Objects.hash(
 				myGoldenResourceId,
 				mySourceId,
+				mySourcePid,
+				myGoldenPid,
 				myMatchResult,
 				myLinkSource,
 				myCreated,
@@ -216,18 +261,21 @@ public class MdmLinkJson implements IModelJson {
 
 	@Override
 	public String toString() {
-		return "MdmLinkJson{" + "myGoldenResourceId='"
-				+ myGoldenResourceId + '\'' + ", mySourceId='"
-				+ mySourceId + '\'' + ", myMatchResult="
-				+ myMatchResult + ", myLinkSource="
-				+ myLinkSource + ", myCreated="
-				+ myCreated + ", myUpdated="
-				+ myUpdated + ", myVersion='"
-				+ myVersion + '\'' + ", myEidMatch="
-				+ myEidMatch + ", myLinkCreatedNewResource="
-				+ myLinkCreatedNewResource + ", myVector="
-				+ myVector + ", myScore="
-				+ myScore + ", myRuleCount="
-				+ myRuleCount + '}';
+		return "MdmLinkJson{"
+			+ "myGoldenResourceId='" + myGoldenResourceId + '\''
+			+ ", myGoldenPid='" + myGoldenPid + '\''
+			+ ", mySourceId='" + mySourceId + '\''
+			+ ", mySourcePid='" + mySourcePid + '\''
+			+ ", myMatchResult=" + myMatchResult
+			+ ", myLinkSource=" + myLinkSource
+			+ ", myCreated=" + myCreated
+			+ ", myUpdated=" + myUpdated
+			+ ", myVersion='" + myVersion + '\''
+			+ ", myEidMatch=" + myEidMatch
+			+ ", myLinkCreatedNewResource=" + myLinkCreatedNewResource
+			+ ", myVector=" + myVector
+			+ ", myScore=" + myScore
+			+ ", myRuleCount=" + myRuleCount
+			+ '}';
 	}
 }

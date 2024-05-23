@@ -155,25 +155,26 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 	public IResourceLookup<JpaPid> resolveResourceIdentity(
 			@Nonnull RequestPartitionId theRequestPartitionId,
 			String theResourceType,
-			String theResourceId,
+			final String theResourceId,
 			boolean theExcludeDeleted)
 			throws ResourceNotFoundException {
 		assert myDontCheckActiveTransactionForUnitTest || TransactionSynchronizationManager.isSynchronizationActive()
 				: "no transaction active";
 
-		if (theResourceId.contains("/")) {
-			theResourceId = theResourceId.substring(theResourceId.indexOf("/") + 1);
+		String resourceIdToUse = theResourceId;
+		if (resourceIdToUse.contains("/")) {
+			resourceIdToUse = theResourceId.substring(resourceIdToUse.indexOf("/") + 1);
 		}
 		IdDt id = new IdDt(theResourceType, theResourceId);
 		Map<String, List<IResourceLookup<JpaPid>>> matches =
 				translateForcedIdToPids(theRequestPartitionId, Collections.singletonList(id), theExcludeDeleted);
 
 		// We only pass 1 input in so only 0..1 will come back
-		if (matches.isEmpty() || !matches.containsKey(theResourceId)) {
+		if (matches.isEmpty() || !matches.containsKey(resourceIdToUse)) {
 			throw new ResourceNotFoundException(Msg.code(2001) + "Resource " + id + " is not known");
 		}
 
-		if (matches.size() > 1 || matches.get(theResourceId).size() > 1) {
+		if (matches.size() > 1 || matches.get(resourceIdToUse).size() > 1) {
 			/*
 			 *  This means that:
 			 *  1. There are two resources with the exact same resource type and forced id
@@ -183,7 +184,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 			throw new PreconditionFailedException(Msg.code(1099) + msg);
 		}
 
-		return matches.get(theResourceId).get(0);
+		return matches.get(resourceIdToUse).get(0);
 	}
 
 	/**
