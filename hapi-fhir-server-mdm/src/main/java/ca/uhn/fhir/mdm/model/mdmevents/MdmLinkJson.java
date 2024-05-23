@@ -262,20 +262,20 @@ public class MdmLinkJson implements IModelJson {
 	@Override
 	public String toString() {
 		return "MdmLinkJson{"
-			+ "myGoldenResourceId='" + myGoldenResourceId + '\''
-			+ ", myGoldenPid='" + myGoldenPid + '\''
-			+ ", mySourceId='" + mySourceId + '\''
-			+ ", mySourcePid='" + mySourcePid + '\''
-			+ ", myMatchResult=" + myMatchResult
-			+ ", myLinkSource=" + myLinkSource
-			+ ", myCreated=" + myCreated
-			+ ", myUpdated=" + myUpdated
-			+ ", myVersion='" + myVersion + '\''
-			+ ", myEidMatch=" + myEidMatch
-			+ ", myLinkCreatedNewResource=" + myLinkCreatedNewResource
-			+ ", myVector=" + myVector
-			+ ", myScore=" + myScore
-			+ ", myRuleCount=" + myRuleCount
-			+ '}';
+				+ "myGoldenResourceId='" + myGoldenResourceId + '\''
+				+ ", myGoldenPid='" + myGoldenPid + '\''
+				+ ", mySourceId='" + mySourceId + '\''
+				+ ", mySourcePid='" + mySourcePid + '\''
+				+ ", myMatchResult=" + myMatchResult
+				+ ", myLinkSource=" + myLinkSource
+				+ ", myCreated=" + myCreated
+				+ ", myUpdated=" + myUpdated
+				+ ", myVersion='" + myVersion + '\''
+				+ ", myEidMatch=" + myEidMatch
+				+ ", myLinkCreatedNewResource=" + myLinkCreatedNewResource
+				+ ", myVector=" + myVector
+				+ ", myScore=" + myScore
+				+ ", myRuleCount=" + myRuleCount
+				+ '}';
 	}
 }
