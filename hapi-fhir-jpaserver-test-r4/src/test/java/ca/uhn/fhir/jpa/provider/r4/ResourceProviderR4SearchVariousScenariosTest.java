@@ -6,6 +6,8 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.param.HasParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import org.hamcrest.MatcherAssert;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CarePlan;
@@ -15,6 +17,7 @@ import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.HumanName;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.ListResource;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
@@ -22,6 +25,7 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.PractitionerRole;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -31,7 +35,9 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.List;
 
+import static org.hamcrest.Matchers.contains;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 
 public class ResourceProviderR4SearchVariousScenariosTest extends BaseResourceProviderR4Test {
@@ -360,21 +366,52 @@ public class ResourceProviderR4SearchVariousScenariosTest extends BaseResourcePr
 
 	@Nested
 	class Sorting {
-		@Test
-		void practitionersAndRoles() {
-			final Practitioner pra1 = createPractitioner("pra1", "A_Family");
-			final Practitioner pra2 = createPractitioner("pra2", "B_Family");
-			final Practitioner pra3 = createPractitioner("pra3", "C_Family");
+		private IdType myPraId1;
+		private IdType myPraId2;
+		private IdType myPraId3;
+		private IdType myPraRoleId1;
+		private IdType myPraRoleId2;
+		private IdType myPraRoleId3;
 
-			final PractitionerRole praRole1 = createPractitionerRole("praRole1", pra1.getId());
-			final PractitionerRole praRole2 = createPractitionerRole("praRole2", pra2.getId());
-			final PractitionerRole praRole3 = createPractitionerRole("praRole3", pra3.getId());
+		@BeforeEach
+		void beforeEach() {
+			myPraId1 = createPractitioner("pra1", "C_Family");
+			myPraId2 = createPractitioner("pra2", "A_Family");
+			myPraId3 = createPractitioner("pra3", "B_Family");
 
-
-//			runQueryAndGetBundle("")
+			myPraRoleId1 = createPractitionerRole("praRole1", myPraId1);
+			myPraRoleId2 = createPractitionerRole("praRole2", myPraId2);
+			myPraRoleId3 = createPractitionerRole("praRole3", myPraId3);
 		}
 
-		private Practitioner createPractitioner(String theId, String theFamilyName) {
+		@Test
+		void testRegularSortAscendingWorks() {
+			// LUKETODO: add a reason
+			runAndAssert("", "Practitioner?_sort=family", myPraId2.getIdPart(), myPraId3.getIdPart(), myPraId1.getIdPart());
+		}
+
+		@Test
+		void testRegularSortDescendingWorks() {
+			// LUKETODO: add a reason
+			runAndAssert("", "Practitioner?_sort=-family", myPraId1.getIdPart(), myPraId3.getIdPart(), myPraId2.getIdPart());
+		}
+
+		@Test
+		void testChainedSortWorks() {
+			// LUKETODO: add a reason
+			runAndAssert("", "PractitionerRole?_sort=practitioner.family", myPraRoleId2.getIdPart(), myPraRoleId3.getIdPart(), myPraRoleId1.getIdPart());
+		}
+
+		@ParameterizedTest
+		@ValueSource(strings = {
+			"PractitionerRole?_text=blahblah&_sort=practitioner.family",
+			"PractitionerRole?_content=blahblah&_sort=practitioner.family"
+		})
+		void unsupportedSearchesWithChainedSorts(String theQueryString) {
+			runAndAssertThrows(InvalidRequestException.class, theQueryString);
+		}
+
+		private IdType createPractitioner(String theId, String theFamilyName) {
 			final Practitioner practitioner = (Practitioner) new Practitioner()
 				.setActive(true)
 				.setName(List.of(new HumanName().setFamily(theFamilyName)))
@@ -382,28 +419,46 @@ public class ResourceProviderR4SearchVariousScenariosTest extends BaseResourcePr
 
 			myPractitionerDao.update(practitioner, new SystemRequestDetails());
 
-			return practitioner;
+			return practitioner.getIdElement().toUnqualifiedVersionless();
 		}
 
-		private PractitionerRole createPractitionerRole(String theId, String thePractitionerId) {
+		private IdType createPractitionerRole(String theId, IdType thePractitionerId) {
 			final PractitionerRole practitionerRole = (PractitionerRole) new PractitionerRole()
 				.setActive(true)
-				.setPractitioner(new Reference(thePractitionerId))
+				.setPractitioner(new Reference(thePractitionerId.asStringValue()))
 				.setId(theId);
 
 			myPractitionerRoleDao.update(practitionerRole, new SystemRequestDetails());
 
-			return practitionerRole;
+			return practitionerRole.getIdElement().toUnqualifiedVersionless();
 		}
 	}
 
+	private void runAndAssert(String theReason, String theQueryString, String... theExpectedIdsInOrder) {
+		final Bundle outcome = runQueryAndGetBundle(theQueryString, myClient);
+
+		assertFalse(outcome.getEntry().isEmpty());
+
+		final List<String> actualIdsInOrder = outcome.getEntry()
+			.stream()
+			.map(Bundle.BundleEntryComponent::getResource)
+			.map(Resource::getIdPart)
+			.toList();
+
+		MatcherAssert.assertThat(theReason, actualIdsInOrder, contains(theExpectedIdsInOrder));
+	}
+
 	private void runAndAssert(String theQueryString) {
-		ourLog.info("queryString:\n{}", theQueryString);
+		ourLog.debug("queryString:\n{}", theQueryString);
 
 		final Bundle outcome = runQueryAndGetBundle(theQueryString, myClient);
 
 		assertFalse(outcome.getEntry().isEmpty());
-		ourLog.info("result:\n{}", theQueryString);
+		ourLog.debug("result:\n{}", theQueryString);
+	}
+
+	private void runAndAssertThrows(Class<? extends Exception> theExceptedException, String theQueryString) {
+		assertThrows(theExceptedException, () -> runQueryAndGetBundle(theQueryString, myClient));
 	}
 
 	private static Bundle runQueryAndGetBundle(String theTheQueryString, IGenericClient theClient) {

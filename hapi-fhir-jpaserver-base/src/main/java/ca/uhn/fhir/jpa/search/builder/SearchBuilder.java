@@ -469,21 +469,31 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		if (!fulltextEnabled) {
 			failIfUsed(Constants.PARAM_TEXT);
 			failIfUsed(Constants.PARAM_CONTENT);
-		}
+		} else {
+			// LUKETODO:  code reuse for this algorithm
+			for (SortSpec sortSpec = myParams.getSort(); sortSpec != null; sortSpec = sortSpec.getChain()) {
+				final String paramName = sortSpec.getParamName();
+				if (paramName.contains(".")) {
+					failIfUsedWithChainedSort(Constants.PARAM_TEXT);
+					failIfUsedWithChainedSort(Constants.PARAM_CONTENT);
+				}
+			}
+//			final Optional<SortSpec> optSort = Optional.ofNullable(myParams.getSort());
+//			if (optSort.isPresent()) {
+//				final SortSpec sortSpec = optSort.get();
+//				final String paramName = sortSpec.getParamName();
+//				if (paramName.contains(".")) {
+//					failIfUsedWithChainedSort(Constants.PARAM_TEXT);
+//					failIfUsedWithChainedSort(Constants.PARAM_CONTENT);
+//				}
+//			}
 
-		final List<List<IQueryParameterType>> listOfList = myParams.get(Constants.PARAM_TYPE);
-
-		if (listOfList != null) {
-			// first off, let's flatten the list of list
-			final List<IQueryParameterType> iQueryParameterTypesList =
-					listOfList.stream().flatMap(List::stream).collect(Collectors.toList());
-
-			// then, extract all elements of each CSV into one big list
-			final List<String> resourceTypes = iQueryParameterTypesList.stream()
-					.map(param -> ((StringParam) param).getValue())
-					.map(csvString -> List.of(csvString.split(",")))
-					.flatMap(List::stream)
-					.collect(Collectors.toList());
+//			if (Optional.ofNullable(myParams.getSort())
+//				.map(SortSpec::getChain)
+////				.map(SortSpec::getChain)
+//				.isPresent()) {
+//				failIfUsed(Constants.PARAM_TEXT);
+//			}
 		}
 
 		final boolean supportsSomeOf = myFulltextSearchSvc.supportsSomeOf(myParams);
@@ -509,6 +519,14 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		if (myParams.containsKey(theParamName)) {
 			throw new InvalidRequestException(Msg.code(1192)
 					+ "Fulltext search is not enabled on this service, can not process parameter: " + theParamName);
+		}
+	}
+
+	private void failIfUsedWithChainedSort(String theParamName) {
+		if (myParams.containsKey(theParamName)) {
+			// LUKETODO:  msg code
+			throw new InvalidRequestException(Msg.code(9999)
+				+ "Fulltext search combined with chained sorts are not supported, can not process parameter: " + theParamName);
 		}
 	}
 

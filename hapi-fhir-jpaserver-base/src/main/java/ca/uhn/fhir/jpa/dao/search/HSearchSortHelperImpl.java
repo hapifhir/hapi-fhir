@@ -98,24 +98,10 @@ public class HSearchSortHelperImpl implements IHSearchSortHelper {
 
 	@Override
 	public boolean newThingee(String theResourceType, SearchParameterMap theParams) {
-		//		if ("SearchParameter".equals(theResourceType) || "Subscription".equals(theResourceType)) {
-		//			return false;
-		//		}
-		//		// LUKETODO:  "practitioner.family" returns nothing from the active search params because this is a chain
-		//		final ResourceSearchParams activeSearchParams =
-		// mySearchParamRegistry.getActiveSearchParams(theResourceType);
-		//		// LUKETODO:  get rid of this experiment:
-		//		// LUKETODO:  what is the affirmative case here?
-		//		final RuntimeSearchParam runtimeSearchParam = activeSearchParams.get("practitioner");
-		//
-		//		final RestSearchParameterTypeEnum paramType = runtimeSearchParam.getParamType();
-		//
-		//		final List<String> sortPropertyList;
-		//		SortSpec sort;
-		//
-
-		for (SortSpec s = theParams.getSort(); s != null; s = s.getChain()) {
-			Optional<RestSearchParameterTypeEnum> paramTypeOpt = getParamType(theResourceType, s.getParamName());
+		// LUKETODO:  capture this in some kind of algorithm
+		// LUKETODO:  use recursion
+		for (SortSpec sortSpec = theParams.getSort(); sortSpec != null; sortSpec = sortSpec.getChain()) {
+			final Optional<RestSearchParameterTypeEnum> paramTypeOpt = getParamType(theResourceType, sortSpec.getParamName());
 			if (paramTypeOpt.isEmpty()) {
 				return false;
 			}

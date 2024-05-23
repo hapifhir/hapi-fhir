@@ -501,8 +501,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	@Override
 	public boolean supportsAllSortTerms(String theResourceType, SearchParameterMap theParams) {
 		// LUKETODO:  go through search types and if any are NOT supported, return false
-		final boolean output = myExtendedFulltextSortHelper.newThingee(theResourceType, theParams);
-		return false;
+		return myExtendedFulltextSortHelper.newThingee(theResourceType, theParams);
 	}
 
 	private void dispatchEvent(IHSearchEventListener.HSearchEventType theEventType) {

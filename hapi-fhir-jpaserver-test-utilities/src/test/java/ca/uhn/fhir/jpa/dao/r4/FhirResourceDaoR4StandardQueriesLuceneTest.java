@@ -121,38 +121,40 @@ public class FhirResourceDaoR4StandardQueriesLuceneTest extends BaseJpaTest {
 
 	@Nested
 	class ChainedSort {
+		private IdType myPraId1;
+		private IdType myPraId2;
+		private IdType myPraId3;
+		private IdType myPraRoleId1;
+		private IdType myPraRoleId2;
+		private IdType myPraRoleId3;
+
+		@BeforeEach
+		void beforeEach() {
+			myPraId1 = createPractitioner("pra1", "C_Family");
+			myPraId2 = createPractitioner("pra2", "A_Family");
+			myPraId3 = createPractitioner("pra3", "B_Family");
+
+			myPraRoleId1 = createPractitionerRole("praRole1", myPraId1);
+			myPraRoleId2 = createPractitionerRole("praRole2", myPraId2);
+			myPraRoleId3 = createPractitionerRole("praRole3", myPraId3);
+		}
+
+		@Test
+		void testRegularSortAscendingWorks() {
+			myTestDaoSearch.assertSearchFindsInOrder("direct ascending sort works", "Practitioner?_sort=family", myPraId2.getIdPart(), myPraId3.getIdPart(), myPraId1.getIdPart());
+		}
+
+		@Test
+		void testRegularSortDescendingWorks() {
+			myTestDaoSearch.assertSearchFindsInOrder("direct descending sort works", "Practitioner?_sort=-family", myPraId1.getIdPart(), myPraId3.getIdPart(), myPraId2.getIdPart());
+		}
+
 		@Test
 		void testChainedSortWorks() {
-			// given
-			final IdType praId1 = createPractitioner("pra1", "C_Family");
-			final IdType praId2 = createPractitioner("pra2", "A_Family");
-			final IdType praId3 = createPractitioner("pra3", "B_Family");
-
-			final String baseUrl = praId1.getBaseUrl();
-			final String stringValue = praId1.asStringValue();
-			final IdType praRoleId1 = createPractitionerRole("praRole1", praId1);
-			final IdType praRoleId2 = createPractitionerRole("praRole2", praId2);
-			final IdType praRoleId3 = createPractitionerRole("praRole3", praId3);
-
-			// when
-			myTestDaoSearch.assertSearchFindsInOrder("chain works", "PractitionerRole?_sort=practitioner.family", praRoleId2.getIdPart(), praRoleId3.getIdPart(), praRoleId1.getIdPart());
+			myTestDaoSearch.assertSearchFindsInOrder("chain works", "PractitionerRole?_sort=practitioner.family", myPraRoleId2.getIdPart(), myPraRoleId3.getIdPart(), myPraRoleId1.getIdPart());
 		}
 
-		@Test
-		void testChainedSortCombinedWithFullTextIsRefused() {
-			// given
-			final IdType praId1 = createPractitioner("pra1", "C_Family");
-			final IdType praId2 = createPractitioner("pra2", "A_Family");
-			final IdType praId3 = createPractitioner("pra3", "B_Family");
-
-			final IdType praRoleId1 = createPractitionerRole("praRole1", praId1);
-			final IdType praRoleId2 = createPractitionerRole("praRole2", praId2);
-			final IdType praRoleId3 = createPractitionerRole("praRole3", praId3);
-
-			// when
-			// LUKETODO:  figure out which code SHOULD throw this Exception
-			assertThrows(IllegalArgumentException.class, ()-> myTestDaoSearch.searchForResources( "PractitionerRole?_text=blahblah&_sort=practitioner.family"));
-		}
+		// TestDaoSearch doesn't seem to work when using "_text:
 
 		private IdType createPractitioner(String theId, String theFamilyName) {
 			final Practitioner practitioner = (Practitioner) new Practitioner()

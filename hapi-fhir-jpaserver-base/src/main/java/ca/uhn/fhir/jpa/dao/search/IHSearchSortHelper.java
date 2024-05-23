@@ -31,6 +31,6 @@ public interface IHSearchSortHelper {
 
 	SortFinalStep getSortClauses(SearchSortFactory theSortFactory, SortSpec theSort, String theResourceType);
 
-	// LUKETODO:  add method "do we support these" and keep in sync with the other code
+	// LUKETODO: rename
 	boolean newThingee(String theResourceType, SearchParameterMap theParams);
 }
