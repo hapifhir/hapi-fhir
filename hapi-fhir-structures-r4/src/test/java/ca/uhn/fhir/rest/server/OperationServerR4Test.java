@@ -53,8 +53,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInRelativeOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
@@ -110,7 +108,7 @@ public class OperationServerR4Test {
 		assertThat(ops.size()).isGreaterThan(1);
 
 		List<String> opNames = toOpNames(ops);
-		assertThat(opNames.toString(), opNames, containsInRelativeOrder("OP_TYPE" ));
+		assertThat(opNames).as(opNames.toString()).contains("OP_TYPE" );
 
 		OperationDefinition def = myFhirClient.read().resource(OperationDefinition.class).withId(ops.get(opNames.indexOf("OP_TYPE" )).getDefinition()).execute();
 		assertEquals("OP_TYPE", def.getCode());

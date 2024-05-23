@@ -91,9 +91,6 @@ import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.either;
-import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -201,7 +198,7 @@ public class ClientR4Test {
 
 		assertEquals(HttpPost.class, capt.getValue().getClass());
 		HttpPost post = (HttpPost) capt.getValue();
-		assertThat(IOUtils.toString(post.getEntity().getContent(), Charsets.UTF_8), StringContains.containsString("{\"resourceType\":\"Patient\""));
+		assertThat(IOUtils.toString(post.getEntity().getContent(), Charsets.UTF_8)).contains("{\"resourceType\":\"Patient\"");
 		assertEquals("http://example.com/fhir/Patient/100/_history/200", response.getId().getValue());
 		assertEquals(EncodingEnum.JSON.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(0).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
 		assertEquals("200", response.getId().getVersionIdPart());
@@ -293,7 +290,7 @@ public class ClientR4Test {
 
 		assertEquals(HttpPost.class, capt.getValue().getClass());
 		HttpPost post = (HttpPost) capt.getValue();
-		assertThat(IOUtils.toString(post.getEntity().getContent(), Charsets.UTF_8), StringContains.containsString("\"Patient"));
+		assertThat(IOUtils.toString(post.getEntity().getContent(), Charsets.UTF_8)).contains("\"Patient");
 		assertEquals("http://example.com/fhir/Patient/100/_history/200", response.getId().getValue());
 		assertEquals("200", response.getId().getVersionIdPart());
 	}
@@ -1203,7 +1200,9 @@ public class ClientR4Test {
 		idx++;
 
 		client.getPatientWithIncludes(Arrays.asList(SummaryEnum.COUNT, SummaryEnum.DATA));
-		assertThat(capt.getAllValues().get(idx).getURI().toString(), either(equalTo("http://foo/Patient?_summary=data&_summary=count")).or(equalTo("http://foo/Patient?_summary=count&_summary=data")));
+		assertThat(capt.getAllValues().get(idx).getURI().toString()).isIn(
+			 "http://foo/Patient?_summary=data&_summary=count",
+			 "http://foo/Patient?_summary=count&_summary=data");
 		idx++;
 
 		client.getPatientWithIncludes(new ArrayList<SummaryEnum>());
@@ -1229,8 +1228,8 @@ public class ClientR4Test {
 
 		assertEquals(HttpPut.class, capt.getValue().getClass());
 		HttpPut post = (HttpPut) capt.getValue();
-		assertThat(post.getURI().toASCIIString(), StringEndsWith.endsWith("/Patient/100"));
-		assertThat(IOUtils.toString(post.getEntity().getContent(), Charsets.UTF_8), StringContains.containsString("\"Patient"));
+		assertThat(post.getURI().toASCIIString()).endsWith("/Patient/100");
+		assertThat(IOUtils.toString(post.getEntity().getContent(), Charsets.UTF_8)).contains("\"Patient");
 		assertEquals("http://example.com/fhir/Patient/100/_history/200", response.getId().getValue());
 		assertEquals("200", response.getId().getVersionIdPart());
 		assertEquals(EncodingEnum.JSON.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(0).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
@@ -1300,8 +1299,8 @@ public class ClientR4Test {
 
 		assertEquals(HttpPut.class, capt.getValue().getClass());
 		HttpPut post = (HttpPut) capt.getValue();
-		assertThat(post.getURI().toASCIIString(), StringEndsWith.endsWith("/Patient/100"));
-		assertThat(IOUtils.toString(post.getEntity().getContent(), Charsets.UTF_8), StringContains.containsString("\"Patient"));
+		assertThat(post.getURI().toASCIIString()).endsWith("/Patient/100");
+		assertThat(IOUtils.toString(post.getEntity().getContent(), Charsets.UTF_8)).contains("\"Patient");
 		assertEquals("http://example.com/fhir/Patient/100/_history/200", response.getId().getValue());
 		assertEquals("200", response.getId().getVersionIdPart());
 	}
@@ -1324,8 +1323,8 @@ public class ClientR4Test {
 
 		assertEquals(HttpPost.class, capt.getValue().getClass());
 		HttpPost post = (HttpPost) capt.getValue();
-		assertThat(post.getURI().toASCIIString(), StringEndsWith.endsWith("/Patient/$validate"));
-		assertThat(IOUtils.toString(post.getEntity().getContent(), Charsets.UTF_8), StringContains.containsString("\"Patient"));
+		assertThat(post.getURI().toASCIIString()).endsWith("/Patient/$validate");
+		assertThat(IOUtils.toString(post.getEntity().getContent(), Charsets.UTF_8)).contains("\"Patient");
 		assertNull(response.getOperationOutcome());
 		assertNull(response.getResource());
 	}
@@ -1373,8 +1372,8 @@ public class ClientR4Test {
 
 		assertEquals(HttpPost.class, capt.getValue().getClass());
 		HttpPost post = (HttpPost) capt.getValue();
-		assertThat(post.getURI().toASCIIString(), StringEndsWith.endsWith("/Patient/$validate"));
-		assertThat(IOUtils.toString(post.getEntity().getContent(), Charsets.UTF_8), StringContains.containsString("\"Patient"));
+		assertThat(post.getURI().toASCIIString()).endsWith("/Patient/$validate");
+		assertThat(IOUtils.toString(post.getEntity().getContent(), Charsets.UTF_8)).contains("\"Patient");
 		assertNotNull(response.getOperationOutcome());
 		assertEquals("ALL GOOD", ((OperationOutcome) response.getOperationOutcome()).getIssueFirstRep().getDiagnostics());
 		assertNull(response.getResource());
