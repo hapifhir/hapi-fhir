@@ -112,14 +112,6 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 	@Column(name = "SP_ID")
 	private Long myId;
 
-	/**
-	 * Composite of resourceType, paramName, and partition info if configured.
-	 * Combined with the various date fields for a query.
-	 * @since 3.5.0 - At some point this should be made not-null
-	 */
-	@Column(name = "HASH_IDENTITY", nullable = true)
-	private Long myHashIdentity;
-
 	@ManyToOne(
 			optional = false,
 			fetch = FetchType.LAZY,
@@ -276,10 +268,6 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 		b.append(getValueHighDateOrdinal(), obj.getValueHighDateOrdinal());
 		b.append(isMissing(), obj.isMissing());
 		return b.isEquals();
-	}
-
-	public void setHashIdentity(Long theHashIdentity) {
-		myHashIdentity = theHashIdentity;
 	}
 
 	@Override

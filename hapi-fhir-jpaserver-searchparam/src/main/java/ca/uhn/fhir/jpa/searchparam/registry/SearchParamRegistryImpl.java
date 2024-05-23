@@ -37,6 +37,7 @@ import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import ca.uhn.fhir.rest.server.util.IndexedSearchParam;
 import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
 import ca.uhn.fhir.util.SearchParameterUtil;
 import ca.uhn.fhir.util.StopWatch;
@@ -145,6 +146,11 @@ public class SearchParamRegistryImpl
 	@Override
 	public List<RuntimeSearchParam> getActiveComboSearchParams(String theResourceName, Set<String> theParamNames) {
 		return myJpaSearchParamCache.getActiveComboSearchParams(theResourceName, theParamNames);
+	}
+
+	@Override
+	public Optional<IndexedSearchParam> getIndexedSearchParamByHashIdentity(Long theHashIdentity) {
+		return myJpaSearchParamCache.getIndexedSearchParamByHashIdentity(theHashIdentity);
 	}
 
 	@Nullable

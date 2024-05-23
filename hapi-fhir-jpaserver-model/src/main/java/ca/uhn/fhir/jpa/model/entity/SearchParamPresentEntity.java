@@ -30,6 +30,8 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.io.Serializable;
 
+import static ca.uhn.fhir.jpa.model.util.SearchParamHash.hashSearchParam;
+
 @Entity
 @Table(
 		name = "HFJ_RES_PARAM_PRESENT",
@@ -200,7 +202,6 @@ public class SearchParamPresentEntity extends BasePartitionable implements Seria
 			String theParamName,
 			Boolean thePresent) {
 		String string = thePresent != null ? Boolean.toString(thePresent) : Boolean.toString(false);
-		return BaseResourceIndexedSearchParam.hash(
-				thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, string);
+		return hashSearchParam(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, string);
 	}
 }

@@ -48,6 +48,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 
+import static ca.uhn.fhir.jpa.model.util.SearchParamHash.hashSearchParam;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.trim;
 
@@ -92,11 +93,6 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SPIDX_TOKEN")
 	@Column(name = "SP_ID")
 	private Long myId;
-	/**
-	 * @since 3.4.0 - At some point this should be made not-null
-	 */
-	@Column(name = "HASH_IDENTITY", nullable = true)
-	private Long myHashIdentity;
 	/**
 	 * @since 3.4.0 - At some point this should be made not-null
 	 */
@@ -235,10 +231,6 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 		myHashSystem = theHashSystem;
 	}
 
-	private void setHashIdentity(Long theHashIdentity) {
-		myHashIdentity = theHashIdentity;
-	}
-
 	public Long getHashSystemAndValue() {
 		return myHashSystemAndValue;
 	}
@@ -366,7 +358,8 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 			String theResourceType,
 			String theParamName,
 			String theSystem) {
-		return hash(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, trim(theSystem));
+		return hashSearchParam(
+				thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, trim(theSystem));
 	}
 
 	public static long calculateHashSystemAndValue(
@@ -388,7 +381,7 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 			String theParamName,
 			String theSystem,
 			String theValue) {
-		return hash(
+		return hashSearchParam(
 				thePartitionSettings,
 				theRequestPartitionId,
 				theResourceType,
@@ -414,7 +407,7 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 			String theParamName,
 			String theValue) {
 		String value = trim(theValue);
-		return hash(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, value);
+		return hashSearchParam(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, value);
 	}
 
 	@Override

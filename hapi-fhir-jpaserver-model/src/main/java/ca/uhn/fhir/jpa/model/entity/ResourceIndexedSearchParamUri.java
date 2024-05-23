@@ -44,6 +44,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 
+import static ca.uhn.fhir.jpa.model.util.SearchParamHash.hashSearchParam;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 
 @Embeddable
@@ -87,11 +88,6 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 	 */
 	@Column(name = "HASH_URI", nullable = true)
 	private Long myHashUri;
-	/**
-	 * @since 3.5.0 - At some point this should be made not-null
-	 */
-	@Column(name = "HASH_IDENTITY", nullable = true)
-	private Long myHashIdentity;
 
 	@ManyToOne(
 			optional = false,
@@ -175,14 +171,6 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 		return b.isEquals();
 	}
 
-	private Long getHashIdentity() {
-		return myHashIdentity;
-	}
-
-	private void setHashIdentity(long theHashIdentity) {
-		myHashIdentity = theHashIdentity;
-	}
-
 	public Long getHashUri() {
 		return myHashUri;
 	}
@@ -262,7 +250,7 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 			String theResourceType,
 			String theParamName,
 			String theUri) {
-		return hash(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, theUri);
+		return hashSearchParam(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, theUri);
 	}
 
 	@Override

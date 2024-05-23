@@ -72,11 +72,6 @@ public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchP
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SPIDX_NUMBER")
 	@Column(name = "SP_ID")
 	private Long myId;
-	/**
-	 * @since 3.5.0 - At some point this should be made not-null
-	 */
-	@Column(name = "HASH_IDENTITY", nullable = true)
-	private Long myHashIdentity;
 
 	@ManyToOne(
 			optional = false,
@@ -123,10 +118,6 @@ public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchP
 		setHashIdentity(calculateHashIdentity(getPartitionSettings(), getPartitionId(), resourceType, paramName));
 	}
 
-	public Long getHashIdentity() {
-		return myHashIdentity;
-	}
-
 	@Override
 	public boolean equals(Object theObj) {
 		if (this == theObj) {
@@ -154,10 +145,6 @@ public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchP
 			return null;
 		}
 		return theValue.doubleValue();
-	}
-
-	public void setHashIdentity(Long theHashIdentity) {
-		myHashIdentity = theHashIdentity;
 	}
 
 	@Override

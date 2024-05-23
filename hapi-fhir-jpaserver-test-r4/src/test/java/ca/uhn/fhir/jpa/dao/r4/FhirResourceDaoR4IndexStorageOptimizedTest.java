@@ -6,8 +6,18 @@ import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamCoords;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamNumber;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantityNormalized;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
+import ca.uhn.fhir.jpa.model.util.SearchParamHash;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
@@ -60,7 +70,7 @@ public class FhirResourceDaoR4IndexStorageOptimizedTest extends BaseJpaR4Test {
 		IIdType id = myLocationDao.create(loc, mySrd).getId().toUnqualifiedVersionless();
 
 		validateAndReindex(theIsIndexStorageOptimized, myLocationDao, myResourceIndexedSearchParamCoordsDao, id,
-			Location.SP_NEAR, "Location", new SpecialParam().setValue("43.7|79.4"));
+			Location.SP_NEAR, "Location", new SpecialParam().setValue("43.7|79.4"), ResourceIndexedSearchParamCoords.class);
 	}
 
 	@ParameterizedTest
@@ -73,7 +83,7 @@ public class FhirResourceDaoR4IndexStorageOptimizedTest extends BaseJpaR4Test {
 		IIdType id = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
 
 		validateAndReindex(theIsIndexStorageOptimized, myPatientDao, myResourceIndexedSearchParamDateDao, id,
-			Patient.SP_BIRTHDATE, "Patient", new DateParam("2021-02-22"));
+			Patient.SP_BIRTHDATE, "Patient", new DateParam("2021-02-22"), ResourceIndexedSearchParamDate.class);
 	}
 
 	@ParameterizedTest
@@ -87,7 +97,7 @@ public class FhirResourceDaoR4IndexStorageOptimizedTest extends BaseJpaR4Test {
 		IIdType id = myRiskAssessmentDao.create(riskAssessment, mySrd).getId().toUnqualifiedVersionless();
 
 		validateAndReindex(theIsIndexStorageOptimized, myRiskAssessmentDao, myResourceIndexedSearchParamNumberDao, id,
-			RiskAssessment.SP_PROBABILITY, "RiskAssessment", new NumberParam(15));
+			RiskAssessment.SP_PROBABILITY, "RiskAssessment", new NumberParam(15), ResourceIndexedSearchParamNumber.class);
 	}
 
 	@ParameterizedTest
@@ -100,7 +110,7 @@ public class FhirResourceDaoR4IndexStorageOptimizedTest extends BaseJpaR4Test {
 		IIdType id = myObservationDao.create(observation, mySrd).getId().toUnqualifiedVersionless();
 
 		validateAndReindex(theIsIndexStorageOptimized, myObservationDao, myResourceIndexedSearchParamQuantityDao, id,
-			Observation.SP_VALUE_QUANTITY, "Observation", new QuantityParam(123));
+			Observation.SP_VALUE_QUANTITY, "Observation", new QuantityParam(123), ResourceIndexedSearchParamQuantity.class);
 	}
 
 	@ParameterizedTest
@@ -114,8 +124,8 @@ public class FhirResourceDaoR4IndexStorageOptimizedTest extends BaseJpaR4Test {
 		IIdType id = mySubstanceDao.create(res, mySrd).getId().toUnqualifiedVersionless();
 
 		QuantityParam quantityParam = new QuantityParam(null, 123, UcumServiceUtil.UCUM_CODESYSTEM_URL, "m");
-		validateAndReindex(theIsIndexStorageOptimized, mySubstanceDao,
-			myResourceIndexedSearchParamQuantityNormalizedDao, id, Substance.SP_QUANTITY, "Substance", quantityParam);
+		validateAndReindex(theIsIndexStorageOptimized, mySubstanceDao, myResourceIndexedSearchParamQuantityNormalizedDao,
+			id, Substance.SP_QUANTITY, "Substance", quantityParam, ResourceIndexedSearchParamQuantityNormalized.class);
 	}
 
 	@ParameterizedTest
@@ -128,7 +138,7 @@ public class FhirResourceDaoR4IndexStorageOptimizedTest extends BaseJpaR4Test {
 		IIdType id = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
 
 		validateAndReindex(theIsIndexStorageOptimized, myPatientDao, myResourceIndexedSearchParamStringDao, id,
-			Patient.SP_ADDRESS, "Patient", new StringParam("123 Main Street"));
+			Patient.SP_ADDRESS, "Patient", new StringParam("123 Main Street"), ResourceIndexedSearchParamString.class);
 	}
 
 	@ParameterizedTest
@@ -141,7 +151,7 @@ public class FhirResourceDaoR4IndexStorageOptimizedTest extends BaseJpaR4Test {
 		IIdType id = myObservationDao.create(observation, mySrd).getId().toUnqualifiedVersionless();
 
 		validateAndReindex(theIsIndexStorageOptimized, myObservationDao, myResourceIndexedSearchParamTokenDao, id,
-			Observation.SP_STATUS, "Observation", new TokenParam("final"));
+			Observation.SP_STATUS, "Observation", new TokenParam("final"), ResourceIndexedSearchParamToken.class);
 	}
 
 	@ParameterizedTest
@@ -154,15 +164,16 @@ public class FhirResourceDaoR4IndexStorageOptimizedTest extends BaseJpaR4Test {
 		IIdType id = myValueSetDao.create(valueSet, mySrd).getId().toUnqualifiedVersionless();
 
 		validateAndReindex(theIsIndexStorageOptimized, myValueSetDao, myResourceIndexedSearchParamUriDao, id,
-			ValueSet.SP_URL, "ValueSet", new UriParam("http://vs"));
+			ValueSet.SP_URL, "ValueSet", new UriParam("http://vs"), ResourceIndexedSearchParamUri.class);
 	}
 
 	private void validateAndReindex(boolean theIsIndexStorageOptimized, IFhirResourceDao<? extends IBaseResource> theResourceDao,
 									JpaRepository<? extends BaseResourceIndexedSearchParam, Long> theIndexedSpRepository, IIdType theId,
-									String theSearchParam, String theResourceType, BaseParam theParamValue) {
+									String theSearchParam, String theResourceType, BaseParam theParamValue,
+									Class<? extends BaseResourceIndexedSearchParam> theIndexedSearchParamClass) {
 		// validate
 		validateSearchContainsResource(theResourceDao, theId, theSearchParam, theParamValue);
-		validateSearchParams(theIndexedSpRepository, theId, theSearchParam, theResourceType);
+		validateSearchParams(theIndexedSpRepository, theId, theSearchParam, theResourceType, theIndexedSearchParamClass);
 
 		// switch on/off storage optimization and run $reindex
 		myStorageSettings.setIndexStorageOptimized(!theIsIndexStorageOptimized);
@@ -170,32 +181,59 @@ public class FhirResourceDaoR4IndexStorageOptimizedTest extends BaseJpaR4Test {
 
 		// validate again
 		validateSearchContainsResource(theResourceDao, theId, theSearchParam, theParamValue);
-		validateSearchParams(theIndexedSpRepository, theId, theSearchParam, theResourceType);
+		validateSearchParams(theIndexedSpRepository, theId, theSearchParam, theResourceType, theIndexedSearchParamClass);
 	}
 
 	private void validateSearchParams(JpaRepository<? extends BaseResourceIndexedSearchParam, Long> theIndexedSpRepository,
-									  IIdType theId, String theSearchParam, String theResourceType) {
+									  IIdType theId, String theSearchParam, String theResourceType,
+									  Class<? extends BaseResourceIndexedSearchParam> theIndexedSearchParamClass) {
+		List<? extends BaseResourceIndexedSearchParam> repositorySearchParams =
+			getAndValidateIndexedSearchParamsRepository(theIndexedSpRepository, theId, theSearchParam, theResourceType);
+
+		long hash = SearchParamHash.hashSearchParam(new PartitionSettings(), null, theResourceType, theSearchParam);
 		if (myStorageSettings.isIndexStorageOptimized()) {
-			List<? extends BaseResourceIndexedSearchParam> list = theIndexedSpRepository.findAll().stream()
-				.filter(sp -> sp.getResourcePid().equals(theId.getIdPartAsLong()))
-				.toList();
-			assertFalse(list.isEmpty());
-			list.forEach(sp -> {
-				assertNull(sp.getParamName());
-				assertNull(sp.getResourceType());
-				assertNull(sp.getUpdated());
+			// validated sp_name, res_type, sp_updated columns are null in DB
+			runInTransaction(() -> {
+				List<?> results = myEntityManager.createQuery("SELECT i FROM " + theIndexedSearchParamClass.getSimpleName() +
+					" i WHERE i.myResourcePid = " + theId.getIdPartAsLong() + " AND i.myResourceType IS NULL " +
+					"AND i.myParamName IS NULL AND i.myUpdated IS NULL AND i.myHashIdentity = " + hash, theIndexedSearchParamClass).getResultList();
+				assertFalse(results.isEmpty());
+				assertEquals(repositorySearchParams.size(), results.size());
 			});
 		} else {
-			List<? extends BaseResourceIndexedSearchParam> list = theIndexedSpRepository.findAll().stream()
-				.filter(sp -> sp.getResourcePid().equals(theId.getIdPartAsLong()))
-				.filter(sp -> theSearchParam.equals(sp.getParamName()))
-				.toList();
-			assertFalse(list.isEmpty());
-			list.forEach(sp -> {
-				assertEquals(theResourceType, sp.getResourceType());
-				assertNotNull(sp.getUpdated());
+			// validated sp_name, res_type, sp_updated columns are not null in DB
+			runInTransaction(() -> {
+				List<?> results = myEntityManager.createQuery("SELECT i FROM " + theIndexedSearchParamClass.getSimpleName() +
+						" i WHERE i.myResourcePid = " + theId.getIdPartAsLong() + " AND i.myResourceType = '" + theResourceType +
+						"' AND i.myParamName = '" + theSearchParam + "' AND i.myUpdated IS NOT NULL AND i.myHashIdentity = " + hash,
+					theIndexedSearchParamClass).getResultList();
+				assertFalse(results.isEmpty());
+				assertEquals(repositorySearchParams.size(), results.size());
 			});
 		}
+	}
+
+	private List<? extends BaseResourceIndexedSearchParam> getAndValidateIndexedSearchParamsRepository(
+		JpaRepository<? extends BaseResourceIndexedSearchParam, Long> theIndexedSpRepository,
+		IIdType theId, String theSearchParam, String theResourceType) {
+
+		List<? extends BaseResourceIndexedSearchParam> repositorySearchParams = theIndexedSpRepository.findAll()
+			.stream()
+			.filter(sp -> sp.getResourcePid().equals(theId.getIdPartAsLong()))
+			.filter(sp -> theSearchParam.equals(sp.getParamName()))
+			.toList();
+		assertFalse(repositorySearchParams.isEmpty());
+
+		repositorySearchParams.forEach(sp -> {
+			assertEquals(theResourceType, sp.getResourceType());
+			if (myStorageSettings.isIndexStorageOptimized()) {
+				assertNull(sp.getUpdated());
+			} else {
+				assertNotNull(sp.getUpdated());
+			}
+		});
+
+		return repositorySearchParams;
 	}
 
 	private void validateSearchContainsResource(IFhirResourceDao<? extends IBaseResource> theResourceDao,

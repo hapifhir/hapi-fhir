@@ -72,11 +72,6 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SPIDX_COORDS")
 	@Column(name = "SP_ID")
 	private Long myId;
-	/**
-	 * @since 3.5.0 - At some point this should be made not-null
-	 */
-	@Column(name = "HASH_IDENTITY", nullable = true)
-	private Long myHashIdentity;
 
 	@ManyToOne(
 			optional = false,
@@ -150,10 +145,6 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 		myLatitude = source.getLatitude();
 		myLongitude = source.getLongitude();
 		myHashIdentity = source.myHashIdentity;
-	}
-
-	public void setHashIdentity(Long theHashIdentity) {
-		myHashIdentity = theHashIdentity;
 	}
 
 	@Override

@@ -22,15 +22,9 @@ package ca.uhn.fhir.jpa.model.entity;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.util.SearchParamHash;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.util.UrlUtil;
-import com.google.common.base.Charsets;
-import com.google.common.hash.HashCode;
-import com.google.common.hash.HashFunction;
-import com.google.common.hash.Hasher;
-import com.google.common.hash.Hashing;
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.Temporal;
@@ -46,16 +40,6 @@ import java.util.List;
 @MappedSuperclass
 public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 	static final int MAX_SP_NAME = 100;
-	/**
-	 * Don't change this without careful consideration. You will break existing hashes!
-	 */
-	private static final HashFunction HASH_FUNCTION = Hashing.murmur3_128(0);
-
-	/**
-	 * Don't make this public 'cause nobody better be able to modify it!
-	 */
-	private static final byte[] DELIMITER_BYTES = "|".getBytes(Charsets.UTF_8);
-
 	private static final long serialVersionUID = 1L;
 
 	@GenericField
@@ -72,6 +56,14 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 	@FullTextField
 	@Column(name = "RES_TYPE", length = Constants.MAX_RESOURCE_NAME_LENGTH)
 	private String myResourceType;
+
+	/**
+	 * Composite of resourceType, paramName, and partition info if configured.
+	 * Combined with the various date fields for a query.
+	 * @since 3.5.0 - At some point this should be made not-null
+	 */
+	@Column(name = "HASH_IDENTITY", nullable = true)
+	protected Long myHashIdentity;
 
 	@GenericField
 	@Column(name = "SP_UPDATED")
@@ -95,6 +87,15 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 		if (!StringUtils.equals(myParamName, theName)) {
 			myParamName = theName;
 			clearHashes();
+		}
+	}
+
+	/**
+	 * Restore SP_NAME without clearing hashes
+	 */
+	public void restoreParamName(String theParamName) {
+		if (myParamName == null) {
+			myParamName = theParamName;
 		}
 	}
 
@@ -137,6 +138,14 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 
 	public void setResourceType(String theResourceType) {
 		myResourceType = theResourceType;
+	}
+
+	public void setHashIdentity(Long theHashIdentity) {
+		myHashIdentity = theHashIdentity;
+	}
+
+	public Long getHashIdentity() {
+		return myHashIdentity;
 	}
 
 	public Date getUpdated() {
@@ -194,7 +203,8 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 			RequestPartitionId theRequestPartitionId,
 			String theResourceType,
 			String theParamName) {
-		return hash(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName);
+		return SearchParamHash.hashSearchParam(
+				thePartitionSettings, theRequestPartitionId, theResourceType, theParamName);
 	}
 
 	public static long calculateHashIdentity(
@@ -210,42 +220,6 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 			values[i + 2] = theAdditionalValues.get(i);
 		}
 
-		return hash(thePartitionSettings, theRequestPartitionId, values);
-	}
-
-	/**
-	 * Applies a fast and consistent hashing algorithm to a set of strings
-	 */
-	static long hash(
-			PartitionSettings thePartitionSettings, RequestPartitionId theRequestPartitionId, String... theValues) {
-		Hasher hasher = HASH_FUNCTION.newHasher();
-
-		if (thePartitionSettings.isPartitioningEnabled()
-				&& thePartitionSettings.isIncludePartitionInSearchHashes()
-				&& theRequestPartitionId != null) {
-			if (theRequestPartitionId.getPartitionIds().size() > 1) {
-				throw new InternalErrorException(Msg.code(1527)
-						+ "Can not search multiple partitions when partitions are included in search hashes");
-			}
-			Integer partitionId = theRequestPartitionId.getFirstPartitionIdOrNull();
-			if (partitionId != null) {
-				hasher.putInt(partitionId);
-			}
-		}
-
-		for (String next : theValues) {
-			if (next == null) {
-				hasher.putByte((byte) 0);
-			} else {
-				next = UrlUtil.escapeUrlParam(next);
-				byte[] bytes = next.getBytes(Charsets.UTF_8);
-				hasher.putBytes(bytes);
-			}
-			hasher.putBytes(DELIMITER_BYTES);
-		}
-
-		HashCode hashCode = hasher.hash();
-		long retVal = hashCode.asLong();
-		return retVal;
+		return SearchParamHash.hashSearchParam(thePartitionSettings, theRequestPartitionId, values);
 	}
 }

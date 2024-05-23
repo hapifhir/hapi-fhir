@@ -44,6 +44,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+import static ca.uhn.fhir.jpa.model.util.SearchParamHash.hashSearchParam;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 
 // @formatter:off
@@ -100,11 +101,6 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 	 */
 	@Column(name = "HASH_NORM_PREFIX", nullable = true)
 	private Long myHashNormalizedPrefix;
-	/**
-	 * @since 3.6.0 - At some point this should be made not-null
-	 */
-	@Column(name = "HASH_IDENTITY", nullable = true)
-	private Long myHashIdentity;
 	/**
 	 * @since 3.4.0 - At some point this should be made not-null
 	 */
@@ -192,14 +188,6 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 		b.append(getHashNormalizedPrefix(), obj.getHashNormalizedPrefix());
 		b.append(getValueNormalized(), obj.getValueNormalized());
 		return b.isEquals();
-	}
-
-	private Long getHashIdentity() {
-		return myHashIdentity;
-	}
-
-	public void setHashIdentity(Long theHashIdentity) {
-		myHashIdentity = theHashIdentity;
 	}
 
 	public Long getHashExact() {
@@ -310,7 +298,8 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 			String theResourceType,
 			String theParamName,
 			String theValueExact) {
-		return hash(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, theValueExact);
+		return hashSearchParam(
+				thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, theValueExact);
 	}
 
 	public static long calculateHashNormalized(
@@ -349,7 +338,7 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 		}
 
 		String value = StringUtil.left(theValueNormalized, hashPrefixLength);
-		return hash(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, value);
+		return hashSearchParam(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, value);
 	}
 
 	@Override
