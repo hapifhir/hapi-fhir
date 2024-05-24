@@ -497,6 +497,11 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		return myAdvancedIndexQueryBuilder.isSupportsAllOf(theParams);
 	}
 
+	@Override
+	public boolean supportsAllSortTerms(String theResourceType, SearchParameterMap theParams) {
+		return myExtendedFulltextSortHelper.supportsAllSortTerms(theResourceType, theParams);
+	}
+
 	private void dispatchEvent(IHSearchEventListener.HSearchEventType theEventType) {
 		if (myHSearchEventListener != null) {
 			myHSearchEventListener.hsearchEvent(theEventType);
