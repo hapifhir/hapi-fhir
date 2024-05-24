@@ -84,10 +84,6 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import static org.mockito.Mockito.mock;
@@ -456,7 +452,7 @@ public class XmlParserDstu2_1Test {
 		ourLog.info(output);
 
 		//@formatter:off
-		assertThat(output,stringContainsInOrder(
+		assertThat(output).containsSubsequence(
 			"<DiagnosticReport xmlns=\"http://hl7.org/fhir\">",
 				"<meta>",
 				"<profile value=\"http://custom_DiagnosticReport\"/>",
@@ -474,7 +470,7 @@ public class XmlParserDstu2_1Test {
 				"<result>",
 					"<reference value=\"#1\"/>",
 				"</result>",
-			"</DiagnosticReport>"));
+			"</DiagnosticReport>");
 		//@formatter:on
 
 		/*
@@ -509,7 +505,7 @@ public class XmlParserDstu2_1Test {
 		ourLog.info(output);
 
 		//@formatter:off
-		assertThat(output,stringContainsInOrder(
+		assertThat(output).containsSubsequence(
 			"<DiagnosticReport xmlns=\"http://hl7.org/fhir\">",
 				"<contained>",
 					"<Observation xmlns=\"http://hl7.org/fhir\">",
@@ -521,7 +517,7 @@ public class XmlParserDstu2_1Test {
 				"<result>",
 					"<reference value=\"#1\"/>",
 				"</result>",
-			"</DiagnosticReport>"));
+			"</DiagnosticReport>");
 		//@formatter:on
 
 		/*
@@ -888,7 +884,7 @@ public class XmlParserDstu2_1Test {
 		// @formatter:on
 		assertThat(encoded).containsSubsequence("<MedicationOrder xmlns=\"http://hl7.org/fhir\">", "<contained>", "<Medication xmlns=\"http://hl7.org/fhir\">", "<id value=\"123\"/>", "<code>", "<coding>",
 						"<system value=\"urn:sys\"/>", "<code value=\"code1\"/>", "</coding>", "</code>", "</Medication>", "</contained>", "<medicationReference>", "<reference value=\"#123\"/>",
-						"<display value=\"MedRef\"/>", "</medicationReference>", "</MedicationOrder>"));
+						"<display value=\"MedRef\"/>", "</medicationReference>", "</MedicationOrder>");
 		//@formatter:off
 
 	}
@@ -922,7 +918,7 @@ public class XmlParserDstu2_1Test {
 		//@formatter:on
 		assertThat(encoded).containsSubsequence("<MedicationOrder xmlns=\"http://hl7.org/fhir\">", "<contained>", "<Medication xmlns=\"http://hl7.org/fhir\">", "<id value=\"1\"/>", "<code>", "<coding>",
 						"<system value=\"urn:sys\"/>", "<code value=\"code1\"/>", "</coding>", "</code>", "</Medication>", "</contained>", "<medicationReference>", "<reference value=\"#1\"/>",
-						"<display value=\"MedRef\"/>", "</medicationReference>", "</MedicationOrder>"));
+						"<display value=\"MedRef\"/>", "</medicationReference>", "</MedicationOrder>");
 		//@formatter:off
 	}
 
@@ -955,7 +951,7 @@ public class XmlParserDstu2_1Test {
 		//@formatter:on
 		assertThat(encoded).containsSubsequence("<MedicationOrder xmlns=\"http://hl7.org/fhir\">", "<contained>", "<Medication xmlns=\"http://hl7.org/fhir\">", "<id value=\"123\"/>", "<code>", "<coding>",
 						"<system value=\"urn:sys\"/>", "<code value=\"code1\"/>", "</coding>", "</code>", "</Medication>", "</contained>", "<medicationReference>", "<reference value=\"#123\"/>",
-						"<display value=\"MedRef\"/>", "</medicationReference>", "</MedicationOrder>"));
+						"<display value=\"MedRef\"/>", "</medicationReference>", "</MedicationOrder>");
 		//@formatter:off
 
 	}
@@ -2202,7 +2198,7 @@ public class XmlParserDstu2_1Test {
 
 		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(manifest);
 		ourLog.info(encoded);
-		assertThat(encoded).containsSubsequence(Arrays.asList("contained>", "<Binary", "</contained>")));
+		assertThat(encoded).containsSubsequence(Arrays.asList("contained>", "<Binary", "</contained>"));
 
 		DocumentManifest actual = ourCtx.newXmlParser().parseResource(DocumentManifest.class, encoded);
 		assertThat(actual.getContained()).hasSize(1);
@@ -2343,7 +2339,7 @@ public class XmlParserDstu2_1Test {
 		p.setParserErrorHandler(errorHandler);
 
 		Patient patient = p.parseResource(Patient.class, out);
-		assertThat(patient.getIdentifier().get(0).getType().getCoding(), IsEmptyCollection.empty());
+		assertThat(patient.getIdentifier().get(0).getType().getCoding()).isEmpty();
 
 		ArgumentCaptor<String> capt = ArgumentCaptor.forClass(String.class);
 		verify(errorHandler, times(1)).unknownAttribute(nullable(IParseLocation.class), capt.capture());

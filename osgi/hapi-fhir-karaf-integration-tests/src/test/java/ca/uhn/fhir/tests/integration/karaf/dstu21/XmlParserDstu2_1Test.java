@@ -444,7 +444,7 @@ public class XmlParserDstu2_1Test {
 		ourLog.info(output);
 
 		//@formatter:off
-		assertThat(output,stringContainsInOrder(
+		assertThat(output).containsSubsequence(
 			"<DiagnosticReport xmlns=\"http://hl7.org/fhir\">",
 			"<contained>",
 			"<Observation xmlns=\"http://hl7.org/fhir\">",
