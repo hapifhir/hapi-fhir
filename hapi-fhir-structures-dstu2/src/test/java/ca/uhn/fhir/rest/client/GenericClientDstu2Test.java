@@ -85,9 +85,6 @@ import java.util.List;
 
 import static ca.uhn.fhir.test.utilities.getMethodNameUtil.getTestName;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.either;
-import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -734,8 +731,9 @@ public class GenericClientDstu2Test {
 			.since(new InstantDt("2001-01-02T11:22:33Z"))
 			.execute();
 		//@formatter:on
-		assertThat(capt.getAllValues().get(idx).getURI().toString(), either(equalTo("http://example.com/fhir/Patient/123/_history?_since=2001-01-02T11:22:33Z&_count=123"))
-			.or(equalTo("http://example.com/fhir/Patient/123/_history?_count=123&_since=2001-01-02T11:22:33Z")));
+		assertThat(capt.getAllValues().get(idx).getURI().toString()).isIn(
+			"http://example.com/fhir/Patient/123/_history?_since=2001-01-02T11:22:33Z&_count=123",
+			"http://example.com/fhir/Patient/123/_history?_count=123&_since=2001-01-02T11:22:33Z");
 		assertThat(response.getEntry()).hasSize(1);
 		idx++;
 
@@ -1732,8 +1730,9 @@ public class GenericClientDstu2Test {
 			.execute();
 		//@formatter:on
 
-		assertThat(capt.getValue().getURI().toString(),
-			either(equalTo("http://example.com/fhir/Patient/123?_elements=name%2Cidentifier")).or(equalTo("http://example.com/fhir/Patient/123?_elements=identifier%2Cname")));
+		assertThat(capt.getValue().getURI().toString()).isIn(
+			"http://example.com/fhir/Patient/123?_elements=name%2Cidentifier",
+			"http://example.com/fhir/Patient/123?_elements=identifier%2Cname");
 		assertEquals(Patient.class, response.getClass());
 
 	}
@@ -2092,8 +2091,9 @@ public class GenericClientDstu2Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertThat(capt.getValue().getURI().toString(),
-			either(equalTo("http://example.com/fhir/Patient?name=james&_elements=name%2Cidentifier")).or(equalTo("http://example.com/fhir/Patient?name=james&_elements=identifier%2Cname")));
+		assertThat(capt.getValue().getURI().toString()).isIn(
+			"http://example.com/fhir/Patient?name=james&_elements=name%2Cidentifier",
+			"http://example.com/fhir/Patient?name=james&_elements=identifier%2Cname");
 		assertEquals(Patient.class, response.getEntry().get(0).getResource().getClass());
 
 	}
