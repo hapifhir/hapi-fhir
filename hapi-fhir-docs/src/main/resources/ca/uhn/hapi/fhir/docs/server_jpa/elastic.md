@@ -115,3 +115,10 @@ This can cause issues, particularly in unit tests where data is being examined s
 
 You can force synchronous writing to them in HAPI FHIR JPA by setting the Hibernate Search [synchronization strategy](https://docs.jboss.org/hibernate/stable/search/reference/en-US/html_single/#mapper-orm-indexing-automatic-synchronization). This setting is internally setting the ElasticSearch [refresh=wait_for](https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-refresh.html) option. Be warned that this will have a negative impact on overall performance. THE HAPI FHIR TEAM has not tried to quantify this impact but the ElasticSearch docs seem to make a fairly big deal about it.
 
+# Sorting
+
+It is possible to sort with Lucene indexing and full text searching enabled.  For example, this will work: `Practitioner?_sort=family`.
+
+Also, chained sorts will work: `PractitionerRole?_sort=practitioner.family`.
+
+However, chained sorting _combined_ with full text searches will fail.  For example, this query will fail with an error:  `PractitionerRole?_text=blah&_sort=practitioner.family`
