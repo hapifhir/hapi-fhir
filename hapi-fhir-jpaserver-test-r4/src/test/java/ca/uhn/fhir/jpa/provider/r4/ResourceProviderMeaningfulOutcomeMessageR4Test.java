@@ -1,7 +1,5 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.matchesPattern;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.i18n.HapiLocalizer;

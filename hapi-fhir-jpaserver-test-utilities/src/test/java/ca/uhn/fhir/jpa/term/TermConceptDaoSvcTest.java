@@ -10,8 +10,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -50,8 +49,8 @@ public class TermConceptDaoSvcTest {
 		verify(myConceptDao, times(1)).save(captor.capture());
 		TermConcept capturedTermConcept = captor.getValue();
 
-		assertThat(capturedTermConcept.hasParentPidsLobForTesting(), equalTo(theSupportLegacyLob));
-		assertThat(capturedTermConcept.getParentPidsAsString(), equalTo(parentPids));
+		assertEquals(theSupportLegacyLob, capturedTermConcept.hasParentPidsLobForTesting());
+		assertEquals(parentPids, capturedTermConcept.getParentPidsAsString());
 	}
 
 }
