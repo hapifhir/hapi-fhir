@@ -251,8 +251,9 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 			flushSearchAndIncludeDeletes();
 
 			int deletedCount = deletedCounter.get();
-
-			ourLog.debug("Deleted {} expired searches", deletedCount);
+			if (deletedCount > 0) {
+				ourLog.debug("Deleted {} expired searches", deletedCount);
+			}
 
 			return deletedCount;
 		}
