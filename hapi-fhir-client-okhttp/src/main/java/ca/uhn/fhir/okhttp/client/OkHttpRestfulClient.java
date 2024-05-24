@@ -136,17 +136,12 @@ public class OkHttpRestfulClient implements IHttpClient {
 		}
 
 		addUserAgentHeader(theHttpRequest, theContext);
-		addAcceptCharsetHeader(theHttpRequest);
 		MethodUtil.addAcceptHeaderToRequest(theEncoding, theHttpRequest, theContext);
 		addIfNoneExistHeader(theHttpRequest);
 	}
 
 	private void addUserAgentHeader(OkHttpRestfulRequest theHttpRequest, FhirContext theContext) {
 		theHttpRequest.addHeader("User-Agent", HttpClientUtil.createUserAgentString(theContext, "okhttp"));
-	}
-
-	private void addAcceptCharsetHeader(OkHttpRestfulRequest theHttpRequest) {
-		theHttpRequest.addHeader("Accept-Charset", "utf-8");
 	}
 
 	private void addIfNoneExistHeader(IHttpRequest result) {
