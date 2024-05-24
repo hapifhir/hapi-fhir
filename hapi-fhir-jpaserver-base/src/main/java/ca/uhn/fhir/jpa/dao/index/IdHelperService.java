@@ -165,7 +165,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 		if (resourceIdToUse.contains("/")) {
 			resourceIdToUse = theResourceId.substring(resourceIdToUse.indexOf("/") + 1);
 		}
-		IdDt id = new IdDt(theResourceType, theResourceId);
+		IdDt id = new IdDt(theResourceType, resourceIdToUse);
 		Map<String, List<IResourceLookup<JpaPid>>> matches =
 				translateForcedIdToPids(theRequestPartitionId, Collections.singletonList(id), theExcludeDeleted);
 
