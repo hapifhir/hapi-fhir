@@ -1159,8 +1159,7 @@ public class Dstu3XmlParserTest {
 		ourLog.info(encoded);
 
 		// @formatter:on
-		assertThat(encoded,
-			stringContainsInOrder("<MedicationRequest xmlns=\"http://hl7.org/fhir\">", "<contained>", "<Medication xmlns=\"http://hl7.org/fhir\">", "<id value=\"123\"/>", "<code>", "<coding>",
+		assertThat(encoded).containsSubsequence("<MedicationRequest xmlns=\"http://hl7.org/fhir\">", "<contained>", "<Medication xmlns=\"http://hl7.org/fhir\">", "<id value=\"123\"/>", "<code>", "<coding>",
 				"<system value=\"urn:sys\"/>", "<code value=\"code1\"/>", "</coding>", "</code>", "</Medication>", "</contained>", "<medicationReference>", "<reference value=\"#123\"/>",
 				"<display value=\"MedRef\"/>", "</medicationReference>", "</MedicationRequest>"));
 
@@ -1192,8 +1191,7 @@ public class Dstu3XmlParserTest {
 		String encoded = p.encodeResourceToString(medicationPrescript);
 		ourLog.info(encoded);
 
-		assertThat(encoded,
-			stringContainsInOrder("<MedicationRequest xmlns=\"http://hl7.org/fhir\">", "<contained>", "<Medication xmlns=\"http://hl7.org/fhir\">", "<id value=\"1\"/>", "<code>", "<coding>",
+		assertThat(encoded).containsSubsequence("<MedicationRequest xmlns=\"http://hl7.org/fhir\">", "<contained>", "<Medication xmlns=\"http://hl7.org/fhir\">", "<id value=\"1\"/>", "<code>", "<coding>",
 				"<system value=\"urn:sys\"/>", "<code value=\"code1\"/>", "</coding>", "</code>", "</Medication>", "</contained>", "<medicationReference>", "<reference value=\"#1\"/>",
 				"<display value=\"MedRef\"/>", "</medicationReference>", "</MedicationRequest>"));
 
@@ -1225,8 +1223,7 @@ public class Dstu3XmlParserTest {
 		String encoded = p.encodeResourceToString(medicationPrescript);
 		ourLog.info(encoded);
 
-		assertThat(encoded,
-			stringContainsInOrder("<MedicationRequest xmlns=\"http://hl7.org/fhir\">", "<contained>", "<Medication xmlns=\"http://hl7.org/fhir\">", "<id value=\"123\"/>", "<code>", "<coding>",
+		assertThat(encoded).containsSubsequence("<MedicationRequest xmlns=\"http://hl7.org/fhir\">", "<contained>", "<Medication xmlns=\"http://hl7.org/fhir\">", "<id value=\"123\"/>", "<code>", "<coding>",
 				"<system value=\"urn:sys\"/>", "<code value=\"code1\"/>", "</coding>", "</code>", "</Medication>", "</contained>", "<medicationReference>", "<reference value=\"#123\"/>",
 				"<display value=\"MedRef\"/>", "</medicationReference>", "</MedicationRequest>"));
 
@@ -2774,7 +2771,7 @@ public class Dstu3XmlParserTest {
 
 		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(manifest);
 		ourLog.info(encoded);
-		assertThat(encoded, StringContainsInOrder.stringContainsInOrder(Arrays.asList("contained>", "<Binary", "</contained>")));
+		assertThat(encoded).containsSubsequence(Arrays.asList("contained>", "<Binary", "</contained>")));
 
 		DocumentManifest actual = ourCtx.newXmlParser().parseResource(DocumentManifest.class, encoded);
 		assertEquals(1, actual.getContained().size());

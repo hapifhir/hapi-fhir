@@ -193,8 +193,7 @@ public class XmlParserHl7OrgDstu2Test {
 		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resB);
 		ourLog.info(encoded);
 
-		assertThat(encoded,
-			stringContainsInOrder(Arrays.asList("<contained>", "<Observation", "</Observation>", "</contained>")));
+		assertThat(encoded).containsSubsequence(Arrays.asList("<contained>", "<Observation", "</Observation>", "</contained>")));
 		assertThat(encoded).doesNotContainPattern("(?s)
 			Arrays.asList("<contained>", "<Observation", "</Observation>", "<Obser", "</contained>"))));
 
@@ -669,8 +668,7 @@ public class XmlParserHl7OrgDstu2Test {
 		ourLog.info(output);
 
 		// @formatter:off
-		assertThat(output,
-			stringContainsInOrder("<id value=\"1\"/>", "<meta>", "<profile value=\"http://profile\"/>",
+		assertThat(output).containsSubsequence("<id value=\"1\"/>", "<meta>", "<profile value=\"http://profile\"/>",
 				"<extension url=\"http://exturl\">", "<extension url=\"http://subext\">",
 				"<valueString value=\"sub_ext_value\"/>", "<text value=\"CODE\"/>"));
 		assertThat(output).doesNotContainPattern("(?s)"<url value=\"http://exturl\"/>")));
@@ -1242,8 +1240,7 @@ public class XmlParserHl7OrgDstu2Test {
 		String str = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(A);
 		ourLog.info(str);
 
-		assertThat(str,
-			stringContainsInOrder(Arrays.asList("<text value=\"B\"/>", "<text value=\"C\"/>", "<text value=\"A\"/>")));
+		assertThat(str).containsSubsequence(Arrays.asList("<text value=\"B\"/>", "<text value=\"C\"/>", "<text value=\"A\"/>")));
 		assertThat(str).containsSubsequence(Arrays.asList("<contained>", "</contained>", "<contained>", "</contained>"));
 
 		org.hl7.fhir.dstu2.model.Observation obs = ourCtx.newXmlParser().parseResource(org.hl7.fhir.dstu2.model.Observation.class, str);
@@ -1288,8 +1285,7 @@ public class XmlParserHl7OrgDstu2Test {
 
 		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(manifest);
 		ourLog.info(encoded);
-		assertThat(encoded,
-			StringContainsInOrder.stringContainsInOrder(Arrays.asList("contained>", "<Binary", "</contained>")));
+		assertThat(encoded).containsSubsequence(Arrays.asList("contained>", "<Binary", "</contained>")));
 
 		org.hl7.fhir.dstu2.model.DocumentManifest actual = ourCtx.newXmlParser().parseResource(org.hl7.fhir.dstu2.model.DocumentManifest.class, encoded);
 		assertEquals(1, actual.getContained().size());
