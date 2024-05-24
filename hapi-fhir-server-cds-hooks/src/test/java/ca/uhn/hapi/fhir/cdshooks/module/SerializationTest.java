@@ -26,8 +26,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalToCompressingWhiteSpace;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -106,7 +104,7 @@ class SerializationTest {
 
 		String json = ourObjectMapper.writeValueAsString(cdsServiceRequestJson);
 		ourLog.debug(json);
-		assertThat(json, equalToCompressingWhiteSpace(myRequestJson));
+		assertThat(json).isEqualToIgnoringWhitespace(myRequestJson);
 	}
 
 	@Test
@@ -151,7 +149,7 @@ class SerializationTest {
 
 		String json = ourObjectMapper.writeValueAsString(cdsServiceRequestJson);
 		ourLog.debug(json);
-		assertThat(json, equalToCompressingWhiteSpace(myResponseJson));
+		assertThat(json).isEqualToIgnoringWhitespace(myResponseJson);
 	}
 
 	@Test

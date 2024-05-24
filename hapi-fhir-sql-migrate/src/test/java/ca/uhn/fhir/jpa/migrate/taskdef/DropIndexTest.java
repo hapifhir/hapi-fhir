@@ -14,9 +14,6 @@ import java.util.function.Supplier;
 
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class DropIndexTest extends BaseTest {
@@ -115,7 +112,7 @@ public class DropIndexTest extends BaseTest {
 		task.setTableName("SOMETABLE");
 		getMigrator().addTask(task);
 
-		assertThat(JdbcUtils.getIndexNames(getConnectionProperties(), "SOMETABLE"), not(empty()));
+		assertThat(JdbcUtils.getIndexNames(getConnectionProperties(), "SOMETABLE")).isNotEmpty();
 		getMigrator().migrate();
 		assertThat(JdbcUtils.getIndexNames(getConnectionProperties(), "SOMETABLE")).isEmpty();
 	}

@@ -8,8 +8,6 @@ import java.sql.SQLException;
 import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 
 public class DropForeignKeyTaskTest extends BaseTest {
 
@@ -23,7 +21,7 @@ public class DropForeignKeyTaskTest extends BaseTest {
 		executeSql("create table CHILD (PID bigint not null, PARENTREF bigint)");
 		executeSql("alter table CHILD add constraint FK_MOM foreign key (PARENTREF) references PARENT(PID)");
 
-		assertThat(JdbcUtils.getForeignKeys(getConnectionProperties(), "PARENT", "CHILD"), hasSize(1));
+		assertThat(JdbcUtils.getForeignKeys(getConnectionProperties(), "PARENT", "CHILD")).hasSize(1);
 
 		DropForeignKeyTask task = new DropForeignKeyTask("1", "1");
 		task.setTableName("CHILD");
