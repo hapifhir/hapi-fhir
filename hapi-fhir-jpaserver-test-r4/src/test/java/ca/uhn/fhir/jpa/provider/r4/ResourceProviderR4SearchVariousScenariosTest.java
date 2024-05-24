@@ -386,20 +386,17 @@ public class ResourceProviderR4SearchVariousScenariosTest extends BaseResourcePr
 
 		@Test
 		void testRegularSortAscendingWorks() {
-			// LUKETODO: add a reason
-			runAndAssert("", "Practitioner?_sort=family", myPraId2.getIdPart(), myPraId3.getIdPart(), myPraId1.getIdPart());
+			runAndAssert("regular sort ascending works", "Practitioner?_sort=family", myPraId2.getIdPart(), myPraId3.getIdPart(), myPraId1.getIdPart());
 		}
 
 		@Test
 		void testRegularSortDescendingWorks() {
-			// LUKETODO: add a reason
-			runAndAssert("", "Practitioner?_sort=-family", myPraId1.getIdPart(), myPraId3.getIdPart(), myPraId2.getIdPart());
+			runAndAssert("regular sort descending works", "Practitioner?_sort=-family", myPraId1.getIdPart(), myPraId3.getIdPart(), myPraId2.getIdPart());
 		}
 
 		@Test
 		void testChainedSortWorks() {
-			// LUKETODO: add a reason
-			runAndAssert("", "PractitionerRole?_sort=practitioner.family", myPraRoleId2.getIdPart(), myPraRoleId3.getIdPart(), myPraRoleId1.getIdPart());
+			runAndAssert("chain sort works", "PractitionerRole?_sort=practitioner.family", myPraRoleId2.getIdPart(), myPraRoleId3.getIdPart(), myPraRoleId1.getIdPart());
 		}
 
 		@ParameterizedTest

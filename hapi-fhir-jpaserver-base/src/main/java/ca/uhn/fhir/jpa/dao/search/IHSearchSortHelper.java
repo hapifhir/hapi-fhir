@@ -31,6 +31,12 @@ public interface IHSearchSortHelper {
 
 	SortFinalStep getSortClauses(SearchSortFactory theSortFactory, SortSpec theSort, String theResourceType);
 
-	// LUKETODO: rename
-	boolean newThingee(String theResourceType, SearchParameterMap theParams);
+	/**
+	 * Given a resource type and a {@link SearchParameterMap}, return true only if all sort terms are supported.
+	 *
+	 * @param theResourceType The resource type for the query.
+	 * @param theParams The {@link SearchParameterMap} being searched with.
+	 * @return true if all sort terms are supported, false otherwise.
+	 */
+	boolean supportsAllSortTerms(String theResourceType, SearchParameterMap theParams);
 }

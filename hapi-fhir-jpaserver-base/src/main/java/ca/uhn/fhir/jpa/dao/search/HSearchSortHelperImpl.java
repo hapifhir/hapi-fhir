@@ -97,10 +97,8 @@ public class HSearchSortHelperImpl implements IHSearchSortHelper {
 	}
 
 	@Override
-	public boolean newThingee(String theResourceType, SearchParameterMap theParams) {
-		// LUKETODO:  capture this in some kind of algorithm
-		// LUKETODO:  use recursion
-		for (SortSpec sortSpec = theParams.getSort(); sortSpec != null; sortSpec = sortSpec.getChain()) {
+	public boolean supportsAllSortTerms(String theResourceType, SearchParameterMap theParams) {
+		for (SortSpec sortSpec : theParams.getAllChainsInOrder()) {
 			final Optional<RestSearchParameterTypeEnum> paramTypeOpt =
 					getParamType(theResourceType, sortSpec.getParamName());
 			if (paramTypeOpt.isEmpty()) {
@@ -121,13 +119,12 @@ public class HSearchSortHelperImpl implements IHSearchSortHelper {
 	Optional<SortFinalStep> getSortClause(SearchSortFactory theF, SortSpec theSortSpec, String theResourceType) {
 		Optional<RestSearchParameterTypeEnum> paramTypeOpt = getParamType(theResourceType, theSortSpec.getParamName());
 		if (paramTypeOpt.isEmpty()) {
-			// LUKETODO:  new error code
 			throw new IllegalArgumentException(
-					Msg.code(9999) + "Invalid sort specification: " + theSortSpec.getParamName());
+					Msg.code(2523) + "Invalid sort specification: " + theSortSpec.getParamName());
 		}
 		List<String> paramFieldNameList = getSortPropertyList(paramTypeOpt.get(), theSortSpec.getParamName());
 		if (paramFieldNameList.isEmpty()) {
-			ourLog.warn("Unable to sort by parameter '" + theSortSpec.getParamName() + "'. Sort parameter ignored.");
+			ourLog.warn("Unable to sort by parameter '{}' . Sort parameter ignored.", theSortSpec.getParamName());
 			return Optional.empty();
 		}
 
@@ -145,7 +142,6 @@ public class HSearchSortHelperImpl implements IHSearchSortHelper {
 			sortFinalStep.add(sortStep.missing().last());
 		}
 
-		// LUKETODO:  hapi-fhir docs:  chained sorting NOT supported:  combination of sort and _text searching
 		// regular sorting is supported
 		return Optional.of(sortFinalStep);
 	}

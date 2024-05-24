@@ -412,7 +412,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 			// can we skip the database entirely and return the pid list from here?
 			boolean canSkipDatabase =
-					// LUKETODO:  return false if there is any chained sorted
 					// if we processed an AND clause, and it returned nothing, then nothing can match.
 					!fulltextExecutor.hasNext()
 							||
@@ -461,8 +460,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	 * @return true if the query should first be processed by Hibernate Search
 	 * @throws InvalidRequestException if fulltext search is not enabled but the query requires it - _content or _text
 	 */
-	// LUKETODO:  return false if there is any chained sorted or are not supported by the Lucene backend
-	// look at HSearchSortHelperImpl  IF THERE ARE ANY DOTS IN THE SEARCH STRING
 	private boolean checkUseHibernateSearch() {
 		boolean fulltextEnabled = (myFulltextSearchSvc != null) && !myFulltextSearchSvc.isDisabled();
 
@@ -470,49 +467,22 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			failIfUsed(Constants.PARAM_TEXT);
 			failIfUsed(Constants.PARAM_CONTENT);
 		} else {
-			// LUKETODO:  code reuse for this algorithm
-			for (SortSpec sortSpec = myParams.getSort(); sortSpec != null; sortSpec = sortSpec.getChain()) {
+			for (SortSpec sortSpec : myParams.getAllChainsInOrder()) {
 				final String paramName = sortSpec.getParamName();
 				if (paramName.contains(".")) {
 					failIfUsedWithChainedSort(Constants.PARAM_TEXT);
 					failIfUsedWithChainedSort(Constants.PARAM_CONTENT);
 				}
 			}
-			//			final Optional<SortSpec> optSort = Optional.ofNullable(myParams.getSort());
-			//			if (optSort.isPresent()) {
-			//				final SortSpec sortSpec = optSort.get();
-			//				final String paramName = sortSpec.getParamName();
-			//				if (paramName.contains(".")) {
-			//					failIfUsedWithChainedSort(Constants.PARAM_TEXT);
-			//					failIfUsedWithChainedSort(Constants.PARAM_CONTENT);
-			//				}
-			//			}
-
-			//			if (Optional.ofNullable(myParams.getSort())
-			//				.map(SortSpec::getChain)
-			////				.map(SortSpec::getChain)
-			//				.isPresent()) {
-			//				failIfUsed(Constants.PARAM_TEXT);
-			//			}
 		}
-
-		final boolean supportsSomeOf = myFulltextSearchSvc.supportsSomeOf(myParams);
-		final boolean supportsAllSearchTerms = myFulltextSearchSvc.supportsAllSortTerms(myResourceName, myParams);
-		ourLog.info(
-				"6123: supportsSomeOf: {}, supportsAllSearchTerms: {}, myParams.sort params: {}",
-				supportsSomeOf,
-				supportsAllSearchTerms,
-				myParams.getSort());
 
 		// someday we'll want a query planner to figure out if we _should_ or _must_ use the ft index, not just if we
 		// can.
 		return fulltextEnabled
 				&& myParams != null
 				&& myParams.getSearchContainedMode() == SearchContainedModeEnum.FALSE
-				&& supportsSomeOf
-				// any empty cases should say no
-				&& supportsAllSearchTerms;
-		// LUKETODO:  do chained sort fully in the database
+				&& myFulltextSearchSvc.supportsSomeOf(myParams)
+				&& myFulltextSearchSvc.supportsAllSortTerms(myResourceName, myParams);
 	}
 
 	private void failIfUsed(String theParamName) {
@@ -524,8 +494,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 	private void failIfUsedWithChainedSort(String theParamName) {
 		if (myParams.containsKey(theParamName)) {
-			// LUKETODO:  msg code
-			throw new InvalidRequestException(Msg.code(9999)
+			throw new InvalidRequestException(Msg.code(2524)
 					+ "Fulltext search combined with chained sorts are not supported, can not process parameter: "
 					+ theParamName);
 		}
@@ -780,7 +749,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		if (sort != null) {
 			assert !theCountOnlyFlag;
 
-			// LUKETODO:  this is where we mainly do sorting
 			createSort(queryStack3, sort, theParams);
 		}
 

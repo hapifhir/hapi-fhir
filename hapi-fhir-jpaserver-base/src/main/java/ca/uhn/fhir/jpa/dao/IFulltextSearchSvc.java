@@ -121,6 +121,12 @@ public interface IFulltextSearchSvc {
 	 */
 	void deleteIndexedDocumentsByTypeAndId(Class theClazz, List<Object> theGivenIds);
 
-	// LUKETODO:  javadoc
+	/**
+	 * Given a resource type and a {@link SearchParameterMap}, return true only if all sort terms are supported.
+	 *
+	 * @param theResourceName The resource type for the query.
+	 * @param theParams The {@link SearchParameterMap} being searched with.
+	 * @return true if all sort terms are supported, false otherwise.
+	 */
 	boolean supportsAllSortTerms(String theResourceName, SearchParameterMap theParams);
 }
