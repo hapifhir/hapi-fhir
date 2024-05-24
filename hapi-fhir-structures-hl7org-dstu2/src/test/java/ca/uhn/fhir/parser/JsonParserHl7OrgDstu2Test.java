@@ -62,9 +62,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -226,10 +223,9 @@ public class JsonParserHl7OrgDstu2Test {
     ourLog.info(output);
 
     String enc = ourCtx.newJsonParser().encodeResourceToString(patient);
-    assertThat(enc,
-        org.hamcrest.Matchers.stringContainsInOrder("{\"resourceType\":\"Patient\",", "\"extension\":[{\"url\":\"http://example.com/extensions#someext\",\"valueDateTime\":\"2011-01-02T11:13:15\"}",
-            "{\"url\":\"http://example.com#parent\",\"extension\":[{\"url\":\"http://example.com#child\",\"valueString\":\"value1\"},{\"url\":\"http://example.com#child\",\"valueString\":\"value2\"}]}"));
-    assertThat(enc, org.hamcrest.Matchers.stringContainsInOrder("\"modifierExtension\":[" + "{" + "\"url\":\"http://example.com/extensions#modext\"," + "\"valueDate\":\"1995-01-02\"" + "}" + "],"));
+    assertThat(enc).containsSubsequence("{\"resourceType\":\"Patient\",", "\"extension\":[{\"url\":\"http://example.com/extensions#someext\",\"valueDateTime\":\"2011-01-02T11:13:15\"}",
+            "{\"url\":\"http://example.com#parent\",\"extension\":[{\"url\":\"http://example.com#child\",\"valueString\":\"value1\"},{\"url\":\"http://example.com#child\",\"valueString\":\"value2\"}]}");
+    assertThat(enc).containsSubsequence("\"modifierExtension\":[" + "{" + "\"url\":\"http://example.com/extensions#modext\"," + "\"valueDate\":\"1995-01-02\"" + "}" + "],");
 		assertThat(enc).contains("\"_given\":[" + "{" + "\"extension\":[" + "{" + "\"url\":\"http://examples.com#givenext\"," + "\"valueString\":\"given\"" + "}" + "]" + "}," + "{"
 			+ "\"extension\":[" + "{" + "\"url\":\"http://examples.com#givenext_parent\"," + "\"extension\":[" + "{"
 			+ "\"url\":\"http://examples.com#givenext_child\"," + "\"valueString\":\"CHILD\"" + "}" + "]" + "}" + "]" + "}");
@@ -336,7 +332,7 @@ public class JsonParserHl7OrgDstu2Test {
 			"\"lastUpdated\": \"" + nowDt.getValueAsString() + "\"" 
 		};
 		//@formatter:off
-		assertThat(bundleString, StringContainsInOrder.stringContainsInOrder(strings));
+		assertThat(bundleString).containsSubsequence(strings);
 
 		b.getEntry().remove(2);
 		bundleString = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(b);
@@ -508,7 +504,7 @@ public class JsonParserHl7OrgDstu2Test {
 		int idx2 = str.indexOf('"', idx + 1);
 		String id = str.substring(idx, idx2);
 		assertThat(str).contains(str);
-		assertThat(str, IsNot.not(StringContains.containsString("<?xml version='1.0'?>")));
+		assertThat(str).doesNotContain("<?xml version='1.0'?>");
 
 	}
 
@@ -782,7 +778,7 @@ public class JsonParserHl7OrgDstu2Test {
 
 		IParser p = ourCtx.newJsonParser();
 		String str = p.encodeResourceToString(patient);
-		assertThat(str, IsNot.not(StringContains.containsString("managingOrganization")));
+		assertThat(str).doesNotContain("managingOrganization");
 
 		patient.setManagingOrganization(new Reference("Organization/123"));
 		str = p.encodeResourceToString(patient);

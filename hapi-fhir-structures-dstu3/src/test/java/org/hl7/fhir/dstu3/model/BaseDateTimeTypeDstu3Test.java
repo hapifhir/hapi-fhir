@@ -28,9 +28,6 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.either;
-import static org.hamcrest.Matchers.endsWith;
 import static org.junit.jupiter.api.Assertions.fail;
 
 
@@ -256,7 +253,9 @@ public class BaseDateTimeTypeDstu3Test {
 	@Test
 	public void testEncodeOffset() throws Exception {
 		String offset = InstantType.withCurrentTime().setTimeZone(TimeZone.getTimeZone("America/Toronto")).getValueAsString();
-		assertThat(offset, either(endsWith("-05:00")).or(endsWith("-04:00")));
+		assertThat(offset).satisfiesAnyOf(
+			 s -> s.endsWith("-05:00"),
+			 s -> s.endsWith("-04:00"));
 	}
 
 	@Test
