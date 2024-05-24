@@ -894,4 +894,13 @@ public class SearchParameterMap implements Serializable {
 			return SearchParameterMap.compare(myCtx, theO1, theO2);
 		}
 	}
+
+	public List<SortSpec> getAllChainsInOrder() {
+		final List<SortSpec> allChainsInOrder = new ArrayList<>();
+		for (SortSpec sortSpec = getSort(); sortSpec != null; sortSpec = sortSpec.getChain()) {
+			allChainsInOrder.add(sortSpec);
+		}
+
+		return Collections.unmodifiableList(allChainsInOrder);
+	}
 }
