@@ -25,9 +25,6 @@ import java.util.TimeZone;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.either;
-import static org.hamcrest.Matchers.endsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -368,7 +365,9 @@ public class BaseDateTimeDtDstu2Test {
 	@Test
 	public void testEncodeOffset() {
 		String offset = InstantDt.withCurrentTime().setTimeZone(TimeZone.getTimeZone("America/Toronto")).getValueAsString();
-		assertThat(offset, either(endsWith("-05:00")).or(endsWith("-04:00")));
+		assertThat(offset).satisfiesAnyOf(
+			s-> s.endsWith("-05:00"),
+			s -> s.endsWith("-04:00"));
 	}
 
 	@Test
