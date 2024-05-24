@@ -121,6 +121,20 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init680_Part2();
 		init700();
 		init720();
+		init740();
+	}
+
+	protected void init740() {
+		// Start of migrations from 7.2 to 7.4
+
+		Builder version = forVersion(VersionEnum.V7_4_0);
+
+		{
+			version.onTable("HFJ_RES_SEARCH_URL")
+					.addForeignKey("20240515.1", "FK_RES_SEARCH_URL_RESOURCE")
+					.toColumn("RES_ID")
+					.references("HFJ_RESOURCE", "RES_ID");
+		}
 	}
 
 	protected void init720() {

@@ -5,7 +5,6 @@ import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
-import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.ips.api.IIpsGenerationStrategy;
 import ca.uhn.fhir.jpa.ips.jpa.DefaultJpaIpsGenerationStrategy;
 import ca.uhn.fhir.jpa.ips.provider.IpsOperationProvider;
@@ -18,6 +17,7 @@ import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationResult;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import org.hl7.fhir.common.hapi.validation.support.NpmPackageValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -31,6 +31,7 @@ import org.hl7.fhir.r4.model.Immunization;
 import org.hl7.fhir.r4.model.MedicationStatement;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.PrimitiveType;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.junit.jupiter.api.AfterEach;
@@ -41,17 +42,19 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.util.BundleUtil.convertBundleIntoTransaction;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * This test uses a complete R4 JPA server as a backend and wires the
@@ -77,13 +80,9 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 
 
 	@Test
-	public void testGenerateLargePatientSummary() {
+	public void testGenerateLargePatientSummary() throws IOException {
 		Bundle sourceData = ClasspathUtil.loadCompressedResource(myFhirContext, Bundle.class, "/large-patient-everything.json.gz");
-		sourceData.setType(Bundle.BundleType.TRANSACTION);
-		for (Bundle.BundleEntryComponent nextEntry : sourceData.getEntry()) {
-			nextEntry.getRequest().setMethod(Bundle.HTTPVerb.PUT);
-			nextEntry.getRequest().setUrl(nextEntry.getResource().getIdElement().toUnqualifiedVersionless().getValue());
-		}
+		sourceData = convertBundleIntoTransaction(myFhirContext, sourceData, null);
 		Bundle outcome = mySystemDao.transaction(mySrd, sourceData);
 		ourLog.info("Created {} resources", outcome.getEntry().size());
 
@@ -97,6 +96,9 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 		ourLog.info("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 
 		// Verify
+		assertThat(output.getMeta().getProfile().stream().map(PrimitiveType::getValue).toList(), contains(
+			"http://hl7.org/fhir/uv/ips/StructureDefinition/Bundle-uv-ips"
+		));
 		validateDocument(output);
 		assertEquals(117, output.getEntry().size());
 		String patientId = findFirstEntryResource(output, Patient.class, 1).getIdElement().toUnqualifiedVersionless().getValue();
@@ -114,11 +116,7 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 		myStorageSettings.setResourceClientIdStrategy(JpaStorageSettings.ClientIdStrategyEnum.ANY);
 
 		Bundle sourceData = ClasspathUtil.loadCompressedResource(myFhirContext, Bundle.class, "/large-patient-everything-2.json.gz");
-		sourceData.setType(Bundle.BundleType.TRANSACTION);
-		for (Bundle.BundleEntryComponent nextEntry : sourceData.getEntry()) {
-			nextEntry.getRequest().setMethod(Bundle.HTTPVerb.PUT);
-			nextEntry.getRequest().setUrl(nextEntry.getResource().getIdElement().toUnqualifiedVersionless().getValue());
-		}
+		sourceData = convertBundleIntoTransaction(myFhirContext, sourceData, null);
 		Bundle outcome = mySystemDao.transaction(mySrd, sourceData);
 		ourLog.info("Created {} resources", outcome.getEntry().size());
 
@@ -140,11 +138,7 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 		myStorageSettings.setResourceClientIdStrategy(JpaStorageSettings.ClientIdStrategyEnum.ANY);
 
 		Bundle sourceData = ClasspathUtil.loadCompressedResource(myFhirContext, Bundle.class, "/large-patient-everything-3.json.gz");
-		sourceData.setType(Bundle.BundleType.TRANSACTION);
-		for (Bundle.BundleEntryComponent nextEntry : sourceData.getEntry()) {
-			nextEntry.getRequest().setMethod(Bundle.HTTPVerb.PUT);
-			nextEntry.getRequest().setUrl(nextEntry.getResource().getIdElement().toUnqualifiedVersionless().getValue());
-		}
+		sourceData = convertBundleIntoTransaction(myFhirContext, sourceData, null);
 		Bundle outcome = mySystemDao.transaction(mySrd, sourceData);
 		ourLog.info("Created {} resources", outcome.getEntry().size());
 
@@ -162,15 +156,32 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void testGenerateTinyPatientSummary() {
+	public void testGenerateLargePatientSummary4() {
+		Bundle sourceData = ClasspathUtil.loadCompressedResource(myFhirContext, Bundle.class, "/large-patient-everything-4.json.gz");
+		sourceData = convertBundleIntoTransaction(myFhirContext, sourceData, "EPD");
+
+		Bundle outcome = mySystemDao.transaction(mySrd, sourceData);
+		ourLog.info("Created {} resources", outcome.getEntry().size());
+
+		Bundle output = myClient
+			.operation()
+			.onInstance("Patient/EPD2223")
+			.named(JpaConstants.OPERATION_SUMMARY)
+			.withNoParameters(Parameters.class)
+			.returnResourceType(Bundle.class)
+			.execute();
+		ourLog.info("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+
+		// Verify
+		assertEquals(55, output.getEntry().size());
+	}
+
+	@Test
+	public void testGenerateTinyPatientSummary() throws IOException {
 		myStorageSettings.setResourceClientIdStrategy(JpaStorageSettings.ClientIdStrategyEnum.ANY);
 
 		Bundle sourceData = ClasspathUtil.loadCompressedResource(myFhirContext, Bundle.class, "/tiny-patient-everything.json.gz");
-		sourceData.setType(Bundle.BundleType.TRANSACTION);
-		for (Bundle.BundleEntryComponent nextEntry : sourceData.getEntry()) {
-			nextEntry.getRequest().setMethod(Bundle.HTTPVerb.PUT);
-			nextEntry.getRequest().setUrl(nextEntry.getResource().getIdElement().toUnqualifiedVersionless().getValue());
-		}
+		sourceData = convertBundleIntoTransaction(myFhirContext, sourceData, null);
 		Bundle outcome = mySystemDao.transaction(mySrd, sourceData);
 		ourLog.info("Created {} resources", outcome.getEntry().size());
 
@@ -251,7 +262,7 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 
 
 	@Nonnull
-	private static Composition findCompositionSectionByDisplay(Bundle output, String theDisplay) {
+	private static Composition findCompositionSectionByDisplay(Bundle output, @SuppressWarnings("SameParameterValue") String theDisplay) {
 		Composition composition = (Composition) output.getEntry().get(0).getResource();
 		Composition.SectionComponent section = composition
 			.getSection()
@@ -259,6 +270,7 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 			.filter(t -> t.getCode().getCoding().get(0).getDisplay().equals(theDisplay))
 			.findFirst()
 			.orElseThrow();
+		assertNotNull(section);
 		return composition;
 	}
 
@@ -266,23 +278,26 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 	@Nonnull
 	private static List<String> extractSectionTitles(Bundle outcome) {
 		Composition composition = (Composition) outcome.getEntry().get(0).getResource();
-		List<String> sectionTitles = composition
+		return composition
 			.getSection()
 			.stream()
 			.map(Composition.SectionComponent::getTitle)
 			.toList();
-		return sectionTitles;
 	}
 
-	private void validateDocument(Bundle theOutcome) {
+	private void validateDocument(Bundle theOutcome) throws IOException {
 		FhirValidator validator = myFhirContext.newValidator();
 		FhirInstanceValidator instanceValidator = new FhirInstanceValidator(myFhirContext);
-		instanceValidator.setValidationSupport(new ValidationSupportChain(new IpsTerminologySvc(), myFhirContext.getValidationSupport()));
+
+		NpmPackageValidationSupport npmSupport = new NpmPackageValidationSupport(myFhirContext);
+		npmSupport.loadPackageFromClasspath("/ips-package-1.1.0.tgz");
+
+		instanceValidator.setValidationSupport(new ValidationSupportChain(npmSupport, new IpsTerminologySvc(), myFhirContext.getValidationSupport()));
 		validator.registerValidatorModule(instanceValidator);
 		ValidationResult validation = validator.validateWithResult(theOutcome);
 
 		Optional<SingleValidationMessage> failure = validation.getMessages().stream().filter(t -> t.getSeverity().ordinal() >= ResultSeverityEnum.ERROR.ordinal()).findFirst();
-		assertFalse(failure.isPresent(), () -> failure.get().toString());
+		assertFalse(failure.isPresent(), () -> failure.orElseThrow().toString());
 	}
 
 	@Configuration
@@ -294,7 +309,7 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 		}
 
 		@Bean
-		public IIpsGeneratorSvc ipsGeneratorSvc(FhirContext theFhirContext, IIpsGenerationStrategy theGenerationStrategy, DaoRegistry theDaoRegistry) {
+		public IIpsGeneratorSvc ipsGeneratorSvc(FhirContext theFhirContext, IIpsGenerationStrategy theGenerationStrategy) {
 			return new IpsGeneratorSvcImpl(theFhirContext, theGenerationStrategy);
 		}
 
