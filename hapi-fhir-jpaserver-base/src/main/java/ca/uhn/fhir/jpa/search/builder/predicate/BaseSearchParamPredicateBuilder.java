@@ -98,10 +98,19 @@ public abstract class BaseSearchParamPredicateBuilder extends BaseJoiningPredica
 
 	public Condition createPredicateParamMissingForNonReference(
 			String theResourceName, String theParamName, Boolean theMissing, RequestPartitionId theRequestPartitionId) {
-		ComboCondition condition = ComboCondition.and(
-				BinaryCondition.equalTo(getResourceTypeColumn(), generatePlaceholder(theResourceName)),
-				BinaryCondition.equalTo(getColumnParamName(), generatePlaceholder(theParamName)),
-				BinaryCondition.equalTo(getMissingColumn(), generatePlaceholder(theMissing)));
+
+		List<Condition> conditions = new ArrayList<>();
+		if (getStorageSettings().isIndexStorageOptimized()) {
+			Long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(
+					getPartitionSettings(), getRequestPartitionId(), theResourceName, theParamName);
+			conditions.add(BinaryCondition.equalTo(getColumnHashIdentity(), generatePlaceholder(hashIdentity)));
+		} else {
+			conditions.add(BinaryCondition.equalTo(getResourceTypeColumn(), generatePlaceholder(theResourceName)));
+			conditions.add(BinaryCondition.equalTo(getColumnParamName(), generatePlaceholder(theParamName)));
+		}
+		conditions.add(BinaryCondition.equalTo(getMissingColumn(), generatePlaceholder(theMissing)));
+
+		ComboCondition condition = ComboCondition.and(conditions.toArray());
 		return combineWithRequestPartitionIdPredicate(theRequestPartitionId, condition);
 	}
 

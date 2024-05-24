@@ -20,7 +20,9 @@
 package ca.uhn.fhir.jpa.dao.index;
 
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndex;
+import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.util.AddRemoveCount;
 import com.google.common.annotations.VisibleForTesting;
@@ -29,10 +31,12 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.PersistenceContextType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -41,6 +45,9 @@ import java.util.Set;
 @Service
 public class DaoSearchParamSynchronizer {
 	private static final Logger ourLog = LoggerFactory.getLogger(DaoSearchParamSynchronizer.class);
+
+	@Autowired
+	private StorageSettings myStorageSettings;
 
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	protected EntityManager myEntityManager;
@@ -115,6 +122,7 @@ public class DaoSearchParamSynchronizer {
 		List<T> paramsToRemove = subtract(theExistingParams, newParams);
 		List<T> paramsToAdd = subtract(newParams, theExistingParams);
 		tryToReuseIndexEntities(paramsToRemove, paramsToAdd);
+		updateExistingParams(theExistingParams, paramsToAdd, paramsToRemove);
 
 		for (T next : paramsToRemove) {
 			if (!myEntityManager.contains(next)) {
@@ -132,6 +140,22 @@ public class DaoSearchParamSynchronizer {
 		// TODO:  are there any unintended consequences to fixing this bug?
 		theAddRemoveCount.addToAddCount(paramsToAdd.size());
 		theAddRemoveCount.addToRemoveCount(paramsToRemove.size());
+	}
+
+	private <T extends BaseResourceIndex> void updateExistingParams(
+			Collection<T> theExistingParams, List<T> theParamsToAdd, List<T> theParamsToRemove) {
+
+		theExistingParams.stream()
+				.filter(BaseResourceIndexedSearchParam.class::isInstance)
+				.map(BaseResourceIndexedSearchParam.class::cast)
+				.filter(sp -> (myStorageSettings.isIndexStorageOptimized() && sp.isOptimizeIndexStorageNotApplied())
+						|| !myStorageSettings.isIndexStorageOptimized() && sp.isOptimizeIndexStorageApplied())
+				.filter(sp -> !theParamsToAdd.contains(sp))
+				.filter(sp -> !theParamsToRemove.contains(sp))
+				.forEach(sp -> {
+					sp.setUpdated(new Date());
+					theParamsToAdd.add((T) sp);
+				});
 	}
 
 	/**

@@ -176,9 +176,6 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 		}
 		ResourceIndexedSearchParamQuantity obj = (ResourceIndexedSearchParamQuantity) theObj;
 		EqualsBuilder b = new EqualsBuilder();
-		b.append(getUpdated(), obj.getUpdated());
-		b.append(getResourceType(), obj.getResourceType());
-		b.append(getParamName(), obj.getParamName());
 		b.append(getHashIdentity(), obj.getHashIdentity());
 		b.append(getHashIdentityAndUnits(), obj.getHashIdentityAndUnits());
 		b.append(getHashIdentitySystemAndUnits(), obj.getHashIdentitySystemAndUnits());

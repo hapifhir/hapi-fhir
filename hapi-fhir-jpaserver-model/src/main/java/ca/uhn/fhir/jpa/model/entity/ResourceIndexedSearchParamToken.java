@@ -216,7 +216,7 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 		}
 		ResourceIndexedSearchParamToken obj = (ResourceIndexedSearchParamToken) theObj;
 		EqualsBuilder b = new EqualsBuilder();
-		b.append(getUpdated(), obj.getUpdated());
+		b.append(getHashIdentity(), obj.getHashIdentity());
 		b.append(getHashSystem(), obj.getHashSystem());
 		b.append(getHashValue(), obj.getHashValue());
 		b.append(getHashSystemAndValue(), obj.getHashSystemAndValue());
@@ -279,7 +279,7 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 	@Override
 	public int hashCode() {
 		HashCodeBuilder b = new HashCodeBuilder();
-		b.append(getResourceType());
+		b.append(getHashIdentity());
 		b.append(getHashValue());
 		b.append(getHashSystem());
 		b.append(getHashSystemAndValue());

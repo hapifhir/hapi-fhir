@@ -108,6 +108,14 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 		myUpdated = null;
 	}
 
+	public boolean isOptimizeIndexStorageApplied() {
+		return myParamName == null || myResourceType == null || myUpdated == null;
+	}
+
+	public boolean isOptimizeIndexStorageNotApplied() {
+		return myParamName != null || myResourceType != null || myUpdated != null;
+	}
+
 	// MB pushed these down to the individual SP classes so we could name the FK in the join annotation
 	/**
 	 * Get the Resource this SP indexes

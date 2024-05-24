@@ -120,8 +120,6 @@ public abstract class BaseResourceIndexedSearchParamQuantity extends BaseResourc
 	@Override
 	public int hashCode() {
 		HashCodeBuilder b = new HashCodeBuilder();
-		b.append(getResourceType());
-		b.append(getParamName());
 		b.append(getHashIdentity());
 		b.append(getHashIdentityAndUnits());
 		b.append(getHashIdentitySystemAndUnits());

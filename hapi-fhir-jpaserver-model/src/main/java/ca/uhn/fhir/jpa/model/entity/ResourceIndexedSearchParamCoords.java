@@ -129,9 +129,7 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 		}
 		ResourceIndexedSearchParamCoords obj = (ResourceIndexedSearchParamCoords) theObj;
 		EqualsBuilder b = new EqualsBuilder();
-		b.append(getUpdated(), obj.getUpdated());
-		b.append(getResourceType(), obj.getResourceType());
-		b.append(getParamName(), obj.getParamName());
+		b.append(getHashIdentity(), obj.getHashIdentity());
 		b.append(getLatitude(), obj.getLatitude());
 		b.append(getLongitude(), obj.getLongitude());
 		b.append(isMissing(), obj.isMissing());
@@ -178,8 +176,7 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 	@Override
 	public int hashCode() {
 		HashCodeBuilder b = new HashCodeBuilder();
-		b.append(getParamName());
-		b.append(getResourceType());
+		b.append(getHashIdentity());
 		b.append(getLatitude());
 		b.append(getLongitude());
 		return b.toHashCode();

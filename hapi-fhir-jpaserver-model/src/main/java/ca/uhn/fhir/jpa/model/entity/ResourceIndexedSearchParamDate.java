@@ -259,9 +259,7 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 		}
 		ResourceIndexedSearchParamDate obj = (ResourceIndexedSearchParamDate) theObj;
 		EqualsBuilder b = new EqualsBuilder();
-		b.append(getUpdated(), obj.getUpdated());
-		b.append(getResourceType(), obj.getResourceType());
-		b.append(getParamName(), obj.getParamName());
+		b.append(getHashIdentity(), obj.getHashIdentity());
 		b.append(getTimeFromDate(getValueHigh()), getTimeFromDate(obj.getValueHigh()));
 		b.append(getTimeFromDate(getValueLow()), getTimeFromDate(obj.getValueLow()));
 		b.append(getValueLowDateOrdinal(), obj.getValueLowDateOrdinal());
@@ -308,8 +306,7 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 	@Override
 	public int hashCode() {
 		HashCodeBuilder b = new HashCodeBuilder();
-		b.append(getResourceType());
-		b.append(getParamName());
+		b.append(getHashIdentity());
 		b.append(getTimeFromDate(getValueHigh()));
 		b.append(getTimeFromDate(getValueLow()));
 		return b.toHashCode();

@@ -131,9 +131,6 @@ public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchP
 		}
 		ResourceIndexedSearchParamNumber obj = (ResourceIndexedSearchParamNumber) theObj;
 		EqualsBuilder b = new EqualsBuilder();
-		b.append(getUpdated(), obj.getUpdated());
-		b.append(getResourceType(), obj.getResourceType());
-		b.append(getParamName(), obj.getParamName());
 		b.append(getHashIdentity(), obj.getHashIdentity());
 		b.append(normalizeForEqualityComparison(getValue()), normalizeForEqualityComparison(obj.getValue()));
 		b.append(isMissing(), obj.isMissing());
@@ -168,8 +165,6 @@ public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchP
 	@Override
 	public int hashCode() {
 		HashCodeBuilder b = new HashCodeBuilder();
-		b.append(getResourceType());
-		b.append(getParamName());
 		b.append(getHashIdentity());
 		b.append(normalizeForEqualityComparison(getValue()));
 		b.append(isMissing());

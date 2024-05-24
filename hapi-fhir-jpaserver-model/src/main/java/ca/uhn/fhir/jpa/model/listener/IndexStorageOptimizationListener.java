@@ -59,9 +59,15 @@ public class IndexStorageOptimizationListener {
 	@PrePersist
 	@PreUpdate
 	public void optimizeSearchParams(Object theEntity) {
-		if (theEntity instanceof BaseResourceIndexedSearchParam && myStorageSettings.isIndexStorageOptimized()) {
+		if (theEntity instanceof BaseResourceIndexedSearchParam) {
 			BaseResourceIndexedSearchParam resourceIndexedSearchParam = (BaseResourceIndexedSearchParam) theEntity;
-			resourceIndexedSearchParam.optimizeIndexStorage();
+			if (myStorageSettings.isIndexStorageOptimized()) {
+				resourceIndexedSearchParam.optimizeIndexStorage();
+			} else {
+				if (resourceIndexedSearchParam.isOptimizeIndexStorageApplied()) {
+					restoreSearchParams(resourceIndexedSearchParam);
+				}
+			}
 		}
 	}
 
@@ -71,19 +77,21 @@ public class IndexStorageOptimizationListener {
 	public void restoreSearchParams(Object theEntity) {
 		if (theEntity instanceof BaseResourceIndexedSearchParam && myStorageSettings.isIndexStorageOptimized()) {
 			BaseResourceIndexedSearchParam resourceIndexedSearchParam = (BaseResourceIndexedSearchParam) theEntity;
+			restoreSearchParams(resourceIndexedSearchParam);
+		}
+	}
 
-			// getting ISearchParamRegistry from the application context as it is initialized after EntityListeners
-			ISearchParamRegistry searchParamRegistry = myApplicationContext.getBean(ISearchParamRegistry.class);
-			Optional<IndexedSearchParam> indexedSearchParamOptional =
-					searchParamRegistry.getIndexedSearchParamByHashIdentity(
-							resourceIndexedSearchParam.getHashIdentity());
+	private void restoreSearchParams(BaseResourceIndexedSearchParam resourceIndexedSearchParam) {
+		// getting ISearchParamRegistry from the application context as it is initialized after EntityListeners
+		ISearchParamRegistry searchParamRegistry = myApplicationContext.getBean(ISearchParamRegistry.class);
+		Optional<IndexedSearchParam> indexedSearchParamOptional =
+				searchParamRegistry.getIndexedSearchParamByHashIdentity(resourceIndexedSearchParam.getHashIdentity());
 
-			if (indexedSearchParamOptional.isPresent()) {
-				resourceIndexedSearchParam.setResourceType(
-						indexedSearchParamOptional.get().getResourceType());
-				resourceIndexedSearchParam.restoreParamName(
-						indexedSearchParamOptional.get().getParameterName());
-			}
+		if (indexedSearchParamOptional.isPresent()) {
+			resourceIndexedSearchParam.setResourceType(
+					indexedSearchParamOptional.get().getResourceType());
+			resourceIndexedSearchParam.restoreParamName(
+					indexedSearchParamOptional.get().getParameterName());
 		}
 	}
 }
