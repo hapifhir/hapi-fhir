@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,10 +93,17 @@ public class ResourceReferenceInfo {
 		int colonIndex = theInclude.getValue().indexOf(':');
 		if (colonIndex != -1) {
 			// DSTU2+ style
-			String resourceName = theInclude.getValue().substring(0, colonIndex);
-			String paramName = theInclude.getValue().substring(colonIndex + 1);
+			String targetResourceName = theInclude.getParamTargetType();
+			if (targetResourceName != null
+					&& !targetResourceName.equals(
+							myResource.getReferenceElement().getResourceType())) {
+				return false;
+			}
+
+			String resourceName = theInclude.getParamType();
 			RuntimeResourceDefinition resourceDef = myContext.getResourceDefinition(resourceName);
 			if (resourceDef != null) {
+				String paramName = theInclude.getParamName();
 				RuntimeSearchParam searchParamDef = resourceDef.getSearchParam(paramName);
 				if (searchParamDef != null) {
 					final String completeName = myOwningResource + "." + myName;
