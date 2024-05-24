@@ -2387,13 +2387,19 @@ public enum Pointcut implements IPointcut {
 	 * <li>
 	 * ca.uhn.fhir.mdm.model.mdmevents.MdmMergeEvent - Contains information about the from and to resources.
 	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.mdm.model.mdmevents.MdmTransactionContext - Contains information about the Transaction context, e.g. merge or link.
+	 * </li>
 	 * </ul>
 	 * <p>
 	 * Hooks should return <code>void</code>.
 	 * </p>
 	 */
 	MDM_POST_MERGE_GOLDEN_RESOURCES(
-			void.class, "ca.uhn.fhir.rest.api.server.RequestDetails", "ca.uhn.fhir.mdm.model.mdmevents.MdmMergeEvent"),
+			void.class,
+			"ca.uhn.fhir.rest.api.server.RequestDetails",
+			"ca.uhn.fhir.mdm.model.mdmevents.MdmMergeEvent",
+			"ca.uhn.fhir.mdm.model.MdmTransactionContext"),
 
 	/**
 	 * <b>MDM Link History Hook:</b>
