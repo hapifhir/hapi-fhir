@@ -85,7 +85,7 @@ public class MdmProviderMergeGoldenResourcesR4Test extends BaseProviderR4Test {
 		assertFalse(MdmResourceUtil.isGoldenRecordRedirected(mergedSourcePatient));
 
 		assertEquals(myToGoldenPatient.getIdElement(), mergedSourcePatient.getIdElement());
-		assertThat(mergedSourcePatient, sameGoldenResourceAs(myToGoldenPatient));
+		assertThat(mergedSourcePatient).is(sameGoldenResourceAs(myToGoldenPatient));
 		assertThat(getAllRedirectedGoldenPatients()).hasSize(1);
 		assertThat(getAllGoldenPatients()).hasSize(1);
 
@@ -128,7 +128,7 @@ public class MdmProviderMergeGoldenResourcesR4Test extends BaseProviderR4Test {
 		assertFalse(MdmResourceUtil.isGoldenRecordRedirected(mergedSourcePatient));
 
 		assertEquals(toGoldenPatient.getIdElement(), mergedSourcePatient.getIdElement());
-		assertThat(mergedSourcePatient, sameGoldenResourceAs(toGoldenPatient));
+		assertThat(mergedSourcePatient).is(sameGoldenResourceAs(toGoldenPatient));
 		assertThat(getAllRedirectedGoldenPatients()).hasSize(1);
 		// 2 from the set-up and only one from this test should be golden resource
 		assertThat(getAllGoldenPatients()).hasSize(3);
@@ -175,7 +175,7 @@ public class MdmProviderMergeGoldenResourcesR4Test extends BaseProviderR4Test {
 			patient, myRequestDetails);
 
 		assertEquals(myToGoldenPatient.getIdElement(), mergedSourcePatient.getIdElement());
-		assertThat(mergedSourcePatient, sameGoldenResourceAs(myToGoldenPatient));
+		assertThat(mergedSourcePatient).is(sameGoldenResourceAs(myToGoldenPatient));
 		assertThat(getAllRedirectedGoldenPatients()).hasSize(1);
 		assertThat(getAllGoldenPatients()).hasSize(1);
 

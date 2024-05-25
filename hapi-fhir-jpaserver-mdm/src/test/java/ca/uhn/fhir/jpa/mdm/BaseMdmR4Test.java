@@ -46,6 +46,7 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
+import org.assertj.core.api.Condition;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -513,53 +514,42 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 		myMdmMatchLinkSvc.updateMdmLinksForMdmSource(thePractitioner, createContextForCreate("Practitioner"));
 		return thePractitioner;
 	}
-
-	private Matcher<IAnyResource> wrapMatcherInTransaction(Supplier<Matcher<IAnyResource>> theFunction) {
-		return new Matcher<IAnyResource>() {
+	private Condition<IAnyResource> wrapConditionInTransaction(Supplier<Condition<IAnyResource>> theFunction) {
+		return new Condition<IAnyResource>() {
 			@Override
-			public boolean matches(Object actual) {
+			public boolean matches(IAnyResource actual) {
 				return runInTransaction(() -> theFunction.get().matches(actual));
 			}
 
 			@Override
-			public void describeMismatch(Object actual, Description mismatchDescription) {
-				runInTransaction(() -> theFunction.get().describeMismatch(actual, mismatchDescription));
-			}
-
-			@Override
-			public void _dont_implement_Matcher___instead_extend_BaseMatcher_() {
-
-			}
-
-			@Override
-			public void describeTo(Description description) {
-				runInTransaction(() -> theFunction.get().describeTo(description));
+			public String toString() {
+				return runInTransaction(theFunction::toString);
 			}
 		};
 	}
 
-	protected Matcher<IAnyResource> sameGoldenResourceAs(IAnyResource... theBaseResource) {
-		return wrapMatcherInTransaction(() -> IsSameGoldenResourceAs.sameGoldenResourceAs(myIdHelperService, myMdmLinkDaoSvc, theBaseResource));
+	protected Condition<IAnyResource> sameGoldenResourceAs(IAnyResource... theBaseResource) {
+		return wrapConditionInTransaction(() -> new Condition<>(IsSameGoldenResourceAs.sameGoldenResourceAs(myIdHelperService, myMdmLinkDaoSvc, theBaseResource), "sameGoldenResourceAs"));
 	}
 
-	protected Matcher<IAnyResource> linkedTo(IAnyResource... theBaseResource) {
-		return wrapMatcherInTransaction(() -> IsLinkedTo.linkedTo(myIdHelperService, myMdmLinkDaoSvc, theBaseResource));
+	protected Condition<IAnyResource> linkedTo(IAnyResource... theBaseResource) {
+		return wrapConditionInTransaction(() -> new Condition<>(IsLinkedTo.linkedTo(myIdHelperService, myMdmLinkDaoSvc, theBaseResource), "linkedTo"));
 	}
 
-	protected Matcher<IAnyResource> possibleLinkedTo(IAnyResource... theBaseResource) {
-		return wrapMatcherInTransaction(() -> IsPossibleLinkedTo.possibleLinkedTo(myIdHelperService, myMdmLinkDaoSvc, theBaseResource));
+	protected Condition<IAnyResource> possibleLinkedTo(IAnyResource... theBaseResource) {
+		return wrapConditionInTransaction(() -> new Condition<>(IsPossibleLinkedTo.possibleLinkedTo(myIdHelperService, myMdmLinkDaoSvc, theBaseResource), "possibleLinkedTo"));
 	}
 
-	protected Matcher<IAnyResource> possibleMatchWith(IAnyResource... theBaseResource) {
-		return wrapMatcherInTransaction(() -> IsPossibleMatchWith.possibleMatchWith(myIdHelperService, myMdmLinkDaoSvc, theBaseResource));
+	protected Condition<IAnyResource> possibleMatchWith(IAnyResource... theBaseResource) {
+		return wrapConditionInTransaction(() -> new Condition<>(IsPossibleMatchWith.possibleMatchWith(myIdHelperService, myMdmLinkDaoSvc, theBaseResource), "possibleMatchWith"));
 	}
 
-	protected Matcher<IAnyResource> possibleDuplicateOf(IAnyResource... theBaseResource) {
-		return wrapMatcherInTransaction(() -> IsPossibleDuplicateOf.possibleDuplicateOf(myIdHelperService, myMdmLinkDaoSvc, theBaseResource));
+	protected Condition<IAnyResource> possibleDuplicateOf(IAnyResource... theBaseResource) {
+		return wrapConditionInTransaction(() -> new Condition<>(IsPossibleDuplicateOf.possibleDuplicateOf(myIdHelperService, myMdmLinkDaoSvc, theBaseResource), "possibleDuplicateOf"));
 	}
 
-	protected Matcher<IAnyResource> matchedToAGoldenResource() {
-		return wrapMatcherInTransaction(() -> IsMatchedToAGoldenResource.matchedToAGoldenResource(myIdHelperService, myMdmLinkDaoSvc));
+	protected Condition<IAnyResource> matchedToAGoldenResource() {
+		return wrapConditionInTransaction(() -> new Condition<>(IsMatchedToAGoldenResource.matchedToAGoldenResource(myIdHelperService, myMdmLinkDaoSvc), "matchedToAGoldenResource"));
 	}
 
 	protected Patient getOnlyGoldenPatient() {
@@ -567,7 +557,6 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 		assertThat(resources).hasSize(1);
 		return (Patient) resources.get(0);
 	}
-
 
 	@Nonnull
 	protected List<IBaseResource> getAllGoldenPatients() {

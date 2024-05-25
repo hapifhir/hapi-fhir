@@ -96,7 +96,7 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 
 		assertEquals(myToGoldenPatient.getIdElement(), mergedGoldenPatient.getIdElement());
 		// FIXME KHS restore
-//		assertThat(mergedGoldenPatient, sameGoldenResourceAs(mergedGoldenPatient));
+//		assertThat(mergedGoldenPatient).is(sameGoldenResourceAs(mergedGoldenPatient));
 		assertThat(getAllGoldenPatients()).hasSize(1);
 		assertThat(getAllRedirectedGoldenPatients()).hasSize(1);
 	}

@@ -23,8 +23,6 @@ import static ca.uhn.fhir.mdm.api.MdmMatchResultEnum.MATCH;
 import static ca.uhn.fhir.mdm.api.MdmMatchResultEnum.POSSIBLE_DUPLICATE;
 import static ca.uhn.fhir.mdm.api.MdmMatchResultEnum.POSSIBLE_MATCH;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -62,7 +60,7 @@ public class MdmMatchLinkSvcMultipleEidModeTest extends BaseMdmR4Test {
 		assertLinksMatchVector(null, 6L);
 
 		//We want to make sure the patients were linked to the same GoldenResource.
-		assertThat(patient, sameGoldenResourceAs(janePatient));
+		assertThat(patient).is(sameGoldenResourceAs(janePatient));
 
 		Patient sourcePatient = (Patient) getGoldenResourceFromTargetResource(patient);
 
@@ -109,7 +107,7 @@ public class MdmMatchLinkSvcMultipleEidModeTest extends BaseMdmR4Test {
 		assertLinksMatchScore(1.0, 1.0);
 		assertLinksMatchVector(null, null);
 
-		assertThat(patient1, sameGoldenResourceAs(patient2));
+		assertThat(patient1).is(sameGoldenResourceAs(patient2));
 
 		clearExternalEIDs(patient2);
 		addExternalEID(patient2, "id_6");
@@ -126,7 +124,7 @@ public class MdmMatchLinkSvcMultipleEidModeTest extends BaseMdmR4Test {
 		assertLinksMatchScore(1.0, 1.0);
 		assertLinksMatchVector(null, null);
 
-		assertThat(patient1, sameGoldenResourceAs(patient2));
+		assertThat(patient1).is(sameGoldenResourceAs(patient2));
 
 		patientFromTarget = (Patient) getGoldenResourceFromTargetResource(patient2);
 		assertThat(patientFromTarget.getIdentifier()).hasSize(6);
@@ -202,7 +200,7 @@ public class MdmMatchLinkSvcMultipleEidModeTest extends BaseMdmR4Test {
 		assertLinksMatchVector(null, null, null);
 
 		//Now, Patient 2 and 3 are linked, and the GoldenResource has 2 eids.
-		assertThat(patient2, sameGoldenResourceAs(patient3));
+		assertThat(patient2).is(sameGoldenResourceAs(patient3));
 
 		//Now lets change one of the EIDs on the second patient to one that matches our original patient.
 		//This should create a situation in which the incoming EIDs are matched to _two_ different GoldenResources. In this case, we want to
@@ -218,12 +216,12 @@ public class MdmMatchLinkSvcMultipleEidModeTest extends BaseMdmR4Test {
 		assertLinksMatchScore(1.0, 1.0, 1.0, 1.0, null);
 		assertLinksMatchVector(null, null, null, null, null);
 
-		assertThat(patient2, not(matchedToAGoldenResource()));
-		assertThat(patient2, possibleMatchWith(patient1));
-		assertThat(patient2, possibleMatchWith(patient3));
+		assertThat(patient2).doesNotHave(matchedToAGoldenResource());
+		assertThat(patient2).is(possibleMatchWith(patient1));
+		assertThat(patient2).is(possibleMatchWith(patient3));
 
 		List<MdmLink> possibleDuplicates = (List<MdmLink>) myMdmLinkDaoSvc.getPossibleDuplicates();
 		assertThat(possibleDuplicates).hasSize(1);
-		assertThat(patient3, possibleDuplicateOf(patient1));
+		assertThat(patient3).is(possibleDuplicateOf(patient1));
 	}
 }
