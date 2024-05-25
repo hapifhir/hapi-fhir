@@ -53,6 +53,7 @@ import java.util.stream.Collectors;
 import static ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum.DATE;
 import static ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum.NUMBER;
 import static ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum.QUANTITY;
+import static ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum.REFERENCE;
 import static ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum.SPECIAL;
 import static ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum.STRING;
 import static ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum.TOKEN;
@@ -63,7 +64,7 @@ public class JpaSearchParamCache {
 	private static final Logger ourLog = LoggerFactory.getLogger(JpaSearchParamCache.class);
 
 	private static final List<RestSearchParameterTypeEnum> SUPPORTED_INDEXED_SEARCH_PARAMS =
-			List.of(SPECIAL, DATE, NUMBER, QUANTITY, STRING, TOKEN, URI);
+			List.of(SPECIAL, DATE, NUMBER, QUANTITY, STRING, TOKEN, URI, REFERENCE);
 
 	volatile Map<String, List<RuntimeSearchParam>> myActiveComboSearchParams = Collections.emptyMap();
 	volatile Map<String, Map<Set<String>, List<RuntimeSearchParam>>> myActiveParamNamesToComboSearchParams =
@@ -221,13 +222,24 @@ public class JpaSearchParamCache {
 	private void populateIndexedSearchParams(
 			String theResourceName,
 			RuntimeSearchParam theRuntimeSearchParam,
-			Map<Long, IndexedSearchParam> theHashIdentitySearchParams) {
+			Map<Long, IndexedSearchParam> theHashIdentityToIndexedSearchParams) {
 
 		if (SUPPORTED_INDEXED_SEARCH_PARAMS.contains(theRuntimeSearchParam.getParamType())) {
-			Long hashIdentity = SearchParamHash.hashSearchParam(
-					new PartitionSettings(), null, theResourceName, theRuntimeSearchParam.getName());
-			theHashIdentitySearchParams.put(
-					hashIdentity, new IndexedSearchParam(theRuntimeSearchParam.getName(), theResourceName));
+			addIndexedSearchParam(
+					theResourceName, theHashIdentityToIndexedSearchParams, theRuntimeSearchParam.getName());
+			// handle Uplifted Ref Chain Search Parameters
+			theRuntimeSearchParam.getUpliftRefchainCodes().stream()
+					.map(urCode -> String.format("%s.%s", theRuntimeSearchParam.getName(), urCode))
+					.forEach(urSpName ->
+							addIndexedSearchParam(theResourceName, theHashIdentityToIndexedSearchParams, urSpName));
 		}
+	}
+
+	private void addIndexedSearchParam(
+			String theResourceName,
+			Map<Long, IndexedSearchParam> theHashIdentityToIndexedSearchParams,
+			String theSpName) {
+		Long hashIdentity = SearchParamHash.hashSearchParam(new PartitionSettings(), null, theResourceName, theSpName);
+		theHashIdentityToIndexedSearchParams.put(hashIdentity, new IndexedSearchParam(theSpName, theResourceName));
 	}
 }
