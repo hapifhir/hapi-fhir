@@ -43,24 +43,13 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
-import org.assertj.core.api.Condition;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.ContactPoint;
-import org.hl7.fhir.r4.model.DateType;
-import org.hl7.fhir.r4.model.Enumerations;
-import org.hl7.fhir.r4.model.Medication;
-import org.hl7.fhir.r4.model.Observation;
-import org.hl7.fhir.r4.model.Organization;
-import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Practitioner;
-import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -69,6 +58,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import jakarta.annotation.Nonnull;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Date;
@@ -77,7 +67,6 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -514,49 +503,61 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 		myMdmMatchLinkSvc.updateMdmLinksForMdmSource(thePractitioner, createContextForCreate("Practitioner"));
 		return thePractitioner;
 	}
-	private Condition<IAnyResource> wrapConditionInTransaction(Supplier<Condition<IAnyResource>> theFunction) {
-		return new Condition<IAnyResource>() {
+
+	private Matcher<IAnyResource> wrapMatcherInTransaction(Supplier<Matcher<IAnyResource>> theFunction) {
+		return new Matcher<IAnyResource>() {
 			@Override
-			public boolean matches(IAnyResource actual) {
+			public boolean matches(Object actual) {
 				return runInTransaction(() -> theFunction.get().matches(actual));
 			}
 
 			@Override
-			public String toString() {
-				return runInTransaction(theFunction::toString);
+			public void describeMismatch(Object actual, Description mismatchDescription) {
+				runInTransaction(() -> theFunction.get().describeMismatch(actual, mismatchDescription));
+			}
+
+			@Override
+			public void _dont_implement_Matcher___instead_extend_BaseMatcher_() {
+
+			}
+
+			@Override
+			public void describeTo(Description description) {
+				runInTransaction(() -> theFunction.get().describeTo(description));
 			}
 		};
 	}
 
-	protected Condition<IAnyResource> sameGoldenResourceAs(IAnyResource... theBaseResource) {
-		return wrapConditionInTransaction(() -> new Condition<>(IsSameGoldenResourceAs.sameGoldenResourceAs(myIdHelperService, myMdmLinkDaoSvc, theBaseResource), "sameGoldenResourceAs"));
+	protected Matcher<IAnyResource> sameGoldenResourceAs(IAnyResource... theBaseResource) {
+		return wrapMatcherInTransaction(() -> IsSameGoldenResourceAs.sameGoldenResourceAs(myIdHelperService, myMdmLinkDaoSvc, theBaseResource));
 	}
 
-	protected Condition<IAnyResource> linkedTo(IAnyResource... theBaseResource) {
-		return wrapConditionInTransaction(() -> new Condition<>(IsLinkedTo.linkedTo(myIdHelperService, myMdmLinkDaoSvc, theBaseResource), "linkedTo"));
+	protected Matcher<IAnyResource> linkedTo(IAnyResource... theBaseResource) {
+		return wrapMatcherInTransaction(() -> IsLinkedTo.linkedTo(myIdHelperService, myMdmLinkDaoSvc, theBaseResource));
 	}
 
-	protected Condition<IAnyResource> possibleLinkedTo(IAnyResource... theBaseResource) {
-		return wrapConditionInTransaction(() -> new Condition<>(IsPossibleLinkedTo.possibleLinkedTo(myIdHelperService, myMdmLinkDaoSvc, theBaseResource), "possibleLinkedTo"));
+	protected Matcher<IAnyResource> possibleLinkedTo(IAnyResource... theBaseResource) {
+		return wrapMatcherInTransaction(() -> IsPossibleLinkedTo.possibleLinkedTo(myIdHelperService, myMdmLinkDaoSvc, theBaseResource));
 	}
 
-	protected Condition<IAnyResource> possibleMatchWith(IAnyResource... theBaseResource) {
-		return wrapConditionInTransaction(() -> new Condition<>(IsPossibleMatchWith.possibleMatchWith(myIdHelperService, myMdmLinkDaoSvc, theBaseResource), "possibleMatchWith"));
+	protected Matcher<IAnyResource> possibleMatchWith(IAnyResource... theBaseResource) {
+		return wrapMatcherInTransaction(() -> IsPossibleMatchWith.possibleMatchWith(myIdHelperService, myMdmLinkDaoSvc, theBaseResource));
 	}
 
-	protected Condition<IAnyResource> possibleDuplicateOf(IAnyResource... theBaseResource) {
-		return wrapConditionInTransaction(() -> new Condition<>(IsPossibleDuplicateOf.possibleDuplicateOf(myIdHelperService, myMdmLinkDaoSvc, theBaseResource), "possibleDuplicateOf"));
+	protected Matcher<IAnyResource> possibleDuplicateOf(IAnyResource... theBaseResource) {
+		return wrapMatcherInTransaction(() -> IsPossibleDuplicateOf.possibleDuplicateOf(myIdHelperService, myMdmLinkDaoSvc, theBaseResource));
 	}
 
-	protected Condition<IAnyResource> matchedToAGoldenResource() {
-		return wrapConditionInTransaction(() -> new Condition<>(IsMatchedToAGoldenResource.matchedToAGoldenResource(myIdHelperService, myMdmLinkDaoSvc), "matchedToAGoldenResource"));
+	protected Matcher<IAnyResource> matchedToAGoldenResource() {
+		return wrapMatcherInTransaction(() -> IsMatchedToAGoldenResource.matchedToAGoldenResource(myIdHelperService, myMdmLinkDaoSvc));
 	}
 
 	protected Patient getOnlyGoldenPatient() {
 		List<IBaseResource> resources = getAllGoldenPatients();
-		assertThat(resources).hasSize(1);
+		assertEquals(1, resources.size());
 		return (Patient) resources.get(0);
 	}
+
 
 	@Nonnull
 	protected List<IBaseResource> getAllGoldenPatients() {
@@ -630,9 +631,9 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 
 	private <T> void assertFields(Function<MdmLink, T> theAccessor, T... theExpectedValues) {
 		List<MdmLink> links = myMdmLinkDao.findAll();
-		assertThat(links).hasSize(theExpectedValues.length);
+		assertEquals(theExpectedValues.length, links.size());
 		for (int i = 0; i < links.size(); ++i) {
-			assertThat(theAccessor.apply(links.get(i))).as("Value at index " + i + " was not equal").isEqualTo(theExpectedValues[i]);
+			assertEquals(theExpectedValues[i], theAccessor.apply(links.get(i)), "Value at index " + i + " was not equal");
 		}
 	}
 
