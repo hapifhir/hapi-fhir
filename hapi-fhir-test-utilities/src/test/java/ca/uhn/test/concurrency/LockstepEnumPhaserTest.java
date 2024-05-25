@@ -1,6 +1,5 @@
 package ca.uhn.test.concurrency;
 
-import com.github.seregamorph.hamcrest.OrderMatchers;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Test;

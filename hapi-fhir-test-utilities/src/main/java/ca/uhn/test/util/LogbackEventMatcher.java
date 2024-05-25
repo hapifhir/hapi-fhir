@@ -23,13 +23,13 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
-import org.hamcrest.CustomTypeSafeMatcher;
+import org.assertj.core.api.AbstractAssert;
 
 /**
- * A Hamcrest matcher for junit assertions.
+ * An assertj matcher for junit assertions.
  * Matches on level, partial message, and/or a portion of the message contained by a throwable, if present.
  */
-public class LogbackEventMatcher extends CustomTypeSafeMatcher<ILoggingEvent> {
+public class LogbackEventMatcher extends AbstractAssert<LogbackEventMatcher, ILoggingEvent> {
 	@Nullable
 	private final Level myLevel;
 	@Nullable
@@ -38,43 +38,39 @@ public class LogbackEventMatcher extends CustomTypeSafeMatcher<ILoggingEvent> {
 	private final String myThrownMessage;
 
 	public LogbackEventMatcher(@Nullable Level theLevel, @Nullable String thePartialString) {
-		this("log event", theLevel, thePartialString, null);
+		this(theLevel, thePartialString, null);
 	}
 
 	public LogbackEventMatcher(@Nullable Level theLevel, @Nullable String thePartialString, @Nullable String theThrownMessage) {
-		this("log event", theLevel, thePartialString, theThrownMessage);
-	}
-
-	private LogbackEventMatcher(@Nonnull String description, Level theLevel,
-										 String thePartialString, String theThrownMessage)
-	{
-		super(makeDescription(description, theLevel, thePartialString, theThrownMessage));
+		super(null, LogbackEventMatcher.class);
 		myLevel = theLevel;
 		myLogMessage = thePartialString;
 		myThrownMessage = theThrownMessage;
 	}
 
-	@Nonnull
-	private static String makeDescription(String description, Level theLevel, String thePartialString, String theThrownMessage) {
-		String msg = description;
-		if (theLevel != null) {
-			msg = msg + " with level at least " + theLevel;
-		}
-		if (thePartialString != null) {
-			msg = msg + " containing string \"" + thePartialString + "\"";
-
-		}
-		if (thePartialString != null) {
-			msg = msg + " and throwable with error message containing string \"" + theThrownMessage + "\"";
-
-		}
-		return msg;
+	public static LogbackEventMatcher assertThat(@Nullable Level theLevel, @Nullable String thePartialString) {
+		return new LogbackEventMatcher(theLevel, thePartialString);
 	}
 
-	@Override
-	protected boolean matchesSafely(ILoggingEvent item) {
-		return (myLevel == null || item.getLevel().isGreaterOrEqual(myLevel)) &&
-			(myLogMessage == null || item.getFormattedMessage().contains(myLogMessage)) &&
-			(myThrownMessage == null || item.getThrowableProxy() == null || item.getThrowableProxy().getMessage().contains(myThrownMessage));
+	public static LogbackEventMatcher assertThat(@Nullable Level theLevel, @Nullable String thePartialString, @Nullable String theThrownMessage) {
+		return new LogbackEventMatcher(theLevel, thePartialString, theThrownMessage);
+	}
+
+	public LogbackEventMatcher matches(ILoggingEvent item) {
+		isNotNull();
+
+		if (myLevel != null && !item.getLevel().isGreaterOrEqual(myLevel)) {
+			failWithMessage("Expected level to be at least <%s> but was <%s>", myLevel, item.getLevel());
+		}
+
+		if (myLogMessage != null && !item.getFormattedMessage().contains(myLogMessage)) {
+			failWithMessage("Expected log message to contain <%s> but was <%s>", myLogMessage, item.getFormattedMessage());
+		}
+
+		if (myThrownMessage != null && (item.getThrowableProxy() == null || !item.getThrowableProxy().getMessage().contains(myThrownMessage))) {
+			failWithMessage("Expected throwable message to contain <%s> but was <%s>", myThrownMessage, item.getThrowableProxy() != null ? item.getThrowableProxy().getMessage() : "null");
+		}
+
+		return this;
 	}
 }
