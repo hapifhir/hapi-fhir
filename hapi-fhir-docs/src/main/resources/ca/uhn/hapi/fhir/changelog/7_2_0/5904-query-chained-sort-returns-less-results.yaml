@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 5904
+title: "Chained sort would exclude results that did not have resources matching the sort chain.  These are now included, and sorted at the end."
