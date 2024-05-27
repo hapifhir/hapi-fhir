@@ -128,9 +128,11 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.NotModifiedException;
+import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.ICallable;
 import ca.uhn.fhir.util.ParametersUtil;
 import ca.uhn.fhir.util.UrlUtil;
+import ca.uhn.fhir.util.bundle.SearchBundleEntryParts;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -594,6 +596,13 @@ public class GenericClient extends BaseClient implements IGenericClient {
 					myCacheControlDirective,
 					myCustomAcceptHeaderValue,
 					myCustomHeaderValues);
+
+			if (resp instanceof IBaseBundle) {
+				List<SearchBundleEntryParts> searchBundleEntryParts =
+						BundleUtil.getSearchBundleEntryParts(getFhirContext(), (IBaseBundle) resp);
+				searchBundleEntryParts.forEach(searchBundleEntryPart -> ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(
+						searchBundleEntryPart.getResource(), searchBundleEntryPart.getSearchMode()));
+			}
 			return resp;
 		}
 
