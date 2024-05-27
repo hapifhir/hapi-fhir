@@ -64,7 +64,7 @@ public class IndexStorageOptimizationListener {
 			if (myStorageSettings.isIndexStorageOptimized()) {
 				resourceIndexedSearchParam.optimizeIndexStorage();
 			} else {
-				if (resourceIndexedSearchParam.isOptimizeIndexStorageApplied()) {
+				if (resourceIndexedSearchParam.isIndexStorageOptimized()) {
 					restoreSearchParams(resourceIndexedSearchParam);
 				}
 			}

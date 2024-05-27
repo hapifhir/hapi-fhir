@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.jpa.model.config;
 
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
+
 /**
  * @since 5.0.0
  */
@@ -58,6 +60,9 @@ public class PartitionSettings {
 	 * <p>
 	 * This setting has no effect if partitioning is not enabled via {@link #isPartitioningEnabled()}.
 	 * </p>
+	 * <p>
+	 * If {@link StorageSettings#isIndexStorageOptimized()} is enabled this setting should be set to <code>false</code>.
+	 * </p>
 	 */
 	public boolean isIncludePartitionInSearchHashes() {
 		return myIncludePartitionInSearchHashes;
@@ -70,6 +75,9 @@ public class PartitionSettings {
 	 * better when using native database partitioning features.
 	 * <p>
 	 * This setting has no effect if partitioning is not enabled via {@link #isPartitioningEnabled()}.
+	 * </p>
+	 * <p>
+	 * If {@link StorageSettings#isIndexStorageOptimized()} is enabled this setting should be set to <code>false</code>.
 	 * </p>
 	 */
 	public PartitionSettings setIncludePartitionInSearchHashes(boolean theIncludePartitionInSearchHashes) {

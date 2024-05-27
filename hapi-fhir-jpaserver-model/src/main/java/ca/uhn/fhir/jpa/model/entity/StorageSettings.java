@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.context.ParserOptions;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.util.ISequenceValueMassager;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationSvc;
@@ -380,6 +381,9 @@ public class StorageSettings {
 	 * In order to apply this optimization setting to existing HFJ_SPIDX index rows,
 	 * <code>$reindex</code> operation should be executed at the instance or server level.
 	 * <p>
+	 * <p>
+	 * If this setting is enabled, {@link PartitionSettings#isIncludePartitionInSearchHashes()} should be disabled.
+	 * </p>
 	 *
 	 * @since 7.4.0
 	 */
@@ -399,11 +403,13 @@ public class StorageSettings {
 	 * In order to apply this optimization setting to existing HFJ_SPIDX index rows,
 	 * <code>$reindex</code> operation should be executed at the instance or server level.
 	 * <p>
+	 * <p>
+	 * If this setting is enabled, {@link PartitionSettings#isIncludePartitionInSearchHashes()} should be set to <code>false</code>.
+	 * </p>
 	 *
 	 * @since 7.4.0
 	 */
 	public void setIndexStorageOptimized(boolean theIndexStorageOptimized) {
-		Validate.notNull(theIndexStorageOptimized, "theIndexStorageOptimized must not be null");
 		myIndexStorageOptimized = theIndexStorageOptimized;
 	}
 

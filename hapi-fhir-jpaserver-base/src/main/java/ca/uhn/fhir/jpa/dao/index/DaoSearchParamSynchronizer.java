@@ -122,7 +122,7 @@ public class DaoSearchParamSynchronizer {
 		List<T> paramsToRemove = subtract(theExistingParams, newParams);
 		List<T> paramsToAdd = subtract(newParams, theExistingParams);
 		tryToReuseIndexEntities(paramsToRemove, paramsToAdd);
-		updateExistingParams(theExistingParams, paramsToAdd, paramsToRemove);
+		updateExistingParamsIfRequired(theExistingParams, paramsToAdd, paramsToRemove);
 
 		for (T next : paramsToRemove) {
 			if (!myEntityManager.contains(next)) {
@@ -142,20 +142,25 @@ public class DaoSearchParamSynchronizer {
 		theAddRemoveCount.addToRemoveCount(paramsToRemove.size());
 	}
 
-	private <T extends BaseResourceIndex> void updateExistingParams(
+	private <T extends BaseResourceIndex> void updateExistingParamsIfRequired(
 			Collection<T> theExistingParams, List<T> theParamsToAdd, List<T> theParamsToRemove) {
 
 		theExistingParams.stream()
 				.filter(BaseResourceIndexedSearchParam.class::isInstance)
 				.map(BaseResourceIndexedSearchParam.class::cast)
-				.filter(sp -> (myStorageSettings.isIndexStorageOptimized() && sp.isOptimizeIndexStorageNotApplied())
-						|| !myStorageSettings.isIndexStorageOptimized() && sp.isOptimizeIndexStorageApplied())
+				.filter(this::isSearchParameterUpdateRequired)
 				.filter(sp -> !theParamsToAdd.contains(sp))
 				.filter(sp -> !theParamsToRemove.contains(sp))
 				.forEach(sp -> {
+					// force hibernate to update Search Parameter entity by resetting SP_UPDATED value
 					sp.setUpdated(new Date());
 					theParamsToAdd.add((T) sp);
 				});
+	}
+
+	private boolean isSearchParameterUpdateRequired(BaseResourceIndexedSearchParam theSearchParameter) {
+		return (myStorageSettings.isIndexStorageOptimized() && !theSearchParameter.isIndexStorageOptimized())
+				|| (!myStorageSettings.isIndexStorageOptimized() && theSearchParameter.isIndexStorageOptimized());
 	}
 
 	/**

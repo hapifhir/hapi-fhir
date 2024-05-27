@@ -4,8 +4,11 @@ import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexAppCtx;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
+import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
+import ca.uhn.fhir.jpa.config.SearchConfig;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
@@ -40,7 +43,10 @@ import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.RiskAssessment;
 import org.hl7.fhir.r4.model.Substance;
 import org.hl7.fhir.r4.model.ValueSet;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -49,15 +55,25 @@ import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class FhirResourceDaoR4IndexStorageOptimizedTest extends BaseJpaR4Test {
 
 	@Autowired
 	private IJobCoordinator myJobCoordinator;
+
+	@Autowired
+	private SearchConfig mySearchConfig;
+
+	@AfterEach
+	void tearDown() {
+		myPartitionSettings.setIncludePartitionInSearchHashes(false);
+	}
 
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})
@@ -165,6 +181,40 @@ public class FhirResourceDaoR4IndexStorageOptimizedTest extends BaseJpaR4Test {
 
 		validateAndReindex(theIsIndexStorageOptimized, myValueSetDao, myResourceIndexedSearchParamUriDao, id,
 			ValueSet.SP_URL, "ValueSet", new UriParam("http://vs"), ResourceIndexedSearchParamUri.class);
+	}
+
+	@ParameterizedTest
+	@CsvSource({
+		"false, false, false",
+		"false, false, true",
+		"false, true, false",
+		"true, false, false",
+		"true, false, true",
+		"true, true, false"})
+	public void testValidateConfiguration_withCorrectConfiguration_doesNotThrowException(boolean thePartitioningEnabled,
+																						 boolean theIsIncludePartitionInSearchHashes,
+																						 boolean theIsIndexStorageOptimized) {
+		myPartitionSettings.setPartitioningEnabled(thePartitioningEnabled);
+		myPartitionSettings.setIncludePartitionInSearchHashes(theIsIncludePartitionInSearchHashes);
+		myStorageSettings.setIndexStorageOptimized(theIsIndexStorageOptimized);
+
+		assertDoesNotThrow(() -> mySearchConfig.validateConfiguration());
+	}
+
+	@Test
+	public void testValidateConfiguration_withInCorrectConfiguration_throwsException() {
+		myPartitionSettings.setIncludePartitionInSearchHashes(true);
+		myPartitionSettings.setPartitioningEnabled(true);
+		myStorageSettings.setIndexStorageOptimized(true);
+
+		try {
+			mySearchConfig.validateConfiguration();
+			fail();
+		} catch (ConfigurationException e) {
+			assertEquals(Msg.code(2525) + "Incorrect configuration. "
+				+ "StorageSettings#isIndexStorageOptimized and PartitionSettings.isIncludePartitionInSearchHashes "
+				+ "could not be enabled at the same time.", e.getMessage());
+		}
 	}
 
 	private void validateAndReindex(boolean theIsIndexStorageOptimized, IFhirResourceDao<? extends IBaseResource> theResourceDao,

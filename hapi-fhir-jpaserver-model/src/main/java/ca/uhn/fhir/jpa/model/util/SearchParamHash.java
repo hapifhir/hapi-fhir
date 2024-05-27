@@ -60,8 +60,6 @@ public class SearchParamHash {
 			}
 			Integer partitionId = theRequestPartitionId.getFirstPartitionIdOrNull();
 			if (partitionId != null) {
-				// TODO: need to handle case when isIncludePartitionInSearchHashes and isIndexStorageOptimized are
-				// enabled
 				hasher.putInt(partitionId);
 			}
 		}

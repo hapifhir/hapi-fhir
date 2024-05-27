@@ -136,38 +136,103 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 					.references("HFJ_RESOURCE", "RES_ID");
 		}
 
-		// allow null values in SP_NAME, RES_TYPE columns for all HFJ_SPIDX_* tables
-		Builder.BuilderWithTableName spidxCoords = version.onTable("HFJ_SPIDX_COORDS");
-		spidxCoords.modifyColumn("20240525.1", "SP_NAME").nullable().withType(ColumnTypeEnum.STRING, 100);
-		spidxCoords.modifyColumn("20240525.2", "RES_TYPE").nullable().withType(ColumnTypeEnum.STRING, 100);
+		// Allow null values in SP_NAME, RES_TYPE columns for all HFJ_SPIDX_* tables. These are marked as failure
+		// allowed, since  SQL Server won't let us change nullability on columns with indexes pointing to them.
+		{
+			Builder.BuilderWithTableName spidxCoords = version.onTable("HFJ_SPIDX_COORDS");
+			spidxCoords
+					.modifyColumn("20240527.1", "SP_NAME")
+					.nullable()
+					.failureAllowed()
+					.withType(ColumnTypeEnum.STRING, 100);
+			spidxCoords
+					.modifyColumn("20240527.2", "RES_TYPE")
+					.nullable()
+					.failureAllowed()
+					.withType(ColumnTypeEnum.STRING, 100);
 
-		Builder.BuilderWithTableName spidxDate = version.onTable("HFJ_SPIDX_DATE");
-		spidxDate.modifyColumn("20240525.3", "SP_NAME").nullable().withType(ColumnTypeEnum.STRING, 100);
-		spidxDate.modifyColumn("20240525.4", "RES_TYPE").nullable().withType(ColumnTypeEnum.STRING, 100);
+			Builder.BuilderWithTableName spidxDate = version.onTable("HFJ_SPIDX_DATE");
+			spidxDate
+					.modifyColumn("20240527.3", "SP_NAME")
+					.nullable()
+					.failureAllowed()
+					.withType(ColumnTypeEnum.STRING, 100);
+			spidxDate
+					.modifyColumn("20240527.4", "RES_TYPE")
+					.nullable()
+					.failureAllowed()
+					.withType(ColumnTypeEnum.STRING, 100);
 
-		Builder.BuilderWithTableName spidxNumber = version.onTable("HFJ_SPIDX_NUMBER");
-		spidxNumber.modifyColumn("20240525.5", "SP_NAME").nullable().withType(ColumnTypeEnum.STRING, 100);
-		spidxNumber.modifyColumn("20240525.6", "RES_TYPE").nullable().withType(ColumnTypeEnum.STRING, 100);
+			Builder.BuilderWithTableName spidxNumber = version.onTable("HFJ_SPIDX_NUMBER");
+			spidxNumber
+					.modifyColumn("20240527.5", "SP_NAME")
+					.nullable()
+					.failureAllowed()
+					.withType(ColumnTypeEnum.STRING, 100);
+			spidxNumber
+					.modifyColumn("20240527.6", "RES_TYPE")
+					.nullable()
+					.failureAllowed()
+					.withType(ColumnTypeEnum.STRING, 100);
 
-		Builder.BuilderWithTableName spidxQuantity = version.onTable("HFJ_SPIDX_QUANTITY");
-		spidxQuantity.modifyColumn("20240525.7", "SP_NAME").nullable().withType(ColumnTypeEnum.STRING, 100);
-		spidxQuantity.modifyColumn("20240525.8", "RES_TYPE").nullable().withType(ColumnTypeEnum.STRING, 100);
+			Builder.BuilderWithTableName spidxQuantity = version.onTable("HFJ_SPIDX_QUANTITY");
+			spidxQuantity
+					.modifyColumn("20240527.7", "SP_NAME")
+					.nullable()
+					.failureAllowed()
+					.withType(ColumnTypeEnum.STRING, 100);
+			spidxQuantity
+					.modifyColumn("20240527.8", "RES_TYPE")
+					.nullable()
+					.failureAllowed()
+					.withType(ColumnTypeEnum.STRING, 100);
 
-		Builder.BuilderWithTableName spidxQuantityNorm = version.onTable("HFJ_SPIDX_QUANTITY_NRML");
-		spidxQuantityNorm.modifyColumn("20240525.9", "SP_NAME").nullable().withType(ColumnTypeEnum.STRING, 100);
-		spidxQuantityNorm.modifyColumn("20240525.10", "RES_TYPE").nullable().withType(ColumnTypeEnum.STRING, 100);
+			Builder.BuilderWithTableName spidxQuantityNorm = version.onTable("HFJ_SPIDX_QUANTITY_NRML");
+			spidxQuantityNorm
+					.modifyColumn("20240527.9", "SP_NAME")
+					.nullable()
+					.failureAllowed()
+					.withType(ColumnTypeEnum.STRING, 100);
+			spidxQuantityNorm
+					.modifyColumn("20240527.10", "RES_TYPE")
+					.nullable()
+					.failureAllowed()
+					.withType(ColumnTypeEnum.STRING, 100);
 
-		Builder.BuilderWithTableName spidxString = version.onTable("HFJ_SPIDX_STRING");
-		spidxString.modifyColumn("20240525.11", "SP_NAME").nullable().withType(ColumnTypeEnum.STRING, 100);
-		spidxString.modifyColumn("20240525.12", "RES_TYPE").nullable().withType(ColumnTypeEnum.STRING, 100);
+			Builder.BuilderWithTableName spidxString = version.onTable("HFJ_SPIDX_STRING");
+			spidxString
+					.modifyColumn("20240527.11", "SP_NAME")
+					.nullable()
+					.failureAllowed()
+					.withType(ColumnTypeEnum.STRING, 100);
+			spidxString
+					.modifyColumn("20240527.12", "RES_TYPE")
+					.nullable()
+					.failureAllowed()
+					.withType(ColumnTypeEnum.STRING, 100);
 
-		Builder.BuilderWithTableName spidxToken = version.onTable("HFJ_SPIDX_TOKEN");
-		spidxToken.modifyColumn("20240525.13", "SP_NAME").nullable().withType(ColumnTypeEnum.STRING, 100);
-		spidxToken.modifyColumn("20240525.14", "RES_TYPE").nullable().withType(ColumnTypeEnum.STRING, 100);
+			Builder.BuilderWithTableName spidxToken = version.onTable("HFJ_SPIDX_TOKEN");
+			spidxToken
+					.modifyColumn("20240527.13", "SP_NAME")
+					.nullable()
+					.failureAllowed()
+					.withType(ColumnTypeEnum.STRING, 100);
+			spidxToken
+					.modifyColumn("20240527.14", "RES_TYPE")
+					.nullable()
+					.failureAllowed()
+					.withType(ColumnTypeEnum.STRING, 100);
 
-		Builder.BuilderWithTableName spidxUri = version.onTable("HFJ_SPIDX_URI");
-		spidxUri.modifyColumn("20240525.15", "SP_NAME").nullable().withType(ColumnTypeEnum.STRING, 100);
-		spidxUri.modifyColumn("20240525.16", "RES_TYPE").nullable().withType(ColumnTypeEnum.STRING, 100);
+			Builder.BuilderWithTableName spidxUri = version.onTable("HFJ_SPIDX_URI");
+			spidxUri.modifyColumn("20240527.15", "SP_NAME")
+					.nullable()
+					.failureAllowed()
+					.withType(ColumnTypeEnum.STRING, 100);
+			spidxUri.modifyColumn("20240527.16", "RES_TYPE")
+					.nullable()
+					.failureAllowed()
+					.withType(ColumnTypeEnum.STRING, 100);
+		}
 	}
 
 	protected void init720() {
