@@ -600,8 +600,12 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			if (resp instanceof IBaseBundle) {
 				List<SearchBundleEntryParts> searchBundleEntryParts =
 						BundleUtil.getSearchBundleEntryParts(getFhirContext(), (IBaseBundle) resp);
-				searchBundleEntryParts.forEach(searchBundleEntryPart -> ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(
-						searchBundleEntryPart.getResource(), searchBundleEntryPart.getSearchMode()));
+				searchBundleEntryParts.forEach(searchBundleEntryPart -> {
+					IBaseResource resource = searchBundleEntryPart.getResource();
+					if (resource != null) {
+						ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(resource, searchBundleEntryPart.getSearchMode());
+					}
+				});
 			}
 			return resp;
 		}
