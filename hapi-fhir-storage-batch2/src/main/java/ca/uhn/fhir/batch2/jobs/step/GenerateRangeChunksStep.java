@@ -34,7 +34,7 @@ import org.slf4j.Logger;
 
 import java.util.Date;
 
-import static ca.uhn.fhir.batch2.util.Batch2Constants.BATCH_START_DATE;
+import static ca.uhn.fhir.batch2.util.Batch2Utils.BATCH_START_DATE;
 
 public class GenerateRangeChunksStep<PT extends PartitionedUrlListJobParameters>
 		implements IFirstJobStepWorker<PT, PartitionedUrlChunkRangeJson> {

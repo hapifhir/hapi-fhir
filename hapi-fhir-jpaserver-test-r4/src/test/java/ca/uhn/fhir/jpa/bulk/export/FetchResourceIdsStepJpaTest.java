@@ -4,6 +4,7 @@ import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.jobs.export.FetchResourceIdsStep;
+import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.batch2.jobs.export.models.ResourceIdList;
 import ca.uhn.fhir.batch2.model.JobInstance;
@@ -68,7 +69,7 @@ public class FetchResourceIdsStepJpaTest  extends BaseJpaR4Test {
 		JobInstance instance = new JobInstance();
 		instance.setInstanceId("instance-id");
 		String chunkId = "chunk-id";
-		StepExecutionDetails<BulkExportJobParameters, VoidModel> executionDetails = new StepExecutionDetails<>(params, data, instance, chunkId);
+		StepExecutionDetails<BulkExportJobParameters, VoidModel> executionDetails = new StepExecutionDetails<>(params, data, instance, new WorkChunk().setId(chunkId));
 		myCaptureQueriesListener.clear();
 
 		// Test
@@ -96,7 +97,7 @@ public class FetchResourceIdsStepJpaTest  extends BaseJpaR4Test {
 		JobInstance instance = new JobInstance();
 		instance.setInstanceId("instance-id");
 		String chunkId = "chunk-id";
-		StepExecutionDetails<BulkExportJobParameters, VoidModel> executionDetails = new StepExecutionDetails<>(params, data, instance, chunkId);
+		StepExecutionDetails<BulkExportJobParameters, VoidModel> executionDetails = new StepExecutionDetails<>(params, data, instance, new WorkChunk().setId(chunkId));
 
 		// Test
 		myFetchResourceIdsStep.run(executionDetails, mySink);

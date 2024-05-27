@@ -155,8 +155,6 @@ public class WorkChunkProcessor {
 			inputData = theWorkChunk.getData(theInputType);
 		}
 
-		String chunkId = theWorkChunk.getId();
-
-		return Optional.of(new StepExecutionDetails<>(theParameters, inputData, theInstance, chunkId));
+		return Optional.of(new StepExecutionDetails<>(theParameters, inputData, theInstance, theWorkChunk));
 	}
 }
