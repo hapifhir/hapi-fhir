@@ -344,19 +344,23 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		IIdType id = myClient.update().resource(patient).conditionalByUrl("Patient?identifier=http://uhn.ca/mrns|100").execute().getId().toUnqualifiedVersionless();
 
 		myServer.getRestfulServer().registerInterceptor(theAuthorizationInterceptor);
-		myClient.registerInterceptor(new SimpleRequestHeaderInterceptor("Authorization", "Bearer AAA"));
 
-		Bundle bundle;
+		SimpleRequestHeaderInterceptor interceptor = new SimpleRequestHeaderInterceptor("Authorization", "Bearer AAA");
+		try {
+			myClient.registerInterceptor(interceptor);
 
-		// Read Patient by id
-		bundle = new Bundle().setType(Bundle.BundleType.TRANSACTION);
-		bundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.GET).setUrl(id.getValue());
-		assertTransactionAllowed(bundle, theShouldAllow);
+			// Read Patient by id
+			Bundle bundle = new Bundle().setType(Bundle.BundleType.TRANSACTION);
+			bundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.GET).setUrl(id.getValue());
+			assertTransactionAllowed(bundle, theShouldAllow);
 
-		// Search all Patients
-		bundle = new Bundle().setType(Bundle.BundleType.TRANSACTION);
-		bundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.GET).setUrl("Patient?");
-		assertTransactionAllowed(bundle, theShouldAllow);
+			// Search all Patients
+			bundle = new Bundle().setType(Bundle.BundleType.TRANSACTION);
+			bundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.GET).setUrl("Patient?");
+			assertTransactionAllowed(bundle, theShouldAllow);
+		} finally {
+			myClient.unregisterInterceptor(interceptor);
+		}
 	}
 
 	public static Stream<Arguments> getReadStandaloneBundleArguments() {
@@ -390,35 +394,42 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		IIdType collectionBundle1Id = documentBundle1.getIdElement();
 
 		myServer.getRestfulServer().registerInterceptor(theAuthorizationInterceptor);
-		myClient.registerInterceptor(new SimpleRequestHeaderInterceptor("Authorization", "Bearer AAA"));
 
-		Bundle bundle;
+		SimpleRequestHeaderInterceptor interceptor = new SimpleRequestHeaderInterceptor("Authorization", "Bearer AAA");
+		try {
+			myClient.registerInterceptor(interceptor);
 
-		// Read Bundle
-		bundle = new Bundle();
-		bundle.setType(Bundle.BundleType.TRANSACTION);
-		bundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.GET).setUrl(collectionBundle1Id.toUnqualifiedVersionless().getValue());
-		assertTransactionAllowed(bundle, theShouldAllow);
+			Bundle bundle;
 
-		// Search
-		bundle = new Bundle();
-		bundle.setType(Bundle.BundleType.TRANSACTION);
-		bundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.GET).setUrl("Bundle?type=collection");
-		assertTransactionAllowed(bundle, theShouldAllow);
-
-		// Simple Search count 1
-		Bundle responseBundle = assertSearchAllowed("/Bundle", theShouldAllow);
-
-		// Get next page
-		if (responseBundle != null) {
-			Bundle.BundleLinkComponent next = responseBundle.getLink("next");
-			assertNotNull(next);
-
+			// Read Bundle
 			bundle = new Bundle();
 			bundle.setType(Bundle.BundleType.TRANSACTION);
-			bundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.GET).setUrl("/Bundle?" + Constants.PARAM_PAGINGACTION + next.getUrl());
+			bundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.GET).setUrl(collectionBundle1Id.toUnqualifiedVersionless().getValue());
 			assertTransactionAllowed(bundle, theShouldAllow);
+
+			// Search
+			bundle = new Bundle();
+			bundle.setType(Bundle.BundleType.TRANSACTION);
+			bundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.GET).setUrl("Bundle?type=collection");
+			assertTransactionAllowed(bundle, theShouldAllow);
+
+			// Simple Search count 1
+			Bundle responseBundle = assertSearchAllowed("/Bundle", theShouldAllow);
+
+			// Get next page
+			if (responseBundle != null) {
+				Bundle.BundleLinkComponent next = responseBundle.getLink("next");
+				assertNotNull(next);
+
+				bundle = new Bundle();
+				bundle.setType(Bundle.BundleType.TRANSACTION);
+				bundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.GET).setUrl("/Bundle?" + Constants.PARAM_PAGINGACTION + next.getUrl());
+				assertTransactionAllowed(bundle, theShouldAllow);
+			}
+		} finally {
+			myClient.unregisterInterceptor(interceptor);
 		}
+
 	}
 
 	@Test
@@ -1891,14 +1902,6 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		bundle.addEntry().setResource(composition);
 		bundle.addEntry().setResource(thePatient);
 		return (Bundle) myBundleDao.create(bundle, mySrd).getResource();
-	}
-
-	private void createCollectionBundle(Patient thePatient) {
-		Bundle bundle = new Bundle();
-		bundle.setType(Bundle.BundleType.COLLECTION);
-		bundle.addEntry().setResource(thePatient);
-		IBaseResource resource = myBundleDao.create(bundle, mySrd).getResource();
-		assertNotNull(resource);
 	}
 
 	private Bundle createMessageHeaderBundle(Patient thePatient) {
