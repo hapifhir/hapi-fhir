@@ -31,9 +31,11 @@ import java.math.RoundingMode;
 
 public class MdmModelConverterSvcImpl implements IMdmModelConverterSvc {
 
+	@SuppressWarnings("rawtypes")
 	@Autowired
 	IIdHelperService myIdHelperService;
 
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	@Override
 	public MdmLinkJson toJson(IMdmLink theLink) {
 		MdmLinkJson retVal = new MdmLinkJson();
@@ -42,11 +44,13 @@ public class MdmModelConverterSvcImpl implements IMdmModelConverterSvc {
 				.toVersionless()
 				.getValue();
 		retVal.setSourceId(sourceId);
+		retVal.setSourcePid(theLink.getSourcePersistenceId());
 		String goldenResourceId = myIdHelperService
 				.resourceIdFromPidOrThrowException(theLink.getGoldenResourcePersistenceId(), theLink.getMdmSourceType())
 				.toVersionless()
 				.getValue();
 		retVal.setGoldenResourceId(goldenResourceId);
+		retVal.setGoldenPid(theLink.getGoldenResourcePersistenceId());
 		retVal.setCreated(theLink.getCreated());
 		retVal.setEidMatch(theLink.getEidMatch());
 		retVal.setLinkSource(theLink.getLinkSource());
