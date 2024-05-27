@@ -3,6 +3,7 @@ package ca.uhn.fhir.mdm.batch2.clear;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.jpa.mdm.helper.MdmHelperR4;
@@ -118,13 +119,13 @@ class MdmClearStepTest extends BaseMdmR4Test {
 	}
 
 	@Nonnull
-	private StepExecutionDetails<MdmClearJobParameters, ResourceIdListWorkChunkJson> buildStepExecutionDetails(ResourceIdListWorkChunkJson chunk) {
+	private StepExecutionDetails<MdmClearJobParameters, ResourceIdListWorkChunkJson> buildStepExecutionDetails(ResourceIdListWorkChunkJson theListWorkChunkJson) {
 		String instanceId = UUID.randomUUID().toString();
 		JobInstance jobInstance = JobInstance.fromInstanceId(instanceId);
 		String chunkid = UUID.randomUUID().toString();
 		MdmClearJobParameters parms = new MdmClearJobParameters();
 
-		StepExecutionDetails<MdmClearJobParameters, ResourceIdListWorkChunkJson> stepExecutionDetails = new StepExecutionDetails<>(parms, chunk, jobInstance, chunkid);
+		StepExecutionDetails<MdmClearJobParameters, ResourceIdListWorkChunkJson> stepExecutionDetails = new StepExecutionDetails<>(parms, theListWorkChunkJson, jobInstance, new WorkChunk().setId(chunkid));
 		return stepExecutionDetails;
 	}
 

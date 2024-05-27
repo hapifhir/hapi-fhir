@@ -6,6 +6,7 @@ import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
+import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.batch2.jobs.export.models.ResourceIdList;
 import ca.uhn.fhir.batch2.jobs.models.BatchResourceId;
@@ -94,7 +95,7 @@ public class FetchResourceIdsStepTest {
 			theParameters,
 			null,
 			theInstance,
-			"1"
+			new WorkChunk().setId("1")
 		);
 	}
 
