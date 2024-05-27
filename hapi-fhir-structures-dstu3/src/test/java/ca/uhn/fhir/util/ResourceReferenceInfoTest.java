@@ -20,15 +20,15 @@ public class ResourceReferenceInfoTest {
 
 	@BeforeEach
 	public void setUp() {
-        Reference theElement = new Reference()
-                .setReference("Practitioner/123")
-                .setDisplay("Test Practitioner");
+		Reference theElement = new Reference()
+			 .setReference("Practitioner/123")
+			 .setDisplay("Test Practitioner");
 
-        Patient theOwningResource = new Patient()
-                .addGeneralPractitioner(theElement);
+		Patient theOwningResource = new Patient()
+			 .addGeneralPractitioner(theElement);
 
-		  resourceReferenceInfo =
-			  new ResourceReferenceInfo(fhirContext, theOwningResource, List.of("generalPractitioner"), theElement);
+		resourceReferenceInfo =
+			 new ResourceReferenceInfo(fhirContext, theOwningResource, List.of("generalPractitioner"), theElement);
 	}
 
 	@Test
