@@ -120,4 +120,13 @@ public interface IFulltextSearchSvc {
 	 * @param theGivenIds The list of IDs for the given document type. Note that while this is a List<Object>, the type must match the type of the `@Id` field on the given class.
 	 */
 	void deleteIndexedDocumentsByTypeAndId(Class theClazz, List<Object> theGivenIds);
+
+	/**
+	 * Given a resource type and a {@link SearchParameterMap}, return true only if all sort terms are supported.
+	 *
+	 * @param theResourceName The resource type for the query.
+	 * @param theParams The {@link SearchParameterMap} being searched with.
+	 * @return true if all sort terms are supported, false otherwise.
+	 */
+	boolean supportsAllSortTerms(String theResourceName, SearchParameterMap theParams);
 }
