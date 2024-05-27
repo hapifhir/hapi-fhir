@@ -9,6 +9,7 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
+import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import org.hamcrest.Matcher;
@@ -22,12 +23,17 @@ import org.hl7.fhir.r4.model.EpisodeOfCare;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Procedure;
+import org.hl7.fhir.r4.model.Questionnaire;
+import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import javax.xml.namespace.QName;
 import java.sql.Date;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -37,6 +43,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -50,6 +57,56 @@ public class FhirResourceDaoR4SearchIncludeTest extends BaseJpaR4Test {
 	public void afterEach() {
 		myStorageSettings.setMaximumIncludesToLoadPerPage(JpaStorageSettings.DEFAULT_MAXIMUM_INCLUDES_TO_LOAD_PER_PAGE);
 	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {
+		"QuestionnaireResponse/qr", 		"QuestionnaireResponse/qr2"
+	})
+	public void testIncludeCanonicalReference(String theQuestionnaireId) {
+
+//		SearchParameter sp = new SearchParameter();
+//		sp.setId("QuestionnaireResponse-questionnaire");
+//		sp.setCode("questionnaire");
+//		sp.addBase("QuestionnaireResponse");
+//		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+//		sp.setType(Enumerations.SearchParamType.REFERENCE);
+//		sp.setExpression("QuestionnaireResponse.questionnaire.replaceMatches('[|].*', '') | QuestionnaireResponse.questionnaire");
+//		sp.addTarget("Questionnaire");
+//		mySearchParameterDao.update(sp, mySrd);
+//		mySearchParamRegistry.forceRefresh();
+
+		Questionnaire q = new Questionnaire();
+		q.setId("q");
+		q.setUrl("http://foo");
+		q.setVersion("1.0");
+		myQuestionnaireDao.update(q, mySrd);
+
+		if (theQuestionnaireId.equals("QuestionnaireResponse/qr")) {
+			QuestionnaireResponse qr = new QuestionnaireResponse();
+			qr.setId("qr");
+			qr.setQuestionnaire("http://foo");
+			myQuestionnaireResponseDao.update(qr, mySrd);
+		} else {
+			QuestionnaireResponse qr2 = new QuestionnaireResponse();
+			qr2.setId("qr2");
+			qr2.setQuestionnaire("http://foo|1.0");
+			myQuestionnaireResponseDao.update(qr2, mySrd);
+		}
+
+		logAllResourceLinks();
+
+		SearchParameterMap map = new SearchParameterMap();
+		map.add("_id", new ReferenceParam(theQuestionnaireId));
+		map.addInclude(QuestionnaireResponse.INCLUDE_QUESTIONNAIRE);
+		IBundleProvider outcome = myQuestionnaireResponseDao.search(map, mySrd);
+		List<String> outcomeValues = toUnqualifiedVersionlessIdValues(outcome);
+		assertThat(outcomeValues.toString(), outcomeValues, contains(
+			theQuestionnaireId, "Questionnaire/q"
+		));
+
+	}
+
+
 
 	@Test
 	public void testIncludesNotAppliedToIncludedResources() {
