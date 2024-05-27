@@ -24,7 +24,6 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import jakarta.annotation.Nonnull;
-import org.hamcrest.Matcher;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -35,77 +34,56 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 /**
  * Test helper to collect logback lines.
  * The empty constructor will capture all log events, or you can name a log root to limit the noise.
- * @deprecated use {@link LogbackTestExtension}
  */
-@Deprecated
-public class LogbackCaptureTestExtension implements BeforeEachCallback, AfterEachCallback {
+public class LogbackTestExtension implements BeforeEachCallback, AfterEachCallback {
 	private final Logger myLogger;
 	private final Level myLevel;
 	private ListAppender<ILoggingEvent> myListAppender = null;
 	private Level mySavedLevel;
 
-	/**
-	 *
-	 * @param theLogger the log to capture
-	 */
-	public LogbackCaptureTestExtension(Logger theLogger) {
+	public LogbackTestExtension(Logger theLogger) {
 		myLogger = theLogger;
 		myLevel = null;
 	}
 
-	/**
-	 *
-	 * @param theLogger the log to capture
-	 * @param theTestLogLevel the log Level to set on the target logger for the duration of the test
-	 */
-	public LogbackCaptureTestExtension(Logger theLogger, Level theTestLogLevel) {
+	public LogbackTestExtension(Logger theLogger, Level theTestLogLevel) {
 		myLogger = theLogger;
 		myLevel = theTestLogLevel;
 	}
 
-	/**
-	 * @param theLoggerName the log name to capture
-	 */
-	public LogbackCaptureTestExtension(String theLoggerName) {
+	public LogbackTestExtension(String theLoggerName) {
 		this((Logger) LoggerFactory.getLogger(theLoggerName));
 	}
 
-	/**
-	 * Capture the root logger - all lines.
-	 */
-	public LogbackCaptureTestExtension() {
+	public LogbackTestExtension() {
 		this(org.slf4j.Logger.ROOT_LOGGER_NAME);
 	}
 
-	public LogbackCaptureTestExtension(String theLoggerName, Level theLevel) {
+	public LogbackTestExtension(String theLoggerName, Level theLevel) {
 		this((Logger) LoggerFactory.getLogger(theLoggerName), theLevel);
 	}
 
-	public LogbackCaptureTestExtension(Class<?> theClass) {
+	public LogbackTestExtension(Class<?> theClass) {
 		this(theClass.getName());
 	}
 
-	public LogbackCaptureTestExtension(Class<?> theClass, Level theLevel) {
+	public LogbackTestExtension(Class<?> theClass, Level theLevel) {
 		this(theClass.getName(), theLevel);
 	}
 
-	public LogbackCaptureTestExtension(org.slf4j.Logger theLogger) {
+	public LogbackTestExtension(org.slf4j.Logger theLogger) {
 		this((Logger) theLogger);
 	}
 
-	/**
-	 * Returns a copy to avoid concurrent modification errors.
-	 * @return A copy of the log events so far.
-	 */
 	public java.util.List<ILoggingEvent> getLogEvents() {
-		// copy to avoid concurrent mod errors
 		return new ArrayList<>(myListAppender.list);
 	}
 
-	/** Clear accumulated log events. */
 	public void clearEvents() {
 		myListAppender.list.clear();
 	}
@@ -119,16 +97,10 @@ public class LogbackCaptureTestExtension implements BeforeEachCallback, AfterEac
 		setUp();
 	}
 
-	/**
-	 * Guts of beforeEach exposed for manual lifecycle.
-	 */
 	public void setUp() {
 		setUp(myLevel);
 	}
 
-	/**
-	 * Guts of beforeEach exposed for manual lifecycle.
-	 */
 	public void setUp(Level theLevel) {
 		myListAppender = new ListAppender<>();
 		myListAppender.start();
@@ -148,50 +120,37 @@ public class LogbackCaptureTestExtension implements BeforeEachCallback, AfterEac
 		}
 	}
 
-
-	public List<ILoggingEvent> filterLoggingEventsWithMessageEqualTo(String theMessageText){
+	public List<ILoggingEvent> filterLoggingEventsWithMessageEqualTo(String theMessageText) {
 		return filterLoggingEventsWithPredicate(loggingEvent -> loggingEvent.getFormattedMessage().equals(theMessageText));
 	}
 
-	public List<ILoggingEvent> filterLoggingEventsWithMessageContaining(String theMessageText){
+	public List<ILoggingEvent> filterLoggingEventsWithMessageContaining(String theMessageText) {
 		return filterLoggingEventsWithPredicate(loggingEvent -> loggingEvent.getFormattedMessage().contains(theMessageText));
 	}
 
-	public List<ILoggingEvent> filterLoggingEventsWithPredicate(Predicate<ILoggingEvent> theLoggingEventPredicate){
-		return getLogEvents()
-			.stream()
-			.filter(theLoggingEventPredicate)
-			.collect(Collectors.toList());
+	public List<ILoggingEvent> filterLoggingEventsWithPredicate(Predicate<ILoggingEvent> theLoggingEventPredicate) {
+		return getLogEvents().stream().filter(theLoggingEventPredicate).collect(Collectors.toList());
 	}
 
-	/**
-	 * Extract the log messages from the logging events.
-	 * @return a copy of the List of log messages
-	 *
-	 */
 	@Nonnull
 	public List<String> getLogMessages() {
 		return getLogEvents().stream().map(ILoggingEvent::getMessage).collect(Collectors.toList());
 	}
 
-	//  Hamcrest matcher support
-	public static Matcher<ILoggingEvent> eventWithLevelAndMessageContains(@Nonnull Level theLevel, @Nonnull String thePartialMessage) {
-		return new LogbackEventMatcher(theLevel, thePartialMessage);
+	public static void assertEventWithLevelAndMessageContains(List<ILoggingEvent> events, @Nonnull Level theLevel, @Nonnull String thePartialMessage) {
+		assertThat(events).anySatisfy(event -> LogbackEventMatcher.assertThat(theLevel, thePartialMessage).matches(event));
 	}
 
-	public static Matcher<ILoggingEvent> eventWithLevel(@Nonnull Level theLevel) {
-		return new LogbackEventMatcher(theLevel, null);
+	public static void assertEventWithLevel(List<ILoggingEvent> events, @Nonnull Level theLevel) {
+		assertThat(events).anySatisfy(event -> LogbackEventMatcher.assertThat(theLevel, null).matches(event));
 	}
 
-	public static Matcher<ILoggingEvent> eventWithMessageContains(@Nonnull String thePartialMessage) {
-		return new LogbackEventMatcher(null, thePartialMessage);
+	public static void assertEventWithMessageContains(List<ILoggingEvent> events, @Nonnull String thePartialMessage) {
+		assertThat(events).anySatisfy(event -> LogbackEventMatcher.assertThat(null, thePartialMessage).matches(event));
 	}
 
-	public static Matcher<ILoggingEvent> eventWithLevelAndMessageAndThrew(@Nonnull Level theLevel,
-																		  @Nonnull String thePartialMessage,
-																		  @Nonnull String theThrown)
-	{
-		return new LogbackEventMatcher(theLevel, thePartialMessage, theThrown);
+	public static void assertEventWithLevelAndMessageAndThrew(List<ILoggingEvent> events, @Nonnull Level theLevel,
+															  @Nonnull String thePartialMessage, @Nonnull String theThrown) {
+		assertThat(events).anySatisfy(event -> LogbackEventMatcher.assertThat(theLevel, thePartialMessage, theThrown).matches(event));
 	}
-
 }

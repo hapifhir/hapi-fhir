@@ -13,7 +13,7 @@ import ca.uhn.fhir.rest.server.interceptor.auth.PolicyEnum;
 import ca.uhn.fhir.rest.server.interceptor.auth.RuleBuilder;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import ca.uhn.test.util.LogEventIterableAssert;
-import ca.uhn.test.util.LogbackCaptureTestExtension;
+import ca.uhn.test.util.LogbackTestExtension;
 import ch.qos.logback.classic.Level;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -48,7 +48,7 @@ class FhirQueryRuleImplTest implements ITestDataBuilder {
 	};
 
 	@RegisterExtension
-	LogbackCaptureTestExtension myLogCapture = new LogbackCaptureTestExtension(myMockRuleApplier.getTroubleshootingLog().getName());
+	LogbackTestExtension myLogCapture = new LogbackTestExtension(myMockRuleApplier.getTroubleshootingLog().getName());
 
 	private IAuthRule myRule;
 	IIdType myPatientId = new IdDt("Patient/1");

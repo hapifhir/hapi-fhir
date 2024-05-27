@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
-import ca.uhn.test.util.LogbackCaptureTestExtension;
+import ca.uhn.test.util.LogbackTestExtension;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
@@ -33,7 +33,7 @@ class AddIndexTaskTest {
 	TransactionTemplate myTransactionTemplate;
 
 	@RegisterExtension
-	LogbackCaptureTestExtension myLogCapture = new LogbackCaptureTestExtension((Logger) AddIndexTask.ourLog, Level.WARN);
+	LogbackTestExtension myLogCapture = new LogbackTestExtension((Logger) AddIndexTask.ourLog, Level.WARN);
 
 
 	@Test

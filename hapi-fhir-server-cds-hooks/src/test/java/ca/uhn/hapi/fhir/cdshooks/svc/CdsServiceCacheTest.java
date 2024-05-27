@@ -6,7 +6,7 @@ import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceRequestJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseCardJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseJson;
 import ca.uhn.test.util.LogEventIterableAssert;
-import ca.uhn.test.util.LogbackCaptureTestExtension;
+import ca.uhn.test.util.LogbackTestExtension;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import jakarta.annotation.Nonnull;
@@ -28,7 +28,7 @@ class CdsServiceCacheTest {
 	private static final String TEST_KEY = "testKey";
 	private static final String MODULE_ID = "moduleId";
 	@RegisterExtension
-	final LogbackCaptureTestExtension myLogCapture = new LogbackCaptureTestExtension((Logger) CdsServiceCache.ourLog, Level.ERROR);
+	final LogbackTestExtension myLogCapture = new LogbackTestExtension((Logger) CdsServiceCache.ourLog, Level.ERROR);
 	@InjectMocks
 	private CdsServiceCache myFixture;
 

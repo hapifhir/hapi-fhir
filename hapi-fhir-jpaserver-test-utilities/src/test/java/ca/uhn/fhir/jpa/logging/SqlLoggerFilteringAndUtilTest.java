@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.logging;
 
-import ca.uhn.test.util.LogbackCaptureTestExtension;
+import ca.uhn.test.util.LogbackTestExtension;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.spi.ILoggingEvent;
@@ -90,7 +90,7 @@ public class SqlLoggerFilteringAndUtilTest {
 		public class FileFiltersTests {
 
 			@RegisterExtension
-			public LogbackCaptureTestExtension myLogCapture = new LogbackCaptureTestExtension("org.hibernate.SQL");
+			public LogbackTestExtension myLogCapture = new LogbackTestExtension("org.hibernate.SQL");
 
 			@BeforeEach
 			void setUp() {
@@ -189,7 +189,7 @@ public class SqlLoggerFilteringAndUtilTest {
 		private SqlLoggerFilteringUtil mySpiedUtil;
 
 		@RegisterExtension
-		public LogbackCaptureTestExtension myLogCapture = new LogbackCaptureTestExtension("org.hibernate.SQL");
+		public LogbackTestExtension myLogCapture = new LogbackTestExtension("org.hibernate.SQL");
 
 		private ch.qos.logback.classic.Logger myHibernateLogger;
 

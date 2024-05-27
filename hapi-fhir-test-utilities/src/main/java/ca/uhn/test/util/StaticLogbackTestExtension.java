@@ -29,32 +29,30 @@ import java.util.List;
 /**
  * This is a static wrapper around LogbackTestExtension for use in IT tests when you need to assert on App
  * startup log entries
- * @deprecated use {@link StaticLogbackTestExtension}
  */
-h3
-@Deprecated
-public class StaticLogbackCaptureTestExtension implements BeforeAllCallback, AfterAllCallback {
-	private final LogbackCaptureTestExtension myLogbackCaptureTestExtension;
 
-	public StaticLogbackCaptureTestExtension(LogbackCaptureTestExtension theLogbackCaptureTestExtension) {
-		myLogbackCaptureTestExtension = theLogbackCaptureTestExtension;
-	}
+public class StaticLogbackTestExtension implements BeforeAllCallback, AfterAllCallback {
+	private final LogbackTestExtension myLogbackTestExtension;
 
-	public StaticLogbackCaptureTestExtension() {
-		myLogbackCaptureTestExtension = new LogbackCaptureTestExtension();
+    public StaticLogbackTestExtension(LogbackTestExtension theLogbackTestExtension) {
+        myLogbackTestExtension = theLogbackTestExtension;
+    }
+
+	public StaticLogbackTestExtension() {
+		myLogbackTestExtension = new LogbackTestExtension();
 	}
 
 	@Override
 	public void beforeAll(ExtensionContext theExtensionContext) throws Exception {
-		myLogbackCaptureTestExtension.beforeEach(theExtensionContext);
+		myLogbackTestExtension.beforeEach(theExtensionContext);
 	}
 
 	@Override
 	public void afterAll(ExtensionContext theExtensionContext) throws Exception {
-		myLogbackCaptureTestExtension.afterEach(theExtensionContext);
+		myLogbackTestExtension.afterEach(theExtensionContext);
 	}
 
 	public List<ILoggingEvent> filterLoggingEventsWithMessageEqualTo(String theMessageText) {
-		return myLogbackCaptureTestExtension.filterLoggingEventsWithMessageEqualTo(theMessageText);
+		return myLogbackTestExtension.filterLoggingEventsWithMessageEqualTo(theMessageText);
 	}
 }

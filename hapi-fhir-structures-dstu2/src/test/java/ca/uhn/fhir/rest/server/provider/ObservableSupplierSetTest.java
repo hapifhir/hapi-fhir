@@ -1,6 +1,6 @@
 package ca.uhn.fhir.rest.server.provider;
 
-import ca.uhn.test.util.LogbackCaptureTestExtension;
+import ca.uhn.test.util.LogbackTestExtension;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import org.jetbrains.annotations.NotNull;
@@ -23,7 +23,7 @@ class ObservableSupplierSetTest {
 	private final AtomicInteger myCounter = new AtomicInteger();
 
 	@RegisterExtension
-	final LogbackCaptureTestExtension myLogger = new LogbackCaptureTestExtension((ch.qos.logback.classic.Logger) LoggerFactory.getLogger(ObservableSupplierSet.class));
+	final LogbackTestExtension myLogger = new LogbackTestExtension((ch.qos.logback.classic.Logger) LoggerFactory.getLogger(ObservableSupplierSet.class));
 
 	@BeforeEach
 	public void before() {

@@ -7,7 +7,7 @@ import ca.uhn.fhir.test.utilities.RestServerR4Helper;
 import ca.uhn.fhir.test.utilities.TlsAuthenticationTestHelper;
 import ca.uhn.fhir.util.ParametersUtil;
 import ca.uhn.test.util.LogEventIterableAssert;
-import ca.uhn.test.util.LogbackCaptureTestExtension;
+import ca.uhn.test.util.LogbackTestExtension;
 import ch.qos.logback.classic.Logger;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,7 +41,7 @@ class ReindexTerminologyCommandTest {
 	public TlsAuthenticationTestHelper myTlsAuthenticationTestHelper = new TlsAuthenticationTestHelper();
 
 	// Deliberately not registered - we manually run this later because App startup resets the logging.
-	LogbackCaptureTestExtension myAppLogCapture;
+	LogbackTestExtension myAppLogCapture;
 
 	static {
 		HapiSystemProperties.enableTestMode();
@@ -174,7 +174,7 @@ class ReindexTerminologyCommandTest {
 	 */
 	Consumer<BaseApp> getLoggingStartupHook() {
 		return (unused) -> {
-			myAppLogCapture = new LogbackCaptureTestExtension((Logger) BaseApp.ourLog);
+			myAppLogCapture = new LogbackTestExtension((Logger) BaseApp.ourLog);
 			myAppLogCapture.setUp();
 		};
 	}

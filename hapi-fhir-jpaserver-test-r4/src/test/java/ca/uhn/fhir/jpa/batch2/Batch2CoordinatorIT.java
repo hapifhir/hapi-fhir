@@ -39,7 +39,7 @@ import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.test.utilities.UnregisterScheduledProcessor;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.test.concurrency.PointcutLatch;
-import ca.uhn.test.util.LogbackCaptureTestExtension;
+import ca.uhn.test.util.LogbackTestExtension;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.annotation.Nonnull;
 import org.junit.jupiter.api.AfterEach;
@@ -107,7 +107,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 	IJobPersistence myJobPersistence;
 
 	@RegisterExtension
-	LogbackCaptureTestExtension myLogbackCaptureTestExtension = new LogbackCaptureTestExtension();
+	LogbackTestExtension myLogbackTestExtension = new LogbackTestExtension();
 
 	private final PointcutLatch myFirstStepLatch = new PointcutLatch("First Step");
 	private final PointcutLatch myLastStepLatch = new PointcutLatch("Last Step");
