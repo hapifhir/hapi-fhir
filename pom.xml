@@ -149,14 +149,6 @@
 			<artifactId>junit-jupiter-engine</artifactId>
 			<scope>test</scope>
 		</dependency>
-		<!-- FIXME KHS do we need this?
-		<dependency>
-			<groupId>com.github.npathai</groupId>
-			<artifactId>hamcrest-optional</artifactId>
-			<version>2.0.0</version>
-			<scope>test</scope>
-		</dependency>
-		-->
 		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-core</artifactId>
@@ -1840,6 +1832,12 @@
 				<artifactId>jscience</artifactId>
 				<version>4.3.1</version>
 			</dependency>
+			<!-- TODO KHS remove hamcrest -->
+			<dependency>
+				<groupId>org.hamcrest</groupId>
+				<artifactId>hamcrest</artifactId>
+				<version>${hamcrest_version}</version>
+			</dependency>
 			<dependency>
 				<groupId>org.htmlunit</groupId>
 				<artifactId>htmlunit</artifactId>
@@ -1852,19 +1850,6 @@
 					</exclusion>
 				</exclusions>
 			</dependency>
-			<!-- FIXME KHS do we need this?
-				<dependency>
-					<groupId>org.exparity</groupId>
-					<artifactId>hamcrest-date</artifactId>
-					<version>2.0.8</version>
-					<exclusions>
-						<exclusion>
-							<artifactId>*</artifactId>
-							<groupId>*</groupId>
-						</exclusion>
-					</exclusions>
-				</dependency>
-				-->
 				<dependency>
 					<groupId>org.hibernate.orm</groupId>
 					<artifactId>hibernate-ant</artifactId>
