@@ -5,6 +5,8 @@ import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
@@ -15,12 +17,18 @@ import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.jpa.util.ValueSetTestUtil;
+import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.collect.Lists;
+import jakarta.annotation.Nonnull;
 import org.hamcrest.MatcherAssert;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -29,6 +37,7 @@ import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
@@ -43,7 +52,6 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import jakarta.annotation.Nonnull;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
@@ -284,6 +292,110 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueries();
 		String lastSelectQuery = selectQueries.get(selectQueries.size() - 1).getSql(true, true).toLowerCase();
 		assertThat(lastSelectQuery, containsString(" like '%display value 9%'"));
+	}
+
+
+	@Test
+	public void expandValueSet_withFiltering_works() {
+		// setup
+		IParser parser = myFhirContext.newJsonParser();
+		String url = "https://health.gov.on.ca/idms/fhir/ValueSet/IDMS-Prouduct-Types";
+		CodeSystem codeSystem;
+		ValueSet valueSet;
+		{
+			String codeSystemStr = """
+							{
+						      "resourceType": "CodeSystem",
+						      "id": "4fb48e4e-57a4-4844-be74-d93707bdf9a1",
+						      "meta": {
+						          "versionId": "4",
+						          "lastUpdated": "2024-01-16T19:10:18.370+00:00",
+						          "source": "#c8957026d46dfab5"
+						      },
+						      "url": "https://health.gov.on.ca/idms/fhir/CodeSystem/Internal-Product-Types",
+						      "version": "1.0.0",
+						      "name": "IDMS-Internal-Product-Types",
+						      "status": "active",
+						      "date": "2024-01-10",
+						      "publisher": "IDMS",
+						      "description": "This contains a lists of Product Type codes.",
+						      "content": "complete",
+						      "concept": [
+						          {
+						              "code": "PRODUCT-MULTI-SOURCE",
+						              "display": "Multi source drug product streamlined or Multi source drug product non- streamlined",
+						              "property": [
+						                  {
+						                      "code": "ACTIVE",
+						                      "valueBoolean": true
+						                  }
+						              ]
+						          }
+						      ]
+						  }
+				""";
+			codeSystem = parser.parseResource(CodeSystem.class, codeSystemStr);
+			String valueSetStr = """
+					{
+					     "resourceType": "ValueSet",
+					     "id": "e0324e95-6d5c-4b08-8832-d5f5cd00a29a",
+					     "meta": {
+					         "versionId": "7",
+					         "lastUpdated": "2024-01-16T19:03:43.313+00:00",
+					         "source": "#1f91b035f91cd290"
+					     },
+					     "url": "https://health.gov.on.ca/idms/fhir/ValueSet/IDMS-Product-Types",
+					     "version": "1.0.0",
+					     "name": "IDMS-Product-Types",
+					     "title": "IDMS Product Types",
+					     "status": "active",
+					     "experimental": false,
+					     "date": "2024-01-16",
+					     "publisher": "IDMS",
+					     "description": "List of Product Types",
+					     "compose": {
+					         "include": [
+					             {
+					                 "system": "https://health.gov.on.ca/idms/fhir/CodeSystem/Internal-Product-Types",
+					                 "filter": [
+					                     {
+					                         "property": "ACTIVE",
+					                         "op": "=",
+					                         "value": "true"
+					                     }
+					                 ]
+					             }
+					         ]
+					     }
+					 }
+				""";
+			valueSet = parser.parseResource(ValueSet.class, valueSetStr);
+		}
+		SystemRequestDetails requestDetails = new SystemRequestDetails();
+
+		{
+			DaoMethodOutcome outcome = myCodeSystemDao.create(codeSystem, requestDetails);
+			codeSystem.setId(outcome.getId());
+		}
+		{
+			DaoMethodOutcome outcome = myValueSetDao.create(valueSet, requestDetails);
+			valueSet.setId(outcome.getId());
+		}
+
+		// copied from JpaPersistedResourceValidationSupport
+		SearchParameterMap searchParameterMap = new SearchParameterMap().setLoadSynchronous(true);
+		searchParameterMap.add(ValueSet.SP_URL, new UriParam(url));
+		IBundleProvider results = myValueSetDao.search(searchParameterMap, requestDetails);
+		assertFalse(results.isEmpty());
+
+		// JPAPersistedResourceValidationSupport.doFetchResource line 246
+		// but no sort and return all, not just one
+		// test
+		ValueSetExpansionOptions options = new ValueSetExpansionOptions();
+		ValueSet result = myValueSetDao.expandByIdentifier(url, options);
+
+		// validation
+		assertNotNull(result);
 	}
 
 	@Test
