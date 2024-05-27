@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 5942
+title: "Delete expunge targeted to resources (not everything) that were created with IfNoneExists URL followed by 
+        recreation of said resources was failing with HAPI-0550 due to the fact that the corresponding search url 
+        records were not being deleted.
+        This has been fixed."

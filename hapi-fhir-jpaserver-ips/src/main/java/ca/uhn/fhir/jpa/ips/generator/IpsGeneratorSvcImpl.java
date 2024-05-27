@@ -146,6 +146,7 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 		bundleBuilder.setType(Bundle.BundleType.DOCUMENT.toCode());
 		bundleBuilder.setIdentifier("urn:ietf:rfc:4122", UUID.randomUUID().toString());
 		bundleBuilder.setTimestamp(InstantType.now());
+		bundleBuilder.addProfile(theStrategy.getBundleProfile());
 
 		// Add composition to document
 		bundleBuilder.addDocumentEntry(composition);

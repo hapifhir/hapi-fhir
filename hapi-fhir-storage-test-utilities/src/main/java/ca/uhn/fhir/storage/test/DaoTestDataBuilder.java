@@ -25,6 +25,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
+import ca.uhn.fhir.util.BundleBuilder;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -97,21 +98,26 @@ public class DaoTestDataBuilder implements ITestDataBuilder.WithSupport, ITestDa
 	}
 
 	/**
-	 * Delete anything created
+	 * Delete anything created by this builder since the last cleanup().
 	 */
 	public void cleanup() {
 		ourLog.info("cleanup {}", myIds);
 
-		myIds.keySet().stream()
-			.sorted() // Hack to ensure Patients are deleted before Practitioners.  This may need to be refined.
-			.forEach(nextType->{
-			// todo do this in a bundle for perf.
-			IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(nextType);
-			myIds.get(nextType).forEach(dao::delete);
-		});
+		var builder = new BundleBuilder(myFhirCtx);
+		myIds.values()
+			.forEach(builder::addTransactionDeleteEntry);
+		var bundle = builder.getBundle();
+
+		ourLog.trace("Deleting in bundle {}", myFhirCtx.newJsonParser().encodeToString(bundle));
+		//noinspection unchecked
+		myDaoRegistry.getSystemDao().transaction(mySrd, bundle);
+
 		myIds.clear();
 	}
 
+	/**
+	 * Tear down and cleanup any Resources created during execution.
+	 */
 	@Override
 	public void afterEach(ExtensionContext context) throws Exception {
 		cleanup();

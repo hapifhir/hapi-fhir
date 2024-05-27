@@ -39,6 +39,7 @@ import ca.uhn.fhir.util.bundle.SearchBundleEntryParts;
 import com.google.common.collect.Sets;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
@@ -59,6 +60,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hl7.fhir.instance.model.api.IBaseBundle.LINK_PREV;
@@ -67,6 +69,12 @@ import static org.hl7.fhir.instance.model.api.IBaseBundle.LINK_PREV;
  * Fetch resources from a bundle
  */
 public class BundleUtil {
+
+	/** Non instantiable */
+	private BundleUtil() {
+		// nothing
+	}
+
 	private static final Logger ourLog = LoggerFactory.getLogger(BundleUtil.class);
 
 	private static final String PREVIOUS = LINK_PREV;
@@ -337,6 +345,66 @@ public class BundleUtil {
 		// Blow away the entries and reset them in the right order.
 		TerserUtil.clearField(theContext, theBundle, "entry");
 		TerserUtil.setField(theContext, "entry", theBundle, retVal.toArray(new IBase[0]));
+	}
+
+	/**
+	 * Converts a Bundle containing resources into a FHIR transaction which
+	 * creates/updates the resources. This method does not modify the original
+	 * bundle, but returns a new copy.
+	 * <p>
+	 * This method is mostly intended for test scenarios where you have a Bundle
+	 * containing search results or other sourced resources, and want to upload
+	 * these resources to a server using a single FHIR transaction.
+	 * </p>
+	 * <p>
+	 * The Bundle is converted using the following logic:
+	 * <ul>
+	 *     <li>Bundle.type is changed to <code>transaction</code></li>
+	 *     <li>Bundle.request.method is changed to <code>PUT</code></li>
+	 *     <li>Bundle.request.url is changed to <code>[resourceType]/[id]</code></li>
+	 *     <li>Bundle.fullUrl is changed to <code>[resourceType]/[id]</code></li>
+	 * </ul>
+	 * </p>
+	 *
+	 * @param theContext The FhirContext to use with the bundle
+	 * @param theBundle The Bundle to modify. All resources in the Bundle should have an ID.
+	 * @param thePrefixIdsOrNull If not <code>null</code>, all resource IDs and all references in the Bundle will be
+	 *                           modified to such that their IDs contain the given prefix. For example, for a value
+	 *                           of "A", the resource "Patient/123" will be changed to be "Patient/A123". If set to
+	 *                           <code>null</code>, resource IDs are unchanged.
+	 * @since 7.4.0
+	 */
+	public static <T extends IBaseBundle> T convertBundleIntoTransaction(
+			@Nonnull FhirContext theContext, @Nonnull T theBundle, @Nullable String thePrefixIdsOrNull) {
+		String prefix = defaultString(thePrefixIdsOrNull);
+
+		BundleBuilder bb = new BundleBuilder(theContext);
+
+		FhirTerser terser = theContext.newTerser();
+		List<IBase> entries = terser.getValues(theBundle, "Bundle.entry");
+		for (var entry : entries) {
+			IBaseResource resource = terser.getSingleValueOrNull(entry, "resource", IBaseResource.class);
+			if (resource != null) {
+				Validate.isTrue(resource.getIdElement().hasIdPart(), "Resource in bundle has no ID");
+				String newId = theContext.getResourceType(resource) + "/" + prefix
+						+ resource.getIdElement().getIdPart();
+
+				IBaseResource resourceClone = terser.clone(resource);
+				resourceClone.setId(newId);
+
+				if (isNotBlank(prefix)) {
+					for (var ref : terser.getAllResourceReferences(resourceClone)) {
+						var refElement = ref.getResourceReference().getReferenceElement();
+						ref.getResourceReference()
+								.setReference(refElement.getResourceType() + "/" + prefix + refElement.getIdPart());
+					}
+				}
+
+				bb.addTransactionUpdateEntry(resourceClone);
+			}
+		}
+
+		return bb.getBundleTyped();
 	}
 
 	private static void validatePartsNotNull(LinkedHashSet<IBase> theDeleteParts) {

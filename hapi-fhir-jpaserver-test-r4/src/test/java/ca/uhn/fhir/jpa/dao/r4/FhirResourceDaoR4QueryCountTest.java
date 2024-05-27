@@ -863,7 +863,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(1, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
-		assertEquals(28, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+		assertEquals(29, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 		assertEquals(10, outcome.getRecordsProcessed());
 		runInTransaction(()-> assertEquals(0, myResourceTableDao.count()));
 	}
