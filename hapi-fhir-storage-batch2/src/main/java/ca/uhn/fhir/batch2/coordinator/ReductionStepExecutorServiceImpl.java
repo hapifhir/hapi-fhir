@@ -264,7 +264,7 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 				ReductionStepDataSink<PT, IT, OT> dataSink = new ReductionStepDataSink<>(
 						instance.getInstanceId(), theJobWorkCursor, myJobPersistence, myJobDefinitionRegistry);
 				StepExecutionDetails<PT, IT> chunkDetails =
-						new StepExecutionDetails<>(parameters, null, instance, "REDUCTION");
+						StepExecutionDetails.createReductionStepDetails(parameters, null, instance);
 
 				if (response.isSuccessful()) {
 					reductionStepWorker.run(chunkDetails, dataSink);

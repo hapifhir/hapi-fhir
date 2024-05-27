@@ -30,6 +30,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import java.util.Date;
 
+import static ca.uhn.fhir.batch2.util.Batch2Utils.REDUCTION_STEP_CHUNK_ID_PLACEHOLDER;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
@@ -228,6 +229,13 @@ public class WorkChunk extends WorkChunkMetadata {
 	public WorkChunk setWarningMessage(String theWarningMessage) {
 		myWarningMessage = theWarningMessage;
 		return this;
+	}
+
+	/**
+	 * Returns true if the workchunk is a reduction workchunk; false otherwise
+	 */
+	public boolean isReductionWorkChunk() {
+		return getId() != null && getId().equals(REDUCTION_STEP_CHUNK_ID_PLACEHOLDER);
 	}
 
 	@Override
