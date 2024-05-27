@@ -31,7 +31,6 @@ import java.util.List;
  * startup log entries
  * @deprecated use {@link StaticLogbackTestExtension}
  */
-h3
 @Deprecated
 public class StaticLogbackCaptureTestExtension implements BeforeAllCallback, AfterAllCallback {
 	private final LogbackCaptureTestExtension myLogbackCaptureTestExtension;
