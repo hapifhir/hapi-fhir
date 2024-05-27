@@ -138,19 +138,19 @@ public class LogbackTestExtension implements BeforeEachCallback, AfterEachCallba
 	}
 
 	public static void assertEventWithLevelAndMessageContains(List<ILoggingEvent> events, @Nonnull Level theLevel, @Nonnull String thePartialMessage) {
-		assertThat(events).anySatisfy(event -> LogbackEventMatcher.assertThat(theLevel, thePartialMessage).matches(event));
+		assertThat(events).anySatisfy(event -> LogbackEventAssert.assertThat(theLevel, thePartialMessage).matches(event));
 	}
 
 	public static void assertEventWithLevel(List<ILoggingEvent> events, @Nonnull Level theLevel) {
-		assertThat(events).anySatisfy(event -> LogbackEventMatcher.assertThat(theLevel, null).matches(event));
+		assertThat(events).anySatisfy(event -> LogbackEventAssert.assertThat(theLevel, null).matches(event));
 	}
 
 	public static void assertEventWithMessageContains(List<ILoggingEvent> events, @Nonnull String thePartialMessage) {
-		assertThat(events).anySatisfy(event -> LogbackEventMatcher.assertThat(null, thePartialMessage).matches(event));
+		assertThat(events).anySatisfy(event -> LogbackEventAssert.assertThat(null, thePartialMessage).matches(event));
 	}
 
 	public static void assertEventWithLevelAndMessageAndThrew(List<ILoggingEvent> events, @Nonnull Level theLevel,
 															  @Nonnull String thePartialMessage, @Nonnull String theThrown) {
-		assertThat(events).anySatisfy(event -> LogbackEventMatcher.assertThat(theLevel, thePartialMessage, theThrown).matches(event));
+		assertThat(events).anySatisfy(event -> LogbackEventAssert.assertThat(theLevel, thePartialMessage, theThrown).matches(event));
 	}
 }
