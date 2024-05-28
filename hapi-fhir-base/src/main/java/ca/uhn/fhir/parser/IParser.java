@@ -36,6 +36,7 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -344,8 +345,9 @@ public interface IParser {
 	 * @see ParserOptions#setDontEncodeElementsForSummaryMode(Collection)
 	 * @since 7.4.0
 	 */
+	@SuppressWarnings("unchecked")
 	default IParser setDontEncodeElements(@Nonnull String... theDontEncodeElements) {
-		return setDontEncodeElements(Set.of(theDontEncodeElements));
+		return setDontEncodeElements((Collection<String>) Collections.singleton(theDontEncodeElements));
 	}
 
 	/**
@@ -394,8 +396,9 @@ public interface IParser {
 	 * @see #setEncodeElements(Set)
 	 * @see ParserOptions#setEncodeElementsForSummaryMode(String...)
 	 */
+	@SuppressWarnings("unchecked")
 	default IParser setEncodeElements(@Nonnull String... theEncodeElements) {
-		return setEncodeElements(Set.of(theEncodeElements));
+		return setEncodeElements((Set<String>) Collections.singleton(theEncodeElements));
 	}
 
 	/**

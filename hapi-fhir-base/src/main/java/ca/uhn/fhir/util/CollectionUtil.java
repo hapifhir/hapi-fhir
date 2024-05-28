@@ -24,7 +24,7 @@ import jakarta.annotation.Nullable;
 import org.apache.commons.collections4.CollectionUtils;
 
 import java.util.Collection;
-import java.util.Set;
+import java.util.Collections;
 
 import static java.util.Collections.unmodifiableCollection;
 
@@ -64,7 +64,7 @@ public class CollectionUtil {
 			collection1 = null;
 		}
 		if (collection0 == null && collection1 == null) {
-			return Set.of();
+			return Collections.emptySet();
 		}
 		if (collection0 == null) {
 			return unmodifiableCollection(collection1);

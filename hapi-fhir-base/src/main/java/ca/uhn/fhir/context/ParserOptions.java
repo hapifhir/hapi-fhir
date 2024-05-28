@@ -226,10 +226,10 @@ public class ParserOptions {
 	 * @see IParser#setEncodeElements(Set) Can be used to specify these values for an individual parser instance.
 	 * @since 7.4.0
 	 */
-	@SuppressWarnings("UnusedReturnValue")
+	@SuppressWarnings({"UnusedReturnValue", "unchecked"})
 	@Nonnull
 	public ParserOptions setEncodeElementsForSummaryMode(@Nonnull String... theEncodeElements) {
-		return setEncodeElementsForSummaryMode(Set.of(theEncodeElements));
+		return setEncodeElementsForSummaryMode((Collection<String>) Collections.singleton(theEncodeElements));
 	}
 
 	/**
@@ -252,7 +252,7 @@ public class ParserOptions {
 	public ParserOptions setEncodeElementsForSummaryMode(@Nullable Collection<String> theEncodeElements) {
 		Set<String> encodeElements = null;
 		if (theEncodeElements != null && !theEncodeElements.isEmpty()) {
-			encodeElements = Set.copyOf(theEncodeElements);
+			encodeElements = new HashSet<>(theEncodeElements);
 		}
 		myEncodeElementsForSummaryMode = encodeElements;
 		return this;
@@ -284,10 +284,10 @@ public class ParserOptions {
 	 * @see IParser#setDontEncodeElements(Collection) Can be used to specify these values for an individual parser instance.
 	 * @since 7.4.0
 	 */
-	@SuppressWarnings("UnusedReturnValue")
+	@SuppressWarnings({"UnusedReturnValue", "unchecked"})
 	@Nonnull
 	public ParserOptions setDontEncodeElementsForSummaryMode(@Nonnull String... theEncodeElements) {
-		return setDontEncodeElementsForSummaryMode(Set.of(theEncodeElements));
+		return setDontEncodeElementsForSummaryMode((Collection<String>) Collections.singleton(theEncodeElements));
 	}
 
 	/**
@@ -309,7 +309,7 @@ public class ParserOptions {
 	public ParserOptions setDontEncodeElementsForSummaryMode(@Nullable Collection<String> theDontEncodeElements) {
 		Set<String> dontEncodeElements = null;
 		if (theDontEncodeElements != null && !theDontEncodeElements.isEmpty()) {
-			dontEncodeElements = Set.copyOf(theDontEncodeElements);
+			dontEncodeElements = new HashSet<>(theDontEncodeElements);
 		}
 		myDontEncodeElementsForSummaryMode = dontEncodeElements;
 		return this;
