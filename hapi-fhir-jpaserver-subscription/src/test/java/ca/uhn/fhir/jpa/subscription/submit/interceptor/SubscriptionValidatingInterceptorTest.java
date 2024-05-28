@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.subscription.submit.interceptor;
 
-import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
@@ -11,14 +10,12 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyEvaluator;
-import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
-import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.subscription.SubscriptionConstants;
-import ca.uhn.fhir.subscription.SubscriptionTestDataHelper;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4b.model.CanonicalType;
 import org.hl7.fhir.r4b.model.Enumerations;
@@ -38,11 +35,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import jakarta.annotation.Nonnull;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
@@ -51,6 +46,7 @@ import static ca.uhn.fhir.subscription.SubscriptionTestDataHelper.TEST_TOPIC;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -73,7 +69,6 @@ public class SubscriptionValidatingInterceptorTest {
 	@Mock
 	private IFhirResourceDao<SubscriptionTopic> mySubscriptionTopicDao;
 	private FhirContext myFhirContext;
-	private SubscriptionCanonicalizer mySubscriptionCanonicalizer;
 
 	@BeforeEach
 	public void before() {
@@ -102,13 +97,8 @@ public class SubscriptionValidatingInterceptorTest {
 			mySubscriptionValidatingInterceptor.resourcePreCreate(theSubscription, null, null);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			CanonicalSubscription subscription = mySubscriptionCanonicalizer.canonicalize(theSubscription);
-
-			if (subscription.isTopicSubscription()) {
-				assertThat(e.getMessage(), is(Msg.code(123) + "No filters found for topic subscription"));
-			} else {
-				assertThat(e.getMessage(), is(Msg.code(11) + "Subscription.criteria must be populated"));
-			}
+			assertThat(e.getMessage(), startsWith(Msg.code(11) + "Subscription."));
+			assertThat(e.getMessage(), endsWith( " must be populated"));
 		}
 	}
 
@@ -117,7 +107,7 @@ public class SubscriptionValidatingInterceptorTest {
 	public void testBadCriteria(IBaseResource theSubscription) {
 		try {
 			initSubscription(theSubscription);
-			SubscriptionTerserUtil.setCriteria(myFhirContext, theSubscription, "Patient");
+			SubscriptionUtil.setCriteria(myFhirContext, theSubscription, "Patient");
 			mySubscriptionValidatingInterceptor.resourcePreCreate(theSubscription, null, null);
 			fail();
 		} catch (UnprocessableEntityException e) {
@@ -130,7 +120,7 @@ public class SubscriptionValidatingInterceptorTest {
 	public void testBadChannel(IBaseResource theSubscription) {
 		try {
 			initSubscription(theSubscription);
-			SubscriptionTerserUtil.setCriteria(myFhirContext, theSubscription, "Patient?");
+			SubscriptionUtil.setCriteria(myFhirContext, theSubscription, "Patient?");
 			mySubscriptionValidatingInterceptor.resourcePreCreate(theSubscription, null, null);
 			fail();
 		} catch (UnprocessableEntityException e) {
@@ -240,10 +230,10 @@ public class SubscriptionValidatingInterceptorTest {
 
 	private void initSubscription(IBaseResource theSubscription) {
 		setFhirContext(theSubscription);
-		SubscriptionTerserUtil.setStatus(myFhirContext, theSubscription, "active");
+		SubscriptionUtil.setStatus(myFhirContext, theSubscription, "active");
 		if (myFhirContext.getVersion().getVersion() == FhirVersionEnum.R5) {
 			initR5();
-			org.hl7.fhir.r5.model.Subscription subscription = (org.hl7.fhir.r5.model.Subscription)theSubscription;
+			org.hl7.fhir.r5.model.Subscription subscription = (org.hl7.fhir.r5.model.Subscription) theSubscription;
 			subscription.setTopic(TEST_TOPIC);
 		}
 	}
@@ -266,7 +256,6 @@ public class SubscriptionValidatingInterceptorTest {
 	private void setFhirContext(IBaseResource theSubscription) {
 		FhirVersionEnum fhirVersion = theSubscription.getStructureFhirVersionEnum();
 		setFhirContext(fhirVersion);
-		mySubscriptionCanonicalizer = new SubscriptionCanonicalizer(myFhirContext);
 	}
 
 	private void setFhirContext(FhirVersionEnum fhirVersion) {

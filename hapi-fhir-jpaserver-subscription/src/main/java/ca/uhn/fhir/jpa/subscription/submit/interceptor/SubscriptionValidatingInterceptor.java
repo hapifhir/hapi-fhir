@@ -47,10 +47,14 @@ import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.subscription.SubscriptionConstants;
 import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.SubscriptionUtil;
 import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.r5.model.SubscriptionTopic;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -157,28 +161,7 @@ public class SubscriptionValidatingInterceptor {
 						"Subscription.extension(url='" + HapiExtensions.EXT_SUBSCRIPTION_PAYLOAD_SEARCH_CRITERIA
 								+ "')");
 			}
-			if (subscription.isTopicSubscription()) {
-				if (myFhirContext.getVersion().getVersion() == FhirVersionEnum.R4) {
-					// This is R4 backport topic subscription
-					List<CanonicalTopicSubscriptionFilter> filters =
-							subscription.getTopicSubscription().getFilters();
-					if (filters.isEmpty()) {
-						// FIXME KHS
-						throw new UnprocessableEntityException(
-								Msg.code(123) + "No filters found for topic subscription");
-					}
-					filters.forEach(filter -> validateQuery(filter.asCriteriaString(), "Subscription.criteria"));
-				} else { // In R4 topic subscriptions exist without a corresponidng SubscriptionTopic
-					// resource
-					Optional<IBaseResource> oTopic = findSubscriptionTopicByUrl(subscription.getTopic());
-					if (!oTopic.isPresent()) {
-						throw new UnprocessableEntityException(
-								Msg.code(2322) + "No SubscriptionTopic exists with topic: " + subscription.getTopic());
-					}
-				}
-			} else {
-				validateQuery(subscription.getCriteriaString(), "Subscription.criteria");
-			}
+			validateCriteria(theSubscription, subscription);
 
 			validateChannelType(subscription);
 
@@ -202,6 +185,33 @@ public class SubscriptionValidatingInterceptor {
 			} else if (subscription.getChannelType() == CanonicalSubscriptionChannelType.MESSAGE) {
 				validateMessageSubscriptionEndpoint(subscription.getEndpointUrl());
 			}
+		}
+	}
+
+	private void validateCriteria(IBaseResource theSubscription, CanonicalSubscription theCanonicalSubscription) {
+		if (theCanonicalSubscription.isTopicSubscription()) {
+			if (myFhirContext.getVersion().getVersion() == FhirVersionEnum.R4) {
+				// This is R4 backport topic subscription
+				Subscription r4Subscription = (Subscription)theSubscription;
+				String filterUrl = null;
+				Extension filterUrlExtension = r4Subscription.getCriteriaElement().getExtensionByUrl(SubscriptionConstants.SUBSCRIPTION_TOPIC_FILTER_URL);
+				if (filterUrlExtension != null) {
+					StringType filterUrlElement = (StringType) filterUrlExtension.getValue();
+					if (filterUrlElement != null) {
+						filterUrl = filterUrlElement.getValue();
+					}
+				}
+				validateQuery(filterUrl, "Subscription.criteria.extension with url " + SubscriptionConstants.SUBSCRIPTION_TOPIC_FILTER_URL);
+			} else { // In R4 topic subscriptions exist without a corresponidng SubscriptionTopic
+				// resource
+				Optional<IBaseResource> oTopic = findSubscriptionTopicByUrl(theCanonicalSubscription.getTopic());
+				if (!oTopic.isPresent()) {
+					throw new UnprocessableEntityException(
+							Msg.code(2322) + "No SubscriptionTopic exists with topic: " + theCanonicalSubscription.getTopic());
+				}
+			}
+		} else {
+			validateQuery(theCanonicalSubscription.getCriteriaString(), "Subscription.criteria");
 		}
 	}
 

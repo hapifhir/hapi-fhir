@@ -13,10 +13,10 @@ import org.hl7.fhir.r4.model.Subscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class SubscriptionTerserUtil {
-	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionTerserUtil.class);
+public final class SubscriptionUtil {
+	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionUtil.class);
 
-	private SubscriptionTerserUtil() {}
+	private SubscriptionUtil() {}
 
 	public static void setStatus(FhirContext theFhirContext, IBaseResource theSubscription, String theStatus) {
 		IBaseEnumeration newValue = switch (theFhirContext.getVersion().getVersion()) {
