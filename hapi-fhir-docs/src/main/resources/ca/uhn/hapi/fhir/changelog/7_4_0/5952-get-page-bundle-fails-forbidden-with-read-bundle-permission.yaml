@@ -1,0 +1,6 @@
+---
+type: add
+issue: 5952
+title: "Previously, since hapi-fhir 7.0, when retrieving the consecutive pages of a Bundle resource search operation 
+using a client with read permissions for Bundle resources, the request would fail with a 403 Forbidden error. 
+This has been fixed."
