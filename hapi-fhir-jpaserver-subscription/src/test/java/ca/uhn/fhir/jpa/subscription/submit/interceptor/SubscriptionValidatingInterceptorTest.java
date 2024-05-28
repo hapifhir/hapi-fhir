@@ -128,56 +128,54 @@ public class SubscriptionValidatingInterceptorTest {
 		}
 	}
 
-	@Test
-	public void testEmptyEndpoint() {
+	@ParameterizedTest
+	@MethodSource("subscriptionByFhirVersion345")
+	public void testEmptyEndpoint(IBaseResource theSubscription) {
 		try {
-			Subscription badSub = new Subscription();
-			badSub.setStatus(Enumerations.SubscriptionStatus.ACTIVE);
-			badSub.setCriteria("Patient?");
-			Subscription.SubscriptionChannelComponent channel = badSub.getChannel();
-			channel.setType(Subscription.SubscriptionChannelType.MESSAGE);
-			mySubscriptionValidatingInterceptor.resourcePreCreate(badSub, null, null);
+			initSubscription(theSubscription);
+			SubscriptionUtil.setCriteria(myFhirContext, theSubscription, "Patient?");
+			SubscriptionUtil.setChannelType(myFhirContext, theSubscription, "message");
+			mySubscriptionValidatingInterceptor.resourcePreCreate(theSubscription, null, null);
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage(), is(Msg.code(16) + "No endpoint defined for message subscription"));
 		}
 	}
 
-	@Test
-	public void testMalformedEndpoint() {
-		Subscription badSub = new Subscription();
-		badSub.setStatus(Enumerations.SubscriptionStatus.ACTIVE);
-		badSub.setCriteria("Patient?");
-		Subscription.SubscriptionChannelComponent channel = badSub.getChannel();
-		channel.setType(Subscription.SubscriptionChannelType.MESSAGE);
+	@ParameterizedTest
+	@MethodSource("subscriptionByFhirVersion345")
+	public void testMalformedEndpoint(IBaseResource theSubscription) {
+		initSubscription(theSubscription);
+		SubscriptionUtil.setCriteria(myFhirContext, theSubscription, "Patient?");
+		SubscriptionUtil.setChannelType(myFhirContext, theSubscription, "message");
+		SubscriptionUtil.setEndpoint(myFhirContext, theSubscription, "foo");
 
-		channel.setEndpoint("foo");
 		try {
-			mySubscriptionValidatingInterceptor.resourcePreCreate(badSub, null, null);
+			mySubscriptionValidatingInterceptor.resourcePreCreate(theSubscription, null, null);
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage(), is(Msg.code(17) + "Only 'channel' protocol is supported for Subscriptions with channel type 'message'"));
 		}
 
-		channel.setEndpoint("channel");
+		SubscriptionUtil.setEndpoint(myFhirContext, theSubscription, "channel");
 		try {
-			mySubscriptionValidatingInterceptor.resourcePreCreate(badSub, null, null);
+			mySubscriptionValidatingInterceptor.resourcePreCreate(theSubscription, null, null);
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage(), is(Msg.code(17) + "Only 'channel' protocol is supported for Subscriptions with channel type 'message'"));
 		}
 
-		channel.setEndpoint("channel:");
+		SubscriptionUtil.setEndpoint(myFhirContext, theSubscription, "channel:");
 		try {
-			mySubscriptionValidatingInterceptor.resourcePreCreate(badSub, null, null);
+			mySubscriptionValidatingInterceptor.resourcePreCreate(theSubscription, null, null);
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage(), is(Msg.code(19) + "Invalid subscription endpoint uri channel:"));
 		}
 
 		// Happy path
-		channel.setEndpoint("channel:my-queue-name");
-		mySubscriptionValidatingInterceptor.resourcePreCreate(badSub, null, null);
+		SubscriptionUtil.setEndpoint(myFhirContext, theSubscription, "channel:my-queue-name");
+		mySubscriptionValidatingInterceptor.resourcePreCreate(theSubscription, null, null);
 	}
 
 	@Test

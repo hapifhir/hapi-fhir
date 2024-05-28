@@ -498,6 +498,10 @@ public final class TerserUtil {
 		setFieldByFhirPath(theFhirContext.newTerser(), theFhirPath, theResource, theValue);
 	}
 
+	public static void setStringFieldByFhirPath(FhirContext theFhirContext, String theFhirPath, IBaseResource theResource, String theValue) {
+		setFieldByFhirPath(theFhirContext.newTerser(), theFhirPath, theResource, theFhirContext.newPrimitiveString(theValue));
+	}
+
 	/**
 	 * Returns field values ant the specified FHIR path from the resource.
 	 *
