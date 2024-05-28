@@ -37,7 +37,6 @@ import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyE
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
-import ca.uhn.fhir.jpa.subscription.model.CanonicalTopicSubscriptionFilter;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -60,7 +59,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.List;
 import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -192,22 +190,27 @@ public class SubscriptionValidatingInterceptor {
 		if (theCanonicalSubscription.isTopicSubscription()) {
 			if (myFhirContext.getVersion().getVersion() == FhirVersionEnum.R4) {
 				// This is R4 backport topic subscription
-				Subscription r4Subscription = (Subscription)theSubscription;
+				Subscription r4Subscription = (Subscription) theSubscription;
 				String filterUrl = null;
-				Extension filterUrlExtension = r4Subscription.getCriteriaElement().getExtensionByUrl(SubscriptionConstants.SUBSCRIPTION_TOPIC_FILTER_URL);
+				Extension filterUrlExtension = r4Subscription
+						.getCriteriaElement()
+						.getExtensionByUrl(SubscriptionConstants.SUBSCRIPTION_TOPIC_FILTER_URL);
 				if (filterUrlExtension != null) {
 					StringType filterUrlElement = (StringType) filterUrlExtension.getValue();
 					if (filterUrlElement != null) {
 						filterUrl = filterUrlElement.getValue();
 					}
 				}
-				validateQuery(filterUrl, "Subscription.criteria.extension with url " + SubscriptionConstants.SUBSCRIPTION_TOPIC_FILTER_URL);
+				validateQuery(
+						filterUrl,
+						"Subscription.criteria.extension with url "
+								+ SubscriptionConstants.SUBSCRIPTION_TOPIC_FILTER_URL);
 			} else { // In R4 topic subscriptions exist without a corresponidng SubscriptionTopic
 				// resource
 				Optional<IBaseResource> oTopic = findSubscriptionTopicByUrl(theCanonicalSubscription.getTopic());
 				if (!oTopic.isPresent()) {
-					throw new UnprocessableEntityException(
-							Msg.code(2322) + "No SubscriptionTopic exists with topic: " + theCanonicalSubscription.getTopic());
+					throw new UnprocessableEntityException(Msg.code(2322) + "No SubscriptionTopic exists with topic: "
+							+ theCanonicalSubscription.getTopic());
 				}
 			}
 		} else {
