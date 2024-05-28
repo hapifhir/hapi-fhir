@@ -37,6 +37,7 @@ import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyE
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
+import ca.uhn.fhir.jpa.subscription.model.CanonicalTopicSubscriptionFilter;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -55,15 +56,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.List;
 import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 @Interceptor
 public class SubscriptionValidatingInterceptor {
-
-	@Autowired
-	private SubscriptionCanonicalizer mySubscriptionCanonicalizer;
 
 	@Autowired
 	private DaoRegistry myDaoRegistry;
@@ -75,6 +74,7 @@ public class SubscriptionValidatingInterceptor {
 	private SubscriptionStrategyEvaluator mySubscriptionStrategyEvaluator;
 
 	private FhirContext myFhirContext;
+	private SubscriptionCanonicalizer mySubscriptionCanonicalizer;
 
 	@Autowired
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
@@ -102,6 +102,7 @@ public class SubscriptionValidatingInterceptor {
 	@Autowired
 	public void setFhirContext(FhirContext theFhirContext) {
 		myFhirContext = theFhirContext;
+		mySubscriptionCanonicalizer = new SubscriptionCanonicalizer(myFhirContext, myStorageSettings);
 	}
 
 	@VisibleForTesting
@@ -150,10 +151,24 @@ public class SubscriptionValidatingInterceptor {
 
 		if (!finished) {
 
+			if (subscription.getPayloadSearchCriteria() != null) {
+				validateQuery(
+						subscription.getPayloadSearchCriteria(),
+						"Subscription.extension(url='" + HapiExtensions.EXT_SUBSCRIPTION_PAYLOAD_SEARCH_CRITERIA
+								+ "')");
+			}
 			if (subscription.isTopicSubscription()) {
-				if (myFhirContext.getVersion().getVersion()
-						!= FhirVersionEnum
-								.R4) { // In R4 topic subscriptions exist without a corresponidng SubscriptionTopic
+				if (myFhirContext.getVersion().getVersion() == FhirVersionEnum.R4) {
+					// This is R4 backport topic subscription
+					List<CanonicalTopicSubscriptionFilter> filters =
+							subscription.getTopicSubscription().getFilters();
+					if (filters.isEmpty()) {
+						// FIXME KHS
+						throw new UnprocessableEntityException(
+								Msg.code(123) + "No filters found for topic subscription");
+					}
+					filters.forEach(filter -> validateQuery(filter.asCriteriaString(), "Subscription.criteria"));
+				} else { // In R4 topic subscriptions exist without a corresponidng SubscriptionTopic
 					// resource
 					Optional<IBaseResource> oTopic = findSubscriptionTopicByUrl(subscription.getTopic());
 					if (!oTopic.isPresent()) {
@@ -163,13 +178,6 @@ public class SubscriptionValidatingInterceptor {
 				}
 			} else {
 				validateQuery(subscription.getCriteriaString(), "Subscription.criteria");
-
-				if (subscription.getPayloadSearchCriteria() != null) {
-					validateQuery(
-							subscription.getPayloadSearchCriteria(),
-							"Subscription.extension(url='" + HapiExtensions.EXT_SUBSCRIPTION_PAYLOAD_SEARCH_CRITERIA
-									+ "')");
-				}
 			}
 
 			validateChannelType(subscription);

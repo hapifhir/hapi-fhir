@@ -1,18 +1,25 @@
 package ca.uhn.fhir.jpa.subscription.submit.interceptor;
 
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyEvaluator;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
+import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.subscription.SubscriptionConstants;
+import ca.uhn.fhir.subscription.SubscriptionTestDataHelper;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4b.model.CanonicalType;
 import org.hl7.fhir.r4b.model.Enumerations;
 import org.hl7.fhir.r4b.model.Subscription;
@@ -20,6 +27,8 @@ import org.hl7.fhir.r4b.model.SubscriptionTopic;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,10 +41,15 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import jakarta.annotation.Nonnull;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Stream;
 
+import static ca.uhn.fhir.subscription.SubscriptionTestDataHelper.TEST_TOPIC;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -58,17 +72,21 @@ public class SubscriptionValidatingInterceptorTest {
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 	@Mock
 	private IFhirResourceDao<SubscriptionTopic> mySubscriptionTopicDao;
+	private FhirContext myFhirContext;
+	private SubscriptionCanonicalizer mySubscriptionCanonicalizer;
 
 	@BeforeEach
 	public void before() {
+		setFhirContext(FhirVersionEnum.R4B);
 		when(myDaoRegistry.isResourceTypeSupported(any())).thenReturn(true);
 	}
 
-	@Test
-	public void testEmptySub() {
+	@ParameterizedTest
+	@MethodSource("subscriptionByFhirVersion345")
+	public void testEmptySub(IBaseResource theSubscription) {
 		try {
-			Subscription badSub = new Subscription();
-			mySubscriptionValidatingInterceptor.resourcePreCreate(badSub, null, null);
+			setFhirContext(theSubscription);
+			mySubscriptionValidatingInterceptor.resourcePreCreate(theSubscription, null, null);
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage(), is(Msg.code(8) + "Can not process submitted Subscription - Subscription.status must be populated on this server"));
@@ -76,38 +94,44 @@ public class SubscriptionValidatingInterceptorTest {
 		}
 	}
 
-	@Test
-	public void testEmptyStatus() {
+	@ParameterizedTest
+	@MethodSource("subscriptionByFhirVersion34") // R5 subscriptions don't have criteria
+	public void testEmptyCriteria(IBaseResource theSubscription) {
 		try {
-			Subscription badSub = new Subscription();
-			badSub.setStatus(Enumerations.SubscriptionStatus.ACTIVE);
-			mySubscriptionValidatingInterceptor.resourcePreCreate(badSub, null, null);
+			initSubscription(theSubscription);
+			mySubscriptionValidatingInterceptor.resourcePreCreate(theSubscription, null, null);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), is(Msg.code(11) + "Subscription.criteria must be populated"));
+			CanonicalSubscription subscription = mySubscriptionCanonicalizer.canonicalize(theSubscription);
+
+			if (subscription.isTopicSubscription()) {
+				assertThat(e.getMessage(), is(Msg.code(123) + "No filters found for topic subscription"));
+			} else {
+				assertThat(e.getMessage(), is(Msg.code(11) + "Subscription.criteria must be populated"));
+			}
 		}
 	}
 
-	@Test
-	public void testBadCriteria() {
+	@ParameterizedTest
+	@MethodSource("subscriptionByFhirVersion34")
+	public void testBadCriteria(IBaseResource theSubscription) {
 		try {
-			Subscription badSub = new Subscription();
-			badSub.setStatus(Enumerations.SubscriptionStatus.ACTIVE);
-			badSub.setCriteria("Patient");
-			mySubscriptionValidatingInterceptor.resourcePreCreate(badSub, null, null);
+			initSubscription(theSubscription);
+			SubscriptionTerserUtil.setCriteria(myFhirContext, theSubscription, "Patient");
+			mySubscriptionValidatingInterceptor.resourcePreCreate(theSubscription, null, null);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), is(Msg.code(14) + "Subscription.criteria must be in the form \"{Resource Type}?[params]\""));
+			assertThat(e.getMessage(), endsWith("criteria must be in the form \"{Resource Type}?[params]\""));
 		}
 	}
 
-	@Test
-	public void testBadChannel() {
+	@ParameterizedTest
+	@MethodSource("subscriptionByFhirVersion34")
+	public void testBadChannel(IBaseResource theSubscription) {
 		try {
-			Subscription badSub = new Subscription();
-			badSub.setStatus(Enumerations.SubscriptionStatus.ACTIVE);
-			badSub.setCriteria("Patient?");
-			mySubscriptionValidatingInterceptor.resourcePreCreate(badSub, null, null);
+			initSubscription(theSubscription);
+			SubscriptionTerserUtil.setCriteria(myFhirContext, theSubscription, "Patient?");
+			mySubscriptionValidatingInterceptor.resourcePreCreate(theSubscription, null, null);
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage(), is(Msg.code(20) + "Subscription.channel.type must be populated"));
@@ -213,6 +237,58 @@ public class SubscriptionValidatingInterceptorTest {
 		mySubscriptionValidatingInterceptor.validateSubmittedSubscription(badSub, null, null, Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED);
 	}
 
+
+	private void initSubscription(IBaseResource theSubscription) {
+		setFhirContext(theSubscription);
+		SubscriptionTerserUtil.setStatus(myFhirContext, theSubscription, "active");
+		if (myFhirContext.getVersion().getVersion() == FhirVersionEnum.R5) {
+			initR5();
+			org.hl7.fhir.r5.model.Subscription subscription = (org.hl7.fhir.r5.model.Subscription)theSubscription;
+			subscription.setTopic(TEST_TOPIC);
+		}
+	}
+
+	void initR5() {
+		when(myDaoRegistry.getResourceDao("SubscriptionTopic")).thenReturn(mySubscriptionTopicDao);
+		org.hl7.fhir.r5.model.SubscriptionTopic topic = new org.hl7.fhir.r5.model.SubscriptionTopic();
+		IBundleProvider provider = new SimpleBundleProvider(topic);
+		when(mySubscriptionTopicDao.search(any(SearchParameterMap.class), any(RequestDetails.class))).thenReturn(provider);
+	}
+
+	public static Stream<IBaseResource> subscriptionByFhirVersion345() {
+		return subscriptionByFhirVersion(true);
+	}
+
+	public static Stream<IBaseResource> subscriptionByFhirVersion34() {
+		return subscriptionByFhirVersion(false);
+	}
+
+	private void setFhirContext(IBaseResource theSubscription) {
+		FhirVersionEnum fhirVersion = theSubscription.getStructureFhirVersionEnum();
+		setFhirContext(fhirVersion);
+		mySubscriptionCanonicalizer = new SubscriptionCanonicalizer(myFhirContext);
+	}
+
+	private void setFhirContext(FhirVersionEnum fhirVersion) {
+		myFhirContext = FhirContext.forCached(fhirVersion);
+		mySubscriptionValidatingInterceptor.setFhirContext(myFhirContext);
+	}
+
+	private static @Nonnull Stream<IBaseResource> subscriptionByFhirVersion(boolean theIncludeR5) {
+		List<IBaseResource> resources = new ArrayList<>();
+		resources.add(new org.hl7.fhir.dstu3.model.Subscription());
+		resources.add(new org.hl7.fhir.r4.model.Subscription());
+		org.hl7.fhir.r4.model.Subscription r4Backport = new org.hl7.fhir.r4.model.Subscription();
+		r4Backport.getMeta().addProfile(SubscriptionConstants.SUBSCRIPTION_TOPIC_PROFILE_URL);
+		resources.add(r4Backport);
+		resources.add(new org.hl7.fhir.r4b.model.Subscription());
+		if (theIncludeR5) {
+			resources.add(new org.hl7.fhir.r5.model.Subscription());
+		}
+
+		return resources.stream();
+	}
+
 	@Configuration
 	public static class SpringConfig {
 		@Bean
@@ -223,11 +299,6 @@ public class SubscriptionValidatingInterceptorTest {
 		@Bean
 		SubscriptionValidatingInterceptor subscriptionValidatingInterceptor() {
 			return new SubscriptionValidatingInterceptor();
-		}
-
-		@Bean
-		SubscriptionCanonicalizer subscriptionCanonicalizer(FhirContext theFhirContext) {
-			return new SubscriptionCanonicalizer(theFhirContext, new StorageSettings());
 		}
 
 		@Bean

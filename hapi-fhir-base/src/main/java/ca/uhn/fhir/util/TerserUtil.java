@@ -464,6 +464,11 @@ public final class TerserUtil {
 		mergeFields(theTerser, theResource, childDefinition, theFromFieldValues, theToFieldValues);
 	}
 
+	public static void setStringField(
+			FhirContext theFhirContext, String theFieldName, IBaseResource theResource, String theValue) {
+		setField(theFhirContext, theFieldName, theResource, theFhirContext.newPrimitiveString(theValue));
+	}
+
 	/**
 	 * Sets the specified value at the FHIR path provided.
 	 *

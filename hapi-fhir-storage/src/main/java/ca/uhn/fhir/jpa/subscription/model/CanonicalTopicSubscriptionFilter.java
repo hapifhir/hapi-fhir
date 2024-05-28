@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.jpa.subscription.model;
 
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.util.UrlUtil;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -89,24 +91,37 @@ public class CanonicalTopicSubscriptionFilter {
 	}
 
 	public static List<CanonicalTopicSubscriptionFilter> fromQueryUrl(String theQueryUrl) {
+		if (!theQueryUrl.contains("?")) {
+			throw new UnprocessableEntityException(
+					Msg.code(123) + "Subscription filter criteria must be in the form \"{Resource Type}?[params]\"");
+		}
+
 		UrlUtil.UrlParts urlParts = UrlUtil.parseUrl(theQueryUrl);
 		String resourceName = urlParts.getResourceType();
 
 		Map<String, String[]> params = UrlUtil.parseQueryString(urlParts.getParams());
 		List<CanonicalTopicSubscriptionFilter> retval = new ArrayList<>();
-		params.forEach((key, valueList) -> {
-			for (String value : valueList) {
-				CanonicalTopicSubscriptionFilter filter = new CanonicalTopicSubscriptionFilter();
-				filter.setResourceType(resourceName);
-				filter.setFilterParameter(key);
-				// WIP STR5 set modifier and comparator properly.  This may be tricky without access to
-				// searchparameters,
-				// But this method cannot assume searchparameters exist on the server.
-				filter.setComparator(Enumerations.SearchComparator.EQ);
-				filter.setValue(value);
-				retval.add(filter);
-			}
-		});
+		if (params.isEmpty()) {
+			// The filter has the form "Patient?" which should match all resources of type Patient
+			// FIXME KHS test this case
+			CanonicalTopicSubscriptionFilter filter = new CanonicalTopicSubscriptionFilter();
+			filter.setResourceType(resourceName);
+			retval.add(filter);
+		} else {
+			params.forEach((key, valueList) -> {
+				for (String value : valueList) {
+					CanonicalTopicSubscriptionFilter filter = new CanonicalTopicSubscriptionFilter();
+					filter.setResourceType(resourceName);
+					filter.setFilterParameter(key);
+					// WIP STR5 set modifier and comparator properly.  This may be tricky without access to
+					// searchparameters,
+					// But this method cannot assume searchparameters exist on the server.
+					filter.setComparator(Enumerations.SearchComparator.EQ);
+					filter.setValue(value);
+					retval.add(filter);
+				}
+			});
+		}
 		return retval;
 	}
 
