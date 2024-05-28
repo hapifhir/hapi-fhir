@@ -161,8 +161,7 @@ public class StorageSettings {
 	 *
 	 * @since 7.4.0
 	 */
-	// TODO: make it false by default
-	private boolean myIndexStorageOptimized = true;
+	private boolean myIndexStorageOptimized = false;
 
 	/**
 	 * If set to true, the server will prevent the creation of Subscriptions which cannot be evaluated IN-MEMORY. This can improve
