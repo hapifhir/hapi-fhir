@@ -31,6 +31,7 @@ import ca.uhn.fhir.util.ReflectionUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
+import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.instrumentation.annotations.WithSpan;
 import jakarta.annotation.Nonnull;
@@ -65,6 +66,13 @@ import java.util.stream.Collectors;
 public abstract class BaseInterceptorService<POINTCUT extends Enum<POINTCUT> & IPointcut>
 		implements IBaseInterceptorService<POINTCUT>, IBaseInterceptorBroadcaster<POINTCUT> {
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseInterceptorService.class);
+	private static final AttributeKey<String> OTEL_INTERCEPTOR_POINTCUT_NAME_ATT_KEY =
+			AttributeKey.stringKey("hapifhir.interceptor.pointcut_name");
+	private static final AttributeKey<String> OTEL_INTERCEPTOR_CLASS_NAME_ATT_KEY =
+			AttributeKey.stringKey("hapifhir.interceptor.class_name");
+	private static final AttributeKey<String> OTEL_INTERCEPTOR_METHOD_NAME_ATT_KEY =
+			AttributeKey.stringKey("hapifhir.interceptor.method_name");
+
 	private final List<Object> myInterceptors = new ArrayList<>();
 	private final ListMultimap<POINTCUT, BaseInvoker> myGlobalInvokers = ArrayListMultimap.create();
 	private final ListMultimap<POINTCUT, BaseInvoker> myAnonymousInvokers = ArrayListMultimap.create();
@@ -573,11 +581,11 @@ public abstract class BaseInterceptorService<POINTCUT extends Enum<POINTCUT> & I
 		private Object invokeMethod(Object[] args) throws InvocationTargetException, IllegalAccessException {
 			// Add attributes to the opentelemetry span
 			Span currentSpan = Span.current();
-			currentSpan.setAttribute("hapifhir.interceptor.pointcut_name", myPointcut.name());
+			currentSpan.setAttribute(OTEL_INTERCEPTOR_POINTCUT_NAME_ATT_KEY, myPointcut.name());
 			currentSpan.setAttribute(
-					"hapifhir.interceptor.class_name",
+					OTEL_INTERCEPTOR_CLASS_NAME_ATT_KEY,
 					myMethod.getDeclaringClass().getName());
-			currentSpan.setAttribute("hapifhir.interceptor.method_name", myMethod.getName());
+			currentSpan.setAttribute(OTEL_INTERCEPTOR_METHOD_NAME_ATT_KEY, myMethod.getName());
 
 			return myMethod.invoke(getInterceptor(), args);
 		}
