@@ -24,7 +24,6 @@ import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.dstu2.model.Subscription;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseEnumeration;
 import org.hl7.fhir.r5.model.Coding;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
