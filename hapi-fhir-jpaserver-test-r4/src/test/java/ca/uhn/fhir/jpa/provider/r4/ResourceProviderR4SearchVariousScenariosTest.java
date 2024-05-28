@@ -194,6 +194,9 @@ public class ResourceProviderR4SearchVariousScenariosTest extends BaseResourcePr
 			"Practitioner?_has:ExplanationOfBenefit:care-team:coverage.payor:Organization._has:List:item:_id="+LIST_ID  // same thing
 		})
 		void hasThenChainThenHas(String theQueryString) {
+			// LUKETODO:  presentation:  THIS IS WHERE THE BUG HAPPENED
+			// https://gitlab.com/simpatico.ai/cdr/-/issues/5351
+			// Fix:  https://github.com/hapifhir/hapi-fhir/pull/5735
 			runAndAssert(theQueryString);
 		}
 
