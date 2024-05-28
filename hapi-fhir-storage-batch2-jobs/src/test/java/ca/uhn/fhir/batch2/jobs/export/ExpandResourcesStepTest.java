@@ -8,6 +8,7 @@ import ca.uhn.fhir.batch2.jobs.export.models.ExpandedResourcesList;
 import ca.uhn.fhir.batch2.jobs.export.models.ResourceIdList;
 import ca.uhn.fhir.batch2.jobs.models.BatchResourceId;
 import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
@@ -107,7 +108,7 @@ public class ExpandResourcesStepTest {
 			theParameters,
 			theData,
 			theInstance,
-			"1"
+			new WorkChunk().setId("1")
 		);
 	}
 

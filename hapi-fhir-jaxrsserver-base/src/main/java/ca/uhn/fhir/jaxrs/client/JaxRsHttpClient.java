@@ -119,7 +119,6 @@ public class JaxRsHttpClient implements IHttpClient {
 		}
 
 		theHttpRequest.addHeader("User-Agent", HttpClientUtil.createUserAgentString(theContext, "jax-rs"));
-		theHttpRequest.addHeader("Accept-Charset", "utf-8");
 
 		Builder request = theHttpRequest.getRequest();
 		request.acceptEncoding("gzip");

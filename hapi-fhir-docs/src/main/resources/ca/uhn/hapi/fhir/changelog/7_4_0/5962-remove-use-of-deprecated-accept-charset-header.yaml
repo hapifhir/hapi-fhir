@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 5962
+title: "The default use of the Accept-Charset header has been removed as its use is deprecated. Thanks to Jens Villadsen for the suggestion and pull request!"
