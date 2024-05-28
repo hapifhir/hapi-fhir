@@ -68,3 +68,17 @@ This setting controls whether non-resource (ex: Patient is a resource, MdmLink i
 Clients may want to disable this setting for performance reasons as it populates a new set of database tables when enabled.
 
 Setting this property explicitly to false disables the feature:  [Non Resource DB History](/apidocs/hapi-fhir-storage/ca/uhn/fhir/jpa/api/config/JpaStorageSettings.html#isNonResourceDbHistoryEnabled())
+
+# Enabling Index Storage Optimization
+
+If enabled, the server will not write data to the `SP_NAME`, `RES_TYPE`, `SP_UPDATED` columns for all HFJ_SPIDX_xxx tables.
+
+This setting may be enabled on servers where HFJ_SPIDX_xxx tables are expected to have a large amount of data (millions of rows) in order to reduce overall storage size.
+
+Setting this property explicitly to true enables the feature: [Index Storage Optimized](/hapi-fhir/apidocs/hapi-fhir-jpaserver-model/ca/uhn/fhir/jpa/model/entity/StorageSettings.html#setIndexStorageOptimized(boolean))
+
+## Limitations:
+
+* This setting only applies to newly inserted and updated rows in HFJ_SPIDX_xxx tables. In order to apply this setting to existing HFJ_SPIDX_xxx index rows, `$reindex` operation should be executed at the instance or server level.
+
+* This setting should not be enabled in combination with [Include Partition in Search Hashes](/hapi-fhir/apidocs/hapi-fhir-jpaserver-model/ca/uhn/fhir/jpa/model/config/PartitionSettings.html#setIncludePartitionInSearchHashes(boolean)) flag, as in this case, Partition could not be included in Search Hashes. 

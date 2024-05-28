@@ -76,6 +76,11 @@ public class DaoSearchParamSynchronizer {
 	}
 
 	@VisibleForTesting
+	public void setStorageSettings(StorageSettings theStorageSettings) {
+		this.myStorageSettings = theStorageSettings;
+	}
+
+	@VisibleForTesting
 	public void setEntityManager(EntityManager theEntityManager) {
 		myEntityManager = theEntityManager;
 	}
@@ -122,7 +127,7 @@ public class DaoSearchParamSynchronizer {
 		List<T> paramsToRemove = subtract(theExistingParams, newParams);
 		List<T> paramsToAdd = subtract(newParams, theExistingParams);
 		tryToReuseIndexEntities(paramsToRemove, paramsToAdd);
-		updateExistingParamsIfRequired(theExistingParams, paramsToAdd, paramsToRemove);
+		updateExistingParamsIfRequired(theExistingParams, paramsToAdd, newParams, paramsToRemove);
 
 		for (T next : paramsToRemove) {
 			if (!myEntityManager.contains(next)) {
@@ -142,8 +147,20 @@ public class DaoSearchParamSynchronizer {
 		theAddRemoveCount.addToRemoveCount(paramsToRemove.size());
 	}
 
+	/**
+	 * <p>
+	 * This method performs an update of Search Parameter's fields in the case of <code>$reindex</code> or update operation by:
+	 * 1. Marking existing entities for updating to apply index storage optimization, if it is enabled (disabled by default).
+	 * 2. Recovering <code>SP_NAME</code>, <code>RES_TYPE</code> values of Search Parameter's fields for existing entities
+	 * in case if index storage optimization is disabled (but was enabled previously).
+	 * </p>
+	 * For details, see: {@link StorageSettings#isIndexStorageOptimized()}
+	 */
 	private <T extends BaseResourceIndex> void updateExistingParamsIfRequired(
-			Collection<T> theExistingParams, List<T> theParamsToAdd, List<T> theParamsToRemove) {
+			Collection<T> theExistingParams,
+			List<T> theParamsToAdd,
+			Collection<T> theNewParams,
+			List<T> theParamsToRemove) {
 
 		theExistingParams.stream()
 				.filter(BaseResourceIndexedSearchParam.class::isInstance)
@@ -154,8 +171,24 @@ public class DaoSearchParamSynchronizer {
 				.forEach(sp -> {
 					// force hibernate to update Search Parameter entity by resetting SP_UPDATED value
 					sp.setUpdated(new Date());
+					recoverExistingSearchParameterIfRequired(sp, theNewParams);
 					theParamsToAdd.add((T) sp);
 				});
+	}
+
+	private <T extends BaseResourceIndex> void recoverExistingSearchParameterIfRequired(
+			BaseResourceIndexedSearchParam theSearchParamToRecover, Collection<T> theNewParams) {
+		if (!myStorageSettings.isIndexStorageOptimized()) {
+			theNewParams.stream()
+					.filter(BaseResourceIndexedSearchParam.class::isInstance)
+					.map(BaseResourceIndexedSearchParam.class::cast)
+					.filter(paramToAdd -> paramToAdd.equals(theSearchParamToRecover))
+					.findFirst()
+					.ifPresent(newParam -> {
+						theSearchParamToRecover.restoreParamName(newParam.getParamName());
+						theSearchParamToRecover.setResourceType(newParam.getResourceType());
+					});
+		}
 	}
 
 	private boolean isSearchParameterUpdateRequired(BaseResourceIndexedSearchParam theSearchParameter) {

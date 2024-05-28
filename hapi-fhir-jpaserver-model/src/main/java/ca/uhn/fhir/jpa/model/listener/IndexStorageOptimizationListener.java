@@ -63,10 +63,6 @@ public class IndexStorageOptimizationListener {
 			BaseResourceIndexedSearchParam resourceIndexedSearchParam = (BaseResourceIndexedSearchParam) theEntity;
 			if (myStorageSettings.isIndexStorageOptimized()) {
 				resourceIndexedSearchParam.optimizeIndexStorage();
-			} else {
-				if (resourceIndexedSearchParam.isIndexStorageOptimized()) {
-					restoreSearchParams(resourceIndexedSearchParam);
-				}
 			}
 		}
 	}

@@ -22,6 +22,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.model.util.SearchParamHash;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
+import ca.uhn.fhir.jpa.reindex.ReindexStepTest;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.param.BaseParam;
@@ -44,6 +45,8 @@ import org.hl7.fhir.r4.model.RiskAssessment;
 import org.hl7.fhir.r4.model.Substance;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -309,5 +312,46 @@ public class FhirResourceDaoR4IndexStorageOptimizedTest extends BaseJpaR4Test {
 		Batch2JobStartResponse res = myJobCoordinator.startInstance(mySrd, startRequest);
 		ourLog.info("Started reindex job with id {}", res.getInstanceId());
 		myBatch2JobHelper.awaitJobCompletion(res);
+	}
+
+	// Additional existing tests with enabled IndexStorageOptimized
+	@Nested
+	public class IndexStorageOptimizedReindexStepTest extends ReindexStepTest {
+		@BeforeEach
+		void setUp() {
+			myStorageSettings.setIndexStorageOptimized(true);
+		}
+	}
+
+	@Nested
+	public class IndexStorageOptimizedPartitioningSqlR4Test extends PartitioningSqlR4Test {
+		@BeforeEach
+		void setUp() {
+			myStorageSettings.setIndexStorageOptimized(true);
+		}
+	}
+
+	@Nested
+	public class IndexStorageOptimizedFhirResourceDaoR4SearchMissingTest extends FhirResourceDaoR4SearchMissingTest {
+		@BeforeEach
+		void setUp() {
+			myStorageSettings.setIndexStorageOptimized(true);
+		}
+	}
+
+	@Nested
+	public class IndexStorageOptimizedFhirResourceDaoR4QueryCountTest extends FhirResourceDaoR4QueryCountTest {
+		@BeforeEach
+		void setUp() {
+			myStorageSettings.setIndexStorageOptimized(true);
+		}
+	}
+
+	@Nested
+	public class IndexStorageOptimizedFhirResourceDaoR4SearchNoFtTest extends FhirResourceDaoR4SearchNoFtTest {
+		@BeforeEach
+		void setUp() {
+			myStorageSettings.setIndexStorageOptimized(true);
+		}
 	}
 }

@@ -7193,6 +7193,15 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Nested
+	public class IndexStorageOptimizedMissingSearchParameterTests extends MissingSearchParameterTests {
+		@BeforeEach
+		public void init() {
+			super.init();
+			myStorageSettings.setIndexStorageOptimized(true);
+		}
+	}
+
+	@Nested
 	public class MissingSearchParameterTests {
 
 		private IParser myParser;
