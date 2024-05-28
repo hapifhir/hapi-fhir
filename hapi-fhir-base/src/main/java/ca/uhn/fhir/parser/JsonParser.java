@@ -1359,9 +1359,17 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 				String alternateName = keyIter.next();
 				if (alternateName.startsWith("_") && alternateName.length() > 1) {
 					BaseJsonLikeValue nextValue = theObject.get(alternateName);
+					String nextName = alternateName.substring(1);
+
 					if (nextValue != null) {
+						BaseJsonLikeValue nonAlternativeValue = theObject.get(nextName);
+
+						// Only alternate values with no corresponding "normal" value is unhandled from previous step.
+						if (nonAlternativeValue != null) {
+							continue;
+						}
+
 						if (nextValue.isObject()) {
-							String nextName = alternateName.substring(1);
 							if (theObject.get(nextName) == null) {
 								theState.enteringNewElement(null, nextName);
 								parseAlternates(nextValue, theState, alternateName, alternateName);
