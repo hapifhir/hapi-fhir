@@ -158,7 +158,7 @@ public class JsonParserDstu3Test {
 			fail();
 		} catch (DataFormatException e) {
 			assertEquals(Msg.code(1861) + "Failed to parse JSON encoded FHIR content: Unexpected character ('=' (code 61)): was expecting a colon to separate field name and value\n" +
-				" at [line: 4, column: 18]", e.getMessage());
+				" at [line: 4, column: 17]", e.getMessage());
 		}
 	}
 
@@ -2328,7 +2328,7 @@ public class JsonParserDstu3Test {
 			// I'm hoping at some point we can get rid of the REDACTED message entirely.
 			// Request filed with Jackson: https://github.com/FasterXML/jackson-core/issues/1158
 			assertEquals(Msg.code(1861) + "Failed to parse JSON encoded FHIR content: Unexpected close marker '}': expected ']' (for root starting at [line: 1])\n" +
-				" at [line: 4, column: 3]", e.getMessage());
+				" at [line: 4, column: 2]", e.getMessage());
 		}
 	}
 
