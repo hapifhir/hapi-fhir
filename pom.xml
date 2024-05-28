@@ -995,6 +995,7 @@
 		<maven_license_plugin_version>1.8</maven_license_plugin_version>
 		<okhttp_version>4.12.0</okhttp_version>
 		<otel.version>1.38.0</otel.version> <!-- BOM Version -->
+		<otel_instrumentation.version>2.4.0</otel_instrumentation.version>
 		<poi_version>4.1.2</poi_version>
 		<poi_ooxml_schemas_version>1.4</poi_ooxml_schemas_version>
 		<resteasy_version>6.2.9.Final</resteasy_version>
@@ -2293,7 +2294,7 @@
 			<dependency>
 				<groupId>io.opentelemetry.instrumentation</groupId>
 				<artifactId>opentelemetry-instrumentation-annotations</artifactId>
-				<version>${otel.version}</version>
+				<version>${otel_instrumentation.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
@@ -3276,4 +3277,3 @@
 		</profile>
 	</profiles>
 </project>
-
