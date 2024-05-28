@@ -464,6 +464,17 @@ public final class TerserUtil {
 		mergeFields(theTerser, theResource, childDefinition, theFromFieldValues, theToFieldValues);
 	}
 
+	/**
+	 * Sets the provided field with the given values. This method will add to the collection of existing field values
+	 * in case of multiple cardinality. Use {@link #clearField(FhirContext, IBaseResource, String)}
+	 * to remove values before setting
+	 *
+	 * @param theFhirContext Context holding resource definition
+	 * @param theFieldName   Child field name of the resource to set
+	 * @param theResource    The resource to set the values on
+	 * @param theValue       The String value to set on the resource child field name. This value is converted to the appropriate primitive type before the value is set
+	 */
+
 	public static void setStringField(
 			FhirContext theFhirContext, String theFieldName, IBaseResource theResource, String theValue) {
 		setField(theFhirContext, theFieldName, theResource, theFhirContext.newPrimitiveString(theValue));
@@ -497,6 +508,15 @@ public final class TerserUtil {
 			FhirContext theFhirContext, String theFhirPath, IBaseResource theResource, IBase theValue) {
 		setFieldByFhirPath(theFhirContext.newTerser(), theFhirPath, theResource, theValue);
 	}
+
+	/**
+	 * Sets the specified String value at the FHIR path provided.
+	 *
+	 * @param theFhirContext Context holding resource definition
+	 * @param theFhirPath    The FHIR path to set the field at
+	 * @param theResource    The resource on which the value should be set
+	 * @param theValue       The String value to set. The string is converted to the appropriate primitive type before setting the field
+	 */
 
 	public static void setStringFieldByFhirPath(
 			FhirContext theFhirContext, String theFhirPath, IBaseResource theResource, String theValue) {

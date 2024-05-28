@@ -15,6 +15,10 @@ import org.hl7.fhir.r4.model.Subscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Version independent utility class for setting fields on subscriptions
+ */
+
 public final class SubscriptionUtil {
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionUtil.class);
 
