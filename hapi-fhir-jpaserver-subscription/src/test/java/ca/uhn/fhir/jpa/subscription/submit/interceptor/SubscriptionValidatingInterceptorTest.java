@@ -44,6 +44,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -95,8 +96,8 @@ public class SubscriptionValidatingInterceptorTest {
 			mySubscriptionValidatingInterceptor.resourcePreCreate(theSubscription, null, null);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), startsWith(Msg.code(11) + "Subscription."));
-			assertThat(e.getMessage(), endsWith( " must be populated"));
+			assertThat(e.getMessage()).startsWith(Msg.code(11) + "Subscription.");
+			assertThat(e.getMessage()).endsWith( " must be populated");
 		}
 	}
 
@@ -109,7 +110,7 @@ public class SubscriptionValidatingInterceptorTest {
 			mySubscriptionValidatingInterceptor.resourcePreCreate(theSubscription, null, null);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), endsWith("criteria must be in the form \"{Resource Type}?[params]\""));
+			assertThat(e.getMessage()).endsWith("criteria must be in the form \"{Resource Type}?[params]\"");
 		}
 	}
 
@@ -230,7 +231,7 @@ public class SubscriptionValidatingInterceptorTest {
 		if (myFhirContext.getVersion().getVersion() == FhirVersionEnum.R5) {
 			initR5();
 			org.hl7.fhir.r5.model.Subscription subscription = (org.hl7.fhir.r5.model.Subscription) theSubscription;
-			subscription.setTopic(TEST_TOPIC);
+			subscription.setTopic(TEST_SUBSCRIPTION_TOPIC_URL);
 		}
 	}
 

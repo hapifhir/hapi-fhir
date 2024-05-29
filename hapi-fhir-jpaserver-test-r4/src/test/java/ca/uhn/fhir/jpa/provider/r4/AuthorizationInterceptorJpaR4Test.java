@@ -863,7 +863,6 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 			assertEquals(201, response.getStatusLine().getStatusCode());
 			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
 			assertThat(newIdString).startsWith(myServerBase + "/Patient/");
-			id2 = new IdType(newIdString);
 		} finally {
 			response.close();
 		}

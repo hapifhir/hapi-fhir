@@ -70,6 +70,7 @@ import java.util.concurrent.TimeUnit;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 
@@ -1205,7 +1206,7 @@ public class JsonParserR4Test extends BaseTest {
 			"        }\n" +
 			"    ]\n" +
 			"}\n";
-		Practitioner practitioner = assertDoesNotThrow(() -> ourCtx.newJsonParser().parseResource(Practitioner.class, resource));
+		Practitioner practitioner = ourCtx.newJsonParser().parseResource(Practitioner.class, resource);
 		HumanName humanName = practitioner.getNameFirstRep();
 		StringType given = humanName.getGiven().get(0);
 		assertTrue(given.getExtension().stream().allMatch(ext -> DataAbsentReason.MASKED.toCode().equals(ext.getValue().primitiveValue())));

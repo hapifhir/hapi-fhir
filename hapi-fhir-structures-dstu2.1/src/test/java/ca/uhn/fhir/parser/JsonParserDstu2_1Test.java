@@ -1911,7 +1911,7 @@ public class JsonParserDstu2_1Test {
 			"        }\n" +
 			"    ]\n" +
 			"}\n";
-		Practitioner practitioner = assertDoesNotThrow(() -> ourCtx.newJsonParser().parseResource(Practitioner.class, resource));
+		Practitioner practitioner = ourCtx.newJsonParser().parseResource(Practitioner.class, resource);
 		HumanName humanName = practitioner.getName().get(0);
 		StringType given = humanName.getGiven().get(0);
 		assertTrue(given.getExtension().stream().allMatch(ext -> DataAbsentReason.MASKED.toCode().equals(ext.getValue().primitiveValue())));
