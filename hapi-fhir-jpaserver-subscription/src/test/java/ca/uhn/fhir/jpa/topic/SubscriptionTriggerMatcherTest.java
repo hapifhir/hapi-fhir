@@ -251,7 +251,7 @@ class SubscriptionTriggerMatcherTest {
 	}
 
 	@Test
-	public void testUpdateWithPrevCriteriaMatchAndValidFhirPathCriteriaUsingPreviousVersion() {
+	public void testUpdateWithPrevCriteriaMatchAndFhirPathCriteriaUsingPreviousVersion() {
 		myEncounter.setStatus(Enumerations.EncounterStatus.INPROGRESS);
 		ResourceModifiedMessage msg = new ResourceModifiedMessage(ourFhirContext, myEncounter, ResourceModifiedMessage.OperationTypeEnum.UPDATE);
 
@@ -260,7 +260,7 @@ class SubscriptionTriggerMatcherTest {
 		trigger.setResource("Encounter");
 		trigger.addSupportedInteraction(SubscriptionTopic.InteractionTrigger.UPDATE);
 		trigger.getQueryCriteria().setPrevious("Encounter?status=in-progress");
-		trigger.setFhirPathCriteria("%current.status.exists() and %previous.status.exists().not()");
+		trigger.setFhirPathCriteria("%current.status='in-progress' and %previous.status.exists().not()");
 
 
 		IFhirResourceDao mockEncounterDao = mock(IFhirResourceDao.class);
@@ -268,6 +268,31 @@ class SubscriptionTriggerMatcherTest {
 		Encounter encounterPreviousVersion = new Encounter();
 		when(mockEncounterDao.read(any(), any(), eq(false))).thenReturn(encounterPreviousVersion);
 		when(mySearchParamMatcher.match(any(), any(), any())).thenReturn(InMemoryMatchResult.successfulMatch());
+
+		// run
+		SubscriptionTriggerMatcher svc = new SubscriptionTriggerMatcher(mySubscriptionTopicSupport, msg, trigger);
+		InMemoryMatchResult result = svc.match();
+
+		// verify
+		assertTrue(result.matched());
+	}
+
+	@Test
+	public void testUpdateOnlyFhirPathCriteriaUsingPreviousVersion() {
+		myEncounter.setStatus(Enumerations.EncounterStatus.INPROGRESS);
+		ResourceModifiedMessage msg = new ResourceModifiedMessage(ourFhirContext, myEncounter, ResourceModifiedMessage.OperationTypeEnum.UPDATE);
+
+		// setup
+		SubscriptionTopic.SubscriptionTopicResourceTriggerComponent trigger = new SubscriptionTopic.SubscriptionTopicResourceTriggerComponent();
+		trigger.setResource("Encounter");
+		trigger.addSupportedInteraction(SubscriptionTopic.InteractionTrigger.UPDATE);
+		trigger.setFhirPathCriteria("%current.status='in-progress' and %previous.status.exists().not()");
+
+
+		IFhirResourceDao mockEncounterDao = mock(IFhirResourceDao.class);
+		when(myDaoRegistry.getResourceDao("Encounter")).thenReturn(mockEncounterDao);
+		Encounter encounterPreviousVersion = new Encounter();
+		when(mockEncounterDao.read(any(), any(), eq(false))).thenReturn(encounterPreviousVersion);
 
 		// run
 		SubscriptionTriggerMatcher svc = new SubscriptionTriggerMatcher(mySubscriptionTopicSupport, msg, trigger);
