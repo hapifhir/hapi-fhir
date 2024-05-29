@@ -59,6 +59,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -192,20 +194,27 @@ public class SubscriptionValidatingInterceptor {
 			if (myFhirContext.getVersion().getVersion() == FhirVersionEnum.R4) {
 				// This is an R4 backport topic subscription
 				Subscription r4Subscription = (Subscription) theSubscription;
-				String filterUrl = null;
-				Extension filterUrlExtension = r4Subscription
-						.getCriteriaElement()
-						.getExtensionByUrl(SubscriptionConstants.SUBSCRIPTION_TOPIC_FILTER_URL);
-				if (filterUrlExtension != null) {
+				List<String> filterUrls = new ArrayList<>();
+				List<Extension> filterUrlExtensions = r4Subscription
+					.getCriteriaElement()
+					.getExtensionsByUrl(SubscriptionConstants.SUBSCRIPTION_TOPIC_FILTER_URL);
+				filterUrlExtensions.forEach(filterUrlExtension -> {
 					StringType filterUrlElement = (StringType) filterUrlExtension.getValue();
 					if (filterUrlElement != null) {
-						filterUrl = filterUrlElement.getValue();
+						filterUrls.add(filterUrlElement.getValue());
 					}
+				});
+				if (filterUrls.isEmpty()) {
+					// Trigger a "no criteria" validation exception
+					validateQuery(null, "Subscription.criteria.extension with url "
+						+ SubscriptionConstants.SUBSCRIPTION_TOPIC_FILTER_URL);
+				} else {
+					filterUrls.forEach(filterUrl ->
+						validateQuery(
+							filterUrl,
+							"Subscription.criteria.extension with url "
+								+ SubscriptionConstants.SUBSCRIPTION_TOPIC_FILTER_URL));
 				}
-				validateQuery(
-						filterUrl,
-						"Subscription.criteria.extension with url "
-								+ SubscriptionConstants.SUBSCRIPTION_TOPIC_FILTER_URL);
 			} else { // In R4 topic subscriptions exist without a corresponidng SubscriptionTopic
 				// resource
 				Optional<IBaseResource> oTopic = findSubscriptionTopicByUrl(theCanonicalSubscription.getTopic());
