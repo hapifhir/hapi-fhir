@@ -261,6 +261,7 @@ public class PatientIdPartitionInterceptor {
 	@SuppressWarnings("unused")
 	@Nonnull
 	protected RequestPartitionId provideNonCompartmentMemberTypeResponse(IBaseResource theResource) {
+//		return RequestPartitionId.defaultPartition();
 		return RequestPartitionId.fromPartitionId(myPartitionSettings.getDefaultPartitionId());
 	}
 }
