@@ -192,40 +192,49 @@ public class SubscriptionValidatingInterceptor {
 	private void validateCriteria(IBaseResource theSubscription, CanonicalSubscription theCanonicalSubscription) {
 		if (theCanonicalSubscription.isTopicSubscription()) {
 			if (myFhirContext.getVersion().getVersion() == FhirVersionEnum.R4) {
-				// This is an R4 backport topic subscription
-				Subscription r4Subscription = (Subscription) theSubscription;
-				List<String> filterUrls = new ArrayList<>();
-				List<Extension> filterUrlExtensions = r4Subscription
-						.getCriteriaElement()
-						.getExtensionsByUrl(SubscriptionConstants.SUBSCRIPTION_TOPIC_FILTER_URL);
-				filterUrlExtensions.forEach(filterUrlExtension -> {
-					StringType filterUrlElement = (StringType) filterUrlExtension.getValue();
-					if (filterUrlElement != null) {
-						filterUrls.add(filterUrlElement.getValue());
-					}
-				});
-				if (filterUrls.isEmpty()) {
-					// Trigger a "no criteria" validation exception
-					validateQuery(
-							null,
-							"Subscription.criteria.extension with url "
-									+ SubscriptionConstants.SUBSCRIPTION_TOPIC_FILTER_URL);
-				} else {
-					filterUrls.forEach(filterUrl -> validateQuery(
-							filterUrl,
-							"Subscription.criteria.extension with url "
-									+ SubscriptionConstants.SUBSCRIPTION_TOPIC_FILTER_URL));
-				}
-			} else { // In R4 topic subscriptions exist without a corresponidng SubscriptionTopic
+				validateR4BackportSubscription((Subscription) theSubscription);
+			} else {
 				// resource
-				Optional<IBaseResource> oTopic = findSubscriptionTopicByUrl(theCanonicalSubscription.getTopic());
-				if (!oTopic.isPresent()) {
-					throw new UnprocessableEntityException(Msg.code(2322) + "No SubscriptionTopic exists with topic: "
-							+ theCanonicalSubscription.getTopic());
-				}
+				validateR5PlusTopicSubscription(theCanonicalSubscription);
 			}
 		} else {
 			validateQuery(theCanonicalSubscription.getCriteriaString(), "Subscription.criteria");
+		}
+	}
+
+	private void validateR5PlusTopicSubscription(CanonicalSubscription theCanonicalSubscription) {
+		Optional<IBaseResource> oTopic = findSubscriptionTopicByUrl(theCanonicalSubscription.getTopic());
+		if (!oTopic.isPresent()) {
+			throw new UnprocessableEntityException(Msg.code(2322) + "No SubscriptionTopic exists with topic: "
+					+ theCanonicalSubscription.getTopic());
+		}
+	}
+
+	private void validateR4BackportSubscription(Subscription theSubscription) {
+		// This is an R4 backport topic subscription
+		// In R4, topic subscriptions exist without a corresponding SubscriptionTopic
+		Subscription r4Subscription = theSubscription;
+		List<String> filterUrls = new ArrayList<>();
+		List<Extension> filterUrlExtensions = r4Subscription
+				.getCriteriaElement()
+				.getExtensionsByUrl(SubscriptionConstants.SUBSCRIPTION_TOPIC_FILTER_URL);
+		filterUrlExtensions.forEach(filterUrlExtension -> {
+			StringType filterUrlElement = (StringType) filterUrlExtension.getValue();
+			if (filterUrlElement != null) {
+				filterUrls.add(filterUrlElement.getValue());
+			}
+		});
+		if (filterUrls.isEmpty()) {
+			// Trigger a "no criteria" validation exception
+			validateQuery(
+					null,
+					"Subscription.criteria.extension with url "
+							+ SubscriptionConstants.SUBSCRIPTION_TOPIC_FILTER_URL);
+		} else {
+			filterUrls.forEach(filterUrl -> validateQuery(
+					filterUrl,
+					"Subscription.criteria.extension with url "
+							+ SubscriptionConstants.SUBSCRIPTION_TOPIC_FILTER_URL));
 		}
 	}
 
