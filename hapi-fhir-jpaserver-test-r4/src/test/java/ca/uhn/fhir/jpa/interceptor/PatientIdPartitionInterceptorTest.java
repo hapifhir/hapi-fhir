@@ -33,6 +33,7 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
@@ -41,6 +42,7 @@ import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.SearchParameter;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -57,6 +59,7 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.either;
 import static org.hamcrest.Matchers.matchesPattern;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -122,6 +125,17 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 			assertEquals("polygenelubricants", pt.getIdDt().getIdPart());
 			assertEquals(8648, pt.getPartitionId().getPartitionId());
 		});
+	}
+
+	@Test
+	public void testCreateSearchParameter_defaultPartition() {
+		SearchParameter resource = new SearchParameter();
+		resource.setId("new-sp");
+		resource.setExpression("active");
+		resource.getBase().add(new CodeType("Patient"));
+		resource.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		DaoMethodOutcome outcome =
+			assertDoesNotThrow(()->mySearchParameterDao.update(resource, mySrd));
 	}
 
 	@Test

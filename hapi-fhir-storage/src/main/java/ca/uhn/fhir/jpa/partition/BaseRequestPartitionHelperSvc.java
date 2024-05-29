@@ -344,9 +344,10 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 
 		// Make sure we're not using one of the conformance resources in a non-default partition
 		if ((theRequestPartitionId.hasPartitionIds()
-						&& !theRequestPartitionId.getPartitionIds().contains(null))
-				|| (theRequestPartitionId.hasPartitionNames()
-						&& !theRequestPartitionId.getPartitionNames().contains(JpaConstants.DEFAULT_PARTITION_NAME))) {
+			&& !theRequestPartitionId.isDefaultPartition()
+			&& !theRequestPartitionId.getPartitionIds().contains(myPartitionSettings.getDefaultPartitionId()))
+			|| (theRequestPartitionId.hasPartitionNames()
+			&& !theRequestPartitionId.getPartitionNames().contains(JpaConstants.DEFAULT_PARTITION_NAME))) {
 
 			if (!isResourcePartitionable(theResourceName)) {
 				String msg = myFhirContext
