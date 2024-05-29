@@ -226,10 +226,10 @@ public class ParserOptions {
 	 * @see IParser#setEncodeElements(Set) Can be used to specify these values for an individual parser instance.
 	 * @since 7.4.0
 	 */
-	@SuppressWarnings({"UnusedReturnValue", "unchecked"})
+	@SuppressWarnings({"UnusedReturnValue"})
 	@Nonnull
 	public ParserOptions setEncodeElementsForSummaryMode(@Nonnull String... theEncodeElements) {
-		return setEncodeElementsForSummaryMode((Collection<String>) Collections.singleton(theEncodeElements));
+		return setEncodeElementsForSummaryMode(Arrays.asList(theEncodeElements));
 	}
 
 	/**
@@ -284,10 +284,10 @@ public class ParserOptions {
 	 * @see IParser#setDontEncodeElements(Collection) Can be used to specify these values for an individual parser instance.
 	 * @since 7.4.0
 	 */
-	@SuppressWarnings({"UnusedReturnValue", "unchecked"})
+	@SuppressWarnings({"UnusedReturnValue"})
 	@Nonnull
 	public ParserOptions setDontEncodeElementsForSummaryMode(@Nonnull String... theEncodeElements) {
-		return setDontEncodeElementsForSummaryMode((Collection<String>) Collections.singleton(theEncodeElements));
+		return setDontEncodeElementsForSummaryMode(Arrays.asList(theEncodeElements));
 	}
 
 	/**

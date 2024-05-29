@@ -35,8 +35,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.io.Writer;
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -109,6 +110,7 @@ public interface IParser {
 	/**
 	 * When encoding, force this resource ID to be encoded as the resource ID
 	 */
+	@SuppressWarnings("UnusedReturnValue")
 	IParser setEncodeForceResourceId(IIdType theForceResourceId);
 
 	/**
@@ -158,7 +160,7 @@ public interface IParser {
 	 * ID will not have an ID.
 	 * <p>
 	 * If the resource being encoded is a Bundle or Parameters resource, this setting only applies to the
-	 * outer resource being encoded, not any resources contained wihthin.
+	 * outer resource being encoded, not any resources contained within.
 	 * </p>
 	 *
 	 * @param theOmitResourceId Should resource IDs be omitted
@@ -175,7 +177,7 @@ public interface IParser {
 	 * links. In that case, this value should be set to <code>false</code>.
 	 *
 	 * @return Returns the parser instance's configuration setting for stripping versions from resource references when
-	 * encoding. This method will retun <code>null</code> if no value is set, in which case
+	 * encoding. This method will return <code>null</code> if no value is set, in which case
 	 * the value from the {@link ParserOptions} will be used (default is <code>true</code>)
 	 * @see ParserOptions
 	 */
@@ -312,7 +314,7 @@ public interface IParser {
 	 * </p>
 	 * <p>
 	 * DSTU2 note: Note that values including meta, such as <code>Patient.meta</code>
-	 * will work for DSTU2 parsers, but values with subelements on meta such
+	 * will work for DSTU2 parsers, but values with sub-elements on meta such
 	 * as <code>Patient.meta.lastUpdated</code> will only work in
 	 * DSTU3+ mode.
 	 * </p>
@@ -335,7 +337,7 @@ public interface IParser {
 	 * </ul>
 	 * <p>
 	 * DSTU2 note: Note that values including meta, such as <code>Patient.meta</code>
-	 * will work for DSTU2 parsers, but values with subelements on meta such
+	 * will work for DSTU2 parsers, but values with sub-elements on meta such
 	 * as <code>Patient.meta.lastUpdated</code> will only work in
 	 * DSTU3+ mode.
 	 * </p>
@@ -345,9 +347,8 @@ public interface IParser {
 	 * @see ParserOptions#setDontEncodeElementsForSummaryMode(Collection)
 	 * @since 7.4.0
 	 */
-	@SuppressWarnings("unchecked")
 	default IParser setDontEncodeElements(@Nonnull String... theDontEncodeElements) {
-		return setDontEncodeElements((Collection<String>) Collections.singleton(theDontEncodeElements));
+		return setDontEncodeElements(Arrays.asList(theDontEncodeElements));
 	}
 
 	/**
@@ -396,9 +397,8 @@ public interface IParser {
 	 * @see #setEncodeElements(Set)
 	 * @see ParserOptions#setEncodeElementsForSummaryMode(String...)
 	 */
-	@SuppressWarnings("unchecked")
 	default IParser setEncodeElements(@Nonnull String... theEncodeElements) {
-		return setEncodeElements((Set<String>) Collections.singleton(theEncodeElements));
+		return setEncodeElements(new HashSet<>(Arrays.asList(theEncodeElements)));
 	}
 
 	/**
@@ -464,7 +464,7 @@ public interface IParser {
 	/**
 	 * Returns the value supplied to {@link IParser#setDontStripVersionsFromReferencesAtPaths(String...)}
 	 * or <code>null</code> if no value has been set for this parser (in which case the default from
-	 * the {@link ParserOptions} will be used}
+	 * the {@link ParserOptions} will be used).
 	 *
 	 * @see #setDontStripVersionsFromReferencesAtPaths(String...)
 	 * @see #setStripVersionsFromReferences(Boolean)
