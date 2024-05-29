@@ -7,6 +7,7 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyEvaluator;
@@ -288,6 +289,11 @@ public class SubscriptionValidatingInterceptorTest {
 		@Bean
 		SubscriptionValidatingInterceptor subscriptionValidatingInterceptor() {
 			return new SubscriptionValidatingInterceptor();
+		}
+
+		@Bean
+		SubscriptionCanonicalizer subscriptionCanonicalizer(FhirContext theFhirContext) {
+			return new SubscriptionCanonicalizer(theFhirContext, new StorageSettings());
 		}
 
 		@Bean
