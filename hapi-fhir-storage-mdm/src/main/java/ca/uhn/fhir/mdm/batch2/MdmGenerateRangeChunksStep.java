@@ -25,7 +25,7 @@ import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
-import ca.uhn.fhir.batch2.util.Batch2Constants;
+import ca.uhn.fhir.batch2.util.Batch2Utils;
 import ca.uhn.fhir.mdm.batch2.clear.MdmClearJobParameters;
 import jakarta.annotation.Nonnull;
 import org.slf4j.Logger;
@@ -44,7 +44,7 @@ public class MdmGenerateRangeChunksStep implements IFirstJobStepWorker<MdmClearJ
 			throws JobExecutionFailedException {
 		MdmClearJobParameters params = theStepExecutionDetails.getParameters();
 
-		Date start = Batch2Constants.BATCH_START_DATE;
+		Date start = Batch2Utils.BATCH_START_DATE;
 		Date end = new Date();
 
 		for (String nextResourceType : params.getResourceNames()) {

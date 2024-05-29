@@ -80,11 +80,10 @@ public class AuthorizationInterceptor implements IRuleApplier {
 
 	public static final String REQUEST_ATTRIBUTE_BULK_DATA_EXPORT_OPTIONS =
 			AuthorizationInterceptor.class.getName() + "_BulkDataExportOptions";
-	public static final String BUNDLE = "Bundle";
 	private static final AtomicInteger ourInstanceCount = new AtomicInteger(0);
 	private static final Logger ourLog = LoggerFactory.getLogger(AuthorizationInterceptor.class);
 	private static final Set<BundleTypeEnum> STANDALONE_BUNDLE_RESOURCE_TYPES =
-			Set.of(BundleTypeEnum.DOCUMENT, BundleTypeEnum.COLLECTION, BundleTypeEnum.MESSAGE);
+			Set.of(BundleTypeEnum.DOCUMENT, BundleTypeEnum.MESSAGE);
 
 	private final int myInstanceIndex = ourInstanceCount.incrementAndGet();
 	private final String myRequestSeenResourcesKey =
@@ -578,7 +577,7 @@ public class AuthorizationInterceptor implements IRuleApplier {
 		OUT,
 	}
 
-	public static List<IBaseResource> toListOfResourcesAndExcludeContainer(
+	protected static List<IBaseResource> toListOfResourcesAndExcludeContainer(
 			IBaseResource theResponseObject, FhirContext fhirContext) {
 		if (theResponseObject == null) {
 			return Collections.emptyList();
@@ -586,7 +585,7 @@ public class AuthorizationInterceptor implements IRuleApplier {
 
 		List<IBaseResource> retVal;
 
-		boolean shouldExamineChildResources = shouldExamineChildResources(fhirContext, theResponseObject);
+		boolean shouldExamineChildResources = shouldExamineChildResources(theResponseObject, fhirContext);
 		if (!shouldExamineChildResources) {
 			return Collections.singletonList(theResponseObject);
 		}
@@ -610,7 +609,7 @@ public class AuthorizationInterceptor implements IRuleApplier {
 	 * For Parameters resources, we include child resources when checking the permissions.
 	 * For Bundle resources, we only look at resources inside if the Bundle is of type document, collection, or message.
 	 */
-	public static boolean shouldExamineChildResources(FhirContext theFhirContext, IBaseResource theResource) {
+	protected static boolean shouldExamineChildResources(IBaseResource theResource, FhirContext theFhirContext) {
 		if (theResource instanceof IBaseParameters) {
 			return true;
 		}

@@ -9,7 +9,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>7.3.2-SNAPSHOT</version>
+	<version>7.3.3-SNAPSHOT</version>
 
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
@@ -916,6 +916,11 @@
 		<developer>
 			<id>subigre</id>
 			<name>Renaud Subiger</name>
+		</developer>
+		<developer>
+			<id>stefan-lindstrom</id>
+			<name>Stefan Lindström</name>
+			<organization>Softhouse AB</organization>
 		</developer>
 	</developers>
 

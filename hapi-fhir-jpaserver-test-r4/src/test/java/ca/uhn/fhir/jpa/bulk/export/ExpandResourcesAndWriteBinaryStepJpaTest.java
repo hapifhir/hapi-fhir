@@ -9,6 +9,7 @@ import ca.uhn.fhir.batch2.jobs.export.models.ExpandedResourcesList;
 import ca.uhn.fhir.batch2.jobs.export.models.ResourceIdList;
 import ca.uhn.fhir.batch2.jobs.models.BatchResourceId;
 import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
@@ -89,7 +90,7 @@ public class ExpandResourcesAndWriteBinaryStepJpaTest extends BaseJpaR4Test {
 		JobInstance jobInstance = new JobInstance();
 		String chunkId = "ABC";
 
-		StepExecutionDetails<BulkExportJobParameters, ResourceIdList> details = new StepExecutionDetails<>(params, resourceList, jobInstance, chunkId);
+		StepExecutionDetails<BulkExportJobParameters, ResourceIdList> details = new StepExecutionDetails<>(params, resourceList, jobInstance, new WorkChunk().setId(chunkId));
 
 		// Test
 
@@ -146,10 +147,9 @@ public class ExpandResourcesAndWriteBinaryStepJpaTest extends BaseJpaR4Test {
 		JobInstance jobInstance = new JobInstance();
 		String chunkId = "ABC";
 
-		StepExecutionDetails<BulkExportJobParameters, ResourceIdList> details = new StepExecutionDetails<>(params, resourceList, jobInstance, chunkId);
+		StepExecutionDetails<BulkExportJobParameters, ResourceIdList> details = new StepExecutionDetails<>(params, resourceList, jobInstance, new WorkChunk().setId(chunkId));
 
 		// Test
-
 		myExpandResourcesStep.run(details, mySink);
 
 		// Verify
