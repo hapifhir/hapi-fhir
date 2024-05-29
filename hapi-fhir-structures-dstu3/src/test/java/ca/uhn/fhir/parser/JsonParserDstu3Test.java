@@ -63,6 +63,7 @@ import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.Practitioner;
 import org.hl7.fhir.dstu3.model.PrimitiveType;
 import org.hl7.fhir.dstu3.model.Quantity;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
@@ -74,6 +75,7 @@ import org.hl7.fhir.dstu3.model.SimpleQuantity;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.dstu3.model.ValueSet;
+import org.hl7.fhir.dstu3.model.codesystems.DataAbsentReason;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -101,6 +103,7 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -2547,6 +2550,41 @@ public class JsonParserDstu3Test {
 		final String patientString = ourCtx.newJsonParser().encodeResourceToString(patient);
 		assertThat(patientString, is(not(containsString("fhir_comment"))));
 	}
+
+		@Test
+	public void testObjectWithBothPrimitiverAndArrayAlternatives() {
+		String resource = "{\n" +
+			"    \"resourceType\": \"Practitioner\",\n" +
+			"    \"id\": \"1\",\n" +
+			"    \"name\": [{\n" +
+			"            \"_family\": {\n" +
+			"                \"extension\": [{\n" +
+			"                        \"url\": \"http://hl7.org/fhir/StructureDefinition/data-absent-reason\",\n" +
+			"                        \"valueString\": \"masked\"\n" +
+			"                    }\n" +
+			"                ]\n" +
+			"            },\n" +
+			"            \"given\": [\n" +
+			"                null\n" +
+			"            ],\n" +
+			"            \"_given\": [{\n" +
+			"                    \"extension\": [{\n" +
+			"                            \"url\": \"http://hl7.org/fhir/StructureDefinition/data-absent-reason\",\n" +
+			"                            \"valueString\": \"masked\"\n" +
+			"                        }\n" +
+			"                    ]\n" +
+			"                }\n" +
+			"            ]\n" +
+			"        }\n" +
+			"    ]\n" +
+			"}\n";
+		Practitioner practitioner = assertDoesNotThrow(() -> ourCtx.newJsonParser().parseResource(Practitioner.class, resource));
+		HumanName humanName = practitioner.getName().get(0);
+		StringType given = humanName.getGiven().get(0);
+		assertTrue(given.getExtension().stream().allMatch(ext -> DataAbsentReason.MASKED.toCode().equals(ext.getValue().primitiveValue())));
+		assertTrue(humanName.getFamilyElement().getExtension().stream().allMatch(ext -> DataAbsentReason.MASKED.toCode().equals(ext.getValue().primitiveValue())));
+	}
+
 
 	@AfterAll
 	public static void afterClassClearContext() {
