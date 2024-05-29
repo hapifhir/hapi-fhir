@@ -225,6 +225,47 @@ class SubscriptionTriggerMatcherTest {
 	}
 
 	@Test
+	public void testValidFhirPathCriteriaEvaluationReturningNonBoolean() {
+		ResourceModifiedMessage msg = new ResourceModifiedMessage(ourFhirContext, myEncounter, ResourceModifiedMessage.OperationTypeEnum.UPDATE);
+
+		// setup
+		SubscriptionTopic.SubscriptionTopicResourceTriggerComponent trigger = new SubscriptionTopic.SubscriptionTopicResourceTriggerComponent();
+		trigger.setResource("Encounter");
+		trigger.addSupportedInteraction(SubscriptionTopic.InteractionTrigger.UPDATE);
+		trigger.setFhirPathCriteria("%current.id");
+
+		// run
+		SubscriptionTriggerMatcher svc = new SubscriptionTriggerMatcher(mySubscriptionTopicSupport, msg, trigger);
+		InMemoryMatchResult result = svc.match();
+
+		// verify
+		assertFalse(result.matched());
+	}
+
+	@Test
+	public void testValidFhirPathReturningCollection() {
+		ResourceModifiedMessage msg = new ResourceModifiedMessage(ourFhirContext, myEncounter, ResourceModifiedMessage.OperationTypeEnum.UPDATE);
+
+		// setup
+		SubscriptionTopic.SubscriptionTopicResourceTriggerComponent trigger = new SubscriptionTopic.SubscriptionTopicResourceTriggerComponent();
+		trigger.setResource("Encounter");
+		trigger.addSupportedInteraction(SubscriptionTopic.InteractionTrigger.UPDATE);
+		trigger.setFhirPathCriteria("%current | %previous");
+
+		IFhirResourceDao mockEncounterDao = mock(IFhirResourceDao.class);
+		when(myDaoRegistry.getResourceDao("Encounter")).thenReturn(mockEncounterDao);
+		Encounter encounterPreviousVersion = new Encounter();
+		when(mockEncounterDao.read(any(), any(), eq(false))).thenReturn(encounterPreviousVersion);
+
+		// run
+		SubscriptionTriggerMatcher svc = new SubscriptionTriggerMatcher(mySubscriptionTopicSupport, msg, trigger);
+		InMemoryMatchResult result = svc.match();
+
+		// verify
+		assertFalse(result.matched());
+	}
+
+	@Test
 	public void testUpdateWithPrevCriteriaMatchAndFailingFhirPathCriteria() {
 		ResourceModifiedMessage msg = new ResourceModifiedMessage(ourFhirContext, myEncounter, ResourceModifiedMessage.OperationTypeEnum.UPDATE);
 
