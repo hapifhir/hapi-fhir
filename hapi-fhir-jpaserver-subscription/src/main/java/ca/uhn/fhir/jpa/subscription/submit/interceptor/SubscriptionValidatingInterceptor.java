@@ -196,8 +196,8 @@ public class SubscriptionValidatingInterceptor {
 				Subscription r4Subscription = (Subscription) theSubscription;
 				List<String> filterUrls = new ArrayList<>();
 				List<Extension> filterUrlExtensions = r4Subscription
-					.getCriteriaElement()
-					.getExtensionsByUrl(SubscriptionConstants.SUBSCRIPTION_TOPIC_FILTER_URL);
+						.getCriteriaElement()
+						.getExtensionsByUrl(SubscriptionConstants.SUBSCRIPTION_TOPIC_FILTER_URL);
 				filterUrlExtensions.forEach(filterUrlExtension -> {
 					StringType filterUrlElement = (StringType) filterUrlExtension.getValue();
 					if (filterUrlElement != null) {
@@ -206,14 +206,15 @@ public class SubscriptionValidatingInterceptor {
 				});
 				if (filterUrls.isEmpty()) {
 					// Trigger a "no criteria" validation exception
-					validateQuery(null, "Subscription.criteria.extension with url "
-						+ SubscriptionConstants.SUBSCRIPTION_TOPIC_FILTER_URL);
+					validateQuery(
+							null,
+							"Subscription.criteria.extension with url "
+									+ SubscriptionConstants.SUBSCRIPTION_TOPIC_FILTER_URL);
 				} else {
-					filterUrls.forEach(filterUrl ->
-						validateQuery(
+					filterUrls.forEach(filterUrl -> validateQuery(
 							filterUrl,
 							"Subscription.criteria.extension with url "
-								+ SubscriptionConstants.SUBSCRIPTION_TOPIC_FILTER_URL));
+									+ SubscriptionConstants.SUBSCRIPTION_TOPIC_FILTER_URL));
 				}
 			} else { // In R4 topic subscriptions exist without a corresponidng SubscriptionTopic
 				// resource
