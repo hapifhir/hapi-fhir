@@ -8,7 +8,10 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.entity.PartitionEntity;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
@@ -16,6 +19,8 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
@@ -24,9 +29,11 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.rest.server.interceptor.partition.RequestTenantPartitionInterceptor;
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.HapiExtensions;
 import org.hamcrest.Matchers;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Appointment;
 import org.hl7.fhir.r4.model.Appointment.AppointmentStatus;
@@ -50,6 +57,7 @@ import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.MedicationRequest;
 import org.hl7.fhir.r4.model.MessageHeader;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.PractitionerRole;
@@ -84,6 +92,7 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
@@ -351,6 +360,100 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		IBundleProvider results = myBundleDao.search(map);
 		assertThat(toUnqualifiedVersionlessIdValues(results), hasItems(bundleId));
 
+	}
+
+	@Test
+	public void  testBundleComposition_multipleSearchParameters() {
+
+		myPartitionSettings.setPartitioningEnabled(true);
+		myPartitionSettings.setAllowReferencesAcrossPartitions(PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
+
+		RequestTenantPartitionInterceptor interceptor = new RequestTenantPartitionInterceptor();
+		myInterceptorRegistry.registerInterceptor(interceptor);
+
+		createBundleSearchParameter("Bundle-composition-patient-identifier", "composition.patient.identifier", "Bundle.entry.resource.ofType(Patient).identifier");
+		createBundleSearchParameter("Bundle-composition-custodian-identifier", "composition.custodian.identifier", "Bundle.entry[0].resource.as(Composition).custodian.resolve().as(Organization).identifier");
+		createBundleSearchParameter("Bundle-composition-device-identifier", "composition.device.identifier", "Bundle.entry[0].resource.as(Composition).author.resolve().as(Device).identifier");
+		createBundleSearchParameter("Bundle-composition-type", "composition.type", "Bundle.entry[0].resource.as(Composition).type");
+
+		RequestDetails requestDetails = new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.allPartitions());
+
+		String uniquenessSPString =  ClasspathUtil.loadResource("/r4/bundle-composition-custodian-patient-identifier.json");
+		SearchParameter uniquenessSP = (SearchParameter)myFhirContext.newJsonParser().parseResource(uniquenessSPString);
+		IBaseResource uniquenessResource = mySearchParameterDao.create(uniquenessSP, requestDetails).getResource();
+		assertNotNull(uniquenessResource);
+
+		Patient patient = new Patient().setActive(true);
+		patient.addName().setFamily("Simpson");
+		patient.addIdentifier().setSystem("http://foo").setValue("foo-patient");
+		patient.setId("urn:uuid:d0b8f7f3-a0ce-41d7-a1b2-4154ed00fcf5");
+
+		Organization organization = new Organization();
+		organization.setName("org");
+		organization.setId("urn:uuid:01f9bcaa-4c72-4c23-8c2f-bf0fe3519fde");
+		organization.addIdentifier().setSystem("http://foo").setValue("foo-organization");
+
+		Composition composition = new Composition();
+		composition.getSubject().setReference(patient.getId());
+		composition.getType().getCodingFirstRep().setSystem("http://loinc.org").setCode("60591-5");
+
+		Bundle bundle = new Bundle();
+		bundle.setType(Bundle.BundleType.DOCUMENT);
+		bundle.addEntry().setResource(composition);
+		bundle.addEntry().setResource(patient);
+		bundle.setId("Example-Bundle-01");
+
+		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(1).setName("Partition-A"), mySrd);
+		RequestDetails requestDetailsA = new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.fromPartitionName("Partition-A"));
+
+		bundle = (Bundle) myBundleDao.update(bundle, requestDetailsA).getResource();
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+		String bundleId = bundle.getIdElement().toUnqualifiedVersionless().getValue();
+
+		composition.setStatus(Composition.CompositionStatus.AMENDED);
+		composition.getCustodian().setReference(organization.getId());
+		bundle.addEntry().setResource(organization);
+
+		bundle = (Bundle) myBundleDao.update(bundle, requestDetailsA).getResource();
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+		assertEquals(bundleId, bundle.getIdElement().toUnqualifiedVersionless().getValue());
+
+		// search Bundle by patient identifier
+		SearchParameterMap searchByPatientParams = new SearchParameterMap("composition.patient.identifier", new TokenParam("foo-patient")).setLoadSynchronous(true);
+		searchByPatientParams.add("composition.type", new TokenParam("60591-5"));
+		IBundleProvider searchByPatientResult = myBundleDao.search(searchByPatientParams, requestDetailsA);
+		assertThat(toUnqualifiedVersionlessIdValues(searchByPatientResult), hasItems(bundleId));
+
+		// search Bundle by custodian identifier
+		SearchParameterMap searchByCustodianParams = new SearchParameterMap("composition.custodian.identifier", new TokenParam("foo-organization")).setLoadSynchronous(true);
+		IBundleProvider searchByCustodianResult = myBundleDao.search(searchByCustodianParams, requestDetailsA);
+		assertThat(toUnqualifiedVersionlessIdValues(searchByCustodianResult), hasItems(bundleId));
+
+		// search Bundle by custodian identifier and composition type
+		SearchParameterMap searchByCustodianAndTypeParams = new SearchParameterMap("composition.custodian.identifier", new TokenParam("foo-organization")).setLoadSynchronous(true);
+		searchByCustodianParams.add("composition.type", new TokenParam("60591-5"));
+		IBundleProvider searchByCustodianAndTypeResult = myBundleDao.search(searchByCustodianAndTypeParams, requestDetailsA);
+		assertThat(toUnqualifiedVersionlessIdValues(searchByCustodianAndTypeResult), hasItems(bundleId));
+
+		myPartitionSettings.setPartitioningEnabled(false);
+		myPartitionSettings.setAllowReferencesAcrossPartitions(PartitionSettings.CrossPartitionReferenceMode.NOT_ALLOWED);
+		myInterceptorRegistry.unregisterInterceptor(interceptor);
+
+	}
+
+	private void createBundleSearchParameter(String id, String theCode, String theExpression) {
+		SearchParameter sp = new SearchParameter()
+				.setCode(theCode)
+				.addBase("Bundle")
+				.setType(Enumerations.SearchParamType.TOKEN)
+				.setExpression(theExpression)
+				//.setXpathUsage(SearchParameter.XPathUsageType.NORMAL)
+				.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sp.setId("SearchParameter/" + id);
+		sp.setUrl("http://example.com/fhir/" + sp.getId());
+		RequestDetails requestDetails = new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.defaultPartition());
+		IBaseResource resource = mySearchParameterDao.update(sp, requestDetails).getResource();
+		assertNotNull(resource);
 	}
 
 
