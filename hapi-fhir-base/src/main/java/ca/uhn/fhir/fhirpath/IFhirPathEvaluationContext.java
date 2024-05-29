@@ -24,6 +24,8 @@ import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IIdType;
 
+import java.util.List;
+
 public interface IFhirPathEvaluationContext {
 
 	/**
@@ -36,4 +38,13 @@ public interface IFhirPathEvaluationContext {
 	default IBase resolveReference(@Nonnull IIdType theReference, @Nullable IBase theContext) {
 		return null;
 	}
+
+	/**
+	 *
+	 * @param appContext
+	 * @param name The name of the constant(s) to be resolved
+	 * @param beforeContext
+	 * @return
+	 */
+	default List<IBase> resolveConstant(Object appContext, String name, boolean beforeContext) {return null; }
 }

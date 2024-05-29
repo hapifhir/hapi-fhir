@@ -8,6 +8,7 @@ import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.r5.model.Encounter;
+import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.SubscriptionTopic;
 import org.junit.jupiter.api.BeforeEach;
@@ -206,6 +207,24 @@ class SubscriptionTriggerMatcherTest {
 	}
 
 	@Test
+	public void testValidFhirPathCriteriaEvaluationUsingCurrent() {
+		ResourceModifiedMessage msg = new ResourceModifiedMessage(ourFhirContext, myEncounter, ResourceModifiedMessage.OperationTypeEnum.UPDATE);
+
+		// setup
+		SubscriptionTopic.SubscriptionTopicResourceTriggerComponent trigger = new SubscriptionTopic.SubscriptionTopicResourceTriggerComponent();
+		trigger.setResource("Encounter");
+		trigger.addSupportedInteraction(SubscriptionTopic.InteractionTrigger.UPDATE);
+		trigger.setFhirPathCriteria("%current.id = " + myEncounter.getIdElement().getIdPart());
+
+		// run
+		SubscriptionTriggerMatcher svc = new SubscriptionTriggerMatcher(mySubscriptionTopicSupport, msg, trigger);
+		InMemoryMatchResult result = svc.match();
+
+		// verify
+		assertTrue(result.matched());
+	}
+
+	@Test
 	public void testUpdateWithPrevCriteriaMatchAndFailingFhirPathCriteria() {
 		ResourceModifiedMessage msg = new ResourceModifiedMessage(ourFhirContext, myEncounter, ResourceModifiedMessage.OperationTypeEnum.UPDATE);
 
@@ -214,7 +233,7 @@ class SubscriptionTriggerMatcherTest {
 		trigger.setResource("Encounter");
 		trigger.addSupportedInteraction(SubscriptionTopic.InteractionTrigger.UPDATE);
 		trigger.getQueryCriteria().setPrevious("Encounter?status=in-progress");
-		trigger.setFhirPathCriteria("false");
+		trigger.setFhirPathCriteria("random text");
 
 
 		IFhirResourceDao mockEncounterDao = mock(IFhirResourceDao.class);
@@ -229,5 +248,32 @@ class SubscriptionTriggerMatcherTest {
 
 		// verify
 		assertFalse(result.matched());
+	}
+
+	@Test
+	public void testUpdateWithPrevCriteriaMatchAndValidFhirPathCriteriaUsingPreviousVersion() {
+		myEncounter.setStatus(Enumerations.EncounterStatus.INPROGRESS);
+		ResourceModifiedMessage msg = new ResourceModifiedMessage(ourFhirContext, myEncounter, ResourceModifiedMessage.OperationTypeEnum.UPDATE);
+
+		// setup
+		SubscriptionTopic.SubscriptionTopicResourceTriggerComponent trigger = new SubscriptionTopic.SubscriptionTopicResourceTriggerComponent();
+		trigger.setResource("Encounter");
+		trigger.addSupportedInteraction(SubscriptionTopic.InteractionTrigger.UPDATE);
+		trigger.getQueryCriteria().setPrevious("Encounter?status=in-progress");
+		trigger.setFhirPathCriteria("%current.status.exists() and %previous.status.exists().not()");
+
+
+		IFhirResourceDao mockEncounterDao = mock(IFhirResourceDao.class);
+		when(myDaoRegistry.getResourceDao("Encounter")).thenReturn(mockEncounterDao);
+		Encounter encounterPreviousVersion = new Encounter();
+		when(mockEncounterDao.read(any(), any(), eq(false))).thenReturn(encounterPreviousVersion);
+		when(mySearchParamMatcher.match(any(), any(), any())).thenReturn(InMemoryMatchResult.successfulMatch());
+
+		// run
+		SubscriptionTriggerMatcher svc = new SubscriptionTriggerMatcher(mySubscriptionTopicSupport, msg, trigger);
+		InMemoryMatchResult result = svc.match();
+
+		// verify
+		assertTrue(result.matched());
 	}
 }

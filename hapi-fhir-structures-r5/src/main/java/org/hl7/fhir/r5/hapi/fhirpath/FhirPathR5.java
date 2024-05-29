@@ -21,6 +21,7 @@ import org.hl7.fhir.r5.utils.FHIRPathUtilityClasses;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class FhirPathR5 implements IFhirPath {
 
@@ -94,7 +95,7 @@ public class FhirPathR5 implements IFhirPath {
 			@Override
 			public List<Base> resolveConstant(Object appContext, String name, boolean beforeContext)
 					throws PathEngineException {
-				return null;
+				return theEvaluationContext.resolveConstant(appContext, name, beforeContext).stream().map(Base.class::cast).collect(Collectors.toUnmodifiableList());
 			}
 
 			@Override

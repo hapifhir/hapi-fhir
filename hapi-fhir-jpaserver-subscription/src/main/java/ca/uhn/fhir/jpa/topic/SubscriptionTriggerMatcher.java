@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.topic;
 
 import ca.uhn.fhir.fhirpath.IFhirPath;
+import ca.uhn.fhir.fhirpath.IFhirPathEvaluationContext;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
@@ -119,9 +120,27 @@ public class SubscriptionTriggerMatcher {
 		}
 	}
 
+
 	private InMemoryMatchResult evaluateFhirPathCriteria(String theFhirPathCriteria) {
 		if (!Strings.isNullOrEmpty(theFhirPathCriteria)) {
 			IFhirPath fhirPathEngine = mySubscriptionTopicSupport.getFhirContext().newFhirPath();
+			fhirPathEngine.setEvaluationContext(new  IFhirPathEvaluationContext(){
+
+				@Override
+				public List<IBase> resolveConstant(Object appContext, String name, boolean beforeContext) {
+					if("current".equalsIgnoreCase(name))
+						return List.of(myResource);
+
+					if("previous".equalsIgnoreCase(name))
+					{
+						Optional previousResource = myPreviousVersionReader.readPreviousVersion(myResource);
+						if(previousResource.isPresent())
+							return List.of((IBase) previousResource.get());
+					}
+
+					return null;
+				}
+			});
 			try {
 				IFhirPath.IParsedExpression expression = fhirPathEngine.parse(theFhirPathCriteria);
 				List<IBase> result = fhirPathEngine.evaluate(myResource, expression, IBase.class);
