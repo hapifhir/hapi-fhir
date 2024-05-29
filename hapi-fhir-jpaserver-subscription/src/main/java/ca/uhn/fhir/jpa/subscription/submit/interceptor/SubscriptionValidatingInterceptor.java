@@ -194,7 +194,6 @@ public class SubscriptionValidatingInterceptor {
 			if (myFhirContext.getVersion().getVersion() == FhirVersionEnum.R4) {
 				validateR4BackportSubscription((Subscription) theSubscription);
 			} else {
-				// resource
 				validateR5PlusTopicSubscription(theCanonicalSubscription);
 			}
 		} else {
