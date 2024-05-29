@@ -36,6 +36,7 @@ import ca.uhn.fhir.rest.api.ValidationModeEnum;
 import ca.uhn.fhir.rest.api.server.IPreResourceShowDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SimplePreResourceShowDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
@@ -68,6 +69,7 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CarePlan;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Composition;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.Consent;
 import org.hl7.fhir.r4.model.Device;
@@ -89,6 +91,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -202,7 +206,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		return retVal;
 	}
 
-	private Resource createPatient(Integer theId) {
+	private Patient createPatient(Integer theId) {
 		Patient retVal = new Patient();
 		if (theId != null) {
 			retVal.setId(new IdType("Patient", (long) theId));
@@ -211,8 +215,8 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		return retVal;
 	}
 
-	private Resource createPatient(Integer theId, int theVersion) {
-		Resource retVal = createPatient(theId);
+	private Patient createPatient(Integer theId, int theVersion) {
+		Patient retVal = createPatient(theId);
 		retVal.setId(retVal.getIdElement().withVersion(Integer.toString(theVersion)));
 		return retVal;
 	}
@@ -4210,6 +4214,59 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		extractResponseAndClose(status);
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertTrue(ourHitMethod);
+	}
+
+	@Test
+	public void testToListOfResourcesAndExcludeContainer_withSearchSetContainingDocumentBundles_onlyRecursesOneLevelDeep() {
+		Patient patient = createPatient(1);
+		Bundle bundle = new Bundle();
+		bundle.setType(Bundle.BundleType.DOCUMENT);
+		bundle.addEntry().setResource(new Composition());
+		bundle.addEntry().setResource(patient);
+		Bundle searchSet = new Bundle();
+		searchSet.setType(Bundle.BundleType.SEARCHSET);
+		searchSet.addEntry().setResource(bundle);
+
+		RequestDetails requestDetails = new SystemRequestDetails();
+		requestDetails.setResourceName("Bundle");
+
+		List<IBaseResource> resources = AuthorizationInterceptor.toListOfResourcesAndExcludeContainer(searchSet, ourCtx);
+		assertEquals(1, resources.size());
+		assertTrue(resources.contains(bundle));
+	}
+
+	@Test
+	public void testToListOfResourcesAndExcludeContainer_withSearchSetContainingPatients_returnsPatients() {
+		Patient patient1 = createPatient(1);
+		Patient patient2 = createPatient(2);
+		Bundle searchSet = new Bundle();
+		searchSet.setType(Bundle.BundleType.SEARCHSET);
+		searchSet.addEntry().setResource(patient1);
+		searchSet.addEntry().setResource(patient2);
+
+		RequestDetails requestDetails = new SystemRequestDetails();
+		requestDetails.setResourceName("Patient");
+
+		List<IBaseResource> resources = AuthorizationInterceptor.toListOfResourcesAndExcludeContainer(searchSet, ourCtx);
+		assertEquals(2, resources.size());
+		assertTrue(resources.contains(patient1));
+		assertTrue(resources.contains(patient2));
+	}
+
+	@ParameterizedTest
+	@EnumSource(value = Bundle.BundleType.class, names = {"DOCUMENT", "MESSAGE"})
+	public void testShouldExamineBundleResources_withBundleRequestAndStandAloneBundleType_returnsFalse(Bundle.BundleType theBundleType) {
+		Bundle bundle = new Bundle();
+		bundle.setType(theBundleType);
+		assertFalse(AuthorizationInterceptor.shouldExamineChildResources(bundle, ourCtx));
+	}
+
+	@ParameterizedTest
+	@EnumSource(value = Bundle.BundleType.class, names = {"DOCUMENT", "MESSAGE"}, mode= EnumSource.Mode.EXCLUDE)
+	public void testShouldExamineBundleResources_withBundleRequestAndNonStandAloneBundleType_returnsTrue(Bundle.BundleType theBundleType) {
+		Bundle bundle = new Bundle();
+		bundle.setType(theBundleType);
+		assertTrue(AuthorizationInterceptor.shouldExamineChildResources(bundle, ourCtx));
 	}
 
 	@AfterAll

@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.mdm.svc;
 
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.EnversRevision;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
@@ -49,7 +50,8 @@ public class MdmModelConverterSvcImplTest extends BaseMdmR4Test {
 
 		ourLog.info("actualMdmLinkJson: {}", actualMdmLinkJson);
 
-		assertEquals(getExepctedMdmLinkJson(mdmLink.getGoldenResourcePersistenceId().getId(), mdmLink.getSourcePersistenceId().getId(), MdmMatchResultEnum.MATCH, MdmLinkSourceEnum.MANUAL, version, createTime, updateTime, isLinkCreatedResource, scoreRounded), actualMdmLinkJson);
+		MdmLinkJson exepctedMdmLinkJson = getExepctedMdmLinkJson(mdmLink.getGoldenResourcePersistenceId().getId(), mdmLink.getSourcePersistenceId().getId(), MdmMatchResultEnum.MATCH, MdmLinkSourceEnum.MANUAL, version, createTime, updateTime, isLinkCreatedResource, scoreRounded);
+		assertEquals(exepctedMdmLinkJson, actualMdmLinkJson);
 	}
 
 	@Test
@@ -99,7 +101,9 @@ public class MdmModelConverterSvcImplTest extends BaseMdmR4Test {
 		final MdmLinkJson mdmLinkJson = new MdmLinkJson();
 
 		mdmLinkJson.setGoldenResourceId("Patient/" + theGoldenPatientId);
+		mdmLinkJson.setGoldenPid(JpaPid.fromId(theGoldenPatientId));
 		mdmLinkJson.setSourceId("Patient/" + theSourceId);
+		mdmLinkJson.setSourcePid(JpaPid.fromId(theSourceId));
 		mdmLinkJson.setMatchResult(theMdmMatchResultEnum);
 		mdmLinkJson.setLinkSource(theMdmLinkSourceEnum);
 		mdmLinkJson.setVersion(version);

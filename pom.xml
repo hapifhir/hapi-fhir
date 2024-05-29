@@ -911,6 +911,11 @@
 			<id>subigre</id>
 			<name>Renaud Subiger</name>
 		</developer>
+		<developer>
+			<id>stefan-lindstrom</id>
+			<name>Stefan Lindström</name>
+			<organization>Softhouse AB</organization>
+		</developer>
 	</developers>
 
 	<licenses>
