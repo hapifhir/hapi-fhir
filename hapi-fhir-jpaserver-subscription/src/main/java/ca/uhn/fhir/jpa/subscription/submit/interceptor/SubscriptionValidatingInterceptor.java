@@ -75,8 +75,10 @@ public class SubscriptionValidatingInterceptor {
 	@Autowired
 	private SubscriptionStrategyEvaluator mySubscriptionStrategyEvaluator;
 
-	private FhirContext myFhirContext;
+	@Autowired
 	private SubscriptionCanonicalizer mySubscriptionCanonicalizer;
+
+	private FhirContext myFhirContext;
 
 	@Autowired
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
