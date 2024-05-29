@@ -104,7 +104,6 @@ public class SubscriptionValidatingInterceptor {
 	@Autowired
 	public void setFhirContext(FhirContext theFhirContext) {
 		myFhirContext = theFhirContext;
-		mySubscriptionCanonicalizer = new SubscriptionCanonicalizer(myFhirContext, myStorageSettings);
 	}
 
 	@VisibleForTesting
