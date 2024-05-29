@@ -205,8 +205,8 @@ public class SubscriptionValidatingInterceptor {
 	private void validateR5PlusTopicSubscription(CanonicalSubscription theCanonicalSubscription) {
 		Optional<IBaseResource> oTopic = findSubscriptionTopicByUrl(theCanonicalSubscription.getTopic());
 		if (!oTopic.isPresent()) {
-			throw new UnprocessableEntityException(Msg.code(2322) + "No SubscriptionTopic exists with topic: "
-					+ theCanonicalSubscription.getTopic());
+			throw new UnprocessableEntityException(
+					Msg.code(2322) + "No SubscriptionTopic exists with topic: " + theCanonicalSubscription.getTopic());
 		}
 	}
 
@@ -228,13 +228,11 @@ public class SubscriptionValidatingInterceptor {
 			// Trigger a "no criteria" validation exception
 			validateQuery(
 					null,
-					"Subscription.criteria.extension with url "
-							+ SubscriptionConstants.SUBSCRIPTION_TOPIC_FILTER_URL);
+					"Subscription.criteria.extension with url " + SubscriptionConstants.SUBSCRIPTION_TOPIC_FILTER_URL);
 		} else {
 			filterUrls.forEach(filterUrl -> validateQuery(
 					filterUrl,
-					"Subscription.criteria.extension with url "
-							+ SubscriptionConstants.SUBSCRIPTION_TOPIC_FILTER_URL));
+					"Subscription.criteria.extension with url " + SubscriptionConstants.SUBSCRIPTION_TOPIC_FILTER_URL));
 		}
 	}
 
