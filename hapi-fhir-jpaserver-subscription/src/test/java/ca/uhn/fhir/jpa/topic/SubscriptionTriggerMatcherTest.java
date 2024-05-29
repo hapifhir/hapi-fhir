@@ -170,6 +170,24 @@ class SubscriptionTriggerMatcherTest {
 	}
 
 	@Test
+	public void testInvalidBooleanOutcomeOfFhirPathCriteriaEvaluation() {
+		ResourceModifiedMessage msg = new ResourceModifiedMessage(ourFhirContext, myEncounter, ResourceModifiedMessage.OperationTypeEnum.UPDATE);
+
+		// setup
+		SubscriptionTopic.SubscriptionTopicResourceTriggerComponent trigger = new SubscriptionTopic.SubscriptionTopicResourceTriggerComponent();
+		trigger.setResource("Encounter");
+		trigger.addSupportedInteraction(SubscriptionTopic.InteractionTrigger.UPDATE);
+		trigger.setFhirPathCriteria("id");
+
+		// run
+		SubscriptionTriggerMatcher svc = new SubscriptionTriggerMatcher(mySubscriptionTopicSupport, msg, trigger);
+		InMemoryMatchResult result = svc.match();
+
+		// verify
+		assertFalse(result.matched());
+	}
+
+	@Test
 	public void testValidFhirPathCriteriaEvaluation() {
 		ResourceModifiedMessage msg = new ResourceModifiedMessage(ourFhirContext, myEncounter, ResourceModifiedMessage.OperationTypeEnum.UPDATE);
 
