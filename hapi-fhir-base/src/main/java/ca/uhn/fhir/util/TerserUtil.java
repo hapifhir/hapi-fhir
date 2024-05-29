@@ -474,7 +474,6 @@ public final class TerserUtil {
 	 * @param theResource    The resource to set the values on
 	 * @param theValue       The String value to set on the resource child field name. This value is converted to the appropriate primitive type before the value is set
 	 */
-
 	public static void setStringField(
 			FhirContext theFhirContext, String theFieldName, IBaseResource theResource, String theValue) {
 		setField(theFhirContext, theFieldName, theResource, theFhirContext.newPrimitiveString(theValue));
@@ -517,7 +516,6 @@ public final class TerserUtil {
 	 * @param theResource    The resource on which the value should be set
 	 * @param theValue       The String value to set. The string is converted to the appropriate primitive type before setting the field
 	 */
-
 	public static void setStringFieldByFhirPath(
 			FhirContext theFhirContext, String theFhirPath, IBaseResource theResource, String theValue) {
 		setFieldByFhirPath(

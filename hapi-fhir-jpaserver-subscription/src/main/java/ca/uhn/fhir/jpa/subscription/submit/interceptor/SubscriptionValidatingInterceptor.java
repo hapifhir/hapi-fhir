@@ -189,7 +189,7 @@ public class SubscriptionValidatingInterceptor {
 	private void validateCriteria(IBaseResource theSubscription, CanonicalSubscription theCanonicalSubscription) {
 		if (theCanonicalSubscription.isTopicSubscription()) {
 			if (myFhirContext.getVersion().getVersion() == FhirVersionEnum.R4) {
-				// This is R4 backport topic subscription
+				// This is an R4 backport topic subscription
 				Subscription r4Subscription = (Subscription) theSubscription;
 				String filterUrl = null;
 				Extension filterUrlExtension = r4Subscription
