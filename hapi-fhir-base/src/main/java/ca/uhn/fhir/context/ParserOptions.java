@@ -20,10 +20,10 @@
 package ca.uhn.fhir.context;
 
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.util.CollectionUtil;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -147,7 +147,7 @@ public class ParserOptions {
 		if (thePaths == null) {
 			setDontStripVersionsFromReferencesAtPaths((List<String>) null);
 		} else {
-			setDontStripVersionsFromReferencesAtPaths(Arrays.asList(thePaths));
+			setDontStripVersionsFromReferencesAtPaths(CollectionUtil.newSet(thePaths));
 		}
 		return this;
 	}
@@ -229,7 +229,7 @@ public class ParserOptions {
 	@SuppressWarnings({"UnusedReturnValue"})
 	@Nonnull
 	public ParserOptions setEncodeElementsForSummaryMode(@Nonnull String... theEncodeElements) {
-		return setEncodeElementsForSummaryMode(Arrays.asList(theEncodeElements));
+		return setEncodeElementsForSummaryMode(CollectionUtil.newSet(theEncodeElements));
 	}
 
 	/**
@@ -287,7 +287,7 @@ public class ParserOptions {
 	@SuppressWarnings({"UnusedReturnValue"})
 	@Nonnull
 	public ParserOptions setDontEncodeElementsForSummaryMode(@Nonnull String... theEncodeElements) {
-		return setDontEncodeElementsForSummaryMode(Arrays.asList(theEncodeElements));
+		return setDontEncodeElementsForSummaryMode(CollectionUtil.newSet(theEncodeElements));
 	}
 
 	/**

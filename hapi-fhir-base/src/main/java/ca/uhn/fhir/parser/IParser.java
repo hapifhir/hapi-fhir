@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.ParserOptions;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.util.CollectionUtil;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -35,9 +36,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.io.Writer;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -348,7 +347,7 @@ public interface IParser {
 	 * @since 7.4.0
 	 */
 	default IParser setDontEncodeElements(@Nonnull String... theDontEncodeElements) {
-		return setDontEncodeElements(Arrays.asList(theDontEncodeElements));
+		return setDontEncodeElements(CollectionUtil.newSet(theDontEncodeElements));
 	}
 
 	/**
@@ -398,7 +397,7 @@ public interface IParser {
 	 * @see ParserOptions#setEncodeElementsForSummaryMode(String...)
 	 */
 	default IParser setEncodeElements(@Nonnull String... theEncodeElements) {
-		return setEncodeElements(new HashSet<>(Arrays.asList(theEncodeElements)));
+		return setEncodeElements(CollectionUtil.newSet(theEncodeElements));
 	}
 
 	/**

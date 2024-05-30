@@ -70,6 +70,7 @@ import ca.uhn.fhir.rest.param.binder.QueryParameterOrBinder;
 import ca.uhn.fhir.rest.param.binder.QueryParameterTypeBinder;
 import ca.uhn.fhir.rest.param.binder.StringBinder;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.util.CollectionUtil;
 import ca.uhn.fhir.util.ReflectionUtil;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -89,8 +90,8 @@ import java.util.Set;
 public class SearchParameter extends BaseQueryParameter {
 
 	private static final String EMPTY_STRING = "";
-	private static HashMap<RestSearchParameterTypeEnum, Set<String>> ourParamQualifiers;
-	private static HashMap<Class<?>, RestSearchParameterTypeEnum> ourParamTypes;
+	private static final HashMap<RestSearchParameterTypeEnum, Set<String>> ourParamQualifiers;
+	private static final HashMap<Class<?>, RestSearchParameterTypeEnum> ourParamTypes;
 	static final String QUALIFIER_ANY_TYPE = ":*";
 
 	static {
@@ -100,27 +101,30 @@ public class SearchParameter extends BaseQueryParameter {
 		ourParamTypes.put(StringParam.class, RestSearchParameterTypeEnum.STRING);
 		ourParamTypes.put(StringOrListParam.class, RestSearchParameterTypeEnum.STRING);
 		ourParamTypes.put(StringAndListParam.class, RestSearchParameterTypeEnum.STRING);
-		ourParamQualifiers.put(RestSearchParameterTypeEnum.STRING, Set.of(new String[] {
-			Constants.PARAMQUALIFIER_STRING_EXACT,
-			Constants.PARAMQUALIFIER_STRING_CONTAINS,
-			Constants.PARAMQUALIFIER_MISSING,
-			EMPTY_STRING
-		}));
+		ourParamQualifiers.put(
+				RestSearchParameterTypeEnum.STRING,
+				CollectionUtil.newSet(
+						Constants.PARAMQUALIFIER_STRING_EXACT,
+						Constants.PARAMQUALIFIER_STRING_CONTAINS,
+						Constants.PARAMQUALIFIER_MISSING,
+						EMPTY_STRING));
 
 		ourParamTypes.put(UriParam.class, RestSearchParameterTypeEnum.URI);
 		ourParamTypes.put(UriOrListParam.class, RestSearchParameterTypeEnum.URI);
 		ourParamTypes.put(UriAndListParam.class, RestSearchParameterTypeEnum.URI);
 		// TODO: are these right for URI?
-		ourParamQualifiers.put(RestSearchParameterTypeEnum.URI, Set.of(new String[] {
-			Constants.PARAMQUALIFIER_STRING_EXACT, Constants.PARAMQUALIFIER_MISSING, EMPTY_STRING
-		}));
+		ourParamQualifiers.put(
+				RestSearchParameterTypeEnum.URI,
+				CollectionUtil.newSet(
+						Constants.PARAMQUALIFIER_STRING_EXACT, Constants.PARAMQUALIFIER_MISSING, EMPTY_STRING));
 
 		ourParamTypes.put(TokenParam.class, RestSearchParameterTypeEnum.TOKEN);
 		ourParamTypes.put(TokenOrListParam.class, RestSearchParameterTypeEnum.TOKEN);
 		ourParamTypes.put(TokenAndListParam.class, RestSearchParameterTypeEnum.TOKEN);
-		ourParamQualifiers.put(RestSearchParameterTypeEnum.TOKEN, Set.of(new String[] {
-			Constants.PARAMQUALIFIER_TOKEN_TEXT, Constants.PARAMQUALIFIER_MISSING, EMPTY_STRING
-		}));
+		ourParamQualifiers.put(
+				RestSearchParameterTypeEnum.TOKEN,
+				CollectionUtil.newSet(
+						Constants.PARAMQUALIFIER_TOKEN_TEXT, Constants.PARAMQUALIFIER_MISSING, EMPTY_STRING));
 
 		ourParamTypes.put(DateParam.class, RestSearchParameterTypeEnum.DATE);
 		ourParamTypes.put(DateOrListParam.class, RestSearchParameterTypeEnum.DATE);
@@ -128,35 +132,35 @@ public class SearchParameter extends BaseQueryParameter {
 		ourParamTypes.put(DateRangeParam.class, RestSearchParameterTypeEnum.DATE);
 		ourParamQualifiers.put(
 				RestSearchParameterTypeEnum.DATE,
-				Set.of(new String[] {Constants.PARAMQUALIFIER_MISSING, EMPTY_STRING}));
+				CollectionUtil.newSet(Constants.PARAMQUALIFIER_MISSING, EMPTY_STRING));
 
 		ourParamTypes.put(QuantityParam.class, RestSearchParameterTypeEnum.QUANTITY);
 		ourParamTypes.put(QuantityOrListParam.class, RestSearchParameterTypeEnum.QUANTITY);
 		ourParamTypes.put(QuantityAndListParam.class, RestSearchParameterTypeEnum.QUANTITY);
 		ourParamQualifiers.put(
 				RestSearchParameterTypeEnum.QUANTITY,
-				Set.of(new String[] {Constants.PARAMQUALIFIER_MISSING, EMPTY_STRING}));
+				CollectionUtil.newSet(Constants.PARAMQUALIFIER_MISSING, EMPTY_STRING));
 
 		ourParamTypes.put(NumberParam.class, RestSearchParameterTypeEnum.NUMBER);
 		ourParamTypes.put(NumberOrListParam.class, RestSearchParameterTypeEnum.NUMBER);
 		ourParamTypes.put(NumberAndListParam.class, RestSearchParameterTypeEnum.NUMBER);
 		ourParamQualifiers.put(
 				RestSearchParameterTypeEnum.NUMBER,
-				Set.of(new String[] {Constants.PARAMQUALIFIER_MISSING, EMPTY_STRING}));
+				CollectionUtil.newSet(Constants.PARAMQUALIFIER_MISSING, EMPTY_STRING));
 
 		ourParamTypes.put(ReferenceParam.class, RestSearchParameterTypeEnum.REFERENCE);
 		ourParamTypes.put(ReferenceOrListParam.class, RestSearchParameterTypeEnum.REFERENCE);
 		ourParamTypes.put(ReferenceAndListParam.class, RestSearchParameterTypeEnum.REFERENCE);
 		// --vvvv-- no empty because that gets added from OptionalParam#chainWhitelist
 		ourParamQualifiers.put(
-				RestSearchParameterTypeEnum.REFERENCE, Set.of(new String[] {Constants.PARAMQUALIFIER_MISSING}));
+				RestSearchParameterTypeEnum.REFERENCE, CollectionUtil.newSet(Constants.PARAMQUALIFIER_MISSING));
 
 		ourParamTypes.put(CompositeParam.class, RestSearchParameterTypeEnum.COMPOSITE);
 		ourParamTypes.put(CompositeOrListParam.class, RestSearchParameterTypeEnum.COMPOSITE);
 		ourParamTypes.put(CompositeAndListParam.class, RestSearchParameterTypeEnum.COMPOSITE);
 		ourParamQualifiers.put(
 				RestSearchParameterTypeEnum.COMPOSITE,
-				Set.of(new String[] {Constants.PARAMQUALIFIER_MISSING, EMPTY_STRING}));
+				CollectionUtil.newSet(Constants.PARAMQUALIFIER_MISSING, EMPTY_STRING));
 
 		ourParamTypes.put(HasParam.class, RestSearchParameterTypeEnum.HAS);
 		ourParamTypes.put(HasOrListParam.class, RestSearchParameterTypeEnum.HAS);

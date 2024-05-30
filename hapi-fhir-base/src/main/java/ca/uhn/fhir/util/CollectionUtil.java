@@ -25,6 +25,8 @@ import org.apache.commons.collections4.CollectionUtils;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 import static java.util.Collections.unmodifiableCollection;
 
@@ -73,5 +75,20 @@ public class CollectionUtil {
 			return unmodifiableCollection(collection0);
 		}
 		return CollectionUtils.union(collection0, collection1);
+	}
+
+	/**
+	 * This method is equivalent to <code>Set.of(...)</code> but is kept here
+	 * and used instead of that method because Set.of is not present on Android
+	 * SDKs (at least up to 29).
+	 * <p>
+	 * Sets returned by this method are unmodifiable.
+	 * </p>
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T> Set<T> newSet(T... theValues) {
+		HashSet<T> retVal = new HashSet<>();
+		Collections.addAll(retVal, theValues);
+		return Collections.unmodifiableSet(retVal);
 	}
 }
