@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.term;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
@@ -68,7 +69,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = TestR4ConfigWithElasticHSearch.class)
 @RequiresDocker
-public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest {
+public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest implements IValueSetExpansionIT {
 
 	protected static final String CS_URL = "http://example.com/my_code_system";
 	@Autowired
@@ -118,6 +119,41 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest {
 	@AfterEach
 	public void afterPurgeDatabase() {
 		purgeDatabase(myStorageSettings, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataExportJobSchedulingHelper);
+	}
+
+	@Override
+	public FhirContext getFhirContext() {
+		return myFhirContext;
+	}
+
+	@Override
+	public ITermDeferredStorageSvc getTerminologyDefferedStorageService() {
+		return myTerminologyDeferredStorageSvc;
+	}
+
+	@Override
+	public ITermReadSvc getTerminologyReadSvc() {
+		return myTermSvc;
+	}
+
+	@Override
+	public DaoRegistry getDaoRegistry() {
+		return myDaoRegistry;
+	}
+
+	@Override
+	public IFhirResourceDaoValueSet<ValueSet> getValueSetDao() {
+		return myValueSetDao;
+	}
+
+	@Override
+	public JpaStorageSettings getJpaStorageSettings() {
+		return myStorageSettings;
+	}
+
+	@Override
+	protected PlatformTransactionManager getTxManager() {
+		return myTxManager;
 	}
 
 	void createCodeSystem() {
@@ -334,16 +370,5 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest {
 				propsCreated++;
 			}
 		}
-	}
-
-
-	@Override
-	protected FhirContext getFhirContext() {
-		return myFhirContext;
-	}
-
-	@Override
-	protected PlatformTransactionManager getTxManager() {
-		return myTxManager;
 	}
 }

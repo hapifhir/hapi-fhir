@@ -106,6 +106,7 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.IndexSearcher;
 import org.hibernate.CacheMode;
+import org.hibernate.search.engine.search.predicate.SearchPredicate;
 import org.hibernate.search.engine.search.predicate.dsl.BooleanPredicateClausesStep;
 import org.hibernate.search.engine.search.predicate.dsl.PredicateFinalStep;
 import org.hibernate.search.engine.search.predicate.dsl.SearchPredicateFactory;
@@ -133,6 +134,8 @@ import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Extension;
@@ -1442,7 +1445,37 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 
 		String value = theFilter.getValue();
 		Term term = new Term(CONCEPT_PROPERTY_PREFIX_NAME + theFilter.getProperty(), value);
-		theB.must(theF.match().field(term.field()).matching(term.text()));
+		switch (theFilter.getOp()) {
+			case EQUAL:
+				theB.must(theF.match().field(term.field()).matching(term.text()));
+				break;
+			case EXISTS:
+				theB.must(theF.exists().field(term.field()));
+				break;
+			case IN:
+			case NOTIN:
+				boolean isNotFilter = theFilter.getOp() == ValueSet.FilterOperator.NOTIN;
+				// IN and NOTIN expect comma separated lists
+				String[] values = term.field().split(",");
+				for (String v : values) {
+					if (isNotFilter) {
+						// NOTIN is an AND of not-ed terms
+						theF.and().add(theF.not(theF.match().field(term.field()).matching(v)));
+					} else {
+						// IN is an OR of terms
+						theF.or().add(theF.match().field(term.field()).matching(v));
+					}
+				}
+				break;
+			case NULL:
+				theB.must(theF.not(theF.exists().field(term.field())));
+				break;
+			default:
+				// NB: we do not need to handle REGEX, because that is handled
+				// in the parent
+
+				break;
+		}
 	}
 
 	private void handleFilterRegex(
@@ -1598,7 +1631,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			SearchPredicateFactory f,
 			BooleanPredicateClausesStep<?> b,
 			ValueSet.ConceptSetFilterComponent theFilter) {
-		TermConcept code = findCodeForFilterCriteria(theSystem, theFilter);
+		TermConcept code = findCodeForFilterCriteriaCodeOrConcept(theSystem, theFilter);
 
 		if (theFilter.getOp() == ValueSet.FilterOperator.ISA) {
 			ourLog.debug(
@@ -1621,7 +1654,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	}
 
 	@Nonnull
-	private TermConcept findCodeForFilterCriteria(String theSystem, ValueSet.ConceptSetFilterComponent theFilter) {
+	private TermConcept findCodeForFilterCriteriaCodeOrConcept(String theSystem, ValueSet.ConceptSetFilterComponent theFilter) {
 		return findCode(theSystem, theFilter.getValue())
 				.orElseThrow(() ->
 						new InvalidRequestException(Msg.code(2071) + "Invalid filter criteria - code does not exist: {"
@@ -1866,17 +1899,22 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 
 		for (ValueSet.ConceptSetFilterComponent nextFilter : theInclude.getFilter()) {
 			boolean handled = false;
-			switch (nextFilter.getProperty()) {
+			switch (nextFilter.getProperty().toLowerCase()) {
 				case "concept":
 				case "code":
 					if (nextFilter.getOp() == ValueSet.FilterOperator.ISA) {
 						theValueSetCodeAccumulator.addMessage(
 								"Processing IS-A filter in database - Note that Hibernate Search is not enabled on this server, so this operation can be inefficient.");
-						TermConcept code = findCodeForFilterCriteria(theSystem, nextFilter);
+						TermConcept code = findCodeForFilterCriteriaCodeOrConcept(theSystem, nextFilter);
 						addConceptAndChildren(
 								theValueSetCodeAccumulator, theAddedCodes, theInclude, theSystem, theAdd, code);
 						handled = true;
 					}
+					break;
+				default:
+					// TODO - we need to handle other properties (fields)
+					// and other operations (not just is-a)
+					// in some (preferably generic) way
 					break;
 			}
 
@@ -3300,6 +3338,20 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			if (next.getValue() instanceof StringType) {
 				property.setType(TermConceptPropertyTypeEnum.STRING);
 				property.setValue(next.getValueStringType().getValue());
+			} else if (next.getValue() instanceof BooleanType) {
+				property.setType(TermConceptPropertyTypeEnum.BOOLEAN);
+				property.setValue(((BooleanType) next.getValue()).getValueAsString());
+			} else if (next.getValue() instanceof IntegerType) {
+				property.setType(TermConceptPropertyTypeEnum.INTEGER);
+				property.setValue(((IntegerType) next.getValue()).getValueAsString());
+			} else if (next.getValue() instanceof DecimalType) {
+				property.setType(TermConceptPropertyTypeEnum.DECIMAL);
+				property.setValue(((DecimalType) next.getValue()).getValueAsString());
+			} else if (next.getValue() instanceof DateTimeType) {
+				// DateType is not supported because it's not
+				// supported in CodeSystem.setValue
+				property.setType(TermConceptPropertyTypeEnum.DATETIME);
+				property.setValue(((DateTimeType) next.getValue()).getValueAsString());
 			} else if (next.getValue() instanceof Coding) {
 				Coding nextCoding = next.getValueCoding();
 				property.setType(TermConceptPropertyTypeEnum.CODING);
@@ -3307,7 +3359,6 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 				property.setValue(nextCoding.getCode());
 				property.setDisplay(nextCoding.getDisplay());
 			} else if (next.getValue() != null) {
-				// TODO: LOINC has properties of type BOOLEAN that we should handle
 				ourLog.warn("Don't know how to handle properties of type: "
 						+ next.getValue().getClass());
 				continue;
