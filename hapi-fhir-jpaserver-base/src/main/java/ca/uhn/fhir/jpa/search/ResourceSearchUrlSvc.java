@@ -84,6 +84,7 @@ public class ResourceSearchUrlSvc {
 	 */
 	public void deleteByResId(long theResId) {
 		myResourceSearchUrlDao.deleteByResId(theResId);
+		myResourceSearchUrlWithPartitionDao.deleteByResId(theResId);
 	}
 
 	/**
@@ -93,6 +94,8 @@ public class ResourceSearchUrlSvc {
 			String theResourceName, String theMatchUrl, ResourceTable theResourceTable) {
 		String canonicalizedUrlForStorage = createCanonicalizedUrlForStorage(theResourceName, theMatchUrl);
 
+		//		ResourceSearchUrlEntity searchUrlEntity =
+		//			ResourceSearchUrlEntity.from(canonicalizedUrlForStorage, theResourceTable);
 		final ResourceSearchUrlWithPartitionEntity searchUrlEntity =
 				ResourceSearchUrlWithPartitionEntity.from(canonicalizedUrlForStorage, theResourceTable);
 		// calling dao.save performs a merge operation which implies a trip to

@@ -33,8 +33,8 @@ import jakarta.persistence.TemporalType;
 
 import java.util.Date;
 
-import static ca.uhn.fhir.jpa.model.entity.ResourceSearchUrlWithPartitionEntity.RES_SEARCH_URL_COLUMN_NAME;
-import static ca.uhn.fhir.jpa.model.entity.ResourceSearchUrlWithPartitionEntity.RES_SEARCH_URL_LENGTH;
+import static ca.uhn.fhir.jpa.model.entity.ResourceSearchUrlWithPartitionEntityPK.RES_SEARCH_URL_COLUMN_NAME;
+import static ca.uhn.fhir.jpa.model.entity.ResourceSearchUrlWithPartitionEntityPK.RES_SEARCH_URL_LENGTH;
 
 /**
  * This entity is used to enforce uniqueness on a given search URL being

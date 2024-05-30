@@ -114,7 +114,13 @@ public class FhirResourceDaoR4ConcurrentCreateTest extends BaseJpaR4Test {
 		// then
 		assertThat(errorList, hasSize(0));
 		// red-green before the fix, the size was 'numberOfThreadsAttemptingToCreateDuplicates'
-		assertThat(myResourceTableDao.findAll(), hasSize(expectedResourceCount));
+		// LUKETODO:
+		/*
+		0 = {ResourceTable@18771} "ResourceTable[pid=1,fhirId=1,resourceType=Observation,version=1,lastUpdated=2024-05-30T10:20:56.970-04:00]"
+		1 = {ResourceTable@18772} "ResourceTable[pid=2,fhirId=2,resourceType=Observation,version=1,lastUpdated=2024-05-30T10:20:56.970-04:00]"
+		 */
+		final List<ResourceTable> all = myResourceTableDao.findAll();
+		assertThat(all, hasSize(expectedResourceCount));
 
 	}
 

@@ -23,7 +23,7 @@ import ca.uhn.fhir.i18n.HapiLocalizer;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
-import ca.uhn.fhir.jpa.model.entity.ResourceSearchUrlWithPartitionEntity;
+import ca.uhn.fhir.jpa.model.entity.ResourceSearchUrlWithPartitionEntityPK;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.system.HapiSystemProperties;
@@ -99,7 +99,7 @@ public class HapiFhirHibernateJpaDialect extends HibernateJpaDialect {
 					throw new ResourceVersionConflictException(
 							Msg.code(825) + makeErrorMessage(messageToPrepend, "forcedIdConstraintFailure"));
 				}
-				if (constraintName.contains(ResourceSearchUrlWithPartitionEntity.RES_SEARCH_URL_COLUMN_NAME)) {
+				if (constraintName.contains(ResourceSearchUrlWithPartitionEntityPK.RES_SEARCH_URL_COLUMN_NAME)) {
 					throw super.convertHibernateAccessException(theException);
 				}
 			}

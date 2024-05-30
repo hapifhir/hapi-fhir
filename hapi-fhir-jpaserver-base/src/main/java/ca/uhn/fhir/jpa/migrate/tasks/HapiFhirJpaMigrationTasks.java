@@ -147,15 +147,15 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			resSearchUrlPartitionTable.addColumn("CREATED_TIME").nonNullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
 
 			resSearchUrlPartitionTable
-					.addIndex("20240529.2", "IDX_RESSEARCHURL_RES")
+					.addIndex("20240529.2", "IDX_RESSEARCHURLPARTIION_RES")
 					.unique(false)
 					.withColumns("RES_ID");
 			resSearchUrlPartitionTable
-					.addIndex("20240529.3", "IDX_RESSEARCHURL_TIME")
+					.addIndex("20240529.3", "IDX_RESSEARCHURLPARTIION_TIME")
 					.unique(false)
 					.withColumns("CREATED_TIME");
 			resSearchUrlPartitionTable
-					.addForeignKey("20240529.4", "FK_RES_SEARCH_URL_RESOURCE")
+					.addForeignKey("20240529.4", "FK_RES_SEARCH_URL_PARTIION_RESOURCE")
 					.toColumn("RES_ID")
 					.references("HFJ_RESOURCE", "RES_ID");
 		}

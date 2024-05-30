@@ -1,8 +1,7 @@
 package ca.uhn.fhir.jpa.config;
 
 import ca.uhn.fhir.i18n.HapiLocalizer;
-import ca.uhn.fhir.jpa.model.entity.ResourceSearchUrlEntity;
-import ca.uhn.fhir.jpa.model.entity.ResourceSearchUrlWithPartitionEntity;
+import ca.uhn.fhir.jpa.model.entity.ResourceSearchUrlWithPartitionEntityPK;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import org.hibernate.HibernateException;
@@ -52,10 +51,10 @@ public class HapiFhirHibernateJpaDialectTest {
 
 		// LUKETODO:  fix and uncomment
 		try {
-			mySvc.convertHibernateAccessException(new ConstraintViolationException("this is a message", new SQLException("reason"), ResourceSearchUrlWithPartitionEntity.RES_SEARCH_URL_COLUMN_NAME));
+			mySvc.convertHibernateAccessException(new ConstraintViolationException("this is a message", new SQLException("reason"), ResourceSearchUrlWithPartitionEntityPK.RES_SEARCH_URL_COLUMN_NAME));
 			fail();
 		} catch (DataIntegrityViolationException e) {
-			assertThat(e.getMessage(), containsString(ResourceSearchUrlWithPartitionEntity.RES_SEARCH_URL_COLUMN_NAME));
+			assertThat(e.getMessage(), containsString(ResourceSearchUrlWithPartitionEntityPK.RES_SEARCH_URL_COLUMN_NAME));
 		}
 
 		outcome = mySvc.convertHibernateAccessException(new HibernateException("this is a message"));

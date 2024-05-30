@@ -11,7 +11,6 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantityNormalized;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
-import ca.uhn.fhir.jpa.model.entity.ResourceSearchUrlEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceSearchUrlWithPartitionEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
@@ -412,6 +411,12 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		}
 	}
 
+	// LUKETODO:  new test:  fake adding to old table and ensure query retrieves it
+	// LUKETODO:  new test:  fake adding to old table and new table and ensure conditional logic picks new table first
+	// LUKETODO:  new test:  new config is off:  ensure partition ID is always -1 even with multiple partitions
+	// LUKETODO:  new test:  new config is on:  ensure partition ID always reflects multiple partitions
+	// LUKETODO:  new test:  new config off, multiple partitions: ensure duplicates among partitions FAIL
+	// LUKETODO:  new test:  new config on, multiple partitions: ensure duplicates among partitions SUCCEEED
 	@Test
 	public void testCreateResource_withConditionalCreate_willAddSearchUrlEntity(){
 		// given
@@ -428,17 +433,18 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 		assertTrue(outcome.getCreated());
 
-		ResourceSearchUrlEntity searchUrlEntity = myResourceSearchUrlDao.findAll().get(0);
+		// LUKETODO:  maybe fake adding to new table and old table DAO and make sure this works
+		ResourceSearchUrlWithPartitionEntity searchUrlEntity = myResourceSearchUrlWithPartitionDao.findAll().get(0);
 		assertThat(searchUrlEntity, is(notNullValue()) );
 		assertThat(searchUrlEntity.getResourcePid(), equalTo(expectedResId));
 		assertThat(searchUrlEntity.getCreatedTime(), DateMatchers.within(1, SECONDS, new Date()));
-		assertThat(searchUrlEntity.getSearchUrl(), equalTo(expectedNormalizedMatchUrl));
+		assertThat(searchUrlEntity.getPk().getSearchUrl(), equalTo(expectedNormalizedMatchUrl));
 
 		ResourceSearchUrlWithPartitionEntity searchUrlWithPartitionEntity = myResourceSearchUrlWithPartitionDao.findAll().get(0);
 		assertThat(searchUrlWithPartitionEntity, is(notNullValue()) );
 		assertThat(searchUrlWithPartitionEntity.getResourcePid(), equalTo(expectedResId));
 		assertThat(searchUrlWithPartitionEntity.getCreatedTime(), DateMatchers.within(1, SECONDS, new Date()));
-		assertThat(searchUrlWithPartitionEntity.getSearchUrl(), equalTo(expectedNormalizedMatchUrl));
+		assertThat(searchUrlWithPartitionEntity.getPk().getSearchUrl(), equalTo(expectedNormalizedMatchUrl));
 	}
 
 	@Test
@@ -1346,12 +1352,14 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 			assertRemainingTasks();
 		}
 
+		// LUKETODO:  maybe test with old table?
 		private void assertRemainingTasks(Task... theExpectedTasks) {
-			final List<ResourceSearchUrlEntity> searchUrlsPreDelete = myResourceSearchUrlDao.findAll();
+//			final List<ResourceSearchUrlEntity> searchUrlsPreDelete = myResourceSearchUrlDao.findAll();
+			final List<ResourceSearchUrlWithPartitionEntity> searchUrlsPreDelete = myResourceSearchUrlWithPartitionDao.findAll();
 
 			assertEquals(theExpectedTasks.length, searchUrlsPreDelete.size());
 			assertEquals(Arrays.stream(theExpectedTasks).map(Resource::getIdElement).map(IdType::getIdPartAsLong).toList(),
-						 searchUrlsPreDelete.stream().map(ResourceSearchUrlEntity::getResourcePid).toList());
+						 searchUrlsPreDelete.stream().map(ResourceSearchUrlWithPartitionEntity::getResourcePid).toList());
 		}
 
 		private void deleteExpunge(Task theTask) {
