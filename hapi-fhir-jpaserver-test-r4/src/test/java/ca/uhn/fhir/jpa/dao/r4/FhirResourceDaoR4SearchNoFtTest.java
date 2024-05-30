@@ -5337,15 +5337,12 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			.setCode("MR");
 		IIdType id1 = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
 
-		Long spHashIdentity = SearchParamHash.hashSearchParam(new PartitionSettings(),
-			RequestPartitionId.defaultPartition(), "Patient", "identifier:of-type");
 		runInTransaction(() -> {
 			List<ResourceIndexedSearchParamToken> params = myResourceIndexedSearchParamTokenDao
 				.findAll()
 				.stream()
-				.filter(t -> myStorageSettings.isIndexStorageOptimized() ? t.getHashIdentity().equals(spHashIdentity) :
-					t.getParamName().equals("identifier:of-type"))
-				.toList();
+				.filter(t -> t.getParamName().equals("identifier:of-type"))
+				.collect(Collectors.toList());
 			assertEquals(1, params.size());
 			assertNotNull(params.get(0).getHashSystemAndValue());
 			assertNull(params.get(0).getHashSystem());

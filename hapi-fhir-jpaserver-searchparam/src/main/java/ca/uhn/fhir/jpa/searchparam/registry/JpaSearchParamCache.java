@@ -29,6 +29,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.model.util.SearchParamHash;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -228,6 +229,13 @@ public class JpaSearchParamCache {
 		if (SUPPORTED_INDEXED_SEARCH_PARAMS.contains(theRuntimeSearchParam.getParamType())) {
 			addIndexedSearchParam(
 					theResourceName, theHashIdentityToIndexedSearchParams, theRuntimeSearchParam.getName());
+			// handle token search parameters with :of-type modifier
+			if (theRuntimeSearchParam.getParamType() == TOKEN) {
+				addIndexedSearchParam(
+						theResourceName,
+						theHashIdentityToIndexedSearchParams,
+						theRuntimeSearchParam.getName() + Constants.PARAMQUALIFIER_TOKEN_OF_TYPE);
+			}
 			// handle Uplifted Ref Chain Search Parameters
 			theRuntimeSearchParam.getUpliftRefchainCodes().stream()
 					.map(urCode -> String.format("%s.%s", theRuntimeSearchParam.getName(), urCode))

@@ -176,6 +176,13 @@ public class DaoSearchParamSynchronizer {
 				});
 	}
 
+	/**
+	 * Search parameters should be updated after changing IndexStorageOptimized setting.
+	 * If IndexStorageOptimized is disabled, this method copies paramName and Resource Type
+	 * from extracted to existing search parameter.
+	 * If IndexStorageOptimized enabled, this method marks existing search parameter for update,
+	 * to allow optimization happen before commit to db.
+	 */
 	private <T extends BaseResourceIndex> void recoverExistingSearchParameterIfRequired(
 			BaseResourceIndexedSearchParam theSearchParamToRecover, Collection<T> theNewParams) {
 		if (!myStorageSettings.isIndexStorageOptimized()) {
