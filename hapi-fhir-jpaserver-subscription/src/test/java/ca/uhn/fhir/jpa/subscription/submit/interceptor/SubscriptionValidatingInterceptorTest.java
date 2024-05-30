@@ -262,7 +262,7 @@ public class SubscriptionValidatingInterceptorTest {
 	private void setFhirContext(FhirVersionEnum fhirVersion) {
 		myFhirContext = FhirContext.forCached(fhirVersion);
 		mySubscriptionValidatingInterceptor.setFhirContext(myFhirContext);
-		mySubscriptionValidatingInterceptor.setSubscriptionCanonicalizerForUnitTest(new SubscriptionCanonicalizer(myFhirContext, myStorageSettings));
+		mySubscriptionValidatingInterceptor.setSubscriptionCanonicalizerForUnitTest(new SubscriptionCanonicalizer(myFhirContext, mySubscriptionSettings));
 	}
 
 	private static @Nonnull Stream<IBaseResource> subscriptionByFhirVersion(boolean theIncludeR5) {
