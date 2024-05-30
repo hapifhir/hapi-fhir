@@ -25,35 +25,33 @@ import jakarta.persistence.Embeddable;
 import java.io.Serializable;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.StringJoiner;
 
 @Embeddable
 public class ResourceSearchUrlWithPartitionEntityPK implements Serializable {
-	public static final String RESSEARCHURLPARTITTION_ID = "RESSEARCHURLPARTITTION_ID ";
 	public static final String RES_SEARCH_URL_COLUMN_NAME = "RES_SEARCH_URL";
-	public static final String PARTITION_ID = "PARTITION_ID";
-	// LUKETODO:  Error executing DDL "create index IDX_RESSEARCHURL_RES on HFJ_RES_SEARCH_URL_PARTITION_ID (RES_ID)"
-	// via JDBC [Index "IDX_RESSEARCHURL_RES" already exists;]
+	public static final String PARTITION_ID_COLUMN_NAME = "PARTITION_ID";
 
 	public static final int RES_SEARCH_URL_LENGTH = 768;
+
 	private static final long serialVersionUID = 1L;
+
+	private static final int PARTITION_ID_NULL_EQUIVALENT = -1;
 
 	@Column(name = RES_SEARCH_URL_COLUMN_NAME, length = RES_SEARCH_URL_LENGTH, nullable = false)
 	// Weird field name isto ensure that this the first key in the index
 	private String my_A_SearchUrl;
 
-	@Column(name = PARTITION_ID, nullable = false, insertable = true, updatable = false)
+	@Column(name = PARTITION_ID_COLUMN_NAME, nullable = false, insertable = true, updatable = false)
 	// Weird field name isto ensure that this the second key in the index
 	private Integer my_B_PartitionId;
 
-	// LUKETODO:  add a new config key to toggle the partition_id behaviour
 	public ResourceSearchUrlWithPartitionEntityPK() {}
 
-	public static ResourceSearchUrlWithPartitionEntityPK from(String theSearchUrl, ResourceTable theResourceTable) {
+	public static ResourceSearchUrlWithPartitionEntityPK from(String theSearchUrl, ResourceTable theResourceTable, boolean theSearchUrlDuplicateAcrossPartitionsEnabled) {
 		return new ResourceSearchUrlWithPartitionEntityPK(
 				theSearchUrl,
-				Optional.ofNullable(theResourceTable.getPartitionId())
-						.map(PartitionablePartitionId::getPartitionId)
-						.orElse(-1));
+				computePartitionIdOrNullEquivalent(theResourceTable, theSearchUrlDuplicateAcrossPartitionsEnabled));
 	}
 
 	public ResourceSearchUrlWithPartitionEntityPK(String theSearchUrl, int thePartitionId) {
@@ -93,5 +91,23 @@ public class ResourceSearchUrlWithPartitionEntityPK implements Serializable {
 	@Override
 	public int hashCode() {
 		return Objects.hash(my_A_SearchUrl, my_B_PartitionId);
+	}
+
+	@Override
+	public String toString() {
+		return new StringJoiner(", ", ResourceSearchUrlWithPartitionEntityPK.class.getSimpleName() + "[", "]")
+			.add("my_A_SearchUrl='" + my_A_SearchUrl + "'")
+			.add("my_B_PartitionId=" + my_B_PartitionId)
+			.toString();
+	}
+
+	private static int computePartitionIdOrNullEquivalent(ResourceTable theTheResourceTable, boolean theTheSearchUrlDuplicateAcrossPartitionsEnabled) {
+		if (! theTheSearchUrlDuplicateAcrossPartitionsEnabled) {
+			return PARTITION_ID_NULL_EQUIVALENT;
+		}
+
+		return Optional.ofNullable(theTheResourceTable.getPartitionId())
+					.map(PartitionablePartitionId::getPartitionId)
+					.orElse(PARTITION_ID_NULL_EQUIVALENT);
 	}
 }

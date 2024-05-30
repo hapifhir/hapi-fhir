@@ -41,6 +41,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
+import ca.uhn.fhir.jpa.model.entity.ResourceSearchUrlWithPartitionEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.SearchParamPresentEntity;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
@@ -147,11 +148,11 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			resSearchUrlPartitionTable.addColumn("CREATED_TIME").nonNullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
 
 			resSearchUrlPartitionTable
-					.addIndex("20240529.2", "IDX_RESSEARCHURLPARTIION_RES")
+					.addIndex("20240529.2", ResourceSearchUrlWithPartitionEntity.IDX_RESSEARCHURLPARTITION_RES)
 					.unique(false)
 					.withColumns("RES_ID");
 			resSearchUrlPartitionTable
-					.addIndex("20240529.3", "IDX_RESSEARCHURLPARTIION_TIME")
+					.addIndex("20240529.3", "IDX_RESSEARCHURLPARTITION_TIME")
 					.unique(false)
 					.withColumns("CREATED_TIME");
 			resSearchUrlPartitionTable

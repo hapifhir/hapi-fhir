@@ -1352,9 +1352,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 			assertRemainingTasks();
 		}
 
-		// LUKETODO:  maybe test with old table?
 		private void assertRemainingTasks(Task... theExpectedTasks) {
-//			final List<ResourceSearchUrlEntity> searchUrlsPreDelete = myResourceSearchUrlDao.findAll();
 			final List<ResourceSearchUrlWithPartitionEntity> searchUrlsPreDelete = myResourceSearchUrlWithPartitionDao.findAll();
 
 			assertEquals(theExpectedTasks.length, searchUrlsPreDelete.size());

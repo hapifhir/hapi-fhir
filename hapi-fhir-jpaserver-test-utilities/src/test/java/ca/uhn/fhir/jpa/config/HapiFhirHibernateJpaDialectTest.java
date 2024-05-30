@@ -49,7 +49,6 @@ public class HapiFhirHibernateJpaDialectTest {
 			assertThat(e.getMessage(), containsString("The operation has failed with a version constraint failure"));
 		}
 
-		// LUKETODO:  fix and uncomment
 		try {
 			mySvc.convertHibernateAccessException(new ConstraintViolationException("this is a message", new SQLException("reason"), ResourceSearchUrlWithPartitionEntityPK.RES_SEARCH_URL_COLUMN_NAME));
 			fail();

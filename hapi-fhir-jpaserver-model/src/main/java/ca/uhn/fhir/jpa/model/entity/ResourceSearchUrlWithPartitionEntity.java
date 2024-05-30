@@ -36,24 +36,30 @@ import java.util.Date;
 import java.util.Optional;
 import java.util.StringJoiner;
 
+import static ca.uhn.fhir.jpa.model.entity.ResourceSearchUrlWithPartitionEntity.IDX_RESSEARCHURLPARTITION_RES;
+
 /**
  * This entity is used to enforce uniqueness on a given search URL being
  * used as a conditional operation URL, e.g. a conditional create or a
  * conditional update. When we perform a conditional operation that is
  * creating a new resource, we store an entity with the conditional URL
- * in this table. The URL is the PK of the table, so the database
- * ensures that two concurrent threads don't accidentally create two
- * resources with the same conditional URL.
+ * in this table. The URL and optional partition_id is the PK of the table,
+ * so the database * ensures that two concurrent threads don't accidentally
+ * create two * resources with the same conditional URL.  The partition ID
+ * is the second part of the primary key and is a non-nullable field with
+ * the caveat that a null equivalent value of -1 will be used in the case
+ * that a partition_id is either null or the config does not active a new
+ * feature that search_urls can be duplicated across non-null partitions.
  */
 @Entity
 @Table(
 		name = "HFJ_RES_SEARCH_URL_PARTITION_ID",
 		indexes = {
-			@Index(name = "IDX_RESSEARCHURLPARTIION_RES", columnList = "RES_ID"),
-			@Index(name = "IDX_RESSEARCHURLPARTIION_TIME", columnList = "CREATED_TIME")
+			@Index(name = IDX_RESSEARCHURLPARTITION_RES, columnList = "RES_ID"),
+			@Index(name = "IDX_RESSEARCHURLPARTITION_TIME", columnList = "CREATED_TIME")
 		})
-// LUKETODO:  enhance javadoc
 public class ResourceSearchUrlWithPartitionEntity {
+	public static final String IDX_RESSEARCHURLPARTITION_RES = "IDX_RESSEARCHURLPARTITION_RES";
 
 	@EmbeddedId
 	private ResourceSearchUrlWithPartitionEntityPK myPk;
@@ -76,12 +82,9 @@ public class ResourceSearchUrlWithPartitionEntity {
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date myCreatedTime;
 
-	public static ResourceSearchUrlWithPartitionEntity from(String theUrl, ResourceTable theResourceTable) {
-		final Optional<PartitionablePartitionId> optPartitionId =
-				Optional.ofNullable(theResourceTable.getPartitionId());
-
+	public static ResourceSearchUrlWithPartitionEntity from(String theUrl, ResourceTable theResourceTable, boolean theSearchUrlDuplicateAcrossPartitionsEnabled) {
 		return new ResourceSearchUrlWithPartitionEntity()
-				.setPk(ResourceSearchUrlWithPartitionEntityPK.from(theUrl, theResourceTable))
+				.setPk(ResourceSearchUrlWithPartitionEntityPK.from(theUrl, theResourceTable, theSearchUrlDuplicateAcrossPartitionsEnabled))
 				.setPartitionDate(Optional.ofNullable(theResourceTable.getPartitionId())
 						.map(PartitionablePartitionId::getPartitionDate)
 						.orElse(null))

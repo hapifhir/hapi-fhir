@@ -23,6 +23,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.dao.data.IResourceSearchUrlDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceSearchUrlPartitionDao;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceSearchUrlWithPartitionEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
@@ -53,18 +54,21 @@ public class ResourceSearchUrlSvc {
 	private final MatchUrlService myMatchUrlService;
 
 	private final FhirContext myFhirContext;
+	private final PartitionSettings myPartitionSettings;
 
 	public ResourceSearchUrlSvc(
 			EntityManager theEntityManager,
 			IResourceSearchUrlDao theResourceSearchUrlDao,
 			IResourceSearchUrlPartitionDao theResourceSearchUrlWithPartitionDao,
 			MatchUrlService theMatchUrlService,
-			FhirContext theFhirContext) {
+			FhirContext theFhirContext,
+			PartitionSettings thePartitionSettings) {
 		myEntityManager = theEntityManager;
 		myResourceSearchUrlDao = theResourceSearchUrlDao;
 		myResourceSearchUrlWithPartitionDao = theResourceSearchUrlWithPartitionDao;
 		myMatchUrlService = theMatchUrlService;
 		myFhirContext = theFhirContext;
+		myPartitionSettings = thePartitionSettings;
 	}
 
 	/**
@@ -84,7 +88,9 @@ public class ResourceSearchUrlSvc {
 	 */
 	public void deleteByResId(long theResId) {
 		myResourceSearchUrlDao.deleteByResId(theResId);
+		ourLog.debug("deleted HFJ_SEARCH_URL fpr RES_ID {}", theResId);
 		myResourceSearchUrlWithPartitionDao.deleteByResId(theResId);
+		ourLog.debug("deleted HFJ_SEARCH_URL_PARTITION_ID fpr RES_ID {}", theResId);
 	}
 
 	/**
@@ -97,7 +103,7 @@ public class ResourceSearchUrlSvc {
 		//		ResourceSearchUrlEntity searchUrlEntity =
 		//			ResourceSearchUrlEntity.from(canonicalizedUrlForStorage, theResourceTable);
 		final ResourceSearchUrlWithPartitionEntity searchUrlEntity =
-				ResourceSearchUrlWithPartitionEntity.from(canonicalizedUrlForStorage, theResourceTable);
+				ResourceSearchUrlWithPartitionEntity.from(canonicalizedUrlForStorage, theResourceTable, myPartitionSettings.isSearchUrlDuplicateAcrossPartitionsEnabled());
 		// calling dao.save performs a merge operation which implies a trip to
 		// the database to see if the resource exists.  Since we don't need the check, we avoid the trip by calling
 		// em.persist.

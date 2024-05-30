@@ -114,11 +114,6 @@ public class FhirResourceDaoR4ConcurrentCreateTest extends BaseJpaR4Test {
 		// then
 		assertThat(errorList, hasSize(0));
 		// red-green before the fix, the size was 'numberOfThreadsAttemptingToCreateDuplicates'
-		// LUKETODO:
-		/*
-		0 = {ResourceTable@18771} "ResourceTable[pid=1,fhirId=1,resourceType=Observation,version=1,lastUpdated=2024-05-30T10:20:56.970-04:00]"
-		1 = {ResourceTable@18772} "ResourceTable[pid=2,fhirId=2,resourceType=Observation,version=1,lastUpdated=2024-05-30T10:20:56.970-04:00]"
-		 */
 		final List<ResourceTable> all = myResourceTableDao.findAll();
 		assertThat(all, hasSize(expectedResourceCount));
 
@@ -135,12 +130,12 @@ public class FhirResourceDaoR4ConcurrentCreateTest extends BaseJpaR4Test {
 		final ResourceTable resTable4 = myResourceTableDao.save(createResTable());
 
 		Date tooOldBy10Minutes = cutOffTimeMinus(tenMinutes);
-		ResourceSearchUrlWithPartitionEntity tooOld1 = ResourceSearchUrlWithPartitionEntity.from("Observation?identifier=20210427133226.444", resTable1).setCreatedTime(tooOldBy10Minutes);
-		ResourceSearchUrlWithPartitionEntity tooOld2 = ResourceSearchUrlWithPartitionEntity.from("Observation?identifier=20210427133226.445", resTable2).setCreatedTime(tooOldBy10Minutes);
+		ResourceSearchUrlWithPartitionEntity tooOld1 = ResourceSearchUrlWithPartitionEntity.from("Observation?identifier=20210427133226.444", resTable1, myPartitionSettings.isSearchUrlDuplicateAcrossPartitionsEnabled()).setCreatedTime(tooOldBy10Minutes);
+		ResourceSearchUrlWithPartitionEntity tooOld2 = ResourceSearchUrlWithPartitionEntity.from("Observation?identifier=20210427133226.445", resTable2, myPartitionSettings.isSearchUrlDuplicateAcrossPartitionsEnabled()).setCreatedTime(tooOldBy10Minutes);
 
 		Date tooNewBy10Minutes = cutOffTimePlus(tenMinutes);
-		ResourceSearchUrlWithPartitionEntity tooNew1 = ResourceSearchUrlWithPartitionEntity.from("Observation?identifier=20210427133226.446", resTable3).setCreatedTime(tooNewBy10Minutes);
-		ResourceSearchUrlWithPartitionEntity tooNew2 = ResourceSearchUrlWithPartitionEntity.from("Observation?identifier=20210427133226.447", resTable4).setCreatedTime(tooNewBy10Minutes);
+		ResourceSearchUrlWithPartitionEntity tooNew1 = ResourceSearchUrlWithPartitionEntity.from("Observation?identifier=20210427133226.446", resTable3, myPartitionSettings.isSearchUrlDuplicateAcrossPartitionsEnabled()).setCreatedTime(tooNewBy10Minutes);
+		ResourceSearchUrlWithPartitionEntity tooNew2 = ResourceSearchUrlWithPartitionEntity.from("Observation?identifier=20210427133226.447", resTable4, myPartitionSettings.isSearchUrlDuplicateAcrossPartitionsEnabled()).setCreatedTime(tooNewBy10Minutes);
 
 		myResourceSearchUrlWithPartitionDao.saveAll(asList(tooOld1, tooOld2, tooNew1, tooNew2));
 
@@ -168,8 +163,8 @@ public class FhirResourceDaoR4ConcurrentCreateTest extends BaseJpaR4Test {
 		final ResourceTable resTable1 = myResourceTableDao.save(createResTable());
 		final ResourceTable resTable2 = myResourceTableDao.save(createResTable());
 
-		ResourceSearchUrlWithPartitionEntity entry1 = ResourceSearchUrlWithPartitionEntity.from("Observation?identifier=20210427133226.444", resTable1);
-		ResourceSearchUrlWithPartitionEntity entry2 = ResourceSearchUrlWithPartitionEntity.from("Observation?identifier=20210427133226.445", resTable2);
+		ResourceSearchUrlWithPartitionEntity entry1 = ResourceSearchUrlWithPartitionEntity.from("Observation?identifier=20210427133226.444", resTable1, myPartitionSettings.isSearchUrlDuplicateAcrossPartitionsEnabled());
+		ResourceSearchUrlWithPartitionEntity entry2 = ResourceSearchUrlWithPartitionEntity.from("Observation?identifier=20210427133226.445", resTable2, myPartitionSettings.isSearchUrlDuplicateAcrossPartitionsEnabled());
 		myResourceSearchUrlWithPartitionDao.saveAll(asList(entry1, entry2));
 
 		// when
