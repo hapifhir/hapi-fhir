@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ResourceIndexedSearchParamUriTest {
 
@@ -34,5 +35,16 @@ public class ResourceIndexedSearchParamUriTest {
 		assertNotEquals(val1, "");
 	}
 
+	@Test
+	public void equalsIsTrueForOptimizedSearchParam() {
+		ResourceIndexedSearchParamUri param = new ResourceIndexedSearchParamUri(new PartitionSettings(), "Patient", "NAME", "http://foo");
+		ResourceIndexedSearchParamUri param2 = new ResourceIndexedSearchParamUri(new PartitionSettings(), "Patient", "NAME", "http://foo");
+
+		param2.optimizeIndexStorage();
+
+		assertTrue(param.equals(param2));
+		assertTrue(param2.equals(param));
+		assertEquals(param.hashCode(), param2.hashCode());
+	}
 
 }

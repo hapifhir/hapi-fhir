@@ -7,6 +7,7 @@ import java.math.BigDecimal;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ResourceIndexedSearchParamQuantityTest {
 
@@ -43,5 +44,16 @@ public class ResourceIndexedSearchParamQuantityTest {
 		assertNotEquals(val1, "");
 	}
 
+	@Test
+	public void equalsIsTrueForOptimizedSearchParam() {
+		BaseResourceIndexedSearchParamQuantity param = createParam("NAME", "123.001", "value", "VALUE");
+		BaseResourceIndexedSearchParamQuantity param2 = createParam("NAME", "123.001", "value", "VALUE");
+
+		param2.optimizeIndexStorage();
+
+		assertTrue(param.equals(param2));
+		assertTrue(param2.equals(param));
+		assertEquals(param.hashCode(), param2.hashCode());
+	}
 
 }

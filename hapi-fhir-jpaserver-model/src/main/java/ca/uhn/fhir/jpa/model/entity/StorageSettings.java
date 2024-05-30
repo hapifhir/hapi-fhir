@@ -383,6 +383,10 @@ public class StorageSettings {
 	 * <p>
 	 * If this setting is enabled, {@link PartitionSettings#isIncludePartitionInSearchHashes()} should be disabled.
 	 * </p>
+	 * <p>
+	 * If {@link StorageSettings#getIndexMissingFields()} is enabled, the following index may need to be added
+	 * into the HFJ_SPIDX tables to improve the search performance: <code>HASH_IDENTITY, SP_MISSING, RES_ID, PARTITION_ID</code>
+	 * </p>
 	 *
 	 * @since 7.4.0
 	 */
@@ -404,6 +408,10 @@ public class StorageSettings {
 	 * <p>
 	 * <p>
 	 * If this setting is enabled, {@link PartitionSettings#isIncludePartitionInSearchHashes()} should be set to <code>false</code>.
+	 * </p>
+	 * <p>
+	 * If {@link StorageSettings#getIndexMissingFields()} ()} is enabled, the following index may need to be added
+	 * into the HFJ_SPIDX tables to improve the search performance: <code>HASH_IDENTITY, SP_MISSING, RES_ID, PARTITION_ID</code>
 	 * </p>
 	 *
 	 * @since 7.4.0

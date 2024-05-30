@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SuppressWarnings("SpellCheckingInspection")
 public class ResourceIndexedSearchParamStringTest {
@@ -107,6 +108,18 @@ public class ResourceIndexedSearchParamStringTest {
 		assertEquals(val1, val2);
 		assertNotEquals(val1, null);
 		assertNotEquals(val1, "");
+	}
+
+	@Test
+	public void equalsIsTrueForOptimizedSearchParam() {
+		ResourceIndexedSearchParamString param = new ResourceIndexedSearchParamString(new PartitionSettings(), new StorageSettings(), "Patient", "param", "aaa", "AAA");
+		ResourceIndexedSearchParamString param2 = new ResourceIndexedSearchParamString(new PartitionSettings(), new StorageSettings(), "Patient", "param", "aaa", "AAA");
+
+		param2.optimizeIndexStorage();
+
+		assertTrue(param.equals(param2));
+		assertTrue(param2.equals(param));
+		assertEquals(param.hashCode(), param2.hashCode());
 	}
 
 }

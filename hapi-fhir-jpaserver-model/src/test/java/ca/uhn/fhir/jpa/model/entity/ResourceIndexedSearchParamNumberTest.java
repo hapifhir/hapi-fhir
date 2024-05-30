@@ -11,14 +11,17 @@ import static org.junit.jupiter.api.Assertions.*;
 public class ResourceIndexedSearchParamNumberTest {
 	private static final String GRITTSCORE = "grittscore";
 
-	public static final ResourceIndexedSearchParamNumber PARAM_VALUE_10_FIRST = new ResourceIndexedSearchParamNumber(new PartitionSettings(), "Patient", GRITTSCORE, BigDecimal.valueOf(10));
-	public static final ResourceIndexedSearchParamNumber PARAM_VALUE_10_SECOND = new ResourceIndexedSearchParamNumber(new PartitionSettings(), "Patient", GRITTSCORE, BigDecimal.valueOf(10));
-	public static final ResourceIndexedSearchParamNumber PARAM_VALUE_12_FIRST = new ResourceIndexedSearchParamNumber(new PartitionSettings(), "Patient", GRITTSCORE, BigDecimal.valueOf(12));
+	public static ResourceIndexedSearchParamNumber PARAM_VALUE_10_FIRST;
+	public static ResourceIndexedSearchParamNumber PARAM_VALUE_10_SECOND;
+	public static ResourceIndexedSearchParamNumber PARAM_VALUE_12_FIRST;
 
 	@BeforeEach
 	void setUp() {
 		final ResourceTable resourceTable = new ResourceTable();
 		resourceTable.setId(1L);
+		PARAM_VALUE_10_FIRST = new ResourceIndexedSearchParamNumber(new PartitionSettings(), "Patient", GRITTSCORE, BigDecimal.valueOf(10));
+		PARAM_VALUE_10_SECOND = new ResourceIndexedSearchParamNumber(new PartitionSettings(), "Patient", GRITTSCORE, BigDecimal.valueOf(10));
+		PARAM_VALUE_12_FIRST = new ResourceIndexedSearchParamNumber(new PartitionSettings(), "Patient", GRITTSCORE, BigDecimal.valueOf(12));
 		PARAM_VALUE_10_FIRST.setResource(resourceTable);
 		PARAM_VALUE_10_SECOND.setResource(resourceTable);
 		PARAM_VALUE_12_FIRST.setResource(resourceTable);
@@ -39,6 +42,15 @@ public class ResourceIndexedSearchParamNumberTest {
 
 	@Test
 	void equalByContract() {
+		assertEquals(PARAM_VALUE_10_FIRST, PARAM_VALUE_10_SECOND);
+		assertEquals(PARAM_VALUE_10_SECOND, PARAM_VALUE_10_FIRST);
+		assertEquals(PARAM_VALUE_10_FIRST.hashCode(), PARAM_VALUE_10_SECOND.hashCode());
+	}
+
+	@Test
+	void equalsIsTrueForOptimizedSearchParam() {
+		PARAM_VALUE_10_SECOND.optimizeIndexStorage();
+
 		assertEquals(PARAM_VALUE_10_FIRST, PARAM_VALUE_10_SECOND);
 		assertEquals(PARAM_VALUE_10_SECOND, PARAM_VALUE_10_FIRST);
 		assertEquals(PARAM_VALUE_10_FIRST.hashCode(), PARAM_VALUE_10_SECOND.hashCode());
