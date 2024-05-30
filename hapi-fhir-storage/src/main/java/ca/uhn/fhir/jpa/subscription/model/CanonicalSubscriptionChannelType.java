@@ -24,6 +24,7 @@ import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.dstu2.model.Subscription;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.r5.model.Coding;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -157,5 +158,9 @@ public enum CanonicalSubscriptionChannelType {
 
 	public Subscription.SubscriptionChannelType toCanonical() {
 		return Subscription.SubscriptionChannelType.fromCode(toCode());
+	}
+
+	public Coding toR5Coding() {
+		return new Coding().setSystem(getSystem()).setCode(toCode());
 	}
 }
