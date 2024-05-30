@@ -46,6 +46,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 public class MdmProviderQueryLinkR4Test extends BaseLinkR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(MdmProviderQueryLinkR4Test.class);
+	public static final double THOUSANDTH = .001d;
 	private static final int MDM_LINK_PROPERTY_COUNT = 9;
 	private static final StringType RESOURCE_TYPE_PATIENT = new StringType("Patient");
 	private static final StringType RESOURCE_TYPE_OBSERVATION = new StringType("Observation");
@@ -473,7 +474,7 @@ public class MdmProviderQueryLinkR4Test extends BaseLinkR4Test {
 		}
 	}
 
-	private void assertMdmLink(int theExpectedSize, List<Parameters.ParametersParameterComponent> thePart, String theGoldenResourceId, String theTargetId, MdmMatchResultEnum theMatchResult, String theEidMatch, String theNewGoldenResource, String theScore) {
+	private void assertMdmLink(int theExpectedSize, List<Parameters.ParametersParameterComponent> thePart, String theGoldenResourceId, String theTargetId, MdmMatchResultEnum theMatchResult, String theEidMatch, String theNewGoldenResource, String theExpectedScore) {
 		assertThat(thePart).hasSize(theExpectedSize);
 		assertEquals("goldenResourceId", thePart.get(0).getName());
 		assertEquals(removeVersion(theGoldenResourceId), thePart.get(0).getValue().toString());
@@ -492,7 +493,9 @@ public class MdmProviderQueryLinkR4Test extends BaseLinkR4Test {
 			assertEquals(theNewGoldenResource, thePart.get(5).getValue().primitiveValue());
 
 			assertEquals("score", thePart.get(6).getName());
-			RangeTestHelper.checkInRange(theScore, thePart.get(6).getValue().primitiveValue());
+			double expectedScore = Double.parseDouble(theExpectedScore);
+			double actualScore = Double.parseDouble(thePart.get(6).getValue().primitiveValue());
+			assertThat(actualScore).isBetween(expectedScore - THOUSANDTH, expectedScore + THOUSANDTH);
 		}
 	}
 
