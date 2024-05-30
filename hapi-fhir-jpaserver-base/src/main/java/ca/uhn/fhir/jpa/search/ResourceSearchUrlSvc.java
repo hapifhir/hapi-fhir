@@ -22,7 +22,8 @@ package ca.uhn.fhir.jpa.search;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.dao.data.IResourceSearchUrlDao;
-import ca.uhn.fhir.jpa.model.entity.ResourceSearchUrlEntity;
+import ca.uhn.fhir.jpa.dao.data.IResourceSearchUrlPartitionDao;
+import ca.uhn.fhir.jpa.model.entity.ResourceSearchUrlWithPartitionEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -47,6 +48,7 @@ public class ResourceSearchUrlSvc {
 	private final EntityManager myEntityManager;
 
 	private final IResourceSearchUrlDao myResourceSearchUrlDao;
+	private final IResourceSearchUrlPartitionDao myResourceSearchUrlWithPartitionDao;
 
 	private final MatchUrlService myMatchUrlService;
 
@@ -55,10 +57,12 @@ public class ResourceSearchUrlSvc {
 	public ResourceSearchUrlSvc(
 			EntityManager theEntityManager,
 			IResourceSearchUrlDao theResourceSearchUrlDao,
+			IResourceSearchUrlPartitionDao theResourceSearchUrlWithPartitionDao,
 			MatchUrlService theMatchUrlService,
 			FhirContext theFhirContext) {
 		myEntityManager = theEntityManager;
 		myResourceSearchUrlDao = theResourceSearchUrlDao;
+		myResourceSearchUrlWithPartitionDao = theResourceSearchUrlWithPartitionDao;
 		myMatchUrlService = theMatchUrlService;
 		myFhirContext = theFhirContext;
 	}
@@ -68,8 +72,10 @@ public class ResourceSearchUrlSvc {
 	 */
 	public void deleteEntriesOlderThan(Date theCutoffDate) {
 		ourLog.debug("About to delete SearchUrl which are older than {}", theCutoffDate);
-		int deletedCount = myResourceSearchUrlDao.deleteAllWhereCreatedBefore(theCutoffDate);
-		ourLog.debug("Deleted {} SearchUrls", deletedCount);
+		int deletedNoPartitionCount = myResourceSearchUrlDao.deleteAllWhereCreatedBefore(theCutoffDate);
+		int deletedWithPartitionCount = myResourceSearchUrlWithPartitionDao.deleteAllWhereCreatedBefore(theCutoffDate);
+		ourLog.debug("Deleted {} legacy SearchUrls", deletedNoPartitionCount);
+		ourLog.debug("Deleted {} SearchUrls with partition ID", deletedWithPartitionCount);
 	}
 
 	/**
@@ -87,8 +93,8 @@ public class ResourceSearchUrlSvc {
 			String theResourceName, String theMatchUrl, ResourceTable theResourceTable) {
 		String canonicalizedUrlForStorage = createCanonicalizedUrlForStorage(theResourceName, theMatchUrl);
 
-		ResourceSearchUrlEntity searchUrlEntity =
-				ResourceSearchUrlEntity.from(canonicalizedUrlForStorage, theResourceTable);
+		final ResourceSearchUrlWithPartitionEntity searchUrlEntity =
+				ResourceSearchUrlWithPartitionEntity.from(canonicalizedUrlForStorage, theResourceTable);
 		// calling dao.save performs a merge operation which implies a trip to
 		// the database to see if the resource exists.  Since we don't need the check, we avoid the trip by calling
 		// em.persist.

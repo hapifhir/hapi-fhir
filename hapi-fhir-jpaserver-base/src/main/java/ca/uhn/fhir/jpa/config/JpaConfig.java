@@ -56,6 +56,7 @@ import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.dao.TransactionProcessor;
 import ca.uhn.fhir.jpa.dao.data.IResourceModifiedDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceSearchUrlDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceSearchUrlPartitionDao;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeEverythingService;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeOperation;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeService;
@@ -856,11 +857,13 @@ public class JpaConfig {
 	public ResourceSearchUrlSvc resourceSearchUrlSvc(
 			PersistenceContextProvider thePersistenceContextProvider,
 			IResourceSearchUrlDao theResourceSearchUrlDao,
+			IResourceSearchUrlPartitionDao theResourceSearchUrlWithPartitionDao,
 			MatchUrlService theMatchUrlService,
 			FhirContext theFhirContext) {
 		return new ResourceSearchUrlSvc(
 				thePersistenceContextProvider.getEntityManager(),
 				theResourceSearchUrlDao,
+				theResourceSearchUrlWithPartitionDao,
 				theMatchUrlService,
 				theFhirContext);
 	}

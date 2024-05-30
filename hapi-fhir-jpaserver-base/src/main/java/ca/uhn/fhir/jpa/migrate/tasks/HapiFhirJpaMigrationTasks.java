@@ -127,11 +127,35 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 	protected void init740() {
 		// Start of migrations from 7.2 to 7.4
 
-		Builder version = forVersion(VersionEnum.V7_4_0);
+		final Builder version = forVersion(VersionEnum.V7_4_0);
 
 		{
 			version.onTable("HFJ_RES_SEARCH_URL")
 					.addForeignKey("20240515.1", "FK_RES_SEARCH_URL_RESOURCE")
+					.toColumn("RES_ID")
+					.references("HFJ_RESOURCE", "RES_ID");
+		}
+
+		{
+			final Builder.BuilderAddTableByColumns resSearchUrlPartitionTable = version.addTableByColumns(
+					"20240529.1", "HFJ_RES_SEARCH_URL_PARTITION", "RES_SEARCH_URL", "PARTITION_ID");
+
+			resSearchUrlPartitionTable.addColumn("RES_SEARCH_URL").nonNullable().type(ColumnTypeEnum.STRING, 768);
+			resSearchUrlPartitionTable.addColumn("PARTITION_ID").nonNullable().type(ColumnTypeEnum.INT);
+			resSearchUrlPartitionTable.addColumn("PARTITION_DATE").nonNullable().type(ColumnTypeEnum.DATE_ONLY);
+			resSearchUrlPartitionTable.addColumn("RES_ID").nonNullable().type(ColumnTypeEnum.LONG);
+			resSearchUrlPartitionTable.addColumn("CREATED_TIME").nonNullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
+
+			resSearchUrlPartitionTable
+					.addIndex("20240529.2", "IDX_RESSEARCHURL_RES")
+					.unique(false)
+					.withColumns("RES_ID");
+			resSearchUrlPartitionTable
+					.addIndex("20240529.3", "IDX_RESSEARCHURL_TIME")
+					.unique(false)
+					.withColumns("CREATED_TIME");
+			resSearchUrlPartitionTable
+					.addForeignKey("20240529.4", "FK_RES_SEARCH_URL_RESOURCE")
 					.toColumn("RES_ID")
 					.references("HFJ_RESOURCE", "RES_ID");
 		}

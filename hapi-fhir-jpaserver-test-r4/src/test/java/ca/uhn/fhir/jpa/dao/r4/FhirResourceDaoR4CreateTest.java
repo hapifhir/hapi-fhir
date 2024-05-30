@@ -12,6 +12,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantityNormalized
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceSearchUrlEntity;
+import ca.uhn.fhir.jpa.model.entity.ResourceSearchUrlWithPartitionEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -426,12 +427,18 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		String expectedNormalizedMatchUrl = obs.fhirType() + "?" + matchUrl;
 
 		assertTrue(outcome.getCreated());
+
 		ResourceSearchUrlEntity searchUrlEntity = myResourceSearchUrlDao.findAll().get(0);
 		assertThat(searchUrlEntity, is(notNullValue()) );
 		assertThat(searchUrlEntity.getResourcePid(), equalTo(expectedResId));
 		assertThat(searchUrlEntity.getCreatedTime(), DateMatchers.within(1, SECONDS, new Date()));
 		assertThat(searchUrlEntity.getSearchUrl(), equalTo(expectedNormalizedMatchUrl));
 
+		ResourceSearchUrlWithPartitionEntity searchUrlWithPartitionEntity = myResourceSearchUrlWithPartitionDao.findAll().get(0);
+		assertThat(searchUrlWithPartitionEntity, is(notNullValue()) );
+		assertThat(searchUrlWithPartitionEntity.getResourcePid(), equalTo(expectedResId));
+		assertThat(searchUrlWithPartitionEntity.getCreatedTime(), DateMatchers.within(1, SECONDS, new Date()));
+		assertThat(searchUrlWithPartitionEntity.getSearchUrl(), equalTo(expectedNormalizedMatchUrl));
 	}
 
 	@Test
