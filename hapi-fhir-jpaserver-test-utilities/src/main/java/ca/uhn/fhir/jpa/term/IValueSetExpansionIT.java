@@ -123,7 +123,8 @@ public interface IValueSetExpansionIT {
 			value = ValueSet.FilterOperator.class,
 			mode = EnumSource.Mode.INCLUDE,
 			names = {"EQUAL", "EXISTS", "IN", "NOTIN"})
-	default void expandByIdentifier_withFiltersThatShouldNotMatchInInclude_addsNoNewCodes(ValueSet.FilterOperator theOperator) {
+	default void expandByIdentifier_withFiltersThatShouldNotMatchInInclude_addsNoNewCodes(
+			ValueSet.FilterOperator theOperator) {
 		// setup
 		IParser parser = getFhirContext().newJsonParser();
 
@@ -179,7 +180,8 @@ public interface IValueSetExpansionIT {
 			value = ValueSet.FilterOperator.class,
 			mode = EnumSource.Mode.INCLUDE,
 			names = {"EQUAL", "EXISTS", "IN", "NOTIN"})
-	default void expandByIdentifier_withBooleanFilteredValuesInInclude_addsMatchingValues(ValueSet.FilterOperator theOperator) {
+	default void expandByIdentifier_withBooleanFilteredValuesInInclude_addsMatchingValues(
+			ValueSet.FilterOperator theOperator) {
 		// setup
 		IParser parser = getFhirContext().newJsonParser();
 		// setup codesystem (nothing to do - base is already boolean friendly)
@@ -215,7 +217,8 @@ public interface IValueSetExpansionIT {
 			value = ValueSet.FilterOperator.class,
 			mode = EnumSource.Mode.INCLUDE,
 			names = {"EQUAL", "EXISTS", "IN", "NOTIN"})
-	default void expandByIdentifier_withIntegerFilteredValuesInInclude_addsMatchingValues(ValueSet.FilterOperator theOperator) {
+	default void expandByIdentifier_withIntegerFilteredValuesInInclude_addsMatchingValues(
+			ValueSet.FilterOperator theOperator) {
 		// setup
 		IParser parser = getFhirContext().newJsonParser();
 
@@ -259,7 +262,8 @@ public interface IValueSetExpansionIT {
 			value = ValueSet.FilterOperator.class,
 			mode = EnumSource.Mode.INCLUDE,
 			names = {"EQUAL", "EXISTS", "IN", "NOTIN"})
-	default void expandByIdentifier_withDecimalFilteredValuesInInclude_addsMatchingValues(ValueSet.FilterOperator theOperator) {
+	default void expandByIdentifier_withDecimalFilteredValuesInInclude_addsMatchingValues(
+			ValueSet.FilterOperator theOperator) {
 		// setup
 		IParser parser = getFhirContext().newJsonParser();
 
@@ -303,7 +307,8 @@ public interface IValueSetExpansionIT {
 			value = ValueSet.FilterOperator.class,
 			mode = EnumSource.Mode.INCLUDE,
 			names = {"EQUAL", "EXISTS", "IN", "NOTIN"})
-	default void expandByIdentifier_withDateTimeFilteredValuesInInclude_addsMatchingValues(ValueSet.FilterOperator theOperator) {
+	default void expandByIdentifier_withDateTimeFilteredValuesInInclude_addsMatchingValues(
+			ValueSet.FilterOperator theOperator) {
 		// setup
 		IParser parser = getFhirContext().newJsonParser();
 		Date now = new Date();
@@ -358,10 +363,11 @@ public interface IValueSetExpansionIT {
 
 	@ParameterizedTest
 	@EnumSource(
-		value = ValueSet.FilterOperator.class,
-		mode = EnumSource.Mode.INCLUDE,
-		names = {"EQUAL", "EXISTS", "IN", "NOTIN"})
-	default void expandByIdentifier_withBooleanFilterInExclude_doesNotAddMatchingCode(ValueSet.FilterOperator theOperator) {
+			value = ValueSet.FilterOperator.class,
+			mode = EnumSource.Mode.INCLUDE,
+			names = {"EQUAL", "EXISTS", "IN", "NOTIN"})
+	default void expandByIdentifier_withBooleanFilterInExclude_doesNotAddMatchingCode(
+			ValueSet.FilterOperator theOperator) {
 		// setup
 		IParser parser = getFhirContext().newJsonParser();
 		// setup codesystem (nothing to do - base is already boolean friendly)
@@ -394,17 +400,18 @@ public interface IValueSetExpansionIT {
 
 	@ParameterizedTest
 	@EnumSource(
-		value = ValueSet.FilterOperator.class,
-		mode = EnumSource.Mode.INCLUDE,
-		names = {"EQUAL", "EXISTS", "IN", "NOTIN"})
-	default void expandByIdentifier_withIntegerFilteredValuesInExclude_doesNotAddMatchingCode(ValueSet.FilterOperator theOperator) {
+			value = ValueSet.FilterOperator.class,
+			mode = EnumSource.Mode.INCLUDE,
+			names = {"EQUAL", "EXISTS", "IN", "NOTIN"})
+	default void expandByIdentifier_withIntegerFilteredValuesInExclude_doesNotAddMatchingCode(
+			ValueSet.FilterOperator theOperator) {
 		// setup
 		IParser parser = getFhirContext().newJsonParser();
 
 		// setup codesystem
 		CodeSystem codeSystem = parser.parseResource(CodeSystem.class, CODE_SYSTEM_STR_BASE);
 		CodeSystem.ConceptDefinitionComponent conceptDefinitionComponent =
-			codeSystem.getConcept().get(0);
+				codeSystem.getConcept().get(0);
 		CodeSystem.ConceptPropertyComponent propertyComponent = new CodeSystem.ConceptPropertyComponent();
 		propertyComponent.setCode(PROPERTY_NAME);
 		propertyComponent.setValue(new IntegerType(1));
@@ -413,7 +420,7 @@ public interface IValueSetExpansionIT {
 		// setup valueset
 		ValueSet valueSet = parser.parseResource(ValueSet.class, VALUE_SET_STR_BASE);
 		ValueSet.ConceptSetComponent conceptSetComponent =
-			valueSet.getCompose().getInclude().get(0);
+				valueSet.getCompose().getInclude().get(0);
 		ValueSet.ConceptSetFilterComponent filterComponent = new ValueSet.ConceptSetFilterComponent();
 		filterComponent.setProperty(PROPERTY_NAME);
 		filterComponent.setOp(theOperator);
@@ -437,17 +444,18 @@ public interface IValueSetExpansionIT {
 
 	@ParameterizedTest
 	@EnumSource(
-		value = ValueSet.FilterOperator.class,
-		mode = EnumSource.Mode.INCLUDE,
-		names = {"EQUAL", "EXISTS", "IN", "NOTIN"})
-	default void expandByIdentifier_withDecimalFilteredValuesInExclude_doesNotAddMatchingCode(ValueSet.FilterOperator theOperator) {
+			value = ValueSet.FilterOperator.class,
+			mode = EnumSource.Mode.INCLUDE,
+			names = {"EQUAL", "EXISTS", "IN", "NOTIN"})
+	default void expandByIdentifier_withDecimalFilteredValuesInExclude_doesNotAddMatchingCode(
+			ValueSet.FilterOperator theOperator) {
 		// setup
 		IParser parser = getFhirContext().newJsonParser();
 
 		// setup code system
 		CodeSystem codeSystem = parser.parseResource(CodeSystem.class, CODE_SYSTEM_STR_BASE);
 		CodeSystem.ConceptDefinitionComponent conceptDefinitionComponent =
-			codeSystem.getConcept().get(0);
+				codeSystem.getConcept().get(0);
 		CodeSystem.ConceptPropertyComponent propertyComponent = new CodeSystem.ConceptPropertyComponent();
 		propertyComponent.setCode(PROPERTY_NAME);
 		propertyComponent.setValue(new DecimalType(1.1));
@@ -456,7 +464,7 @@ public interface IValueSetExpansionIT {
 		// setup valueset
 		ValueSet valueSet = parser.parseResource(ValueSet.class, VALUE_SET_STR_BASE);
 		ValueSet.ConceptSetComponent conceptSetComponent =
-			valueSet.getCompose().getInclude().get(0);
+				valueSet.getCompose().getInclude().get(0);
 		ValueSet.ConceptSetFilterComponent filterComponent = new ValueSet.ConceptSetFilterComponent();
 		filterComponent.setProperty(PROPERTY_NAME);
 		filterComponent.setOp(theOperator);
@@ -480,10 +488,11 @@ public interface IValueSetExpansionIT {
 
 	@ParameterizedTest
 	@EnumSource(
-		value = ValueSet.FilterOperator.class,
-		mode = EnumSource.Mode.INCLUDE,
-		names = {"EQUAL", "EXISTS", "IN", "NOTIN"})
-	default void expandByIdentifier_withDateTimeFilteredValuesInExclude_doesNotAddMatchingCode(ValueSet.FilterOperator theOperator) {
+			value = ValueSet.FilterOperator.class,
+			mode = EnumSource.Mode.INCLUDE,
+			names = {"EQUAL", "EXISTS", "IN", "NOTIN"})
+	default void expandByIdentifier_withDateTimeFilteredValuesInExclude_doesNotAddMatchingCode(
+			ValueSet.FilterOperator theOperator) {
 		// setup
 		IParser parser = getFhirContext().newJsonParser();
 		Date now = new Date();
@@ -492,7 +501,7 @@ public interface IValueSetExpansionIT {
 		// setup codesystem
 		CodeSystem codeSystem = parser.parseResource(CodeSystem.class, CODE_SYSTEM_STR_BASE);
 		CodeSystem.ConceptDefinitionComponent conceptDefinitionComponent =
-			codeSystem.getConcept().get(0);
+				codeSystem.getConcept().get(0);
 		CodeSystem.ConceptPropertyComponent propertyComponent = new CodeSystem.ConceptPropertyComponent();
 		propertyComponent.setCode(PROPERTY_NAME);
 		propertyComponent.setValue(dt);
@@ -501,7 +510,7 @@ public interface IValueSetExpansionIT {
 		// setup valueset
 		ValueSet valueSet = parser.parseResource(ValueSet.class, VALUE_SET_STR_BASE);
 		ValueSet.ConceptSetComponent conceptSetComponent =
-			valueSet.getCompose().getInclude().get(0);
+				valueSet.getCompose().getInclude().get(0);
 		ValueSet.ConceptSetFilterComponent filterComponent = new ValueSet.ConceptSetFilterComponent();
 		filterComponent.setProperty(PROPERTY_NAME);
 		filterComponent.setOp(theOperator);
@@ -511,7 +520,7 @@ public interface IValueSetExpansionIT {
 				StringBuilder sb = new StringBuilder();
 				for (int i = 1; i < 3; i++) {
 					DateTimeType arbitraryDateTime =
-						new DateTimeType(Date.from(Instant.now().minus(i, ChronoUnit.SECONDS)));
+							new DateTimeType(Date.from(Instant.now().minus(i, ChronoUnit.SECONDS)));
 					if (!sb.isEmpty()) {
 						sb.append(",");
 					}
