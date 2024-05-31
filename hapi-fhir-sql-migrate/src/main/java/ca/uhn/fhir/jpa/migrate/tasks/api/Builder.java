@@ -26,6 +26,7 @@ import ca.uhn.fhir.jpa.migrate.taskdef.AddColumnTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.AddForeignKeyTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.AddIdGeneratorTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.AddIndexTask;
+import ca.uhn.fhir.jpa.migrate.taskdef.AddPrimaryKeyTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.AddTableByColumnTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.AddTableRawSqlTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTableTask;
@@ -47,6 +48,7 @@ import ca.uhn.fhir.jpa.migrate.taskdef.NopTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.RenameColumnTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.RenameIndexTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.RenameTableTask;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
 import org.intellij.lang.annotations.Language;
 import org.slf4j.Logger;
@@ -203,6 +205,11 @@ public class Builder {
 			return new BuilderCompleteTask(task);
 		}
 
+		// LUKETODO: do we need this?
+		//		public BuilderCompleteTask dropPrimaryKey(String theVersion, String thePrimaryKeyName) {
+		//
+		//		}
+
 		/**
 		 * Drop index without taking write lock on PG, Oracle, MSSQL.
 		 */
@@ -261,7 +268,13 @@ public class Builder {
 		}
 
 		public BuilderWithTableName.BuilderAddColumnWithName addColumn(String theVersion, String theColumnName) {
-			return new BuilderWithTableName.BuilderAddColumnWithName(myRelease, theVersion, theColumnName, this);
+			return new BuilderWithTableName.BuilderAddColumnWithName(myRelease, theVersion, theColumnName, null, this);
+		}
+
+		public BuilderWithTableName.BuilderAddColumnWithName addColumn(
+				String theVersion, String theColumnName, Object theDefaultValue) {
+			return new BuilderWithTableName.BuilderAddColumnWithName(
+					myRelease, theVersion, theColumnName, theDefaultValue, this);
 		}
 
 		public BuilderCompleteTask dropColumn(String theVersion, String theColumnName) {
@@ -316,6 +329,10 @@ public class Builder {
 
 		public Optional<BaseTask> getLastAddedTask() {
 			return Optional.ofNullable(myLastAddedTask);
+		}
+
+		public void addPrimaryKey(String theVersion, String... theColumnsInOrder) {
+			addTask(new AddPrimaryKeyTask(myRelease, theVersion, theColumnsInOrder));
 		}
 
 		/**
@@ -533,16 +550,22 @@ public class Builder {
 			private final String myRelease;
 			private final String myVersion;
 			private final String myColumnName;
+
+			@Nullable
+			private final Object myDefaultValue;
+
 			private final BaseMigrationTasks.IAcceptsTasks myTaskSink;
 
 			public BuilderAddColumnWithName(
 					String theRelease,
 					String theVersion,
 					String theColumnName,
+					@Nullable Object theDefaultValue,
 					BaseMigrationTasks.IAcceptsTasks theTaskSink) {
 				myRelease = theRelease;
 				myVersion = theVersion;
 				myColumnName = theColumnName;
+				myDefaultValue = theDefaultValue;
 				myTaskSink = theTaskSink;
 			}
 
@@ -579,6 +602,7 @@ public class Builder {
 					if (theLength != null) {
 						task.setColumnLength(theLength);
 					}
+					task.setDefaultValue(myDefaultValue);
 					myTaskSink.addTask(task);
 
 					return new BuilderCompleteTask(task);
@@ -680,6 +704,7 @@ public class Builder {
 		private final String myVersion;
 		private final AddTableByColumnTask myTask;
 
+		// LUKETOOD:  handle default value for create new table
 		public BuilderAddTableByColumns(
 				String theRelease,
 				String theVersion,
@@ -695,7 +720,7 @@ public class Builder {
 		}
 
 		public BuilderAddColumnWithName addColumn(String theColumnName) {
-			return new BuilderAddColumnWithName(myRelease, myVersion, theColumnName, this);
+			return new BuilderAddColumnWithName(myRelease, myVersion, theColumnName, null, this);
 		}
 
 		@Override

@@ -103,6 +103,7 @@ public class ModifyColumnTask extends BaseTableColumnTypeTask {
 		String sql = null;
 		String sqlNotNull = null;
 		switch (getDriverType()) {
+				// LUKETODO: support alter table set column default value later
 			case DERBY_EMBEDDED:
 				if (!alreadyOfCorrectType) {
 					sql = "alter table " + getTableName() + " alter column " + getColumnName() + " set data type "

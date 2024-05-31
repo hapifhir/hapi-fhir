@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.search;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.dao.data.IResourceSearchUrlDao;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceSearchUrlEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
@@ -51,16 +52,19 @@ public class ResourceSearchUrlSvc {
 	private final MatchUrlService myMatchUrlService;
 
 	private final FhirContext myFhirContext;
+	private final PartitionSettings myPartitionSettings;
 
 	public ResourceSearchUrlSvc(
 			EntityManager theEntityManager,
 			IResourceSearchUrlDao theResourceSearchUrlDao,
 			MatchUrlService theMatchUrlService,
-			FhirContext theFhirContext) {
+			FhirContext theFhirContext,
+			PartitionSettings thePartitionSettings) {
 		myEntityManager = theEntityManager;
 		myResourceSearchUrlDao = theResourceSearchUrlDao;
 		myMatchUrlService = theMatchUrlService;
 		myFhirContext = theFhirContext;
+		myPartitionSettings = thePartitionSettings;
 	}
 
 	/**
@@ -88,7 +92,7 @@ public class ResourceSearchUrlSvc {
 		String canonicalizedUrlForStorage = createCanonicalizedUrlForStorage(theResourceName, theMatchUrl);
 
 		ResourceSearchUrlEntity searchUrlEntity =
-				ResourceSearchUrlEntity.from(canonicalizedUrlForStorage, theResourceTable);
+				ResourceSearchUrlEntity.from(canonicalizedUrlForStorage, theResourceTable, myPartitionSettings.isSearchUrlDuplicateAcrossPartitionsEnabled());
 		// calling dao.save performs a merge operation which implies a trip to
 		// the database to see if the resource exists.  Since we don't need the check, we avoid the trip by calling
 		// em.persist.

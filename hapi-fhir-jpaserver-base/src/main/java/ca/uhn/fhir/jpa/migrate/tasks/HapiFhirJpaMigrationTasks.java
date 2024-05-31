@@ -41,6 +41,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
+import ca.uhn.fhir.jpa.model.entity.ResourceSearchUrlEntityPK;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.SearchParamPresentEntity;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
@@ -127,13 +128,52 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 	protected void init740() {
 		// Start of migrations from 7.2 to 7.4
 
-		Builder version = forVersion(VersionEnum.V7_4_0);
+		final Builder version = forVersion(VersionEnum.V7_4_0);
+		final String tableHfjResSearchUrl = "HFJ_RES_SEARCH_URL";
 
 		{
-			version.onTable("HFJ_RES_SEARCH_URL")
+			version.onTable(tableHfjResSearchUrl)
 					.addForeignKey("20240515.1", "FK_RES_SEARCH_URL_RESOURCE")
 					.toColumn("RES_ID")
 					.references("HFJ_RESOURCE", "RES_ID");
+		}
+
+		{
+			version.onTable(tableHfjResSearchUrl)
+					.addColumn("20240531.1", "PARTITION_ID", -1)
+					.nullable()
+					.type(ColumnTypeEnum.INT);
+
+			version.onTable(tableHfjResSearchUrl)
+					.addColumn("20240531.2", "PARTITION_DATE")
+					.nullable()
+					.type(ColumnTypeEnum.DATE_ONLY);
+
+			version.onTable(tableHfjResSearchUrl).dropIndex("20240531.3", "PRIMARY KEY");
+
+			version.onTable(tableHfjResSearchUrl)
+					.addIndex("20240531.4", "IDX_SEARCH_URL_PARTITION_ID")
+					.unique(true)
+					.withColumns("RES_SEARCH_URL", "PARTITION_ID");
+
+			final String updateSetPartitionIdToMinusOne = String.format("UPDATE %s SET %s = -1", tableHfjResSearchUrl, ResourceSearchUrlEntityPK.PARTITION_ID_COLUMN_NAME);
+
+			final Map<DriverTypeEnum, String> addResTagConstraint = new HashMap<>();
+			addResTagConstraint.put(DriverTypeEnum.H2_EMBEDDED, updateSetPartitionIdToMinusOne);
+			addResTagConstraint.put(DriverTypeEnum.MARIADB_10_1, updateSetPartitionIdToMinusOne);
+			addResTagConstraint.put(DriverTypeEnum.MSSQL_2012, updateSetPartitionIdToMinusOne);
+			addResTagConstraint.put(DriverTypeEnum.MYSQL_5_7, updateSetPartitionIdToMinusOne);
+			addResTagConstraint.put(DriverTypeEnum.ORACLE_12C, updateSetPartitionIdToMinusOne);
+			addResTagConstraint.put(DriverTypeEnum.POSTGRES_9_4, updateSetPartitionIdToMinusOne);
+			version.executeRawSql("20240531.5", addResTagConstraint);
+
+			version.onTable(tableHfjResSearchUrl)
+					.modifyColumn("20240531.6", ResourceSearchUrlEntityPK.PARTITION_ID_COLUMN_NAME)
+					.nonNullable()
+					.withType(ColumnTypeEnum.INT);
+
+			version.onTable(tableHfjResSearchUrl)
+				.addPrimaryKey("20240531.7", ResourceSearchUrlEntityPK.RES_SEARCH_URL_COLUMN_NAME, ResourceSearchUrlEntityPK.PARTITION_ID_COLUMN_NAME);
 		}
 	}
 

@@ -20,10 +20,10 @@
 package ca.uhn.fhir.jpa.model.entity;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ForeignKey;
-import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -31,7 +31,9 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 
+import java.time.LocalDate;
 import java.util.Date;
+import java.util.Optional;
 
 /**
  * This entity is used to enforce uniqueness on a given search URL being
@@ -45,6 +47,11 @@ import java.util.Date;
 @Entity
 @Table(
 		name = "HFJ_RES_SEARCH_URL",
+		//		uniqueConstraints = {
+		//			@UniqueConstraint(
+		//					name = "IDX_RES_ID_PARTITION_ID",
+		//					columnNames = {RES_SEARCH_URL_COLUMN_NAME, PARTITION_ID})
+		//		},
 		indexes = {
 			@Index(name = "IDX_RESSEARCHURL_RES", columnList = "RES_ID"),
 			@Index(name = "IDX_RESSEARCHURL_TIME", columnList = "CREATED_TIME")
@@ -52,12 +59,15 @@ import java.util.Date;
 public class ResourceSearchUrlEntity {
 
 	public static final String RES_SEARCH_URL_COLUMN_NAME = "RES_SEARCH_URL";
+	public static final String PARTITION_ID = "PARTITION_ID";
 
 	public static final int RES_SEARCH_URL_LENGTH = 768;
 
-	@Id
-	@Column(name = RES_SEARCH_URL_COLUMN_NAME, length = RES_SEARCH_URL_LENGTH, nullable = false)
-	private String mySearchUrl;
+	@EmbeddedId
+	private ResourceSearchUrlEntityPK myPk;
+
+	//	@Column(name = RES_SEARCH_URL_COLUMN_NAME, length = RES_SEARCH_URL_LENGTH, nullable = false)
+	//	private String mySearchUrl;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(
@@ -70,15 +80,49 @@ public class ResourceSearchUrlEntity {
 	@Column(name = "RES_ID", updatable = false, nullable = false, insertable = false)
 	private Long myResourcePid;
 
+	//	@Column(name = PARTITION_ID, nullable = true, insertable = true, updatable = false)
+	//	private Integer myPartitionId;
+
+	@Column(name = "PARTITION_DATE", nullable = true, insertable = true, updatable = false)
+	private LocalDate myPartitionDate;
+
 	@Column(name = "CREATED_TIME", nullable = false)
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date myCreatedTime;
 
-	public static ResourceSearchUrlEntity from(String theUrl, ResourceTable theResourceTable) {
+	public static ResourceSearchUrlEntity from(
+			String theUrl, ResourceTable theResourceTable, boolean theSearchUrlDuplicateAcrossPartitionsEnabled) {
+
 		return new ResourceSearchUrlEntity()
+				.setPk(ResourceSearchUrlEntityPK.from(
+						theUrl, theResourceTable, theSearchUrlDuplicateAcrossPartitionsEnabled))
+				.setPartitionDate(Optional.ofNullable(theResourceTable.getPartitionId())
+						.map(PartitionablePartitionId::getPartitionDate)
+						.orElse(null))
 				.setResourceTable(theResourceTable)
-				.setSearchUrl(theUrl)
 				.setCreatedTime(new Date());
+		//
+		//		final Optional<PartitionablePartitionId> optPartitionId =
+		//			Optional.ofNullable(theResourceTable.getPartitionId());
+		//		return new ResourceSearchUrlEntity()
+		//				.setResourceTable(theResourceTable)
+		//				.setSearchUrl(theUrl)
+		//				.setCreatedTime(new Date())
+		//				.setPartitionId(optPartitionId
+		//						.map(PartitionablePartitionId::getPartitionId)
+		//						.orElse(null))
+		//				.setPartitionDate(optPartitionId
+		//						.map(PartitionablePartitionId::getPartitionDate)
+		//						.orElse(null));
+	}
+
+	public ResourceSearchUrlEntityPK getPk() {
+		return myPk;
+	}
+
+	public ResourceSearchUrlEntity setPk(ResourceSearchUrlEntityPK thePk) {
+		myPk = thePk;
+		return this;
 	}
 
 	public Long getResourcePid() {
@@ -111,12 +155,30 @@ public class ResourceSearchUrlEntity {
 		return this;
 	}
 
-	public String getSearchUrl() {
-		return mySearchUrl;
+	//	public String getSearchUrl() {
+	//		return mySearchUrl;
+	//	}
+	//
+	//	public ResourceSearchUrlEntity setSearchUrl(String theSearchUrl) {
+	//		mySearchUrl = theSearchUrl;
+	//		return this;
+	//	}
+	//
+	//	public Integer getPartitionId() {
+	//		return myPartitionId;
+	//	}
+	//
+	//	public ResourceSearchUrlEntity setPartitionId(Integer thePartitionId) {
+	//		myPartitionId = thePartitionId;
+	//		return this;
+	//	}
+
+	public LocalDate getPartitionDate() {
+		return myPartitionDate;
 	}
 
-	public ResourceSearchUrlEntity setSearchUrl(String theSearchUrl) {
-		mySearchUrl = theSearchUrl;
+	public ResourceSearchUrlEntity setPartitionDate(LocalDate thePartitionDate) {
+		myPartitionDate = thePartitionDate;
 		return this;
 	}
 }
