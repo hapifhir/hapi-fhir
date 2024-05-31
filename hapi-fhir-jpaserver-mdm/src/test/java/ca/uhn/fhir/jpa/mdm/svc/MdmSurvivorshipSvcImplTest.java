@@ -14,7 +14,6 @@ import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.model.CanonicalEID;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.model.mdmevents.MdmLinkJson;
-import ca.uhn.fhir.mdm.model.mdmevents.MdmLinkWithRevisionJson;
 import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
 import ca.uhn.fhir.mdm.svc.MdmSurvivorshipSvcImpl;
 import ca.uhn.fhir.mdm.util.EIDHelper;
@@ -25,8 +24,9 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -96,10 +96,12 @@ public class MdmSurvivorshipSvcImplTest {
 	}
 
 	@SuppressWarnings({"rawtypes", "unchecked"})
-	@Test
-	public void rebuildGoldenResourceCurrentLinksUsingSurvivorshipRules_withManyLinks_rebuildsInUpdateOrder() {
+	@ParameterizedTest
+	@ValueSource(booleans = {true,false})
+	public void rebuildGoldenResourceCurrentLinksUsingSurvivorshipRules_withManyLinks_rebuildsInUpdateOrder(boolean theIsUseNonNumericId) {
 		// setup
 		// create resources
+		int goldenId = 777;
 		Patient goldenPatient = new Patient();
 		goldenPatient.addAddress()
 			.setCity("Toronto")
@@ -107,13 +109,13 @@ public class MdmSurvivorshipSvcImplTest {
 		goldenPatient.addName()
 			.setFamily("Doe")
 			.addGiven("Jane");
-		goldenPatient.setId("Patient/777");
+		goldenPatient.setId("Patient/" + goldenId);
 		MdmResourceUtil.setMdmManaged(goldenPatient);
 		MdmResourceUtil.setGoldenResource(goldenPatient);
 
 		List<IBaseResource> resources = new ArrayList<>();
 		List<MdmLinkJson> links = new ArrayList<>();
-		List<MdmLinkWithRevisionJson> linksWithRevisions = new ArrayList<>();
+
 		for (int i = 0; i < 10; i++) {
 			// we want our resources to be slightly different
 			Patient patient = new Patient();
@@ -126,21 +128,16 @@ public class MdmSurvivorshipSvcImplTest {
 			patient.addIdentifier()
 				.setSystem("http://example.com")
 				.setValue("Value" + i);
-			patient.setId("Patient/" + i);
+			patient.setId("Patient/" + (theIsUseNonNumericId ? "pat" + i : Integer.toString(i)));
 			resources.add(patient);
 
 			MdmLinkJson link = createLinkJson(
 				patient,
 				goldenPatient
 			);
+			link.setSourcePid(JpaPid.fromId((long)i));
+			link.setGoldenPid(JpaPid.fromId((long)goldenId));
 			links.add(link);
-			linksWithRevisions.add(new MdmLinkWithRevisionJson(
-				link,
-				1L,
-				Date.from(
-					Instant.now().minus(i, ChronoUnit.HOURS)
-				)
-			));
 		}
 
 		IFhirResourceDao resourceDao = mock(IFhirResourceDao.class);

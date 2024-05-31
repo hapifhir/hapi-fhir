@@ -20,6 +20,7 @@
 package ca.uhn.fhir.mdm.svc;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
@@ -31,17 +32,22 @@ import ca.uhn.fhir.mdm.api.params.MdmQuerySearchParameters;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.model.mdmevents.MdmLinkJson;
 import ca.uhn.fhir.mdm.util.GoldenResourceHelper;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.util.TerserUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.data.domain.Page;
 
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 public class MdmSurvivorshipSvcImpl implements IMdmSurvivorshipService {
+	private static final Pattern IS_UUID =
+			Pattern.compile("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}");
 
 	protected final FhirContext myFhirContext;
 
@@ -113,7 +119,15 @@ public class MdmSurvivorshipSvcImpl implements IMdmSurvivorshipService {
 
 		// save it
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(goldenResource.fhirType());
-		dao.update(toSave, new SystemRequestDetails());
+
+		SystemRequestDetails requestDetails = new SystemRequestDetails();
+		// if using partitions, we should save to the correct partition
+		Object resourcePartitionIdObj = toSave.getUserData(Constants.RESOURCE_PARTITION_ID);
+		if (resourcePartitionIdObj instanceof RequestPartitionId) {
+			RequestPartitionId partitionId = (RequestPartitionId) resourcePartitionIdObj;
+			requestDetails.setRequestPartitionId(partitionId);
+		}
+		dao.update(toSave, requestDetails);
 
 		return (T) toSave;
 	}
@@ -130,19 +144,17 @@ public class MdmSurvivorshipSvcImpl implements IMdmSurvivorshipService {
 		Page<MdmLinkJson> linksQuery = myMdmLinkQuerySvc.queryLinks(searchParameters, theMdmTransactionContext);
 
 		return linksQuery.get().map(link -> {
-			String sourceId = link.getSourceId();
-
-			// +1 because of "/" in id: "ResourceType/Id"
-			IResourcePersistentId<?> pid = getResourcePID(sourceId.substring(resourceType.length() + 1), resourceType);
-
-			// this might be a bit unperformant
-			// but it depends how many links there are
-			// per golden resource (unlikely to be thousands)
+			IResourcePersistentId<?> pid = link.getSourcePid();
 			return dao.readByPid(pid);
 		});
 	}
 
 	private IResourcePersistentId<?> getResourcePID(String theId, String theResourceType) {
 		return myIIdHelperService.newPidFromStringIdAndResourceName(theId, theResourceType);
+	}
+
+	private boolean isNumericOrUuid(String theLongCandidate) {
+		return StringUtils.isNumeric(theLongCandidate)
+				|| IS_UUID.matcher(theLongCandidate).matches();
 	}
 }

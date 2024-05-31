@@ -81,7 +81,6 @@ public abstract class BaseHttpClient implements IHttpClient {
 		}
 
 		theHttpRequest.addHeader("User-Agent", HttpClientUtil.createUserAgentString(theContext, "apache"));
-		theHttpRequest.addHeader("Accept-Charset", "utf-8");
 		theHttpRequest.addHeader("Accept-Encoding", "gzip");
 
 		addHeaderIfNoneExist(theHttpRequest);
