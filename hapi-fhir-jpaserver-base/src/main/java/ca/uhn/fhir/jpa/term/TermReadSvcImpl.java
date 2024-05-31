@@ -106,7 +106,6 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.IndexSearcher;
 import org.hibernate.CacheMode;
-import org.hibernate.search.engine.search.predicate.SearchPredicate;
 import org.hibernate.search.engine.search.predicate.dsl.BooleanPredicateClausesStep;
 import org.hibernate.search.engine.search.predicate.dsl.PredicateFinalStep;
 import org.hibernate.search.engine.search.predicate.dsl.SearchPredicateFactory;
@@ -1162,7 +1161,6 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		int accumulatedBatchesSoFar = 0;
 		for (var next : searchProps.getSearchScroll()) {
 			try (SearchScroll<EntityReference> scroll = next.get()) {
-
 				ourLog.debug(
 						"Beginning batch expansion for {} with max results per batch: {}",
 						(theAdd ? "inclusion" : "exclusion"),
@@ -1397,7 +1395,10 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			return;
 		}
 
-		if (isBlank(theFilter.getValue()) || theFilter.getOp() == null || isBlank(theFilter.getProperty())) {
+		// if filter type is EXISTS, there's no reason to worry about the value (we won't set it anyways)
+		if ((isBlank(theFilter.getValue()) && theFilter.getOp() != ValueSet.FilterOperator.EXISTS)
+				|| theFilter.getOp() == null
+				|| isBlank(theFilter.getProperty())) {
 			throw new InvalidRequestException(
 					Msg.code(891) + "Invalid filter, must have fields populated: property op value");
 		}
@@ -1444,37 +1445,37 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			ValueSet.ConceptSetFilterComponent theFilter) {
 
 		String value = theFilter.getValue();
-		Term term = new Term(CONCEPT_PROPERTY_PREFIX_NAME + theFilter.getProperty(), value);
-		switch (theFilter.getOp()) {
-			case EQUAL:
-				theB.must(theF.match().field(term.field()).matching(term.text()));
-				break;
-			case EXISTS:
-				theB.must(theF.exists().field(term.field()));
-				break;
-			case IN:
-			case NOTIN:
-				boolean isNotFilter = theFilter.getOp() == ValueSet.FilterOperator.NOTIN;
-				// IN and NOTIN expect comma separated lists
-				String[] values = term.field().split(",");
-				for (String v : values) {
+		if (theFilter.getOp() == ValueSet.FilterOperator.EXISTS) {
+			// EXISTS has no value and is thus handled differently
+			Term term = new Term(CONCEPT_PROPERTY_PREFIX_NAME + theFilter.getProperty());
+			theB.must(theF.exists().field(term.field()));
+		} else {
+			Term term = new Term(CONCEPT_PROPERTY_PREFIX_NAME + theFilter.getProperty(), value);
+			switch (theFilter.getOp()) {
+				case EQUAL:
+					theB.must(theF.match().field(term.field()).matching(term.text()));
+					break;
+				case IN:
+				case NOTIN:
+					boolean isNotFilter = theFilter.getOp() == ValueSet.FilterOperator.NOTIN;
+					// IN and NOTIN expect comma separated lists
+					String[] values = term.text().split(",");
+					Set<String> valueSet = new HashSet<>(Arrays.asList(values));
 					if (isNotFilter) {
-						// NOTIN is an AND of not-ed terms
-						theF.and().add(theF.not(theF.match().field(term.field()).matching(v)));
+						theB.filter(theF.not(theF.terms().field(term.field()).matchingAny(valueSet)));
 					} else {
-						// IN is an OR of terms
-						theF.or().add(theF.match().field(term.field()).matching(v));
+						theB.filter(theF.terms().field(term.field()).matchingAny(valueSet));
 					}
-				}
-				break;
-			case NULL:
-				theB.must(theF.not(theF.exists().field(term.field())));
-				break;
-			default:
-				// NB: we do not need to handle REGEX, because that is handled
-				// in the parent
-
-				break;
+					break;
+				default:
+					/*
+					 * We do not need to handle REGEX, because that's handled in parent
+					 * We also don't handle EXISTS because that's a separate area (with different term)
+					 */
+					throw new InvalidRequestException(Msg.code(2526) + "Unsupported property filter "
+							+ theFilter.getOp().getDisplay());
+					break;
+			}
 		}
 	}
 
@@ -1654,7 +1655,8 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	}
 
 	@Nonnull
-	private TermConcept findCodeForFilterCriteriaCodeOrConcept(String theSystem, ValueSet.ConceptSetFilterComponent theFilter) {
+	private TermConcept findCodeForFilterCriteriaCodeOrConcept(
+			String theSystem, ValueSet.ConceptSetFilterComponent theFilter) {
 		return findCode(theSystem, theFilter.getValue())
 				.orElseThrow(() ->
 						new InvalidRequestException(Msg.code(2071) + "Invalid filter criteria - code does not exist: {"

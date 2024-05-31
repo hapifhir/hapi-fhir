@@ -27,6 +27,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public interface IValueSetExpansionIT {
 	static final String CODE_SYSTEM_CODE = "PRODUCT-MULTI-SOURCE";
@@ -34,76 +35,77 @@ public interface IValueSetExpansionIT {
 
 	static final String INCLUDE_SYSTEM = "https://health.gov.on.ca/idms/fhir/CodeSystem/Internal-Product-Types";
 
-
-	static final String CODE_SYSTEM_STR_BASE = """
+	static final String CODE_SYSTEM_STR_BASE =
+			"""
 								{
-							      "resourceType": "CodeSystem",
-							      "id": "4fb48e4e-57a4-4844-be74-d93707bdf9a1",
-							      "meta": {
-							          "versionId": "4",
-							          "lastUpdated": "2024-01-16T19:10:18.370+00:00",
-							          "source": "#c8957026d46dfab5"
-							      },
-							      "url": "https://health.gov.on.ca/idms/fhir/CodeSystem/Internal-Product-Types",
-							      "version": "1.0.0",
-							      "name": "IDMS-Internal-Product-Types",
-							      "status": "active",
-							      "date": "2024-01-10",
-							      "publisher": "IDMS",
-							      "description": "This contains a lists of Product Type codes.",
-							      "content": "complete",
-							      "property": [{
-							      		"code": "ACTIVE",
-							      		"type": "boolean"
-							      }],
-							      "concept": [
-							          {
-							              "code": "PRODUCT-MULTI-SOURCE",
-							              "display": "Multi source drug product streamlined or Multi source drug product non- streamlined",
-							              "property": [
-							                  {
-							                      "code": "ACTIVE",
-							                      "valueBoolean": true
-							                  }
-							              ]
-							          }
-							      ]
-							  }
+								"resourceType": "CodeSystem",
+								"id": "4fb48e4e-57a4-4844-be74-d93707bdf9a1",
+								"meta": {
+									"versionId": "4",
+									"lastUpdated": "2024-01-16T19:10:18.370+00:00",
+									"source": "#c8957026d46dfab5"
+								},
+								"url": "https://health.gov.on.ca/idms/fhir/CodeSystem/Internal-Product-Types",
+								"version": "1.0.0",
+								"name": "IDMS-Internal-Product-Types",
+								"status": "active",
+								"date": "2024-01-10",
+								"publisher": "IDMS",
+								"description": "This contains a lists of Product Type codes.",
+								"content": "complete",
+								"property": [{
+										"code": "ACTIVE",
+										"type": "boolean"
+								}],
+								"concept": [
+									{
+										"code": "PRODUCT-MULTI-SOURCE",
+										"display": "Multi source drug product streamlined or Multi source drug product non- streamlined",
+										"property": [
+											{
+												"code": "ACTIVE",
+												"valueBoolean": true
+											}
+										]
+									}
+								]
+							}
 					""";
 
-	static final String VALUE_SET_STR_BASE = """
+	static final String VALUE_SET_STR_BASE =
+			"""
 						{
-						     "resourceType": "ValueSet",
-						     "id": "e0324e95-6d5c-4b08-8832-d5f5cd00a29a",
-						     "meta": {
-						         "versionId": "7",
-						         "lastUpdated": "2024-01-16T19:03:43.313+00:00",
-						         "source": "#1f91b035f91cd290"
-						     },
-						     "url": "https://health.gov.on.ca/idms/fhir/ValueSet/IDMS-Product-Types",
-						     "version": "1.0.0",
-						     "name": "IDMS-Product-Types",
-						     "title": "IDMS Product Types",
-						     "status": "active",
-						     "experimental": false,
-						     "date": "2024-01-16",
-						     "publisher": "IDMS",
-						     "description": "List of Product Types",
-						     "compose": {
-						         "include": [
-						             {
-						                 "system": "https://health.gov.on.ca/idms/fhir/CodeSystem/Internal-Product-Types",
-						                 "filter": [
-						                     {
-						                         "property": "ACTIVE",
-						                         "op": "=",
-						                         "value": "true"
-						                     }
-						                 ]
-						             }
-						         ]
-						     }
-						 }
+							"resourceType": "ValueSet",
+							"id": "e0324e95-6d5c-4b08-8832-d5f5cd00a29a",
+							"meta": {
+								"versionId": "7",
+								"lastUpdated": "2024-01-16T19:03:43.313+00:00",
+								"source": "#1f91b035f91cd290"
+							},
+							"url": "https://health.gov.on.ca/idms/fhir/ValueSet/IDMS-Product-Types",
+							"version": "1.0.0",
+							"name": "IDMS-Product-Types",
+							"title": "IDMS Product Types",
+							"status": "active",
+							"experimental": false,
+							"date": "2024-01-16",
+							"publisher": "IDMS",
+							"description": "List of Product Types",
+							"compose": {
+								"include": [
+									{
+										"system": "https://health.gov.on.ca/idms/fhir/CodeSystem/Internal-Product-Types",
+										"filter": [
+											{
+												"property": "ACTIVE",
+												"op": "=",
+												"value": "true"
+											}
+										]
+									}
+								]
+							}
+						}
 					""";
 
 	FhirContext getFhirContext();
@@ -119,12 +121,67 @@ public interface IValueSetExpansionIT {
 	JpaStorageSettings getJpaStorageSettings();
 
 	@ParameterizedTest
-	@EnumSource(value = ValueSet.FilterOperator.class,
-		mode = EnumSource.Mode.INCLUDE,
-		names = {
-		"EQUAL", "EXISTS", "IN", "NOTIN"
-	})
-	default void expandByIdentifier_withBooleanFilteredValues_worksAsExpected(ValueSet.FilterOperator theOperator) {
+	@EnumSource(
+			value = ValueSet.FilterOperator.class,
+			mode = EnumSource.Mode.INCLUDE,
+			names = {"EQUAL", "EXISTS", "IN", "NOTIN"})
+	default void expandByIdentifier_withFiltersThatShouldNotMatch_addsNoNewCodes(ValueSet.FilterOperator theOperator) {
+		// setup
+		IParser parser = getFhirContext().newJsonParser();
+
+		// setup codesystem
+		CodeSystem codeSystem = parser.parseResource(CodeSystem.class, CODE_SYSTEM_STR_BASE);
+		CodeSystem.ConceptDefinitionComponent conceptDefinitionComponent =
+				codeSystem.getConcept().get(0);
+		CodeSystem.ConceptPropertyComponent propertyComponent = new CodeSystem.ConceptPropertyComponent();
+		propertyComponent.setCode(PROPERTY_NAME);
+		propertyComponent.setValue(new IntegerType(1));
+		conceptDefinitionComponent.setProperty(List.of(propertyComponent));
+
+		// setup valueset
+		ValueSet valueSet = parser.parseResource(ValueSet.class, VALUE_SET_STR_BASE);
+		ValueSet.ConceptSetComponent conceptSetComponent =
+				valueSet.getCompose().getInclude().get(0);
+		ValueSet.ConceptSetFilterComponent filterComponent = new ValueSet.ConceptSetFilterComponent();
+		filterComponent.setProperty(PROPERTY_NAME);
+		filterComponent.setOp(theOperator);
+		switch (theOperator) {
+			case EXISTS:
+				filterComponent.setProperty(PROPERTY_NAME + "-not");
+				filterComponent.setValue(null);
+				break;
+			case IN:
+				filterComponent.setValue("2,3,4");
+				break;
+			case NOTIN:
+				filterComponent.setValue("1,2,3");
+				break;
+			case EQUAL:
+				filterComponent.setValue("2");
+				break;
+			default:
+				// just in case
+				fail(theOperator.getDisplay() + " is not added for testing");
+				break;
+		}
+		conceptSetComponent.setFilter(List.of(filterComponent));
+
+		// test
+		boolean preExpand = getJpaStorageSettings().isPreExpandValueSets();
+		getJpaStorageSettings().setPreExpandValueSets(true);
+		try {
+			ValueSet expanded = doFailedValueSetExpansionTest(codeSystem, valueSet);
+		} finally {
+			getJpaStorageSettings().setPreExpandValueSets(preExpand);
+		}
+	}
+
+	@ParameterizedTest
+	@EnumSource(
+			value = ValueSet.FilterOperator.class,
+			mode = EnumSource.Mode.INCLUDE,
+			names = {"EQUAL", "EXISTS", "IN", "NOTIN"})
+	default void expandByIdentifier_withBooleanFilteredValues_addsMatchingValues(ValueSet.FilterOperator theOperator) {
 		// setup
 		IParser parser = getFhirContext().newJsonParser();
 		// setup codesystem (nothing to do - base is already boolean friendly)
@@ -132,8 +189,8 @@ public interface IValueSetExpansionIT {
 
 		// setup valueset
 		ValueSet valueSet = parser.parseResource(ValueSet.class, VALUE_SET_STR_BASE);
-		ValueSet.ConceptSetComponent conceptSetComponent = valueSet.getCompose()
-			.getInclude().get(0);
+		ValueSet.ConceptSetComponent conceptSetComponent =
+				valueSet.getCompose().getInclude().get(0);
 		ValueSet.ConceptSetFilterComponent filterComponent = new ValueSet.ConceptSetFilterComponent();
 		filterComponent.setProperty(PROPERTY_NAME);
 		filterComponent.setOp(theOperator);
@@ -148,27 +205,26 @@ public interface IValueSetExpansionIT {
 		getJpaStorageSettings().setPreExpandValueSets(true);
 		try {
 			ValueSet expanded = doSuccessfulValueSetExpansionTest(codeSystem, valueSet);
-			assertTrue(expanded.getExpansion()
-				.getContains().stream().anyMatch(c -> c.getCode().equals(CODE_SYSTEM_CODE)));
+			assertTrue(expanded.getExpansion().getContains().stream()
+					.anyMatch(c -> c.getCode().equals(CODE_SYSTEM_CODE)));
 		} finally {
 			getJpaStorageSettings().setPreExpandValueSets(preExpand);
 		}
 	}
 
 	@ParameterizedTest
-	@EnumSource(value = ValueSet.FilterOperator.class,
-		mode = EnumSource.Mode.INCLUDE,
-		names = {
-		"EQUAL", "EXISTS", "IN", "NOTIN"
-	})
-	default void expandByIdentifier_withIntegerFilteredValues_worksAsExpected(ValueSet.FilterOperator theOperator) {
+	@EnumSource(
+			value = ValueSet.FilterOperator.class,
+			mode = EnumSource.Mode.INCLUDE,
+			names = {"EQUAL", "EXISTS", "IN", "NOTIN"})
+	default void expandByIdentifier_withIntegerFilteredValues_addsMatchingValues(ValueSet.FilterOperator theOperator) {
 		// setup
 		IParser parser = getFhirContext().newJsonParser();
 
 		// setup codesystem
 		CodeSystem codeSystem = parser.parseResource(CodeSystem.class, CODE_SYSTEM_STR_BASE);
-		CodeSystem.ConceptDefinitionComponent conceptDefinitionComponent = codeSystem.getConcept()
-			.get(0);
+		CodeSystem.ConceptDefinitionComponent conceptDefinitionComponent =
+				codeSystem.getConcept().get(0);
 		CodeSystem.ConceptPropertyComponent propertyComponent = new CodeSystem.ConceptPropertyComponent();
 		propertyComponent.setCode(PROPERTY_NAME);
 		propertyComponent.setValue(new IntegerType(1));
@@ -176,8 +232,8 @@ public interface IValueSetExpansionIT {
 
 		// setup valueset
 		ValueSet valueSet = parser.parseResource(ValueSet.class, VALUE_SET_STR_BASE);
-		ValueSet.ConceptSetComponent conceptSetComponent = valueSet.getCompose()
-			.getInclude().get(0);
+		ValueSet.ConceptSetComponent conceptSetComponent =
+				valueSet.getCompose().getInclude().get(0);
 		ValueSet.ConceptSetFilterComponent filterComponent = new ValueSet.ConceptSetFilterComponent();
 		filterComponent.setProperty(PROPERTY_NAME);
 		filterComponent.setOp(theOperator);
@@ -193,25 +249,26 @@ public interface IValueSetExpansionIT {
 		try {
 			ValueSet expanded = doSuccessfulValueSetExpansionTest(codeSystem, valueSet);
 
-			assertTrue(expanded.getExpansion()
-				.getContains().stream().anyMatch(c -> c.getCode().equals(CODE_SYSTEM_CODE)));
+			assertTrue(expanded.getExpansion().getContains().stream()
+					.anyMatch(c -> c.getCode().equals(CODE_SYSTEM_CODE)));
 		} finally {
 			getJpaStorageSettings().setPreExpandValueSets(preExpand);
 		}
 	}
 
 	@ParameterizedTest
-	@EnumSource(value = ValueSet.FilterOperator.class,
-		mode = EnumSource.Mode.INCLUDE,
-		names = { "EQUAL", "EXISTS", "IN", "NOTIN" })
-	default void expandByIdentifier_withDecimalFilteredValues_worksAsExpected(ValueSet.FilterOperator theOperator) {
+	@EnumSource(
+			value = ValueSet.FilterOperator.class,
+			mode = EnumSource.Mode.INCLUDE,
+			names = {"EQUAL", "EXISTS", "IN", "NOTIN"})
+	default void expandByIdentifier_withDecimalFilteredValues_addsMatchingValues(ValueSet.FilterOperator theOperator) {
 		// setup
 		IParser parser = getFhirContext().newJsonParser();
 
 		// setup code system
 		CodeSystem codeSystem = parser.parseResource(CodeSystem.class, CODE_SYSTEM_STR_BASE);
-		CodeSystem.ConceptDefinitionComponent conceptDefinitionComponent = codeSystem.getConcept()
-			.get(0);
+		CodeSystem.ConceptDefinitionComponent conceptDefinitionComponent =
+				codeSystem.getConcept().get(0);
 		CodeSystem.ConceptPropertyComponent propertyComponent = new CodeSystem.ConceptPropertyComponent();
 		propertyComponent.setCode(PROPERTY_NAME);
 		propertyComponent.setValue(new DecimalType(1.1));
@@ -219,8 +276,8 @@ public interface IValueSetExpansionIT {
 
 		// setup valueset
 		ValueSet valueSet = parser.parseResource(ValueSet.class, VALUE_SET_STR_BASE);
-		ValueSet.ConceptSetComponent conceptSetComponent = valueSet.getCompose()
-			.getInclude().get(0);
+		ValueSet.ConceptSetComponent conceptSetComponent =
+				valueSet.getCompose().getInclude().get(0);
 		ValueSet.ConceptSetFilterComponent filterComponent = new ValueSet.ConceptSetFilterComponent();
 		filterComponent.setProperty(PROPERTY_NAME);
 		filterComponent.setOp(theOperator);
@@ -236,18 +293,19 @@ public interface IValueSetExpansionIT {
 		try {
 			ValueSet expanded = doSuccessfulValueSetExpansionTest(codeSystem, valueSet);
 
-			assertTrue(expanded.getExpansion()
-				.getContains().stream().anyMatch(c -> c.getCode().equals(CODE_SYSTEM_CODE)));
+			assertTrue(expanded.getExpansion().getContains().stream()
+					.anyMatch(c -> c.getCode().equals(CODE_SYSTEM_CODE)));
 		} finally {
 			getJpaStorageSettings().setPreExpandValueSets(preExpand);
 		}
 	}
 
 	@ParameterizedTest
-	@EnumSource(value = ValueSet.FilterOperator.class,
-		mode = EnumSource.Mode.INCLUDE,
-		names = { "EQUAL", "EXISTS", "IN", "NOTIN" })
-	default void expandByIdentifier_withDateTimeFilteredValues_worksAsExpected(ValueSet.FilterOperator theOperator) {
+	@EnumSource(
+			value = ValueSet.FilterOperator.class,
+			mode = EnumSource.Mode.INCLUDE,
+			names = {"EQUAL", "EXISTS", "IN", "NOTIN"})
+	default void expandByIdentifier_withDateTimeFilteredValues_addsMatchingValues(ValueSet.FilterOperator theOperator) {
 		// setup
 		IParser parser = getFhirContext().newJsonParser();
 		Date now = new Date();
@@ -255,8 +313,8 @@ public interface IValueSetExpansionIT {
 
 		// setup codesystem
 		CodeSystem codeSystem = parser.parseResource(CodeSystem.class, CODE_SYSTEM_STR_BASE);
-		CodeSystem.ConceptDefinitionComponent conceptDefinitionComponent = codeSystem.getConcept()
-			.get(0);
+		CodeSystem.ConceptDefinitionComponent conceptDefinitionComponent =
+				codeSystem.getConcept().get(0);
 		CodeSystem.ConceptPropertyComponent propertyComponent = new CodeSystem.ConceptPropertyComponent();
 		propertyComponent.setCode(PROPERTY_NAME);
 		propertyComponent.setValue(dt);
@@ -264,8 +322,8 @@ public interface IValueSetExpansionIT {
 
 		// setup valueset
 		ValueSet valueSet = parser.parseResource(ValueSet.class, VALUE_SET_STR_BASE);
-		ValueSet.ConceptSetComponent conceptSetComponent = valueSet.getCompose()
-			.getInclude().get(0);
+		ValueSet.ConceptSetComponent conceptSetComponent =
+				valueSet.getCompose().getInclude().get(0);
 		ValueSet.ConceptSetFilterComponent filterComponent = new ValueSet.ConceptSetFilterComponent();
 		filterComponent.setProperty(PROPERTY_NAME);
 		filterComponent.setOp(theOperator);
@@ -275,9 +333,8 @@ public interface IValueSetExpansionIT {
 			case NOTIN -> {
 				StringBuilder sb = new StringBuilder();
 				for (int i = 1; i < 3; i++) {
-					DateTimeType arbitraryDateTime = new DateTimeType(
-						Date.from(Instant.now().minus(i, ChronoUnit.SECONDS))
-					);
+					DateTimeType arbitraryDateTime =
+							new DateTimeType(Date.from(Instant.now().minus(i, ChronoUnit.SECONDS)));
 					if (!sb.isEmpty()) {
 						sb.append(",");
 					}
@@ -294,22 +351,58 @@ public interface IValueSetExpansionIT {
 		try {
 			ValueSet expanded = doSuccessfulValueSetExpansionTest(codeSystem, valueSet);
 
-			assertTrue(expanded.getExpansion()
-				.getContains().stream().anyMatch(c -> c.getCode().equals(CODE_SYSTEM_CODE)));
+			assertTrue(expanded.getExpansion().getContains().stream()
+					.anyMatch(c -> c.getCode().equals(CODE_SYSTEM_CODE)));
 		} finally {
 			getJpaStorageSettings().setPreExpandValueSets(preExpand);
 		}
 	}
 
+	/**
+	 * Runs the test for value set expansion that will find no new codes to add
+	 * @param theCodeSystem
+	 * @param theValueSet
+	 * @return
+	 */
+	private ValueSet doFailedValueSetExpansionTest(CodeSystem theCodeSystem, ValueSet theValueSet) {
+		ValueSet expandedValueSet = createCodeSystemAndValueSetAndReturnExpandedValueSet(theCodeSystem, theValueSet);
+
+		// validate
+		assertNotNull(expandedValueSet);
+		assertNotNull(expandedValueSet.getExpansion());
+		assertTrue(expandedValueSet.getExpansion().getContains().isEmpty());
+
+		// pass back for additional validation
+		return expandedValueSet;
+	}
+
+	/**
+	 * Runs the test for value set expansion that will find codes to add
+	 * @param theCodeSystem
+	 * @param theValueSet
+	 * @return
+	 */
 	private ValueSet doSuccessfulValueSetExpansionTest(CodeSystem theCodeSystem, ValueSet theValueSet) {
+		ValueSet expandedValueSet = createCodeSystemAndValueSetAndReturnExpandedValueSet(theCodeSystem, theValueSet);
+
+		// validate
+		assertNotNull(expandedValueSet);
+		assertNotNull(expandedValueSet.getExpansion());
+		assertFalse(expandedValueSet.getExpansion().getContains().isEmpty());
+
+		// pass back for additional validation
+		return expandedValueSet;
+	}
+
+	private ValueSet createCodeSystemAndValueSetAndReturnExpandedValueSet(
+			CodeSystem theCodeSystem, ValueSet theValueSet) {
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
 		String url = "https://health.gov.on.ca/idms/fhir/ValueSet/IDMS-Product-Types";
 
 		// create the code system
 		{
 			@SuppressWarnings("unchecked")
-			IFhirResourceDao<CodeSystem> codeSystemDao = getDaoRegistry()
-				.getResourceDao("CodeSystem");
+			IFhirResourceDao<CodeSystem> codeSystemDao = getDaoRegistry().getResourceDao("CodeSystem");
 			DaoMethodOutcome outcome = codeSystemDao.create(theCodeSystem, requestDetails);
 			theCodeSystem.setId(outcome.getId());
 			getTerminologyDefferedStorageService().saveAllDeferred();
@@ -317,8 +410,7 @@ public interface IValueSetExpansionIT {
 		// create the value set
 		{
 			@SuppressWarnings("unchecked")
-			IFhirResourceDao<ValueSet> valueSetDao = getDaoRegistry()
-				.getResourceDao("ValueSet");
+			IFhirResourceDao<ValueSet> valueSetDao = getDaoRegistry().getResourceDao("ValueSet");
 			DaoMethodOutcome outcome = valueSetDao.create(theValueSet, requestDetails);
 			theValueSet.setId(outcome.getId());
 			getTerminologyReadSvc().preExpandDeferredValueSetsToTerminologyTables();
@@ -327,14 +419,6 @@ public interface IValueSetExpansionIT {
 		// test
 		ValueSetExpansionOptions options = new ValueSetExpansionOptions();
 		ValueSet expandedValueSet = getValueSetDao().expandByIdentifier(url, options);
-
-		// validate
-		assertNotNull(expandedValueSet);
-		assertNotNull(expandedValueSet.getExpansion());
-		assertFalse(expandedValueSet.getExpansion()
-			.getContains().isEmpty());
-
-		// pass back for additional validation
 		return expandedValueSet;
 	}
 }
