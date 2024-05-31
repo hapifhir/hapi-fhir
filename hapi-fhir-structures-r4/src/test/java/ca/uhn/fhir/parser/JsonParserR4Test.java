@@ -45,6 +45,7 @@ import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Type;
+import org.hl7.fhir.r4.model.codesystems.DataAbsentReason;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -73,6 +74,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.hamcrest.core.IsNot.not;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -1188,6 +1190,40 @@ public class JsonParserR4Test extends BaseTest {
 		String expected = "{\"resourceType\":\"Patient\",\"id\":\"123\",\"active\":true}";
 		String actual = ourCtx.newJsonParser().encodeToString(p);
 		assertEquals(expected, actual);
+	}
+
+	@Test
+	public void testObjectWithBothPrimitiverAndArrayAlternatives() {
+		String resource = "{\n" +
+			"    \"resourceType\": \"Practitioner\",\n" +
+			"    \"id\": \"1\",\n" +
+			"    \"name\": [{\n" +
+			"            \"_family\": {\n" +
+			"                \"extension\": [{\n" +
+			"                        \"url\": \"http://hl7.org/fhir/StructureDefinition/data-absent-reason\",\n" +
+			"                        \"valueString\": \"masked\"\n" +
+			"                    }\n" +
+			"                ]\n" +
+			"            },\n" +
+			"            \"given\": [\n" +
+			"                null\n" +
+			"            ],\n" +
+			"            \"_given\": [{\n" +
+			"                    \"extension\": [{\n" +
+			"                            \"url\": \"http://hl7.org/fhir/StructureDefinition/data-absent-reason\",\n" +
+			"                            \"valueString\": \"masked\"\n" +
+			"                        }\n" +
+			"                    ]\n" +
+			"                }\n" +
+			"            ]\n" +
+			"        }\n" +
+			"    ]\n" +
+			"}\n";
+		Practitioner practitioner = assertDoesNotThrow(() -> ourCtx.newJsonParser().parseResource(Practitioner.class, resource));
+		HumanName humanName = practitioner.getNameFirstRep();
+		StringType given = humanName.getGiven().get(0);
+		assertTrue(given.getExtension().stream().allMatch(ext -> DataAbsentReason.MASKED.toCode().equals(ext.getValue().primitiveValue())));
+		assertTrue(humanName.getFamilyElement().getExtension().stream().allMatch(ext -> DataAbsentReason.MASKED.toCode().equals(ext.getValue().primitiveValue())));
 	}
 
 	@Test

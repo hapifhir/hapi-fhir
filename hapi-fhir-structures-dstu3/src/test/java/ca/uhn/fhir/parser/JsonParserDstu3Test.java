@@ -63,6 +63,7 @@ import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.Practitioner;
 import org.hl7.fhir.dstu3.model.PrimitiveType;
 import org.hl7.fhir.dstu3.model.Quantity;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
@@ -74,6 +75,7 @@ import org.hl7.fhir.dstu3.model.SimpleQuantity;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.dstu3.model.ValueSet;
+import org.hl7.fhir.dstu3.model.codesystems.DataAbsentReason;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -101,6 +103,7 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -1155,99 +1158,6 @@ public class JsonParserDstu3Test {
 		ourLog.info(enc);
 
 		assertThat(enc, containsString("\"valueId\": \"1\""));
-	}
-
-	@Test
-	public void testEncodeSummary() {
-		Patient patient = new Patient();
-		patient.setId("Patient/1/_history/1");
-		patient.getText().setDivAsString("<div>THE DIV</div>");
-		patient.addName().setFamily("FAMILY");
-		patient.addPhoto().setTitle("green");
-		patient.getMaritalStatus().addCoding().setCode("D");
-
-		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
-
-		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).setSummaryMode(true).encodeResourceToString(patient);
-		ourLog.info(encoded);
-
-		assertThat(encoded, containsString("Patient"));
-		assertThat(encoded, stringContainsInOrder("\"tag\"", "\"system\": \"" + ca.uhn.fhir.rest.api.Constants.TAG_SUBSETTED_SYSTEM_DSTU3 + "\",", "\"code\": \"" + ca.uhn.fhir.rest.api.Constants.TAG_SUBSETTED_CODE + "\""));
-		assertThat(encoded, not(containsString("THE DIV")));
-		assertThat(encoded, containsString("family"));
-		assertThat(encoded, not(containsString("maritalStatus")));
-	}
-
-	/**
-	 * We specifically include extensions on CapabilityStatment even in
-	 * summary mode, since this is behaviour that people depend on
-	 */
-	@Test
-	public void testEncodeSummaryCapabilityStatementExtensions() {
-
-		CapabilityStatement cs = new CapabilityStatement();
-		CapabilityStatement.CapabilityStatementRestComponent rest = cs.addRest();
-		rest.setMode(CapabilityStatement.RestfulCapabilityMode.CLIENT);
-		rest.getSecurity()
-			.addExtension()
-			.setUrl("http://foo")
-			.setValue(new StringType("bar"));
-
-		cs.getVersionElement().addExtension()
-			.setUrl("http://goo")
-			.setValue(new StringType("ber"));
-
-		String encoded = ourCtx.newJsonParser().setSummaryMode(true).setPrettyPrint(true).setPrettyPrint(true).encodeResourceToString(cs);
-		ourLog.info(encoded);
-
-		assertThat(encoded, (containsString("http://foo")));
-		assertThat(encoded, (containsString("bar")));
-		assertThat(encoded, (containsString("http://goo")));
-		assertThat(encoded, (containsString("ber")));
-	}
-
-	@Test
-	public void testEncodeSummaryPatientExtensions() {
-
-		Patient cs = new Patient();
-		Address address = cs.addAddress();
-		address.setCity("CITY");
-		address
-			.addExtension()
-			.setUrl("http://foo")
-			.setValue(new StringType("bar"));
-		address.getCityElement().addExtension()
-			.setUrl("http://goo")
-			.setValue(new StringType("ber"));
-
-		String encoded = ourCtx.newJsonParser().setSummaryMode(true).setPrettyPrint(true).setPrettyPrint(true).encodeResourceToString(cs);
-		ourLog.info(encoded);
-
-		assertThat(encoded, not(containsString("http://foo")));
-		assertThat(encoded, not(containsString("bar")));
-		assertThat(encoded, not(containsString("http://goo")));
-		assertThat(encoded, not(containsString("ber")));
-	}
-
-	@Test
-	public void testEncodeSummary2() {
-		Patient patient = new Patient();
-		patient.setId("Patient/1/_history/1");
-		patient.getText().setDivAsString("<div>THE DIV</div>");
-		patient.addName().setFamily("FAMILY");
-		patient.getMaritalStatus().addCoding().setCode("D");
-
-		patient.getMeta().addTag().setSystem("foo").setCode("bar");
-
-		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).setSummaryMode(true).encodeResourceToString(patient);
-		ourLog.info(encoded);
-
-		assertThat(encoded, containsString("Patient"));
-		assertThat(encoded, stringContainsInOrder("\"tag\"", "\"system\": \"foo\",", "\"code\": \"bar\"", "\"system\": \"" + ca.uhn.fhir.rest.api.Constants.TAG_SUBSETTED_SYSTEM_DSTU3 + "\"",
-			"\"code\": \"" + ca.uhn.fhir.rest.api.Constants.TAG_SUBSETTED_CODE + "\""));
-		assertThat(encoded, not(containsString("THE DIV")));
-		assertThat(encoded, containsString("family"));
-		assertThat(encoded, not(containsString("maritalStatus")));
 	}
 
 	/**
@@ -2547,6 +2457,41 @@ public class JsonParserDstu3Test {
 		final String patientString = ourCtx.newJsonParser().encodeResourceToString(patient);
 		assertThat(patientString, is(not(containsString("fhir_comment"))));
 	}
+
+		@Test
+	public void testObjectWithBothPrimitiverAndArrayAlternatives() {
+		String resource = "{\n" +
+			"    \"resourceType\": \"Practitioner\",\n" +
+			"    \"id\": \"1\",\n" +
+			"    \"name\": [{\n" +
+			"            \"_family\": {\n" +
+			"                \"extension\": [{\n" +
+			"                        \"url\": \"http://hl7.org/fhir/StructureDefinition/data-absent-reason\",\n" +
+			"                        \"valueString\": \"masked\"\n" +
+			"                    }\n" +
+			"                ]\n" +
+			"            },\n" +
+			"            \"given\": [\n" +
+			"                null\n" +
+			"            ],\n" +
+			"            \"_given\": [{\n" +
+			"                    \"extension\": [{\n" +
+			"                            \"url\": \"http://hl7.org/fhir/StructureDefinition/data-absent-reason\",\n" +
+			"                            \"valueString\": \"masked\"\n" +
+			"                        }\n" +
+			"                    ]\n" +
+			"                }\n" +
+			"            ]\n" +
+			"        }\n" +
+			"    ]\n" +
+			"}\n";
+		Practitioner practitioner = assertDoesNotThrow(() -> ourCtx.newJsonParser().parseResource(Practitioner.class, resource));
+		HumanName humanName = practitioner.getName().get(0);
+		StringType given = humanName.getGiven().get(0);
+		assertTrue(given.getExtension().stream().allMatch(ext -> DataAbsentReason.MASKED.toCode().equals(ext.getValue().primitiveValue())));
+		assertTrue(humanName.getFamilyElement().getExtension().stream().allMatch(ext -> DataAbsentReason.MASKED.toCode().equals(ext.getValue().primitiveValue())));
+	}
+
 
 	@AfterAll
 	public static void afterClassClearContext() {

@@ -284,6 +284,8 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 			throws IOException {
 
 		switch (theChildDef.getChildType()) {
+			case EXTENSION_DECLARED:
+				break;
 			case ID_DATATYPE: {
 				IIdType value = (IIdType) theNextValue;
 				String encodedValue = "id".equals(theChildName) ? value.getIdPart() : value.getValue();
@@ -797,7 +799,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 
 	private boolean isSupportsFhirComment() {
 		if (myIsSupportsFhirComment == null) {
-			myIsSupportsFhirComment = isFhirVersionLessThanOrEqualTo(FhirVersionEnum.DSTU2_1);
+			myIsSupportsFhirComment = !getContext().getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU2_1);
 		}
 		return myIsSupportsFhirComment;
 	}
@@ -836,7 +838,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 					+ theResource.getStructureFhirVersionEnum());
 		}
 
-		EncodeContext encodeContext = new EncodeContext();
+		EncodeContext encodeContext = new EncodeContext(this, getContext().getParserOptions());
 		String resourceName = getContext().getResourceType(theResource);
 		encodeContext.pushPath(resourceName, true);
 		doEncodeResourceToJsonLikeWriter(theResource, theJsonLikeWriter, encodeContext);
@@ -887,7 +889,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 			EncodeContext theEncodeContext)
 			throws IOException {
 
-		if (!super.shouldEncodeResource(theResDef.getName())) {
+		if (!super.shouldEncodeResource(theResDef.getName(), theEncodeContext)) {
 			return;
 		}
 
@@ -973,15 +975,15 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 		}
 		List<Map.Entry<ResourceMetadataKeyEnum<?>, Object>> extensionMetadataKeys = getExtensionMetadataKeys(resource);
 
-		if (super.shouldEncodeResourceMeta(resource)
+		if (super.shouldEncodeResourceMeta(resource, theEncodeContext)
 						&& (ElementUtil.isEmpty(versionIdPart, updated, securityLabels, tags, profiles) == false)
 				|| !extensionMetadataKeys.isEmpty()) {
 			beginObject(theEventWriter, "meta");
 
-			if (shouldEncodePath(resource, "meta.versionId")) {
+			if (shouldEncodePath(resource, "meta.versionId", theEncodeContext)) {
 				writeOptionalTagWithTextNode(theEventWriter, "versionId", versionIdPart);
 			}
-			if (shouldEncodePath(resource, "meta.lastUpdated")) {
+			if (shouldEncodePath(resource, "meta.lastUpdated", theEncodeContext)) {
 				writeOptionalTagWithTextNode(theEventWriter, "lastUpdated", updated);
 			}
 
@@ -1359,9 +1361,17 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 				String alternateName = keyIter.next();
 				if (alternateName.startsWith("_") && alternateName.length() > 1) {
 					BaseJsonLikeValue nextValue = theObject.get(alternateName);
+					String nextName = alternateName.substring(1);
+
 					if (nextValue != null) {
+						BaseJsonLikeValue nonAlternativeValue = theObject.get(nextName);
+
+						// Only alternate values with no corresponding "normal" value is unhandled from previous step.
+						if (nonAlternativeValue != null) {
+							continue;
+						}
+
 						if (nextValue.isObject()) {
-							String nextName = alternateName.substring(1);
 							if (theObject.get(nextName) == null) {
 								theState.enteringNewElement(null, nextName);
 								parseAlternates(nextValue, theState, alternateName, alternateName);
