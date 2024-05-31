@@ -832,7 +832,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 		} else if (theOutputResource != null) {
 
 			List<IBaseResource> outputResources = AuthorizationInterceptor.toListOfResourcesAndExcludeContainer(
-					theRequestDetails, theOutputResource, theRequestDetails.getFhirContext());
+					theOutputResource, theRequestDetails.getFhirContext());
 
 			Verdict verdict = null;
 			for (IBaseResource nextResource : outputResources) {
