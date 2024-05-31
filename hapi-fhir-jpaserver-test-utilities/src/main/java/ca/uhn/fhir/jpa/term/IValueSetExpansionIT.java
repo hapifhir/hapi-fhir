@@ -33,8 +33,6 @@ public interface IValueSetExpansionIT {
 	static final String CODE_SYSTEM_CODE = "PRODUCT-MULTI-SOURCE";
 	static final String PROPERTY_NAME = "ACTIVE";
 
-	static final String INCLUDE_SYSTEM = "https://health.gov.on.ca/idms/fhir/CodeSystem/Internal-Product-Types";
-
 	static final String CODE_SYSTEM_STR_BASE =
 			"""
 								{
@@ -125,7 +123,7 @@ public interface IValueSetExpansionIT {
 			value = ValueSet.FilterOperator.class,
 			mode = EnumSource.Mode.INCLUDE,
 			names = {"EQUAL", "EXISTS", "IN", "NOTIN"})
-	default void expandByIdentifier_withFiltersThatShouldNotMatch_addsNoNewCodes(ValueSet.FilterOperator theOperator) {
+	default void expandByIdentifier_withFiltersThatShouldNotMatchInInclude_addsNoNewCodes(ValueSet.FilterOperator theOperator) {
 		// setup
 		IParser parser = getFhirContext().newJsonParser();
 
@@ -181,7 +179,7 @@ public interface IValueSetExpansionIT {
 			value = ValueSet.FilterOperator.class,
 			mode = EnumSource.Mode.INCLUDE,
 			names = {"EQUAL", "EXISTS", "IN", "NOTIN"})
-	default void expandByIdentifier_withBooleanFilteredValues_addsMatchingValues(ValueSet.FilterOperator theOperator) {
+	default void expandByIdentifier_withBooleanFilteredValuesInInclude_addsMatchingValues(ValueSet.FilterOperator theOperator) {
 		// setup
 		IParser parser = getFhirContext().newJsonParser();
 		// setup codesystem (nothing to do - base is already boolean friendly)
@@ -217,7 +215,7 @@ public interface IValueSetExpansionIT {
 			value = ValueSet.FilterOperator.class,
 			mode = EnumSource.Mode.INCLUDE,
 			names = {"EQUAL", "EXISTS", "IN", "NOTIN"})
-	default void expandByIdentifier_withIntegerFilteredValues_addsMatchingValues(ValueSet.FilterOperator theOperator) {
+	default void expandByIdentifier_withIntegerFilteredValuesInInclude_addsMatchingValues(ValueSet.FilterOperator theOperator) {
 		// setup
 		IParser parser = getFhirContext().newJsonParser();
 
@@ -261,7 +259,7 @@ public interface IValueSetExpansionIT {
 			value = ValueSet.FilterOperator.class,
 			mode = EnumSource.Mode.INCLUDE,
 			names = {"EQUAL", "EXISTS", "IN", "NOTIN"})
-	default void expandByIdentifier_withDecimalFilteredValues_addsMatchingValues(ValueSet.FilterOperator theOperator) {
+	default void expandByIdentifier_withDecimalFilteredValuesInInclude_addsMatchingValues(ValueSet.FilterOperator theOperator) {
 		// setup
 		IParser parser = getFhirContext().newJsonParser();
 
@@ -305,7 +303,7 @@ public interface IValueSetExpansionIT {
 			value = ValueSet.FilterOperator.class,
 			mode = EnumSource.Mode.INCLUDE,
 			names = {"EQUAL", "EXISTS", "IN", "NOTIN"})
-	default void expandByIdentifier_withDateTimeFilteredValues_addsMatchingValues(ValueSet.FilterOperator theOperator) {
+	default void expandByIdentifier_withDateTimeFilteredValuesInInclude_addsMatchingValues(ValueSet.FilterOperator theOperator) {
 		// setup
 		IParser parser = getFhirContext().newJsonParser();
 		Date now = new Date();
@@ -353,6 +351,184 @@ public interface IValueSetExpansionIT {
 
 			assertTrue(expanded.getExpansion().getContains().stream()
 					.anyMatch(c -> c.getCode().equals(CODE_SYSTEM_CODE)));
+		} finally {
+			getJpaStorageSettings().setPreExpandValueSets(preExpand);
+		}
+	}
+
+	@ParameterizedTest
+	@EnumSource(
+		value = ValueSet.FilterOperator.class,
+		mode = EnumSource.Mode.INCLUDE,
+		names = {"EQUAL", "EXISTS", "IN", "NOTIN"})
+	default void expandByIdentifier_withBooleanFilterInExclude_doesNotAddMatchingCode(ValueSet.FilterOperator theOperator) {
+		// setup
+		IParser parser = getFhirContext().newJsonParser();
+		// setup codesystem (nothing to do - base is already boolean friendly)
+		CodeSystem codeSystem = parser.parseResource(CodeSystem.class, CODE_SYSTEM_STR_BASE);
+
+		// setup valueset
+		ValueSet valueSet = parser.parseResource(ValueSet.class, VALUE_SET_STR_BASE);
+		ValueSet.ValueSetComposeComponent composeComponent = valueSet.getCompose();
+		ValueSet.ConceptSetComponent exclude = composeComponent.getInclude().get(0);
+		ValueSet.ConceptSetFilterComponent filterComponent = new ValueSet.ConceptSetFilterComponent();
+		filterComponent.setProperty(PROPERTY_NAME);
+		filterComponent.setOp(theOperator);
+		switch (theOperator) {
+			case EQUAL, EXISTS, IN -> filterComponent.setValue("true");
+			case NOTIN -> filterComponent.setValue("false");
+		}
+		exclude.setFilter(List.of(filterComponent));
+		composeComponent.setExclude(List.of(exclude));
+		composeComponent.setInclude(null);
+
+		boolean preExpand = getJpaStorageSettings().isPreExpandValueSets();
+
+		getJpaStorageSettings().setPreExpandValueSets(true);
+		try {
+			ValueSet expanded = doFailedValueSetExpansionTest(codeSystem, valueSet);
+		} finally {
+			getJpaStorageSettings().setPreExpandValueSets(preExpand);
+		}
+	}
+
+	@ParameterizedTest
+	@EnumSource(
+		value = ValueSet.FilterOperator.class,
+		mode = EnumSource.Mode.INCLUDE,
+		names = {"EQUAL", "EXISTS", "IN", "NOTIN"})
+	default void expandByIdentifier_withIntegerFilteredValuesInExclude_doesNotAddMatchingCode(ValueSet.FilterOperator theOperator) {
+		// setup
+		IParser parser = getFhirContext().newJsonParser();
+
+		// setup codesystem
+		CodeSystem codeSystem = parser.parseResource(CodeSystem.class, CODE_SYSTEM_STR_BASE);
+		CodeSystem.ConceptDefinitionComponent conceptDefinitionComponent =
+			codeSystem.getConcept().get(0);
+		CodeSystem.ConceptPropertyComponent propertyComponent = new CodeSystem.ConceptPropertyComponent();
+		propertyComponent.setCode(PROPERTY_NAME);
+		propertyComponent.setValue(new IntegerType(1));
+		conceptDefinitionComponent.setProperty(List.of(propertyComponent));
+
+		// setup valueset
+		ValueSet valueSet = parser.parseResource(ValueSet.class, VALUE_SET_STR_BASE);
+		ValueSet.ConceptSetComponent conceptSetComponent =
+			valueSet.getCompose().getInclude().get(0);
+		ValueSet.ConceptSetFilterComponent filterComponent = new ValueSet.ConceptSetFilterComponent();
+		filterComponent.setProperty(PROPERTY_NAME);
+		filterComponent.setOp(theOperator);
+		switch (theOperator) {
+			case EQUAL, EXISTS, IN -> filterComponent.setValue("1");
+			case NOTIN -> filterComponent.setValue("2,3,4");
+		}
+		conceptSetComponent.setFilter(List.of(filterComponent));
+		valueSet.getCompose().setExclude(List.of(conceptSetComponent));
+		valueSet.getCompose().setInclude(null);
+
+		boolean preExpand = getJpaStorageSettings().isPreExpandValueSets();
+
+		getJpaStorageSettings().setPreExpandValueSets(true);
+		try {
+			ValueSet expanded = doFailedValueSetExpansionTest(codeSystem, valueSet);
+		} finally {
+			getJpaStorageSettings().setPreExpandValueSets(preExpand);
+		}
+	}
+
+	@ParameterizedTest
+	@EnumSource(
+		value = ValueSet.FilterOperator.class,
+		mode = EnumSource.Mode.INCLUDE,
+		names = {"EQUAL", "EXISTS", "IN", "NOTIN"})
+	default void expandByIdentifier_withDecimalFilteredValuesInExclude_doesNotAddMatchingCode(ValueSet.FilterOperator theOperator) {
+		// setup
+		IParser parser = getFhirContext().newJsonParser();
+
+		// setup code system
+		CodeSystem codeSystem = parser.parseResource(CodeSystem.class, CODE_SYSTEM_STR_BASE);
+		CodeSystem.ConceptDefinitionComponent conceptDefinitionComponent =
+			codeSystem.getConcept().get(0);
+		CodeSystem.ConceptPropertyComponent propertyComponent = new CodeSystem.ConceptPropertyComponent();
+		propertyComponent.setCode(PROPERTY_NAME);
+		propertyComponent.setValue(new DecimalType(1.1));
+		conceptDefinitionComponent.setProperty(List.of(propertyComponent));
+
+		// setup valueset
+		ValueSet valueSet = parser.parseResource(ValueSet.class, VALUE_SET_STR_BASE);
+		ValueSet.ConceptSetComponent conceptSetComponent =
+			valueSet.getCompose().getInclude().get(0);
+		ValueSet.ConceptSetFilterComponent filterComponent = new ValueSet.ConceptSetFilterComponent();
+		filterComponent.setProperty(PROPERTY_NAME);
+		filterComponent.setOp(theOperator);
+		switch (theOperator) {
+			case EQUAL, EXISTS, IN -> filterComponent.setValue("1.1");
+			case NOTIN -> filterComponent.setValue("2.1,3.2,4.3");
+		}
+		conceptSetComponent.setFilter(List.of(filterComponent));
+		valueSet.getCompose().setExclude(List.of(conceptSetComponent));
+		valueSet.getCompose().setInclude(null);
+
+		boolean preExpand = getJpaStorageSettings().isPreExpandValueSets();
+
+		getJpaStorageSettings().setPreExpandValueSets(true);
+		try {
+			ValueSet expanded = doFailedValueSetExpansionTest(codeSystem, valueSet);
+		} finally {
+			getJpaStorageSettings().setPreExpandValueSets(preExpand);
+		}
+	}
+
+	@ParameterizedTest
+	@EnumSource(
+		value = ValueSet.FilterOperator.class,
+		mode = EnumSource.Mode.INCLUDE,
+		names = {"EQUAL", "EXISTS", "IN", "NOTIN"})
+	default void expandByIdentifier_withDateTimeFilteredValuesInExclude_doesNotAddMatchingCode(ValueSet.FilterOperator theOperator) {
+		// setup
+		IParser parser = getFhirContext().newJsonParser();
+		Date now = new Date();
+		DateTimeType dt = new DateTimeType(now);
+
+		// setup codesystem
+		CodeSystem codeSystem = parser.parseResource(CodeSystem.class, CODE_SYSTEM_STR_BASE);
+		CodeSystem.ConceptDefinitionComponent conceptDefinitionComponent =
+			codeSystem.getConcept().get(0);
+		CodeSystem.ConceptPropertyComponent propertyComponent = new CodeSystem.ConceptPropertyComponent();
+		propertyComponent.setCode(PROPERTY_NAME);
+		propertyComponent.setValue(dt);
+		conceptDefinitionComponent.setProperty(List.of(propertyComponent));
+
+		// setup valueset
+		ValueSet valueSet = parser.parseResource(ValueSet.class, VALUE_SET_STR_BASE);
+		ValueSet.ConceptSetComponent conceptSetComponent =
+			valueSet.getCompose().getInclude().get(0);
+		ValueSet.ConceptSetFilterComponent filterComponent = new ValueSet.ConceptSetFilterComponent();
+		filterComponent.setProperty(PROPERTY_NAME);
+		filterComponent.setOp(theOperator);
+		switch (theOperator) {
+			case EQUAL, EXISTS, IN -> filterComponent.setValue(dt.getValueAsString());
+			case NOTIN -> {
+				StringBuilder sb = new StringBuilder();
+				for (int i = 1; i < 3; i++) {
+					DateTimeType arbitraryDateTime =
+						new DateTimeType(Date.from(Instant.now().minus(i, ChronoUnit.SECONDS)));
+					if (!sb.isEmpty()) {
+						sb.append(",");
+					}
+					sb.append(arbitraryDateTime.getValueAsString());
+				}
+				filterComponent.setValue(sb.toString());
+			}
+		}
+		conceptSetComponent.setFilter(List.of(filterComponent));
+		valueSet.getCompose().setExclude(List.of(conceptSetComponent));
+		valueSet.getCompose().setInclude(null);
+
+		boolean preExpand = getJpaStorageSettings().isPreExpandValueSets();
+
+		getJpaStorageSettings().setPreExpandValueSets(true);
+		try {
+			ValueSet expanded = doFailedValueSetExpansionTest(codeSystem, valueSet);
 		} finally {
 			getJpaStorageSettings().setPreExpandValueSets(preExpand);
 		}

@@ -1474,7 +1474,6 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 					 */
 					throw new InvalidRequestException(Msg.code(2526) + "Unsupported property filter "
 							+ theFilter.getOp().getDisplay());
-					break;
 			}
 		}
 	}
