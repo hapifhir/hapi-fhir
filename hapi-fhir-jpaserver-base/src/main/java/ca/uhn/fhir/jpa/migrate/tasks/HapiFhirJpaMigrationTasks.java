@@ -137,7 +137,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		}
 
 		// Allow null values in SP_NAME, RES_TYPE columns for all HFJ_SPIDX_* tables. These are marked as failure
-		// allowed, since  SQL Server won't let us change nullability on columns with indexes pointing to them.
+		// allowed, since SQL Server won't let us change nullability on columns with indexes pointing to them.
 		{
 			Builder.BuilderWithTableName spidxCoords = version.onTable("HFJ_SPIDX_COORDS");
 			spidxCoords
