@@ -177,7 +177,7 @@ public class RequestValidatingInterceptorDstu3Test extends BaseValidationTestWit
 		ourLog.trace("Response was:\n{}", responseContent);
 
 		assertEquals(201, status.getStatusLine().getStatusCode());
-		assertThat(status.toString()).contains("X-FHIR-Request-Validation: NO ISSUES");
+		assertThat(status.toString().contains("X-FHIR-Request-Validation: NO ISSUES"));
 	}
 
 	@Test

@@ -764,8 +764,8 @@ public class XmlParserHl7OrgDstu2Test {
     String str = p.encodeResourceToString(rpt);
 
     ourLog.info(str);
-    assertThat(str).contains(str);
-    assertThat(str).contains(str);
+    assertThat(str).contains("<div xmlns=\"http://www.w3.org/1999/xhtml\">AAA</div>");
+    assertThat(str).contains("reference value=\"#");
 
     int idx = str.indexOf("reference value=\"#") + "reference value=\"#".length();
     int idx2 = str.indexOf('"', idx + 1);
@@ -1027,7 +1027,7 @@ public class XmlParserHl7OrgDstu2Test {
     try {
       p.encodeResourceToString(obs);
     } catch (DataFormatException e) {
-      assertThat(e.getMessage()).contains(e.getMessage());
+      assertThat(e.getMessage()).contains("DecimalType");
     }
   }
 
@@ -1170,7 +1170,7 @@ public class XmlParserHl7OrgDstu2Test {
     org.addIdentifier().setSystem("foo").setValue("bar");
     patient.setManagingOrganization(new Reference(org));
     str = p.encodeResourceToString(patient);
-    assertThat(str).contains(str);
+    assertThat(str).contains("<contained><Organization");
 
   }
 
@@ -1340,14 +1340,14 @@ public class XmlParserHl7OrgDstu2Test {
 
     ourLog.info(str);
 
-    assertThat(str).contains(str);
+    assertThat(str).contains("<Patient xmlns=\"http://hl7.org/fhir\">");
     assertThat(str).contains(
         "<extension url=\"http://example.com/dontuse#petname\"><valueString value=\"Fido\"/></extension>");
     assertThat(str).contains(
         "<modifierExtension url=\"http://example.com/dontuse#importantDates\"><valueDateTime value=\"2010-01-02\"/></modifierExtension>");
     assertThat(str).contains(
         "<modifierExtension url=\"http://example.com/dontuse#importantDates\"><valueDateTime value=\"2014-01-26T11:11:11\"/></modifierExtension>");
-    assertThat(str).contains(str);
+    assertThat(str).contains("<name><family value=\"Smith\"/></name>");
 
   }
 

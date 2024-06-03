@@ -1532,7 +1532,7 @@ public class Dstu3XmlParserTest {
 
 		String val = parser.encodeResourceToString(patient);
 		ourLog.info(val);
-		assertThat(val).contains(val);
+		assertThat(val).contains("<extension url=\"urn:foo\"><valueReference><reference value=\"Organization/123\"/></valueReference></extension>");
 
 		Patient actual = parser.parseResource(Patient.class, val);
 		assertEquals(Address.AddressUse.HOME, patient.getAddress().get(0).getUse());
@@ -1801,7 +1801,7 @@ public class Dstu3XmlParserTest {
 
 		String val = parser.encodeResourceToString(patient);
 		ourLog.info(val);
-		assertThat(val).contains(val);
+		assertThat(val).contains("<extension url=\"urn:foo\"><valueCode value=\"home\"/></extension>");
 
 		MyPatientWithOneDeclaredEnumerationExtensionDstu3 actual = parser.parseResource(MyPatientWithOneDeclaredEnumerationExtensionDstu3.class, val);
 		assertEquals(Address.AddressUse.HOME, patient.getAddress().get(0).getUse());

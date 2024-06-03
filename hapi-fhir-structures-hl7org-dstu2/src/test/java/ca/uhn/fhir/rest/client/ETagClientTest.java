@@ -243,22 +243,22 @@ public class ETagClientTest {
     int count = 0;
 
     Patient response = client.read().resource(Patient.class).withId(new IdDt("Patient/1234")).execute();
-    assertThat(response.getName().get(0).getFamily().get(0).getValue()).contains(response.getName().get(0).getFamily().get(0).getValue());
+    assertThat(response.getName().get(0).getFamily().get(0).getValue()).contains("Cardinal");
 		assertEquals("http://example.com/fhir/Patient/1234", capt.getAllValues().get(count++).getURI().toString());
 
     when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
     response = (Patient) client.read().resource("Patient").withId("1234").execute();
-    assertThat(response.getName().get(0).getFamily().get(0).getValue()).contains(response.getName().get(0).getFamily().get(0).getValue());
+    assertThat(response.getName().get(0).getFamily().get(0).getValue()).contains("Cardinal");
 		assertEquals("http://example.com/fhir/Patient/1234", capt.getAllValues().get(count++).getURI().toString());
 
     when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
     response = client.read().resource(Patient.class).withIdAndVersion("1234", "22").execute();
-    assertThat(response.getName().get(0).getFamily().get(0).getValue()).contains(response.getName().get(0).getFamily().get(0).getValue());
+    assertThat(response.getName().get(0).getFamily().get(0).getValue()).contains("Cardinal");
 		assertEquals("http://example.com/fhir/Patient/1234/_history/22", capt.getAllValues().get(count++).getURI().toString());
 
     when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
     response = client.read().resource(Patient.class).withUrl("http://foo/Patient/22").execute();
-    assertThat(response.getName().get(0).getFamily().get(0).getValue()).contains(response.getName().get(0).getFamily().get(0).getValue());
+    assertThat(response.getName().get(0).getFamily().get(0).getValue()).contains("Cardinal");
 		assertEquals("http://foo/Patient/22", capt.getAllValues().get(count++).getURI().toString());
 
   }

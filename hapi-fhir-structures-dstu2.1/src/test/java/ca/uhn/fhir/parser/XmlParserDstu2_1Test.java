@@ -16,9 +16,6 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.collect.Sets;
-import org.hamcrest.collection.IsEmptyCollection;
-import org.hamcrest.core.StringContains;
-import org.hamcrest.text.StringContainsInOrder;
 import org.hl7.fhir.dstu2016may.model.Address.AddressUse;
 import org.hl7.fhir.dstu2016may.model.Appointment;
 import org.hl7.fhir.dstu2016may.model.AuditEvent;
@@ -1221,7 +1218,7 @@ public class XmlParserDstu2_1Test {
 
 		String val = parser.encodeResourceToString(patient);
 		ourLog.info(val);
-		assertThat(val).contains(val);
+		assertThat(val).contains("<extension url=\"urn:foo\"><valueReference><reference value=\"Organization/123\"/></valueReference></extension>");
 
 		Patient actual = parser.parseResource(Patient.class, val);
 		assertEquals(AddressUse.HOME, patient.getAddress().get(0).getUse());

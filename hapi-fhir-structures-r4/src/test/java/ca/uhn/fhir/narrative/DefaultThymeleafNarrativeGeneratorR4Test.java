@@ -63,7 +63,7 @@ public class DefaultThymeleafNarrativeGeneratorR4Test {
 		myGen.populateResourceNarrative(myCtx, value);
 		String output = value.getText().getDiv().getValueAsString();
 		ourLog.info(output);
-		assertThat(output).contains(output);
+		assertThat(output).contains("<div class=\"hapiHeaderText\">joe john <b>BLOW </b></div>");
 
 	}
 
@@ -80,7 +80,7 @@ public class DefaultThymeleafNarrativeGeneratorR4Test {
 		String output = value.getText().getDiv().getValueAsString();
 
 		ourLog.info(output);
-		assertThat(output).contains(output);
+		assertThat(output).contains(value.getCode().getTextElement().getValue());
 	}
 
 	@Test
@@ -146,7 +146,7 @@ public class DefaultThymeleafNarrativeGeneratorR4Test {
 		String output = value.getText().getDiv().getValueAsString();
 
 		ourLog.info(output);
-		assertThat(output).contains(output);
+		assertThat(output).contains("<div class=\"hapiHeaderText\"> Untitled Diagnostic Report </div>");
 
 	}
 
@@ -210,7 +210,7 @@ public class DefaultThymeleafNarrativeGeneratorR4Test {
 		String output = value.getText().getDiv().getValueAsString();
 
 		ourLog.info(output);
-		assertThat(output).contains(output);
+		assertThat(output).contains("<div class=\"hapiHeaderText\"> Some &amp; Diagnostic Report </div>");
 
 	}
 

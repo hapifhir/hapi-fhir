@@ -74,8 +74,8 @@ public class ExceptionHandlingTest {
 		try {
 			client.read().resource(Patient.class).withId(new IdType("Patient/1234")).execute();
 			fail();		} catch (InternalErrorException e) {
-			assertThat(e.getMessage()).contains(e.getMessage());
-			assertThat(e.getMessage()).contains(e.getMessage());
+			assertThat(e.getMessage()).contains("HTTP 500 Internal Error");
+			assertThat(e.getMessage()).contains("Help I'm a bug");
 		}
 
 	}
@@ -98,8 +98,8 @@ public class ExceptionHandlingTest {
 		try {
         client.read().resource(Patient.class).withId(new IdType("Patient/1234")).execute();
 			fail();		} catch (InternalErrorException e) {
-			assertThat(e.getMessage()).contains(e.getMessage());
-			assertThat(e.getMessage()).contains(e.getMessage());
+			assertThat(e.getMessage()).contains("HTTP 500 Internal Error");
+			assertThat(e.getMessage()).contains("Help I'm a bug");
 		}
 
 	}
@@ -123,7 +123,7 @@ public class ExceptionHandlingTest {
         client.read().resource(Patient.class).withId(new IdType("Patient/1234")).execute();
 			fail();		} catch (InternalErrorException e) {
 			assertEquals("HTTP 500 Internal Error", e.getMessage());
-			assertThat(e.getResponseBody()).contains(e.getResponseBody());
+			assertThat(e.getResponseBody()).contains("value=\"foo\"");
 		}
 
 	}
@@ -145,8 +145,8 @@ public class ExceptionHandlingTest {
 		try {
         client.read().resource(Patient.class).withId(new IdType("Patient/1234")).execute();
 			fail();		} catch (InternalErrorException e) {
-			assertThat(e.getMessage()).contains(e.getMessage());
-			assertThat(e.getMessage()).contains(e.getMessage());
+			assertThat(e.getMessage()).contains("HTTP 500 Internal Error");
+			assertThat(e.getMessage()).contains("Help I'm a bug");
 			assertNotNull(e.getOperationOutcome());
 			assertEquals("Help I'm a bug", ((OperationOutcome) e.getOperationOutcome()).getIssueFirstRep().getDiagnosticsElement().getValue());
 		}
@@ -170,8 +170,8 @@ public class ExceptionHandlingTest {
 		try {
 			client.read(new IdType("Patient/1234"));
 			fail();		} catch (InternalErrorException e) {
-			assertThat(e.getMessage()).contains(e.getMessage());
-			assertThat(e.getMessage()).contains(e.getMessage());
+			assertThat(e.getMessage()).contains("HTTP 500 Internal Error");
+			assertThat(e.getMessage()).contains("Help I'm a bug");
 			assertNotNull(e.getOperationOutcome());
 			assertEquals("Help I'm a bug", ((OperationOutcome) e.getOperationOutcome()).getIssueFirstRep().getDiagnosticsElement().getValue());
 		}

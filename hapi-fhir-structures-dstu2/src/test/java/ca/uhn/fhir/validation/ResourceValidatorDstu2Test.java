@@ -78,14 +78,14 @@ public class ResourceValidatorDstu2Test {
 		String encoded = parser.setPrettyPrint(true).encodeResourceToString(p).replace("2000-12-31", "2000-15-31");
 		ourLog.info(encoded);
 
-		assertThat(encoded).contains(encoded);
+		assertThat(encoded).contains("2000-15-31");
 
 		ValidationResult result = ourCtx.newValidator().validateWithResult(encoded);
 		String resultString = parser.setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome());
 		ourLog.info(resultString);
 
 		assertThat(((OperationOutcome) result.toOperationOutcome()).getIssue()).hasSize(2);
-		assertThat(resultString).contains(resultString);
+		assertThat(resultString).contains("cvc-pattern-valid");
 
 		try {
 			parser.parseResource(encoded);

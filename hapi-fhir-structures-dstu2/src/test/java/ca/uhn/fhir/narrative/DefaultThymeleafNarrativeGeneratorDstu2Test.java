@@ -65,7 +65,7 @@ public class DefaultThymeleafNarrativeGeneratorDstu2Test {
 		myGen.populateResourceNarrative(myCtx, value);
 		String output = value.getText().getDiv().getValueAsString();
 		ourLog.info(output);
-		assertThat(output).contains(output);
+		assertThat(output).contains("<div class=\"hapiHeaderText\">joe john <b>BLOW </b></div>");
 
 	}
 
@@ -138,13 +138,13 @@ public class DefaultThymeleafNarrativeGeneratorDstu2Test {
 		String output = value.getText().getDiv().getValueAsString();
 
 		ourLog.info(output);
-		assertThat(output).contains(output);
+		assertThat(output).contains("<div class=\"hapiHeaderText\"> Some &amp; Diagnostic Report </div>");
 
 		// Now try it with the parser
 
 		output = myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(value);
 		ourLog.info(output);
-		assertThat(output).contains(output);
+		assertThat(output).contains("<div class=\"hapiHeaderText\"> Some &amp; Diagnostic Report </div>");
 	}
 
 	@Test

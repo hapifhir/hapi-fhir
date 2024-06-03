@@ -75,7 +75,7 @@ public class ExceptionHandlingInterceptorTest {
 			ourLog.info(responseContent);
 			assertEquals(500, status.getStatusLine().getStatusCode());
 			OperationOutcome oo = (OperationOutcome) ourCtx.newXmlParser().parseResource(responseContent);
-			assertThat(oo.getIssueFirstRep().getDiagnosticsElement().getValue()).contains(oo.getIssueFirstRep().getDiagnosticsElement().getValue());
+			assertThat(oo.getIssueFirstRep().getDiagnosticsElement().getValue()).contains("Exception Text");
 			assertThat(oo.getIssueFirstRep().getDiagnosticsElement().getValue()).contains("InternalErrorException: Exception Text");
 		}
 	}
@@ -100,7 +100,7 @@ public class ExceptionHandlingInterceptorTest {
 		assertEquals(500, status.getStatusLine().getStatusCode());
 		OperationOutcome oo = (OperationOutcome) ourCtx.newXmlParser().parseResource(responseContent);
 		ourLog.debug(ourCtx.newXmlParser().encodeResourceToString(oo));
-		assertThat(oo.getIssueFirstRep().getDiagnosticsElement().getValue()).contains(oo.getIssueFirstRep().getDiagnosticsElement().getValue());
+		assertThat(oo.getIssueFirstRep().getDiagnosticsElement().getValue()).contains("Simulated IOException");
 	}
 
 	@Test
@@ -113,7 +113,7 @@ public class ExceptionHandlingInterceptorTest {
 			ourLog.info(responseContent);
 			assertEquals(500, status.getStatusLine().getStatusCode());
 			OperationOutcome oo = (OperationOutcome) ourCtx.newXmlParser().parseResource(responseContent);
-			assertThat(oo.getIssueFirstRep().getDiagnosticsElement().getValue()).contains(oo.getIssueFirstRep().getDiagnosticsElement().getValue());
+			assertThat(oo.getIssueFirstRep().getDiagnosticsElement().getValue()).contains("Exception Text");
 			assertThat(oo.getIssueFirstRep().getDiagnosticsElement().getValue()).contains("InternalErrorException: Exception Text");
 		}
 	}

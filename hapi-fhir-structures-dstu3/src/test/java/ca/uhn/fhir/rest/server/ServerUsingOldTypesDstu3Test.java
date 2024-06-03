@@ -37,7 +37,7 @@ public class ServerUsingOldTypesDstu3Test {
 		try {
 			srv.init();
 			fail();		} catch (ServletException e) {
-			assertThat(e.getCause().toString()).contains(e.getCause().toString());
+			assertThat(e.getCause().toString()).contains("ConfigurationException");
 		}
 	}
 
@@ -50,7 +50,7 @@ public class ServerUsingOldTypesDstu3Test {
 		try {
 			srv.init();
 			fail();		} catch (ServletException e) {
-			assertThat(e.getCause().toString()).contains(e.getCause().toString());
+			assertThat(e.getCause().toString()).contains("ConfigurationException");
 		}
 	}
 
@@ -63,7 +63,7 @@ public class ServerUsingOldTypesDstu3Test {
 		try {
 			srv.init();
 			fail();		} catch (ServletException e) {
-			assertThat(e.getCause().toString()).contains(e.getCause().toString());
+			assertThat(e.getCause().toString()).contains("Incorrect use of type");
 		}
 	}
 

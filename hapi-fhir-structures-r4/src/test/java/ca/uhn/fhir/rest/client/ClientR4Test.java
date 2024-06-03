@@ -219,7 +219,7 @@ public class ClientR4Test {
 		try {
 			ourCtx.newRestfulClient(ITestClient.class, "http://foo").createPatient(patient);
 			fail();		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).contains(e.getMessage());
+			assertThat(e.getMessage()).contains("foobar");
 		}
 	}
 
@@ -260,7 +260,7 @@ public class ClientR4Test {
 		HttpPost post = (HttpPost) capt.getValue();
 		String requestBody = IOUtils.toString(post.getEntity().getContent(), Charsets.UTF_8);
 		ourLog.info("Request body: {}", requestBody);
-		assertThat(requestBody).contains(requestBody);
+		assertThat(requestBody).contains("{\"resourceType\":\"Patient\"");
 		Bundle requestBundle = ourCtx.newJsonParser().parseResource(Bundle.class, requestBody);
 
 		assertEquals("123", requestBundle.getEntry().get(0).getResource().getIdElement().getIdPart());
