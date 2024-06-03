@@ -4,12 +4,15 @@ import org.hl7.fhir.r5.elementmodel.Element;
 import org.hl7.fhir.r5.model.ElementDefinition;
 import org.hl7.fhir.r5.model.StructureDefinition;
 import org.hl7.fhir.r5.model.ValueSet;
+import org.hl7.fhir.r5.utils.validation.IMessagingServices;
 import org.hl7.fhir.r5.utils.validation.IResourceValidator;
 import org.hl7.fhir.r5.utils.validation.IValidationPolicyAdvisor;
 import org.hl7.fhir.r5.utils.validation.constants.BindingKind;
 import org.hl7.fhir.r5.utils.validation.constants.ContainedReferenceValidationPolicy;
 import org.hl7.fhir.r5.utils.validation.constants.ReferenceValidationPolicy;
+import org.hl7.fhir.utilities.validation.ValidationMessage;
 
+import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
 
@@ -67,5 +70,19 @@ public class FhirDefaultPolicyAdvisor implements IValidationPolicyAdvisor {
 			ValueSet valueSet,
 			List<String> systems) {
 		return EnumSet.allOf(CodedContentValidationAction.class);
+	}
+
+	@Override
+	public List<StructureDefinition> getImpliedProfilesForResource(
+			IResourceValidator validator,
+			Object appContext,
+			String stackPath,
+			ElementDefinition definition,
+			StructureDefinition structure,
+			Element resource,
+			boolean valid,
+			IMessagingServices msgServices,
+			List<ValidationMessage> messages) {
+		return Arrays.asList();
 	}
 }
