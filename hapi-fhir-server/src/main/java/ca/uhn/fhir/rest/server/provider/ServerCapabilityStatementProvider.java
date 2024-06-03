@@ -31,7 +31,6 @@ import ca.uhn.fhir.rest.annotation.Metadata;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
-import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.Bindings;
 import ca.uhn.fhir.rest.server.IServerConformanceProvider;
@@ -434,57 +433,15 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 
 				// Add Include to CapabilityStatement.rest.resource
 				NavigableSet<String> resourceIncludes = resourceNameToIncludes.get(resourceName);
-				if (resourceIncludes.isEmpty()) {
-					List<String> includes = searchParams.values().stream()
-							.filter(t -> t.getParamType() == RestSearchParameterTypeEnum.REFERENCE)
-							.map(t -> resourceName + ":" + t.getName())
-							.sorted()
-							.collect(Collectors.toList());
-					terser.addElement(resource, "searchInclude", "*");
-					for (String nextInclude : includes) {
-						terser.addElement(resource, "searchInclude", nextInclude);
-					}
-				} else {
-					for (String resourceInclude : resourceIncludes) {
-						terser.addElement(resource, "searchInclude", resourceInclude);
-					}
+				for (String resourceInclude : resourceIncludes) {
+					terser.addElement(resource, "searchInclude", resourceInclude);
 				}
 
 				// Add RevInclude to CapabilityStatement.rest.resource
 				if (myRestResourceRevIncludesEnabled) {
 					NavigableSet<String> resourceRevIncludes = resourceNameToRevIncludes.get(resourceName);
-					if (resourceRevIncludes.isEmpty()) {
-						TreeSet<String> revIncludes = new TreeSet<>();
-						for (String nextResourceName : resourceToMethods.keySet()) {
-							if (isBlank(nextResourceName)) {
-								continue;
-							}
-
-							for (RuntimeSearchParam t : searchParamRegistry
-									.getActiveSearchParams(nextResourceName)
-									.values()) {
-								if (t.getParamType() == RestSearchParameterTypeEnum.REFERENCE) {
-									if (isNotBlank(t.getName())) {
-										boolean appropriateTarget = false;
-										if (t.getTargets().contains(resourceName)
-												|| t.getTargets().isEmpty()) {
-											appropriateTarget = true;
-										}
-
-										if (appropriateTarget) {
-											revIncludes.add(nextResourceName + ":" + t.getName());
-										}
-									}
-								}
-							}
-						}
-						for (String nextInclude : revIncludes) {
-							terser.addElement(resource, "searchRevInclude", nextInclude);
-						}
-					} else {
-						for (String resourceInclude : resourceRevIncludes) {
-							terser.addElement(resource, "searchRevInclude", resourceInclude);
-						}
+					for (String resourceInclude : resourceRevIncludes) {
+						terser.addElement(resource, "searchRevInclude", resourceInclude);
 					}
 				}
 

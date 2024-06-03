@@ -1245,7 +1245,7 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 	}
 
 	@Test
-	public void testRevIncludes_Inferred() throws Exception {
+	public void testRevIncludes_NotSpecifiedReturnsEmptyList() throws Exception {
 
 		class PatientResourceProvider implements IResourceProvider {
 
@@ -1291,7 +1291,7 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 		CapabilityStatementRestResourceComponent patientResource = resources.stream()
 			.filter(resource -> "Patient".equals(resource.getType()))
 			.findFirst().get();
-		assertThat(toStrings(patientResource.getSearchRevInclude()), containsInAnyOrder("Observation:subject"));
+		assertTrue(patientResource.getSearchRevInclude().isEmpty());
 	}
 
 	@Test
