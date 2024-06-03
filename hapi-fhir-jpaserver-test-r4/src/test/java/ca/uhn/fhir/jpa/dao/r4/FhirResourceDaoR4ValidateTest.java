@@ -2223,5 +2223,23 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		myCodeSystemDao.update(cs);
 	}
 
+	@Test
+	public void testValidateObservationWithVitalSignsLoincCode() {
+		Observation obs = new Observation();
+		obs.setStatus(ObservationStatus.FINAL);
+		obs.setCode(
+			new CodeableConcept().addCoding(
+				new Coding().setSystem("http://loinc.org").setCode("8302-2").setDisplay("Body height")
+			));
+		obs.getSubject().setReference("Patient/A");
+		obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
+		obs.getText().getDiv().setValue("<div>hello</div>");
+
+		obs.setEffective(new DateTimeType("2020-01-01"));
+
+		obs.setValue(new Quantity().setUnit("cm").setValue(51));
+		OperationOutcome oo = validateAndReturnOutcome(obs);
+		assertHasNoErrors(oo);
+	}
 
 }
