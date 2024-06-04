@@ -38,7 +38,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 	private boolean assumeValidRestReferences;
 	private List<String> myExtensionDomains = Collections.emptyList();
 	private IValidatorResourceFetcher validatorResourceFetcher;
-	private IValidationPolicyAdvisor validatorPolicyAdvisor;
+	private IValidationPolicyAdvisor validatorPolicyAdvisor = new FhirDefaultPolicyAdvisor();
 
 	/**
 	 * Constructor
