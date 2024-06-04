@@ -145,23 +145,16 @@ public interface IValueSetExpansionIT {
 		filterComponent.setProperty(PROPERTY_NAME);
 		filterComponent.setOp(theOperator);
 		switch (theOperator) {
-			case EXISTS:
+			case EXISTS -> {
 				filterComponent.setProperty(PROPERTY_NAME + "-not");
 				filterComponent.setValue(null);
-				break;
-			case IN:
-				filterComponent.setValue("2,3,4");
-				break;
-			case NOTIN:
-				filterComponent.setValue("1,2,3");
-				break;
-			case EQUAL:
-				filterComponent.setValue("2");
-				break;
-			default:
+			}
+			case IN -> filterComponent.setValue("2,3,4");
+			case NOTIN -> filterComponent.setValue("1,2,3");
+			case EQUAL -> filterComponent.setValue("2");
+			default ->
 				// just in case
 				fail(theOperator.getDisplay() + " is not added for testing");
-				break;
 		}
 		conceptSetComponent.setFilter(List.of(filterComponent));
 
@@ -169,7 +162,7 @@ public interface IValueSetExpansionIT {
 		boolean preExpand = getJpaStorageSettings().isPreExpandValueSets();
 		getJpaStorageSettings().setPreExpandValueSets(true);
 		try {
-			ValueSet expanded = doFailedValueSetExpansionTest(codeSystem, valueSet);
+			doFailedValueSetExpansionTest(codeSystem, valueSet);
 		} finally {
 			getJpaStorageSettings().setPreExpandValueSets(preExpand);
 		}
@@ -392,7 +385,7 @@ public interface IValueSetExpansionIT {
 
 		getJpaStorageSettings().setPreExpandValueSets(true);
 		try {
-			ValueSet expanded = doFailedValueSetExpansionTest(codeSystem, valueSet);
+			doFailedValueSetExpansionTest(codeSystem, valueSet);
 		} finally {
 			getJpaStorageSettings().setPreExpandValueSets(preExpand);
 		}
@@ -436,7 +429,7 @@ public interface IValueSetExpansionIT {
 
 		getJpaStorageSettings().setPreExpandValueSets(true);
 		try {
-			ValueSet expanded = doFailedValueSetExpansionTest(codeSystem, valueSet);
+			doFailedValueSetExpansionTest(codeSystem, valueSet);
 		} finally {
 			getJpaStorageSettings().setPreExpandValueSets(preExpand);
 		}
@@ -480,7 +473,7 @@ public interface IValueSetExpansionIT {
 
 		getJpaStorageSettings().setPreExpandValueSets(true);
 		try {
-			ValueSet expanded = doFailedValueSetExpansionTest(codeSystem, valueSet);
+			doFailedValueSetExpansionTest(codeSystem, valueSet);
 		} finally {
 			getJpaStorageSettings().setPreExpandValueSets(preExpand);
 		}
@@ -537,7 +530,7 @@ public interface IValueSetExpansionIT {
 
 		getJpaStorageSettings().setPreExpandValueSets(true);
 		try {
-			ValueSet expanded = doFailedValueSetExpansionTest(codeSystem, valueSet);
+			doFailedValueSetExpansionTest(codeSystem, valueSet);
 		} finally {
 			getJpaStorageSettings().setPreExpandValueSets(preExpand);
 		}
@@ -545,9 +538,9 @@ public interface IValueSetExpansionIT {
 
 	/**
 	 * Runs the test for value set expansion that will find no new codes to add
-	 * @param theCodeSystem
-	 * @param theValueSet
-	 * @return
+	 * @param theCodeSystem the code system to create
+	 * @param theValueSet the value set to expand
+	 * @return the expanded value set
 	 */
 	private ValueSet doFailedValueSetExpansionTest(CodeSystem theCodeSystem, ValueSet theValueSet) {
 		ValueSet expandedValueSet = createCodeSystemAndValueSetAndReturnExpandedValueSet(theCodeSystem, theValueSet);
@@ -563,9 +556,9 @@ public interface IValueSetExpansionIT {
 
 	/**
 	 * Runs the test for value set expansion that will find codes to add
-	 * @param theCodeSystem
-	 * @param theValueSet
-	 * @return
+	 * @param theCodeSystem the code system to create
+	 * @param theValueSet the value set to expand
+	 * @return the expanded value set
 	 */
 	private ValueSet doSuccessfulValueSetExpansionTest(CodeSystem theCodeSystem, ValueSet theValueSet) {
 		ValueSet expandedValueSet = createCodeSystemAndValueSetAndReturnExpandedValueSet(theCodeSystem, theValueSet);
@@ -603,7 +596,6 @@ public interface IValueSetExpansionIT {
 
 		// test
 		ValueSetExpansionOptions options = new ValueSetExpansionOptions();
-		ValueSet expandedValueSet = getValueSetDao().expandByIdentifier(url, options);
-		return expandedValueSet;
+		return getValueSetDao().expandByIdentifier(url, options);
 	}
 }
