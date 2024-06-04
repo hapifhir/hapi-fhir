@@ -117,7 +117,7 @@ public class LoggingInterceptorDstu2Test {
 
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(logger, timeout(1000).times(1)).info(captor.capture());
-		assertThat(captor.getValue()).contains("read - Patient/1");
+		assertThat(captor.getValue()).contains("metadata - ");
 	}
 
 	@Test
@@ -363,7 +363,7 @@ public class LoggingInterceptorDstu2Test {
 
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(logger, timeout(1000).times(1)).info(captor.capture());
-		assertThat(captor.getValue()).contains("metadata - ");
+		assertThat(captor.getValue()).contains("read - Patient/1");
 	}
 
 	@Test
