@@ -19,4 +19,5 @@
  */
 package ca.uhn.fhir.jpa.model.config;
 
+// Empty subclass to avoid bean wiring conflicts in projects that want to define a different implementation
 public class SubscriptionSettings extends BaseSubscriptionSettings {}
