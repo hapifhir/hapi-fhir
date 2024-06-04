@@ -44,6 +44,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.URISyntaxException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -145,6 +146,6 @@ public class ValidatorResourceFetcher implements IValidatorResourceFetcher {
 
 	@Override
 	public Set<String> fetchCanonicalResourceVersions(IResourceValidator validator, Object appContext, String url) {
-		return null;
+		return Collections.emptySet();
 	}
 }
