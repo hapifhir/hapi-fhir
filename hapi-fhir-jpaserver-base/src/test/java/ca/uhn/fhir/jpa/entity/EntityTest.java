@@ -1,22 +1,17 @@
 package ca.uhn.fhir.jpa.entity;
 
-import com.apicatalog.jsonld.http.link.Link;
 import com.google.common.reflect.ClassPath;
 import jakarta.persistence.Column;
 import org.junit.jupiter.api.Test;
-import org.testcontainers.shaded.com.google.common.collect.Multimap;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class EntityTest {
@@ -63,18 +58,19 @@ public class EntityTest {
 					continue;
 				}
 
-				if (column.nullable()) {
-					if (field.getType().isPrimitive()) {
-						if (!(CLASS_TO_FIELD_NAME_EXCEPTIONS.containsKey(className)
-							&& CLASS_TO_FIELD_NAME_EXCEPTIONS.get(className).contains(field.getName()))) {
-							fail(String.format("Column %s on Entity %s is nullable, but has been defined as primitive.",
-									field.getName(), className)
-								+ " If this is a new field on an existing Table, this can result in deserialization issues when reading old data."
-								+ " Either change to a nullable type (Object) or ensure existing data is migrated and add as an exception.");
-						}
-					}
+				if (isPrimitiveFieldNullable(className, field, column)) {
+					fail(String.format("Column %s on Entity %s is nullable, but has been defined as primitive.",
+						field.getName(), className)
+						+ " If this is a new field on an existing Table, this can result in deserialization issues when reading old data."
+						+ " Either change to a nullable type (Object) or ensure existing data is migrated and add as an exception.");
 				}
 			}
 		}
+	}
+
+	private boolean isPrimitiveFieldNullable(String className, Field field, Column column) {
+		return column.nullable()
+			&& field.getType().isPrimitive()
+			&& !(CLASS_TO_FIELD_NAME_EXCEPTIONS.containsKey(className) && CLASS_TO_FIELD_NAME_EXCEPTIONS.get(className).contains(field.getName()));
 	}
 }

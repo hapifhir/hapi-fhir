@@ -214,7 +214,7 @@ public class WorkChunk extends WorkChunkMetadata {
 		myNextPollTime = theNextPollTime;
 	}
 
-	public int getPollAttempts() {
+	public Integer getPollAttempts() {
 		return myPollAttempts;
 	}
 
