@@ -1116,12 +1116,12 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		oo = validateAndReturnOutcome(obs);
 		assertEquals("None of the codings provided are in the value set 'ValueSet[http://example.com/fhir/ValueSet/observation-vitalsignresult]' (http://example.com/fhir/ValueSet/observation-vitalsignresult), and a coding from this value set is required) (codes = http://terminology.hl7.org/CodeSystem/observation-category#vital-signs)", oo.getIssue().get(1).getDiagnostics(), encode(oo));
 
-		// Invalid code in built-in VS/CS
+		// Invalid code according to profile-vitalsigns-all-loinc.json
 		obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
 		obs.getCode().getCodingFirstRep().setSystem("http://loinc.org").setCode("CODE3").setDisplay("Display 3");
 		obs.getCategoryFirstRep().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("FOO");
 		oo = validateAndReturnOutcome(obs);
-		assertEquals("Unknown code 'http://terminology.hl7.org/CodeSystem/observation-category#FOO'", oo.getIssueFirstRep().getDiagnostics(), encode(oo));
+		assertEquals("Value is 'FOO' but must be 'vital-signs'", oo.getIssueFirstRep().getDiagnostics(), encode(oo));
 
 	}
 
