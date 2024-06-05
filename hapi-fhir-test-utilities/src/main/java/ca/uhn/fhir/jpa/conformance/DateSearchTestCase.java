@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.jpa.conformance;
 
-import ca.uhn.fhir.util.CollectionUtil;
 import jakarta.annotation.Nonnull;
 import org.junit.jupiter.params.provider.Arguments;
 
@@ -127,7 +126,7 @@ public class DateSearchTestCase {
 	 */
 	@Nonnull
 	static List<DateSearchTestCase> expandPrefixCases(Reader theSource, String theFileName) {
-		Set<String> supportedPrefixes = CollectionUtil.newSet("eq", "ge", "gt", "le", "lt", "ne");
+		Set<String> supportedPrefixes = Set.of(new String[] {"eq", "ge", "gt", "le", "lt", "ne"});
 
 		// expand these into individual tests for each prefix.
 		LineNumberReader lineNumberReader = new LineNumberReader(theSource);
