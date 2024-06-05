@@ -161,12 +161,13 @@ public class MdmSurvivorshipSvcImpl implements IMdmSurvivorshipService {
 		if (!sourceIds.isEmpty()) {
 			// we cannot call resolveResourcePersistentIds if there are no ids to call it with
 			myTransactionService
-				.withRequest(new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.allPartitions()))
-				.execute(() -> {
-					Map<String, ? extends IResourcePersistentId> ids = myIIdHelperService.resolveResourcePersistentIds(
-						RequestPartitionId.allPartitions(), resourceType, sourceIds);
-					sourceIdToPid.putAll(ids);
-				});
+					.withRequest(new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.allPartitions()))
+					.execute(() -> {
+						Map<String, ? extends IResourcePersistentId> ids =
+								myIIdHelperService.resolveResourcePersistentIds(
+										RequestPartitionId.allPartitions(), resourceType, sourceIds);
+						sourceIdToPid.putAll(ids);
+					});
 		}
 
 		return sourceIds.stream().map(id -> {
