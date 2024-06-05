@@ -834,7 +834,8 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 	public JpaPid fromSerializablePid(SerializablePid thePid) {
 		Object id = thePid.getId();
 		if (id instanceof Long) {
-			JpaPid pid = JpaPid.fromIdAndVersionAndResourceType((Long)id, thePid.getVersion(), thePid.getResourceType());
+			JpaPid pid =
+					JpaPid.fromIdAndVersionAndResourceType((Long) id, thePid.getVersion(), thePid.getResourceType());
 			// set the associatedResourceType
 			if (thePid.getAssociatedResourceId() != null) {
 				IIdType idType = myFhirCtx.getVersion().newIdType();

@@ -201,6 +201,7 @@ public interface IIdHelperService<T extends IResourcePersistentId> {
 	 * appropriate PID without having to know what that is.
 	 */
 	default T fromSerializablePid(SerializablePid thePid) {
-		throw new UnsupportedOperationException(Msg.code(2527) + " fromSerializablePid is not supported for this type of PID. " + thePid.toString());
+		throw new UnsupportedOperationException(
+				Msg.code(2527) + " fromSerializablePid is not supported for this type of PID. " + thePid.toString());
 	}
 }

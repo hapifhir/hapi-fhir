@@ -3,7 +3,6 @@ package ca.uhn.fhir.rest.api.server.storage;
 import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.TreeNode;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.JsonSerializer;
@@ -14,8 +13,6 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 
 /**
  * A deserialized version of the PID
@@ -78,7 +75,8 @@ public class SerializablePid extends BaseResourcePersistentId<Object> {
 		}
 
 		@Override
-		public void serialize(IResourcePersistentId value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+		public void serialize(IResourcePersistentId value, JsonGenerator gen, SerializerProvider provider)
+				throws IOException {
 			SerializablePid serializablePid = SerializablePid.fromPID(value);
 
 			gen.writeStartObject();
@@ -111,7 +109,8 @@ public class SerializablePid extends BaseResourcePersistentId<Object> {
 		}
 
 		@Override
-		public IResourcePersistentId<?> deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JacksonException {
+		public IResourcePersistentId<?> deserialize(JsonParser p, DeserializationContext ctxt)
+				throws IOException, JacksonException {
 			JsonNode node = p.getCodec().readTree(p);
 
 			String resourceType = node.get("resourceType").asText();

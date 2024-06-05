@@ -158,13 +158,13 @@ public class MdmSurvivorshipSvcImpl implements IMdmSurvivorshipService {
 			sourceIds.add(link.getSourceId());
 		});
 		Map<String, IResourcePersistentId> sourceIdToPid = new HashMap<>();
-		myTransactionService.withRequest(new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.allPartitions()))
+		myTransactionService
+				.withRequest(new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.allPartitions()))
 				.execute(() -> {
-					Map<String, ? extends IResourcePersistentId> ids = myIIdHelperService.resolveResourcePersistentIds(RequestPartitionId.allPartitions(),
-						resourceType, sourceIds);
+					Map<String, ? extends IResourcePersistentId> ids = myIIdHelperService.resolveResourcePersistentIds(
+							RequestPartitionId.allPartitions(), resourceType, sourceIds);
 					sourceIdToPid.putAll(ids);
 				});
-
 
 		return sourceIds.stream().map(id -> {
 			IResourcePersistentId<?> pid = sourceIdToPid.get(id);
