@@ -29,7 +29,9 @@ import jakarta.annotation.Nullable;
 /**
  * A Hamcrest matcher for junit assertions.
  * Matches on level, partial message, and/or a portion of the message contained by a throwable, if present.
+ * @deprecated use {@link LogbackEventAssert}
  */
+@Deprecated
 public class LogbackEventMatcher extends CustomTypeSafeMatcher<ILoggingEvent> {
 	@Nullable
 	private final Level myLevel;
@@ -47,7 +49,7 @@ public class LogbackEventMatcher extends CustomTypeSafeMatcher<ILoggingEvent> {
 	}
 
 	private LogbackEventMatcher(@Nonnull String description, Level theLevel,
-										 String thePartialString, String theThrownMessage)
+								String thePartialString, String theThrownMessage)
 	{
 		super(makeDescription(description, theLevel, thePartialString, theThrownMessage));
 		myLevel = theLevel;

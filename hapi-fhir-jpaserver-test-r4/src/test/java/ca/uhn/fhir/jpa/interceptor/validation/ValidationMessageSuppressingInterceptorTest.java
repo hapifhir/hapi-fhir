@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.interceptor.validation;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -24,10 +25,7 @@ import org.springframework.context.ApplicationContext;
 import java.io.IOException;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.matchesPattern;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class ValidationMessageSuppressingInterceptorTest extends BaseResourceProviderR4Test {
@@ -66,7 +64,7 @@ public class ValidationMessageSuppressingInterceptorTest extends BaseResourcePro
 		assertHasWarnings(oo);
 		String encode = encode(oo);
 		ourLog.info(encode);
-		assertThat(encode, containsString("All observations should have a performer"));
+		assertThat(encode).contains("All observations should have a performer");
 	}
 
 	@Test
@@ -94,7 +92,7 @@ public class ValidationMessageSuppressingInterceptorTest extends BaseResourcePro
 			} catch (UnprocessableEntityException e) {
 				String encode = encode(e.getOperationOutcome());
 				ourLog.info(encode);
-				assertThat(encode, containsString("Unknown code 'http://loinc.org#59408-5'"));
+				assertThat(encode).contains("Unknown code 'http://loinc.org#59408-5'");
 			}
 		}
 
@@ -105,7 +103,7 @@ public class ValidationMessageSuppressingInterceptorTest extends BaseResourcePro
 		{
 			Observation inputObs = loadResource(myFhirContext, Observation.class, "/r4/uscore/observation-pulseox.json");
 			String id = myClient.create().resource(inputObs).execute().getId().toUnqualifiedVersionless().getValue();
-			assertThat(id, matchesPattern("Observation/[0-9]+"));
+			assertThat(id).matches("Observation/[0-9]+");
 		}
 	}
 
@@ -133,7 +131,7 @@ public class ValidationMessageSuppressingInterceptorTest extends BaseResourcePro
 		} catch (PreconditionFailedException e) {
 			String encode = encode(e.getOperationOutcome());
 			ourLog.info(encode);
-			assertThat(encode, containsString("Encounter.status: minimum required = 1"));
+			assertThat(encode).contains("Encounter.status: minimum required = 1");
 		}
 
 		// With suppression
@@ -145,7 +143,7 @@ public class ValidationMessageSuppressingInterceptorTest extends BaseResourcePro
 		Encounter encounter = new Encounter();
 		encounter.setSubject(new Reference("Patient/A"));
 		IIdType id = myEncounterDao.create(encounter).getId().toUnqualifiedVersionless();
-		assertThat(id.getValue(), matchesPattern("Encounter/[0-9]+"));
+		assertThat(id.getValue()).matches("Encounter/[0-9]+");
 
 	}
 

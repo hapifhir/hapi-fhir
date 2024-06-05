@@ -1,12 +1,10 @@
 package ca.uhn.fhir.rest.server.interceptor.validation.address.impl;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.server.interceptor.validation.address.AddressValidationException;
 import ca.uhn.fhir.rest.server.interceptor.validation.address.AddressValidationResult;
 import ca.uhn.fhir.rest.server.interceptor.validation.address.IAddressValidator;
 import ca.uhn.fhir.util.ExtensionUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
@@ -22,10 +20,11 @@ import java.util.HashMap;
 import java.util.Properties;
 
 import static ca.uhn.fhir.rest.server.interceptor.validation.address.impl.LoquateAddressValidator.PROPERTY_GEOCODE;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -150,8 +149,7 @@ class LoquateAddressValidatorTest {
 	public void testInvalidInit() {
 		try {
 			new LoquateAddressValidator(new Properties());
-			fail();
-		} catch (Exception e) {
+			fail();		} catch (Exception e) {
 		}
 	}
 
@@ -160,8 +158,7 @@ class LoquateAddressValidatorTest {
 		try {
 			AddressValidationResult res = myValidator.getValidationResult(new AddressValidationResult(),
 				new ObjectMapper().readTree(RESPONSE_INVALID), ourCtx);
-			fail();
-		} catch (Exception e) {
+			fail();		} catch (Exception e) {
 		}
 	}
 
@@ -170,8 +167,7 @@ class LoquateAddressValidatorTest {
 		try {
 			assertEquals(clear(REQUEST), clear(myValidator.getRequestBody(ourCtx, getAddress())));
 		} catch (JsonProcessingException e) {
-			fail();
-		}
+			fail();		}
 	}
 
 	private String clear(String theString) {
@@ -196,8 +192,7 @@ class LoquateAddressValidatorTest {
 		try {
 			val.getResponseEntity(address, ourCtx);
 		} catch (Exception e) {
-			fail();
-		}
+			fail();		}
 
 		verify(template, times(1)).postForEntity(any(String.class), any(HttpEntity.class), eq(String.class));
 	}
@@ -230,9 +225,9 @@ class LoquateAddressValidatorTest {
 		IBase address = res.getValidatedAddress();
 		IBaseExtension geocode = ExtensionUtil.getExtensionByUrl(address, IAddressValidator.FHIR_GEOCODE_EXTENSION_URL);
 		assertNotNull(geocode);
-		assertEquals(2, geocode.getExtension().size());
-		assertEquals("latitude", ((IBaseExtension)geocode.getExtension().get(0)).getUrl());
-		assertEquals("longitude", ((IBaseExtension)geocode.getExtension().get(1)).getUrl());
+		assertThat(geocode.getExtension()).hasSize(2);
+		assertEquals("latitude", ((IBaseExtension) geocode.getExtension().get(0)).getUrl());
+		assertEquals("longitude", ((IBaseExtension) geocode.getExtension().get(1)).getUrl());
 
 		IBaseExtension quality = ExtensionUtil.getExtensionByUrl(address, IAddressValidator.ADDRESS_QUALITY_EXTENSION_URL);
 		assertNotNull(quality);
@@ -249,7 +244,7 @@ class LoquateAddressValidatorTest {
 
 	@Test
 	public void testErrorResponses() throws Exception {
-		assertThrows(IllegalArgumentException.class, () -> {
+		assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
 			myValidator.getValidationResult(new AddressValidationResult(),
 				new ObjectMapper().readTree(RESPONSE_INVALID_KEY), ourCtx);
 		});

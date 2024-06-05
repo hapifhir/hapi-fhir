@@ -41,12 +41,11 @@ import java.sql.Date;
 import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.countMatches;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.hasSize;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 
 public class ChainingR4SearchTest extends BaseJpaR4Test {
@@ -95,7 +94,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 		RuntimeSearchParam sp = mySearchParamRegistry.getActiveSearchParam("Bundle", "message");
 		assertEquals("Bundle.entry[0].resource", sp.getPath());
-		assertThat(sp.getBase(), contains("Bundle"));
+		assertThat(sp.getBase()).containsExactly("Bundle");
 		assertEquals(RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, sp.getStatus());
 
 		// Test
@@ -139,8 +138,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		List<String> oids = myTestDaoSearch.searchForIds(url);
 
 		// validate
-		assertEquals(1L, oids.size());
-		assertThat(oids, contains(oid1.getIdPart()));
+		assertThat(oids).hasSize(1);
+		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
 	@Test
@@ -173,8 +172,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		List<String> oids = myTestDaoSearch.searchForIds(url);
 
 		// validate
-		assertEquals(1L, oids.size());
-		assertThat(oids, contains(oid1.getIdPart()));
+		assertThat(oids).hasSize(1);
+		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
 	@Test
@@ -217,8 +216,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.logSelectQueries();
 
 		// validate
-		assertEquals(1L, oids.size());
-		assertThat(oids, contains(oid1.getIdPart()));
+		assertThat(oids).hasSize(1);
+		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
 	@Test
@@ -264,8 +263,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.logSelectQueries();
 
 		// validate
-		assertEquals(2L, oids.size());
-		assertThat(oids, contains(oid1.getIdPart(), oid2.getIdPart()));
+		assertThat(oids).hasSize(2);
+		assertThat(oids).containsExactly(oid1.getIdPart(), oid2.getIdPart());
 	}
 
 	@Test
@@ -312,8 +311,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.logSelectQueries();
 
 		// validate
-		assertEquals(2L, oids.size());
-		assertThat(oids, contains(oid1.getIdPart(), oid2.getIdPart()));
+		assertThat(oids).hasSize(2);
+		assertThat(oids).containsExactly(oid1.getIdPart(), oid2.getIdPart());
 	}
 
 	@Test
@@ -353,8 +352,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		List<String> oids = myTestDaoSearch.searchForIds(url);
 
 		// validate
-		assertEquals(1L, oids.size());
-		assertThat(oids, contains(oid1.getIdPart()));
+		assertThat(oids).hasSize(1);
+		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
 	@Test
@@ -385,7 +384,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		List<String> oids = myTestDaoSearch.searchForIds(url);
 
 		// validate
-		assertEquals(0L, oids.size());
+		assertThat(oids).hasSize(0);
 	}
 
 	@Test
@@ -433,8 +432,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		List<String> oids = myTestDaoSearch.searchForIds(url);
 
 		// validate
-		assertEquals(1L, oids.size());
-		assertThat(oids, contains(oid1.getIdPart()));
+		assertThat(oids).hasSize(1);
+		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
 	@Test
@@ -475,8 +474,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		List<String> oids = myTestDaoSearch.searchForIds(url);
 
 		// validate
-		assertEquals(1L, oids.size());
-		assertThat(oids, contains(oid1.getIdPart()));
+		assertThat(oids).hasSize(1);
+		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
 	@Test
@@ -517,8 +516,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		List<String> oids = myTestDaoSearch.searchForIds(url);
 
 		// validate
-		assertEquals(1L, oids.size());
-		assertThat(oids, contains(oid1.getIdPart()));
+		assertThat(oids).hasSize(1);
+		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
 	@Test
@@ -557,8 +556,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.logSelectQueries();
 
 		// validate
-		assertEquals(1L, oids.size());
-		assertThat(oids, contains(oid1.getIdPart()));
+		assertThat(oids).hasSize(1);
+		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
 	@Test
@@ -609,8 +608,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		List<String> oids = myTestDaoSearch.searchForIds(url);
 
 		// validate
-		assertEquals(1L, oids.size());
-		assertThat(oids, contains(oid1.getIdPart()));
+		assertThat(oids).hasSize(1);
+		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
 	@Test
@@ -663,8 +662,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		List<String> oids = myTestDaoSearch.searchForIds(url);
 
 		// validate
-		assertEquals(1L, oids.size());
-		assertThat(oids, contains(oid1.getIdPart()));
+		assertThat(oids).hasSize(1);
+		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
 	@Test
@@ -704,8 +703,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		List<String> oids = myTestDaoSearch.searchForIds(url);
 
 		// validate
-		assertEquals(1L, oids.size());
-		assertThat(oids, contains(oid1.getIdPart()));
+		assertThat(oids).hasSize(1);
+		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
 	@Test
@@ -749,8 +748,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.logSelectQueries();
 
 		// validate
-		assertEquals(1L, oids.size());
-		assertThat(oids, contains(oid1.getIdPart()));
+		assertThat(oids).hasSize(1);
+		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
 	@Test
@@ -790,8 +789,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		List<String> oids = myTestDaoSearch.searchForIds(url);
 
 		// validate
-		assertEquals(1L, oids.size());
-		assertThat(oids, contains(oid1.getIdPart()));
+		assertThat(oids).hasSize(1);
+		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
 	@Test
@@ -834,8 +833,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.logSelectQueries();
 
 		// validate
-		assertEquals(1L, oids.size());
-		assertThat(oids, contains(oid1.getIdPart()));
+		assertThat(oids).hasSize(1);
+		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
 	@Test
@@ -874,7 +873,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		List<String> oids = myTestDaoSearch.searchForIds(url);
 
 		// validate
-		assertEquals(0L, oids.size());
+		assertThat(oids).hasSize(0);
 	}
 
 	@Test
@@ -917,8 +916,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.logSelectQueries();
 
 		// validate
-		assertEquals(1L, oids.size());
-		assertThat(oids, contains(oid1.getIdPart()));
+		assertThat(oids).hasSize(1);
+		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
 	@Test
@@ -967,8 +966,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		List<String> oids = myTestDaoSearch.searchForIds(url);
 
 		// validate
-		assertEquals(1L, oids.size());
-		assertThat(oids, contains(oid1.getIdPart()));
+		assertThat(oids).hasSize(1);
+		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
 	@Test
@@ -1023,8 +1022,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		List<String> oids = myTestDaoSearch.searchForIds(url);
 
 		// validate
-		assertEquals(1L, oids.size());
-		assertThat(oids, contains(oid1.getIdPart()));
+		assertThat(oids).hasSize(1);
+		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
 	@Test
@@ -1077,8 +1076,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.logSelectQueries();
 
 		// validate
-		assertEquals(1L, oids.size());
-		assertThat(oids, contains(oid1.getIdPart()));
+		assertThat(oids).hasSize(1);
+		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
 	@Test
@@ -1135,8 +1134,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.logSelectQueries();
 
 		// validate
-		assertEquals(1L, oids.size());
-		assertThat(oids, contains(oid1.getIdPart()));
+		assertThat(oids).hasSize(1);
+		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
 	@Test
@@ -1197,8 +1196,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.logSelectQueries();
 
 		// validate
-		assertEquals(1L, oids.size());
-		assertThat(oids, contains(oid1.getIdPart()));
+		assertThat(oids).hasSize(1);
+		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
 	@Test
@@ -1242,8 +1241,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		List<String> oids = myTestDaoSearch.searchForIds(url);
 
 		// validate
-		assertEquals(1L, oids.size());
-		assertThat(oids, contains(oid1.getIdPart()));
+		assertThat(oids).hasSize(1);
+		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
 	@Test
@@ -1287,8 +1286,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		List<String> oids = myTestDaoSearch.searchForIds(url);
 
 		// validate
-		assertEquals(1L, oids.size());
-		assertThat(oids, contains(oid1.getIdPart()));
+		assertThat(oids).hasSize(1);
+		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
 	@Test
@@ -1332,8 +1331,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		List<String> oids = myTestDaoSearch.searchForIds(url);
 
 		// validate
-		assertEquals(1L, oids.size());
-		assertThat(oids, contains(oid1.getIdPart()));
+		assertThat(oids).hasSize(1);
+		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
 	@Test
@@ -1383,8 +1382,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.logSelectQueries();
 
 		// validate
-		assertEquals(1L, oids.size());
-		assertThat(oids, contains(oid1.getIdPart()));
+		assertThat(oids).hasSize(1);
+		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
 	@Test
@@ -1429,8 +1428,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		List<String> oids = myTestDaoSearch.searchForIds(url);
 
 		// validate
-		assertEquals(1L, oids.size());
-		assertThat(oids, contains(oid1.getIdPart()));
+		assertThat(oids).hasSize(1);
+		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
 	@Test
@@ -1474,8 +1473,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		List<String> oids = myTestDaoSearch.searchForIds(url);
 
 		// validate
-		assertEquals(1L, oids.size());
-		assertThat(oids, contains(oid1.getIdPart()));
+		assertThat(oids).hasSize(1);
+		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
 	@Test
@@ -1523,8 +1522,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 
 		// validate
-		assertEquals(1L, oids.size());
-		assertThat(oids, contains(oid1.getIdPart()));
+		assertThat(oids).hasSize(1);
+		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
 	@Test
@@ -1609,7 +1608,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		createDocumentBundleWithPatientDetails("1980-01-01", "system", "value-1");
 
 		List<String> ids = myTestDaoSearch.searchForIds(theSearchUrl);
-		assertThat(theMessage, ids, hasSize(theExpectedCount));
+		assertThat(ids).as(theMessage).hasSize(theExpectedCount);
 	}
 
 	private void createSearchParameter(String theId, String theCode, String theBase, String theExpression, Enumerations.SearchParamType theType) {
@@ -1653,10 +1652,10 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.clear();
 		myTestDaoSearch.searchForIds(theUrl);
 		List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueriesForCurrentThread();
-		assertEquals(1, selectQueries.size());
+		assertThat(selectQueries).hasSize(1);
 
 		String sqlQuery = selectQueries.get(0).getSql(true, true).toLowerCase();
-		assertEquals(theExpectedNumberOfUnions, countMatches(sqlQuery, "union"), sqlQuery);
+		assertThat(countMatches(sqlQuery, "union")).as(sqlQuery).isEqualTo(theExpectedNumberOfUnions);
 	}
 
 }

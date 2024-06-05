@@ -29,20 +29,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class ResourceLinkPredicateBuilderTest {
 
-    private static final String PLACEHOLDER_BASE = UUID.randomUUID().toString();
+	private static final String PLACEHOLDER_BASE = UUID.randomUUID().toString();
 
 	private ResourceLinkPredicateBuilder myResourceLinkPredicateBuilder;
 
-    @Mock
-    private SearchQueryBuilder mySearchQueryBuilder;
+	@Mock
+	private SearchQueryBuilder mySearchQueryBuilder;
 
 	@Mock
 	private ISearchParamRegistry mySearchParamRegistry;
@@ -56,29 +56,29 @@ public class ResourceLinkPredicateBuilderTest {
 		DbSchema schema = new DbSchema(spec, "schema");
 		DbTable table = new DbTable(schema, "table");
 		when(mySearchQueryBuilder.addTable(Mockito.anyString())).thenReturn(table);
-        myResourceLinkPredicateBuilder = new ResourceLinkPredicateBuilder(null, mySearchQueryBuilder, false);
+		myResourceLinkPredicateBuilder = new ResourceLinkPredicateBuilder(null, mySearchQueryBuilder, false);
 		myResourceLinkPredicateBuilder.setSearchParamRegistryForUnitTest(mySearchParamRegistry);
 		myResourceLinkPredicateBuilder.setIdHelperServiceForUnitTest(myIdHelperService);
 	}
 
 	@Test
 	public void createEverythingPredicate_withListOfPids_returnsInPredicate() {
-        when(myResourceLinkPredicateBuilder.generatePlaceholders(anyCollection())).thenReturn(List.of(PLACEHOLDER_BASE+"1", PLACEHOLDER_BASE+"2"));
+		when(myResourceLinkPredicateBuilder.generatePlaceholders(anyCollection())).thenReturn(List.of(PLACEHOLDER_BASE + "1", PLACEHOLDER_BASE + "2"));
 		Condition condition = myResourceLinkPredicateBuilder.createEverythingPredicate("Patient", new ArrayList<>(), 1l, 2l);
-        assertEquals(InCondition.class, condition.getClass());
+		assertEquals(InCondition.class, condition.getClass());
 	}
 
 	@Test
 	public void createEverythingPredicate_withSinglePid_returnsInCondition() {
-        when(myResourceLinkPredicateBuilder.generatePlaceholders(anyCollection())).thenReturn(List.of(PLACEHOLDER_BASE+"1"));
+		when(myResourceLinkPredicateBuilder.generatePlaceholders(anyCollection())).thenReturn(List.of(PLACEHOLDER_BASE + "1"));
 		Condition condition = myResourceLinkPredicateBuilder.createEverythingPredicate("Patient", new ArrayList<>(), 1l);
-        assertEquals(BinaryCondition.class, condition.getClass());
+		assertEquals(BinaryCondition.class, condition.getClass());
 	}
 
 	@Test
 	public void createEverythingPredicate_withNoPids_returnsBinaryCondition() {
-        Condition condition = myResourceLinkPredicateBuilder.createEverythingPredicate("Patient", new ArrayList<>(), new Long[0]);
-        assertEquals(BinaryCondition.class, condition.getClass());
+		Condition condition = myResourceLinkPredicateBuilder.createEverythingPredicate("Patient", new ArrayList<>(), new Long[0]);
+		assertEquals(BinaryCondition.class, condition.getClass());
 	}
 
 	@Test
@@ -94,11 +94,10 @@ public class ResourceLinkPredicateBuilderTest {
 		params.put("patient", new String[]{"4"});
 		requestDetails.setParameters(params);
 
-		try {
-			myResourceLinkPredicateBuilder.createPredicate(requestDetails, "Observation", "", Collections.emptyList(), referenceOrParamList, null, RequestPartitionId.allPartitions());
-			fail();
-		} catch (Exception exception) {
-			assertEquals("HAPI-2498: Unsupported search modifier(s): \"[:identifier, :x, :y]\" for resource type \"Observation\". Valid search modifiers are: [:contains, :exact, :in, :iterate, :missing, :not-in, :of-type, :recurse, :text]", exception.getMessage());
-		}
+		assertThatThrownBy(() ->
+			myResourceLinkPredicateBuilder.createPredicate(requestDetails, "Observation", "", Collections.emptyList(), referenceOrParamList, null, RequestPartitionId.allPartitions()))
+			.isInstanceOf(Exception.class)
+			.hasMessage("HAPI-2498: Unsupported search modifier(s): \"[:identifier, :x, :y]\" for resource type \"Observation\". Valid search modifiers are: [:contains, :exact, :in, :iterate, :missing, :not-in, :of-type, :recurse, :text]");
+
 	}
 }

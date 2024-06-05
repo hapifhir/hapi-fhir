@@ -9,32 +9,23 @@ import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
-import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.ee10.servlet.ServletHandler;
-import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class SearchCountParamDstu2Test {
 
@@ -70,7 +61,7 @@ public class SearchCountParamDstu2Test {
 			assertEquals("search", ourLastMethod);
 			assertEquals(Integer.valueOf(2), ourLastParam);
 			
-			assertThat(responseContent, stringContainsInOrder(
+			assertThat(responseContent).containsSubsequence(
 				"<link>", 
 				"<relation value=\"self\"/>", 
 				"<url value=\"" + ourServer.getBaseUrl() + "/Patient?_count=2\"/>",
@@ -78,7 +69,7 @@ public class SearchCountParamDstu2Test {
 				"<link>",
 				"<relation value=\"next\"/>", 
 				"<url value=\"" + ourServer.getBaseUrl() + "?_getpages=", "&amp;_getpagesoffset=2&amp;_count=2&amp;_bundletype=searchset\"/>",
-				"</link>"));
+				"</link>");
 
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
@@ -98,10 +89,10 @@ public class SearchCountParamDstu2Test {
 			ourLog.info(responseContent);
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			assertEquals("searchWithNoCountParam", ourLastMethod);
-			assertEquals(null, ourLastParam);
+			assertNull(ourLastParam);
 			
 			//@formatter:off
-			assertThat(responseContent, stringContainsInOrder(
+			assertThat(responseContent).containsSubsequence(
 				"<link>", 
 				"<relation value=\"self\"/>", 
 				"<url value=\"" + ourServer.getBaseUrl() + "/Patient?_count=2&amp;_query=searchWithNoCountParam\"/>",
@@ -109,7 +100,7 @@ public class SearchCountParamDstu2Test {
 				"<link>",
 				"<relation value=\"next\"/>", 
 				"<url value=\"" + ourServer.getBaseUrl() + "?_getpages=", "&amp;_getpagesoffset=2&amp;_count=2&amp;_bundletype=searchset\"/>",
-				"</link>"));
+				"</link>");
 			//@formatter:on
 			
 		} finally {

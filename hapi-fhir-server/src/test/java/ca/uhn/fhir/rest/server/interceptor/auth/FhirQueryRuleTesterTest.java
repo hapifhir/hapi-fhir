@@ -17,7 +17,6 @@ import static ca.uhn.fhir.rest.server.interceptor.auth.IAuthorizationSearchParam
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @MockitoSettings

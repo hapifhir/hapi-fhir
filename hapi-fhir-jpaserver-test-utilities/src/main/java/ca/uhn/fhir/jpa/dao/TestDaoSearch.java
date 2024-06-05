@@ -47,7 +47,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.ArrayUtils.EMPTY_STRING_ARRAY;
-import static org.hamcrest.Matchers.contains;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.Matchers.hasItems;
@@ -127,7 +127,7 @@ public class TestDaoSearch {
 	public void assertSearchFindsInOrder(String theReason, String theQueryUrl, String... theIds) {
 		List<String> ids = searchForIds(theQueryUrl);
 
-		MatcherAssert.assertThat(theReason, ids, contains(theIds));
+		assertThat(ids).as(theReason).containsExactly(theIds);
 	}
 
 	public void assertSearchFindsInOrder(String theReason, String theQueryUrl, List<String> theIds) {

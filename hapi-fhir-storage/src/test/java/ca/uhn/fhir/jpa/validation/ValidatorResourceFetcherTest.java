@@ -60,6 +60,6 @@ public class ValidatorResourceFetcherTest extends BaseTest {
     RequestDetails r = new SystemRequestDetails();
     // test
     Element returnedResource = fetcher.fetch(v, r,"http://www.test-url-for-questionnaire.com/Questionnaire/test-id|1.0.0");
-    assertNotNull(returnedResource);
+		assertNotNull(returnedResource);
   }
 }

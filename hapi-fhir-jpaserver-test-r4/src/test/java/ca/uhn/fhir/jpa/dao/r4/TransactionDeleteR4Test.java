@@ -11,9 +11,7 @@ import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.matchesPattern;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class TransactionDeleteR4Test extends BaseJpaR4SystemTest {
@@ -120,7 +118,7 @@ public class TransactionDeleteR4Test extends BaseJpaR4SystemTest {
 		}
 
 		rpt = myDiagnosticReportDao.read(rptId);
-		assertThat(rpt.getResult(), empty());
+		assertThat(rpt.getResult()).isEmpty();
 	}
 
 	@Test
@@ -191,7 +189,7 @@ public class TransactionDeleteR4Test extends BaseJpaR4SystemTest {
 			mySystemDao.transaction(mySrd, b);
 			fail();
 		} catch (ResourceVersionConflictException e ) {
-			assertThat(e.getMessage(), matchesPattern(Msg.code(550) + Msg.code(515) + "Unable to delete Observation/[0-9]+ because at least one resource has a reference to this resource. First reference found was resource DiagnosticReport/[0-9]+ in path DiagnosticReport.result"));
+			assertThat(e.getMessage()).matches(Msg.code(550) + Msg.code(515) + "Unable to delete Observation/[0-9]+ because at least one resource has a reference to this resource. First reference found was resource DiagnosticReport/[0-9]+ in path DiagnosticReport.result");
 		}
 
 		myObservationDao.read(obs1id);

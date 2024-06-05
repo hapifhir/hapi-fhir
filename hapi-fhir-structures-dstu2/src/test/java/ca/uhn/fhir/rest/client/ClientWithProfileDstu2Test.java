@@ -30,8 +30,7 @@ import java.io.InputStream;
 import java.io.StringReader;
 import java.nio.charset.Charset;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -86,7 +85,7 @@ public class ClientWithProfileDstu2Test {
 		String requestBody = IOUtils.toString(((HttpPost) value).getEntity().getContent());
 		IOUtils.closeQuietly(((HttpPost) value).getEntity().getContent());
 		ourLog.info(requestBody);
-		assertThat(requestBody, containsString("<meta><profile value=\"http://foo_profile\"/></meta>"));
+		assertThat(requestBody).contains("<meta><profile value=\"http://foo_profile\"/></meta>");
 	}
 
 	@ResourceDef(name = "Patient", profile = "http://foo_profile")

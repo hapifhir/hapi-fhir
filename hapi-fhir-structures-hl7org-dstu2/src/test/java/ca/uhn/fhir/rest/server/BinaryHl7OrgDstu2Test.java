@@ -10,7 +10,6 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
-import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
@@ -19,28 +18,18 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.ee10.servlet.ServletHandler;
-import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.hl7.fhir.dstu2.model.Binary;
 import org.hl7.fhir.dstu2.model.IdType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.startsWith;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
@@ -76,12 +65,12 @@ public class BinaryHl7OrgDstu2Test {
 
     ourLog.info(responseContent);
 
-    assertEquals(200, status.getStatusLine().getStatusCode());
-    assertThat(status.getFirstHeader("content-type").getValue(), startsWith(Constants.CT_FHIR_XML + ";"));
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(status.getFirstHeader("content-type").getValue()).startsWith(Constants.CT_FHIR_XML + ";");
 
     Binary bin = ourCtx.newXmlParser().parseResource(Binary.class, responseContent);
-    assertEquals("foo", bin.getContentType());
-    assertArrayEquals(new byte[]{1, 2, 3, 4}, bin.getContent());
+		assertEquals("foo", bin.getContentType());
+		assertThat(bin.getContent()).containsExactly(new byte[]{1, 2, 3, 4});
   }
 
   @Test
@@ -93,12 +82,12 @@ public class BinaryHl7OrgDstu2Test {
 
     ourLog.info(responseContent);
 
-    assertEquals(200, status.getStatusLine().getStatusCode());
-    assertThat(status.getFirstHeader("content-type").getValue(), startsWith(Constants.CT_FHIR_JSON + ";"));
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(status.getFirstHeader("content-type").getValue()).startsWith(Constants.CT_FHIR_JSON + ";");
 
     Binary bin = ourCtx.newJsonParser().parseResource(Binary.class, responseContent);
-    assertEquals("foo", bin.getContentType());
-    assertArrayEquals(new byte[]{1, 2, 3, 4}, bin.getContent());
+		assertEquals("foo", bin.getContentType());
+		assertThat(bin.getContent()).containsExactly(new byte[]{1, 2, 3, 4});
   }
 
 
@@ -108,10 +97,10 @@ public class BinaryHl7OrgDstu2Test {
     http.setEntity(new ByteArrayEntity(new byte[]{1, 2, 3, 4}, ContentType.create("foo/bar", "UTF-8")));
 
     HttpResponse status = ourClient.execute(http);
-    assertEquals(201, status.getStatusLine().getStatusCode());
+		assertEquals(201, status.getStatusLine().getStatusCode());
 
-    assertEquals("foo/bar; charset=UTF-8", ourLast.getContentType());
-    assertArrayEquals(new byte[]{1, 2, 3, 4}, ourLast.getContent());
+		assertEquals("foo/bar; charset=UTF-8", ourLast.getContentType());
+		assertThat(ourLast.getContent()).containsExactly(new byte[]{1, 2, 3, 4});
 
   }
 
@@ -121,9 +110,9 @@ public class BinaryHl7OrgDstu2Test {
     HttpResponse status = ourClient.execute(httpGet);
     byte[] responseContent = IOUtils.toByteArray(status.getEntity().getContent());
     IOUtils.closeQuietly(status.getEntity().getContent());
-    assertEquals(200, status.getStatusLine().getStatusCode());
-    assertEquals("foo", status.getFirstHeader("content-type").getValue());
-    assertArrayEquals(new byte[]{1, 2, 3, 4}, responseContent);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertEquals("foo", status.getFirstHeader("content-type").getValue());
+		assertThat(responseContent).containsExactly(new byte[]{1, 2, 3, 4});
 
   }
 
@@ -133,16 +122,16 @@ public class BinaryHl7OrgDstu2Test {
     HttpResponse status = ourClient.execute(httpGet);
     String responseContent = IOUtils.toString(status.getEntity().getContent());
     IOUtils.closeQuietly(status.getEntity().getContent());
-    assertEquals(200, status.getStatusLine().getStatusCode());
-    assertEquals(Constants.CT_FHIR_JSON + ";charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").replace("UTF", "utf"));
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertEquals(Constants.CT_FHIR_JSON + ";charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").replace("UTF", "utf"));
 
     ourLog.info(responseContent);
 
 		org.hl7.fhir.dstu2.model.Bundle bundle = ourCtx.newJsonParser().parseResource(org.hl7.fhir.dstu2.model.Bundle.class, responseContent);
     Binary bin = (Binary) bundle.getEntry().get(0).getResource();
 
-    assertEquals("text/plain", bin.getContentType());
-    assertArrayEquals(new byte[]{1, 2, 3, 4}, bin.getContent());
+		assertEquals("text/plain", bin.getContentType());
+		assertThat(bin.getContent()).containsExactly(new byte[]{1, 2, 3, 4});
   }
 
   @Test
@@ -151,16 +140,16 @@ public class BinaryHl7OrgDstu2Test {
     HttpResponse status = ourClient.execute(httpGet);
     String responseContent = IOUtils.toString(status.getEntity().getContent());
     IOUtils.closeQuietly(status.getEntity().getContent());
-    assertEquals(200, status.getStatusLine().getStatusCode());
-    assertEquals(Constants.CT_FHIR_XML + ";charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").replace("UTF", "utf"));
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertEquals(Constants.CT_FHIR_XML + ";charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").replace("UTF", "utf"));
 
     ourLog.info(responseContent);
 
 		org.hl7.fhir.dstu2.model.Bundle bundle = ourCtx.newXmlParser().parseResource(org.hl7.fhir.dstu2.model.Bundle.class, responseContent);
     Binary bin = (Binary) bundle.getEntry().get(0).getResource();
 
-    assertEquals("text/plain", bin.getContentType());
-    assertArrayEquals(new byte[]{1, 2, 3, 4}, bin.getContent());
+		assertEquals("text/plain", bin.getContentType());
+		assertThat(bin.getContent()).containsExactly(new byte[]{1, 2, 3, 4});
   }
 
   /**

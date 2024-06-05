@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.dstu2;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
@@ -9,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class FhirResourceDaoDstu2ParseTest extends BaseJpaDstu2Test {
 	@Autowired
@@ -32,7 +33,7 @@ public class FhirResourceDaoDstu2ParseTest extends BaseJpaDstu2Test {
 
 		// then
 		List<? extends IBaseCoding> tags = resourceOut.getMeta().getTag();
-		assertEquals(1, tags.size(), "tag is present");
+		assertThat(tags.size()).as("tag is present").isEqualTo(1);
 		IBaseCoding tagOut = tags.get(0);
 		assertEquals("code", tagOut.getCode());
 		assertEquals("display", tagOut.getDisplay());
@@ -59,7 +60,7 @@ public class FhirResourceDaoDstu2ParseTest extends BaseJpaDstu2Test {
 
 		// then
 		List<? extends IBaseCoding> tags = resourceOut.getMeta().getSecurity();
-		assertEquals(1, tags.size(), "coding is present");
+		assertThat(tags.size()).as("coding is present").isEqualTo(1);
 		IBaseCoding codingOut = tags.get(0);
 		assertEquals("code", codingOut.getCode());
 		assertEquals("display", codingOut.getDisplay());

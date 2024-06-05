@@ -1,9 +1,9 @@
 package ca.uhn.fhir.narrative2;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.fhirpath.IFhirPathEvaluationContext;
 import ca.uhn.fhir.narrative.CustomThymeleafNarrativeGenerator;
-import org.hamcrest.Matchers;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Composition;
@@ -24,9 +24,7 @@ import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import java.io.IOException;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ThymeleafNarrativeGeneratorTest {
 
@@ -79,14 +77,14 @@ public class ThymeleafNarrativeGeneratorTest {
 
 		// First narrative should be empty
 		String narrative = composition.getSection().get(0).getText().getDiv().getValueAsString();
-		assertThat(narrative, Matchers.emptyOrNullString());
+		assertThat(narrative).isNullOrEmpty();
 
 		// Second narrative should have details
 		narrative = composition.getSection().get(1).getText().getDiv().getValueAsString();
 		ourLog.info("Narrative:\n{}", narrative);
 
-		assertThat(narrative, containsString("<thead><tr><td>Name</td><td>Value</td>"));
-		assertThat(narrative, containsString("<td> 4.2 - 6.0 </td>"));
+		assertThat(narrative).contains("<thead><tr><td>Name</td><td>Value</td>");
+		assertThat(narrative).contains("<td> 4.2 - 6.0 </td>");
 	}
 
 	@Test

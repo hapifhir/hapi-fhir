@@ -27,6 +27,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -53,13 +54,13 @@ public class FhirPathEngineR4Test extends BaseValidationTestWithInlineMocks {
 		List<Base> value;
 
 		value = ourCtx.newFhirPath().evaluate(o, "Observation.specimen", Base.class);
-		assertEquals(1, value.size());
+		assertThat(value).hasSize(1);
 		value = ourCtx.newFhirPath().evaluate(o, "Observation.specimen.resolve()", Base.class);
-		assertEquals(1, value.size());
+		assertThat(value).hasSize(1);
 
 
 		value = ourCtx.newFhirPath().evaluate(o, "Observation.specimen.resolve().receivedTime", Base.class);
-		assertEquals(1, value.size());
+		assertThat(value).hasSize(1);
 		assertEquals("2011-01-01", ((DateTimeType) value.get(0)).getValueAsString());
 	}
 
@@ -76,7 +77,7 @@ public class FhirPathEngineR4Test extends BaseValidationTestWithInlineMocks {
 			.setValue(new Quantity().setSystem("http://bar").setCode("code2").setValue(200));
 
 		List<Base> outcome = ourCtx.newFhirPath().evaluate(o1, path, Base.class);
-		assertEquals(2, outcome.size());
+		assertThat(outcome).hasSize(2);
 
 	}
 
@@ -90,19 +91,19 @@ public class FhirPathEngineR4Test extends BaseValidationTestWithInlineMocks {
 		// even some 4.0.1 SPs use it
 
 		List<Base> value = ourCtx.newFhirPath().evaluate(obs, "Observation.value.as(string)", Base.class);
-		assertEquals(1, value.size());
+		assertThat(value).hasSize(1);
 		assertEquals("FOO", ((StringType) value.get(0)).getValue());
 
 		value = ourCtx.newFhirPath().evaluate(obs, "Observation.value.as(FHIR.string)", Base.class);
-		assertEquals(1, value.size());
+		assertThat(value).hasSize(1);
 		assertEquals("FOO", ((StringType) value.get(0)).getValue());
 
 		value = ourCtx.newFhirPath().evaluate(obs, "Observation.value.as(String)", Base.class);
-		assertEquals(1, value.size());
+		assertThat(value).hasSize(1);
 		assertEquals("FOO", ((StringType) value.get(0)).getValue());
 
 		value = ourCtx.newFhirPath().evaluate(obs, "Observation.value.as(FHIR.String)", Base.class);
-		assertEquals(1, value.size());
+		assertThat(value).hasSize(1);
 		assertEquals("FOO", ((StringType) value.get(0)).getValue());
 	}
 	

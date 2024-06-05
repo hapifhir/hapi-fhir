@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.interceptor.validation;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
@@ -27,11 +29,7 @@ import org.springframework.context.ApplicationContext;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
@@ -158,7 +156,7 @@ public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 		}
 
 		patient = myPatientDao.read(id);
-		assertThat(patient.getMeta().getProfile().stream().map(t -> t.getValue()).collect(Collectors.toList()), containsInAnyOrder("http://foo/Profile1"));
+		assertThat(patient.getMeta().getProfile().stream().map(t -> t.getValue()).collect(Collectors.toList())).containsExactlyInAnyOrder("http://foo/Profile1");
 
 	}
 
@@ -239,7 +237,7 @@ public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 		}
 
 		patient = myPatientDao.read(id);
-		assertThat(patient.getMeta().getProfile().stream().map(t -> t.getValue()).collect(Collectors.toList()), containsInAnyOrder("http://foo/Profile1"));
+		assertThat(patient.getMeta().getProfile().stream().map(t -> t.getValue()).collect(Collectors.toList())).containsExactlyInAnyOrder("http://foo/Profile1");
 
 	}
 
@@ -386,8 +384,7 @@ public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 			fail();
 		} catch (PreconditionFailedException e) {
 			OperationOutcome oo = (OperationOutcome) e.getOperationOutcome();
-			assertThat(oo.getIssue().get(0).getDiagnostics(),
-				containsString("Observation.status: minimum required = 1, but only found 0"));
+			assertThat(oo.getIssue().get(0).getDiagnostics()).contains("Observation.status: minimum required = 1, but only found 0");
 		}
 
 	}
@@ -412,7 +409,7 @@ public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 			myObservationDao.create(Observation);
 			fail();
 		} catch (PreconditionFailedException e) {
-			assertThat(e.getMessage(), containsString("Observation.status: minimum required = 1, but only found 0"));
+			assertThat(e.getMessage()).contains("Observation.status: minimum required = 1, but only found 0");
 		}
 	}
 

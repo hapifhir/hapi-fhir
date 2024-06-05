@@ -11,9 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.not;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 @ExtendWith(MockitoExtension.class)
 class BulkDataExportProviderTest {
@@ -39,9 +37,11 @@ class BulkDataExportProviderTest {
 	@ParameterizedTest
 	@MethodSource("fhirContexts")
 	void checkDeviceIsSupportedInPatientCompartment(FhirContext theFhirContext) {
-		assertThat(new BulkDataExportProvider().getPatientCompartmentResources(theFhirContext),
-			PATIENT_COMPARTMENT_FHIR_VERSIONS_SUPPORT_DEVICE.contains(theFhirContext.getVersion().getVersion())
-				? hasItem("Device")
-				: not(hasItem("Device")));
+		Set<String> resourceNames = new BulkDataExportProvider().getPatientCompartmentResources(theFhirContext);
+		if (PATIENT_COMPARTMENT_FHIR_VERSIONS_SUPPORT_DEVICE.contains(theFhirContext.getVersion().getVersion())) {
+			assertThat(resourceNames).contains("Device");
+		} else {
+			assertThat(resourceNames).doesNotContain("Device");
+		}
 	}
 }

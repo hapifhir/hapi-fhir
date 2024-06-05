@@ -9,7 +9,6 @@ import ca.uhn.fhir.jpa.migrate.taskdef.BaseTest;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import jakarta.annotation.Nonnull;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -19,12 +18,10 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.function.Supplier;
 
-import static org.hamcrest.CoreMatchers.startsWith;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.endsWith;
-import static org.hamcrest.Matchers.hasSize;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
+
 
 public class SchemaMigratorTest extends BaseTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SchemaMigratorTest.class);
@@ -41,8 +38,8 @@ public class SchemaMigratorTest extends BaseTest {
 			schemaMigrator.validate();
 			fail();
 		} catch (ConfigurationException e) {
-			assertThat(e.getMessage(), startsWith(Msg.code(27) + "The database schema for "));
-			assertThat(e.getMessage(), endsWith(" is out of date.  Current database schema version is unknown.  Schema version required by application is 1.1.  Please run the database migrator."));
+			assertThat(e.getMessage()).startsWith(Msg.code(27) + "The database schema for ");
+			assertThat(e.getMessage()).endsWith(" is out of date.  Current database schema version is unknown.  Schema version required by application is 1.1.  Please run the database migrator.");
 		}
 
 		schemaMigrator.migrate();
@@ -63,22 +60,22 @@ public class SchemaMigratorTest extends BaseTest {
 			assertEquals(org.springframework.jdbc.BadSqlGrammarException.class, e.getCause().getCause().getClass());
 			MigrationResult failedResult = e.getResult();
 			assertEquals(0, failedResult.changes);
-			assertEquals(0, failedResult.succeededTasks.size());
-			assertEquals(1, failedResult.failedTasks.size());
-			assertEquals(0, failedResult.executedStatements.size());
+			assertThat(failedResult.succeededTasks).isEmpty();
+			assertThat(failedResult.failedTasks).hasSize(1);
+			assertThat(failedResult.executedStatements).isEmpty();
 
-			assertThat(myHapiMigrationDao.findAll(), hasSize(1));
+			assertThat(myHapiMigrationDao.findAll()).hasSize(1);
 		}
 		schemaMigrator = createTableMigrator();
 
 		MigrationResult result = schemaMigrator.migrate();
 		assertEquals(0, result.changes);
-		assertEquals(1, result.succeededTasks.size());
-		assertEquals(0, result.failedTasks.size());
-		assertEquals(1, result.executedStatements.size());
+		assertThat(result.succeededTasks).hasSize(1);
+		assertThat(result.failedTasks).isEmpty();
+		assertThat(result.executedStatements).hasSize(1);
 
 		List<HapiMigrationEntity> entities = myHapiMigrationDao.findAll();
-		assertThat(entities, hasSize(2));
+		assertThat(entities).hasSize(2);
 		assertEquals(1, entities.get(0).getPid());
 		assertEquals(false, entities.get(0).getSuccess());
 		assertEquals(2, entities.get(1).getPid());
@@ -115,7 +112,7 @@ public class SchemaMigratorTest extends BaseTest {
 
 		DriverTypeEnum.ConnectionProperties connectionProperties = super.getDriverType().newConnectionProperties(getDataSource().getUrl(), getDataSource().getUsername(), getDataSource().getPassword());
 		Set<String> tableNames = JdbcUtils.getTableNames(connectionProperties);
-		assertThat(tableNames, Matchers.containsInAnyOrder("SOMETABLE_A", "SOMETABLE_C"));
+		assertThat(tableNames).containsExactlyInAnyOrder("SOMETABLE_A", "SOMETABLE_C");
 	}
 
 	@Nonnull

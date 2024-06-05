@@ -34,8 +34,8 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -81,7 +81,7 @@ public class SubscriptionRegisteringSubscriberTest {
 		ResourceOperationJsonMessage message = new ResourceOperationJsonMessage();
 		mySubscriptionRegisteringSubscriber.handleMessage(message);
 		String expectedMessage = String.format("Received message of unexpected type on matching channel: %s", message);
-		assertTrue(output.getOut().contains(expectedMessage));
+		assertThat(output.getOut()).contains(expectedMessage);
 	}
 
 	@Test

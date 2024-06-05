@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.mdm.provider;
 
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.mdm.api.MdmConstants;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import com.google.common.collect.Ordering;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
@@ -19,9 +19,10 @@ import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class MdmProviderMatchR4Test extends BaseProviderR4Test {
 
@@ -43,7 +44,7 @@ public class MdmProviderMatchR4Test extends BaseProviderR4Test {
 		Patient newJane = buildJanePatient();
 
 		Bundle result = (Bundle) myMdmProvider.match(newJane, new SystemRequestDetails());
-		assertEquals(1, result.getEntry().size());
+		assertThat(result.getEntry()).hasSize(1);
 
 		Bundle.BundleEntryComponent entry0 = result.getEntry().get(0);
 		assertEquals(createdJane.getId(), entry0.getResource().getId());
@@ -51,7 +52,7 @@ public class MdmProviderMatchR4Test extends BaseProviderR4Test {
 		Bundle.BundleEntrySearchComponent searchComponent = entry0.getSearch();
 		assertEquals(Bundle.SearchEntryMode.MATCH, searchComponent.getMode());
 
-		assertEquals(2.0 / 3.0, searchComponent.getScore().doubleValue(), 0.01);
+		assertThat(searchComponent.getScore().doubleValue()).isCloseTo(2.0 / 3.0, within(0.01));
 		Extension matchGradeExtension = searchComponent.getExtensionByUrl(MdmConstants.FIHR_STRUCTURE_DEF_MATCH_GRADE_URL_NAMESPACE);
 		assertNotNull(matchGradeExtension);
 		assertEquals(MatchGrade.CERTAIN.toCode(), matchGradeExtension.getValue().toString());
@@ -67,7 +68,7 @@ public class MdmProviderMatchR4Test extends BaseProviderR4Test {
 		Medication newMedication = buildMedication("Organization/mfr");
 
 		Bundle result = (Bundle) myMdmProvider.serverMatch(newMedication, new StringType("Medication"), new SystemRequestDetails());
-		assertEquals(1, result.getEntry().size());
+		assertThat(result.getEntry()).hasSize(1);
 
 		Bundle.BundleEntryComponent entry0 = result.getEntry().get(0);
 		assertEquals(createdMedication.getId(), entry0.getResource().getId());
@@ -76,7 +77,7 @@ public class MdmProviderMatchR4Test extends BaseProviderR4Test {
 		assertEquals(Bundle.SearchEntryMode.MATCH, searchComponent.getMode());
 
 		//Since there is only
-		assertEquals(1.0 / 1.0, searchComponent.getScore().doubleValue(), 0.01);
+		assertThat(searchComponent.getScore().doubleValue()).isCloseTo(1.0 / 1.0, within(0.01));
 		Extension matchGradeExtension = searchComponent.getExtensionByUrl(MdmConstants.FIHR_STRUCTURE_DEF_MATCH_GRADE_URL_NAMESPACE);
 		assertNotNull(matchGradeExtension);
 		assertEquals(MatchGrade.CERTAIN.toCode(), matchGradeExtension.getValue().toString());
@@ -92,7 +93,7 @@ public class MdmProviderMatchR4Test extends BaseProviderR4Test {
 		Patient newJane = buildJanePatient();
 
 		Bundle result = (Bundle) myMdmProvider.serverMatch(newJane, new StringType("Patient"), new SystemRequestDetails());
-		assertEquals(1, result.getEntry().size());
+		assertThat(result.getEntry()).hasSize(1);
 
 		Bundle.BundleEntryComponent entry0 = result.getEntry().get(0);
 		assertEquals(createdJane.getId(), entry0.getResource().getId());
@@ -100,7 +101,7 @@ public class MdmProviderMatchR4Test extends BaseProviderR4Test {
 		Bundle.BundleEntrySearchComponent searchComponent = entry0.getSearch();
 		assertEquals(Bundle.SearchEntryMode.MATCH, searchComponent.getMode());
 
-		assertEquals(2.0 / 3.0, searchComponent.getScore().doubleValue(), 0.01);
+		assertThat(searchComponent.getScore().doubleValue()).isCloseTo(2.0 / 3.0, within(0.01));
 		Extension matchGradeExtension = searchComponent.getExtensionByUrl(MdmConstants.FIHR_STRUCTURE_DEF_MATCH_GRADE_URL_NAMESPACE);
 		assertNotNull(matchGradeExtension);
 		assertEquals(MatchGrade.CERTAIN.toCode(), matchGradeExtension.getValue().toString());
@@ -118,18 +119,18 @@ public class MdmProviderMatchR4Test extends BaseProviderR4Test {
 		Patient newJane = buildJanePatient();
 
 		Bundle result = (Bundle) myMdmProvider.match(newJane, new SystemRequestDetails());
-		assertEquals(2, result.getEntry().size());
+		assertThat(result.getEntry()).hasSize(2);
 
 		Bundle.BundleEntryComponent entry0 = result.getEntry().get(0);
-		assertTrue(jane0.getId().equals(((Patient) entry0.getResource()).getId()), "First match should be Jane");
+		assertThat(jane0.getId().equals(((Patient) entry0.getResource()).getId())).as("First match should be Jane").isTrue();
 		Bundle.BundleEntryComponent entry1 = result.getEntry().get(1);
-		assertTrue(jane1.getId().equals(((Patient) entry1.getResource()).getId()), "Second match should be Janet");
+		assertThat(jane1.getId().equals(((Patient) entry1.getResource()).getId())).as("Second match should be Janet").isTrue();
 
 		List<Double> scores = result.getEntry()
 			.stream()
 			.map(bec -> bec.getSearch().getScore().doubleValue())
 			.collect(Collectors.toList());
-		assertTrue(Ordering.<Double>natural().reverse().isOrdered(scores), "Match scores must be descending");
+		assertThat(Ordering.<Double>natural().reverse().isOrdered(scores)).as("Match scores must be descending").isTrue();
 	}
 
 	@Test
@@ -142,7 +143,7 @@ public class MdmProviderMatchR4Test extends BaseProviderR4Test {
 		paul.setActive(true);
 
 		Bundle result = (Bundle) myMdmProvider.match(paul, new SystemRequestDetails());
-		assertEquals(0, result.getEntry().size());
+		assertThat(result.getEntry()).isEmpty();
 	}
 
 	@Test
@@ -154,7 +155,7 @@ public class MdmProviderMatchR4Test extends BaseProviderR4Test {
 		Patient newJane = buildJanePatient();
 
 		Bundle result = (Bundle) myMdmProvider.match(newJane, new SystemRequestDetails());
-		assertEquals(1, result.getEntry().size());
+		assertThat(result.getEntry()).hasSize(1);
 		assertEquals(createdJane.getId(), result.getEntryFirstRep().getResource().getId());
 	}
 
@@ -226,7 +227,7 @@ public class MdmProviderMatchR4Test extends BaseProviderR4Test {
 
 		IBaseResource coarseResource = myFhirContext.newJsonParser().parseResource(coarsePatient);
 		Bundle result = (Bundle) myMdmProvider.match((Patient) coarseResource, new SystemRequestDetails());
-		assertEquals(1, result.getEntry().size());
+		assertThat(result.getEntry()).hasSize(1);
 	}
 
 	@Test
@@ -268,7 +269,7 @@ public class MdmProviderMatchR4Test extends BaseProviderR4Test {
 		createPatient(noMatchPatient);
 		{
 			Bundle result = (Bundle) myMdmProvider.match(noMatchPatient, new SystemRequestDetails());
-			assertEquals(0, result.getEntry().size());
+			assertThat(result.getEntry()).isEmpty();
 		}
 
 		String nickPatientJson = """
@@ -289,7 +290,7 @@ public class MdmProviderMatchR4Test extends BaseProviderR4Test {
 		{
 			Patient nickPatient = (Patient) myFhirContext.newJsonParser().parseResource(nickPatientJson);
 			Bundle result = (Bundle) myMdmProvider.match(nickPatient, new SystemRequestDetails());
-			assertEquals(1, result.getEntry().size());
+			assertThat(result.getEntry()).hasSize(1);
 		}
 	}
 }

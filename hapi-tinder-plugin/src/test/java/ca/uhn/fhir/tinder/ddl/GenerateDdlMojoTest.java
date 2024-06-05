@@ -11,8 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Locale;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class GenerateDdlMojoTest {
 
@@ -39,7 +38,7 @@ class GenerateDdlMojoTest {
 
 	private static void verifySequence(String fileName) throws IOException {
 		String contents = FileUtils.readFileToString(new File("target/generate-ddl-plugin-test/" + fileName), StandardCharsets.UTF_8).toUpperCase(Locale.ROOT);
-		assertThat(fileName, contents, containsString("CREATE SEQUENCE"));
+		assertThat(contents).as(fileName).contains("CREATE SEQUENCE");
 	}
 
 

@@ -8,7 +8,6 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
@@ -31,6 +30,7 @@ import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
@@ -50,16 +50,12 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.support.GenericMessage;
 
-import jakarta.annotation.Nonnull;
 import java.net.URISyntaxException;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.hasSize;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -185,7 +181,7 @@ public class BaseSubscriptionDeliverySubscriberTest {
 
 		try {
 			mySubscriber.handleMessage(new ResourceDeliveryJsonMessage(payload));
-			fail();
+			fail("");
 		} catch (MessagingException e) {
 			assertEquals(Msg.code(2) + "Failure handling subscription payload for subscription: Subscription/123", e.getMessage());
 		}
@@ -244,11 +240,11 @@ public class BaseSubscriptionDeliverySubscriberTest {
 		ArgumentCaptor<ResourceModifiedJsonMessage> captor = ArgumentCaptor.forClass(ResourceModifiedJsonMessage.class);
 		verify(myChannelProducer).send(captor.capture());
 		final List<ResourceModifiedJsonMessage> messages = captor.getAllValues();
-		assertThat(messages, hasSize(1));
+		assertThat(messages).hasSize(1);
 		ResourceModifiedJsonMessage receivedMessage = messages.get(0);
 		Collection<String> foo = (Collection<String>) receivedMessage.getHapiHeaders().getCustomHeaders().get("foo");
 
-		assertThat(foo, containsInAnyOrder("bar", "bar2"));
+		assertThat(foo).containsExactlyInAnyOrder("bar", "bar2");
 	}
 
 	@Test
@@ -278,13 +274,13 @@ public class BaseSubscriptionDeliverySubscriberTest {
 		ArgumentCaptor<ResourceModifiedJsonMessage> captor = ArgumentCaptor.forClass(ResourceModifiedJsonMessage.class);
 		verify(myChannelProducer).send(captor.capture());
 		final List<ResourceModifiedJsonMessage> messages = captor.getAllValues();
-		assertThat(messages, hasSize(1));
+		assertThat(messages).hasSize(1);
 
 		ResourceModifiedMessage receivedMessage = messages.get(0).getPayload();
 		assertEquals(receivedMessage.getPayloadId(), "Bundle");
 
 		Bundle receivedBundle = (Bundle) receivedMessage.getPayload(myCtx);
-		assertThat(receivedBundle.getEntry(), hasSize(2));
+		assertThat(receivedBundle.getEntry()).hasSize(2);
 		assertEquals(p1.getIdElement().getValue(), receivedBundle.getEntry().get(0).getResource().getIdElement().getValue());
 		assertEquals(p2.getIdElement().getValue(), receivedBundle.getEntry().get(1).getResource().getIdElement().getValue());
 
@@ -332,8 +328,8 @@ public class BaseSubscriptionDeliverySubscriberTest {
 
 
 		// Assert that the partitionID is being serialized in JSON
-		assertThat(jsonString, containsString("\"partitionDate\":[2020,1,1]"));
-		assertThat(jsonString, containsString("\"partitionIds\":[123]"));
+		assertThat(jsonString).contains("\"partitionDate\":[2020,1,1]");
+		assertThat(jsonString).contains("\"partitionIds\":[123]");
 	}
 
 	@Test
@@ -351,12 +347,12 @@ public class BaseSubscriptionDeliverySubscriberTest {
 
 		ourLog.info(jsonString);
 
-		assertThat(jsonString, containsString("\"operationType\":\"CREATE"));
-		assertThat(jsonString, containsString("\"canonicalSubscription\":"));
+		assertThat(jsonString).contains("\"operationType\":\"CREATE");
+		assertThat(jsonString).contains("\"canonicalSubscription\":");
 
 		// Assert that the default partitionID is being generated and is being serialized in JSON
-		assertThat(jsonString, containsString("\"allPartitions\":false"));
-		assertThat(jsonString, containsString("\"partitionIds\":[null]"));
+		assertThat(jsonString).contains("\"allPartitions\":false");
+		assertThat(jsonString).contains("\"partitionIds\":[null]");
 	}
 
 	@Test
@@ -414,7 +410,7 @@ public class BaseSubscriptionDeliverySubscriberTest {
 
 		try {
 			mySubscriber.handleMessage(new ResourceDeliveryJsonMessage(payload));
-			fail();
+			fail("");
 		} catch (MessagingException e) {
 			String messageExceptionAsString = e.toString();
 			assertFalse(messageExceptionAsString.contains(familyName));

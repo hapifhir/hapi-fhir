@@ -10,11 +10,8 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static org.hamcrest.CoreMatchers.hasItems;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
-import static org.hamcrest.core.Is.is;
-import static org.hamcrest.core.IsEqual.equalTo;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class NameUtilTestR4 {
 
@@ -28,17 +25,17 @@ public class NameUtilTestR4 {
 		patient.getNameFirstRep().getGiven().add(new StringType("given2"));
 		FhirTerser terser = myFhirContext.newTerser();
 		List<IBase> names = terser.getValues(patient, "name", IBase.class);
-		assertThat(names, hasSize(1));
+		assertThat(names).hasSize(1);
 		IBase name = names.get(0);
 
 		{
 			String familyName = NameUtil.extractFamilyName(myFhirContext, name );
-			assertThat(familyName, is(equalTo("family")));
+			assertEquals("family", familyName);
 		}
 
 		{
 			List<String> familyName = NameUtil.extractGivenNames(myFhirContext, name);
-			assertThat(familyName, hasItems("given1", "given2"));
+			assertThat(familyName).contains("given1", "given2");
 		}
 	}
 }

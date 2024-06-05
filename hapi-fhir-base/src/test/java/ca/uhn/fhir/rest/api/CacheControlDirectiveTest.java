@@ -7,6 +7,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class CacheControlDirectiveTest {
@@ -27,7 +28,7 @@ public class CacheControlDirectiveTest {
 		ccd.parse(values);
 		assertTrue(ccd.isNoCache());
 		assertTrue(ccd.isNoStore());
-		assertEquals(null, ccd.getMaxResults());
+		assertNull(ccd.getMaxResults());
 	}
 
 	@Test
@@ -47,7 +48,7 @@ public class CacheControlDirectiveTest {
 		ccd.parse(values);
 		assertFalse(ccd.isNoCache());
 		assertTrue(ccd.isNoStore());
-		assertEquals(null, ccd.getMaxResults());
+		assertNull(ccd.getMaxResults());
 	}
 
 	@Test

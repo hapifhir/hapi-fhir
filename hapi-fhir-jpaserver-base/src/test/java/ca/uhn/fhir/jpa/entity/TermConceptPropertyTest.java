@@ -5,11 +5,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.startsWith;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TermConceptPropertyTest {
 
@@ -24,8 +22,8 @@ public class TermConceptPropertyTest {
 		termConceptProperty.setValue(ourVeryLongString);
 
 		// then
-		assertThat(termConceptProperty.hasValueBlobForTesting(), equalTo(true));
-		assertThat(termConceptProperty.hasValueBinForTesting(), equalTo(true));
+		assertTrue(termConceptProperty.hasValueBlobForTesting());
+		assertTrue(termConceptProperty.hasValueBinForTesting());
 	}
 
 	@Test
@@ -36,7 +34,7 @@ public class TermConceptPropertyTest {
 		termConceptProperty.setValueBlobForTesting(null);
 
 		// when/then
-		assertThat(termConceptProperty.hasValueBin(), is(true));
+		assertTrue(termConceptProperty.hasValueBin());
 
 	}
 
@@ -48,7 +46,7 @@ public class TermConceptPropertyTest {
 		termConceptProperty.setValueBlobForTesting(ourVeryLongString.getBytes());
 
 		// when/then
-		assertThat(termConceptProperty.hasValueBin(), is(true));
+		assertTrue(termConceptProperty.hasValueBin());
 
 	}
 
@@ -63,7 +61,7 @@ public class TermConceptPropertyTest {
 		String value = termConceptProperty.getValue();
 
 		// then
-		assertThat(value, startsWith("a"));
+		assertThat(value).startsWith("a");
 
 	}
 
@@ -78,7 +76,7 @@ public class TermConceptPropertyTest {
 		String value = termConceptProperty.getValue();
 
 		// then
-		assertThat(value, startsWith("a"));
+		assertThat(value).startsWith("a");
 	}
 
 	@ParameterizedTest
@@ -92,8 +90,8 @@ public class TermConceptPropertyTest {
 		termConceptProperty.performLegacyLobSupport(theSupportLegacyLob);
 
 		// then
-		assertThat(termConceptProperty.hasValueBinForTesting(), equalTo(true));
-		assertThat(termConceptProperty.hasValueBlobForTesting(), equalTo(theSupportLegacyLob));
+		assertTrue(termConceptProperty.hasValueBinForTesting());
+		assertEquals(theSupportLegacyLob, termConceptProperty.hasValueBlobForTesting());
 	}
 
 }

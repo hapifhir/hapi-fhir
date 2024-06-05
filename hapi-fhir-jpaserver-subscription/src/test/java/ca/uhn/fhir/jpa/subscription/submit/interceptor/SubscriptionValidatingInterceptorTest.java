@@ -44,11 +44,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static ca.uhn.fhir.subscription.SubscriptionTestDataHelper.TEST_TOPIC;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.endsWith;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.startsWith;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -86,7 +83,7 @@ public class SubscriptionValidatingInterceptorTest {
 			mySubscriptionValidatingInterceptor.resourcePreCreate(theSubscription, null, null);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), is(Msg.code(8) + "Can not process submitted Subscription - Subscription.status must be populated on this server"));
+			assertEquals(Msg.code(8) + "Can not process submitted Subscription - Subscription.status must be populated on this server", e.getMessage());
 			ourLog.info("Expected exception", e);
 		}
 	}
@@ -99,8 +96,8 @@ public class SubscriptionValidatingInterceptorTest {
 			mySubscriptionValidatingInterceptor.resourcePreCreate(theSubscription, null, null);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), startsWith(Msg.code(11) + "Subscription."));
-			assertThat(e.getMessage(), endsWith( " must be populated"));
+			assertThat(e.getMessage()).startsWith(Msg.code(11) + "Subscription.");
+			assertThat(e.getMessage()).endsWith( " must be populated");
 		}
 	}
 
@@ -113,7 +110,7 @@ public class SubscriptionValidatingInterceptorTest {
 			mySubscriptionValidatingInterceptor.resourcePreCreate(theSubscription, null, null);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), endsWith("criteria must be in the form \"{Resource Type}?[params]\""));
+			assertThat(e.getMessage()).endsWith("criteria must be in the form \"{Resource Type}?[params]\"");
 		}
 	}
 
@@ -126,7 +123,7 @@ public class SubscriptionValidatingInterceptorTest {
 			mySubscriptionValidatingInterceptor.resourcePreCreate(theSubscription, null, null);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), is(Msg.code(20) + "Subscription.channel.type must be populated"));
+			assertEquals(Msg.code(20) + "Subscription.channel.type must be populated", e.getMessage());
 		}
 	}
 
@@ -140,7 +137,7 @@ public class SubscriptionValidatingInterceptorTest {
 			mySubscriptionValidatingInterceptor.resourcePreCreate(theSubscription, null, null);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), is(Msg.code(16) + "No endpoint defined for message subscription"));
+			assertEquals(Msg.code(16) + "No endpoint defined for message subscription", e.getMessage());
 		}
 	}
 
@@ -156,7 +153,7 @@ public class SubscriptionValidatingInterceptorTest {
 			mySubscriptionValidatingInterceptor.resourcePreCreate(theSubscription, null, null);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), is(Msg.code(17) + "Only 'channel' protocol is supported for Subscriptions with channel type 'message'"));
+			assertEquals(Msg.code(17) + "Only 'channel' protocol is supported for Subscriptions with channel type 'message'", e.getMessage());
 		}
 
 		SubscriptionUtil.setEndpoint(myFhirContext, theSubscription, "channel");
@@ -164,7 +161,7 @@ public class SubscriptionValidatingInterceptorTest {
 			mySubscriptionValidatingInterceptor.resourcePreCreate(theSubscription, null, null);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), is(Msg.code(17) + "Only 'channel' protocol is supported for Subscriptions with channel type 'message'"));
+			assertEquals(Msg.code(17) + "Only 'channel' protocol is supported for Subscriptions with channel type 'message'", e.getMessage());
 		}
 
 		SubscriptionUtil.setEndpoint(myFhirContext, theSubscription, "channel:");
@@ -172,7 +169,7 @@ public class SubscriptionValidatingInterceptorTest {
 			mySubscriptionValidatingInterceptor.resourcePreCreate(theSubscription, null, null);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), is(Msg.code(19) + "Invalid subscription endpoint uri channel:"));
+			assertEquals(Msg.code(19) + "Invalid subscription endpoint uri channel:", e.getMessage());
 		}
 
 		// Happy path
@@ -192,9 +189,9 @@ public class SubscriptionValidatingInterceptorTest {
 	public void testInvalidPointcut() {
 		try {
 			mySubscriptionValidatingInterceptor.validateSubmittedSubscription(createSubscription(), null, null, Pointcut.TEST_RB);
-			fail();
+			fail("");
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), is(Msg.code(2267) + "Expected Pointcut to be either STORAGE_PRESTORAGE_RESOURCE_CREATED or STORAGE_PRESTORAGE_RESOURCE_UPDATED but was: " + Pointcut.TEST_RB));
+			assertEquals(Msg.code(2267) + "Expected Pointcut to be either STORAGE_PRESTORAGE_RESOURCE_CREATED or STORAGE_PRESTORAGE_RESOURCE_UPDATED but was: " + Pointcut.TEST_RB, e.getMessage());
 		}
 	}
 
@@ -215,9 +212,9 @@ public class SubscriptionValidatingInterceptorTest {
 		channel.setEndpoint("channel:my-queue-name");
 		try {
 			mySubscriptionValidatingInterceptor.validateSubmittedSubscription(badSub, null, null, Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED);
-			fail();
+			fail("");
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), is(Msg.code(2322) + "No SubscriptionTopic exists with topic: http://topic.url"));
+			assertEquals(Msg.code(2322) + "No SubscriptionTopic exists with topic: http://topic.url", e.getMessage());
 		}
 
 		// Happy path
@@ -234,7 +231,7 @@ public class SubscriptionValidatingInterceptorTest {
 		if (myFhirContext.getVersion().getVersion() == FhirVersionEnum.R5) {
 			initR5();
 			org.hl7.fhir.r5.model.Subscription subscription = (org.hl7.fhir.r5.model.Subscription) theSubscription;
-			subscription.setTopic(TEST_TOPIC);
+			subscription.setTopic(TEST_SUBSCRIPTION_TOPIC_URL);
 		}
 	}
 

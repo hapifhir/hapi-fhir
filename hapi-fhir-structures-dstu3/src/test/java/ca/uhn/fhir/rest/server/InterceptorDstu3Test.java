@@ -1,5 +1,8 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -11,7 +14,6 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Validate;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -22,7 +24,6 @@ import ca.uhn.fhir.rest.server.interceptor.InterceptorAdapter;
 import ca.uhn.fhir.rest.server.interceptor.ServerOperationInterceptorAdapter;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
-import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
@@ -31,12 +32,6 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.ee10.servlet.ServletHandler;
-import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.IntegerType;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
@@ -45,7 +40,6 @@ import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -56,15 +50,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.either;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.inOrder;
@@ -162,7 +150,7 @@ public class InterceptorDstu3Test {
 			HttpGet get = new HttpGet(ourServer.getBaseUrl() + "/Patient/1");
 			try (CloseableHttpResponse status = ourClient.execute(get)) {
 				String response = IOUtils.toString(status.getEntity().getContent(), Constants.CHARSET_UTF8);
-				assertThat(response, containsString("NAME1"));
+				assertThat(response).contains("NAME1");
 				assertEquals(202, status.getStatusLine().getStatusCode());
 				assertEquals("Accepted", status.getStatusLine().getReasonPhrase());
 			}
@@ -238,7 +226,7 @@ public class InterceptorDstu3Test {
 		httpPost.setEntity(new StringEntity(input, ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
 		try (CloseableHttpResponse status = ourClient.execute(httpPost)) {
 			IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(status.getStatusLine().getStatusCode(), either(equalTo(200)).or(equalTo(201)));
+			assertThat(status.getStatusLine().getStatusCode()).isBetween(200, 201);
 		}
 	}
 
@@ -273,8 +261,8 @@ public class InterceptorDstu3Test {
 		verify(myInterceptor1, times(1)).incomingRequestPreHandled(opTypeCapt.capture(), arTypeCapt.capture());
 		verify(myInterceptor1, times(1)).outgoingResponse(nullable(ServletRequestDetails.class), resourceCapt.capture());
 
-		assertEquals(1, resourceCapt.getAllValues().size());
-		assertEquals(null, resourceCapt.getAllValues().get(0));
+		assertThat(resourceCapt.getAllValues()).hasSize(1);
+		assertNull(resourceCapt.getAllValues().get(0));
 //		assertEquals("", rdCapt.getAllValues().get(0).get)
 	}
 
@@ -307,7 +295,7 @@ public class InterceptorDstu3Test {
 		order.verify(myInterceptor1, times(1)).incomingRequestPreHandled(opTypeCapt.capture(), arTypeCapt.capture());
 		order.verify(myInterceptor1, times(1)).outgoingResponse(nullable(ServletRequestDetails.class), resourceCapt.capture());
 
-		assertEquals(1, resourceCapt.getAllValues().size());
+		assertThat(resourceCapt.getAllValues()).hasSize(1);
 		assertEquals(OperationOutcome.class, resourceCapt.getAllValues().get(0).getClass());
 	}
 

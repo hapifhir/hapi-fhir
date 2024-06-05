@@ -13,7 +13,6 @@ import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
-import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.ElementUtil;
@@ -21,12 +20,6 @@ import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.ee10.servlet.ServletHandler;
-import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.Observation;
@@ -35,7 +28,6 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
@@ -45,13 +37,12 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.fail;
+
 
 public class IncludeTest {
 
@@ -77,7 +68,7 @@ public class IncludeTest {
 			String responseContent = IOUtils.toString(status.getEntity().getContent());
 
 			ourLog.info(responseContent);
-			assertThat(responseContent, containsString("Invalid _include parameter value"));
+			assertThat(responseContent).contains("Invalid _include parameter value");
 		}
 	}
 
@@ -92,17 +83,17 @@ public class IncludeTest {
 
 			ourLog.info(responseContent);
 
-			assertEquals(3, bundle.getEntry().size());
+			assertThat(bundle.getEntry()).hasSize(3);
 
 			assertEquals(("Patient/p1"), bundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue());
 			assertEquals(("Patient/p2"), bundle.getEntry().get(1).getResource().getIdElement().toUnqualifiedVersionless().getValue());
 			assertEquals(("Organization/o1"), bundle.getEntry().get(2).getResource().getIdElement().toUnqualifiedVersionless().getValue());
 
 			Patient p1 = (Patient) bundle.getEntry().get(0).getResource();
-			assertEquals(0, p1.getContained().size());
+			assertThat(p1.getContained()).isEmpty();
 
 			Patient p2 = (Patient) bundle.getEntry().get(1).getResource();
-			assertEquals(0, p2.getContained().size());
+			assertThat(p2.getContained()).isEmpty();
 
 		}
 	}
@@ -118,17 +109,17 @@ public class IncludeTest {
 
 			ourLog.info(responseContent);
 
-			assertEquals(4, bundle.getEntry().size());
+			assertThat(bundle.getEntry()).hasSize(4);
 			assertEquals(("Patient/p1"), bundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue());
 			assertEquals(("Patient/p2"), bundle.getEntry().get(1).getResource().getIdElement().toUnqualifiedVersionless().getValue());
 			assertEquals(("Organization/o1"), bundle.getEntry().get(2).getResource().getIdElement().toUnqualifiedVersionless().getValue());
 			assertEquals(("Organization/o2"), bundle.getEntry().get(3).getResource().getIdElement().toUnqualifiedVersionless().getValue());
 
 			Patient p1 = (Patient) bundle.getEntry().get(0).getResource();
-			assertEquals(0, p1.getContained().size());
+			assertThat(p1.getContained()).isEmpty();
 
 			Patient p2 = (Patient) bundle.getEntry().get(1).getResource();
-			assertEquals(0, p2.getContained().size());
+			assertThat(p2.getContained()).isEmpty();
 
 		}
 	}
@@ -144,16 +135,16 @@ public class IncludeTest {
 
 			ourLog.info(responseContent);
 
-			assertEquals(3, bundle.getEntry().size());
+			assertThat(bundle.getEntry()).hasSize(3);
 			assertEquals(("Patient/p1"), bundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue());
 			assertEquals(("Patient/p2"), bundle.getEntry().get(1).getResource().getIdElement().toUnqualifiedVersionless().getValue());
 			assertEquals(("Organization/o1"), bundle.getEntry().get(2).getResource().getIdElement().toUnqualifiedVersionless().getValue());
 
 			Patient p1 = (Patient) bundle.getEntry().get(0).getResource();
-			assertEquals(0, p1.getContained().size());
+			assertThat(p1.getContained()).isEmpty();
 
 			Patient p2 = (Patient) bundle.getEntry().get(1).getResource();
-			assertEquals(0, p2.getContained().size());
+			assertThat(p2.getContained()).isEmpty();
 
 		}
 	}
@@ -169,16 +160,16 @@ public class IncludeTest {
 
 			ourLog.info(responseContent);
 
-			assertEquals(3, bundle.getEntry().size());
+			assertThat(bundle.getEntry()).hasSize(3);
 			assertEquals("Patient/p1", bundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue());
 			assertEquals("Patient/p2", bundle.getEntry().get(1).getResource().getIdElement().toUnqualifiedVersionless().getValue());
 			assertEquals("Organization/o1", bundle.getEntry().get(2).getResource().getIdElement().toUnqualifiedVersionless().getValue());
 
 			Patient p1 = (Patient) bundle.getEntry().get(0).getResource();
-			assertEquals(0, p1.getContained().size());
+			assertThat(p1.getContained()).isEmpty();
 
 			Patient p2 = (Patient) bundle.getEntry().get(1).getResource();
-			assertEquals(0, p2.getContained().size());
+			assertThat(p2.getContained()).isEmpty();
 
 		}
 	}
@@ -189,27 +180,24 @@ public class IncludeTest {
 		assertEquals(true, new Include("Patient:careProvider", true).withType("Practitioner").isRecurse());
 		assertEquals(false, new Include("Patient:careProvider:Organization", true).withType("Practitioner").isLocked());
 		assertEquals("Practitioner", new Include("Patient:careProvider", true).withType("Practitioner").getParamTargetType());
-		assertEquals(null, new Include("Patient:careProvider", true).getParamTargetType());
+		assertNull(new Include("Patient:careProvider", true).getParamTargetType());
 
 		assertEquals("Patient:careProvider:Practitioner", new Include("Patient:careProvider:Organization", true).withType("Practitioner").getValue());
 		assertEquals(true, new Include("Patient:careProvider:Organization", true).toLocked().withType("Practitioner").isLocked());
 
 		try {
 			new Include("").withType("Patient");
-			fail();
-		} catch (IllegalStateException e) {
+			fail();		} catch (IllegalStateException e) {
 			// good
 		}
 		try {
 			new Include("Patient").withType("Patient");
-			fail();
-		} catch (IllegalStateException e) {
+			fail();		} catch (IllegalStateException e) {
 			// good
 		}
 		try {
 			new Include("Patient:").withType("Patient");
-			fail();
-		} catch (IllegalStateException e) {
+			fail();		} catch (IllegalStateException e) {
 			// good
 		}
 	}
@@ -222,10 +210,10 @@ public class IncludeTest {
 
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
-			assertEquals(1, bundle.getEntry().size());
+			assertThat(bundle.getEntry()).hasSize(1);
 
 			Patient p = BundleUtil.toListOfResourcesOfType(ourCtx, bundle, Patient.class).get(0);
-			assertEquals(0, p.getName().size());
+			assertThat(p.getName()).isEmpty();
 			assertEquals("Hello", p.getIdElement().getIdPart());
 		}
 	}
@@ -238,10 +226,10 @@ public class IncludeTest {
 
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
-			assertEquals(1, bundle.getEntry().size());
+			assertThat(bundle.getEntry()).hasSize(1);
 
 			Patient p = BundleUtil.toListOfResourcesOfType(ourCtx, bundle, Patient.class).get(0);
-			assertEquals(1, p.getName().size());
+			assertThat(p.getName()).hasSize(1);
 			assertEquals("Hello", p.getIdElement().getIdPart());
 			assertEquals("foo-false", p.getName().get(0).getFamily());
 		}
@@ -255,10 +243,10 @@ public class IncludeTest {
 
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
-			assertEquals(1, bundle.getEntry().size());
+			assertThat(bundle.getEntry()).hasSize(1);
 
 			Patient p = BundleUtil.toListOfResourcesOfType(ourCtx, bundle, Patient.class).get(0);
-			assertEquals(1, p.getName().size());
+			assertThat(p.getName()).hasSize(1);
 			assertEquals("Hello", p.getIdElement().getIdPart());
 			assertEquals("foo-true", p.getName().get(0).getFamily());
 		}
@@ -272,16 +260,16 @@ public class IncludeTest {
 
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
-			assertEquals(1, bundle.getEntry().size());
+			assertThat(bundle.getEntry()).hasSize(1);
 
 			Patient p = BundleUtil.toListOfResourcesOfType(ourCtx, bundle, Patient.class).get(0);
-			assertEquals(2, p.getName().size());
+			assertThat(p.getName()).hasSize(2);
 			assertEquals("Hello", p.getIdElement().getIdPart());
 
 			Set<String> values = new HashSet<String>();
 			values.add(p.getName().get(0).getFamily());
 			values.add(p.getName().get(1).getFamily());
-			assertThat(values, containsInAnyOrder("foo-false", "bar-false"));
+			assertThat(values).containsExactlyInAnyOrder("foo-false", "bar-false");
 
 		}
 	}
@@ -294,7 +282,7 @@ public class IncludeTest {
 
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
-			assertEquals(1, bundle.getEntry().size());
+			assertThat(bundle.getEntry()).hasSize(1);
 
 			Patient p = BundleUtil.toListOfResourcesOfType(ourCtx, bundle, Patient.class).get(0);
 			assertEquals("foo", p.getIdentifierFirstRep().getValue());

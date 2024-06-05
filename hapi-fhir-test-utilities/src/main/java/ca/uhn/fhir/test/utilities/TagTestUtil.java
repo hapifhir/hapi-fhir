@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -58,7 +59,7 @@ public class TagTestUtil {
 	 * @param theActualCodings
 	 */
 	public static void assertCodingsEqualAndInOrder(List<? extends IBaseCoding> theExpectedCodings, List<? extends IBaseCoding> theActualCodings) {
-		assertEquals(theExpectedCodings.size(), theActualCodings.size());
+		assertThat(theActualCodings).hasSize(theExpectedCodings.size());
 
 		for (int index = 0; index < theExpectedCodings.size(); index++) {
 			final IBaseCoding expectedCoding = theExpectedCodings.get(index);

@@ -11,10 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 public class JsonParserSummaryModeR5Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(JsonParserSummaryModeR5Test.class);
@@ -35,11 +32,11 @@ public class JsonParserSummaryModeR5Test {
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).setSummaryMode(true).encodeResourceToString(patient);
 		ourLog.info(encoded);
 
-		assertThat(encoded, containsString("Patient"));
-		assertThat(encoded, stringContainsInOrder("\"tag\"", "\"system\": \"" + Constants.TAG_SUBSETTED_SYSTEM_R4 + "\",", "\"code\": \"" + ca.uhn.fhir.rest.api.Constants.TAG_SUBSETTED_CODE + "\""));
-		assertThat(encoded, not(containsString("THE DIV")));
-		assertThat(encoded, containsString("family"));
-		assertThat(encoded, not(containsString("maritalStatus")));
+		assertThat(encoded).contains("Patient");
+		assertThat(encoded).containsSubsequence("\"tag\"", "\"system\": \"" + Constants.TAG_SUBSETTED_SYSTEM_R4 + "\",", "\"code\": \"" + ca.uhn.fhir.rest.api.Constants.TAG_SUBSETTED_CODE + "\"");
+		assertThat(encoded).doesNotContain("THE DIV");
+		assertThat(encoded).contains("family");
+		assertThat(encoded).doesNotContain("maritalStatus");
 	}
 
 	@Test
@@ -55,12 +52,12 @@ public class JsonParserSummaryModeR5Test {
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).setSummaryMode(true).encodeResourceToString(patient);
 		ourLog.info(encoded);
 
-		assertThat(encoded, containsString("Patient"));
-		assertThat(encoded, stringContainsInOrder("\"tag\"", "\"system\": \"foo\",", "\"code\": \"bar\"", "\"system\": \"" + ca.uhn.fhir.rest.api.Constants.TAG_SUBSETTED_SYSTEM_R4 + "\"",
-			"\"code\": \"" + ca.uhn.fhir.rest.api.Constants.TAG_SUBSETTED_CODE + "\""));
-		assertThat(encoded, not(containsString("THE DIV")));
-		assertThat(encoded, containsString("family"));
-		assertThat(encoded, not(containsString("maritalStatus")));
+		assertThat(encoded).contains("Patient");
+		assertThat(encoded).containsSubsequence("\"tag\"", "\"system\": \"foo\",", "\"code\": \"bar\"", "\"system\": \"" + ca.uhn.fhir.rest.api.Constants.TAG_SUBSETTED_SYSTEM_R4 + "\"",
+			"\"code\": \"" + ca.uhn.fhir.rest.api.Constants.TAG_SUBSETTED_CODE + "\"");
+		assertThat(encoded).doesNotContain("THE DIV");
+		assertThat(encoded).contains("family");
+		assertThat(encoded).doesNotContain("maritalStatus");
 	}
 
 	/**
@@ -78,11 +75,11 @@ public class JsonParserSummaryModeR5Test {
 		String encoded = parser.encodeResourceToString(cs);
 		ourLog.info(encoded);
 
-		assertThat(encoded, (containsString("\"rest\"")));
-		assertThat(encoded, (containsString("http://foo")));
-		assertThat(encoded, (containsString("bar")));
-		assertThat(encoded, (containsString("http://goo")));
-		assertThat(encoded, (containsString("ber")));
+		assertThat(encoded).contains("\"rest\"");
+		assertThat(encoded).contains("http://foo");
+		assertThat(encoded).contains("bar");
+		assertThat(encoded).contains("http://goo");
+		assertThat(encoded).contains("ber");
 	}
 
 	/**
@@ -104,11 +101,11 @@ public class JsonParserSummaryModeR5Test {
 		String encoded = parser.encodeResourceToString(cs);
 		ourLog.info(encoded);
 
-		assertThat(encoded, (containsString("\"rest\"")));
-		assertThat(encoded, not(containsString("http://foo")));
-		assertThat(encoded, not(containsString("bar")));
-		assertThat(encoded, not(containsString("http://goo")));
-		assertThat(encoded, not(containsString("ber")));
+		assertThat(encoded).contains("\"rest\"");
+		assertThat(encoded).doesNotContain("http://foo");
+		assertThat(encoded).doesNotContain("bar");
+		assertThat(encoded).doesNotContain("http://goo");
+		assertThat(encoded).doesNotContain("ber");
 	}
 
 
@@ -122,16 +119,16 @@ public class JsonParserSummaryModeR5Test {
 		String encoded = parser.encodeResourceToString(cs);
 		ourLog.info(encoded);
 
-		assertThat(encoded, containsString("\"id\": \"1\""));
-		assertThat(encoded, containsString("\"versionId\": \"1\""));
-		assertThat(encoded, containsString("\"city\": \"CITY\""));
-		assertThat(encoded, not(containsString("http://foo")));
-		assertThat(encoded, not(containsString("bar")));
-		assertThat(encoded, not(containsString("http://goo")));
-		assertThat(encoded, not(containsString("ber")));
-		assertThat(encoded, not(containsString("http://fog")));
-		assertThat(encoded, not(containsString("baz")));
-		assertThat(encoded, not(containsString("Married to work")));
+		assertThat(encoded).contains("\"id\": \"1\"");
+		assertThat(encoded).contains("\"versionId\": \"1\"");
+		assertThat(encoded).contains("\"city\": \"CITY\"");
+		assertThat(encoded).doesNotContain("http://foo");
+		assertThat(encoded).doesNotContain("bar");
+		assertThat(encoded).doesNotContain("http://goo");
+		assertThat(encoded).doesNotContain("ber");
+		assertThat(encoded).doesNotContain("http://fog");
+		assertThat(encoded).doesNotContain("baz");
+		assertThat(encoded).doesNotContain("Married to work");
 	}
 
 	@Test
@@ -145,16 +142,16 @@ public class JsonParserSummaryModeR5Test {
 		String encoded = parser.encodeResourceToString(cs);
 		ourLog.info(encoded);
 
-		assertThat(encoded, containsString("\"id\": \"1\""));
-		assertThat(encoded, containsString("\"versionId\": \"1\""));
-		assertThat(encoded, containsString("\"city\": \"CITY\""));
-		assertThat(encoded, not(containsString("http://foo")));
-		assertThat(encoded, not(containsString("bar")));
-		assertThat(encoded, not(containsString("http://fog")));
-		assertThat(encoded, not(containsString("baz")));
-		assertThat(encoded, containsString("http://goo"));
-		assertThat(encoded, containsString("ber"));
-		assertThat(encoded, containsString("Married to work"));
+		assertThat(encoded).contains("\"id\": \"1\"");
+		assertThat(encoded).contains("\"versionId\": \"1\"");
+		assertThat(encoded).contains("\"city\": \"CITY\"");
+		assertThat(encoded).doesNotContain("http://foo");
+		assertThat(encoded).doesNotContain("bar");
+		assertThat(encoded).doesNotContain("http://fog");
+		assertThat(encoded).doesNotContain("baz");
+		assertThat(encoded).contains("http://goo");
+		assertThat(encoded).contains("ber");
+		assertThat(encoded).contains("Married to work");
 	}
 
 	@Test
@@ -168,16 +165,16 @@ public class JsonParserSummaryModeR5Test {
 		String encoded = parser.encodeResourceToString(cs);
 		ourLog.info(encoded);
 
-		assertThat(encoded, containsString("\"id\": \"1\""));
-		assertThat(encoded, containsString("\"versionId\": \"1\""));
-		assertThat(encoded, containsString("\"city\": \"CITY\""));
-		assertThat(encoded, not(containsString("http://foo")));
-		assertThat(encoded, not(containsString("bar")));
-		assertThat(encoded, not(containsString("http://fog")));
-		assertThat(encoded, not(containsString("baz")));
-		assertThat(encoded, containsString("http://goo"));
-		assertThat(encoded, containsString("ber"));
-		assertThat(encoded, containsString("Married to work"));
+		assertThat(encoded).contains("\"id\": \"1\"");
+		assertThat(encoded).contains("\"versionId\": \"1\"");
+		assertThat(encoded).contains("\"city\": \"CITY\"");
+		assertThat(encoded).doesNotContain("http://foo");
+		assertThat(encoded).doesNotContain("bar");
+		assertThat(encoded).doesNotContain("http://fog");
+		assertThat(encoded).doesNotContain("baz");
+		assertThat(encoded).contains("http://goo");
+		assertThat(encoded).contains("ber");
+		assertThat(encoded).contains("Married to work");
 	}
 
 	@Test
@@ -194,16 +191,16 @@ public class JsonParserSummaryModeR5Test {
 		String encoded = parser.encodeResourceToString(cs);
 		ourLog.info(encoded);
 
-		assertThat(encoded, not(containsString("\"id\": \"1\"")));
-		assertThat(encoded, containsString("\"versionId\": \"1\""));
-		assertThat(encoded, containsString("\"city\": \"CITY\""));
-		assertThat(encoded, not(containsString("http://foo")));
-		assertThat(encoded, not(containsString("bar")));
-		assertThat(encoded, not(containsString("http://fog")));
-		assertThat(encoded, not(containsString("baz")));
-		assertThat(encoded, containsString("http://goo"));
-		assertThat(encoded, containsString("ber"));
-		assertThat(encoded, containsString("Married to work"));
+		assertThat(encoded).doesNotContain("\"id\": \"1\"");
+		assertThat(encoded).contains("\"versionId\": \"1\"");
+		assertThat(encoded).contains("\"city\": \"CITY\"");
+		assertThat(encoded).doesNotContain("http://foo");
+		assertThat(encoded).doesNotContain("bar");
+		assertThat(encoded).doesNotContain("http://fog");
+		assertThat(encoded).doesNotContain("baz");
+		assertThat(encoded).contains("http://goo");
+		assertThat(encoded).contains("ber");
+		assertThat(encoded).contains("Married to work");
 	}
 
 	@Test
@@ -220,16 +217,16 @@ public class JsonParserSummaryModeR5Test {
 		String encoded = parser.encodeResourceToString(cs);
 		ourLog.info(encoded);
 
-		assertThat(encoded, containsString("\"id\": \"1\""));
-		assertThat(encoded, containsString("\"versionId\": \"1\""));
-		assertThat(encoded, containsString("\"city\": \"CITY\""));
-		assertThat(encoded, containsString("http://foo"));
-		assertThat(encoded, containsString("bar"));
-		assertThat(encoded, containsString("http://fog"));
-		assertThat(encoded, containsString("baz"));
-		assertThat(encoded, containsString("http://goo"));
-		assertThat(encoded, containsString("ber"));
-		assertThat(encoded, containsString("Married to work"));
+		assertThat(encoded).contains("\"id\": \"1\"");
+		assertThat(encoded).contains("\"versionId\": \"1\"");
+		assertThat(encoded).contains("\"city\": \"CITY\"");
+		assertThat(encoded).contains("http://foo");
+		assertThat(encoded).contains("bar");
+		assertThat(encoded).contains("http://fog");
+		assertThat(encoded).contains("baz");
+		assertThat(encoded).contains("http://goo");
+		assertThat(encoded).contains("ber");
+		assertThat(encoded).contains("Married to work");
 	}
 
 	private static @Nonnull CapabilityStatement createCapabilityStatementWithExtensions() {

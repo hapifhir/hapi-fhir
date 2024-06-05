@@ -1,6 +1,7 @@
 package ca.uhn.fhir.batch2.jobs.export;
 
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
@@ -62,9 +63,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -293,21 +295,18 @@ public class ExpandResourceAndWriteBinaryStepTest {
 		// test
 		try {
 			myFinalStep.run(input, sink);
-			fail();
+			fail("");
 		} catch (JobExecutionFailedException ex) {
-			assertTrue(ex.getMessage().contains("Failure to process resource of type"));
+			assertThat(ex.getMessage()).contains("Failure to process resource of type");
 		}
 
 		// verify
 		ArgumentCaptor<ILoggingEvent> logCaptor = ArgumentCaptor.forClass(ILoggingEvent.class);
 		verify(myAppender).doAppend(logCaptor.capture());
-		assertTrue(logCaptor.getValue().getFormattedMessage()
-			.contains(
-				"Failure to process resource of type "
-				+ idList.getResourceType()
-				+ " : "
-				+ testException
-			));
+		assertThat(logCaptor.getValue().getFormattedMessage()).contains("Failure to process resource of type "
+			+ idList.getResourceType()
+			+ " : "
+			+ testException);
 
 		verify(sink, never())
 			.accept(any(BulkExportBinaryFileId.class));
