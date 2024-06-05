@@ -23,6 +23,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.dao.HapiMigrationDao;
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.InitializeSchemaTask;
+import ca.uhn.fhir.jpa.migrate.tasks.api.TaskFlagEnum;
 import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
@@ -154,14 +155,23 @@ public class HapiMigrator {
 					newTaskList.removeIf(BaseTask::isHeavyweightSkippableTask);
 				}
 
-				newTaskList.forEach(next -> {
+				boolean initializedSchema = false;
+				for (BaseTask next : newTaskList) {
+					if (initializedSchema && !next.hasFlag(TaskFlagEnum.RUN_DURING_SCHEMA_INITIALIZATION)) {
+						ourLog.info("Skipping task {} because schema is being initialized", next.getMigrationVersion());
+						postExecute(next, new StopWatch(), true);
+						continue;
+					}
+
 					next.setDriverType(getDriverType());
 					next.setDryRun(isDryRun());
 					next.setNoColumnShrink(isNoColumnShrink());
 					next.setConnectionProperties(connectionProperties);
 
 					executeTask(next, retval);
-				});
+
+					initializedSchema |= next.initializedSchema();
+				}
 			}
 		} catch (Exception e) {
 			ourLog.error("Migration failed", e);

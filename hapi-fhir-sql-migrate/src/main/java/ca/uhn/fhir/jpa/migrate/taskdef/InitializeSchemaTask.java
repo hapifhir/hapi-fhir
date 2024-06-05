@@ -36,6 +36,7 @@ public class InitializeSchemaTask extends BaseTask {
 	private static final String DESCRIPTION_PREFIX = "Initialize schema for ";
 	private static final Logger ourLog = LoggerFactory.getLogger(InitializeSchemaTask.class);
 	private final ISchemaInitializationProvider mySchemaInitializationProvider;
+	private boolean myInitializedSchema;
 
 	public InitializeSchemaTask(
 			String theProductVersion,
@@ -79,11 +80,20 @@ public class InitializeSchemaTask extends BaseTask {
 			executeSql(null, nextSql);
 		}
 
+		if (mySchemaInitializationProvider.canInitializeSchema()) {
+			myInitializedSchema = true;
+		}
+
 		logInfo(
 				ourLog,
 				"{} schema for {} initialized successfully",
 				driverType,
 				mySchemaInitializationProvider.getSchemaDescription());
+	}
+
+	@Override
+	public boolean initializedSchema() {
+		return myInitializedSchema;
 	}
 
 	@Override

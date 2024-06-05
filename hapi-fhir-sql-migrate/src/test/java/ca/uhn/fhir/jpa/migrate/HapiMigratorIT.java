@@ -32,6 +32,8 @@ import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -84,15 +86,43 @@ class HapiMigratorIT {
 		Builder.BuilderAddTableByColumns nonSchemaInit = version.addTableByColumns("2", "NON_SCHEMA_INIT", "PID");
 		nonSchemaInit.addColumn("PID").nonNullable().type(ColumnTypeEnum.LONG);
 
-		Builder.BuilderAddTableByColumns schemaInit = version.addTableByColumns("2", "SCHEMA_INIT", "PID");
+		Builder.BuilderAddTableByColumns schemaInit = version.addTableByColumns("3", "SCHEMA_INIT", "PID");
 		schemaInit.addColumn("PID").nonNullable().type(ColumnTypeEnum.LONG);
 		schemaInit.withFlags().runEvenDuringSchemaInitialization();
 
-		HapiMigrator migrator = buildMigrator(taskList.toTaskArray());
-		MigrationResult outcome = migrator.migrate();
+		HapiMigrator migrator;
+		MigrationResult outcome;
 
-		ourLog.info("First migration outcome: {}", outcome.summary());
-		assertEquals(1, outcome.executedStatements.size(), "Statements:\n * " + outcome.executedStatements.stream().map(BaseTask.ExecutedStatement::toString).collect(Collectors.joining("\n * ")));
+		/*
+		 * Run the migrator for the first time. This should execute 2 tasks: the initial
+		 * schema initialization, and the task set to run even during initialization. Task
+		 * 2 should not run.
+		 */
+		migrator = buildMigrator(taskList.toTaskArray());
+		outcome = migrator.migrate();
+		assertThat(toTaskStatementDescriptions(outcome), toTaskVersionList(outcome), contains("1", "3"));
+
+		/*
+		 * Run again - Nothing should happen since we've already finished the migration
+		 */
+		migrator = buildMigrator(taskList.toTaskArray());
+		outcome = migrator.migrate();
+		assertThat(toTaskStatementDescriptions(outcome), toTaskVersionList(outcome), empty());
+
+		/*
+		 * Add another pair of tasks - Both should run
+		 */
+		Builder.BuilderAddTableByColumns nonSchemaInit2 = version.addTableByColumns("4", "NON_SCHEMA_INIT_2", "PID");
+		nonSchemaInit2.addColumn("PID").nonNullable().type(ColumnTypeEnum.LONG);
+
+		Builder.BuilderAddTableByColumns schemaInit2 = version.addTableByColumns("5", "SCHEMA_INIT_2", "PID");
+		schemaInit2.addColumn("PID").nonNullable().type(ColumnTypeEnum.LONG);
+		schemaInit2.withFlags().runEvenDuringSchemaInitialization();
+
+		migrator = buildMigrator(taskList.toTaskArray());
+		outcome = migrator.migrate();
+		assertThat(toTaskStatementDescriptions(outcome), toTaskVersionList(outcome), contains("4", "5"));
+
 	}
 
 	@Test
@@ -186,7 +216,6 @@ class HapiMigratorIT {
 
 	}
 
-
 	@Test
 	void test_oldLockFails_block() {
 		HapiMigrationLock.setMaxRetryAttempts(0);
@@ -239,7 +268,6 @@ class HapiMigratorIT {
 		assertThat(result.succeededTasks, hasSize(expectedInvocations));
 	}
 
-
 	@SuppressWarnings("DataFlowIssue")
 	private int countLockRecords() {
 		return myJdbcTemplate.queryForObject("SELECT COUNT(*) FROM " + MIGRATION_TABLENAME + " WHERE \"installed_rank\" = " + HapiMigrationLock.LOCK_PID, Integer.class);
@@ -259,6 +287,13 @@ class HapiMigratorIT {
 		return new HapiMigrator(MIGRATION_TABLENAME, myDataSource, DriverTypeEnum.H2_EMBEDDED);
 	}
 
+	private static @Nonnull String toTaskStatementDescriptions(MigrationResult outcome) {
+		return "Statements:\n * " + outcome.executedStatements.stream().map(BaseTask.ExecutedStatement::toString).collect(Collectors.joining("\n * "));
+	}
+
+	private static @Nonnull List<String> toTaskVersionList(MigrationResult outcome) {
+		return outcome.executedStatements.stream().map(BaseTask.ExecutedStatement::getSchemaVersion).toList();
+	}
 
 	private static class LatchMigrationTask extends BaseTask implements IPointcutLatch {
 		private final PointcutLatch myLatch;
