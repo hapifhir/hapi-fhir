@@ -186,10 +186,7 @@ public class FhirResourceDaoR4SearchBundleNoFTTest extends BaseJpaR4Test {
 		}
 	}
 
-	private IIdType createDocumentBundleWithLocalPatient(@Nonnull String thePatientId,
-																		  @Nonnull String theBirthDate,
-																		  @Nonnull String theIdentifierSystem,
-																		  @Nonnull String theIdentifierValue) {
+	private IIdType createDocumentBundleWithLocalPatient(@Nonnull String thePatientId, @Nonnull String theBirthDate, @Nonnull String theIdentifierSystem, @Nonnull String theIdentifierValue) {
 		String patientUrl = "http://example.com/fhir/" + thePatientId;
 
 		Composition composition = new Composition();
