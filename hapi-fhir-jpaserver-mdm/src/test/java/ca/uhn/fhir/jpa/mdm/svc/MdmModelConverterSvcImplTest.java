@@ -50,8 +50,15 @@ public class MdmModelConverterSvcImplTest extends BaseMdmR4Test {
 
 		ourLog.info("actualMdmLinkJson: {}", actualMdmLinkJson);
 
-		MdmLinkJson exepctedMdmLinkJson = getExepctedMdmLinkJson(mdmLink.getGoldenResourcePersistenceId().getId(), mdmLink.getSourcePersistenceId().getId(), MdmMatchResultEnum.MATCH, MdmLinkSourceEnum.MANUAL, version, createTime, updateTime, isLinkCreatedResource, scoreRounded);
-		assertEquals(exepctedMdmLinkJson, actualMdmLinkJson);
+		MdmLinkJson expectedMdmLinkJson = getExepctedMdmLinkJson(mdmLink.getGoldenResourcePersistenceId().getId(), mdmLink.getSourcePersistenceId().getId(), MdmMatchResultEnum.MATCH, MdmLinkSourceEnum.MANUAL, version, createTime, updateTime, isLinkCreatedResource, scoreRounded);
+		assertEquals(expectedMdmLinkJson.getSourceId(), actualMdmLinkJson.getSourceId());
+		assertEquals(expectedMdmLinkJson.getGoldenResourceId(), actualMdmLinkJson.getGoldenResourceId());
+		assertEquals(expectedMdmLinkJson.getGoldenPid().getId(), actualMdmLinkJson.getGoldenPid().getId());
+		assertEquals(expectedMdmLinkJson.getSourcePid().getId(), actualMdmLinkJson.getSourcePid().getId());
+		assertEquals(expectedMdmLinkJson.getVector(), actualMdmLinkJson.getVector());
+		assertEquals(expectedMdmLinkJson.getScore(), actualMdmLinkJson.getScore());
+		assertEquals(expectedMdmLinkJson.getMatchResult(), actualMdmLinkJson.getMatchResult());
+		assertEquals(expectedMdmLinkJson.getLinkSource(), actualMdmLinkJson.getLinkSource());
 	}
 
 	@Test
@@ -101,9 +108,9 @@ public class MdmModelConverterSvcImplTest extends BaseMdmR4Test {
 		final MdmLinkJson mdmLinkJson = new MdmLinkJson();
 
 		mdmLinkJson.setGoldenResourceId("Patient/" + theGoldenPatientId);
-		mdmLinkJson.setGoldenPid(JpaPid.fromId(theGoldenPatientId));
+		mdmLinkJson.setGoldenPid(JpaPid.fromId(theGoldenPatientId).toSerializablePid());
 		mdmLinkJson.setSourceId("Patient/" + theSourceId);
-		mdmLinkJson.setSourcePid(JpaPid.fromId(theSourceId));
+		mdmLinkJson.setSourcePid(JpaPid.fromId(theSourceId).toSerializablePid());
 		mdmLinkJson.setMatchResult(theMdmMatchResultEnum);
 		mdmLinkJson.setLinkSource(theMdmLinkSourceEnum);
 		mdmLinkJson.setVersion(version);

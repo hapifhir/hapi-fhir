@@ -9,7 +9,6 @@ import org.hl7.fhir.r4.model.IdType;
 import org.junit.jupiter.api.Test;
 
 import java.util.Date;
-import java.util.Map;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -28,6 +27,11 @@ public class MdmLinkJsonTest {
 
 		public String getId() {
 			return myId;
+		}
+
+		@Override
+		public String toString() {
+			return "{id:" + myId + "}";
 		}
 	}
 
@@ -59,21 +63,19 @@ public class MdmLinkJsonTest {
 		TestPID<TestIdType> source = new TestPID<TestIdType>("Patient", new TestIdType("2"));
 		source.setAssociatedResourceId(new IdType("Patient/2"));
 		source.setVersion(1L);
-		json.setGoldenPid(golden);
-		json.setSourcePid(source);
+		json.setGoldenPid(golden.toSerializablePid());
+		json.setSourcePid(source.toSerializablePid());
 
 		// test
 		String strVal = myObjectMapper.writeValueAsString(json);
 		assertFalse(isBlank(strVal));
-		assertTrue(strVal.contains("\"id\":{\"id\":\"1\""));
-		assertTrue(strVal.contains("\"id\":{\"id\":\"2\""));
+		assertTrue(strVal.contains("\"id\":\"{id:1}\""), strVal);
+		assertTrue(strVal.contains("\"id\":\"{id:2}\""), strVal);
 
 		MdmLinkJson deserialized = myObjectMapper.readValue(strVal, MdmLinkJson.class);
 		assertNotNull(deserialized);
-		assertTrue(deserialized.getGoldenPid().getId() instanceof Map);
-		assertEquals(golden.getId().getId(), ((Map<String, String>)deserialized.getGoldenPid().getId()).get("id"));
-		assertTrue(deserialized.getSourcePid().getId() instanceof Map);
-		assertEquals(source.getId().getId(), ((Map<String, String>)deserialized.getSourcePid().getId()).get("id"));
+		assertEquals(golden.getId().toString(), deserialized.getGoldenPid().getId());
+		assertEquals(source.getId().toString(), deserialized.getSourcePid().getId());
 	}
 
 	@Test
@@ -86,20 +88,18 @@ public class MdmLinkJsonTest {
 		TestPID<Long> source = new TestPID<>("Patient", 2L);
 		source.setAssociatedResourceId(new IdType("Patient/2"));
 		source.setVersion(1L);
-		json.setGoldenPid(golden);
-		json.setSourcePid(source);
+		json.setGoldenPid(golden.toSerializablePid());
+		json.setSourcePid(source.toSerializablePid());
 
 		// test
 		String strVal = myObjectMapper.writeValueAsString(json);
-		assertTrue(strVal.contains("\"id\":1"));
-		assertTrue(strVal.contains("\"id\":2"));
+		assertTrue(strVal.contains("\"id\":\"1\""));
+		assertTrue(strVal.contains("\"id\":\"2\""));
 
 		MdmLinkJson deserialized = myObjectMapper.readValue(strVal, MdmLinkJson.class);
 		assertNotNull(deserialized);
-		assertTrue(deserialized.getGoldenPid().getId() instanceof Long);
-		assertEquals(golden.getId(), deserialized.getGoldenPid().getId());
-		assertTrue(deserialized.getSourcePid().getId() instanceof Long);
-		assertEquals(source.getId(), deserialized.getSourcePid().getId());
+		assertEquals(golden.getId().toString(), deserialized.getGoldenPid().getId());
+		assertEquals(source.getId().toString(), deserialized.getSourcePid().getId());
 	}
 
 	private MdmLinkJson createLinkJson() {

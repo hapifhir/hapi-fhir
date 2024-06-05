@@ -36,7 +36,6 @@ import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.util.QueryChunker;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
-import ca.uhn.fhir.rest.api.server.storage.SerializablePid;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -828,23 +827,5 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 	@Override
 	public JpaPid newPidFromStringIdAndResourceName(String thePid, String theResourceName) {
 		return JpaPid.fromIdAndResourceType(Long.parseLong(thePid), theResourceName);
-	}
-
-	@Override
-	public JpaPid fromSerializablePid(SerializablePid thePid) {
-		Object id = thePid.getId();
-		if (id instanceof Long) {
-			JpaPid pid =
-					JpaPid.fromIdAndVersionAndResourceType((Long) id, thePid.getVersion(), thePid.getResourceType());
-			// set the associatedResourceType
-			if (thePid.getAssociatedResourceId() != null) {
-				IIdType idType = myFhirCtx.getVersion().newIdType();
-				idType.setValue(thePid.getAssociatedResourceId().getValueAsString());
-				pid.setAssociatedResourceId(idType);
-			}
-			pid.setVersion(thePid.getVersion());
-			return pid;
-		}
-		return IIdHelperService.super.fromSerializablePid(thePid);
 	}
 }

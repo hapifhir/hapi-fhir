@@ -19,12 +19,8 @@
  */
 package ca.uhn.fhir.rest.api.server.storage;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-@JsonSerialize(using = SerializablePid.IResourcePersistenceSerializer.class)
-@JsonDeserialize(using = SerializablePid.IResourcePersistenceDeserializer.class)
 public interface IResourcePersistentId<T> {
 
 	IResourcePersistentId NOT_FOUND = new NotFoundPid();
@@ -50,4 +46,14 @@ public interface IResourcePersistentId<T> {
 
 	// TODO KHS this is only used by batch.  Consider moving this to a new interface just for batch resource ids.
 	String getResourceType();
+
+	/**
+	 * Returns a serializeable version of this PID class
+	 */
+	default SerializablePid toSerializablePid() {
+		SerializablePid serializablePid = new SerializablePid(getResourceType(), String.valueOf(getId()));
+		serializablePid.setVersion(getVersion());
+		serializablePid.setAssociatedResourceId(getAssociatedResourceId());
+		return serializablePid;
+	}
 }

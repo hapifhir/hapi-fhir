@@ -20,13 +20,11 @@
 package ca.uhn.fhir.jpa.api.svc;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.PersistentIdToForcedIdMap;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
-import ca.uhn.fhir.rest.api.server.storage.SerializablePid;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -195,13 +193,4 @@ public interface IIdHelperService<T extends IResourcePersistentId> {
 	T newPid(Object thePid);
 
 	T newPidFromStringIdAndResourceName(String thePid, String theResourceType);
-
-	/**
-	 * A convenience method to convert the serialized pid to the
-	 * appropriate PID without having to know what that is.
-	 */
-	default T fromSerializablePid(SerializablePid thePid) {
-		throw new UnsupportedOperationException(
-				Msg.code(2527) + " fromSerializablePid is not supported for this type of PID. " + thePid.toString());
-	}
 }

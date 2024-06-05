@@ -22,7 +22,7 @@ package ca.uhn.fhir.mdm.model.mdmevents;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.model.api.IModelJson;
-import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.SerializablePid;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Date;
@@ -46,13 +46,13 @@ public class MdmLinkJson implements IModelJson {
 	 * Golden resource PID
 	 */
 	@JsonProperty("goldenPid")
-	private IResourcePersistentId<?> myGoldenPid;
+	private SerializablePid myGoldenPid;
 
 	/**
 	 * Source PID
 	 */
 	@JsonProperty("sourcePid")
-	private IResourcePersistentId<?> mySourcePid;
+	private SerializablePid mySourcePid;
 
 	/**
 	 * Kind of link (MATCH, etc)
@@ -203,19 +203,19 @@ public class MdmLinkJson implements IModelJson {
 		myRuleCount = theRuleCount;
 	}
 
-	public IResourcePersistentId<?> getGoldenPid() {
+	public SerializablePid getGoldenPid() {
 		return myGoldenPid;
 	}
 
-	public void setGoldenPid(IResourcePersistentId<?> theGoldenPid) {
+	public void setGoldenPid(SerializablePid theGoldenPid) {
 		myGoldenPid = theGoldenPid;
 	}
 
-	public IResourcePersistentId<?> getSourcePid() {
+	public SerializablePid getSourcePid() {
 		return mySourcePid;
 	}
 
-	public void setSourcePid(IResourcePersistentId<?> theSourcePid) {
+	public void setSourcePid(SerializablePid theSourcePid) {
 		mySourcePid = theSourcePid;
 	}
 

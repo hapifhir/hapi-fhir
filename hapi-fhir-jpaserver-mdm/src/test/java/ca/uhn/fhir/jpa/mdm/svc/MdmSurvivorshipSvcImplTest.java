@@ -135,8 +135,8 @@ public class MdmSurvivorshipSvcImplTest {
 				patient,
 				goldenPatient
 			);
-			link.setSourcePid(JpaPid.fromId((long)i));
-			link.setGoldenPid(JpaPid.fromId((long)goldenId));
+			link.setSourcePid(JpaPid.fromId((long)i).toSerializablePid());
+			link.setGoldenPid(JpaPid.fromId((long)goldenId).toSerializablePid());
 			links.add(link);
 		}
 

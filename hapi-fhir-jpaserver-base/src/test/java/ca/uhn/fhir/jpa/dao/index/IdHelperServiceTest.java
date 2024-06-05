@@ -8,14 +8,11 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
-import ca.uhn.fhir.rest.api.server.storage.SerializablePid;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Tuple;
 import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Root;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,9 +26,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class IdHelperServiceTest {
@@ -110,42 +112,6 @@ public class IdHelperServiceTest {
 		assertNull(actualIds.get(ids.get(0)));
     }
 
-	@Test
-	public void fromSerializablePid_withValidJpaPid_returnsJpaPid() {
-		// setup
-		String resourceType = "Patient";
-		long id = 1L;
-		long version = 2;
-		IdType idType = new IdType(resourceType + "/" + id);
-		SerializablePid serializablePid = new SerializablePid(resourceType, id, String.valueOf(id));
-		serializablePid.setAssociatedResourceId(idType);
-		serializablePid.setVersion(version);
-
-		// test
-		JpaPid jpaPid = myHelperSvc.fromSerializablePid(serializablePid);
-
-		// verification
-		assertEquals(id, jpaPid.getId());
-		assertEquals(resourceType, jpaPid.getResourceType());
-		assertEquals(version, jpaPid.getVersion());
-		assertNotNull(jpaPid.getAssociatedResourceId());
-		IIdType actual = jpaPid.getAssociatedResourceId();
-		assertEquals(idType.getValueAsString(), actual.getValueAsString());
-	}
-
-	@Test
-	public void fromSerializablePid_withInvalidPjaPid_throws() {
-		// setup
-		SerializablePid serializablePid = new SerializablePid("Patient", "red", "red");
-
-		// test
-		try {
-			myHelperSvc.fromSerializablePid(serializablePid);
-			fail();
-		} catch (UnsupportedOperationException ex) {
-			assertTrue(ex.getMessage().contains("fromSerializablePid is not supported for this type of PID"));
-		}
-	}
 
     private Root<ResourceTable> getMockedFrom() {
         @SuppressWarnings("unchecked")
