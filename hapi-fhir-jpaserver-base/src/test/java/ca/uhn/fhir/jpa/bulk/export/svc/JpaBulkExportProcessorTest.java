@@ -210,8 +210,6 @@ public class JpaBulkExportProcessorTest {
 		ISearchBuilder<JpaPid> searchBuilder = mock(ISearchBuilder.class);
 
 		// when
-		when(myStorageSettings.getIndexMissingFields())
-			.thenReturn(JpaStorageSettings.IndexEnabledEnum.ENABLED);
 		when(myBulkExportHelperService.createSearchParameterMapsForResourceType(any(RuntimeResourceDefinition.class), eq(parameters), any(boolean.class)))
 			.thenReturn(maps);
 		// from getSearchBuilderForLocalResourceType
@@ -252,26 +250,7 @@ public class JpaBulkExportProcessorTest {
 			return RequestPartitionId.allPartitions();
 		}
 	}
-
-	@Test
-	public void getResourcePidIterator_patientStyleWithIndexMissingFieldsDisabled_throws() {
-		// setup
-		ExportPIDIteratorParameters parameters = createExportParameters(BulkExportJobParameters.ExportStyle.PATIENT);
-		parameters.setResourceType("Patient");
-
-		// when
-		when(myStorageSettings.getIndexMissingFields())
-			.thenReturn(JpaStorageSettings.IndexEnabledEnum.DISABLED);
-
-		// test
-		try {
-			myProcessor.getResourcePidIterator(parameters);
-			fail();
-		} catch (InternalErrorException ex) {
-			assertThat(ex.getMessage(), containsString("You attempted to start a Patient Bulk Export,"));
-		}
-	}
-
+	
 	@ParameterizedTest
 	@CsvSource({"false, false", "false, true", "true, true", "true, false"})
 	public void getResourcePidIterator_groupExportStyleWithPatientResource_returnsIterator(boolean theMdm, boolean thePartitioned) {
