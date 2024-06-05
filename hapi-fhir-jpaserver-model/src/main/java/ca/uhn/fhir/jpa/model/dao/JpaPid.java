@@ -99,8 +99,8 @@ public class JpaPid extends BaseResourcePersistentId<Long> {
 	}
 
 	public static JpaPid fromSerializablePid(SerializablePid thePid, FhirContext theFhirContext) {
-		JpaPid pid =
-			JpaPid.fromIdAndVersionAndResourceType(Long.parseLong(thePid.getId()), thePid.getVersion(), thePid.getResourceType());
+		JpaPid pid = JpaPid.fromIdAndVersionAndResourceType(
+				Long.parseLong(thePid.getId()), thePid.getVersion(), thePid.getResourceType());
 		// set the associatedResourceType
 		if (thePid.getAssociatedResourceIdStr() != null) {
 			IIdType idType = theFhirContext.getVersion().newIdType();

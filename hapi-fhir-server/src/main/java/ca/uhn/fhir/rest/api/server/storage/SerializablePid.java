@@ -33,7 +33,9 @@ public class SerializablePid implements IResourcePersistentId<String>, IModelJso
 
 	@Override
 	public IIdType getAssociatedResourceId() {
-		throw new UnsupportedOperationException(Msg.code(2527) + " This method is not implemented; call getAssociatedResourceIdStr() and use a FhirContext.getVersion().newId() to create.");
+		throw new UnsupportedOperationException(
+				Msg.code(2527)
+						+ " This method is not implemented; call getAssociatedResourceIdStr() and use a FhirContext.getVersion().newId() to create.");
 	}
 
 	public String getAssociatedResourceIdStr() {
