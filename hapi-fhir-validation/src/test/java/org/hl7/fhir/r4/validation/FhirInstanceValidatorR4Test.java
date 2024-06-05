@@ -1617,9 +1617,9 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 			"}";
 		ValidationResult output = myFhirValidator.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
-		assertEquals(1, errors.size(), errors.toString());
-		assertThat(errors.get(0).getMessage(), containsString("The value provided ('BLAH') was not found in the value set 'CurrencyCode' (http://hl7.org/fhir/ValueSet/currencies|4.0.1)"));
-		assertThat(errors.get(0).getMessage(), containsString("error message = Unknown code \"urn:iso:std:iso:4217#BLAH\""));
+		assertEquals(2, errors.size(), errors.toString());
+		assertThat(errors.get(1).getMessage(), containsString("The value provided ('BLAH') was not found in the value set 'CurrencyCode' (http://hl7.org/fhir/ValueSet/currencies|4.0.1)"));
+		assertThat(errors.get(1).getMessage(), containsString("error message = Unknown code \"urn:iso:std:iso:4217#BLAH\""));
 
 
 	}
@@ -1813,7 +1813,7 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 		final ValidationResult output = myFhirValidator.validateWithResult(encoded);
 		final List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
 
-		assertTrue(errors.isEmpty());
+		assertFalse(output.isSuccessful());
 	}
 
 	@Test

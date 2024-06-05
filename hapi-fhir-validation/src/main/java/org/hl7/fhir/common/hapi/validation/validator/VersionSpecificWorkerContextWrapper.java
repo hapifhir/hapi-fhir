@@ -876,11 +876,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 			}
 			ValidationResult retVal = validateCode(theOptions, next, theVs);
 			if (retVal.isOk()) {
-				if (myValidationSupportContext.isEnabledValidationForCodingsLogicalAnd()) {
-					validationResultsOk.add(retVal);
-				} else {
-					return retVal;
-				}
+				validationResultsOk.add(retVal);
 			} else {
 				for (OperationOutcome.OperationOutcomeIssueComponent issue : retVal.getIssues()) {
 					issues.add(issue);
@@ -888,9 +884,16 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 			}
 		}
 
-		if (code.getCoding().size() > 0
-				&& validationResultsOk.size() == code.getCoding().size()) {
-			return validationResultsOk.get(0);
+		if (code.getCoding().size() > 0) {
+			if (!myValidationSupportContext.isEnabledValidationForCodingsLogicalAnd()) {
+				if (validationResultsOk.size() == code.getCoding().size()) {
+					return validationResultsOk.get(0);
+				}
+			} else {
+				if (validationResultsOk.size() > 0) {
+					return validationResultsOk.get(0);
+				}
+			}
 		}
 
 		return new ValidationResult(ValidationMessage.IssueSeverity.ERROR, null, issues);
