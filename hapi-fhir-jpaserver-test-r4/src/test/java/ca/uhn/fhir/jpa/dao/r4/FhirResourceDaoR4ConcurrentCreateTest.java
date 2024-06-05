@@ -4,9 +4,9 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IPointcut;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
-import ca.uhn.fhir.jpa.dao.data.IResourceSearchUrlDao;
 import ca.uhn.fhir.jpa.interceptor.UserRequestRetryVersionConflictsInterceptor;
 import ca.uhn.fhir.jpa.model.entity.ResourceSearchUrlEntity;
+import ca.uhn.fhir.jpa.model.entity.ResourceSearchUrlWithPartitionEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.search.ResourceSearchUrlSvc;
 import ca.uhn.fhir.jpa.search.SearchUrlJobMaintenanceSvcImpl;
@@ -36,7 +36,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -56,9 +56,6 @@ public class FhirResourceDaoR4ConcurrentCreateTest extends BaseJpaR4Test {
 	SearchUrlJobMaintenanceSvcImpl mySearchUrlJobMaintenanceSvc;
 
 	@Autowired
-	IResourceSearchUrlDao myResourceSearchUrlDao;
-
-	@Autowired
 	ResourceSearchUrlSvc myResourceSearchUrlSvc;
 
 	Callable<String> myResource;
@@ -74,7 +71,7 @@ public class FhirResourceDaoR4ConcurrentCreateTest extends BaseJpaR4Test {
 		myResourceConcurrentSubmitterSvc = new ResourceConcurrentSubmitterSvc();
 		myResource = buildResourceAndCreateCallable();
 
-		List<ResourceSearchUrlEntity> all = myResourceSearchUrlDao.findAll();
+		List<ResourceSearchUrlWithPartitionEntity> all = myResourceSearchUrlWithPartitionDao.findAll();
 		assertThat(all, hasSize(0));
 	}
 
@@ -117,7 +114,8 @@ public class FhirResourceDaoR4ConcurrentCreateTest extends BaseJpaR4Test {
 		// then
 		assertThat(errorList, hasSize(0));
 		// red-green before the fix, the size was 'numberOfThreadsAttemptingToCreateDuplicates'
-		assertThat(myResourceTableDao.findAll(), hasSize(expectedResourceCount));
+		final List<ResourceTable> all = myResourceTableDao.findAll();
+		assertThat(all, hasSize(expectedResourceCount));
 
 	}
 
@@ -132,20 +130,20 @@ public class FhirResourceDaoR4ConcurrentCreateTest extends BaseJpaR4Test {
 		final ResourceTable resTable4 = myResourceTableDao.save(createResTable());
 
 		Date tooOldBy10Minutes = cutOffTimeMinus(tenMinutes);
-		ResourceSearchUrlEntity tooOld1 = ResourceSearchUrlEntity.from("Observation?identifier=20210427133226.444", resTable1).setCreatedTime(tooOldBy10Minutes);
-		ResourceSearchUrlEntity tooOld2 = ResourceSearchUrlEntity.from("Observation?identifier=20210427133226.445", resTable2).setCreatedTime(tooOldBy10Minutes);
+		ResourceSearchUrlWithPartitionEntity tooOld1 = ResourceSearchUrlWithPartitionEntity.from("Observation?identifier=20210427133226.444", resTable1, myPartitionSettings.isSearchUrlDuplicateAcrossPartitionsEnabled()).setCreatedTime(tooOldBy10Minutes);
+		ResourceSearchUrlWithPartitionEntity tooOld2 = ResourceSearchUrlWithPartitionEntity.from("Observation?identifier=20210427133226.445", resTable2, myPartitionSettings.isSearchUrlDuplicateAcrossPartitionsEnabled()).setCreatedTime(tooOldBy10Minutes);
 
 		Date tooNewBy10Minutes = cutOffTimePlus(tenMinutes);
-		ResourceSearchUrlEntity tooNew1 = ResourceSearchUrlEntity.from("Observation?identifier=20210427133226.446", resTable3).setCreatedTime(tooNewBy10Minutes);
-		ResourceSearchUrlEntity tooNew2 =ResourceSearchUrlEntity.from("Observation?identifier=20210427133226.447", resTable4).setCreatedTime(tooNewBy10Minutes);
+		ResourceSearchUrlWithPartitionEntity tooNew1 = ResourceSearchUrlWithPartitionEntity.from("Observation?identifier=20210427133226.446", resTable3, myPartitionSettings.isSearchUrlDuplicateAcrossPartitionsEnabled()).setCreatedTime(tooNewBy10Minutes);
+		ResourceSearchUrlWithPartitionEntity tooNew2 = ResourceSearchUrlWithPartitionEntity.from("Observation?identifier=20210427133226.447", resTable4, myPartitionSettings.isSearchUrlDuplicateAcrossPartitionsEnabled()).setCreatedTime(tooNewBy10Minutes);
 
-		myResourceSearchUrlDao.saveAll(asList(tooOld1, tooOld2, tooNew1, tooNew2));
+		myResourceSearchUrlWithPartitionDao.saveAll(asList(tooOld1, tooOld2, tooNew1, tooNew2));
 
 		// when
 		mySearchUrlJobMaintenanceSvc.removeStaleEntries();
 
 		// then
-		List<Long> resourcesPids = getStoredResourceSearchUrlEntitiesPids();
+		List<Long> resourcesPids = getStoredResourceSearchUrlOrWithPartitionEntitiesPids();
 		assertThat(resourcesPids, containsInAnyOrder(resTable3.getResourceId(), resTable4.getResourceId()));
 	}
 
@@ -165,23 +163,32 @@ public class FhirResourceDaoR4ConcurrentCreateTest extends BaseJpaR4Test {
 		final ResourceTable resTable1 = myResourceTableDao.save(createResTable());
 		final ResourceTable resTable2 = myResourceTableDao.save(createResTable());
 
-		ResourceSearchUrlEntity entry1 = ResourceSearchUrlEntity.from("Observation?identifier=20210427133226.444", resTable1);
-		ResourceSearchUrlEntity entry2 = ResourceSearchUrlEntity.from("Observation?identifier=20210427133226.445", resTable2);
-		myResourceSearchUrlDao.saveAll(asList(entry1, entry2));
+		ResourceSearchUrlWithPartitionEntity entry1 = ResourceSearchUrlWithPartitionEntity.from("Observation?identifier=20210427133226.444", resTable1, myPartitionSettings.isSearchUrlDuplicateAcrossPartitionsEnabled());
+		ResourceSearchUrlWithPartitionEntity entry2 = ResourceSearchUrlWithPartitionEntity.from("Observation?identifier=20210427133226.445", resTable2, myPartitionSettings.isSearchUrlDuplicateAcrossPartitionsEnabled());
+		myResourceSearchUrlWithPartitionDao.saveAll(asList(entry1, entry2));
 
 		// when
 		myResourceSearchUrlSvc.deleteByResId(entry1.getResourcePid());
 		myResourceSearchUrlSvc.deleteByResId(nonExistentResourceId);
 
 		// then
-		List<Long> resourcesPids = getStoredResourceSearchUrlEntitiesPids();
+		List<Long> resourcesPids = getStoredResourceSearchUrlOrWithPartitionEntitiesPids();
 		assertThat(resourcesPids, containsInAnyOrder(resTable2.getResourceId()));
 
 	}
 
-	private List<Long> getStoredResourceSearchUrlEntitiesPids(){
-		List<ResourceSearchUrlEntity> remainingSearchUrlEntities = myResourceSearchUrlDao.findAll();
-		return remainingSearchUrlEntities.stream().map(ResourceSearchUrlEntity::getResourcePid).collect(Collectors.toList());
+	private List<Long> getStoredResourceSearchUrlOrWithPartitionEntitiesPids(){
+		final List<ResourceSearchUrlEntity> remainingSearchUrlEntities = myResourceSearchUrlDao.findAll();
+		final List<ResourceSearchUrlWithPartitionEntity> remainingSearchUrlWithPartitionEntities = myResourceSearchUrlWithPartitionDao.findAll();
+
+		final Stream<Long> allSearchUrlIds = remainingSearchUrlEntities.stream()
+			.map(ResourceSearchUrlEntity::getResourcePid);
+
+		final Stream<Long> allSearchUrlPartitionIds = remainingSearchUrlWithPartitionEntities.stream()
+			.map(ResourceSearchUrlWithPartitionEntity::getResourcePid);
+
+		return Stream.concat(allSearchUrlIds, allSearchUrlPartitionIds)
+			.toList();
 	}
 
 	private Date cutOffTimePlus(long theAdjustment) {

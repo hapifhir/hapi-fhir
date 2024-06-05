@@ -33,6 +33,9 @@ import jakarta.persistence.TemporalType;
 
 import java.util.Date;
 
+import static ca.uhn.fhir.jpa.model.entity.ResourceSearchUrlWithPartitionEntityPK.RES_SEARCH_URL_COLUMN_NAME;
+import static ca.uhn.fhir.jpa.model.entity.ResourceSearchUrlWithPartitionEntityPK.RES_SEARCH_URL_LENGTH;
+
 /**
  * This entity is used to enforce uniqueness on a given search URL being
  * used as a conditional operation URL, e.g. a conditional create or a
@@ -50,10 +53,6 @@ import java.util.Date;
 			@Index(name = "IDX_RESSEARCHURL_TIME", columnList = "CREATED_TIME")
 		})
 public class ResourceSearchUrlEntity {
-
-	public static final String RES_SEARCH_URL_COLUMN_NAME = "RES_SEARCH_URL";
-
-	public static final int RES_SEARCH_URL_LENGTH = 768;
 
 	@Id
 	@Column(name = RES_SEARCH_URL_COLUMN_NAME, length = RES_SEARCH_URL_LENGTH, nullable = false)

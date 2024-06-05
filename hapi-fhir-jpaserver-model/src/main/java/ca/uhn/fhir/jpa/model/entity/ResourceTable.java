@@ -395,7 +395,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	private String myFhirId;
 
 	/**
-	 * Is there a corresponding row in {@link ResourceSearchUrlEntity} for
+	 * Is there a corresponding row in {@link ResourceSearchUrlEntity} or {@link ResourceSearchUrlWithPartitionEntity} for
 	 * this row.
 	 * TODO: Added in 6.6.0 - Should make this a primitive boolean at some point
 	 */

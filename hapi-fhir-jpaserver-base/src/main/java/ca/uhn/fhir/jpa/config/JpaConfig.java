@@ -56,6 +56,7 @@ import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.dao.TransactionProcessor;
 import ca.uhn.fhir.jpa.dao.data.IResourceModifiedDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceSearchUrlDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceSearchUrlPartitionDao;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeEverythingService;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeOperation;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeService;
@@ -80,6 +81,7 @@ import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.jpa.interceptor.JpaConsentContextServices;
 import ca.uhn.fhir.jpa.interceptor.OverridePathBasedReferentialIntegrityForDeletesInterceptor;
 import ca.uhn.fhir.jpa.interceptor.validation.RepositoryValidatingRuleBuilder;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.packages.IHapiPackageCacheManager;
@@ -856,13 +858,17 @@ public class JpaConfig {
 	public ResourceSearchUrlSvc resourceSearchUrlSvc(
 			PersistenceContextProvider thePersistenceContextProvider,
 			IResourceSearchUrlDao theResourceSearchUrlDao,
+			IResourceSearchUrlPartitionDao theResourceSearchUrlWithPartitionDao,
 			MatchUrlService theMatchUrlService,
-			FhirContext theFhirContext) {
+			FhirContext theFhirContext,
+			PartitionSettings thePartitionSettings) {
 		return new ResourceSearchUrlSvc(
 				thePersistenceContextProvider.getEntityManager(),
 				theResourceSearchUrlDao,
+				theResourceSearchUrlWithPartitionDao,
 				theMatchUrlService,
-				theFhirContext);
+				theFhirContext,
+				thePartitionSettings);
 	}
 
 	@Bean
