@@ -187,13 +187,14 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 	}
 
 	protected CodeValidationResult getValidateCodeResultError(final String theMessage) {
-		return new CodeValidationResult().setSeverity(IssueSeverity.ERROR)
-			.setMessage(theMessage)
-			.setCodeValidationIssues(Collections.singletonList(new CodeValidationIssue(
-				theMessage,
-				IssueSeverity.ERROR,
-				CodeValidationIssueCode.INVALID,
-				CodeValidationIssueCoding.INVALID_CODE)));
+		return new CodeValidationResult()
+				.setSeverity(IssueSeverity.ERROR)
+				.setMessage(theMessage)
+				.setCodeValidationIssues(Collections.singletonList(new CodeValidationIssue(
+						theMessage,
+						IssueSeverity.ERROR,
+						CodeValidationIssueCode.INVALID,
+						CodeValidationIssueCoding.INVALID_CODE)));
 	}
 
 	private CodeValidationResult validateCodeUsingCodeMap(
