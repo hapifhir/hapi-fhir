@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.annotation.Create;
@@ -11,7 +12,6 @@ import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.MyPatientWithExtensions;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
-import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
@@ -20,12 +20,6 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.ee10.servlet.ServletHandler;
-import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.hl7.fhir.dstu3.model.DateType;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
@@ -34,7 +28,6 @@ import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -42,13 +35,8 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class CreateDstu3Test {
 
@@ -130,8 +118,8 @@ public class CreateDstu3Test {
 
 		assertEquals(400, status.getStatusLine().getStatusCode());
 
-		assertThat(responseContent, containsString("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\""));
-		assertThat(responseContent, containsString("Failed to parse request body as XML resource. Error was: " + Msg.code(1852) +  "com.ctc.wstx.exc.WstxUnexpectedCharException: Unexpected character 'F'"));
+		assertThat(responseContent).contains("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\"");
+		assertThat(responseContent).contains("Failed to parse request body as XML resource. Error was: " + Msg.code(1852) + "com.ctc.wstx.exc.WstxUnexpectedCharException: Unexpected character 'F'");
 
 	}
 
@@ -149,8 +137,8 @@ public class CreateDstu3Test {
 
 		assertEquals(400, status.getStatusLine().getStatusCode());
 
-		assertThat(responseContent, containsString("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\""));
-		assertThat(responseContent, containsString("Failed to parse request body as XML resource."));
+		assertThat(responseContent).contains("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\"");
+		assertThat(responseContent).contains("Failed to parse request body as XML resource.");
 
 	}
 
@@ -168,8 +156,8 @@ public class CreateDstu3Test {
 
 		assertEquals(400, status.getStatusLine().getStatusCode());
 
-		assertThat(responseContent, containsString("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\""));
-		assertThat(responseContent, containsString("Failed to parse request body as XML resource."));
+		assertThat(responseContent).contains("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\"");
+		assertThat(responseContent).contains("Failed to parse request body as XML resource.");
 
 	}
 
@@ -187,7 +175,7 @@ public class CreateDstu3Test {
 
 		assertEquals(400, status.getStatusLine().getStatusCode());
 
-		assertThat(responseContent, containsString("Failed to parse request body as JSON resource."));
+		assertThat(responseContent).contains("Failed to parse request body as JSON resource.");
 
 	}
 
@@ -205,19 +193,19 @@ public class CreateDstu3Test {
 		assertEquals(200, status.getStatusLine().getStatusCode());
 
 		//@formatter:off
-		assertThat(responseContent, stringContainsInOrder(
-			"<Patient xmlns=\"http://hl7.org/fhir\">", 
-				"<id value=\"0\"/>", 
-				"<meta>", 
-					"<profile value=\"http://example.com/StructureDefinition/patient_with_extensions\"/>", 
-				"</meta>", 
-				"<modifierExtension url=\"http://example.com/ext/date\">", 
-					"<valueDate value=\"2011-01-01\"/>", 
-				"</modifierExtension>", 
-			"</Patient>"));
+		assertThat(responseContent).contains(
+			"<Patient xmlns=\"http://hl7.org/fhir\">",
+				"<id value=\"0\"/>",
+				"<meta>",
+					"<profile value=\"http://example.com/StructureDefinition/patient_with_extensions\"/>",
+				"</meta>",
+				"<modifierExtension url=\"http://example.com/ext/date\">",
+					"<valueDate value=\"2011-01-01\"/>",
+				"</modifierExtension>",
+			"</Patient>");
 		//@formatter:on
 
-		assertThat(responseContent, not(containsString("http://hl7.org/fhir/")));
+		assertThat(responseContent).doesNotContain("http://hl7.org/fhir/");
 	}
 
 	@AfterAll

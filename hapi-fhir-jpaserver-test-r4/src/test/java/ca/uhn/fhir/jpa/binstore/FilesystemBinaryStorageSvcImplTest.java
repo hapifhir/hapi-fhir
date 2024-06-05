@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.binstore;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
@@ -21,9 +23,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class FilesystemBinaryStorageSvcImplTest {
@@ -64,8 +64,8 @@ public class FilesystemBinaryStorageSvcImplTest {
 		ByteArrayOutputStream capture = new ByteArrayOutputStream();
 		mySvc.writeBinaryContent(id, outcome.getBinaryContentId(), capture);
 
-		assertArrayEquals(SOME_BYTES, capture.toByteArray());
-		assertArrayEquals(SOME_BYTES, mySvc.fetchBinaryContent(id, outcome.getBinaryContentId()));
+		assertThat(capture.toByteArray()).containsExactly(SOME_BYTES);
+		assertThat(mySvc.fetchBinaryContent(id, outcome.getBinaryContentId())).containsExactly(SOME_BYTES);
 	}
 
 	@Test
@@ -88,8 +88,8 @@ public class FilesystemBinaryStorageSvcImplTest {
 		ByteArrayOutputStream capture = new ByteArrayOutputStream();
 		mySvc.writeBinaryContent(id, outcome.getBinaryContentId(), capture);
 
-		assertArrayEquals(SOME_BYTES, capture.toByteArray());
-		assertArrayEquals(SOME_BYTES, mySvc.fetchBinaryContent(id, outcome.getBinaryContentId()));
+		assertThat(capture.toByteArray()).containsExactly(SOME_BYTES);
+		assertThat(mySvc.fetchBinaryContent(id, outcome.getBinaryContentId())).containsExactly(SOME_BYTES);
 	}
 
 

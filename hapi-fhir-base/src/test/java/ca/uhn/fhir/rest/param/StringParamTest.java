@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.rest.api.Constants.PARAMQUALIFIER_STRING_TEXT;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -51,7 +52,7 @@ public class StringParamTest {
 	@Test
 	public void testEquals() {
 		StringParam input = new StringParam("foo", true);
-		
+
 		assertTrue(input.equals(input));
 		assertFalse(input.equals(null));
 		assertFalse(input.equals(""));
@@ -177,9 +178,9 @@ public class StringParamTest {
 			.collect(Collectors.toList());
 
 		if (theWasLogged) {
-			assertEquals(1, warningLogs.size());
+			assertThat(warningLogs).hasSize(1);
 		} else {
-			assertTrue(warningLogs.isEmpty());
+			assertThat(warningLogs).isEmpty();
 		}
 	}
 

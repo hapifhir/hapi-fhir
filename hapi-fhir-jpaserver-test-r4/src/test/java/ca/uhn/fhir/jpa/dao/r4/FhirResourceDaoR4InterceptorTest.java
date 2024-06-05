@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
@@ -27,12 +28,9 @@ import org.mockito.stubbing.Answer;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.inOrder;
@@ -172,7 +170,7 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 		p = new Patient();
 		p.addName().setFamily("PATIENT3");
 		id2 = myPatientDao.update(p, "Patient?family=PATIENT3", mySrd).getId().getIdPartAsLong();
-		assertNotEquals(id, id2);
+		assertThat(id2).isNotEqualTo(id);
 
 		detailsCapt = ArgumentCaptor.forClass(RequestDetails.class);
 		tableCapt = ArgumentCaptor.forClass(IBaseResource.class);
@@ -254,7 +252,7 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 		DeleteMethodOutcome outcome = myPatientDao.deleteByUrl("Patient?name=PATIENT", mySrd);
 		String oo = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(outcome.getOperationOutcome());
 		ourLog.info(oo);
-		assertThat(oo, containsString("deleted 2 resource(s)"));
+		assertThat(oo).contains("deleted 2 resource(s)");
 
 		verify(interceptor, times(2)).resourceDeleted(any(), any());
 		verify(interceptor, times(2)).resourceCreated(any(), any());
@@ -370,7 +368,7 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 
 		String oo = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp);
 		ourLog.info(oo);
-		assertThat(oo, containsString("deleted 2 resource(s)"));
+		assertThat(oo).contains("deleted 2 resource(s)");
 
 		verify(interceptor, times(2)).resourceDeleted(any(), any());
 		verify(interceptor, times(2)).resourceCreated(any(), any());
@@ -584,14 +582,14 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 			IIdType id = myPatientDao.create(p).getId().toUnqualifiedVersionless();
 
 			p = myPatientDao.read(id);
-			assertEquals(false, p.getActive());
+		assertEquals(false, p.getActive());
 
 			p.setId(p.getIdElement().toUnqualifiedVersionless());
 			p.addAddress().setCity("CITY");
 			myPatientDao.update(p, mySrd);
 
 			p = myPatientDao.read(id);
-			assertEquals(true, p.getActive());
+		assertEquals(true, p.getActive());
 
 	}
 

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.reindex;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.api.pid.IResourcePidStream;
 import ca.uhn.fhir.jpa.api.pid.TypedResourcePid;
 import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
@@ -13,10 +14,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @TestMethodOrder(value = MethodOrderer.MethodName.class)
 public class ResourceReindexSvcImplTest extends BaseJpaR4Test {
@@ -56,10 +54,10 @@ public class ResourceReindexSvcImplTest extends BaseJpaR4Test {
 
 		// Verify
 		List<TypedResourcePid> typedPids = queryStream.visitStream(Stream::toList);
-		assertEquals(3, typedPids.size());
-		assertThat(typedPids, contains(new TypedResourcePid("Patient", id0), new TypedResourcePid("Patient", id1), new TypedResourcePid("Observation", id2)));
+		assertThat(typedPids).hasSize(3);
+		assertThat(typedPids).containsExactly(new TypedResourcePid("Patient", id0), new TypedResourcePid("Patient", id1), new TypedResourcePid("Observation", id2));
 
-		assertEquals(1, myCaptureQueriesListener.logSelectQueries().size());
+		assertThat(myCaptureQueriesListener.logSelectQueries()).hasSize(1);
 		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
@@ -85,9 +83,9 @@ public class ResourceReindexSvcImplTest extends BaseJpaR4Test {
 		// Verify
 		List<TypedResourcePid> typedPids = queryStream.visitStream(Stream::toList);
 
-		assertTrue(typedPids.isEmpty());
+		assertThat(typedPids).isEmpty();
 
-		assertEquals(1, myCaptureQueriesListener.logSelectQueries().size());
+		assertThat(myCaptureQueriesListener.logSelectQueries()).hasSize(1);
 		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
@@ -132,13 +130,10 @@ public class ResourceReindexSvcImplTest extends BaseJpaR4Test {
 		// Verify
 		List<TypedResourcePid> typedResourcePids = queryStream.visitStream(Stream::toList);
 
-		assertEquals(2, typedResourcePids.size());
-		assertThat(typedResourcePids,
-			contains(
-				new TypedResourcePid("Patient", patientId1),
-				new TypedResourcePid("Patient", patientId2)));
+		assertThat(typedResourcePids).hasSize(2);
+		assertThat(typedResourcePids).containsExactly(new TypedResourcePid("Patient", patientId1), new TypedResourcePid("Patient", patientId2));
 
-		assertEquals(1, myCaptureQueriesListener.logSelectQueries().size());
+		assertThat(myCaptureQueriesListener.logSelectQueries()).hasSize(1);
 		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());

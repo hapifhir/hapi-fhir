@@ -14,9 +14,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ResourceProviderLanguageParamDstu3Test extends BaseResourceProviderDstu3Test {
@@ -48,7 +46,7 @@ public class ResourceProviderLanguageParamDstu3Test extends BaseResourceProvider
 			.execute();
 
 		foundResources = toUnqualifiedVersionlessIdValues(result);
-		assertThat(foundResources, contains(patId.getValue()));
+		assertThat(foundResources).contains(patId.getValue());
 	}
 
 	@SuppressWarnings("unused")
@@ -79,6 +77,6 @@ public class ResourceProviderLanguageParamDstu3Test extends BaseResourceProvider
 				.returnBundle(Bundle.class)
 				.execute();
 		});
-		assertThat(exception.getMessage(), containsString(Msg.code(1223)));
+		assertThat(exception.getMessage()).contains(Msg.code(1223));
 	}
 }

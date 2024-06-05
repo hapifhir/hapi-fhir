@@ -27,13 +27,11 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+
 
 public class ResourceValidatorDstu2_1Test extends BaseValidationTestWithInlineMocks {
 
@@ -61,19 +59,18 @@ public class ResourceValidatorDstu2_1Test extends BaseValidationTestWithInlineMo
 		String encoded = parser.setPrettyPrint(true).encodeResourceToString(p).replace("2000-12-31", "2000-15-31");
 		ourLog.info(encoded);
 
-		assertThat(encoded, StringContains.containsString("2000-15-31"));
+		assertThat(encoded).contains("2000-15-31");
 
 		ValidationResult result = ourCtx.newValidator().validateWithResult(encoded);
 		String resultString = parser.setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome());
 		ourLog.info(resultString);
 
-		assertEquals(2, ((OperationOutcome)result.toOperationOutcome()).getIssue().size());
-		assertThat(resultString, StringContains.containsString("cvc-pattern-valid"));
+		assertThat(((OperationOutcome) result.toOperationOutcome()).getIssue()).hasSize(2);
+		assertThat(resultString).contains("cvc-pattern-valid");
 		
 		try {
 			parser.parseResource(encoded);
-			fail();
-		} catch (DataFormatException e) {
+			fail();		} catch (DataFormatException e) {
 			assertEquals(Msg.code(1851) + "DataFormatException at [[row,col {unknown-source}]: [2,4]]: " + Msg.code(1821) + "[element=\"birthDate\"] Invalid attribute value \"2000-15-31\": Invalid date/time format: \"2000-15-31\"", e.getMessage());
 		}
 	}
@@ -98,20 +95,17 @@ public class ResourceValidatorDstu2_1Test extends BaseValidationTestWithInlineMo
 		ourLog.info(messageString);
 
 		//@formatter:off
-		assertThat(messageString, stringContainsInOrder(
+		assertThat(messageString).containsSubsequence(
 			"meta",
 			"Organization/2.25.79433498044103547197447759549862032393",
 			"furry-grey",
 			"furry-white",
 			"String Extension",
 			"FamilyName"
-		));
-		assertThat(messageString, not(stringContainsInOrder(
-			"extension",
-			"meta"
-		)));
-		assertThat(messageString, containsString("url=\"http://ahr.copa.inso.tuwien.ac.at/StructureDefinition/Patient#animal-colorSecondary\""));
-		assertThat(messageString, containsString("url=\"http://foo.com/example\""));
+		);
+		assertThat(messageString).doesNotContainPattern("(?s)extension.*meta");
+		assertThat(messageString).contains("url=\"http://ahr.copa.inso.tuwien.ac.at/StructureDefinition/Patient#animal-colorSecondary\"");
+		assertThat(messageString).contains("url=\"http://foo.com/example\"");
 		//@formatter:on
 
 		FhirValidator val = ourCtx.newValidator();
@@ -125,8 +119,8 @@ public class ResourceValidatorDstu2_1Test extends BaseValidationTestWithInlineMo
 		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationOutcome);
 		ourLog.info(encoded);
 
-		assertThat(messageString, containsString("valueReference"));
-		assertThat(messageString, not(containsString("valueResource")));
+		assertThat(messageString).contains("valueReference");
+		assertThat(messageString).doesNotContain("valueResource");
 	}
 
 	/**
@@ -167,18 +161,15 @@ public class ResourceValidatorDstu2_1Test extends BaseValidationTestWithInlineMo
 		ourLog.info(messageString);
 
 		//@formatter:off
-		assertThat(messageString, stringContainsInOrder(
+		assertThat(messageString).containsSubsequence(
 			"meta",
 			"String Extension",
 			"Organization/2.25.79433498044103547197447759549862032393",
 			"furry-grey",
 			"furry-white",
 			"FamilyName"
-		));
-		assertThat(messageString, not(stringContainsInOrder(
-			"extension",
-			"meta"
-		)));
+		);
+		assertThat(messageString).doesNotContainPattern("(?s)extension.*meta");
 		//@formatter:on
 
 		FhirValidator val = ourCtx.newValidator();
@@ -192,8 +183,8 @@ public class ResourceValidatorDstu2_1Test extends BaseValidationTestWithInlineMo
 		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationOutcome);
 		ourLog.info(encoded);
 
-		assertThat(messageString, containsString("valueReference"));
-		assertThat(messageString, not(containsString("valueResource")));
+		assertThat(messageString).contains("valueReference");
+		assertThat(messageString).doesNotContain("valueResource");
 	}
 
 }

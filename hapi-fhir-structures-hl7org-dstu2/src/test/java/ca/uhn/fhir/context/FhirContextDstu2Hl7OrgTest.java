@@ -10,7 +10,7 @@ public class FhirContextDstu2Hl7OrgTest {
   @Test
   public void testAutoDetectVersion() {
     FhirContext ctx = new FhirContext();
-    assertEquals(FhirVersionEnum.DSTU2_HL7ORG, ctx.getVersion().getVersion());
+		assertEquals(FhirVersionEnum.DSTU2_HL7ORG, ctx.getVersion().getVersion());
   }
 
 }

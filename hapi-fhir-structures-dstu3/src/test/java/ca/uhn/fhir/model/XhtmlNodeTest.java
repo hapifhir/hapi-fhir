@@ -1,5 +1,7 @@
 package ca.uhn.fhir.model;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
@@ -7,8 +9,7 @@ import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class XhtmlNodeTest {
 
@@ -55,7 +56,7 @@ public class XhtmlNodeTest {
 		
 		ExplanationOfBenefit copy1 = ourCtx.newXmlParser().parseResource(ExplanationOfBenefit.class, input);
 		ExplanationOfBenefit copy2 = ourCtx.newXmlParser().parseResource(ExplanationOfBenefit.class, input);
-		
+
 		assertTrue(copy1.equalsDeep(copy2));
 		assertTrue(copy1.equalsShallow(copy2));
 		

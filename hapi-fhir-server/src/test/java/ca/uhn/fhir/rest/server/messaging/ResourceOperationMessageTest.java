@@ -9,9 +9,8 @@ import org.junit.jupiter.api.Test;
 import static ca.uhn.fhir.rest.server.messaging.json.HapiMessageHeaders.FIRST_FAILURE_KEY;
 import static ca.uhn.fhir.rest.server.messaging.json.HapiMessageHeaders.LAST_FAILURE_KEY;
 import static ca.uhn.fhir.rest.server.messaging.json.HapiMessageHeaders.RETRY_COUNT_KEY;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 class ResourceOperationMessageTest {
 
@@ -25,12 +24,12 @@ class ResourceOperationMessageTest {
 		String serialized = mapper.writeValueAsString(jsonMessage);
 		jsonMessage = mapper.readValue(serialized, ResourceOperationJsonMessage.class);
 
-		assertThat(jsonMessage.getHapiHeaders().getRetryCount(), is(equalTo(0)));
-		assertThat(jsonMessage.getHapiHeaders().getFirstFailureTimestamp(), is(equalTo(null)));
-		assertThat(jsonMessage.getHapiHeaders().getLastFailureTimestamp(), is(equalTo(null)));
+		assertEquals(0, jsonMessage.getHapiHeaders().getRetryCount());
+		assertNull(jsonMessage.getHapiHeaders().getFirstFailureTimestamp());
+		assertNull(jsonMessage.getHapiHeaders().getLastFailureTimestamp());
 
-		assertThat(jsonMessage.getHeaders().get(RETRY_COUNT_KEY), is(equalTo(0)));
-		assertThat(jsonMessage.getHeaders().get(FIRST_FAILURE_KEY), is(equalTo(null)));
-		assertThat(jsonMessage.getHeaders().get(LAST_FAILURE_KEY), is(equalTo(null)));
+		assertEquals(0, jsonMessage.getHeaders().get(RETRY_COUNT_KEY));
+		assertNull(jsonMessage.getHeaders().get(FIRST_FAILURE_KEY));
+		assertNull(jsonMessage.getHeaders().get(LAST_FAILURE_KEY));
 	}
 }

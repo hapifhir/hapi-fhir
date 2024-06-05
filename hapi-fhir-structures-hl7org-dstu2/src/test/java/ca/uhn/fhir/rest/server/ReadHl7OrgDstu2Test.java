@@ -15,8 +15,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ReadHl7OrgDstu2Test {
@@ -44,8 +43,8 @@ public class ReadHl7OrgDstu2Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, containsString("p1ReadValue"));
-		assertThat(responseContent, containsString("p1ReadId"));
+		assertThat(responseContent).contains("p1ReadValue");
+		assertThat(responseContent).contains("p1ReadId");
 	}
 
 	/**
@@ -59,8 +58,8 @@ public class ReadHl7OrgDstu2Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, containsString("p1ReadValue"));
-		assertThat(responseContent, containsString("p1ReadId"));
+		assertThat(responseContent).contains("p1ReadValue");
+		assertThat(responseContent).contains("p1ReadId");
 	}
 
 	@AfterAll

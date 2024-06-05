@@ -27,7 +27,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class FhirDaoConcurrencyDstu3Test extends BaseJpaDstu3SystemTest {
 
@@ -137,7 +137,7 @@ public class FhirDaoConcurrencyDstu3Test extends BaseJpaDstu3SystemTest {
 		ourLog.info("Last version: {}", lastVersion);
 
 		//assertEquals(message, currentVersion.intValue(), versions.size());
-		assertEquals(currentVersion, lastVersion, message);
+		assertThat(lastVersion).as(message).isEqualTo(currentVersion);
 
 	}
 

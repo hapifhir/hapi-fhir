@@ -35,8 +35,9 @@ import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
+import jakarta.annotation.Nonnull;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -118,8 +119,8 @@ public class CrossPartitionReferencesTest extends BaseJpaR5Test {
 			.newSynchronous(Constants.PARAM_ID, new TokenParam(patient2Id.getValue()))
 			.addInclude(Patient.INCLUDE_LINK);
 		IBundleProvider search = myPatientDao.search(params, mySrd);
-		assertThat(toUnqualifiedVersionlessIdValues(search), contains(patient2Id.getValue(), patient1Id.getValue()));
-		assertEquals(2, search.getAllResources().size());
+		assertThat(toUnqualifiedVersionlessIdValues(search)).containsExactly(patient2Id.getValue(), patient1Id.getValue());
+		assertThat(search.getAllResources()).hasSize(2);
 		search.getAllResources().forEach(p -> assertTrue(((Patient) p).getActive()));
 	}
 
@@ -145,8 +146,8 @@ public class CrossPartitionReferencesTest extends BaseJpaR5Test {
 		IBundleProvider search = myPatientDao.search(params, mySrd);
 
 		// Verify
-		assertThat(toUnqualifiedVersionlessIdValues(search), contains(patient2Id.getValue(), patient1Id.getValue()));
-		assertEquals(2, search.getAllResources().size());
+		assertThat(toUnqualifiedVersionlessIdValues(search)).containsExactly(patient2Id.getValue(), patient1Id.getValue());
+		assertThat(search.getAllResources()).hasSize(2);
 		search.getAllResources().forEach(p -> assertTrue(((Patient) p).getActive()));
 	}
 

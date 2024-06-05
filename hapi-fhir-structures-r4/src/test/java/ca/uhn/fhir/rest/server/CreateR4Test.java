@@ -13,7 +13,6 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.client.MyPatientWithExtensions;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
-import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
@@ -23,12 +22,6 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.ee10.servlet.ServletHandler;
-import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.IdType;
@@ -36,8 +29,6 @@ import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.OperationOutcome.OperationOutcomeIssueComponent;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -45,13 +36,8 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.emptyOrNullString;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
@@ -110,7 +96,7 @@ public class CreateR4Test {
 			ourLog.info("Response was:\n{}", responseContent);
 
 			assertEquals(400, status.getStatusLine().getStatusCode());
-			assertThat(responseContent, containsString("No Content-Type header was provided in the request. This is required for \\\"CREATE\\\" operation"));
+			assertThat(responseContent).contains("No Content-Type header was provided in the request. This is required for \\\"CREATE\\\" operation");
 
 		}
 	}
@@ -154,7 +140,7 @@ public class CreateR4Test {
 
 		assertEquals(201, status.getStatusLine().getStatusCode());
 
-		assertThat(responseContent, containsString("DIAG"));
+		assertThat(responseContent).contains("DIAG");
 	}
 
 	@Test
@@ -189,8 +175,8 @@ public class CreateR4Test {
 
 		assertEquals(400, status.getStatusLine().getStatusCode());
 
-		assertThat(responseContent, containsString("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\""));
-		assertThat(responseContent, containsString("Failed to parse request body as XML resource."));
+		assertThat(responseContent).contains("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\"");
+		assertThat(responseContent).contains("Failed to parse request body as XML resource.");
 
 	}
 
@@ -208,8 +194,8 @@ public class CreateR4Test {
 
 		assertEquals(400, status.getStatusLine().getStatusCode());
 
-		assertThat(responseContent, containsString("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\""));
-		assertThat(responseContent, containsString("Failed to parse request body as XML resource."));
+		assertThat(responseContent).contains("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\"");
+		assertThat(responseContent).contains("Failed to parse request body as XML resource.");
 
 	}
 
@@ -227,7 +213,7 @@ public class CreateR4Test {
 
 		assertEquals(400, status.getStatusLine().getStatusCode());
 
-		assertThat(responseContent, containsString("Failed to parse request body as JSON resource."));
+		assertThat(responseContent).contains("Failed to parse request body as JSON resource.");
 
 	}
 
@@ -248,8 +234,8 @@ public class CreateR4Test {
 
 		assertEquals(400, status.getStatusLine().getStatusCode());
 
-		assertThat(responseContent, containsString("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\""));
-		assertThat(responseContent, containsString(Msg.code(450) + "Failed to parse request body as XML resource. Error was: " + Msg.code(1852) +  "com.ctc.wstx.exc.WstxUnexpectedCharException: Unexpected character 'F'"));
+		assertThat(responseContent).contains("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\"");
+		assertThat(responseContent).contains(Msg.code(450) + "Failed to parse request body as XML resource. Error was: " + Msg.code(1852) + "com.ctc.wstx.exc.WstxUnexpectedCharException: Unexpected character 'F'");
 
 	}
 
@@ -273,7 +259,7 @@ public class CreateR4Test {
 
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info("Response was:\n{}", responseContent);
-			assertThat(responseContent, containsString("\"resourceType\":\"Patient\""));
+			assertThat(responseContent).contains("\"resourceType\":\"Patient\"");
 		}
 
 	}
@@ -297,7 +283,7 @@ public class CreateR4Test {
 
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info("Response was:\n{}", responseContent);
-			assertThat(responseContent, containsString("\"resourceType\":\"OperationOutcome\""));
+			assertThat(responseContent).contains("\"resourceType\":\"OperationOutcome\"");
 		}
 
 
@@ -321,7 +307,7 @@ public class CreateR4Test {
 			assertNull(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE));
 
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(responseContent, emptyOrNullString());
+			assertThat(responseContent).isNullOrEmpty();
 		}
 
 	}
@@ -340,7 +326,7 @@ public class CreateR4Test {
 		assertEquals(200, status.getStatusLine().getStatusCode());
 
 		//@formatter:off
-		assertThat(responseContent, stringContainsInOrder(
+		assertThat(responseContent).containsSubsequence(
 			"<Patient xmlns=\"http://hl7.org/fhir\">",
 			"<id value=\"0\"/>",
 			"<meta>",
@@ -349,10 +335,10 @@ public class CreateR4Test {
 			"<modifierExtension url=\"http://example.com/ext/date\">",
 			"<valueDate value=\"2011-01-01\"/>",
 			"</modifierExtension>",
-			"</Patient>"));
+			"</Patient>");
 		//@formatter:on
 
-		assertThat(responseContent, not(containsString("http://hl7.org/fhir/")));
+		assertThat(responseContent).doesNotContain("http://hl7.org/fhir/");
 	}
 
 	public static class PatientProviderRead implements IResourceProvider {

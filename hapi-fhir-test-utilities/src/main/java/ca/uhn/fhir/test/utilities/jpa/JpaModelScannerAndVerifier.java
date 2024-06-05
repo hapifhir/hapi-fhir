@@ -29,13 +29,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.reflect.ClassPath;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Validate;
-import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.Subselect;
-import org.hibernate.validator.constraints.Length;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Embedded;
@@ -55,6 +48,13 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.Size;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Subselect;
+import org.hibernate.validator.constraints.Length;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.AnnotatedElement;
@@ -72,7 +72,7 @@ import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * This class is only used at build-time. It scans the various Hibernate entity classes
@@ -330,7 +330,7 @@ public class JpaModelScannerAndVerifier {
 					// this foreign key has the same name as an existing index
 					// let's make sure it's on the same column
 					Collection<String> columns = ourIndexNameToColumn.get(fk.name());
-					assertTrue(columns.contains(columnName), String.format("Foreign key %s duplicates index name, but column %s is not part of the index!", fk.name(), columnName));
+					assertThat(columns.contains(columnName)).as(String.format("Foreign key %s duplicates index name, but column %s is not part of the index!", fk.name(), columnName)).isTrue();
 				} else {
 					// verify it's not a duplicate
 					assertNotADuplicateName(fk.name(), theNames);

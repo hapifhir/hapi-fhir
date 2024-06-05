@@ -7,8 +7,8 @@ import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Test;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class AddressHelperTest {
 
@@ -20,11 +20,11 @@ class AddressHelperTest {
 		name.setFamily("Test");
 
 		final AddressHelper helper = new AddressHelper(null, name);
-		assertThrows(IllegalStateException.class, () -> {
+		assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> {
 			helper.getCountry();
 		});
 
-		assertThrows(IllegalArgumentException.class, () -> {
+		assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
 			new AddressHelper(null, new StringType("this will blow up"));
 		});
 	}

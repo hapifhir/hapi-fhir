@@ -18,9 +18,7 @@ import org.junit.jupiter.api.Test;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.util.ExtensionUtil.getExtensionPrimitiveValues;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.empty;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -41,10 +39,10 @@ class VersionCanonicalizerTest {
 			org.hl7.fhir.r5.model.SearchParameter actual = ourCanonicalizer.searchParameterToCanonical(input);
 
 			// Verify
-			assertThat(actual.getBase().stream().map(Enumeration::getCode).collect(Collectors.toList()), contains("Patient", "Observation"));
-			assertThat(actual.getTarget().stream().map(Enumeration::getCode).collect(Collectors.toList()), contains("Organization"));
-			assertThat(getExtensionPrimitiveValues(actual, HapiExtensions.EXTENSION_SEARCHPARAM_CUSTOM_BASE_RESOURCE), empty());
-			assertThat(getExtensionPrimitiveValues(actual, HapiExtensions.EXTENSION_SEARCHPARAM_CUSTOM_TARGET_RESOURCE), empty());
+			assertThat(actual.getBase().stream().map(Enumeration::getCode).collect(Collectors.toList())).containsExactly("Patient", "Observation");
+			assertThat(actual.getTarget().stream().map(Enumeration::getCode).collect(Collectors.toList())).containsExactly("Organization");
+			assertThat(getExtensionPrimitiveValues(actual, HapiExtensions.EXTENSION_SEARCHPARAM_CUSTOM_BASE_RESOURCE)).isEmpty();
+			assertThat(getExtensionPrimitiveValues(actual, HapiExtensions.EXTENSION_SEARCHPARAM_CUSTOM_TARGET_RESOURCE)).isEmpty();
 
 		}
 
@@ -61,13 +59,13 @@ class VersionCanonicalizerTest {
 			org.hl7.fhir.r5.model.SearchParameter actual = ourCanonicalizer.searchParameterToCanonical(input);
 
 			// Verify
-			assertThat(actual.getBase().stream().map(Enumeration::getCode).collect(Collectors.toList()), empty());
-			assertThat(actual.getTarget().stream().map(Enumeration::getCode).collect(Collectors.toList()), empty());
-			assertThat(getExtensionPrimitiveValues(actual, HapiExtensions.EXTENSION_SEARCHPARAM_CUSTOM_BASE_RESOURCE), contains("Base1", "Base2"));
-			assertThat(getExtensionPrimitiveValues(actual, HapiExtensions.EXTENSION_SEARCHPARAM_CUSTOM_TARGET_RESOURCE), contains("Target1", "Target2"));
+			assertThat(actual.getBase().stream().map(Enumeration::getCode).collect(Collectors.toList())).isEmpty();
+			assertThat(actual.getTarget().stream().map(Enumeration::getCode).collect(Collectors.toList())).isEmpty();
+			assertThat(getExtensionPrimitiveValues(actual, HapiExtensions.EXTENSION_SEARCHPARAM_CUSTOM_BASE_RESOURCE)).containsExactly("Base1", "Base2");
+			assertThat(getExtensionPrimitiveValues(actual, HapiExtensions.EXTENSION_SEARCHPARAM_CUSTOM_TARGET_RESOURCE)).containsExactly("Target1", "Target2");
 			// Original shouldn't be modified
-			assertThat(input.getBase().stream().map(CodeType::getCode).toList(), contains("Base1", "Base2"));
-			assertThat(input.getTarget().stream().map(CodeType::getCode).toList(), contains("Target1", "Target2"));
+			assertThat(input.getBase().stream().map(CodeType::getCode).toList()).containsExactly("Base1", "Base2");
+			assertThat(input.getTarget().stream().map(CodeType::getCode).toList()).containsExactly("Target1", "Target2");
 
 		}
 	}

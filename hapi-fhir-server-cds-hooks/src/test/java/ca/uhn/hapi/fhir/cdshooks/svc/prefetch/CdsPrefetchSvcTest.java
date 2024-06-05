@@ -12,9 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Set;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.hasSize;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(MockitoExtension.class)
 class CdsPrefetchSvcTest {
@@ -37,20 +35,20 @@ class CdsPrefetchSvcTest {
 		CdsServiceRequestJson input = new CdsServiceRequestJson();
 
 		result = myCdsPrefetchSvc.findMissingPrefetch(spec, input);
-		assertThat(result, hasSize(0));
+		assertThat(result).hasSize(0);
 
 		spec.addPrefetch("foo", "fooval");
 		result = myCdsPrefetchSvc.findMissingPrefetch(spec, input);
-		assertThat(result, contains("foo"));
+		assertThat(result).containsExactly("foo");
 
 		input.addPrefetch("foo", new Patient());
 		result = myCdsPrefetchSvc.findMissingPrefetch(spec, input);
-		assertThat(result, hasSize(0));
+		assertThat(result).hasSize(0);
 
 		spec.addPrefetch("bar", "barval");
 		spec.addPrefetch("baz", "bazval");
 		result = myCdsPrefetchSvc.findMissingPrefetch(spec, input);
-		assertThat(result, contains("bar", "baz"));
+		assertThat(result).containsExactly("bar", "baz");
 
 		/**
 		 * From the Spec:
@@ -66,6 +64,6 @@ class CdsPrefetchSvcTest {
 		// Per the spec above, null is not considered missing
 		input.addPrefetch("baz", null);
 		result = myCdsPrefetchSvc.findMissingPrefetch(spec, input);
-		assertThat(result, contains("bar"));
+		assertThat(result).containsExactly("bar");
 	}
 }

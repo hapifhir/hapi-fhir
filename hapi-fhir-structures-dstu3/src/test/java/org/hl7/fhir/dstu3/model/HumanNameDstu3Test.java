@@ -1,8 +1,9 @@
 package org.hl7.fhir.dstu3.model;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class HumanNameDstu3Test {
 	/**
