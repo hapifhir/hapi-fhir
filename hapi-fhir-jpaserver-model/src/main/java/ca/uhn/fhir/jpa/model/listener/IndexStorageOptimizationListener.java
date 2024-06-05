@@ -41,7 +41,7 @@ import java.util.Optional;
  * </p>
  * <p>
  * As <code>SP_NAME, RES_TYPE</code> values could still be used after merge/persist to database, we are restoring
- * them from <code>HASH_IDENTITY</code> value.  .
+ * them from <code>HASH_IDENTITY</code> value.
  *</p>
  * See {@link ca.uhn.fhir.jpa.model.entity.StorageSettings#setIndexStorageOptimized(boolean)}
  */
@@ -59,11 +59,8 @@ public class IndexStorageOptimizationListener {
 	@PrePersist
 	@PreUpdate
 	public void optimizeSearchParams(Object theEntity) {
-		if (theEntity instanceof BaseResourceIndexedSearchParam) {
-			BaseResourceIndexedSearchParam resourceIndexedSearchParam = (BaseResourceIndexedSearchParam) theEntity;
-			if (myStorageSettings.isIndexStorageOptimized()) {
-				resourceIndexedSearchParam.optimizeIndexStorage();
-			}
+		if (myStorageSettings.isIndexStorageOptimized() && theEntity instanceof BaseResourceIndexedSearchParam) {
+			((BaseResourceIndexedSearchParam) theEntity).optimizeIndexStorage();
 		}
 	}
 
@@ -71,9 +68,8 @@ public class IndexStorageOptimizationListener {
 	@PostPersist
 	@PostUpdate
 	public void restoreSearchParams(Object theEntity) {
-		if (theEntity instanceof BaseResourceIndexedSearchParam && myStorageSettings.isIndexStorageOptimized()) {
-			BaseResourceIndexedSearchParam resourceIndexedSearchParam = (BaseResourceIndexedSearchParam) theEntity;
-			restoreSearchParams(resourceIndexedSearchParam);
+		if (myStorageSettings.isIndexStorageOptimized() && theEntity instanceof BaseResourceIndexedSearchParam) {
+			restoreSearchParams((BaseResourceIndexedSearchParam) theEntity);
 		}
 	}
 

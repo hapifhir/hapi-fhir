@@ -216,7 +216,7 @@ public class FhirResourceDaoR4IndexStorageOptimizedTest extends BaseJpaR4Test {
 		} catch (ConfigurationException e) {
 			assertEquals(Msg.code(2525) + "Incorrect configuration. "
 				+ "StorageSettings#isIndexStorageOptimized and PartitionSettings.isIncludePartitionInSearchHashes "
-				+ "could not be enabled at the same time.", e.getMessage());
+				+ "cannot be enabled at the same time.", e.getMessage());
 		}
 	}
 

@@ -217,7 +217,7 @@ public class SearchConfig {
 				&& myPartitionSettings.isIncludePartitionInSearchHashes()) {
 			throw new ConfigurationException(Msg.code(2525) + "Incorrect configuration. "
 					+ "StorageSettings#isIndexStorageOptimized and PartitionSettings.isIncludePartitionInSearchHashes "
-					+ "could not be enabled at the same time.");
+					+ "cannot be enabled at the same time.");
 		}
 	}
 }
