@@ -24,6 +24,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.mdm.api.IMdmLinkQuerySvc;
 import ca.uhn.fhir.mdm.api.IMdmSurvivorshipService;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
@@ -36,12 +37,16 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.util.TerserUtil;
-import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
@@ -57,6 +62,9 @@ public class MdmSurvivorshipSvcImpl implements IMdmSurvivorshipService {
 	private final IMdmLinkQuerySvc myMdmLinkQuerySvc;
 
 	private final IIdHelperService<?> myIIdHelperService;
+
+	@Autowired
+	private HapiTransactionService myTransactionService;
 
 	public MdmSurvivorshipSvcImpl(
 			FhirContext theFhirContext,
@@ -132,6 +140,7 @@ public class MdmSurvivorshipSvcImpl implements IMdmSurvivorshipService {
 		return (T) toSave;
 	}
 
+	@SuppressWarnings("rawtypes")
 	private Stream<IBaseResource> getMatchedSourceIdsByLinkUpdateDate(
 			IBaseResource theGoldenResource, MdmTransactionContext theMdmTransactionContext) {
 		String resourceType = theGoldenResource.fhirType();
@@ -143,18 +152,23 @@ public class MdmSurvivorshipSvcImpl implements IMdmSurvivorshipService {
 		searchParameters.setMatchResult(MdmMatchResultEnum.MATCH);
 		Page<MdmLinkJson> linksQuery = myMdmLinkQuerySvc.queryLinks(searchParameters, theMdmTransactionContext);
 
-		return linksQuery.get().map(link -> {
-			IResourcePersistentId<?> pid = link.getSourcePid();
+		// we want it ordered
+		List<String> sourceIds = new ArrayList<>();
+		linksQuery.forEach(link -> {
+			sourceIds.add(link.getSourceId());
+		});
+		Map<String, IResourcePersistentId> sourceIdToPid = new HashMap<>();
+		myTransactionService.withRequest(new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.allPartitions()))
+				.execute(() -> {
+					Map<String, ? extends IResourcePersistentId> ids = myIIdHelperService.resolveResourcePersistentIds(RequestPartitionId.allPartitions(),
+						resourceType, sourceIds);
+					sourceIdToPid.putAll(ids);
+				});
+
+
+		return sourceIds.stream().map(id -> {
+			IResourcePersistentId<?> pid = sourceIdToPid.get(id);
 			return dao.readByPid(pid);
 		});
-	}
-
-	private IResourcePersistentId<?> getResourcePID(String theId, String theResourceType) {
-		return myIIdHelperService.newPidFromStringIdAndResourceName(theId, theResourceType);
-	}
-
-	private boolean isNumericOrUuid(String theLongCandidate) {
-		return StringUtils.isNumeric(theLongCandidate)
-				|| IS_UUID.matcher(theLongCandidate).matches();
 	}
 }

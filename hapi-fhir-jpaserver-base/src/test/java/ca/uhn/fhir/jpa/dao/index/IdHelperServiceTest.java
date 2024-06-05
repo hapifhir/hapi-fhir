@@ -8,11 +8,14 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
+import ca.uhn.fhir.rest.api.server.storage.SerializablePid;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Tuple;
 import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Root;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,6 +23,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
@@ -33,7 +37,7 @@ import static org.mockito.Mockito.*;
 public class IdHelperServiceTest {
 
     @InjectMocks
-    private final IdHelperService subject = new IdHelperService();
+    private final IdHelperService myHelperSvc = new IdHelperService();
 
     @Mock
     protected IResourceTableDao myResourceTableDao;
@@ -41,8 +45,8 @@ public class IdHelperServiceTest {
     @Mock
     private JpaStorageSettings myStorageSettings;
 
-    @Mock
-    private FhirContext myFhirCtx;
+    @Spy
+    private FhirContext myFhirCtx = FhirContext.forR4Cached();
 
     @Mock
     private MemoryCacheService myMemoryCacheService;
@@ -55,10 +59,11 @@ public class IdHelperServiceTest {
 
     @BeforeEach
     void setUp() {
-        subject.setDontCheckActiveTransactionForUnitTest(true);
+        myHelperSvc.setDontCheckActiveTransactionForUnitTest(true);
 
-		when(myStorageSettings.isDeleteEnabled()).thenReturn(true);
-		when(myStorageSettings.getResourceClientIdStrategy()).thenReturn(JpaStorageSettings.ClientIdStrategyEnum.ANY);
+		// lenient because some tests require this setup, and others do not
+		lenient().doReturn(true).when(myStorageSettings).isDeleteEnabled();
+		lenient().doReturn(JpaStorageSettings.ClientIdStrategyEnum.ANY).when(myStorageSettings).getResourceClientIdStrategy();
     }
 
     @Test
@@ -77,7 +82,7 @@ public class IdHelperServiceTest {
         // configure mock behaviour
 		when(myStorageSettings.isDeleteEnabled()).thenReturn(true);
 
-		final ResourceNotFoundException resourceNotFoundException = assertThrows(ResourceNotFoundException.class, () -> subject.resolveResourcePersistentIds(requestPartitionId, resourceType, ids, theExcludeDeleted));
+		final ResourceNotFoundException resourceNotFoundException = assertThrows(ResourceNotFoundException.class, () -> myHelperSvc.resolveResourcePersistentIds(requestPartitionId, resourceType, ids, theExcludeDeleted));
 		assertEquals("HAPI-2001: Resource Patient/123 is not known", resourceNotFoundException.getMessage());
     }
 
@@ -98,12 +103,49 @@ public class IdHelperServiceTest {
         // configure mock behaviour
         when(myStorageSettings.isDeleteEnabled()).thenReturn(false);
 
-		Map<String, JpaPid> actualIds = subject.resolveResourcePersistentIds(requestPartitionId, resourceType, ids, theExcludeDeleted);
+		Map<String, JpaPid> actualIds = myHelperSvc.resolveResourcePersistentIds(requestPartitionId, resourceType, ids, theExcludeDeleted);
 
 		//verifyResult
 		assertFalse(actualIds.isEmpty());
 		assertNull(actualIds.get(ids.get(0)));
     }
+
+	@Test
+	public void fromSerializablePid_withValidJpaPid_returnsJpaPid() {
+		// setup
+		String resourceType = "Patient";
+		long id = 1L;
+		long version = 2;
+		IdType idType = new IdType(resourceType + "/" + id);
+		SerializablePid serializablePid = new SerializablePid(resourceType, id, String.valueOf(id));
+		serializablePid.setAssociatedResourceId(idType);
+		serializablePid.setVersion(version);
+
+		// test
+		JpaPid jpaPid = myHelperSvc.fromSerializablePid(serializablePid);
+
+		// verification
+		assertEquals(id, jpaPid.getId());
+		assertEquals(resourceType, jpaPid.getResourceType());
+		assertEquals(version, jpaPid.getVersion());
+		assertNotNull(jpaPid.getAssociatedResourceId());
+		IIdType actual = jpaPid.getAssociatedResourceId();
+		assertEquals(idType.getValueAsString(), actual.getValueAsString());
+	}
+
+	@Test
+	public void fromSerializablePid_withInvalidPjaPid_throws() {
+		// setup
+		SerializablePid serializablePid = new SerializablePid("Patient", "red", "red");
+
+		// test
+		try {
+			myHelperSvc.fromSerializablePid(serializablePid);
+			fail();
+		} catch (UnsupportedOperationException ex) {
+			assertTrue(ex.getMessage().contains("fromSerializablePid is not supported for this type of PID"));
+		}
+	}
 
     private Root<ResourceTable> getMockedFrom() {
         @SuppressWarnings("unchecked")
