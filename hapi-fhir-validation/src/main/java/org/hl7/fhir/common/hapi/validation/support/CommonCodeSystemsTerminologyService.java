@@ -187,7 +187,13 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 	}
 
 	protected CodeValidationResult getValidateCodeResultError(final String theMessage) {
-		return new CodeValidationResult().setSeverity(IssueSeverity.ERROR).setMessage(theMessage);
+		return new CodeValidationResult().setSeverity(IssueSeverity.ERROR)
+			.setMessage(theMessage)
+			.setCodeValidationIssues(Collections.singletonList(new CodeValidationIssue(
+				theMessage,
+				IssueSeverity.ERROR,
+				CodeValidationIssueCode.INVALID,
+				CodeValidationIssueCoding.INVALID_CODE)));
 	}
 
 	private CodeValidationResult validateCodeUsingCodeMap(
@@ -209,7 +215,8 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 		if (result.isFound()) {
 			return getValidateCodeResultOk(theCode, result.getCodeDisplay());
 		} else if (result.getErrorMessage() != null) {
-			return getValidateCodeResultError(result.getErrorMessage());
+			String errorMessageWithSystemInfo = result.getErrorMessage() + " (for '" + theSystem + "#" + theCode + "')";
+			return getValidateCodeResultError(errorMessageWithSystemInfo);
 		}
 		return null;
 	}
