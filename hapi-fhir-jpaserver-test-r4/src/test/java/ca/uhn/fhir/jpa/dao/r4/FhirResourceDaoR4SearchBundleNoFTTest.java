@@ -7,14 +7,12 @@ import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.util.HapiExtensions;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Composition;
 import org.hl7.fhir.r4.model.Enumerations;
-import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
@@ -22,11 +20,16 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.sql.Date;
+import java.util.List;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -42,25 +45,10 @@ public class FhirResourceDaoR4SearchBundleNoFTTest extends BaseJpaR4Test {
 				"Bundle.entry[0].resource.as(Composition).subject.resolve().as(Patient).identifier");
 
 		String patientId = "Patient/ABC";
-		String patientUrl = "http://example.com/fhir/" + patientId;
 		String identifierSystem = "http://foo";
 		String identifierValue = "bar";
 
-		Composition composition = new Composition();
-		composition.setSubject(new Reference(patientUrl));
-
-		Patient patient = new Patient();
-		patient.setId(patientId);
-		patient.addIdentifier().setSystem(identifierSystem).setValue(identifierValue);
-
-		Bundle bundle = new Bundle();
-		bundle.setType(Bundle.BundleType.DOCUMENT);
-		bundle.addEntry().setResource(composition);
-		bundle.addEntry().setFullUrl(patientUrl).setResource(patient);
-
-		DaoMethodOutcome createOutcome = myBundleDao.create(bundle, mySrd);
-		assertTrue(createOutcome.getCreated());
-		IIdType bundleId = createOutcome.getId();
+		IIdType bundleId = createDocumentBundleWithLocalPatient(patientId, "1980-01-30", identifierSystem, identifierValue);
 
 		verifySearchCompositionPatientReturnsBundle(identifierSystem, identifierValue, bundleId);
 	}
@@ -97,7 +85,7 @@ public class FhirResourceDaoR4SearchBundleNoFTTest extends BaseJpaR4Test {
 	@Test
 	public void searchDocumentBundle_withExternalReference_returnsCorrectly() {
 		String searchParamCode = "composition.subject";
-		createBundleSearchParameter("Bundle-composition-patient",
+		createBundleSearchParameter("Bundle-composition-subject",
 				Enumerations.SearchParamType.REFERENCE,
 				searchParamCode,
 				"Bundle.entry[0].resource.as(Composition).subject");
@@ -153,6 +141,75 @@ public class FhirResourceDaoR4SearchBundleNoFTTest extends BaseJpaR4Test {
 		assertEquals(patient.getIdElement().toUnqualifiedVersionless().getValue(), observation.getSubject().getReference());
 	}
 
+	private void verifySearchCompositionPatientReturnsBundle(String theIdentifierSystem, String theIdentifierValue, IIdType theBundleId) {
+		final String systemAndValue = theIdentifierSystem + "|" + theIdentifierValue;
+		verifySearchReturnsBundle(SearchParameterMap.newSynchronous("composition.patient.identifier", new TokenParam(theIdentifierValue)), theBundleId);
+		verifySearchReturnsBundle(SearchParameterMap.newSynchronous("composition.patient.identifier", new TokenParam(theIdentifierSystem, theIdentifierValue)), theBundleId);
+		verifySearchReturnsBundle(SearchParameterMap.newSynchronous("composition", new ReferenceParam("patient.identifier", theIdentifierValue)), theBundleId);
+		verifySearchReturnsBundle(SearchParameterMap.newSynchronous("composition", new ReferenceParam("patient.identifier", systemAndValue)), theBundleId);
+	}
+
+	@ParameterizedTest
+	@CsvSource({
+			"/Bundle?composition.patient.identifier=system|value-1&composition.patient.birthdate=1980-01-01, true, correct identifier correct birthdate",
+			"/Bundle?composition.patient.birthdate=1980-01-01&composition.patient.identifier=system|value-1, true, correct birthdate correct identifier",
+			"/Bundle?composition.patient.identifier=system|value-1&composition.patient.birthdate=2000-01-01, false, correct identifier incorrect birthdate",
+			"/Bundle?composition.patient.birthdate=2000-01-01&composition.patient.identifier=system|value-1, false, incorrect birthdate correct identifier",
+			"/Bundle?composition.patient.identifier=system|value-2&composition.patient.birthdate=1980-01-01, false, incorrect identifier correct birthdate",
+			"/Bundle?composition.patient.birthdate=1980-01-01&composition.patient.identifier=system|value-2, false, correct birthdate incorrect identifier",
+			"/Bundle?composition.patient.identifier=system|value-2&composition.patient.birthdate=2000-01-01, false, incorrect identifier incorrect birthdate",
+			"/Bundle?composition.patient.birthdate=2000-01-01&composition.patient.identifier=system|value-2, false, incorrect birthdate incorrect identifier",
+			// try sort by composition sp
+			"/Bundle?composition.patient.identifier=system|value-1&_sort=composition.patient.birthdate, true, correct identifier sort by birthdate",
+
+	})
+	public void testMultipleChainedBundleCompositionSearchParameters(String theSearchUrl, boolean theShouldMatch, String theMessage) {
+		createBundleSearchParameter("bundle-composition-patient-birthdate",
+				Enumerations.SearchParamType.DATE,
+				"composition.patient.birthdate",
+				"Bundle.entry.resource.ofType(Patient).birthDate"
+		);
+
+		createBundleSearchParameter("bundle-composition-patient-identifier",
+				Enumerations.SearchParamType.TOKEN,
+				"composition.patient.identifier",
+				"Bundle.entry.resource.ofType(Patient).identifier"
+		);
+
+		IIdType bundleId = createDocumentBundleWithLocalPatient("Patient/A", "1980-01-01", "system", "value-1");
+
+		List<String> ids = myTestDaoSearch.searchForIds(theSearchUrl);
+		if (theShouldMatch) {
+			assertThat(ids).as(theMessage).containsExactlyInAnyOrder(bundleId.getIdPart());
+		} else {
+			assertThat(ids).as(theMessage).hasSize(0);
+		}
+	}
+
+	private IIdType createDocumentBundleWithLocalPatient(@Nonnull String thePatientId,
+																		  @Nonnull String theBirthDate,
+																		  @Nonnull String theIdentifierSystem,
+																		  @Nonnull String theIdentifierValue) {
+		String patientUrl = "http://example.com/fhir/" + thePatientId;
+
+		Composition composition = new Composition();
+		composition.setSubject(new Reference(patientUrl));
+
+		Patient patient = new Patient();
+		patient.setBirthDate(Date.valueOf(theBirthDate));
+		patient.setId(thePatientId);
+		patient.addIdentifier().setSystem(theIdentifierSystem).setValue(theIdentifierValue);
+
+		Bundle bundle = new Bundle();
+		bundle.setType(Bundle.BundleType.DOCUMENT);
+		bundle.addEntry().setResource(composition);
+		bundle.addEntry().setFullUrl(patientUrl).setResource(patient);
+
+		DaoMethodOutcome createOutcome = myBundleDao.create(bundle, mySrd);
+		assertTrue(createOutcome.getCreated());
+		return createOutcome.getId();
+	}
+
 	private void createBundleSearchParameter(String id, Enumerations.SearchParamType theType, String theCode, String theExpression) {
 		SearchParameter sp = new SearchParameter()
 				.setCode(theCode)
@@ -161,21 +218,11 @@ public class FhirResourceDaoR4SearchBundleNoFTTest extends BaseJpaR4Test {
 				.setExpression(theExpression)
 				.setXpathUsage(SearchParameter.XPathUsageType.NORMAL)
 				.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		Extension upliftRefChain = sp.addExtension().setUrl(HapiExtensions.EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN);
-		upliftRefChain.addExtension(HapiExtensions.EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN_PARAM_CODE, new CodeType("identifier"));
 		sp.setId("SearchParameter/" + id);
 		sp.setUrl("http://example.com/fhir/" + sp.getId());
 		ourLog.info("SP: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(sp));
 		IBaseResource resource = mySearchParameterDao.update(sp, mySrd).getResource();
 		assertNotNull(resource);
-	}
-
-	private void verifySearchCompositionPatientReturnsBundle(String theIdentifierSystem, String theIdentifierValue, IIdType theBundleId) {
-		final String systemAndValue = theIdentifierSystem + "|" + theIdentifierValue;
-		verifySearchReturnsBundle(SearchParameterMap.newSynchronous("composition.patient.identifier", new TokenParam(theIdentifierValue)), theBundleId);
-		verifySearchReturnsBundle(SearchParameterMap.newSynchronous("composition.patient.identifier", new TokenParam(theIdentifierSystem, theIdentifierValue)), theBundleId);
-		verifySearchReturnsBundle(SearchParameterMap.newSynchronous("composition", new ReferenceParam("patient.identifier", theIdentifierValue)), theBundleId);
-		verifySearchReturnsBundle(SearchParameterMap.newSynchronous("composition", new ReferenceParam("patient.identifier", systemAndValue)), theBundleId);
 	}
 
 	private void verifySearchReturnsBundle(SearchParameterMap theSearchParameterMap, IIdType theBundleId) {
