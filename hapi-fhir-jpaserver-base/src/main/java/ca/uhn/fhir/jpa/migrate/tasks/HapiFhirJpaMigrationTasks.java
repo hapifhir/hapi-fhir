@@ -46,6 +46,7 @@ import ca.uhn.fhir.jpa.model.entity.SearchParamPresentEntity;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.VersionEnum;
+import jakarta.persistence.Index;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
@@ -237,6 +238,29 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 				.withType(ColumnTypeEnum.LONG)
 				.heavyweightSkipByDefault()
 				.failureAllowed();
+
+		/*
+		 * Add RES_ID to two indexes on HFJ_RES_VER which support history operations.
+		 * This makes server and type level _history work properly on large databases
+		 * on postgres. These are both marked as heavyweightSkipByDefault because the
+		 * necessary reindexing would be very expensive for a rarely used FHIR feature.
+		 */
+		version.onTable("HFJ_RES_VER")
+			.dropIndex("20240601.17", "IDX_RESVER_TYPE_DATE")
+			.heavyweightSkipByDefault();
+		version.onTable("HFJ_RES_VER")
+			.addIndex("20240601.18", "IDX_RESVER_TYPE_DATE")
+			.unique(false)
+			.withColumns("RES_TYPE","RES_UPDATED","RES_ID")
+			.heavyweightSkipByDefault();
+		version.onTable("HFJ_RES_VER")
+			.dropIndex("20240601.19", "IDX_RESVER_DATE")
+			.heavyweightSkipByDefault();
+		version.onTable("HFJ_RES_VER")
+			.addIndex("20240601.20", "IDX_RESVER_DATE")
+			.unique(false)
+			.withColumns("RES_UPDATED","RES_ID")
+			.heavyweightSkipByDefault();
 	}
 
 	protected void init720() {

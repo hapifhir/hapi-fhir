@@ -97,14 +97,14 @@ class HapiMigratorIT {
 		 */
 		migrator = buildMigrator(taskList.toTaskArray());
 		outcome = migrator.migrate();
-		assertThat(toTaskStatementDescriptions(outcome), toTaskVersionList(outcome), contains("1", "3"));
+		assertThat(toTaskVersionList(outcome)).as(toTaskStatementDescriptions(outcome)).containsExactly("1", "3");
 
 		/*
 		 * Run again - Nothing should happen since we've already finished the migration
 		 */
 		migrator = buildMigrator(taskList.toTaskArray());
 		outcome = migrator.migrate();
-		assertThat(toTaskStatementDescriptions(outcome), toTaskVersionList(outcome), empty());
+		assertThat(toTaskVersionList(outcome)).as(toTaskStatementDescriptions(outcome)).isEmpty();
 
 		/*
 		 * Add another pair of tasks - Both should run
@@ -118,7 +118,7 @@ class HapiMigratorIT {
 
 		migrator = buildMigrator(taskList.toTaskArray());
 		outcome = migrator.migrate();
-		assertThat(toTaskStatementDescriptions(outcome), toTaskVersionList(outcome), contains("4", "5"));
+		assertThat(toTaskVersionList(outcome)).as(toTaskStatementDescriptions(outcome)).containsExactly("4", "5");
 
 	}
 
@@ -262,7 +262,7 @@ class HapiMigratorIT {
 		latchMigrationTask.release("1");
 
 		MigrationResult result = future.get();
-		assertThat(result.succeededTasks, hasSize(expectedInvocations));
+		assertThat(result.succeededTasks).hasSize(expectedInvocations);
 	}
 
 	@SuppressWarnings("DataFlowIssue")
