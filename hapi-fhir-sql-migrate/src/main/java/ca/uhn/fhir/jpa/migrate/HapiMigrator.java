@@ -44,6 +44,7 @@ public class HapiMigrator {
 	private static final Logger ourLog = LoggerFactory.getLogger(HapiMigrator.class);
 	private final MigrationTaskList myTaskList = new MigrationTaskList();
 	private boolean myDryRun;
+	private boolean myRunHeavyweightSkippableTasks;
 	private boolean myNoColumnShrink;
 	private final DriverTypeEnum myDriverType;
 	private final DataSource myDataSource;
@@ -67,6 +68,24 @@ public class HapiMigrator {
 
 	public void setDryRun(boolean theDryRun) {
 		myDryRun = theDryRun;
+	}
+
+	/**
+	 * Should we run the tasks marked with {@link ca.uhn.fhir.jpa.migrate.tasks.api.TaskFlagEnum#HEAVYWEIGHT_SKIP_BY_DEFAULT}
+	 *
+	 * @since 7.4.0
+	 */
+	public boolean isRunHeavyweightSkippableTasks() {
+		return myRunHeavyweightSkippableTasks;
+	}
+
+	/**
+	 * Should we run the tasks marked with {@link ca.uhn.fhir.jpa.migrate.tasks.api.TaskFlagEnum#HEAVYWEIGHT_SKIP_BY_DEFAULT}
+	 *
+	 * @since 7.4.0
+	 */
+	public void setRunHeavyweightSkippableTasks(boolean theRunHeavyweightSkippableTasks) {
+		myRunHeavyweightSkippableTasks = theRunHeavyweightSkippableTasks;
 	}
 
 	public boolean isNoColumnShrink() {
@@ -130,6 +149,10 @@ public class HapiMigrator {
 
 			try (DriverTypeEnum.ConnectionProperties connectionProperties =
 					getDriverType().newConnectionProperties(getDataSource())) {
+
+				if (!isRunHeavyweightSkippableTasks()) {
+					newTaskList.removeIf(BaseTask::isHeavyweightSkippableTask);
+				}
 
 				newTaskList.forEach(next -> {
 					next.setDriverType(getDriverType());
@@ -211,7 +234,7 @@ public class HapiMigrator {
 	}
 
 	public void setCallbacks(@Nonnull List<IHapiMigrationCallback> theCallbacks) {
-		Validate.notNull(theCallbacks);
+		Validate.notNull(theCallbacks, "theCallbacks must not be null");
 		myCallbacks = theCallbacks;
 	}
 

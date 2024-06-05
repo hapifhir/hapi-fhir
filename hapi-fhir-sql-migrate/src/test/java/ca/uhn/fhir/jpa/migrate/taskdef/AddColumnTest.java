@@ -8,6 +8,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.sql.SQLException;
+import java.util.Set;
 import java.util.function.Supplier;
 
 import static org.hamcrest.MatcherAssert.assertThat;

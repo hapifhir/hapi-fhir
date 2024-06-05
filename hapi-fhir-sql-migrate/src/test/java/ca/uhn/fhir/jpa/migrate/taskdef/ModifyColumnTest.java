@@ -3,11 +3,13 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.HapiMigrationException;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
+import ca.uhn.fhir.jpa.migrate.tasks.api.TaskFlagEnum;
+import jakarta.annotation.Nonnull;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import jakarta.annotation.Nonnull;
 import java.sql.SQLException;
+import java.util.Set;
 import java.util.function.Supplier;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -270,11 +272,11 @@ public class ModifyColumnTest extends BaseTest {
 		executeSql("insert into SOMETABLE (TEXTCOL) values ('HELLO')");
 
 		ModifyColumnTask task = new ModifyColumnTask("1", "1");
+		task.addFlag(TaskFlagEnum.FAILURE_ALLOWED);
 		task.setTableName("SOMETABLE");
 		task.setColumnName("TEXTCOL");
 		task.setColumnType(ColumnTypeEnum.LONG);
 		task.setNullable(true);
-		task.setFailureAllowed(true);
 		getMigrator().addTask(task);
 
 		getMigrator().migrate();

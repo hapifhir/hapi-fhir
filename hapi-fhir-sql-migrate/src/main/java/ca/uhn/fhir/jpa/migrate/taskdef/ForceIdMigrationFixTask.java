@@ -113,6 +113,13 @@ public class ForceIdMigrationFixTask extends BaseTask {
 		switch (getDriverType()) {
 			case MSSQL_2012:
 				return " where (fhir_id is null or DATALENGTH(fhir_id) > LEN(fhir_id)) ";
+			case H2_EMBEDDED:
+			case DERBY_EMBEDDED:
+			case MARIADB_10_1:
+			case MYSQL_5_7:
+			case POSTGRES_9_4:
+			case ORACLE_12C:
+			case COCKROACHDB_21_1:
 			default:
 				return " where (fhir_id is null or fhir_id <> trim(fhir_id)) ";
 		}

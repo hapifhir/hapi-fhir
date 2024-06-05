@@ -46,6 +46,9 @@ public class ArbitrarySqlTask extends BaseTask {
 	private String myExecuteOnlyIfTableExists;
 	private List<TableAndColumn> myConditionalOnExistenceOf = new ArrayList<>();
 
+	/**
+	 * Constructor
+	 */
 	public ArbitrarySqlTask(VersionEnum theRelease, String theVersion, String theTableName, String theDescription) {
 		super(theRelease.toString(), theVersion);
 		myTableName = theTableName;

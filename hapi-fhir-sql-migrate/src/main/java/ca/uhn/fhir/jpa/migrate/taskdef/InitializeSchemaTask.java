@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import ca.uhn.fhir.jpa.migrate.tasks.api.ISchemaInitializationProvider;
+import ca.uhn.fhir.jpa.migrate.tasks.api.TaskFlagEnum;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.slf4j.Logger;
@@ -35,7 +36,6 @@ public class InitializeSchemaTask extends BaseTask {
 	private static final String DESCRIPTION_PREFIX = "Initialize schema for ";
 	private static final Logger ourLog = LoggerFactory.getLogger(InitializeSchemaTask.class);
 	private final ISchemaInitializationProvider mySchemaInitializationProvider;
-	private boolean myInitializedSchema;
 
 	public InitializeSchemaTask(
 			String theProductVersion,
@@ -44,11 +44,7 @@ public class InitializeSchemaTask extends BaseTask {
 		super(theProductVersion, theSchemaVersion);
 		mySchemaInitializationProvider = theSchemaInitializationProvider;
 		setDescription(DESCRIPTION_PREFIX + mySchemaInitializationProvider.getSchemaDescription());
-	}
-
-	@Override
-	public boolean isRunDuringSchemaInitialization() {
-		return true;
+		addFlag(TaskFlagEnum.RUN_DURING_SCHEMA_INITIALIZATION);
 	}
 
 	@Override
@@ -83,10 +79,6 @@ public class InitializeSchemaTask extends BaseTask {
 			executeSql(null, nextSql);
 		}
 
-		if (mySchemaInitializationProvider.canInitializeSchema()) {
-			myInitializedSchema = true;
-		}
-
 		logInfo(
 				ourLog,
 				"{} schema for {} initialized successfully",
@@ -95,19 +87,14 @@ public class InitializeSchemaTask extends BaseTask {
 	}
 
 	@Override
-	public boolean initializedSchema() {
-		return myInitializedSchema;
-	}
-
-	@Override
 	protected void generateEquals(EqualsBuilder theBuilder, BaseTask theOtherObject) {
 		InitializeSchemaTask otherObject = (InitializeSchemaTask) theOtherObject;
-		theBuilder.append(mySchemaInitializationProvider, otherObject.mySchemaInitializationProvider);
+		theBuilder.append(getSchemaInitializationProvider(), otherObject.getSchemaInitializationProvider());
 	}
 
 	@Override
 	protected void generateHashCode(HashCodeBuilder theBuilder) {
-		theBuilder.append(mySchemaInitializationProvider);
+		theBuilder.append(getSchemaInitializationProvider());
 	}
 
 	public ISchemaInitializationProvider getSchemaInitializationProvider() {
