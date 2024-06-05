@@ -52,6 +52,8 @@ import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
 import com.google.common.collect.Lists;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -82,9 +84,6 @@ import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
 import org.mockito.quality.Strictness;
 
 import java.io.IOException;
@@ -98,18 +97,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.test.utilities.server.MockServletUtil.createServletConfig;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.nullValue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -183,14 +174,7 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 			.stream()
 			.map(t -> t.getCode())
 			.collect(Collectors.toList());
-		assertThat(formats.toString(), formats, containsInAnyOrder(
-			"application/fhir+xml",
-			"xml",
-			"application/fhir+json",
-			"json",
-			"application/x-turtle",
-			"ttl"
-		));
+		assertThat(formats).as(formats.toString()).containsExactlyInAnyOrder("application/fhir+xml", "xml", "application/fhir+json", "json", "application/x-turtle", "ttl");
 	}
 
 	@Test
@@ -208,7 +192,7 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 		String conf = myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 
-		assertEquals(2, conformance.getRest().get(0).getResource().size());
+		assertThat(conformance.getRest().get(0).getResource()).hasSize(2);
 		CapabilityStatementRestResourceComponent res = conformance.getRest().get(0).getResource().get(1);
 		assertEquals("Patient", res.getType());
 
@@ -232,7 +216,7 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 
 		// then
 		String instantiatesFirstRepValue = conformance.getInstantiates().get(0).getValue();
-		assertThat(instantiatesFirstRepValue, equalTo(Constants.BULK_DATA_ACCESS_IG_URL));
+		assertEquals(Constants.BULK_DATA_ACCESS_IG_URL, instantiatesFirstRepValue);
 	}
 
 	private RequestDetails createRequestDetails(RestfulServer theServer) {
@@ -258,16 +242,16 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 		validate(conformance);
 
 		CapabilityStatementRestResourceComponent patient = conformance.getRestFirstRep().getResource().stream().filter(t -> t.getType().equals("Patient")).findFirst().orElseThrow(() -> new IllegalArgumentException());
-		assertEquals(1, patient.getOperation().size());
+		assertThat(patient.getOperation()).hasSize(1);
 		assertEquals("everything", patient.getOperation().get(0).getName());
 		assertEquals("http://localhost/baseR4/OperationDefinition/Patient-i-everything", patient.getOperation().get(0).getDefinition());
 
 		OperationDefinition opDef = (OperationDefinition) sc.readOperationDefinition(new IdType("OperationDefinition/Patient-i-everything"), createRequestDetails(rs));
 		validate(opDef);
 		assertEquals("everything", opDef.getCode());
-		assertThat(opDef.getSystem(), is(false));
-		assertThat(opDef.getType(), is(false));
-		assertThat(opDef.getInstance(), is(true));
+		assertEquals(false, opDef.getSystem());
+		assertEquals(false, opDef.getType());
+		assertEquals(true, opDef.getInstance());
 	}
 
 	@Test
@@ -308,7 +292,7 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 		String conf = validate(conformance);
 
 		conf = myCtx.newXmlParser().setPrettyPrint(false).encodeResourceToString(conformance);
-		assertThat(conf, containsString("<interaction><code value=\"" + TypeRestfulInteraction.HISTORYINSTANCE.toCode() + "\"/></interaction>"));
+		assertThat(conf).contains("<interaction><code value=\"" + TypeRestfulInteraction.HISTORYINSTANCE.toCode() + "\"/></interaction>");
 	}
 
 	@Test
@@ -338,9 +322,9 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		String conf = validate(conformance);
 
-		assertThat(conf, containsString("<documentation value=\"The patient's identifier\"/>"));
-		assertThat(conf, containsString("<documentation value=\"The patient's name\"/>"));
-		assertThat(conf, containsString("<type value=\"token\"/>"));
+		assertThat(conf).contains("<documentation value=\"The patient's identifier\"/>");
+		assertThat(conf).contains("<documentation value=\"The patient's name\"/>");
+		assertThat(conf).contains("<type value=\"token\"/>");
 	}
 
 	@Test
@@ -387,14 +371,14 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 		assertEquals("someOp", opDef.getCode());
 		assertEquals(true, opDef.getInstance());
 		assertEquals(false, opDef.getSystem());
-		assertThat(types, containsInAnyOrder("Patient", "Encounter"));
-		assertEquals(2, opDef.getParameter().size());
+		assertThat(types).containsExactlyInAnyOrder("Patient", "Encounter");
+		assertThat(opDef.getParameter()).hasSize(2);
 		assertEquals("someOpParam1", opDef.getParameter().get(0).getName());
 		assertEquals("date", opDef.getParameter().get(0).getType());
 		assertEquals("Start description", opDef.getParameter().get(0).getDocumentation());
 
 		List<Extension> exampleExtensions = opDef.getParameter().get(0).getExtensionsByUrl(HapiExtensions.EXT_OP_PARAMETER_EXAMPLE_VALUE);
-		assertEquals(2, exampleExtensions.size());
+		assertThat(exampleExtensions).hasSize(2);
 		assertEquals("2001", exampleExtensions.get(0).getValueAsPrimitive().getValueAsString());
 		assertEquals("2002", exampleExtensions.get(1).getValueAsPrimitive().getValueAsString());
 	}
@@ -418,14 +402,14 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 		validate(conformance);
 
 		CapabilityStatementRestResourceComponent patient = conformance.getRestFirstRep().getResource().stream().filter(t -> t.getType().equals("Patient")).findFirst().orElseThrow(() -> new IllegalArgumentException());
-		assertEquals(2, patient.getOperation().size());
-		assertThat(toOperationNames(patient.getOperation()), containsInAnyOrder("someOp", "validate"));
-		assertThat(toOperationDefinitions(patient.getOperation()), containsInAnyOrder("http://localhost/baseR4/OperationDefinition/EncounterPatient-i-someOp", "http://localhost/baseR4/OperationDefinition/EncounterPatient-i-validate"));
+		assertThat(patient.getOperation()).hasSize(2);
+		assertThat(toOperationNames(patient.getOperation())).containsExactlyInAnyOrder("someOp", "validate");
+		assertThat(toOperationDefinitions(patient.getOperation())).containsExactlyInAnyOrder("http://localhost/baseR4/OperationDefinition/EncounterPatient-i-someOp", "http://localhost/baseR4/OperationDefinition/EncounterPatient-i-validate");
 
 		CapabilityStatementRestResourceComponent encounter = conformance.getRestFirstRep().getResource().stream().filter(t -> t.getType().equals("Encounter")).findFirst().orElseThrow(() -> new IllegalArgumentException());
-		assertEquals(2, encounter.getOperation().size());
-		assertThat(toOperationNames(encounter.getOperation()), containsInAnyOrder("someOp", "validate"));
-		assertThat(toOperationDefinitions(encounter.getOperation()).toString(), toOperationDefinitions(encounter.getOperation()), containsInAnyOrder("http://localhost/baseR4/OperationDefinition/EncounterPatient-i-someOp", "http://localhost/baseR4/OperationDefinition/EncounterPatient-i-validate"));
+		assertThat(encounter.getOperation()).hasSize(2);
+		assertThat(toOperationNames(encounter.getOperation())).containsExactlyInAnyOrder("someOp", "validate");
+		assertThat(toOperationDefinitions(encounter.getOperation())).as(toOperationDefinitions(encounter.getOperation()).toString()).containsExactlyInAnyOrder("http://localhost/baseR4/OperationDefinition/EncounterPatient-i-someOp", "http://localhost/baseR4/OperationDefinition/EncounterPatient-i-validate");
 
 
 		{
@@ -436,8 +420,8 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 			assertEquals("someOp", opDef.getCode());
 			assertEquals(true, opDef.getInstance());
 			assertEquals(false, opDef.getSystem());
-			assertThat(types, containsInAnyOrder("Patient", "Encounter"));
-			assertEquals(2, opDef.getParameter().size());
+			assertThat(types).containsExactlyInAnyOrder("Patient", "Encounter");
+			assertThat(opDef.getParameter()).hasSize(2);
 			assertEquals("someOpParam1", opDef.getParameter().get(0).getName());
 			assertEquals("date", opDef.getParameter().get(0).getType());
 			assertEquals("someOpParam2", opDef.getParameter().get(1).getName());
@@ -451,8 +435,8 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 			assertEquals("validate", opDef.getCode());
 			assertEquals(true, opDef.getInstance());
 			assertEquals(false, opDef.getSystem());
-			assertThat(types, containsInAnyOrder("Patient", "Encounter"));
-			assertEquals(1, opDef.getParameter().size());
+			assertThat(types).containsExactlyInAnyOrder("Patient", "Encounter");
+			assertThat(opDef.getParameter()).hasSize(1);
 			assertEquals("resource", opDef.getParameter().get(0).getName());
 			assertEquals("Resource", opDef.getParameter().get(0).getType());
 		}
@@ -473,8 +457,8 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 
 		String conf = validate(conformance);
 
-		assertThat(conf, containsString("<documentation value=\"The patient's identifier (MRN or other card number)\"/>"));
-		assertThat(conf, containsString("<type value=\"token\"/>"));
+		assertThat(conf).contains("<documentation value=\"The patient's identifier (MRN or other card number)\"/>");
+		assertThat(conf).contains("<type value=\"token\"/>");
 
 	}
 
@@ -503,7 +487,7 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 
 		assertEquals(DiagnosticReport.SP_DATE, res.getSearchParam().get(2).getName());
 
-		assertEquals(1, res.getSearchInclude().size());
+		assertThat(res.getSearchInclude()).hasSize(1);
 		assertEquals("DiagnosticReport.result", res.getSearchInclude().get(0).getValue());
 	}
 
@@ -521,8 +505,8 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		String conf = validate(conformance);
 
-		assertThat(conf, containsString("<interaction><code value=\"vread\"/></interaction>"));
-		assertThat(conf, containsString("<interaction><code value=\"read\"/></interaction>"));
+		assertThat(conf).contains("<interaction><code value=\"vread\"/></interaction>");
+		assertThat(conf).contains("<interaction><code value=\"read\"/></interaction>");
 	}
 
 	@Test
@@ -541,8 +525,8 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 		ourLog.info(conf);
 
 		conf = myCtx.newXmlParser().setPrettyPrint(false).encodeResourceToString(conformance);
-		assertThat(conf, not(containsString("<interaction><code value=\"vread\"/></interaction>")));
-		assertThat(conf, containsString("<interaction><code value=\"read\"/></interaction>"));
+		assertThat(conf).doesNotContain("<interaction><code value=\"vread\"/></interaction>");
+		assertThat(conf).contains("<interaction><code value=\"read\"/></interaction>");
 	}
 
 	@Test
@@ -576,8 +560,8 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 
 		String conf = validate(conformance);
 
-		assertThat(conf, containsString("<documentation value=\"The patient's identifier (MRN or other card number)\"/>"));
-		assertThat(conf, containsString("<type value=\"token\"/>"));
+		assertThat(conf).contains("<documentation value=\"The patient's identifier (MRN or other card number)\"/>");
+		assertThat(conf).contains("<type value=\"token\"/>");
 
 	}
 
@@ -594,10 +578,10 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 
 		List<String> formatCodes = serverConformance.getFormat().stream().map(c -> c.getCode()).collect(Collectors.toList());
 
-		assertThat(formatCodes, hasItem(Constants.FORMAT_XML));
-		assertThat(formatCodes, hasItem(Constants.FORMAT_JSON));
-		assertThat(formatCodes, hasItem(Constants.CT_FHIR_JSON_NEW));
-		assertThat(formatCodes, hasItem(Constants.CT_FHIR_XML_NEW));
+		assertThat(formatCodes).contains(Constants.FORMAT_XML);
+		assertThat(formatCodes).contains(Constants.FORMAT_JSON);
+		assertThat(formatCodes).contains(Constants.CT_FHIR_JSON_NEW);
+		assertThat(formatCodes).contains(Constants.CT_FHIR_XML_NEW);
 	}
 
 	/**
@@ -708,7 +692,7 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 		String confWithType = validate(conformanceWithType);
 
 		assertEquals(confNoType, confWithType);
-		assertThat(confNoType, containsString("<date value=\"2011-02-22T11:22:33Z\"/>"));
+		assertThat(confNoType).contains("<date value=\"2011-02-22T11:22:33Z\"/>");
 	}
 
 	@Test
@@ -725,7 +709,7 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		String conf = validate(conformance);
 
-		assertThat(conf, containsString("<interaction><code value=\"" + SystemRestfulInteraction.HISTORYSYSTEM.toCode() + "\"/></interaction>"));
+		assertThat(conf).contains("<interaction><code value=\"" + SystemRestfulInteraction.HISTORYSYSTEM.toCode() + "\"/></interaction>");
 	}
 
 	@Test
@@ -742,7 +726,7 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		String conf = validate(conformance);
 
-		assertThat(conf, containsString("<interaction><code value=\"" + TypeRestfulInteraction.HISTORYTYPE.toCode() + "\"/></interaction>"));
+		assertThat(conf).contains("<interaction><code value=\"" + TypeRestfulInteraction.HISTORYTYPE.toCode() + "\"/></interaction>");
 	}
 
 	@Test
@@ -781,7 +765,7 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 		CapabilityStatementRestResourceComponent resource = opDef.getRest().get(0).getResource().get(0);
 		assertEquals("DiagnosticReport", resource.getType());
 		List<String> searchParamNames = resource.getSearchParam().stream().map(t -> t.getName()).collect(Collectors.toList());
-		assertThat(searchParamNames, containsInAnyOrder("patient.birthdate", "patient.family", "patient.given", "date"));
+		assertThat(searchParamNames).containsExactlyInAnyOrder("patient.birthdate", "patient.family", "patient.given", "date");
 	}
 
 	@Test
@@ -992,7 +976,7 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 		// On Patient Resource
 		CapabilityStatementRestResourceComponent resource = opDef.getRest().get(0).getResource().stream().filter(t -> t.getType().equals("Patient")).findFirst().orElseThrow(() -> new IllegalArgumentException());
 		List<CapabilityStatementRestResourceOperationComponent> expungeResourceOperations = resource.getOperation().stream().filter(t -> t.getName().equals("expunge")).collect(Collectors.toList());
-		assertEquals(1, expungeResourceOperations.size());
+		assertThat(expungeResourceOperations).hasSize(1);
 		CapabilityStatementRestResourceOperationComponent operation = expungeResourceOperations.get(0);
 		assertEquals("expunge", operation.getName());
 		assertEquals("http://localhost/baseR4/OperationDefinition/Patient-it-expunge", operation.getDefinition());
@@ -1056,7 +1040,7 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 		CapabilityStatementRestResourceComponent resource = opDef.getRest().get(0).getResource().get(0);
 		assertEquals("DiagnosticReport", resource.getType());
 		List<String> searchParamNames = resource.getSearchParam().stream().map(t -> t.getName()).collect(Collectors.toList());
-		assertThat(searchParamNames, containsInAnyOrder("date", "_lastUpdated"));
+		assertThat(searchParamNames).containsExactlyInAnyOrder("date", "_lastUpdated");
 	}
 
 	@Test
@@ -1075,33 +1059,33 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 
 		CapabilityStatementRestResourceComponent patient = conformance.getRestFirstRep().getResource().stream().filter(t -> t.getType().equals("Patient")).findFirst().orElseThrow(() -> new IllegalArgumentException());
 		CapabilityStatementRestResourceOperationComponent operationComponent = patient.getOperation().get(0);
-		assertThat(operationComponent.getName(), is(NamedQueryPlainProvider.QUERY_NAME));
+		assertEquals(NamedQueryPlainProvider.QUERY_NAME, operationComponent.getName());
 
 		String operationReference = operationComponent.getDefinition();
-		assertThat(operationReference, not(nullValue()));
+		assertNotNull(operationReference);
 
 		OperationDefinition operationDefinition = (OperationDefinition) sc.readOperationDefinition(new IdType(operationReference), createRequestDetails(rs));
 		ourLog.debug(myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationDefinition));
 		validate(operationDefinition);
-		assertThat(operationDefinition.getCode(), is(NamedQueryPlainProvider.QUERY_NAME));
-		assertThat(operationDefinition.getName(), is("TestQuery"));
-		assertThat(operationDefinition.getStatus(), is(PublicationStatus.ACTIVE));
-		assertThat(operationDefinition.getKind(), is(OperationKind.QUERY));
-		assertThat(operationDefinition.getDescription(), is(NamedQueryPlainProvider.DESCRIPTION));
-		assertThat(operationDefinition.getAffectsState(), is(false));
-		assertThat("A system level search has no target resources", operationDefinition.getResource(), is(empty()));
-		assertThat(operationDefinition.getSystem(), is(true));
-		assertThat(operationDefinition.getType(), is(false));
-		assertThat(operationDefinition.getInstance(), is(false));
+		assertEquals(NamedQueryPlainProvider.QUERY_NAME, operationDefinition.getCode());
+		assertEquals("TestQuery", operationDefinition.getName());
+		assertEquals(PublicationStatus.ACTIVE, operationDefinition.getStatus());
+		assertEquals(OperationKind.QUERY, operationDefinition.getKind());
+		assertEquals(NamedQueryPlainProvider.DESCRIPTION, operationDefinition.getDescription());
+		assertEquals(false, operationDefinition.getAffectsState());
+		assertThat(operationDefinition.getResource()).as("A system level search has no target resources").isEmpty();
+		assertEquals(true, operationDefinition.getSystem());
+		assertEquals(false, operationDefinition.getType());
+		assertEquals(false, operationDefinition.getInstance());
 		List<OperationDefinitionParameterComponent> parameters = operationDefinition.getParameter();
-		assertThat(parameters.size(), is(1));
+		assertThat(parameters).hasSize(1);
 		OperationDefinitionParameterComponent param = parameters.get(0);
-		assertThat(param.getName(), is(NamedQueryPlainProvider.SP_QUANTITY));
-		assertThat(param.getType(), is("string"));
-		assertThat(param.getSearchTypeElement().asStringValue(), is(RestSearchParameterTypeEnum.QUANTITY.getCode()));
-		assertThat(param.getMin(), is(1));
-		assertThat(param.getMax(), is("1"));
-		assertThat(param.getUse(), is(OperationParameterUse.IN));
+		assertEquals(NamedQueryPlainProvider.SP_QUANTITY, param.getName());
+		assertEquals("string", param.getType());
+		assertEquals(RestSearchParameterTypeEnum.QUANTITY.getCode(), param.getSearchTypeElement().asStringValue());
+		assertEquals(1, param.getMin());
+		assertEquals("1", param.getMax());
+		assertEquals(OperationParameterUse.IN, param.getUse());
 	}
 
 	@Test
@@ -1121,29 +1105,29 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 		CapabilityStatementRestResourceComponent restComponent = conformance.getRestFirstRep().getResource().stream().filter(t -> t.getType().equals("Patient")).findFirst().orElseThrow(() -> new IllegalArgumentException());
 		CapabilityStatementRestResourceOperationComponent operationComponent = restComponent.getOperation().get(0);
 		String operationReference = operationComponent.getDefinition();
-		assertThat(operationReference, not(nullValue()));
+		assertNotNull(operationReference);
 
 		OperationDefinition operationDefinition = (OperationDefinition) sc.readOperationDefinition(new IdType(operationReference), createRequestDetails(rs));
 		ourLog.debug(myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationDefinition));
 		validate(operationDefinition);
-		assertThat("The operation name should be the code if no description is set", operationDefinition.getName(), is("TestQuery"));
+		assertThat(operationDefinition.getName()).as("The operation name should be the code if no description is set").isEqualTo("TestQuery");
 		String patientResourceName = "Patient";
-		assertThat("A resource level search targets the resource of the provider it's defined in", operationDefinition.getResource().get(0).getValue(), is(patientResourceName));
-		assertThat(operationDefinition.getSystem(), is(false));
-		assertThat(operationDefinition.getType(), is(true));
-		assertThat(operationDefinition.getInstance(), is(false));
+		assertThat(operationDefinition.getResource().get(0).getValue()).as("A resource level search targets the resource of the provider it's defined in").isEqualTo(patientResourceName);
+		assertEquals(false, operationDefinition.getSystem());
+		assertEquals(true, operationDefinition.getType());
+		assertEquals(false, operationDefinition.getInstance());
 		List<OperationDefinitionParameterComponent> parameters = operationDefinition.getParameter();
-		assertThat(parameters.size(), is(1));
+		assertThat(parameters).hasSize(1);
 		OperationDefinitionParameterComponent param = parameters.get(0);
-		assertThat(param.getName(), is(NamedQueryResourceProvider.SP_PARAM));
-		assertThat(param.getType(), is("string"));
-		assertThat(param.getSearchTypeElement().asStringValue(), is(RestSearchParameterTypeEnum.STRING.getCode()));
-		assertThat(param.getMin(), is(0));
-		assertThat(param.getMax(), is("1"));
-		assertThat(param.getUse(), is(OperationParameterUse.IN));
+		assertEquals(NamedQueryResourceProvider.SP_PARAM, param.getName());
+		assertEquals("string", param.getType());
+		assertEquals(RestSearchParameterTypeEnum.STRING.getCode(), param.getSearchTypeElement().asStringValue());
+		assertEquals(0, param.getMin());
+		assertEquals("1", param.getMax());
+		assertEquals(OperationParameterUse.IN, param.getUse());
 
 		List<CapabilityStatementRestResourceSearchParamComponent> patientResource = restComponent.getSearchParam();
-		assertThat("Named query parameters should not appear in the resource search params", patientResource, is(empty()));
+		assertThat(patientResource).as("Named query parameters should not appear in the resource search params").isEmpty();
 	}
 
 	@Test
@@ -1163,15 +1147,15 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 
 		CapabilityStatementRestResourceComponent patient = conformance.getRestFirstRep().getResource().stream().filter(t -> t.getType().equals("Patient")).findFirst().orElseThrow(() -> new IllegalArgumentException());
 		List<CapabilityStatementRestResourceOperationComponent> operations = patient.getOperation();
-		assertThat(operations.size(), is(1));
-		assertThat(operations.get(0).getName(), is(TypeLevelOperationProvider.OPERATION_NAME));
+		assertThat(operations).hasSize(1);
+		assertEquals(TypeLevelOperationProvider.OPERATION_NAME, operations.get(0).getName());
 
 		OperationDefinition opDef = (OperationDefinition) sc.readOperationDefinition(new IdType(operations.get(0).getDefinition()), createRequestDetails(rs));
 		validate(opDef);
 		assertEquals(TypeLevelOperationProvider.OPERATION_NAME, opDef.getCode());
-		assertThat(opDef.getSystem(), is(false));
-		assertThat(opDef.getType(), is(true));
-		assertThat(opDef.getInstance(), is(false));
+		assertEquals(false, opDef.getSystem());
+		assertEquals(true, opDef.getType());
+		assertEquals(false, opDef.getInstance());
 	}
 
 	@Test
@@ -1191,7 +1175,7 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 		CapabilityStatementRestResourceComponent patientResource = resources.stream()
 			.filter(resource -> "Patient".equals(resource.getType()))
 			.findFirst().get();
-		assertThat(patientResource.getProfile(), containsString(PATIENT_SUB));
+		assertThat(patientResource.getProfile()).contains(PATIENT_SUB);
 	}
 
 	@Test
@@ -1241,7 +1225,7 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 		CapabilityStatementRestResourceComponent patientResource = resources.stream()
 			.filter(resource -> "Patient".equals(resource.getType()))
 			.findFirst().get();
-		assertThat(toStrings(patientResource.getSearchRevInclude()), containsInAnyOrder("Observation:foo", "Provenance:bar"));
+		assertThat(toStrings(patientResource.getSearchRevInclude())).containsExactlyInAnyOrder("Observation:foo", "Provenance:bar");
 	}
 
 	@Test
@@ -1291,7 +1275,7 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 		CapabilityStatementRestResourceComponent patientResource = resources.stream()
 			.filter(resource -> "Patient".equals(resource.getType()))
 			.findFirst().get();
-		assertThat(toStrings(patientResource.getSearchRevInclude()), containsInAnyOrder("Observation:subject"));
+		assertThat(toStrings(patientResource.getSearchRevInclude())).containsExactlyInAnyOrder("Observation:subject");
 	}
 
 	@Test
@@ -1317,8 +1301,8 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 			.map(CapabilityStatementRestResourceOperationComponent::getName)
 			.filter("export-poll-status"::equals).findFirst().isPresent();
 
-		assertThat(toOperationNames(groupResource.getOperation()),contains("export"));
-		assertThat(hasExportPollStatusOperationAtSystemLevel, is(true));
+		assertThat(toOperationNames(groupResource.getOperation())).containsExactly("export");
+		assertEquals(true, hasExportPollStatusOperationAtSystemLevel);
 	}
 
 	@Test
@@ -1330,9 +1314,9 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 		rs.init(createServletConfig());
 
 		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
-		assertEquals(2, conformance.getRest().get(0).getResource().size());
+		assertThat(conformance.getRest().get(0).getResource()).hasSize(2);
 		List<CapabilityStatementRestResourceOperationComponent> res = conformance.getRest().get(0).getResource().get(1).getOperation();
-		assertEquals(1, res.size());
+		assertThat(res).hasSize(1);
 		CapabilityStatementRestResourceOperationComponent operationComponent = res.get(0);
 		assertEquals("everything", operationComponent.getName());
 		assertEquals("http://hl7.org/fhir/OperationDefinition/Patient-everything", operationComponent.getDefinition());
@@ -1371,13 +1355,13 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 		String outcome = myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationOutcome);
 		ourLog.info("Outcome: {}", outcome);
 
-		assertTrue(result.isSuccessful(), outcome);
+		assertThat(result.isSuccessful()).as(outcome).isTrue();
 		List<OperationOutcome.OperationOutcomeIssueComponent> warningsAndErrors = operationOutcome
 			.getIssue()
 			.stream()
 			.filter(t -> t.getSeverity().ordinal() <= OperationOutcome.IssueSeverity.WARNING.ordinal()) // <= because this enum has a strange order
 			.collect(Collectors.toList());
-		assertThat(outcome, warningsAndErrors, is(empty()));
+		assertThat(warningsAndErrors).as(outcome).isEmpty();
 
 		return myCtx.newXmlParser().setPrettyPrint(false).encodeResourceToString(theResource);
 	}

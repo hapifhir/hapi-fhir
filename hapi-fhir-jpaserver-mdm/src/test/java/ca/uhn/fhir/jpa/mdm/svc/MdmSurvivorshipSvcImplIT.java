@@ -17,6 +17,8 @@ import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -35,12 +37,12 @@ class MdmSurvivorshipSvcImplIT extends BaseMdmR4Test {
 		myMdmSurvivorshipService.applySurvivorshipRulesToGoldenResource(p1, p2, new MdmTransactionContext(MdmTransactionContext.OperationType.CREATE_RESOURCE));
 
 		assertFalse(p2.hasIdElement());
-		assertTrue(p2.getIdentifier().isEmpty());
+		assertThat(p2.getIdentifier()).isEmpty();
 		assertTrue(p2.getMeta().isEmpty());
 
 		assertTrue(p1.getNameFirstRep().equalsDeep(p2.getNameFirstRep()));
 		assertNull(p2.getBirthDate());
-		assertEquals(p1.getTelecom().size(), p2.getTelecom().size());
+		assertThat(p2.getTelecom()).hasSize(p1.getTelecom().size());
 		assertTrue(p2.getTelecomFirstRep().equalsDeep(p1.getTelecomFirstRep()));
 	}
 
@@ -54,15 +56,15 @@ class MdmSurvivorshipSvcImplIT extends BaseMdmR4Test {
 		myMdmSurvivorshipService.applySurvivorshipRulesToGoldenResource(p1, p2, new MdmTransactionContext(MdmTransactionContext.OperationType.MERGE_GOLDEN_RESOURCES));
 
 		assertFalse(p2.hasIdElement());
-		assertFalse(p2.getIdentifier().isEmpty());
+		assertThat(p2.getIdentifier()).isNotEmpty();
 		assertTrue(p2.getMeta().isEmpty());
 
-		assertEquals(2, p2.getName().size());
+		assertThat(p2.getName()).hasSize(2);
 		assertEquals(p2Name, p2.getName().get(0).getNameAsSingleString());
 		assertEquals(p1Name, p2.getName().get(1).getNameAsSingleString());
 		assertNull(p2.getBirthDate());
 
-		assertEquals(p1.getTelecom().size(), p1.getTelecom().size());
+		assertThat(p1.getTelecom()).hasSize(p1.getTelecom().size());
 		assertTrue(p2.getTelecomFirstRep().equalsDeep(p1.getTelecomFirstRep()));
 	}
 

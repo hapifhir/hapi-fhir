@@ -1,5 +1,8 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.jobs.export.BulkDataExportProvider;
 import ca.uhn.fhir.batch2.model.JobInstance;
@@ -57,15 +60,12 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.hasSize;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isNotNull;
@@ -210,7 +210,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 			Collection<Object[]> forcedIds = myResourceTableDao.findAndResolveByForcedIdWithNoType(
 				"Patient", List.of(patientId), true
 			);
-			assertThat(forcedIds, hasSize(0));
+			assertThat(forcedIds).hasSize(0);
 		});
 	}
 
@@ -343,7 +343,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 	}
 
 	private void assertContainsSingleForcedId(Collection<Object[]> forcedIds, String patientId){
-		assertEquals(1, forcedIds.size());
+		assertThat(forcedIds).hasSize(1);
 		assertEquals(patientId, forcedIds.stream().toList().get(0)[2]);
 	}
 
@@ -378,7 +378,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 			myClient.create().resource(patientA).execute();
 			fail();
 		} catch (ResourceNotFoundException e) {
-			assertThat(e.getMessage(), containsString("Partition name \"TENANT-ZZZ\" is not valid"));
+			assertThat(e.getMessage()).contains("Partition name \"TENANT-ZZZ\" is not valid");
 		}
 
 	}
@@ -468,7 +468,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		Bundle result = myClient.transaction().withBundle(transactioBundle).execute();
 
 		// verify
-		assertEquals(1, result.getEntry().size());
+		assertThat(result.getEntry()).hasSize(1);
 		Patient retrievedPatient = (Patient) result.getEntry().get(0).getResource();
 		assertNotNull(retrievedPatient);
 		assertEquals("Family", retrievedPatient.getName().get(0).getFamily());
@@ -650,7 +650,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		IIdType idA = createResource("Patient", withTenant(JpaConstants.DEFAULT_PARTITION_NAME), withId("test"), withFamily("Smith"), withActiveTrue());
 		createConditionWithAllowedUnqualified(idA);
 		Bundle response = myClient.search().byUrl(myClient.getServerBase() + "/" + TENANT_A + "/Condition?subject=Patient/" + idA.getIdPart() + "&_include=Condition:subject").returnBundle(Bundle.class).execute();
-		assertThat(response.getEntry(), hasSize(2));
+		assertThat(response.getEntry()).hasSize(2);
 	}
 
 	@Test
@@ -658,7 +658,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		IIdType idA = createResource("Patient", withTenant(JpaConstants.DEFAULT_PARTITION_NAME), withFamily("Smith"), withActiveTrue());
 		createConditionWithAllowedUnqualified(idA);
 		Bundle response = myClient.search().byUrl(myClient.getServerBase() + "/" + TENANT_A + "/Condition?subject=Patient/" + idA.getIdPart() + "&_include=Condition:subject").returnBundle(Bundle.class).execute();
-		assertThat(response.getEntry(), hasSize(2));
+		assertThat(response.getEntry()).hasSize(2);
 	}
 
 	private void createConditionWithAllowedUnqualified(IIdType idA) {
@@ -734,7 +734,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 			try (CloseableHttpResponse response = ourHttpClient.execute(get)) {
 				String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 				BulkExportResponseJson responseJson = JsonUtil.deserialize(responseString, BulkExportResponseJson.class);
-				assertThat(responseJson.getOutput().get(0).getUrl(), containsString(createInPartition + "/Binary/"));
+				assertThat(responseJson.getOutput().get(0).getUrl()).contains(createInPartition + "/Binary/");
 			}
 		}
 

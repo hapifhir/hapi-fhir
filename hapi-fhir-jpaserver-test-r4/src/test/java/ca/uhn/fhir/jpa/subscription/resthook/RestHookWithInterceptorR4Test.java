@@ -1,5 +1,8 @@
 package ca.uhn.fhir.jpa.subscription.resthook;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
@@ -22,9 +25,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,15 +42,9 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.matchesPattern;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.mock;
 
 /**
  * Test the rest-hook subscriptions
@@ -144,7 +139,7 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 		assertEquals(Constants.CT_FHIR_JSON_NEW, ourRestfulServer.getRequestContentTypes().get(0));
 		assertTrue(ourHitBeforeRestHookDelivery);
 		assertTrue(ourHitAfterRestHookDelivery);
-		assertThat(ourRestfulServer.getRequestHeaders().get(0), hasItem("X-Foo: Bar"));
+		assertThat(ourRestfulServer.getRequestHeaders().get(0)).contains("X-Foo: Bar");
 	}
 
 	@Test
@@ -163,12 +158,12 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 
 			interceptor.getFinishedLatch().await(10, TimeUnit.SECONDS);
 			ResourceDeliveryMessage lastDelivery = interceptor.getLastDelivery();
-			assertTrue(lastDelivery.getAttribute("ATTR1").isPresent());
-			assertTrue(lastDelivery.getAttribute("ATTR2").isPresent());
-			assertTrue(lastDelivery.getAttribute("ATTRBLANK").isPresent());
-			assertEquals("Some value 1", lastDelivery.getAttribute("ATTR1").get());
-			assertEquals("Some value 2", lastDelivery.getAttribute("ATTR2").get());
-			assertEquals("", lastDelivery.getAttribute("ATTRBLANK").get());
+			assertThat(lastDelivery.getAttribute("ATTR1")).isPresent();
+			assertThat(lastDelivery.getAttribute("ATTR2")).isPresent();
+			assertThat(lastDelivery.getAttribute("ATTRBLANK")).isPresent();
+			assertThat(lastDelivery.getAttribute("ATTR1")).contains("Some value 1");
+			assertThat(lastDelivery.getAttribute("ATTR2")).contains("Some value 2");
+			assertThat(lastDelivery.getAttribute("ATTRBLANK")).contains("");
 			assertEquals(false, lastDelivery.getAttribute("ATTRNONEXISTENT").isPresent());
 
 		} finally {
@@ -281,7 +276,7 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 
 			ourLog.info("Messages:\n  " + messages.stream().collect(Collectors.joining("\n  ")));
 
-			assertThat(messages.get(messages.size() - 1), matchesPattern("Finished delivery of resource Observation.*"));
+			assertThat(messages.get(messages.size() - 1)).matches("Finished delivery of resource Observation.*");
 
 		} finally {
 			myInterceptorRegistry.unregisterInterceptor(interceptor);

@@ -13,7 +13,8 @@ import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.subscription.SubscriptionConstants;
-import ca.uhn.test.util.LogbackCaptureTestExtension;
+import ca.uhn.test.util.LogEventIterableAssert;
+import ca.uhn.test.util.LogbackTestExtension;
 import ch.qos.logback.classic.Level;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Subscription;
@@ -28,8 +29,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasItem;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -43,7 +42,7 @@ public class SubscriptionLoaderTest {
 	private FhirContext myFhirContext = FhirContext.forR4Cached();
 
 	@RegisterExtension
-	LogbackCaptureTestExtension myLogCapture = new LogbackCaptureTestExtension(SubscriptionLoader.class);
+	LogbackTestExtension myLogCapture = new LogbackTestExtension(SubscriptionLoader.class);
 
 	@Mock
 	private SubscriptionRegistry mySubscriptionRegistry;
@@ -129,7 +128,7 @@ public class SubscriptionLoaderTest {
 		String expected = "Subscription "
 			+ subscription.getIdElement().getIdPart()
 			+ " could not be activated.";
-		assertThat(myLogCapture.getLogEvents(), hasItem(LogbackCaptureTestExtension.eventWithLevelAndMessageContains(Level.ERROR, expected)));
-		assertThat(myLogCapture.getLogEvents(), hasItem(LogbackCaptureTestExtension.eventWithMessageContains(subscription.getError())));
+		LogEventIterableAssert.assertThat(myLogCapture.getLogEvents()).hasEventWithLevelAndMessageContains(Level.ERROR, expected);
+		LogEventIterableAssert.assertThat(myLogCapture.getLogEvents()).hasAtLeastOneEventWithMessage(subscription.getError());
 	}
 }

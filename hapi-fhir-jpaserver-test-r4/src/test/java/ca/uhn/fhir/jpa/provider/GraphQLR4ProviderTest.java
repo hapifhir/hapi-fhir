@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.graphql.GraphQLProvider;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
@@ -38,9 +39,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.startsWith;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class GraphQLR4ProviderTest {
 
@@ -68,15 +67,15 @@ public class GraphQLR4ProviderTest {
 			ourLog.info(responseContent);
 			assertEquals(200, status.getStatusLine().getStatusCode());
 
-			assertEquals(TestUtil.stripWhitespace(GraphQLProviderTestUtil.DATA_PREFIX + "{\n" +
+			assertThat(TestUtil.stripWhitespace(responseContent)).isEqualTo(TestUtil.stripWhitespace(GraphQLProviderTestUtil.DATA_PREFIX + "{\n" +
 				"  \"name\":[{\n" +
 				"    \"family\":\"FAMILY\",\n" +
 				"    \"given\":[\"GIVEN1\",\"GIVEN2\"]\n" +
 				"  },{\n" +
 				"    \"given\":[\"GivenOnly1\",\"GivenOnly2\"]\n" +
 				"  }]\n" +
-				"}" + GraphQLProviderTestUtil.DATA_SUFFIX), TestUtil.stripWhitespace(responseContent));
-			assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue(), startsWith("application/json"));
+				"}" + GraphQLProviderTestUtil.DATA_SUFFIX));
+			assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue()).startsWith("application/json");
 		}
 
 	}
@@ -90,13 +89,13 @@ public class GraphQLR4ProviderTest {
 			ourLog.info(responseContent);
 			assertEquals(200, status.getStatusLine().getStatusCode());
 
-			assertEquals(TestUtil.stripWhitespace(GraphQLProviderTestUtil.DATA_PREFIX + "{\n" +
+			assertThat(TestUtil.stripWhitespace(responseContent)).isEqualTo(TestUtil.stripWhitespace(GraphQLProviderTestUtil.DATA_PREFIX + "{\n" +
 				"  \"name\":[{\n" +
 				"    \"given\":[\"GIVEN1\",\"GIVEN2\"],\n" +
 				"    \"family\":\"FAMILY\"\n" +
 				"  }]\n" +
-				"}" + GraphQLProviderTestUtil.DATA_SUFFIX), TestUtil.stripWhitespace(responseContent));
-			assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue(), startsWith("application/json"));
+				"}" + GraphQLProviderTestUtil.DATA_SUFFIX));
+			assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue()).startsWith("application/json");
 		}
 
 	}
@@ -110,7 +109,7 @@ public class GraphQLR4ProviderTest {
 			ourLog.info(responseContent);
 			assertEquals(200, status.getStatusLine().getStatusCode());
 
-			assertEquals(TestUtil.stripWhitespace(GraphQLProviderTestUtil.DATA_PREFIX + "{\n" +
+			assertThat(TestUtil.stripWhitespace(responseContent)).isEqualTo(TestUtil.stripWhitespace(GraphQLProviderTestUtil.DATA_PREFIX + "{\n" +
 				"  \"Patient\":{\n" +
 				"    \"name\":[{\n" +
 				"      \"given\":[\"GIVEN1\",\"GIVEN2\"],\n" +
@@ -119,8 +118,8 @@ public class GraphQLR4ProviderTest {
 				"      \"given\":[\"GivenOnly1\",\"GivenOnly2\"]\n" +
 				"    }]\n" +
 				"  }\n" +
-				"}" + GraphQLProviderTestUtil.DATA_SUFFIX), TestUtil.stripWhitespace(responseContent));
-			assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue(), startsWith("application/json"));
+				"}" + GraphQLProviderTestUtil.DATA_SUFFIX));
+			assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue()).startsWith("application/json");
 		}
 
 	}
@@ -135,7 +134,7 @@ public class GraphQLR4ProviderTest {
 			ourLog.info(responseContent);
 			assertEquals(200, status.getStatusLine().getStatusCode());
 
-			assertEquals(TestUtil.stripWhitespace(GraphQLProviderTestUtil.DATA_PREFIX + "{\n" +
+			assertThat(TestUtil.stripWhitespace(responseContent)).isEqualTo(TestUtil.stripWhitespace(GraphQLProviderTestUtil.DATA_PREFIX + "{\n" +
 				"  \"PatientList\":[{\n" +
 				"    \"name\":[{\n" +
 				"      \"family\":\"pet\",\n" +
@@ -148,8 +147,8 @@ public class GraphQLR4ProviderTest {
 				"      \"given\":[\"pet\",\"GivenOnlyB1\",\"GivenOnlyB2\"]\n" +
 				"    }]\n" +
 				"  }]\n" +
-				"}" + GraphQLProviderTestUtil.DATA_SUFFIX), TestUtil.stripWhitespace(responseContent));
-			assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue(), startsWith("application/json"));
+				"}" + GraphQLProviderTestUtil.DATA_SUFFIX));
+			assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue()).startsWith("application/json");
 
 		}
 
@@ -164,7 +163,7 @@ public class GraphQLR4ProviderTest {
 			ourLog.info(responseContent);
 			assertEquals(200, status.getStatusLine().getStatusCode());
 
-			assertEquals(TestUtil.stripWhitespace(GraphQLProviderTestUtil.DATA_PREFIX + "{\n" +
+			assertThat(TestUtil.stripWhitespace(responseContent)).isEqualTo(TestUtil.stripWhitespace(GraphQLProviderTestUtil.DATA_PREFIX + "{\n" +
 				"  \"PatientList\":[{\n" +
 				"    \"id\":\"Patient/hapi-123/_history/2\",\n" +
 				"    \"name\":[{\n" +
@@ -176,8 +175,8 @@ public class GraphQLR4ProviderTest {
 				"      \"family\":\"FAMILY 124\"\n" +
 				"    }]\n" +
 				"  }]\n" +
-				"}" + GraphQLProviderTestUtil.DATA_SUFFIX), TestUtil.stripWhitespace(responseContent));
-			assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue(), startsWith("application/json"));
+				"}" + GraphQLProviderTestUtil.DATA_SUFFIX));
+			assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue()).startsWith("application/json");
 		}
 
 	}

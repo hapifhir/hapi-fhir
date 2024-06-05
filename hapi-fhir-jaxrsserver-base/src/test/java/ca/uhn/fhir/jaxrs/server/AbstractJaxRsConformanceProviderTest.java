@@ -4,19 +4,19 @@ import ca.uhn.fhir.jaxrs.server.test.TestJaxRsDummyPatientProvider;
 import ca.uhn.fhir.jaxrs.server.test.TestJaxRsMockPatientRestProvider;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import jakarta.ws.rs.core.MultivaluedHashMap;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriInfo;
 import org.jboss.resteasy.specimpl.ResteasyHttpHeaders;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import jakarta.ws.rs.core.MultivaluedHashMap;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.UriInfo;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -65,8 +65,8 @@ public class AbstractJaxRsConformanceProviderTest {
 		providers.put(TestJaxRsMockPatientRestProvider.class, new TestJaxRsMockPatientRestProvider());
 		Response response = createConformanceProvider(providers).conformance();
 		assertEquals(Constants.STATUS_HTTP_200_OK, response.getStatus());
-		assertTrue(response.getEntity().toString().contains("\"type\": \"Patient\""));
-		assertTrue(response.getEntity().toString().contains("\"someCustomOperation"));
+		assertThat(response.getEntity().toString()).contains("\"type\": \"Patient\"");
+		assertThat(response.getEntity().toString()).contains("\"someCustomOperation");
 		System.out.println(response);
 		System.out.println(response.getEntity());
 	}
@@ -79,8 +79,8 @@ public class AbstractJaxRsConformanceProviderTest {
 		Response response = createConformanceProvider(providers).conformance();
 		assertEquals(Constants.STATUS_HTTP_200_OK, response.getStatus());
 		System.out.println(response.getEntity());
-		assertTrue(response.getEntity().toString().contains(" <type value=\"Patient\"/>"));
-		assertTrue(response.getEntity().toString().contains("\"someCustomOperation"));
+		assertThat(response.getEntity().toString()).contains(" <type value=\"Patient\"/>");
+		assertThat(response.getEntity().toString()).contains("\"someCustomOperation");
 		System.out.println(response.getEntity());
 	}
 	

@@ -10,6 +10,7 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -63,7 +64,7 @@ public class QuestionnaireOperationsProviderTest extends BaseCrR4TestServer {
 			requestDetails);
 
 		assertNotNull(result);
-		assertEquals(11, result.getEntry().size());
-		assertTrue(result.getEntry().get(0).getResource().fhirType().equals(Enumerations.FHIRAllTypes.QUESTIONNAIRE.toCode()));
+		assertThat(result.getEntry()).hasSize(11);
+		assertEquals(Enumerations.FHIRAllTypes.QUESTIONNAIRE.toCode(), result.getEntry().get(0).getResource().fhirType());
 	}
 }

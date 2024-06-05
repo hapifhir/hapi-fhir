@@ -25,9 +25,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
+
 
 class MdmClearStepTest extends BaseMdmR4Test {
 	private static final String GOLDEN_ID = "Patient/GOLDEN-ID";
@@ -87,12 +89,10 @@ class MdmClearStepTest extends BaseMdmR4Test {
 			mdmClearGoldenResource();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals(
-				String.format("HAPI-0822: DELETE with _expunge=true failed.  Unable to delete %s because %s refers to it via the path Patient.link.other",
-					myGoldenId,
-					husbandId
-				),
-				e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(String.format("HAPI-0822: DELETE with _expunge=true failed.  Unable to delete %s because %s refers to it via the path Patient.link.other",
+				myGoldenId,
+				husbandId
+			));
 		}
 	}
 

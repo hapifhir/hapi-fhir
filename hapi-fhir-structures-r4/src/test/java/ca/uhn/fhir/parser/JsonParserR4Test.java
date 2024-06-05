@@ -67,20 +67,12 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.hamcrest.core.IsNot.not;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+
 
 public class JsonParserR4Test extends BaseTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(JsonParserR4Test.class);
@@ -113,7 +105,7 @@ public class JsonParserR4Test extends BaseTest {
 			"}\n";
 		IBaseResource iBaseResource = ourCtx.newJsonParser().parseResource(binaryPayload);
 		String resourceType = iBaseResource.getIdElement().getResourceType();
-		assertThat(resourceType, is(equalTo("Binary")));
+		assertEquals("Binary", resourceType);
 
 		//Test a domain resource.
 		String observationPayload = "{\n" +
@@ -122,7 +114,7 @@ public class JsonParserR4Test extends BaseTest {
 			"}\n";
 		IBaseResource obs = ourCtx.newJsonParser().parseResource(observationPayload);
 		resourceType = obs.getIdElement().getResourceType();
-		assertThat(resourceType, is(equalTo("Observation")));
+		assertEquals("Observation", resourceType);
 	}
 
 	@Test
@@ -140,8 +132,7 @@ public class JsonParserR4Test extends BaseTest {
 
 		try {
 			ourCtx.newJsonParser().encodeResourceToString(p);
-			fail();
-		} catch (ConfigurationException e) {
+			fail();		} catch (ConfigurationException e) {
 			assertEquals(Msg.code(1844) + "Unable to encode extension, unrecognized child element type: ca.uhn.fhir.parser.JsonParserR4Test.MyUnknownPrimitiveType", e.getMessage());
 		}
 	}
@@ -163,7 +154,7 @@ public class JsonParserR4Test extends BaseTest {
 
 		String encoded = ourCtx.newJsonParser().encodeResourceToString(parsed);
 		ourLog.info(encoded);
-		assertThat(encoded, containsString("\"div\":\"" + expected.replace("\"", "\\\"") + "\""));
+		assertThat(encoded).contains("\"div\":\"" + expected.replace("\"", "\\\"") + "\"");
 	}
 
 	@Test
@@ -204,7 +195,7 @@ public class JsonParserR4Test extends BaseTest {
 
 		String asString = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle);
 		ourLog.info(asString);
-		assertThat(asString, not(containsString("{ }")));
+		assertThat(asString).doesNotContain("{ }");
 	}
 
 
@@ -232,7 +223,7 @@ public class JsonParserR4Test extends BaseTest {
 		String output = ctx.newJsonParser().setPrettyPrint(true).encodeResourceToString(qr);
 		ourLog.info(output);
 
-		assertThat(output, containsString("\"Questionnaire/123/_history/456\""));
+		assertThat(output).contains("\"Questionnaire/123/_history/456\"");
 	}
 
 	@Test
@@ -245,7 +236,7 @@ public class JsonParserR4Test extends BaseTest {
 		String output = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(qr);
 		ourLog.info(output);
 
-		assertThat(output, containsString("\n  \"resourceType\""));
+		assertThat(output).contains("\n  \"resourceType\"");
 	}
 
 	/**
@@ -266,7 +257,7 @@ public class JsonParserR4Test extends BaseTest {
 		ourLog.info(encoded);
 
 		int idx = encoded.indexOf("\"Medication\"");
-		assertNotEquals(-1, idx);
+		assertThat(idx).isNotEqualTo(-1);
 
 		idx = encoded.indexOf("\"Medication\"", idx + 1);
 		assertEquals(-1, idx);
@@ -331,7 +322,7 @@ public class JsonParserR4Test extends BaseTest {
 		ourLog.info(encoded);
 
 		int idx = encoded.indexOf("\"Medication\"");
-		assertNotEquals(-1, idx);
+		assertThat(idx).isNotEqualTo(-1);
 
 		idx = encoded.indexOf("\"Medication\"", idx + 1);
 		assertEquals(-1, idx);
@@ -364,7 +355,7 @@ public class JsonParserR4Test extends BaseTest {
 		ourLog.info(encoded);
 
 		int idx = encoded.indexOf("\"Medication\"");
-		assertNotEquals(-1, idx);
+		assertThat(idx).isNotEqualTo(-1);
 
 		idx = encoded.indexOf("\"Medication\"", idx + 1);
 		assertEquals(-1, idx);
@@ -442,10 +433,10 @@ public class JsonParserR4Test extends BaseTest {
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input);
 
 		ourLog.info("Encoded: {}", encoded);
-		assertThat(encoded, stringContainsInOrder(
+		assertThat(encoded).containsSubsequence(
 			"\"fullUrl\": \"urn:uuid:0.0.0.0\"",
 			"\"id\": \"1.1.1.1\""
-		));
+		);
 
 		input = ourCtx.newJsonParser().parseResource(Bundle.class, encoded);
 		assertEquals("urn:uuid:0.0.0.0", input.getEntry().get(0).getFullUrl());
@@ -477,10 +468,10 @@ public class JsonParserR4Test extends BaseTest {
 		Patient p = new Patient();
 		p.setId("1");
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p);
-		assertEquals("{\n" +
+		assertThat(encoded).isEqualTo("{\n" +
 			"  \"resourceType\": \"Patient\",\n" +
 			"  \"id\": \"1\"\n" +
-			"}", encoded);
+			"}");
 	}
 
 	@Test
@@ -494,14 +485,13 @@ public class JsonParserR4Test extends BaseTest {
 		IParser parser = ourCtx.newJsonParser();
 		String output = parser.encodeResourceToString(p);
 		ourLog.info("Output: {}", output);
-		assertThat(output, containsString("ROOT_VALUE"));
+		assertThat(output).contains("ROOT_VALUE");
 
 		// Strict error handler
 		try {
 			parser.setParserErrorHandler(new StrictErrorHandler());
 			parser.encodeResourceToString(p);
-			fail();
-		} catch (DataFormatException e) {
+			fail();		} catch (DataFormatException e) {
 			assertEquals(Msg.code(1822) + "Resource is missing required element 'url' in parent element 'Patient(res).extension'", e.getMessage());
 		}
 
@@ -523,8 +513,7 @@ public class JsonParserR4Test extends BaseTest {
 		IParser parser = ourCtx.newJsonParser();
 		try {
 			parser.encodeResourceToString(p);
-			fail();
-		} catch (DataFormatException e) {
+			fail();		} catch (DataFormatException e) {
 			assertEquals(Msg.code(1827) + "[element=\"Patient(res).extension\"] Extension contains both a value and nested extensions", e.getMessage());
 		}
 
@@ -532,8 +521,7 @@ public class JsonParserR4Test extends BaseTest {
 		try {
 			parser.setParserErrorHandler(new StrictErrorHandler());
 			parser.encodeResourceToString(p);
-			fail();
-		} catch (DataFormatException e) {
+			fail();		} catch (DataFormatException e) {
 			assertEquals(Msg.code(1827) + "[element=\"Patient(res).extension\"] Extension contains both a value and nested extensions", e.getMessage());
 		}
 
@@ -555,10 +543,10 @@ public class JsonParserR4Test extends BaseTest {
 		IParser parser = ourCtx.newJsonParser().setParserErrorHandler(errorHandler);
 		String output = parser.encodeResourceToString(p);
 		ourLog.info("Output: {}", output);
-		assertThat(output, containsString("http://root"));
-		assertThat(output, containsString("ROOT_VALUE"));
-		assertThat(output, containsString("http://child"));
-		assertThat(output, containsString("CHILD_VALUE"));
+		assertThat(output).contains("http://root");
+		assertThat(output).contains("ROOT_VALUE");
+		assertThat(output).contains("http://child");
+		assertThat(output).contains("CHILD_VALUE");
 		assertEquals(false, errorHandler.isErrorOnInvalidExtension());
 		assertEquals(false, errorHandler.isErrorOnInvalidValue());
 	}
@@ -654,11 +642,11 @@ public class JsonParserR4Test extends BaseTest {
 		String encoded = parser.encodeResourceToString(b);
 		ourLog.info(encoded);
 
-		assertThat(encoded, containsString("BUNDLEID"));
-		assertThat(encoded, containsString("http://FOO"));
-		assertThat(encoded, containsString("PATIENTID"));
-		assertThat(encoded, containsString("http://BAR"));
-		assertThat(encoded, containsString("GIVEN"));
+		assertThat(encoded).contains("BUNDLEID");
+		assertThat(encoded).contains("http://FOO");
+		assertThat(encoded).contains("PATIENTID");
+		assertThat(encoded).contains("http://BAR");
+		assertThat(encoded).contains("GIVEN");
 
 		b = parser.parseResource(Bundle.class, encoded);
 
@@ -681,15 +669,15 @@ public class JsonParserR4Test extends BaseTest {
 		String encoded = parser.encodeResourceToString(b);
 		ourLog.info(encoded);
 
-		assertThat(encoded, not(containsString("BUNDLEID")));
-		assertThat(encoded, not(containsString("http://FOO")));
-		assertThat(encoded, (containsString("PATIENTID")));
-		assertThat(encoded, (containsString("http://BAR")));
-		assertThat(encoded, containsString("GIVEN"));
+		assertThat(encoded).doesNotContain("BUNDLEID");
+		assertThat(encoded).doesNotContain("http://FOO");
+		assertThat(encoded).contains("PATIENTID");
+		assertThat(encoded).contains("http://BAR");
+		assertThat(encoded).contains("GIVEN");
 
 		b = parser.parseResource(Bundle.class, encoded);
 
-		assertNotEquals("BUNDLEID", b.getIdElement().getIdPart());
+		assertThat(b.getIdElement().getIdPart()).isNotEqualTo("BUNDLEID");
 		assertEquals("Patient/PATIENTID", b.getEntry().get(0).getResource().getId());
 		assertEquals("GIVEN", ((Patient) b.getEntry().get(0).getResource()).getNameFirstRep().getGivenAsSingleString());
 	}
@@ -707,16 +695,16 @@ public class JsonParserR4Test extends BaseTest {
 		String encoded = parser.encodeResourceToString(b);
 		ourLog.info(encoded);
 
-		assertThat(encoded, not(containsString("BUNDLEID")));
-		assertThat(encoded, not(containsString("http://FOO")));
-		assertThat(encoded, not(containsString("PATIENTID")));
-		assertThat(encoded, not(containsString("http://BAR")));
-		assertThat(encoded, containsString("GIVEN"));
+		assertThat(encoded).doesNotContain("BUNDLEID");
+		assertThat(encoded).doesNotContain("http://FOO");
+		assertThat(encoded).doesNotContain("PATIENTID");
+		assertThat(encoded).doesNotContain("http://BAR");
+		assertThat(encoded).contains("GIVEN");
 
 		b = parser.parseResource(Bundle.class, encoded);
 
-		assertNotEquals("BUNDLEID", b.getIdElement().getIdPart());
-		assertNotEquals("Patient/PATIENTID", b.getEntry().get(0).getResource().getId());
+		assertThat(b.getIdElement().getIdPart()).isNotEqualTo("BUNDLEID");
+		assertThat(b.getEntry().get(0).getResource().getId()).isNotEqualTo("Patient/PATIENTID");
 		assertEquals("GIVEN", ((Patient) b.getEntry().get(0).getResource()).getNameFirstRep().getGivenAsSingleString());
 	}
 
@@ -731,7 +719,7 @@ public class JsonParserR4Test extends BaseTest {
 		p.addName().setFamily(longString);
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p);
 
-		assertThat(encoded, containsString(longString));
+		assertThat(encoded).contains(longString);
 	}
 
 	@Test
@@ -772,8 +760,8 @@ public class JsonParserR4Test extends BaseTest {
 		Patient parsed = jsonParser.parseResource(Patient.class, input);
 
 		ourLog.info(jsonParser.setPrettyPrint(true).encodeResourceToString(parsed));
-		assertThat(xmlParser.encodeResourceToString(parsed), containsString("Underweight"));
-		assertThat(jsonParser.encodeResourceToString(parsed), containsString("Underweight"));
+		assertThat(xmlParser.encodeResourceToString(parsed)).contains("Underweight");
+		assertThat(jsonParser.encodeResourceToString(parsed)).contains("Underweight");
 
 	}
 
@@ -796,8 +784,7 @@ public class JsonParserR4Test extends BaseTest {
 		jsonParser.setParserErrorHandler(new StrictErrorHandler());
 		try {
 			jsonParser.parseResource(Patient.class, input);
-			fail();
-		} catch (DataFormatException e) {
+			fail();		} catch (DataFormatException e) {
 			assertEquals(Msg.code(1821) + "[element=\"value\"] Invalid attribute value \"\": Attribute value must not be empty (\"\")", e.getMessage());
 		}
 
@@ -901,7 +888,7 @@ public class JsonParserR4Test extends BaseTest {
 		ourLog.info(encoded);
 
 		int idx = encoded.indexOf(sectionText);
-		assertNotEquals(-1, idx);
+		assertThat(idx).isNotEqualTo(-1);
 	}
 
 
@@ -1219,7 +1206,7 @@ public class JsonParserR4Test extends BaseTest {
 			"        }\n" +
 			"    ]\n" +
 			"}\n";
-		Practitioner practitioner = assertDoesNotThrow(() -> ourCtx.newJsonParser().parseResource(Practitioner.class, resource));
+		Practitioner practitioner = ourCtx.newJsonParser().parseResource(Practitioner.class, resource);
 		HumanName humanName = practitioner.getNameFirstRep();
 		StringType given = humanName.getGiven().get(0);
 		assertTrue(given.getExtension().stream().allMatch(ext -> DataAbsentReason.MASKED.toCode().equals(ext.getValue().primitiveValue())));
@@ -1255,15 +1242,15 @@ public class JsonParserR4Test extends BaseTest {
 		String output = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle);
 		ourLog.info(output);
 
-		assertThat(output, not(containsString("\"contained\"")));
-		assertThat(output, not(containsString("\"id\"")));
-		assertThat(output, stringContainsInOrder(
+		assertThat(output).doesNotContain("\"contained\"");
+		assertThat(output).doesNotContain("\"id\"");
+		assertThat(output).containsSubsequence(
 			 "\"fullUrl\": \"urn:uuid:9e9187c1-db6d-4b6f-adc6-976153c65ed7\",",
 			 "\"resourceType\": \"Patient\"",
 			 "\"fullUrl\": \"urn:uuid:71d7ab79-a001-41dc-9a8e-b3e478ce1cbb\"",
 			 "\"resourceType\": \"Observation\"",
 			 "\"reference\": \"urn:uuid:9e9187c1-db6d-4b6f-adc6-976153c65ed7\""
-		));
+		);
 
 	}
 
@@ -1274,9 +1261,9 @@ public class JsonParserR4Test extends BaseTest {
 		String output = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(parameters);
 		ourLog.info(output);
 
-		assertThat(output, not(containsString("\"contained\"")));
-		assertThat(output, not(containsString("\"id\"")));
-		assertThat(output, stringContainsInOrder(
+		assertThat(output).doesNotContain("\"contained\"");
+		assertThat(output).doesNotContain("\"id\"");
+		assertThat(output).containsSubsequence(
 			 "\"resourceType\": \"Parameters\"",
 			 "\"name\": \"resource\"",
 			 "\"fullUrl\": \"urn:uuid:9e9187c1-db6d-4b6f-adc6-976153c65ed7\",",
@@ -1284,7 +1271,7 @@ public class JsonParserR4Test extends BaseTest {
 			 "\"fullUrl\": \"urn:uuid:71d7ab79-a001-41dc-9a8e-b3e478ce1cbb\"",
 			 "\"resourceType\": \"Observation\"",
 			 "\"reference\": \"urn:uuid:9e9187c1-db6d-4b6f-adc6-976153c65ed7\""
-		));
+		);
 
 	}
 
@@ -1350,7 +1337,7 @@ public class JsonParserR4Test extends BaseTest {
 		patient.getName().add(humanName2);
 
 		final String patientString = ourCtx.newJsonParser().encodeResourceToString(patient);
-		assertThat(patientString, is(not(containsString("fhir_comment"))));
+		assertThat(patientString).doesNotContain("fhir_comment");
 	}
 
 	@DatatypeDef(

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r5;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.fql.util.HfqlConstants;
 import ca.uhn.fhir.rest.client.apache.ResourceEntity;
 import org.apache.commons.io.IOUtils;
@@ -13,9 +14,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ResourceProviderR5FqlTest extends BaseResourceProviderR5Test {
 
@@ -46,8 +45,8 @@ public class ResourceProviderR5FqlTest extends BaseResourceProviderR5Test {
 			// Verify
 			assertEquals(200, response.getStatusLine().getStatusCode());
 			String outcome = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(outcome, containsString("0,Simpson0,Homer"));
-			assertThat(outcome, containsString("1,Simpson1,Homer"));
+			assertThat(outcome).contains("0,Simpson0,Homer");
+			assertThat(outcome).contains("1,Simpson1,Homer");
 		}
 
 	}

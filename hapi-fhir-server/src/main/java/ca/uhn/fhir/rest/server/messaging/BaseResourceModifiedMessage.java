@@ -37,6 +37,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.List;
+import java.util.Objects;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -286,5 +287,19 @@ public abstract class BaseResourceModifiedMessage extends BaseResourceMessage im
 			}
 		}
 		return retval;
+	}
+
+	@Override
+	public boolean equals(Object theO) {
+		if (this == theO) return true;
+		if (theO == null || getClass() != theO.getClass()) return false;
+		if (!super.equals(theO)) return false;
+		BaseResourceModifiedMessage that = (BaseResourceModifiedMessage) theO;
+		return Objects.equals(myPayload, that.myPayload) && Objects.equals(getPayloadId(), that.getPayloadId());
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(super.hashCode(), myPayload, getPayloadId());
 	}
 }

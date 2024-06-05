@@ -5,28 +5,19 @@ import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
-import ca.uhn.fhir.rest.server.interceptor.ExceptionInterceptorMethodTest;
 import ca.uhn.fhir.rest.server.method.ResponsePage;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
-import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.collect.Lists;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.ee10.servlet.ServletHandler;
-import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleLinkComponent;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -36,8 +27,8 @@ import org.mockito.stubbing.Answer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -104,7 +95,7 @@ public class SearchBundleProviderWithNoSizeR4Test {
 			assertEquals("searchAll", ourLastMethod);
 			respBundle = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
 
-			assertEquals(10, respBundle.getEntry().size());
+			assertThat(respBundle.getEntry()).hasSize(10);
 			assertEquals("Patient/0", respBundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue());
 			linkNext = respBundle.getLink("next");
 			assertNotNull(linkNext);
@@ -125,7 +116,7 @@ public class SearchBundleProviderWithNoSizeR4Test {
 			assertEquals("searchAll", ourLastMethod);
 			respBundle = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
 
-			assertEquals(10, respBundle.getEntry().size());
+			assertThat(respBundle.getEntry()).hasSize(10);
 			assertEquals("Patient/10", respBundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue());
 			linkNext = respBundle.getLink("next");
 			assertNotNull(linkNext);
@@ -143,7 +134,7 @@ public class SearchBundleProviderWithNoSizeR4Test {
 			assertEquals("searchAll", ourLastMethod);
 			respBundle = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
 
-			assertEquals(5, respBundle.getEntry().size());
+			assertThat(respBundle.getEntry()).hasSize(5);
 			assertEquals("Patient/20", respBundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue());
 			linkNext = respBundle.getLink("next");
 			assertNull(linkNext);

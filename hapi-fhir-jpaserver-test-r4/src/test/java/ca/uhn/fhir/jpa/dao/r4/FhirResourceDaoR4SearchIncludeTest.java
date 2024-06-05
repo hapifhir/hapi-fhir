@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.search.PersistedJpaSearchFirstPageBundleProvider;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -36,11 +37,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
+
 
 @SuppressWarnings({"unchecked", "Duplicates"})
 public class FhirResourceDaoR4SearchIncludeTest extends BaseJpaR4Test {
@@ -61,7 +61,7 @@ public class FhirResourceDaoR4SearchIncludeTest extends BaseJpaR4Test {
 			.addRevInclude(new Include("*").setRecurse(true));
 		IBundleProvider results = myEpisodeOfCareDao.search(map);
 		List<String> ids = toUnqualifiedVersionlessIdValues(results);
-		assertThat(ids.toString(), ids, containsInAnyOrder("EpisodeOfCare/EOC-0", "Organization/ORG-0"));
+		assertThat(ids).as(ids.toString()).containsExactlyInAnyOrder("EpisodeOfCare/EOC-0", "Organization/ORG-0");
 	}
 
 	@Test
@@ -74,10 +74,16 @@ public class FhirResourceDaoR4SearchIncludeTest extends BaseJpaR4Test {
 			.addRevInclude(new Include("*").setRecurse(true));
 		IBundleProvider results = myOrganizationDao.search(map);
 		List<String> ids = toUnqualifiedVersionlessIdValues(results);
-		Collection<Matcher<String>> expected = IntStream.range(0, 10).mapToObj(t -> equalTo("EpisodeOfCare/EOC-" + t)).collect(Collectors.toList());
-		expected.add(equalTo("Organization/ORG-0"));
-		expected.add(equalTo("Organization/ORG-P"));
-		assertThat(ids.toString(), ids, new IsIterableContainingInAnyOrder(expected));
+
+		List<String> expected = IntStream.range(0, 10)
+			.mapToObj(t -> "EpisodeOfCare/EOC-" + t)
+			.collect(Collectors.toList());
+		expected.add("Organization/ORG-0");
+		expected.add("Organization/ORG-P");
+
+		assertThat(ids)
+			.as("Check ids list contains all expected elements in any order")
+			.containsExactlyInAnyOrderElementsOf(expected);
 	}
 
 	@Test
@@ -93,14 +99,7 @@ public class FhirResourceDaoR4SearchIncludeTest extends BaseJpaR4Test {
 			.addRevInclude(new Include("*").setRecurse(true));
 		IBundleProvider results = myOrganizationDao.search(map);
 		List<String> ids = toUnqualifiedVersionlessIdValues(results);
-		assertThat(ids.toString(), ids, containsInAnyOrder(
-			"EpisodeOfCare/EOC-0",
-			"EpisodeOfCare/EOC-1",
-			"EpisodeOfCare/EOC-2",
-			"EpisodeOfCare/EOC-3",
-			"EpisodeOfCare/EOC-4",
-			"Organization/ORG-0"
-		));
+		assertThat(ids).as(ids.toString()).containsExactlyInAnyOrder("EpisodeOfCare/EOC-0", "EpisodeOfCare/EOC-1", "EpisodeOfCare/EOC-2", "EpisodeOfCare/EOC-3", "EpisodeOfCare/EOC-4", "Organization/ORG-0");
 	}
 
 	@Test
@@ -123,7 +122,7 @@ public class FhirResourceDaoR4SearchIncludeTest extends BaseJpaR4Test {
 		try {
 			IBundleProvider results = myCarePlanDao.search(map2);
 			List<String> ids = toUnqualifiedVersionlessIdValues(results);
-			assertThat(ids.toString(), ids, containsInAnyOrder("CarePlan/CP-1", "Patient/PAT-1"));
+			assertThat(ids).as(ids.toString()).containsExactlyInAnyOrder("CarePlan/CP-1", "Patient/PAT-1");
 		} catch (Exception e) {
 			fail();
 		}
@@ -170,7 +169,7 @@ public class FhirResourceDaoR4SearchIncludeTest extends BaseJpaR4Test {
 		IBundleProvider outcome = myProcedureDao.search(map, mySrd);
 		assertEquals(PersistedJpaSearchFirstPageBundleProvider.class, outcome.getClass());
 		List<String> ids = toUnqualifiedVersionlessIdValues(outcome);
-		assertThat(ids.toString(), ids, Matchers.containsInAnyOrder("Procedure/PRA8780542726", "Procedure/PRA8780542785", "BodyStructure/B51936689"));
+		assertThat(ids).as(ids.toString()).containsExactlyInAnyOrder("Procedure/PRA8780542726", "Procedure/PRA8780542785", "BodyStructure/B51936689");
 
 		// Synchronous
 		map = new SearchParameterMap().setLoadSynchronous(true);
@@ -180,7 +179,7 @@ public class FhirResourceDaoR4SearchIncludeTest extends BaseJpaR4Test {
 		outcome = myProcedureDao.search(map, mySrd);
 		assertEquals(SimpleBundleProvider.class, outcome.getClass());
 		ids = toUnqualifiedVersionlessIdValues(outcome);
-		assertThat(ids.toString(), ids, Matchers.containsInAnyOrder("Procedure/PRA8780542726", "Procedure/PRA8780542785", "BodyStructure/B51936689"));
+		assertThat(ids).as(ids.toString()).containsExactlyInAnyOrder("Procedure/PRA8780542726", "Procedure/PRA8780542785", "BodyStructure/B51936689");
 	}
 
 
@@ -197,14 +196,7 @@ public class FhirResourceDaoR4SearchIncludeTest extends BaseJpaR4Test {
 			.addRevInclude(new Include("*").setRecurse(true));
 		IBundleProvider results = myOrganizationDao.search(map);
 		List<String> ids = toUnqualifiedVersionlessIdValues(results);
-		assertThat(ids.toString(), ids, containsInAnyOrder(
-			"EpisodeOfCare/EOC-0",
-			"EpisodeOfCare/EOC-1",
-			"EpisodeOfCare/EOC-2",
-			"EpisodeOfCare/EOC-3",
-			"Organization/ORG-0",
-			"Organization/ORG-P"
-		));
+		assertThat(ids).as(ids.toString()).containsExactlyInAnyOrder("EpisodeOfCare/EOC-0", "EpisodeOfCare/EOC-1", "EpisodeOfCare/EOC-2", "EpisodeOfCare/EOC-3", "Organization/ORG-0", "Organization/ORG-P");
 
 	}
 
@@ -221,19 +213,7 @@ public class FhirResourceDaoR4SearchIncludeTest extends BaseJpaR4Test {
 		IBundleProvider results = myOrganizationDao.search(map);
 		List<String> ids = toUnqualifiedVersionlessIdValues(results);
 		myCaptureQueriesListener.logSelectQueries();
-		assertThat(ids.toString(), ids, containsInAnyOrder(
-			"EpisodeOfCare/EOC-0",
-			"EpisodeOfCare/EOC-1",
-			"EpisodeOfCare/EOC-2",
-			"EpisodeOfCare/EOC-3",
-			"EpisodeOfCare/EOC-4",
-			"EpisodeOfCare/EOC-5",
-			"EpisodeOfCare/EOC-6",
-			"EpisodeOfCare/EOC-7",
-			"EpisodeOfCare/EOC-8",
-			"EpisodeOfCare/EOC-9",
-			"Organization/ORG-0"
-		));
+		assertThat(ids).as(ids.toString()).containsExactlyInAnyOrder("EpisodeOfCare/EOC-0", "EpisodeOfCare/EOC-1", "EpisodeOfCare/EOC-2", "EpisodeOfCare/EOC-3", "EpisodeOfCare/EOC-4", "EpisodeOfCare/EOC-5", "EpisodeOfCare/EOC-6", "EpisodeOfCare/EOC-7", "EpisodeOfCare/EOC-8", "EpisodeOfCare/EOC-9", "Organization/ORG-0");
 
 
 
@@ -291,7 +271,7 @@ public class FhirResourceDaoR4SearchIncludeTest extends BaseJpaR4Test {
 				.setParameter("new_updated", Date.from(now.minus(1, ChronoUnit.HOURS)))
 				.setParameter("target_ids", List.of(groupId.getIdPartAsLong(), careTeam.getIdPartAsLong(), org.getIdPartAsLong()))
 				.executeUpdate());
-		assertEquals(3, updatedCount, "backdated the Organization, CareTeam and Group");
+		assertThat(updatedCount).as("backdated the Organization, CareTeam and Group").isEqualTo(3);
 
 
 		// when
@@ -307,7 +287,7 @@ public class FhirResourceDaoR4SearchIncludeTest extends BaseJpaR4Test {
 
 
 		// then
-		assertThat(ids, Matchers.containsInAnyOrder(patId.getValue(), groupId.getValue(), careTeam.getValue(), org.getValue()));
+		assertThat(ids).containsExactlyInAnyOrder(patId.getValue(), groupId.getValue(), careTeam.getValue(), org.getValue());
 	}
 
 }

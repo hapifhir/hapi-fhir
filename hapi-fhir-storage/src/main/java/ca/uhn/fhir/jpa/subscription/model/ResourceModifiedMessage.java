@@ -28,6 +28,8 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
+import java.util.Objects;
+
 /**
  * Most of this class has been moved to ResourceModifiedMessage in the hapi-fhir-server project, for a reusable channel ResourceModifiedMessage
  * that doesn't require knowledge of subscriptions.
@@ -106,5 +108,19 @@ public class ResourceModifiedMessage extends BaseResourceModifiedMessage {
 				.append("payloadId", myPayloadId)
 				.append("partitionId", myPartitionId)
 				.toString();
+	}
+
+	@Override
+	public boolean equals(Object theO) {
+		if (this == theO) return true;
+		if (theO == null || getClass() != theO.getClass()) return false;
+		if (!super.equals(theO)) return false;
+		ResourceModifiedMessage that = (ResourceModifiedMessage) theO;
+		return Objects.equals(getSubscriptionId(), that.getSubscriptionId());
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(super.hashCode(), getSubscriptionId());
 	}
 }

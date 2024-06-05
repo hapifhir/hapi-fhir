@@ -38,8 +38,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class IncludeHl7OrgDstu2Test {
@@ -65,13 +64,13 @@ public class IncludeHl7OrgDstu2Test {
     String responseContent = IOUtils.toString(status.getEntity().getContent());
     IOUtils.closeQuietly(status.getEntity().getContent());
 
-    assertEquals(200, status.getStatusLine().getStatusCode());
+		assertEquals(200, status.getStatusLine().getStatusCode());
     Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
-    assertEquals(1, bundle.getEntry().size());
+		assertThat(bundle.getEntry()).hasSize(1);
 
     Patient p = (Patient) bundle.getEntry().get(0).getResource();
-    assertEquals(0, p.getName().size());
-    assertEquals("Hello", p.getIdElement().getIdPart());
+		assertThat(p.getName()).isEmpty();
+		assertEquals("Hello", p.getIdElement().getIdPart());
   }
 
   @Test
@@ -81,17 +80,17 @@ public class IncludeHl7OrgDstu2Test {
     String responseContent = IOUtils.toString(status.getEntity().getContent());
     IOUtils.closeQuietly(status.getEntity().getContent());
 
-    assertEquals(200, status.getStatusLine().getStatusCode());
+		assertEquals(200, status.getStatusLine().getStatusCode());
 
     ourLog.info(responseContent);
 
     Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
-    assertEquals(1, bundle.getEntry().size());
+		assertThat(bundle.getEntry()).hasSize(1);
 
     Patient p = (Patient) bundle.getEntry().get(0).getResource();
-    assertEquals(1, p.getName().size());
-    assertEquals("Hello", p.getIdElement().getIdPart());
-    assertEquals("foo", p.getName().get(0).getFamily().get(0).getValue());
+		assertThat(p.getName()).hasSize(1);
+		assertEquals("Hello", p.getIdElement().getIdPart());
+		assertEquals("foo", p.getName().get(0).getFamily().get(0).getValue());
   }
 
   @Test
@@ -101,17 +100,17 @@ public class IncludeHl7OrgDstu2Test {
     String responseContent = IOUtils.toString(status.getEntity().getContent());
     IOUtils.closeQuietly(status.getEntity().getContent());
 
-    assertEquals(200, status.getStatusLine().getStatusCode());
+		assertEquals(200, status.getStatusLine().getStatusCode());
 
     ourLog.info(responseContent);
 
     Bundle bundle = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
-    assertEquals(1, bundle.getEntry().size());
+		assertThat(bundle.getEntry()).hasSize(1);
 
     Patient p = (Patient) bundle.getEntry().get(0).getResource();
-    assertEquals(1, p.getName().size());
-    assertEquals("Hello", p.getIdElement().getIdPart());
-    assertEquals("foo", p.getName().get(0).getFamily().get(0).getValue());
+		assertThat(p.getName()).hasSize(1);
+		assertEquals("Hello", p.getIdElement().getIdPart());
+		assertEquals("foo", p.getName().get(0).getFamily().get(0).getValue());
   }
 
   @Test
@@ -121,22 +120,22 @@ public class IncludeHl7OrgDstu2Test {
     String responseContent = IOUtils.toString(status.getEntity().getContent());
     IOUtils.closeQuietly(status.getEntity().getContent());
 
-    assertEquals(200, status.getStatusLine().getStatusCode());
+		assertEquals(200, status.getStatusLine().getStatusCode());
     Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 
     ourLog.info(responseContent);
 
-    assertEquals(3, bundle.getEntry().size());
-    assertEquals(new IdType("Patient/p1"), bundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless());
-    assertEquals(new IdType("Patient/p2"), bundle.getEntry().get(1).getResource().getIdElement().toUnqualifiedVersionless());
-    assertEquals(new IdType("Organization/o1"), bundle.getEntry().get(2).getResource().getIdElement().toUnqualifiedVersionless());
-    assertEquals(SearchEntryMode.INCLUDE, bundle.getEntry().get(2).getSearch().getMode());
+		assertThat(bundle.getEntry()).hasSize(3);
+		assertEquals(new IdType("Patient/p1"), bundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless());
+		assertEquals(new IdType("Patient/p2"), bundle.getEntry().get(1).getResource().getIdElement().toUnqualifiedVersionless());
+		assertEquals(new IdType("Organization/o1"), bundle.getEntry().get(2).getResource().getIdElement().toUnqualifiedVersionless());
+		assertEquals(SearchEntryMode.INCLUDE, bundle.getEntry().get(2).getSearch().getMode());
 
     Patient p1 = (Patient) bundle.getEntry().get(0).getResource();
-    assertEquals(0, p1.getContained().size());
+		assertThat(p1.getContained()).isEmpty();
 
     Patient p2 = (Patient) bundle.getEntry().get(1).getResource();
-    assertEquals(0, p2.getContained().size());
+		assertThat(p2.getContained()).isEmpty();
 
   }
 
@@ -147,22 +146,22 @@ public class IncludeHl7OrgDstu2Test {
     String responseContent = IOUtils.toString(status.getEntity().getContent());
     IOUtils.closeQuietly(status.getEntity().getContent());
 
-    assertEquals(200, status.getStatusLine().getStatusCode());
+		assertEquals(200, status.getStatusLine().getStatusCode());
     Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 
     ourLog.info(responseContent);
 
-    assertEquals(3, bundle.getEntry().size());
-    assertEquals(new IdType("Patient/p1"), bundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless());
-    assertEquals(new IdType("Patient/p2"), bundle.getEntry().get(1).getResource().getIdElement().toUnqualifiedVersionless());
-    assertEquals(new IdType("Organization/o1"), bundle.getEntry().get(2).getResource().getIdElement().toUnqualifiedVersionless());
-    assertEquals(SearchEntryMode.INCLUDE, bundle.getEntry().get(2).getSearch().getMode());
+		assertThat(bundle.getEntry()).hasSize(3);
+		assertEquals(new IdType("Patient/p1"), bundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless());
+		assertEquals(new IdType("Patient/p2"), bundle.getEntry().get(1).getResource().getIdElement().toUnqualifiedVersionless());
+		assertEquals(new IdType("Organization/o1"), bundle.getEntry().get(2).getResource().getIdElement().toUnqualifiedVersionless());
+		assertEquals(SearchEntryMode.INCLUDE, bundle.getEntry().get(2).getSearch().getMode());
 
     Patient p1 = (Patient) bundle.getEntry().get(0).getResource();
-    assertEquals(0, p1.getContained().size());
+		assertThat(p1.getContained()).isEmpty();
 
     Patient p2 = (Patient) bundle.getEntry().get(1).getResource();
-    assertEquals(0, p2.getContained().size());
+		assertThat(p2.getContained()).isEmpty();
 
   }
 
@@ -173,22 +172,22 @@ public class IncludeHl7OrgDstu2Test {
     String responseContent = IOUtils.toString(status.getEntity().getContent());
     IOUtils.closeQuietly(status.getEntity().getContent());
 
-    assertEquals(200, status.getStatusLine().getStatusCode());
+		assertEquals(200, status.getStatusLine().getStatusCode());
     Bundle bundle = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
 
     ourLog.info(responseContent);
 
-    assertEquals(3, bundle.getEntry().size());
-    assertEquals(new IdType("Patient/p1"), bundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless());
-    assertEquals(new IdType("Patient/p2"), bundle.getEntry().get(1).getResource().getIdElement().toUnqualifiedVersionless());
-    assertEquals(new IdType("Organization/o1"), bundle.getEntry().get(2).getResource().getIdElement().toUnqualifiedVersionless());
-    assertEquals(SearchEntryMode.INCLUDE, bundle.getEntry().get(2).getSearch().getMode());
+		assertThat(bundle.getEntry()).hasSize(3);
+		assertEquals(new IdType("Patient/p1"), bundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless());
+		assertEquals(new IdType("Patient/p2"), bundle.getEntry().get(1).getResource().getIdElement().toUnqualifiedVersionless());
+		assertEquals(new IdType("Organization/o1"), bundle.getEntry().get(2).getResource().getIdElement().toUnqualifiedVersionless());
+		assertEquals(SearchEntryMode.INCLUDE, bundle.getEntry().get(2).getSearch().getMode());
 
     Patient p1 = (Patient) bundle.getEntry().get(0).getResource();
-    assertEquals(0, p1.getContained().size());
+		assertThat(p1.getContained()).isEmpty();
 
     Patient p2 = (Patient) bundle.getEntry().get(1).getResource();
-    assertEquals(0, p2.getContained().size());
+		assertThat(p2.getContained()).isEmpty();
 
   }
 
@@ -199,24 +198,24 @@ public class IncludeHl7OrgDstu2Test {
     String responseContent = IOUtils.toString(status.getEntity().getContent());
     IOUtils.closeQuietly(status.getEntity().getContent());
 
-    assertEquals(200, status.getStatusLine().getStatusCode());
+		assertEquals(200, status.getStatusLine().getStatusCode());
     Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 
     ourLog.info(responseContent);
 
-    assertEquals(4, bundle.getEntry().size());
-    assertEquals(new IdType("Patient/p1"), bundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless());
-    assertEquals(new IdType("Patient/p2"), bundle.getEntry().get(1).getResource().getIdElement().toUnqualifiedVersionless());
-    assertEquals(new IdType("Organization/o1"), bundle.getEntry().get(2).getResource().getIdElement().toUnqualifiedVersionless());
-    assertEquals(new IdType("Organization/o2"), bundle.getEntry().get(3).getResource().getIdElement().toUnqualifiedVersionless());
-    assertEquals(SearchEntryMode.INCLUDE, bundle.getEntry().get(2).getSearch().getMode());
-    assertEquals(SearchEntryMode.INCLUDE, bundle.getEntry().get(3).getSearch().getMode());
+		assertThat(bundle.getEntry()).hasSize(4);
+		assertEquals(new IdType("Patient/p1"), bundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless());
+		assertEquals(new IdType("Patient/p2"), bundle.getEntry().get(1).getResource().getIdElement().toUnqualifiedVersionless());
+		assertEquals(new IdType("Organization/o1"), bundle.getEntry().get(2).getResource().getIdElement().toUnqualifiedVersionless());
+		assertEquals(new IdType("Organization/o2"), bundle.getEntry().get(3).getResource().getIdElement().toUnqualifiedVersionless());
+		assertEquals(SearchEntryMode.INCLUDE, bundle.getEntry().get(2).getSearch().getMode());
+		assertEquals(SearchEntryMode.INCLUDE, bundle.getEntry().get(3).getSearch().getMode());
 
     Patient p1 = (Patient) bundle.getEntry().get(0).getResource();
-    assertEquals(0, p1.getContained().size());
+		assertThat(p1.getContained()).isEmpty();
 
     Patient p2 = (Patient) bundle.getEntry().get(1).getResource();
-    assertEquals(0, p2.getContained().size());
+		assertThat(p2.getContained()).isEmpty();
 
   }
 
@@ -229,18 +228,18 @@ public class IncludeHl7OrgDstu2Test {
 
     ourLog.info(responseContent);
 
-    assertEquals(200, status.getStatusLine().getStatusCode());
+		assertEquals(200, status.getStatusLine().getStatusCode());
     Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
-    assertEquals(1, bundle.getEntry().size());
+		assertThat(bundle.getEntry()).hasSize(1);
 
     Patient p = (Patient) bundle.getEntry().get(0).getResource();
-    assertEquals(2, p.getName().size());
-    assertEquals("Hello", p.getIdElement().getIdPart());
+		assertThat(p.getName()).hasSize(2);
+		assertEquals("Hello", p.getIdElement().getIdPart());
 
     Set<String> values = new HashSet<String>();
     values.add(p.getName().get(0).getFamily().get(0).getValue());
     values.add(p.getName().get(1).getFamily().get(0).getValue());
-    assertThat(values, containsInAnyOrder("foo", "bar"));
+		assertThat(values).containsExactlyInAnyOrder("foo", "bar");
 
   }
 
@@ -248,7 +247,7 @@ public class IncludeHl7OrgDstu2Test {
   public void testBadInclude() throws Exception {
     HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?name=Hello&_include=foo&_include=baz");
     HttpResponse status = ourClient.execute(httpGet);
-    assertEquals(400, status.getStatusLine().getStatusCode());
+		assertEquals(400, status.getStatusLine().getStatusCode());
   }
 
   @ResourceDef(name = "Patient")

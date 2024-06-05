@@ -21,8 +21,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.Map;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -69,7 +68,7 @@ public class NpmPackageValidationSupportTest extends BaseValidationTestWithInlin
 
 		String outcomeSerialized = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.toOperationOutcome());
 		ourLog.info(outcomeSerialized);
-		assertThat(outcomeSerialized, containsString("Patient.identifier:nhsNumber.value: minimum required = 1, but only found 0"));
+		assertThat(outcomeSerialized).contains("Patient.identifier:nhsNumber.value: minimum required = 1, but only found 0");
 
 	}
 
@@ -87,7 +86,7 @@ public class NpmPackageValidationSupportTest extends BaseValidationTestWithInlin
 		for (Map.Entry<String, byte[]> entry : EXPECTED_BINARIES_MAP.entrySet()) {
 			byte[] expectedBytes = entry.getValue();
 			byte[] actualBytes = npmPackageSupport.fetchBinary(entry.getKey());
-			assertArrayEquals(expectedBytes, actualBytes);
+			assertThat(actualBytes).containsExactly(expectedBytes);
 		}
 	}
 
@@ -116,6 +115,6 @@ public class NpmPackageValidationSupportTest extends BaseValidationTestWithInlin
 			.encodeResourceToString(validationResult.toOperationOutcome());
 		ourLog.info(outcomeSerialized);
 
-		assertThat(outcomeSerialized, containsString("Terminology_TX_ValueSet_NotFound"));
+		assertThat(outcomeSerialized).contains("Terminology_TX_ValueSet_NotFound");
 	}
 }

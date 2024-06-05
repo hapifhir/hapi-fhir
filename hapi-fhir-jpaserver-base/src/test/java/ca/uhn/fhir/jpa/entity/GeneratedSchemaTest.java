@@ -6,8 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class GeneratedSchemaTest {
 
@@ -34,7 +33,7 @@ public class GeneratedSchemaTest {
 		String schema = ClasspathUtil.loadResource("ca/uhn/hapi/fhir/jpa/docs/database/" + schemaName);
 		String[] lines = StringUtils.split(schema, '\n');
 		String resTextVc = Arrays.stream(lines).filter(t -> t.contains("RES_TEXT_VC ")).findFirst().orElseThrow();
-		assertThat("Wrong type in " + schemaName, resTextVc, containsString("RES_TEXT_VC " + expectedDatatype));
+		assertThat(resTextVc).as("Wrong type in " + schemaName).contains("RES_TEXT_VC " + expectedDatatype);
 	}
 
 }

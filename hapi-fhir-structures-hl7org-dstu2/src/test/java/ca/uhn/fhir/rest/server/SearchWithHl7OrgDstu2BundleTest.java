@@ -15,8 +15,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SearchWithHl7OrgDstu2BundleTest {
@@ -48,7 +47,7 @@ public class SearchWithHl7OrgDstu2BundleTest {
 		ourLog.info(responseContent);
 
 		//@formatter:off
-		assertThat(responseContent, stringContainsInOrder("<Bundle xmlns=\"http://hl7.org/fhir\">", 
+		assertThat(responseContent).containsSubsequence("<Bundle xmlns=\"http://hl7.org/fhir\">",
 				"<type value=\"searchset\"/>", 
 				"<link>" ,
 				"<relation value=\"self\"/>", 
@@ -57,7 +56,7 @@ public class SearchWithHl7OrgDstu2BundleTest {
 				"<entry>" , 
 				//"<fullUrl value=\ourServer.getBaseUrl() + "/Patient/123\"/>" , 
 				"<resource>" , 
-				"<Patient xmlns=\"http://hl7.org/fhir\">"));
+				"<Patient xmlns=\"http://hl7.org/fhir\">");
 		// @formatter:off
 	}
 

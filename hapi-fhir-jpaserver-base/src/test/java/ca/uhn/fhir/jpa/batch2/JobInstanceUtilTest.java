@@ -6,7 +6,7 @@ import ca.uhn.fhir.test.utilities.RandomDataHelper;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class JobInstanceUtilTest {
 

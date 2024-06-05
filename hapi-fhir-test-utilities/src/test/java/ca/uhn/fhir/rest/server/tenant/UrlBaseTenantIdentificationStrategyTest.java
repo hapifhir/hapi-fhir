@@ -18,9 +18,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Collections;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -92,7 +92,7 @@ public class UrlBaseTenantIdentificationStrategyTest {
 
 		String actual = ourTenantStrategy.resolveRelativeUrl(theInputUrl, myRequestDetails);
 
-		assertEquals(theExpectedResolvedUrl, actual, theMessage);
+		assertThat(actual).as(theMessage).isEqualTo(theExpectedResolvedUrl);
 	}
 
 	@Test
@@ -182,7 +182,7 @@ public class UrlBaseTenantIdentificationStrategyTest {
 
 		//then we should see an exception thrown with HAPI-0307 in it
 		verify(myHapiLocalizer, times(1)).getMessage(RestfulServer.class, "rootRequest.multitenant");
-		assertTrue(ire.getMessage().contains("HAPI-0307"));
+		assertThat(ire.getMessage()).contains("HAPI-0307");
 	}
 
 	@Test

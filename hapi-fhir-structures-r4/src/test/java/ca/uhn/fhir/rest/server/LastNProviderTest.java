@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class LastNProviderTest extends BaseR4ServerTest {
@@ -48,12 +49,12 @@ public class LastNProviderTest extends BaseR4ServerTest {
 			.execute();
 		assertEquals("abc123", response.getIdElement().getIdPart());
 		assertEquals("Patient/123", myLastSubject.getReferenceElement().getValue());
-		assertEquals(2, myLastCategories.size());
+		assertThat(myLastCategories).hasSize(2);
 		assertEquals("http://terminology.hl7.org/CodeSystem/observation-category", myLastCategories.get(0).getSystem());
 		assertEquals("laboratory", myLastCategories.get(0).getCode());
 		assertEquals("http://terminology.hl7.org/CodeSystem/observation-category", myLastCategories.get(1).getSystem());
 		assertEquals("vital-signs", myLastCategories.get(1).getCode());
-		assertEquals(2, myLastCodes.size());
+		assertThat(myLastCodes).hasSize(2);
 		assertEquals("http://loinc.org", myLastCodes.get(0).getSystem());
 		assertEquals("1111-1", myLastCodes.get(0).getCode());
 		assertEquals("http://loinc.org", myLastCodes.get(1).getSystem());

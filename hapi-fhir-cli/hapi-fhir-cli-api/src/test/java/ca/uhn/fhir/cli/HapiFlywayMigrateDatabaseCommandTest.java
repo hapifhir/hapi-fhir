@@ -5,12 +5,10 @@ import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import ca.uhn.fhir.jpa.migrate.SchemaMigrator;
 import ca.uhn.fhir.jpa.migrate.dao.HapiMigrationDao;
 import ca.uhn.fhir.jpa.migrate.entity.HapiMigrationEntity;
-import ca.uhn.fhir.jpa.migrate.SchemaMigrator;
-import ca.uhn.fhir.jpa.migrate.dao.HapiMigrationDao;
-import ca.uhn.fhir.jpa.migrate.entity.HapiMigrationEntity;
 import ca.uhn.fhir.jpa.util.RandomTextUtils;
 import ca.uhn.fhir.system.HapiSystemProperties;
 import com.google.common.base.Charsets;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.MethodOrderer;
@@ -23,7 +21,6 @@ import org.springframework.jdbc.core.support.AbstractLobCreatingPreparedStatemen
 import org.springframework.jdbc.support.lob.DefaultLobHandler;
 import org.springframework.jdbc.support.lob.LobCreator;
 
-import jakarta.annotation.Nonnull;
 import java.io.File;
 import java.io.IOException;
 import java.sql.PreparedStatement;
@@ -37,6 +34,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -76,43 +74,43 @@ public class HapiFlywayMigrateDatabaseCommandTest {
 			"-p", "SA"
 		};
 
-		assertFalse(JdbcUtils.getTableNames(connectionProperties).contains("HFJ_RES_REINDEX_JOB"));
+		assertThat(JdbcUtils.getTableNames(connectionProperties)).doesNotContain("HFJ_RES_REINDEX_JOB");
 		// Verify that HFJ_SEARCH_PARM exists along with index and foreign key dependencies.
-		assertTrue(JdbcUtils.getTableNames(connectionProperties).contains("HFJ_SEARCH_PARM"));
+		assertThat(JdbcUtils.getTableNames(connectionProperties)).contains("HFJ_SEARCH_PARM");
 		Set<String> indexNames =  JdbcUtils.getIndexNames(connectionProperties, "HFJ_SEARCH_PARM");
-		assertTrue(indexNames.contains("IDX_SEARCHPARM_RESTYPE_SPNAME"));
+		assertThat(indexNames).contains("IDX_SEARCHPARM_RESTYPE_SPNAME");
 		Set<String> foreignKeys =  JdbcUtils.getForeignKeys(connectionProperties, "HFJ_SEARCH_PARM", "HFJ_RES_PARAM_PRESENT");
-		assertTrue(foreignKeys.contains("FK_RESPARMPRES_SPID"));
+		assertThat(foreignKeys).contains("FK_RESPARMPRES_SPID");
 		// Verify that IDX_FORCEDID_TYPE_FORCEDID index exists on HFJ_FORCED_ID table
 		indexNames = JdbcUtils.getIndexNames(connectionProperties, "HFJ_FORCED_ID");
-		assertTrue(indexNames.contains("IDX_FORCEDID_TYPE_FORCEDID"));
+		assertThat(indexNames).contains("IDX_FORCEDID_TYPE_FORCEDID");
 		// Verify that HFJ_RES_PARAM_PRESENT has column SP_ID
 		Set<String> columnNames = JdbcUtils.getColumnNames(connectionProperties, "HFJ_RES_PARAM_PRESENT");
-		assertTrue(columnNames.contains("SP_ID"));
+		assertThat(columnNames).contains("SP_ID");
 		// Verify that SEQ_SEARCHPARM_ID sequence exists
 		Set<String> seqNames = JdbcUtils.getSequenceNames(connectionProperties);
-		assertTrue(seqNames.contains("SEQ_SEARCHPARM_ID"));
+		assertThat(seqNames).contains("SEQ_SEARCHPARM_ID");
 		// Verify that foreign key FK_SEARCHRES_RES on HFJ_SEARCH_RESULT exists
 		foreignKeys = JdbcUtils.getForeignKeys(connectionProperties, "HFJ_RESOURCE", "HFJ_SEARCH_RESULT");
-		assertTrue(foreignKeys.contains("FK_SEARCHRES_RES"));
+		assertThat(foreignKeys).contains("FK_SEARCHRES_RES");
 
 		App.main(args);
 
-		assertTrue(JdbcUtils.getTableNames(connectionProperties).contains("HFJ_RES_REINDEX_JOB"));
+		assertThat(JdbcUtils.getTableNames(connectionProperties)).contains("HFJ_RES_REINDEX_JOB");
 		// Verify that HFJ_SEARCH_PARM has been removed
-		assertFalse(JdbcUtils.getTableNames(connectionProperties).contains("HFJ_SEARCH_PARM"));
+		assertThat(JdbcUtils.getTableNames(connectionProperties)).doesNotContain("HFJ_SEARCH_PARM");
 		// Verify that IDX_FORCEDID_TYPE_FORCEDID index no longer exists on HFJ_FORCED_ID table
 		indexNames = JdbcUtils.getIndexNames(connectionProperties, "HFJ_FORCED_ID");
-		assertFalse(indexNames.contains("IDX_FORCEDID_TYPE_FORCEDID"));
+		assertThat(indexNames).doesNotContain("IDX_FORCEDID_TYPE_FORCEDID");
 		// Verify that HFJ_RES_PARAM_PRESENT no longer has column SP_ID
 		columnNames = JdbcUtils.getColumnNames(connectionProperties, "HFJ_RES_PARAM_PRESENT");
-		assertFalse(columnNames.contains("SP_ID"));
+		assertThat(columnNames).doesNotContain("SP_ID");
 		// Verify that SEQ_SEARCHPARM_ID sequence no longer exists
 		seqNames = JdbcUtils.getSequenceNames(connectionProperties);
-		assertFalse(seqNames.contains("SEQ_SEARCHPARM_ID"));
+		assertThat(seqNames).doesNotContain("SEQ_SEARCHPARM_ID");
 		// Verify that foreign key FK_SEARCHRES_RES on HFJ_SEARCH_RESULT no longer exists
 		foreignKeys = JdbcUtils.getForeignKeys(connectionProperties, "HFJ_RESOURCE", "HFJ_SEARCH_RESULT");
-		assertFalse(foreignKeys.contains("FK_SEARCHRES_RES"));
+		assertThat(foreignKeys).doesNotContain("FK_SEARCHRES_RES");
 
 		connectionProperties.getTxTemplate().execute(t -> {
 			JdbcTemplate jdbcTemplate = connectionProperties.newJdbcTemplate();
@@ -155,45 +153,45 @@ public class HapiFlywayMigrateDatabaseCommandTest {
 		};
 
 		// Verify that HFJ_SEARCH_PARM exists along with index and foreign key dependencies.
-		assertTrue(JdbcUtils.getTableNames(connectionProperties).contains("HFJ_SEARCH_PARM"));
+		assertThat(JdbcUtils.getTableNames(connectionProperties)).contains("HFJ_SEARCH_PARM");
 		Set<String> indexNames =  JdbcUtils.getIndexNames(connectionProperties, "HFJ_SEARCH_PARM");
-		assertTrue(indexNames.contains("IDX_SEARCHPARM_RESTYPE_SPNAME"));
+		assertThat(indexNames).contains("IDX_SEARCHPARM_RESTYPE_SPNAME");
 		Set<String> foreignKeys =  JdbcUtils.getForeignKeys(connectionProperties, "HFJ_SEARCH_PARM", "HFJ_RES_PARAM_PRESENT");
-		assertTrue(foreignKeys.contains("FK_RESPARMPRES_SPID"));
+		assertThat(foreignKeys).contains("FK_RESPARMPRES_SPID");
 		// Verify that IDX_FORCEDID_TYPE_FORCEDID index exists on HFJ_FORCED_ID table
 		indexNames = JdbcUtils.getIndexNames(connectionProperties, "HFJ_FORCED_ID");
-		assertTrue(indexNames.contains("IDX_FORCEDID_TYPE_FORCEDID"));
+		assertThat(indexNames).contains("IDX_FORCEDID_TYPE_FORCEDID");
 		// Verify that HFJ_RES_PARAM_PRESENT has column SP_ID
 		Set<String> columnNames = JdbcUtils.getColumnNames(connectionProperties, "HFJ_RES_PARAM_PRESENT");
-		assertTrue(columnNames.contains("SP_ID"));
+		assertThat(columnNames).contains("SP_ID");
 		// Verify that SEQ_SEARCHPARM_ID sequence exists
 		Set<String> seqNames = JdbcUtils.getSequenceNames(connectionProperties);
-		assertTrue(seqNames.contains("SEQ_SEARCHPARM_ID"));
+		assertThat(seqNames).contains("SEQ_SEARCHPARM_ID");
 		// Verify that foreign key FK_SEARCHRES_RES on HFJ_SEARCH_RESULT exists
 		foreignKeys = JdbcUtils.getForeignKeys(connectionProperties, "HFJ_RESOURCE", "HFJ_SEARCH_RESULT");
-		assertTrue(foreignKeys.contains("FK_SEARCHRES_RES"));
+		assertThat(foreignKeys).contains("FK_SEARCHRES_RES");
 		int expectedMigrationEntities = hapiMigrationDao.findAll().size();
 
 		App.main(args);
 
 		// Verify that HFJ_SEARCH_PARM still exists along with index and foreign key dependencies.
-		assertTrue(JdbcUtils.getTableNames(connectionProperties).contains("HFJ_SEARCH_PARM"));
+		assertThat(JdbcUtils.getTableNames(connectionProperties)).contains("HFJ_SEARCH_PARM");
 		indexNames =  JdbcUtils.getIndexNames(connectionProperties, "HFJ_SEARCH_PARM");
-		assertTrue(indexNames.contains("IDX_SEARCHPARM_RESTYPE_SPNAME"));
+		assertThat(indexNames).contains("IDX_SEARCHPARM_RESTYPE_SPNAME");
 		foreignKeys =  JdbcUtils.getForeignKeys(connectionProperties, "HFJ_SEARCH_PARM", "HFJ_RES_PARAM_PRESENT");
-		assertTrue(foreignKeys.contains("FK_RESPARMPRES_SPID"));
+		assertThat(foreignKeys).contains("FK_RESPARMPRES_SPID");
 		// Verify that IDX_FORCEDID_TYPE_FORCEDID index still exists on HFJ_FORCED_ID table
 		indexNames = JdbcUtils.getIndexNames(connectionProperties, "HFJ_FORCED_ID");
-		assertTrue(indexNames.contains("IDX_FORCEDID_TYPE_FORCEDID"));
+		assertThat(indexNames).contains("IDX_FORCEDID_TYPE_FORCEDID");
 		// Verify that HFJ_RES_PARAM_PRESENT still has column SP_ID
 		columnNames = JdbcUtils.getColumnNames(connectionProperties, "HFJ_RES_PARAM_PRESENT");
-		assertTrue(columnNames.contains("SP_ID"));
+		assertThat(columnNames).contains("SP_ID");
 		// Verify that SEQ_SEARCHPARM_ID sequence still exists
 		seqNames = JdbcUtils.getSequenceNames(connectionProperties);
-		assertTrue(seqNames.contains("SEQ_SEARCHPARM_ID"));
+		assertThat(seqNames).contains("SEQ_SEARCHPARM_ID");
 		// Verify that foreign key FK_SEARCHRES_RES on HFJ_SEARCH_RESULT still exists
 		foreignKeys = JdbcUtils.getForeignKeys(connectionProperties, "HFJ_RESOURCE", "HFJ_SEARCH_RESULT");
-		assertTrue(foreignKeys.contains("FK_SEARCHRES_RES"));
+		assertThat(foreignKeys).contains("FK_SEARCHRES_RES");
 		assertTrue(expectedMigrationEntities == hapiMigrationDao.findAll().size());
 
 	}
@@ -223,8 +221,8 @@ public class HapiFlywayMigrateDatabaseCommandTest {
 		assertFalse(JdbcUtils.getTableNames(connectionProperties).contains("HFJ_RESOURCE"));
 		assertFalse(JdbcUtils.getTableNames(connectionProperties).contains("HFJ_BLK_EXPORT_JOB"));
 		App.main(args);
-		assertTrue(JdbcUtils.getTableNames(connectionProperties).contains("HFJ_RESOURCE")); // Early table
-		assertTrue(JdbcUtils.getTableNames(connectionProperties).contains("HFJ_BLK_EXPORT_JOB")); // Late table
+		assertThat(JdbcUtils.getTableNames(connectionProperties)).contains("HFJ_RESOURCE"); // Early table
+		assertThat(JdbcUtils.getTableNames(connectionProperties)).contains("HFJ_BLK_EXPORT_JOB"); // Late table
 	}
 
 	@Test
@@ -256,7 +254,7 @@ public class HapiFlywayMigrateDatabaseCommandTest {
 
 		App.main(args);
 
-		assertFalse(JdbcUtils.getTableNames(connectionProperties).contains("FLY_HFJ_MIGRATION"));
+		assertThat(JdbcUtils.getTableNames(connectionProperties)).doesNotContain("FLY_HFJ_MIGRATION");
 	}
 
 	@Nonnull

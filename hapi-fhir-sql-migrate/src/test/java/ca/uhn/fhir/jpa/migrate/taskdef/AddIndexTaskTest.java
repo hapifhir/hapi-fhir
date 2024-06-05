@@ -17,9 +17,7 @@ import org.mockito.quality.Strictness;
 import java.sql.SQLException;
 import java.util.function.Supplier;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.hasItem;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -45,7 +43,7 @@ public class AddIndexTaskTest extends BaseTest {
 		getMigrator().migrate();
 		getMigrator().migrate();
 
-		assertThat(JdbcUtils.getIndexNames(getConnectionProperties(), "SOMETABLE"), hasItem("IDX_ANINDEX"));
+		assertThat(JdbcUtils.getIndexNames(getConnectionProperties(), "SOMETABLE")).contains("IDX_ANINDEX");
 
 	}
 
@@ -70,7 +68,7 @@ public class AddIndexTaskTest extends BaseTest {
 		getMigrator().migrate();
 		getMigrator().migrate();
 
-		assertThat(JdbcUtils.getIndexNames(getConnectionProperties(), "SOMETABLE"), containsInAnyOrder("IDX_DIFINDEX", "IDX_ANINDEX"));
+		assertThat(JdbcUtils.getIndexNames(getConnectionProperties(), "SOMETABLE")).containsExactlyInAnyOrder("IDX_DIFINDEX", "IDX_ANINDEX");
 	}
 
 	@ParameterizedTest(name = "{index}: {0}")
@@ -94,7 +92,7 @@ public class AddIndexTaskTest extends BaseTest {
 		getMigrator().migrate();
 		getMigrator().migrate();
 
-		assertThat(JdbcUtils.getIndexNames(getConnectionProperties(), "SOMETABLE"), containsInAnyOrder("IDX_DIFINDEX", "IDX_ANINDEX"));
+		assertThat(JdbcUtils.getIndexNames(getConnectionProperties(), "SOMETABLE")).containsExactlyInAnyOrder("IDX_DIFINDEX", "IDX_ANINDEX");
 	}
 
 	@ParameterizedTest(name = "{index}: {0}")
@@ -114,7 +112,7 @@ public class AddIndexTaskTest extends BaseTest {
 
 		getMigrator().migrate();
 
-		assertThat(JdbcUtils.getIndexNames(getConnectionProperties(), "SOMETABLE"), containsInAnyOrder("IDX_DIFINDEX", "IDX_ANINDEX"));
+		assertThat(JdbcUtils.getIndexNames(getConnectionProperties(), "SOMETABLE")).containsExactlyInAnyOrder("IDX_DIFINDEX", "IDX_ANINDEX");
 	}
 
 	@Nested

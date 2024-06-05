@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.reindex;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.pid.IResourcePidStream;
 import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
@@ -25,7 +26,7 @@ import java.util.List;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class Batch2DaoSvcImplTest extends BaseJpaR4Test {
@@ -108,7 +109,7 @@ class Batch2DaoSvcImplTest extends BaseJpaR4Test {
 	}
 
 	private static void assertIdsEqual(List<IIdType> expectedResourceIds, List<? extends IIdType> actualResourceIds) {
-		assertEquals(expectedResourceIds.size(), actualResourceIds.size());
+		assertThat(actualResourceIds).hasSize(expectedResourceIds.size());
 
 		for (int index = 0; index < expectedResourceIds.size(); index++) {
 			final IIdType expectedIdType = expectedResourceIds.get(index);
