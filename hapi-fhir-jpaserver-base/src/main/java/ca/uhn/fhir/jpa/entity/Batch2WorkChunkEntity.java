@@ -354,7 +354,7 @@ public class Batch2WorkChunkEntity implements Serializable {
 
 	public Integer getPollAttempts() {
 		if (myPollAttempts == null) {
-			myPollAttempts = 0;
+			return 0;
 		}
 		return myPollAttempts;
 	}
