@@ -302,6 +302,7 @@ public class CustomTypeR4Test {
 			"</meta>");
 		//@formatter:on
 
+
 		//@formatter:off
 		assertThat(messageString).doesNotContainPattern("(?s)" + ".*" +
 			"<meta>" + ".*" +
