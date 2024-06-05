@@ -31,6 +31,7 @@ import org.apache.commons.lang3.Validate;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
@@ -236,5 +237,22 @@ public abstract class BaseResourceMessage implements IResourceMessage, IModelJso
 	@VisibleForTesting
 	public Map<String, String> getAttributes() {
 		return ObjectUtils.defaultIfNull(myAttributes, Collections.emptyMap());
+	}
+
+	@Override
+	public boolean equals(Object theO) {
+		if (this == theO) return true;
+		if (theO == null || getClass() != theO.getClass()) return false;
+		BaseResourceMessage that = (BaseResourceMessage) theO;
+		return getOperationType() == that.getOperationType()
+				&& Objects.equals(getAttributes(), that.getAttributes())
+				&& Objects.equals(getTransactionId(), that.getTransactionId())
+				&& Objects.equals(getMediaType(), that.getMediaType())
+				&& Objects.equals(getMessageKey(), that.getMessageKey());
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(getOperationType(), getAttributes(), getTransactionId(), getMediaType());
 	}
 }

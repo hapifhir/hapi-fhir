@@ -17,24 +17,17 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.test.utilities;
+package ca.uhn.test.util;
 
-import java.util.List;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import org.assertj.core.api.AbstractAssert;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.not;
+public class LogEventAssert extends AbstractAssert<LogEventAssert, ILoggingEvent> {
 
-public class CustomMatchersUtil {
-
-	/**
-	 * Asserts that none of the items in theShouldNotContain are in theActual
-	 * @param theActual the actual results
-	 * @param theShouldNotContain the items that should not be in theActual
-	 */
-	public static <T> void assertDoesNotContainAnyOf(List<T> theActual, List<T> theShouldNotContain) {
-		for (T item : theShouldNotContain) {
-			assertThat(theActual, not(hasItem(item)));
-		}
+	protected LogEventAssert(ILoggingEvent actual) {
+		super(actual, LogEventAssert.class);
 	}
+
+	// Example of a custom assertion for a single LogEvent
+	// You can add methods for specific assertions here
 }

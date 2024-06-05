@@ -7,9 +7,7 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.junit.jupiter.api.Test;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.not;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 public class ObservationLastnDstu3Test extends BaseResourceProviderDstu3Test {
 
@@ -19,7 +17,7 @@ public class ObservationLastnDstu3Test extends BaseResourceProviderDstu3Test {
 	@Test
 	public void testSupplyingMaxToTheLastNOPerationDoesNotCauseAValidationError() throws Exception {
 		String outcome = executeApiCall(myServerBase + "/Observation/$lastn?max=1");
-		assertThat(outcome, not(containsString("HAPI-524")));
+		assertThat(outcome).doesNotContain("HAPI-524");
 	}
 
 	private String executeApiCall(String theUrl) throws IOException {

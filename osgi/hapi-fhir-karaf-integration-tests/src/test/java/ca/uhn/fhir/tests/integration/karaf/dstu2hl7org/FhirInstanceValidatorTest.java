@@ -19,9 +19,6 @@ import org.ops4j.pax.exam.spi.reactors.PerClass;
 
 import java.io.IOException;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.debugConfiguration;
 
@@ -107,7 +104,7 @@ public class FhirInstanceValidatorTest {
 		ourLog.info(encoded);
 
 		assertTrue(result.isSuccessful());
-		assertThat(encoded, not(containsString("A parameter must have a value or a resource, but not both")));
+		assertThat(encoded).doesNotContain("A parameter must have a value or a resource, but not both");
 	}
 
 	@Test

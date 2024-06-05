@@ -1,8 +1,12 @@
 package ca.uhn.fhir.model.primitive;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class UriDtTest {
 
@@ -23,11 +27,11 @@ public class UriDtTest {
 		UriDt dt = new UriDt("http://example.com/foo");
 		assertEquals(dt, dt);
 		assertFalse(dt.equals(null));
-		assertNotEquals(dt, new UriDt());
+		assertThat(new UriDt()).isNotEqualTo(dt);
 		assertEquals(dt, new UriDt("http://example.com/foo"));
 		assertEquals(dt, new UriDt("http://example.com/foo/"));
-		assertNotEquals(dt, new UriDt("http://blah.com/foo/"));
-		assertNotEquals(dt, new StringDt("http://example.com/foo"));
+		assertThat(new UriDt("http://blah.com/foo/")).isNotEqualTo(dt);
+		assertThat(new StringDt("http://example.com/foo")).isNotEqualTo(dt);
 	}
 
 	@Test

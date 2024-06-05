@@ -10,7 +10,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
 
-import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -47,7 +47,7 @@ public class ClientMockingTest {
 		//@formatter:off
 		
 		Bundle actual = client.search().forResource(Condition.class).where(Condition.ASSERTER.hasId("123")).returnBundle(Bundle.class).execute();
-		assertSame(retVal, actual);
+		assertThat(actual).isSameAs(retVal);
 		
 	}
 	

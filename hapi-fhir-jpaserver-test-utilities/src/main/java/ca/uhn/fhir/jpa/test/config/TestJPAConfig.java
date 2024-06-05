@@ -41,14 +41,13 @@ import ca.uhn.fhir.jpa.test.util.StoppableSubscriptionDeliveringRestHookSubscrib
 import ca.uhn.fhir.jpa.test.util.SubscriptionTestUtil;
 import ca.uhn.fhir.jpa.util.LoggingEmailSender;
 import ca.uhn.fhir.system.HapiTestSystemProperties;
+import jakarta.persistence.EntityManagerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Primary;
 import org.springframework.orm.jpa.JpaTransactionManager;
-
-import jakarta.persistence.EntityManagerFactory;
 
 @Configuration
 @Import({

@@ -33,9 +33,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.not;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -101,7 +99,7 @@ public class FhirResourceDaoR4QuerySandbox extends BaseJpaTest {
 
 		myTestDaoSearch.searchForIds("Patient?name=smith");
 
-		assertThat(myCapturedQueries, not(empty()));
+		assertThat(myCapturedQueries).isNotEmpty();
 	}
 
 	@Test

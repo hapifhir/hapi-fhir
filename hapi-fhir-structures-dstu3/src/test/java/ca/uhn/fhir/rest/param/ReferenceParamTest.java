@@ -1,5 +1,8 @@
 package ca.uhn.fhir.rest.param;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.base.Charsets;
@@ -10,8 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ReferenceParamTest {
 
@@ -42,7 +44,7 @@ public class ReferenceParamTest {
 		assertEquals("Location", rp.getResourceType());
 		assertEquals("123", rp.getIdPart());
 		assertEquals("Location/123", rp.getValue());
-		assertEquals(null, rp.getQueryParameterQualifier());
+		assertNull(rp.getQueryParameterQualifier());
 
 	}
 
@@ -54,7 +56,7 @@ public class ReferenceParamTest {
 		assertEquals("d", rp.getResourceType());
 		assertEquals("e", rp.getIdPart());
 		assertEquals("http://a.b/c/d/e", rp.getValue());
-		assertEquals(null, rp.getQueryParameterQualifier());
+		assertNull(rp.getQueryParameterQualifier());
 
 	}
 
@@ -63,7 +65,7 @@ public class ReferenceParamTest {
 
 		ReferenceParam rp = new ReferenceParam();
 		rp.setValueAsQueryToken(ourCtx, null, ".name", "FOO");
-		assertEquals(null, rp.getResourceType());
+		assertNull(rp.getResourceType());
 		assertEquals("FOO", rp.getIdPart());
 		assertEquals("FOO", rp.getValue());
 		assertEquals(".name", rp.getQueryParameterQualifier());
@@ -76,7 +78,7 @@ public class ReferenceParamTest {
 
 		ReferenceParam rp = new ReferenceParam();
 		rp.setValueAsQueryToken(ourCtx, null, ".name", "Patient/1233");
-		assertEquals(null, rp.getResourceType());
+		assertNull(rp.getResourceType());
 		assertEquals("Patient/1233", rp.getIdPart());
 		assertEquals("Patient/1233", rp.getValue());
 		assertEquals(".name", rp.getQueryParameterQualifier());
@@ -89,7 +91,7 @@ public class ReferenceParamTest {
 
 		ReferenceParam rp = new ReferenceParam();
 		rp.setValueAsQueryToken(ourCtx, null, ".name", "http://something.strange/a/b/c");
-		assertEquals(null, rp.getResourceType());
+		assertNull(rp.getResourceType());
 		assertEquals("http://something.strange/a/b/c", rp.getIdPart());
 		assertEquals("http://something.strange/a/b/c", rp.getValue());
 		assertEquals(".name", rp.getQueryParameterQualifier());
@@ -105,7 +107,7 @@ public class ReferenceParamTest {
 		assertEquals("Location", rp.getResourceType());
 		assertEquals("123", rp.getIdPart());
 		assertEquals("123", rp.getValue());
-		assertEquals(null, rp.getQueryParameterQualifier());
+		assertNull(rp.getQueryParameterQualifier());
 
 	}
 
@@ -121,7 +123,7 @@ public class ReferenceParamTest {
 		assertEquals("Patient", rp.getResourceType());
 		assertEquals("123", rp.getIdPart());
 		assertEquals("Patient/123", rp.getValue());
-		assertEquals(null, rp.getQueryParameterQualifier());
+		assertNull(rp.getQueryParameterQualifier());
 
 	}
 
@@ -133,7 +135,7 @@ public class ReferenceParamTest {
 		assertEquals("Patient", rp.getResourceType());
 		assertEquals("123", rp.getIdPart());
 		assertEquals("Patient/123", rp.getValue());
-		assertEquals(null, rp.getQueryParameterQualifier());
+		assertNull(rp.getQueryParameterQualifier());
 
 	}
 
@@ -146,7 +148,7 @@ public class ReferenceParamTest {
 		assertEquals("Location", rp.getResourceType());
 		assertEquals("http://a.b/c/d/e", rp.getIdPart());
 		assertEquals("http://a.b/c/d/e", rp.getValue());
-		assertEquals(null, rp.getQueryParameterQualifier());
+		assertNull(rp.getQueryParameterQualifier());
 
 	}
 
@@ -218,7 +220,7 @@ public class ReferenceParamTest {
 
 		assertTrue(rp.isIdPartValidLong());
 		assertEquals("123", rp.getIdPart());
-		assertEquals(null, rp.getResourceType(ourCtx));
+		assertNull(rp.getResourceType(ourCtx));
 	}
 
 	@Test
@@ -245,7 +247,7 @@ public class ReferenceParamTest {
 		rp.setValue("123");
 
 		assertEquals("123", rp.getIdPart());
-		assertEquals(null, rp.getResourceType(ourCtx));
+		assertNull(rp.getResourceType(ourCtx));
 	}
 
 	@Test

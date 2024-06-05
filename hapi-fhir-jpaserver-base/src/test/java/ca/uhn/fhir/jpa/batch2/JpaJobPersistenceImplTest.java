@@ -4,7 +4,6 @@ import ca.uhn.fhir.batch2.api.JobOperationResultJson;
 import ca.uhn.fhir.batch2.model.FetchJobInstancesRequest;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
-import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
@@ -26,13 +25,13 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -140,9 +139,9 @@ class JpaJobPersistenceImplTest {
 		List<JobInstance> retInstances = mySvc.fetchInstances(req, pageStart, pageSize);
 
 		// verify
-		assertEquals(instances.size(), retInstances.size());
-		assertEquals(instances.get(0).getId(),  retInstances.get(0).getInstanceId());
-		assertEquals(instances.get(1).getId(),  retInstances.get(1).getInstanceId());
+		assertThat(retInstances).hasSize(instances.size());
+		assertEquals(instances.get(0).getId(), retInstances.get(0).getInstanceId());
+		assertEquals(instances.get(1).getId(), retInstances.get(1).getInstanceId());
 
 		ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
 		verify(myJobInstanceRepository)
@@ -171,7 +170,7 @@ class JpaJobPersistenceImplTest {
 		Optional<JobInstance> retInstance = mySvc.fetchInstance(entity.getId());
 
 		// verify
-		assertTrue(retInstance.isPresent());
+		assertThat(retInstance).isPresent();
 		assertEquals(instance.getInstanceId(), retInstance.get().getInstanceId());
 	}
 

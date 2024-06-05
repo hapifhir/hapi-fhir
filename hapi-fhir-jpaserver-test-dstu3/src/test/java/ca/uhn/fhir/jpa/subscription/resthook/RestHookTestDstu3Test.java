@@ -1,5 +1,9 @@
 package ca.uhn.fhir.jpa.subscription.resthook;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
@@ -44,7 +48,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -61,17 +64,11 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import static ca.uhn.fhir.util.HapiExtensions.EX_SEND_DELETE_MESSAGES;
-import static org.awaitility.Awaitility.await;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.fail;
+
 
 /**
  * Test the rest-hook subscriptions
@@ -223,7 +220,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		try {
 			createSubscription(databaseCriteria, null, ourNotificationListenerServer);
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), is(containsString("HAPI-2367: This server is configured to only allow in-memory subscriptions.")));
+			assertThat(e.getMessage()).contains("HAPI-2367: This server is configured to only allow in-memory subscriptions.");
 		}
 		mySubscriptionSettings.setOnlyAllowInMemorySubscriptions(false);
 	}
@@ -267,24 +264,24 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 
 		// Should see 1 subscription notification with authorization header
 		waitForSize(1, ourNotificationServlet.getReceivedAuthorizationHeaders());
-		Assertions.assertEquals(1, ourNotificationServlet.getReceivedNotificationCount());
-		Assertions.assertEquals("abc-def", ourNotificationServlet.getReceivedAuthorizationHeaders().get(0));
+		assertEquals(1, ourNotificationServlet.getReceivedNotificationCount());
+		assertEquals("abc-def", ourNotificationServlet.getReceivedAuthorizationHeaders().get(0));
 		ourNotificationServlet.reset();
 
 		sendObservation(code, "SNOMED-CT");
 
 		// Should see 1 subscription notification with authorization header
 		waitForSize(1, ourNotificationServlet.getReceivedAuthorizationHeaders());
-		Assertions.assertEquals(1, ourNotificationServlet.getReceivedNotificationCount());
-		Assertions.assertEquals("abc-def", ourNotificationServlet.getReceivedAuthorizationHeaders().get(0));
+		assertEquals(1, ourNotificationServlet.getReceivedNotificationCount());
+		assertEquals("abc-def", ourNotificationServlet.getReceivedAuthorizationHeaders().get(0));
 		ourNotificationServlet.reset();
 
 		Observation observationTemp3 = sendObservation(code, "SNOMED-CT");
 
 		/// Should see 1 subscription notification with authorization header
 		waitForSize(1, ourNotificationServlet.getReceivedAuthorizationHeaders());
-		Assertions.assertEquals(1, ourNotificationServlet.getReceivedNotificationCount());
-		Assertions.assertEquals("abc-def", ourNotificationServlet.getReceivedAuthorizationHeaders().get(0));
+		assertEquals(1, ourNotificationServlet.getReceivedNotificationCount());
+		assertEquals("abc-def", ourNotificationServlet.getReceivedAuthorizationHeaders().get(0));
 		ourNotificationServlet.reset();
 
 		Observation observation3 = myClient.read(Observation.class, observationTemp3.getId());
@@ -297,7 +294,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 
 		// Should see 2 subscription notifications with and without authorization header
 		waitForSize(1, ourNotificationServlet.getReceivedAuthorizationHeaders());
-		Assertions.assertEquals(1, ourNotificationServlet.getReceivedNotificationCount());
+		assertEquals(1, ourNotificationServlet.getReceivedNotificationCount());
 		assertNull(ourNotificationServlet.getReceivedAuthorizationHeaders().get(0));
 		ourNotificationServlet.reset();
 	}
@@ -421,8 +418,8 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		waitForSize(5, ourUpdatedObservations);
 
 		assertFalse(subscription1.getId().equals(subscription2.getId()));
-		assertFalse(observation1.getId().isEmpty());
-		assertFalse(observation2.getId().isEmpty());
+		assertThat(observation1.getId()).isNotEmpty();
+		assertThat(observation2.getId()).isNotEmpty();
 	}
 
 	@Test
@@ -500,9 +497,9 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(5, ourUpdatedObservations);
 
-		assertNotEquals(subscription1.getId(), subscription2.getId());
-		assertFalse(observation1.getId().isEmpty());
-		assertFalse(observation2.getId().isEmpty());
+		assertThat(subscription2.getId()).isNotEqualTo(subscription1.getId());
+		assertThat(observation1.getId()).isNotEmpty();
+		assertThat(observation2.getId()).isNotEmpty();
 	}
 
 	@Test
@@ -552,7 +549,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 
 		try {
 			createSubscription(criteria1, payload, ourListenerServerBase);
-			fail();
+			fail("");
 		} catch (UnprocessableEntityException e) {
 			assertEquals("HTTP 422 Unprocessable Entity: " + Msg.code(9) + "Invalid subscription criteria submitted: Observation?codeeeee=SNOMED-CT " + Msg.code(488) + "Failed to parse match URL[Observation?codeeeee=SNOMED-CT] - Resource type Observation does not have a parameter with name: codeeeee", e.getMessage());
 		}
@@ -574,7 +571,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 
 		assertEquals(Subscription.SubscriptionStatus.REQUESTED, subscriptionOrig.getStatus());
 		List<Coding> tags = subscriptionOrig.getMeta().getTag();
-		assertEquals(1, tags.size());
+		assertThat(tags).hasSize(1);
 		Coding tag = tags.get(0);
 		assertEquals(HapiExtensions.EXT_SUBSCRIPTION_MATCHING_STRATEGY, tag.getSystem());
 		assertEquals(SubscriptionMatchingStrategy.IN_MEMORY.toString(), tag.getCode());
@@ -592,7 +589,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		List<Coding> tags;
 		Coding tag;
 		tags = theSubscription.getMeta().getTag();
-		assertEquals(1, tags.size());
+		assertThat(tags).hasSize(1);
 		tag = tags.get(0);
 		assertEquals(HapiExtensions.EXT_SUBSCRIPTION_MATCHING_STRATEGY, tag.getSystem());
 		assertEquals(SubscriptionMatchingStrategy.IN_MEMORY.toString(), tag.getCode());
@@ -607,7 +604,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		IdType subscriptionId = subscriptionOrig.getIdElement();
 
 		List<Coding> tags = subscriptionOrig.getMeta().getTag();
-		assertEquals(1, tags.size());
+		assertThat(tags).hasSize(1);
 		Coding tag = tags.get(0);
 		assertEquals(HapiExtensions.EXT_SUBSCRIPTION_MATCHING_STRATEGY, tag.getSystem());
 		assertEquals(SubscriptionMatchingStrategy.DATABASE.toString(), tag.getCode());
@@ -619,7 +616,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		Subscription subscription = myClient.read().resource(Subscription.class).withId(subscriptionId.toUnqualifiedVersionless()).execute();
 		assertEquals(Subscription.SubscriptionStatus.ACTIVE, subscription.getStatus());
 		tags = subscription.getMeta().getTag();
-		assertEquals(1, tags.size());
+		assertThat(tags).hasSize(1);
 		tag = tags.get(0);
 		assertEquals(HapiExtensions.EXT_SUBSCRIPTION_MATCHING_STRATEGY, tag.getSystem());
 		assertEquals(SubscriptionMatchingStrategy.DATABASE.toString(), tag.getCode());
@@ -641,7 +638,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		cr.setOccurrence(new DateTimeType("2019-02-08T00:01:00-05:00"));
 		communicationRequestListenerLatch = new CountDownLatch(1);
 		myClient.create().resource(cr).execute();
-		assertTrue(communicationRequestListenerLatch.await(10, TimeUnit.SECONDS), "Timed out waiting for subscription to match");
+		assertThat(communicationRequestListenerLatch.await(10, TimeUnit.SECONDS)).as("Timed out waiting for subscription to match").isTrue();
 	}
 
 	@Test
@@ -651,9 +648,9 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 
 		try {
 			myClient.create().resource(subscription).execute();
-			fail();
+			fail("");
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), containsString("Can not process submitted Subscription - Subscription.status must be populated on this server"));
+			assertThat(e.getMessage()).contains("Can not process submitted Subscription - Subscription.status must be populated on this server");
 		}
 	}
 

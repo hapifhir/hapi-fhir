@@ -1,11 +1,12 @@
 package ca.uhn.fhir.jpa.binstore;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.jpa.binary.svc.NullBinaryStorageSvcImpl;
 import org.hl7.fhir.r4.model.IdType;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 
 public class NullBinaryStorageSvcImplTest {
 
@@ -17,32 +18,32 @@ public class NullBinaryStorageSvcImplTest {
 	}
 
 	@Test
-	public void storeBinaryContent() {
-		assertThrows(UnsupportedOperationException.class, () -> mySvc.storeBinaryContent(null, null, null, null, null));
+	public void storeBlob() {
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() -> mySvc.storeBinaryContent(null, null, null, null, null));
 	}
 
 	@Test
-	public void fetchBinaryContentDetails() {
-		assertThrows(UnsupportedOperationException.class, () -> mySvc.fetchBinaryContentDetails(null, null));
+	public void fetchBlobDetails() {
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() -> mySvc.fetchBinaryContentDetails(null, null));
 	}
 
 	@Test
-	public void writeBinaryContent() {
-		assertThrows(UnsupportedOperationException.class, () -> mySvc.writeBinaryContent(null, null, null));
+	public void writeBlob() {
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() -> mySvc.writeBinaryContent(null, null, null));
 	}
 
 	@Test
-	public void expungeBinaryContent() {
-		assertThrows(UnsupportedOperationException.class, () -> mySvc.expungeBinaryContent(null, null));
+	public void expungeBlob() {
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() -> mySvc.expungeBinaryContent(null, null));
 	}
 
 	@Test
-	public void fetchBinaryContent() {
-		assertThrows(UnsupportedOperationException.class, () -> mySvc.fetchBinaryContent(null, null));
+	public void fetchBlob() {
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() -> mySvc.fetchBinaryContent(null, null));
 	}
 
 	@Test
-	public void newBinaryContentId() {
-		assertThrows(UnsupportedOperationException.class, () -> mySvc.newBinaryContentId());
+	public void newBlobId() {
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() -> mySvc.newBinaryContentId());
 	}
 }

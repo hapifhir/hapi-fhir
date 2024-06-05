@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
@@ -22,9 +23,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class SearchWithGenericListDstu3Test {
 
@@ -59,8 +58,8 @@ public class SearchWithGenericListDstu3Test {
 		ourLog.info(responseContent);
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertEquals("searchByIdentifier", ourLastMethod);
-		assertThat(responseContent, containsString("<family value=\"FAMILY\""));
-		assertThat(responseContent, containsString("<fullUrl value=\"" + ourServer.getBaseUrl() + "/Patient/1\"/>"));
+		assertThat(responseContent).contains("<family value=\"FAMILY\"");
+		assertThat(responseContent).contains("<fullUrl value=\"" + ourServer.getBaseUrl() + "/Patient/1\"/>");
 	}
 
 

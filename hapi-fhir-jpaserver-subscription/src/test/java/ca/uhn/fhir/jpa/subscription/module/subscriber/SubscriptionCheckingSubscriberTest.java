@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
@@ -40,7 +41,7 @@ public class SubscriptionCheckingSubscriberTest extends BaseBlockingQueueSubscri
 		mySubscriptionResourceMatched.awaitExpected();
 		ourObservationListener.awaitExpected();
 
-		assertEquals(1, ourContentTypes.size());
+		assertThat(ourContentTypes).hasSize(1);
 		assertEquals(Constants.CT_FHIR_JSON_NEW, ourContentTypes.get(0));
 	}
 
@@ -65,7 +66,7 @@ public class SubscriptionCheckingSubscriberTest extends BaseBlockingQueueSubscri
 		mySubscriptionResourceMatched.awaitExpected();
 		ourObservationListener.awaitExpected();
 
-		assertEquals(1, ourContentTypes.size());
+		assertThat(ourContentTypes).hasSize(1);
 		assertEquals(Constants.CT_FHIR_XML_NEW, ourContentTypes.get(0));
 	}
 
@@ -92,7 +93,7 @@ public class SubscriptionCheckingSubscriberTest extends BaseBlockingQueueSubscri
 		ourObservationListener.clear();
 		mySubscriptionAfterDelivery.awaitExpected();
 
-		assertEquals(0, ourContentTypes.size());
+		assertThat(ourContentTypes).isEmpty();
 	}
 
 	@Test
@@ -131,7 +132,7 @@ public class SubscriptionCheckingSubscriberTest extends BaseBlockingQueueSubscri
 		mySubscriptionResourceMatched.awaitExpected();
 		ourObservationListener.awaitExpected();
 
-		assertEquals(1, ourContentTypes.size());
+		assertThat(ourContentTypes).hasSize(1);
 		assertEquals(Constants.CT_FHIR_JSON_NEW, ourContentTypes.get(0));
 	}
 

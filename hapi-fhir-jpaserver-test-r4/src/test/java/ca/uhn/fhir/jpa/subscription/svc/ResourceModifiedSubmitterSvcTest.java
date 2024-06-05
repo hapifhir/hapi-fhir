@@ -1,5 +1,8 @@
 package ca.uhn.fhir.jpa.subscription.svc;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.entity.PersistedResourceModifiedMessageEntityPK;
 import ca.uhn.fhir.jpa.model.entity.ResourceModifiedEntity;
@@ -31,11 +34,7 @@ import org.springframework.transaction.support.SimpleTransactionStatus;
 
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.atLeast;
@@ -93,7 +92,7 @@ public class ResourceModifiedSubmitterSvcTest {
 
 		// then
 		ChannelProducerSettings capturedChannelProducerSettings = getCapturedChannelProducerSettings();
-		assertThat(capturedChannelProducerSettings.isQualifyChannelName(), is(expectedResult));
+		assertEquals(expectedResult, capturedChannelProducerSettings.isQualifyChannelName());
 
 	}
 
@@ -108,8 +107,8 @@ public class ResourceModifiedSubmitterSvcTest {
 		boolean wasProcessed = myResourceModifiedSubmitterSvc.submitPersisedResourceModifiedMessage(new ResourceModifiedEntity());
 
 		// then
-		assertThat(wasProcessed, is(Boolean.TRUE));
-		assertThat(myCapturingTransactionStatus.isRollbackOnly(), is(Boolean.FALSE));
+		assertEquals(Boolean.TRUE, wasProcessed);
+		assertEquals(Boolean.FALSE, myCapturingTransactionStatus.isRollbackOnly());
 		verify(myChannelProducer, times(1)).send(any());
 	}
 
@@ -195,7 +194,7 @@ public class ResourceModifiedSubmitterSvcTest {
 		verify(myListAppender).doAppend(loggingCaptor.capture());
 		ILoggingEvent event = loggingCaptor.getValue();
 		assertNotNull(event);
-		assertTrue(event.getThrowableProxy().getMessage().contains(exceptionString));
+		assertThat(event.getThrowableProxy().getMessage()).contains(exceptionString);
 	}
 
 	@Test
@@ -209,8 +208,8 @@ public class ResourceModifiedSubmitterSvcTest {
 		boolean wasProcessed = myResourceModifiedSubmitterSvc.submitPersisedResourceModifiedMessage(new ResourceModifiedEntity());
 
 		// then
-		assertThat(wasProcessed, is(Boolean.TRUE));
-		assertThat(myCapturingTransactionStatus.isRollbackOnly(), is(Boolean.FALSE));
+		assertEquals(Boolean.TRUE, wasProcessed);
+		assertEquals(Boolean.FALSE, myCapturingTransactionStatus.isRollbackOnly());
 		// we do not send a message which was already sent
 		verify(myChannelProducer, times(0)).send(any());
 
@@ -229,8 +228,8 @@ public class ResourceModifiedSubmitterSvcTest {
 		boolean wasProcessed = myResourceModifiedSubmitterSvc.submitPersisedResourceModifiedMessage(new ResourceModifiedEntity());
 
 		// then
-		assertThat(wasProcessed, is(Boolean.FALSE));
-		assertThat(myCapturingTransactionStatus.isRollbackOnly(), is(Boolean.TRUE));
+		assertEquals(Boolean.FALSE, wasProcessed);
+		assertEquals(Boolean.TRUE, myCapturingTransactionStatus.isRollbackOnly());
 
 	}
 

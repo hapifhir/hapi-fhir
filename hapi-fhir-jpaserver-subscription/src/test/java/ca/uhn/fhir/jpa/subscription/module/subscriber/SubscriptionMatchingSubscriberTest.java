@@ -40,6 +40,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionCriteriaParser.TypeEnum.STARTYPE_EXPRESSION;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -87,7 +88,7 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		mySubscriptionResourceMatched.awaitExpected();
 		ourObservationListener.awaitExpected();
 
-		assertEquals(1, ourContentTypes.size());
+		assertThat(ourContentTypes).hasSize(1);
 		assertEquals(Constants.CT_FHIR_JSON_NEW, ourContentTypes.get(0));
 	}
 
@@ -112,7 +113,7 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		mySubscriptionResourceMatched.awaitExpected();
 		ourObservationListener.awaitExpected();
 
-		assertEquals(1, ourContentTypes.size());
+		assertThat(ourContentTypes).hasSize(1);
 		assertEquals(Constants.CT_FHIR_XML_NEW, ourContentTypes.get(0));
 	}
 
@@ -132,7 +133,7 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		mySubscriptionResourceMatched.awaitExpected();
 		ourObservationListener.awaitExpected();
 
-		assertEquals(1, ourContentTypes.size());
+		assertThat(ourContentTypes).hasSize(1);
 		assertEquals(Constants.CT_FHIR_XML_NEW, ourContentTypes.get(0));
 	}
 
@@ -159,7 +160,7 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		ourObservationListener.clear();
 		mySubscriptionAfterDelivery.awaitExpected();
 
-		assertEquals(0, ourContentTypes.size());
+		assertThat(ourContentTypes).isEmpty();
 	}
 
 
@@ -187,7 +188,7 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		mySubscriptionResourceMatched.awaitExpected();
 		ourObservationListener.awaitExpected();
 
-		assertEquals(2, ourContentTypes.size());
+		assertThat(ourContentTypes).hasSize(2);
 		assertEquals(Constants.CT_FHIR_XML_NEW, ourContentTypes.get(0));
 	}
 
@@ -574,8 +575,8 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 			mySubscriptionResourceMatched.awaitExpected();
 			ourObservationListener.awaitExpected();
 		} catch (InterruptedException exception) {
-			fail();
 			Thread.currentThread().interrupt();
+			fail();
 		}
 	}
 }

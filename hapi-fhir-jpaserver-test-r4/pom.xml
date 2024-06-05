@@ -35,17 +35,6 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.exparity</groupId>
-			<artifactId>hamcrest-date</artifactId>
-			<exclusions>
-				<exclusion>
-					<artifactId>*</artifactId>
-					<groupId>*</groupId>
-				</exclusion>
-			</exclusions>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
 			<groupId>org.xmlunit</groupId>
 			<artifactId>xmlunit-core</artifactId>
 			<scope>test</scope>

@@ -11,7 +11,7 @@ import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
 import ca.uhn.fhir.util.JsonUtil;
-import org.apache.commons.lang3.time.DateUtils;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Binary;
@@ -29,22 +29,17 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import jakarta.annotation.Nonnull;
-
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.IntStream;
 
-import static org.exparity.hamcrest.date.DateMatchers.within;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -133,7 +128,7 @@ public class BulkDataExportJobSchedulingHelperImplTest {
 		}
 
 		final Date cutoffDate = myCutoffCaptor.getValue();
-		assertThat(cutoffDate, within(1, ChronoUnit.MINUTES, computeDateFromConfig(expectedRetentionHours)));
+		assertThat(cutoffDate).isInSameMinuteWindowAs(computeDateFromConfig(expectedRetentionHours));
 	}
 
 	@Test
@@ -156,7 +151,7 @@ public class BulkDataExportJobSchedulingHelperImplTest {
 		}
 
 		final Date cutoffDate = myCutoffCaptor.getValue();
-		assertThat(cutoffDate, within(1, ChronoUnit.MINUTES, computeDateFromConfig(expectedRetentionHours)));
+		assertThat(cutoffDate).isInSameMinuteWindowAs(computeDateFromConfig(expectedRetentionHours));
 	}
 
 	@Test
@@ -179,7 +174,7 @@ public class BulkDataExportJobSchedulingHelperImplTest {
 		}
 
 		final Date cutoffDate = myCutoffCaptor.getValue();
-		assertThat(cutoffDate, within(1, ChronoUnit.MINUTES, computeDateFromConfig(expectedRetentionHours)));
+		assertThat(cutoffDate).isInSameMinuteWindowAs(computeDateFromConfig(expectedRetentionHours));
 	}
 
 	@Test
@@ -202,7 +197,7 @@ public class BulkDataExportJobSchedulingHelperImplTest {
 		}
 
 		final Date cutoffDate = myCutoffCaptor.getValue();
-		assertThat(cutoffDate, within(1, ChronoUnit.MINUTES, computeDateFromConfig(expectedRetentionHours)));
+		assertThat(cutoffDate).isInSameMinuteWindowAs(computeDateFromConfig(expectedRetentionHours));
 	}
 
 	@Test
@@ -226,7 +221,7 @@ public class BulkDataExportJobSchedulingHelperImplTest {
 
 		final Date cutoffDate = myCutoffCaptor.getValue();
 
-		assertThat(cutoffDate, within(1, ChronoUnit.MINUTES, computeDateFromConfig(expectedRetentionHours)));
+		assertThat(cutoffDate).isInSameMinuteWindowAs(computeDateFromConfig(expectedRetentionHours));
 	}
 
 	@Test
@@ -250,7 +245,7 @@ public class BulkDataExportJobSchedulingHelperImplTest {
 
 		final Date cutoffDate = myCutoffCaptor.getValue();
 
-		assertThat(cutoffDate, within(1, ChronoUnit.MINUTES, computeDateFromConfig(expectedRetentionHours)));
+		assertThat(cutoffDate).isInSameMinuteWindowAs(computeDateFromConfig(expectedRetentionHours));
 	}
 
 	@Test
@@ -277,7 +272,7 @@ public class BulkDataExportJobSchedulingHelperImplTest {
 
 		final Date cutoffDate = myCutoffCaptor.getValue();
 
-		assertThat(cutoffDate, within(1, ChronoUnit.MINUTES, computeDateFromConfig(expectedRetentionHours)));
+		assertThat(cutoffDate).isInSameMinuteWindowAs(computeDateFromConfig(expectedRetentionHours));
 	}
 
 	@Nonnull

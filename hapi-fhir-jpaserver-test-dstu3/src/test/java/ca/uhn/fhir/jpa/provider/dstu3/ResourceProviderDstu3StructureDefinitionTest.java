@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -13,7 +14,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ResourceProviderDstu3StructureDefinitionTest extends BaseResourceProviderDstu3Test {
 
@@ -29,7 +30,7 @@ public class ResourceProviderDstu3StructureDefinitionTest extends BaseResourcePr
 			.withParameter(Parameters.class, "definition", sd)
 			.returnResourceType(StructureDefinition.class)
 			.execute();
-		assertEquals(54, response.getSnapshot().getElement().size());
+		assertThat(response.getSnapshot().getElement()).hasSize(54);
 	}
 
 
@@ -45,7 +46,7 @@ public class ResourceProviderDstu3StructureDefinitionTest extends BaseResourcePr
 			.withNoParameters(Parameters.class)
 			.returnResourceType(StructureDefinition.class)
 			.execute();
-		assertEquals(54, response.getSnapshot().getElement().size());
+		assertThat(response.getSnapshot().getElement()).hasSize(54);
 	}
 
 
@@ -61,7 +62,7 @@ public class ResourceProviderDstu3StructureDefinitionTest extends BaseResourcePr
 			.withParameter(Parameters.class, "url", new StringType("http://hl7.org/fhir/StructureDefinition/MyPatient421"))
 			.returnResourceType(StructureDefinition.class)
 			.execute();
-		assertEquals(54, response.getSnapshot().getElement().size());
+		assertThat(response.getSnapshot().getElement()).hasSize(54);
 	}
 
 	@Test

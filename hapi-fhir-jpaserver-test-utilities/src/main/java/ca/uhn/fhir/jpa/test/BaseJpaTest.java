@@ -877,7 +877,7 @@ public abstract class BaseJpaTest extends BaseTest {
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theId.getResourceType());
 		try {
 			dao.read(theId, mySrd);
-			fail();
+			fail("");
 		} catch (ResourceNotFoundException e) {
 			// good
 		}

@@ -1,5 +1,11 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.delete.ThreadSafeResourceDeleterSvc;
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
@@ -77,15 +83,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.startsWith;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 
 public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Test {
 
@@ -844,7 +846,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		try {
 			assertEquals(201, response.getStatusLine().getStatusCode());
 			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
-			assertThat(newIdString, startsWith(myServerBase + "/Patient/"));
+			assertThat(newIdString).startsWith(myServerBase + "/Patient/");
 			id = new IdType(newIdString);
 		} finally {
 			response.close();
@@ -860,7 +862,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		try {
 			assertEquals(201, response.getStatusLine().getStatusCode());
 			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
-			assertThat(newIdString, startsWith(myServerBase + "/Patient/"));
+			assertThat(newIdString).startsWith(myServerBase + "/Patient/");
 		} finally {
 			response.close();
 		}
@@ -916,10 +918,10 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		Parameters diff;
 
 		diff = myClient.operation().onInstance("Patient/A").named(ProviderConstants.DIFF_OPERATION_NAME).withNoParameters(Parameters.class).execute();
-		assertEquals(1, diff.getParameter().size());
+		assertThat(diff.getParameter()).hasSize(1);
 
 		diff = myClient.operation().onInstanceVersion(new IdType("Patient/A/_history/2")).named(ProviderConstants.DIFF_OPERATION_NAME).withNoParameters(Parameters.class).execute();
-		assertEquals(1, diff.getParameter().size());
+		assertThat(diff.getParameter()).hasSize(1);
 
 		try {
 			myClient.operation().onInstance("Observation/B").named(ProviderConstants.DIFF_OPERATION_NAME).withNoParameters(Parameters.class).execute();
@@ -958,7 +960,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 			.withParameter(Parameters.class, ProviderConstants.DIFF_FROM_PARAMETER, new StringType("Patient/A"))
 			.andParameter(ProviderConstants.DIFF_TO_PARAMETER, new StringType("Patient/B"))
 			.execute();
-		assertEquals(2, diff.getParameter().size());
+		assertThat(diff.getParameter()).hasSize(2);
 
 		try {
 			myClient
@@ -999,7 +1001,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		try (CloseableHttpResponse response = ourHttpClient.execute(httpGet)) {
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			assertEquals(200, response.getStatusLine().getStatusCode());
-			assertThat(resp, containsString("MY_FAMILY"));
+			assertThat(resp).contains("MY_FAMILY");
 		}
 
 		httpGet = new HttpGet(myServerBase + "/Patient/B/$graphql?query=" + UrlUtil.escapeUrlParam(query));
@@ -1046,7 +1048,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		request.addEntry().setResource(o).getRequest().setMethod(Bundle.HTTPVerb.POST);
 
 		Bundle resp = myClient.transaction().withBundle(request).execute();
-		assertEquals(2, resp.getEntry().size());
+		assertThat(resp.getEntry()).hasSize(2);
 
 
 	}
@@ -1199,7 +1201,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 			.withBundle(bundle)
 			.withAdditionalHeader(Constants.HEADER_PREFER, "return=" + Constants.HEADER_PREFER_RETURN_MINIMAL)
 			.execute();
-		assertEquals(3, resp.getEntry().size());
+		assertThat(resp.getEntry()).hasSize(3);
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp));
 	}
 
@@ -1233,7 +1235,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 			.withNoParameters(Parameters.class)
 			.returnResourceType(Bundle.class)
 			.execute();
-		assertEquals(2, outcome.getEntry().size());
+		assertThat(outcome.getEntry()).hasSize(2);
 
 		// Add an Encounter, which will be returned by $everything but that hasn't been
 		// explicitly authorized
@@ -1252,7 +1254,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 				.execute();
 			fail();
 		} catch (ForbiddenOperationException e) {
-			assertThat(e.getMessage(), containsString("Access denied by default policy"));
+			assertThat(e.getMessage()).contains("Access denied by default policy");
 		}
 	}
 
@@ -1480,7 +1482,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 				myClient.search().byUrl(url).returnBundle(Bundle.class).execute();
 				fail();
 			} catch (ForbiddenOperationException e) {
-				assertThat(e.getMessage(), startsWith("HTTP 403 Forbidden: " + Msg.code(333) + "Access denied by rule"));
+				assertThat(e.getMessage()).startsWith("HTTP 403 Forbidden: " + Msg.code(333) + "Access denied by rule");
 			}
 		}
 
@@ -1631,12 +1633,8 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 	}
 
 	private void validateDeleteConditionalByUrlIsForbidden(String theUrl) {
-		try {
-			executeDeleteConditionalByUrl(theUrl);
-			fail();
-		} catch (ForbiddenOperationException e) {
-			// good
-		}
+		assertThatThrownBy(() -> executeDeleteConditionalByUrl(theUrl))
+			.isInstanceOf(ForbiddenOperationException.class);
 	}
 
 	private void executeDeleteConditionalByUrl(String theUrl) {
@@ -1671,7 +1669,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 
 		// search runs without 403.
 		Bundle bundle = myClient.search().byUrl("/Observation?code=foo").returnBundle(Bundle.class).execute();
-		assertThat(bundle.getEntry(), hasSize(1));
+		assertThat(bundle.getEntry()).hasSize(1);
 	}
 
 	@Test
@@ -1807,16 +1805,14 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 
 		myServer.getRestfulServer().registerInterceptor(new WriteResourcesInTransactionAuthorizationInterceptor());
 
-		try {
+		String expectedMessage = "HTTP 400 Bad Request: HAPI-2504: Can not handle nested Bundle request with url:";
+		assertThatThrownBy(() ->
 			myClient
 				.transaction()
 				.withBundle(outerTransaction)
-				.execute();
-			fail();
-		} catch (InvalidRequestException e) {
-			String expectedMessage = "HTTP 400 Bad Request: HAPI-2504: Can not handle nested Bundle request with url:";
-			assertTrue(e.getMessage().contains(expectedMessage));
-		}
+				.execute())
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessageContaining(expectedMessage);
 
 		// verify nested Patient transaction did NOT execute
 		assertTrue(myPatientDao.search(SearchParameterMap.newSynchronous(), mySrd).isEmpty());
@@ -1836,16 +1832,13 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 
 		myServer.getRestfulServer().registerInterceptor(new WriteResourcesInTransactionAuthorizationInterceptor());
 
-		try {
+		assertThatThrownBy(() ->
 			myClient
 				.transaction()
 				.withBundle(transaction)
-				.execute();
-			fail();
-		} catch (InvalidRequestException e) {
-			String expectedMessage = "HTTP 400 Bad Request: HAPI-0339: Can not handle nested Parameters with UPDATE operation";
-			assertEquals(expectedMessage, e.getMessage());
-		}
+				.execute())
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessage("HTTP 400 Bad Request: HAPI-0339: Can not handle nested Parameters with UPDATE operation");
 
 		List<IBaseResource> allPatients = myPatientDao.search(SearchParameterMap.newSynchronous(), mySrd).getAllResources();
 		assertEquals(1, allPatients.size());
@@ -2014,12 +2007,9 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 	}
 
 	private void assertSearchFailsWith403Forbidden(String theUrl) {
-		try {
-			myClient.search().byUrl(theUrl).execute();
-			fail();
-		} catch (Exception e) {
-			assertTrue(e.getMessage().contains("HTTP 403 Forbidden"));
-		}
+		assertThatThrownBy(() ->
+			myClient.search().byUrl(theUrl).execute())
+			.hasMessageContaining("HTTP 403 Forbidden");
 	}
 
 	private Parameters createPatientBirthdatePatch(DateType theNewBirthDate) {
