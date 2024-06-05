@@ -159,7 +159,7 @@ public class HapiMigrator {
 				for (BaseTask next : newTaskList) {
 					if (initializedSchema && !next.hasFlag(TaskFlagEnum.RUN_DURING_SCHEMA_INITIALIZATION)) {
 						ourLog.info("Skipping task {} because schema is being initialized", next.getMigrationVersion());
-						postExecute(next, new StopWatch(), true);
+						recordTaskAsCompletedIfNotDryRun(next, 0L, true);
 						continue;
 					}
 
@@ -200,13 +200,13 @@ public class HapiMigrator {
 			}
 			preExecute(theTask);
 			theTask.execute();
-			postExecute(theTask, sw, true);
+			recordTaskAsCompletedIfNotDryRun(theTask, sw.getMillis(), true);
 			theMigrationResult.changes += theTask.getChangesCount();
 			theMigrationResult.executedStatements.addAll(theTask.getExecutedStatements());
 			theMigrationResult.succeededTasks.add(theTask);
 		} catch (SQLException | HapiMigrationException e) {
 			theMigrationResult.failedTasks.add(theTask);
-			postExecute(theTask, sw, false);
+			recordTaskAsCompletedIfNotDryRun(theTask, sw.getMillis(), false);
 			String description = theTask.getDescription();
 			if (isBlank(description)) {
 				description = theTask.getClass().getSimpleName();
@@ -220,9 +220,9 @@ public class HapiMigrator {
 		myCallbacks.forEach(action -> action.preExecution(theTask));
 	}
 
-	private void postExecute(BaseTask theNext, StopWatch theStopWatch, boolean theSuccess) {
+	private void recordTaskAsCompletedIfNotDryRun(BaseTask theNext, long theExecutionMillis, boolean theSuccess) {
 		if (!theNext.isDryRun()) {
-			myHapiMigrationStorageSvc.saveTask(theNext, Math.toIntExact(theStopWatch.getMillis()), theSuccess);
+			myHapiMigrationStorageSvc.saveTask(theNext, Math.toIntExact(theExecutionMillis), theSuccess);
 		}
 	}
 
