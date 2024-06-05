@@ -68,6 +68,7 @@ public abstract class BaseTask {
 	 * Whether to generate the SQL in a 'readable format'
 	 */
 	protected boolean myPrettyPrint = false;
+
 	private DriverTypeEnum.ConnectionProperties myConnectionProperties;
 	private DriverTypeEnum myDriverType;
 	private String myDescription;
@@ -211,13 +212,13 @@ public abstract class BaseTask {
 				return 0;
 			} else {
 				throw new HapiMigrationException(
-					Msg.code(61) + "Failed during task " + getMigrationVersion() + ": " + e, e);
+						Msg.code(61) + "Failed during task " + getMigrationVersion() + ": " + e, e);
 			}
 		}
 	}
 
 	protected void captureExecutedStatement(
-		String theTableName, @Language("SQL") String theSql, Object... theArguments) {
+			String theTableName, @Language("SQL") String theSql, Object... theArguments) {
 		myExecutedStatements.add(new ExecutedStatement(mySchemaVersion, theTableName, theSql, theArguments));
 	}
 
@@ -265,8 +266,8 @@ public abstract class BaseTask {
 			ourLog.debug("precondition to evaluate: {}", precondition);
 			if (!precondition.getPreconditionRunner().get()) {
 				ourLog.info(
-					"Skipping task since one of the preconditions was not met: {}",
-					precondition.getPreconditionReason());
+						"Skipping task since one of the preconditions was not met: {}",
+						precondition.getPreconditionReason());
 				return;
 			}
 		}
@@ -294,7 +295,7 @@ public abstract class BaseTask {
 		Matcher matcher = versionPattern.matcher(mySchemaVersion);
 		if (!matcher.matches()) {
 			throw new IllegalStateException(Msg.code(62) + "The version " + mySchemaVersion
-				+ " does not match the expected pattern " + MIGRATION_VERSION_PATTERN);
+					+ " does not match the expected pattern " + MIGRATION_VERSION_PATTERN);
 		}
 	}
 
@@ -373,10 +374,10 @@ public abstract class BaseTask {
 		@Override
 		public String toString() {
 			return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-				.append("tableName", myTableName)
-				.append("sql", mySql)
-				.append("arguments", myArguments)
-				.toString();
+					.append("tableName", myTableName)
+					.append("sql", mySql)
+					.append("arguments", myArguments)
+					.toString();
 		}
 	}
 }
