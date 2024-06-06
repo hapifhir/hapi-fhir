@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.tx;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeOperation;
@@ -19,9 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.times;
@@ -79,7 +78,7 @@ public class ExpungeOperationTest {
 			.map(RequestDetails::getTenantId)
 			.allMatch(theExpectedTenantId::equals);
 
-		assertThat(allMatching, is(equalTo(true)));
+		assertEquals(true, allMatching);
 	}
 
 	private RequestDetails getRequestDetails() {

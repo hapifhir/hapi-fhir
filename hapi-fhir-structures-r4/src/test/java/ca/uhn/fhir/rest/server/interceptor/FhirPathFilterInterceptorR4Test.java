@@ -37,9 +37,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.stream.Stream;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.not;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -85,8 +83,8 @@ public class FhirPathFilterInterceptorR4Test {
 		try (CloseableHttpResponse response = myHttpClient.execute(request)) {
 			String responseText = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response:\n{}", responseText);
-			assertThat(responseText, containsString("\"system\": \"http://identifiers/1\""));
-			assertThat(responseText, containsString("\"given\": [ \"Homer\", \"Jay\" ]"));
+			assertThat(responseText).contains("\"system\": \"http://identifiers/1\"");
+			assertThat(responseText).contains("\"given\": [ \"Homer\", \"Jay\" ]");
 		}
 	}
 
@@ -100,8 +98,8 @@ public class FhirPathFilterInterceptorR4Test {
 		try (CloseableHttpResponse response = myHttpClient.execute(request)) {
 			String responseText = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response:\n{}", responseText);
-			assertThat(responseText, containsString("<span class='hlTagName'>&quot;system&quot;</span>: <span class='hlQuot'>&quot;http://identifiers/1&quot;"));
-			assertThat(responseText, containsString("<span class='hlTagName'>&quot;given&quot;</span>: <span class='hlControl'>[</span> <span class='hlTagName'>&quot;Homer&quot;</span><span class='hlControl'>,</span> <span class='hlTagName'>&quot;Jay&quot;</span> ]</div>"));
+			assertThat(responseText).contains("<span class='hlTagName'>&quot;system&quot;</span>: <span class='hlQuot'>&quot;http://identifiers/1&quot;");
+			assertThat(responseText).contains("<span class='hlTagName'>&quot;given&quot;</span>: <span class='hlControl'>[</span> <span class='hlTagName'>&quot;Homer&quot;</span><span class='hlControl'>,</span> <span class='hlTagName'>&quot;Jay&quot;</span> ]</div>");
 		}
 	}
 
@@ -113,8 +111,8 @@ public class FhirPathFilterInterceptorR4Test {
 		try (CloseableHttpResponse response = myHttpClient.execute(request)) {
 			String responseText = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response:\n{}", responseText);
-			assertThat(responseText, containsString("\"system\": \"http://identifiers/1\""));
-			assertThat(responseText, not(containsString("\"given\": [ \"Homer\", \"Jay\" ]")));
+			assertThat(responseText).contains("\"system\": \"http://identifiers/1\"");
+			assertThat(responseText).doesNotContain("\"given\": [ \"Homer\", \"Jay\" ]");
 		}
 
 	}
@@ -127,7 +125,7 @@ public class FhirPathFilterInterceptorR4Test {
 		try (CloseableHttpResponse response = myHttpClient.execute(request)) {
 			String responseText = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response:\n{}", responseText);
-			assertThat(responseText, containsString("\"url\": \"http://hl7.org/fhir/us/core/StructureDefinition/us-core-race\""));
+			assertThat(responseText).contains("\"url\": \"http://hl7.org/fhir/us/core/StructureDefinition/us-core-race\"");
 		}
 
 	}
@@ -140,9 +138,9 @@ public class FhirPathFilterInterceptorR4Test {
 		try (CloseableHttpResponse response = myHttpClient.execute(request)) {
 			String responseText = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response:\n{}", responseText);
-			assertThat(responseText, containsString("\"resource\": {"));
-			assertThat(responseText, containsString("\"system\": \"http://identifiers/1\""));
-			assertThat(responseText, containsString("\"given\": [ \"Homer\", \"Jay\" ]"));
+			assertThat(responseText).contains("\"resource\": {");
+			assertThat(responseText).contains("\"system\": \"http://identifiers/1\"");
+			assertThat(responseText).contains("\"given\": [ \"Homer\", \"Jay\" ]");
 		}
 
 	}
@@ -156,7 +154,7 @@ public class FhirPathFilterInterceptorR4Test {
 			String responseText = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response:\n{}", responseText);
 			assertEquals(400, response.getStatusLine().getStatusCode());
-			assertThat(responseText, containsString("left operand to * can only have 1 value, but has 8 values"));
+			assertThat(responseText).contains("left operand to * can only have 1 value, but has 8 values");
 		}
 
 	}
@@ -169,12 +167,10 @@ public class FhirPathFilterInterceptorR4Test {
 		try (CloseableHttpResponse response = myHttpClient.execute(request)) {
 			String responseText = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response:\n{}", responseText);
-			assertThat(responseText, containsString(
-				"      \"valueHumanName\": {\n" +
-					"        \"family\": \"Simpson\",\n" +
-					"        \"given\": [ \"Homer\", \"Jay\" ]\n" +
-					"      }"
-			));
+			assertThat(responseText).contains("      \"valueHumanName\": {\n" +
+				"        \"family\": \"Simpson\",\n" +
+				"        \"given\": [ \"Homer\", \"Jay\" ]\n" +
+				"      }");
 		}
 
 	}
@@ -188,8 +184,8 @@ public class FhirPathFilterInterceptorR4Test {
 		try (CloseableHttpResponse response = myHttpClient.execute(request)) {
 			String responseText = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response:\n{}", responseText);
-			assertThat(responseText, containsString("<span class='hlTagName'>&quot;system&quot;</span>: <span class='hlQuot'>&quot;http://identifiers/1&quot;"));
-			assertThat(responseText, not(containsString("<span class='hlTagName'>&quot;given&quot;</span>: <span class='hlControl'>[</span> <span class='hlTagName'>&quot;Homer&quot;</span><span class='hlControl'>,</span> <span class='hlTagName'>&quot;Jay&quot;</span> ]</div>")));
+			assertThat(responseText).contains("<span class='hlTagName'>&quot;system&quot;</span>: <span class='hlQuot'>&quot;http://identifiers/1&quot;");
+			assertThat(responseText).doesNotContain("<span class='hlTagName'>&quot;given&quot;</span>: <span class='hlControl'>[</span> <span class='hlTagName'>&quot;Homer&quot;</span><span class='hlControl'>,</span> <span class='hlTagName'>&quot;Jay&quot;</span> ]</div>");
 		}
 
 	}
@@ -219,10 +215,10 @@ public class FhirPathFilterInterceptorR4Test {
 			Parameters parameters = (Parameters)resource;
 			Parameters.ParametersParameterComponent parameterComponent = parameters.getParameter("result");
 			assertNotNull(parameterComponent);
-			assertEquals(2, parameterComponent.getPart().size());
+			assertThat(parameterComponent.getPart()).hasSize(2);
 			Parameters.ParametersParameterComponent resultComponent = parameterComponent.getPart().get(1);
 			assertEquals("result", resultComponent.getName());
-			assertThat(responseText, containsString(expectedResult));
+			assertThat(responseText).contains(expectedResult);
 		}
 
 	}

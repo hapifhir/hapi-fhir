@@ -28,10 +28,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -61,7 +60,7 @@ public class ResourceProviderConcurrencyR4Test extends BaseResourceProviderR4Tes
 		myInterceptorRegistry.unregisterInterceptorsIf(t -> t instanceof SearchBlockingInterceptor);
 		myExecutor.shutdown();
 
-		assertThat(myExceptions, empty());
+		assertThat(myExceptions).isEmpty();
 	}
 
 	/**
@@ -109,7 +108,7 @@ public class ResourceProviderConcurrencyR4Test extends BaseResourceProviderR4Tes
 			});
 		}
 
-		await().until(() -> searchBlockingInterceptorFamily1.getHits(), equalTo(1));
+		await().until(() -> searchBlockingInterceptorFamily1.getHits() == 1);
 
 		// Submit search 2 (should also block because it will reuse the first search - same name being searched)
 		{

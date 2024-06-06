@@ -11,10 +11,7 @@ import org.hl7.fhir.r5.model.Resource;
 import org.junit.jupiter.api.Test;
 import org.mockito.quality.Strictness;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
@@ -37,9 +34,9 @@ public class VersionSpecificWorkerContextWrapperTest extends BaseValidationTestW
 		VersionCanonicalizer versionCanonicalizer = new VersionCanonicalizer(FhirContext.forR5Cached());
 		VersionSpecificWorkerContextWrapper wrapper = new VersionSpecificWorkerContextWrapper(mockContext, versionCanonicalizer);
 
-		assertTrue(wrapper.hasBinaryKey(EXPECTED_BINARY_KEY_1), "wrapper should have binary key " + EXPECTED_BINARY_KEY_1);
-		assertTrue(wrapper.hasBinaryKey(EXPECTED_BINARY_KEY_2), "wrapper should have binary key " + EXPECTED_BINARY_KEY_1);
-		assertFalse(wrapper.hasBinaryKey(NON_EXISTENT_BINARY_KEY), "wrapper should not have binary key " + NON_EXISTENT_BINARY_KEY);
+		assertThat(wrapper.hasBinaryKey(EXPECTED_BINARY_KEY_1)).as("wrapper should have binary key " + EXPECTED_BINARY_KEY_1).isTrue();
+		assertThat(wrapper.hasBinaryKey(EXPECTED_BINARY_KEY_2)).as("wrapper should have binary key " + EXPECTED_BINARY_KEY_1).isTrue();
+		assertThat(wrapper.hasBinaryKey(NON_EXISTENT_BINARY_KEY)).as("wrapper should not have binary key " + NON_EXISTENT_BINARY_KEY).isFalse();
 
 	}
 
@@ -53,9 +50,9 @@ public class VersionSpecificWorkerContextWrapperTest extends BaseValidationTestW
 		VersionCanonicalizer versionCanonicalizer = new VersionCanonicalizer(FhirContext.forR5Cached());
 		VersionSpecificWorkerContextWrapper wrapper = new VersionSpecificWorkerContextWrapper(mockContext, versionCanonicalizer);
 
-		assertArrayEquals(EXPECTED_BINARY_CONTENT_1, wrapper.getBinaryForKey(EXPECTED_BINARY_KEY_1));
-		assertArrayEquals(EXPECTED_BINARY_CONTENT_2, wrapper.getBinaryForKey(EXPECTED_BINARY_KEY_2));
-		assertNull(wrapper.getBinaryForKey(NON_EXISTENT_BINARY_KEY), "wrapper should return null for binary key " + NON_EXISTENT_BINARY_KEY);
+		assertThat(wrapper.getBinaryForKey(EXPECTED_BINARY_KEY_1)).containsExactly(EXPECTED_BINARY_CONTENT_1);
+		assertThat(wrapper.getBinaryForKey(EXPECTED_BINARY_KEY_2)).containsExactly(EXPECTED_BINARY_CONTENT_2);
+		assertThat(wrapper.getBinaryForKey(NON_EXISTENT_BINARY_KEY)).as("wrapper should return null for binary key " + NON_EXISTENT_BINARY_KEY).isNull();
 	}
 
 	@Test

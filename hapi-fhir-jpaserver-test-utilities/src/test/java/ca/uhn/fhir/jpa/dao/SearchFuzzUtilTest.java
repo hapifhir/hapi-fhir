@@ -9,8 +9,7 @@ import org.slf4j.LoggerFactory;
 import java.math.BigDecimal;
 import java.math.MathContext;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.startsWith;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SearchFuzzUtilTest {
@@ -37,7 +36,7 @@ public class SearchFuzzUtilTest {
 		BigDecimal in = new BigDecimal("123.010");
 		BigDecimal out = SearchFuzzUtil.calculateFuzzAmount(ParamPrefixEnum.EQUAL, in);
 		ourLog.info(out.toPlainString());
-		assertThat(out.toPlainString(), startsWith("0.0005"));
+		assertThat(out.toPlainString()).startsWith("0.0005");
 
 		BigDecimal low = in.subtract(out, MathContext.DECIMAL64);
 		BigDecimal high = in.add(out, MathContext.DECIMAL64);
@@ -49,7 +48,7 @@ public class SearchFuzzUtilTest {
 		BigDecimal in = new BigDecimal("200.0");
 		BigDecimal out = SearchFuzzUtil.calculateFuzzAmount(ParamPrefixEnum.EQUAL, in);
 		ourLog.info(out.toPlainString());
-		assertThat(out.toPlainString(), startsWith("0.05000000"));
+		assertThat(out.toPlainString()).startsWith("0.05000000");
 	}
 
 	@Test
@@ -57,7 +56,7 @@ public class SearchFuzzUtilTest {
 		BigDecimal in = new BigDecimal("200.3");
 		BigDecimal out = SearchFuzzUtil.calculateFuzzAmount(ParamPrefixEnum.EQUAL, in);
 		ourLog.info(out.toPlainString());
-		assertThat(out.toPlainString(), startsWith("0.05000000"));
+		assertThat(out.toPlainString()).startsWith("0.05000000");
 	}
 
 	@Test
@@ -65,7 +64,7 @@ public class SearchFuzzUtilTest {
 		BigDecimal in = new BigDecimal("200.300");
 		BigDecimal out = SearchFuzzUtil.calculateFuzzAmount(ParamPrefixEnum.EQUAL, in);
 		ourLog.info(out.toPlainString());
-		assertThat(out.toPlainString(), startsWith("0.0005000000"));
+		assertThat(out.toPlainString()).startsWith("0.0005000000");
 	}
 
 	@Test
@@ -73,7 +72,7 @@ public class SearchFuzzUtilTest {
 		BigDecimal in = new BigDecimal("200.30000000");
 		BigDecimal out = SearchFuzzUtil.calculateFuzzAmount(ParamPrefixEnum.EQUAL, in);
 		ourLog.info(out.toPlainString());
-		assertThat(out.toPlainString(), startsWith("0.000000005000000"));
+		assertThat(out.toPlainString()).startsWith("0.000000005000000");
 	}
 
 	@Test
@@ -81,7 +80,7 @@ public class SearchFuzzUtilTest {
 		BigDecimal in = new BigDecimal("200.300000001");
 		BigDecimal out = SearchFuzzUtil.calculateFuzzAmount(ParamPrefixEnum.EQUAL, in);
 		ourLog.info(out.toPlainString());
-		assertThat(out.toPlainString(), startsWith("0.0000000005000000"));
+		assertThat(out.toPlainString()).startsWith("0.0000000005000000");
 	}
 
 	@Test
@@ -89,6 +88,6 @@ public class SearchFuzzUtilTest {
 		BigDecimal in = new BigDecimal("200");
 		BigDecimal out = SearchFuzzUtil.calculateFuzzAmount(ParamPrefixEnum.APPROXIMATE, in);
 		ourLog.info(out.toPlainString());
-		assertThat(out.toPlainString(), startsWith("20.000"));
+		assertThat(out.toPlainString()).startsWith("20.000");
 	}
 }

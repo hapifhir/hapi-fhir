@@ -5,8 +5,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.io.StringReader;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class NicknameMapTest {
@@ -24,7 +23,7 @@ kent,ken,kenny,kendrick
 		NicknameMap map = new NicknameMap();
 		map.load(new StringReader(testData));
 		assertEquals(7, map.size());
-		assertThat(map.getNicknamesFromFormalName("kenneth"), containsInAnyOrder("ken", "kenny", "kendrick"));
-		assertThat(map.getFormalNamesFromNickname("ken"), containsInAnyOrder("kendall", "kendrick", "kendrik", "kenneth", "kenny", "kent"));
+		assertThat(map.getNicknamesFromFormalName("kenneth")).containsExactlyInAnyOrder("ken", "kenny", "kendrick");
+		assertThat(map.getFormalNamesFromNickname("ken")).containsExactlyInAnyOrder("kendall", "kendrick", "kendrik", "kenneth", "kenny", "kent");
 	}
 }

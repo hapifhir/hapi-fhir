@@ -27,9 +27,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.startsWith;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class MultitenancyR4Test {
@@ -77,7 +75,7 @@ public class MultitenancyR4Test {
 			assertEquals(ourServer.getBaseUrl() + "/TENANT2/Patient?identifier=foo%7Cbar", resp.getLink("self").getUrl());
 			assertEquals(ourServer.getBaseUrl() + "/TENANT2/Patient/0", resp.getEntry().get(0).getFullUrl());
 			assertEquals(ourServer.getBaseUrl() + "/TENANT2/Patient/0", resp.getEntry().get(0).getResource().getId());
-			assertThat(resp.getLink("next").getUrl(), startsWith(ourServer.getBaseUrl() + "/TENANT2?_getpages="));
+			assertThat(resp.getLink("next").getUrl()).startsWith(ourServer.getBaseUrl() + "/TENANT2?_getpages=");
 
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
@@ -89,7 +87,7 @@ public class MultitenancyR4Test {
 		try {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			assertEquals(400, status.getStatusLine().getStatusCode());
-			assertThat(responseContent, containsString("\"diagnostics\":\"" + Msg.code(307) + "This is the base URL of a multitenant FHIR server. Unable to handle this request, as it does not contain a tenant ID.\""));
+			assertThat(responseContent).contains("\"diagnostics\":\"" + Msg.code(307) + "This is the base URL of a multitenant FHIR server. Unable to handle this request, as it does not contain a tenant ID.\"");
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}

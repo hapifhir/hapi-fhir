@@ -17,8 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.times;
@@ -92,8 +91,8 @@ public class ValueSetConceptAccumulatorTest {
 
 		TermValueSetConcept capturedTermValueSetConcept = captor.getValue();
 
-		assertThat(capturedTermValueSetConcept.hasSourceConceptDirectParentPidsLob(), equalTo(theSupportLegacyLob));
-		assertThat(capturedTermValueSetConcept.getSourceConceptDirectParentPids(), equalTo(sourceConceptDirectParentPids));
+		assertEquals(theSupportLegacyLob, capturedTermValueSetConcept.hasSourceConceptDirectParentPidsLob());
+		assertEquals(sourceConceptDirectParentPids, capturedTermValueSetConcept.getSourceConceptDirectParentPids());
 
 	}
 

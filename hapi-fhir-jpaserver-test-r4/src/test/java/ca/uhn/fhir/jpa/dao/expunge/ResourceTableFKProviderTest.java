@@ -18,8 +18,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 
 class ResourceTableFKProviderTest extends BaseJpaR4Test {
@@ -68,6 +67,6 @@ class ResourceTableFKProviderTest extends BaseJpaR4Test {
 		// If this assertion fails, it means hapi-fhir has added a new foreign-key dependency to HFJ_RESOURCE.  To fix
 		// the test, add the missing key to myResourceTableFKProvider.getResourceForeignKeys()
 		List<ResourceForeignKey> actual = myResourceTableFKProvider.getResourceForeignKeys();
-		assertThat(actual, containsInAnyOrder(expected.toArray()));
+		assertThat(actual.toArray()).containsExactlyInAnyOrder(expected.toArray());
 	}
 }

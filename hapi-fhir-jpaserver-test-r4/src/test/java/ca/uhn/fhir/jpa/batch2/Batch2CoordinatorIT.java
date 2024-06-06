@@ -1,5 +1,9 @@
 package ca.uhn.fhir.jpa.batch2;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.batch2.api.ChunkExecutionDetails;
 import ca.uhn.fhir.batch2.api.IJobCompletionHandler;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
@@ -35,7 +39,7 @@ import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.test.utilities.UnregisterScheduledProcessor;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.test.concurrency.PointcutLatch;
-import ca.uhn.test.util.LogbackCaptureTestExtension;
+import ca.uhn.test.util.LogbackTestExtension;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.annotation.Nonnull;
 import org.junit.jupiter.api.AfterEach;
@@ -69,12 +73,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static ca.uhn.fhir.batch2.config.BaseBatch2Config.CHANNEL_NAME;
 import static ca.uhn.fhir.batch2.coordinator.WorkChunkProcessor.MAX_CHUNK_ERROR_COUNT;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
+
 
 @ContextConfiguration(classes = {
 	Batch2FastSchedulerConfig.class
@@ -105,7 +107,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 	IJobPersistence myJobPersistence;
 
 	@RegisterExtension
-	LogbackCaptureTestExtension myLogbackCaptureTestExtension = new LogbackCaptureTestExtension();
+	LogbackTestExtension myLogbackTestExtension = new LogbackTestExtension();
 
 	private final PointcutLatch myFirstStepLatch = new PointcutLatch("First Step");
 	private final PointcutLatch myLastStepLatch = new PointcutLatch("Last Step");
@@ -198,14 +200,14 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 
 			while (iterator.hasNext()) {
 				JobInstance next = iterator.next();
-				assertTrue(jobIds.contains(next.getInstanceId()));
+				assertThat(jobIds).contains(next.getInstanceId());
 				fetched.add(next.getInstanceId());
 			}
 
 			pageIndex++;
 		} while (page.hasNext());
 
-		assertEquals(maxJobsToSave, fetched.size());
+		assertThat(fetched).hasSize(maxJobsToSave);
 	}
 
 	@Test
@@ -256,7 +258,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 
 		final List<JobInstance> jobInstances = myJobPersistence.fetchInstances(10, 0);
 
-		assertEquals(1, jobInstances.size());
+		assertThat(jobInstances).hasSize(1);
 
 		final JobInstance jobInstance = jobInstances.get(0);
 
@@ -529,7 +531,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 			@Override
 			public void reductionStepRun(StepExecutionDetails<TestJobParameters, SecondStepOutput> theStepExecutionDetails, IJobDataSink<ReductionStepOutput> theDataSink) {
 				boolean isRunAlready = myBoolean.getAndSet(true);
-				assertFalse(isRunAlready, "Reduction step should only be called once!");
+				assertThat(isRunAlready).as("Reduction step should only be called once!").isFalse();
 
 				complete(theStepExecutionDetails, theDataSink);
 			}
@@ -566,7 +568,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 
 		// verify
 		Optional<JobInstance> instanceOp = myJobPersistence.fetchInstance(instanceId);
-		assertTrue(instanceOp.isPresent());
+		assertThat(instanceOp).isPresent();
 		int secondStepCalls = secondStepInt.get();
 		assertEquals(2, secondStepCalls);
 		JobInstance instance = instanceOp.get();
@@ -574,14 +576,12 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		assertNotNull(instance.getReport());
 
 		for (int i = 0; i < secondStepInt.get(); i++) {
-			assertTrue(instance.getReport().contains(
-				testInfo + i
-			));
+			assertThat(instance.getReport()).contains(testInfo + i);
 		}
 
 		final List<JobInstance> jobInstances = myJobPersistence.fetchInstances(10, 0);
 
-		assertEquals(1, jobInstances.size());
+		assertThat(jobInstances).hasSize(1);
 
 		final JobInstance jobInstance = jobInstances.get(0);
 
@@ -745,7 +745,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 				callLatch(myFirstStepLatch, step);
 				throw new RuntimeException("Expected Test Exception");
 			};
-			IJobStepWorker<TestJobParameters, FirstStepOutput, VoidModel> lastStep = (step, sink) -> fail();
+		IJobStepWorker<TestJobParameters, FirstStepOutput, VoidModel> lastStep = (step, sink) -> fail();
 
 			String jobDefId = getMethodNameForJobId();
 			JobDefinition<? extends IModelJson> definition = buildGatedJobDefinition(jobDefId, firstStep, lastStep);
@@ -825,7 +825,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 
 		assertEquals(MAX_CHUNK_ERROR_COUNT + 1, counter.get());
 
-		assertSame(StatusEnum.FAILED, instance.getStatus());
+		assertThat(instance.getStatus()).isSameAs(StatusEnum.FAILED);
 	}
 
 	@Nonnull

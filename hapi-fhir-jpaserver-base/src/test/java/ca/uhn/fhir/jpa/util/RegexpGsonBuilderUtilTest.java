@@ -7,7 +7,7 @@ import com.google.gson.stream.MalformedJsonException;
 import org.junit.jupiter.api.Test;
 
 import static ca.uhn.fhir.jpa.entity.TermConceptPropertyBinder.CONCEPT_PROPERTY_PREFIX_NAME;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -25,8 +25,8 @@ class RegexpGsonBuilderUtilTest {
 		String propertyValue = "propAAA";
 		String expectedGson = "{\"regexp\":{\"P:" + PROP_NAME + "\":{\"value\":\"" + propertyValue + "\"}}}";
 
-		assertEquals(expectedGson, RegexpGsonBuilderUtil.toGson(
-			CONCEPT_PROPERTY_PREFIX_NAME + PROP_NAME, propertyValue).toString());
+		assertThat(RegexpGsonBuilderUtil.toGson(
+				CONCEPT_PROPERTY_PREFIX_NAME + PROP_NAME, propertyValue).toString()).isEqualTo(expectedGson);
 	}
 
 	/**

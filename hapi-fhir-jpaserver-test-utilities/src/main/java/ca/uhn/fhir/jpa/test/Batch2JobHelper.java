@@ -24,7 +24,6 @@ import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
-import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import org.awaitility.Awaitility;
 import org.awaitility.core.ConditionTimeoutException;

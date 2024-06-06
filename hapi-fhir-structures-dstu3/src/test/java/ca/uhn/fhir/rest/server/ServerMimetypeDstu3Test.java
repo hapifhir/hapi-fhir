@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -11,7 +12,6 @@ import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.MyPatientWithExtensions;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
-import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
@@ -23,12 +23,6 @@ import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.methods.HttpTrace;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.ee10.servlet.ServletHandler;
-import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.hl7.fhir.dstu3.model.CapabilityStatement;
 import org.hl7.fhir.dstu3.model.CodeType;
 import org.hl7.fhir.dstu3.model.DateType;
@@ -37,7 +31,6 @@ import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
@@ -45,13 +38,8 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.hasItems;
-import static org.hamcrest.Matchers.not;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ServerMimetypeDstu3Test {
 
@@ -75,7 +63,7 @@ public class ServerMimetypeDstu3Test {
 			String content = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			CapabilityStatement conf = ourCtx.newXmlParser().parseResource(CapabilityStatement.class, content);
 			List<String> strings = toStrings(conf.getFormat());
-			assertThat(strings, hasItems(Constants.CT_FHIR_XML_NEW, Constants.CT_FHIR_JSON_NEW, Constants.FORMAT_XML, Constants.FORMAT_JSON));
+			assertThat(strings).contains(Constants.CT_FHIR_XML_NEW, Constants.CT_FHIR_JSON_NEW, Constants.FORMAT_XML, Constants.FORMAT_JSON);
 		} finally {
 			status.close();
 		}
@@ -265,8 +253,8 @@ public class ServerMimetypeDstu3Test {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, containsString("<Patient xmlns=\"http://hl7.org/fhir\">"));
-		assertThat(responseContent, not(containsString("http://hl7.org/fhir/")));
+		assertThat(responseContent).contains("<Patient xmlns=\"http://hl7.org/fhir\">");
+		assertThat(responseContent).doesNotContain("http://hl7.org/fhir/");
 		assertEquals(Constants.CT_FHIR_XML_NEW, status.getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
 	}
 
@@ -282,8 +270,8 @@ public class ServerMimetypeDstu3Test {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, containsString("<Patient xmlns=\"http://hl7.org/fhir\">"));
-		assertThat(responseContent, not(containsString("http://hl7.org/fhir/")));
+		assertThat(responseContent).contains("<Patient xmlns=\"http://hl7.org/fhir\">");
+		assertThat(responseContent).doesNotContain("http://hl7.org/fhir/");
 		assertEquals(Constants.CT_FHIR_XML, status.getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
 	}
 
@@ -299,8 +287,8 @@ public class ServerMimetypeDstu3Test {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, containsString("<Patient xmlns=\"http://hl7.org/fhir\">"));
-		assertThat(responseContent, not(containsString("http://hl7.org/fhir/")));
+		assertThat(responseContent).contains("<Patient xmlns=\"http://hl7.org/fhir\">");
+		assertThat(responseContent).doesNotContain("http://hl7.org/fhir/");
 		assertEquals(Constants.CT_FHIR_XML_NEW, status.getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
 	}
 
@@ -318,7 +306,7 @@ public class ServerMimetypeDstu3Test {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, containsString("\"resourceType\""));
+		assertThat(responseContent).contains("\"resourceType\"");
 		assertEquals(Constants.CT_FHIR_JSON_NEW, status.getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
 	}
 
@@ -334,7 +322,7 @@ public class ServerMimetypeDstu3Test {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, containsString("\"resourceType\""));
+		assertThat(responseContent).contains("\"resourceType\"");
 		assertEquals(Constants.CT_FHIR_JSON, status.getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
 	}
 
@@ -350,7 +338,7 @@ public class ServerMimetypeDstu3Test {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, containsString("\"resourceType\""));
+		assertThat(responseContent).contains("\"resourceType\"");
 		assertEquals(Constants.CT_FHIR_JSON_NEW, status.getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
 	}
 

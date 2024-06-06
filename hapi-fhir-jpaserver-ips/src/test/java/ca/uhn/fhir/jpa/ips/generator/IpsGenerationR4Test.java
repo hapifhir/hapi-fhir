@@ -47,10 +47,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static ca.uhn.fhir.util.BundleUtil.convertBundleIntoTransaction;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -96,9 +94,9 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 		ourLog.info("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 
 		// Verify
-		assertThat(output.getMeta().getProfile().stream().map(PrimitiveType::getValue).toList(), contains(
+		assertThat(output.getMeta().getProfile().stream().map(PrimitiveType::getValue).toList()).contains(
 			"http://hl7.org/fhir/uv/ips/StructureDefinition/Bundle-uv-ips"
-		));
+		);
 		validateDocument(output);
 		assertEquals(117, output.getEntry().size());
 		String patientId = findFirstEntryResource(output, Patient.class, 1).getIdElement().toUnqualifiedVersionless().getValue();
@@ -108,7 +106,7 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 		assertNull(medicationStatement.getInformationSource().getReference());
 
 		List<String> sectionTitles = extractSectionTitles(output);
-		assertThat(sectionTitles.toString(), sectionTitles, contains("Allergies and Intolerances", "Medication List", "Problem List", "History of Immunizations", "Diagnostic Results"));
+		assertThat(sectionTitles).as(sectionTitles.toString()).containsExactly("Allergies and Intolerances", "Medication List", "Problem List", "History of Immunizations", "Diagnostic Results");
 	}
 
 	@Test
@@ -130,7 +128,7 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 		ourLog.info("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 
 		// Verify
-		assertEquals(74, output.getEntry().size());
+		assertThat(output.getEntry()).hasSize(74);
 	}
 
 	@Test
@@ -152,7 +150,7 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 		ourLog.info("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 
 		// Verify
-		assertEquals(80, output.getEntry().size());
+		assertThat(output.getEntry()).hasSize(80);
 	}
 
 	@Test
@@ -203,7 +201,7 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 		assertEquals(patientId, findEntryResource(output, Condition.class, 1, 2).getSubject().getReference());
 
 		List<String> sectionTitles = extractSectionTitles(output);
-		assertThat(sectionTitles.toString(), sectionTitles, contains("Allergies and Intolerances", "Medication List", "Problem List"));
+		assertThat(sectionTitles).as(sectionTitles.toString()).containsExactly("Allergies and Intolerances", "Medication List", "Problem List");
 	}
 
 	/**
@@ -246,9 +244,9 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 
 		Composition composition = findCompositionSectionByDisplay(output, "History of Immunization Narrative");
 		// Should be newest first
-		assertThat(composition.getText().getDivAsString(), stringContainsInOrder(
+		assertThat(composition.getText().getDivAsString()).containsSubsequence(
 			"Vax 2015", "Vax 2010", "Vax 2005"
-		));
+		);
 
 		List<String> resourceDates = output
 			.getEntry()
@@ -257,7 +255,7 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 			.map(t -> (Immunization) t.getResource())
 			.map(t -> t.getOccurrenceDateTimeType().getValueAsString().substring(0, 4))
 			.collect(Collectors.toList());
-		assertThat(resourceDates, contains("2015", "2010", "2005"));
+		assertThat(resourceDates).containsExactly("2015", "2010", "2005");
 	}
 
 
@@ -333,7 +331,7 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 			.map(Bundle.BundleEntryComponent::getResource)
 			.filter(r -> theType.isAssignableFrom(r.getClass()))
 			.toList();
-		assertEquals(theExpectedCount, resources.size());
+		assertThat(resources).hasSize(theExpectedCount);
 		return (T) resources.get(index);
 	}
 

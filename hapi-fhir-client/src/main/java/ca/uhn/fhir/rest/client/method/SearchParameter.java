@@ -90,8 +90,8 @@ import java.util.Set;
 public class SearchParameter extends BaseQueryParameter {
 
 	private static final String EMPTY_STRING = "";
-	private static HashMap<RestSearchParameterTypeEnum, Set<String>> ourParamQualifiers;
-	private static HashMap<Class<?>, RestSearchParameterTypeEnum> ourParamTypes;
+	private static final HashMap<RestSearchParameterTypeEnum, Set<String>> ourParamQualifiers;
+	private static final HashMap<Class<?>, RestSearchParameterTypeEnum> ourParamTypes;
 	static final String QUALIFIER_ANY_TYPE = ":*";
 
 	static {

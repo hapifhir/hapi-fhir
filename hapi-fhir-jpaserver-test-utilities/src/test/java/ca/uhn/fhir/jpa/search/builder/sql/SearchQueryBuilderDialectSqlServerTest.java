@@ -2,18 +2,15 @@ package ca.uhn.fhir.jpa.search.builder.sql;
 
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirSQLServerDialect;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceTablePredicateBuilder;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.dialect.Dialect;
-import org.hibernate.dialect.SQLServer2012Dialect;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import jakarta.annotation.Nonnull;
-import java.util.Locale;
-
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -27,10 +24,10 @@ public class SearchQueryBuilderDialectSqlServerTest extends BaseSearchQueryBuild
 
 		String sql = generatedSql.getSql();
 		sql = massageSql(sql);
-		assertTrue(sql.endsWith("ORDER BY -t1.SP_VALUE_LOW DESC offset 0 rows fetch first ? rows only"), sql);
+		assertThat(sql.endsWith("ORDER BY -t1.SP_VALUE_LOW DESC offset 0 rows fetch first ? rows only")).as(sql).isTrue();
 
 		assertEquals(3, StringUtils.countMatches(sql, "?"));
-		assertEquals(3, generatedSql.getBindVariables().size());
+		assertThat(generatedSql.getBindVariables()).hasSize(3);
 	}
 
 	@Nonnull
@@ -49,10 +46,10 @@ public class SearchQueryBuilderDialectSqlServerTest extends BaseSearchQueryBuild
 
 		String sql = generatedSql.getSql();
 		sql = massageSql(sql);
-		assertTrue(sql.endsWith("order by @@version offset ? rows fetch next ? rows only"), sql);
+		assertThat(sql.endsWith("order by @@version offset ? rows fetch next ? rows only")).as(sql).isTrue();
 
 		assertEquals(3, StringUtils.countMatches(sql, "?"));
-		assertEquals(3, generatedSql.getBindVariables().size());
+		assertThat(generatedSql.getBindVariables()).hasSize(3);
 	}
 
 	@Test
@@ -65,10 +62,10 @@ public class SearchQueryBuilderDialectSqlServerTest extends BaseSearchQueryBuild
 
 		String sql = generatedSql.getSql();
 		sql = massageSql(sql);
-		assertTrue(sql.endsWith("order by @@version offset 0 rows fetch first ? rows only"), sql);
+		assertThat(sql.endsWith("order by @@version offset 0 rows fetch first ? rows only")).as(sql).isTrue();
 
 		assertEquals(2, StringUtils.countMatches(sql, "?"));
-		assertEquals(2, generatedSql.getBindVariables().size());
+		assertThat(generatedSql.getBindVariables()).hasSize(2);
 	}
 
 	@Nonnull

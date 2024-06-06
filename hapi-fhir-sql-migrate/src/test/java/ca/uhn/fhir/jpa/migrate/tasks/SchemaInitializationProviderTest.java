@@ -6,8 +6,7 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class SchemaInitializationProviderTest {
 
@@ -31,12 +30,7 @@ public class SchemaInitializationProviderTest {
 		List<String> listToPopulate = new ArrayList<>();
 		svc.parseSqlFileIntoIndividualStatements(DriverTypeEnum.POSTGRES_9_4, listToPopulate, input);
 
-		assertThat(listToPopulate.toString(), listToPopulate, contains(
-			"create sequence foo",
-			"alter table if exists CDR_XACT_LOG_STEP add constraint FK_XACTLOGSTEP_XACTLOG foreign key (LOG_PID) references CDR_XACT_LOG",
-			"ALTER TABLE hfj_resource SET (autovacuum_vacuum_scale_factor = 0.01)",
-			"ALTER TABLE hfj_spidx_token SET (autovacuum_vacuum_scale_factor = 0.01)"
-		));
+		assertThat(listToPopulate).as(listToPopulate.toString()).containsExactly("create sequence foo", "alter table if exists CDR_XACT_LOG_STEP add constraint FK_XACTLOGSTEP_XACTLOG foreign key (LOG_PID) references CDR_XACT_LOG", "ALTER TABLE hfj_resource SET (autovacuum_vacuum_scale_factor = 0.01)", "ALTER TABLE hfj_spidx_token SET (autovacuum_vacuum_scale_factor = 0.01)");
 
 	}
 

@@ -10,15 +10,14 @@ import org.hl7.fhir.r4.model.Resource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(SpringExtension.class)
 class MeasureOperationProviderTest extends BaseCrR4TestServer {
@@ -99,9 +98,8 @@ class MeasureOperationProviderTest extends BaseCrR4TestServer {
 				&& x.getCode().getCoding().get(0).getCode().equals(populationName))
 			.findFirst();
 
-		assertTrue(population.isPresent(), String.format("Unable to locate a population with id \"%s\"", populationName));
-		assertEquals(population.get().getCount(), expectedCount,
-			String.format("expected count for population \"%s\" did not match", populationName));
+		assertThat(population.isPresent()).as(String.format("Unable to locate a population with id \"%s\"",populationName)).isTrue();
+		assertThat(expectedCount).as(String.format("expected count for population \"%s\" did not match",populationName)).isEqualTo(population.get().getCount());
 	}
 	void testMeasureEvaluateMultiVersion() {
 
@@ -121,12 +119,8 @@ class MeasureOperationProviderTest extends BaseCrR4TestServer {
 			.getPopulation().stream().filter(x -> x.hasCode() && x.getCode().hasCoding()
 				&& x.getCode().getCoding().get(0).getCode().equals(populationName))
 			.findFirst();
-		assertTrue(population.isPresent(), String.format("population \"%s\" not found in report", populationName));
-		assertEquals(
-			expectedCount,
-			population.get().getCount(),
-			String.format("expected count for population \"%s\" did not match", populationName)
-		);
+		assertThat(population.isPresent()).as(String.format("population \"%s\" not found in report",populationName)).isTrue();
+		assertThat(population.get().getCount()).as(String.format("expected count for population \"%s\" did not match",populationName)).isEqualTo(expectedCount);
 	}
 	private void runWithPatient(String measureId, String patientId, int initialPopulationCount, int denominatorCount,
 								int denominatorExclusionCount, int numeratorCount, boolean enrolledDuringParticipationPeriod,
