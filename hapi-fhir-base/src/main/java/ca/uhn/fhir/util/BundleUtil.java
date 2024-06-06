@@ -776,7 +776,7 @@ public class BundleUtil {
 				continue;
 			}
 			if (isPlaceholderReference) {
-				if (theUrl.equals(next.getUrl())
+				if (theUrl.equals(next.getFullUrl())
 						|| theUrl.equals(nextResource.getIdElement().getValue())) {
 					return nextResource;
 				}
