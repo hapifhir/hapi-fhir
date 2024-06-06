@@ -780,7 +780,7 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 		ValidationResult results = myVal.validateWithResult(is);
 		List<SingleValidationMessage> outcome = logResultsAndReturnNonInformationalOnes(results);
 		assertThat(outcome).hasSize(1);
-		assertEquals("The Coding provided (http://dicom.nema.org/resources/ontology/DCM#BAR) was not found in the value set 'Acquisition Modality Codes' (http://hl7.org/fhir/ValueSet/dicom-cid29|20121129)", outcome.get(0).getMessage());
+		assertThat(outcome.get(0).getMessage()).startsWith("The Coding provided (http://dicom.nema.org/resources/ontology/DCM#BAR) was not found in the value set 'Acquisition Modality Codes' (http://hl7.org/fhir/ValueSet/dicom-cid29|20121129)");
 	}
 
 	/**

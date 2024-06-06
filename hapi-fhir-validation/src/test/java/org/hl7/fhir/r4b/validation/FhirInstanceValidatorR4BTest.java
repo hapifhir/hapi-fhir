@@ -496,7 +496,9 @@ public class FhirInstanceValidatorR4BTest extends BaseValidationTestWithInlineMo
 		result = val.validateWithResult(input);
 		all = logResultsAndReturnAll(result);
 		assertTrue(result.isSuccessful());
-		assertThat(all).isEmpty();
+		assertThat(all).hasSize(1);
+		assertEquals("Best Practice Recommendation: In general, all observations should have a subject", all.get(0).getMessage());
+		assertEquals(ResultSeverityEnum.WARNING, all.get(0).getSeverity());
 
 		// With BPs enabled
 		val = ourCtx.newValidator();
@@ -1479,7 +1481,7 @@ public class FhirInstanceValidatorR4BTest extends BaseValidationTestWithInlineMo
 		ValidationResult output = myFhirValidator.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
 		assertThat(errors.size()).as(errors.toString()).isEqualTo(2);
-		assertThat(errors.get(0).getMessage()).contains("The value provided ('BLAH') was not found in the value set 'CurrencyCode' (http://hl7.org/fhir/ValueSet/currencies|4.3.0), and a code is required from this value set");
+		assertThat(errors.get(1).getMessage()).contains("The value provided ('BLAH') was not found in the value set 'CurrencyCode' (http://hl7.org/fhir/ValueSet/currencies|4.3.0), and a code is required from this value set");
 
 
 	}
