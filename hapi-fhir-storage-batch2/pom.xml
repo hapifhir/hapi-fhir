@@ -68,6 +68,12 @@
 			<artifactId>jakarta.el</artifactId>
 		</dependency>
 
+		<!-- OpenTelemetry -->
+		<dependency>
+			<groupId>io.opentelemetry</groupId>
+			<artifactId>opentelemetry-api</artifactId>
+		</dependency>
+
 		<!-- test -->
 		<dependency>
 			<groupId>org.awaitility</groupId>
