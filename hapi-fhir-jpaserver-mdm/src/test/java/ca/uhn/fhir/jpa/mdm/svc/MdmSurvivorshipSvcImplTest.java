@@ -14,7 +14,6 @@ import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.model.CanonicalEID;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.model.mdmevents.MdmLinkJson;
-import ca.uhn.fhir.mdm.model.mdmevents.MdmLinkWithRevisionJson;
 import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
 import ca.uhn.fhir.mdm.svc.MdmSurvivorshipSvcImpl;
 import ca.uhn.fhir.mdm.util.EIDHelper;
@@ -41,7 +40,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -102,6 +101,7 @@ public class MdmSurvivorshipSvcImplTest {
 	public void rebuildGoldenResourceCurrentLinksUsingSurvivorshipRules_withManyLinks_rebuildsInUpdateOrder(boolean theIsUseNonNumericId) {
 		// setup
 		// create resources
+		int goldenId = 777;
 		Patient goldenPatient = new Patient();
 		goldenPatient.addAddress()
 			.setCity("Toronto")
@@ -109,13 +109,13 @@ public class MdmSurvivorshipSvcImplTest {
 		goldenPatient.addName()
 			.setFamily("Doe")
 			.addGiven("Jane");
-		goldenPatient.setId("Patient/777");
+		goldenPatient.setId("Patient/" + goldenId);
 		MdmResourceUtil.setMdmManaged(goldenPatient);
 		MdmResourceUtil.setGoldenResource(goldenPatient);
 
 		List<IBaseResource> resources = new ArrayList<>();
 		List<MdmLinkJson> links = new ArrayList<>();
-		List<MdmLinkWithRevisionJson> linksWithRevisions = new ArrayList<>();
+
 		for (int i = 0; i < 10; i++) {
 			// we want our resources to be slightly different
 			Patient patient = new Patient();
@@ -128,21 +128,16 @@ public class MdmSurvivorshipSvcImplTest {
 			patient.addIdentifier()
 				.setSystem("http://example.com")
 				.setValue("Value" + i);
-			patient.setId("Patient/" + (theIsUseNonNumericId ? "pat"+i : Integer.toString(i)));
+			patient.setId("Patient/" + (theIsUseNonNumericId ? "pat" + i : Integer.toString(i)));
 			resources.add(patient);
 
 			MdmLinkJson link = createLinkJson(
 				patient,
 				goldenPatient
 			);
+			link.setSourcePid(JpaPid.fromId((long)i));
+			link.setGoldenPid(JpaPid.fromId((long)goldenId));
 			links.add(link);
-			linksWithRevisions.add(new MdmLinkWithRevisionJson(
-				link,
-				1L,
-				Date.from(
-					Instant.now().minus(i, ChronoUnit.HOURS)
-				)
-			));
 		}
 
 		IFhirResourceDao resourceDao = mock(IFhirResourceDao.class);
@@ -151,13 +146,8 @@ public class MdmSurvivorshipSvcImplTest {
 		when(myDaoRegistry.getResourceDao(eq("Patient")))
 			.thenReturn(resourceDao);
 		AtomicInteger counter = new AtomicInteger();
-		if (theIsUseNonNumericId) {
-			when(resourceDao.read(any(), any()))
-				.thenAnswer(params -> resources.get(counter.getAndIncrement()));
-		} else {
-			when(resourceDao.readByPid(any()))
-				.thenAnswer(params -> resources.get(counter.getAndIncrement()));
-		}
+		when(resourceDao.readByPid(any()))
+			.thenAnswer(params -> resources.get(counter.getAndIncrement()));
 		Page<MdmLinkJson> linkPage = mock(Page.class);
 		when(myMdmLinkQuerySvc.queryLinks(any(), any()))
 			.thenReturn(linkPage);
@@ -178,9 +168,9 @@ public class MdmSurvivorshipSvcImplTest {
 		// verify
 		assertNotNull(goldenPatientRebuilt);
 		// make sure it doesn't match the previous golden resource
-		assertNotEquals(goldenPatient, goldenPatientRebuilt);
-		assertNotEquals(goldenPatient.getName().get(0).getGiven(), goldenPatientRebuilt.getName().get(0).getGiven());
-		assertNotEquals(goldenPatient.getAddress().get(0).getLine().get(0), goldenPatientRebuilt.getAddress().get(0).getLine().get(0));
+		assertThat(goldenPatientRebuilt).isNotEqualTo(goldenPatient);
+		assertThat(goldenPatientRebuilt.getName().get(0).getGiven()).isNotEqualTo(goldenPatient.getName().get(0).getGiven());
+		assertThat(goldenPatientRebuilt.getAddress().get(0).getLine().get(0)).isNotEqualTo(goldenPatient.getAddress().get(0).getLine().get(0));
 		// make sure it's still a golden resource
 		assertTrue(MdmResourceUtil.isGoldenRecord(goldenPatientRebuilt));
 

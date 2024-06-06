@@ -19,11 +19,10 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
+import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
-import org.eclipse.jetty.ee10.servlet.ServletHandler;
-import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -32,6 +31,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 /**
  * Created by dsotnikov on 2/25/2014.
@@ -53,9 +53,9 @@ public class ReadTest {
 
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			IdentifierDt dt = ourCtx.newXmlParser().parseResource(Patient.class,responseContent).getIdentifierFirstRep();
-			
+
 			assertEquals("1", dt.getSystemElement().getValueAsString());
-			assertEquals(null, dt.getValueElement().getValueAsString());
+			assertNull(dt.getValueElement().getValueAsString());
 			
 			org.apache.http.Header cl = status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION_LC);
 			assertNotNull(cl);
@@ -74,7 +74,7 @@ public class ReadTest {
 			byte[] responseContent = IOUtils.toByteArray(status.getEntity().getContent());
 			IOUtils.closeQuietly(status.getEntity().getContent());
 
-			
+
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			assertEquals("application/x-foo", status.getEntity().getContentType().getValue());
 			
@@ -85,8 +85,8 @@ public class ReadTest {
 			org.apache.http.Header cd = status.getFirstHeader("content-disposition");
 			assertNotNull(cd);
 			assertEquals("Attachment;", cd.getValue());
-			
-			assertEquals(4,responseContent.length);
+
+			assertEquals(4, responseContent.length);
 			for (int i = 0; i < 4; i++) {
 				assertEquals(i+1, responseContent[i]); // should be 1,2,3,4
 			}

@@ -16,16 +16,17 @@ import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.opencds.cqf.fhir.utility.r4.Parameters.booleanPart;
-import static org.opencds.cqf.fhir.utility.r4.Parameters.canonicalPart;
-import static org.opencds.cqf.fhir.utility.r4.Parameters.parameters;
-import static org.opencds.cqf.fhir.utility.r4.Parameters.part;
-import static org.opencds.cqf.fhir.utility.r4.Parameters.datePart;
-import static org.opencds.cqf.fhir.utility.r4.Parameters.stringPart;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.opencds.cqf.fhir.utility.r4.Parameters.booleanPart;
+import static org.opencds.cqf.fhir.utility.r4.Parameters.canonicalPart;
+import static org.opencds.cqf.fhir.utility.r4.Parameters.datePart;
+import static org.opencds.cqf.fhir.utility.r4.Parameters.parameters;
+import static org.opencds.cqf.fhir.utility.r4.Parameters.part;
+import static org.opencds.cqf.fhir.utility.r4.Parameters.stringPart;
 
 public class CpgOperationProviderTest extends BaseCrR4TestServer{
 	@BeforeEach
@@ -173,7 +174,7 @@ public class CpgOperationProviderTest extends BaseCrR4TestServer{
 		Parameters results = runCqlExecution(params);
 
 		assertFalse(results.isEmpty());
-		assertEquals(1, results.getParameter().size());
+		assertThat(results.getParameter()).hasSize(1);
 		assertTrue(results.getParameter("return").getValue() instanceof BooleanType);
 		assertTrue(((BooleanType) results.getParameter("return").getValue()).booleanValue());
 	}
@@ -189,9 +190,8 @@ public class CpgOperationProviderTest extends BaseCrR4TestServer{
 		assertEquals("evaluation error", results.getParameterFirstRep().getName());
 		assertTrue(results.getParameterFirstRep().hasResource());
 		assertTrue(results.getParameterFirstRep().getResource() instanceof OperationOutcome);
-		assertEquals("Unsupported interval point type for FHIR conversion java.lang.Integer",
-			((OperationOutcome) results.getParameterFirstRep().getResource()).getIssueFirstRep().getDetails()
-				.getText());
+		assertThat(((OperationOutcome) results.getParameterFirstRep().getResource()).getIssueFirstRep().getDetails()
+				.getText()).isEqualTo("Unsupported interval point type for FHIR conversion java.lang.Integer");
 	}
 
 	public Parameters runCqlExecution(Parameters parameters){

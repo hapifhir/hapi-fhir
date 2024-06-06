@@ -16,8 +16,8 @@ import java.util.List;
 
 import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_DELETE_JOB_NAME;
 import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
@@ -35,7 +35,7 @@ public class FhirResourceDaoR4CodeSystemTest extends BaseJpaR4Test {
 
 		myResourceReindexingSvc.markAllResourcesForReindexing();
 		int outcome = myResourceReindexingSvc.forceReindexingPass();
-		assertNotEquals(-1, outcome); // -1 means there was a failure
+		assertThat(outcome).isNotEqualTo(-1); // -1 means there was a failure
 
 		myTerminologyDeferredStorageSvc.saveDeferred();
 

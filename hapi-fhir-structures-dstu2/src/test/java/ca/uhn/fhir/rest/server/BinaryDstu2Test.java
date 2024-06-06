@@ -14,25 +14,16 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
-import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
-import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.ee10.servlet.ServletHandler;
-import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -41,11 +32,8 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.startsWith;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
@@ -83,11 +71,11 @@ public class BinaryDstu2Test {
 			ourLog.info(responseContent);
 
 			assertEquals(200, response.getStatusLine().getStatusCode());
-			assertThat(response.getFirstHeader("content-type").getValue(), startsWith(Constants.CT_FHIR_XML + ";"));
+			assertThat(response.getFirstHeader("content-type").getValue()).startsWith(Constants.CT_FHIR_XML + ";");
 
 			Binary bin = ourCtx.newXmlParser().parseResource(Binary.class, responseContent);
 			assertEquals("foo", bin.getContentType());
-			assertArrayEquals(new byte[]{1, 2, 3, 4}, bin.getContent());
+			assertThat(bin.getContent()).containsExactly(new byte[]{1, 2, 3, 4});
 		}
 	}
 
@@ -101,11 +89,11 @@ public class BinaryDstu2Test {
 			ourLog.info(responseContent);
 
 			assertEquals(200, response.getStatusLine().getStatusCode());
-			assertThat(response.getFirstHeader("content-type").getValue(), startsWith(Constants.CT_FHIR_JSON + ";"));
+			assertThat(response.getFirstHeader("content-type").getValue()).startsWith(Constants.CT_FHIR_JSON + ";");
 
 			Binary bin = ourCtx.newJsonParser().parseResource(Binary.class, responseContent);
 			assertEquals("foo", bin.getContentType());
-			assertArrayEquals(new byte[]{1, 2, 3, 4}, bin.getContent());
+			assertThat(bin.getContent()).containsExactly(new byte[]{1, 2, 3, 4});
 		}
 	}
 
@@ -119,7 +107,7 @@ public class BinaryDstu2Test {
 			assertEquals(201, response.getStatusLine().getStatusCode());
 
 			assertEquals("foo/bar; charset=UTF-8", ourLast.getContentType());
-			assertArrayEquals(new byte[]{1, 2, 3, 4}, ourLast.getContent());
+			assertThat(ourLast.getContent()).containsExactly(new byte[]{1, 2, 3, 4});
 		}
 	}
 
@@ -164,7 +152,7 @@ public class BinaryDstu2Test {
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			assertEquals("foo", status.getFirstHeader("content-type").getValue());
 			assertEquals("Attachment;", status.getFirstHeader("Content-Disposition").getValue()); // This is a security requirement!
-			assertArrayEquals(new byte[]{1, 2, 3, 4}, responseContent);
+			assertThat(responseContent).containsExactly(new byte[]{1, 2, 3, 4});
 		}
 	}
 
@@ -199,7 +187,7 @@ public class BinaryDstu2Test {
 			Binary bin = (Binary) bundle.getEntry().get(0).getResource();
 
 			assertEquals("text/plain", bin.getContentType());
-			assertArrayEquals(new byte[]{1, 2, 3, 4}, bin.getContent());
+			assertThat(bin.getContent()).containsExactly(new byte[]{1, 2, 3, 4});
 		}
 	}
 
@@ -218,7 +206,7 @@ public class BinaryDstu2Test {
 			Binary bin = (Binary) bundle.getEntry().get(0).getResource();
 
 			assertEquals("text/plain", bin.getContentType());
-			assertArrayEquals(new byte[]{1, 2, 3, 4}, bin.getContent());
+			assertThat(bin.getContent()).containsExactly(new byte[]{1, 2, 3, 4});
 		}
 	}
 

@@ -1,7 +1,6 @@
 package ca.uhn.fhir.storage.interceptor.balp;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.storage.interceptor.balp.FhirClientBalpSink;
 import ca.uhn.fhir.test.utilities.server.HashMapResourceProviderExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import org.hl7.fhir.dstu3.model.AuditEvent;
@@ -12,8 +11,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class FhirClientBalpSinkTest {
 
@@ -44,7 +42,7 @@ public class FhirClientBalpSinkTest {
 			.stream()
 			.map(t -> t.getEntity().get(0).getReference().getReference())
 			.toList();
-		assertThat(whats, containsInAnyOrder("Patient/123", "Patient/456"));
+		assertThat(whats).containsExactlyInAnyOrder("Patient/123", "Patient/456");
 
 	}
 }

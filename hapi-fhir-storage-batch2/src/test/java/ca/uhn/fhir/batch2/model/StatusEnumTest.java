@@ -5,20 +5,17 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
 
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.hasItem;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class StatusEnumTest {
 	@Test
 	public void testEndedStatuses() {
-		assertThat(StatusEnum.getEndedStatuses(), containsInAnyOrder(StatusEnum.COMPLETED, StatusEnum.FAILED, StatusEnum.CANCELLED));
+		assertThat(StatusEnum.getEndedStatuses()).containsExactlyInAnyOrder(StatusEnum.COMPLETED, StatusEnum.FAILED, StatusEnum.CANCELLED);
 	}
 	@Test
 	public void testNotEndedStatuses() {
-		assertThat(StatusEnum.getNotEndedStatuses(), containsInAnyOrder(StatusEnum.QUEUED, StatusEnum.IN_PROGRESS, StatusEnum.ERRORED, StatusEnum.FINALIZE));
+		assertThat(StatusEnum.getNotEndedStatuses()).containsExactlyInAnyOrder(StatusEnum.QUEUED, StatusEnum.IN_PROGRESS, StatusEnum.ERRORED, StatusEnum.FINALIZE);
 	}
 
 	@ParameterizedTest
@@ -73,11 +70,11 @@ class StatusEnumTest {
 	public void testStateTransition(StatusEnum origStatus, StatusEnum newStatus, boolean expected) {
 		assertEquals(expected, StatusEnum.isLegalStateTransition(origStatus, newStatus));
 		if (expected) {
-			assertThat(StatusEnum.ourFromStates.get(newStatus), hasItem(origStatus));
-			assertThat(StatusEnum.ourToStates.get(origStatus), hasItem(newStatus));
+			assertThat(StatusEnum.ourFromStates.get(newStatus)).contains(origStatus);
+			assertThat(StatusEnum.ourToStates.get(origStatus)).contains(newStatus);
 		} else {
-			assertThat(StatusEnum.ourFromStates.get(newStatus), not(hasItem(origStatus)));
-			assertThat(StatusEnum.ourToStates.get(origStatus), not(hasItem(newStatus)));
+			assertThat(StatusEnum.ourFromStates.get(newStatus)).doesNotContain(origStatus);
+			assertThat(StatusEnum.ourToStates.get(origStatus)).doesNotContain(newStatus);
 		}
 	}
 
@@ -89,6 +86,6 @@ class StatusEnumTest {
 
 	@Test
 	public void testEnumSize() {
-		assertEquals(7, StatusEnum.values().length, "Update testStateTransition() with new cases");
+		assertThat(StatusEnum.values().length).as("Update testStateTransition() with new cases").isEqualTo(7);
 	}
 }

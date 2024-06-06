@@ -27,9 +27,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.not;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class InjectionAttackTest {
@@ -58,7 +56,7 @@ public class InjectionAttackTest {
 			ourLog.info(responseContent);
 
 			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertThat(responseContent, not(containsString("<script>")));
+			assertThat(responseContent).doesNotContain("<script>");
 		}
 	}
 
@@ -77,7 +75,7 @@ public class InjectionAttackTest {
 			ourLog.info(responseContent);
 
 			assertEquals(400, status.getStatusLine().getStatusCode());
-			assertThat(responseContent, not(containsString("<script>")));
+			assertThat(responseContent).doesNotContain("<script>");
 			assertEquals("text/html", status.getFirstHeader("Content-Type").getValue().toLowerCase().replaceAll(";.*", "").trim());
 		}
 
@@ -89,7 +87,7 @@ public class InjectionAttackTest {
 			ourLog.info(responseContent);
 
 			assertEquals(400, status.getStatusLine().getStatusCode());
-			assertThat(responseContent, not(containsString("<script>")));
+			assertThat(responseContent).doesNotContain("<script>");
 			assertEquals("text/html", status.getFirstHeader("Content-Type").getValue().toLowerCase().replaceAll(";.*", "").trim());
 		}
 
@@ -101,7 +99,7 @@ public class InjectionAttackTest {
 			ourLog.info(responseContent);
 
 			assertEquals(400, status.getStatusLine().getStatusCode());
-			assertThat(responseContent, not(containsString("<script>")));
+			assertThat(responseContent).doesNotContain("<script>");
 			assertEquals(Constants.CT_FHIR_XML_NEW, status.getFirstHeader("Content-Type").getValue().toLowerCase().replaceAll(";.*", "").trim());
 		}
 
@@ -113,7 +111,7 @@ public class InjectionAttackTest {
 			ourLog.info(responseContent);
 
 			assertEquals(400, status.getStatusLine().getStatusCode());
-			assertThat(responseContent, not(containsString("<script>")));
+			assertThat(responseContent).doesNotContain("<script>");
 			assertEquals(Constants.CT_FHIR_JSON_NEW, status.getFirstHeader("Content-Type").getValue().toLowerCase().replaceAll(";.*", "").trim());
 		}
 	}
@@ -132,7 +130,7 @@ public class InjectionAttackTest {
 			ourLog.info(responseContent);
 
 			assertEquals(404, status.getStatusLine().getStatusCode());
-			assertThat(responseContent, not(containsString("<script>")));
+			assertThat(responseContent).doesNotContain("<script>");
 			assertEquals("text/html", status.getFirstHeader("Content-Type").getValue().toLowerCase().replaceAll(";.*", "").trim());
 		}
 
@@ -144,7 +142,7 @@ public class InjectionAttackTest {
 			ourLog.info(responseContent);
 
 			assertEquals(404, status.getStatusLine().getStatusCode());
-			assertThat(responseContent, not(containsString("<script>")));
+			assertThat(responseContent).doesNotContain("<script>");
 			assertEquals("text/html", status.getFirstHeader("Content-Type").getValue().toLowerCase().replaceAll(";.*", "").trim());
 		}
 
@@ -156,7 +154,7 @@ public class InjectionAttackTest {
 			ourLog.info(responseContent);
 
 			assertEquals(404, status.getStatusLine().getStatusCode());
-			assertThat(responseContent, not(containsString("<script>")));
+			assertThat(responseContent).doesNotContain("<script>");
 			assertEquals(Constants.CT_FHIR_XML_NEW, status.getFirstHeader("Content-Type").getValue().toLowerCase().replaceAll(";.*", "").trim());
 		}
 
@@ -168,7 +166,7 @@ public class InjectionAttackTest {
 			ourLog.info(responseContent);
 
 			assertEquals(404, status.getStatusLine().getStatusCode());
-			assertThat(responseContent, not(containsString("<script>")));
+			assertThat(responseContent).doesNotContain("<script>");
 			assertEquals(Constants.CT_FHIR_JSON_NEW, status.getFirstHeader("Content-Type").getValue().toLowerCase().replaceAll(";.*", "").trim());
 		}
 	}
@@ -186,7 +184,7 @@ public class InjectionAttackTest {
 			ourLog.info(responseContent);
 
 			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertThat(responseContent, not(containsString("<script>")));
+			assertThat(responseContent).doesNotContain("<script>");
 		}
 
 	}

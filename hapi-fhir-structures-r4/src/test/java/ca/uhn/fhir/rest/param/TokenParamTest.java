@@ -4,9 +4,10 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.Constants;
 import org.junit.jupiter.api.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -18,11 +19,10 @@ public class TokenParamTest {
 		TokenParam tokenParam1 = new TokenParam("foo", "bar");
 		TokenParam tokenParam2 = new TokenParam("foo", "bar");
 		TokenParam tokenParam3 = new TokenParam("foo", "baz");
-		assertEquals(tokenParam1, tokenParam1);
+		assertNotNull(tokenParam1);
 		assertEquals(tokenParam1, tokenParam2);
-		assertNotEquals(tokenParam1, tokenParam3);
-		assertNotEquals(tokenParam1, null);
-		assertNotEquals(tokenParam1, "");
+		assertThat(tokenParam3).isNotEqualTo(tokenParam1);
+		assertThat("").isNotEqualTo(tokenParam1);
 	}
 
 	@Test

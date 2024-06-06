@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static ca.uhn.fhir.context.support.IValidationSupport.TYPE_CODING;
 import static ca.uhn.fhir.context.support.IValidationSupport.TYPE_GROUP;
 import static ca.uhn.fhir.context.support.IValidationSupport.TYPE_STRING;
@@ -25,7 +26,6 @@ import static org.hl7.fhir.common.hapi.validation.support.RemoteTerminologyServi
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**
@@ -54,8 +54,7 @@ public interface ILookupCodeTest {
 	default void lookupCode_forCodeSystemWithBlankCode_throwsException() {
 		try {
 			getService().lookupCode(null, new LookupCodeRequest(CODE_SYSTEM, ""));
-			fail();
-		} catch (IllegalArgumentException e) {
+				fail();			} catch (IllegalArgumentException e) {
 			assertEquals("theCode must be provided", e.getMessage());
 		}
 	}
@@ -73,11 +72,9 @@ public interface ILookupCodeTest {
 
 		// test and verify
 		try {
-			LookupCodeRequest request = new LookupCodeRequest(CODE_SYSTEM, CODE, LANGUAGE, null);
-			getService().lookupCode(null, request);
-			fail();
-		} catch (InternalErrorException e) {
-			assertTrue(e.getMessage().contains("HAPI-1739: Don't know how to handle "));
+				getService().lookupCode(null, new LookupCodeRequest(CODE_SYSTEM, CODE, LANGUAGE, null));
+				fail();			} catch (InternalErrorException e) {
+				assertThat(e.getMessage()).contains("HAPI-1739: Don't know how to handle ");
 		}
 	}
 

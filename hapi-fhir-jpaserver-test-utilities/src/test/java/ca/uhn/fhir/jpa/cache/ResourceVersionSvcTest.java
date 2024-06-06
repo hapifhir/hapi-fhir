@@ -15,7 +15,6 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Root;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,8 +29,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -127,8 +128,8 @@ public class ResourceVersionSvcTest {
 		ResourcePersistentIdMap retMap = myResourceVersionSvc.getLatestVersionIdsForResourceIds(RequestPartitionId.allPartitions(),
 			Collections.singletonList(type));
 
-		Assertions.assertTrue(retMap.containsKey(type));
-		Assertions.assertEquals(jpaPid.getVersion(), map.get(type).getVersion());
+		assertTrue(retMap.containsKey(type));
+		assertEquals(jpaPid.getVersion(), map.get(type).getVersion());
 	}
 
 	@Test
@@ -142,7 +143,7 @@ public class ResourceVersionSvcTest {
 		ResourcePersistentIdMap retMap = myResourceVersionSvc.getLatestVersionIdsForResourceIds(RequestPartitionId.allPartitions(),
 			Collections.singletonList(type));
 
-		Assertions.assertTrue(retMap.isEmpty());
+		assertTrue(retMap.isEmpty());
 	}
 
 	@Test
@@ -167,9 +168,9 @@ public class ResourceVersionSvcTest {
 		);
 
 		// verify
-		Assertions.assertEquals(1, retMap.size());
-		Assertions.assertTrue(retMap.containsKey(type));
-		Assertions.assertFalse(retMap.containsKey(type2));
+		assertEquals(1, retMap.size());
+		assertTrue(retMap.containsKey(type));
+		assertFalse(retMap.containsKey(type2));
 	}
 
 	@Test
@@ -181,7 +182,7 @@ public class ResourceVersionSvcTest {
 		svc.setPartitionSettingsForUnitTest(partitionSettings);
 
 		RequestPartitionId outcome = svc.replaceDefault(RequestPartitionId.allPartitions());
-		assertSame(RequestPartitionId.allPartitions(), outcome);
+		assertThat(outcome).isSameAs(RequestPartitionId.allPartitions());
 	}
 
 	@Test

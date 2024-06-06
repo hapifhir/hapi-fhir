@@ -2,7 +2,6 @@ package org.hl7.fhir.common.hapi.validation.support;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
-import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
 import com.google.common.collect.Lists;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -19,10 +18,9 @@ import java.util.Collections;
 import java.util.List;
 
 import static ca.uhn.fhir.util.TestUtil.sleepAtLeast;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -57,27 +55,26 @@ public class CachingValidationSupportTest {
 			.setMiscMillis(1000);
 		final CachingValidationSupport support = getSupport(cacheTimeouts, theIsEnabledValidationForCodingsLogicalAnd);
 
-		assertEquals(3, responses.size());
+		assertThat(responses).hasSize(3);
 		List<IBaseResource> fetched = support.fetchAllNonBaseStructureDefinitions();
 		assert fetched != null;
-		assertSame(sd0, fetched.get(0));
-		assertEquals(2, responses.size());
+		assertThat(fetched.get(0)).isSameAs(sd0);
+		assertThat(responses).hasSize(2);
 
 		sleepAtLeast(1200);
 		fetched = support.fetchAllNonBaseStructureDefinitions();
 		assert fetched != null;
-		assertSame(sd0, fetched.get(0));
-		assertEquals(2, responses.size());
+		assertThat(fetched.get(0)).isSameAs(sd0);
+		assertThat(responses).hasSize(2);
 
-		await().until(() -> responses.size(), equalTo(1));
-		assertEquals(1, responses.size());
+		await().until(() -> responses.size() == 1);
+		assertThat(responses).hasSize(1);
 		fetched = support.fetchAllNonBaseStructureDefinitions();
 		assert fetched != null;
-		assertSame(sd1, fetched.get(0));
-		assertEquals(1, responses.size());
+		assertThat(fetched.get(0)).isSameAs(sd1);
+		assertThat(responses).hasSize(1);
 
-		assertEquals(theIsEnabledValidationForCodingsLogicalAnd != null && theIsEnabledValidationForCodingsLogicalAnd,
-			support.isEnabledValidationForCodingsLogicalAnd());
+		assertEquals(theIsEnabledValidationForCodingsLogicalAnd != null && theIsEnabledValidationForCodingsLogicalAnd, support.isEnabledValidationForCodingsLogicalAnd());
 	}
 
 	@ParameterizedTest
@@ -92,15 +89,14 @@ public class CachingValidationSupportTest {
 		final CachingValidationSupport support = getSupport(null, theIsEnabledValidationForCodingsLogicalAnd);
 
 		final byte[] firstActualBinary = support.fetchBinary(EXPECTED_BINARY_KEY);
-		assertEquals(EXPECTED_BINARY,firstActualBinary);
+		assertEquals(EXPECTED_BINARY, firstActualBinary);
 		verify(myValidationSupport, times(1)).fetchBinary(EXPECTED_BINARY_KEY);
 
 		final byte[] secondActualBinary = support.fetchBinary(EXPECTED_BINARY_KEY);
-		assertEquals(EXPECTED_BINARY,secondActualBinary);
+		assertEquals(EXPECTED_BINARY, secondActualBinary);
 		verify(myValidationSupport, times(1)).fetchBinary(EXPECTED_BINARY_KEY);
 
-		assertEquals(theIsEnabledValidationForCodingsLogicalAnd != null && theIsEnabledValidationForCodingsLogicalAnd,
-			support.isEnabledValidationForCodingsLogicalAnd());
+		assertEquals(theIsEnabledValidationForCodingsLogicalAnd != null && theIsEnabledValidationForCodingsLogicalAnd, support.isEnabledValidationForCodingsLogicalAnd());
 	}
 
 	@Nonnull

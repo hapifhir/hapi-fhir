@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.rest.server.exceptions.PayloadTooLargeException;
 import org.hl7.fhir.dstu3.model.Bundle;
@@ -10,9 +11,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class FhirSystemDaoTransactionDstu3Test extends BaseJpaDstu3SystemTest {
@@ -51,11 +50,11 @@ public class FhirSystemDaoTransactionDstu3Test extends BaseJpaDstu3SystemTest {
 
 		try {
 			mySystemDao.transaction(null, bundle);
-			fail();
+			fail("");
 		} catch (PayloadTooLargeException e) {
-			assertThat(e.getMessage(), containsString("Transaction Bundle Too large.  Transaction bundle contains " +
+			assertThat(e.getMessage()).contains("Transaction Bundle Too large.  Transaction bundle contains " +
 				(TEST_MAXIMUM_TRANSACTION_BUNDLE_SIZE + 1) +
-				" which exceedes the maximum permitted transaction bundle size of " + TEST_MAXIMUM_TRANSACTION_BUNDLE_SIZE));
+				" which exceedes the maximum permitted transaction bundle size of " + TEST_MAXIMUM_TRANSACTION_BUNDLE_SIZE);
 		}
 	}
 
@@ -70,7 +69,7 @@ public class FhirSystemDaoTransactionDstu3Test extends BaseJpaDstu3SystemTest {
 		Bundle bundle = createInputTransactionWithSize(theSize);
 		Bundle response = mySystemDao.transaction(null, bundle);
 
-		assertEquals(theSize, response.getEntry().size());
+		assertThat(response.getEntry()).hasSize(theSize);
 		assertEquals("201 Created", response.getEntry().get(0).getResponse().getStatus());
 		assertEquals("201 Created", response.getEntry().get(theSize - 1).getResponse().getStatus());
 	}

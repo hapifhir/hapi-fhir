@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
@@ -9,7 +11,6 @@ import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
-import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
@@ -18,12 +19,6 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.ee10.servlet.ServletHandler;
-import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.hl7.fhir.dstu3.model.CodeType;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
@@ -32,16 +27,11 @@ import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import java.util.concurrent.TimeUnit;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ValidateDstu3Test {
 	private static final FhirContext ourCtx = FhirContext.forDstu3Cached();
@@ -93,7 +83,7 @@ public class ValidateDstu3Test {
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
 
-		assertThat(resp, stringContainsInOrder("<OperationOutcome"));
+		assertThat(resp).contains("<OperationOutcome");
 	}
 
 	@Test
@@ -137,7 +127,7 @@ public class ValidateDstu3Test {
 
 		assertEquals(400, status.getStatusLine().getStatusCode());
 
-		assertThat(resp, stringContainsInOrder("Invalid mode value: &quot;AAA&quot;"));
+		assertThat(resp).contains("Invalid mode value: &quot;AAA&quot;");
 	}
 
 	@Test
@@ -157,7 +147,7 @@ public class ValidateDstu3Test {
 		String resp = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertEquals(null, ourLastPatient);
+		assertNull(ourLastPatient);
 		assertEquals(200, status.getStatusLine().getStatusCode());
 	}
 
@@ -174,8 +164,8 @@ public class ValidateDstu3Test {
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
 
-		assertThat(resp, stringContainsInOrder("<OperationOutcome", "FOOBAR"));
-		assertEquals(null, ourLastPatient);
+		assertThat(resp).contains("<OperationOutcome", "FOOBAR");
+		assertNull(ourLastPatient);
 		assertEquals("Patient", ourLastId.getResourceType());
 		assertEquals("123", ourLastId.getIdPart());
 	}
@@ -196,7 +186,7 @@ public class ValidateDstu3Test {
 		HttpResponse status = ourClient.execute(httpPost);
 		assertEquals(200, status.getStatusLine().getStatusCode());
 
-		assertThat(ourLastResourceBody, stringContainsInOrder("\"resourceType\":\"Organization\"", "\"identifier\"", "\"value\":\"001"));
+		assertThat(ourLastResourceBody).contains("\"resourceType\":\"Organization\"", "\"identifier\"", "\"value\":\"001");
 		assertEquals(EncodingEnum.JSON, ourLastEncoding);
 
 	}
@@ -223,7 +213,7 @@ public class ValidateDstu3Test {
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
 
-		assertThat(resp, stringContainsInOrder("<OperationOutcome"));
+		assertThat(resp).contains("<OperationOutcome");
 		assertEquals("http://foo", ourLastProfile);
 		assertEquals(ValidationModeEnum.CREATE, ourLastMode);
 	}
@@ -250,7 +240,7 @@ public class ValidateDstu3Test {
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
 
-		assertThat(resp, stringContainsInOrder("<OperationOutcome", "FOOBAR"));
+		assertThat(resp).contains("<OperationOutcome", "FOOBAR");
 	}
 
 	@AfterAll

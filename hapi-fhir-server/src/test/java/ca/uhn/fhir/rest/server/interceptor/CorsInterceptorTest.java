@@ -1,18 +1,18 @@
 package ca.uhn.fhir.rest.server.interceptor;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
-
-import java.util.Arrays;
-import java.util.Collections;
-
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.cors.CorsConfiguration;
+
+import java.util.Arrays;
+import java.util.Collections;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class CorsInterceptorTest {
 
@@ -31,13 +31,13 @@ public class CorsInterceptorTest {
 			"X-Correlation-Id"));
 		CorsInterceptor corsInterceptor = new CorsInterceptor(corsConfiguration);
 
-		assertSame(corsConfiguration, corsInterceptor.getConfig());
+		assertThat(corsInterceptor.getConfig()).isSameAs(corsConfiguration);
 		assertNull(corsConfiguration.getAllowCredentials());
 		assertNotNull(corsConfiguration.getAllowedHeaders());
 		assertNotNull(corsConfiguration.getAllowedMethods());
 		assertNotNull(corsConfiguration.getAllowedOrigins());
 		assertNotNull(corsConfiguration.getExposedHeaders());
-		assertEquals(Long.valueOf(1800L),corsConfiguration.getMaxAge());
+		assertEquals(Long.valueOf(1800L), corsConfiguration.getMaxAge());
 		assertNotNull(corsConfiguration.checkHeaders(Collections.singletonList("Content-Type")));
 		assertNotNull(corsConfiguration.checkHeaders(Collections.singletonList("Authorization")));
 		assertNotNull(corsConfiguration.checkHeaders(Arrays.asList("Authorization", "Content-Type")));

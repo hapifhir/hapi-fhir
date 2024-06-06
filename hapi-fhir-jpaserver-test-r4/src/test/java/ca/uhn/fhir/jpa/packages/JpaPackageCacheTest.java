@@ -22,10 +22,11 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Locale;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.fail;
 
 public class JpaPackageCacheTest extends BaseJpaR4Test {
 	@Autowired
@@ -184,7 +185,7 @@ public class JpaPackageCacheTest extends BaseJpaR4Test {
 	public void testNonMatchingPackageIdsCauseError() throws IOException {
 		String incorrectPackageName = "hl7.fhir.us.davinci-nonsense";
 		try (InputStream stream = ClasspathUtil.loadResourceAsStream("/packages/package-davinci-cdex-0.2.0.tgz")) {
-			assertThrows(InvalidRequestException.class, () -> myPackageCacheManager.addPackageToCache(incorrectPackageName, "0.2.0", stream, "hl7.fhir.us.davinci-cdex"));
+			assertThatExceptionOfType(InvalidRequestException.class).isThrownBy(() -> myPackageCacheManager.addPackageToCache(incorrectPackageName, "0.2.0", stream, "hl7.fhir.us.davinci-cdex"));
 		}
 	}
 

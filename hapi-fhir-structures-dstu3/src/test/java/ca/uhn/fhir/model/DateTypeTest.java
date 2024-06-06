@@ -1,5 +1,6 @@
 package ca.uhn.fhir.model;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.dstu3.model.DateType;
 import org.junit.jupiter.api.AfterAll;
@@ -8,9 +9,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Calendar;
 import java.util.TimeZone;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class DateTypeTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DateTypeTest.class);
@@ -23,9 +22,9 @@ public class DateTypeTest {
 	@Test
 	public void testDateType() {
 		DateType birthDate = new DateType(1974, 11, 25);
-		assertThat(birthDate.getYear(), is(1974));
-		assertThat(birthDate.getMonth(), is(11));
-		assertThat(birthDate.getDay(), is(25));
+		assertEquals(1974, birthDate.getYear());
+		assertEquals(11, birthDate.getMonth());
+		assertEquals(25, birthDate.getDay());
 	}
 
 	@SuppressWarnings("unused")

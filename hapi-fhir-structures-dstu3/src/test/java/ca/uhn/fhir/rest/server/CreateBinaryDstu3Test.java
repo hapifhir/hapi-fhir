@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
@@ -7,7 +9,6 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
-import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
@@ -15,27 +16,16 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.ee10.servlet.ServletHandler;
-import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.hl7.fhir.dstu3.model.Binary;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import java.util.concurrent.TimeUnit;
-
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class CreateBinaryDstu3Test {
 	private static final FhirContext ourCtx = FhirContext.forDstu3Cached();
@@ -68,8 +58,8 @@ public class CreateBinaryDstu3Test {
 		CloseableHttpResponse status = ourClient.execute(post);
 		try {
 			assertEquals("application/foo", ourLastBinary.getContentType());
-			assertArrayEquals(new byte[] { 0, 1, 2, 3, 4 }, ourLastBinary.getContent());
-			assertArrayEquals(new byte[] { 0, 1, 2, 3, 4 }, ourLastBinaryBytes);
+			assertThat(ourLastBinary.getContent()).containsExactly(new byte[]{0, 1, 2, 3, 4});
+			assertThat(ourLastBinaryBytes).containsExactly(new byte[]{0, 1, 2, 3, 4});
 		} finally {
 			IOUtils.closeQuietly(status);
 		}
@@ -92,7 +82,7 @@ public class CreateBinaryDstu3Test {
 		CloseableHttpResponse status = ourClient.execute(post);
 		try {
 			assertEquals("application/foo", ourLastBinary.getContentType());
-			assertArrayEquals(new byte[] { 0, 1, 2, 3, 4 }, ourLastBinary.getContent());
+			assertThat(ourLastBinary.getContent()).containsExactly(new byte[]{0, 1, 2, 3, 4});
 		} finally {
 			IOUtils.closeQuietly(status);
 		}
@@ -115,9 +105,9 @@ public class CreateBinaryDstu3Test {
 		CloseableHttpResponse status = ourClient.execute(post);
 		try {
 			assertEquals("application/xml+fhir", ourLastBinary.getContentType());
-			assertArrayEquals(b.getContent(), ourLastBinary.getContent());
+			assertThat(ourLastBinary.getContent()).containsExactly(b.getContent());
 			assertEquals(encoded, ourLastBinaryString);
-			assertArrayEquals(encoded.getBytes("UTF-8"), ourLastBinaryBytes);
+			assertThat(ourLastBinaryBytes).containsExactly(encoded.getBytes("UTF-8"));
 		} finally {
 			IOUtils.closeQuietly(status);
 		}
@@ -130,7 +120,7 @@ public class CreateBinaryDstu3Test {
 		CloseableHttpResponse status = ourClient.execute(post);
 		try {
 			assertNull(ourLastBinary.getContentType());
-			assertArrayEquals(new byte[] { 0, 1, 2, 3, 4 }, ourLastBinary.getContent());
+			assertThat(ourLastBinary.getContent()).containsExactly(new byte[]{0, 1, 2, 3, 4});
 		} finally {
 			IOUtils.closeQuietly(status);
 		}

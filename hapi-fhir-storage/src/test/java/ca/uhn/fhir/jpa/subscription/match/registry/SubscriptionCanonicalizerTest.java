@@ -32,8 +32,7 @@ import java.util.stream.Stream;
 
 import static ca.uhn.fhir.rest.api.Constants.CT_FHIR_JSON_NEW;
 import static ca.uhn.fhir.util.HapiExtensions.EX_SEND_DELETE_MESSAGES;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -63,7 +62,7 @@ class SubscriptionCanonicalizerTest {
 
 		CanonicalSubscription canonicalSubscription = testedSC.canonicalize(subscription);
 
-		assertEquals("baz", canonicalSubscription.getTags().get("http://foo"));
+		assertThat(canonicalSubscription.getTags()).containsEntry("http://foo", "baz");
 	}
 
 	@Test
@@ -136,7 +135,7 @@ class SubscriptionCanonicalizerTest {
 		assertEquals("http://foo", canonical.getEndpointUrl());
 		assertEquals(SubscriptionTestDataHelper.TEST_TOPIC, canonical.getTopic());
 		assertEquals(CanonicalSubscriptionChannelType.RESTHOOK, canonical.getChannelType());
-		assertThat(canonical.getFilters(), hasSize(2));
+		assertThat(canonical.getFilters()).hasSize(2);
 
 		CanonicalTopicSubscriptionFilter filter1 = canonical.getFilters().get(0);
 		assertEquals("Observation", filter1.getResourceType());
@@ -261,7 +260,7 @@ class SubscriptionCanonicalizerTest {
 		assertEquals(Subscription.SubscriptionStatus.ACTIVE, canonical.getStatus());
 		verifyChannelParameters(canonical, thePayloadContent);
 
-		assertThat(canonical.getFilters(), hasSize(2));
+		assertThat(canonical.getFilters()).hasSize(2);
 
 		CanonicalTopicSubscriptionFilter filter1 = canonical.getFilters().get(0);
 		assertEquals("Encounter", filter1.getResourceType());
@@ -283,7 +282,7 @@ class SubscriptionCanonicalizerTest {
 	}
 
 	private void verifyChannelParameters(CanonicalSubscription theCanonicalSubscriptions, String thePayloadContent) {
-		assertThat(theCanonicalSubscriptions.getHeaders(), hasSize(2));
+		assertThat(theCanonicalSubscriptions.getHeaders()).hasSize(2);
 		assertEquals(SubscriptionTestDataHelper.TEST_HEADER1, theCanonicalSubscriptions.getHeaders().get(0));
 		assertEquals(SubscriptionTestDataHelper.TEST_HEADER2, theCanonicalSubscriptions.getHeaders().get(1));
 
@@ -295,9 +294,9 @@ class SubscriptionCanonicalizerTest {
 	}
 
 	private void verifyStandardSubscriptionParameters(CanonicalSubscription theCanonicalSubscription) {
-		assertEquals(2, theCanonicalSubscription.getTags().size());
-		assertEquals("b", theCanonicalSubscription.getTags().get("http://a"));
-		assertEquals("e", theCanonicalSubscription.getTags().get("http://d"));
+		assertThat(theCanonicalSubscription.getTags()).hasSize(2);
+		assertThat(theCanonicalSubscription.getTags()).containsEntry("http://a", "b");
+		assertThat(theCanonicalSubscription.getTags()).containsEntry("http://d", "e");
 		assertEquals("testId", theCanonicalSubscription.getIdPart());
 		assertEquals("testId", theCanonicalSubscription.getIdElementString());
 	}

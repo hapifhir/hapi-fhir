@@ -19,9 +19,8 @@
  */
 package ca.uhn.fhir.test.utilities.server;
 
-import org.apache.commons.lang3.Validate;
-
 import jakarta.servlet.http.HttpServlet;
+import org.apache.commons.lang3.Validate;
 
 public class HttpServletExtension extends BaseJettyServerExtension<HttpServletExtension> {
 	private HttpServlet myServlet;

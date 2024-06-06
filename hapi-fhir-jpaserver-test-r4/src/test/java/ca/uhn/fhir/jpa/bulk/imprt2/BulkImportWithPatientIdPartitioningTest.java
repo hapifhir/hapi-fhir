@@ -24,11 +24,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.concurrent.TimeUnit;
 
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.blankOrNullString;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
@@ -88,7 +85,7 @@ public class BulkImportWithPatientIdPartitioningTest extends BaseJpaR4Test {
 
 		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(request);
 		String instanceId = startResponse.getInstanceId();
-		assertThat(instanceId, not(blankOrNullString()));
+		assertThat(instanceId).isNotBlank();
 		ourLog.info("Execution got ID: {}", instanceId);
 
 		// Verify
@@ -96,8 +93,8 @@ public class BulkImportWithPatientIdPartitioningTest extends BaseJpaR4Test {
 		await().atMost(120, TimeUnit.SECONDS).until(() -> {
 			myJobCleanerService.runMaintenancePass();
 			JobInstance instance = myJobCoordinator.getInstance(instanceId);
-			return instance.getStatus();
-		}, equalTo(StatusEnum.COMPLETED));
+			return instance.getStatus() == StatusEnum.COMPLETED;
+		});
 
 		runInTransaction(() -> {
 			assertEquals(1, myResourceTableDao.count());

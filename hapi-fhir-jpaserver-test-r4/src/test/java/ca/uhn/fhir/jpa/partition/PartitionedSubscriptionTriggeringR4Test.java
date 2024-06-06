@@ -27,7 +27,6 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.*;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -42,14 +41,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static org.awaitility.Awaitility.await;
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4Test  {
+public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(RestHookTestR4Test.class);
 
 	@Autowired
@@ -115,7 +112,7 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 		mySrdInterceptorService.unregisterInterceptorsIf(t -> t instanceof BasePartitioningR4Test.MyReadWriteInterceptor);
 		await().until(() -> {
 			mySubscriptionTriggeringSvc.runDeliveryPass();
-			return ((SubscriptionTriggeringSvcImpl)mySubscriptionTriggeringSvc).getActiveJobCount() == 0;
+			return ((SubscriptionTriggeringSvcImpl) mySubscriptionTriggeringSvc).getActiveJobCount() == 0;
 		});
 
 		super.afterUnregisterRestHookListener();
@@ -129,7 +126,7 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 		Subscription subscription = newSubscription(criteria1, payload);
 
-		Assertions.assertEquals(mySrdInterceptorService.getAllRegisteredInterceptors().size(), 1);
+		assertEquals(mySrdInterceptorService.getAllRegisteredInterceptors().size(), 1);
 
 		myDaoRegistry.getResourceDao("Subscription").create(subscription, mySrd);
 
@@ -140,10 +137,10 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 
 		// Should see 1 subscription notification
 		waitForQueueToDrain();
-		Assertions.assertEquals(0, BaseSubscriptionsR4Test.ourObservationProvider.getCountCreate());
+		assertEquals(0, BaseSubscriptionsR4Test.ourObservationProvider.getCountCreate());
 		BaseSubscriptionsR4Test.ourObservationProvider.waitForUpdateCount(1);
 
-		Assertions.assertEquals(Constants.CT_FHIR_JSON_NEW, BaseSubscriptionsR4Test.ourRestfulServer.getRequestContentTypes().get(0));
+		assertEquals(Constants.CT_FHIR_JSON_NEW, BaseSubscriptionsR4Test.ourRestfulServer.getRequestContentTypes().get(0));
 	}
 
 	@ParameterizedTest
@@ -156,7 +153,7 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 		String criteria1 = "Patient?active=true";
 		Subscription subscription = newSubscription(criteria1, payload);
 
-		Assertions.assertEquals(mySrdInterceptorService.getAllRegisteredInterceptors().size(), 1);
+		assertEquals(mySrdInterceptorService.getAllRegisteredInterceptors().size(), 1);
 
 		myDaoRegistry.getResourceDao("Subscription").create(subscription, mySrd);
 
@@ -168,20 +165,20 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 
 		// Should see 0 subscription notification
 		waitForQueueToDrain();
-		Assertions.assertEquals(0, BaseSubscriptionsR4Test.ourPatientProvider.getCountCreate());
+		assertEquals(0, BaseSubscriptionsR4Test.ourPatientProvider.getCountCreate());
 
 		try {
 			BaseSubscriptionsR4Test.ourPatientProvider.waitForUpdateCount(1);
 			if (!theIsCrossPartitionEnabled) {
 				fail("Expecting a timeout and 0 matching subscriptions and thus a timeout if cross partition is DISabled");
 			}
-			Assertions.assertEquals(1, BaseSubscriptionsR4Test.ourRestfulServer.getRequestContentTypes().size());
+			assertEquals(1, BaseSubscriptionsR4Test.ourRestfulServer.getRequestContentTypes().size());
 		} catch (ConditionTimeoutException e) {
 			if (theIsCrossPartitionEnabled) {
 				fail("Expecting no timeout and 1 matching subscriptions and thus a timeout if cross partition is enabled");
 			} else {
 				// Should have 0 matching subscription, if we get 1 update count then the test fails
-				Assertions.assertEquals(0, BaseSubscriptionsR4Test.ourRestfulServer.getRequestContentTypes().size());
+				assertEquals(0, BaseSubscriptionsR4Test.ourRestfulServer.getRequestContentTypes().size());
 			}
 		}
 	}
@@ -216,16 +213,16 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 		waitForQueueToDrain();
 		List<Observation> resourceUpdates = BaseSubscriptionsR4Test.ourObservationProvider.getResourceUpdates();
 		if (theIsCrossPartitionEnabled) {
-			assertThat(resourceUpdates.size(), is(equalTo(2)));
-			assertThat(resourceUpdates.stream().map(Resource::getId).sorted().toList(),
-				is(equalTo(Stream.of(observationIdPartitionOne, observationIdPartitionTwo).map(Object::toString).sorted().toList())));
+			assertEquals(2, resourceUpdates.size());
+			assertEquals(Stream.of(observationIdPartitionOne, observationIdPartitionTwo).map(Object::toString).sorted().toList(),
+				resourceUpdates.stream().map(Resource::getId).sorted().toList());
 		} else {
-			assertThat(resourceUpdates.size(), is(equalTo(1)));
-			assertThat(resourceUpdates.get(0).getId(), is(equalTo(observationIdPartitionOne.toString())));
+			assertEquals(1, resourceUpdates.size());
+			assertEquals(observationIdPartitionOne.toString(), resourceUpdates.get(0).getId());
 		}
 
 		String responseValue = resultParameters.getParameter().get(0).getValue().primitiveValue();
-		assertThat(responseValue, containsString("Subscription triggering job submitted as JOB ID"));
+		assertThat(responseValue).contains("Subscription triggering job submitted as JOB ID");
 	}
 
 	@Test
@@ -246,7 +243,7 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 		Subscription theResource = newSubscription(criteria1, payload);
 		theResource.addExtension(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION, new BooleanType(Boolean.TRUE));
 		myPartitionInterceptor.setRequestPartitionId(RequestPartitionId.defaultPartition());
-		IIdType subscriptionId= myDaoRegistry.getResourceDao("Subscription").create(theResource, mySrd).getId();
+		IIdType subscriptionId = myDaoRegistry.getResourceDao("Subscription").create(theResource, mySrd).getId();
 		waitForActivatedSubscriptionCount(1);
 
 		ArrayList<IPrimitiveType<String>> searchUrlList = new ArrayList<>();
@@ -258,8 +255,9 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 
 		waitForQueueToDrain();
 		List<Observation> resourceUpdates = BaseSubscriptionsR4Test.ourObservationProvider.getResourceUpdates();
-		assertThat(resourceUpdates.size(), is(equalTo(2)));
+		assertThat(resourceUpdates).hasSize(2);
 	}
+
 	@Test
 	public void testManualTriggeredSubscriptionInPartition() throws Exception {
 		String payload = "application/fhir+json";
@@ -274,7 +272,7 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 		// Create the subscription now
 		DaoMethodOutcome subscriptionOutcome = myDaoRegistry.getResourceDao("Subscription").create(newSubscription(criteria1, payload), mySrd);
 
-		Assertions.assertEquals(mySrdInterceptorService.getAllRegisteredInterceptors().size(), 1);
+		assertEquals(mySrdInterceptorService.getAllRegisteredInterceptors().size(), 1);
 
 		Subscription subscription = (Subscription) subscriptionOutcome.getResource();
 
@@ -288,10 +286,10 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 		mySubscriptionTriggeringSvc.runDeliveryPass();
 
 		waitForQueueToDrain();
-		Assertions.assertEquals(1, BaseSubscriptionsR4Test.ourObservationProvider.getCountUpdate());
+		assertEquals(1, BaseSubscriptionsR4Test.ourObservationProvider.getCountUpdate());
 
 		String responseValue = resultParameters.getParameter().get(0).getValue().primitiveValue();
-		assertThat(responseValue, containsString("Subscription triggering job submitted as JOB ID"));
+		assertThat(responseValue).contains("Subscription triggering job submitted as JOB ID");
 	}
 
 	@Interceptor

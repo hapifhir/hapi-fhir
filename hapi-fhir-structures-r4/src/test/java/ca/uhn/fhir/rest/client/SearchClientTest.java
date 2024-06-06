@@ -23,7 +23,6 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicStatusLine;
-import org.hamcrest.Matchers;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Encounter;
 import org.junit.jupiter.api.AfterAll;
@@ -38,10 +37,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -87,18 +84,18 @@ public class SearchClientTest {
 
 		List<Encounter> found = client.searchByList(params, includes);
 
-		assertEquals(1, found.size());
+		assertThat(found).hasSize(1);
 
 		Encounter encounter = found.get(0);
 		assertNotNull(encounter.getSubject().getReference());
 		HttpUriRequest value = capt.getValue();
 
-		assertTrue(value instanceof HttpPost, "Expected request of type POST on long params list");
+		assertThat(value instanceof HttpPost).as("Expected request of type POST on long params list").isTrue();
 		HttpPost post = (HttpPost) value;
 		String body = IOUtils.toString(post.getEntity().getContent(), Charsets.UTF_8);
 		ourLog.info(body);
-		assertThat(body, Matchers.containsString("_include=one"));
-		assertThat(body, Matchers.containsString("_include=two"));
+		assertThat(body).contains("_include=one");
+		assertThat(body).contains("_include=two");
 
 		// With AND list
 
@@ -106,18 +103,18 @@ public class SearchClientTest {
 		paramsAndList.addAnd(params);
 		found = client.searchByList(paramsAndList, includes);
 
-		assertEquals(1, found.size());
+		assertThat(found).hasSize(1);
 
 		encounter = found.get(0);
 		assertNotNull(encounter.getSubject().getReference());
 		value = capt.getAllValues().get(1);
 
-		assertTrue(value instanceof HttpPost, "Expected request of type POST on long params list");
+		assertThat(value instanceof HttpPost).as("Expected request of type POST on long params list").isTrue();
 		post = (HttpPost) value;
 		body = IOUtils.toString(post.getEntity().getContent(), Charsets.UTF_8);
 		ourLog.info(body);
-		assertThat(body, Matchers.containsString("_include=one"));
-		assertThat(body, Matchers.containsString("_include=two"));
+		assertThat(body).contains("_include=one");
+		assertThat(body).contains("_include=two");
 	}
 
 	@Test
@@ -133,7 +130,7 @@ public class SearchClientTest {
 
 		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
 		List<Encounter> found = client.search();
-		assertEquals(1, found.size());
+		assertThat(found).hasSize(1);
 
 		Encounter encounter = found.get(0);
 		assertNotNull(encounter.getSubject().getReference());
