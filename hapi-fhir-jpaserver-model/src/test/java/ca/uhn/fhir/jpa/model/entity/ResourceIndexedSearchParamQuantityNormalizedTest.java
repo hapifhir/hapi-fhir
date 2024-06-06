@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ResourceIndexedSearchParamQuantityNormalizedTest {
 
@@ -35,8 +34,8 @@ public class ResourceIndexedSearchParamQuantityNormalizedTest {
 
 		param2.optimizeIndexStorage();
 
-		assertTrue(param.equals(param2));
-		assertTrue(param2.equals(param));
+		assertEquals(param, param2);
+		assertEquals(param2, param);
 		assertEquals(param.hashCode(), param2.hashCode());
 	}
 

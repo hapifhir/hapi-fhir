@@ -10,9 +10,8 @@ import java.util.Date;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ResourceIndexedSearchParamDateTest {
 
@@ -83,8 +82,8 @@ public class ResourceIndexedSearchParamDateTest {
 	}
 
 	private void validateEquals(ResourceIndexedSearchParamDate theParam, ResourceIndexedSearchParamDate theParam2) {
-		assertTrue(theParam.equals(theParam2));
-		assertTrue(theParam2.equals(theParam));
+		assertEquals(theParam, theParam2);
+		assertEquals(theParam2, theParam);
 		assertEquals(theParam.hashCode(), theParam2.hashCode());
 	}
 
@@ -121,8 +120,8 @@ public class ResourceIndexedSearchParamDateTest {
 	}
 
 	private void validateNotEquals(ResourceIndexedSearchParamDate theParam, ResourceIndexedSearchParamDate theParam2) {
-		assertFalse(theParam.equals(theParam2));
-		assertFalse(theParam2.equals(theParam));
+		assertNotEquals(theParam, theParam2);
+		assertNotEquals(theParam2, theParam);
 		assertThat(theParam2.hashCode()).isNotEqualTo(theParam.hashCode());
 	}
 
