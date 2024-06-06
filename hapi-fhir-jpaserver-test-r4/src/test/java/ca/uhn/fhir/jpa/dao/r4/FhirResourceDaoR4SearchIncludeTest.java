@@ -99,9 +99,9 @@ public class FhirResourceDaoR4SearchIncludeTest extends BaseJpaR4Test {
 		map.addInclude(QuestionnaireResponse.INCLUDE_QUESTIONNAIRE);
 		IBundleProvider outcome = myQuestionnaireResponseDao.search(map, mySrd);
 		List<String> outcomeValues = toUnqualifiedVersionlessIdValues(outcome);
-		assertThat(outcomeValues.toString(), outcomeValues, contains(
+		assertThat(outcomeValues).as(outcomeValues.toString()).containsExactly(
 			theQuestionnaireId, "Questionnaire/q"
-		));
+		);
 
 	}
 
