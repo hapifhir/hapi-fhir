@@ -358,8 +358,11 @@ public class Batch2WorkChunkEntity implements Serializable {
 		myNextPollTime = theNextPollTime;
 	}
 
-	public int getPollAttempts() {
-		return myPollAttempts != null ? myPollAttempts : 0;
+	public Integer getPollAttempts() {
+		if (myPollAttempts == null) {
+			return 0;
+		}
+		return myPollAttempts;
 	}
 
 	public void setPollAttempts(int thePollAttempts) {
