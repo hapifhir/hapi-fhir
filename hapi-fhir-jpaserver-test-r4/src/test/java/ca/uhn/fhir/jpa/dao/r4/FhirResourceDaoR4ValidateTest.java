@@ -68,7 +68,6 @@ import static org.awaitility.Awaitility.await;
 import static org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService.CURRENCIES_CODESYSTEM_URL;
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_LOW;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -629,7 +628,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
 		obs.getCode().getCodingFirstRep().setSystem("http://loinc.org").setCode("non-existing-code").setDisplay("Display 3");
 		oo = validateAndReturnOutcome(obs);
-		assertThat(oo.getIssueFirstRep().getDiagnostics()).as(encode(oo)).isEqualTo("None of the codings provided are in the value set 'ValueSet[http://example.com/fhir/ValueSet/observation-vitalsignresult]' (http://example.com/fhir/ValueSet/observation-vitalsignresult), and a coding from this value set is required) (codes = http://loinc.org#non-existing-code)");
+		assertThat(oo.getIssue().get(1).getDiagnostics()).as(encode(oo)).isEqualTo("None of the codings provided are in the value set 'ValueSet[http://example.com/fhir/ValueSet/observation-vitalsignresult]' (http://example.com/fhir/ValueSet/observation-vitalsignresult), and a coding from this value set is required) (codes = http://loinc.org#non-existing-code)");
 
 		// Valid code with no system
 		obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
@@ -992,7 +991,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		obs.getCode().getCodingFirstRep().setDisplay("Some Code");
 		outcome = (OperationOutcome) myObservationDao.validate(obs, null, null, null, ValidationModeEnum.CREATE, "http://example.com/structuredefinition", mySrd).getOperationOutcome();
 		ourLog.debug("Outcome: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
-		assertEquals("Unknown code in fragment CodeSystem 'http://example.com/codesystem#foo-foo' for in-memory expansion of ValueSet 'http://example.com/valueset'", outcome.getIssueFirstRep().getDiagnostics());
+		assertEquals("Unknown code in fragment CodeSystem 'http://example.com/codesystem#foo-foo'", outcome.getIssueFirstRep().getDiagnostics());
 		assertEquals(OperationOutcome.IssueSeverity.WARNING, outcome.getIssueFirstRep().getSeverity());
 
 		// Correct codesystem, Code in codesystem
@@ -1083,7 +1082,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
 		obs.getCode().getCodingFirstRep().setSystem("http://loinc.org").setCode("non-existing-code").setDisplay("Display 3");
 		oo = validateAndReturnOutcome(obs);
-		assertThat(oo.getIssueFirstRep().getDiagnostics()).as(encode(oo)).isEqualTo("None of the codings provided are in the value set 'ValueSet[http://example.com/fhir/ValueSet/observation-vitalsignresult]' (http://example.com/fhir/ValueSet/observation-vitalsignresult), and a coding from this value set is required) (codes = http://loinc.org#non-existing-code)");
+		assertThat(oo.getIssue().get(2).getDiagnostics()).as(encode(oo)).isEqualTo("None of the codings provided are in the value set 'ValueSet[http://example.com/fhir/ValueSet/observation-vitalsignresult]' (http://example.com/fhir/ValueSet/observation-vitalsignresult), and a coding from this value set is required) (codes = http://loinc.org#non-existing-code)");
 
 		// Valid code with no system
 		obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
@@ -1095,13 +1094,13 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
 		obs.getCode().getCodingFirstRep().setSystem("http://foo").setCode("CODE3").setDisplay("Display 3");
 		oo = validateAndReturnOutcome(obs);
-		assertThat(oo.getIssueFirstRep().getDiagnostics()).as(encode(oo)).isEqualTo("None of the codings provided are in the value set 'ValueSet[http://example.com/fhir/ValueSet/observation-vitalsignresult]' (http://example.com/fhir/ValueSet/observation-vitalsignresult), and a coding from this value set is required) (codes = http://foo#CODE3)");
+		assertThat(oo.getIssue().get(1).getDiagnostics()).as(encode(oo)).isEqualTo("None of the codings provided are in the value set 'ValueSet[http://example.com/fhir/ValueSet/observation-vitalsignresult]' (http://example.com/fhir/ValueSet/observation-vitalsignresult), and a coding from this value set is required) (codes = http://foo#CODE3)");
 
 		// Code that exists but isn't in the valueset
 		obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
 		obs.getCode().getCodingFirstRep().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("vital-signs").setDisplay("Vital Signs");
 		oo = validateAndReturnOutcome(obs);
-		assertThat(oo.getIssueFirstRep().getDiagnostics()).as(encode(oo)).isEqualTo("None of the codings provided are in the value set 'ValueSet[http://example.com/fhir/ValueSet/observation-vitalsignresult]' (http://example.com/fhir/ValueSet/observation-vitalsignresult), and a coding from this value set is required) (codes = http://terminology.hl7.org/CodeSystem/observation-category#vital-signs)");
+		assertThat(oo.getIssue().get(1).getDiagnostics()).as(encode(oo)).isEqualTo("None of the codings provided are in the value set 'ValueSet[http://example.com/fhir/ValueSet/observation-vitalsignresult]' (http://example.com/fhir/ValueSet/observation-vitalsignresult), and a coding from this value set is required) (codes = http://terminology.hl7.org/CodeSystem/observation-category#vital-signs)");
 
 		// Invalid code in built-in VS/CS
 		obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
