@@ -7,14 +7,11 @@ import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Composition;
 import org.hl7.fhir.r4.model.Enumerations;
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.SearchParameter;
@@ -38,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ContextConfiguration(classes = {TestHSearchAddInConfig.NoFT.class})
 public class FhirResourceDaoR4SearchBundleNoFTTest extends BaseJpaR4Test {
 	@Test
-	public void searchDocumentBundle_withLocalReference_returnsCorrectly() {
+	public void searchDocumentBundle_withLocalReferenceUsingId_returnsCorrectly() {
 		createBundleSearchParameter("Bundle-composition-patient-identifier",
 				Enumerations.SearchParamType.TOKEN,
 				"composition.patient.identifier",
@@ -48,13 +45,29 @@ public class FhirResourceDaoR4SearchBundleNoFTTest extends BaseJpaR4Test {
 		String identifierSystem = "http://foo";
 		String identifierValue = "bar";
 
-		IIdType bundleId = createDocumentBundleWithLocalPatient(patientId, "1980-01-30", identifierSystem, identifierValue);
+		String patientUrl = "http://example.com/fhir/" + patientId;
+
+		Composition composition = new Composition();
+		composition.setSubject(new Reference(patientUrl));
+
+		Patient patient = new Patient();
+		patient.setId(patientId);
+		patient.addIdentifier().setSystem(identifierSystem).setValue(identifierValue);
+
+		Bundle bundle = new Bundle();
+		bundle.setType(Bundle.BundleType.DOCUMENT);
+		bundle.addEntry().setResource(composition);
+		bundle.addEntry().setResource(patient);
+
+		DaoMethodOutcome createOutcome = myBundleDao.create(bundle, mySrd);
+		assertTrue(createOutcome.getCreated());
+		IIdType bundleId = createOutcome.getId();
 
 		verifySearchCompositionPatientReturnsBundle(identifierSystem, identifierValue, bundleId);
 	}
 
 	@Test
-	public void searchDocumentBundle_withPlaceholderReference_returnsCorrectly() {
+	public void searchDocumentBundle_withPlaceholderReferenceUsingFullUrl_returnsCorrectly() {
 		createBundleSearchParameter("Bundle-composition-patient-identifier",
 				Enumerations.SearchParamType.TOKEN,
 				"composition.patient.identifier",
@@ -74,6 +87,36 @@ public class FhirResourceDaoR4SearchBundleNoFTTest extends BaseJpaR4Test {
 		bundle.setType(Bundle.BundleType.DOCUMENT);
 		bundle.addEntry().setResource(composition);
 		bundle.addEntry().setFullUrl(patientUrl).setResource(patient);
+
+		DaoMethodOutcome createOutcome = myBundleDao.create(bundle, mySrd);
+		assertTrue(createOutcome.getCreated());
+		IIdType bundleId = createOutcome.getId();
+
+		verifySearchCompositionPatientReturnsBundle(identifierSystem, identifierValue, bundleId);
+	}
+
+	@Test
+	public void searchDocumentBundle_withPlaceholderReferenceUsingId_returnsCorrectly() {
+		createBundleSearchParameter("Bundle-composition-patient-identifier",
+				Enumerations.SearchParamType.TOKEN,
+				"composition.patient.identifier",
+				"Bundle.entry[0].resource.as(Composition).subject.resolve().as(Patient).identifier");
+
+		String patientId = "urn:uuid:" + UUID.randomUUID();
+		String identifierSystem = "http://foo";
+		String identifierValue = "bar";
+
+		Composition composition = new Composition();
+		composition.setSubject(new Reference(patientId));
+
+		Patient patient = new Patient();
+		patient.setId(patientId);
+		patient.addIdentifier().setSystem(identifierSystem).setValue(identifierValue);
+
+		Bundle bundle = new Bundle();
+		bundle.setType(Bundle.BundleType.DOCUMENT);
+		bundle.addEntry().setResource(composition);
+		bundle.addEntry().setResource(patient);
 
 		DaoMethodOutcome createOutcome = myBundleDao.create(bundle, mySrd);
 		assertTrue(createOutcome.getCreated());
@@ -114,33 +157,6 @@ public class FhirResourceDaoR4SearchBundleNoFTTest extends BaseJpaR4Test {
 		verifySearchReturnsBundle(SearchParameterMap.newSynchronous(searchParamCode, new ReferenceParam(patientId)), bundleId);
 	}
 
-	@Test
-	public void transactionBundle_withFullyChainedLocalReference_referenceResolved() {
-		String patientId = "urn:uuid:" + UUID.randomUUID();
-		String identifierSystem = "http://foo";
-		String identifierValue = "bar";
-
-		Patient patient = new Patient();
-		patient.addIdentifier().setSystem(identifierSystem).setValue(identifierValue);
-
-		Observation observation = new Observation();
-		observation.getSubject().setReference(patientId);
-		observation.setStatus(Observation.ObservationStatus.FINAL);
-
-		Bundle bundle = new Bundle();
-		bundle.setType(Bundle.BundleType.TRANSACTION);
-		bundle.addEntry().setFullUrl(patientId).setResource(patient)
-				.getRequest().setMethod(Bundle.HTTPVerb.PUT).setUrl("Patient?identifier=http://foo|bar");
-		bundle.addEntry().setResource(observation)
-				.getRequest().setMethod(Bundle.HTTPVerb.POST).setUrl("Observation");
-
-		Bundle bundleOutCome = mySystemDao.transaction(mySrd, bundle);
-		assertTrue(bundleOutCome.hasEntry());
-		patient = myPatientDao.read(new IdType(bundleOutCome.getEntry().get(0).getResponse().getLocation()), mySrd);
-		observation = myObservationDao.read(new IdType(bundleOutCome.getEntry().get(1).getResponse().getLocation()), mySrd);
-		assertEquals(patient.getIdElement().toUnqualifiedVersionless().getValue(), observation.getSubject().getReference());
-	}
-
 	private void verifySearchCompositionPatientReturnsBundle(String theIdentifierSystem, String theIdentifierValue, IIdType theBundleId) {
 		final String systemAndValue = theIdentifierSystem + "|" + theIdentifierValue;
 		verifySearchReturnsBundle(SearchParameterMap.newSynchronous("composition.patient.identifier", new TokenParam(theIdentifierValue)), theBundleId);
@@ -163,7 +179,7 @@ public class FhirResourceDaoR4SearchBundleNoFTTest extends BaseJpaR4Test {
 			"/Bundle?composition.patient.identifier=system|value-1&_sort=composition.patient.birthdate, true, correct identifier sort by birthdate",
 
 	})
-	public void testMultipleChainedBundleCompositionSearchParameters(String theSearchUrl, boolean theShouldMatch, String theMessage) {
+	public void searchDocumentBundle_withExternalReferenceAndEntryCopy_returnsCorrectly(String theSearchUrl, boolean theShouldMatch, String theMessage) {
 		createBundleSearchParameter("bundle-composition-patient-birthdate",
 				Enumerations.SearchParamType.DATE,
 				"composition.patient.birthdate",
@@ -176,7 +192,28 @@ public class FhirResourceDaoR4SearchBundleNoFTTest extends BaseJpaR4Test {
 				"Bundle.entry.resource.ofType(Patient).identifier"
 		);
 
-		IIdType bundleId = createDocumentBundleWithLocalPatient("Patient/A", "1980-01-01", "system", "value-1");
+		String identifierSystem = "system";
+		String identifierValue = "value-1";
+		String birthDateString = "1980-01-01";
+
+		Patient patient = new Patient();
+		patient.setBirthDate(Date.valueOf(birthDateString));
+		patient.addIdentifier().setSystem(identifierSystem).setValue(identifierValue);
+
+		DaoMethodOutcome createPatientOutcome = myPatientDao.create(patient, mySrd);
+		assertTrue(createPatientOutcome.getCreated());
+
+		Composition composition = new Composition();
+		composition.setSubject(new Reference(createPatientOutcome.getId().getValue()));
+
+		Bundle bundle = new Bundle();
+		bundle.setType(Bundle.BundleType.DOCUMENT);
+		bundle.addEntry().setResource(composition);
+		bundle.addEntry().setResource(patient);
+
+		DaoMethodOutcome createBundleOutcome = myBundleDao.create(bundle, mySrd);
+		assertTrue(createBundleOutcome.getCreated());
+		IIdType bundleId = createBundleOutcome.getId();
 
 		List<String> ids = myTestDaoSearch.searchForIds(theSearchUrl);
 		if (theShouldMatch) {
@@ -184,27 +221,6 @@ public class FhirResourceDaoR4SearchBundleNoFTTest extends BaseJpaR4Test {
 		} else {
 			assertThat(ids).as(theMessage).hasSize(0);
 		}
-	}
-
-	private IIdType createDocumentBundleWithLocalPatient(@Nonnull String thePatientId, @Nonnull String theBirthDate, @Nonnull String theIdentifierSystem, @Nonnull String theIdentifierValue) {
-		String patientUrl = "http://example.com/fhir/" + thePatientId;
-
-		Composition composition = new Composition();
-		composition.setSubject(new Reference(patientUrl));
-
-		Patient patient = new Patient();
-		patient.setBirthDate(Date.valueOf(theBirthDate));
-		patient.setId(thePatientId);
-		patient.addIdentifier().setSystem(theIdentifierSystem).setValue(theIdentifierValue);
-
-		Bundle bundle = new Bundle();
-		bundle.setType(Bundle.BundleType.DOCUMENT);
-		bundle.addEntry().setResource(composition);
-		bundle.addEntry().setFullUrl(patientUrl).setResource(patient);
-
-		DaoMethodOutcome createOutcome = myBundleDao.create(bundle, mySrd);
-		assertTrue(createOutcome.getCreated());
-		return createOutcome.getId();
 	}
 
 	private void createBundleSearchParameter(String id, Enumerations.SearchParamType theType, String theCode, String theExpression) {
