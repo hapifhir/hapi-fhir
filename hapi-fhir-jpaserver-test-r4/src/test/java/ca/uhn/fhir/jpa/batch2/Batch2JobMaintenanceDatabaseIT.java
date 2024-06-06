@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.batch2;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
@@ -47,11 +48,7 @@ import java.util.Optional;
 
 import static ca.uhn.fhir.batch2.config.BaseBatch2Config.CHANNEL_NAME;
 import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.hasSize;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(Batch2JobMaintenanceDatabaseIT.class);
@@ -375,14 +372,14 @@ public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 
 	private void assertError(String theExpectedErrorMessage) {
 		Optional<Batch2JobInstanceEntity> instance = myJobInstanceRepository.findById(TEST_INSTANCE_ID);
-		assertTrue(instance.isPresent());
+		assertThat(instance).isPresent();
 		assertEquals(theExpectedErrorMessage, instance.get().getErrorMessage());
 	}
 
 
 	private void assertCurrentGatedStep(String theNextStepId) {
 		Optional<JobInstance> instance = myJobPersistence.fetchInstance(TEST_INSTANCE_ID);
-		assertTrue(instance.isPresent());
+		assertThat(instance).isPresent();
 		assertEquals(theNextStepId, instance.get().getCurrentGatedStepId());
 	}
 
@@ -437,13 +434,13 @@ public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 	}
 
 	private void assertInstanceCount(int size) {
-		assertThat(myJobPersistence.fetchInstancesByJobDefinitionId(JOB_DEF_ID, 100, 0), hasSize(size));
+		assertThat(myJobPersistence.fetchInstancesByJobDefinitionId(JOB_DEF_ID, 100, 0)).hasSize(size);
 	}
 
 
 	private void assertInstanceStatus(StatusEnum theInProgress) {
 		Optional<Batch2JobInstanceEntity> instance = myJobInstanceRepository.findById(TEST_INSTANCE_ID);
-		assertTrue(instance.isPresent());
+		assertThat(instance).isPresent();
 		assertEquals(theInProgress, instance.get().getStatus());
 	}
 	@Nonnull
@@ -514,7 +511,7 @@ public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 		}
 
 		public void assertNotifications() {
-			assertThat(myChannelInterceptor.getReceivedChunkIds(), containsInAnyOrder(myExpectedChunkIdNotifications.toArray()));
+			assertThat(myChannelInterceptor.getReceivedChunkIds()).containsExactlyInAnyOrderElementsOf(myExpectedChunkIdNotifications);
 		}
 	}
 

@@ -19,9 +19,8 @@ import org.junit.jupiter.api.Test;
 import java.net.URI;
 import java.util.HashMap;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isNull;
@@ -75,7 +74,7 @@ public class JaxRsExceptionInterceptorTest {
 			interceptor.intercept(context);
 			fail();
 		} catch (BaseServerResponseException e) {
-			assertTrue(e.getMessage().contains("someMessage"));
+			assertThat(e.getMessage()).contains("someMessage");
 		}
 	}
 
@@ -84,7 +83,7 @@ public class JaxRsExceptionInterceptorTest {
 		Object expected = new Object();
 		when(context.proceed()).thenReturn(expected);
 		Object result = interceptor.intercept(context);
-		assertSame(expected, result);
+		assertThat(result).isSameAs(expected);
 	}
 	
 	@Test

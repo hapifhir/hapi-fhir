@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
@@ -24,7 +25,7 @@ public class PropertyModifyingHelperTest {
 
 		address = (Address) helper.getBase();
 
-		assertEquals(2, address.getLine().size());
+		assertThat(address.getLine()).hasSize(2);
 		assertEquals("city", address.getCity());
 		assertNull(address.getCountry());
 

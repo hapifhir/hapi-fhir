@@ -20,7 +20,7 @@ public class DefaultProfileValidationSupportR4Test extends BaseValidationTestWit
 		assertNotNull(mySvc.fetchStructureDefinition("http://hl7.org/fhir/StructureDefinition/Extension"));
 		assertNotNull(mySvc.fetchStructureDefinition("StructureDefinition/Extension"));
 		assertNotNull(mySvc.fetchStructureDefinition("Extension"));
-		
+
 		assertNull(mySvc.fetchStructureDefinition("http://hl7.org/fhir/StructureDefinition/Extension2"));
 		assertNull(mySvc.fetchStructureDefinition("StructureDefinition/Extension2"));
 		assertNull(mySvc.fetchStructureDefinition("Extension2"));

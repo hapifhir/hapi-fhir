@@ -1,15 +1,16 @@
 package org.hl7.fhir.r5.validation;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.LookupCodeRequest;
+import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import org.hl7.fhir.common.hapi.validation.support.RemoteTerminologyServiceValidationSupport;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
+
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 
 public class RemoteTerminologyServiceValidationSupportR5Test extends BaseValidationTestWithInlineMocks {
 	private static final String ANY_NONBLANK_VALUE = "anything";
@@ -28,9 +29,8 @@ public class RemoteTerminologyServiceValidationSupportR5Test extends BaseValidat
 
 	@Test
 	public void testLookupCode_R5_ThrowsException() {
-		Assertions.assertThrows(UnsupportedOperationException.class,
-				() -> mySvc.lookupCode(
-						new ValidationSupportContext(ourCtx.getValidationSupport()),
-						new LookupCodeRequest(ANY_NONBLANK_VALUE, ANY_NONBLANK_VALUE)));
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() -> mySvc.lookupCode(
+			new ValidationSupportContext(ourCtx.getValidationSupport()),
+			new LookupCodeRequest(ANY_NONBLANK_VALUE, ANY_NONBLANK_VALUE)));
 	}
 }

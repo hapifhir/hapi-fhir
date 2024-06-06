@@ -6,11 +6,9 @@ import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.nullValue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 class ValueSetAutocompleteSearchTest {
 	FhirContext myFhirContext = FhirContext.forR4();
@@ -28,10 +26,10 @@ class ValueSetAutocompleteSearchTest {
 
 			makeCoding(entry);
 
-			assertThat(myCoding, is(not(nullValue())));
-			assertThat(myCoding.getSystem(), equalTo("http://loinc.org"));
-			assertThat(myCoding.getCode(), equalTo("4544-3"));
-			assertThat(myCoding.getDisplay(), equalTo("Hematocrit [Volume Fraction] of Blood by Automated count"));
+			assertNotNull(myCoding);
+			assertEquals("http://loinc.org", myCoding.getSystem());
+			assertEquals("4544-3", myCoding.getCode());
+			assertEquals("Hematocrit [Volume Fraction] of Blood by Automated count", myCoding.getDisplay());
 		}
 
 		@Test
@@ -40,10 +38,10 @@ class ValueSetAutocompleteSearchTest {
 
 			makeCoding(entry);
 
-			assertThat(myCoding, is(not(nullValue())));
-			assertThat(myCoding.getSystem(), is(nullValue()));
-			assertThat(myCoding.getCode(), equalTo("some_code"));
-			assertThat(myCoding.getDisplay(), equalTo("Some text"));
+			assertNotNull(myCoding);
+			assertNull(myCoding.getSystem());
+			assertEquals("some_code", myCoding.getCode());
+			assertEquals("Some text", myCoding.getDisplay());
 		}
 
 		@Test
@@ -52,10 +50,10 @@ class ValueSetAutocompleteSearchTest {
 
 			makeCoding(entry);
 
-			assertThat(myCoding, is(not(nullValue())));
-			assertThat(myCoding.getSystem(), is(nullValue()));
-			assertThat(myCoding.getCode(), equalTo("some_code"));
-			assertThat(myCoding.getDisplay(), is(nullValue()));
+			assertNotNull(myCoding);
+			assertNull(myCoding.getSystem());
+			assertEquals("some_code", myCoding.getCode());
+			assertNull(myCoding.getDisplay());
 
 		}
 

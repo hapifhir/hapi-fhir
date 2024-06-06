@@ -17,6 +17,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -56,9 +57,9 @@ class SubscriptionTopicPayloadBuilderR4BTest {
 		Bundle payload = (Bundle) myStPayloadBuilder.buildPayload(List.of(myEncounter), myActiveSubscription, TEST_TOPIC_URL, RestOperationTypeEnum.DELETE);
 
 		// verify Bundle size
-		assertEquals(2, payload.getEntry().size());
+		assertThat(payload.getEntry()).hasSize(2);
 		List<Resource> resources = BundleUtil.toListOfResourcesOfType(ourFhirContext, payload, Resource.class);
-		assertEquals(1, resources.size());
+		assertThat(resources).hasSize(1);
 
 		// verify SubscriptionStatus.notificationEvent.focus
 		verifySubscriptionStatusNotificationEvent(resources.get(0));
@@ -93,9 +94,9 @@ class SubscriptionTopicPayloadBuilderR4BTest {
 		Bundle payload = (Bundle) myStPayloadBuilder.buildPayload(List.of(myEncounter), myActiveSubscription, TEST_TOPIC_URL, restOperationType);
 
 		// verify Bundle size
-		assertEquals(2, payload.getEntry().size());
+		assertThat(payload.getEntry()).hasSize(2);
 		List<Resource> resources = BundleUtil.toListOfResourcesOfType(ourFhirContext, payload, Resource.class);
-		assertEquals(2, resources.size());
+		assertThat(resources).hasSize(2);
 
 		// verify SubscriptionStatus.notificationEvent.focus
 		verifySubscriptionStatusNotificationEvent(resources.get(0));
@@ -125,9 +126,9 @@ class SubscriptionTopicPayloadBuilderR4BTest {
 		Bundle payload = (Bundle) myStPayloadBuilder.buildPayload(List.of(myEncounter), myActiveSubscription, TEST_TOPIC_URL, restOperationType);
 
 		// verify Bundle size
-		assertEquals(2, payload.getEntry().size());
+		assertThat(payload.getEntry()).hasSize(2);
 		List<Resource> resources = BundleUtil.toListOfResourcesOfType(ourFhirContext, payload, Resource.class);
-		assertEquals(1, resources.size());
+		assertThat(resources).hasSize(1);
 
 		// verify SubscriptionStatus.notificationEvent.focus
 		verifySubscriptionStatusNotificationEvent(resources.get(0));
@@ -154,13 +155,13 @@ class SubscriptionTopicPayloadBuilderR4BTest {
 		Bundle payload = (Bundle) myStPayloadBuilder.buildPayload(List.of(myEncounter), myActiveSubscription, TEST_TOPIC_URL, restOperationType);
 
 		// verify Bundle size
-		assertEquals(1, payload.getEntry().size());
+		assertThat(payload.getEntry()).hasSize(1);
 		List<Resource> resources = BundleUtil.toListOfResourcesOfType(ourFhirContext, payload, Resource.class);
-		assertEquals(1, resources.size());
+		assertThat(resources).hasSize(1);
 
 		// verify SubscriptionStatus.notificationEvent.focus
 		assertEquals("SubscriptionStatus", resources.get(0).getResourceType().name());
-		assertEquals(1, ((SubscriptionStatus) resources.get(0)).getNotificationEvent().size());
+		assertThat(((SubscriptionStatus) resources.get(0)).getNotificationEvent()).hasSize(1);
 		SubscriptionStatus.SubscriptionStatusNotificationEventComponent notificationEvent =
 				((SubscriptionStatus) resources.get(0)).getNotificationEventFirstRep();
 		assertFalse(notificationEvent.hasFocus());
@@ -175,7 +176,7 @@ class SubscriptionTopicPayloadBuilderR4BTest {
 
 	private void verifySubscriptionStatusNotificationEvent(Resource theResource) {
 		assertEquals("SubscriptionStatus", theResource.getResourceType().name());
-		assertEquals(1, ((SubscriptionStatus) theResource).getNotificationEvent().size());
+		assertThat(((SubscriptionStatus) theResource).getNotificationEvent()).hasSize(1);
 		SubscriptionStatus.SubscriptionStatusNotificationEventComponent notificationEvent =
 				((SubscriptionStatus) theResource).getNotificationEventFirstRep();
 		assertTrue(notificationEvent.hasFocus());

@@ -40,13 +40,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.blankOrNullString;
-import static org.hamcrest.Matchers.containsInRelativeOrder;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.startsWith;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
@@ -88,16 +82,16 @@ public class OperationServerDstu2Test {
 	public void testConformance() throws Exception {
 		Conformance p = ourServer.getFhirClient().fetchConformance().ofType(Conformance.class).prettyPrint().execute();
 		List<RestOperation> ops = p.getRest().get(0).getOperation();
-		assertThat(ops.size(), greaterThan(1));
+		assertThat(ops.size()).isGreaterThan(1);
 		assertNull(ops.get(0).getDefinition().getReference().getBaseUrl());
-		assertThat(ops.get(0).getDefinition().getReference().getValue(), startsWith("OperationDefinition/"));
+		assertThat(ops.get(0).getDefinition().getReference().getValue()).startsWith("OperationDefinition/");
 
 		OperationDefinition def = ourServer.getFhirClient().read().resource(OperationDefinition.class).withId(ops.get(0).getDefinition().getReference()).execute();
-		assertThat(def.getCode(), not(blankOrNullString()));
+		assertThat(def.getCode()).isNotBlank();
 
 		List<String> opNames = toOpNames(ops);
-		assertThat(opNames, containsInRelativeOrder("OP_TYPE"));
-		
+		assertThat(opNames).containsSubsequence("OP_TYPE");
+
 		assertEquals("OperationDefinition/Patient-t-OP_TYPE", ops.get(opNames.indexOf("OP_TYPE")).getDefinition().getReference().getValue());
 	}
 
@@ -109,28 +103,28 @@ public class OperationServerDstu2Test {
 		OperationDefinition def = ourServer.getFhirClient().read().resource(OperationDefinition.class).withId("OperationDefinition/Patient-t-OP_TYPE").execute();
 		
 		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(def));
-		
+
 //		@OperationParam(name="PARAM1") StringType theParam1,
 //		@OperationParam(name="PARAM2") Patient theParam2,
 //		@OperationParam(name="PARAM3", min=2, max=5) List<StringType> theParam3,
 //		@OperationParam(name="PARAM4", min=1) List<StringType> theParam4,
 
-		assertEquals(4, def.getParameter().size());
+		assertThat(def.getParameter()).hasSize(4);
 		assertEquals("PARAM1", def.getParameter().get(0).getName());
 		assertEquals(OperationParameterUseEnum.IN.getCode(), def.getParameter().get(0).getUse());
 		assertEquals(0, def.getParameter().get(0).getMin().intValue());
 		assertEquals("1", def.getParameter().get(0).getMax());
-		
+
 		assertEquals("PARAM2", def.getParameter().get(1).getName());
 		assertEquals(OperationParameterUseEnum.IN.getCode(), def.getParameter().get(1).getUse());
 		assertEquals(0, def.getParameter().get(1).getMin().intValue());
 		assertEquals("1", def.getParameter().get(1).getMax());
-		
+
 		assertEquals("PARAM3", def.getParameter().get(2).getName());
 		assertEquals(OperationParameterUseEnum.IN.getCode(), def.getParameter().get(2).getUse());
 		assertEquals(2, def.getParameter().get(2).getMin().intValue());
 		assertEquals("5", def.getParameter().get(2).getMax());
-		
+
 		assertEquals("PARAM4", def.getParameter().get(3).getName());
 		assertEquals(OperationParameterUseEnum.IN.getCode(), def.getParameter().get(3).getUse());
 		assertEquals(1, def.getParameter().get(3).getMin().intValue());
@@ -159,7 +153,7 @@ public class OperationServerDstu2Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertEquals("instance $everything", ourLastMethod);
-		assertThat(response, startsWith("<Bundle"));
+		assertThat(response).startsWith("<Bundle");
 		assertEquals("Patient/123", ourLastId.toUnqualifiedVersionless().getValue());
 
 	}
@@ -188,7 +182,7 @@ public class OperationServerDstu2Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertEquals("instance $everything", ourLastMethod);
-		assertThat(response, startsWith("<Bundle"));
+		assertThat(response).startsWith("<Bundle");
 		assertEquals("Patient/123", ourLastId.toUnqualifiedVersionless().getValue());
 
 	}
@@ -203,7 +197,7 @@ public class OperationServerDstu2Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertEquals("POST", status.getFirstHeader(Constants.HEADER_ALLOW).getValue());
-		assertThat(response, containsString("HTTP Method GET is not allowed"));
+		assertThat(response).contains("HTTP Method GET is not allowed");
 	}
 
 	@Test
@@ -217,7 +211,7 @@ public class OperationServerDstu2Test {
 		CloseableHttpResponse status = ourClient.execute(httpPost);
 		try {
 			String response = IOUtils.toString(status.getEntity().getContent());
-			assertThat(response, containsString("Request has parameter PARAM1 of type IntegerDt but method expects type StringDt"));
+			assertThat(response).contains("Request has parameter PARAM1 of type IntegerDt but method expects type StringDt");
 			ourLog.info(response);
 		} finally {
 			IOUtils.closeQuietly(status);
@@ -304,7 +298,7 @@ public class OperationServerDstu2Test {
 
 		assertEquals("PARAM1val", ourLastParam1.getValue());
 		assertEquals(true, ourLastParam2.getActive().booleanValue());
-		assertEquals(null, ourLastId);
+		assertNull(ourLastId);
 		assertEquals("$OP_INSTANCE_OR_TYPE", ourLastMethod);
 
 		Parameters resp = ourCtx.newXmlParser().parseResource(Parameters.class, response);
@@ -420,7 +414,7 @@ public class OperationServerDstu2Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertEquals("POST", status.getFirstHeader(Constants.HEADER_ALLOW).getValue());
-		assertThat(response, containsString("Can not invoke operation $OP_TYPE using HTTP GET because parameter PARAM2 is not a primitive datatype"));
+		assertThat(response).contains("Can not invoke operation $OP_TYPE using HTTP GET because parameter PARAM2 is not a primitive datatype");
 	}
 
 	@Test
@@ -441,8 +435,8 @@ public class OperationServerDstu2Test {
 
 		assertEquals("$OP_SERVER_LIST_PARAM", ourLastMethod);
 		assertEquals(true, ourLastParam2.getActive().booleanValue());
-		assertEquals(null, ourLastParam1);
-		assertEquals(2, ourLastParam3.size());
+		assertNull(ourLastParam1);
+		assertThat(ourLastParam3).hasSize(2);
 		assertEquals("PARAM3val1", ourLastParam3.get(0).getValue());
 		assertEquals("PARAM3val2", ourLastParam3.get(1).getValue());
 
@@ -520,7 +514,7 @@ public class OperationServerDstu2Test {
 		ourLog.info(status.getStatusLine().toString());
 		ourLog.info(response);
 
-		assertThat(response, containsString("Request has parameter PARAM1 of type IntegerDt but method expects type StringDt"));
+		assertThat(response).contains("Request has parameter PARAM1 of type IntegerDt but method expects type StringDt");
 	}
 
 	@Test

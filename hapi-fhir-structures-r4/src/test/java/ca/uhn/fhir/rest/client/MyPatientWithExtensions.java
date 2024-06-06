@@ -1,13 +1,18 @@
 package ca.uhn.fhir.rest.client;
 
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Extension;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.util.ElementUtil;
+import org.hl7.fhir.r4.model.DateType;
+import org.hl7.fhir.r4.model.DomainResource;
+import org.hl7.fhir.r4.model.HumanName;
+import org.hl7.fhir.r4.model.ResourceType;
+import org.hl7.fhir.r4.model.StringType;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import org.hl7.fhir.r4.model.*;
-
-import ca.uhn.fhir.model.api.annotation.*;
-import ca.uhn.fhir.model.api.annotation.Extension;
-import ca.uhn.fhir.util.ElementUtil;
 
 
 @ResourceDef(name="Patient", profile="http://example.com/StructureDefinition/patient_with_extensions")

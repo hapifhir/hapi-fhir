@@ -14,6 +14,7 @@ import ca.uhn.fhir.jpa.api.pid.ListWrappingPidStream;
 import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.r4.model.InstantType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,7 +24,6 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import jakarta.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -85,7 +85,7 @@ public class LoadIdsStepTest {
 			assertEquals(expected, actual);
 		}
 		final ResourceIdListWorkChunkJson expectedIdChunk = createIdChunk(19500, 20000);
-		assertEquals(expectedIdChunk.toString(), allCapturedValues.get(expectedLoops -1).toString());
+		assertEquals(expectedIdChunk.toString(), allCapturedValues.get(expectedLoops - 1).toString());
 	}
 
 	@Nonnull

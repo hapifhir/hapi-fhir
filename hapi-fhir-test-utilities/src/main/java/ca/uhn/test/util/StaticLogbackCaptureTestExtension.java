@@ -27,16 +27,17 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 import java.util.List;
 
 /**
- * This is a static wrapper around LogbackCaptureTestExtension for use in IT tests when you need to assert on App
+ * This is a static wrapper around LogbackTestExtension for use in IT tests when you need to assert on App
  * startup log entries
+ * @deprecated use {@link StaticLogbackTestExtension}
  */
-
+@Deprecated
 public class StaticLogbackCaptureTestExtension implements BeforeAllCallback, AfterAllCallback {
 	private final LogbackCaptureTestExtension myLogbackCaptureTestExtension;
 
-    public StaticLogbackCaptureTestExtension(LogbackCaptureTestExtension theLogbackCaptureTestExtension) {
-        myLogbackCaptureTestExtension = theLogbackCaptureTestExtension;
-    }
+	public StaticLogbackCaptureTestExtension(LogbackCaptureTestExtension theLogbackCaptureTestExtension) {
+		myLogbackCaptureTestExtension = theLogbackCaptureTestExtension;
+	}
 
 	public StaticLogbackCaptureTestExtension() {
 		myLogbackCaptureTestExtension = new LogbackCaptureTestExtension();

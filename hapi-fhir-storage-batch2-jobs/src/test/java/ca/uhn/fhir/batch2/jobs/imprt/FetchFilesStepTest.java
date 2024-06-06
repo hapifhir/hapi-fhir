@@ -25,10 +25,8 @@ import static ca.uhn.fhir.rest.api.Constants.CT_FHIR_JSON_NEW;
 import static ca.uhn.fhir.rest.api.Constants.CT_FHIR_NDJSON;
 import static ca.uhn.fhir.rest.api.Constants.CT_JSON;
 import static ca.uhn.fhir.rest.api.Constants.CT_TEXT;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasItem;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -68,10 +66,10 @@ public class FetchFilesStepTest {
 
 		// Verify
 
-		assertEquals(1, myHttpServletExtension.getRequestHeaders().size());
+		assertThat(myHttpServletExtension.getRequestHeaders()).hasSize(1);
 
 		String expectedAuthHeader = "Authorization: Basic " + Base64.getEncoder().encodeToString("admin:password".getBytes(StandardCharsets.UTF_8));
-		assertThat(myHttpServletExtension.toString(), myHttpServletExtension.getRequestHeaders().get(0), hasItem(expectedAuthHeader));
+		assertThat(myHttpServletExtension.getRequestHeaders().get(0)).as(myHttpServletExtension.toString()).contains(expectedAuthHeader);
 	}
 
 	@Test
@@ -114,7 +112,7 @@ public class FetchFilesStepTest {
 
 		// Test & Verify
 
-		assertThrows(JobExecutionFailedException.class, () -> mySvc.run(details, myJobDataSink));
+		assertThatExceptionOfType(JobExecutionFailedException.class).isThrownBy(() -> mySvc.run(details, myJobDataSink));
 	}
 
 	public static class ContentTypeHeaderModifiableBulkImportFileServlet extends BulkImportFileServlet{

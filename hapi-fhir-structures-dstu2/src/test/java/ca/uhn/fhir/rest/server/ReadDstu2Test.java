@@ -13,7 +13,6 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
-import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.DateUtils;
 import ca.uhn.fhir.util.TestUtil;
@@ -21,24 +20,15 @@ import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.ee10.servlet.ServletHandler;
-import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ReadDstu2Test {
@@ -123,8 +113,8 @@ public class ReadDstu2Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, containsString("p1ReadValue"));
-		assertThat(responseContent, containsString("p1ReadId"));
+		assertThat(responseContent).contains("p1ReadValue");
+		assertThat(responseContent).contains("p1ReadId");
 		assertEquals("<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"p1ReadId\"/><meta><lastUpdated value=\"2012-01-01T12:12:12Z\"/><profile value=\"http://foo_profile\"/></meta><identifier><value value=\"p1ReadValue\"/></identifier></Patient>", responseContent);
 
 		ourLog.info(responseContent);
@@ -148,8 +138,8 @@ public class ReadDstu2Test {
 		ourLog.info(responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, containsString("p1ReadValue"));
-		assertThat(responseContent, containsString("p1ReadId"));
+		assertThat(responseContent).contains("p1ReadValue");
+		assertThat(responseContent).contains("p1ReadId");
 		assertEquals("<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"p1ReadId\"/><meta><lastUpdated value=\"2012-01-01T12:12:12Z\"/><profile value=\"http://foo\"/><profile value=\"http://foo_profile\"/></meta><identifier><value value=\"p1ReadValue\"/></identifier></Patient>", responseContent);
 	}
 
@@ -167,9 +157,9 @@ public class ReadDstu2Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, containsString("p1ReadValue"));
-		assertThat(responseContent, containsString("p1ReadId"));
-		assertThat(responseContent, containsString("\"meta\":{\"lastUpdated\":\"2012-01-01T12:12:12Z\",\"profile\":[\"http://foo_profile\"]}"));
+		assertThat(responseContent).contains("p1ReadValue");
+		assertThat(responseContent).contains("p1ReadId");
+		assertThat(responseContent).contains("\"meta\":{\"lastUpdated\":\"2012-01-01T12:12:12Z\",\"profile\":[\"http://foo_profile\"]}");
 	}
 
 	/**
@@ -183,8 +173,8 @@ public class ReadDstu2Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, containsString("p1ReadValue"));
-		assertThat(responseContent, containsString("p1ReadId"));
+		assertThat(responseContent).contains("p1ReadValue");
+		assertThat(responseContent).contains("p1ReadId");
 
 		ourLog.info(responseContent);
 	}
@@ -199,8 +189,8 @@ public class ReadDstu2Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, containsString("p1ReadValue"));
-		assertThat(responseContent, containsString("p1ReadId"));
+		assertThat(responseContent).contains("p1ReadValue");
+		assertThat(responseContent).contains("p1ReadId");
 		assertEquals("<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"p1ReadId\"/><meta><lastUpdated value=\"2012-01-01T12:12:12Z\"/><profile value=\"http://foo_profile\"/></meta><identifier><value value=\"p1ReadValue\"/></identifier></Patient>", responseContent);
 
 		ourLog.info(responseContent);

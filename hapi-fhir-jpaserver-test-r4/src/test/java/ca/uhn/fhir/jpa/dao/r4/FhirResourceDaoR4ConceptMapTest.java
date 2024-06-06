@@ -36,8 +36,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasItem;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -1144,15 +1143,13 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 		CodeableConcept sourceCodeableConcept = new CodeableConcept();
 		sourceCodeableConcept.addCoding(new Coding("http://source", "source1", null));
 		List<TranslateConceptResult> translationResults = myValidationSupport.translateConcept(new IValidationSupport.TranslateCodeRequest(Collections.unmodifiableList(sourceCodeableConcept.getCoding()), "http://target")).getResults();
-		assertThat(translationResults.toString(), translationResults, hasItem(
-			new TranslateConceptResult()
-				.setSystem("http://target")
-				.setCode("target1")
-				.setEquivalence("equal")
-				.setConceptMapUrl("http://foo")
-				.setValueSet("http://target"))
-		);
-		assertEquals(translationResults.size(), new HashSet<>(translationResults).size());
+		assertThat(translationResults).as(translationResults.toString()).contains(new TranslateConceptResult()
+			.setSystem("http://target")
+			.setCode("target1")
+			.setEquivalence("equal")
+			.setConceptMapUrl("http://foo")
+			.setValueSet("http://target"));
+		assertThat(new HashSet<>(translationResults)).hasSize(translationResults.size());
 	}
 
 	/**

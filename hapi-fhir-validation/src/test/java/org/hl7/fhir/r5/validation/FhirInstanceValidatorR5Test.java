@@ -43,7 +43,6 @@ import org.hl7.fhir.r5.model.StringType;
 import org.hl7.fhir.r5.model.StructureDefinition;
 import org.hl7.fhir.r5.model.ValueSet;
 import org.hl7.fhir.r5.model.ValueSet.ValueSetExpansionComponent;
-;
 import org.hl7.fhir.r5.terminologies.expansion.ValueSetExpansionOutcome;
 import org.hl7.fhir.r5.utils.validation.IValidationPolicyAdvisor;
 import org.hl7.fhir.r5.utils.validation.IValidatorResourceFetcher;
@@ -68,14 +67,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.lessThan;
-import static org.hamcrest.Matchers.not;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -87,6 +79,8 @@ import static org.mockito.Mockito.atMost;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+;
 
 public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMocks {
 
@@ -110,7 +104,6 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 		myValidConcepts.add(theSystem + "___" + theCode);
 	}
 
-
 	/**
 	 * An invalid local reference should not cause a ServiceException.
 	 */
@@ -125,7 +118,7 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 		ValidationResult output = myVal.validateWithResult(resource);
 		List<SingleValidationMessage> nonInfo = logResultsAndReturnNonInformationalOnes(output);
 		//TODO JA: This is now 3 since we now validate that there is a questionnaire provided.
-		assertThat(nonInfo, hasSize(3));
+		assertThat(nonInfo).hasSize(3);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -258,8 +251,6 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 			.setSystem("http://foo")
 			.setCode("AA  ");
 
-		ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p);
-
 		FhirValidator val = ourCtx.newValidator();
 		val.registerValidatorModule(new FhirInstanceValidator(myValidationSupport));
 
@@ -289,7 +280,7 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 		ValidationResult result = val.validateWithResult(input);
 		List<SingleValidationMessage> all = logResultsAndReturnAll(result);
 		assertFalse(result.isSuccessful());
-		assertThat(all.get(0).getMessage(), containsString("All FHIR elements must have a @value or children"));
+		assertThat(all.get(0).getMessage()).contains("All FHIR elements must have a @value or children");
 	}
 
 	/**
@@ -319,7 +310,7 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 		result = val.validateWithResult(input);
 		all = logResultsAndReturnAll(result);
 		assertTrue(result.isSuccessful());
-		assertThat(all, hasSize(1));
+		assertThat(all).hasSize(1);
 		assertEquals("Best Practice Recommendation: In general, all observations should have a subject", all.get(0).getMessage());
 		assertEquals(ResultSeverityEnum.WARNING, all.get(0).getSeverity());
 
@@ -385,7 +376,7 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 
 		ValidationResult output = myVal.validateWithResult(encoded);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
-		assertEquals(1, errors.size(), ()->errors.toString());
+		assertThat(errors.size()).as(() -> errors.toString()).isEqualTo(1);
 		assertEquals("The value '%%%2@()()' is not a valid Base64 value", errors.get(0).getMessage());
 
 	}
@@ -405,7 +396,7 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 
 		ValidationResult output = myVal.validateWithResult(encoded);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
-		assertEquals(0, errors.size(), ()->errors.toString());
+		assertThat(errors.size()).as(() -> errors.toString()).isEqualTo(0);
 
 	}
 
@@ -419,7 +410,7 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 		Period period = new Period();
 		period.setStartElement(new DateTimeType("2000-01-01T00:00:01+05:00"));
 		period.setEndElement(new DateTimeType("2000-01-01T00:00:00+04:00"));
-		assertThat(period.getStart().getTime(), lessThan(period.getEnd().getTime()));
+		assertThat(period.getStart().getTime()).isLessThan(period.getEnd().getTime());
 		procedure.setOccurrence(period);
 
 		FhirValidator val = ourCtx.newValidator();
@@ -446,7 +437,7 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 
 		ValidationResult results = myVal.validateWithResult(p);
 		List<SingleValidationMessage> outcome = logResultsAndReturnNonInformationalOnes(results);
-		assertThat(outcome, empty());
+		assertThat(outcome).isEmpty();
 
 	}
 
@@ -458,7 +449,7 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 		String input = IOUtils.toString(FhirInstanceValidator.class.getResourceAsStream("/bug872-ext-with-hl7-url.json"), Charsets.UTF_8);
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> nonInfo = logResultsAndReturnNonInformationalOnes(output);
-		assertThat(nonInfo, empty());
+		assertThat(nonInfo).isEmpty();
 	}
 
 
@@ -508,7 +499,7 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 			"}";
 
 		ValidationResult output = myVal.validateWithResult(input);
-		assertEquals(0, output.getMessages().size(), output.toString());
+		assertThat(output.getMessages().size()).as(output.toString()).isEqualTo(0);
 	}
 
 	@Test
@@ -525,7 +516,7 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 				"}";
 
 		ValidationResult output = myVal.validateWithResult(input);
-		assertEquals(1, output.getMessages().size(), output.toString());
+		assertThat(output.getMessages().size()).as(output.toString()).isEqualTo(1);
 		ourLog.info(output.getMessages().get(0).getLocationString());
 		ourLog.info(output.getMessages().get(0).getMessage());
 		assertEquals("Patient", output.getMessages().get(0).getLocationString());
@@ -576,7 +567,7 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 		 */
 
 		ValidationResult output = myVal.validateWithResult(encoded);
-		assertEquals(1, output.getMessages().size(), output.toString());
+		assertThat(output.getMessages().size()).as(output.toString()).isEqualTo(1);
 
 		assertEquals("Unknown extension http://hl7.org/fhir/v3/ethnicity", output.getMessages().get(0).getMessage());
 		assertEquals(ResultSeverityEnum.INFORMATION, output.getMessages().get(0).getSeverity());
@@ -611,7 +602,7 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 
 		myInstanceVal.setAnyExtensionsAllowed(false);
 		ValidationResult output = myVal.validateWithResult(encoded);
-		assertEquals( 1, output.getMessages().size(), output.toString());
+		assertThat(output.getMessages().size()).as(output.toString()).isEqualTo(1);
 
 		assertEquals("The extension http://hl7.org/fhir/v3/ethnicity could not be found so is not allowed here", output.getMessages().get(0).getMessage());
 		assertEquals(ResultSeverityEnum.ERROR, output.getMessages().get(0).getSeverity());
@@ -628,7 +619,7 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 			"</Patient>";
 
 		ValidationResult output = myVal.validateWithResult(input);
-		assertEquals(0, output.getMessages().size(), output.toString());
+		assertThat(output.getMessages().size()).as(output.toString()).isEqualTo(0);
 	}
 
 	@Test
@@ -644,7 +635,7 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 				"</Patient>";
 
 		ValidationResult output = myVal.validateWithResult(input);
-		assertEquals( 1, output.getMessages().size(), output.toString());
+		assertThat(output.getMessages().size()).as(output.toString()).isEqualTo(1);
 		ourLog.info(output.getMessages().get(0).getLocationString());
 		ourLog.info(output.getMessages().get(0).getMessage());
 		assertEquals("/f:Patient", output.getMessages().get(0).getLocationString());
@@ -663,10 +654,10 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> messages = logResultsAndReturnNonInformationalOnes(output);
-		assertEquals( 3, messages.size(), output.toString());
-		assertThat(messages.get(0).getMessage(), containsString("Element must have some content"));
-		assertThat(messages.get(1).getMessage(), containsString("All FHIR elements must have a @value or children"));
-		assertThat(messages.get(2).getMessage(), containsString("Primitive types must have a value or must have child extensions"));
+		assertThat(messages.size()).as(output.toString()).isEqualTo(3);
+		assertThat(messages.get(0).getMessage()).contains("Element must have some content");
+		assertThat(messages.get(1).getMessage()).contains("All FHIR elements must have a @value or children");
+		assertThat(messages.get(2).getMessage()).contains("Primitive types must have a value or must have child extensions");
 	}
 
 	@Test
@@ -701,13 +692,14 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> res = logResultsAndReturnNonInformationalOnes(output);
-		assertEquals(1, res.size(), output.toString());
+		assertThat(res.size()).as(output.toString()).isEqualTo(1);
 		assertEquals("Coding has no system. A code with no system has no defined meaning, and it cannot be validated. A system should be provided", res.get(0).getMessage());
 	}
 
 	@Test
 	public void testValidateRawXmlWithMissingRootNamespace() {
-		String input = "<Patient>"
+		String input = ""
+			+ "<Patient>"
 			+ "    <text>"
 			+ "        <status value=\"generated\"/>"
 			+ "        <div xmlns=\"http://www.w3.org/1999/xhtml\">Some narrative</div>"
@@ -722,7 +714,7 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 			+ "</Patient>";
 
 		ValidationResult output = myVal.validateWithResult(input);
-		assertEquals(1, output.getMessages().size(), output.toString());
+		assertThat(output.getMessages().size()).as(output.toString()).isEqualTo(1);
 		assertEquals("This content cannot be parsed (unknown or unrecognized XML Root element namespace/name 'noNamespace::Patient')", output.getMessages().get(0).getMessage());
 		ourLog.info(output.getMessages().get(0).getLocationString());
 	}
@@ -738,7 +730,7 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 
 		ValidationResult output = myVal.validateWithResult(p);
 		List<SingleValidationMessage> nonInfo = logResultsAndReturnNonInformationalOnes(output);
-		assertThat(nonInfo, empty());
+		assertThat(nonInfo).isEmpty();
 	}
 
 	/**
@@ -753,7 +745,7 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 
 		ValidationResult output = myVal.validateWithResult(p);
 		List<SingleValidationMessage> nonInfo = logResultsAndReturnNonInformationalOnes(output);
-		assertThat(nonInfo, empty());
+		assertThat(nonInfo).isEmpty();
 	}
 
 	/**
@@ -768,11 +760,11 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 		RelatedPerson rp = new RelatedPerson();
 		rp.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
 		rp.getPatient().setReference("Patient/1");
-		rp.addRelationship().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/v2-0131").setCode("O");
+		rp.addRelationship().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/v2-0131").setCode("C");
 
 		ValidationResult results = myVal.validateWithResult(rp);
 		List<SingleValidationMessage> outcome = logResultsAndReturnNonInformationalOnes(results);
-		assertThat(outcome, empty());
+		assertThat(outcome).isEmpty();
 
 		/*
 		 * Now a bad code
@@ -789,9 +781,9 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 
 
 		assertEquals(2, outcome.size());
-		assertThat(outcome.get(0).getMessage(), containsString("Unknown code 'http://terminology.hl7.org/CodeSystem/v2-0131#GAGAGAGA'"));
+		assertThat(outcome.get(0).getMessage()).contains("Unknown code 'http://terminology.hl7.org/CodeSystem/v2-0131#GAGAGAGA'");
 		assertEquals(ResultSeverityEnum.ERROR, outcome.get(0).getSeverity());
-		assertThat(outcome.get(1).getMessage(), containsString("None of the codings provided are in the value set 'Patient Relationship Type'"));
+		assertThat(outcome.get(1).getMessage()).contains("None of the codings provided are in the value set 'Patient Relationship Type'");
 		assertEquals(ResultSeverityEnum.INFORMATION, outcome.get(1).getSeverity());
 
 	}
@@ -836,9 +828,9 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
 
-		assertThat(errors.toString(), containsString("Observation.subject: minimum required = 1, but only found 0"));
-		assertThat(errors.toString(), containsString("Observation.encounter: max allowed = 0, but found 1"));
-		assertThat(errors.toString(), containsString("Observation.device: minimum required = 1, but only found 0"));
+		assertThat(errors.toString()).contains("Observation.subject: minimum required = 1, but only found 0");
+		assertThat(errors.toString()).contains("Observation.encounter: max allowed = 0, but found 1");
+		assertThat(errors.toString()).contains("Observation.device: minimum required = 1, but only found 0");
 	}
 
 	@Test
@@ -855,7 +847,7 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 		myInstanceVal.setValidationSupport(myValidationSupport);
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
-		assertThat(errors.toString(), containsString("Profile reference 'http://foo/structuredefinition/myprofile' has not been checked because it could not be found"));
+		assertThat(errors.toString()).contains("Profile reference 'http://foo/structuredefinition/myprofile' has not been checked because it could not be found");
 	}
 
 	@Test
@@ -868,8 +860,8 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 		input.setValue(new StringType("AAA"));
 
 		ValidationResult output = myVal.validateWithResult(input);
-		assertThat(output.getMessages().size(), greaterThan(0));
-		assertThat(output.getMessages().get(0).getMessage(), containsString("Observation.status: minimum required = 1, but only found 0"));
+		assertThat(output.getMessages().size()).isGreaterThan(0);
+		assertThat(output.getMessages().get(0).getMessage()).contains("Observation.status: minimum required = 1, but only found 0");
 
 	}
 
@@ -902,10 +894,7 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 				"</Observation>";
 		ValidationResult output = myVal.validateWithResult(input);
 		logResultsAndReturnAll(output);
-		assertThat(
-			output.getMessages().get(0).getMessage(),
-			containsString("The value provided ('notvalidcode') was not found in the value set 'Observation Status' (http://hl7.org/fhir/ValueSet/observation-status|5.0.0), and a code is required from this value set  (error message = Unknown code 'notvalidcode' for in-memory expansion of ValueSet 'http://hl7.org/fhir/ValueSet/observation-status')")
-			);
+		assertThat(output.getMessages().get(0).getMessage()).contains("The value provided ('notvalidcode') was not found in the value set 'Observation Status' (http://hl7.org/fhir/ValueSet/observation-status|5.0.0), and a code is required from this value set  (error message = Unknown code 'notvalidcode' for in-memory expansion of ValueSet 'http://hl7.org/fhir/ValueSet/observation-status')");
 	}
 
 
@@ -930,7 +919,7 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
-		assertEquals( 0, errors.size(), errors.toString());
+		assertThat(errors.size()).as(errors.toString()).isEqualTo(0);
 
 	}
 
@@ -947,7 +936,7 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnAll(output);
-		assertThat(errors.toString(), errors.size(), greaterThan(0));
+		assertThat(errors.size()).as(errors.toString()).isGreaterThan(0);
 		assertEquals("Unknown code (for 'http://acme.org#9988877')", errors.get(0).getMessage());
 
 	}
@@ -965,7 +954,7 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
-		assertEquals( 0, errors.size(),errors.toString());
+		assertThat(errors.size()).as(errors.toString()).isEqualTo(0);
 	}
 
 	@Test
@@ -985,7 +974,7 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
-		assertEquals(1, errors.size());
+		assertThat(errors).hasSize(1);
 		assertEquals("Unknown code (for 'http://loinc.org#1234')", errors.get(0).getMessage());
 	}
 
@@ -1002,11 +991,12 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnAll(output);
-		assertEquals( 0, errors.size(), errors.toString());
+		assertThat(errors.size()).as(errors.toString()).isEqualTo(0);
 	}
 
 	@Test
 	public void testValidateResourceWithValuesetExpansionBad() {
+
 		Patient p = new Patient();
 		p.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
 		p.addIdentifier().setSystem("http://example.com/").setValue("12345").getType()
@@ -1017,12 +1007,9 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 
 		ValidationResult output = myVal.validateWithResult(p);
 		List<SingleValidationMessage> all = logResultsAndReturnAll(output);
-		assertEquals(1, all.size());
-
+		assertThat(all).hasSize(1);
 		assertEquals("Patient.identifier[0].type", all.get(0).getLocationString());
-		assertThat(
-			all.get(0).getMessage(),
-			containsString("None of the codings provided are in the value set 'Identifier Type Codes'"));
+		assertThat(all.get(0).getMessage()).contains("None of the codings provided are in the value set 'Identifier Type Codes'");
 		assertEquals(ResultSeverityEnum.WARNING, all.get(0).getSeverity());
 
 	}
@@ -1042,7 +1029,7 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 		for (String msg : messages) {
 			messages.add(msg);
 		}
-		assertThat(messages, not(hasItem("All observations should have a performer")));
+		assertThat(messages).doesNotContain("All observations should have a performer");
 	}
 
 	@Test
@@ -1060,7 +1047,7 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 
 		ValidationResult output = myVal.validateWithResult(patient);
 		List<SingleValidationMessage> all = logResultsAndReturnAll(output);
-		assertEquals(0, all.size());
+		assertThat(all).isEmpty();
 	}
 
 
@@ -1073,7 +1060,7 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 		ValidationResult output = myVal.validateWithResult(input);
 		logResultsAndReturnAll(output);
 
-		assertEquals( 3, output.getMessages().size(), output.toString());
+		assertThat(output.getMessages().size()).as(output.toString()).isEqualTo(3);
 		ourLog.info(output.getMessages().get(0).getLocationString());
 		ourLog.info(output.getMessages().get(0).getMessage());
 	}

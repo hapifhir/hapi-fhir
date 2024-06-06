@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.packages;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.test.BaseJpaDstu3Test;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
@@ -19,9 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class NpmDstu3Test extends BaseJpaDstu3Test {
 
@@ -80,8 +79,7 @@ public class NpmDstu3Test extends BaseJpaDstu3Test {
 		assertHasErrors(oo);
 		ourLog.debug("Fail Outcome: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
 
-		assertThat(oo.getIssueFirstRep().getDiagnostics(),
-			containsString("Condition.subject: minimum required = 1, but only found 0 (from http://fhir.de/StructureDefinition/condition-de-basis/0.2"));
+		assertThat(oo.getIssueFirstRep().getDiagnostics()).contains("Condition.subject: minimum required = 1, but only found 0 (from http://fhir.de/StructureDefinition/condition-de-basis/0.2");
 	}
 
 }

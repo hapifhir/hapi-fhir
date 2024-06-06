@@ -3,14 +3,12 @@ package org.hl7.fhir.dstu3.hapi.validation;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
-import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationResult;
-import org.hamcrest.Matchers;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
@@ -58,16 +56,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType.BOOLEAN;
 import static org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType.CHOICE;
 import static org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseStatus.COMPLETED;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.anyString;
@@ -196,7 +189,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 
 			ValidationResult errors = myVal.validateWithResult(qa);
 
-			assertThat("index[" + i + "]: " + errors.toString(), errors.getMessages(), empty());
+			assertThat(errors.getMessages()).as("index[" + i + "]: " + errors.toString()).isEmpty();
 		}
 	}
 
@@ -215,7 +208,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		ValidationResult errors = myVal.validateWithResult(qa);
 
 		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("Answer value must be of the type boolean"));
+		assertThat(errors.toString()).contains("Answer value must be of the type boolean");
 	}
 
 	@Test
@@ -267,7 +260,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		qa.addItem().setLinkId("link0").addAnswer().setValue(new Coding().setSystem("http://codesystems.com/system").setCode("code0"));
 		errors = myVal.validateWithResult(qa);
 		errors = stripBindingHasNoSourceMessage(errors);
-		assertEquals(0, errors.getMessages().size(), errors.toString());
+		assertThat(errors.getMessages().size()).as(errors.toString()).isEqualTo(0);
 
 		// Bad code
 
@@ -278,8 +271,8 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		errors = myVal.validateWithResult(qa);
 		errors = stripBindingHasNoSourceMessage(errors);
 		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("Unknown code: http://codesystems.com/system / code1 (for 'http://codesystems.com/system#code1')"));
-		assertThat(errors.toString(), containsString("QuestionnaireResponse.item[0].answer[0]"));
+		assertThat(errors.toString()).contains("Unknown code: http://codesystems.com/system / code1 (for 'http://codesystems.com/system#code1')");
+		assertThat(errors.toString()).contains("QuestionnaireResponse.item[0].answer[0]");
 
 		// Unhandled system
 
@@ -290,8 +283,8 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		errors = myVal.validateWithResult(qa);
 		errors = stripBindingHasNoSourceMessage(errors);
 		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("Unknown code 'http://codesystems.com/system2#code3'"));
-		assertThat(errors.toString(), containsString("QuestionnaireResponse.item[0].answer[0]"));
+		assertThat(errors.toString()).contains("Unknown code 'http://codesystems.com/system2#code3'");
+		assertThat(errors.toString()).contains("QuestionnaireResponse.item[0].answer[0]");
 
 	}
 
@@ -311,7 +304,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		ValidationResult errors = myVal.validateWithResult(qa);
 
 		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("QuestionnaireResponse.item.linkId: minimum required = 1, but only found 0"));
+		assertThat(errors.toString()).contains("QuestionnaireResponse.item.linkId: minimum required = 1, but only found 0");
 	}
 
 	@Test
@@ -329,7 +322,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 
 		ValidationResult errors = myVal.validateWithResult(qa);
 
-		assertThat(errors.toString(), Matchers.not(containsString("No issues")));
+		assertThat(errors.toString()).doesNotContain("No issues");
 	}
 
 	@Test
@@ -348,7 +341,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 
 		ValidationResult errors = myVal.validateWithResult(qa);
 
-		assertThat(errors.toString(), containsString("No issues"));
+		assertThat(errors.toString()).contains("No issues");
 	}
 
 	@Test
@@ -367,8 +360,8 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		ValidationResult errors = myVal.validateWithResult(qa);
 
 		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("Definition for item link0 does not contain a type"));
-		assertEquals(1, errors.getMessages().size());
+		assertThat(errors.toString()).contains("Definition for item link0 does not contain a type");
+		assertThat(errors.getMessages()).hasSize(1);
 	}
 
 	@Test
@@ -388,7 +381,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		ValidationResult errors = myVal.validateWithResult(qa);
 
 		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("No response answer found for required item 'link0'"));
+		assertThat(errors.toString()).contains("No response answer found for required item 'link0'");
 	}
 
 	@Test
@@ -407,7 +400,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		ValidationResult errors = myVal.validateWithResult(qa);
 
 		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("No issues"));
+		assertThat(errors.toString()).contains("No issues");
 	}
 
 	@Test
@@ -431,7 +424,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		ValidationResult errors = myVal.validateWithResult(qa);
 
 		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("No issues"));
+		assertThat(errors.toString()).contains("No issues");
 	}
 
 	@Test
@@ -459,7 +452,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		ValidationResult errors = myVal.validateWithResult(qa);
 
 		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("No issues"));
+		assertThat(errors.toString()).contains("No issues");
 	}
 
 	@Test
@@ -487,7 +480,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		ValidationResult errors = myVal.validateWithResult(qa);
 
 		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("No issues"));
+		assertThat(errors.toString()).contains("No issues");
 	}
 
 	@Test
@@ -514,7 +507,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		ValidationResult errors = myVal.validateWithResult(qa);
 
 		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString(" No response answer found for required item 'link1'"));
+		assertThat(errors.toString()).contains(" No response answer found for required item 'link1'");
 	}
 
 	@Test
@@ -546,7 +539,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		qa.addItem().setLinkId("link0").addAnswer().setValue(new Coding("http://foo", "NO", null));
 		errors = myVal.validateWithResult(qa);
 		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("No issues"));
+		assertThat(errors.toString()).contains("No issues");
 
 		// link0 has an answer, but it's the wrong one - An answer to link1 provided (bad)
 		qa = new QuestionnaireResponse();
@@ -556,7 +549,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		qa.addItem().setLinkId("link1").addAnswer().setValue(new StringType("HELLO"));
 		errors = myVal.validateWithResult(qa);
 		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("Item has answer, even though it is not enabled (item id = 'link1')"));
+		assertThat(errors.toString()).contains("Item has answer, even though it is not enabled (item id = 'link1')");
 
 		// link0 has an answer, and it's the right one
 		qa = new QuestionnaireResponse();
@@ -565,7 +558,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		qa.addItem().setLinkId("link0").addAnswer().setValue(new Coding("http://foo", "YES", null));
 		errors = myVal.validateWithResult(qa);
 		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("No response answer found for required item 'link1'"));
+		assertThat(errors.toString()).contains("No response answer found for required item 'link1'");
 	}
 
 	@Test
@@ -594,7 +587,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		ValidationResult errors = myVal.validateWithResult(qa);
 
 		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("No issues"));
+		assertThat(errors.toString()).contains("No issues");
 	}
 
 	@Test
@@ -624,7 +617,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		ValidationResult errors = myVal.validateWithResult(qa);
 
 		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("No issues"));
+		assertThat(errors.toString()).contains("No issues");
 	}
 
 	@Test
@@ -644,7 +637,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 
 		ValidationResult errors = myVal.validateWithResult(qr);
 
-		assertThat(errors.toString(), Matchers.not(containsString("No issues")));
+		assertThat(errors.toString()).doesNotContain("No issues");
 	}
 
 	@Test
@@ -664,7 +657,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 
 		ValidationResult errors = myVal.validateWithResult(qr);
 
-		assertThat(errors.toString(), containsString("No issues"));
+		assertThat(errors.toString()).contains("No issues");
 	}
 
 	@Test
@@ -693,12 +686,12 @@ public class QuestionnaireResponseValidatorDstu3Test {
 
 		// Without an answer
 		ValidationResult errors = myVal.validateWithResult(qr);
-		assertThat(errors.toString(), containsString("No response answer found for required item 'link2'"));
+		assertThat(errors.toString()).contains("No response answer found for required item 'link2'");
 
 		// With an answer
 		qr.getItem().get(2).addAnswer().setValue(new StringType("AAA"));
 		errors = myVal.validateWithResult(qr);
-		assertThat(errors.toString(), containsString("No issues"));
+		assertThat(errors.toString()).contains("No issues");
 	}
 
 	@Test
@@ -716,10 +709,9 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		when(myValSupport.fetchResource(eq(Questionnaire.class), eq(reference))).thenReturn(q);
 
 		ValidationResult errors = myVal.validateWithResult(qr);
-		assertThat(errors.toString(), Matchers.not(containsString("No issues")));
-		assertTrue(
-			errors.getMessages().stream().filter(vm -> vm.getMessage().contains("Structural Error"))
-				.anyMatch(vm -> vm.getMessage().contains("link1")), "Must contain structural error about misplaced link1 item");
+		assertThat(errors.toString()).doesNotContain("No issues");
+		assertThat(errors.getMessages().stream().filter(vm -> vm.getMessage().contains("Structural Error"))
+			.anyMatch(vm -> vm.getMessage().contains("link1"))).as("Must contain structural error about misplaced link1 item").isTrue();
 	}
 
 	@Test
@@ -747,7 +739,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		when(myValSupport.fetchResource(eq(Questionnaire.class), eq(reference))).thenReturn(q);
 
 		ValidationResult errors = myVal.validateWithResult(qr);
-		assertThat(errors.toString(), containsString("No issues"));
+		assertThat(errors.toString()).contains("No issues");
 
 	}
 
@@ -777,7 +769,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		when(myValSupport.fetchResource(eq(Questionnaire.class), eq(reference))).thenReturn(q);
 
 		ValidationResult errors = myVal.validateWithResult(qr);
-		assertThat(errors.toString(), containsString("No issues"));
+		assertThat(errors.toString()).contains("No issues");
 	}
 
 	@Test
@@ -832,7 +824,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		ValidationResult errors = myVal.validateWithResult(qa);
 
 		ourLog.info(errors.toString());
-		assertThat(errors.getMessages(), empty());
+		assertThat(errors.getMessages()).isEmpty();
 	}
 
 	@Test
@@ -888,7 +880,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		ValidationResult errors = myVal.validateWithResult(qa);
 
 		ourLog.info(errors.toString());
-		assertThat(errors.getMessages(), empty());
+		assertThat(errors.getMessages()).isEmpty();
 	}
 
 	@Test
@@ -926,7 +918,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		ValidationResult errors = myVal.validateWithResult(qa);
 
 		ourLog.info(errors.toString());
-		assertThat(errors.getMessages(), empty());
+		assertThat(errors.getMessages()).isEmpty();
 	}
 
 	@Test
@@ -996,7 +988,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		ValidationResult errors = myVal.validateWithResult(questionnaireResponse);
 
 		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("No issues"));
+		assertThat(errors.toString()).contains("No issues");
 	}
 
 	@Test
@@ -1017,14 +1009,14 @@ public class QuestionnaireResponseValidatorDstu3Test {
 
 		ValidationResult errors = myVal.validateWithResult(qa);
 		ourLog.info(errors.toString());
-		assertThat(errors.getMessages(), hasSize(1));
+		assertThat(errors.getMessages()).hasSize(1);
 		assertEquals(ResultSeverityEnum.WARNING, errors.getMessages().get(0).getSeverity());
 
 		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
 
 		errors = myVal.validateWithResult(qa);
 		ourLog.info(errors.toString());
-		assertThat(errors.getMessages(), hasSize(1));
+		assertThat(errors.getMessages()).hasSize(1);
 		assertEquals(ResultSeverityEnum.ERROR, errors.getMessages().get(0).getSeverity());
 	}
 
@@ -1077,7 +1069,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		qa.addItem().setLinkId("link0").addAnswer().setValue(new Coding().setSystem("http://codesystems.com/system").setCode("code0"));
 		errors = myVal.validateWithResult(qa);
 		errors = stripBindingHasNoSourceMessage(errors);
-		assertEquals(0, errors.getMessages().size(), errors.toString());
+		assertThat(errors.getMessages().size()).as(errors.toString()).isEqualTo(0);
 
 		// Bad code
 
@@ -1088,8 +1080,8 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		errors = myVal.validateWithResult(qa);
 		errors = stripBindingHasNoSourceMessage(errors);
 		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("Unknown code (for 'http://codesystems.com/system#code1')"));
-		assertThat(errors.toString(), containsString("QuestionnaireResponse.item[0].answer[0]"));
+		assertThat(errors.toString()).contains("Unknown code (for 'http://codesystems.com/system#code1')");
+		assertThat(errors.toString()).contains("QuestionnaireResponse.item[0].answer[0]");
 
 		// Partial code
 
@@ -1099,11 +1091,11 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		qa.addItem().setLinkId("link0").addAnswer().setValue(new Coding().setSystem(null).setCode("code1"));
 		errors = myVal.validateWithResult(qa);
 		errors = stripBindingHasNoSourceMessage(errors);
-		assertEquals(2, errors.getMessages().size());
-		assertThat(errors.getMessages().get(0).getMessage(), containsString("A code with no system has no defined meaning, and it cannot be validated. A system should be provided"));
-		assertThat(errors.getMessages().get(0).getLocationString(), containsString("QuestionnaireResponse.item[0].answer[0]"));
-		assertThat(errors.getMessages().get(1).getMessage(), containsString("The code 'code1' in the system 'null' is not in the options value set (ValueSet[http://somevalueset]) specified by the questionnaire. Terminology Error: Validation failed"));
-		assertThat(errors.getMessages().get(1).getLocationString(), containsString("QuestionnaireResponse.item[0].answer[0]"));
+		assertThat(errors.getMessages()).hasSize(2);
+		assertThat(errors.getMessages().get(0).getMessage()).contains("A code with no system has no defined meaning, and it cannot be validated. A system should be provided");
+		assertThat(errors.getMessages().get(0).getLocationString()).contains("QuestionnaireResponse.item[0].answer[0]");
+		assertThat(errors.getMessages().get(1).getMessage()).contains("The code 'code1' in the system 'null' is not in the options value set (ValueSet[http://somevalueset]) specified by the questionnaire. Terminology Error: Validation failed");
+		assertThat(errors.getMessages().get(1).getLocationString()).contains("QuestionnaireResponse.item[0].answer[0]");
 
 		qa = new QuestionnaireResponse();
 		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
@@ -1112,11 +1104,11 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		errors = myVal.validateWithResult(qa);
 		errors = stripBindingHasNoSourceMessage(errors);
 		ourLog.info(errors.toString());
-		assertEquals(2, errors.getMessages().size());
-		assertThat(errors.getMessages().get(0).getMessage(), containsString("A code with no system has no defined meaning, and it cannot be validated. A system should be provided"));
-		assertThat(errors.getMessages().get(0).getLocationString(), containsString("QuestionnaireResponse.item[0].answer[0]"));
-		assertThat(errors.getMessages().get(1).getMessage(), containsString("The code 'code1' in the system 'null' is not in the options value set (ValueSet[http://somevalueset]) specified by the questionnaire. Terminology Error: Validation failed"));
-		assertThat(errors.getMessages().get(1).getLocationString(), containsString("QuestionnaireResponse.item[0].answer[0]"));
+		assertThat(errors.getMessages()).hasSize(2);
+		assertThat(errors.getMessages().get(0).getMessage()).contains("A code with no system has no defined meaning, and it cannot be validated. A system should be provided");
+		assertThat(errors.getMessages().get(0).getLocationString()).contains("QuestionnaireResponse.item[0].answer[0]");
+		assertThat(errors.getMessages().get(1).getMessage()).contains("The code 'code1' in the system 'null' is not in the options value set (ValueSet[http://somevalueset]) specified by the questionnaire. Terminology Error: Validation failed");
+		assertThat(errors.getMessages().get(1).getLocationString()).contains("QuestionnaireResponse.item[0].answer[0]");
 
 		qa = new QuestionnaireResponse();
 		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
@@ -1124,8 +1116,8 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		qa.addItem().setLinkId("link0").addAnswer().setValue(new Coding().setSystem("http://system").setCode(null));
 		errors = myVal.validateWithResult(qa);
 		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("ValidationResult{messageCount=1, isSuccessful=false, description="));
-		assertThat(errors.toString(), containsString("QuestionnaireResponse.item[0].answer[0]"));
+		assertThat(errors.toString()).contains("ValidationResult{messageCount=1, isSuccessful=false, description=");
+		assertThat(errors.toString()).contains("QuestionnaireResponse.item[0].answer[0]");
 
 		// Wrong type
 
@@ -1135,8 +1127,8 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		qa.addItem().setLinkId("link0").addAnswer().setValue(new IntegerType(123));
 		errors = myVal.validateWithResult(qa);
 		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("Cannot validate integer answer option because no option list is provided"));
-		assertThat(errors.toString(), containsString("QuestionnaireResponse.item[0].answer[0]"));
+		assertThat(errors.toString()).contains("Cannot validate integer answer option because no option list is provided");
+		assertThat(errors.toString()).contains("QuestionnaireResponse.item[0].answer[0]");
 
 		// String answer
 
@@ -1151,7 +1143,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 			.stream()
 			.filter(t -> t.getSeverity().ordinal() > ResultSeverityEnum.INFORMATION.ordinal())
 			.collect(Collectors.toList());
-		assertThat(warningsAndErrors, is(empty()));
+		assertThat(warningsAndErrors).isEmpty();
 
 		// Missing String answer
 
@@ -1161,7 +1153,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		qa.addItem().setLinkId("link0").addAnswer().setValue(new Coding().setDisplay(""));
 		errors = myVal.validateWithResult(qa);
 		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("No response answer found for required item 'link0'"));
+		assertThat(errors.toString()).contains("No response answer found for required item 'link0'");
 	}
 
 	@Test
@@ -1178,8 +1170,8 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		ValidationResult errors = myVal.validateWithResult(qa);
 
 		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString(" - QuestionnaireResponse"));
-		assertThat(errors.toString(), containsString("LinkId 'link1' not found in questionnaire"));
+		assertThat(errors.toString()).contains(" - QuestionnaireResponse");
+		assertThat(errors.toString()).contains("LinkId 'link1' not found in questionnaire");
 	}
 
 	@Test
@@ -1196,8 +1188,8 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		ValidationResult errors = myVal.validateWithResult(qa);
 
 		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString(" - QuestionnaireResponse"));
-		assertThat(errors.toString(), containsString("LinkId 'link1' not found in questionnaire"));
+		assertThat(errors.toString()).contains(" - QuestionnaireResponse");
+		assertThat(errors.toString()).contains("LinkId 'link1' not found in questionnaire");
 	}
 
 	@BeforeAll

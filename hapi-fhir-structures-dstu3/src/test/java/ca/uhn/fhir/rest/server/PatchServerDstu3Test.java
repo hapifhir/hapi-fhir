@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
@@ -28,7 +30,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.nio.charset.StandardCharsets;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class PatchServerDstu3Test {
 
@@ -100,7 +102,7 @@ public class PatchServerDstu3Test {
 
 		assertEquals("patientPatch", ourLastMethod);
 		assertEquals("Patient?_id=123", ourLastConditional);
-		assertEquals(null, ourLastId);
+		assertNull(ourLastId);
 		assertEquals(requestContents, ourLastBody);
 		assertEquals(PatchTypeEnum.JSON_PATCH, ourLastPatchType);
 	}
@@ -159,7 +161,7 @@ public class PatchServerDstu3Test {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseContent);
 			assertEquals(400, status.getStatusLine().getStatusCode());
-			assertEquals("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\""+ Msg.code(1965)+"Invalid Content-Type for PATCH operation: text/plain\"/></issue></OperationOutcome>", responseContent);
+			assertEquals("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\"" + Msg.code(1965) + "Invalid Content-Type for PATCH operation: text/plain\"/></issue></OperationOutcome>", responseContent);
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}

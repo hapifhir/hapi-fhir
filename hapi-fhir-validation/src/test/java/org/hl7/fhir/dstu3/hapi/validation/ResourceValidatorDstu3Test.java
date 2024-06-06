@@ -54,13 +54,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+
 
 public class ResourceValidatorDstu3Test extends BaseValidationTestWithInlineMocks {
 
@@ -99,19 +97,18 @@ public class ResourceValidatorDstu3Test extends BaseValidationTestWithInlineMock
 		String encoded = parser.setPrettyPrint(true).encodeResourceToString(p).replace("2000-12-31", "2000-15-31");
 		ourLog.info(encoded);
 
-		assertThat(encoded, StringContains.containsString("2000-15-31"));
+		assertThat(encoded).contains("2000-15-31");
 
 		ValidationResult result = ourCtx.newValidator().validateWithResult(encoded);
 		String resultString = parser.setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome());
 		ourLog.info(resultString);
 
-		assertEquals(2, ((OperationOutcome) result.toOperationOutcome()).getIssue().size());
-		assertThat(resultString, StringContains.containsString("cvc-pattern-valid"));
+		assertThat(((OperationOutcome) result.toOperationOutcome()).getIssue()).hasSize(2);
+		assertThat(resultString).contains("cvc-pattern-valid");
 
 		try {
 			parser.parseResource(encoded);
-			fail();
-		} catch (DataFormatException e) {
+			fail();		} catch (DataFormatException e) {
 			assertEquals(Msg.code(1851) + "DataFormatException at [[row,col {unknown-source}]: [2,4]]: " + Msg.code(1821) + "[element=\"birthDate\"] Invalid attribute value \"2000-15-31\": Invalid date/time format: \"2000-15-31\"", e.getMessage());
 		}
 	}
@@ -137,8 +134,8 @@ public class ResourceValidatorDstu3Test extends BaseValidationTestWithInlineMock
 		String resultString = parser.setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome());
 		ourLog.info(resultString);
 
-		assertEquals(2, ((OperationOutcome) result.toOperationOutcome()).getIssue().size());
-		assertThat(resultString, StringContains.containsString("cvc-pattern-valid"));
+		assertThat(((OperationOutcome) result.toOperationOutcome()).getIssue()).hasSize(2);
+		assertThat(resultString).contains("cvc-pattern-valid");
 
 	}
 
@@ -162,7 +159,7 @@ public class ResourceValidatorDstu3Test extends BaseValidationTestWithInlineMock
 		String resultString = parser.setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome());
 		ourLog.info(resultString);
 
-		assertThat(resultString, containsString("No issues detected during validation"));
+		assertThat(resultString).contains("No issues detected during validation");
 
 	}
 
@@ -180,10 +177,10 @@ public class ResourceValidatorDstu3Test extends BaseValidationTestWithInlineMock
 		List<SingleValidationMessage> all = logResultsAndReturnNonInformationalOnes(output);
 
 
-		assertThat(output.getMessages().get(0).getMessage(), containsString("Unknown code 'http://hl7.org/fhir/v3/MaritalStatus#FOO'"));
+		assertThat(output.getMessages().get(0).getMessage()).contains("Unknown code 'http://hl7.org/fhir/v3/MaritalStatus#FOO'");
 		assertEquals(ResultSeverityEnum.ERROR, output.getMessages().get(0).getSeverity());
 
-		assertThat(output.getMessages().get(1).getMessage(), containsString("None of the codings provided are in the value set 'Marital Status Codes'"));
+		assertThat(output.getMessages().get(1).getMessage()).contains("None of the codings provided are in the value set 'Marital Status Codes'");
 		assertEquals(ResultSeverityEnum.WARNING, output.getMessages().get(1).getSeverity());
 	}
 
@@ -199,8 +196,8 @@ public class ResourceValidatorDstu3Test extends BaseValidationTestWithInlineMock
 
 		ValidationResult output = val.validateWithResult(p);
 		List<SingleValidationMessage> all = logResultsAndReturnNonInformationalOnes(output);
-		assertEquals(0, all.size());
-		assertEquals(0, output.getMessages().size());
+		assertThat(all).isEmpty();
+		assertThat(output.getMessages()).isEmpty();
 	}
 
 	@Test
@@ -221,8 +218,8 @@ public class ResourceValidatorDstu3Test extends BaseValidationTestWithInlineMock
 
 		ValidationResult output = val.validateWithResult(input);
 		List<SingleValidationMessage> all = logResultsAndReturnNonInformationalOnes(output);
-		assertEquals(0, all.size());
-		assertEquals(0, output.getMessages().size());
+		assertThat(all).isEmpty();
+		assertThat(output.getMessages()).isEmpty();
 
 	}
 
@@ -256,7 +253,7 @@ public class ResourceValidatorDstu3Test extends BaseValidationTestWithInlineMock
 
 		ValidationResult result = validator.validateWithResult(input);
 		// we should get some results, not an exception
-		assertEquals(4, result.getMessages().size());
+		assertThat(result.getMessages()).hasSize(4);
 	}
 
 	@Test
@@ -290,7 +287,7 @@ public class ResourceValidatorDstu3Test extends BaseValidationTestWithInlineMock
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(operationOutcome);
 		ourLog.info(encoded);
 
-		assertThat(encoded, containsString("Error parsing JSON: the primitive value must be a string"));
+		assertThat(encoded).contains("Error parsing JSON: the primitive value must be a string");
 
 	}
 
@@ -396,7 +393,7 @@ public class ResourceValidatorDstu3Test extends BaseValidationTestWithInlineMock
 
 		assertTrue(result.isSuccessful());
 
-		assertThat(ooencoded, containsString("Unknown extension http://foo"));
+		assertThat(ooencoded).contains("Unknown extension http://foo");
 	}
 
 	/**
@@ -416,18 +413,15 @@ public class ResourceValidatorDstu3Test extends BaseValidationTestWithInlineMock
 		String messageString = p.encodeResourceToString(myPatient);
 //		ourLog.info(messageString);
 
-		assertThat(messageString, stringContainsInOrder(
+		assertThat(messageString).containsSubsequence(
 			"meta",
 			"String Extension",
 			"Organization/2.25.79433498044103547197447759549862032393",
 			"furry-grey",
 			"furry-white",
 			"FamilyName"
-		));
-		assertThat(messageString, not(stringContainsInOrder(
-			"extension",
-			"meta"
-		)));
+		);
+		assertThat(messageString).doesNotContainPattern("(?s)extension.*meta");
 
 		FhirValidator val = ourCtx.newValidator();
 		val.registerValidatorModule(new SchemaBaseValidator(ourCtx));
@@ -442,8 +436,8 @@ public class ResourceValidatorDstu3Test extends BaseValidationTestWithInlineMock
 
 		assertTrue(result.isSuccessful());
 
-		assertThat(messageString, containsString("valueReference"));
-		assertThat(messageString, not(containsString("valueResource")));
+		assertThat(messageString).contains("valueReference");
+		assertThat(messageString).doesNotContain("valueResource");
 	}
 
 	/**
@@ -464,20 +458,17 @@ public class ResourceValidatorDstu3Test extends BaseValidationTestWithInlineMock
 		ourLog.info(messageString);
 
 		//@formatter:off
-		assertThat(messageString, stringContainsInOrder(
+		assertThat(messageString).containsSubsequence(
 			"meta",
 			"Organization/2.25.79433498044103547197447759549862032393",
 			"furry-grey",
 			"furry-white",
 			"String Extension",
 			"FamilyName"
-		));
-		assertThat(messageString, not(stringContainsInOrder(
-			"extension",
-			"meta"
-		)));
-		assertThat(messageString, containsString("url=\"http://ahr.copa.inso.tuwien.ac.at/StructureDefinition/Patient#animal-colorSecondary\""));
-		assertThat(messageString, containsString("url=\"http://foo.com/example\""));
+		);
+		assertThat(messageString).doesNotContainPattern("(?s)extension.*meta");
+		assertThat(messageString).contains("url=\"http://ahr.copa.inso.tuwien.ac.at/StructureDefinition/Patient#animal-colorSecondary\"");
+		assertThat(messageString).contains("url=\"http://foo.com/example\"");
 		//@formatter:on
 
 		FhirValidator val = ourCtx.newValidator();
@@ -493,8 +484,8 @@ public class ResourceValidatorDstu3Test extends BaseValidationTestWithInlineMock
 
 		assertTrue(result.isSuccessful());
 
-		assertThat(messageString, containsString("valueReference"));
-		assertThat(messageString, not(containsString("valueResource")));
+		assertThat(messageString).contains("valueReference");
+		assertThat(messageString).doesNotContain("valueResource");
 	}
 
 	@AfterAll

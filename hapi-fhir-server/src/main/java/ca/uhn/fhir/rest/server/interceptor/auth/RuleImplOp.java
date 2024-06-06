@@ -57,8 +57,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.rest.server.interceptor.auth.AppliesTypeEnum.ALL_RESOURCES;
-import static ca.uhn.fhir.rest.server.interceptor.auth.AppliesTypeEnum.TYPES;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;

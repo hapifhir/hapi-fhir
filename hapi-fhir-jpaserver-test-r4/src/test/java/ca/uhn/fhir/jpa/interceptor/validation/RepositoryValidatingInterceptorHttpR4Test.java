@@ -19,8 +19,7 @@ import org.springframework.context.ApplicationContext;
 
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class RepositoryValidatingInterceptorHttpR4Test extends BaseJpaR4Test {
 
@@ -70,7 +69,7 @@ public class RepositoryValidatingInterceptorHttpR4Test extends BaseJpaR4Test {
 
 		String operationOutcomeEncoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getOperationOutcome());
 		ourLog.info("Outcome: {}", operationOutcomeEncoded);
-		assertThat(operationOutcomeEncoded, containsString("In general, all observations should have a subject"));
+		assertThat(operationOutcomeEncoded).contains("In general, all observations should have a subject");
 
 	}
 	@Test
@@ -96,7 +95,7 @@ public class RepositoryValidatingInterceptorHttpR4Test extends BaseJpaR4Test {
 
 		String operationOutcomeEncoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getOperationOutcome());
 		ourLog.info("Outcome: {}", operationOutcomeEncoded);
-		assertThat(operationOutcomeEncoded, containsString("In general, all observations should have a subject"));
+		assertThat(operationOutcomeEncoded).contains("In general, all observations should have a subject");
 
 	}
 

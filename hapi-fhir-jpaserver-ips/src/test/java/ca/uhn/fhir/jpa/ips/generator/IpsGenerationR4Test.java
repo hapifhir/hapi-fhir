@@ -54,12 +54,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static ca.uhn.fhir.util.BundleUtil.convertBundleIntoTransaction;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.matchesPattern;
-import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -105,19 +101,19 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 		ourLog.info("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 
 		// Verify
-		assertThat(output.getMeta().getProfile().stream().map(PrimitiveType::getValue).toList(), contains(
+		assertThat(output.getMeta().getProfile().stream().map(PrimitiveType::getValue).toList()).contains(
 			"http://hl7.org/fhir/uv/ips/StructureDefinition/Bundle-uv-ips"
-		));
+		);
 		validateDocument(output);
 		assertEquals(117, output.getEntry().size());
 		String patientId = findFirstEntryResource(output, Patient.class, 1).getIdElement().toUnqualifiedVersionless().getValue();
-		assertThat(patientId, matchesPattern("urn:uuid:.*"));
+		assertThat(patientId).matches("urn:uuid:.*");
 		MedicationStatement medicationStatement = findFirstEntryResource(output, MedicationStatement.class, 2);
 		assertEquals(patientId, medicationStatement.getSubject().getReference());
 		assertNull(medicationStatement.getInformationSource().getReference());
 
 		List<String> sectionTitles = extractSectionTitles(output);
-		assertThat(sectionTitles.toString(), sectionTitles, contains("Allergies and Intolerances", "Medication List", "Problem List", "History of Immunizations", "Diagnostic Results"));
+		assertThat(sectionTitles).as(sectionTitles.toString()).containsExactly("Allergies and Intolerances", "Medication List", "Problem List", "History of Immunizations", "Diagnostic Results");
 	}
 
 	@Test
@@ -139,7 +135,7 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 		ourLog.info("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 
 		// Verify
-		assertEquals(74, output.getEntry().size());
+		assertThat(output.getEntry()).hasSize(74);
 	}
 
 	@Test
@@ -161,7 +157,7 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 		ourLog.info("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 
 		// Verify
-		assertEquals(80, output.getEntry().size());
+		assertThat(output.getEntry()).hasSize(80);
 	}
 
 	@Test
@@ -207,12 +203,12 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 		validateDocument(output);
 		assertEquals(7, output.getEntry().size());
 		String patientId = findFirstEntryResource(output, Patient.class, 1).getIdElement().toUnqualifiedVersionless().getValue();
-		assertThat(patientId, matchesPattern("urn:uuid:.*"));
+		assertThat(patientId).matches("urn:uuid:.*");
 		assertEquals(patientId, findEntryResource(output, Condition.class, 0, 2).getSubject().getReference());
 		assertEquals(patientId, findEntryResource(output, Condition.class, 1, 2).getSubject().getReference());
 
 		List<String> sectionTitles = extractSectionTitles(output);
-		assertThat(sectionTitles.toString(), sectionTitles, contains("Allergies and Intolerances", "Medication List", "Problem List"));
+		assertThat(sectionTitles).as(sectionTitles.toString()).containsExactly("Allergies and Intolerances", "Medication List", "Problem List");
 	}
 
 	/**
@@ -254,9 +250,9 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 		ourLog.info("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 
 		Composition composition = findCompositionSectionByDisplay(output, "History of Immunization Narrative");
-		assertThat(composition.getText().getDivAsString(), is(
+		assertThat(composition.getText().getDivAsString()).isEqualTo(
 			"<div xmlns=\"http://www.w3.org/1999/xhtml\"><h1>International Patient Summary Document</h1></div>"
-		));
+		);
 
 		List<String> resourceDates = output
 			.getEntry()
@@ -265,8 +261,7 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 			.map(t -> (Immunization) t.getResource())
 			.map(t -> t.getOccurrenceDateTimeType().getValueAsString().substring(0, 4))
 			.collect(Collectors.toList());
-		// Should be newest first
-		assertThat(resourceDates, contains("2015", "2010", "2005"));
+		assertThat(resourceDates).containsExactly("2015", "2010", "2005");
 	}
 
 
@@ -347,7 +342,7 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 			.map(Bundle.BundleEntryComponent::getResource)
 			.filter(r -> theType.isAssignableFrom(r.getClass()))
 			.toList();
-		assertEquals(theExpectedCount, resources.size());
+		assertThat(resources).hasSize(theExpectedCount);
 		return (T) resources.get(index);
 	}
 
