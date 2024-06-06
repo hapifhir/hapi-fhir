@@ -116,8 +116,8 @@ public class QuestionnaireValidatorDstu3Test extends BaseValidationTestWithInlin
 
 			ValidationResult errors = myVal.validateWithResult(q);
 			ourLog.info(errors.toString());
-			assertThat(errors.isSuccessful(), Matchers.is(true));
-			assertThat(errors.getMessages().get(1).getMessage(), containsString("and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = null#text-box)"));
+			assertThat(errors.isSuccessful()).isTrue();
+			assertThat(errors.getMessages().get(1).getMessage()).contains("and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = null#text-box)");
 		}
 	}
 

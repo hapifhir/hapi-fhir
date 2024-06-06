@@ -337,7 +337,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		ourLog.info(encoded);
 		assertThat(oo.getIssue()).hasSize(2);
 		OperationOutcome.OperationOutcomeIssueComponent unableToExpandError = oo.getIssue().get(0);
-		assertThat(unableToExpandError.getDiagnostics()).containsString("Unable to expand ValueSet because CodeSystem could not be found: http://cs");
+		assertThat(unableToExpandError.getDiagnostics()).contains("Unable to expand ValueSet because CodeSystem could not be found: http://cs");
 		assertEquals(OperationOutcome.IssueSeverity.ERROR, oo.getIssueFirstRep().getSeverity());
 
 		OperationOutcome.OperationOutcomeIssueComponent notInValueSetError = oo.getIssue().get(1);

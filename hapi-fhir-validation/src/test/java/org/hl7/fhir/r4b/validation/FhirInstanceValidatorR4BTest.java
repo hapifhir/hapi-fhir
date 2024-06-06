@@ -80,6 +80,8 @@ import org.mockito.stubbing.Answer;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -494,7 +496,7 @@ public class FhirInstanceValidatorR4BTest extends BaseValidationTestWithInlineMo
 		result = val.validateWithResult(input);
 		all = logResultsAndReturnAll(result);
 		assertTrue(result.isSuccessful());
-		assertThat(all, empty());
+		assertThat(all).isEmpty();
 
 		// With BPs enabled
 		val = ourCtx.newValidator();

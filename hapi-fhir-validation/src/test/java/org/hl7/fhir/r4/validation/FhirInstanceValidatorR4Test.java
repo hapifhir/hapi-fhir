@@ -542,7 +542,7 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 		result = val.validateWithResult(input);
 		all = logResultsAndReturnAll(result);
 		assertTrue(result.isSuccessful());
-		assertThat(all, hasSize(1));
+		assertThat(all).hasSize(1);
 		assertEquals("Best Practice Recommendation: In general, all observations should have a subject", all.get(0).getMessage());
 		assertEquals(ResultSeverityEnum.WARNING, all.get(0).getSeverity());
 
