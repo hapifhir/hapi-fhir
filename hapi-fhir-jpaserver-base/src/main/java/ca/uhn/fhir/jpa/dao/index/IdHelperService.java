@@ -125,7 +125,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 	private boolean myDontCheckActiveTransactionForUnitTest;
 
 	@VisibleForTesting
-	void setDontCheckActiveTransactionForUnitTest(boolean theDontCheckActiveTransactionForUnitTest) {
+	protected void setDontCheckActiveTransactionForUnitTest(boolean theDontCheckActiveTransactionForUnitTest) {
 		myDontCheckActiveTransactionForUnitTest = theDontCheckActiveTransactionForUnitTest;
 	}
 

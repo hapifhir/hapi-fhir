@@ -46,14 +46,4 @@ public interface IResourcePersistentId<T> {
 
 	// TODO KHS this is only used by batch.  Consider moving this to a new interface just for batch resource ids.
 	String getResourceType();
-
-	/**
-	 * Returns a serializeable version of this PID class
-	 */
-	default SerializablePid toSerializablePid() {
-		SerializablePid serializablePid = new SerializablePid(getResourceType(), String.valueOf(getId()));
-		serializablePid.setVersion(getVersion());
-		serializablePid.setAssociatedResourceId(getAssociatedResourceId());
-		return serializablePid;
-	}
 }

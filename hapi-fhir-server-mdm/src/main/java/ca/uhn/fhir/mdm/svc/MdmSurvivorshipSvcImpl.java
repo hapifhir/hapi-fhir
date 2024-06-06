@@ -63,20 +63,21 @@ public class MdmSurvivorshipSvcImpl implements IMdmSurvivorshipService {
 
 	private final IIdHelperService<?> myIIdHelperService;
 
-	@Autowired
-	private HapiTransactionService myTransactionService;
+	private final HapiTransactionService myTransactionService;
 
 	public MdmSurvivorshipSvcImpl(
 			FhirContext theFhirContext,
 			GoldenResourceHelper theResourceHelper,
 			DaoRegistry theDaoRegistry,
 			IMdmLinkQuerySvc theLinkQuerySvc,
-			IIdHelperService<?> theIIdHelperService) {
+			IIdHelperService<?> theIIdHelperService,
+			HapiTransactionService theHapiTransactionService) {
 		myFhirContext = theFhirContext;
 		myGoldenResourceHelper = theResourceHelper;
 		myDaoRegistry = theDaoRegistry;
 		myMdmLinkQuerySvc = theLinkQuerySvc;
 		myIIdHelperService = theIIdHelperService;
+		myTransactionService = theHapiTransactionService;
 	}
 
 	// this logic is custom in smile vs hapi

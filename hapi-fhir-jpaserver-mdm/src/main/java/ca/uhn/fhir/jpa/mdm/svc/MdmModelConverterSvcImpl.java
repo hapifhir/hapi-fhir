@@ -45,7 +45,7 @@ public class MdmModelConverterSvcImpl implements IMdmModelConverterSvc {
 				.getValue();
 		retVal.setSourceId(sourceId);
 		if (theLink.getSourcePersistenceId() != null) {
-			retVal.setSourcePid(theLink.getSourcePersistenceId().toSerializablePid());
+			retVal.setSourcePid(theLink.getSourcePersistenceId());
 		}
 		String goldenResourceId = myIdHelperService
 				.resourceIdFromPidOrThrowException(theLink.getGoldenResourcePersistenceId(), theLink.getMdmSourceType())
@@ -53,7 +53,7 @@ public class MdmModelConverterSvcImpl implements IMdmModelConverterSvc {
 				.getValue();
 		retVal.setGoldenResourceId(goldenResourceId);
 		if (theLink.getGoldenResourcePersistenceId() != null) {
-			retVal.setGoldenPid(theLink.getGoldenResourcePersistenceId().toSerializablePid());
+			retVal.setGoldenPid(theLink.getGoldenResourcePersistenceId());
 		}
 		retVal.setCreated(theLink.getCreated());
 		retVal.setEidMatch(theLink.getEidMatch());

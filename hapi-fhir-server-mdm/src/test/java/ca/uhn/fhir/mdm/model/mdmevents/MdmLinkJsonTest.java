@@ -11,29 +11,11 @@ import org.junit.jupiter.api.Test;
 import java.util.Date;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class MdmLinkJsonTest {
-
-	private static class TestIdType {
-		private final String myId;
-
-		public TestIdType(String theId) {
-			myId = theId;
-		}
-
-		public String getId() {
-			return myId;
-		}
-
-		@Override
-		public String toString() {
-			return "{id:" + myId + "}";
-		}
-	}
 
 	private static class TestPID<T> extends BaseResourcePersistentId<T> {
 
@@ -53,32 +35,6 @@ public class MdmLinkJsonTest {
 	private final ObjectMapper myObjectMapper = new ObjectMapper();
 
 	@Test
-	@SuppressWarnings("unchecked")
-	public void serializeDeserialize_complexId_works() throws JsonProcessingException {
-		// setup
-		MdmLinkJson json = createLinkJson();
-		TestPID<TestIdType> golden = new TestPID<TestIdType>("Patient", new TestIdType("1"));
-		golden.setAssociatedResourceId(new IdType("Patient/1"));
-		golden.setVersion(1L);
-		TestPID<TestIdType> source = new TestPID<TestIdType>("Patient", new TestIdType("2"));
-		source.setAssociatedResourceId(new IdType("Patient/2"));
-		source.setVersion(1L);
-		json.setGoldenPid(golden.toSerializablePid());
-		json.setSourcePid(source.toSerializablePid());
-
-		// test
-		String strVal = myObjectMapper.writeValueAsString(json);
-		assertFalse(isBlank(strVal));
-		assertTrue(strVal.contains("\"id\":\"{id:1}\""), strVal);
-		assertTrue(strVal.contains("\"id\":\"{id:2}\""), strVal);
-
-		MdmLinkJson deserialized = myObjectMapper.readValue(strVal, MdmLinkJson.class);
-		assertNotNull(deserialized);
-		assertEquals(golden.getId().toString(), deserialized.getGoldenPid().getId());
-		assertEquals(source.getId().toString(), deserialized.getSourcePid().getId());
-	}
-
-	@Test
 	public void serializeDeserialize_longId_works() throws JsonProcessingException {
 		// setup
 		MdmLinkJson json = createLinkJson();
@@ -88,18 +44,17 @@ public class MdmLinkJsonTest {
 		TestPID<Long> source = new TestPID<>("Patient", 2L);
 		source.setAssociatedResourceId(new IdType("Patient/2"));
 		source.setVersion(1L);
-		json.setGoldenPid(golden.toSerializablePid());
-		json.setSourcePid(source.toSerializablePid());
+		json.setGoldenPid(golden);
+		json.setSourcePid(source);
 
 		// test
 		String strVal = myObjectMapper.writeValueAsString(json);
-		assertTrue(strVal.contains("\"id\":\"1\""));
-		assertTrue(strVal.contains("\"id\":\"2\""));
+		assertFalse(isBlank(strVal));
 
 		MdmLinkJson deserialized = myObjectMapper.readValue(strVal, MdmLinkJson.class);
 		assertNotNull(deserialized);
-		assertEquals(golden.getId().toString(), deserialized.getGoldenPid().getId());
-		assertEquals(source.getId().toString(), deserialized.getSourcePid().getId());
+		assertNull(deserialized.getSourcePid());
+		assertNull(deserialized.getGoldenPid());
 	}
 
 	private MdmLinkJson createLinkJson() {

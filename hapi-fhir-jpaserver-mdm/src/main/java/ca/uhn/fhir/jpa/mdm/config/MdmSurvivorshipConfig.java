@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.mdm.config;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.mdm.api.IMdmLinkQuerySvc;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.IMdmSurvivorshipService;
@@ -57,10 +58,13 @@ public class MdmSurvivorshipConfig {
 	@Autowired
 	private IIdHelperService<?> myIIdHelperService;
 
+	@Autowired
+	private HapiTransactionService myTransactionService;
+
 	@Bean
 	public IMdmSurvivorshipService mdmSurvivorshipService() {
 		return new MdmSurvivorshipSvcImpl(
-				myFhirContext, goldenResourceHelper(), myDaoRegistry, myMdmLinkQuerySvc, myIIdHelperService);
+				myFhirContext, goldenResourceHelper(), myDaoRegistry, myMdmLinkQuerySvc, myIIdHelperService, myTransactionService);
 	}
 
 	@Bean

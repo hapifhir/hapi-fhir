@@ -19,10 +19,7 @@
  */
 package ca.uhn.fhir.jpa.model.dao;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
-import ca.uhn.fhir.rest.api.server.storage.SerializablePid;
-import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -96,19 +93,6 @@ public class JpaPid extends BaseResourcePersistentId<Long> {
 
 	public static JpaPid fromIdAndVersionAndResourceType(Long theId, Long theVersion, String theResourceType) {
 		return new JpaPid(theId, theVersion, theResourceType);
-	}
-
-	public static JpaPid fromSerializablePid(SerializablePid thePid, FhirContext theFhirContext) {
-		JpaPid pid = JpaPid.fromIdAndVersionAndResourceType(
-				Long.parseLong(thePid.getId()), thePid.getVersion(), thePid.getResourceType());
-		// set the associatedResourceType
-		if (thePid.getAssociatedResourceIdStr() != null) {
-			IIdType idType = theFhirContext.getVersion().newIdType();
-			idType.setValue(thePid.getAssociatedResourceIdStr());
-			pid.setAssociatedResourceId(idType);
-		}
-		pid.setVersion(thePid.getVersion());
-		return pid;
 	}
 
 	@Override

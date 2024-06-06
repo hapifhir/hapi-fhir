@@ -108,9 +108,9 @@ public class MdmModelConverterSvcImplTest extends BaseMdmR4Test {
 		final MdmLinkJson mdmLinkJson = new MdmLinkJson();
 
 		mdmLinkJson.setGoldenResourceId("Patient/" + theGoldenPatientId);
-		mdmLinkJson.setGoldenPid(JpaPid.fromId(theGoldenPatientId).toSerializablePid());
+		mdmLinkJson.setGoldenPid(JpaPid.fromId(theGoldenPatientId));
 		mdmLinkJson.setSourceId("Patient/" + theSourceId);
-		mdmLinkJson.setSourcePid(JpaPid.fromId(theSourceId).toSerializablePid());
+		mdmLinkJson.setSourcePid(JpaPid.fromId(theSourceId));
 		mdmLinkJson.setMatchResult(theMdmMatchResultEnum);
 		mdmLinkJson.setLinkSource(theMdmLinkSourceEnum);
 		mdmLinkJson.setVersion(version);
