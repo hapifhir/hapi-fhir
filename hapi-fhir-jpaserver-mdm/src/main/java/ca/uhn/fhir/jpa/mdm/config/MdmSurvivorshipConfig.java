@@ -64,7 +64,12 @@ public class MdmSurvivorshipConfig {
 	@Bean
 	public IMdmSurvivorshipService mdmSurvivorshipService() {
 		return new MdmSurvivorshipSvcImpl(
-				myFhirContext, goldenResourceHelper(), myDaoRegistry, myMdmLinkQuerySvc, myIIdHelperService, myTransactionService);
+				myFhirContext,
+				goldenResourceHelper(),
+				myDaoRegistry,
+				myMdmLinkQuerySvc,
+				myIIdHelperService,
+				myTransactionService);
 	}
 
 	@Bean
