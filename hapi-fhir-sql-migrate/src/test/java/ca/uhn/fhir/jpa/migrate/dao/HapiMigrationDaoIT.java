@@ -7,8 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Set;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class HapiMigrationDaoIT extends BaseMigrationTest {
@@ -16,7 +15,7 @@ class HapiMigrationDaoIT extends BaseMigrationTest {
 	@Test
 	public void findAll_empty_returnsNothing() {
 		Set<MigrationVersion> result = ourHapiMigrationDao.fetchSuccessfulMigrationVersions();
-		assertThat(result, hasSize(0));
+		assertThat(result).hasSize(0);
 	}
 
 	@Test
@@ -27,7 +26,7 @@ class HapiMigrationDaoIT extends BaseMigrationTest {
 		assertTrue(result1);
 		{
 			Set<MigrationVersion> all = ourHapiMigrationDao.fetchSuccessfulMigrationVersions();
-			assertThat(all, hasSize(1));
+			assertThat(all).hasSize(1);
 		}
 		HapiMigrationEntity record2 = buildEntity("DESC2", "1.2");
 
@@ -35,7 +34,7 @@ class HapiMigrationDaoIT extends BaseMigrationTest {
 		assertTrue(result2);
 		{
 			Set<MigrationVersion> all = ourHapiMigrationDao.fetchSuccessfulMigrationVersions();
-			assertThat(all, hasSize(2));
+			assertThat(all).hasSize(2);
 		}
 	}
 

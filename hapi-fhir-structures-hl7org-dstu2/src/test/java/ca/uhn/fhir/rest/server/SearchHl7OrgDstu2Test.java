@@ -7,35 +7,22 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
-import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.ee10.servlet.ServletHandler;
-import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.hl7.fhir.dstu2.model.Bundle;
 import org.hl7.fhir.dstu2.model.Patient;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import jakarta.annotation.Nonnull;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.matchesPattern;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
@@ -63,13 +50,13 @@ public class SearchHl7OrgDstu2Test {
     IOUtils.closeQuietly(status.getEntity().getContent());
     ourLog.info(responseContent);
 
-    assertThat(responseContent, not(containsString("text")));
+		assertThat(responseContent).doesNotContain("text");
 
-    assertEquals(200, status.getStatusLine().getStatusCode());
+		assertEquals(200, status.getStatusLine().getStatusCode());
     Patient patient = (Patient) ourCtx.newXmlParser().parseResource(Bundle.class, responseContent).getEntry().get(0).getResource();
     String ref = patient.getManagingOrganization().getReference();
-    assertEquals("Organization/555", ref);
-    assertNull(status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION));
+		assertEquals("Organization/555", ref);
+		assertNull(status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION));
   }
 
   @Test
@@ -80,13 +67,13 @@ public class SearchHl7OrgDstu2Test {
     IOUtils.closeQuietly(status.getEntity().getContent());
     ourLog.info(responseContent);
 
-    assertThat(responseContent, not(containsString("text")));
+		assertThat(responseContent).doesNotContain("text");
 
-    assertEquals(200, status.getStatusLine().getStatusCode());
+		assertEquals(200, status.getStatusLine().getStatusCode());
     Patient patient = (Patient) ourCtx.newJsonParser().parseResource(Bundle.class, responseContent).getEntry().get(0).getResource();
     String ref = patient.getManagingOrganization().getReference();
-    assertEquals("Organization/555", ref);
-    assertNull(status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION));
+		assertEquals("Organization/555", ref);
+		assertNull(status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION));
   }
 
   @Test
@@ -97,14 +84,14 @@ public class SearchHl7OrgDstu2Test {
     IOUtils.closeQuietly(status.getEntity().getContent());
     ourLog.info(responseContent);
 
-    assertEquals(200, status.getStatusLine().getStatusCode());
-    assertThat(responseContent, matchesPattern(".*id value..[0-9a-f-]+\\\".*"));
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(responseContent).matches(".*id value..[0-9a-f-]+\\\".*");
   }
 
   @Test
   public void testResultBundleHasUpdateTime() throws Exception {
     ourReturnPublished = new InstantDt("2011-02-03T11:22:33Z");
-    assertEquals(ourReturnPublished.getValueAsString(), "2011-02-03T11:22:33Z");
+		assertEquals(ourReturnPublished.getValueAsString(), "2011-02-03T11:22:33Z");
 
     HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_query=searchWithBundleProvider&_pretty=true");
     HttpResponse status = ourClient.execute(httpGet);
@@ -112,7 +99,7 @@ public class SearchHl7OrgDstu2Test {
     IOUtils.closeQuietly(status.getEntity().getContent());
     ourLog.info(responseContent);
 
-    assertThat(responseContent, stringContainsInOrder("<lastUpdated value=\"2011-02-03T11:22:33Z\"/>"));
+    assertThat(responseContent).containsSubsequence("<lastUpdated value=\"2011-02-03T11:22:33Z\"/>");
   }
 
   /**

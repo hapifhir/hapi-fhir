@@ -1,18 +1,15 @@
 package ca.uhn.fhir.jpa.packages.loader;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.packages.FakeNpmServlet;
 import ca.uhn.fhir.jpa.packages.util.PackageUtils;
-import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.test.utilities.server.HttpServletExtension;
 import ca.uhn.fhir.util.ClasspathUtil;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.ee10.servlet.ServletHandler;
-import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.hl7.fhir.utilities.npm.PackageServer;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -24,11 +21,10 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
+
 
 public class PackageLoaderSvcIT {
 
@@ -78,8 +74,8 @@ public class PackageLoaderSvcIT {
 		}
 
 		// verify fetched resources
-		assertFalse(resources.isEmpty());
-		assertEquals(1, resources.size());
+		assertThat(resources).isNotEmpty();
+		assertThat(resources).hasSize(1);
 		assertEquals("SearchParameter", resources.get(0).fhirType());
 	}
 
@@ -102,7 +98,7 @@ public class PackageLoaderSvcIT {
 			myPackageLoaderSvc.loadPackageFromCacheOnly("id", "versionId");
 			fail();
 		} catch (UnsupportedOperationException ex) {
-			assertTrue(ex.getMessage().contains("Cannot load from cache."));
+			assertThat(ex.getMessage()).contains("Cannot load from cache.");
 		}
 
 		// addPackageToCache
@@ -110,7 +106,7 @@ public class PackageLoaderSvcIT {
 			myPackageLoaderSvc.addPackageToCache("id", "version", Mockito.mock(InputStream.class), "description or url");
 			fail();
 		} catch (UnsupportedOperationException ex) {
-			assertTrue(ex.getMessage().contains("Cannot add to cache."));
+			assertThat(ex.getMessage()).contains("Cannot add to cache.");
 		}
 
 		// loadPackage
@@ -118,7 +114,7 @@ public class PackageLoaderSvcIT {
 			myPackageLoaderSvc.loadPackage("id", "version");
 			fail();
 		} catch (UnsupportedOperationException ex) {
-			assertTrue(ex.getMessage().contains("No packages are cached;"));
+			assertThat(ex.getMessage()).contains("No packages are cached;");
 		}
 	}
 }

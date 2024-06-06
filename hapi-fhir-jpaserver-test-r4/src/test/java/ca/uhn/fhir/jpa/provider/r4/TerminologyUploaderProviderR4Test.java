@@ -55,13 +55,10 @@ import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_UNIVERS
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_UPLOAD_PROPERTIES_FILE;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_XML_FILE;
 import static org.apache.commons.lang3.StringUtils.leftPad;
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.matchesPattern;
-import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 
 public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Test {
 
@@ -94,7 +91,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), containsString("Did not find file matching concepts.csv"));
+			assertThat(e.getMessage()).contains("Did not find file matching concepts.csv");
 		}
 	}
 
@@ -113,8 +110,8 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(((IntegerType) respParam.getParameter().get(1).getValue()).getValue(), greaterThan(1));
-		assertThat(((Reference) respParam.getParameter().get(2).getValue()).getReference(), matchesPattern("CodeSystem\\/[a-zA-Z0-9\\.\\-]+"));
+		assertThat(((IntegerType) respParam.getParameter().get(1).getValue()).getValue()).isGreaterThan(1);
+		assertThat(((Reference) respParam.getParameter().get(2).getValue()).getReference()).matches("CodeSystem\\/[a-zA-Z0-9\\.\\-]+");
 	}
 
 		@Test
@@ -132,8 +129,8 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(((IntegerType) respParam.getParameter().get(1).getValue()).getValue(), greaterThan(1));
-		assertThat(((Reference) respParam.getParameter().get(2).getValue()).getReference(), matchesPattern("CodeSystem\\/[a-zA-Z0-9\\.\\-]+"));
+			assertThat(((IntegerType) respParam.getParameter().get(1).getValue()).getValue()).isGreaterThan(1);
+			assertThat(((Reference) respParam.getParameter().get(2).getValue()).getReference()).matches("CodeSystem\\/[a-zA-Z0-9\\.\\-]+");
 
 		/*
 		 * Try uploading a second time
@@ -180,7 +177,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), containsString("Missing mandatory parameter: system"));
+			assertThat(e.getMessage()).contains("Missing mandatory parameter: system");
 		}
 
 	}
@@ -200,7 +197,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(((IntegerType) respParam.getParameter().get(1).getValue()).getValue(), greaterThan(1));
+		assertThat(((IntegerType) respParam.getParameter().get(1).getValue()).getValue()).isGreaterThan(1);
 	}
 
 	@Test
@@ -224,7 +221,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(((IntegerType) respParam.getParameter().get(1).getValue()).getValue(), greaterThan(1));
+		assertThat(((IntegerType) respParam.getParameter().get(1).getValue()).getValue()).isGreaterThan(1);
 	}
 
 	@Test
@@ -255,12 +252,12 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 
 		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 		ourLog.info(encoded);
-		assertThat(encoded, stringContainsInOrder(
+		assertThat(encoded).containsSubsequence(
 			"\"name\": \"conceptCount\"",
 			"\"valueInteger\": 5",
 			"\"name\": \"target\"",
 			"\"reference\": \"CodeSystem/"
-		));
+		);
 	}
 
 	@Test
@@ -296,12 +293,12 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 
 		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 		ourLog.info(encoded);
-		assertThat(encoded, stringContainsInOrder(
+		assertThat(encoded).containsSubsequence(
 			"\"name\": \"conceptCount\"",
 			"\"valueInteger\": 5",
 			"\"name\": \"target\"",
 			"\"reference\": \"CodeSystem/"
-		));
+		);
 		runInTransaction(() -> {
 			TermCodeSystem cs = myTermCodeSystemDao.findByCodeSystemUri("http://foo/cs");
 			TermCodeSystemVersion version = cs.getCurrentVersion();
@@ -343,12 +340,12 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 
 		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 		ourLog.info(encoded);
-		assertThat(encoded, stringContainsInOrder(
+		assertThat(encoded).containsSubsequence(
 			"\"name\": \"conceptCount\"",
 			"\"valueInteger\": 5",
 			"\"name\": \"target\"",
 			"\"reference\": \"CodeSystem/"
-		));
+		);
 
 		assertHierarchyContains(
 			"CHEM seq=0",
@@ -383,12 +380,12 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 
 		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 		ourLog.info(encoded);
-		assertThat(encoded, stringContainsInOrder(
+		assertThat(encoded).containsSubsequence(
 			"\"name\": \"conceptCount\"",
 			"\"valueInteger\": 5",
 			"\"name\": \"target\"",
 			"\"reference\": \"CodeSystem/"
-		));
+		);
 
 		assertHierarchyContains(
 			"CHEM seq=0",
@@ -453,12 +450,12 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 
 		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 		ourLog.info(encoded);
-		assertThat(encoded, stringContainsInOrder(
+		assertThat(encoded).containsSubsequence(
 			"\"name\": \"conceptCount\"",
 			"\"valueInteger\": 2",
 			"\"name\": \"target\"",
 			"\"reference\": \"CodeSystem/"
-		));
+		);
 
 		assertHierarchyContains(
 			"1111222233 seq=0",
@@ -523,12 +520,12 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 
 		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 		ourLog.info(encoded);
-		assertThat(encoded, stringContainsInOrder(
+		assertThat(encoded).containsSubsequence(
 			"\"name\": \"conceptCount\"",
 			"\"valueInteger\": 2",
 			"\"name\": \"target\"",
 			"\"reference\": \"CodeSystem/"
-		));
+		);
 
 		assertHierarchyContains(
 			"CHEM seq=0",
@@ -558,7 +555,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), containsString("Missing mandatory parameter: system"));
+			assertThat(e.getMessage()).contains("Missing mandatory parameter: system");
 		}
 		myClient.unregisterInterceptor(interceptor);
 
@@ -579,7 +576,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), containsString("Missing mandatory parameter: file"));
+			assertThat(e.getMessage()).contains("Missing mandatory parameter: file");
 		}
 		myClient.unregisterInterceptor(interceptor);
 	}
@@ -624,7 +621,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 
 		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 		ourLog.info(encoded);
-		assertThat(encoded, containsString("\"valueInteger\": 5"));
+		assertThat(encoded).contains("\"valueInteger\": 5");
 	}
 
 

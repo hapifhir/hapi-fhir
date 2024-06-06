@@ -23,9 +23,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class FhirContextDstu3Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirContextDstu3Test.class);
@@ -119,7 +119,7 @@ public class FhirContextDstu3Test {
 			threadPool.shutdownNow();
 		}
 
-		assertTrue(exceptions.isEmpty(), "failed with exception(s): " + exceptions);
+		assertThat(exceptions.isEmpty()).as("failed with exception(s): " + exceptions).isTrue();
 	}
 
 	/**

@@ -3,10 +3,12 @@ package ca.uhn.fhir.jpa.model.entity;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import org.junit.jupiter.api.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SuppressWarnings("SpellCheckingInspection")
 public class ResourceIndexedSearchParamStringTest {
@@ -84,10 +86,10 @@ public class ResourceIndexedSearchParamStringTest {
 		val2.setPartitionSettings(new PartitionSettings());
 		val2.setStorageSettings(new StorageSettings());
 		val2.calculateHashes();
-		assertEquals(val1, val1);
+		assertNotNull(val1);
 		assertEquals(val1, val2);
-		assertNotEquals(val1, null);
-		assertNotEquals(val1, "");
+
+		assertThat("").isNotEqualTo(val1);
 	}
 
 	@Test
@@ -104,10 +106,9 @@ public class ResourceIndexedSearchParamStringTest {
 		val2.setPartitionSettings(new PartitionSettings().setIncludePartitionInSearchHashes(true));
 		val2.setStorageSettings(new StorageSettings());
 		val2.calculateHashes();
-		assertEquals(val1, val1);
+		assertNotNull(val1);
 		assertEquals(val1, val2);
-		assertNotEquals(val1, null);
-		assertNotEquals(val1, "");
+		assertThat("").isNotEqualTo(val1);
 	}
 
 	@Test
@@ -117,8 +118,8 @@ public class ResourceIndexedSearchParamStringTest {
 
 		param2.optimizeIndexStorage();
 
-		assertTrue(param.equals(param2));
-		assertTrue(param2.equals(param));
+		assertEquals(param, param2);
+		assertEquals(param2, param);
 		assertEquals(param.hashCode(), param2.hashCode());
 	}
 

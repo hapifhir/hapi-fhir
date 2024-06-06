@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -55,7 +56,7 @@ public class PagingIteratorTest {
 
 		String next = myPagingIterator.next();
 		assertNotNull(next);
-		assertFalse(next.isEmpty());
+		assertThat(next).isNotEmpty();
 	}
 
 	@Test
@@ -84,7 +85,7 @@ public class PagingIteratorTest {
 			myPagingIterator.next();
 			fail();
 		} catch (NoSuchElementException ex) {
-			assertTrue(ex.getMessage().contains("Nothing to fetch"));
+			assertThat(ex.getMessage()).contains("Nothing to fetch");
 		}
 	}
 }

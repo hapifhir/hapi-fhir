@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.Count;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
@@ -7,36 +9,23 @@ import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
-import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.ee10.servlet.ServletHandler;
-import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class SearchCountParamDstu3Test {
 
@@ -72,15 +61,15 @@ public class SearchCountParamDstu3Test {
 			assertEquals("search", ourLastMethod);
 			assertEquals(Integer.valueOf(2), ourLastParam);
 
-			assertThat(responseContent, stringContainsInOrder(
-				"<link>",
-				"<relation value=\"self\"/>",
-				"<url value=\"" + ourServer.getBaseUrl() + "/Patient?_count=2\"/>",
-				"</link>",
-				"<link>",
-				"<relation value=\"next\"/>",
-				"<url value=\"" + ourServer.getBaseUrl() + "?_getpages=", "&amp;_getpagesoffset=2&amp;_count=2&amp;_bundletype=searchset\"/>",
-				"</link>"));
+			assertThat(responseContent).contains(
+				 "<link>",
+				 "<relation value=\"self\"/>",
+				 "<url value=\"" + ourServer.getBaseUrl() + "/Patient?_count=2\"/>",
+				 "</link>",
+				 "<link>",
+				 "<relation value=\"next\"/>",
+				 "<url value=\"" + ourServer.getBaseUrl() + "?_getpages=", "&amp;_getpagesoffset=2&amp;_count=2&amp;_bundletype=searchset\"/>",
+				 "</link>");
 
 		}
 
@@ -98,11 +87,11 @@ public class SearchCountParamDstu3Test {
 			assertEquals("search", ourLastMethod);
 			assertEquals(Integer.valueOf(0), ourLastParam);
 
-			assertThat(responseContent, stringContainsInOrder(
-				"<Bundle",
-				"<total value=\"99\"/>",
-				"</Bundle>"));
-			assertThat(responseContent, not(containsString("entry")));
+			assertThat(responseContent).contains(
+				 "<Bundle",
+				 "<total value=\"99\"/>",
+				 "</Bundle>");
+			assertThat(responseContent).doesNotContain("entry");
 
 		}
 
@@ -120,17 +109,17 @@ public class SearchCountParamDstu3Test {
 			ourLog.info(responseContent);
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			assertEquals("searchWithNoCountParam", ourLastMethod);
-			assertEquals(null, ourLastParam);
+			assertNull(ourLastParam);
 
-			assertThat(responseContent, stringContainsInOrder(
-				"<link>",
-				"<relation value=\"self\"/>",
-				"<url value=\"" + ourServer.getBaseUrl() + "/Patient?_count=2&amp;_query=searchWithNoCountParam\"/>",
-				"</link>",
-				"<link>",
-				"<relation value=\"next\"/>",
-				"<url value=\"" + ourServer.getBaseUrl() + "?_getpages=", "&amp;_getpagesoffset=2&amp;_count=2&amp;_bundletype=searchset\"/>",
-				"</link>"));
+			assertThat(responseContent).contains(
+				 "<link>",
+				 "<relation value=\"self\"/>",
+				 "<url value=\"" + ourServer.getBaseUrl() + "/Patient?_count=2&amp;_query=searchWithNoCountParam\"/>",
+				 "</link>",
+				 "<link>",
+				 "<relation value=\"next\"/>",
+				 "<url value=\"" + ourServer.getBaseUrl() + "?_getpages=", "&amp;_getpagesoffset=2&amp;_count=2&amp;_bundletype=searchset\"/>",
+				 "</link>");
 
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());

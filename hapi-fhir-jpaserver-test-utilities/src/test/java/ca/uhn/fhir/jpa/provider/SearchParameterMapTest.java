@@ -20,8 +20,8 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.util.UrlUtil;
 import org.junit.jupiter.api.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 public class SearchParameterMapTest {
 	private static final FhirContext ourCtx = FhirContext.forDstu3Cached();
@@ -62,7 +62,7 @@ public class SearchParameterMapTest {
 
 		ourLog.info(containedQueryString);
 		ourLog.info(uncontainedQueryString);
-		assertNotEquals(containedQueryString, uncontainedQueryString);
+		assertThat(uncontainedQueryString).isNotEqualTo(containedQueryString);
 
 	}
 
@@ -125,7 +125,7 @@ public class SearchParameterMapTest {
 		String queryString = map.toNormalizedQueryString(ourCtx);
 		ourLog.info(queryString);
 		ourLog.info(UrlUtil.unescape(queryString));
-		
+
 		assertEquals("?identifier=SYS%7C%5C%7CVAL&_sort=name,-identifier", queryString);
 		assertEquals("?identifier=SYS|\\|VAL&_sort=name,-identifier", UrlUtil.unescape(queryString));
 	}

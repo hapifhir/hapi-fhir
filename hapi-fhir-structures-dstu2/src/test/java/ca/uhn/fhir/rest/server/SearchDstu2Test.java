@@ -23,10 +23,10 @@ import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
-import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.base.Charsets;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -37,33 +37,19 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.message.BasicNameValuePair;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.ee10.servlet.ServletHandler;
-import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import jakarta.annotation.Nonnull;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.matchesPattern;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.startsWith;
-import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
@@ -114,7 +100,7 @@ public class SearchDstu2Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
 		assertEquals(400, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, containsString("<diagnostics value=\"" + Msg.code(446) + "Incorrect Content-Type header value of &quot;application/x-www-form-urlencoded; charset=UTF-8&quot; was provided in the request. A FHIR Content-Type is required for &quot;CREATE&quot; operation\"/>"));
+		assertThat(responseContent).contains("<diagnostics value=\"" + Msg.code(446) + "Incorrect Content-Type header value of &quot;application/x-www-form-urlencoded; charset=UTF-8&quot; was provided in the request. A FHIR Content-Type is required for &quot;CREATE&quot; operation\"/>");
 
 	}
 
@@ -126,7 +112,7 @@ public class SearchDstu2Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
 
-		assertThat(responseContent, not(containsString("text")));
+		assertThat(responseContent).doesNotContain("text");
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		Patient patient = (Patient) ourCtx.newXmlParser().parseResource(Bundle.class, responseContent).getEntry().get(0).getResource();
@@ -143,7 +129,7 @@ public class SearchDstu2Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
 
-		assertThat(responseContent, not(containsString("text")));
+		assertThat(responseContent).doesNotContain("text");
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		Patient patient = (Patient) ourCtx.newJsonParser().parseResource(Bundle.class, responseContent).getEntry().get(0).getResource();
@@ -162,7 +148,7 @@ public class SearchDstu2Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
 
-		assertThat(responseContent, stringContainsInOrder("<lastUpdated value=\"2011-02-03T11:22:33Z\"/>"));
+		assertThat(responseContent).containsSubsequence("<lastUpdated value=\"2011-02-03T11:22:33Z\"/>");
 	}
 
 	@Test
@@ -174,7 +160,7 @@ public class SearchDstu2Test {
 		ourLog.info(responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, matchesPattern(".*id value..[0-9a-f-]+\\\".*"));
+		assertThat(responseContent).matches(".*id value..[0-9a-f-]+\\\".*");
 	}
 
 	@Test
@@ -209,12 +195,12 @@ public class SearchDstu2Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
 		assertEquals("searchDateAndList", ourLastMethod);
-		assertEquals(2, ourLastDateAndList.getValuesAsQueryTokens().size());
-		assertEquals(2, ourLastDateAndList.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().size());
-		assertEquals(2, ourLastDateAndList.getValuesAsQueryTokens().get(1).getValuesAsQueryTokens().size());
+		assertThat(ourLastDateAndList.getValuesAsQueryTokens()).hasSize(2);
+		assertThat(ourLastDateAndList.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()).hasSize(2);
+		assertThat(ourLastDateAndList.getValuesAsQueryTokens().get(1).getValuesAsQueryTokens()).hasSize(2);
 		assertEquals("2001", ourLastDateAndList.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValueAsString());
 		assertEquals("2002", ourLastDateAndList.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(1).getValueAsString());
-		assertThat(responseContent, containsString("SYSTEM"));
+		assertThat(responseContent).contains("SYSTEM");
 	}
 
 	@Test
@@ -226,7 +212,7 @@ public class SearchDstu2Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
 		assertEquals("searchReturnNull", ourLastMethod);
-		assertThat(responseContent, containsString("<total value=\"0\"/>"));
+		assertThat(responseContent).contains("<total value=\"0\"/>");
 	}
 
 	@Test
@@ -240,12 +226,12 @@ public class SearchDstu2Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
 		assertEquals("searchDateAndList", ourLastMethod);
-		assertEquals(2, ourLastDateAndList.getValuesAsQueryTokens().size());
-		assertEquals(2, ourLastDateAndList.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().size());
-		assertEquals(2, ourLastDateAndList.getValuesAsQueryTokens().get(1).getValuesAsQueryTokens().size());
+		assertThat(ourLastDateAndList.getValuesAsQueryTokens()).hasSize(2);
+		assertThat(ourLastDateAndList.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()).hasSize(2);
+		assertThat(ourLastDateAndList.getValuesAsQueryTokens().get(1).getValuesAsQueryTokens()).hasSize(2);
 		assertEquals("2001", ourLastDateAndList.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValueAsString());
 		assertEquals("2002", ourLastDateAndList.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(1).getValueAsString());
-		assertThat(responseContent, containsString(":\"SYSTEM\""));
+		assertThat(responseContent).contains(":\"SYSTEM\"");
 
 	}
 
@@ -262,12 +248,12 @@ public class SearchDstu2Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
 		assertEquals("searchDateAndList", ourLastMethod);
-		assertEquals(2, ourLastDateAndList.getValuesAsQueryTokens().size());
-		assertEquals(2, ourLastDateAndList.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().size());
-		assertEquals(2, ourLastDateAndList.getValuesAsQueryTokens().get(1).getValuesAsQueryTokens().size());
+		assertThat(ourLastDateAndList.getValuesAsQueryTokens()).hasSize(2);
+		assertThat(ourLastDateAndList.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()).hasSize(2);
+		assertThat(ourLastDateAndList.getValuesAsQueryTokens().get(1).getValuesAsQueryTokens()).hasSize(2);
 		assertEquals("2001", ourLastDateAndList.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValueAsString());
 		assertEquals("2002", ourLastDateAndList.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(1).getValueAsString());
-		assertThat(responseContent, containsString(":\"SYSTEM\""));
+		assertThat(responseContent).contains(":\"SYSTEM\"");
 
 	}
 
@@ -292,9 +278,9 @@ public class SearchDstu2Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
 		assertEquals("searchDateAndList", ourLastMethod);
-		assertEquals(2, ourLastDateAndList.getValuesAsQueryTokens().size());
-		assertEquals(2, ourLastDateAndList.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().size());
-		assertEquals(2, ourLastDateAndList.getValuesAsQueryTokens().get(1).getValuesAsQueryTokens().size());
+		assertThat(ourLastDateAndList.getValuesAsQueryTokens()).hasSize(2);
+		assertThat(ourLastDateAndList.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()).hasSize(2);
+		assertThat(ourLastDateAndList.getValuesAsQueryTokens().get(1).getValuesAsQueryTokens()).hasSize(2);
 		assertEquals("2001", ourLastDateAndList.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValueAsString());
 		assertEquals("2002", ourLastDateAndList.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(1).getValueAsString());
 	}
@@ -316,7 +302,7 @@ public class SearchDstu2Test {
 			assertEquals(100, resp.getTotal().intValue());
 		}
 		Link nextLink = resp.getLink("next");
-		assertThat(nextLink.getUrl(), startsWith("http://"));
+		assertThat(nextLink.getUrl()).startsWith("http://");
 
 		// Now try the next page
 		{
@@ -331,7 +317,7 @@ public class SearchDstu2Test {
 		}
 
 		nextLink = resp.getLink("next");
-		assertThat(nextLink.getUrl(), startsWith("http://"));
+		assertThat(nextLink.getUrl()).startsWith("http://");
 
 		// Now try a third page
 		{
@@ -386,7 +372,7 @@ public class SearchDstu2Test {
 		assertEquals(200, status.getStatusLine().getStatusCode());
 
 		assertEquals("123", ourLastRef.getIdPart());
-		assertEquals(null, ourLastRef.getResourceType());
+		assertNull(ourLastRef.getResourceType());
 	}
 
 	@Test

@@ -11,6 +11,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
@@ -98,7 +99,7 @@ public class CaptureResourceSourceFromHeaderInterceptorTest {
 			.forResource(Patient.class)
 			.returnBundle(Bundle.class)
 			.execute();
-		assertEquals(0, bundle.getEntry().size());
+		assertThat(bundle.getEntry()).isEmpty();
 	}
 
 }

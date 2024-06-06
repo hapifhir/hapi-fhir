@@ -8,8 +8,7 @@ import ca.uhn.fhir.validation.ValidationResult;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 public class SchemaValidationDstu3Test extends BaseValidationTestWithInlineMocks {
@@ -55,8 +54,8 @@ public class SchemaValidationDstu3Test extends BaseValidationTestWithInlineMocks
 		ourLog.info(encoded);
 
 		assertFalse(result.isSuccessful());
-		assertThat(encoded, containsString("passwd"));
-		assertThat(encoded, containsString("accessExternalDTD"));
+		assertThat(encoded).contains("passwd");
+		assertThat(encoded).contains("accessExternalDTD");
 	}
 
 	@AfterAll

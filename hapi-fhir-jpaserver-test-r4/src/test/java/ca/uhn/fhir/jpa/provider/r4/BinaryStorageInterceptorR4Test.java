@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -43,17 +45,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.stream.Collectors;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.blankOrNullString;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.not;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -145,10 +139,10 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 		outcome.getId().toUnqualifiedVersionless();
 		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getResource());
 		ourLog.info("Encoded: {}", encoded);
-		assertThat(encoded, containsString(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID));
+		assertThat(encoded).contains(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID);
 
 		// Then: Make sure the prefix was applied
-		assertThat(encoded, (containsString("prefix-bar-bar2-")));
+		assertThat(encoded).contains("prefix-bar-bar2-");
 		myInterceptorRegistry.unregisterInterceptor(interceptor);
 
 	}
@@ -175,7 +169,7 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 		outcome.getId().toUnqualifiedVersionless();
 		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getResource());
 		ourLog.info("Encoded: {}", encoded);
-		assertThat(encoded, containsString("\"valueString\": \"prefix-test-blob-id-"));
+		assertThat(encoded).contains("\"valueString\": \"prefix-test-blob-id-");
 		verify(interceptor, times(1)).provideBlobIdForBinary(any(), any());
 
 		myInterceptorRegistry.unregisterInterceptor(interceptor);
@@ -194,13 +188,13 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 		IIdType id = outcome.getId().toUnqualifiedVersionless();
 		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getResource());
 		ourLog.info("Encoded: {}", encoded);
-		assertThat(encoded, containsString(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID));
-		assertThat(encoded, not(containsString("\"data\"")));
+		assertThat(encoded).contains(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID);
+		assertThat(encoded).doesNotContain("\"data\"");
 
 		// Now read it back and make sure it was de-externalized
 		Binary output = myBinaryDao.read(id, mySrd);
 		assertEquals("application/octet-stream", output.getContentType());
-		assertArrayEquals(SOME_BYTES, output.getData());
+		assertThat(SOME_BYTES).containsExactly(output.getData());
 	}
 
 
@@ -217,13 +211,13 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 		IIdType id = outcome.getId().toUnqualifiedVersionless();
 		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getResource());
 		ourLog.info("Encoded: {}", encoded);
-		assertThat(encoded, containsString(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID));
-		assertThat(encoded, not(containsString("\"data\"")));
+		assertThat(encoded).contains(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID);
+		assertThat(encoded).doesNotContain("\"data\"");
 
 		// Now read it back and make sure it was de-externalized
 		Binary output = myBinaryDao.read(id, mySrd);
 		assertEquals("application/octet-stream", output.getContentType());
-		assertArrayEquals(SOME_BYTES, output.getData());
+		assertThat(SOME_BYTES).containsExactly(output.getData());
 
 	}
 
@@ -241,14 +235,14 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 		IIdType id = outcome.getId().toUnqualifiedVersionless();
 		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getResource());
 		ourLog.info("Encoded: {}", encoded);
-		assertThat(encoded, containsString(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID));
-		assertThat(encoded, not(containsString("\"data\"")));
+		assertThat(encoded).contains(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID);
+		assertThat(encoded).doesNotContain("\"data\"");
 
 		// Now read it back and make sure it was not  de-externalized
 		Binary output = myBinaryDao.read(id, mySrd);
 		assertEquals("application/octet-stream", output.getContentType());
-		assertArrayEquals(null, output.getData());
-		assertThat(output.getDataElement().getExtensionByUrl(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID), is(notNullValue()));
+		assertNull(output.getData());;
+		assertNotNull(output.getDataElement().getExtensionByUrl(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID));
 	}
 
 	@Test
@@ -264,13 +258,13 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 		IIdType id = outcome.getId().toUnqualifiedVersionless();
 		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getResource());
 		ourLog.info("Encoded: {}", encoded);
-		assertThat(encoded, containsString("\"data\": \"BAMCAQ==\""));
-		assertThat(encoded, not(containsString(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID)));
+		assertThat(encoded).contains("\"data\": \"BAMCAQ==\"");
+		assertThat(encoded).doesNotContain(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID);
 
 		// Now read it back and make sure it was de-externalized
 		Binary output = myBinaryDao.read(id, mySrd);
 		assertEquals("application/octet-stream", output.getContentType());
-		assertArrayEquals(FEW_BYTES, output.getData());
+		assertThat(FEW_BYTES).containsExactly(output.getData());
 
 	}
 
@@ -304,8 +298,8 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 		IIdType id = outcome.getId().toUnqualifiedVersionless();
 		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getResource());
 		ourLog.info("Encoded: {}", encoded);
-		assertThat(encoded, containsString(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID));
-		assertThat(encoded, not(containsString("\"data\"")));
+		assertThat(encoded).contains(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID);
+		assertThat(encoded).doesNotContain("\"data\"");
 
 		// Now read it back and make sure it is not successfully de-externalized
 		ContentTypeStrippingInterceptor interceptor = new ContentTypeStrippingInterceptor();
@@ -315,6 +309,7 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 
 		assertNull(execute.getContent());
 		assertNull(execute.getDataElement().getValue());
+
 		assertNotNull(execute.getDataElement().getExtensionByUrl(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID).getValue());
 	}
 	@Test
@@ -331,15 +326,14 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 		IIdType id = outcome.getId().toUnqualifiedVersionless();
 		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getResource());
 		ourLog.info("Encoded: {}", encoded);
-		assertThat(encoded, containsString(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID));
-		assertThat(encoded, not(containsString("\"data\"")));
+		assertThat(encoded).contains(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID);
+		assertThat(encoded).doesNotContain("\"data\"");
 
 		// Now read it back and make sure it was de-externalized
 		Binary output = myBinaryDao.read(id, mySrd);
 		assertEquals("application/octet-stream", output.getContentType());
-		assertArrayEquals(SOME_BYTES, output.getData());
+		assertThat(SOME_BYTES).containsExactly(output.getData());
 		assertNotNull(output.getDataElement().getExtensionByUrl(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID).getValue());
-
 	}
 
 
@@ -356,8 +350,8 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 		IIdType id = outcome.getId().toUnqualifiedVersionless();
 		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getResource());
 		ourLog.info("Encoded: {}", encoded);
-		assertThat(encoded, containsString(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID));
-		assertThat(encoded, not(containsString("\"data\"")));
+		assertThat(encoded).contains(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID);
+		assertThat(encoded).doesNotContain("\"data\"");
 
 		// Now update
 		binary = new Binary();
@@ -370,12 +364,12 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 		// Now read it back the first version
 		Binary output = myBinaryDao.read(id.withVersion("1"), mySrd);
 		assertEquals("application/octet-stream", output.getContentType());
-		assertArrayEquals(SOME_BYTES, output.getData());
+		assertThat(SOME_BYTES).containsExactly(output.getData());
 
 		// Now read back the second version
 		output = myBinaryDao.read(id.withVersion("2"), mySrd);
 		assertEquals("application/octet-stream", output.getContentType());
-		assertArrayEquals(SOME_BYTES_2, output.getData());
+		assertThat(SOME_BYTES_2).containsExactly(output.getData());
 
 	}
 
@@ -393,10 +387,10 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 		IIdType id = outcome.getId().toUnqualifiedVersionless();
 		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getResource());
 		ourLog.info("Encoded: {}", encoded);
-		assertThat(encoded, containsString(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID));
-		assertThat(encoded, not(containsString("\"data\"")));
+		assertThat(encoded).contains(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID);
+		assertThat(encoded).doesNotContain("\"data\"");
 		String binaryId = docRef.getContentFirstRep().getAttachment().getDataElement().getExtensionString(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID);
-		assertThat(binaryId, not(blankOrNullString()));
+		assertThat(binaryId).isNotBlank();
 
 		// Now update
 		docRef = new DocumentReference();
@@ -413,12 +407,12 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 		// Now read it back the first version
 		DocumentReference output = myDocumentReferenceDao.read(id.withVersion("1"), mySrd);
 		assertEquals("application/octet-stream", output.getContentFirstRep().getAttachment().getContentType());
-		assertArrayEquals(SOME_BYTES, output.getContentFirstRep().getAttachment().getData());
+		assertThat(output.getContentFirstRep().getAttachment().getData()).containsExactly(SOME_BYTES);
 
 		// Now read back the second version
 		output = myDocumentReferenceDao.read(id.withVersion("2"), mySrd);
 		assertEquals("application/octet-stream", output.getContentFirstRep().getAttachment().getContentType());
-		assertArrayEquals(SOME_BYTES, output.getContentFirstRep().getAttachment().getData());
+		assertThat(output.getContentFirstRep().getAttachment().getData()).containsExactly(SOME_BYTES);
 
 	}
 
@@ -453,22 +447,23 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
 
 		// Verify bundle response
-		assertEquals(3, output.getEntry().size());
+		assertThat(output.getEntry()).hasSize(3);
 		output.getEntry().forEach(entry -> assertEquals("201 Created", entry.getResponse().getStatus()));
 
 		// Read back and verify first DocumentReference and attachments
 		IIdType firstDocRef = new IdType(output.getEntry().get(1).getResponse().getLocation());
 		DocumentReference firstDoc = myDocumentReferenceDao.read(firstDocRef, mySrd);
 		assertEquals("application/octet-stream", firstDoc.getContentFirstRep().getAttachment().getContentType());
-		assertArrayEquals(SOME_BYTES, firstDoc.getContentFirstRep().getAttachment().getData());
+		assertThat(firstDoc.getContentFirstRep().getAttachment().getData()).containsExactly(SOME_BYTES);
 		assertEquals("application/octet-stream", firstDoc.getContent().get(1).getAttachment().getContentType());
-		assertArrayEquals(SOME_BYTES_2, firstDoc.getContent().get(1).getAttachment().getData());
+		assertThat(firstDoc.getContent().get(1).getAttachment().getData()).containsExactly(SOME_BYTES_2);
+		assertEquals("application/octet-stream", firstDoc.getContent().get(1).getAttachment().getContentType());
 
 		// Read back and verify second DocumentReference and attachment
 		IIdType secondDocRef = new IdType(output.getEntry().get(2).getResponse().getLocation());
 		DocumentReference secondDoc = myDocumentReferenceDao.read(secondDocRef, mySrd);
 		assertEquals("application/octet-stream", secondDoc.getContentFirstRep().getAttachment().getContentType());
-		assertArrayEquals(SOME_BYTES_3, secondDoc.getContentFirstRep().getAttachment().getData());
+		assertThat(secondDoc.getContentFirstRep().getAttachment().getData()).containsExactly(SOME_BYTES_3);
 	}
 
 	private void addBundleEntry(Bundle theBundle, Resource theResource, String theUrl) {
@@ -495,10 +490,10 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 		IIdType id = outcome.getId().toUnqualifiedVersionless();
 		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getResource());
 		ourLog.info("Encoded: {}", encoded);
-		assertThat(encoded, containsString(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID));
-		assertThat(encoded, not(containsString("\"data\"")));
+		assertThat(encoded).contains(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID);
+		assertThat(encoded).doesNotContain("\"data\"");
 		String binaryId = docRef.getContentFirstRep().getAttachment().getDataElement().getExtensionString(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID);
-		assertThat(binaryId, not(blankOrNullString()));
+		assertThat(binaryId).isNotBlank();
 
 		// Now update
 		docRef = new DocumentReference();
@@ -519,7 +514,7 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 
 		try {
 			myDocumentReferenceDao.update(docRef, mySrd);
-			fail();
+			fail("Should not be able to update docRef");
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(1329) + "Illegal extension found in request payload - URL \"http://hapifhir.io/fhir/StructureDefinition/externalized-binary-id\" and value \"12345-67890\"", e.getMessage());
 		}
@@ -541,8 +536,8 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 		IIdType id = outcome.getId().toUnqualifiedVersionless();
 		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getResource());
 		ourLog.info("Encoded: {}", encoded);
-		assertThat(encoded, containsString(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID));
-		assertThat(encoded, not(containsString("\"data\"")));
+		assertThat(encoded).contains(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID);
+		assertThat(encoded).doesNotContain("\"data\"");
 
 		// Now read it back and make sure it was de-externalized
 		Binary output = myBinaryDao.read(id, mySrd);

@@ -16,10 +16,11 @@ import java.security.KeyStore;
 import java.security.cert.Certificate;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
+
 
 public class TlsAuthenticationSvcTest {
 
@@ -47,8 +48,7 @@ public class TlsAuthenticationSvcTest {
 		TlsAuthentication emptyAuthentication = null;
 		try {
 			TlsAuthenticationSvc.createSslContext(emptyAuthentication);
-			fail();
-		} catch (Exception e) {
+			fail();		} catch (Exception e) {
 			assertEquals("theTlsAuthentication cannot be null", e.getMessage());
 		}
 	}
@@ -65,9 +65,8 @@ public class TlsAuthenticationSvcTest {
 		TlsAuthentication invalidTlsAuthentication = new TlsAuthentication(Optional.of(invalidKeyStoreInfo), Optional.of(myServerTrustStoreInfo));
 		try {
 			TlsAuthenticationSvc.createSslContext(invalidTlsAuthentication);
-			fail();
-		} catch (Exception e) {
-			assertEquals(Msg.code(2102)+"Failed to create SSLContext", e.getMessage());
+			fail();		} catch (Exception e) {
+			assertEquals(Msg.code(2102) + "Failed to create SSLContext", e.getMessage());
 		}
 	}
 
@@ -89,10 +88,9 @@ public class TlsAuthenticationSvcTest {
 		KeyStoreInfo keyStoreInfo = new KeyStoreInfo("classpath:/non-existent.p12", "changeit", "changeit", "server");
 		try {
 			TlsAuthenticationSvc.createKeyStore(keyStoreInfo);
-			fail();
-		}
+			fail();		}
 		catch (Exception e) {
-			assertEquals(Msg.code(2103)+"Failed to create KeyStore", e.getMessage());
+			assertEquals(Msg.code(2103) + "Failed to create KeyStore", e.getMessage());
 		}
 	}
 
@@ -114,9 +112,8 @@ public class TlsAuthenticationSvcTest {
 		TrustStoreInfo trustStoreInfo = new TrustStoreInfo("classpath:/non-existent.p12", "changeit", "server");
 		try {
 			TlsAuthenticationSvc.createKeyStore(trustStoreInfo);
-			fail();
-		} catch (Exception e) {
-			assertEquals(Msg.code(2103)+"Failed to create KeyStore", e.getMessage());
+			fail();		} catch (Exception e) {
+			assertEquals(Msg.code(2103) + "Failed to create KeyStore", e.getMessage());
 		}
 	}
 
@@ -134,7 +131,7 @@ public class TlsAuthenticationSvcTest {
 	public void testCreateTrustManagerNoTrustStore() {
 		// trust manager should contain common certifications if no trust store information is used
 		X509TrustManager trustManager = TlsAuthenticationSvc.createTrustManager(Optional.empty());
-		assertNotEquals(0, trustManager.getAcceptedIssuers().length);
+		assertThat(trustManager.getAcceptedIssuers().length).isNotEqualTo(0);
 	}
 
 	@Test
@@ -142,9 +139,8 @@ public class TlsAuthenticationSvcTest {
 		TrustStoreInfo invalidKeyStoreInfo = new TrustStoreInfo("file:///INVALID.p12", "changeit", "client");
 		try {
 			TlsAuthenticationSvc.createTrustManager(Optional.of(invalidKeyStoreInfo));
-			fail();
-		} catch (Exception e) {
-			assertEquals(Msg.code(2105)+"Failed to create X509TrustManager", e.getMessage());
+			fail();		} catch (Exception e) {
+			assertEquals(Msg.code(2105) + "Failed to create X509TrustManager", e.getMessage());
 		}
 	}
 

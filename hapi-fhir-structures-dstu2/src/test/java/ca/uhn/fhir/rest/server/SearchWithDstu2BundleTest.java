@@ -7,27 +7,16 @@ import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
-import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.ee10.servlet.ServletHandler;
-import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import java.util.concurrent.TimeUnit;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SearchWithDstu2BundleTest {
@@ -59,7 +48,7 @@ public class SearchWithDstu2BundleTest {
 		ourLog.info(responseContent);
 
 		//@formatter:off
-		assertThat(responseContent, stringContainsInOrder("<Bundle xmlns=\"http://hl7.org/fhir\">", 
+		assertThat(responseContent).containsSubsequence("<Bundle xmlns=\"http://hl7.org/fhir\">",
 				"<type value=\"searchset\"/>", 
 				"<link>" ,
 				"<relation value=\"self\"/>", 
@@ -67,7 +56,7 @@ public class SearchWithDstu2BundleTest {
 				"</link>" ,
 				"<entry>" , 
 				"<resource>" , 
-				"<Patient xmlns=\"http://hl7.org/fhir\">"));
+				"<Patient xmlns=\"http://hl7.org/fhir\">");
 		// @formatter:off
 		
 	}

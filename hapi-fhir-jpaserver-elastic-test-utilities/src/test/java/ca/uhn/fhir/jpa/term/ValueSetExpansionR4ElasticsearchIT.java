@@ -51,12 +51,10 @@ import java.util.Date;
 
 import static ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc.MAKE_LOADING_VERSION_CURRENT;
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_ALL_VALUESET_ID;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -191,9 +189,8 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest {
 		include.setSystem(CS_URL);
 		try {
 			myTermSvc.expandValueSet(null, vs);
-			fail();
-		} catch (InternalErrorException e) {
-			assertThat(e.getMessage(), containsString(Msg.code(832) + "Expansion of ValueSet produced too many codes (maximum 50) - Operation aborted!"));
+			fail("");		} catch (InternalErrorException e) {
+			assertThat(e.getMessage()).contains(Msg.code(832) + "Expansion of ValueSet produced too many codes (maximum 50) - Operation aborted!");
 		}
 
 		// Increase the max so it won't exceed
@@ -202,7 +199,7 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest {
 		include = vs.getCompose().addInclude();
 		include.setSystem(CS_URL);
 		ValueSet outcome = myTermSvc.expandValueSet(null, vs);
-		assertEquals(109, outcome.getExpansion().getContains().size());
+		assertThat(outcome.getExpansion().getContains()).hasSize(109);
 
 	}
 
@@ -252,7 +249,7 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest {
 		// exception is swallowed in pre-expansion process, so let's check the ValueSet was successfully expanded
 		Slice<TermValueSet> page = runInTransaction(() ->
 			myTermValueSetDao.findByExpansionStatus(PageRequest.of(0, 1), TermValueSetPreExpansionStatusEnum.EXPANDED));
-		assertEquals(1, page.getContent().size());
+		assertThat(page.getContent()).hasSize(1);
 	}
 
 

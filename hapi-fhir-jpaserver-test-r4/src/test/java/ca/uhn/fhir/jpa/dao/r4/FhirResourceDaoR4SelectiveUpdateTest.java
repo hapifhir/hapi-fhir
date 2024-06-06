@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.ServerOperationInterceptorAdapter;
@@ -11,7 +12,7 @@ import org.hl7.fhir.r4.model.Resource;
 import org.junit.jupiter.api.Test;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class FhirResourceDaoR4SelectiveUpdateTest extends BaseJpaR4Test {
 
@@ -50,7 +51,7 @@ public class FhirResourceDaoR4SelectiveUpdateTest extends BaseJpaR4Test {
 			// Read it back
 			p = myPatientDao.read(id);
 			assertEquals(false, p.getActive());
-			assertEquals(2, p.getIdentifier().size());
+			assertThat(p.getIdentifier()).hasSize(2);
 
 		} finally {
 			myInterceptorRegistry.unregisterInterceptor(interceptor);

@@ -14,7 +14,6 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.system.HapiSystemProperties;
-import org.hamcrest.MatcherAssert;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.hapi.rest.server.helper.BatchHelperR4;
 import org.hl7.fhir.r4.model.Bundle;
@@ -32,9 +31,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.DEFAULT_PARTITION_NAME;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.isA;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProviderR4Test {
@@ -106,11 +103,11 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 		String jobId = BatchHelperR4.jobIdFromBatch2Parameters(response);
 		myBatch2JobHelper.awaitJobCompletion(jobId);
 
-		assertThat(interceptor.requestPartitionIds, hasSize(4));
+		assertThat(interceptor.requestPartitionIds).hasSize(4);
 		RequestPartitionId partitionId = interceptor.requestPartitionIds.get(0);
 		assertEquals(TENANT_B_ID, partitionId.getFirstPartitionIdOrNull());
 		assertEquals(TENANT_B, partitionId.getFirstPartitionNameOrNull());
-		assertThat(interceptor.requestDetails.get(0), isA(ServletRequestDetails.class));
+		assertThat(interceptor.requestDetails.get(0)).isInstanceOf(ServletRequestDetails.class);
 		assertEquals("Patient", interceptor.resourceDefs.get(0).getName());
 		myInterceptorRegistry.unregisterInterceptor(interceptor);
 
@@ -139,11 +136,11 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 
 		// The searchparam value is on the observation, but it hasn't been indexed yet
 		myTenantClientInterceptor.setTenantId(TENANT_A);
-		MatcherAssert.assertThat(reindexTestHelper.getAlleleObservationIds(myClient), hasSize(0));
+		assertThat(reindexTestHelper.getAlleleObservationIds(myClient)).hasSize(0);
 		myTenantClientInterceptor.setTenantId(TENANT_B);
-		MatcherAssert.assertThat(reindexTestHelper.getAlleleObservationIds(myClient), hasSize(0));
+		assertThat(reindexTestHelper.getAlleleObservationIds(myClient)).hasSize(0);
 		myTenantClientInterceptor.setTenantId(DEFAULT_PARTITION_NAME);
-		MatcherAssert.assertThat(reindexTestHelper.getAlleleObservationIds(myClient), hasSize(0));
+		assertThat(reindexTestHelper.getAlleleObservationIds(myClient)).hasSize(0);
 
 		// setup
 		Parameters input = new Parameters();
@@ -178,12 +175,12 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 		List<String> alleleObservationIds = reindexTestHelper.getAlleleObservationIds(myClient);
 		// Only the one in the first tenant should be indexed
 		myTenantClientInterceptor.setTenantId(TENANT_A);
-		assertThat(reindexTestHelper.getAlleleObservationIds(myClient), hasSize(1));
+		assertThat(reindexTestHelper.getAlleleObservationIds(myClient)).hasSize(1);
 		assertEquals(obsFinalA.getIdPart(), alleleObservationIds.get(0));
 		myTenantClientInterceptor.setTenantId(TENANT_B);
-		MatcherAssert.assertThat(reindexTestHelper.getAlleleObservationIds(myClient), hasSize(0));
+		assertThat(reindexTestHelper.getAlleleObservationIds(myClient)).hasSize(0);
 		myTenantClientInterceptor.setTenantId(DEFAULT_PARTITION_NAME);
-		MatcherAssert.assertThat(reindexTestHelper.getAlleleObservationIds(myClient), hasSize(0));
+		assertThat(reindexTestHelper.getAlleleObservationIds(myClient)).hasSize(0);
 
 		// Reindex default partition
 		myTenantClientInterceptor.setTenantId(DEFAULT_PARTITION_NAME);
@@ -211,7 +208,7 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 		});
 
 		myTenantClientInterceptor.setTenantId(DEFAULT_PARTITION_NAME);
-		assertThat(reindexTestHelper.getAlleleObservationIds(myClient), hasSize(1));
+		assertThat(reindexTestHelper.getAlleleObservationIds(myClient)).hasSize(1);
 	}
 
 	@Test
@@ -230,9 +227,9 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 
 		// The searchparam value is on the observation, but it hasn't been indexed yet
 		myTenantClientInterceptor.setTenantId(TENANT_A);
-		MatcherAssert.assertThat(reindexTestHelper.getAlleleObservationIds(myClient), hasSize(0));
+		assertThat(reindexTestHelper.getAlleleObservationIds(myClient)).hasSize(0);
 		myTenantClientInterceptor.setTenantId(TENANT_B);
-		MatcherAssert.assertThat(reindexTestHelper.getAlleleObservationIds(myClient), hasSize(0));
+		assertThat(reindexTestHelper.getAlleleObservationIds(myClient)).hasSize(0);
 
 		// setup
 		Parameters input = new Parameters();
@@ -259,10 +256,10 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 		List<String> alleleObservationIds = reindexTestHelper.getAlleleObservationIds(myClient);
 		// Only the one in the first tenant should be indexed
 		myTenantClientInterceptor.setTenantId(TENANT_A);
-		assertThat(reindexTestHelper.getAlleleObservationIds(myClient), hasSize(1));
+		assertThat(reindexTestHelper.getAlleleObservationIds(myClient)).hasSize(1);
 		assertEquals(obsFinalA.getIdPart(), alleleObservationIds.get(0));
 		myTenantClientInterceptor.setTenantId(TENANT_B);
-		MatcherAssert.assertThat(reindexTestHelper.getAlleleObservationIds(myClient), hasSize(0));
+		assertThat(reindexTestHelper.getAlleleObservationIds(myClient)).hasSize(0);
 	}
 
 	private Bundle getAllPatientsInTenant(String theTenantId) {

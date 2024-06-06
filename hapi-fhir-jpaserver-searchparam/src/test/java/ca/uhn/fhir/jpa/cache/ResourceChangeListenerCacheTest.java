@@ -15,8 +15,8 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.Instant;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -46,12 +46,12 @@ class ResourceChangeListenerCacheTest {
 	public void doNotRefreshIfNotMatches() {
 		ResourceChangeListenerCache cache = myResourceChangeListenerCacheFactory.newResourceChangeListenerCache(TEST_RESOURCE_NAME, ourMap, mock(IResourceChangeListener.class), TEST_REFRESH_INTERVAL);
 		cache.forceRefresh();
-		assertNotEquals(Instant.MIN, cache.getNextRefreshTimeForUnitTest());
+		assertThat(cache.getNextRefreshTimeForUnitTest()).isNotEqualTo(Instant.MIN);
 
 		// Don't reset timer if it doesn't match any searchparams
 		mockInMemorySupported(cache, InMemoryMatchResult.fromBoolean(false));
 		cache.requestRefreshIfWatching(ourPatient);
-		assertNotEquals(Instant.MIN, cache.getNextRefreshTimeForUnitTest());
+		assertThat(cache.getNextRefreshTimeForUnitTest()).isNotEqualTo(Instant.MIN);
 
 		// Reset timer if it does match searchparams
 		mockInMemorySupported(cache, InMemoryMatchResult.successfulMatch());

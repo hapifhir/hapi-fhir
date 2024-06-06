@@ -22,8 +22,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SearchWithGenericListHl7OrgDstu2Test {
@@ -57,10 +56,10 @@ public class SearchWithGenericListHl7OrgDstu2Test {
     String responseContent = IOUtils.toString(status.getEntity().getContent());
     IOUtils.closeQuietly(status.getEntity().getContent());
     ourLog.info(responseContent);
-    assertEquals(200, status.getStatusLine().getStatusCode());
-    assertEquals("searchByIdentifier", ourLastMethod);
-    assertThat(responseContent, containsString("<family value=\"FAMILY\""));
-    assertThat(responseContent, containsString("<fullUrl value=\"" + ourServer.getBaseUrl() + "/Patient/1\"/>"));
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertEquals("searchByIdentifier", ourLastMethod);
+		assertThat(responseContent).contains("<family value=\"FAMILY\"");
+		assertThat(responseContent).contains("<fullUrl value=\"" + ourServer.getBaseUrl() + "/Patient/1\"/>");
   }
 
   public static class DummyPatientResourceProvider implements IResourceProvider {

@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.dao.index;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
@@ -8,7 +10,6 @@ import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,9 +28,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.when;
@@ -70,9 +69,9 @@ public class IdHelperServiceTest {
 			resourceType,
 			patientIdsToResolve);
 
-		Assertions.assertFalse(idToPid.isEmpty());
+		assertFalse(idToPid.isEmpty());
 		for (String pid : patientIdsToResolve) {
-			Assertions.assertTrue(idToPid.containsKey(pid));
+			assertThat(idToPid).containsKey(pid);
 		}
 	}
 
@@ -111,9 +110,9 @@ public class IdHelperServiceTest {
 			resourceType,
 			patientIdsToResolve);
 
-		Assertions.assertFalse(map.isEmpty());
+		assertFalse(map.isEmpty());
 		for (String id : patientIdsToResolve) {
-			Assertions.assertTrue(map.containsKey(id));
+			assertThat(map).containsKey(id);
 		}
 	}
 
@@ -142,12 +141,12 @@ public class IdHelperServiceTest {
 			patientIdsToResolve
 		);
 
-		Assertions.assertFalse(map.isEmpty());
+		assertFalse(map.isEmpty());
 		for (String id : patientIdsToResolve) {
-			Assertions.assertTrue(map.containsKey(id));
+			assertThat(map).containsKey(id);
 		}
-		assertEquals(red, map.get("RED"));
-		assertEquals(blue, map.get("BLUE"));
+		assertThat(map).containsEntry("RED", red);
+		assertThat(map).containsEntry("BLUE", blue);
 	}
 
 	@Test
@@ -187,7 +186,7 @@ public class IdHelperServiceTest {
 			.thenReturn(resourcePersistentId3);
 		Map<String, JpaPid> result = myHelperService.resolveResourcePersistentIds(partitionId, resourceType, ids)
 			.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue()));
-		assertThat(result.keySet(), hasSize(3));
+		assertThat(result.keySet()).hasSize(3);
 		assertEquals(1L, result.get("A").getId());
 		assertEquals(2L, result.get("B").getId());
 		assertEquals(3L, result.get("C").getId());

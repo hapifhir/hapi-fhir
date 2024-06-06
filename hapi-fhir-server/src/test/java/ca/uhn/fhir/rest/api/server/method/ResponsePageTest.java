@@ -20,8 +20,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -334,14 +333,14 @@ public class ResponsePageTest {
 		boolean theHasNextBoolean
 	) {
 		if (theHasNextBoolean) {
-			assertNotNull(myLinks.getNext(), "Next link expected but not found");
+			assertThat(myLinks.getNext()).as("Next link expected but not found").isNotNull();
 		} else {
-			assertNull(myLinks.getNext(), "Found unexpected next link");
+			assertThat(myLinks.getNext()).as("Found unexpected next link").isNull();
 		}
 		if (theHasPreviousBoolean) {
-			assertNotNull(myLinks.getPrev(), "Previous link expected but not found");
+			assertThat(myLinks.getPrev()).as("Previous link expected but not found").isNotNull();
 		} else {
-			assertNull(myLinks.getPrev(), "Found unexpected previous link");
+			assertThat(myLinks.getPrev()).as("Found unexpected previous link").isNull();
 		}
 	}
 }

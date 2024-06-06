@@ -217,9 +217,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.empty;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -750,9 +748,9 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 			return hierarchyHolder;
 		});
 		if (theStrings.length == 0) {
-			assertThat("\n" + String.join("\n", hierarchy), hierarchy, empty());
+			assertThat(hierarchy).as("\n" + String.join("\n", hierarchy)).isEmpty();
 		} else {
-			assertThat("\n" + String.join("\n", hierarchy), hierarchy, contains(theStrings));
+			assertThat(hierarchy).as("\n" + String.join("\n", hierarchy)).containsExactly(theStrings);
 		}
 	}
 

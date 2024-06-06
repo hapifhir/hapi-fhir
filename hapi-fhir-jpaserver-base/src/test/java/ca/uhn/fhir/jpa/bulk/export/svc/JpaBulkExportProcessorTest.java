@@ -59,8 +59,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -268,7 +267,7 @@ public class JpaBulkExportProcessorTest {
 			myProcessor.getResourcePidIterator(parameters);
 			fail();
 		} catch (InternalErrorException ex) {
-			assertThat(ex.getMessage(), containsString("You attempted to start a Patient Bulk Export,"));
+			assertThat(ex.getMessage()).contains("You attempted to start a Patient Bulk Export,");
 		}
 	}
 
@@ -483,8 +482,8 @@ public class JpaBulkExportProcessorTest {
 		Iterator<JpaPid> pidIterator = myProcessor.getResourcePidIterator(parameters);
 
 		// verify
-		assertNotNull(pidIterator, "PID iterator null for mdm = " + theMdm);
-		assertTrue(pidIterator.hasNext(), "PID iterator empty for mdm = " + theMdm);
+		assertThat(pidIterator).as("PID iterator null for mdm = " + theMdm).isNotNull();
+		assertThat(pidIterator.hasNext()).as("PID iterator empty for mdm = " + theMdm).isTrue();
 		ArgumentCaptor<SystemRequestDetails> groupDaoReadSystemRequestDetailsCaptor = ArgumentCaptor.forClass(SystemRequestDetails.class);
 		verify(groupDao).read(any(IIdType.class), groupDaoReadSystemRequestDetailsCaptor.capture());
 		validatePartitionId(thePartitioned, groupDaoReadSystemRequestDetailsCaptor.getValue().getRequestPartitionId());
@@ -544,9 +543,7 @@ public class JpaBulkExportProcessorTest {
 		int count = 0;
 		while (iterator.hasNext()) {
 			JpaPid ret = iterator.next();
-			assertTrue(
-				ret.equals(pid) || ret.equals(pid2)
-			);
+			assertTrue(ret.equals(pid) || ret.equals(pid2));
 			count++;
 		}
 		assertEquals(2, count);

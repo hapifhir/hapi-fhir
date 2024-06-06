@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class QuestionnaireResponseOperationsProviderTest extends BaseCrR4TestServer {
@@ -24,6 +24,6 @@ public class QuestionnaireResponseOperationsProviderTest extends BaseCrR4TestSer
 		var result = (Bundle) myQuestionnaireResponseExtractProvider.extract(null, questionnaireResponse, null, null, requestDetails);
 
 		assertNotNull(result);
-		assertEquals(5, result.getEntry().size());
+		assertThat(result.getEntry()).hasSize(5);
 	}
 }

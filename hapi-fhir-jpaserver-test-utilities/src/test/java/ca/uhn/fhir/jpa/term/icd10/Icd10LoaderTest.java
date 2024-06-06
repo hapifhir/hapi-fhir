@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class Icd10LoaderTest {
@@ -32,16 +32,16 @@ public class Icd10LoaderTest {
 		assertEquals("2022-tree-expanded", codeSystemVersion.getCodeSystemVersionId());
 
 		List<TermConcept> rootConcepts = new ArrayList<>(codeSystemVersion.getConcepts());
-		assertEquals(2, rootConcepts.size());
+		assertThat(rootConcepts).hasSize(2);
 		TermConcept chapterA = rootConcepts.get(0);
 		assertEquals("A", chapterA.getCode());
 		assertEquals("Fruit", chapterA.getDisplay());
 		Collection<TermConceptProperty> properties = chapterA.getProperties();
-		assertEquals(2, properties.size());
+		assertThat(properties).hasSize(2);
 		assertEquals("Include fruit", chapterA.getStringProperty("inclusion"));
 		assertEquals("Things that are not fruit", chapterA.getStringProperty("exclusion"));
 
-		assertEquals("""
+		assertThat(toTree(rootConcepts)).isEqualTo("""
 						A "Fruit"
 						-A1-A3 "A1 to A3 type fruit"
 						--A1 "Apples"
@@ -51,7 +51,7 @@ public class Icd10LoaderTest {
 						-B1-B2 "A group of trees"
 						--B1 "Oak trees"
 						--B2 "Ash trees"
-                  """, toTree(rootConcepts));
+                  """);
 	}
 
 	private String toTree(List<TermConcept> concepts) {

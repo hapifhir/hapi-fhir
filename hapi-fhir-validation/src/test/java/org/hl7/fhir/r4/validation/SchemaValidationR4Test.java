@@ -18,8 +18,7 @@ import javax.xml.xpath.XPathFactory;
 import java.security.CodeSource;
 import java.text.MessageFormat;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 public class SchemaValidationR4Test extends BaseValidationTestWithInlineMocks {
@@ -77,8 +76,8 @@ public class SchemaValidationR4Test extends BaseValidationTestWithInlineMocks {
 		 */
 
 		assertFalse(result.isSuccessful());
-		assertThat(encoded, containsString("passwd"));
-		assertThat(encoded, containsString("accessExternalDTD"));
+		assertThat(encoded).contains("passwd");
+		assertThat(encoded).contains("accessExternalDTD");
 	}
 
 	private static String getJaxpImplementationInfo(String componentName, Class componentClass) {

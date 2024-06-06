@@ -34,12 +34,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.emptyString;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.equalTo;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -60,15 +55,15 @@ public interface IInstanceStateTransitions extends IWorkChunkCommon, WorkChunkTe
 		// then
 		ourLog.info("job and chunk created {}", createResult);
 		assertNotNull(createResult);
-		assertThat(createResult.jobInstanceId, not(emptyString()));
-		assertThat(createResult.workChunkId, not(emptyString()));
+		assertThat(createResult.jobInstanceId).isNotEmpty();
+		assertThat(createResult.workChunkId).isNotEmpty();
 
 		JobInstance jobInstance = getTestManager().freshFetchJobInstance(createResult.jobInstanceId);
-		assertThat(jobInstance.getStatus(), equalTo(StatusEnum.QUEUED));
-		assertThat(jobInstance.getParameters(), equalTo("{}"));
+		assertEquals(StatusEnum.QUEUED, jobInstance.getStatus());
+		assertEquals("{}", jobInstance.getParameters());
 
 		WorkChunk firstChunk = getTestManager().freshFetchWorkChunk(createResult.workChunkId);
-		assertThat(firstChunk.getStatus(), equalTo(WorkChunkStatusEnum.READY));
+		assertEquals(WorkChunkStatusEnum.READY, firstChunk.getStatus());
 		assertNull(firstChunk.getData(), "First chunk data is null - only uses parameters");
 	}
 
@@ -85,7 +80,7 @@ public interface IInstanceStateTransitions extends IWorkChunkCommon, WorkChunkTe
 
 		// then
 		JobInstance jobInstance = getTestManager().freshFetchJobInstance(createResult.jobInstanceId);
-		assertThat(jobInstance.getStatus(), equalTo(StatusEnum.IN_PROGRESS));
+		assertEquals(StatusEnum.IN_PROGRESS, jobInstance.getStatus());
 	}
 
 	@ParameterizedTest
@@ -120,7 +115,7 @@ public interface IInstanceStateTransitions extends IWorkChunkCommon, WorkChunkTe
 		JobInstance freshInstance1 = getTestManager().getSvc().fetchInstance(instanceId1).orElseThrow();
 		if (theState.isCancellable()) {
 			assertEquals(StatusEnum.CANCELLED, freshInstance1.getStatus(), "cancel request processed");
-			assertThat(freshInstance1.getErrorMessage(), containsString("Job instance cancelled"));
+			assertThat(freshInstance1.getErrorMessage()).contains("Job instance cancelled");
 		} else {
 			assertEquals(theState, freshInstance1.getStatus(), "cancel request ignored - state unchanged");
 			assertNull(freshInstance1.getErrorMessage(), "no error message");
