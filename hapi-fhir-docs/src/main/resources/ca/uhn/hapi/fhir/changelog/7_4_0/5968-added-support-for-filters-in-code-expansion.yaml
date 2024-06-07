@@ -1,0 +1,8 @@
+---
+type: add
+issue: 5968
+title: "Added support for filtering on CodeSystem defined properties when
+        using database (hibernate) filtering.
+        The following ValueSet filters can be used to filter on
+        CodeSystem defined properties: EQUAL, EXISTS, IN, NOTIN
+"

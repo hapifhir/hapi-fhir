@@ -76,7 +76,7 @@ public class WorkChunk extends WorkChunkMetadata {
 	 * Total polling attempts done thus far.
 	 */
 	@JsonProperty("pollAttempts")
-	private int myPollAttempts;
+	private Integer myPollAttempts;
 
 	@JsonProperty(value = "recordsProcessed", access = JsonProperty.Access.READ_ONLY)
 	private Integer myRecordsProcessed;
@@ -214,7 +214,7 @@ public class WorkChunk extends WorkChunkMetadata {
 		myNextPollTime = theNextPollTime;
 	}
 
-	public int getPollAttempts() {
+	public Integer getPollAttempts() {
 		return myPollAttempts;
 	}
 

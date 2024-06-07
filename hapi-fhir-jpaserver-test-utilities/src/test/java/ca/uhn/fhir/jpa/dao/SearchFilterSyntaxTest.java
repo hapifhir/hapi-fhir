@@ -3,8 +3,7 @@ package ca.uhn.fhir.jpa.dao;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class SearchFilterSyntaxTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchFilterSyntaxTest.class);
@@ -13,8 +12,8 @@ public class SearchFilterSyntaxTest {
 		SearchFilterParser.BaseFilter filter = SearchFilterParser.parse(theExpression);
 		ourLog.info("Source: {}", theExpression);
 		ourLog.info("Parsed: {}", filter.toString());
-		assertNotNull(filter, "Parsing failed - returned null");
-		assertEquals(theExpression, filter.toString(), String.format("Expression mismatch: found %s, expecting %s", filter.toString(), theExpression));
+		assertThat(filter).as("Parsing failed - returned null").isNotNull();
+		assertThat(filter.toString()).as(String.format("Expression mismatch: found %s, expecting %s", filter.toString(), theExpression)).isEqualTo(theExpression);
 	}
 
 	@Test

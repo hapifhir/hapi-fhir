@@ -1,5 +1,8 @@
 package ca.uhn.fhir.jpa.cache;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -25,12 +28,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
+
 
 public class ResourceChangeListenerRegistryImplIT extends BaseJpaR4Test {
 	private static final long TEST_REFRESH_INTERVAL = DateUtils.MILLIS_PER_DAY;
@@ -103,9 +104,9 @@ public class ResourceChangeListenerRegistryImplIT extends BaseJpaR4Test {
 	}
 
 	private void assertResult(ResourceChangeResult theResult, long theExpectedCreated, long theExpectedUpdated, long theExpectedDeleted) {
-		assertEquals(theExpectedCreated, theResult.created, "created results");
-		assertEquals(theExpectedUpdated, theResult.updated, "updated results");
-		assertEquals(theExpectedDeleted, theResult.deleted, "deleted results");
+		assertThat(theResult.created).as("created results").isEqualTo(theExpectedCreated);
+		assertThat(theResult.updated).as("updated results").isEqualTo(theExpectedUpdated);
+		assertThat(theResult.deleted).as("deleted results").isEqualTo(theExpectedDeleted);
 	}
 
 	private void assertEmptyResult(ResourceChangeResult theResult) {
@@ -123,7 +124,7 @@ public class ResourceChangeListenerRegistryImplIT extends BaseJpaR4Test {
 		theTestCallback.awaitInitExpected();
 
 		List<IIdType> resourceIds = theTestCallback.getInitResourceIds();
-		assertThat(resourceIds, hasSize(1));
+		assertThat(resourceIds).hasSize(1);
 		IIdType resourceId = resourceIds.get(0);
 		assertEquals(patientId.toString(), resourceId.toString());
 		assertEquals(1L, resourceId.getVersionIdPartAsLong());
@@ -310,12 +311,12 @@ public class ResourceChangeListenerRegistryImplIT extends BaseJpaR4Test {
 		}
 
 		public IIdType getUpdateResourceId() {
-			assertThat(myResourceChangeEvent.getUpdatedResourceIds(), hasSize(1));
+			assertThat(myResourceChangeEvent.getUpdatedResourceIds()).hasSize(1);
 			return myResourceChangeEvent.getUpdatedResourceIds().get(0);
 		}
 
 		public IIdType getDeletedResourceId() {
-			assertThat(myResourceChangeEvent.getDeletedResourceIds(), hasSize(1));
+			assertThat(myResourceChangeEvent.getDeletedResourceIds()).hasSize(1);
 			return myResourceChangeEvent.getDeletedResourceIds().get(0);
 		}
 	}

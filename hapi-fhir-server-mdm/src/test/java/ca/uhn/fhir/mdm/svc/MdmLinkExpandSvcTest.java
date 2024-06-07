@@ -27,6 +27,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -120,7 +121,7 @@ class MdmLinkExpandSvcTest {
 
 		final Set<String> resolvedPids = mySubject.expandMdmBySourceResourcePid(theRequestPartitionId, jpaPid);
 
-		assertEquals(toPidStrings(theExpectedJpaPids), resolvedPids, String.format("expected: %s, actual: %s", theExpectedJpaPids, resolvedPids));
+		assertThat(resolvedPids).as(String.format("expected: %s, actual: %s", theExpectedJpaPids, resolvedPids)).isEqualTo(toPidStrings(theExpectedJpaPids));
 	}
 
 	@ParameterizedTest
@@ -133,7 +134,7 @@ class MdmLinkExpandSvcTest {
 		final JpaPid jpaPid = JpaPid.fromId(123L);
 		final Set<String> resolvedPids = mySubject.expandMdmByGoldenResourcePid(theRequestPartitionId, jpaPid);
 
-		assertEquals(toPidStrings(theExpectedJpaPids), resolvedPids, String.format("expected: %s, actual: %s", theExpectedJpaPids, resolvedPids));
+		assertThat(resolvedPids).as(String.format("expected: %s, actual: %s", theExpectedJpaPids, resolvedPids)).isEqualTo(toPidStrings(theExpectedJpaPids));
 	}
 
 	private static Stream<Arguments> partitionsAndTuples() {

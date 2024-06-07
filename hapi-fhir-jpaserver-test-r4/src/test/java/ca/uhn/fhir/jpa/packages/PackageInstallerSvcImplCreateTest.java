@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.packages;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetDao;
@@ -23,9 +25,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class PackageInstallerSvcImplCreateTest extends BaseJpaR4Test {
 	private static final String PACKAGE_ID_1 = "package1";
@@ -54,7 +54,7 @@ public class PackageInstallerSvcImplCreateTest extends BaseJpaR4Test {
 
 		install(namingSystem);
 
-		assertEquals(1, myNamingSystemDao.search(SearchParameterMap.newSynchronous(), REQUEST_DETAILS).getAllResources().size());
+		assertThat(myNamingSystemDao.search(SearchParameterMap.newSynchronous(), REQUEST_DETAILS).getAllResources()).hasSize(1);
 	}
 
 	@Test
@@ -122,7 +122,7 @@ public class PackageInstallerSvcImplCreateTest extends BaseJpaR4Test {
 
 		final List<TermValueSet> all2 = myTermValueSetDao.findAll();
 
-		assertEquals(2, all2.size());
+		assertThat(all2).hasSize(2);
 
 		final TermValueSet termValueSet1 = all2.get(0);
 		final TermValueSet termValueSet2 = all2.get(1);
@@ -132,7 +132,7 @@ public class PackageInstallerSvcImplCreateTest extends BaseJpaR4Test {
 
 		final List<ValueSet> allValueSets = getAllValueSets();
 
-		assertEquals(2, allValueSets.size());
+		assertThat(allValueSets).hasSize(2);
 
 		final ValueSet actualValueSet1 = allValueSets.get(0);
 
@@ -153,7 +153,7 @@ public class PackageInstallerSvcImplCreateTest extends BaseJpaR4Test {
 	private List<ValueSet> getAllValueSets() {
 		final List<IBaseResource> allResources = myValueSetDao.search(SearchParameterMap.newSynchronous(), REQUEST_DETAILS).getAllResources();
 
-		assertFalse(allResources.isEmpty());
+		assertThat(allResources).isNotEmpty();
 		assertTrue(allResources.get(0) instanceof ValueSet);
 
 		return allResources.stream()
@@ -165,7 +165,7 @@ public class PackageInstallerSvcImplCreateTest extends BaseJpaR4Test {
 	private ValueSet getFirstValueSet() {
 		final List<IBaseResource> allResources = myValueSetDao.search(SearchParameterMap.newSynchronous(), REQUEST_DETAILS).getAllResources();
 
-		assertEquals(1, allResources.size());
+		assertThat(allResources).hasSize(1);
 
 		final IBaseResource resource1 = allResources.get(0);
 		assertTrue(resource1 instanceof ValueSet);
@@ -177,7 +177,7 @@ public class PackageInstallerSvcImplCreateTest extends BaseJpaR4Test {
 	private TermValueSet getFirstTermValueSet() {
 		final List<TermValueSet> all2 = myTermValueSetDao.findAll();
 
-		assertEquals(1, all2.size());
+		assertThat(all2).hasSize(1);
 
 		return all2.get(0);
 	}

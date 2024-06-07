@@ -23,10 +23,9 @@ public class ValidatorInstantiatorDstu2Test {
       
       FhirValidator val = ourCtx.newValidator();
       val.validateWithResult(new Patient());
-      
-      // We have a full classpath, so take advantage
-      assertTrue(val.isValidateAgainstStandardSchema());
-      assertTrue(val.isValidateAgainstStandardSchematron());
+			// We have a full classpath, so take advantage
+		 assertTrue(val.isValidateAgainstStandardSchema());
+		 assertTrue(val.isValidateAgainstStandardSchematron());
       
    }
    

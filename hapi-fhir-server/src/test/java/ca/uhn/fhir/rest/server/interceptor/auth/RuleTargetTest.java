@@ -6,8 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Map;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class RuleTargetTest {
@@ -21,7 +20,7 @@ class RuleTargetTest {
 		target.setSearchParams(requestDetails);
 
 		Map<String, String[]> storedParams = target.getSearchParams();
-		assertThat(storedParams.keySet(), hasSize(2));
+		assertThat(storedParams.keySet()).hasSize(2);
 		assertEquals("Patient/123", storedParams.get("subject")[0]);
 		assertEquals("Practioner/456", storedParams.get("performer")[0]);
 	}

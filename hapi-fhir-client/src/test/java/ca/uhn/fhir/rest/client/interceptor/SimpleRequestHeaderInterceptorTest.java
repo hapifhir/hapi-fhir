@@ -3,6 +3,7 @@ package ca.uhn.fhir.rest.client.interceptor;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class SimpleRequestHeaderInterceptorTest {
 	@Test
@@ -16,7 +17,7 @@ public class SimpleRequestHeaderInterceptorTest {
 	public void testParseComnpleteHeaderNameOnly(){
 		SimpleRequestHeaderInterceptor i = new SimpleRequestHeaderInterceptor("Authorization");
 		assertEquals("Authorization", i.getHeaderName());
-		assertEquals(null, i.getHeaderValue());
+		assertNull(i.getHeaderValue());
 	}
 
 }

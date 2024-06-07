@@ -22,6 +22,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ApacheClientIntegrationTest {
@@ -53,7 +54,7 @@ public class ApacheClientIntegrationTest {
 		Bundle response = ourServer.getFhirClient().search().forResource(Patient.class).where(Patient.NAME.matches().value("FOO")).returnBundle(Bundle.class).execute();
 		assertEquals("search", ourLastMethod);
 		assertEquals("FOO", ourLastName.getValue());
-		assertEquals(1, response.getEntry().size());
+		assertThat(response.getEntry()).hasSize(1);
 		assertEquals("123", response.getEntry().get(0).getResource().getIdElement().getIdPart());
 	}
 	

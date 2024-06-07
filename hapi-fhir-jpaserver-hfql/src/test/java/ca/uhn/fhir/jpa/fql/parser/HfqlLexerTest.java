@@ -8,9 +8,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -25,9 +23,7 @@ public class HfqlLexerTest {
 					   name.family
 			""";
 		List<String> allTokens = new HfqlLexer(input).allTokens();
-		assertThat(allTokens, contains(
-			"from", "Patient", "select", "name.given[0]", ",", "name.family"
-		));
+		assertThat(allTokens).containsExactly("from", "Patient", "select", "name.given[0]", ",", "name.family");
 	}
 
 	@Test
@@ -38,9 +34,7 @@ public class HfqlLexerTest {
 					   *
 			""";
 		List<String> allTokens = new HfqlLexer(input).allTokens();
-		assertThat(allTokens, contains(
-			"from", "Patient", "select", "*"
-		));
+		assertThat(allTokens).containsExactly("from", "Patient", "select", "*");
 	}
 
 	@Test
@@ -55,12 +49,7 @@ public class HfqlLexerTest {
 			  name.family
 			  """;
 		List<String> allTokens = new HfqlLexer(input).allTokens();
-		assertThat(allTokens, contains(
-			"from", "Patient", "where",
-			"name.given", "=", "'Foo ' Chalmers'",
-			"select", "name.given[0]",
-			",", "name.family"
-		));
+		assertThat(allTokens).containsExactly("from", "Patient", "where", "name.given", "=", "'Foo ' Chalmers'", "select", "name.given[0]", ",", "name.family");
 
 	}
 
@@ -97,13 +86,7 @@ public class HfqlLexerTest {
 			    URL: url
 			""";
 		List<String> allTokens = new HfqlLexer(input).allTokens();
-		assertThat(allTokens, contains(
-			"from", "StructureDefinition", "where",
-			"url", "in", "(", "'foo'", "|", "'bar'", ")",
-			"select",
-			"Name", ":", "name", ",",
-			"URL", ":", "url"
-		));
+		assertThat(allTokens).containsExactly("from", "StructureDefinition", "where", "url", "in", "(", "'foo'", "|", "'bar'", ")", "select", "Name", ":", "name", ",", "URL", ":", "url");
 	}
 
 	@Test
@@ -211,7 +194,7 @@ public class HfqlLexerTest {
 		expectedItems.add(comparator);
 		expectedItems.add("'2023-10-09'");
 
-		assertThat(allTokens.toString(), allTokens, contains(expectedItems.toArray(new String[0])));
+		assertThat(allTokens).as(allTokens.toString()).containsExactly(expectedItems.toArray(new String[0]));
 	}
 
 
@@ -229,7 +212,7 @@ public class HfqlLexerTest {
 			}
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), containsString("Unexpected end of string"));
+			assertThat(e.getMessage()).contains("Unexpected end of string");
 		}
 	}
 

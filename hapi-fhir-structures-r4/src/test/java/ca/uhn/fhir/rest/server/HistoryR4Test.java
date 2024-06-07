@@ -10,19 +10,12 @@ import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
-import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.ee10.servlet.ServletHandler;
-import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.DateTimeType;
@@ -31,7 +24,6 @@ import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -41,8 +33,8 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -105,7 +97,7 @@ public class HistoryR4Test {
 			}
 
 			Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
-			assertEquals(2, bundle.getEntry().size());
+			assertThat(bundle.getEntry()).hasSize(2);
 			assertEquals(ourServer.getBaseUrl() + "/Patient/ih1/_history/1", bundle.getEntry().get(0).getResource().getId());
 			assertEquals(ourServer.getBaseUrl() + "/Patient/ih1/_history/2", bundle.getEntry().get(1).getResource().getId());
 
@@ -124,7 +116,7 @@ public class HistoryR4Test {
 			}
 
 			Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
-			assertEquals(2, bundle.getEntry().size());
+			assertThat(bundle.getEntry()).hasSize(2);
 			assertEquals(ourServer.getBaseUrl() + "/Patient/h1/_history/1", bundle.getEntry().get(0).getResource().getId());
 			assertEquals(ourServer.getBaseUrl() + "/Patient/h1/_history/2", bundle.getEntry().get(1).getResource().getId());
 
@@ -142,7 +134,7 @@ public class HistoryR4Test {
 				assertEquals(200, status.getStatusLine().getStatusCode());
 			}
 
-			assertEquals(null, ourLastAt);
+			assertNull(ourLastAt);
 			assertEquals("2005", ourLastSince.getValueAsString());
 			assertEquals("2005", ourLastSince2.getValueAsString());
 			assertTrue(DateTimeType.class.equals(ourLastSince2.getClass()));
@@ -167,7 +159,7 @@ public class HistoryR4Test {
 			assertNull(ourLastAt);
 
 			Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
-			assertEquals(2, bundle.getEntry().size());
+			assertThat(bundle.getEntry()).hasSize(2);
 			assertEquals(ourServer.getBaseUrl() + "/Patient/th1/_history/1", bundle.getEntry().get(0).getResource().getId());
 			assertEquals(ourServer.getBaseUrl() + "/Patient/th1/_history/2", bundle.getEntry().get(1).getResource().getId());
 

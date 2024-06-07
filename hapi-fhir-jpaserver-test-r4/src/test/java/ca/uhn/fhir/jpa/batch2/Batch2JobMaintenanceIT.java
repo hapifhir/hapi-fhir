@@ -44,7 +44,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static ca.uhn.fhir.batch2.config.BaseBatch2Config.CHANNEL_NAME;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * The on-enter actions are defined in
@@ -142,7 +142,7 @@ public class Batch2JobMaintenanceIT extends BaseJpaR4Test {
 	}
 
 	private void assertJobMaintenanceCalledAtLeast(int theSize) {
-		assertTrue(myStackTraceElements.size() >= theSize, "Expected at least " + theSize + " calls to job maintenance but got " + myStackTraceElements.size());
+		assertThat(myStackTraceElements.size() >= theSize).as("Expected at least " + theSize + " calls to job maintenance but got " + myStackTraceElements.size()).isTrue();
 	}
 
 	private void assertJobMaintenanceCalledByQuartzThread() {
@@ -154,7 +154,7 @@ public class Batch2JobMaintenanceIT extends BaseJpaR4Test {
 				break;
 			}
 		}
-		assertTrue(found, "Job maintenance should be called by Quartz thread");
+		assertThat(found).as("Job maintenance should be called by Quartz thread").isTrue();
 	}
 
 	@Test

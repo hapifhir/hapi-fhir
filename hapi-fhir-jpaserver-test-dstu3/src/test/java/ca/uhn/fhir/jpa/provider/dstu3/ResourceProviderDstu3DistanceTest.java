@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.util.CoordCalculatorTestUtil;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Location;
@@ -10,7 +11,7 @@ import org.junit.jupiter.api.Test;
 
 import java.net.URLEncoder;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ResourceProviderDstu3DistanceTest extends BaseResourceProviderDstu3Test {
 
@@ -45,7 +46,7 @@ public class ResourceProviderDstu3DistanceTest extends BaseResourceProviderDstu3
 				.returnBundle(Bundle.class)
 				.execute();
 
-			assertEquals(1, actual.getEntry().size());
+			assertThat(actual.getEntry()).hasSize(1);
 			assertEquals(locId.getIdPart(), actual.getEntry().get(0).getResource().getIdElement().getIdPart());
 		}
 		{ // Outside the box
@@ -65,7 +66,7 @@ public class ResourceProviderDstu3DistanceTest extends BaseResourceProviderDstu3
 				.execute();
 			myCaptureQueriesListener.logSelectQueries();
 
-			assertEquals(0, actual.getEntry().size());
+			assertThat(actual.getEntry()).isEmpty();
 		}
 	}
 
@@ -93,7 +94,7 @@ public class ResourceProviderDstu3DistanceTest extends BaseResourceProviderDstu3
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertEquals(1, actual.getEntry().size());
+		assertThat(actual.getEntry()).hasSize(1);
 		assertEquals(prId.getIdPart(), actual.getEntry().get(0).getResource().getIdElement().getIdPart());
 	}
 
@@ -128,7 +129,7 @@ public class ResourceProviderDstu3DistanceTest extends BaseResourceProviderDstu3
 				.execute();
 			myCaptureQueriesListener.logSelectQueries();
 
-			assertEquals(1, actual.getEntry().size());
+			assertThat(actual.getEntry()).hasSize(1);
 			assertEquals(prId.getIdPart(), actual.getEntry().get(0).getResource().getIdElement().getIdPart());
 		}
 
@@ -149,7 +150,7 @@ public class ResourceProviderDstu3DistanceTest extends BaseResourceProviderDstu3
 				.execute();
 			myCaptureQueriesListener.logSelectQueries();
 
-			assertEquals(0, actual.getEntry().size());
+			assertThat(actual.getEntry()).isEmpty();
 		}
 	}
 }

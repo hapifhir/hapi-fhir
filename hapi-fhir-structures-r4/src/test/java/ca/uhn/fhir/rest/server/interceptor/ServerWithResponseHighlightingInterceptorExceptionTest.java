@@ -10,32 +10,20 @@ import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
-import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
-import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.ee10.servlet.ServletHandler;
-import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import java.util.concurrent.TimeUnit;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ServerWithResponseHighlightingInterceptorExceptionTest {
@@ -60,7 +48,7 @@ public class ServerWithResponseHighlightingInterceptorExceptionTest {
 		ourLog.info(responseContent);
 
 		assertEquals(400, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, containsString("<diagnostics value=\"AAABBB\"/>"));
+		assertThat(responseContent).contains("<diagnostics value=\"AAABBB\"/>");
 	}
 
 
@@ -73,7 +61,7 @@ public class ServerWithResponseHighlightingInterceptorExceptionTest {
 		ourLog.info(responseContent);
 
 		assertEquals(500, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, containsString("<diagnostics value=\""+ Msg.code(389) +"Failed to call access method: java.lang.Error: AAABBB\"/>"));
+		assertThat(responseContent).contains("<diagnostics value=\"" + Msg.code(389) + "Failed to call access method: java.lang.Error: AAABBB\"/>");
 	}
 
 	@AfterAll

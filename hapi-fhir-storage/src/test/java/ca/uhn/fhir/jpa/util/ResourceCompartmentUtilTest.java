@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -50,8 +51,8 @@ class ResourceCompartmentUtilTest {
 		Optional<String> oCompartment = ResourceCompartmentUtil.getResourceCompartment(
 			myResource, myCompartmentSearchParams, mySearchParamExtractor);
 
-		assertTrue(oCompartment.isPresent());
-		assertEquals("P01", oCompartment.get());
+		assertThat(oCompartment).isPresent();
+		assertThat(oCompartment).contains("P01");
 	}
 
 	@Test
@@ -61,7 +62,7 @@ class ResourceCompartmentUtilTest {
 
 		List<RuntimeSearchParam> result = ResourceCompartmentUtil.getPatientCompartmentSearchParams(myRuntimeResourceDefinition);
 
-		assertEquals(2, result.size());
+		assertThat(result).hasSize(2);
 	}
 
 	@Nested
@@ -101,8 +102,8 @@ class ResourceCompartmentUtilTest {
 
 			Optional<String> result = ResourceCompartmentUtil.getPatientCompartmentIdentity(myResource, myFhirContext, mySearchParamExtractor);
 
-			assertTrue(result.isPresent());
-			assertEquals("Abc", result.get());
+			assertThat(result).isPresent();
+			assertThat(result).contains("Abc");
 		}
 
 		@Test
@@ -123,8 +124,8 @@ class ResourceCompartmentUtilTest {
 				// execute
 				Optional<String> result = ResourceCompartmentUtil.getPatientCompartmentIdentity(myResource, myFhirContext, mySearchParamExtractor);
 
-				assertTrue(result.isPresent());
-				assertEquals("P01", result.get());
+			assertThat(result).isPresent();
+			assertThat(result).contains("P01");
 //			}
 		}
 	}

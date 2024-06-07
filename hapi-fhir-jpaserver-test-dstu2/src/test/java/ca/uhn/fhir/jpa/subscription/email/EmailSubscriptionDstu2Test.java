@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.subscription.email;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderDstu2Test;
 import ca.uhn.fhir.jpa.subscription.match.deliver.email.EmailSenderImpl;
 import ca.uhn.fhir.jpa.test.util.SubscriptionTestUtil;
@@ -34,9 +36,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import static ca.uhn.fhir.jpa.dao.DaoTestUtils.logAllInterceptors;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class EmailSubscriptionDstu2Test extends BaseResourceProviderDstu2Test {
 
@@ -124,7 +125,7 @@ public class EmailSubscriptionDstu2Test extends BaseResourceProviderDstu2Test {
 		mySubscriptionTestUtil.waitForQueueToDrain();
 		await().until(() -> mySubscriptionRegistry.get(subscription1.getIdElement().getIdPart()), Matchers.not(Matchers.nullValue()));
 		mySubscriptionTestUtil.setEmailSender(subscription1.getIdElement(), new EmailSenderImpl(withMailService()));
-		assertEquals(0, Arrays.asList(ourGreenMail.getReceivedMessages()).size());
+		assertThat(Arrays.asList(ourGreenMail.getReceivedMessages())).isEmpty();
 
 		Observation observation1 = sendObservation(code, "SNOMED-CT");
 

@@ -21,13 +21,11 @@ package ca.uhn.fhir.jpa.entity;
 
 /**
  * @see TermConceptProperty#getType()
- * @see TermConceptProperty#MAX_PROPTYPE_ENUM_LENGTH
  */
 public enum TermConceptPropertyTypeEnum {
-	/*
-	 * VALUES SHOULD BE <= 6 CHARS LONG!
-	 *
-	 * We store this in a DB column of that length
+	/**
+	 * Do not change order - the ordinal is used by hibernate in the column.
+	 * TermConceptProperty#getType()
 	 */
 
 	/**
@@ -37,5 +35,21 @@ public enum TermConceptPropertyTypeEnum {
 	/**
 	 * Coding
 	 */
-	CODING
+	CODING,
+	/**
+	 * Boolean values
+	 */
+	BOOLEAN,
+	/**
+	 * Integer values
+	 */
+	INTEGER,
+	/**
+	 * Decimal or float values.
+	 */
+	DECIMAL,
+	/**
+	 * Date and time values.
+	 */
+	DATETIME
 }

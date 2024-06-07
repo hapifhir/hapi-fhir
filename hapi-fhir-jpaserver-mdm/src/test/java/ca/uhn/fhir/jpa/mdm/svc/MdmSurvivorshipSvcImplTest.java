@@ -42,7 +42,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -187,9 +187,9 @@ public class MdmSurvivorshipSvcImplTest {
 		// verify
 		assertNotNull(goldenPatientRebuilt);
 		// make sure it doesn't match the previous golden resource
-		assertNotEquals(goldenPatient, goldenPatientRebuilt);
-		assertNotEquals(goldenPatient.getName().get(0).getGiven(), goldenPatientRebuilt.getName().get(0).getGiven());
-		assertNotEquals(goldenPatient.getAddress().get(0).getLine().get(0), goldenPatientRebuilt.getAddress().get(0).getLine().get(0));
+		assertThat(goldenPatientRebuilt).isNotEqualTo(goldenPatient);
+		assertThat(goldenPatientRebuilt.getName().get(0).getGiven()).isNotEqualTo(goldenPatient.getName().get(0).getGiven());
+		assertThat(goldenPatientRebuilt.getAddress().get(0).getLine().get(0)).isNotEqualTo(goldenPatient.getAddress().get(0).getLine().get(0));
 		// make sure it's still a golden resource
 		assertTrue(MdmResourceUtil.isGoldenRecord(goldenPatientRebuilt));
 

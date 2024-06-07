@@ -15,7 +15,7 @@ public class BaseHapiSchedulerTest {
 		};
 		try {
 			sched.init();
-			fail();
+			fail("");
 		} catch (SchedulerException e) {
 			assertEquals(Msg.code(1633) + "java.lang.NullPointerException: No instance name supplied", e.getMessage());
 		}

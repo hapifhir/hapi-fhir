@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.batch2;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
@@ -12,7 +13,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class Batch2JobInstanceRepositoryTest extends BaseJpaR4Test {
 
@@ -44,10 +45,10 @@ public class Batch2JobInstanceRepositoryTest extends BaseJpaR4Test {
 		Batch2JobInstanceEntity readBack = runInTransaction(() ->
 			myJobInstanceRepository.findById(jobId).orElseThrow());
 		if (theExpectedSuccessFlag) {
-			assertEquals(1, changeCount, "The change happened");
+			assertThat(changeCount).as("The change happened").isEqualTo(1);
 			assertEquals(theTargetState, readBack.getStatus());
 		} else {
-			assertEquals(0, changeCount, "The change did not happened");
+			assertThat(changeCount).as("The change did not happened").isEqualTo(0);
 			assertEquals(theCurrentState, readBack.getStatus());
 		}
 

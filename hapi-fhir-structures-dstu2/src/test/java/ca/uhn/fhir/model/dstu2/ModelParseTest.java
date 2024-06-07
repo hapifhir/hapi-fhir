@@ -1,7 +1,6 @@
 package ca.uhn.fhir.model.dstu2;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.parser.IParser;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
@@ -12,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ModelParseTest {
@@ -37,7 +37,7 @@ public class ModelParseTest {
 
 		// then
 		List<? extends IBaseCoding> tags = bundleOut.getMeta().getTag();
-		assertEquals(1, tags.size(), "tag is present");
+		assertThat(tags.size()).as("tag is present").isEqualTo(1);
 		IBaseCoding tagOut = tags.get(0);
 		assertEquals("code", tagOut.getCode());
 		assertEquals("display", tagOut.getDisplay());
@@ -65,7 +65,7 @@ public class ModelParseTest {
 
 		// then
 		List<? extends IBaseCoding> labels = bundleOut.getMeta().getSecurity();
-		assertEquals(1, labels.size(), "security is present");
+		assertThat(labels.size()).as("security is present").isEqualTo(1);
 		IBaseCoding codingOut = labels.get(0);
 		assertEquals("code", codingOut.getCode());
 		assertEquals("display", codingOut.getDisplay());

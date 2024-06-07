@@ -16,8 +16,7 @@ import org.springframework.test.context.ContextConfiguration;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @SuppressWarnings("Duplicates")
 @ContextConfiguration(classes = {ResourceProviderOnlySomeResourcesProvidedR4Test.OnlySomeResourcesProvidedCtxConfig.class})
@@ -36,19 +35,16 @@ public class ResourceProviderOnlySomeResourcesProvidedR4Test extends BaseResourc
 			myClient.create().resource(pract).execute();
 		} catch (ResourceNotFoundException e) {
 			String errorMessage = e.getMessage();
-			assertThat(errorMessage, CoreMatchers.allOf(
-				containsString("Unknown resource type 'Practitioner' - Server knows how to handle:"),
-
-				// Error message should contain all resources providers
-				containsString("Patient"),
-				containsString("Practitioner"),
-				containsString("SearchParameter"),
-
-				// Error message should not contain the registered plain providers
-				Matchers.not(containsString("ValueSet")),
-				Matchers.not(containsString("CodeSystem")),
-				Matchers.not(containsString("OperationDefinition"))
-			));
+			assertThat(errorMessage)
+				.satisfies(
+					arg -> assertThat(arg).contains("Unknown resource type 'Practitioner' - Server knows how to handle:"),
+					arg -> assertThat(arg).contains("Patient"),
+					arg -> assertThat(arg).contains("Practitioner"),
+					arg -> assertThat(arg).contains("SearchParameter"),
+					arg -> assertThat(arg).doesNotContain("ValueSet"),
+					arg -> assertThat(arg).doesNotContain("CodeSystem"),
+					arg -> assertThat(arg).doesNotContain("OperationDefinition")
+				);
 		}
 	}
 

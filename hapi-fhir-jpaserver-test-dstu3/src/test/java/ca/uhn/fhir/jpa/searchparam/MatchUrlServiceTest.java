@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.searchparam;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
@@ -19,9 +21,11 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.within;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -61,7 +65,7 @@ public class MatchUrlServiceTest extends BaseJpaTest {
 		QuantityParam nearDistanceParam = map.getNearDistanceParam();
 		assertEquals(1, map.size());
 		assertNotNull(nearDistanceParam);
-		assertEquals(kmDistance, nearDistanceParam.getValue().doubleValue(), 0.0);
+		assertThat(nearDistanceParam.getValue().doubleValue()).isCloseTo(kmDistance, within(0.0));
 	}
 
 	@Test
@@ -75,7 +79,7 @@ public class MatchUrlServiceTest extends BaseJpaTest {
 				ourCtx.getResourceDefinition("Location"));
 			Dstu3DistanceHelper.setNearDistance(Location.class, map);
 
-			fail();
+			fail("");
 		} catch (IllegalArgumentException e) {
 			assertEquals(Msg.code(495) + "Only one " + Location.SP_NEAR_DISTANCE + " parameter may be present", e.getMessage());
 		}
@@ -92,7 +96,7 @@ public class MatchUrlServiceTest extends BaseJpaTest {
 				ourCtx.getResourceDefinition("Location"));
 			Dstu3DistanceHelper.setNearDistance(Location.class, map);
 
-			fail();
+			fail("");
 		} catch (IllegalArgumentException e) {
 			assertEquals(Msg.code(495) + "Only one " + Location.SP_NEAR_DISTANCE + " parameter may be present", e.getMessage());
 		}
