@@ -102,7 +102,6 @@ public class InMemoryResourceMatcherR5Test {
 			.setSystem(OBSERVATION_CODE_SYSTEM).setDisplay(OBSERVATION_CODE_DISPLAY);
 		myObservation.setCode(codeableConcept);
 		mySearchParams = extractSearchParams(myObservation);
-		myStorageSettings.setIndexStorageOptimized(true);
 	}
 
 	@Test

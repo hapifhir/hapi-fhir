@@ -73,17 +73,26 @@ public class IndexStorageOptimizationListener {
 		}
 	}
 
-	private void restoreSearchParams(BaseResourceIndexedSearchParam resourceIndexedSearchParam) {
+	/**
+	 * As <code>SP_NAME, RES_TYPE</code> values could still be used after merge/persist to database (mostly by tests),
+	 * we are restoring them from <code>HASH_IDENTITY</code> value.
+	 * Note that <code>SP_NAME, RES_TYPE</code> values are not recovered if
+	 * {@link ca.uhn.fhir.jpa.model.entity.StorageSettings#isIndexOnContainedResources()} or
+	 * {@link ca.uhn.fhir.jpa.model.entity.StorageSettings#isIndexOnContainedResourcesRecursively()}
+	 * settings are enabled.
+	 */
+	private void restoreSearchParams(BaseResourceIndexedSearchParam theResourceIndexedSearchParam) {
 		// getting ISearchParamRegistry from the application context as it is initialized after EntityListeners
 		ISearchParamRegistry searchParamRegistry = myApplicationContext.getBean(ISearchParamRegistry.class);
 		Optional<IndexedSearchParam> indexedSearchParamOptional =
-				searchParamRegistry.getIndexedSearchParamByHashIdentity(resourceIndexedSearchParam.getHashIdentity());
+			searchParamRegistry.getIndexedSearchParamByHashIdentity(
+				theResourceIndexedSearchParam.getHashIdentity());
 
 		if (indexedSearchParamOptional.isPresent()) {
-			resourceIndexedSearchParam.setResourceType(
-					indexedSearchParamOptional.get().getResourceType());
-			resourceIndexedSearchParam.restoreParamName(
-					indexedSearchParamOptional.get().getParameterName());
+			theResourceIndexedSearchParam.setResourceType(
+				indexedSearchParamOptional.get().getResourceType());
+			theResourceIndexedSearchParam.restoreParamName(
+				indexedSearchParamOptional.get().getParameterName());
 		}
 	}
 }
