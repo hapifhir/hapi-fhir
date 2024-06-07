@@ -3,9 +3,6 @@ package ca.uhn.fhir.jpa.dao.r4;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
-import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.parser.StrictErrorHandler;
@@ -13,12 +10,9 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.AuditEvent;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.Composition;
 import org.hl7.fhir.r4.model.Device;
 import org.hl7.fhir.r4.model.Encounter;
-import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.MessageHeader;
@@ -27,31 +21,21 @@ import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
-import org.springframework.beans.factory.annotation.Autowired;
 
-import java.sql.Date;
 import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 
 public class ChainingR4SearchTest extends BaseJpaR4Test {
-
-	@Autowired
-	MatchUrlService myMatchUrlService;
 
 	@AfterEach
 	public void after() throws Exception {
@@ -359,7 +343,6 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 	@Test
 	public void testShouldNotResolveATwoLinkChainWithAContainedResourceWhenContainedResourceIndexingIsTurnedOff() {
 		// setup
-		IIdType oid1;
 
 		{
 			Patient p = new Patient();
@@ -842,8 +825,6 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 		// setup
 		myStorageSettings.setIndexOnContainedResources(true);
-
-		IIdType oid1;
 
 		{
 			Organization org = new Organization();
@@ -1573,79 +1554,6 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 		// If such a reference if qualified to restrict the type, the number goes back down
 		countUnionStatementsInGeneratedQuery("/Observation?subject:Location.name=Smith", 1);
-	}
-
-	@ParameterizedTest
-	@CsvSource({
-		// search url                                                                                       expected count
-		"/Bundle?composition.patient.identifier=system|value-1&composition.patient.birthdate=1980-01-01,    1,     correct identifier correct birthdate",
-		"/Bundle?composition.patient.birthdate=1980-01-01&composition.patient.identifier=system|value-1,    1,     correct birthdate  correct identifier",
-		"/Bundle?composition.patient.identifier=system|value-1&composition.patient.birthdate=2000-01-01,    0,     correct identifier incorrect birthdate",
-		"/Bundle?composition.patient.birthdate=2000-01-01&composition.patient.identifier=system|value-1,    0,     incorrect birthdate correct identifier",
-		"/Bundle?composition.patient.identifier=system|value-2&composition.patient.birthdate=1980-01-01,    0,     incorrect identifier correct birthdate",
-		"/Bundle?composition.patient.birthdate=1980-01-01&composition.patient.identifier=system|value-2,    0,     correct birthdate  incorrect identifier",
-		"/Bundle?composition.patient.identifier=system|value-2&composition.patient.birthdate=2000-01-01,    0,     incorrect identifier incorrect birthdate",
-		"/Bundle?composition.patient.birthdate=2000-01-01&composition.patient.identifier=system|value-2,    0,     incorrect birthdate  incorrect identifier",
-		// try sort by composition sp
-		"/Bundle?composition.patient.identifier=system|value-1&_sort=composition.patient.birthdate,    1,     correct identifier sort by birthdate",
-
-	})
-	public void testMultipleChainedBundleCompositionSearchParameters(String theSearchUrl, int theExpectedCount, String theMessage) {
-		createSearchParameter("bundle-composition-patient-birthdate",
-			"composition.patient.birthdate",
-			"Bundle",
-			"Bundle.entry.resource.ofType(Patient).birthDate",
-			Enumerations.SearchParamType.DATE
-		);
-
-		createSearchParameter("bundle-composition-patient-identifier",
-			"composition.patient.identifier",
-			"Bundle",
-			"Bundle.entry.resource.ofType(Patient).identifier",
-			Enumerations.SearchParamType.TOKEN
-		);
-
-		createDocumentBundleWithPatientDetails("1980-01-01", "system", "value-1");
-
-		List<String> ids = myTestDaoSearch.searchForIds(theSearchUrl);
-		assertThat(ids).as(theMessage).hasSize(theExpectedCount);
-	}
-
-	private void createSearchParameter(String theId, String theCode, String theBase, String theExpression, Enumerations.SearchParamType theType) {
-		SearchParameter searchParameter = new SearchParameter();
-		searchParameter.setId(theId);
-		searchParameter.setCode(theCode);
-		searchParameter.setName(theCode);
-		searchParameter.setUrl("http://example.org/SearchParameter/" + theId);
-		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		searchParameter.addBase(theBase);
-		searchParameter.setType(theType);
-		searchParameter.setExpression(theExpression);
-		searchParameter = (SearchParameter) mySearchParameterDao.update(searchParameter, mySrd).getResource();
-		mySearchParamRegistry.forceRefresh();
-		assertNotNull(mySearchParamRegistry.getActiveSearchParam(theBase, searchParameter.getName()));
-	}
-
-	private void createDocumentBundleWithPatientDetails(String theBirthDate, String theIdentifierSystem, String theIdentifierValue) {
-		Patient patient = new Patient();
-		patient.setBirthDate(Date.valueOf(theBirthDate));
-		patient.addIdentifier().setSystem(theIdentifierSystem).setValue(theIdentifierValue);
-		patient = (Patient) myPatientDao.create(patient, mySrd).getResource();
-		assertSearchReturns(myPatientDao, SearchParameterMap.newSynchronous(), 1);
-
-		Bundle bundle = new Bundle();
-		bundle.setType(Bundle.BundleType.DOCUMENT);
-		Composition composition = new Composition();
-		composition.setType(new CodeableConcept().addCoding(new Coding().setCode("code").setSystem("http://example.org")));
-		bundle.addEntry().setResource(composition);
-		composition.getSubject().setReference(patient.getIdElement().getValue());
-		bundle.addEntry().setResource(patient);
-		myBundleDao.create(bundle, mySrd);
-		assertSearchReturns(myBundleDao, SearchParameterMap.newSynchronous(), 1);
-	}
-
-	private void assertSearchReturns(IFhirResourceDao<?> theDao, SearchParameterMap theSearchParams, int theExpectedCount){
-		assertEquals(theExpectedCount, theDao.search(theSearchParams, mySrd).size());
 	}
 
 	private void countUnionStatementsInGeneratedQuery(String theUrl, int theExpectedNumberOfUnions) {

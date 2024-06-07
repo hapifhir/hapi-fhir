@@ -127,11 +127,6 @@
 			</exclusions>
 		</dependency>
 
-		<dependency>
-			<groupId>org.apache.poi</groupId>
-			<artifactId>poi</artifactId>
-		</dependency>
-
 		<!-- This is needed for the threaded execution -->
 		<dependency>
 			<groupId>org.springframework.security</groupId>

@@ -133,6 +133,8 @@ import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Extension;
@@ -1162,7 +1164,6 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		int accumulatedBatchesSoFar = 0;
 		for (var next : searchProps.getSearchScroll()) {
 			try (SearchScroll<EntityReference> scroll = next.get()) {
-
 				ourLog.debug(
 						"Beginning batch expansion for {} with max results per batch: {}",
 						(theAdd ? "inclusion" : "exclusion"),
@@ -1397,7 +1398,10 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			return;
 		}
 
-		if (isBlank(theFilter.getValue()) || theFilter.getOp() == null || isBlank(theFilter.getProperty())) {
+		// if filter type is EXISTS, there's no reason to worry about the value (we won't set it anyways)
+		if ((isBlank(theFilter.getValue()) && theFilter.getOp() != ValueSet.FilterOperator.EXISTS)
+				|| theFilter.getOp() == null
+				|| isBlank(theFilter.getProperty())) {
 			throw new InvalidRequestException(
 					Msg.code(891) + "Invalid filter, must have fields populated: property op value");
 		}
@@ -1444,8 +1448,37 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			ValueSet.ConceptSetFilterComponent theFilter) {
 
 		String value = theFilter.getValue();
-		Term term = new Term(CONCEPT_PROPERTY_PREFIX_NAME + theFilter.getProperty(), value);
-		theB.must(theF.match().field(term.field()).matching(term.text()));
+		if (theFilter.getOp() == ValueSet.FilterOperator.EXISTS) {
+			// EXISTS has no value and is thus handled differently
+			Term term = new Term(CONCEPT_PROPERTY_PREFIX_NAME + theFilter.getProperty());
+			theB.must(theF.exists().field(term.field()));
+		} else {
+			Term term = new Term(CONCEPT_PROPERTY_PREFIX_NAME + theFilter.getProperty(), value);
+			switch (theFilter.getOp()) {
+				case EQUAL:
+					theB.must(theF.match().field(term.field()).matching(term.text()));
+					break;
+				case IN:
+				case NOTIN:
+					boolean isNotFilter = theFilter.getOp() == ValueSet.FilterOperator.NOTIN;
+					// IN and NOTIN expect comma separated lists
+					String[] values = term.text().split(",");
+					Set<String> valueSet = new HashSet<>(Arrays.asList(values));
+					if (isNotFilter) {
+						theB.filter(theF.not(theF.terms().field(term.field()).matchingAny(valueSet)));
+					} else {
+						theB.filter(theF.terms().field(term.field()).matchingAny(valueSet));
+					}
+					break;
+				default:
+					/*
+					 * We do not need to handle REGEX, because that's handled in parent
+					 * We also don't handle EXISTS because that's a separate area (with different term)
+					 */
+					throw new InvalidRequestException(Msg.code(2526) + "Unsupported property filter "
+							+ theFilter.getOp().getDisplay());
+			}
+		}
 	}
 
 	private void handleFilterRegex(
@@ -1601,7 +1634,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			SearchPredicateFactory f,
 			BooleanPredicateClausesStep<?> b,
 			ValueSet.ConceptSetFilterComponent theFilter) {
-		TermConcept code = findCodeForFilterCriteria(theSystem, theFilter);
+		TermConcept code = findCodeForFilterCriteriaCodeOrConcept(theSystem, theFilter);
 
 		if (theFilter.getOp() == ValueSet.FilterOperator.ISA) {
 			ourLog.debug(
@@ -1624,7 +1657,8 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	}
 
 	@Nonnull
-	private TermConcept findCodeForFilterCriteria(String theSystem, ValueSet.ConceptSetFilterComponent theFilter) {
+	private TermConcept findCodeForFilterCriteriaCodeOrConcept(
+			String theSystem, ValueSet.ConceptSetFilterComponent theFilter) {
 		return findCode(theSystem, theFilter.getValue())
 				.orElseThrow(() ->
 						new InvalidRequestException(Msg.code(2071) + "Invalid filter criteria - code does not exist: {"
@@ -1869,17 +1903,22 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 
 		for (ValueSet.ConceptSetFilterComponent nextFilter : theInclude.getFilter()) {
 			boolean handled = false;
-			switch (nextFilter.getProperty()) {
+			switch (nextFilter.getProperty().toLowerCase()) {
 				case "concept":
 				case "code":
 					if (nextFilter.getOp() == ValueSet.FilterOperator.ISA) {
 						theValueSetCodeAccumulator.addMessage(
 								"Processing IS-A filter in database - Note that Hibernate Search is not enabled on this server, so this operation can be inefficient.");
-						TermConcept code = findCodeForFilterCriteria(theSystem, nextFilter);
+						TermConcept code = findCodeForFilterCriteriaCodeOrConcept(theSystem, nextFilter);
 						addConceptAndChildren(
 								theValueSetCodeAccumulator, theAddedCodes, theInclude, theSystem, theAdd, code);
 						handled = true;
 					}
+					break;
+				default:
+					// TODO - we need to handle other properties (fields)
+					// and other operations (not just is-a)
+					// in some (preferably generic) way
 					break;
 			}
 
@@ -3311,6 +3350,20 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			if (next.getValue() instanceof StringType) {
 				property.setType(TermConceptPropertyTypeEnum.STRING);
 				property.setValue(next.getValueStringType().getValue());
+			} else if (next.getValue() instanceof BooleanType) {
+				property.setType(TermConceptPropertyTypeEnum.BOOLEAN);
+				property.setValue(((BooleanType) next.getValue()).getValueAsString());
+			} else if (next.getValue() instanceof IntegerType) {
+				property.setType(TermConceptPropertyTypeEnum.INTEGER);
+				property.setValue(((IntegerType) next.getValue()).getValueAsString());
+			} else if (next.getValue() instanceof DecimalType) {
+				property.setType(TermConceptPropertyTypeEnum.DECIMAL);
+				property.setValue(((DecimalType) next.getValue()).getValueAsString());
+			} else if (next.getValue() instanceof DateTimeType) {
+				// DateType is not supported because it's not
+				// supported in CodeSystem.setValue
+				property.setType(TermConceptPropertyTypeEnum.DATETIME);
+				property.setValue(((DateTimeType) next.getValue()).getValueAsString());
 			} else if (next.getValue() instanceof Coding) {
 				Coding nextCoding = next.getValueCoding();
 				property.setType(TermConceptPropertyTypeEnum.CODING);
@@ -3318,7 +3371,6 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 				property.setValue(nextCoding.getCode());
 				property.setDisplay(nextCoding.getDisplay());
 			} else if (next.getValue() != null) {
-				// TODO: LOINC has properties of type BOOLEAN that we should handle
 				ourLog.warn("Don't know how to handle properties of type: "
 						+ next.getValue().getClass());
 				continue;
