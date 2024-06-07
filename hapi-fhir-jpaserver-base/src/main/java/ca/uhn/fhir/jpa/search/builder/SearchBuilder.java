@@ -1682,19 +1682,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		return targetResourceTypes;
 	}
 
-	// FIXME: remove
-	private Pair<String, Map<String, Object>> buildCanonicalUrlQueryReverse_(Set<String> theTargetResourceTypes) {
-		Map<String, Object> canonicalUriQueryParams = new HashMap<>();
-
-		StringBuilder b = new StringBuilder();
-		b.append("SELECT r.src_resource_id ");
-		b.append("FROM hfj_res_link r ");
-		b.append("JOIN ");
-		b.append("WHERE r.target_resource_id IS NULL ");
-
-		return Pair.of(b.toString(), canonicalUriQueryParams);
-	}
-
 	// FIXE: remove redundant column
 	@Nonnull
 	private Pair<String, Map<String, Object>> buildCanonicalUrlQuery(

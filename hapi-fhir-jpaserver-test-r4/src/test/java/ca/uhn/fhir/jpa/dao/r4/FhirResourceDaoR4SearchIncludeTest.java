@@ -82,6 +82,12 @@ public class FhirResourceDaoR4SearchIncludeTest extends BaseJpaR4Test {
 //		"QuestionnaireResponse/qr2  , true,       true", // Not yet supported
 	})
 	public void testIncludeCanonicalReference(String theQuestionnaireRespId, boolean theReverse, boolean theMatchAll) {
+		Questionnaire qWrongVersion = new Questionnaire();
+		qWrongVersion.setId("qWrongVersion");
+		qWrongVersion.setUrl("http://foo");
+		qWrongVersion.setVersion("99.0");
+		myQuestionnaireDao.update(qWrongVersion, mySrd);
+
 		Questionnaire q = new Questionnaire();
 		q.setId("q");
 		q.setUrl("http://foo");
@@ -103,7 +109,20 @@ public class FhirResourceDaoR4SearchIncludeTest extends BaseJpaR4Test {
 		logAllUriIndexes();
 		logAllResourceLinks();
 
-		IBundleProvider outcome;
+		// Create a QR and Q that have other URLs and shouldn't be turned up in searches here
+		Questionnaire qIrrelevant = new Questionnaire();
+		qIrrelevant.setId("qIrrelevant");
+		qIrrelevant.setUrl("http://fooIrrelevant");
+		qIrrelevant.setVersion("1.0");
+		myQuestionnaireDao.update(qIrrelevant, mySrd);
+
+		QuestionnaireResponse qrIrrelevant = new QuestionnaireResponse();
+		qrIrrelevant.setId("qrIrrelevant");
+		qrIrrelevant.setQuestionnaire("http://fooIrrelevant");
+		myQuestionnaireResponseDao.update(qrIrrelevant, mySrd);
+
+
+			IBundleProvider outcome;
 		IFhirResourceDao<?> dao;
 		SearchParameterMap map;
 		String expectWarning = null;
@@ -138,9 +157,16 @@ public class FhirResourceDaoR4SearchIncludeTest extends BaseJpaR4Test {
 		outcome = dao.search(map, mySrd);
 		List<String> outcomeValues = toUnqualifiedVersionlessIdValues(outcome);
 		myCaptureQueriesListener.logSelectQueries();
-		assertThat(outcomeValues).as(outcomeValues.toString()).containsExactlyInAnyOrder(
-			theQuestionnaireRespId, "Questionnaire/q"
-		);
+
+		if (theReverse) {
+			assertThat(outcomeValues).as(outcomeValues.toString()).containsExactlyInAnyOrder(
+				theQuestionnaireRespId, "Questionnaire/q"
+			);
+		} else {
+			assertThat(outcomeValues).as(outcomeValues.toString()).containsExactlyInAnyOrder(
+				theQuestionnaireRespId, "Questionnaire/q", "Questionnaire/qWrongVersion"
+			);
+		}
 
 		if (expectWarning == null) {
 			verify(myAnonymousInterceptor, never()).invoke(eq(Pointcut.JPA_PERFTRACE_WARNING), myParamsCaptor.capture());
