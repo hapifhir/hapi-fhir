@@ -1,7 +1,11 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.search.PersistedJpaSearchFirstPageBundleProvider;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
@@ -10,12 +14,9 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
-import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
-import org.hamcrest.Matcher;
-import org.hamcrest.Matchers;
-import org.hamcrest.collection.IsIterableContainingInAnyOrder;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BodyStructure;
 import org.hl7.fhir.r4.model.CarePlan;
@@ -31,56 +32,63 @@ import org.hl7.fhir.r4.model.SearchParameter;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Mock;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import javax.xml.namespace.QName;
 import java.sql.Date;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 
 @SuppressWarnings({"unchecked", "Duplicates"})
 public class FhirResourceDaoR4SearchIncludeTest extends BaseJpaR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4SearchIncludeTest.class);
 
+	@Mock
+	private IAnonymousInterceptor myAnonymousInterceptor;
+	@Captor
+	private ArgumentCaptor<HookParams> myParamsCaptor;
+
 	@AfterEach
 	public void afterEach() {
 		myStorageSettings.setMaximumIncludesToLoadPerPage(JpaStorageSettings.DEFAULT_MAXIMUM_INCLUDES_TO_LOAD_PER_PAGE);
+		myInterceptorRegistry.unregisterInterceptor(myAnonymousInterceptor);
 	}
 
 	@ParameterizedTest
-	@ValueSource(strings = {
-		"QuestionnaireResponse/qr", 		"QuestionnaireResponse/qr2"
+	@CsvSource({
+		// theQuestionnaireRespId,    theReverse, theMatchAll
+		"QuestionnaireResponse/qr   , false,      false",
+		"QuestionnaireResponse/qr2  , false,      false",
+		"QuestionnaireResponse/qr   , true,       false",
+		"QuestionnaireResponse/qr2  , true,       false",
+		"QuestionnaireResponse/qr   , false,      true",
+		"QuestionnaireResponse/qr2  , false,      true",
+//		"QuestionnaireResponse/qr   , true,       true", // Not yet supported
+//		"QuestionnaireResponse/qr2  , true,       true", // Not yet supported
 	})
-	public void testIncludeCanonicalReference(String theQuestionnaireId) {
-
-//		SearchParameter sp = new SearchParameter();
-//		sp.setId("QuestionnaireResponse-questionnaire");
-//		sp.setCode("questionnaire");
-//		sp.addBase("QuestionnaireResponse");
-//		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
-//		sp.setType(Enumerations.SearchParamType.REFERENCE);
-//		sp.setExpression("QuestionnaireResponse.questionnaire.replaceMatches('[|].*', '') | QuestionnaireResponse.questionnaire");
-//		sp.addTarget("Questionnaire");
-//		mySearchParameterDao.update(sp, mySrd);
-//		mySearchParamRegistry.forceRefresh();
-
+	public void testIncludeCanonicalReference(String theQuestionnaireRespId, boolean theReverse, boolean theMatchAll) {
 		Questionnaire q = new Questionnaire();
 		q.setId("q");
 		q.setUrl("http://foo");
 		q.setVersion("1.0");
 		myQuestionnaireDao.update(q, mySrd);
 
-		if (theQuestionnaireId.equals("QuestionnaireResponse/qr")) {
+		if (theQuestionnaireRespId.equals("QuestionnaireResponse/qr")) {
 			QuestionnaireResponse qr = new QuestionnaireResponse();
 			qr.setId("qr");
 			qr.setQuestionnaire("http://foo");
@@ -92,16 +100,55 @@ public class FhirResourceDaoR4SearchIncludeTest extends BaseJpaR4Test {
 			myQuestionnaireResponseDao.update(qr2, mySrd);
 		}
 
+		logAllUriIndexes();
 		logAllResourceLinks();
 
-		SearchParameterMap map = new SearchParameterMap();
-		map.add("_id", new ReferenceParam(theQuestionnaireId));
-		map.addInclude(QuestionnaireResponse.INCLUDE_QUESTIONNAIRE);
-		IBundleProvider outcome = myQuestionnaireResponseDao.search(map, mySrd);
+		IBundleProvider outcome;
+		IFhirResourceDao<?> dao;
+		SearchParameterMap map;
+		String expectWarning = null;
+		if (theReverse) {
+			map = new SearchParameterMap();
+			map.add("_id", new TokenParam("Questionnaire/q"));
+			if (theMatchAll) {
+				map.addRevInclude(IBaseResource.INCLUDE_ALL);
+			} else {
+				map.addRevInclude(QuestionnaireResponse.INCLUDE_QUESTIONNAIRE);
+			}
+			dao = myQuestionnaireDao;
+		} else {
+			map = new SearchParameterMap();
+			map.add("_id", new TokenParam(theQuestionnaireRespId));
+			if (theMatchAll) {
+				map.addInclude(IBaseResource.INCLUDE_ALL);
+			} else {
+				map.addInclude(QuestionnaireResponse.INCLUDE_QUESTIONNAIRE);
+			}
+			dao = myQuestionnaireResponseDao;
+		}
+
+		if (theMatchAll) {
+			expectWarning = "Search with _include=* can be inefficient";
+		}
+
+		myCaptureQueriesListener.clear();
+		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.JPA_PERFTRACE_WARNING, myAnonymousInterceptor);
+
+		map.setLoadSynchronous(true);
+		outcome = dao.search(map, mySrd);
 		List<String> outcomeValues = toUnqualifiedVersionlessIdValues(outcome);
-		assertThat(outcomeValues).as(outcomeValues.toString()).containsExactly(
-			theQuestionnaireId, "Questionnaire/q"
+		myCaptureQueriesListener.logSelectQueries();
+		assertThat(outcomeValues).as(outcomeValues.toString()).containsExactlyInAnyOrder(
+			theQuestionnaireRespId, "Questionnaire/q"
 		);
+
+		if (expectWarning == null) {
+			verify(myAnonymousInterceptor, never()).invoke(eq(Pointcut.JPA_PERFTRACE_WARNING), myParamsCaptor.capture());
+		} else {
+			verify(myAnonymousInterceptor, times(1)).invoke(eq(Pointcut.JPA_PERFTRACE_WARNING), myParamsCaptor.capture());
+			HookParams params = myParamsCaptor.getValue();
+			assertThat(params.get(StorageProcessingMessage.class).getMessage()).contains(expectWarning);
+		}
 
 	}
 
