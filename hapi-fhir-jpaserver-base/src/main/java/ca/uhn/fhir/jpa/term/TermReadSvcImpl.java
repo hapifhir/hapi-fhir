@@ -1452,6 +1452,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		} else {
 			Term term = new Term(CONCEPT_PROPERTY_PREFIX_NAME + theFilter.getProperty(), value);
 			switch (theFilter.getOp()) {
+				case ISA:
 				case EQUAL:
 					theB.must(theF.match().field(term.field()).matching(term.text()));
 					break;
