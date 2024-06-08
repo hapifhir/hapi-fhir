@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 5993
+title: "Corrected a regression in valueset expansion. If a valueset with a non-standard `property` in the filter used the `is-a` operation, the caller would receive `HAPI-2526`. This has been corrected."
+
+
