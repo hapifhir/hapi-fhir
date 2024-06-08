@@ -1,13 +1,14 @@
 package ca.uhn.fhir.jpa.term;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
@@ -19,6 +20,8 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
+import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.jpa.util.ValueSetTestUtil;
@@ -26,6 +29,7 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.collect.Lists;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -46,7 +50,6 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import jakarta.annotation.Nonnull;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
@@ -54,17 +57,17 @@ import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.util.HapiExtensions.EXT_VALUESET_EXPANSION_MESSAGE;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
-import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 
-public class ValueSetExpansionR4Test extends BaseTermR4Test {
+public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSetExpansionIT {
 	private static final Logger ourLog = LoggerFactory.getLogger(ValueSetExpansionR4Test.class);
 
 	private final ValueSetTestUtil myValueSetTestUtil = new ValueSetTestUtil(FhirVersionEnum.R4);
@@ -72,6 +75,31 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 	@AfterEach
 	public void afterEach() {
 		SearchBuilder.setMaxPageSize50ForTest(false);
+	}
+
+	@Override
+	public ITermDeferredStorageSvc getTerminologyDefferedStorageService() {
+		return myTerminologyDeferredStorageSvc;
+	}
+
+	@Override
+	public ITermReadSvc getTerminologyReadSvc() {
+		return myTermSvc;
+	}
+
+	@Override
+	public DaoRegistry getDaoRegistry() {
+		return myDaoRegistry;
+	}
+
+	@Override
+	public IFhirResourceDaoValueSet<ValueSet> getValueSetDao() {
+		return myValueSetDao;
+	}
+
+	@Override
+	public JpaStorageSettings getJpaStorageSettings() {
+		return myStorageSettings;
 	}
 
 	@Test
@@ -381,6 +409,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 	public void create100ConceptsCodeSystemAndValueSet() {
 		createConceptsCodeSystemAndValueSet(100);
 	}
+
 
 	public IIdType createConceptsCodeSystemAndValueSet(int theCount) {
 		CodeSystem cs = new CodeSystem();
@@ -2054,6 +2083,5 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		assertThat(outcome.getMessage()).contains("Code validation occurred using a ValueSet expansion that was pre-calculated");
 
 	}
-
 
 }
