@@ -1494,13 +1494,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			}
 
 			// Case 2:
-			Pair<String, Map<String, Object>> canonicalQuery;
-			// FIXME: restore
-//						if (reverseMode) {
-//							canonicalQuery = buildCanonicalUrlQueryReverse(targetResourceTypes);
-//						} else {
-				canonicalQuery = buildCanonicalUrlQuery(findVersionFieldName, searchPidFieldSqlColumn, targetResourceTypes, reverseMode);
-//						}
+			Pair<String, Map<String, Object>> canonicalQuery = buildCanonicalUrlQuery(findVersionFieldName, searchPidFieldSqlColumn, targetResourceTypes, reverseMode);
 
 			String sql = localReferenceQuery + " UNION " + canonicalQuery.getLeft();
 

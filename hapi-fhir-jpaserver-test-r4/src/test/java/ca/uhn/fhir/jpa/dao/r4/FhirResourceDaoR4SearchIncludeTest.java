@@ -122,7 +122,7 @@ public class FhirResourceDaoR4SearchIncludeTest extends BaseJpaR4Test {
 		myQuestionnaireResponseDao.update(qrIrrelevant, mySrd);
 
 
-			IBundleProvider outcome;
+		IBundleProvider outcome;
 		IFhirResourceDao<?> dao;
 		SearchParameterMap map;
 		String expectWarning = null;
