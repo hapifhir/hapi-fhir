@@ -2161,7 +2161,8 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 						}
 
 						if (parsed.isAbsolute()) {
-							String refValue = fakeReference.getReferenceElement().getValue();
+							String refValue =
+									fakeReference.getReferenceElement().getValue();
 							if (refValue.contains("|")) {
 								fakeReference.setReference(refValue.substring(0, refValue.indexOf('|')));
 							}

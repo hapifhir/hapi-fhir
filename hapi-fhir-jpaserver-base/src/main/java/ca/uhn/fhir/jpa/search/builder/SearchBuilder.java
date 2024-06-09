@@ -1356,9 +1356,32 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				}
 
 				if (matchAll) {
-					loadIncludesMatchAll(findPidFieldName, findResourceTypeFieldName, findVersionFieldName, searchPidFieldName, wantResourceType, reverseMode, hasDesiredResourceTypes, nextRoundMatches, entityManager, maxCount, desiredResourceTypes, pidsToInclude, request);
+					loadIncludesMatchAll(
+							findPidFieldName,
+							findResourceTypeFieldName,
+							findVersionFieldName,
+							searchPidFieldName,
+							wantResourceType,
+							reverseMode,
+							hasDesiredResourceTypes,
+							nextRoundMatches,
+							entityManager,
+							maxCount,
+							desiredResourceTypes,
+							pidsToInclude,
+							request);
 				} else {
-					loadIncludesMatchSpecific(nextInclude, fhirContext, findPidFieldName, findVersionFieldName, searchPidFieldName, reverseMode, nextRoundMatches, entityManager, maxCount, pidsToInclude);
+					loadIncludesMatchSpecific(
+							nextInclude,
+							fhirContext,
+							findPidFieldName,
+							findVersionFieldName,
+							searchPidFieldName,
+							reverseMode,
+							nextRoundMatches,
+							entityManager,
+							maxCount,
+							pidsToInclude);
 				}
 			}
 
@@ -1422,7 +1445,17 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		return allAdded;
 	}
 
-	private void loadIncludesMatchSpecific(Include nextInclude, FhirContext fhirContext, String findPidFieldName, String findVersionFieldName, String searchPidFieldName, boolean reverseMode, List<JpaPid> nextRoundMatches, EntityManager entityManager, Integer maxCount, HashSet<JpaPid> pidsToInclude) {
+	private void loadIncludesMatchSpecific(
+			Include nextInclude,
+			FhirContext fhirContext,
+			String findPidFieldName,
+			String findVersionFieldName,
+			String searchPidFieldName,
+			boolean reverseMode,
+			List<JpaPid> nextRoundMatches,
+			EntityManager entityManager,
+			Integer maxCount,
+			HashSet<JpaPid> pidsToInclude) {
 		List<String> paths;
 
 		// Start replace
@@ -1454,9 +1487,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		Set<String> targetResourceTypes = computeTargetResourceTypes(nextInclude, param);
 
 		for (String nextPath : paths) {
-			String findPidFieldSqlColumn = findPidFieldName.equals(MY_SOURCE_RESOURCE_PID)
-					? "src_resource_id"
-					: "target_resource_id";
+			String findPidFieldSqlColumn =
+					findPidFieldName.equals(MY_SOURCE_RESOURCE_PID) ? "src_resource_id" : "target_resource_id";
 			String fieldsToLoad = "r." + findPidFieldSqlColumn + " AS " + RESOURCE_ID_ALIAS;
 			if (findVersionFieldName != null) {
 				fieldsToLoad += ", r.target_resource_version AS " + RESOURCE_VERSION_ALIAS;
@@ -1470,15 +1502,13 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			// Case 1:
 			Map<String, Object> localReferenceQueryParams = new HashMap<>();
 
-			String searchPidFieldSqlColumn = searchPidFieldName.equals(MY_TARGET_RESOURCE_PID)
-					? "target_resource_id"
-					: "src_resource_id";
-			StringBuilder localReferenceQuery =
-					new StringBuilder("SELECT " + fieldsToLoad + " FROM hfj_res_link r "
-							+ " WHERE r.src_path = :src_path AND "
-							+ " r.target_resource_id IS NOT NULL AND "
-							+ " r."
-							+ searchPidFieldSqlColumn + " IN (:target_pids) ");
+			String searchPidFieldSqlColumn =
+					searchPidFieldName.equals(MY_TARGET_RESOURCE_PID) ? "target_resource_id" : "src_resource_id";
+			StringBuilder localReferenceQuery = new StringBuilder("SELECT " + fieldsToLoad + " FROM hfj_res_link r "
+					+ " WHERE r.src_path = :src_path AND "
+					+ " r.target_resource_id IS NOT NULL AND "
+					+ " r."
+					+ searchPidFieldSqlColumn + " IN (:target_pids) ");
 			localReferenceQueryParams.put("src_path", nextPath);
 			// we loop over target_pids later.
 			if (targetResourceTypes != null) {
@@ -1494,7 +1524,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			}
 
 			// Case 2:
-			Pair<String, Map<String, Object>> canonicalQuery = buildCanonicalUrlQuery(findVersionFieldName, searchPidFieldSqlColumn, targetResourceTypes, reverseMode);
+			Pair<String, Map<String, Object>> canonicalQuery =
+					buildCanonicalUrlQuery(findVersionFieldName, targetResourceTypes, reverseMode);
 
 			String sql = localReferenceQuery + " UNION " + canonicalQuery.getLeft();
 
@@ -1512,12 +1543,11 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				List<Tuple> results = q.getResultList();
 				for (Tuple result : results) {
 					if (result != null) {
-						Long resourceId =
-								NumberUtils.createLong(String.valueOf(result.get(RESOURCE_ID_ALIAS)));
+						Long resourceId = NumberUtils.createLong(String.valueOf(result.get(RESOURCE_ID_ALIAS)));
 						Long resourceVersion = null;
 						if (findVersionFieldName != null && result.get(RESOURCE_VERSION_ALIAS) != null) {
-							resourceVersion = NumberUtils.createLong(
-									String.valueOf(result.get(RESOURCE_VERSION_ALIAS)));
+							resourceVersion =
+									NumberUtils.createLong(String.valueOf(result.get(RESOURCE_VERSION_ALIAS)));
 						}
 						pidsToInclude.add(JpaPid.fromIdAndVersion(resourceId, resourceVersion));
 					}
@@ -1526,7 +1556,20 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		}
 	}
 
-	private void loadIncludesMatchAll(String findPidFieldName, String findResourceTypeFieldName, String findVersionFieldName, String searchPidFieldName, String wantResourceType, boolean reverseMode, boolean hasDesiredResourceTypes, List<JpaPid> nextRoundMatches, EntityManager entityManager, Integer maxCount, List<String> desiredResourceTypes, HashSet<JpaPid> pidsToInclude, RequestDetails request) {
+	private void loadIncludesMatchAll(
+			String findPidFieldName,
+			String findResourceTypeFieldName,
+			String findVersionFieldName,
+			String searchPidFieldName,
+			String wantResourceType,
+			boolean reverseMode,
+			boolean hasDesiredResourceTypes,
+			List<JpaPid> nextRoundMatches,
+			EntityManager entityManager,
+			Integer maxCount,
+			List<String> desiredResourceTypes,
+			HashSet<JpaPid> pidsToInclude,
+			RequestDetails request) {
 		StringBuilder sqlBuilder = new StringBuilder();
 		sqlBuilder.append("SELECT r.").append(findPidFieldName);
 		sqlBuilder.append(", r.").append(findResourceTypeFieldName);
@@ -1554,8 +1597,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		 * because for an include, it doesn't really make sense to include a different
 		 * resource type than the one you are searching on.
 		 */
-		if (wantResourceType != null
-				&& (reverseMode || (myParams != null && myParams.getEverythingMode() != null))) {
+		if (wantResourceType != null && (reverseMode || (myParams != null && myParams.getEverythingMode() != null))) {
 			// because mySourceResourceType is not part of the HFJ_RES_LINK
 			// index, this might not be the most optimal performance.
 			// but it is for an $everything operation (and maybe we should update the index)
@@ -1609,8 +1651,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				}
 
 				if (resourceId != null) {
-					JpaPid pid =
-							JpaPid.fromIdAndVersionAndResourceType(resourceId, version, resourceType);
+					JpaPid pid = JpaPid.fromIdAndVersionAndResourceType(resourceId, version, resourceType);
 					pidsToInclude.add(pid);
 				} else if (resourceCanonicalUrl != null) {
 					if (canonicalUrls == null) {
@@ -1621,17 +1662,20 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			}
 
 			if (canonicalUrls != null) {
-				String message = "Search with _include=* can be inefficient when references using canonical URLs are detected. Use more specific _include values instead.";
+				String message =
+						"Search with _include=* can be inefficient when references using canonical URLs are detected. Use more specific _include values instead.";
 				firePerformanceWarning(request, message);
 				loadCanonicalUrls(canonicalUrls, entityManager, pidsToInclude);
 			}
 		}
 	}
 
-	private void loadCanonicalUrls(Set<String> theCanonicalUrls, EntityManager theEntityManager, HashSet<JpaPid> thePidsToInclude) {
+	private void loadCanonicalUrls(
+			Set<String> theCanonicalUrls, EntityManager theEntityManager, HashSet<JpaPid> thePidsToInclude) {
 		StringBuilder sqlBuilder;
 		Set<Long> identityHashesForTypes = calculateIndexUriIdentityHashesForResourceTypes(null);
-		List<Collection<String>> canonicalUrlPartitions = partition(theCanonicalUrls, getMaximumPageSize() - identityHashesForTypes.size());
+		List<Collection<String>> canonicalUrlPartitions =
+				partition(theCanonicalUrls, getMaximumPageSize() - identityHashesForTypes.size());
 
 		sqlBuilder = new StringBuilder();
 		sqlBuilder.append("SELECT i.myResourcePid ");
@@ -1684,10 +1728,9 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		return targetResourceTypes;
 	}
 
-	// FIXE: remove redundant column
 	@Nonnull
 	private Pair<String, Map<String, Object>> buildCanonicalUrlQuery(
-			String theVersionFieldName, String thePidFieldSqlColumn, Set<String> theTargetResourceTypes, boolean theReverse) {
+			String theVersionFieldName, Set<String> theTargetResourceTypes, boolean theReverse) {
 		String fieldsToLoadFromSpidxUriTable = theReverse ? "r.src_resource_id" : "rUri.res_id";
 		if (theVersionFieldName != null) {
 			// canonical-uri references aren't versioned, but we need to match the column count for the UNION
