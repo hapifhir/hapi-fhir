@@ -11,23 +11,33 @@ import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.mockito.ArgumentCaptor;
+import org.slf4j.LoggerFactory;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 public interface IValueSetExpansionIT {
 	static final String CODE_SYSTEM_CODE = "PRODUCT-MULTI-SOURCE";
@@ -202,6 +212,67 @@ public interface IValueSetExpansionIT {
 					.anyMatch(c -> c.getCode().equals(CODE_SYSTEM_CODE)));
 		} finally {
 			getJpaStorageSettings().setPreExpandValueSets(preExpand);
+		}
+	}
+
+	/**
+	 * We exclude filters we do support (tested in this class),
+	 * as well as NULL (which isn't a "real" filter),
+	 * and REGEX (tested elsewhere).
+	 */
+	@ParameterizedTest
+	@EnumSource(
+		value = ValueSet.FilterOperator.class,
+		mode = EnumSource.Mode.EXCLUDE,
+		names = {"EQUAL", "EXISTS", "IN", "NOTIN", "REGEX", "NULL"})
+	default void expandValueSet_withUnsupportedFilters_doesNotThrow(ValueSet.FilterOperator theOperator) {
+		// setup
+		IParser parser = getFhirContext().newJsonParser();
+		Logger logger = (Logger) LoggerFactory.getLogger(TermReadSvcImpl.class);
+		ListAppender<ILoggingEvent> listAppender = mock(ListAppender.class);
+
+		// setup CodeSystem
+		// one really isn't necessary for this test, but we'll include it for completeness
+		CodeSystem codeSystem = parser.parseResource(CodeSystem.class, CODE_SYSTEM_STR_BASE);
+
+		// setup valueset
+		ValueSet valueSet = parser.parseResource(ValueSet.class, VALUE_SET_STR_BASE);
+		ValueSet.ConceptSetComponent conceptSetComponent =
+			valueSet.getCompose().getInclude().get(0);
+		ValueSet.ConceptSetFilterComponent filterComponent = new ValueSet.ConceptSetFilterComponent();
+		filterComponent.setProperty(PROPERTY_NAME);
+		filterComponent.setOp(theOperator);
+		filterComponent.setValue("anything");
+		conceptSetComponent.setFilter(List.of(filterComponent));
+
+		// test
+		boolean preExpand = getJpaStorageSettings().isPreExpandValueSets();
+		Level logLevel = logger.getLevel();
+
+		getJpaStorageSettings().setPreExpandValueSets(true);
+		logger.setLevel(Level.ERROR);
+		logger.addAppender(listAppender);
+		try {
+			ValueSet expanded = createCodeSystemAndValueSetAndReturnExpandedValueSet(codeSystem, valueSet);
+
+			assertNotNull(expanded);
+			assertNotNull(expanded.getExpansion());
+			assertTrue(expanded.getExpansion().getContains().isEmpty());
+
+			ArgumentCaptor<ILoggingEvent> loggingEventArgumentCaptor = ArgumentCaptor.forClass(ILoggingEvent.class);
+			verify(listAppender)
+				.doAppend(loggingEventArgumentCaptor.capture());
+			List<ILoggingEvent> errors = loggingEventArgumentCaptor.getAllValues()
+				.stream().filter(e -> e.getLevel() == Level.ERROR)
+				.toList();
+			assertFalse(errors.isEmpty());
+			ILoggingEvent first = errors.get(0);
+			assertTrue(first.getFormattedMessage().contains("Unsupported property filter"));
+			assertTrue(first.getFormattedMessage().contains(theOperator.getDisplay()));
+		} finally {
+			getJpaStorageSettings().setPreExpandValueSets(preExpand);
+			logger.setLevel(logLevel);
+			logger.detachAppender(listAppender);
 		}
 	}
 
