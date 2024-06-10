@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -12,7 +13,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ListR4Test extends BaseResourceProviderR4Test {
 
@@ -45,7 +46,7 @@ public class ListR4Test extends BaseResourceProviderR4Test {
 			.whereMap(Collections.singletonMap("_list", Collections.singletonList(list.getIdPart())))
 			.execute();
 
-		assertEquals(1, results.getEntry().size());
+		assertThat(results.getEntry()).hasSize(1);
 		assertEquals(orgInList.toUnqualifiedVersionless().getValue(), results.getEntryFirstRep().getResource().getIdElement().toUnqualifiedVersionless().getValue());
 	}
 
@@ -57,7 +58,7 @@ public class ListR4Test extends BaseResourceProviderR4Test {
 			.and(Organization.IDENTIFIER.hasSystemWithAnyCode(identifierSystem))
 			.execute();
 
-		assertEquals(1, results.getEntry().size());
+		assertThat(results.getEntry()).hasSize(1);
 		assertEquals(orgInList.toUnqualifiedVersionless().getValue(), results.getEntryFirstRep().getResource().getIdElement().toUnqualifiedVersionless().getValue());
 	}
 
@@ -68,7 +69,7 @@ public class ListR4Test extends BaseResourceProviderR4Test {
 			.whereMap(Collections.singletonMap("_list", Collections.singletonList(list.getIdPart())))
 			.execute();
 
-		assertEquals(1, results.getEntry().size());
+		assertThat(results.getEntry()).hasSize(1);
 		assertEquals(practitionerInList.toUnqualifiedVersionless().getValue(), results.getEntryFirstRep().getResource().getIdElement().toUnqualifiedVersionless().getValue());
 	}
 }

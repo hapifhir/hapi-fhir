@@ -39,10 +39,10 @@ import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.hasSize;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
+
 
 public class FhirResourceDaoR4ConcurrentCreateTest extends BaseJpaR4Test {
 
@@ -75,7 +75,7 @@ public class FhirResourceDaoR4ConcurrentCreateTest extends BaseJpaR4Test {
 		myResource = buildResourceAndCreateCallable();
 
 		List<ResourceSearchUrlEntity> all = myResourceSearchUrlDao.findAll();
-		assertThat(all, hasSize(0));
+		assertThat(all).hasSize(0);
 	}
 
 	@AfterEach
@@ -115,9 +115,9 @@ public class FhirResourceDaoR4ConcurrentCreateTest extends BaseJpaR4Test {
 		List<String> errorList = myResourceConcurrentSubmitterSvc.waitForThreadsCompletionAndReturnErrors();
 
 		// then
-		assertThat(errorList, hasSize(0));
+		assertThat(errorList).hasSize(0);
 		// red-green before the fix, the size was 'numberOfThreadsAttemptingToCreateDuplicates'
-		assertThat(myResourceTableDao.findAll(), hasSize(expectedResourceCount));
+		assertThat(myResourceTableDao.findAll()).hasSize(expectedResourceCount);
 
 	}
 
@@ -146,7 +146,7 @@ public class FhirResourceDaoR4ConcurrentCreateTest extends BaseJpaR4Test {
 
 		// then
 		List<Long> resourcesPids = getStoredResourceSearchUrlEntitiesPids();
-		assertThat(resourcesPids, containsInAnyOrder(resTable3.getResourceId(), resTable4.getResourceId()));
+		assertThat(resourcesPids).containsExactlyInAnyOrder(resTable3.getResourceId(), resTable4.getResourceId());
 	}
 
 	@Test
@@ -175,7 +175,7 @@ public class FhirResourceDaoR4ConcurrentCreateTest extends BaseJpaR4Test {
 
 		// then
 		List<Long> resourcesPids = getStoredResourceSearchUrlEntitiesPids();
-		assertThat(resourcesPids, containsInAnyOrder(resTable2.getResourceId()));
+		assertThat(resourcesPids).containsExactlyInAnyOrder(resTable2.getResourceId());
 
 	}
 

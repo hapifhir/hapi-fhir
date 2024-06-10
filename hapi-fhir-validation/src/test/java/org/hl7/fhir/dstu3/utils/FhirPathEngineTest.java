@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -36,7 +37,7 @@ public class FhirPathEngineTest extends BaseValidationTestWithInlineMocks {
 		obs.setValue(new StringType("FOO"));
 
 		List<Base> value = ourEngine.evaluate(obs, "Observation.value.as(String)");
-		assertEquals(1, value.size());
+		assertThat(value).hasSize(1);
 		assertEquals("FOO", ((StringType) value.get(0)).getValue());
 	}
 
@@ -53,7 +54,7 @@ public class FhirPathEngineTest extends BaseValidationTestWithInlineMocks {
 		o.setSpecimen(new Reference("#FOO"));
 
 		List<Base> value = ourEngine.evaluate(o, "Observation.specimen.resolve().receivedTime");
-		assertEquals(1, value.size());
+		assertThat(value).hasSize(1);
 		assertEquals("2011-01-01", ((DateTimeType) value.get(0)).getValueAsString());
 	}
 

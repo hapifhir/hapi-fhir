@@ -78,7 +78,7 @@ public interface IBatch2WorkChunkRepository
 
 	@Modifying
 	@Query(
-			"UPDATE Batch2WorkChunkEntity e SET e.myStatus = :status, e.myNextPollTime = :nextPollTime, e.myPollAttempts = e.myPollAttempts + 1 WHERE e.myId = :id AND e.myStatus IN(:states)")
+			"UPDATE Batch2WorkChunkEntity e SET e.myStatus = :status, e.myNextPollTime = :nextPollTime, e.myPollAttempts = COALESCE(e.myPollAttempts, 0) + 1 WHERE e.myId = :id AND e.myStatus IN(:states)")
 	int updateWorkChunkNextPollTime(
 			@Param("id") String theChunkId,
 			@Param("status") WorkChunkStatusEnum theStatus,

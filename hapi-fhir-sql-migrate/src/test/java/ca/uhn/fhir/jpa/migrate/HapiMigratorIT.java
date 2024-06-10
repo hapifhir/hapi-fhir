@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.NopTask;
 import ca.uhn.test.concurrency.IPointcutLatch;
 import ca.uhn.test.concurrency.PointcutLatch;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -16,7 +17,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import jakarta.annotation.Nonnull;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
@@ -24,8 +24,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -71,7 +70,7 @@ class HapiMigratorIT {
 		latchMigrationTask.release("1");
 
 		MigrationResult result = future.get();
-		assertThat(result.succeededTasks, hasSize(1));
+		assertThat(result.succeededTasks).hasSize(1);
 	}
 
 	@Test
@@ -113,8 +112,8 @@ class HapiMigratorIT {
 		MigrationResult result2 = future2.get();
 
 		// Tasks were only run on the first migration
-		assertThat(result1.succeededTasks, hasSize(1));
-		assertThat(result2.succeededTasks, hasSize(1));
+		assertThat(result1.succeededTasks).hasSize(1);
+		assertThat(result2.succeededTasks).hasSize(1);
 	}
 
 	@Test
@@ -135,7 +134,7 @@ class HapiMigratorIT {
 
 			MigrationResult result = future.get();
 			assertEquals(0, countLockRecords());
-			assertThat(result.succeededTasks, hasSize(1));
+			assertThat(result.succeededTasks).hasSize(1);
 		}
 
 		{
@@ -143,7 +142,7 @@ class HapiMigratorIT {
 
 			MigrationResult result = future.get();
 			assertEquals(0, countLockRecords());
-			assertThat(result.succeededTasks, hasSize(0));
+			assertThat(result.succeededTasks).hasSize(0);
 		}
 
 	}
@@ -174,7 +173,7 @@ class HapiMigratorIT {
 		System.setProperty(HapiMigrationLock.CLEAR_LOCK_TABLE_WITH_DESCRIPTION, description);
 
 		MigrationResult result = migrator.migrate();
-		assertThat(result.succeededTasks, hasSize(1));
+		assertThat(result.succeededTasks).hasSize(1);
 	}
 
 

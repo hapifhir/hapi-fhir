@@ -259,7 +259,7 @@ public abstract class BaseJpaTest extends BaseTest {
 	@Autowired
 	private IResourceHistoryTableDao myResourceHistoryTableDao;
 	@Autowired
-	private DaoRegistry myDaoRegistry;
+	protected DaoRegistry myDaoRegistry;
 	@Autowired
 	protected ITermDeferredStorageSvc myTermDeferredStorageSvc;
 	private final List<Object> myRegisteredInterceptors = new ArrayList<>(1);
@@ -874,7 +874,7 @@ public abstract class BaseJpaTest extends BaseTest {
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theId.getResourceType());
 		try {
 			dao.read(theId, mySrd);
-			fail();
+			fail("");
 		} catch (ResourceNotFoundException e) {
 			// good
 		}

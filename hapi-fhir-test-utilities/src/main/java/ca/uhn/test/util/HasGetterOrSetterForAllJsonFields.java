@@ -22,13 +22,13 @@ package ca.uhn.test.util;
 import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.annotation.Nonnull;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jakarta.annotation.Nonnull;
 import java.beans.BeanInfo;
 import java.beans.FeatureDescriptor;
 import java.beans.IntrospectionException;
@@ -43,6 +43,10 @@ import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.hasItems;
 
+@Deprecated
+/**
+ * @deprecated convert usages to HasGetterOrSetterForAllJsonFieldsAssert
+ */
 public class HasGetterOrSetterForAllJsonFields extends TypeSafeMatcher<Class<? extends IModelJson>> {
 	private static final Logger ourLog = LoggerFactory.getLogger(HasGetterOrSetterForAllJsonFields.class);
 

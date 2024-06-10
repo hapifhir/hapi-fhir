@@ -46,7 +46,7 @@ import org.mockito.Mockito;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 
@@ -103,8 +103,8 @@ public class RequestValidatingInterceptorDstu3Test extends BaseValidationTestWit
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(201, status.getStatusLine().getStatusCode());
-		assertThat(status.toString(), Matchers.containsString("X-FHIR-Request-Validation"));
-		assertThat(responseContent, Matchers.not(Matchers.containsString("<severity value=\"error\"/>")));
+		assertThat(status.toString()).contains("X-FHIR-Request-Validation");
+		assertThat(responseContent).doesNotContain("<severity value=\"error\"/>");
 	}
 
 	@Test
@@ -129,8 +129,8 @@ public class RequestValidatingInterceptorDstu3Test extends BaseValidationTestWit
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(422, status.getStatusLine().getStatusCode());
-		assertThat(status.toString(), Matchers.containsString("X-FHIR-Request-Validation"));
-		assertThat(responseContent, Matchers.containsString("\"severity\":\"error\""));
+		assertThat(status.toString()).contains("X-FHIR-Request-Validation");
+		assertThat(responseContent).contains("\"severity\":\"error\"");
 	}
 
 	@Test
@@ -152,7 +152,7 @@ public class RequestValidatingInterceptorDstu3Test extends BaseValidationTestWit
 		ourLog.trace("Response was:\n{}", responseContent);
 
 		assertEquals(201, status.getStatusLine().getStatusCode());
-		assertThat(status.toString(), Matchers.not(Matchers.containsString("X-FHIR-Request-Validation")));
+		assertThat(status.toString()).doesNotContain("X-FHIR-Request-Validation");
 	}
 
 	@Test
@@ -177,7 +177,7 @@ public class RequestValidatingInterceptorDstu3Test extends BaseValidationTestWit
 		ourLog.trace("Response was:\n{}", responseContent);
 
 		assertEquals(201, status.getStatusLine().getStatusCode());
-		assertThat(status.toString(), (Matchers.containsString("X-FHIR-Request-Validation: NO ISSUES")));
+		assertThat(status.toString().contains("X-FHIR-Request-Validation: NO ISSUES"));
 	}
 
 	@Test
@@ -205,7 +205,7 @@ public class RequestValidatingInterceptorDstu3Test extends BaseValidationTestWit
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(422, status.getStatusLine().getStatusCode());
-		assertThat(status.toString(), Matchers.containsString("X-FHIR-Request-Validation"));
+		assertThat(status.toString()).contains("X-FHIR-Request-Validation");
 	}
 
 	@Test
@@ -230,7 +230,7 @@ public class RequestValidatingInterceptorDstu3Test extends BaseValidationTestWit
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(422, status.getStatusLine().getStatusCode());
-		assertThat(status.toString(), Matchers.containsString("X-FHIR-Request-Validation"));
+		assertThat(status.toString()).contains("X-FHIR-Request-Validation");
 	}
 
 	@Test
@@ -257,7 +257,7 @@ public class RequestValidatingInterceptorDstu3Test extends BaseValidationTestWit
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(201, status.getStatusLine().getStatusCode());
-		assertThat(status.toString(), Matchers.containsString("X-FHIR-Request-Validation: {\"resourceType\":\"OperationOutcome"));
+		assertThat(status.toString()).contains("X-FHIR-Request-Validation: {\"resourceType\":\"OperationOutcome");
 	}
 
 
@@ -288,7 +288,7 @@ public class RequestValidatingInterceptorDstu3Test extends BaseValidationTestWit
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(500, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, Matchers.containsString("<diagnostics value=\"" + Msg.code(331) + "java.lang.NullPointerException: SOME MESSAGE\"/>"));
+		assertThat(responseContent).contains("<diagnostics value=\"" + Msg.code(331) + "java.lang.NullPointerException: SOME MESSAGE\"/>");
 	}
 
 	@SuppressWarnings("unchecked")
@@ -318,7 +318,7 @@ public class RequestValidatingInterceptorDstu3Test extends BaseValidationTestWit
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(201, status.getStatusLine().getStatusCode());
-		assertThat(status.toString(), Matchers.not(Matchers.containsString("X-FHIR-Request-Validation")));
+		assertThat(status.toString()).doesNotContain("X-FHIR-Request-Validation");
 	}
 
 	@SuppressWarnings("unchecked")
@@ -348,7 +348,7 @@ public class RequestValidatingInterceptorDstu3Test extends BaseValidationTestWit
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(500, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, Matchers.containsString("<diagnostics value=\"FOO\"/>"));
+		assertThat(responseContent).contains("<diagnostics value=\"FOO\"/>");
 	}
 
 	@SuppressWarnings("unchecked")
@@ -378,7 +378,7 @@ public class RequestValidatingInterceptorDstu3Test extends BaseValidationTestWit
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(201, status.getStatusLine().getStatusCode());
-		assertThat(status.toString(), Matchers.not(Matchers.containsString("X-FHIR-Request-Validation")));
+		assertThat(status.toString()).doesNotContain("X-FHIR-Request-Validation");
 	}
 
 	@Test
@@ -400,7 +400,7 @@ public class RequestValidatingInterceptorDstu3Test extends BaseValidationTestWit
 		ourLog.trace("Response was:\n{}", responseContent);
 
 		assertEquals(201, status.getStatusLine().getStatusCode());
-		assertThat(status.toString(), Matchers.not(Matchers.containsString("X-FHIR-Request-Validation")));
+		assertThat(status.toString()).doesNotContain("X-FHIR-Request-Validation");
 	}
 
 	/**
@@ -418,7 +418,7 @@ public class RequestValidatingInterceptorDstu3Test extends BaseValidationTestWit
 			ourLog.info("Response was:\n{}", status);
 
 			assertEquals(204, status.getStatusLine().getStatusCode());
-			assertThat(status.toString(), Matchers.not(Matchers.containsString("X-FHIR-Request-Validation")));
+			assertThat(status.toString()).doesNotContain("X-FHIR-Request-Validation");
 		} finally {
 			IOUtils.closeQuietly(status);
 		}
@@ -442,7 +442,7 @@ public class RequestValidatingInterceptorDstu3Test extends BaseValidationTestWit
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, Matchers.containsString("CapabilityStatement"));
+		assertThat(responseContent).contains("CapabilityStatement");
 	}
 
 	@Test
@@ -458,7 +458,7 @@ public class RequestValidatingInterceptorDstu3Test extends BaseValidationTestWit
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(status.toString(), Matchers.not(Matchers.containsString("X-FHIR-Request-Validation")));
+		assertThat(status.toString()).doesNotContain("X-FHIR-Request-Validation");
 		assertEquals(true, ourLastRequestWasSearch);
 	}
 

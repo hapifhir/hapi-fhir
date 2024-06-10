@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.packages;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
@@ -8,16 +9,10 @@ import ca.uhn.fhir.jpa.packages.util.PackageUtils;
 import ca.uhn.fhir.jpa.test.BaseJpaDstu3Test;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.test.utilities.ProxyUtil;
 import ca.uhn.fhir.test.utilities.server.HttpServletExtension;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.ee10.servlet.ServletHandler;
-import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.utilities.npm.IPackageCacheManager;
 import org.hl7.fhir.utilities.npm.PackageServer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,14 +27,10 @@ import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.util.ClasspathUtil.loadResourceAsByteArray;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.hasItem;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 public class IgInstallerDstu3Test extends BaseJpaDstu3Test {
 
@@ -84,9 +75,9 @@ public class IgInstallerDstu3Test extends BaseJpaDstu3Test {
 		// That patient profile in this NPM package has an invalid base
 		try {
 			igInstaller.install(new PackageInstallationSpec().setName("erroneous-ig").setVersion("1.0.2").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL).setPackageContents(bytes));
-			fail();
+			fail("");
 		} catch (ImplementationGuideInstallationException e) {
-			assertThat(e.getMessage(), containsString("Could not load NPM package erroneous-ig#1.0.2"));
+			assertThat(e.getMessage()).contains("Could not load NPM package erroneous-ig#1.0.2");
 		}
 	}
 
@@ -112,7 +103,7 @@ public class IgInstallerDstu3Test extends BaseJpaDstu3Test {
 			.addDependencyExclude("hl7\\.fhir\\.[a-zA-Z0-9]+\\.core");
 		PackageInstallOutcomeJson outcome = igInstaller.install(spec);
 		ourLog.info("Install messages:\n * {}", outcome.getMessage().stream().collect(Collectors.joining("\n * ")));
-		assertThat(outcome.getMessage(), hasItem("Indexing StructureDefinition Resource[package/vl-QuestionnaireProvisioningTask.json] with URL: http://nictiz.nl/fhir/StructureDefinition/vl-QuestionnaireProvisioningTask|1.0.1"));
+		assertThat(outcome.getMessage()).contains("Indexing StructureDefinition Resource[package/vl-QuestionnaireProvisioningTask.json] with URL: http://nictiz.nl/fhir/StructureDefinition/vl-QuestionnaireProvisioningTask|1.0.1");
 
 		runInTransaction(() -> {
 			assertTrue(myPackageVersionDao.findByPackageIdAndVersion("nictiz.fhir.nl.stu3.questionnaires", "1.0.2").isPresent());
@@ -214,9 +205,9 @@ public class IgInstallerDstu3Test extends BaseJpaDstu3Test {
 		installationSpec.setReloadExisting(true);
 		try {
 			ensureNoCreatesOrUpdates(() -> igInstaller.install(installationSpec));
-			fail();
+			fail("");
 		} catch (RuntimeException e) {
-			assertThat(e.getMessage(), is(containsString("Not allowed!")));
+			assertThat(e.getMessage()).contains("Not allowed!");
 		}
 
 		installationSpec.setReloadExisting(false);
@@ -237,7 +228,7 @@ public class IgInstallerDstu3Test extends BaseJpaDstu3Test {
 				.setVersion("1.0.2")
 				.setPackageUrl(myServer.getBaseUrl() + "/foo.tgz")
 			);
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(1297) + "Package ID nictiz.fhir.nl.stu3.questionnaires doesn't match expected: blah", e.getMessage());
 		}
@@ -252,7 +243,7 @@ public class IgInstallerDstu3Test extends BaseJpaDstu3Test {
 				.setVersion("1.0.2")
 				.setPackageUrl(myServer.getBaseUrl() + "/foo.tgz")
 			);
-			fail();
+			fail("");
 		} catch (ResourceNotFoundException e) {
 			assertEquals(Msg.code(1303) + "Received HTTP 404 from URL: " + myServer.getBaseUrl() + "/foo.tgz", e.getMessage());
 		}

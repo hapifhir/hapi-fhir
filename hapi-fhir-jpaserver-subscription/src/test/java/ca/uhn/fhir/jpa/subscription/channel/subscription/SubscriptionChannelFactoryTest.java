@@ -58,7 +58,7 @@ public class SubscriptionChannelFactoryTest {
 
 		try {
 			channel.send(input);
-			fail();
+			fail("");
 		} catch (MessageDeliveryException e) {
 			assertTrue(e.getCause() instanceof NullPointerException);
 		}

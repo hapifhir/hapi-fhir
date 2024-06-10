@@ -32,7 +32,7 @@ import java.sql.Statement;
 import java.util.Collection;
 import javax.sql.DataSource;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * This test class is used to verify all foreign key constraints
@@ -137,11 +137,11 @@ public class HapiForeignKeyIndexHelper {
 					Collection<String> whiteListColumns = ourTableToColumnsWhitelist.get(tableName);
 					boolean isWhiteListed = whiteListColumns.contains(columns);
 
-					assertTrue(
-							isWhiteListed,
-							String.format(
+					assertThat(isWhiteListed)
+							.as(String.format(
 									"Unindexed foreign key detected! Table.column: %s.%s. Constraint: %s",
-									tableName, columns, constraint));
+									tableName, columns, constraint))
+							.isTrue();
 				}
 			}
 		}

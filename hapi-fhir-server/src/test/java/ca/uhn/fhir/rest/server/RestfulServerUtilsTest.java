@@ -27,12 +27,10 @@ import java.util.stream.Stream;
 import static ca.uhn.fhir.rest.api.RequestTypeEnum.GET;
 import static ca.uhn.fhir.rest.api.RequestTypeEnum.POST;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.apache.http.util.TextUtils.isBlank;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.when;
@@ -60,14 +58,14 @@ public class RestfulServerUtilsTest {
 	@Test
 	public void testParsePreferAsync() {
 		PreferHeader header = RestfulServerUtils.parsePreferHeader(null, "respond-async");
-		assertEquals(null, header.getReturn());
+		assertNull(header.getReturn());
 		assertTrue(header.getRespondAsync());
 	}
 
 	@Test
 	public void testParseHandlingLenient() {
 		PreferHeader header = RestfulServerUtils.parsePreferHeader(null, "handling=lenient");
-		assertEquals(null, header.getReturn());
+		assertNull(header.getReturn());
 		assertFalse(header.getRespondAsync());
 		assertEquals(PreferHandlingEnum.LENIENT, header.getHanding());
 	}
@@ -120,8 +118,7 @@ public class RestfulServerUtilsTest {
 		if (theExpectedMaxRounds != null && theExpectedMaxRounds == -1) {
 			try {
 				RestfulServerUtils.extractDeleteCascadeParameter(myRequestDetails);
-				fail();
-			} catch (InvalidRequestException e) {
+				fail();			} catch (InvalidRequestException e) {
 				// good
 			}
 		} else {
@@ -151,17 +148,17 @@ public class RestfulServerUtilsTest {
 		//When
 		String linkSelf = RestfulServerUtils.createLinkSelf(baseUrl, servletRequestDetails);
 		//Then
-		assertThat(linkSelf, is(containsString("http://localhost:8000/$my-operation?")));
-		assertThat(linkSelf, is(containsString("_format=json")));
-		assertThat(linkSelf, is(containsString("_count=10")));
-		assertThat(linkSelf, is(containsString("_offset=100")));
+		assertThat(linkSelf).contains("http://localhost:8000/$my-operation?");
+		assertThat(linkSelf).contains("_format=json");
+		assertThat(linkSelf).contains("_count=10");
+		assertThat(linkSelf).contains("_offset=100");
 
 
 		//When
 		String linkSelfWithoutGivenParameters = RestfulServerUtils.createLinkSelfWithoutGivenParameters(baseUrl, servletRequestDetails, paramsToRemove);
 		//Then
-		assertThat(linkSelfWithoutGivenParameters, is(containsString("http://localhost:8000/$my-operation?")));
-		assertThat(linkSelfWithoutGivenParameters, is(containsString("_format=json")));
+		assertThat(linkSelfWithoutGivenParameters).contains("http://localhost:8000/$my-operation?");
+		assertThat(linkSelfWithoutGivenParameters).contains("_format=json");
 	}
 
 	@ParameterizedTest

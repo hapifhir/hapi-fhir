@@ -23,8 +23,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
@@ -77,13 +77,13 @@ class ResourceIdListStepTest {
 			.thenReturn(mockStream);
 
 		final RunOutcome run = myResourceIdListStep.run(myStepExecutionDetails, myDataSink);
-		assertNotEquals(null, run);
+		assertThat(run).isNotEqualTo(null);
 
 		// The work should be divided into chunks of MAX_BATCH_OF_IDS in size (or less, but never more):
 		int expectedBatchCount = (int) Math.ceil((float) theListSize / ResourceIdListStep.MAX_BATCH_OF_IDS);
 		verify(myDataSink, times(expectedBatchCount)).accept(myDataCaptor.capture());
 		final List<ResourceIdListWorkChunkJson> allDataChunks = myDataCaptor.getAllValues();
-		assertEquals(expectedBatchCount, allDataChunks.size());
+		assertThat(allDataChunks).hasSize(expectedBatchCount);
 
 		// Ensure that all chunks except the very last one are MAX_BATCH_OF_IDS in length
 		for (int i = 0; i < expectedBatchCount - 1; i++) {

@@ -6,10 +6,7 @@ import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.junit.jupiter.api.Test;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 class JsonUtilTest {
 
@@ -46,9 +43,9 @@ class JsonUtilTest {
 		object.setSensitiveField("Sensitive Value!");
 
 		String sensitiveExcluded  = JsonUtil.serializeOrInvalidRequest(object);
-		assertThat(sensitiveExcluded, is(not(containsString("Sensitive Value!"))));
+		assertThat(sensitiveExcluded).doesNotContain("Sensitive Value!");
 
 		String sensitiveIncluded  = JsonUtil.serializeWithSensitiveData(object);
-		assertThat(sensitiveIncluded, is(containsString("Sensitive Value!")));
+		assertThat(sensitiveIncluded).contains("Sensitive Value!");
 	}
 }

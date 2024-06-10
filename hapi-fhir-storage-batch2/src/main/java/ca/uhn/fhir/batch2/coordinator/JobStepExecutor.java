@@ -27,12 +27,16 @@ import ca.uhn.fhir.batch2.model.JobWorkCursor;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.progress.JobInstanceStatusUpdater;
+import ca.uhn.fhir.batch2.util.BatchJobOpenTelemetryUtils;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.Logs;
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import jakarta.annotation.Nonnull;
 import org.slf4j.Logger;
 
 import java.util.Date;
+
+import static ca.uhn.fhir.batch2.util.BatchJobOpenTelemetryUtils.JOB_STEP_EXECUTION_SPAN_NAME;
 
 public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
@@ -67,7 +71,16 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 		myJobInstanceStatusUpdater = new JobInstanceStatusUpdater(theJobDefinitionRegistry);
 	}
 
+	@WithSpan(JOB_STEP_EXECUTION_SPAN_NAME)
 	public void executeStep() {
+
+		BatchJobOpenTelemetryUtils.addAttributesToCurrentSpan(
+				myInstance.getJobDefinitionId(),
+				myInstance.getJobDefinitionVersion(),
+				myInstance.getInstanceId(),
+				myCursor.getCurrentStepId(),
+				myWorkChunk == null ? null : myWorkChunk.getId());
+
 		JobStepExecutorOutput<PT, IT, OT> stepExecutorOutput =
 				myJobExecutorSvc.doExecution(myCursor, myInstance, myWorkChunk);
 
