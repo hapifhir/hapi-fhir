@@ -6,12 +6,9 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class StreamUtilTest {
 
@@ -20,7 +17,7 @@ class StreamUtilTest {
 	void testStreamPartitionBy4(String theCase, List<Integer> theInput, List<List<Integer>> theOutput) {
 		List<List<Integer>> result = StreamUtil.partition(theInput.stream(), 4).toList();
 
-		assertEquals(theOutput, result, theCase);
+		assertThat(result).as(theCase).isEqualTo(theOutput);
 	}
 
 	static Object[][] streamPartitionTestCases() {
@@ -58,7 +55,7 @@ class StreamUtilTest {
 		StreamUtil.partition(baseStream, 2).close();
 
 		// then
-	    assertThat("partition closed underlying stream", closed.get());
+			assertThat(closed.get()).as("partition closed underlying stream").isTrue();
 	}
 
 

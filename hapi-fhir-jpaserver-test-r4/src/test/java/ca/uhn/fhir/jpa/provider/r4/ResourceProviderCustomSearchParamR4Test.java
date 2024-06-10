@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexAppCtx;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
 import ca.uhn.fhir.batch2.model.JobInstance;
@@ -58,15 +60,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+
 
 public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProviderR4Test {
 
@@ -294,7 +292,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 			ourLog.info(resp);
 			assertEquals(200, response.getStatusLine().getStatusCode());
 
-			assertThat(resp, containsString("<fullUrl value=\"http://localhost:" + myPort + "/fhir/context/Practitioner/"));
+			assertThat(resp).contains("<fullUrl value=\"http://localhost:" + myPort + "/fhir/context/Practitioner/");
 		} finally {
 			IOUtils.closeQuietly(response);
 		}
@@ -342,7 +340,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 
 		List<String> foundResources = toUnqualifiedVersionlessIdValues(bundle);
-		assertThat(foundResources, contains(p1id.getValue()));
+		assertThat(foundResources).containsExactly(p1id.getValue());
 	}
 
 
@@ -386,7 +384,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 			.returnBundle(Bundle.class)
 			.execute();
 		foundResources = toUnqualifiedVersionlessIdValues(result);
-		assertThat(foundResources, contains(obsId1.getValue()));
+		assertThat(foundResources).containsExactly(obsId1.getValue());
 
 	}
 
@@ -428,7 +426,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 			.execute();
 
 		foundResources = toUnqualifiedVersionlessIdValues(result);
-		assertThat(foundResources, contains(patId.getValue()));
+		assertThat(foundResources).containsExactly(patId.getValue());
 
 	}
 
@@ -468,7 +466,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 				.execute();
 
 		} catch (Exception e) {
-			assertThat(e.getMessage(), is(equalTo("HTTP 400 Bad Request: " + Msg.code(1882) + "Invalid date/time format: \"01-01-2020\"")));
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(1882) + "Invalid date/time format: \"01-01-2020\"", e.getMessage());
 		}
 
 		//Now with custom SP
@@ -481,7 +479,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 				.execute();
 
 		} catch (Exception e) {
-			assertThat(e.getMessage(), is(equalTo("HTTP 400 Bad Request: " + Msg.code(1882) + "Invalid date/time format: \"01-01-2020\"")));
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(1882) + "Invalid date/time format: \"01-01-2020\"", e.getMessage());
 		}
 	}
 
@@ -636,8 +634,8 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 			.execute();
 
 		List<String> foundResources = toUnqualifiedVersionlessIdValues(result);
-		assertEquals(1, foundResources.size());
-		assertThat(foundResources, contains(patId.getValue()));
+		assertThat(foundResources).hasSize(1);
+		assertThat(foundResources).containsExactly(patId.getValue());
 	}
 
 }

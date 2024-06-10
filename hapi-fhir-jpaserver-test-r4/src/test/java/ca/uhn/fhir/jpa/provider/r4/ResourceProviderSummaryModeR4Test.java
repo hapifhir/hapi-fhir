@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
@@ -16,7 +18,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.AopTestUtils;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @SuppressWarnings("Duplicates")
 public class ResourceProviderSummaryModeR4Test extends BaseResourceProviderR4Test {
@@ -74,7 +76,7 @@ public class ResourceProviderSummaryModeR4Test extends BaseResourceProviderR4Tes
 			.execute();
 
 		assertEquals(new Integer(104), outcome.getTotalElement().getValue());
-		assertEquals(0, outcome.getEntry().size());
+		assertThat(outcome.getEntry()).isEmpty();
 	}
 
 	/**
@@ -91,7 +93,7 @@ public class ResourceProviderSummaryModeR4Test extends BaseResourceProviderR4Tes
 			.execute();
 
 		assertEquals(new Integer(104), outcome.getTotalElement().getValue());
-		assertEquals(10, outcome.getEntry().size());
+		assertThat(outcome.getEntry()).hasSize(10);
 	}
 
 	/**
@@ -109,7 +111,7 @@ public class ResourceProviderSummaryModeR4Test extends BaseResourceProviderR4Tes
 			.execute();
 
 		assertEquals(new Integer(104), outcome.getTotalElement().getValue());
-		assertEquals(10, outcome.getEntry().size());
+		assertThat(outcome.getEntry()).hasSize(10);
 	}
 
 	/**
@@ -127,7 +129,7 @@ public class ResourceProviderSummaryModeR4Test extends BaseResourceProviderR4Tes
 			.execute();
 
 		assertEquals(new Integer(0), outcome.getTotalElement().getValue());
-		assertEquals(0, outcome.getEntry().size());
+		assertThat(outcome.getEntry()).isEmpty();
 	}
 
 	/**
@@ -143,8 +145,8 @@ public class ResourceProviderSummaryModeR4Test extends BaseResourceProviderR4Tes
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertEquals(null, outcome.getTotalElement().getValue());
-		assertEquals(10, outcome.getEntry().size());
+		assertNull(outcome.getTotalElement().getValue());
+		assertThat(outcome.getEntry()).hasSize(10);
 	}
 
 	/**
@@ -163,8 +165,8 @@ public class ResourceProviderSummaryModeR4Test extends BaseResourceProviderR4Tes
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertEquals(null, outcome.getTotalElement().getValue());
-		assertEquals(10, outcome.getEntry().size());
+		assertNull(outcome.getTotalElement().getValue());
+		assertThat(outcome.getEntry()).hasSize(10);
 	}
 
 

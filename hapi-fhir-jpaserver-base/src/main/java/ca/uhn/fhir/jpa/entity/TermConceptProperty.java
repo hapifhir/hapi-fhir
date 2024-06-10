@@ -118,7 +118,7 @@ public class TermConceptProperty implements Serializable {
 	private byte[] myValueBin;
 
 	@Enumerated(EnumType.ORDINAL)
-	@Column(name = "PROP_TYPE", nullable = false, length = MAX_PROPTYPE_ENUM_LENGTH)
+	@Column(name = "PROP_TYPE", nullable = false)
 	@JdbcTypeCode(SqlTypes.INTEGER)
 	private TermConceptPropertyTypeEnum myType;
 

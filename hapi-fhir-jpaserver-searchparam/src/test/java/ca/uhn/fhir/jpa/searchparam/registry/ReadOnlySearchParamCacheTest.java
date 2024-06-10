@@ -4,8 +4,8 @@ import org.junit.jupiter.api.Test;
 
 import static ca.uhn.fhir.jpa.searchparam.registry.ReadOnlySearchParamCache.searchParamMatchesAtLeastOnePattern;
 import static com.google.common.collect.Sets.newHashSet;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ReadOnlySearchParamCacheTest {
@@ -23,9 +23,9 @@ public class ReadOnlySearchParamCacheTest {
 
 	@Test
 	void testSearchParamMatchesAtLeastOnePattern_InvalidPattern() {
-		assertThrows(IllegalArgumentException.class, () -> searchParamMatchesAtLeastOnePattern(newHashSet("aaa"), "Patient", "name"));
-		assertThrows(IllegalArgumentException.class, () -> searchParamMatchesAtLeastOnePattern(newHashSet(":name"), "Patient", "name"));
-		assertThrows(IllegalArgumentException.class, () -> searchParamMatchesAtLeastOnePattern(newHashSet("Patient:"), "Patient", "name"));
+		assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> searchParamMatchesAtLeastOnePattern(newHashSet("aaa"), "Patient", "name"));
+		assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> searchParamMatchesAtLeastOnePattern(newHashSet(":name"), "Patient", "name"));
+		assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> searchParamMatchesAtLeastOnePattern(newHashSet("Patient:"), "Patient", "name"));
 	}
 
 }

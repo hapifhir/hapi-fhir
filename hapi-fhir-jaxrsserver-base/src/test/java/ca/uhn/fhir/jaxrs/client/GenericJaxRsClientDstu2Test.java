@@ -41,22 +41,16 @@ import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.either;
-import static org.hamcrest.Matchers.emptyString;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.not;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class GenericJaxRsClientDstu2Test {
@@ -117,20 +111,20 @@ public class GenericJaxRsClientDstu2Test {
 
 		client.fetchConformance().ofType(Conformance.class).execute();
 		assertEquals(ourServer.getBaseUrl() + "/fhir/metadata", CAPTURE_SERVLET.ourRequestUri);
-		assertEquals(1, CAPTURE_SERVLET.ourRequestHeaders.get("Accept").size());
-		assertThat(CAPTURE_SERVLET.ourRequestHeaders.get("Accept").get(0).getValue(), containsString(Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_LEGACY));
+		assertThat(CAPTURE_SERVLET.ourRequestHeaders.get("Accept")).hasSize(1);
+		assertThat(CAPTURE_SERVLET.ourRequestHeaders.get("Accept").get(0).getValue()).contains(Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_LEGACY);
 
 
 		client.fetchConformance().ofType(Conformance.class).encodedJson().execute();
 		assertEquals(ourServer.getBaseUrl() + "/fhir/metadata?_format=json", CAPTURE_SERVLET.ourRequestUri);
-		assertEquals(1, CAPTURE_SERVLET.ourRequestHeaders.get("Accept").size());
-		assertThat(CAPTURE_SERVLET.ourRequestHeaders.get("Accept").get(0).getValue(), containsString(Constants.CT_FHIR_JSON));
+		assertThat(CAPTURE_SERVLET.ourRequestHeaders.get("Accept")).hasSize(1);
+		assertThat(CAPTURE_SERVLET.ourRequestHeaders.get("Accept").get(0).getValue()).contains(Constants.CT_FHIR_JSON);
 
 
 		client.fetchConformance().ofType(Conformance.class).encodedXml().execute();
 		assertEquals(ourServer.getBaseUrl() + "/fhir/metadata?_format=xml", CAPTURE_SERVLET.ourRequestUri);
-		assertEquals(1, CAPTURE_SERVLET.ourRequestHeaders.get("Accept").size());
-		assertThat(CAPTURE_SERVLET.ourRequestHeaders.get("Accept").get(0).getValue(), containsString(Constants.CT_FHIR_XML));
+		assertThat(CAPTURE_SERVLET.ourRequestHeaders.get("Accept")).hasSize(1);
+		assertThat(CAPTURE_SERVLET.ourRequestHeaders.get("Accept").get(0).getValue()).contains(Constants.CT_FHIR_XML);
 
 	}
 
@@ -153,15 +147,15 @@ public class GenericJaxRsClientDstu2Test {
 		Patient resp = client.read(Patient.class, new IdDt("123"));
 		assertEquals("FAMILY", resp.getName().get(0).getFamily().get(0).getValue());
 		assertEquals(ourServer.getBaseUrl() + "/fhir/metadata", CAPTURE_SERVLET.ourRequestUriAll.get(0));
-		assertEquals(1, CAPTURE_SERVLET.ourRequestHeadersAll.get(0).get("Accept").size());
-		assertThat(CAPTURE_SERVLET.ourRequestHeadersAll.get(0).get("Accept").get(0).getValue(), containsString(Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_LEGACY));
-		assertThat(CAPTURE_SERVLET.ourRequestHeadersAll.get(0).get("Accept").get(0).getValue(), containsString(Constants.CT_FHIR_XML));
-		assertThat(CAPTURE_SERVLET.ourRequestHeadersAll.get(0).get("Accept").get(0).getValue(), containsString(Constants.CT_FHIR_JSON));
+		assertThat(CAPTURE_SERVLET.ourRequestHeadersAll.get(0).get("Accept")).hasSize(1);
+		assertThat(CAPTURE_SERVLET.ourRequestHeadersAll.get(0).get("Accept").get(0).getValue()).contains(Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_LEGACY);
+		assertThat(CAPTURE_SERVLET.ourRequestHeadersAll.get(0).get("Accept").get(0).getValue()).contains(Constants.CT_FHIR_XML);
+		assertThat(CAPTURE_SERVLET.ourRequestHeadersAll.get(0).get("Accept").get(0).getValue()).contains(Constants.CT_FHIR_JSON);
 		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/123", CAPTURE_SERVLET.ourRequestUriAll.get(1));
-		assertEquals(1, CAPTURE_SERVLET.ourRequestHeadersAll.get(1).get("Accept").size());
-		assertThat(CAPTURE_SERVLET.ourRequestHeadersAll.get(1).get("Accept").get(0).getValue(), containsString(Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_LEGACY));
-		assertThat(CAPTURE_SERVLET.ourRequestHeadersAll.get(1).get("Accept").get(0).getValue(), containsString(Constants.CT_FHIR_XML));
-		assertThat(CAPTURE_SERVLET.ourRequestHeadersAll.get(1).get("Accept").get(0).getValue(), containsString(Constants.CT_FHIR_JSON));
+		assertThat(CAPTURE_SERVLET.ourRequestHeadersAll.get(1).get("Accept")).hasSize(1);
+		assertThat(CAPTURE_SERVLET.ourRequestHeadersAll.get(1).get("Accept").get(0).getValue()).contains(Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_LEGACY);
+		assertThat(CAPTURE_SERVLET.ourRequestHeadersAll.get(1).get("Accept").get(0).getValue()).contains(Constants.CT_FHIR_XML);
+		assertThat(CAPTURE_SERVLET.ourRequestHeadersAll.get(1).get("Accept").get(0).getValue()).contains(Constants.CT_FHIR_JSON);
 	}
 
 	@Test
@@ -184,13 +178,13 @@ public class GenericJaxRsClientDstu2Test {
 		Patient resp = client.read(Patient.class, new IdDt("123"));
 		assertEquals("FAMILY", resp.getName().get(0).getFamily().get(0).getValue());
 		assertEquals(ourServer.getBaseUrl() + "/fhir/metadata?_format=json", CAPTURE_SERVLET.ourRequestUriAll.get(0));
-		assertEquals(1, CAPTURE_SERVLET.ourRequestHeadersAll.get(0).get("Accept").size());
-		assertThat(CAPTURE_SERVLET.ourRequestHeadersAll.get(0).get("Accept").get(0).getValue(), containsString(Constants.CT_FHIR_JSON));
-		assertThat(CAPTURE_SERVLET.ourRequestHeadersAll.get(0).get("Accept").get(0).getValue(), not(containsString(Constants.CT_FHIR_XML)));
+		assertThat(CAPTURE_SERVLET.ourRequestHeadersAll.get(0).get("Accept")).hasSize(1);
+		assertThat(CAPTURE_SERVLET.ourRequestHeadersAll.get(0).get("Accept").get(0).getValue()).contains(Constants.CT_FHIR_JSON);
+		assertThat(CAPTURE_SERVLET.ourRequestHeadersAll.get(0).get("Accept").get(0).getValue()).doesNotContain(Constants.CT_FHIR_XML);
 		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/123?_format=json", CAPTURE_SERVLET.ourRequestUriAll.get(1));
-		assertEquals(1, CAPTURE_SERVLET.ourRequestHeadersAll.get(1).get("Accept").size());
-		assertThat(CAPTURE_SERVLET.ourRequestHeadersAll.get(1).get("Accept").get(0).getValue(), containsString(Constants.CT_FHIR_JSON));
-		assertThat(CAPTURE_SERVLET.ourRequestHeadersAll.get(1).get("Accept").get(0).getValue(), not(containsString(Constants.CT_FHIR_XML)));
+		assertThat(CAPTURE_SERVLET.ourRequestHeadersAll.get(1).get("Accept")).hasSize(1);
+		assertThat(CAPTURE_SERVLET.ourRequestHeadersAll.get(1).get("Accept").get(0).getValue()).contains(Constants.CT_FHIR_JSON);
+		assertThat(CAPTURE_SERVLET.ourRequestHeadersAll.get(1).get("Accept").get(0).getValue()).doesNotContain(Constants.CT_FHIR_XML);
 	}
 
 	@Test
@@ -242,9 +236,9 @@ public class GenericJaxRsClientDstu2Test {
 
 		client.create().resource(p).encodedXml().execute();
 
-		assertEquals(1, CAPTURE_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
+		assertThat(CAPTURE_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE)).hasSize(1);
 		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, CAPTURE_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char"));
-		assertThat(CAPTURE_SERVLET.ourRequestBodyString, containsString("<family value=\"FOOFAMILY\"/>"));
+		assertThat(CAPTURE_SERVLET.ourRequestBodyString).contains("<family value=\"FOOFAMILY\"/>");
 		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient", CAPTURE_SERVLET.ourRequestUri);
 		assertEquals("POST", CAPTURE_SERVLET.ourRequestMethod);
 
@@ -252,11 +246,11 @@ public class GenericJaxRsClientDstu2Test {
 		p.setId("123");
 
 		client.create().resource(p).encodedXml().execute();
-		assertEquals(1, CAPTURE_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
+		assertThat(CAPTURE_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE)).hasSize(1);
 		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, CAPTURE_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char"));
 		String body = CAPTURE_SERVLET.ourRequestBodyString;
-		assertThat(body, containsString("<family value=\"FOOFAMILY\"/>"));
-		assertThat(body, not(containsString("123")));
+		assertThat(body).contains("<family value=\"FOOFAMILY\"/>");
+		assertThat(body).doesNotContain("123");
 		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient", CAPTURE_SERVLET.ourRequestUri);
 		assertEquals("POST", CAPTURE_SERVLET.ourRequestMethod);
 
@@ -276,27 +270,27 @@ public class GenericJaxRsClientDstu2Test {
 		p.addName().addFamily("FOOFAMILY");
 
 		client.create().resource(p).conditionalByUrl("Patient?name=foo").encodedXml().execute();
-		assertEquals(1, CAPTURE_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
+		assertThat(CAPTURE_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE)).hasSize(1);
 		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, CAPTURE_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char"));
-		assertThat(CAPTURE_SERVLET.ourRequestBodyString, containsString("<family value=\"FOOFAMILY\"/>"));
+		assertThat(CAPTURE_SERVLET.ourRequestBodyString).contains("<family value=\"FOOFAMILY\"/>");
 		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient", CAPTURE_SERVLET.ourRequestUri);
 		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient?name=foo", CAPTURE_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_IF_NONE_EXIST).getValue());
 		assertEquals("POST", CAPTURE_SERVLET.ourRequestMethod);
 
 
 		client.create().resource(p).conditionalByUrl("Patient?name=http://foo|bar").encodedXml().execute();
-		assertEquals(1, CAPTURE_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
+		assertThat(CAPTURE_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE)).hasSize(1);
 		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, CAPTURE_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char"));
-		assertThat(CAPTURE_SERVLET.ourRequestBodyString, containsString("<family value=\"FOOFAMILY\"/>"));
+		assertThat(CAPTURE_SERVLET.ourRequestBodyString).contains("<family value=\"FOOFAMILY\"/>");
 		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient", CAPTURE_SERVLET.ourRequestUri);
 		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient?name=http%3A//foo%7Cbar", CAPTURE_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_IF_NONE_EXIST).getValue());
 		assertEquals("POST", CAPTURE_SERVLET.ourRequestMethod);
 
 
 		client.create().resource(p).conditional().where(Patient.NAME.matches().value("foo")).encodedXml().execute();
-		assertEquals(1, CAPTURE_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
+		assertThat(CAPTURE_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE)).hasSize(1);
 		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, CAPTURE_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char"));
-		assertThat(CAPTURE_SERVLET.ourRequestBodyString, containsString("<family value=\"FOOFAMILY\"/>"));
+		assertThat(CAPTURE_SERVLET.ourRequestBodyString).contains("<family value=\"FOOFAMILY\"/>");
 		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient", CAPTURE_SERVLET.ourRequestUri);
 		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient?name=foo", CAPTURE_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_IF_NONE_EXIST).getValue());
 		assertEquals("POST", CAPTURE_SERVLET.ourRequestMethod);
@@ -317,12 +311,12 @@ public class GenericJaxRsClientDstu2Test {
 		p.addName().addFamily("FOOFAMILY");
 
 		client.create().resource(p).prefer(PreferReturnEnum.MINIMAL).execute();
-		assertEquals(1, CAPTURE_SERVLET.ourRequestHeaders.get(Constants.HEADER_PREFER).size());
+		assertThat(CAPTURE_SERVLET.ourRequestHeaders.get(Constants.HEADER_PREFER)).hasSize(1);
 		assertEquals(Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_MINIMAL, CAPTURE_SERVLET.ourRequestHeaders.get(Constants.HEADER_PREFER).get(0).getValue());
 
 
 		client.create().resource(p).prefer(PreferReturnEnum.REPRESENTATION).execute();
-		assertEquals(1, CAPTURE_SERVLET.ourRequestHeaders.get(Constants.HEADER_PREFER).size());
+		assertThat(CAPTURE_SERVLET.ourRequestHeaders.get(Constants.HEADER_PREFER)).hasSize(1);
 		assertEquals(Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION, CAPTURE_SERVLET.ourRequestHeaders.get(Constants.HEADER_PREFER).get(0).getValue());
 
 
@@ -408,7 +402,7 @@ public class GenericJaxRsClientDstu2Test {
 			.execute();
 
 		assertEquals(ourServer.getBaseUrl() + "/fhir/_history", CAPTURE_SERVLET.ourRequestUri);
-		assertEquals(1, response.getEntry().size());
+		assertThat(response.getEntry()).hasSize(1);
 
 
 		response = client
@@ -420,7 +414,7 @@ public class GenericJaxRsClientDstu2Test {
 			.execute();
 
 		assertEquals(ourServer.getBaseUrl() + "/fhir/_history", CAPTURE_SERVLET.ourRequestUri);
-		assertEquals(1, response.getEntry().size());
+		assertThat(response.getEntry()).hasSize(1);
 
 
 		response = client
@@ -431,7 +425,7 @@ public class GenericJaxRsClientDstu2Test {
 			.execute();
 
 		assertEquals(ourServer.getBaseUrl() + "/fhir/_history", CAPTURE_SERVLET.ourRequestUri);
-		assertEquals(1, response.getEntry().size());
+		assertThat(response.getEntry()).hasSize(1);
 
 
 		response = client
@@ -441,7 +435,7 @@ public class GenericJaxRsClientDstu2Test {
 			.execute();
 
 		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/_history", CAPTURE_SERVLET.ourRequestUri);
-		assertEquals(1, response.getEntry().size());
+		assertThat(response.getEntry()).hasSize(1);
 
 
 		response = client
@@ -451,7 +445,7 @@ public class GenericJaxRsClientDstu2Test {
 			.execute();
 
 		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/123/_history", CAPTURE_SERVLET.ourRequestUri);
-		assertEquals(1, response.getEntry().size());
+		assertThat(response.getEntry()).hasSize(1);
 
 
 		response = client
@@ -462,8 +456,10 @@ public class GenericJaxRsClientDstu2Test {
 			.since(new InstantDt("2001-01-02T11:22:33Z"))
 			.execute();
 
-		assertThat(CAPTURE_SERVLET.ourRequestUri, either(equalTo(ourServer.getBaseUrl() + "/fhir/Patient/123/_history?_since=2001-01-02T11:22:33Z&_count=123")).or(equalTo(ourServer.getBaseUrl() + "/fhir/Patient/123/_history?_count=123&_since=2001-01-02T11:22:33Z")));
-		assertEquals(1, response.getEntry().size());
+		assertThat(CAPTURE_SERVLET.ourRequestUri).isIn(
+			ourServer.getBaseUrl() + "/fhir/Patient/123/_history?_since=2001-01-02T11:22:33Z&_count=123",
+			ourServer.getBaseUrl() + "/fhir/Patient/123/_history?_count=123&_since=2001-01-02T11:22:33Z");
+		assertThat(response.getEntry()).hasSize(1);
 
 
 		response = client
@@ -473,8 +469,8 @@ public class GenericJaxRsClientDstu2Test {
 			.since(new InstantDt("2001-01-02T11:22:33Z").getValue())
 			.execute();
 
-		assertThat(CAPTURE_SERVLET.ourRequestUri, containsString("_since=2001-01"));
-		assertEquals(1, response.getEntry().size());
+		assertThat(CAPTURE_SERVLET.ourRequestUri).contains("_since=2001-01");
+		assertThat(response.getEntry()).hasSize(1);
 
 	}
 
@@ -758,11 +754,11 @@ public class GenericJaxRsClientDstu2Test {
 			.withParameters(inParams).encodedXml().execute();
 
 		assertEquals(ourServer.getBaseUrl() + "/fhir/$SOMEOPERATION", CAPTURE_SERVLET.ourRequestUri);
-		assertEquals(1, CAPTURE_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
+		assertThat(CAPTURE_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE)).hasSize(1);
 		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, CAPTURE_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char"));
 		assertEquals(CAPTURE_SERVLET.ourRequestBodyString, reqString);
 		assertEquals("POST", CAPTURE_SERVLET.ourRequestMethod);
-		assertEquals(1, resp.getParameter().size());
+		assertThat(resp.getParameter()).hasSize(1);
 		assertEquals(ca.uhn.fhir.model.dstu2.resource.Bundle.class, resp.getParameter().get(0).getResource().getClass());
 
 	}
@@ -793,7 +789,7 @@ public class GenericJaxRsClientDstu2Test {
 
 		assertEquals(ourServer.getBaseUrl() + "/fhir/$SOMEOPERATION", CAPTURE_SERVLET.ourRequestUri);
 		assertEquals(respString, p.encodeResourceToString(resp));
-		assertEquals(1, CAPTURE_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
+		assertThat(CAPTURE_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE)).hasSize(1);
 		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, CAPTURE_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char"));
 		assertEquals("POST", CAPTURE_SERVLET.ourRequestMethod);
 		assertEquals("<Parameters xmlns=\"http://hl7.org/fhir\"><parameter><name value=\"name1\"/><valueString value=\"value1\"/></parameter><parameter><name value=\"name2\"/><valueString value=\"value1\"/></parameter></Parameters>", (CAPTURE_SERVLET.ourRequestBodyString));
@@ -815,11 +811,10 @@ public class GenericJaxRsClientDstu2Test {
 
 		assertEquals(ourServer.getBaseUrl() + "/fhir/$SOMEOPERATION", CAPTURE_SERVLET.ourRequestUri);
 		assertEquals(respString, p.encodeResourceToString(resp));
-		assertEquals(1, CAPTURE_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
+		assertThat(CAPTURE_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE)).hasSize(1);
 		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, CAPTURE_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char"));
 		assertEquals("POST", CAPTURE_SERVLET.ourRequestMethod);
-		assertEquals("<Parameters xmlns=\"http://hl7.org/fhir\"><parameter><name value=\"name1\"/><valueIdentifier><system value=\"system1\"/><value value=\"value1\"/></valueIdentifier></parameter><parameter><name value=\"name2\"/><valueString value=\"value1\"/></parameter></Parameters>",
-			(CAPTURE_SERVLET.ourRequestBodyString));
+		assertEquals("<Parameters xmlns=\"http://hl7.org/fhir\"><parameter><name value=\"name1\"/><valueIdentifier><system value=\"system1\"/><value value=\"value1\"/></valueIdentifier></parameter><parameter><name value=\"name2\"/><valueString value=\"value1\"/></parameter></Parameters>", (CAPTURE_SERVLET.ourRequestBodyString));
 
 
 		/*
@@ -838,12 +833,10 @@ public class GenericJaxRsClientDstu2Test {
 
 		assertEquals(ourServer.getBaseUrl() + "/fhir/$SOMEOPERATION", CAPTURE_SERVLET.ourRequestUri);
 		assertEquals(respString, p.encodeResourceToString(resp));
-		assertEquals(1, CAPTURE_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
+		assertThat(CAPTURE_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE)).hasSize(1);
 		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, CAPTURE_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char"));
 		assertEquals("POST", CAPTURE_SERVLET.ourRequestMethod);
-		assertEquals(
-			"<Parameters xmlns=\"http://hl7.org/fhir\"><parameter><name value=\"name1\"/><valueIdentifier><system value=\"system1\"/><value value=\"value1\"/></valueIdentifier></parameter><parameter><name value=\"name2\"/><resource><Patient xmlns=\"http://hl7.org/fhir\"><active value=\"true\"/></Patient></resource></parameter></Parameters>",
-			(CAPTURE_SERVLET.ourRequestBodyString));
+		assertEquals("<Parameters xmlns=\"http://hl7.org/fhir\"><parameter><name value=\"name1\"/><valueIdentifier><system value=\"system1\"/><value value=\"value1\"/></valueIdentifier></parameter><parameter><name value=\"name2\"/><resource><Patient xmlns=\"http://hl7.org/fhir\"><active value=\"true\"/></Patient></resource></parameter></Parameters>", (CAPTURE_SERVLET.ourRequestBodyString));
 
 
 	}
@@ -887,7 +880,7 @@ public class GenericJaxRsClientDstu2Test {
 			}
 		};
 
-		assertThrows(IllegalArgumentException.class, () -> {
+		assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
 			client
 				.operation()
 				.onServer()
@@ -973,7 +966,7 @@ public class GenericJaxRsClientDstu2Test {
 
 		assertEquals(ourServer.getBaseUrl() + "/fhir/$SOMEOPERATION", CAPTURE_SERVLET.ourRequestUri);
 		assertEquals(respString, p.encodeResourceToString(resp));
-		assertEquals(1, CAPTURE_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
+		assertThat(CAPTURE_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE)).hasSize(1);
 		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, CAPTURE_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char"));
 		assertEquals(CAPTURE_SERVLET.ourRequestBodyString, reqString);
 		assertEquals("POST", CAPTURE_SERVLET.ourRequestMethod);
@@ -987,7 +980,7 @@ public class GenericJaxRsClientDstu2Test {
 
 		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/$SOMEOPERATION", CAPTURE_SERVLET.ourRequestUri);
 		assertEquals(respString, p.encodeResourceToString(resp));
-		assertEquals(1, CAPTURE_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
+		assertThat(CAPTURE_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE)).hasSize(1);
 		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, CAPTURE_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char"));
 		assertEquals(CAPTURE_SERVLET.ourRequestBodyString, reqString);
 		assertEquals("POST", CAPTURE_SERVLET.ourRequestMethod);
@@ -1003,7 +996,7 @@ public class GenericJaxRsClientDstu2Test {
 
 		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/123/$SOMEOPERATION", CAPTURE_SERVLET.ourRequestUri);
 		assertEquals(respString, p.encodeResourceToString(resp));
-		assertEquals(1, CAPTURE_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
+		assertThat(CAPTURE_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE)).hasSize(1);
 		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, CAPTURE_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char"));
 		assertEquals(CAPTURE_SERVLET.ourRequestBodyString, reqString);
 		assertEquals("POST", CAPTURE_SERVLET.ourRequestMethod);
@@ -1042,7 +1035,7 @@ public class GenericJaxRsClientDstu2Test {
 
 		assertEquals(ourServer.getBaseUrl() + "/fhir/$SOMEOPERATION", CAPTURE_SERVLET.ourRequestUri);
 		assertEquals(respString, p.encodeResourceToString(resp));
-		assertEquals(1, CAPTURE_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
+		assertThat(CAPTURE_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE)).hasSize(1);
 		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, CAPTURE_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char"));
 		assertEquals(CAPTURE_SERVLET.ourRequestBodyString, reqString);
 		assertEquals("POST", CAPTURE_SERVLET.ourRequestMethod);
@@ -1056,7 +1049,7 @@ public class GenericJaxRsClientDstu2Test {
 
 		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/$SOMEOPERATION", CAPTURE_SERVLET.ourRequestUri);
 		assertEquals(respString, p.encodeResourceToString(resp));
-		assertEquals(1, CAPTURE_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
+		assertThat(CAPTURE_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE)).hasSize(1);
 		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, CAPTURE_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char"));
 		assertEquals(CAPTURE_SERVLET.ourRequestBodyString, reqString);
 		assertEquals("POST", CAPTURE_SERVLET.ourRequestMethod);
@@ -1070,7 +1063,7 @@ public class GenericJaxRsClientDstu2Test {
 
 		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/123/$SOMEOPERATION", CAPTURE_SERVLET.ourRequestUri);
 		assertEquals(respString, p.encodeResourceToString(resp));
-		assertEquals(1, CAPTURE_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
+		assertThat(CAPTURE_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE)).hasSize(1);
 		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, CAPTURE_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char"));
 		assertEquals(CAPTURE_SERVLET.ourRequestBodyString, reqString);
 		assertEquals("POST", CAPTURE_SERVLET.ourRequestMethod);
@@ -1108,7 +1101,7 @@ public class GenericJaxRsClientDstu2Test {
 			.execute();
 
 
-		assertEquals(1, resp.getEntry().size());
+		assertThat(resp.getEntry()).hasSize(1);
 		assertEquals(ourServer.getBaseUrl() + "/fhir/next", CAPTURE_SERVLET.ourRequestUri);
 
 
@@ -1122,7 +1115,7 @@ public class GenericJaxRsClientDstu2Test {
 		try {
 			client.loadPage().next(sourceBundle).execute();
 		} catch (IllegalArgumentException e) {
-			assertThat(e.getMessage(), containsString("Can not perform paging operation because no link was found in Bundle with relation \"next\""));
+			assertThat(e.getMessage()).contains("Can not perform paging operation because no link was found in Bundle with relation \"next\"");
 		}
 	}
 
@@ -1146,7 +1139,7 @@ public class GenericJaxRsClientDstu2Test {
 			.execute();
 
 
-		assertEquals(1, resp.getEntry().size());
+		assertThat(resp.getEntry()).hasSize(1);
 		assertEquals(ourServer.getBaseUrl() + "/fhir/prev", CAPTURE_SERVLET.ourRequestUri);
 
 
@@ -1164,7 +1157,7 @@ public class GenericJaxRsClientDstu2Test {
 			.execute();
 
 
-		assertEquals(1, resp.getEntry().size());
+		assertThat(resp.getEntry()).hasSize(1);
 		assertEquals(ourServer.getBaseUrl() + "/fhir/prev", CAPTURE_SERVLET.ourRequestUri);
 
 
@@ -1260,7 +1253,8 @@ public class GenericJaxRsClientDstu2Test {
 			.elementsSubset("name", "identifier")
 			.execute();
 
-		assertThat(CAPTURE_SERVLET.ourRequestUri, either(equalTo(ourServer.getBaseUrl() + "/fhir/Patient/123?_elements=name%2Cidentifier")).or(equalTo(ourServer.getBaseUrl() + "/fhir/Patient/123?_elements=identifier%2Cname")));
+		assertThat(CAPTURE_SERVLET.ourRequestUri).isIn(ourServer.getBaseUrl() + "/fhir/Patient/123?_elements=name%2Cidentifier",
+			ourServer.getBaseUrl() + "/fhir/Patient/123?_elements=identifier%2Cname");
 		assertEquals(Patient.class, response.getClass());
 
 	}
@@ -1285,7 +1279,7 @@ public class GenericJaxRsClientDstu2Test {
 				.execute();
 			fail();
 		} catch (InvalidResponseException e) {
-			assertThat(e.getMessage(), containsString("String does not appear to be valid"));
+			assertThat(e.getMessage()).contains("String does not appear to be valid");
 		}
 	}
 
@@ -1453,7 +1447,8 @@ public class GenericJaxRsClientDstu2Test {
 			.execute();
 
 
-		assertThat(CAPTURE_SERVLET.ourRequestUri, either(equalTo(ourServer.getBaseUrl() + "/fhir/Patient?name=james&_elements=name%2Cidentifier")).or(equalTo(ourServer.getBaseUrl() + "/fhir/Patient?name=james&_elements=identifier%2Cname")));
+		assertThat(CAPTURE_SERVLET.ourRequestUri).isIn(ourServer.getBaseUrl() + "/fhir/Patient?name=james&_elements=name%2Cidentifier",
+			ourServer.getBaseUrl() + "/fhir/Patient?name=james&_elements=identifier%2Cname");
 		assertEquals(Patient.class, response.getEntry().get(0).getResource().getClass());
 
 	}
@@ -1490,7 +1485,7 @@ public class GenericJaxRsClientDstu2Test {
 
 		assertEquals("application/x-www-form-urlencoded", CAPTURE_SERVLET.ourRequestContentType.replace(";char", "; char").toLowerCase());
 		assertEquals(Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_LEGACY, CAPTURE_SERVLET.ourRequestFirstHeaders.get("Accept").getValue());
-		assertThat(CAPTURE_SERVLET.ourRequestFirstHeaders.get("User-Agent").getValue(), not(emptyString()));
+		assertThat(CAPTURE_SERVLET.ourRequestFirstHeaders.get("User-Agent").getValue()).isNotEmpty();
 	}
 
 	@Test
@@ -1515,8 +1510,8 @@ public class GenericJaxRsClientDstu2Test {
 			.execute();
 
 
-		assertThat(CAPTURE_SERVLET.ourRequestUri, containsString(ourServer.getBaseUrl() + "/fhir/Patient/_search?"));
-		assertThat(CAPTURE_SERVLET.ourRequestUri, containsString("_elements=identifier%2Cname"));
+		assertThat(CAPTURE_SERVLET.ourRequestUri).contains(ourServer.getBaseUrl() + "/fhir/Patient/_search?");
+		assertThat(CAPTURE_SERVLET.ourRequestUri).contains("_elements=identifier%2Cname");
 
 		//		assertThat(MY_SERVLET.ourRequestUri,
 		//				either(equalTo(ourServer.getBaseUrl() + "/fhir/Patient?name=james&_elements=name%2Cidentifier")).or(equalTo(ourServer.getBaseUrl() + "/fhir/Patient?name=james&_elements=identifier%2Cname")));
@@ -1665,11 +1660,11 @@ public class GenericJaxRsClientDstu2Test {
 
 
 		assertEquals(ourServer.getBaseUrl() + "/fhir", CAPTURE_SERVLET.ourRequestUri);
-		assertEquals(2, response.size());
+		assertThat(response).hasSize(2);
 
 		String requestString = CAPTURE_SERVLET.ourRequestBodyString;
 		ca.uhn.fhir.model.dstu2.resource.Bundle requestBundle = ourCtx.newJsonParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, requestString);
-		assertEquals(2, requestBundle.getEntry().size());
+		assertThat(requestBundle.getEntry()).hasSize(2);
 		assertEquals("POST", requestBundle.getEntry().get(0).getRequest().getMethod());
 		assertEquals("PUT", requestBundle.getEntry().get(1).getRequest().getMethod());
 		assertEquals("http://example.com/Patient/2", requestBundle.getEntry().get(1).getFullUrl());
@@ -1712,7 +1707,7 @@ public class GenericJaxRsClientDstu2Test {
 
 
 		assertEquals(ourServer.getBaseUrl() + "/fhir/", CAPTURE_SERVLET.ourRequestUri);
-		assertThat(response, containsString("\"Bundle\""));
+		assertThat(response).contains("\"Bundle\"");
 		assertEquals("application/json+fhir;charset=UTF-8", CAPTURE_SERVLET.ourRequestFirstHeaders.get("Content-Type").getValue());
 
 
@@ -1760,7 +1755,7 @@ public class GenericJaxRsClientDstu2Test {
 
 
 		assertEquals(ourServer.getBaseUrl() + "/fhir", CAPTURE_SERVLET.ourRequestUri);
-		assertEquals(2, response.getEntry().size());
+		assertThat(response.getEntry()).hasSize(2);
 
 		assertEquals("Patient/1/_history/1", response.getEntry().get(0).getResponse().getLocation());
 		assertEquals("Patient/2/_history/2", response.getEntry().get(1).getResponse().getLocation());
@@ -1779,41 +1774,41 @@ public class GenericJaxRsClientDstu2Test {
 		p.addName().addFamily("FOOFAMILY");
 
 		client.update().resource(p).conditionalByUrl("Patient?name=foo").encodedXml().execute();
-		assertEquals(1, CAPTURE_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
+		assertThat(CAPTURE_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE)).hasSize(1);
 		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, CAPTURE_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char"));
-		assertThat(CAPTURE_SERVLET.ourRequestBodyString, containsString("<family value=\"FOOFAMILY\"/>"));
+		assertThat(CAPTURE_SERVLET.ourRequestBodyString).contains("<family value=\"FOOFAMILY\"/>");
 		assertEquals("PUT", CAPTURE_SERVLET.ourRequestMethod);
 		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient?name=foo", CAPTURE_SERVLET.ourRequestUri);
 
 
 		client.update().resource(p).conditionalByUrl("Patient?name=http://foo|bar").encodedXml().execute();
-		assertEquals(1, CAPTURE_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
+		assertThat(CAPTURE_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE)).hasSize(1);
 		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, CAPTURE_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char"));
-		assertThat(CAPTURE_SERVLET.ourRequestBodyString, containsString("<family value=\"FOOFAMILY\"/>"));
+		assertThat(CAPTURE_SERVLET.ourRequestBodyString).contains("<family value=\"FOOFAMILY\"/>");
 		assertEquals("PUT", CAPTURE_SERVLET.ourRequestMethod);
 		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient?name=http%3A//foo%7Cbar", CAPTURE_SERVLET.ourRequestUri);
 
 
 		client.update().resource(ourCtx.newXmlParser().encodeResourceToString(p)).conditionalByUrl("Patient?name=foo").encodedXml().execute();
-		assertEquals(1, CAPTURE_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
+		assertThat(CAPTURE_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE)).hasSize(1);
 		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, CAPTURE_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char"));
-		assertThat(CAPTURE_SERVLET.ourRequestBodyString, containsString("<family value=\"FOOFAMILY\"/>"));
+		assertThat(CAPTURE_SERVLET.ourRequestBodyString).contains("<family value=\"FOOFAMILY\"/>");
 		assertEquals("PUT", CAPTURE_SERVLET.ourRequestMethod);
 		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient?name=foo", CAPTURE_SERVLET.ourRequestUri);
 
 
 		client.update().resource(p).conditional().where(Patient.NAME.matches().value("foo")).and(Patient.ADDRESS.matches().value("AAA|BBB")).encodedXml().execute();
-		assertEquals(1, CAPTURE_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
+		assertThat(CAPTURE_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE)).hasSize(1);
 		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, CAPTURE_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char"));
-		assertThat(CAPTURE_SERVLET.ourRequestBodyString, containsString("<family value=\"FOOFAMILY\"/>"));
+		assertThat(CAPTURE_SERVLET.ourRequestBodyString).contains("<family value=\"FOOFAMILY\"/>");
 		assertEquals("PUT", CAPTURE_SERVLET.ourRequestMethod);
 		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient?name=foo&address=AAA%5C%7CBBB", CAPTURE_SERVLET.ourRequestUri);
 
 
 		client.update().resource(ourCtx.newXmlParser().encodeResourceToString(p)).conditional().where(Patient.NAME.matches().value("foo")).and(Patient.ADDRESS.matches().value("AAA|BBB")).encodedXml().execute();
-		assertEquals(1, CAPTURE_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
+		assertThat(CAPTURE_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE)).hasSize(1);
 		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, CAPTURE_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char"));
-		assertThat(CAPTURE_SERVLET.ourRequestBodyString, containsString("<family value=\"FOOFAMILY\"/>"));
+		assertThat(CAPTURE_SERVLET.ourRequestBodyString).contains("<family value=\"FOOFAMILY\"/>");
 		assertEquals("PUT", CAPTURE_SERVLET.ourRequestMethod);
 		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient?name=foo&address=AAA%5C%7CBBB", CAPTURE_SERVLET.ourRequestUri);
 
@@ -1834,17 +1829,17 @@ public class GenericJaxRsClientDstu2Test {
 		p.addName().addFamily("FOOFAMILY");
 
 		client.update(new IdDt("Patient/123"), p);
-		assertEquals(1, CAPTURE_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
+		assertThat(CAPTURE_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE)).hasSize(1);
 		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, CAPTURE_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char"));
-		assertThat(CAPTURE_SERVLET.ourRequestBodyString, containsString("<family value=\"FOOFAMILY\"/>"));
+		assertThat(CAPTURE_SERVLET.ourRequestBodyString).contains("<family value=\"FOOFAMILY\"/>");
 		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/123?_format=xml", CAPTURE_SERVLET.ourRequestUri);
 		assertEquals("PUT", CAPTURE_SERVLET.ourRequestMethod);
 
 
 		client.update("123", p);
-		assertEquals(1, CAPTURE_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
+		assertThat(CAPTURE_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE)).hasSize(1);
 		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, CAPTURE_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char"));
-		assertThat(CAPTURE_SERVLET.ourRequestBodyString, containsString("<family value=\"FOOFAMILY\"/>"));
+		assertThat(CAPTURE_SERVLET.ourRequestBodyString).contains("<family value=\"FOOFAMILY\"/>");
 		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/123?_format=xml", CAPTURE_SERVLET.ourRequestUri);
 		assertEquals("PUT", CAPTURE_SERVLET.ourRequestMethod);
 
@@ -1864,12 +1859,12 @@ public class GenericJaxRsClientDstu2Test {
 		p.addName().addFamily("FOOFAMILY");
 
 		client.update().resource(p).prefer(PreferReturnEnum.MINIMAL).execute();
-		assertEquals(1, CAPTURE_SERVLET.ourRequestHeaders.get(Constants.HEADER_PREFER).size());
+		assertThat(CAPTURE_SERVLET.ourRequestHeaders.get(Constants.HEADER_PREFER)).hasSize(1);
 		assertEquals(Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_MINIMAL, CAPTURE_SERVLET.ourRequestHeaders.get(Constants.HEADER_PREFER).get(0).getValue());
 
 
 		client.update().resource(p).prefer(PreferReturnEnum.REPRESENTATION).execute();
-		assertEquals(1, CAPTURE_SERVLET.ourRequestHeaders.get(Constants.HEADER_PREFER).size());
+		assertThat(CAPTURE_SERVLET.ourRequestHeaders.get(Constants.HEADER_PREFER)).hasSize(1);
 		assertEquals(Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION, CAPTURE_SERVLET.ourRequestHeaders.get(Constants.HEADER_PREFER).get(0).getValue());
 
 
@@ -1943,7 +1938,7 @@ public class GenericJaxRsClientDstu2Test {
 		response = client.validate().resource(ourCtx.newJsonParser().encodeResourceToString(p)).prettyPrint().execute();
 		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/$validate?_pretty=true", CAPTURE_SERVLET.ourRequestUri);
 		assertEquals("POST", CAPTURE_SERVLET.ourRequestMethod);
-		assertThat(CAPTURE_SERVLET.ourRequestBodyString, containsString("\"resourceType\": \"Parameters\",\n"));
+		assertThat(CAPTURE_SERVLET.ourRequestBodyString).contains("\"resourceType\": \"Parameters\",\n");
 		assertNotNull(response.getOperationOutcome());
 		assertEquals("FOOBAR", toOo(response.getOperationOutcome()).getIssueFirstRep().getDiagnosticsElement().getValue());
 

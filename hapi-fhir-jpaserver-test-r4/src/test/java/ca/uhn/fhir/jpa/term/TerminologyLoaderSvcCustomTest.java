@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.term;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
@@ -18,8 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.io.IOException;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -64,12 +65,12 @@ public class TerminologyLoaderSvcCustomTest extends BaseLoaderTest {
 
 		// Root code
 		TermConcept code;
-		assertEquals(2, concepts.size());
+		assertThat(concepts).hasSize(2);
 		code = concepts.get("CHEM");
 		assertEquals("CHEM", code.getCode());
 		assertEquals("Chemistry", code.getDisplay());
 
-		assertEquals(2, code.getChildren().size());
+		assertThat(code.getChildren()).hasSize(2);
 		assertEquals("HB", code.getChildren().get(0).getChild().getCode());
 		assertEquals("Hemoglobin", code.getChildren().get(0).getChild().getDisplay());
 		assertEquals("NEUT", code.getChildren().get(1).getChild().getCode());
@@ -109,7 +110,7 @@ public class TerminologyLoaderSvcCustomTest extends BaseLoaderTest {
 		TermConcept code;
 
 		// Root code
-		assertEquals(5, concepts.size());
+		assertThat(concepts).hasSize(5);
 		code = concepts.get("CHEM");
 		assertEquals("CHEM", code.getCode());
 		assertEquals("Chemistry", code.getDisplay());
@@ -126,23 +127,23 @@ public class TerminologyLoaderSvcCustomTest extends BaseLoaderTest {
 		when(myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd(eq("http://foo/system"), any())).thenReturn(stats);
 
 		UploadStatistics outcome = mySvc.loadDeltaAdd("http://foo/system", myFiles.getFiles(), mySrd);
-		assertSame(stats, outcome);
+		assertThat(outcome).isSameAs(stats);
 
 		verify(myTermCodeSystemStorageSvc, times(1)).applyDeltaCodeSystemsAdd(eq("http://foo/system"), myCustomTerminologySetCaptor.capture());
 		CustomTerminologySet set = myCustomTerminologySetCaptor.getValue();
 
 		// Root concepts
-		assertEquals(2, set.getRootConcepts().size());
+		assertThat(set.getRootConcepts()).hasSize(2);
 		assertEquals("CHEM", set.getRootConcepts().get(0).getCode());
 		assertEquals("Chemistry", set.getRootConcepts().get(0).getDisplay());
 		assertEquals("MICRO", set.getRootConcepts().get(1).getCode());
 		assertEquals("Microbiology", set.getRootConcepts().get(1).getDisplay());
 
 		// Child concepts
-		assertEquals(2, set.getRootConcepts().get(0).getChildren().size());
+		assertThat(set.getRootConcepts().get(0).getChildren()).hasSize(2);
 		assertEquals("HB", set.getRootConcepts().get(0).getChildren().get(0).getChild().getCode());
 		assertEquals("Hemoglobin", set.getRootConcepts().get(0).getChildren().get(0).getChild().getDisplay());
-		assertEquals(null, set.getRootConcepts().get(0).getChildren().get(0).getChild().getSequence());
+		assertNull(set.getRootConcepts().get(0).getChildren().get(0).getChild().getSequence());
 		assertEquals("NEUT", set.getRootConcepts().get(0).getChildren().get(1).getChild().getCode());
 		assertEquals("Neutrophils", set.getRootConcepts().get(0).getChildren().get(1).getChild().getDisplay());
 
@@ -161,13 +162,13 @@ public class TerminologyLoaderSvcCustomTest extends BaseLoaderTest {
 		when(myTermCodeSystemStorageSvc.applyDeltaCodeSystemsRemove(eq("http://foo/system"), any())).thenReturn(stats);
 
 		UploadStatistics outcome = mySvc.loadDeltaRemove("http://foo/system", myFiles.getFiles(), mySrd);
-		assertSame(stats, outcome);
+		assertThat(outcome).isSameAs(stats);
 
 		verify(myTermCodeSystemStorageSvc, times(1)).applyDeltaCodeSystemsRemove(eq("http://foo/system"), myCustomTerminologySetCaptor.capture());
 		CustomTerminologySet set = myCustomTerminologySetCaptor.getValue();
 
 		// Root concepts
-		assertEquals(5, set.getRootConcepts().size());
+		assertThat(set.getRootConcepts()).hasSize(5);
 		assertEquals("CHEM", set.getRootConcepts().get(0).getCode());
 		assertEquals("Chemistry", set.getRootConcepts().get(0).getDisplay());
 		assertEquals("HB", set.getRootConcepts().get(1).getCode());

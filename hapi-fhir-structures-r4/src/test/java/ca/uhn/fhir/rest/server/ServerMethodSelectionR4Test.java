@@ -1,28 +1,23 @@
 package ca.uhn.fhir.rest.server;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Search;
-import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.test.utilities.HttpClientExtension;
-import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import com.google.common.collect.Lists;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.util.List;
 import java.util.Set;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
+
 
 public class ServerMethodSelectionR4Test extends BaseR4ServerTest {
 
@@ -53,9 +48,8 @@ public class ServerMethodSelectionR4Test extends BaseR4ServerTest {
 				.where(Patient.NAME.matches().value("foo"))
 				.include(Patient.INCLUDE_ORGANIZATION)
 				.execute();
-			fail();
-		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), containsString("this server does not know how to handle GET operation[Patient] with parameters [[_include, name]]"));
+			fail();		} catch (InvalidRequestException e) {
+			assertThat(e.getMessage()).contains("this server does not know how to handle GET operation[Patient] with parameters [[_include, name]]");
 		}
 	}
 
@@ -86,7 +80,7 @@ public class ServerMethodSelectionR4Test extends BaseR4ServerTest {
 			.include(Patient.INCLUDE_ORGANIZATION)
 			.returnBundle(Bundle.class)
 			.execute();
-		assertEquals(1, results.getEntry().size());
+		assertThat(results.getEntry()).hasSize(1);
 	}
 
 	/**
@@ -116,9 +110,8 @@ public class ServerMethodSelectionR4Test extends BaseR4ServerTest {
 				.where(Patient.NAME.matches().value("foo"))
 				.revInclude(Patient.INCLUDE_ORGANIZATION)
 				.execute();
-			fail();
-		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), containsString("this server does not know how to handle GET operation[Patient] with parameters [[_revinclude, name]]"));
+			fail();		} catch (InvalidRequestException e) {
+			assertThat(e.getMessage()).contains("this server does not know how to handle GET operation[Patient] with parameters [[_revinclude, name]]");
 		}
 	}
 
@@ -149,7 +142,7 @@ public class ServerMethodSelectionR4Test extends BaseR4ServerTest {
 			.revInclude(Patient.INCLUDE_ORGANIZATION)
 			.returnBundle(Bundle.class)
 			.execute();
-		assertEquals(1, results.getEntry().size());
+		assertThat(results.getEntry()).hasSize(1);
 	}
 
 

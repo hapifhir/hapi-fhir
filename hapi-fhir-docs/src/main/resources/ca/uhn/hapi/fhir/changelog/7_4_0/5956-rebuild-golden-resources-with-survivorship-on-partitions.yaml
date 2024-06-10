@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 5956
+title: "Fixed a regression that prevented rebuilding golden resources with mdm
+        survivorship rules when resources have non-numeric fhir ids in
+        a partitioned system.
+"

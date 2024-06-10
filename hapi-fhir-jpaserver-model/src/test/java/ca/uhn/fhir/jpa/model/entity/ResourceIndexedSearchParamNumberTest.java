@@ -6,7 +6,8 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ResourceIndexedSearchParamNumberTest {
 	private static final String GRITTSCORE = "grittscore";
@@ -26,9 +27,9 @@ public class ResourceIndexedSearchParamNumberTest {
 
 	@Test
 	void notEqual() {
-		assertNotEquals(PARAM_VALUE_10_FIRST, PARAM_VALUE_12_FIRST);
-		assertNotEquals(PARAM_VALUE_12_FIRST, PARAM_VALUE_10_FIRST);
-		assertNotEquals(PARAM_VALUE_10_FIRST.hashCode(), PARAM_VALUE_12_FIRST.hashCode());
+		assertThat(PARAM_VALUE_12_FIRST).isNotEqualTo(PARAM_VALUE_10_FIRST);
+		assertThat(PARAM_VALUE_10_FIRST).isNotEqualTo(PARAM_VALUE_12_FIRST);
+		assertThat(PARAM_VALUE_12_FIRST.hashCode()).isNotEqualTo(PARAM_VALUE_10_FIRST.hashCode());
 	}
 
 	@Test

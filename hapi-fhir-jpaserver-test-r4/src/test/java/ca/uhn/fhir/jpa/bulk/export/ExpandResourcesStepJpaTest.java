@@ -7,6 +7,7 @@ import ca.uhn.fhir.batch2.jobs.export.models.ExpandedResourcesList;
 import ca.uhn.fhir.batch2.jobs.export.models.ResourceIdList;
 import ca.uhn.fhir.batch2.jobs.models.BatchResourceId;
 import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
@@ -21,15 +22,11 @@ import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.IntStream;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.lessThanOrEqualTo;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.times;
@@ -73,7 +70,7 @@ public class ExpandResourcesStepJpaTest extends BaseJpaR4Test {
 				p.getMeta().addTag().setSystem("http://dynamic").setCode("tag" + t).setUserSelected(true).setVersion("1");
 				return myPatientDao.create(p, mySrd).getId().getIdPartAsLong();
 			}).toList();
-		assertEquals(count, ids.size());
+		assertThat(ids).hasSize(count);
 
 		ResourceIdList resourceList = new ResourceIdList();
 		resourceList.setResourceType("Patient");
@@ -83,7 +80,7 @@ public class ExpandResourcesStepJpaTest extends BaseJpaR4Test {
 		JobInstance jobInstance = new JobInstance();
 		String chunkId = "ABC";
 
-		StepExecutionDetails<BulkExportJobParameters, ResourceIdList> details = new StepExecutionDetails<>(params, resourceList, jobInstance, chunkId);
+		StepExecutionDetails<BulkExportJobParameters, ResourceIdList> details = new StepExecutionDetails<>(params, resourceList, jobInstance, new WorkChunk().setId(chunkId));
 
 		// Test
 
@@ -94,9 +91,9 @@ public class ExpandResourcesStepJpaTest extends BaseJpaR4Test {
 
 		verify(mySink, times(1)).accept(myWorkChunkCaptor.capture());
 		ExpandedResourcesList expandedResourceList = myWorkChunkCaptor.getValue();
-		assertEquals(10, expandedResourceList.getStringifiedResources().size());
-		assertThat(expandedResourceList.getStringifiedResources().get(0), containsString("{\"system\":\"http://static\",\"version\":\"1\",\"code\":\"tag\",\"userSelected\":true}"));
-		assertThat(expandedResourceList.getStringifiedResources().get(1), containsString("{\"system\":\"http://static\",\"version\":\"1\",\"code\":\"tag\",\"userSelected\":true}"));
+		assertThat(expandedResourceList.getStringifiedResources()).hasSize(10);
+		assertThat(expandedResourceList.getStringifiedResources().get(0)).contains("{\"system\":\"http://static\",\"version\":\"1\",\"code\":\"tag\",\"userSelected\":true}");
+		assertThat(expandedResourceList.getStringifiedResources().get(1)).contains("{\"system\":\"http://static\",\"version\":\"1\",\"code\":\"tag\",\"userSelected\":true}");
 
 		// Verify query counts
 		assertEquals(theExpectedSelectQueries, myCaptureQueriesListener.countSelectQueries());
@@ -140,7 +137,7 @@ public class ExpandResourcesStepJpaTest extends BaseJpaR4Test {
 		JobInstance jobInstance = new JobInstance();
 		String chunkId = "ABC";
 
-		StepExecutionDetails<BulkExportJobParameters, ResourceIdList> details = new StepExecutionDetails<>(params, resourceList, jobInstance, chunkId);
+		StepExecutionDetails<BulkExportJobParameters, ResourceIdList> details = new StepExecutionDetails<>(params, resourceList, jobInstance, new WorkChunk().setId(chunkId));
 
 		// Test
 
@@ -155,7 +152,7 @@ public class ExpandResourcesStepJpaTest extends BaseJpaR4Test {
 			.stream()
 			.map(t -> myFhirContext.newJsonParser().parseResource(t).getIdElement().getIdPartAsLong())
 			.toList();
-		assertThat(resourceIds.toString(), resourceIds, containsInAnyOrder(matchingIds.toArray(new Long[0])));
+		assertThat(resourceIds).as(resourceIds.toString()).containsExactlyInAnyOrder(matchingIds.toArray(new Long[0]));
 
 	}
 
@@ -182,7 +179,7 @@ public class ExpandResourcesStepJpaTest extends BaseJpaR4Test {
 		JobInstance jobInstance = new JobInstance();
 		String chunkId = "ABC";
 
-		StepExecutionDetails<BulkExportJobParameters, ResourceIdList> details = new StepExecutionDetails<>(params, resourceList, jobInstance, chunkId);
+		StepExecutionDetails<BulkExportJobParameters, ResourceIdList> details = new StepExecutionDetails<>(params, resourceList, jobInstance, new WorkChunk().setId(chunkId));
 
 		// Test
 
@@ -197,7 +194,7 @@ public class ExpandResourcesStepJpaTest extends BaseJpaR4Test {
 			.stream()
 			.map(t -> myFhirContext.newJsonParser().parseResource(t).getIdElement().getIdPartAsLong())
 			.toList();
-		assertThat(resourceIds.toString(), resourceIds, containsInAnyOrder(allIds.toArray(new Long[0])));
+		assertThat(resourceIds).as(resourceIds.toString()).containsExactlyInAnyOrder(allIds.toArray(new Long[0]));
 
 	}
 
@@ -230,7 +227,7 @@ public class ExpandResourcesStepJpaTest extends BaseJpaR4Test {
 		JobInstance jobInstance = new JobInstance();
 		String chunkId = "ABC";
 
-		StepExecutionDetails<BulkExportJobParameters, ResourceIdList> details = new StepExecutionDetails<>(params, resourceList, jobInstance, chunkId);
+		StepExecutionDetails<BulkExportJobParameters, ResourceIdList> details = new StepExecutionDetails<>(params, resourceList, jobInstance, new WorkChunk().setId(chunkId));
 
 		// Test
 
@@ -243,7 +240,7 @@ public class ExpandResourcesStepJpaTest extends BaseJpaR4Test {
 		for (var next : myWorkChunkCaptor.getAllValues()) {
 			int nextSize = String.join("\n", next.getStringifiedResources()).length();
 			ourLog.info("Next size: {}", nextSize);
-			assertThat(nextSize, lessThanOrEqualTo(maxFileSize));
+			assertThat(nextSize).isLessThanOrEqualTo(maxFileSize);
 			next.getStringifiedResources().stream()
 				.filter(StringUtils::isNotBlank)
 				.map(t->myFhirContext.newJsonParser().parseResource(t))

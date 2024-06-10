@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 5973
+title: "Previously, subscription criteria on R4 backport subscriptions were not validated by the
+SubscriptionValidatingInterceptor.  This has been corrected."

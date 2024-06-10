@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.batch2;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.JobOperationResultJson;
@@ -65,11 +66,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasSize;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -200,10 +198,9 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		final List<JobInstance> jobInstancesByCutoff =
 			mySvc.fetchInstances(JOB_DEFINITION_ID, StatusEnum.getEndedStatuses(), cutoffDate, PageRequest.of(0, 100));
 
-		assertEquals(Set.of(completedId, failedId, cancelledId),
-			jobInstancesByCutoff.stream()
-				.map(JobInstance::getInstanceId)
-				.collect(Collectors.toUnmodifiableSet()));
+		assertThat(jobInstancesByCutoff.stream()
+			.map(JobInstance::getInstanceId)
+			.collect(Collectors.toUnmodifiableSet())).isEqualTo(Set.of(completedId, failedId, cancelledId));
 	}
 
 	@Test
@@ -228,10 +225,9 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.logSelectQueries();
 		myCaptureQueriesListener.getSelectQueries().forEach(query -> ourLog.info("query: {}", query.getSql(true, true)));
 
-		assertEquals(Set.of(sevenMinutesAgoId, eightMinutesAgoId),
-			jobInstancesByCutoff.stream()
-				.map(JobInstance::getInstanceId)
-				.collect(Collectors.toUnmodifiableSet()));
+		assertThat(jobInstancesByCutoff.stream()
+			.map(JobInstance::getInstanceId)
+			.collect(Collectors.toUnmodifiableSet())).isEqualTo(Set.of(sevenMinutesAgoId, eightMinutesAgoId));
 	}
 
 	@Test
@@ -253,10 +249,9 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		final List<JobInstance> jobInstancesByCutoff =
 			mySvc.fetchInstances(JOB_DEFINITION_ID, StatusEnum.getEndedStatuses(), cutoffDate, PageRequest.of(0, 2));
 
-		assertEquals(Set.of(job1, job2),
-			jobInstancesByCutoff.stream()
-				.map(JobInstance::getInstanceId)
-				.collect(Collectors.toUnmodifiableSet()));
+		assertThat(jobInstancesByCutoff.stream()
+			.map(JobInstance::getInstanceId)
+			.collect(Collectors.toUnmodifiableSet())).isEqualTo(Set.of(job1, job2));
 	}
 
 	@ParameterizedTest
@@ -311,7 +306,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		String instanceId = mySvc.storeNewInstance(instance);
 
 		List<JobInstance> foundInstances = mySvc.fetchInstancesByJobDefinitionId(JOB_DEFINITION_ID, 10, 0);
-		assertThat(foundInstances, hasSize(1));
+		assertThat(foundInstances).hasSize(1);
 		assertEquals(instanceId, foundInstances.get(0).getInstanceId());
 	}
 
@@ -324,7 +319,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		statuses.add(StatusEnum.QUEUED);
 		statuses.add(StatusEnum.COMPLETED);
 		List<JobInstance> foundInstances = mySvc.fetchInstancesByJobDefinitionIdAndStatus(JOB_DEFINITION_ID, statuses, 10, 0);
-		assertThat(foundInstances, hasSize(1));
+		assertThat(foundInstances).hasSize(1);
 		assertEquals(instanceId, foundInstances.get(0).getInstanceId());
 	}
 
@@ -336,7 +331,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		// Test
 		request.setJobStatus("");
 		Page<JobInstance> foundInstances = mySvc.fetchJobInstances(request);
-		assertThat(foundInstances.getTotalElements(), equalTo(2L));
+		assertEquals(2L, foundInstances.getTotalElements());
 	}
 
 	@Test
@@ -347,7 +342,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		// Test
 		request.setJobStatus("COMPLETED");
 		Page<JobInstance> foundInstances = mySvc.fetchJobInstances(request);
-		assertThat(foundInstances.getTotalElements(), equalTo(1L));
+		assertEquals(1L, foundInstances.getTotalElements());
 	}
 
 	private JobInstanceFetchRequest createFetchRequest() {
@@ -589,11 +584,11 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		// then
 		ArrayList<WorkChunk> chunks = new ArrayList<>();
 		Iterators.addAll(chunks, workChunks);
-		assertEquals(3, chunks.size());
+		assertThat(chunks).hasSize(3);
 
 		{
 			WorkChunk workChunk = chunks.get(0);
-			assertNull(workChunk.getData(), "we skip the data");
+			assertThat(workChunk.getData()).as("we skip the data").isNull();
 			assertEquals(queuedId, workChunk.getId());
 			assertEquals(JOB_DEFINITION_ID, workChunk.getJobDefinitionId());
 			assertEquals(JOB_DEF_VER, workChunk.getJobDefinitionVersion());
@@ -660,7 +655,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		runInTransaction(() -> assertEquals(theExpectedTransitionStatus, findChunkByIdOrThrow(id).getStatus()));
 
 		WorkChunk chunk = mySvc.onWorkChunkDequeue(id).orElseThrow(IllegalArgumentException::new);
-		assertEquals(36, chunk.getInstanceId().length());
+		assertThat(chunk.getInstanceId()).hasSize(36);
 		assertEquals(JOB_DEFINITION_ID, chunk.getJobDefinitionId());
 		assertEquals(JOB_DEF_VER, chunk.getJobDefinitionVersion());
 		assertEquals(WorkChunkStatusEnum.IN_PROGRESS, chunk.getStatus());
@@ -777,7 +772,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		});
 
 		List<WorkChunk> chunks = ImmutableList.copyOf(mySvc.fetchAllWorkChunksIterator(instanceId, true));
-		assertEquals(1, chunks.size());
+		assertThat(chunks).hasSize(1);
 		assertEquals(2, chunks.get(0).getErrorCount());
 
 		verify(myBatchSender).sendWorkChannelMessage(any());
@@ -851,7 +846,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 
 		while (reducedChunks.hasNext()) {
 			WorkChunk reducedChunk = reducedChunks.next();
-			assertTrue(chunkIds.contains(reducedChunk.getId()));
+			assertThat(chunkIds).contains(reducedChunk.getId());
 			assertEquals(WorkChunkStatusEnum.COMPLETED, reducedChunk.getStatus());
 		}
 	}

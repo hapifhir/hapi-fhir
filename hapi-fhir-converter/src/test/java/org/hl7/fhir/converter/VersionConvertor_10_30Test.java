@@ -1,15 +1,23 @@
 package org.hl7.fhir.converter;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import org.hl7.fhir.convertors.factory.VersionConvertorFactory_10_30;
-import org.hl7.fhir.dstu3.model.*;
-import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.dstu2.model.Resource;
+import org.hl7.fhir.dstu3.model.CodeableConcept;
+import org.hl7.fhir.dstu3.model.Coding;
+import org.hl7.fhir.dstu3.model.DateTimeType;
+import org.hl7.fhir.dstu3.model.Extension;
+import org.hl7.fhir.dstu3.model.Observation;
+import org.hl7.fhir.dstu3.model.Reference;
+import org.hl7.fhir.dstu3.model.SimpleQuantity;
+import org.hl7.fhir.dstu3.model.Specimen;
+import org.hl7.fhir.dstu3.model.StringType;
+import org.hl7.fhir.exceptions.FHIRException;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
 import java.util.Date;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class VersionConvertor_10_30Test {
 
@@ -21,7 +29,7 @@ public class VersionConvertor_10_30Test {
 		
 		org.hl7.fhir.dstu3.model.Observation output = (Observation) VersionConvertorFactory_10_30.convertResource(input);
 		String context = output.getContext().getReference();
-		
+
 		assertEquals("Encounter/123", context);
 	}
 

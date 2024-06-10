@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.test;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.fql.executor.HfqlDataTypeEnum;
 import ca.uhn.fhir.jpa.fql.executor.IHfqlExecutor;
@@ -64,9 +65,7 @@ import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.ArgumentMatchers.any;
@@ -148,7 +147,7 @@ public class WebTest {
 		HtmlPage searchResultPage = searchButton.click();
 		HtmlTable controlsTable = searchResultPage.getHtmlElementById("resultControlsTable");
 		List<HtmlTableRow> controlRows = controlsTable.getBodies().get(0).getRows();
-		assertEquals(5, controlRows.size());
+		assertThat(controlRows).hasSize(5);
 		assertEquals("Read Update $summary $validate", controlRows.get(0).getCell(0).asNormalizedText());
 		assertEquals("Patient/A0/_history/1", controlRows.get(0).getCell(1).asNormalizedText());
 		assertEquals("Patient/A4/_history/1", controlRows.get(4).getCell(1).asNormalizedText());
@@ -172,7 +171,7 @@ public class WebTest {
 		HtmlPage searchResultPage = historyButton.click();
 		HtmlTable controlsTable = searchResultPage.getHtmlElementById("resultControlsTable");
 		List<HtmlTableRow> controlRows = controlsTable.getBodies().get(0).getRows();
-		assertEquals(5, controlRows.size());
+		assertThat(controlRows).hasSize(5);
 		ourLog.info(controlRows.get(0).asXml());
 		assertEquals("Patient/A4/_history/1", controlRows.get(0).getCell(1).asNormalizedText());
 		assertEquals("Patient/A0/_history/1", controlRows.get(4).getCell(1).asNormalizedText());
@@ -196,7 +195,7 @@ public class WebTest {
 			.orElseThrow()
 			.click();
 
-		assertThat(summaryPage.asNormalizedText(), containsString("Result Narrative\t\nHELLO WORLD DOCUMENT"));
+		assertThat(summaryPage.asNormalizedText()).contains("Result Narrative\t\nHELLO WORLD DOCUMENT");
 	}
 
 	private static Stream<Arguments> getButtonMappingPredicates() {
@@ -258,7 +257,7 @@ public class WebTest {
 			.orElseThrow()
 			.click();
 
-		assertThat(summaryPage.asNormalizedText(), containsString("\"diagnostics\": \"VALIDATION FAILURE\""));
+		assertThat(summaryPage.asNormalizedText()).contains("\"diagnostics\": \"VALIDATION FAILURE\"");
 	}
 
 	@Test
@@ -278,7 +277,7 @@ public class WebTest {
 			.orElseThrow()
 			.click();
 
-		assertThat(diffPage.asNormalizedText(), containsString("\"resourceType\": \"Parameters\""));
+		assertThat(diffPage.asNormalizedText()).contains("\"resourceType\": \"Parameters\"");
 	}
 
 
@@ -307,7 +306,7 @@ public class WebTest {
 
 		HtmlTable table = (HtmlTable) resultsPage.getElementById("resultsTable");
 		ourLog.info(table.asXml());
-		assertThat(table.asNormalizedText(), containsString("Simpson"));
+		assertThat(table.asNormalizedText()).contains("Simpson");
 	}
 
 

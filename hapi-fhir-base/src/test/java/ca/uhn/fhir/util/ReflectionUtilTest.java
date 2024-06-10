@@ -10,8 +10,10 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+
 
 public class ReflectionUtilTest {
 
@@ -27,7 +29,7 @@ public class ReflectionUtilTest {
 
 	@Test
 	public void testNewInstanceOrReturnNullWrong1() {
-		assertEquals(null, ReflectionUtil.newInstanceOrReturnNull("foo.Foo", List.class));
+		assertNull(ReflectionUtil.newInstanceOrReturnNull("foo.Foo", List.class));
 	}
 
 	@Test

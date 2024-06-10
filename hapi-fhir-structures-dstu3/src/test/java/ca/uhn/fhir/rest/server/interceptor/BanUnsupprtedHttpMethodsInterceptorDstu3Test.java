@@ -1,16 +1,15 @@
 package ca.uhn.fhir.rest.server.interceptor;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.rest.server.CreateDstu3Test;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
-import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
-import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
@@ -20,27 +19,17 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.methods.HttpTrace;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.ee10.servlet.ServletHandler;
-import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class BanUnsupprtedHttpMethodsInterceptorDstu3Test {
 
@@ -72,23 +61,23 @@ public class BanUnsupprtedHttpMethodsInterceptorDstu3Test {
 	@Test	
 	public void testHeadJsonWithInvalidPatient() throws Exception {	
 		HttpHead httpGet = new HttpHead(ourServer.getBaseUrl() + "/Patient/123");	
-		HttpResponse status = ourClient.execute(httpGet);	
-		assertEquals(null, status.getEntity());	
- 		ourLog.info(status.toString());	
-			
-		assertEquals(404, status.getStatusLine().getStatusCode());	
-		assertThat(status.getFirstHeader("x-powered-by").getValue(), containsString("HAPI"));	
+		HttpResponse status = ourClient.execute(httpGet);
+		assertNull(status.getEntity());	
+ 		ourLog.info(status.toString());
+
+		assertEquals(404, status.getStatusLine().getStatusCode());
+		assertThat(status.getFirstHeader("x-powered-by").getValue()).contains("HAPI");	
 	}
 	
 	@Test	
 	public void testHeadJsonWithValidPatient() throws Exception {	
 		HttpHead httpGet = new HttpHead(ourServer.getBaseUrl() + "/Patient/1");	
-		HttpResponse status = ourClient.execute(httpGet);	
-		assertEquals(null, status.getEntity());	
- 		ourLog.info(status.toString());	
-			
-		assertEquals(200, status.getStatusLine().getStatusCode());	
-		assertThat(status.getFirstHeader("x-powered-by").getValue(), containsString("HAPI"));	
+		HttpResponse status = ourClient.execute(httpGet);
+		assertNull(status.getEntity());	
+ 		ourLog.info(status.toString());
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(status.getFirstHeader("x-powered-by").getValue()).contains("HAPI");	
 	}
 	
 	@Test
@@ -135,7 +124,7 @@ public class BanUnsupprtedHttpMethodsInterceptorDstu3Test {
 		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1");
 		HttpResponse status = ourClient.execute(httpGet);
 		IOUtils.closeQuietly(status.getEntity().getContent());
-		
+
 		assertEquals(200, status.getStatusLine().getStatusCode());
 	}
 	

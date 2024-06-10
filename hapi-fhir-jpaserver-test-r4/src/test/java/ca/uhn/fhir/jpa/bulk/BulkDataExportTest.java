@@ -1,5 +1,8 @@
 package ca.uhn.fhir.jpa.bulk;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.model.JobInstance;
@@ -87,17 +90,10 @@ import java.util.stream.Stream;
 
 import static ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4TagsInlineTest.createSearchParameterForInlineSecurity;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.awaitility.Awaitility.await;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.matchesPattern;
-import static org.hamcrest.Matchers.not;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.awaitility.Awaitility.await;
+
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class BulkDataExportTest extends BaseResourceProviderR4Test {
@@ -477,8 +473,8 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 				"Expected " + String.join(", ", ids) + ". Actual : " + String.join(", ", valueSet));
 			for (String id : valueSet) {
 				// should start with our value from the key-value pairs
-				assertTrue(id.startsWith(value));
-				assertTrue(ids.contains(id.substring(value.length())));
+				assertThat(id).startsWith(value);
+				assertThat(ids).contains(id.substring(value.length()));
 			}
 		} finally {
 			myInterceptorRegistry.unregisterInterceptor(interceptor);
@@ -1059,7 +1055,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		JobInstance finalJobInstance = verifyBulkExportResults(options, expectedIds, List.of());
 		BulkExportJobResults results = JsonUtil.deserialize(finalJobInstance.getReport(), BulkExportJobResults.class);
 		List<String> binaryIds = results.getResourceTypeToBinaryIds().values().stream().flatMap(Collection::stream).toList();
-		assertEquals(2, binaryIds.size());
+		assertThat(binaryIds).hasSize(2);
 		for (String next : binaryIds) {
 			Binary binary = myBinaryDao.read(new IdType(next), new SystemRequestDetails());
 			assertEquals("http://foo", binary.getSecurityContext().getIdentifier().getSystem());
@@ -1095,7 +1091,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 			List<String> binaryIds = file.getValue();
 			for (var nextBinaryId : binaryIds) {
 				String nextBinaryIdPart = new IdType(nextBinaryId).getIdPart();
-				assertThat(nextBinaryIdPart, matchesPattern("[a-zA-Z0-9]{32}"));
+				assertThat(nextBinaryIdPart).matches("[a-zA-Z0-9]{32}");
 
 				Binary binary = myBinaryDao.read(new IdType(nextBinaryId));
 				assertEquals(Constants.CT_FHIR_NDJSON, binary.getContentType());
@@ -1126,10 +1122,10 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		}
 
 		for (String containedString : theContainedList) {
-			assertThat("Didn't find expected ID " + containedString + " in IDS: " + foundIds, foundIds, hasItem(containedString));
+			assertThat(foundIds).as("Didn't find expected ID " + containedString + " in IDS: " + foundIds).contains(containedString);
 		}
 		for (String excludedString : theExcludedList) {
-			assertThat("Didn't want unexpected ID " + excludedString + " in IDS: " + foundIds, foundIds, not(hasItem(excludedString)));
+			assertThat(foundIds).as("Didn't want unexpected ID " + excludedString + " in IDS: " + foundIds).doesNotContain(excludedString);
 		}
 		return jobInstance;
 	}
@@ -1147,9 +1143,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		} catch (InvalidRequestException e) {
 
 			// Verify
-			assertThat(e.getMessage(), containsString(
-				"Invalid post-fetch filter URL, must be in the format [resourceType]?[parameters]: foo"
-			));
+			assertThat(e.getMessage()).contains("Invalid post-fetch filter URL, must be in the format [resourceType]?[parameters]: foo");
 
 		}
 	}
@@ -1166,9 +1160,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		} catch (InvalidRequestException e) {
 
 			// Verify
-			assertThat(e.getMessage(), containsString(
-				"Invalid post-fetch filter URL, must be in the format [resourceType]?[parameters]: Patient?"
-			));
+			assertThat(e.getMessage()).contains("Invalid post-fetch filter URL, must be in the format [resourceType]?[parameters]: Patient?");
 
 		}
 	}
@@ -1185,9 +1177,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		} catch (InvalidRequestException e) {
 
 			// Verify
-			assertThat(e.getMessage(), containsString(
-				"Invalid post-fetch filter URL, unknown resource type: Foo"
-			));
+			assertThat(e.getMessage()).contains("Invalid post-fetch filter URL, unknown resource type: Foo");
 
 		}
 	}
@@ -1204,9 +1194,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		} catch (InvalidRequestException e) {
 
 			// Verify
-			assertThat(e.getMessage(), containsString(
-				"Chained parameters are not supported"
-			));
+			assertThat(e.getMessage()).contains("Chained parameters are not supported");
 
 		}
 	}
@@ -1223,8 +1211,8 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		} catch (InvalidRequestException e) {
 
 			// Verify
-			assertThat(e.getMessage(), containsString("Invalid post-fetch filter URL."));
-			assertThat(e.getMessage(), containsString("Resource type Observation does not have a parameter with name: foo"));
+			assertThat(e.getMessage()).contains("Invalid post-fetch filter URL.");
+			assertThat(e.getMessage()).contains("Resource type Observation does not have a parameter with name: foo");
 
 		}
 	}

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.term;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -14,8 +15,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 public class ValueSetExpansionWithHierarchyR4Test extends BaseTermR4Test {
@@ -101,9 +101,9 @@ public class ValueSetExpansionWithHierarchyR4Test extends BaseTermR4Test {
       myValueSetDao.create(theValueSet, mySrd);
       myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
       Optional<TermValueSet> optionalTermValueSet = runInTransaction(() -> myTermValueSetDao.findTermValueSetByUrlAndNullVersion(theValueSet.getUrl()));
-      assertTrue(optionalTermValueSet.isPresent());
+		 assertThat(optionalTermValueSet).isPresent();
       TermValueSet expandedTermValueSet = optionalTermValueSet.get();
-      assertEquals(TermValueSetPreExpansionStatusEnum.EXPANDED, expandedTermValueSet.getExpansionStatus());
-      assertEquals(theExpectedConceptExpansionCount, expandedTermValueSet.getTotalConcepts());
+	   assertEquals(TermValueSetPreExpansionStatusEnum.EXPANDED, expandedTermValueSet.getExpansionStatus());
+	   assertEquals(theExpectedConceptExpansionCount, expandedTermValueSet.getTotalConcepts());
    }
 }

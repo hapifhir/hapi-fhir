@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
@@ -15,7 +16,6 @@ import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
-import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.base.Charsets;
@@ -24,12 +24,6 @@ import org.apache.commons.lang3.Validate;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.ee10.servlet.ServletHandler;
-import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.OperationOutcome.IssueType;
@@ -37,7 +31,6 @@ import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
@@ -45,11 +38,8 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ServerExceptionDstu3Test {
 
@@ -91,7 +81,7 @@ public class ServerExceptionDstu3Test {
 
 			assertEquals(404, status.getStatusLine().getStatusCode());
 			assertEquals("BAR BAR", status.getFirstHeader("X-Foo").getValue());
-			assertThat(status.getFirstHeader("X-Powered-By").getValue(), containsString("HAPI FHIR"));
+			assertThat(status.getFirstHeader("X-Powered-By").getValue()).contains("HAPI FHIR");
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
@@ -116,7 +106,7 @@ public class ServerExceptionDstu3Test {
 			String responseContent = new String(responseContentBytes, Charsets.UTF_8);
 			ourLog.info(status.getStatusLine().toString());
 			ourLog.info(responseContent);
-			assertThat(responseContent, containsString("El nombre está vacío"));
+			assertThat(responseContent).contains("El nombre está vacío");
 		}
 
 	}
@@ -133,7 +123,7 @@ public class ServerExceptionDstu3Test {
 			String responseContent = new String(responseContentBytes, Charsets.UTF_8);
 			ourLog.info(status.getStatusLine().toString());
 			ourLog.info(responseContent);
-			assertThat(responseContent, containsString("\"diagnostics\":\"" + Msg.code(389) + "Failed to call access method: java.lang.NullPointerException: Hello\""));
+			assertThat(responseContent).contains("\"diagnostics\":\"" + Msg.code(389) + "Failed to call access method: java.lang.NullPointerException: Hello\"");
 		}
 
 	}
@@ -150,7 +140,7 @@ public class ServerExceptionDstu3Test {
 			String responseContent = new String(responseContentBytes, Charsets.UTF_8);
 			ourLog.info(status.getStatusLine().toString());
 			ourLog.info(responseContent);
-			assertThat(responseContent, containsString("\"diagnostics\":\"" + Msg.code(389) + "Failed to call access method: java.io.IOException: Hello\""));
+			assertThat(responseContent).contains("\"diagnostics\":\"" + Msg.code(389) + "Failed to call access method: java.io.IOException: Hello\"");
 		}
 
 	}
@@ -172,7 +162,7 @@ public class ServerExceptionDstu3Test {
 			String responseContent = new String(responseContentBytes, Charsets.UTF_8);
 			ourLog.info(status.getStatusLine().toString());
 			ourLog.info(responseContent);
-			assertThat(responseContent, containsString("\"diagnostics\":\"Hello\""));
+			assertThat(responseContent).contains("\"diagnostics\":\"Hello\"");
 		}
 
 		ourServer.getInterceptorService().unregisterAllInterceptors();
@@ -190,7 +180,7 @@ public class ServerExceptionDstu3Test {
 			ourLog.info(responseContent);
 
 			assertEquals(201, status.getStatusLine().getStatusCode());
-			assertThat(status.getFirstHeader("Location").getValue(), containsString("Patient/123"));
+			assertThat(status.getFirstHeader("Location").getValue()).contains("Patient/123");
 		}
 
 	}

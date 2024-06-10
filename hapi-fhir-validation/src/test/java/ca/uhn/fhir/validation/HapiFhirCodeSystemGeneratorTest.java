@@ -20,6 +20,7 @@ import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
+
 public class HapiFhirCodeSystemGeneratorTest extends BaseValidationTestWithInlineMocks {
 
 	public static final String HAPI_FHIR_STORAGE_RESPONSE_CODE_JSON = "HapiFhirStorageResponseCode.json";

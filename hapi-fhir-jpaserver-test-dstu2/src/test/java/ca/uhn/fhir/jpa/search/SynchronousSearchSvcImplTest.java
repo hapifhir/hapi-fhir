@@ -1,5 +1,8 @@
 package ca.uhn.fhir.jpa.search;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -16,17 +19,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Collection;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
-import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -60,7 +58,7 @@ public class SynchronousSearchSvcImplTest extends BaseSearchSvc {
 		assertFalse(result.isEmpty());
 
 		List<IBaseResource> resources = result.getResources(0, 1000);
-		assertEquals(790, resources.size());
+		assertThat(resources).hasSize(790);
 		assertEquals("10", resources.get(0).getIdElement().getValueAsString());
 		assertEquals("799", resources.get(789).getIdElement().getValueAsString());
 	}
@@ -83,7 +81,7 @@ public class SynchronousSearchSvcImplTest extends BaseSearchSvc {
 		IBundleProvider result = mySynchronousSearchSvc.executeQuery("Patient", params, RequestPartitionId.allPartitions());
 
 		List<IBaseResource> resources = result.getResources(0, 1000);
-		assertEquals(10, resources.size());
+		assertThat(resources).hasSize(10);
 		assertEquals("20", resources.get(0).getIdElement().getValueAsString());
 	}
 
@@ -106,7 +104,7 @@ public class SynchronousSearchSvcImplTest extends BaseSearchSvc {
 		IBundleProvider result = mySynchronousSearchSvc.executeQuery("Patient", params,   RequestPartitionId.allPartitions());
 
 		List<IBaseResource> resources = result.getResources(0, 1000);
-		assertEquals(100, resources.size());
+		assertThat(resources).hasSize(100);
 		assertEquals("10", resources.get(0).getIdElement().getValueAsString());
 		assertEquals("109", resources.get(99).getIdElement().getValueAsString());
 	}

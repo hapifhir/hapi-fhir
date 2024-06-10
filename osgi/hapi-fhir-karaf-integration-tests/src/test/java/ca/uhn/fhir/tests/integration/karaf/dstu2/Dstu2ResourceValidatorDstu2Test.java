@@ -51,9 +51,9 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.when;
@@ -112,14 +112,14 @@ public class Dstu2ResourceValidatorDstu2Test {
 		String encoded = parser.setPrettyPrint(true).encodeResourceToString(p).replace("2000-12-31", "2000-15-31");
 		ourLog.info(encoded);
 
-		assertThat(encoded, StringContains.containsString("2000-15-31"));
+		assertThat(encoded).contains("2000-15-31");
 
 		ValidationResult result = ourCtx.newValidator().validateWithResult(encoded);
 		String resultString = parser.setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome());
 		ourLog.info(resultString);
 
 		assertEquals(2, ((OperationOutcome)result.toOperationOutcome()).getIssue().size());
-		assertThat(resultString, StringContains.containsString("cvc-pattern-valid"));
+		assertThat(resultString).contains("cvc-pattern-valid");
 
 		try {
 			parser.parseResource(encoded);
@@ -182,7 +182,7 @@ public class Dstu2ResourceValidatorDstu2Test {
 
 		assertTrue(result.isSuccessful());
 
-		assertThat(messageString, containsString("No issues"));
+		assertThat(messageString).contains("No issues"));
 
 	}
 
@@ -205,7 +205,7 @@ public class Dstu2ResourceValidatorDstu2Test {
 		ourLog.info(messageString);
 
 		//@formatter:off
-		assertThat(messageString, stringContainsInOrder(
+		assertThat(messageString).containsSubsequence(
 			"meta",
 			"String Extension",
 			"Organization/2.25.79433498044103547197447759549862032393",
@@ -213,7 +213,7 @@ public class Dstu2ResourceValidatorDstu2Test {
 			"furry-white",
 			"FamilyName"
 		));
-		assertThat(messageString, not(stringContainsInOrder(
+		assertThat(messageString).doesNotContainPattern("(?s)
 			"extension",
 			"meta"
 		)));
@@ -231,8 +231,8 @@ public class Dstu2ResourceValidatorDstu2Test {
 
 		assertTrue(result.isSuccessful());
 
-		assertThat(messageString, containsString("valueReference"));
-		assertThat(messageString, not(containsString("valueResource")));
+		assertThat(messageString).contains("valueReference"));
+		assertThat(messageString).doesNotContain("valueResource");
 	}
 
 	private Matcher<? super String> stringContainsInOrder(java.lang.String... substrings) {
@@ -258,7 +258,7 @@ public class Dstu2ResourceValidatorDstu2Test {
 		ourLog.info(messageString);
 
 		//@formatter:off
-		assertThat(messageString, stringContainsInOrder(
+		assertThat(messageString).containsSubsequence(
 			"meta",
 			"Organization/2.25.79433498044103547197447759549862032393",
 			"furry-grey",
@@ -266,12 +266,12 @@ public class Dstu2ResourceValidatorDstu2Test {
 			"String Extension",
 			"FamilyName"
 		));
-		assertThat(messageString, not(stringContainsInOrder(
+		assertThat(messageString).doesNotContainPattern("(?s)
 			"extension",
 			"meta"
 		)));
-		assertThat(messageString, containsString("url=\"http://ahr.copa.inso.tuwien.ac.at/StructureDefinition/Patient#animal-colorSecondary\""));
-		assertThat(messageString, containsString("url=\"http://foo.com/example\""));
+		assertThat(messageString).contains("url=\"http://ahr.copa.inso.tuwien.ac.at/StructureDefinition/Patient#animal-colorSecondary\""));
+		assertThat(messageString).contains("url=\"http://foo.com/example\""));
 		//@formatter:on
 
 		FhirValidator val = ourCtx.newValidator();
@@ -286,8 +286,8 @@ public class Dstu2ResourceValidatorDstu2Test {
 
 		assertTrue(result.isSuccessful());
 
-		assertThat(messageString, containsString("valueReference"));
-		assertThat(messageString, not(containsString("valueResource")));
+		assertThat(messageString).contains("valueReference"));
+		assertThat(messageString).doesNotContain("valueResource");
 	}
 
 	@ResourceDef(name = "Patient")

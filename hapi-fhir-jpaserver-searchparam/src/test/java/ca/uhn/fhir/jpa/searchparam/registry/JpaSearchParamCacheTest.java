@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -36,8 +37,8 @@ public class JpaSearchParamCacheTest {
 		setActiveComboSearchParams(RESOURCE_TYPE, List.of(unique1, unique2, nonUnique1, nonUnique2));
 
 		List<RuntimeSearchParam> result = myJpaSearchParamCache.getActiveComboSearchParams(RESOURCE_TYPE);
-		assertEquals(4, result.size());
-		assertTrue(result.containsAll(List.of(unique1, unique2, nonUnique1, nonUnique2)));
+		assertThat(result).hasSize(4);
+		assertThat(result).containsAll(List.of(unique1, unique2, nonUnique1, nonUnique2));
 	}
 
 	@Test
@@ -48,8 +49,8 @@ public class JpaSearchParamCacheTest {
 		setActiveComboSearchParams(RESOURCE_TYPE, List.of(unique1, unique2, nonUnique));
 
 		List<RuntimeSearchParam> result = myJpaSearchParamCache.getActiveComboSearchParams(RESOURCE_TYPE, ComboSearchParamType.UNIQUE);
-		assertEquals(2, result.size());
-		assertTrue(result.containsAll(List.of(unique1, unique2)));
+		assertThat(result).hasSize(2);
+		assertThat(result).containsAll(List.of(unique1, unique2));
 	}
 
 	@Test
@@ -60,8 +61,8 @@ public class JpaSearchParamCacheTest {
 		setActiveComboSearchParams(RESOURCE_TYPE, List.of(nonUnique1, nonUnique2, unique));
 
 		List<RuntimeSearchParam> result = myJpaSearchParamCache.getActiveComboSearchParams(RESOURCE_TYPE, ComboSearchParamType.NON_UNIQUE);
-		assertEquals(2, result.size());
-		assertTrue(result.containsAll(List.of(nonUnique1, nonUnique2)));
+		assertThat(result).hasSize(2);
+		assertThat(result).containsAll(List.of(nonUnique1, nonUnique2));
 	}
 
 	@Test
@@ -75,7 +76,7 @@ public class JpaSearchParamCacheTest {
 		setActiveComboSearchParams(RESOURCE_TYPE, List.of(sp1, sp2));
 
 		Optional<RuntimeSearchParam> found = myJpaSearchParamCache.getActiveComboSearchParamById(RESOURCE_TYPE, id1);
-		assertTrue(found.isPresent());
+		assertThat(found).isPresent();
 		assertEquals(id1, found.get().getId());
 	}
 

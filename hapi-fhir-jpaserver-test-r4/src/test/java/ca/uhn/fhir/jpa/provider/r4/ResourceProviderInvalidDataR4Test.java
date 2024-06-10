@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
-import ca.uhn.fhir.jpa.dao.GZipUtil;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import org.apache.commons.io.IOUtils;
@@ -14,8 +13,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ResourceProviderInvalidDataR4Test extends BaseResourceProviderR4Test {
 
@@ -49,7 +47,7 @@ public class ResourceProviderInvalidDataR4Test extends BaseResourceProviderR4Tes
 		try (CloseableHttpResponse status = ourHttpClient.execute(httpGet)) {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info("Response content: " + responseContent);
-			assertThat(responseContent, containsString("\"value\":-0.100"));
+			assertThat(responseContent).contains("\"value\":-0.100");
 		}
 	}
 

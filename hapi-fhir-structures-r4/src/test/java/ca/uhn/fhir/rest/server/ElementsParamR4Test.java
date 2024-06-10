@@ -8,21 +8,13 @@ import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.rest.server.interceptor.ExceptionInterceptorMethodTest;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
-import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.ee10.servlet.ServletHandler;
-import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.DiagnosticReport;
@@ -34,7 +26,6 @@ import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -43,13 +34,9 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.not;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ElementsParamR4Test {
@@ -171,12 +158,12 @@ public class ElementsParamR4Test {
 			Patient.class,
 			patient -> {
 				String responseContent = ourCtx.newXmlParser().encodeResourceToString(patient);
-				assertThat(responseContent, not(containsString("<Bundle")));
-				assertThat(responseContent, (containsString("<Patient")));
-				assertThat(responseContent, not(containsString("<div>THE DIV</div>")));
-				assertThat(responseContent, (containsString("family")));
-				assertThat(responseContent, (containsString("maritalStatus")));
-				assertThat(ourLastElements, containsInAnyOrder("name", "maritalStatus"));
+				assertThat(responseContent).doesNotContain("<Bundle");
+				assertThat(responseContent).contains("<Patient");
+				assertThat(responseContent).doesNotContain("<div>THE DIV</div>");
+				assertThat(responseContent).contains("family");
+				assertThat(responseContent).contains("maritalStatus");
+				assertThat(ourLastElements).containsExactlyInAnyOrder("name", "maritalStatus");
 			}
 		);
 	}
@@ -188,10 +175,10 @@ public class ElementsParamR4Test {
 			Patient.class,
 			patient -> {
 				String responseContent = ourCtx.newXmlParser().encodeResourceToString(patient);
-				assertThat(responseContent, not(containsString("<div>THE DIV</div>")));
-				assertThat(responseContent, (containsString("family")));
-				assertThat(responseContent, not(containsString("maritalStatus")));
-				assertThat(ourLastElements, containsInAnyOrder("name"));
+				assertThat(responseContent).doesNotContain("<div>THE DIV</div>");
+				assertThat(responseContent).contains("family");
+				assertThat(responseContent).doesNotContain("maritalStatus");
+				assertThat(ourLastElements).containsExactlyInAnyOrder("name");
 			}
 		);
 	}
@@ -203,11 +190,11 @@ public class ElementsParamR4Test {
 			bundle -> {
 				assertEquals("1", bundle.getTotalElement().getValueAsString());
 				String responseContent = ourCtx.newXmlParser().encodeResourceToString(bundle.getEntry().get(0).getResource());
-				assertThat(responseContent, containsString("<Patient"));
-				assertThat(responseContent, not(containsString("THE DIV")));
-				assertThat(responseContent, containsString("family"));
-				assertThat(responseContent, containsString("maritalStatus"));
-				assertThat(ourLastElements, containsInAnyOrder("name", "maritalStatus"));
+				assertThat(responseContent).contains("<Patient");
+				assertThat(responseContent).doesNotContain("THE DIV");
+				assertThat(responseContent).contains("family");
+				assertThat(responseContent).contains("maritalStatus");
+				assertThat(ourLastElements).containsExactlyInAnyOrder("name", "maritalStatus");
 			}
 		);
 	}
@@ -219,10 +206,10 @@ public class ElementsParamR4Test {
 			bundle -> {
 				assertEquals("1", bundle.getTotalElement().getValueAsString());
 				String responseContent = ourCtx.newXmlParser().encodeResourceToString(bundle.getEntry().get(0).getResource());
-				assertThat(responseContent, containsString("THE DIV"));
-				assertThat(responseContent, not(containsString("family")));
-				assertThat(responseContent, not(containsString("maritalStatus")));
-				assertThat(ourLastElements, containsInAnyOrder("text"));
+				assertThat(responseContent).contains("THE DIV");
+				assertThat(responseContent).doesNotContain("family");
+				assertThat(responseContent).doesNotContain("maritalStatus");
+				assertThat(ourLastElements).containsExactlyInAnyOrder("text");
 			}
 		);
 	}

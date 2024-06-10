@@ -22,7 +22,6 @@ import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
-import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.ElementUtil;
@@ -30,14 +29,7 @@ import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.ee10.servlet.ServletHandler;
-import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -48,10 +40,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class IncludeDstu2Test {
@@ -91,7 +81,7 @@ public class IncludeDstu2Test {
 
 		ourLog.info(responseContent);
 
-		assertEquals(3, bundle.getEntry().size());
+		assertThat(bundle.getEntry()).hasSize(3);
 
 		assertEquals(new IdDt("Patient/p1"), BundleUtil.toListOfResources(ourCtx, bundle).get(0).getIdElement().toUnqualifiedVersionless());
 		assertEquals(new IdDt("Patient/p2"), BundleUtil.toListOfResources(ourCtx, bundle).get(1).getIdElement().toUnqualifiedVersionless());
@@ -99,10 +89,10 @@ public class IncludeDstu2Test {
 		assertEquals(SearchEntryModeEnum.INCLUDE, bundle.getEntry().get(2).getSearch().getModeElement().getValueAsEnum());
 
 		Patient p1 = (Patient) BundleUtil.toListOfResources(ourCtx, bundle).get(0);
-		assertEquals(0, p1.getContained().getContainedResources().size());
+		assertThat(p1.getContained().getContainedResources()).isEmpty();
 
 		Patient p2 = (Patient) BundleUtil.toListOfResources(ourCtx, bundle).get(1);
-		assertEquals(0, p2.getContained().getContainedResources().size());
+		assertThat(p2.getContained().getContainedResources()).isEmpty();
 
 	}
 
@@ -118,7 +108,7 @@ public class IncludeDstu2Test {
 
 		ourLog.info(responseContent);
 
-		assertEquals(4, bundle.getEntry().size());
+		assertThat(bundle.getEntry()).hasSize(4);
 		assertEquals(new IdDt("Patient/p1"), BundleUtil.toListOfResources(ourCtx, bundle).get(0).getIdElement().toUnqualifiedVersionless());
 		assertEquals(new IdDt("Patient/p2"), BundleUtil.toListOfResources(ourCtx, bundle).get(1).getIdElement().toUnqualifiedVersionless());
 		assertEquals(new IdDt("Organization/o1"), BundleUtil.toListOfResources(ourCtx, bundle).get(2).getIdElement().toUnqualifiedVersionless());
@@ -127,10 +117,10 @@ public class IncludeDstu2Test {
 		assertEquals(SearchEntryModeEnum.INCLUDE, bundle.getEntry().get(3).getSearch().getModeElement().getValueAsEnum());
 
 		Patient p1 = (Patient) BundleUtil.toListOfResources(ourCtx, bundle).get(0);
-		assertEquals(0, p1.getContained().getContainedResources().size());
+		assertThat(p1.getContained().getContainedResources()).isEmpty();
 
 		Patient p2 = (Patient) BundleUtil.toListOfResources(ourCtx, bundle).get(1);
-		assertEquals(0, p2.getContained().getContainedResources().size());
+		assertThat(p2.getContained().getContainedResources()).isEmpty();
 
 	}
 
@@ -146,17 +136,17 @@ public class IncludeDstu2Test {
 
 		ourLog.info(responseContent);
 
-		assertEquals(3, bundle.getEntry().size());
+		assertThat(bundle.getEntry()).hasSize(3);
 		assertEquals(new IdDt("Patient/p1"), BundleUtil.toListOfResources(ourCtx, bundle).get(0).getIdElement().toUnqualifiedVersionless());
 		assertEquals(new IdDt("Patient/p2"), BundleUtil.toListOfResources(ourCtx, bundle).get(1).getIdElement().toUnqualifiedVersionless());
 		assertEquals(new IdDt("Organization/o1"), BundleUtil.toListOfResources(ourCtx, bundle).get(2).getIdElement().toUnqualifiedVersionless());
 		assertEquals(SearchEntryModeEnum.INCLUDE, bundle.getEntry().get(2).getSearch().getModeElement().getValueAsEnum());
 
 		Patient p1 = (Patient) BundleUtil.toListOfResources(ourCtx, bundle).get(0);
-		assertEquals(0, p1.getContained().getContainedResources().size());
+		assertThat(p1.getContained().getContainedResources()).isEmpty();
 
 		Patient p2 = (Patient) BundleUtil.toListOfResources(ourCtx, bundle).get(1);
-		assertEquals(0, p2.getContained().getContainedResources().size());
+		assertThat(p2.getContained().getContainedResources()).isEmpty();
 
 	}
 
@@ -172,17 +162,17 @@ public class IncludeDstu2Test {
 
 		ourLog.info(responseContent);
 
-		assertEquals(3, bundle.getEntry().size());
+		assertThat(bundle.getEntry()).hasSize(3);
 		assertEquals(new IdDt("Patient/p1"), BundleUtil.toListOfResources(ourCtx, bundle).get(0).getIdElement().toUnqualifiedVersionless());
 		assertEquals(new IdDt("Patient/p2"), BundleUtil.toListOfResources(ourCtx, bundle).get(1).getIdElement().toUnqualifiedVersionless());
 		assertEquals(new IdDt("Organization/o1"), BundleUtil.toListOfResources(ourCtx, bundle).get(2).getIdElement().toUnqualifiedVersionless());
 		assertEquals(SearchEntryModeEnum.INCLUDE, bundle.getEntry().get(2).getSearch().getModeElement().getValueAsEnum());
 
 		Patient p1 = (Patient) BundleUtil.toListOfResources(ourCtx, bundle).get(0);
-		assertEquals(0, p1.getContained().getContainedResources().size());
+		assertThat(p1.getContained().getContainedResources()).isEmpty();
 
 		Patient p2 = (Patient) BundleUtil.toListOfResources(ourCtx, bundle).get(1);
-		assertEquals(0, p2.getContained().getContainedResources().size());
+		assertThat(p2.getContained().getContainedResources()).isEmpty();
 
 	}
 
@@ -198,7 +188,7 @@ public class IncludeDstu2Test {
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
-		assertEquals(4, bundle.getEntry().size());
+		assertThat(bundle.getEntry()).hasSize(4);
 	}
 
 	@Test
@@ -210,10 +200,10 @@ public class IncludeDstu2Test {
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
-		assertEquals(1, bundle.getEntry().size());
+		assertThat(bundle.getEntry()).hasSize(1);
 
 		Patient p = BundleUtil.toListOfResourcesOfType(ourCtx, bundle, Patient.class).get(0);
-		assertEquals(0, p.getName().size());
+		assertThat(p.getName()).isEmpty();
 		assertEquals("Hello", p.getId().getIdPart());
 	}
 
@@ -229,10 +219,10 @@ public class IncludeDstu2Test {
 		ourLog.info(responseContent);
 
 		Bundle bundle = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
-		assertEquals(1, bundle.getEntry().size());
+		assertThat(bundle.getEntry()).hasSize(1);
 
 		Patient p = BundleUtil.toListOfResourcesOfType(ourCtx, bundle, Patient.class).get(0);
-		assertEquals(1, p.getName().size());
+		assertThat(p.getName()).hasSize(1);
 		assertEquals("Hello", p.getId().getIdPart());
 		assertEquals("foo", p.getName().get(0).getFamilyFirstRep().getValue());
 	}
@@ -249,10 +239,10 @@ public class IncludeDstu2Test {
 		ourLog.info(responseContent);
 
 		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
-		assertEquals(1, bundle.getEntry().size());
+		assertThat(bundle.getEntry()).hasSize(1);
 
 		Patient p = BundleUtil.toListOfResourcesOfType(ourCtx, bundle, Patient.class).get(0);
-		assertEquals(1, p.getName().size());
+		assertThat(p.getName()).hasSize(1);
 		assertEquals("Hello", p.getId().getIdPart());
 		assertEquals("foo", p.getName().get(0).getFamilyFirstRep().getValue());
 	}
@@ -268,16 +258,16 @@ public class IncludeDstu2Test {
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
-		assertEquals(1, bundle.getEntry().size());
+		assertThat(bundle.getEntry()).hasSize(1);
 
 		Patient p = BundleUtil.toListOfResourcesOfType(ourCtx, bundle, Patient.class).get(0);
-		assertEquals(2, p.getName().size());
+		assertThat(p.getName()).hasSize(2);
 		assertEquals("Hello", p.getId().getIdPart());
 
 		Set<String> values = new HashSet<String>();
 		values.add(p.getName().get(0).getFamilyFirstRep().getValue());
 		values.add(p.getName().get(1).getFamilyFirstRep().getValue());
-		assertThat(values, containsInAnyOrder("foo", "bar"));
+		assertThat(values).containsExactlyInAnyOrder("foo", "bar");
 
 	}
 

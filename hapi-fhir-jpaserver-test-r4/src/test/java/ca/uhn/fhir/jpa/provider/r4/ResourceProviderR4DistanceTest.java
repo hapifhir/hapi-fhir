@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
@@ -33,13 +34,10 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 
@@ -71,7 +69,7 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 				.returnBundle(Bundle.class)
 				.execute();
 
-			assertEquals(1, actual.getEntry().size());
+			assertThat(actual.getEntry()).hasSize(1);
 			assertEquals(locId.getIdPart(), actual.getEntry().get(0).getResource().getIdElement().getIdPart());
 		}
 		{ // Outside the box
@@ -88,7 +86,7 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 				.execute();
 			myCaptureQueriesListener.logSelectQueries();
 
-			assertEquals(0, actual.getEntry().size());
+			assertThat(actual.getEntry()).isEmpty();
 		}
 	}
 
@@ -114,7 +112,7 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertEquals(1, actual.getEntry().size());
+		assertThat(actual.getEntry()).hasSize(1);
 		assertEquals(prId.getIdPart(), actual.getEntry().get(0).getResource().getIdElement().getIdPart());
 	}
 
@@ -146,7 +144,7 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 				.execute();
 			myCaptureQueriesListener.logSelectQueries();
 
-			assertEquals(1, actual.getEntry().size());
+			assertThat(actual.getEntry()).hasSize(1);
 			assertEquals(prId.getIdPart(), actual.getEntry().get(0).getResource().getIdElement().getIdPart());
 		}
 
@@ -164,7 +162,7 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 				.execute();
 			myCaptureQueriesListener.logSelectQueries();
 
-			assertEquals(0, actual.getEntry().size());
+			assertThat(actual.getEntry()).isEmpty();
 		}
 	}
 
@@ -189,11 +187,7 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 			.returnBundle(Bundle.class)
 			.execute();
 		List<String> ids = toUnqualifiedVersionlessIdValues(actual);
-		assertThat(ids.toString(), ids, contains(
-			"Location/toronto",
-			"Location/belleville",
-			"Location/kingston"
-		));
+		assertThat(ids).as(ids.toString()).containsExactly("Location/toronto", "Location/belleville", "Location/kingston");
 	}
 
 	@ParameterizedTest
@@ -226,17 +220,9 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 		List<String> ids = toUnqualifiedVersionlessIdValues(actual);
 		myCaptureQueriesListener.logSelectQueries();
 		if (theAscending) {
-			assertThat(ids.toString(), ids, contains(
-				"Location/toronto",
-				"Location/belleville",
-				"Location/kingston"
-			));
+			assertThat(ids).as(ids.toString()).containsExactly("Location/toronto", "Location/belleville", "Location/kingston");
 		} else {
-			assertThat(ids.toString(), ids, contains(
-				"Location/kingston",
-				"Location/belleville",
-				"Location/toronto"
-			));
+			assertThat(ids).as(ids.toString()).containsExactly("Location/kingston", "Location/belleville", "Location/toronto");
 		}
 
 	}
@@ -281,11 +267,7 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 			.execute();
 		List<String> ids = toUnqualifiedVersionlessIdValues(actual);
 		myCaptureQueriesListener.logSelectQueries();
-		assertThat(ids.toString(), ids, contains(
-			"Location/toronto",
-			"Location/belleville",
-			"Location/kingston"
-		));
+		assertThat(ids).as(ids.toString()).containsExactly("Location/toronto", "Location/belleville", "Location/kingston");
 	}
 
 	@Test
@@ -299,7 +281,7 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), containsString("Can not sort on coordinate parameter \"near\" unless this parameter is also specified as a search parameter"));
+			assertThat(e.getMessage()).contains("Can not sort on coordinate parameter \"near\" unless this parameter is also specified as a search parameter");
 		}
 
 	}
@@ -326,7 +308,7 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), containsString("Can not sort on coordinate parameter \"near\" unless this parameter is also specified"));
+			assertThat(e.getMessage()).contains("Can not sort on coordinate parameter \"near\" unless this parameter is also specified");
 		}
 	}
 
@@ -358,11 +340,9 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), containsString(theExpectedErrorMessageContains));
+			assertThat(e.getMessage()).contains(theExpectedErrorMessageContains);
 		}
 	}
-
-
 
 
 	@Test
@@ -416,7 +396,8 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 			"PractitionerRole-Barrie",
 			"PractitionerRole-Kitchener");
 
-		assertArrayEquals(referenceList.toArray(), list.toArray());
+		assertThat(list.toArray())
+			.containsExactly(referenceList.toArray());
 
 		Bundle sortedPractitionerRolesDesc = (Bundle) myClient.search()
 			.forResource(PractitionerRole.class)
@@ -432,7 +413,8 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 			.map(Identifier::getValue).toList();
 
 		Collections.reverse(referenceList);
-		assertArrayEquals(referenceList.toArray(), list.toArray());
+		assertThat(list.toArray())
+			.containsExactly(referenceList.toArray());
 
 	}
 
@@ -486,7 +468,8 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 			"PractitionerRole-city3",
 			"PractitionerRole-city4");
 
-		assertArrayEquals(referenceList.toArray(), sortedValues.toArray());
+		assertThat(sortedValues.toArray())
+			.containsExactly(referenceList.toArray());
 
 		Bundle sortedPractitionerRolesDesc = (Bundle) myClient.search()
 			.forResource(PractitionerRole.class)
@@ -514,7 +497,8 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 			"PractitionerRole-city2",
 			"PractitionerRole-city1"
 		);
-		assertArrayEquals(referenceList.toArray(), sortedValuesDesc.toArray());
+		assertThat(sortedValuesDesc.toArray())
+			.containsExactly(referenceList.toArray());
 	}
 
 	@Test
@@ -590,12 +574,13 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 
 	@Test
 	void shouldThrowExceptionWhenSortingByChainedNearWithoutProvidingNearValue() {
-		assertThrows(InvalidRequestException.class, () -> {
+		assertThatThrownBy(() ->
 			myClient.search()
 				.forResource(PractitionerRole.class)
 				.sort(new SortSpec("location.near", SortOrderEnum.ASC))
-				.execute();
-		}, "HTTP 400 : HAPI-2307: Can not sort on coordinate parameter \"location\" unless this parameter is also specified as a search parameter with a latitude/longitude value");
+				.execute())
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessage("HTTP 400 Bad Request: HAPI-2497: Can not sort on coordinate parameter \"location\" unless this parameter is also specified as a search parameter with a latitude/longitude value");
 	}
 
 	private void createLocation(String id, double latitude, double longitude) {

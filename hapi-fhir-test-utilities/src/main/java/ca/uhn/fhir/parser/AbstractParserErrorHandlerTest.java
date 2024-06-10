@@ -21,7 +21,7 @@ package ca.uhn.fhir.parser;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 
 /**
  * Defines FHIR version independent tests for testing parser error handling. In version dependent
@@ -52,7 +52,7 @@ public abstract sealed class AbstractParserErrorHandlerTest
 		parser.setParserErrorHandler(errorHandler);
 
 		String resourceStr = createResourceWithRepeatingChoice();
-		assertThrows(RepeatingChoiceHandledException.class, () -> {
+		assertThatExceptionOfType(RepeatingChoiceHandledException.class).isThrownBy(() -> {
 			parser.parseResource(resourceStr);
 		});
 	}

@@ -29,6 +29,7 @@ import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.collect.Lists;
+import jakarta.annotation.Nonnull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
@@ -42,13 +43,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 import org.springframework.messaging.MessageDeliveryException;
 
-import jakarta.annotation.Nonnull;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -193,11 +193,9 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 		verify(myJobInstancePersister)
 			.fetchInstances(requestArgumentCaptor.capture(), anyInt(), anyInt());
 		FetchJobInstancesRequest req = requestArgumentCaptor.getValue();
-		assertEquals(2, req.getStatuses().size());
-		assertTrue(
-			req.getStatuses().contains(StatusEnum.IN_PROGRESS)
-				&& req.getStatuses().contains(StatusEnum.QUEUED)
-		);
+		assertThat(req.getStatuses()).hasSize(2);
+		assertThat(req.getStatuses().contains(StatusEnum.IN_PROGRESS)
+				&& req.getStatuses().contains(StatusEnum.QUEUED)).isTrue();
 	}
 
 	@Test
@@ -357,9 +355,7 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testPerformStep_FinalStep_PreventChunkWriting() {
-
 		// Setup
-
 		when(myJobInstancePersister.onWorkChunkDequeue(eq(CHUNK_ID))).thenReturn(Optional.of(createWorkChunk(STEP_3, new TestJobStep3InputType().setData3(DATA_3_VALUE).setData4(DATA_4_VALUE))));
 		doReturn(createJobDefinition()).when(myJobDefinitionRegistry).getJobDefinitionOrThrowException(eq(JOB_DEFINITION_ID), eq(1));
 		when(myJobInstancePersister.fetchInstance(eq(INSTANCE_ID))).thenReturn(Optional.of(createInstance()));
@@ -371,11 +367,9 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 		mySvc.start();
 
 		// Execute
-
 		myWorkChannelReceiver.send(new JobWorkNotificationJsonMessage(createWorkNotification(STEP_3)));
 
 		// Verify
-
 		verify(myStep3Worker, times(1)).run(myStep3ExecutionDetailsCaptor.capture(), any());
 		verify(myJobInstancePersister, times(1)).onWorkChunkFailed(eq(CHUNK_ID), any());
 	}
@@ -474,7 +468,7 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 
 		verify(myJobInstancePersister, times(1))
 			.onCreateWithFirstChunk(myJobDefinitionCaptor.capture(), myParametersJsonCaptor.capture());
-		assertSame(jobDefinition, myJobDefinitionCaptor.getValue());
+		assertThat(myJobDefinitionCaptor.getValue()).isSameAs(jobDefinition);
 		assertEquals(startRequest.getParameters(), myParametersJsonCaptor.getValue());
 
 		verify(myBatchJobSender, never()).sendWorkChannelMessage(any());

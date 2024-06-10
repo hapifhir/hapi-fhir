@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class DefaultProfileValidationSupportR5Test extends BaseValidationTestWithInlineMocks {
 
@@ -24,7 +24,7 @@ public class DefaultProfileValidationSupportR5Test extends BaseValidationTestWit
 				.map(t->(StructureDefinition)t)
 				.filter(t->t.getUrl().equals("http://hl7.org/fhir/StructureDefinition/language"))
 				.collect(Collectors.toList());
-		assertEquals(1, allSds.size());
+		assertThat(allSds).hasSize(1);
 	}
 
 }

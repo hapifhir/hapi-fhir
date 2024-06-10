@@ -33,10 +33,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.lessThan;
-import static org.hamcrest.Matchers.not;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -103,7 +100,7 @@ public class FhirInstanceValidatorDstu2Test extends BaseValidationTestWithInline
 		PeriodDt period = new PeriodDt();
 		period.setStart(new DateTimeDt("2000-01-01T00:00:01+05:00"));
 		period.setEnd(new DateTimeDt("2000-01-01T00:00:00+04:00"));
-		assertThat(period.getStart().getTime(), lessThan(period.getEnd().getTime()));
+		assertThat(period.getStart().getTime()).isLessThan(period.getEnd().getTime());
 		procedure.setPerformed(period);
 
 		FhirValidator val = ourCtxDstu2.newValidator();
@@ -189,7 +186,7 @@ public class FhirInstanceValidatorDstu2Test extends BaseValidationTestWithInline
 		ourLog.info(encoded);
 
 		assertFalse(result.isSuccessful());
-		assertThat(encoded, containsString("A parameter must have a value or a resource, but not both"));
+		assertThat(encoded).contains("A parameter must have a value or a resource, but not both");
 	}
 
 	@Test
@@ -212,7 +209,7 @@ public class FhirInstanceValidatorDstu2Test extends BaseValidationTestWithInline
 		ourLog.info(encoded);
 
 		assertFalse(result.isSuccessful());
-		assertThat(encoded, containsString("A parameter must have a value or a resource, but not both"));
+		assertThat(encoded).contains("A parameter must have a value or a resource, but not both");
 	}
 
 	@Test
@@ -235,7 +232,7 @@ public class FhirInstanceValidatorDstu2Test extends BaseValidationTestWithInline
 		ourLog.info(encoded);
 
 		assertTrue(result.isSuccessful());
-		assertThat(encoded, not(containsString("A parameter must have a value or a resource, but not both")));
+		assertThat(encoded).doesNotContain("A parameter must have a value or a resource, but not both");
 	}
 
 	@Test
