@@ -1474,12 +1474,11 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 				default:
 					/*
 					 * We do not need to handle REGEX, because that's handled in parent
-					 * We also don't handle EXISTS because that's a separate area (with different term)
+					 * We also don't handle EXISTS because that's a separate area (with different term).
+					 * We add a match-none filter because otherwise it matches everything (not desired).
 					 */
 					ourLog.error("Unsupported property filter {}. This may affect expansion, but will not cause errors.", theFilter.getOp().getDisplay());
 					theB.must(theF.matchNone());
-//					throw new InvalidRequestException(Msg.code(2526) + "Unsupported property filter "
-//							+ theFilter.getOp().getDisplay());
 					break;
 			}
 		}
