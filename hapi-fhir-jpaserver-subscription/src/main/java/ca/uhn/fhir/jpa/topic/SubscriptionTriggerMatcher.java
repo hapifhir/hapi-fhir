@@ -24,6 +24,7 @@ import ca.uhn.fhir.fhirpath.IFhirPathEvaluationContext;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
+import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.messaging.BaseResourceMessage;
 import ca.uhn.fhir.storage.PreviousVersionReader;
@@ -50,11 +51,13 @@ public class SubscriptionTriggerMatcher {
 	private final IFhirResourceDao myDao;
 	private final PreviousVersionReader myPreviousVersionReader;
 	private final SystemRequestDetails mySrd;
+	private final MemoryCacheService myMemoryCacheService;
 
 	public SubscriptionTriggerMatcher(
 			SubscriptionTopicSupport theSubscriptionTopicSupport,
 			ResourceModifiedMessage theMsg,
-			SubscriptionTopic.SubscriptionTopicResourceTriggerComponent theTrigger) {
+			SubscriptionTopic.SubscriptionTopicResourceTriggerComponent theTrigger,
+			MemoryCacheService theMemoryCacheService) {
 		mySubscriptionTopicSupport = theSubscriptionTopicSupport;
 		myOperation = theMsg.getOperationType();
 		myResource = theMsg.getPayload(theSubscriptionTopicSupport.getFhirContext());
@@ -63,6 +66,7 @@ public class SubscriptionTriggerMatcher {
 		myTrigger = theTrigger;
 		myPreviousVersionReader = new PreviousVersionReader(myDao);
 		mySrd = new SystemRequestDetails();
+		myMemoryCacheService = theMemoryCacheService;
 	}
 
 	public InMemoryMatchResult match() {
@@ -114,39 +118,51 @@ public class SubscriptionTriggerMatcher {
 		}
 		// WIP STR5 implement resultForCreate and resultForDelete
 		if (theQueryCriteria.getRequireBoth()) {
-			return InMemoryMatchResult.and(InMemoryMatchResult.and(previousMatches, currentMatches), fhirPathCriteriaEvaluationResult);
+			return InMemoryMatchResult.and(
+					InMemoryMatchResult.and(previousMatches, currentMatches), fhirPathCriteriaEvaluationResult);
 		} else {
-			return InMemoryMatchResult.and(InMemoryMatchResult.or(previousMatches, currentMatches), fhirPathCriteriaEvaluationResult);
+			return InMemoryMatchResult.and(
+					InMemoryMatchResult.or(previousMatches, currentMatches), fhirPathCriteriaEvaluationResult);
 		}
 	}
 
-
 	private InMemoryMatchResult evaluateFhirPathCriteria(String theFhirPathCriteria) {
 		if (!Strings.isNullOrEmpty(theFhirPathCriteria)) {
-			IFhirPath fhirPathEngine = mySubscriptionTopicSupport.getFhirContext().newFhirPath();
-			fhirPathEngine.setEvaluationContext(new  IFhirPathEvaluationContext(){
+			IFhirPath fhirPathEngine =
+					mySubscriptionTopicSupport.getFhirContext().newFhirPath();
+			fhirPathEngine.setEvaluationContext(new IFhirPathEvaluationContext() {
 
 				@Override
 				public List<IBase> resolveConstant(Object appContext, String name, boolean beforeContext) {
-					if("current".equalsIgnoreCase(name))
-						return List.of(myResource);
+					if ("current".equalsIgnoreCase(name)) return List.of(myResource);
 
-					if("previous".equalsIgnoreCase(name))
-					{
+					if ("previous".equalsIgnoreCase(name)) {
 						Optional previousResource = myPreviousVersionReader.readPreviousVersion(myResource);
-						if(previousResource.isPresent())
-							return List.of((IBase) previousResource.get());
+						if (previousResource.isPresent()) return List.of((IBase) previousResource.get());
 					}
 
 					return null;
 				}
 			});
 			try {
-				IFhirPath.IParsedExpression expression = fhirPathEngine.parse(theFhirPathCriteria);
+				IFhirPath.IParsedExpression expression = myMemoryCacheService.get(
+						MemoryCacheService.CacheEnum.FHIRPATH_EXPRESSION, theFhirPathCriteria, exp -> {
+							try {
+								return fhirPathEngine.parse(exp);
+							} catch (Exception e) {
+								throw new RuntimeException(e);
+							}
+						});
+
 				List<IBase> result = fhirPathEngine.evaluate(myResource, expression, IBase.class);
-				return InMemoryMatchResult.fromBoolean( result != null && result.size() == 1 && ((BooleanType)result.get(0)).booleanValue());
+				return InMemoryMatchResult.fromBoolean(
+						result != null && result.size() == 1 && ((BooleanType) result.get(0)).booleanValue());
 			} catch (Exception e) {
-				ourLog.warn("Subscription topic {} has a fhirPathCriteria that is not valid: {}", myTrigger.getId(), theFhirPathCriteria, e);
+				ourLog.warn(
+						"Subscription topic {} has a fhirPathCriteria that is not valid: {}",
+						myTrigger.getId(),
+						theFhirPathCriteria,
+						e);
 				return InMemoryMatchResult.unsupportedFromReason(e.getMessage());
 			}
 		}

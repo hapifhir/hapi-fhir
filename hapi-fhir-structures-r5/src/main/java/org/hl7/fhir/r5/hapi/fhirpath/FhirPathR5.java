@@ -95,7 +95,9 @@ public class FhirPathR5 implements IFhirPath {
 			@Override
 			public List<Base> resolveConstant(Object appContext, String name, boolean beforeContext)
 					throws PathEngineException {
-				return theEvaluationContext.resolveConstant(appContext, name, beforeContext).stream().map(Base.class::cast).collect(Collectors.toUnmodifiableList());
+				return theEvaluationContext.resolveConstant(appContext, name, beforeContext).stream()
+						.map(Base.class::cast)
+						.collect(Collectors.toUnmodifiableList());
 			}
 
 			@Override

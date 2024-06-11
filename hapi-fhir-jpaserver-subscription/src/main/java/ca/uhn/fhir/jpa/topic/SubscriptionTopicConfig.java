@@ -24,6 +24,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
 import ca.uhn.fhir.jpa.subscription.config.SubscriptionConfig;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionQueryValidator;
+import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -33,11 +34,12 @@ import org.springframework.context.annotation.Lazy;
 @Import(SubscriptionConfig.class)
 public class SubscriptionTopicConfig {
 	@Bean
-	SubscriptionTopicMatchingSubscriber subscriptionTopicMatchingSubscriber(FhirContext theFhirContext) {
+	SubscriptionTopicMatchingSubscriber subscriptionTopicMatchingSubscriber(
+			FhirContext theFhirContext, MemoryCacheService memoryCacheService) {
 		switch (theFhirContext.getVersion().getVersion()) {
 			case R5:
 			case R4B:
-				return new SubscriptionTopicMatchingSubscriber(theFhirContext);
+				return new SubscriptionTopicMatchingSubscriber(theFhirContext, memoryCacheService);
 			default:
 				return null;
 		}

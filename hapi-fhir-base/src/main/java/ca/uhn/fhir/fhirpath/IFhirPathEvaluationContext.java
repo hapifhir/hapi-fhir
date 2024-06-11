@@ -46,5 +46,7 @@ public interface IFhirPathEvaluationContext {
 	 * @param beforeContext
 	 * @return
 	 */
-	default List<IBase> resolveConstant(Object appContext, String name, boolean beforeContext) {return null; }
+	default List<IBase> resolveConstant(Object appContext, String name, boolean beforeContext) {
+		return null;
+	}
 }
