@@ -51,7 +51,8 @@ public class SearchParamMatcher {
 			return InMemoryMatchResult.successfulMatch();
 		}
 		ResourceIndexedSearchParams resourceIndexedSearchParams =
-				myIndexedSearchParamExtractor.extractIndexedSearchParams(theResource, null, getFilter(theSearchParameterMap));
+				myIndexedSearchParamExtractor.extractIndexedSearchParams(
+						theResource, null, getFilter(theSearchParameterMap));
 		RuntimeResourceDefinition resourceDefinition = myFhirContext.getResourceDefinition(theResource);
 		return myInMemoryResourceMatcher.match(
 				theSearchParameterMap, theResource, resourceDefinition, resourceIndexedSearchParams);
@@ -59,8 +60,7 @@ public class SearchParamMatcher {
 
 	private ISearchParamExtractor.ISearchParamFilter getFilter(SearchParameterMap searchParameterMap) {
 		return theSearchParams -> theSearchParams.stream()
-			.filter(runtimeSearchParam -> searchParameterMap.keySet().stream()
-				.anyMatch(parameter -> parameter.equals(runtimeSearchParam.getName())))
-			.collect(Collectors.toList());
+				.filter(runtimeSearchParam -> searchParameterMap.keySet().contains(runtimeSearchParam.getName()))
+				.collect(Collectors.toList());
 	}
 }
