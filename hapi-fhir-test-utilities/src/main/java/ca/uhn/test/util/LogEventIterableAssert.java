@@ -83,4 +83,14 @@ public class LogEventIterableAssert extends AbstractIterableAssert<LogEventItera
 	protected LogEventIterableAssert newAbstractIterableAssert(Iterable<? extends ILoggingEvent> iterable) {
 		return new LogEventIterableAssert((Collection<ILoggingEvent>) iterable);
 	}
+
+	public LogEventIterableAssert doesNotHaveEventWithMessage(String thePartial) {
+		isNotNull();
+
+		matches(logEvents -> logEvents.stream()
+				.map(ILoggingEvent::getFormattedMessage)
+				.noneMatch(message -> message.contains(thePartial)),
+			"Log Events should have no message with "+ thePartial + " in it.");
+		return this;
+	}
 }
