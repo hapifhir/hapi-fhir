@@ -18,6 +18,7 @@ There are additional IGs outside the FHIR CR module that define further requirem
 * [Structured Data Capture IG](https://build.fhir.org/ig/HL7/sdc/)
 * [Clinical Guidelines IG](https://hl7.org/fhir/uv/cpg/)
 * [Quality Measures IG](http://hl7.org/fhir/us/cqfmeasures/)
+* [Canonical Resource Management Infrastructure IG](https://build.fhir.org/ig/HL7/crmi-ig/index.html)
 
 ## HAPI FHIR
 

@@ -27,6 +27,7 @@ import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -55,7 +56,8 @@ public interface IWorkChunkPersistence {
 	 * The first state event, as the chunk is created.
 	 * This method should be atomic and should only
 	 * return when the chunk has been successfully stored in the database.
-	 * Chunk should be stored with a status of {@link WorkChunkStatusEnum#QUEUED}
+	 * Chunk should be stored with a status of {@link WorkChunkStatusEnum#READY} or
+	 * {@link WorkChunkStatusEnum#GATE_WAITING} for ungated and gated jobs, respectively.
 	 *
 	 * @param theBatchWorkChunk the batch work chunk to be stored
 	 * @return a globally unique identifier for this chunk.
@@ -83,6 +85,17 @@ public interface IWorkChunkPersistence {
 	 */
 	// on impl - @Transactional(propagation = Propagation.REQUIRES_NEW)
 	WorkChunkStatusEnum onWorkChunkError(WorkChunkErrorEvent theParameters);
+
+	/**
+	 * Updates the specified Work Chunk to set the next polling interval.
+	 * It wil also:
+	 * * update the poll attempts
+	 * * sets the workchunk status to POLL_WAITING (if it's not already in this state)
+	 * @param theChunkId the id of the chunk to update
+	 * @param theNewDeadline the time when polling should be redone
+	 */
+	@Transactional
+	void onWorkChunkPollDelay(String theChunkId, Date theNewDeadline);
 
 	/**
 	 * An unrecoverable error.
@@ -130,14 +143,4 @@ public interface IWorkChunkPersistence {
 	 */
 	@Transactional(propagation = Propagation.MANDATORY, readOnly = true)
 	Stream<WorkChunk> fetchAllWorkChunksForStepStream(String theInstanceId, String theStepId);
-
-	/**
-	 * Fetch chunk ids for starting a gated step.
-	 *
-	 * @param theInstanceId the job
-	 * @param theStepId     the step that is starting
-	 * @return the WorkChunk ids
-	 */
-	List<String> fetchAllChunkIdsForStepWithStatus(
-			String theInstanceId, String theStepId, WorkChunkStatusEnum theStatusEnum);
 }

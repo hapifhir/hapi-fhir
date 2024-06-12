@@ -10,7 +10,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.test.concurrency.PointcutLatch;
-import ca.uhn.test.util.LogbackCaptureTestExtension;
+import ca.uhn.test.util.LogbackTestExtension;
 import ch.qos.logback.classic.Logger;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.r4.model.IdType;
@@ -32,9 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.io.IOException;
 import java.util.stream.Stream;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.either;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
@@ -52,7 +50,7 @@ public class MdmProviderBatchR4Test extends BaseLinkR4Test {
 	protected StringType myGoldenMedicationId;
 
 	@RegisterExtension
-	LogbackCaptureTestExtension myLogCapture = new LogbackCaptureTestExtension((Logger) Logs.getMdmTroubleshootingLog());
+	LogbackTestExtension myLogCapture = new LogbackTestExtension((Logger) Logs.getMdmTroubleshootingLog());
 
 	@Autowired
 	IInterceptorService myInterceptorService;
@@ -210,10 +208,12 @@ public class MdmProviderBatchR4Test extends BaseLinkR4Test {
 			myMdmProvider.mdmBatchOnAllSourceResources(null, criteria , null, theSyncOrAsyncRequest);
 			fail();
 		} catch (InvalidRequestException e) {
-
-			assertThat(e.getMessage(), either(
-				containsString(Msg.code(2039) + "Failed to validate parameters for job"))//Async case
-				.or(containsString(Msg.code(488) + "Failed to parse match URL")));// Sync case
+			assertThat(e.getMessage())
+				.overridingErrorMessage("Expected error message to contain specific codes and messages")
+				.satisfiesAnyOf(
+					message -> assertThat(message).contains(Msg.code(2039) + "Failed to validate parameters for job"),
+					message -> assertThat(message).contains(Msg.code(488) + "Failed to parse match URL")
+				);
 		}
 	}
 

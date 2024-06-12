@@ -16,37 +16,52 @@ import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.opencds.cqf.fhir.utility.r4.Parameters.booleanPart;
-import static org.opencds.cqf.fhir.utility.r4.Parameters.canonicalPart;
-import static org.opencds.cqf.fhir.utility.r4.Parameters.parameters;
-import static org.opencds.cqf.fhir.utility.r4.Parameters.part;
-import static org.opencds.cqf.fhir.utility.r4.Parameters.datePart;
-import static org.opencds.cqf.fhir.utility.r4.Parameters.stringPart;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.opencds.cqf.fhir.utility.r4.Parameters.booleanPart;
+import static org.opencds.cqf.fhir.utility.r4.Parameters.canonicalPart;
+import static org.opencds.cqf.fhir.utility.r4.Parameters.datePart;
+import static org.opencds.cqf.fhir.utility.r4.Parameters.parameters;
+import static org.opencds.cqf.fhir.utility.r4.Parameters.part;
+import static org.opencds.cqf.fhir.utility.r4.Parameters.stringPart;
 
 public class CpgOperationProviderTest extends BaseCrR4TestServer{
 	@BeforeEach
 	void setup() {
-		var reqDeets = setupRequestDetails();
-		loadResource(Library.class, "SimpleR4Library.json", reqDeets);
-		loadResource(Patient.class, "SimplePatient.json", reqDeets);
-		loadResource(Observation.class, "SimpleObservation.json", reqDeets);
-		loadResource(Condition.class, "SimpleCondition.json", reqDeets);
+		var requestDetails = setupRequestDetails();
+		loadResource(Library.class, "SimpleR4Library.json", requestDetails);
+		loadResource(Patient.class, "SimplePatient.json", requestDetails);
+		loadResource(Observation.class, "SimpleObservation.json", requestDetails);
+		loadResource(Condition.class, "SimpleCondition.json", requestDetails);
+	}
+	@Test
+	void cpgProviderTest(){
+		// reuse loaded resources for all tests
+		assertTrue(cqlExecutionProviderTestSimpleDate());
+		cqlExecutionProviderTestSimpleArithmetic();
+		evaluateLibraryProviderTestLibraryWithSubject();
+		evaluateLibraryProviderTestSimpleExpression();
+		cqlExecutionProviderTestReferencedLibrary();
+		cqlExecutionProviderTestDataBundle();
+		cqlExecutionProviderTestDataBundleWithSubject();
+		cqlExecutionProviderTestSimpleParameters();
+		cqlExecutionProviderTestExpression();
+		cqlExecutionProviderTestErrorExpression();
 	}
 
-	@Test
-	void cqlExecutionProvider_testSimpleDate() {
+
+	private Boolean cqlExecutionProviderTestSimpleDate() {
 		// execute cql expression on date interval
 		Parameters params = parameters(stringPart("expression", "Interval[Today() - 2 years, Today())"));
 		Parameters results = runCqlExecution(params);
-		assertTrue(results.getParameter("return").getValue() instanceof Period);
+		return results.getParameter("return").getValue() instanceof Period;
 	}
 
-	@Test
-	void cqlExecutionProvider_testSimpleArithmetic() {
+
+	void cqlExecutionProviderTestSimpleArithmetic() {
 		// execute simple cql expression
 		Parameters params = parameters(stringPart("expression", "5 * 5"));
 		Parameters results = runCqlExecution(params);
@@ -54,8 +69,7 @@ public class CpgOperationProviderTest extends BaseCrR4TestServer{
 		assertEquals("25", ((IntegerType) results.getParameter("return").getValue()).asStringValue());
 	}
 
-	@Test
-	void evaluateLibraryProvider_testLibraryWithSubject() {
+	void evaluateLibraryProviderTestLibraryWithSubject() {
 		// evaluate library resource for a subject
 		var params = new Parameters();
 		params.addParameter("subject", new StringType("Patient/SimplePatient"));
@@ -71,8 +85,8 @@ public class CpgOperationProviderTest extends BaseCrR4TestServer{
 		assertTrue(((BooleanType) report.getParameter("Denominator").getValue()).booleanValue());
 	}
 
-	@Test
-	void evaluateLibraryProvider_testSimpleExpression() {
+
+	void evaluateLibraryProviderTestSimpleExpression() {
 		// evaluate expression for subject from specified library resource
 		var params = new Parameters();
 		params.addParameter("subject", new StringType("Patient/SimplePatient"));
@@ -84,8 +98,7 @@ public class CpgOperationProviderTest extends BaseCrR4TestServer{
 		assertTrue(((BooleanType) report.getParameter("Numerator").getValue()).booleanValue());
 	}
 
-	@Test
-	void cqlExecutionProvider_testReferencedLibrary() {
+	void cqlExecutionProviderTestReferencedLibrary() {
 		// execute cql expression from referenced library on subject
 		Parameters libraryParameter = parameters(
 			canonicalPart("url", ourClient.getServerBase() + "/Library/SimpleR4Library|0.0.1"),
@@ -100,8 +113,7 @@ public class CpgOperationProviderTest extends BaseCrR4TestServer{
 		assertTrue(((BooleanType) results.getParameter("return").getValue()).booleanValue());
 	}
 
-	@Test
-	void cqlExecutionProvider_testDataBundle() {
+	void cqlExecutionProviderTestDataBundle() {
 		// execute cql expression from library over data from bundle with no subject
 		Parameters libraryParameter = parameters(
 			canonicalPart("url", ourClient.getServerBase() + "/Library/SimpleR4Library"),
@@ -118,8 +130,8 @@ public class CpgOperationProviderTest extends BaseCrR4TestServer{
 		assertTrue(results.getParameter().get(0).getResource() instanceof Observation);
 	}
 
-	@Test
-	void cqlExecutionProvider_testDataBundleWithSubject() {
+
+	void cqlExecutionProviderTestDataBundleWithSubject() {
 		// execute cql expression from library over data from bundle with subject
 		Parameters libraryParameter = parameters(
 			canonicalPart("url", ourClient.getServerBase() + "/Library/SimpleR4Library"),
@@ -135,8 +147,8 @@ public class CpgOperationProviderTest extends BaseCrR4TestServer{
 		assertTrue(results.getParameter().get(0).getResource() instanceof Observation);
 	}
 
-	@Test
-	void cqlExecutionProvider_testSimpleParameters() {
+
+	void cqlExecutionProviderTestSimpleParameters() {
 		// execute inline cql date expression with input valuemv
 		Parameters evaluationParams = parameters(
 			datePart("%inputDate", "2019-11-01"));
@@ -148,8 +160,7 @@ public class CpgOperationProviderTest extends BaseCrR4TestServer{
 		assertTrue(((BooleanType) results.getParameter("return").getValue()).booleanValue());
 	}
 
-	@Test
-	void cqlExecutionProvider_testExpression() {
+	void cqlExecutionProviderTestExpression() {
 		// execute cql expression from referenced library
 		Parameters libraryParameter = parameters(
 			canonicalPart("url", ourClient.getServerBase() + "/Library/SimpleR4Library"),
@@ -163,13 +174,12 @@ public class CpgOperationProviderTest extends BaseCrR4TestServer{
 		Parameters results = runCqlExecution(params);
 
 		assertFalse(results.isEmpty());
-		assertEquals(1, results.getParameter().size());
+		assertThat(results.getParameter()).hasSize(1);
 		assertTrue(results.getParameter("return").getValue() instanceof BooleanType);
 		assertTrue(((BooleanType) results.getParameter("return").getValue()).booleanValue());
 	}
 
-	@Test
-	void cqlExecutionProvider_testErrorExpression() {
+	void cqlExecutionProviderTestErrorExpression() {
 		// execute invalid cql expression
 		Parameters params = parameters(stringPart("expression", "Interval[1,5]"));
 
@@ -180,9 +190,8 @@ public class CpgOperationProviderTest extends BaseCrR4TestServer{
 		assertEquals("evaluation error", results.getParameterFirstRep().getName());
 		assertTrue(results.getParameterFirstRep().hasResource());
 		assertTrue(results.getParameterFirstRep().getResource() instanceof OperationOutcome);
-		assertEquals("Unsupported interval point type for FHIR conversion java.lang.Integer",
-			((OperationOutcome) results.getParameterFirstRep().getResource()).getIssueFirstRep().getDetails()
-				.getText());
+		assertThat(((OperationOutcome) results.getParameterFirstRep().getResource()).getIssueFirstRep().getDetails()
+				.getText()).isEqualTo("Unsupported interval point type for FHIR conversion java.lang.Integer");
 	}
 
 	public Parameters runCqlExecution(Parameters parameters){

@@ -21,14 +21,27 @@ package ca.uhn.fhir.jpa.model.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 
 import java.util.Date;
 
+/**
+ * This entity is used to enforce uniqueness on a given search URL being
+ * used as a conditional operation URL, e.g. a conditional create or a
+ * conditional update. When we perform a conditional operation that is
+ * creating a new resource, we store an entity with the conditional URL
+ * in this table. The URL is the PK of the table, so the database
+ * ensures that two concurrent threads don't accidentally create two
+ * resources with the same conditional URL.
+ */
 @Entity
 @Table(
 		name = "HFJ_RES_SEARCH_URL",
@@ -46,26 +59,46 @@ public class ResourceSearchUrlEntity {
 	@Column(name = RES_SEARCH_URL_COLUMN_NAME, length = RES_SEARCH_URL_LENGTH, nullable = false)
 	private String mySearchUrl;
 
-	@Column(name = "RES_ID", updatable = false, nullable = false)
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(
+			name = "RES_ID",
+			nullable = false,
+			updatable = false,
+			foreignKey = @ForeignKey(name = "FK_RES_SEARCH_URL_RESOURCE"))
+	private ResourceTable myResourceTable;
+
+	@Column(name = "RES_ID", updatable = false, nullable = false, insertable = false)
 	private Long myResourcePid;
 
 	@Column(name = "CREATED_TIME", nullable = false)
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date myCreatedTime;
 
-	public static ResourceSearchUrlEntity from(String theUrl, Long theId) {
+	public static ResourceSearchUrlEntity from(String theUrl, ResourceTable theResourceTable) {
 		return new ResourceSearchUrlEntity()
-				.setResourcePid(theId)
+				.setResourceTable(theResourceTable)
 				.setSearchUrl(theUrl)
 				.setCreatedTime(new Date());
 	}
 
 	public Long getResourcePid() {
-		return myResourcePid;
+		if (myResourcePid != null) {
+			return myResourcePid;
+		}
+		return myResourceTable.getResourceId();
 	}
 
 	public ResourceSearchUrlEntity setResourcePid(Long theResourcePid) {
 		myResourcePid = theResourcePid;
+		return this;
+	}
+
+	public ResourceTable getResourceTable() {
+		return myResourceTable;
+	}
+
+	public ResourceSearchUrlEntity setResourceTable(ResourceTable myResourceTable) {
+		this.myResourceTable = myResourceTable;
 		return this;
 	}
 

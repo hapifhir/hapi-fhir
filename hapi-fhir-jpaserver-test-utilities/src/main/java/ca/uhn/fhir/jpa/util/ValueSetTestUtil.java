@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.util.HapiExtensions.EXT_VALUESET_EXPANSION_MESSAGE;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ValueSetTestUtil {
 
@@ -43,7 +43,7 @@ public class ValueSetTestUtil {
 	public String extractExpansionMessage(IBaseResource theValueSet) {
 		ValueSet outcome = myCanonicalizer.valueSetToCanonical(theValueSet);
 		List<Extension> extensions = outcome.getMeta().getExtensionsByUrl(EXT_VALUESET_EXPANSION_MESSAGE);
-		assertEquals(1, extensions.size());
+		assertThat(extensions).hasSize(1);
 		String expansionMessage = extensions.get(0).getValueAsPrimitive().getValueAsString();
 		return expansionMessage;
 	}

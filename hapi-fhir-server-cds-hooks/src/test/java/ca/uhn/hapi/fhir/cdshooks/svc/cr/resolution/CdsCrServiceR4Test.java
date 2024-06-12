@@ -23,6 +23,7 @@ import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 
 import java.io.IOException;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -47,7 +48,7 @@ public class CdsCrServiceR4Test extends BaseCrTest {
 		requestDetails.setId(planDefinitionId);
 		final Parameters params = new CdsCrServiceR4(requestDetails, repository, myCdsConfigService).encodeParams(cdsServiceRequestJson);
 
-		assertTrue(params.getParameter().size() == 3);
+		assertTrue(params.getParameter().size() == 2);
 		assertTrue(params.getParameter("parameters").hasResource());
 	}
 
@@ -78,7 +79,7 @@ public class CdsCrServiceR4Test extends BaseCrTest {
 		final CdsServiceResponseJson cdsServiceResponseJson = new CdsCrServiceR4(requestDetails, repository, myCdsConfigService).encodeResponse(responseBundle);
 
 		assertTrue(cdsServiceResponseJson.getServiceActions().size() == 1);
-		assertTrue(cdsServiceResponseJson.getServiceActions().get(0).getType().equals(ActionType.CREATE.toCode()));
+		assertEquals(ActionType.CREATE, cdsServiceResponseJson.getServiceActions().get(0).getType());
 		assertNotNull(cdsServiceResponseJson.getServiceActions().get(0).getResource());
 	}
 }

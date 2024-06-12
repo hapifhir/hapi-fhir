@@ -48,6 +48,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -57,6 +58,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hl7.fhir.instance.model.api.IAnyResource.SP_RES_ID;
 
@@ -266,13 +268,16 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 			case DELETE:
 				if (theOperation == RestOperationTypeEnum.DELETE) {
 					if (thePointcut == Pointcut.STORAGE_PRE_DELETE_EXPUNGE && myAppliesToDeleteExpunge) {
-						return newVerdict(
-								theOperation,
-								theRequestDetails,
-								theInputResource,
-								theInputResourceId,
-								theOutputResource,
-								theRuleApplier);
+						target.resourceType = theRequestDetails.getResourceName();
+						String[] resourceIds = theRequestDetails.getParameters().get("_id");
+						if (resourceIds != null) {
+							target.resourceIds =
+									extractResourceIdsFromRequestParameters(theRequestDetails, resourceIds);
+						} else {
+							target.setSearchParams(theRequestDetails);
+						}
+
+						break;
 					}
 					if (myAppliesToDeleteCascade != (thePointcut == Pointcut.STORAGE_CASCADE_DELETE)) {
 						return null;
@@ -428,6 +433,18 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 				ctx,
 				target,
 				theRuleApplier);
+	}
+
+	private List<IIdType> extractResourceIdsFromRequestParameters(
+			RequestDetails theRequestDetails, String[] theResourceIds) {
+		return Arrays.stream(theResourceIds)
+				.map(id -> {
+					IIdType inputResourceId =
+							theRequestDetails.getFhirContext().getVersion().newIdType();
+					inputResourceId.setParts(null, theRequestDetails.getResourceName(), id, null);
+					return inputResourceId;
+				})
+				.collect(Collectors.toList());
 	}
 
 	/**
@@ -722,6 +739,11 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 			boolean allComponentsAreGets = true;
 			for (BundleEntryParts nextPart : inputResources) {
 
+				if (isInvalidNestedBundleRequest(nextPart)) {
+					throw new InvalidRequestException(
+							Msg.code(2504) + "Can not handle nested Bundle request with url: " + nextPart.getUrl());
+				}
+
 				IBaseResource inputResource = nextPart.getResource();
 				IIdType inputResourceId = null;
 				if (isNotBlank(nextPart.getUrl())) {
@@ -766,20 +788,11 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 							+ "Can not handle transaction with operation of type " + nextPart.getRequestType());
 				}
 
-				/*
-				 * This is basically just being conservative - Be careful of transactions containing
-				 * nested operations and nested transactions. We block them by default. At some point
-				 * it would be nice to be more nuanced here.
-				 */
-				if (nextPart.getResource() != null) {
-					RuntimeResourceDefinition resourceDef = ctx.getResourceDefinition(nextPart.getResource());
-
-					// TODO:  LD:  We should pursue a more ideal fix after the release to inspect the bundle more deeply
-					// to ensure that it's a valid request
-					if (shouldRejectBundleEntry(resourceDef, operation)) {
-						throw new InvalidRequestException(Msg.code(339)
-								+ "Can not handle transaction with nested resource of type " + resourceDef.getName());
-					}
+				// This is done because a Bundle can contain a nested PATCH with Parameters,
+				// which is supported but a non-PATCH nested Parameters resource may be problematic.
+				if (isInvalidNestedParametersRequest(ctx, nextPart, operation)) {
+					throw new InvalidRequestException(Msg.code(339)
+							+ String.format("Can not handle nested Parameters with %s operation", operation));
 				}
 
 				String previousFixedConditionalUrl = theRequestDetails.getFixedConditionalUrl();
@@ -817,7 +830,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 		} else if (theOutputResource != null) {
 
 			List<IBaseResource> outputResources = AuthorizationInterceptor.toListOfResourcesAndExcludeContainer(
-					theRequestDetails, theOutputResource, theRequestDetails.getFhirContext());
+					theOutputResource, theRequestDetails.getFhirContext());
 
 			Verdict verdict = null;
 			for (IBaseResource nextResource : outputResources) {
@@ -840,22 +853,38 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 		}
 	}
 
+	private boolean isInvalidNestedBundleRequest(BundleEntryParts theEntry) {
+		IBaseResource resource = theEntry.getResource();
+		if (!(resource instanceof IBaseBundle)) {
+			return false;
+		}
+
+		// transactions are permitted that contain entries with Bundle requests that
+		// have a specified url (i.e. POST to /Bundle), but are rejected if no url is specified
+		// (i.e. nested transactions or batches).
+		String url = theEntry.getUrl();
+		return isBlank(url) || "/".equals(url);
+	}
+
 	/**
 	 * Ascertain whether this transaction request contains a nested operations or nested transactions.
 	 * This is done carefully because a bundle can contain a nested PATCH with Parameters, which is supported but
 	 * a non-PATCH nested Parameters resource may be problematic.
 	 *
-	 * @param theResourceDef The {@link RuntimeResourceDefinition} associated with this bundle entry
-	 * @param theOperation The {@link RestOperationTypeEnum} associated with this bundle entry
 	 * @return true if we should reject this reject
 	 */
-	private boolean shouldRejectBundleEntry(
-			RuntimeResourceDefinition theResourceDef, RestOperationTypeEnum theOperation) {
-		final boolean isResourceParameters = PARAMETERS.equals(theResourceDef.getName());
-		final boolean isResourceBundle = BUNDLE.equals(theResourceDef.getName());
+	private boolean isInvalidNestedParametersRequest(
+			FhirContext theContext, BundleEntryParts theEntry, RestOperationTypeEnum theOperation) {
+		IBaseResource resource = theEntry.getResource();
+		if (resource == null) {
+			return false;
+		}
+
+		RuntimeResourceDefinition resourceDefinition = theContext.getResourceDefinition(resource);
+		final boolean isResourceParameters = PARAMETERS.equals(resourceDefinition.getName());
 		final boolean isOperationPatch = theOperation == RestOperationTypeEnum.PATCH;
 
-		return (isResourceParameters && !isOperationPatch) || isResourceBundle;
+		return (isResourceParameters && !isOperationPatch);
 	}
 
 	private void setTargetFromResourceId(RequestDetails theRequestDetails, FhirContext ctx, RuleTarget target) {

@@ -1,8 +1,9 @@
 package ca.uhn.fhir.jpa.interceptor;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
-import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.r4.model.Annotation;
@@ -13,31 +14,29 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class PatientCompartmentEnforcingInterceptorTest extends BaseJpaR4Test {
+public class PatientCompartmentEnforcingInterceptorTest extends BaseResourceProviderR4Test {
 
 	public static final int ALTERNATE_DEFAULT_ID = -1;
-	private PatientIdPartitionInterceptor mySvc;
-	private ForceOffsetSearchModeInterceptor myForceOffsetSearchModeInterceptor;
-	private PatientCompartmentEnforcingInterceptor myUpdateCrossPartitionInterceptor;
-
 	@Autowired
 	private ISearchParamExtractor mySearchParamExtractor;
+	private ForceOffsetSearchModeInterceptor myForceOffsetSearchModeInterceptor;
+	private PatientIdPartitionInterceptor myPatientIdPartitionInterceptor;
+	private PatientCompartmentEnforcingInterceptor mySvc;
 
 	@Override
 	@BeforeEach
 	public void before() throws Exception {
 		super.before();
-		mySvc = new PatientIdPartitionInterceptor(myFhirContext, mySearchParamExtractor, myPartitionSettings);
 		myForceOffsetSearchModeInterceptor = new ForceOffsetSearchModeInterceptor();
-		myUpdateCrossPartitionInterceptor = new PatientCompartmentEnforcingInterceptor(
-			myFhirContext, mySearchParamExtractor);
+		myPatientIdPartitionInterceptor = new PatientIdPartitionInterceptor(getFhirContext(), mySearchParamExtractor, myPartitionSettings);
+		mySvc = new PatientCompartmentEnforcingInterceptor(getFhirContext(), mySearchParamExtractor);
 
-		myInterceptorRegistry.registerInterceptor(mySvc);
+		myInterceptorRegistry.registerInterceptor(myPatientIdPartitionInterceptor);
 		myInterceptorRegistry.registerInterceptor(myForceOffsetSearchModeInterceptor);
-		myInterceptorRegistry.registerInterceptor(myUpdateCrossPartitionInterceptor);
+		myInterceptorRegistry.registerInterceptor(mySvc);
 
 		myPartitionSettings.setPartitioningEnabled(true);
 		myPartitionSettings.setUnnamedPartitionMode(true);
@@ -46,9 +45,9 @@ public class PatientCompartmentEnforcingInterceptorTest extends BaseJpaR4Test {
 
 	@AfterEach
 	public void after() {
-		myInterceptorRegistry.unregisterInterceptor(mySvc);
+		myInterceptorRegistry.unregisterInterceptor(myPatientIdPartitionInterceptor);
 		myInterceptorRegistry.unregisterInterceptor(myForceOffsetSearchModeInterceptor);
-		myInterceptorRegistry.unregisterInterceptor(myUpdateCrossPartitionInterceptor);
+		myInterceptorRegistry.unregisterInterceptor(mySvc);
 
 		myPartitionSettings.setPartitioningEnabled(false);
 		myPartitionSettings.setUnnamedPartitionMode(new PartitionSettings().isUnnamedPartitionMode());

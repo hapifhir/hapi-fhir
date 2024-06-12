@@ -1,10 +1,12 @@
 package ca.uhn.fhir.jpa.subscription;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionMatchingStrategy;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyEvaluator;
@@ -28,11 +30,9 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
@@ -63,7 +63,7 @@ public class SubscriptionValidatingInterceptorTest {
 	@BeforeEach
 	public void before() {
 		mySvc = new SubscriptionValidatingInterceptor();
-		mySubscriptionCanonicalizer = spy(new SubscriptionCanonicalizer(myCtx));
+		mySubscriptionCanonicalizer = spy(new SubscriptionCanonicalizer(myCtx, new StorageSettings()));
 		mySvc.setSubscriptionCanonicalizerForUnitTest(mySubscriptionCanonicalizer);
 		mySvc.setDaoRegistryForUnitTest(myDaoRegistry);
 		mySvc.setSubscriptionStrategyEvaluatorForUnitTest(mySubscriptionStrategyEvaluator);
@@ -80,7 +80,7 @@ public class SubscriptionValidatingInterceptorTest {
 			mySvc.resourcePreCreate(subscription, null, null);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), containsString("Subscription.status must be populated on this server"));
+			assertThat(e.getMessage()).contains("Subscription.status must be populated on this server");
 		}
 	}
 
@@ -113,7 +113,7 @@ public class SubscriptionValidatingInterceptorTest {
 			mySvc.resourcePreCreate(subscription, null, null);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), containsString("Subscription.criteria contains invalid/unsupported resource type: Patient"));
+			assertThat(e.getMessage()).contains("Subscription.criteria contains invalid/unsupported resource type: Patient");
 		}
 	}
 
@@ -132,7 +132,7 @@ public class SubscriptionValidatingInterceptorTest {
 			mySvc.resourcePreCreate(subscription, null, null);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), containsString("Subscription.criteria contains invalid/unsupported resource type: Patient"));
+			assertThat(e.getMessage()).contains("Subscription.criteria contains invalid/unsupported resource type: Patient");
 		}
 	}
 
@@ -150,7 +150,7 @@ public class SubscriptionValidatingInterceptorTest {
 			mySvc.resourcePreCreate(subscription, null, null);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), containsString("Rest-hook subscriptions must have Subscription.channel.endpoint defined"));
+			assertThat(e.getMessage()).contains("Rest-hook subscriptions must have Subscription.channel.endpoint defined");
 		}
 	}
 
@@ -169,7 +169,7 @@ public class SubscriptionValidatingInterceptorTest {
 			mySvc.resourcePreCreate(subscription, null, null);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), containsString("Subscription.channel.type must be populated"));
+			assertThat(e.getMessage()).contains("Subscription.channel.type must be populated");
 		}
 	}
 
@@ -198,7 +198,7 @@ public class SubscriptionValidatingInterceptorTest {
 			mySvc.resourcePreCreate(subscription, null, null);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), containsString("Subscription.criteria must be populated"));
+			assertThat(e.getMessage()).contains("Subscription.criteria must be populated");
 		}
 	}
 

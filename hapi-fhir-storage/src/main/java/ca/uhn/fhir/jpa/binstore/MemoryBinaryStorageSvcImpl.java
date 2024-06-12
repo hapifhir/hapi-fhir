@@ -54,7 +54,7 @@ public class MemoryBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl impleme
 
 	@Nonnull
 	@Override
-	public StoredDetails storeBlob(
+	public StoredDetails storeBinaryContent(
 			IIdType theResourceId,
 			String theBlobIdOrNull,
 			String theContentType,
@@ -66,7 +66,7 @@ public class MemoryBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl impleme
 		CountingInputStream countingIs = createCountingInputStream(hashingIs);
 
 		byte[] bytes = IOUtils.toByteArray(countingIs);
-		String id = super.provideIdForNewBlob(theBlobIdOrNull, bytes, theRequestDetails, theContentType);
+		String id = super.provideIdForNewBinaryContent(theBlobIdOrNull, bytes, theRequestDetails, theContentType);
 		String key = toKey(theResourceId, id);
 		theInputStream.close();
 		myDataMap.put(key, bytes);
@@ -77,13 +77,14 @@ public class MemoryBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl impleme
 	}
 
 	@Override
-	public StoredDetails fetchBlobDetails(IIdType theResourceId, String theBlobId) {
+	public StoredDetails fetchBinaryContentDetails(IIdType theResourceId, String theBlobId) {
 		String key = toKey(theResourceId, theBlobId);
 		return myDetailsMap.get(key);
 	}
 
 	@Override
-	public boolean writeBlob(IIdType theResourceId, String theBlobId, OutputStream theOutputStream) throws IOException {
+	public boolean writeBinaryContent(IIdType theResourceId, String theBlobId, OutputStream theOutputStream)
+			throws IOException {
 		String key = toKey(theResourceId, theBlobId);
 		byte[] bytes = myDataMap.get(key);
 		if (bytes == null) {
@@ -94,14 +95,14 @@ public class MemoryBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl impleme
 	}
 
 	@Override
-	public void expungeBlob(IIdType theResourceId, String theBlobId) {
+	public void expungeBinaryContent(IIdType theResourceId, String theBlobId) {
 		String key = toKey(theResourceId, theBlobId);
 		myDataMap.remove(key);
 		myDetailsMap.remove(key);
 	}
 
 	@Override
-	public byte[] fetchBlob(IIdType theResourceId, String theBlobId) {
+	public byte[] fetchBinaryContent(IIdType theResourceId, String theBlobId) {
 		String key = toKey(theResourceId, theBlobId);
 		return myDataMap.get(key);
 	}

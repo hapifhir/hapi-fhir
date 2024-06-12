@@ -23,8 +23,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -61,7 +60,7 @@ public class MdmCandidateSearchSvcIT extends BaseMdmR4Test {
 		Patient newJane = buildJanePatient();
 
 		Collection<IAnyResource> result = myMdmCandidateSearchSvc.findCandidates("Patient", newJane, RequestPartitionId.allPartitions());
-		assertEquals(1, result.size());
+		assertThat(result).hasSize(1);
 	}
 
 	@Test
@@ -88,7 +87,7 @@ public class MdmCandidateSearchSvcIT extends BaseMdmR4Test {
 			nick.getNameFirstRep().addGiven("Bill");
 			nick.getNameFirstRep().setFamily("Shatner");
 			Collection<IAnyResource> result = myMdmCandidateSearchSvc.findCandidates("Practitioner", nick, RequestPartitionId.allPartitions());
-			assertEquals(1, result.size());
+			assertThat(result).hasSize(1);
 		}
 
 		{
@@ -97,7 +96,7 @@ public class MdmCandidateSearchSvcIT extends BaseMdmR4Test {
 			noMatch.getNameFirstRep().addGiven("Bob");
 			noMatch.getNameFirstRep().setFamily("Shatner");
 			Collection<IAnyResource> result = myMdmCandidateSearchSvc.findCandidates("Practitioner", noMatch, RequestPartitionId.allPartitions());
-			assertEquals(0, result.size());
+			assertThat(result).isEmpty();
 		}
 	}
 
@@ -112,7 +111,7 @@ public class MdmCandidateSearchSvcIT extends BaseMdmR4Test {
 		Patient newJane = buildJaneWithBirthday(today);
 
 		Collection<IAnyResource> result = myMdmCandidateSearchSvc.findCandidates("Patient", newJane, RequestPartitionId.allPartitions());
-		assertEquals(1, result.size());
+		assertThat(result).hasSize(1);
 	}
 
 	@Test
@@ -130,7 +129,7 @@ public class MdmCandidateSearchSvcIT extends BaseMdmR4Test {
 		incomingPatient.setGeneralPractitioner(Collections.singletonList(new Reference(practitionerAndUpdateLinks.getId())));
 
 		Collection<IAnyResource> patient = myMdmCandidateSearchSvc.findCandidates("Patient", incomingPatient, RequestPartitionId.allPartitions());
-		assertThat(patient, hasSize(1));
+		assertThat(patient).hasSize(1);
 	}
 
 	@Test

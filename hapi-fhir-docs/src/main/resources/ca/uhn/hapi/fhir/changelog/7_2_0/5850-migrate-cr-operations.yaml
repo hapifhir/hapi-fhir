@@ -1,0 +1,6 @@
+---
+type: add
+issue: 5850
+title: "Add additional Clinical Reasoning operations $collect-data and $data-requirements to HAPI-FHIR to expand capability
+for clinical reasoning module users. These operations will assist users in identifying data requirements for evaluating a measure, and what
+data was used for a measure evaluation"

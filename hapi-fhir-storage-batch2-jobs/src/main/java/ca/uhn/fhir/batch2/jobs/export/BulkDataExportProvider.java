@@ -25,11 +25,11 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -38,7 +38,6 @@ import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.bulk.export.model.BulkExportResponseJson;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
@@ -78,7 +77,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -102,6 +100,13 @@ public class BulkDataExportProvider {
 	public static final String UNSUPPORTED_BINARY_TYPE = "Binary";
 
 	private static final Logger ourLog = getLogger(BulkDataExportProvider.class);
+	private static final Set<FhirVersionEnum> PATIENT_COMPARTMENT_FHIR_VERSIONS_SUPPORT_DEVICE = Set.of(
+			FhirVersionEnum.DSTU2,
+			FhirVersionEnum.DSTU2_1,
+			FhirVersionEnum.DSTU2_HL7ORG,
+			FhirVersionEnum.DSTU3,
+			FhirVersionEnum.R4,
+			FhirVersionEnum.R4B);
 
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
@@ -164,17 +169,38 @@ public class BulkDataExportProvider {
 	}
 
 	private void startJob(ServletRequestDetails theRequestDetails, BulkExportJobParameters theOptions) {
+		// parameter massaging
+		expandParameters(theRequestDetails, theOptions);
+
 		// permission check
-		HookParams params = (new HookParams())
+		HookParams initiateBulkExportHookParams = (new HookParams())
 				.add(BulkExportJobParameters.class, theOptions)
 				.add(RequestDetails.class, theRequestDetails)
 				.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
 		CompositeInterceptorBroadcaster.doCallHooks(
-				this.myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_INITIATE_BULK_EXPORT, params);
+				this.myInterceptorBroadcaster,
+				theRequestDetails,
+				Pointcut.STORAGE_INITIATE_BULK_EXPORT,
+				initiateBulkExportHookParams);
 
 		// get cache boolean
 		boolean useCache = shouldUseCache(theRequestDetails);
 
+		// start job
+		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
+		startRequest.setParameters(theOptions);
+		startRequest.setUseCache(useCache);
+		startRequest.setJobDefinitionId(Batch2JobDefinitionConstants.BULK_EXPORT);
+		Batch2JobStartResponse response = myJobCoordinator.startInstance(theRequestDetails, startRequest);
+
+		writePollingLocationToResponseHeaders(theRequestDetails, response.getInstanceId());
+	}
+
+	/**
+	 * This method changes any parameters (limiting the _type parameter, for instance)
+	 * so that later steps in the export do not have to handle them.
+	 */
+	private void expandParameters(ServletRequestDetails theRequestDetails, BulkExportJobParameters theOptions) {
 		// Set the original request URL as part of the job information, as this is used in the poll-status-endpoint, and
 		// is needed for the report.
 		theOptions.setOriginalRequestUrl(theRequestDetails.getCompleteUrl());
@@ -186,23 +212,23 @@ public class BulkDataExportProvider {
 			theOptions.setResourceTypes(resourceTypes);
 		}
 
-		ReadPartitionIdRequestDetails theDetails =
-				ReadPartitionIdRequestDetails.forOperation(null, null, ProviderConstants.OPERATION_EXPORT);
-
 		// Determine and validate partition permissions (if needed).
 		RequestPartitionId partitionId =
-				myRequestPartitionHelperService.determineReadPartitionForRequest(theRequestDetails, theDetails);
+				myRequestPartitionHelperService.determineReadPartitionForRequestForServerOperation(
+						theRequestDetails, ProviderConstants.OPERATION_EXPORT);
 		myRequestPartitionHelperService.validateHasPartitionPermissions(theRequestDetails, "Binary", partitionId);
 		theOptions.setPartitionId(partitionId);
 
-		// start job
-		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
-		startRequest.setParameters(theOptions);
-		startRequest.setUseCache(useCache);
-		startRequest.setJobDefinitionId(Batch2JobDefinitionConstants.BULK_EXPORT);
-		Batch2JobStartResponse response = myJobCoordinator.startInstance(theRequestDetails, startRequest);
-
-		writePollingLocationToResponseHeaders(theRequestDetails, response.getInstanceId());
+		// call hook so any other parameter manipulation can be done
+		HookParams preInitiateBulkExportHookParams = new HookParams();
+		preInitiateBulkExportHookParams.add(BulkExportJobParameters.class, theOptions);
+		preInitiateBulkExportHookParams.add(RequestDetails.class, theRequestDetails);
+		preInitiateBulkExportHookParams.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
+		CompositeInterceptorBroadcaster.doCallHooks(
+				myInterceptorBroadcaster,
+				theRequestDetails,
+				Pointcut.STORAGE_PRE_INITIATE_BULK_EXPORT,
+				preInitiateBulkExportHookParams);
 	}
 
 	private boolean shouldUseCache(ServletRequestDetails theRequestDetails) {
@@ -296,11 +322,15 @@ public class BulkDataExportProvider {
 	 */
 	private void validateTargetsExists(
 			RequestDetails theRequestDetails, String theTargetResourceName, Iterable<IIdType> theIdParams) {
-		RequestPartitionId partitionId = myRequestPartitionHelperService.determineReadPartitionForRequestForRead(
-				theRequestDetails, theTargetResourceName, theIdParams.iterator().next());
-		SystemRequestDetails requestDetails = new SystemRequestDetails().setRequestPartitionId(partitionId);
-		for (IIdType nextId : theIdParams) {
-			myDaoRegistry.getResourceDao(theTargetResourceName).read(nextId, requestDetails);
+		if (theIdParams.iterator().hasNext()) {
+			RequestPartitionId partitionId = myRequestPartitionHelperService.determineReadPartitionForRequestForRead(
+					theRequestDetails,
+					theTargetResourceName,
+					theIdParams.iterator().next());
+			SystemRequestDetails requestDetails = new SystemRequestDetails().setRequestPartitionId(partitionId);
+			for (IIdType nextId : theIdParams) {
+				myDaoRegistry.getResourceDao(theTargetResourceName).read(nextId, requestDetails);
+			}
 		}
 	}
 
@@ -322,10 +352,18 @@ public class BulkDataExportProvider {
 	}
 
 	private Set<String> getPatientCompartmentResources() {
+		return getPatientCompartmentResources(myFhirContext);
+	}
+
+	@VisibleForTesting
+	Set<String> getPatientCompartmentResources(FhirContext theFhirContext) {
 		if (myCompartmentResources == null) {
 			myCompartmentResources =
-					new HashSet<>(SearchParameterUtil.getAllResourceTypesThatAreInPatientCompartment(myFhirContext));
-			myCompartmentResources.add("Device");
+					new HashSet<>(SearchParameterUtil.getAllResourceTypesThatAreInPatientCompartment(theFhirContext));
+			if (isDeviceResourceSupportedForPatientCompartmentForFhirVersion(
+					theFhirContext.getVersion().getVersion())) {
+				myCompartmentResources.add("Device");
+			}
 		}
 		return myCompartmentResources;
 	}
@@ -367,26 +405,18 @@ public class BulkDataExportProvider {
 			@OperationParam(name = JpaConstants.PARAM_EXPORT_IDENTIFIER, min = 0, max = 1, typeName = "string")
 					IPrimitiveType<String> theExportIdentifier,
 			ServletRequestDetails theRequestDetails) {
-		validatePreferAsyncHeader(theRequestDetails, ProviderConstants.OPERATION_EXPORT);
 
-		if (thePatient != null) {
-			validateTargetsExists(
-					theRequestDetails,
-					"Patient",
-					thePatient.stream().map(s -> new IdDt(s.getValue())).collect(Collectors.toList()));
-		}
+		List<IPrimitiveType<String>> patientIds = thePatient != null ? thePatient : new ArrayList<>();
 
-		BulkExportJobParameters BulkExportJobParameters = buildPatientBulkExportOptions(
+		doPatientExport(
+				theRequestDetails,
 				theOutputFormat,
 				theType,
 				theSince,
-				theTypeFilter,
 				theExportIdentifier,
-				thePatient,
-				theTypePostFetchFilterUrl);
-		validateResourceTypesAllContainPatientSearchParams(BulkExportJobParameters.getResourceTypes());
-
-		startJob(theRequestDetails, BulkExportJobParameters);
+				theTypeFilter,
+				theTypePostFetchFilterUrl,
+				patientIds);
 	}
 
 	/**
@@ -420,9 +450,34 @@ public class BulkDataExportProvider {
 			@OperationParam(name = JpaConstants.PARAM_EXPORT_IDENTIFIER, min = 0, max = 1, typeName = "string")
 					IPrimitiveType<String> theExportIdentifier,
 			ServletRequestDetails theRequestDetails) {
+
+		// call the type-level export to ensure spec compliance
+		patientExport(
+				theOutputFormat,
+				theType,
+				theSince,
+				theTypeFilter,
+				theTypePostFetchFilterUrl,
+				List.of(theIdParam),
+				theExportIdentifier,
+				theRequestDetails);
+	}
+
+	private void doPatientExport(
+			ServletRequestDetails theRequestDetails,
+			IPrimitiveType<String> theOutputFormat,
+			IPrimitiveType<String> theType,
+			IPrimitiveType<Date> theSince,
+			IPrimitiveType<String> theExportIdentifier,
+			List<IPrimitiveType<String>> theTypeFilter,
+			List<IPrimitiveType<String>> theTypePostFetchFilterUrl,
+			List<IPrimitiveType<String>> thePatientIds) {
 		validatePreferAsyncHeader(theRequestDetails, ProviderConstants.OPERATION_EXPORT);
 
-		validateTargetsExists(theRequestDetails, "Patient", List.of(theIdParam));
+		validateTargetsExists(
+				theRequestDetails,
+				"Patient",
+				thePatientIds.stream().map(c -> new IdType(c.getValue())).collect(Collectors.toList()));
 
 		BulkExportJobParameters BulkExportJobParameters = buildPatientBulkExportOptions(
 				theOutputFormat,
@@ -430,7 +485,7 @@ public class BulkDataExportProvider {
 				theSince,
 				theTypeFilter,
 				theExportIdentifier,
-				theIdParam,
+				thePatientIds,
 				theTypePostFetchFilterUrl);
 		validateResourceTypesAllContainPatientSearchParams(BulkExportJobParameters.getResourceTypes());
 
@@ -472,7 +527,8 @@ public class BulkDataExportProvider {
 		if (parameters.getPartitionId() != null) {
 			// Determine and validate permissions for partition (if needed)
 			RequestPartitionId partitionId =
-					myRequestPartitionHelperService.determineReadPartitionForRequest(theRequestDetails, null);
+					myRequestPartitionHelperService.determineReadPartitionForRequestForServerOperation(
+							theRequestDetails, ProviderConstants.OPERATION_EXPORT_POLL_STATUS);
 			myRequestPartitionHelperService.validateHasPartitionPermissions(theRequestDetails, "Binary", partitionId);
 			if (!parameters.getPartitionId().equals(partitionId)) {
 				throw new InvalidRequestException(
@@ -672,31 +728,6 @@ public class BulkDataExportProvider {
 		return BulkExportJobParameters;
 	}
 
-	private BulkExportJobParameters buildPatientBulkExportOptions(
-			IPrimitiveType<String> theOutputFormat,
-			IPrimitiveType<String> theType,
-			IPrimitiveType<Date> theSince,
-			List<IPrimitiveType<String>> theTypeFilter,
-			IPrimitiveType<String> theExportIdentifier,
-			IIdType thePatientId,
-			List<IPrimitiveType<String>> theTypePostFetchFilterUrl) {
-		IPrimitiveType<String> type = theType;
-		if (type == null) {
-			// set type to all patient compartment resources if it is null
-			type = new StringDt(String.join(",", getPatientCompartmentResources()));
-		}
-		BulkExportJobParameters BulkExportJobParameters = buildBulkExportJobParameters(
-				theOutputFormat,
-				type,
-				theSince,
-				theTypeFilter,
-				theExportIdentifier,
-				ExportStyle.PATIENT,
-				theTypePostFetchFilterUrl);
-		BulkExportJobParameters.setPatientIds(Collections.singleton(thePatientId.getValue()));
-		return BulkExportJobParameters;
-	}
-
 	private BulkExportJobParameters buildBulkExportJobParameters(
 			IPrimitiveType<String> theOutputFormat,
 			IPrimitiveType<String> theType,
@@ -787,5 +818,10 @@ public class BulkDataExportProvider {
 		if (!prefer.getRespondAsync()) {
 			throw new InvalidRequestException(Msg.code(513) + "Must request async processing for " + theOperationName);
 		}
+	}
+
+	private static boolean isDeviceResourceSupportedForPatientCompartmentForFhirVersion(
+			FhirVersionEnum theFhirVersionEnum) {
+		return PATIENT_COMPARTMENT_FHIR_VERSIONS_SUPPORT_DEVICE.contains(theFhirVersionEnum);
 	}
 }

@@ -1,19 +1,22 @@
 package ca.uhn.fhir.jpa.subscription.module;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
+import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
 import ca.uhn.fhir.util.HapiExtensions;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.annotation.Nonnull;
 import org.assertj.core.util.Lists;
-import org.hamcrest.Matchers;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Subscription;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,8 +24,9 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class CanonicalSubscriptionTest {
@@ -42,9 +46,9 @@ public class CanonicalSubscriptionTest {
 
 		s = serializeAndDeserialize(s);
 
-		assertThat(s.getChannelExtension("key1"), Matchers.equalTo("VALUE1"));
-		assertThat(s.getChannelExtension("key2"), Matchers.equalTo("VALUE2a"));
-		assertThat(s.getChannelExtension("key3"), Matchers.nullValue());
+		assertEquals("VALUE1", s.getChannelExtension("key1"));
+		assertEquals("VALUE2a", s.getChannelExtension("key2"));
+		assertNull(s.getChannelExtension("key3"));
 	}
 
 	@Test
@@ -59,22 +63,22 @@ public class CanonicalSubscriptionTest {
 
 		s = serializeAndDeserialize(s);
 
-		assertThat(s.getChannelExtensions("key1"), Matchers.contains("VALUE1"));
-		assertThat(s.getChannelExtensions("key2"), Matchers.contains("VALUE2a", "VALUE2b"));
-		assertThat(s.getChannelExtensions("key3"), Matchers.empty());
+		assertThat(s.getChannelExtensions("key1")).containsExactly("VALUE1");
+		assertThat(s.getChannelExtensions("key2")).containsExactly("VALUE2a", "VALUE2b");
+		assertThat(s.getChannelExtensions("key3")).isEmpty();
 	}
 
 	@Test
 	public void testCanonicalSubscriptionRetainsMetaTags() throws IOException {
-		SubscriptionCanonicalizer canonicalizer = new SubscriptionCanonicalizer(FhirContext.forR4());
+		SubscriptionCanonicalizer canonicalizer = new SubscriptionCanonicalizer(FhirContext.forR4(), new StorageSettings());
 		CanonicalSubscription sub1 = canonicalizer.canonicalize(makeMdmSubscription());
-		assertTrue(sub1.getTags().keySet().contains(TAG_SYSTEM));
+		assertThat(sub1.getTags()).containsKey(TAG_SYSTEM);
 		assertEquals(sub1.getTags().get(TAG_SYSTEM), TAG_VALUE);
    }
 
 	@Test
 	public void emailDetailsEquals() {
-		SubscriptionCanonicalizer canonicalizer = new SubscriptionCanonicalizer(FhirContext.forR4());
+		SubscriptionCanonicalizer canonicalizer = new SubscriptionCanonicalizer(FhirContext.forR4(), new StorageSettings());
 		CanonicalSubscription sub1 = canonicalizer.canonicalize(makeEmailSubscription());
 		CanonicalSubscription sub2 = canonicalizer.canonicalize(makeEmailSubscription());
 		assertTrue(sub1.equals(sub2));
@@ -82,7 +86,7 @@ public class CanonicalSubscriptionTest {
 
 	@Test
 	public void testSerializeMultiPartitionSubscription(){
-		SubscriptionCanonicalizer canonicalizer = new SubscriptionCanonicalizer(FhirContext.forR4());
+		SubscriptionCanonicalizer canonicalizer = new SubscriptionCanonicalizer(FhirContext.forR4(), new StorageSettings());
 		Subscription subscription = makeEmailSubscription();
 		subscription.addExtension(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION, new BooleanType().setValue(true));
 		CanonicalSubscription canonicalSubscription = canonicalizer.canonicalize(subscription);
@@ -90,28 +94,30 @@ public class CanonicalSubscriptionTest {
 		assertEquals(canonicalSubscription.getCrossPartitionEnabled(), true);
 	}
 
-	@Test
-	public void testSerializeIncorrectMultiPartitionSubscription(){
-		SubscriptionCanonicalizer canonicalizer = new SubscriptionCanonicalizer(FhirContext.forR4());
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	public void testSerializeIncorrectMultiPartitionSubscription(boolean theIsCrossPartitionEnabled){
+		final StorageSettings storageSettings = buildStorageSettings(theIsCrossPartitionEnabled);
+		SubscriptionCanonicalizer canonicalizer = new SubscriptionCanonicalizer(FhirContext.forR4(), storageSettings);
 		Subscription subscription = makeEmailSubscription();
 		subscription.addExtension(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION, new StringType().setValue("false"));
 		CanonicalSubscription canonicalSubscription = canonicalizer.canonicalize(subscription);
 
-		System.out.print(canonicalSubscription);
-
-		assertEquals(canonicalSubscription.getCrossPartitionEnabled(), false);
+		assertEquals(canonicalSubscription.getCrossPartitionEnabled(), theIsCrossPartitionEnabled);
 	}
 
-	@Test
-	public void testSerializeNonMultiPartitionSubscription(){
-		SubscriptionCanonicalizer canonicalizer = new SubscriptionCanonicalizer(FhirContext.forR4());
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	public void testSerializeNonMultiPartitionSubscription(boolean theIsCrossPartitionEnabled){
+		final StorageSettings storageSettings = buildStorageSettings(theIsCrossPartitionEnabled);
+		SubscriptionCanonicalizer canonicalizer = new SubscriptionCanonicalizer(FhirContext.forR4(), storageSettings);
 		Subscription subscription = makeEmailSubscription();
 		subscription.addExtension(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION, new BooleanType().setValue(false));
 		CanonicalSubscription canonicalSubscription = canonicalizer.canonicalize(subscription);
 
 		System.out.print(canonicalSubscription);
 
-		assertEquals(canonicalSubscription.getCrossPartitionEnabled(), false);
+		assertEquals(canonicalSubscription.getCrossPartitionEnabled(), theIsCrossPartitionEnabled);
 	}
 
 	@Test
@@ -153,5 +159,12 @@ public class CanonicalSubscriptionTest {
 
 		ResourceDeliveryMessage payload = resourceDeliveryMessage.getPayload();
 		return payload.getSubscription();
+	}
+
+	@Nonnull
+	private static StorageSettings buildStorageSettings(boolean theIsCrossPartitionEnabled) {
+		final StorageSettings storageSettings = new StorageSettings();
+		storageSettings.setCrossPartitionSubscriptionEnabled(theIsCrossPartitionEnabled);
+		return storageSettings;
 	}
 }

@@ -466,6 +466,14 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		if (!fulltextEnabled) {
 			failIfUsed(Constants.PARAM_TEXT);
 			failIfUsed(Constants.PARAM_CONTENT);
+		} else {
+			for (SortSpec sortSpec : myParams.getAllChainsInOrder()) {
+				final String paramName = sortSpec.getParamName();
+				if (paramName.contains(".")) {
+					failIfUsedWithChainedSort(Constants.PARAM_TEXT);
+					failIfUsedWithChainedSort(Constants.PARAM_CONTENT);
+				}
+			}
 		}
 
 		// someday we'll want a query planner to figure out if we _should_ or _must_ use the ft index, not just if we
@@ -473,13 +481,22 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		return fulltextEnabled
 				&& myParams != null
 				&& myParams.getSearchContainedMode() == SearchContainedModeEnum.FALSE
-				&& myFulltextSearchSvc.supportsSomeOf(myParams);
+				&& myFulltextSearchSvc.supportsSomeOf(myParams)
+				&& myFulltextSearchSvc.supportsAllSortTerms(myResourceName, myParams);
 	}
 
 	private void failIfUsed(String theParamName) {
 		if (myParams.containsKey(theParamName)) {
 			throw new InvalidRequestException(Msg.code(1192)
 					+ "Fulltext search is not enabled on this service, can not process parameter: " + theParamName);
+		}
+	}
+
+	private void failIfUsedWithChainedSort(String theParamName) {
+		if (myParams.containsKey(theParamName)) {
+			throw new InvalidRequestException(Msg.code(2524)
+					+ "Fulltext search combined with chained sorts are not supported, can not process parameter: "
+					+ theParamName);
 		}
 	}
 
@@ -843,6 +860,11 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 			RuntimeSearchParam param = null;
 
+			if (param == null) {
+				// do we have a composition param defined for the whole chain?
+				param = mySearchParamRegistry.getActiveSearchParam(myResourceName, theSort.getParamName());
+			}
+
 			/*
 			 * If we have a sort like _sort=subject.name and we  have an
 			 * uplifted refchain for that combination we can do it more efficiently
@@ -851,7 +873,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			 * to "name" in this example) so that we know what datatype it is.
 			 */
 			String paramName = theSort.getParamName();
-			if (myStorageSettings.isIndexOnUpliftedRefchains()) {
+			if (param == null && myStorageSettings.isIndexOnUpliftedRefchains()) {
 				String[] chains = StringUtils.split(paramName, '.');
 				if (chains.length == 2) {
 

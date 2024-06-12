@@ -2,13 +2,14 @@ package ca.uhn.fhir.jpa.mdm.svc;
 
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.EnversRevision;
 import ca.uhn.fhir.mdm.api.IMdmLink;
-import ca.uhn.fhir.mdm.model.mdmevents.MdmLinkJson;
-import ca.uhn.fhir.mdm.model.mdmevents.MdmLinkWithRevisionJson;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmLinkWithRevision;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
+import ca.uhn.fhir.mdm.model.mdmevents.MdmLinkJson;
+import ca.uhn.fhir.mdm.model.mdmevents.MdmLinkWithRevisionJson;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.hibernate.envers.RevisionType;
 import org.junit.jupiter.api.Test;
@@ -16,14 +17,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.time.Month;
 import java.time.ZoneId;
 import java.util.Date;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class MdmModelConverterSvcImplTest extends BaseMdmR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(MdmModelConverterSvcImplTest.class);
@@ -49,7 +50,15 @@ public class MdmModelConverterSvcImplTest extends BaseMdmR4Test {
 
 		ourLog.info("actualMdmLinkJson: {}", actualMdmLinkJson);
 
-		assertEquals(getExepctedMdmLinkJson(mdmLink.getGoldenResourcePersistenceId().getId(), mdmLink.getSourcePersistenceId().getId(), MdmMatchResultEnum.MATCH, MdmLinkSourceEnum.MANUAL, version, createTime, updateTime, isLinkCreatedResource, scoreRounded), actualMdmLinkJson);
+		MdmLinkJson expectedMdmLinkJson = getExepctedMdmLinkJson(mdmLink.getGoldenResourcePersistenceId().getId(), mdmLink.getSourcePersistenceId().getId(), MdmMatchResultEnum.MATCH, MdmLinkSourceEnum.MANUAL, version, createTime, updateTime, isLinkCreatedResource, scoreRounded);
+		assertEquals(expectedMdmLinkJson.getSourceId(), actualMdmLinkJson.getSourceId());
+		assertEquals(expectedMdmLinkJson.getGoldenResourceId(), actualMdmLinkJson.getGoldenResourceId());
+		assertEquals(expectedMdmLinkJson.getGoldenPid().getId(), actualMdmLinkJson.getGoldenPid().getId());
+		assertEquals(expectedMdmLinkJson.getSourcePid().getId(), actualMdmLinkJson.getSourcePid().getId());
+		assertEquals(expectedMdmLinkJson.getVector(), actualMdmLinkJson.getVector());
+		assertEquals(expectedMdmLinkJson.getScore(), actualMdmLinkJson.getScore());
+		assertEquals(expectedMdmLinkJson.getMatchResult(), actualMdmLinkJson.getMatchResult());
+		assertEquals(expectedMdmLinkJson.getLinkSource(), actualMdmLinkJson.getLinkSource());
 	}
 
 	@Test
@@ -99,7 +108,9 @@ public class MdmModelConverterSvcImplTest extends BaseMdmR4Test {
 		final MdmLinkJson mdmLinkJson = new MdmLinkJson();
 
 		mdmLinkJson.setGoldenResourceId("Patient/" + theGoldenPatientId);
+		mdmLinkJson.setGoldenPid(JpaPid.fromId(theGoldenPatientId));
 		mdmLinkJson.setSourceId("Patient/" + theSourceId);
+		mdmLinkJson.setSourcePid(JpaPid.fromId(theSourceId));
 		mdmLinkJson.setMatchResult(theMdmMatchResultEnum);
 		mdmLinkJson.setLinkSource(theMdmLinkSourceEnum);
 		mdmLinkJson.setVersion(version);

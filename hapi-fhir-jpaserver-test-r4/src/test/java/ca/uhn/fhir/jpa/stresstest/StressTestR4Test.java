@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.stresstest;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
@@ -64,12 +65,7 @@ import java.util.concurrent.Future;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.leftPad;
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @TestPropertySource(properties = {
@@ -195,7 +191,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 			searchResult = fhirClient.loadPage().next(searchResult).execute();
 		}
 
-		assertEquals(resourceCount, ids.size());
+		assertThat(ids).hasSize(resourceCount);
 	}
 
 	@Disabled("Stress test")
@@ -240,8 +236,8 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 			ourLog.info("Loading page {} - Have {} results: {}", pageIndex++, ids.size(), resultBundle.getLink("next").getUrl());
 			resultBundle = myClient.loadPage().next(resultBundle).execute();
 		}
-		assertEquals(count, ids.size());
-		assertEquals(count, Sets.newHashSet(ids).size());
+		assertThat(ids).hasSize(count);
+		assertThat(Sets.newHashSet(ids)).hasSize(count);
 
 		// Load from DAOs
 		ids = new ArrayList<>();
@@ -253,8 +249,8 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 			ids.addAll(toUnqualifiedVersionlessIdValues(resultsAndIncludes));
 			results = myPagingProvider.retrieveResultList(null, results.getUuid());
 		}
-		assertEquals(count, ids.size());
-		assertEquals(count, Sets.newHashSet(ids).size());
+		assertThat(ids).hasSize(count);
+		assertThat(Sets.newHashSet(ids)).hasSize(count);
 
 		// Load from DAOs starting half way through
 		ids = new ArrayList<>();
@@ -266,8 +262,8 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 			ids.addAll(toUnqualifiedVersionlessIdValues(resultsAndIncludes));
 			results = myPagingProvider.retrieveResultList(null, results.getUuid());
 		}
-		assertEquals(count - 1000, ids.size());
-		assertEquals(count - 1000, Sets.newHashSet(ids).size());
+		assertThat(ids).hasSize(count - 1000);
+		assertThat(Sets.newHashSet(ids)).hasSize(count - 1000);
 	}
 
 	@Disabled("Stress test")
@@ -301,8 +297,8 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 			ourLog.info("Loading page {} - Have {} results: {}", pageIndex++, ids.size(), resultBundle.getLink("next").getUrl());
 			resultBundle = myClient.loadPage().next(resultBundle).execute();
 		}
-		assertEquals(count, ids.size());
-		assertEquals(count, Sets.newHashSet(ids).size());
+		assertThat(ids).hasSize(count);
+		assertThat(Sets.newHashSet(ids)).hasSize(count);
 
 	}
 
@@ -343,7 +339,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		map.setLoadSynchronous(true);
 		IBundleProvider results = myDiagnosticReportDao.search(map, mySrd);
 		List<IBaseResource> resultsAndIncludes = results.getResources(0, 999999);
-		assertEquals(1001, resultsAndIncludes.size());
+		assertThat(resultsAndIncludes).hasSize(1001);
 
 		// Using focused includes
 		map = new SearchParameterMap();
@@ -352,7 +348,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		map.setLoadSynchronous(true);
 		results = myDiagnosticReportDao.search(map, mySrd);
 		resultsAndIncludes = results.getResources(0, 999999);
-		assertEquals(1001, resultsAndIncludes.size());
+		assertThat(resultsAndIncludes).hasSize(1001);
 	}
 
 	@Disabled("Stress test")
@@ -447,7 +443,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 					myClient.transaction().withBundle(input).execute();
 					return null;
 				} catch (ResourceVersionConflictException e) {
-					assertThat(e.toString(), containsString("Error flushing transaction with resource types: [Patient] - The operation has failed with a client-assigned ID constraint failure"));
+					assertThat(e.toString()).contains("Error flushing transaction with resource types: [Patient] - The operation has failed with a client-assigned ID constraint failure");
 					return e.toString();
 				}
 			};
@@ -467,9 +463,9 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		}
 
 		ourLog.info("Results: {}", results);
-		assertThat(results, not(Matchers.empty()));
-		assertThat(results.get(0), containsString("HTTP 409 Conflict"));
-		assertThat(results.get(0), containsString("Error flushing transaction with resource types: [Patient]"));
+		assertThat(results).isNotEmpty();
+		assertThat(results.get(0)).contains("HTTP 409 Conflict");
+		assertThat(results.get(0)).contains("Error flushing transaction with resource types: [Patient]");
 	}
 
 	@Test
@@ -499,7 +495,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 					myClient.transaction().withBundle(input).execute();
 					return null;
 				} catch (ResourceVersionConflictException e) {
-					assertThat(e.toString(), containsString("Error flushing transaction with resource types: [Patient] - The operation has failed with a version constraint failure. This generally means that two clients/threads were trying to update the same resource at the same time, and this request was chosen as the failing request."));
+					assertThat(e.toString()).contains("Error flushing transaction with resource types: [Patient] - The operation has failed with a version constraint failure. This generally means that two clients/threads were trying to update the same resource at the same time, and this request was chosen as the failing request.");
 					return e.toString();
 				}
 			};
@@ -519,9 +515,9 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		}
 
 		ourLog.info("Results: {}", results);
-		assertThat(results, not(Matchers.empty()));
-		assertThat(results.get(0), containsString("HTTP 409 Conflict"));
-		assertThat(results.get(0), containsString("Error flushing transaction with resource types: [Patient]"));
+		assertThat(results).isNotEmpty();
+		assertThat(results.get(0)).contains("HTTP 409 Conflict");
+		assertThat(results.get(0)).contains("Error flushing transaction with resource types: [Patient]");
 	}
 
 	/**
@@ -610,7 +606,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		int deleteCount = myCaptureQueriesListener.getDeleteQueries().size();
 
 		myCaptureQueriesListener.logDeleteQueries();
-		assertThat(deleteCount, is(equalTo(59)));
+		assertEquals(59, deleteCount);
 	}
 
 	@Disabled("Stress test")
@@ -652,7 +648,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		int deleteCount = myCaptureQueriesListener.getDeleteQueries().size();
 
 		myCaptureQueriesListener.logDeleteQueries();
-		assertThat(deleteCount, is(equalTo(30)));
+		assertEquals(30, deleteCount);
 	}
 
 	private void validateNoErrors(List<BaseTask> tasks) {
@@ -682,7 +678,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 					getResp = ourHttpClient.execute(get);
 					try {
 						String respBundleString = IOUtils.toString(getResp.getEntity().getContent(), Charsets.UTF_8);
-						assertEquals(200, getResp.getStatusLine().getStatusCode(), respBundleString);
+						assertThat(getResp.getStatusLine().getStatusCode()).as(respBundleString).isEqualTo(200);
 						respBundle = myFhirContext.newJsonParser().parseResource(Bundle.class, respBundleString);
 						myTaskCount++;
 					} finally {

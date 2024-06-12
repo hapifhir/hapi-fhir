@@ -50,6 +50,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
@@ -225,7 +226,7 @@ abstract public class BaseR4SearchLastN extends BaseJpaTest {
 
 		List<String> actual = toUnqualifiedVersionlessIdValues(myObservationDao.observationsLastN(params, mockSrd(), null));
 
-		assertEquals(4, actual.size());
+		assertThat(actual).hasSize(4);
 	}
 
 	private void executeTestCase(SearchParameterMap params, List<String> sortedPatients, List<String> sortedObservationCodes, List<String> theCategories, int expectedObservationCount) {
@@ -235,7 +236,7 @@ abstract public class BaseR4SearchLastN extends BaseJpaTest {
 
 		actual = toUnqualifiedVersionlessIdValues(myObservationDao.observationsLastN(params, mockSrd(), null));
 
-		assertEquals(expectedObservationCount, actual.size());
+		assertThat(actual).hasSize(expectedObservationCount);
 
 		validateSorting(actual, sortedPatients, sortedObservationCodes, theCategories);
 	}
@@ -244,7 +245,7 @@ abstract public class BaseR4SearchLastN extends BaseJpaTest {
 		int theNextObservationIdx = 0;
 		// Validate patient grouping
 		for (String patientId : thePatientIds) {
-			assertEquals(patientId, observationPatientMap.get(theObservationIds.get(theNextObservationIdx)));
+			assertThat(observationPatientMap).containsEntry(theObservationIds.get(theNextObservationIdx), patientId);
 			theNextObservationIdx = validateSortingWithinPatient(theObservationIds, theNextObservationIdx, theCodes, theCategores, patientId);
 		}
 		assertEquals(theObservationIds.size(), theNextObservationIdx);
@@ -254,7 +255,7 @@ abstract public class BaseR4SearchLastN extends BaseJpaTest {
 														  List<String> theCategories, String thePatientId) {
 		int theNextObservationIdx = theFirstObservationIdxForPatient;
 		for (String codeValue : theCodes) {
-			assertEquals(codeValue, observationCodeMap.get(theObservationIds.get(theNextObservationIdx)));
+			assertThat(observationCodeMap).containsEntry(theObservationIds.get(theNextObservationIdx), codeValue);
 			// Validate sorting within code group
 			theNextObservationIdx = validateSortingWithinCode(theObservationIds, theNextObservationIdx,
 				observationCodeMap.get(theObservationIds.get(theNextObservationIdx)), theCategories, thePatientId);
@@ -275,7 +276,7 @@ abstract public class BaseR4SearchLastN extends BaseJpaTest {
 
 			// Check that observation is in one of the specified categories (if applicable)
 			if (theCategories != null && !theCategories.isEmpty()) {
-				assertTrue(theCategories.contains(observationCategoryMap.get(theObservationIds.get(theNextObservationIdx))));
+				assertThat(theCategories).contains(observationCategoryMap.get(theObservationIds.get(theNextObservationIdx)));
 			}
 			theNextObservationIdx++;
 			if (theNextObservationIdx >= theObservationIds.size()) {

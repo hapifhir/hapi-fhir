@@ -1,11 +1,10 @@
 ﻿<?xml version="1.0"?>
 <?mso-application progid="Excel.Sheet"?>
 <Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
- xmlns:o="urn:schemas-microsoft-com:office:office"
- xmlns:x="urn:schemas-microsoft-com:office:excel"
- xmlns:dt="uuid:C2F41010-65B3-11d1-A29F-00AA00C14882"
- xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"
- xmlns:html="http://www.w3.org/TR/REC-html40">
+			 xmlns:x="urn:schemas-microsoft-com:office:excel"
+			 xmlns:dt="uuid:C2F41010-65B3-11d1-A29F-00AA00C14882"
+			 xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"
+			 xmlns:html="http://www.w3.org/TR/REC-html40">
  <DocumentProperties xmlns="urn:schemas-microsoft-com:office:office">
   <Author>Grahame</Author>
   <LastAuthor>lloyd</LastAuthor>

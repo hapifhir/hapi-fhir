@@ -7,6 +7,7 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -44,8 +45,8 @@ import java.nio.file.Path;
 import java.util.Date;
 import java.util.zip.GZIPOutputStream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -106,6 +107,7 @@ public class BulkImportCommandTest {
 		writeNdJsonFileToTempDirectory(fileContents1, "file1.json");
 		writeNdJsonFileToTempDirectory(fileContents2, "file2.json");
 
+		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForServerOperation(any(), any())).thenReturn(RequestPartitionId.allPartitions());
 		when(myJobCoordinator.startInstance(any(), any())).thenReturn(createJobStartResponse("THE-JOB-ID"));
 
 		// Start the command in a separate thread
@@ -118,7 +120,7 @@ public class BulkImportCommandTest {
 		})).start();
 
 		ourLog.info("Waiting for initiation requests");
-		await().until(() -> myRestfulServerExtension.getRequestContentTypes().size(), equalTo(2));
+		await().untilAsserted(() -> assertThat(myRestfulServerExtension.getRequestContentTypes()).hasSize(2));
 		ourLog.info("Initiation requests complete");
 
 		verify(myJobCoordinator, timeout(10000).times(1)).startInstance(any(RequestDetails.class), myStartCaptor.capture());
@@ -127,7 +129,7 @@ public class BulkImportCommandTest {
 		BulkImportJobParameters jobParameters = startRequest.getParameters(BulkImportJobParameters.class);
 
 		// Reverse order because Patient should be first
-		assertEquals(2, jobParameters.getNdJsonUrls().size());
+		assertThat(jobParameters.getNdJsonUrls()).hasSize(2);
 		assertEquals(fileContents2, fetchFile(jobParameters.getNdJsonUrls().get(0)));
 		assertEquals(fileContents1, fetchFile(jobParameters.getNdJsonUrls().get(1)));
 	}
@@ -149,6 +151,7 @@ public class BulkImportCommandTest {
 
 		when(myJobCoordinator.startInstance(any(), any()))
 			.thenReturn(createJobStartResponse("THE-JOB-ID"));
+		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForServerOperation(any(), any())).thenReturn(RequestPartitionId.allPartitions());
 
 		// Start the command in a separate thread
 		new Thread(() -> App.main(new String[]{
@@ -160,7 +163,7 @@ public class BulkImportCommandTest {
 		})).start();
 
 		ourLog.info("Waiting for initiation requests");
-		await().until(() -> myRestfulServerExtension.getRequestContentTypes().size(), equalTo(2));
+		await().untilAsserted(() -> assertThat(myRestfulServerExtension.getRequestContentTypes()).hasSize(2));
 		ourLog.info("Initiation requests complete");
 
 		verify(myJobCoordinator, timeout(10000).times(1)).startInstance(any(RequestDetails.class), myStartCaptor.capture());
@@ -169,7 +172,7 @@ public class BulkImportCommandTest {
 		BulkImportJobParameters jobParameters = startRequest.getParameters(BulkImportJobParameters.class);
 
 		// Reverse order because Patient should be first
-		assertEquals(2, jobParameters.getNdJsonUrls().size());
+		assertThat(jobParameters.getNdJsonUrls()).hasSize(2);
 		assertEquals(fileContents2, fetchFile(jobParameters.getNdJsonUrls().get(0)));
 		assertEquals(fileContents1, fetchFile(jobParameters.getNdJsonUrls().get(1)));
 	}
@@ -189,6 +192,7 @@ public class BulkImportCommandTest {
 		writeNdJsonFileToTempDirectory(fileContents1, "file1.json");
 		writeNdJsonFileToTempDirectory(fileContents2, "file2.json");
 
+		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForServerOperation(any(), any())).thenReturn(RequestPartitionId.allPartitions());
 		when(myJobCoordinator.startInstance(any(), any())).thenReturn(createJobStartResponse("THE-JOB-ID"));
 
 		// Start the command in a separate thread
@@ -201,7 +205,7 @@ public class BulkImportCommandTest {
 		})).start();
 
 		ourLog.info("Waiting for initiation requests");
-		await().until(() -> myRestfulServerExtension.getRequestContentTypes().size(), equalTo(2));
+		await().untilAsserted(() -> assertThat(myRestfulServerExtension.getRequestContentTypes()).hasSize(2));
 		ourLog.info("Initiation requests complete");
 
 		verify(myJobCoordinator, timeout(10000).times(1)).startInstance(any(RequestDetails.class), myStartCaptor.capture());
@@ -211,7 +215,7 @@ public class BulkImportCommandTest {
 			BulkImportJobParameters jobParameters = startRequest.getParameters(BulkImportJobParameters.class);
 
 			// Reverse order because Patient should be first
-			assertEquals(2, jobParameters.getNdJsonUrls().size());
+			assertThat(jobParameters.getNdJsonUrls()).hasSize(2);
 			assertEquals(fileContents2, fetchFile(jobParameters.getNdJsonUrls().get(0)));
 			assertEquals(fileContents1, fetchFile(jobParameters.getNdJsonUrls().get(1)));
 		}

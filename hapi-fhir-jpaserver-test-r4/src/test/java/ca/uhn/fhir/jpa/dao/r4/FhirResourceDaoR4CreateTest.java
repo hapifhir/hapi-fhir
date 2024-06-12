@@ -4,6 +4,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
@@ -29,7 +30,6 @@ import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.ClasspathUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
-import org.exparity.hamcrest.date.DateMatchers;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -48,6 +48,7 @@ import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.SampledData;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.StructureDefinition;
@@ -60,10 +61,13 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.transaction.support.TransactionTemplate;
 
-import java.io.IOException;
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -74,17 +78,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
-import static java.time.temporal.ChronoUnit.SECONDS;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.matchesPattern;
-import static org.hamcrest.Matchers.notNullValue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -147,7 +144,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 				.map(ResourceLink::getSourcePath)
 				.sorted()
 				.collect(Collectors.toList());
-			assertThat(paths.toString(), paths, contains("Observation.subject", "Observation.subject.where(resolve() is Patient)"));
+			assertThat(paths).as(paths.toString()).containsExactly("Observation.subject", "Observation.subject.where(resolve() is Patient)");
 		});
 
 		myCaptureQueriesListener.clear();
@@ -423,15 +420,18 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 		assertTrue(outcome.getCreated());
 		ResourceSearchUrlEntity searchUrlEntity = myResourceSearchUrlDao.findAll().get(0);
-		assertThat(searchUrlEntity, is(notNullValue()) );
-		assertThat(searchUrlEntity.getResourcePid(), equalTo(expectedResId));
-		assertThat(searchUrlEntity.getCreatedTime(), DateMatchers.within(1, SECONDS, new Date()));
-		assertThat(searchUrlEntity.getSearchUrl(), equalTo(expectedNormalizedMatchUrl));
+		assertNotNull(searchUrlEntity);
+		assertEquals(expectedResId, searchUrlEntity.getResourcePid());
+		Instant now = Instant.now();
+		assertThat(searchUrlEntity.getCreatedTime())
+			.as("Check that the creation time of the URL is within the last second")
+			.isBetween(now.minus(1, ChronoUnit.SECONDS), now);
+		assertEquals(expectedNormalizedMatchUrl, searchUrlEntity.getSearchUrl());
 
 	}
 
 	@Test
-	public void testCreateResourceWithKoreanText() throws IOException {
+	public void testCreateResourceWithKoreanText() {
 		String input = ClasspathUtil.loadResource("/r4/bug832-korean-text.xml");
 		Patient p = myFhirContext.newXmlParser().parseResource(Patient.class, input);
 		String id = myPatientDao.create(p).getId().toUnqualifiedVersionless().getValue();
@@ -439,22 +439,22 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		SearchParameterMap map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		map.add(Patient.SP_FAMILY, new StringParam("김"));
-		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), contains(id));
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map))).containsExactly(id);
 
 		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		map.add(Patient.SP_GIVEN, new StringParam("준"));
-		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), contains(id));
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map))).containsExactly(id);
 
 		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		map.add(Patient.SP_GIVEN, new StringParam("준수"));
-		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), contains(id));
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map))).containsExactly(id);
 
 		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		map.add(Patient.SP_GIVEN, new StringParam("수")); // rightmost character only
-		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), empty());
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map))).isEmpty();
 	}
 
 	@Test
@@ -465,7 +465,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		p.addName().setFamily("FAM");
 		IIdType id = myPatientDao.create(p).getId().toUnqualified();
 
-		assertThat(id.getIdPart(), matchesPattern("[a-z0-9]{8}-.*"));
+		assertThat(id.getIdPart()).matches("[a-z0-9]{8}-.*");
 
 		p = myPatientDao.read(id);
 		assertEquals("FAM", p.getNameFirstRep().getFamily());
@@ -481,7 +481,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		p.addName().setFamily("FAM");
 		IIdType id = myPatientDao.create(p).getId().toUnqualified();
 
-		assertThat(id.getIdPart(), matchesPattern("[a-z0-9]{8}-.*"));
+		assertThat(id.getIdPart()).matches("[a-z0-9]{8}-.*");
 
 		p = myPatientDao.read(id);
 		assertEquals("FAM", p.getNameFirstRep().getFamily());
@@ -717,8 +717,8 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
 
-		assertThat(output.getEntry().get(0).getResponse().getLocation(), matchesPattern("Organization/[a-z0-9]{8}-.*"));
-		assertThat(output.getEntry().get(1).getResponse().getLocation(), matchesPattern("Patient/[a-z0-9]{8}-.*"));
+		assertThat(output.getEntry().get(0).getResponse().getLocation()).matches("Organization/[a-z0-9]{8}-.*");
+		assertThat(output.getEntry().get(1).getResponse().getLocation()).matches("Patient/[a-z0-9]{8}-.*");
 
 
 	}
@@ -734,7 +734,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(p);
 		ourLog.info("Input: {}", encoded);
-		assertThat(encoded, containsString("#1"));
+		assertThat(encoded).contains("#1");
 
 		IIdType id = myPatientDao.create(p).getId().toUnqualifiedVersionless();
 
@@ -742,11 +742,11 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 		encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(p);
 		ourLog.info("Output: {}", encoded);
-		assertThat(encoded, containsString("#1"));
+		assertThat(encoded).contains("#1");
 
 		Organization org = (Organization) p.getManagingOrganization().getResource();
 		assertEquals("#1", org.getId());
-		assertEquals(1, org.getMeta().getTag().size());
+		assertThat(org.getMeta().getTag()).hasSize(1);
 
 	}
 
@@ -807,7 +807,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 			.setValue(new BigDecimal("0.012"))
 			.setUnits("m")
 		);
-		assertEquals(1, toUnqualifiedVersionlessIdValues(myObservationDao.search(map)).size());
+		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map))).hasSize(1);
 	}
 
 	@Test
@@ -858,9 +858,9 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		);
 		ids = toUnqualifiedVersionlessIdValues(myObservationDao.search(map));
 		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
-		assertThat(searchSql, containsString("HFJ_SPIDX_QUANTITY_NRML t0"));
-		assertThat(searchSql, containsString("t0.SP_VALUE = '1.2E-9'"));
-		assertEquals(1, ids.size());
+		assertThat(searchSql).contains("HFJ_SPIDX_QUANTITY_NRML t0");
+		assertThat(searchSql).contains("t0.SP_VALUE = '1.2E-9'");
+		assertThat(ids).hasSize(1);
 
 		// Try with non-normalized value
 		myCaptureQueriesListener.clear();
@@ -871,9 +871,9 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		);
 		ids = toUnqualifiedVersionlessIdValues(myObservationDao.search(map));
 		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
-		assertThat(searchSql, containsString("HFJ_SPIDX_QUANTITY_NRML t0"));
-		assertThat(searchSql, containsString("t0.SP_VALUE = '1.2E-9'"));
-		assertEquals(1, ids.size());
+		assertThat(searchSql).contains("HFJ_SPIDX_QUANTITY_NRML t0");
+		assertThat(searchSql).contains("t0.SP_VALUE = '1.2E-9'");
+		assertThat(ids).hasSize(1);
 
 		// Try with no units value
 		myCaptureQueriesListener.clear();
@@ -882,9 +882,9 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		);
 		ids = toUnqualifiedVersionlessIdValues(myObservationDao.search(map));
 		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
-		assertThat(searchSql, containsString("HFJ_SPIDX_QUANTITY t0"));
-		assertThat(searchSql, containsString("t0.SP_VALUE = '0.0000012'"));
-		assertEquals(1, ids.size());
+		assertThat(searchSql).contains("HFJ_SPIDX_QUANTITY t0");
+		assertThat(searchSql).contains("t0.SP_VALUE = '0.0000012'");
+		assertThat(ids).hasSize(1);
 	}
 
 	@Test
@@ -933,7 +933,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 		List<IBaseResource> resources = found.getResources(0, found.sizeOrThrowNpe());
 
-		assertEquals(1, ids.size());
+		assertThat(ids).hasSize(1);
 
 		ourLog.debug("Observation2: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(resources.get(0)));
 
@@ -976,7 +976,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 			.setValue(new BigDecimal("957412345"))
 			.setUnits("g.m-3")
 		);
-		assertEquals(1, toUnqualifiedVersionlessIdValues(myObservationDao.search(map)).size());
+		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map))).hasSize(1);
 	}
 
 	@Test
@@ -1019,9 +1019,9 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		);
 		ids = toUnqualifiedVersionlessIdValues(myObservationDao.search(map));
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
-		assertThat(searchSql, containsString("HFJ_SPIDX_QUANTITY t0"));
-		assertThat(searchSql, containsString("t0.SP_VALUE = '95.7412345'"));
-		assertEquals(1, ids.size());
+		assertThat(searchSql).contains("HFJ_SPIDX_QUANTITY t0");
+		assertThat(searchSql).contains("t0.SP_VALUE = '95.7412345'");
+		assertThat(ids).hasSize(1);
 
 	}
 
@@ -1074,9 +1074,9 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		);
 		ids = toUnqualifiedVersionlessIdValues(myObservationDao.search(map));
 		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
-		assertThat(searchSql, containsString("HFJ_SPIDX_QUANTITY t0"));
-		assertThat(searchSql, containsString("t0.SP_VALUE = '1.2E-9'"));
-		assertEquals(0, ids.size());
+		assertThat(searchSql).contains("HFJ_SPIDX_QUANTITY t0");
+		assertThat(searchSql).contains("t0.SP_VALUE = '1.2E-9'");
+		assertThat(ids).isEmpty();
 
 		// Try with non-normalized value
 		myCaptureQueriesListener.clear();
@@ -1087,9 +1087,9 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		);
 		ids = toUnqualifiedVersionlessIdValues(myObservationDao.search(map));
 		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
-		assertThat(searchSql, containsString("HFJ_SPIDX_QUANTITY t0"));
-		assertThat(searchSql, containsString("t0.SP_VALUE = '0.0000012'"));
-		assertEquals(1, ids.size());
+		assertThat(searchSql).contains("HFJ_SPIDX_QUANTITY t0");
+		assertThat(searchSql).contains("t0.SP_VALUE = '0.0000012'");
+		assertThat(ids).hasSize(1);
 
 		// Try with no units value
 		myCaptureQueriesListener.clear();
@@ -1098,9 +1098,9 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		);
 		ids = toUnqualifiedVersionlessIdValues(myObservationDao.search(map));
 		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
-		assertThat(searchSql, containsString("HFJ_SPIDX_QUANTITY t0"));
-		assertThat(searchSql, containsString("t0.SP_VALUE = '0.0000012'"));
-		assertEquals(1, ids.size());
+		assertThat(searchSql).contains("HFJ_SPIDX_QUANTITY t0");
+		assertThat(searchSql).contains("t0.SP_VALUE = '0.0000012'");
+		assertThat(ids).hasSize(1);
 	}
 
 	@Test
@@ -1204,9 +1204,9 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		);
 		ids = toUnqualifiedVersionlessIdValues(myObservationDao.search(map));
 		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
-		assertThat(searchSql, containsString("HFJ_SPIDX_QUANTITY t0"));
-		assertThat(searchSql, containsString("t0.SP_VALUE = '1.2E-9'"));
-		assertEquals(0, ids.size());
+		assertThat(searchSql).contains("HFJ_SPIDX_QUANTITY t0");
+		assertThat(searchSql).contains("t0.SP_VALUE = '1.2E-9'");
+		assertThat(ids).isEmpty();
 
 		// Try with non-normalized value
 		myCaptureQueriesListener.clear();
@@ -1217,9 +1217,9 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		);
 		ids = toUnqualifiedVersionlessIdValues(myObservationDao.search(map));
 		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
-		assertThat(searchSql, containsString("HFJ_SPIDX_QUANTITY t0"));
-		assertThat(searchSql, containsString("t0.SP_VALUE = '0.0000012'"));
-		assertEquals(1, ids.size());
+		assertThat(searchSql).contains("HFJ_SPIDX_QUANTITY t0");
+		assertThat(searchSql).contains("t0.SP_VALUE = '0.0000012'");
+		assertThat(ids).hasSize(1);
 
 		// Try with no units value
 		myCaptureQueriesListener.clear();
@@ -1228,9 +1228,9 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		);
 		ids = toUnqualifiedVersionlessIdValues(myObservationDao.search(map));
 		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
-		assertThat(searchSql, containsString("HFJ_SPIDX_QUANTITY t0"));
-		assertThat(searchSql, containsString("t0.SP_VALUE = '0.0000012'"));
-		assertEquals(1, ids.size());
+		assertThat(searchSql).contains("HFJ_SPIDX_QUANTITY t0");
+		assertThat(searchSql).contains("t0.SP_VALUE = '0.0000012'");
+		assertThat(ids).hasSize(1);
 	}
 
 	@Nested
@@ -1294,17 +1294,18 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		public void testConditionalCreateDependsOnFirstEntryExisting(boolean theHasQuestionMark) {
 			final BundleBuilder bundleBuilder = new BundleBuilder(myFhirContext);
 
-			bundleBuilder.addTransactionCreateEntry(myTask1, "urn:uuid:59cda086-4763-4ef0-8e36-8c90058686ea")
-				.conditional("identifier=http://tempuri.org|1");
-
+			final String firstMatchUrl = "identifier=http://tempuri.org|1";
 			final String secondEntryConditionalTemplate = "%sidentifier=http://tempuri.org|2&based-on=urn:uuid:59cda086-4763-4ef0-8e36-8c90058686ea";
 			final String secondMatchUrl = String.format(secondEntryConditionalTemplate, theHasQuestionMark ? "?" : "");
+
+			bundleBuilder.addTransactionCreateEntry(myTask1, "urn:uuid:59cda086-4763-4ef0-8e36-8c90058686ea")
+				.conditional(firstMatchUrl);
 
 			bundleBuilder.addTransactionCreateEntry(myTask2)
 				.conditional(secondMatchUrl);
 
 			final IBaseBundle requestBundle = bundleBuilder.getBundle();
-			assertTrue(requestBundle instanceof Bundle);
+			assertInstanceOf(Bundle.class, requestBundle);
 
 			final List<Bundle.BundleEntryComponent> responseEntries = sendBundleAndGetResponse(requestBundle);
 
@@ -1324,6 +1325,30 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 			assertEquals(1, task2BasedOn.size());
 			final Reference task2BasedOnReference = task2BasedOn.get(0);
 			assertEquals(taskPostBundle1.getIdElement().toUnqualifiedVersionless().asStringValue(), task2BasedOnReference.getReference());
+
+			assertRemainingTasks(myTask1, myTask2);
+
+			deleteExpunge(myTask2);
+			assertRemainingTasks(myTask1);
+
+			deleteExpunge(myTask1);
+			assertRemainingTasks();
+		}
+
+		private void assertRemainingTasks(Task... theExpectedTasks) {
+			final List<ResourceSearchUrlEntity> searchUrlsPreDelete = myResourceSearchUrlDao.findAll();
+
+			assertEquals(theExpectedTasks.length, searchUrlsPreDelete.size());
+			assertEquals(Arrays.stream(theExpectedTasks).map(Resource::getIdElement).map(IdType::getIdPartAsLong).toList(),
+						 searchUrlsPreDelete.stream().map(ResourceSearchUrlEntity::getResourcePid).toList());
+		}
+
+		private void deleteExpunge(Task theTask) {
+			final JpaPid pidOrThrowException = myIdHelperService.getPidOrThrowException(theTask);
+			final List<JpaPid> pidOrThrowException1 = List.of(pidOrThrowException);
+
+			final TransactionTemplate transactionTemplate = new TransactionTemplate(getTxManager());
+			transactionTemplate.execute(x -> myDeleteExpungeSvc.deleteExpunge(pidOrThrowException1, true, 10));
 		}
 	}
 

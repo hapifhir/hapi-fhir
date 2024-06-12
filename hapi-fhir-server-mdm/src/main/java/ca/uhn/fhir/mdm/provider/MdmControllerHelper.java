@@ -21,7 +21,6 @@ package ca.uhn.fhir.mdm.provider;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.mdm.api.IMdmMatchFinderSvc;
@@ -143,13 +142,11 @@ public class MdmControllerHelper {
 	public IBaseBundle getMatchesAndPossibleMatchesForResource(
 			IAnyResource theResource, String theResourceType, RequestDetails theRequestDetails) {
 		RequestPartitionId requestPartitionId;
-		ReadPartitionIdRequestDetails details =
-				ReadPartitionIdRequestDetails.forSearchType(theResourceType, null, null);
 		if (myMdmSettings.getSearchAllPartitionForMatch()) {
 			requestPartitionId = RequestPartitionId.allPartitions();
 		} else {
-			requestPartitionId =
-					myRequestPartitionHelperSvc.determineReadPartitionForRequest(theRequestDetails, details);
+			requestPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(
+					theRequestDetails, theResourceType);
 		}
 		List<MatchedTarget> matches =
 				myMdmMatchFinderSvc.getMatchedTargets(theResourceType, theResource, requestPartitionId);

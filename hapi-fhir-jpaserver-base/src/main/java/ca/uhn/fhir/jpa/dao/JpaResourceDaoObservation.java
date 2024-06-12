@@ -65,7 +65,7 @@ public class JpaResourceDaoObservation<T extends IBaseResource> extends BaseHapi
 
 		RequestPartitionId requestPartitionId =
 				myRequestPartitionHelperService.determineReadPartitionForRequestForSearchType(
-						theRequestDetails, getResourceName(), theSearchParameterMap, null);
+						theRequestDetails, getResourceName(), theSearchParameterMap);
 		return mySearchCoordinatorSvc.registerSearch(
 				this,
 				theSearchParameterMap,
@@ -128,7 +128,7 @@ public class JpaResourceDaoObservation<T extends IBaseResource> extends BaseHapi
 
 			RequestPartitionId requestPartitionId =
 					myRequestPartitionHelperService.determineReadPartitionForRequestForSearchType(
-							theRequestDetails, getResourceName(), theSearchParameterMap, null);
+							theRequestDetails, getResourceName(), theSearchParameterMap);
 
 			List<List<IQueryParameterType>> patientParams = new ArrayList<>();
 			if (theSearchParameterMap.get(getPatientParamName()) != null) {

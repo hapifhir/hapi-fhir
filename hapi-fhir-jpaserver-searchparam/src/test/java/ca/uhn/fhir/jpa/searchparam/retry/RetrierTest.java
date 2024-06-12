@@ -41,7 +41,7 @@ public class RetrierTest {
 
 		try {
 			retrier.runWithRetry();
-			fail();
+			fail("");
 		} catch (RetryRuntimeException e) {
 			assertEquals("test failure message", e.getMessage());
 		}
@@ -57,7 +57,7 @@ public class RetrierTest {
 
 		try {
 			new Retrier<>(supplier, 0);
-			fail();
+			fail("");
 		} catch (IllegalArgumentException e) {
 			assertEquals("maxRetries must be above zero.", e.getMessage());
 		}
@@ -73,7 +73,7 @@ public class RetrierTest {
 
 		try {
 			new Retrier<>(supplier, -1);
-			fail();
+			fail("");
 		} catch (IllegalArgumentException e) {
 			assertEquals("maxRetries must be above zero.", e.getMessage());
 		}

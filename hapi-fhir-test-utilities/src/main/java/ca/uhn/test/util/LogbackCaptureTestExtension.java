@@ -38,7 +38,9 @@ import java.util.stream.Collectors;
 /**
  * Test helper to collect logback lines.
  * The empty constructor will capture all log events, or you can name a log root to limit the noise.
+ * @deprecated use {@link LogbackTestExtension}
  */
+@Deprecated
 public class LogbackCaptureTestExtension implements BeforeEachCallback, AfterEachCallback {
 	private final Logger myLogger;
 	private final Level myLevel;
@@ -82,11 +84,19 @@ public class LogbackCaptureTestExtension implements BeforeEachCallback, AfterEac
 		this((Logger) LoggerFactory.getLogger(theLoggerName), theLevel);
 	}
 
-    public LogbackCaptureTestExtension(Class<?> theClass) {
+	public LogbackCaptureTestExtension(Class<?> theClass) {
 		this(theClass.getName());
-    }
+	}
 
-    /**
+	public LogbackCaptureTestExtension(Class<?> theClass, Level theLevel) {
+		this(theClass.getName(), theLevel);
+	}
+
+	public LogbackCaptureTestExtension(org.slf4j.Logger theLogger) {
+		this((Logger) theLogger);
+	}
+
+	/**
 	 * Returns a copy to avoid concurrent modification errors.
 	 * @return A copy of the log events so far.
 	 */
@@ -154,6 +164,16 @@ public class LogbackCaptureTestExtension implements BeforeEachCallback, AfterEac
 			.collect(Collectors.toList());
 	}
 
+	/**
+	 * Extract the log messages from the logging events.
+	 * @return a copy of the List of log messages
+	 *
+	 */
+	@Nonnull
+	public List<String> getLogMessages() {
+		return getLogEvents().stream().map(ILoggingEvent::getMessage).collect(Collectors.toList());
+	}
+
 	//  Hamcrest matcher support
 	public static Matcher<ILoggingEvent> eventWithLevelAndMessageContains(@Nonnull Level theLevel, @Nonnull String thePartialMessage) {
 		return new LogbackEventMatcher(theLevel, thePartialMessage);
@@ -168,8 +188,8 @@ public class LogbackCaptureTestExtension implements BeforeEachCallback, AfterEac
 	}
 
 	public static Matcher<ILoggingEvent> eventWithLevelAndMessageAndThrew(@Nonnull Level theLevel,
-																								 @Nonnull String thePartialMessage,
-																								 @Nonnull String theThrown)
+																		  @Nonnull String thePartialMessage,
+																		  @Nonnull String theThrown)
 	{
 		return new LogbackEventMatcher(theLevel, thePartialMessage, theThrown);
 	}

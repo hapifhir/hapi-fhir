@@ -3,18 +3,18 @@ package ca.uhn.fhir.jpa.cache;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
-import ca.uhn.fhir.jpa.cache.ResourcePersistentIdMap;
-import ca.uhn.fhir.jpa.cache.ResourceVersionSvcDaoImpl;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Root;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,20 +23,16 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import jakarta.persistence.TypedQuery;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Path;
-import jakarta.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -85,8 +81,6 @@ public class ResourceVersionSvcTest {
 		CriteriaQuery<ResourceTable> criteriaQuery = Mockito.mock(CriteriaQuery.class);
 		Root<ResourceTable> from = Mockito.mock(Root.class);
 		Path path = Mockito.mock(Path.class);
-
-		TypedQuery<ForcedId> queryMock = Mockito.mock(TypedQuery.class);
 	}
 
 	/**
@@ -134,8 +128,8 @@ public class ResourceVersionSvcTest {
 		ResourcePersistentIdMap retMap = myResourceVersionSvc.getLatestVersionIdsForResourceIds(RequestPartitionId.allPartitions(),
 			Collections.singletonList(type));
 
-		Assertions.assertTrue(retMap.containsKey(type));
-		Assertions.assertEquals(jpaPid.getVersion(), map.get(type).getVersion());
+		assertTrue(retMap.containsKey(type));
+		assertEquals(jpaPid.getVersion(), map.get(type).getVersion());
 	}
 
 	@Test
@@ -149,7 +143,7 @@ public class ResourceVersionSvcTest {
 		ResourcePersistentIdMap retMap = myResourceVersionSvc.getLatestVersionIdsForResourceIds(RequestPartitionId.allPartitions(),
 			Collections.singletonList(type));
 
-		Assertions.assertTrue(retMap.isEmpty());
+		assertTrue(retMap.isEmpty());
 	}
 
 	@Test
@@ -174,9 +168,9 @@ public class ResourceVersionSvcTest {
 		);
 
 		// verify
-		Assertions.assertEquals(1, retMap.size());
-		Assertions.assertTrue(retMap.containsKey(type));
-		Assertions.assertFalse(retMap.containsKey(type2));
+		assertEquals(1, retMap.size());
+		assertTrue(retMap.containsKey(type));
+		assertFalse(retMap.containsKey(type2));
 	}
 
 	@Test
@@ -188,7 +182,7 @@ public class ResourceVersionSvcTest {
 		svc.setPartitionSettingsForUnitTest(partitionSettings);
 
 		RequestPartitionId outcome = svc.replaceDefault(RequestPartitionId.allPartitions());
-		assertSame(RequestPartitionId.allPartitions(), outcome);
+		assertThat(outcome).isSameAs(RequestPartitionId.allPartitions());
 	}
 
 	@Test

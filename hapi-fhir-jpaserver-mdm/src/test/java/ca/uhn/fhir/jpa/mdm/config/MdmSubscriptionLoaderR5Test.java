@@ -24,6 +24,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Arrays;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -79,8 +80,8 @@ class MdmSubscriptionLoaderR5Test {
 
         SubscriptionTopic subscriptionTopic = subscriptionTopicCaptor.getValue();
 		assertNotNull(subscriptionTopic);
-        assertEquals("mdm-subscription-topic", subscriptionTopic.getId());
-		assertEquals(1, subscriptionTopic.getResourceTrigger().size());
+		assertEquals("mdm-subscription-topic", subscriptionTopic.getId());
+		assertThat(subscriptionTopic.getResourceTrigger()).hasSize(1);
 		SubscriptionTopic.SubscriptionTopicResourceTriggerComponent triggerComponent = subscriptionTopic.getResourceTrigger().get(0);
 		assertEquals("Patient", triggerComponent.getResource());
 
@@ -90,6 +91,6 @@ class MdmSubscriptionLoaderR5Test {
 
         Subscription subscription = subscriptionCaptor.getValue();
 		assertNotNull(subscription);
-        assertEquals("mdm-subscription", subscription.getId());
+		assertEquals("mdm-subscription", subscription.getId());
 	}
 }

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.IPointcut;
@@ -37,11 +38,11 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.leftPad;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+
 import static org.mockito.Mockito.when;
 
 @SuppressWarnings("unchecked")
@@ -128,7 +129,7 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 		List<String> returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
 		assertEquals(myObservationIdsEvenOnly.subList(0, 10), returnedIdValues);
 		assertEquals(1, hitCount.get());
-		assertEquals(myObservationIds.subList(0, 21), interceptedResourceIds, "Wrong response from " + outcome.getClass());
+		assertThat(interceptedResourceIds).as("Wrong response from " + outcome.getClass()).isEqualTo(myObservationIds.subList(0, 21));
 
 		// Fetch the next 30 (do cross a fetch boundary)
 		String searchId = outcome.getUuid();
@@ -143,7 +144,7 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 				});
 			}
 		}
-		assertEquals(myObservationIdsEvenOnly.subList(10, 25), returnedIdValues, "Wrong response from " + outcome.getClass());
+		assertThat(returnedIdValues).as("Wrong response from " + outcome.getClass()).isEqualTo(myObservationIdsEvenOnly.subList(10, 25));
 		assertEquals(3, hitCount.get());
 	}
 
@@ -434,7 +435,7 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 
 			IPreResourceAccessDetails accessDetails = theArgs.get(IPreResourceAccessDetails.class);
 
-			assertThat(accessDetails.size(), greaterThan(0));
+			assertThat(accessDetails.size()).isGreaterThan(0);
 
 			List<String> currentPassIds = new ArrayList<>();
 			for (int i = 0; i < accessDetails.size(); i++) {

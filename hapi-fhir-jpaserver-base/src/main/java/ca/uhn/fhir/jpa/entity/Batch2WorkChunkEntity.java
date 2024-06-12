@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.entity;
 
+import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import jakarta.persistence.Basic;
 import jakarta.persistence.Column;
@@ -38,6 +39,7 @@ import jakarta.persistence.TemporalType;
 import jakarta.persistence.Version;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hibernate.Length;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -49,7 +51,10 @@ import static org.apache.commons.lang3.StringUtils.left;
 @Entity
 @Table(
 		name = "BT2_WORK_CHUNK",
-		indexes = {@Index(name = "IDX_BT2WC_II_SEQ", columnList = "INSTANCE_ID,SEQ")})
+		indexes = {
+			@Index(name = "IDX_BT2WC_II_SEQ", columnList = "INSTANCE_ID,SEQ"),
+			@Index(name = "IDX_BT2WC_II_SI_S_SEQ_ID", columnList = "INSTANCE_ID,TGT_STEP_ID,STAT,SEQ,ID")
+		})
 public class Batch2WorkChunkEntity implements Serializable {
 
 	public static final int ERROR_MSG_MAX_LENGTH = 500;
@@ -92,10 +97,13 @@ public class Batch2WorkChunkEntity implements Serializable {
 	@Column(name = "TGT_STEP_ID", length = ID_MAX_LENGTH, nullable = false)
 	private String myTargetStepId;
 
-	@Lob
+	@Lob // TODO: VC column added in 7.2.0 - Remove non-VC column later
 	@Basic(fetch = FetchType.LAZY)
 	@Column(name = "CHUNK_DATA", nullable = true, length = Integer.MAX_VALUE - 1)
 	private String mySerializedData;
+
+	@Column(name = "CHUNK_DATA_VC", nullable = true, length = Length.LONG32)
+	private String mySerializedDataVc;
 
 	@Column(name = "STAT", length = STATUS_MAX_LENGTH, nullable = false)
 	@Enumerated(EnumType.STRING)
@@ -122,6 +130,19 @@ public class Batch2WorkChunkEntity implements Serializable {
 	private String myWarningMessage;
 
 	/**
+	 * The next time the work chunk can attempt to rerun its work step.
+	 */
+	@Column(name = "NEXT_POLL_TIME", nullable = true)
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date myNextPollTime;
+
+	/**
+	 * The number of times the work chunk has had its state set back to POLL_WAITING.
+	 */
+	@Column(name = "POLL_ATTEMPTS", nullable = true)
+	private Integer myPollAttempts;
+
+	/**
 	 * Default constructor for Hibernate.
 	 */
 	public Batch2WorkChunkEntity() {}
@@ -144,7 +165,9 @@ public class Batch2WorkChunkEntity implements Serializable {
 			String theErrorMessage,
 			int theErrorCount,
 			Integer theRecordsProcessed,
-			String theWarningMessage) {
+			String theWarningMessage,
+			Date theNextPollTime,
+			Integer thePollAttempts) {
 		myId = theId;
 		mySequence = theSequence;
 		myJobDefinitionId = theJobDefinitionId;
@@ -160,6 +183,32 @@ public class Batch2WorkChunkEntity implements Serializable {
 		myErrorCount = theErrorCount;
 		myRecordsProcessed = theRecordsProcessed;
 		myWarningMessage = theWarningMessage;
+		myNextPollTime = theNextPollTime;
+		myPollAttempts = thePollAttempts;
+	}
+
+	public static Batch2WorkChunkEntity fromWorkChunk(WorkChunk theWorkChunk) {
+		Batch2WorkChunkEntity entity = new Batch2WorkChunkEntity(
+				theWorkChunk.getId(),
+				theWorkChunk.getSequence(),
+				theWorkChunk.getJobDefinitionId(),
+				theWorkChunk.getJobDefinitionVersion(),
+				theWorkChunk.getInstanceId(),
+				theWorkChunk.getTargetStepId(),
+				theWorkChunk.getStatus(),
+				theWorkChunk.getCreateTime(),
+				theWorkChunk.getStartTime(),
+				theWorkChunk.getUpdateTime(),
+				theWorkChunk.getEndTime(),
+				theWorkChunk.getErrorMessage(),
+				theWorkChunk.getErrorCount(),
+				theWorkChunk.getRecordsProcessed(),
+				theWorkChunk.getWarningMessage(),
+				theWorkChunk.getNextPollTime(),
+				theWorkChunk.getPollAttempts());
+		entity.setSerializedData(theWorkChunk.getData());
+
+		return entity;
 	}
 
 	public int getErrorCount() {
@@ -263,11 +312,12 @@ public class Batch2WorkChunkEntity implements Serializable {
 	}
 
 	public String getSerializedData() {
-		return mySerializedData;
+		return mySerializedDataVc != null ? mySerializedDataVc : mySerializedData;
 	}
 
 	public void setSerializedData(String theSerializedData) {
-		mySerializedData = theSerializedData;
+		mySerializedData = null;
+		mySerializedDataVc = theSerializedData;
 	}
 
 	public WorkChunkStatusEnum getStatus() {
@@ -294,6 +344,25 @@ public class Batch2WorkChunkEntity implements Serializable {
 		myInstanceId = theInstanceId;
 	}
 
+	public Date getNextPollTime() {
+		return myNextPollTime;
+	}
+
+	public void setNextPollTime(Date theNextPollTime) {
+		myNextPollTime = theNextPollTime;
+	}
+
+	public Integer getPollAttempts() {
+		if (myPollAttempts == null) {
+			return 0;
+		}
+		return myPollAttempts;
+	}
+
+	public void setPollAttempts(int thePollAttempts) {
+		myPollAttempts = thePollAttempts;
+	}
+
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
@@ -309,10 +378,12 @@ public class Batch2WorkChunkEntity implements Serializable {
 				.append("updateTime", myUpdateTime)
 				.append("recordsProcessed", myRecordsProcessed)
 				.append("targetStepId", myTargetStepId)
-				.append("serializedData", mySerializedData)
+				.append("serializedData", getSerializedData())
 				.append("status", myStatus)
 				.append("errorMessage", myErrorMessage)
 				.append("warningMessage", myWarningMessage)
+				.append("nextPollTime", myNextPollTime)
+				.append("pollAttempts", myPollAttempts)
 				.toString();
 	}
 }

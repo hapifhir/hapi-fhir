@@ -8,9 +8,10 @@ import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.Date;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ResourceIndexedSearchParamDateTest {
@@ -86,7 +87,7 @@ public class ResourceIndexedSearchParamDateTest {
 
 		assertFalse(param.equals(param2));
 		assertFalse(param2.equals(param));
-		assertNotEquals(param.hashCode(), param2.hashCode());
+		assertThat(param2.hashCode()).isNotEqualTo(param.hashCode());
 	}
 
 	@Test
@@ -96,7 +97,7 @@ public class ResourceIndexedSearchParamDateTest {
 
 		assertFalse(param.equals(param2));
 		assertFalse(param2.equals(param));
-		assertNotEquals(param.hashCode(), param2.hashCode());
+		assertThat(param2.hashCode()).isNotEqualTo(param.hashCode());
 	}
 
 	@Test
@@ -106,7 +107,7 @@ public class ResourceIndexedSearchParamDateTest {
 
 		assertFalse(param.equals(param2));
 		assertFalse(param2.equals(param));
-		assertNotEquals(param.hashCode(), param2.hashCode());
+		assertThat(param2.hashCode()).isNotEqualTo(param.hashCode());
 	}
 
 	@Test
@@ -116,7 +117,7 @@ public class ResourceIndexedSearchParamDateTest {
 
 		assertFalse(param.equals(param2));
 		assertFalse(param2.equals(param));
-		assertNotEquals(param.hashCode(), param2.hashCode());
+		assertThat(param2.hashCode()).isNotEqualTo(param.hashCode());
 	}
 
 
@@ -132,9 +133,8 @@ public class ResourceIndexedSearchParamDateTest {
 			.setValueLow(new Date(111111111L));
 		val2.setPartitionSettings(new PartitionSettings());
 		val2.calculateHashes();
-		assertEquals(val1, val1);
+		assertNotNull(val1);
 		assertEquals(val1, val2);
-		assertNotEquals(val1, null);
-		assertNotEquals(val1, "");
+		assertThat("").isNotEqualTo(val1);
 	}
 }

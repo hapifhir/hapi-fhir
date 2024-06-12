@@ -32,6 +32,8 @@ import jakarta.annotation.PreDestroy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.function.Supplier;
+
 @Service
 public class MdmProviderLoader {
 	@Autowired
@@ -58,26 +60,28 @@ public class MdmProviderLoader {
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
-	private BaseMdmProvider myMdmProvider;
-	private MdmLinkHistoryProviderDstu3Plus myMdmHistoryProvider;
+	private Supplier<Object> myMdmProviderSupplier;
+	private Supplier<Object> myMdmHistoryProviderSupplier;
 
 	public void loadProvider() {
 		switch (myFhirContext.getVersion().getVersion()) {
 			case DSTU3:
 			case R4:
 			case R5:
-				myResourceProviderFactory.addSupplier(() -> new MdmProviderDstu3Plus(
+				// We store the supplier so that removeSupplier works properly
+				myMdmProviderSupplier = () -> new MdmProviderDstu3Plus(
 						myFhirContext,
 						myMdmControllerSvc,
 						myMdmControllerHelper,
 						myMdmSubmitSvc,
 						myInterceptorBroadcaster,
-						myMdmSettings));
+						myMdmSettings);
+				// We store the supplier so that removeSupplier works properly
+				myResourceProviderFactory.addSupplier(myMdmProviderSupplier);
 				if (myStorageSettings.isNonResourceDbHistoryEnabled()) {
-					myResourceProviderFactory.addSupplier(() -> {
-						return new MdmLinkHistoryProviderDstu3Plus(
-								myFhirContext, myMdmControllerSvc, myInterceptorBroadcaster);
-					});
+					myMdmHistoryProviderSupplier = () -> new MdmLinkHistoryProviderDstu3Plus(
+							myFhirContext, myMdmControllerSvc, myInterceptorBroadcaster);
+					myResourceProviderFactory.addSupplier(myMdmHistoryProviderSupplier);
 				}
 				break;
 			default:
@@ -88,11 +92,11 @@ public class MdmProviderLoader {
 
 	@PreDestroy
 	public void unloadProvider() {
-		if (myMdmProvider != null) {
-			myResourceProviderFactory.removeSupplier(() -> myMdmProvider);
+		if (myMdmProviderSupplier != null) {
+			myResourceProviderFactory.removeSupplier(myMdmProviderSupplier);
 		}
-		if (myMdmHistoryProvider != null) {
-			myResourceProviderFactory.removeSupplier(() -> myMdmHistoryProvider);
+		if (myMdmHistoryProviderSupplier != null) {
+			myResourceProviderFactory.removeSupplier(myMdmHistoryProviderSupplier);
 		}
 	}
 }

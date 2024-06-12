@@ -6,13 +6,12 @@ import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.TokenParam;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -55,8 +54,8 @@ public class HfqlExecutorFhirPathTranslationToSearchParamTest extends BaseHfqlEx
 		verify(patientDao, times(1)).search(mySearchParameterMapCaptor.capture(), any());
 		SearchParameterMap map = mySearchParameterMapCaptor.getValue();
 		if (theShouldConvert) {
-			assertEquals(1, map.get("_id").size());
-			assertEquals(1, map.get("_id").get(0).size());
+			assertThat(map.get("_id")).hasSize(1);
+			assertThat(map.get("_id").get(0)).hasSize(1);
 			assertNull(((TokenParam) map.get("_id").get(0).get(0)).getSystem());
 			assertEquals("ABC123", ((TokenParam) map.get("_id").get(0).get(0)).getValue());
 		} else {
@@ -93,8 +92,8 @@ public class HfqlExecutorFhirPathTranslationToSearchParamTest extends BaseHfqlEx
 
 		verify(patientDao, times(1)).search(mySearchParameterMapCaptor.capture(), any());
 		SearchParameterMap map = mySearchParameterMapCaptor.getValue();
-		assertEquals(1, map.get("_lastUpdated").size());
-		assertEquals(1, map.get("_lastUpdated").get(0).size());
+		assertThat(map.get("_lastUpdated")).hasSize(1);
+		assertThat(map.get("_lastUpdated").get(0)).hasSize(1);
 		assertEquals(theExpectedParamValue, ((DateParam) map.get("_lastUpdated").get(0).get(0)).getValueAsString());
 		assertEquals(theExpectedParamPrefix, ((DateParam) map.get("_lastUpdated").get(0).get(0)).getPrefix());
 	}

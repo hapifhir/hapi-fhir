@@ -39,11 +39,14 @@ import ca.uhn.fhir.jpa.migrate.taskdef.DropTableTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.ExecuteRawSqlTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.ExecuteTaskPrecondition;
 import ca.uhn.fhir.jpa.migrate.taskdef.InitializeSchemaTask;
+import ca.uhn.fhir.jpa.migrate.taskdef.MigrateColumBlobTypeToBinaryTypeTask;
+import ca.uhn.fhir.jpa.migrate.taskdef.MigrateColumnClobTypeToTextTypeTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.MigratePostgresTextClobToBinaryClobTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.ModifyColumnTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.NopTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.RenameColumnTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.RenameIndexTask;
+import ca.uhn.fhir.jpa.migrate.taskdef.RenameTableTask;
 import org.apache.commons.lang3.Validate;
 import org.intellij.lang.annotations.Language;
 import org.slf4j.Logger;
@@ -54,6 +57,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -182,6 +186,7 @@ public class Builder {
 		private final String myRelease;
 		private final BaseMigrationTasks.IAcceptsTasks mySink;
 		private final String myTableName;
+		private BaseTask myLastAddedTask;
 
 		public BuilderWithTableName(String theRelease, BaseMigrationTasks.IAcceptsTasks theSink, String theTableName) {
 			myRelease = theRelease;
@@ -271,6 +276,7 @@ public class Builder {
 		@Override
 		public void addTask(BaseTask theTask) {
 			((BaseTableTask) theTask).setTableName(myTableName);
+			myLastAddedTask = theTask;
 			mySink.addTask(theTask);
 		}
 
@@ -308,6 +314,10 @@ public class Builder {
 			return this;
 		}
 
+		public Optional<BaseTask> getLastAddedTask() {
+			return Optional.ofNullable(myLastAddedTask);
+		}
+
 		/**
 		 * @param theFkName          the name of the foreign key
 		 * @param theParentTableName the name of the table that exports the foreign key
@@ -320,12 +330,37 @@ public class Builder {
 			addTask(task);
 		}
 
-		public void migratePostgresTextClobToBinaryClob(String theVersion, String theColumnName) {
+		public BuilderCompleteTask renameTable(String theVersion, String theNewTableName) {
+			RenameTableTask task = new RenameTableTask(myRelease, theVersion, getTableName(), theNewTableName);
+			addTask(task);
+			return new BuilderCompleteTask(task);
+		}
+
+		public BuilderCompleteTask migratePostgresTextClobToBinaryClob(String theVersion, String theColumnName) {
 			MigratePostgresTextClobToBinaryClobTask task =
 					new MigratePostgresTextClobToBinaryClobTask(myRelease, theVersion);
 			task.setTableName(getTableName());
 			task.setColumnName(theColumnName);
 			addTask(task);
+			return new BuilderCompleteTask(task);
+		}
+
+		public BuilderCompleteTask migrateBlobToBinary(
+				String theVersion, String theFromColumName, String theToColumName) {
+			MigrateColumBlobTypeToBinaryTypeTask task = new MigrateColumBlobTypeToBinaryTypeTask(
+					myRelease, theVersion, getTableName(), theFromColumName, theToColumName);
+
+			addTask(task);
+			return new BuilderCompleteTask(task);
+		}
+
+		public BuilderCompleteTask migrateClobToText(
+				String theVersion, String theFromColumName, String theToColumName) {
+			MigrateColumnClobTypeToTextTypeTask task = new MigrateColumnClobTypeToTextTypeTask(
+					myRelease, theVersion, getTableName(), theFromColumName, theToColumName);
+
+			addTask(task);
+			return new BuilderCompleteTask(task);
 		}
 
 		public class BuilderAddIndexWithName {

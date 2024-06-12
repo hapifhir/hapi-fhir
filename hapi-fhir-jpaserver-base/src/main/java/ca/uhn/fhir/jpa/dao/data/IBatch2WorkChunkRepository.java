@@ -49,7 +49,8 @@ public interface IBatch2WorkChunkRepository
 	@Query("SELECT new Batch2WorkChunkEntity("
 			+ "e.myId, e.mySequence, e.myJobDefinitionId, e.myJobDefinitionVersion, e.myInstanceId, e.myTargetStepId, e.myStatus,"
 			+ "e.myCreateTime, e.myStartTime, e.myUpdateTime, e.myEndTime,"
-			+ "e.myErrorMessage, e.myErrorCount, e.myRecordsProcessed, e.myWarningMessage"
+			+ "e.myErrorMessage, e.myErrorCount, e.myRecordsProcessed, e.myWarningMessage,"
+			+ "e.myNextPollTime, e.myPollAttempts"
 			+ ") FROM Batch2WorkChunkEntity e WHERE e.myInstanceId = :instanceId ORDER BY e.mySequence ASC, e.myId ASC")
 	List<Batch2WorkChunkEntity> fetchChunksNoData(Pageable thePageRequest, @Param("instanceId") String theInstanceId);
 
@@ -65,7 +66,7 @@ public interface IBatch2WorkChunkRepository
 
 	@Modifying
 	@Query("UPDATE Batch2WorkChunkEntity e SET e.myStatus = :status, e.myEndTime = :et, "
-			+ "e.myRecordsProcessed = :rp, e.myErrorCount = e.myErrorCount + :errorRetries, e.mySerializedData = null, "
+			+ "e.myRecordsProcessed = :rp, e.myErrorCount = e.myErrorCount + :errorRetries, e.mySerializedData = null, e.mySerializedDataVc = null, "
 			+ "e.myWarningMessage = :warningMessage WHERE e.myId = :id")
 	void updateChunkStatusAndClearDataForEndSuccess(
 			@Param("id") String theChunkId,
@@ -77,7 +78,25 @@ public interface IBatch2WorkChunkRepository
 
 	@Modifying
 	@Query(
-			"UPDATE Batch2WorkChunkEntity e SET e.myStatus = :status, e.myEndTime = :et, e.mySerializedData = null, e.myErrorMessage = :em WHERE e.myId IN(:ids)")
+			"UPDATE Batch2WorkChunkEntity e SET e.myStatus = :status, e.myNextPollTime = :nextPollTime, e.myPollAttempts = COALESCE(e.myPollAttempts, 0) + 1 WHERE e.myId = :id AND e.myStatus IN(:states)")
+	int updateWorkChunkNextPollTime(
+			@Param("id") String theChunkId,
+			@Param("status") WorkChunkStatusEnum theStatus,
+			@Param("states") Set<WorkChunkStatusEnum> theInitialStates,
+			@Param("nextPollTime") Date theNextPollTime);
+
+	@Modifying
+	@Query(
+			"UPDATE Batch2WorkChunkEntity e SET e.myStatus = :status, e.myNextPollTime = null WHERE e.myInstanceId = :instanceId AND e.myStatus IN(:states) AND e.myNextPollTime <= :pollTime")
+	int updateWorkChunksForPollWaiting(
+			@Param("instanceId") String theInstanceId,
+			@Param("pollTime") Date theTime,
+			@Param("states") Set<WorkChunkStatusEnum> theInitialStates,
+			@Param("status") WorkChunkStatusEnum theNewStatus);
+
+	@Modifying
+	@Query(
+			"UPDATE Batch2WorkChunkEntity e SET e.myStatus = :status, e.myEndTime = :et, e.mySerializedData = null, e.mySerializedDataVc = null, e.myErrorMessage = :em WHERE e.myId IN(:ids)")
 	void updateAllChunksForInstanceStatusClearDataAndSetError(
 			@Param("ids") List<String> theChunkIds,
 			@Param("et") Date theEndTime,
@@ -101,6 +120,22 @@ public interface IBatch2WorkChunkRepository
 			@Param("st") Date theStartedTime,
 			@Param("status") WorkChunkStatusEnum theInProgress,
 			@Param("startStatuses") Collection<WorkChunkStatusEnum> theStartStatuses);
+
+	@Modifying
+	@Query("UPDATE Batch2WorkChunkEntity e SET e.myStatus = :newStatus WHERE e.myId = :id AND e.myStatus = :oldStatus")
+	int updateChunkStatus(
+			@Param("id") String theChunkId,
+			@Param("oldStatus") WorkChunkStatusEnum theOldStatus,
+			@Param("newStatus") WorkChunkStatusEnum theNewStatus);
+
+	@Modifying
+	@Query(
+			"UPDATE Batch2WorkChunkEntity e SET e.myStatus = :newStatus WHERE e.myInstanceId = :instanceId AND e.myTargetStepId = :stepId AND e.myStatus IN ( :oldStatuses )")
+	int updateAllChunksForStepWithStatus(
+			@Param("instanceId") String theInstanceId,
+			@Param("stepId") String theStepId,
+			@Param("oldStatuses") List<WorkChunkStatusEnum> theOldStatuses,
+			@Param("newStatus") WorkChunkStatusEnum theNewStatus);
 
 	@Modifying
 	@Query("DELETE FROM Batch2WorkChunkEntity e WHERE e.myInstanceId = :instanceId")
