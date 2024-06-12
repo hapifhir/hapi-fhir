@@ -892,6 +892,11 @@
 			<name>Max Bureck</name>
 			<organization>Fraunhofer FOKUS</organization>
 		</developer>
+		<developer>
+			<id>adriennesox</id>
+			<name>Adrienne Sox</name>
+			<organization>Galileo, Inc.</organization>
+		</developer>
 	</developers>
 
 	<licenses>
