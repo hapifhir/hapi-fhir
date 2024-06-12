@@ -1703,7 +1703,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		}
 	}
 
-	// FIXME: call this for all SQL executions in this class
 	/**
 	 * Sends a raw SQL query to the Pointcut for raw SQL queries.
 	 */
