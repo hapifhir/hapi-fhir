@@ -155,7 +155,10 @@ public class MdmSurvivorshipSvcImpl implements IMdmSurvivorshipService {
 		// we want it ordered
 		List<String> sourceIds = new ArrayList<>();
 		linksQuery.forEach(link -> {
-			sourceIds.add(link.getSourceId());
+			String sourceId = link.getSourceId();
+			// we want only the id part, not the resource type
+			sourceId = sourceId.replace(resourceType + "/", "");
+			sourceIds.add(sourceId);
 		});
 		Map<String, IResourcePersistentId> sourceIdToPid = new HashMap<>();
 		if (!sourceIds.isEmpty()) {

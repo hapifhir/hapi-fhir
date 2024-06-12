@@ -29,6 +29,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -43,11 +44,13 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -195,6 +198,15 @@ public class MdmSurvivorshipSvcImplTest {
 
 		verify(resourceDao)
 			.update(eq(goldenPatientRebuilt), any(RequestDetails.class));
+
+		ArgumentCaptor<List<String>> idsCaptor = ArgumentCaptor.forClass(List.class);
+		verify(myIIdHelperService).resolveResourcePersistentIds(any(RequestPartitionId.class), anyString(), idsCaptor.capture());
+		assertNotNull(idsCaptor.getValue());
+		assertFalse(idsCaptor.getValue().isEmpty());
+		for (String id : idsCaptor.getValue()) {
+			assertFalse(id.contains("/"));
+			assertFalse(id.contains("Patient"));
+		}
 	}
 
 	private MdmTransactionContext createTransactionContext() {
