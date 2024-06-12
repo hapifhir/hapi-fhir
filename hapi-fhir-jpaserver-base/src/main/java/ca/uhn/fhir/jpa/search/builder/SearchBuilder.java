@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.jpa.search.builder;
 
+import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.ComboSearchParamType;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -163,7 +165,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	public static boolean myUseMaxPageSize50ForTest = false;
 	protected final IInterceptorBroadcaster myInterceptorBroadcaster;
 	protected final IResourceTagDao myResourceTagDao;
-	private final String myResourceName;
+	String myResourceName;
 	private final Class<? extends IBaseResource> myResourceType;
 	private final HapiFhirLocalContainerEntityManagerFactoryBean myEntityManagerFactory;
 	private final SqlObjectFactory mySqlBuilderFactory;
@@ -194,6 +196,9 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 	@Autowired(required = false)
 	private IElasticsearchSvc myIElasticsearchSvc;
+
+	@Autowired
+	private FhirContext myCtx;
 
 	@Autowired
 	private IJpaStorageResourceParser myJpaStorageResourceParser;
@@ -1665,15 +1670,15 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				String message =
 						"Search with _include=* can be inefficient when references using canonical URLs are detected. Use more specific _include values instead.";
 				firePerformanceWarning(request, message);
-				loadCanonicalUrls(canonicalUrls, entityManager, pidsToInclude);
+				loadCanonicalUrls(canonicalUrls, entityManager, pidsToInclude, reverseMode);
 			}
 		}
 	}
 
 	private void loadCanonicalUrls(
-			Set<String> theCanonicalUrls, EntityManager theEntityManager, HashSet<JpaPid> thePidsToInclude) {
+			Set<String> theCanonicalUrls, EntityManager theEntityManager, HashSet<JpaPid> thePidsToInclude, boolean theReverse) {
 		StringBuilder sqlBuilder;
-		Set<Long> identityHashesForTypes = calculateIndexUriIdentityHashesForResourceTypes(null);
+		Set<Long> identityHashesForTypes = calculateIndexUriIdentityHashesForResourceTypes(null, theReverse);
 		List<Collection<String>> canonicalUrlPartitions =
 				partition(theCanonicalUrls, getMaximumPageSize() - identityHashesForTypes.size());
 
@@ -1698,9 +1703,9 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		}
 	}
 
+	// FIXME: call this for all SQL executions in this class
 	/**
-	 * Given a
-	 * @param request
+	 * Sends a raw SQL query to the Pointcut for raw SQL queries.
 	 */
 	private void callRawSqlHookWithCurrentThreadQueries(RequestDetails request) {
 		SqlQueryList capturedQueries = CurrentThreadCaptureQueriesListener.getCurrentQueueAndStopCapturing();
@@ -1738,7 +1743,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		}
 		// The logical join will be by hfj_spidx_uri on sp_name='uri' and sp_uri=target_resource_url.
 		// But sp_name isn't indexed, so we use hash_identity instead.
-		Set<Long> identityHashesForTypes = calculateIndexUriIdentityHashesForResourceTypes(theTargetResourceTypes);
+		Set<Long> identityHashesForTypes = calculateIndexUriIdentityHashesForResourceTypes(theTargetResourceTypes, theReverse);
 
 		Map<String, Object> canonicalUriQueryParams = new HashMap<>();
 		StringBuilder canonicalUrlQuery = new StringBuilder(
@@ -1767,11 +1772,66 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		return Pair.of(canonicalUrlQuery.toString(), canonicalUriQueryParams);
 	}
 
-	private @Nonnull Set<Long> calculateIndexUriIdentityHashesForResourceTypes(Set<String> theTargetResourceTypes) {
+	@Nonnull Set<Long> calculateIndexUriIdentityHashesForResourceTypes(Set<String> theTargetResourceTypes, boolean theReverse) {
 		Set<String> targetResourceTypes = theTargetResourceTypes;
 		if (targetResourceTypes == null) {
-			// hash_identity includes the resource type.  So a null wildcard must be replaced with a list of all types.
-			targetResourceTypes = myDaoRegistry.getRegisteredDaoTypes();
+			/*
+			 * If we don't have a list of valid target types, we need to figure out a list of all
+			 * possible target types in order to perform the search of the URI index table. This is
+			 * because the hash_identity column encodes the resource type, so we'll need a hash
+			 * value for each possible target type.
+			 */
+			targetResourceTypes = new HashSet<>();
+			Set<String> possibleTypes = myDaoRegistry.getRegisteredDaoTypes();
+			if (theReverse) {
+				// For reverse includes, it is really hard to figure out what types
+				// are actually potentially pointing to the type we're searching for
+				// in this context, so let's just assume it could be anything.
+				targetResourceTypes = possibleTypes;
+			} else {
+				for (var next : mySearchParamRegistry.getActiveSearchParams(myResourceName).values().stream().filter(t -> t.getParamType().equals(RestSearchParameterTypeEnum.REFERENCE)).collect(Collectors.toList())) {
+
+					// If the reference points to a Reference (ie not a canonical or CanonicalReference)
+					// then it doesn't matter here anyhow. The logic here only works for elements at the
+					// root level of the document (e.g. QuestionnaireResponse.subject or
+					// QuestionnaireResponse.subject.where(...)) but this is just an optimization
+					// anyhow.
+					if (next.getPath().startsWith(myResourceName + ".")) {
+						String elementName = next.getPath().substring(next.getPath().indexOf('.') + 1);
+						int secondDotIndex = elementName.indexOf('.');
+						if (secondDotIndex != -1) {
+							elementName = elementName.substring(0, secondDotIndex);
+						}
+						BaseRuntimeChildDefinition child = myContext.getResourceDefinition(myResourceName).getChildByName(elementName);
+						if (child != null) {
+							BaseRuntimeElementDefinition<?> childDef = child.getChildByName(elementName);
+							if (childDef != null) {
+								if (childDef.getName().equals("Reference")) {
+									continue;
+								}
+							}
+						}
+					}
+
+					if (!next.getTargets().isEmpty()) {
+						// For each reference parameter on the resource type we're searching for,
+						// add all the potential target types to the list of possible target
+						// resource types we can look up.
+						for (var nextTarget : next.getTargets()) {
+							if (possibleTypes.contains(nextTarget)) {
+								targetResourceTypes.add(nextTarget);
+							}
+						}
+					} else {
+						// If we have any references that don't define any target types, then
+						// we need to assume that all enabled resource types are possible target
+						// types
+						targetResourceTypes.addAll(possibleTypes);
+						break;
+					}
+
+				}
+			}
 		}
 		assert !targetResourceTypes.isEmpty();
 

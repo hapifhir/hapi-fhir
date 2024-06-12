@@ -9,6 +9,7 @@ import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.search.PersistedJpaSearchFirstPageBundleProvider;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
+import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateParam;
@@ -174,6 +175,17 @@ public class FhirResourceDaoR4SearchIncludeTest extends BaseJpaR4Test {
 			verify(myAnonymousInterceptor, times(1)).invoke(eq(Pointcut.JPA_PERFTRACE_WARNING), myParamsCaptor.capture());
 			HookParams params = myParamsCaptor.getValue();
 			assertThat(params.get(StorageProcessingMessage.class).getMessage()).contains(expectWarning);
+		}
+
+		if (!theReverse && theMatchAll) {
+			SqlQuery searchForCanonicalReferencesQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(3);
+			// Make sure we have the right query - If this ever fails, maybe we have optimized the queries
+			// (or somehow made things worse) and the search for the canonical target is no longer the 4th
+			// SQL query
+			assertThat(searchForCanonicalReferencesQuery.getSql(true, false)).contains("where rispu1_0.HASH_IDENTITY in");
+			// Make sure we're only using canonical target types which are actually valid
+			// for the given resource type
+			assertThat(searchForCanonicalReferencesQuery.getSql(true, false)).contains("aaaaaa");
 		}
 
 	}
