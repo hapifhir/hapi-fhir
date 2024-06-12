@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.mdm.interceptor;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
@@ -50,6 +51,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -99,6 +101,31 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 		Patient sourcePatient = getOnlyGoldenPatient();
 		myPatientDao.delete(sourcePatient.getIdElement());
 		assertLinkCount(0);
+	}
+
+	@Test
+	public void deleteResourcesByUrl_withMultipleDeleteCatchingSourceAndGoldenResource_deletesWithoutThrowing() throws InterruptedException {
+		// setup
+		boolean allowMultipleDelete = myStorageSettings.isAllowMultipleDelete();
+		myStorageSettings.setAllowMultipleDelete(true);
+
+		myMdmHelper.createWithLatch(buildJanePatient());
+
+		try {
+			// test
+			DeleteMethodOutcome outcome = myPatientDao.deleteByUrl("Patient?_lastUpdated=ge2024-01-01", new SystemRequestDetails());
+
+			// validation
+			assertNotNull(outcome);
+			List<MdmLink> links = myMdmLinkDao.findAll();
+			assertTrue(links.isEmpty());
+			SearchParameterMap map = new SearchParameterMap();
+			map.setLoadSynchronous(true);
+			IBundleProvider provider = myPatientDao.search(map, new SystemRequestDetails());
+			assertTrue(provider.getAllResources().isEmpty());
+		} finally {
+			myStorageSettings.setAllowMultipleDelete(allowMultipleDelete);
+		}
 	}
 
 	@Test

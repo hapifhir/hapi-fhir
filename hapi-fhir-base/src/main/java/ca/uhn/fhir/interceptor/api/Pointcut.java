@@ -1575,11 +1575,11 @@ public enum Pointcut implements IPointcut {
 
 	/**
 	 * <b>Storage Hook:</b>
-	 * Invoked before a resource will be created, immediately before the resource
-	 * is persisted to the database.
+	 * Invoked before a resource will be deleted, immediately before the resource
+	 * is removed from the database.
 	 * <p>
-	 * Hooks will have access to the contents of the resource being created
-	 * and may choose to make modifications to it. These changes will be
+	 * Hooks will have access to the contents of the resource being deleted
+	 * and may choose to make modifications related to it. These changes will be
 	 * reflected in permanent storage.
 	 * </p>
 	 * Hooks may accept the following parameters:
