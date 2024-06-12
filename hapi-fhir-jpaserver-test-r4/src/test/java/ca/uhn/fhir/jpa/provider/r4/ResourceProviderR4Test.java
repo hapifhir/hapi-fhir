@@ -1,11 +1,5 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.i18n.HapiLocalizer;
 import ca.uhn.fhir.i18n.Msg;
@@ -203,8 +197,16 @@ import static ca.uhn.fhir.rest.param.BaseParamWithPrefix.MSG_PREFIX_INVALID_FORM
 import static ca.uhn.fhir.util.TestUtil.sleepAtLeast;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import static org.mockito.Mockito.when;
 
 @SuppressWarnings("Duplicates")
@@ -2108,7 +2110,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			String respString = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.debug(respString);
 			assertEquals(200, resp.getStatusLine().getStatusCode());
-			assertThat(respString).contains("Profile reference 'http://foo/structuredefinition/myprofile' has not been checked because it is unknown");
+			assertThat(respString).contains("Profile reference 'http://foo/structuredefinition/myprofile' has not been checked because it could not be found");
 		}
 	}
 

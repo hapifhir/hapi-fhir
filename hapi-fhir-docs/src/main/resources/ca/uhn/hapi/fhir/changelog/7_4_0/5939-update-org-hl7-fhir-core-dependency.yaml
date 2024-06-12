@@ -1,0 +1,4 @@
+---
+type: change
+issue: 5939
+title: "This brings the org.hl7.fhir.core dependency to version 6.3.11."

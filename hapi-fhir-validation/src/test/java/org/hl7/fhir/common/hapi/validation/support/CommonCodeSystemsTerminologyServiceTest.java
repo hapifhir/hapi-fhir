@@ -109,7 +109,7 @@ public class CommonCodeSystemsTerminologyServiceTest extends BaseValidationTestW
 		final String code = "FOO";
 		final ValueSet vs = new ValueSet().setUrl(UCUM_VALUESET_URL);
 		CodeValidationResult result = mySvc.validateCodeInValueSet(newSupport(), newOptions(), UCUM_CODESYSTEM_URL, code, null, vs);
-		validateCodeResultError(result, "Error processing unit '" + code +"': The unit '" + code + "' is unknown' at position 0");
+		validateCodeResultError(result, "Error processing unit '" + code +"': The unit '" + code + "' is unknown' at position 0 (for 'http://unitsofmeasure.org#"+code+"')");
 	}
 
 	@ParameterizedTest
