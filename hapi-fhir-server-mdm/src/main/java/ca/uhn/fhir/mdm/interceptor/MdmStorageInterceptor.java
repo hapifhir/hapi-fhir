@@ -197,7 +197,8 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 	}
 
 	@Hook(Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED)
-	public void deletePostCommit(RequestDetails theRequest, IBaseResource theResource, TransactionDetails theTransactionDetails) {
+	public void deletePostCommit(
+			RequestDetails theRequest, IBaseResource theResource, TransactionDetails theTransactionDetails) {
 		Set<IResourcePersistentId> goldenResourceIds = theTransactionDetails.getUserData(GOLDEN_RESOURCES_TO_DELETE);
 
 		if (goldenResourceIds != null) {
@@ -214,7 +215,8 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 
 	@SuppressWarnings("unchecked")
 	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_DELETED)
-	public void deleteMdmLinks(RequestDetails theRequest, IBaseResource theResource, TransactionDetails theTransactionDetails) {
+	public void deleteMdmLinks(
+			RequestDetails theRequest, IBaseResource theResource, TransactionDetails theTransactionDetails) {
 		if (ourLinksDeletedBeforehand.get()) {
 			return;
 		}
@@ -255,7 +257,8 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 					 * that include this exact golden resource
 					 * (eg, if delete is done by a filter and multiple delete is enabled)
 					 */
-					Set<IResourcePersistentId> goldenIdsToDelete = theTransactionDetails.getUserData(GOLDEN_RESOURCES_TO_DELETE);
+					Set<IResourcePersistentId> goldenIdsToDelete =
+							theTransactionDetails.getUserData(GOLDEN_RESOURCES_TO_DELETE);
 					if (goldenIdsToDelete == null) {
 						goldenIdsToDelete = new HashSet<>();
 					}
@@ -269,9 +272,7 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 
 	@SuppressWarnings("rawtypes")
 	private void deleteGoldenResource(
-			IResourcePersistentId goldenPid,
-			IFhirResourceDao<?> theDao,
-			RequestDetails theRequest) {
+			IResourcePersistentId goldenPid, IFhirResourceDao<?> theDao, RequestDetails theRequest) {
 		setLinksDeletedBeforehand();
 
 		if (myMdmSettings.isAutoExpungeGoldenResources()) {

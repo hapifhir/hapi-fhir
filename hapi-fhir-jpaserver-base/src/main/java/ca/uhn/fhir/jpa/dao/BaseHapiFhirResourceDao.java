@@ -908,7 +908,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			RequestDetails theRequestDetails,
 			TransactionDetails theTransactionDetails) {
 		StopWatch w = new StopWatch();
-		TransactionDetails transactionDetails = theTransactionDetails != null ? theTransactionDetails : new TransactionDetails();
+		TransactionDetails transactionDetails =
+				theTransactionDetails != null ? theTransactionDetails : new TransactionDetails();
 		List<ResourceTable> deletedResources = new ArrayList<>();
 
 		List<IResourcePersistentId<?>> resolvedIds =
