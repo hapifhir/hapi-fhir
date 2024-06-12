@@ -916,6 +916,11 @@
 			<name>Stefan Lindström</name>
 			<organization>Softhouse AB</organization>
 		</developer>
+    <developer>
+      <id>adriennesox</id>
+			<name>Adrienne Sox</name>
+			<organization>Galileo, Inc.</organization>
+    </developer>
 	</developers>
 
 	<licenses>
