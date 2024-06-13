@@ -60,7 +60,7 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 	/**
 	 * Composite of resourceType, paramName, and partition info if configured.
 	 * Combined with the various date fields for a query.
-	 * @since 3.5.0 - At some point this should be made not-null
+	 * Nullable to allow optimized storage.
 	 */
 	@Column(name = "HASH_IDENTITY", nullable = true)
 	protected Long myHashIdentity;
