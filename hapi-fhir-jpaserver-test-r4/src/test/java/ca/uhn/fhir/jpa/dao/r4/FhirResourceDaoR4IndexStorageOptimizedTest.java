@@ -20,6 +20,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantityNormalized
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.util.SearchParamHash;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.jpa.reindex.ReindexStepTest;
@@ -65,6 +66,11 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
+/**
+ * This test was added to check if changing {@link StorageSettings#isIndexStorageOptimized()} setting and performing
+ * $reindex operation will correctly null/recover sp_name, res_type, sp_updated parameters
+ * of ResourceIndexedSearchParam entities.
+ */
 public class FhirResourceDaoR4IndexStorageOptimizedTest extends BaseJpaR4Test {
 
 	@Autowired

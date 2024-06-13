@@ -79,7 +79,7 @@ Setting this property explicitly to true enables the feature: [Index Storage Opt
 
 ## Limitations
 
-* This setting only applies to newly inserted and updated rows in `HFJ_SPIDX_xxx` tables. The`$reindex` operation will apply this to existing data.
+* This setting only applies to newly inserted and updated rows in `HFJ_SPIDX_xxx` tables. The `$reindex` operation will apply this to existing data.
 
 * If this setting is enabled along with [Index Missing Fields](/hapi-fhir/apidocs/hapi-fhir-jpaserver-model/ca/uhn/fhir/jpa/model/entity/StorageSettings.html#getIndexMissingFields()) setting, the following index may need to be added into the `HFJ_SPIDX_xxx` tables to improve the search performance: `(HASH_IDENTITY, SP_MISSING, RES_ID, PARTITION_ID)`.
 

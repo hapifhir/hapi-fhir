@@ -30,6 +30,9 @@ import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hasher;
 import com.google.common.hash.Hashing;
 
+/**
+ * Utility class for calculating hashes of SearchParam entity fields.
+ */
 public class SearchParamHash {
 
 	/**

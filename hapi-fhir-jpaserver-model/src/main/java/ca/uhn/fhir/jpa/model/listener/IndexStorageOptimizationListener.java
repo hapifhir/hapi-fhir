@@ -85,14 +85,14 @@ public class IndexStorageOptimizationListener {
 		// getting ISearchParamRegistry from the application context as it is initialized after EntityListeners
 		ISearchParamRegistry searchParamRegistry = myApplicationContext.getBean(ISearchParamRegistry.class);
 		Optional<IndexedSearchParam> indexedSearchParamOptional =
-			searchParamRegistry.getIndexedSearchParamByHashIdentity(
-				theResourceIndexedSearchParam.getHashIdentity());
+				searchParamRegistry.getIndexedSearchParamByHashIdentity(
+						theResourceIndexedSearchParam.getHashIdentity());
 
 		if (indexedSearchParamOptional.isPresent()) {
 			theResourceIndexedSearchParam.setResourceType(
-				indexedSearchParamOptional.get().getResourceType());
+					indexedSearchParamOptional.get().getResourceType());
 			theResourceIndexedSearchParam.restoreParamName(
-				indexedSearchParamOptional.get().getParameterName());
+					indexedSearchParamOptional.get().getParameterName());
 		}
 	}
 }
