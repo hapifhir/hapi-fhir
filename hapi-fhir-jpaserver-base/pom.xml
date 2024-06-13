@@ -415,11 +415,11 @@
 				<artifactId>maven-checkstyle-plugin</artifactId>
 				<configuration>
 					<excludes>**/osgi/**/*, **/.mvn/**/*, **/.mvn_/**/*</excludes>
-<!--					<sourceDirectories>-->
+					<sourceDirectories>
 						<!--scan base project directory to include all modules-->
 						<!--suppress UnresolvedMavenProperty -->
-<!--						<directory>${maven.multiModuleProjectDirectory}/</directory>-->
-<!--					</sourceDirectories>-->
+						<directory>${maven.multiModuleProjectDirectory}/</directory>
+					</sourceDirectories>
 					<includeTestSourceDirectory>true</includeTestSourceDirectory>
 					<!--suppress UnresolvedMavenProperty -->
 					<configLocation>${maven.multiModuleProjectDirectory}/hapi-fhir-checkstyle/src/checkstyle/hapi-base-checkstyle.xml</configLocation>
@@ -436,10 +436,10 @@
 							<goal>check</goal>
 						</goals>
 					</execution>
-					<execution>
-						<id>hapi-single-module-checkstyle</id>
-						<phase>none</phase>
-					</execution>
+<!--					<execution>-->
+<!--						<id>hapi-single-module-checkstyle</id>-->
+<!--						<phase>none</phase>-->
+<!--					</execution>-->
 				</executions>
 			</plugin>
 			<!-- Generate the Spring ContextCfg classes for loading JPA DAOs and RPs -->
