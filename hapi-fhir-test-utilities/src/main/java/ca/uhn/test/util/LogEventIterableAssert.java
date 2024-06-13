@@ -93,4 +93,16 @@ public class LogEventIterableAssert extends AbstractIterableAssert<LogEventItera
 			"Log Events should have no message with "+ thePartial + " in it.");
 		return this;
 	}
+
+	public LogEventIterableAssert hasEventWithLevelAndMessageAndThrew(Level theLevel, String thePartial, String theExceptionMessage) {
+		isNotNull();
+
+		matches(logEvents -> logEvents.stream()
+				.filter(message -> message.getMessage().contains(thePartial))
+				.filter(message -> message.getLevel() == theLevel)
+				.anyMatch(message -> message.getThrowableProxy().getMessage().contains(theExceptionMessage)),
+			"Log Events should have at least one message with "+ thePartial + " in it.");
+
+		return this;
+	}
 }
