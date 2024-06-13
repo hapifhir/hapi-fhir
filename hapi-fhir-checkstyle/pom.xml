@@ -109,6 +109,7 @@
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-checkstyle-plugin</artifactId>
 						<configuration>
+							<includeTestSourceDirectory>true</includeTestSourceDirectory>
 							<excludes>**/osgi/**/*, **/.mvn/**/*, **/.mvn_/**/*</excludes>
 							<sourceDirectories>
 								<!--scan base project directory to include all modules-->
