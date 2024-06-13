@@ -109,13 +109,13 @@
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-checkstyle-plugin</artifactId>
 						<configuration>
-							<includeTestSourceDirectory>true</includeTestSourceDirectory>
 							<excludes>**/osgi/**/*, **/.mvn/**/*, **/.mvn_/**/*</excludes>
 							<sourceDirectories>
 								<!--scan base project directory to include all modules-->
 								<!--suppress UnresolvedMavenProperty -->
 								<directory>${maven.multiModuleProjectDirectory}/</directory>
 							</sourceDirectories>
+							<includeTestSourceDirectory>true</includeTestSourceDirectory>
 							<!--suppress UnresolvedMavenProperty -->
 							<configLocation>${maven.multiModuleProjectDirectory}/hapi-fhir-checkstyle/src/checkstyle/hapi-base-checkstyle.xml</configLocation>
 							<!--suppress UnresolvedMavenProperty -->

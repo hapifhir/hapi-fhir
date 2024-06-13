@@ -119,9 +119,9 @@ public class JpaBulkExportProcessorTest {
 		}
 	}
 
-	@Spy
+	@Spy //FIXME GGG WIP
 	private FhirContext myFhirContext = FhirContext.forR4Cached();
-
+	// FIXME HELLO
 	@Mock
 	private BulkExportHelperService myBulkExportHelperService;
 
