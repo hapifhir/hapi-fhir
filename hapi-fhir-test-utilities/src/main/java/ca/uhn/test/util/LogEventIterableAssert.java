@@ -105,4 +105,15 @@ public class LogEventIterableAssert extends AbstractIterableAssert<LogEventItera
 
 		return this;
 	}
+
+	public LogEventIterableAssert doesNotHaveEventWithLevelAndMessage(Level theLevel, String thePartial) {
+		isNotNull();
+
+		matches(logEvents -> logEvents.stream()
+				.filter(e -> e.getLevel() == theLevel)
+				.map(ILoggingEvent::getFormattedMessage)
+				.noneMatch(message -> message.contains(thePartial)),
+			"Log Events should have no " + theLevel.toString() + " message with "+ thePartial + " in it.");
+		return this;
+	}
 }
