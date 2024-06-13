@@ -20,6 +20,8 @@
 package ca.uhn.fhir.batch2.jobs.reindex;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.api.IJobStepWorker;
+import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.jobs.chunk.PartitionedUrlChunkRangeJson;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.batch2.jobs.parameters.UrlListValidator;
@@ -57,14 +59,21 @@ public class ReindexAppCtx {
 						"load-ids",
 						"Load IDs of resources to reindex",
 						ResourceIdListWorkChunkJson.class,
-						new LoadIdsStep(theBatch2DaoSvc))
+						loadIdsStep(theBatch2DaoSvc))
 				.addLastStep("reindex", "Perform the resource reindex", reindexStep())
 				.build();
 	}
 
 	@Bean
-	public GenerateRangeChunksStep reindexGenerateRangeChunksStep() {
-		return new ReindexGenerateRangeChunksStep();
+	public IJobStepWorker<ReindexJobParameters, VoidModel, PartitionedUrlChunkRangeJson>
+			reindexGenerateRangeChunksStep() {
+		return new GenerateRangeChunksStep<>();
+	}
+
+	@Bean
+	public IJobStepWorker<ReindexJobParameters, PartitionedUrlChunkRangeJson, ResourceIdListWorkChunkJson> loadIdsStep(
+			IBatch2DaoSvc theBatch2DaoSvc) {
+		return new LoadIdsStep<>(theBatch2DaoSvc);
 	}
 
 	@Bean

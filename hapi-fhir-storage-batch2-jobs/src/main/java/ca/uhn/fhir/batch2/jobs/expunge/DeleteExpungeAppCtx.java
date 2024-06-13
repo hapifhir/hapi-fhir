@@ -45,8 +45,8 @@ public class DeleteExpungeAppCtx {
 	public JobDefinition<DeleteExpungeJobParameters> expungeJobDefinition(
 			IBatch2DaoSvc theBatch2DaoSvc,
 			HapiTransactionService theHapiTransactionService,
-			IDeleteExpungeSvc theDeleteExpungeSvc,
-			IIdHelperService theIdHelperService,
+			IDeleteExpungeSvc<?> theDeleteExpungeSvc,
+			IIdHelperService<?> theIdHelperService,
 			IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
 		return JobDefinition.newBuilder()
 				.setJobDefinitionId(JOB_DELETE_EXPUNGE)
@@ -65,7 +65,7 @@ public class DeleteExpungeAppCtx {
 						"load-ids",
 						"Load IDs of resources to expunge",
 						ResourceIdListWorkChunkJson.class,
-						new LoadIdsStep(theBatch2DaoSvc))
+						loadIdsStep(theBatch2DaoSvc))
 				.addLastStep(
 						"expunge",
 						"Perform the resource expunge",
@@ -76,7 +76,7 @@ public class DeleteExpungeAppCtx {
 	@Bean
 	public DeleteExpungeJobParametersValidator expungeJobParametersValidator(
 			IBatch2DaoSvc theBatch2DaoSvc,
-			IDeleteExpungeSvc theDeleteExpungeSvc,
+			IDeleteExpungeSvc<?> theDeleteExpungeSvc,
 			IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
 		return new DeleteExpungeJobParametersValidator(
 				new UrlListValidator(ProviderConstants.OPERATION_EXPUNGE, theBatch2DaoSvc),
@@ -85,16 +85,21 @@ public class DeleteExpungeAppCtx {
 	}
 
 	@Bean
+	public LoadIdsStep<DeleteExpungeJobParameters> loadIdsStep(IBatch2DaoSvc theBatch2DaoSvc) {
+		return new LoadIdsStep<>(theBatch2DaoSvc);
+	}
+
+	@Bean
 	public DeleteExpungeStep expungeStep(
 			HapiTransactionService theHapiTransactionService,
-			IDeleteExpungeSvc theDeleteExpungeSvc,
-			IIdHelperService theIdHelperService) {
+			IDeleteExpungeSvc<?> theDeleteExpungeSvc,
+			IIdHelperService<?> theIdHelperService) {
 		return new DeleteExpungeStep(theHapiTransactionService, theDeleteExpungeSvc, theIdHelperService);
 	}
 
 	@Bean
-	public GenerateRangeChunksStep expungeGenerateRangeChunksStep() {
-		return new GenerateRangeChunksStep();
+	public GenerateRangeChunksStep<DeleteExpungeJobParameters> expungeGenerateRangeChunksStep() {
+		return new GenerateRangeChunksStep<>();
 	}
 
 	@Bean

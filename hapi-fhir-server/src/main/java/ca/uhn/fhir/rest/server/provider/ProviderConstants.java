@@ -212,6 +212,7 @@ public class ProviderConstants {
 	/**
 	 * Whether all resource types should be reindexed
 	 */
+	@Deprecated(since = "7.3.4")
 	public static final String OPERATION_REINDEX_PARAM_EVERYTHING = "everything";
 
 	/**

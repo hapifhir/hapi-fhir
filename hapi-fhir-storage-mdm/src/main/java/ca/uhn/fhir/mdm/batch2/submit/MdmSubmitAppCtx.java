@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.mdm.batch2.submit;
 
+import ca.uhn.fhir.batch2.api.IJobStepWorker;
+import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.jobs.chunk.PartitionedUrlChunkRangeJson;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.batch2.jobs.step.GenerateRangeChunksStep;
@@ -38,12 +40,12 @@ public class MdmSubmitAppCtx {
 	public static String MDM_SUBMIT_JOB = "MDM_SUBMIT";
 
 	@Bean
-	public GenerateRangeChunksStep submitGenerateRangeChunksStep() {
-		return new GenerateRangeChunksStep();
+	public GenerateRangeChunksStep<MdmSubmitJobParameters> submitGenerateRangeChunksStep() {
+		return new GenerateRangeChunksStep<>();
 	}
 
 	@Bean(name = MDM_SUBMIT_JOB_BEAN_NAME)
-	public JobDefinition mdmSubmitJobDefinition(
+	public JobDefinition<MdmSubmitJobParameters> mdmSubmitJobDefinition(
 			IBatch2DaoSvc theBatch2DaoSvc,
 			MatchUrlService theMatchUrlService,
 			FhirContext theFhirContext,
@@ -61,7 +63,7 @@ public class MdmSubmitAppCtx {
 						PartitionedUrlChunkRangeJson.class,
 						submitGenerateRangeChunksStep())
 				.addIntermediateStep(
-						"load-ids", "Load the IDs", ResourceIdListWorkChunkJson.class, new LoadIdsStep(theBatch2DaoSvc))
+						"load-ids", "Load the IDs", ResourceIdListWorkChunkJson.class, loadIdsStep(theBatch2DaoSvc))
 				.addLastStep(
 						"inflate-and-submit-resources",
 						"Inflate and Submit resources",
@@ -76,7 +78,13 @@ public class MdmSubmitAppCtx {
 	}
 
 	@Bean
-	public MdmInflateAndSubmitResourcesStep mdmInflateAndSubmitResourcesStep() {
+	public LoadIdsStep<MdmSubmitJobParameters> loadIdsStep(IBatch2DaoSvc theBatch2DaoSvc) {
+		return new LoadIdsStep<>(theBatch2DaoSvc);
+	}
+
+	@Bean
+	public IJobStepWorker<MdmSubmitJobParameters, ResourceIdListWorkChunkJson, VoidModel>
+			mdmInflateAndSubmitResourcesStep() {
 		return new MdmInflateAndSubmitResourcesStep();
 	}
 }

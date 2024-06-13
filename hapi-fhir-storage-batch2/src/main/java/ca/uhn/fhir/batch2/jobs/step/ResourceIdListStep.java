@@ -45,7 +45,6 @@ import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends ChunkRangeJson>
 		implements IJobStepWorker<PT, IT, ResourceIdListWorkChunkJson> {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
-	public static final int DEFAULT_PAGE_SIZE = 20000;
 
 	protected static final int MAX_BATCH_OF_IDS = 500;
 
