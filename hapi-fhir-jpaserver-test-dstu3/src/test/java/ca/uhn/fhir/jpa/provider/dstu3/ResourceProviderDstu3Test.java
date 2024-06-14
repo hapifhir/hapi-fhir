@@ -328,7 +328,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		try {
 			CodeableConcept codeableConcept = new CodeableConcept();
 			Coding codingCode = codeableConcept.addCoding();
-			codingCode.setSystem(DeviceStatus.ACTIVE.toCode());
+			codingCode.setCode(DeviceStatus.ACTIVE.toCode());
 			codingCode.setSystem(DeviceStatus.ACTIVE.getSystem());
 
 			Task task = new Task();

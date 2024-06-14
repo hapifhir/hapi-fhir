@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 5559
+title: "The IPS narrative generator previously created narratives for each `Composition.section.text` entry, 
+   but also combined these section narratives into a single concatenated narrative for `Composition.text`. This
+   caused validation issues as the narratives then contained duplicate IDs, and also wasted space. This has
+   been removed."

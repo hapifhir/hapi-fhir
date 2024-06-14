@@ -176,8 +176,12 @@ public class ResourceValidatorDstu3Test extends BaseValidationTestWithInlineMock
 		ValidationResult output = val.validateWithResult(p);
 		List<SingleValidationMessage> all = logResultsAndReturnNonInformationalOnes(output);
 
-		assertThat(output.getMessages().get(0).getMessage()).contains("None of the codings provided are in the value set 'Marital Status Codes'");
-		assertEquals(ResultSeverityEnum.WARNING, output.getMessages().get(0).getSeverity());
+
+		assertThat(output.getMessages().get(0).getMessage()).contains("Unknown code 'http://hl7.org/fhir/v3/MaritalStatus#FOO'");
+		assertEquals(ResultSeverityEnum.ERROR, output.getMessages().get(0).getSeverity());
+
+		assertThat(output.getMessages().get(1).getMessage()).contains("None of the codings provided are in the value set 'Marital Status Codes'");
+		assertEquals(ResultSeverityEnum.WARNING, output.getMessages().get(1).getSeverity());
 	}
 
 	@Test
