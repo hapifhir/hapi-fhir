@@ -22,6 +22,9 @@
 	<suppress files="BaseMigrationTasks\.java" checks="AbstractClassName"/>
 	<suppress files="BaseLoincTop2000LabResultsHandler\.java" checks="AbstractClassName"/>
 
+	<!-- TODO GGG Checkstyle MDM tests can currently use hamcrest until we fix em -->
+	<suppress files=".*/mdm/.*" checks="RegexpSinglelineJava" id="NoHamcrestAssert"/>
+
 	<!-- Missing "Base" prefix suppressions -->
 	<suppress files="ResourceMetadataKeyEnum\.java" checks="AbstractClassName"/>
 	<suppress files="RequestDetails\.java" checks="AbstractClassName"/>

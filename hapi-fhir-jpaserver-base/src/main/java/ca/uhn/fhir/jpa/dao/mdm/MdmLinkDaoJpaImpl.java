@@ -48,7 +48,6 @@ import jakarta.persistence.criteria.Order;
 import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
-import jakarta.validation.constraints.NotNull;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.ObjectUtils;
@@ -287,7 +286,7 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<JpaPid, MdmLink> {
 		return myEntityManager.createQuery(countQuery).getSingleResult();
 	}
 
-	@NotNull
+	@Nonnull
 	private List<Predicate> buildPredicates(
 			MdmQuerySearchParameters theParams, CriteriaBuilder criteriaBuilder, Root<MdmLink> from) {
 		List<Predicate> andPredicates = new ArrayList<>();

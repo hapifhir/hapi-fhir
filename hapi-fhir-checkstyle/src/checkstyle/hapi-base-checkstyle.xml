@@ -32,6 +32,7 @@
 			<property name="ignoreComments" value="true"/>
 		</module>
 		<module name="RegexpSinglelineJava">
+			<property name="id" value="NoHamcrestAssert"/>
 			<property name="format" value="org.hamcrest.MatcherAssert.assertThat"/>
 			<property name="message" value="Incorrect assertThat import used: The &quot;org.assertj.core.api.Assertions.assertThat&quot; import should be used for tests"/>
 		</module>

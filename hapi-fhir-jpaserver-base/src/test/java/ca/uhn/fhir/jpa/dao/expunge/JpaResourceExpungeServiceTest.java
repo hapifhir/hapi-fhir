@@ -51,9 +51,7 @@ public class JpaResourceExpungeServiceTest {
 	public void testExpungeDoesNotDeleteAllSearchParams() {
 		when(myResourceTableDao.findById(any())).thenReturn(Optional.of(resourceTable));
 		when(resourceTable.getIdDt()).thenReturn(new IdDt());
-		//FIXME GGG
 		myService.expungeCurrentVersionOfResource(myRequestDetails, 1L, new AtomicInteger(1));
-		System.out.println("zoop");
 		verify(myService, never()).deleteAllSearchParams(any());
 	}
 }

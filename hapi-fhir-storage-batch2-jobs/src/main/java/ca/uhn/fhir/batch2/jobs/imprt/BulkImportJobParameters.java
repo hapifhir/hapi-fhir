@@ -24,9 +24,9 @@ import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.model.api.annotation.SensitiveNoDisplay;
 import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import org.apache.commons.lang3.Validate;
@@ -44,7 +44,7 @@ public class BulkImportJobParameters implements IModelJson {
 
 	@JsonProperty(value = "ndJsonUrls", required = true)
 	@Size(min = 1, message = "At least one NDJSON URL must be provided")
-	@NotNull(message = "At least one NDJSON URL must be provided")
+	@Nonnull
 	private List<@Pattern(regexp = "^http[s]?://.*", message = "Must be a valid URL") String> myNdJsonUrls;
 
 	@JsonProperty(value = "httpBasicCredentials", required = false)

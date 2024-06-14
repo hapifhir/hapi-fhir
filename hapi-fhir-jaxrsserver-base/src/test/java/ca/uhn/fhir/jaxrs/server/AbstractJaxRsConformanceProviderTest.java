@@ -69,8 +69,8 @@ public class AbstractJaxRsConformanceProviderTest {
 		assertEquals(Constants.STATUS_HTTP_200_OK, response.getStatus());
 		assertThat(response.getEntity().toString()).contains("\"type\": \"Patient\"");
 		assertThat(response.getEntity().toString()).contains("\"someCustomOperation");
-		ourLog.info(response);
-		ourLog.info(response.getEntity());
+		ourLog.info(response.toString());
+		ourLog.info(response.getEntity().toString());
 	}
 	
 	@Test
