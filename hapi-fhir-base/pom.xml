@@ -207,10 +207,10 @@
 				<artifactId>maven-antrun-plugin</artifactId>
 				<version>1.8</version>
 				<configuration>
-<!--					<target>-->
-						<!--suppress UnresolvedMavenProperty -->
-<!--						<delete dir="${pom.basedir}/target/" includes="checkstyle*"/>-->
-<!--					</target>-->
+					<target>
+						suppress UnresolvedMavenProperty
+						<delete dir="${pom.basedir}/target/" includes="checkstyle*"/>
+					</target>
 				</configuration>
 				<inherited>true</inherited>
 				<executions>
