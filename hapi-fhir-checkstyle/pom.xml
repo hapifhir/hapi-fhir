@@ -102,7 +102,7 @@
 			</build>
 		</profile>
 		<profile>
-			<id>CI</id>
+			<id>CHECKSTYLE</id>
 			<build>
 				<plugins>
 					<plugin>

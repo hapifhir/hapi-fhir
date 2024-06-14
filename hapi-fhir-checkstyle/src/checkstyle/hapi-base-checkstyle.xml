@@ -12,7 +12,9 @@
 	<module name="TreeWalker">
 		<module name="SuppressWarningsHolder" />
 		<!-- Run custom HapiErrorCodeCheck to find duplicate error codes -->
-<!--		<module name="ca.uhn.fhir.checks.HapiErrorCodeCheck"/>-->
+		<module name="ca.uhn.fhir.checks.HapiErrorCodeCheck">
+			<property name="id" value="HapiErrorCodeUniqueness"/>
+		</module>
 		<!-- Throw error if any FIX ME is left in the code -->
 		<module name="TodoComment">
 			<!-- The (?i) below means Case Insensitive -->
