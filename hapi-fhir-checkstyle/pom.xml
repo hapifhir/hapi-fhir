@@ -37,15 +37,29 @@
 	</dependencies>
 
 
-<!--	<build>-->
-<!--		<plugins>-->
-<!--			<plugin>-->
-<!--				<groupId>org.apache.maven.plugins</groupId>-->
-<!--				<artifactId>maven-checkstyle-plugin</artifactId>-->
-<!--				<inherited>true</inherited>-->
-<!--			</plugin>-->
-<!--		</plugins>-->
-<!--	</build>-->
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-checkstyle-plugin</artifactId>
+					<dependencies>
+						<dependency>
+							<groupId>com.puppycrawl.tools</groupId>
+							<artifactId>checkstyle</artifactId>
+							<version>${checkstyle_version}</version>
+						</dependency>
+						<dependency>
+							<groupId>ca.uhn.hapi.fhir</groupId>
+							<artifactId>hapi-fhir-checkstyle</artifactId>
+							<!-- Remember to bump this when you upgrade the version -->
+							<version>${project.version}</version>
+						</dependency>
+					</dependencies>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
 	<profiles>
 		<!-- For releases, we need to generate javadoc and sources JAR -->
 		<profile>
@@ -95,7 +109,7 @@
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-checkstyle-plugin</artifactId>
 						<configuration>
-<!--							<excludes>**/osgi/**/*, **/.mvn/**/*, **/.mvn_/**/*</excludes>-->
+							<excludes>**/osgi/**/*, **/.mvn/**/*, **/.mvn_/**/*</excludes>
 							<sourceDirectories>
 								<!--scan base project directory to include all modules-->
 								<!--suppress UnresolvedMavenProperty -->
@@ -110,17 +124,17 @@
 							<consoleOutput>true</consoleOutput>
 						</configuration>
 						<executions>
-<!--							<execution>-->
-<!--								<id>checkstyle-across-all-modules</id>-->
-<!--								<phase>install</phase>-->
-<!--								<goals>-->
-<!--									<goal>check</goal>-->
-<!--								</goals>-->
-<!--							</execution>-->
-<!--							<execution>-->
-<!--								<id>hapi-single-module-checkstyle</id>-->
-<!--								<phase>none</phase>-->
-<!--							</execution>-->
+							<execution>
+								<id>checkstyle-across-all-modules</id>
+								<phase>install</phase>
+								<goals>
+									<goal>check</goal>
+								</goals>
+							</execution>
+							<execution>
+								<id>hapi-single-module-checkstyle</id>
+								<phase>none</phase>
+							</execution>
 						</executions>
 					</plugin>
 				</plugins>
