@@ -2339,6 +2339,9 @@
 					<inherited>true</inherited>
 					<executions>
 						<execution>
+							<configuration>
+								<includeTestSourceDirectory>true</includeTestSourceDirectory>
+							</configuration>
 							<id>hapi-single-module-checkstyle</id>
 							<phase>verify</phase>
 							<goals>

@@ -53,7 +53,7 @@ public class JpaResourceExpungeServiceTest {
 		when(resourceTable.getIdDt()).thenReturn(new IdDt());
 		//FIXME GGG
 		myService.expungeCurrentVersionOfResource(myRequestDetails, 1L, new AtomicInteger(1));
-
+		System.out.println("zoop");
 		verify(myService, never()).deleteAllSearchParams(any());
 	}
 }

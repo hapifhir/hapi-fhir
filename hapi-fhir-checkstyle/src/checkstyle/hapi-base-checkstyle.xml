@@ -4,7 +4,6 @@
 	"http://www.puppycrawl.com/dtds/configuration_1_3.dtd">
 
 <module name="Checker">
-
 	<property name="severity" value="error"/>
 	<property name="charset" value="UTF-8"/>
 	<property name="fileExtensions" value="java, properties, xml, js, json"/>

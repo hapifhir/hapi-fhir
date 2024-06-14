@@ -95,7 +95,7 @@
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-checkstyle-plugin</artifactId>
 						<configuration>
-							<excludes>**/osgi/**/*, **/.mvn/**/*, **/.mvn_/**/*</excludes>
+<!--							<excludes>**/osgi/**/*, **/.mvn/**/*, **/.mvn_/**/*</excludes>-->
 							<sourceDirectories>
 								<!--scan base project directory to include all modules-->
 								<!--suppress UnresolvedMavenProperty -->
