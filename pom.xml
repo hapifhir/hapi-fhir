@@ -2340,7 +2340,7 @@
 					<executions>
 						<execution>
 							<id>hapi-single-module-checkstyle</id>
-							<phase>validate</phase>
+							<phase>verify</phase>
 							<goals>
 								<goal>check</goal>
 							</goals>
@@ -2460,10 +2460,7 @@
 						<maxmem>2000m</maxmem>
 						<compilerArgs>
 							<arg>-XDcompilePolicy=simple</arg>
-							<arg>-Xplugin:errorprone</arg>
-							<arg>-Xep:MissingSummary:OFF</arg>
-							<arg>-Xep:JavaUtilDate:OFF</arg>
-							<arg>-XepExcludedPaths:.*/src/test/java/.*</arg>
+							<arg>-Xplugin:ErrorProne -Xep:MissingSummary:OFF -Xep:JavaUtilDate:OFF -XepExcludedPaths:.*/src/test/java/.*</arg>
 							<arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED</arg>
 							<arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED</arg>
 							<arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.main=ALL-UNNAMED</arg>
