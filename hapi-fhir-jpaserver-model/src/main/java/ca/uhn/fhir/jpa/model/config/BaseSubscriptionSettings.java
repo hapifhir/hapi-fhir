@@ -83,7 +83,7 @@ public abstract class BaseSubscriptionSettings {
 	}
 
 	/**
-	 * If e-mail subscriptions are supported, the From address used when sending e-mails
+	 * Set the from address used for sending emails when using email subscriptions
 	 */
 	public void setEmailFromAddress(String theEmailFromAddress) {
 		myEmailFromAddress = theEmailFromAddress;
@@ -97,14 +97,14 @@ public abstract class BaseSubscriptionSettings {
 	}
 
 	/**
-	 * If websocket subscriptions are enabled, this specifies the context path that listens to them.  Default value "/websocket".
+	 * Set the websocket endpoint context path to use when websocket subscriptions are enabled.  Default value "/websocket".
 	 */
 	public void setWebsocketContextPath(String theWebsocketContextPath) {
 		myWebsocketContextPath = theWebsocketContextPath;
 	}
 
 	/**
-	 * This setting return whether the channel name should be qualified or not.
+	 * This setting returns whether the channel name should be qualified or not.
 	 *
 	 * @return whether the channel name is qualified or not
 	 * @since 6.4.0

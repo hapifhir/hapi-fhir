@@ -41,8 +41,7 @@ public class DaoSubscriptionMatcherTest {
 
 	@Autowired(required = false)
 	private PlatformTransactionManager myTxManager;
-	@MockBean
-	private SubscriptionSettings mySubscriptionSettings;
+
 	@MockBean
 	private JpaStorageSettings myStorageSettings;
 	@MockBean
@@ -98,6 +97,11 @@ public class DaoSubscriptionMatcherTest {
 		@Bean
 		public IResourceModifiedMessagePersistenceSvc resourceModifiedMessagePersistenceSvc() {
 			return mock(IResourceModifiedMessagePersistenceSvc.class);
+		}
+
+		@Bean
+		public SubscriptionSettings subscriptionSettings() {
+			return new SubscriptionSettings();
 		}
 	}
 
