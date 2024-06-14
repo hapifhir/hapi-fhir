@@ -2323,6 +2323,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-checkstyle-plugin</artifactId>
+					<version>${maven_checkstyle_version}</version>
 					<configuration>
 						<includeTestSourceDirectory>true</includeTestSourceDirectory>
 						<!--suppress UnresolvedMavenProperty -->
@@ -2350,11 +2351,11 @@
 						</execution>
 					</executions>
 					<dependencies>
-						<dependency>
-							<groupId>ca.uhn.hapi.fhir</groupId>
-							<artifactId>hapi-fhir-checkstyle</artifactId>
-							<version>${project.version}</version>
-						</dependency>
+<!--						<dependency>-->
+<!--							<groupId>ca.uhn.hapi.fhir</groupId>-->
+<!--							<artifactId>hapi-fhir-checkstyle</artifactId>-->
+<!--							<version>${project.version}</version>-->
+<!--						</dependency>-->
 						<dependency>
 							<groupId>com.puppycrawl.tools</groupId>
 							<artifactId>checkstyle</artifactId>

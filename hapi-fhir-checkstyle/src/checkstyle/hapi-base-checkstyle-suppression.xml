@@ -4,7 +4,7 @@
 	"https://checkstyle.org/dtds/suppressions_1_2.dtd">
 
 <suppressions>
-	<suppress files="[/\\]test[/\\]" checks="[a-zA-Z0-9]*" />
+<!--	<suppress files="[/\\]test[/\\]" checks="[a-zA-Z0-9]*" />-->
 	<suppress files="[/\\]resources[/\\]" checks="[a-zA-Z0-9]*" />
 	<suppress files="[\\/]target[\\/]" checks="[a-zA-Z0-9]*" />
 	<suppress files="[\\/]hapi-fhir-docs[\\/]" checks="[a-zA-Z0-9]*" />
@@ -15,6 +15,8 @@
 	<suppress files="[\\/]osgi[\\/]" checks="[a-zA-Z0-9]*"/>
 
 	<!-- Name suppressions -->
+	<!-- We don't care if test files have `base` or abstract in the name`  -->
+	<suppress files="[/\\]test[/\\]" checks="AbstractClassName" />
 	<suppress files="Base64BinaryDt\.java" checks="AbstractClassName"/>
 	<!-- TODO KHS cdr instantiates these.  Remove them once cdr has been fixed. -->
 	<suppress files="BaseMigrationTasks\.java" checks="AbstractClassName"/>

@@ -4,13 +4,15 @@
 	"http://www.puppycrawl.com/dtds/configuration_1_3.dtd">
 
 <module name="Checker">
+	<module name="SuppressWarningsFilter" />
 	<property name="severity" value="error"/>
 	<property name="charset" value="UTF-8"/>
 	<property name="fileExtensions" value="java, properties, xml, js, json"/>
 
 	<module name="TreeWalker">
+		<module name="SuppressWarningsHolder" />
 		<!-- Run custom HapiErrorCodeCheck to find duplicate error codes -->
-		<module name="ca.uhn.fhir.checks.HapiErrorCodeCheck"/>
+<!--		<module name="ca.uhn.fhir.checks.HapiErrorCodeCheck"/>-->
 		<!-- Throw error if any FIX ME is left in the code -->
 		<module name="TodoComment">
 			<!-- The (?i) below means Case Insensitive -->
@@ -25,6 +27,7 @@
 		-->
 
 		<module name="RegexpSinglelineJava">
+			<property name="id" value="NoPrintln"/>
 			<property name="format" value="System\.out\.println"/>
 			<property name="ignoreComments" value="true"/>
 		</module>

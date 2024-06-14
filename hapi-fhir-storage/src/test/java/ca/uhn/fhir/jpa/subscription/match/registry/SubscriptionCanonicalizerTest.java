@@ -11,6 +11,7 @@ import ca.uhn.fhir.model.dstu2.FhirDstu2;
 import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.subscription.SubscriptionConstants;
 import ca.uhn.fhir.subscription.SubscriptionTestDataHelper;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.dstu3.hapi.ctx.FhirDstu3;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.hapi.ctx.FhirR4;
@@ -21,7 +22,6 @@ import org.hl7.fhir.r4b.hapi.ctx.FhirR4B;
 import org.hl7.fhir.r5.hapi.ctx.FhirR5;
 import org.hl7.fhir.r5.model.Coding;
 import org.hl7.fhir.r5.model.Enumerations;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -301,7 +301,7 @@ class SubscriptionCanonicalizerTest {
 		assertEquals("testId", theCanonicalSubscription.getIdElementString());
 	}
 
-	@NotNull
+	@Nonnull
 	private static org.hl7.fhir.r5.model.Subscription.SubscriptionFilterByComponent buildFilter(String theResourceType, String theParam, String theValue) {
 		org.hl7.fhir.r5.model.Subscription.SubscriptionFilterByComponent filter = new org.hl7.fhir.r5.model.Subscription.SubscriptionFilterByComponent();
 		filter.setResourceType(theResourceType);

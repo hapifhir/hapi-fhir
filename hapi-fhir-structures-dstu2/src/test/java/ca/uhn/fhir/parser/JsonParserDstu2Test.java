@@ -153,7 +153,7 @@ public class JsonParserDstu2Test {
 		IParser parser = ourCtx.newJsonParser();
 
 		String output = parser.encodeResourceToString(fhirPat);
-		System.out.println("output: " + output);
+		ourLog.info("output: " + output);
 
 		// Deserialize then check that valueReference value is still correct
 		fhirPat = parser.parseResource(Patient.class, output);
@@ -227,7 +227,7 @@ public class JsonParserDstu2Test {
 		jsonParser.setServerBaseUrl("http://www.example.com");
 
 		final String parsedPatient = jsonParser.encodeResourceToString(patient);
-		System.out.println(parsedPatient);
+		ourLog.info(parsedPatient);
 		assertEquals(expected, parsedPatient);
 
 		// Parse with string
@@ -261,7 +261,7 @@ public class JsonParserDstu2Test {
 		jsonParser.setServerBaseUrl("http://www.example.com");
 
 		final String parsedBundle = jsonParser.encodeResourceToString(bundle);
-		System.out.println(parsedBundle);
+		ourLog.info(parsedBundle);
 		assertEquals(expected, parsedBundle);
 
 		// Parse with string
