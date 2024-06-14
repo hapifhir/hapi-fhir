@@ -3,7 +3,6 @@
 			xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 
-
 	<!-- the version info -->
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>ca.uhn.hapi.fhir</groupId>
@@ -916,11 +915,11 @@
 			<name>Stefan Lindström</name>
 			<organization>Softhouse AB</organization>
 		</developer>
-    <developer>
-      <id>adriennesox</id>
+		<developer>
+			<id>adriennesox</id>
 			<name>Adrienne Sox</name>
 			<organization>Galileo, Inc.</organization>
-    </developer>
+		</developer>
 	</developers>
 
 	<licenses>
@@ -985,7 +984,7 @@
 		<flyway_version>9.4.0</flyway_version>
 		<hibernate_version>6.4.1.Final</hibernate_version>
 		<logback_version>1.4.14</logback_version>
-	 	<!-- Update lucene version when you update hibernate-search version - These go together! -->
+		<!-- Update lucene version when you update hibernate-search version - These go together! -->
 		<hibernate_search_version>7.0.0.Final</hibernate_search_version>
 		<!-- Update lucene version when you update hibernate-search version - These go together! -->
 		<lucene_version>9.8.0</lucene_version>
@@ -1385,10 +1384,10 @@
 				<version>3.0.2</version>
 			</dependency>
 			<dependency>
-					<groupId>javax.json</groupId>
-					<artifactId>javax.json-api</artifactId>
-					<version>1.1</version>
-				</dependency>
+				<groupId>javax.json</groupId>
+				<artifactId>javax.json-api</artifactId>
+				<version>1.1</version>
+			</dependency>
 			<dependency>
 				<groupId>co.elastic.clients</groupId>
 				<artifactId>elasticsearch-java</artifactId>
@@ -1861,415 +1860,415 @@
 					</exclusion>
 				</exclusions>
 			</dependency>
-				<dependency>
-					<groupId>org.hibernate.orm</groupId>
-					<artifactId>hibernate-ant</artifactId>
-					<version>${hibernate_version}</version>
-				</dependency>
-				<dependency>
-					<groupId>org.hibernate.orm</groupId>
-					<artifactId>hibernate-core</artifactId>
-					<version>${hibernate_version}</version>
-					<exclusions>
-						<exclusion>
-							<artifactId>xml-apis</artifactId>
-							<groupId>xml-apis</groupId>
-						</exclusion>
-						<exclusion>
-							<groupId>jakarta.activation</groupId>
-							<artifactId>activation</artifactId>
-						</exclusion>
-						<exclusion>
-							<groupId>jakarta.activation</groupId>
-							<artifactId>jakarta.activation-api</artifactId>
-						</exclusion>
-						<exclusion>
-							<groupId>org.jboss.spec.javax.transaction</groupId>
-							<artifactId>jboss-transaction-api_1.2_spec</artifactId>
-						</exclusion>
-						<exclusion>
-							<groupId>com.sun.activation</groupId>
-							<artifactId>jakarta.activation</artifactId>
-						</exclusion>
-					</exclusions>
-				</dependency>
-				<dependency>
-					<groupId>org.hibernate.orm</groupId>
-					<artifactId>hibernate-envers</artifactId>
-					<version>${hibernate_version}</version>
-				</dependency>
-				<dependency>
-					<groupId>org.springframework.data</groupId>
-					<artifactId>spring-data-envers</artifactId>
-					<version>${spring_boot_version}</version>
-				</dependency>
-				<dependency>
-					<groupId>org.hibernate.validator</groupId>
-					<artifactId>hibernate-validator</artifactId>
-					<version>${hibernate_validator_version}</version>
-				</dependency>
-				<dependency>
-					<groupId>org.apache.logging.log4j</groupId>
-					<artifactId>log4j-to-slf4j</artifactId>
-					<version>${log4j_to_slf4j_version}</version>
-				</dependency>
-				<dependency>
-					<groupId>org.hibernate.search</groupId>
-					<artifactId>hibernate-search-mapper-orm</artifactId>
-					<version>${hibernate_search_version}</version>
-					<exclusions>
-						<exclusion>
-							<groupId>org.apache.logging.log4j</groupId>
-							<artifactId>log4j-api</artifactId>
-						</exclusion>
-					</exclusions>
-				</dependency>
-				<dependency>
-					<groupId>org.elasticsearch</groupId>
-					<artifactId>elasticsearch</artifactId>
-					<version>8.9.2</version>
-				</dependency>
-				<dependency>
-					<groupId>org.hibernate.search</groupId>
-					<artifactId>hibernate-search-backend-elasticsearch</artifactId>
-					<version>${hibernate_search_version}</version>
-				</dependency>
-				<dependency>
-					<groupId>org.hibernate.search</groupId>
-					<artifactId>hibernate-search-backend-lucene</artifactId>
-					<version>${hibernate_search_version}</version>
-				</dependency>
-				<dependency>
-					<groupId>org.hibernate.search</groupId>
-					<artifactId>hibernate-search-backend-elasticsearch-aws</artifactId>
-					<version>${hibernate_search_version}</version>
-				</dependency>
-				<dependency>
-					<groupId>org.javassist</groupId>
-					<artifactId>javassist</artifactId>
-					<version>3.22.0-GA</version>
-				</dependency>
-				<dependency>
-					<groupId>org.junit</groupId>
-					<artifactId>junit-bom</artifactId>
-					<version>${junit_version}</version>
-					<type>pom</type>
-					<scope>import</scope>
-				</dependency>
-				<dependency>
-					<groupId>org.junit.jupiter</groupId>
-					<artifactId>junit-jupiter</artifactId>
-					<version>${junit_version}</version>
-					<scope>test</scope>
-				</dependency>
-				<dependency>
-					<groupId>org.junit.jupiter</groupId>
-					<artifactId>junit-jupiter-api</artifactId>
-					<version>${junit_version}</version>
-					<scope>test</scope>
-				</dependency>
-				<dependency>
-					<groupId>org.junit.jupiter</groupId>
-					<artifactId>junit-jupiter-engine</artifactId>
-					<version>${junit_version}</version>
-					<scope>test</scope>
-				</dependency>
-				<dependency>
-					<groupId>org.junit.jupiter</groupId>
-					<artifactId>junit-jupiter-params</artifactId>
-					<version>${junit_version}</version>
-					<scope>test</scope>
-				</dependency>
-				<dependency>
-					<groupId>org.junit-pioneer</groupId>
-					<artifactId>junit-pioneer</artifactId>
-					<version>1.3.8</version>
-				</dependency>
-				<dependency>
-					<groupId>org.mariadb.jdbc</groupId>
-					<artifactId>mariadb-java-client</artifactId>
-					<version>3.0.4</version>
-				</dependency>
-				<dependency>
-					<groupId>org.mockito</groupId>
-					<artifactId>mockito-core</artifactId>
-					<version>${mockito_version}</version>
-				</dependency>
-				<dependency>
-					<groupId>org.mockito</groupId>
-					<artifactId>mockito-junit-jupiter</artifactId>
-					<version>${mockito_version}</version>
-				</dependency>
-				<dependency>
-					<groupId>org.postgresql</groupId>
-					<artifactId>postgresql</artifactId>
-					<version>42.7.3</version>
-				</dependency>
-				<dependency>
-					<groupId>com.oracle.database.jdbc</groupId>
-					<artifactId>ojdbc11</artifactId>
-					<version>23.3.0.23.09</version>
-				</dependency>
-				<dependency>
-					<groupId>org.quartz-scheduler</groupId>
-					<artifactId>quartz</artifactId>
-					<version>2.3.2</version>
-					<exclusions>
-						<exclusion>
-							<groupId>com.zaxxer</groupId>
-							<artifactId>HikariCP-java7</artifactId>
-						</exclusion>
-						<exclusion>
-							<groupId>com.mchange</groupId>
-							<artifactId>c3p0</artifactId>
-						</exclusion>
-						<exclusion>
-							<groupId>com.mchange</groupId>
-							<artifactId>mchange-commons-java</artifactId>
-						</exclusion>
-					</exclusions>
-				</dependency>
-				<dependency>
-					<groupId>org.slf4j</groupId>
-					<artifactId>slf4j-android</artifactId>
-					<version>1.7.36</version>
-				</dependency>
-				<dependency>
-					<groupId>org.slf4j</groupId>
-					<artifactId>slf4j-api</artifactId>
-					<version>${slf4j_version}</version>
-				</dependency>
-				<dependency>
-					<groupId>org.slf4j</groupId>
-					<artifactId>slf4j-simple</artifactId>
-					<version>${slf4j_version}</version>
-				</dependency>
-				<dependency>
-					<groupId>org.slf4j</groupId>
-					<artifactId>log4j-over-slf4j</artifactId>
-					<version>${slf4j_version}</version>
-				</dependency>
-				<dependency>
-					<groupId>org.slf4j</groupId>
-					<artifactId>jcl-over-slf4j</artifactId>
-					<version>${slf4j_version}</version>
-				</dependency>
-				<dependency>
-					<groupId>org.springframework</groupId>
-					<artifactId>spring-beans</artifactId>
-					<version>${spring_version}</version>
-				</dependency>
-				<dependency>
-					<groupId>org.springframework</groupId>
-					<artifactId>spring-context</artifactId>
-					<version>${spring_version}</version>
-				</dependency>
-				<dependency>
-					<groupId>org.springframework</groupId>
-					<artifactId>spring-context-support</artifactId>
-					<version>${spring_version}</version>
-				</dependency>
-				<dependency>
-					<groupId>org.springframework</groupId>
-					<artifactId>spring-core</artifactId>
-					<version>${spring_version}</version>
-				</dependency>
-				<dependency>
-					<groupId>org.springframework</groupId>
-					<artifactId>spring-expression</artifactId>
-					<version>${spring_version}</version>
-				</dependency>
-				<dependency>
-					<groupId>org.springframework</groupId>
-					<artifactId>spring-jdbc</artifactId>
-					<version>${spring_version}</version>
-				</dependency>
-				<dependency>
-					<groupId>org.springframework</groupId>
-					<artifactId>spring-messaging</artifactId>
-					<version>${spring_version}</version>
-				</dependency>
-				<dependency>
-					<groupId>org.springframework</groupId>
-					<artifactId>spring-orm</artifactId>
-					<version>${spring_version}</version>
-				</dependency>
-				<dependency>
-					<groupId>org.springframework</groupId>
-					<artifactId>spring-test</artifactId>
-					<version>${spring_version}</version>
-				</dependency>
-				<dependency>
-					<groupId>org.springframework</groupId>
-					<artifactId>spring-webmvc</artifactId>
-					<version>${spring_version}</version>
-				</dependency>
-				<dependency>
-					<groupId>org.springframework.boot</groupId>
-					<artifactId>spring-boot-starter-test</artifactId>
-					<version>${spring_boot_version}</version>
-				</dependency>
-				<dependency>
-					<groupId>org.springframework.boot</groupId>
-					<artifactId>spring-boot-test</artifactId>
-					<version>${spring_boot_version}</version>
-				</dependency>
-				<dependency>
-					<groupId>org.springframework</groupId>
-					<artifactId>spring-tx</artifactId>
-					<version>${spring_version}</version>
-				</dependency>
-				<dependency>
-					<groupId>org.springframework</groupId>
-					<artifactId>spring-web</artifactId>
-					<version>${spring_version}</version>
-				</dependency>
-				<dependency>
-					<groupId>org.springframework</groupId>
-					<artifactId>spring-websocket</artifactId>
-					<version>${spring_version}</version>
-				</dependency>
-				<dependency>
-					<groupId>org.springframework.retry</groupId>
-					<artifactId>spring-retry</artifactId>
-					<version>${spring_retry_version}</version>
-				</dependency>
-				<dependency>
-					<groupId>org.thymeleaf</groupId>
-					<artifactId>thymeleaf</artifactId>
-					<version>${thymeleaf-version}</version>
-				</dependency>
-				<dependency>
-					<groupId>org.thymeleaf</groupId>
-					<artifactId>thymeleaf-spring6</artifactId>
-					<version>${thymeleaf-version}</version>
-				</dependency>
-				<dependency>
-					<groupId>org.webjars.npm</groupId>
-					<artifactId>ace-builds</artifactId>
-					<version>1.22.0</version>
-				</dependency>
-				<dependency>
-					<groupId>org.webjars.npm</groupId>
-					<artifactId>bootstrap</artifactId>
-					<version>4.5.2</version>
-				</dependency>
-				<dependency>
-					<groupId>org.webjars</groupId>
-					<artifactId>Eonasdan-bootstrap-datetimepicker</artifactId>
-					<version>4.17.47</version>
-					<exclusions>
-						<exclusion>
-							<groupId>*</groupId>
-							<artifactId>*</artifactId>
-						</exclusion>
-					</exclusions>
-				</dependency>
-				<dependency>
-					<groupId>org.webjars</groupId>
-					<artifactId>font-awesome</artifactId>
-					<version>5.8.2</version>
-				</dependency>
-				<dependency>
-					<groupId>org.webjars.bower</groupId>
-					<artifactId>awesome-bootstrap-checkbox</artifactId>
-					<version>1.0.2</version>
-				</dependency>
-				<dependency>
-					<groupId>org.webjars</groupId>
-					<artifactId>jstimezonedetect</artifactId>
-					<version>1.0.6</version>
-				</dependency>
-				<dependency>
-					<groupId>org.webjars</groupId>
-					<artifactId>select2</artifactId>
-					<version>4.0.13</version>
-					<exclusions>
-						<exclusion>
-							<groupId>org.webjars</groupId>
-							<artifactId>jquery</artifactId>
-						</exclusion>
-					</exclusions>
-				</dependency>
-				<dependency>
-					<groupId>org.webjars.bower</groupId>
-					<artifactId>jquery</artifactId>
-					<version>3.5.1</version>
-				</dependency>
-				<dependency>
-					<groupId>org.webjars.bower</groupId>
-					<artifactId>moment</artifactId>
-					<version>2.27.0</version>
-				</dependency>
-				<dependency>
-					<groupId>org.webjars.npm</groupId>
-					<artifactId>popper.js</artifactId>
-					<version>1.16.1</version>
-				</dependency>
-				<dependency>
-					<groupId>org.webjars</groupId>
-					<artifactId>swagger-ui</artifactId>
-					<version>4.1.3</version>
-				</dependency>
-				<dependency>
-					<groupId>org.xmlunit</groupId>
-					<artifactId>xmlunit-core</artifactId>
-					<version>2.4.0</version>
-				</dependency>
-				<dependency>
-					<groupId>org.testcontainers</groupId>
-					<artifactId>testcontainers</artifactId>
-					<version>${testcontainers_version}</version>
-				</dependency>
-				<dependency>
-					<groupId>org.testcontainers</groupId>
-					<artifactId>postgresql</artifactId>
-					<version>${testcontainers_version}</version>
-				</dependency>
-				<dependency>
-					<groupId>org.testcontainers</groupId>
-					<artifactId>mssqlserver</artifactId>
-					<version>${testcontainers_version}</version>
-				</dependency>
-				<dependency>
-					<groupId>org.testcontainers</groupId>
-					<artifactId>oracle-xe</artifactId>
-					<version>${testcontainers_version}</version>
-				</dependency>
-				<dependency>
-					<groupId>org.testcontainers</groupId>
-					<artifactId>elasticsearch</artifactId>
-					<version>${testcontainers_version}</version>
-					<scope>test</scope>
-				</dependency>
-				<dependency>
-					<groupId>org.testcontainers</groupId>
-					<artifactId>junit-jupiter</artifactId>
-					<version>${testcontainers_version}</version>
-					<scope>test</scope>
-				</dependency>
-				<dependency>
-					<groupId>org.ogce</groupId>
-					<artifactId>xpp3</artifactId>
-					<version>1.1.6</version>
-					<exclusions>
-						<exclusion>
-							<groupId>junit</groupId>
-							<artifactId>junt</artifactId>
-						</exclusion>
-					</exclusions>
-				</dependency>
-				<dependency>
-					<groupId>org.flywaydb</groupId>
-					<artifactId>flyway-core</artifactId>
-					<version>${flyway_version}</version>
-				</dependency>
-				<dependency>
-					<groupId>uk.org.webcompere</groupId>
-					<artifactId>system-stubs-jupiter</artifactId>
-					<version>2.0.1</version>
-				</dependency>
-				<!-- dependencies required for Android -->
+			<dependency>
+				<groupId>org.hibernate.orm</groupId>
+				<artifactId>hibernate-ant</artifactId>
+				<version>${hibernate_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.hibernate.orm</groupId>
+				<artifactId>hibernate-core</artifactId>
+				<version>${hibernate_version}</version>
+				<exclusions>
+					<exclusion>
+						<artifactId>xml-apis</artifactId>
+						<groupId>xml-apis</groupId>
+					</exclusion>
+					<exclusion>
+						<groupId>jakarta.activation</groupId>
+						<artifactId>activation</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>jakarta.activation</groupId>
+						<artifactId>jakarta.activation-api</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.jboss.spec.javax.transaction</groupId>
+						<artifactId>jboss-transaction-api_1.2_spec</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>com.sun.activation</groupId>
+						<artifactId>jakarta.activation</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			<dependency>
+				<groupId>org.hibernate.orm</groupId>
+				<artifactId>hibernate-envers</artifactId>
+				<version>${hibernate_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.data</groupId>
+				<artifactId>spring-data-envers</artifactId>
+				<version>${spring_boot_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.hibernate.validator</groupId>
+				<artifactId>hibernate-validator</artifactId>
+				<version>${hibernate_validator_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.logging.log4j</groupId>
+				<artifactId>log4j-to-slf4j</artifactId>
+				<version>${log4j_to_slf4j_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.hibernate.search</groupId>
+				<artifactId>hibernate-search-mapper-orm</artifactId>
+				<version>${hibernate_search_version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.apache.logging.log4j</groupId>
+						<artifactId>log4j-api</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			<dependency>
+				<groupId>org.elasticsearch</groupId>
+				<artifactId>elasticsearch</artifactId>
+				<version>8.9.2</version>
+			</dependency>
+			<dependency>
+				<groupId>org.hibernate.search</groupId>
+				<artifactId>hibernate-search-backend-elasticsearch</artifactId>
+				<version>${hibernate_search_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.hibernate.search</groupId>
+				<artifactId>hibernate-search-backend-lucene</artifactId>
+				<version>${hibernate_search_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.hibernate.search</groupId>
+				<artifactId>hibernate-search-backend-elasticsearch-aws</artifactId>
+				<version>${hibernate_search_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.javassist</groupId>
+				<artifactId>javassist</artifactId>
+				<version>3.22.0-GA</version>
+			</dependency>
+			<dependency>
+				<groupId>org.junit</groupId>
+				<artifactId>junit-bom</artifactId>
+				<version>${junit_version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.junit.jupiter</groupId>
+				<artifactId>junit-jupiter</artifactId>
+				<version>${junit_version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.junit.jupiter</groupId>
+				<artifactId>junit-jupiter-api</artifactId>
+				<version>${junit_version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.junit.jupiter</groupId>
+				<artifactId>junit-jupiter-engine</artifactId>
+				<version>${junit_version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.junit.jupiter</groupId>
+				<artifactId>junit-jupiter-params</artifactId>
+				<version>${junit_version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.junit-pioneer</groupId>
+				<artifactId>junit-pioneer</artifactId>
+				<version>1.3.8</version>
+			</dependency>
+			<dependency>
+				<groupId>org.mariadb.jdbc</groupId>
+				<artifactId>mariadb-java-client</artifactId>
+				<version>3.0.4</version>
+			</dependency>
+			<dependency>
+				<groupId>org.mockito</groupId>
+				<artifactId>mockito-core</artifactId>
+				<version>${mockito_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.mockito</groupId>
+				<artifactId>mockito-junit-jupiter</artifactId>
+				<version>${mockito_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.postgresql</groupId>
+				<artifactId>postgresql</artifactId>
+				<version>42.7.3</version>
+			</dependency>
+			<dependency>
+				<groupId>com.oracle.database.jdbc</groupId>
+				<artifactId>ojdbc11</artifactId>
+				<version>23.3.0.23.09</version>
+			</dependency>
+			<dependency>
+				<groupId>org.quartz-scheduler</groupId>
+				<artifactId>quartz</artifactId>
+				<version>2.3.2</version>
+				<exclusions>
+					<exclusion>
+						<groupId>com.zaxxer</groupId>
+						<artifactId>HikariCP-java7</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>com.mchange</groupId>
+						<artifactId>c3p0</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>com.mchange</groupId>
+						<artifactId>mchange-commons-java</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-android</artifactId>
+				<version>1.7.36</version>
+			</dependency>
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-api</artifactId>
+				<version>${slf4j_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-simple</artifactId>
+				<version>${slf4j_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>log4j-over-slf4j</artifactId>
+				<version>${slf4j_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>jcl-over-slf4j</artifactId>
+				<version>${slf4j_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-beans</artifactId>
+				<version>${spring_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-context</artifactId>
+				<version>${spring_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-context-support</artifactId>
+				<version>${spring_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-core</artifactId>
+				<version>${spring_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-expression</artifactId>
+				<version>${spring_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-jdbc</artifactId>
+				<version>${spring_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-messaging</artifactId>
+				<version>${spring_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-orm</artifactId>
+				<version>${spring_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-test</artifactId>
+				<version>${spring_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-webmvc</artifactId>
+				<version>${spring_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-starter-test</artifactId>
+				<version>${spring_boot_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-test</artifactId>
+				<version>${spring_boot_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-tx</artifactId>
+				<version>${spring_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-web</artifactId>
+				<version>${spring_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-websocket</artifactId>
+				<version>${spring_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.retry</groupId>
+				<artifactId>spring-retry</artifactId>
+				<version>${spring_retry_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.thymeleaf</groupId>
+				<artifactId>thymeleaf</artifactId>
+				<version>${thymeleaf-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.thymeleaf</groupId>
+				<artifactId>thymeleaf-spring6</artifactId>
+				<version>${thymeleaf-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.webjars.npm</groupId>
+				<artifactId>ace-builds</artifactId>
+				<version>1.22.0</version>
+			</dependency>
+			<dependency>
+				<groupId>org.webjars.npm</groupId>
+				<artifactId>bootstrap</artifactId>
+				<version>4.5.2</version>
+			</dependency>
+			<dependency>
+				<groupId>org.webjars</groupId>
+				<artifactId>Eonasdan-bootstrap-datetimepicker</artifactId>
+				<version>4.17.47</version>
+				<exclusions>
+					<exclusion>
+						<groupId>*</groupId>
+						<artifactId>*</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			<dependency>
+				<groupId>org.webjars</groupId>
+				<artifactId>font-awesome</artifactId>
+				<version>5.8.2</version>
+			</dependency>
+			<dependency>
+				<groupId>org.webjars.bower</groupId>
+				<artifactId>awesome-bootstrap-checkbox</artifactId>
+				<version>1.0.2</version>
+			</dependency>
+			<dependency>
+				<groupId>org.webjars</groupId>
+				<artifactId>jstimezonedetect</artifactId>
+				<version>1.0.6</version>
+			</dependency>
+			<dependency>
+				<groupId>org.webjars</groupId>
+				<artifactId>select2</artifactId>
+				<version>4.0.13</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.webjars</groupId>
+						<artifactId>jquery</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			<dependency>
+				<groupId>org.webjars.bower</groupId>
+				<artifactId>jquery</artifactId>
+				<version>3.5.1</version>
+			</dependency>
+			<dependency>
+				<groupId>org.webjars.bower</groupId>
+				<artifactId>moment</artifactId>
+				<version>2.27.0</version>
+			</dependency>
+			<dependency>
+				<groupId>org.webjars.npm</groupId>
+				<artifactId>popper.js</artifactId>
+				<version>1.16.1</version>
+			</dependency>
+			<dependency>
+				<groupId>org.webjars</groupId>
+				<artifactId>swagger-ui</artifactId>
+				<version>4.1.3</version>
+			</dependency>
+			<dependency>
+				<groupId>org.xmlunit</groupId>
+				<artifactId>xmlunit-core</artifactId>
+				<version>2.4.0</version>
+			</dependency>
+			<dependency>
+				<groupId>org.testcontainers</groupId>
+				<artifactId>testcontainers</artifactId>
+				<version>${testcontainers_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.testcontainers</groupId>
+				<artifactId>postgresql</artifactId>
+				<version>${testcontainers_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.testcontainers</groupId>
+				<artifactId>mssqlserver</artifactId>
+				<version>${testcontainers_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.testcontainers</groupId>
+				<artifactId>oracle-xe</artifactId>
+				<version>${testcontainers_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.testcontainers</groupId>
+				<artifactId>elasticsearch</artifactId>
+				<version>${testcontainers_version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.testcontainers</groupId>
+				<artifactId>junit-jupiter</artifactId>
+				<version>${testcontainers_version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.ogce</groupId>
+				<artifactId>xpp3</artifactId>
+				<version>1.1.6</version>
+				<exclusions>
+					<exclusion>
+						<groupId>junit</groupId>
+						<artifactId>junt</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			<dependency>
+				<groupId>org.flywaydb</groupId>
+				<artifactId>flyway-core</artifactId>
+				<version>${flyway_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>uk.org.webcompere</groupId>
+				<artifactId>system-stubs-jupiter</artifactId>
+				<version>2.0.1</version>
+			</dependency>
+			<!-- dependencies required for Android -->
 			<dependency>
 				<groupId>xerces</groupId>
 				<artifactId>xercesImpl</artifactId>
@@ -2322,6 +2321,45 @@
 		<pluginManagement>
 			<plugins>
 				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-checkstyle-plugin</artifactId>
+					<configuration>
+						<includeTestSourceDirectory>true</includeTestSourceDirectory>
+						<!--suppress UnresolvedMavenProperty -->
+						<configLocation>
+							${maven.multiModuleProjectDirectory}/hapi-fhir-checkstyle/src/checkstyle/hapi-base-checkstyle.xml
+						</configLocation>
+						<!--suppress UnresolvedMavenProperty -->
+						<suppressionsLocation>
+							${maven.multiModuleProjectDirectory}/hapi-fhir-checkstyle/src/checkstyle/hapi-base-checkstyle-suppression.xml
+						</suppressionsLocation>
+						<inputEncoding>UTF-8</inputEncoding>
+						<consoleOutput>true</consoleOutput>
+					</configuration>
+					<inherited>true</inherited>
+					<executions>
+						<execution>
+							<id>hapi-single-module-checkstyle</id>
+							<phase>validate</phase>
+							<goals>
+								<goal>check</goal>
+							</goals>
+						</execution>
+					</executions>
+					<dependencies>
+<!--						<dependency>-->
+<!--							<groupId>ca.uhn.hapi.fhir</groupId>-->
+<!--							<artifactId>hapi-fhir-checkstyle</artifactId>-->
+<!--							<version>${project.version}</version>-->
+<!--						</dependency>-->
+						<dependency>
+							<groupId>com.puppycrawl.tools</groupId>
+							<artifactId>checkstyle</artifactId>
+							<version>${checkstyle_version}</version>
+						</dependency>
+					</dependencies>
+				</plugin>
+				<plugin>
 					<groupId>com.diffplug.spotless</groupId>
 					<artifactId>spotless-maven-plugin</artifactId>
 					<version>${spotless_version}</version>
@@ -2347,7 +2385,7 @@
 								<spacesPerTab>4</spacesPerTab>
 							</indent>
 							<!--Just removes unused imports-->
-							<removeUnusedImports />
+							<removeUnusedImports/>
 							<!--Follow the editorconfig-defined order of imports-->
 							<importOrder>
 								<wildcardsLast>true</wildcardsLast>
@@ -2407,11 +2445,6 @@
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-checkstyle-plugin</artifactId>
-					<version>${maven_checkstyle_version}</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-clean-plugin</artifactId>
 					<version>3.1.0</version>
 				</plugin>
@@ -2427,7 +2460,10 @@
 						<maxmem>2000m</maxmem>
 						<compilerArgs>
 							<arg>-XDcompilePolicy=simple</arg>
-							<arg>-Xplugin:ErrorProne -Xep:MissingSummary:OFF -Xep:JavaUtilDate:OFF -XepExcludedPaths:.*/src/test/java/.*</arg>
+							<arg>-Xplugin:errorprone</arg>
+							<arg>-Xep:MissingSummary:OFF</arg>
+							<arg>-Xep:JavaUtilDate:OFF</arg>
+							<arg>-XepExcludedPaths:.*/src/test/java/.*</arg>
 							<arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED</arg>
 							<arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED</arg>
 							<arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.main=ALL-UNNAMED</arg>
@@ -2687,6 +2723,20 @@
 			</plugins>
 		</pluginManagement>
 		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-checkstyle-plugin</artifactId>
+				<inherited>true</inherited>
+				<executions>
+					<execution>
+						<id>hapi-single-module-checkstyle</id>
+						<phase>validate</phase>
+						<goals>
+							<goal>check</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-enforcer-plugin</artifactId>
@@ -3135,16 +3185,16 @@
 							</execution>
 						</executions>
 					</plugin>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-checkstyle-plugin</artifactId>
-						<executions>
-							<execution>
-								<id>hapi-single-module-checkstyle</id>
-								<phase>none</phase>
-							</execution>
-						</executions>
-					</plugin>
+					<!--					<plugin>-->
+					<!--						<groupId>org.apache.maven.plugins</groupId>-->
+					<!--						<artifactId>maven-checkstyle-plugin</artifactId>-->
+					<!--						<executions>-->
+					<!--							<execution>-->
+					<!--								<id>hapi-single-module-checkstyle</id>-->
+					<!--								<phase>none</phase>-->
+					<!--							</execution>-->
+					<!--						</executions>-->
+					<!--					</plugin>-->
 				</plugins>
 			</build>
 		</profile>
@@ -3196,16 +3246,16 @@
 							</execution>
 						</executions>
 					</plugin>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-checkstyle-plugin</artifactId>
-						<executions>
-							<execution>
-								<id>validate</id>
-								<phase>none</phase>
-							</execution>
-						</executions>
-					</plugin>
+					<!--					<plugin>-->
+					<!--						<groupId>org.apache.maven.plugins</groupId>-->
+					<!--						<artifactId>maven-checkstyle-plugin</artifactId>-->
+					<!--						<executions>-->
+					<!--							<execution>-->
+					<!--								<id>validate</id>-->
+					<!--								<phase>none</phase>-->
+					<!--							</execution>-->
+					<!--						</executions>-->
+					<!--					</plugin>-->
 				</plugins>
 			</build>
 		</profile>
