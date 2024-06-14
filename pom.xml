@@ -2347,11 +2347,11 @@
 						</execution>
 					</executions>
 					<dependencies>
-<!--						<dependency>-->
-<!--							<groupId>ca.uhn.hapi.fhir</groupId>-->
-<!--							<artifactId>hapi-fhir-checkstyle</artifactId>-->
-<!--							<version>${project.version}</version>-->
-<!--						</dependency>-->
+						<dependency>
+							<groupId>ca.uhn.hapi.fhir</groupId>
+							<artifactId>hapi-fhir-checkstyle</artifactId>
+							<version>${project.version}</version>
+						</dependency>
 						<dependency>
 							<groupId>com.puppycrawl.tools</groupId>
 							<artifactId>checkstyle</artifactId>
@@ -2724,15 +2724,6 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-checkstyle-plugin</artifactId>
 				<inherited>true</inherited>
-				<executions>
-					<execution>
-						<id>hapi-single-module-checkstyle</id>
-						<phase>validate</phase>
-						<goals>
-							<goal>check</goal>
-						</goals>
-					</execution>
-				</executions>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

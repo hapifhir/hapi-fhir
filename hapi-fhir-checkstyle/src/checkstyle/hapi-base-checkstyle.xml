@@ -11,7 +11,7 @@
 
 	<module name="TreeWalker">
 		<!-- Run custom HapiErrorCodeCheck to find duplicate error codes -->
-<!--		<module name="ca.uhn.fhir.checks.HapiErrorCodeCheck"/>-->
+		<module name="ca.uhn.fhir.checks.HapiErrorCodeCheck"/>
 		<!-- Throw error if any FIX ME is left in the code -->
 		<module name="TodoComment">
 			<!-- The (?i) below means Case Insensitive -->
