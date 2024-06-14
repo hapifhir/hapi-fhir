@@ -949,7 +949,7 @@
 		<apache_karaf_version>4.2.5</apache_karaf_version>
 		<aries_spifly_version>1.2</aries_spifly_version>
 		<caffeine_version>3.1.8</caffeine_version>
-		<checkstyle_version>10.6.0</checkstyle_version>
+		<checkstyle_version>10.17.0</checkstyle_version>
 		<maven_changes_version>2.12.1</maven_changes_version>
 		<commons_codec_version>1.15</commons_codec_version>
 		<commons_compress_version>1.26.0</commons_compress_version>
@@ -1039,7 +1039,7 @@
 		<maven.compiler.testSource>17</maven.compiler.testSource>
 		<maven.compiler.testTarget>17</maven.compiler.testTarget>
 		<maven.compiler.testRelease>17</maven.compiler.testRelease>
-		<maven_checkstyle_version>3.3.1</maven_checkstyle_version>
+		<maven_checkstyle_version>3.4.0</maven_checkstyle_version>
 
 		<!-- Jacoco -->
 		<argLine></argLine>
