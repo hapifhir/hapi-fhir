@@ -19,7 +19,7 @@
 	<suppress files="[/\\]test[/\\]" checks="ca.uhn.fhir.checks.HapiErrorCodeCheck" id="HapiErrorCodeUniqueness"/>
 
 	<suppress files="Base64BinaryDt\.java" checks="AbstractClassName"/>
-	<!-- TODO KHS CHECKSTYLE cdr instantiates these.  Remove them once cdr has been fixed. -->
+	<!-- TODO CHECKSTYLE KHS cdr instantiates these.  Remove them once cdr has been fixed. -->
 	<suppress files="BaseMigrationTasks\.java" checks="AbstractClassName"/>
 	<suppress files="BaseLoincTop2000LabResultsHandler\.java" checks="AbstractClassName"/>
 
