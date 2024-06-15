@@ -285,4 +285,14 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 			ourLog.error("Error triggering scheduled job with key {}", theJobDefinition);
 		}
 	}
+
+	/**
+	 * Retrieves a clone of the properties required for unit testing.
+	 *
+	 * @return The properties for unit testing.
+	 */
+	@VisibleForTesting
+	protected Properties getPropertiesForUnitTest() {
+		return new Properties(myProperties);
+	}
 }
