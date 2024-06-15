@@ -92,24 +92,6 @@ public class JpaCapabilityStatementProvider extends ServerCapabilityStatementPro
 	}
 
 	@Override
-	protected void postProcessRest(FhirTerser theTerser, IBase theRest) {
-		super.postProcessRest(theTerser, theRest);
-
-		if (myStorageSettings
-				.getSupportedSubscriptionTypes()
-				.contains(org.hl7.fhir.dstu2.model.Subscription.SubscriptionChannelType.WEBSOCKET)) {
-			if (isNotBlank(myStorageSettings.getWebsocketContextPath())) {
-				ExtensionUtil.setExtension(
-						myContext,
-						theRest,
-						Constants.CAPABILITYSTATEMENT_WEBSOCKET_URL,
-						"uri",
-						myStorageSettings.getWebsocketContextPath());
-			}
-		}
-	}
-
-	@Override
 	protected void postProcessRestResource(FhirTerser theTerser, IBase theResource, String theResourceName) {
 		super.postProcessRestResource(theTerser, theResource, theResourceName);
 

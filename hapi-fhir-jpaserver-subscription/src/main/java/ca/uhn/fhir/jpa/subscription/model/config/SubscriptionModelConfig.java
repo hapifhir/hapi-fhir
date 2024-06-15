@@ -20,7 +20,7 @@
 package ca.uhn.fhir.jpa.subscription.model.config;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.model.entity.StorageSettings;
+import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyEvaluator;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
 import org.springframework.context.annotation.Bean;
@@ -31,8 +31,8 @@ public class SubscriptionModelConfig {
 
 	@Bean
 	public SubscriptionCanonicalizer subscriptionCanonicalizer(
-			FhirContext theFhirContext, StorageSettings theStorageSettings) {
-		return new SubscriptionCanonicalizer(theFhirContext, theStorageSettings);
+			FhirContext theFhirContext, SubscriptionSettings theSubscriptionSettings) {
+		return new SubscriptionCanonicalizer(theFhirContext, theSubscriptionSettings);
 	}
 
 	@Bean
