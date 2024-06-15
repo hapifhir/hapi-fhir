@@ -107,6 +107,12 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 		// Note that we use a common name, with no suffixed ID for the name, as per the quartz docs:
 		// https://www.quartz-scheduler.org/documentation/quartz-2.1.7/configuration/ConfigMain.html
 		myProperties.setProperty(StdSchedulerFactory.PROP_SCHED_INSTANCE_NAME, myInstanceName);
+
+		// By Default, the scheduler ID is not set, which will cause quartz to set it to the string NON_CLUSTERED. Here
+		// we are setting it explicitly as an indication to implementers that if they want a different ID, they should
+		// set it using this below property.
+		addProperty(StdSchedulerFactory.PROP_SCHED_INSTANCE_ID, StdSchedulerFactory.DEFAULT_INSTANCE_ID);
+
 		addProperty("org.quartz.threadPool.threadNamePrefix", getThreadPrefix());
 	}
 
@@ -293,6 +299,6 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 	 */
 	@VisibleForTesting
 	protected Properties getPropertiesForUnitTest() {
-		return new Properties(myProperties);
+		return myProperties;
 	}
 }

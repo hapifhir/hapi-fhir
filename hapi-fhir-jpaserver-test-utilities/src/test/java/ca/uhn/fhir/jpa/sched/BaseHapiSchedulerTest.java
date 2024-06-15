@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.quartz.SchedulerException;
 import org.quartz.impl.StdSchedulerFactory;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -27,6 +27,8 @@ public class BaseHapiSchedulerTest {
 	public void testSchedulersShareTheSameServiceName() throws SchedulerException {
 
 		String instanceName = "local-scheduler";
+		String instanceID = "NON_CLUSTERED";
+
 		BaseHapiScheduler firstScheduler = new BaseHapiScheduler("hello", new AutowiringSpringBeanJobFactory()) {
 		};
 		firstScheduler.setInstanceName(instanceName);
@@ -38,12 +40,11 @@ public class BaseHapiSchedulerTest {
 		firstScheduler.init();
 		secondScheduler.init();
 
-		assertThat(firstScheduler.getPropertiesForUnitTest().get(StdSchedulerFactory.PROP_SCHED_INSTANCE_NAME)).isEqualTo(instanceName);
-		assertThat(secondScheduler.getPropertiesForUnitTest().get(StdSchedulerFactory.PROP_SCHED_INSTANCE_NAME)).isEqualTo(instanceName);
+		assertThat(firstScheduler.getPropertiesForUnitTest()).containsEntry(StdSchedulerFactory.PROP_SCHED_INSTANCE_NAME, instanceName);
+		assertThat(secondScheduler.getPropertiesForUnitTest()).containsEntry(StdSchedulerFactory.PROP_SCHED_INSTANCE_NAME, instanceName);
 
-		assertThat(firstScheduler.getPropertiesForUnitTest().get(StdSchedulerFactory.PROP_SCHED_INSTANCE_ID)).isEqualTo(instanceName);
-		assertThat(secondScheduler.getPropertiesForUnitTest().get(StdSchedulerFactory.PROP_SCHED_INSTANCE_ID)).isEqualTo(instanceName);
-
+		assertThat(firstScheduler.getPropertiesForUnitTest()).containsEntry(StdSchedulerFactory.PROP_SCHED_INSTANCE_ID, instanceID);
+		assertThat(secondScheduler.getPropertiesForUnitTest()).containsEntry(StdSchedulerFactory.PROP_SCHED_INSTANCE_ID, instanceID);
 	}
 
 
