@@ -13,6 +13,7 @@ import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.subscription.BaseSubscriptionsR4Test;
 import ca.uhn.fhir.jpa.subscription.resthook.RestHookTestR4Test;
+import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.subscription.triggering.ISubscriptionTriggeringSvc;
 import ca.uhn.fhir.jpa.subscription.triggering.SubscriptionTriggeringSvcImpl;
 import ca.uhn.fhir.jpa.test.util.StoppableSubscriptionDeliveringRestHookSubscriber;
@@ -69,7 +70,7 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 
 	@BeforeEach
 	public void beforeEach() throws ServletException {
-		myStorageSettings.setCrossPartitionSubscriptionEnabled(true);
+		mySubscriptionSettings.setCrossPartitionSubscriptionEnabled(true);
 		myPartitionSettings.setPartitioningEnabled(true);
 		myPartitionSettings.setIncludePartitionInSearchHashes(new PartitionSettings().isIncludePartitionInSearchHashes());
 
@@ -97,9 +98,9 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 	public void afterUnregisterRestHookListener() {
 		myStoppableSubscriptionDeliveringRestHookSubscriber.setCountDownLatch(null);
 		myStoppableSubscriptionDeliveringRestHookSubscriber.unPause();
-		myStorageSettings.setTriggerSubscriptionsForNonVersioningChanges(new JpaStorageSettings().isTriggerSubscriptionsForNonVersioningChanges());
+		mySubscriptionSettings.setTriggerSubscriptionsForNonVersioningChanges(new SubscriptionSettings().isTriggerSubscriptionsForNonVersioningChanges());
 
-		myStorageSettings.setCrossPartitionSubscriptionEnabled(false);
+		mySubscriptionSettings.setCrossPartitionSubscriptionEnabled(false);
 		myPartitionSettings.setPartitioningEnabled(false);
 		myPartitionSettings.setUnnamedPartitionMode(false);
 
@@ -146,7 +147,7 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})
 	public void testCreateSubscriptionInPartitionAndResourceInDifferentPartition(boolean theIsCrossPartitionEnabled) throws Exception {
-		myStorageSettings.setCrossPartitionSubscriptionEnabled(theIsCrossPartitionEnabled);
+		mySubscriptionSettings.setCrossPartitionSubscriptionEnabled(theIsCrossPartitionEnabled);
 		String payload = "application/fhir+json";
 
 		String code = "1000000050";
@@ -186,7 +187,7 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})
 	public void testManualTriggeredSubscriptionDoesNotCheckOutsideOfPartition(boolean theIsCrossPartitionEnabled) throws Exception {
-		myStorageSettings.setCrossPartitionSubscriptionEnabled(theIsCrossPartitionEnabled);
+		mySubscriptionSettings.setCrossPartitionSubscriptionEnabled(theIsCrossPartitionEnabled);
 		String payload = "application/fhir+json";
 		String code = "1000000050";
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
