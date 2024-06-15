@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.model.listener;
 
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
-import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import ca.uhn.fhir.jpa.model.search.ISearchParamHashIdentityRegistry;
 import ca.uhn.fhir.rest.server.util.IndexedSearchParam;
 import jakarta.persistence.PostLoad;
 import jakarta.persistence.PostPersist;
@@ -82,8 +82,9 @@ public class IndexStorageOptimizationListener {
 	 * settings are enabled.
 	 */
 	private void restoreSearchParams(BaseResourceIndexedSearchParam theResourceIndexedSearchParam) {
-		// getting ISearchParamRegistry from the application context as it is initialized after EntityListeners
-		ISearchParamRegistry searchParamRegistry = myApplicationContext.getBean(ISearchParamRegistry.class);
+		// getting ISearchParamHashIdentityRegistry from the App Context as it is initialized after EntityListeners
+		ISearchParamHashIdentityRegistry searchParamRegistry =
+				myApplicationContext.getBean(ISearchParamHashIdentityRegistry.class);
 		Optional<IndexedSearchParam> indexedSearchParamOptional =
 				searchParamRegistry.getIndexedSearchParamByHashIdentity(
 						theResourceIndexedSearchParam.getHashIdentity());

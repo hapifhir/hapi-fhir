@@ -5,14 +5,22 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import org.hl7.fhir.r5.model.Observation;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 
 
 public class InMemoryResourceMatcherR5IndexStorageOptimizedTest extends InMemoryResourceMatcherR5Test {
 
+	@Override
 	@BeforeEach
-	void setUp() {
+	public void before() {
+		super.before();
 		myStorageSettings.setIndexStorageOptimized(true);
+	}
+
+	@AfterEach
+	public void after() {
+		myStorageSettings.setIndexStorageOptimized(false);
 	}
 
 	@NotNull

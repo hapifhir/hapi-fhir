@@ -7113,6 +7113,11 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			super.init();
 			myStorageSettings.setIndexStorageOptimized(true);
 		}
+
+		@AfterEach
+		public void cleanUp() {
+			myStorageSettings.setIndexStorageOptimized(false);
+		}
 	}
 
 	@Nested

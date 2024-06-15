@@ -80,7 +80,7 @@ public class FhirResourceDaoR4IndexStorageOptimizedTest extends BaseJpaR4Test {
 	private SearchConfig mySearchConfig;
 
 	@AfterEach
-	void tearDown() {
+	void cleanUp() {
 		myPartitionSettings.setIncludePartitionInSearchHashes(false);
 	}
 

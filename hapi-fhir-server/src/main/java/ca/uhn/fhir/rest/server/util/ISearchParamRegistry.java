@@ -86,10 +86,6 @@ public interface ISearchParamRegistry {
 		return Collections.emptyList();
 	}
 
-	default Optional<IndexedSearchParam> getIndexedSearchParamByHashIdentity(Long theHashIdentity) {
-		return Optional.empty();
-	}
-
 	/**
 	 * Returns a collection containing all of the valid active search parameters. This method is intended for
 	 * creating error messages for users as opposed to actual search processing. It will include meta parameters

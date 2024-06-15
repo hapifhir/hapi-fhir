@@ -31,6 +31,7 @@ import ca.uhn.fhir.jpa.cache.IResourceChangeListenerCache;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
 import ca.uhn.fhir.jpa.cache.ResourceChangeResult;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
+import ca.uhn.fhir.jpa.model.search.ISearchParamHashIdentityRegistry;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
@@ -66,7 +67,10 @@ import java.util.Set;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class SearchParamRegistryImpl
-		implements ISearchParamRegistry, IResourceChangeListener, ISearchParamRegistryController {
+		implements ISearchParamRegistry,
+				IResourceChangeListener,
+				ISearchParamRegistryController,
+				ISearchParamHashIdentityRegistry {
 
 	public static final Set<String> NON_DISABLEABLE_SEARCH_PARAMS =
 			Collections.unmodifiableSet(Sets.newHashSet("*:url", "Subscription:*", "SearchParameter:*"));

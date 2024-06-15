@@ -82,11 +82,6 @@ public class FhirContextSearchParamRegistry implements ISearchParamRegistry {
 		throw new UnsupportedOperationException(Msg.code(2066));
 	}
 
-	@Override
-	public Optional<IndexedSearchParam> getIndexedSearchParamByHashIdentity(Long theHashIdentity) {
-		throw new UnsupportedOperationException(Msg.code(2522));
-	}
-
 	@Nullable
 	@Override
 	public RuntimeSearchParam getActiveSearchParamByUrl(String theUrl) {
