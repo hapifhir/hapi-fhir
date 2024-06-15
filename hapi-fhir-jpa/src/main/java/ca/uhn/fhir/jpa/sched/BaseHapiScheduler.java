@@ -104,8 +104,8 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 
 	protected void setProperties() {
 		addProperty("org.quartz.threadPool.threadCount", "4");
-		myProperties.setProperty(
-				StdSchedulerFactory.PROP_SCHED_INSTANCE_NAME, myInstanceName + "-" + nextSchedulerId());
+		//Note that we use a common name, with no suffixed ID for the name, as per the quartz docs: https://www.quartz-scheduler.org/documentation/quartz-2.1.7/configuration/ConfigMain.html
+		myProperties.setProperty(StdSchedulerFactory.PROP_SCHED_INSTANCE_NAME, myInstanceName);
 		addProperty("org.quartz.threadPool.threadNamePrefix", getThreadPrefix());
 	}
 
