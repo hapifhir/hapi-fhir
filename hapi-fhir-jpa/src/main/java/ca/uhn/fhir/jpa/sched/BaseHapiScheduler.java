@@ -56,8 +56,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public abstract class BaseHapiScheduler implements IHapiScheduler {
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseHapiScheduler.class);
 
-	private static final AtomicInteger ourNextSchedulerId = new AtomicInteger();
-
 	private final String myThreadNamePrefix;
 	private final AutowiringSpringBeanJobFactory mySpringBeanJobFactory;
 	private final SchedulerFactoryBean myFactory = new SchedulerFactoryBean();
@@ -73,10 +71,6 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 
 	void setInstanceName(String theInstanceName) {
 		myInstanceName = theInstanceName;
-	}
-
-	int nextSchedulerId() {
-		return ourNextSchedulerId.getAndIncrement();
 	}
 
 	@Override
