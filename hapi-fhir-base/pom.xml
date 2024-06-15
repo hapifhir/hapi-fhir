@@ -208,7 +208,7 @@
 				<version>1.8</version>
 				<configuration>
 					<target>
-						suppress UnresolvedMavenProperty
+<!--						suppress UnresolvedMavenProperty-->
 						<delete dir="${pom.basedir}/target/" includes="checkstyle*"/>
 					</target>
 				</configuration>
