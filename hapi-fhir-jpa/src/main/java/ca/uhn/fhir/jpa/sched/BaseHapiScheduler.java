@@ -74,12 +74,14 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 
 	@Override
 	public void init() throws SchedulerException {
+
 		setProperties();
 		myFactory.setQuartzProperties(myProperties);
 		myFactory.setBeanName(myInstanceName);
 		myFactory.setSchedulerName(myThreadNamePrefix);
 		myFactory.setJobFactory(mySpringBeanJobFactory);
 		massageJobFactory(myFactory);
+
 		try {
 			Validate.notBlank(myInstanceName, "No instance name supplied");
 			myFactory.afterPropertiesSet();
@@ -99,7 +101,9 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 		addProperty("org.quartz.threadPool.threadCount", "4");
 		// Note that we use a common name, with no suffixed ID for the name, as per the quartz docs:
 		// https://www.quartz-scheduler.org/documentation/quartz-2.1.7/configuration/ConfigMain.html
-		myProperties.setProperty(StdSchedulerFactory.PROP_SCHED_INSTANCE_NAME, myInstanceName);
+		if (myInstanceName != null) {
+			myProperties.setProperty(StdSchedulerFactory.PROP_SCHED_INSTANCE_NAME, myInstanceName);
+		}
 
 		// By Default, the scheduler ID is not set, which will cause quartz to set it to the string NON_CLUSTERED. Here
 		// we are setting it explicitly as an indication to implementers that if they want a different ID, they should
