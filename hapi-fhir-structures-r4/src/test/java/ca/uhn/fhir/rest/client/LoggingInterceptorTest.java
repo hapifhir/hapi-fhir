@@ -39,6 +39,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+@SuppressWarnings("checkstyle:NoPrintln")
 public class LoggingInterceptorTest {
 
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
@@ -77,7 +78,6 @@ public class LoggingInterceptorTest {
 
 	@Test
 	public void testLoggerNonVerbose() {
-		System.out.println("Starting testLogger");
 		IGenericClient client = ourCtx.newRestfulGenericClient(ourServer.getBaseUrl());
 		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 

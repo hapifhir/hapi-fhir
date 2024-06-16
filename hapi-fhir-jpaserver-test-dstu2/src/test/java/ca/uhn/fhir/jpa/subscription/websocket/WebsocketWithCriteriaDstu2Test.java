@@ -28,7 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class WebsocketWithCriteriaDstu2Test extends BaseResourceProviderDstu2Test {
 	private static final Logger ourLog = org.slf4j.LoggerFactory.getLogger(WebsocketWithCriteriaDstu2Test.class);
 	@RegisterExtension
-	private final WebsocketSubscriptionClient myWebsocketClientExtension = new WebsocketSubscriptionClient(() -> myServer, () -> myStorageSettings);
+	private final WebsocketSubscriptionClient myWebsocketClientExtension = new WebsocketSubscriptionClient(() -> myServer, () -> mySubscriptionSettings);
 	private String myPatientId;
 	private String mySubscriptionId;
 

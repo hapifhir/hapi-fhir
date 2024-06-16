@@ -1,0 +1,9 @@
+---
+type: fix
+issue: 5988
+title: "Previously, when creating a custom SearchParameter for a document Bundle that references an entry resource 
+through the composition (e.g. Bundle.entry[0].resource.as(Composition).subject.resolve().as(Patient).identifier), 
+the search using that parameter would not return the matching document Bundle resources, despite the fullUrl of the entry matching the composite reference. 
+This problem does not exist if the reference match can be done against the entry id. 
+However an id is not required so the match should be done against the fullUrl.
+This issue has been fixed."

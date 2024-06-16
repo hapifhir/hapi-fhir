@@ -6,11 +6,11 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.entity.PersistedResourceModifiedMessageEntityPK;
 import ca.uhn.fhir.jpa.model.entity.ResourceModifiedEntity;
-import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
+import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.subscription.submit.svc.ResourceModifiedSubmitterSvc;
 import ca.uhn.fhir.jpa.svc.MockHapiTransactionService;
 import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
@@ -49,7 +49,7 @@ public class ResourceModifiedSubmitterSvcTest {
 	private final ch.qos.logback.classic.Logger ourLogger = (Logger) LoggerFactory.getLogger(ResourceModifiedSubmitterSvc.class);
 
 	@Mock
-	StorageSettings myStorageSettings;
+	SubscriptionSettings mySubscriptionSettings;
 	@Mock
 	SubscriptionChannelFactory mySubscriptionChannelFactory;
 	@Mock
@@ -68,12 +68,12 @@ public class ResourceModifiedSubmitterSvcTest {
 	@BeforeEach
 	public void beforeEach(){
 		myCapturingTransactionStatus = new SimpleTransactionStatus();
-		lenient().when(myStorageSettings.hasSupportedSubscriptionTypes()).thenReturn(true);
+		lenient().when(mySubscriptionSettings.hasSupportedSubscriptionTypes()).thenReturn(true);
 		lenient().when(mySubscriptionChannelFactory.newMatchingSendingChannel(anyString(), any())).thenReturn(myChannelProducer);
 
 		IHapiTransactionService hapiTransactionService = new MockHapiTransactionService(myCapturingTransactionStatus);
 		myResourceModifiedSubmitterSvc = new ResourceModifiedSubmitterSvc(
-			myStorageSettings,
+			mySubscriptionSettings,
 			mySubscriptionChannelFactory,
 			myResourceModifiedMessagePersistenceSvc,
 			hapiTransactionService);
@@ -85,7 +85,7 @@ public class ResourceModifiedSubmitterSvcTest {
 	public void testMethodStartIfNeeded_withQualifySubscriptionMatchingChannelNameProperty_mayQualifyChannelName(boolean theIsQualifySubMatchingChannelName){
 		// given
 		boolean expectedResult = theIsQualifySubMatchingChannelName;
-		when(myStorageSettings.isQualifySubscriptionMatchingChannelName()).thenReturn(theIsQualifySubMatchingChannelName);
+		when(mySubscriptionSettings.isQualifySubscriptionMatchingChannelName()).thenReturn(theIsQualifySubMatchingChannelName);
 
 		// when
 		myResourceModifiedSubmitterSvc.startIfNeeded();

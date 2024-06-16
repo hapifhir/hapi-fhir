@@ -655,15 +655,8 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 
 	public List<String> createResourceLinkPaths(
 			String theResourceName, String theParamName, List<String> theParamQualifiers) {
-		int linkIndex = theParamName.indexOf('.');
-		if (linkIndex == -1) {
-
-			RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam(theResourceName, theParamName);
-			if (param == null) {
-				// This can happen during recursion, if not all the possible target types of one link in the chain
-				// support the next link
-				return new ArrayList<>();
-			}
+		RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam(theResourceName, theParamName);
+		if (param != null) {
 			List<String> path = param.getPathsSplit();
 
 			/*
@@ -681,40 +674,48 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 			}
 
 			return path;
-		} else {
+		}
+
+		boolean containsChain = theParamName.contains(".");
+		if (containsChain) {
+			int linkIndex = theParamName.indexOf('.');
 			String paramNameHead = theParamName.substring(0, linkIndex);
 			String paramNameTail = theParamName.substring(linkIndex + 1);
-			String qualifier = theParamQualifiers.get(0);
+			String qualifier = !theParamQualifiers.isEmpty() ? theParamQualifiers.get(0) : null;
+			List<String> nextQualifiersList = !theParamQualifiers.isEmpty()
+					? theParamQualifiers.subList(1, theParamQualifiers.size())
+					: List.of();
 
-			RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam(theResourceName, paramNameHead);
-			if (param == null) {
-				// This can happen during recursion, if not all the possible target types of one link in the chain
-				// support the next link
-				return new ArrayList<>();
+			param = mySearchParamRegistry.getActiveSearchParam(theResourceName, paramNameHead);
+			if (param != null) {
+				Set<String> tailPaths = param.getTargets().stream()
+						.filter(t -> isBlank(qualifier) || qualifier.equals(t))
+						.map(t -> createResourceLinkPaths(t, paramNameTail, nextQualifiersList))
+						.flatMap(Collection::stream)
+						.map(t -> t.substring(t.indexOf('.') + 1))
+						.collect(Collectors.toSet());
+
+				List<String> path = param.getPathsSplit();
+
+				/*
+				 * SearchParameters can declare paths on multiple resource
+				 * types. Here we only want the ones that actually apply.
+				 * Then append all the tail paths to each of the applicable head paths
+				 */
+				return path.stream()
+						.map(String::trim)
+						.filter(t -> t.startsWith(theResourceName + "."))
+						.map(head -> tailPaths.stream()
+								.map(tail -> head + "." + tail)
+								.collect(Collectors.toSet()))
+						.flatMap(Collection::stream)
+						.collect(Collectors.toList());
 			}
-			Set<String> tailPaths = param.getTargets().stream()
-					.filter(t -> isBlank(qualifier) || qualifier.equals(t))
-					.map(t -> createResourceLinkPaths(
-							t, paramNameTail, theParamQualifiers.subList(1, theParamQualifiers.size())))
-					.flatMap(Collection::stream)
-					.map(t -> t.substring(t.indexOf('.') + 1))
-					.collect(Collectors.toSet());
-
-			List<String> path = param.getPathsSplit();
-
-			/*
-			 * SearchParameters can declare paths on multiple resource
-			 * types. Here we only want the ones that actually apply.
-			 * Then append all the tail paths to each of the applicable head paths
-			 */
-			return path.stream()
-					.map(String::trim)
-					.filter(t -> t.startsWith(theResourceName + "."))
-					.map(head ->
-							tailPaths.stream().map(tail -> head + "." + tail).collect(Collectors.toSet()))
-					.flatMap(Collection::stream)
-					.collect(Collectors.toList());
 		}
+
+		// This can happen during recursion, if not all the possible target types of one link in the chain
+		// support the next link
+		return new ArrayList<>();
 	}
 
 	private IQueryParameterType mapReferenceChainToRawParamType(
