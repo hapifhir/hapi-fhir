@@ -10,8 +10,6 @@ import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import jakarta.annotation.Nullable;
 import org.assertj.core.api.AbstractAssert;
 import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -20,8 +18,10 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * Assertion class for asserting matching of golden resources.
+ */
 public  class GoldenResourceMatchingAssert extends AbstractAssert<GoldenResourceMatchingAssert,  IAnyResource> {
-	private static final Logger ourLog = LoggerFactory.getLogger(GoldenResourceMatchingAssert.class);
 
 	private IResourcePersistentId actualGoldenResourcePid;
 	private IResourcePersistentId actualSourceResourcePid;
