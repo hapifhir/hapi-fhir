@@ -64,6 +64,13 @@ public abstract class BaseGoldenResourceMatcher extends TypeSafeMatcher<IAnyReso
 		}
 	}
 
+
+	protected List<IResourcePersistentId> getPossibleMatchedGoldenResourcePidsFromTarget(IAnyResource theBaseResource) {
+		return getMdmLinksForTarget(theBaseResource, MdmMatchResultEnum.POSSIBLE_MATCH)
+			.stream()
+			.map(IMdmLink::getGoldenResourcePersistenceId).collect(Collectors.toList());
+	}
+
 	protected List<? extends IMdmLink> getMdmLinksForTarget(IAnyResource theTargetResource, MdmMatchResultEnum theMatchResult) {
 		IResourcePersistentId pidOrNull = myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), theTargetResource);
 		List<? extends IMdmLink> matchLinkForTarget = myMdmLinkDaoSvc.getMdmLinksBySourcePidAndMatchResult(pidOrNull, theMatchResult);
