@@ -37,7 +37,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
-import org.jetbrains.annotations.NotNull;
+import jakarta.annotation.Nonnull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -234,7 +234,7 @@ public class ExpandResourceAndWriteBinaryStepTest {
 		assertEquals(binaryId.getValueAsString(), fileIdArgumentCaptor.getValue().getBinaryId());
 	}
 
-	@NotNull
+	@Nonnull
 	private static ArrayList<IBaseResource> createResourceList(ResourceIdList idList) {
 		idList.setResourceType("Patient");
 		ArrayList<IBaseResource> resources = new ArrayList<>();

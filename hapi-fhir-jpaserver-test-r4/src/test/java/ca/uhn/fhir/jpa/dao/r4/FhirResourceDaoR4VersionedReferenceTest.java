@@ -31,7 +31,7 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task;
-import org.jetbrains.annotations.NotNull;
+import jakarta.annotation.Nonnull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -104,7 +104,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 			messageHeaderAutoVersionExtension = createAutoVersionReferencesExtensions("focus");
 		}
 
-		@NotNull
+		@Nonnull
 		private List<Extension> createAutoVersionReferencesExtensions(String... thePaths) {
 			return Arrays.stream(thePaths)
 				.map(path -> new Extension(EXTENSION_AUTO_VERSION_REFERENCES_AT_PATH, new StringType(path)))

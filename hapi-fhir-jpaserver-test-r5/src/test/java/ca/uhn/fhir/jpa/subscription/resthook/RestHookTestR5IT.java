@@ -28,7 +28,7 @@ import org.hl7.fhir.r5.model.SearchParameter;
 import org.hl7.fhir.r5.model.Subscription;
 import org.hl7.fhir.r5.model.SubscriptionStatus;
 import org.hl7.fhir.r5.model.SubscriptionTopic;
-import org.jetbrains.annotations.NotNull;
+import jakarta.annotation.Nonnull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -86,12 +86,12 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 		assertEquals(sentObservation.getIdElement(), obs.getIdElement());
 	}
 
-	@NotNull
+	@Nonnull
 	private Observation sendObservationExpectDelivery(int theCount) throws InterruptedException {
 		return sendObservation(OBS_CODE, "SNOMED-CT", true, theCount);
 	}
 
-	@NotNull
+	@Nonnull
 	private Observation sendObservationExpectDelivery() throws InterruptedException {
 		return sendObservation(OBS_CODE, "SNOMED-CT", true, 1);
 	}
@@ -143,7 +143,7 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 		assertEquals("2", receivedObs.getIdentifierFirstRep().getValue());
 	}
 
-	@NotNull
+	@Nonnull
 	private Subscription createMatchingTopicSubscription() throws Exception {
 		Subscription subscription = createTopicSubscription(OBS_CODE);
 		waitForActivatedSubscriptionCount(1);
@@ -271,7 +271,7 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 		}
 	}
 
-	@NotNull
+	@Nonnull
 	private Subscription createTopicSubscription() throws InterruptedException {
 		Subscription subscription = newTopicSubscription(SUBSCRIPTION_TOPIC_TEST_URL + OBS_CODE, Constants.CT_FHIR_JSON_NEW);
 

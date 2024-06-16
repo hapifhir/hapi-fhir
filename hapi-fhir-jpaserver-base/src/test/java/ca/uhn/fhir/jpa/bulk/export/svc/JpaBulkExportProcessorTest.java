@@ -122,7 +122,6 @@ public class JpaBulkExportProcessorTest {
 
 	@Spy
 	private FhirContext myFhirContext = FhirContext.forR4Cached();
-
 	@Mock
 	private BulkExportHelperService myBulkExportHelperService;
 

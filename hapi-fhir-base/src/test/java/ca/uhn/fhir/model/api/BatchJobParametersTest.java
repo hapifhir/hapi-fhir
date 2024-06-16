@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class BaseBatchJobParametersTest {
+public class BatchJobParametersTest {
 
 	private static class TestParameters extends BaseBatchJobParameters {
 

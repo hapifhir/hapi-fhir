@@ -15,10 +15,10 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.messaging.BaseResourceMessage;
 import ca.uhn.fhir.rest.server.messaging.json.ResourceOperationJsonMessage;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.r4.model.codesystems.SubscriptionStatus;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -69,7 +69,7 @@ public class SubscriptionRegisteringSubscriberTest {
 		mySubscription = buildSubscription();
 	}
 
-	@NotNull
+	@Nonnull
 	private static Subscription buildSubscription() {
 		Subscription subscription = new Subscription();
 		subscription.setId("Subscription/testrest");
