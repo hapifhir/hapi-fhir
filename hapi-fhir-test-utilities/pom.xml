@@ -214,16 +214,6 @@
 			<groupId>org.assertj</groupId>
 			<artifactId>assertj-core</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-storage</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-jpaserver-mdm</artifactId>
-			<version>${project.version}</version>
-		</dependency>
 		<!-- FIXME KHS do we need this?
 <dependency>
 	<groupId>com.github.seregamorph</groupId>

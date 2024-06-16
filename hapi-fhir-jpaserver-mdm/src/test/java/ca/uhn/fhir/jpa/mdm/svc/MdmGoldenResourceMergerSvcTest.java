@@ -18,7 +18,7 @@ import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.test.util.asserts.GoldenResourceMatchingAssert;
+import ca.uhn.fhir.jpa.mdm.matcher.GoldenResourceMatchingAssert;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.DateType;
