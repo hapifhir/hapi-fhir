@@ -1,0 +1,67 @@
+{
+	"resourceType": "ValueSet",
+	"id": "doc-typecodes",
+	"meta": {
+		"lastUpdated": "2019-10-24T11:53:00+11:00",
+		"profile": [
+			"http://hl7.org/fhir/StructureDefinition/shareablevalueset"
+		]
+	},
+	"text": {
+		"status": "generated",
+		"div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><h2>FHIR Document Type Codes</h2><div><p>FHIR Document Codes - all LOINC codes where scale type = 'DOC'.</p>\n</div><p><b>Copyright Statement:</b> This content from LOINC® is copyright © 1995 Regenstrief Institute, Inc. and the LOINC Committee, and available at no cost under the license at http://loinc.org/terms-of-use.</p><p>This value set includes codes from the following code systems:</p><ul><li>Include codes from <a href=\"http://loinc.org\"><code>http://loinc.org</code></a> where SCALE_TYP  =  Doc</li></ul></div>"
+	},
+	"extension": [
+		{
+			"url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status",
+			"valueString": "Informative"
+		},
+		{
+			"url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+			"valueInteger": 2
+		},
+		{
+			"url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+			"valueCode": "sd"
+		}
+	],
+	"url": "http://hl7.org/fhir/ValueSet/doc-typecodes",
+	"identifier": [
+		{
+			"system": "urn:ietf:rfc:3986",
+			"value": "urn:oid:2.16.840.1.113883.4.642.3.235"
+		}
+	],
+	"version": "3.0.2",
+	"name": "FHIR Document Type Codes",
+	"status": "draft",
+	"experimental": true,
+	"date": "2019-10-24T11:53:00+11:00",
+	"publisher": "HL7",
+	"contact": [
+		{
+			"telecom": [
+				{
+					"system": "url",
+					"value": "http://hl7.org"
+				}
+			]
+		}
+	],
+	"description": "FHIR Document Codes - all LOINC codes where scale type = 'DOC'.",
+	"copyright": "This content from LOINC® is copyright © 1995 Regenstrief Institute, Inc. and the LOINC Committee, and available at no cost under the license at http://loinc.org/terms-of-use.",
+	"compose": {
+		"include": [
+			{
+				"system": "http://loinc.org",
+				"filter": [
+					{
+						"property": "SCALE_TYP",
+						"op": "=",
+						"value": "Doc"
+					}
+				]
+			}
+		]
+	}
+}

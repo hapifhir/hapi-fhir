@@ -2827,7 +2827,7 @@ public class XmlParserDstu2Test {
 		xmlParser.setServerBaseUrl("http://www.example.com");
 
 		final String parsedPatient = xmlParser.encodeResourceToString(patient);
-		System.out.println(parsedPatient);
+		ourLog.info(parsedPatient);
 		assertEquals(expected, parsedPatient);
 
 		// Parse with string
@@ -2860,7 +2860,7 @@ public class XmlParserDstu2Test {
 		xmlParser.setServerBaseUrl("http://www.example.com");
 
 		final String parsedBundle = xmlParser.encodeResourceToString(bundle);
-		System.out.println(parsedBundle);
+		ourLog.info(parsedBundle);
 		assertEquals(expected, parsedBundle);
 
 		// Parse with string
@@ -2889,7 +2889,7 @@ public class XmlParserDstu2Test {
 		IParser parser = ourCtx.newXmlParser();
 
 		String output = parser.encodeResourceToString(fhirPat);
-		System.out.println("output: " + output);
+		ourLog.info("output: " + output);
 
 		// Deserialize then check that valueReference value is still correct
 		fhirPat = parser.parseResource(Patient.class, output);

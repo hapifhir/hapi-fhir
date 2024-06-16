@@ -3,9 +3,9 @@ package ca.uhn.fhir.jpa.topic.filter;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalTopicSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalTopicSubscriptionFilter;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Observation;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -99,7 +99,7 @@ class SubscriptionTopicFilterUtilTest {
 		assertFalse(result);
 	}
 
-	@NotNull
+	@Nonnull
 	private static CanonicalTopicSubscription buildTopicSubscriptionWithFilter(String... theQueryUrls) {
 		CanonicalTopicSubscription topicSubscription = new CanonicalTopicSubscription();
 		for (String queryUrl : theQueryUrls) {

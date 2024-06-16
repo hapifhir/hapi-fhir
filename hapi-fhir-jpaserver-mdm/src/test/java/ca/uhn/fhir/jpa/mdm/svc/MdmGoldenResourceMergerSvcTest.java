@@ -95,7 +95,7 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 		Patient mergedGoldenPatient = mergeGoldenPatients();
 
 		assertEquals(myToGoldenPatient.getIdElement(), mergedGoldenPatient.getIdElement());
-		// FIXME KHS restore
+		// TODO CHECKSTYLE KHS restore
 //		assertThat(mergedGoldenPatient).is(sameGoldenResourceAs(mergedGoldenPatient));
 		assertThat(getAllGoldenPatients()).hasSize(1);
 		assertThat(getAllRedirectedGoldenPatients()).hasSize(1);
@@ -242,7 +242,7 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 		Patient mergedGoldenPatient = mergeGoldenPatients();
 		List<MdmLink> links = getNonRedirectLinksByGoldenResource(mergedGoldenPatient);
 		assertThat(links).hasSize(1);
-		// FIXME KHS restore
+		// TODO CHECKSTYLE KHS restore
 //		assertThat(mergedGoldenPatient, possibleLinkedTo(myTargetPatient1));
 	}
 
@@ -253,7 +253,7 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 		Patient mergedSourcePatient = mergeGoldenPatients();
 		List<MdmLink> links = getNonRedirectLinksByGoldenResource(mergedSourcePatient);
 		assertThat(links).hasSize(1);
-		// FIXME KHS restore
+		// TODO CHECKSTYLE KHS restore
 //		assertThat(mergedSourcePatient, possibleLinkedTo(myTargetPatient1));
 	}
 

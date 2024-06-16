@@ -300,6 +300,9 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 
 	@Override
 	public boolean isCodeSystemSupported(ValidationSupportContext theValidationSupportContext, String theSystem) {
+		if (isBlank(theSystem)) {
+			return false;
+		}
 		TermCodeSystemVersionDetails cs = getCurrentCodeSystemVersion(theSystem);
 		return cs != null;
 	}
@@ -1040,8 +1043,8 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 				} catch (InMemoryTerminologyServerValidationSupport.ExpansionCouldNotBeCompletedInternallyException e) {
 					if (theExpansionOptions != null
 							&& !theExpansionOptions.isFailOnMissingCodeSystem()
-							&& e.getFailureType()
-									== InMemoryTerminologyServerValidationSupport.FailureType.UNKNOWN_CODE_SYSTEM) {
+							// Code system is unknown, therefore NOT_FOUND
+							&& e.getCodeValidationIssue().getCoding() == CodeValidationIssueCoding.NOT_FOUND) {
 						return;
 					}
 					throw new InternalErrorException(Msg.code(888) + e);
@@ -1452,7 +1455,6 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		} else {
 			Term term = new Term(CONCEPT_PROPERTY_PREFIX_NAME + theFilter.getProperty(), value);
 			switch (theFilter.getOp()) {
-				case ISA:
 				case EQUAL:
 					theB.must(theF.match().field(term.field()).matching(term.text()));
 					break;
@@ -1468,13 +1470,21 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 						theB.filter(theF.terms().field(term.field()).matchingAny(valueSet));
 					}
 					break;
+				case ISA:
+				case ISNOTA:
+				case DESCENDENTOF:
+				case GENERALIZES:
 				default:
 					/*
 					 * We do not need to handle REGEX, because that's handled in parent
-					 * We also don't handle EXISTS because that's a separate area (with different term)
+					 * We also don't handle EXISTS because that's a separate area (with different term).
+					 * We add a match-none filter because otherwise it matches everything (not desired).
 					 */
-					throw new InvalidRequestException(Msg.code(2526) + "Unsupported property filter "
-							+ theFilter.getOp().getDisplay());
+					ourLog.error(
+							"Unsupported property filter {}. This may affect expansion, but will not cause errors.",
+							theFilter.getOp().getDisplay());
+					theB.must(theF.matchNone());
+					break;
 			}
 		}
 	}
@@ -2144,6 +2154,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 					theCode,
 					theDisplay,
 					expectedDisplay,
+					theSystem,
 					systemVersion,
 					myStorageSettings.getIssueSeverityForCodeDisplayMismatch());
 		}
@@ -2174,10 +2185,16 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 
 	private CodeValidationResult createFailureCodeValidationResult(
 			String theSystem, String theCode, String theCodeSystemVersion, String theAppend) {
+		String theMessage = "Unable to validate code " + theSystem + "#" + theCode + theAppend;
 		return new CodeValidationResult()
 				.setSeverity(IssueSeverity.ERROR)
 				.setCodeSystemVersion(theCodeSystemVersion)
-				.setMessage("Unable to validate code " + theSystem + "#" + theCode + theAppend);
+				.setMessage(theMessage)
+				.addCodeValidationIssue(new CodeValidationIssue(
+						theMessage,
+						IssueSeverity.ERROR,
+						CodeValidationIssueCode.CODE_INVALID,
+						CodeValidationIssueCoding.INVALID_CODE));
 	}
 
 	private List<TermValueSetConcept> findByValueSetResourcePidSystemAndCode(
@@ -2793,6 +2810,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 						theCode,
 						theDisplay,
 						code.getDisplay(),
+						code.getSystem(),
 						code.getSystemVersion(),
 						myStorageSettings.getIssueSeverityForCodeDisplayMismatch());
 			}

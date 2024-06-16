@@ -19,7 +19,7 @@
  */
 package ca.uhn.fhir.jpa.util;
 
-import ca.uhn.fhir.jpa.model.entity.StorageSettings;
+import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.subscription.SocketImplementation;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -40,7 +40,7 @@ import java.util.function.Supplier;
 public class WebsocketSubscriptionClient implements AfterEachCallback {
 	private static final Logger ourLog = LoggerFactory.getLogger(WebsocketSubscriptionClient.class);
 	private final Supplier<RestfulServerExtension> myServerSupplier;
-	private final Supplier<StorageSettings> myStorageSettings;
+	private final Supplier<SubscriptionSettings> mySubscriptionSettingsSupplier;
 	private jakarta.websocket.Session mySession;
 	private SocketImplementation mySocketImplementation;
 
@@ -48,12 +48,12 @@ public class WebsocketSubscriptionClient implements AfterEachCallback {
 	 * Constructor
 	 */
 	public WebsocketSubscriptionClient(
-			Supplier<RestfulServerExtension> theServerSupplier, Supplier<StorageSettings> theStorageSettings) {
+			Supplier<RestfulServerExtension> theServerSupplier, Supplier<SubscriptionSettings> theStorageSettings) {
 		assert theServerSupplier != null;
 		assert theStorageSettings != null;
 
 		myServerSupplier = theServerSupplier;
-		myStorageSettings = theStorageSettings;
+		mySubscriptionSettingsSupplier = theStorageSettings;
 	}
 
 	public void bind(String theSubscriptionId) {
@@ -67,7 +67,7 @@ public class WebsocketSubscriptionClient implements AfterEachCallback {
 
 		try {
 			URI echoUri = new URI("ws://localhost:" + server.getPort() + server.getWebsocketContextPath()
-					+ myStorageSettings.get().getWebsocketContextPath());
+					+ mySubscriptionSettingsSupplier.get().getWebsocketContextPath());
 
 			WebSocketContainer container = ContainerProvider.getWebSocketContainer();
 			mySession = container.connectToServer(mySocketImplementation, echoUri);

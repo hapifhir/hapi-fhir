@@ -9,15 +9,16 @@ import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
+import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.messaging.BaseResourceMessage;
 import ca.uhn.fhir.rest.server.messaging.json.ResourceOperationJsonMessage;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.r4.model.codesystems.SubscriptionStatus;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -51,7 +52,7 @@ public class SubscriptionRegisteringSubscriberTest {
 	@Mock
 	private SubscriptionRegistry mySubscriptionRegistry;
 	@Spy
-	private SubscriptionCanonicalizer mySubscriptionCanonicalizer = new SubscriptionCanonicalizer(myFhirContext, new StorageSettings());
+	private SubscriptionCanonicalizer mySubscriptionCanonicalizer = new SubscriptionCanonicalizer(myFhirContext, new SubscriptionSettings());
 	@Mock
 	private DaoRegistry myDaoRegistry;
 	@Mock
@@ -68,7 +69,7 @@ public class SubscriptionRegisteringSubscriberTest {
 		mySubscription = buildSubscription();
 	}
 
-	@NotNull
+	@Nonnull
 	private static Subscription buildSubscription() {
 		Subscription subscription = new Subscription();
 		subscription.setId("Subscription/testrest");

@@ -36,6 +36,8 @@ public class RequestPartitionHelperSvc extends BaseRequestPartitionHelperSvc {
 	@Autowired
 	IPartitionLookupSvc myPartitionConfigSvc;
 
+	public RequestPartitionHelperSvc() {}
+
 	@Override
 	public RequestPartitionId validateAndNormalizePartitionIds(RequestPartitionId theRequestPartitionId) {
 		List<String> names = null;

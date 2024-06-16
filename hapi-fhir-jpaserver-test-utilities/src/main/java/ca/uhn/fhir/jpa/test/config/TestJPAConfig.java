@@ -32,6 +32,7 @@ import ca.uhn.fhir.jpa.subscription.channel.config.SubscriptionChannelConfig;
 import ca.uhn.fhir.jpa.subscription.match.config.SubscriptionProcessorConfig;
 import ca.uhn.fhir.jpa.subscription.match.deliver.email.IEmailSender;
 import ca.uhn.fhir.jpa.subscription.match.deliver.resthook.SubscriptionDeliveringRestHookSubscriber;
+import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.subscription.submit.config.SubscriptionSubmitterConfig;
 import ca.uhn.fhir.jpa.term.TermCodeSystemDeleteJobSvcWithUniTestFailures;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemDeleteJobSvc;
@@ -66,6 +67,11 @@ public class TestJPAConfig {
 		}
 
 		return retVal;
+	}
+
+	@Bean
+	public SubscriptionSettings subscriptionSettings() {
+		return new SubscriptionSettings();
 	}
 
 	@Bean

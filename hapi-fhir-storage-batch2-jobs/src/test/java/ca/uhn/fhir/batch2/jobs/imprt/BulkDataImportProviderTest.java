@@ -20,6 +20,7 @@ import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import com.google.common.base.Charsets;
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -32,8 +33,6 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.UrlType;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
@@ -419,15 +418,15 @@ public class BulkDataImportProviderTest {
 			return null;
 		}
 
-		@NotNull
+		@Nonnull
 		@Override
-		public RequestPartitionId determineCreatePartitionForRequest(@Nullable RequestDetails theRequest, @NotNull IBaseResource theResource, @NotNull String theResourceType) {
+		public RequestPartitionId determineCreatePartitionForRequest(@Nullable RequestDetails theRequest, @Nonnull IBaseResource theResource, @Nonnull String theResourceType) {
 			return null;
 		}
 
-		@NotNull
+		@Nonnull
 		@Override
-		public Set<Integer> toReadPartitions(@NotNull RequestPartitionId theRequestPartitionId) {
+		public Set<Integer> toReadPartitions(@Nonnull RequestPartitionId theRequestPartitionId) {
 			return null;
 		}
 

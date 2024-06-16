@@ -29,7 +29,7 @@ public class WebsocketWithSubscriptionIdR5Test extends BaseSubscriptionsR5Test {
 
 	@RegisterExtension
 	private final WebsocketSubscriptionClient myWebsocketClientExtension =
-		new WebsocketSubscriptionClient(() -> myServer, () -> myStorageSettings);
+		new WebsocketSubscriptionClient(() -> myServer, () -> mySubscriptionSettings);
 
 	@Autowired
 	private SubscriptionTestUtil mySubscriptionTestUtil;
