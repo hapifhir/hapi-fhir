@@ -18,6 +18,7 @@ import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.test.util.asserts.GoldenResourceMatchingAssert;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.DateType;
@@ -96,7 +97,7 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 
 		assertEquals(myToGoldenPatient.getIdElement(), mergedGoldenPatient.getIdElement());
 		// TODO CHECKSTYLE KHS restore
-//		assertThat(mergedGoldenPatient).is(sameGoldenResourceAs(mergedGoldenPatient));
+		GoldenResourceMatchingAssert.assertThat(mergedGoldenPatient, myIdHelperService, myMdmLinkDaoSvc).isMatchedTo(mergedGoldenPatient);
 		assertThat(getAllGoldenPatients()).hasSize(1);
 		assertThat(getAllRedirectedGoldenPatients()).hasSize(1);
 	}

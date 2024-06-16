@@ -17,14 +17,15 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.test.util;
+package ca.uhn.test.util.asserts;
 
 import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.annotation.Nonnull;
-import org.assertj.core.api.AbstractAssert;
-import org.assertj.core.api.Assertions;
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
+import org.hamcrest.TypeSafeMatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,28 +41,27 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class HasGetterOrSetterForAllJsonFieldsAssert extends AbstractAssert<HasGetterOrSetterForAllJsonFieldsAssert, Class<? extends IModelJson>> {
-	private static final Logger ourLog = LoggerFactory.getLogger(HasGetterOrSetterForAllJsonFieldsAssert.class);
+import static org.hamcrest.Matchers.hasItems;
 
-	public HasGetterOrSetterForAllJsonFieldsAssert(Class<? extends IModelJson> actual) {
-		super(actual, HasGetterOrSetterForAllJsonFieldsAssert.class);
+@Deprecated
+/**
+ * @deprecated convert usages to HasGetterOrSetterForAllJsonFieldsAssert
+ */
+public class HasGetterOrSetterForAllJsonFields extends TypeSafeMatcher<Class<? extends IModelJson>> {
+	private static final Logger ourLog = LoggerFactory.getLogger(HasGetterOrSetterForAllJsonFields.class);
+
+	@Override
+	public void describeTo(Description description) {
+		description.appendText("All @JsonProperty annotated fields have getters and setters.");
 	}
 
-	public static HasGetterOrSetterForAllJsonFieldsAssert assertThat(Class<? extends IModelJson> actual) {
-		return new HasGetterOrSetterForAllJsonFieldsAssert(actual);
-	}
-
-	public HasGetterOrSetterForAllJsonFieldsAssert hasGetterOrSetterForAllJsonFields() {
-		isNotNull();
-
-		List<String> jsonPropertyFields = getJsonPropertyFields(actual);
-		List<String> properties = getProperties(actual);
-
-		ourLog.info("{}: testing {} @JsonProperty fields", actual.getSimpleName(), jsonPropertyFields.size());
-
-		Assertions.assertThat(properties).containsAll(jsonPropertyFields);
-
-		return this;
+	@Override
+	protected boolean matchesSafely(Class<? extends IModelJson> item) {
+		List<String> jsonPropertyFields = getJsonPropertyFields(item);
+		Matcher<Iterable<Object>> matcher = hasItems(jsonPropertyFields.toArray());
+		List<String> properties = getProperties(item);
+		ourLog.info("{}: testing {} @JsonProperty fields", item.getSimpleName(), jsonPropertyFields.size());
+		return matcher.matches(properties);
 	}
 
 	@Nonnull
@@ -114,6 +114,17 @@ public class HasGetterOrSetterForAllJsonFieldsAssert extends AbstractAssert<HasG
 		return theFieldName;
 	}
 
+	@Override
+	protected void describeMismatchSafely(Class<? extends IModelJson> item, Description mismatchDescription) {
+		mismatchDescription.appendText(" for class ").appendText(item.getName()).appendText(", ");
+		List<String> jsonFields = getJsonPropertyFields(item);
+		Matcher<Iterable<Object>> matcher = hasItems(jsonFields.toArray());
+		List<String> properties = getProperties(item);
+		matcher.describeMismatch(properties, mismatchDescription);
+		mismatchDescription.appendText("\n  All non-collection @JsonProperty fields: " + String.join(", ", jsonFields));
+		mismatchDescription.appendText("\n  Have get/set methods for: " + String.join(", ", properties));
+	}
+
 	private List<String> getProperties(Class<? extends IModelJson> item) {
 		try {
 			BeanInfo beanInfo = Introspector.getBeanInfo(item);
@@ -138,5 +149,9 @@ public class HasGetterOrSetterForAllJsonFieldsAssert extends AbstractAssert<HasG
 		if (theItem.getSuperclass() != null) {
 			populateFields(theFields, theItem.getSuperclass());
 		}
+	}
+
+	public static HasGetterOrSetterForAllJsonFields hasGetterOrSetterForAllJsonFields() {
+		return new HasGetterOrSetterForAllJsonFields();
 	}
 }

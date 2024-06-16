@@ -6,7 +6,7 @@ import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.test.utilities.RestServerR4Helper;
 import ca.uhn.fhir.test.utilities.TlsAuthenticationTestHelper;
 import ca.uhn.fhir.util.ParametersUtil;
-import ca.uhn.test.util.LogEventIterableAssert;
+import ca.uhn.test.util.asserts.LogEventIterableAssert;
 import ca.uhn.test.util.LogbackTestExtension;
 import ch.qos.logback.classic.Logger;
 import org.hl7.fhir.instance.model.api.IBaseParameters;

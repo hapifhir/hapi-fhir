@@ -13,7 +13,7 @@ import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.subscription.SubscriptionConstants;
-import ca.uhn.test.util.LogEventIterableAssert;
+import ca.uhn.test.util.asserts.LogEventIterableAssert;
 import ca.uhn.test.util.LogbackTestExtension;
 import ch.qos.logback.classic.Level;
 import org.hl7.fhir.instance.model.api.IBaseResource;

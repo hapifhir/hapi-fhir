@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.test.util;
+package ca.uhn.test.util.asserts;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import org.assertj.core.api.AbstractAssert;
