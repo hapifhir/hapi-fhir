@@ -96,8 +96,7 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 		Patient mergedGoldenPatient = mergeGoldenPatients();
 
 		assertEquals(myToGoldenPatient.getIdElement(), mergedGoldenPatient.getIdElement());
-		// TODO CHECKSTYLE KHS restore
-		GoldenResourceMatchingAssert.assertThat(mergedGoldenPatient, myIdHelperService, myMdmLinkDaoSvc).isMatchedTo(mergedGoldenPatient);
+		GoldenResourceMatchingAssert.assertThat(mergedGoldenPatient, myIdHelperService, myMdmLinkDaoSvc).is_MATCH_to(mergedGoldenPatient);
 		assertThat(getAllGoldenPatients()).hasSize(1);
 		assertThat(getAllRedirectedGoldenPatients()).hasSize(1);
 	}
@@ -243,8 +242,7 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 		Patient mergedGoldenPatient = mergeGoldenPatients();
 		List<MdmLink> links = getNonRedirectLinksByGoldenResource(mergedGoldenPatient);
 		assertThat(links).hasSize(1);
-		// TODO CHECKSTYLE KHS restore
-//		assertThat(mergedGoldenPatient, possibleLinkedTo(myTargetPatient1));
+		GoldenResourceMatchingAssert.assertThat(mergedGoldenPatient, myIdHelperService, myMdmLinkDaoSvc).is_POSSIBLE_MATCH_to(myTargetPatient1);
 	}
 
 	@Test
@@ -254,8 +252,7 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 		Patient mergedSourcePatient = mergeGoldenPatients();
 		List<MdmLink> links = getNonRedirectLinksByGoldenResource(mergedSourcePatient);
 		assertThat(links).hasSize(1);
-		// TODO CHECKSTYLE KHS restore
-//		assertThat(mergedSourcePatient, possibleLinkedTo(myTargetPatient1));
+		GoldenResourceMatchingAssert.assertThat(mergedSourcePatient, myIdHelperService, myMdmLinkDaoSvc).is_POSSIBLE_MATCH_to(myTargetPatient1);
 	}
 
 	private Patient mergeGoldenResources(Patient theFrom, Patient theTo) {

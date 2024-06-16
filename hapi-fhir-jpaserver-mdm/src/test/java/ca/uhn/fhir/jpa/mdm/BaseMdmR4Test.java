@@ -12,12 +12,7 @@ import ca.uhn.fhir.jpa.mdm.config.MdmSubmitterConfig;
 import ca.uhn.fhir.jpa.mdm.config.TestMdmConfigR4;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import ca.uhn.fhir.jpa.mdm.helper.MdmLinkHelper;
-import ca.uhn.fhir.jpa.mdm.matcher.IsLinkedTo;
-import ca.uhn.fhir.jpa.mdm.matcher.IsMatchedToAGoldenResource;
-import ca.uhn.fhir.jpa.mdm.matcher.IsPossibleDuplicateOf;
-import ca.uhn.fhir.jpa.mdm.matcher.IsPossibleLinkedTo;
-import ca.uhn.fhir.jpa.mdm.matcher.IsPossibleMatchWith;
-import ca.uhn.fhir.jpa.mdm.matcher.IsSameGoldenResourceAs;
+import ca.uhn.fhir.jpa.mdm.matcher.GoldenResourceMatchingAssert;
 import ca.uhn.fhir.jpa.mdm.svc.MdmMatchLinkSvc;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
@@ -159,6 +154,9 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 		myMdmLinkDaoSvc.save(theMdmLink);
 	}
 
+	protected GoldenResourceMatchingAssert mdmAssertThat(IAnyResource theResource) {
+		return GoldenResourceMatchingAssert.assertThat(theResource, myIdHelperService, myMdmLinkDaoSvc);
+	}
 	@Nonnull
 	protected Patient createGoldenPatient() {
 		return createPatient(new Patient(), true, false);
@@ -526,30 +524,6 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 				runInTransaction(() -> theFunction.get().describeTo(description));
 			}
 		};
-	}
-
-	protected Matcher<IAnyResource> sameGoldenResourceAs(IAnyResource... theBaseResource) {
-		return wrapMatcherInTransaction(() -> IsSameGoldenResourceAs.sameGoldenResourceAs(myIdHelperService, myMdmLinkDaoSvc, theBaseResource));
-	}
-
-	protected Matcher<IAnyResource> linkedTo(IAnyResource... theBaseResource) {
-		return wrapMatcherInTransaction(() -> IsLinkedTo.linkedTo(myIdHelperService, myMdmLinkDaoSvc, theBaseResource));
-	}
-
-	protected Matcher<IAnyResource> possibleLinkedTo(IAnyResource... theBaseResource) {
-		return wrapMatcherInTransaction(() -> IsPossibleLinkedTo.possibleLinkedTo(myIdHelperService, myMdmLinkDaoSvc, theBaseResource));
-	}
-
-	protected Matcher<IAnyResource> possibleMatchWith(IAnyResource... theBaseResource) {
-		return wrapMatcherInTransaction(() -> IsPossibleMatchWith.possibleMatchWith(myIdHelperService, myMdmLinkDaoSvc, theBaseResource));
-	}
-
-	protected Matcher<IAnyResource> possibleDuplicateOf(IAnyResource... theBaseResource) {
-		return wrapMatcherInTransaction(() -> IsPossibleDuplicateOf.possibleDuplicateOf(myIdHelperService, myMdmLinkDaoSvc, theBaseResource));
-	}
-
-	protected Matcher<IAnyResource> matchedToAGoldenResource() {
-		return wrapMatcherInTransaction(() -> IsMatchedToAGoldenResource.matchedToAGoldenResource(myIdHelperService, myMdmLinkDaoSvc));
 	}
 
 	protected Patient getOnlyGoldenPatient() {

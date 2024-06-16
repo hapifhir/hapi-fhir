@@ -4,6 +4,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
+import ca.uhn.fhir.jpa.mdm.matcher.GoldenResourceMatchingAssert;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
@@ -29,7 +30,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-//TODO GGG Convert this to assertJ
 public class MdmProviderMergeGoldenResourcesR4Test extends BaseProviderR4Test {
 
 	private Patient myFromGoldenPatient;
@@ -88,7 +88,7 @@ public class MdmProviderMergeGoldenResourcesR4Test extends BaseProviderR4Test {
 		assertFalse(MdmResourceUtil.isGoldenRecordRedirected(mergedSourcePatient));
 
 		assertEquals(myToGoldenPatient.getIdElement(), mergedSourcePatient.getIdElement());
-		assertThat(mergedSourcePatient, is(sameGoldenResourceAs(myToGoldenPatient)));
+		GoldenResourceMatchingAssert.assertThat(mergedSourcePatient, myIdHelperService, myMdmLinkDaoSvc).is_MATCH_to(myToGoldenPatient);
 		assertEquals(1, getAllRedirectedGoldenPatients().size());
 		assertEquals(1, getAllGoldenPatients().size());
 
@@ -131,7 +131,7 @@ public class MdmProviderMergeGoldenResourcesR4Test extends BaseProviderR4Test {
 		assertFalse(MdmResourceUtil.isGoldenRecordRedirected(mergedSourcePatient));
 
 		assertEquals(toGoldenPatient.getIdElement(), mergedSourcePatient.getIdElement());
-		assertThat(mergedSourcePatient, is(sameGoldenResourceAs(toGoldenPatient)));
+		mdmAssertThat(mergedSourcePatient).is_MATCH_to(toGoldenPatient);
 		assertEquals(1, getAllRedirectedGoldenPatients().size());
 		// 2 from the set-up and only one from this test should be golden resource
 		assertEquals(3, getAllGoldenPatients().size());
@@ -178,7 +178,7 @@ public class MdmProviderMergeGoldenResourcesR4Test extends BaseProviderR4Test {
 			patient, myRequestDetails);
 
 		assertEquals(myToGoldenPatient.getIdElement(), mergedSourcePatient.getIdElement());
-		assertThat(mergedSourcePatient, is(sameGoldenResourceAs(myToGoldenPatient)));
+		mdmAssertThat(mergedSourcePatient).is_MATCH_to(myToGoldenPatient);
 		assertEquals(1, getAllRedirectedGoldenPatients().size());
 		assertEquals(1, getAllGoldenPatients().size());
 

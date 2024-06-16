@@ -14,37 +14,131 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
-public  class GoldenResourceMatchingAssert<T extends IAnyResource > extends AbstractAssert<GoldenResourceMatchingAssert<T>,  T> {
+public  class GoldenResourceMatchingAssert extends AbstractAssert<GoldenResourceMatchingAssert,  IAnyResource> {
 	private static final Logger ourLog = LoggerFactory.getLogger(GoldenResourceMatchingAssert.class);
 
 	private IResourcePersistentId actualGoldenResourcePid;
+	private IResourcePersistentId actualSourceResourcePid;
 	private IIdHelperService myIdHelperService;
 	private MdmLinkDaoSvc myMdmLinkDaoSvc;
 
-	protected GoldenResourceMatchingAssert(T actual, IIdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc) {
+	protected GoldenResourceMatchingAssert(IAnyResource actual, IIdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc) {
 		super(actual, GoldenResourceMatchingAssert.class);
 		myIdHelperService = theIdHelperService;
 		myMdmLinkDaoSvc = theMdmLinkDaoSvc;
-		actualGoldenResourcePid = getMatchedResourcePidFromResource(actual);
+		actualGoldenResourcePid = getGoldenResourcePid(actual);
+		actualSourceResourcePid = myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), actual);
 	}
 
-	public static <T extends IAnyResource> GoldenResourceMatchingAssert<T> assertThat(T actual, IIdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc) {
-		return new GoldenResourceMatchingAssert<>(actual, theIdHelperService, theMdmLinkDaoSvc);
+	public static GoldenResourceMatchingAssert assertThat(IAnyResource actual, IIdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc) {
+		return new GoldenResourceMatchingAssert(actual, theIdHelperService, theMdmLinkDaoSvc);
 	}
 
 	// Method to compare with another resource
-	public GoldenResourceMatchingAssert<T> isMatchedTo(T other) {
-		IResourcePersistentId otherGoldenPid = getMatchedResourcePidFromResource(other);
-		if (actualGoldenResourcePid != otherGoldenPid) {
+	public GoldenResourceMatchingAssert is_MATCH_to(IAnyResource other) {
+		IResourcePersistentId otherGoldenPid = getGoldenResourcePid(other);
+		if (!actualGoldenResourcePid.equals(otherGoldenPid)) {
 			failWithActualExpectedAndMessage(actualGoldenResourcePid, otherGoldenPid, "Did not match golden resource pids!");
 		}
 		return this;
 	}
 
+	public GoldenResourceMatchingAssert is_not_MATCH_to(IAnyResource other) {
+		IResourcePersistentId otherGoldenPid = getGoldenResourcePid(other);
+		if (actualGoldenResourcePid != null &&  actualGoldenResourcePid.equals(otherGoldenPid)) {
+			failWithActualExpectedAndMessage(actualGoldenResourcePid, otherGoldenPid, "Matched when it should not have!");
+		}
+		return this;
+	}
+
+
+
+	public GoldenResourceMatchingAssert is_NO_MATCH_to(IAnyResource other) {
+		IResourcePersistentId otherGoldenPid = getGoldenResourcePid(other);
+		if (actualGoldenResourcePid != null && actualGoldenResourcePid.equals(otherGoldenPid)) {
+			failWithActualExpectedAndMessage(actualGoldenResourcePid, otherGoldenPid, "Both resources are linked to the same Golden pid!");
+		}
+		return this;
+	}
+
+	public GoldenResourceMatchingAssert is_POSSIBLE_MATCH_to(IAnyResource other) {
+		boolean possibleMatch = hasPossibleMatchWith(other);
+
+		if (!possibleMatch) {
+			failWithMessage("No POSSIBLE_MATCH between these two resources.");
+		}
+
+		return this;
+	}
+
+	private boolean hasPossibleMatchWith(IAnyResource other) {
+		boolean possibleMatch = false;
+		Set<IResourcePersistentId> goldenPids = new HashSet<>();
+
+		IResourcePersistentId otherSourceId = myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), other);
+		List<? extends IMdmLink> possibleLinksForOther = myMdmLinkDaoSvc.getMdmLinksBySourcePidAndMatchResult(otherSourceId, MdmMatchResultEnum.POSSIBLE_MATCH);
+		Set<IResourcePersistentId> otherPossibles = possibleLinksForOther.stream().map(IMdmLink::getGoldenResourcePersistenceId).collect(Collectors.toSet());
+
+		//Populate visited list with all possible matches from the passed in target
+		goldenPids.addAll(otherPossibles);
+
+		//Compare and inflate with all possible matches from the actual.
+		List<? extends IMdmLink> possibleLinksForActual = myMdmLinkDaoSvc.getMdmLinksBySourcePidAndMatchResult(actualSourceResourcePid, MdmMatchResultEnum.POSSIBLE_MATCH);
+		Set<IResourcePersistentId> actualPossiblePids = possibleLinksForActual.stream().map(IMdmLink::getGoldenResourcePersistenceId).collect(Collectors.toSet());
+		possibleMatch |= isPossibleMatch(actualPossiblePids, goldenPids, possibleMatch);
+
+		//Compare and inflate with the two potential MATCH resources.
+		List<? extends IMdmLink> actualMatches = myMdmLinkDaoSvc.getMdmLinksBySourcePidAndMatchResult(actualSourceResourcePid, MdmMatchResultEnum.MATCH);
+		Set<IResourcePersistentId> actualMatchedPids = actualMatches.stream().map(match -> match.getGoldenResourcePersistenceId()).collect(Collectors.toSet());
+		possibleMatch |= isPossibleMatch(actualMatchedPids, goldenPids, possibleMatch);
+
+		List<? extends IMdmLink> otherMatches= myMdmLinkDaoSvc.getMdmLinksBySourcePidAndMatchResult(otherSourceId, MdmMatchResultEnum.MATCH);
+		Set<IResourcePersistentId> otherMatchedPids = otherMatches.stream().map(match -> match.getGoldenResourcePersistenceId()).collect(Collectors.toSet());
+		possibleMatch |= isPossibleMatch(otherMatchedPids, goldenPids, possibleMatch);
+
+		return possibleMatch;
+	}
+
+	private static boolean isPossibleMatch(Set<IResourcePersistentId> matchedPids, Set<IResourcePersistentId> goldenPids, boolean possibleMatch) {
+		for (IResourcePersistentId pid : matchedPids) {
+			if (goldenPids.contains(pid)) {
+				return true;
+			} else {
+				goldenPids.add(pid);
+			}
+		}
+		return false;
+	}
+
+	public boolean possibleDuplicateLinkExistsBetween(IResourcePersistentId goldenPid1, IResourcePersistentId goldenPid2) {
+		Optional possibleForwardsLink = myMdmLinkDaoSvc.getMdmLinksByGoldenResourcePidSourcePidAndMatchResult(goldenPid1, goldenPid2, MdmMatchResultEnum.POSSIBLE_DUPLICATE);
+		Optional possibleBackwardsLink = myMdmLinkDaoSvc.getMdmLinksByGoldenResourcePidSourcePidAndMatchResult(goldenPid2, goldenPid1, MdmMatchResultEnum.POSSIBLE_DUPLICATE);
+		return possibleBackwardsLink.isPresent() || possibleForwardsLink.isPresent();
+	}
+
+	public GoldenResourceMatchingAssert is_POSSIBLE_DUPLICATE_to(IAnyResource other) {
+		IResourcePersistentId otherGoldenPid = getGoldenResourcePid(other);
+		if (actualGoldenResourcePid == null || otherGoldenPid == null) {
+			failWithMessage("For a POSSIBLE_DUPLICATE, both resources must have a MATCH. This is not the case for these resources.");
+		}
+		boolean possibleDuplicateExists = possibleDuplicateLinkExistsBetween(actualGoldenResourcePid, otherGoldenPid);
+		if (!possibleDuplicateExists) {
+			failWithActualExpectedAndMessage("No POSSIBLE_DUPLICATE found between " + actualGoldenResourcePid + " and " + otherGoldenPid,
+				"POSSIBLE_DUPLICATE found between " + actualGoldenResourcePid + " and " + otherGoldenPid,
+				"No POSSIBLE_DUPLICATE links were found between golden resources");
+		}
+		return this;
+	}
+
+
 	@Nullable
-	protected IResourcePersistentId getMatchedResourcePidFromResource( T theResource) {
+	protected IResourcePersistentId getGoldenResourcePid(IAnyResource theResource) {
 		IResourcePersistentId retval;
 
 		boolean isGoldenRecord = MdmResourceUtil.isMdmManaged(theResource);
@@ -61,7 +155,7 @@ public  class GoldenResourceMatchingAssert<T extends IAnyResource > extends Abst
 		return retval;
 	}
 
-	protected IMdmLink getMatchedMdmLink(T thePatientOrPractitionerResource) {
+	protected IMdmLink getMatchedMdmLink(IAnyResource thePatientOrPractitionerResource) {
 		List<? extends IMdmLink> mdmLinks = getMdmLinksForTarget(thePatientOrPractitionerResource, MdmMatchResultEnum.MATCH);
 		if (mdmLinks.size() == 0) {
 			return null;
@@ -72,7 +166,7 @@ public  class GoldenResourceMatchingAssert<T extends IAnyResource > extends Abst
 		}
 	}
 
-	protected List<? extends IMdmLink> getMdmLinksForTarget(T theTargetResource, MdmMatchResultEnum theMatchResult) {
+	protected List<? extends IMdmLink> getMdmLinksForTarget(IAnyResource theTargetResource, MdmMatchResultEnum theMatchResult) {
 		IResourcePersistentId pidOrNull = myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), theTargetResource);
 		List<? extends IMdmLink> matchLinkForTarget = myMdmLinkDaoSvc.getMdmLinksBySourcePidAndMatchResult(pidOrNull, theMatchResult);
 		if (!matchLinkForTarget.isEmpty()) {
@@ -80,5 +174,30 @@ public  class GoldenResourceMatchingAssert<T extends IAnyResource > extends Abst
 		} else {
 			return new ArrayList<>();
 		}
+	}
+
+	public GoldenResourceMatchingAssert hasGoldenResourceMatch() {
+		IResourcePersistentId otherGoldenPid = getGoldenResourcePid(actual);
+		if (otherGoldenPid == null) {
+			failWithMessage("Expected resource to be matched to a golden resource. Found no such matches. ");
+		}
+		return this;
+	}
+
+	public GoldenResourceMatchingAssert doesNotHaveGoldenResourceMatch() {
+		IResourcePersistentId otherGoldenPid = getGoldenResourcePid(actual);
+		if (otherGoldenPid != null) {
+			failWithMessage("Expected resource to have no golden resource match, but it did.");
+		}
+		return this;
+	}
+
+	public GoldenResourceMatchingAssert is_not_POSSIBLE_DUPLICATE_to(IAnyResource other) {
+		IResourcePersistentId otherGoldenResourcePid = getGoldenResourcePid(other);
+		boolean possibleDuplicateExists = possibleDuplicateLinkExistsBetween(actualGoldenResourcePid, otherGoldenResourcePid);
+		if (possibleDuplicateExists) {
+			failWithMessage("Possible duplicate exists between both resources!");
+		}
+		return this;
 	}
 }
