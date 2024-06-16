@@ -7,4 +7,6 @@ title: "When performing a search for a resource which uses versioned canonical
   the server failed to process `_include` directives which should bring in
   these references. Includes will now fetch all versions of a canonical
   reference, which is still not perfect but is an improvement over the
-  current behaviour."
+  current behaviour. A future update may add more targeted behaviour to
+  address including versioned reference targets, but this will require a
+  significant re-architecture of the loading module."

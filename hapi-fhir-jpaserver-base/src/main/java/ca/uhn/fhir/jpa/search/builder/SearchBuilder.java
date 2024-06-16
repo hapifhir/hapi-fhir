@@ -1676,7 +1676,10 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	}
 
 	private void loadCanonicalUrls(
-			Set<String> theCanonicalUrls, EntityManager theEntityManager, HashSet<JpaPid> thePidsToInclude, boolean theReverse) {
+			Set<String> theCanonicalUrls,
+			EntityManager theEntityManager,
+			HashSet<JpaPid> thePidsToInclude,
+			boolean theReverse) {
 		StringBuilder sqlBuilder;
 		Set<Long> identityHashesForTypes = calculateIndexUriIdentityHashesForResourceTypes(null, theReverse);
 		List<Collection<String>> canonicalUrlPartitions =
@@ -1742,7 +1745,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		}
 		// The logical join will be by hfj_spidx_uri on sp_name='uri' and sp_uri=target_resource_url.
 		// But sp_name isn't indexed, so we use hash_identity instead.
-		Set<Long> identityHashesForTypes = calculateIndexUriIdentityHashesForResourceTypes(theTargetResourceTypes, theReverse);
+		Set<Long> identityHashesForTypes =
+				calculateIndexUriIdentityHashesForResourceTypes(theTargetResourceTypes, theReverse);
 
 		Map<String, Object> canonicalUriQueryParams = new HashMap<>();
 		StringBuilder canonicalUrlQuery = new StringBuilder(
@@ -1771,7 +1775,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		return Pair.of(canonicalUrlQuery.toString(), canonicalUriQueryParams);
 	}
 
-	@Nonnull Set<Long> calculateIndexUriIdentityHashesForResourceTypes(Set<String> theTargetResourceTypes, boolean theReverse) {
+	@Nonnull
+	Set<Long> calculateIndexUriIdentityHashesForResourceTypes(Set<String> theTargetResourceTypes, boolean theReverse) {
 		Set<String> targetResourceTypes = theTargetResourceTypes;
 		if (targetResourceTypes == null) {
 			/*
@@ -1788,7 +1793,9 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				// in this context, so let's just assume it could be anything.
 				targetResourceTypes = possibleTypes;
 			} else {
-				for (var next : mySearchParamRegistry.getActiveSearchParams(myResourceName).values().stream().filter(t -> t.getParamType().equals(RestSearchParameterTypeEnum.REFERENCE)).collect(Collectors.toList())) {
+				for (var next : mySearchParamRegistry.getActiveSearchParams(myResourceName).values().stream()
+						.filter(t -> t.getParamType().equals(RestSearchParameterTypeEnum.REFERENCE))
+						.collect(Collectors.toList())) {
 
 					// If the reference points to a Reference (ie not a canonical or CanonicalReference)
 					// then it doesn't matter here anyhow. The logic here only works for elements at the
@@ -1796,12 +1803,14 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					// QuestionnaireResponse.subject.where(...)) but this is just an optimization
 					// anyhow.
 					if (next.getPath().startsWith(myResourceName + ".")) {
-						String elementName = next.getPath().substring(next.getPath().indexOf('.') + 1);
+						String elementName =
+								next.getPath().substring(next.getPath().indexOf('.') + 1);
 						int secondDotIndex = elementName.indexOf('.');
 						if (secondDotIndex != -1) {
 							elementName = elementName.substring(0, secondDotIndex);
 						}
-						BaseRuntimeChildDefinition child = myContext.getResourceDefinition(myResourceName).getChildByName(elementName);
+						BaseRuntimeChildDefinition child =
+								myContext.getResourceDefinition(myResourceName).getChildByName(elementName);
 						if (child != null) {
 							BaseRuntimeElementDefinition<?> childDef = child.getChildByName(elementName);
 							if (childDef != null) {
@@ -1828,7 +1837,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 						targetResourceTypes.addAll(possibleTypes);
 						break;
 					}
-
 				}
 			}
 		}
