@@ -352,6 +352,12 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		for (var next : theCodeList) {
 			if (isNotBlank(next.getCode())) {
 				if (!theFoundCodesBuffer.add(next.getCode())) {
+					/*
+					 * Note: We could possibly modify this behaviour to be forgiving, and just
+					 * ignore duplicates. The only issue is that concepts can have properties,
+					 * designations, etc. and it could be dangerous to just pick one and ignore the
+					 * other. So the safer thing seems to be to just throw an error.
+					 */
 					throw new PreconditionFailedException(Msg.code(2528) + "Duplicate concept detected in CodeSystem: "
 							+ UrlUtil.sanitizeUrlPart(next.getCode()));
 				}

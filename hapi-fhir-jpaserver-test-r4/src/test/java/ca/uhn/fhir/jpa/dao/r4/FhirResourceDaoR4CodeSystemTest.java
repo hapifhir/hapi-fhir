@@ -212,6 +212,25 @@ public class FhirResourceDaoR4CodeSystemTest extends BaseJpaR4Test {
 		}
 	}
 
+	@Test
+	public void testCodeSystemWithDuplicateCodeInChild() {
+		CodeSystem cs = new CodeSystem();
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.setUrl("http://foo");
+		cs.setVersion("1.0");
+
+		CodeSystem.ConceptDefinitionComponent parent = cs.addConcept().setCode("CODE0").setDisplay("Code0");
+		parent.addConcept().setCode("CODE1").setDisplay("Code1");
+		parent.addConcept().setCode("CODE1").setDisplay("Code1");
+		cs.addConcept().setCode("CODE2").setDisplay("Code2");
+
+		try {
+			myCodeSystemDao.create(cs, mySrd);
+			fail();
+		} catch (PreconditionFailedException e) {
+			assertThat(e.getMessage()).contains("Duplicate concept detected in CodeSystem: CODE1");
+		}
+	}
 
 
 	@AfterAll
