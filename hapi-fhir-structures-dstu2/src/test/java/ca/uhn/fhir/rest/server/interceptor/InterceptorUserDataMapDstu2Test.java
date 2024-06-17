@@ -91,7 +91,15 @@ public class InterceptorUserDataMapDstu2Test {
 			assertEquals(400, status.getStatusLine().getStatusCode());
 		}
 
-		await().until(() -> myMapCheckMethods, contains("incomingRequestPostProcessed", "incomingRequestPreHandled", "preProcessOutgoingException", "handleException", "processingCompleted"));
+		await().untilAsserted(() ->
+			assertThat(myMapCheckMethods).containsExactly(
+				"incomingRequestPostProcessed",
+				"incomingRequestPreHandled",
+				"preProcessOutgoingException",
+				"handleException",
+				"processingCompleted"
+			)
+		);
 	}
 
 	@Test
@@ -103,7 +111,7 @@ public class InterceptorUserDataMapDstu2Test {
 
 			String response = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			assertThat(response).contains("\"id\":\"1\"");
-		await().until(() -> myMapCheckMethods, contains("incomingRequestPostProcessed", "incomingRequestPreHandled", "outgoingResponse", "processingCompletedNormally", "processingCompleted"));
+		await().untilAsserted(() -> assertThat(myMapCheckMethods).contains("incomingRequestPostProcessed", "incomingRequestPreHandled", "outgoingResponse", "processingCompletedNormally", "processingCompleted"));
 	}
 
 	}
