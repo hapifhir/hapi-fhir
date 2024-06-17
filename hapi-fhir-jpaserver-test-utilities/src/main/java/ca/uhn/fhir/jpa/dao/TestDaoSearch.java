@@ -131,8 +131,7 @@ public class TestDaoSearch {
 		assertSearchIdsMatch(theReason, theQueryUrl, theIds);
 	}
 
-	public void assertSearchIdsMatch(
-			String theReason, String theQueryUrl, String... theIds) {
+	public void assertSearchIdsMatch(String theReason, String theQueryUrl, String... theIds) {
 		List<String> ids = searchForIds(theQueryUrl);
 		assertThat(ids).as(theReason).containsExactlyInAnyOrder(theIds);
 	}
