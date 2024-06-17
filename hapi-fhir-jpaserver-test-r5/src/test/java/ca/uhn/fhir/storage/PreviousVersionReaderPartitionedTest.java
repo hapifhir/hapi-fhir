@@ -11,7 +11,7 @@ import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.Patient;
-import org.jetbrains.annotations.NotNull;
+import jakarta.annotation.Nonnull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -123,7 +123,7 @@ public class PreviousVersionReaderPartitionedTest extends BaseJpaR5Test {
 		assertTrue(previousPatient.isDeleted());
 	}
 
-	@NotNull
+	@Nonnull
 	private Patient setupPreviousDeletedResource() {
 		Patient patient = createMale();
 		assertEquals(1L, patient.getIdElement().getVersionIdPartAsLong());

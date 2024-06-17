@@ -157,7 +157,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 	@AfterEach
 	public void afterResetDao() {
-		myStorageSettings.clearSupportedSubscriptionTypesForUnitTest();
+		mySubscriptionSettings.clearSupportedSubscriptionTypesForUnitTest();
 		myStorageSettings.setAllowMultipleDelete(new JpaStorageSettings().isAllowMultipleDelete());
 		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(new JpaStorageSettings().isAutoCreatePlaceholderReferenceTargets());
 		myStorageSettings.setAutoVersionReferenceAtPaths(new JpaStorageSettings().getAutoVersionReferenceAtPaths());

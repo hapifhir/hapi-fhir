@@ -12,6 +12,7 @@ import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyEvaluator;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
+import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
@@ -62,7 +63,7 @@ public class SubscriptionValidatingInterceptorTest {
 	@MockBean
 	private SubscriptionStrategyEvaluator mySubscriptionStrategyEvaluator;
 	@MockBean
-	private JpaStorageSettings myStorageSettings;
+	private SubscriptionSettings mySubscriptionSettings;
 	@MockBean
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 	@Mock
@@ -258,7 +259,7 @@ public class SubscriptionValidatingInterceptorTest {
 	private void setFhirContext(FhirVersionEnum fhirVersion) {
 		myFhirContext = FhirContext.forCached(fhirVersion);
 		mySubscriptionValidatingInterceptor.setFhirContext(myFhirContext);
-		mySubscriptionValidatingInterceptor.setSubscriptionCanonicalizerForUnitTest(new SubscriptionCanonicalizer(myFhirContext, myStorageSettings));
+		mySubscriptionValidatingInterceptor.setSubscriptionCanonicalizerForUnitTest(new SubscriptionCanonicalizer(myFhirContext, mySubscriptionSettings));
 	}
 
 	private static @Nonnull Stream<IBaseResource> subscriptionByFhirVersion(boolean theIncludeR5) {
@@ -290,7 +291,7 @@ public class SubscriptionValidatingInterceptorTest {
 
 		@Bean
 		SubscriptionCanonicalizer subscriptionCanonicalizer(FhirContext theFhirContext) {
-			return new SubscriptionCanonicalizer(theFhirContext, new StorageSettings());
+			return new SubscriptionCanonicalizer(theFhirContext, new SubscriptionSettings());
 		}
 
 		@Bean

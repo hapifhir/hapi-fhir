@@ -1242,7 +1242,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		ourLog.info("Patient TEMP UUID: {}", patient.getId());
 		String s = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(transactionBundle);
-		System.out.println(s);
+		ourLog.info(s);
 		Bundle outcome = mySystemDao.transaction(null, transactionBundle);
 		String patientLocation = outcome.getEntry().get(0).getResponse().getLocation();
 		assertThat(patientLocation).matches("Patient/[a-z0-9-]+/_history/1");

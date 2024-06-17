@@ -119,7 +119,7 @@ public class CompartmentDstu2Test {
 		public List<Encounter> method2SearchCompartment(final @IdParam IdDt theId) {
 			ourLastId = theId;
 			ourLastMethod = "searchEncounterCompartment";
-			System.out.println("Encounter compartment search");
+			ourLog.info("Encounter compartment search");
 			List<Encounter> encounters = new ArrayList<Encounter>();
 			Encounter encounter = new Encounter();
 			encounter.setId("1");
@@ -132,7 +132,7 @@ public class CompartmentDstu2Test {
 		public List<Observation> method2SearchCompartment2(final @IdParam IdDt theId) {
 			ourLastId = theId;
 			ourLastMethod = "searchObservationCompartment";
-			System.out.println("Encounter compartment search");
+			ourLog.info("Encounter compartment search");
 			List<Observation> encounters = new ArrayList<Observation>();
 			Observation obs = new Observation();
 			obs.setId("1");
