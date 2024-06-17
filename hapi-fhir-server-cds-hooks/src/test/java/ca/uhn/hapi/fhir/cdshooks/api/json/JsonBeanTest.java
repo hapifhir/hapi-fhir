@@ -1,7 +1,7 @@
 package ca.uhn.hapi.fhir.cdshooks.api.json;
 
 import ca.uhn.fhir.model.api.IModelJson;
-import ca.uhn.test.util.asserts.HasGetterOrSetterForAllJsonFieldsAssert;
+import ca.uhn.test.util.HasGetterOrSetterForAllJsonFieldsAssert;
 import org.junit.jupiter.api.Test;
 import org.reflections.Reflections;
 

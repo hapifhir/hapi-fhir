@@ -12,7 +12,7 @@ import ca.uhn.fhir.rest.server.interceptor.auth.IAuthorizationSearchParamMatcher
 import ca.uhn.fhir.rest.server.interceptor.auth.PolicyEnum;
 import ca.uhn.fhir.rest.server.interceptor.auth.RuleBuilder;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
-import ca.uhn.test.util.asserts.LogEventIterableAssert;
+import ca.uhn.test.util.LogEventIterableAssert;
 import ca.uhn.test.util.LogbackTestExtension;
 import ch.qos.logback.classic.Level;
 import jakarta.annotation.Nullable;
