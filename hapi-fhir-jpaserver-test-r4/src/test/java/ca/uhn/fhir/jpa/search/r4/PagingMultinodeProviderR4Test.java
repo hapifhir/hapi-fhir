@@ -16,8 +16,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.test.util.AopTestUtils;
 
 import static org.apache.commons.lang3.StringUtils.leftPad;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class PagingMultinodeProviderR4Test extends BaseResourceProviderR4Test {
 
@@ -94,28 +93,28 @@ public class PagingMultinodeProviderR4Test extends BaseResourceProviderR4Test {
 			.offset(0)
 			.returnBundle(Bundle.class)
 			.execute();
-		assertThat(toUnqualifiedVersionlessIdValues(found), contains(resultsPages[index++]));
+		assertThat(toUnqualifiedVersionlessIdValues(found)).containsExactly(resultsPages[index++]);
 
 		found = myClient
 			.loadPage()
 			.next(found)
 			.cacheControl(directive)
 			.execute();
-		assertThat(toUnqualifiedVersionlessIdValues(found), contains(resultsPages[index++]));
+		assertThat(toUnqualifiedVersionlessIdValues(found)).containsExactly(resultsPages[index++]);
 
 		found = myClient
 			.loadPage()
 			.next(found)
 			.cacheControl(directive)
 			.execute();
-		assertThat(toUnqualifiedVersionlessIdValues(found), contains(resultsPages[index++]));
+		assertThat(toUnqualifiedVersionlessIdValues(found)).containsExactly(resultsPages[index++]);
 
 		found = myClient
 			.loadPage()
 			.next(found)
 			.cacheControl(directive)
 			.execute();
-		assertThat(toUnqualifiedVersionlessIdValues(found), contains(resultsPages[index]));
+		assertThat(toUnqualifiedVersionlessIdValues(found)).containsExactly(resultsPages[index]);
 
 		// page backwards
 		while (index > 0) {
@@ -125,7 +124,7 @@ public class PagingMultinodeProviderR4Test extends BaseResourceProviderR4Test {
 				.previous(found)
 				.cacheControl(directive)
 				.execute();
-			assertThat(toUnqualifiedVersionlessIdValues(found), contains(resultsPages[--index]));
+			assertThat(toUnqualifiedVersionlessIdValues(found)).containsExactly(resultsPages[--index]);
 		}
 	}
 

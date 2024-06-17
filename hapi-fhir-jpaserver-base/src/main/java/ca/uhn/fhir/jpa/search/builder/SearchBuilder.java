@@ -468,6 +468,14 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		if (!fulltextEnabled) {
 			failIfUsed(Constants.PARAM_TEXT);
 			failIfUsed(Constants.PARAM_CONTENT);
+		} else {
+			for (SortSpec sortSpec : myParams.getAllChainsInOrder()) {
+				final String paramName = sortSpec.getParamName();
+				if (paramName.contains(".")) {
+					failIfUsedWithChainedSort(Constants.PARAM_TEXT);
+					failIfUsedWithChainedSort(Constants.PARAM_CONTENT);
+				}
+			}
 		}
 
 		// someday we'll want a query planner to figure out if we _should_ or _must_ use the ft index, not just if we
@@ -475,13 +483,22 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		return fulltextEnabled
 				&& myParams != null
 				&& myParams.getSearchContainedMode() == SearchContainedModeEnum.FALSE
-				&& myFulltextSearchSvc.supportsSomeOf(myParams);
+				&& myFulltextSearchSvc.supportsSomeOf(myParams)
+				&& myFulltextSearchSvc.supportsAllSortTerms(myResourceName, myParams);
 	}
 
 	private void failIfUsed(String theParamName) {
 		if (myParams.containsKey(theParamName)) {
 			throw new InvalidRequestException(Msg.code(1192)
 					+ "Fulltext search is not enabled on this service, can not process parameter: " + theParamName);
+		}
+	}
+
+	private void failIfUsedWithChainedSort(String theParamName) {
+		if (myParams.containsKey(theParamName)) {
+			throw new InvalidRequestException(Msg.code(2524)
+					+ "Fulltext search combined with chained sorts are not supported, can not process parameter: "
+					+ theParamName);
 		}
 	}
 

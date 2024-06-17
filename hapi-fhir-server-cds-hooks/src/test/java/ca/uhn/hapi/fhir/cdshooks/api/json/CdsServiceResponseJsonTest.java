@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -17,17 +18,17 @@ class CdsServiceResponseJsonTest {
         fixture.addCard(expected);
         //execute
         final List<CdsServiceResponseCardJson> actual = fixture.getCards();
-        //validate
-        assertNotNull(actual);
-        assertEquals(1, actual.size());
-        assertEquals(expected, actual.get(0));
+		//validate
+		assertNotNull(actual);
+			assertThat(actual).hasSize(1);
+		assertEquals(expected, actual.get(0));
     }
 
     @Test
     void testGetCardsNotNull() {
         //execute
         final List<CdsServiceResponseCardJson> actual = fixture.getCards();
-        //validate
-        assertNotNull(actual);
+		//validate
+		assertNotNull(actual);
     }
 }

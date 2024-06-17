@@ -1,5 +1,8 @@
 package ca.uhn.fhir.jpa.provider.r5;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.BooleanType;
 import org.hl7.fhir.r5.model.CodeType;
@@ -17,9 +20,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ResourceProviderR5ConceptMapTest extends BaseResourceProviderR5Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceProviderR5ConceptMapTest.class);
@@ -89,7 +90,7 @@ public class ResourceProviderR5ConceptMapTest extends BaseResourceProviderR5Test
 		assertEquals(1, getNumberOfParametersByName(respParams, "match"));
 		param = getParametersByName(respParams, "match").get(0);
 
-		assertEquals(3, param.getPart().size());
+		assertThat(param.getPart()).hasSize(3);
 		
 		ParametersParameterComponent part = getPartByName(param, "concept");
 		Coding coding = (Coding) part.getValue();
@@ -173,7 +174,7 @@ public class ResourceProviderR5ConceptMapTest extends BaseResourceProviderR5Test
 
 		assertEquals(1, getNumberOfParametersByName(respParams, "match"));
 		param = getParametersByName(respParams, "match").get(0);
-		assertEquals(3, param.getPart().size());
+		assertThat(param.getPart()).hasSize(3);
 		ParametersParameterComponent part = getPartByName(param, "equivalence");
 		assertEquals("equivalent", ((CodeType) part.getValue()).getCode());
 		part = getPartByName(param, "concept");
@@ -184,6 +185,6 @@ public class ResourceProviderR5ConceptMapTest extends BaseResourceProviderR5Test
 		assertEquals(CS_URL, coding.getSystem());
 		assertEquals("Version 1", coding.getVersion());
 		part = getPartByName(param, "source");
-		assertEquals(CM_URL, ((UriType) part.getValue()).getValueAsString());	
+		assertEquals(CM_URL, ((UriType) part.getValue()).getValueAsString());
 	}
 }

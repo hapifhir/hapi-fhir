@@ -13,6 +13,7 @@ import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamProvider;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
 import ca.uhn.fhir.jpa.subscription.match.config.SubscriptionProcessorConfig;
 import ca.uhn.fhir.jpa.subscription.match.deliver.email.IEmailSender;
+import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.subscription.submit.config.SubscriptionSubmitterConfig;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionQueryValidator;
 import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
@@ -40,6 +41,7 @@ public class DaoSubscriptionMatcherTest {
 
 	@Autowired(required = false)
 	private PlatformTransactionManager myTxManager;
+
 	@MockBean
 	private JpaStorageSettings myStorageSettings;
 	@MockBean
@@ -95,6 +97,11 @@ public class DaoSubscriptionMatcherTest {
 		@Bean
 		public IResourceModifiedMessagePersistenceSvc resourceModifiedMessagePersistenceSvc() {
 			return mock(IResourceModifiedMessagePersistenceSvc.class);
+		}
+
+		@Bean
+		public SubscriptionSettings subscriptionSettings() {
+			return new SubscriptionSettings();
 		}
 	}
 

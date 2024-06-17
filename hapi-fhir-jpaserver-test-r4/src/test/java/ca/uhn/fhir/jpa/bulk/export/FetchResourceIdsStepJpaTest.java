@@ -4,6 +4,7 @@ import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.jobs.export.FetchResourceIdsStep;
+import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.batch2.jobs.export.models.ResourceIdList;
 import ca.uhn.fhir.batch2.model.JobInstance;
@@ -20,9 +21,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.lessThanOrEqualTo;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -68,7 +67,7 @@ public class FetchResourceIdsStepJpaTest  extends BaseJpaR4Test {
 		JobInstance instance = new JobInstance();
 		instance.setInstanceId("instance-id");
 		String chunkId = "chunk-id";
-		StepExecutionDetails<BulkExportJobParameters, VoidModel> executionDetails = new StepExecutionDetails<>(params, data, instance, chunkId);
+		StepExecutionDetails<BulkExportJobParameters, VoidModel> executionDetails = new StepExecutionDetails<>(params, data, instance, new WorkChunk().setId(chunkId));
 		myCaptureQueriesListener.clear();
 
 		// Test
@@ -77,7 +76,7 @@ public class FetchResourceIdsStepJpaTest  extends BaseJpaR4Test {
 		// Verify
 		verify(mySink, times(1)).accept(myResourceIdListCaptor.capture());
 		ResourceIdList idList = myResourceIdListCaptor.getAllValues().get(0);
-		assertEquals(10, idList.getIds().size());
+		assertThat(idList.getIds()).hasSize(10);
 	}
 
 	@Test
@@ -96,7 +95,7 @@ public class FetchResourceIdsStepJpaTest  extends BaseJpaR4Test {
 		JobInstance instance = new JobInstance();
 		instance.setInstanceId("instance-id");
 		String chunkId = "chunk-id";
-		StepExecutionDetails<BulkExportJobParameters, VoidModel> executionDetails = new StepExecutionDetails<>(params, data, instance, chunkId);
+		StepExecutionDetails<BulkExportJobParameters, VoidModel> executionDetails = new StepExecutionDetails<>(params, data, instance, new WorkChunk().setId(chunkId));
 
 		// Test
 		myFetchResourceIdsStep.run(executionDetails, mySink);
@@ -110,7 +109,7 @@ public class FetchResourceIdsStepJpaTest  extends BaseJpaR4Test {
 			// Note that the 600 is a bit higher than the configured maximum of 500 above,
 			// because our chunk size estimate is not totally accurate, but it's not
 			// going to be way off, less than 100 regardless of how big the maximum is
-			assertThat(serialized, serialized.length(), lessThanOrEqualTo(600));
+			assertThat(serialized.length()).as(serialized).isLessThanOrEqualTo(600);
 		}
 
 	}

@@ -575,7 +575,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		// Pre-cache the match URL, and create an entry in the HFJ_RES_SEARCH_URL table to
 		// protect against concurrent writes to the same conditional URL
 		if (theMatchUrl != null) {
-			myResourceSearchUrlSvc.enforceMatchUrlResourceUniqueness(getResourceName(), theMatchUrl, jpaPid);
+			myResourceSearchUrlSvc.enforceMatchUrlResourceUniqueness(getResourceName(), theMatchUrl, updatedEntity);
 			myMatchResourceUrlService.matchUrlResolved(theTransactionDetails, getResourceName(), theMatchUrl, jpaPid);
 		}
 
@@ -1410,19 +1410,20 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	@Override
-	@Transactional
 	public <MT extends IBaseMetaType> MT metaGetOperation(Class<MT> theType, IIdType theId, RequestDetails theRequest) {
-		Set<TagDefinition> tagDefs = new HashSet<>();
-		BaseHasResource entity = readEntity(theId, theRequest);
-		for (BaseTag next : entity.getTags()) {
-			tagDefs.add(next.getTag());
-		}
-		MT retVal = toMetaDt(theType, tagDefs);
+		return myTransactionService.withRequest(theRequest).execute(() -> {
+			Set<TagDefinition> tagDefs = new HashSet<>();
+			BaseHasResource entity = readEntity(theId, theRequest);
+			for (BaseTag next : entity.getTags()) {
+				tagDefs.add(next.getTag());
+			}
+			MT retVal = toMetaDt(theType, tagDefs);
 
-		retVal.setLastUpdated(entity.getUpdatedDate());
-		retVal.setVersionId(Long.toString(entity.getVersion()));
+			retVal.setLastUpdated(entity.getUpdatedDate());
+			retVal.setVersionId(Long.toString(entity.getVersion()));
 
-		return retVal;
+			return retVal;
+		});
 	}
 
 	@Override

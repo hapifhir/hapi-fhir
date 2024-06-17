@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.search.reindex;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
@@ -31,7 +32,7 @@ import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Date;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests the narrative generation in {@link InstanceReindexServiceImpl}. This is a separate test

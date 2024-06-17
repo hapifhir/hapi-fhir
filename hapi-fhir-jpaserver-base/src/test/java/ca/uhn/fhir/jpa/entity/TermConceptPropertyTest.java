@@ -2,11 +2,12 @@ package ca.uhn.fhir.jpa.entity;
 
 import com.google.common.base.Strings;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.startsWith;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TermConceptPropertyTest {
 
@@ -21,8 +22,8 @@ public class TermConceptPropertyTest {
 		termConceptProperty.setValue(ourVeryLongString);
 
 		// then
-		assertThat(termConceptProperty.getValueBlobForTesting(), notNullValue());
-		assertThat(termConceptProperty.getValueBinForTesting(), notNullValue());
+		assertTrue(termConceptProperty.hasValueBlobForTesting());
+		assertTrue(termConceptProperty.hasValueBinForTesting());
 	}
 
 	@Test
@@ -33,7 +34,7 @@ public class TermConceptPropertyTest {
 		termConceptProperty.setValueBlobForTesting(null);
 
 		// when/then
-		assertThat(termConceptProperty.hasValueBin(), is(true));
+		assertTrue(termConceptProperty.hasValueBin());
 
 	}
 
@@ -45,7 +46,7 @@ public class TermConceptPropertyTest {
 		termConceptProperty.setValueBlobForTesting(ourVeryLongString.getBytes());
 
 		// when/then
-		assertThat(termConceptProperty.hasValueBin(), is(true));
+		assertTrue(termConceptProperty.hasValueBin());
 
 	}
 
@@ -60,7 +61,7 @@ public class TermConceptPropertyTest {
 		String value = termConceptProperty.getValue();
 
 		// then
-		assertThat(value, startsWith("a"));
+		assertThat(value).startsWith("a");
 
 	}
 
@@ -75,7 +76,22 @@ public class TermConceptPropertyTest {
 		String value = termConceptProperty.getValue();
 
 		// then
-		assertThat(value, startsWith("a"));
+		assertThat(value).startsWith("a");
+	}
+
+	@ParameterizedTest
+	@ValueSource(booleans = {false, true})
+	public void testSetValue_withSupportLegacyLob(boolean theSupportLegacyLob){
+		// given
+		TermConceptProperty termConceptProperty = new TermConceptProperty();
+
+		// when
+		termConceptProperty.setValue(ourVeryLongString);
+		termConceptProperty.performLegacyLobSupport(theSupportLegacyLob);
+
+		// then
+		assertTrue(termConceptProperty.hasValueBinForTesting());
+		assertEquals(theSupportLegacyLob, termConceptProperty.hasValueBlobForTesting());
 	}
 
 }

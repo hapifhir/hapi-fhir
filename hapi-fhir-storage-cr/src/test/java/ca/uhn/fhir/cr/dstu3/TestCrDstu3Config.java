@@ -2,17 +2,13 @@ package ca.uhn.fhir.cr.dstu3;
 
 import ca.uhn.fhir.cr.TestCqlProperties;
 import ca.uhn.fhir.cr.TestCrConfig;
-
-
 import ca.uhn.fhir.cr.config.dstu3.CrDstu3Config;
-
 import org.cqframework.cql.cql2elm.CqlCompilerOptions;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.cqframework.cql.cql2elm.model.Model;
 import org.hl7.cql.model.ModelIdentifier;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
-
 import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings;
@@ -22,7 +18,6 @@ import org.opencds.cqf.fhir.utility.ValidationProfile;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-
 
 import java.util.EnumSet;
 import java.util.List;

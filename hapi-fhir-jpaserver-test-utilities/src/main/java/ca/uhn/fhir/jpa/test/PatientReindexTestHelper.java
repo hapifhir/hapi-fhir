@@ -38,8 +38,10 @@ import org.junit.jupiter.params.provider.Arguments;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
+
 
 public class PatientReindexTestHelper {
 
@@ -153,7 +155,7 @@ public class PatientReindexTestHelper {
 	private void validatePersistedPatients(int theExpectedNumPatients, long theExpectedVersion) {
 		RequestDetails requestDetails = new SystemRequestDetails();
 		List<IBaseResource> resources = myPatientDao.search(SearchParameterMap.newSynchronous(), requestDetails).getAllResources();
-		assertEquals(theExpectedNumPatients, resources.size());
+		assertThat(resources).hasSize(theExpectedNumPatients);
 		for(IBaseResource resource : resources){
 			assertEquals(Patient.class, resource.getClass());
 			Patient patient = (Patient) resource;

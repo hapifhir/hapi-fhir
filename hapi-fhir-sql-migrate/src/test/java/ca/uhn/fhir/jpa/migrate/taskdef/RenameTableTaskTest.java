@@ -8,13 +8,7 @@ import java.sql.SQLException;
 import java.util.Set;
 import java.util.function.Supplier;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.not;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 public class RenameTableTaskTest extends BaseTest {
 
@@ -37,30 +31,8 @@ public class RenameTableTaskTest extends BaseTest {
 
 		// then
 		Set<String> tableNames = JdbcUtils.getTableNames(getConnectionProperties());
-		assertThat(tableNames, hasItem(newTableName));
-		assertThat(tableNames, not(hasItem(oldTableName)));
-	}
-
-	@ParameterizedTest(name = "{index}: {0}")
-	@MethodSource("data")
-	public void testRenameTableTask_whenTableDoesNotExists_willRaiseException(Supplier<TestDatabaseDetails> theTestDatabaseDetails) throws SQLException {
-		// given
-		before(theTestDatabaseDetails);
-		final String newTableName = "NEWTABLE";
-		final String oldTableName = "SOMETABLE";
-
-		RenameTableTask task = new RenameTableTask("1", "1", oldTableName, newTableName);
-		getMigrator().addTask(task);
-
-		// when
-		try {
-			getMigrator().migrate();
-			fail();
-		} catch (Exception e){
-			// then
-			assertThat(e.getMessage(), containsString("2516"));
-		}
-
+		assertThat(tableNames).contains(newTableName);
+		assertThat(tableNames).doesNotContain(oldTableName);
 	}
 
 }

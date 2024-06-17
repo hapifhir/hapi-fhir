@@ -1,38 +1,23 @@
 package ca.uhn.fhir.jpa.dao.r5.database;
 
-import ca.uhn.fhir.batch2.jobs.export.BulkDataExportProvider;
-import ca.uhn.fhir.batch2.jobs.expunge.DeleteExpungeProvider;
-import ca.uhn.fhir.batch2.jobs.reindex.ReindexProvider;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
-import ca.uhn.fhir.jpa.api.dao.PatientEverythingParameters;
+import ca.uhn.fhir.jpa.dao.TestDaoSearch;
 import ca.uhn.fhir.jpa.embedded.JpaEmbeddedDatabase;
-import ca.uhn.fhir.jpa.fql.provider.HfqlRestProvider;
-import ca.uhn.fhir.jpa.graphql.GraphQLProvider;
 import ca.uhn.fhir.jpa.migrate.HapiMigrationStorageSvc;
 import ca.uhn.fhir.jpa.migrate.MigrationTaskList;
 import ca.uhn.fhir.jpa.migrate.SchemaMigrator;
 import ca.uhn.fhir.jpa.migrate.dao.HapiMigrationDao;
 import ca.uhn.fhir.jpa.migrate.tasks.HapiFhirJpaMigrationTasks;
-import ca.uhn.fhir.jpa.provider.DiffProvider;
-import ca.uhn.fhir.jpa.provider.JpaCapabilityStatementProvider;
-import ca.uhn.fhir.jpa.provider.ProcessMessageProvider;
-import ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider;
-import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
-import ca.uhn.fhir.jpa.provider.ValueSetOperationProvider;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.test.BaseJpaTest;
 import ca.uhn.fhir.jpa.test.config.TestR5Config;
-import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
-import ca.uhn.fhir.rest.server.interceptor.CorsInterceptor;
 import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import ca.uhn.fhir.test.utilities.server.RestfulServerConfigurerExtension;
@@ -44,18 +29,17 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.IdType;
-import org.hl7.fhir.r5.model.IntegerType;
 import org.hl7.fhir.r5.model.Parameters;
 import org.hl7.fhir.r5.model.Patient;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.envers.repository.support.EnversRevisionRepositoryFactoryBean;
@@ -63,24 +47,21 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.web.cors.CorsConfiguration;
 
 import javax.sql.DataSource;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_EVERYTHING;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 @ExtendWith(SpringExtension.class)
 @EnableJpaRepositories(repositoryFactoryBeanClass = EnversRevisionRepositoryFactoryBean.class)
-@ContextConfiguration(classes = {BaseDatabaseVerificationIT.TestConfig.class})
+@ContextConfiguration(classes = {BaseDatabaseVerificationIT.TestConfig.class, TestDaoSearch.Config.class})
 public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements ITestDataBuilder {
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseDatabaseVerificationIT.class);
 	private static final String MIGRATION_TABLENAME = "MIGRATIONS";
@@ -108,6 +89,9 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
 
 	@Autowired
 	private DatabaseBackedPagingProvider myPagingProvider;
+
+	@Autowired
+	TestDaoSearch myTestDaoSearch;
 
 	@RegisterExtension
 	protected RestfulServerExtension myServer = new RestfulServerExtension(FhirContext.forR5Cached());
@@ -145,7 +129,7 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
 
 		myPatientDao.delete(id, new SystemRequestDetails());
 
-		assertThrows(ResourceGoneException.class, () -> myPatientDao.read(id, new SystemRequestDetails()));
+		assertThatExceptionOfType(ResourceGoneException.class).isThrownBy(() -> myPatientDao.read(id, new SystemRequestDetails()));
 	}
 
 
@@ -172,10 +156,25 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
 			values.addAll(toUnqualifiedVersionlessIdValues(outcome));
 		}
 
-        assertThat(values.toString(), values, containsInAnyOrder(expectedIds.toArray(new String[0])));
+		assertThat(values).as(values.toString()).containsExactlyInAnyOrder(expectedIds.toArray(new String[0]));
     }
 
-
+	@ParameterizedTest
+	@CsvSource(textBlock = """
+			query string,			Patient?name=smith
+			query date,				Observation?date=2021
+			query token,			Patient?active=true
+			sort string, 			Patient?_sort=name
+			sort date, 				Observation?_sort=date
+			sort token, 			Patient?_sort=active
+			sort chained date, 		Observation?_sort=patient.birthdate
+			sort chained string, 	Observation?_sort=patient.name
+			sort chained qualified, Patient?_sort=Practitioner:general-practitioner.family
+			sort chained token, 	Observation?_sort=patient.active
+			""")
+	void testSyntaxForVariousQueries(String theMessage, String theQuery) {
+		assertDoesNotThrow(()->myTestDaoSearch.searchForBundleProvider(theQuery), theMessage);
+	}
 
 	@Configuration
 	public static class TestConfig extends TestR5Config {
@@ -222,8 +221,8 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
 	}
 
 	public static class JpaDatabaseContextConfigParamObject {
-		private JpaEmbeddedDatabase myJpaEmbeddedDatabase;
-		private String myDialect;
+		final JpaEmbeddedDatabase myJpaEmbeddedDatabase;
+		final String myDialect;
 
 		public JpaDatabaseContextConfigParamObject(JpaEmbeddedDatabase theJpaEmbeddedDatabase, String theDialect) {
 			myJpaEmbeddedDatabase = theJpaEmbeddedDatabase;
@@ -239,11 +238,13 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public IIdType doCreateResource(IBaseResource theResource) {
 		return myDaoRegistry.getResourceDao(myFhirContext.getResourceType(theResource)).create(theResource, new SystemRequestDetails()).getId();
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public IIdType doUpdateResource(IBaseResource theResource) {
 		return myDaoRegistry.getResourceDao(myFhirContext.getResourceType(theResource)).update(theResource, new SystemRequestDetails()).getId();

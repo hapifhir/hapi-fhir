@@ -29,7 +29,12 @@ import ca.uhn.fhir.tinder.parser.ResourceGeneratorUsingSpreadsheet;
 import org.apache.maven.plugin.MojoFailureException;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.TreeSet;
 
 public abstract class AbstractGenerator {
 

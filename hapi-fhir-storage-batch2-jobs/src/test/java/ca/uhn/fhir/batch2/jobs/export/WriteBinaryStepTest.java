@@ -1,11 +1,13 @@
 package ca.uhn.fhir.batch2.jobs.export;
 
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.jobs.export.models.BulkExportBinaryFileId;
+import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.batch2.jobs.export.models.ExpandedResourcesList;
 import ca.uhn.fhir.batch2.model.JobInstance;
@@ -43,9 +45,10 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -111,7 +114,7 @@ public class WriteBinaryStepTest {
 			parameters,
 			theData,
 			theInstance,
-			"1"
+			new WorkChunk().setId("1")
 		);
 	}
 
@@ -161,11 +164,7 @@ public class WriteBinaryStepTest {
 		String outputString = new String(binaryCaptor.getValue().getContent());
 		// post-pending a \n (as this is what the binary does)
 		String expected = String.join("\n", stringified) + "\n";
-		assertEquals(
-			expected,
-			outputString,
-			outputString + " != " + expected
-		);
+		assertThat(outputString).as(outputString + " != " + expected).isEqualTo(expected);
 		if (thePartitioned) {
 			assertEquals(getPartitionId(thePartitioned), binaryDaoCreateRequestDetailsCaptor.getValue().getRequestPartitionId());
 		}
@@ -204,21 +203,18 @@ public class WriteBinaryStepTest {
 		// test
 		try {
 			myFinalStep.run(input, sink);
-			fail();
+			fail("");
 		} catch (JobExecutionFailedException ex) {
-			assertTrue(ex.getMessage().contains("Failure to process resource of type"));
+			assertThat(ex.getMessage()).contains("Failure to process resource of type");
 		}
 
 		// verify
 		ArgumentCaptor<ILoggingEvent> logCaptor = ArgumentCaptor.forClass(ILoggingEvent.class);
 		verify(myAppender).doAppend(logCaptor.capture());
-		assertTrue(logCaptor.getValue().getFormattedMessage()
-			.contains(
-				"Failure to process resource of type "
-				+ expandedResources.getResourceType()
-				+ " : "
-				+ testException
-			));
+		assertThat(logCaptor.getValue().getFormattedMessage()).contains("Failure to process resource of type "
+			+ expandedResources.getResourceType()
+			+ " : "
+			+ testException);
 
 		verify(sink, never())
 			.accept(any(BulkExportBinaryFileId.class));

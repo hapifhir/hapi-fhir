@@ -220,7 +220,6 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 			// flush to force Hibernate to actually get a connection from the pool
 			myEntityManager.flush();
 			// get our connection from the underlying Hibernate session, and commit
-			//noinspection resource
 			myEntityManager.unwrap(Session.class).doWork(Connection::commit);
 		}
 
@@ -252,17 +251,19 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 			flushSearchAndIncludeDeletes();
 
 			int deletedCount = deletedCounter.get();
-
-			ourLog.info("Deleted {} expired searches", deletedCount);
+			if (deletedCount > 0) {
+				ourLog.debug("Deleted {} expired searches", deletedCount);
+			}
 
 			return deletedCount;
 		}
 
 		/**
 		 * Schedule theSearchPid for deletion assuming it has theNumberOfResults SearchResults attached.
-		 *
+		 * <p>
 		 * We accumulate a batch of search pids for deletion, and then do a bulk DML as we reach a threshold number
 		 * of SearchResults.
+		 * </p>
 		 *
 		 * @param theSearchPid pk of the Search
 		 * @param theNumberOfResults the number of SearchResults attached

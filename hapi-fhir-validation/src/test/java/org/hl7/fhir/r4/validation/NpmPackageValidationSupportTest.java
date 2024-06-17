@@ -21,9 +21,10 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.Map;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class NpmPackageValidationSupportTest extends BaseValidationTestWithInlineMocks {
 
@@ -68,7 +69,7 @@ public class NpmPackageValidationSupportTest extends BaseValidationTestWithInlin
 
 		String outcomeSerialized = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.toOperationOutcome());
 		ourLog.info(outcomeSerialized);
-		assertThat(outcomeSerialized, containsString("Patient.identifier:nhsNumber.value: minimum required = 1, but only found 0"));
+		assertThat(outcomeSerialized).contains("Patient.identifier:nhsNumber.value: minimum required = 1, but only found 0");
 
 	}
 
@@ -86,7 +87,37 @@ public class NpmPackageValidationSupportTest extends BaseValidationTestWithInlin
 		for (Map.Entry<String, byte[]> entry : EXPECTED_BINARIES_MAP.entrySet()) {
 			byte[] expectedBytes = entry.getValue();
 			byte[] actualBytes = npmPackageSupport.fetchBinary(entry.getKey());
-			assertArrayEquals(expectedBytes, actualBytes);
+			assertThat(actualBytes).containsExactly(expectedBytes);
 		}
+	}
+
+	@Test
+	public void testValidateIheMhdPackage() throws IOException {
+		ValidationSupportChain validationSupportChain = new ValidationSupportChain();
+		validationSupportChain.addValidationSupport(getNpmPackageValidationSupport("classpath:package/ihe.iti.mhd.tgz"));
+		validationSupportChain.addValidationSupport(new DefaultProfileValidationSupport(myFhirContext));
+		validationSupportChain.addValidationSupport(new CommonCodeSystemsTerminologyService(myFhirContext));
+		validationSupportChain.addValidationSupport(new InMemoryTerminologyServerValidationSupport(myFhirContext));
+		validationSupportChain.addValidationSupport(new SnapshotGeneratingValidationSupport(myFhirContext));
+
+		CachingValidationSupport validationSupport = new CachingValidationSupport(validationSupportChain);
+
+		FhirValidator validator = myFhirContext.newValidator();
+		FhirInstanceValidator instanceValidator = new FhirInstanceValidator(validationSupport);
+		validator.registerValidatorModule(instanceValidator);
+
+		String bundle = loadResource("/r4/mhd_minimal_provide_document_bundle.json");
+		ValidationResult validationResult = validator.validateWithResult(bundle);
+
+		assertEquals(3, validationResult.getMessages().size());
+
+		assertTrue(validationResult.isSuccessful());
+
+		String outcomeSerialized = myFhirContext.newJsonParser()
+			.setPrettyPrint(true)
+			.encodeResourceToString(validationResult.toOperationOutcome());
+		ourLog.info(outcomeSerialized);
+
+		assertThat(outcomeSerialized).contains("Terminology_TX_ValueSet_NotFound");
 	}
 }

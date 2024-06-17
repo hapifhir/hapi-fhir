@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.partition;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
@@ -11,8 +13,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class PartitionSettingsSvcImplTest extends BaseJpaR4Test {
@@ -120,7 +121,7 @@ public class PartitionSettingsSvcImplTest extends BaseJpaR4Test {
 		}
 
 		catch (InvalidRequestException e) {
-			assertEquals( Msg.code(2366) + "Partition ID already exists", e.getMessage());
+			assertEquals(Msg.code(2366) + "Partition ID already exists", e.getMessage());
 		}
 	}
 
@@ -208,7 +209,7 @@ public class PartitionSettingsSvcImplTest extends BaseJpaR4Test {
 
 		List<PartitionEntity> actual = myPartitionConfigSvc.listPartitions();
 
-		assertEquals(2, actual.size());
+		assertThat(actual).hasSize(2);
 		assertTrue(actual.stream().anyMatch(item -> "PARTITION-1".equals(item.getName())));
 		assertTrue(actual.stream().anyMatch(item -> "PARTITION-2".equals(item.getName())));
 	}

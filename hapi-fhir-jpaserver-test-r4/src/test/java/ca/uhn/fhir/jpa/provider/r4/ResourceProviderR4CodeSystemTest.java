@@ -1,11 +1,15 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.term.TermTestUtil;
+import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.apache.commons.io.IOUtils;
@@ -26,22 +30,31 @@ import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.codesystems.ConceptSubsumptionOutcome;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test {
+
 
 	private static final String SYSTEM_PARENTCHILD = "http://parentchild";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderR4CodeSystemTest.class);
 	private static final String CS_ACME_URL = "http://acme.org";
 	private Long parentChildCsId;
 	private IIdType myCsId;
+
+	@Autowired
+	private ITermDeferredStorageSvc myITermDeferredStorageSvc;
 
 	@BeforeEach
 	@Transactional
@@ -63,6 +76,13 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 		DaoMethodOutcome parentChildCsOutcome = myCodeSystemDao.create(parentChildCs);
 		parentChildCsId = ((ResourceTable) parentChildCsOutcome.getEntity()).getId();
 
+		// ensure all terms are loaded
+		await().atMost(5, TimeUnit.SECONDS)
+				.until(() -> {
+					myBatch2JobHelper.forceRunMaintenancePass();
+					myITermDeferredStorageSvc.saveDeferred();
+					return myITermDeferredStorageSvc.isStorageQueueEmpty(true);
+				});
 	}
 
 	@Test
@@ -319,7 +339,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(1, respParam.getParameter().size());
+		assertThat(respParam.getParameter()).hasSize(1);
 		assertEquals("outcome", respParam.getParameter().get(0).getName());
 		assertEquals(ConceptSubsumptionOutcome.SUBSUMES.toCode(), ((CodeType) respParam.getParameter().get(0).getValue()).getValue());
 	}
@@ -339,7 +359,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(1, respParam.getParameter().size());
+		assertThat(respParam.getParameter()).hasSize(1);
 		assertEquals("outcome", respParam.getParameter().get(0).getName());
 		assertEquals(ConceptSubsumptionOutcome.SUBSUMEDBY.toCode(), ((CodeType) respParam.getParameter().get(0).getValue()).getValue());
 	}
@@ -358,7 +378,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(1, respParam.getParameter().size());
+		assertThat(respParam.getParameter()).hasSize(1);
 		assertEquals("outcome", respParam.getParameter().get(0).getName());
 		assertEquals(ConceptSubsumptionOutcome.NOTSUBSUMED.toCode(), ((CodeType) respParam.getParameter().get(0).getValue()).getValue());
 	}
@@ -425,7 +445,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(1, respParam.getParameter().size());
+		assertThat(respParam.getParameter()).hasSize(1);
 		assertEquals("outcome", respParam.getParameter().get(0).getName());
 		assertEquals(ConceptSubsumptionOutcome.SUBSUMES.toCode(), ((CodeType) respParam.getParameter().get(0).getValue()).getValue());
 	}
@@ -444,7 +464,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(1, respParam.getParameter().size());
+		assertThat(respParam.getParameter()).hasSize(1);
 		assertEquals("outcome", respParam.getParameter().get(0).getName());
 		assertEquals(ConceptSubsumptionOutcome.SUBSUMEDBY.toCode(), ((CodeType) respParam.getParameter().get(0).getValue()).getValue());
 	}
@@ -462,7 +482,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(1, respParam.getParameter().size());
+		assertThat(respParam.getParameter()).hasSize(1);
 		assertEquals("outcome", respParam.getParameter().get(0).getName());
 		assertEquals(ConceptSubsumptionOutcome.NOTSUBSUMED.toCode(), ((CodeType) respParam.getParameter().get(0).getValue()).getValue());
 	}
@@ -553,7 +573,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 		ourLog.info(resp);
 
 		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
-		assertEquals("Concept Display \"Old Systolic blood pressure.inspiration - expiration\" does not match expected \"Systolic blood pressure.inspiration - expiration\"", ((StringType) respParam.getParameter().get(1).getValue()).getValueAsString());
+		assertEquals("Concept Display \"Old Systolic blood pressure.inspiration - expiration\" does not match expected \"Systolic blood pressure.inspiration - expiration\" for 'http://acme.org#8452-5'", ((StringType) respParam.getParameter().get(1).getValue()).getValueAsString());
 	}
 
 	@Test
@@ -858,7 +878,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 		assertEquals("display", respParam.getParameter().get(1).getName());
 		String message = ((StringType) respParam.getParameter().get(1).getValue()).getValueAsString();
 
-		assertTrue(value, message);
+		assertThat(value).as(message).isTrue();
 		assertEquals("Systolic blood pressure.inspiration - expiration", message);
 	}
 

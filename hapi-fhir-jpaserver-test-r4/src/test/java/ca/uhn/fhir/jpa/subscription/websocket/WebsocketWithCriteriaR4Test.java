@@ -17,8 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.Logger;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
+import static org.assertj.core.api.Assertions.assertThat;
 
 
 // This is currently disabled as the criteria mechanism was a non-standard experiment
@@ -27,7 +26,7 @@ public class WebsocketWithCriteriaR4Test extends BaseResourceProviderR4Test {
 
 	private static final Logger ourLog = org.slf4j.LoggerFactory.getLogger(WebsocketWithCriteriaR4Test.class);
 	@RegisterExtension
-	private final WebsocketSubscriptionClient myWebsocketClientExtension = new WebsocketSubscriptionClient(() -> myServer, () -> myStorageSettings);
+	private final WebsocketSubscriptionClient myWebsocketClientExtension = new WebsocketSubscriptionClient(() -> myServer, () -> mySubscriptionSettings);
 	private String myPatientId;
 	private String mySubscriptionId;
 
@@ -95,7 +94,7 @@ public class WebsocketWithCriteriaR4Test extends BaseResourceProviderR4Test {
 
 		ourLog.info("WS Messages: {}", myWebsocketClientExtension.getMessages());
 		waitForSize(2, myWebsocketClientExtension.getMessages());
-		assertThat(myWebsocketClientExtension.getMessages(), contains("bound " + mySubscriptionId, "ping " + mySubscriptionId));
+		assertThat(myWebsocketClientExtension.getMessages()).containsExactly("bound " + mySubscriptionId, "ping " + mySubscriptionId);
 	}
 
 	@Test
@@ -119,6 +118,6 @@ public class WebsocketWithCriteriaR4Test extends BaseResourceProviderR4Test {
 
 		ourLog.info("WS Messages: {}", myWebsocketClientExtension.getMessages());
 		waitForSize(2, myWebsocketClientExtension.getMessages());
-		assertThat(myWebsocketClientExtension.getMessages(), contains("bound " + mySubscriptionId));
+		assertThat(myWebsocketClientExtension.getMessages()).containsExactly("bound " + mySubscriptionId);
 	}
 }

@@ -459,6 +459,58 @@ public interface IValidationSupport {
 		INFORMATION
 	}
 
+	enum CodeValidationIssueCode {
+		NOT_FOUND,
+		CODE_INVALID,
+		INVALID,
+		OTHER
+	}
+
+	enum CodeValidationIssueCoding {
+		VS_INVALID,
+		NOT_FOUND,
+		NOT_IN_VS,
+
+		INVALID_CODE,
+		INVALID_DISPLAY,
+		OTHER
+	}
+
+	class CodeValidationIssue {
+
+		private final String myMessage;
+		private final IssueSeverity mySeverity;
+		private final CodeValidationIssueCode myCode;
+		private final CodeValidationIssueCoding myCoding;
+
+		public CodeValidationIssue(
+				String theMessage,
+				IssueSeverity mySeverity,
+				CodeValidationIssueCode theCode,
+				CodeValidationIssueCoding theCoding) {
+			this.myMessage = theMessage;
+			this.mySeverity = mySeverity;
+			this.myCode = theCode;
+			this.myCoding = theCoding;
+		}
+
+		public String getMessage() {
+			return myMessage;
+		}
+
+		public IssueSeverity getSeverity() {
+			return mySeverity;
+		}
+
+		public CodeValidationIssueCode getCode() {
+			return myCode;
+		}
+
+		public CodeValidationIssueCoding getCoding() {
+			return myCoding;
+		}
+	}
+
 	class ConceptDesignation {
 
 		private String myLanguage;
@@ -530,8 +582,13 @@ public interface IValidationSupport {
 		public abstract String getType();
 	}
 
+	// The reason these cannot be declared within an enum is because a Remote Terminology Service
+	// can support arbitrary types. We do not restrict against the types in the spec.
+	// Some of the types in the spec are not yet implemented as well.
+	// @see https://github.com/hapifhir/hapi-fhir/issues/5700
 	String TYPE_STRING = "string";
 	String TYPE_CODING = "Coding";
+	String TYPE_GROUP = "group";
 
 	class StringConceptProperty extends BaseConceptProperty {
 		private final String myValue;
@@ -589,6 +646,31 @@ public interface IValidationSupport {
 		}
 	}
 
+	class GroupConceptProperty extends BaseConceptProperty {
+		public GroupConceptProperty(String thePropertyName) {
+			super(thePropertyName);
+		}
+
+		private List<BaseConceptProperty> subProperties;
+
+		public BaseConceptProperty addSubProperty(BaseConceptProperty theProperty) {
+			if (subProperties == null) {
+				subProperties = new ArrayList<>();
+			}
+			subProperties.add(theProperty);
+			return this;
+		}
+
+		public List<BaseConceptProperty> getSubProperties() {
+			return subProperties != null ? subProperties : Collections.emptyList();
+		}
+
+		@Override
+		public String getType() {
+			return TYPE_GROUP;
+		}
+	}
+
 	class CodeValidationResult {
 		public static final String SOURCE_DETAILS = "sourceDetails";
 		public static final String RESULT = "result";
@@ -603,6 +685,8 @@ public interface IValidationSupport {
 		private List<BaseConceptProperty> myProperties;
 		private String myDisplay;
 		private String mySourceDetails;
+
+		private List<CodeValidationIssue> myCodeValidationIssues;
 
 		public CodeValidationResult() {
 			super();
@@ -687,6 +771,23 @@ public interface IValidationSupport {
 			return this;
 		}
 
+		public List<CodeValidationIssue> getCodeValidationIssues() {
+			if (myCodeValidationIssues == null) {
+				myCodeValidationIssues = new ArrayList<>();
+			}
+			return myCodeValidationIssues;
+		}
+
+		public CodeValidationResult setCodeValidationIssues(List<CodeValidationIssue> theCodeValidationIssues) {
+			myCodeValidationIssues = new ArrayList<>(theCodeValidationIssues);
+			return this;
+		}
+
+		public CodeValidationResult addCodeValidationIssue(CodeValidationIssue theCodeValidationIssue) {
+			getCodeValidationIssues().add(theCodeValidationIssue);
+			return this;
+		}
+
 		public boolean isOk() {
 			return isNotBlank(myCode);
 		}
@@ -747,14 +848,18 @@ public interface IValidationSupport {
 		private final IBaseResource myValueSet;
 		private final String myError;
 
-		public ValueSetExpansionOutcome(String theError) {
+		private boolean myErrorIsFromServer;
+
+		public ValueSetExpansionOutcome(String theError, boolean theErrorIsFromServer) {
 			myValueSet = null;
 			myError = theError;
+			myErrorIsFromServer = theErrorIsFromServer;
 		}
 
 		public ValueSetExpansionOutcome(IBaseResource theValueSet) {
 			myValueSet = theValueSet;
 			myError = null;
+			myErrorIsFromServer = false;
 		}
 
 		public String getError() {
@@ -763,6 +868,10 @@ public interface IValidationSupport {
 
 		public IBaseResource getValueSet() {
 			return myValueSet;
+		}
+
+		public boolean getErrorIsFromServer() {
+			return myErrorIsFromServer;
 		}
 	}
 
@@ -871,8 +980,15 @@ public interface IValidationSupport {
 			}
 		}
 
+		/**
+		 * Converts the current LookupCodeResult instance into a IBaseParameters instance which is returned
+		 * to the client of the $lookup operation.
+		 * @param theContext the FHIR context used for running the operation
+		 * @param thePropertyNamesToFilter the properties which are passed as parameter to filter the result.
+		 * @return the output for the lookup operation.
+		 */
 		public IBaseParameters toParameters(
-				FhirContext theContext, List<? extends IPrimitiveType<String>> thePropertyNames) {
+				FhirContext theContext, List<? extends IPrimitiveType<String>> thePropertyNamesToFilter) {
 
 			IBaseParameters retVal = ParametersUtil.newInstance(theContext);
 			if (isNotBlank(getCodeSystemDisplayName())) {
@@ -886,50 +1002,29 @@ public interface IValidationSupport {
 
 			if (myProperties != null) {
 
-				Set<String> properties = Collections.emptySet();
-				if (thePropertyNames != null) {
-					properties = thePropertyNames.stream()
+				final List<BaseConceptProperty> propertiesToReturn;
+				if (thePropertyNamesToFilter != null && !thePropertyNamesToFilter.isEmpty()) {
+					// TODO MM: The logic to filter of properties could actually be moved to the lookupCode provider.
+					// That is where the rest of the lookupCode input parameter handling is done.
+					// This was left as is for now but can be done with next opportunity.
+					Set<String> propertyNameList = thePropertyNamesToFilter.stream()
 							.map(IPrimitiveType::getValueAsString)
 							.collect(Collectors.toSet());
+					propertiesToReturn = myProperties.stream()
+							.filter(p -> propertyNameList.contains(p.getPropertyName()))
+							.collect(Collectors.toList());
+				} else {
+					propertiesToReturn = myProperties;
 				}
 
-				for (BaseConceptProperty next : myProperties) {
-					String propertyName = next.getPropertyName();
-
-					if (!properties.isEmpty() && !properties.contains(propertyName)) {
-						continue;
-					}
-
+				for (BaseConceptProperty next : propertiesToReturn) {
 					IBase property = ParametersUtil.addParameterToParameters(theContext, retVal, "property");
-					ParametersUtil.addPartCode(theContext, property, "code", propertyName);
-
-					String propertyType = next.getType();
-					switch (propertyType) {
-						case TYPE_STRING:
-							StringConceptProperty stringConceptProperty = (StringConceptProperty) next;
-							ParametersUtil.addPartString(
-									theContext, property, "value", stringConceptProperty.getValue());
-							break;
-						case TYPE_CODING:
-							CodingConceptProperty codingConceptProperty = (CodingConceptProperty) next;
-							ParametersUtil.addPartCoding(
-									theContext,
-									property,
-									"value",
-									codingConceptProperty.getCodeSystem(),
-									codingConceptProperty.getCode(),
-									codingConceptProperty.getDisplay());
-							break;
-						default:
-							throw new IllegalStateException(
-									Msg.code(1739) + "Don't know how to handle " + next.getClass());
-					}
+					populateProperty(theContext, property, next);
 				}
 			}
 
 			if (myDesignations != null) {
 				for (ConceptDesignation next : myDesignations) {
-
 					IBase property = ParametersUtil.addParameterToParameters(theContext, retVal, "designation");
 					ParametersUtil.addPartCode(theContext, property, "language", next.getLanguage());
 					ParametersUtil.addPartCoding(
@@ -939,6 +1034,41 @@ public interface IValidationSupport {
 			}
 
 			return retVal;
+		}
+
+		private void populateProperty(
+				FhirContext theContext, IBase theProperty, BaseConceptProperty theConceptProperty) {
+			ParametersUtil.addPartCode(theContext, theProperty, "code", theConceptProperty.getPropertyName());
+			String propertyType = theConceptProperty.getType();
+			switch (propertyType) {
+				case TYPE_STRING:
+					StringConceptProperty stringConceptProperty = (StringConceptProperty) theConceptProperty;
+					ParametersUtil.addPartString(theContext, theProperty, "value", stringConceptProperty.getValue());
+					break;
+				case TYPE_CODING:
+					CodingConceptProperty codingConceptProperty = (CodingConceptProperty) theConceptProperty;
+					ParametersUtil.addPartCoding(
+							theContext,
+							theProperty,
+							"value",
+							codingConceptProperty.getCodeSystem(),
+							codingConceptProperty.getCode(),
+							codingConceptProperty.getDisplay());
+					break;
+				case TYPE_GROUP:
+					GroupConceptProperty groupConceptProperty = (GroupConceptProperty) theConceptProperty;
+					if (groupConceptProperty.getSubProperties().isEmpty()) {
+						break;
+					}
+					groupConceptProperty.getSubProperties().forEach(p -> {
+						IBase subProperty = ParametersUtil.addPart(theContext, theProperty, "subproperty", null);
+						populateProperty(theContext, subProperty, p);
+					});
+					break;
+				default:
+					throw new IllegalStateException(
+							Msg.code(1739) + "Don't know how to handle " + theConceptProperty.getClass());
+			}
 		}
 
 		public void setErrorMessage(String theErrorMessage) {

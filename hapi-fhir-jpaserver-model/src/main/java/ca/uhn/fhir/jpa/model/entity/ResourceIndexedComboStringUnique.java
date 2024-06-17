@@ -19,8 +19,6 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ForeignKey;
@@ -238,7 +236,7 @@ public class ResourceIndexedComboStringUnique extends BaseResourceIndex
 	public int hashCode() {
 		calculateHashes();
 
-		return new HashCodeBuilder(17, 37).append(myHashComplete).toHashCode();
+        return new HashCodeBuilder(17, 37).append(myHashIdentity).append(myHashComplete).toHashCode();
 	}
 
 	@Override

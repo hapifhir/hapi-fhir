@@ -26,21 +26,46 @@ import ca.uhn.fhir.batch2.maintenance.JobInstanceProcessor;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
+import ca.uhn.fhir.batch2.model.WorkChunk;
+import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 public interface IInstanceStateTransitions extends IWorkChunkCommon, WorkChunkTestConstants {
 	Logger ourLog = LoggerFactory.getLogger(IInstanceStateTransitions.class);
+
+	@Test
+	default void createInstance_createsInQueuedWithChunkInReady() {
+		// given
+		JobDefinition<?> jd = getTestManager().withJobDefinition(false);
+
+		// when
+		IJobPersistence.CreateResult createResult =
+			getTestManager().newTxTemplate().execute(status->
+				getTestManager().getSvc().onCreateWithFirstChunk(jd, "{}"));
+
+		// then
+		ourLog.info("job and chunk created {}", createResult);
+		assertNotNull(createResult);
+		assertThat(createResult.jobInstanceId).isNotEmpty();
+		assertThat(createResult.workChunkId).isNotEmpty();
+
+		JobInstance jobInstance = getTestManager().freshFetchJobInstance(createResult.jobInstanceId);
+		assertEquals(StatusEnum.QUEUED, jobInstance.getStatus());
+		assertEquals("{}", jobInstance.getParameters());
+
+		WorkChunk firstChunk = getTestManager().freshFetchWorkChunk(createResult.workChunkId);
+		assertEquals(WorkChunkStatusEnum.READY, firstChunk.getStatus());
+		assertNull(firstChunk.getData(), "First chunk data is null - only uses parameters");
+	}
 
 	@Test
 	default void testCreateInstance_firstChunkDequeued_movesToInProgress() {
@@ -55,7 +80,7 @@ public interface IInstanceStateTransitions extends IWorkChunkCommon, WorkChunkTe
 
 		// then
 		JobInstance jobInstance = getTestManager().freshFetchJobInstance(createResult.jobInstanceId);
-		assertThat(jobInstance.getStatus(), equalTo(StatusEnum.IN_PROGRESS));
+		assertEquals(StatusEnum.IN_PROGRESS, jobInstance.getStatus());
 	}
 
 	@ParameterizedTest
@@ -90,7 +115,7 @@ public interface IInstanceStateTransitions extends IWorkChunkCommon, WorkChunkTe
 		JobInstance freshInstance1 = getTestManager().getSvc().fetchInstance(instanceId1).orElseThrow();
 		if (theState.isCancellable()) {
 			assertEquals(StatusEnum.CANCELLED, freshInstance1.getStatus(), "cancel request processed");
-			assertThat(freshInstance1.getErrorMessage(), containsString("Job instance cancelled"));
+			assertThat(freshInstance1.getErrorMessage()).contains("Job instance cancelled");
 		} else {
 			assertEquals(theState, freshInstance1.getStatus(), "cancel request ignored - state unchanged");
 			assertNull(freshInstance1.getErrorMessage(), "no error message");

@@ -25,7 +25,6 @@ import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.loinc.LoincXmlFileZipContentsHandler;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -33,8 +32,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Properties;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
@@ -69,7 +68,7 @@ class TermLoaderSvcImplTest {
 			() -> testedClass.processLoincFiles(
 				theDescriptors, theRequestDetails, theUploadProperties, true));
 
-		assertTrue(thrown.getMessage().contains("Did not find loinc.xml in the ZIP distribution."));
+		assertThat(thrown.getMessage()).contains("Did not find loinc.xml in the ZIP distribution.");
 	}
 
 	@Test
@@ -82,7 +81,7 @@ class TermLoaderSvcImplTest {
 			() -> testedClass.processLoincFiles(
 				theDescriptors, theRequestDetails, theUploadProperties, true));
 
-		assertTrue(thrown.getMessage().contains("'loinc.xml' file must not have a version defined."));
+		assertThat(thrown.getMessage()).contains("'loinc.xml' file must not have a version defined.");
 	}
 
 

@@ -25,12 +25,10 @@ import ca.uhn.fhir.batch2.model.WorkChunkErrorEvent;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import org.junit.jupiter.api.Test;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public interface IWorkChunkErrorActionsTests extends IWorkChunkCommon, WorkChunkTestConstants {
-
 
 	/**
 	 * The consumer will retry after a retryable error is thrown
@@ -120,8 +118,8 @@ public interface IWorkChunkErrorActionsTests extends IWorkChunkCommon, WorkChunk
 		chunk = getTestManager().freshFetchWorkChunk(myChunkId);
 		assertEquals(WorkChunkStatusEnum.FAILED, chunk.getStatus());
 		assertEquals(4, chunk.getErrorCount());
-		assertThat("Error message contains last error", chunk.getErrorMessage(), containsString(ERROR_MESSAGE_C));
-		assertThat("Error message contains error count and complaint", chunk.getErrorMessage(), containsString("many errors: 4"));
+		assertThat(chunk.getErrorMessage()).as("Error message contains last error").contains(ERROR_MESSAGE_C);
+		assertThat(chunk.getErrorMessage()).as("Error message contains error count and complaint").contains("many errors: 4");
 	}
 
 }

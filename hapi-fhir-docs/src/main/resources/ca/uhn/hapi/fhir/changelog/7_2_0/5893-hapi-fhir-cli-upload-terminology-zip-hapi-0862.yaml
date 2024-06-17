@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 5893
+title: "Previously, hapi-fhir-cli: upload-terminology failed with a HAPI-0862 error when uploading LOINC.
+        This has been fixed."
+

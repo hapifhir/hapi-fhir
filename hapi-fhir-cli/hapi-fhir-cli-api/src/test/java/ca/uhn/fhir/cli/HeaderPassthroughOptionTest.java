@@ -6,16 +6,10 @@ import ca.uhn.fhir.jpa.term.UploadStatistics;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.CapturingInterceptor;
-import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.test.utilities.JettyUtil;
-import ca.uhn.fhir.test.utilities.server.HttpServletExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.ParseException;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.ee10.servlet.ServletHandler;
-import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.hl7.fhir.r4.model.IdType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,12 +27,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.hamcrest.CoreMatchers.hasItems;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
@@ -98,10 +90,10 @@ public class HeaderPassthroughOptionTest {
 		Map<String, List<String>> allHeaders = myCapturingInterceptor.getLastRequest().getAllHeaders();
 		assertFalse(allHeaders.isEmpty());
 
-		assertTrue(allHeaders.containsKey(headerKey1));
-		assertEquals(1, allHeaders.get(headerKey1).size());
+		assertThat(allHeaders).containsKey(headerKey1);
+		assertThat(allHeaders.get(headerKey1)).hasSize(1);
 
-		assertThat(allHeaders.get(headerKey1), hasItems(headerValue1));
+		assertThat(allHeaders.get(headerKey1)).contains(headerValue1);
 	}
 
 	@Test
@@ -128,10 +120,10 @@ public class HeaderPassthroughOptionTest {
 		assertNotNull(myCapturingInterceptor.getLastRequest());
 		Map<String, List<String>> allHeaders = myCapturingInterceptor.getLastRequest().getAllHeaders();
 		assertFalse(allHeaders.isEmpty());
-		assertEquals(2, allHeaders.get(headerKey1).size());
+		assertThat(allHeaders.get(headerKey1)).hasSize(2);
 
-		assertTrue(allHeaders.containsKey(headerKey1));
-		assertEquals(2, allHeaders.get(headerKey1).size());
+		assertThat(allHeaders).containsKey(headerKey1);
+		assertThat(allHeaders.get(headerKey1)).hasSize(2);
 
 		assertEquals(headerValue1, allHeaders.get(headerKey1).get(0));
 		assertEquals(headerValue2, allHeaders.get(headerKey1).get(1));
@@ -163,13 +155,13 @@ public class HeaderPassthroughOptionTest {
 		Map<String, List<String>> allHeaders = myCapturingInterceptor.getLastRequest().getAllHeaders();
 		assertFalse(allHeaders.isEmpty());
 
-		assertTrue(allHeaders.containsKey(headerKey1));
-		assertEquals(1, allHeaders.get(headerKey1).size());
-		assertThat(allHeaders.get(headerKey1), hasItems(headerValue1));
+		assertThat(allHeaders).containsKey(headerKey1);
+		assertThat(allHeaders.get(headerKey1)).hasSize(1);
+		assertThat(allHeaders.get(headerKey1)).contains(headerValue1);
 
-		assertTrue(allHeaders.containsKey(headerKey2));
-		assertEquals(1, allHeaders.get(headerKey2).size());
-		assertThat(allHeaders.get(headerKey2), hasItems(headerValue2));
+		assertThat(allHeaders).containsKey(headerKey2);
+		assertThat(allHeaders.get(headerKey2)).hasSize(1);
+		assertThat(allHeaders.get(headerKey2)).contains(headerValue2);
 	}
 
 	private static void writeConceptAndHierarchyFiles(int theFilenameCounter) throws IOException {

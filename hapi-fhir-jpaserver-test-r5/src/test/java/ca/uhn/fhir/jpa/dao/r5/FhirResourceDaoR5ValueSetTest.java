@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r5;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
@@ -35,16 +37,11 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 import java.util.Optional;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.startsWith;
-import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class FhirResourceDaoR5ValueSetTest extends BaseJpaR5Test {
 
@@ -119,7 +116,7 @@ public class FhirResourceDaoR5ValueSetTest extends BaseJpaR5Test {
 		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
 		assertTrue(result.isOk());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
-		assertEquals("Concept Display \"Systolic blood pressure at First encounterXXXX\" does not match expected \"Systolic blood pressure at First encounter\" for in-memory expansion of ValueSet: http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", result.getMessage());
+		assertEquals("Concept Display \"Systolic blood pressure at First encounterXXXX\" does not match expected \"Systolic blood pressure at First encounter\" for 'http://acme.org#11378-7' for in-memory expansion of ValueSet: http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", result.getMessage());
 	}
 
 	@Test
@@ -225,19 +222,19 @@ public class FhirResourceDaoR5ValueSetTest extends BaseJpaR5Test {
 		ValueSet expanded = myValueSetDao.expand(myExtensionalVsId, null, mySrd);
 		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp, containsString("<ValueSet xmlns=\"http://hl7.org/fhir\">"));
-		assertThat(resp, containsString("<expansion>"));
-		assertThat(resp, containsString("<contains>"));
-		assertThat(resp, containsString("<system value=\"http://acme.org\"/>"));
-		assertThat(resp, containsString("<code value=\"8450-9\"/>"));
-		assertThat(resp, containsString("<display value=\"Systolic blood pressure--expiration\"/>"));
-		assertThat(resp, containsString("</contains>"));
-		assertThat(resp, containsString("<contains>"));
-		assertThat(resp, containsString("<system value=\"http://acme.org\"/>"));
-		assertThat(resp, containsString("<code value=\"11378-7\"/>"));
-		assertThat(resp, containsString("<display value=\"Systolic blood pressure at First encounter\"/>"));
-		assertThat(resp, containsString("</contains>"));
-		assertThat(resp, containsString("</expansion>"));
+		assertThat(resp).contains("<ValueSet xmlns=\"http://hl7.org/fhir\">");
+		assertThat(resp).contains("<expansion>");
+		assertThat(resp).contains("<contains>");
+		assertThat(resp).contains("<system value=\"http://acme.org\"/>");
+		assertThat(resp).contains("<code value=\"8450-9\"/>");
+		assertThat(resp).contains("<display value=\"Systolic blood pressure--expiration\"/>");
+		assertThat(resp).contains("</contains>");
+		assertThat(resp).contains("<contains>");
+		assertThat(resp).contains("<system value=\"http://acme.org\"/>");
+		assertThat(resp).contains("<code value=\"11378-7\"/>");
+		assertThat(resp).contains("<display value=\"Systolic blood pressure at First encounter\"/>");
+		assertThat(resp).contains("</contains>");
+		assertThat(resp).contains("</expansion>");
 
 		/*
 		 * Filter with display name
@@ -247,9 +244,9 @@ public class FhirResourceDaoR5ValueSetTest extends BaseJpaR5Test {
 		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		//@formatter:off
-		assertThat(resp, stringContainsInOrder(
+		assertThat(resp).containsSubsequence(
 			"<code value=\"11378-7\"/>",
-			"<display value=\"Systolic blood pressure at First encounter\"/>"));
+			"<display value=\"Systolic blood pressure at First encounter\"/>");
 		//@formatter:on
 
 	}
@@ -284,7 +281,7 @@ public class FhirResourceDaoR5ValueSetTest extends BaseJpaR5Test {
 		myValueSetDao.delete(id, mySrd);
 
 		// Verify it's deleted
-		assertThrows(ResourceGoneException.class, ()-> myValueSetDao.read(id, mySrd));
+		assertThatExceptionOfType(ResourceGoneException.class).isThrownBy(() -> myValueSetDao.read(id, mySrd));
 
 		// Expunge
 		myValueSetDao.expunge(id, new ExpungeOptions().setExpungeDeletedResources(true).setExpungeOldVersions(true), mySrd);
@@ -316,7 +313,7 @@ public class FhirResourceDaoR5ValueSetTest extends BaseJpaR5Test {
 			myValueSetDao.expand(vs, null);
 			fail();
 		} catch (InternalErrorException e) {
-			assertThat(e.getMessage(), containsString(Msg.code(832) + "Expansion of ValueSet produced too many codes (maximum 50) - Operation aborted!"));
+			assertThat(e.getMessage()).contains(Msg.code(832) + "Expansion of ValueSet produced too many codes (maximum 50) - Operation aborted!");
 		}
 	}
 
@@ -348,13 +345,13 @@ public class FhirResourceDaoR5ValueSetTest extends BaseJpaR5Test {
 		IValidationSupport.CodeValidationResult outcome = myValidationSupport.validateCode(ctx, options, "http://cs", "CODE4", null, "http://vs");
 		assertNotNull(outcome);
 		assertTrue(outcome.isOk());
-		assertThat(outcome.getMessage(), startsWith("Code validation occurred using a ValueSet expansion that was pre-calculated at "));
+		assertThat(outcome.getMessage()).startsWith("Code validation occurred using a ValueSet expansion that was pre-calculated at ");
 
 		// Expand valueset
 
 		ValueSet outcomeVs = myValueSetDao.expand(vs, null);
 		String expansionMessage = myValueSetTestUtil.extractExpansionMessage(outcomeVs);
-		assertThat(expansionMessage, startsWith("ValueSet was expanded using an expansion that was pre-calculated"));
+		assertThat(expansionMessage).startsWith("ValueSet was expanded using an expansion that was pre-calculated");
 	}
 
 	@Autowired
@@ -371,7 +368,7 @@ public class FhirResourceDaoR5ValueSetTest extends BaseJpaR5Test {
 		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(vsIdentifier, null, code, system, display, coding, codeableConcept, mySrd);
 
 		ourLog.info(result.getMessage());
-		assertTrue(result.isOk(), result.getMessage());
+		assertThat(result.isOk()).as(result.getMessage()).isTrue();
 		assertEquals("Male", result.getDisplay());
 	}
 

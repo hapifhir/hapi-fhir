@@ -8,6 +8,8 @@ import org.hl7.fhir.dstu3.model.Encounter;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 
 public class Example20_ValidateResource {
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(Example20_ValidateResource.class);
+
 	public static void main(String[] args) {
 		
 		// Create an incomplete encounter (status is required)
@@ -20,11 +22,11 @@ public class Example20_ValidateResource {
 		
 		// Did we succeed?
 		ValidationResult result = validator.validateWithResult(enc);
-		System.out.println("Success: " + result.isSuccessful());
+		ourLog.info("Success: " + result.isSuccessful());
 		
 		// What was the result
 		OperationOutcome outcome = (OperationOutcome) result.toOperationOutcome();
 		IParser parser = ctx.newXmlParser().setPrettyPrint(true);
-		System.out.println(parser.encodeResourceToString(outcome));
+		ourLog.info(parser.encodeResourceToString(outcome));
 	}
 }

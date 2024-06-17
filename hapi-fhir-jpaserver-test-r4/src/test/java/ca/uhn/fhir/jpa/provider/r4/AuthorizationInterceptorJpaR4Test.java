@@ -1,5 +1,11 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.delete.ThreadSafeResourceDeleterSvc;
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
@@ -12,11 +18,8 @@ import ca.uhn.fhir.jpa.term.TermTestUtil;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.client.interceptor.SimpleRequestHeaderInterceptor;
-import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
@@ -64,7 +67,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
@@ -73,18 +77,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Stream;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.startsWith;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 
 public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Test {
 
@@ -94,9 +97,6 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 	private SearchParamMatcher mySearchParamMatcher;
 	@Autowired
 	private ThreadSafeResourceDeleterSvc myThreadSafeResourceDeleterSvc;
-	private AuthorizationInterceptor myReadAllBundleInterceptor;
-	private AuthorizationInterceptor myReadAllPatientInterceptor;
-	private AuthorizationInterceptor myWriteResourcesInTransactionAuthorizationInterceptor;
 
 	@BeforeEach
 	@Override
@@ -105,9 +105,6 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		myStorageSettings.setAllowMultipleDelete(true);
 		myStorageSettings.setExpungeEnabled(true);
 		myStorageSettings.setDeleteExpungeEnabled(true);
-		myReadAllBundleInterceptor = new ReadAllAuthorizationInterceptor("Bundle");
-		myReadAllPatientInterceptor = new ReadAllAuthorizationInterceptor("Patient");
-		myWriteResourcesInTransactionAuthorizationInterceptor = new WriteResourcesInTransactionAuthorizationInterceptor();
 	}
 
 	@Override
@@ -115,6 +112,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 	public void after() throws Exception {
 		super.after();
 		myInterceptorRegistry.unregisterInterceptorsIf(t -> t instanceof AuthorizationInterceptor);
+		myClient.getInterceptorService().unregisterInterceptorsIf(t -> t instanceof SimpleRequestHeaderInterceptor);
 	}
 
 	/**
@@ -231,9 +229,8 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 				return new RuleBuilder()
 					.allow().create().resourcesOfType("Patient").withAnyId().withTester(new IAuthRuleTester() {
 						@Override
-						public boolean matches(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IIdType theInputResourceId, IBaseResource theInputResource) {
-							if (theInputResource instanceof Patient) {
-								Patient patient = (Patient) theInputResource;
+						public boolean matches(RuleTestRequest theRequest) {
+							if (theRequest.resource instanceof Patient patient) {
 								return patient
 									.getIdentifier()
 									.stream()
@@ -316,53 +313,121 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 
 	}
 
+	public static Stream<Arguments> getReadPatientArguments() {
+		return Stream.of(
+				Arguments.of(new ReadAllOfTypeAuthorizationInterceptor("Bundle"), false),
+				Arguments.of(new ReadAllOfTypeAuthorizationInterceptor("Patient"), true)
+		);
+	}
 
-	@Test
-	public void testReadInTransaction() {
+	public static Stream<Arguments> getReadPatientInTransactionArguments() {
+		return Stream.of(
+				Arguments.of(new ReadAllOfTypeAndTransactionAuthorizationInterceptor("Bundle"), false),
+				Arguments.of(new ReadAllOfTypeAndTransactionAuthorizationInterceptor("Patient"), true)
+		);
+	}
 
-		Patient patient = new Patient();
+	@ParameterizedTest
+	@MethodSource(value = "getReadPatientArguments")
+	public void testReadPatientById(AuthorizationInterceptor theAuthorizationInterceptor, boolean theShouldAllow) {
+		IIdType patient = createPatient();
+		myServer.getRestfulServer().registerInterceptor(theAuthorizationInterceptor);
+
+		assertReadByIdAllowed(patient, theShouldAllow);
+	}
+
+	@ParameterizedTest
+	@MethodSource(value = "getReadPatientInTransactionArguments")
+	public void testReadPatientInTransaction(AuthorizationInterceptor theAuthorizationInterceptor, boolean theShouldAllow) {
+
+		final Patient patient = new Patient();
 		patient.addIdentifier().setSystem("http://uhn.ca/mrns").setValue("100");
 		patient.addName().setFamily("Tester").addGiven("Raghad");
 		IIdType id = myClient.update().resource(patient).conditionalByUrl("Patient?identifier=http://uhn.ca/mrns|100").execute().getId().toUnqualifiedVersionless();
 
-		myServer.getRestfulServer().registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
-			@Override
-			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				String authHeader = theRequestDetails.getHeader("Authorization");
-				if (!"Bearer AAA".equals(authHeader)) {
-					throw new AuthenticationException("Invalid auth header: " + authHeader);
-				}
-				return new RuleBuilder()
-					.allow().transaction().withAnyOperation().andApplyNormalRules().andThen()
-					.allow().read().resourcesOfType(Patient.class).withAnyId()
-					.build();
-			}
-		});
+		myServer.getRestfulServer().registerInterceptor(theAuthorizationInterceptor);
+
+		SimpleRequestHeaderInterceptor interceptor = new SimpleRequestHeaderInterceptor("Authorization", "Bearer AAA");
+		try {
+			myClient.registerInterceptor(interceptor);
+
+			// Read Patient by id
+			Bundle bundle = new Bundle().setType(Bundle.BundleType.TRANSACTION);
+			bundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.GET).setUrl(id.getValue());
+			assertTransactionAllowed(bundle, theShouldAllow);
+
+			// Search all Patients
+			bundle = new Bundle().setType(Bundle.BundleType.TRANSACTION);
+			bundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.GET).setUrl("Patient?");
+			assertTransactionAllowed(bundle, theShouldAllow);
+		} finally {
+			myClient.unregisterInterceptor(interceptor);
+		}
+	}
+
+	public static Stream<Arguments> getReadStandaloneBundleArguments() {
+		return Stream.of(
+				Arguments.of(new ReadAllOfTypeAuthorizationInterceptor("Bundle"), true),
+				Arguments.of(new ReadAllOfTypeAuthorizationInterceptor("Patient"), false)
+		);
+	}
+
+	public static Stream<Arguments> getReadStandaloneBundleInTransactionArguments() {
+		return Stream.of(
+				Arguments.of(new ReadAllOfTypeAndTransactionAuthorizationInterceptor("Bundle"), true),
+				Arguments.of(new ReadAllOfTypeAndTransactionAuthorizationInterceptor("Patient"), false)
+		);
+	}
+
+	@ParameterizedTest
+	@MethodSource(value = "getReadStandaloneBundleArguments")
+	public void testReadBundleById(AuthorizationInterceptor theAuthorizationInterceptor, boolean theShouldAllow) {
+		Bundle bundle = createDocumentBundle(createPatient("John", "Smith"));
+		myServer.getRestfulServer().registerInterceptor(theAuthorizationInterceptor);
+
+		assertReadByIdAllowed(bundle.getIdElement(), theShouldAllow);
+	}
+
+	@ParameterizedTest
+	@MethodSource(value = "getReadStandaloneBundleInTransactionArguments")
+	public void testReadBundleInTransaction(AuthorizationInterceptor theAuthorizationInterceptor, boolean theShouldAllow) {
+		Bundle documentBundle1 = createDocumentBundle(createPatient("John", "Smith"));
+		createDocumentBundle(createPatient("Jane", "Doe"));
+		IIdType collectionBundle1Id = documentBundle1.getIdElement();
+
+		myServer.getRestfulServer().registerInterceptor(theAuthorizationInterceptor);
 
 		SimpleRequestHeaderInterceptor interceptor = new SimpleRequestHeaderInterceptor("Authorization", "Bearer AAA");
 		try {
 			myClient.registerInterceptor(interceptor);
 
 			Bundle bundle;
-			Bundle responseBundle;
 
-			// Read
+			// Read Bundle
 			bundle = new Bundle();
 			bundle.setType(Bundle.BundleType.TRANSACTION);
-			bundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.GET).setUrl(id.getValue());
-			responseBundle = myClient.transaction().withBundle(bundle).execute();
-			patient = (Patient) responseBundle.getEntry().get(0).getResource();
-			assertEquals("Tester", patient.getNameFirstRep().getFamily());
+			bundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.GET).setUrl(collectionBundle1Id.toUnqualifiedVersionless().getValue());
+			assertTransactionAllowed(bundle, theShouldAllow);
 
 			// Search
 			bundle = new Bundle();
 			bundle.setType(Bundle.BundleType.TRANSACTION);
-			bundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.GET).setUrl("Patient?");
-			responseBundle = myClient.transaction().withBundle(bundle).execute();
-			responseBundle = (Bundle) responseBundle.getEntry().get(0).getResource();
-			patient = (Patient) responseBundle.getEntry().get(0).getResource();
-			assertEquals("Tester", patient.getNameFirstRep().getFamily());
+			bundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.GET).setUrl("Bundle?type=collection");
+			assertTransactionAllowed(bundle, theShouldAllow);
 
+			// Simple Search count 1
+			Bundle responseBundle = assertSearchAllowed("/Bundle", theShouldAllow);
+
+			// Get next page
+			if (responseBundle != null) {
+				Bundle.BundleLinkComponent next = responseBundle.getLink("next");
+				assertNotNull(next);
+
+				bundle = new Bundle();
+				bundle.setType(Bundle.BundleType.TRANSACTION);
+				bundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.GET).setUrl("/Bundle?" + Constants.PARAM_PAGINGACTION + next.getUrl());
+				assertTransactionAllowed(bundle, theShouldAllow);
+			}
 		} finally {
 			myClient.unregisterInterceptor(interceptor);
 		}
@@ -395,7 +460,6 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 			}
 		});
 
-		Bundle bundle;
 		Observation response;
 
 		// Read (no masking)
@@ -411,7 +475,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 			.elementsSubset("status")
 			.execute();
 		assertEquals(ObservationStatus.FINAL, response.getStatus());
-		assertEquals(null, response.getSubject().getReference());
+		assertNull(response.getSubject().getReference());
 
 		// Read a non-allowed observation
 		try {
@@ -440,8 +504,9 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		}.setValidationSupport(myValidationSupport));
 
 		// Should be ok
-		myClient.read().resource(Observation.class).withId("Observation/allowed").execute();
+		Observation result = myClient.read().resource(Observation.class).withId("Observation/allowed").execute();
 
+		assertNotNull(result);
 	}
 
 	@Test
@@ -463,8 +528,10 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		}.setValidationSupport(myValidationSupport));
 
 		// Should be ok
-		myClient.read().resource(Patient.class).withId("Patient/P").execute();
-		myClient.read().resource(Observation.class).withId("Observation/O").execute();
+		Patient pat = myClient.read().resource(Patient.class).withId("Patient/P").execute();
+		Observation obs = myClient.read().resource(Observation.class).withId("Observation/O").execute();
+		assertNotNull(pat);
+		assertNotNull(obs);
 	}
 
 	/**
@@ -477,7 +544,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		patient.setId("Patient/A");
 		patient.addIdentifier().setSystem("http://uhn.ca/mrns").setValue("100");
 		patient.addName().setFamily("Tester").addGiven("Raghad");
-		IIdType id = myClient.update().resource(patient).execute().getId();
+		myClient.update().resource(patient).execute();
 
 		Observation obs = new Observation();
 		obs.setId("Observation/B");
@@ -779,7 +846,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		try {
 			assertEquals(201, response.getStatusLine().getStatusCode());
 			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
-			assertThat(newIdString, startsWith(myServerBase + "/Patient/"));
+			assertThat(newIdString).startsWith(myServerBase + "/Patient/");
 			id = new IdType(newIdString);
 		} finally {
 			response.close();
@@ -792,12 +859,10 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		post = new HttpPost(myServerBase + "/Patient");
 		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		response = ourHttpClient.execute(post);
-		final IdType id2;
 		try {
 			assertEquals(201, response.getStatusLine().getStatusCode());
 			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
-			assertThat(newIdString, startsWith(myServerBase + "/Patient/"));
-			id2 = new IdType(newIdString);
+			assertThat(newIdString).startsWith(myServerBase + "/Patient/");
 		} finally {
 			response.close();
 		}
@@ -853,10 +918,10 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		Parameters diff;
 
 		diff = myClient.operation().onInstance("Patient/A").named(ProviderConstants.DIFF_OPERATION_NAME).withNoParameters(Parameters.class).execute();
-		assertEquals(1, diff.getParameter().size());
+		assertThat(diff.getParameter()).hasSize(1);
 
 		diff = myClient.operation().onInstanceVersion(new IdType("Patient/A/_history/2")).named(ProviderConstants.DIFF_OPERATION_NAME).withNoParameters(Parameters.class).execute();
-		assertEquals(1, diff.getParameter().size());
+		assertThat(diff.getParameter()).hasSize(1);
 
 		try {
 			myClient.operation().onInstance("Observation/B").named(ProviderConstants.DIFF_OPERATION_NAME).withNoParameters(Parameters.class).execute();
@@ -895,7 +960,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 			.withParameter(Parameters.class, ProviderConstants.DIFF_FROM_PARAMETER, new StringType("Patient/A"))
 			.andParameter(ProviderConstants.DIFF_TO_PARAMETER, new StringType("Patient/B"))
 			.execute();
-		assertEquals(2, diff.getParameter().size());
+		assertThat(diff.getParameter()).hasSize(2);
 
 		try {
 			myClient
@@ -936,12 +1001,11 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		try (CloseableHttpResponse response = ourHttpClient.execute(httpGet)) {
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			assertEquals(200, response.getStatusLine().getStatusCode());
-			assertThat(resp, containsString("MY_FAMILY"));
+			assertThat(resp).contains("MY_FAMILY");
 		}
 
 		httpGet = new HttpGet(myServerBase + "/Patient/B/$graphql?query=" + UrlUtil.escapeUrlParam(query));
 		try (CloseableHttpResponse response = ourHttpClient.execute(httpGet)) {
-			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			assertEquals(403, response.getStatusLine().getStatusCode());
 		}
 
@@ -984,7 +1048,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		request.addEntry().setResource(o).getRequest().setMethod(Bundle.HTTPVerb.POST);
 
 		Bundle resp = myClient.transaction().withBundle(request).execute();
-		assertEquals(2, resp.getEntry().size());
+		assertThat(resp.getEntry()).hasSize(2);
 
 
 	}
@@ -1137,7 +1201,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 			.withBundle(bundle)
 			.withAdditionalHeader(Constants.HEADER_PREFER, "return=" + Constants.HEADER_PREFER_RETURN_MINIMAL)
 			.execute();
-		assertEquals(3, resp.getEntry().size());
+		assertThat(resp.getEntry()).hasSize(3);
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp));
 	}
 
@@ -1171,7 +1235,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 			.withNoParameters(Parameters.class)
 			.returnResourceType(Bundle.class)
 			.execute();
-		assertEquals(2, outcome.getEntry().size());
+		assertThat(outcome.getEntry()).hasSize(2);
 
 		// Add an Encounter, which will be returned by $everything but that hasn't been
 		// explicitly authorized
@@ -1181,7 +1245,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		myClient.create().resource(enc).execute();
 
 		try {
-			outcome = myClient
+			myClient
 				.operation()
 				.onInstance(pid1)
 				.named(JpaConstants.OPERATION_EVERYTHING)
@@ -1190,7 +1254,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 				.execute();
 			fail();
 		} catch (ForbiddenOperationException e) {
-			assertThat(e.getMessage(), containsString("Access denied by default policy"));
+			assertThat(e.getMessage()).contains("Access denied by default policy");
 		}
 	}
 
@@ -1226,9 +1290,10 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 			}
 		});
 
-		String patchBody = "[\n" +
-			"     { \"op\": \"replace\", \"path\": \"/status\", \"value\": \"amended\" }\n" +
-			"     ]";
+		String patchBody = """
+				[
+				     { "op": "replace", "path": "/status", "value": "amended" }
+				     ]""";
 
 		// Allowed
 		myClient.patch().withBody(patchBody).withId(oid1).execute();
@@ -1414,10 +1479,10 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		{
 			String url = "/ExplanationOfBenefit?patient=" + p1id.getIdPart() + "," + p3id.getIdPart();
 			try {
-				Bundle result = myClient.search().byUrl(url).returnBundle(Bundle.class).execute();
+				myClient.search().byUrl(url).returnBundle(Bundle.class).execute();
 				fail();
 			} catch (ForbiddenOperationException e) {
-				assertThat(e.getMessage(), startsWith("HTTP 403 Forbidden: " + Msg.code(333) + "Access denied by rule"));
+				assertThat(e.getMessage()).startsWith("HTTP 403 Forbidden: " + Msg.code(333) + "Access denied by rule");
 			}
 		}
 
@@ -1568,12 +1633,8 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 	}
 
 	private void validateDeleteConditionalByUrlIsForbidden(String theUrl) {
-		try {
-			executeDeleteConditionalByUrl(theUrl);
-			fail();
-		} catch (ForbiddenOperationException e) {
-			// good
-		}
+		assertThatThrownBy(() -> executeDeleteConditionalByUrl(theUrl))
+			.isInstanceOf(ForbiddenOperationException.class);
 	}
 
 	private void executeDeleteConditionalByUrl(String theUrl) {
@@ -1608,7 +1669,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 
 		// search runs without 403.
 		Bundle bundle = myClient.search().byUrl("/Observation?code=foo").returnBundle(Bundle.class).execute();
-		assertThat(bundle.getEntry(), hasSize(1));
+		assertThat(bundle.getEntry()).hasSize(1);
 	}
 
 	@Test
@@ -1637,40 +1698,39 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 
 	}
 
-	@Test
-	public void testSearchBundles_withPermissionToSearchAllBundles_doesNotReturn403ForbiddenForDocumentBundles(){
-		myServer.getRestfulServer().registerInterceptor(myReadAllBundleInterceptor);
+	@ParameterizedTest
+	@MethodSource(value = "getReadStandaloneBundleArguments")
+	public void testGetNextPage_forDocumentBundles(AuthorizationInterceptor theAuthorizationInterceptor, boolean theShouldAllow) {
+		myServer.getRestfulServer().registerInterceptor(theAuthorizationInterceptor);
+		Bundle bundle = createDocumentBundle(createPatient("John", "Smith"));
+		Bundle firstBundle = new Bundle();
+		firstBundle.addLink().setRelation("next").setUrl(myClient.getServerBase() + "/"+ bundle.getIdElement().toUnqualifiedVersionless());
+		assertGetNextPageAllowed(firstBundle, theShouldAllow);
+	}
 
-		Bundle bundle1 = createDocumentBundle(createPatient("John", "Smith"));
-		Bundle bundle2 = createDocumentBundle(createPatient("Jane", "Doe"));
-		assertSearchContainsResources("/Bundle", bundle1, bundle2);
+	@ParameterizedTest
+	@MethodSource(value = "getReadStandaloneBundleArguments")
+	public void testSearchBundles_forDocumentBundles(AuthorizationInterceptor theAuthorizationInterceptor, boolean theShouldAllow) {
+		myServer.getRestfulServer().registerInterceptor(theAuthorizationInterceptor);
+		createDocumentBundle(createPatient("John", "Smith"));
+		assertSearchAllowed("/Bundle", theShouldAllow);
+	}
+
+	@ParameterizedTest
+	@MethodSource(value = "getReadStandaloneBundleArguments")
+	public void testSearchBundles_forMessageBundles(AuthorizationInterceptor theAuthorizationInterceptor, boolean theShouldAllow) {
+		myServer.getRestfulServer().registerInterceptor(theAuthorizationInterceptor);
+		createMessageHeaderBundle(createPatient("John", "Smith"));
+		assertSearchAllowed("/Bundle", theShouldAllow);
 	}
 
 	@Test
-	public void testSearchBundles_withPermissionToSearchAllBundles_doesNotReturn403ForbiddenForCollectionBundles(){
-		myServer.getRestfulServer().registerInterceptor(myReadAllBundleInterceptor);
-
-		Bundle bundle1 = createCollectionBundle(createPatient("John", "Smith"));
-		Bundle bundle2 = createCollectionBundle(createPatient("Jane", "Doe"));
-		assertSearchContainsResources("/Bundle", bundle1, bundle2);
-	}
-
-	@Test
-	public void testSearchBundles_withPermissionToSearchAllBundles_doesNotReturn403ForbiddenForMessageBundles(){
-		myServer.getRestfulServer().registerInterceptor(myReadAllBundleInterceptor);
-
-		Bundle bundle1 = createMessageHeaderBundle(createPatient("John", "Smith"));
-		Bundle bundle2 = createMessageHeaderBundle(createPatient("Jane", "Doe"));
-		assertSearchContainsResources("/Bundle", bundle1, bundle2);
-	}
-
-	@Test
-	public void testSearchBundles_withPermissionToViewOneBundle_onlyAllowsViewingOneBundle(){
+	public void testSearchBundles_withPermissionToViewOneBundle_onlyAllowsViewingOneBundle() {
 		Bundle bundle1 = createMessageHeaderBundle(createPatient("John", "Smith"));
 		Bundle bundle2 = createMessageHeaderBundle(createPatient("Jane", "Doe"));
 
 		myServer.getRestfulServer().getInterceptorService().registerInterceptor(
-			new ReadInCompartmentAuthorizationInterceptor("Bundle", bundle1.getIdElement())
+				new ReadInCompartmentAuthorizationInterceptor("Bundle", bundle1.getIdElement())
 		);
 
 		assertSearchContainsResources("/Bundle?_id=" + bundle1.getIdPart(), bundle1);
@@ -1678,26 +1738,16 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		assertSearchFailsWith403Forbidden("/Bundle");
 	}
 
-	@Test
-	public void testSearchPatients_withPermissionToSearchAllBundles_returns403Forbidden(){
-		myServer.getRestfulServer().registerInterceptor(myReadAllBundleInterceptor);
-
+	@ParameterizedTest
+	@MethodSource(value = "getReadPatientArguments")
+	public void testSearchPatients(AuthorizationInterceptor theAuthorizationInterceptor, boolean theShouldAllow) {
+		myServer.getRestfulServer().registerInterceptor(theAuthorizationInterceptor);
 		createPatient("John", "Smith");
-		createPatient("Jane", "Doe");
-		assertSearchFailsWith403Forbidden("/Patient");
+		assertSearchAllowed("/Patient", theShouldAllow);
 	}
 
 	@Test
-	public void testSearchPatients_withPermissionToSearchAllPatients_returnsAllPatients(){
-		myServer.getRestfulServer().registerInterceptor(myReadAllPatientInterceptor);
-
-		Patient patient1 = createPatient("John", "Smith");
-		Patient patient2 = createPatient("Jane", "Doe");
-		assertSearchContainsResources("/Patient", patient1, patient2);
-	}
-
-	@Test
-	public void testSearchPatients_withPermissionToViewOnePatient_onlyAllowsViewingOnePatient(){
+	public void testSearchPatients_withPermissionToViewOnePatient_onlyAllowsViewingOnePatient() {
 		Patient patient1 = createPatient("John", "Smith");
 		Patient patient2 = createPatient("Jane", "Doe");
 
@@ -1710,72 +1760,9 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		assertSearchFailsWith403Forbidden("/Patient");
 	}
 
-	@Test
-	public void testToListOfResourcesAndExcludeContainer_withSearchSetContainingDocumentBundles_onlyRecursesOneLevelDeep() {
-		Bundle bundle1 = createDocumentBundle(createPatient("John", "Smith"));
-		Bundle bundle2 = createDocumentBundle(createPatient("John", "Smith"));
-		Bundle searchSet = createSearchSet(bundle1, bundle2);
-
-		RequestDetails requestDetails = new SystemRequestDetails();
-		requestDetails.setResourceName("Bundle");
-
-		List<IBaseResource> resources = AuthorizationInterceptor.toListOfResourcesAndExcludeContainer(requestDetails, searchSet, myFhirContext);
-		assertEquals(2, resources.size());
-		assertTrue(resources.contains(bundle1));
-		assertTrue(resources.contains(bundle2));
-	}
-
-	@Test
-	public void testToListOfResourcesAndExcludeContainer_withSearchSetContainingPatients_returnsPatients() {
-		Patient patient1 = createPatient("John", "Smith");
-		Patient patient2 = createPatient("Jane", "Doe");
-		Bundle searchSet = createSearchSet(patient1, patient2);
-
-		RequestDetails requestDetails = new SystemRequestDetails();
-		requestDetails.setResourceName("Patient");
-
-		List<IBaseResource> resources = AuthorizationInterceptor.toListOfResourcesAndExcludeContainer(requestDetails, searchSet, myFhirContext);
-		assertEquals(2, resources.size());
-		assertTrue(resources.contains(patient1));
-		assertTrue(resources.contains(patient2));
-	}
-
 	@ParameterizedTest
-	@EnumSource(value = Bundle.BundleType.class, names = {"DOCUMENT", "COLLECTION", "MESSAGE"})
-	public void testShouldExamineBundleResources_withBundleRequestAndStandAloneBundleType_returnsFalse(Bundle.BundleType theBundleType){
-		RequestDetails requestDetails = new SystemRequestDetails();
-		requestDetails.setResourceName("Bundle");
-		Bundle bundle = new Bundle();
-		bundle.setType(theBundleType);
-
-		assertFalse(AuthorizationInterceptor.shouldExamineBundleChildResources(requestDetails, myFhirContext, bundle));
-	}
-
-	@ParameterizedTest
-	@EnumSource(value = Bundle.BundleType.class, names = {"DOCUMENT", "COLLECTION", "MESSAGE"}, mode= EnumSource.Mode.EXCLUDE)
-	public void testShouldExamineBundleResources_withBundleRequestAndNonStandAloneBundleType_returnsTrue(Bundle.BundleType theBundleType){
-		RequestDetails requestDetails = new SystemRequestDetails();
-		requestDetails.setResourceName("Bundle");
-		Bundle bundle = new Bundle();
-		bundle.setType(theBundleType);
-
-		assertTrue(AuthorizationInterceptor.shouldExamineBundleChildResources(requestDetails, myFhirContext, bundle));
-	}
-
-	@ParameterizedTest
-	@EnumSource(value = Bundle.BundleType.class)
-	public void testShouldExamineBundleResources_withNonBundleRequests_returnsTrue(Bundle.BundleType theBundleType){
-		RequestDetails requestDetails = new SystemRequestDetails();
-		requestDetails.setResourceName("Patient");
-		Bundle bundle = new Bundle();
-		bundle.setType(theBundleType);
-
-		assertTrue(AuthorizationInterceptor.shouldExamineBundleChildResources(requestDetails, myFhirContext, bundle));
-	}
-
-	@ParameterizedTest
-	@ValueSource(strings = {"collection", "document", "message"})
-	public void testPermissionsToPostTransaction_withValidNestedBundleRequest_successfullyPostsTransactions(String theBundleType){
+	@ValueSource(strings = {"document", "message", "collection"})
+	public void testTransactionBundle_withNestedNonTransactionBundle_allowed(String theBundleType) {
 		BundleBuilder builder = new BundleBuilder(myFhirContext);
 		builder.setType(theBundleType);
 		IBaseBundle nestedBundle = builder.getBundle();
@@ -1784,7 +1771,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		builder.addTransactionCreateEntry(nestedBundle);
 		IBaseBundle transaction = builder.getBundle();
 
-		myServer.getRestfulServer().registerInterceptor(myWriteResourcesInTransactionAuthorizationInterceptor);
+		myServer.getRestfulServer().registerInterceptor(new WriteResourcesInTransactionAuthorizationInterceptor());
 
 		myClient
 			.transaction()
@@ -1802,7 +1789,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 	@ParameterizedTest
 	@NullSource
 	@ValueSource(strings = {"", "/"})
-	public void testPermissionsToPostTransaction_withInvalidNestedBundleRequest_blocksTransaction(String theInvalidUrl){
+	public void testTransactionBundle_withNestedTransactionBundle_notAllowed(String theInvalidUrl) {
 		// inner transaction
 		Patient patient = new Patient();
 		BundleBuilder builder = new BundleBuilder(myFhirContext);
@@ -1816,27 +1803,25 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		entry.setResource(innerTransaction);
 		entry.getRequest().setUrl(theInvalidUrl).setMethod(Bundle.HTTPVerb.POST);
 
-		myServer.getRestfulServer().registerInterceptor(myWriteResourcesInTransactionAuthorizationInterceptor);
+		myServer.getRestfulServer().registerInterceptor(new WriteResourcesInTransactionAuthorizationInterceptor());
 
-		try {
+		String expectedMessage = "HTTP 400 Bad Request: HAPI-2504: Can not handle nested Bundle request with url:";
+		assertThatThrownBy(() ->
 			myClient
 				.transaction()
 				.withBundle(outerTransaction)
-				.execute();
-			fail();
-		} catch (InvalidRequestException e) {
-			String expectedMessage = "HTTP 400 Bad Request: HAPI-2504: Can not handle nested Bundle request with url:";
-			assertTrue(e.getMessage().contains(expectedMessage));
-		}
+				.execute())
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessageContaining(expectedMessage);
 
 		// verify nested Patient transaction did NOT execute
 		assertTrue(myPatientDao.search(SearchParameterMap.newSynchronous(), mySrd).isEmpty());
 	}
 
 	@Test
-	public void testPermissionToPostTransaction_withUpdateParameters_blocksTransaction(){
+	public void testTransactionBundle_withUpdateParameters_blocksTransaction() {
 		DateType originalBirthDate = new DateType("2000-01-01");
-		Patient patient = createPatient(originalBirthDate);
+		createPatient(originalBirthDate);
 
 		DateType newBirthDate = new DateType("2005-01-01");
 		Parameters birthDatePatch = createPatientBirthdatePatch(newBirthDate);
@@ -1845,18 +1830,15 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		bundleBuilder.addTransactionUpdateEntry(birthDatePatch);
 		IBaseBundle transaction = bundleBuilder.getBundle();
 
-		myServer.getRestfulServer().registerInterceptor(myWriteResourcesInTransactionAuthorizationInterceptor);
+		myServer.getRestfulServer().registerInterceptor(new WriteResourcesInTransactionAuthorizationInterceptor());
 
-		try {
+		assertThatThrownBy(() ->
 			myClient
 				.transaction()
 				.withBundle(transaction)
-				.execute();
-			fail();
-		} catch (InvalidRequestException e) {
-			String expectedMessage = "HTTP 400 Bad Request: HAPI-0339: Can not handle nested Parameters with UPDATE operation";
-			assertEquals(expectedMessage, e.getMessage());
-		}
+				.execute())
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessage("HTTP 400 Bad Request: HAPI-0339: Can not handle nested Parameters with UPDATE operation");
 
 		List<IBaseResource> allPatients = myPatientDao.search(SearchParameterMap.newSynchronous(), mySrd).getAllResources();
 		assertEquals(1, allPatients.size());
@@ -1866,7 +1848,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 	}
 
 	@Test
-	public void testPermissionToPostTransaction_withPatchParameters_successfullyPostsTransaction(){
+	public void testTransactionBundle_withPatchParameters_allowed() {
 		DateType originalBirthDate = new DateType("2000-01-01");
 		Patient patient = createPatient(originalBirthDate);
 
@@ -1877,7 +1859,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		bundleBuilder.addTransactionFhirPatchEntry(patient.getIdElement(), birthDatePatch);
 		IBaseBundle transaction = bundleBuilder.getBundle();
 
-		myServer.getRestfulServer().registerInterceptor(myWriteResourcesInTransactionAuthorizationInterceptor);
+		myServer.getRestfulServer().registerInterceptor(new WriteResourcesInTransactionAuthorizationInterceptor());
 
 		myClient
 			.transaction()
@@ -1891,7 +1873,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		assertEquals(newBirthDate.getValueAsString(), savedPatient.getBirthDateElement().getValueAsString());
 	}
 
-	private Patient createPatient(String theFirstName, String theLastName){
+	private Patient createPatient(String theFirstName, String theLastName) {
 		Patient patient = new Patient();
 		patient.addName().addGiven(theFirstName).setFamily(theLastName);
 		return (Patient) myPatientDao.create(patient, mySrd).getResource();
@@ -1903,7 +1885,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		return (Patient) myPatientDao.create(patient, mySrd).getResource();
 	}
 
-	private Bundle createDocumentBundle(Patient thePatient){
+	private Bundle createDocumentBundle(Patient thePatient) {
 		Composition composition = new Composition();
 		composition.setType(new CodeableConcept().addCoding(new Coding().setSystem("http://example.org").setCode("some-type")));
 		composition.getSubject().setReference(thePatient.getIdElement().getValue());
@@ -1911,13 +1893,6 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		Bundle bundle = new Bundle();
 		bundle.setType(Bundle.BundleType.DOCUMENT);
 		bundle.addEntry().setResource(composition);
-		bundle.addEntry().setResource(thePatient);
-		return (Bundle) myBundleDao.create(bundle, mySrd).getResource();
-	}
-
-	private Bundle createCollectionBundle(Patient thePatient) {
-		Bundle bundle = new Bundle();
-		bundle.setType(Bundle.BundleType.COLLECTION);
 		bundle.addEntry().setResource(thePatient);
 		return (Bundle) myBundleDao.create(bundle, mySrd).getResource();
 	}
@@ -1936,10 +1911,86 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		return (Bundle) myBundleDao.create(bundle, mySrd).getResource();
 	}
 
-	private void assertSearchContainsResources(String theUrl, Resource... theExpectedResources){
-		List<String> expectedIds = Arrays.stream(theExpectedResources)
-			.map(resource -> resource.getIdPart())
-			.toList();
+	private void assertReadByIdAllowed(IIdType theId, boolean theShouldAllow) {
+		if (theShouldAllow) {
+			IBaseResource resource = myClient.read()
+					.resource(theId.getResourceType())
+					.withId(theId.toUnqualifiedVersionless().getValue())
+					.execute();
+			assertNotNull(resource);
+			return;
+		}
+
+		try {
+			myClient.read()
+					.resource(theId.getResourceType())
+					.withId(theId.toUnqualifiedVersionless().getValue())
+					.execute();
+			fail();
+		} catch (Exception e) {
+			assertTrue(e.getMessage().contains("HTTP 403 Forbidden"));
+		}
+	}
+
+	private void assertTransactionAllowed(Bundle theBundle, boolean theShouldAllow) {
+		Bundle outcome = myClient.transaction().withBundle(theBundle).execute();
+		assertNotNull(outcome);
+
+		if (theShouldAllow) {
+			assertNotNull(outcome.getEntry().get(0).getResource());
+		} else {
+			assertNull(outcome.getEntry().get(0).getResource());
+			assertTrue(outcome.getEntry().get(0).getResponse().getStatus().contains("403 Forbidden"));
+		}
+	}
+
+	private Bundle assertSearchAllowed(String theUrl, boolean theShouldAllow) {
+		if (theShouldAllow) {
+			Bundle outcome = myClient.search()
+					.byUrl(theUrl)
+					.count(1)
+					.returnBundle(Bundle.class)
+					.execute();
+			assertNotNull(outcome);
+			assertNotNull(outcome.getEntry().get(0).getResource());
+			return outcome;
+		}
+
+		try {
+			myClient.search()
+					.byUrl(theUrl)
+					.count(1)
+					.returnBundle(Bundle.class)
+					.execute();
+			fail();
+		} catch (Exception e) {
+			assertTrue(e.getMessage().contains("HTTP 403 Forbidden"));
+		}
+
+		return null;
+	}
+
+	private void assertGetNextPageAllowed(Bundle theBundle, boolean theShouldAllow) {
+		if (theShouldAllow) {
+			Bundle nextResult = myClient.loadPage()
+					.next(theBundle)
+					.execute();
+			assertNotNull(nextResult);
+			return;
+		}
+
+		try {
+			myClient.loadPage()
+					.next(theBundle)
+					.execute();
+			fail();
+		} catch (Exception e) {
+			assertTrue(e.getMessage().contains("HTTP 403 Forbidden"));
+		}
+	}
+
+	private void assertSearchContainsResources(String theUrl, Resource... theExpectedResources) {
+		List<String> expectedIds = Arrays.stream(theExpectedResources).map(Resource::getIdPart).toList();
 
 		Bundle searchResult = myClient
 			.search()
@@ -1955,23 +2006,13 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		assertTrue(expectedIds.containsAll(actualIds));
 	}
 
-	private void assertSearchFailsWith403Forbidden(String theUrl){
-		try {
-			myClient.search().byUrl(theUrl).execute();
-			fail();
-		} catch (Exception e){
-			assertTrue(e.getMessage().contains("HTTP 403 Forbidden"));
-		}
+	private void assertSearchFailsWith403Forbidden(String theUrl) {
+		assertThatThrownBy(() ->
+			myClient.search().byUrl(theUrl).execute())
+			.hasMessageContaining("HTTP 403 Forbidden");
 	}
 
-	private Bundle createSearchSet(Resource... theResources){
-		Bundle bundle = new Bundle();
-		bundle.setType(Bundle.BundleType.SEARCHSET);
-		Arrays.stream(theResources).forEach(resource -> bundle.addEntry().setResource(resource));
-		return bundle;
-	}
-
-	private Parameters createPatientBirthdatePatch(DateType theNewBirthDate){
+	private Parameters createPatientBirthdatePatch(DateType theNewBirthDate) {
 		final Parameters patch = new Parameters();
 
 		final Parameters.ParametersParameterComponent op = patch.addParameter().setName("operation");
@@ -1982,20 +2023,33 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		return patch;
 	}
 
-	static class ReadAllAuthorizationInterceptor extends AuthorizationInterceptor {
+	static class ReadAllOfTypeAndTransactionAuthorizationInterceptor extends ReadAllOfTypeAuthorizationInterceptor {
 
-		private final String myResourceType;
+		ReadAllOfTypeAndTransactionAuthorizationInterceptor(String... theResourceTypes) {
+			super(theResourceTypes);
+		}
 
-		public ReadAllAuthorizationInterceptor(String theResourceType){
+		public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+			List<IAuthRule> rules = new ArrayList<>(super.buildRuleList(theRequestDetails));
+			List<IAuthRule> rulesToAdd = new RuleBuilder().allow().transaction().withAnyOperation().andApplyNormalRules().build();
+			rules.addAll(rulesToAdd);
+			return rules;
+		}
+	}
+
+	static class ReadAllOfTypeAuthorizationInterceptor extends AuthorizationInterceptor {
+		private final String[] myResourceTypes;
+
+		public ReadAllOfTypeAuthorizationInterceptor(String... theResourceTypes) {
 			super(PolicyEnum.DENY);
-			myResourceType = theResourceType;
+			myResourceTypes = theResourceTypes;
 		}
 
 		@Override
 		public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-			return new RuleBuilder()
-				.allow().read().resourcesOfType(myResourceType).withAnyId().andThen()
-				.build();
+			return Arrays.stream(myResourceTypes).map(resourceType -> new RuleBuilder()
+				.allow().read().resourcesOfType(resourceType).withAnyId().andThen()
+				.build()).flatMap(Collection::stream).toList();
 		}
 	}
 
@@ -2004,7 +2058,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		private final String myResourceType;
 		private final IIdType myId;
 
-		public ReadInCompartmentAuthorizationInterceptor(String theResourceType, IIdType theId){
+		public ReadInCompartmentAuthorizationInterceptor(String theResourceType, IIdType theId) {
 			super(PolicyEnum.DENY);
 			myResourceType = theResourceType;
 			myId = theId;
@@ -2020,7 +2074,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 
 	static class WriteResourcesInTransactionAuthorizationInterceptor extends AuthorizationInterceptor {
 
-		public WriteResourcesInTransactionAuthorizationInterceptor(){
+		public WriteResourcesInTransactionAuthorizationInterceptor() {
 			super(PolicyEnum.DENY);
 		}
 

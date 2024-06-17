@@ -17,6 +17,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 
@@ -65,7 +67,7 @@ public abstract class BaseR4Test {
 	}
 
 	protected void assertMatchResult(MdmMatchResultEnum theExpectedMatchEnum, long theExpectedVector, double theExpectedScore, boolean theExpectedNewGoldenResource, boolean theExpectedEidMatch, MdmMatchOutcome theMatchResult) {
-		assertEquals(theExpectedScore, theMatchResult.getScore(), 0.001);
+		assertThat(theMatchResult.getScore()).isCloseTo(theExpectedScore, within(0.001));
 		assertEquals(theExpectedVector, theMatchResult.getVector());
 		assertEquals(theExpectedEidMatch, theMatchResult.isEidMatch());
 		assertEquals(theExpectedNewGoldenResource, theMatchResult.isCreatedNewResource());

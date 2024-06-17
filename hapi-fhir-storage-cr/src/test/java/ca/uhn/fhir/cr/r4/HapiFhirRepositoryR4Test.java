@@ -1,12 +1,12 @@
 package ca.uhn.fhir.cr.r4;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import java.util.*;
-
-import ca.uhn.fhir.rest.param.*;
+import ca.uhn.fhir.cr.repo.HapiFhirRepository;
+import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.param.InternalCodingDt;
+import ca.uhn.fhir.rest.param.NumberParam;
+import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Encounter;
@@ -17,9 +17,17 @@ import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import ca.uhn.fhir.cr.repo.HapiFhirRepository;
-import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.rest.api.Constants;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class HapiFhirRepositoryR4Test extends BaseCrR4TestServer {
 
@@ -53,9 +61,9 @@ public class HapiFhirRepositoryR4Test extends BaseCrR4TestServer {
 			.create(new Patient().addName(new HumanName().setFamily("Test").addGiven("Name1")));
 		assertEquals(true, result.getCreated());
 		var patient = (Patient) result.getResource();
-		assertEquals(1, patient.getName().size());
+		assertThat(patient.getName()).hasSize(1);
 		assertEquals("Test", patient.getName().get(0).getFamily());
-		assertEquals(1, patient.getName().get(0).getGiven().size());
+		assertThat(patient.getName().get(0).getGiven()).hasSize(1);
 		patient.getName().get(0).addGiven("Name2");
 		theRepository.update(patient);
 		var updatedPatient = theRepository.read(Patient.class, patient.getIdElement());
@@ -79,13 +87,12 @@ public class HapiFhirRepositoryR4Test extends BaseCrR4TestServer {
 			counter++;
 		}
 		// verify all patient resources captured
-		assertEquals(expectedPatientCount, counter,
-			"Patient search results don't match available resources");
+		assertThat(counter).as("Patient search results don't match available resources").isEqualTo(expectedPatientCount);
 	}
 
 
 	void canSearchWithPagination(HapiFhirRepository theRepository) {
-		
+
 		var result = theRepository.search(Bundle.class, Patient.class, withCountParam(20));
 		assertEquals(20, result.getEntry().size());
 		var next = result.getLink().get(1);
@@ -110,10 +117,9 @@ public class HapiFhirRepositoryR4Test extends BaseCrR4TestServer {
 			counter++;
 		}
 		// verify all patient resources captured
-		assertEquals(expectedPatientCount, counter,
-			"Patient search results don't match available resources");
+		assertThat(counter).as("Patient search results don't match available resources").isEqualTo(expectedPatientCount);
 	}
-	
+
 	void transactionReadsEncounterResources(HapiFhirRepository theRepository) {
 		var expectedEncounterCount = 654;
 		ourPagingProvider.setMaximumPageSize(1000);
@@ -124,10 +130,9 @@ public class HapiFhirRepositoryR4Test extends BaseCrR4TestServer {
 			counter++;
 		}
 		// verify all encounter resources captured
-		assertEquals(expectedEncounterCount, counter,
-			"Encounter search results don't match available resources");
+		assertThat(counter).as("Encounter search results don't match available resources").isEqualTo(expectedEncounterCount);
 	}
-	
+
 	void repositorySearchForEncounterWithMatchingCode(HapiFhirRepository theRepository) {
 
 		//SearchConverter validation test for repository
@@ -161,14 +166,13 @@ public class HapiFhirRepositoryR4Test extends BaseCrR4TestServer {
 			counter++;
 		}
 		// verify patient encounter was the only one found
-		assertEquals(1, counter,
-				"Encounter search results don't match available resources");
+		assertThat(counter).as("Encounter search results don't match available resources").isEqualTo(1);
 	}
-	
+
 	void transactionReadsImmunizationResources(HapiFhirRepository theRepository) {
 		var expectedEncounterCount = 638;
 		ourPagingProvider.setMaximumPageSize(1000);
-		
+
 		var result = theRepository.search(Bundle.class, Immunization.class, withCountParam(1000));
 		// count all resources in result
 		int counter = 0;
@@ -176,8 +180,7 @@ public class HapiFhirRepositoryR4Test extends BaseCrR4TestServer {
 			counter++;
 		}
 		// verify all immunization resources captured
-		assertEquals(expectedEncounterCount, counter,
-			"Immunization search results don't match available resources");
+		assertThat(counter).as("Immunization search results don't match available resources").isEqualTo(expectedEncounterCount);
 	}
 
 	Map<String, List<IQueryParameterType>> withEmptySearchParams() {

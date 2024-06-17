@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboTokenNonUnique;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -27,15 +28,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.Comparator;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4Test {
 	public static final String ORG_ID_UNQUALIFIED = "my-org";
@@ -153,13 +147,19 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		IBundleProvider results = myPatientDao.search(params, mySrd);
 		List<String> actual = toUnqualifiedVersionlessIdValues(results);
 		myCaptureQueriesListener.logSelectQueries();
-		assertThat(actual, containsInAnyOrder(id1.toUnqualifiedVersionless().getValue()));
+		assertThat(actual).containsExactlyInAnyOrder(id1.toUnqualifiedVersionless().getValue());
 
-		String expected = "SELECT t0.RES_ID FROM HFJ_IDX_CMB_TOK_NU t0 WHERE (t0.HASH_COMPLETE = '-7504889232313729794')";
-		assertEquals(expected, myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false));
+		boolean found = false;
+		for (SqlQuery query : myCaptureQueriesListener.getSelectQueries()) {
+			String sql = query.getSql(true, false);
+			if ("SELECT t0.RES_ID FROM HFJ_IDX_CMB_TOK_NU t0 WHERE (t0.IDX_STRING = 'Patient?family=FAMILY1%5C%7C&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale&given=GIVEN1')".equals(sql)) {
+				found = true;
+			}
+		}
+		assertThat(found).as("Found expected sql").isTrue();
 
 		logCapturedMessages();
-		assertThat(myMessages.toString(), containsString("[INFO Using NON_UNIQUE index for query for search: Patient?family=FAMILY1%5C%7C&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale&given=GIVEN1]"));
+		assertThat(myMessages.toString()).contains("[INFO Using NON_UNIQUE index for query for search: Patient?family=FAMILY1%5C%7C&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale&given=GIVEN1]");
 		myMessages.clear();
 
 		// Remove 1, add another
@@ -176,7 +176,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		results = myPatientDao.search(params, mySrd);
 		actual = toUnqualifiedVersionlessIdValues(results);
 		myCaptureQueriesListener.logSelectQueries();
-		assertThat(actual, containsInAnyOrder(id3.toUnqualifiedVersionless().getValue()));
+		assertThat(actual).containsExactlyInAnyOrder(id3.toUnqualifiedVersionless().getValue());
 
 	}
 
@@ -189,9 +189,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		IIdType id1 = createPatient1(null);
 		assertNotNull(id1);
 
-		assertEquals(0, myCaptureQueriesListener.countSelectQueries(),
-			String.join(",", "\n" + myCaptureQueriesListener.getSelectQueries().stream().map(SqlQuery::getThreadName).toList())
-		);
+		assertThat(myCaptureQueriesListener.countSelectQueries()).as(String.join(",", "\n" + myCaptureQueriesListener.getSelectQueries().stream().map(q -> q.getThreadName()).collect(Collectors.toList()))).isEqualTo(0);
 		assertEquals(12, myCaptureQueriesListener.countInsertQueries());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
@@ -204,7 +202,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 				.stream()
 				.map(ResourceIndexedComboTokenNonUnique::getIndexString)
 				.toList();
-			assertThat(indexes.toString(), indexes, contains("Patient?family=FAMILY1%5C%7C&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale&given=GIVEN1"));
+			assertThat(indexes).as(indexes.toString()).containsExactly("Patient?family=FAMILY1%5C%7C&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale&given=GIVEN1");
 		});
 
 		/*
@@ -230,7 +228,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 				.stream()
 				.map(ResourceIndexedComboTokenNonUnique::getIndexString)
 				.toList();
-			assertThat(indexes.toString(), indexes, contains("Patient?family=FAMILY2%5C%7C&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale&given=GIVEN1"));
+			assertThat(indexes).as(indexes.toString()).containsExactly("Patient?family=FAMILY2%5C%7C&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale&given=GIVEN1");
 		});
 
 	}
@@ -263,14 +261,14 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		IBundleProvider results = myPatientDao.search(params, mySrd);
 		List<String> actual = toUnqualifiedVersionlessIdValues(results);
 		myCaptureQueriesListener.logSelectQueries();
-		assertThat(actual, containsInAnyOrder(id1.toUnqualifiedVersionless().getValue()));
+		assertThat(actual).containsExactlyInAnyOrder(id1.toUnqualifiedVersionless().getValue());
 
 		String sql = myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false);
 		String expected = "SELECT t1.RES_ID FROM HFJ_RESOURCE t1 INNER JOIN HFJ_IDX_CMB_TOK_NU t0 ON (t1.RES_ID = t0.RES_ID) INNER JOIN HFJ_SPIDX_DATE t2 ON (t1.RES_ID = t2.RES_ID) WHERE ((t0.HASH_COMPLETE = '-7504889232313729794') AND ((t2.HASH_IDENTITY = '5247847184787287691') AND ((t2.SP_VALUE_LOW_DATE_ORDINAL >= '20210202') AND (t2.SP_VALUE_HIGH_DATE_ORDINAL <= '20210202'))))";
 		assertEquals(expected, sql);
 
 		logCapturedMessages();
-		assertThat(myMessages.toString(), containsString("[INFO Using NON_UNIQUE index for query for search: Patient?family=FAMILY1%5C%7C&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale&given=GIVEN1]"));
+		assertThat(myMessages.toString()).contains("[INFO Using NON_UNIQUE index for query for search: Patient?family=FAMILY1%5C%7C&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale&given=GIVEN1]");
 		myMessages.clear();
 
 	}

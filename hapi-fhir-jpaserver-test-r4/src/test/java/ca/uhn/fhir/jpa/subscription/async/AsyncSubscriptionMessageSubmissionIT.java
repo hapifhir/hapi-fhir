@@ -1,7 +1,10 @@
 package ca.uhn.fhir.jpa.subscription.async;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.subscription.BaseSubscriptionsR4Test;
+import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SynchronousSubscriptionMatcherInterceptor;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
@@ -26,11 +29,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.test.context.ContextConfiguration;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @ContextConfiguration(classes = {AsyncSubscriptionMessageSubmissionIT.SpringConfig.class})
 public class AsyncSubscriptionMessageSubmissionIT extends BaseSubscriptionsR4Test {
@@ -54,7 +53,7 @@ public class AsyncSubscriptionMessageSubmissionIT extends BaseSubscriptionsR4Tes
 	public void cleanupStoppableSubscriptionDeliveringRestHookSubscriber() {
 		myStoppableSubscriptionDeliveringRestHookSubscriber.setCountDownLatch(null);
 		myStoppableSubscriptionDeliveringRestHookSubscriber.unPause();
-		myStorageSettings.setTriggerSubscriptionsForNonVersioningChanges(new JpaStorageSettings().isTriggerSubscriptionsForNonVersioningChanges());
+		mySubscriptionSettings.setTriggerSubscriptionsForNonVersioningChanges(new SubscriptionSettings().isTriggerSubscriptionsForNonVersioningChanges());
 		myStorageSettings.setTagStorageMode(new JpaStorageSettings().getTagStorageMode());
 	}
 
@@ -102,13 +101,13 @@ public class AsyncSubscriptionMessageSubmissionIT extends BaseSubscriptionsR4Tes
 		Observation observation = (Observation) fetchSingleResourceFromSubscriptionTerminalEndpoint();
 		Coding coding = observation.getCode().getCodingFirstRep();
 
-		assertThat(coding.getCode(), equalTo(aCode));
-		assertThat(coding.getSystem(), equalTo(aSystem));
+		assertEquals(aCode, coding.getCode());
+		assertEquals(aSystem, coding.getSystem());
 
 	}
 
 	private void assertCountOfResourcesNeedingSubmission(int theExpectedCount) {
-		assertThat(myResourceModifiedMessagePersistenceSvc.findAllOrderedByCreatedTime(), hasSize(theExpectedCount));
+		assertThat(myResourceModifiedMessagePersistenceSvc.findAllOrderedByCreatedTime()).hasSize(theExpectedCount);
 	}
 
 	private Subscription createAndSubmitSubscriptionWithCriteria(String theCriteria) {
@@ -132,7 +131,7 @@ public class AsyncSubscriptionMessageSubmissionIT extends BaseSubscriptionsR4Tes
 
 
 	private IBaseResource fetchSingleResourceFromSubscriptionTerminalEndpoint() {
-		assertThat(myQueueConsumerHandler.getMessages().size(), is(equalTo(1)));
+		assertThat(myQueueConsumerHandler.getMessages()).hasSize(1);
 		ResourceModifiedJsonMessage resourceModifiedJsonMessage = myQueueConsumerHandler.getMessages().get(0);
 		ResourceModifiedMessage payload = resourceModifiedJsonMessage.getPayload();
 		String payloadString = payload.getPayloadString();
@@ -142,7 +141,7 @@ public class AsyncSubscriptionMessageSubmissionIT extends BaseSubscriptionsR4Tes
 	}
 
 	private void assertCountOfResourcesReceivedAtSubscriptionTerminalEndpoint(int expectedCount) {
-		assertThat(myQueueConsumerHandler.getMessages(), hasSize(expectedCount));
+		assertThat(myQueueConsumerHandler.getMessages()).hasSize(expectedCount);
 	}
 
 	@Configuration

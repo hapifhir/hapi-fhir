@@ -1,7 +1,9 @@
 package ca.uhn.fhir.util;
 
 import org.hl7.fhir.r4.model.CanonicalType;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Meta;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -13,18 +15,14 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static ca.uhn.fhir.test.utilities.TagTestUtil.toCanonicalTypeList;
+import static ca.uhn.fhir.test.utilities.TagTestUtil.assertCodingsEqualAndInOrder;
+import static ca.uhn.fhir.test.utilities.TagTestUtil.createCoding;
 import static ca.uhn.fhir.test.utilities.TagTestUtil.createMeta;
+import static ca.uhn.fhir.test.utilities.TagTestUtil.generateAllCodingPairs;
+import static ca.uhn.fhir.test.utilities.TagTestUtil.toCanonicalTypeList;
 import static ca.uhn.fhir.test.utilities.TagTestUtil.toStringList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Named.named;
-
-import org.hl7.fhir.r4.model.Coding;
-import org.junit.jupiter.api.BeforeEach;
-
-import static ca.uhn.fhir.test.utilities.TagTestUtil.assertCodingsEqualAndInOrder;
-import static ca.uhn.fhir.test.utilities.TagTestUtil.createCoding;
-import static ca.uhn.fhir.test.utilities.TagTestUtil.generateAllCodingPairs;
 
 class MetaTagSorterAlphabeticalTest {
 

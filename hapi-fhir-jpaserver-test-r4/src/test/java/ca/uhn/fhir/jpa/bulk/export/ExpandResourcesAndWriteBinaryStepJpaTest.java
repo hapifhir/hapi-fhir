@@ -9,6 +9,7 @@ import ca.uhn.fhir.batch2.jobs.export.models.ExpandedResourcesList;
 import ca.uhn.fhir.batch2.jobs.export.models.ResourceIdList;
 import ca.uhn.fhir.batch2.jobs.models.BatchResourceId;
 import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
@@ -33,10 +34,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.lessThanOrEqualTo;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.times;
@@ -89,7 +87,7 @@ public class ExpandResourcesAndWriteBinaryStepJpaTest extends BaseJpaR4Test {
 		JobInstance jobInstance = new JobInstance();
 		String chunkId = "ABC";
 
-		StepExecutionDetails<BulkExportJobParameters, ResourceIdList> details = new StepExecutionDetails<>(params, resourceList, jobInstance, chunkId);
+		StepExecutionDetails<BulkExportJobParameters, ResourceIdList> details = new StepExecutionDetails<>(params, resourceList, jobInstance, new WorkChunk().setId(chunkId));
 
 		// Test
 
@@ -104,7 +102,7 @@ public class ExpandResourcesAndWriteBinaryStepJpaTest extends BaseJpaR4Test {
 			String nextNdJsonString = new String(nextBinary.getContent(), StandardCharsets.UTF_8);
 
 			// This is the most important check here
-			assertThat(nextNdJsonString.length(), lessThanOrEqualTo(maxFileSize));
+			assertThat(nextNdJsonString.length()).isLessThanOrEqualTo(maxFileSize);
 
 			Arrays.stream(nextNdJsonString.split("\\n"))
 				.filter(StringUtils::isNotBlank)
@@ -146,10 +144,9 @@ public class ExpandResourcesAndWriteBinaryStepJpaTest extends BaseJpaR4Test {
 		JobInstance jobInstance = new JobInstance();
 		String chunkId = "ABC";
 
-		StepExecutionDetails<BulkExportJobParameters, ResourceIdList> details = new StepExecutionDetails<>(params, resourceList, jobInstance, chunkId);
+		StepExecutionDetails<BulkExportJobParameters, ResourceIdList> details = new StepExecutionDetails<>(params, resourceList, jobInstance, new WorkChunk().setId(chunkId));
 
 		// Test
-
 		myExpandResourcesStep.run(details, mySink);
 
 		// Verify

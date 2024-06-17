@@ -10,10 +10,7 @@ import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
-import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.rest.server.interceptor.ExceptionInterceptorMethodTest;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
-import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import ch.qos.logback.classic.Logger;
@@ -21,9 +18,6 @@ import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.joran.JoranConfigurator;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.ee10.servlet.ServletHandler;
-import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterAll;
@@ -45,6 +39,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+@SuppressWarnings("checkstyle:NoPrintln")
 public class LoggingInterceptorTest {
 
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
@@ -83,7 +78,6 @@ public class LoggingInterceptorTest {
 
 	@Test
 	public void testLoggerNonVerbose() {
-		System.out.println("Starting testLogger");
 		IGenericClient client = ourCtx.newRestfulGenericClient(ourServer.getBaseUrl());
 		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 
@@ -115,7 +109,7 @@ public class LoggingInterceptorTest {
 		LoggingInterceptor interceptor = new LoggingInterceptor(true);
 		client.registerInterceptor(interceptor);
 		Patient patient = client.read(Patient.class, "1");
-		assertFalse(patient.getIdentifierFirstRep().isEmpty());
+			assertFalse(patient.getIdentifierFirstRep().isEmpty());
 
 		verify(myMockAppender, times(1)).doAppend(argThat(new ArgumentMatcher<ILoggingEvent>() {
 			@Override
@@ -130,7 +124,7 @@ public class LoggingInterceptorTest {
 		client.unregisterInterceptor(interceptor);
 		
 		patient = client.read(Patient.class, "1");
-		assertFalse(patient.getIdentifierFirstRep().isEmpty());
+			assertFalse(patient.getIdentifierFirstRep().isEmpty());
 
 		verify(myMockAppender, times(1)).doAppend(argThat(new ArgumentMatcher<ILoggingEvent>() {
 			@Override

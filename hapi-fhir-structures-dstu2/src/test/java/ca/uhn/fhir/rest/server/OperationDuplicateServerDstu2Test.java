@@ -11,26 +11,17 @@ import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
-import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.ee10.servlet.ServletHandler;
-import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import java.util.concurrent.TimeUnit;
-
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class OperationDuplicateServerDstu2Test {
@@ -62,7 +53,7 @@ public class OperationDuplicateServerDstu2Test {
 			ourLog.info(response);
 
 			Conformance resp = ourCtx.newXmlParser().parseResource(Conformance.class, response);
-			assertEquals(1, resp.getRest().get(0).getOperation().size());
+			assertThat(resp.getRest().get(0).getOperation()).hasSize(1);
 			assertEquals("myoperation", resp.getRest().get(0).getOperation().get(0).getName());
 			assertEquals("OperationDefinition/OrganizationPatient-ts-myoperation", resp.getRest().get(0).getOperation().get(0).getDefinition().getReference().getValue());
 		}
@@ -81,8 +72,8 @@ public class OperationDuplicateServerDstu2Test {
 			assertEquals(true, resp.getSystemElement().getValue().booleanValue());
 			assertEquals("myoperation", resp.getCode());
 			assertEquals(true, resp.getIdempotent().booleanValue());
-			assertEquals(2, resp.getType().size());
-			assertEquals(1, resp.getParameter().size());
+			assertThat(resp.getType()).hasSize(2);
+			assertThat(resp.getParameter()).hasSize(1);
 		}
 	}
 

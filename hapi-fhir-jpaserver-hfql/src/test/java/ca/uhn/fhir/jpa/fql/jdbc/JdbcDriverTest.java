@@ -39,9 +39,10 @@ import java.util.List;
 import java.util.Map;
 
 import static ca.uhn.fhir.jpa.fql.jdbc.HfqlRestClientTest.createFakeStatement;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -109,7 +110,7 @@ public class JdbcDriverTest {
 			""";
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(myDs);
 		List<Map<String, Object>> outcome = jdbcTemplate.query(input, new ColumnMapRowMapper());
-		assertEquals(2, outcome.size());
+		assertThat(outcome).hasSize(2);
 
 		String expectedAuthHeader = Constants.HEADER_AUTHORIZATION_VALPREFIX_BASIC + Base64Utils.encodeToString((SOME_USERNAME + ":" + SOME_PASSWORD).getBytes(StandardCharsets.UTF_8));
 		String actual = ourHeaderCaptureInterceptor.getCapturedHeaders().get(0).get(Constants.HEADER_AUTHORIZATION).get(0);
@@ -203,9 +204,9 @@ public class JdbcDriverTest {
 		assertEquals(987L, resultSet.getObject("col.longint"));
 		assertEquals(new Timestamp(new DateTimeType("2023-02-12T10:01:02.234Z").getValue().getTime()), resultSet.getObject("col.timestamp"));
 
-		assertThrows(SQLException.class, () -> resultSet.getString(0));
-		assertThrows(SQLException.class, () -> resultSet.getString(999));
-		assertThrows(SQLException.class, () -> resultSet.getString("foo"));
+		assertThatExceptionOfType(SQLException.class).isThrownBy(() -> resultSet.getString(0));
+		assertThatExceptionOfType(SQLException.class).isThrownBy(() -> resultSet.getString(999));
+		assertThatExceptionOfType(SQLException.class).isThrownBy(() -> resultSet.getString("foo"));
 	}
 
 	@Test
@@ -308,9 +309,9 @@ public class JdbcDriverTest {
 		// No more rows
 		assertFalse(tables.next());
 		// Invalid columns
-		assertThrows(SQLException.class, () -> tables.getString(0));
-		assertThrows(SQLException.class, () -> tables.getString(999));
-		assertThrows(SQLException.class, () -> tables.getString("foo"));
+		assertThatExceptionOfType(SQLException.class).isThrownBy(() -> tables.getString(0));
+		assertThatExceptionOfType(SQLException.class).isThrownBy(() -> tables.getString(999));
+		assertThatExceptionOfType(SQLException.class).isThrownBy(() -> tables.getString("foo"));
 
 	}
 

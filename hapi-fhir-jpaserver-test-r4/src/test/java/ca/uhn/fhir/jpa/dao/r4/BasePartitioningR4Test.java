@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import static ca.uhn.fhir.jpa.model.entity.ResourceTable.IDX_RES_TYPE_FHIR_ID;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -30,10 +32,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static ca.uhn.fhir.jpa.model.entity.ResourceTable.IDX_RES_TYPE_FHIR_ID;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
@@ -289,7 +288,7 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		@Override
 		public void assertNoRemainingIds() {
 			super.assertNoRemainingIds();
-			assertEquals(0, myReadRequestPartitionIds.size(), () -> "Found " + myReadRequestPartitionIds.size() + " READ partitions remaining in interceptor");
+			assertThat(myReadRequestPartitionIds).as("Found " + myReadRequestPartitionIds.size() + " READ partitions remaining in interceptor").hasSize(0);
 		}
 
 	}
@@ -307,14 +306,14 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE)
 		public RequestPartitionId PartitionIdentifyCreate(IBaseResource theResource, ServletRequestDetails theRequestDetails) {
 			assertNotNull(theResource);
-			assertTrue(!myCreateRequestPartitionIds.isEmpty(), "No create partitions left in interceptor");
+			assertThat(!myCreateRequestPartitionIds.isEmpty()).as("No create partitions left in interceptor").isTrue();
 			RequestPartitionId retVal = myCreateRequestPartitionIds.remove(0);
 			ourLog.debug("Returning partition [{}] for create of resource {} with date {}", retVal, theResource, retVal.getPartitionDate());
 			return retVal;
 		}
 
 		public void assertNoRemainingIds() {
-			assertEquals(0, myCreateRequestPartitionIds.size(), () -> "Still have " + myCreateRequestPartitionIds.size() + " CREATE partitions remaining in interceptor");
+			assertThat(myCreateRequestPartitionIds.size()).as(() -> "Still have " + myCreateRequestPartitionIds.size() + " CREATE partitions remaining in interceptor").isEqualTo(0);
 		}
 
 	}

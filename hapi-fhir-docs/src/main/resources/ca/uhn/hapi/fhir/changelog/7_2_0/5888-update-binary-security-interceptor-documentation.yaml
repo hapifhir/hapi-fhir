@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 5888
+title: "Updated documentation on binary_security_interceptor to specify using
+    `STORAGE_PRE_INITIATE_BULK_EXPORT` not `STORAGE_INITIATE_BULK_EXPORT` pointcut
+    to change bulk export parameters.
+"

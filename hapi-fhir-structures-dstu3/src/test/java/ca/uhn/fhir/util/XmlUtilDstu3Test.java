@@ -1,5 +1,6 @@
 package ca.uhn.fhir.util;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.DataFormatException;
@@ -17,10 +18,9 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.transform.TransformerException;
 import java.io.IOException;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.junit.jupiter.params.shadow.com.univocity.parsers.conversions.Conversions.replace;
+
 
 public class XmlUtilDstu3Test {
 
@@ -42,8 +42,7 @@ public class XmlUtilDstu3Test {
 	public void testParseMalformed() {
 		try {
 			ourCtx.newXmlParser().parseResource("AAAAA");
-			fail();
-		} catch (DataFormatException e) {
+			fail();		} catch (DataFormatException e) {
 			// good
 		}
 	}
@@ -54,14 +53,12 @@ public class XmlUtilDstu3Test {
 		
 		try {
 			ourCtx.newXmlParser().parseResource("AAAAA");
-			fail();
-		} catch (DataFormatException e) {
+			fail();		} catch (DataFormatException e) {
 			// good
 		}
 		try {
 			ourCtx.newXmlParser().encodeResourceToString(myPatient);
-			fail();
-		} catch (ConfigurationException e) {
+			fail();		} catch (ConfigurationException e) {
 			// good
 		}
 	}
@@ -72,8 +69,7 @@ public class XmlUtilDstu3Test {
 		
 		try {
 			ourCtx.newXmlParser().parseResource("AAAAA");
-			fail();
-		} catch (ConfigurationException e) {
+			fail();		} catch (ConfigurationException e) {
 			// good
 		}
 	}
@@ -89,9 +85,9 @@ public class XmlUtilDstu3Test {
 			initialLen = output.length();
 			output = output.replace("\n ", "\n");
 		} while (output.length() != initialLen);
-		assertEquals("<document>\n" +
+		assertThat(output).isEqualTo("<document>\n" +
 			"<tag id=\"1\"/>\n" +
-			"</document>\n", output);
+			"</document>\n");
 	}
 
 	@Test

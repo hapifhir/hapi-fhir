@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 3986
+title: "Removed the validation error of the `max` query parameter on the $lastn operation. Now, the $lastn operation can be invoked with the `max` query parameter. Contribution by Gijs Groenewegen (@thetrueoneshots)."

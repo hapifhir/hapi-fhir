@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.subscription.resthook;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.subscription.submit.svc.ResourceModifiedSubmitterSvc;
@@ -36,7 +37,7 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class RestHookActivatesPreExistingSubscriptionsR4Test extends BaseResourceProviderR4Test {
 
@@ -57,12 +58,12 @@ public class RestHookActivatesPreExistingSubscriptionsR4Test extends BaseResourc
 	@AfterEach
 	public void afterUnregisterRestHookListener() {
 		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
-		myStorageSettings.clearSupportedSubscriptionTypesForUnitTest();
+		mySubscriptionSettings.clearSupportedSubscriptionTypesForUnitTest();
 	}
 
 	@BeforeEach
 	public void beforeSetSubscriptionActivatingInterceptor() {
-		myStorageSettings.addSupportedSubscriptionType(org.hl7.fhir.dstu2.model.Subscription.SubscriptionChannelType.RESTHOOK);
+		mySubscriptionSettings.addSupportedSubscriptionType(org.hl7.fhir.dstu2.model.Subscription.SubscriptionChannelType.RESTHOOK);
 		myResourceModifiedSubmitterSvc.startIfNeeded();
 		mySubscriptionLoader.doSyncSubscriptionsForUnitTest();
 	}

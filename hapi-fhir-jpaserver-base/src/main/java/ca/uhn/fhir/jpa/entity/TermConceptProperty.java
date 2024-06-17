@@ -54,6 +54,7 @@ import org.hibernate.validator.constraints.NotBlank;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 
+import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.left;
 import static org.apache.commons.lang3.StringUtils.length;
 
@@ -117,7 +118,7 @@ public class TermConceptProperty implements Serializable {
 	private byte[] myValueBin;
 
 	@Enumerated(EnumType.ORDINAL)
-	@Column(name = "PROP_TYPE", nullable = false, length = MAX_PROPTYPE_ENUM_LENGTH)
+	@Column(name = "PROP_TYPE", nullable = false)
 	@JdbcTypeCode(SqlTypes.INTEGER)
 	private TermConceptPropertyTypeEnum myType;
 
@@ -307,9 +308,15 @@ public class TermConceptProperty implements Serializable {
 		return myId;
 	}
 
+	public void performLegacyLobSupport(boolean theSupportLegacyLob) {
+		if (!theSupportLegacyLob) {
+			myValueLob = null;
+		}
+	}
+
 	@VisibleForTesting
-	public byte[] getValueBlobForTesting() {
-		return myValueLob;
+	public boolean hasValueBlobForTesting() {
+		return nonNull(myValueLob);
 	}
 
 	@VisibleForTesting
@@ -318,8 +325,8 @@ public class TermConceptProperty implements Serializable {
 	}
 
 	@VisibleForTesting
-	public byte[] getValueBinForTesting() {
-		return myValueBin;
+	public boolean hasValueBinForTesting() {
+		return nonNull(myValueBin);
 	}
 
 	@VisibleForTesting
