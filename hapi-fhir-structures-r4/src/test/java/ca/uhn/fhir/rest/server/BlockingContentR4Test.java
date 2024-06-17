@@ -93,7 +93,7 @@ public class BlockingContentR4Test {
 			try (CloseableHttpResponse resp = client.execute(post)) {
 				ourLog.info(Arrays.asList(resp.getAllHeaders()).toString().replace(", ", "\n"));
 				ourLog.info(resp.toString());
-				await().until(()->myServerException, notNullValue());
+				await().until(()->myServerException != null);
 			}
 
 			assertThat(myServerException.toString()).contains("Idle timeout expired");
