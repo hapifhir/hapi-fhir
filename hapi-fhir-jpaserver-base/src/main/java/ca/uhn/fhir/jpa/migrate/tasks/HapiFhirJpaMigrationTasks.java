@@ -141,18 +141,8 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		 * on the live system as it would take a loooooong time to execute these on heavily loaded
 		 * databases.
 		 */
-		version.onTable("HFJ_SPIDX_COORDS")
-				.modifyColumn("20240601.1", "SP_LATITUDE")
-				.nonNullable()
-				.withType(ColumnTypeEnum.DOUBLE)
-				.heavyweightSkipByDefault()
-				.failureAllowed();
-		version.onTable("HFJ_SPIDX_COORDS")
-				.modifyColumn("20240601.2", "SP_LONGITUDE")
-				.nonNullable()
-				.withType(ColumnTypeEnum.DOUBLE)
-				.heavyweightSkipByDefault()
-				.failureAllowed();
+		// Skipping numbers 20240601.1 and 20240601.2 as they were found to not
+		// be needed during code review.
 		version.onTable("HFJ_RESOURCE")
 				.modifyColumn("20240601.3", "SP_HAS_LINKS")
 				.nonNullable()
