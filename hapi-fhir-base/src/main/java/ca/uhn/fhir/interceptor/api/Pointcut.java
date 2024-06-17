@@ -321,9 +321,12 @@ public enum Pointcut implements IPointcut {
 	 * This hook is invoked before an incoming request is processed. Note that this method is called
 	 * after the server has begun preparing the response to the incoming client request.
 	 * As such, it is not able to supply a response to the incoming request in the way that
-	 * SERVER_INCOMING_REQUEST_PRE_PROCESSED and
-	 * {@link #SERVER_INCOMING_REQUEST_POST_PROCESSED}
-	 * are.
+	 * SERVER_INCOMING_REQUEST_PRE_PROCESSED and {@link #SERVER_INCOMING_REQUEST_POST_PROCESSED} are.
+	 * At this point the request has already been passed to the handler so any changes
+	 * (e.g. adding parameters) will not be considered.
+	 * If you'd like to modify request parameters before they are passed to the handler,
+	 * use {@link Pointcut#SERVER_INCOMING_REQUEST_PRE_HANDLER_SELECTED}.
+	 * If you are attempting to modify a search before it occurs, use {@link Pointcut#STORAGE_PRESEARCH_REGISTERED}.
 	 * <p>
 	 * Hooks may accept the following parameters:
 	 * <ul>
@@ -902,7 +905,6 @@ public enum Pointcut implements IPointcut {
 	 * canonical subscription such as adding headers, modifying the channel
 	 * endpoint, etc.
 	 * Furthermore, you may modify the outgoing message wrapper, for example adding headers via ResourceModifiedJsonMessage field.
-	 *
 	 * </p>
 	 * Hooks may accept the following parameters:
 	 * <ul>
@@ -1122,7 +1124,6 @@ public enum Pointcut implements IPointcut {
 	 * <b>Storage Hook:</b>
 	 * Invoked when a Bulk Export job is being kicked off. Hook methods may modify
 	 * the request, or raise an exception to prevent it from being initiated.
-	 *
 	 * This hook is not guaranteed to be called before permission checks, and so
 	 * anu implementers should be cautious of changing the options in ways that would
 	 * affect permissions.
@@ -1192,7 +1193,7 @@ public enum Pointcut implements IPointcut {
 
 	/**
 	 * <b>Storage Hook:</b>
-	 * Invoked when a set of resources are about to be deleted and expunged via url like http://localhost/Patient?active=false&_expunge=true
+	 * Invoked when a set of resources are about to be deleted and expunged via url like {@code http://localhost/Patient?active=false&_expunge=true}.
 	 * <p>
 	 * Hooks may accept the following parameters:
 	 * </p>
@@ -1228,7 +1229,7 @@ public enum Pointcut implements IPointcut {
 
 	/**
 	 * <b>Storage Hook:</b>
-	 * Invoked when a batch of resource pids are about to be deleted and expunged via url like http://localhost/Patient?active=false&_expunge=true
+	 * Invoked when a batch of resource pids are about to be deleted and expunged via url like {@code http://localhost/Patient?active=false&_expunge=true}.
 	 * <p>
 	 * Hooks may accept the following parameters:
 	 * </p>
@@ -2957,7 +2958,6 @@ public enum Pointcut implements IPointcut {
 			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
 			"ca.uhn.fhir.jpa.util.SqlQueryList"),
 
-	@Deprecated(since = "7.2.0 - Use STORAGE_BINARY_ASSIGN_BINARY_CONTENT_ID_PREFIX instead.")
 	/**
 	 * <b> Deprecated but still supported.  Will eventually be removed.  <code>Please use Pointcut.STORAGE_BINARY_ASSIGN_BINARY_CONTENT_ID_PREFIX</code>  </b>
 	 * <b> Binary Blob Prefix Assigning Hook:</b>
@@ -2980,6 +2980,7 @@ public enum Pointcut implements IPointcut {
 	 * Hooks should return <code>String</code>, which represents the full prefix to be applied to the blob.
 	 * </p>
 	 */
+	@Deprecated(since = "7.2.0 - Use STORAGE_BINARY_ASSIGN_BINARY_CONTENT_ID_PREFIX instead.")
 	STORAGE_BINARY_ASSIGN_BLOB_ID_PREFIX(
 			String.class,
 			"ca.uhn.fhir.rest.api.server.RequestDetails",
