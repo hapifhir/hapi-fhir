@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.search.builder.predicate;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
@@ -16,8 +17,6 @@ import com.healthmarketscience.sqlbuilder.InCondition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbSchema;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbSpec;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -114,7 +113,7 @@ public class ResourceLinkPredicateBuilderTest {
 		when(mockSearchParam.getPathsSplit()).thenReturn(List.of("Patient.given", "Bundle.composition.subject", "Bundle.type"));
 		when(mySearchParamRegistry.getActiveSearchParam(resourceType, paramName)).thenReturn(mockSearchParam);
 		List<String> result = myResourceLinkPredicateBuilder.createResourceLinkPaths(resourceType, paramName, List.of());
-		MatcherAssert.assertThat(result, Matchers.containsInAnyOrder("Bundle.composition.subject", "Bundle.type"));
+		MatcherAssert.assertThat(result).containsExactlyInAnyOrder("Bundle.composition.subject", "Bundle.type");
 	}
 
 	@Test
@@ -122,7 +121,7 @@ public class ResourceLinkPredicateBuilderTest {
 		String paramName = "param.name";
 		String resourceType = "Bundle";
 		List<String> result = myResourceLinkPredicateBuilder.createResourceLinkPaths(resourceType, paramName, List.of());
-		MatcherAssert.assertThat(result, Matchers.empty());
+		MatcherAssert.assertThat(result).isEmpty();
 	}
 
 	@Test
@@ -138,7 +137,7 @@ public class ResourceLinkPredicateBuilderTest {
 		when(patientIdentifierSP.getPathsSplit()).thenReturn(List.of("Patient.identifier"));
 		when(mySearchParamRegistry.getActiveSearchParam("Patient", "identifier")).thenReturn(patientIdentifierSP);
 		List<String> result = myResourceLinkPredicateBuilder.createResourceLinkPaths(resourceType, paramName, List.of());
-		MatcherAssert.assertThat(result, Matchers.containsInAnyOrder("Observation.subject.identifier"));
+		MatcherAssert.assertThat(result).containsExactlyInAnyOrder("Observation.subject.identifier");
 	}
 
 	@Test
@@ -165,7 +164,7 @@ public class ResourceLinkPredicateBuilderTest {
 		when(mySearchParamRegistry.getActiveSearchParam("Organization", "identifier")).thenReturn(organizationIdentifierSP);
 
 		List<String> result = myResourceLinkPredicateBuilder.createResourceLinkPaths(resourceType, paramName, List.of("Patient", "Organization"));
-		MatcherAssert.assertThat(result, Matchers.containsInAnyOrder("Observation.subject.managingOrganization.identifier"));
+		MatcherAssert.assertThat(result).containsExactlyInAnyOrder("Observation.subject.managingOrganization.identifier");
 	}
 
 	@Test
@@ -178,6 +177,6 @@ public class ResourceLinkPredicateBuilderTest {
 		when(observationSubjectSP.getTargets()).thenReturn(Set.of("Patient"));
 		when(mySearchParamRegistry.getActiveSearchParam("Observation", "subject")).thenReturn(observationSubjectSP);
 		List<String> result = myResourceLinkPredicateBuilder.createResourceLinkPaths(resourceType, paramName, List.of("Group"));
-		MatcherAssert.assertThat(result, Matchers.empty());
+		MatcherAssert.assertThat(result).isEmpty();
 	}
 }

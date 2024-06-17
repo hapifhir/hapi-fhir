@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.mdm.svc;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
@@ -58,14 +59,6 @@ import static ca.uhn.fhir.mdm.api.MdmMatchResultEnum.MATCH;
 import static ca.uhn.fhir.mdm.api.MdmMatchResultEnum.NO_MATCH;
 import static ca.uhn.fhir.mdm.api.MdmMatchResultEnum.POSSIBLE_DUPLICATE;
 import static ca.uhn.fhir.mdm.api.MdmMatchResultEnum.POSSIBLE_MATCH;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.blankOrNullString;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.equalToIgnoringCase;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.in;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -285,8 +278,8 @@ public class MdmMatchLinkSvcTest {
 			Patient patient = getTargetResourceFromMdmLink(mdmLink.get(), "Patient");
 			List<CanonicalEID> externalEid = myEidHelper.getExternalEid(patient);
 
-			assertThat(externalEid.get(0).getSystem(), is(equalTo(myMdmSettings.getMdmRules().getEnterpriseEIDSystemForResourceType("Patient"))));
-			assertThat(externalEid.get(0).getValue(), is(equalTo(sampleEID)));
+			assertThat(externalEid.get(0).getSystem()).isEqualTo(myMdmSettings.getMdmRules().getEnterpriseEIDSystemForResourceType("Patient"));
+			assertThat(externalEid.get(0).getValue()).isEqualTo(sampleEID);
 		}
 
 		@Test
@@ -296,8 +289,8 @@ public class MdmMatchLinkSvcTest {
 
 			Patient targetPatient = getTargetResourceFromMdmLink(mdmLink, "Patient");
 			Identifier identifierFirstRep = targetPatient.getIdentifierFirstRep();
-			assertThat(identifierFirstRep.getSystem(), is(equalTo(MdmConstants.HAPI_ENTERPRISE_IDENTIFIER_SYSTEM)));
-			assertThat(identifierFirstRep.getValue(), not(blankOrNullString()));
+			assertThat(identifierFirstRep.getSystem()).isEqualTo(MdmConstants.HAPI_ENTERPRISE_IDENTIFIER_SYSTEM);
+			assertThat(identifierFirstRep.getValue()).isNotBlank();
 		}
 
 		@Test
@@ -307,13 +300,13 @@ public class MdmMatchLinkSvcTest {
 			Optional<? extends IMdmLink> mdmLink = myMdmLinkDaoSvc.getMatchedLinkForSourcePid(JpaPid.fromId(patient.getIdElement().getIdPartAsLong()));
 			Patient read = getTargetResourceFromMdmLink(mdmLink.get(), "Patient");
 
-			assertThat(read.getNameFirstRep().getFamily(), is(equalTo(patient.getNameFirstRep().getFamily())));
-			assertThat(read.getNameFirstRep().getGivenAsSingleString(), is(equalTo(patient.getNameFirstRep().getGivenAsSingleString())));
-			assertThat(read.getBirthDateElement().toHumanDisplay(), is(equalTo(patient.getBirthDateElement().toHumanDisplay())));
-			assertThat(read.getTelecomFirstRep().getValue(), is(equalTo(patient.getTelecomFirstRep().getValue())));
-			assertThat(read.getPhoto().size(), is(equalTo(patient.getPhoto().size())));
-			assertThat(read.getPhotoFirstRep().getData(), is(equalTo(patient.getPhotoFirstRep().getData())));
-			assertThat(read.getGender(), is(equalTo(patient.getGender())));
+			assertThat(read.getNameFirstRep().getFamily()).isEqualTo(patient.getNameFirstRep().getFamily());
+			assertThat(read.getNameFirstRep().getGivenAsSingleString()).isEqualTo(patient.getNameFirstRep().getGivenAsSingleString());
+			assertThat(read.getBirthDateElement().toHumanDisplay()).isEqualTo(patient.getBirthDateElement().toHumanDisplay());
+			assertThat(read.getTelecomFirstRep().getValue()).isEqualTo(patient.getTelecomFirstRep().getValue());
+			assertThat(read.getPhoto().size()).isEqualTo(patient.getPhoto().size());
+			assertThat(read.getPhotoFirstRep().getData()).isEqualTo(patient.getPhotoFirstRep().getData());
+			assertThat(read.getGender()).isEqualTo(patient.getGender());
 		}
 
 		@Test
@@ -345,13 +338,13 @@ public class MdmMatchLinkSvcTest {
 
 			//The collision should have kept the old identifier
 			Identifier firstIdentifier = identifier.get(0);
-			assertThat(firstIdentifier.getSystem(), is(equalTo(MdmConstants.HAPI_ENTERPRISE_IDENTIFIER_SYSTEM)));
-			assertThat(firstIdentifier.getValue(), is(equalTo(foundHapiEid)));
+			assertThat(firstIdentifier.getSystem()).isEqualTo(MdmConstants.HAPI_ENTERPRISE_IDENTIFIER_SYSTEM);
+			assertThat(firstIdentifier.getValue()).isEqualTo(foundHapiEid);
 
 			//The collision should have added a new identifier with the external system.
 			Identifier secondIdentifier = identifier.get(1);
-			assertThat(secondIdentifier.getSystem(), is(equalTo(myMdmSettings.getMdmRules().getEnterpriseEIDSystemForResourceType("Patient"))));
-			assertThat(secondIdentifier.getValue(), is(equalTo("12345")));
+			assertThat(secondIdentifier.getSystem()).isEqualTo(myMdmSettings.getMdmRules().getEnterpriseEIDSystemForResourceType("Patient"));
+			assertThat(secondIdentifier.getValue()).isEqualTo("12345");
 		}
 
 		@Test
@@ -394,7 +387,7 @@ public class MdmMatchLinkSvcTest {
 			patient2 = createPatientAndUpdateLinks(patient2);
 
 			List<MdmLink> possibleDuplicates = (List<MdmLink>) myMdmLinkDaoSvc.getPossibleDuplicates();
-			assertThat(possibleDuplicates, hasSize(1));
+			assertThat(possibleDuplicates).hasSize(1);
 
 			Patient finalPatient1 = patient1;
 			Patient finalPatient2 = patient2;
@@ -500,7 +493,7 @@ public class MdmMatchLinkSvcTest {
 
 			//Ensure there is no successful MATCH links for incomingJanePatient
 			Optional<? extends IMdmLink> matchedLinkForTargetPid = runInTransaction(() -> myMdmLinkDaoSvc.getMatchedLinkForSourcePid(myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), incomingJanePatient)));
-			assertThat(matchedLinkForTargetPid.isPresent(), is(false));
+			assertThat(matchedLinkForTargetPid.isPresent()).isEqualTo(false);
 
 			logAllLinks();
 			assertLinksMatchResult(MATCH, MATCH, POSSIBLE_MATCH, POSSIBLE_MATCH, POSSIBLE_DUPLICATE);
@@ -608,7 +601,7 @@ public class MdmMatchLinkSvcTest {
 			assertFalse(myEidHelper.getHapiEid(janeGoldenResourcePatient).isEmpty());
 
 			// original checks - verifies that EIDs are assigned
-			assertThat("Resource must not be identical", janePatient != janeGoldenResourcePatient);
+			assertThat(janePatient != janeGoldenResourcePatient).as("Resource must not be identical").isTrue();
 			assertFalse(janePatient.getIdentifier().isEmpty());
 			assertFalse(janeGoldenResourcePatient.getIdentifier().isEmpty());
 
@@ -637,7 +630,7 @@ public class MdmMatchLinkSvcTest {
 			Patient sourcePatientFromTarget = getGoldenResourceFromTargetResource(janePaulPatient);
 			HumanName nameFirstRep = sourcePatientFromTarget.getNameFirstRep();
 
-			assertThat(nameFirstRep.getGivenAsSingleString(), is(equalToIgnoringCase("paul")));
+			assertThat(nameFirstRep.getGivenAsSingleString()).isEqualToIgnoringCase("paul");
 		}
 
 		@Test
@@ -649,7 +642,7 @@ public class MdmMatchLinkSvcTest {
 			paul = createPatientAndUpdateLinks(paul);
 
 			Patient sourcePatientFromTarget = getGoldenResourceFromTargetResource(paul);
-			assertThat(sourcePatientFromTarget.getBirthDateElement().getValueAsString(), is(incorrectBirthdate));
+			assertThat(sourcePatientFromTarget.getBirthDateElement().getValueAsString()).isEqualTo(incorrectBirthdate);
 
 			String correctBirthdate = "1990-06-28";
 			paul.getBirthDateElement().setValueAsString(correctBirthdate);
@@ -657,7 +650,7 @@ public class MdmMatchLinkSvcTest {
 			paul = updatePatientAndUpdateLinks(paul);
 
 			sourcePatientFromTarget = getGoldenResourceFromTargetResource(paul);
-			assertThat(sourcePatientFromTarget.getBirthDateElement().getValueAsString(), is(equalTo(correctBirthdate)));
+			assertThat(sourcePatientFromTarget.getBirthDateElement().getValueAsString()).isEqualTo(correctBirthdate);
 			assertLinkCount(1);
 		}
 
@@ -715,7 +708,7 @@ public class MdmMatchLinkSvcTest {
 			Patient originalPaulGolden = getGoldenResourceFromTargetResource(paul);
 
 			String oldEid = myEidHelper.getExternalEid(originalPaulGolden).get(0).getValue();
-			assertThat(oldEid, is(equalTo(EID_1)));
+			assertThat(oldEid).isEqualTo(EID_1);
 
 			clearExternalEIDs(paul);
 			addExternalEID(paul, EID_2);
@@ -726,12 +719,12 @@ public class MdmMatchLinkSvcTest {
 			Patient newlyFoundPaulPatient = getGoldenResourceFromTargetResource(paul);
 			mdmAssertThat(originalPaulGolden).is_MATCH_to(newlyFoundPaulPatient);
 			String newEid = myEidHelper.getExternalEid(newlyFoundPaulPatient).get(0).getValue();
-			assertThat(newEid, is(equalTo(EID_2)));
+			assertThat(newEid).isEqualTo(EID_2);
 		}
 
 		private void assertNoDuplicates() {
 			List<MdmLink> possibleDuplicates = (List<MdmLink>) myMdmLinkDaoSvc.getPossibleDuplicates();
-			assertThat(possibleDuplicates, hasSize(0));
+			assertThat(possibleDuplicates).hasSize(0);
 		}
 
 		@Test
@@ -766,7 +759,7 @@ public class MdmMatchLinkSvcTest {
 			mdmAssertThat(patient2).is_MATCH_to(patient1);
 
 			List<MdmLink> possibleDuplicates = (List<MdmLink>) myMdmLinkDaoSvc.getPossibleDuplicates();
-			assertThat(possibleDuplicates, hasSize(1));
+			assertThat(possibleDuplicates).hasSize(1);
 			mdmAssertThat(patient3).is_POSSIBLE_DUPLICATE_to(patient1);
 		}
 

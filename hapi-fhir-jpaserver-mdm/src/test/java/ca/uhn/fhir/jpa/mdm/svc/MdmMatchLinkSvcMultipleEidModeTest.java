@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.mdm.svc;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
@@ -22,12 +23,6 @@ import java.util.stream.Stream;
 import static ca.uhn.fhir.mdm.api.MdmMatchResultEnum.MATCH;
 import static ca.uhn.fhir.mdm.api.MdmMatchResultEnum.POSSIBLE_DUPLICATE;
 import static ca.uhn.fhir.mdm.api.MdmMatchResultEnum.POSSIBLE_MATCH;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.in;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
 import static org.slf4j.LoggerFactory.getLogger;
 
 @TestPropertySource(properties = {
@@ -72,17 +67,17 @@ public class MdmMatchLinkSvcMultipleEidModeTest extends BaseMdmR4Test {
 
 		//The collision should have kept the old identifier
 		Identifier firstIdentifier = identifier.get(0);
-		assertThat(firstIdentifier.getSystem(), is(equalTo(MdmConstants.HAPI_ENTERPRISE_IDENTIFIER_SYSTEM)));
-		assertThat(firstIdentifier.getValue(), is(equalTo(foundHapiEid)));
+		assertThat(firstIdentifier.getSystem()).isEqualTo(MdmConstants.HAPI_ENTERPRISE_IDENTIFIER_SYSTEM);
+		assertThat(firstIdentifier.getValue()).isEqualTo(foundHapiEid);
 
 		//The collision should have added a new identifier with the external system.
 		Identifier secondIdentifier = identifier.get(1);
-		assertThat(secondIdentifier.getSystem(), is(equalTo(myMdmSettings.getMdmRules().getEnterpriseEIDSystemForResourceType("Patient"))));
-		assertThat(secondIdentifier.getValue(), is(equalTo("12345")));
+		assertThat(secondIdentifier.getSystem()).isEqualTo(myMdmSettings.getMdmRules().getEnterpriseEIDSystemForResourceType("Patient"));
+		assertThat(secondIdentifier.getValue()).isEqualTo("12345");
 
 		Identifier thirdIdentifier = identifier.get(2);
-		assertThat(thirdIdentifier.getSystem(), is(equalTo(myMdmSettings.getMdmRules().getEnterpriseEIDSystemForResourceType("Patient"))));
-		assertThat(thirdIdentifier.getValue(), is(equalTo("67890")));
+		assertThat(thirdIdentifier.getSystem()).isEqualTo(myMdmSettings.getMdmRules().getEnterpriseEIDSystemForResourceType("Patient"));
+		assertThat(thirdIdentifier.getValue()).isEqualTo("67890");
 	}
 
 	@Test
@@ -118,7 +113,7 @@ public class MdmMatchLinkSvcMultipleEidModeTest extends BaseMdmR4Test {
 
 		//At this point, there should be 5 EIDs on the GoldenResource
 		Patient patientFromTarget = (Patient) getGoldenResourceFromTargetResource(patient2);
-		assertThat(patientFromTarget.getIdentifier(), hasSize(5));
+		assertThat(patientFromTarget.getIdentifier()).hasSize(5);
 
 		ourLog.info("About to update patient...");
 		updatePatientAndUpdateLinks(patient2);
@@ -131,7 +126,7 @@ public class MdmMatchLinkSvcMultipleEidModeTest extends BaseMdmR4Test {
 		mdmAssertThat(patient1).is_MATCH_to(patient2);
 
 		patientFromTarget = (Patient) getGoldenResourceFromTargetResource(patient2);
-		assertThat(patientFromTarget.getIdentifier(), hasSize(6));
+		assertThat(patientFromTarget.getIdentifier()).hasSize(6);
 	}
 
 	@Test
@@ -157,7 +152,7 @@ public class MdmMatchLinkSvcMultipleEidModeTest extends BaseMdmR4Test {
 		assertLinksMatchVector(null, null, null);
 
 		List<MdmLink> possibleDuplicates = (List<MdmLink>) myMdmLinkDaoSvc.getPossibleDuplicates();
-		assertThat(possibleDuplicates, hasSize(1));
+		assertThat(possibleDuplicates).hasSize(1);
 
 		Patient finalPatient1 = patient1;
 		Patient finalPatient2 = patient2;
@@ -225,7 +220,7 @@ public class MdmMatchLinkSvcMultipleEidModeTest extends BaseMdmR4Test {
 		mdmAssertThat(patient2).is_POSSIBLE_MATCH_to(patient3);
 
 		List<MdmLink> possibleDuplicates = (List<MdmLink>) myMdmLinkDaoSvc.getPossibleDuplicates();
-		assertThat(possibleDuplicates, hasSize(1));
+		assertThat(possibleDuplicates).hasSize(1);
 		mdmAssertThat(patient3).is_POSSIBLE_DUPLICATE_to(patient1);
 	}
 }

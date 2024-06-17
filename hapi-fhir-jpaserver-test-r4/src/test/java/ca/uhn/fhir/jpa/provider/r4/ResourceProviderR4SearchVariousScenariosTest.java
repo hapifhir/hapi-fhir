@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -7,7 +8,6 @@ import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.param.HasParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import org.hamcrest.MatcherAssert;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CarePlan;
@@ -35,7 +35,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.List;
 
-import static org.hamcrest.Matchers.contains;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -442,7 +441,7 @@ public class ResourceProviderR4SearchVariousScenariosTest extends BaseResourcePr
 			.map(Resource::getIdPart)
 			.toList();
 
-		MatcherAssert.assertThat(theReason, actualIdsInOrder, contains(theExpectedIdsInOrder));
+		MatcherAssert.assertThat(actualIdsInOrder).as(theReason).contains(theExpectedIdsInOrder);
 	}
 
 	private void runAndAssert(String theQueryString) {

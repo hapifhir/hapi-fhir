@@ -9,9 +9,6 @@ import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.hamcrest.Description;
-import org.hamcrest.Matcher;
-import org.hamcrest.TypeSafeDiagnosingMatcher;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coding;
@@ -92,7 +89,7 @@ public class ResourceProviderR4ElasticTest extends BaseResourceProviderR4Test {
 			assertNotNull(valueSet);
 			List<ValueSet.ValueSetExpansionContainsComponent> expansions = valueSet.getExpansion().getContains();
 			// TODO CHECKSTYLE KHS
-//			assertThat(expansions, hasItem(valueSetExpansionMatching(mean_blood_pressure)));
+//			assertThat(expansions).contains(valueSetExpansionMatching(mean_blood_pressure));
 //			assertThat(expansions).doesNotContain(valueSetExpansionMatching(blood_count));
 		}
 
