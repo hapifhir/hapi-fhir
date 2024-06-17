@@ -38,6 +38,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.ScaledNumberField;
@@ -182,6 +183,17 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 		b.append(isMissing(), obj.isMissing());
 		b.append(getValue(), obj.getValue());
 		return b.isEquals();
+	}
+
+	@Override
+	public int hashCode() {
+		HashCodeBuilder b = new HashCodeBuilder();
+		b.append(getHashIdentity());
+		b.append(getHashIdentityAndUnits());
+		b.append(getHashIdentitySystemAndUnits());
+		b.append(isMissing());
+		b.append(getValue());
+		return b.toHashCode();
 	}
 
 	@Override

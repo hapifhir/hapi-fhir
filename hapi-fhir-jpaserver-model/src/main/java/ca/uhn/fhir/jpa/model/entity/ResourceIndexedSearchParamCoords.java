@@ -179,6 +179,7 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 		b.append(getHashIdentity());
 		b.append(getLatitude());
 		b.append(getLongitude());
+		b.append(isMissing());
 		return b.toHashCode();
 	}
 

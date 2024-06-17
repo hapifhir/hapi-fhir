@@ -2,12 +2,12 @@ package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SuppressWarnings("SpellCheckingInspection")
 public class ResourceIndexedSearchParamStringTest {
@@ -85,10 +85,7 @@ public class ResourceIndexedSearchParamStringTest {
 		val2.setPartitionSettings(new PartitionSettings());
 		val2.setStorageSettings(new StorageSettings());
 		val2.calculateHashes();
-		assertNotNull(val1);
-		assertEquals(val1, val2);
-
-		assertThat("").isNotEqualTo(val1);
+		validateEquals(val1, val2);
 	}
 
 	@Test
@@ -105,9 +102,7 @@ public class ResourceIndexedSearchParamStringTest {
 		val2.setPartitionSettings(new PartitionSettings().setIncludePartitionInSearchHashes(true));
 		val2.setStorageSettings(new StorageSettings());
 		val2.calculateHashes();
-		assertNotNull(val1);
-		assertEquals(val1, val2);
-		assertThat("").isNotEqualTo(val1);
+		validateEquals(val1, val2);
 	}
 
 	@Test
@@ -117,9 +112,45 @@ public class ResourceIndexedSearchParamStringTest {
 
 		param2.optimizeIndexStorage();
 
-		assertEquals(param, param2);
-		assertEquals(param2, param);
-		assertEquals(param.hashCode(), param2.hashCode());
+		validateEquals(param, param2);
+	}
+
+	private void validateEquals(ResourceIndexedSearchParamString theParam1,
+								ResourceIndexedSearchParamString theParam2) {
+		assertEquals(theParam2, theParam1);
+		assertEquals(theParam1, theParam2);
+		assertEquals(theParam1.hashCode(), theParam2.hashCode());
+	}
+
+	@ParameterizedTest
+	@CsvSource({
+		"Patient, param, aaa, AAA, false,   Observation, param, aaa, AAA, false, ResourceType is different",
+		"Patient, param, aaa, AAA, false,   Patient,     name,  aaa, AAA, false, ParamName is different",
+		"Patient, param, aaa, AAA, false,   Patient,     param, bbb, AAA, false, Value is different",
+		"Patient, param, aaa, AAA, false,   Patient,     param, aaa, BBB, false, ValueNormalized is different",
+		"Patient, param, aaa, AAA, false,   Patient,     param, aaa, AAA, true,  Missing is different",
+	})
+	public void testEqualsAndHashCode_withDifferentParams_equalsIsFalseAndHashCodeIsDifferent(String theFirstResourceType,
+																							  String theFirstParamName,
+																							  String theFirstValue,
+																							  String theFirstValueNormalized,
+																							  boolean theFirstMissing,
+																							  String theSecondResourceType,
+																							  String theSecondParamName,
+																							  String theSecondValue,
+																							  String theSecondValueNormalized,
+																							  boolean theSecondMissing,
+																							  String theMessage) {
+		ResourceIndexedSearchParamString param = new ResourceIndexedSearchParamString(new PartitionSettings(),
+			new StorageSettings(), theFirstResourceType, theFirstParamName, theFirstValue, theFirstValueNormalized);
+		param.setMissing(theFirstMissing);
+		ResourceIndexedSearchParamString param2 = new ResourceIndexedSearchParamString(new PartitionSettings(),
+			new StorageSettings(), theSecondResourceType, theSecondParamName, theSecondValue, theSecondValueNormalized);
+		param2.setMissing(theSecondMissing);
+
+		assertNotEquals(param, param2, theMessage);
+		assertNotEquals(param2, param, theMessage);
+		assertNotEquals(param.hashCode(), param2.hashCode(), theMessage);
 	}
 
 }

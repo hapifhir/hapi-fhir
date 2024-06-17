@@ -220,6 +220,7 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 		b.append(getHashSystem(), obj.getHashSystem());
 		b.append(getHashValue(), obj.getHashValue());
 		b.append(getHashSystemAndValue(), obj.getHashSystemAndValue());
+		b.append(isMissing(), obj.isMissing());
 		return b.isEquals();
 	}
 
@@ -283,7 +284,7 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 		b.append(getHashValue());
 		b.append(getHashSystem());
 		b.append(getHashSystemAndValue());
-
+		b.append(isMissing());
 		return b.toHashCode();
 	}
 

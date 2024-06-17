@@ -179,12 +179,12 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 		}
 		ResourceIndexedSearchParamString obj = (ResourceIndexedSearchParamString) theObj;
 		EqualsBuilder b = new EqualsBuilder();
-		b.append(getHashIdentity(), obj.getHashIdentity());
 		b.append(getValueExact(), obj.getValueExact());
 		b.append(getHashIdentity(), obj.getHashIdentity());
 		b.append(getHashExact(), obj.getHashExact());
 		b.append(getHashNormalizedPrefix(), obj.getHashNormalizedPrefix());
 		b.append(getValueNormalized(), obj.getValueNormalized());
+		b.append(isMissing(), obj.isMissing());
 		return b.isEquals();
 	}
 
@@ -241,12 +241,12 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 	@Override
 	public int hashCode() {
 		HashCodeBuilder b = new HashCodeBuilder();
-		b.append(getHashIdentity());
 		b.append(getValueExact());
 		b.append(getHashIdentity());
 		b.append(getHashExact());
 		b.append(getHashNormalizedPrefix());
 		b.append(getValueNormalized());
+		b.append(isMissing());
 		return b.toHashCode();
 	}
 

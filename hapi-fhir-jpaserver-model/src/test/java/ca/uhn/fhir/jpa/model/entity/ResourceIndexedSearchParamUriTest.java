@@ -2,10 +2,11 @@ package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 public class ResourceIndexedSearchParamUriTest {
 
@@ -29,9 +30,7 @@ public class ResourceIndexedSearchParamUriTest {
 			.setUri("http://foo");
 		val2.setPartitionSettings(new PartitionSettings());
 		val2.calculateHashes();
-		assertNotNull(val1);
-		assertEquals(val1, val2);
-		assertThat("").isNotEqualTo(val1);
+		validateEquals(val1, val2);
 	}
 
 	@Test
@@ -41,9 +40,42 @@ public class ResourceIndexedSearchParamUriTest {
 
 		param2.optimizeIndexStorage();
 
-		assertEquals(param, param2);
-		assertEquals(param2, param);
-		assertEquals(param.hashCode(), param2.hashCode());
+		validateEquals(param, param2);
+	}
+
+	private void validateEquals(ResourceIndexedSearchParamUri theParam1,
+								ResourceIndexedSearchParamUri theParam2) {
+		assertEquals(theParam2, theParam1);
+		assertEquals(theParam1, theParam2);
+		assertEquals(theParam1.hashCode(), theParam2.hashCode());
+	}
+
+	@ParameterizedTest
+	@CsvSource({
+		"Patient, param, http://test, false,   Observation, param, http://test, false, ResourceType is different",
+		"Patient, param, http://test, false,   Patient,     name,  http://test, false, ParamName is different",
+		"Patient, param, http://test, false,   Patient,     param, http://diff, false, Uri is different",
+		"Patient, param, http://test, false,   Patient,     param, http://test, true,  Missing is different",
+	})
+	public void testEqualsAndHashCode_withDifferentParams_equalsIsFalseAndHashCodeIsDifferent(String theFirstResourceType,
+																							  String theFirstParamName,
+																							  String theFirstUri,
+																							  boolean theFirstMissing,
+																							  String theSecondResourceType,
+																							  String theSecondParamName,
+																							  String theSecondUri,
+																							  boolean theSecondMissing,
+																							  String theMessage) {
+		ResourceIndexedSearchParamUri param = new ResourceIndexedSearchParamUri(new PartitionSettings(),
+			theFirstResourceType, theFirstParamName, theFirstUri);
+		param.setMissing(theFirstMissing);
+		ResourceIndexedSearchParamUri param2 = new ResourceIndexedSearchParamUri(new PartitionSettings(),
+			theSecondResourceType, theSecondParamName, theSecondUri);
+		param2.setMissing(theSecondMissing);
+
+		assertNotEquals(param, param2, theMessage);
+		assertNotEquals(param2, param, theMessage);
+		assertNotEquals(param.hashCode(), param2.hashCode(), theMessage);
 	}
 
 }

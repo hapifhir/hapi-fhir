@@ -160,10 +160,10 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 		}
 		ResourceIndexedSearchParamUri obj = (ResourceIndexedSearchParamUri) theObj;
 		EqualsBuilder b = new EqualsBuilder();
-		b.append(getHashIdentity(), obj.getHashIdentity());
 		b.append(getUri(), obj.getUri());
 		b.append(getHashUri(), obj.getHashUri());
 		b.append(getHashIdentity(), obj.getHashIdentity());
+		b.append(isMissing(), obj.isMissing());
 		return b.isEquals();
 	}
 
@@ -200,6 +200,7 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 		b.append(getUri());
 		b.append(getHashUri());
 		b.append(getHashIdentity());
+		b.append(isMissing());
 		return b.toHashCode();
 	}
 

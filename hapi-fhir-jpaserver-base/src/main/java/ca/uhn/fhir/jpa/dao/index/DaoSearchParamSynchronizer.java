@@ -149,10 +149,12 @@ public class DaoSearchParamSynchronizer {
 
 	/**
 	 * <p>
-	 * This method performs an update of Search Parameter's fields in the case of <code>$reindex</code> or update operation by:
-	 * 1. Marking existing entities for updating to apply index storage optimization, if it is enabled (disabled by default).
-	 * 2. Recovering <code>SP_NAME</code>, <code>RES_TYPE</code> values of Search Parameter's fields for existing entities
-	 * in case if index storage optimization is disabled (but was enabled previously).
+	 * This method performs an update of Search Parameter's fields in the case of
+	 * <code>$reindex</code> or update operation by:
+	 * 1. Marking existing entities for updating to apply index storage optimization,
+	 * if it is enabled (disabled by default).
+	 * 2. Recovering <code>SP_NAME</code>, <code>RES_TYPE</code> values of Search Parameter's fields
+	 * for existing entities in case if index storage optimization is disabled (but was enabled previously).
 	 * </p>
 	 * For details, see: {@link StorageSettings#isIndexStorageOptimized()}
 	 */
@@ -178,10 +180,8 @@ public class DaoSearchParamSynchronizer {
 
 	/**
 	 * Search parameters should be updated after changing IndexStorageOptimized setting.
-	 * If IndexStorageOptimized is disabled, this method copies paramName and Resource Type
-	 * from extracted to existing search parameter.
-	 * If IndexStorageOptimized enabled, this method marks existing search parameter for update,
-	 * to allow optimization happen before commit to db.
+	 * If IndexStorageOptimized is disabled (and was enabled previously), this method copies paramName
+	 * and Resource Type from extracted to existing search parameter.
 	 */
 	private <T extends BaseResourceIndex> void recoverExistingSearchParameterIfRequired(
 			BaseResourceIndexedSearchParam theSearchParamToRecover, Collection<T> theNewParams) {

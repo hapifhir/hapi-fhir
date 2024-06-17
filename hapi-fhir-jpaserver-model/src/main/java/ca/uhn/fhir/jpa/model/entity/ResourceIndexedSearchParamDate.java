@@ -309,6 +309,9 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 		b.append(getHashIdentity());
 		b.append(getTimeFromDate(getValueHigh()));
 		b.append(getTimeFromDate(getValueLow()));
+		b.append(getValueHighDateOrdinal());
+		b.append(getValueLowDateOrdinal());
+		b.append(isMissing());
 		return b.toHashCode();
 	}
 
