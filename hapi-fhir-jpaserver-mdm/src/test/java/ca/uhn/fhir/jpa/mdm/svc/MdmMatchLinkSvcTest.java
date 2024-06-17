@@ -397,8 +397,8 @@ public class MdmMatchLinkSvcTest {
 
 			//The two GoldenResources related to the patients should both show up in the only existing POSSIBLE_DUPLICATE MdmLink.
 			MdmLink mdmLink = possibleDuplicates.get(0);
-			assertThat(mdmLink.getGoldenResourcePersistenceId(), is(in(duplicatePids)));
-			assertThat(mdmLink.getSourcePersistenceId(), is(in(duplicatePids)));
+			assertThat(mdmLink.getGoldenResourcePersistenceId()).isIn(duplicatePids);
+			assertThat(mdmLink.getSourcePersistenceId()).isIn(duplicatePids);
 		}
 
 		@Test
