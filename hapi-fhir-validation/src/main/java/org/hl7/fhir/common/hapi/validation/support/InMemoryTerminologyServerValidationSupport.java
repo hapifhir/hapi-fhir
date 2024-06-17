@@ -134,7 +134,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 			expansionR5 = expandValueSetToCanonical(
 					theValidationSupportContext, theValueSetToExpand, theWantSystemAndVersion, theWantCode);
 		} catch (ExpansionCouldNotBeCompletedInternallyException e) {
-			return new ValueSetExpansionOutcome(e.getMessage());
+			return new ValueSetExpansionOutcome(e.getMessage(), false);
 		}
 		if (expansionR5 == null) {
 			return null;
@@ -267,6 +267,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 			}
 
 			codeValidationResult.setMessage(msg);
+			codeValidationResult.addCodeValidationIssue(e.getCodeValidationIssue());
 			return codeValidationResult;
 		}
 
@@ -407,6 +408,8 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 			String theValueSetUrl) {
 		assert theExpansion != null;
 
+		final CodeValidationResult codeValidationResult;
+
 		boolean caseSensitive = true;
 		IBaseResource codeSystemToValidateResource = null;
 		if (!theOptions.isInferSystem() && isNotBlank(theCodeSystemUrlAndVersionToValidate)) {
@@ -534,7 +537,83 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 				codeSystemUrlToValidate = theCodeSystemUrlAndVersionToValidate;
 			}
 		}
-		for (FhirVersionIndependentConcept nextExpansionCode : codes) {
+		CodeValidationResult valueSetResult = findCodeInExpansion(
+				theCodeToValidate,
+				theDisplayToValidate,
+				theValueSetUrl,
+				codeSystemUrlToValidate,
+				codeSystemVersionToValidate,
+				codeSystemResourceName,
+				codeSystemResourceVersion,
+				codes,
+				theOptions,
+				caseSensitive);
+		if (valueSetResult != null) {
+			codeValidationResult = valueSetResult;
+		} else {
+			ValidationMessage.IssueSeverity severity;
+			String message;
+			CodeValidationIssueCode issueCode = CodeValidationIssueCode.CODE_INVALID;
+			CodeValidationIssueCoding issueCoding = CodeValidationIssueCoding.INVALID_CODE;
+			if ("fragment".equals(codeSystemResourceContentMode)) {
+				severity = ValidationMessage.IssueSeverity.WARNING;
+				message = "Unknown code in fragment CodeSystem '"
+						+ getFormattedCodeSystemAndCodeForMessage(
+								theCodeSystemUrlAndVersionToValidate, theCodeToValidate)
+						+ "'";
+			} else {
+				severity = ValidationMessage.IssueSeverity.ERROR;
+				message = "Unknown code '"
+						+ getFormattedCodeSystemAndCodeForMessage(
+								theCodeSystemUrlAndVersionToValidate, theCodeToValidate)
+						+ "'";
+			}
+			if (isNotBlank(theValueSetUrl)) {
+				message += " for in-memory expansion of ValueSet '" + theValueSetUrl + "'";
+				issueCoding = CodeValidationIssueCoding.NOT_IN_VS;
+			}
+
+			codeValidationResult = new CodeValidationResult()
+					.setSeverityCode(severity.toCode())
+					.setMessage(message)
+					.addCodeValidationIssue(new CodeValidationIssue(
+							message, getIssueSeverityFromCodeValidationIssue(severity), issueCode, issueCoding));
+		}
+
+		return codeValidationResult;
+	}
+
+	private static String getFormattedCodeSystemAndCodeForMessage(
+			String theCodeSystemUrlAndVersionToValidate, String theCodeToValidate) {
+		return (isNotBlank(theCodeSystemUrlAndVersionToValidate) ? theCodeSystemUrlAndVersionToValidate + "#" : "")
+				+ theCodeToValidate;
+	}
+
+	private IValidationSupport.IssueSeverity getIssueSeverityFromCodeValidationIssue(
+			ValidationMessage.IssueSeverity theSeverity) {
+		switch (theSeverity) {
+			case ERROR:
+				return IValidationSupport.IssueSeverity.ERROR;
+			case WARNING:
+				return IValidationSupport.IssueSeverity.WARNING;
+			case INFORMATION:
+				return IValidationSupport.IssueSeverity.INFORMATION;
+		}
+		return null;
+	}
+
+	private CodeValidationResult findCodeInExpansion(
+			String theCodeToValidate,
+			String theDisplayToValidate,
+			String theValueSetUrl,
+			String codeSystemUrlToValidate,
+			String codeSystemVersionToValidate,
+			String codeSystemResourceName,
+			String codeSystemResourceVersion,
+			List<FhirVersionIndependentConcept> expansionCodes,
+			ConceptValidationOptions theOptions,
+			boolean caseSensitive) {
+		for (FhirVersionIndependentConcept nextExpansionCode : expansionCodes) {
 
 			boolean codeMatches;
 			if (caseSensitive) {
@@ -574,6 +653,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 								theCodeToValidate,
 								theDisplayToValidate,
 								nextExpansionCode.getDisplay(),
+								codeSystemUrlToValidate,
 								csVersion,
 								messageAppend,
 								getIssueSeverityForCodeDisplayMismatch());
@@ -585,29 +665,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 				}
 			}
 		}
-
-		ValidationMessage.IssueSeverity severity;
-		String message;
-		if ("fragment".equals(codeSystemResourceContentMode)) {
-			severity = ValidationMessage.IssueSeverity.WARNING;
-			message = "Unknown code in fragment CodeSystem '"
-					+ (isNotBlank(theCodeSystemUrlAndVersionToValidate)
-							? theCodeSystemUrlAndVersionToValidate + "#"
-							: "")
-					+ theCodeToValidate + "'";
-		} else {
-			severity = ValidationMessage.IssueSeverity.ERROR;
-			message = "Unknown code '"
-					+ (isNotBlank(theCodeSystemUrlAndVersionToValidate)
-							? theCodeSystemUrlAndVersionToValidate + "#"
-							: "")
-					+ theCodeToValidate + "'";
-		}
-		if (isNotBlank(theValueSetUrl)) {
-			message += " for in-memory expansion of ValueSet '" + theValueSetUrl + "'";
-		}
-
-		return new CodeValidationResult().setSeverityCode(severity.toCode()).setMessage(message);
+		return null;
 	}
 
 	@Override
@@ -915,7 +973,6 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 
 			boolean ableToHandleCode = false;
 			String failureMessage = null;
-			FailureType failureType = FailureType.OTHER;
 
 			boolean isIncludeCodeSystemIgnored = includeOrExcludeSystemResource != null
 					&& includeOrExcludeSystemResource.getContent() == Enumerations.CodeSystemContentMode.NOTPRESENT;
@@ -1025,16 +1082,22 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 			}
 
 			if (!ableToHandleCode) {
-				if (includeOrExcludeSystemResource == null && failureMessage == null) {
-					failureMessage = getFailureMessageForMissingOrUnusableCodeSystem(
-							includeOrExcludeSystemResource, loadedCodeSystemUrl);
+				if (failureMessage == null) {
+					if (includeOrExcludeSystemResource == null) {
+						failureMessage = getFailureMessageForMissingOrUnusableCodeSystem(
+								includeOrExcludeSystemResource, loadedCodeSystemUrl);
+					} else {
+						failureMessage = "Unable to expand value set";
+					}
 				}
 
-				if (includeOrExcludeSystemResource == null) {
-					failureType = FailureType.UNKNOWN_CODE_SYSTEM;
-				}
-
-				throw new ExpansionCouldNotBeCompletedInternallyException(Msg.code(702) + failureMessage, failureType);
+				throw new ExpansionCouldNotBeCompletedInternallyException(
+						Msg.code(702) + failureMessage,
+						new CodeValidationIssue(
+								failureMessage,
+								IssueSeverity.ERROR,
+								CodeValidationIssueCode.NOT_FOUND,
+								CodeValidationIssueCoding.NOT_FOUND));
 			}
 
 			if (includeOrExcludeSystemResource != null
@@ -1054,9 +1117,14 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 				org.hl7.fhir.r5.model.ValueSet subExpansion =
 						expandValueSetR5(theValidationSupportContext, vs, theWantSystemUrlAndVersion, theWantCode);
 				if (subExpansion == null) {
+					String theMessage = "Failed to expand ValueSet: " + nextValueSetInclude.getValueAsString();
 					throw new ExpansionCouldNotBeCompletedInternallyException(
-							Msg.code(703) + "Failed to expand ValueSet: " + nextValueSetInclude.getValueAsString(),
-							FailureType.OTHER);
+							Msg.code(703) + theMessage,
+							new CodeValidationIssue(
+									theMessage,
+									IssueSeverity.ERROR,
+									CodeValidationIssueCode.OTHER,
+									CodeValidationIssueCoding.OTHER));
 				}
 				for (org.hl7.fhir.r5.model.ValueSet.ValueSetExpansionContainsComponent next :
 						subExpansion.getExpansion().getContains()) {
@@ -1260,6 +1328,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 			String theCode,
 			String theDisplay,
 			String theExpectedDisplay,
+			String theCodeSystem,
 			String theCodeSystemVersion,
 			IssueSeverity theIssueSeverityForCodeDisplayMismatch) {
 		return createResultForDisplayMismatch(
@@ -1267,6 +1336,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 				theCode,
 				theDisplay,
 				theExpectedDisplay,
+				theCodeSystem,
 				theCodeSystemVersion,
 				"",
 				theIssueSeverityForCodeDisplayMismatch);
@@ -1277,6 +1347,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 			String theCode,
 			String theDisplay,
 			String theExpectedDisplay,
+			String theCodeSystem,
 			String theCodeSystemVersion,
 			String theMessageAppend,
 			IssueSeverity theIssueSeverityForCodeDisplayMismatch) {
@@ -1293,15 +1364,26 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 									InMemoryTerminologyServerValidationSupport.class,
 									"displayMismatch",
 									theDisplay,
-									theExpectedDisplay)
+									theExpectedDisplay,
+									theCodeSystem,
+									theCode)
 					+ theMessageAppend;
 		}
-		return new CodeValidationResult()
+		CodeValidationResult codeValidationResult = new CodeValidationResult()
 				.setSeverity(issueSeverity)
 				.setMessage(message)
 				.setCode(theCode)
 				.setCodeSystemVersion(theCodeSystemVersion)
 				.setDisplay(theExpectedDisplay);
+		if (issueSeverity != null) {
+			codeValidationResult.setCodeValidationIssues(Collections.singletonList(new CodeValidationIssue(
+					message,
+					theIssueSeverityForCodeDisplayMismatch,
+					CodeValidationIssueCode.INVALID,
+					CodeValidationIssueCoding.INVALID_DISPLAY)));
+		}
+
+		return codeValidationResult;
 	}
 
 	private static void flattenAndConvertCodesDstu2(
@@ -1364,23 +1446,19 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 		}
 	}
 
-	public enum FailureType {
-		UNKNOWN_CODE_SYSTEM,
-		OTHER
-	}
-
 	public static class ExpansionCouldNotBeCompletedInternallyException extends Exception {
 
 		private static final long serialVersionUID = -2226561628771483085L;
-		private final FailureType myFailureType;
+		private final CodeValidationIssue myCodeValidationIssue;
 
-		public ExpansionCouldNotBeCompletedInternallyException(String theMessage, FailureType theFailureType) {
+		public ExpansionCouldNotBeCompletedInternallyException(
+				String theMessage, CodeValidationIssue theCodeValidationIssue) {
 			super(theMessage);
-			myFailureType = theFailureType;
+			myCodeValidationIssue = theCodeValidationIssue;
 		}
 
-		public FailureType getFailureType() {
-			return myFailureType;
+		public CodeValidationIssue getCodeValidationIssue() {
+			return myCodeValidationIssue;
 		}
 	}
 }

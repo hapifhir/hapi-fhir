@@ -3,7 +3,7 @@ package ca.uhn.fhir.rest.server.provider;
 import ca.uhn.test.util.LogbackTestExtension;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.spi.ILoggingEvent;
-import org.jetbrains.annotations.NotNull;
+import jakarta.annotation.Nonnull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -84,12 +84,12 @@ class ObservableSupplierSetTest {
 		int removed = 0;
 
 		@Override
-		public void update(@NotNull Supplier<Object> theSupplier) {
+		public void update(@Nonnull Supplier<Object> theSupplier) {
 			++updated;
 		}
 
 		@Override
-		public void remove(@NotNull Supplier<Object> theSupplier) {
+		public void remove(@Nonnull Supplier<Object> theSupplier) {
 			++removed;
 		}
 

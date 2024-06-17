@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexAppCtx;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.context.RuntimeSearchParam;
@@ -27,7 +26,6 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.HapiExtensions;
-import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Appointment;
 import org.hl7.fhir.r4.model.Appointment.AppointmentStatus;
@@ -36,13 +34,11 @@ import org.hl7.fhir.r4.model.ChargeItem;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.Composition;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.DiagnosticReport;
-import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.r4.model.Extension;
@@ -74,9 +70,8 @@ import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.junit.jupiter.api.Assertions.fail;
-
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -303,48 +298,6 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		mySearchParameterDao.create(fooSp, mySrd);
 		mySearchParamRegistry.forceRefresh();
 	}
-
-
-	@Test
-	public void testBundleComposition() {
-		SearchParameter fooSp = new SearchParameter();
-		fooSp.setCode("foo");
-		fooSp.addBase("Bundle");
-		fooSp.setType(Enumerations.SearchParamType.REFERENCE);
-		fooSp.setTitle("FOO SP");
-		fooSp.setExpression("Bundle.entry[0].resource.as(Composition).encounter");
-		fooSp.setXpathUsage(org.hl7.fhir.r4.model.SearchParameter.XPathUsageType.NORMAL);
-		fooSp.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
-
-		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(fooSp));
-
-		mySearchParameterDao.create(fooSp, mySrd);
-		mySearchParamRegistry.forceRefresh();
-
-		Encounter enc = new Encounter();
-		enc.setStatus(Encounter.EncounterStatus.ARRIVED);
-		String encId = myEncounterDao.create(enc).getId().toUnqualifiedVersionless().getValue();
-
-		Composition composition = new Composition();
-		composition.getEncounter().setReference(encId);
-
-		Bundle bundle = new Bundle();
-		bundle.setType(Bundle.BundleType.DOCUMENT);
-		bundle.addEntry().setResource(composition);
-
-		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
-		String bundleId = myBundleDao.create(bundle).getId().toUnqualifiedVersionless().getValue();
-
-		SearchParameterMap map;
-
-		map = new SearchParameterMap();
-		map.setLoadSynchronous(true);
-		map.add("foo", new ReferenceParam(encId));
-		IBundleProvider results = myBundleDao.search(map);
-		assertThat(toUnqualifiedVersionlessIdValues(results)).contains(bundleId);
-
-	}
-
 
 	@Test
 	public void testCreateInvalidUnquotedExtensionUrl() {

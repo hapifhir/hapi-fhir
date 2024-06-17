@@ -13,6 +13,7 @@ import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
+import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.test.util.StoppableSubscriptionDeliveringRestHookSubscriber;
 import ca.uhn.fhir.rest.client.api.Header;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
@@ -72,7 +73,7 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 	public void cleanupStoppableSubscriptionDeliveringRestHookSubscriber() {
 		myStoppableSubscriptionDeliveringRestHookSubscriber.setCountDownLatch(null);
 		myStoppableSubscriptionDeliveringRestHookSubscriber.unPause();
-		myStorageSettings.setTriggerSubscriptionsForNonVersioningChanges(new JpaStorageSettings().isTriggerSubscriptionsForNonVersioningChanges());
+		mySubscriptionSettings.setTriggerSubscriptionsForNonVersioningChanges(new SubscriptionSettings().isTriggerSubscriptionsForNonVersioningChanges());
 		myStorageSettings.setTagStorageMode(new JpaStorageSettings().getTagStorageMode());
 	}
 
