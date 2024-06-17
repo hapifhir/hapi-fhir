@@ -919,7 +919,11 @@
 			<id>adriennesox</id>
 			<name>Adrienne Sox</name>
 			<organization>Galileo, Inc.</organization>
-		</developer>
+    </developer>
+	 <developer>
+		 <id>melihaydogd</id>
+		 <name>Ahmet Melih Aydoğdu</name>
+    </developer>
 	</developers>
 
 	<licenses>
