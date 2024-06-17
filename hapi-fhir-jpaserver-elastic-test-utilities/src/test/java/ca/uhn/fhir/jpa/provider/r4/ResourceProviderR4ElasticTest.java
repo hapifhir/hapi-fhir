@@ -1,14 +1,21 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.config.TestR4ConfigWithElasticHSearch;
+import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import ca.uhn.fhir.jpa.provider.BaseJpaResourceProvider;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
+import ca.uhn.test.util.asserts.LogEventIterableAssert;
+import ch.qos.logback.classic.spi.ILoggingEvent;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.assertj.core.api.AbstractAssert;
+import org.assertj.core.api.AbstractIterableAssert;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coding;
@@ -30,6 +37,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -39,6 +47,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 @ExtendWith(SpringExtension.class)
 @RequiresDocker
@@ -88,9 +97,8 @@ public class ResourceProviderR4ElasticTest extends BaseResourceProviderR4Test {
 			ourLog.info("testAutocompleteDirectionExisting {}", text);
 			assertNotNull(valueSet);
 			List<ValueSet.ValueSetExpansionContainsComponent> expansions = valueSet.getExpansion().getContains();
-			// TODO CHECKSTYLE KHS
-//			assertThat(expansions).contains(valueSetExpansionMatching(mean_blood_pressure));
-//			assertThat(expansions).doesNotContain(valueSetExpansionMatching(blood_count));
+			ValueSetExpansionIterableAssert.assertThat(expansions).hasExpansionWithCoding(mean_blood_pressure);
+			ValueSetExpansionIterableAssert.assertThat(expansions).doesNotHaveExpansionWithCoding(blood_count);
 		}
 
 	}
@@ -107,19 +115,51 @@ public class ResourceProviderR4ElasticTest extends BaseResourceProviderR4Test {
 		myObservationDao.create(observation, mySrd).getId().toUnqualifiedVersionless();
 	}
 
-	public static Matcher<ValueSet.ValueSetExpansionContainsComponent> valueSetExpansionMatching(IBaseCoding theTarget) {
-		return new TypeSafeDiagnosingMatcher<ValueSet.ValueSetExpansionContainsComponent>() {
-			@Override
-			public void describeTo(Description description) {
-				description.appendText("ValueSetExpansionContainsComponent matching ").appendValue(theTarget.getSystem() + "|" + theTarget.getCode());
-			}
+	public static class ValueSetExpansionAssert extends AbstractAssert<ValueSetExpansionAssert, ValueSet.ValueSetExpansionContainsComponent> {
 
-			@Override
-			protected boolean matchesSafely(ValueSet.ValueSetExpansionContainsComponent theItem, Description mismatchDescription) {
-				return Objects.equals(theItem.getSystem(), theTarget.getSystem()) &&
-					Objects.equals(theItem.getCode(), theTarget.getCode());
+		protected ValueSetExpansionAssert(ValueSet.ValueSetExpansionContainsComponent valueSetExpansionContainsComponent) {
+			super(valueSetExpansionContainsComponent, ValueSetExpansionAssert.class);
+		}
+	}
+
+	public static class ValueSetExpansionIterableAssert extends AbstractIterableAssert<ValueSetExpansionIterableAssert, Collection<ValueSet.ValueSetExpansionContainsComponent>, ValueSet.ValueSetExpansionContainsComponent, ValueSetExpansionAssert> {
+		protected ValueSetExpansionIterableAssert(Collection<ValueSet.ValueSetExpansionContainsComponent> actual) {
+			super(actual, ValueSetExpansionIterableAssert.class);
+		}
+
+		@Override
+		protected ValueSetExpansionAssert toAssert(ValueSet.ValueSetExpansionContainsComponent value, String description) {
+			return new ValueSetExpansionAssert(value).as(description);
+		}
+
+		public static ValueSetExpansionIterableAssert assertThat(Collection<ValueSet.ValueSetExpansionContainsComponent> actual) {
+			return new ValueSetExpansionIterableAssert(actual);
+		}
+
+		@Override
+		protected ValueSetExpansionIterableAssert newAbstractIterableAssert(Iterable<? extends ValueSet.ValueSetExpansionContainsComponent> iterable) {
+			return new ValueSetExpansionIterableAssert((Collection<ValueSet.ValueSetExpansionContainsComponent>) iterable);
+		}
+
+		public ValueSetExpansionIterableAssert hasExpansionWithCoding(IBaseCoding theCoding) {
+			String otherSystem = theCoding.getSystem();
+			String otherCode = theCoding.getCode();
+			boolean hasMatchingExpansion = actual.stream().anyMatch(item -> Objects.equals(item.getSystem(), otherSystem) && Objects.equals(item.getCode(), otherCode));
+			if (!hasMatchingExpansion) {
+				failWithMessage("Expansion list should contain an expansion with system " + otherSystem + " and code " + otherCode);
 			}
-		};
+			return this;
+		}
+
+		public ValueSetExpansionIterableAssert doesNotHaveExpansionWithCoding(IBaseCoding theCoding) {
+			String otherSystem = theCoding.getSystem();
+			String otherCode = theCoding.getCode();
+			boolean hasMatchingExpansion = actual.stream().anyMatch(expansion -> Objects.equals(expansion.getCode(), otherCode) && Objects.equals(expansion.getSystem(), otherSystem));
+			if (hasMatchingExpansion) {
+				failWithMessage("Expected not to find a matching expansion, but we found one!");
+			}
+			return this;
+		}
 	}
 
 	@Test

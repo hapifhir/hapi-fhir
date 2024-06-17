@@ -441,7 +441,7 @@ public class ResourceProviderR4SearchVariousScenariosTest extends BaseResourcePr
 			.map(Resource::getIdPart)
 			.toList();
 
-		MatcherAssert.assertThat(actualIdsInOrder).as(theReason).contains(theExpectedIdsInOrder);
+		assertThat(actualIdsInOrder).as(theReason).contains(theExpectedIdsInOrder);
 	}
 
 	private void runAndAssert(String theQueryString) {

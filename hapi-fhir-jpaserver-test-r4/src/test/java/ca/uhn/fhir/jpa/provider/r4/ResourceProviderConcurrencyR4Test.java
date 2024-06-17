@@ -27,6 +27,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
@@ -153,20 +155,18 @@ public class ResourceProviderConcurrencyR4Test extends BaseResourceProviderR4Tes
 		}
 
 		ourLog.info("About to wait for FAMILY3 to complete");
-		await().until(() -> {
-			ourLog.info("Received names: {}", myReceivedNames);
-			return myReceivedNames;
-		}, contains("FAMILY3"));
+		await().untilAsserted(() ->  assertThat(myReceivedNames).contains("FAMILY3"));
 		ourLog.info("Got FAMILY3");
 
 		searchBlockingInterceptorFamily1.getLatch().countDown();
 
 		ourLog.info("About to wait for FAMILY1 to complete");
-		await().until(() -> myReceivedNames, contains("FAMILY3", "FAMILY1", "FAMILY1"));
+		await().untilAsserted(() -> assertThat(myReceivedNames).containsOnly("FAMILY3", "FAMILY1","FAMILY1"));
 		ourLog.info("Got FAMILY1");
 
 		assertEquals(1, searchBlockingInterceptorFamily1.getHits());
 	}
+
 
 
 	@Interceptor

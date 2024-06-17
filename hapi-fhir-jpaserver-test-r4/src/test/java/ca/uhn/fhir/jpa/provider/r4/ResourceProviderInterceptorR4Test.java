@@ -248,7 +248,7 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 			await()
 				.atMost(60, TimeUnit.SECONDS)
 				.pollInterval(1, TimeUnit.SECONDS)
-				.until(()->{
+				.untilAsserted(()-> {
 						Bundle observations = myClient
 							.search()
 							.forResource("Observation")
@@ -257,9 +257,8 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 							.cacheControl(CacheControlDirective.noCache())
 							.execute();
 						ourLog.info("Have {} observations", observations.getEntry().size());
-						return observations.getEntry().size();
-					},
-					equalTo(1));
+						assertThat(observations.getEntry()).hasSize(1);
+					});
 
 		} finally {
 			myServer.getRestfulServer().unregisterInterceptor(interceptor);
