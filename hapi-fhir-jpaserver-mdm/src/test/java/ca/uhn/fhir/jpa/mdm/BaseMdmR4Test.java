@@ -500,30 +500,6 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 		return thePractitioner;
 	}
 
-	private Matcher<IAnyResource> wrapMatcherInTransaction(Supplier<Matcher<IAnyResource>> theFunction) {
-		return new Matcher<IAnyResource>() {
-			@Override
-			public boolean matches(Object actual) {
-				return runInTransaction(() -> theFunction.get().matches(actual));
-			}
-
-			@Override
-			public void describeMismatch(Object actual, Description mismatchDescription) {
-				runInTransaction(() -> theFunction.get().describeMismatch(actual, mismatchDescription));
-			}
-
-			@Override
-			public void _dont_implement_Matcher___instead_extend_BaseMatcher_() {
-
-			}
-
-			@Override
-			public void describeTo(Description description) {
-				runInTransaction(() -> theFunction.get().describeTo(description));
-			}
-		};
-	}
-
 	protected Patient getOnlyGoldenPatient() {
 		List<IBaseResource> resources = getAllGoldenPatients();
 		assertEquals(1, resources.size());

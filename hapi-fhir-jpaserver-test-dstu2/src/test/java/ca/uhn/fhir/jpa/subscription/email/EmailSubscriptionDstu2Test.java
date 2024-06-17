@@ -122,11 +122,11 @@ public class EmailSubscriptionDstu2Test extends BaseResourceProviderDstu2Test {
 
 		Subscription subscription1 = createSubscription(criteria1, payload, "to1@example.com,to2@example.com");
 		mySubscriptionTestUtil.waitForQueueToDrain();
-		await().until(() -> mySubscriptionRegistry.get(subscription1.getIdElement().getIdPart()), Matchers.not(Matchers.nullValue()));
+		await().untilAsserted(() -> assertThat(mySubscriptionRegistry.get(subscription1.getIdElement().getIdPart())).isNotNull());
 		mySubscriptionTestUtil.setEmailSender(subscription1.getIdElement(), new EmailSenderImpl(withMailService()));
 		assertThat(Arrays.asList(ourGreenMail.getReceivedMessages())).isEmpty();
 
-		Observation observation1 = sendObservation(code, "SNOMED-CT");
+		 sendObservation(code, "SNOMED-CT");
 
 		assertTrue(ourGreenMail.waitForIncomingEmail(10000, 1));
 

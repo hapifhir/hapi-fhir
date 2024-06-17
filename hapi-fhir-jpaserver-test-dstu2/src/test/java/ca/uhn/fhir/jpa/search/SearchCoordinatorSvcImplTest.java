@@ -323,7 +323,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 
 		ourLog.info("Registering the first search");
 		new Thread(() -> mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null, RequestPartitionId.allPartitions())).start();
-		await().until(iter::getCountReturned, Matchers.greaterThan(0));
+		await().untilAsserted(() -> assertThat(iter.getCountReturned()).isGreaterThan(0));
 
 		String searchId = mySvc.getActiveSearchIds().iterator().next();
 		CountDownLatch completionLatch = new CountDownLatch(1);
