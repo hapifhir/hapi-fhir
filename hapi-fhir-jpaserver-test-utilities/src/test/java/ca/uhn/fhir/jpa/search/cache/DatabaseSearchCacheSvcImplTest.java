@@ -14,9 +14,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -47,7 +47,7 @@ public class DatabaseSearchCacheSvcImplTest {
 
 		Search search = new Search();
 		Optional<Search> outcome = mySvc.tryToMarkSearchAsInProgress(search, RequestPartitionId.allPartitions());
-		assertTrue(outcome.isPresent());
+		assertThat(outcome).isPresent();
 
 		verify(mySearchDao, times(1)).save(any());
 		assertEquals(SearchStatusEnum.LOADING, updated.getStatus());

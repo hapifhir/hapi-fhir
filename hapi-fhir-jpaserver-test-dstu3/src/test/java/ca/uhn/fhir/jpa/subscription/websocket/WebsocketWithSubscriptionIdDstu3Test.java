@@ -18,8 +18,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Adds a FHIR subscription with criteria through the rest interface. Then creates a websocket with the id of the
@@ -42,7 +41,7 @@ public class WebsocketWithSubscriptionIdDstu3Test extends BaseResourceProviderDs
 
 	private static final Logger ourLog = org.slf4j.LoggerFactory.getLogger(WebsocketWithSubscriptionIdDstu3Test.class);
 	@RegisterExtension
-	private final WebsocketSubscriptionClient myWebsocketClientExtension = new WebsocketSubscriptionClient(() -> myServer, () -> myStorageSettings);
+	private final WebsocketSubscriptionClient myWebsocketClientExtension = new WebsocketSubscriptionClient(() -> myServer, () -> mySubscriptionSettings);
 	private String myPatientId;
 	private String mySubscriptionId;
 	@Autowired
@@ -112,7 +111,7 @@ public class WebsocketWithSubscriptionIdDstu3Test extends BaseResourceProviderDs
 
 		ourLog.info("WS Messages: {}", myWebsocketClientExtension.getMessages());
 		waitForSize(2, myWebsocketClientExtension.getMessages());
-		assertThat(myWebsocketClientExtension.getMessages(), contains("bound " + mySubscriptionId, "ping " + mySubscriptionId));
+		assertThat(myWebsocketClientExtension.getMessages()).containsExactly("bound " + mySubscriptionId, "ping " + mySubscriptionId);
 	}
 
 	@Test
@@ -136,6 +135,6 @@ public class WebsocketWithSubscriptionIdDstu3Test extends BaseResourceProviderDs
 
 		ourLog.info("WS Messages: {}", myWebsocketClientExtension.getMessages());
 		waitForSize(1, myWebsocketClientExtension.getMessages());
-		assertThat(myWebsocketClientExtension.getMessages(), contains("bound " + mySubscriptionId));
+		assertThat(myWebsocketClientExtension.getMessages()).containsExactly("bound " + mySubscriptionId);
 	}
 }

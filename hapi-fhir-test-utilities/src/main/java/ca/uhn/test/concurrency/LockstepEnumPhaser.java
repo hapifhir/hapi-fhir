@@ -24,8 +24,10 @@ import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.Phaser;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Fail.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+
 
 /**
  * Test helper to force a particular sequence on multiple threads.
@@ -54,7 +56,7 @@ public class LockstepEnumPhaser<E extends Enum<E>> {
 	}
 
 	public void assertInPhase(E theStageEnum) {
-		assertEquals(theStageEnum, getPhase(), "In stage " + theStageEnum);
+		assertThat(theStageEnum).as("In stage" + theStageEnum).isEqualTo(getPhase());
 	}
 
 	/**
@@ -74,7 +76,7 @@ public class LockstepEnumPhaser<E extends Enum<E>> {
 	public E arriveAndAwaitSharedEndOf(E thePhase) {
 		checkAwait(thePhase);
 		E current = arrive();
-		assertEquals(thePhase, current);
+		assertEquals(current, thePhase);
 		return doAwait(thePhase);
 	}
 

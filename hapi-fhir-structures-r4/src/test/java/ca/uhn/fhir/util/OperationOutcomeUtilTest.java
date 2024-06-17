@@ -5,9 +5,9 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.junit.jupiter.api.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class OperationOutcomeUtilTest {
@@ -41,7 +41,7 @@ public class OperationOutcomeUtilTest {
 	public void testAddIssueWithMessageId() {
 		OperationOutcome oo = (OperationOutcome) OperationOutcomeUtil.newInstance(myCtx);
 		OperationOutcomeUtil.addIssueWithMessageId(myCtx, oo, "error", "message", "messageID", "location", "processing");
-		assertNotNull(oo.getIssueFirstRep().getDetails(), "OO.issue.details is empty");
+		assertThat(oo.getIssueFirstRep().getDetails()).as("OO.issue.details is empty").isNotNull();
 	}
 
 	@Test

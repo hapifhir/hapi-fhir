@@ -1,20 +1,15 @@
 package ca.uhn.fhir.parser;
 
-
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Test;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.TestUtil;
-
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Patient;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class NDJsonParserTest {
 	private static FhirContext ourCtx = FhirContext.forR4();
@@ -103,8 +98,9 @@ public class NDJsonParserTest {
 	public void testOnlyEncodesBundles() {
 		Patient p = new Patient();
 		p.setId("Patient/P1");
-		assertThrows(IllegalArgumentException.class,
-		             ()->{toNDJson(p);});
+		assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
+			toNDJson(p);
+		});
 	}
 
 	@Test
@@ -117,8 +113,9 @@ public class NDJsonParserTest {
 		IBaseResource myBundle = myBuilder.getBundle();
  		String myBundleJson = toNDJson(myBundle);
 		IParser parser = ourCtx.newNDJsonParser();
-		assertThrows(DataFormatException.class,
-		             ()->{parser.parseResource(Patient.class, myBundleJson);});
+		assertThatExceptionOfType(DataFormatException.class).isThrownBy(() -> {
+			parser.parseResource(Patient.class, myBundleJson);
+		});
 	}
 	
 	@AfterAll

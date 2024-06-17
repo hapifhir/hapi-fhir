@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.packages;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
@@ -63,17 +64,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.not;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -224,13 +220,13 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		FhirContext fhirContext = FhirContext.forDstu3Cached();
 		runInTransaction(() -> {
 			IBaseResource asset = myPackageCacheManager.loadPackageAssetByUrl(FhirVersionEnum.DSTU3, "http://nictiz.nl/fhir/StructureDefinition/vl-QuestionnaireResponse");
-			assertThat(fhirContext.newJsonParser().encodeResourceToString(asset), containsString("\"url\":\"http://nictiz.nl/fhir/StructureDefinition/vl-QuestionnaireResponse\",\"version\":\"1.0.1\""));
+			assertThat(fhirContext.newJsonParser().encodeResourceToString(asset)).contains("\"url\":\"http://nictiz.nl/fhir/StructureDefinition/vl-QuestionnaireResponse\",\"version\":\"1.0.1\"");
 		});
 
 		// Fetch resource by URL with version
 		runInTransaction(() -> {
 			IBaseResource asset = myPackageCacheManager.loadPackageAssetByUrl(FhirVersionEnum.DSTU3, "http://nictiz.nl/fhir/StructureDefinition/vl-QuestionnaireResponse|1.0.1");
-			assertThat(fhirContext.newJsonParser().encodeResourceToString(asset), containsString("\"url\":\"http://nictiz.nl/fhir/StructureDefinition/vl-QuestionnaireResponse\",\"version\":\"1.0.1\""));
+			assertThat(fhirContext.newJsonParser().encodeResourceToString(asset)).contains("\"url\":\"http://nictiz.nl/fhir/StructureDefinition/vl-QuestionnaireResponse\",\"version\":\"1.0.1\"");
 		});
 
 		// This was saved but is the wrong version of FHIR for this server
@@ -249,7 +245,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 			.setVersion("0.12.0")
 			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
 		PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(spec);
-		assertEquals(1, outcome.getResourcesInstalled().get("CodeSystem"));
+		assertThat(outcome.getResourcesInstalled()).containsEntry("CodeSystem", 1);
 
 		// Be sure no further communication with the server
 		myServer.stopServer();
@@ -289,13 +285,13 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		// Fetch resource by URL
 		runInTransaction(() -> {
 			IBaseResource asset = myPackageCacheManager.loadPackageAssetByUrl(FhirVersionEnum.R4, "http://hl7.org/fhir/uv/shorthand/ImplementationGuide/hl7.fhir.uv.shorthand");
-			assertThat(myFhirContext.newJsonParser().encodeResourceToString(asset), containsString("\"url\":\"http://hl7.org/fhir/uv/shorthand/ImplementationGuide/hl7.fhir.uv.shorthand\",\"version\":\"0.12.0\""));
+			assertThat(myFhirContext.newJsonParser().encodeResourceToString(asset)).contains("\"url\":\"http://hl7.org/fhir/uv/shorthand/ImplementationGuide/hl7.fhir.uv.shorthand\",\"version\":\"0.12.0\"");
 		});
 
 		// Fetch resource by URL with version
 		runInTransaction(() -> {
 			IBaseResource asset = myPackageCacheManager.loadPackageAssetByUrl(FhirVersionEnum.R4, "http://hl7.org/fhir/uv/shorthand/ImplementationGuide/hl7.fhir.uv.shorthand|0.12.0");
-			assertThat(myFhirContext.newJsonParser().encodeResourceToString(asset), containsString("\"url\":\"http://hl7.org/fhir/uv/shorthand/ImplementationGuide/hl7.fhir.uv.shorthand\",\"version\":\"0.12.0\""));
+			assertThat(myFhirContext.newJsonParser().encodeResourceToString(asset)).contains("\"url\":\"http://hl7.org/fhir/uv/shorthand/ImplementationGuide/hl7.fhir.uv.shorthand\",\"version\":\"0.12.0\"");
 		});
 
 		// Search for the installed resource
@@ -319,7 +315,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 
 		PackageInstallationSpec spec = new PackageInstallationSpec().setName("hl7.fhir.uv.shorthand").setVersion("0.12.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
 		PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(spec);
-		assertEquals(1, outcome.getResourcesInstalled().get("CodeSystem"));
+		assertThat(outcome.getResourcesInstalled()).containsEntry("CodeSystem", 1);
 
 		// Be sure no further communication with the server
 		myServer.stopServer();
@@ -359,13 +355,13 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		// Fetch resource by URL
 		runInTransaction(() -> {
 			IBaseResource asset = myPackageCacheManager.loadPackageAssetByUrl(FhirVersionEnum.R4, "http://hl7.org/fhir/uv/shorthand/ImplementationGuide/hl7.fhir.uv.shorthand");
-			assertThat(myFhirContext.newJsonParser().encodeResourceToString(asset), containsString("\"url\":\"http://hl7.org/fhir/uv/shorthand/ImplementationGuide/hl7.fhir.uv.shorthand\",\"version\":\"0.12.0\""));
+			assertThat(myFhirContext.newJsonParser().encodeResourceToString(asset)).contains("\"url\":\"http://hl7.org/fhir/uv/shorthand/ImplementationGuide/hl7.fhir.uv.shorthand\",\"version\":\"0.12.0\"");
 		});
 
 		// Fetch resource by URL with version
 		runInTransaction(() -> {
 			IBaseResource asset = myPackageCacheManager.loadPackageAssetByUrl(FhirVersionEnum.R4, "http://hl7.org/fhir/uv/shorthand/ImplementationGuide/hl7.fhir.uv.shorthand|0.12.0");
-			assertThat(myFhirContext.newJsonParser().encodeResourceToString(asset), containsString("\"url\":\"http://hl7.org/fhir/uv/shorthand/ImplementationGuide/hl7.fhir.uv.shorthand\",\"version\":\"0.12.0\""));
+			assertThat(myFhirContext.newJsonParser().encodeResourceToString(asset)).contains("\"url\":\"http://hl7.org/fhir/uv/shorthand/ImplementationGuide/hl7.fhir.uv.shorthand\",\"version\":\"0.12.0\"");
 		});
 
 		// Search for the installed resource
@@ -418,7 +414,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		PackageInstallationSpec spec = new PackageInstallationSpec().setName("test-organizations").setVersion("1.0.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
 		spec.setInstallResourceTypes(resourceList);
 		PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(spec);
-		assertEquals(3, outcome.getResourcesInstalled().get("Organization"));
+		assertThat(outcome.getResourcesInstalled()).containsEntry("Organization", 3);
 
 		// Be sure no further communication with the server
 		myServer.stopServer();
@@ -458,7 +454,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
 		spec.setInstallResourceTypes(resourceList);
 		PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(spec);
-		assertEquals(3, outcome.getResourcesInstalled().get("Organization"));
+		assertThat(outcome.getResourcesInstalled()).containsEntry("Organization", 3);
 
 		// Be sure no further communication with the server
 		myServer.stopServer();
@@ -503,7 +499,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 			PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(spec);
 			fail(outcome.toString());
 		} catch (ImplementationGuideInstallationException theE) {
-			assertThat(theE.getMessage(), containsString("Resources in a package must have a url or identifier to be loaded by the package installer."));
+			assertThat(theE.getMessage()).contains("Resources in a package must have a url or identifier to be loaded by the package installer.");
 		}
 	}
 
@@ -527,7 +523,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		spec.setInstallResourceTypes(resourceList);
 		PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(spec);
 		ourLog.info("Outcome: {}", outcome);
-		assertEquals(1, outcome.getResourcesInstalled().get("ImplementationGuide"));
+		assertThat(outcome.getResourcesInstalled()).containsEntry("ImplementationGuide", 1);
 
 		// Be sure no further communication with the server
 		myServer.stopServer();
@@ -550,7 +546,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 
 		PackageInstallationSpec spec = new PackageInstallationSpec().setName("hl7.fhir.uv.onlydrafts").setVersion("0.11.1").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
 		PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(spec);
-		assertEquals(0, outcome.getResourcesInstalled().size(), outcome.getResourcesInstalled().toString());
+		assertThat(outcome.getResourcesInstalled().size()).as(outcome.getResourcesInstalled().toString()).isEqualTo(0);
 	}
 
 	@Test
@@ -564,11 +560,11 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 
 		PackageInstallationSpec spec = new PackageInstallationSpec().setName("hl7.fhir.uv.shorthand").setVersion("0.12.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
 		outcome = myPackageInstallerSvc.install(spec);
-		assertEquals(1, outcome.getResourcesInstalled().get("CodeSystem"));
+		assertThat(outcome.getResourcesInstalled()).containsEntry("CodeSystem", 1);
 
 		myPackageInstallerSvc.install(spec);
 		outcome = myPackageInstallerSvc.install(spec);
-		assertEquals(null, outcome.getResourcesInstalled().get("CodeSystem"));
+		assertNull(outcome.getResourcesInstalled().get("CodeSystem"));
 
 		// Ensure that we loaded the contents
 		IBundleProvider searchResult = myCodeSystemDao.search(SearchParameterMap.newSynchronous("url", new UriParam("http://hl7.org/fhir/uv/shorthand/CodeSystem/shorthand-code-system")));
@@ -589,11 +585,11 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 
 		PackageInstallationSpec spec = new PackageInstallationSpec().setName("hl7.fhir.uv.shorthand").setVersion("0.12.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
 		outcome = myPackageInstallerSvc.install(spec);
-		assertEquals(1, outcome.getResourcesInstalled().get("CodeSystem"));
+		assertThat(outcome.getResourcesInstalled()).containsEntry("CodeSystem", 1);
 
 		myPackageInstallerSvc.install(spec);
 		outcome = myPackageInstallerSvc.install(spec);
-		assertEquals(null, outcome.getResourcesInstalled().get("CodeSystem"));
+		assertNull(outcome.getResourcesInstalled().get("CodeSystem"));
 
 		// Ensure that we loaded the contents
 		IBundleProvider searchResult = myCodeSystemDao.search(SearchParameterMap.newSynchronous("url", new UriParam("http://hl7.org/fhir/uv/shorthand/CodeSystem/shorthand-code-system")));
@@ -615,7 +611,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 
 		// Make sure we can fetch the package by ID and Version
 		NpmPackage pkg = myPackageCacheManager.loadPackage("UK.Core.r4", "1.1.0");
-		assertEquals(null, pkg.description());
+		assertNull(pkg.description());
 		assertEquals("UK.Core.r4", pkg.name());
 
 	}
@@ -638,7 +634,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 
 			assertEquals("0.12.0", metadata.getDistTags().getLatest());
 
-			assertThat(metadata.getVersions().keySet(), contains("0.12.0", "0.11.1"));
+			assertThat(metadata.getVersions().keySet()).containsExactly("0.12.0", "0.11.1");
 
 			NpmPackageMetadataJson.Version version0120 = metadata.getVersions().get("0.12.0");
 			assertEquals(3001, version0120.getBytes());
@@ -658,13 +654,13 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		spec = new PackageInstallationSpec().setName("hl7.fhir.uv.shorthand").setVersion("0.12.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY);
 		PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(spec);
 		ourLog.info("Install messages:\n * {}", outcome.getMessage().stream().collect(Collectors.joining("\n * ")));
-		assertThat(outcome.getMessage(), hasItem("Marking package hl7.fhir.uv.shorthand#0.12.0 as current version"));
-		assertThat(outcome.getMessage(), hasItem("Indexing CodeSystem Resource[package/CodeSystem-shorthand-code-system.json] with URL: http://hl7.org/fhir/uv/shorthand/CodeSystem/shorthand-code-system|0.12.0"));
+		assertThat(outcome.getMessage()).contains("Marking package hl7.fhir.uv.shorthand#0.12.0 as current version");
+		assertThat(outcome.getMessage()).contains("Indexing CodeSystem Resource[package/CodeSystem-shorthand-code-system.json] with URL: http://hl7.org/fhir/uv/shorthand/CodeSystem/shorthand-code-system|0.12.0");
 
 		spec = new PackageInstallationSpec().setName("hl7.fhir.uv.shorthand").setVersion("0.11.1").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY);
 		outcome = myPackageInstallerSvc.install(spec);
 		ourLog.info("Install messages:\n * {}", outcome.getMessage().stream().collect(Collectors.joining("\n * ")));
-		assertThat(outcome.getMessage(), not(hasItem("Marking package hl7.fhir.uv.shorthand#0.11.1 as current version")));
+		assertThat(outcome.getMessage()).doesNotContain("Marking package hl7.fhir.uv.shorthand#0.11.1 as current version");
 
 		spec = new PackageInstallationSpec().setName("hl7.fhir.uv.shorthand").setVersion("0.11.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY);
 		myPackageInstallerSvc.install(spec);
@@ -852,14 +848,14 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		myPackageInstallerSvc.install(spec);
 
 
-		assertArrayEquals(contents0111, myPackageCacheManager.loadPackageContents("hl7.fhir.uv.shorthand", "0.11.1").getBytes());
-		assertArrayEquals(contents0120, myPackageCacheManager.loadPackageContents("hl7.fhir.uv.shorthand", "0.12.0").getBytes());
-		assertArrayEquals(contents0120, myPackageCacheManager.loadPackageContents("hl7.fhir.uv.shorthand", "latest").getBytes());
+		assertThat(myPackageCacheManager.loadPackageContents("hl7.fhir.uv.shorthand", "0.11.1").getBytes()).containsExactly(contents0111);
+		assertThat(myPackageCacheManager.loadPackageContents("hl7.fhir.uv.shorthand", "0.12.0").getBytes()).containsExactly(contents0120);
+		assertThat(myPackageCacheManager.loadPackageContents("hl7.fhir.uv.shorthand", "latest").getBytes()).containsExactly(contents0120);
 		assertEquals("0.11.1", myPackageCacheManager.loadPackageContents("hl7.fhir.uv.shorthand", "0.11.1").getVersion());
 		assertEquals("0.12.0", myPackageCacheManager.loadPackageContents("hl7.fhir.uv.shorthand", "0.12.0").getVersion());
 		assertEquals("0.12.0", myPackageCacheManager.loadPackageContents("hl7.fhir.uv.shorthand", "latest").getVersion());
-		assertEquals(null, myPackageCacheManager.loadPackageContents("hl7.fhir.uv.shorthand", "1.2.3"));
-		assertEquals(null, myPackageCacheManager.loadPackageContents("foo", "1.2.3"));
+		assertNull(myPackageCacheManager.loadPackageContents("hl7.fhir.uv.shorthand", "1.2.3"));
+		assertNull(myPackageCacheManager.loadPackageContents("foo", "1.2.3"));
 	}
 
 
@@ -917,7 +913,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 
 		PackageInstallationSpec spec = new PackageInstallationSpec().setName("test-logical-structuredefinition").setVersion("1.0.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
 		PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(spec);
-		assertEquals(2, outcome.getResourcesInstalled().get("StructureDefinition"));
+		assertThat(outcome.getResourcesInstalled()).containsEntry("StructureDefinition", 2);
 
 		// Be sure no further communication with the server
 		myServer.stopServer();
@@ -954,7 +950,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 
 		PackageInstallationSpec spec = new PackageInstallationSpec().setName("test-logical-structuredefinition").setVersion("1.0.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
 		PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(spec);
-		assertEquals(2, outcome.getResourcesInstalled().get("StructureDefinition"));
+		assertThat(outcome.getResourcesInstalled()).containsEntry("StructureDefinition", 2);
 
 		// Be sure no further communication with the server
 		myServer.stopServer();
@@ -988,7 +984,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		if (s.charAt(0) != '/' && s.charAt(1) == ':') { // is Windows..
 			s = s.substring(2); // .. get rid of the "C:" part (not perfect but...
 		}
-		System.out.println("Current absolute path is: " + s);
+		ourLog.info("Current absolute path is: " + s);
 
 		String fileUrl = "file:" + s + "/src/test/resources/packages/de.basisprofil.r4-1.2.0.tgz";
 

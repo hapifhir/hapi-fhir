@@ -31,16 +31,16 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.PathEngineException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.r5.context.IWorkerContext;
+import org.hl7.fhir.r5.fhirpath.ExpressionNode;
+import org.hl7.fhir.r5.fhirpath.FHIRPathEngine;
+import org.hl7.fhir.r5.fhirpath.FHIRPathUtilityClasses.FunctionDetails;
+import org.hl7.fhir.r5.fhirpath.TypeDetails;
 import org.hl7.fhir.r5.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.r5.model.Base;
-import org.hl7.fhir.r5.model.ExpressionNode;
 import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.Resource;
 import org.hl7.fhir.r5.model.ResourceType;
-import org.hl7.fhir.r5.model.TypeDetails;
 import org.hl7.fhir.r5.model.ValueSet;
-import org.hl7.fhir.r5.utils.FHIRPathEngine;
-import org.hl7.fhir.r5.utils.FHIRPathUtilityClasses.FunctionDetails;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -103,13 +103,16 @@ public class SearchParamExtractorR5 extends BaseSearchParamExtractor implements 
 		private final Map<String, Base> myResourceTypeToStub = Collections.synchronizedMap(new HashMap<>());
 
 		@Override
-		public List<Base> resolveConstant(Object appContext, String name, boolean beforeContext)
+		public List<Base> resolveConstant(
+				FHIRPathEngine engine, Object appContext, String name, boolean beforeContext, boolean explicitConstant)
 				throws PathEngineException {
 			return Collections.emptyList();
 		}
 
 		@Override
-		public TypeDetails resolveConstantType(Object appContext, String name) throws PathEngineException {
+		public TypeDetails resolveConstantType(
+				FHIRPathEngine engine, Object appContext, String name, boolean explicitConstant)
+				throws PathEngineException {
 			return null;
 		}
 
@@ -119,24 +122,33 @@ public class SearchParamExtractorR5 extends BaseSearchParamExtractor implements 
 		}
 
 		@Override
-		public FunctionDetails resolveFunction(String functionName) {
+		public FunctionDetails resolveFunction(FHIRPathEngine engine, String functionName) {
 			return null;
 		}
 
 		@Override
-		public TypeDetails checkFunction(Object appContext, String functionName, List<TypeDetails> parameters)
+		public TypeDetails checkFunction(
+				FHIRPathEngine engine,
+				Object appContext,
+				String functionName,
+				TypeDetails focus,
+				List<TypeDetails> parameters)
 				throws PathEngineException {
 			return null;
 		}
 
 		@Override
 		public List<Base> executeFunction(
-				Object appContext, List<Base> focus, String functionName, List<List<Base>> parameters) {
+				FHIRPathEngine engine,
+				Object appContext,
+				List<Base> focus,
+				String functionName,
+				List<List<Base>> parameters) {
 			return null;
 		}
 
 		@Override
-		public Base resolveReference(Object appContext, String theUrl, Base refContext) throws FHIRException {
+		public Base resolveReference(FHIRPathEngine engine, Object appContext, String theUrl, Base refContext) {
 			Base retVal = (Base) BundleUtil.getReferenceInBundle(getContext(), theUrl, appContext);
 			if (retVal != null) {
 				return retVal;
@@ -184,13 +196,19 @@ public class SearchParamExtractorR5 extends BaseSearchParamExtractor implements 
 		}
 
 		@Override
-		public boolean conformsToProfile(Object appContext, Base item, String url) throws FHIRException {
+		public boolean conformsToProfile(FHIRPathEngine engine, Object appContext, Base item, String url)
+				throws FHIRException {
 			return false;
 		}
 
 		@Override
-		public ValueSet resolveValueSet(Object theO, String theS) {
+		public ValueSet resolveValueSet(FHIRPathEngine engine, Object appContext, String url) {
 			return null;
+		}
+
+		@Override
+		public boolean paramIsType(String name, int index) {
+			return false;
 		}
 	}
 }

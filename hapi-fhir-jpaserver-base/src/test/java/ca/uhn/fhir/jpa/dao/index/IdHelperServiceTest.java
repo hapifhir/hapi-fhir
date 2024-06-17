@@ -20,20 +20,33 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class IdHelperServiceTest {
 
     @InjectMocks
-    private final IdHelperService subject = new IdHelperService();
+    private final IdHelperService myHelperSvc = new IdHelperService();
 
     @Mock
     protected IResourceTableDao myResourceTableDao;
@@ -41,8 +54,8 @@ public class IdHelperServiceTest {
     @Mock
     private JpaStorageSettings myStorageSettings;
 
-    @Mock
-    private FhirContext myFhirCtx;
+    @Spy
+    private FhirContext myFhirCtx = FhirContext.forR4Cached();
 
     @Mock
     private MemoryCacheService myMemoryCacheService;
@@ -55,10 +68,11 @@ public class IdHelperServiceTest {
 
     @BeforeEach
     void setUp() {
-        subject.setDontCheckActiveTransactionForUnitTest(true);
+        myHelperSvc.setDontCheckActiveTransactionForUnitTest(true);
 
-		when(myStorageSettings.isDeleteEnabled()).thenReturn(true);
-		when(myStorageSettings.getResourceClientIdStrategy()).thenReturn(JpaStorageSettings.ClientIdStrategyEnum.ANY);
+		// lenient because some tests require this setup, and others do not
+		lenient().doReturn(true).when(myStorageSettings).isDeleteEnabled();
+		lenient().doReturn(JpaStorageSettings.ClientIdStrategyEnum.ANY).when(myStorageSettings).getResourceClientIdStrategy();
     }
 
     @Test
@@ -77,7 +91,7 @@ public class IdHelperServiceTest {
         // configure mock behaviour
 		when(myStorageSettings.isDeleteEnabled()).thenReturn(true);
 
-		final ResourceNotFoundException resourceNotFoundException = assertThrows(ResourceNotFoundException.class, () -> subject.resolveResourcePersistentIds(requestPartitionId, resourceType, ids, theExcludeDeleted));
+		final ResourceNotFoundException resourceNotFoundException = assertThrows(ResourceNotFoundException.class, () -> myHelperSvc.resolveResourcePersistentIds(requestPartitionId, resourceType, ids, theExcludeDeleted));
 		assertEquals("HAPI-2001: Resource Patient/123 is not known", resourceNotFoundException.getMessage());
     }
 
@@ -98,12 +112,13 @@ public class IdHelperServiceTest {
         // configure mock behaviour
         when(myStorageSettings.isDeleteEnabled()).thenReturn(false);
 
-		Map<String, JpaPid> actualIds = subject.resolveResourcePersistentIds(requestPartitionId, resourceType, ids, theExcludeDeleted);
+		Map<String, JpaPid> actualIds = myHelperSvc.resolveResourcePersistentIds(requestPartitionId, resourceType, ids, theExcludeDeleted);
 
 		//verifyResult
 		assertFalse(actualIds.isEmpty());
 		assertNull(actualIds.get(ids.get(0)));
     }
+
 
     private Root<ResourceTable> getMockedFrom() {
         @SuppressWarnings("unchecked")

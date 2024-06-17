@@ -26,8 +26,8 @@ import ca.uhn.fhir.util.UrlUtil;
 import org.hl7.fhir.r4.model.IdType;
 import org.junit.jupiter.api.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class BaseTransactionProcessorTest {
 
@@ -107,7 +107,7 @@ public class BaseTransactionProcessorTest {
 	void testUnqualifiedMatchUrlStart_RegexPatternMatches() {
 		String matchUrl = "patient-first-identifier=MRN%7C123456789";
 		boolean matchResult = BaseTransactionProcessor.UNQUALIFIED_MATCH_URL_START.matcher(matchUrl).find();
-		assertTrue(matchResult, "Failed to find a Regex match using Url '" + matchUrl + "'");
+		assertThat(matchResult).as("Failed to find a Regex match using Url '" + matchUrl + "'").isTrue();
 	}
 
 	@Test

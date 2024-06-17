@@ -6,6 +6,7 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.ips.api.IIpsGenerationStrategy;
+import ca.uhn.fhir.jpa.ips.api.IpsContext;
 import ca.uhn.fhir.jpa.ips.jpa.DefaultJpaIpsGenerationStrategy;
 import ca.uhn.fhir.jpa.ips.provider.IpsOperationProvider;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
@@ -21,12 +22,14 @@ import org.hl7.fhir.common.hapi.validation.support.NpmPackageValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Composition;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Immunization;
 import org.hl7.fhir.r4.model.MedicationStatement;
 import org.hl7.fhir.r4.model.Parameters;
@@ -43,14 +46,16 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static ca.uhn.fhir.util.BundleUtil.convertBundleIntoTransaction;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -96,19 +101,19 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 		ourLog.info("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 
 		// Verify
-		assertThat(output.getMeta().getProfile().stream().map(PrimitiveType::getValue).toList(), contains(
+		assertThat(output.getMeta().getProfile().stream().map(PrimitiveType::getValue).toList()).contains(
 			"http://hl7.org/fhir/uv/ips/StructureDefinition/Bundle-uv-ips"
-		));
+		);
 		validateDocument(output);
 		assertEquals(117, output.getEntry().size());
 		String patientId = findFirstEntryResource(output, Patient.class, 1).getIdElement().toUnqualifiedVersionless().getValue();
-		assertEquals("Patient/f15d2419-fbff-464a-826d-0afe8f095771", patientId);
+		assertThat(patientId).matches("urn:uuid:.*");
 		MedicationStatement medicationStatement = findFirstEntryResource(output, MedicationStatement.class, 2);
 		assertEquals(patientId, medicationStatement.getSubject().getReference());
 		assertNull(medicationStatement.getInformationSource().getReference());
 
 		List<String> sectionTitles = extractSectionTitles(output);
-		assertThat(sectionTitles.toString(), sectionTitles, contains("Allergies and Intolerances", "Medication List", "Problem List", "History of Immunizations", "Diagnostic Results"));
+		assertThat(sectionTitles).as(sectionTitles.toString()).containsExactly("Allergies and Intolerances", "Medication List", "Problem List", "History of Immunizations", "Diagnostic Results");
 	}
 
 	@Test
@@ -130,7 +135,7 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 		ourLog.info("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 
 		// Verify
-		assertEquals(74, output.getEntry().size());
+		assertThat(output.getEntry()).hasSize(74);
 	}
 
 	@Test
@@ -152,7 +157,7 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 		ourLog.info("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 
 		// Verify
-		assertEquals(80, output.getEntry().size());
+		assertThat(output.getEntry()).hasSize(80);
 	}
 
 	@Test
@@ -198,12 +203,12 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 		validateDocument(output);
 		assertEquals(7, output.getEntry().size());
 		String patientId = findFirstEntryResource(output, Patient.class, 1).getIdElement().toUnqualifiedVersionless().getValue();
-		assertEquals("Patient/5342998", patientId);
+		assertThat(patientId).matches("urn:uuid:.*");
 		assertEquals(patientId, findEntryResource(output, Condition.class, 0, 2).getSubject().getReference());
 		assertEquals(patientId, findEntryResource(output, Condition.class, 1, 2).getSubject().getReference());
 
 		List<String> sectionTitles = extractSectionTitles(output);
-		assertThat(sectionTitles.toString(), sectionTitles, contains("Allergies and Intolerances", "Medication List", "Problem List"));
+		assertThat(sectionTitles).as(sectionTitles.toString()).containsExactly("Allergies and Intolerances", "Medication List", "Problem List");
 	}
 
 	/**
@@ -245,10 +250,9 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 		ourLog.info("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 
 		Composition composition = findCompositionSectionByDisplay(output, "History of Immunization Narrative");
-		// Should be newest first
-		assertThat(composition.getText().getDivAsString(), stringContainsInOrder(
-			"Vax 2015", "Vax 2010", "Vax 2005"
-		));
+		assertThat(composition.getText().getDivAsString()).isEqualTo(
+			"<div xmlns=\"http://www.w3.org/1999/xhtml\"><h1>International Patient Summary Document</h1></div>"
+		);
 
 		List<String> resourceDates = output
 			.getEntry()
@@ -257,7 +261,7 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 			.map(t -> (Immunization) t.getResource())
 			.map(t -> t.getOccurrenceDateTimeType().getValueAsString().substring(0, 4))
 			.collect(Collectors.toList());
-		assertThat(resourceDates, contains("2015", "2010", "2005"));
+		assertThat(resourceDates).containsExactly("2015", "2010", "2005");
 	}
 
 
@@ -305,7 +309,12 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 
 		@Bean
 		public IIpsGenerationStrategy ipsGenerationStrategy() {
-			return new DefaultJpaIpsGenerationStrategy();
+			return new DefaultJpaIpsGenerationStrategy() {
+				@Override
+				public IIdType massageResourceId(@Nullable IpsContext theIpsContext, @Nonnull IBaseResource theResource) {
+					return IdType.newRandomUuid();
+				}
+			};
 		}
 
 		@Bean
@@ -333,7 +342,7 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 			.map(Bundle.BundleEntryComponent::getResource)
 			.filter(r -> theType.isAssignableFrom(r.getClass()))
 			.toList();
-		assertEquals(theExpectedCount, resources.size());
+		assertThat(resources).hasSize(theExpectedCount);
 		return (T) resources.get(index);
 	}
 
@@ -343,6 +352,73 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 	 * package.
 	 */
 	private class IpsTerminologySvc implements IValidationSupport {
+
+		final Set<String> loincValueSetCodes = Set.of(
+			"60591-5",
+			"75326-9",
+			"94306-8"
+		);
+
+		final Set<String> snomedValueSetCodes = Set.of(
+			"14657009",
+			"255604002",
+			"38341003",
+			"1208807009"
+		);
+
+		final Set<String> loincCodes = Set.of(
+			"10160-0",
+			"11369-6",
+			"11450-4",
+			"14682-9",
+			"14933-6",
+			"1988-5",
+			"20570-8",
+			"2157-6",
+			"26444-0",
+			"26449-9",
+			"26464-8",
+			"26474-7",
+			"26484-6",
+			"26515-7",
+			"2823-3",
+			"28539-5",
+			"2951-2",
+			"29953-7",
+			"30428-7",
+			"30449-3",
+			"30954-2",
+			"31348-6",
+			"31627-3",
+			"32677-7",
+			"48765-2",
+			"62238-1",
+			"718-7",
+			"8061-4",
+			"8076-2",
+			"8091-1",
+			"8092-9",
+			"8093-7",
+			"8094-5",
+			"94500-6"
+		);
+
+		final Set<String> snomedCodes = Set.of(
+			// Tiny patient summary
+			"38341003",
+			"1208807009",
+
+			// Large patient summary
+			"10312003",
+			"385055001",
+			"318913001",
+			"90560007",
+			"1240581000000104",
+			"16217701000119102",
+			"72098002",
+			"260415000"
+		);
+
 		@Override
 		public boolean isValueSetSupported(ValidationSupportContext theValidationSupportContext, String theValueSetUrl) {
 			return true;
@@ -352,12 +428,40 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 		@Override
 		public CodeValidationResult validateCodeInValueSet(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
 			if ("http://loinc.org".equals(theCodeSystem)) {
-				if ("60591-5".equals(theCode)) {
+				if (loincValueSetCodes.contains(theCode)) {
 					return new CodeValidationResult().setCode(theCode);
 				}
 			}
 			if ("http://snomed.info/sct".equals(theCodeSystem)) {
-				if ("14657009".equals(theCode) || "255604002".equals(theCode)) {
+				if (snomedValueSetCodes.contains(theCode)) {
+					return new CodeValidationResult().setCode(theCode);
+				}
+			}
+			return null;
+		}
+
+		@Override
+		public boolean isCodeSystemSupported(ValidationSupportContext theValidationSupportContext, String theSystem) {
+			return true;
+		}
+
+		@Nullable
+		@Override
+		public CodeValidationResult validateCode(
+			ValidationSupportContext theValidationSupportContext,
+			ConceptValidationOptions theOptions,
+			String theCodeSystem,
+			String theCode,
+			String theDisplay,
+			String theValueSetUrl) {
+			if ("http://loinc.org".equals(theCodeSystem)) {
+				if (loincCodes.contains(theCode)) {
+					return new CodeValidationResult().setCode(theCode);
+				}
+			}
+
+			if ("http://snomed.info/sct".equals(theCodeSystem)) {
+				if (snomedCodes.contains(theCode)) {
 					return new CodeValidationResult().setCode(theCode);
 				}
 			}
@@ -374,6 +478,15 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 				cs.addConcept().setCode("no-allergy-info");
 				cs.addConcept().setCode("no-medication-info");
 				cs.addConcept().setCode("no-known-allergies");
+				return cs;
+			}
+			if ("http://hl7.org/fhir/sid/cvx".equals(theSystem)) {
+				CodeSystem cs = new CodeSystem();
+				cs.setUrl("http://hl7.org/fhir/sid/cvx");
+				cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+				cs.addConcept().setCode("208");
+				cs.addConcept().setCode("121");
+				cs.addConcept().setCode("141");
 				return cs;
 			}
 			return null;

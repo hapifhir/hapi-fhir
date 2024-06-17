@@ -1,5 +1,8 @@
 package ca.uhn.fhir.jpa.dao.expunge;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -18,12 +21,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
+
 
 public class ExpungeHookTest extends BaseJpaDstu3Test {
 	@Autowired
@@ -110,9 +111,9 @@ public class ExpungeHookTest extends BaseJpaDstu3Test {
 	private void assertPatientGone(IIdType theId) {
 		try {
 			myPatientDao.read(theId);
-			fail();
+			fail("");
 		} catch (ResourceNotFoundException e) {
-			assertThat(e.getMessage(), containsString("is not known"));
+			assertThat(e.getMessage()).contains("is not known");
 		}
 	}
 

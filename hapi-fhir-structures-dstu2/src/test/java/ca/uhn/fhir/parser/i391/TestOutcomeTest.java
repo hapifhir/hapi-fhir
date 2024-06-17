@@ -9,6 +9,7 @@ import ca.uhn.fhir.util.TestUtil;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -31,15 +32,15 @@ public class TestOutcomeTest {
 		IParser parser = FhirContext.forDstu2().newXmlParser();
 		String outcomeString = parser.setPrettyPrint(true).encodeResourceToString(outcome);		
 		ourLog.info(outcomeString);
-		
-		assertEquals("<OperationOutcome xmlns=\"http://hl7.org/fhir\">" + 
-				"<meta>" + 
-				"<profile value=\"http://hl7.org/fhir/profiles/custom-operation-outcome\"/>" + 
-				"</meta>" + 
-				"<extension url=\"#someElement2\">" + 
-				"<valueString value=\"testText\"/>" + 
-				"</extension>" + 
-				"</OperationOutcome>", parser.setPrettyPrint(false).encodeResourceToString(outcome));
+
+		assertThat(parser.setPrettyPrint(false).encodeResourceToString(outcome)).isEqualTo("<OperationOutcome xmlns=\"http://hl7.org/fhir\">" +
+			"<meta>" +
+			"<profile value=\"http://hl7.org/fhir/profiles/custom-operation-outcome\"/>" +
+			"</meta>" +
+			"<extension url=\"#someElement2\">" +
+			"<valueString value=\"testText\"/>" +
+			"</extension>" +
+			"</OperationOutcome>");
 		
 		CustomOperationOutcome parsedOutcome = parser.parseResource(CustomOperationOutcome.class, outcomeString);
 		ourLog.info(outcomeString);

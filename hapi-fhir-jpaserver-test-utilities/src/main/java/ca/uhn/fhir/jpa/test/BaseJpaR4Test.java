@@ -187,6 +187,7 @@ import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r5.elementmodel.Element;
 import org.hl7.fhir.r5.model.ElementDefinition;
+import org.hl7.fhir.r5.utils.validation.IMessagingServices;
 import org.hl7.fhir.r5.utils.validation.IResourceValidator;
 import org.hl7.fhir.r5.utils.validation.IValidationPolicyAdvisor;
 import org.hl7.fhir.r5.utils.validation.constants.BestPracticeWarningLevel;
@@ -194,6 +195,7 @@ import org.hl7.fhir.r5.utils.validation.constants.BindingKind;
 import org.hl7.fhir.r5.utils.validation.constants.CodedContentValidationPolicy;
 import org.hl7.fhir.r5.utils.validation.constants.ContainedReferenceValidationPolicy;
 import org.hl7.fhir.r5.utils.validation.constants.ReferenceValidationPolicy;
+import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Order;
@@ -211,15 +213,14 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.empty;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -750,9 +751,9 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 			return hierarchyHolder;
 		});
 		if (theStrings.length == 0) {
-			assertThat("\n" + String.join("\n", hierarchy), hierarchy, empty());
+			assertThat(hierarchy).as("\n" + String.join("\n", hierarchy)).isEmpty();
 		} else {
-			assertThat("\n" + String.join("\n", hierarchy), hierarchy, contains(theStrings));
+			assertThat(hierarchy).as("\n" + String.join("\n", hierarchy)).containsExactly(theStrings);
 		}
 	}
 
@@ -1024,12 +1025,44 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		}
 
 		@Override
-		public CodedContentValidationPolicy policyForCodedContent(IResourceValidator iResourceValidator, Object o, String s, ElementDefinition elementDefinition, org.hl7.fhir.r5.model.StructureDefinition structureDefinition, BindingKind bindingKind, org.hl7.fhir.r5.model.ValueSet valueSet, List<String> list) {
-			return CodedContentValidationPolicy.CODE;
+		public EnumSet<ResourceValidationAction> policyForResource(IResourceValidator validator, Object appContext,
+																   org.hl7.fhir.r5.model.StructureDefinition type, String path) {
+			return EnumSet.allOf(ResourceValidationAction.class);
 		}
 
 		@Override
-		public ContainedReferenceValidationPolicy policyForContained(IResourceValidator validator, Object appContext, String containerType, String containerId, Element.SpecialElement containingResourceType, String path, String url) {
+		public EnumSet<ElementValidationAction> policyForElement(IResourceValidator validator, Object appContext,
+																 org.hl7.fhir.r5.model.StructureDefinition structure, ElementDefinition element, String path) {
+			return EnumSet.allOf(ElementValidationAction.class);
+		}
+		@Override
+		public EnumSet<CodedContentValidationAction> policyForCodedContent(IResourceValidator validator,
+																		   Object appContext,
+																		   String stackPath,
+																		   ElementDefinition definition,
+																		   org.hl7.fhir.r5.model.StructureDefinition structure,
+																		   BindingKind kind,
+																		   AdditionalBindingPurpose purpose,
+																		   org.hl7.fhir.r5.model.ValueSet valueSet,
+																		   List<String> systems) {
+			return EnumSet.allOf(CodedContentValidationAction.class);
+		}
+
+		@Override
+		public List<org.hl7.fhir.r5.model.StructureDefinition> getImpliedProfilesForResource(IResourceValidator validator, Object appContext, String stackPath, ElementDefinition definition, org.hl7.fhir.r5.model.StructureDefinition structure, Element resource, boolean valid, IMessagingServices msgServices, List<ValidationMessage> messages) {
+			return List.of();
+		}
+
+		@Override
+		public ContainedReferenceValidationPolicy policyForContained(IResourceValidator validator,
+																	 Object appContext,
+																	 org.hl7.fhir.r5.model.StructureDefinition structure,
+																	 ElementDefinition element,
+																	 String containerType,
+																	 String containerId,
+																	 Element.SpecialElement containingResourceType,
+																	 String path,
+																	 String url) {
 			return ContainedReferenceValidationPolicy.CHECK_VALID;
 		}
 	}

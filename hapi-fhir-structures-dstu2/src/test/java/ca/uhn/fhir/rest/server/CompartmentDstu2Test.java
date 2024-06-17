@@ -11,31 +11,20 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
-import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.ee10.servlet.ServletHandler;
-import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.startsWith;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
@@ -80,7 +69,7 @@ public class CompartmentDstu2Test {
 		assertEquals("read", ourLastMethod);
 		assertEquals("Patient", ourLastId.getResourceType());
 		assertEquals("123", ourLastId.getIdPart());
-		assertThat(responseContent, startsWith("<Patient"));
+		assertThat(responseContent).startsWith("<Patient");
 	}
 
 	@Test
@@ -93,8 +82,8 @@ public class CompartmentDstu2Test {
 		assertEquals("searchEncounterCompartment", ourLastMethod);
 		assertEquals("Patient", ourLastId.getResourceType());
 		assertEquals("123", ourLastId.getIdPart());
-		assertThat(responseContent, startsWith("<Bundle"));
-		assertThat(responseContent, containsString("<Encounter"));
+		assertThat(responseContent).startsWith("<Bundle");
+		assertThat(responseContent).contains("<Encounter");
 	}
 
 	@Test
@@ -107,8 +96,8 @@ public class CompartmentDstu2Test {
 		assertEquals("searchObservationCompartment", ourLastMethod);
 		assertEquals("Patient", ourLastId.getResourceType());
 		assertEquals("123", ourLastId.getIdPart());
-		assertThat(responseContent, startsWith("<Bundle"));
-		assertThat(responseContent, containsString("<Observation"));
+		assertThat(responseContent).startsWith("<Bundle");
+		assertThat(responseContent).contains("<Observation");
 	}
 
 	public static class TempPatientResourceProvider implements IResourceProvider {
@@ -130,7 +119,7 @@ public class CompartmentDstu2Test {
 		public List<Encounter> method2SearchCompartment(final @IdParam IdDt theId) {
 			ourLastId = theId;
 			ourLastMethod = "searchEncounterCompartment";
-			System.out.println("Encounter compartment search");
+			ourLog.info("Encounter compartment search");
 			List<Encounter> encounters = new ArrayList<Encounter>();
 			Encounter encounter = new Encounter();
 			encounter.setId("1");
@@ -143,7 +132,7 @@ public class CompartmentDstu2Test {
 		public List<Observation> method2SearchCompartment2(final @IdParam IdDt theId) {
 			ourLastId = theId;
 			ourLastMethod = "searchObservationCompartment";
-			System.out.println("Encounter compartment search");
+			ourLog.info("Encounter compartment search");
 			List<Observation> encounters = new ArrayList<Observation>();
 			Observation obs = new Observation();
 			obs.setId("1");

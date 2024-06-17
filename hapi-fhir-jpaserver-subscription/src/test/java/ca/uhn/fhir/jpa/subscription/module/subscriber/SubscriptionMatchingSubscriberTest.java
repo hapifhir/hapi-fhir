@@ -14,6 +14,7 @@ import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.module.standalone.BaseBlockingQueueSubscribableChannelDstu3Test;
+import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.messaging.BaseResourceModifiedMessage;
@@ -39,6 +40,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionCriteriaParser.TypeEnum.STARTYPE_EXPRESSION;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -62,7 +64,7 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 
 	@AfterEach
 	public void afterEach() {
-		myStorageSettings.setCrossPartitionSubscriptionEnabled(new JpaStorageSettings().isCrossPartitionSubscriptionEnabled());
+		mySubscriptionSettings.setCrossPartitionSubscriptionEnabled(new SubscriptionSettings().isCrossPartitionSubscriptionEnabled());
 	}
 
 	@Test
@@ -86,7 +88,7 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		mySubscriptionResourceMatched.awaitExpected();
 		ourObservationListener.awaitExpected();
 
-		assertEquals(1, ourContentTypes.size());
+		assertThat(ourContentTypes).hasSize(1);
 		assertEquals(Constants.CT_FHIR_JSON_NEW, ourContentTypes.get(0));
 	}
 
@@ -111,7 +113,7 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		mySubscriptionResourceMatched.awaitExpected();
 		ourObservationListener.awaitExpected();
 
-		assertEquals(1, ourContentTypes.size());
+		assertThat(ourContentTypes).hasSize(1);
 		assertEquals(Constants.CT_FHIR_XML_NEW, ourContentTypes.get(0));
 	}
 
@@ -131,7 +133,7 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		mySubscriptionResourceMatched.awaitExpected();
 		ourObservationListener.awaitExpected();
 
-		assertEquals(1, ourContentTypes.size());
+		assertThat(ourContentTypes).hasSize(1);
 		assertEquals(Constants.CT_FHIR_XML_NEW, ourContentTypes.get(0));
 	}
 
@@ -158,7 +160,7 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		ourObservationListener.clear();
 		mySubscriptionAfterDelivery.awaitExpected();
 
-		assertEquals(0, ourContentTypes.size());
+		assertThat(ourContentTypes).isEmpty();
 	}
 
 
@@ -186,7 +188,7 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		mySubscriptionResourceMatched.awaitExpected();
 		ourObservationListener.awaitExpected();
 
-		assertEquals(2, ourContentTypes.size());
+		assertThat(ourContentTypes).hasSize(2);
 		assertEquals(Constants.CT_FHIR_XML_NEW, ourContentTypes.get(0));
 	}
 
@@ -233,7 +235,7 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})
 	public void testSubscriptionAndResourceOnDiffPartitionNotMatch(boolean theIsCrossPartitionEnabled) throws InterruptedException {
-		myStorageSettings.setCrossPartitionSubscriptionEnabled(theIsCrossPartitionEnabled);
+		mySubscriptionSettings.setCrossPartitionSubscriptionEnabled(theIsCrossPartitionEnabled);
 		myPartitionSettings.setPartitioningEnabled(true);
 		String payload = "application/fhir+json";
 
@@ -256,7 +258,7 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})
 	public void testSubscriptionAndResourceOnDiffPartitionNotMatchPart2(boolean theIsCrossPartitionEnabled) throws InterruptedException {
-		myStorageSettings.setCrossPartitionSubscriptionEnabled(theIsCrossPartitionEnabled);
+		mySubscriptionSettings.setCrossPartitionSubscriptionEnabled(theIsCrossPartitionEnabled);
 		myPartitionSettings.setPartitioningEnabled(true);
 		String payload = "application/fhir+json";
 
@@ -280,7 +282,7 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})
 	public void testSubscriptionOnDefaultPartitionAndResourceOnDiffPartitionNotMatch(boolean theIsCrossPartitionEnabled) throws InterruptedException {
-		myStorageSettings.setCrossPartitionSubscriptionEnabled(theIsCrossPartitionEnabled);
+		mySubscriptionSettings.setCrossPartitionSubscriptionEnabled(theIsCrossPartitionEnabled);
 		myPartitionSettings.setPartitioningEnabled(true);
 		String payload = "application/fhir+json";
 
@@ -304,7 +306,7 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})
 	public void testSubscriptionOnAPartitionAndResourceOnDefaultPartitionNotMatch(boolean theIsCrossPartitionEnabled) throws InterruptedException {
-		myStorageSettings.setCrossPartitionSubscriptionEnabled(theIsCrossPartitionEnabled);
+		mySubscriptionSettings.setCrossPartitionSubscriptionEnabled(theIsCrossPartitionEnabled);
 		myPartitionSettings.setPartitioningEnabled(true);
 		String payload = "application/fhir+json";
 
@@ -349,7 +351,7 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})
 	public void testSubscriptionOnOnePartitionDoNotMatchResourceOnMultiplePartitions(boolean theIsCrossPartitionEnabled) throws InterruptedException {
-		myStorageSettings.setCrossPartitionSubscriptionEnabled(theIsCrossPartitionEnabled);
+		mySubscriptionSettings.setCrossPartitionSubscriptionEnabled(theIsCrossPartitionEnabled);
 		myPartitionSettings.setPartitioningEnabled(true);
 		String payload = "application/fhir+json";
 
@@ -373,7 +375,7 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 	@Test
 	public void testCrossPartitionSubscriptionForResourceOnTheSamePartitionMatch() throws InterruptedException {
 		myPartitionSettings.setPartitioningEnabled(true);
-		myStorageSettings.setCrossPartitionSubscriptionEnabled(true);
+		mySubscriptionSettings.setCrossPartitionSubscriptionEnabled(true);
 		String payload = "application/fhir+json";
 
 		String code = "1000000050";
@@ -395,7 +397,7 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 	@Test
 	public void testCrossPartitionSubscriptionForResourceOnDifferentPartitionMatch() throws InterruptedException {
 		myPartitionSettings.setPartitioningEnabled(true);
-		myStorageSettings.setCrossPartitionSubscriptionEnabled(true);
+		mySubscriptionSettings.setCrossPartitionSubscriptionEnabled(true);
 		String payload = "application/fhir+json";
 
 		String code = "1000000050";
@@ -418,7 +420,7 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 	@Test
 	public void testCrossPartitionSubscriptionForMultipleResourceOnDifferentPartitionMatch() throws InterruptedException {
 		myPartitionSettings.setPartitioningEnabled(true);
-		myStorageSettings.setCrossPartitionSubscriptionEnabled(true);
+		mySubscriptionSettings.setCrossPartitionSubscriptionEnabled(true);
 		String payload = "application/fhir+json";
 
 		String code = "1000000050";
@@ -573,8 +575,8 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 			mySubscriptionResourceMatched.awaitExpected();
 			ourObservationListener.awaitExpected();
 		} catch (InterruptedException exception) {
-			fail();
 			Thread.currentThread().interrupt();
+			fail();
 		}
 	}
 }

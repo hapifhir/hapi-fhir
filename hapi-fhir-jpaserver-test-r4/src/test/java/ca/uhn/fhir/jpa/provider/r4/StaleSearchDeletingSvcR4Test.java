@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
 import ca.uhn.fhir.jpa.entity.Search;
@@ -26,13 +27,10 @@ import java.util.Date;
 import java.util.UUID;
 
 import static ca.uhn.fhir.util.TestUtil.sleepAtLeast;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.blankOrNullString;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.not;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 
 public class StaleSearchDeletingSvcR4Test extends BaseResourceProviderR4Test {
 
@@ -84,7 +82,7 @@ public class StaleSearchDeletingSvcR4Test extends BaseResourceProviderR4Test {
 		BundleLinkComponent nextLink = resp1.getLink("next");
 		assertNotNull(nextLink);
 		String nextLinkUrl = nextLink.getUrl();
-		assertThat(nextLinkUrl, not(blankOrNullString()));
+		assertThat(nextLinkUrl).isNotBlank();
 
 		Bundle resp2 = myClient.search().byUrl(nextLinkUrl).returnBundle(Bundle.class).execute();
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp2));
@@ -102,7 +100,7 @@ public class StaleSearchDeletingSvcR4Test extends BaseResourceProviderR4Test {
 			myClient.search().byUrl(nextLinkUrl).returnBundle(Bundle.class).execute();
 			fail();
 		} catch (ResourceGoneException e) {
-			assertThat(e.getMessage(), containsString("does not exist and may have expired"));
+			assertThat(e.getMessage()).contains("does not exist and may have expired");
 		}
 	}
 

@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-fhir</artifactId>
-		<version>7.3.3-SNAPSHOT</version>
+		<version>7.3.7-SNAPSHOT</version>
 
 		<relativePath>../../pom.xml</relativePath>
 	</parent>
@@ -84,6 +84,11 @@
 		<dependency>
 			<groupId>org.jetbrains.kotlin</groupId>
 			<artifactId>kotlin-maven-noarg</artifactId>
+			<version>${kotlin.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jetbrains.kotlin</groupId>
+			<artifactId>kotlin-stdlib</artifactId>
 			<version>${kotlin.version}</version>
 		</dependency>
 	</dependencies>
@@ -192,6 +197,6 @@
 
 	<properties>
 		<!--<kotlin.compiler.incremental>true</kotlin.compiler.incremental>-->
-		<kotlin.version>1.6.21</kotlin.version>
+		<kotlin.version>1.9.23</kotlin.version>
 	</properties>
 </project>

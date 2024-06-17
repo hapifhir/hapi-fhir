@@ -1,16 +1,18 @@
 package ca.uhn.fhir.jpa.subscription.svc;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.entity.PersistedResourceModifiedMessageEntityPK;
 import ca.uhn.fhir.jpa.model.entity.ResourceModifiedEntity;
-import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
+import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.subscription.submit.svc.ResourceModifiedSubmitterSvc;
 import ca.uhn.fhir.jpa.svc.MockHapiTransactionService;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
@@ -31,18 +33,12 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.SimpleTransactionStatus;
 
 import java.util.List;
-import java.util.Optional;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -53,7 +49,7 @@ public class ResourceModifiedSubmitterSvcTest {
 	private final ch.qos.logback.classic.Logger ourLogger = (Logger) LoggerFactory.getLogger(ResourceModifiedSubmitterSvc.class);
 
 	@Mock
-	StorageSettings myStorageSettings;
+	SubscriptionSettings mySubscriptionSettings;
 	@Mock
 	SubscriptionChannelFactory mySubscriptionChannelFactory;
 	@Mock
@@ -72,12 +68,12 @@ public class ResourceModifiedSubmitterSvcTest {
 	@BeforeEach
 	public void beforeEach(){
 		myCapturingTransactionStatus = new SimpleTransactionStatus();
-		lenient().when(myStorageSettings.hasSupportedSubscriptionTypes()).thenReturn(true);
+		lenient().when(mySubscriptionSettings.hasSupportedSubscriptionTypes()).thenReturn(true);
 		lenient().when(mySubscriptionChannelFactory.newMatchingSendingChannel(anyString(), any())).thenReturn(myChannelProducer);
 
 		IHapiTransactionService hapiTransactionService = new MockHapiTransactionService(myCapturingTransactionStatus);
 		myResourceModifiedSubmitterSvc = new ResourceModifiedSubmitterSvc(
-			myStorageSettings,
+			mySubscriptionSettings,
 			mySubscriptionChannelFactory,
 			myResourceModifiedMessagePersistenceSvc,
 			hapiTransactionService);
@@ -89,14 +85,14 @@ public class ResourceModifiedSubmitterSvcTest {
 	public void testMethodStartIfNeeded_withQualifySubscriptionMatchingChannelNameProperty_mayQualifyChannelName(boolean theIsQualifySubMatchingChannelName){
 		// given
 		boolean expectedResult = theIsQualifySubMatchingChannelName;
-		when(myStorageSettings.isQualifySubscriptionMatchingChannelName()).thenReturn(theIsQualifySubMatchingChannelName);
+		when(mySubscriptionSettings.isQualifySubscriptionMatchingChannelName()).thenReturn(theIsQualifySubMatchingChannelName);
 
 		// when
 		myResourceModifiedSubmitterSvc.startIfNeeded();
 
 		// then
 		ChannelProducerSettings capturedChannelProducerSettings = getCapturedChannelProducerSettings();
-		assertThat(capturedChannelProducerSettings.isQualifyChannelName(), is(expectedResult));
+		assertEquals(expectedResult, capturedChannelProducerSettings.isQualifyChannelName());
 
 	}
 
@@ -111,8 +107,8 @@ public class ResourceModifiedSubmitterSvcTest {
 		boolean wasProcessed = myResourceModifiedSubmitterSvc.submitPersisedResourceModifiedMessage(new ResourceModifiedEntity());
 
 		// then
-		assertThat(wasProcessed, is(Boolean.TRUE));
-		assertThat(myCapturingTransactionStatus.isRollbackOnly(), is(Boolean.FALSE));
+		assertEquals(Boolean.TRUE, wasProcessed);
+		assertEquals(Boolean.FALSE, myCapturingTransactionStatus.isRollbackOnly());
 		verify(myChannelProducer, times(1)).send(any());
 	}
 
@@ -198,7 +194,7 @@ public class ResourceModifiedSubmitterSvcTest {
 		verify(myListAppender).doAppend(loggingCaptor.capture());
 		ILoggingEvent event = loggingCaptor.getValue();
 		assertNotNull(event);
-		assertTrue(event.getThrowableProxy().getMessage().contains(exceptionString));
+		assertThat(event.getThrowableProxy().getMessage()).contains(exceptionString);
 	}
 
 	@Test
@@ -212,8 +208,8 @@ public class ResourceModifiedSubmitterSvcTest {
 		boolean wasProcessed = myResourceModifiedSubmitterSvc.submitPersisedResourceModifiedMessage(new ResourceModifiedEntity());
 
 		// then
-		assertThat(wasProcessed, is(Boolean.TRUE));
-		assertThat(myCapturingTransactionStatus.isRollbackOnly(), is(Boolean.FALSE));
+		assertEquals(Boolean.TRUE, wasProcessed);
+		assertEquals(Boolean.FALSE, myCapturingTransactionStatus.isRollbackOnly());
 		// we do not send a message which was already sent
 		verify(myChannelProducer, times(0)).send(any());
 
@@ -232,8 +228,8 @@ public class ResourceModifiedSubmitterSvcTest {
 		boolean wasProcessed = myResourceModifiedSubmitterSvc.submitPersisedResourceModifiedMessage(new ResourceModifiedEntity());
 
 		// then
-		assertThat(wasProcessed, is(Boolean.FALSE));
-		assertThat(myCapturingTransactionStatus.isRollbackOnly(), is(Boolean.TRUE));
+		assertEquals(Boolean.FALSE, wasProcessed);
+		assertEquals(Boolean.TRUE, myCapturingTransactionStatus.isRollbackOnly());
 
 	}
 

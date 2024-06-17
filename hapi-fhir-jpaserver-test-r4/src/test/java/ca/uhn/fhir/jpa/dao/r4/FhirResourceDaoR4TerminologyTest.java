@@ -49,14 +49,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.containsStringIgnoringCase;
-import static org.hamcrest.Matchers.empty;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 @SuppressWarnings("Duplicates")
 public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
@@ -207,7 +203,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 		validator.setValidateAgainstStandardSchematron(true);
 		ValidationResult result = validator.validateWithResult(theResult);
 
-		assertEquals(0, result.getMessages().size());
+		assertThat(result.getMessages()).isEmpty();
 
 	}
 
@@ -268,7 +264,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 		IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
 
 		Set<TermConcept> codes = myTermSvc.findCodesBelow(id.getIdPartAsLong(), id.getVersionIdPartAsLong(), "A");
-		assertThat(toCodes(codes), containsInAnyOrder("A", "AA", "AB"));
+		assertThat(toCodes(codes)).containsExactlyInAnyOrder("A", "AA", "AB");
 
 	}
 
@@ -278,7 +274,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 
 		runInTransaction(() -> {
 			List<TermConcept> concepts = myTermConceptDao.findAll();
-			assertThat(concepts, empty());
+			assertThat(concepts).isEmpty();
 		});
 
 		createExternalCsDogs();
@@ -328,9 +324,9 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 
 		assertEquals(2, result.getExpansion().getTotal());
 		ArrayList<String> codes = toCodesContains(result.getExpansion().getContains());
-		assertThat(codes, containsInAnyOrder("hello", "goodbye"));
+		assertThat(codes).containsExactlyInAnyOrder("hello", "goodbye");
 		for (ValueSetExpansionContainsComponent vsConcept : result.getExpansion().getContains()) {
-			assertTrue(vsConcept.getDisplay().contains("VS"));
+			assertThat(vsConcept.getDisplay()).contains("VS");
 		}
 
 
@@ -363,7 +359,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 
 		assertEquals(4, result.getExpansion().getTotal());
 		ArrayList<String> codes = toCodesContains(result.getExpansion().getContains());
-		assertThat(codes, containsInAnyOrder("hello", "goodbye", "labrador", "beagle"));
+		assertThat(codes).containsExactlyInAnyOrder("hello", "goodbye", "labrador", "beagle");
 
 	}
 
@@ -393,7 +389,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 
 		assertEquals(1, result.getExpansion().getTotal());
 		ArrayList<String> codes = toCodesContains(result.getExpansion().getContains());
-		assertThat(codes, containsInAnyOrder("hello"));
+		assertThat(codes).containsExactlyInAnyOrder("hello");
 
 	}
 
@@ -411,7 +407,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 
 		assertEquals(1, result.getExpansion().getTotal());
 		ArrayList<String> codes = toCodesContains(result.getExpansion().getContains());
-		assertThat(codes, containsInAnyOrder("labrador"));
+		assertThat(codes).containsExactlyInAnyOrder("labrador");
 
 	}
 
@@ -441,7 +437,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 
 		assertEquals(1, result.getExpansion().getTotal());
 		ArrayList<String> codes = toCodesContains(result.getExpansion().getContains());
-		assertThat(codes, containsInAnyOrder("labrador"));
+		assertThat(codes).containsExactlyInAnyOrder("labrador");
 
 	}
 
@@ -456,7 +452,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 		ValueSet result = myValueSetDao.expand(vs, null);
 		logAndValidateValueSet(result);
 		ArrayList<String> codes = toCodesContains(result.getExpansion().getContains());
-		assertThat(codes, containsInAnyOrder("ParentA"));
+		assertThat(codes).containsExactlyInAnyOrder("ParentA");
 
 		vs = new ValueSet();
 		include = vs.getCompose().addInclude();
@@ -465,7 +461,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 		result = myValueSetDao.expand(vs, null);
 		logAndValidateValueSet(result);
 		codes = toCodesContains(result.getExpansion().getContains());
-		assertThat(codes, containsInAnyOrder("ParentA", "ParentB", "ParentC"));
+		assertThat(codes).containsExactlyInAnyOrder("ParentA", "ParentB", "ParentC");
 
 		vs = new ValueSet();
 		include = vs.getCompose().addInclude();
@@ -474,7 +470,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 		result = myValueSetDao.expand(vs, null);
 		logAndValidateValueSet(result);
 		codes = toCodesContains(result.getExpansion().getContains());
-		assertThat(codes, empty());
+		assertThat(codes).isEmpty();
 
 	}
 
@@ -495,7 +491,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 		logAndValidateValueSet(result);
 
 		ArrayList<String> codes = toCodesContains(result.getExpansion().getContains());
-		assertThat(codes, containsInAnyOrder("ParentA", "ParentB", "childAB", "childAAB", "ParentC", "childBA", "childCA"));
+		assertThat(codes).containsExactlyInAnyOrder("ParentA", "ParentB", "childAB", "childAAB", "ParentC", "childBA", "childCA");
 	}
 
 	@Test
@@ -546,7 +542,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 			.map(t -> t.getCode())
 			.collect(Collectors.toSet());
 		ourLog.info("Codes: {}", codes);
-		assertThat(codes, containsInAnyOrder("LA2222-2", "LA1122-2"));
+		assertThat(codes).containsExactlyInAnyOrder("LA2222-2", "LA1122-2");
 	}
 
 	@Test
@@ -584,7 +580,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 		logAndValidateValueSet(result);
 
 		ArrayList<String> codes = toCodesContains(result.getExpansion().getContains());
-		assertThat(codes, containsInAnyOrder("childAA", "childAAA", "childAAB"));
+		assertThat(codes).containsExactlyInAnyOrder("childAA", "childAAA", "childAAB");
 
 	}
 
@@ -611,7 +607,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 
 		ArrayList<String> codes = toCodesContains(result.getExpansion().getContains());
 		assertEquals(3, codes.size());
-		assertThat(codes, containsInAnyOrder("childAA", "childAAA", "childAAB"));
+		assertThat(codes).contains("childAA", "childAAA", "childAAB");
 
 	}
 
@@ -638,7 +634,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 
 		ArrayList<String> codes = toCodesContains(result.getExpansion().getContains());
 		assertEquals(2, codes.size());
-		assertThat(codes, containsInAnyOrder("childAAA", "childAAB"));
+		assertThat(codes).containsExactlyInAnyOrder("childAAA", "childAAB");
 
 	}
 
@@ -693,7 +689,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 			logAndValidateValueSet(result);
 
 			ArrayList<String> codes = toCodesContains(result.getExpansion().getContains());
-			assertThat(codes, containsInAnyOrder("AAA"));
+			assertThat(codes).containsExactlyInAnyOrder("AAA");
 
 			int idx = codes.indexOf("AAA");
 			assertEquals("AAA", result.getExpansion().getContains().get(idx).getCode());
@@ -720,7 +716,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 			logAndValidateValueSet(result);
 
 			ArrayList<String> codes = toCodesContains(result.getExpansion().getContains());
-			assertThat(codes, empty());
+			assertThat(codes).isEmpty();
 
 		}
 	}
@@ -740,7 +736,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 		logAndValidateValueSet(result);
 
 		ArrayList<String> codes = toCodesContains(result.getExpansion().getContains());
-		assertThat(codes, containsInAnyOrder("ParentA", "childAA", "childAAA"));
+		assertThat(codes).containsExactlyInAnyOrder("ParentA", "childAA", "childAAA");
 
 		int idx = codes.indexOf("childAA");
 		assertEquals("childAA", result.getExpansion().getContains().get(idx).getCode());
@@ -764,7 +760,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 		logAndValidateValueSet(result);
 
 		ArrayList<String> codes = toCodesContains(result.getExpansion().getContains());
-		assertThat(codes, containsInAnyOrder("A", "AA", "AAA", "AB"));
+		assertThat(codes).containsExactlyInAnyOrder("A", "AA", "AAA", "AB");
 
 		int idx = codes.indexOf("AAA");
 		assertEquals("AAA", result.getExpansion().getContains().get(idx).getCode());
@@ -790,7 +786,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 
 		assertEquals(5, result.getExpansion().getTotal());
 		ArrayList<String> codes = toCodesContains(result.getExpansion().getContains());
-		assertThat(codes, containsInAnyOrder("hello", "goodbye", "dogs", "labrador", "beagle"));
+		assertThat(codes).containsExactlyInAnyOrder("hello", "goodbye", "dogs", "labrador", "beagle");
 
 	}
 
@@ -808,7 +804,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 		logAndValidateValueSet(result);
 
 		ArrayList<String> codes = toCodesContains(result.getExpansion().getContains());
-		assertThat(codes, containsInAnyOrder("ParentB"));
+		assertThat(codes).containsExactlyInAnyOrder("ParentB");
 
 	}
 
@@ -828,7 +824,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 		ValueSet result = myValueSetDao.expand(vs, null);
 		logAndValidateValueSet(result);
 
-		assertEquals(0, result.getExpansion().getContains().size());
+		assertThat(result.getExpansion().getContains()).isEmpty();
 
 		myTerminologyDeferredStorageSvc.setProcessDeferred(true);
 		myTerminologyDeferredStorageSvc.saveDeferred();
@@ -846,10 +842,10 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 		result = myValueSetDao.expand(vs, null);
 		logAndValidateValueSet(result);
 
-		assertEquals(4, result.getExpansion().getContains().size());
+		assertThat(result.getExpansion().getContains()).hasSize(4);
 
 		String encoded = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(result);
-		assertThat(encoded, containsStringIgnoringCase("<code value=\"childAAB\"/>"));
+		assertThat(encoded).containsIgnoringCase("<code value=\"childAAB\"/>");
 	}
 
 	@Test
@@ -904,7 +900,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 			myObservationDao.search(params).size();
 			fail();
 		} catch (InternalErrorException e) {
-			assertThat(e.getMessage(), containsString(Msg.code(885) + "Expansion of ValueSet produced too many codes (maximum 1) - Operation aborted!"));
+			assertThat(e.getMessage()).contains(Msg.code(885) + "Expansion of ValueSet produced too many codes (maximum 1) - Operation aborted!");
 		}
 	}
 
@@ -950,11 +946,11 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 
 		SearchParameterMap params = new SearchParameterMap();
 		params.add(Observation.SP_CODE, new TokenParam(TermTestUtil.URL_MY_CODE_SYSTEM, "AAA").setModifier(TokenParamModifier.ABOVE));
-		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(params)), containsInAnyOrder(idAA.getValue()));
+		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(params))).containsExactlyInAnyOrder(idAA.getValue());
 
 		params = new SearchParameterMap();
 		params.add(Observation.SP_CODE, new TokenParam(TermTestUtil.URL_MY_CODE_SYSTEM, "A").setModifier(TokenParamModifier.ABOVE));
-		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(params)), empty());
+		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(params))).isEmpty();
 
 	}
 
@@ -964,10 +960,10 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 		SearchParameterMap params = new SearchParameterMap();
 
 		params.add(Observation.SP_CODE, new TokenParam(TermTestUtil.URL_MY_CODE_SYSTEM, "childAA").setModifier(TokenParamModifier.BELOW));
-		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(params)), empty());
+		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(params))).isEmpty();
 
 		params.add(Observation.SP_CODE, new TokenParam(TermTestUtil.URL_MY_CODE_SYSTEM, "childAA").setModifier(TokenParamModifier.ABOVE));
-		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(params)), empty());
+		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(params))).isEmpty();
 
 	}
 
@@ -988,29 +984,29 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 		SearchParameterMap params;
 		params = new SearchParameterMap();
 		params.add(AllergyIntolerance.SP_CLINICAL_STATUS, new TokenParam("http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical", "active"));
-		assertThat(toUnqualifiedVersionlessIdValues(myAllergyIntoleranceDao.search(params)), containsInAnyOrder(id1));
+		assertThat(toUnqualifiedVersionlessIdValues(myAllergyIntoleranceDao.search(params))).containsExactlyInAnyOrder(id1);
 
 		params = new SearchParameterMap();
 		params.add(AllergyIntolerance.SP_CLINICAL_STATUS, new TokenParam("http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical", "active").setModifier(TokenParamModifier.BELOW));
-		assertThat(toUnqualifiedVersionlessIdValues(myAllergyIntoleranceDao.search(params)), containsInAnyOrder(id1));
+		assertThat(toUnqualifiedVersionlessIdValues(myAllergyIntoleranceDao.search(params))).containsExactlyInAnyOrder(id1);
 
 		params = new SearchParameterMap();
 		params.add(AllergyIntolerance.SP_CLINICAL_STATUS, new TokenParam("http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical", "resolved").setModifier(TokenParamModifier.BELOW));
-		assertThat(toUnqualifiedVersionlessIdValues(myAllergyIntoleranceDao.search(params)), containsInAnyOrder(id2));
+		assertThat(toUnqualifiedVersionlessIdValues(myAllergyIntoleranceDao.search(params))).containsExactlyInAnyOrder(id2);
 
 		params = new SearchParameterMap();
 		params.add(AllergyIntolerance.SP_CLINICAL_STATUS, new TokenParam("http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical", "resolved"));
-		assertThat(toUnqualifiedVersionlessIdValues(myAllergyIntoleranceDao.search(params)), containsInAnyOrder(id2));
+		assertThat(toUnqualifiedVersionlessIdValues(myAllergyIntoleranceDao.search(params))).containsExactlyInAnyOrder(id2);
 
 		// Unknown code
 		params = new SearchParameterMap();
 		params.add(AllergyIntolerance.SP_CLINICAL_STATUS, new TokenParam("http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical", "fooooo"));
-		assertThat(toUnqualifiedVersionlessIdValues(myAllergyIntoleranceDao.search(params)), empty());
+		assertThat(toUnqualifiedVersionlessIdValues(myAllergyIntoleranceDao.search(params))).isEmpty();
 
 		// Unknown system
 		params = new SearchParameterMap();
 		params.add(AllergyIntolerance.SP_CLINICAL_STATUS, new TokenParam("http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical222222", "fooooo"));
-		assertThat(toUnqualifiedVersionlessIdValues(myAllergyIntoleranceDao.search(params)), empty());
+		assertThat(toUnqualifiedVersionlessIdValues(myAllergyIntoleranceDao.search(params))).isEmpty();
 
 	}
 
@@ -1035,27 +1031,27 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 
 		params = new SearchParameterMap();
 		params.add(AllergyIntolerance.SP_CLINICAL_STATUS, new TokenParam(null, "active"));
-		assertThat(toUnqualifiedVersionlessIdValues(myAllergyIntoleranceDao.search(params)), containsInAnyOrder(id1));
+		assertThat(toUnqualifiedVersionlessIdValues(myAllergyIntoleranceDao.search(params))).containsExactlyInAnyOrder(id1);
 
 		params = new SearchParameterMap();
 		params.add(AllergyIntolerance.SP_CLINICAL_STATUS, new TokenParam(null, "active").setModifier(TokenParamModifier.BELOW));
-		assertThat(toUnqualifiedVersionlessIdValues(myAllergyIntoleranceDao.search(params)), containsInAnyOrder(id1));
+		assertThat(toUnqualifiedVersionlessIdValues(myAllergyIntoleranceDao.search(params))).containsExactlyInAnyOrder(id1);
 
 		params = new SearchParameterMap();
 		params.add(AllergyIntolerance.SP_CATEGORY, new TokenParam(null, AllergyIntoleranceCategory.MEDICATION.toCode()).setModifier(TokenParamModifier.BELOW));
-		assertThat(toUnqualifiedVersionlessIdValues(myAllergyIntoleranceDao.search(params)), containsInAnyOrder(id1));
+		assertThat(toUnqualifiedVersionlessIdValues(myAllergyIntoleranceDao.search(params))).containsExactlyInAnyOrder(id1);
 
 		params = new SearchParameterMap();
 		params.add(AllergyIntolerance.SP_CLINICAL_STATUS, new TokenParam(null, "resolved").setModifier(TokenParamModifier.BELOW));
-		assertThat(toUnqualifiedVersionlessIdValues(myAllergyIntoleranceDao.search(params)), containsInAnyOrder(id2));
+		assertThat(toUnqualifiedVersionlessIdValues(myAllergyIntoleranceDao.search(params))).containsExactlyInAnyOrder(id2);
 
 		params = new SearchParameterMap();
 		params.add(AllergyIntolerance.SP_CLINICAL_STATUS, new TokenParam(null, "resolved"));
-		assertThat(toUnqualifiedVersionlessIdValues(myAllergyIntoleranceDao.search(params)), containsInAnyOrder(id2));
+		assertThat(toUnqualifiedVersionlessIdValues(myAllergyIntoleranceDao.search(params))).containsExactlyInAnyOrder(id2);
 
 		params = new SearchParameterMap();
 		params.add(AllergyIntolerance.SP_CLINICAL_STATUS, new TokenParam(null, "FOO"));
-		assertThat(toUnqualifiedVersionlessIdValues(myAllergyIntoleranceDao.search(params)), empty());
+		assertThat(toUnqualifiedVersionlessIdValues(myAllergyIntoleranceDao.search(params))).isEmpty();
 
 	}
 
@@ -1081,11 +1077,11 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 
 		SearchParameterMap params = new SearchParameterMap();
 		params.add(Observation.SP_CODE, new TokenParam(TermTestUtil.URL_MY_CODE_SYSTEM, "codeA").setModifier(TokenParamModifier.BELOW));
-		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(params)), containsInAnyOrder(id0.getValue(), id1.getValue(), id2.getValue()));
+		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(params))).containsExactlyInAnyOrder(id0.getValue(), id1.getValue(), id2.getValue());
 
 		params = new SearchParameterMap();
 		params.add(Observation.SP_CODE, new TokenParam(TermTestUtil.URL_MY_CODE_SYSTEM, "subCodeB1").setModifier(TokenParamModifier.BELOW));
-		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(params)), empty());
+		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(params))).isEmpty();
 
 	}
 
@@ -1107,11 +1103,11 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 
 		SearchParameterMap params = new SearchParameterMap();
 		params.add(Observation.SP_CODE, new TokenParam(TermTestUtil.URL_MY_CODE_SYSTEM, "A").setModifier(TokenParamModifier.BELOW));
-		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(params)), containsInAnyOrder(idAA.getValue()));
+		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(params))).containsExactlyInAnyOrder(idAA.getValue());
 
 		params = new SearchParameterMap();
 		params.add(Observation.SP_CODE, new TokenParam(TermTestUtil.URL_MY_CODE_SYSTEM, "AAA").setModifier(TokenParamModifier.BELOW));
-		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(params)), empty());
+		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(params))).isEmpty();
 
 	}
 
@@ -1132,12 +1128,12 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 		SearchParameterMap params;
 		params = new SearchParameterMap();
 		params.add(AllergyIntolerance.SP_CLINICAL_STATUS, new TokenParam(null, "http://hl7.org/fhir/ValueSet/allergyintolerance-clinical").setModifier(TokenParamModifier.IN));
-		assertThat(toUnqualifiedVersionlessIdValues(myAllergyIntoleranceDao.search(params)), containsInAnyOrder(id1, id2, id3));
+		assertThat(toUnqualifiedVersionlessIdValues(myAllergyIntoleranceDao.search(params))).containsExactlyInAnyOrder(id1, id2, id3);
 
 		// No codes in this one
 		params = new SearchParameterMap();
 		params.add(AllergyIntolerance.SP_CLINICAL_STATUS, new TokenParam(null, "http://hl7.org/fhir/ValueSet/allergy-intolerance-category").setModifier(TokenParamModifier.IN));
-		assertThat(toUnqualifiedVersionlessIdValues(myAllergyIntoleranceDao.search(params)), empty());
+		assertThat(toUnqualifiedVersionlessIdValues(myAllergyIntoleranceDao.search(params))).isEmpty();
 
 		// Invalid VS
 		params = new SearchParameterMap();
@@ -1162,14 +1158,14 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 
 		params = new SearchParameterMap();
 		params.add(Observation.SP_CODE, new TokenParam(null, TermTestUtil.URL_MY_VALUE_SET).setModifier(TokenParamModifier.IN));
-		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(params)), empty());
+		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(params))).isEmpty();
 
 		ourLog.info("testSearchCodeInEmptyValueSet with status");
 
 		params = new SearchParameterMap();
 		params.add(Observation.SP_CODE, new TokenParam(null, TermTestUtil.URL_MY_VALUE_SET).setModifier(TokenParamModifier.IN));
 		params.add(Observation.SP_STATUS, new TokenParam(null, "final"));
-		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(params)), empty());
+		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(params))).isEmpty();
 
 		ourLog.info("testSearchCodeInEmptyValueSet done");
 	}
@@ -1196,15 +1192,15 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 
 		SearchParameterMap params = new SearchParameterMap();
 		params.add(Observation.SP_CODE, new TokenParam(TermTestUtil.URL_MY_CODE_SYSTEM, "childAA").setModifier(TokenParamModifier.BELOW));
-		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(params)), containsInAnyOrder(idAAA.getValue(), idAAB.getValue()));
+		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(params))).containsExactlyInAnyOrder(idAAA.getValue(), idAAB.getValue());
 
 		params = new SearchParameterMap();
 		params.add(Observation.SP_CODE, new TokenParam(TermTestUtil.URL_MY_CODE_SYSTEM, "childAA").setModifier(TokenParamModifier.ABOVE));
-		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(params)), containsInAnyOrder(idPA.getValue()));
+		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(params))).containsExactlyInAnyOrder(idPA.getValue());
 
 		params = new SearchParameterMap();
 		params.add(Observation.SP_CODE, new TokenParam(null, TermTestUtil.URL_MY_VALUE_SET).setModifier(TokenParamModifier.IN));
-		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(params)), containsInAnyOrder(idPA.getValue(), idAAA.getValue(), idAAB.getValue()));
+		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(params))).containsExactlyInAnyOrder(idPA.getValue(), idAAA.getValue(), idAAB.getValue());
 
 	}
 
@@ -1226,7 +1222,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 
 		SearchParameterMap params = new SearchParameterMap();
 		params.add(AuditEvent.SP_TYPE, new TokenParam(null, "http://hl7.org/fhir/ValueSet/audit-event-type").setModifier(TokenParamModifier.IN));
-		assertThat(toUnqualifiedVersionlessIdValues(myAuditEventDao.search(params)), containsInAnyOrder(idIn1.getValue(), idIn2.getValue()));
+		assertThat(toUnqualifiedVersionlessIdValues(myAuditEventDao.search(params))).containsExactlyInAnyOrder(idIn1.getValue(), idIn2.getValue());
 
 		try {
 			params = new SearchParameterMap();
@@ -1255,10 +1251,10 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 
 		SearchParameterMap params = SearchParameterMap.newSynchronous();
 		params.add(Observation.SP_CODE, new TokenParam(null, TermTestUtil.URL_MY_VALUE_SET).setModifier(TokenParamModifier.IN));
-		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(params)), containsInAnyOrder(idAA.getValue(), idBA.getValue()));
+		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(params))).containsExactlyInAnyOrder(idAA.getValue(), idBA.getValue());
 
 		myCaptureQueriesListener.clear();
-		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(params)), containsInAnyOrder(idAA.getValue(), idBA.getValue()));
+		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(params))).containsExactlyInAnyOrder(idAA.getValue(), idBA.getValue());
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 
 	}
@@ -1281,10 +1277,10 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 
 		SearchParameterMap params = SearchParameterMap.newSynchronous();
 		params.add(Observation.SP_CODE, new TokenParam(null, TermTestUtil.URL_MY_VALUE_SET).setModifier(TokenParamModifier.NOT_IN));
-		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(params)), containsInAnyOrder(idCA.getValue()));
+		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(params))).containsExactlyInAnyOrder(idCA.getValue());
 
 		myCaptureQueriesListener.clear();
-		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(params)), containsInAnyOrder(idCA.getValue()));
+		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(params))).containsExactlyInAnyOrder(idCA.getValue());
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 
 	}
@@ -1295,7 +1291,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 
 		try {
 			params.add(Observation.SP_CODE, new TokenParam(null, TermTestUtil.URL_MY_VALUE_SET).setModifier(TokenParamModifier.IN));
-			assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(params)), empty());
+			assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(params))).isEmpty();
 		} catch (ResourceNotFoundException e) {
 			//noinspection SpellCheckingInspection
 			assertEquals(Msg.code(2024) + "Unknown ValueSet: http%3A%2F%2Fexample.com%2Fmy_value_set", e.getMessage());
@@ -1360,12 +1356,12 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 		SearchParameterMap params;
 		params = new SearchParameterMap();
 		params.add(AllergyIntolerance.SP_CLINICAL_STATUS, new TokenParam(null, "http://hl7.org/fhir/ValueSet/allergy-intolerance-status").setModifier(TokenParamModifier.NOT_IN));
-		assertThat(toUnqualifiedVersionlessIdValues(myAllergyIntoleranceDao.search(params)), empty());
+		assertThat(toUnqualifiedVersionlessIdValues(myAllergyIntoleranceDao.search(params))).isEmpty();
 
 		// No codes in this one
 		params = new SearchParameterMap();
 		params.add(AllergyIntolerance.SP_CLINICAL_STATUS, new TokenParam(null, "http://hl7.org/fhir/ValueSet/allergy-intolerance-criticality").setModifier(TokenParamModifier.NOT_IN));
-		assertThat(toUnqualifiedVersionlessIdValues(myAllergyIntoleranceDao.search(params)), containsInAnyOrder(id1, id2, id3));
+		assertThat(toUnqualifiedVersionlessIdValues(myAllergyIntoleranceDao.search(params))).containsExactlyInAnyOrder(id1, id2, id3);
 
 		// Invalid VS
 		params = new SearchParameterMap();
