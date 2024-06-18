@@ -31,8 +31,6 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.hamcrest.Matchers.hasItems;
-import static org.hamcrest.Matchers.not;
 import static org.hl7.fhir.r4.model.Observation.SP_VALUE_QUANTITY;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -80,7 +78,7 @@ public class FhirResourceDaoR4SearchFtTest extends BaseJpaR4Test {
 //
 //		map = new SearchParameterMap();
 //		map.add(Observation.SP_CODE, new TokenParam(null, "blood").setModifier(TokenParamModifier.TEXT));
-//		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), empty());
+//		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map))).isEmpty();
 //
 //		map = new SearchParameterMap();
 //		map.add(Observation.SP_CODE, new TokenParam(null, "blood").setModifier(TokenParamModifier.TEXT));
@@ -148,7 +146,7 @@ public class FhirResourceDaoR4SearchFtTest extends BaseJpaR4Test {
 		// contains doesn't work
 //		map = new SearchParameterMap();
 //		map.add(Observation.SP_VALUE_STRING, new StringParam("sure").setContains(true));
-//		assertThat("contains matches internal fragment", toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id1, id2)));
+//		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map))).as("contains matches internal fragment").containsExactlyInAnyOrder(toValues(id1, id2));
 
 	}
 

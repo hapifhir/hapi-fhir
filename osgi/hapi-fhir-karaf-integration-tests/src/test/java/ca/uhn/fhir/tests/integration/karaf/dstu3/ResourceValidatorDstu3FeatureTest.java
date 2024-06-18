@@ -8,7 +8,6 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.tests.integration.karaf.ValidationConstants;
 import ca.uhn.fhir.validation.schematron.SchematronBaseValidator;
-import org.hamcrest.core.StringContains;
 import org.hl7.fhir.r5.hapi.validation.FhirInstanceValidator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

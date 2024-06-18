@@ -1180,7 +1180,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 //		params = new SearchParameterMap();
 //		params.setLoadSynchronous(true);
 //		params.add("_has", new HasParam("Observation", "subject", "device.identifier", "urn:system|DEVICEID"));
-//		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(params)), contains(pid0.getValue()));
+//		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(params))).contains(pid0.getValue());
 
 		// No targets exist
 		params = new SearchParameterMap();
