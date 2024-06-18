@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.util.bundle;
 
-import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 

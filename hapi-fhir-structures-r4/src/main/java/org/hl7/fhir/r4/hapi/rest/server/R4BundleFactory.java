@@ -23,7 +23,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.api.BundleInclusionRule;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
-import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
 import ca.uhn.fhir.model.valueset.BundleEntryTransactionMethodEnum;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
@@ -34,7 +33,6 @@ import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
-import org.fhir.ucum.Decimal;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -184,10 +182,10 @@ public class R4BundleFactory implements IVersionSpecificBundleFactory {
 			if (searchMode != null) {
 				entry.getSearch().getModeElement().setValueAsString(searchMode.getCode());
 			}
-      BigDecimal searchScore = ResourceMetadataKeyEnum.ENTRY_SEARCH_SCORE.get(nextAsResource);
-      if (searchScore != null) {
-        entry.getSearch().getScoreElement().setValue(searchScore);
-      }
+			BigDecimal searchScore = ResourceMetadataKeyEnum.ENTRY_SEARCH_SCORE.get(nextAsResource);
+			if (searchScore != null) {
+				entry.getSearch().getScoreElement().setValue(searchScore);
+			}
 		}
 
 		/*

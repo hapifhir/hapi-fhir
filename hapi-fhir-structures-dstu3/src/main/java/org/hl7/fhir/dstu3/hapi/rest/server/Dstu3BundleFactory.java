@@ -174,10 +174,10 @@ public class Dstu3BundleFactory implements IVersionSpecificBundleFactory {
 			if (searchMode != null) {
 				entry.getSearch().getModeElement().setValueAsString(searchMode.getCode());
 			}
-      BigDecimal searchScore = ResourceMetadataKeyEnum.ENTRY_SEARCH_SCORE.get(nextAsResource);
-      if (searchScore != null) {
-        entry.getSearch().getScoreElement().setValue(searchScore);
-      }
+			BigDecimal searchScore = ResourceMetadataKeyEnum.ENTRY_SEARCH_SCORE.get(nextAsResource);
+			if (searchScore != null) {
+				entry.getSearch().getScoreElement().setValue(searchScore);
+			}
 		}
 
 		/*
