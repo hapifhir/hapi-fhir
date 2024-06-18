@@ -92,14 +92,7 @@ public class ExtendedHSearchSearchBuilder {
 		SearchParameterMap myParams,
 		ISearchParamRegistry theSearchParamRegistry)
 	{
-		boolean canUseHibernate = myParams.getSort() != null
-				|| myParams.getLastUpdated() != null;
-
-		// if sorts or last updated - can't use
-		if (!canUseHibernate) {
-			return false;
-		}
-
+		boolean canUseHibernate = true;
 		ResourceSearchParams resourceActiveSearchParams = theSearchParamRegistry.getActiveSearchParams(theResourceType);
 		for (String paramName : myParams.keySet()) {
 			// is this parameter supported?
@@ -119,7 +112,7 @@ public class ExtendedHSearchSearchBuilder {
 			}
 		}
 
-		return true;
+		return canUseHibernate;
 	}
 
 	/**
