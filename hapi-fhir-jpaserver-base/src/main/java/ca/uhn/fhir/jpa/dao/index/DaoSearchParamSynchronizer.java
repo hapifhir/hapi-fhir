@@ -35,8 +35,6 @@ import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.PersistenceContextType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -50,7 +48,6 @@ import java.util.function.Consumer;
 
 @Service
 public class DaoSearchParamSynchronizer {
-	private static final Logger ourLog = LoggerFactory.getLogger(DaoSearchParamSynchronizer.class);
 
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	protected EntityManager myEntityManager;
@@ -106,9 +103,7 @@ public class DaoSearchParamSynchronizer {
 
 				String searchParameterId = "(unknown)";
 				if (theIndex.getSearchParameterId() != null) {
-					searchParameterId = theIndex.getSearchParameterId()
-							.toUnqualifiedVersionless()
-							.getValue();
+					searchParameterId = theIndex.getSearchParameterId();
 				}
 
 				String msg = myFhirContext

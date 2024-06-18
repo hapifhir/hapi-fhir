@@ -171,7 +171,8 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueriesForCurrentThread();
 		assertEquals(1, selectQueries.size());
 		// Look up the referenced subject/patient
-		assertThat(selectQueries.get(0).getSql(true, false).toLowerCase(), containsString(" from hfj_resource "));
+		String sql = selectQueries.get(0).getSql(true, false).toLowerCase();
+		assertThat(sql).contains(" from hfj_resource ");
 		assertEquals(0, StringUtils.countMatches(selectQueries.get(0).getSql(true, false).toLowerCase(), "partition"));
 
 		runInTransaction(() -> {
@@ -2617,20 +2618,20 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		IBundleProvider results = myPatientDao.search(map, mySrd);
 		List<IIdType> ids = toUnqualifiedVersionlessIds(results);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertThat(ids, contains(patientId));
+		assertThat(ids).containsExactly(patientId);
 
 		ourLog.info("Search SQL:\n{}", myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true));
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
 
 		switch (theReadPartitions) {
 			case "ALL":
-				assertThat(searchSql,is(not( containsString( "t0.PARTITION_ID"))));
+				assertThat(searchSql).doesNotContain("t0.PARTITION_ID");
 				break;
 			case "ONE":
-				assertThat(searchSql, containsString( "t0.PARTITION_ID = '1'"));
+				assertThat(searchSql).contains("t0.PARTITION_ID = '1'");
 				break;
 			case "MANY":
-				assertThat(searchSql, containsString( "t0.PARTITION_ID IN ('1','4')"));
+				assertThat(searchSql).contains("t0.PARTITION_ID IN ('1','4')");
 				break;
 			default:
 				throw new IllegalStateException();

@@ -396,6 +396,32 @@ public class ReindexJobTest extends BaseJpaR4Test {
 		assertThat(myJob.getWarningMessages()).contains("Failed to reindex resource because unique search parameter " + searchParameter.getEntity().getIdDt().toVersionless().toString());
 	}
 
+	/**
+	 * This test will fail and can be deleted if we make the hash columns on
+	 * the unique index table non-nullable.
+	 */
+	@Test
+	public void testReindex_UniqueHashesShouldBePopulated() {
+		myReindexTestHelper.createObservationWithCode();
+		myReindexTestHelper.createObservationWithCode();
+
+		DaoMethodOutcome searchParameter = myReindexTestHelper.createUniqueCodeSearchParameter();
+
+		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
+		startRequest.setJobDefinitionId(ReindexAppCtx.JOB_REINDEX);
+		startRequest.setParameters(new ReindexJobParameters());
+		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(new SystemRequestDetails(), startRequest);
+		JobInstance myJob = myBatch2JobHelper.awaitJobCompletion(startResponse);
+
+		assertEquals(StatusEnum.COMPLETED, myJob.getStatus());
+		assertNotNull(myJob.getWarningMessages());
+		assertThat(myJob.getWarningMessages()).contains("Failed to reindex resource because unique search parameter " + searchParameter.getEntity().getIdDt().toVersionless().toString());
+
+		// Write this test
+		fail();
+
+	}
+
 	@Test
 	public void testReindex_ExceptionThrownDuringWrite() {
 		// setup

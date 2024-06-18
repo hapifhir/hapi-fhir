@@ -50,7 +50,7 @@ import static ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam.hash;
 			@Index(name = "IDX_IDXCMBTOKNU_HASHC", columnList = "HASH_COMPLETE,RES_ID,PARTITION_ID", unique = false),
 			@Index(name = "IDX_IDXCMBTOKNU_RES", columnList = "RES_ID", unique = false)
 		})
-public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndex
+public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndexedCombo
 		implements Comparable<ResourceIndexedComboTokenNonUnique>, IResourceIndexComboSearchParameter {
 
 	@SequenceGenerator(name = "SEQ_IDXCMBTOKNU_ID", sequenceName = "SEQ_IDXCMBTOKNU_ID")
@@ -77,9 +77,6 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndex
 
 	@Transient
 	private transient PartitionSettings myPartitionSettings;
-
-	@Transient
-	private IIdType mySearchParameterId;
 
 	/**
 	 * Constructor
@@ -217,19 +214,4 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndex
 		return hash(partitionSettings, requestPartitionId, queryString);
 	}
 
-	/**
-	 * Note: This field is not persisted, so it will only be populated for new indexes
-	 */
-	@Override
-	public void setSearchParameterId(IIdType theSearchParameterId) {
-		mySearchParameterId = theSearchParameterId;
-	}
-
-	/**
-	 * Note: This field is not persisted, so it will only be populated for new indexes
-	 */
-	@Override
-	public IIdType getSearchParameterId() {
-		return mySearchParameterId;
-	}
 }

@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboTokenNonUnique;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -30,6 +29,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4Test {
 	public static final String ORG_ID_UNQUALIFIED = "my-org";
@@ -98,7 +98,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		pt.getMaritalStatus().addCoding().setSystem("http://foo1").setCode("bar1");
 		pt.getMaritalStatus().addCoding().setSystem("http://foo2").setCode("bar2");
 		myPatientDao.create(pt, mySrd);
-		IIdType id1 = createPatient1(null);
+		createPatient1(null);
 
 		logAllNonUniqueIndexes();
 		runInTransaction(() -> {
@@ -149,14 +149,9 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		myCaptureQueriesListener.logSelectQueries();
 		assertThat(actual).containsExactlyInAnyOrder(id1.toUnqualifiedVersionless().getValue());
 
-		boolean found = false;
-		for (SqlQuery query : myCaptureQueriesListener.getSelectQueries()) {
-			String sql = query.getSql(true, false);
-			if ("SELECT t0.RES_ID FROM HFJ_IDX_CMB_TOK_NU t0 WHERE (t0.IDX_STRING = 'Patient?family=FAMILY1%5C%7C&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale&given=GIVEN1')".equals(sql)) {
-				found = true;
-			}
-		}
-		assertThat(found).as("Found expected sql").isTrue();
+		assertThat(myCaptureQueriesListener.getSelectQueries().stream().map(t->t.getSql(true, false)).toList()).contains(
+			"SELECT t0.RES_ID FROM HFJ_IDX_CMB_TOK_NU t0 WHERE (t0.HASH_COMPLETE = '-7504889232313729794')"
+		);
 
 		logCapturedMessages();
 		assertThat(myMessages.toString()).contains("[INFO Using NON_UNIQUE index for query for search: Patient?family=FAMILY1%5C%7C&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale&given=GIVEN1]");
@@ -189,7 +184,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		IIdType id1 = createPatient1(null);
 		assertNotNull(id1);
 
-		assertThat(myCaptureQueriesListener.countSelectQueries()).as(String.join(",", "\n" + myCaptureQueriesListener.getSelectQueries().stream().map(q -> q.getThreadName()).collect(Collectors.toList()))).isEqualTo(0);
+		assertThat(myCaptureQueriesListener.countSelectQueries()).as(String.join(",", "\n" + myCaptureQueriesListener.getSelectQueries().stream().map(SqlQuery::getThreadName).toList())).isEqualTo(0);
 		assertEquals(12, myCaptureQueriesListener.countInsertQueries());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
@@ -302,13 +297,13 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		IBundleProvider results = myPatientDao.search(params, mySrd);
 		List<String> actual = toUnqualifiedVersionlessIdValues(results);
 		myCaptureQueriesListener.logSelectQueries();
-		assertThat(actual, containsInAnyOrder(id1.toUnqualifiedVersionless().getValue()));
+		assertThat(actual).contains(id1.toUnqualifiedVersionless().getValue());
 
 		String expected = "SELECT t0.RES_ID FROM HFJ_IDX_CMB_TOK_NU t0 WHERE (t0.HASH_COMPLETE = '7196518367857292879')";
 		assertEquals(expected, myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false));
 
 		logCapturedMessages();
-		assertThat(myMessages.toString(), containsString("[INFO Using NON_UNIQUE index for query for search: Patient?birthdate=2021-02-02&family=FAMILY1]"));
+		assertThat(myMessages.toString()).contains("[INFO Using NON_UNIQUE index for query for search: Patient?birthdate=2021-02-02&family=FAMILY1]");
 		myMessages.clear();
 	}
 
@@ -338,13 +333,13 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		IBundleProvider results = myPatientDao.search(params, mySrd);
 		List<String> actual = toUnqualifiedVersionlessIdValues(results);
 		myCaptureQueriesListener.logSelectQueries();
-		assertThat(actual, containsInAnyOrder(id1.toUnqualifiedVersionless().getValue()));
+		assertThat(actual).contains(id1.toUnqualifiedVersionless().getValue());
 
-		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false),
-			is(not(containsString("HFJ_IDX_CMB_TOK_NU"))));
+		String sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
+		assertThat(sql).doesNotContain("HFJ_IDX_CMB_TOK_NU");
 
 		logCapturedMessages();
-		assertThat(myMessages, empty());
+		assertThat(myMessages).isEmpty();
 	}
 
 	@Test
@@ -372,7 +367,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		IBundleProvider results = myPatientDao.search(params, mySrd);
 		List<String> actual = toUnqualifiedVersionlessIdValues(results);
 		myCaptureQueriesListener.logSelectQueries();
-		assertThat(actual, containsInAnyOrder(id1.toUnqualifiedVersionless().getValue()));
+		assertThat(actual).contains(id1.toUnqualifiedVersionless().getValue());
 
 		String expected = "SELECT t0.RES_ID FROM HFJ_IDX_CMB_TOK_NU t0 WHERE (t0.HASH_COMPLETE = '2277801301223576208')";
 		assertEquals(expected, myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false));
@@ -395,17 +390,17 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		myCaptureQueriesListener.clear();
 		IBundleProvider results = myPatientDao.search(params, mySrd);
 		List<String> actual = toUnqualifiedVersionlessIdValues(results);
-		assertThat(actual, containsInAnyOrder(id1.toUnqualifiedVersionless().getValue()));
+		assertThat(actual).contains(id1.toUnqualifiedVersionless().getValue());
 
 		myCaptureQueriesListener.logSelectQueries();
 		String expected;
         expected = "select rt1_0.RES_ID,rt1_0.RES_TYPE,rt1_0.FHIR_ID from HFJ_RESOURCE rt1_0 where rt1_0.FHIR_ID='my-org'";
         assertEquals(expected, myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false));
 		String sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, false);
-		assertThat(sql, sql, containsString("SP_VALUE_NORMALIZED LIKE 'FAMILY1%'"));
-		assertThat(sql, sql, containsString("t1.TARGET_RESOURCE_ID"));
+		assertThat(sql).contains("SP_VALUE_NORMALIZED LIKE 'FAMILY1%'");
+		assertThat(sql).contains("t1.TARGET_RESOURCE_ID");
 
-		assertThat(myMessages.toString(), myMessages.get(0), containsString("This search uses an unqualified resource"));
+		assertThat(myMessages.get(0)).contains("This search uses an unqualified resource");
 	}
 
 	private void createOrg() {

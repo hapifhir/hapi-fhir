@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ForeignKey;
@@ -54,7 +56,7 @@ import static ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam.hash;
 					columnList = "RES_ID",
 					unique = false)
 		})
-public class ResourceIndexedComboStringUnique extends BaseResourceIndex
+public class ResourceIndexedComboStringUnique extends BaseResourceIndexedCombo
 		implements Comparable<ResourceIndexedComboStringUnique>, IResourceIndexComboSearchParameter {
 
 	public static final int MAX_STRING_LENGTH = 500;
@@ -95,9 +97,6 @@ public class ResourceIndexedComboStringUnique extends BaseResourceIndex
 	@SuppressWarnings("unused")
 	@Column(name = PartitionablePartitionId.PARTITION_ID, insertable = false, updatable = false, nullable = true)
 	private Integer myPartitionIdValue;
-
-	@Transient
-	private IIdType mySearchParameterId;
 
 	@Transient
 	private PartitionSettings myPartitionSettings;
@@ -214,16 +213,30 @@ public class ResourceIndexedComboStringUnique extends BaseResourceIndex
 
 	@Override
 	public void calculateHashes() {
-		if (myHashIdentity == null) {
+		if (myHashComplete == null) {
 			PartitionSettings partitionSettings = getPartitionSettings();
 			PartitionablePartitionId partitionId = getPartitionId();
 			String queryString = myIndexString;
-			setHashIdentity(calculateHash(
-					partitionSettings,
-					partitionId,
-					mySearchParameterId.toUnqualifiedVersionless().getValue()));
-			setHashComplete(calculateHash(partitionSettings, partitionId, queryString));
+
+			setHashIdentity(calculateHashIdentity(partitionSettings, partitionId, getSearchParameterId()));
+			setHashComplete(calculateHashComplete(partitionSettings, partitionId, getSearchParameterId(), queryString));
 		}
+	}
+
+	/**
+	 * @param theSearchParameterId Must be exactly in the form <code>[resourceType]/[id]</code>
+	 */
+	private static long calculateHashComplete(PartitionSettings thePartitionSettings, PartitionablePartitionId thePartitionId, String theSearchParameterId, String theQueryString) {
+		assert BaseResourceIndexedCombo.SEARCH_PARAM_ID_PATTERN.matcher(theSearchParameterId).matches();
+		return calculateHash(thePartitionSettings, thePartitionId, theSearchParameterId, theQueryString);
+	}
+
+	/**
+	 * @param theSearchParameterId Must be exactly in the form <code>[resourceType]/[id]</code>
+	 */
+	private static long calculateHashIdentity(PartitionSettings thePartitionSettings, PartitionablePartitionId thePartitionId, String theSearchParameterId) {
+		assert BaseResourceIndexedCombo.SEARCH_PARAM_ID_PATTERN.matcher(theSearchParameterId).matches();
+		return calculateHash(thePartitionSettings, thePartitionId, theSearchParameterId);
 	}
 
 	@Override
@@ -249,25 +262,9 @@ public class ResourceIndexedComboStringUnique extends BaseResourceIndex
 				.toString();
 	}
 
-	/**
-	 * Note: This field is not persisted, so it will only be populated for new indexes
-	 */
-	@Override
-	public IIdType getSearchParameterId() {
-		return mySearchParameterId;
-	}
-
-	/**
-	 * Note: This field is not persisted, so it will only be populated for new indexes
-	 */
-	@Override
-	public void setSearchParameterId(IIdType theSearchParameterId) {
-		mySearchParameterId = theSearchParameterId;
-	}
-
 	public static long calculateHash(
-			PartitionSettings partitionSettings, PartitionablePartitionId thePartitionId, String queryString) {
+			PartitionSettings partitionSettings, PartitionablePartitionId thePartitionId, String... theValues) {
 		RequestPartitionId requestPartitionId = PartitionablePartitionId.toRequestPartitionId(thePartitionId);
-		return hash(partitionSettings, requestPartitionId, queryString);
+		return hash(partitionSettings, requestPartitionId, theValues);
 	}
 }

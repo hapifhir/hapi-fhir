@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 /**
@@ -27,13 +28,20 @@ import org.hl7.fhir.instance.model.api.IIdType;
  */
 public interface IResourceIndexComboSearchParameter {
 
-	IIdType getSearchParameterId();
+	/**
+	 * Will be in the exact form <code>[resourceType]/[id]</code>
+	 */
+	@Nonnull
+	String getSearchParameterId();
 
-	void setSearchParameterId(IIdType theSearchParameterId);
+	void setSearchParameterId(@Nonnull IIdType theSearchParameterId);
+
+	void setSearchParameterId(@Nonnull String theSearchParameterId);
 
 	String getIndexString();
 
 	ResourceTable getResource();
 
 	void setResource(ResourceTable theResourceTable);
+
 }
