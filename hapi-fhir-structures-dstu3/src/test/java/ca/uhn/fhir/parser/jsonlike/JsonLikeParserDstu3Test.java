@@ -66,8 +66,9 @@ public class JsonLikeParserDstu3Test {
 
 		jsonLikeParser.encodeResourceToJsonLikeWriter(fhirPat, jsonLikeWriter);
 		Map<String,Object> jsonLikeMap = jsonLikeWriter.getResultMap();
-		
-		System.out.println("encoded map: " + jsonLikeMap.toString());
+
+
+		ourLog.info("encoded map: " + jsonLikeMap.toString());
 
 		assertThat(jsonLikeMap.get("resourceType")).as("Encoded resource missing 'resourceType' element").isNotNull();
 		assertThat("Patient").as("Expecting 'resourceType'='Patient'; found '" + jsonLikeMap.get("resourceType") + "'").isEqualTo(jsonLikeMap.get("resourceType"));

@@ -7,6 +7,7 @@ import ca.uhn.fhir.model.dstu2.valueset.AppointmentStatusEnum;
 import ca.uhn.fhir.model.dstu2.valueset.BundleTypeEnum;
 import ca.uhn.fhir.model.dstu2.valueset.ParticipantTypeEnum;
 import ca.uhn.fhir.model.dstu2.valueset.ParticipationStatusEnum;
+import ca.uhn.fhir.rest.server.CompartmentDstu2Test;
 import ca.uhn.fhir.util.TestUtil;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Disabled;
@@ -19,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
  * @author Bill de Beaubien on 11/30/2015.
  */
 public class BundleValidationTest {
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BundleValidationTest.class);
 	private static FhirContext ourCtx = FhirContext.forDstu2();
 
 	@Test
@@ -33,7 +35,7 @@ public class BundleValidationTest {
 		assertFalse(result.isSuccessful());
 		assertThat(result.getMessages()).hasSize(1);
 		for (SingleValidationMessage singleValidationMessage : result.getMessages()) {
-			System.out.println(singleValidationMessage.getMessage());
+			ourLog.info(singleValidationMessage.getMessage());
 		}
 	}
 
@@ -54,7 +56,7 @@ public class BundleValidationTest {
 		assertThat(result.isSuccessful()).as("Validation should have failed").isFalse();
 		assertThat(result.getMessages()).hasSize(1);
 		for (SingleValidationMessage singleValidationMessage : result.getMessages()) {
-			System.out.println(singleValidationMessage.getMessage());
+			ourLog.info(singleValidationMessage.getMessage());
 		}
 	}
 

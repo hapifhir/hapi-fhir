@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.mdm.config;
 
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.mdm.helper.MdmHelperR4;
+import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.subscription.channel.config.SubscriptionChannelConfig;
 import ca.uhn.fhir.jpa.subscription.submit.config.SubscriptionSubmitterConfig;
 import ca.uhn.fhir.jpa.test.config.TestSubscriptionMatcherInterceptorConfig;
@@ -19,8 +20,8 @@ public class TestMdmConfigR4 extends BaseTestMdmConfig {
 
 	@Primary
 	@Bean
-	public JpaStorageSettings storageSettings() {
-		JpaStorageSettings retVal = new JpaStorageSettings();
+	public SubscriptionSettings subscriptionSettings() {
+		SubscriptionSettings retVal = new SubscriptionSettings();
 
 		retVal.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.MESSAGE);
 

@@ -23,6 +23,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class AbstractJaxRsConformanceProviderDstu2_1Test {
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(AbstractJaxRsConformanceProviderDstu2_1Test.class);
+
 
 	private static final String BASEURI = "http://basiuri";
 	private static final String REQUESTURI = BASEURI + "/metadata";
@@ -50,7 +52,7 @@ public class AbstractJaxRsConformanceProviderDstu2_1Test {
 		providers.put(AbstractJaxRsConformanceProvider.class, provider);
 		providers.put(TestJaxRsDummyPatientProviderDstu2_1.class, new TestJaxRsDummyPatientProviderDstu2_1());
 		Response response = createConformanceProvider(providers).conformance();
-		System.out.println(response);
+		ourLog.info(response.toString());
 	}
 
 	@Test
@@ -58,7 +60,7 @@ public class AbstractJaxRsConformanceProviderDstu2_1Test {
 		providers.put(AbstractJaxRsConformanceProvider.class, provider);
 		providers.put(TestJaxRsDummyPatientProviderDstu2_1.class, new TestJaxRsDummyPatientProviderDstu2_1());
 		Response response = createConformanceProvider(providers).conformanceUsingOptions();
-		System.out.println(response);
+		ourLog.info(response.toString());
 	}
 
 	@Test
@@ -69,8 +71,8 @@ public class AbstractJaxRsConformanceProviderDstu2_1Test {
 		assertEquals(Constants.STATUS_HTTP_200_OK, response.getStatus());
 		assertThat(response.getEntity().toString()).contains("\"type\": \"Patient\"");
 		assertThat(response.getEntity().toString()).contains("\"someCustomOperation");
-		System.out.println(response);
-		System.out.println(response.getEntity());
+		ourLog.info(response.toString());
+		ourLog.info(response.getEntity().toString());
 	}
 
 	@Test
@@ -80,10 +82,10 @@ public class AbstractJaxRsConformanceProviderDstu2_1Test {
 		providers.put(TestJaxRsMockPatientRestProviderDstu2_1.class, new TestJaxRsMockPatientRestProviderDstu2_1());
 		Response response = createConformanceProvider(providers).conformance();
 		assertEquals(Constants.STATUS_HTTP_200_OK, response.getStatus());
-		System.out.println(response.getEntity());
+		ourLog.info(response.getEntity().toString());
 		assertThat(response.getEntity().toString()).contains(" <type value=\"Patient\"/>");
 		assertThat(response.getEntity().toString()).contains("\"someCustomOperation");
-		System.out.println(response.getEntity());
+		ourLog.info(response.getEntity().toString());
 	}
 
 	private AbstractJaxRsConformanceProvider createConformanceProvider(final ConcurrentHashMap<Class<? extends IResourceProvider>, IResourceProvider> providers)
