@@ -1,11 +1,26 @@
 package ca.uhn.fhir.jpa.provider.r5;
 
+import ca.uhn.fhir.batch2.jobs.reindex.ReindexAppCtx;
+import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
+import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
+import ca.uhn.fhir.rest.api.SortOrderEnum;
+import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.client.interceptor.CapturingInterceptor;
+import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.util.BundleBuilder;
@@ -17,7 +32,6 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
-import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.Bundle.BundleEntryComponent;
@@ -25,13 +39,17 @@ import org.hl7.fhir.r5.model.CarePlan;
 import org.hl7.fhir.r5.model.CodeableConcept;
 import org.hl7.fhir.r5.model.Condition;
 import org.hl7.fhir.r5.model.DateTimeType;
+import org.hl7.fhir.r5.model.Extension;
 import org.hl7.fhir.r5.model.MedicationRequest;
+import org.hl7.fhir.r5.model.MedicinalProductDefinition;
 import org.hl7.fhir.r5.model.Observation;
 import org.hl7.fhir.r5.model.Observation.ObservationComponentComponent;
 import org.hl7.fhir.r5.model.Organization;
 import org.hl7.fhir.r5.model.Parameters;
 import org.hl7.fhir.r5.model.Patient;
 import org.hl7.fhir.r5.model.Quantity;
+import org.hl7.fhir.r5.model.SearchParameter;
+import org.hl7.fhir.r5.model.StringType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -44,11 +62,13 @@ import org.springframework.util.comparator.Comparators;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.leftPad;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SuppressWarnings("Duplicates")
 public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
@@ -207,7 +227,337 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 			assertEquals(501, e.getStatusCode());
 			assertThat(e.getMessage()).contains("Some Failure Message");
 		}
+	}
 
+	@Test
+	public void searchForNewerResources_fullTextSearchWithFilterAndCount_shouldReturnAccurateResults() {
+		IParser parser = myFhirContext.newJsonParser();
+		int count = 10;
+
+		boolean presetAutoCreatePlaceholders = myStorageSettings.isAutoCreatePlaceholderReferenceTargets();
+		boolean presetFilterParameterEnabled = myStorageSettings.isFilterParameterEnabled();
+		boolean presetAdvancedHSearchIndexing = myStorageSettings.isAdvancedHSearchIndexing();
+
+		try {
+			myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+			// fullTextSearch means Advanced Hibernate Search
+			myStorageSettings.setFilterParameterEnabled(true);
+			myStorageSettings.setAdvancedHSearchIndexing(true);
+
+			// create custom search parameters - the _filter and _include are needed
+			{
+				IFhirResourceDao<SearchParameter> spDao = myDaoRegistry.getResourceDao("SearchParameter");
+				SearchParameter sp;
+
+				String includeParam = """
+						{
+						  "resourceType": "SearchParameter",
+						  "id": "9905463e-e817-4db0-9a3e-ff6aa3427848",
+						  "meta": {
+						    "versionId": "2",
+						    "lastUpdated": "2024-03-28T12:53:57.874+00:00",
+						    "source": "#7b34a4bfa42fe3ae"
+						  },
+						  "title": "Medicinal Product Manfacturer",
+						  "status": "active",
+						  "publisher": "MOH-IDMS",
+						  "code": "productmanufacturer",
+						  "base": [
+						    "MedicinalProductDefinition"
+						  ],
+						  "type": "reference",
+						  "expression": "MedicinalProductDefinition.operation.organization"
+						}
+					""";
+				sp = parser.parseResource(SearchParameter.class, includeParam);
+				spDao.create(sp, new SystemRequestDetails());
+				sp = null;
+				String filterParam = """
+						{
+						  "resourceType": "SearchParameter",
+						  "id": "SEARCH-PARAMETER-MedicinalProductDefinition-SearchableString",
+						  "meta": {
+						    "versionId": "2",
+						    "lastUpdated": "2024-03-27T19:20:25.200+00:00",
+						    "source": "#384dd6bccaeafa6c"
+						  },
+						  "url": "https://health.gov.on.ca/idms/fhir/SearchParameter/MedicinalProductDefinition-SearchableString",
+						  "version": "1.0.0",
+						  "name": "MedicinalProductDefinitionSearchableString",
+						  "status": "active",
+						  "publisher": "MOH-IDMS",
+						  "description": "Search Parameter for the MedicinalProductDefinition Searchable String Extension",
+						  "code": "MedicinalProductDefinitionSearchableString",
+						  "base": [
+						    "MedicinalProductDefinition"
+						  ],
+						  "type": "string",
+						  "expression": "MedicinalProductDefinition.extension('https://health.gov.on.ca/idms/fhir/StructureDefinition/SearchableExtraString')",
+						  "target": [
+						    "MedicinalProductDefinition"
+						  ]
+						}
+					""";
+				sp = parser.parseResource(SearchParameter.class, filterParam);
+				spDao.create(sp, new SystemRequestDetails());
+			}
+			// create MedicinalProductDefinitions
+			MedicinalProductDefinition mdr;
+			{
+				String mpdstr = """
+					{
+					                "resourceType": "MedicinalProductDefinition",
+					                "id": "36fb418b-4b1f-414c-bbb1-731bc8744b93",
+					                "meta": {
+					                    "versionId": "17",
+					                    "lastUpdated": "2024-06-10T16:52:23.907+00:00",
+					                    "source": "#3a309416d5f52c5b",
+					                    "profile": [
+					                        "https://health.gov.on.ca/idms/fhir/StructureDefinition/IDMS_MedicinalProductDefinition"
+					                    ]
+					                },
+					                "extension": [
+					                    {
+					                        "url": "https://health.gov.on.ca/idms/fhir/StructureDefinition/SearchableExtraString",
+					                        "valueString": "zahidbrand0610-2up|genupuu|qwewqe2 111|11111115|DF other des|Biologic|Oncology|Private Label"
+					                    }
+					                ],
+					                "identifier": [
+					                    {
+					                        "use": "official",
+					                        "system": "urn:idms:medicinalProductType:DIN",
+					                        "value": "11111115"
+					                    },
+					                    {
+					                        "use": "old",
+					                        "system": "urn:idms:medicinalProductType:PIN",
+					                        "value": "11111112"
+					                    },
+					                    {
+					                        "use": "old",
+					                        "system": "urn:idms:medicinalProductType:PIN",
+					                        "value": "11111113"
+					                    },
+					                    {
+					                        "use": "old",
+					                        "system": "urn:idms:medicinalProductType:PIN",
+					                        "value": "11111114"
+					                    }
+					                ],
+					                "type": {
+					                    "coding": [
+					                        {
+					                            "system": "https://health.gov.on.ca/idms/fhir/CodeSystem/Internal-Product-Types",
+					                            "code": "PRODUCT-GLUCOUSE",
+					                            "display": "Flash Glucose Monitoring (FGM)"
+					                        }
+					                    ]
+					                },
+					                "status": {
+					                    "coding": [
+					                        {
+					                            "system": "http://hl7.org/fhir/ValueSet/publication-status",
+					                            "code": "active",
+					                            "display": "Active"
+					                        }
+					                    ]
+					                },
+					                "combinedPharmaceuticalDoseForm": {
+					                    "coding": [
+					                        {
+					                            "system": "https://health.gov.on.ca/idms/fhir/CodeSystem/Dosage-Forms",
+					                            "code": "OTHER",
+					                            "display": "DF other des"
+					                        }
+					                    ]
+					                },
+					                "route": [
+					                    {
+					                        "coding": [
+					                            {
+					                                "system": "https://health.gov.on.ca/idms/fhir/CodeSystem/Route-Of-Administration",
+					                                "code": "OTHER",
+					                                "display": "ROA other des"
+					                            }
+					                        ]
+					                    }
+					                ],
+					                "ingredient": [
+					                    {
+					                        "text": "genupuu"
+					                    }
+					                ],
+					                "name": [
+					                    {
+					                        "productName": "zahidbrand0610-2up"
+					                    }
+					                ],
+					                "crossReference": [
+					                    {
+					                        "product": {
+					                            "reference": {
+					                                "reference": "MedicinalProductDefinition/0e85ebd5-bde3-40ef-b279-d47a1ef364bd"
+					                            }
+					                        },
+					                        "type": {
+					                            "coding": [
+					                                {
+					                                    "system": "IDMS-VALUESET-CROSS-REFERENCE-TYPE",
+					                                    "code": "CROSS-REFERENCE-TYPE-INNOVATOR-DRUG",
+					                                    "display": "Innovator Drug"
+					                                }
+					                            ]
+					                        }
+					                    },
+					                    {
+					                        "product": {
+					                            "reference": {
+					                                "reference": "MedicinalProductDefinition/36fb418b-4b1f-414c-bbb1-731bc8744b93"
+					                            }
+					                        },
+					                        "type": {
+					                            "coding": [
+					                                {
+					                                    "system": "IDMS-VALUESET-CROSS-REFERENCE-TYPE",
+					                                    "code": "CROSS-REFERENCE-TYPE-CROSS-REFERENCE",
+					                                    "display": "Cross Reference"
+					                                }
+					                            ]
+					                        }
+					                    }
+					                ],
+					                "operation": [
+					                    {
+					                        "organization": [
+					                            {
+					                                "reference": "Organization/8101f539-bd7d-406b-aae5-f9d16f154ec6",
+					                                "display": "One more Vendor Organization 10062024"
+					                            }
+					                        ]
+					                    }
+					                ],
+					                "characteristic": [
+					                    {
+					                        "type": {
+					                            "coding": [
+					                                {
+					                                    "code": "DRUG-CHARACTERISTIC-BIOLOGIC-INDICATOR",
+					                                    "display": "Biologic"
+					                                }
+					                            ]
+					                        },
+					                        "valueBoolean": true
+					                    },
+					                    {
+					                        "type": {
+					                            "coding": [
+					                                {
+					                                    "code": "DRUG-CHARACTERISTIC-ONCOLOGY-INDICATOR",
+					                                    "display": "Oncology"
+					                                }
+					                            ]
+					                        },
+					                        "valueBoolean": true
+					                    },
+					                    {
+					                        "type": {
+					                            "coding": [
+					                                {
+					                                    "code": "DRUG-CHARACTERISTIC-RARE-DISEASE-INDICATOR",
+					                                    "display": "Drug for Rare Disease"
+					                                }
+					                            ]
+					                        },
+					                        "valueBoolean": false
+					                    },
+					                    {
+					                        "type": {
+					                            "coding": [
+					                                {
+					                                    "code": "DRUG-CHARACTERISTIC-PRIVATE-LABEL-INDICATOR",
+					                                    "display": "Private Label"
+					                                }
+					                            ]
+					                        },
+					                        "valueBoolean": true
+					                    },
+					                    {
+					                        "type": {
+					                            "coding": [
+					                                {
+					                                    "code": "DRUG-CHARACTERISTIC-PCG6",
+					                                    "display": "PCG 6 Code"
+					                                }
+					                            ]
+					                        },
+					                        "valueMarkdown": "999999"
+					                    }
+					                ]
+					            }
+					""";
+				mdr = parser.parseResource(MedicinalProductDefinition.class, mpdstr);
+			}
+			IFhirResourceDao<MedicinalProductDefinition> mdrdao = myDaoRegistry.getResourceDao(MedicinalProductDefinition.class);
+
+			/*
+			 * We actually want a bunch of non-matching resources in the db
+			 * that won't match the filter before we get to the one that will.
+			 *
+			 * To this end, we're going to insert more than we plan
+			 * on retrieving to ensure the _filter is being used in both the
+			 * count query and the actual db hit
+			 */
+			List<MedicinalProductDefinition.MedicinalProductDefinitionNameComponent> productNames = mdr.getName();
+			mdr.setName(null);
+			List<Extension> extensions = mdr.getExtension();
+			mdr.setExtension(null);
+			// we need at least 10 of these; 20 should be good
+			for (int i = 0; i < 2 * count; i++) {
+				mdr.addName(new MedicinalProductDefinition.MedicinalProductDefinitionNameComponent("Product " + i));
+				mdr.addExtension()
+					.setUrl("https://health.gov.on.ca/idms/fhir/StructureDefinition/SearchableExtraString")
+					.setValue(new StringType("Non-matching string " + i));
+				mdrdao.create(mdr, new SystemRequestDetails());
+			}
+			mdr.setName(productNames);
+			mdr.setExtension(extensions);
+			mdrdao.create(mdr, new SystemRequestDetails());
+
+			// do a reindex
+			ReindexJobParameters jobParameters = new ReindexJobParameters();
+			jobParameters.setRequestPartitionId(RequestPartitionId.allPartitions());
+			JobInstanceStartRequest request = new JobInstanceStartRequest();
+			request.setJobDefinitionId(ReindexAppCtx.JOB_REINDEX);
+			request.setParameters(jobParameters);
+			Batch2JobStartResponse response = myJobCoordinator.startInstance(new SystemRequestDetails(), request);
+
+			myBatch2JobHelper.awaitJobCompletion(response);
+
+			// query like:
+			// MedicinalProductDefinition?_getpagesoffset=0&_count=10&_total=accurate&_sort:asc=name&status=active&_include=MedicinalProductDefinition:productmanufacturer&_filter=MedicinalProductDefinitionSearchableString%20co%20%22zah%22
+			SearchParameterMap map = new SearchParameterMap();
+			map.setCount(10);
+			map.setSearchTotalMode(SearchTotalModeEnum.ACCURATE);
+			map.setSort(new SortSpec().setOrder(SortOrderEnum.ASC).setParamName("name"));
+			map.setIncludes(Set.of(
+				new Include("MedicinalProductDefinition:productmanufacturer")
+			));
+			map.add("_filter", new StringParam("MedicinalProductDefinitionSearchableString co \"zah\""));
+
+			// test
+			IBundleProvider result = mdrdao.search(map, new SystemRequestDetails());
+
+			// validate
+			// we expect to find our 1 matching resource
+			assertEquals(1, result.getAllResources().size());
+			assertNotNull(result.size());
+			assertEquals(1, result.size());
+		} finally {
+			// reset values
+			myStorageSettings.setAutoCreatePlaceholderReferenceTargets(presetAutoCreatePlaceholders);
+			myStorageSettings.setFilterParameterEnabled(presetFilterParameterEnabled);
+			myStorageSettings.setAdvancedHSearchIndexing(presetAdvancedHSearchIndexing);
+		}
 	}
 
 	@Test
@@ -610,4 +960,5 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 		}
 		return retVal;
 	}
+
 }

@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.dao.search;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
+import ca.uhn.fhir.jpa.model.search.ExtendedHSearchBuilderConsumeAdvancedQueryClausesParams;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.util.LastNParameterHelper;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
@@ -67,8 +68,12 @@ public class LastNOperation {
 					b.must(f.match().field("myResourceType").matching(OBSERVATION_RES_TYPE));
 					ExtendedHSearchClauseBuilder builder =
 							new ExtendedHSearchClauseBuilder(myFhirContext, myStorageSettings, b, f);
+					ExtendedHSearchBuilderConsumeAdvancedQueryClausesParams params = new ExtendedHSearchBuilderConsumeAdvancedQueryClausesParams();
+					params.setResourceType(OBSERVATION_RES_TYPE)
+							.setSearchParameterMap(theParams.clone())
+								.setSearchParamRegistry(mySearchParamRegistry);
 					myExtendedHSearchSearchBuilder.addAndConsumeAdvancedQueryClauses(
-							builder, OBSERVATION_RES_TYPE, theParams.clone(), mySearchParamRegistry);
+							builder, params);
 				}))
 				.aggregation(observationsByCodeKey, f -> f.fromJson(lastNAggregation.toAggregation()))
 				.fetch(0);
