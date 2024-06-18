@@ -78,30 +78,42 @@ public  class GoldenResourceMatchingAssert extends AbstractAssert<GoldenResource
 	}
 
 	private boolean hasPossibleMatchWith(IAnyResource other) {
+		IResourcePersistentId otherSourcePid = myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), other);
+		IResourcePersistentId otherGoldenPid = getGoldenResourcePid(other);
+
+		//Check for direct matches in either direction.
+		// A POSSIBLE_MATCH -> B
+		if (actualGoldenResourcePid != null) {
+			Optional directForwardLink = myMdmLinkDaoSvc.getMdmLinksByGoldenResourcePidSourcePidAndMatchResult(actualGoldenResourcePid, otherSourcePid, MdmMatchResultEnum.POSSIBLE_MATCH);
+			if (directForwardLink.isPresent()) {
+				return true;
+			}
+		}
+		// B -> POSSIBLE_MATCH -> A
+		if (otherGoldenPid != null) {
+			Optional directBackwardLink = myMdmLinkDaoSvc.getMdmLinksByGoldenResourcePidSourcePidAndMatchResult(otherGoldenPid, actualSourceResourcePid, MdmMatchResultEnum.POSSIBLE_MATCH);
+			if (directBackwardLink.isPresent()) {
+				return true;
+			}
+		}
+
+		// Check for indirect possible matches, e.g.
+		// A -> POSSIBLE_MATCH -> B
+		// C -> POSSIBLE_MATCH -> B
+		// this implies
+		// A -> POSSIBLE_MATCH ->C
+
 		boolean possibleMatch = false;
 		Set<IResourcePersistentId> goldenPids = new HashSet<>();
-
-		IResourcePersistentId otherSourceId = myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), other);
-		List<? extends IMdmLink> possibleLinksForOther = myMdmLinkDaoSvc.getMdmLinksBySourcePidAndMatchResult(otherSourceId, MdmMatchResultEnum.POSSIBLE_MATCH);
+		List<? extends IMdmLink> possibleLinksForOther = myMdmLinkDaoSvc.getMdmLinksBySourcePidAndMatchResult(otherSourcePid, MdmMatchResultEnum.POSSIBLE_MATCH);
 		Set<IResourcePersistentId> otherPossibles = possibleLinksForOther.stream().map(IMdmLink::getGoldenResourcePersistenceId).collect(Collectors.toSet());
-
-		//Populate visited list with all possible matches from the passed in target
 		goldenPids.addAll(otherPossibles);
 
-		//Compare and inflate with all possible matches from the actual.
+
+//		Compare and inflate with all possible matches from the actual. If we hit a collision, we know that the implies POSSIBLE_MATCH exists.
 		List<? extends IMdmLink> possibleLinksForActual = myMdmLinkDaoSvc.getMdmLinksBySourcePidAndMatchResult(actualSourceResourcePid, MdmMatchResultEnum.POSSIBLE_MATCH);
 		Set<IResourcePersistentId> actualPossiblePids = possibleLinksForActual.stream().map(IMdmLink::getGoldenResourcePersistenceId).collect(Collectors.toSet());
-		possibleMatch |= isPossibleMatch(actualPossiblePids, goldenPids, possibleMatch);
-
-		//Compare and inflate with the two potential MATCH resources.
-		List<? extends IMdmLink> actualMatches = myMdmLinkDaoSvc.getMdmLinksBySourcePidAndMatchResult(actualSourceResourcePid, MdmMatchResultEnum.MATCH);
-		Set<IResourcePersistentId> actualMatchedPids = actualMatches.stream().map(match -> match.getGoldenResourcePersistenceId()).collect(Collectors.toSet());
-		possibleMatch |= isPossibleMatch(actualMatchedPids, goldenPids, possibleMatch);
-
-		List<? extends IMdmLink> otherMatches= myMdmLinkDaoSvc.getMdmLinksBySourcePidAndMatchResult(otherSourceId, MdmMatchResultEnum.MATCH);
-		Set<IResourcePersistentId> otherMatchedPids = otherMatches.stream().map(match -> match.getGoldenResourcePersistenceId()).collect(Collectors.toSet());
-		possibleMatch |= isPossibleMatch(otherMatchedPids, goldenPids, possibleMatch);
-
+		possibleMatch = isPossibleMatch(actualPossiblePids, goldenPids, possibleMatch);
 		return possibleMatch;
 	}
 
