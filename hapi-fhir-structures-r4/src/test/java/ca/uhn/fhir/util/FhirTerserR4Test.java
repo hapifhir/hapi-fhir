@@ -586,7 +586,7 @@ public class FhirTerserR4Test {
 			.setUrl("http://acme.org/childExtension")
 			.setValue(new StringType("nestedValue"));
 
-		System.out.println(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
+		ourLog.info(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
 
 		List<IBase> values = myCtx.newTerser().getValues(p, "Patient.active");
 		assertThat(values).hasSize(1);
@@ -705,7 +705,7 @@ public class FhirTerserR4Test {
 			.setUrl("http://acme.org/childExtension")
 			.setValue(new StringType("nestedValue"));
 
-		System.out.println(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
+		ourLog.info(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
 
 		List<IBase> values = myCtx.newTerser().getValues(p, "Patient.active");
 		assertThat(values).hasSize(1);
@@ -715,7 +715,7 @@ public class FhirTerserR4Test {
 
 		((BooleanType) values.get(0)).setValue(Boolean.FALSE);
 
-		System.out.println(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
+		ourLog.info(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
 
 		values = myCtx.newTerser().getValues(p, "Patient.active");
 		assertThat(values).hasSize(1);
@@ -732,7 +732,7 @@ public class FhirTerserR4Test {
 
 		((Extension) values.get(0)).setValue(new StringType("modifiedValue"));
 
-		System.out.println(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
+		ourLog.info(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
 
 		values = myCtx.newTerser().getValues(p, "Patient.extension('http://acme.org/extension')");
 		assertThat(values).hasSize(1);
@@ -750,7 +750,7 @@ public class FhirTerserR4Test {
 
 		((Extension) values.get(0)).setValue(new StringType("modifiedModifierValue"));
 
-		System.out.println(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
+		ourLog.info(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
 
 		values = myCtx.newTerser().getValues(p, "Patient.modifierExtension('http://acme.org/modifierExtension')");
 		assertThat(values).hasSize(1);
@@ -768,7 +768,7 @@ public class FhirTerserR4Test {
 
 		((Extension) values.get(0)).setValue(new StringType("modifiedNestedValue"));
 
-		System.out.println(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
+		ourLog.info(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
 
 		values = myCtx.newTerser().getValues(p, "Patient.extension('http://acme.org/parentExtension').extension('http://acme.org/childExtension')");
 		assertThat(values).hasSize(1);
@@ -807,7 +807,7 @@ public class FhirTerserR4Test {
 			.setUrl("http://acme.org/childExtension")
 			.setValue(new StringType("nestedValue2"));
 
-		System.out.println(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
+		ourLog.info(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
 
 		List<IBase> values = myCtx.newTerser().getValues(p, "Patient.extension('http://acme.org/extension')");
 		assertThat(values).hasSize(2);
@@ -862,7 +862,7 @@ public class FhirTerserR4Test {
 			.setUrl("http://acme.org/childExtension")
 			.setValue(new StringType("nestedValue"));
 
-		System.out.println(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
+		ourLog.info(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
 
 		List<PrimitiveType> values = myCtx.newTerser().getValues(p, "Patient.active", PrimitiveType.class);
 		assertThat(values).hasSize(1);
@@ -907,7 +907,7 @@ public class FhirTerserR4Test {
 			.setUrl("http://acme.org/childExtension")
 			.setValue(new StringType("nestedValue"));
 
-		System.out.println(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
+		ourLog.info(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
 
 		List<PrimitiveType> values = myCtx.newTerser().getValues(p, "Patient.active", PrimitiveType.class);
 		assertThat(values).hasSize(1);
@@ -916,7 +916,7 @@ public class FhirTerserR4Test {
 
 		((BooleanType) values.get(0)).setValue(Boolean.FALSE);
 
-		System.out.println(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
+		ourLog.info(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
 
 		values = myCtx.newTerser().getValues(p, "Patient.active", PrimitiveType.class);
 		assertThat(values).hasSize(1);
@@ -931,7 +931,7 @@ public class FhirTerserR4Test {
 
 		extValues.get(0).setValue(new StringType("modifiedValue"));
 
-		System.out.println(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
+		ourLog.info(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
 
 		extValues = myCtx.newTerser().getValues(p, "Patient.extension('http://acme.org/extension')", Extension.class);
 		assertThat(extValues).hasSize(1);
@@ -947,7 +947,7 @@ public class FhirTerserR4Test {
 
 		extValues.get(0).setValue(new StringType("modifiedModifierValue"));
 
-		System.out.println(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
+		ourLog.info(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
 
 		extValues = myCtx.newTerser().getValues(p, "Patient.modifierExtension('http://acme.org/modifierExtension')", Extension.class);
 		assertThat(extValues).hasSize(1);
@@ -963,7 +963,7 @@ public class FhirTerserR4Test {
 
 		extValues.get(0).setValue(new StringType("modifiedNestedValue"));
 
-		System.out.println(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
+		ourLog.info(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
 
 		extValues = myCtx.newTerser().getValues(p, "Patient.extension('http://acme.org/parentExtension').extension('http://acme.org/childExtension')", Extension.class);
 		assertThat(extValues).hasSize(1);
@@ -976,7 +976,7 @@ public class FhirTerserR4Test {
 	public void testGetValuesWithWantedClassAndTheCreate() {
 		Patient p = new Patient();
 
-		System.out.println(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
+		ourLog.info(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
 
 		List<PrimitiveType> values = myCtx.newTerser().getValues(p, "Patient.active", PrimitiveType.class, true);
 		assertThat(values).hasSize(1);
@@ -1018,7 +1018,7 @@ public class FhirTerserR4Test {
 			.setUrl("http://acme.org/childExtension")
 			.setValue(new StringType("nestedValue"));
 
-		System.out.println(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
+		ourLog.info(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
 
 		List<IBase> values = myCtx.newTerser().getValues(p, "Patient.active");
 		assertThat(values).hasSize(1);
@@ -1053,7 +1053,7 @@ public class FhirTerserR4Test {
 
 		((Extension) values.get(1)).setValue(new StringType("addedValue"));
 
-		System.out.println(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
+		ourLog.info(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
 
 		assertTrue(values.get(1) instanceof IBaseExtension);
 		assertTrue(values.get(1) instanceof Extension);
@@ -1080,14 +1080,14 @@ public class FhirTerserR4Test {
 
 		((Extension) values.get(1)).setValue(new StringType("addedModifierValue"));
 
-		System.out.println(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
+		ourLog.info(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
 
 		assertTrue(values.get(1) instanceof IBaseExtension);
 		assertTrue(values.get(1) instanceof Extension);
 		assertEquals("http://acme.org/modifierExtension", ((Extension) values.get(1)).getUrl());
 		assertEquals("addedModifierValue", ((StringType) ((Extension) values.get(1)).getValue()).getValueAsString());
 
-		System.out.println(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
+		ourLog.info(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
 
 		values = myCtx.newTerser().getValues(p, "Patient.extension('http://acme.org/parentExtension').extension('http://acme.org/childExtension')");
 		assertThat(values).hasSize(1);
@@ -1109,7 +1109,7 @@ public class FhirTerserR4Test {
 
 		((Extension) values.get(1)).setValue(new StringType("addedNestedValue"));
 
-		System.out.println(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
+		ourLog.info(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
 
 		assertTrue(values.get(1) instanceof IBaseExtension);
 		assertTrue(values.get(1) instanceof Extension);
@@ -1168,7 +1168,7 @@ public class FhirTerserR4Test {
 			.setUrl("http://acme.org/childExtension")
 			.setValue(new StringType("nestedValue"));
 
-		System.out.println(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
+		ourLog.info(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
 
 		List<IBase> values = myCtx.newTerser().getValues(p, "Patient.active");
 		assertThat(values).hasSize(1);
@@ -1203,7 +1203,7 @@ public class FhirTerserR4Test {
 
 		((Extension) values.get(1)).setValue(new StringType("addedValue"));
 
-		System.out.println(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
+		ourLog.info(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
 
 		assertTrue(values.get(1) instanceof IBaseExtension);
 		assertTrue(values.get(1) instanceof Extension);
@@ -1230,7 +1230,7 @@ public class FhirTerserR4Test {
 
 		((Extension) values.get(1)).setValue(new StringType("addedModifierValue"));
 
-		System.out.println(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
+		ourLog.info(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
 
 		assertTrue(values.get(1) instanceof IBaseExtension);
 		assertTrue(values.get(1) instanceof Extension);
@@ -1257,7 +1257,7 @@ public class FhirTerserR4Test {
 
 		((Extension) values.get(1)).setValue(new StringType("addedNestedValue"));
 
-		System.out.println(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
+		ourLog.info(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
 
 		assertTrue(values.get(1) instanceof IBaseExtension);
 		assertTrue(values.get(1) instanceof Extension);
@@ -1284,7 +1284,7 @@ public class FhirTerserR4Test {
 			.setUrl("http://acme.org/childExtension")
 			.setValue(new StringType("nestedValue"));
 
-		System.out.println(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
+		ourLog.info(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
 
 		List<IBase> values = myCtx.newTerser().getValues(p, "Patient.active", true);
 		assertThat(values).hasSize(1);

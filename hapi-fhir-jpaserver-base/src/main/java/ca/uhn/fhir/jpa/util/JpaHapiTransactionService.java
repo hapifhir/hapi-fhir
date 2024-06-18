@@ -28,6 +28,8 @@ public class JpaHapiTransactionService extends HapiTransactionService {
 
 	private volatile Boolean myCustomIsolationSupported;
 
+	public JpaHapiTransactionService() {}
+
 	@Override
 	public boolean isCustomIsolationSupported() {
 		if (myCustomIsolationSupported == null) {

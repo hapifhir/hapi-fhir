@@ -459,6 +459,58 @@ public interface IValidationSupport {
 		INFORMATION
 	}
 
+	enum CodeValidationIssueCode {
+		NOT_FOUND,
+		CODE_INVALID,
+		INVALID,
+		OTHER
+	}
+
+	enum CodeValidationIssueCoding {
+		VS_INVALID,
+		NOT_FOUND,
+		NOT_IN_VS,
+
+		INVALID_CODE,
+		INVALID_DISPLAY,
+		OTHER
+	}
+
+	class CodeValidationIssue {
+
+		private final String myMessage;
+		private final IssueSeverity mySeverity;
+		private final CodeValidationIssueCode myCode;
+		private final CodeValidationIssueCoding myCoding;
+
+		public CodeValidationIssue(
+				String theMessage,
+				IssueSeverity mySeverity,
+				CodeValidationIssueCode theCode,
+				CodeValidationIssueCoding theCoding) {
+			this.myMessage = theMessage;
+			this.mySeverity = mySeverity;
+			this.myCode = theCode;
+			this.myCoding = theCoding;
+		}
+
+		public String getMessage() {
+			return myMessage;
+		}
+
+		public IssueSeverity getSeverity() {
+			return mySeverity;
+		}
+
+		public CodeValidationIssueCode getCode() {
+			return myCode;
+		}
+
+		public CodeValidationIssueCoding getCoding() {
+			return myCoding;
+		}
+	}
+
 	class ConceptDesignation {
 
 		private String myLanguage;
@@ -634,6 +686,8 @@ public interface IValidationSupport {
 		private String myDisplay;
 		private String mySourceDetails;
 
+		private List<CodeValidationIssue> myCodeValidationIssues;
+
 		public CodeValidationResult() {
 			super();
 		}
@@ -717,6 +771,23 @@ public interface IValidationSupport {
 			return this;
 		}
 
+		public List<CodeValidationIssue> getCodeValidationIssues() {
+			if (myCodeValidationIssues == null) {
+				myCodeValidationIssues = new ArrayList<>();
+			}
+			return myCodeValidationIssues;
+		}
+
+		public CodeValidationResult setCodeValidationIssues(List<CodeValidationIssue> theCodeValidationIssues) {
+			myCodeValidationIssues = new ArrayList<>(theCodeValidationIssues);
+			return this;
+		}
+
+		public CodeValidationResult addCodeValidationIssue(CodeValidationIssue theCodeValidationIssue) {
+			getCodeValidationIssues().add(theCodeValidationIssue);
+			return this;
+		}
+
 		public boolean isOk() {
 			return isNotBlank(myCode);
 		}
@@ -777,14 +848,18 @@ public interface IValidationSupport {
 		private final IBaseResource myValueSet;
 		private final String myError;
 
-		public ValueSetExpansionOutcome(String theError) {
+		private boolean myErrorIsFromServer;
+
+		public ValueSetExpansionOutcome(String theError, boolean theErrorIsFromServer) {
 			myValueSet = null;
 			myError = theError;
+			myErrorIsFromServer = theErrorIsFromServer;
 		}
 
 		public ValueSetExpansionOutcome(IBaseResource theValueSet) {
 			myValueSet = theValueSet;
 			myError = null;
+			myErrorIsFromServer = false;
 		}
 
 		public String getError() {
@@ -793,6 +868,10 @@ public interface IValidationSupport {
 
 		public IBaseResource getValueSet() {
 			return myValueSet;
+		}
+
+		public boolean getErrorIsFromServer() {
+			return myErrorIsFromServer;
 		}
 	}
 

@@ -13,6 +13,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.ReindexParameters;
 import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
@@ -72,6 +73,8 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Quantity;
+import org.hl7.fhir.r4.model.Questionnaire;
+import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.StringType;
@@ -157,7 +160,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 	@AfterEach
 	public void afterResetDao() {
-		myStorageSettings.clearSupportedSubscriptionTypesForUnitTest();
+		mySubscriptionSettings.clearSupportedSubscriptionTypesForUnitTest();
 		myStorageSettings.setAllowMultipleDelete(new JpaStorageSettings().isAllowMultipleDelete());
 		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(new JpaStorageSettings().isAutoCreatePlaceholderReferenceTargets());
 		myStorageSettings.setAutoVersionReferenceAtPaths(new JpaStorageSettings().getAutoVersionReferenceAtPaths());
@@ -594,24 +597,24 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 			fail(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
 		}
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertEquals(14, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		assertEquals(8, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
 		assertEquals(0, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
 		assertEquals(0, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
 		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
-		assertEquals(12, myCaptureQueriesListener.getCommitCount());
+		assertEquals(6, myCaptureQueriesListener.getCommitCount());
 
 		// Validate again (should rely only on caches)
 		myCaptureQueriesListener.clear();
 		myObservationDao.validate(obs, null, null, null, null, null, null);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertEquals(6, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
 		myCaptureQueriesListener.logUpdateQueriesForCurrentThread();
 		assertThat(myCaptureQueriesListener.getUpdateQueriesForCurrentThread()).isEmpty();
 		myCaptureQueriesListener.logInsertQueriesForCurrentThread();
 		assertThat(myCaptureQueriesListener.getInsertQueriesForCurrentThread()).isEmpty();
 		myCaptureQueriesListener.logDeleteQueriesForCurrentThread();
 		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
-		assertEquals(6, myCaptureQueriesListener.getCommitCount());
+		assertEquals(0, myCaptureQueriesListener.getCommitCount());
 	}
 
 	/**
@@ -1502,6 +1505,40 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertThat(myCaptureQueriesListener.getInsertQueriesForCurrentThread()).isEmpty();
 		assertThat(myCaptureQueriesListener.getUpdateQueriesForCurrentThread()).isEmpty();
 		assertThat(myCaptureQueriesListener.getDeleteQueriesForCurrentThread()).isEmpty();
+	}
+
+
+	@Test
+	public void testSearchWithRevInclude() {
+		Questionnaire q = new Questionnaire();
+		q.setId("q");
+		q.setUrl("http://foo");
+		q.setVersion("1.0");
+		myQuestionnaireDao.update(q, mySrd);
+
+		QuestionnaireResponse qr = new QuestionnaireResponse();
+		qr.setId("qr");
+		qr.setQuestionnaire("http://foo");
+		myQuestionnaireResponseDao.update(qr, mySrd);
+
+		logAllResourceLinks();
+
+		SearchParameterMap map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add("_id", new ReferenceParam("Questionnaire/q"));
+		map.addRevInclude(QuestionnaireResponse.INCLUDE_QUESTIONNAIRE);
+		IFhirResourceDao<?> dao = myQuestionnaireDao;
+		dao.search(map, mySrd);
+
+		myCaptureQueriesListener.clear();
+		IBundleProvider outcome = dao.search(map, mySrd);
+		toUnqualifiedVersionlessIdValues(outcome);
+		assertEquals(4, myCaptureQueriesListener.countSelectQueries());
+
+		myCaptureQueriesListener.clear();
+		outcome = dao.search(map, mySrd);
+		toUnqualifiedVersionlessIdValues(outcome);
+		assertEquals(4, myCaptureQueriesListener.countSelectQueries());
 	}
 
 

@@ -45,7 +45,7 @@ import ca.uhn.hapi.fhir.batch2.test.support.TestJobStep2InputType;
 import ca.uhn.hapi.fhir.batch2.test.support.TestJobStep3InputType;
 import ca.uhn.test.concurrency.PointcutLatch;
 import jakarta.annotation.Nonnull;
-import org.jetbrains.annotations.NotNull;
+import jakarta.annotation.Nonnull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Nested;
 import org.mockito.ArgumentCaptor;
@@ -111,15 +111,15 @@ public abstract class AbstractIJobPersistenceSpecificationTest
 			.addFirstStep(FIRST_STEP_ID, "the first step", TestJobStep2InputType.class, (theStepExecutionDetails, theDataSink) -> new RunOutcome(0))
 			.addIntermediateStep(SECOND_STEP_ID, "the second step", TestJobStep3InputType.class, (theStepExecutionDetails, theDataSink) -> new RunOutcome(0))
 			.addFinalReducerStep(LAST_STEP_ID, "reduction step", VoidModel.class, new IReductionStepWorker<TestJobParameters, TestJobStep3InputType, VoidModel>() {
-				@NotNull
+				@Nonnull
 				@Override
 				public ChunkOutcome consume(ChunkExecutionDetails<TestJobParameters, TestJobStep3InputType> theChunkDetails) {
 					return ChunkOutcome.SUCCESS();
 				}
 
-				@NotNull
+				@Nonnull
 				@Override
-				public RunOutcome run(@NotNull StepExecutionDetails<TestJobParameters, TestJobStep3InputType> theStepExecutionDetails, @NotNull IJobDataSink<VoidModel> theDataSink) throws JobExecutionFailedException {
+				public RunOutcome run(@Nonnull StepExecutionDetails<TestJobParameters, TestJobStep3InputType> theStepExecutionDetails, @Nonnull IJobDataSink<VoidModel> theDataSink) throws JobExecutionFailedException {
 					return RunOutcome.SUCCESS;
 				}
 			});

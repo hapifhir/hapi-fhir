@@ -300,6 +300,9 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 
 	@Override
 	public boolean isCodeSystemSupported(ValidationSupportContext theValidationSupportContext, String theSystem) {
+		if (isBlank(theSystem)) {
+			return false;
+		}
 		TermCodeSystemVersionDetails cs = getCurrentCodeSystemVersion(theSystem);
 		return cs != null;
 	}
@@ -1040,8 +1043,8 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 				} catch (InMemoryTerminologyServerValidationSupport.ExpansionCouldNotBeCompletedInternallyException e) {
 					if (theExpansionOptions != null
 							&& !theExpansionOptions.isFailOnMissingCodeSystem()
-							&& e.getFailureType()
-									== InMemoryTerminologyServerValidationSupport.FailureType.UNKNOWN_CODE_SYSTEM) {
+							// Code system is unknown, therefore NOT_FOUND
+							&& e.getCodeValidationIssue().getCoding() == CodeValidationIssueCoding.NOT_FOUND) {
 						return;
 					}
 					throw new InternalErrorException(Msg.code(888) + e);
@@ -2151,6 +2154,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 					theCode,
 					theDisplay,
 					expectedDisplay,
+					theSystem,
 					systemVersion,
 					myStorageSettings.getIssueSeverityForCodeDisplayMismatch());
 		}
@@ -2181,10 +2185,16 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 
 	private CodeValidationResult createFailureCodeValidationResult(
 			String theSystem, String theCode, String theCodeSystemVersion, String theAppend) {
+		String theMessage = "Unable to validate code " + theSystem + "#" + theCode + theAppend;
 		return new CodeValidationResult()
 				.setSeverity(IssueSeverity.ERROR)
 				.setCodeSystemVersion(theCodeSystemVersion)
-				.setMessage("Unable to validate code " + theSystem + "#" + theCode + theAppend);
+				.setMessage(theMessage)
+				.addCodeValidationIssue(new CodeValidationIssue(
+						theMessage,
+						IssueSeverity.ERROR,
+						CodeValidationIssueCode.CODE_INVALID,
+						CodeValidationIssueCoding.INVALID_CODE));
 	}
 
 	private List<TermValueSetConcept> findByValueSetResourcePidSystemAndCode(
@@ -2800,6 +2810,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 						theCode,
 						theDisplay,
 						code.getDisplay(),
+						code.getSystem(),
 						code.getSystemVersion(),
 						myStorageSettings.getIssueSeverityForCodeDisplayMismatch());
 			}

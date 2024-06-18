@@ -30,6 +30,10 @@ public final class R4ValidationTestUtil {
 	private R4ValidationTestUtil() {
 	}
 
+	public static void assertHasFatals(OperationOutcome theOperationOutcome) {
+		assertThat(hasValidationIssuesWithSeverity(theOperationOutcome, OperationOutcome.IssueSeverity.FATAL)).as("Expected validation errors, found none").isTrue();
+	}
+
 	public static void assertHasErrors(OperationOutcome theOperationOutcome) {
 		assertThat(hasValidationIssuesWithSeverity(theOperationOutcome, OperationOutcome.IssueSeverity.ERROR)).as("Expected validation errors, found none").isTrue();
 	}
@@ -54,5 +58,9 @@ public final class R4ValidationTestUtil {
 
 	public static void assertErrorDiagnosticContainsString(OperationOutcome theOo, String theExpectedDiagnosticSubstring) {
 		assertThat(theOo.getIssue().stream().anyMatch(t -> t.getSeverity() == OperationOutcome.IssueSeverity.ERROR && t.getDiagnostics().contains(theExpectedDiagnosticSubstring))).as("Expected a validation error with diagnostic containing '" + theExpectedDiagnosticSubstring + "', found none").isTrue();
+	}
+
+	public static void assertFatalDiagnosticContainsString(OperationOutcome theOo, String theExpectedDiagnosticSubstring) {
+		assertThat(theOo.getIssue().stream().anyMatch(t -> t.getSeverity() == OperationOutcome.IssueSeverity.FATAL && t.getDiagnostics().contains(theExpectedDiagnosticSubstring))).as("Expected a validation error with diagnostic containing '" + theExpectedDiagnosticSubstring+ "', found none").isTrue();
 	}
 }

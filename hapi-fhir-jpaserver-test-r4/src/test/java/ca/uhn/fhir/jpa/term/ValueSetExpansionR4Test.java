@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
@@ -18,11 +19,13 @@ import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.jpa.util.ValueSetTestUtil;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.collect.Lists;
@@ -97,6 +100,12 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 	@Override
 	public JpaStorageSettings getJpaStorageSettings() {
 		return myStorageSettings;
+	}
+
+	@Test
+	public void testValueSetUrlSP() {
+		RuntimeSearchParam sp = mySearchParamRegistry.getActiveSearchParam("ValueSet", "url");
+		assertEquals("url", sp.getName());
 	}
 
 	@Test
@@ -1642,7 +1651,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 		assertTrue(outcome.isOk());
 		assertEquals("28571000087109", outcome.getCode());
 		assertEquals("MODERNA COVID-19 mRNA-1273", outcome.getDisplay());
-		assertEquals("Concept Display \"BLAH\" does not match expected \"MODERNA COVID-19 mRNA-1273\" for in-memory expansion of ValueSet: http://ehealthontario.ca/fhir/ValueSet/vaccinecode", outcome.getMessage());
+		assertEquals("Concept Display \"BLAH\" does not match expected \"MODERNA COVID-19 mRNA-1273\" for 'http://snomed.info/sct#28571000087109' for in-memory expansion of ValueSet: http://ehealthontario.ca/fhir/ValueSet/vaccinecode", outcome.getMessage());
 		assertEquals("Code was validated against in-memory expansion of ValueSet: http://ehealthontario.ca/fhir/ValueSet/vaccinecode", outcome.getSourceDetails());
 		assertEquals("0.17", outcome.getCodeSystemVersion());
 
@@ -1689,7 +1698,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 		assertEquals("28571000087109", outcome.getCode());
 		assertEquals("MODERNA COVID-19 mRNA-1273", outcome.getDisplay());
 		assertEquals("0.17", outcome.getCodeSystemVersion());
-		assertEquals("Concept Display \"BLAH\" does not match expected \"MODERNA COVID-19 mRNA-1273\"", outcome.getMessage());
+		assertEquals("Concept Display \"BLAH\" does not match expected \"MODERNA COVID-19 mRNA-1273\" for 'http://snomed.info/sct#28571000087109'", outcome.getMessage());
 
 		// Validate code - good code, good display
 		codeSystemUrl = "http://snomed.info/sct";

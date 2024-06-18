@@ -26,9 +26,9 @@ import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.PostConstruct;
 import org.hl7.fhir.dstu3.context.IWorkerContext;
+import org.hl7.fhir.dstu3.fhirpath.FHIRPathEngine;
 import org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.dstu3.model.Base;
-import org.hl7.fhir.dstu3.utils.FHIRPathEngine;
 import org.hl7.fhir.instance.model.api.IBase;
 
 import java.util.ArrayList;

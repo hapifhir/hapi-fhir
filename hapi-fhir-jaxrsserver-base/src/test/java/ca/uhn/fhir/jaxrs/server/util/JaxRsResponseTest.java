@@ -21,6 +21,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class JaxRsResponseTest {
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(JaxRsResponseTest.class);
+
 
 	private JaxRsResponse response;
 	private JaxRsRequest request;
@@ -80,7 +82,7 @@ public class JaxRsResponseTest {
 		Response result = (Response) RestfulServerUtils.streamResponseAsResource(request.getServer(), createPatient(), theSummaryMode, 200, addContentLocationHeader, respondGzip, this.request);
 		assertEquals(200, result.getStatus());
 		assertEquals("application/json+fhir; charset=UTF-8", result.getHeaderString(Constants.HEADER_CONTENT_TYPE));
-		System.out.println(result.getEntity().toString());
+		ourLog.info(result.getEntity().toString());
 		assertThat(result.getEntity().toString()).contains("resourceType\": \"Patient");
 		assertThat(result.getEntity().toString()).contains("15");
 

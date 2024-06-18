@@ -1848,7 +1848,7 @@ public class JsonParserDstu2_1Test {
 		IParser parser = ourCtx.newJsonParser();
 
 		String output = parser.encodeResourceToString(fhirPat);
-		System.out.println("output: " + output);
+		ourLog.info("output: " + output);
 
 		// Deserialize then check that valueReference value is still correct
 		fhirPat = parser.parseResource(Patient.class, output);

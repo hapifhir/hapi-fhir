@@ -91,7 +91,7 @@ public class ResourceProviderR4ElasticTest extends BaseResourceProviderR4Test {
 			ourLog.info("testAutocompleteDirectionExisting {}", text);
 			assertNotNull(valueSet);
 			List<ValueSet.ValueSetExpansionContainsComponent> expansions = valueSet.getExpansion().getContains();
-			// FIXME KHS
+			// TODO CHECKSTYLE KHS
 //			assertThat(expansions, hasItem(valueSetExpansionMatching(mean_blood_pressure)));
 //			assertThat(expansions).doesNotContain(valueSetExpansionMatching(blood_count));
 		}

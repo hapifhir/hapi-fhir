@@ -325,7 +325,7 @@ public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 		assertHasErrors(oo);
 		String outputString = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo);
 		ourLog.info(outputString);
-		assertThat(outputString).contains("Profile reference 'http://example.com/StructureDefinition/testValidateResourceContainingProfileDeclarationInvalid' has not been checked because it is unknown");
+		assertThat(outputString).contains("Profile reference 'http://example.com/StructureDefinition/testValidateResourceContainingProfileDeclarationInvalid' has not been checked because it could not be found");
 	}
 
 	@Test
