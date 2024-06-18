@@ -104,16 +104,16 @@ public class JpaSearchParamCacheTest {
 
 	@ParameterizedTest
 	@CsvSource({
-		"Patient, name, name, type = string",
-		"Patient, active, active, type = token",
-		"Patient, active, active:of-type, type = token with of-type",
-		"Patient, birthdate, birthdate, type = date",
-		"Patient, general-practitioner, general-practitioner, type = reference",
-		"Location, near, near, type = special",
-		"RiskAssessment, probability, probability, type = number",
-		"Observation, value-quantity, value-quantity, type = quantity",
-		"ValueSet, url, url, type = uri",
-		"Encounter, subject, subject.name, type = reference with refChain"
+		"Patient,        name,                 name,                 type = string",
+		"Patient,        active,               active,               type = token",
+		"Patient,        active,               active:of-type,       type = token with of-type",
+		"Patient,        birthdate,            birthdate,            type = date",
+		"Patient,        general-practitioner, general-practitioner, type = reference",
+		"Location,       near,                 near,                 type = special",
+		"RiskAssessment, probability,          probability,          type = number",
+		"Observation,    value-quantity,       value-quantity,       type = quantity",
+		"ValueSet,       url,                  url,                  type = uri",
+		"Encounter,      subject,              subject.name,         type = reference with refChain"
 	})
 	public void getIndexedSearchParamByHashIdentity_returnsCorrectIndexedSearchParam(String theResourceType,
 																					 String theSpName,
