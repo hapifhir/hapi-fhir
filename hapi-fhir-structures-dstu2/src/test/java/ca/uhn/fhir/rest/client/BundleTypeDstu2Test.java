@@ -95,7 +95,7 @@ public class BundleTypeDstu2Test {
 		client.registerInterceptor(new LoggingInterceptor(true));
 		Bundle result = client.search().forResource(Patient.class).where(Patient.NAME.matches().value("Alice")).returnBundle(Bundle.class).execute();
 		
-		System.out.println(result.getEntry().size());
+		ourLog.info("size is " + result.getEntry().size());
 		
 	}
 	

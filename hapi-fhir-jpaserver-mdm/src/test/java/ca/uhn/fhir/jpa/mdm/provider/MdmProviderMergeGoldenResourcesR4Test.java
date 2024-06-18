@@ -29,6 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+//TODO GGG Convert this to assertJ
 public class MdmProviderMergeGoldenResourcesR4Test extends BaseProviderR4Test {
 
 	private Patient myFromGoldenPatient;

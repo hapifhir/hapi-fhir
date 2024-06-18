@@ -1737,7 +1737,7 @@ public class XmlParserHl7OrgDstu2Test {
     IParser parser = ourCtx.newXmlParser();
 
     String output = parser.encodeResourceToString(fhirPat);
-    System.out.println("output: " + output);
+    ourLog.info("output: " + output);
 
     // Deserialize then check that valueReference value is still correct
     fhirPat = parser.parseResource(Patient.class, output);

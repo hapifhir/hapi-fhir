@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.HapiMigrationException;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
+import ca.uhn.fhir.jpa.migrate.tasks.api.TaskFlagEnum;
 import jakarta.annotation.Nonnull;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -17,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 
+@SuppressWarnings("SqlDialectInspection")
 public class ModifyColumnTest extends BaseTest {
 
 	@ParameterizedTest(name = "{index}: {0}")
@@ -232,14 +234,11 @@ public class ModifyColumnTest extends BaseTest {
 	@SuppressWarnings("EnumSwitchStatementWhichMissesCases")
 	@Nonnull
 	private JdbcUtils.ColumnType getLongColumnType(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
-		switch (theTestDatabaseDetails.get().getDriverType()) {
-			case H2_EMBEDDED:
-				return new JdbcUtils.ColumnType(ColumnTypeEnum.LONG, 64);
-			case DERBY_EMBEDDED:
-				return new JdbcUtils.ColumnType(ColumnTypeEnum.LONG, 19);
-			default:
-				throw new UnsupportedOperationException();
-		}
+		return switch (theTestDatabaseDetails.get().getDriverType()) {
+			case H2_EMBEDDED -> new JdbcUtils.ColumnType(ColumnTypeEnum.LONG, 64);
+			case DERBY_EMBEDDED -> new JdbcUtils.ColumnType(ColumnTypeEnum.LONG, 19);
+			default -> throw new UnsupportedOperationException();
+		};
 	}
 
 	@ParameterizedTest(name = "{index}: {0}")
@@ -270,11 +269,11 @@ public class ModifyColumnTest extends BaseTest {
 		executeSql("insert into SOMETABLE (TEXTCOL) values ('HELLO')");
 
 		ModifyColumnTask task = new ModifyColumnTask("1", "1");
+		task.addFlag(TaskFlagEnum.FAILURE_ALLOWED);
 		task.setTableName("SOMETABLE");
 		task.setColumnName("TEXTCOL");
 		task.setColumnType(ColumnTypeEnum.LONG);
 		task.setNullable(true);
-		task.setFailureAllowed(true);
 		getMigrator().addTask(task);
 
 		getMigrator().migrate();

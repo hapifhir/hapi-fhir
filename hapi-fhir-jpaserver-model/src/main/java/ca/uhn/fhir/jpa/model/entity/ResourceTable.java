@@ -142,7 +142,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@OptimisticLock(excluded = true)
 	private String myHashSha256;
 
-	@Column(name = "SP_HAS_LINKS")
+	@Column(name = "SP_HAS_LINKS", nullable = false)
 	@OptimisticLock(excluded = true)
 	private boolean myHasLinks;
 
@@ -203,7 +203,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@OptimisticLock(excluded = true)
 	private Collection<ResourceIndexedSearchParamCoords> myParamsCoords;
 
-	@Column(name = "SP_COORDS_PRESENT")
+	@Column(name = "SP_COORDS_PRESENT", nullable = false)
 	@OptimisticLock(excluded = true)
 	private boolean myParamsCoordsPopulated;
 
@@ -215,7 +215,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@OptimisticLock(excluded = true)
 	private Collection<ResourceIndexedSearchParamDate> myParamsDate;
 
-	@Column(name = "SP_DATE_PRESENT")
+	@Column(name = "SP_DATE_PRESENT", nullable = false)
 	@OptimisticLock(excluded = true)
 	private boolean myParamsDatePopulated;
 
@@ -227,7 +227,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 			orphanRemoval = false)
 	private Collection<ResourceIndexedSearchParamNumber> myParamsNumber;
 
-	@Column(name = "SP_NUMBER_PRESENT")
+	@Column(name = "SP_NUMBER_PRESENT", nullable = false)
 	@OptimisticLock(excluded = true)
 	private boolean myParamsNumberPopulated;
 
@@ -239,7 +239,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@OptimisticLock(excluded = true)
 	private Collection<ResourceIndexedSearchParamQuantity> myParamsQuantity;
 
-	@Column(name = "SP_QUANTITY_PRESENT")
+	@Column(name = "SP_QUANTITY_PRESENT", nullable = false)
 	@OptimisticLock(excluded = true)
 	private boolean myParamsQuantityPopulated;
 
@@ -260,7 +260,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	 * NOTE : use Boolean class instead of boolean primitive, in order to set the existing rows to null
 	 * since 5.3.0
 	 */
-	@Column(name = "SP_QUANTITY_NRML_PRESENT")
+	@Column(name = "SP_QUANTITY_NRML_PRESENT", nullable = false)
 	@OptimisticLock(excluded = true)
 	private Boolean myParamsQuantityNormalizedPopulated = Boolean.FALSE;
 
@@ -272,7 +272,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@OptimisticLock(excluded = true)
 	private Collection<ResourceIndexedSearchParamString> myParamsString;
 
-	@Column(name = "SP_STRING_PRESENT")
+	@Column(name = "SP_STRING_PRESENT", nullable = false)
 	@OptimisticLock(excluded = true)
 	private boolean myParamsStringPopulated;
 
@@ -284,7 +284,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@OptimisticLock(excluded = true)
 	private Collection<ResourceIndexedSearchParamToken> myParamsToken;
 
-	@Column(name = "SP_TOKEN_PRESENT")
+	@Column(name = "SP_TOKEN_PRESENT", nullable = false)
 	@OptimisticLock(excluded = true)
 	private boolean myParamsTokenPopulated;
 
@@ -296,7 +296,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@OptimisticLock(excluded = true)
 	private Collection<ResourceIndexedSearchParamUri> myParamsUri;
 
-	@Column(name = "SP_URI_PRESENT")
+	@Column(name = "SP_URI_PRESENT", nullable = false)
 	@OptimisticLock(excluded = true)
 	private boolean myParamsUriPopulated;
 
@@ -404,7 +404,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	private Boolean mySearchUrlPresent = false;
 
 	@Version
-	@Column(name = "RES_VER")
+	@Column(name = "RES_VER", nullable = false)
 	private long myVersion;
 
 	@OneToMany(mappedBy = "myResourceTable", fetch = FetchType.LAZY)

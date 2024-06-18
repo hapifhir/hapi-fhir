@@ -144,7 +144,7 @@ public class VersionSpecificWorkerContextWrapperCoreTest {
 							public ValueSet answer(InvocationOnMock theInvocation) {
 								String url = (String) theInvocation.getArguments()[1];
 
-								System.out.println("Looking for valueSet: " + url + "... " + (myValueSets.containsKey(url) ? "found" : "not found"));
+								ourLog.info("Looking for valueSet: " + url + "... " + (myValueSets.containsKey(url) ? "found" : "not found"));
 								return myValueSets.get(url);
 							}
 						}
@@ -156,7 +156,7 @@ public class VersionSpecificWorkerContextWrapperCoreTest {
 							public ValueSet answer(InvocationOnMock theInvocation) {
 								String url = (String) theInvocation.getArguments()[0];
 
-								System.out.println("Looking for valueSet: " + url + "... " + (myValueSets.containsKey(url) ? "found" : "not found"));
+								ourLog.info("Looking for valueSet: " + url + "... " + (myValueSets.containsKey(url) ? "found" : "not found"));
 								return myValueSets.get(url);
 							}
 						}
@@ -168,7 +168,7 @@ public class VersionSpecificWorkerContextWrapperCoreTest {
 							public IBaseResource answer(InvocationOnMock theInvocation) {
 								String url = (String) theInvocation.getArguments()[0];
 
-								System.out.println("Looking for codeSystem: " + url);
+								ourLog.info("Looking for codeSystem: " + url);
 								return  myCodeSystems.get(url);
 							}
 						}
@@ -208,7 +208,7 @@ public class VersionSpecificWorkerContextWrapperCoreTest {
 	@ParameterizedTest(name = "{0}")
 	@MethodSource("argumentSource")
 	public void fhirTestCasesCodeValidationTest(String name, TxTestData testData, TxTestSetup setup) throws IOException {
-		System.out.println("Name: " + name);
+		ourLog.info("Name: " + name);
 
 		for (String s : setup.getSuite().forceArray("setup").asStrings()) {
 
@@ -220,7 +220,7 @@ public class VersionSpecificWorkerContextWrapperCoreTest {
 				CodeSystem codeSystem = (CodeSystem) res;
 				myCodeSystems.put(codeSystem.getUrl(), codeSystem);
 			} else {
-				System.out.println("Can't load setup resource: " + s);
+				ourLog.info("Can't load setup resource: " + s);
 			}
 		}
 		Resource req = loadResource(setup.getTest().asString("request"));

@@ -37,6 +37,7 @@ import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.dao.mdm.MdmExpansionCacheSvc;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
+import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.search.SearchBuilderLoadIncludesParameters;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
@@ -109,9 +110,8 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 	@Autowired
 	private IIdHelperService<JpaPid> myIdHelperService;
 
-	@SuppressWarnings("rawtypes")
 	@Autowired
-	protected IMdmLinkDao myMdmLinkDao;
+	protected IMdmLinkDao<JpaPid, MdmLink> myMdmLinkDao;
 
 	@Autowired
 	private MdmExpansionCacheSvc myMdmExpansionCacheSvc;

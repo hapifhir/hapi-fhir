@@ -311,7 +311,7 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 		public IIpsGenerationStrategy ipsGenerationStrategy() {
 			return new DefaultJpaIpsGenerationStrategy() {
 				@Override
-				public IIdType massageResourceId(@Nullable IpsContext theIpsContext, @javax.annotation.Nonnull IBaseResource theResource) {
+				public IIdType massageResourceId(@Nullable IpsContext theIpsContext, @Nonnull IBaseResource theResource) {
 					return IdType.newRandomUuid();
 				}
 			};

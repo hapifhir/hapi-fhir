@@ -248,7 +248,7 @@ public class ResourceProviderMeaningfulOutcomeMessageR4Test extends BaseResource
 			.execute();
 		ourLog.debug("Create {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 		OperationOutcome oo = (OperationOutcome) output.getEntry().get(0).getResponse().getOutcome();
-		// FIXME KHS restore this
+		// TODO CHECKSTYLE KHS restore this
 //		assertThat(oo.getIssueFirstRep().getDiagnostics()).matches("Successfully conditionally created resource \".*\". No existing resources matched URL \"Patient\\?active=true\". Took [0-9]+ms.");
 		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
 		assertEquals(StorageResponseCodeEnum.SYSTEM, oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
