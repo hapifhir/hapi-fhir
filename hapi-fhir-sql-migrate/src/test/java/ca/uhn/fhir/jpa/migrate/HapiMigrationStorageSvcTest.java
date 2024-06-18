@@ -128,7 +128,7 @@ class HapiMigrationStorageSvcTest extends BaseMigrationTest {
 		return taskList;
 	}
 
-	public Builder forVersion(MigrationTaskList theTaskList) {
+	public static Builder forVersion(MigrationTaskList theTaskList) {
 		BaseMigrationTasks.IAcceptsTasks sink = theTask -> {
 			theTask.validate();
 			theTaskList.add(theTask);

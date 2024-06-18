@@ -524,8 +524,12 @@ public class InstanceReindexServiceImpl implements IInstanceReindexService {
 				String theParamTypeName) {
 			Parameters.ParametersParameterComponent retVal =
 					super.addIndexValue(theAction, theParent, theParam, theParamTypeName);
-			retVal.addPart().setName("Latitude").setValue(new DecimalType(theParam.getLatitude()));
-			retVal.addPart().setName("Longitude").setValue(new DecimalType(theParam.getLongitude()));
+			if (theParam.getLatitude() != null) {
+				retVal.addPart().setName("Latitude").setValue(new DecimalType(theParam.getLatitude()));
+			}
+			if (theParam.getLongitude() != null) {
+				retVal.addPart().setName("Longitude").setValue(new DecimalType(theParam.getLongitude()));
+			}
 			return retVal;
 		}
 	}

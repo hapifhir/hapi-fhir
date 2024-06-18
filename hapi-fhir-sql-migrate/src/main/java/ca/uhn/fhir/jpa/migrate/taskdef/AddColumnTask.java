@@ -35,12 +35,6 @@ public class AddColumnTask extends BaseTableColumnTypeTask {
 		return new AddColumnTask(null, null, ColumnNameCase.ALL_LOWER, theColumnDriverMappingOverrides);
 	}
 
-	public AddColumnTask() {
-		this(null, null);
-		setDryRun(true);
-		myCheckForExistingTables = false;
-	}
-
 	public AddColumnTask(String theProductVersion, String theSchemaVersion) {
 		super(theProductVersion, theSchemaVersion);
 	}
@@ -84,6 +78,7 @@ public class AddColumnTask extends BaseTableColumnTypeTask {
 				break;
 			case DERBY_EMBEDDED:
 			case POSTGRES_9_4:
+			case COCKROACHDB_21_1:
 				sql = "alter table " + getTableName() + " add column " + getColumnName() + " " + typeStatement;
 				break;
 			case MSSQL_2012:

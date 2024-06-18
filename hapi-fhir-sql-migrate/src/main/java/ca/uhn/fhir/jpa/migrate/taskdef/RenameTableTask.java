@@ -99,6 +99,7 @@ public class RenameTableTask extends BaseTableTask {
 		return retVal;
 	}
 
+	@Override
 	protected void generateHashCode(HashCodeBuilder theBuilder) {
 		super.generateHashCode(theBuilder);
 		theBuilder.append(myOldTableName);

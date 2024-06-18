@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.model.entity;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.listener.IndexStorageOptimizationListener;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Entity;
@@ -59,13 +60,11 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 
 	private static final long serialVersionUID = 1L;
 
-	@Column(name = "SP_LATITUDE")
-	// @FullTextField
-	public double myLatitude;
+	@Column(name = "SP_LATITUDE", nullable = true)
+	public Double myLatitude;
 
-	@Column(name = "SP_LONGITUDE")
-	// @FullTextField
-	public double myLongitude;
+	@Column(name = "SP_LONGITUDE", nullable = true)
+	public Double myLongitude;
 
 	@Id
 	@SequenceGenerator(name = "SEQ_SPIDX_COORDS", sequenceName = "SEQ_SPIDX_COORDS")
@@ -155,7 +154,8 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 		myId = theId;
 	}
 
-	public double getLatitude() {
+	@Nullable
+	public Double getLatitude() {
 		return myLatitude;
 	}
 
@@ -164,7 +164,8 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 		return this;
 	}
 
-	public double getLongitude() {
+	@Nullable
+	public Double getLongitude() {
 		return myLongitude;
 	}
 

@@ -138,6 +138,10 @@ public class Batch2WorkChunkEntity implements Serializable {
 
 	/**
 	 * The number of times the work chunk has had its state set back to POLL_WAITING.
+	 * <p>
+	 * TODO: Note that this column was added in 7.2.0, so it is nullable in order to
+	 * account for existing rows that were added before the column was added. In
+	 * the future we should make this non-null.
 	 */
 	@Column(name = "POLL_ATTEMPTS", nullable = true)
 	private Integer myPollAttempts;
@@ -145,7 +149,9 @@ public class Batch2WorkChunkEntity implements Serializable {
 	/**
 	 * Default constructor for Hibernate.
 	 */
-	public Batch2WorkChunkEntity() {}
+	public Batch2WorkChunkEntity() {
+		myPollAttempts = 0;
+	}
 
 	/**
 	 * Projection constructor for no-data path.
@@ -184,7 +190,7 @@ public class Batch2WorkChunkEntity implements Serializable {
 		myRecordsProcessed = theRecordsProcessed;
 		myWarningMessage = theWarningMessage;
 		myNextPollTime = theNextPollTime;
-		myPollAttempts = thePollAttempts;
+		myPollAttempts = thePollAttempts != null ? thePollAttempts : 0;
 	}
 
 	public static Batch2WorkChunkEntity fromWorkChunk(WorkChunk theWorkChunk) {
