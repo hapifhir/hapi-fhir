@@ -24,17 +24,95 @@ import jakarta.annotation.Nonnull;
 import org.intellij.lang.annotations.Language;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.ResultSetExtractor;
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.List;
 
 // LUKETODO:  make sure error handling is clear about what went wrong
 public class DropPrimaryKeyTask extends BaseTableTask {
 	private static final Logger ourLog = LoggerFactory.getLogger(DropPrimaryKeyTask.class);
+
+	public DropPrimaryKeyTask(String theProductVersion, String theSchemaVersion, String theTableName) {
+		super(theProductVersion, theSchemaVersion);
+		setTableName(theTableName);
+	}
+
+	@Nonnull
+	private String generateSql() {
+		final ResultSetExtractor<String> resultSetExtractor = rs -> rs.getString(1);
+		final String primaryKeyName = executeSqlWithResult(generatePrimaryKeyIndexNameSql(), resultSetExtractor, getTableName());
+		return generateDropPrimaryKeySql(primaryKeyName);
+	}
+
+	@Override
+	protected void doExecute() throws SQLException {
+		logInfo(
+			ourLog,
+			"Going to DROP the PRIMARY KEY on table {}",
+			getTableName());
+
+//		// LUKETODO:  error handling?
+		executeSql(getTableName(), generateSql());
+	}
+
+	private String generateDropPrimaryKeySql(String thePrimaryKeyName) {
+		switch (getDriverType()) {
+			case MARIADB_10_1:
+			case DERBY_EMBEDDED:
+			case H2_EMBEDDED:
+				@Language("SQL")
+				final String sqlH2 = "ALTER TABLE %s DROP PRIMARY KEY";
+				return String.format(sqlH2, getTableName());
+			case POSTGRES_9_4:
+			case ORACLE_12C:
+			case MSSQL_2012:
+			case MYSQL_5_7:
+				@Language("SQL")
+				final String sql = "ALTER TABLE %s DROP CONSTRAINT %s";
+				return String.format(sql, getTableName(), thePrimaryKeyName);
+			default:
+				throw new IllegalStateException(Msg.code(59));
+		}
+	}
+
+	@Language("SQL")
+	private String generatePrimaryKeyIndexNameSql() {
+		switch (getDriverType()) {
+			case MYSQL_5_7:
+			case MARIADB_10_1:
+			case DERBY_EMBEDDED:
+			case COCKROACHDB_21_1:
+			case H2_EMBEDDED:
+				return
+					"SELECT index_name " +
+					"FROM information_schema.indexes " +
+					"WHERE table_schema = 'PUBLIC' " +
+					"AND index_type_name = 'PRIMARY KEY' " +
+					"AND table_name = ?";
+			case POSTGRES_9_4:
+				return
+					"SELECT constraint_name " +
+					"FROM information_schema.table_constraints " +
+					"WHERE table_schema = 'public' " +
+					"AND constraint_type = 'PRIMARY KEY' " +
+					"AND table_name = ?";
+			case ORACLE_12C:
+				return
+					"SELECT constraint_name, constraint_type " +
+					"FROM user_constraints " +
+					"WHERE table_name = ?";
+			case MSSQL_2012:
+				return
+					"SELECT tc.constraint_name " +
+					"FROM information_schema.table_constraints tc " +
+					"JOIN information_schema.constraint_column_usage ccu ON tc.constraint_name = ccu.constraint_name " +
+					"WHERE tc.constraint_type = 'PRIMARY KEY' " +
+					"AND  tc.table_name = ?";
+			default:
+				throw new IllegalStateException(Msg.code(59));
+		}
+	}
+
 
 
 	// LUKETODO:  in order to drop a primary key, we need to introspect
@@ -166,10 +244,6 @@ create index PUBLIC.IDX_TIMER_MODCOLLSTART_V2
 
 	 */
 
-	public DropPrimaryKeyTask(String theProductVersion, String theSchemaVersion, String... theColumnsInOrder) {
-		super(theProductVersion, theSchemaVersion);
-	}
-
 	// find PK index name:
 	/*
 	h2:
@@ -206,72 +280,4 @@ mysql:
 ALTER TABLE user_customer_permission DROP PRIMARY KEY;
 
 	 */
-
-	@Nonnull
-	private String generateSql() {
-		final ResultSetExtractor<String> resultSetExtractor = rs -> rs.getString(1);
-		final String constraintName = executeSqlWithResult(getPrimaryKeyIndexNameSql(), resultSetExtractor, getTableName());
-		return String.format("ALTER TABLE %s DROP CONSTRAINT %s", getTableName(), constraintName);
-	}
-
-	@Override
-	protected void doExecute() throws SQLException {
-//		logInfo(
-//			ourLog,
-//			"Going to add a primary key on table {} for columns {}",
-//			getTableName(),
-//			myPrimaryKeyColumnsInOrder);
-//
-//		// LUKETODO:  error handling?
-//		executeSql(getTableName(), generateSql());
-	}
-
-	// LUKETODO:  consider making this part of a new utility class?
-	private String getPrimaryKeyIndexName() {
-		final ResultSetExtractor<String> resultSetExtractor = rs -> rs.getString(1);
-		final String constraintName = executeSqlWithResult(getPrimaryKeyIndexNameSql(), resultSetExtractor, getTableName());
-		return String.format("ALTER TABLE %s DROP CONSTRAINT %s", getTableName(), constraintName);
-	}
-
-	private String getPrimaryKeyIndexNameSql() {
-		switch (getDriverType()) {
-			case MYSQL_5_7:
-			case MARIADB_10_1:
-			case DERBY_EMBEDDED:
-			case H2_EMBEDDED:
-				@Language("SQL")
-				final String getPkSqlH2 =
-					"select index_name " +
-					"from information_schema.indexes " +
-					"where table_schema = 'PUBLIC' and " +
-					"table_name = 'HFJ_RES_SEARCH_URL' and " +
-					"index_type_name = 'PRIMARY KEY'";
-
-				return getPkSqlH2;
-			case POSTGRES_9_4:
-				@Language("SQL")
-				final String getPkSqlPostgres =
-					"select constraint_name " +
-					"from information_schema.table_constraints " +
-					"where table_schema = 'public' " +
-					"and table_name = 'hfj_res_search_url' " +
-					"and constraint_type = 'PRIMARY KEY' ";
-
-				return getPkSqlPostgres;
-			case ORACLE_12C:
-			case COCKROACHDB_21_1:
-			case MSSQL_2012:
-				@Language("SQL")
-				final String getPkSqlMssql =
-					"SELECT index_name " +
-					"FROM information_schema.indexes " +
-					"WHERE table_schema = 'PUBLIC' AND " +
-					"table_name = '?' AND " +
-					"index_type_name = 'PRIMARY KEY'";
-
-				return getPkSqlMssql;
-			default:
-				throw new IllegalStateException(Msg.code(59));
-		}
-	}
 }

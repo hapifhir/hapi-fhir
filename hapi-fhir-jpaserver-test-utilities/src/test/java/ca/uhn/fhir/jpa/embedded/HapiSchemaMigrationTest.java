@@ -22,9 +22,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -43,16 +49,28 @@ public class HapiSchemaMigrationTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(HapiSchemaMigrationTest.class);
 	public static final String TEST_SCHEMA_NAME = "test";
 
+	private static final String METADATA_COLUMN_NAME = "COLUMN_NAME";
+	private static final String METADATA_COLUMN_SIZE = "COLUMN_SIZE";
+	private static final String METADATA_DATA_TYPE = "DATA_TYPE";
+	private static final String METADATA_IS_NULLABLE = "IS_NULLABLE";
+	private static final String METADATA_IS_NULLABLE_NO = "NO";
+	private static final String METADATA_IS_NULLABLE_YES = "YES";
+
+	private static final String TABLE_HFJ_RES_SEARCH_URL = "HFJ_RES_SEARCH_URL";
+	private static final String COLUMN_RES_SEARCH_URL = "RES_SEARCH_URL";
+	private static final String COLUMN_PARTITION_ID = "PARTITION_ID";
+	private static final String COLUMN_PARTITION_DATE = "PARTITION_DATE";
+
 	static {
 		HapiSystemProperties.enableUnitTestMode();
 	}
 
 	@RegisterExtension
 //	static HapiEmbeddedDatabasesExtension myEmbeddedServersExtension = new HapiEmbeddedDatabasesExtension();
-	static HapiEmbeddedDatabasesExtensionPostgresOnly myEmbeddedServersExtension = new HapiEmbeddedDatabasesExtensionPostgresOnly();
+//	static HapiEmbeddedDatabasesExtensionPostgresOnly myEmbeddedServersExtension = new HapiEmbeddedDatabasesExtensionPostgresOnly();
 //	static HapiEmbeddedDatabasesExtensionMSSQLOnly myEmbeddedServersExtension = new HapiEmbeddedDatabasesExtensionMSSQLOnly();
 //	static HapiEmbeddedDatabasesExtensionOracleOnly myEmbeddedServersExtension = new HapiEmbeddedDatabasesExtensionOracleOnly();
-//	static HapiEmbeddedDatabasesExtensionH2Only myEmbeddedServersExtension = new HapiEmbeddedDatabasesExtensionH2Only ();
+	static HapiEmbeddedDatabasesExtensionH2Only myEmbeddedServersExtension = new HapiEmbeddedDatabasesExtensionH2Only ();
 
 	@AfterEach
 	public void afterEach() {
@@ -66,10 +84,12 @@ public class HapiSchemaMigrationTest {
 	}
 
 	@ParameterizedTest
-	@ArgumentsSource(HapiEmbeddedDatabasesExtensionPostgresOnly.DatabaseVendorProvider.class)
+//	@ArgumentsSource(HapiEmbeddedDatabasesExtension.DatabaseVendorProvider.class)
+//	@ArgumentsSource(HapiEmbeddedDatabasesExtensionPostgresOnly.DatabaseVendorProvider.class)
 //	@ArgumentsSource(HapiEmbeddedDatabasesExtensionMSSQLOnly.DatabaseVendorProvider.class)
 //	@ArgumentsSource(HapiEmbeddedDatabasesExtensionOracleOnly.DatabaseVendorProvider.class)
 //	@ArgumentsSource(HapiEmbeddedDatabasesExtensionH2Only.DatabaseVendorProvider.class)
+	@ArgumentsSource(HapiEmbeddedDatabasesExtensionH2Only.DatabaseVendorProvider.class)
 	public void testMigration(DriverTypeEnum theDriverType) throws SQLException {
 		// ensure all migrations are run
 		HapiSystemProperties.disableUnitTestMode();
@@ -106,25 +126,96 @@ public class HapiSchemaMigrationTest {
 		verifyForcedIdMigration(dataSource);
 
 		checkOutPkSqlResult(database, theDriverType);
+
+		verifyHfjResSearchUrlMigration(database, theDriverType);
+	}
+
+	private void verifyHfjResSearchUrlMigration(JpaEmbeddedDatabase theDatabase, DriverTypeEnum theDriverType) throws SQLException {
+		final List<Map<String, Object>> allCount = theDatabase.query(String.format("SELECT count(*) FROM %s", TABLE_HFJ_RES_SEARCH_URL));
+		final List<Map<String, Object>> minusOnePartitionCount = theDatabase.query(String.format("SELECT count(*) FROM %s WHERE %s = -1", TABLE_HFJ_RES_SEARCH_URL, COLUMN_PARTITION_ID));
+
+		final Long minusCount = (Long)minusOnePartitionCount.get(0).values().iterator().next();
+		assertThat(minusCount).isEqualTo(1L);
+		assertThat(allCount.get(0).values().iterator().next()).isEqualTo(1L);
+
+		try (final Connection connection = theDatabase.getDataSource().getConnection()) {
+			final DatabaseMetaData tableMetaData = connection.getMetaData();
+
+			final List<Map<String,String>> actualColumnResults = new ArrayList<>();
+			try (final ResultSet columnsResultSet = tableMetaData.getColumns(null, null, TABLE_HFJ_RES_SEARCH_URL, null)) {
+				while (columnsResultSet.next()) {
+					final Map<String, String> columnMap = new HashMap<>();
+					actualColumnResults.add(columnMap);
+
+					extractAndAddToMap(columnsResultSet, columnMap, METADATA_COLUMN_NAME);
+					extractAndAddToMap(columnsResultSet, columnMap, METADATA_COLUMN_SIZE);
+					extractAndAddToMap(columnsResultSet, columnMap, METADATA_DATA_TYPE);
+					extractAndAddToMap(columnsResultSet, columnMap, METADATA_IS_NULLABLE);
+				}
+			}
+
+			ourLog.info("6145: actualColumnResults: {}", actualColumnResults);
+
+			final List<Map<String,String>> actualPrimaryKeyResults = new ArrayList<>();
+
+			try (final ResultSet primaryKeyResultSet = tableMetaData.getPrimaryKeys(null, null, TABLE_HFJ_RES_SEARCH_URL)) {
+				while (primaryKeyResultSet.next()) {
+					final Map<String, String> primaryKeyMap = new HashMap<>();
+					actualPrimaryKeyResults.add(primaryKeyMap);
+					extractAndAddToMap(primaryKeyResultSet, primaryKeyMap, METADATA_COLUMN_NAME);
+				}
+			}
+
+			final List<Map<String, String>> expectedPrimaryKeyResults = List.of(
+				Map.of(METADATA_COLUMN_NAME, COLUMN_RES_SEARCH_URL),
+				Map.of(METADATA_COLUMN_NAME, COLUMN_PARTITION_ID)
+			);
+
+			assertThat(expectedPrimaryKeyResults).containsAll(actualPrimaryKeyResults);
+
+			final List<Map<String, String>> expectedColumnResults = List.of(
+				Map.of(METADATA_COLUMN_NAME, COLUMN_RES_SEARCH_URL,
+					METADATA_COLUMN_SIZE, "768",
+					METADATA_DATA_TYPE, Integer.toString(Types.VARCHAR),
+					METADATA_IS_NULLABLE, METADATA_IS_NULLABLE_NO),
+				Map.of(METADATA_COLUMN_NAME, "RES_ID",
+					METADATA_COLUMN_SIZE, "64",
+					METADATA_DATA_TYPE, Integer.toString(Types.BIGINT),
+					METADATA_IS_NULLABLE, METADATA_IS_NULLABLE_NO),
+				Map.of(METADATA_COLUMN_NAME, "CREATED_TIME",
+					METADATA_COLUMN_SIZE, "26",
+					METADATA_DATA_TYPE, Integer.toString(Types.TIMESTAMP),
+					METADATA_IS_NULLABLE, METADATA_IS_NULLABLE_NO),
+				Map.of(METADATA_COLUMN_NAME, COLUMN_PARTITION_ID,
+					METADATA_COLUMN_SIZE, "32",
+					METADATA_DATA_TYPE, Integer.toString(Types.INTEGER),
+					METADATA_IS_NULLABLE, METADATA_IS_NULLABLE_NO),
+				Map.of(METADATA_COLUMN_NAME, COLUMN_PARTITION_DATE,
+					METADATA_COLUMN_SIZE, "10",
+					METADATA_DATA_TYPE, Integer.toString(Types.DATE),
+					METADATA_IS_NULLABLE, METADATA_IS_NULLABLE_YES)
+			);
+
+			assertThat(expectedColumnResults).containsAll(actualColumnResults);
+		}
+	}
+
+	private void extractAndAddToMap(ResultSet theResultSet, Map<String,String> theMap, String theColumn) throws SQLException {
+		theMap.put(theColumn, theResultSet.getString(theColumn).toUpperCase());
 	}
 
 	private void checkOutPkSqlResult(JpaEmbeddedDatabase theDatabase, DriverTypeEnum theDriverType) {
-		final String tableName = "hfj_res_search_url";
+//		final String alterTableAddColumnWithDefaultSql = getAddColumnWithDefaultSql(theDriverType,TABLE_HFJ_RES_SEARCH_URL.toLowerCase(), COLUMN_PARTITION_ID.toLowerCase(), "int", "-1");
+//		final String alterTableAddColumnSql = getAddColumnSql(theDriverType, TABLE_HFJ_RES_SEARCH_URL.toLowerCase(), COLUMN_PARTITION_DATE.toLowerCase(), "date");
+//
+//		ourLog.info("6145: BEFORE add partition_id");
+//		theDatabase.executeSqlWithParams(alterTableAddColumnWithDefaultSql);
+//		ourLog.info("6145: AFTER add partition_id");
+//		ourLog.info("6145: BEFORE add partition_date");
+//		theDatabase.executeSqlWithParams(alterTableAddColumnSql);
+//		ourLog.info("6145: AFTER add partition_date");
 
-		final String searchUrlColumn = "res_search_url";
-		final String partitionIdColumn = "partition_id";
-		final String partitionDateColumn = "partition_date";
-
-		final String alterTableAddColumnSql = "ALTER TABLE %s ADD COLUMN %s %s %s";
-
-		ourLog.info("6145: BEFORE add partition_id");
-		theDatabase.executeSqlWithParams(String.format(alterTableAddColumnSql, tableName, partitionIdColumn, "int", "DEFAULT -1"));
-		ourLog.info("6145: AFTER add partition_id");
-		ourLog.info("6145: BEFORE add partition_date");
-		theDatabase.executeSqlWithParams(String.format(alterTableAddColumnSql, tableName, partitionDateColumn, "date", ""));
-		ourLog.info("6145: AFTER add partition_date");
-
-		final List<Map<String, Object>> query = theDatabase.query(getSql(theDriverType), tableName);
+		final List<Map<String, Object>> query = theDatabase.query(getPrimaryKeyForTableSql(theDriverType, TABLE_HFJ_RES_SEARCH_URL.toLowerCase()));
 
 		ourLog.info("6145: query result: {}", query);
 
@@ -132,30 +223,35 @@ public class HapiSchemaMigrationTest {
 		assertEquals(1, query.size());
 		final Collection<Object> rowColumns = query.get(0).values();
 		assertEquals(1, rowColumns.size());
-		final Object pkName = rowColumns.iterator().next();
+		final String primaryKeyName = (String)rowColumns.iterator().next();
 
 		// LUKETODO:  DROP and ADD primary SQL works for Postgres
-		ourLog.info("6145: BEFORE drop primary key: {}", pkName);
+		ourLog.info("6145: BEFORE drop primary key: {}", primaryKeyName);
 
-		final String dropPrimaryKeySql = "ALTER TABLE %s DROP CONSTRAINT %s";
+		final String dropPrimaryKeySql = getDropPrimaryKeySql(theDriverType, TABLE_HFJ_RES_SEARCH_URL.toLowerCase(), primaryKeyName);
 
-		theDatabase.executeSqlWithParams(String.format(dropPrimaryKeySql, tableName, pkName));
+		theDatabase.executeSqlWithParams(dropPrimaryKeySql);
 
-		ourLog.info("6145: AFTER drop primary key: {}", pkName);
+		ourLog.info("6145: AFTER drop primary key: {}", primaryKeyName);
 
-		final String setColumnToNonNull = "ALTER TABLE %s ALTER COLUMN %s SET NOT NULL";
+		final List<Map<String, Object>> countRows = theDatabase.query("SELECT count(*) FROM " + TABLE_HFJ_RES_SEARCH_URL.toLowerCase());
 
-		ourLog.info("6145: BEFORE partition_id NOT NULL: {}", pkName);
+		ourLog.info("6145: countRows: {}", countRows);
 
-		theDatabase.executeSqlWithParams(String.format(setColumnToNonNull, tableName, partitionIdColumn));
+//		// LUKETODO:  update all search URLs to have a default value of -1
+//		theDatabase.executeSqlAsBatch(String.format("UPDATE %s SET %s = %s", TABLE_HFJ_RES_SEARCH_URL.toLowerCase(), COLUMN_PARTITION_ID.toLowerCase(), "-1"));
 
-		ourLog.info("6145: AFTER partition_id NOT NULL: {}", pkName);
+//		ourLog.info("6145: BEFORE partition_id NOT NULL: {}", primaryKeyName);
+//
+//		theDatabase.executeSqlWithParams(getSetColumnToNonNullSql(theDriverType, TABLE_HFJ_RES_SEARCH_URL.toLowerCase(), COLUMN_PARTITION_ID.toLowerCase(), "int"));
+//
+//		ourLog.info("6145: AFTER partition_id NOT NULL: {}", primaryKeyName);
 
 		final String addPrimaryKeySql = "ALTER TABLE %s ADD PRIMARY KEY (%s, %s)";
 
 		ourLog.info("6145: BEFORE add primary key");
 
-		theDatabase.executeSqlWithParams(String.format(addPrimaryKeySql, tableName, searchUrlColumn, partitionIdColumn));
+		theDatabase.executeSqlWithParams(String.format(addPrimaryKeySql, TABLE_HFJ_RES_SEARCH_URL.toLowerCase(), COLUMN_RES_SEARCH_URL.toUpperCase(), COLUMN_PARTITION_ID.toLowerCase()));
 
 		ourLog.info("6145: AFTER add primary key");
 
@@ -178,57 +274,113 @@ Foreign-key constraints:
 	}
 
 	@Language("SQL")
-	private static String getSql(DriverTypeEnum theDriverType) {
+	private static String getDropPrimaryKeySql(DriverTypeEnum theDriverType, String theTableName, String thePrimaryKeyName) {
+
 		return switch (theDriverType) {
+			case COCKROACHDB_21_1 -> null;
+			case DERBY_EMBEDDED -> null;
+			case MARIADB_10_1 -> null;
+			case MYSQL_5_7 -> null;
 			case H2_EMBEDDED ->
-				"""
-				SELECT index_name
-				FROM information_schema.indexes
-				WHERE table_schema = 'PUBLIC' AND
-				table_name = ? AND
-				index_type_name = 'PRIMARY KEY';
-				""";
+				String.format("ALTER TABLE %s DROP PRIMARY KEY", theTableName);
+			case POSTGRES_9_4, ORACLE_12C, MSSQL_2012 ->
+				String.format("ALTER TABLE %s DROP CONSTRAINT %s", theTableName, thePrimaryKeyName);
+		};
+	}
+
+	@Language("SQL")
+	private static String getSetColumnToNonNullSql(DriverTypeEnum theDriverType, String theTableName, String theColumnName, String theColumnType) {
+		return switch (theDriverType) {
+			case COCKROACHDB_21_1 -> null;
+			case DERBY_EMBEDDED -> null;
+			case MARIADB_10_1 -> null;
+			case MYSQL_5_7 -> null;
+			case POSTGRES_9_4, H2_EMBEDDED ->
+				String.format("ALTER TABLE %s ALTER COLUMN %s SET NOT NULL", theTableName, theColumnName);
+			case ORACLE_12C, MSSQL_2012 ->
+				String.format("ALTER TABLE %s ALTER COLUMN %s %s NOT NULL", theTableName, theColumnName, theColumnType);
+		};
+	}
+
+	@Language("SQL")
+	private static String getAddColumnWithDefaultSql(DriverTypeEnum theDriverType, String theTableName, String theColumnName, String theColumnType, String theDefaultValue) {
+		return switch (theDriverType) {
+			case COCKROACHDB_21_1 -> null;
 			case DERBY_EMBEDDED -> null;
 			case MARIADB_10_1 -> null;
 			case MYSQL_5_7 -> null;
 			case POSTGRES_9_4 ->
-				// LUKETODO:  this works:  copy over to DropPrimaryKeyTask
-				"""
-				SELECT constraint_name 
-				FROM information_schema.table_constraints
-				WHERE table_schema = 'public'
-				AND table_name = ?
-				AND constraint_type = 'PRIMARY KEY'
-				""";
-			case ORACLE_12C ->
-				"""
-				SELECT constraint_name, constraint_type
-				FROM user_constraints
-				WHERE table_name = ?
-				""";
-			case MSSQL_2012 ->
-				"""
-				SELECT tc.constraint_name 
-				FROM information_schema.table_constraints tc
-				JOIN information_schema.constraint_column_usage ccu ON tc.constraint_name = ccu.constraint_name
-				WHERE tc.table_name = ? AND 
-				tc.constraint_type = 'PRIMARY KEY'
-				""";
+				String.format("ALTER TABLE %s ADD COLUMN %s %s DEFAULT %s", theTableName, theColumnName, theColumnType, theDefaultValue);
+			case H2_EMBEDDED, ORACLE_12C, MSSQL_2012 ->
+				String.format("ALTER TABLE %s ADD %s %s DEFAULT %s", theTableName, theColumnName, theColumnType, theDefaultValue);
+		};
+	}
 
-//			SELECT tc.*, ccu.*
-//			select C.COLUMN_NAME FROM
-//			INFORMATION_SCHEMA.TABLE_CONSTRAINTS T
-//			JOIN INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE C
-//			ON C.CONSTRAINT_NAME=T.CONSTRAINT_NAME
-//			WHERE
-//			C.TABLE_NAME='Employee'
-//			and T.CONSTRAINT_TYPE='PRIMARY KEY'
+	@Language("SQL")
+	private static String getAddColumnSql(DriverTypeEnum theDriverType, String theTableName, String theColumnName, String theColumnType) {
+		return switch (theDriverType) {
+			case COCKROACHDB_21_1 -> null;
+			case DERBY_EMBEDDED -> null;
+			case MARIADB_10_1 -> null;
+			case MYSQL_5_7 -> null;
+			case POSTGRES_9_4 ->
+				String.format("ALTER TABLE %s ADD COLUMN %s %s", theTableName, theColumnName, theColumnType);
+			case H2_EMBEDDED, ORACLE_12C, MSSQL_2012 ->
+				String.format("ALTER TABLE %s ADD %s %s", theTableName, theColumnName, theColumnType);
+		};
+	}
+
+	@Language("SQL")
+	private static String getPrimaryKeyForTableSql(DriverTypeEnum theDriverType, String theTableName) {
+		return switch (theDriverType) {
+			case H2_EMBEDDED ->
+				String.format(
+					"""
+					SELECT index_name
+					FROM information_schema.indexes
+					WHERE table_schema = 'PUBLIC' AND
+					table_name = '%s' AND
+					index_type_name = 'PRIMARY KEY';
+					""",
+					theTableName.toUpperCase());
+			case DERBY_EMBEDDED -> null;
+			case MARIADB_10_1 -> null;
+			case MYSQL_5_7 -> null;
+			case POSTGRES_9_4 ->
+				String.format(
+					"""
+					SELECT constraint_name
+					FROM information_schema.table_constraints
+					WHERE table_schema = 'public'
+					AND table_name = '%s'
+					AND constraint_type = 'PRIMARY KEY'
+					""",
+					theTableName);
+			case ORACLE_12C ->
+				String.format(
+					"""
+					SELECT constraint_name, constraint_type
+					FROM user_constraints
+					WHERE table_name = '%s'
+					""",
+					theTableName);
+			case MSSQL_2012 ->
+				String.format(
+					"""
+					SELECT tc.constraint_name
+					FROM information_schema.table_constraints tc
+					JOIN information_schema.constraint_column_usage ccu ON tc.constraint_name = ccu.constraint_name
+					WHERE tc.table_name = '%s' AND
+					tc.constraint_type = 'PRIMARY KEY'
+					""",
+					theTableName);
+
 			case COCKROACHDB_21_1 -> null;
 		};
 	}
 
-	private static void migrate(DriverTypeEnum theDriverType, DataSource dataSource, HapiMigrationStorageSvc hapiMigrationStorageSvc, VersionEnum to) throws SQLException {
-		MigrationTaskList migrationTasks = new HapiFhirJpaMigrationTasks(Collections.emptySet()).getAllTasks(new VersionEnum[]{to});
+	private static void migrate(DriverTypeEnum theDriverType, DataSource dataSource, HapiMigrationStorageSvc hapiMigrationStorageSvc, VersionEnum to) {
+		MigrationTaskList migrationTasks = new HapiFhirJpaMigrationTasks(Collections.emptySet()).getAllTasks(to);
 		SchemaMigrator schemaMigrator = new SchemaMigrator(TEST_SCHEMA_NAME, HAPI_FHIR_MIGRATION_TABLENAME, dataSource, new Properties(), migrationTasks, hapiMigrationStorageSvc);
 		schemaMigrator.setDriverType(theDriverType);
 		schemaMigrator.createMigrationTableIfRequired();

@@ -36,6 +36,7 @@ import ca.uhn.fhir.jpa.migrate.taskdef.DropColumnTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.DropForeignKeyTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.DropIdGeneratorTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.DropIndexTask;
+import ca.uhn.fhir.jpa.migrate.taskdef.DropPrimaryKeyTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.DropTableTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.ExecuteRawSqlTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.ExecuteTaskPrecondition;
@@ -380,7 +381,12 @@ public class Builder {
 			return new BuilderCompleteTask(task);
 		}
 
-		public class BuilderAddIndexWithName {
+		public void dropPrimaryKey(String theVersion) {
+			final DropPrimaryKeyTask task = new DropPrimaryKeyTask(myRelease, theVersion, myTableName);
+			addTask(task);
+		}
+
+        public class BuilderAddIndexWithName {
 			private final String myVersion;
 			private final String myIndexName;
 

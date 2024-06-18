@@ -115,6 +115,7 @@ public abstract class JpaEmbeddedDatabase {
 
 	// LUKETODO:  clean up if unused
 	public void executeSqlWithParams(String theSql, Object... theParams) {
+		ourLog.info("Executing SQL: {}", theSql);
 		try (final PreparedStatement preparedStatement = myConnection.prepareStatement(theSql)) {
 
 			for (int index = 0; index < theParams.length; index++) {
@@ -122,8 +123,8 @@ public abstract class JpaEmbeddedDatabase {
 			}
 
 			preparedStatement.execute();
-		} catch (Exception e) {
-			throw new RuntimeException(e);
+		} catch (Exception exception) {
+			throw new RuntimeException(String.format("Execute SQL: [%s] failed with error: %s", theSql, exception.getMessage()), exception);
 		}
 	}
 
