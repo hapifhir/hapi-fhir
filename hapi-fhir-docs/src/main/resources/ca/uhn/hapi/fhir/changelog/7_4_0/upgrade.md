@@ -10,11 +10,9 @@
 To update columns to nullable in such a scenario, execute steps below:
 
 1. Indexes that include `sp_name` or `res_type` columns should be dropped:
-
 ```sql
 DROP INDEX IDX_SP_TOKEN_REST_TYPE_SP_NAME ON HFJ_SPIDX_TOKEN;
 ```
-
 2.  The nullability of `sp_name` and `res_type` columns should be updated:
 
 ```sql
