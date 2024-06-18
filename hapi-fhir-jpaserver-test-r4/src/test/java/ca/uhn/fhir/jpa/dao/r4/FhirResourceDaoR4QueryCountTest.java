@@ -50,7 +50,6 @@ import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.HapiExtensions;
 import jakarta.annotation.Nonnull;
-import org.hamcrest.CoreMatchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
@@ -1159,7 +1158,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
         runInTransaction(() -> {
             assertEquals(25L, myResourceTableDao.count());
-            assertEquals(20L, myResourceIndexedCompositeStringUniqueDao.count());
+            assertEquals(20L, myResourceIndexedComboStringUniqueDao.count());
             assertEquals(20L, myResourceIndexedComboTokensNonUniqueDao.count());
         });
 

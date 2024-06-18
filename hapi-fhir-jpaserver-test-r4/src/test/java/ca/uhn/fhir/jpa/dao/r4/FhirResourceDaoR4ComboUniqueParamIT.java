@@ -69,7 +69,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 
 	@AfterEach
 	public void purgeUniqueIndexes() {
-		myResourceIndexedCompositeStringUniqueDao.deleteAll();
+		myResourceIndexedComboStringUniqueDao.deleteAll();
 	}
 
 	private void createUniqueBirthdateAndGenderSps() {
@@ -383,7 +383,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		myCaptureQueriesListener.logInsertQueries();
 
 		List<ResourceIndexedComboStringUnique> values = runInTransaction(()->{
-			return myResourceIndexedCompositeStringUniqueDao.findAllForResourceIdForUnitTest(id.getIdPartAsLong());
+			return myResourceIndexedComboStringUniqueDao.findAllForResourceIdForUnitTest(id.getIdPartAsLong());
 		});
 		assertEquals(2, values.size());
 		values.sort(Comparator.comparing(ResourceIndexedComboStringUnique::getIndexString));
@@ -404,7 +404,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		myPatientDao.update(pt, mySrd);
 
 		values = runInTransaction(()->{
-			return myResourceIndexedCompositeStringUniqueDao.findAllForResourceIdForUnitTest(id.getIdPartAsLong());
+			return myResourceIndexedComboStringUniqueDao.findAllForResourceIdForUnitTest(id.getIdPartAsLong());
 		});
 		assertEquals(2, values.size());
 		values.sort(Comparator.comparing(ResourceIndexedComboStringUnique::getIndexString));
@@ -659,7 +659,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 
 		// Make sure entries are saved
 		runInTransaction(() -> {
-			List<ResourceIndexedComboStringUnique> all = myResourceIndexedCompositeStringUniqueDao.findAll();
+			List<ResourceIndexedComboStringUnique> all = myResourceIndexedComboStringUniqueDao.findAll();
 			assertEquals(2, all.size());
 		});
 
@@ -703,7 +703,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus status) {
-				List<ResourceIndexedComboStringUnique> all = myResourceIndexedCompositeStringUniqueDao.findAll();
+				List<ResourceIndexedComboStringUnique> all = myResourceIndexedComboStringUniqueDao.findAll();
 				assertEquals(2, all.size());
 			}
 		});
@@ -757,14 +757,14 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		executeReindex();
 
 		runInTransaction(() -> {
-			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
+			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedComboStringUniqueDao.findAll();
 			assertEquals(1, uniques.size(), uniques.toString());
 			assertThat(uniques.get(0).getResource().getIdDt().toUnqualifiedVersionless().getValue()).isIn(
 				"Observation/" + id2.getIdPart(),
 				"Observation/" + id3.getIdPart());
 			assertEquals("Observation?code=foo%7Cbar&date=2011-01-01&subject=Patient%2F" + id1.getIdPart(), uniques.get(0).getIndexString());
 
-			myResourceIndexedCompositeStringUniqueDao.deleteAll();
+			myResourceIndexedComboStringUniqueDao.deleteAll();
 		});
 
 		assertThat(mySearchParamRegistry.getActiveComboSearchParams("Observation")).hasSize(1);
@@ -772,7 +772,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		executeReindex();
 
 		runInTransaction(() -> {
-			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
+			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedComboStringUniqueDao.findAll();
 			assertEquals(1, uniques.size(), uniques.toString());
 			assertThat(uniques.get(0).getResource().getIdDt().toUnqualifiedVersionless().getValue()).isIn(
 				"Observation/" + id2.getIdPart(),
@@ -845,7 +845,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus status) {
-				List<ResourceIndexedComboStringUnique> all = myResourceIndexedCompositeStringUniqueDao.findAll();
+				List<ResourceIndexedComboStringUnique> all = myResourceIndexedComboStringUniqueDao.findAll();
 				assertEquals(2, all.size());
 			}
 		});
@@ -863,7 +863,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus status) {
-				List<ResourceIndexedComboStringUnique> all = myResourceIndexedCompositeStringUniqueDao.findAll();
+				List<ResourceIndexedComboStringUnique> all = myResourceIndexedComboStringUniqueDao.findAll();
 				assertEquals(1, all.size());
 			}
 		});
@@ -877,7 +877,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus status) {
-				List<ResourceIndexedComboStringUnique> all = myResourceIndexedCompositeStringUniqueDao.findAll();
+				List<ResourceIndexedComboStringUnique> all = myResourceIndexedComboStringUniqueDao.findAll();
 				assertEquals(1, all.size());
 			}
 		});
@@ -902,7 +902,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		createUniqueIndexCoverageBeneficiary();
 
 		runInTransaction(() -> {
-			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
+			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedComboStringUniqueDao.findAll();
 			assertEquals(0, uniques.size(), uniques.toString());
 		});
 
@@ -921,7 +921,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		});
 
 		runInTransaction(() -> {
-			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
+			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedComboStringUniqueDao.findAll();
 			ourLog.info("** Uniques: {}", uniques);
 			assertEquals(1, uniques.size(), uniques.toString());
 			assertEquals("Coverage/" + id3.getIdPart(), uniques.get(0).getResource().getIdDt().toUnqualifiedVersionless().getValue());
@@ -1104,7 +1104,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus status) {
-				List<ResourceIndexedComboStringUnique> all = myResourceIndexedCompositeStringUniqueDao.findAll();
+				List<ResourceIndexedComboStringUnique> all = myResourceIndexedComboStringUniqueDao.findAll();
 				assertEquals(1, all.size(), all.toString());
 			}
 		});
@@ -1214,7 +1214,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		pt1.setBirthDateElement(new DateType("2011-01-01"));
 		IIdType id1 = myPatientDao.create(pt1, mySrd).getId().toUnqualifiedVersionless();
 
-		List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
+		List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedComboStringUniqueDao.findAll();
 		assertThat(uniques.size()).as(uniques.toString()).isEqualTo(1);
 		assertEquals("Patient/" + id1.getIdPart(), uniques.get(0).getResource().getIdDt().toUnqualifiedVersionless().getValue());
 		assertEquals("Patient?birthdate=2011-01-01&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale", uniques.get(0).getIndexString());
@@ -1226,7 +1226,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 
 		runInTransaction(() -> {
 			List<ResourceIndexedComboStringUnique> uniques;
-			uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
+			uniques = myResourceIndexedComboStringUniqueDao.findAll();
 			assertEquals(0, uniques.size(), uniques.toString());
 		});
 
@@ -1247,7 +1247,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		ourLog.info("ID1: {}  -  ID2: {}   - ID3:  {}", id1, id2, id3);
 
 		runInTransaction(() -> {
-			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
+			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedComboStringUniqueDao.findAll();
 			assertEquals(1, uniques.size(), uniques.toString());
 			assertEquals("Observation/" + id2.getIdPart(), uniques.get(0).getResource().getIdDt().toUnqualifiedVersionless().getValue());
 			assertEquals("Observation?code=foo%7Cbar&date=2011-01-01&subject=Patient%2F" + id1.getIdPart(), uniques.get(0).getIndexString());
@@ -1275,7 +1275,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		myMessages.clear();
 
 		runInTransaction(() -> {
-			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
+			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedComboStringUniqueDao.findAll();
 			assertEquals(1, uniques.size());
 			assertEquals("Patient/" + id1.getIdPart(), uniques.get(0).getResource().getIdDt().toUnqualifiedVersionless().getValue());
 			assertEquals("Patient?name=FAMILY1&organization=Organization%2FORG", uniques.get(0).getIndexString());
@@ -1293,7 +1293,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		assertThat(myMessages.toString()).contains("Using UNIQUE index for query for search: Patient?name=FAMILY1&organization=Organization%2FORG");
 		myMessages.clear();
 		runInTransaction(() -> {
-			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
+			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedComboStringUniqueDao.findAll();
 			assertEquals(1, uniques.size());
 			assertEquals("Patient/" + id2.getIdPart(), uniques.get(0).getResource().getIdDt().toUnqualifiedVersionless().getValue());
 			assertEquals("Patient?name=FAMILY1&organization=Organization%2FORG", uniques.get(0).getIndexString());
@@ -1319,7 +1319,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		pt1.setManagingOrganization(new Reference("Organization/ORG"));
 		IIdType id1 = myPatientDao.create(pt1, mySrd).getId().toUnqualifiedVersionless();
 
-		List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
+		List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedComboStringUniqueDao.findAll();
 		Collections.sort(uniques);
 
 		assertThat(uniques).hasSize(3);
@@ -1348,7 +1348,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		IIdType id1 = myPatientDao.update(pt1, "Patient?name=FAMILY1&organization.name=ORG", mySrd).getId().toUnqualifiedVersionless();
 
 		runInTransaction(() -> {
-			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
+			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedComboStringUniqueDao.findAll();
 			assertEquals(1, uniques.size());
 			assertEquals("Patient/" + id1.getIdPart(), uniques.get(0).getResource().getIdDt().toUnqualifiedVersionless().getValue());
 			assertEquals("Patient?name=FAMILY1&organization=Organization%2FORG", uniques.get(0).getIndexString());
@@ -1362,7 +1362,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		myPatientDao.update(pt1, "Patient?name=FAMILY1&organization.name=ORG", mySrd).getId().toUnqualifiedVersionless();
 
 		runInTransaction(() -> {
-			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
+			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedComboStringUniqueDao.findAll();
 			assertEquals(1, uniques.size());
 			assertEquals("Patient/" + id1.getIdPart(), uniques.get(0).getResource().getIdDt().toUnqualifiedVersionless().getValue());
 			assertEquals("Patient?name=FAMILY1&organization=Organization%2FORG", uniques.get(0).getIndexString());
@@ -1407,7 +1407,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		IIdType id1 = new IdType(resp.getEntry().get(1).getResponse().getLocation());
 
 		runInTransaction(() -> {
-			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
+			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedComboStringUniqueDao.findAll();
 			assertEquals(1, uniques.size());
 			assertEquals("Patient/" + id1.getIdPart(), uniques.get(0).getResource().getIdDt().toUnqualifiedVersionless().getValue());
 			assertEquals("Patient?name=FAMILY1&organization=Organization%2FORG", uniques.get(0).getIndexString());
@@ -1444,7 +1444,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		IdType id2 = new IdType(resp.getEntry().get(1).getResponse().getLocation());
 
 		runInTransaction(() -> {
-			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
+			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedComboStringUniqueDao.findAll();
 			assertEquals(1, uniques.size());
 			assertEquals("Patient/" + id2.getIdPart(), uniques.get(0).getResource().getIdDt().toUnqualifiedVersionless().getValue());
 			assertEquals("Patient?name=FAMILY1&organization=Organization%2FORG", uniques.get(0).getIndexString());
@@ -1461,14 +1461,14 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		pt.setGender(Enumerations.AdministrativeGender.MALE);
 		myPatientDao.create(pt, mySrd).getId().toUnqualifiedVersionless();
 		runInTransaction(() -> {
-			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
+			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedComboStringUniqueDao.findAll();
 			assertEquals(0, uniques.size(), uniques.toString());
 		});
 
 		pt = new Patient();
 		myPatientDao.create(pt, mySrd).getId().toUnqualifiedVersionless();
 		runInTransaction(() -> {
-			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
+			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedComboStringUniqueDao.findAll();
 			assertEquals(0, uniques.size(), uniques.toString());
 		});
 
@@ -1478,7 +1478,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		myPatientDao.create(pt, mySrd).getId().toUnqualifiedVersionless();
 
 		runInTransaction(() -> {
-			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
+			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedComboStringUniqueDao.findAll();
 			assertEquals(0, uniques.size(), uniques.toString());
 		});
 	}
@@ -1498,7 +1498,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		pt.setManagingOrganization(new Reference("Organization/ORG"));
 		myPatientDao.create(pt, mySrd).getId().toUnqualifiedVersionless();
 		runInTransaction(() -> {
-			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
+			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedComboStringUniqueDao.findAll();
 			assertEquals(0, uniques.size(), uniques.toString());
 		});
 
@@ -1510,7 +1510,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 			.addGiven("GIVEN2"); // GIVEN2 happens twice
 		myPatientDao.create(pt, mySrd).getId().toUnqualifiedVersionless();
 		runInTransaction(() -> {
-			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
+			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedComboStringUniqueDao.findAll();
 			assertEquals(0, uniques.size(), uniques.toString());
 		});
 		pt = new Patient();
@@ -1518,7 +1518,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		myPatientDao.create(pt, mySrd).getId().toUnqualifiedVersionless();
 
 		runInTransaction(() -> {
-			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
+			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedComboStringUniqueDao.findAll();
 			assertEquals(0, uniques.size(), uniques.toString());
 		});
 	}
@@ -1544,18 +1544,18 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		executeReindex();
 
 		runInTransaction(() -> {
-			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
+			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedComboStringUniqueDao.findAll();
 			assertEquals(1, uniques.size(), uniques.toString());
 			assertEquals("Observation/" + id2.getIdPart(), uniques.get(0).getResource().getIdDt().toUnqualifiedVersionless().getValue());
 			assertEquals("Observation?code=foo%7Cbar&date=2011-01-01&subject=Patient%2F" + id1.getIdPart(), uniques.get(0).getIndexString());
 		});
 
-		runInTransaction(() -> myResourceIndexedCompositeStringUniqueDao.deleteAll());
+		runInTransaction(() -> myResourceIndexedComboStringUniqueDao.deleteAll());
 
 		executeReindex();
 
 		runInTransaction(() -> {
-			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
+			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedComboStringUniqueDao.findAll();
 			assertEquals(1, uniques.size(), uniques.toString());
 			assertEquals("Observation/" + id2.getIdPart(), uniques.get(0).getResource().getIdDt().toUnqualifiedVersionless().getValue());
 			assertEquals("Observation?code=foo%7Cbar&date=2011-01-01&subject=Patient%2F" + id1.getIdPart(), uniques.get(0).getIndexString());

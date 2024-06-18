@@ -42,6 +42,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import static ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam.hash;
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 @Entity()
 @Table(
@@ -212,14 +213,25 @@ public class ResourceIndexedComboStringUnique extends BaseResourceIndexedCombo
 	}
 
 	@Override
+	public void setPlaceholderHashesIfMissing() {
+		super.setPlaceholderHashesIfMissing();
+
+		myHashComplete = 0L;
+		myHashIdentity = 0L;
+	}
+
+
+	@Override
 	public void calculateHashes() {
 		if (myHashComplete == null) {
 			PartitionSettings partitionSettings = getPartitionSettings();
 			PartitionablePartitionId partitionId = getPartitionId();
 			String queryString = myIndexString;
 
-			setHashIdentity(calculateHashIdentity(partitionSettings, partitionId, getSearchParameterId()));
-			setHashComplete(calculateHashComplete(partitionSettings, partitionId, getSearchParameterId(), queryString));
+			String searchParameterId = getSearchParameterId();
+
+			setHashIdentity(calculateHashIdentity(partitionSettings, partitionId, searchParameterId));
+			setHashComplete(calculateHashComplete(partitionSettings, partitionId, searchParameterId, queryString));
 		}
 	}
 
@@ -258,6 +270,8 @@ public class ResourceIndexedComboStringUnique extends BaseResourceIndexedCombo
 				.append("id", myId)
 				.append("resourceId", myResourceId)
 				.append("indexString", myIndexString)
+				.append("hashIdentity", myHashIdentity)
+				.append("hashComplete", myHashComplete)
 				.append("partition", getPartitionId())
 				.toString();
 	}

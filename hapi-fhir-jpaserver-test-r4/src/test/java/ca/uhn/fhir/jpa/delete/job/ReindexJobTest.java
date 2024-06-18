@@ -15,6 +15,8 @@ import ca.uhn.fhir.jpa.api.dao.ReindexParameters;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboTokenNonUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
@@ -44,6 +46,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+@SuppressWarnings("SqlDialectInspection")
 public class ReindexJobTest extends BaseJpaR4Test {
 
 	@Autowired
@@ -65,7 +68,6 @@ public class ReindexJobTest extends BaseJpaR4Test {
 	@AfterEach
 	public void after() {
 		myInterceptorRegistry.unregisterAllAnonymousInterceptors();
-		myStorageSettings.setInlineResourceTextBelowSize(new JpaStorageSettings().getInlineResourceTextBelowSize());
 		myStorageSettings.setStoreMetaSourceInformation(new JpaStorageSettings().getStoreMetaSourceInformation());
 		myStorageSettings.setPreserveRequestIdInResourceBody(new JpaStorageSettings().isPreserveRequestIdInResourceBody());
 	}
@@ -98,8 +100,6 @@ public class ReindexJobTest extends BaseJpaR4Test {
 			}
 		});
 
-		myStorageSettings.setInlineResourceTextBelowSize(10000);
-
 		// execute
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
 		startRequest.setJobDefinitionId(ReindexAppCtx.JOB_REINDEX);
@@ -108,7 +108,7 @@ public class ReindexJobTest extends BaseJpaR4Test {
 				.setOptimizeStorage(ReindexParameters.OptimizeStorageModeEnum.CURRENT_VERSION)
 				.setReindexSearchParameters(ReindexParameters.ReindexSearchParametersEnum.NONE)
 		);
-		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(startRequest);
+		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(mySrd, startRequest);
 		myBatch2JobHelper.awaitJobCompletion(startResponse);
 
 		// validate
@@ -165,7 +165,7 @@ public class ReindexJobTest extends BaseJpaR4Test {
 				.setOptimizeStorage(ReindexParameters.OptimizeStorageModeEnum.ALL_VERSIONS)
 				.setReindexSearchParameters(ReindexParameters.ReindexSearchParametersEnum.NONE)
 		);
-		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(startRequest);
+		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(mySrd, startRequest);
 		myBatch2JobHelper.awaitJobCompletion(startResponse);
 
 		// validate
@@ -224,7 +224,7 @@ public class ReindexJobTest extends BaseJpaR4Test {
 				.setOptimizeStorage(ReindexParameters.OptimizeStorageModeEnum.ALL_VERSIONS)
 				.setReindexSearchParameters(ReindexParameters.ReindexSearchParametersEnum.NONE)
 		);
-		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(startRequest);
+		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(mySrd, startRequest);
 		myBatch2JobHelper.awaitJobCompletion(startResponse);
 
 		// validate
@@ -250,8 +250,6 @@ public class ReindexJobTest extends BaseJpaR4Test {
 			IIdType nextId = createPatient(withActiveTrue());
 			myPatientDao.delete(nextId, mySrd);
 		}
-
-		myStorageSettings.setInlineResourceTextBelowSize(10000);
 
 		// execute
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
@@ -299,7 +297,7 @@ public class ReindexJobTest extends BaseJpaR4Test {
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
 		startRequest.setJobDefinitionId(ReindexAppCtx.JOB_REINDEX);
 		startRequest.setParameters(parameters);
-		Batch2JobStartResponse res = myJobCoordinator.startInstance(startRequest);
+		Batch2JobStartResponse res = myJobCoordinator.startInstance(mySrd, startRequest);
 		myBatch2JobHelper.awaitJobCompletion(res);
 
 		// validate
@@ -338,7 +336,7 @@ public class ReindexJobTest extends BaseJpaR4Test {
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
 		startRequest.setJobDefinitionId(ReindexAppCtx.JOB_REINDEX);
 		startRequest.setParameters(parameters);
-		Batch2JobStartResponse res = myJobCoordinator.startInstance(startRequest);
+		Batch2JobStartResponse res = myJobCoordinator.startInstance(mySrd, startRequest);
 		myBatch2JobHelper.awaitJobCompletion(res);
 
 		// then
@@ -369,7 +367,7 @@ public class ReindexJobTest extends BaseJpaR4Test {
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
 		startRequest.setJobDefinitionId(ReindexAppCtx.JOB_REINDEX);
 		startRequest.setParameters(new ReindexJobParameters());
-		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(startRequest);
+		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(mySrd, startRequest);
 		myBatch2JobHelper.awaitJobCompletion(startResponse);
 
 		// validate
@@ -380,8 +378,8 @@ public class ReindexJobTest extends BaseJpaR4Test {
 
 	@Test
 	public void testReindex_DuplicateResourceBeforeEnforceUniqueShouldSaveWarning() {
-		myReindexTestHelper.createObservationWithCode();
-		myReindexTestHelper.createObservationWithCode();
+		myReindexTestHelper.createObservationWithStatusAndCode();
+		myReindexTestHelper.createObservationWithStatusAndCode();
 
 		DaoMethodOutcome searchParameter = myReindexTestHelper.createUniqueCodeSearchParameter();
 
@@ -401,25 +399,66 @@ public class ReindexJobTest extends BaseJpaR4Test {
 	 * the unique index table non-nullable.
 	 */
 	@Test
-	public void testReindex_UniqueHashesShouldBePopulated() {
-		myReindexTestHelper.createObservationWithCode();
-		myReindexTestHelper.createObservationWithCode();
+	public void testReindex_ComboUnique_HashesShouldBePopulated() {
+		myReindexTestHelper.createUniqueCodeSearchParameter();
+		myReindexTestHelper.createObservationWithStatusAndCode();
+		logAllUniqueIndexes();
 
-		DaoMethodOutcome searchParameter = myReindexTestHelper.createUniqueCodeSearchParameter();
+		// Clear hashes
+		runInTransaction(()->{
+			assertEquals(1, myEntityManager.createNativeQuery("UPDATE HFJ_IDX_CMP_STRING_UNIQ SET HASH_IDENTITY = null WHERE HASH_IDENTITY IS NOT NULL").executeUpdate());
+			assertEquals(0, myEntityManager.createNativeQuery("UPDATE HFJ_IDX_CMP_STRING_UNIQ SET HASH_IDENTITY = null WHERE HASH_IDENTITY IS NOT NULL").executeUpdate());
+			assertEquals(1, myEntityManager.createNativeQuery("UPDATE HFJ_IDX_CMP_STRING_UNIQ SET HASH_COMPLETE = null WHERE HASH_COMPLETE IS NOT NULL").executeUpdate());
+			assertEquals(0, myEntityManager.createNativeQuery("UPDATE HFJ_IDX_CMP_STRING_UNIQ SET HASH_COMPLETE = null WHERE HASH_COMPLETE IS NOT NULL").executeUpdate());
+		});
 
+		// Run a reindex
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
 		startRequest.setJobDefinitionId(ReindexAppCtx.JOB_REINDEX);
 		startRequest.setParameters(new ReindexJobParameters());
 		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(new SystemRequestDetails(), startRequest);
-		JobInstance myJob = myBatch2JobHelper.awaitJobCompletion(startResponse);
-
+		JobInstance myJob = myBatch2JobHelper.awaitJobCompletion(startResponse.getInstanceId(), 999);
 		assertEquals(StatusEnum.COMPLETED, myJob.getStatus());
-		assertNotNull(myJob.getWarningMessages());
-		assertThat(myJob.getWarningMessages()).contains("Failed to reindex resource because unique search parameter " + searchParameter.getEntity().getIdDt().toVersionless().toString());
 
-		// Write this test
-		fail();
+		// Verify that hashes are repopulated
+		runInTransaction(()->{
+			List<ResourceIndexedComboStringUnique> indexes = myResourceIndexedComboStringUniqueDao.findAll();
+			assertEquals(1, indexes.size());
+			assertThat(indexes.get(0).getHashIdentity()).isNotNull().isNotZero();
+			assertThat(indexes.get(0).getHashComplete()).isNotNull().isNotZero();
+		});
+	}
 
+	/**
+	 * This test will fail and can be deleted if we make the hash columns on
+	 * the unique index table non-nullable.
+	 */
+	@Test
+	public void testReindex_ComboNonUnique_HashesShouldBePopulated() {
+		myReindexTestHelper.createNonUniqueStatusAndCodeSearchParameter();
+		myReindexTestHelper.createObservationWithStatusAndCode();
+		logAllNonUniqueIndexes();
+
+		// Set hash wrong
+		runInTransaction(()->{
+			assertEquals(1, myEntityManager.createNativeQuery("UPDATE HFJ_IDX_CMB_TOK_NU SET HASH_COMPLETE = 0 WHERE HASH_COMPLETE != 0").executeUpdate());
+			assertEquals(0, myEntityManager.createNativeQuery("UPDATE HFJ_IDX_CMB_TOK_NU SET HASH_COMPLETE = 0 WHERE HASH_COMPLETE != 0").executeUpdate());
+		});
+
+		// Run a reindex
+		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
+		startRequest.setJobDefinitionId(ReindexAppCtx.JOB_REINDEX);
+		startRequest.setParameters(new ReindexJobParameters());
+		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(new SystemRequestDetails(), startRequest);
+		JobInstance myJob = myBatch2JobHelper.awaitJobCompletion(startResponse.getInstanceId(), 999);
+		assertEquals(StatusEnum.COMPLETED, myJob.getStatus());
+
+		// Verify that hashes are repopulated
+		runInTransaction(()->{
+			List<ResourceIndexedComboTokenNonUnique> indexes = myResourceIndexedComboTokensNonUniqueDao.findAll();
+			assertEquals(1, indexes.size());
+			assertEquals(-4763890811650597657L, indexes.get(0).getHashComplete());
+		});
 	}
 
 	@Test
@@ -441,7 +480,7 @@ public class ReindexJobTest extends BaseJpaR4Test {
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
 		startRequest.setJobDefinitionId(ReindexAppCtx.JOB_REINDEX);
 		startRequest.setParameters(new ReindexJobParameters());
-		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(startRequest);
+		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(mySrd, startRequest);
 		JobInstance outcome = myBatch2JobHelper.awaitJobCompletion(startResponse);
 
 		// Verify
@@ -487,7 +526,7 @@ public class ReindexJobTest extends BaseJpaR4Test {
 		myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(true);
 
 		// create an Observation resource and SearchParameter for it to trigger re-indexing
-		myReindexTestHelper.createObservationWithCode();
+		myReindexTestHelper.createObservationWithStatusAndCode();
 		myReindexTestHelper.createCodeSearchParameter();
 
 		// check that reindex job was created

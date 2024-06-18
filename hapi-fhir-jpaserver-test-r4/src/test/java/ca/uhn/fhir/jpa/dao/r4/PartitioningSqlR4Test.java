@@ -50,7 +50,6 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.BundleBuilder;
 import org.apache.commons.lang3.StringUtils;
-import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -473,7 +472,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			assertLocalDateFromDbMatches(myPartitionDate, presents.get(0).getPartitionId().getPartitionDate());
 
 			// HFJ_IDX_CMP_STRING_UNIQ
-			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAllForResourceIdForUnitTest(patientId);
+			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedComboStringUniqueDao.findAllForResourceIdForUnitTest(patientId);
 			assertEquals(1, uniques.size());
 			assertEquals(myPartitionId, uniques.get(0).getPartitionId().getPartitionId().intValue());
 			assertLocalDateFromDbMatches(myPartitionDate, uniques.get(0).getPartitionId().getPartitionDate());
@@ -560,7 +559,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			assertLocalDateFromDbMatches(myPartitionDate, presents.get(0).getPartitionId().getPartitionDate());
 
 			// HFJ_IDX_CMP_STRING_UNIQ
-			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAllForResourceIdForUnitTest(patientId);
+			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedComboStringUniqueDao.findAllForResourceIdForUnitTest(patientId);
 			assertEquals(1, uniques.size());
             assertNull(uniques.get(0).getPartitionId().getPartitionId());
 			assertLocalDateFromDbMatches(myPartitionDate, uniques.get(0).getPartitionId().getPartitionDate());
