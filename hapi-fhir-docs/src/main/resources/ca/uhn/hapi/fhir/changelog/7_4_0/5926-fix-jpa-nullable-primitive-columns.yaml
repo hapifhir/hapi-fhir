@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 5926
+title: "A number of columns in the JPA schema use primitive types (and therefore can never have a null value) but aren't marked as non-null."

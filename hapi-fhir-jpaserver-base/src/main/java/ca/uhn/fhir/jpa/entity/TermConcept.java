@@ -117,11 +117,12 @@ public class TermConcept implements Serializable {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(
 			name = "CODESYSTEM_PID",
+			nullable = false,
 			referencedColumnName = "PID",
 			foreignKey = @ForeignKey(name = "FK_CONCEPT_PID_CS_PID"))
 	private TermCodeSystemVersion myCodeSystem;
 
-	@Column(name = "CODESYSTEM_PID", insertable = false, updatable = false)
+	@Column(name = "CODESYSTEM_PID", insertable = false, updatable = false, nullable = false)
 	@GenericField(name = "myCodeSystemVersionPid")
 	private long myCodeSystemVersionPid;
 
