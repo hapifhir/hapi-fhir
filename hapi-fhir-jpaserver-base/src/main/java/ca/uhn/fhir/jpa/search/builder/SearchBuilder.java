@@ -398,7 +398,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			}
 
 			if (fulltextExecutor == null) {
-				fulltextExecutor = SearchQueryExecutors.from(fulltextMatchIds != null ? fulltextMatchIds : new ArrayList<>());
+				fulltextExecutor =
+						SearchQueryExecutors.from(fulltextMatchIds != null ? fulltextMatchIds : new ArrayList<>());
 			}
 
 			if (theSearchRuntimeDetails != null) {
@@ -483,10 +484,10 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		// someday we'll want a query planner to figure out if we _should_ or _must_ use the ft index, not just if we
 		// can.
 		return fulltextEnabled
-			&& myParams != null
-			&& myParams.getSearchContainedMode() == SearchContainedModeEnum.FALSE
-			&& myFulltextSearchSvc.canUseHibernateSearch(myResourceName, myParams)
-			&& myFulltextSearchSvc.supportsAllSortTerms(myResourceName, myParams);
+				&& myParams != null
+				&& myParams.getSearchContainedMode() == SearchContainedModeEnum.FALSE
+				&& myFulltextSearchSvc.canUseHibernateSearch(myResourceName, myParams)
+				&& myFulltextSearchSvc.supportsAllSortTerms(myResourceName, myParams);
 	}
 
 	private void failIfUsed(String theParamName) {
@@ -860,7 +861,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			theQueryStack.addSortOnLastUpdated(ascending);
 
 		} else {
-			RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam(myResourceName, theSort.getParamName());
+			RuntimeSearchParam param =
+					mySearchParamRegistry.getActiveSearchParam(myResourceName, theSort.getParamName());
 
 			/*
 			 * If we have a sort like _sort=subject.name and we  have an
@@ -1116,14 +1118,12 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			if (resource == null) {
 				if (next != null) {
 					ourLog.warn(
-						"Unable to find resource {}/{}/_history/{} in database",
-						next.getResourceType(),
-						next.getIdDt().getIdPart(),
-						next.getVersion());
+							"Unable to find resource {}/{}/_history/{} in database",
+							next.getResourceType(),
+							next.getIdDt().getIdPart(),
+							next.getVersion());
 				} else {
-					ourLog.warn(
-						"Unable to find resource in database."
-					);
+					ourLog.warn("Unable to find resource in database.");
 				}
 				continue;
 			}

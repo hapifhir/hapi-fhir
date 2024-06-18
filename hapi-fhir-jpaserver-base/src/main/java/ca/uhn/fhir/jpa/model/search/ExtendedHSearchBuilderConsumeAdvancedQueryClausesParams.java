@@ -39,7 +39,8 @@ public class ExtendedHSearchBuilderConsumeAdvancedQueryClausesParams {
 		return mySearchParamRegistry;
 	}
 
-	public ExtendedHSearchBuilderConsumeAdvancedQueryClausesParams setSearchParamRegistry(ISearchParamRegistry theSearchParamRegistry) {
+	public ExtendedHSearchBuilderConsumeAdvancedQueryClausesParams setSearchParamRegistry(
+			ISearchParamRegistry theSearchParamRegistry) {
 		mySearchParamRegistry = theSearchParamRegistry;
 		return this;
 	}

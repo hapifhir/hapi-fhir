@@ -144,7 +144,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	@Override
 	public boolean canUseHibernateSearch(String theResourceType, SearchParameterMap myParams) {
 		return myStorageSettings.isAdvancedHSearchIndexing()
-			&& myAdvancedIndexQueryBuilder.canUseHibernateSearch(theResourceType, myParams, mySearchParamRegistry);
+				&& myAdvancedIndexQueryBuilder.canUseHibernateSearch(theResourceType, myParams, mySearchParamRegistry);
 	}
 
 	@Override
@@ -267,12 +267,12 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 			 * Handle other supported parameters
 			 */
 			if (myStorageSettings.isAdvancedHSearchIndexing() && theParams.getEverythingMode() == null) {
-				ExtendedHSearchBuilderConsumeAdvancedQueryClausesParams params = new ExtendedHSearchBuilderConsumeAdvancedQueryClausesParams();
+				ExtendedHSearchBuilderConsumeAdvancedQueryClausesParams params =
+						new ExtendedHSearchBuilderConsumeAdvancedQueryClausesParams();
 				params.setSearchParamRegistry(mySearchParamRegistry)
 						.setResourceType(theResourceType)
-							.setSearchParameterMap(theParams);
-				myAdvancedIndexQueryBuilder.addAndConsumeAdvancedQueryClauses(
-						builder, params);
+						.setSearchParameterMap(theParams);
+				myAdvancedIndexQueryBuilder.addAndConsumeAdvancedQueryClauses(builder, params);
 			}
 			// DROP EARLY HERE IF BOOL IS EMPTY?
 		});

@@ -61,7 +61,6 @@ public class ExtendedHSearchSearchBuilder {
 	 */
 	public static final Set<String> ourUnsafeSearchParmeters = Sets.newHashSet("_id", "_meta");
 
-
 	/**
 	 * Determine if ExtendedHibernateSearchBuilder can support this parameter
 	 * @param theParamName param name
@@ -88,10 +87,7 @@ public class ExtendedHSearchSearchBuilder {
 	 * be inaccurate and wrong.
 	 */
 	public boolean canUseHibernateSearch(
-		String theResourceType,
-		SearchParameterMap myParams,
-		ISearchParamRegistry theSearchParamRegistry)
-	{
+			String theResourceType, SearchParameterMap myParams, ISearchParamRegistry theSearchParamRegistry) {
 		boolean canUseHibernate = true;
 		ResourceSearchParams resourceActiveSearchParams = theSearchParamRegistry.getActiveSearchParams(theResourceType);
 		for (String paramName : myParams.keySet()) {
@@ -100,10 +96,12 @@ public class ExtendedHSearchSearchBuilder {
 				canUseHibernate = false;
 			} else {
 				// are the parameter values supported?
-				canUseHibernate = myParams.get(paramName)
-					.stream().flatMap(Collection::stream)
-					.collect(Collectors.toList())
-					.stream().anyMatch(this::isParamTypeSupported);
+				canUseHibernate =
+						myParams.get(paramName).stream()
+								.flatMap(Collection::stream)
+								.collect(Collectors.toList())
+								.stream()
+								.anyMatch(this::isParamTypeSupported);
 			}
 
 			// if not supported, don't use
@@ -209,8 +207,8 @@ public class ExtendedHSearchSearchBuilder {
 	}
 
 	public void addAndConsumeAdvancedQueryClauses(
-		ExtendedHSearchClauseBuilder theBuilder,
-		ExtendedHSearchBuilderConsumeAdvancedQueryClausesParams theMethodParams) {
+			ExtendedHSearchClauseBuilder theBuilder,
+			ExtendedHSearchBuilderConsumeAdvancedQueryClausesParams theMethodParams) {
 		SearchParameterMap searchParameterMap = theMethodParams.getSearchParameterMap();
 		String resourceType = theMethodParams.getResourceType();
 		ISearchParamRegistry searchParamRegistry = theMethodParams.getSearchParamRegistry();
@@ -242,25 +240,29 @@ public class ExtendedHSearchSearchBuilder {
 							searchParameterMap.removeByNameAndModifier(nextParam, Constants.PARAMQUALIFIER_TOKEN_TEXT);
 					theBuilder.addStringTextSearch(nextParam, stringTextAndOrTerms);
 
-					List<List<IQueryParameterType>> stringExactAndOrTerms =
-							searchParameterMap.removeByNameAndModifier(nextParam, Constants.PARAMQUALIFIER_STRING_EXACT);
+					List<List<IQueryParameterType>> stringExactAndOrTerms = searchParameterMap.removeByNameAndModifier(
+							nextParam, Constants.PARAMQUALIFIER_STRING_EXACT);
 					theBuilder.addStringExactSearch(nextParam, stringExactAndOrTerms);
 
 					List<List<IQueryParameterType>> stringContainsAndOrTerms =
-							searchParameterMap.removeByNameAndModifier(nextParam, Constants.PARAMQUALIFIER_STRING_CONTAINS);
+							searchParameterMap.removeByNameAndModifier(
+									nextParam, Constants.PARAMQUALIFIER_STRING_CONTAINS);
 					theBuilder.addStringContainsSearch(nextParam, stringContainsAndOrTerms);
 
-					List<List<IQueryParameterType>> stringAndOrTerms = searchParameterMap.removeByNameUnmodified(nextParam);
+					List<List<IQueryParameterType>> stringAndOrTerms =
+							searchParameterMap.removeByNameUnmodified(nextParam);
 					theBuilder.addStringUnmodifiedSearch(nextParam, stringAndOrTerms);
 					break;
 
 				case QUANTITY:
-					List<List<IQueryParameterType>> quantityAndOrTerms = searchParameterMap.removeByNameUnmodified(nextParam);
+					List<List<IQueryParameterType>> quantityAndOrTerms =
+							searchParameterMap.removeByNameUnmodified(nextParam);
 					theBuilder.addQuantityUnmodifiedSearch(nextParam, quantityAndOrTerms);
 					break;
 
 				case REFERENCE:
-					List<List<IQueryParameterType>> referenceAndOrTerms = searchParameterMap.removeByNameUnmodified(nextParam);
+					List<List<IQueryParameterType>> referenceAndOrTerms =
+							searchParameterMap.removeByNameUnmodified(nextParam);
 					theBuilder.addReferenceUnchainedSearch(nextParam, referenceAndOrTerms);
 					break;
 
@@ -272,7 +274,8 @@ public class ExtendedHSearchSearchBuilder {
 					break;
 
 				case COMPOSITE:
-					List<List<IQueryParameterType>> compositeAndOrTerms = searchParameterMap.removeByNameUnmodified(nextParam);
+					List<List<IQueryParameterType>> compositeAndOrTerms =
+							searchParameterMap.removeByNameUnmodified(nextParam);
 					// RuntimeSearchParam only points to the subs by reference.  Resolve here while we have
 					// ISearchParamRegistry
 					List<RuntimeSearchParam> subSearchParams =

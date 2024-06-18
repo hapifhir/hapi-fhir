@@ -68,12 +68,12 @@ public class LastNOperation {
 					b.must(f.match().field("myResourceType").matching(OBSERVATION_RES_TYPE));
 					ExtendedHSearchClauseBuilder builder =
 							new ExtendedHSearchClauseBuilder(myFhirContext, myStorageSettings, b, f);
-					ExtendedHSearchBuilderConsumeAdvancedQueryClausesParams params = new ExtendedHSearchBuilderConsumeAdvancedQueryClausesParams();
+					ExtendedHSearchBuilderConsumeAdvancedQueryClausesParams params =
+							new ExtendedHSearchBuilderConsumeAdvancedQueryClausesParams();
 					params.setResourceType(OBSERVATION_RES_TYPE)
 							.setSearchParameterMap(theParams.clone())
-								.setSearchParamRegistry(mySearchParamRegistry);
-					myExtendedHSearchSearchBuilder.addAndConsumeAdvancedQueryClauses(
-							builder, params);
+							.setSearchParamRegistry(mySearchParamRegistry);
+					myExtendedHSearchSearchBuilder.addAndConsumeAdvancedQueryClauses(builder, params);
 				}))
 				.aggregation(observationsByCodeKey, f -> f.fromJson(lastNAggregation.toAggregation()))
 				.fetch(0);
