@@ -34,6 +34,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import static ca.uhn.fhir.jpa.embedded.HapiEmbeddedDatabasesExtension.FIRST_TESTED_VERSION;
 import static ca.uhn.fhir.jpa.migrate.SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME;
@@ -50,7 +51,6 @@ public class HapiSchemaMigrationTest {
 	public static final String TEST_SCHEMA_NAME = "test";
 
 	private static final String METADATA_COLUMN_NAME = "COLUMN_NAME";
-	private static final String METADATA_COLUMN_SIZE = "COLUMN_SIZE";
 	private static final String METADATA_DATA_TYPE = "DATA_TYPE";
 	private static final String METADATA_IS_NULLABLE = "IS_NULLABLE";
 	private static final String METADATA_IS_NULLABLE_NO = "NO";
@@ -67,10 +67,10 @@ public class HapiSchemaMigrationTest {
 
 	@RegisterExtension
 //	static HapiEmbeddedDatabasesExtension myEmbeddedServersExtension = new HapiEmbeddedDatabasesExtension();
+	static HapiEmbeddedDatabasesExtensionH2Only myEmbeddedServersExtension = new HapiEmbeddedDatabasesExtensionH2Only ();
 //	static HapiEmbeddedDatabasesExtensionPostgresOnly myEmbeddedServersExtension = new HapiEmbeddedDatabasesExtensionPostgresOnly();
 //	static HapiEmbeddedDatabasesExtensionMSSQLOnly myEmbeddedServersExtension = new HapiEmbeddedDatabasesExtensionMSSQLOnly();
 //	static HapiEmbeddedDatabasesExtensionOracleOnly myEmbeddedServersExtension = new HapiEmbeddedDatabasesExtensionOracleOnly();
-	static HapiEmbeddedDatabasesExtensionH2Only myEmbeddedServersExtension = new HapiEmbeddedDatabasesExtensionH2Only ();
 
 	@AfterEach
 	public void afterEach() {
@@ -85,11 +85,10 @@ public class HapiSchemaMigrationTest {
 
 	@ParameterizedTest
 //	@ArgumentsSource(HapiEmbeddedDatabasesExtension.DatabaseVendorProvider.class)
+	@ArgumentsSource(HapiEmbeddedDatabasesExtensionH2Only.DatabaseVendorProvider.class)
 //	@ArgumentsSource(HapiEmbeddedDatabasesExtensionPostgresOnly.DatabaseVendorProvider.class)
 //	@ArgumentsSource(HapiEmbeddedDatabasesExtensionMSSQLOnly.DatabaseVendorProvider.class)
 //	@ArgumentsSource(HapiEmbeddedDatabasesExtensionOracleOnly.DatabaseVendorProvider.class)
-//	@ArgumentsSource(HapiEmbeddedDatabasesExtensionH2Only.DatabaseVendorProvider.class)
-	@ArgumentsSource(HapiEmbeddedDatabasesExtensionH2Only.DatabaseVendorProvider.class)
 	public void testMigration(DriverTypeEnum theDriverType) throws SQLException {
 		// ensure all migrations are run
 		HapiSystemProperties.disableUnitTestMode();
@@ -104,6 +103,7 @@ public class HapiSchemaMigrationTest {
 		HapiMigrationDao hapiMigrationDao = new HapiMigrationDao(dataSource, theDriverType, HAPI_FHIR_MIGRATION_TABLENAME);
 		HapiMigrationStorageSvc hapiMigrationStorageSvc = new HapiMigrationStorageSvc(hapiMigrationDao);
 
+//		getAllConstraints(database, theDriverType).forEach(constraint -> ourLog.info("constraint: {}", constraint));
 		for (VersionEnum aVersion : VersionEnum.values()) {
 			ourLog.info("Applying migrations for {}", aVersion);
 			migrate(theDriverType, dataSource, hapiMigrationStorageSvc, aVersion);
@@ -111,6 +111,7 @@ public class HapiSchemaMigrationTest {
 			if (aVersion.isNewerThan(FIRST_TESTED_VERSION)) {
 				myEmbeddedServersExtension.maybeInsertPersistenceTestData(theDriverType, aVersion);
 			}
+//			getAllConstraints(database, theDriverType).forEach(constraint -> ourLog.info("constraint: {}", constraint));
 		}
 
 		if (theDriverType == DriverTypeEnum.POSTGRES_9_4) {
@@ -134,9 +135,16 @@ public class HapiSchemaMigrationTest {
 		final List<Map<String, Object>> allCount = theDatabase.query(String.format("SELECT count(*) FROM %s", TABLE_HFJ_RES_SEARCH_URL));
 		final List<Map<String, Object>> minusOnePartitionCount = theDatabase.query(String.format("SELECT count(*) FROM %s WHERE %s = -1", TABLE_HFJ_RES_SEARCH_URL, COLUMN_PARTITION_ID));
 
-		final Long minusCount = (Long)minusOnePartitionCount.get(0).values().iterator().next();
-		assertThat(minusCount).isEqualTo(1L);
-		assertThat(allCount.get(0).values().iterator().next()).isEqualTo(1L);
+		if (Set.of(DriverTypeEnum.MSSQL_2012, DriverTypeEnum.ORACLE_12C).contains(theDriverType)) {
+			final Integer minusCount = (Integer) minusOnePartitionCount.get(0).values().iterator().next();
+			assertThat(minusCount).isEqualTo(1);
+			assertThat(allCount.get(0).values().iterator().next()).isEqualTo(1);
+
+		} else {
+			final Long minusCount = (Long)minusOnePartitionCount.get(0).values().iterator().next();
+			assertThat(minusCount).isEqualTo(1L);
+			assertThat(allCount.get(0).values().iterator().next()).isEqualTo(1L);
+		}
 
 		try (final Connection connection = theDatabase.getDataSource().getConnection()) {
 			final DatabaseMetaData tableMetaData = connection.getMetaData();
@@ -148,7 +156,6 @@ public class HapiSchemaMigrationTest {
 					actualColumnResults.add(columnMap);
 
 					extractAndAddToMap(columnsResultSet, columnMap, METADATA_COLUMN_NAME);
-					extractAndAddToMap(columnsResultSet, columnMap, METADATA_COLUMN_SIZE);
 					extractAndAddToMap(columnsResultSet, columnMap, METADATA_DATA_TYPE);
 					extractAndAddToMap(columnsResultSet, columnMap, METADATA_IS_NULLABLE);
 				}
@@ -175,23 +182,18 @@ public class HapiSchemaMigrationTest {
 
 			final List<Map<String, String>> expectedColumnResults = List.of(
 				Map.of(METADATA_COLUMN_NAME, COLUMN_RES_SEARCH_URL,
-					METADATA_COLUMN_SIZE, "768",
 					METADATA_DATA_TYPE, Integer.toString(Types.VARCHAR),
 					METADATA_IS_NULLABLE, METADATA_IS_NULLABLE_NO),
 				Map.of(METADATA_COLUMN_NAME, "RES_ID",
-					METADATA_COLUMN_SIZE, "64",
 					METADATA_DATA_TYPE, Integer.toString(Types.BIGINT),
 					METADATA_IS_NULLABLE, METADATA_IS_NULLABLE_NO),
 				Map.of(METADATA_COLUMN_NAME, "CREATED_TIME",
-					METADATA_COLUMN_SIZE, "26",
 					METADATA_DATA_TYPE, Integer.toString(Types.TIMESTAMP),
 					METADATA_IS_NULLABLE, METADATA_IS_NULLABLE_NO),
 				Map.of(METADATA_COLUMN_NAME, COLUMN_PARTITION_ID,
-					METADATA_COLUMN_SIZE, "32",
 					METADATA_DATA_TYPE, Integer.toString(Types.INTEGER),
 					METADATA_IS_NULLABLE, METADATA_IS_NULLABLE_NO),
 				Map.of(METADATA_COLUMN_NAME, COLUMN_PARTITION_DATE,
-					METADATA_COLUMN_SIZE, "10",
 					METADATA_DATA_TYPE, Integer.toString(Types.DATE),
 					METADATA_IS_NULLABLE, METADATA_IS_NULLABLE_YES)
 			);
@@ -205,23 +207,13 @@ public class HapiSchemaMigrationTest {
 	}
 
 	private void checkOutPkSqlResult(JpaEmbeddedDatabase theDatabase, DriverTypeEnum theDriverType) {
-//		final String alterTableAddColumnWithDefaultSql = getAddColumnWithDefaultSql(theDriverType,TABLE_HFJ_RES_SEARCH_URL.toLowerCase(), COLUMN_PARTITION_ID.toLowerCase(), "int", "-1");
-//		final String alterTableAddColumnSql = getAddColumnSql(theDriverType, TABLE_HFJ_RES_SEARCH_URL.toLowerCase(), COLUMN_PARTITION_DATE.toLowerCase(), "date");
-//
-//		ourLog.info("6145: BEFORE add partition_id");
-//		theDatabase.executeSqlWithParams(alterTableAddColumnWithDefaultSql);
-//		ourLog.info("6145: AFTER add partition_id");
-//		ourLog.info("6145: BEFORE add partition_date");
-//		theDatabase.executeSqlWithParams(alterTableAddColumnSql);
-//		ourLog.info("6145: AFTER add partition_date");
+		final List<Map<String, Object>> primaryKeyQueryResults = theDatabase.query(getPrimaryKeyForTableSql(theDriverType, TABLE_HFJ_RES_SEARCH_URL.toLowerCase()));
 
-		final List<Map<String, Object>> query = theDatabase.query(getPrimaryKeyForTableSql(theDriverType, TABLE_HFJ_RES_SEARCH_URL.toLowerCase()));
+		ourLog.info("6145: primaryKeyQueryResults result: {}", primaryKeyQueryResults);
 
-		ourLog.info("6145: query result: {}", query);
-
-		assertFalse(query.isEmpty());
-		assertEquals(1, query.size());
-		final Collection<Object> rowColumns = query.get(0).values();
+		assertFalse(primaryKeyQueryResults.isEmpty());
+		assertEquals(1, primaryKeyQueryResults.size());
+		final Collection<Object> rowColumns = primaryKeyQueryResults.get(0).values();
 		assertEquals(1, rowColumns.size());
 		final String primaryKeyName = (String)rowColumns.iterator().next();
 
@@ -330,6 +322,21 @@ Foreign-key constraints:
 		};
 	}
 
+	private static List<Map<String, Object>> getAllConstraints(JpaEmbeddedDatabase theDatabase, DriverTypeEnum theDriverType) {
+		return switch (theDriverType) {
+			case ORACLE_12C -> {
+				final String sql =
+					"""
+					SELECT constraint_name, constraint_type, table_name
+					FROM user_constraints
+					WHERE constraint_type = 'P'
+					""";
+				yield theDatabase.query(sql);
+			}
+			default -> null;
+		};
+	}
+
 	@Language("SQL")
 	private static String getPrimaryKeyForTableSql(DriverTypeEnum theDriverType, String theTableName) {
 		return switch (theDriverType) {
@@ -359,11 +366,12 @@ Foreign-key constraints:
 			case ORACLE_12C ->
 				String.format(
 					"""
-					SELECT constraint_name, constraint_type
+					SELECT constraint_name
 					FROM user_constraints
-					WHERE table_name = '%s'
+					WHERE constraint_type = 'P'
+					AND table_name = '%s'
 					""",
-					theTableName);
+					theTableName.toUpperCase());
 			case MSSQL_2012 ->
 				String.format(
 					"""

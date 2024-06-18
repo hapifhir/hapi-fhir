@@ -98,9 +98,10 @@ public class DropPrimaryKeyTask extends BaseTableTask {
 					"AND table_name = ?";
 			case ORACLE_12C:
 				return
-					"SELECT constraint_name, constraint_type " +
+					"SELECT constraint_name " +
 					"FROM user_constraints " +
-					"WHERE table_name = ?";
+					"WHERE constraint_type = 'P' " +
+					"AND table_name = ?";
 			case MSSQL_2012:
 				return
 					"SELECT tc.constraint_name " +
