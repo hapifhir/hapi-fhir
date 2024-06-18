@@ -325,7 +325,7 @@ public enum Pointcut implements IPointcut {
 	 * At this point the request has already been passed to the handler so any changes
 	 * (e.g. adding parameters) will not be considered.
 	 * If you'd like to modify request parameters before they are passed to the handler,
-	 * use {@link Pointcut#SERVER_INCOMING_REQUEST_PRE_HANDLER_SELECTED}.
+	 * use {@link Pointcut#SERVER_INCOMING_REQUEST_PRE_HANDLER_SELECTED} or {@link Pointcut#SERVER_INCOMING_REQUEST_POST_PROCESSED}.
 	 * If you are attempting to modify a search before it occurs, use {@link Pointcut#STORAGE_PRESEARCH_REGISTERED}.
 	 * <p>
 	 * Hooks may accept the following parameters:
