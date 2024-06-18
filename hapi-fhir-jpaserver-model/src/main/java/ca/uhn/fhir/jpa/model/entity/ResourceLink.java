@@ -304,11 +304,11 @@ public class ResourceLink extends BaseResourceIndex {
 		StringBuilder b = new StringBuilder();
 		b.append("ResourceLink[");
 		b.append("path=").append(mySourcePath);
-		b.append(", src=").append(mySourceResourcePid);
-		b.append(", target=").append(myTargetResourcePid);
-		b.append(", targetType=").append(myTargetResourceType);
-		b.append(", targetVersion=").append(myTargetResourceVersion);
-		b.append(", targetUrl=").append(myTargetResourceUrl);
+		b.append(", srcResId=").append(mySourceResourcePid);
+		b.append(", targetResId=").append(myTargetResourcePid);
+		b.append(", targetResType=").append(myTargetResourceType);
+		b.append(", targetResVersion=").append(myTargetResourceVersion);
+		b.append(", targetResUrl=").append(myTargetResourceUrl);
 
 		b.append("]");
 		return b.toString();

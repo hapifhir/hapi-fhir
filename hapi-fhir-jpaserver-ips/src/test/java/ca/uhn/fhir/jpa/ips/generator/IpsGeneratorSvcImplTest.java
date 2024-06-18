@@ -124,7 +124,7 @@ public class IpsGeneratorSvcImplTest {
 	private void initializeGenerationStrategy(List<Function<Section, Section>> theGlobalSectionCustomizers) {
 		myStrategy = new DefaultJpaIpsGenerationStrategy() {
 			@Override
-			public IIdType massageResourceId(@Nullable IpsContext theIpsContext, @javax.annotation.Nonnull IBaseResource theResource) {
+			public IIdType massageResourceId(@Nullable IpsContext theIpsContext, @Nonnull IBaseResource theResource) {
 				return IdType.newRandomUuid();
 			}
 		};
@@ -171,9 +171,9 @@ public class IpsGeneratorSvcImplTest {
 		// Composition itself should also have a narrative
 		String compositionNarrative = composition.getText().getDivAsString();
 		ourLog.info("Composition narrative: {}", compositionNarrative);
-		assertThat(compositionNarrative).contains("Allergies and Intolerances");
-		assertThat(compositionNarrative).doesNotContain("Pregnancy");
-
+		assertThat(compositionNarrative).isEqualTo(
+			"<div xmlns=\"http://www.w3.org/1999/xhtml\"><h1>International Patient Summary Document</h1></div>"
+		);
 	}
 
 	@Test

@@ -1,0 +1,6 @@
+---
+type: perf
+issue: 5658
+title: "The MDM candidate search will now be skipped if data for required
+  search parameters is not present. Thanks to Adrienne Sox for the 
+  pull request!"

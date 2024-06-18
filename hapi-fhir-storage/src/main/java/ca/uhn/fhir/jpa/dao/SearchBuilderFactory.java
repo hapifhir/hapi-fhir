@@ -30,6 +30,8 @@ public class SearchBuilderFactory<T extends IResourcePersistentId<?>> {
 	@Autowired
 	private ApplicationContext myApplicationContext;
 
+	public SearchBuilderFactory() {}
+
 	public ISearchBuilder<T> newSearchBuilder(
 			IDao theDao, String theResourceName, Class<? extends IBaseResource> theResourceType) {
 		return (ISearchBuilder<T>) myApplicationContext.getBean(

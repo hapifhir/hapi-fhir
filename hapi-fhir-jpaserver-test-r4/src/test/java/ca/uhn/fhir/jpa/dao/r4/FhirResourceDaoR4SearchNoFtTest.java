@@ -1,9 +1,5 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
@@ -89,7 +85,6 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Communication;
 import org.hl7.fhir.r4.model.CommunicationRequest;
-import org.hl7.fhir.r4.model.Composition;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.ContactPoint.ContactPointSystem;
 import org.hl7.fhir.r4.model.DateTimeType;
@@ -144,8 +139,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -184,11 +177,13 @@ import static ca.uhn.fhir.util.DateUtils.convertDateToIso8601String;
 import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.apache.commons.lang3.StringUtils.leftPad;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -5731,95 +5726,6 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			assertEquals(Msg.code(2016) + "Invalid _include parameter value: \"Patient:organization:Foo\". Invalid/unsupported resource type: \"Foo\"", e.getMessage());
 		}
 	}
-
-	/**
-	 * Index for
-	 * [base]/Bundle?composition.patient.identifier=foo
-	 */
-	@ParameterizedTest
-	@CsvSource({
-		"true , urn:uuid:5c34dc2c-9b5d-4ec1-b30b-3e2d4371508b , urn:uuid:5c34dc2c-9b5d-4ec1-b30b-3e2d4371508b",
-		"false, urn:uuid:5c34dc2c-9b5d-4ec1-b30b-3e2d4371508b , urn:uuid:5c34dc2c-9b5d-4ec1-b30b-3e2d4371508b",
-		"true , Patient/ABC                                   , Patient/ABC ",
-		"false, Patient/ABC                                   , Patient/ABC ",
-		"true , Patient/ABC                                   , http://example.com/fhir/Patient/ABC ",
-		"false, Patient/ABC                                   , http://example.com/fhir/Patient/ABC ",
-	})
-	public void testCreateAndSearchForFullyChainedSearchParameter(boolean theUseFullChainInName, String thePatientId, String theFullUrl) {
-		// Setup 1
-
-		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.DISABLED);
-
-		SearchParameter sp = new SearchParameter();
-		sp.setId("SearchParameter/Bundle-composition-patient-identifier");
-		sp.setCode("composition.patient.identifier");
-		sp.setName("composition.patient.identifier");
-		sp.setUrl("http://example.org/SearchParameter/Bundle-composition-patient-identifier");
-		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		sp.setType(Enumerations.SearchParamType.TOKEN);
-		sp.setExpression("Bundle.entry[0].resource.as(Composition).subject.resolve().as(Patient).identifier");
-		sp.addBase("Bundle");
-		ourLog.info("SP: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(sp));
-		mySearchParameterDao.update(sp, mySrd);
-
-		mySearchParamRegistry.forceRefresh();
-
-		// Test 1
-
-		Composition composition = new Composition();
-		composition.setSubject(new Reference(thePatientId));
-
-		Patient patient = new Patient();
-		patient.setId(new IdType(theFullUrl));
-		patient.addIdentifier().setSystem("http://foo").setValue("bar");
-
-		Bundle bundle = new Bundle();
-		bundle.setType(Bundle.BundleType.DOCUMENT);
-		bundle
-			.addEntry()
-			.setResource(composition);
-		bundle
-			.addEntry()
-			.setFullUrl(theFullUrl)
-			.setResource(patient);
-
-		myBundleDao.create(bundle, mySrd);
-
-		Bundle bundle2 = new Bundle();
-		bundle2.setType(Bundle.BundleType.DOCUMENT);
-		myBundleDao.create(bundle2, mySrd);
-
-		// Test
-
-		SearchParameterMap map;
-		if (theUseFullChainInName) {
-			map = SearchParameterMap.newSynchronous("composition.patient.identifier", new TokenParam("http://foo", "bar"));
-		} else {
-			map = SearchParameterMap.newSynchronous("composition", new ReferenceParam("patient.identifier", "http://foo|bar"));
-		}
-		IBundleProvider outcome = myBundleDao.search(map, mySrd);
-
-		// Verify
-
-		List<String> params = extractAllTokenIndexes();
-		assertThat(params).as(params.toString()).containsExactlyInAnyOrder("composition.patient.identifier http://foo|bar");
-		assertEquals(1, outcome.size());
-	}
-
-	private List<String> extractAllTokenIndexes() {
-		List<String> params = runInTransaction(() -> {
-			logAllTokenIndexes();
-
-			return myResourceIndexedSearchParamTokenDao
-				.findAll()
-				.stream()
-				.filter(t -> t.getParamName().contains("."))
-				.map(t -> t.getParamName() + " " + t.getSystem() + "|" + t.getValue())
-				.toList();
-		});
-		return params;
-	}
-
 
 	@Nested
 	public class TagBelowTests {

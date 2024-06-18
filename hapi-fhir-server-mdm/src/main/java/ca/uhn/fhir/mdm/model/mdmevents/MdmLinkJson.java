@@ -23,6 +23,7 @@ import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Date;
@@ -45,13 +46,13 @@ public class MdmLinkJson implements IModelJson {
 	/**
 	 * Golden resource PID
 	 */
-	@JsonProperty("goldenPid")
+	@JsonIgnore
 	private IResourcePersistentId<?> myGoldenPid;
 
 	/**
 	 * Source PID
 	 */
-	@JsonProperty("sourcePid")
+	@JsonIgnore
 	private IResourcePersistentId<?> mySourcePid;
 
 	/**

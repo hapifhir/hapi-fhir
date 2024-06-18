@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.subscription.match.registry;
 
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.model.primitive.IdDt;
-import org.jetbrains.annotations.NotNull;
+import jakarta.annotation.Nonnull;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -130,7 +130,7 @@ public class ActiveSubscriptionCacheTest {
 		assertEquals(ID3, match.getId());
 	}
 
-	@NotNull
+	@Nonnull
 	private ActiveSubscription buildTopicSubscription(String theId, String theTopicUrl) {
 		ActiveSubscription activeSub2 = buildActiveSubscription(theId);
 		activeSub2.getSubscription().setTopicSubscription(true);

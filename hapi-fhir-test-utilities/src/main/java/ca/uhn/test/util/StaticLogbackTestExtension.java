@@ -19,6 +19,8 @@
  */
 package ca.uhn.test.util;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.filter.ThresholdFilter;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
@@ -42,6 +44,16 @@ public class StaticLogbackTestExtension implements BeforeAllCallback, AfterAllCa
 		myLogbackTestExtension = new LogbackTestExtension();
 	}
 
+	public static StaticLogbackTestExtension withThreshold(Level theLevel) {
+		LogbackTestExtension logbackTestExtension = new LogbackTestExtension();
+		logbackTestExtension.setUp(theLevel);
+		ThresholdFilter thresholdFilter = new ThresholdFilter();
+		thresholdFilter.setLevel(theLevel.levelStr);
+		logbackTestExtension.getAppender().addFilter(thresholdFilter);
+
+		return new StaticLogbackTestExtension(logbackTestExtension);
+	}
+
 	@Override
 	public void beforeAll(ExtensionContext theExtensionContext) throws Exception {
 		myLogbackTestExtension.beforeEach(theExtensionContext);
@@ -55,4 +67,13 @@ public class StaticLogbackTestExtension implements BeforeAllCallback, AfterAllCa
 	public List<ILoggingEvent> filterLoggingEventsWithMessageEqualTo(String theMessageText) {
 		return myLogbackTestExtension.filterLoggingEventsWithMessageEqualTo(theMessageText);
 	}
+
+	/**
+	 * Returns a copy to avoid concurrent modification errors.
+	 * @return A copy of the log events so far.
+	 */
+	public java.util.List<ILoggingEvent> getLogEvents() {
+		return myLogbackTestExtension.getLogEvents();
+	}
+
 }
