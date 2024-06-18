@@ -1868,8 +1868,8 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2SystemTest {
 	// assertTrue(o1.getId().getValue(), o1.getId().getIdPart().matches("^[0-9]+$"));
 	// assertTrue(o2.getId().getValue(), o2.getId().getIdPart().matches("^[0-9]+$"));
 	//
-	// assertThat(o1.getSubject().getReference().getValue(), endsWith("Patient/" + p1.getId().getIdPart()));
-	// assertThat(o2.getSubject().getReference().getValue(), endsWith("Patient/" + p1.getId().getIdPart()));
+	// assertThat(o1.getSubject().getReference().getValue()).endsWith("Patient/" + p1.getId().getIdPart());
+	// assertThat(o2.getSubject().getReference().getValue()).endsWith("Patient/" + p1.getId().getIdPart());
 	//
 	// }
 	//

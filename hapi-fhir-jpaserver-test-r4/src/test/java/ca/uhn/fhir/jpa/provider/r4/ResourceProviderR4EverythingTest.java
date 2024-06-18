@@ -797,7 +797,7 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 		// ourLog.info(output);
 		// List<IIdType> ids = toUnqualifiedVersionlessIds(myFhirCtx.newXmlParser().parseResource(Bundle.class, output));
 		// ourLog.info(ids.toString());
-		// assertThat(ids, contains(pId, cId));
+		// assertThat(ids).contains(pId, cId);
 		// } finally {
 		// response.close();
 		// }
@@ -811,7 +811,7 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 		// ourLog.info(output);
 		// List<IIdType> ids = toUnqualifiedVersionlessIds(myFhirCtx.newXmlParser().parseResource(Bundle.class, output));
 		// ourLog.info(ids.toString());
-		// assertThat(ids, contains(cId, pId, oId));
+		// assertThat(ids).contains(cId, pId, oId);
 		// } finally {
 		// response.close();
 		// }

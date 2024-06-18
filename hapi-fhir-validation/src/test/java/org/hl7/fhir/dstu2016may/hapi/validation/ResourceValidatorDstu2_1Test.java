@@ -12,7 +12,6 @@ import ca.uhn.fhir.validation.SchemaBaseValidator;
 import ca.uhn.fhir.validation.ValidationResult;
 import ca.uhn.fhir.validation.schematron.SchematronBaseValidator;
 import org.apache.commons.io.IOUtils;
-import org.hamcrest.core.StringContains;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.dstu2016may.model.CodeableConcept;
 import org.hl7.fhir.dstu2016may.model.Coding;
