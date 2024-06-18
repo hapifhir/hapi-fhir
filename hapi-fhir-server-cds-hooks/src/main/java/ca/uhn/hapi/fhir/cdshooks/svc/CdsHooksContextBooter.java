@@ -85,7 +85,7 @@ public class CdsHooksContextBooter {
 				cdsServiceJson.setHook(annotation.hook());
 				cdsServiceJson.setDescription(annotation.description());
 				cdsServiceJson.setTitle(annotation.title());
-				cdsServiceJson.setExtension(validateJson(annotation.extension()));
+				// cdsServiceJson.setExtension(validateJson(annotation.extension()));
 				for (CdsServicePrefetch prefetch : annotation.prefetch()) {
 					cdsServiceJson.addPrefetch(prefetch.value(), prefetch.query());
 					cdsServiceJson.addSource(prefetch.value(), prefetch.source());
