@@ -234,12 +234,10 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 		IParser parser = myFhirContext.newJsonParser();
 		int count = 10;
 
-		boolean presetAutoCreatePlaceholders = myStorageSettings.isAutoCreatePlaceholderReferenceTargets();
 		boolean presetFilterParameterEnabled = myStorageSettings.isFilterParameterEnabled();
 		boolean presetAdvancedHSearchIndexing = myStorageSettings.isAdvancedHSearchIndexing();
 
 		try {
-			myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
 			// fullTextSearch means Advanced Hibernate Search
 			myStorageSettings.setFilterParameterEnabled(true);
 			myStorageSettings.setAdvancedHSearchIndexing(true);
@@ -397,7 +395,6 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 			assertEquals(1, result.size());
 		} finally {
 			// reset values
-			myStorageSettings.setAutoCreatePlaceholderReferenceTargets(presetAutoCreatePlaceholders);
 			myStorageSettings.setFilterParameterEnabled(presetFilterParameterEnabled);
 			myStorageSettings.setAdvancedHSearchIndexing(presetAdvancedHSearchIndexing);
 		}
