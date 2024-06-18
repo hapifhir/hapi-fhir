@@ -42,6 +42,7 @@ public class IResourceTableDaoImpl implements IForcedIdQueries {
 	 * is an object array, where the order matters (the array represents columns returned by the query).
 	 * Deleted resources are not filtered.
 	 */
+	@Override
 	public Collection<Object[]> findAndResolveByForcedIdWithNoTypeIncludeDeleted(
 			String theResourceType, Collection<String> theForcedIds) {
 		return findAndResolveByForcedIdWithNoType(theResourceType, theForcedIds, false);
@@ -52,6 +53,7 @@ public class IResourceTableDaoImpl implements IForcedIdQueries {
 	 * is an object array, where the order matters (the array represents columns returned by the query).
 	 * Deleted resources are optionally filtered. Be careful if you change this query in any way.
 	 */
+	@Override
 	public Collection<Object[]> findAndResolveByForcedIdWithNoType(
 			String theResourceType, Collection<String> theForcedIds, boolean theExcludeDeleted) {
 		String query = "SELECT t.myResourceType, t.myId, t.myFhirId, t.myDeleted "
@@ -74,6 +76,7 @@ public class IResourceTableDaoImpl implements IForcedIdQueries {
 	 * is an object array, where the order matters (the array represents columns returned by the query).
 	 * Deleted resources are optionally filtered. Be careful if you change this query in any way.
 	 */
+	@Override
 	public Collection<Object[]> findAndResolveByForcedIdWithNoTypeInPartition(
 			String theResourceType,
 			Collection<String> theForcedIds,
@@ -100,6 +103,7 @@ public class IResourceTableDaoImpl implements IForcedIdQueries {
 	 * is an object array, where the order matters (the array represents columns returned by the query).
 	 * Deleted resources are optionally filtered. Be careful if you change this query in any way.
 	 */
+	@Override
 	public Collection<Object[]> findAndResolveByForcedIdWithNoTypeInPartitionNull(
 			String theResourceType, Collection<String> theForcedIds, boolean theExcludeDeleted) {
 		String query = "SELECT t.myResourceType, t.myId, t.myFhirId, t.myDeleted "
@@ -122,6 +126,7 @@ public class IResourceTableDaoImpl implements IForcedIdQueries {
 	 * is an object array, where the order matters (the array represents columns returned by the query).
 	 * Deleted resources are optionally filtered. Be careful if you change this query in any way.
 	 */
+	@Override
 	public Collection<Object[]> findAndResolveByForcedIdWithNoTypeInPartitionIdOrNullPartitionId(
 			String theResourceType,
 			Collection<String> theForcedIds,
