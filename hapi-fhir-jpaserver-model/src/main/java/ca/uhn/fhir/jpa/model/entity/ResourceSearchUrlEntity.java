@@ -155,10 +155,11 @@ public class ResourceSearchUrlEntity {
 		return this;
 	}
 
-	//	public String getSearchUrl() {
-	//		return mySearchUrl;
-	//	}
-	//
+	public String getSearchUrl() {
+		return myPk.getSearchUrl();
+	}
+
+	// LUKETODO:  clean up if unused
 	//	public ResourceSearchUrlEntity setSearchUrl(String theSearchUrl) {
 	//		mySearchUrl = theSearchUrl;
 	//		return this;

@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Arrays;
@@ -112,9 +113,22 @@ public abstract class JpaEmbeddedDatabase {
 		executeSqlAsBatch(statements);
 	}
 
+	// LUKETODO:  clean up if unused
+	public void executeSqlWithParams(String theSql, Object... theParams) {
+		try (final PreparedStatement preparedStatement = myConnection.prepareStatement(theSql)) {
+
+			for (int index = 0; index < theParams.length; index++) {
+				preparedStatement.setObject(index+1, theParams[index]);
+			}
+
+			preparedStatement.execute();
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
 	public void executeSqlAsBatch(List<String> theStatements) {
-		try {
-			Statement statement = myConnection.createStatement();
+		try (final Statement statement = myConnection.createStatement()) {
 			for (String sql : theStatements) {
 				if (!StringUtils.isBlank(sql)) {
 					statement.addBatch(sql);
@@ -129,5 +143,10 @@ public abstract class JpaEmbeddedDatabase {
 
 	public List<Map<String, Object>> query(String theSql) {
 		return getJdbcTemplate().queryForList(theSql);
+	}
+
+	// LUKETODO:  clean up if unused
+	public List<Map<String, Object>> query(String theSql, Object... theParams) {
+		return getJdbcTemplate().queryForList(theSql, theParams);
 	}
 }

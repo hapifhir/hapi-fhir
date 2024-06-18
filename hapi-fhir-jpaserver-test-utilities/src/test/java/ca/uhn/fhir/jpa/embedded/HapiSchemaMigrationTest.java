@@ -11,6 +11,7 @@ import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
 import ca.uhn.fhir.util.VersionEnum;
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -22,12 +23,16 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import static ca.uhn.fhir.jpa.embedded.HapiEmbeddedDatabasesExtension.FIRST_TESTED_VERSION;
 import static ca.uhn.fhir.jpa.migrate.SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -43,7 +48,11 @@ public class HapiSchemaMigrationTest {
 	}
 
 	@RegisterExtension
-	static HapiEmbeddedDatabasesExtension myEmbeddedServersExtension = new HapiEmbeddedDatabasesExtension();
+//	static HapiEmbeddedDatabasesExtension myEmbeddedServersExtension = new HapiEmbeddedDatabasesExtension();
+	static HapiEmbeddedDatabasesExtensionPostgresOnly myEmbeddedServersExtension = new HapiEmbeddedDatabasesExtensionPostgresOnly();
+//	static HapiEmbeddedDatabasesExtensionMSSQLOnly myEmbeddedServersExtension = new HapiEmbeddedDatabasesExtensionMSSQLOnly();
+//	static HapiEmbeddedDatabasesExtensionOracleOnly myEmbeddedServersExtension = new HapiEmbeddedDatabasesExtensionOracleOnly();
+//	static HapiEmbeddedDatabasesExtensionH2Only myEmbeddedServersExtension = new HapiEmbeddedDatabasesExtensionH2Only ();
 
 	@AfterEach
 	public void afterEach() {
@@ -57,7 +66,10 @@ public class HapiSchemaMigrationTest {
 	}
 
 	@ParameterizedTest
-	@ArgumentsSource(HapiEmbeddedDatabasesExtension.DatabaseVendorProvider.class)
+	@ArgumentsSource(HapiEmbeddedDatabasesExtensionPostgresOnly.DatabaseVendorProvider.class)
+//	@ArgumentsSource(HapiEmbeddedDatabasesExtensionMSSQLOnly.DatabaseVendorProvider.class)
+//	@ArgumentsSource(HapiEmbeddedDatabasesExtensionOracleOnly.DatabaseVendorProvider.class)
+//	@ArgumentsSource(HapiEmbeddedDatabasesExtensionH2Only.DatabaseVendorProvider.class)
 	public void testMigration(DriverTypeEnum theDriverType) throws SQLException {
 		// ensure all migrations are run
 		HapiSystemProperties.disableUnitTestMode();
@@ -92,6 +104,127 @@ public class HapiSchemaMigrationTest {
 		}
 
 		verifyForcedIdMigration(dataSource);
+
+		checkOutPkSqlResult(database, theDriverType);
+	}
+
+	private void checkOutPkSqlResult(JpaEmbeddedDatabase theDatabase, DriverTypeEnum theDriverType) {
+		final String tableName = "hfj_res_search_url";
+
+		final String searchUrlColumn = "res_search_url";
+		final String partitionIdColumn = "partition_id";
+		final String partitionDateColumn = "partition_date";
+
+		final String alterTableAddColumnSql = "ALTER TABLE %s ADD COLUMN %s %s %s";
+
+		ourLog.info("6145: BEFORE add partition_id");
+		theDatabase.executeSqlWithParams(String.format(alterTableAddColumnSql, tableName, partitionIdColumn, "int", "DEFAULT -1"));
+		ourLog.info("6145: AFTER add partition_id");
+		ourLog.info("6145: BEFORE add partition_date");
+		theDatabase.executeSqlWithParams(String.format(alterTableAddColumnSql, tableName, partitionDateColumn, "date", ""));
+		ourLog.info("6145: AFTER add partition_date");
+
+		final List<Map<String, Object>> query = theDatabase.query(getSql(theDriverType), tableName);
+
+		ourLog.info("6145: query result: {}", query);
+
+		assertFalse(query.isEmpty());
+		assertEquals(1, query.size());
+		final Collection<Object> rowColumns = query.get(0).values();
+		assertEquals(1, rowColumns.size());
+		final Object pkName = rowColumns.iterator().next();
+
+		// LUKETODO:  DROP and ADD primary SQL works for Postgres
+		ourLog.info("6145: BEFORE drop primary key: {}", pkName);
+
+		final String dropPrimaryKeySql = "ALTER TABLE %s DROP CONSTRAINT %s";
+
+		theDatabase.executeSqlWithParams(String.format(dropPrimaryKeySql, tableName, pkName));
+
+		ourLog.info("6145: AFTER drop primary key: {}", pkName);
+
+		final String setColumnToNonNull = "ALTER TABLE %s ALTER COLUMN %s SET NOT NULL";
+
+		ourLog.info("6145: BEFORE partition_id NOT NULL: {}", pkName);
+
+		theDatabase.executeSqlWithParams(String.format(setColumnToNonNull, tableName, partitionIdColumn));
+
+		ourLog.info("6145: AFTER partition_id NOT NULL: {}", pkName);
+
+		final String addPrimaryKeySql = "ALTER TABLE %s ADD PRIMARY KEY (%s, %s)";
+
+		ourLog.info("6145: BEFORE add primary key");
+
+		theDatabase.executeSqlWithParams(String.format(addPrimaryKeySql, tableName, searchUrlColumn, partitionIdColumn));
+
+		ourLog.info("6145: AFTER add primary key");
+
+		/*
+		                          Table "public.hfj_res_search_url"
+     Column     |            Type             | Collation | Nullable |    Default
+----------------+-----------------------------+-----------+----------+---------------
+ res_search_url | character varying(768)      |           | not null |
+ res_id         | bigint                      |           | not null |
+ created_time   | timestamp without time zone |           | not null |
+ partition_id   | integer                     |           | not null | '-1'::integer
+ partition_date | date                        |           |          |
+Indexes:
+    "hfj_res_search_url_pkey" PRIMARY KEY, btree (res_search_url, partition_id)
+    "idx_ressearchurl_res" btree (res_id)
+    "idx_ressearchurl_time" btree (created_time)
+Foreign-key constraints:
+    "fk_res_search_url_resource" FOREIGN KEY (res_id) REFERENCES hfj_resource(res_id)
+		 */
+	}
+
+	@Language("SQL")
+	private static String getSql(DriverTypeEnum theDriverType) {
+		return switch (theDriverType) {
+			case H2_EMBEDDED ->
+				"""
+				SELECT index_name
+				FROM information_schema.indexes
+				WHERE table_schema = 'PUBLIC' AND
+				table_name = ? AND
+				index_type_name = 'PRIMARY KEY';
+				""";
+			case DERBY_EMBEDDED -> null;
+			case MARIADB_10_1 -> null;
+			case MYSQL_5_7 -> null;
+			case POSTGRES_9_4 ->
+				// LUKETODO:  this works:  copy over to DropPrimaryKeyTask
+				"""
+				SELECT constraint_name 
+				FROM information_schema.table_constraints
+				WHERE table_schema = 'public'
+				AND table_name = ?
+				AND constraint_type = 'PRIMARY KEY'
+				""";
+			case ORACLE_12C ->
+				"""
+				SELECT constraint_name, constraint_type
+				FROM user_constraints
+				WHERE table_name = ?
+				""";
+			case MSSQL_2012 ->
+				"""
+				SELECT tc.constraint_name 
+				FROM information_schema.table_constraints tc
+				JOIN information_schema.constraint_column_usage ccu ON tc.constraint_name = ccu.constraint_name
+				WHERE tc.table_name = ? AND 
+				tc.constraint_type = 'PRIMARY KEY'
+				""";
+
+//			SELECT tc.*, ccu.*
+//			select C.COLUMN_NAME FROM
+//			INFORMATION_SCHEMA.TABLE_CONSTRAINTS T
+//			JOIN INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE C
+//			ON C.CONSTRAINT_NAME=T.CONSTRAINT_NAME
+//			WHERE
+//			C.TABLE_NAME='Employee'
+//			and T.CONSTRAINT_TYPE='PRIMARY KEY'
+			case COCKROACHDB_21_1 -> null;
+		};
 	}
 
 	private static void migrate(DriverTypeEnum theDriverType, DataSource dataSource, HapiMigrationStorageSvc hapiMigrationStorageSvc, VersionEnum to) throws SQLException {

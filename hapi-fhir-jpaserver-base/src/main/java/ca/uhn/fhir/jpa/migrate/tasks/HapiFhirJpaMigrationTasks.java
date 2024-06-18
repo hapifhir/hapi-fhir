@@ -138,43 +138,46 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 					.references("HFJ_RESOURCE", "RES_ID");
 		}
 
-		{
-			version.onTable(tableHfjResSearchUrl)
-					.addColumn("20240531.1", "PARTITION_ID", -1)
-					.nullable()
-					.type(ColumnTypeEnum.INT);
-
-			version.onTable(tableHfjResSearchUrl)
-					.addColumn("20240531.2", "PARTITION_DATE")
-					.nullable()
-					.type(ColumnTypeEnum.DATE_ONLY);
-
-			version.onTable(tableHfjResSearchUrl).dropIndex("20240531.3", "PRIMARY KEY");
-
-			version.onTable(tableHfjResSearchUrl)
-					.addIndex("20240531.4", "IDX_SEARCH_URL_PARTITION_ID")
-					.unique(true)
-					.withColumns("RES_SEARCH_URL", "PARTITION_ID");
-
-			final String updateSetPartitionIdToMinusOne = String.format("UPDATE %s SET %s = -1", tableHfjResSearchUrl, ResourceSearchUrlEntityPK.PARTITION_ID_COLUMN_NAME);
-
-			final Map<DriverTypeEnum, String> addResTagConstraint = new HashMap<>();
-			addResTagConstraint.put(DriverTypeEnum.H2_EMBEDDED, updateSetPartitionIdToMinusOne);
-			addResTagConstraint.put(DriverTypeEnum.MARIADB_10_1, updateSetPartitionIdToMinusOne);
-			addResTagConstraint.put(DriverTypeEnum.MSSQL_2012, updateSetPartitionIdToMinusOne);
-			addResTagConstraint.put(DriverTypeEnum.MYSQL_5_7, updateSetPartitionIdToMinusOne);
-			addResTagConstraint.put(DriverTypeEnum.ORACLE_12C, updateSetPartitionIdToMinusOne);
-			addResTagConstraint.put(DriverTypeEnum.POSTGRES_9_4, updateSetPartitionIdToMinusOne);
-			version.executeRawSql("20240531.5", addResTagConstraint);
-
-			version.onTable(tableHfjResSearchUrl)
-					.modifyColumn("20240531.6", ResourceSearchUrlEntityPK.PARTITION_ID_COLUMN_NAME)
-					.nonNullable()
-					.withType(ColumnTypeEnum.INT);
-
-			version.onTable(tableHfjResSearchUrl)
-				.addPrimaryKey("20240531.7", ResourceSearchUrlEntityPK.RES_SEARCH_URL_COLUMN_NAME, ResourceSearchUrlEntityPK.PARTITION_ID_COLUMN_NAME);
-		}
+		// LUKETODO:  uncomment
+		// LUKETODO:  modify
+		// LUKETODO:  test
+//		{
+//			version.onTable(tableHfjResSearchUrl)
+//					.addColumn("20240531.1", "PARTITION_ID", -1)
+//					.nullable()
+//					.type(ColumnTypeEnum.INT);
+//
+//			version.onTable(tableHfjResSearchUrl)
+//					.addColumn("20240531.2", "PARTITION_DATE")
+//					.nullable()
+//					.type(ColumnTypeEnum.DATE_ONLY);
+//
+//			version.onTable(tableHfjResSearchUrl).dropIndex("20240531.3", "PRIMARY KEY");
+//
+//			version.onTable(tableHfjResSearchUrl)
+//					.addIndex("20240531.4", "IDX_SEARCH_URL_PARTITION_ID")
+//					.unique(true)
+//					.withColumns("RES_SEARCH_URL", "PARTITION_ID");
+//
+//			final String updateSetPartitionIdToMinusOne = String.format("UPDATE %s SET %s = -1", tableHfjResSearchUrl, ResourceSearchUrlEntityPK.PARTITION_ID_COLUMN_NAME);
+//
+//			final Map<DriverTypeEnum, String> addResTagConstraint = new HashMap<>();
+//			addResTagConstraint.put(DriverTypeEnum.H2_EMBEDDED, updateSetPartitionIdToMinusOne);
+//			addResTagConstraint.put(DriverTypeEnum.MARIADB_10_1, updateSetPartitionIdToMinusOne);
+//			addResTagConstraint.put(DriverTypeEnum.MSSQL_2012, updateSetPartitionIdToMinusOne);
+//			addResTagConstraint.put(DriverTypeEnum.MYSQL_5_7, updateSetPartitionIdToMinusOne);
+//			addResTagConstraint.put(DriverTypeEnum.ORACLE_12C, updateSetPartitionIdToMinusOne);
+//			addResTagConstraint.put(DriverTypeEnum.POSTGRES_9_4, updateSetPartitionIdToMinusOne);
+//			version.executeRawSql("20240531.5", addResTagConstraint);
+//
+//			version.onTable(tableHfjResSearchUrl)
+//					.modifyColumn("20240531.6", ResourceSearchUrlEntityPK.PARTITION_ID_COLUMN_NAME)
+//					.nonNullable()
+//					.withType(ColumnTypeEnum.INT);
+//
+//			version.onTable(tableHfjResSearchUrl)
+//				.addPrimaryKey("20240531.7", ResourceSearchUrlEntityPK.RES_SEARCH_URL_COLUMN_NAME, ResourceSearchUrlEntityPK.PARTITION_ID_COLUMN_NAME);
+//		}
 	}
 
 	protected void init720() {

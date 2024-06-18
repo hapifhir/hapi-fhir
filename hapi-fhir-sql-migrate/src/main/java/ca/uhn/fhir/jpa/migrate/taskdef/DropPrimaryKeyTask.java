@@ -209,33 +209,9 @@ ALTER TABLE user_customer_permission DROP PRIMARY KEY;
 
 	@Nonnull
 	private String generateSql() {
-		switch (getDriverType()) {
-			case MYSQL_5_7:
-			case MARIADB_10_1:
-			case DERBY_EMBEDDED:
-			case H2_EMBEDDED:
-				return "ALTER TABLE user_customer_permission DROP PRIMARY KEY";
-				// LUKETODO:  I need to 2 step this:  excecute the SQL and then craft the SQL to drop the named constraint?
-				// LUKETODO:  alternatively, I can infer the PK name from direct queries against the DBs and then use that (ex: hfj_res_search_url_pkey for postgres)
-			case POSTGRES_9_4:
-			case ORACLE_12C:
-			case COCKROACHDB_21_1:
-			case MSSQL_2012:
-				@Language("SQL")
-				final String getPkSql = "select index_name from information_schema.indexes where table_schema = 'PUBLIC' and table_name = '?' and index_type_name = 'PRIMARY KEY'";
-
-				final ResultSetExtractor<String> resultSetExtractor = rs -> rs.getString(1);
-				final String constraintName = executeSqlWithResult(getPkSql, resultSetExtractor, getTableName());
-				return String.format("ALTER TABLE %s DROP CONSTRAINT %s", getTableName(), constraintName);
-//				// LUKETODO:  test on Oracle
-//				// LUKETODO:  test on MSSQL
-//				// LUKETODO:  test on Postgres
-//				return String.format(
-//					"ALTER TABLE DROP CONSTRAINT FROM TABLE %s",
-//					getTableName(), String.join(", ", myPrimaryKeyColumnsInOrder));
-			default:
-				throw new IllegalStateException(Msg.code(59));
-		}
+		final ResultSetExtractor<String> resultSetExtractor = rs -> rs.getString(1);
+		final String constraintName = executeSqlWithResult(getPrimaryKeyIndexNameSql(), resultSetExtractor, getTableName());
+		return String.format("ALTER TABLE %s DROP CONSTRAINT %s", getTableName(), constraintName);
 	}
 
 	@Override
@@ -248,5 +224,54 @@ ALTER TABLE user_customer_permission DROP PRIMARY KEY;
 //
 //		// LUKETODO:  error handling?
 //		executeSql(getTableName(), generateSql());
+	}
+
+	// LUKETODO:  consider making this part of a new utility class?
+	private String getPrimaryKeyIndexName() {
+		final ResultSetExtractor<String> resultSetExtractor = rs -> rs.getString(1);
+		final String constraintName = executeSqlWithResult(getPrimaryKeyIndexNameSql(), resultSetExtractor, getTableName());
+		return String.format("ALTER TABLE %s DROP CONSTRAINT %s", getTableName(), constraintName);
+	}
+
+	private String getPrimaryKeyIndexNameSql() {
+		switch (getDriverType()) {
+			case MYSQL_5_7:
+			case MARIADB_10_1:
+			case DERBY_EMBEDDED:
+			case H2_EMBEDDED:
+				@Language("SQL")
+				final String getPkSqlH2 =
+					"select index_name " +
+					"from information_schema.indexes " +
+					"where table_schema = 'PUBLIC' and " +
+					"table_name = 'HFJ_RES_SEARCH_URL' and " +
+					"index_type_name = 'PRIMARY KEY'";
+
+				return getPkSqlH2;
+			case POSTGRES_9_4:
+				@Language("SQL")
+				final String getPkSqlPostgres =
+					"select constraint_name " +
+					"from information_schema.table_constraints " +
+					"where table_schema = 'public' " +
+					"and table_name = 'hfj_res_search_url' " +
+					"and constraint_type = 'PRIMARY KEY' ";
+
+				return getPkSqlPostgres;
+			case ORACLE_12C:
+			case COCKROACHDB_21_1:
+			case MSSQL_2012:
+				@Language("SQL")
+				final String getPkSqlMssql =
+					"SELECT index_name " +
+					"FROM information_schema.indexes " +
+					"WHERE table_schema = 'PUBLIC' AND " +
+					"table_name = '?' AND " +
+					"index_type_name = 'PRIMARY KEY'";
+
+				return getPkSqlMssql;
+			default:
+				throw new IllegalStateException(Msg.code(59));
+		}
 	}
 }
