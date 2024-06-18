@@ -105,26 +105,13 @@ public class CdsHooksContextBooter {
 		}
 	}
 
-	private JsonNode serializeExtensions(String theExtension) {
-		try {
-			final ObjectMapper mapper = new ObjectMapper();
-			return mapper.readTree(theExtension);
-		} catch (JsonProcessingException e) {
-			final String message = String.format("Invalid JSON: %s", e.getMessage());
-			ourLog.debug(message);
-			throw new UnprocessableEntityException(Msg.code(2378) + message);
-		}
-	}
-
-	// TODO: @Adi remove
-	protected String validateJson(String theExtension) {
+	JsonNode serializeExtensions(String theExtension) {
 		if (StringUtils.isEmpty(theExtension)) {
 			return null;
 		}
 		try {
 			final ObjectMapper mapper = new ObjectMapper();
-			mapper.readTree(theExtension);
-			return theExtension;
+			return mapper.readTree(theExtension);
 		} catch (JsonProcessingException e) {
 			final String message = String.format("Invalid JSON: %s", e.getMessage());
 			ourLog.debug(message);
