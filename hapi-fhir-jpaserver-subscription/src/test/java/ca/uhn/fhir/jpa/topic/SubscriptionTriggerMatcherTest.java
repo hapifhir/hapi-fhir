@@ -20,6 +20,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -172,6 +174,7 @@ class SubscriptionTriggerMatcherTest {
 
 		// verify
 		assertFalse(result.matched());
+		assertEquals("Error @1, 2: Premature ExpressionNode termination at unexpected token \"text\"", result.getUnsupportedReason());
 	}
 
 	@Test
@@ -234,6 +237,7 @@ class SubscriptionTriggerMatcherTest {
 
 		// setup
 		SubscriptionTopic.SubscriptionTopicResourceTriggerComponent trigger = new SubscriptionTopic.SubscriptionTopicResourceTriggerComponent();
+		trigger.setId("1");
 		trigger.setResource("Encounter");
 		trigger.addSupportedInteraction(SubscriptionTopic.InteractionTrigger.UPDATE);
 		trigger.setFhirPathCriteria("%current.id");
@@ -244,6 +248,7 @@ class SubscriptionTriggerMatcherTest {
 
 		// verify
 		assertFalse(result.matched());
+		assertEquals("FhirPath evaluation criteria '%current.id' from Subscription topic: '1' resulted in a non-boolean result: 'org.hl7.fhir.r5.model.IdType'", result.getUnsupportedReason());
 	}
 
 	@Test
@@ -252,6 +257,7 @@ class SubscriptionTriggerMatcherTest {
 
 		// setup
 		SubscriptionTopic.SubscriptionTopicResourceTriggerComponent trigger = new SubscriptionTopic.SubscriptionTopicResourceTriggerComponent();
+		trigger.setId("1");
 		trigger.setResource("Encounter");
 		trigger.addSupportedInteraction(SubscriptionTopic.InteractionTrigger.UPDATE);
 		trigger.setFhirPathCriteria("%current | %previous");
@@ -267,6 +273,7 @@ class SubscriptionTriggerMatcherTest {
 
 		// verify
 		assertFalse(result.matched());
+		assertEquals("FhirPath evaluation criteria '%current | %previous' from Subscription topic: '1' resulted in '2' results. Expected 1.", result.getUnsupportedReason());
 	}
 
 	@Test
@@ -293,6 +300,7 @@ class SubscriptionTriggerMatcherTest {
 
 		// verify
 		assertFalse(result.matched());
+		assertEquals("Error @1, 2: Premature ExpressionNode termination at unexpected token \"text\"", result.getUnsupportedReason());
 	}
 
 	@Test
@@ -363,7 +371,8 @@ class SubscriptionTriggerMatcherTest {
 		IFhirResourceDao mockEncounterDao = mock(IFhirResourceDao.class);
 		when(myDaoRegistry.getResourceDao("Encounter")).thenReturn(mockEncounterDao);
 
-		assertFalse(myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.FHIRPATH_EXPRESSION, fhirPathCriteria));
+		assertNull(myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.FHIRPATH_EXPRESSION, fhirPathCriteria));
+
 		// run
 		SubscriptionTriggerMatcher svc = new SubscriptionTriggerMatcher(mySubscriptionTopicSupport, msg, trigger, myMemoryCacheService);
 		InMemoryMatchResult result = svc.match();
@@ -371,6 +380,6 @@ class SubscriptionTriggerMatcherTest {
 
 		// verify
 		assertTrue(result.matched());
-		assertTrue(myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.FHIRPATH_EXPRESSION, fhirPathCriteria) != null);
+		assertNotNull(myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.FHIRPATH_EXPRESSION, fhirPathCriteria));
 	}
 }
