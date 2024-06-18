@@ -28,7 +28,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -39,7 +38,6 @@ import java.util.Set;
 import static ca.uhn.fhir.jpa.embedded.HapiEmbeddedDatabasesExtension.FIRST_TESTED_VERSION;
 import static ca.uhn.fhir.jpa.migrate.SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -207,28 +205,28 @@ public class HapiSchemaMigrationTest {
 	}
 
 	private void checkOutPkSqlResult(JpaEmbeddedDatabase theDatabase, DriverTypeEnum theDriverType) {
-		final List<Map<String, Object>> primaryKeyQueryResults = theDatabase.query(getPrimaryKeyForTableSql(theDriverType, TABLE_HFJ_RES_SEARCH_URL.toLowerCase()));
+//		final List<Map<String, Object>> primaryKeyQueryResults = theDatabase.query(getPrimaryKeyForTableSql(theDriverType, TABLE_HFJ_RES_SEARCH_URL.toLowerCase()));
+//
+//		ourLog.info("6145: primaryKeyQueryResults result: {}", primaryKeyQueryResults);
+//
+//		assertFalse(primaryKeyQueryResults.isEmpty());
+//		assertEquals(1, primaryKeyQueryResults.size());
+//		final Collection<Object> rowColumns = primaryKeyQueryResults.get(0).values();
+//		assertEquals(1, rowColumns.size());
+//		final String primaryKeyName = (String)rowColumns.iterator().next();
 
-		ourLog.info("6145: primaryKeyQueryResults result: {}", primaryKeyQueryResults);
+//		// LUKETODO:  DROP and ADD primary SQL works for Postgres
+//		ourLog.info("6145: BEFORE drop primary key: {}", primaryKeyName);
+//
+//		final String dropPrimaryKeySql = getDropPrimaryKeySql(theDriverType, TABLE_HFJ_RES_SEARCH_URL.toLowerCase(), primaryKeyName);
+//
+//		theDatabase.executeSqlWithParams(dropPrimaryKeySql);
+//
+//		ourLog.info("6145: AFTER drop primary key: {}", primaryKeyName);
 
-		assertFalse(primaryKeyQueryResults.isEmpty());
-		assertEquals(1, primaryKeyQueryResults.size());
-		final Collection<Object> rowColumns = primaryKeyQueryResults.get(0).values();
-		assertEquals(1, rowColumns.size());
-		final String primaryKeyName = (String)rowColumns.iterator().next();
-
-		// LUKETODO:  DROP and ADD primary SQL works for Postgres
-		ourLog.info("6145: BEFORE drop primary key: {}", primaryKeyName);
-
-		final String dropPrimaryKeySql = getDropPrimaryKeySql(theDriverType, TABLE_HFJ_RES_SEARCH_URL.toLowerCase(), primaryKeyName);
-
-		theDatabase.executeSqlWithParams(dropPrimaryKeySql);
-
-		ourLog.info("6145: AFTER drop primary key: {}", primaryKeyName);
-
-		final List<Map<String, Object>> countRows = theDatabase.query("SELECT count(*) FROM " + TABLE_HFJ_RES_SEARCH_URL.toLowerCase());
-
-		ourLog.info("6145: countRows: {}", countRows);
+//		final List<Map<String, Object>> countRows = theDatabase.query("SELECT count(*) FROM " + TABLE_HFJ_RES_SEARCH_URL.toLowerCase());
+//
+//		ourLog.info("6145: countRows: {}", countRows);
 
 //		// LUKETODO:  update all search URLs to have a default value of -1
 //		theDatabase.executeSqlAsBatch(String.format("UPDATE %s SET %s = %s", TABLE_HFJ_RES_SEARCH_URL.toLowerCase(), COLUMN_PARTITION_ID.toLowerCase(), "-1"));
@@ -239,13 +237,13 @@ public class HapiSchemaMigrationTest {
 //
 //		ourLog.info("6145: AFTER partition_id NOT NULL: {}", primaryKeyName);
 
-		final String addPrimaryKeySql = "ALTER TABLE %s ADD PRIMARY KEY (%s, %s)";
-
-		ourLog.info("6145: BEFORE add primary key");
-
-		theDatabase.executeSqlWithParams(String.format(addPrimaryKeySql, TABLE_HFJ_RES_SEARCH_URL.toLowerCase(), COLUMN_RES_SEARCH_URL.toUpperCase(), COLUMN_PARTITION_ID.toLowerCase()));
-
-		ourLog.info("6145: AFTER add primary key");
+//		final String addPrimaryKeySql = "ALTER TABLE %s ADD PRIMARY KEY (%s, %s)";
+//
+//		ourLog.info("6145: BEFORE add primary key");
+//
+//		theDatabase.executeSqlWithParams(String.format(addPrimaryKeySql, TABLE_HFJ_RES_SEARCH_URL.toLowerCase(), COLUMN_RES_SEARCH_URL.toUpperCase(), COLUMN_PARTITION_ID.toLowerCase()));
+//
+//		ourLog.info("6145: AFTER add primary key");
 
 		/*
 		                          Table "public.hfj_res_search_url"

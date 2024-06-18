@@ -133,7 +133,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		{
 			version.onTable(tableHfjResSearchUrl)
-					.addForeignKey("20240515.1", "FK_RES_SEARCH_URL_RESOURCE")
+					.addForeignKey("20240618.1", "FK_RES_SEARCH_URL_RESOURCE")
 					.toColumn("RES_ID")
 					.references("HFJ_RESOURCE", "RES_ID");
 		}
@@ -149,12 +149,12 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 	void doStuff(Builder version) {
 		final String tableHfjResSearchUrl = "HFJ_RES_SEARCH_URL";
 		version.onTable(tableHfjResSearchUrl)
-			.addColumn("20240531.1", "PARTITION_ID", -1)
+			.addColumn("20240618.2","PARTITION_ID", -1)
 			.nullable()
 			.type(ColumnTypeEnum.INT);
 
 		version.onTable(tableHfjResSearchUrl)
-			.addColumn("20240531.2", "PARTITION_DATE")
+			.addColumn("20240618.3", "PARTITION_DATE")
 			.nullable()
 			.type(ColumnTypeEnum.DATE_ONLY);
 
@@ -167,29 +167,18 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		6) ADD new PK >>> NEW CODE
 		 */
 
-		version.executeRawSql("20240531.5", String.format("UPDATE %s SET %s = -1", tableHfjResSearchUrl, ResourceSearchUrlEntityPK.PARTITION_ID_COLUMN_NAME));
+		version.executeRawSql("20240618.4", String.format("UPDATE %s SET %s = -1", tableHfjResSearchUrl, ResourceSearchUrlEntityPK.PARTITION_ID_COLUMN_NAME));
 
 		version.onTable(tableHfjResSearchUrl)
-				.modifyColumn("20240531.6", ResourceSearchUrlEntityPK.PARTITION_ID_COLUMN_NAME)
+				.modifyColumn("20240618.5", ResourceSearchUrlEntityPK.PARTITION_ID_COLUMN_NAME)
 				.nonNullable()
 				.withType(ColumnTypeEnum.INT);
 
-//		version.onTable(tableHfjResSearchUrl).dropPrimaryKey("20240531.3");
+		version.onTable(tableHfjResSearchUrl)
+			.dropPrimaryKey("20240618.6");
 
-//		version.onTable(tableHfjResSearchUrl).dropIndex("20240531.3", "PRIMARY KEY");
-//			version.onTable(tableHfjResSearchUrl)
-//					.addIndex("20240531.4", "IDX_SEARCH_URL_PARTITION_ID")
-//					.unique(true)
-//					.withColumns("RES_SEARCH_URL", "PARTITION_ID");
-//
-//
-//			version.onTable(tableHfjResSearchUrl)
-//					.modifyColumn("20240531.6", ResourceSearchUrlEntityPK.PARTITION_ID_COLUMN_NAME)
-//					.nonNullable()
-//					.withType(ColumnTypeEnum.INT);
-//
-//			version.onTable(tableHfjResSearchUrl)
-//				.addPrimaryKey("20240531.7", ResourceSearchUrlEntityPK.RES_SEARCH_URL_COLUMN_NAME, ResourceSearchUrlEntityPK.PARTITION_ID_COLUMN_NAME);
+		version.onTable(tableHfjResSearchUrl)
+			.addPrimaryKey("20240618.7", ResourceSearchUrlEntityPK.RES_SEARCH_URL_COLUMN_NAME, ResourceSearchUrlEntityPK.PARTITION_ID_COLUMN_NAME);
 	}
 
 	protected void init720() {
@@ -3676,3 +3665,18 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		}
 	}
 }
+
+//		version.onTable(tableHfjResSearchUrl).dropIndex("20240531.3", "PRIMARY KEY");
+//			version.onTable(tableHfjResSearchUrl)
+//					.addIndex("20240531.4", "IDX_SEARCH_URL_PARTITION_ID")
+//					.unique(true)
+//					.withColumns("RES_SEARCH_URL", "PARTITION_ID");
+//
+//
+//			version.onTable(tableHfjResSearchUrl)
+//					.modifyColumn("20240531.6", ResourceSearchUrlEntityPK.PARTITION_ID_COLUMN_NAME)
+//					.nonNullable()
+//					.withType(ColumnTypeEnum.INT);
+//
+//			version.onTable(tableHfjResSearchUrl)
+//				.addPrimaryKey("20240531.7", ResourceSearchUrlEntityPK.RES_SEARCH_URL_COLUMN_NAME, ResourceSearchUrlEntityPK.PARTITION_ID_COLUMN_NAME);

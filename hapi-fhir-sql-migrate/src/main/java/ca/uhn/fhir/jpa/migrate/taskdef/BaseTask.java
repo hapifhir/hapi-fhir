@@ -233,7 +233,7 @@ public abstract class BaseTask {
 		// 0 means no timeout -- we use this for index rebuilds that may take time.
 		jdbcTemplate.setQueryTimeout(0);
 		try {
-			T result = jdbcTemplate.query(theSql, theResultSetExtractor);
+			T result = jdbcTemplate.query(theSql, theResultSetExtractor, theArguments);
 			if (!HapiSystemProperties.isUnitTestModeEnabled()) {
 				logInfo(ourLog, "SQL \"{}\" returned result {}", theSql, result);
 			}

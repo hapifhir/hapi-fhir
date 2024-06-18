@@ -39,8 +39,17 @@ public class DropPrimaryKeyTask extends BaseTableTask {
 
 	@Nonnull
 	private String generateSql() {
-		final ResultSetExtractor<String> resultSetExtractor = rs -> rs.getString(1);
-		final String primaryKeyName = executeSqlWithResult(generatePrimaryKeyIndexNameSql(), resultSetExtractor, getTableName());
+		ourLog.info("6145: DropPrimaryKeyTask.generateSql()");
+		final ResultSetExtractor<String> resultSetExtractor = rs -> {
+			//LUKETODO:  error handling
+			if (rs.next()) {
+				return rs.getString(1);
+			}
+			return null;
+		};
+
+		final String primaryKeyName = executeSqlWithResult(generatePrimaryKeyIndexNameSql(), resultSetExtractor, getTableName().toLowerCase());
+		ourLog.info("6145: primaryKeyName: [{}]", primaryKeyName);
 		return generateDropPrimaryKeySql(primaryKeyName);
 	}
 

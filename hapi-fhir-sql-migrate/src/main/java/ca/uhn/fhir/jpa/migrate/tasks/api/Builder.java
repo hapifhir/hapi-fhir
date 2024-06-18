@@ -333,7 +333,7 @@ public class Builder {
 		}
 
 		public void addPrimaryKey(String theVersion, String... theColumnsInOrder) {
-			addTask(new AddPrimaryKeyTask(myRelease, theVersion, theColumnsInOrder));
+			addTask(new AddPrimaryKeyTask(myRelease, theVersion, myTableName, theColumnsInOrder));
 		}
 
 		/**
