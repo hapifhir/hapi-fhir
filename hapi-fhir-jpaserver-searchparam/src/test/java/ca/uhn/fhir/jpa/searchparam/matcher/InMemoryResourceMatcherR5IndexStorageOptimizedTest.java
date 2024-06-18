@@ -4,7 +4,6 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import org.hl7.fhir.r5.model.Observation;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 
@@ -23,7 +22,6 @@ public class InMemoryResourceMatcherR5IndexStorageOptimizedTest extends InMemory
 		myStorageSettings.setIndexStorageOptimized(false);
 	}
 
-	@NotNull
 	@Override
 	protected ResourceIndexedSearchParamDate extractEffectiveDateParam(Observation theObservation) {
 		ResourceIndexedSearchParamDate searchParamDate = super.extractEffectiveDateParam(theObservation);

@@ -57,13 +57,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**
@@ -304,7 +303,7 @@ public class FhirResourceDaoR4IndexStorageOptimizedTest extends BaseJpaR4Test {
 			.add(theSearchParam, theParamValue);
 		List<IIdType> listIds = toUnqualifiedVersionlessIds(theResourceDao.search(searchParameterMap));
 
-		assertThat(listIds, containsInAnyOrder(theId));
+		assertTrue(listIds.contains(theId));
 	}
 
 	private void executeReindex(String... theUrls) {
