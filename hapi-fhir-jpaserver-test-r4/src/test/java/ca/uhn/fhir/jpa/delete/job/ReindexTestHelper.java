@@ -11,11 +11,13 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.BundleUtil;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -241,4 +243,27 @@ public class ReindexTestHelper {
 		return BundleUtil.toListOfResourceIds(myFhirContext, result);
 	}
 
+	/**
+	 * Creates a transaction bundle with 20 Observations which will create rows for indexes
+	 * created by {@link #createNonUniqueStatusAndCodeSearchParameter()} and
+	 * {@link #createUniqueCodeSearchParameter()}.
+	 */
+	public Bundle createTransactionBundleWith20Observation(boolean theUseClientAssignedIds) {
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		for (int i = 0; i < 20; i++) {
+			Observation observation = new Observation();
+			if (theUseClientAssignedIds) {
+				observation.setId("OBS" + i);
+			}
+			observation.addIdentifier().setSystem("http://foo").setValue("ident" + i);
+			observation.setStatus(Observation.ObservationStatus.FINAL);
+			observation.getCode().addCoding().setSystem("http://foo").setCode("" + i);
+			if (theUseClientAssignedIds) {
+				bb.addTransactionUpdateEntry(observation);
+			} else {
+				bb.addTransactionCreateEntry(observation);
+			}
+		}
+		return bb.getBundleTyped();
+	}
 }

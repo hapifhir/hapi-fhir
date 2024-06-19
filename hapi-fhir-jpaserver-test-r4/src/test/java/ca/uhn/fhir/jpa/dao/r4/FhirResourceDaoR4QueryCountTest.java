@@ -19,6 +19,7 @@ import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
 import ca.uhn.fhir.jpa.dao.data.ISearchParamPresentDao;
+import ca.uhn.fhir.jpa.delete.job.ReindexTestHelper;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
 import ca.uhn.fhir.jpa.interceptor.ForceOffsetSearchModeInterceptor;
@@ -27,7 +28,6 @@ import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.search.PersistedJpaSearchFirstPageBundleProvider;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.subscription.submit.svc.ResourceModifiedSubmitterSvc;
 import ca.uhn.fhir.jpa.subscription.triggering.ISubscriptionTriggeringSvc;
 import ca.uhn.fhir.jpa.subscription.triggering.SubscriptionTriggeringSvcImpl;
 import ca.uhn.fhir.jpa.term.TermReadSvcImpl;
@@ -48,7 +48,6 @@ import ca.uhn.fhir.test.utilities.ProxyUtil;
 import ca.uhn.fhir.test.utilities.server.HashMapResourceProviderExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.BundleBuilder;
-import ca.uhn.fhir.util.HapiExtensions;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -62,7 +61,6 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Encounter;
-import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
@@ -77,7 +75,6 @@ import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Subscription;
@@ -151,13 +148,12 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	@Autowired
 	private ISubscriptionTriggeringSvc mySubscriptionTriggeringSvc;
 	@Autowired
-	private ResourceModifiedSubmitterSvc myResourceModifiedSubmitterSvc;
-	@Autowired
 	private ReindexStep myReindexStep;
 	@Autowired
 	private DeleteExpungeStep myDeleteExpungeStep;
 	@Autowired
 	protected SubscriptionTestUtil mySubscriptionTestUtil;
+	private ReindexTestHelper myReindexTestHelper;
 
 
 	@AfterEach
@@ -169,7 +165,6 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myStorageSettings.setDeleteEnabled(new JpaStorageSettings().isDeleteEnabled());
 		myStorageSettings.setHistoryCountMode(JpaStorageSettings.DEFAULT_HISTORY_COUNT_MODE);
 		myStorageSettings.setIndexMissingFields(new JpaStorageSettings().getIndexMissingFields());
-		myStorageSettings.setInlineResourceTextBelowSize(new JpaStorageSettings().getInlineResourceTextBelowSize());
 		myStorageSettings.setMassIngestionMode(new JpaStorageSettings().isMassIngestionMode());
 		myStorageSettings.setMatchUrlCacheEnabled(new JpaStorageSettings().isMatchUrlCacheEnabled());
 		myStorageSettings.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(new JpaStorageSettings().isPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets());
@@ -179,6 +174,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myStorageSettings.setTagStorageMode(new JpaStorageSettings().getTagStorageMode());
 		myStorageSettings.setExpungeEnabled(false);
 		myStorageSettings.setUniqueIndexesEnabled(new JpaStorageSettings().isUniqueIndexesEnabled());
+		myStorageSettings.setUniqueIndexesCheckedBeforeSave(new JpaStorageSettings().isUniqueIndexesCheckedBeforeSave());
 
 		myFhirContext.getParserOptions().setStripVersionsFromReferences(true);
 		TermReadSvcImpl.setForceDisableHibernateSearchForUnitTest(false);
@@ -194,6 +190,8 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		// Pre-cache all StructureDefinitions so that query doesn't affect other counts
 		myValidationSupport.invalidateCaches();
 		myValidationSupport.fetchAllStructureDefinitions();
+
+		myReindexTestHelper = new ReindexTestHelper(myFhirContext, myDaoRegistry, mySearchParamRegistry);
 	}
 
 	/**
@@ -1075,89 +1073,20 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	@Test
 	public void testReindexJob_ComboParamIndexesInUse() {
         myStorageSettings.setUniqueIndexesEnabled(true);
+		myReindexTestHelper.createUniqueCodeSearchParameter();
+		myReindexTestHelper.createNonUniqueStatusAndCodeSearchParameter();
 
-        {
-            SearchParameter sp = new SearchParameter();
-            sp.setId("SearchParameter/patient-identifier");
-            sp.setCode("identifier");
-            sp.setExpression("Patient.identifier");
-            sp.setType(Enumerations.SearchParamType.TOKEN);
-            sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
-            sp.addBase("Patient");
-            mySearchParameterDao.update(sp);
-
-            sp = new SearchParameter();
-            sp.setId("SearchParameter/patient-uniq-identifier");
-            sp.setCode("patient-uniq-identifier");
-            sp.setExpression("Patient");
-            sp.setType(Enumerations.SearchParamType.COMPOSITE);
-            sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
-            sp.addBase("Patient");
-            sp.addComponent()
-                    .setExpression("Patient")
-                    .setDefinition("/SearchParameter/patient-identifier");
-            sp.addExtension()
-                    .setUrl(HapiExtensions.EXT_SP_UNIQUE)
-                    .setValue(new BooleanType(true));
-            mySearchParameterDao.update(sp);
-        }
-        {
-            SearchParameter sp = new SearchParameter();
-            sp.setId("SearchParameter/patient-family");
-            sp.setCode("family");
-            sp.setExpression("Patient.name.family");
-            sp.setType(Enumerations.SearchParamType.STRING);
-            sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
-            sp.addBase("Patient");
-            mySearchParameterDao.update(sp);
-
-            sp = new SearchParameter();
-            sp.setId("SearchParameter/patient-gender");
-            sp.setCode("gender");
-            sp.setExpression("Patient.gender");
-            sp.setType(Enumerations.SearchParamType.TOKEN);
-            sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
-            sp.addBase("Patient");
-            mySearchParameterDao.update(sp);
-
-            sp = new SearchParameter();
-            sp.setId("SearchParameter/patient-nonuniq-family-gender");
-            sp.setCode("patient-nonuniq-family-gender");
-            sp.setExpression("Patient");
-            sp.setType(Enumerations.SearchParamType.COMPOSITE);
-            sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
-            sp.addBase("Patient");
-            sp.addComponent()
-                    .setExpression("Patient")
-                    .setDefinition("/SearchParameter/patient-family");
-            sp.addComponent()
-                    .setExpression("Patient")
-                    .setDefinition("/SearchParameter/patient-gender");
-            sp.addExtension()
-                    .setUrl(HapiExtensions.EXT_SP_UNIQUE)
-                    .setValue(new BooleanType(false));
-            mySearchParameterDao.update(sp);
-        }
-        mySearchParamRegistry.forceRefresh();
-
-        BundleBuilder bb = new BundleBuilder(myFhirContext);
-        for (int i = 0; i < 20; i++) {
-            Patient p = new Patient();
-            p.addIdentifier().setSystem("http://foo").setValue("ident" + i);
-            p.addName().setFamily("Family" + i);
-            p.setGender(Enumerations.AdministrativeGender.MALE);
-            bb.addTransactionCreateEntry(p);
-        }
-		Bundle transactionResonse = mySystemDao.transaction(mySrd, bb.getBundleTyped());
+		Bundle inputBundle = myReindexTestHelper.createTransactionBundleWith20Observation(false);
+		Bundle transactionResonse = mySystemDao.transaction(mySrd, inputBundle);
 		ResourceIdListWorkChunkJson data = new ResourceIdListWorkChunkJson();
 		transactionResonse
 			.getEntry()
 			.stream()
 			.map(t->new IdType(t.getResponse().getLocation()))
-			.forEach(t->data.addTypedPid("Patient", t.getIdPartAsLong()));
+			.forEach(t->data.addTypedPid("Observation", t.getIdPartAsLong()));
 
         runInTransaction(() -> {
-            assertEquals(25L, myResourceTableDao.count());
+            assertEquals(24L, myResourceTableDao.count());
             assertEquals(20L, myResourceIndexedComboStringUniqueDao.count());
             assertEquals(20L, myResourceIndexedComboTokensNonUniqueDao.count());
         });
@@ -1173,7 +1102,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(20, outcome.getRecordsProcessed());
 
         // validate
-        assertEquals(5, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+        assertEquals(4, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
         assertEquals(0, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
         assertEquals(0, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
         assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
@@ -3213,6 +3142,63 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 	}
 
+
+	@Test
+	public void testTransaction_ComboParamIndexesInUse() {
+		myStorageSettings.setUniqueIndexesEnabled(true);
+		myReindexTestHelper.createUniqueCodeSearchParameter();
+		myReindexTestHelper.createNonUniqueStatusAndCodeSearchParameter();
+
+		// Create resources for the first time
+		myCaptureQueriesListener.clear();
+		Bundle inputBundle = myReindexTestHelper.createTransactionBundleWith20Observation(true);
+		mySystemDao.transaction(mySrd, inputBundle);
+		assertEquals(21, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		assertEquals(0, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
+		assertEquals(78, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
+		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
+
+		// Now run the transaction again - It should not need too many SELECTs
+		myCaptureQueriesListener.clear();
+		inputBundle = myReindexTestHelper.createTransactionBundleWith20Observation(true);
+		mySystemDao.transaction(mySrd, inputBundle);
+		assertEquals(4, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		assertEquals(0, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
+		assertEquals(0, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
+		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
+
+
+	}
+
+	@Test
+	public void testTransaction_ComboParamIndexesInUse_NoPreCheck() {
+		myStorageSettings.setUniqueIndexesEnabled(true);
+		myStorageSettings.setUniqueIndexesCheckedBeforeSave(false);
+
+		myReindexTestHelper.createUniqueCodeSearchParameter();
+		myReindexTestHelper.createNonUniqueStatusAndCodeSearchParameter();
+
+		// Create resources for the first time
+		myCaptureQueriesListener.clear();
+		Bundle inputBundle = myReindexTestHelper.createTransactionBundleWith20Observation(true);
+		mySystemDao.transaction(mySrd, inputBundle);
+		myCaptureQueriesListener.logSelectQueries();
+		assertEquals(1, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		assertEquals(0, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
+		assertEquals(7, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
+		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
+
+		// Now run the transaction again - It should not need too many SELECTs
+		myCaptureQueriesListener.clear();
+		inputBundle = myReindexTestHelper.createTransactionBundleWith20Observation(true);
+		mySystemDao.transaction(mySrd, inputBundle);
+		assertEquals(4, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		assertEquals(0, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
+		assertEquals(0, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
+		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
+
+
+	}
 
 	/**
 	 * See the class javadoc before changing the counts in this test!
