@@ -81,16 +81,6 @@ public abstract class BaseTask {
 	private boolean myNoColumnShrink;
 	private boolean myFailureAllowed;
 	private boolean myRunDuringSchemaInitialization;
-	/**
-	 * Whether or not to check for existing tables
-	 * before generating SQL
-	 */
-	protected boolean myCheckForExistingTables = true;
-
-	/**
-	 * Whether or not to generate the SQL in a 'readable format'
-	 */
-	protected boolean myPrettyPrint = false;
 
 	protected BaseTask(String theProductVersion, String theSchemaVersion) {
 		myProductVersion = theProductVersion;
