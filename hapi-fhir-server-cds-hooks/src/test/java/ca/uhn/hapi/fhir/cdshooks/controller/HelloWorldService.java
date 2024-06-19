@@ -1,4 +1,4 @@
-package ca.cdr.endpoint.cdshooks.module;
+package ca.uhn.hapi.fhir.cdshooks.controller;
 
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.hapi.fhir.cdshooks.api.CdsService;
