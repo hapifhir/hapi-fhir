@@ -206,6 +206,15 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 				if (!theTransactionDetails.getDeletedResourceIds().contains(goldenPid)) {
 					IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(theResource);
 					deleteGoldenResource(goldenPid, dao, theRequest);
+					/*
+					 * We will add the removed id to the deleted list so that
+					 * the deletedResourceId list is accurte for what has been
+					 * deleted.
+					 *
+					 * This benefits other interceptor writers who might want
+					 * to do their own resource deletion on this same pre-commit
+					 * hook (and wouldn't be aware if we did this deletion already).
+					 */
 					theTransactionDetails.addDeletedResourceId(goldenPid);
 				}
 			}
