@@ -50,6 +50,7 @@ import org.hl7.fhir.r5.model.Patient;
 import org.hl7.fhir.r5.model.Quantity;
 import org.hl7.fhir.r5.model.SearchParameter;
 import org.hl7.fhir.r5.model.StringType;
+import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -244,9 +245,11 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 
 			// create custom search parameters - the _filter and _include are needed
 			{
+				@SuppressWarnings("unchecked")
 				IFhirResourceDao<SearchParameter> spDao = myDaoRegistry.getResourceDao("SearchParameter");
 				SearchParameter sp;
 
+				@Language("JSON")
 				String includeParam = """
 						{
 						  "resourceType": "SearchParameter",
@@ -270,6 +273,7 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 				sp = parser.parseResource(SearchParameter.class, includeParam);
 				spDao.create(sp, new SystemRequestDetails());
 				sp = null;
+				@Language("JSON")
 				String filterParam = """
 						{
 						  "resourceType": "SearchParameter",
@@ -302,6 +306,7 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 			// create MedicinalProductDefinitions
 			MedicinalProductDefinition mdr;
 			{
+				@Language("JSON")
 				String mpdstr = """
 					{
 					                "resourceType": "MedicinalProductDefinition",

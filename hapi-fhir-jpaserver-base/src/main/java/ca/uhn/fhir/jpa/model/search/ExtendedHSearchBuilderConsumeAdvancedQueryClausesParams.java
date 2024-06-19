@@ -1,8 +1,15 @@
 package ca.uhn.fhir.jpa.model.search;
 
+import ca.uhn.fhir.jpa.dao.search.ExtendedHSearchClauseBuilder;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 
+/**
+ * This is a parameter class for the
+ * {@link ca.uhn.fhir.jpa.dao.search.ExtendedHSearchSearchBuilder#addAndConsumeAdvancedQueryClauses(ExtendedHSearchClauseBuilder, ExtendedHSearchBuilderConsumeAdvancedQueryClausesParams)}
+ * method, so that we can keep the signature manageable (small) and allow for updates without breaking
+ * implementers so often.
+ */
 public class ExtendedHSearchBuilderConsumeAdvancedQueryClausesParams {
 	/**
 	 * Resource type
