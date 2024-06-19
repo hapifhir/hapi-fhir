@@ -144,8 +144,8 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	@Override
 	public boolean canUseHibernateSearch(String theResourceType, SearchParameterMap myParams) {
 		boolean requiresHibernateSearchAccess = myParams.containsKey(Constants.PARAM_CONTENT)
-			|| myParams.containsKey(Constants.PARAM_TEXT)
-			|| myParams.isLastN();
+				|| myParams.containsKey(Constants.PARAM_TEXT)
+				|| myParams.isLastN();
 		// we have to use it - _text and _content searches only use hibernate
 		if (requiresHibernateSearchAccess) {
 			return true;
