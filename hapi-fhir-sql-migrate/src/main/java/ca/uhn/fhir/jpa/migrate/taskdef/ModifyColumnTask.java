@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
+import ca.uhn.fhir.jpa.migrate.tasks.api.TaskFlagEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.intellij.lang.annotations.Language;
 import org.slf4j.Logger;
@@ -160,8 +161,8 @@ public class ModifyColumnTask extends BaseTableColumnTypeTask {
 				throw new IllegalStateException(Msg.code(67) + "Dont know how to handle " + getDriverType());
 		}
 
-		if (!isFailureAllowed() && isShrinkOnly) {
-			setFailureAllowed(true);
+		if (isShrinkOnly) {
+			addFlag(TaskFlagEnum.FAILURE_ALLOWED);
 		}
 
 		logInfo(ourLog, "Updating column {} on table {} to type {}", getColumnName(), getTableName(), type);

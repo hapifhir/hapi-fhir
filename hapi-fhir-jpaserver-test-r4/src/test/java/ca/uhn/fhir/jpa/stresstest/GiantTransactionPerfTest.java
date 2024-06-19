@@ -49,7 +49,6 @@ import ca.uhn.fhir.util.MetaTagSorterAlphabetical;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.validation.IInstanceValidatorModule;
 import com.google.common.collect.Lists;
-import org.hamcrest.Matchers;
 import org.hibernate.internal.SessionImpl;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;

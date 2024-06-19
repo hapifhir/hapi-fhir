@@ -19,8 +19,6 @@ import org.ops4j.pax.exam.spi.reactors.PerClass;
 import static ca.uhn.fhir.tests.integration.karaf.PaxExamOptions.HAPI_FHIR_R4;
 import static ca.uhn.fhir.tests.integration.karaf.PaxExamOptions.KARAF;
 import static ca.uhn.fhir.tests.integration.karaf.PaxExamOptions.WRAP;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.core.IsNot.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.mockito.ArgumentMatchers.contains;

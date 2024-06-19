@@ -14,7 +14,6 @@ import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationInterce
 import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
 import ca.uhn.fhir.util.JsonUtil;
 import com.google.common.collect.Sets;
-import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Coding;

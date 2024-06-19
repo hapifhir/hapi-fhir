@@ -108,7 +108,7 @@ public class AddTableByColumnTaskTest extends BaseTest {
 			return theTask1.getColumnName().compareTo(theTask2.getColumnName());
 		};
 
-		final AddTableByColumnTask addTableByColumnTask = new AddTableByColumnTask(comparator);
+		final AddTableByColumnTask addTableByColumnTask = new AddTableByColumnTask("1", "1", comparator);
 		addTableByColumnTask.setTableName(tableName);
 		addTableByColumnTask.setDriverType(driverType);
 		addTableByColumnTask.setPkColumns(Collections.singletonList(columnNameId));

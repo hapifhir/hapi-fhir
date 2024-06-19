@@ -31,8 +31,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static ca.uhn.fhir.util.TestUtil.sleepAtLeast;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @ContextConfiguration(classes = SchedulerServiceImplTest.TestConfiguration.class)
@@ -59,8 +57,7 @@ public class SchedulerServiceImplTest {
 
 		StopWatch sw = new StopWatch();
 		mySvc.scheduleLocalJob(100, def);
-
-		await().until(CountingJob.ourCount::get, greaterThan(5));
+		await().until(CountingJob.ourCount::get, count -> count > 5);
 
 		ourLog.info("Fired {} times in {}", CountingJob.ourCount, sw);
 		assertThat(sw.getMillis()).isGreaterThan(500L);
@@ -77,8 +74,7 @@ public class SchedulerServiceImplTest {
 		for (int i = 0; i < 20; ++i) {
 			mySvc.triggerLocalJobImmediately(def);
 		}
-
-		await().until(CountingJob.ourCount::get, greaterThan(25));
+		await().until(CountingJob.ourCount::get, count -> count > 25);
 
 		ourLog.info("Fired {} times in {}", CountingJob.ourCount, sw);
 		assertThat(sw.getMillis()).isGreaterThan(500L);
@@ -106,7 +102,7 @@ public class SchedulerServiceImplTest {
 		StopWatch sw = new StopWatch();
 		mySvc.scheduleLocalJob(100, def);
 
-		await().until(CountingJob.ourCount::get, greaterThan(5));
+		await().until(CountingJob.ourCount::get, count -> count > 5);
 
 		ourLog.info("Fired {} times in {}", CountingJob.ourCount, sw);
 		assertThat(sw.getMillis()).isGreaterThan(0L);
@@ -121,7 +117,7 @@ public class SchedulerServiceImplTest {
 		StopWatch sw = new StopWatch();
 		mySvc.scheduleLocalJob(100, def);
 
-		await().until(CountingJob.ourCount::get, greaterThan(5));
+		await().until(CountingJob.ourCount::get, count -> count > 5);
 
 		ourLog.info("Fired {} times in {}", CountingJob.ourCount, sw);
 		assertThat(sw.getMillis()).isGreaterThan(3000L);
@@ -138,7 +134,7 @@ public class SchedulerServiceImplTest {
 		mySvc.triggerLocalJobImmediately(def);
 		mySvc.triggerLocalJobImmediately(def);
 
-		await().until(CountingJob.ourCount::get, greaterThan(5));
+		await().until(CountingJob.ourCount::get, count -> count > 5);
 
 		ourLog.info("Fired {} times in {}", CountingJob.ourCount, sw);
 		assertThat(sw.getMillis()).isGreaterThan(3000L);
@@ -160,7 +156,7 @@ public class SchedulerServiceImplTest {
 
 		ourLog.info("Fired {} times", CountingIntervalJob.ourCount);
 
-		await().until(() -> CountingIntervalJob.ourCount, greaterThanOrEqualTo(2));
+		await().until(() -> CountingIntervalJob.ourCount, count -> count >= 2);
 		assertThat(CountingIntervalJob.ourCount).isLessThan(6);
 	}
 
