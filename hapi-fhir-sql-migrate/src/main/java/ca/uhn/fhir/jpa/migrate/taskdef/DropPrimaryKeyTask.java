@@ -87,7 +87,7 @@ public class DropPrimaryKeyTask extends BaseTableTask {
 				final String sql = "ALTER TABLE %s DROP CONSTRAINT %s";
 				return String.format(sql, getTableName(), thePrimaryKeyName);
 			default:
-				throw new IllegalStateException(Msg.code(59));
+				throw new IllegalStateException(String.format("%s Unknown driver type.  Cannot drop primary key: %s for table %s", Msg.code(2529), thePrimaryKeyName, getTableName()));
 		}
 	}
 
