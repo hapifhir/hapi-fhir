@@ -1,5 +1,6 @@
 package ca.uhn.fhir.tests.integration.karaf.dstu21;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -13,8 +14,6 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.LenientErrorHandler;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import com.google.common.collect.Sets;
-import org.hamcrest.Matcher;
-import org.hamcrest.Matchers;
 import org.hl7.fhir.dstu2016may.model.Conformance;
 import org.hl7.fhir.dstu2016may.model.PrimitiveType;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -30,10 +29,6 @@ import org.ops4j.pax.exam.spi.reactors.PerClass;
 import static ca.uhn.fhir.tests.integration.karaf.PaxExamOptions.HAPI_FHIR_DSTU2_1;
 import static ca.uhn.fhir.tests.integration.karaf.PaxExamOptions.KARAF;
 import static ca.uhn.fhir.tests.integration.karaf.PaxExamOptions.WRAP;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -668,7 +663,7 @@ public class JsonParserDstu2_1Test {
 
 		assertNull(ourCtx.newJsonParser().getStripVersionsFromReferences());
 		assertTrue(ourCtx.getParserOptions().isStripVersionsFromReferences());
-		assertThat(ourCtx.getParserOptions().getDontStripVersionsFromReferencesAtPaths(), empty());
+		assertThat(ourCtx.getParserOptions().getDontStripVersionsFromReferencesAtPaths()).isEmpty();
 
 		org.hl7.fhir.dstu2016may.model.Patient p = new org.hl7.fhir.dstu2016may.model.Patient();
 		p.setManagingOrganization(new org.hl7.fhir.dstu2016may.model.Reference("http://foo.com/Organization/2/_history/1"));
@@ -1033,7 +1028,7 @@ public class JsonParserDstu2_1Test {
 
 		assertThat(ourCtx.newJsonParser().encodeResourceToString(p)).containsSubsequence("123", "ABC"));
 		assertThat(ourCtx.newJsonParser().setOmitResourceId(true).encodeResourceToString(p)).contains("ABC"));
-		assertThat(ourCtx.newJsonParser().setOmitResourceId(true).encodeResourceToString(p), not(containsString("123")));
+		assertThat(ourCtx.newJsonParser().setOmitResourceId(true).encodeResourceToString(p)).doesNotContain("123");
 	}
 
 	@Test
@@ -1157,8 +1152,8 @@ public class JsonParserDstu2_1Test {
 		assertEquals("654321", res.getIdentifier().get(0).getValue());
 		assertEquals(true, res.getActive());
 
-		assertThat(res.getIdentifier().get(0).getFormatCommentsPre(), contains("identifier comment 1", "identifier comment 2"));
-		assertThat(res.getIdentifier().get(0).getUseElement().getFormatCommentsPre(), contains("use comment 1", "use comment 2"));
+		assertThat(res.getIdentifier().get(0).getFormatCommentsPre()).contains("identifier comment 1", "identifier comment 2");
+		assertThat(res.getIdentifier().get(0).getUseElement().getFormatCommentsPre()).contains("use comment 1", "use comment 2");
 
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(res);
 		ourLog.info(encoded);

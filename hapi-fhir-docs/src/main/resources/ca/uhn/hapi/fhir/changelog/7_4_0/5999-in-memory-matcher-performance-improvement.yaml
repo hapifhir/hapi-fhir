@@ -1,0 +1,8 @@
+---
+type: perf
+issue: 5999
+title: "The in-memory search matcher module (used for Subscriptions and other
+  places where a resource needs to be evaluated against an existing pool of
+  search parameter expressions) has been optimized so that it doesn't evaluate
+  unnecessary search parameters while analyzing the resource. Thanks to
+  Ahmet Melih Aydoğdu for the pull request!"

@@ -328,7 +328,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		try {
 			CodeableConcept codeableConcept = new CodeableConcept();
 			Coding codingCode = codeableConcept.addCoding();
-			codingCode.setSystem(DeviceStatus.ACTIVE.toCode());
+			codingCode.setCode(DeviceStatus.ACTIVE.toCode());
 			codingCode.setSystem(DeviceStatus.ACTIVE.getSystem());
 
 			Task task = new Task();
@@ -1972,7 +1972,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		// ourLog.info(output);
 		// List<IIdType> ids = toUnqualifiedVersionlessIds(myFhirCtx.newXmlParser().parseResource(Bundle.class, output));
 		// ourLog.info(ids.toString());
-		// assertThat(ids, contains(pId, cId));
+		// assertThat(ids).contains(pId, cId);
 		// } finally {
 		// response.close();
 		// }
@@ -1986,7 +1986,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		// ourLog.info(output);
 		// List<IIdType> ids = toUnqualifiedVersionlessIds(myFhirCtx.newXmlParser().parseResource(Bundle.class, output));
 		// ourLog.info(ids.toString());
-		// assertThat(ids, contains(cId, pId, oId));
+		// assertThat(ids).contains(cId, pId, oId);
 		// } finally {
 		// response.close();
 		// }

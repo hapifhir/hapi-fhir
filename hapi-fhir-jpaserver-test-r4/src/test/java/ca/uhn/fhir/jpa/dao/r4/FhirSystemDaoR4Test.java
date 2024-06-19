@@ -40,7 +40,6 @@ import ca.uhn.fhir.rest.server.interceptor.auth.RuleBuilder;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.ClasspathUtil;
 import org.apache.commons.io.IOUtils;
-import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.AllergyIntolerance;
@@ -1242,7 +1241,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		ourLog.info("Patient TEMP UUID: {}", patient.getId());
 		String s = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(transactionBundle);
-		System.out.println(s);
+		ourLog.info(s);
 		Bundle outcome = mySystemDao.transaction(null, transactionBundle);
 		String patientLocation = outcome.getEntry().get(0).getResponse().getLocation();
 		assertThat(patientLocation).matches("Patient/[a-z0-9-]+/_history/1");
@@ -4777,8 +4776,8 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	// assertTrue(o1.getId().getValue(), o1.getId().getIdPart().matches("^[0-9]+$"));
 	// assertTrue(o2.getId().getValue(), o2.getId().getIdPart().matches("^[0-9]+$"));
 	//
-	// assertThat(o1.getSubject().getReference().getValue(), endsWith("Patient/" + p1.getId().getIdPart()));
-	// assertThat(o2.getSubject().getReference().getValue(), endsWith("Patient/" + p1.getId().getIdPart()));
+	// assertThat(o1.getSubject().getReference().getValue()).endsWith("Patient/" + p1.getId().getIdPart());
+	// assertThat(o2.getSubject().getReference().getValue()).endsWith("Patient/" + p1.getId().getIdPart());
 	//
 	// }
 	//

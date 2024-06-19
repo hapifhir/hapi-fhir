@@ -25,11 +25,10 @@ public class QualifiedParamListTest {
 		assertEquals("aaa", actual.get(0));
 		assertEquals("bbb", actual.get(1));
 	}
-	
+
 	@Test
 	public void testSplit3() {
 		List<String> actual = QualifiedParamList.splitQueryStringByCommasIgnoreEscape(null,"aaa,b\\,bb");
-		System.out.println(actual);
 		assertThat(actual).hasSize(2);
 		assertEquals("aaa", actual.get(0));
 		assertEquals("b,bb", actual.get(1));

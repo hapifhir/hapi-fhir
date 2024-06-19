@@ -58,7 +58,6 @@ import net.sf.json.JSON;
 import net.sf.json.JSONSerializer;
 import net.sf.json.JsonConfig;
 import org.apache.commons.io.IOUtils;
-import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
@@ -153,7 +152,7 @@ public class JsonParserDstu2Test {
 		IParser parser = ourCtx.newJsonParser();
 
 		String output = parser.encodeResourceToString(fhirPat);
-		System.out.println("output: " + output);
+		ourLog.info("output: " + output);
 
 		// Deserialize then check that valueReference value is still correct
 		fhirPat = parser.parseResource(Patient.class, output);
@@ -227,7 +226,7 @@ public class JsonParserDstu2Test {
 		jsonParser.setServerBaseUrl("http://www.example.com");
 
 		final String parsedPatient = jsonParser.encodeResourceToString(patient);
-		System.out.println(parsedPatient);
+		ourLog.info(parsedPatient);
 		assertEquals(expected, parsedPatient);
 
 		// Parse with string
@@ -261,7 +260,7 @@ public class JsonParserDstu2Test {
 		jsonParser.setServerBaseUrl("http://www.example.com");
 
 		final String parsedBundle = jsonParser.encodeResourceToString(bundle);
-		System.out.println(parsedBundle);
+		ourLog.info(parsedBundle);
 		assertEquals(expected, parsedBundle);
 
 		// Parse with string

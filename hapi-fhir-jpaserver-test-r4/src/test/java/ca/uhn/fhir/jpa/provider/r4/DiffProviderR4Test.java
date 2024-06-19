@@ -47,8 +47,8 @@ public class DiffProviderR4Test extends BaseResourceProviderR4Test {
 
 		assertEquals("replace", FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 0, "operation", "type"));
 		assertEquals("Patient.text.div", FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 0, "operation", "path"));
-		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\"><table class=\"hapiPropertyTable\"><tbody></tbody></table></div>", FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 0, "operation", "previousValue"));
-		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\"><div class=\"hapiHeaderText\"><b>SMITH </b></div><table class=\"hapiPropertyTable\"><tbody></tbody></table></div>", FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 0, "operation", "value"));
+		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\"><table class=\"hapiPropertyTable\"><tbody/></table></div>", FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 0, "operation", "previousValue"));
+		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\"><div class=\"hapiHeaderText\"><b>SMITH </b></div><table class=\"hapiPropertyTable\"><tbody/></table></div>", FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 0, "operation", "value"));
 
 		assertEquals("insert", FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 1, "operation", "type"));
 		assertEquals("Patient.name", FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 1, "operation", "path"));
@@ -86,8 +86,8 @@ public class DiffProviderR4Test extends BaseResourceProviderR4Test {
 
 		assertEquals("replace", FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 2, "operation", "type"));
 		assertEquals("Patient.text.div", FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 2, "operation", "path"));
-		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\"><table class=\"hapiPropertyTable\"><tbody></tbody></table></div>", FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 2, "operation", "previousValue"));
-		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\"><div class=\"hapiHeaderText\"><b>SMITH </b></div><table class=\"hapiPropertyTable\"><tbody></tbody></table></div>", FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 2, "operation", "value"));
+		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\"><table class=\"hapiPropertyTable\"><tbody/></table></div>", FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 2, "operation", "previousValue"));
+		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\"><div class=\"hapiHeaderText\"><b>SMITH </b></div><table class=\"hapiPropertyTable\"><tbody/></table></div>", FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 2, "operation", "value"));
 
 		assertEquals("insert", FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 3, "operation", "type"));
 		assertEquals("Patient.name", FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 3, "operation", "path"));

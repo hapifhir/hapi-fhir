@@ -1,5 +1,6 @@
 package ca.uhn.fhir.checks;
 
+import com.puppycrawl.tools.checkstyle.AbstractAutomaticBean;
 import com.puppycrawl.tools.checkstyle.Checker;
 import com.puppycrawl.tools.checkstyle.DefaultConfiguration;
 import com.puppycrawl.tools.checkstyle.DefaultLogger;
@@ -31,8 +32,8 @@ class HapiErrorCodeCheckTest {
 		files.add(getFile("BadClass.java"));
 
 		ByteArrayOutputStream errors = new ByteArrayOutputStream();
-		DefaultLogger listener = new DefaultLogger(NullOutputStream.NULL_OUTPUT_STREAM, AutomaticBean.OutputStreamOptions.CLOSE,
-			errors, AutomaticBean.OutputStreamOptions.CLOSE);
+		DefaultLogger listener = new DefaultLogger(NullOutputStream.NULL_OUTPUT_STREAM, AbstractAutomaticBean.OutputStreamOptions.CLOSE,
+			errors, AbstractAutomaticBean.OutputStreamOptions.CLOSE);
 		checker.addListener(listener);
 
 		// execute

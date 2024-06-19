@@ -83,4 +83,37 @@ public class LogEventIterableAssert extends AbstractIterableAssert<LogEventItera
 	protected LogEventIterableAssert newAbstractIterableAssert(Iterable<? extends ILoggingEvent> iterable) {
 		return new LogEventIterableAssert((Collection<ILoggingEvent>) iterable);
 	}
+
+	public LogEventIterableAssert doesNotHaveEventWithMessage(String thePartial) {
+		isNotNull();
+
+		matches(logEvents -> logEvents.stream()
+				.map(ILoggingEvent::getFormattedMessage)
+				.noneMatch(message -> message.contains(thePartial)),
+			"Log Events should have no message with "+ thePartial + " in it.");
+		return this;
+	}
+
+	public LogEventIterableAssert hasEventWithLevelAndMessageAndThrew(Level theLevel, String thePartial, String theExceptionMessage) {
+		isNotNull();
+
+		matches(logEvents -> logEvents.stream()
+				.filter(message -> message.getMessage().contains(thePartial))
+				.filter(message -> message.getLevel() == theLevel)
+				.anyMatch(message -> message.getThrowableProxy().getMessage().contains(theExceptionMessage)),
+			"Log Events should have at least one message with "+ thePartial + " in it.");
+
+		return this;
+	}
+
+	public LogEventIterableAssert doesNotHaveEventWithLevelAndMessage(Level theLevel, String thePartial) {
+		isNotNull();
+
+		matches(logEvents -> logEvents.stream()
+				.filter(e -> e.getLevel() == theLevel)
+				.map(ILoggingEvent::getFormattedMessage)
+				.noneMatch(message -> message.contains(thePartial)),
+			"Log Events should have no " + theLevel.toString() + " message with "+ thePartial + " in it.");
+		return this;
+	}
 }

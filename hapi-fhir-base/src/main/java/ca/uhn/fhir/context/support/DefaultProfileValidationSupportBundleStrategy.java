@@ -123,8 +123,10 @@ class DefaultProfileValidationSupportBundleStrategy implements IValidationSuppor
 				break;
 			case R4B:
 				terminologyResources.add("/org/hl7/fhir/r4b/model/valueset/valuesets.xml");
-				terminologyResources.add("/org/hl7/fhir/r4b/model/valueset/v2-tables.xml");
-				terminologyResources.add("/org/hl7/fhir/r4b/model/valueset/v3-codesystems.xml");
+				// For R4B we can re-use the same v2 and v3 files as R4, as these will not be updated and it will reduce
+				// duplication.
+				terminologyResources.add("/org/hl7/fhir/r4/model/valueset/v2-tables.xml");
+				terminologyResources.add("/org/hl7/fhir/r4/model/valueset/v3-codesystems.xml");
 				structureDefinitionResources.add("/org/hl7/fhir/r4b/model/profile/profiles-resources.xml");
 				structureDefinitionResources.add("/org/hl7/fhir/r4b/model/profile/profiles-types.xml");
 				structureDefinitionResources.add("/org/hl7/fhir/r4b/model/profile/profiles-others.xml");

@@ -12,9 +12,6 @@ import ca.uhn.fhir.rest.api.Constants;
 import net.sf.json.JSON;
 import net.sf.json.JSONSerializer;
 import org.apache.commons.io.IOUtils;
-import org.hamcrest.core.IsNot;
-import org.hamcrest.core.StringContains;
-import org.hamcrest.text.StringContainsInOrder;
 import org.hl7.fhir.dstu2.model.Address;
 import org.hl7.fhir.dstu2.model.Address.AddressUse;
 import org.hl7.fhir.dstu2.model.Address.AddressUseEnumFactory;
@@ -1737,7 +1734,7 @@ public class XmlParserHl7OrgDstu2Test {
     IParser parser = ourCtx.newXmlParser();
 
     String output = parser.encodeResourceToString(fhirPat);
-    System.out.println("output: " + output);
+    ourLog.info("output: " + output);
 
     // Deserialize then check that valueReference value is still correct
     fhirPat = parser.parseResource(Patient.class, output);

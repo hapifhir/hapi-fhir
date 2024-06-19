@@ -18,8 +18,6 @@ import net.sf.json.JSON;
 import net.sf.json.JSONSerializer;
 import net.sf.json.JsonConfig;
 import org.apache.commons.io.IOUtils;
-import org.hamcrest.Matchers;
-import org.hamcrest.core.StringContains;
 import org.hl7.fhir.dstu2016may.model.Address.AddressUse;
 import org.hl7.fhir.dstu2016may.model.Address.AddressUseEnumFactory;
 import org.hl7.fhir.dstu2016may.model.AuditEvent;
@@ -1848,7 +1846,7 @@ public class JsonParserDstu2_1Test {
 		IParser parser = ourCtx.newJsonParser();
 
 		String output = parser.encodeResourceToString(fhirPat);
-		System.out.println("output: " + output);
+		ourLog.info("output: " + output);
 
 		// Deserialize then check that valueReference value is still correct
 		fhirPat = parser.parseResource(Patient.class, output);

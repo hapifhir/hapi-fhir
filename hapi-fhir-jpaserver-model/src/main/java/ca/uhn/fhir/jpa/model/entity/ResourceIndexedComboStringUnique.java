@@ -135,12 +135,14 @@ public class ResourceIndexedComboStringUnique extends BasePartitionable
 		myIndexString = theIndexString;
 	}
 
+	@Override
 	public ResourceTable getResource() {
 		return myResource;
 	}
 
+	@Override
 	public void setResource(ResourceTable theResource) {
-		Validate.notNull(theResource);
+		Validate.notNull(theResource, "theResource must not be null");
 		myResource = theResource;
 	}
 

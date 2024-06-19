@@ -45,7 +45,7 @@ public class BinaryStorageEntity {
 	@Column(name = "RESOURCE_ID", length = 100, nullable = false)
 	private String myResourceId;
 
-	@Column(name = "BLOB_SIZE", nullable = true)
+	@Column(name = "BLOB_SIZE", nullable = false)
 	private long mySize;
 
 	@Column(name = "CONTENT_TYPE", nullable = false, length = 100)
