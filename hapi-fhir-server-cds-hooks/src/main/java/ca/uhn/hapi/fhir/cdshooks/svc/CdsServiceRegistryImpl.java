@@ -90,24 +90,40 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 		String json;
 		if (result instanceof String) {
 			json = (String) result;
+			return buildResponseFromString(theServiceId, result, json);
 		} else {
-			try {
-				json = myObjectMapper.writeValueAsString(result);
-			} catch (JsonProcessingException e) {
-				throw new ConfigurationException(
-						Msg.code(2389) + "Failed to json serialize Cds service response of type "
-								+ result.getClass().getName() + " when calling CDS Hook Service " + theServiceId,
-						e);
-			}
+			return buildResponseFromImplementation(theServiceId, result);
 		}
+
+	}
+
+	private CdsServiceResponseJson buildResponseFromImplementation(String theServiceId, Object result) {
+		String json;
+		try {
+			json = myObjectMapper.writeValueAsString(result);
+			return (CdsServiceResponseJson) result;
+		} catch (JsonProcessingException e) {
+			throw new ConfigurationException(
+				Msg.code(2389) + "Failed to json serialize Cds service response of type "
+					+ result.getClass().getName() + " when calling CDS Hook Service " + theServiceId,
+				e);
+		} catch (ClassCastException e) {
+			throw new ConfigurationException(
+				Msg.code(2389) + "Failed to cast Cds service response to CdsServiceResponseJson when calling CDS Hook Service " + theServiceId +
+					". The type " + result.getClass().getName() + " cannot be casted to CdsServiceResponseJson",
+				e);
+		}
+	}
+
+	private CdsServiceResponseJson buildResponseFromString(String theServiceId, Object result, String json) {
 		try {
 			return myObjectMapper.readValue(json, CdsServiceResponseJson.class);
 		} catch (JsonProcessingException e) {
 			throw new ConfigurationException(
-					Msg.code(2390) + "Failed to json deserialize Cds service response of type "
-							+ result.getClass().getName() + " when calling CDS Hook Service " + theServiceId
-							+ ".  Json: " + json,
-					e);
+				Msg.code(2390) + "Failed to json deserialize Cds service response of type "
+					+ result.getClass().getName() + " when calling CDS Hook Service " + theServiceId
+					+ ".  Json: " + json,
+				e);
 		}
 	}
 

@@ -21,7 +21,6 @@ package ca.uhn.hapi.fhir.cdshooks.api.json;
 
 import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.JsonNode;
 
 /**
  * @see <a href=" https://cds-hooks.hl7.org/1.0/#extensions">For reading more about Extension support in CDS hooks</a>
@@ -30,14 +29,14 @@ import com.fasterxml.jackson.databind.JsonNode;
  */
 public abstract class BaseCdsServiceJson implements IModelJson {
 
-	@JsonProperty(value = "extension", required = true)
-	JsonNode myExtension;
+	@JsonProperty(value = "extension")
+	CdsHooksExtension myExtension;
 
-	public JsonNode getExtension() {
+	public CdsHooksExtension getExtension() {
 		return myExtension;
 	}
 
-	public BaseCdsServiceJson setExtension(JsonNode theExtension) {
+	public BaseCdsServiceJson setExtension(CdsHooksExtension theExtension) {
 		this.myExtension = theExtension;
 		return this;
 	}

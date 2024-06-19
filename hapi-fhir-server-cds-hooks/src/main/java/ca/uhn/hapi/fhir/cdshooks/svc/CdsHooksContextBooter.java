@@ -25,9 +25,10 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.hapi.fhir.cdshooks.api.CdsService;
 import ca.uhn.hapi.fhir.cdshooks.api.CdsServiceFeedback;
 import ca.uhn.hapi.fhir.cdshooks.api.CdsServicePrefetch;
+import ca.uhn.hapi.fhir.cdshooks.api.json.CdsHooksExtension;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceJson;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PreDestroy;
 import org.apache.commons.lang3.StringUtils;
@@ -105,13 +106,13 @@ public class CdsHooksContextBooter {
 		}
 	}
 
-	JsonNode serializeExtensions(String theExtension) {
+	CdsHooksExtension serializeExtensions(String theExtension) {
 		if (StringUtils.isEmpty(theExtension)) {
 			return null;
 		}
 		try {
-			final ObjectMapper mapper = new ObjectMapper();
-			return mapper.readTree(theExtension);
+			final ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+			return mapper.readValue(theExtension, CdsHooksExtension.class);
 		} catch (JsonProcessingException e) {
 			final String message = String.format("Invalid JSON: %s", e.getMessage());
 			ourLog.debug(message);
