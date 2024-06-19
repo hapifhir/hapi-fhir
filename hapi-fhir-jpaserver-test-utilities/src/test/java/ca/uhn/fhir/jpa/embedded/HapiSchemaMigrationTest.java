@@ -65,10 +65,10 @@ public class HapiSchemaMigrationTest {
 
 	@RegisterExtension
 //	static HapiEmbeddedDatabasesExtension myEmbeddedServersExtension = new HapiEmbeddedDatabasesExtension();
-//	static HapiEmbeddedDatabasesExtensionH2Only myEmbeddedServersExtension = new HapiEmbeddedDatabasesExtensionH2Only ();
+	static HapiEmbeddedDatabasesExtensionH2Only myEmbeddedServersExtension = new HapiEmbeddedDatabasesExtensionH2Only ();
 //	static HapiEmbeddedDatabasesExtensionPostgresOnly myEmbeddedServersExtension = new HapiEmbeddedDatabasesExtensionPostgresOnly();
 //	static HapiEmbeddedDatabasesExtensionMSSQLOnly myEmbeddedServersExtension = new HapiEmbeddedDatabasesExtensionMSSQLOnly();
-	static HapiEmbeddedDatabasesExtensionOracleOnly myEmbeddedServersExtension = new HapiEmbeddedDatabasesExtensionOracleOnly();
+//	static HapiEmbeddedDatabasesExtensionOracleOnly myEmbeddedServersExtension = new HapiEmbeddedDatabasesExtensionOracleOnly();
 
 	@AfterEach
 	public void afterEach() {
@@ -83,10 +83,10 @@ public class HapiSchemaMigrationTest {
 
 	@ParameterizedTest
 //	@ArgumentsSource(HapiEmbeddedDatabasesExtension.DatabaseVendorProvider.class)
-//	@ArgumentsSource(HapiEmbeddedDatabasesExtensionH2Only.DatabaseVendorProvider.class)
+	@ArgumentsSource(HapiEmbeddedDatabasesExtensionH2Only.DatabaseVendorProvider.class)
 //	@ArgumentsSource(HapiEmbeddedDatabasesExtensionPostgresOnly.DatabaseVendorProvider.class)
 //	@ArgumentsSource(HapiEmbeddedDatabasesExtensionMSSQLOnly.DatabaseVendorProvider.class)
-	@ArgumentsSource(HapiEmbeddedDatabasesExtensionOracleOnly.DatabaseVendorProvider.class)
+//	@ArgumentsSource(HapiEmbeddedDatabasesExtensionOracleOnly.DatabaseVendorProvider.class)
 	public void testMigration(DriverTypeEnum theDriverType) throws SQLException {
 		// ensure all migrations are run
 		HapiSystemProperties.disableUnitTestMode();

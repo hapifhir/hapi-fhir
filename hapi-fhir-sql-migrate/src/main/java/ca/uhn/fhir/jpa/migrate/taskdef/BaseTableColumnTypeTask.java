@@ -33,6 +33,7 @@ public abstract class BaseTableColumnTypeTask extends BaseTableColumnTask {
 	private ColumnTypeEnum myColumnType;
 	private Boolean myNullable;
 	private Long myColumnLength;
+
 	@Nullable
 	private Object myDefaultValue;
 

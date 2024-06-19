@@ -133,7 +133,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		{
 			version.onTable(tableHfjResSearchUrl)
-					.addForeignKey("20240618.1", "FK_RES_SEARCH_URL_RESOURCE")
+					.addForeignKey("20240515.1", "FK_RES_SEARCH_URL_RESOURCE")
 					.toColumn("RES_ID")
 					.references("HFJ_RESOURCE", "RES_ID");
 		}
