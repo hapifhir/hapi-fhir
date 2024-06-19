@@ -176,9 +176,12 @@ public abstract class BaseTask {
 		captureExecutedStatement(theTableName, theSql, theArguments);
 	}
 
-	protected <T> T executeSqlWithResult(@Language("SQL") String theSql, ResultSetExtractor<T> theResultSetExtractor, Object... theArguments) {
+	protected <T> T executeSqlWithResult(
+			@Language("SQL") String theSql, ResultSetExtractor<T> theResultSetExtractor, Object... theArguments) {
 		if (myTransactional) {
-			return getConnectionProperties().getTxTemplate().execute(t -> doExecuteSqlWithResult(theSql, theResultSetExtractor, theArguments));
+			return getConnectionProperties()
+					.getTxTemplate()
+					.execute(t -> doExecuteSqlWithResult(theSql, theResultSetExtractor, theArguments));
 		}
 
 		return doExecuteSqlWithResult(theSql, theResultSetExtractor, theArguments);
@@ -228,7 +231,8 @@ public abstract class BaseTask {
 	}
 
 	@Nullable
-	private <T> T doExecuteSqlWithResult(@Language("SQL") String theSql, ResultSetExtractor<T> theResultSetExtractor, Object... theArguments) {
+	private <T> T doExecuteSqlWithResult(
+			@Language("SQL") String theSql, ResultSetExtractor<T> theResultSetExtractor, Object... theArguments) {
 		final JdbcTemplate jdbcTemplate = getConnectionProperties().newJdbcTemplate();
 		// 0 means no timeout -- we use this for index rebuilds that may take time.
 		jdbcTemplate.setQueryTimeout(0);
@@ -246,8 +250,8 @@ public abstract class BaseTask {
 				return null;
 			} else {
 				throw new HapiMigrationException(
-					// LUKETODO: new code?
-					Msg.code(61) + "Failed during task " + getMigrationVersion() + ": " + e, e);
+						// LUKETODO: new code?
+						Msg.code(61) + "Failed during task " + getMigrationVersion() + ": " + e, e);
 			}
 		}
 	}

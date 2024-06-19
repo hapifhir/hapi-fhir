@@ -33,7 +33,8 @@ public class AddPrimaryKeyTask extends BaseTableTask {
 
 	private final List<String> myPrimaryKeyColumnsInOrder;
 
-	public AddPrimaryKeyTask(String theProductVersion, String theSchemaVersion, String theTableName, String... theColumnsInOrder) {
+	public AddPrimaryKeyTask(
+			String theProductVersion, String theSchemaVersion, String theTableName, String... theColumnsInOrder) {
 		super(theProductVersion, theSchemaVersion);
 		setTableName(theTableName);
 

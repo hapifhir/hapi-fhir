@@ -149,14 +149,14 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 	void doStuff(Builder version) {
 		final String tableHfjResSearchUrl = "HFJ_RES_SEARCH_URL";
 		version.onTable(tableHfjResSearchUrl)
-			.addColumn("20240618.2","PARTITION_ID", -1)
-			.nullable()
-			.type(ColumnTypeEnum.INT);
+				.addColumn("20240618.2", "PARTITION_ID", -1)
+				.nullable()
+				.type(ColumnTypeEnum.INT);
 
 		version.onTable(tableHfjResSearchUrl)
-			.addColumn("20240618.3", "PARTITION_DATE")
-			.nullable()
-			.type(ColumnTypeEnum.DATE_ONLY);
+				.addColumn("20240618.3", "PARTITION_DATE")
+				.nullable()
+				.type(ColumnTypeEnum.DATE_ONLY);
 
 		// LUKETODO:  clean up
 		/*
@@ -168,18 +168,24 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		6) ADD new PK >>> NEW CODE
 		 */
 
-		version.executeRawSql("20240618.4", String.format("UPDATE %s SET %s = -1", tableHfjResSearchUrl, ResourceSearchUrlEntityPK.PARTITION_ID_COLUMN_NAME));
+		version.executeRawSql(
+				"20240618.4",
+				String.format(
+						"UPDATE %s SET %s = -1",
+						tableHfjResSearchUrl, ResourceSearchUrlEntityPK.PARTITION_ID_COLUMN_NAME));
 
 		version.onTable(tableHfjResSearchUrl)
 				.modifyColumn("20240618.5", ResourceSearchUrlEntityPK.PARTITION_ID_COLUMN_NAME)
 				.nonNullable()
 				.withType(ColumnTypeEnum.INT);
 
-		version.onTable(tableHfjResSearchUrl)
-			.dropPrimaryKey("20240618.6");
+		version.onTable(tableHfjResSearchUrl).dropPrimaryKey("20240618.6");
 
 		version.onTable(tableHfjResSearchUrl)
-			.addPrimaryKey("20240618.7", ResourceSearchUrlEntityPK.RES_SEARCH_URL_COLUMN_NAME, ResourceSearchUrlEntityPK.PARTITION_ID_COLUMN_NAME);
+				.addPrimaryKey(
+						"20240618.7",
+						ResourceSearchUrlEntityPK.RES_SEARCH_URL_COLUMN_NAME,
+						ResourceSearchUrlEntityPK.PARTITION_ID_COLUMN_NAME);
 	}
 
 	protected void init720() {
@@ -3680,4 +3686,5 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 //					.withType(ColumnTypeEnum.INT);
 //
 //			version.onTable(tableHfjResSearchUrl)
-//				.addPrimaryKey("20240531.7", ResourceSearchUrlEntityPK.RES_SEARCH_URL_COLUMN_NAME, ResourceSearchUrlEntityPK.PARTITION_ID_COLUMN_NAME);
+//				.addPrimaryKey("20240531.7", ResourceSearchUrlEntityPK.RES_SEARCH_URL_COLUMN_NAME,
+// ResourceSearchUrlEntityPK.PARTITION_ID_COLUMN_NAME);

@@ -81,18 +81,18 @@ public class AddColumnTask extends BaseTableColumnTypeTask {
 			case MARIADB_10_1:
 				// Quote the column name as "SYSTEM" is a reserved word in MySQL
 				sql = "alter table " + getTableName() + " add column `" + getColumnName() + "` " + typeStatement
-					+  buildString(getDefaultValue(), (obj -> " default " + obj) ,"");
+						+ buildString(getDefaultValue(), (obj -> " default " + obj), "");
 				break;
 			case DERBY_EMBEDDED:
 			case POSTGRES_9_4:
 				sql = "alter table " + getTableName() + " add column " + getColumnName() + " " + typeStatement
-					+  buildString(getDefaultValue(), (obj -> " default " + obj) ,"");
+						+ buildString(getDefaultValue(), (obj -> " default " + obj), "");
 				break;
 			case MSSQL_2012:
 			case ORACLE_12C:
 			case H2_EMBEDDED:
 				sql = "alter table " + getTableName() + " add " + getColumnName() + " " + typeStatement
-					+  buildString(getDefaultValue(), (obj -> " default " + obj) ,"");
+						+ buildString(getDefaultValue(), (obj -> " default " + obj), "");
 				break;
 			default:
 				throw new IllegalStateException(Msg.code(60));

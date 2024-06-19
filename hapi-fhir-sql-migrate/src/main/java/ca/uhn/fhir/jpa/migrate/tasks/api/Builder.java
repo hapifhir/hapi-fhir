@@ -386,7 +386,7 @@ public class Builder {
 			addTask(task);
 		}
 
-        public class BuilderAddIndexWithName {
+		public class BuilderAddIndexWithName {
 			private final String myVersion;
 			private final String myIndexName;
 

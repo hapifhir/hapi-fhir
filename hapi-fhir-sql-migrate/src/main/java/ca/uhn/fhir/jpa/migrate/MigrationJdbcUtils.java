@@ -38,16 +38,14 @@ public class MigrationJdbcUtils {
 	public static boolean queryForSingleBooleanResultMultipleThrowsException(
 			String theSql, JdbcTemplate theJdbcTemplate) {
 		final RowMapper<Boolean> booleanRowMapper = (theResultSet, theRowNumber) -> theResultSet.getBoolean(1);
-		return queryForSingle(theSql, theJdbcTemplate, booleanRowMapper)
-			.orElse(false);
+		return queryForSingle(theSql, theJdbcTemplate, booleanRowMapper).orElse(false);
 	}
 
 	@Nullable
 	public static String queryForSingleStringResultMultipleThrowsException(
-		String theSql, JdbcTemplate theJdbcTemplate) {
+			String theSql, JdbcTemplate theJdbcTemplate) {
 		final RowMapper<String> booleanRowMapper = (theResultSet, theRowNumber) -> theResultSet.getString(1);
-		return queryForSingle(theSql, theJdbcTemplate, booleanRowMapper)
-			.orElse(null);
+		return queryForSingle(theSql, theJdbcTemplate, booleanRowMapper).orElse(null);
 	}
 
 	private static <T> Optional<T> queryForSingle(

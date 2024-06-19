@@ -119,12 +119,14 @@ public abstract class JpaEmbeddedDatabase {
 		try (final PreparedStatement preparedStatement = myConnection.prepareStatement(theSql)) {
 
 			for (int index = 0; index < theParams.length; index++) {
-				preparedStatement.setObject(index+1, theParams[index]);
+				preparedStatement.setObject(index + 1, theParams[index]);
 			}
 
 			preparedStatement.execute();
 		} catch (Exception exception) {
-			throw new RuntimeException(String.format("Execute SQL: [%s] failed with error: %s", theSql, exception.getMessage()), exception);
+			throw new RuntimeException(
+					String.format("Execute SQL: [%s] failed with error: %s", theSql, exception.getMessage()),
+					exception);
 		}
 	}
 

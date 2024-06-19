@@ -112,9 +112,7 @@ public abstract class BaseTableColumnTypeTask extends BaseTableColumnTask {
 
 	@Nonnull
 	String buildString(@Nullable Object theValue, Function<Object, String> doIfNull, String theDefaultResult) {
-		return Optional.ofNullable(theValue)
-			.map(doIfNull)
-			.orElse(theDefaultResult);
+		return Optional.ofNullable(theValue).map(doIfNull).orElse(theDefaultResult);
 	}
 
 	public BaseTableColumnTypeTask setDefaultValue(Object theDefaultValue) {
