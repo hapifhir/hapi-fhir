@@ -25,6 +25,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 /**
  * @see <a href=" https://cds-hooks.hl7.org/1.0/#extensions">For reading more about Extension support in CDS hooks</a>
+ * We keep it as a JsonNode as it can contain arbitrary JSON fields
+ * another example can be found <a href="https://build.fhir.org/ig/HL7/davinci-crd/deviations.html#configuration-options-extension">here</a>
  */
 public abstract class BaseCdsServiceJson implements IModelJson {
 
