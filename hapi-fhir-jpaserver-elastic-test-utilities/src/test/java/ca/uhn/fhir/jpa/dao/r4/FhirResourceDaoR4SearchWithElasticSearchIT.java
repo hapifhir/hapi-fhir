@@ -26,7 +26,7 @@ import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.search.BaseSourceSearchParameterTestCases;
 import ca.uhn.fhir.jpa.search.CompositeSearchParameterTestCases;
 import ca.uhn.fhir.jpa.search.QuantitySearchParameterTestCases;
-import ca.uhn.fhir.jpa.search.lastn.ElasticsearchSvcImpl;
+import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
@@ -56,6 +56,7 @@ import ca.uhn.fhir.test.utilities.LogbackLevelOverrideExtension;
 import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
+import ch.qos.logback.classic.Level;
 import jakarta.annotation.Nonnull;
 import jakarta.persistence.EntityManager;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -106,7 +107,6 @@ import org.springframework.test.context.support.DirtiesContextTestExecutionListe
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
-import org.testcontainers.elasticsearch.ElasticsearchContainer;
 
 import java.io.IOException;
 import java.net.URLEncoder;
@@ -207,13 +207,9 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 	private IFhirResourceDao<QuestionnaireResponse> myQuestionnaireResponseDao;
 	@Autowired
 	private TestHSearchEventDispatcher myHSearchEventDispatcher;
-	@Autowired
-	ElasticsearchContainer myElasticsearchContainer;
 
 	@Mock
 	private IHSearchEventListener mySearchEventListener;
-	@Autowired
-	private ElasticsearchSvcImpl myElasticsearchSvc;
 
 
 	@BeforeEach
@@ -917,15 +913,14 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 	 */
 	@Test
 	public void testDirectPathWholeResourceNotIndexedWorks() {
+		// setup
+		myLogbackLevelOverrideExtension.setLogLevel(SearchBuilder.class, Level.WARN);
 		IIdType id1 = myTestDataBuilder.createObservation(List.of(myTestDataBuilder.withObservationCode("http://example.com/", "theCode")));
 
 		// set it after creating resource, so search doesn't find it in the index
 		myStorageSettings.setStoreResourceInHSearchIndex(true);
 
-		myCaptureQueriesListener.clear();
-
-		List<IBaseResource> result = searchForFastResources("Observation?code=theCode");
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		List<IBaseResource> result = searchForFastResources("Observation?code=theCode&_count=10&_total=accurate");
 
 		assertThat(result).hasSize(1);
 		assertEquals(((Observation) result.get(0)).getIdElement().getIdPart(), id1.getIdPart());
