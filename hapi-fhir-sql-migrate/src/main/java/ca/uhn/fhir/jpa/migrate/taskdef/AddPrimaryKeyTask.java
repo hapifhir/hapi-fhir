@@ -59,7 +59,7 @@ public class AddPrimaryKeyTask extends BaseTableTask {
 						"ALTER TABLE %s ADD PRIMARY KEY (%s)",
 						getTableName(), String.join(", ", myPrimaryKeyColumnsInOrder));
 			default:
-				throw new IllegalStateException(String.format("%s Unknown driver type.  Cannot add primary key for table %s", Msg.code(2530), getTableName()));
+				throw new IllegalStateException(String.format("%s Unknown driver type.  Cannot add primary key for table %s", Msg.code(2531), getTableName()));
 		}
 	}
 

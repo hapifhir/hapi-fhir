@@ -118,7 +118,7 @@ public class DropPrimaryKeyTask extends BaseTableTask {
 						+ "WHERE tc.constraint_type = 'PRIMARY KEY' "
 						+ "AND  tc.table_name = ?";
 			default:
-				throw new IllegalStateException(Msg.code(59));
+				throw new IllegalStateException(String.format("%s Unknown driver type.  Cannot find primary key to drop for table %s", Msg.code(2530), getTableName()));
 		}
 	}
 
