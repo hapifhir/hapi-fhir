@@ -39,7 +39,7 @@ class SearchBuilderTest {
 
 	@BeforeEach
 	public void beforeEach() {
-		mySearchBuilder.myResourceName = "QuestionnaireResponse";
+		mySearchBuilder.setResourceName("QuestionnaireResponse");
 		when(myDaoRegistry.getRegisteredDaoTypes()).thenReturn(ourCtx.getResourceTypes());
 	}
 

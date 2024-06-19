@@ -2117,6 +2117,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@SuppressWarnings("unused")
 	@Test
 	public void testFullTextSearch() throws Exception {
+		IParser parser = myFhirContext.newJsonParser();
+
 		Observation obs1 = new Observation();
 		obs1.getCode().setText("Systolic Blood Pressure");
 		obs1.setStatus(ObservationStatus.FINAL);
@@ -2128,13 +2130,21 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		obs2.setStatus(ObservationStatus.FINAL);
 		obs2.setValue(new Quantity(81));
 		IIdType id2 = myObservationDao.create(obs2, mySrd).getId().toUnqualifiedVersionless();
+		obs2.setId(id2);
+
+		myStorageSettings.setAdvancedHSearchIndexing(true);
 
 		HttpGet get = new HttpGet(myServerBase + "/Observation?_content=systolic&_pretty=true");
+		get.addHeader("Content-Type", "application/json");
 		try (CloseableHttpResponse response = ourHttpClient.execute(get)) {
 			assertEquals(200, response.getStatusLine().getStatusCode());
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseString);
-			assertThat(responseString).contains(id1.getIdPart());
+			Bundle bundle = parser.parseResource(Bundle.class, responseString);
+			assertEquals(1, bundle.getTotal());
+			Resource resource = bundle.getEntry().get(0).getResource();
+			assertEquals("Observation", resource.fhirType());
+			assertEquals(id1.getIdPart(), resource.getIdPart());
 		}
 	}
 

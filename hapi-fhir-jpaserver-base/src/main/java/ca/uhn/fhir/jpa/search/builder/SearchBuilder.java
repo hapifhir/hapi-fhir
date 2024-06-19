@@ -95,6 +95,7 @@ import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.StringUtil;
 import ca.uhn.fhir.util.UrlUtil;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Streams;
 import com.healthmarketscience.sqlbuilder.Condition;
 import jakarta.annotation.Nonnull;
@@ -239,6 +240,11 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		myResourceSearchViewDao = theResourceSearchViewDao;
 		myContext = theContext;
 		myIdHelperService = theIdHelperService;
+	}
+
+	@VisibleForTesting
+	void setResourceName(String theName) {
+		myResourceName = theName;
 	}
 
 	@Override
