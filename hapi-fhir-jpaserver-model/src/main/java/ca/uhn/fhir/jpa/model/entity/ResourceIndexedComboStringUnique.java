@@ -42,7 +42,6 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import static ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam.hash;
-import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 @Entity()
 @Table(
@@ -83,11 +82,19 @@ public class ResourceIndexedComboStringUnique extends BaseResourceIndexedCombo
 	// TODO: These hashes were added in 7.4.0 - They aren't used or indexed yet, but
 	// eventually we should replace the string index with a hash index in order to
 	// reduce the space usage.
-	@Column(name = "HASH_IDENTITY")
-	private Long myHashIdentity;
-
 	@Column(name = "HASH_COMPLETE")
 	private Long myHashComplete;
+
+	/**
+	 * Because we'll be using these hashes to enforce uniqueness, the risk of
+	 * collisions is bad, since it would be plain impossible to insert a row
+	 * with a false collision here. So in order to reduce that risk, we
+	 * double the number of bits we hash by having two hashes.
+	 *
+	 * @see #calculateHashComplete2(PartitionSettings, PartitionablePartitionId, String) to see how this is calculated
+	 */
+	@Column(name = "HASH_COMPLETE_2")
+	private Long myHashComplete2;
 
 	@Column(name = "IDX_STRING", nullable = false, length = MAX_STRING_LENGTH)
 	private String myIndexString;
@@ -144,8 +151,8 @@ public class ResourceIndexedComboStringUnique extends BaseResourceIndexedCombo
 		ResourceIndexedComboStringUnique that = (ResourceIndexedComboStringUnique) theO;
 
 		EqualsBuilder b = new EqualsBuilder();
-		b.append(myHashIdentity, that.myHashIdentity);
 		b.append(myHashComplete, that.myHashComplete);
+		b.append(myHashComplete2, that.myHashComplete2);
 		return b.isEquals();
 	}
 
@@ -154,8 +161,8 @@ public class ResourceIndexedComboStringUnique extends BaseResourceIndexedCombo
 		ResourceIndexedComboStringUnique source = (ResourceIndexedComboStringUnique) theSource;
 		myPartitionSettings = source.myPartitionSettings;
 		myIndexString = source.myIndexString;
-		myHashIdentity = source.myHashIdentity;
 		myHashComplete = source.myHashComplete;
+		myHashComplete2 = source.myHashComplete2;
 	}
 
 	@Override
@@ -204,22 +211,24 @@ public class ResourceIndexedComboStringUnique extends BaseResourceIndexedCombo
 		myHashComplete = theHashComplete;
 	}
 
-	public Long getHashIdentity() {
-		return myHashIdentity;
+	public Long getHashComplete2() {
+		return myHashComplete2;
 	}
 
-	public void setHashIdentity(Long theHashIdentity) {
-		myHashIdentity = theHashIdentity;
+	public void setHashComplete2(Long theHashComplete2) {
+		myHashComplete2 = theHashComplete2;
 	}
 
 	@Override
 	public void setPlaceholderHashesIfMissing() {
 		super.setPlaceholderHashesIfMissing();
-
-		myHashComplete = 0L;
-		myHashIdentity = 0L;
+		if (myHashComplete == null) {
+			myHashComplete = 0L;
+		}
+		if (myHashComplete2 == null) {
+			myHashComplete2 = 0L;
+		}
 	}
-
 
 	@Override
 	public void calculateHashes() {
@@ -228,40 +237,42 @@ public class ResourceIndexedComboStringUnique extends BaseResourceIndexedCombo
 			PartitionablePartitionId partitionId = getPartitionId();
 			String queryString = myIndexString;
 
-			String searchParameterId = getSearchParameterId();
-
-			setHashIdentity(calculateHashIdentity(partitionSettings, partitionId, searchParameterId));
-			setHashComplete(calculateHashComplete(partitionSettings, partitionId, searchParameterId, queryString));
+			setHashComplete(calculateHashComplete(partitionSettings, partitionId, queryString));
+			setHashComplete2(calculateHashComplete2(partitionSettings, partitionId, queryString));
 		}
 	}
 
-	/**
-	 * @param theSearchParameterId Must be exactly in the form <code>[resourceType]/[id]</code>
-	 */
-	private static long calculateHashComplete(PartitionSettings thePartitionSettings, PartitionablePartitionId thePartitionId, String theSearchParameterId, String theQueryString) {
-		assert BaseResourceIndexedCombo.SEARCH_PARAM_ID_PATTERN.matcher(theSearchParameterId).matches();
-		return calculateHash(thePartitionSettings, thePartitionId, theSearchParameterId, theQueryString);
+	private static long calculateHashComplete(
+			PartitionSettings thePartitionSettings,
+			PartitionablePartitionId thePartitionId,
+			String theQueryString) {
+		return calculateHash(thePartitionSettings, thePartitionId, theQueryString);
 	}
 
-	/**
-	 * @param theSearchParameterId Must be exactly in the form <code>[resourceType]/[id]</code>
-	 */
-	private static long calculateHashIdentity(PartitionSettings thePartitionSettings, PartitionablePartitionId thePartitionId, String theSearchParameterId) {
-		assert BaseResourceIndexedCombo.SEARCH_PARAM_ID_PATTERN.matcher(theSearchParameterId).matches();
-		return calculateHash(thePartitionSettings, thePartitionId, theSearchParameterId);
+	private static long calculateHashComplete2(
+			PartitionSettings thePartitionSettings,
+			PartitionablePartitionId thePartitionId,
+			String theQueryString) {
+		// Just add a constant salt to the query string in order to hopefully
+		// further avoid collisions
+		String newQueryString = theQueryString + "ABC123";
+		return calculateHashComplete(thePartitionSettings, thePartitionId, newQueryString);
 	}
 
 	@Override
 	public void clearHashes() {
-		myHashIdentity = null;
 		myHashComplete = null;
+		myHashComplete2 = null;
 	}
 
 	@Override
 	public int hashCode() {
 		calculateHashes();
 
-        return new HashCodeBuilder(17, 37).append(myHashIdentity).append(myHashComplete).toHashCode();
+		HashCodeBuilder b = new HashCodeBuilder(17, 37);
+		b.append(myHashComplete);
+		b.append(myHashComplete2);
+		return b.toHashCode();
 	}
 
 	@Override
@@ -270,8 +281,8 @@ public class ResourceIndexedComboStringUnique extends BaseResourceIndexedCombo
 				.append("id", myId)
 				.append("resourceId", myResourceId)
 				.append("indexString", myIndexString)
-				.append("hashIdentity", myHashIdentity)
 				.append("hashComplete", myHashComplete)
+				.append("hashComplete2", myHashComplete2)
 				.append("partition", getPartitionId())
 				.toString();
 	}

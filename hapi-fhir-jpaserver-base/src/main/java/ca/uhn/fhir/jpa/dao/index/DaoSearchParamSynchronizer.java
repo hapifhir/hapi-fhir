@@ -35,7 +35,6 @@ import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.PersistenceContextType;
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -51,17 +50,20 @@ public class DaoSearchParamSynchronizer {
 
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	protected EntityManager myEntityManager;
+
 	@Autowired
 	private JpaStorageSettings myStorageSettings;
+
 	@Autowired
 	private IResourceIndexedComboStringUniqueDao myResourceIndexedCompositeStringUniqueDao;
+
 	@Autowired
 	private FhirContext myFhirContext;
 
 	public AddRemoveCount synchronizeSearchParamsToDatabase(
-		ResourceIndexedSearchParams theParams,
-		ResourceTable theEntity,
-		ResourceIndexedSearchParams existingParams) {
+			ResourceIndexedSearchParams theParams,
+			ResourceTable theEntity,
+			ResourceIndexedSearchParams existingParams) {
 		AddRemoveCount retVal = new AddRemoveCount();
 
 		synchronize(theEntity, retVal, theParams.myStringParams, existingParams.myStringParams, null);
@@ -69,17 +71,22 @@ public class DaoSearchParamSynchronizer {
 		synchronize(theEntity, retVal, theParams.myNumberParams, existingParams.myNumberParams, null);
 		synchronize(theEntity, retVal, theParams.myQuantityParams, existingParams.myQuantityParams, null);
 		synchronize(
-			theEntity,
-			retVal,
-			theParams.myQuantityNormalizedParams,
-			existingParams.myQuantityNormalizedParams,
-			null);
+				theEntity,
+				retVal,
+				theParams.myQuantityNormalizedParams,
+				existingParams.myQuantityNormalizedParams,
+				null);
 		synchronize(theEntity, retVal, theParams.myDateParams, existingParams.myDateParams, null);
 		synchronize(theEntity, retVal, theParams.myUriParams, existingParams.myUriParams, null);
 		synchronize(theEntity, retVal, theParams.myCoordsParams, existingParams.myCoordsParams, null);
 		synchronize(theEntity, retVal, theParams.myLinks, existingParams.myLinks, null);
 		synchronize(theEntity, retVal, theParams.myComboTokenNonUnique, existingParams.myComboTokenNonUnique, null);
-		synchronize(theEntity, retVal, theParams.myComboStringUniques, existingParams.myComboStringUniques, new UniqueIndexPreExistenceChecker());
+		synchronize(
+				theEntity,
+				retVal,
+				theParams.myComboStringUniques,
+				existingParams.myComboStringUniques,
+				new UniqueIndexPreExistenceChecker());
 
 		// make sure links are indexed
 		theEntity.setResourceLinks(theParams.myLinks);
@@ -93,11 +100,11 @@ public class DaoSearchParamSynchronizer {
 	}
 
 	private <T extends BaseResourceIndex> void synchronize(
-		ResourceTable theEntity,
-		AddRemoveCount theAddRemoveCount,
-		Collection<T> theNewParams,
-		Collection<T> theExistingParams,
-		@Nullable IPreSaveHook<T> theAddParamPreSaveHook) {
+			ResourceTable theEntity,
+			AddRemoveCount theAddRemoveCount,
+			Collection<T> theNewParams,
+			Collection<T> theExistingParams,
+			@Nullable IPreSaveHook<T> theAddParamPreSaveHook) {
 		Collection<T> newParams = theNewParams;
 		for (T next : newParams) {
 			next.setPartitionId(theEntity.getPartitionId());
@@ -172,7 +179,7 @@ public class DaoSearchParamSynchronizer {
 	 * @param theIndexesToAdd    The rows that would be added
 	 */
 	private <T extends BaseResourceIndex> void tryToReuseIndexEntities(
-		List<T> theIndexesToRemove, List<T> theIndexesToAdd) {
+			List<T> theIndexesToRemove, List<T> theIndexesToAdd) {
 		for (int addIndex = 0; addIndex < theIndexesToAdd.size(); addIndex++) {
 
 			// If there are no more rows to remove, there's nothing we can reuse
@@ -211,18 +218,18 @@ public class DaoSearchParamSynchronizer {
 	private interface IPreSaveHook<T> {
 
 		void preSave(Collection<T> theParamsToRemove, Collection<T> theParamsToAdd);
-
 	}
 
 	private class UniqueIndexPreExistenceChecker implements IPreSaveHook<ResourceIndexedComboStringUnique> {
 
-
 		@Override
-		public void preSave(Collection<ResourceIndexedComboStringUnique> theParamsToRemove, Collection<ResourceIndexedComboStringUnique> theParamsToAdd) {
-			if (!myStorageSettings.isUniqueIndexesCheckedBeforeSave()) {
+		public void preSave(
+				Collection<ResourceIndexedComboStringUnique> theParamsToRemove,
+				Collection<ResourceIndexedComboStringUnique> theParamsToAdd) {
+			if (myStorageSettings.isUniqueIndexesCheckedBeforeSave()) {
 				for (ResourceIndexedComboStringUnique theIndex : theParamsToAdd) {
 					ResourceIndexedComboStringUnique existing =
-						myResourceIndexedCompositeStringUniqueDao.findByQueryString(theIndex.getIndexString());
+							myResourceIndexedCompositeStringUniqueDao.findByQueryString(theIndex.getIndexString());
 					if (existing != null) {
 
 						/*
@@ -247,17 +254,17 @@ public class DaoSearchParamSynchronizer {
 						}
 
 						String msg = myFhirContext
-							.getLocalizer()
-							.getMessage(
-								BaseHapiFhirDao.class,
-								"uniqueIndexConflictFailure",
-								existing.getResource().getResourceType(),
-								theIndex.getIndexString(),
-								existing.getResource()
-									.getIdDt()
-									.toUnqualifiedVersionless()
-									.getValue(),
-								searchParameterId);
+								.getLocalizer()
+								.getMessage(
+										BaseHapiFhirDao.class,
+										"uniqueIndexConflictFailure",
+										existing.getResource().getResourceType(),
+										theIndex.getIndexString(),
+										existing.getResource()
+												.getIdDt()
+												.toUnqualifiedVersionless()
+												.getValue(),
+										searchParameterId);
 
 						// Use ResourceVersionConflictException here because the HapiTransactionService
 						// catches this and can retry it if needed

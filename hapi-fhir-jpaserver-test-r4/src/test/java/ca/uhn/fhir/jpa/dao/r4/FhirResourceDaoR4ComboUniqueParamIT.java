@@ -388,11 +388,11 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		assertEquals(2, values.size());
 		values.sort(Comparator.comparing(ResourceIndexedComboStringUnique::getIndexString));
 		assertEquals("Patient?identifier=urn%7C111", values.get(0).getIndexString());
-		assertEquals(2540757258130705957L, values.get(0).getHashIdentity());
-		assertEquals(-4623451542923825548L, values.get(0).getHashComplete());
+		assertEquals(1719691123901055728L, values.get(0).getHashComplete());
+		assertEquals(-8172870218136407824L, values.get(0).getHashComplete2());
 		assertEquals("Patient?identifier=urn%7C222", values.get(1).getIndexString());
-		assertEquals(2540757258130705957L, values.get(1).getHashIdentity());
-		assertEquals(2490522300877633000L, values.get(1).getHashComplete());
+		assertEquals(7615522755370797441L, values.get(1).getHashComplete());
+		assertEquals(1496354762750275623L, values.get(1).getHashComplete2());
 
 		// Update the values
 
@@ -409,12 +409,11 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		assertEquals(2, values.size());
 		values.sort(Comparator.comparing(ResourceIndexedComboStringUnique::getIndexString));
 		assertEquals("Patient?identifier=urn%7C111", values.get(0).getIndexString());
-		assertEquals(2540757258130705957L, values.get(0).getHashIdentity());
-		assertEquals(-4623451542923825548L, values.get(0).getHashComplete());
+		assertEquals(1719691123901055728L, values.get(0).getHashComplete());
+		assertEquals(-8172870218136407824L, values.get(0).getHashComplete2());
 		assertEquals("Patient?identifier=urn%7C333", values.get(1).getIndexString());
-		assertEquals(2540757258130705957L, values.get(1).getHashIdentity());
-		assertEquals(1151683749308800855L, values.get(1).getHashComplete());
-
+		assertEquals(3049342026616784675L, values.get(1).getHashComplete());
+		assertEquals(-2327712097368275295L, values.get(1).getHashComplete2());
 	}
 
 	@Test

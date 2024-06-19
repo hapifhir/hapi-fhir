@@ -1,0 +1,3 @@
+# Upgrade Instructions for this version
+
+HAPI FHIR 7.4.0 JPA introduces a new pair of hash columns on the table containing [Unique Combo Search Params](https://smilecdr.com/docs/fhir_standard/fhir_search_custom_search_parameters.html#uniqueness). If you use Unique Combo Search Params, please initiate a [$reindex](https://smilecdr.com/docs/fhir_repository/search_parameter_reindexing.html) after upgrading to this version. The system may be used before this job is complete, but the system should not be upgraded beyond this version until the reindex has completed. This only applies to systems with Unique Combo Search Params in use, which is not expected to apply to most deployments.

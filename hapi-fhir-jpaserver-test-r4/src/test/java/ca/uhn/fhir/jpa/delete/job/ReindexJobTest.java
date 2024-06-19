@@ -406,10 +406,10 @@ public class ReindexJobTest extends BaseJpaR4Test {
 
 		// Clear hashes
 		runInTransaction(()->{
-			assertEquals(1, myEntityManager.createNativeQuery("UPDATE HFJ_IDX_CMP_STRING_UNIQ SET HASH_IDENTITY = null WHERE HASH_IDENTITY IS NOT NULL").executeUpdate());
-			assertEquals(0, myEntityManager.createNativeQuery("UPDATE HFJ_IDX_CMP_STRING_UNIQ SET HASH_IDENTITY = null WHERE HASH_IDENTITY IS NOT NULL").executeUpdate());
 			assertEquals(1, myEntityManager.createNativeQuery("UPDATE HFJ_IDX_CMP_STRING_UNIQ SET HASH_COMPLETE = null WHERE HASH_COMPLETE IS NOT NULL").executeUpdate());
 			assertEquals(0, myEntityManager.createNativeQuery("UPDATE HFJ_IDX_CMP_STRING_UNIQ SET HASH_COMPLETE = null WHERE HASH_COMPLETE IS NOT NULL").executeUpdate());
+			assertEquals(1, myEntityManager.createNativeQuery("UPDATE HFJ_IDX_CMP_STRING_UNIQ SET HASH_COMPLETE_2 = null WHERE HASH_COMPLETE_2 IS NOT NULL").executeUpdate());
+			assertEquals(0, myEntityManager.createNativeQuery("UPDATE HFJ_IDX_CMP_STRING_UNIQ SET HASH_COMPLETE_2 = null WHERE HASH_COMPLETE_2 IS NOT NULL").executeUpdate());
 		});
 
 		// Run a reindex
@@ -424,8 +424,8 @@ public class ReindexJobTest extends BaseJpaR4Test {
 		runInTransaction(()->{
 			List<ResourceIndexedComboStringUnique> indexes = myResourceIndexedComboStringUniqueDao.findAll();
 			assertEquals(1, indexes.size());
-			assertThat(indexes.get(0).getHashIdentity()).isNotNull().isNotZero();
 			assertThat(indexes.get(0).getHashComplete()).isNotNull().isNotZero();
+			assertThat(indexes.get(0).getHashComplete2()).isNotNull().isNotZero();
 		});
 	}
 

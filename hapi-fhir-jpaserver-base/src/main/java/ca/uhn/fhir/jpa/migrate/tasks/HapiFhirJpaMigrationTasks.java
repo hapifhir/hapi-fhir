@@ -141,92 +141,94 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		 * on the live system as it would take a loooooong time to execute these on heavily loaded
 		 * databases.
 		 */
-		// Skipping numbers 20240601.1 and 20240601.2 as they were found to not
-		// be needed during code review.
-		version.onTable("HFJ_RESOURCE")
-				.modifyColumn("20240601.3", "SP_HAS_LINKS")
-				.nonNullable()
-				.withType(ColumnTypeEnum.BOOLEAN)
-				.heavyweightSkipByDefault()
-				.failureAllowed();
-		version.onTable("HFJ_RESOURCE")
-				.modifyColumn("20240601.4", "SP_COORDS_PRESENT")
-				.nonNullable()
-				.withType(ColumnTypeEnum.BOOLEAN)
-				.heavyweightSkipByDefault()
-				.failureAllowed();
-		version.onTable("HFJ_RESOURCE")
-				.modifyColumn("20240601.5", "SP_DATE_PRESENT")
-				.nonNullable()
-				.withType(ColumnTypeEnum.BOOLEAN)
-				.heavyweightSkipByDefault()
-				.failureAllowed();
-		version.onTable("HFJ_RESOURCE")
-				.modifyColumn("20240601.6", "SP_NUMBER_PRESENT")
-				.nonNullable()
-				.withType(ColumnTypeEnum.BOOLEAN)
-				.heavyweightSkipByDefault()
-				.failureAllowed();
-		version.onTable("HFJ_RESOURCE")
-				.modifyColumn("20240601.7", "SP_QUANTITY_PRESENT")
-				.nonNullable()
-				.withType(ColumnTypeEnum.BOOLEAN)
-				.heavyweightSkipByDefault()
-				.failureAllowed();
-		version.onTable("HFJ_RESOURCE")
-				.modifyColumn("20240601.8", "SP_QUANTITY_NRML_PRESENT")
-				.nonNullable()
-				.withType(ColumnTypeEnum.BOOLEAN)
-				.heavyweightSkipByDefault()
-				.failureAllowed();
-		version.onTable("HFJ_RESOURCE")
-				.modifyColumn("20240601.9", "SP_STRING_PRESENT")
-				.nonNullable()
-				.withType(ColumnTypeEnum.BOOLEAN)
-				.heavyweightSkipByDefault()
-				.failureAllowed();
-		version.onTable("HFJ_RESOURCE")
-				.modifyColumn("20240601.10", "SP_TOKEN_PRESENT")
-				.nonNullable()
-				.withType(ColumnTypeEnum.BOOLEAN)
-				.heavyweightSkipByDefault()
-				.failureAllowed();
-		version.onTable("HFJ_RESOURCE")
-				.modifyColumn("20240601.11", "SP_URI_PRESENT")
-				.nonNullable()
-				.withType(ColumnTypeEnum.BOOLEAN)
-				.heavyweightSkipByDefault()
-				.failureAllowed();
-		version.onTable("HFJ_RESOURCE")
-				.modifyColumn("20240601.12", "RES_VER")
-				.nonNullable()
-				.withType(ColumnTypeEnum.LONG)
-				.heavyweightSkipByDefault()
-				.failureAllowed();
-		version.onTable("TRM_CONCEPT")
-				.modifyColumn("20240601.13", "CODESYSTEM_PID")
-				.nonNullable()
-				.withType(ColumnTypeEnum.LONG)
-				.heavyweightSkipByDefault()
-				.failureAllowed();
-		version.onTable("BT2_JOB_INSTANCE")
-				.modifyColumn("20240601.14", "PROGRESS_PCT")
-				.nonNullable()
-				.withType(ColumnTypeEnum.DOUBLE)
-				.heavyweightSkipByDefault()
-				.failureAllowed();
-		version.onTable("BT2_JOB_INSTANCE")
-				.modifyColumn("20240601.15", "ERROR_COUNT")
-				.nonNullable()
-				.withType(ColumnTypeEnum.INT)
-				.heavyweightSkipByDefault()
-				.failureAllowed();
-		version.onTable("HFJ_BINARY_STORAGE_BLOB")
-				.modifyColumn("20240601.16", "BLOB_SIZE")
-				.nonNullable()
-				.withType(ColumnTypeEnum.LONG)
-				.heavyweightSkipByDefault()
-				.failureAllowed();
+		{
+			// Skipping numbers 20240601.1 and 20240601.2 as they were found to not
+			// be needed during code review.
+			version.onTable("HFJ_RESOURCE")
+					.modifyColumn("20240601.3", "SP_HAS_LINKS")
+					.nonNullable()
+					.withType(ColumnTypeEnum.BOOLEAN)
+					.heavyweightSkipByDefault()
+					.failureAllowed();
+			version.onTable("HFJ_RESOURCE")
+					.modifyColumn("20240601.4", "SP_COORDS_PRESENT")
+					.nonNullable()
+					.withType(ColumnTypeEnum.BOOLEAN)
+					.heavyweightSkipByDefault()
+					.failureAllowed();
+			version.onTable("HFJ_RESOURCE")
+					.modifyColumn("20240601.5", "SP_DATE_PRESENT")
+					.nonNullable()
+					.withType(ColumnTypeEnum.BOOLEAN)
+					.heavyweightSkipByDefault()
+					.failureAllowed();
+			version.onTable("HFJ_RESOURCE")
+					.modifyColumn("20240601.6", "SP_NUMBER_PRESENT")
+					.nonNullable()
+					.withType(ColumnTypeEnum.BOOLEAN)
+					.heavyweightSkipByDefault()
+					.failureAllowed();
+			version.onTable("HFJ_RESOURCE")
+					.modifyColumn("20240601.7", "SP_QUANTITY_PRESENT")
+					.nonNullable()
+					.withType(ColumnTypeEnum.BOOLEAN)
+					.heavyweightSkipByDefault()
+					.failureAllowed();
+			version.onTable("HFJ_RESOURCE")
+					.modifyColumn("20240601.8", "SP_QUANTITY_NRML_PRESENT")
+					.nonNullable()
+					.withType(ColumnTypeEnum.BOOLEAN)
+					.heavyweightSkipByDefault()
+					.failureAllowed();
+			version.onTable("HFJ_RESOURCE")
+					.modifyColumn("20240601.9", "SP_STRING_PRESENT")
+					.nonNullable()
+					.withType(ColumnTypeEnum.BOOLEAN)
+					.heavyweightSkipByDefault()
+					.failureAllowed();
+			version.onTable("HFJ_RESOURCE")
+					.modifyColumn("20240601.10", "SP_TOKEN_PRESENT")
+					.nonNullable()
+					.withType(ColumnTypeEnum.BOOLEAN)
+					.heavyweightSkipByDefault()
+					.failureAllowed();
+			version.onTable("HFJ_RESOURCE")
+					.modifyColumn("20240601.11", "SP_URI_PRESENT")
+					.nonNullable()
+					.withType(ColumnTypeEnum.BOOLEAN)
+					.heavyweightSkipByDefault()
+					.failureAllowed();
+			version.onTable("HFJ_RESOURCE")
+					.modifyColumn("20240601.12", "RES_VER")
+					.nonNullable()
+					.withType(ColumnTypeEnum.LONG)
+					.heavyweightSkipByDefault()
+					.failureAllowed();
+			version.onTable("TRM_CONCEPT")
+					.modifyColumn("20240601.13", "CODESYSTEM_PID")
+					.nonNullable()
+					.withType(ColumnTypeEnum.LONG)
+					.heavyweightSkipByDefault()
+					.failureAllowed();
+			version.onTable("BT2_JOB_INSTANCE")
+					.modifyColumn("20240601.14", "PROGRESS_PCT")
+					.nonNullable()
+					.withType(ColumnTypeEnum.DOUBLE)
+					.heavyweightSkipByDefault()
+					.failureAllowed();
+			version.onTable("BT2_JOB_INSTANCE")
+					.modifyColumn("20240601.15", "ERROR_COUNT")
+					.nonNullable()
+					.withType(ColumnTypeEnum.INT)
+					.heavyweightSkipByDefault()
+					.failureAllowed();
+			version.onTable("HFJ_BINARY_STORAGE_BLOB")
+					.modifyColumn("20240601.16", "BLOB_SIZE")
+					.nonNullable()
+					.withType(ColumnTypeEnum.LONG)
+					.heavyweightSkipByDefault()
+					.failureAllowed();
+		}
 
 		/*
 		 * Add RES_ID to two indexes on HFJ_RES_VER which support history operations.
@@ -234,35 +236,41 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		 * on postgres. These are both marked as heavyweightSkipByDefault because the
 		 * necessary reindexing would be very expensive for a rarely used FHIR feature.
 		 */
-		version.onTable("HFJ_RES_VER")
-				.dropIndex("20240601.17", "IDX_RESVER_TYPE_DATE")
-				.heavyweightSkipByDefault();
-		version.onTable("HFJ_RES_VER")
-				.addIndex("20240601.18", "IDX_RESVER_TYPE_DATE")
-				.unique(false)
-				.withColumns("RES_TYPE", "RES_UPDATED", "RES_ID")
-				.heavyweightSkipByDefault();
-		version.onTable("HFJ_RES_VER")
-				.dropIndex("20240601.19", "IDX_RESVER_DATE")
-				.heavyweightSkipByDefault();
-		version.onTable("HFJ_RES_VER")
-				.addIndex("20240601.20", "IDX_RESVER_DATE")
-				.unique(false)
-				.withColumns("RES_UPDATED", "RES_ID")
-				.heavyweightSkipByDefault();
+		{
+			version.onTable("HFJ_RES_VER")
+					.dropIndex("20240601.17", "IDX_RESVER_TYPE_DATE")
+					.heavyweightSkipByDefault();
+			version.onTable("HFJ_RES_VER")
+					.addIndex("20240601.18", "IDX_RESVER_TYPE_DATE")
+					.unique(false)
+					.withColumns("RES_TYPE", "RES_UPDATED", "RES_ID")
+					.heavyweightSkipByDefault();
+			version.onTable("HFJ_RES_VER")
+					.dropIndex("20240601.19", "IDX_RESVER_DATE")
+					.heavyweightSkipByDefault();
+			version.onTable("HFJ_RES_VER")
+					.addIndex("20240601.20", "IDX_RESVER_DATE")
+					.unique(false)
+					.withColumns("RES_UPDATED", "RES_ID")
+					.heavyweightSkipByDefault();
+		}
+
+		/*
+		 * Add hash columns to the combo param index tables
+		 */
 		{
 			version.onTable("HFJ_IDX_CMB_TOK_NU")
-				.addIndex("20240617.1", "IDX_IDXCMBTOKNU_HASHC")
-				.unique(false)
-				.withColumns("HASH_COMPLETE", "RES_ID", "PARTITION_ID");
+					.addIndex("20240617.1", "IDX_IDXCMBTOKNU_HASHC")
+					.unique(false)
+					.withColumns("HASH_COMPLETE", "RES_ID", "PARTITION_ID");
 			version.onTable("HFJ_IDX_CMP_STRING_UNIQ")
-				.addColumn("20240617.2", "HASH_IDENTITY")
-				.nullable()
-				.type(ColumnTypeEnum.LONG);
+					.addColumn("20240617.2", "HASH_COMPLETE")
+					.nullable()
+					.type(ColumnTypeEnum.LONG);
 			version.onTable("HFJ_IDX_CMP_STRING_UNIQ")
-				.addColumn("20240617.3", "HASH_COMPLETE")
-				.nullable()
-				.type(ColumnTypeEnum.LONG);
+					.addColumn("20240617.3", "HASH_COMPLETE_2")
+					.nullable()
+					.type(ColumnTypeEnum.LONG);
 		}
 	}
 

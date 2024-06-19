@@ -15,7 +15,6 @@ public abstract class BaseResourceIndexedCombo extends BaseResourceIndex impleme
 	@Transient
 	private String mySearchParameterId;
 
-	@Nonnull
 	@Override
 	public String getSearchParameterId() {
 		return mySearchParameterId;
