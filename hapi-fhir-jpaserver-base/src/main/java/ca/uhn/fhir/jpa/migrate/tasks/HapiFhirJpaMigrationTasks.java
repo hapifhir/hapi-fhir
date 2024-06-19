@@ -36,6 +36,7 @@ import ca.uhn.fhir.jpa.migrate.tasks.api.TaskFlagEnum;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
@@ -271,6 +272,17 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 					.addColumn("20240617.3", "HASH_COMPLETE_2")
 					.nullable()
 					.type(ColumnTypeEnum.LONG);
+			version.onTable("HFJ_IDX_CMP_STRING_UNIQ").addTask(new CalculateHashesTask(VersionEnum.V3_5_0, "20180903.14")
+				.addCalculator(
+					"HASH_COMPLETE",
+					t -> ResourceIndexedComboStringUnique.calculateHashComplete(
+						t.getString("IDX_STRING")))
+				.addCalculator(
+					"HASH_COMPLETE_2",
+					t -> ResourceIndexedComboStringUnique.calculateHashComplete2(
+						t.getString("IDX_STRING")))
+				.setColumnName("HASH_COMPLETE"));
+
 		}
 	}
 

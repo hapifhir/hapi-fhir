@@ -70,7 +70,7 @@ public class InstanceReindexServiceImplNarrativeR5Test {
 	public void testIndexComboUnique() throws IOException {
 		// Setup
 		ResourceIndexedSearchParams newParams = newParams();
-		newParams.myComboStringUniques.add(new ResourceIndexedComboStringUnique(myEntity, myPartitionSettings, "Patient?identifier=123", new IdType("Parameter/foo")));
+		newParams.myComboStringUniques.add(new ResourceIndexedComboStringUnique(myEntity, "Patient?identifier=123", new IdType("Parameter/foo")));
 
 		// Test
 		Parameters outcome = mySvc.buildIndexResponse(newParams(), newParams, true, Collections.emptyList());
