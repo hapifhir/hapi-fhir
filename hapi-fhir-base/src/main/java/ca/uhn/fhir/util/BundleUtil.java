@@ -604,7 +604,7 @@ public class BundleUtil {
 			IBase entry) {
 		IBaseResource resource = null;
 		String matchMode = null;
-		BigDecimal matchScore = null;
+		BigDecimal searchScore = null;
 
 		String fullUrl = theFullUrlChildDef
 				.getAccessor()
@@ -621,11 +621,11 @@ public class BundleUtil {
 				matchMode = ((IPrimitiveType<?>) nextUrl).getValueAsString();
 			}
 			for (IBase nextUrl : theSearchScoreChildDef.getAccessor().getValues(nextSearch)) {
-				matchScore = (BigDecimal) ((IPrimitiveType<?>) nextUrl).getValue();
+				searchScore = (BigDecimal) ((IPrimitiveType<?>) nextUrl).getValue();
 			}
 		}
 
-		return new SearchBundleEntryParts(fullUrl, resource, matchMode, matchScore);
+		return new SearchBundleEntryParts(fullUrl, resource, matchMode, searchScore);
 	}
 
 	/**

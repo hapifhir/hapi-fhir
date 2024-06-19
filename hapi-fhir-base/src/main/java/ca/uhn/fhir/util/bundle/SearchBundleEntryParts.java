@@ -27,15 +27,15 @@ import java.math.BigDecimal;
 public class SearchBundleEntryParts {
 	private final IBaseResource myResource;
 	private final BundleEntrySearchModeEnum mySearchMode;
+	private final BigDecimal mySearchScore;
 	private final String myFullUrl;
-	private final BigDecimal myScore;
 
 	public SearchBundleEntryParts(
-			String theFullUrl, IBaseResource theResource, String theSearchMode, BigDecimal theScore) {
+			String theFullUrl, IBaseResource theResource, String theSearchMode, BigDecimal theSearchScore) {
 		myFullUrl = theFullUrl;
 		myResource = theResource;
 		mySearchMode = BundleEntrySearchModeEnum.forCode(theSearchMode);
-		myScore = theScore;
+		mySearchScore = theSearchScore;
 	}
 
 	public String getFullUrl() {
@@ -51,6 +51,6 @@ public class SearchBundleEntryParts {
 	}
 
 	public BigDecimal getSearchScore() {
-		return myScore;
+		return mySearchScore;
 	}
 }
