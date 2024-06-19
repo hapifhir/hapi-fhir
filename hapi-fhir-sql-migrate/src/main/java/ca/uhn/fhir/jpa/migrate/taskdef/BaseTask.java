@@ -24,8 +24,8 @@ import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.HapiMigrationException;
 import ca.uhn.fhir.jpa.migrate.tasks.api.TaskFlagEnum;
 import ca.uhn.fhir.system.HapiSystemProperties;
-import jakarta.annotation.Nullable;
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -252,8 +252,7 @@ public abstract class BaseTask {
 				return null;
 			} else {
 				throw new HapiMigrationException(
-						// LUKETODO: new code?
-						Msg.code(61) + "Failed during task " + getMigrationVersion() + ": " + e, e);
+						Msg.code(2532) + "Failed during task " + getMigrationVersion() + ": " + e, e);
 			}
 		}
 	}

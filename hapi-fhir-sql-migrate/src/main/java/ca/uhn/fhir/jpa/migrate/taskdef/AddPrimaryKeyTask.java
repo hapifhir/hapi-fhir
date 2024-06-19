@@ -52,14 +52,13 @@ public class AddPrimaryKeyTask extends BaseTableTask {
 			case ORACLE_12C:
 			case MSSQL_2012:
 			case COCKROACHDB_21_1:
-				// LUKETODO:  test on Oracle
-				// LUKETODO:  test on MSSQL
-				// LUKETODO:  test on Postgres
 				return String.format(
 						"ALTER TABLE %s ADD PRIMARY KEY (%s)",
 						getTableName(), String.join(", ", myPrimaryKeyColumnsInOrder));
 			default:
-				throw new IllegalStateException(String.format("%s Unknown driver type.  Cannot add primary key for table %s", Msg.code(2531), getTableName()));
+				throw new IllegalStateException(String.format(
+						"%s Unknown driver type.  Cannot add primary key for task %s",
+						Msg.code(2531), getMigrationVersion()));
 		}
 	}
 

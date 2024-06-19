@@ -33,7 +33,6 @@ public abstract class BaseTableColumnTypeTask extends BaseTableColumnTask {
 	private ColumnTypeEnum myColumnType;
 	private Boolean myNullable;
 	private Long myColumnLength;
-	// LUKETODO:  add default value
 	@Nullable
 	private Object myDefaultValue;
 

@@ -205,11 +205,6 @@ public class Builder {
 			return new BuilderCompleteTask(task);
 		}
 
-		// LUKETODO: do we need this?
-		//		public BuilderCompleteTask dropPrimaryKey(String theVersion, String thePrimaryKeyName) {
-		//
-		//		}
-
 		/**
 		 * Drop index without taking write lock on PG, Oracle, MSSQL.
 		 */

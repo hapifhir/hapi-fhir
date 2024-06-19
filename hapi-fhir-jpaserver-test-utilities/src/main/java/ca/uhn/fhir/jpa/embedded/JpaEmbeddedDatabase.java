@@ -27,7 +27,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Arrays;
@@ -113,23 +112,6 @@ public abstract class JpaEmbeddedDatabase {
 		executeSqlAsBatch(statements);
 	}
 
-	// LUKETODO:  clean up if unused
-	public void executeSqlWithParams(String theSql, Object... theParams) {
-		ourLog.info("Executing SQL: {}", theSql);
-		try (final PreparedStatement preparedStatement = myConnection.prepareStatement(theSql)) {
-
-			for (int index = 0; index < theParams.length; index++) {
-				preparedStatement.setObject(index + 1, theParams[index]);
-			}
-
-			preparedStatement.execute();
-		} catch (Exception exception) {
-			throw new RuntimeException(
-					String.format("Execute SQL: [%s] failed with error: %s", theSql, exception.getMessage()),
-					exception);
-		}
-	}
-
 	public void executeSqlAsBatch(List<String> theStatements) {
 		try (final Statement statement = myConnection.createStatement()) {
 			for (String sql : theStatements) {
@@ -147,10 +129,5 @@ public abstract class JpaEmbeddedDatabase {
 	public List<Map<String, Object>> query(String theSql) {
 		ourLog.info("query SQL: {}", theSql);
 		return getJdbcTemplate().queryForList(theSql);
-	}
-
-	// LUKETODO:  clean up if unused
-	public List<Map<String, Object>> query(String theSql, Object... theParams) {
-		return getJdbcTemplate().queryForList(theSql, theParams);
 	}
 }

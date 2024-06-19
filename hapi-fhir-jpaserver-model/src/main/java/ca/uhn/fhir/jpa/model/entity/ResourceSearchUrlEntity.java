@@ -47,11 +47,6 @@ import java.util.Optional;
 @Entity
 @Table(
 		name = "HFJ_RES_SEARCH_URL",
-		//		uniqueConstraints = {
-		//			@UniqueConstraint(
-		//					name = "IDX_RES_ID_PARTITION_ID",
-		//					columnNames = {RES_SEARCH_URL_COLUMN_NAME, PARTITION_ID})
-		//		},
 		indexes = {
 			@Index(name = "IDX_RESSEARCHURL_RES", columnList = "RES_ID"),
 			@Index(name = "IDX_RESSEARCHURL_TIME", columnList = "CREATED_TIME")
@@ -66,9 +61,6 @@ public class ResourceSearchUrlEntity {
 	@EmbeddedId
 	private ResourceSearchUrlEntityPK myPk;
 
-	//	@Column(name = RES_SEARCH_URL_COLUMN_NAME, length = RES_SEARCH_URL_LENGTH, nullable = false)
-	//	private String mySearchUrl;
-
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(
 			name = "RES_ID",
@@ -79,9 +71,6 @@ public class ResourceSearchUrlEntity {
 
 	@Column(name = "RES_ID", updatable = false, nullable = false, insertable = false)
 	private Long myResourcePid;
-
-	//	@Column(name = PARTITION_ID, nullable = true, insertable = true, updatable = false)
-	//	private Integer myPartitionId;
 
 	@Column(name = "PARTITION_DATE", nullable = true, insertable = true, updatable = false)
 	private LocalDate myPartitionDate;
@@ -101,19 +90,6 @@ public class ResourceSearchUrlEntity {
 						.orElse(null))
 				.setResourceTable(theResourceTable)
 				.setCreatedTime(new Date());
-		//
-		//		final Optional<PartitionablePartitionId> optPartitionId =
-		//			Optional.ofNullable(theResourceTable.getPartitionId());
-		//		return new ResourceSearchUrlEntity()
-		//				.setResourceTable(theResourceTable)
-		//				.setSearchUrl(theUrl)
-		//				.setCreatedTime(new Date())
-		//				.setPartitionId(optPartitionId
-		//						.map(PartitionablePartitionId::getPartitionId)
-		//						.orElse(null))
-		//				.setPartitionDate(optPartitionId
-		//						.map(PartitionablePartitionId::getPartitionDate)
-		//						.orElse(null));
 	}
 
 	public ResourceSearchUrlEntityPK getPk() {
@@ -158,21 +134,6 @@ public class ResourceSearchUrlEntity {
 	public String getSearchUrl() {
 		return myPk.getSearchUrl();
 	}
-
-	// LUKETODO:  clean up if unused
-	//	public ResourceSearchUrlEntity setSearchUrl(String theSearchUrl) {
-	//		mySearchUrl = theSearchUrl;
-	//		return this;
-	//	}
-	//
-	//	public Integer getPartitionId() {
-	//		return myPartitionId;
-	//	}
-	//
-	//	public ResourceSearchUrlEntity setPartitionId(Integer thePartitionId) {
-	//		myPartitionId = thePartitionId;
-	//		return this;
-	//	}
 
 	public LocalDate getPartitionDate() {
 		return myPartitionDate;

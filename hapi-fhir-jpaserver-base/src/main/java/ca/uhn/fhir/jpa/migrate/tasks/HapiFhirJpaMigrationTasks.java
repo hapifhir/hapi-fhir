@@ -25,7 +25,6 @@ import ca.uhn.fhir.jpa.entity.BulkImportJobEntity;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.taskdef.ArbitrarySqlTask;
-import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.CalculateHashesTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.CalculateOrdinalDatesTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.ColumnTypeEnum;
@@ -253,54 +252,37 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 				.unique(false)
 				.withColumns("RES_UPDATED", "RES_ID")
 				.heavyweightSkipByDefault();
-		// LUKETODO:  uncomment
-		// LUKETODO:  modify
-		// LUKETODO:  test
+
 		{
-			doStuff(version);
+			version.onTable(tableHfjResSearchUrl)
+					.addColumn("20240618.2", "PARTITION_ID", -1)
+					.nullable()
+					.type(ColumnTypeEnum.INT);
+
+			version.onTable(tableHfjResSearchUrl)
+					.addColumn("20240618.3", "PARTITION_DATE")
+					.nullable()
+					.type(ColumnTypeEnum.DATE_ONLY);
+
+			version.executeRawSql(
+					"20240618.4",
+					String.format(
+							"UPDATE %s SET %s = -1",
+							tableHfjResSearchUrl, ResourceSearchUrlEntityPK.PARTITION_ID_COLUMN_NAME));
+
+			version.onTable(tableHfjResSearchUrl)
+					.modifyColumn("20240618.5", ResourceSearchUrlEntityPK.PARTITION_ID_COLUMN_NAME)
+					.nonNullable()
+					.withType(ColumnTypeEnum.INT);
+
+			version.onTable(tableHfjResSearchUrl).dropPrimaryKey("20240618.6");
+
+			version.onTable(tableHfjResSearchUrl)
+					.addPrimaryKey(
+							"20240618.7",
+							ResourceSearchUrlEntityPK.RES_SEARCH_URL_COLUMN_NAME,
+							ResourceSearchUrlEntityPK.PARTITION_ID_COLUMN_NAME);
 		}
-	}
-
-	void doStuff(Builder version) {
-		final String tableHfjResSearchUrl = "HFJ_RES_SEARCH_URL";
-		version.onTable(tableHfjResSearchUrl)
-			.addColumn("20240618.2", "PARTITION_ID", -1)
-			.nullable()
-			.type(ColumnTypeEnum.INT);
-
-		version.onTable(tableHfjResSearchUrl)
-			.addColumn("20240618.3", "PARTITION_DATE")
-			.nullable()
-			.type(ColumnTypeEnum.DATE_ONLY);
-
-		// LUKETODO:  clean up
-		/*
-		1) Add partition_id NULLABLE
-		2) Add partition_date NULLABLE
-		3) UPDATE all to -1
-		4) SET partition_id to non-null
-		5) DROP PK >>> NEW CODE
-		6) ADD new PK >>> NEW CODE
-		 */
-
-		version.executeRawSql(
-			"20240618.4",
-			String.format(
-				"UPDATE %s SET %s = -1",
-				tableHfjResSearchUrl, ResourceSearchUrlEntityPK.PARTITION_ID_COLUMN_NAME));
-
-		version.onTable(tableHfjResSearchUrl)
-			.modifyColumn("20240618.5", ResourceSearchUrlEntityPK.PARTITION_ID_COLUMN_NAME)
-			.nonNullable()
-			.withType(ColumnTypeEnum.INT);
-
-		version.onTable(tableHfjResSearchUrl).dropPrimaryKey("20240618.6");
-
-		version.onTable(tableHfjResSearchUrl)
-			.addPrimaryKey(
-				"20240618.7",
-				ResourceSearchUrlEntityPK.RES_SEARCH_URL_COLUMN_NAME,
-				ResourceSearchUrlEntityPK.PARTITION_ID_COLUMN_NAME);
 	}
 
 	protected void init720() {
