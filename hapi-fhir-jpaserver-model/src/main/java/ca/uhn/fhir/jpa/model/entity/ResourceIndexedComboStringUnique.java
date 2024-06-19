@@ -43,9 +43,18 @@ import static ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam.hash;
 /**
  * NOTE ON LIMITATIONS HERE
  * <p>
- * This table does not include the partition ID in the uniqueness check. This is because
- * when this table was originally created, it did not include it so adding partition ID
- * would be a breaking change.
+ * This table does not include the partition ID in the uniqueness check. This was the case
+ * when this table was originally created. In other words, the uniqueness constraint does not
+ * include the partition column, and would therefore not be able to guarantee uniqueness
+ * local to a partition.
+ * </p>
+ * <p>
+ * TODO: HAPI FHIR 7.4.0 introduced hashes to this table - In a future release we should
+ * move the uniqueness constraint over to using them instead of the long string. At that
+ * time we could probably decide whether it makes sense to include the partition ID in
+ * the uniqueness check. Null values will be an issue there, we may need to introduce
+ * a rule that if you want to enforce uniqueness on a partitioned system you need a
+ * non-null default partition ID?
  * </p>
  */
 @Entity()
@@ -94,7 +103,8 @@ public class ResourceIndexedComboStringUnique extends BaseResourceIndexedCombo
 	 * Because we'll be using these hashes to enforce uniqueness, the risk of
 	 * collisions is bad, since it would be plain impossible to insert a row
 	 * with a false collision here. So in order to reduce that risk, we
-	 * double the number of bits we hash by having two hashes.
+	 * double the number of bits we hash by having two hashes, effectively
+	 * making the hash a 128 bit hash instead of just 64.
 	 *
 	 * @see #calculateHashComplete2(String) to see how this is calculated
 	 */

@@ -55,6 +55,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
@@ -398,7 +399,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testCreate_ServerId_WithPartition() {
-		createUniqueCompositeSp();
+		createUniqueComboSp();
 		createRequestId();
 
 		addCreatePartition(myPartitionId, myPartitionDate);
@@ -411,7 +412,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		p.getMeta().addTag("http://system", "code", "diisplay");
 		p.addName().setFamily("FAM");
 		p.addIdentifier().setSystem("system").setValue("value");
-		p.setBirthDate(new Date());
+		p.setBirthDateElement(new DateType("2020-01-01"));
 		p.getManagingOrganization().setReferenceElement(orgId);
 		Long patientId = myPatientDao.create(p, mySrd).getId().getIdPartAsLong();
 
@@ -478,11 +479,14 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			assertLocalDateFromDbMatches(myPartitionDate, uniques.get(0).getPartitionId().getPartitionDate());
 		});
 
+		myCaptureQueriesListener.clear();
+
+
 	}
 
 	@Test
 	public void testCreate_ServerId_DefaultPartition() {
-		createUniqueCompositeSp();
+		createUniqueComboSp();
 		createRequestId();
 
 		addCreateDefaultPartition(myPartitionDate);
@@ -647,7 +651,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testCreateInTransaction_ServerId_WithPartition() {
-		createUniqueCompositeSp();
+		createUniqueComboSp();
 		createRequestId();
 
 		addCreatePartition(myPartitionId, myPartitionDate);
@@ -2524,14 +2528,15 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testSearch_UniqueParam_SearchAllPartitions() {
-		createUniqueCompositeSp();
+		createUniqueComboSp();
 
-		IIdType id = createPatient(withPartition(1), withBirthdate("2020-01-01"));
+		IIdType id = createPatient(withPartition(1), withBirthdate("2020-01-01"), withFamily("FAM"));
 
 		addReadAllPartitions();
 
 		myCaptureQueriesListener.clear();
 		SearchParameterMap map = new SearchParameterMap();
+		map.add(Patient.SP_FAMILY, new StringParam("FAM"));
 		map.add(Patient.SP_BIRTHDATE, new DateParam("2020-01-01"));
 		map.setLoadSynchronous(true);
 		IBundleProvider results = myPatientDao.search(map, mySrd);
@@ -2541,20 +2546,21 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		ourLog.info("Search SQL:\n{}", searchSql);
-		assertEquals(0, StringUtils.countMatches(searchSql, "PARTITION_ID"));
-		assertEquals(1, StringUtils.countMatches(searchSql, "IDX_STRING = 'Patient?birthdate=2020-01-01'"));
+		assertThat(searchSql).doesNotContain("PARTITION_ID");
+		assertThat(searchSql).containsOnlyOnce("IDX_STRING = 'Patient?birthdate=2020-01-01&family=FAM'");
 	}
 
 
 	@Test
 	public void testSearch_UniqueParam_SearchOnePartition() {
-		createUniqueCompositeSp();
+		createUniqueComboSp();
 
-		IIdType id = createPatient(withPartition(1), withBirthdate("2020-01-01"));
+		IIdType id = createPatient(withPartition(1), withBirthdate("2020-01-01"), withFamily("FAM"));
 
 		addReadPartition(1);
 		myCaptureQueriesListener.clear();
 		SearchParameterMap map = new SearchParameterMap();
+		map.add(Patient.SP_FAMILY, new StringParam("FAM"));
 		map.add(Patient.SP_BIRTHDATE, new DateParam("2020-01-01"));
 		map.setLoadSynchronous(true);
 		IBundleProvider results = myPatientDao.search(map, mySrd);
@@ -2564,8 +2570,8 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		ourLog.info("Search SQL:\n{}", searchSql);
-		assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID"));
-		assertEquals(1, StringUtils.countMatches(searchSql, "IDX_STRING = 'Patient?birthdate=2020-01-01'"));
+		assertThat(searchSql).containsOnlyOnce( "PARTITION_ID = '1'");
+		assertThat(searchSql).containsOnlyOnce("IDX_STRING = 'Patient?birthdate=2020-01-01&family=FAM'");
 
 		// Same query, different partition
 		addReadPartition(2);
@@ -2584,7 +2590,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 	@ParameterizedTest
 	@ValueSource(strings = {"ALL", "ONE", "MANY"})
 	public void testSearch_NonUniqueComboParam(String theReadPartitions) {
-		createNonUniqueCompositeSp();
+		createNonUniqueComboSp();
 
 		IIdType orgId = createOrganization(withId("A"), withPartition(myPartitionId), withName("My Org")).toUnqualifiedVersionless();
 		IIdType orgId2 = createOrganization(withId("B"), withPartition(myPartitionId2), withName("My Org")).toUnqualifiedVersionless();
@@ -2636,14 +2642,13 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 				throw new IllegalStateException();
 		}
 
-		assertEquals(1, StringUtils.countMatches(searchSql, "t0.HASH_COMPLETE = '-2879121558074554863'"), searchSql);
-
+		assertThat(searchSql).containsOnlyOnce("t0.HASH_COMPLETE = '-2879121558074554863'");
 	}
 
 
 	@Test
 	public void testSearch_RefParam_TargetPid_SearchOnePartition() {
-		createUniqueCompositeSp();
+		createUniqueComboSp();
 
 		IIdType patientId = createPatient(withPartition(myPartitionId), withBirthdate("2020-01-01"));
 		IIdType observationId = createObservation(withPartition(myPartitionId), withSubject(patientId));
@@ -2680,7 +2685,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testSearch_RefParam_TargetPid_SearchDefaultPartition() {
-		createUniqueCompositeSp();
+		createUniqueComboSp();
 
 		IIdType patientId = createPatient(withPartition(null), withBirthdate("2020-01-01"));
 		IIdType observationId = createObservation(withPartition(null), withSubject(patientId));
@@ -2717,7 +2722,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testSearch_RefParam_TargetForcedId_SearchOnePartition() {
-		createUniqueCompositeSp();
+		createUniqueComboSp();
 
 		IIdType patientId = createPatient(withPartition(myPartitionId), withId("ONE"), withBirthdate("2020-01-01"));
 		IIdType observationId = createObservation(withPartition(myPartitionId), withSubject(patientId));
@@ -2787,7 +2792,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testSearch_RefParam_TargetForcedId_SearchDefaultPartition() {
-		createUniqueCompositeSp();
+		createUniqueComboSp();
 
 		IIdType patientId = createPatient(withPartition(null), withId("ONE"), withBirthdate("2020-01-01"));
 		IIdType observationId = createObservation(withPartition(null), withSubject(patientId));

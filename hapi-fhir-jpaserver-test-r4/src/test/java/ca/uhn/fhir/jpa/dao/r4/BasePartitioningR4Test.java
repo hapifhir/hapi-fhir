@@ -119,7 +119,8 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 			});
 		}
 	}
-	protected void createUniqueCompositeSp() {
+
+	protected void createUniqueComboSp() {
 		addCreateDefaultPartition();
 		addReadDefaultPartition(); // one for search param validation
 		SearchParameter sp = new SearchParameter();
@@ -127,6 +128,17 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		sp.setType(Enumerations.SearchParamType.DATE);
 		sp.setCode("birthdate");
 		sp.setExpression("Patient.birthDate");
+		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sp.addBase("Patient");
+		mySearchParameterDao.update(sp, mySrd);
+
+		addCreateDefaultPartition();
+		addReadDefaultPartition(); // one for search param validation
+		sp = new SearchParameter();
+		sp.setId("SearchParameter/patient-family");
+		sp.setType(Enumerations.SearchParamType.STRING);
+		sp.setCode("family");
+		sp.setExpression("Patient.name[0].family");
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		sp.addBase("Patient");
 		mySearchParameterDao.update(sp, mySrd);
@@ -140,6 +152,9 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		sp.addComponent()
 			.setExpression("Patient")
 			.setDefinition("SearchParameter/patient-birthdate");
+		sp.addComponent()
+			.setExpression("Patient")
+			.setDefinition("SearchParameter/patient-family");
 		sp.addExtension()
 			.setUrl(HapiExtensions.EXT_SP_UNIQUE)
 			.setValue(new BooleanType(true));
@@ -148,7 +163,7 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		mySearchParamRegistry.forceRefresh();
 	}
 
-	protected void createNonUniqueCompositeSp() {
+	protected void createNonUniqueComboSp() {
 		addCreateDefaultPartition();
 		addReadDefaultPartition(); // one for search param validation
 		SearchParameter sp = new SearchParameter();
