@@ -158,6 +158,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.nullable()
 			.type(ColumnTypeEnum.DATE_ONLY);
 
+		// LUKETODO:  clean up
 		/*
 		1) Add partition_id NULLABLE
 		2) Add partition_date NULLABLE

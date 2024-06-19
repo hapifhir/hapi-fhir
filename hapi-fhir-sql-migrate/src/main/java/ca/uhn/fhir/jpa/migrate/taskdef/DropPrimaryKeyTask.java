@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import jakarta.annotation.Nonnull;
 import org.intellij.lang.annotations.Language;
 import org.slf4j.Logger;
@@ -48,9 +49,17 @@ public class DropPrimaryKeyTask extends BaseTableTask {
 			return null;
 		};
 
-		final String primaryKeyName = executeSqlWithResult(generatePrimaryKeyIndexNameSql(), resultSetExtractor, getTableName().toLowerCase());
+		final String primaryKeyName = executeSqlWithResult(generatePrimaryKeyIndexNameSql(), resultSetExtractor, getTableNameWithDatabaseExpectedCase());
 		ourLog.info("6145: primaryKeyName: [{}]", primaryKeyName);
 		return generateDropPrimaryKeySql(primaryKeyName);
+	}
+
+	private String getTableNameWithDatabaseExpectedCase() {
+		if (DriverTypeEnum.ORACLE_12C == getDriverType()) {
+			return getTableName().toUpperCase();
+		}
+
+		return getTableName().toLowerCase();
 	}
 
 	@Override
