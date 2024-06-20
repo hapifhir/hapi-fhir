@@ -52,9 +52,7 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 			// for queries
 			@Index(name = "IDX_SP_URI_HASH_URI_V2", columnList = "HASH_URI,RES_ID,PARTITION_ID"),
 			// for sorting
-			@Index(
-					name = "IDX_SP_URI_HASH_IDENTITY_V2",
-					columnList = "HASH_IDENTITY,SP_URI,RES_ID,PARTITION_ID"),
+			@Index(name = "IDX_SP_URI_HASH_IDENTITY_V2", columnList = "HASH_IDENTITY,SP_URI,RES_ID,PARTITION_ID"),
 			// for index create/delete
 			@Index(name = "IDX_SP_URI_COORDS", columnList = "RES_ID")
 		})
