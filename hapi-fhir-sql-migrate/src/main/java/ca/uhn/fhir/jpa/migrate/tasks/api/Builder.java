@@ -704,7 +704,6 @@ public class Builder {
 		private final String myVersion;
 		private final AddTableByColumnTask myTask;
 
-		// LUKETOOD:  handle default value for create new table
 		public BuilderAddTableByColumns(
 				String theRelease,
 				String theVersion,

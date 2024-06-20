@@ -168,7 +168,8 @@ public class PartitionSettings {
 		return myConditionalCreateDuplicateIdentifiersEnabled;
 	}
 
-	public void setConditionalCreateDuplicateIdentifiersEnabled(boolean theConditionalCreateDuplicateIdentifiersEnabled) {
+	public void setConditionalCreateDuplicateIdentifiersEnabled(
+			boolean theConditionalCreateDuplicateIdentifiersEnabled) {
 		myConditionalCreateDuplicateIdentifiersEnabled = theConditionalCreateDuplicateIdentifiersEnabled;
 	}
 

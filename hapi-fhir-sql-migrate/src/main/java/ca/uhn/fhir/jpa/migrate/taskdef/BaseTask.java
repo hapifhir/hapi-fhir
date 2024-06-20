@@ -220,7 +220,9 @@ public abstract class BaseTask {
 			return changesCount;
 		} catch (DataAccessException e) {
 			if (myFlags.contains(TaskFlagEnum.FAILURE_ALLOWED)) {
-				ourLog.info("Task {} did not exit successfully on doExecuteSql(), but task is allowed to fail", getMigrationVersion());
+				ourLog.info(
+						"Task {} did not exit successfully on doExecuteSql(), but task is allowed to fail",
+						getMigrationVersion());
 				ourLog.debug("Error was: {}", e.getMessage(), e);
 				return 0;
 			} else {
@@ -244,7 +246,9 @@ public abstract class BaseTask {
 			return result;
 		} catch (DataAccessException e) {
 			if (myFlags.contains(TaskFlagEnum.FAILURE_ALLOWED)) {
-				ourLog.info("Task {} did not exit successfully on doExecuteSqlWithResult(), but task is allowed to fail", getMigrationVersion());
+				ourLog.info(
+						"Task {} did not exit successfully on doExecuteSqlWithResult(), but task is allowed to fail",
+						getMigrationVersion());
 				ourLog.debug("Error was: {}", e.getMessage(), e);
 				return null;
 			} else {

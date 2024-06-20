@@ -56,7 +56,9 @@ public class DropPrimaryKeyTask extends BaseTableTask {
 				final String singleResult = rs.getString(1);
 
 				if (rs.next()) {
-					throw new IllegalArgumentException(Msg.code(2533) + "Expecting only a single result for the table primary but got multiple for task: " + getMigrationVersion());
+					throw new IllegalArgumentException(Msg.code(2533)
+							+ "Expecting only a single result for the table primary but got multiple for task: "
+							+ getMigrationVersion());
 				}
 
 				return singleResult;
@@ -70,8 +72,8 @@ public class DropPrimaryKeyTask extends BaseTableTask {
 
 		@Nullable
 		final String primaryKeyName = primaryKeyNameSql != null
-			? executeSqlWithResult(primaryKeyNameSql, resultSetExtractor, getTableNameWithDatabaseExpectedCase())
-			: null;
+				? executeSqlWithResult(primaryKeyNameSql, resultSetExtractor, getTableNameWithDatabaseExpectedCase())
+				: null;
 
 		ourLog.debug("primaryKeyName: {} for driver: {}", primaryKeyName, getDriverType());
 
