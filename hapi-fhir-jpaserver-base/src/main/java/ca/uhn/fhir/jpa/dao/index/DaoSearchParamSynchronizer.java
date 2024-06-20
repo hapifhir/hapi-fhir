@@ -99,6 +99,11 @@ public class DaoSearchParamSynchronizer {
 		myEntityManager = theEntityManager;
 	}
 
+	@VisibleForTesting
+	public void setStorageSettings(JpaStorageSettings theStorageSettings) {
+		myStorageSettings = theStorageSettings;
+	}
+
 	private <T extends BaseResourceIndex> void synchronize(
 			ResourceTable theEntity,
 			AddRemoveCount theAddRemoveCount,

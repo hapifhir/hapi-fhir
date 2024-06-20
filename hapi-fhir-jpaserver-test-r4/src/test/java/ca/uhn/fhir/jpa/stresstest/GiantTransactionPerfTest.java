@@ -246,6 +246,7 @@ public class GiantTransactionPerfTest {
 
 		myDaoSearchParamSynchronizer = new DaoSearchParamSynchronizer();
 		myDaoSearchParamSynchronizer.setEntityManager(myEntityManager);
+		myDaoSearchParamSynchronizer.setStorageSettings(myStorageSettings);
 
 		mySearchParamWithInlineReferencesExtractor = new SearchParamWithInlineReferencesExtractor();
 		mySearchParamWithInlineReferencesExtractor.setStorageSettings(myStorageSettings);

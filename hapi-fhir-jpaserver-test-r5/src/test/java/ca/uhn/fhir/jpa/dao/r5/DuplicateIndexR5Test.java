@@ -23,6 +23,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class DuplicateIndexR5Test extends BaseJpaR5Test {
 
+	public static final String SEARCH_PARAMETER_PATIENT_NAMES_AND_GENDER = "SearchParameter/patient-names-and-gender";
+
 	@Test
 	public void testDuplicateTokensClearedOnUpdate() {
 		// Setup
@@ -168,7 +170,7 @@ public class DuplicateIndexR5Test extends BaseJpaR5Test {
 			dupe0.setResource(param.getResource());
 			dupe0.setHashComplete(param.getHashComplete());
 			dupe0.setIndexString(param.getIndexString());
-			dupe0.setSearchParameterId(param.getSearchParameterId());
+			dupe0.setSearchParameterId(SEARCH_PARAMETER_PATIENT_NAMES_AND_GENDER);
 			dupe0.calculateHashes();
 			myResourceIndexedComboTokensNonUniqueDao.save(dupe0);
 
@@ -178,7 +180,7 @@ public class DuplicateIndexR5Test extends BaseJpaR5Test {
 			dupe1.setResource(param.getResource());
 			dupe1.setHashComplete(param.getHashComplete());
 			dupe1.setIndexString(param.getIndexString());
-			dupe1.setSearchParameterId(param.getSearchParameterId());
+			dupe1.setSearchParameterId(SEARCH_PARAMETER_PATIENT_NAMES_AND_GENDER);
 			dupe1.calculateHashes();
 			myResourceIndexedComboTokensNonUniqueDao.save(dupe1);
 		});
@@ -289,7 +291,7 @@ public class DuplicateIndexR5Test extends BaseJpaR5Test {
 		mySearchParameterDao.update(sp, mySrd);
 
 		sp = new SearchParameter();
-		sp.setId("SearchParameter/patient-names-and-gender");
+		sp.setId(SEARCH_PARAMETER_PATIENT_NAMES_AND_GENDER);
 		sp.setType(Enumerations.SearchParamType.COMPOSITE);
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		sp.addBase(Enumerations.VersionIndependentResourceTypesAll.PATIENT);
