@@ -79,8 +79,6 @@ public abstract class BaseTask {
 	private boolean myTransactional = true;
 	private Set<DriverTypeEnum> myOnlyAppliesToPlatforms = new HashSet<>();
 	private boolean myNoColumnShrink;
-	private boolean myFailureAllowed;
-	private boolean myRunDuringSchemaInitialization;
 
 	protected BaseTask(String theProductVersion, String theSchemaVersion) {
 		myProductVersion = theProductVersion;
@@ -222,7 +220,7 @@ public abstract class BaseTask {
 			return changesCount;
 		} catch (DataAccessException e) {
 			if (myFlags.contains(TaskFlagEnum.FAILURE_ALLOWED)) {
-				ourLog.info("Task {} did not exit successfully, but task is allowed to fail", getMigrationVersion());
+				ourLog.info("Task {} did not exit successfully on doExecuteSql(), but task is allowed to fail", getMigrationVersion());
 				ourLog.debug("Error was: {}", e.getMessage(), e);
 				return 0;
 			} else {
@@ -245,9 +243,8 @@ public abstract class BaseTask {
 			}
 			return result;
 		} catch (DataAccessException e) {
-			if (myFailureAllowed) {
-				// LUKETODO:  new log message
-				ourLog.info("Task {} did not exit successfully, but task is allowed to fail", getMigrationVersion());
+			if (myFlags.contains(TaskFlagEnum.FAILURE_ALLOWED)) {
+				ourLog.info("Task {} did not exit successfully on doExecuteSqlWithResult(), but task is allowed to fail", getMigrationVersion());
 				ourLog.debug("Error was: {}", e.getMessage(), e);
 				return null;
 			} else {

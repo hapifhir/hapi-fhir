@@ -65,8 +65,13 @@ public class DropPrimaryKeyTask extends BaseTableTask {
 		};
 
 		@Nullable
-		final String primaryKeyName = executeSqlWithResult(
-				generatePrimaryKeyIndexNameSql(), resultSetExtractor, getTableNameWithDatabaseExpectedCase());
+		@Language("SQL")
+		final String primaryKeyNameSql = generatePrimaryKeyNameSql();
+
+		@Nullable
+		final String primaryKeyName = primaryKeyNameSql != null
+			? executeSqlWithResult(primaryKeyNameSql, resultSetExtractor, getTableNameWithDatabaseExpectedCase())
+			: null;
 
 		ourLog.debug("primaryKeyName: {} for driver: {}", primaryKeyName, getDriverType());
 
@@ -113,7 +118,7 @@ public class DropPrimaryKeyTask extends BaseTableTask {
 
 	@Language("SQL")
 	@Nullable
-	private String generatePrimaryKeyIndexNameSql() {
+	private String generatePrimaryKeyNameSql() {
 		switch (getDriverType()) {
 			case MYSQL_5_7:
 			case MARIADB_10_1:

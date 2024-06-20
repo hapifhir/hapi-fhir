@@ -20,7 +20,6 @@
 package ca.uhn.fhir.jpa.migrate;
 
 import ca.uhn.fhir.i18n.Msg;
-import jakarta.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -39,13 +38,6 @@ public class MigrationJdbcUtils {
 			String theSql, JdbcTemplate theJdbcTemplate) {
 		final RowMapper<Boolean> booleanRowMapper = (theResultSet, theRowNumber) -> theResultSet.getBoolean(1);
 		return queryForSingle(theSql, theJdbcTemplate, booleanRowMapper).orElse(false);
-	}
-
-	@Nullable
-	public static String queryForSingleStringResultMultipleThrowsException(
-			String theSql, JdbcTemplate theJdbcTemplate) {
-		final RowMapper<String> booleanRowMapper = (theResultSet, theRowNumber) -> theResultSet.getString(1);
-		return queryForSingle(theSql, theJdbcTemplate, booleanRowMapper).orElse(null);
 	}
 
 	private static <T> Optional<T> queryForSingle(

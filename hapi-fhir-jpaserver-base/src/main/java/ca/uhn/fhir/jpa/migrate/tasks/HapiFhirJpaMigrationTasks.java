@@ -3772,19 +3772,3 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		}
 	}
 }
-
-//		version.onTable(tableHfjResSearchUrl).dropIndex("20240531.3", "PRIMARY KEY");
-//			version.onTable(tableHfjResSearchUrl)
-//					.addIndex("20240531.4", "IDX_SEARCH_URL_PARTITION_ID")
-//					.unique(true)
-//					.withColumns("RES_SEARCH_URL", "PARTITION_ID");
-//
-//
-//			version.onTable(tableHfjResSearchUrl)
-//					.modifyColumn("20240531.6", ResourceSearchUrlEntityPK.PARTITION_ID_COLUMN_NAME)
-//					.nonNullable()
-//					.withType(ColumnTypeEnum.INT);
-//
-//			version.onTable(tableHfjResSearchUrl)
-//				.addPrimaryKey("20240531.7", ResourceSearchUrlEntityPK.RES_SEARCH_URL_COLUMN_NAME,
-// ResourceSearchUrlEntityPK.PARTITION_ID_COLUMN_NAME);

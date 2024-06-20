@@ -64,11 +64,7 @@ public class HapiSchemaMigrationTest {
 	}
 
 	@RegisterExtension
-//	static HapiEmbeddedDatabasesExtension myEmbeddedServersExtension = new HapiEmbeddedDatabasesExtension();
-	static HapiEmbeddedDatabasesExtensionH2Only myEmbeddedServersExtension = new HapiEmbeddedDatabasesExtensionH2Only ();
-//	static HapiEmbeddedDatabasesExtensionPostgresOnly myEmbeddedServersExtension = new HapiEmbeddedDatabasesExtensionPostgresOnly();
-//	static HapiEmbeddedDatabasesExtensionMSSQLOnly myEmbeddedServersExtension = new HapiEmbeddedDatabasesExtensionMSSQLOnly();
-//	static HapiEmbeddedDatabasesExtensionOracleOnly myEmbeddedServersExtension = new HapiEmbeddedDatabasesExtensionOracleOnly();
+	static HapiEmbeddedDatabasesExtension myEmbeddedServersExtension = new HapiEmbeddedDatabasesExtension();
 
 	@AfterEach
 	public void afterEach() {
@@ -82,11 +78,7 @@ public class HapiSchemaMigrationTest {
 	}
 
 	@ParameterizedTest
-//	@ArgumentsSource(HapiEmbeddedDatabasesExtension.DatabaseVendorProvider.class)
-	@ArgumentsSource(HapiEmbeddedDatabasesExtensionH2Only.DatabaseVendorProvider.class)
-//	@ArgumentsSource(HapiEmbeddedDatabasesExtensionPostgresOnly.DatabaseVendorProvider.class)
-//	@ArgumentsSource(HapiEmbeddedDatabasesExtensionMSSQLOnly.DatabaseVendorProvider.class)
-//	@ArgumentsSource(HapiEmbeddedDatabasesExtensionOracleOnly.DatabaseVendorProvider.class)
+	@ArgumentsSource(HapiEmbeddedDatabasesExtension.DatabaseVendorProvider.class)
 	public void testMigration(DriverTypeEnum theDriverType) throws SQLException {
 		// ensure all migrations are run
 		HapiSystemProperties.disableUnitTestMode();
@@ -101,7 +93,6 @@ public class HapiSchemaMigrationTest {
 		HapiMigrationDao hapiMigrationDao = new HapiMigrationDao(dataSource, theDriverType, HAPI_FHIR_MIGRATION_TABLENAME);
 		HapiMigrationStorageSvc hapiMigrationStorageSvc = new HapiMigrationStorageSvc(hapiMigrationDao);
 
-//		getAllConstraints(database, theDriverType).forEach(constraint -> ourLog.info("constraint: {}", constraint));
 		for (VersionEnum aVersion : VersionEnum.values()) {
 			ourLog.info("Applying migrations for {}", aVersion);
 			migrate(theDriverType, dataSource, hapiMigrationStorageSvc, aVersion);
@@ -109,7 +100,6 @@ public class HapiSchemaMigrationTest {
 			if (aVersion.isNewerThan(FIRST_TESTED_VERSION)) {
 				myEmbeddedServersExtension.maybeInsertPersistenceTestData(theDriverType, aVersion);
 			}
-//			getAllConstraints(database, theDriverType).forEach(constraint -> ourLog.info("constraint: {}", constraint));
 		}
 
 		if (theDriverType == DriverTypeEnum.POSTGRES_9_4) {

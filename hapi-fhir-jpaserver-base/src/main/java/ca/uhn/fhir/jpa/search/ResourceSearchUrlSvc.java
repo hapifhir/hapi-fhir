@@ -94,7 +94,7 @@ public class ResourceSearchUrlSvc {
 		ResourceSearchUrlEntity searchUrlEntity = ResourceSearchUrlEntity.from(
 				canonicalizedUrlForStorage,
 				theResourceTable,
-				myPartitionSettings.isSearchUrlDuplicateAcrossPartitionsEnabled());
+				myPartitionSettings.isConditionalCreateDuplicateIdentifiersEnabled());
 		// calling dao.save performs a merge operation which implies a trip to
 		// the database to see if the resource exists.  Since we don't need the check, we avoid the trip by calling
 		// em.persist.

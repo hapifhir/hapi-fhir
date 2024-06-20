@@ -27,6 +27,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.StringJoiner;
 
+/**
+ * Multi-column primary Key for {@link ResourceSearchUrlEntity}
+ */
 @Embeddable
 public class ResourceSearchUrlEntityPK implements Serializable {
 	public static final String RES_SEARCH_URL_COLUMN_NAME = "RES_SEARCH_URL";

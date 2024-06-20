@@ -127,7 +127,6 @@ public abstract class JpaEmbeddedDatabase {
 	}
 
 	public List<Map<String, Object>> query(String theSql) {
-		ourLog.info("query SQL: {}", theSql);
 		return getJdbcTemplate().queryForList(theSql);
 	}
 }
