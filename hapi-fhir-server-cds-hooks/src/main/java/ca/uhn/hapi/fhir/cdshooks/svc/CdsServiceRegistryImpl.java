@@ -94,7 +94,6 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 		} else {
 			return buildResponseFromImplementation(theServiceId, result);
 		}
-
 	}
 
 	private CdsServiceResponseJson buildResponseFromImplementation(String theServiceId, Object result) {
@@ -104,14 +103,16 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 			return (CdsServiceResponseJson) result;
 		} catch (JsonProcessingException e) {
 			throw new ConfigurationException(
-				Msg.code(2389) + "Failed to json serialize Cds service response of type "
-					+ result.getClass().getName() + " when calling CDS Hook Service " + theServiceId,
-				e);
+					Msg.code(2389) + "Failed to json serialize Cds service response of type "
+							+ result.getClass().getName() + " when calling CDS Hook Service " + theServiceId,
+					e);
 		} catch (ClassCastException e) {
 			throw new ConfigurationException(
-				Msg.code(2389) + "Failed to cast Cds service response to CdsServiceResponseJson when calling CDS Hook Service " + theServiceId +
-					". The type " + result.getClass().getName() + " cannot be casted to CdsServiceResponseJson",
-				e);
+					Msg.code(2389)
+							+ "Failed to cast Cds service response to CdsServiceResponseJson when calling CDS Hook Service "
+							+ theServiceId + ". The type " + result.getClass().getName()
+							+ " cannot be casted to CdsServiceResponseJson",
+					e);
 		}
 	}
 
@@ -120,10 +121,10 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 			return myObjectMapper.readValue(json, CdsServiceResponseJson.class);
 		} catch (JsonProcessingException e) {
 			throw new ConfigurationException(
-				Msg.code(2390) + "Failed to json deserialize Cds service response of type "
-					+ result.getClass().getName() + " when calling CDS Hook Service " + theServiceId
-					+ ".  Json: " + json,
-				e);
+					Msg.code(2390) + "Failed to json deserialize Cds service response of type "
+							+ result.getClass().getName() + " when calling CDS Hook Service " + theServiceId
+							+ ".  Json: " + json,
+					e);
 		}
 	}
 

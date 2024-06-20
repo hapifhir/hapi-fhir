@@ -111,7 +111,7 @@ public class CdsHooksContextBooter {
 		}
 		try {
 			final ObjectMapper mapper = new ObjectMapper();
-//				.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+			//				.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 			return mapper.readValue(theExtension, theClass);
 		} catch (JsonProcessingException e) {
 			final String message = String.format("Invalid JSON: %s", e.getMessage());
