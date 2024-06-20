@@ -30,7 +30,7 @@ public class PartitionSettings {
 	private boolean myUnnamedPartitionMode;
 	private Integer myDefaultPartitionId;
 	private boolean myAlwaysOpenNewTransactionForDifferentPartition;
-	private boolean mySearchUrlDuplicateAcrossPartitionsEnabled = false;
+	private boolean myConditionalCreateDuplicateIdentifiersEnabled = false;
 
 	/**
 	 * Should we always open a new database transaction if the partition context changes
@@ -164,12 +164,12 @@ public class PartitionSettings {
 				PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
 	}
 
-	public boolean isSearchUrlDuplicateAcrossPartitionsEnabled() {
-		return mySearchUrlDuplicateAcrossPartitionsEnabled;
+	public boolean isConditionalCreateDuplicateIdentifiersEnabled() {
+		return myConditionalCreateDuplicateIdentifiersEnabled;
 	}
 
-	public void setSearchUrlDuplicateAcrossPartitionsEnabled(boolean theSearchUrlDuplicateAcrossPartitionsEnabled) {
-		mySearchUrlDuplicateAcrossPartitionsEnabled = theSearchUrlDuplicateAcrossPartitionsEnabled;
+	public void setConditionalCreateDuplicateIdentifiersEnabled(boolean theConditionalCreateDuplicateIdentifiersEnabled) {
+		myConditionalCreateDuplicateIdentifiersEnabled = theConditionalCreateDuplicateIdentifiersEnabled;
 	}
 
 	public enum CrossPartitionReferenceMode {
