@@ -75,7 +75,7 @@ public class PreferTest {
 
 		assertEquals(Constants.STATUS_HTTP_201_CREATED, status.getStatusLine().getStatusCode());
 		assertThat(responseContent).isNullOrEmpty();
-		// assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue(), not(containsString("fhir")));
+		// assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue()).doesNotContain("fhir");
 		assertNull(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE));
 		assertEquals(ourServer.getBaseUrl() + "/Patient/001/_history/002", status.getFirstHeader("location").getValue());
 		assertEquals(ourServer.getBaseUrl() + "/Patient/001/_history/002", status.getFirstHeader("content-location").getValue());

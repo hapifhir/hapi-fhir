@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.mdm.interceptor;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
@@ -16,6 +17,7 @@ import ca.uhn.fhir.mdm.model.CanonicalEID;
 import ca.uhn.fhir.mdm.model.MdmCreateOrUpdateParams;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.rules.config.MdmSettings;
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -27,6 +29,8 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.ContactPoint;
+import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.Organization;
@@ -34,11 +38,14 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.test.context.ContextConfiguration;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -50,6 +57,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -99,6 +107,70 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 		Patient sourcePatient = getOnlyGoldenPatient();
 		myPatientDao.delete(sourcePatient.getIdElement());
 		assertLinkCount(0);
+	}
+
+	@ParameterizedTest
+	@ValueSource(booleans = { true, false })
+	public void deleteResourcesByUrl_withMultipleDeleteCatchingSourceAndGoldenResource_deletesWithoutThrowing(boolean theIncludeOtherResources) throws InterruptedException {
+		// setup
+		boolean allowMultipleDelete = myStorageSettings.isAllowMultipleDelete();
+		myStorageSettings.setAllowMultipleDelete(true);
+
+		int linkCount = 0;
+		int resourceCount = 0;
+		myMdmHelper.createWithLatch(buildJanePatient());
+		resourceCount += 2; // patient + golden
+		linkCount++;
+
+		// add some other resources to make it more complex
+		if (theIncludeOtherResources) {
+			Date birthday = new Date();
+			Patient patient = new Patient();
+			patient.getNameFirstRep().addGiven("yui");
+			patient.setBirthDate(birthday);
+			patient.setTelecom(Collections.singletonList(new ContactPoint()
+				.setSystem(ContactPoint.ContactPointSystem.PHONE)
+				.setValue("555-567-5555")));
+			DateType dateType = new DateType(birthday);
+			patient.addIdentifier().setSystem(TEST_ID_SYSTEM).setValue("ID.YUI.123");
+			dateType.setPrecision(TemporalPrecisionEnum.DAY);
+			patient.setBirthDateElement(dateType);
+			patient.setActive(true);
+			for (int i = 0; i < 2; i++) {
+				String familyName = i == 0 ? "hirasawa" : "kotegawa";
+				patient.getNameFirstRep().setFamily(familyName);
+				myMdmHelper.createWithLatch(patient);
+				resourceCount++;
+				linkCount++; // every resource creation creates 1 link
+			}
+			resourceCount++; // for the Golden Resource
+
+			// verify we have at least this many resources
+			SearchParameterMap map = new SearchParameterMap();
+			map.setLoadSynchronous(true);
+			IBundleProvider provider = myPatientDao.search(map, new SystemRequestDetails());
+			assertEquals(resourceCount, provider.size());
+
+			// verify we have the links
+			assertEquals(linkCount, myMdmLinkDao.count());
+		}
+
+		try {
+			// test
+			// filter will delete everything
+			DeleteMethodOutcome outcome = myPatientDao.deleteByUrl("Patient?_lastUpdated=ge2024-01-01", new SystemRequestDetails());
+
+			// validation
+			assertNotNull(outcome);
+			List<MdmLink> links = myMdmLinkDao.findAll();
+			assertTrue(links.isEmpty());
+			SearchParameterMap map = new SearchParameterMap();
+			map.setLoadSynchronous(true);
+			IBundleProvider provider = myPatientDao.search(map, new SystemRequestDetails());
+			assertTrue(provider.getAllResources().isEmpty());
+		} finally {
+			myStorageSettings.setAllowMultipleDelete(allowMultipleDelete);
+		}
 	}
 
 	@Test

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.tests.integration.karaf.dstu21;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,10 +16,6 @@ import ca.uhn.fhir.parser.LenientErrorHandler;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.Constants;
 import com.google.common.collect.Sets;
-import org.hamcrest.Matcher;
-import org.hamcrest.Matchers;
-import org.hamcrest.core.StringContains;
-import org.hamcrest.text.StringContainsInOrder;
 import org.hl7.fhir.dstu2016may.model.Address;
 import org.hl7.fhir.dstu2016may.model.Appointment;
 import org.hl7.fhir.dstu2016may.model.AuditEvent;
@@ -75,10 +72,6 @@ import org.xmlunit.diff.ElementSelectors;
 import static ca.uhn.fhir.tests.integration.karaf.PaxExamOptions.HAPI_FHIR_DSTU2_1;
 import static ca.uhn.fhir.tests.integration.karaf.PaxExamOptions.KARAF;
 import static ca.uhn.fhir.tests.integration.karaf.PaxExamOptions.WRAP;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -723,7 +716,7 @@ public class XmlParserDstu2_1Test {
 		//@formatter:on
 
 		Patient parsed = ourCtx.newXmlParser().parseResource(Patient.class, enc);
-		assertThat(parsed.getMeta().getProfile(), empty());
+		assertThat(parsed.getMeta().getProfile()).isEmpty();
 
 		List<Coding> tagList = parsed.getMeta().getTag();
 		assertEquals(2, tagList.size());
@@ -1673,7 +1666,7 @@ public class XmlParserDstu2_1Test {
 
 		assertThat(ourCtx.newXmlParser().encodeResourceToString(p)).containsSubsequence("123", "ABC"));
 		assertThat(ourCtx.newXmlParser().setOmitResourceId(true).encodeResourceToString(p)).contains("ABC"));
-		assertThat(ourCtx.newXmlParser().setOmitResourceId(true).encodeResourceToString(p), not(containsString("123")));
+		assertThat(ourCtx.newXmlParser().setOmitResourceId(true).encodeResourceToString(p)).doesNotContain("123");
 	}
 
 
@@ -1717,10 +1710,10 @@ public class XmlParserDstu2_1Test {
 		assertEquals("654321", res.getIdentifier().get(0).getValue());
 		assertEquals(true, res.getActive());
 
-		assertThat(res.getIdElement().getFormatCommentsPre(), contains("pre resource comment"));
-		assertThat(res.getIdentifier().get(0).getFormatCommentsPre(), contains("identifier comment 1", "identifier comment 2"));
-		assertThat(res.getIdentifier().get(0).getUseElement().getFormatCommentsPre(), contains("use comment 1", "use comment 2"));
-		assertThat(res.getActiveElement().getFormatCommentsPost(), contains("post resource comment"));
+		assertThat(res.getIdElement().getFormatCommentsPre()).contains("pre resource comment");
+		assertThat(res.getIdentifier().get(0).getFormatCommentsPre()).contains("identifier comment 1", "identifier comment 2");
+		assertThat(res.getIdentifier().get(0).getUseElement().getFormatCommentsPre()).contains("use comment 1", "use comment 2");
+		assertThat(res.getActiveElement().getFormatCommentsPost()).contains("post resource comment");
 
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(res);
 		ourLog.info(encoded);

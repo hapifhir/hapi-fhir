@@ -19,7 +19,6 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.hamcrest.Matchers.empty;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CapabilityStatementCacheR4Test {
@@ -47,7 +46,9 @@ public class CapabilityStatementCacheR4Test {
 		// Shut down the server
 		myServerExtension.stopServer();
 
-		await().until(() -> Thread.getAllStackTraces().keySet().stream().map(t -> t.getName()).filter(t -> t.startsWith(ConformanceMethodBinding.CACHE_THREAD_PREFIX)).sorted().collect(Collectors.toList()), empty());
+		await().until(() -> Thread.getAllStackTraces().keySet().stream()
+			 .map(Thread::getName)
+			 .noneMatch(t -> t.startsWith(ConformanceMethodBinding.CACHE_THREAD_PREFIX)));
 	}
 
 	private static class MyCapabilityStatementProvider extends ServerCapabilityStatementProvider {

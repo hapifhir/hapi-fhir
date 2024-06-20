@@ -62,7 +62,7 @@ public class FhirResourceDaoSearchListTest extends BaseJpaR4Test {
 		for(IIdType patientId: theExpectedPatientIds) {
 			assertThat(ids).contains(patientId);
 
-			//assertThat(patientId, contains(ids));
+			//assertThat(patientId).contains(ids);
 		}
 		// assert ids equal pid1 and pid2
 	}
