@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.context.ParserOptions;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.util.ISequenceValueMassager;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationSvc;
@@ -133,6 +134,14 @@ public class StorageSettings {
 	 * @since 7.0.0
 	 */
 	private boolean myValidateResourceStatusForPackageUpload = true;
+
+	/**
+	 * If set to <code>true</code>, the server will not write data to the <code>SP_NAME, RES_TYPE, SP_UPDATED</code>
+	 * columns for all HFJ_SPIDX tables.
+	 *
+	 * @since 7.4.0
+	 */
+	private boolean myIndexStorageOptimized = false;
 
 	/**
 	 * Constructor
@@ -275,6 +284,58 @@ public class StorageSettings {
 	public void setIndexMissingFields(IndexEnabledEnum theIndexMissingFields) {
 		Validate.notNull(theIndexMissingFields, "theIndexMissingFields must not be null");
 		myIndexMissingFieldsEnabled = theIndexMissingFields;
+	}
+
+	/**
+	 * If set to <code>true</code> (default is false), the server will not write data
+	 * to the <code>SP_NAME, RES_TYPE, SP_UPDATED</code> columns for all HFJ_SPIDX tables.
+	 * <p>
+	 * This feature may be enabled on servers where HFJ_SPIDX tables are expected
+	 * to have a large amount of data (millions of rows) in order to reduce overall storage size.
+	 * </p>
+	 * <p>
+	 * Note that this setting only applies to newly inserted and updated rows in HFJ_SPIDX tables.
+	 * In order to apply this optimization setting to existing HFJ_SPIDX index rows,
+	 * <code>$reindex</code> operation should be executed at the instance or server level.
+	 * <p>
+	 * <p>
+	 * If this setting is enabled, {@link PartitionSettings#isIncludePartitionInSearchHashes()} should be disabled.
+	 * </p>
+	 * <p>
+	 * If {@link StorageSettings#getIndexMissingFields()} is enabled, the following index may need to be added
+	 * into the HFJ_SPIDX tables to improve the search performance: <code>HASH_IDENTITY, SP_MISSING, RES_ID, PARTITION_ID</code>
+	 * </p>
+	 *
+	 * @since 7.4.0
+	 */
+	public boolean isIndexStorageOptimized() {
+		return myIndexStorageOptimized;
+	}
+
+	/**
+	 * If set to <code>true</code> (default is false), the server will not write data
+	 * to the <code>SP_NAME, RES_TYPE, SP_UPDATED</code> columns for all HFJ_SPIDX tables.
+	 * <p>
+	 * This feature may be enabled on servers where HFJ_SPIDX tables are expected
+	 * to have a large amount of data (millions of rows) in order to reduce overall storage size.
+	 * </p>
+	 * <p>
+	 * Note that this setting only applies to newly inserted and updated rows in HFJ_SPIDX tables.
+	 * In order to apply this optimization setting to existing HFJ_SPIDX index rows,
+	 * <code>$reindex</code> operation should be executed at the instance or server level.
+	 * <p>
+	 * <p>
+	 * If this setting is enabled, {@link PartitionSettings#isIncludePartitionInSearchHashes()} should be set to <code>false</code>.
+	 * </p>
+	 * <p>
+	 * If {@link StorageSettings#getIndexMissingFields()} ()} is enabled, the following index may need to be added
+	 * into the HFJ_SPIDX tables to improve the search performance: <code>HASH_IDENTITY, SP_MISSING, RES_ID, PARTITION_ID</code>
+	 * </p>
+	 *
+	 * @since 7.4.0
+	 */
+	public void setIndexStorageOptimized(boolean theIndexStorageOptimized) {
+		myIndexStorageOptimized = theIndexStorageOptimized;
 	}
 
 	/**
