@@ -1339,11 +1339,9 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 			assertRemainingTasks();
 		}
 
-		// LUKETODO:  add partitions
-
 		@ParameterizedTest
 		@ValueSource(booleans = {true, false})
-		void partitions(boolean theIsSearchUrlDuplicateAcrossPartitionsEnabled) {
+		void conditionalCreateSameIdentifierCrossPartition(boolean theIsSearchUrlDuplicateAcrossPartitionsEnabled) {
 			myPartitionSettings.setPartitioningEnabled(true);
 			myPartitionSettings.setSearchUrlDuplicateAcrossPartitionsEnabled(theIsSearchUrlDuplicateAcrossPartitionsEnabled);
 
@@ -1366,19 +1364,35 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 			final RequestPartitionId requestPartitionId2 = RequestPartitionId.fromPartitionId(2, LocalDate.now());
 
 			final List<Bundle.BundleEntryComponent> responseEntries1 = sendBundleAndGetResponse(bundleBuilder.getBundle(), requestPartitionId1);
+			assertEquals(1, responseEntries1.size());
+			final Bundle.BundleEntryComponent bundleEntry1 = responseEntries1.get(0);
+			assertEquals("201 Created", bundleEntry1.getResponse().getStatus());
 
 			if (!theIsSearchUrlDuplicateAcrossPartitionsEnabled) {
-				assertThatThrownBy(() -> sendBundleAndGetResponse(bundleBuilder.getBundle(), requestPartitionId2)).isInstanceOf(RuntimeException.class);
+				final IBaseBundle bundle = bundleBuilder.getBundle();
+				assertThatThrownBy(() -> sendBundleAndGetResponse(bundle, requestPartitionId2)).isInstanceOf(RuntimeException.class);
 				return;
 			}
 
 			final List<Bundle.BundleEntryComponent> responseEntries2 = sendBundleAndGetResponse(bundleBuilder.getBundle(), requestPartitionId2);
+			assertEquals(1, responseEntries2.size());
+			final Bundle.BundleEntryComponent bundleEntry2 = responseEntries1.get(0);
+			assertEquals("201 Created", bundleEntry2.getResponse().getStatus());
 
 			final List<ResourceSearchUrlEntity> allSearchUrls = myResourceSearchUrlDao.findAll();
 
 			assertThat(allSearchUrls).hasSize(2);
 
-			//LUKETODO: more assertions
+			final String resolvedSearchUrl = "Task?identifier=http%3A%2F%2Ftempuri.org%7C1";
+
+			final ResourceSearchUrlEntity resourceSearchUrlEntity1 = allSearchUrls.get(0);
+			final ResourceSearchUrlEntity resourceSearchUrlEntity2 = allSearchUrls.get(1);
+
+			assertThat(resourceSearchUrlEntity1.getSearchUrl()).isEqualTo(resolvedSearchUrl);
+			assertThat(resourceSearchUrlEntity1.getPartitionId()).isEqualTo(partitionEntity1.getId());
+
+			assertThat(resourceSearchUrlEntity2.getSearchUrl()).isEqualTo(resolvedSearchUrl);
+			assertThat(resourceSearchUrlEntity2.getPartitionId()).isEqualTo(partitionEntity2.getId());
 		}
 
 		private void assertRemainingTasks(Task... theExpectedTasks) {
@@ -1399,8 +1413,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 	}
 
 	private List<Bundle.BundleEntryComponent> sendBundleAndGetResponse(IBaseBundle theRequestBundle, RequestPartitionId thePartitionId) {
-		// LUKETODO:  assertj
-		assertTrue(theRequestBundle instanceof Bundle);
+		assertThat(theRequestBundle).isInstanceOf(Bundle.class);
 
 		final SystemRequestDetails requestDetails = new SystemRequestDetails();
 		requestDetails.setRequestPartitionId(thePartitionId);

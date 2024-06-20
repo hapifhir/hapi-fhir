@@ -135,6 +135,10 @@ public class ResourceSearchUrlEntity {
 		return myPk.getSearchUrl();
 	}
 
+	public Integer getPartitionId() {
+		return myPk.getPartitionId();
+	}
+
 	public LocalDate getPartitionDate() {
 		return myPartitionDate;
 	}
