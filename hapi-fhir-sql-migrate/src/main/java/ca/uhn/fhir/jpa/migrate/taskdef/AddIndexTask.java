@@ -172,6 +172,7 @@ public class AddIndexTask extends BaseTableTask {
 	@Nonnull
 	private String buildMSSqlNotNullWhereClause() {
 		String mssqlWhereClause;
+
 		mssqlWhereClause = " WHERE (";
 		for (int i = 0; i < myColumns.size(); i++) {
 			mssqlWhereClause += myColumns.get(i) + " IS NOT NULL ";
