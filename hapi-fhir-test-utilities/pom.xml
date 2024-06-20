@@ -50,6 +50,7 @@
 			<version>${fhir_core_version}</version>
 		</dependency>
 
+
 		<!-- Logging -->
 		<dependency>
 			<groupId>org.slf4j</groupId>

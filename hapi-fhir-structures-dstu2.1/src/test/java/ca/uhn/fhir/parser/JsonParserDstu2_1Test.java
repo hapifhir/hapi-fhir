@@ -18,8 +18,6 @@ import net.sf.json.JSON;
 import net.sf.json.JSONSerializer;
 import net.sf.json.JsonConfig;
 import org.apache.commons.io.IOUtils;
-import org.hamcrest.Matchers;
-import org.hamcrest.core.StringContains;
 import org.hl7.fhir.dstu2016may.model.Address.AddressUse;
 import org.hl7.fhir.dstu2016may.model.Address.AddressUseEnumFactory;
 import org.hl7.fhir.dstu2016may.model.AuditEvent;

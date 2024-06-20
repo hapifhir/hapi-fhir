@@ -19,7 +19,6 @@ import ca.uhn.fhir.rest.server.mail.MailSvc;
 import com.icegreen.greenmail.junit5.GreenMailExtension;
 import com.icegreen.greenmail.util.GreenMailUtil;
 import com.icegreen.greenmail.util.ServerSetupTest;
-import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -123,11 +122,11 @@ public class EmailSubscriptionDstu2Test extends BaseResourceProviderDstu2Test {
 
 		Subscription subscription1 = createSubscription(criteria1, payload, "to1@example.com,to2@example.com");
 		mySubscriptionTestUtil.waitForQueueToDrain();
-		await().until(() -> mySubscriptionRegistry.get(subscription1.getIdElement().getIdPart()), Matchers.not(Matchers.nullValue()));
+		await().untilAsserted(() -> assertThat(mySubscriptionRegistry.get(subscription1.getIdElement().getIdPart())).isNotNull());
 		mySubscriptionTestUtil.setEmailSender(subscription1.getIdElement(), new EmailSenderImpl(withMailService()));
 		assertThat(Arrays.asList(ourGreenMail.getReceivedMessages())).isEmpty();
 
-		Observation observation1 = sendObservation(code, "SNOMED-CT");
+		 sendObservation(code, "SNOMED-CT");
 
 		assertTrue(ourGreenMail.waitForIncomingEmail(10000, 1));
 
