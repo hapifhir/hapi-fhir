@@ -94,7 +94,8 @@ public class HelloWorldService implements IPointcutLatch {
 		{
 			"example-client-conformance": "http://hooks.example.org/fhir/102/Conformance/patientview"
 		}
-		""")
+		""",
+		extensionClass = HelloWorldServiceExtension.class)
 	public CdsServiceResponseJson playback(CdsServiceRequestJson theCdsServiceRequestJson) {
 		final CdsServiceResponseJson cdsServiceResponseJson = new CdsServiceResponseJson();
 		final CdsServiceResponseCardJson cdsServiceResponseCardJson = new CdsServiceResponseCardJson();
@@ -146,5 +147,10 @@ public class HelloWorldService implements IPointcutLatch {
 		public String getPractitionerSpecialty() {
 			return myPractionerSpecialty;
 		}
+	}
+
+	private static class HelloWorldServiceExtension extends CdsHooksExtension {
+		@JsonProperty("example-client-conformance")
+		String myExampleClientConformance;
 	}
 }

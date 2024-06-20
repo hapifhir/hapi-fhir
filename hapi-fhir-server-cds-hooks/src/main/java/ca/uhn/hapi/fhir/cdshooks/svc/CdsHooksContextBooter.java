@@ -86,7 +86,7 @@ public class CdsHooksContextBooter {
 				cdsServiceJson.setHook(annotation.hook());
 				cdsServiceJson.setDescription(annotation.description());
 				cdsServiceJson.setTitle(annotation.title());
-				cdsServiceJson.setExtension(serializeExtensions(annotation.extension()));
+				cdsServiceJson.setExtension(serializeExtensions(annotation.extension(), annotation.extensionClass()));
 				for (CdsServicePrefetch prefetch : annotation.prefetch()) {
 					cdsServiceJson.addPrefetch(prefetch.value(), prefetch.query());
 					cdsServiceJson.addSource(prefetch.value(), prefetch.source());
@@ -105,14 +105,14 @@ public class CdsHooksContextBooter {
 		}
 	}
 
-	CdsHooksExtension serializeExtensions(String theExtension) {
+	CdsHooksExtension serializeExtensions(String theExtension, Class<? extends CdsHooksExtension> theClass) {
 		if (StringUtils.isEmpty(theExtension)) {
 			return null;
 		}
 		try {
 			final ObjectMapper mapper = new ObjectMapper();
 //				.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-			return mapper.readValue(theExtension, CdsHooksExtension.class);
+			return mapper.readValue(theExtension, theClass);
 		} catch (JsonProcessingException e) {
 			final String message = String.format("Invalid JSON: %s", e.getMessage());
 			ourLog.debug(message);
