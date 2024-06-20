@@ -1,19 +1,14 @@
 package ca.uhn.fhir.jpa.migrate.tasks;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
-import ca.uhn.fhir.jpa.migrate.HapiMigrationStorageSvc;
 import ca.uhn.fhir.jpa.migrate.HapiMigrator;
 import ca.uhn.fhir.jpa.migrate.MigrationResult;
 import ca.uhn.fhir.jpa.migrate.MigrationTaskList;
-import ca.uhn.fhir.jpa.migrate.SchemaMigrator;
-import ca.uhn.fhir.jpa.migrate.dao.HapiMigrationDao;
 import ca.uhn.fhir.jpa.migrate.taskdef.InitializeSchemaTask;
 import ca.uhn.fhir.util.VersionEnum;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.ColumnMapRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.support.AbstractLobCreatingPreparedStatementCallback;
@@ -24,6 +19,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -35,20 +31,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class HapiFhirJpaMigrationTasksTest {
 
-	private static final String MIGRATION_TABLENAME = "HFJ_FLY_MIGRATOR";
-	private static final Logger ourLog = LoggerFactory.getLogger(HapiFhirJpaMigrationTasksTest.class);
+	private static final String MIGRATION_TABLE_NAME = "HFJ_FLY_MIGRATOR";
 	private final BasicDataSource myDataSource = newDataSource();
 	private final JdbcTemplate myJdbcTemplate = new JdbcTemplate(myDataSource);
-	private HapiMigrationStorageSvc myMigrationStorageSvc;
-	private HapiMigrator myMigrator;
-
-	@BeforeEach
-	void before() {
-		myMigrator = new HapiMigrator(MIGRATION_TABLENAME, myDataSource, DriverTypeEnum.H2_EMBEDDED);
-		HapiMigrationDao migrationDao = new HapiMigrationDao(myDataSource, DriverTypeEnum.H2_EMBEDDED, MIGRATION_TABLENAME);
-		myMigrationStorageSvc = new HapiMigrationStorageSvc(migrationDao);
-
-	}
 
 	@Test
 	public void testCreate() {
@@ -56,7 +41,9 @@ public class HapiFhirJpaMigrationTasksTest {
 	}
 
 	/**
-	 * Verify that the migration task which handles creation
+	 * Verify migration task 20240617.4 which creates hashes on the unique combo
+	 * search param table if they aren't already present. Hash columns were only
+	 * added in 7.4.0 so this backfills them.
 	 */
 	@Test
 	public void testCreateUniqueComboParamHashes() {
@@ -64,31 +51,35 @@ public class HapiFhirJpaMigrationTasksTest {
 		 * Setup
 		 */
 
-
-		// Create migrator and initialize schema
+		// Create migrator and initialize schema using a static version
+		// of the schema from the 7.2.0 release
 		HapiFhirJpaMigrationTasks tasks = new HapiFhirJpaMigrationTasks(Set.of());
-		MigrationTaskList allTasks = tasks.getAllTasks(VersionEnum.V7_2_0, VersionEnum.V7_4_0);
-		myMigrator.addTask(new InitializeSchemaTask("7.2.0",				"20180115.0",
+		HapiMigrator migrator = new HapiMigrator(MIGRATION_TABLE_NAME, myDataSource, DriverTypeEnum.H2_EMBEDDED);
+		migrator.addTask(new InitializeSchemaTask("7.2.0",				"20180115.0",
 			new SchemaInitializationProvider(
 				"HAPI FHIR", "/jpa_h2_schema_720", "HFJ_RESOURCE", true)));
 
-		myMigrator.addTasks(allTasks);
-		myMigrator.createMigrationTableIfRequired();
-		myMigrator.migrate();
+		migrator.createMigrationTableIfRequired();
+		migrator.migrate();
+
+		// Run a second time to run the 7.4.0 migrations
+		MigrationTaskList allTasks = tasks.getAllTasks(VersionEnum.V7_3_0, VersionEnum.V7_4_0);
+		migrator.addTasks(allTasks);
+		migrator.migrate();
 
 		// Create a unique index row with no hashes populated
 		insertRow_ResourceTable();
 		insertRow_ResourceIndexedComboStringUnique();
 
-		// Remove the hash creation task from history so it runs again
-		assertEquals(1, myJdbcTemplate.update("DELETE FROM " + MIGRATION_TABLENAME + " WHERE version = ?", "7.4.0.20240617.4"));
-
 		/*
 		 * Execute
 		 */
 
+		// Remove the task we're testing from the migrator history, so it runs again
+		assertEquals(1, myJdbcTemplate.update("DELETE FROM " + MIGRATION_TABLE_NAME + " WHERE version = ?", "7.4.0.20240617.4"));
+
 		// Run the migrator
-		MigrationResult migrationResult = myMigrator.migrate();
+		MigrationResult migrationResult = migrator.migrate();
 		assertEquals(1, migrationResult.succeededTasks.size());
 		assertEquals(0, migrationResult.failedTasks.size());
 
@@ -110,7 +101,7 @@ public class HapiFhirJpaMigrationTasksTest {
 				HFJ_IDX_CMP_STRING_UNIQ (
 				  PID,
 				  RES_ID,
-				  IDX_STRING) 
+				  IDX_STRING)
 				values (1, 1, 'Patient?foo=bar')
 				""");
 	}
@@ -135,17 +126,18 @@ public class HapiFhirJpaMigrationTasksTest {
 				  SP_DATE_PRESENT,
 				  SP_NUMBER_PRESENT,
 				  SP_QUANTITY_PRESENT,
-				              SP_STRING_PRESENT,
-				              SP_TOKEN_PRESENT,
-				              SP_URI_PRESENT,
-				              SP_QUANTITY_NRML_PRESENT,
-				              RES_TYPE,
-				              RES_VER,
-				              RES_ID) 
-				            values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+				  SP_STRING_PRESENT,
+				  SP_TOKEN_PRESENT,
+				  SP_URI_PRESENT,
+				  SP_QUANTITY_NRML_PRESENT,
+				  RES_TYPE,
+				  RES_VER,
+				  RES_ID)
+				  values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  		""",
 			new AbstractLobCreatingPreparedStatementCallback(new DefaultLobHandler()) {
 				@Override
-				protected void setValues(PreparedStatement thePs, LobCreator theLobCreator) throws SQLException {
+				protected void setValues(@Nonnull PreparedStatement thePs, @Nonnull LobCreator theLobCreator) throws SQLException {
 					int i = 1;
 					thePs.setNull(i++, Types.TIMESTAMP);
 					thePs.setString(i++, "R4");
@@ -168,7 +160,7 @@ public class HapiFhirJpaMigrationTasksTest {
 					thePs.setBoolean(i++, false); // SP_QUANTITY_NRML_PRESENT
 					thePs.setString(i++, "Patient");
 					thePs.setLong(i++, 1L);
-					thePs.setLong(i++, 1L); // RES_ID
+					thePs.setLong(i, 1L); // RES_ID
 				}
 			});
 	}
@@ -177,7 +169,7 @@ public class HapiFhirJpaMigrationTasksTest {
 		BasicDataSource retVal = new BasicDataSource();
 		retVal.setDriver(new org.h2.Driver());
 		retVal.setUrl("jdbc:h2:mem:test_migration-" + UUID.randomUUID() + ";CASE_INSENSITIVE_IDENTIFIERS=TRUE;");
-		retVal.setMaxWaitMillis(30000);
+		retVal.setMaxWait(Duration.ofMillis(30000));
 		retVal.setUsername("");
 		retVal.setPassword("");
 		retVal.setMaxTotal(5);
