@@ -1,6 +1,6 @@
 ---
 type: fix
-issue: 9999
+issue: 6033
 jira:  SMILE-8429
 title: "Previously, attempting to store resources with common identifies but different partitions would.
         This has been fixed by adding a new optional configuration key defaulting to false to allow storing.

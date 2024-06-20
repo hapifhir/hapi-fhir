@@ -6,7 +6,6 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.data.IResourceSearchUrlDao;
 import ca.uhn.fhir.jpa.interceptor.UserRequestRetryVersionConflictsInterceptor;
-import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceSearchUrlEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.search.ResourceSearchUrlSvc;
@@ -24,8 +23,6 @@ import org.hl7.fhir.r4.model.Observation;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +41,6 @@ import java.util.stream.Collectors;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class FhirResourceDaoR4ConcurrentCreateTest extends BaseJpaR4Test {
@@ -52,7 +48,6 @@ public class FhirResourceDaoR4ConcurrentCreateTest extends BaseJpaR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoR4ConcurrentCreateTest.class);
 
 	private static final boolean IS_SEARCH_URL_DUPLICATE_ACROSS_PARTITIONS_ENABLED_FALSE = false;
-	private static final boolean IS_SEARCH_URL_DUPLICATE_ACROSS_PARTITIONS_ENABLED_TRUE = true;
 
 	ThreadGaterPointcutLatch myThreadGaterPointcutLatchInterceptor;
 	UserRequestRetryVersionConflictsInterceptor myUserRequestRetryVersionConflictsInterceptor;
@@ -125,17 +120,6 @@ public class FhirResourceDaoR4ConcurrentCreateTest extends BaseJpaR4Test {
 		// red-green before the fix, the size was 'numberOfThreadsAttemptingToCreateDuplicates'
 		assertThat(myResourceTableDao.findAll()).hasSize(expectedResourceCount);
 
-	}
-
-	// LUKETODO:  new test for partitions
-	@ParameterizedTest
-	@ValueSource(booleans = {true, false})
-	void testWithPartitions(boolean isDuplicateSearchUrlCrossPartitionPermitted) {
-		final ResourceTable resTable1 = myResourceTableDao.save(createResTableWithPartition(null));
-		final ResourceTable resTable2 = myResourceTableDao.save(createResTableWithPartition(null));
-
-		final ResourceSearchUrlEntity searchUrlEntityPartition1 = ResourceSearchUrlEntity.from("Observation?identifier=20210427133226.444", resTable1, isDuplicateSearchUrlCrossPartitionPermitted);
-		final ResourceSearchUrlEntity searchUrlEntityPartition2 = ResourceSearchUrlEntity.from("Observation?identifier=20210427133226.444", resTable2, isDuplicateSearchUrlCrossPartitionPermitted);
 	}
 
 	@Test
@@ -213,16 +197,6 @@ public class FhirResourceDaoR4ConcurrentCreateTest extends BaseJpaR4Test {
 		resourceTable.setResourceType("Patient");
 		resourceTable.setPublished(new Date());
 		resourceTable.setUpdated(new Date());
-		return resourceTable;
-	}
-
-	@Nonnull
-	private static ResourceTable createResTableWithPartition(PartitionablePartitionId thePartitionId) {
-		final ResourceTable resourceTable = new ResourceTable();
-		resourceTable.setResourceType("Patient");
-		resourceTable.setPublished(new Date());
-		resourceTable.setUpdated(new Date());
-		resourceTable.setPartitionId(thePartitionId);
 		return resourceTable;
 	}
 

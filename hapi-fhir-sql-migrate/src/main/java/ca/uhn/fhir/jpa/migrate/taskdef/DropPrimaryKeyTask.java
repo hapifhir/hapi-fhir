@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.intellij.lang.annotations.Language;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +30,15 @@ import org.springframework.jdbc.core.ResultSetExtractor;
 
 import java.sql.SQLException;
 
-// LUKETODO:  make sure error handling is clear about what went wrong
+/**
+ * Migration task that handles cross-database logic for dropping a primary key.
+ * <p>
+ * The process involves 2 steps for most databases:
+ * <ol>
+ *     <li>Running SQL to introspect the metadata tables to determine the name of the primary key.</li>
+ *     <li>Running an ALTER TABLE to drop the constraint found above by name.</li>
+ * </ol>
+ */
 public class DropPrimaryKeyTask extends BaseTableTask {
 	private static final Logger ourLog = LoggerFactory.getLogger(DropPrimaryKeyTask.class);
 
@@ -40,18 +49,27 @@ public class DropPrimaryKeyTask extends BaseTableTask {
 
 	@Nonnull
 	private String generateSql() {
-		ourLog.info("6145: DropPrimaryKeyTask.generateSql()");
+		ourLog.debug("DropPrimaryKeyTask.generateSql()");
+
 		final ResultSetExtractor<String> resultSetExtractor = rs -> {
-			// LUKETODO:  error handling
 			if (rs.next()) {
-				return rs.getString(1);
+				final String singleResult = rs.getString(1);
+
+				if (rs.next()) {
+					throw new IllegalArgumentException(Msg.code(2533) + "Expecting only a single result for the table primary but got multiple for task: " + getMigrationVersion());
+				}
+
+				return singleResult;
 			}
 			return null;
 		};
 
+		@Nullable
 		final String primaryKeyName = executeSqlWithResult(
 				generatePrimaryKeyIndexNameSql(), resultSetExtractor, getTableNameWithDatabaseExpectedCase());
-		ourLog.info("6145: primaryKeyName: [{}]", primaryKeyName);
+
+		ourLog.debug("primaryKeyName: {} for driver: {}", primaryKeyName, getDriverType());
+
 		return generateDropPrimaryKeySql(primaryKeyName);
 	}
 
@@ -67,11 +85,10 @@ public class DropPrimaryKeyTask extends BaseTableTask {
 	protected void doExecute() throws SQLException {
 		logInfo(ourLog, "Going to DROP the PRIMARY KEY on table {}", getTableName());
 
-		// LUKETODO:  error handling?
 		executeSql(getTableName(), generateSql());
 	}
 
-	private String generateDropPrimaryKeySql(String thePrimaryKeyName) {
+	private String generateDropPrimaryKeySql(@Nullable String thePrimaryKeyName) {
 		switch (getDriverType()) {
 			case MARIADB_10_1:
 			case DERBY_EMBEDDED:
@@ -83,6 +100,7 @@ public class DropPrimaryKeyTask extends BaseTableTask {
 			case ORACLE_12C:
 			case MSSQL_2012:
 			case MYSQL_5_7:
+				assert thePrimaryKeyName != null;
 				@Language("SQL")
 				final String sql = "ALTER TABLE %s DROP CONSTRAINT %s";
 				return String.format(sql, getTableName(), thePrimaryKeyName);
@@ -94,6 +112,7 @@ public class DropPrimaryKeyTask extends BaseTableTask {
 	}
 
 	@Language("SQL")
+	@Nullable
 	private String generatePrimaryKeyIndexNameSql() {
 		switch (getDriverType()) {
 			case MYSQL_5_7:
@@ -101,10 +120,7 @@ public class DropPrimaryKeyTask extends BaseTableTask {
 			case DERBY_EMBEDDED:
 			case COCKROACHDB_21_1:
 			case H2_EMBEDDED:
-				return "SELECT index_name " + "FROM information_schema.indexes "
-						+ "WHERE table_schema = 'PUBLIC' "
-						+ "AND index_type_name = 'PRIMARY KEY' "
-						+ "AND table_name = ?";
+				return null; // Irrelevant:  We don't need to run the SQL for these databases.
 			case POSTGRES_9_4:
 				return "SELECT constraint_name " + "FROM information_schema.table_constraints "
 						+ "WHERE table_schema = 'public' "

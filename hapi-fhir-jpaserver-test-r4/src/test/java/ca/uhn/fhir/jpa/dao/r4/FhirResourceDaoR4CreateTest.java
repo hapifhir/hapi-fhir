@@ -1370,7 +1370,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 			if (!theIsSearchUrlDuplicateAcrossPartitionsEnabled) {
 				final IBaseBundle bundle = bundleBuilder.getBundle();
-				assertThatThrownBy(() -> sendBundleAndGetResponse(bundle, requestPartitionId2)).isInstanceOf(RuntimeException.class);
+				assertThatThrownBy(() -> sendBundleAndGetResponse(bundle, requestPartitionId2)).isInstanceOf(ResourceVersionConflictException.class);
 				return;
 			}
 

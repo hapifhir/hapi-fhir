@@ -28,6 +28,9 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Migration task that handles cross-database logic for adding a new primary key.
+ */
 public class AddPrimaryKeyTask extends BaseTableTask {
 	private static final Logger ourLog = LoggerFactory.getLogger(AddPrimaryKeyTask.class);
 
@@ -70,7 +73,6 @@ public class AddPrimaryKeyTask extends BaseTableTask {
 				getTableName(),
 				myPrimaryKeyColumnsInOrder);
 
-		// LUKETODO:  error handling?
 		executeSql(getTableName(), generateSql());
 	}
 }

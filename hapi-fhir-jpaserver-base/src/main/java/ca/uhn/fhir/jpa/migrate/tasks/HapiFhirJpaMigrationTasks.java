@@ -254,6 +254,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 				.heavyweightSkipByDefault();
 
 		{
+			// Please see https://github.com/hapifhir/hapi-fhir/issues/6033 for why we're doing this
 			version.onTable(tableHfjResSearchUrl)
 					.addColumn("20240618.2", "PARTITION_ID", -1)
 					.nullable()
