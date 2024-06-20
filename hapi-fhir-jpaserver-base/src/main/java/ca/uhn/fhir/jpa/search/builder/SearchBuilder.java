@@ -95,6 +95,7 @@ import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.StringUtil;
 import ca.uhn.fhir.util.UrlUtil;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Streams;
 import com.healthmarketscience.sqlbuilder.Condition;
 import jakarta.annotation.Nonnull;
@@ -165,7 +166,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	public static boolean myUseMaxPageSize50ForTest = false;
 	protected final IInterceptorBroadcaster myInterceptorBroadcaster;
 	protected final IResourceTagDao myResourceTagDao;
-	String myResourceName;
+	private String myResourceName;
 	private final Class<? extends IBaseResource> myResourceType;
 	private final HapiFhirLocalContainerEntityManagerFactoryBean myEntityManagerFactory;
 	private final SqlObjectFactory mySqlBuilderFactory;
@@ -206,6 +207,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	/**
 	 * Constructor
 	 */
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	public SearchBuilder(
 			IDao theDao,
 			String theResourceName,
@@ -240,6 +242,11 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		myIdHelperService = theIdHelperService;
 	}
 
+	@VisibleForTesting
+	void setResourceName(String theName) {
+		myResourceName = theName;
+	}
+
 	@Override
 	public void setMaxResultsToFetch(Integer theMaxResultsToFetch) {
 		myMaxResultsToFetch = theMaxResultsToFetch;
@@ -264,8 +271,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		if (isCompositeUniqueSpCandidate()) {
 			attemptComboUniqueSpProcessing(theQueryStack, theParams, theRequest);
 		}
-
-		SearchContainedModeEnum searchContainedMode = theParams.getSearchContainedMode();
 
 		// Handle _id and _tag last, since they can typically be tacked onto a different parameter
 		List<String> paramNames = myParams.keySet().stream()
@@ -399,7 +404,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			}
 
 			if (fulltextExecutor == null) {
-				fulltextExecutor = SearchQueryExecutors.from(fulltextMatchIds);
+				fulltextExecutor =
+						SearchQueryExecutors.from(fulltextMatchIds != null ? fulltextMatchIds : new ArrayList<>());
 			}
 
 			if (theSearchRuntimeDetails != null) {
@@ -486,7 +492,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		return fulltextEnabled
 				&& myParams != null
 				&& myParams.getSearchContainedMode() == SearchContainedModeEnum.FALSE
-				&& myFulltextSearchSvc.supportsSomeOf(myParams)
+				&& myFulltextSearchSvc.canUseHibernateSearch(myResourceName, myParams)
 				&& myFulltextSearchSvc.supportsAllSortTerms(myResourceName, myParams);
 	}
 
@@ -538,8 +544,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 			pid = myIdHelperService.resolveResourcePersistentIds(myRequestPartitionId, myResourceName, idParamValue);
 		}
-		List<JpaPid> pids = myFulltextSearchSvc.everything(myResourceName, myParams, pid, theRequestDetails);
-		return pids;
+		return myFulltextSearchSvc.everything(myResourceName, myParams, pid, theRequestDetails);
 	}
 
 	private void doCreateChunkedQueries(
@@ -862,13 +867,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			theQueryStack.addSortOnLastUpdated(ascending);
 
 		} else {
-
-			RuntimeSearchParam param = null;
-
-			if (param == null) {
-				// do we have a composition param defined for the whole chain?
-				param = mySearchParamRegistry.getActiveSearchParam(myResourceName, theSort.getParamName());
-			}
+			RuntimeSearchParam param =
+					mySearchParamRegistry.getActiveSearchParam(myResourceName, theSort.getParamName());
 
 			/*
 			 * If we have a sort like _sort=subject.name and we  have an
@@ -896,9 +896,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 							mySearchParamRegistry.getActiveSearchParam(myResourceName, referenceParam);
 					if (outerParam == null) {
 						throwInvalidRequestExceptionForUnknownSortParameter(myResourceName, referenceParam);
-					}
-
-					if (outerParam.hasUpliftRefchain(targetParam)) {
+					} else if (outerParam.hasUpliftRefchain(targetParam)) {
 						for (String nextTargetType : outerParam.getTargets()) {
 							if (referenceParamTargetType != null && !referenceParamTargetType.equals(nextTargetType)) {
 								continue;
@@ -945,6 +943,9 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				throwInvalidRequestExceptionForUnknownSortParameter(getResourceName(), paramName);
 			}
 
+			// param will never be null here (the above line throws if it does)
+			// this is just to prevent the warning
+			assert param != null;
 			if (isNotBlank(chainName) && param.getParamType() != RestSearchParameterTypeEnum.REFERENCE) {
 				throw new InvalidRequestException(
 						Msg.code(2285) + "Invalid chain, " + paramName + " is not a reference SearchParameter");
@@ -1121,11 +1122,15 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 						resourceType, next, tagMap.get(next.getId()), theForHistoryOperation);
 			}
 			if (resource == null) {
-				ourLog.warn(
-						"Unable to find resource {}/{}/_history/{} in database",
-						next.getResourceType(),
-						next.getIdDt().getIdPart(),
-						next.getVersion());
+				if (next != null) {
+					ourLog.warn(
+							"Unable to find resource {}/{}/_history/{} in database",
+							next.getResourceType(),
+							next.getIdDt().getIdPart(),
+							next.getVersion());
+				} else {
+					ourLog.warn("Unable to find resource in database.");
+				}
 				continue;
 			}
 
@@ -1196,7 +1201,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			RequestDetails theDetails) {
 		if (thePids.isEmpty()) {
 			ourLog.debug("The include pids are empty");
-			// return;
 		}
 
 		// Dupes will cause a crash later anyhow, but this is expensive so only do it
@@ -1256,10 +1260,9 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		// only impl
 		// to handle lastN?
 		if (myStorageSettings.isAdvancedHSearchIndexing() && myStorageSettings.isStoreResourceInHSearchIndex()) {
-			List<Long> pidList = thePids.stream().map(pid -> (pid).getId()).collect(Collectors.toList());
+			List<Long> pidList = thePids.stream().map(JpaPid::getId).collect(Collectors.toList());
 
-			List<IBaseResource> resources = myFulltextSearchSvc.getResources(pidList);
-			return resources;
+			return myFulltextSearchSvc.getResources(pidList);
 		} else if (!Objects.isNull(myParams) && myParams.isLastN()) {
 			// legacy LastN implementation
 			return myIElasticsearchSvc.getObservationResources(thePids);
@@ -1344,7 +1347,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 			for (Iterator<Include> iter = includes.iterator(); iter.hasNext(); ) {
 				Include nextInclude = iter.next();
-				if (nextInclude.isRecurse() == false) {
+				if (!nextInclude.isRecurse()) {
 					iter.remove();
 				}
 
@@ -1707,6 +1710,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	}
 
 	/**
+	 * Calls Performance Trace Hook
+	 * @param request the request deatils
 	 * Sends a raw SQL query to the Pointcut for raw SQL queries.
 	 */
 	private void callRawSqlHookWithCurrentThreadQueries(RequestDetails request) {
@@ -1890,7 +1895,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			for (RuntimeSearchParam nextCandidate : candidateComboParams) {
 				List<String> nextCandidateParamNames =
 						JpaParamUtil.resolveComponentParameters(mySearchParamRegistry, nextCandidate).stream()
-								.map(t -> t.getName())
+								.map(RuntimeSearchParam::getName)
 								.collect(Collectors.toList());
 				if (theParams.keySet().containsAll(nextCandidateParamNames)) {
 					comboParam = nextCandidate;
@@ -1902,7 +1907,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 		if (comboParam != null) {
 			// Since we're going to remove elements below
-			theParams.values().forEach(nextAndList -> ensureSubListsAreWritable(nextAndList));
+			theParams.values().forEach(this::ensureSubListsAreWritable);
 
 			StringBuilder sb = new StringBuilder();
 			sb.append(myResourceName);
