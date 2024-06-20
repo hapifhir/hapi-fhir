@@ -252,23 +252,27 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 				.heavyweightSkipByDefault();
 
 		{
-			// Note that these are recreations of a previous migration from 6.6.0. The original migration had these set as unique,
-			// which causes SQL Server to create a filtered index. See https://www.sqlshack.com/introduction-to-sql-server-filtered-indexes/
-			// What this means for hibernate search is that for any column that is nullable, the SQLServerDialect will omit the whole row from the index if
-			// the value of the nullable column is actually null. Removing the uniqueness constraint works around this problem.
+			// Note that these are recreations of a previous migration from 6.6.0. The original migration had these set
+			// as unique,
+			// which causes SQL Server to create a filtered index. See
+			// https://www.sqlshack.com/introduction-to-sql-server-filtered-indexes/
+			// What this means for hibernate search is that for any column that is nullable, the SQLServerDialect will
+			// omit the whole row from the index if
+			// the value of the nullable column is actually null. Removing the uniqueness constraint works around this
+			// problem.
 			Builder.BuilderWithTableName uriTable = version.onTable("HFJ_SPIDX_URI");
 
 			uriTable.dropIndex("20240620.1", "IDX_SP_URI_HASH_URI_V2");
 			uriTable.dropIndex("20240620.2", "IDX_SP_URI_HASH_IDENTITY_V2");
 
 			uriTable.addIndex("20240620.3", "IDX_SP_URI_HASH_URI_V2")
-				.unique(false)
-				.online(true)
-				.withColumns("HASH_URI", "RES_ID", "PARTITION_ID");
+					.unique(false)
+					.online(true)
+					.withColumns("HASH_URI", "RES_ID", "PARTITION_ID");
 			uriTable.addIndex("20240620.4", "IDX_SP_URI_HASH_IDENTITY_V2")
-				.unique(false)
-				.online(true)
-				.withColumns("HASH_IDENTITY", "SP_URI", "RES_ID", "PARTITION_ID");
+					.unique(false)
+					.online(true)
+					.withColumns("HASH_IDENTITY", "SP_URI", "RES_ID", "PARTITION_ID");
 		}
 	}
 
