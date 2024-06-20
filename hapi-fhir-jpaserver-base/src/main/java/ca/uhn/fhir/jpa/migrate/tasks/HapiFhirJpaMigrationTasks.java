@@ -273,22 +273,22 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 					.nullable()
 					.type(ColumnTypeEnum.LONG);
 			version.onTable("HFJ_IDX_CMP_STRING_UNIQ")
-					.addTask(new CalculateHashesTask(VersionEnum.V7_4_0, "20240617.4"){
-						@Override
-						protected boolean shouldSkipTask() {
-							return false;
-						}
-					}
-						.setPidColumnName("PID")
-							.addCalculator(
-									"HASH_COMPLETE",
-									t -> ResourceIndexedComboStringUnique.calculateHashComplete(
-											t.getString("IDX_STRING")))
-							.addCalculator(
-									"HASH_COMPLETE_2",
-									t -> ResourceIndexedComboStringUnique.calculateHashComplete2(
-											t.getString("IDX_STRING")))
-							.setColumnName("HASH_COMPLETE"));
+					.addTask(
+							new CalculateHashesTask(VersionEnum.V7_4_0, "20240617.4") {
+								@Override
+								protected boolean shouldSkipTask() {
+									return false;
+								}
+							}.setPidColumnName("PID")
+									.addCalculator(
+											"HASH_COMPLETE",
+											t -> ResourceIndexedComboStringUnique.calculateHashComplete(
+													t.getString("IDX_STRING")))
+									.addCalculator(
+											"HASH_COMPLETE_2",
+											t -> ResourceIndexedComboStringUnique.calculateHashComplete2(
+													t.getString("IDX_STRING")))
+									.setColumnName("HASH_COMPLETE"));
 		}
 	}
 
