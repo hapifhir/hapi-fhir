@@ -80,6 +80,8 @@ import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.RiskAssessment;
+import org.hl7.fhir.r4.model.SearchParameter;
+import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.AfterEach;
@@ -210,6 +212,12 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 	@Qualifier("myQuestionnaireResponseDaoR4")
 	private IFhirResourceDao<QuestionnaireResponse> myQuestionnaireResponseDao;
 	@Autowired
+	@Qualifier("myServiceRequestDaoR4")
+	private IFhirResourceDao<ServiceRequest> myServiceRequestDao;
+	@Autowired
+	@Qualifier("mySearchParameterDaoR4")
+	private IFhirResourceDao<SearchParameter> mySearchParameterDao;
+	@Autowired
 	private TestHSearchEventDispatcher myHSearchEventDispatcher;
 
 	@Mock
@@ -269,6 +277,40 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 			return messages;
 		}
 	}
+
+
+	@Test
+	public void testSearchParamTokenOnExtension() {
+		myStorageSettings.setAllowContainsSearches(true);
+		String body = "{\n" +
+			"  \"resourceType\": \"SearchParameter\",\n" +
+			"  \"url\": \"https://health.gov.on.ca/idms/fhir/SearchParameter/ServiceRequest-Indication\",\n" +
+			"  \"title\": \"ServiceRequest Indication\",\n" +
+			"  \"status\": \"active\",\n" +
+			"  \"publisher\": \"MOH-IDMS\",\n" +
+			"  \"code\": \"ServiceRequestIndication\",\n" +
+			"  \"base\": [\n" +
+			"    \"ServiceRequest\"\n" +
+			"  ],\n" +
+			"  \"type\": \"string\",\n" +
+			"  \"expression\": \"ServiceRequest.extension('https://health.gov.on.ca/idms/fhir/StructureDefinition/Extension-Indication')\"\n" +
+			"}";
+		SearchParameter searchParameter = myFhirContext.newJsonParser().parseResource(SearchParameter.class, body);
+
+		mySearchParameterDao.create(searchParameter, mySrd);
+		mySearchParamRegistry.forceRefresh();
+
+		ServiceRequest sr = new ServiceRequest();
+		sr.addExtension().setUrl("https://health.gov.on.ca/idms/fhir/StructureDefinition/Extension-Indication").setValue(new StringType("Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapib"));
+
+		myServiceRequestDao.create(sr, mySrd);
+
+		SearchParameterMap searchParameter1 = new SearchParameterMap();
+		searchParameter1.add("ServiceRequestIndication", new StringParam("Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapib").setContains(true));
+		IBundleProvider search = myServiceRequestDao.search(searchParameter1, new SystemRequestDetails());
+		assertThat(search.size()).isEqualTo(1);
+	}
+
 	@Test
 	public void testFullTextSearchesArePerformanceLogged() {
 
