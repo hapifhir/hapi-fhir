@@ -1343,7 +1343,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		@ValueSource(booleans = {true, false})
 		void conditionalCreateSameIdentifierCrossPartition(boolean theIsSearchUrlDuplicateAcrossPartitionsEnabled) {
 			myPartitionSettings.setPartitioningEnabled(true);
-			myPartitionSettings.setSearchUrlDuplicateAcrossPartitionsEnabled(theIsSearchUrlDuplicateAcrossPartitionsEnabled);
+			myPartitionSettings.setConditionalCreateDuplicateIdentifiersEnabled(theIsSearchUrlDuplicateAcrossPartitionsEnabled);
 
 			final PartitionEntity partitionEntity1 = new PartitionEntity();
 			partitionEntity1.setId(1);
