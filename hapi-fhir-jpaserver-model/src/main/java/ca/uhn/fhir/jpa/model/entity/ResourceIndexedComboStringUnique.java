@@ -132,9 +132,7 @@ public class ResourceIndexedComboStringUnique extends BaseResourceIndexedCombo
 	 * Constructor
 	 */
 	public ResourceIndexedComboStringUnique(
-			ResourceTable theResource,
-			String theIndexString,
-			IIdType theSearchParameterId) {
+			ResourceTable theResource, String theIndexString, IIdType theSearchParameterId) {
 		setResource(theResource);
 		setIndexString(theIndexString);
 		setPartitionId(theResource.getPartitionId());
@@ -239,13 +237,11 @@ public class ResourceIndexedComboStringUnique extends BaseResourceIndexedCombo
 		}
 	}
 
-	public static long calculateHashComplete(
-			String theQueryString) {
+	public static long calculateHashComplete(String theQueryString) {
 		return hash(theQueryString);
 	}
 
-	public static long calculateHashComplete2(
-			String theQueryString) {
+	public static long calculateHashComplete2(String theQueryString) {
 		// Just add a constant salt to the query string in order to hopefully
 		// further avoid collisions
 		String newQueryString = theQueryString + "ABC123";
@@ -279,5 +275,4 @@ public class ResourceIndexedComboStringUnique extends BaseResourceIndexedCombo
 				.append("partition", getPartitionId())
 				.toString();
 	}
-
 }

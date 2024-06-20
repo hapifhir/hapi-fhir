@@ -38,7 +38,6 @@ import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.persistence.Transient;
-import jakarta.validation.constraints.Null;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField;
@@ -210,7 +209,9 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 	 * Applies a fast and consistent hashing algorithm to a set of strings
 	 */
 	static long hash(
-		@Nonnull PartitionSettings thePartitionSettings, @Nonnull RequestPartitionId theRequestPartitionId, String... theValues) {
+			@Nonnull PartitionSettings thePartitionSettings,
+			@Nonnull RequestPartitionId theRequestPartitionId,
+			String... theValues) {
 		return doHash(thePartitionSettings, theRequestPartitionId, theValues);
 	}
 
@@ -221,16 +222,19 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 		return doHash(null, null, theValues);
 	}
 
-	private static long doHash(@Nullable PartitionSettings thePartitionSettings, @Nullable RequestPartitionId theRequestPartitionId, String[] theValues) {
+	private static long doHash(
+			@Nullable PartitionSettings thePartitionSettings,
+			@Nullable RequestPartitionId theRequestPartitionId,
+			String[] theValues) {
 		Hasher hasher = HASH_FUNCTION.newHasher();
 
 		if (thePartitionSettings != null) {
 			if (thePartitionSettings.isPartitioningEnabled()
-				&& thePartitionSettings.isIncludePartitionInSearchHashes()
-				&& theRequestPartitionId != null) {
+					&& thePartitionSettings.isIncludePartitionInSearchHashes()
+					&& theRequestPartitionId != null) {
 				if (theRequestPartitionId.getPartitionIds().size() > 1) {
 					throw new InternalErrorException(Msg.code(1527)
-						+ "Can not search multiple partitions when partitions are included in search hashes");
+							+ "Can not search multiple partitions when partitions are included in search hashes");
 				}
 				Integer partitionId = theRequestPartitionId.getFirstPartitionIdOrNull();
 				if (partitionId != null) {
