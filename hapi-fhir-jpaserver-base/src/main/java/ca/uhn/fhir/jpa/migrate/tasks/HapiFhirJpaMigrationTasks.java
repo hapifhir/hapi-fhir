@@ -262,14 +262,14 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			// problem.
 			Builder.BuilderWithTableName uriTable = version.onTable("HFJ_SPIDX_URI");
 
-			uriTable.dropIndex("20240620.1", "IDX_SP_URI_HASH_URI_V2");
-			uriTable.dropIndex("20240620.2", "IDX_SP_URI_HASH_IDENTITY_V2");
+			uriTable.dropIndex("20240620.10", "IDX_SP_URI_HASH_URI_V2");
+			uriTable.dropIndex("20240620.20", "IDX_SP_URI_HASH_IDENTITY_V2");
 
-			uriTable.addIndex("20240620.3", "IDX_SP_URI_HASH_URI_V2")
+			uriTable.addIndex("20240620.30", "IDX_SP_URI_HASH_URI_V2")
 					.unique(false)
 					.online(true)
 					.withColumns("HASH_URI", "RES_ID", "PARTITION_ID");
-			uriTable.addIndex("20240620.4", "IDX_SP_URI_HASH_IDENTITY_V2")
+			uriTable.addIndex("20240620.40", "IDX_SP_URI_HASH_IDENTITY_V2")
 					.unique(false)
 					.online(true)
 					.withColumns("HASH_IDENTITY", "SP_URI", "RES_ID", "PARTITION_ID");
