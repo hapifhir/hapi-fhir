@@ -82,7 +82,8 @@ public class CdsHooksControllerTest {
 			.andExpect(jsonPath("services[2].title").value(GreeterCdsService.TEST_HOOK_TITLE))
 			.andExpect(jsonPath("services[2].id").value(GreeterCdsService.TEST_HOOK_STRING_ID))
 			.andExpect(jsonPath("services[2].prefetch." + GreeterCdsService.TEST_HOOK_PREFETCH_USER_KEY).value(GreeterCdsService.TEST_HOOK_PREFETCH_USER_QUERY))
-			.andExpect(jsonPath("services[2].prefetch." + GreeterCdsService.TEST_HOOK_PREFETCH_PATIENT_KEY).value(GreeterCdsService.TEST_HOOK_PREFETCH_PATIENT_QUERY));
+			.andExpect(jsonPath("services[2].prefetch." + GreeterCdsService.TEST_HOOK_PREFETCH_PATIENT_KEY).value(GreeterCdsService.TEST_HOOK_PREFETCH_PATIENT_QUERY))
+			.andExpect(jsonPath("services[5].extension.example-client-conformance").value("http://hooks.example.org/fhir/102/Conformance/patientview"));
 	}
 
 	@Test
@@ -127,8 +128,13 @@ public class CdsHooksControllerTest {
 
 	@Test
 	void testCallHelloUniverse() throws Exception {
+		MyRequestExtension myRequestExtension = new MyRequestExtension();
+		myRequestExtension.setConfigItem("request-config-item");
+
 		CdsServiceRequestJson request = new CdsServiceRequestJson();
+		request.setExtension(myRequestExtension);
 		request.setFhirServer(TEST_FHIR_SERVER);
+
 
 		String requestBody = myObjectMapper.writeValueAsString(request);
 
@@ -139,7 +145,7 @@ public class CdsHooksControllerTest {
 			.andExpect(content().contentType(MediaType.APPLICATION_JSON))
 			.andExpect(jsonPath("cards[0].summary").value("Hello Universe!"))
 			.andExpect(jsonPath("cards[0].indicator").value("critical"))
-		;
+			.andExpect(jsonPath("cards[0].extension.example-config-item").value("request-config-item"));
 	}
 
 	@Test

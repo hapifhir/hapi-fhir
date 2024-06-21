@@ -48,7 +48,7 @@ public class HelloWorldService implements IPointcutLatch {
 		cdsServiceResponseCardJson.setIndicator(CdsServiceIndicatorEnum.WARNING);
 		cdsServiceResponseCardJson.setDetail("This is a test.  Do not be alarmed.");
 		cdsServiceResponseCardJson.setSource(new CdsServiceResponseCardSourceJson().setLabel("World Greeter"));
-		MyCdsHooksExtension extension = new MyCdsHooksExtension();
+		final MyCdsHooksExtension extension = new MyCdsHooksExtension();
 		extension.setTimestamp(new Date());
 		extension.setPractitionerSpecialty(CDS_HOOKS_EXTENSION_VALUE_PRACTITIONER_SPECIALITY);
 		cdsServiceResponseCardJson.setExtension(extension);
@@ -69,7 +69,13 @@ public class HelloWorldService implements IPointcutLatch {
 		prefetch = {
 			@CdsServicePrefetch(value = TEST_HOOK_PREFETCH_PATIENT_KEY, query = "Patient/{{context.patientId}}"),
 			@CdsServicePrefetch(value = TEST_HOOK_PREFETCH_MEDS_KEY, query = "MedicationRequest?patient={{context.patientId}}")
-		})
+		},
+		extension = """
+        {
+   				"example-config-item": "example-value"
+   		}
+		""",
+		extensionClass = MyRequestExtension.class)
 	public CdsServiceResponseJson helloUniverse(CdsServiceRequestJson theCdsServiceRequestJson) {
 		final CdsServiceResponseJson cdsServiceResponseJson = new CdsServiceResponseJson();
 		final CdsServiceResponseCardJson cdsServiceResponseCardJson = new CdsServiceResponseCardJson();
@@ -128,7 +134,7 @@ public class HelloWorldService implements IPointcutLatch {
 		@JsonProperty(value = "timestamp", required = true)
 		private Date myDate;
 		@JsonProperty(value = "myextension-practitionerspecialty", required = true)
-		private String myPractionerSpecialty;
+		private String myPractitionerSpecialty;
 
 		MyCdsHooksExtension() {}
 
@@ -136,17 +142,10 @@ public class HelloWorldService implements IPointcutLatch {
 			myDate = theDate;
 		}
 
-		private void setPractitionerSpecialty(String thePractionerSpecialty) {
-			myPractionerSpecialty = thePractionerSpecialty;
+		private void setPractitionerSpecialty(String thePractitionerSpecialty) {
+			myPractitionerSpecialty = thePractitionerSpecialty;
 		}
 
-		public Date getTimestamp() {
-			return myDate;
-		}
-
-		public String getPractitionerSpecialty() {
-			return myPractionerSpecialty;
-		}
 	}
 
 	private static class HelloWorldServiceExtension extends CdsHooksExtension {
