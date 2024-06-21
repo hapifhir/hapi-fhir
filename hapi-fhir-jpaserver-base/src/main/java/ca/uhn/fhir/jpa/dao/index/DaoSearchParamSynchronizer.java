@@ -255,7 +255,7 @@ public class DaoSearchParamSynchronizer {
 
 						String searchParameterId = "(unknown)";
 						if (theIndex.getSearchParameterId() != null) {
-							searchParameterId = theIndex.getSearchParameterId();
+							searchParameterId = theIndex.getSearchParameterId().getValue();
 						}
 
 						String msg = myFhirContext

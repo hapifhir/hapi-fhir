@@ -33,11 +33,9 @@ public interface IResourceIndexComboSearchParameter {
 	 * Will be in the exact form <code>[resourceType]/[id]</code>
 	 */
 	@Nullable // if it never got set, e.g. on a row pulled from the DB
-	String getSearchParameterId();
+	IIdType getSearchParameterId();
 
 	void setSearchParameterId(@Nonnull IIdType theSearchParameterId);
-
-	void setSearchParameterId(@Nonnull String theSearchParameterId);
 
 	String getIndexString();
 

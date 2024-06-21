@@ -10,24 +10,18 @@ import java.util.regex.Pattern;
 @MappedSuperclass
 public abstract class BaseResourceIndexedCombo extends BaseResourceIndex implements IResourceIndexComboSearchParameter {
 
-	public static final Pattern SEARCH_PARAM_ID_PATTERN = Pattern.compile("^[a-zA-Z0-9]+/[^/]+$");
-
 	@Transient
-	private String mySearchParameterId;
+	private IIdType mySearchParameterId;
 
 	@Override
-	public String getSearchParameterId() {
+	public IIdType getSearchParameterId() {
 		return mySearchParameterId;
 	}
 
 	@Override
-	public void setSearchParameterId(@Nonnull String theSearchParameterId) {
-		assert SEARCH_PARAM_ID_PATTERN.matcher(theSearchParameterId).matches();
-		mySearchParameterId = theSearchParameterId;
-	}
-
-	@Override
 	public void setSearchParameterId(@Nonnull IIdType theSearchParameterId) {
-		setSearchParameterId(theSearchParameterId.toUnqualifiedVersionless().getValue());
+		assert theSearchParameterId.hasResourceType();
+		assert theSearchParameterId.hasIdPart();
+		mySearchParameterId = theSearchParameterId.toUnqualifiedVersionless();
 	}
 }
