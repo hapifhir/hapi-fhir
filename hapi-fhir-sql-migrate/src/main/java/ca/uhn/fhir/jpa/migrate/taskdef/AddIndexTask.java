@@ -182,7 +182,7 @@ public class AddIndexTask extends BaseTableTask {
 	@Nonnull
 	private String buildMSSqlNotNullWhereClause() {
 		String mssqlWhereClause = "";
-		if (myNullableColumns.isEmpty()) {
+		if (myNullableColumns == null || myNullableColumns.isEmpty()) {
 			return mssqlWhereClause;
 		}
 
