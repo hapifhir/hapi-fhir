@@ -77,6 +77,7 @@ public class MemoryCacheService {
 				case HISTORY_COUNT:
 				case TAG_DEFINITION:
 				case RESOURCE_CONDITIONAL_CREATE_VERSION:
+				case FHIRPATH_EXPRESSION:
 				default:
 					timeoutSeconds = SECONDS.convert(1, MINUTES);
 					maximumSize = 10000;
@@ -193,6 +194,7 @@ public class MemoryCacheService {
 		TAG_DEFINITION(TagDefinitionCacheKey.class),
 		RESOURCE_LOOKUP(String.class),
 		FORCED_ID_TO_PID(String.class),
+		FHIRPATH_EXPRESSION(String.class),
 		/**
 		 * Key type: {@literal Long}
 		 * Value type: {@literal Optional<String>}
