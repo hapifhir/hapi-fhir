@@ -348,17 +348,20 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 					.withType(ColumnTypeEnum.STRING, 100)
 					.failureAllowed();
 
-
-			{ // These migrations permit much longer values to be stored in SPIDX_TOKEN and SPIDX_STRING value components.
-			  // This is mostly helpful for `:contains` searches on long values, since exact searches use the hash anyhow.
-				spidxString.modifyColumn("20240621.10", "SP_VALUE_EXACT")
-					.nullable()
-					.withType(ColumnTypeEnum.STRING, 500)
-					.failureAllowed();
-				spidxString.modifyColumn("20240621.20", "SP_VALUE_NORMALIZED")
-					.nullable()
-					.withType(ColumnTypeEnum.STRING, 500)
-					.failureAllowed();
+			{ // These migrations permit much longer values to be stored in SPIDX_TOKEN and SPIDX_STRING value
+				// components.
+				// This is mostly helpful for `:contains` searches on long values, since exact searches use the hash
+				// anyhow.
+				spidxString
+						.modifyColumn("20240621.10", "SP_VALUE_EXACT")
+						.nullable()
+						.withType(ColumnTypeEnum.STRING, 500)
+						.failureAllowed();
+				spidxString
+						.modifyColumn("20240621.20", "SP_VALUE_NORMALIZED")
+						.nullable()
+						.withType(ColumnTypeEnum.STRING, 500)
+						.failureAllowed();
 			}
 		}
 	}
