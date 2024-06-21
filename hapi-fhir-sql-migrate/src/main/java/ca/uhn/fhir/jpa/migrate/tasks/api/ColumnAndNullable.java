@@ -15,6 +15,7 @@ public class ColumnAndNullable {
 	public String getColumnName() {
 		return myColumnName;
 	}
+
 	public boolean isNullable() {
 		return myNullable;
 	}

@@ -196,6 +196,7 @@ public class AddIndexTask extends BaseTableTask {
 	public void setColumns(String... theColumns) {
 		setColumns(Arrays.asList(theColumns));
 	}
+
 	public void setNullableColumns(String... theColumns) {
 		setNullableColumns(Arrays.asList(theColumns));
 	}

@@ -409,8 +409,13 @@ public class Builder {
 				 * THis is strictly needed for SQL Server, as it will create filtered indexes on nullable columns, and we have to build a tail clause which matches what the SQL Server Hibernate dialect does.
 				 */
 				public BuilderCompleteTask withPossibleNullableColumns(ColumnAndNullable... theColumns) {
-					String[] columnNames = Arrays.stream(theColumns).map(ColumnAndNullable::getColumnName).toArray(String[]::new);
-					String[] nullableColumnNames = Arrays.stream(theColumns).filter(ColumnAndNullable::isNullable).map(ColumnAndNullable::getColumnName).toArray(String[]::new);
+					String[] columnNames = Arrays.stream(theColumns)
+							.map(ColumnAndNullable::getColumnName)
+							.toArray(String[]::new);
+					String[] nullableColumnNames = Arrays.stream(theColumns)
+							.filter(ColumnAndNullable::isNullable)
+							.map(ColumnAndNullable::getColumnName)
+							.toArray(String[]::new);
 					AddIndexTask task = new AddIndexTask(myRelease, myVersion);
 					task.setTableName(myTableName);
 					task.setIndexName(myIndexName);
@@ -424,7 +429,6 @@ public class Builder {
 					addTask(task);
 					return new BuilderCompleteTask(task);
 				}
-
 
 				public BuilderAddIndexUnique includeColumns(String... theIncludeColumns) {
 					myIncludeColumns = theIncludeColumns;

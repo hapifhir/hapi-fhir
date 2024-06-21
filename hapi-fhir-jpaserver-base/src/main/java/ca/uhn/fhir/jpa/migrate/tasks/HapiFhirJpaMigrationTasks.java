@@ -269,11 +269,18 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			uriTable.addIndex("20240620.30", "IDX_SP_URI_HASH_URI_V2")
 					.unique(false)
 					.online(true)
-					.withPossibleNullableColumns(new ColumnAndNullable("HASH_URI", true),  new ColumnAndNullable("RES_ID", false), new ColumnAndNullable("PARTITION_ID", true));
+					.withPossibleNullableColumns(
+							new ColumnAndNullable("HASH_URI", true),
+							new ColumnAndNullable("RES_ID", false),
+							new ColumnAndNullable("PARTITION_ID", true));
 			uriTable.addIndex("20240620.40", "IDX_SP_URI_HASH_IDENTITY_V2")
 					.unique(false)
 					.online(true)
-					.withPossibleNullableColumns(new ColumnAndNullable("HASH_IDENTITY", true),new ColumnAndNullable("SP_URI", true), new ColumnAndNullable("RES_ID", false), new ColumnAndNullable("PARTITION_ID", true));
+					.withPossibleNullableColumns(
+							new ColumnAndNullable("HASH_IDENTITY", true),
+							new ColumnAndNullable("SP_URI", true),
+							new ColumnAndNullable("RES_ID", false),
+							new ColumnAndNullable("PARTITION_ID", true));
 		}
 	}
 
