@@ -34,6 +34,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class AddIndexTask extends BaseTableTask {
 
@@ -180,17 +181,16 @@ public class AddIndexTask extends BaseTableTask {
 
 	@Nonnull
 	private String buildMSSqlNotNullWhereClause() {
-		String mssqlWhereClause;
+		String mssqlWhereClause = "";
+		if (myNullableColumns.isEmpty()) {
+			return mssqlWhereClause;
+		}
 
 		mssqlWhereClause = " WHERE (";
-		for (int i = 0; i < myColumns.size(); i++) {
-			mssqlWhereClause += myColumns.get(i) + " IS NOT NULL ";
-			if (i < myColumns.size() - 1) {
-				mssqlWhereClause += "AND ";
-			}
-		}
+		mssqlWhereClause +=  myNullableColumns.stream().map(column -> column + " IS NOT NULL ").collect(Collectors.joining("AND"));
 		mssqlWhereClause += ")";
 		return mssqlWhereClause;
+
 	}
 
 	public void setColumns(String... theColumns) {
