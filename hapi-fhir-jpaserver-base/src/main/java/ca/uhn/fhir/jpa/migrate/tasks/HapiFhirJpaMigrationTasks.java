@@ -32,6 +32,7 @@ import ca.uhn.fhir.jpa.migrate.taskdef.ForceIdMigrationCopyTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.ForceIdMigrationFixTask;
 import ca.uhn.fhir.jpa.migrate.tasks.api.BaseMigrationTasks;
 import ca.uhn.fhir.jpa.migrate.tasks.api.Builder;
+import ca.uhn.fhir.jpa.migrate.tasks.api.ColumnAndNullable;
 import ca.uhn.fhir.jpa.migrate.tasks.api.TaskFlagEnum;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
@@ -268,11 +269,11 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			uriTable.addIndex("20240620.30", "IDX_SP_URI_HASH_URI_V2")
 					.unique(false)
 					.online(true)
-					.withColumns("HASH_URI", "RES_ID", "PARTITION_ID");
+					.withPossibleNullableColumns(new ColumnAndNullable("HASH_URI", true),  new ColumnAndNullable("RES_ID", false), new ColumnAndNullable("PARTITION_ID", true));
 			uriTable.addIndex("20240620.40", "IDX_SP_URI_HASH_IDENTITY_V2")
 					.unique(false)
 					.online(true)
-					.withColumns("HASH_IDENTITY", "SP_URI", "RES_ID", "PARTITION_ID");
+					.withPossibleNullableColumns(new ColumnAndNullable("HASH_IDENTITY", true),new ColumnAndNullable("SP_URI", true), new ColumnAndNullable("RES_ID", false), new ColumnAndNullable("PARTITION_ID", true));
 		}
 	}
 
