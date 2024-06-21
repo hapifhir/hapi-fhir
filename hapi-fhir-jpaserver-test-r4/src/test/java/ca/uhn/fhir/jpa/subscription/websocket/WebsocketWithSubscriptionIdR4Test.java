@@ -18,9 +18,8 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
 
 /**
  * Adds a FHIR subscription with criteria through the rest interface. Then creates a websocket with the id of the
@@ -43,7 +42,7 @@ public class WebsocketWithSubscriptionIdR4Test extends BaseResourceProviderR4Tes
 
 	private static final Logger ourLog = org.slf4j.LoggerFactory.getLogger(WebsocketWithSubscriptionIdR4Test.class);
 	@RegisterExtension
-	private final WebsocketSubscriptionClient myWebsocketClientExtension = new WebsocketSubscriptionClient(() -> myServer, () -> myStorageSettings);
+	private final WebsocketSubscriptionClient myWebsocketClientExtension = new WebsocketSubscriptionClient(() -> myServer, () -> mySubscriptionSettings);
 	private String myPatientId;
 	private String mySubscriptionId;
 	@Autowired
@@ -117,7 +116,7 @@ public class WebsocketWithSubscriptionIdR4Test extends BaseResourceProviderR4Tes
 
 		ourLog.info("WS Messages: {}", myWebsocketClientExtension.getMessages());
 		waitForSize(2, myWebsocketClientExtension.getMessages());
-		assertThat(myWebsocketClientExtension.getMessages(), contains("bound " + mySubscriptionId, "ping " + mySubscriptionId));
+		assertThat(myWebsocketClientExtension.getMessages()).containsExactly("bound " + mySubscriptionId, "ping " + mySubscriptionId);
 	}
 
 	@Test
@@ -141,6 +140,6 @@ public class WebsocketWithSubscriptionIdR4Test extends BaseResourceProviderR4Tes
 
 		ourLog.info("WS Messages: {}", myWebsocketClientExtension.getMessages());
 		waitForSize(1, myWebsocketClientExtension.getMessages());
-		assertThat(myWebsocketClientExtension.getMessages(), contains("bound " + mySubscriptionId));
+		assertThat(myWebsocketClientExtension.getMessages()).containsExactly("bound " + mySubscriptionId);
 	}
 }

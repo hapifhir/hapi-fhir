@@ -18,6 +18,7 @@ import java.net.URLClassLoader;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 
+
 /**
  * Tests for {@link FhirAutoConfiguration}.
  *
@@ -53,8 +54,7 @@ public class FhirAutoConfigurationTest {
 		load("hapi.fhir.validation.enabled:false");
 		try {
 			this.context.getBean(RequestValidatingInterceptor.class);
-			fail();
-		} catch (NoSuchBeanDefinitionException e) {
+			fail();		} catch (NoSuchBeanDefinitionException e) {
 			// good
 		}
 	}

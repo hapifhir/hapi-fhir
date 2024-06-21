@@ -6,6 +6,7 @@ import ca.uhn.fhir.batch2.jobs.chunk.PartitionedUrlChunkRangeJson;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrlListJobParameters;
 import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.jpa.api.pid.HomogeneousResourcePidList;
 import ca.uhn.fhir.jpa.api.pid.IResourcePidList;
 import ca.uhn.fhir.jpa.api.pid.IResourcePidStream;
@@ -13,6 +14,7 @@ import ca.uhn.fhir.jpa.api.pid.ListWrappingPidStream;
 import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.r4.model.InstantType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,7 +24,6 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import jakarta.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -65,7 +66,7 @@ public class LoadIdsStepTest {
 		String instanceId = "instance-id";
 		JobInstance jobInstance = JobInstance.fromInstanceId(instanceId);
 		String chunkId = "chunk-id";
-		StepExecutionDetails<PartitionedUrlListJobParameters, PartitionedUrlChunkRangeJson> details = new StepExecutionDetails<>(parameters, range, jobInstance, chunkId);
+		StepExecutionDetails<PartitionedUrlListJobParameters, PartitionedUrlChunkRangeJson> details = new StepExecutionDetails<>(parameters, range, jobInstance, new WorkChunk().setId(chunkId));
 
 		// First Execution
 
@@ -84,7 +85,7 @@ public class LoadIdsStepTest {
 			assertEquals(expected, actual);
 		}
 		final ResourceIdListWorkChunkJson expectedIdChunk = createIdChunk(19500, 20000);
-		assertEquals(expectedIdChunk.toString(), allCapturedValues.get(expectedLoops -1).toString());
+		assertEquals(expectedIdChunk.toString(), allCapturedValues.get(expectedLoops - 1).toString());
 	}
 
 	@Nonnull

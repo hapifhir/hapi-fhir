@@ -32,10 +32,20 @@ import ca.uhn.fhir.jpa.dao.IJpaStorageResourceParser;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboTokenNonUnique;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamCoords;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamNumber;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantityNormalized;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.SearchParamPresentEntity;
-import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.jpa.partition.BaseRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
@@ -514,8 +524,12 @@ public class InstanceReindexServiceImpl implements IInstanceReindexService {
 				String theParamTypeName) {
 			Parameters.ParametersParameterComponent retVal =
 					super.addIndexValue(theAction, theParent, theParam, theParamTypeName);
-			retVal.addPart().setName("Latitude").setValue(new DecimalType(theParam.getLatitude()));
-			retVal.addPart().setName("Longitude").setValue(new DecimalType(theParam.getLongitude()));
+			if (theParam.getLatitude() != null) {
+				retVal.addPart().setName("Latitude").setValue(new DecimalType(theParam.getLatitude()));
+			}
+			if (theParam.getLongitude() != null) {
+				retVal.addPart().setName("Longitude").setValue(new DecimalType(theParam.getLongitude()));
+			}
 			return retVal;
 		}
 	}

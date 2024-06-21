@@ -20,7 +20,6 @@ import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.util.TestUtil;
-import org.hamcrest.core.StringContains;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,10 +28,8 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Date;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.not;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class DefaultThymeleafNarrativeGeneratorDstu2Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DefaultThymeleafNarrativeGeneratorDstu2Test.class);
@@ -67,7 +64,7 @@ public class DefaultThymeleafNarrativeGeneratorDstu2Test {
 		myGen.populateResourceNarrative(myCtx, value);
 		String output = value.getText().getDiv().getValueAsString();
 		ourLog.info(output);
-		assertThat(output, StringContains.containsString("<div class=\"hapiHeaderText\">joe john <b>BLOW </b></div>"));
+		assertThat(output).contains("<div class=\"hapiHeaderText\">joe john <b>BLOW </b></div>");
 
 	}
 
@@ -79,7 +76,7 @@ public class DefaultThymeleafNarrativeGeneratorDstu2Test {
 		myGen.populateResourceNarrative(myCtx, value);
 		String output = value.getText().getDiv().getValueAsString();
 		ourLog.info(output);
-		assertThat(output, not(containsString("narrative")));
+		assertNull(output);
 
 	}
 
@@ -103,7 +100,7 @@ public class DefaultThymeleafNarrativeGeneratorDstu2Test {
 
 		ourLog.info(output);
 
-		assertThat(output, containsString("<td>YThis is a warning</td>"));
+		assertThat(output).contains("<td>YThis is a warning</td>");
 	}
 
 	@Test
@@ -140,13 +137,13 @@ public class DefaultThymeleafNarrativeGeneratorDstu2Test {
 		String output = value.getText().getDiv().getValueAsString();
 
 		ourLog.info(output);
-		assertThat(output, StringContains.containsString("<div class=\"hapiHeaderText\"> Some &amp; Diagnostic Report </div>"));
+		assertThat(output).contains("<div class=\"hapiHeaderText\"> Some &amp; Diagnostic Report </div>");
 
 		// Now try it with the parser
 
 		output = myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(value);
 		ourLog.info(output);
-		assertThat(output, StringContains.containsString("<div class=\"hapiHeaderText\"> Some &amp; Diagnostic Report </div>"));
+		assertThat(output).contains("<div class=\"hapiHeaderText\"> Some &amp; Diagnostic Report </div>");
 	}
 
 	@Test
@@ -164,8 +161,8 @@ public class DefaultThymeleafNarrativeGeneratorDstu2Test {
 		myGen.populateResourceNarrative(myCtx, mp);
 		String output = mp.getText().getDiv().getValueAsString();
 
-		assertTrue(output.contains("ciprofloaxin"), "Expected medication name of ciprofloaxin within narrative: " + output);
-		assertTrue(output.contains("ACTIVE"), "Expected string status of ACTIVE within narrative: " + output);
+		assertThat(output.contains("ciprofloaxin")).as("Expected medication name of ciprofloaxin within narrative: " + output).isTrue();
+		assertThat(output.contains("ACTIVE")).as("Expected string status of ACTIVE within narrative: " + output).isTrue();
 
 	}
 
@@ -176,7 +173,7 @@ public class DefaultThymeleafNarrativeGeneratorDstu2Test {
 
 		myGen.populateResourceNarrative(myCtx, med);
 		String output = med.getText().getDiv().getValueAsString();
-		assertThat(output, containsString("ciproflaxin"));
+		assertThat(output).contains("ciproflaxin");
 
 	}
 

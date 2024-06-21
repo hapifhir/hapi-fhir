@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -15,7 +17,6 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
-import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
@@ -25,12 +26,6 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.ee10.servlet.ServletHandler;
-import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.hl7.fhir.dstu3.hapi.rest.server.ServerCapabilityStatementProvider;
 import org.hl7.fhir.dstu3.model.CapabilityStatement;
 import org.hl7.fhir.dstu3.model.IdType;
@@ -40,7 +35,6 @@ import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -50,12 +44,8 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -118,14 +108,14 @@ public class OperationServerWithSearchParamTypesDstu3Test {
 		ourLog.info(response);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertEquals(2, ourLastParamValStr.size());
-		assertEquals(2, ourLastParamValStr.get(0).getValuesAsQueryTokens().size());
+		assertThat(ourLastParamValStr).hasSize(2);
+		assertThat(ourLastParamValStr.get(0).getValuesAsQueryTokens()).hasSize(2);
 		assertEquals("VALSTR1A", ourLastParamValStr.get(0).getValuesAsQueryTokens().get(0).getValue());
 		assertEquals("VALSTR1B", ourLastParamValStr.get(0).getValuesAsQueryTokens().get(1).getValue());
 		assertEquals("VALSTR2A", ourLastParamValStr.get(1).getValuesAsQueryTokens().get(0).getValue());
 		assertEquals("VALSTR2B", ourLastParamValStr.get(1).getValuesAsQueryTokens().get(1).getValue());
-		assertEquals(2, ourLastParamValTok.size());
-		assertEquals(1, ourLastParamValTok.get(0).getValuesAsQueryTokens().size());
+		assertThat(ourLastParamValTok).hasSize(2);
+		assertThat(ourLastParamValTok.get(0).getValuesAsQueryTokens()).hasSize(1);
 		assertEquals("VALTOK1A", ourLastParamValTok.get(0).getValuesAsQueryTokens().get(0).getSystem());
 		assertEquals("VALTOK1B", ourLastParamValTok.get(0).getValuesAsQueryTokens().get(0).getValue());
 		assertEquals("VALTOK2A", ourLastParamValTok.get(1).getValuesAsQueryTokens().get(0).getSystem());
@@ -143,7 +133,7 @@ public class OperationServerWithSearchParamTypesDstu3Test {
 		ourLog.info(response);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertEquals(2, ourLastParamValStr.size());
+		assertThat(ourLastParamValStr).hasSize(2);
 	}
 	
 	@Test
@@ -156,14 +146,14 @@ public class OperationServerWithSearchParamTypesDstu3Test {
 		ourLog.info(response);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertEquals(2, ourLastParamValStr.size());
-		assertEquals(2, ourLastParamValStr.get(0).getValuesAsQueryTokens().size());
+		assertThat(ourLastParamValStr).hasSize(2);
+		assertThat(ourLastParamValStr.get(0).getValuesAsQueryTokens()).hasSize(2);
 		assertEquals("VALSTR1A", ourLastParamValStr.get(0).getValuesAsQueryTokens().get(0).getValue());
 		assertEquals("VALSTR1B", ourLastParamValStr.get(0).getValuesAsQueryTokens().get(1).getValue());
 		assertEquals("VALSTR2A", ourLastParamValStr.get(1).getValuesAsQueryTokens().get(0).getValue());
 		assertEquals("VALSTR2B", ourLastParamValStr.get(1).getValuesAsQueryTokens().get(1).getValue());
-		assertEquals(2, ourLastParamValTok.size());
-		assertEquals(1, ourLastParamValTok.get(0).getValuesAsQueryTokens().size());
+		assertThat(ourLastParamValTok).hasSize(2);
+		assertThat(ourLastParamValTok.get(0).getValuesAsQueryTokens()).hasSize(1);
 		assertEquals("VALTOK1A", ourLastParamValTok.get(0).getValuesAsQueryTokens().get(0).getSystem());
 		assertEquals("VALTOK1B", ourLastParamValTok.get(0).getValuesAsQueryTokens().get(0).getValue());
 		assertEquals("VALTOK2A", ourLastParamValTok.get(1).getValuesAsQueryTokens().get(0).getSystem());
@@ -186,22 +176,22 @@ public class OperationServerWithSearchParamTypesDstu3Test {
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 		//@formatter:off
-		assertThat(conf, stringContainsInOrder(
+		assertThat(conf).contains(
 			"<type value=\"Patient\"/>",
-			"<operation>", 
+			"<operation>",
 			"<name value=\"andlist\"/>",
-			"</operation>" 
-		));
-		assertThat(conf, stringContainsInOrder(
+			"</operation>"
+		);
+		assertThat(conf).contains(
 			"<type value=\"Patient\"/>",
-			"<operation>", 
+			"<operation>",
 			"<name value=\"nonrepeating\"/>"
-		));
-		assertThat(conf, stringContainsInOrder(
+		);
+		assertThat(conf).contains(
 			"<type value=\"Patient\"/>",
-			"<operation>", 
+			"<operation>",
 			"<name value=\"orlist\"/>"
-		));
+		);
 		//@formatter:on
 		
 		/*
@@ -211,64 +201,64 @@ public class OperationServerWithSearchParamTypesDstu3Test {
 		String def = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(andListDef);
 		ourLog.info(def);
 		//@formatter:off
-		assertThat(def, stringContainsInOrder(
-			"<parameter>", 
-			"<name value=\"valtok\"/>", 
-			"<use value=\"in\"/>", 
-			"<min value=\"0\"/>", 
-			"<max value=\"10\"/>", 
-			"<type value=\"string\"/>", 
-			"<searchType value=\"token\"/>", 
+		assertThat(def).contains(
+			"<parameter>",
+			"<name value=\"valtok\"/>",
+			"<use value=\"in\"/>",
+			"<min value=\"0\"/>",
+			"<max value=\"10\"/>",
+			"<type value=\"string\"/>",
+			"<searchType value=\"token\"/>",
 			"</parameter>"
-		));
+		);
 		//@formatter:on
 		
 		andListDef = sc.readOperationDefinition(new IdType("OperationDefinition/Patient-t-andlist-withnomax"), createRequestDetails(rs));
 		def = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(andListDef);
 		ourLog.info(def);
 		//@formatter:off
-		assertThat(def, stringContainsInOrder(
-			"<parameter>", 
-			"<name value=\"valtok\"/>", 
-			"<use value=\"in\"/>", 
-			"<min value=\"0\"/>", 
-			"<max value=\"*\"/>", 
-			"<type value=\"string\"/>", 
-			"<searchType value=\"token\"/>", 
+		assertThat(def).contains(
+			"<parameter>",
+			"<name value=\"valtok\"/>",
+			"<use value=\"in\"/>",
+			"<min value=\"0\"/>",
+			"<max value=\"*\"/>",
+			"<type value=\"string\"/>",
+			"<searchType value=\"token\"/>",
 			"</parameter>"
-		));
+		);
 		//@formatter:on
 
 		OperationDefinition orListDef = sc.readOperationDefinition(new IdType("OperationDefinition/Patient-t-orlist"), createRequestDetails(rs));
 		def = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(orListDef);
 		ourLog.info(def);
 		//@formatter:off
-		assertThat(def, stringContainsInOrder(
-			"<parameter>", 
-			"<name value=\"valtok\"/>", 
-			"<use value=\"in\"/>", 
-			"<min value=\"0\"/>", 
-			"<max value=\"10\"/>", 
-			"<type value=\"string\"/>", 
-			"<searchType value=\"token\"/>", 
+		assertThat(def).contains(
+			"<parameter>",
+			"<name value=\"valtok\"/>",
+			"<use value=\"in\"/>",
+			"<min value=\"0\"/>",
+			"<max value=\"10\"/>",
+			"<type value=\"string\"/>",
+			"<searchType value=\"token\"/>",
 			"</parameter>"
-		));
+		);
 		//@formatter:on
 		
 		orListDef = sc.readOperationDefinition(new IdType("OperationDefinition/Patient-t-orlist-withnomax"), createRequestDetails(rs));
 		def = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(orListDef);
 		ourLog.info(def);
 		//@formatter:off
-		assertThat(def, stringContainsInOrder(
-			"<parameter>", 
-			"<name value=\"valtok\"/>", 
-			"<use value=\"in\"/>", 
-			"<min value=\"0\"/>", 
-			"<max value=\"*\"/>", 
-			"<type value=\"string\"/>", 
-			"<searchType value=\"token\"/>", 
+		assertThat(def).contains(
+			"<parameter>",
+			"<name value=\"valtok\"/>",
+			"<use value=\"in\"/>",
+			"<min value=\"0\"/>",
+			"<max value=\"*\"/>",
+			"<type value=\"string\"/>",
+			"<searchType value=\"token\"/>",
 			"</parameter>"
-		));
+		);
 		//@formatter:on
 
 	}
@@ -289,11 +279,11 @@ public class OperationServerWithSearchParamTypesDstu3Test {
 		ourLog.info(response);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertEquals(1, ourLastParamValStr.size());
-		assertEquals(1, ourLastParamValStr.get(0).getValuesAsQueryTokens().size());
+		assertThat(ourLastParamValStr).hasSize(1);
+		assertThat(ourLastParamValStr.get(0).getValuesAsQueryTokens()).hasSize(1);
 		assertEquals("VALSTR", ourLastParamValStr.get(0).getValuesAsQueryTokens().get(0).getValue());
-		assertEquals(1, ourLastParamValTok.size());
-		assertEquals(1, ourLastParamValTok.get(0).getValuesAsQueryTokens().size());
+		assertThat(ourLastParamValTok).hasSize(1);
+		assertThat(ourLastParamValTok.get(0).getValuesAsQueryTokens()).hasSize(1);
 		assertEquals("VALTOKA", ourLastParamValTok.get(0).getValuesAsQueryTokens().get(0).getSystem());
 		assertEquals("VALTOKB", ourLastParamValTok.get(0).getValuesAsQueryTokens().get(0).getValue());
 		assertEquals("type $nonrepeating", ourLastMethod);
@@ -308,11 +298,11 @@ public class OperationServerWithSearchParamTypesDstu3Test {
 		ourLog.info(response);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertEquals(1, ourLastParamValStr.size());
-		assertEquals(1, ourLastParamValStr.get(0).getValuesAsQueryTokens().size());
+		assertThat(ourLastParamValStr).hasSize(1);
+		assertThat(ourLastParamValStr.get(0).getValuesAsQueryTokens()).hasSize(1);
 		assertEquals("VALSTR", ourLastParamValStr.get(0).getValuesAsQueryTokens().get(0).getValue());
-		assertEquals(1, ourLastParamValTok.size());
-		assertEquals(1, ourLastParamValTok.get(0).getValuesAsQueryTokens().size());
+		assertThat(ourLastParamValTok).hasSize(1);
+		assertThat(ourLastParamValTok.get(0).getValuesAsQueryTokens()).hasSize(1);
 		assertEquals("VALTOKA", ourLastParamValTok.get(0).getValuesAsQueryTokens().get(0).getSystem());
 		assertEquals("VALTOKB", ourLastParamValTok.get(0).getValuesAsQueryTokens().get(0).getValue());
 		assertEquals("type $nonrepeating", ourLastMethod);
@@ -328,12 +318,12 @@ public class OperationServerWithSearchParamTypesDstu3Test {
 		ourLog.info(response);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertEquals(1, ourLastParamValStr.size());
-		assertEquals(1, ourLastParamValStr.get(0).getValuesAsQueryTokens().size());
+		assertThat(ourLastParamValStr).hasSize(1);
+		assertThat(ourLastParamValStr.get(0).getValuesAsQueryTokens()).hasSize(1);
 		assertEquals("VALSTR", ourLastParamValStr.get(0).getValuesAsQueryTokens().get(0).getValue());
 		assertTrue(ourLastParamValStr.get(0).getValuesAsQueryTokens().get(0).isExact());
-		assertEquals(1, ourLastParamValTok.size());
-		assertEquals(1, ourLastParamValTok.get(0).getValuesAsQueryTokens().size());
+		assertThat(ourLastParamValTok).hasSize(1);
+		assertThat(ourLastParamValTok.get(0).getValuesAsQueryTokens()).hasSize(1);
 		assertEquals("VALTOKA", ourLastParamValTok.get(0).getValuesAsQueryTokens().get(0).getSystem());
 		assertEquals("VALTOKB", ourLastParamValTok.get(0).getValuesAsQueryTokens().get(0).getValue());
 		assertEquals(TokenParamModifier.NOT, ourLastParamValTok.get(0).getValuesAsQueryTokens().get(0).getModifier());
@@ -358,14 +348,14 @@ public class OperationServerWithSearchParamTypesDstu3Test {
 		ourLog.info(response);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertEquals(2, ourLastParamValStr.size());
-		assertEquals(2, ourLastParamValStr.get(0).getValuesAsQueryTokens().size());
+		assertThat(ourLastParamValStr).hasSize(2);
+		assertThat(ourLastParamValStr.get(0).getValuesAsQueryTokens()).hasSize(2);
 		assertEquals("VALSTR1A", ourLastParamValStr.get(0).getValuesAsQueryTokens().get(0).getValue());
 		assertEquals("VALSTR1B", ourLastParamValStr.get(0).getValuesAsQueryTokens().get(1).getValue());
 		assertEquals("VALSTR2A", ourLastParamValStr.get(1).getValuesAsQueryTokens().get(0).getValue());
 		assertEquals("VALSTR2B", ourLastParamValStr.get(1).getValuesAsQueryTokens().get(1).getValue());
-		assertEquals(2, ourLastParamValTok.size());
-		assertEquals(1, ourLastParamValTok.get(0).getValuesAsQueryTokens().size());
+		assertThat(ourLastParamValTok).hasSize(2);
+		assertThat(ourLastParamValTok.get(0).getValuesAsQueryTokens()).hasSize(1);
 		assertEquals("VALTOK1A", ourLastParamValTok.get(0).getValuesAsQueryTokens().get(0).getSystem());
 		assertEquals("VALTOK1B", ourLastParamValTok.get(0).getValuesAsQueryTokens().get(0).getValue());
 		assertEquals("VALTOK2A", ourLastParamValTok.get(1).getValuesAsQueryTokens().get(0).getSystem());
@@ -383,14 +373,14 @@ public class OperationServerWithSearchParamTypesDstu3Test {
 		ourLog.info(response);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertEquals(2, ourLastParamValStr.size());
-		assertEquals(2, ourLastParamValStr.get(0).getValuesAsQueryTokens().size());
+		assertThat(ourLastParamValStr).hasSize(2);
+		assertThat(ourLastParamValStr.get(0).getValuesAsQueryTokens()).hasSize(2);
 		assertEquals("VALSTR1A", ourLastParamValStr.get(0).getValuesAsQueryTokens().get(0).getValue());
 		assertEquals("VALSTR1B", ourLastParamValStr.get(0).getValuesAsQueryTokens().get(1).getValue());
 		assertEquals("VALSTR2A", ourLastParamValStr.get(1).getValuesAsQueryTokens().get(0).getValue());
 		assertEquals("VALSTR2B", ourLastParamValStr.get(1).getValuesAsQueryTokens().get(1).getValue());
-		assertEquals(2, ourLastParamValTok.size());
-		assertEquals(1, ourLastParamValTok.get(0).getValuesAsQueryTokens().size());
+		assertThat(ourLastParamValTok).hasSize(2);
+		assertThat(ourLastParamValTok.get(0).getValuesAsQueryTokens()).hasSize(1);
 		assertEquals("VALTOK1A", ourLastParamValTok.get(0).getValuesAsQueryTokens().get(0).getSystem());
 		assertEquals("VALTOK1B", ourLastParamValTok.get(0).getValuesAsQueryTokens().get(0).getValue());
 		assertEquals("VALTOK2A", ourLastParamValTok.get(1).getValuesAsQueryTokens().get(0).getSystem());

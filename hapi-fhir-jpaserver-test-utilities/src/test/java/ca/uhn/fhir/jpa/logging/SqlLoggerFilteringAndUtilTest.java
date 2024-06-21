@@ -1,8 +1,9 @@
 package ca.uhn.fhir.jpa.logging;
 
-import ca.uhn.test.util.LogbackCaptureTestExtension;
+import ca.uhn.test.util.LogbackTestExtension;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.spi.ILoggingEvent;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -24,10 +25,8 @@ import java.time.temporal.ChronoUnit;
 
 import static ca.uhn.fhir.jpa.logging.SqlLoggerFilteringUtil.FILTER_FILE_PATH;
 import static ca.uhn.fhir.jpa.logging.SqlLoggerFilteringUtil.FILTER_UPDATE_INTERVAL_SECS;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.hasItems;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -55,7 +54,7 @@ public class SqlLoggerFilteringAndUtilTest {
 
 		@BeforeEach
 		void setUp() {
-			myTestedLogger= new SqlStatementFilteringLogger(myFilteringUtil);
+			myTestedLogger = new SqlStatementFilteringLogger(myFilteringUtil);
 
 			LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
 			myLogger = loggerContext.getLogger("org.hibernate.SQL");
@@ -91,7 +90,7 @@ public class SqlLoggerFilteringAndUtilTest {
 		public class FileFiltersTests {
 
 			@RegisterExtension
-			public LogbackCaptureTestExtension myLogCapture = new LogbackCaptureTestExtension("org.hibernate.SQL");
+			public LogbackTestExtension myLogCapture = new LogbackTestExtension("org.hibernate.SQL");
 
 			@BeforeEach
 			void setUp() {
@@ -110,7 +109,7 @@ public class SqlLoggerFilteringAndUtilTest {
 				myTestedLogger.logStatement("1-must-log-this-statement");
 				myTestedLogger.logStatement("2-must-log-this-statement");
 				myTestedLogger.logStatement("3-must-log-this-statement");
-				assertEquals(3, myLogCapture.getLogEvents().size() );
+				assertEquals(3, myLogCapture.getLogEvents().size());
 
 				addLineToFilterFile("sw: 1-must-log");
 				waitForFiltersRefresh();
@@ -120,11 +119,7 @@ public class SqlLoggerFilteringAndUtilTest {
 				myTestedLogger.logStatement("1-must-log-this-statement");
 				myTestedLogger.logStatement("2-must-log-this-statement");
 				myTestedLogger.logStatement("3-must-log-this-statement");
-				assertThat(
-					myLogCapture.getLogEvents().stream().map(Object::toString).toList(),
-					hasItems(
-						containsString("2-must-log-this-statement"),
-						containsString("3-must-log-this-statement")));
+				assertThat(myLogCapture.getLogEvents().stream().map(ILoggingEvent::getMessage).toList()).contains("2-must-log-this-statement", "3-must-log-this-statement");
 
 				addLineToFilterFile("sw: 3-must-log");
 				waitForFiltersRefresh();
@@ -134,9 +129,7 @@ public class SqlLoggerFilteringAndUtilTest {
 				myTestedLogger.logStatement("1-must-log-this-statement");
 				myTestedLogger.logStatement("2-must-log-this-statement");
 				myTestedLogger.logStatement("3-must-log-this-statement");
-				assertThat(
-					myLogCapture.getLogEvents().stream().map(Object::toString).toList(),
-					hasItems(containsString("2-must-log-this-statement")));
+				assertThat(myLogCapture.getLogEvents().stream().map(ILoggingEvent::getMessage).toList()).contains("2-must-log-this-statement");
 			}
 
 			@Test
@@ -145,7 +138,7 @@ public class SqlLoggerFilteringAndUtilTest {
 				myTestedLogger.logStatement("1-must-log-this-statement");
 				myTestedLogger.logStatement("2-must-log-this-statement");
 				myTestedLogger.logStatement("3-must-log-this-statement");
-				assertEquals(3, myLogCapture.getLogEvents().size() );
+				assertEquals(3, myLogCapture.getLogEvents().size());
 
 				addLineToFilterFile("eq: 1-must-log-this-statement");
 				waitForFiltersRefresh();
@@ -155,11 +148,7 @@ public class SqlLoggerFilteringAndUtilTest {
 				myTestedLogger.logStatement("1-must-log-this-statement");
 				myTestedLogger.logStatement("2-must-log-this-statement");
 				myTestedLogger.logStatement("3-must-log-this-statement");
-				assertThat(
-					myLogCapture.getLogEvents().stream().map(Object::toString).toList(),
-					hasItems(
-						containsString("2-must-log-this-statement"),
-						containsString("3-must-log-this-statement")));
+				assertThat(myLogCapture.getLogEvents().stream().map(ILoggingEvent::getMessage).toList()).contains("2-must-log-this-statement", "3-must-log-this-statement");
 
 				addLineToFilterFile("sw: 3-must-log-this-statement");
 				waitForFiltersRefresh();
@@ -169,17 +158,14 @@ public class SqlLoggerFilteringAndUtilTest {
 				myTestedLogger.logStatement("1-must-log-this-statement");
 				myTestedLogger.logStatement("2-must-log-this-statement");
 				myTestedLogger.logStatement("3-must-log-this-statement");
-				assertThat(
-					myLogCapture.getLogEvents().stream().map(Object::toString).toList(),
-					hasItems(containsString("2-must-log-this-statement")));
+				assertThat(myLogCapture.getLogEvents().stream().map(ILoggingEvent::getMessage).toList()).contains("2-must-log-this-statement");
 			}
 
 		}
 
 		private void waitForFiltersRefresh() {
 			int beforeRefreshCount = SqlLoggerFilteringUtil.getRefreshCountForTests();
-			await().atMost(Duration.of(SqlLoggerFilteringUtil.FILTER_UPDATE_INTERVAL_SECS + 1, ChronoUnit.SECONDS))
-				.until(() -> SqlLoggerFilteringUtil.getRefreshCountForTests() > beforeRefreshCount);
+			await().atMost(Duration.of(SqlLoggerFilteringUtil.FILTER_UPDATE_INTERVAL_SECS + 1, ChronoUnit.SECONDS)).until(() -> SqlLoggerFilteringUtil.getRefreshCountForTests() > beforeRefreshCount);
 		}
 
 		private void addLineToFilterFile(String theFilterLine) throws IOException {
@@ -203,7 +189,7 @@ public class SqlLoggerFilteringAndUtilTest {
 		private SqlLoggerFilteringUtil mySpiedUtil;
 
 		@RegisterExtension
-		public LogbackCaptureTestExtension myLogCapture = new LogbackCaptureTestExtension("org.hibernate.SQL");
+		public LogbackTestExtension myLogCapture = new LogbackTestExtension("org.hibernate.SQL");
 
 		private ch.qos.logback.classic.Logger myHibernateLogger;
 
@@ -250,6 +236,7 @@ public class SqlLoggerFilteringAndUtilTest {
 
 				assertFalse(result);
 			}
+
 			private void setFilter(String theFilterDefinition) {
 				mySpiedUtil.getSqlLoggerFilters().forEach(f -> f.evaluateFilterLine(theFilterDefinition));
 			}
@@ -323,8 +310,7 @@ public class SqlLoggerFilteringAndUtilTest {
 		private void assertExecutorState(boolean isActive) {
 			int beforeRefreshCount = SqlLoggerFilteringUtil.getRefreshCountForTests();
 			if (isActive) {
-				await().atMost(Duration.of(FILTER_UPDATE_INTERVAL_SECS + 1, ChronoUnit.SECONDS))
-					.until(() -> beforeRefreshCount < SqlLoggerFilteringUtil.getRefreshCountForTests());
+				await().atMost(Duration.of(FILTER_UPDATE_INTERVAL_SECS + 1, ChronoUnit.SECONDS)).until(() -> beforeRefreshCount < SqlLoggerFilteringUtil.getRefreshCountForTests());
 			} else {
 				waitForRefreshCycle();
 				int newCount = SqlLoggerFilteringUtil.getRefreshCountForTests();
@@ -333,7 +319,6 @@ public class SqlLoggerFilteringAndUtilTest {
 		}
 
 	}
-
 
 
 }

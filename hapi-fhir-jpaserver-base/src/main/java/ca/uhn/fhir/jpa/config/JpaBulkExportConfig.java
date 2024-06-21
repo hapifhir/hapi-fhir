@@ -22,13 +22,14 @@ package ca.uhn.fhir.jpa.config;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
 import ca.uhn.fhir.jpa.bulk.export.svc.BulkExportHelperService;
 import ca.uhn.fhir.jpa.bulk.export.svc.JpaBulkExportProcessor;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class JpaBulkExportConfig {
 	@Bean
-	public IBulkExportProcessor jpaBulkExportProcessor() {
+	public IBulkExportProcessor<JpaPid> jpaBulkExportProcessor() {
 		return new JpaBulkExportProcessor();
 	}
 

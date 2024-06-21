@@ -20,7 +20,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.UUID;
 
-import static ca.uhn.fhir.jpa.search.cache.DatabaseSearchCacheSvcImpl.DEFAULT_MAX_DELETE_CANDIDATES_TO_FIND;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SearchCoordinatorSvcImplTest extends BaseJpaR4Test {

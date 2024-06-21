@@ -67,12 +67,14 @@ public class TagDefinition implements Serializable {
 	@Column(name = "TAG_ID")
 	private Long myId;
 
+	// one tag definition -> many resource tags
 	@OneToMany(
 			cascade = {},
 			fetch = FetchType.LAZY,
 			mappedBy = "myTag")
 	private Collection<ResourceTag> myResources;
 
+	// one tag definition -> many history
 	@OneToMany(
 			cascade = {},
 			fetch = FetchType.LAZY,

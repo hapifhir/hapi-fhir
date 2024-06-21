@@ -8,7 +8,6 @@ import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
-import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
@@ -16,25 +15,17 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpOptions;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.ee10.servlet.ServletHandler;
-import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.concurrent.TimeUnit;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 /**
  * Created by dsotnikov on 2/25/2014.
@@ -62,7 +53,7 @@ public class ServerFeaturesDstu2Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, containsString("<Conformance"));
+		assertThat(responseContent).contains("<Conformance");
 
 		/*
 		 * Now with a leading /
@@ -74,7 +65,7 @@ public class ServerFeaturesDstu2Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, containsString("<Conformance"));
+		assertThat(responseContent).contains("<Conformance");
 
 	}
 
@@ -129,19 +120,19 @@ public class ServerFeaturesDstu2Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, containsString("resourceType\":\"Conformance"));
+		assertThat(responseContent).contains("resourceType\":\"Conformance");
 	}
 
 	@Test
 	public void testHeadJson() throws Exception {
 		HttpHead httpGet = new HttpHead(ourServer.getBaseUrl() + "/Patient/123");
 		HttpResponse status = ourClient.execute(httpGet);
-		assertEquals(null, status.getEntity());
+		assertNull(status.getEntity());
 
 		ourLog.info(status.toString());
-		
+
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(status.getFirstHeader("x-powered-by").getValue(), containsString("HAPI"));
+		assertThat(status.getFirstHeader("x-powered-by").getValue()).contains("HAPI");
 	}
 
 	@Test
@@ -151,7 +142,7 @@ public class ServerFeaturesDstu2Test {
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, containsString("PRP1"));
+		assertThat(responseContent).contains("PRP1");
 
 		Collection<IResourceProvider> originalProviders = new ArrayList<>(ourServer.getRestfulServer().getResourceProviders());
 		DummyPatientResourceProvider2 newProvider = new DummyPatientResourceProvider2();
@@ -168,7 +159,7 @@ public class ServerFeaturesDstu2Test {
 			responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			IOUtils.closeQuietly(status.getEntity().getContent());
 			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertThat(responseContent, containsString("PRP2"));
+			assertThat(responseContent).contains("PRP2");
 
 		} finally {
 

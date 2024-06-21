@@ -575,7 +575,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		// Pre-cache the match URL, and create an entry in the HFJ_RES_SEARCH_URL table to
 		// protect against concurrent writes to the same conditional URL
 		if (theMatchUrl != null) {
-			myResourceSearchUrlSvc.enforceMatchUrlResourceUniqueness(getResourceName(), theMatchUrl, jpaPid);
+			myResourceSearchUrlSvc.enforceMatchUrlResourceUniqueness(getResourceName(), theMatchUrl, updatedEntity);
 			myMatchResourceUrlService.matchUrlResolved(theTransactionDetails, getResourceName(), theMatchUrl, jpaPid);
 		}
 
@@ -908,7 +908,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			RequestDetails theRequestDetails,
 			TransactionDetails theTransactionDetails) {
 		StopWatch w = new StopWatch();
-		TransactionDetails transactionDetails = new TransactionDetails();
+		TransactionDetails transactionDetails =
+				theTransactionDetails != null ? theTransactionDetails : new TransactionDetails();
 		List<ResourceTable> deletedResources = new ArrayList<>();
 
 		List<IResourcePersistentId<?>> resolvedIds =
@@ -923,6 +924,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			deletedResources.add(entity);
 
 			T resourceToDelete = myJpaStorageResourceParser.toResource(myResourceType, entity, null, false);
+
+			transactionDetails.addDeletedResourceId(pid);
 
 			// Notify IServerOperationInterceptors about pre-action call
 			HookParams hooks = new HookParams()
@@ -987,8 +990,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				theUrl,
 				deletedResources.size(),
 				w.getMillis());
-
-		theTransactionDetails.addDeletedResourceIds(theResourceIds);
 
 		DeleteMethodOutcome retVal = new DeleteMethodOutcome();
 		retVal.setDeletedEntities(deletedResources);
@@ -1410,19 +1411,20 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	@Override
-	@Transactional
 	public <MT extends IBaseMetaType> MT metaGetOperation(Class<MT> theType, IIdType theId, RequestDetails theRequest) {
-		Set<TagDefinition> tagDefs = new HashSet<>();
-		BaseHasResource entity = readEntity(theId, theRequest);
-		for (BaseTag next : entity.getTags()) {
-			tagDefs.add(next.getTag());
-		}
-		MT retVal = toMetaDt(theType, tagDefs);
+		return myTransactionService.withRequest(theRequest).execute(() -> {
+			Set<TagDefinition> tagDefs = new HashSet<>();
+			BaseHasResource entity = readEntity(theId, theRequest);
+			for (BaseTag next : entity.getTags()) {
+				tagDefs.add(next.getTag());
+			}
+			MT retVal = toMetaDt(theType, tagDefs);
 
-		retVal.setLastUpdated(entity.getUpdatedDate());
-		retVal.setVersionId(Long.toString(entity.getVersion()));
+			retVal.setLastUpdated(entity.getUpdatedDate());
+			retVal.setVersionId(Long.toString(entity.getVersion()));
 
-		return retVal;
+			return retVal;
+		});
 	}
 
 	@Override

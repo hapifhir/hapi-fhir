@@ -32,6 +32,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import java.util.Collection;
 import java.util.List;
 
+@SuppressWarnings({"rawtypes"})
 public interface IFulltextSearchSvc {
 
 	/**
@@ -79,11 +80,18 @@ public interface IFulltextSearchSvc {
 	ExtendedHSearchIndexData extractLuceneIndexData(
 			IBaseResource theResource, ResourceIndexedSearchParams theNewParams);
 
-	boolean supportsSomeOf(SearchParameterMap myParams);
+	/**
+	 * Returns true if the parameter map can be handled for hibernate search.
+	 * We have to filter out any queries that might use search params
+	 * we only know how to handle in JPA.
+	 * -
+	 * See {@link ca.uhn.fhir.jpa.dao.search.ExtendedHSearchSearchBuilder#addAndConsumeAdvancedQueryClauses}
+	 */
+	boolean canUseHibernateSearch(String theResourceType, SearchParameterMap theParameterMap);
 
 	/**
 	 * Re-publish the resource to the full-text index.
-	 *
+	 * -
 	 * During update, hibernate search only republishes the entity if it has changed.
 	 * During $reindex, we want to force the re-index.
 	 *
@@ -120,4 +128,13 @@ public interface IFulltextSearchSvc {
 	 * @param theGivenIds The list of IDs for the given document type. Note that while this is a List<Object>, the type must match the type of the `@Id` field on the given class.
 	 */
 	void deleteIndexedDocumentsByTypeAndId(Class theClazz, List<Object> theGivenIds);
+
+	/**
+	 * Given a resource type and a {@link SearchParameterMap}, return true only if all sort terms are supported.
+	 *
+	 * @param theResourceName The resource type for the query.
+	 * @param theParams The {@link SearchParameterMap} being searched with.
+	 * @return true if all sort terms are supported, false otherwise.
+	 */
+	boolean supportsAllSortTerms(String theResourceName, SearchParameterMap theParams);
 }

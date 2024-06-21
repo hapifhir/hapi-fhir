@@ -21,6 +21,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService.ALL_LANGUAGES_VALUESET_URL;
 import static org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService.CURRENCIES_CODESYSTEM_URL;
 import static org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService.CURRENCIES_VALUESET_URL;
@@ -38,6 +39,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+
 
 public class CommonCodeSystemsTerminologyServiceTest extends BaseValidationTestWithInlineMocks {
 
@@ -107,7 +109,7 @@ public class CommonCodeSystemsTerminologyServiceTest extends BaseValidationTestW
 		final String code = "FOO";
 		final ValueSet vs = new ValueSet().setUrl(UCUM_VALUESET_URL);
 		CodeValidationResult result = mySvc.validateCodeInValueSet(newSupport(), newOptions(), UCUM_CODESYSTEM_URL, code, null, vs);
-		validateCodeResultError(result, "Error processing unit '" + code +"': The unit '" + code + "' is unknown' at position 0");
+		validateCodeResultError(result, "Error processing unit '" + code +"': The unit '" + code + "' is unknown' at position 0 (for 'http://unitsofmeasure.org#"+code+"')");
 	}
 
 	@ParameterizedTest
@@ -174,14 +176,14 @@ public class CommonCodeSystemsTerminologyServiceTest extends BaseValidationTestW
 		CommonCodeSystemsTerminologyService svc = new CommonCodeSystemsTerminologyService(FhirContext.forDstu3Cached());
 		org.hl7.fhir.dstu3.model.CodeSystem cs = (org.hl7.fhir.dstu3.model.CodeSystem) svc.fetchCodeSystem(CommonCodeSystemsTerminologyService.COUNTRIES_CODESYSTEM_URL);
 		assertNotNull(cs);
-		assertEquals(498, cs.getConcept().size());
+		assertThat(cs.getConcept()).hasSize(498);
 	}
 
 	@Test
 	public void testFetchCodeSystem_withCountriesForR4_returnsOk() {
 		CodeSystem cs = (CodeSystem) mySvc.fetchCodeSystem(CommonCodeSystemsTerminologyService.COUNTRIES_CODESYSTEM_URL);
 		assertNotNull(cs);
-		assertEquals(498, cs.getConcept().size());
+		assertThat(cs.getConcept()).hasSize(498);
 	}
 
 	@Test
@@ -280,7 +282,7 @@ public class CommonCodeSystemsTerminologyServiceTest extends BaseValidationTestW
 	public void testFetchCodeSystem_withCurrencies_returnsOk() {
 		CodeSystem cs = (CodeSystem) mySvc.fetchCodeSystem(CURRENCIES_CODESYSTEM_URL);
 		assertNotNull(cs);
-		assertEquals(182, cs.getConcept().size());
+		assertThat(cs.getConcept()).hasSize(182);
 	}
 
 	@Test
@@ -293,8 +295,7 @@ public class CommonCodeSystemsTerminologyServiceTest extends BaseValidationTestW
 	public void testGetCodeSystemUrl_forDSTU3_throwsException() {
 		try {
 			CommonCodeSystemsTerminologyService.getCodeSystemUrl(myCtx, new org.hl7.fhir.dstu3.model.CodeSystem());
-			fail();
-		} catch (IllegalArgumentException e) {
+			fail();		} catch (IllegalArgumentException e) {
 			assertEquals(Msg.code(696) + "Can not handle version: DSTU3", e.getMessage());
 		}
 	}

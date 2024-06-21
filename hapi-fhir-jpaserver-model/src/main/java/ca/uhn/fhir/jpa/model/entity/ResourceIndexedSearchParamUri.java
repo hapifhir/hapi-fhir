@@ -21,11 +21,13 @@ package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.listener.IndexStorageOptimizationListener;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.UriParam;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
@@ -42,9 +44,11 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 
+import static ca.uhn.fhir.jpa.model.util.SearchParamHash.hashSearchParam;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 
 @Embeddable
+@EntityListeners(IndexStorageOptimizationListener.class)
 @Entity
 @Table(
 		name = "HFJ_SPIDX_URI",
@@ -84,11 +88,6 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 	 */
 	@Column(name = "HASH_URI", nullable = true)
 	private Long myHashUri;
-	/**
-	 * @since 3.5.0 - At some point this should be made not-null
-	 */
-	@Column(name = "HASH_IDENTITY", nullable = true)
-	private Long myHashIdentity;
 
 	@ManyToOne(
 			optional = false,
@@ -161,20 +160,11 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 		}
 		ResourceIndexedSearchParamUri obj = (ResourceIndexedSearchParamUri) theObj;
 		EqualsBuilder b = new EqualsBuilder();
-		b.append(getResourceType(), obj.getResourceType());
-		b.append(getParamName(), obj.getParamName());
 		b.append(getUri(), obj.getUri());
 		b.append(getHashUri(), obj.getHashUri());
 		b.append(getHashIdentity(), obj.getHashIdentity());
+		b.append(isMissing(), obj.isMissing());
 		return b.isEquals();
-	}
-
-	private Long getHashIdentity() {
-		return myHashIdentity;
-	}
-
-	private void setHashIdentity(long theHashIdentity) {
-		myHashIdentity = theHashIdentity;
 	}
 
 	public Long getHashUri() {
@@ -207,11 +197,10 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 	@Override
 	public int hashCode() {
 		HashCodeBuilder b = new HashCodeBuilder();
-		b.append(getResourceType());
-		b.append(getParamName());
 		b.append(getUri());
 		b.append(getHashUri());
 		b.append(getHashIdentity());
+		b.append(isMissing());
 		return b.toHashCode();
 	}
 
@@ -228,6 +217,7 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 		b.append("paramName", getParamName());
 		b.append("uri", myUri);
 		b.append("hashUri", myHashUri);
+		b.append("hashIdentity", myHashIdentity);
 		return b.toString();
 	}
 
@@ -256,7 +246,7 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 			String theResourceType,
 			String theParamName,
 			String theUri) {
-		return hash(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, theUri);
+		return hashSearchParam(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, theUri);
 	}
 
 	@Override

@@ -3,11 +3,12 @@ package ca.uhn.fhir.jpa.subscription.submit.interceptor;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
-import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.cache.IResourceVersionSvc;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
+import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.config.SearchParamConfig;
@@ -40,6 +41,7 @@ import static org.mockito.Mockito.verify;
 public class SubscriptionSubmitInterceptorLoaderTest {
 	@Autowired
 	private SubscriptionMatcherInterceptor mySubscriptionMatcherInterceptor;
+
 	@MockBean
 	private IInterceptorService myInterceptorService;
 
@@ -72,6 +74,8 @@ public class SubscriptionSubmitInterceptorLoaderTest {
 			return subscriptionSettings;
 		}
 
+		@MockBean
+		public StorageSettings myStorageSettings;
 		@MockBean
 		private ISearchParamProvider mySearchParamProvider;
 		@MockBean

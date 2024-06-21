@@ -19,9 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.blankString;
-import static org.hamcrest.Matchers.not;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class BulkDataImportSvcImplTest extends BaseJpaR4Test {
@@ -45,7 +43,7 @@ public class BulkDataImportSvcImplTest extends BaseJpaR4Test {
 		BulkImportJobFileJson file2 = new BulkImportJobFileJson();
 		file2.setContents("contents 2");
 		String jobId = mySvc.createNewJob(job, Lists.newArrayList(file1, file2));
-		assertThat(jobId, not(blankString()));
+		assertThat(jobId).isNotBlank();
 
 		// Add file
 		BulkImportJobFileJson file3 = new BulkImportJobFileJson();

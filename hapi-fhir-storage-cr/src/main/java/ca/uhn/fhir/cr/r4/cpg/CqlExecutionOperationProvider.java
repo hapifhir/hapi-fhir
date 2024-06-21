@@ -113,7 +113,7 @@ public class CqlExecutionOperationProvider {
 	 *         is a CQL system-defined or FHIR-defined type, the result is returned
 	 *         as a {@link Parameters} Parameters resource
 	 */
-	@Operation(name = ProviderConstants.CR_OPERATION_CQL)
+	@Operation(name = ProviderConstants.CR_OPERATION_CQL, idempotent = true)
 	@Description(
 			shortDefinition = "$cql",
 			value =
@@ -145,6 +145,6 @@ public class CqlExecutionOperationProvider {
 						theDataEndpoint,
 						theContentEndpoint,
 						theTerminologyEndpoint,
-						null);
+						theContent);
 	}
 }

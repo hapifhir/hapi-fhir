@@ -48,6 +48,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -267,13 +268,16 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 			case DELETE:
 				if (theOperation == RestOperationTypeEnum.DELETE) {
 					if (thePointcut == Pointcut.STORAGE_PRE_DELETE_EXPUNGE && myAppliesToDeleteExpunge) {
-						return newVerdict(
-								theOperation,
-								theRequestDetails,
-								theInputResource,
-								theInputResourceId,
-								theOutputResource,
-								theRuleApplier);
+						target.resourceType = theRequestDetails.getResourceName();
+						String[] resourceIds = theRequestDetails.getParameters().get("_id");
+						if (resourceIds != null) {
+							target.resourceIds =
+									extractResourceIdsFromRequestParameters(theRequestDetails, resourceIds);
+						} else {
+							target.setSearchParams(theRequestDetails);
+						}
+
+						break;
 					}
 					if (myAppliesToDeleteCascade != (thePointcut == Pointcut.STORAGE_CASCADE_DELETE)) {
 						return null;
@@ -429,6 +433,18 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 				ctx,
 				target,
 				theRuleApplier);
+	}
+
+	private List<IIdType> extractResourceIdsFromRequestParameters(
+			RequestDetails theRequestDetails, String[] theResourceIds) {
+		return Arrays.stream(theResourceIds)
+				.map(id -> {
+					IIdType inputResourceId =
+							theRequestDetails.getFhirContext().getVersion().newIdType();
+					inputResourceId.setParts(null, theRequestDetails.getResourceName(), id, null);
+					return inputResourceId;
+				})
+				.collect(Collectors.toList());
 	}
 
 	/**
@@ -814,7 +830,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 		} else if (theOutputResource != null) {
 
 			List<IBaseResource> outputResources = AuthorizationInterceptor.toListOfResourcesAndExcludeContainer(
-					theRequestDetails, theOutputResource, theRequestDetails.getFhirContext());
+					theOutputResource, theRequestDetails.getFhirContext());
 
 			Verdict verdict = null;
 			for (IBaseResource nextResource : outputResources) {
@@ -850,6 +866,13 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 		return isBlank(url) || "/".equals(url);
 	}
 
+	/**
+	 * Ascertain whether this transaction request contains a nested operations or nested transactions.
+	 * This is done carefully because a bundle can contain a nested PATCH with Parameters, which is supported but
+	 * a non-PATCH nested Parameters resource may be problematic.
+	 *
+	 * @return true if we should reject this reject
+	 */
 	private boolean isInvalidNestedParametersRequest(
 			FhirContext theContext, BundleEntryParts theEntry, RestOperationTypeEnum theOperation) {
 		IBaseResource resource = theEntry.getResource();
@@ -861,7 +884,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 		final boolean isResourceParameters = PARAMETERS.equals(resourceDefinition.getName());
 		final boolean isOperationPatch = theOperation == RestOperationTypeEnum.PATCH;
 
-		return isResourceParameters && !isOperationPatch;
+		return (isResourceParameters && !isOperationPatch);
 	}
 
 	private void setTargetFromResourceId(RequestDetails theRequestDetails, FhirContext ctx, RuleTarget target) {

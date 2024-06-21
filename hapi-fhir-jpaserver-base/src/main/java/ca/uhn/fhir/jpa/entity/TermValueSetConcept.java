@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.entity;
 
 import ca.uhn.fhir.util.ValidateUtil;
+import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -40,11 +41,14 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hibernate.Length;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.util.Objects.nonNull;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.left;
 import static org.apache.commons.lang3.StringUtils.length;
 
@@ -98,9 +102,13 @@ public class TermValueSetConcept implements Serializable {
 	@Column(name = "SOURCE_PID", nullable = true)
 	private Long mySourceConceptPid;
 
+	@Deprecated(since = "7.2.0")
 	@Lob
 	@Column(name = "SOURCE_DIRECT_PARENT_PIDS", nullable = true)
 	private String mySourceConceptDirectParentPids;
+
+	@Column(name = "SOURCE_DIRECT_PARENT_PIDS_VC", nullable = true, length = Length.LONG32)
+	private String mySourceConceptDirectParentPidsVc;
 
 	@Column(name = "SYSTEM_URL", nullable = false, length = TermCodeSystem.MAX_URL_LENGTH)
 	private String mySystem;
@@ -264,7 +272,7 @@ public class TermValueSetConcept implements Serializable {
 				.append("valueSetName", this.getValueSetName())
 				.append("display", myDisplay)
 				.append("designationCount", myDesignations != null ? myDesignations.size() : "(null)")
-				.append("parentPids", mySourceConceptDirectParentPids)
+				.append("parentPids", getSourceConceptDirectParentPids())
 				.toString();
 	}
 
@@ -282,5 +290,21 @@ public class TermValueSetConcept implements Serializable {
 
 	public void setSourceConceptDirectParentPids(String theSourceConceptDirectParentPids) {
 		mySourceConceptDirectParentPids = theSourceConceptDirectParentPids;
+		mySourceConceptDirectParentPidsVc = theSourceConceptDirectParentPids;
+	}
+
+	public String getSourceConceptDirectParentPids() {
+		return isNotEmpty(mySourceConceptDirectParentPidsVc)
+				? mySourceConceptDirectParentPidsVc
+				: mySourceConceptDirectParentPids;
+	}
+
+	public void clearSourceConceptDirectParentPidsLob() {
+		mySourceConceptDirectParentPids = null;
+	}
+
+	@VisibleForTesting
+	public boolean hasSourceConceptDirectParentPidsLob() {
+		return nonNull(mySourceConceptDirectParentPids);
 	}
 }

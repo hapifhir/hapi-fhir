@@ -22,8 +22,8 @@ package ca.uhn.fhir.jpa.search;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.dao.data.IResourceSearchUrlDao;
-import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceSearchUrlEntity;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import jakarta.persistence.EntityManager;
@@ -84,11 +84,11 @@ public class ResourceSearchUrlSvc {
 	 *  We store a record of match urls with res_id so a db constraint can catch simultaneous creates that slip through.
 	 */
 	public void enforceMatchUrlResourceUniqueness(
-			String theResourceName, String theMatchUrl, JpaPid theResourcePersistentId) {
+			String theResourceName, String theMatchUrl, ResourceTable theResourceTable) {
 		String canonicalizedUrlForStorage = createCanonicalizedUrlForStorage(theResourceName, theMatchUrl);
 
 		ResourceSearchUrlEntity searchUrlEntity =
-				ResourceSearchUrlEntity.from(canonicalizedUrlForStorage, theResourcePersistentId.getId());
+				ResourceSearchUrlEntity.from(canonicalizedUrlForStorage, theResourceTable);
 		// calling dao.save performs a merge operation which implies a trip to
 		// the database to see if the resource exists.  Since we don't need the check, we avoid the trip by calling
 		// em.persist.

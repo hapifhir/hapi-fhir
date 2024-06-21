@@ -1,5 +1,9 @@
 package ca.uhn.fhir.model;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.dstu2016may.model.IdType;
@@ -11,10 +15,7 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class IdTypeDstu2_1Test {
 
@@ -34,10 +35,10 @@ public class IdTypeDstu2_1Test {
 		assertEquals("urn:uuid:1234-5678", id.getIdPart());
 		assertEquals("urn:uuid:1234-5678", id.toUnqualified().getValueAsString());
 		assertEquals("urn:uuid:1234-5678", id.toUnqualifiedVersionless().getValueAsString());
-		assertEquals(null, id.getVersionIdPart());
-		assertEquals(null, id.getResourceType());
-		assertEquals(null, id.getBaseUrl());
-		
+		assertNull(id.getVersionIdPart());
+		assertNull(id.getResourceType());
+		assertNull(id.getBaseUrl());
+
 		assertEquals("urn:uuid:1234-5678", id.withResourceType("Patient").getValue());
 		assertEquals("urn:uuid:1234-5678", id.withServerBase("http://foo", "Patient").getValue());
 		assertEquals("urn:uuid:1234-5678", id.withVersion("2").getValue());
@@ -50,10 +51,10 @@ public class IdTypeDstu2_1Test {
 		assertEquals("urn:oid:1.2.3.4", id.getIdPart());
 		assertEquals("urn:oid:1.2.3.4", id.toUnqualified().getValueAsString());
 		assertEquals("urn:oid:1.2.3.4", id.toUnqualifiedVersionless().getValueAsString());
-		assertEquals(null, id.getVersionIdPart());
-		assertEquals(null, id.getResourceType());
-		assertEquals(null, id.getBaseUrl());
-		
+		assertNull(id.getVersionIdPart());
+		assertNull(id.getResourceType());
+		assertNull(id.getBaseUrl());
+
 		assertEquals("urn:oid:1.2.3.4", id.withResourceType("Patient").getValue());
 		assertEquals("urn:oid:1.2.3.4", id.withServerBase("http://foo", "Patient").getValue());
 		assertEquals("urn:oid:1.2.3.4", id.withVersion("2").getValue());
@@ -66,10 +67,10 @@ public class IdTypeDstu2_1Test {
 		assertEquals("#foo", id.getIdPart());
 		assertEquals("#foo", id.toUnqualified().getValueAsString());
 		assertEquals("#foo", id.toUnqualifiedVersionless().getValueAsString());
-		assertEquals(null, id.getVersionIdPart());
-		assertEquals(null, id.getResourceType());
-		assertEquals(null, id.getBaseUrl());
-		
+		assertNull(id.getVersionIdPart());
+		assertNull(id.getResourceType());
+		assertNull(id.getBaseUrl());
+
 		assertEquals("#foo", id.withResourceType("Patient").getValue());
 		assertEquals("#foo", id.withServerBase("http://foo", "Patient").getValue());
 		assertEquals("#foo", id.withVersion("2").getValue());
@@ -82,10 +83,10 @@ public class IdTypeDstu2_1Test {
 		assertEquals("foo", id.getIdPart());
 		assertEquals("foo", id.toUnqualified().getValueAsString());
 		assertEquals("foo", id.toUnqualifiedVersionless().getValueAsString());
-		assertEquals(null, id.getVersionIdPart());
-		assertEquals(null, id.getResourceType());
-		assertEquals(null, id.getBaseUrl());
-		
+		assertNull(id.getVersionIdPart());
+		assertNull(id.getResourceType());
+		assertNull(id.getBaseUrl());
+
 		assertEquals("Patient/foo", id.withResourceType("Patient").getValue());
 		assertEquals("http://foo/Patient/foo", id.withServerBase("http://foo", "Patient").getValue());
 		assertEquals("foo/_history/2", id.withVersion("2").getValue());
@@ -95,10 +96,10 @@ public class IdTypeDstu2_1Test {
 	public void testBaseUrlFoo1() {
 		IdType id = new IdType("http://my.org/foo");
 		assertEquals("http://my.org/foo", id.getValueAsString());
-		assertEquals(null, id.getIdPart());
+		assertNull(id.getIdPart());
 		assertEquals("foo", id.toUnqualified().getValueAsString());
 		assertEquals("foo", id.toUnqualifiedVersionless().getValueAsString());
-		assertEquals(null, id.getVersionIdPart());
+		assertNull(id.getVersionIdPart());
 		assertEquals("foo", id.getResourceType());
 		assertEquals("http://my.org", id.getBaseUrl());
 
@@ -114,7 +115,7 @@ public class IdTypeDstu2_1Test {
 		assertEquals("foo", id.getIdPart());
 		assertEquals("c/foo", id.toUnqualified().getValueAsString());
 		assertEquals("c/foo", id.toUnqualifiedVersionless().getValueAsString());
-		assertEquals(null, id.getVersionIdPart());
+		assertNull(id.getVersionIdPart());
 		assertEquals("c", id.getResourceType());
 		assertEquals("http://my.org/a/b", id.getBaseUrl());
 
@@ -143,21 +144,21 @@ public class IdTypeDstu2_1Test {
 	 @Test
 	  public void testConstructorsWithNullArguments() {
 	    IdType id = new IdType(null, null, null);
-	    assertEquals(null, id.getValue());
+			assertNull(id.getValue());
 	  }
 
 	@Test
 	public void testDetectLocalBase() {
 		assertEquals("urn:uuid:180f219f-97a8-486d-99d9-ed631fe4fc57", new IdType("urn:uuid:180f219f-97a8-486d-99d9-ed631fe4fc57").getValue());
-		assertEquals(null, new IdType("urn:uuid:180f219f-97a8-486d-99d9-ed631fe4fc57").getBaseUrl());
+		assertNull(new IdType("urn:uuid:180f219f-97a8-486d-99d9-ed631fe4fc57").getBaseUrl());
 		assertEquals("urn:uuid:180f219f-97a8-486d-99d9-ed631fe4fc57", new IdType("urn:uuid:180f219f-97a8-486d-99d9-ed631fe4fc57").getIdPart());
 
 		assertEquals("cid:180f219f-97a8-486d-99d9-ed631fe4fc57", new IdType("cid:180f219f-97a8-486d-99d9-ed631fe4fc57").getValue());
-		assertEquals(null, new IdType("cid:180f219f-97a8-486d-99d9-ed631fe4fc57").getBaseUrl());
+		assertNull(new IdType("cid:180f219f-97a8-486d-99d9-ed631fe4fc57").getBaseUrl());
 		assertEquals("cid:180f219f-97a8-486d-99d9-ed631fe4fc57", new IdType("cid:180f219f-97a8-486d-99d9-ed631fe4fc57").getIdPart());
 
 		assertEquals("#180f219f-97a8-486d-99d9-ed631fe4fc57", new IdType("#180f219f-97a8-486d-99d9-ed631fe4fc57").getValue());
-		assertEquals(null, new IdType("#180f219f-97a8-486d-99d9-ed631fe4fc57").getBaseUrl());
+		assertNull(new IdType("#180f219f-97a8-486d-99d9-ed631fe4fc57").getBaseUrl());
 		assertEquals("#180f219f-97a8-486d-99d9-ed631fe4fc57", new IdType("#180f219f-97a8-486d-99d9-ed631fe4fc57").getIdPart());
 	}
 	
@@ -169,7 +170,7 @@ public class IdTypeDstu2_1Test {
 	public void testComplicatedLocal() {
 		IdType id = new IdType("#Patient/cid:Patient-72/_history/1");
 		assertTrue(id.isLocal());
-		assertEquals(null, id.getBaseUrl());
+		assertNull(id.getBaseUrl());
 		assertNull(id.getResourceType());
 		assertNull(id.getVersionIdPart());
 		assertEquals("#Patient/cid:Patient-72/_history/1", id.getIdPart());
@@ -198,7 +199,7 @@ public class IdTypeDstu2_1Test {
 		assertEquals("http://foo/fhir", rr.getBaseUrl());
 		
 		rr = new IdType("Organization/123/_history/123");
-		assertEquals(null, rr.getBaseUrl());
+		assertNull(rr.getBaseUrl());
 
 	}
 
@@ -236,7 +237,7 @@ public class IdTypeDstu2_1Test {
 		Reference ref = actual.getManagingOrganization();
 		assertEquals("Organization", ref.getReferenceElement().getResourceType());
 		assertEquals("123", ref.getReferenceElement().getIdPart());
-		assertEquals(null, ref.getReferenceElement().getVersionIdPart());
+		assertNull(ref.getReferenceElement().getVersionIdPart());
 
 	}
 
@@ -258,9 +259,9 @@ public class IdTypeDstu2_1Test {
 
 		Patient actual = parseAndEncode(patient);
 		Reference ref = actual.getManagingOrganization();
-		assertEquals(null, ref.getReferenceElement().getResourceType());
+		assertNull(ref.getReferenceElement().getResourceType());
 		assertEquals("123", ref.getReferenceElement().getIdPart());
-		assertEquals(null, ref.getReferenceElement().getVersionIdPart());
+		assertNull(ref.getReferenceElement().getVersionIdPart());
 
 	}
 
@@ -273,7 +274,7 @@ public class IdTypeDstu2_1Test {
 
 		Patient actual = parseAndEncode(patient);
 		Reference ref = actual.getManagingOrganization();
-		assertEquals(null, ref.getReferenceElement().getResourceType());
+		assertNull(ref.getReferenceElement().getResourceType());
 		assertEquals("123", ref.getReferenceElement().getIdPart());
 
 	}
@@ -287,7 +288,7 @@ public class IdTypeDstu2_1Test {
 
 		Patient actual = parseAndEncode(patient);
 		Reference ref = actual.getManagingOrganization();
-		assertEquals(null, ref.getReferenceElement().getResourceType());
+		assertNull(ref.getReferenceElement().getResourceType());
 		assertEquals("123", ref.getReferenceElement().getIdPart());
 
 	}

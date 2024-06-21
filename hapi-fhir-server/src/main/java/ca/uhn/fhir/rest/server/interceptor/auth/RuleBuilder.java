@@ -737,6 +737,20 @@ public class RuleBuilder implements IAuthRuleBuilder {
 				}
 
 				@Override
+				public IAuthRuleBuilderOperationNamedAndScoped onInstances(Collection<IIdType> theInstanceIds) {
+					Validate.notNull(theInstanceIds, "theInstanceIds must not be null");
+					theInstanceIds.forEach(instanceId -> Validate.notBlank(
+							instanceId.getResourceType(),
+							"at least one of theInstanceIds does not have a resource type"));
+					theInstanceIds.forEach(instanceId -> Validate.notBlank(
+							instanceId.getIdPart(), "at least one of theInstanceIds does not have an ID part"));
+
+					final OperationRule rule = createRule();
+					rule.appliesToInstances(new ArrayList<>(theInstanceIds));
+					return new RuleBuilderOperationNamedAndScoped(rule);
+				}
+
+				@Override
 				public IAuthRuleBuilderOperationNamedAndScoped onInstancesOfType(
 						Class<? extends IBaseResource> theType) {
 					validateType(theType);
@@ -869,7 +883,7 @@ public class RuleBuilder implements IAuthRuleBuilder {
 		}
 
 		private class RuleBuilderBulkExport implements IAuthRuleBuilderRuleBulkExport {
-			private RuleBulkExportImpl ruleBulkExport;
+			private RuleBulkExportImpl myRuleBulkExport;
 
 			@Override
 			public IAuthRuleBuilderRuleBulkExportWithTarget groupExportOnGroup(@Nonnull String theFocusResourceId) {
@@ -882,22 +896,59 @@ public class RuleBuilder implements IAuthRuleBuilder {
 			}
 
 			@Override
+			public IAuthRuleBuilderRuleBulkExportWithTarget patientExportOnAllPatients() {
+				if (myRuleBulkExport == null) {
+					RuleBulkExportImpl rule = new RuleBulkExportImpl(myRuleName);
+					rule.setMode(myRuleMode);
+					myRuleBulkExport = rule;
+				}
+				myRuleBulkExport.setAppliesToPatientExportAllPatients();
+
+				// prevent duplicate rules being added
+				if (!myRules.contains(myRuleBulkExport)) {
+					myRules.add(myRuleBulkExport);
+				}
+
+				return new RuleBuilderBulkExportWithTarget(myRuleBulkExport);
+			}
+
+			@Override
 			public IAuthRuleBuilderRuleBulkExportWithTarget patientExportOnPatient(@Nonnull String theFocusResourceId) {
-				if (ruleBulkExport == null) {
+				if (myRuleBulkExport == null) {
 					RuleBulkExportImpl rule = new RuleBulkExportImpl(myRuleName);
 					rule.setAppliesToPatientExport(theFocusResourceId);
 					rule.setMode(myRuleMode);
-					ruleBulkExport = rule;
+					myRuleBulkExport = rule;
 				} else {
-					ruleBulkExport.setAppliesToPatientExport(theFocusResourceId);
+					myRuleBulkExport.setAppliesToPatientExport(theFocusResourceId);
 				}
 
 				// prevent duplicate rules being added
-				if (!myRules.contains(ruleBulkExport)) {
-					myRules.add(ruleBulkExport);
+				if (!myRules.contains(myRuleBulkExport)) {
+					myRules.add(myRuleBulkExport);
 				}
 
-				return new RuleBuilderBulkExportWithTarget(ruleBulkExport);
+				return new RuleBuilderBulkExportWithTarget(myRuleBulkExport);
+			}
+
+			@Override
+			public IAuthRuleBuilderRuleBulkExportWithTarget patientExportOnPatientStrings(
+					@Nonnull Collection<String> theFocusResourceIds) {
+				if (myRuleBulkExport == null) {
+					RuleBulkExportImpl rule = new RuleBulkExportImpl(myRuleName);
+					rule.setAppliesToPatientExport(theFocusResourceIds);
+					rule.setMode(myRuleMode);
+					myRuleBulkExport = rule;
+				} else {
+					myRuleBulkExport.setAppliesToPatientExport(theFocusResourceIds);
+				}
+
+				// prevent duplicate rules being added
+				if (!myRules.contains(myRuleBulkExport)) {
+					myRules.add(myRuleBulkExport);
+				}
+
+				return new RuleBuilderBulkExportWithTarget(myRuleBulkExport);
 			}
 
 			@Override

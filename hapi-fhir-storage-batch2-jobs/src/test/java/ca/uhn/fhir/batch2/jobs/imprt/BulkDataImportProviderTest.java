@@ -1,5 +1,6 @@
 package ca.uhn.fhir.batch2.jobs.imprt;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
@@ -19,6 +20,7 @@ import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import com.google.common.base.Charsets;
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -31,8 +33,6 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.UrlType;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
@@ -58,9 +58,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -178,8 +176,8 @@ public class BulkDataImportProviderTest {
 
 			assertEquals(400, response.getStatusLine().getStatusCode());
 			assertEquals("application/fhir+json;charset=utf-8", response.getEntity().getContentType().getValue());
-			assertThat(resp, containsString("\"resourceType\": \"OperationOutcome\""));
-			assertThat(resp, containsString("HAPI-0513: Must request async processing for $import"));
+			assertThat(resp).contains("\"resourceType\": \"OperationOutcome\"");
+			assertThat(resp).contains("HAPI-0513: Must request async processing for $import");
 		}
 
 	}
@@ -207,7 +205,7 @@ public class BulkDataImportProviderTest {
 			// Verify
 
 			assertEquals(400, response.getStatusLine().getStatusCode());
-			assertThat(resp, containsString("HAPI-1769: No URLs specified"));
+			assertThat(resp).contains("HAPI-1769: No URLs specified");
 		}
 
 	}
@@ -256,7 +254,7 @@ public class BulkDataImportProviderTest {
 			assertEquals(202, response.getStatusLine().getStatusCode());
 			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
 			assertEquals("120", response.getFirstHeader(Constants.HEADER_RETRY_AFTER).getValue());
-			assertThat(response.getFirstHeader(Constants.HEADER_X_PROGRESS).getValue(), containsString("Job was created at "));
+			assertThat(response.getFirstHeader(Constants.HEADER_X_PROGRESS).getValue()).contains("Job was created at ");
 		}
 	}
 
@@ -279,7 +277,7 @@ public class BulkDataImportProviderTest {
 			assertEquals(202, response.getStatusLine().getStatusCode());
 			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
 			assertEquals("120", response.getFirstHeader(Constants.HEADER_RETRY_AFTER).getValue());
-			assertThat(response.getFirstHeader(Constants.HEADER_X_PROGRESS).getValue(), containsString("Job was created at 2022-01"));
+			assertThat(response.getFirstHeader(Constants.HEADER_X_PROGRESS).getValue()).contains("Job was created at 2022-01");
 		}
 	}
 
@@ -311,7 +309,7 @@ public class BulkDataImportProviderTest {
 
 			assertEquals(200, response.getStatusLine().getStatusCode());
 			assertEquals("OK", response.getStatusLine().getReasonPhrase());
-			assertThat(response.getEntity().getContentType().getValue(), containsString(Constants.CT_FHIR_JSON));
+			assertThat(response.getEntity().getContentType().getValue()).contains(Constants.CT_FHIR_JSON);
 		}
 	}
 
@@ -337,7 +335,7 @@ public class BulkDataImportProviderTest {
 			assertEquals("Server Error", response.getStatusLine().getReasonPhrase());
 			String responseContent = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response content: {}", responseContent);
-			assertThat(responseContent, containsString("\"diagnostics\": \"Job is in FAILED state with 123 error count. Last error: It failed.\""));
+			assertThat(responseContent).contains("\"diagnostics\": \"Job is in FAILED state with 123 error count. Last error: It failed.\"");
 		}
 	}
 
@@ -420,21 +418,31 @@ public class BulkDataImportProviderTest {
 			return null;
 		}
 
-		@NotNull
+		@Nonnull
 		@Override
-		public RequestPartitionId determineCreatePartitionForRequest(@Nullable RequestDetails theRequest, @NotNull IBaseResource theResource, @NotNull String theResourceType) {
+		public RequestPartitionId determineCreatePartitionForRequest(@Nullable RequestDetails theRequest, @Nonnull IBaseResource theResource, @Nonnull String theResourceType) {
 			return null;
 		}
 
-		@NotNull
+		@Nonnull
 		@Override
-		public Set<Integer> toReadPartitions(@NotNull RequestPartitionId theRequestPartitionId) {
+		public Set<Integer> toReadPartitions(@Nonnull RequestPartitionId theRequestPartitionId) {
 			return null;
 		}
 
 		@Override
 		public boolean isResourcePartitionable(String theResourceType) {
 			return false;
+		}
+
+		@Override
+		public RequestPartitionId validateAndNormalizePartitionIds(RequestPartitionId theRequestPartitionId) {
+			return null;
+		}
+
+		@Override
+		public RequestPartitionId validateAndNormalizePartitionNames(RequestPartitionId theRequestPartitionId) {
+			return null;
 		}
 	}
 

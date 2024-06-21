@@ -50,8 +50,9 @@ class JobDataSink<PT extends IModelJson, IT extends IModelJson, OT extends IMode
 	private final JobDefinitionStep<PT, OT, ?> myTargetStep;
 	private final AtomicInteger myChunkCounter = new AtomicInteger(0);
 	private final AtomicReference<String> myLastChunkId = new AtomicReference<>();
-	private final boolean myGatedExecution;
 	private final IHapiTransactionService myHapiTransactionService;
+
+	private final boolean myGatedExecution;
 
 	JobDataSink(
 			@Nonnull BatchJobSender theBatchJobSender,
@@ -66,8 +67,8 @@ class JobDataSink<PT extends IModelJson, IT extends IModelJson, OT extends IMode
 		myJobDefinitionId = theDefinition.getJobDefinitionId();
 		myJobDefinitionVersion = theDefinition.getJobDefinitionVersion();
 		myTargetStep = theJobWorkCursor.nextStep;
-		myGatedExecution = theDefinition.isGatedExecution();
 		myHapiTransactionService = theHapiTransactionService;
+		myGatedExecution = theDefinition.isGatedExecution();
 	}
 
 	@Override
@@ -79,8 +80,15 @@ class JobDataSink<PT extends IModelJson, IT extends IModelJson, OT extends IMode
 		OT dataValue = theData.getData();
 		String dataValueString = JsonUtil.serialize(dataValue, false);
 
+		// once finished, create workchunks in READY state
 		WorkChunkCreateEvent batchWorkChunk = new WorkChunkCreateEvent(
-				myJobDefinitionId, myJobDefinitionVersion, targetStepId, instanceId, sequence, dataValueString);
+				myJobDefinitionId,
+				myJobDefinitionVersion,
+				targetStepId,
+				instanceId,
+				sequence,
+				dataValueString,
+				myGatedExecution);
 		String chunkId = myHapiTransactionService
 				.withSystemRequestOnDefaultPartition()
 				.withPropagation(Propagation.REQUIRES_NEW)
@@ -89,9 +97,17 @@ class JobDataSink<PT extends IModelJson, IT extends IModelJson, OT extends IMode
 		myLastChunkId.set(chunkId);
 
 		if (!myGatedExecution) {
-			JobWorkNotification workNotification = new JobWorkNotification(
-					myJobDefinitionId, myJobDefinitionVersion, instanceId, targetStepId, chunkId);
-			myBatchJobSender.sendWorkChannelMessage(workNotification);
+			myJobPersistence.enqueueWorkChunkForProcessing(chunkId, updated -> {
+				if (updated == 1) {
+					JobWorkNotification workNotification = new JobWorkNotification(
+							myJobDefinitionId, myJobDefinitionVersion, instanceId, targetStepId, chunkId);
+					myBatchJobSender.sendWorkChannelMessage(workNotification);
+				} else {
+					ourLog.error(
+							"Expected to have updated 1 workchunk, but instead found {}. Chunk is not sent to queue.",
+							updated);
+				}
+			});
 		}
 	}
 

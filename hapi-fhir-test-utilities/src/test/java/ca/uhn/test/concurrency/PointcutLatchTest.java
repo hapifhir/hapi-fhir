@@ -10,10 +10,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.startsWith;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 class PointcutLatchTest {
@@ -47,7 +45,7 @@ class PointcutLatchTest {
 		myPointcutLatch.setExpectedCount(1);
 		Future<Thread> future = myExecutorService.submit(this::invoke);
 		myPointcutLatch.awaitExpected();
-		assertNotEquals(Thread.currentThread(), future.get());
+		assertThat(future.get()).isNotEqualTo(Thread.currentThread());
 	}
 
 	@Test
@@ -57,7 +55,7 @@ class PointcutLatchTest {
 			myPointcutLatch.setExpectedCount(1);
 			fail();
 		} catch (PointcutLatchException e) {
-			assertThat(e.getMessage(), startsWith(TEST_LATCH_NAME + ": HAPI-1480: setExpectedCount() called before previous awaitExpected() completed. Previous set stack:"));
+			assertThat(e.getMessage()).startsWith(TEST_LATCH_NAME + ": HAPI-1480: setExpectedCount() called before previous awaitExpected() completed. Previous set stack:");
 		}
 	}
 
@@ -88,7 +86,7 @@ class PointcutLatchTest {
 			invoke();
 			fail();
 		} catch (PointcutLatchException e) {
-			assertThat(e.getMessage(), startsWith(TEST_LATCH_NAME + ": HAPI-1485: invoke() called outside of setExpectedCount() .. awaitExpected().  Probably got more invocations than expected or clear() was called before invoke()."));
+			assertThat(e.getMessage()).startsWith(TEST_LATCH_NAME + ": HAPI-1485: invoke() called outside of setExpectedCount() .. awaitExpected().  Probably got more invocations than expected or clear() was called before invoke().");
 		}
 		// Don't blow up in the clear() called by @AfterEach
 		myPointcutLatch.setStrict(false);
@@ -111,7 +109,7 @@ class PointcutLatchTest {
 			myPointcutLatch.awaitExpected();
 			fail();
 		} catch (AssertionError e) {
-			assertThat(e.getMessage(), startsWith("HAPI-1484: test-latch-name PointcutLatch ERROR: invoke() called when countdown was zero."));
+			assertThat(e.getMessage()).startsWith("HAPI-1484: test-latch-name PointcutLatch ERROR: invoke() called when countdown was zero.");
 		}
 	}
 
@@ -122,13 +120,13 @@ class PointcutLatchTest {
 			future.get();
 		} catch (ExecutionException e) {
 			// This is the exception thrown on the invocation thread
-			assertThat(e.getMessage(), startsWith("ca.uhn.test.concurrency.PointcutLatchException: " + TEST_LATCH_NAME + ": HAPI-1485: invoke() called outside of setExpectedCount() .. awaitExpected().  Probably got more invocations than expected or clear() was called before invoke()."));
+			assertThat(e.getMessage()).startsWith("ca.uhn.test.concurrency.PointcutLatchException: " + TEST_LATCH_NAME + ": HAPI-1485: invoke() called outside of setExpectedCount() .. awaitExpected().  Probably got more invocations than expected or clear() was called before invoke().");
 		}
 		try {
 			myPointcutLatch.clear();
 		} catch (AssertionError e) {
 			// This is the exception the test thread gets
-			assertThat(e.getMessage(), startsWith("HAPI-2344: " + TEST_LATCH_NAME + " PointcutLatch had 1 exceptions.  Throwing first one."));
+			assertThat(e.getMessage()).startsWith("HAPI-2344: " + TEST_LATCH_NAME + " PointcutLatch had 1 exceptions.  Throwing first one.");
 		}
 
 		// Don't blow up in the clear() called by @AfterEach

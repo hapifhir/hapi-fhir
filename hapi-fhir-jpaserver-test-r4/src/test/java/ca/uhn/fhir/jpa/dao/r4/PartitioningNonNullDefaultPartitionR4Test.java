@@ -1,11 +1,11 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import org.hamcrest.Matchers;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
@@ -18,10 +18,9 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SuppressWarnings({"unchecked", "ConstantConditions"})
 public class PartitioningNonNullDefaultPartitionR4Test extends BasePartitioningR4Test {
@@ -67,12 +66,12 @@ public class PartitioningNonNullDefaultPartitionR4Test extends BasePartitioningR
 		// Search on Token
 		addReadDefaultPartition();
 		List<String> outcome = toUnqualifiedVersionlessIdValues(mySearchParameterDao.search(SearchParameterMap.newSynchronous().add("code", new TokenParam("extpatorg")), mySrd));
-		assertThat(outcome, Matchers.contains("SearchParameter/" + id));
+		assertThat(outcome).containsExactly("SearchParameter/" + id);
 
 		// Search on All Resources
 		addReadDefaultPartition();
 		outcome = toUnqualifiedVersionlessIdValues(mySearchParameterDao.search(SearchParameterMap.newSynchronous(), mySrd));
-		assertThat(outcome, Matchers.contains("SearchParameter/" + id));
+		assertThat(outcome).containsExactly("SearchParameter/" + id);
 
 	}
 
@@ -101,12 +100,12 @@ public class PartitioningNonNullDefaultPartitionR4Test extends BasePartitioningR
 		// Search on Token
 		addReadDefaultPartition();
 		List<String> outcome = toUnqualifiedVersionlessIdValues(mySearchParameterDao.search(SearchParameterMap.newSynchronous().add("code", new TokenParam("extpatorg")), mySrd));
-		assertThat(outcome, Matchers.contains("SearchParameter/A"));
+		assertThat(outcome).containsExactly("SearchParameter/A");
 
 		// Search on All Resources
 		addReadDefaultPartition();
 		outcome = toUnqualifiedVersionlessIdValues(mySearchParameterDao.search(SearchParameterMap.newSynchronous(), mySrd));
-		assertThat(outcome, Matchers.contains("SearchParameter/A"));
+		assertThat(outcome).containsExactly("SearchParameter/A");
 
 	}
 
@@ -127,12 +126,12 @@ public class PartitioningNonNullDefaultPartitionR4Test extends BasePartitioningR
 		// Search on Token
 		addReadDefaultPartition();
 		List<String> outcome = toUnqualifiedVersionlessIdValues(myPatientDao.search(SearchParameterMap.newSynchronous().add("identifier", new TokenParam("http://foo", "123")), mySrd));
-		assertThat(outcome, Matchers.contains("Patient/A"));
+		assertThat(outcome).containsExactly("Patient/A");
 
 		// Search on All Resources
 		addReadDefaultPartition();
 		outcome = toUnqualifiedVersionlessIdValues(myPatientDao.search(SearchParameterMap.newSynchronous(), mySrd));
-		assertThat(outcome, Matchers.contains("Patient/A"));
+		assertThat(outcome).containsExactly("Patient/A");
 
 	}
 
@@ -156,17 +155,17 @@ public class PartitioningNonNullDefaultPartitionR4Test extends BasePartitioningR
 		// Search on Token
 		addReadDefaultPartition();
 		List<String> outcome = toUnqualifiedVersionlessIdValues(myPatientDao.search(SearchParameterMap.newSynchronous().add("identifier", new TokenParam("http://foo", "123")), mySrd));
-		assertThat(outcome, Matchers.contains("Patient/" + id));
+		assertThat(outcome).containsExactly("Patient/" + id);
 
 		// Search on Tag
 		addReadDefaultPartition();
 		outcome = toUnqualifiedVersionlessIdValues(myPatientDao.search(SearchParameterMap.newSynchronous().add("_tag", new TokenParam("http://foo", "TAG")), mySrd));
-		assertThat(outcome, Matchers.contains("Patient/" + id));
+		assertThat(outcome).containsExactly("Patient/" + id);
 
 		// Search on All Resources
 		addReadDefaultPartition();
 		outcome = toUnqualifiedVersionlessIdValues(myPatientDao.search(SearchParameterMap.newSynchronous(), mySrd));
-		assertThat(outcome, Matchers.contains("Patient/" + id));
+		assertThat(outcome).containsExactly("Patient/" + id);
 
 	}
 

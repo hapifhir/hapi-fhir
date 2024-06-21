@@ -1,5 +1,6 @@
 package ca.uhn.fhir.tests.integration.karaf.dstu3;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import java.io.IOException;
 import java.io.StringReader;
 import java.math.BigDecimal;
@@ -14,8 +15,6 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.LenientErrorHandler;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import com.google.common.collect.Sets;
-import org.hamcrest.Matcher;
-import org.hamcrest.Matchers;
 import org.hl7.fhir.dstu3.model.AuditEvent;
 import org.hl7.fhir.dstu3.model.Basic;
 import org.hl7.fhir.dstu3.model.Binary;
@@ -62,17 +61,13 @@ import static ca.uhn.fhir.tests.integration.karaf.PaxExamOptions.HAPI_FHIR_DSTU3
 import static ca.uhn.fhir.tests.integration.karaf.PaxExamOptions.KARAF;
 import static ca.uhn.fhir.tests.integration.karaf.PaxExamOptions.WRAP;
 import static org.apache.commons.lang3.StringUtils.countMatches;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.when;
@@ -284,9 +279,9 @@ public class Dstu3JsonParserTest {
 		ourLog.info(output);
 
 		String enc = ourCtx.newJsonParser().encodeResourceToString(patient);
-		assertThat(enc, stringContainsInOrder("{\"resourceType\":\"Patient\",", "\"extension\":[{\"url\":\"http://example.com/extensions#someext\",\"valueDateTime\":\"2011-01-02T11:13:15\"}",
+		assertThat(enc).containsSubsequence("{\"resourceType\":\"Patient\",", "\"extension\":[{\"url\":\"http://example.com/extensions#someext\",\"valueDateTime\":\"2011-01-02T11:13:15\"}",
 			"{\"url\":\"http://example.com#parent\",\"extension\":[{\"url\":\"http://example.com#child\",\"valueString\":\"value1\"},{\"url\":\"http://example.com#child\",\"valueString\":\"value2\"}]}"));
-		assertThat(enc, stringContainsInOrder("\"modifierExtension\":[" + "{" + "\"url\":\"http://example.com/extensions#modext\"," + "\"valueDate\":\"1995-01-02\"" + "}" + "],"));
+		assertThat(enc).containsSubsequence("\"modifierExtension\":[" + "{" + "\"url\":\"http://example.com/extensions#modext\"," + "\"valueDate\":\"1995-01-02\"" + "}" + "],");
 		assertThat(enc,
 			containsString("\"_given\":[" + "{" + "\"extension\":[" + "{" + "\"url\":\"http://examples.com#givenext\"," + "\"valueString\":\"given\"" + "}" + "]" + "}," + "{" + "\"extension\":[" + "{"
 				+ "\"url\":\"http://examples.com#givenext_parent\"," + "\"extension\":[" + "{" + "\"url\":\"http://examples.com#givenext_child\"," + "\"valueString\":\"CHILD\"" + "}" + "]" + "}"
@@ -352,7 +347,7 @@ public class Dstu3JsonParserTest {
 		ourLog.info(enc);
 
 		//@formatter:off
-		assertThat(enc, stringContainsInOrder("\"meta\": {",
+		assertThat(enc).containsSubsequence("\"meta\": {",
 			"\"profile\": [",
 			"\"http://foo/Profile1\",",
 			"\"http://foo/Profile2\"",
@@ -534,10 +529,10 @@ public class Dstu3JsonParserTest {
 		bin.setSecurityContext(securityContext);
 		String encoded = ourCtx.newJsonParser().encodeResourceToString(bin);
 		ourLog.info(encoded);
-		assertThat(encoded, containsString("Binary"));
-		assertThat(encoded, containsString("\"contentType\":\"text/plain\""));
-		assertThat(encoded, containsString("\"content\":\"Tm93IGlzIHRoZSB0aW1l\""));
-		assertThat(encoded, containsString("\"securityContext\":{\"reference\":\"DiagnosticReport/1\"}"));
+		assertThat(encoded).contains("Binary"));
+		assertThat(encoded).contains("\"contentType\":\"text/plain\""));
+		assertThat(encoded).contains("\"content\":\"Tm93IGlzIHRoZSB0aW1l\""));
+		assertThat(encoded).contains("\"securityContext\":{\"reference\":\"DiagnosticReport/1\"}"));
 	}
 
 	@Test
@@ -550,11 +545,11 @@ public class Dstu3JsonParserTest {
 
 		String val = ourCtx.newJsonParser().setPrettyPrint(false).encodeResourceToString(b);
 		ourLog.info(val);
-		assertThat(val, not(containsString("text")));
+		assertThat(val).doesNotContain("text");
 
 		val = ourCtx.newXmlParser().setPrettyPrint(false).encodeResourceToString(b);
 		ourLog.info(val);
-		assertThat(val, not(containsString("text")));
+		assertThat(val).doesNotContain("text");
 
 	}
 
@@ -571,7 +566,7 @@ public class Dstu3JsonParserTest {
 		ourLog.info(encoded);
 
 		//@formatter:off
-		assertThat(encoded, stringContainsInOrder(
+		assertThat(encoded).containsSubsequence(
 			"{",
 			"\"resourceType\": \"Patient\",",
 			"\"contained\": [",
@@ -601,7 +596,7 @@ public class Dstu3JsonParserTest {
 		p.addIdentifier().setSystem("ACME");
 
 		String actual = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p);
-		assertThat(actual, not(containsString("78ef6f64c2f2")));
+		assertThat(actual).doesNotContain("78ef6f64c2f2");
 	}
 
 	@Test
@@ -623,7 +618,7 @@ public class Dstu3JsonParserTest {
 		p.getMeta().getTag().addAll(tagList);
 
 		String encoded = ourCtx.newJsonParser().encodeResourceToString(p);
-		assertThat(encoded, not(containsString("tag")));
+		assertThat(encoded).doesNotContain("tag");
 	}
 
 	/**
@@ -639,9 +634,9 @@ public class Dstu3JsonParserTest {
 		p.getMeta().getTag().addAll(tagList);
 
 		String encoded = ourCtx.newJsonParser().encodeResourceToString(p);
-		assertThat(encoded, containsString("tag"));
-		assertThat(encoded, containsString("scheme"));
-		assertThat(encoded, not(containsString("Label")));
+		assertThat(encoded).contains("tag"));
+		assertThat(encoded).contains("scheme"));
+		assertThat(encoded).doesNotContain("Label");
 	}
 
 	/**
@@ -659,9 +654,9 @@ public class Dstu3JsonParserTest {
 		String encoded = ourCtx.newJsonParser().encodeResourceToString(qr);
 		ourLog.info(encoded);
 
-		assertThat(encoded, stringContainsInOrder("123"));
-		assertThat(encoded, not(stringContainsInOrder("\"\"")));
-		assertThat(encoded, not(stringContainsInOrder("null")));
+		assertThat(encoded).containsSubsequence("123");
+		assertThat(encoded).doesNotContainPattern("(?s)"\"\"")));
+		assertThat(encoded).doesNotContainPattern("(?s)"null")));
 	}
 
 	@Test
@@ -708,8 +703,8 @@ public class Dstu3JsonParserTest {
 		String encoded = parser.encodeResourceToString(p);
 		ourLog.info(encoded);
 
-		assertThat(encoded, containsString("http://foo"));
-		assertThat(encoded, containsString("Practitioner/A"));
+		assertThat(encoded).contains("http://foo"));
+		assertThat(encoded).contains("Practitioner/A"));
 	}
 
 	@Test
@@ -729,7 +724,7 @@ public class Dstu3JsonParserTest {
 		ourLog.info(output);
 
 		//@formatter:off
-		assertThat(output, stringContainsInOrder(
+		assertThat(output).containsSubsequence(
 			"\"id\": \"1\"",
 			"\"meta\"",
 			"\"extension\"",
@@ -737,7 +732,7 @@ public class Dstu3JsonParserTest {
 			"\"valueString\": \"ext_url_value\"",
 			"\"code\":"
 		));
-		assertThat(output, not(stringContainsInOrder(
+		assertThat(output).doesNotContainPattern("(?s)
 			"\"url\": \"http://exturl\"",
 			",",
 			"\"url\": \"http://exturl\""
@@ -772,7 +767,7 @@ public class Dstu3JsonParserTest {
 		ourLog.info(output);
 
 		//@formatter:off
-		assertThat(output, stringContainsInOrder(
+		assertThat(output).containsSubsequence(
 			"\"id\": \"1\"",
 			"\"meta\"",
 			"\"extension\"",
@@ -782,7 +777,7 @@ public class Dstu3JsonParserTest {
 			"\"valueString\": \"sub_ext_value\"",
 			"\"code\":"
 		));
-		assertThat(output, not(stringContainsInOrder(
+		assertThat(output).doesNotContainPattern("(?s)
 			"\"url\": \"http://exturl\"",
 			",",
 			"\"url\": \"http://exturl\""
@@ -812,7 +807,7 @@ public class Dstu3JsonParserTest {
 		parser.setDontStripVersionsFromReferencesAtPaths("Patient.managingOrganization");
 		String enc = parser.setPrettyPrint(true).encodeResourceToString(p);
 		ourLog.info(enc);
-		assertThat(enc, containsString("\"reference\": \"http://foo.com/Organization/2/_history/1\""));
+		assertThat(enc).contains("\"reference\": \"http://foo.com/Organization/2/_history/1\""));
 	}
 
 	@Test
@@ -830,7 +825,7 @@ public class Dstu3JsonParserTest {
 		parser.setDontStripVersionsFromReferencesAtPaths("AuditEvent.entity.reference");
 		String enc = parser.setPrettyPrint(true).encodeResourceToString(p);
 		ourLog.info(enc);
-		assertThat(enc, containsString("\"reference\": \"http://foo.com/Organization/2\""));
+		assertThat(enc).contains("\"reference\": \"http://foo.com/Organization/2\""));
 	}
 
 	@Test
@@ -847,22 +842,22 @@ public class Dstu3JsonParserTest {
 		parser.setDontStripVersionsFromReferencesAtPaths("AuditEvent.entity.reference");
 		String enc = parser.setPrettyPrint(true).encodeResourceToString(auditEvent);
 		ourLog.info(enc);
-		assertThat(enc, containsString("\"reference\": \"http://foo.com/Organization/2/_history/1\""));
+		assertThat(enc).contains("\"reference\": \"http://foo.com/Organization/2/_history/1\""));
 
 		parser.setDontStripVersionsFromReferencesAtPaths(new ArrayList<String>());
 		enc = parser.setPrettyPrint(true).encodeResourceToString(auditEvent);
 		ourLog.info(enc);
-		assertThat(enc, containsString("\"reference\": \"http://foo.com/Organization/2\""));
+		assertThat(enc).contains("\"reference\": \"http://foo.com/Organization/2\""));
 
 		parser.setDontStripVersionsFromReferencesAtPaths((String[]) null);
 		enc = parser.setPrettyPrint(true).encodeResourceToString(auditEvent);
 		ourLog.info(enc);
-		assertThat(enc, containsString("\"reference\": \"http://foo.com/Organization/2\""));
+		assertThat(enc).contains("\"reference\": \"http://foo.com/Organization/2\""));
 
 		parser.setDontStripVersionsFromReferencesAtPaths((List<String>) null);
 		enc = parser.setPrettyPrint(true).encodeResourceToString(auditEvent);
 		ourLog.info(enc);
-		assertThat(enc, containsString("\"reference\": \"http://foo.com/Organization/2\""));
+		assertThat(enc).contains("\"reference\": \"http://foo.com/Organization/2\""));
 	}
 
 	@Test
@@ -871,7 +866,7 @@ public class Dstu3JsonParserTest {
 
 		assertNull(ourCtx.newJsonParser().getStripVersionsFromReferences());
 		assertTrue(ourCtx.getParserOptions().isStripVersionsFromReferences());
-		assertThat(ourCtx.getParserOptions().getDontStripVersionsFromReferencesAtPaths(), empty());
+		assertThat(ourCtx.getParserOptions().getDontStripVersionsFromReferencesAtPaths()).isEmpty();
 
 		Patient p = new Patient();
 		p.setManagingOrganization(new Reference("http://foo.com/Organization/2/_history/1"));
@@ -881,17 +876,17 @@ public class Dstu3JsonParserTest {
 		ourCtx.getParserOptions().setDontStripVersionsFromReferencesAtPaths("Patient.managingOrganization");
 		String enc = parser.setPrettyPrint(true).encodeResourceToString(p);
 		ourLog.info(enc);
-		assertThat(enc, containsString("\"reference\": \"http://foo.com/Organization/2/_history/1\""));
+		assertThat(enc).contains("\"reference\": \"http://foo.com/Organization/2/_history/1\""));
 
 		ourCtx.getParserOptions().setDontStripVersionsFromReferencesAtPaths(Arrays.asList("Patient.managingOrganization"));
 		enc = parser.setPrettyPrint(true).encodeResourceToString(p);
 		ourLog.info(enc);
-		assertThat(enc, containsString("\"reference\": \"http://foo.com/Organization/2/_history/1\""));
+		assertThat(enc).contains("\"reference\": \"http://foo.com/Organization/2/_history/1\""));
 
 		ourCtx.getParserOptions().setDontStripVersionsFromReferencesAtPaths(new HashSet<String>(Arrays.asList("Patient.managingOrganization")));
 		enc = parser.setPrettyPrint(true).encodeResourceToString(p);
 		ourLog.info(enc);
-		assertThat(enc, containsString("\"reference\": \"http://foo.com/Organization/2/_history/1\""));
+		assertThat(enc).contains("\"reference\": \"http://foo.com/Organization/2/_history/1\""));
 	}
 
 	@Test
@@ -906,12 +901,12 @@ public class Dstu3JsonParserTest {
 		IParser parser = ourCtx.newJsonParser();
 		String enc = parser.setPrettyPrint(true).encodeResourceToString(p);
 		ourLog.info(enc);
-		assertThat(enc, containsString("\"reference\": \"http://foo.com/Organization/2\""));
+		assertThat(enc).contains("\"reference\": \"http://foo.com/Organization/2\""));
 
 		parser.setStripVersionsFromReferences(false);
 		enc = parser.setPrettyPrint(true).encodeResourceToString(p);
 		ourLog.info(enc);
-		assertThat(enc, containsString("\"reference\": \"http://foo.com/Organization/2/_history/1\""));
+		assertThat(enc).contains("\"reference\": \"http://foo.com/Organization/2/_history/1\""));
 
 		ourCtx = FhirContext.forDstu3();
 	}
@@ -928,17 +923,17 @@ public class Dstu3JsonParserTest {
 		IParser parser = ourCtx.newJsonParser();
 		String enc = parser.setPrettyPrint(true).encodeResourceToString(p);
 		ourLog.info(enc);
-		assertThat(enc, containsString("\"reference\": \"http://foo.com/Organization/2\""));
+		assertThat(enc).contains("\"reference\": \"http://foo.com/Organization/2\""));
 
 		ourCtx.getParserOptions().setStripVersionsFromReferences(false);
 		enc = parser.setPrettyPrint(true).encodeResourceToString(p);
 		ourLog.info(enc);
-		assertThat(enc, containsString("\"reference\": \"http://foo.com/Organization/2/_history/1\""));
+		assertThat(enc).contains("\"reference\": \"http://foo.com/Organization/2/_history/1\""));
 
 		parser.setStripVersionsFromReferences(true);
 		enc = parser.setPrettyPrint(true).encodeResourceToString(p);
 		ourLog.info(enc);
-		assertThat(enc, containsString("\"reference\": \"http://foo.com/Organization/2\""));
+		assertThat(enc).contains("\"reference\": \"http://foo.com/Organization/2\""));
 
 		ourCtx = FhirContext.forDstu3();
 	}
@@ -951,7 +946,7 @@ public class Dstu3JsonParserTest {
 
 		String output = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p);
 		ourLog.info(output);
-		assertThat(output, containsString("\"div\": \"<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">VALUE</div>\""));
+		assertThat(output).contains("\"div\": \"<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">VALUE</div>\""));
 	}
 
 	@Test
@@ -962,7 +957,7 @@ public class Dstu3JsonParserTest {
 
 		String output = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p);
 		ourLog.info(output);
-		assertThat(output, containsString("\"div\": \"<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">VALUE</div>\""));
+		assertThat(output).contains("\"div\": \"<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">VALUE</div>\""));
 	}
 
 	@Test
@@ -976,12 +971,12 @@ public class Dstu3JsonParserTest {
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).setSuppressNarratives(true).encodeResourceToString(patient);
 		ourLog.info(encoded);
 
-		assertThat(encoded, containsString("Patient"));
-		assertThat(encoded, stringContainsInOrder(ca.uhn.fhir.rest.api.Constants.TAG_SUBSETTED_SYSTEM_DSTU3, ca.uhn.fhir.rest.api.Constants.TAG_SUBSETTED_CODE));
-		assertThat(encoded, not(containsString("text")));
-		assertThat(encoded, not(containsString("THE DIV")));
-		assertThat(encoded, containsString("family"));
-		assertThat(encoded, containsString("maritalStatus"));
+		assertThat(encoded).contains("Patient"));
+		assertThat(encoded).containsSubsequence(ca.uhn.fhir.rest.api.Constants.TAG_SUBSETTED_SYSTEM_DSTU3, ca.uhn.fhir.rest.api.Constants.TAG_SUBSETTED_CODE);
+		assertThat(encoded).doesNotContain("text");
+		assertThat(encoded).doesNotContain("THE DIV");
+		assertThat(encoded).contains("family"));
+		assertThat(encoded).contains("maritalStatus"));
 	}
 
 	@Test
@@ -993,7 +988,7 @@ public class Dstu3JsonParserTest {
 		String enc = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(reqParms);
 		ourLog.info(enc);
 
-		assertThat(enc, containsString("\"valueId\": \"1\""));
+		assertThat(enc).contains("\"valueId\": \"1\""));
 	}
 
 	@Test
@@ -1010,11 +1005,11 @@ public class Dstu3JsonParserTest {
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).setSummaryMode(true).encodeResourceToString(patient);
 		ourLog.info(encoded);
 
-		assertThat(encoded, containsString("Patient"));
-		assertThat(encoded, stringContainsInOrder("\"tag\"", "\"system\": \"" + ca.uhn.fhir.rest.api.Constants.TAG_SUBSETTED_SYSTEM_DSTU3 + "\",", "\"code\": \"" + ca.uhn.fhir.rest.api.Constants.TAG_SUBSETTED_CODE + "\""));
-		assertThat(encoded, not(containsString("THE DIV")));
-		assertThat(encoded, containsString("family"));
-		assertThat(encoded, not(containsString("maritalStatus")));
+		assertThat(encoded).contains("Patient"));
+		assertThat(encoded).containsSubsequence("\"tag\"", "\"system\": \"" + ca.uhn.fhir.rest.api.Constants.TAG_SUBSETTED_SYSTEM_DSTU3 + "\",", "\"code\": \"" + ca.uhn.fhir.rest.api.Constants.TAG_SUBSETTED_CODE + "\"");
+		assertThat(encoded).doesNotContain("THE DIV");
+		assertThat(encoded).contains("family"));
+		assertThat(encoded).doesNotContain("maritalStatus");
 	}
 
 	@Test
@@ -1030,12 +1025,12 @@ public class Dstu3JsonParserTest {
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).setSummaryMode(true).encodeResourceToString(patient);
 		ourLog.info(encoded);
 
-		assertThat(encoded, containsString("Patient"));
-		assertThat(encoded, stringContainsInOrder("\"tag\"", "\"system\": \"foo\",", "\"code\": \"bar\"", "\"system\": \"" + ca.uhn.fhir.rest.api.Constants.TAG_SUBSETTED_SYSTEM_DSTU3 + "\"",
+		assertThat(encoded).contains("Patient"));
+		assertThat(encoded).containsSubsequence("\"tag\"", "\"system\": \"foo\",", "\"code\": \"bar\"", "\"system\": \"" + ca.uhn.fhir.rest.api.Constants.TAG_SUBSETTED_SYSTEM_DSTU3 + "\"",
 			"\"code\": \"" + ca.uhn.fhir.rest.api.Constants.TAG_SUBSETTED_CODE + "\""));
-		assertThat(encoded, not(containsString("THE DIV")));
-		assertThat(encoded, containsString("family"));
-		assertThat(encoded, not(containsString("maritalStatus")));
+		assertThat(encoded).doesNotContain("THE DIV");
+		assertThat(encoded).contains("family"));
+		assertThat(encoded).doesNotContain("maritalStatus");
 	}
 
 	/**
@@ -1093,11 +1088,11 @@ public class Dstu3JsonParserTest {
 			p.setPrettyPrint(true);
 			String out = p.encodeResourceToString(patient);
 			ourLog.info(out);
-			assertThat(out, containsString("Patient"));
-			assertThat(out, containsString("name"));
-			assertThat(out, containsString("address"));
-			assertThat(out, not(containsString("id")));
-			assertThat(out, not(containsString("meta")));
+			assertThat(out).contains("Patient"));
+			assertThat(out).contains("name"));
+			assertThat(out).contains("address"));
+			assertThat(out).doesNotContain("id");
+			assertThat(out).doesNotContain("meta");
 		}
 		{
 			IParser p = ourCtx.newJsonParser();
@@ -1105,11 +1100,11 @@ public class Dstu3JsonParserTest {
 			p.setPrettyPrint(true);
 			String out = p.encodeResourceToString(patient);
 			ourLog.info(out);
-			assertThat(out, containsString("Patient"));
-			assertThat(out, containsString("name"));
-			assertThat(out, containsString("address"));
-			assertThat(out, not(containsString("id")));
-			assertThat(out, not(containsString("meta")));
+			assertThat(out).contains("Patient"));
+			assertThat(out).contains("name"));
+			assertThat(out).contains("address"));
+			assertThat(out).doesNotContain("id");
+			assertThat(out).doesNotContain("meta");
 		}
 		{
 			IParser p = ourCtx.newJsonParser();
@@ -1117,8 +1112,8 @@ public class Dstu3JsonParserTest {
 			p.setPrettyPrint(true);
 			String out = p.encodeResourceToString(patient);
 			ourLog.info(out);
-			assertThat(out, containsString("GIVEN"));
-			assertThat(out, not(containsString("FAMILY")));
+			assertThat(out).contains("GIVEN"));
+			assertThat(out).doesNotContain("FAMILY");
 		}
 		{
 			IParser p = ourCtx.newJsonParser();
@@ -1126,11 +1121,11 @@ public class Dstu3JsonParserTest {
 			p.setPrettyPrint(true);
 			String out = p.encodeResourceToString(patient);
 			ourLog.info(out);
-			assertThat(out, containsString("Patient"));
-			assertThat(out, containsString("name"));
-			assertThat(out, containsString("address"));
-			assertThat(out, not(containsString("id")));
-			assertThat(out, not(containsString("meta")));
+			assertThat(out).contains("Patient"));
+			assertThat(out).contains("name"));
+			assertThat(out).contains("address"));
+			assertThat(out).doesNotContain("id");
+			assertThat(out).doesNotContain("meta");
 		}
 		{
 			IParser p = ourCtx.newJsonParser();
@@ -1139,10 +1134,10 @@ public class Dstu3JsonParserTest {
 			p.setPrettyPrint(true);
 			String out = p.encodeResourceToString(patient);
 			ourLog.info(out);
-			assertThat(out, containsString("Patient"));
-			assertThat(out, containsString("name"));
-			assertThat(out, containsString("id"));
-			assertThat(out, not(containsString("address")));
+			assertThat(out).contains("Patient"));
+			assertThat(out).contains("name"));
+			assertThat(out).contains("id"));
+			assertThat(out).doesNotContain("address");
 		}
 	}
 
@@ -1242,7 +1237,7 @@ public class Dstu3JsonParserTest {
 
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(false).encodeResourceToString(parsed);
 		ourLog.info(encoded);
-		assertThat(encoded, containsString("{\"linkId\":\"value123\",\"_linkId\":{\"extension\":[{\"url\":\"http://123\",\"valueString\":\"HELLO\"}]}}"));
+		assertThat(encoded).contains("{\"linkId\":\"value123\",\"_linkId\":{\"extension\":[{\"url\":\"http://123\",\"valueString\":\"HELLO\"}]}}"));
 
 	}
 
@@ -1262,9 +1257,9 @@ public class Dstu3JsonParserTest {
 		p.setId("123");
 		p.addName().setFamily("ABC");
 
-		assertThat(ourCtx.newJsonParser().encodeResourceToString(p), stringContainsInOrder("123", "ABC"));
-		assertThat(ourCtx.newJsonParser().setOmitResourceId(true).encodeResourceToString(p), containsString("ABC"));
-		assertThat(ourCtx.newJsonParser().setOmitResourceId(true).encodeResourceToString(p), not(containsString("123")));
+		assertThat(ourCtx.newJsonParser().encodeResourceToString(p)).containsSubsequence("123", "ABC"));
+		assertThat(ourCtx.newJsonParser().setOmitResourceId(true).encodeResourceToString(p)).contains("ABC"));
+		assertThat(ourCtx.newJsonParser().setOmitResourceId(true).encodeResourceToString(p)).doesNotContain("123");
 	}
 
 	@Test
@@ -1388,7 +1383,7 @@ public class Dstu3JsonParserTest {
 		assertEquals("urn:uuid:180f219f-97a8-486d-99d9-ed631fe4fc57", parsed.getEntry().get(0).getResource().getIdElement().getValue());
 		assertEquals(null, parsed.getEntry().get(0).getResource().getIdElement().getBaseUrl());
 		assertEquals("urn:uuid:180f219f-97a8-486d-99d9-ed631fe4fc57", parsed.getEntry().get(0).getResource().getIdElement().getIdPart());
-		assertThat(encoded, not(containsString("\"id\":\"180f219f-97a8-486d-99d9-ed631fe4fc57\"")));
+		assertThat(encoded).doesNotContain("\"id\":\"180f219f-97a8-486d-99d9-ed631fe4fc57\"");
 	}
 
 	@Test
@@ -1430,14 +1425,14 @@ public class Dstu3JsonParserTest {
 		assertEquals("654321", res.getIdentifier().get(0).getValue());
 		assertEquals(true, res.getActive());
 
-		assertThat(res.getIdentifier().get(0).getFormatCommentsPre(), contains("identifier comment 1", "identifier comment 2"));
-		assertThat(res.getIdentifier().get(0).getUseElement().getFormatCommentsPre(), contains("use comment 1", "use comment 2"));
+		assertThat(res.getIdentifier().get(0).getFormatCommentsPre()).contains("identifier comment 1", "identifier comment 2");
+		assertThat(res.getIdentifier().get(0).getUseElement().getFormatCommentsPre()).contains("use comment 1", "use comment 2");
 
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(res);
 		ourLog.info(encoded);
 
 		//@formatter:off
-		assertThat(encoded, stringContainsInOrder(
+		assertThat(encoded).containsSubsequence(
 			"\"identifier\": [",
 			"{",
 			"\"fhir_comments\":",

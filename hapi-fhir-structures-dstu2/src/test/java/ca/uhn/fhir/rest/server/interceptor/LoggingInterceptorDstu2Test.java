@@ -23,11 +23,8 @@ import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
-import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.rest.server.SummaryParamDstu2Test;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
-import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
@@ -36,15 +33,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.ee10.servlet.ServletHandler;
-import org.eclipse.jetty.ee10.servlet.ServletHolder;
-import org.hamcrest.core.StringContains;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -55,11 +44,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.matchesPattern;
-import static org.hamcrest.Matchers.startsWith;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -110,7 +96,7 @@ public class LoggingInterceptorDstu2Test {
 
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(logger, timeout(1000).times(1)).info(captor.capture());
-		assertThat(captor.getAllValues().get(0), StringContains.containsString("ERROR - GET " + ourServer.getBaseUrl() + "/Patient/EX"));
+		assertThat(captor.getAllValues().get(0)).contains("ERROR - GET " + ourServer.getBaseUrl() + "/Patient/EX");
 	}
 
 	@Test
@@ -130,7 +116,7 @@ public class LoggingInterceptorDstu2Test {
 
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(logger, timeout(1000).times(1)).info(captor.capture());
-		assertThat(captor.getValue(), StringContains.containsString("metadata - "));
+		assertThat(captor.getValue()).contains("metadata - ");
 	}
 
 	@Test
@@ -192,7 +178,7 @@ public class LoggingInterceptorDstu2Test {
 
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(logger, timeout(1000).times(1)).info(captor.capture());
-		assertEquals(Constants.REQUEST_ID_LENGTH, captor.getValue().length());
+		assertThat(captor.getValue()).hasSize(Constants.REQUEST_ID_LENGTH);
 	}
 
 	@Test
@@ -212,7 +198,7 @@ public class LoggingInterceptorDstu2Test {
 
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(logger, timeout(1000).times(1)).info(captor.capture());
-		assertThat(captor.getValue(), startsWith("read - "));
+		assertThat(captor.getValue()).startsWith("read - ");
 		Integer.parseInt(captor.getValue().substring("read - ".length()));
 	}
 
@@ -236,7 +222,7 @@ public class LoggingInterceptorDstu2Test {
 
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(logger, timeout(1000).times(1)).info(captor.capture());
-		assertThat(captor.getValue(), matchesPattern("[1-9][0-9]{1,3}"));
+		assertThat(captor.getValue()).matches("[1-9][0-9]{1,3}");
 	}
 
 	@Test
@@ -376,7 +362,7 @@ public class LoggingInterceptorDstu2Test {
 
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(logger, timeout(1000).times(1)).info(captor.capture());
-		assertThat(captor.getValue(), StringContains.containsString("read - Patient/1"));
+		assertThat(captor.getValue()).contains("read - Patient/1");
 	}
 
 	@Test
@@ -397,7 +383,7 @@ public class LoggingInterceptorDstu2Test {
 		
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(logger, timeout(1000).times(1)).info(captor.capture());
-		assertThat(captor.getValue(), StringContains.containsString("search-type - Patient - ?_id=1"));
+		assertThat(captor.getValue()).contains("search-type - Patient - ?_id=1");
 	}
 
 	@AfterAll

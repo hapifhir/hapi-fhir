@@ -50,8 +50,10 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.ObjectUtil;
+import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.util.ValidateUtil;
 import jakarta.annotation.Nonnull;
 import jakarta.persistence.EntityManager;
@@ -73,7 +75,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
@@ -295,6 +296,8 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 						theResourceEntity.getIdDt().getValue(),
 						theCodeSystem.getContentElement().getValueAsString());
 
+				detectDuplicatesInCodeSystem(theCodeSystem);
+
 				Long pid = (Long) theCodeSystem.getUserData(RESOURCE_PID_KEY);
 				assert pid != null;
 				JpaPid codeSystemResourcePid = JpaPid.fromId(pid);
@@ -337,6 +340,30 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 						theResourceEntity,
 						theRequestDetails);
 			}
+		}
+	}
+
+	private static void detectDuplicatesInCodeSystem(CodeSystem theCodeSystem) {
+		detectDuplicatesInCodeSystem(theCodeSystem.getConcept(), new HashSet<>());
+	}
+
+	private static void detectDuplicatesInCodeSystem(
+			List<CodeSystem.ConceptDefinitionComponent> theCodeList, Set<String> theFoundCodesBuffer) {
+		for (var next : theCodeList) {
+			if (isNotBlank(next.getCode())) {
+				if (!theFoundCodesBuffer.add(next.getCode())) {
+					/*
+					 * Note: We could possibly modify this behaviour to be forgiving, and just
+					 * ignore duplicates. The only issue is that concepts can have properties,
+					 * designations, etc. and it could be dangerous to just pick one and ignore the
+					 * other. So the safer thing seems to be to just throw an error.
+					 */
+					throw new PreconditionFailedException(Msg.code(2528) + "Duplicate concept detected in CodeSystem: "
+							+ UrlUtil.sanitizeUrlPart(next.getCode()));
+				}
+			}
+			// Test child concepts within the parent concept
+			detectDuplicatesInCodeSystem(next.getConcept(), theFoundCodesBuffer);
 		}
 	}
 
@@ -683,26 +710,6 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		if (next.getId() == null) {
 			myConceptParentChildLinkDao.save(next);
 		}
-	}
-
-	private int ensureParentsSaved(Collection<TermConceptParentChildLink> theParents) {
-		ourLog.trace("Checking {} parents", theParents.size());
-		int retVal = 0;
-
-		for (TermConceptParentChildLink nextLink : theParents) {
-			if (nextLink.getRelationshipType() == TermConceptParentChildLink.RelationshipTypeEnum.ISA) {
-				TermConcept nextParent = nextLink.getParent();
-				retVal += ensureParentsSaved(nextParent.getParents());
-				if (nextParent.getId() == null) {
-					nextParent.setUpdated(new Date());
-					myConceptDao.saveAndFlush(nextParent);
-					retVal++;
-					ourLog.debug("Saved parent code {} and got id {}", nextParent.getCode(), nextParent.getId());
-				}
-			}
-		}
-
-		return retVal;
 	}
 
 	@Nonnull

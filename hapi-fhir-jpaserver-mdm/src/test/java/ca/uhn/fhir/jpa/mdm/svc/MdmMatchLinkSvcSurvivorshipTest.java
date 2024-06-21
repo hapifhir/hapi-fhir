@@ -26,6 +26,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -120,7 +121,7 @@ public class MdmMatchLinkSvcSurvivorshipTest extends BaseMdmR4Test {
 		}
 
 		Optional<MdmLink> linkop = myMdmLinkDaoSvc.findMdmLinkBySource(r);
-		assertTrue(linkop.isPresent());
+		assertThat(linkop).isPresent();
 		MdmLink link = linkop.get();
 		JpaPid gpid = link.getGoldenResourcePersistenceId();
 
@@ -128,9 +129,9 @@ public class MdmMatchLinkSvcSurvivorshipTest extends BaseMdmR4Test {
 
 		// we should have a link for each resource all linked
 		// to the same golden resource
-		assertEquals(resourceCount, myMdmLinkDaoSvc.findMdmLinksByGoldenResource(golden).size());
-		assertEquals(1, golden.getAddress().size());
-		assertEquals(1, golden.getTelecom().size());
+		assertThat(myMdmLinkDaoSvc.findMdmLinksByGoldenResource(golden)).hasSize(resourceCount);
+		assertThat(golden.getAddress()).hasSize(1);
+		assertThat(golden.getTelecom()).hasSize(1);
 		assertEquals(r.getTelecom().get(0).getValue(), golden.getTelecom().get(0).getValue());
 
 		// test

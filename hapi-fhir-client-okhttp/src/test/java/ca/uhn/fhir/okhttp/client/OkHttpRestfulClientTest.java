@@ -2,8 +2,7 @@ package ca.uhn.fhir.okhttp.client;
 
 import org.junit.jupiter.api.Test;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class OkHttpRestfulClientTest {
 
@@ -11,14 +10,14 @@ public class OkHttpRestfulClientTest {
     public void testNewHeaderBuilder_urlHasTrailingSlash_shouldTrim() {
         StringBuilder headerBuilder = OkHttpRestfulClient.newHeaderBuilder(new StringBuilder("http://localhost/"));
 
-        assertThat(headerBuilder.toString(), equalTo("http://localhost"));
+			assertEquals("http://localhost", headerBuilder.toString());
     }
 
     @Test
     public void testNewHeaderBuilder_urlHasNoTrailingSlash_shouldNotTrimLastCharacter() {
         StringBuilder headerBuilder = OkHttpRestfulClient.newHeaderBuilder(new StringBuilder("http://example.com"));
 
-        assertThat(headerBuilder.toString(), equalTo("http://example.com"));
+			assertEquals("http://example.com", headerBuilder.toString());
     }
 
 }

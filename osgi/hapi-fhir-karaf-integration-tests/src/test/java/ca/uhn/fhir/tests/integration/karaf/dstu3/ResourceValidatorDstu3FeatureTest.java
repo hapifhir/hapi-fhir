@@ -8,7 +8,6 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.tests.integration.karaf.ValidationConstants;
 import ca.uhn.fhir.validation.schematron.SchematronBaseValidator;
-import org.hamcrest.core.StringContains;
 import org.hl7.fhir.r5.hapi.validation.FhirInstanceValidator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -83,14 +82,14 @@ public class ResourceValidatorDstu3FeatureTest {
 		String encoded = parser.setPrettyPrint(true).encodeResourceToString(p).replace("2000-12-31", "2000-15-31");
 		ourLog.info(encoded);
 
-		assertThat(encoded, StringContains.containsString("2000-15-31"));
+		assertThat(encoded).contains("2000-15-31");
 
 		ValidationResult result = ourCtx.newValidator().validateWithResult(encoded);
 		String resultString = parser.setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome());
 		ourLog.info(resultString);
 
 		assertEquals(2, ((OperationOutcome) result.toOperationOutcome()).getIssue().size());
-		assertThat(resultString, StringContains.containsString("cvc-pattern-valid"));
+		assertThat(resultString).contains("cvc-pattern-valid");
 
 		try {
 			parser.parseResource(encoded);
@@ -118,7 +117,7 @@ public class ResourceValidatorDstu3FeatureTest {
 		String resultString = parser.setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome());
 		ourLog.info(resultString);
 
-		assertThat(resultString, containsString("No issues detected during validation"));
+		assertThat(resultString).contains("No issues detected during validation"));
 
 	}
 
@@ -190,7 +189,7 @@ public class ResourceValidatorDstu3FeatureTest {
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(operationOutcome);
 //		ourLog.info(encoded);
 
-		assertThat(encoded, containsString("Error parsing JSON: the primitive value must be a string"));
+		assertThat(encoded).contains("Error parsing JSON: the primitive value must be a string"));
 
 	}
 
@@ -276,7 +275,7 @@ public class ResourceValidatorDstu3FeatureTest {
 
 		assertTrue(result.isSuccessful());
 
-		assertThat(ooencoded, containsString("Unknown extension http://foo"));
+		assertThat(ooencoded).contains("Unknown extension http://foo"));
 	}
 
 	/**
@@ -302,12 +301,12 @@ public class ResourceValidatorDstu3FeatureTest {
 			"furry-grey",
 			"furry-white",
 			"FamilyName"};
-		assertThat(messageString, stringContainsInOrder(
+		assertThat(messageString).containsSubsequence(
 			Arrays.asList(strings)
 		));
 		String[] strings1 = {"extension",
 			"meta"};
-		assertThat(messageString, not(stringContainsInOrder(
+		assertThat(messageString).doesNotContainPattern("(?s)
 			Arrays.asList(strings1)
 		)));
 
@@ -326,8 +325,8 @@ public class ResourceValidatorDstu3FeatureTest {
 
 		assertTrue(result.isSuccessful());
 
-		assertThat(messageString, containsString("valueReference"));
-		assertThat(messageString, not(containsString("valueResource")));
+		assertThat(messageString).contains("valueReference"));
+		assertThat(messageString).doesNotContain("valueResource");
 	}
 
 	/**
@@ -354,16 +353,16 @@ public class ResourceValidatorDstu3FeatureTest {
 			"furry-white",
 			"String Extension",
 			"FamilyName"};
-		assertThat(messageString, stringContainsInOrder(
+		assertThat(messageString).containsSubsequence(
 			Arrays.asList(strings)
 		));
 		String[] strings1 = {"extension",
 			"meta"};
-		assertThat(messageString, not(stringContainsInOrder(
+		assertThat(messageString).doesNotContainPattern("(?s)
 			Arrays.asList(strings1)
 		)));
-		assertThat(messageString, containsString("url=\"http://ahr.copa.inso.tuwien.ac.at/StructureDefinition/Patient#animal-colorSecondary\""));
-		assertThat(messageString, containsString("url=\"http://foo.com/example\""));
+		assertThat(messageString).contains("url=\"http://ahr.copa.inso.tuwien.ac.at/StructureDefinition/Patient#animal-colorSecondary\""));
+		assertThat(messageString).contains("url=\"http://foo.com/example\""));
 		//@formatter:on
 
 		FhirValidator val = ourCtx.newValidator();
@@ -381,8 +380,8 @@ public class ResourceValidatorDstu3FeatureTest {
 
 		assertTrue(result.isSuccessful());
 
-		assertThat(messageString, containsString("valueReference"));
-		assertThat(messageString, not(containsString("valueResource")));
+		assertThat(messageString).contains("valueReference"));
+		assertThat(messageString).doesNotContain("valueResource");
 	}
 
 	@ResourceDef(name = "Patient")

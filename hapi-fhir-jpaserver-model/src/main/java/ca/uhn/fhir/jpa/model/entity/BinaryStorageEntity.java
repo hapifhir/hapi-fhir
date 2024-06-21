@@ -26,9 +26,12 @@ import jakarta.persistence.Lob;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+import org.hibernate.Length;
 
 import java.sql.Blob;
 import java.util.Date;
+
+import static java.util.Objects.nonNull;
 
 @Entity
 @Table(name = "HFJ_BINARY_STORAGE_BLOB")
@@ -36,21 +39,28 @@ public class BinaryStorageEntity {
 
 	@Id
 	@Column(name = "BLOB_ID", length = 200, nullable = false)
-	// N.B GGG: Note that the `blob id` is the same as the `externalized binary id`.
-	private String myBlobId;
+	// N.B GGG: Note that the `content id` is the same as the `externalized binary id`.
+	private String myContentId;
 
 	@Column(name = "RESOURCE_ID", length = 100, nullable = false)
 	private String myResourceId;
 
-	@Column(name = "BLOB_SIZE", nullable = true)
+	@Column(name = "BLOB_SIZE", nullable = false)
 	private long mySize;
 
 	@Column(name = "CONTENT_TYPE", nullable = false, length = 100)
-	private String myBlobContentType;
+	private String myContentType;
 
-	@Lob
-	@Column(name = "BLOB_DATA", nullable = false, insertable = true, updatable = false)
+	/**
+	 * @deprecated
+	 */
+	@Deprecated(since = "7.2.0")
+	@Lob // TODO: VC column added in 7.2.0 - Remove non-VC column later
+	@Column(name = "BLOB_DATA", nullable = true, insertable = true, updatable = false)
 	private Blob myBlob;
+
+	@Column(name = "STORAGE_CONTENT_BIN", nullable = true, length = Length.LONG32)
+	private byte[] myStorageContentBin;
 
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "PUBLISHED_DATE", nullable = false)
@@ -71,8 +81,8 @@ public class BinaryStorageEntity {
 		return myHash;
 	}
 
-	public void setBlobId(String theBlobId) {
-		myBlobId = theBlobId;
+	public void setContentId(String theContentId) {
+		myContentId = theContentId;
 	}
 
 	public void setResourceId(String theResourceId) {
@@ -83,12 +93,12 @@ public class BinaryStorageEntity {
 		return mySize;
 	}
 
-	public String getBlobContentType() {
-		return myBlobContentType;
+	public String getContentType() {
+		return myContentType;
 	}
 
-	public void setBlobContentType(String theBlobContentType) {
-		myBlobContentType = theBlobContentType;
+	public void setContentType(String theContentType) {
+		myContentType = theContentType;
 	}
 
 	public Blob getBlob() {
@@ -99,8 +109,8 @@ public class BinaryStorageEntity {
 		myBlob = theBlob;
 	}
 
-	public String getBlobId() {
-		return myBlobId;
+	public String getContentId() {
+		return myContentId;
 	}
 
 	public void setSize(long theSize) {
@@ -109,5 +119,22 @@ public class BinaryStorageEntity {
 
 	public void setHash(String theHash) {
 		myHash = theHash;
+	}
+
+	public byte[] getStorageContentBin() {
+		return myStorageContentBin;
+	}
+
+	public BinaryStorageEntity setStorageContentBin(byte[] theStorageContentBin) {
+		myStorageContentBin = theStorageContentBin;
+		return this;
+	}
+
+	public boolean hasStorageContent() {
+		return nonNull(myStorageContentBin);
+	}
+
+	public boolean hasBlob() {
+		return nonNull(myBlob);
 	}
 }

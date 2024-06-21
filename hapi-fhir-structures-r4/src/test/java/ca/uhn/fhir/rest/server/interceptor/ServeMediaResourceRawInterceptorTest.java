@@ -25,9 +25,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.io.IOException;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ServeMediaResourceRawInterceptorTest {
@@ -71,7 +69,7 @@ public class ServeMediaResourceRawInterceptorTest {
 		try (CloseableHttpResponse response = ourClient.execute(get)) {
 			assertEquals("application/fhir+json;charset=utf-8", response.getEntity().getContentType().getValue());
 			String contents = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
-			assertThat(contents, containsString("\"resourceType\""));
+			assertThat(contents).contains("\"resourceType\"");
 		}
 	}
 
@@ -86,7 +84,7 @@ public class ServeMediaResourceRawInterceptorTest {
 		try (CloseableHttpResponse response = ourClient.execute(get)) {
 			assertEquals("image/png", response.getEntity().getContentType().getValue());
 			byte[] contents = IOUtils.toByteArray(response.getEntity().getContent());
-			assertArrayEquals(new byte[]{2, 3, 4, 5, 6, 7, 8}, contents);
+			assertThat(contents).containsExactly(new byte[]{2, 3, 4, 5, 6, 7, 8});
 		}
 	}
 
@@ -112,7 +110,7 @@ public class ServeMediaResourceRawInterceptorTest {
 		try (CloseableHttpResponse response = ourClient.execute(get)) {
 			assertEquals("image/png", response.getEntity().getContentType().getValue());
 			byte[] contents = IOUtils.toByteArray(response.getEntity().getContent());
-			assertArrayEquals(new byte[]{2, 3, 4, 5, 6, 7, 8}, contents);
+			assertThat(contents).containsExactly(new byte[]{2, 3, 4, 5, 6, 7, 8});
 		}
 	}
 

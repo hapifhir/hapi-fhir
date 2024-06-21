@@ -13,24 +13,21 @@ import ca.uhn.fhir.util.VersionEnum;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.DisabledIf;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.util.Collections;
-import java.util.List;
 import java.util.Properties;
 
 import static ca.uhn.fhir.jpa.embedded.HapiEmbeddedDatabasesExtension.FIRST_TESTED_VERSION;
 import static ca.uhn.fhir.jpa.migrate.SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -75,28 +72,12 @@ public class HapiSchemaMigrationTest {
 		HapiMigrationDao hapiMigrationDao = new HapiMigrationDao(dataSource, theDriverType, HAPI_FHIR_MIGRATION_TABLENAME);
 		HapiMigrationStorageSvc hapiMigrationStorageSvc = new HapiMigrationStorageSvc(hapiMigrationDao);
 
-		VersionEnum[] allVersions =  VersionEnum.values();
+		for (VersionEnum aVersion : VersionEnum.values()) {
+			ourLog.info("Applying migrations for {}", aVersion);
+			migrate(theDriverType, dataSource, hapiMigrationStorageSvc, aVersion);
 
-		List<VersionEnum> dataVersions = List.of(
-			VersionEnum.V5_2_0,
-			VersionEnum.V5_3_0,
-			VersionEnum.V5_4_0,
-			VersionEnum.V5_5_0,
-			VersionEnum.V6_0_0,
-			VersionEnum.V6_6_0,
-			VersionEnum.V7_2_0
-		);
-
-		int fromVersion = 0;
-		VersionEnum from = allVersions[fromVersion];
-		VersionEnum toVersion;
-
-		for (int i = 0; i < allVersions.length; i++) {
-			toVersion = allVersions[i];
-			ourLog.info("Applying migrations for {}", toVersion);
-			migrate(theDriverType, dataSource, hapiMigrationStorageSvc, toVersion);
-			if (dataVersions.contains(toVersion)) {
-				myEmbeddedServersExtension.insertPersistenceTestData(theDriverType, toVersion);
+			if (aVersion.isNewerThan(FIRST_TESTED_VERSION)) {
+				myEmbeddedServersExtension.maybeInsertPersistenceTestData(theDriverType, aVersion);
 			}
 		}
 
@@ -111,14 +92,6 @@ public class HapiSchemaMigrationTest {
 		}
 
 		verifyForcedIdMigration(dataSource);
-	}
-
-	private static void migrate(DriverTypeEnum theDriverType, DataSource dataSource, HapiMigrationStorageSvc hapiMigrationStorageSvc, VersionEnum from, VersionEnum to) throws SQLException {
-		MigrationTaskList migrationTasks = new HapiFhirJpaMigrationTasks(Collections.emptySet()).getTaskList(from, to);
-		SchemaMigrator schemaMigrator = new SchemaMigrator(TEST_SCHEMA_NAME, HAPI_FHIR_MIGRATION_TABLENAME, dataSource, new Properties(), migrationTasks, hapiMigrationStorageSvc);
-		schemaMigrator.setDriverType(theDriverType);
-		schemaMigrator.createMigrationTableIfRequired();
-		schemaMigrator.migrate();
 	}
 
 	private static void migrate(DriverTypeEnum theDriverType, DataSource dataSource, HapiMigrationStorageSvc hapiMigrationStorageSvc, VersionEnum to) throws SQLException {
@@ -136,9 +109,9 @@ public class HapiSchemaMigrationTest {
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(theDataSource);
 		@SuppressWarnings("DataFlowIssue")
 		int nullCount = jdbcTemplate.queryForObject("select count(1) from hfj_resource where fhir_id is null", Integer.class);
-		assertEquals(0, nullCount, "no fhir_id should be null");
+		assertThat(nullCount).as("no fhir_id should be null").isEqualTo(0);
 		int trailingSpaceCount = jdbcTemplate.queryForObject("select count(1) from hfj_resource where fhir_id <> trim(fhir_id)", Integer.class);
-		assertEquals(0, trailingSpaceCount, "no fhir_id should contain a space");
+		assertThat(trailingSpaceCount).as("no fhir_id should contain a space").isEqualTo(0);
 	}
 
 
@@ -163,5 +136,4 @@ public class HapiSchemaMigrationTest {
 		assertFalse(schemaMigrator.createMigrationTableIfRequired());
 
 	}
-
 }

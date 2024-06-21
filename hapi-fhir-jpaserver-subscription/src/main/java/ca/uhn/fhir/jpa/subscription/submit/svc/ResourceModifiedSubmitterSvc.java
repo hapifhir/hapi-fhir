@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.subscription.submit.svc;
  */
 
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
+import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.model.entity.IPersistedResourceModifiedMessage;
 import ca.uhn.fhir.jpa.model.entity.IPersistedResourceModifiedMessagePK;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;

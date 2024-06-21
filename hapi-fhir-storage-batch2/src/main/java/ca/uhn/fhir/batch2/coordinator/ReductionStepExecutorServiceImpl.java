@@ -30,8 +30,10 @@ import ca.uhn.fhir.batch2.model.ChunkOutcome;
 import ca.uhn.fhir.batch2.model.JobDefinitionStep;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
+import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
+import ca.uhn.fhir.batch2.util.BatchJobOpenTelemetryUtils;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.IHasScheduledJobs;
@@ -40,6 +42,7 @@ import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import com.google.common.annotations.VisibleForTesting;
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.time.DateUtils;
 import org.quartz.JobExecutionContext;
@@ -69,6 +72,7 @@ import static ca.uhn.fhir.batch2.model.StatusEnum.COMPLETED;
 import static ca.uhn.fhir.batch2.model.StatusEnum.ERRORED;
 import static ca.uhn.fhir.batch2.model.StatusEnum.FINALIZE;
 import static ca.uhn.fhir.batch2.model.StatusEnum.IN_PROGRESS;
+import static ca.uhn.fhir.batch2.util.BatchJobOpenTelemetryUtils.JOB_STEP_EXECUTION_SPAN_NAME;
 
 public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorService, IHasScheduledJobs {
 	public static final String SCHEDULED_JOB_ID = ReductionStepExecutorScheduledJob.class.getName();
@@ -137,7 +141,6 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 	public void reducerPass() {
 		if (myCurrentlyExecuting.tryAcquire()) {
 			try {
-
 				String[] instanceIds = myInstanceIdToJobWorkCursor.keySet().toArray(new String[0]);
 				if (instanceIds.length > 0) {
 					String instanceId = instanceIds[0];
@@ -159,9 +162,17 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 	}
 
 	@VisibleForTesting
+	@WithSpan(JOB_STEP_EXECUTION_SPAN_NAME)
 	<PT extends IModelJson, IT extends IModelJson, OT extends IModelJson>
 			ReductionStepChunkProcessingResponse executeReductionStep(
 					String theInstanceId, JobWorkCursor<PT, IT, OT> theJobWorkCursor) {
+
+		BatchJobOpenTelemetryUtils.addAttributesToCurrentSpan(
+				theJobWorkCursor.getJobDefinition().getJobDefinitionId(),
+				theJobWorkCursor.getJobDefinition().getJobDefinitionVersion(),
+				theInstanceId,
+				theJobWorkCursor.getCurrentStepId(),
+				null);
 
 		JobDefinitionStep<PT, IT, OT> step = theJobWorkCursor.getCurrentStep();
 
@@ -215,6 +226,36 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 		ReductionStepChunkProcessingResponse response = new ReductionStepChunkProcessingResponse(defaultSuccessValue);
 
 		try {
+			processChunksAndCompleteJob(theJobWorkCursor, step, instance, parameters, reductionStepWorker, response);
+		} catch (Exception ex) {
+			ourLog.error("Job completion failed for Job {}", instance.getInstanceId(), ex);
+
+			executeInTransactionWithSynchronization(() -> {
+				myJobPersistence.updateInstance(instance.getInstanceId(), theInstance -> {
+					theInstance.setStatus(StatusEnum.FAILED);
+					return true;
+				});
+				return null;
+			});
+			response.setSuccessful(false);
+		}
+
+		// if no successful chunks, return false
+		if (!response.hasSuccessfulChunksIds()) {
+			response.setSuccessful(false);
+		}
+
+		return response;
+	}
+
+	private <PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> void processChunksAndCompleteJob(
+			JobWorkCursor<PT, IT, OT> theJobWorkCursor,
+			JobDefinitionStep<PT, IT, OT> step,
+			JobInstance instance,
+			PT parameters,
+			IReductionStepWorker<PT, IT, OT> reductionStepWorker,
+			ReductionStepChunkProcessingResponse response) {
+		try {
 			executeInTransactionWithSynchronization(() -> {
 				try (Stream<WorkChunk> chunkIterator =
 						myJobPersistence.fetchAllWorkChunksForStepStream(instance.getInstanceId(), step.getStepId())) {
@@ -234,7 +275,7 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 				ReductionStepDataSink<PT, IT, OT> dataSink = new ReductionStepDataSink<>(
 						instance.getInstanceId(), theJobWorkCursor, myJobPersistence, myJobDefinitionRegistry);
 				StepExecutionDetails<PT, IT> chunkDetails =
-						new StepExecutionDetails<>(parameters, null, instance, "REDUCTION");
+						StepExecutionDetails.createReductionStepDetails(parameters, null, instance);
 
 				if (response.isSuccessful()) {
 					reductionStepWorker.run(chunkDetails, dataSink);
@@ -277,13 +318,6 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 				return null;
 			});
 		}
-
-		// if no successful chunks, return false
-		if (!response.hasSuccessfulChunksIds()) {
-			response.setSuccessful(false);
-		}
-
-		return response;
 	}
 
 	private <T> T executeInTransactionWithSynchronization(Callable<T> runnable) {
@@ -314,10 +348,13 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 			ReductionStepChunkProcessingResponse theResponseObject,
 			JobWorkCursor<PT, IT, OT> theJobWorkCursor) {
 
-		if (!theChunk.getStatus().isIncomplete()) {
+		/*
+		 * Reduction steps are done inline and only on gated jobs.
+		 */
+		if (theChunk.getStatus() == WorkChunkStatusEnum.COMPLETED) {
 			// This should never happen since jobs with reduction are required to be gated
 			ourLog.error(
-					"Unexpected chunk {} with status {} found while reducing {}.  No chunks feeding into a reduction step should be complete.",
+					"Unexpected chunk {} with status {} found while reducing {}.  No chunks feeding into a reduction step should be in a state other than READY.",
 					theChunk.getId(),
 					theChunk.getStatus(),
 					theInstance);

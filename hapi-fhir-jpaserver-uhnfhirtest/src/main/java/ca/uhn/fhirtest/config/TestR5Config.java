@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.config.HapiJpaConfig;
 import ca.uhn.fhir.jpa.config.r5.JpaR5Config;
 import ca.uhn.fhir.jpa.config.util.HapiEntityManagerFactoryUtil;
+import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgres94Dialect;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
@@ -55,9 +56,18 @@ public class TestR5Config {
 	private String myFhirLuceneLocation = System.getProperty(FHIR_LUCENE_LOCATION_R5);
 
 	@Bean
+	public SubscriptionSettings subscriptionSettings() {
+		SubscriptionSettings retVal = new SubscriptionSettings();
+		retVal.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.EMAIL);
+		retVal.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.RESTHOOK);
+		retVal.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.WEBSOCKET);
+		retVal.setWebsocketContextPath("/websocketR5");
+		return retVal;
+	}
+
+	@Bean
 	public JpaStorageSettings storageSettings() {
 		JpaStorageSettings retVal = new JpaStorageSettings();
-		retVal.setWebsocketContextPath("/websocketR5");
 		retVal.setAllowContainsSearches(true);
 		retVal.setAllowMultipleDelete(true);
 		retVal.setAllowInlineMatchUrlReferences(true);

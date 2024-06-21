@@ -51,14 +51,23 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.lessThan;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/**
+ * Version specific tests for validation using RemoteTerminologyValidationSupport.
+ * The tests in this class simulate the call to a remote server and therefore, only tests the code in
+ * the RemoteTerminologyServiceValidationSupport itself. The remote client call is simulated using the test providers.
+ * @see RemoteTerminologyServiceValidationSupport
+ *
+ * Other operations are tested separately.
+ * @see RemoteTerminologyLookupCodeR4Test
+ * @see RemoteTerminologyServiceResourceProviderR4Test
+ */
 public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidationTestWithInlineMocks {
 	private static final String DISPLAY = "DISPLAY";
 	private static final String CODE_SYSTEM = "CODE_SYS";
@@ -101,7 +110,7 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 
 	@AfterEach
 	public void after() {
-		assertThat(myValueSetProvider.myInvocationCount, lessThan(2));
+		assertThat(myValueSetProvider.myInvocationCount).isLessThan(2);
 	}
 
 	@Test
@@ -453,7 +462,7 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 						Parameters params = parser.parseResource(Parameters.class, content);
 						List<String> systemValues = ParametersUtil.getNamedParameterValuesAsString(
 							ourCtx, params, "system");
-						assertEquals(1, systemValues.size());
+						assertThat(systemValues).hasSize(1);
 						capturedSystemParameter = systemValues.get(0);
 					}
 				} catch (IOException theE) {

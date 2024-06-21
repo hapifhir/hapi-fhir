@@ -321,9 +321,12 @@ public enum Pointcut implements IPointcut {
 	 * This hook is invoked before an incoming request is processed. Note that this method is called
 	 * after the server has begun preparing the response to the incoming client request.
 	 * As such, it is not able to supply a response to the incoming request in the way that
-	 * SERVER_INCOMING_REQUEST_PRE_PROCESSED and
-	 * {@link #SERVER_INCOMING_REQUEST_POST_PROCESSED}
-	 * are.
+	 * SERVER_INCOMING_REQUEST_PRE_PROCESSED and {@link #SERVER_INCOMING_REQUEST_POST_PROCESSED} are.
+	 * At this point the request has already been passed to the handler so any changes
+	 * (e.g. adding parameters) will not be considered.
+	 * If you'd like to modify request parameters before they are passed to the handler,
+	 * use {@link Pointcut#SERVER_INCOMING_REQUEST_PRE_HANDLER_SELECTED} or {@link Pointcut#SERVER_INCOMING_REQUEST_POST_PROCESSED}.
+	 * If you are attempting to modify a search before it occurs, use {@link Pointcut#STORAGE_PRESEARCH_REGISTERED}.
 	 * <p>
 	 * Hooks may accept the following parameters:
 	 * <ul>
@@ -902,7 +905,6 @@ public enum Pointcut implements IPointcut {
 	 * canonical subscription such as adding headers, modifying the channel
 	 * endpoint, etc.
 	 * Furthermore, you may modify the outgoing message wrapper, for example adding headers via ResourceModifiedJsonMessage field.
-	 *
 	 * </p>
 	 * Hooks may accept the following parameters:
 	 * <ul>
@@ -1082,8 +1084,49 @@ public enum Pointcut implements IPointcut {
 
 	/**
 	 * <b>Storage Hook:</b>
+	 * Invoked when a Bulk Export job is being kicked off, but before any permission checks
+	 * have been done.
+	 * This hook can be used to modify or update parameters as need be before
+	 * authorization/permission checks are done.
+	 * <p>
+	 * Hooks may accept the following parameters:
+	 * </p>
+	 * <ul>
+	 * <li>
+	 * ca.uhn.fhir.jpa.bulk.export.api.BulkDataExportOptions - The details of the job being kicked off
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. Note that the bean
+	 * properties are not all guaranteed to be populated, depending on how early during processing the
+	 * exception occurred. <b>Note that this parameter may be null in contexts where the request is not
+	 * known, such as while processing searches</b>
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.server.servlet.ServletRequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. This parameter is identical to the RequestDetails parameter above but will
+	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
+	 * </li>
+	 * </ul>
+	 * <p>
+	 * Hooks should return <code>void</code>, and can throw exceptions.
+	 * </p>
+	 */
+	STORAGE_PRE_INITIATE_BULK_EXPORT(
+			void.class,
+			"ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters",
+			"ca.uhn.fhir.rest.api.server.RequestDetails",
+			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"),
+
+	/**
+	 * <b>Storage Hook:</b>
 	 * Invoked when a Bulk Export job is being kicked off. Hook methods may modify
 	 * the request, or raise an exception to prevent it from being initiated.
+	 * This hook is not guaranteed to be called before permission checks, and so
+	 * anu implementers should be cautious of changing the options in ways that would
+	 * affect permissions.
 	 * <p>
 	 * Hooks may accept the following parameters:
 	 * </p>
@@ -1150,7 +1193,7 @@ public enum Pointcut implements IPointcut {
 
 	/**
 	 * <b>Storage Hook:</b>
-	 * Invoked when a set of resources are about to be deleted and expunged via url like http://localhost/Patient?active=false&_expunge=true
+	 * Invoked when a set of resources are about to be deleted and expunged via url like {@code http://localhost/Patient?active=false&_expunge=true}.
 	 * <p>
 	 * Hooks may accept the following parameters:
 	 * </p>
@@ -1186,7 +1229,7 @@ public enum Pointcut implements IPointcut {
 
 	/**
 	 * <b>Storage Hook:</b>
-	 * Invoked when a batch of resource pids are about to be deleted and expunged via url like http://localhost/Patient?active=false&_expunge=true
+	 * Invoked when a batch of resource pids are about to be deleted and expunged via url like {@code http://localhost/Patient?active=false&_expunge=true}.
 	 * <p>
 	 * Hooks may accept the following parameters:
 	 * </p>
@@ -1533,11 +1576,11 @@ public enum Pointcut implements IPointcut {
 
 	/**
 	 * <b>Storage Hook:</b>
-	 * Invoked before a resource will be created, immediately before the resource
-	 * is persisted to the database.
+	 * Invoked before a resource will be deleted, immediately before the resource
+	 * is removed from the database.
 	 * <p>
-	 * Hooks will have access to the contents of the resource being created
-	 * and may choose to make modifications to it. These changes will be
+	 * Hooks will have access to the contents of the resource being deleted
+	 * and may choose to make modifications related to it. These changes will be
 	 * reflected in permanent storage.
 	 * </p>
 	 * Hooks may accept the following parameters:
@@ -2345,13 +2388,19 @@ public enum Pointcut implements IPointcut {
 	 * <li>
 	 * ca.uhn.fhir.mdm.model.mdmevents.MdmMergeEvent - Contains information about the from and to resources.
 	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.mdm.model.mdmevents.MdmTransactionContext - Contains information about the Transaction context, e.g. merge or link.
+	 * </li>
 	 * </ul>
 	 * <p>
 	 * Hooks should return <code>void</code>.
 	 * </p>
 	 */
 	MDM_POST_MERGE_GOLDEN_RESOURCES(
-			void.class, "ca.uhn.fhir.rest.api.server.RequestDetails", "ca.uhn.fhir.mdm.model.mdmevents.MdmMergeEvent"),
+			void.class,
+			"ca.uhn.fhir.rest.api.server.RequestDetails",
+			"ca.uhn.fhir.mdm.model.mdmevents.MdmMergeEvent",
+			"ca.uhn.fhir.mdm.model.MdmTransactionContext"),
 
 	/**
 	 * <b>MDM Link History Hook:</b>
@@ -2910,6 +2959,7 @@ public enum Pointcut implements IPointcut {
 			"ca.uhn.fhir.jpa.util.SqlQueryList"),
 
 	/**
+	 * <b> Deprecated but still supported.  Will eventually be removed.  <code>Please use Pointcut.STORAGE_BINARY_ASSIGN_BINARY_CONTENT_ID_PREFIX</code>  </b>
 	 * <b> Binary Blob Prefix Assigning Hook:</b>
 	 * <p>
 	 * Immediately before a binary blob is stored to its eventual data sink, this hook is called.
@@ -2930,7 +2980,34 @@ public enum Pointcut implements IPointcut {
 	 * Hooks should return <code>String</code>, which represents the full prefix to be applied to the blob.
 	 * </p>
 	 */
+	@Deprecated(since = "7.2.0 - Use STORAGE_BINARY_ASSIGN_BINARY_CONTENT_ID_PREFIX instead.")
 	STORAGE_BINARY_ASSIGN_BLOB_ID_PREFIX(
+			String.class,
+			"ca.uhn.fhir.rest.api.server.RequestDetails",
+			"org.hl7.fhir.instance.model.api.IBaseResource"),
+
+	/**
+	 * <b> Binary Content Prefix Assigning Hook:</b>
+	 * <p>
+	 * Immediately before binary content is stored to its eventual data sink, this hook is called.
+	 * This hook allows implementers to provide a prefix to the binary content's ID.
+	 * This is helpful in cases where you want to identify this blob for later retrieval outside of HAPI-FHIR. Note that allowable characters will depend on the specific storage sink being used.
+	 * <ul>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. Note that the bean
+	 * properties are not all guaranteed to be populated.
+	 * </li>
+	 * <li>
+	 * org.hl7.fhir.instance.model.api.IBaseBinary - The binary resource that is about to be stored.
+	 * </li>
+	 * </ul>
+	 * <p>
+	 * Hooks should return <code>String</code>, which represents the full prefix to be applied to the blob.
+	 * </p>
+	 */
+	STORAGE_BINARY_ASSIGN_BINARY_CONTENT_ID_PREFIX(
 			String.class,
 			"ca.uhn.fhir.rest.api.server.RequestDetails",
 			"org.hl7.fhir.instance.model.api.IBaseResource"),

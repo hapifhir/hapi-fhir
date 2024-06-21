@@ -1,5 +1,9 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
@@ -45,17 +49,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.matchesPattern;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.startsWith;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doAnswer;
@@ -125,7 +119,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 				assertEquals(SOME_BYTES.length, resp.getEntity().getContentLength());
 
 				byte[] actualBytes = IOUtils.toByteArray(resp.getEntity().getContent());
-				assertArrayEquals(SOME_BYTES, actualBytes);
+				assertThat(actualBytes).containsExactly(SOME_BYTES);
 
 			}
 
@@ -156,7 +150,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 				assertEquals(SOME_BYTES_2.length, resp.getEntity().getContentLength());
 
 				byte[] actualBytes = IOUtils.toByteArray(resp.getEntity().getContent());
-				assertArrayEquals(SOME_BYTES_2, actualBytes);
+				assertThat(actualBytes).containsExactly(SOME_BYTES_2);
 			}
 
 			verify(interceptor, times(1)).invoke(eq(Pointcut.STORAGE_PRESHOW_RESOURCES), any());
@@ -177,7 +171,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 
 			assertEquals(400, resp.getStatusLine().getStatusCode());
 			String response = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
-			assertThat(response, containsString("No path specified"));
+			assertThat(response).contains("No path specified");
 
 		}
 
@@ -197,7 +191,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 
 			assertEquals(400, resp.getStatusLine().getStatusCode());
 			String response = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
-			assertThat(response, matchesPattern(".*The resource with ID DocumentReference/[0-9]+ has no data at path.*"));
+			assertThat(response).matches(".*The resource with ID DocumentReference/[0-9]+ has no data at path.*");
 
 		}
 	}
@@ -225,10 +219,10 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 			RequestDetails requestDetails = PointcutLatch.getInvocationParameterOfType(hookParams, RequestDetails.class);
 			ResponseDetails responseDetails= PointcutLatch.getInvocationParameterOfType(hookParams, ResponseDetails.class);
 
-			assertThat(responseDetails, is(notNullValue()));
-			assertThat(requestDetails, is(notNullValue()));
+			assertNotNull(responseDetails);
+			assertNotNull(requestDetails);
 
-			assertThat(requestDetails.getId().toString(), is(equalTo(id.toString())));
+			assertEquals(id.toString(), requestDetails.getId().toString());
 		}
 	}
 	@Test
@@ -248,7 +242,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 		try (CloseableHttpResponse resp = ourHttpClient.execute(post)) {
 
 			assertEquals(200, resp.getStatusLine().getStatusCode());
-			assertThat(resp.getEntity().getContentType().getValue(), containsString("application/fhir+json"));
+			assertThat(resp.getEntity().getContentType().getValue()).contains("application/fhir+json");
 			String response = IOUtils.toString(resp.getEntity().getContent(), Constants.CHARSET_UTF8);
 			ourLog.info("Response: {}", response);
 
@@ -260,11 +254,11 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 			assertNull(attachment.getData());
 			assertEquals("2", ref.getMeta().getVersionId());
 			attachmentId = attachment.getDataElement().getExtensionString(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID);
-			assertThat(attachmentId, matchesPattern("[a-zA-Z0-9]{100}"));
+			assertThat(attachmentId).matches("[a-zA-Z0-9]{100}");
 		}
 
 
-		myBinaryStorageSvc.expungeBlob(id, attachmentId);
+		myBinaryStorageSvc.expungeBinaryContent(id, attachmentId);
 
 		path = myServerBase +
 			"/DocumentReference/" + id.getIdPart() + "/" +
@@ -275,7 +269,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 
 			assertEquals(400, resp.getStatusLine().getStatusCode());
 			String response = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
-			assertThat(response, matchesPattern(".*Can not find the requested binary content. It may have been deleted.*"));
+			assertThat(response).matches(".*Can not find the requested binary content. It may have been deleted.*");
 
 		}
 
@@ -307,7 +301,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 			try (CloseableHttpResponse resp = ourHttpClient.execute(post)) {
 
 				assertEquals(200, resp.getStatusLine().getStatusCode());
-				assertThat(resp.getEntity().getContentType().getValue(), containsString("application/fhir+json"));
+				assertThat(resp.getEntity().getContentType().getValue()).contains("application/fhir+json");
 				String response = IOUtils.toString(resp.getEntity().getContent(), Constants.CHARSET_UTF8);
 				ourLog.info("Response: {}", response);
 
@@ -319,7 +313,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 				assertNull(attachment.getData());
 				assertEquals("2", ref.getMeta().getVersionId());
 				attachmentId = attachment.getDataElement().getExtensionString(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID);
-				assertThat(attachmentId, matchesPattern("[a-zA-Z0-9]{100}"));
+				assertThat(attachmentId).matches("[a-zA-Z0-9]{100}");
 
 			}
 
@@ -341,7 +335,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 				assertEquals(SOME_BYTES.length, resp.getEntity().getContentLength());
 
 				byte[] actualBytes = IOUtils.toByteArray(resp.getEntity().getContent());
-				assertArrayEquals(SOME_BYTES, actualBytes);
+				assertThat(actualBytes).containsExactly(SOME_BYTES);
 			}
 		} finally {
 			myInterceptorRegistry.unregisterInterceptor(interceptor);
@@ -361,7 +355,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 			myClient.create().resource(dr).execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), containsString("Can not find the requested binary content. It may have been deleted."));
+			assertThat(e.getMessage()).contains("Can not find the requested binary content. It may have been deleted.");
 		}
 	}
 
@@ -391,7 +385,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 			try (CloseableHttpResponse resp = ourHttpClient.execute(post)) {
 
 				assertEquals(200, resp.getStatusLine().getStatusCode());
-				assertThat(resp.getEntity().getContentType().getValue(), containsString("application/fhir+json"));
+				assertThat(resp.getEntity().getContentType().getValue()).contains("application/fhir+json");
 				String response = IOUtils.toString(resp.getEntity().getContent(), Constants.CHARSET_UTF8);
 				ourLog.info("Response: {}", response);
 
@@ -400,7 +394,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 				Attachment attachment = ref.getContentFirstRep().getAttachment();
 				assertEquals(ContentType.IMAGE_JPEG.getMimeType(), attachment.getContentType());
 				assertEquals(4, attachment.getSize());
-				assertArrayEquals(SOME_BYTES_2, attachment.getData());
+				assertThat(attachment.getData()).containsExactly(SOME_BYTES_2);
 				assertEquals("2", ref.getMeta().getVersionId());
 				attachmentId = attachment.getExtensionString(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID);
 				assertNull(attachmentId);
@@ -445,7 +439,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 			try (CloseableHttpResponse resp = ourHttpClient.execute(post)) {
 
 				assertEquals(200, resp.getStatusLine().getStatusCode());
-				assertThat(resp.getEntity().getContentType().getValue(), containsString("application/fhir+json"));
+				assertThat(resp.getEntity().getContentType().getValue()).contains("application/fhir+json");
 				String response = IOUtils.toString(resp.getEntity().getContent(), Constants.CHARSET_UTF8);
 				ourLog.info("Response: {}", response);
 
@@ -455,7 +449,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 				assertNull(target.getData());
 				assertEquals("2", target.getMeta().getVersionId());
 				attachmentId = target.getDataElement().getExtensionString(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID);
-				assertThat(attachmentId, matchesPattern("[a-zA-Z0-9]{100}"));
+				assertThat(attachmentId).matches("[a-zA-Z0-9]{100}");
 
 			}
 
@@ -477,7 +471,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 				assertEquals(SOME_BYTES.length, resp.getEntity().getContentLength());
 
 				byte[] actualBytes = IOUtils.toByteArray(resp.getEntity().getContent());
-				assertArrayEquals(SOME_BYTES, actualBytes);
+				assertThat(actualBytes).containsExactly(SOME_BYTES);
 			}
 		} finally {
 			myInterceptorRegistry.unregisterInterceptor(interceptor);
@@ -510,7 +504,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 		try (CloseableHttpResponse resp = ourHttpClient.execute(post)) {
 
 			assertEquals(200, resp.getStatusLine().getStatusCode());
-			assertThat(resp.getEntity().getContentType().getValue(), containsString("application/fhir+json"));
+			assertThat(resp.getEntity().getContentType().getValue()).contains("application/fhir+json");
 			String response = IOUtils.toString(resp.getEntity().getContent(), Constants.CHARSET_UTF8);
 			ourLog.info("Response: {}", response);
 
@@ -520,7 +514,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 			assertNull(target.getData());
 			assertEquals("2", target.getMeta().getVersionId());
 			attachmentId = target.getDataElement().getExtensionString(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID);
-			assertThat(attachmentId, matchesPattern("[a-zA-Z0-9]{100}"));
+			assertThat(attachmentId).matches("[a-zA-Z0-9]{100}");
 
 		}
 
@@ -537,7 +531,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 			assertEquals(SOME_BYTES.length, resp.getEntity().getContentLength());
 
 			byte[] actualBytes = IOUtils.toByteArray(resp.getEntity().getContent());
-			assertArrayEquals(SOME_BYTES, actualBytes);
+			assertThat(actualBytes).containsExactly(SOME_BYTES);
 		}
 
 	}
@@ -582,7 +576,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 			String attachmentId;
 			try (CloseableHttpResponse resp = ourHttpClient.execute(post)) {
 				assertEquals(200, resp.getStatusLine().getStatusCode());
-				assertThat(resp.getEntity().getContentType().getValue(), containsString("application/fhir+json"));
+				assertThat(resp.getEntity().getContentType().getValue()).contains("application/fhir+json");
 
 				String response = IOUtils.toString(resp.getEntity().getContent(), Constants.CHARSET_UTF8);
 				ourLog.info("Response: {}", response);
@@ -592,7 +586,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 				assertNull(target.getContentFirstRep().getAttachment().getData());
 				assertEquals("2", target.getMeta().getVersionId());
 				attachmentId = target.getContentFirstRep().getAttachment().getDataElement().getExtensionString(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID);
-				assertThat(attachmentId, startsWith("test-blob-id-prefix"));
+				assertThat(attachmentId).startsWith("test-blob-id-prefix");
 			}
 
 			verify(interceptor, timeout(5_000).times(1)).provideBlobIdForBinary(any(), any());
@@ -635,7 +629,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 			String attachmentId;
 			try (CloseableHttpResponse resp = ourHttpClient.execute(post)) {
 				assertEquals(200, resp.getStatusLine().getStatusCode());
-				assertThat(resp.getEntity().getContentType().getValue(), containsString("application/fhir+json"));
+				assertThat(resp.getEntity().getContentType().getValue()).contains("application/fhir+json");
 
 				String response = IOUtils.toString(resp.getEntity().getContent(), Constants.CHARSET_UTF8);
 				ourLog.info("Response: {}", response);
@@ -645,7 +639,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 				assertNull(target.getContentFirstRep().getAttachment().getData());
 				assertEquals("2", target.getMeta().getVersionId());
 				attachmentId = target.getContentFirstRep().getAttachment().getDataElement().getExtensionString(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID);
-				assertThat(attachmentId, matchesPattern("[a-zA-Z0-9]{100}"));
+				assertThat(attachmentId).matches("[a-zA-Z0-9]{100}");
 
 			}
 
@@ -667,7 +661,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 				assertEquals(bytes.length, resp.getEntity().getContentLength());
 
 				byte[] actualBytes = IOUtils.toByteArray(resp.getEntity().getContent());
-				assertArrayEquals(bytes, actualBytes);
+				assertThat(actualBytes).containsExactly(bytes);
 			}
 		} finally {
 			myInterceptorRegistry.unregisterInterceptor(interceptor);
@@ -712,16 +706,16 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 		String attachmentId;
 		try (CloseableHttpResponse resp = ourHttpClient.execute(post)) {
 			assertEquals(200, resp.getStatusLine().getStatusCode());
-			assertThat(resp.getEntity().getContentType().getValue(), containsString("application/fhir+json"));
+			assertThat(resp.getEntity().getContentType().getValue()).contains("application/fhir+json");
 			String response = IOUtils.toString(resp.getEntity().getContent(), Constants.CHARSET_UTF8);
 			DocumentReference ref = myFhirContext.newJsonParser().parseResource(DocumentReference.class, response);
 			Attachment attachment = ref.getContentFirstRep().getAttachment();
 			attachmentId = attachment.getDataElement().getExtensionString(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID);
-			assertThat(attachmentId, matchesPattern("[a-zA-Z0-9]{100}"));
+			assertThat(attachmentId).matches("[a-zA-Z0-9]{100}");
 		}
 
 		ByteArrayOutputStream capture = new ByteArrayOutputStream();
-		myStorageSvc.writeBlob(id, attachmentId, capture);
+		myStorageSvc.writeBinaryContent(id, attachmentId, capture);
 		assertEquals(15, capture.size());
 
 		// Now delete (logical delete- should not expunge the binary)
@@ -734,7 +728,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 		}
 
 		capture = new ByteArrayOutputStream();
-		myStorageSvc.writeBlob(id, attachmentId, capture);
+		myStorageSvc.writeBinaryContent(id, attachmentId, capture);
 		assertEquals(15, capture.size());
 
 		// Now expunge
@@ -748,7 +742,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 			.execute();
 
 		capture = new ByteArrayOutputStream();
-		assertFalse(myStorageSvc.writeBlob(id, attachmentId, capture));
+		assertFalse(myStorageSvc.writeBinaryContent(id, attachmentId, capture));
 		assertEquals(0, capture.size());
 
 	}
@@ -776,11 +770,11 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 				ourLog.info("Response: {}\n{}", resp, response);
 
 				assertEquals(200, resp.getStatusLine().getStatusCode());
-				assertThat(resp.getEntity().getContentType().getValue(), containsString("application/fhir+json"));
+				assertThat(resp.getEntity().getContentType().getValue()).contains("application/fhir+json");
 				DocumentReference ref = myFhirContext.newJsonParser().parseResource(DocumentReference.class, response);
 				Attachment attachment = ref.getContentFirstRep().getAttachment();
 				attachmentId = attachment.getDataElement().getExtensionString(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID);
-				assertThat(attachmentId, matchesPattern("[a-zA-Z0-9]{100}"));
+				assertThat(attachmentId).matches("[a-zA-Z0-9]{100}");
 			}
 
 		} finally {

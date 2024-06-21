@@ -23,6 +23,7 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionMatchingStrategy;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
@@ -68,10 +69,23 @@ public class SubscriptionCanonicalizer {
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionCanonicalizer.class);
 
 	final FhirContext myFhirContext;
+	private final SubscriptionSettings mySubscriptionSettings;
 
 	@Autowired
+	public SubscriptionCanonicalizer(FhirContext theFhirContext, SubscriptionSettings theSubscriptionSettings) {
+		myFhirContext = theFhirContext;
+		mySubscriptionSettings = theSubscriptionSettings;
+	}
+
+	// TODO:  LD:  remove this constructor once all callers call the 2 arg constructor above
+
+	/**
+	 * @deprecated All callers should invoke {@link SubscriptionCanonicalizer()} instead.
+	 */
+	@Deprecated
 	public SubscriptionCanonicalizer(FhirContext theFhirContext) {
 		myFhirContext = theFhirContext;
+		mySubscriptionSettings = new SubscriptionSettings();
 	}
 
 	public CanonicalSubscription canonicalize(IBaseResource theSubscription) {
@@ -109,7 +123,7 @@ public class SubscriptionCanonicalizer {
 			retVal.setIdElement(subscription.getIdElement());
 			retVal.setPayloadString(channel.getPayload());
 			retVal.setTags(extractTags(subscription));
-			retVal.setCrossPartitionEnabled(SubscriptionUtil.isCrossPartition(theSubscription));
+			handleCrossPartition(theSubscription, retVal);
 			retVal.setSendDeleteMessages(extractDeleteExtensionDstu2(subscription));
 		} catch (FHIRException theE) {
 			throw new InternalErrorException(Msg.code(557) + theE);
@@ -161,7 +175,7 @@ public class SubscriptionCanonicalizer {
 			retVal.setPayloadSearchCriteria(
 					getExtensionString(subscription, HapiExtensions.EXT_SUBSCRIPTION_PAYLOAD_SEARCH_CRITERIA));
 			retVal.setTags(extractTags(subscription));
-			retVal.setCrossPartitionEnabled(SubscriptionUtil.isCrossPartition(theSubscription));
+			handleCrossPartition(theSubscription, retVal);
 
 			if (retVal.getChannelType() == CanonicalSubscriptionChannelType.EMAIL) {
 				String from;
@@ -292,7 +306,7 @@ public class SubscriptionCanonicalizer {
 				getExtensionString(subscription, HapiExtensions.EXT_SUBSCRIPTION_PAYLOAD_SEARCH_CRITERIA));
 		retVal.setTags(extractTags(subscription));
 		setPartitionIdOnReturnValue(theSubscription, retVal);
-		retVal.setCrossPartitionEnabled(SubscriptionUtil.isCrossPartition(theSubscription));
+		handleCrossPartition(theSubscription, retVal);
 
 		List<org.hl7.fhir.r4.model.CanonicalType> profiles =
 				subscription.getMeta().getProfile();
@@ -497,6 +511,8 @@ public class SubscriptionCanonicalizer {
 			retVal.setSendDeleteMessages(extension.getValueBooleanType().booleanValue());
 		}
 
+		handleCrossPartition(theSubscription, retVal);
+
 		return retVal;
 	}
 
@@ -560,6 +576,8 @@ public class SubscriptionCanonicalizer {
 		retVal.getTopicSubscription().setMaxCount(subscription.getMaxCount());
 
 		setR5FlagsBasedOnChannelType(subscription, retVal);
+
+		handleCrossPartition(theSubscription, retVal);
 
 		return retVal;
 	}
@@ -761,5 +779,13 @@ public class SubscriptionCanonicalizer {
 			return null;
 		}
 		return status.getValueAsString();
+	}
+
+	private void handleCrossPartition(IBaseResource theSubscription, CanonicalSubscription retVal) {
+		if (mySubscriptionSettings.isCrossPartitionSubscriptionEnabled()) {
+			retVal.setCrossPartitionEnabled(true);
+		} else {
+			retVal.setCrossPartitionEnabled(SubscriptionUtil.isCrossPartition(theSubscription));
+		}
 	}
 }

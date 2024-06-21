@@ -20,7 +20,6 @@
 package ca.uhn.fhir.jpa.test.util;
 
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
-import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerCacheRefresher;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelRegistry;
@@ -30,6 +29,7 @@ import ca.uhn.fhir.jpa.subscription.match.deliver.email.SubscriptionDeliveringEm
 import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.config.SubscriptionSettings;
+import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionSubmitInterceptorLoader;
 import ca.uhn.fhir.jpa.subscription.submit.svc.ResourceModifiedSubmitterSvc;
 import ca.uhn.fhir.jpa.subscription.util.SubscriptionDebugLogInterceptor;
@@ -42,7 +42,7 @@ public class SubscriptionTestUtil {
 	private static final SubscriptionDebugLogInterceptor ourSubscriptionDebugLogInterceptor = new SubscriptionDebugLogInterceptor();
 
 	@Autowired
-	private JpaStorageSettings myStorageSettings;
+	private SubscriptionSettings mySubscriptionSettings;
 	@Autowired
 	private SubscriptionSettings mySubscriptionSettings;
 	@Autowired

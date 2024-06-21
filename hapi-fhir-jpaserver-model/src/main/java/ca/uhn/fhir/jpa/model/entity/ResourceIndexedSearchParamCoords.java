@@ -20,10 +20,13 @@
 package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.listener.IndexStorageOptimizationListener;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
@@ -40,6 +43,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 @Embeddable
+@EntityListeners(IndexStorageOptimizationListener.class)
 @Entity
 @Table(
 		name = "HFJ_SPIDX_COORDS",
@@ -56,24 +60,17 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 
 	private static final long serialVersionUID = 1L;
 
-	@Column(name = "SP_LATITUDE")
-	// @FullTextField
-	public double myLatitude;
+	@Column(name = "SP_LATITUDE", nullable = true)
+	public Double myLatitude;
 
-	@Column(name = "SP_LONGITUDE")
-	// @FullTextField
-	public double myLongitude;
+	@Column(name = "SP_LONGITUDE", nullable = true)
+	public Double myLongitude;
 
 	@Id
 	@SequenceGenerator(name = "SEQ_SPIDX_COORDS", sequenceName = "SEQ_SPIDX_COORDS")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SPIDX_COORDS")
 	@Column(name = "SP_ID")
 	private Long myId;
-	/**
-	 * @since 3.5.0 - At some point this should be made not-null
-	 */
-	@Column(name = "HASH_IDENTITY", nullable = true)
-	private Long myHashIdentity;
 
 	@ManyToOne(
 			optional = false,
@@ -131,8 +128,7 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 		}
 		ResourceIndexedSearchParamCoords obj = (ResourceIndexedSearchParamCoords) theObj;
 		EqualsBuilder b = new EqualsBuilder();
-		b.append(getResourceType(), obj.getResourceType());
-		b.append(getParamName(), obj.getParamName());
+		b.append(getHashIdentity(), obj.getHashIdentity());
 		b.append(getLatitude(), obj.getLatitude());
 		b.append(getLongitude(), obj.getLongitude());
 		b.append(isMissing(), obj.isMissing());
@@ -148,10 +144,6 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 		myHashIdentity = source.myHashIdentity;
 	}
 
-	public void setHashIdentity(Long theHashIdentity) {
-		myHashIdentity = theHashIdentity;
-	}
-
 	@Override
 	public Long getId() {
 		return myId;
@@ -162,7 +154,8 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 		myId = theId;
 	}
 
-	public double getLatitude() {
+	@Nullable
+	public Double getLatitude() {
 		return myLatitude;
 	}
 
@@ -171,7 +164,8 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 		return this;
 	}
 
-	public double getLongitude() {
+	@Nullable
+	public Double getLongitude() {
 		return myLongitude;
 	}
 
@@ -183,10 +177,10 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 	@Override
 	public int hashCode() {
 		HashCodeBuilder b = new HashCodeBuilder();
-		b.append(getParamName());
-		b.append(getResourceType());
+		b.append(getHashIdentity());
 		b.append(getLatitude());
 		b.append(getLongitude());
+		b.append(isMissing());
 		return b.toHashCode();
 	}
 

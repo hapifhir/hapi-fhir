@@ -48,6 +48,7 @@ import java.util.TreeSet;
 
 @SuppressWarnings("JavadocLinkAsPlainText")
 public class JpaStorageSettings extends StorageSettings {
+	private static final Logger ourLog = LoggerFactory.getLogger(JpaStorageSettings.class);
 
 	/**
 	 * Default value for {@link #getBulkExportFileMaximumSize()}: 100 MB
@@ -105,7 +106,6 @@ public class JpaStorageSettings extends StorageSettings {
 	 */
 	private static final Integer DEFAULT_MAXIMUM_SEARCH_RESULT_COUNT_IN_TRANSACTION = null;
 
-	private static final Logger ourLog = LoggerFactory.getLogger(JpaStorageSettings.class);
 	private static final int DEFAULT_REINDEX_BATCH_SIZE = 800;
 	private static final int DEFAULT_MAXIMUM_DELETE_CONFLICT_COUNT = 60;
 	/**
@@ -359,6 +359,14 @@ public class JpaStorageSettings extends StorageSettings {
 	 * @since 7.2.0
 	 */
 	private long myRestDeleteByUrlResourceIdThreshold = DEFAULT_REST_DELETE_BY_URL_RESOURCE_ID_THRESHOLD;
+
+	/**
+	 * If enabled, this setting causes persisting data to legacy LOB columns as well as columns introduced
+	 * to migrate away from LOB columns which effectively duplicates stored information.
+	 *
+	 * @since 7.2.0
+	 */
+	private boolean myWriteToLegacyLobColumns = false;
 
 	/**
 	 * Constructor
@@ -2423,8 +2431,8 @@ public class JpaStorageSettings extends StorageSettings {
 	 * This setting controls the validation issue severity to report when a code validation
 	 * finds that the code is present in the given CodeSystem, but the display name being
 	 * validated doesn't match the expected value(s). Defaults to
-	 * {@link ca.uhn.fhir.context.support.IValidationSupport.IssueSeverity#WARNING}. Set this
-	 * value to {@link ca.uhn.fhir.context.support.IValidationSupport.IssueSeverity#INFORMATION}
+	 * {@link IValidationSupport.IssueSeverity#WARNING}. Set this
+	 * value to {@link IValidationSupport.IssueSeverity#INFORMATION}
 	 * if you don't want to see display name validation issues at all in resource validation
 	 * outcomes.
 	 *
@@ -2439,8 +2447,8 @@ public class JpaStorageSettings extends StorageSettings {
 	 * This setting controls the validation issue severity to report when a code validation
 	 * finds that the code is present in the given CodeSystem, but the display name being
 	 * validated doesn't match the expected value(s). Defaults to
-	 * {@link ca.uhn.fhir.context.support.IValidationSupport.IssueSeverity#WARNING}. Set this
-	 * value to {@link ca.uhn.fhir.context.support.IValidationSupport.IssueSeverity#INFORMATION}
+	 * {@link IValidationSupport.IssueSeverity#WARNING}. Set this
+	 * value to {@link IValidationSupport.IssueSeverity#INFORMATION}
 	 * if you don't want to see display name validation issues at all in resource validation
 	 * outcomes.
 	 *
@@ -2452,6 +2460,33 @@ public class JpaStorageSettings extends StorageSettings {
 		Validate.notNull(
 				theIssueSeverityForCodeDisplayMismatch, "theIssueSeverityForCodeDisplayMismatch must not be null");
 		myIssueSeverityForCodeDisplayMismatch = theIssueSeverityForCodeDisplayMismatch;
+	}
+
+	/**
+	 * This method returns whether data will be stored in LOB columns as well as the columns
+	 * introduced to migrate away from LOB.  Writing to LOB columns is set to false by
+	 * default.  Enabling the setting will effectively double the persisted information.
+	 * If enabled, a careful monitoring of LOB table (if applicable) is required to avoid
+	 * exceeding the table maximum capacity.
+	 *
+	 * @since 7.2.0
+	 */
+	public boolean isWriteToLegacyLobColumns() {
+		return myWriteToLegacyLobColumns;
+	}
+
+	/**
+	 * This setting controls whether data will be stored in LOB columns as well as the columns
+	 * introduced to migrate away from LOB.  Writing to LOB columns is set to false by
+	 * default.  Enabling the setting will effectively double the persisted information.
+	 * When enabled, a careful monitoring of LOB table (if applicable) is required to avoid
+	 * exceeding the table maximum capacity.
+	 *
+	 * @param theWriteToLegacyLobColumns
+	 * @since 7.2.0
+	 */
+	public void setWriteToLegacyLobColumns(boolean theWriteToLegacyLobColumns) {
+		myWriteToLegacyLobColumns = theWriteToLegacyLobColumns;
 	}
 
 	/**

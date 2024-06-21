@@ -1,9 +1,13 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.param.HasParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CarePlan;
@@ -12,12 +16,16 @@ import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Group;
+import org.hl7.fhir.r4.model.HumanName;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.ListResource;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
+import org.hl7.fhir.r4.model.PractitionerRole;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -25,7 +33,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 
 public class ResourceProviderR4SearchVariousScenariosTest extends BaseResourceProviderR4Test {
@@ -352,15 +363,104 @@ public class ResourceProviderR4SearchVariousScenariosTest extends BaseResourcePr
 		}
 	}
 
-	private void runAndAssert(String theQueryString) {
-		ourLog.info("queryString:\n{}", theQueryString);
+	@Nested
+	class Sorting {
+		private IdType myPraId1;
+		private IdType myPraId2;
+		private IdType myPraId3;
+		private IdType myPraRoleId1;
+		private IdType myPraRoleId2;
+		private IdType myPraRoleId3;
 
-		final Bundle outcome = myClient.search()
-			.byUrl(theQueryString)
-			.returnBundle(Bundle.class)
-			.execute();
+		@BeforeEach
+		void beforeEach() {
+			myPraId1 = createPractitioner("pra1", "C_Family");
+			myPraId2 = createPractitioner("pra2", "A_Family");
+			myPraId3 = createPractitioner("pra3", "B_Family");
+
+			myPraRoleId1 = createPractitionerRole("praRole1", myPraId1);
+			myPraRoleId2 = createPractitionerRole("praRole2", myPraId2);
+			myPraRoleId3 = createPractitionerRole("praRole3", myPraId3);
+		}
+
+		@Test
+		void testRegularSortAscendingWorks() {
+			runAndAssert("regular sort ascending works", "Practitioner?_sort=family", myPraId2.getIdPart(), myPraId3.getIdPart(), myPraId1.getIdPart());
+		}
+
+		@Test
+		void testRegularSortDescendingWorks() {
+			runAndAssert("regular sort descending works", "Practitioner?_sort=-family", myPraId1.getIdPart(), myPraId3.getIdPart(), myPraId2.getIdPart());
+		}
+
+		@Test
+		void testChainedSortWorks() {
+			runAndAssert("chain sort works", "PractitionerRole?_sort=practitioner.family", myPraRoleId2.getIdPart(), myPraRoleId3.getIdPart(), myPraRoleId1.getIdPart());
+		}
+
+		@ParameterizedTest
+		@ValueSource(strings = {
+			"PractitionerRole?_text=blahblah&_sort=practitioner.family",
+			"PractitionerRole?_content=blahblah&_sort=practitioner.family"
+		})
+		void unsupportedSearchesWithChainedSorts(String theQueryString) {
+			runAndAssertThrows(InvalidRequestException.class, theQueryString);
+		}
+
+		private IdType createPractitioner(String theId, String theFamilyName) {
+			final Practitioner practitioner = (Practitioner) new Practitioner()
+				.setActive(true)
+				.setName(List.of(new HumanName().setFamily(theFamilyName)))
+				.setId(theId);
+
+			myPractitionerDao.update(practitioner, new SystemRequestDetails());
+
+			return practitioner.getIdElement().toUnqualifiedVersionless();
+		}
+
+		private IdType createPractitionerRole(String theId, IdType thePractitionerId) {
+			final PractitionerRole practitionerRole = (PractitionerRole) new PractitionerRole()
+				.setActive(true)
+				.setPractitioner(new Reference(thePractitionerId.asStringValue()))
+				.setId(theId);
+
+			myPractitionerRoleDao.update(practitionerRole, new SystemRequestDetails());
+
+			return practitionerRole.getIdElement().toUnqualifiedVersionless();
+		}
+	}
+
+	private void runAndAssert(String theReason, String theQueryString, String... theExpectedIdsInOrder) {
+		final Bundle outcome = runQueryAndGetBundle(theQueryString, myClient);
 
 		assertFalse(outcome.getEntry().isEmpty());
-		ourLog.info("result:\n{}", theQueryString);
+
+		final List<String> actualIdsInOrder = outcome.getEntry()
+			.stream()
+			.map(Bundle.BundleEntryComponent::getResource)
+			.map(Resource::getIdPart)
+			.toList();
+
+		assertThat(actualIdsInOrder).as(theReason).contains(theExpectedIdsInOrder);
+	}
+
+	private void runAndAssert(String theQueryString) {
+		ourLog.debug("queryString:\n{}", theQueryString);
+
+		final Bundle outcome = runQueryAndGetBundle(theQueryString, myClient);
+
+		assertFalse(outcome.getEntry().isEmpty());
+		ourLog.debug("result:\n{}", theQueryString);
+	}
+
+	private void runAndAssertThrows(Class<? extends Exception> theExceptedException, String theQueryString) {
+		assertThrows(theExceptedException, () -> runQueryAndGetBundle(theQueryString, myClient));
+	}
+
+	private static Bundle runQueryAndGetBundle(String theTheQueryString, IGenericClient theClient) {
+		return theClient.search()
+			.byUrl(theTheQueryString)
+			.returnBundle(Bundle.class)
+			.execute();
 	}
 }

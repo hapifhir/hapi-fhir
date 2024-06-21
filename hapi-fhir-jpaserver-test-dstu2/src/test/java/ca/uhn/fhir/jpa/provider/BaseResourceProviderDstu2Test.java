@@ -13,6 +13,7 @@ import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerConfigurerExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,8 +70,8 @@ public abstract class BaseResourceProviderDstu2Test extends BaseJpaDstu2Test {
 		myFhirContext.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.ONCE);
 	}
 
-	protected List<IdDt> toIdListUnqualifiedVersionless(Bundle found) {
-		List<IdDt> list = new ArrayList<>();
+	protected List<IIdType> toIdListUnqualifiedVersionless(Bundle found) {
+		List<IIdType> list = new ArrayList<>();
 		for (Entry next : found.getEntry()) {
 			list.add(next.getResource().getId().toUnqualifiedVersionless());
 		}

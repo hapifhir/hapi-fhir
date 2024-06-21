@@ -19,8 +19,8 @@
  */
 package ca.uhn.fhir.jpa.model.dialect;
 
-import org.hibernate.dialect.DatabaseVersion;
 import org.hibernate.dialect.MariaDBDialect;
+import org.hibernate.engine.jdbc.dialect.spi.DialectResolutionInfo;
 
 /**
  * Dialect for MySQL database.
@@ -28,12 +28,12 @@ import org.hibernate.dialect.MariaDBDialect;
  */
 public class HapiFhirMariaDBDialect extends MariaDBDialect {
 
-	public HapiFhirMariaDBDialect(DatabaseVersion theDatabaseVersion) {
-		super(theDatabaseVersion);
+	public HapiFhirMariaDBDialect() {
+		super();
 	}
 
-	public HapiFhirMariaDBDialect() {
-		super(DatabaseVersion.make(10, 11, 5));
+	public HapiFhirMariaDBDialect(DialectResolutionInfo info) {
+		super(info);
 	}
 
 	/**

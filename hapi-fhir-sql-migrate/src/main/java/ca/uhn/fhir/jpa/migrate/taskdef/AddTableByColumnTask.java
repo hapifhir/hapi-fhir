@@ -56,7 +56,7 @@ public class AddTableByColumnTask extends BaseTableTask {
 		this(theProductVersion, theSchemaVersion, null);
 	}
 
-	private AddTableByColumnTask(
+	public AddTableByColumnTask(
 			String theProductVersion, String theSchemaVersion, Comparator<AddColumnTask> theColumnSortingRules) {
 		super(theProductVersion, theSchemaVersion);
 		myColumnSortingRules = theColumnSortingRules;

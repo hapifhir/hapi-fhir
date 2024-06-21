@@ -1,10 +1,10 @@
 package ca.uhn.fhir.sl.cache.guava;
 
-import static org.junit.jupiter.api.Assertions.assertNull;
-
 import ca.uhn.fhir.sl.cache.CacheFactory;
 import ca.uhn.fhir.sl.cache.LoadingCache;
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class CacheLoaderTest {
 	@Test
