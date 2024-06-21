@@ -353,33 +353,33 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			{
 				// Please see https://github.com/hapifhir/hapi-fhir/issues/6033 for why we're doing this
 				version.onTable(tableHfjResSearchUrl)
-					.addColumn("20240618.2", "PARTITION_ID", -1)
-					.nullable()
-					.type(ColumnTypeEnum.INT);
+						.addColumn("20240618.2", "PARTITION_ID", -1)
+						.nullable()
+						.type(ColumnTypeEnum.INT);
 
 				version.onTable(tableHfjResSearchUrl)
-					.addColumn("20240618.3", "PARTITION_DATE")
-					.nullable()
-					.type(ColumnTypeEnum.DATE_ONLY);
+						.addColumn("20240618.3", "PARTITION_DATE")
+						.nullable()
+						.type(ColumnTypeEnum.DATE_ONLY);
 
 				version.executeRawSql(
-					"20240618.4",
-					String.format(
-						"UPDATE %s SET %s = -1",
-						tableHfjResSearchUrl, ResourceSearchUrlEntityPK.PARTITION_ID_COLUMN_NAME));
+						"20240618.4",
+						String.format(
+								"UPDATE %s SET %s = -1",
+								tableHfjResSearchUrl, ResourceSearchUrlEntityPK.PARTITION_ID_COLUMN_NAME));
 
 				version.onTable(tableHfjResSearchUrl)
-					.modifyColumn("20240618.5", ResourceSearchUrlEntityPK.PARTITION_ID_COLUMN_NAME)
-					.nonNullable()
-					.withType(ColumnTypeEnum.INT);
+						.modifyColumn("20240618.5", ResourceSearchUrlEntityPK.PARTITION_ID_COLUMN_NAME)
+						.nonNullable()
+						.withType(ColumnTypeEnum.INT);
 
 				version.onTable(tableHfjResSearchUrl).dropPrimaryKey("20240618.6");
 
 				version.onTable(tableHfjResSearchUrl)
-					.addPrimaryKey(
-						"20240618.7",
-						ResourceSearchUrlEntityPK.RES_SEARCH_URL_COLUMN_NAME,
-						ResourceSearchUrlEntityPK.PARTITION_ID_COLUMN_NAME);
+						.addPrimaryKey(
+								"20240618.7",
+								ResourceSearchUrlEntityPK.RES_SEARCH_URL_COLUMN_NAME,
+								ResourceSearchUrlEntityPK.PARTITION_ID_COLUMN_NAME);
 			}
 		}
 	}
