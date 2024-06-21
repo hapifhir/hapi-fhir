@@ -103,10 +103,9 @@ public class FhirPathR5 implements IFhirPath {
 					throws PathEngineException {
 
 				return Collections.unmodifiableList(
-					theEvaluationContext.resolveConstant(appContext, name, beforeContext).stream()
-						.map(Base.class::cast)
-						.collect(Collectors.toList())
-				);
+						theEvaluationContext.resolveConstant(appContext, name, beforeContext).stream()
+								.map(Base.class::cast)
+								.collect(Collectors.toList()));
 			}
 
 			@Override
