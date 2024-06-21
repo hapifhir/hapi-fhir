@@ -187,10 +187,11 @@ public class AddIndexTask extends BaseTableTask {
 		}
 
 		mssqlWhereClause = " WHERE (";
-		mssqlWhereClause +=  myNullableColumns.stream().map(column -> column + " IS NOT NULL ").collect(Collectors.joining("AND"));
+		mssqlWhereClause += myNullableColumns.stream()
+				.map(column -> column + " IS NOT NULL ")
+				.collect(Collectors.joining("AND"));
 		mssqlWhereClause += ")";
 		return mssqlWhereClause;
-
 	}
 
 	public void setColumns(String... theColumns) {
