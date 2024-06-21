@@ -22,6 +22,7 @@ package ca.uhn.hapi.fhir.cdshooks.module;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.serializer.FhirResourceDeserializer;
 import ca.uhn.fhir.serializer.FhirResourceSerializer;
+import ca.uhn.hapi.fhir.cdshooks.api.json.CdsHooksExtension;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceRequestContextJson;
 import ca.uhn.hapi.fhir.cdshooks.serializer.CdsServiceRequestContextDeserializer;
 import ca.uhn.hapi.fhir.cdshooks.serializer.CdsServiceRequestContextSerializer;
@@ -45,6 +46,7 @@ public class CdsHooksObjectMapperFactory extends ObjectMapper {
 		module.addSerializer(new FhirResourceSerializer(myFhirContext));
 		module.addSerializer(new CdsServiceRequestContextSerializer(myFhirContext, retval));
 		module.addDeserializer(IBaseResource.class, new FhirResourceDeserializer(myFhirContext));
+		module.addDeserializer(CdsHooksExtension.class, new CdsHooksExtensionDeserializer());
 		module.addDeserializer(
 				CdsServiceRequestContextJson.class, new CdsServiceRequestContextDeserializer(myFhirContext, retval));
 		retval.registerModule(module);
