@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.topic;
 
 import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.fhirpath.IFhirPathEvaluationContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
@@ -151,7 +152,7 @@ public class SubscriptionTriggerMatcher {
 						} catch (FHIRException e) {
 							throw e;
 						} catch (Exception e) {
-							throw new RuntimeException(e);
+							throw new RuntimeException(Msg.code(2534) + e.getMessage(), e);
 						}
 					});
 
