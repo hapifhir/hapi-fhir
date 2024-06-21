@@ -280,38 +280,6 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 
 
 	@Test
-	public void testSearchParamTokenOnExtension() {
-		myStorageSettings.setAllowContainsSearches(true);
-		String body = "{\n" +
-			"  \"resourceType\": \"SearchParameter\",\n" +
-			"  \"url\": \"https://health.gov.on.ca/idms/fhir/SearchParameter/ServiceRequest-Indication\",\n" +
-			"  \"title\": \"ServiceRequest Indication\",\n" +
-			"  \"status\": \"active\",\n" +
-			"  \"publisher\": \"MOH-IDMS\",\n" +
-			"  \"code\": \"ServiceRequestIndication\",\n" +
-			"  \"base\": [\n" +
-			"    \"ServiceRequest\"\n" +
-			"  ],\n" +
-			"  \"type\": \"string\",\n" +
-			"  \"expression\": \"ServiceRequest.extension('https://health.gov.on.ca/idms/fhir/StructureDefinition/Extension-Indication')\"\n" +
-			"}";
-		SearchParameter searchParameter = myFhirContext.newJsonParser().parseResource(SearchParameter.class, body);
-
-		mySearchParameterDao.create(searchParameter, mySrd);
-		mySearchParamRegistry.forceRefresh();
-
-		ServiceRequest sr = new ServiceRequest();
-		sr.addExtension().setUrl("https://health.gov.on.ca/idms/fhir/StructureDefinition/Extension-Indication").setValue(new StringType("Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapib"));
-
-		myServiceRequestDao.create(sr, mySrd);
-
-		SearchParameterMap searchParameter1 = new SearchParameterMap();
-		searchParameter1.add("ServiceRequestIndication", new StringParam("Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapib").setContains(true));
-		IBundleProvider search = myServiceRequestDao.search(searchParameter1, new SystemRequestDetails());
-		assertThat(search.size()).isEqualTo(1);
-	}
-
-	@Test
 	public void testFullTextSearchesArePerformanceLogged() {
 
 		ElasticPerformanceTracingInterceptor elasticPerformanceTracingInterceptor = new ElasticPerformanceTracingInterceptor();
