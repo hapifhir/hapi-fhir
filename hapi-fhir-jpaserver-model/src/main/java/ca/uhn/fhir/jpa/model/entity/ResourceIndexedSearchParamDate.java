@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.listener.IndexStorageOptimizationListener;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.primitive.InstantDt;
@@ -29,6 +30,7 @@ import ca.uhn.fhir.util.DateUtils;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
@@ -55,6 +57,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 @Embeddable
+@EntityListeners(IndexStorageOptimizationListener.class)
 @Entity
 @Table(
 		name = "HFJ_SPIDX_DATE",
@@ -108,14 +111,6 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SPIDX_DATE")
 	@Column(name = "SP_ID")
 	private Long myId;
-
-	/**
-	 * Composite of resourceType, paramName, and partition info if configured.
-	 * Combined with the various date fields for a query.
-	 * @since 3.5.0 - At some point this should be made not-null
-	 */
-	@Column(name = "HASH_IDENTITY", nullable = true)
-	private Long myHashIdentity;
 
 	@ManyToOne(
 			optional = false,
@@ -264,18 +259,13 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 		}
 		ResourceIndexedSearchParamDate obj = (ResourceIndexedSearchParamDate) theObj;
 		EqualsBuilder b = new EqualsBuilder();
-		b.append(getResourceType(), obj.getResourceType());
-		b.append(getParamName(), obj.getParamName());
+		b.append(getHashIdentity(), obj.getHashIdentity());
 		b.append(getTimeFromDate(getValueHigh()), getTimeFromDate(obj.getValueHigh()));
 		b.append(getTimeFromDate(getValueLow()), getTimeFromDate(obj.getValueLow()));
 		b.append(getValueLowDateOrdinal(), obj.getValueLowDateOrdinal());
 		b.append(getValueHighDateOrdinal(), obj.getValueHighDateOrdinal());
 		b.append(isMissing(), obj.isMissing());
 		return b.isEquals();
-	}
-
-	public void setHashIdentity(Long theHashIdentity) {
-		myHashIdentity = theHashIdentity;
 	}
 
 	@Override
@@ -316,10 +306,12 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 	@Override
 	public int hashCode() {
 		HashCodeBuilder b = new HashCodeBuilder();
-		b.append(getResourceType());
-		b.append(getParamName());
+		b.append(getHashIdentity());
 		b.append(getTimeFromDate(getValueHigh()));
 		b.append(getTimeFromDate(getValueLow()));
+		b.append(getValueHighDateOrdinal());
+		b.append(getValueLowDateOrdinal());
+		b.append(isMissing());
 		return b.toHashCode();
 	}
 
