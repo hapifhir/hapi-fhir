@@ -71,6 +71,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams.isMatchSearchParam;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -579,11 +580,11 @@ public class InMemoryResourceMatcher {
 			switch (theQueryParam.getModifier()) {
 				case IN:
 					return theSearchParams.myTokenParams.stream()
-							.filter(t -> t.getParamName().equals(theParamName))
+							.filter(t -> isMatchSearchParam(theStorageSettings, theResourceName, theParamName, t))
 							.anyMatch(t -> systemContainsCode(theQueryParam, t));
 				case NOT_IN:
 					return theSearchParams.myTokenParams.stream()
-							.filter(t -> t.getParamName().equals(theParamName))
+							.filter(t -> isMatchSearchParam(theStorageSettings, theResourceName, theParamName, t))
 							.noneMatch(t -> systemContainsCode(theQueryParam, t));
 				case NOT:
 					return !theSearchParams.matchParam(
