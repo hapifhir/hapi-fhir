@@ -14,7 +14,8 @@ public class CdsHooksExtensionDeserializer extends StdDeserializer<CdsHooksExten
 	}
 
 	@Override
-	public CdsHooksExtension deserialize(JsonParser theJsonParser, DeserializationContext theDeserializationContext) throws IOException, JacksonException {
+	public CdsHooksExtension deserialize(JsonParser theJsonParser, DeserializationContext theDeserializationContext)
+			throws IOException, JacksonException {
 		return null;
 	}
 }
