@@ -11,6 +11,7 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
@@ -583,7 +584,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 	}
 
 	@Test
-	public void testSearchParamTokenOnExtension() {
+	public void testSearchParamStringOnExtensionForVeryLongContainsSearch() {
 		myStorageSettings.setAllowContainsSearches(true);
 		String body = "{\n" +
 			"  \"resourceType\": \"SearchParameter\",\n" +
@@ -612,6 +613,8 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		searchParameter1.add("ServiceRequestIndication", new StringParam("Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapib").setContains(true));
 		IBundleProvider search = myServiceRequestDao.search(searchParameter1, mySrd);
 		assertThat(search.size()).isEqualTo(1);
+
+		myStorageSettings.setAllowContainsSearches(new StorageSettings().isAllowContainsSearches());
 	}
 
 
