@@ -10,6 +10,8 @@ import org.assertj.core.api.SoftAssertions;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -30,7 +32,7 @@ public class AssertJsn extends AbstractAssert<AssertJsn, String> {
 		return new AssertJsn(actual);
 	}
 
-	public void hasPath(String thePath) {
+	public AssertJsn hasPath(String thePath) {
 		isNotNull();
 		isNotEmpty(thePath);
 
@@ -38,34 +40,58 @@ public class AssertJsn extends AbstractAssert<AssertJsn, String> {
 		Map<String, Object> actualMap = getMap(actual);
 		Assertions.assertThat(actualMap).isNotNull();
 		getPathMap(thePath);
-
+		return this;
 	}
 
-	private void isNotEmpty(String thePath) {
+	private AssertJsn isNotEmpty(String thePath) {
 		Assertions.assertThat(thePath).isNotEmpty();
+		return this;
 	}
 
-	public void hasKeys(Collection<String> theKeys) {
+	public AssertJsn hasKeys(String... theKeys) {
 		isNotNull();
 
 		Map<String, Object> map = getMap(actual);
 		Assertions.assertThat(map).isNotNull();
 
 		Assertions.assertThat(
-			map.keySet()).containsAll(theKeys);
+			map.keySet()).containsAll(Arrays.asList(theKeys));
+		return this;
 	}
 
-	public void hasExactlyKeys(Collection<String> theKeys) {
+	public AssertJsn hasExactlyKeys(String... theKeys) {
 		isNotNull();
+
+		Map<String, Object> map = getMap(actual);
+		Assertions.assertThat(map).isNotNull();
+
+		Assertions.assertThat(
+			map.keySet()).hasSameElementsAs(Arrays.asList(theKeys));
+		return this;
+	}
+
+	public AssertJsn hasExactlyKeysWithValues(List<String> theKeys, List<? extends Serializable> theValues) {
+		isNotNull();
+
+		if (!checkSizes(theKeys.size(), theValues.size())) {
+			return this;
+		}
 
 		Map<String, Object> map = getMap(actual);
 		Assertions.assertThat(map).isNotNull();
 
 		Assertions.assertThat(
 			map.keySet()).hasSameElementsAs(theKeys);
+
+		for (int i = 0; i <theKeys.size(); i++) {
+			hasKeyWithValue(theKeys.get(i), theValues.get(i));
+		}
+
+		return this;
 	}
 
-	public void hasKeyWithValue(String theKey, Object theExpectedValue) {
+
+	public AssertJsn hasKeyWithValue(String theKey, Object theExpectedValue) {
 		isNotNull();
 
 		Map<String, Object> actualMap = getMap(actual);
@@ -81,17 +107,18 @@ public class AssertJsn extends AbstractAssert<AssertJsn, String> {
 
 		if (isJsonObjStr(theExpectedValue)) {
 			assertJsonObject(actualMap, theKey, theExpectedValue);
-			return;
+			return this;
 		}
 
 		if (isJsonList(theExpectedValue)) {
 			assertJsonList(actualMap, theKey, theExpectedValue);
-			return;
+			return this;
 		}
 
 		Assertions.assertThat(actualMap)
 			.extracting(theKey)
 			.isEqualTo(theExpectedValue);
+		return this;
 	}
 
 	private void assertJsonList(Map<String, Object> theActualMap, String theKey, Object theExpectedValue) {
@@ -162,7 +189,7 @@ public class AssertJsn extends AbstractAssert<AssertJsn, String> {
 	}
 
 	private String trimAll(String theString) {
-		return theString.trim().replaceAll("\\n", "").replaceAll("\\t", "");
+		return theString.trim().replace("\n", "").replace("\t", "");
 	}
 
 	private boolean isValidJson(String theStrValue) {
@@ -170,7 +197,7 @@ public class AssertJsn extends AbstractAssert<AssertJsn, String> {
 		return true;
 	}
 
-	public void hasKeysWithValues(List<String> theKeys, List<Object> theValues) {
+	public AssertJsn hasKeysWithValues(List<String> theKeys, List<Object> theValues) {
 		isNotNull();
 
 		checkSizes(theKeys.size(), theValues.size());
@@ -180,6 +207,7 @@ public class AssertJsn extends AbstractAssert<AssertJsn, String> {
 		Assertions.assertThat(map).isNotNull();
 		Assertions.assertThat(map.keySet()).containsAll(theKeys);
 		checkKeysAndValues(map, theKeys, theValues);
+		return this;
 	}
 
 	private void checkKeysAndValues(Map<String, Object> theExpected, List<String> theKeys, List<Object> theValues) {
@@ -192,10 +220,12 @@ public class AssertJsn extends AbstractAssert<AssertJsn, String> {
 		lazyly.assertAll();
 	}
 
-	private void checkSizes(int keysSize, int valuesSize) {
+	private boolean checkSizes(int keysSize, int valuesSize) {
 		if (keysSize != valuesSize) {
 			fail("Keys and values should have same size. Received " + keysSize + " keys and " + valuesSize + " values.");
+			return false;
 		}
+		return true;
 	}
 
 	@Nonnull
@@ -218,17 +248,18 @@ public class AssertJsn extends AbstractAssert<AssertJsn, String> {
 		} catch (IOException theE) {
 			fail("IOException: " + theE);
 		}
-		return null;
+		return Collections.emptyList();
 	}
 
 
-	public void hasPaths(String... thePaths) {
+	public AssertJsn hasPaths(String... thePaths) {
 		for (String path : thePaths) {
 			hasPath(path);
 		}
+		return this;
 	}
 
-	public void hasPathWithValue(String thePath, String theValue) {
+	public AssertJsn hasPathWithValue(String thePath, String theValue) {
 		String[] pathElements = thePath.split("\\.");
 		if (pathElements.length == 1) {
 			hasKeyWithValue(thePath, theValue);
@@ -241,7 +272,7 @@ public class AssertJsn extends AbstractAssert<AssertJsn, String> {
 			Assertions.assertThat(pathMap)
 				.extracting(lastPathElement)
 				.isEqualTo(getMap(theValue));
-			return;
+			return this;
 		}
 
 		if (isJsonList(theValue)) {
@@ -249,39 +280,41 @@ public class AssertJsn extends AbstractAssert<AssertJsn, String> {
 				.extracting(lastPathElement)
 				.asList()
 				.hasSameElementsAs(getList(theValue));
-			return;
+			return this;
 		}
 
 		// check last path element's value
 		Assertions.assertThat(pathMap)
 			.extracting(pathElements[pathElements.length-1])
 				.isEqualTo(theValue);
+		return this;
 	}
 
-	public void hasPathsWithValues(List<String> thePaths, List<String> theValues) {
+	public AssertJsn hasPathsWithValues(List<String> thePaths, List<String> theValues) {
 		if (thePaths.size() != theValues.size()) {
 			fail("Paths size (" + thePaths.size() + ") is different than values size (" + theValues.size() + ")");
-			return;
+			return this;
 		}
 
 		for (int i = 0; i < thePaths.size(); i++) {
 			hasPathWithValue(thePaths.get(i), theValues.get(i));
 		}
+		return this;
 	}
 
 	private Map<String, Object> getPathMap(String thePath) {
 		String[] pathElements = thePath.split("\\.");
-		String pathSoFar = "";
+		StringBuilder pathSoFar = new StringBuilder();
 
 		Map<String, Object> pathMap = getMap(actual);
 
 		for (int i = 0; i < pathElements.length-1; i++) {
 			String pathElement = pathElements[i];
-			pathSoFar += StringUtils.isNotEmpty(pathSoFar) ? "." + pathElement : pathElement;
+			pathSoFar.append(StringUtils.isNotEmpty(pathSoFar) ? "." + pathElement : pathElement);
 			Object pathValue = pathMap.get(pathElement);
 
 			// all path values, other than the last, must be json objects (maps)
-			assertIsJsonObject(pathSoFar, pathValue);
+			assertIsJsonObject(pathSoFar.toString(), pathValue);
 
 			@SuppressWarnings("unchecked")
 			Map<String, Object> aMap = (Map<String, Object>) pathValue;
@@ -296,14 +329,14 @@ public class AssertJsn extends AbstractAssert<AssertJsn, String> {
 			return;
 		}
 
-		if (theValue instanceof String) {
+		if (theValue instanceof String stringValue) {
 			if (!isJsonObjStr(theValue)) {
 				fail(thePath + " doesn't contain a json object but a plain string");
 				return;
 			}
 
 			try {
-				getMap((String) theValue);
+				getMap(stringValue);
 			} catch (Exception theE) {
 				fail(thePath + " doesn't contain a json object");
 			}

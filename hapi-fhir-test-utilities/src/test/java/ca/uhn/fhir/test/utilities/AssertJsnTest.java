@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
-import java.util.Set;
 
 import static ca.uhn.test.util.AssertJsn.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -79,8 +78,25 @@ class AssertJsnTest {
 		]
 		""";
 
+	@Test
+	void testFluency() {
+		assertThat(myJsonString)
+			.hasPath("address.city")
+			.hasPaths("firstName", "address.city")
+			.hasKeys("firstName", "address")
+			.hasExactlyKeys("firstName", "lastName", "age", "address", "phoneNumbers")
+			.hasKeyWithValue("lastName", "Smith")
+			.hasKeysWithValues(
+				List.of("firstName", "lastName"),
+				List.of("John", "Smith"))
+			.hasExactlyKeysWithValues(
+				List.of("firstName", "lastName", "age", "address", "phoneNumbers"),
+				List.of("John", "Smith", 25, goodAddress, goodPhoneNumbers))
+			.hasPath("lastName");
+	}
+
 	@Nested
-	public class TestHasPath {
+	class TestHasPath {
 
 		@Test
 		void test_success() {
@@ -96,7 +112,7 @@ class AssertJsnTest {
 	}
 
 	@Nested
-	public class TestHasPaths {
+	class TestHasPaths {
 
 		@Test
 		void test_success() {
@@ -112,7 +128,7 @@ class AssertJsnTest {
 	}
 
 	@Nested
-	public class TestHasPathWithValue {
+	class TestHasPathWithValue {
 
 		@Test
 		void testStringValue_success() {
@@ -228,7 +244,7 @@ class AssertJsnTest {
 	}
 
 	@Nested
-	public class TestHasPathsWithValues {
+	class TestHasPathsWithValues {
 
 		@Test
 		void testMixedValues_success() {
@@ -324,21 +340,21 @@ class AssertJsnTest {
 
 	@Test
 	void hasExactlyKeys() {
-		assertThat(myJsonString).hasExactlyKeys(Set.of("firstName", "lastName", "age", "address", "phoneNumbers"));
+		assertThat(myJsonString).hasExactlyKeys("firstName", "lastName", "age", "address", "phoneNumbers");
 	}
 
 	@Nested
-	public class TestHasExactlyKeys {
+	class TestHasExactlyKeys {
 
 		@Test
 		void hasExactlyKeys_succeeds() {
-			assertThat(myJsonString).hasExactlyKeys(Set.of("firstName", "lastName", "age", "address", "phoneNumbers"));
+			assertThat(myJsonString).hasExactlyKeys("firstName", "lastName", "age", "address", "phoneNumbers");
 		}
 
 		@Test
 		void hasExactlyKeys_fails() {
 			assertThatThrownBy(() -> assertThat(myJsonString)
-					.hasExactlyKeys(Set.of("firstName", "age", "address", "phoneNumbers", "extraKey")))
+					.hasExactlyKeys("firstName", "age", "address", "phoneNumbers", "extraKey"))
 				.isInstanceOf(AssertionError.class)
 				.hasMessageContaining("""
 						element(s) not found:
@@ -350,7 +366,7 @@ class AssertJsnTest {
 	}
 
 	@Nested
-	public class TestHasKeysWithValues {
+	class TestHasKeysWithValues {
 
 		@Test
 		void hasExactlyKeysWithValues_succeeds() {
@@ -393,15 +409,15 @@ class AssertJsnTest {
 	}
 
 	@Nested
-	public class TestHasKeys {
+	class TestHasKeys {
 		@Test
 		void testSuccess() {
-			assertThat(myJsonString).hasKeys(Set.of("address", "phoneNumbers"));
+			assertThat(myJsonString).hasKeys("address", "phoneNumbers");
 		}
 
 		@Test
 		void testFailure() {
-			assertThatThrownBy(() -> assertThat(myJsonString).hasKeys(Set.of("address", "weight")))
+			assertThatThrownBy(() -> assertThat(myJsonString).hasKeys("address", "weight"))
 				.isInstanceOf(AssertionError.class)
 				.hasMessageContaining("""
 					but could not find the following element(s):
@@ -411,7 +427,7 @@ class AssertJsnTest {
 	}
 
 	@Nested
-	public class TestHasKeyWithValue {
+	class TestHasKeyWithValue {
 
 		@Test
 		void testSuccess() {
