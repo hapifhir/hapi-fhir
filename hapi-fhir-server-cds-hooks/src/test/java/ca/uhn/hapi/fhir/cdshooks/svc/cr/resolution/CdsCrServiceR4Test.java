@@ -24,6 +24,7 @@ import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -33,7 +34,8 @@ public class CdsCrServiceR4Test extends BaseCrTest {
 
 	@BeforeEach
 	public void loadJson() throws IOException {
-		myObjectMapper = new CdsHooksObjectMapperFactory(myFhirContext).newMapper();
+		// TODO: Fix me Adi
+		myObjectMapper = new CdsHooksObjectMapperFactory(myFhirContext, null).newMapper();
 		myCdsConfigService = new CdsConfigServiceImpl(myFhirContext, myObjectMapper, myCdsCrSettings, null, null, null);
 	}
 
@@ -48,7 +50,7 @@ public class CdsCrServiceR4Test extends BaseCrTest {
 		requestDetails.setId(planDefinitionId);
 		final Parameters params = new CdsCrServiceR4(requestDetails, repository, myCdsConfigService).encodeParams(cdsServiceRequestJson);
 
-		assertTrue(params.getParameter().size() == 2);
+		assertEquals(2, params.getParameter().size());
 		assertTrue(params.getParameter("parameters").hasResource());
 	}
 
@@ -62,9 +64,9 @@ public class CdsCrServiceR4Test extends BaseCrTest {
 		requestDetails.setId(planDefinitionId);
 		final CdsServiceResponseJson cdsServiceResponseJson = new CdsCrServiceR4(requestDetails, repository, myCdsConfigService).encodeResponse(responseBundle);
 
-		assertTrue(cdsServiceResponseJson.getCards().size() == 1);
-		assertTrue(!cdsServiceResponseJson.getCards().get(0).getSummary().isEmpty());
-		assertTrue(!cdsServiceResponseJson.getCards().get(0).getDetail().isEmpty());
+		assertEquals(1, cdsServiceResponseJson.getCards().size());
+		assertFalse(cdsServiceResponseJson.getCards().get(0).getSummary().isEmpty());
+		assertFalse(cdsServiceResponseJson.getCards().get(0).getDetail().isEmpty());
 	}
 
 	@Test
@@ -78,7 +80,7 @@ public class CdsCrServiceR4Test extends BaseCrTest {
 		requestDetails.setId(planDefinitionId);
 		final CdsServiceResponseJson cdsServiceResponseJson = new CdsCrServiceR4(requestDetails, repository, myCdsConfigService).encodeResponse(responseBundle);
 
-		assertTrue(cdsServiceResponseJson.getServiceActions().size() == 1);
+		assertEquals(1, cdsServiceResponseJson.getServiceActions().size());
 		assertEquals(ActionType.CREATE, cdsServiceResponseJson.getServiceActions().get(0).getType());
 		assertNotNull(cdsServiceResponseJson.getServiceActions().get(0).getResource());
 	}

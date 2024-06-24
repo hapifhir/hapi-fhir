@@ -22,7 +22,8 @@ public class CrDiscoveryServiceR4Test extends BaseCrTest {
 
 		final IdType planDefinitionId = new IdType(PLAN_DEFINITION_RESOURCE_NAME, "ASLPCrd");
 		final CdsServiceJson cdsServiceJson = new CrDiscoveryServiceR4(planDefinitionId, repository).resolveService();
-		final ObjectMapper objectMapper = new CdsHooksObjectMapperFactory(myFhirContext).newMapper();
+		// TODO: Fix me Adi
+		final ObjectMapper objectMapper = new CdsHooksObjectMapperFactory(myFhirContext, null).newMapper();
 		// execute
 		final String actual = objectMapper.writeValueAsString(cdsServiceJson);
 		final String expected = "{\n" +

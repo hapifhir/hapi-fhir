@@ -17,7 +17,8 @@ class CdsServiceResponseJsonTest {
     "cards" : [ ]
   }""";
 		final CdsServiceResponseJson cdsServiceResponseJson = new CdsServiceResponseJson();
-		final ObjectMapper objectMapper = new CdsHooksObjectMapperFactory(FhirContext.forR4()).newMapper();
+		// TODO: Fix me Adi
+		final ObjectMapper objectMapper = new CdsHooksObjectMapperFactory(FhirContext.forR4(), null).newMapper();
 		// execute
 		final String actual = objectMapper.writeValueAsString(cdsServiceResponseJson);
 		// validate
