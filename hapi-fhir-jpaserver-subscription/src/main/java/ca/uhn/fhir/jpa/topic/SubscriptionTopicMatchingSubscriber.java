@@ -27,6 +27,7 @@ import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.topic.filter.InMemoryTopicFilterMatcher;
+import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
 import ca.uhn.fhir.util.Logs;
@@ -67,8 +68,11 @@ public class SubscriptionTopicMatchingSubscriber implements MessageHandler {
 	@Autowired
 	private IResourceModifiedMessagePersistenceSvc myResourceModifiedMessagePersistenceSvc;
 
-	public SubscriptionTopicMatchingSubscriber(FhirContext theFhirContext) {
+	private MemoryCacheService myMemoryCacheService;
+
+	public SubscriptionTopicMatchingSubscriber(FhirContext theFhirContext, MemoryCacheService memoryCacheService) {
 		myFhirContext = theFhirContext;
+		this.myMemoryCacheService = memoryCacheService;
 	}
 
 	@Override
@@ -110,7 +114,8 @@ public class SubscriptionTopicMatchingSubscriber implements MessageHandler {
 
 		Collection<SubscriptionTopic> topics = mySubscriptionTopicRegistry.getAll();
 		for (SubscriptionTopic topic : topics) {
-			SubscriptionTopicMatcher matcher = new SubscriptionTopicMatcher(mySubscriptionTopicSupport, topic);
+			SubscriptionTopicMatcher matcher =
+					new SubscriptionTopicMatcher(mySubscriptionTopicSupport, topic, myMemoryCacheService);
 			InMemoryMatchResult result = matcher.match(theMsg);
 			if (result.matched()) {
 				int deliveries = deliverToTopicSubscriptions(theMsg, topic, result);

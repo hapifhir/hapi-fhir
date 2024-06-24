@@ -32,6 +32,7 @@ import ca.uhn.fhir.jpa.migrate.taskdef.ForceIdMigrationCopyTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.ForceIdMigrationFixTask;
 import ca.uhn.fhir.jpa.migrate.tasks.api.BaseMigrationTasks;
 import ca.uhn.fhir.jpa.migrate.tasks.api.Builder;
+import ca.uhn.fhir.jpa.migrate.tasks.api.ColumnAndNullable;
 import ca.uhn.fhir.jpa.migrate.tasks.api.TaskFlagEnum;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
@@ -250,6 +251,135 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 				.unique(false)
 				.withColumns("RES_UPDATED", "RES_ID")
 				.heavyweightSkipByDefault();
+
+		// Allow null values in SP_NAME, RES_TYPE columns for all HFJ_SPIDX_* tables. These are marked as failure
+		// allowed, since SQL Server won't let us change nullability on columns with indexes pointing to them.
+		{
+			Builder.BuilderWithTableName spidxCoords = version.onTable("HFJ_SPIDX_COORDS");
+			spidxCoords
+					.modifyColumn("20240617.1", "SP_NAME")
+					.nullable()
+					.withType(ColumnTypeEnum.STRING, 100)
+					.failureAllowed();
+			spidxCoords
+					.modifyColumn("20240617.2", "RES_TYPE")
+					.nullable()
+					.withType(ColumnTypeEnum.STRING, 100)
+					.failureAllowed();
+
+			Builder.BuilderWithTableName spidxDate = version.onTable("HFJ_SPIDX_DATE");
+			spidxDate
+					.modifyColumn("20240617.3", "SP_NAME")
+					.nullable()
+					.withType(ColumnTypeEnum.STRING, 100)
+					.failureAllowed();
+			spidxDate
+					.modifyColumn("20240617.4", "RES_TYPE")
+					.nullable()
+					.withType(ColumnTypeEnum.STRING, 100)
+					.failureAllowed();
+
+			Builder.BuilderWithTableName spidxNumber = version.onTable("HFJ_SPIDX_NUMBER");
+			spidxNumber
+					.modifyColumn("20240617.5", "SP_NAME")
+					.nullable()
+					.withType(ColumnTypeEnum.STRING, 100)
+					.failureAllowed();
+			spidxNumber
+					.modifyColumn("20240617.6", "RES_TYPE")
+					.nullable()
+					.withType(ColumnTypeEnum.STRING, 100)
+					.failureAllowed();
+
+			Builder.BuilderWithTableName spidxQuantity = version.onTable("HFJ_SPIDX_QUANTITY");
+			spidxQuantity
+					.modifyColumn("20240617.7", "SP_NAME")
+					.nullable()
+					.withType(ColumnTypeEnum.STRING, 100)
+					.failureAllowed();
+			spidxQuantity
+					.modifyColumn("20240617.8", "RES_TYPE")
+					.nullable()
+					.withType(ColumnTypeEnum.STRING, 100)
+					.failureAllowed();
+
+			Builder.BuilderWithTableName spidxQuantityNorm = version.onTable("HFJ_SPIDX_QUANTITY_NRML");
+			spidxQuantityNorm
+					.modifyColumn("20240617.9", "SP_NAME")
+					.nullable()
+					.withType(ColumnTypeEnum.STRING, 100)
+					.failureAllowed();
+			spidxQuantityNorm
+					.modifyColumn("20240617.10", "RES_TYPE")
+					.nullable()
+					.withType(ColumnTypeEnum.STRING, 100)
+					.failureAllowed();
+
+			Builder.BuilderWithTableName spidxString = version.onTable("HFJ_SPIDX_STRING");
+			spidxString
+					.modifyColumn("20240617.11", "SP_NAME")
+					.nullable()
+					.withType(ColumnTypeEnum.STRING, 100)
+					.failureAllowed();
+			spidxString
+					.modifyColumn("20240617.12", "RES_TYPE")
+					.nullable()
+					.withType(ColumnTypeEnum.STRING, 100)
+					.failureAllowed();
+
+			Builder.BuilderWithTableName spidxToken = version.onTable("HFJ_SPIDX_TOKEN");
+			spidxToken
+					.modifyColumn("20240617.13", "SP_NAME")
+					.nullable()
+					.withType(ColumnTypeEnum.STRING, 100)
+					.failureAllowed();
+			spidxToken
+					.modifyColumn("20240617.14", "RES_TYPE")
+					.nullable()
+					.withType(ColumnTypeEnum.STRING, 100)
+					.failureAllowed();
+
+			Builder.BuilderWithTableName spidxUri = version.onTable("HFJ_SPIDX_URI");
+			spidxUri.modifyColumn("20240617.15", "SP_NAME")
+					.nullable()
+					.withType(ColumnTypeEnum.STRING, 100)
+					.failureAllowed();
+			spidxUri.modifyColumn("20240617.16", "RES_TYPE")
+					.nullable()
+					.withType(ColumnTypeEnum.STRING, 100)
+					.failureAllowed();
+		}
+
+		{
+			// Note that these are recreations of a previous migration from 6.6.0. The original migration had these set
+			// as unique,
+			// which causes SQL Server to create a filtered index. See
+			// https://www.sqlshack.com/introduction-to-sql-server-filtered-indexes/
+			// What this means for hibernate search is that for any column that is nullable, the SQLServerDialect will
+			// omit the whole row from the index if
+			// the value of the nullable column is actually null. Removing the uniqueness constraint works around this
+			// problem.
+			Builder.BuilderWithTableName uriTable = version.onTable("HFJ_SPIDX_URI");
+
+			uriTable.dropIndex("20240620.10", "IDX_SP_URI_HASH_URI_V2");
+			uriTable.dropIndex("20240620.20", "IDX_SP_URI_HASH_IDENTITY_V2");
+
+			uriTable.addIndex("20240620.30", "IDX_SP_URI_HASH_URI_V2")
+					.unique(false)
+					.online(true)
+					.withPossibleNullableColumns(
+							new ColumnAndNullable("HASH_URI", true),
+							new ColumnAndNullable("RES_ID", false),
+							new ColumnAndNullable("PARTITION_ID", true));
+			uriTable.addIndex("20240620.40", "IDX_SP_URI_HASH_IDENTITY_V2")
+					.unique(false)
+					.online(true)
+					.withPossibleNullableColumns(
+							new ColumnAndNullable("HASH_IDENTITY", true),
+							new ColumnAndNullable("SP_URI", true),
+							new ColumnAndNullable("RES_ID", false),
+							new ColumnAndNullable("PARTITION_ID", true));
+		}
 	}
 
 	protected void init720() {

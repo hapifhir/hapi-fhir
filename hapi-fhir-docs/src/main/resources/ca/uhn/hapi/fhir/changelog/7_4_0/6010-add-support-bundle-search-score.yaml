@@ -1,0 +1,5 @@
+---
+type: add
+issue: 6010
+jira: SMILE-8214
+title: "When populated, the search score field will now be included in the entries of a response Bundle."

@@ -398,7 +398,7 @@ public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuil
 
 	private PerformanceTracingLoggingInterceptor myPerformanceTracingLoggingInterceptor;
 	@Autowired
-	private DaoRegistry myDaoRegistry;
+	protected DaoRegistry myDaoRegistry;
 	@Autowired
 	private IBulkDataExportJobSchedulingHelper myBulkDataSchedulerHelper;
 
