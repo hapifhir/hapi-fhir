@@ -96,7 +96,6 @@ import ca.uhn.fhir.jpa.partition.RequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.provider.DiffProvider;
 import ca.uhn.fhir.jpa.provider.InstanceReindexProvider;
 import ca.uhn.fhir.jpa.provider.ProcessMessageProvider;
-import ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.provider.ValueSetOperationProvider;
 import ca.uhn.fhir.jpa.provider.ValueSetOperationProviderDstu2;
@@ -291,11 +290,7 @@ public class JpaConfig {
 		return b;
 	}
 
-	@Bean(name = "mySubscriptionTriggeringProvider")
-	@Lazy
-	public SubscriptionTriggeringProvider subscriptionTriggeringProvider() {
-		return new SubscriptionTriggeringProvider();
-	}
+	// FIXME KHS removing SubscriptionTriggeringProvider from this config will break hapi tests
 
 	@Bean
 	@Lazy

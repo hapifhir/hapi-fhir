@@ -36,12 +36,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
+// FIXME KHS register in subscription module
 public class SubscriptionTriggeringProvider implements IResourceProvider {
 	@Autowired
 	private FhirContext myFhirContext;
 
 	@Autowired
 	private ISubscriptionTriggeringSvc mySubscriptionTriggeringSvc;
+
 
 	@Operation(name = JpaConstants.OPERATION_TRIGGER_SUBSCRIPTION)
 	public IBaseParameters triggerSubscription(
