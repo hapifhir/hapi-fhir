@@ -1,7 +1,5 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
@@ -20,6 +18,7 @@ import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChain;
 import ca.uhn.fhir.jpa.validation.ValidationSettings;
+import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.LenientErrorHandler;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -33,6 +32,8 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.validation.IValidatorModule;
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.spi.ILoggingEvent;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.UnknownCodeSystemWarningValidationSupport;
@@ -40,13 +41,46 @@ import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.AllergyIntolerance;
+import org.hl7.fhir.r4.model.Binary;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.r4.model.CanonicalType;
+import org.hl7.fhir.r4.model.CapabilityStatement;
+import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Condition;
+import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.ElementDefinition;
+import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.Group;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.IntegerType;
+import org.hl7.fhir.r4.model.Location;
+import org.hl7.fhir.r4.model.Narrative;
+import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
+import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Practitioner;
+import org.hl7.fhir.r4.model.Quantity;
+import org.hl7.fhir.r4.model.Questionnaire;
+import org.hl7.fhir.r4.model.QuestionnaireResponse;
+import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.SearchParameter;
+import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.StructureDefinition;
+import org.hl7.fhir.r4.model.UriType;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r5.utils.validation.constants.BestPracticeWarningLevel;
 import org.hl7.fhir.r5.utils.validation.constants.ReferenceValidationPolicy;
 import org.hl7.fhir.utilities.i18n.I18nConstants;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
+import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
@@ -59,16 +93,19 @@ import org.springframework.test.util.AopTestUtils;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.rest.api.Constants.JAVA_VALIDATOR_DETAILS_SYSTEM;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
 import static org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService.CURRENCIES_CODESYSTEM_URL;
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_LOW;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -1450,6 +1487,181 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		}
 
 		throw new IllegalStateException(); // shouldn't get here
+	}
+
+	@Test
+	public void validateResource_withUnknownMetaProfileurl_validatesButLogsWarning() {
+		// setup
+		IParser parser = myFhirContext.newJsonParser();
+
+		myLogbackTestExtension.setUp(Level.WARN);
+
+		String obsStr ="""
+					{
+				    "resourceType": "Observation",
+				    "meta": {
+				  		"profile": [
+				              "http://example.com/StructureDefinition|a|b|c"
+				    	]
+				  	}
+				  }
+			""";
+		Observation observation = parser.parseResource(Observation.class, obsStr);
+
+		// test
+		ValidationModeEnum mode = ValidationModeEnum.CREATE;
+		MethodOutcome outcome = myObservationDao.validate(observation, null, obsStr, EncodingEnum.JSON, mode, null, mySrd);
+
+		// validator
+		assertNotNull(outcome);
+		assertTrue(outcome.getOperationOutcome() instanceof OperationOutcome);
+		List<OperationOutcome.OperationOutcomeIssueComponent> issues = ((OperationOutcome) outcome.getOperationOutcome()).getIssue();
+		assertFalse(issues.isEmpty());
+		List<OperationOutcome.OperationOutcomeIssueComponent> errors = issues.stream()
+			.filter(i -> i.getSeverity() == OperationOutcome.IssueSeverity.ERROR)
+			.toList();
+		// we have errors
+		assertFalse(errors.isEmpty());
+
+		List<ILoggingEvent> events = myLogbackTestExtension.filterLoggingEventsWithPredicate(e -> {
+			return e.getLevel() == Level.WARN;
+		});
+		// and we have warning logs
+		assertFalse(events.isEmpty());
+		assertTrue(events.stream().anyMatch(e -> e.getFormattedMessage().contains("Unrecognized profile uri")));
+	}
+
+	@Test
+	public void validateResource_withMetaProfileWithVersion_validatesAsExpected() {
+		// setup
+		IParser parser = myFhirContext.newJsonParser();
+
+		// create our structure definition
+		@Language("JSON")
+		String strDefStr =
+			"""
+			{
+   				"resourceType": "StructureDefinition",
+   				"id": "example-profile",
+   				"url": "http://example.com/StructureDefinition",
+   				"version": "1.0.0",
+   				"name": "observation-example",
+   				"title": "Example Profile",
+   				"status": "active",
+  			 	"experimental": false,
+   				"date": "2016-03-25",
+   				"description": "Example Profile",
+   				"fhirVersion": "4.0.1",
+   				"kind": "resource",
+  			 	"abstract": false,
+   				"type": "Observation",
+   				"baseDefinition": "http://hl7.org/fhir/StructureDefinition/Observation",
+   				"derivation": "constraint",
+   				"differential": {
+  			 		"element": [
+   						{
+   							"id": "Observation",
+   							"path": "Observation",
+   							"short": "Example Profile",
+   							"alias": [
+   								"Example"
+   							],
+   							"min": 0,
+   							"max": "*"
+   						},
+   						{
+   							"id": "Observation.code",
+   							"path": "Observation.code",
+   							"short": "Coded Responses from C-CDA Vital Sign Results",
+   							"definition": "Coded Responses from C-CDA Vital Sign Results.",
+   							"requirements": "5. SHALL contain exactly one [1..1] code, where the @code SHOULD be selected from ValueSet Example",
+   							"min": 1,
+   							"max": "1",
+   							"type": [
+   								{
+   									"code": "CodeableConcept"
+   								}
+   							],
+   							"mustSupport": true,
+   							"binding": {
+   								"strength": "required",
+   								"description": "This identifies the vital sign result type.",
+   								"valueSet": "http://example.com/valueset"
+   							}
+   						}
+   					]
+   				}
+   			}
+			""";
+		StructureDefinition sd = parser.parseResource(StructureDefinition.class, strDefStr);
+		myStructureDefinitionDao.create(sd, mySrd);
+
+		@Language("JSON")
+		String obsStr ="""
+					{
+				    "resourceType": "Observation",
+				    "meta": {
+				  		"profile": [
+				              "http://example.com/StructureDefinition|1.0.0"
+				    	]
+				  	},
+				    "identifier": [
+				      {
+				        "use": "official",
+				        "system": "http://www.bmc.nl/zorgportal/identifiers/observations",
+				        "value": "6323"
+				      }
+				    ],
+				    "status": "final",
+				    "code": {
+				      "coding": [
+				        {
+				          "system": "http://example.com/codesystem",
+				          "code": "some-code",
+				          "display": "Some Code"
+				        }
+				      ]
+				    },
+				  	"subject": {
+				  		"reference": "Patient/1452"
+				  	},
+				    "effectiveDateTime": "2013-05-02T09:30:10+01:00",
+				    "issued": "2013-04-03T15:30:10+01:00",
+				    "valueQuantity": {
+				      "value": 6.3,
+				      "unit": "mmol/l",
+				      "system": "http://unitsofmeasure.org",
+				      "code": "mmol/L"
+				    },
+				    "interpretation": [
+				      {
+				        "coding": [
+				          {
+				            "system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation",
+				            "code": "H",
+				            "display": "High"
+				          }
+				        ]
+				      }
+				    ]
+				  }
+			""";
+		Observation observation = parser.parseResource(Observation.class, obsStr);
+
+		// test
+		ValidationModeEnum mode = ValidationModeEnum.CREATE;
+		MethodOutcome outcome = myObservationDao.validate(observation, null, obsStr, EncodingEnum.JSON, mode, null, mySrd);
+
+		// verify
+		assertNotNull(outcome);
+		assertTrue(outcome.getOperationOutcome() instanceof OperationOutcome);
+		List<OperationOutcome.OperationOutcomeIssueComponent> issues = ((OperationOutcome) outcome.getOperationOutcome()).getIssue();
+		assertFalse(issues.isEmpty());
+		List<OperationOutcome.OperationOutcomeIssueComponent> errors = issues.stream()
+			.filter(i -> i.getSeverity() == OperationOutcome.IssueSeverity.ERROR)
+			.toList();
+		// no errors - just warnings
+		assertTrue(errors.isEmpty(), errors.stream().map(OperationOutcome.OperationOutcomeIssueComponent::getDiagnostics).collect(Collectors.joining(",")));
 	}
 
 	@Test

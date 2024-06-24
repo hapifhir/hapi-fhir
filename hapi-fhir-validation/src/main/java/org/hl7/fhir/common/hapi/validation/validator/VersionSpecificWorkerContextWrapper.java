@@ -51,7 +51,11 @@ import org.slf4j.LoggerFactory;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -486,10 +490,20 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	}
 
 	@Override
-	public <T extends Resource> T fetchResource(Class<T> class_, String uri) {
-
-		if (isBlank(uri)) {
+	public <T extends Resource> T fetchResource(Class<T> class_, String theUri) {
+		if (isBlank(theUri)) {
 			return null;
+		}
+
+		String uri = theUri;
+		// handle profile version, if present
+		if (theUri.contains("|")) {
+			String[] parts = theUri.split("\\|");
+			if (parts.length == 2) {
+				uri = parts[0];
+			} else {
+				ourLog.warn("Unrecognized profile uri: {}", theUri);
+			}
 		}
 
 		ResourceKey key = new ResourceKey(class_.getSimpleName(), uri);
