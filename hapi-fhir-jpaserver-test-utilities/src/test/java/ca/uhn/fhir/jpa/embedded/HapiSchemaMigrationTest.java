@@ -214,6 +214,7 @@ public class HapiSchemaMigrationTest {
 			METADATA_DATA_TYPE, theDataType,
 			METADATA_IS_NULLABLE, theNullable,
 			METADATA_DEFAULT_VALUE, Optional.ofNullable(theDefaultValue)
+					.map(defaultValueNonNull -> defaultValueNonNull.equals("((-1))") ? "-1" : defaultValueNonNull) // MSSQL returns "((-1))" for default value
 				.orElse(NULL_PLACEHOLDER));
 	}
 
