@@ -151,6 +151,15 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 			return true;
 		}
 
+		// if the registry has not been initialized
+		// we cannot use HibernateSearch because it
+		// will, internally, trigger a new search
+		// when it refreshes the search parameters
+		// (which will cause an infinite loop)
+		if (!mySearchParamRegistry.isInitialized()) {
+			return false;
+		}
+
 		return myStorageSettings.isAdvancedHSearchIndexing()
 				&& myAdvancedIndexQueryBuilder.canUseHibernateSearch(theResourceType, myParams, mySearchParamRegistry);
 	}

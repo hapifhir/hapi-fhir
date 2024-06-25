@@ -89,26 +89,29 @@ public class ExtendedHSearchSearchBuilder {
 	public boolean canUseHibernateSearch(
 			String theResourceType, SearchParameterMap myParams, ISearchParamRegistry theSearchParamRegistry) {
 		boolean canUseHibernate = true;
-		ResourceSearchParams resourceActiveSearchParams = theSearchParamRegistry.getActiveSearchParams(theResourceType);
-		for (String paramName : myParams.keySet()) {
-			// is this parameter supported?
-			if (!supportsSearchParameter(paramName, resourceActiveSearchParams)) {
-				canUseHibernate = false;
-			} else {
-				// are the parameter values supported?
-				canUseHibernate =
+		// TODO - when ew check here, we want to not refresh active search parameters
+//		if (!myParams.isEmpty()) {
+			ResourceSearchParams resourceActiveSearchParams = theSearchParamRegistry.getActiveSearchParams(theResourceType);
+			for (String paramName : myParams.keySet()) {
+				// is this parameter supported?
+				if (!supportsSearchParameter(paramName, resourceActiveSearchParams)) {
+					canUseHibernate = false;
+				} else {
+					// are the parameter values supported?
+					canUseHibernate =
 						myParams.get(paramName).stream()
-								.flatMap(Collection::stream)
-								.collect(Collectors.toList())
-								.stream()
-								.anyMatch(this::isParamTypeSupported);
-			}
+							.flatMap(Collection::stream)
+							.collect(Collectors.toList())
+							.stream()
+							.anyMatch(this::isParamTypeSupported);
+				}
 
-			// if not supported, don't use
-			if (!canUseHibernate) {
-				return false;
+				// if not supported, don't use
+				if (!canUseHibernate) {
+					return false;
+				}
 			}
-		}
+//		}
 
 		return canUseHibernate;
 	}

@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 6044
+title: "Fixed an issue where doing a cache refresh with advanced Hibernate Search
+        enabled would result in an infinite loop of cache refresh -> search for
+        StructureDefinition -> cache refresh, etc
+"

@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.cache;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.CacheConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
@@ -43,7 +44,6 @@ import java.time.ZoneId;
 @Scope("prototype")
 public class ResourceChangeListenerCache implements IResourceChangeListenerCache {
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceChangeListenerCache.class);
-	private static final int MAX_RETRIES = 60;
 
 	private static Instant ourNowForUnitTests;
 
@@ -153,7 +153,7 @@ public class ResourceChangeListenerCache implements IResourceChangeListenerCache
 						return myResourceChangeListenerCacheRefresher.refreshCacheAndNotifyListener(this);
 					}
 				},
-				MAX_RETRIES);
+				CacheConstants.getMaxRetries());
 		return refreshCacheRetrier.runWithRetry();
 	}
 

@@ -149,6 +149,7 @@ public class ResourceChangeListenerCacheRefresherImpl
 			return retVal;
 		}
 		SearchParameterMap searchParamMap = theCache.getSearchParameterMap();
+
 		ResourceVersionMap newResourceVersionMap =
 				myResourceVersionSvc.getVersionMap(theCache.getResourceName(), searchParamMap);
 
