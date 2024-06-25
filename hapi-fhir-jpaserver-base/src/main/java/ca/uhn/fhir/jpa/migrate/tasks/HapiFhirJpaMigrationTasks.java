@@ -405,41 +405,41 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 							new ColumnAndNullable("RES_ID", false),
 							new ColumnAndNullable("PARTITION_ID", true));
 		}
-        
-        /*
-         * Add hash columns to the combo param index tables
-         */
-        {
-            version.onTable("HFJ_IDX_CMB_TOK_NU")
-            .addIndex("20240625.10", "IDX_IDXCMBTOKNU_HASHC")
-            .unique(false)
-            .withColumns("HASH_COMPLETE", "RES_ID", "PARTITION_ID");
-            version.onTable("HFJ_IDX_CMP_STRING_UNIQ")
-            .addColumn("20240625.20", "HASH_COMPLETE")
-            .nullable()
-            .type(ColumnTypeEnum.LONG);
-            version.onTable("HFJ_IDX_CMP_STRING_UNIQ")
-            .addColumn("20240625.30", "HASH_COMPLETE_2")
-            .nullable()
-            .type(ColumnTypeEnum.LONG);
-            version.onTable("HFJ_IDX_CMP_STRING_UNIQ")
-            .addTask(
-                     new CalculateHashesTask(VersionEnum.V7_4_0, "20240625.40") {
-                @Override
-                protected boolean shouldSkipTask() {
-                    return false;
-                }
-            }.setPidColumnName("PID")
-                     .addCalculator(
-                                    "HASH_COMPLETE",
-                                    t -> ResourceIndexedComboStringUnique.calculateHashComplete(
-                                                                                                t.getString("IDX_STRING")))
-                     .addCalculator(
-                                    "HASH_COMPLETE_2",
-                                    t -> ResourceIndexedComboStringUnique.calculateHashComplete2(
-                                                                                                 t.getString("IDX_STRING")))
-                     .setColumnName("HASH_COMPLETE"));
-        }
+
+		/*
+		 * Add hash columns to the combo param index tables
+		 */
+		{
+			version.onTable("HFJ_IDX_CMB_TOK_NU")
+					.addIndex("20240625.10", "IDX_IDXCMBTOKNU_HASHC")
+					.unique(false)
+					.withColumns("HASH_COMPLETE", "RES_ID", "PARTITION_ID");
+			version.onTable("HFJ_IDX_CMP_STRING_UNIQ")
+					.addColumn("20240625.20", "HASH_COMPLETE")
+					.nullable()
+					.type(ColumnTypeEnum.LONG);
+			version.onTable("HFJ_IDX_CMP_STRING_UNIQ")
+					.addColumn("20240625.30", "HASH_COMPLETE_2")
+					.nullable()
+					.type(ColumnTypeEnum.LONG);
+			version.onTable("HFJ_IDX_CMP_STRING_UNIQ")
+					.addTask(
+							new CalculateHashesTask(VersionEnum.V7_4_0, "20240625.40") {
+								@Override
+								protected boolean shouldSkipTask() {
+									return false;
+								}
+							}.setPidColumnName("PID")
+									.addCalculator(
+											"HASH_COMPLETE",
+											t -> ResourceIndexedComboStringUnique.calculateHashComplete(
+													t.getString("IDX_STRING")))
+									.addCalculator(
+											"HASH_COMPLETE_2",
+											t -> ResourceIndexedComboStringUnique.calculateHashComplete2(
+													t.getString("IDX_STRING")))
+									.setColumnName("HASH_COMPLETE"));
+		}
 	}
 
 	protected void init720() {

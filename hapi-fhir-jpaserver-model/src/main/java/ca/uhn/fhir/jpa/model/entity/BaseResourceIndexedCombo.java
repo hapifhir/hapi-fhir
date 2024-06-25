@@ -5,8 +5,6 @@ import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.Transient;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-import java.util.regex.Pattern;
-
 @MappedSuperclass
 public abstract class BaseResourceIndexedCombo extends BaseResourceIndex implements IResourceIndexComboSearchParameter {
 

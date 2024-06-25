@@ -53,22 +53,28 @@ public class SearchParamHash {
 	 * Applies a fast and consistent hashing algorithm to a set of strings
 	 */
 	public static long hashSearchParam(
-		@Nonnull PartitionSettings thePartitionSettings, @Nonnull RequestPartitionId theRequestPartitionId, @Nonnull String... theValues) {
+			@Nonnull PartitionSettings thePartitionSettings,
+			@Nonnull RequestPartitionId theRequestPartitionId,
+			@Nonnull String... theValues) {
 		return doHashSearchParam(thePartitionSettings, theRequestPartitionId, theValues);
 	}
 
 	/**
 	 * Applies a fast and consistent hashing algorithm to a set of strings
 	 */
-	public static long hashSearchParam(
-		@Nonnull String... theValues) {
+	public static long hashSearchParam(@Nonnull String... theValues) {
 		return doHashSearchParam(null, null, theValues);
 	}
 
-	private static long doHashSearchParam(@Nullable PartitionSettings thePartitionSettings, @Nullable RequestPartitionId theRequestPartitionId, @Nonnull String[] theValues) {
+	private static long doHashSearchParam(
+			@Nullable PartitionSettings thePartitionSettings,
+			@Nullable RequestPartitionId theRequestPartitionId,
+			@Nonnull String[] theValues) {
 		Hasher hasher = HASH_FUNCTION.newHasher();
 
-		if (thePartitionSettings != null && theRequestPartitionId != null && thePartitionSettings.isPartitioningEnabled()
+		if (thePartitionSettings != null
+				&& theRequestPartitionId != null
+				&& thePartitionSettings.isPartitioningEnabled()
 				&& thePartitionSettings.isIncludePartitionInSearchHashes()) {
 			if (theRequestPartitionId.getPartitionIds().size() > 1) {
 				throw new InternalErrorException(Msg.code(1527)

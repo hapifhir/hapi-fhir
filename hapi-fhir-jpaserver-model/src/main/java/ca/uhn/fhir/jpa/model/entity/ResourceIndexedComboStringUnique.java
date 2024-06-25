@@ -104,6 +104,21 @@ public class ResourceIndexedComboStringUnique extends BaseResourceIndexedCombo
 	 * with a false collision here. So in order to reduce that risk, we
 	 * double the number of bits we hash by having two hashes, effectively
 	 * making the hash a 128 bit hash instead of just 64.
+	 * <p>
+	 * The idea is that having two of them widens the hash from 64 bits to 128
+	 * bits
+	 * </p><p>
+	 * If we have a value we want to guarantee uniqueness on of
+	 * <code>Observation?code=A</code>, say it hashes to <code>12345</code>.
+	 * And suppose we have another value of <code>Observation?code=B</code> which
+	 * also hashes to <code>12345</code>. This is unlikely but not impossible.
+	 * And if this happens, it will be impossible to add a resource with
+	 * code B if there is already a resource with code A.
+	 * </p><p>
+	 * Adding a second, salted hash reduces the likelihood of this happening,
+	 * since it's unlikely the second hash would also collide. Not impossible
+	 * of course, but orders of magnitude less likely still.
+	 * </p>
 	 *
 	 * @see #calculateHashComplete2(String) to see how this is calculated
 	 */
