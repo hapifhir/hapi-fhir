@@ -11,6 +11,7 @@ import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
 import ca.uhn.fhir.util.VersionEnum;
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -25,6 +26,7 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
@@ -33,6 +35,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
 
 import static ca.uhn.fhir.jpa.embedded.HapiEmbeddedDatabasesExtension.FIRST_TESTED_VERSION;
@@ -51,6 +54,7 @@ public class HapiSchemaMigrationTest {
 	private static final String METADATA_COLUMN_NAME = "COLUMN_NAME";
 	private static final String METADATA_DATA_TYPE = "DATA_TYPE";
 	private static final String METADATA_IS_NULLABLE = "IS_NULLABLE";
+	private static final String METADATA_DEFAULT_VALUE = "COLUMN_DEF";
 	private static final String METADATA_IS_NULLABLE_NO = "NO";
 	private static final String METADATA_IS_NULLABLE_YES = "YES";
 
@@ -58,6 +62,8 @@ public class HapiSchemaMigrationTest {
 	private static final String COLUMN_RES_SEARCH_URL = "RES_SEARCH_URL";
 	private static final String COLUMN_PARTITION_ID = "PARTITION_ID";
 	private static final String COLUMN_PARTITION_DATE = "PARTITION_DATE";
+
+	private static final String NULL_PLACEHOLDER = "[NULL]";
 
 	static {
 		HapiSystemProperties.enableUnitTestMode();
@@ -167,6 +173,7 @@ public class HapiSchemaMigrationTest {
 					extractAndAddToMap(columnsResultSet, columnMap, METADATA_COLUMN_NAME);
 					extractAndAddToMap(columnsResultSet, columnMap, METADATA_DATA_TYPE);
 					extractAndAddToMap(columnsResultSet, columnMap, METADATA_IS_NULLABLE);
+					extractAndAddToMap(columnsResultSet, columnMap, METADATA_DEFAULT_VALUE);
 				}
 			}
 
@@ -190,11 +197,11 @@ public class HapiSchemaMigrationTest {
 			assertThat(expectedPrimaryKeyResults).containsAll(actualPrimaryKeyResults);
 
 			final List<Map<String, String>> expectedColumnResults = List.of(
-				addExpectedColumnMetadata(COLUMN_RES_SEARCH_URL, Integer.toString(Types.VARCHAR), METADATA_IS_NULLABLE_NO),
-				addExpectedColumnMetadata("RES_ID", getExpectedSqlTypeForResId(theDriverType), METADATA_IS_NULLABLE_NO),
-				addExpectedColumnMetadata("CREATED_TIME", Integer.toString(Types.TIMESTAMP), METADATA_IS_NULLABLE_NO),
-				addExpectedColumnMetadata(COLUMN_PARTITION_ID, getExpectedSqlTypeForPartitionId(theDriverType), METADATA_IS_NULLABLE_NO),
-				addExpectedColumnMetadata(COLUMN_PARTITION_DATE, getExpectedSqlTypeForPartitionDate(theDriverType), METADATA_IS_NULLABLE_YES)
+				addExpectedColumnMetadata(COLUMN_RES_SEARCH_URL, Integer.toString(Types.VARCHAR), METADATA_IS_NULLABLE_NO, null),
+				addExpectedColumnMetadata("RES_ID", getExpectedSqlTypeForResId(theDriverType), METADATA_IS_NULLABLE_NO, null),
+				addExpectedColumnMetadata("CREATED_TIME", Integer.toString(Types.TIMESTAMP), METADATA_IS_NULLABLE_NO, null),
+				addExpectedColumnMetadata(COLUMN_PARTITION_ID, getExpectedSqlTypeForPartitionId(theDriverType), METADATA_IS_NULLABLE_NO, "-1"),
+				addExpectedColumnMetadata(COLUMN_PARTITION_DATE, getExpectedSqlTypeForPartitionDate(theDriverType), METADATA_IS_NULLABLE_YES, null)
 			);
 
 			assertThat(expectedColumnResults).containsAll(actualColumnResults);
@@ -202,10 +209,12 @@ public class HapiSchemaMigrationTest {
 	}
 
 	@Nonnull
-	private Map<String, String> addExpectedColumnMetadata(String theColumnName, String theDataType, String theNullable) {
+	private Map<String, String> addExpectedColumnMetadata(String theColumnName, String theDataType, String theNullable, @Nullable String theDefaultValue) {
 		return Map.of(METADATA_COLUMN_NAME, theColumnName,
 			METADATA_DATA_TYPE, theDataType,
-			METADATA_IS_NULLABLE, theNullable);
+			METADATA_IS_NULLABLE, theNullable,
+			METADATA_DEFAULT_VALUE, Optional.ofNullable(theDefaultValue)
+				.orElse(NULL_PLACEHOLDER));
 	}
 
 	private String getExpectedSqlTypeForResId(DriverTypeEnum theDriverType) {
@@ -227,7 +236,9 @@ public class HapiSchemaMigrationTest {
 	}
 
 	private void extractAndAddToMap(ResultSet theResultSet, Map<String,String> theMap, String theColumn) throws SQLException {
-		theMap.put(theColumn, theResultSet.getString(theColumn).toUpperCase());
+		theMap.put(theColumn, Optional.ofNullable(theResultSet.getString(theColumn))
+			.map(String::toUpperCase)
+			.orElse(NULL_PLACEHOLDER));
 	}
 
 	private static void migrate(DriverTypeEnum theDriverType, DataSource dataSource, HapiMigrationStorageSvc hapiMigrationStorageSvc, VersionEnum to) {
