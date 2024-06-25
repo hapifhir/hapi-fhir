@@ -7,6 +7,7 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoSearchParameter;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
@@ -180,6 +181,8 @@ public class FhirResourceDaoR5SearchWithElasticSearchIT extends BaseJpaTest impl
 
 	@Mock
 	private IHSearchEventListener mySearchEventListener;
+	@Autowired
+	private IFhirResourceDaoSearchParameter mySearchParameterDaoR5;
 
 
 	@BeforeEach
@@ -271,7 +274,7 @@ public class FhirResourceDaoR5SearchWithElasticSearchIT extends BaseJpaTest impl
 
 	@Test
 	public void testResourceTextSearch() {
-
+		myStorageSettings.setAdvancedHSearchIndexing(false);
 		Observation obs1 = new Observation();
 		obs1.getCode().setText("Systolic Blood Pressure");
 		obs1.setStatus(Enumerations.ObservationStatus.FINAL);
@@ -289,9 +292,11 @@ public class FhirResourceDaoR5SearchWithElasticSearchIT extends BaseJpaTest impl
 		obs2.getText().setStatus(Narrative.NarrativeStatus.ADDITIONAL);
 		IIdType id2 = myObservationDao.create(obs2, mySrd).getId().toUnqualifiedVersionless();
 
+		SearchParameterMap searchParameterMap = new SearchParameterMap().setLoadSynchronous(true);
+		IBundleProvider search = mySearchParameterDaoR5.search(searchParameterMap);
 
 		SearchParameterMap map= new SearchParameterMap();
-		map.add(Constants.PARAM_TEXT, new StringParam("zoop"));
+		map.add(Constants.PARAM_TEXT, new SpecialParam().setValue("zoop"));
 		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map))).containsExactlyInAnyOrder(toValues(id1));
 
 		map = new SearchParameterMap();
