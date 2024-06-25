@@ -41,7 +41,6 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
-import ca.uhn.fhir.jpa.model.entity.ResourceSearchUrlEntityPK;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.SearchParamPresentEntity;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
@@ -129,10 +128,9 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		// Start of migrations from 7.2 to 7.4
 
 		final Builder version = forVersion(VersionEnum.V7_4_0);
-		final String tableHfjResSearchUrl = "HFJ_RES_SEARCH_URL";
 
 		{
-			version.onTable(tableHfjResSearchUrl)
+			version.onTable("HFJ_RES_SEARCH_URL")
 					.addForeignKey("20240515.1", "FK_RES_SEARCH_URL_RESOURCE")
 					.toColumn("RES_ID")
 					.references("HFJ_RESOURCE", "RES_ID");
@@ -352,34 +350,26 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 			{
 				// Please see https://github.com/hapifhir/hapi-fhir/issues/6033 for why we're doing this
-				version.onTable(tableHfjResSearchUrl)
+				version.onTable("HFJ_RES_SEARCH_URL")
 						.addColumn("20240618.2", "PARTITION_ID", -1)
 						.nullable()
 						.type(ColumnTypeEnum.INT);
 
-				version.onTable(tableHfjResSearchUrl)
+				version.onTable("HFJ_RES_SEARCH_URL")
 						.addColumn("20240618.3", "PARTITION_DATE")
 						.nullable()
 						.type(ColumnTypeEnum.DATE_ONLY);
 
-				version.executeRawSql(
-						"20240618.4",
-						String.format(
-								"UPDATE %s SET %s = -1",
-								tableHfjResSearchUrl, ResourceSearchUrlEntityPK.PARTITION_ID_COLUMN_NAME));
+				version.executeRawSql("20240618.4", "UPDATE HFJ_RES_SEARCH_URL SET PARTITION_ID = -1");
 
-				version.onTable(tableHfjResSearchUrl)
-						.modifyColumn("20240618.5", ResourceSearchUrlEntityPK.PARTITION_ID_COLUMN_NAME)
+				version.onTable("HFJ_RES_SEARCH_URL")
+						.modifyColumn("20240618.5", "PARTITION_ID")
 						.nonNullable()
 						.withType(ColumnTypeEnum.INT);
 
-				version.onTable(tableHfjResSearchUrl).dropPrimaryKey("20240618.6");
+				version.onTable("HFJ_RES_SEARCH_URL").dropPrimaryKey("20240618.6");
 
-				version.onTable(tableHfjResSearchUrl)
-						.addPrimaryKey(
-								"20240618.7",
-								ResourceSearchUrlEntityPK.RES_SEARCH_URL_COLUMN_NAME,
-								ResourceSearchUrlEntityPK.PARTITION_ID_COLUMN_NAME);
+				version.onTable("HFJ_RES_SEARCH_URL").addPrimaryKey("20240618.7", "RES_SEARCH_URL", "PARTITION_ID");
 			}
 		}
 	}

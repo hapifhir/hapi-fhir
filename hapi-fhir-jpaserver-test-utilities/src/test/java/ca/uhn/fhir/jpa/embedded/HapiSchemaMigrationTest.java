@@ -10,6 +10,7 @@ import ca.uhn.fhir.jpa.migrate.tasks.HapiFhirJpaMigrationTasks;
 import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
 import ca.uhn.fhir.util.VersionEnum;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -21,7 +22,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
-import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -117,6 +117,26 @@ public class HapiSchemaMigrationTest {
 		verifyHfjResSearchUrlMigration(database, theDriverType);
 	}
 
+	/**
+	 * We start with a single record in HFJ_RES_SEARCH_URL:
+	 * <p/>
+	 * <ul>
+	 *     <li>Primary key:  ONLY RES_SEARCH_URL</li>
+	 *     <li>PK: RES_SEARCH_URL: https://example.com</li>
+	 *     <li>CREATED_TIME: 2023-06-29 10:14:39.69</li>
+	 *     <li>RES_ID: 1678</li>
+	 * </ul>
+	 * <p/>
+	 * Once the migration is complete, we should have:
+	 * <ul>
+	 *     <li>Primary key:  RES_SEARCH_URL, PARTITION_ID</li>
+	 *     <li>PK: RES_SEARCH_URL: https://example.com</li>
+	 *     <li>PK: PARTITION_ID: -1</li>
+	 *     <li>CREATED_TIME: 2023-06-29 10:14:39.69</li>
+	 *     <li>RES_ID: 1678</li>
+	 *     <li>PARTITION_DATE: null</li>
+	 * </ul>
+	 */
 	private void verifyHfjResSearchUrlMigration(JpaEmbeddedDatabase theDatabase, DriverTypeEnum theDriverType) throws SQLException {
 		final List<Map<String, Object>> allCount = theDatabase.query(String.format("SELECT count(*) FROM %s", TABLE_HFJ_RES_SEARCH_URL));
 		final List<Map<String, Object>> minusOnePartitionCount = theDatabase.query(String.format("SELECT count(*) FROM %s WHERE %s = -1", TABLE_HFJ_RES_SEARCH_URL, COLUMN_PARTITION_ID));
@@ -125,28 +145,14 @@ public class HapiSchemaMigrationTest {
 		final Collection<Object> queryResultValues = minusOnePartitionCount.get(0).values();
 		assertThat(queryResultValues).hasSize(1);
 		final Object queryResultValue = queryResultValues.iterator().next();
+		assertThat(queryResultValue).isInstanceOf(Number.class);
+		if (queryResultValue instanceof Number queryResultNumber) {
+			assertThat(queryResultNumber.intValue()).isEqualTo(1);
+		}
 
-		switch (theDriverType) {
-			case MSSQL_2012:
-				assertThat(queryResultValue).isOfAnyClassIn(Integer.class);
-				if (queryResultValue instanceof Integer minusCountInt) {
-					assertThat(minusCountInt).isEqualTo(1);
-					assertThat(allCount.get(0).values().iterator().next()).isEqualTo(1);
-				}
-				break;
-			case ORACLE_12C:
-				assertThat(queryResultValue).isOfAnyClassIn(BigDecimal.class);
-				if (queryResultValue instanceof BigDecimal minusCountBigDecimal) {
-					assertThat(minusCountBigDecimal).isEqualTo(BigDecimal.ONE);
-					assertThat(allCount.get(0).values().iterator().next()).isEqualTo(BigDecimal.ONE);
-				}
-				break;
-			default:
-				assertThat(queryResultValue).isOfAnyClassIn(Long.class);
-				if (queryResultValue instanceof Long minusCountLong) {
-					assertThat(minusCountLong).isEqualTo(1L);
-					assertThat(allCount.get(0).values().iterator().next()).isEqualTo(1L);
-				}
+		final Object allCountValue = allCount.get(0).values().iterator().next();
+		if (allCountValue instanceof Number allCountNumber) {
+			assertThat(allCountNumber.intValue()).isEqualTo(1);
 		}
 
 		try (final Connection connection = theDatabase.getDataSource().getConnection()) {
@@ -184,25 +190,22 @@ public class HapiSchemaMigrationTest {
 			assertThat(expectedPrimaryKeyResults).containsAll(actualPrimaryKeyResults);
 
 			final List<Map<String, String>> expectedColumnResults = List.of(
-				Map.of(METADATA_COLUMN_NAME, COLUMN_RES_SEARCH_URL,
-					METADATA_DATA_TYPE, Integer.toString(Types.VARCHAR),
-					METADATA_IS_NULLABLE, METADATA_IS_NULLABLE_NO),
-				Map.of(METADATA_COLUMN_NAME, "RES_ID",
-					METADATA_DATA_TYPE, getExpectedSqlTypeForResId(theDriverType),
-					METADATA_IS_NULLABLE, METADATA_IS_NULLABLE_NO),
-				Map.of(METADATA_COLUMN_NAME, "CREATED_TIME",
-					METADATA_DATA_TYPE, Integer.toString(Types.TIMESTAMP),
-					METADATA_IS_NULLABLE, METADATA_IS_NULLABLE_NO),
-				Map.of(METADATA_COLUMN_NAME, COLUMN_PARTITION_ID,
-					METADATA_DATA_TYPE, getExpectedSqlTypeForPartitionId(theDriverType),
-					METADATA_IS_NULLABLE, METADATA_IS_NULLABLE_NO),
-				Map.of(METADATA_COLUMN_NAME, COLUMN_PARTITION_DATE,
-					METADATA_DATA_TYPE, getExpectedSqlTypeForPartitionDate(theDriverType),
-					METADATA_IS_NULLABLE, METADATA_IS_NULLABLE_YES)
+				addExpectedColumnMetadata(COLUMN_RES_SEARCH_URL, Integer.toString(Types.VARCHAR), METADATA_IS_NULLABLE_NO),
+				addExpectedColumnMetadata("RES_ID", getExpectedSqlTypeForResId(theDriverType), METADATA_IS_NULLABLE_NO),
+				addExpectedColumnMetadata("CREATED_TIME", Integer.toString(Types.TIMESTAMP), METADATA_IS_NULLABLE_NO),
+				addExpectedColumnMetadata(COLUMN_PARTITION_ID, getExpectedSqlTypeForPartitionId(theDriverType), METADATA_IS_NULLABLE_NO),
+				addExpectedColumnMetadata(COLUMN_PARTITION_DATE, getExpectedSqlTypeForPartitionDate(theDriverType), METADATA_IS_NULLABLE_YES)
 			);
 
 			assertThat(expectedColumnResults).containsAll(actualColumnResults);
 		}
+	}
+
+	@Nonnull
+	private Map<String, String> addExpectedColumnMetadata(String theColumnName, String theDataType, String theNullable) {
+		return Map.of(METADATA_COLUMN_NAME, theColumnName,
+			METADATA_DATA_TYPE, theDataType,
+			METADATA_IS_NULLABLE, theNullable);
 	}
 
 	private String getExpectedSqlTypeForResId(DriverTypeEnum theDriverType) {
