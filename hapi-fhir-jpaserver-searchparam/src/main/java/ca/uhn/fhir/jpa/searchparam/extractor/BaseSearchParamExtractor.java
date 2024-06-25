@@ -975,7 +975,8 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		mySearchParamRegistry = theSearchParamRegistry;
 	}
 
-	private Collection<RuntimeSearchParam> getSearchParams(IBaseResource theResource) {
+	@VisibleForTesting
+	Collection<RuntimeSearchParam> getSearchParams(IBaseResource theResource) {
 		RuntimeResourceDefinition def = getContext().getResourceDefinition(theResource);
 		Collection<RuntimeSearchParam> retVal =
 				mySearchParamRegistry.getActiveSearchParams(def.getName()).values();
@@ -2013,8 +2014,9 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		List<? extends IBase> get() throws FHIRException;
 	}
 
+	@VisibleForTesting
 	@FunctionalInterface
-	private interface IExtractor<T> {
+	interface IExtractor<T> {
 
 		void extract(
 				SearchParamSet<T> theParams,
