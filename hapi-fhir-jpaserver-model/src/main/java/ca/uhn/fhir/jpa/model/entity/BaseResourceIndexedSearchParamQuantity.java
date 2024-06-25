@@ -26,6 +26,8 @@ import jakarta.persistence.MappedSuperclass;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 
+import static ca.uhn.fhir.jpa.model.util.SearchParamHash.hashSearchParam;
+
 @MappedSuperclass
 public abstract class BaseResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearchParam {
 
@@ -51,11 +53,6 @@ public abstract class BaseResourceIndexedSearchParamQuantity extends BaseResourc
 	 */
 	@Column(name = "HASH_IDENTITY_SYS_UNITS", nullable = true)
 	private Long myHashIdentitySystemAndUnits;
-	/**
-	 * @since 3.5.0 - At some point this should be made not-null
-	 */
-	@Column(name = "HASH_IDENTITY", nullable = true)
-	private Long myHashIdentity;
 
 	/**
 	 * Constructor
@@ -86,14 +83,6 @@ public abstract class BaseResourceIndexedSearchParamQuantity extends BaseResourc
 				calculateHashUnits(getPartitionSettings(), getPartitionId(), resourceType, paramName, units));
 		setHashIdentitySystemAndUnits(calculateHashSystemAndUnits(
 				getPartitionSettings(), getPartitionId(), resourceType, paramName, system, units));
-	}
-
-	public Long getHashIdentity() {
-		return myHashIdentity;
-	}
-
-	public void setHashIdentity(Long theHashIdentity) {
-		myHashIdentity = theHashIdentity;
 	}
 
 	public Long getHashIdentityAndUnits() {
@@ -131,8 +120,6 @@ public abstract class BaseResourceIndexedSearchParamQuantity extends BaseResourc
 	@Override
 	public int hashCode() {
 		HashCodeBuilder b = new HashCodeBuilder();
-		b.append(getResourceType());
-		b.append(getParamName());
 		b.append(getHashIdentity());
 		b.append(getHashIdentityAndUnits());
 		b.append(getHashIdentitySystemAndUnits());
@@ -158,7 +145,8 @@ public abstract class BaseResourceIndexedSearchParamQuantity extends BaseResourc
 			String theParamName,
 			String theSystem,
 			String theUnits) {
-		return hash(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, theSystem, theUnits);
+		return hashSearchParam(
+				thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, theSystem, theUnits);
 	}
 
 	public static long calculateHashUnits(
@@ -177,6 +165,6 @@ public abstract class BaseResourceIndexedSearchParamQuantity extends BaseResourc
 			String theResourceType,
 			String theParamName,
 			String theUnits) {
-		return hash(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, theUnits);
+		return hashSearchParam(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, theUnits);
 	}
 }

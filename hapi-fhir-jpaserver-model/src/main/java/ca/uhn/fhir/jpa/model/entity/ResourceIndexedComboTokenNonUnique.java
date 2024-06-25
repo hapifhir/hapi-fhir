@@ -38,7 +38,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-import static ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam.hash;
+import static ca.uhn.fhir.jpa.model.util.SearchParamHash.hashSearchParam;
 
 @Entity
 @Table(

@@ -22,12 +22,14 @@ package ca.uhn.fhir.jpa.model.entity;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.listener.IndexStorageOptimizationListener;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.util.StringUtil;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -42,10 +44,12 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+import static ca.uhn.fhir.jpa.model.util.SearchParamHash.hashSearchParam;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 
 // @formatter:off
 @Embeddable
+@EntityListeners(IndexStorageOptimizationListener.class)
 @Entity
 @Table(
 		name = "HFJ_SPIDX_STRING",
@@ -97,11 +101,6 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 	 */
 	@Column(name = "HASH_NORM_PREFIX", nullable = true)
 	private Long myHashNormalizedPrefix;
-	/**
-	 * @since 3.6.0 - At some point this should be made not-null
-	 */
-	@Column(name = "HASH_IDENTITY", nullable = true)
-	private Long myHashIdentity;
 	/**
 	 * @since 3.4.0 - At some point this should be made not-null
 	 */
@@ -180,22 +179,13 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 		}
 		ResourceIndexedSearchParamString obj = (ResourceIndexedSearchParamString) theObj;
 		EqualsBuilder b = new EqualsBuilder();
-		b.append(getResourceType(), obj.getResourceType());
-		b.append(getParamName(), obj.getParamName());
 		b.append(getValueExact(), obj.getValueExact());
 		b.append(getHashIdentity(), obj.getHashIdentity());
 		b.append(getHashExact(), obj.getHashExact());
 		b.append(getHashNormalizedPrefix(), obj.getHashNormalizedPrefix());
 		b.append(getValueNormalized(), obj.getValueNormalized());
+		b.append(isMissing(), obj.isMissing());
 		return b.isEquals();
-	}
-
-	private Long getHashIdentity() {
-		return myHashIdentity;
-	}
-
-	public void setHashIdentity(Long theHashIdentity) {
-		myHashIdentity = theHashIdentity;
 	}
 
 	public Long getHashExact() {
@@ -251,13 +241,12 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 	@Override
 	public int hashCode() {
 		HashCodeBuilder b = new HashCodeBuilder();
-		b.append(getResourceType());
-		b.append(getParamName());
 		b.append(getValueExact());
 		b.append(getHashIdentity());
 		b.append(getHashExact());
 		b.append(getHashNormalizedPrefix());
 		b.append(getValueNormalized());
+		b.append(isMissing());
 		return b.toHashCode();
 	}
 
@@ -306,7 +295,8 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 			String theResourceType,
 			String theParamName,
 			String theValueExact) {
-		return hash(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, theValueExact);
+		return hashSearchParam(
+				thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, theValueExact);
 	}
 
 	public static long calculateHashNormalized(
@@ -345,7 +335,7 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 		}
 
 		String value = StringUtil.left(theValueNormalized, hashPrefixLength);
-		return hash(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, value);
+		return hashSearchParam(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, value);
 	}
 
 	@Override

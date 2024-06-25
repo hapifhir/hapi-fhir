@@ -19,8 +19,10 @@ import org.hl7.fhir.r5.model.Base;
 import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.ValueSet;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class FhirPathR5 implements IFhirPath {
 
@@ -99,7 +101,11 @@ public class FhirPathR5 implements IFhirPath {
 					boolean beforeContext,
 					boolean explicitConstant)
 					throws PathEngineException {
-				return null;
+
+				return Collections.unmodifiableList(
+						theEvaluationContext.resolveConstant(appContext, name, beforeContext).stream()
+								.map(Base.class::cast)
+								.collect(Collectors.toList()));
 			}
 
 			@Override

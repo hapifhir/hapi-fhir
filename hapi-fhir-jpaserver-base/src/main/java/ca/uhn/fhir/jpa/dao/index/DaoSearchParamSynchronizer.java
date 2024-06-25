@@ -26,7 +26,9 @@ import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedComboStringUniqueDao;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndex;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
+import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.util.AddRemoveCount;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
@@ -35,11 +37,14 @@ import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.PersistenceContextType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -153,6 +158,7 @@ public class DaoSearchParamSynchronizer {
 		}
 
 		tryToReuseIndexEntities(paramsToRemove, paramsToAdd);
+		updateExistingParamsIfRequired(theExistingParams, paramsToAdd, newParams, paramsToRemove);
 
 		for (T next : paramsToRemove) {
 			if (!myEntityManager.contains(next)) {
@@ -171,6 +177,62 @@ public class DaoSearchParamSynchronizer {
 		// TODO:  are there any unintended consequences to fixing this bug?
 		theAddRemoveCount.addToAddCount(paramsToAdd.size());
 		theAddRemoveCount.addToRemoveCount(paramsToRemove.size());
+	}
+
+	/**
+	 * <p>
+	 * This method performs an update of Search Parameter's fields in the case of
+	 * <code>$reindex</code> or update operation by:
+	 * 1. Marking existing entities for updating to apply index storage optimization,
+	 * if it is enabled (disabled by default).
+	 * 2. Recovering <code>SP_NAME</code>, <code>RES_TYPE</code> values of Search Parameter's fields
+	 * for existing entities in case if index storage optimization is disabled (but was enabled previously).
+	 * </p>
+	 * For details, see: {@link StorageSettings#isIndexStorageOptimized()}
+	 */
+	private <T extends BaseResourceIndex> void updateExistingParamsIfRequired(
+			Collection<T> theExistingParams,
+			List<T> theParamsToAdd,
+			Collection<T> theNewParams,
+			List<T> theParamsToRemove) {
+
+		theExistingParams.stream()
+				.filter(BaseResourceIndexedSearchParam.class::isInstance)
+				.map(BaseResourceIndexedSearchParam.class::cast)
+				.filter(this::isSearchParameterUpdateRequired)
+				.filter(sp -> !theParamsToAdd.contains(sp))
+				.filter(sp -> !theParamsToRemove.contains(sp))
+				.forEach(sp -> {
+					// force hibernate to update Search Parameter entity by resetting SP_UPDATED value
+					sp.setUpdated(new Date());
+					recoverExistingSearchParameterIfRequired(sp, theNewParams);
+					theParamsToAdd.add((T) sp);
+				});
+	}
+
+	/**
+	 * Search parameters should be updated after changing IndexStorageOptimized setting.
+	 * If IndexStorageOptimized is disabled (and was enabled previously), this method copies paramName
+	 * and Resource Type from extracted to existing search parameter.
+	 */
+	private <T extends BaseResourceIndex> void recoverExistingSearchParameterIfRequired(
+			BaseResourceIndexedSearchParam theSearchParamToRecover, Collection<T> theNewParams) {
+		if (!myStorageSettings.isIndexStorageOptimized()) {
+			theNewParams.stream()
+					.filter(BaseResourceIndexedSearchParam.class::isInstance)
+					.map(BaseResourceIndexedSearchParam.class::cast)
+					.filter(paramToAdd -> paramToAdd.equals(theSearchParamToRecover))
+					.findFirst()
+					.ifPresent(newParam -> {
+						theSearchParamToRecover.restoreParamName(newParam.getParamName());
+						theSearchParamToRecover.setResourceType(newParam.getResourceType());
+					});
+		}
+	}
+
+	private boolean isSearchParameterUpdateRequired(BaseResourceIndexedSearchParam theSearchParameter) {
+		return (myStorageSettings.isIndexStorageOptimized() && !theSearchParameter.isIndexStorageOptimized())
+				|| (!myStorageSettings.isIndexStorageOptimized() && theSearchParameter.isIndexStorageOptimized());
 	}
 
 	/**

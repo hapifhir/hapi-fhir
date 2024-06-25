@@ -504,7 +504,7 @@ The following columns are common to **all HFJ_SPIDX_xxx tables**.
             <td>SP_NAME</td>
             <td></td>
             <td>String</td>
-            <td></td>
+            <td>Nullable</td>
             <td>
                 This is the name of the search parameter being indexed. 
             </td>        
@@ -513,7 +513,7 @@ The following columns are common to **all HFJ_SPIDX_xxx tables**.
             <td>RES_TYPE</td>
             <td></td>
             <td>String</td>
-            <td></td>
+            <td>Nullable</td>
             <td>
                 This is the name of the resource being indexed.
             </td>        
