@@ -29,6 +29,8 @@ import com.google.common.hash.HashCode;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hasher;
 import com.google.common.hash.Hashing;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Utility class for calculating hashes of SearchParam entity fields.
@@ -51,12 +53,23 @@ public class SearchParamHash {
 	 * Applies a fast and consistent hashing algorithm to a set of strings
 	 */
 	public static long hashSearchParam(
-			PartitionSettings thePartitionSettings, RequestPartitionId theRequestPartitionId, String... theValues) {
+		@Nonnull PartitionSettings thePartitionSettings, @Nonnull RequestPartitionId theRequestPartitionId, @Nonnull String... theValues) {
+		return doHashSearchParam(thePartitionSettings, theRequestPartitionId, theValues);
+	}
+
+	/**
+	 * Applies a fast and consistent hashing algorithm to a set of strings
+	 */
+	public static long hashSearchParam(
+		@Nonnull String... theValues) {
+		return doHashSearchParam(null, null, theValues);
+	}
+
+	private static long doHashSearchParam(@Nullable PartitionSettings thePartitionSettings, @Nullable RequestPartitionId theRequestPartitionId, @Nonnull String[] theValues) {
 		Hasher hasher = HASH_FUNCTION.newHasher();
 
-		if (thePartitionSettings.isPartitioningEnabled()
-				&& thePartitionSettings.isIncludePartitionInSearchHashes()
-				&& theRequestPartitionId != null) {
+		if (thePartitionSettings != null && theRequestPartitionId != null && thePartitionSettings.isPartitioningEnabled()
+				&& thePartitionSettings.isIncludePartitionInSearchHashes()) {
 			if (theRequestPartitionId.getPartitionIds().size() > 1) {
 				throw new InternalErrorException(Msg.code(1527)
 						+ "Can not search multiple partitions when partitions are included in search hashes");

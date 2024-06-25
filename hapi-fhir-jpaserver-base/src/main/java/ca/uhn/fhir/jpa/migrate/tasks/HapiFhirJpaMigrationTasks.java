@@ -411,20 +411,20 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
          */
         {
             version.onTable("HFJ_IDX_CMB_TOK_NU")
-            .addIndex("20240617.1", "IDX_IDXCMBTOKNU_HASHC")
+            .addIndex("20240625.10", "IDX_IDXCMBTOKNU_HASHC")
             .unique(false)
             .withColumns("HASH_COMPLETE", "RES_ID", "PARTITION_ID");
             version.onTable("HFJ_IDX_CMP_STRING_UNIQ")
-            .addColumn("20240617.2", "HASH_COMPLETE")
+            .addColumn("20240625.20", "HASH_COMPLETE")
             .nullable()
             .type(ColumnTypeEnum.LONG);
             version.onTable("HFJ_IDX_CMP_STRING_UNIQ")
-            .addColumn("20240617.3", "HASH_COMPLETE_2")
+            .addColumn("20240625.30", "HASH_COMPLETE_2")
             .nullable()
             .type(ColumnTypeEnum.LONG);
             version.onTable("HFJ_IDX_CMP_STRING_UNIQ")
             .addTask(
-                     new CalculateHashesTask(VersionEnum.V7_4_0, "20240617.4") {
+                     new CalculateHashesTask(VersionEnum.V7_4_0, "20240625.40") {
                 @Override
                 protected boolean shouldSkipTask() {
                     return false;

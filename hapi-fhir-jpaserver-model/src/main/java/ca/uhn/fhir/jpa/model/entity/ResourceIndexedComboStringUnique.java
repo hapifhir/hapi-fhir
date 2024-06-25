@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
+import ca.uhn.fhir.jpa.model.util.SearchParamHash;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ForeignKey;
@@ -37,8 +38,6 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IIdType;
-
-import static ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam.hash;
 
 /**
  * NOTE ON LIMITATIONS HERE
@@ -238,7 +237,7 @@ public class ResourceIndexedComboStringUnique extends BaseResourceIndexedCombo
 	}
 
 	public static long calculateHashComplete(String theQueryString) {
-		return hash(theQueryString);
+		return SearchParamHash.hashSearchParam(theQueryString);
 	}
 
 	public static long calculateHashComplete2(String theQueryString) {

@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.util.SearchParamHash;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ForeignKey;
@@ -210,6 +211,6 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndexedCombo
 	public static long calculateHashComplete(
 			PartitionSettings partitionSettings, PartitionablePartitionId thePartitionId, String queryString) {
 		RequestPartitionId requestPartitionId = PartitionablePartitionId.toRequestPartitionId(thePartitionId);
-		return hash(partitionSettings, requestPartitionId, queryString);
+		return SearchParamHash.hashSearchParam(partitionSettings, requestPartitionId, queryString);
 	}
 }
