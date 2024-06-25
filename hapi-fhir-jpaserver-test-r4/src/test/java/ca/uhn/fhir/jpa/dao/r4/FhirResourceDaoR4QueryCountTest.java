@@ -154,7 +154,6 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	@Autowired
 	protected SubscriptionTestUtil mySubscriptionTestUtil;
 
-
 	@AfterEach
 	public void afterResetDao() {
 		mySubscriptionSettings.clearSupportedSubscriptionTypesForUnitTest();
