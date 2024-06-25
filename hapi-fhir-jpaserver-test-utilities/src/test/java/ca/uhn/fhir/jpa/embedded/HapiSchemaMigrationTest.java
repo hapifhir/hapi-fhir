@@ -214,7 +214,6 @@ public class HapiSchemaMigrationTest {
 			METADATA_DATA_TYPE, theDataType,
 			METADATA_IS_NULLABLE, theNullable,
 			METADATA_DEFAULT_VALUE, Optional.ofNullable(theDefaultValue)
-					.map(defaultValueNonNull -> defaultValueNonNull.equals("((-1))") ? "-1" : defaultValueNonNull) // MSSQL returns "((-1))" for default value
 				.orElse(NULL_PLACEHOLDER));
 	}
 
@@ -238,6 +237,7 @@ public class HapiSchemaMigrationTest {
 
 	private void extractAndAddToMap(ResultSet theResultSet, Map<String,String> theMap, String theColumn) throws SQLException {
 		theMap.put(theColumn, Optional.ofNullable(theResultSet.getString(theColumn))
+			.map(defaultValueNonNull -> defaultValueNonNull.equals("((-1))") ? "-1" : defaultValueNonNull) // MSSQL returns "((-1))" for default value
 			.map(String::toUpperCase)
 			.orElse(NULL_PLACEHOLDER));
 	}
