@@ -17,6 +17,7 @@ public class CdsHooksExtensionDeserializer extends StdDeserializer<CdsHooksExten
 
 	private final CdsServiceRegistryImpl myCdsServiceRegistry;
 	private final ObjectMapper myObjectMapper;
+
 	public CdsHooksExtensionDeserializer(CdsServiceRegistryImpl theCdsServiceRegistry, ObjectMapper theObjectMapper) {
 		super(CdsHooksExtension.class);
 		myCdsServiceRegistry = theCdsServiceRegistry;
@@ -26,14 +27,16 @@ public class CdsHooksExtensionDeserializer extends StdDeserializer<CdsHooksExten
 	@Override
 	public CdsHooksExtension deserialize(JsonParser theJsonParser, DeserializationContext theDeserializationContext)
 			throws IOException {
-//		CdsServiceJson cdsServiceJson = myCdsServiceRegistry.getCdsService();
-//		cdsServiceJson.
-//		new ObjectMapper().readValue(theJsonParser.getCodec().readTree(theJsonParser).toString(), MyRequestExtension.class)
+		//		CdsServiceJson cdsServiceJson = myCdsServiceRegistry.getCdsService();
+		//		cdsServiceJson.
+		//		new ObjectMapper().readValue(theJsonParser.getCodec().readTree(theJsonParser).toString(),
+		// MyRequestExtension.class)
 		JsonNode rootNode = theJsonParser.getCodec().readTree(theJsonParser);
 		/**
 		 * getParent(hook)
 		 */
-		HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+		HttpServletRequest request =
+				((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
 		final String serviceId = request.getRequestURI().replace("/cds-services/", "");
 		return new CdsHooksExtension();
 	}

@@ -67,8 +67,7 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 		myCdsPrefetchSvc = theCdsPrefetchSvc;
 		myObjectMapper = theObjectMapper;
 		SimpleModule module = new SimpleModule();
-		module.addDeserializer(CdsHooksExtension.class,
-			new CdsHooksExtensionDeserializer(this, myObjectMapper));
+		module.addDeserializer(CdsHooksExtension.class, new CdsHooksExtensionDeserializer(this, myObjectMapper));
 		myObjectMapper.registerModule(module);
 		myCdsCrServiceFactory = theCdsCrServiceFactory;
 		myCrDiscoveryServiceFactory = theCrDiscoveryServiceFactory;
