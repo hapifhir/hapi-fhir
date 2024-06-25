@@ -3,6 +3,8 @@ package ca.uhn.fhir.jpa.provider.r4;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.i18n.HapiLocalizer;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
@@ -44,12 +46,16 @@ import ca.uhn.fhir.rest.gclient.NumberClientParam;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
+import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.rest.server.util.ICachedSearchDetails;
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.TestUtil;
@@ -198,15 +204,12 @@ import static ca.uhn.fhir.util.TestUtil.sleepAtLeast;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-
 import static org.mockito.Mockito.when;
 
 @SuppressWarnings("Duplicates")
@@ -2117,6 +2120,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@SuppressWarnings("unused")
 	@Test
 	public void testFullTextSearch() throws Exception {
+		IParser parser = myFhirContext.newJsonParser();
+
 		Observation obs1 = new Observation();
 		obs1.getCode().setText("Systolic Blood Pressure");
 		obs1.setStatus(ObservationStatus.FINAL);
@@ -2128,13 +2133,21 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		obs2.setStatus(ObservationStatus.FINAL);
 		obs2.setValue(new Quantity(81));
 		IIdType id2 = myObservationDao.create(obs2, mySrd).getId().toUnqualifiedVersionless();
+		obs2.setId(id2);
+
+		myStorageSettings.setAdvancedHSearchIndexing(true);
 
 		HttpGet get = new HttpGet(myServerBase + "/Observation?_content=systolic&_pretty=true");
+		get.addHeader("Content-Type", "application/json");
 		try (CloseableHttpResponse response = ourHttpClient.execute(get)) {
 			assertEquals(200, response.getStatusLine().getStatusCode());
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseString);
-			assertThat(responseString).contains(id1.getIdPart());
+			Bundle bundle = parser.parseResource(Bundle.class, responseString);
+			assertEquals(1, bundle.getTotal());
+			Resource resource = bundle.getEntry().get(0).getResource();
+			assertEquals("Observation", resource.fhirType());
+			assertEquals(id1.getIdPart(), resource.getIdPart());
 		}
 	}
 
@@ -5325,6 +5338,40 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
+	public void testSearchWithParameterAddedInInterceptor() {
+		Object interceptor = new Object() {
+			@Hook(Pointcut.STORAGE_PRESEARCH_REGISTERED)
+			public void storagePreSearchRegistered(
+					ICachedSearchDetails theCachedSearchDetails,
+					RequestDetails theRequestDetails,
+					ServletRequestDetails theServletRequestDetails,
+					SearchParameterMap theSearchParameterMap) {
+				theSearchParameterMap.add("_security", new TokenParam("http://system", "security1").setModifier(TokenParamModifier.NOT));
+			}
+		};
+		myInterceptorRegistry.registerInterceptor(interceptor);
+
+		try {
+			final Patient patient1 = new Patient().setActive(true);
+			patient1.getMeta().addSecurity("http://system", "security1", "Tag 1");
+			MethodOutcome outcome1 = myPatientDao.create(patient1, mySrd);
+			assertTrue(outcome1.getCreated());
+
+			final Patient patient2 = new Patient().setActive(true);
+			patient2.getMeta().addSecurity("http://system", "security2", "Tag 2");
+			MethodOutcome outcome2 = myPatientDao.create(patient2, mySrd);
+			assertTrue(outcome2.getCreated());
+			String idForPatient2 = outcome2.getId().toUnqualifiedVersionless().getValue();
+
+			IBaseBundle bundle = myClient.search().forResource("Patient").execute();
+			List<String> ids = toUnqualifiedVersionlessIdValues(bundle);
+			assertThat(ids).containsExactly(idForPatient2);
+		} finally {
+			myInterceptorRegistry.unregisterInterceptor(interceptor);
+		}
+	}
+
+	@Test
 	public void testSelfReferentialInclude() {
 		Location loc1 = new Location();
 		loc1.setName("loc1");
@@ -7106,6 +7153,20 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	private String toStr(Date theDate) {
 		return new InstantDt(theDate).getValueAsString();
+	}
+
+	@Nested
+	public class IndexStorageOptimizedMissingSearchParameterTests extends MissingSearchParameterTests {
+		@BeforeEach
+		public void init() {
+			super.init();
+			myStorageSettings.setIndexStorageOptimized(true);
+		}
+
+		@AfterEach
+		public void cleanUp() {
+			myStorageSettings.setIndexStorageOptimized(false);
+		}
 	}
 
 	@Nested

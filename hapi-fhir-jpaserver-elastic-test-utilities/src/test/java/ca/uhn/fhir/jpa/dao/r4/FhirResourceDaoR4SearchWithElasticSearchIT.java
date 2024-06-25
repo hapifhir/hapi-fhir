@@ -26,6 +26,7 @@ import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.search.BaseSourceSearchParameterTestCases;
 import ca.uhn.fhir.jpa.search.CompositeSearchParameterTestCases;
 import ca.uhn.fhir.jpa.search.QuantitySearchParameterTestCases;
+import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
@@ -54,6 +55,9 @@ import ca.uhn.fhir.test.utilities.LogbackLevelOverrideExtension;
 import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
+import ca.uhn.test.util.LogbackTestExtension;
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.spi.ILoggingEvent;
 import jakarta.annotation.Nonnull;
 import jakarta.persistence.EntityManager;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
@@ -118,6 +122,7 @@ import static ca.uhn.fhir.jpa.model.util.UcumServiceUtil.UCUM_CODESYSTEM_URL;
 import static ca.uhn.fhir.rest.api.Constants.CHARSET_UTF8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -168,6 +173,9 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 	TestDaoSearch myTestDaoSearch;
 	@RegisterExtension
 	LogbackLevelOverrideExtension myLogbackLevelOverrideExtension = new LogbackLevelOverrideExtension();
+
+	@RegisterExtension
+	LogbackTestExtension myLogbackTestExtension = new LogbackTestExtension();
 	@Autowired
 	@Qualifier("myCodeSystemDaoR4")
 	private IFhirResourceDao<CodeSystem> myCodeSystemDao;
@@ -742,19 +750,21 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 	 */
 	@Test
 	public void testDirectPathWholeResourceNotIndexedWorks() {
+		// setup
+		myLogbackLevelOverrideExtension.setLogLevel(SearchBuilder.class, Level.WARN);
 		IIdType id1 = myTestDataBuilder.createObservation(List.of(myTestDataBuilder.withObservationCode("http://example.com/", "theCode")));
 
 		// set it after creating resource, so search doesn't find it in the index
 		myStorageSettings.setStoreResourceInHSearchIndex(true);
 
-		myCaptureQueriesListener.clear();
-
-		List<IBaseResource> result = searchForFastResources("Observation?code=theCode");
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		List<IBaseResource> result = searchForFastResources("Observation?code=theCode&_count=10&_total=accurate");
 
 		assertThat(result).hasSize(1);
 		assertEquals(((Observation) result.get(0)).getIdElement().getIdPart(), id1.getIdPart());
-		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).as("JPA search for IDs and for resources").isEqualTo(2);
+
+		List<ILoggingEvent> events = myLogbackTestExtension.filterLoggingEventsWithPredicate(e -> e.getLevel() == Level.WARN);
+		assertFalse(events.isEmpty());
+		assertTrue(events.stream().anyMatch(e -> e.getFormattedMessage().contains("Some resources were not found in index. Make sure all resources were indexed. Resorting to database search.")));
 
 		// restore changed property
 		JpaStorageSettings defaultConfig = new JpaStorageSettings();

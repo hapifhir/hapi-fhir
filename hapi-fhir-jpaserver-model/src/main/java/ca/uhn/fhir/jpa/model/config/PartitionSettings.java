@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.jpa.model.config;
 
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
+
 /**
  * @since 5.0.0
  */
@@ -30,6 +32,7 @@ public class PartitionSettings {
 	private boolean myUnnamedPartitionMode;
 	private Integer myDefaultPartitionId;
 	private boolean myAlwaysOpenNewTransactionForDifferentPartition;
+	private boolean myConditionalCreateDuplicateIdentifiersEnabled = false;
 
 	/**
 	 * Should we always open a new database transaction if the partition context changes
@@ -58,6 +61,9 @@ public class PartitionSettings {
 	 * <p>
 	 * This setting has no effect if partitioning is not enabled via {@link #isPartitioningEnabled()}.
 	 * </p>
+	 * <p>
+	 * If {@link StorageSettings#isIndexStorageOptimized()} is enabled this setting should be set to <code>false</code>.
+	 * </p>
 	 */
 	public boolean isIncludePartitionInSearchHashes() {
 		return myIncludePartitionInSearchHashes;
@@ -70,6 +76,9 @@ public class PartitionSettings {
 	 * better when using native database partitioning features.
 	 * <p>
 	 * This setting has no effect if partitioning is not enabled via {@link #isPartitioningEnabled()}.
+	 * </p>
+	 * <p>
+	 * If {@link StorageSettings#isIndexStorageOptimized()} is enabled this setting should be set to <code>false</code>.
 	 * </p>
 	 */
 	public PartitionSettings setIncludePartitionInSearchHashes(boolean theIncludePartitionInSearchHashes) {
@@ -161,6 +170,15 @@ public class PartitionSettings {
 	public boolean isAllowUnqualifiedCrossPartitionReference() {
 		return myAllowReferencesAcrossPartitions.equals(
 				PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
+	}
+
+	public boolean isConditionalCreateDuplicateIdentifiersEnabled() {
+		return myConditionalCreateDuplicateIdentifiersEnabled;
+	}
+
+	public void setConditionalCreateDuplicateIdentifiersEnabled(
+			boolean theConditionalCreateDuplicateIdentifiersEnabled) {
+		myConditionalCreateDuplicateIdentifiersEnabled = theConditionalCreateDuplicateIdentifiersEnabled;
 	}
 
 	public enum CrossPartitionReferenceMode {

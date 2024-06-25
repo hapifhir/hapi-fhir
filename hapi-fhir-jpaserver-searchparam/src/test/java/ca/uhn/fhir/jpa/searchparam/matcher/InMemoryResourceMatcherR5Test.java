@@ -34,6 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.Duration;
@@ -51,6 +52,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
+@ContextConfiguration(classes = {InMemoryResourceMatcherR5Test.SpringConfig.class})
 public class InMemoryResourceMatcherR5Test {
 	public static final String OBSERVATION_DATE = "1970-10-17";
 	public static final String OBSERVATION_DATETIME = OBSERVATION_DATE + "T01:00:00-08:30";
@@ -76,6 +78,8 @@ public class InMemoryResourceMatcherR5Test {
 	IndexedSearchParamExtractor myIndexedSearchParamExtractor;
 	@Autowired
 	private InMemoryResourceMatcher myInMemoryResourceMatcher;
+	@Autowired
+	StorageSettings myStorageSettings;
 	private Observation myObservation;
 	private ResourceIndexedSearchParams mySearchParams;
 
@@ -414,17 +418,17 @@ public class InMemoryResourceMatcherR5Test {
 	}
 
 	@Nonnull
-	private ResourceIndexedSearchParamDate extractEffectiveDateParam(Observation theObservation) {
+	protected ResourceIndexedSearchParamDate extractEffectiveDateParam(Observation theObservation) {
 		BaseDateTimeType dateValue = (BaseDateTimeType) theObservation.getEffective();
-		return new ResourceIndexedSearchParamDate(new PartitionSettings(), "Patient", "date", dateValue.getValue(), dateValue.getValueAsString(), dateValue.getValue(), dateValue.getValueAsString(), dateValue.getValueAsString());
+		return new ResourceIndexedSearchParamDate(new PartitionSettings(), "Observation", "date", dateValue.getValue(), dateValue.getValueAsString(), dateValue.getValue(), dateValue.getValueAsString(), dateValue.getValueAsString());
 	}
 
-	private ResourceIndexedSearchParamToken extractCodeTokenParam(Observation theObservation) {
+	protected ResourceIndexedSearchParamToken extractCodeTokenParam(Observation theObservation) {
 		Coding coding = theObservation.getCode().getCodingFirstRep();
 		return new ResourceIndexedSearchParamToken(new PartitionSettings(), "Observation", "code", coding.getSystem(), coding.getCode());
 	}
 
-	private ResourceIndexedSearchParamUri extractSourceUriParam(Observation theObservation) {
+	protected ResourceIndexedSearchParamUri extractSourceUriParam(Observation theObservation) {
 		String source = theObservation.getMeta().getSource();
 		return new ResourceIndexedSearchParamUri(new PartitionSettings(), "Observation", "_source", source);
 	}

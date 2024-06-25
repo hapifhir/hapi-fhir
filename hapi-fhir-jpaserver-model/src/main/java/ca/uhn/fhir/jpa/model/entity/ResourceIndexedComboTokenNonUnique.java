@@ -39,7 +39,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-import static ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam.hash;
+import static ca.uhn.fhir.jpa.model.util.SearchParamHash.hashSearchParam;
 
 @Entity
 @Table(
@@ -206,12 +206,12 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndex
 	public static long calculateHashComplete(
 			PartitionSettings partitionSettings, PartitionablePartitionId thePartitionId, String queryString) {
 		RequestPartitionId requestPartitionId = PartitionablePartitionId.toRequestPartitionId(thePartitionId);
-		return hash(partitionSettings, requestPartitionId, queryString);
+		return hashSearchParam(partitionSettings, requestPartitionId, queryString);
 	}
 
 	public static long calculateHashComplete(
 			PartitionSettings partitionSettings, RequestPartitionId partitionId, String queryString) {
-		return hash(partitionSettings, partitionId, queryString);
+		return hashSearchParam(partitionSettings, partitionId, queryString);
 	}
 
 	/**

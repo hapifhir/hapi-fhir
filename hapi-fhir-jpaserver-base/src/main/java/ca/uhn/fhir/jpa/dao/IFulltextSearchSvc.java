@@ -32,6 +32,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import java.util.Collection;
 import java.util.List;
 
+@SuppressWarnings({"rawtypes"})
 public interface IFulltextSearchSvc {
 
 	/**
@@ -79,11 +80,18 @@ public interface IFulltextSearchSvc {
 	ExtendedHSearchIndexData extractLuceneIndexData(
 			IBaseResource theResource, ResourceIndexedSearchParams theNewParams);
 
-	boolean supportsSomeOf(SearchParameterMap myParams);
+	/**
+	 * Returns true if the parameter map can be handled for hibernate search.
+	 * We have to filter out any queries that might use search params
+	 * we only know how to handle in JPA.
+	 * -
+	 * See {@link ca.uhn.fhir.jpa.dao.search.ExtendedHSearchSearchBuilder#addAndConsumeAdvancedQueryClauses}
+	 */
+	boolean canUseHibernateSearch(String theResourceType, SearchParameterMap theParameterMap);
 
 	/**
 	 * Re-publish the resource to the full-text index.
-	 *
+	 * -
 	 * During update, hibernate search only republishes the entity if it has changed.
 	 * During $reindex, we want to force the re-index.
 	 *

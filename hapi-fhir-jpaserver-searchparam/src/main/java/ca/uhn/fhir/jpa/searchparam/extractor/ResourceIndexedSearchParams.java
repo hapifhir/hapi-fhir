@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.searchparam.extractor;
 
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
@@ -37,6 +38,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.SearchParamPresentEntity;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
+import ca.uhn.fhir.jpa.model.util.SearchParamHash;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.jpa.searchparam.util.RuntimeSearchParamHelper;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -294,7 +296,7 @@ public final class ResourceIndexedSearchParams {
 		}
 
 		for (BaseResourceIndexedSearchParam nextParam : resourceParams) {
-			if (nextParam.getParamName().equalsIgnoreCase(theParamName)) {
+			if (isMatchSearchParam(theStorageSettings, theResourceName, theParamName, nextParam)) {
 				if (nextParam.matches(value)) {
 					return true;
 				}
@@ -302,6 +304,21 @@ public final class ResourceIndexedSearchParams {
 		}
 
 		return false;
+	}
+
+	public static boolean isMatchSearchParam(
+			StorageSettings theStorageSettings,
+			String theResourceName,
+			String theParamName,
+			BaseResourceIndexedSearchParam theIndexedSearchParam) {
+
+		if (theStorageSettings.isIndexStorageOptimized()) {
+			Long hashIdentity = SearchParamHash.hashSearchParam(
+					new PartitionSettings(), RequestPartitionId.defaultPartition(), theResourceName, theParamName);
+			return theIndexedSearchParam.getHashIdentity().equals(hashIdentity);
+		} else {
+			return theIndexedSearchParam.getParamName().equalsIgnoreCase(theParamName);
+		}
 	}
 
 	/**

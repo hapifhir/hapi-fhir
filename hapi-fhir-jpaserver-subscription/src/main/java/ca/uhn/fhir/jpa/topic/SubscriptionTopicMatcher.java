@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.topic;
 
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
+import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.SubscriptionTopic;
 
@@ -29,10 +30,15 @@ import java.util.List;
 public class SubscriptionTopicMatcher {
 	private final SubscriptionTopicSupport mySubscriptionTopicSupport;
 	private final SubscriptionTopic myTopic;
+	private final MemoryCacheService myMemoryCacheService;
 
-	public SubscriptionTopicMatcher(SubscriptionTopicSupport theSubscriptionTopicSupport, SubscriptionTopic theTopic) {
+	public SubscriptionTopicMatcher(
+			SubscriptionTopicSupport theSubscriptionTopicSupport,
+			SubscriptionTopic theTopic,
+			MemoryCacheService memoryCacheService) {
 		mySubscriptionTopicSupport = theSubscriptionTopicSupport;
 		myTopic = theTopic;
+		myMemoryCacheService = memoryCacheService;
 	}
 
 	public InMemoryMatchResult match(ResourceModifiedMessage theMsg) {
@@ -43,7 +49,7 @@ public class SubscriptionTopicMatcher {
 		for (SubscriptionTopic.SubscriptionTopicResourceTriggerComponent next : triggers) {
 			if (resourceName.equals(next.getResource())) {
 				SubscriptionTriggerMatcher matcher =
-						new SubscriptionTriggerMatcher(mySubscriptionTopicSupport, theMsg, next);
+						new SubscriptionTriggerMatcher(mySubscriptionTopicSupport, theMsg, next, myMemoryCacheService);
 				InMemoryMatchResult result = matcher.match();
 				if (result.matched()) {
 					// as soon as one trigger matches, we're done

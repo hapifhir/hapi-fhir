@@ -4,6 +4,7 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndex;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamNumber;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.util.AddRemoveCount;
 import jakarta.persistence.EntityManager;
@@ -61,6 +62,7 @@ public class DaoSearchParamSynchronizerTest {
 		THE_SEARCH_PARAM_NUMBER.setResource(resourceTable);
 
 		subject.setEntityManager(entityManager);
+		subject.setStorageSettings(new StorageSettings());
 	}
 
 	@Test

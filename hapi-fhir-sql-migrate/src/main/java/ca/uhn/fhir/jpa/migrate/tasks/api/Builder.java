@@ -26,6 +26,7 @@ import ca.uhn.fhir.jpa.migrate.taskdef.AddColumnTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.AddForeignKeyTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.AddIdGeneratorTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.AddIndexTask;
+import ca.uhn.fhir.jpa.migrate.taskdef.AddPrimaryKeyTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.AddTableByColumnTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.AddTableRawSqlTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTableTask;
@@ -35,6 +36,7 @@ import ca.uhn.fhir.jpa.migrate.taskdef.DropColumnTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.DropForeignKeyTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.DropIdGeneratorTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.DropIndexTask;
+import ca.uhn.fhir.jpa.migrate.taskdef.DropPrimaryKeyTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.DropTableTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.ExecuteRawSqlTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.ExecuteTaskPrecondition;
@@ -47,6 +49,7 @@ import ca.uhn.fhir.jpa.migrate.taskdef.NopTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.RenameColumnTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.RenameIndexTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.RenameTableTask;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
 import org.intellij.lang.annotations.Language;
 import org.slf4j.Logger;
@@ -260,7 +263,13 @@ public class Builder {
 		}
 
 		public BuilderWithTableName.BuilderAddColumnWithName addColumn(String theVersion, String theColumnName) {
-			return new BuilderWithTableName.BuilderAddColumnWithName(myRelease, theVersion, theColumnName, this);
+			return new BuilderWithTableName.BuilderAddColumnWithName(myRelease, theVersion, theColumnName, null, this);
+		}
+
+		public BuilderWithTableName.BuilderAddColumnWithName addColumn(
+				String theVersion, String theColumnName, Object theDefaultValue) {
+			return new BuilderWithTableName.BuilderAddColumnWithName(
+					myRelease, theVersion, theColumnName, theDefaultValue, this);
 		}
 
 		public BuilderCompleteTask dropColumn(String theVersion, String theColumnName) {
@@ -317,6 +326,10 @@ public class Builder {
 			return Optional.ofNullable(myLastAddedTask);
 		}
 
+		public void addPrimaryKey(String theVersion, String... theColumnsInOrder) {
+			addTask(new AddPrimaryKeyTask(myRelease, theVersion, myTableName, theColumnsInOrder));
+		}
+
 		/**
 		 * @param theFkName          the name of the foreign key
 		 * @param theParentTableName the name of the table that exports the foreign key
@@ -362,6 +375,11 @@ public class Builder {
 			return new BuilderCompleteTask(task);
 		}
 
+		public void dropPrimaryKey(String theVersion) {
+			final DropPrimaryKeyTask task = new DropPrimaryKeyTask(myRelease, theVersion, myTableName);
+			addTask(task);
+		}
+
 		public class BuilderAddIndexWithName {
 			private final String myVersion;
 			private final String myIndexName;
@@ -397,6 +415,31 @@ public class Builder {
 					task.setIndexName(myIndexName);
 					task.setUnique(myUnique);
 					task.setColumns(theColumnNames);
+					task.setOnline(myOnline);
+					if (myIncludeColumns != null) {
+						task.setIncludeColumns(myIncludeColumns);
+					}
+					addTask(task);
+					return new BuilderCompleteTask(task);
+				}
+
+				/**
+				 * THis is strictly needed for SQL Server, as it will create filtered indexes on nullable columns, and we have to build a tail clause which matches what the SQL Server Hibernate dialect does.
+				 */
+				public BuilderCompleteTask withPossibleNullableColumns(ColumnAndNullable... theColumns) {
+					String[] columnNames = Arrays.stream(theColumns)
+							.map(ColumnAndNullable::getColumnName)
+							.toArray(String[]::new);
+					String[] nullableColumnNames = Arrays.stream(theColumns)
+							.filter(ColumnAndNullable::isNullable)
+							.map(ColumnAndNullable::getColumnName)
+							.toArray(String[]::new);
+					AddIndexTask task = new AddIndexTask(myRelease, myVersion);
+					task.setTableName(myTableName);
+					task.setIndexName(myIndexName);
+					task.setUnique(myUnique);
+					task.setColumns(columnNames);
+					task.setNullableColumns(nullableColumnNames);
 					task.setOnline(myOnline);
 					if (myIncludeColumns != null) {
 						task.setIncludeColumns(myIncludeColumns);
@@ -522,16 +565,22 @@ public class Builder {
 			private final String myRelease;
 			private final String myVersion;
 			private final String myColumnName;
+
+			@Nullable
+			private final Object myDefaultValue;
+
 			private final BaseMigrationTasks.IAcceptsTasks myTaskSink;
 
 			public BuilderAddColumnWithName(
 					String theRelease,
 					String theVersion,
 					String theColumnName,
+					@Nullable Object theDefaultValue,
 					BaseMigrationTasks.IAcceptsTasks theTaskSink) {
 				myRelease = theRelease;
 				myVersion = theVersion;
 				myColumnName = theColumnName;
+				myDefaultValue = theDefaultValue;
 				myTaskSink = theTaskSink;
 			}
 
@@ -568,6 +617,7 @@ public class Builder {
 					if (theLength != null) {
 						task.setColumnLength(theLength);
 					}
+					task.setDefaultValue(myDefaultValue);
 					myTaskSink.addTask(task);
 
 					return new BuilderCompleteTask(task);
@@ -694,7 +744,7 @@ public class Builder {
 		}
 
 		public BuilderAddColumnWithName addColumn(String theColumnName) {
-			return new BuilderAddColumnWithName(myRelease, myVersion, theColumnName, this);
+			return new BuilderAddColumnWithName(myRelease, myVersion, theColumnName, null, this);
 		}
 
 		@Override

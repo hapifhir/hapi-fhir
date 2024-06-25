@@ -1,9 +1,11 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
@@ -65,6 +67,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -79,6 +82,7 @@ import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
@@ -1335,6 +1339,62 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 			assertRemainingTasks();
 		}
 
+		@ParameterizedTest
+		@ValueSource(booleans = {true, false})
+		void conditionalCreateSameIdentifierCrossPartition(boolean theIsSearchUrlDuplicateAcrossPartitionsEnabled) {
+			myPartitionSettings.setPartitioningEnabled(true);
+			myPartitionSettings.setConditionalCreateDuplicateIdentifiersEnabled(theIsSearchUrlDuplicateAcrossPartitionsEnabled);
+
+			final PartitionEntity partitionEntity1 = new PartitionEntity();
+			partitionEntity1.setId(1);
+			partitionEntity1.setName("Partition-A");
+			myPartitionDao.save(partitionEntity1);
+
+			final PartitionEntity partitionEntity2 = new PartitionEntity();
+			partitionEntity2.setId(2);
+			partitionEntity2.setName("Partition-B");
+			myPartitionDao.save(partitionEntity2);
+
+			final BundleBuilder bundleBuilder = new BundleBuilder(myFhirContext);
+			final String matchUrl = "identifier=http://tempuri.org|1";
+			bundleBuilder.addTransactionCreateEntry(myTask1, "urn:uuid:59cda086-4763-4ef0-8e36-8c90058686ea")
+				.conditional(matchUrl);
+
+			final RequestPartitionId requestPartitionId1 = RequestPartitionId.fromPartitionId(1, LocalDate.now());
+			final RequestPartitionId requestPartitionId2 = RequestPartitionId.fromPartitionId(2, LocalDate.now());
+
+			final List<Bundle.BundleEntryComponent> responseEntries1 = sendBundleAndGetResponse(bundleBuilder.getBundle(), requestPartitionId1);
+			assertEquals(1, responseEntries1.size());
+			final Bundle.BundleEntryComponent bundleEntry1 = responseEntries1.get(0);
+			assertEquals("201 Created", bundleEntry1.getResponse().getStatus());
+
+			if (!theIsSearchUrlDuplicateAcrossPartitionsEnabled) {
+				final IBaseBundle bundle = bundleBuilder.getBundle();
+				assertThatThrownBy(() -> sendBundleAndGetResponse(bundle, requestPartitionId2)).isInstanceOf(ResourceVersionConflictException.class);
+				return;
+			}
+
+			final List<Bundle.BundleEntryComponent> responseEntries2 = sendBundleAndGetResponse(bundleBuilder.getBundle(), requestPartitionId2);
+			assertEquals(1, responseEntries2.size());
+			final Bundle.BundleEntryComponent bundleEntry2 = responseEntries1.get(0);
+			assertEquals("201 Created", bundleEntry2.getResponse().getStatus());
+
+			final List<ResourceSearchUrlEntity> allSearchUrls = myResourceSearchUrlDao.findAll();
+
+			assertThat(allSearchUrls).hasSize(2);
+
+			final String resolvedSearchUrl = "Task?identifier=http%3A%2F%2Ftempuri.org%7C1";
+
+			final ResourceSearchUrlEntity resourceSearchUrlEntity1 = allSearchUrls.get(0);
+			final ResourceSearchUrlEntity resourceSearchUrlEntity2 = allSearchUrls.get(1);
+
+			assertThat(resourceSearchUrlEntity1.getSearchUrl()).isEqualTo(resolvedSearchUrl);
+			assertThat(resourceSearchUrlEntity1.getPartitionId()).isEqualTo(partitionEntity1.getId());
+
+			assertThat(resourceSearchUrlEntity2.getSearchUrl()).isEqualTo(resolvedSearchUrl);
+			assertThat(resourceSearchUrlEntity2.getPartitionId()).isEqualTo(partitionEntity2.getId());
+		}
+
 		private void assertRemainingTasks(Task... theExpectedTasks) {
 			final List<ResourceSearchUrlEntity> searchUrlsPreDelete = myResourceSearchUrlDao.findAll();
 
@@ -1350,6 +1410,14 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 			final TransactionTemplate transactionTemplate = new TransactionTemplate(getTxManager());
 			transactionTemplate.execute(x -> myDeleteExpungeSvc.deleteExpunge(pidOrThrowException1, true, 10));
 		}
+	}
+
+	private List<Bundle.BundleEntryComponent> sendBundleAndGetResponse(IBaseBundle theRequestBundle, RequestPartitionId thePartitionId) {
+		assertThat(theRequestBundle).isInstanceOf(Bundle.class);
+
+		final SystemRequestDetails requestDetails = new SystemRequestDetails();
+		requestDetails.setRequestPartitionId(thePartitionId);
+		return mySystemDao.transaction(requestDetails, (Bundle)theRequestBundle).getEntry();
 	}
 
 	private List<Bundle.BundleEntryComponent> sendBundleAndGetResponse(IBaseBundle theRequestBundle) {
