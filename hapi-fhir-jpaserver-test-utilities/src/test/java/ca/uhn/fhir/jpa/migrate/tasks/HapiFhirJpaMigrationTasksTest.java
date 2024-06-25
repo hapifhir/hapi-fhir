@@ -9,6 +9,8 @@ import ca.uhn.fhir.util.VersionEnum;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.ColumnMapRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.support.AbstractLobCreatingPreparedStatementCallback;
@@ -31,6 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class HapiFhirJpaMigrationTasksTest {
 
+	private static final Logger ourLog = LoggerFactory.getLogger(HapiFhirJpaMigrationTasksTest.class);
 	private static final String MIGRATION_TABLE_NAME = "HFJ_FLY_MIGRATOR";
 	private final BasicDataSource myDataSource = newDataSource();
 	private final JdbcTemplate myJdbcTemplate = new JdbcTemplate(myDataSource);
@@ -76,9 +79,10 @@ public class HapiFhirJpaMigrationTasksTest {
 		 */
 
 		// Remove the task we're testing from the migrator history, so it runs again
-		assertEquals(1, myJdbcTemplate.update("DELETE FROM " + MIGRATION_TABLE_NAME + " WHERE version = ?", "7.4.0.20240617.4"));
+		assertEquals(1, myJdbcTemplate.update("DELETE FROM " + MIGRATION_TABLE_NAME + " WHERE version = ?", "7.4.0.20240625.40"));
 
 		// Run the migrator
+		ourLog.info("About to run the migrator a second time");
 		MigrationResult migrationResult = migrator.migrate();
 		assertEquals(1, migrationResult.succeededTasks.size());
 		assertEquals(0, migrationResult.failedTasks.size());

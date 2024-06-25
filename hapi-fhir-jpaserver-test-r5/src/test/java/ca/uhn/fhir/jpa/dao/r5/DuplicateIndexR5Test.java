@@ -13,12 +13,12 @@ import ca.uhn.fhir.util.HapiExtensions;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.BooleanType;
 import org.hl7.fhir.r5.model.Enumerations;
-import org.hl7.fhir.r5.model.SearchParameter;
+import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.Patient;
 import org.hl7.fhir.r5.model.Reference;
+import org.hl7.fhir.r5.model.SearchParameter;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class DuplicateIndexR5Test extends BaseJpaR5Test {
@@ -170,7 +170,7 @@ public class DuplicateIndexR5Test extends BaseJpaR5Test {
 			dupe0.setResource(param.getResource());
 			dupe0.setHashComplete(param.getHashComplete());
 			dupe0.setIndexString(param.getIndexString());
-			dupe0.setSearchParameterId(SEARCH_PARAMETER_PATIENT_NAMES_AND_GENDER);
+			dupe0.setSearchParameterId(new IdType(SEARCH_PARAMETER_PATIENT_NAMES_AND_GENDER));
 			dupe0.calculateHashes();
 			myResourceIndexedComboTokensNonUniqueDao.save(dupe0);
 
@@ -180,7 +180,7 @@ public class DuplicateIndexR5Test extends BaseJpaR5Test {
 			dupe1.setResource(param.getResource());
 			dupe1.setHashComplete(param.getHashComplete());
 			dupe1.setIndexString(param.getIndexString());
-			dupe1.setSearchParameterId(SEARCH_PARAMETER_PATIENT_NAMES_AND_GENDER);
+			dupe1.setSearchParameterId(new IdType(SEARCH_PARAMETER_PATIENT_NAMES_AND_GENDER));
 			dupe1.calculateHashes();
 			myResourceIndexedComboTokensNonUniqueDao.save(dupe1);
 		});
