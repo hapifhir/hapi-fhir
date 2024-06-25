@@ -88,9 +88,9 @@ public class CdsHooksConfig {
 	private RestfulServer myRestfulServer;
 
 	@Bean(name = CDS_HOOKS_OBJECT_MAPPER_FACTORY)
-	public ObjectMapper objectMapper(FhirContext theFhirContext, ICdsServiceRegistry theCdsServiceRegistry) {
+	public ObjectMapper objectMapper(FhirContext theFhirContext) {
 		// TODO: Fix me Adi
-		return new CdsHooksObjectMapperFactory(theFhirContext, (CdsServiceRegistryImpl) theCdsServiceRegistry).newMapper();
+		return new CdsHooksObjectMapperFactory(theFhirContext).newMapper();
 	}
 
 	@Bean

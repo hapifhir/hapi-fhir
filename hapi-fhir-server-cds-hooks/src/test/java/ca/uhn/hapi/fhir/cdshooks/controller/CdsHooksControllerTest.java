@@ -137,6 +137,7 @@ public class CdsHooksControllerTest {
 		CdsServiceRequestJson request = new CdsServiceRequestJson();
 		request.setExtension(myRequestExtension);
 		request.setFhirServer(TEST_FHIR_SERVER);
+		request.setHook(HelloWorldService.TEST_HOOK_UNIVERSE_ID);
 
 
 		String requestBody = myObjectMapper.writeValueAsString(request);

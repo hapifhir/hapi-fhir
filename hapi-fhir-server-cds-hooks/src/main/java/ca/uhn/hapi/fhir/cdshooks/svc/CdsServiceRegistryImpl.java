@@ -25,16 +25,19 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsMethod;
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsServiceMethod;
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsServiceRegistry;
+import ca.uhn.hapi.fhir.cdshooks.api.json.CdsHooksExtension;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceFeedbackJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceRequestJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServicesJson;
+import ca.uhn.hapi.fhir.cdshooks.serializer.CdsHooksExtensionDeserializer;
 import ca.uhn.hapi.fhir.cdshooks.svc.cr.ICdsCrServiceFactory;
 import ca.uhn.hapi.fhir.cdshooks.svc.cr.discovery.ICrDiscoveryServiceFactory;
 import ca.uhn.hapi.fhir.cdshooks.svc.prefetch.CdsPrefetchSvc;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.PostConstruct;
 import org.apache.commons.lang3.Validate;
@@ -63,6 +66,10 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 		myCdsHooksContextBooter = theCdsHooksContextBooter;
 		myCdsPrefetchSvc = theCdsPrefetchSvc;
 		myObjectMapper = theObjectMapper;
+		SimpleModule module = new SimpleModule();
+		module.addDeserializer(CdsHooksExtension.class,
+			new CdsHooksExtensionDeserializer(this, myObjectMapper));
+		myObjectMapper.registerModule(module);
 		myCdsCrServiceFactory = theCdsCrServiceFactory;
 		myCrDiscoveryServiceFactory = theCrDiscoveryServiceFactory;
 	}

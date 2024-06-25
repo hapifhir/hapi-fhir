@@ -22,12 +22,9 @@ package ca.uhn.hapi.fhir.cdshooks.module;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.serializer.FhirResourceDeserializer;
 import ca.uhn.fhir.serializer.FhirResourceSerializer;
-import ca.uhn.hapi.fhir.cdshooks.api.json.CdsHooksExtension;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceRequestContextJson;
-import ca.uhn.hapi.fhir.cdshooks.serializer.CdsHooksExtensionDeserializer;
 import ca.uhn.hapi.fhir.cdshooks.serializer.CdsServiceRequestContextDeserializer;
 import ca.uhn.hapi.fhir.cdshooks.serializer.CdsServiceRequestContextSerializer;
-import ca.uhn.hapi.fhir.cdshooks.svc.CdsServiceRegistryImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -35,11 +32,9 @@ import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 
 public class CdsHooksObjectMapperFactory extends ObjectMapper {
 	private final FhirContext myFhirContext;
-	private final CdsServiceRegistryImpl myCdsServiceRegistry;
 
-	public CdsHooksObjectMapperFactory(FhirContext theFhirContext,CdsServiceRegistryImpl theCdsServiceRegistry) {
+	public CdsHooksObjectMapperFactory(FhirContext theFhirContext) {
 		myFhirContext = theFhirContext;
-		myCdsServiceRegistry = theCdsServiceRegistry;
 	}
 
 	public ObjectMapper newMapper() {
@@ -50,8 +45,6 @@ public class CdsHooksObjectMapperFactory extends ObjectMapper {
 		module.addSerializer(new FhirResourceSerializer(myFhirContext));
 		module.addSerializer(new CdsServiceRequestContextSerializer(myFhirContext, retval));
 		module.addDeserializer(IBaseResource.class, new FhirResourceDeserializer(myFhirContext));
-		module.addDeserializer(CdsHooksExtension.class,
-			new CdsHooksExtensionDeserializer(myCdsServiceRegistry, retval));
 		module.addDeserializer(
 				CdsServiceRequestContextJson.class, new CdsServiceRequestContextDeserializer(myFhirContext, retval));
 		retval.registerModule(module);

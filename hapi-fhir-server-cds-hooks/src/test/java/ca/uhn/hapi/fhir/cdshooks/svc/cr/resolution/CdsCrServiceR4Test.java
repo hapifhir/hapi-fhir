@@ -35,7 +35,7 @@ public class CdsCrServiceR4Test extends BaseCrTest {
 	@BeforeEach
 	public void loadJson() throws IOException {
 		// TODO: Fix me Adi
-		myObjectMapper = new CdsHooksObjectMapperFactory(myFhirContext, null).newMapper();
+		myObjectMapper = new CdsHooksObjectMapperFactory(myFhirContext).newMapper();
 		myCdsConfigService = new CdsConfigServiceImpl(myFhirContext, myObjectMapper, myCdsCrSettings, null, null, null);
 	}
 

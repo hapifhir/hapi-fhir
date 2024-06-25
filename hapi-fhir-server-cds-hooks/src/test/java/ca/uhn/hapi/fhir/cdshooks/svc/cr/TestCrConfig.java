@@ -21,7 +21,7 @@ public class TestCrConfig {
 	@Bean(name = CDS_HOOKS_OBJECT_MAPPER_FACTORY)
 	public ObjectMapper objectMapper(FhirContext theFhirContext) {
 		// TODO: Fix me Adi
-		return new CdsHooksObjectMapperFactory(theFhirContext, null).newMapper();
+		return new CdsHooksObjectMapperFactory(theFhirContext).newMapper();
 	}
 
 	@Bean
