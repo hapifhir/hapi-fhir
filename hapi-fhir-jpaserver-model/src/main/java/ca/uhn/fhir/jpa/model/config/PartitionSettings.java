@@ -32,6 +32,7 @@ public class PartitionSettings {
 	private boolean myUnnamedPartitionMode;
 	private Integer myDefaultPartitionId;
 	private boolean myAlwaysOpenNewTransactionForDifferentPartition;
+	private boolean myConditionalCreateDuplicateIdentifiersEnabled = false;
 
 	/**
 	 * Should we always open a new database transaction if the partition context changes
@@ -169,6 +170,15 @@ public class PartitionSettings {
 	public boolean isAllowUnqualifiedCrossPartitionReference() {
 		return myAllowReferencesAcrossPartitions.equals(
 				PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
+	}
+
+	public boolean isConditionalCreateDuplicateIdentifiersEnabled() {
+		return myConditionalCreateDuplicateIdentifiersEnabled;
+	}
+
+	public void setConditionalCreateDuplicateIdentifiersEnabled(
+			boolean theConditionalCreateDuplicateIdentifiersEnabled) {
+		myConditionalCreateDuplicateIdentifiersEnabled = theConditionalCreateDuplicateIdentifiersEnabled;
 	}
 
 	public enum CrossPartitionReferenceMode {

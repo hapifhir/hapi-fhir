@@ -128,7 +128,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 	protected void init740() {
 		// Start of migrations from 7.2 to 7.4
 
-		Builder version = forVersion(VersionEnum.V7_4_0);
+		final Builder version = forVersion(VersionEnum.V7_4_0);
 
 		{
 			version.onTable("HFJ_RES_SEARCH_URL")
@@ -348,6 +348,30 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 					.nullable()
 					.withType(ColumnTypeEnum.STRING, 100)
 					.failureAllowed();
+
+			{
+				// Please see https://github.com/hapifhir/hapi-fhir/issues/6033 for why we're doing this
+				version.onTable("HFJ_RES_SEARCH_URL")
+						.addColumn("20240618.2", "PARTITION_ID", -1)
+						.nullable()
+						.type(ColumnTypeEnum.INT);
+
+				version.onTable("HFJ_RES_SEARCH_URL")
+						.addColumn("20240618.3", "PARTITION_DATE")
+						.nullable()
+						.type(ColumnTypeEnum.DATE_ONLY);
+
+				version.executeRawSql("20240618.4", "UPDATE HFJ_RES_SEARCH_URL SET PARTITION_ID = -1");
+
+				version.onTable("HFJ_RES_SEARCH_URL")
+						.modifyColumn("20240618.5", "PARTITION_ID")
+						.nonNullable()
+						.withType(ColumnTypeEnum.INT);
+
+				version.onTable("HFJ_RES_SEARCH_URL").dropPrimaryKey("20240618.6");
+
+				version.onTable("HFJ_RES_SEARCH_URL").addPrimaryKey("20240618.7", "RES_SEARCH_URL", "PARTITION_ID");
+			}
 		}
 
 		{
