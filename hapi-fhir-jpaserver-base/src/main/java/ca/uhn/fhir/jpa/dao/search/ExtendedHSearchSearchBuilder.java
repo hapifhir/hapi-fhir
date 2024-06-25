@@ -89,8 +89,7 @@ public class ExtendedHSearchSearchBuilder {
 	public boolean canUseHibernateSearch(
 			String theResourceType, SearchParameterMap myParams, ISearchParamRegistry theSearchParamRegistry) {
 		boolean canUseHibernate = true;
-		// TODO - when ew check here, we want to not refresh active search parameters
-		//		if (!myParams.isEmpty()) {
+
 		ResourceSearchParams resourceActiveSearchParams = theSearchParamRegistry.getActiveSearchParams(theResourceType);
 		for (String paramName : myParams.keySet()) {
 			// is this parameter supported?
@@ -111,7 +110,6 @@ public class ExtendedHSearchSearchBuilder {
 				return false;
 			}
 		}
-		//		}
 
 		return canUseHibernate;
 	}
