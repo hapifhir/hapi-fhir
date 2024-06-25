@@ -45,6 +45,7 @@ public interface ISearchParamRegistry {
 	 * Return false if cache has not been initialized.
 	 */
 	default boolean isInitialized() {
+		// default initialized to not break current implementers
 		return true;
 	}
 

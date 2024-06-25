@@ -96,9 +96,6 @@ public class GraphQLProviderWithIntrospection extends GraphQLProvider {
 		myDaoRegistry = theDaoRegistry;
 
 		myContext = VersionSpecificWorkerContextWrapper.newVersionSpecificWorkerContextWrapper(theValidationSupport);
-		// creating this will call myContext to search for StructureDefinitions
-		// which will (if AdvancedHSearchIndexing is enabled) try and force refresh
-		// the cache of resources, which will do a search manually, which will....
 		myGenerator = new GraphQLSchemaGenerator(myContext, VersionUtil.getVersion());
 	}
 
