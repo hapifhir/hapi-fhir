@@ -80,6 +80,7 @@ import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.jpa.interceptor.JpaConsentContextServices;
 import ca.uhn.fhir.jpa.interceptor.OverridePathBasedReferentialIntegrityForDeletesInterceptor;
 import ca.uhn.fhir.jpa.interceptor.validation.RepositoryValidatingRuleBuilder;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.packages.IHapiPackageCacheManager;
@@ -852,12 +853,14 @@ public class JpaConfig {
 			PersistenceContextProvider thePersistenceContextProvider,
 			IResourceSearchUrlDao theResourceSearchUrlDao,
 			MatchUrlService theMatchUrlService,
-			FhirContext theFhirContext) {
+			FhirContext theFhirContext,
+			PartitionSettings thePartitionSettings) {
 		return new ResourceSearchUrlSvc(
 				thePersistenceContextProvider.getEntityManager(),
 				theResourceSearchUrlDao,
 				theMatchUrlService,
-				theFhirContext);
+				theFhirContext,
+				thePartitionSettings);
 	}
 
 	@Bean

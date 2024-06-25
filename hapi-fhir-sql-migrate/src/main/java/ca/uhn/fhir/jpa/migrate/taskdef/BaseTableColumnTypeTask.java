@@ -19,17 +19,23 @@
  */
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 
 public abstract class BaseTableColumnTypeTask extends BaseTableColumnTask {
 	private ColumnTypeEnum myColumnType;
 	private Boolean myNullable;
 	private Long myColumnLength;
+
+	@Nullable
+	private Object myDefaultValue;
 
 	/**
 	 * Constructor
@@ -96,6 +102,21 @@ public abstract class BaseTableColumnTypeTask extends BaseTableColumnTask {
 
 	public BaseTableColumnTypeTask setColumnLength(long theColumnLength) {
 		myColumnLength = theColumnLength;
+		return this;
+	}
+
+	@Nullable
+	public Object getDefaultValue() {
+		return myDefaultValue;
+	}
+
+	@Nonnull
+	String buildString(@Nullable Object theValue, Function<Object, String> doIfNull, String theDefaultResult) {
+		return Optional.ofNullable(theValue).map(doIfNull).orElse(theDefaultResult);
+	}
+
+	public BaseTableColumnTypeTask setDefaultValue(Object theDefaultValue) {
+		myDefaultValue = theDefaultValue;
 		return this;
 	}
 
