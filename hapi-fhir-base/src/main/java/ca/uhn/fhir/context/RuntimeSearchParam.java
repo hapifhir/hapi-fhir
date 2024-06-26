@@ -58,6 +58,7 @@ public class RuntimeSearchParam {
 	private final Map<String, String> myUpliftRefchains = new HashMap<>();
 	private final ComboSearchParamType myComboSearchParamType;
 	private final List<Component> myComponents;
+	private final IIdType myIdUnqualifiedVersionless;
 	private IPhoneticEncoder myPhoneticEncoder;
 
 	/**
@@ -126,7 +127,8 @@ public class RuntimeSearchParam {
 			Collection<String> theBase) {
 		super();
 
-		myId = theId != null ? theId.toUnqualifiedVersionless() : null;
+		myId = theId;
+		myIdUnqualifiedVersionless = theId != null ? theId.toUnqualifiedVersionless() : null;
 		myUri = theUri;
 		myName = theName;
 		myDescription = theDescription;
@@ -212,6 +214,10 @@ public class RuntimeSearchParam {
 
 	public IIdType getId() {
 		return myId;
+	}
+
+	public IIdType getIdUnqualifiedVersionless() {
+		return myIdUnqualifiedVersionless;
 	}
 
 	public String getUri() {
