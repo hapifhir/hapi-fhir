@@ -258,33 +258,56 @@ public class ExtendedHSearchClauseBuilder {
 
 		if (isContainsSearch(theSearchParamName, stringAndOrTerms)) {
 			for (List<? extends IQueryParameterType> nextOrList : stringAndOrTerms) {
-				Set<String> orTerms =
-						TermHelper.makePrefixSearchTerm(extractOrStringParams(theSearchParamName, nextOrList));
-				for (String orTerm : orTerms) {
-					myRootClause.must(myRootContext.match().field(fieldName).matching(orTerm));
-				}
+				addPreciseMatchClauses(theSearchParamName, nextOrList, fieldName);
 			}
 		} else {
 			for (List<? extends IQueryParameterType> nextOrList : stringAndOrTerms) {
-				Set<String> orTerms =
-						TermHelper.makePrefixSearchTerm(extractOrStringParams(theSearchParamName, nextOrList));
-				ourLog.debug("addStringTextSearch {}, {}", theSearchParamName, orTerms);
-				if (!orTerms.isEmpty()) {
-					String query = orTerms.stream().map(s -> "( " + s + " )").collect(Collectors.joining(" | "));
-					myRootClause.must(myRootContext
-							.simpleQueryString()
-							.field(fieldName)
-							.matching(query)
-							.defaultOperator(
-									BooleanOperator
-											.AND)); // term value may contain multiple tokens.  Require all of them to
-					// be
-					// present.
-
-				} else {
-					ourLog.warn("No Terms found in query parameter {}", nextOrList);
-				}
+				addSimpleQueryMatchClauses(theSearchParamName, nextOrList, fieldName);
 			}
+		}
+	}
+
+	/**
+	 * This route is used for standard string searches, or `_text` or `_content`. For each term, we build a `simpleQueryString `element which allows hibernate search to search on normalized, analyzed, indexed fields.
+	 *
+	 * @param theSearchParamName The name of the search parameter
+	 * @param nextOrList the list of query parameters
+	 * @param fieldName  the field name in the index document to compare with.
+	 */
+	private void addSimpleQueryMatchClauses(String theSearchParamName, List<? extends IQueryParameterType> nextOrList, String fieldName) {
+		Set<String> orTerms =
+				TermHelper.makePrefixSearchTerm(extractOrStringParams(theSearchParamName, nextOrList));
+		ourLog.debug("addStringTextSearch {}, {}", theSearchParamName, orTerms);
+		if (!orTerms.isEmpty()) {
+			String query = orTerms.stream().map(s -> "( " + s + " )").collect(Collectors.joining(" | "));
+			myRootClause.must(myRootContext
+					.simpleQueryString()
+					.field(fieldName)
+					.matching(query)
+					.defaultOperator(
+							BooleanOperator
+									.AND)); // term value may contain multiple tokens.  Require all of them to
+			// be
+			// present.
+
+		} else {
+			ourLog.warn("No Terms found in query parameter {}", nextOrList);
+		}
+	}
+
+	/**
+	 * Note that this `match()` operation is different from out standard behaviour, which uses simpleQueryString(). This `match()` forces a precise string match, Whereas `simpleQueryString()` uses a more nebulous
+	 * and loose check against a collection of terms. We only use this when we see ` _text:contains=` or `_content:contains=` search.
+	 *
+	 * @param theSearchParamName the Name of the search parameter
+	 * @param nextOrList the list of query parameters
+	 * @param fieldName the field name in the index document to compare with.
+	 */
+	private void addPreciseMatchClauses(String theSearchParamName, List<? extends IQueryParameterType> nextOrList, String fieldName) {
+		Set<String> orTerms =
+				TermHelper.makePrefixSearchTerm(extractOrStringParams(theSearchParamName, nextOrList));
+		for (String orTerm : orTerms) {
+			myRootClause.must(myRootContext.match().field(fieldName).matching(orTerm));
 		}
 	}
 
