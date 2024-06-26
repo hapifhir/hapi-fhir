@@ -44,6 +44,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -172,6 +173,10 @@ public class Dstu3BundleFactory implements IVersionSpecificBundleFactory {
 			BundleEntrySearchModeEnum searchMode = ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.get(nextAsResource);
 			if (searchMode != null) {
 				entry.getSearch().getModeElement().setValueAsString(searchMode.getCode());
+			}
+			BigDecimal searchScore = ResourceMetadataKeyEnum.ENTRY_SEARCH_SCORE.get(nextAsResource);
+			if (searchScore != null) {
+				entry.getSearch().getScoreElement().setValue(searchScore);
 			}
 		}
 
