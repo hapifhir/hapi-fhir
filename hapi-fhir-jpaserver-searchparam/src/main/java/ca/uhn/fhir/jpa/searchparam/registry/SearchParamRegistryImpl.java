@@ -105,11 +105,6 @@ public class SearchParamRegistryImpl
 	private volatile RuntimeSearchParamCache myActiveSearchParams;
 
 	/**
-	 * We will keep track of if these parameters are initialized or not
-	 */
-	private boolean myIsInitialized;
-
-	/**
 	 * Constructor
 	 */
 	public SearchParamRegistryImpl() {
@@ -440,13 +435,13 @@ public class SearchParamRegistryImpl
 
 	@Override
 	public boolean isInitialized() {
-		return myIsInitialized;
+		return myActiveSearchParams != null;
 	}
 
 	@VisibleForTesting
 	public void resetForUnitTest() {
 		myBuiltInSearchParams = null;
-		myIsInitialized = false;
+		setActiveSearchParams(null);
 		handleInit(Collections.emptyList());
 	}
 
@@ -464,6 +459,5 @@ public class SearchParamRegistryImpl
 	@VisibleForTesting
 	public void setActiveSearchParams(RuntimeSearchParamCache theSearchParams) {
 		myActiveSearchParams = theSearchParams;
-		myIsInitialized = theSearchParams != null;
 	}
 }
