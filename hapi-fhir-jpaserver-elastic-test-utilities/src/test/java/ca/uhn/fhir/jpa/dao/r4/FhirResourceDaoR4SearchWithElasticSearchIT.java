@@ -402,8 +402,45 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 	}
 
 	@Test
+	public void testTextContainsFunctionality() {
+		String slug = "my-special-@char!";
+		Observation obs1 = new Observation();
+		obs1.getCode().setText("Systolic Blood Pressure");
+		obs1.setStatus(Observation.ObservationStatus.FINAL);
+		obs1.setValue(new Quantity(123));
+		obs1.getNoteFirstRep().setText("obs1");
+		obs1.getText().setDivAsString(slug);
+		obs1.getText().setStatus(Narrative.NarrativeStatus.ADDITIONAL);
+		IIdType id1 = myObservationDao.create(obs1, mySrd).getId().toUnqualifiedVersionless();
+
+		Observation obs2 = new Observation();
+		obs2.getCode().setText("Diastolic Blood Pressure");
+		obs2.setStatus(Observation.ObservationStatus.FINAL);
+		obs2.setValue(new Quantity(81));
+		obs2.getText().setDivAsString("diastolic blood pressure");
+		obs2.getText().setStatus(Narrative.NarrativeStatus.ADDITIONAL);
+		myObservationDao.create(obs2, mySrd).getId().toUnqualifiedVersionless();
+
+
+		SearchParameterMap map;
+
+		{ //_text
+			//With :contains
+			map = new SearchParameterMap();
+			map.add(Constants.PARAM_TEXT, new SpecialParam().setValue(slug).setContains(true));
+			assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map))).containsExactlyInAnyOrder(toValues(id1));
+
+			//Without :contains
+			map = new SearchParameterMap();
+			map.add(Constants.PARAM_TEXT, new SpecialParam().setValue(slug));
+			assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map))).isEmpty();
+		}
+
+	}
+
+	@Test
 	public void testLudicrouslyLongNarrative() throws IOException {
-		String slug = "mylongemailaddress@hotmail.com";
+		String slug = "myveryveryveryveryveryveryveryveryveryeryveryveryveryveryveryveryveryveryeryveryveryveryveryveryveryveryveryeryveryveryveryveryveryveryveryveryeryveryveryveryveryveryveryveryverylongemailaddress@hotmail.com";
 
 		Observation obs1 = new Observation();
 		obs1.getCode().setText("Systolic Blood Pressure");
@@ -435,10 +472,6 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 
 		SearchParameterMap map;
 
-		ElasticsearchClient elasticsearchHighLevelRestClient = ElasticsearchRestClientFactory.createElasticsearchHighLevelRestClient("http", myElasticsearchContainer.getHost() + ":" + myElasticsearchContainer.getMappedPort(9200), "", "");
-		SearchRequest sr = SearchRequest.of(req -> req.index("resourcetable-000001").query(qb -> qb.bool(bb -> bb.must(bbm -> bbm.match(match -> match.field("myNarrativeText").query(slug))))));
-		SearchResponse<ObjectNode> search = elasticsearchHighLevelRestClient.search(sr, ObjectNode.class);
-
 		{ //_text works as a special param
 			map = new SearchParameterMap();
 			map.add(Constants.PARAM_TEXT, new SpecialParam().setValue(slug).setContains(true));
@@ -458,7 +491,6 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 			map.add(Constants.PARAM_TEXT, new StringParam("blood").setContains(true));
 			assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map))).containsExactlyInAnyOrder(toValues(id2));
 		}
-
 	}
 
 	private String get15000CharacterNarrativeIncludingSlugAtEnd(String theSlug) {

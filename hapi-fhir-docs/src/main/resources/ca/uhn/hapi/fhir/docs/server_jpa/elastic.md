@@ -6,14 +6,14 @@ This is required to support the `_content`, or `_text` search parameters.
 # Performing Fulltext Search in Lucene/Elasticsearch
 
 When enabled, searches for `_text` and `_content` are forwarded to the underlying Hibernate Search engine, which can be backed by either Elasticsearch or Lucene. 
-By default, these searches support the searches in the way indicated in the [FHIR Specification on _text/_content Search](https://www.hl7.org/fhir/search.html#_text). This means that 
+By default, search is supported in the way indicated in the [FHIR Specification on _text/_content Search](https://www.hl7.org/fhir/search.html#_text). This means that 
 queries like the following can be evaluated: 
 
 ```http request
 GET [base]/Observation?_content=cancer OR metastases OR tumor
 ```
+To understand how this works, look at the following example. During ingestion, the fields required for `_content` and `_text` searches are stored in the backing engine, after undergoing normalization and analysis. For example consider this Observation: 
 
-During ingestion, the fields required for `_content` and `_text` searches are stored in the backing engine, after undergoing normalization and analysis. For example, a resource that looks like this
 ```json
 {
   "resourceType" : "Observation",
@@ -33,7 +33,7 @@ During ingestion, the fields required for `_content` and `_text` searches are st
 }
 ```
 
-Look at the display section. That section, once parsed and analyzed, will result in the followings tokens being generated for searchability: 
+In the display section, once parsed and analyzed, will result in the followings tokens being generated to be able to be searched on: 
 
 ```json
 ["glucose", "mole", "volume", "blood", "found", "during", "patient", "visit"]
@@ -41,15 +41,15 @@ Look at the display section. That section, once parsed and analyzed, will result
 
 You will notice that plurality is removed, and the text has been normalized, and special characters removed. When searched for, the search terms will be normalized in the same fashion. 
 
-However, the default implementation will not allow you to search for an exact match over a long string that contains specific special characters, e.g. an exact match for `_content=[Moles/volume]` would not return this result.
+However, the default implementation will not allow you to search for an exact match over a long string that contains special characters or other characters which could be broken apart during tokenization. E.g. an exact match for `_content=[Moles/volume]` would not return this result.
 
 In order to perform such an exact string match in Lucene/Elasticsearch, you should modify the `_text` or `_content` Search Parameter with the `:contains` modifier, as follows: 
 
 ```http request
-GET [base]/Observation?_content:contains=visit!
+GET [base]/Observation?_content:contains=[Moles/volume]
 ```
 
-Using `:contains` on the `_text` or `_content` modifies the search engine to perform a direct string match.
+Using `:contains` on the `_text` or `_content` modifies the search engine to perform a direct substring match anywhere within the field.
 
 
 # Experimental Extended Lucene/Elasticsearch Indexing

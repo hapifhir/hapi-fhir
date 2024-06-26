@@ -114,7 +114,7 @@ public class SpecialParam extends BaseParam /*implements IQueryParameterType*/ {
 		return theSystem.getValueAsString();
 	}
 	/**
-	 * String parameter modifier <code>:contains</code>
+	 * Special parameter modifier <code>:contains</code> for _text and _content
 	 */
 	public boolean isContains() {
 		return myContains;
