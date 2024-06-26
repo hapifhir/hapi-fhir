@@ -57,7 +57,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.dstu3.model.Location;
 import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
+import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -97,6 +99,12 @@ public class InMemoryResourceMatcher {
 
 	@Autowired
 	IndexedSearchParamExtractor myIndexedSearchParamExtractor;
+
+	@Autowired
+	ISearchParamExtractor searchParamExtractor;
+
+	@Autowired
+	SearchParamMatcher searchParamMatcher;
 
 	@Autowired
 	private MatchUrlService myMatchUrlService;
@@ -270,7 +278,13 @@ public class InMemoryResourceMatcher {
 				return InMemoryMatchResult.fromBoolean(matchProfilesAndOr(theAndOrParams, theResource));
 			default:
 				return matchResourceParam(
-						myStorageSettings, theParamName, theAndOrParams, theSearchParams, resourceName, paramDef);
+						myStorageSettings,
+						theParamName,
+						theAndOrParams,
+						theSearchParams,
+						resourceName,
+						paramDef,
+						theResource);
 		}
 	}
 
@@ -301,11 +315,6 @@ public class InMemoryResourceMatcher {
 			String theParamName, RuntimeSearchParam theParamDef, IQueryParameterType theParam) {
 		// Assume we're ok until we find evidence we aren't
 		InMemoryMatchResult checkUnsupportedResult = InMemoryMatchResult.successfulMatch();
-
-		if (hasChain(theParam)) {
-			checkUnsupportedResult = InMemoryMatchResult.unsupportedFromParameterAndReason(
-					theParamName + "." + ((ReferenceParam) theParam).getChain(), InMemoryMatchResult.CHAIN);
-		}
 
 		if (checkUnsupportedResult.supported()) {
 			checkUnsupportedResult = checkUnsupportedQualifiers(theParamName, theParamDef, theParam);
@@ -466,7 +475,8 @@ public class InMemoryResourceMatcher {
 			List<List<IQueryParameterType>> theAndOrParams,
 			ResourceIndexedSearchParams theSearchParams,
 			String theResourceName,
-			RuntimeSearchParam theParamDef) {
+			RuntimeSearchParam theParamDef,
+			IBaseResource theResource) {
 		if (theParamDef != null) {
 			switch (theParamDef.getParamType()) {
 				case QUANTITY:
@@ -480,13 +490,20 @@ public class InMemoryResourceMatcher {
 						return InMemoryMatchResult.successfulMatch();
 					} else {
 						return InMemoryMatchResult.fromBoolean(theAndOrParams.stream()
-								.allMatch(nextAnd -> matchParams(
-										theStorageSettings,
-										theResourceName,
-										theParamName,
-										theParamDef,
-										nextAnd,
-										theSearchParams)));
+								.allMatch(nextAnd -> nextAnd.stream().anyMatch(token -> {
+									if (token instanceof ReferenceParam
+											&& ((ReferenceParam) token).getChain() != null) {
+										return matchChainedReferenceParam(
+												theParamName, theResourceName, theResource, (ReferenceParam) token);
+									}
+									return matchParam(
+											theStorageSettings,
+											theResourceName,
+											theParamName,
+											theParamDef,
+											theSearchParams,
+											token);
+								})));
 					}
 				case COMPOSITE:
 				case HAS:
@@ -503,6 +520,62 @@ public class InMemoryResourceMatcher {
 						+ " for resource type " + theResourceName);
 			}
 		}
+	}
+
+	private boolean matchChainedReferenceParam(
+			String theParamName, String theResourceName, IBaseResource theResource, ReferenceParam referenceParam) {
+		RuntimeSearchParam activeSearchParam =
+				mySearchParamRegistry.getActiveSearchParam(theResourceName, theParamName);
+		List<? extends IBase> bases = searchParamExtractor
+				.getPathValueExtractor(theResource, activeSearchParam.getPath())
+				.get();
+		return bases.stream()
+				.filter(IBaseReference.class::isInstance)
+				.map(IBaseReference.class::cast)
+				.map(IBaseReference::getResource)
+				.anyMatch(resource -> {
+					// Obtain the next parameter name, modifier and chain
+					String[] chains = referenceParam.getChain().split("\\.");
+					String parameterNameWithModifier = chains[0];
+					String chain = chains.length > 1 ? StringUtils.join(chains, ".", 1, chains.length) : null;
+
+					String[] parameterNameAndModifier = parameterNameWithModifier.split(":");
+					String parameterName = parameterNameAndModifier[0];
+					String resourceType = parameterNameAndModifier.length > 1 ? parameterNameAndModifier[1] : null;
+
+					// Find the path of next search parameter in the next resource
+					RuntimeSearchParam resourceSearchParam = mySearchParamRegistry.getActiveSearchParam(
+							resource.getIdElement().getResourceType(), parameterName);
+					// Make sure the search param exists and modifier matches with next resource
+					if (resourceSearchParam == null
+							|| (referenceParam.getResourceType() != null
+									&& !referenceParam
+											.getResourceType()
+											.equals(resource.getIdElement().getResourceType()))) {
+						return false;
+					}
+
+					// Create new search parameter map to match the next resource
+					SearchParameterMap searchParameterMap = new SearchParameterMap();
+					if (resourceSearchParam.getParamType().equals(RestSearchParameterTypeEnum.REFERENCE)) {
+						searchParameterMap.add(
+								parameterName, new ReferenceParam(resourceType, chain, referenceParam.getValue()));
+					} else {
+						TokenParam tokenParam;
+						if (referenceParam.getValue().contains("|")) {
+							String[] systemAndValue = referenceParam.getValue().split("\\|");
+							tokenParam = new TokenParam(systemAndValue[0], systemAndValue[1]);
+						} else {
+							tokenParam = new TokenParam(referenceParam.getValue());
+						}
+						searchParameterMap.add(parameterName, tokenParam);
+					}
+
+					// Recursively match the chained resources
+					return searchParamMatcher
+							.match(searchParameterMap, resource)
+							.matched();
+				});
 	}
 
 	private boolean matchParams(
@@ -691,6 +764,8 @@ public class InMemoryResourceMatcher {
 					default:
 						return false;
 				}
+			case REFERENCE:
+				return true;
 			default:
 				return false;
 		}
