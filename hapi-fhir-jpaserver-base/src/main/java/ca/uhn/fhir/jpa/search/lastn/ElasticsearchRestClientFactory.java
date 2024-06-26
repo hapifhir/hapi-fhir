@@ -83,7 +83,6 @@ public class ElasticsearchRestClientFactory {
 
 		RestClient restClient = clientBuilder.build();
 
-
 		// Create the transport with a Jackson mapper
 		ElasticsearchTransport transport = new RestClientTransport(restClient, new JacksonJsonpMapper());
 

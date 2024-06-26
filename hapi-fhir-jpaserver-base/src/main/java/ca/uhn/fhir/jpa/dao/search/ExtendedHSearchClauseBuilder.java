@@ -49,14 +49,12 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.tuple.Pair;
-import org.checkerframework.checker.units.qual.A;
 import org.hibernate.search.engine.search.common.BooleanOperator;
 import org.hibernate.search.engine.search.predicate.dsl.BooleanPredicateClausesStep;
 import org.hibernate.search.engine.search.predicate.dsl.PredicateFinalStep;
 import org.hibernate.search.engine.search.predicate.dsl.RangePredicateOptionsStep;
 import org.hibernate.search.engine.search.predicate.dsl.SearchPredicateFactory;
 import org.hibernate.search.engine.search.predicate.dsl.WildcardPredicateOptionsStep;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -158,7 +156,9 @@ public class ExtendedHSearchClauseBuilder {
 		} else if (nextOr instanceof SpecialParam) {
 			value = ((SpecialParam) nextOr).getValue();
 		} else {
-			throw new IllegalArgumentException(Msg.code(2535) + "Failed to extract value for fulltext search from parameter. Needs to be a `string` parameter, or `_text` or `_content` special parameter." + nextOr);
+			throw new IllegalArgumentException(Msg.code(2535)
+					+ "Failed to extract value for fulltext search from parameter. Needs to be a `string` parameter, or `_text` or `_content` special parameter."
+					+ nextOr);
 		}
 		return StringUtils.defaultString(value).trim();
 	}
@@ -173,7 +173,8 @@ public class ExtendedHSearchClauseBuilder {
 	 */
 	private static boolean isStringParamOrEquivalent(String theSearchParamName, IQueryParameterType nextOr) {
 		List<String> specialSearchParamsToTreatAsStrings = List.of(Constants.PARAM_TEXT, Constants.PARAM_CONTENT);
-		return (nextOr instanceof StringParam) || (nextOr instanceof SpecialParam && specialSearchParamsToTreatAsStrings.contains(theSearchParamName));
+		return (nextOr instanceof StringParam)
+				|| (nextOr instanceof SpecialParam && specialSearchParamsToTreatAsStrings.contains(theSearchParamName));
 	}
 
 	public void addTokenUnmodifiedSearch(String theSearchParamName, List<List<IQueryParameterType>> theAndOrTerms) {
@@ -256,7 +257,8 @@ public class ExtendedHSearchClauseBuilder {
 		}
 
 		for (List<? extends IQueryParameterType> nextOrList : stringAndOrTerms) {
-			Set<String> orTerms = TermHelper.makePrefixSearchTerm(extractOrStringParams(theSearchParamName, nextOrList));
+			Set<String> orTerms =
+					TermHelper.makePrefixSearchTerm(extractOrStringParams(theSearchParamName, nextOrList));
 			ourLog.debug("addStringTextSearch {}, {}", theSearchParamName, orTerms);
 			if (!orTerms.isEmpty()) {
 				String query = orTerms.stream().map(s -> "( " + s + " )").collect(Collectors.joining(" | "));
@@ -264,12 +266,13 @@ public class ExtendedHSearchClauseBuilder {
 					myRootClause.must(myRootContext.match().field(fieldName).matching(query));
 				} else {
 					myRootClause.must(myRootContext
-						.simpleQueryString()
-						.field(fieldName)
-						.matching(query)
-						.defaultOperator(
-							BooleanOperator
-								.AND)); // term value may contain multiple tokens.  Require all of them to be
+							.simpleQueryString()
+							.field(fieldName)
+							.matching(query)
+							.defaultOperator(
+									BooleanOperator
+											.AND)); // term value may contain multiple tokens.  Require all of them to
+					// be
 					// present.
 				}
 			} else {

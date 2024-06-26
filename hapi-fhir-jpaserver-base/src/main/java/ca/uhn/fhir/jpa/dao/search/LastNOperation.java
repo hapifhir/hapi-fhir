@@ -63,8 +63,7 @@ public class LastNOperation {
 		SearchResult<ResourceTable> result = mySession
 				.search(ResourceTable.class)
 				.extension(ElasticsearchExtension.get())
-				.where(f ->
-					f.bool(b -> {
+				.where(f -> f.bool(b -> {
 					// Must match observation type
 					b.must(f.match().field("myResourceType").matching(OBSERVATION_RES_TYPE));
 					ExtendedHSearchClauseBuilder builder =
