@@ -81,17 +81,14 @@
 						<dependency>
 							<groupId>org.apache.derby</groupId>
 							<artifactId>derbyclient</artifactId>
-							<version>${derby_version}</version>
 						</dependency>
 						<dependency>
 							<groupId>org.apache.derby</groupId>
 							<artifactId>derbynet</artifactId>
-							<version>${derby_version}</version>
 						</dependency>
 						<dependency>
 							<groupId>org.apache.derby</groupId>
 							<artifactId>derbyclient</artifactId>
-							<version>${derby_version}</version>
 						</dependency>
 						<dependency>
 							<groupId>org.checkerframework</groupId>
