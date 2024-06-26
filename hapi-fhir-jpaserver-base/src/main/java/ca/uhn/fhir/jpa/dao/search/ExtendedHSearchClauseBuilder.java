@@ -274,9 +274,9 @@ public class ExtendedHSearchClauseBuilder {
 	 * @param nextOrList the list of query parameters
 	 * @param fieldName  the field name in the index document to compare with.
 	 */
-	private void addSimpleQueryMatchClauses(String theSearchParamName, List<? extends IQueryParameterType> nextOrList, String fieldName) {
-		Set<String> orTerms =
-				TermHelper.makePrefixSearchTerm(extractOrStringParams(theSearchParamName, nextOrList));
+	private void addSimpleQueryMatchClauses(
+			String theSearchParamName, List<? extends IQueryParameterType> nextOrList, String fieldName) {
+		Set<String> orTerms = TermHelper.makePrefixSearchTerm(extractOrStringParams(theSearchParamName, nextOrList));
 		ourLog.debug("addStringTextSearch {}, {}", theSearchParamName, orTerms);
 		if (!orTerms.isEmpty()) {
 			String query = orTerms.stream().map(s -> "( " + s + " )").collect(Collectors.joining(" | "));
@@ -285,8 +285,7 @@ public class ExtendedHSearchClauseBuilder {
 					.field(fieldName)
 					.matching(query)
 					.defaultOperator(
-							BooleanOperator
-									.AND)); // term value may contain multiple tokens.  Require all of them to
+							BooleanOperator.AND)); // term value may contain multiple tokens.  Require all of them to
 			// be
 			// present.
 
@@ -303,9 +302,9 @@ public class ExtendedHSearchClauseBuilder {
 	 * @param nextOrList the list of query parameters
 	 * @param fieldName the field name in the index document to compare with.
 	 */
-	private void addPreciseMatchClauses(String theSearchParamName, List<? extends IQueryParameterType> nextOrList, String fieldName) {
-		Set<String> orTerms =
-				TermHelper.makePrefixSearchTerm(extractOrStringParams(theSearchParamName, nextOrList));
+	private void addPreciseMatchClauses(
+			String theSearchParamName, List<? extends IQueryParameterType> nextOrList, String fieldName) {
+		Set<String> orTerms = TermHelper.makePrefixSearchTerm(extractOrStringParams(theSearchParamName, nextOrList));
 		for (String orTerm : orTerms) {
 			myRootClause.must(myRootContext.match().field(fieldName).matching(orTerm));
 		}
