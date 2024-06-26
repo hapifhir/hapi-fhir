@@ -20,7 +20,6 @@
 package ca.uhn.fhir.jpa.cache;
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.CacheConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
@@ -44,6 +43,10 @@ import java.time.ZoneId;
 @Scope("prototype")
 public class ResourceChangeListenerCache implements IResourceChangeListenerCache {
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceChangeListenerCache.class);
+	/**
+	 * Max number of retries to do for cache refreshing
+	 */
+	private static final int MAX_RETRIES = 60;
 
 	private static Instant ourNowForUnitTests;
 
@@ -123,7 +126,7 @@ public class ResourceChangeListenerCache implements IResourceChangeListenerCache
 		return myNextRefreshTime.isBefore(now());
 	}
 
-	private static Instant now() {
+	static Instant now() {
 		if (ourNowForUnitTests != null) {
 			return ourNowForUnitTests;
 		}
@@ -153,7 +156,7 @@ public class ResourceChangeListenerCache implements IResourceChangeListenerCache
 						return myResourceChangeListenerCacheRefresher.refreshCacheAndNotifyListener(this);
 					}
 				},
-				CacheConstants.getMaxRetries());
+				getMaxRetries());
 		return refreshCacheRetrier.runWithRetry();
 	}
 
@@ -222,5 +225,9 @@ public class ResourceChangeListenerCache implements IResourceChangeListenerCache
 				.append("mySearchParameterMap", mySearchParameterMap)
 				.append("myInitialized", myInitialized)
 				.toString();
+	}
+
+	static int getMaxRetries() {
+		return MAX_RETRIES;
 	}
 }

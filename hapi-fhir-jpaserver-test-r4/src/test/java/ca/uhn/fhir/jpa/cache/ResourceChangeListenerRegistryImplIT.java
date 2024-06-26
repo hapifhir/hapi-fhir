@@ -2,7 +2,6 @@ package ca.uhn.fhir.jpa.cache;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
-import ca.uhn.fhir.jpa.CacheConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
@@ -96,14 +95,16 @@ public class ResourceChangeListenerRegistryImplIT extends BaseJpaR4Test {
 
 		// so they will be forced to be refreshed
 		mySearchParamRegistry.setActiveSearchParams(null);
-		try (MockedStatic<CacheConstants> cacheConstants = mockStatic(CacheConstants.class)) {
-			cacheConstants.when(CacheConstants::getMaxRetries).thenAnswer((args) -> {
+		try (MockedStatic<ResourceChangeListenerCache> cacheConstants = mockStatic(ResourceChangeListenerCache.class)) {
+			cacheConstants.when(ResourceChangeListenerCache::getMaxRetries).thenAnswer((args) -> {
 				if (counter.getAndIncrement() > maxRetries) {
 					// fail after a few tries to ensure we don't fall into an infinite loop
 					fail("This should not fall into an infinite loop");
 				}
 				return maxRetries;
 			});
+			cacheConstants.when(ResourceChangeListenerCache::now)
+				.thenCallRealMethod();
 
 			// test
 			ResourceChangeResult result = cache.forceRefresh();
