@@ -9,7 +9,7 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
-import ca.uhn.fhir.jpa.subscription.channel.config.SubscriptionChannelConfig;
+import ca.uhn.fhir.jpa.channel.ChannelConfig;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
 import ca.uhn.fhir.jpa.subscription.match.config.SubscriptionProcessorConfig;
 import ca.uhn.fhir.jpa.subscription.match.deliver.email.IEmailSender;
@@ -56,7 +56,7 @@ public class WebsocketConnectionValidatorTest {
 	@MockBean
 	SearchParamMatcher mySearchParamMatcher;
 	@MockBean
-	SubscriptionChannelConfig mySubscriptionChannelConfig;
+	ChannelConfig myChannelConfig;
 	@MockBean
 	SubscriptionChannelFactory mySubscriptionChannelFactory;
 	@MockBean

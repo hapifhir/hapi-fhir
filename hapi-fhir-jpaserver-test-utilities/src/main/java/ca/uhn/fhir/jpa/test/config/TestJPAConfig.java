@@ -28,7 +28,7 @@ import ca.uhn.fhir.jpa.binary.api.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.binstore.MemoryBinaryStorageSvcImpl;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.searchparam.submit.config.SearchParamSubmitterConfig;
-import ca.uhn.fhir.jpa.subscription.channel.config.SubscriptionChannelConfig;
+import ca.uhn.fhir.jpa.channel.ChannelConfig;
 import ca.uhn.fhir.jpa.subscription.match.config.SubscriptionProcessorConfig;
 import ca.uhn.fhir.jpa.subscription.match.deliver.email.IEmailSender;
 import ca.uhn.fhir.jpa.subscription.match.deliver.resthook.SubscriptionDeliveringRestHookSubscriber;
@@ -53,7 +53,7 @@ import org.springframework.orm.jpa.JpaTransactionManager;
 @Import({
 	SubscriptionSubmitterConfig.class,
 	SubscriptionProcessorConfig.class,
-	SubscriptionChannelConfig.class,
+	ChannelConfig.class,
 	SearchParamSubmitterConfig.class,
 	ThreadPoolFactoryConfig.class
 })
