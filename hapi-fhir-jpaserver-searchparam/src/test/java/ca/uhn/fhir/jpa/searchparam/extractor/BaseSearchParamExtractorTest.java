@@ -57,16 +57,15 @@ class BaseSearchParamExtractorTest {
 		@BeforeEach
 		void setUp() {
 			myExtractor.setStorageSettings(myStorageSettings);
+			doReturn(List.of(myRuntimeSearchParam)).when(myExtractor).getSearchParams(myResource);
+			when(mySearchParamFilter.filterSearchParams(any())).thenReturn(List.of(myRuntimeSearchParam));
+			when(myRuntimeSearchParam.getParamType()).thenReturn(mySearchParamType);
 		}
 
 		@Test
 		void testWhenSet_resourceLevelParamsAreExtracted() {
-			doReturn(List.of(myRuntimeSearchParam)).when(myExtractor).getSearchParams(myResource);
-			when(mySearchParamFilter.filterSearchParams(any())).thenReturn(List.of(myRuntimeSearchParam));
-			when(myRuntimeSearchParam.getParamType()).thenReturn(mySearchParamType);
-			doNothing().when(myExtractor).extractSearchParam(any(), any(), any(), any(), eq(false));
-
 			myExtractor.setExtractResourceLevelParams(true);
+			doNothing().when(myExtractor).extractSearchParam(any(), any(), any(), any(), eq(false));
 
 			// execute
 			myExtractor.extractSearchParams(myResource, null, mySearchParamType, false, mySearchParamFilter);
@@ -76,9 +75,6 @@ class BaseSearchParamExtractorTest {
 
 		@Test
 		void testWhenNotSet_resourceLevelParamsAreNotExtracted() {
-			doReturn(List.of(myRuntimeSearchParam)).when(myExtractor).getSearchParams(myResource);
-			when(mySearchParamFilter.filterSearchParams(any())).thenReturn(List.of(myRuntimeSearchParam));
-			when(myRuntimeSearchParam.getParamType()).thenReturn(mySearchParamType);
 			when(myRuntimeSearchParam.getPath()).thenReturn("Resource.something");
 
 			// execute
