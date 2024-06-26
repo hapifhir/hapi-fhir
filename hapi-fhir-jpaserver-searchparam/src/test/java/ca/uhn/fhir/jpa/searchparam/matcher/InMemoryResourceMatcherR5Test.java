@@ -7,6 +7,7 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
@@ -20,11 +21,15 @@ import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import jakarta.annotation.Nonnull;
+import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.r5.model.BaseDateTimeType;
 import org.hl7.fhir.r5.model.CodeableConcept;
 import org.hl7.fhir.r5.model.Coding;
 import org.hl7.fhir.r5.model.DateTimeType;
+import org.hl7.fhir.r5.model.Encounter;
 import org.hl7.fhir.r5.model.Observation;
+import org.hl7.fhir.r5.model.Reference;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -40,6 +45,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -52,7 +58,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {InMemoryResourceMatcherR5Test.SpringConfig.class})
+@ContextConfiguration(classes = {InMemoryResourceMatcherConfigurationR5Test.SpringConfig.class})
 public class InMemoryResourceMatcherR5Test {
 	public static final String OBSERVATION_DATE = "1970-10-17";
 	public static final String OBSERVATION_DATETIME = OBSERVATION_DATE + "T01:00:00-08:30";
@@ -60,6 +66,11 @@ public class InMemoryResourceMatcherR5Test {
 	public static final String OBSERVATION_CODE_SYSTEM = "http://hl7.org/some-cs";
 	public static final String OBSERVATION_CODE_DISPLAY = "Match";
 	public static final String OBSERVATION_CODE_VALUE_SET_URI = "http://hl7.org/some-vs";
+	public static final String ENCOUNTER_REFERENCE = "Encounter/1234";
+	public static final String ENCOUNTER_CLASS_SYSTEM = "http://hl7.org/fhir/v3/ActCode";
+	public static final String ENCOUNTER_CLASS_CODE = "IMP";
+	public static final String ENCOUNTER_CLASS_DISPLAY = "My Encounter";
+
 	private static final String EARLY_DATE = "1965-08-09";
 	private static final String LATE_DATE = "2000-06-29";
 	private static final String EARLY_DATETIME = EARLY_DATE + "T12:00:00Z";
@@ -81,6 +92,7 @@ public class InMemoryResourceMatcherR5Test {
 	@Autowired
 	StorageSettings myStorageSettings;
 	private Observation myObservation;
+	private Encounter myEncounter;
 	private ResourceIndexedSearchParams mySearchParams;
 
 	@BeforeEach
@@ -94,6 +106,9 @@ public class InMemoryResourceMatcherR5Test {
 		RuntimeSearchParam encSearchParam = new RuntimeSearchParam(null, null, null, null, "Observation.encounter", RestSearchParameterTypeEnum.REFERENCE, null, null, RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, null, null, null);
 		when(mySearchParamRegistry.getActiveSearchParam("Observation", "encounter")).thenReturn(encSearchParam);
 
+		RuntimeSearchParam clsSearchParam = new RuntimeSearchParam(null, null, null, null, "Encounter.class", RestSearchParameterTypeEnum.TOKEN, null, null, RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, null, null, null);
+		when(mySearchParamRegistry.getActiveSearchParam("Encounter", "class")).thenReturn(clsSearchParam);
+
 		myObservation = new Observation();
 		myObservation.getMeta().setSource(TEST_SOURCE);
 		myObservation.setEffective(new DateTimeType(OBSERVATION_DATETIME));
@@ -101,7 +116,20 @@ public class InMemoryResourceMatcherR5Test {
 		codeableConcept.addCoding().setCode(OBSERVATION_CODE)
 			.setSystem(OBSERVATION_CODE_SYSTEM).setDisplay(OBSERVATION_CODE_DISPLAY);
 		myObservation.setCode(codeableConcept);
+
+		myEncounter = new Encounter();
+		myEncounter.setId(ENCOUNTER_REFERENCE);
+		myEncounter.addClass_(new CodeableConcept(new Coding(ENCOUNTER_CLASS_SYSTEM, ENCOUNTER_CLASS_CODE, ENCOUNTER_CLASS_DISPLAY)));
+
+		IBaseReference myEncounterReference = new Reference()
+			.setReference(ENCOUNTER_REFERENCE)
+			.setDisplay(ENCOUNTER_CLASS_DISPLAY)
+			.setResource(myEncounter);
+		myObservation.setEncounter((Reference) myEncounterReference);
+
 		mySearchParams = extractSearchParams(myObservation);
+		when(myIndexedSearchParamExtractor.extractIndexedSearchParams(
+			eq(myEncounter), any(), any())).thenReturn(extractSearchParams(myEncounter));
 	}
 
 	@Test
@@ -177,10 +205,14 @@ public class InMemoryResourceMatcherR5Test {
 	}
 
 	@Test
-	public void testUnsupportedChained() {
+	public void testChained() {
 		InMemoryMatchResult result = myInMemoryResourceMatcher.match("encounter.class=FOO", myObservation, mySearchParams, newRequest());
-		assertFalse(result.supported());
-		assertEquals("Parameter: <encounter.class> Reason: Chained parameters are not supported", result.getUnsupportedReason());
+		assertTrue(result.supported());
+		assertFalse(result.matched());
+
+		result = myInMemoryResourceMatcher.match("encounter.class=http://hl7.org/fhir/v3/ActCode|IMP", myObservation, mySearchParams, newRequest());
+		assertTrue(result.supported());
+		assertTrue(result.matched());
 	}
 
 	@Test
@@ -417,6 +449,12 @@ public class InMemoryResourceMatcherR5Test {
 		return retval;
 	}
 
+	private ResourceIndexedSearchParams extractSearchParams(Encounter theEncounter) {
+		ResourceIndexedSearchParams retval = ResourceIndexedSearchParams.withSets();
+		retval.myTokenParams.add(extractCodeTokenParam(theEncounter));
+		return retval;
+	}
+
 	@Nonnull
 	protected ResourceIndexedSearchParamDate extractEffectiveDateParam(Observation theObservation) {
 		BaseDateTimeType dateValue = (BaseDateTimeType) theObservation.getEffective();
@@ -433,27 +471,9 @@ public class InMemoryResourceMatcherR5Test {
 		return new ResourceIndexedSearchParamUri(new PartitionSettings(), "Observation", "_source", source);
 	}
 
-	@Configuration
-	public static class SpringConfig {
-		@Bean
-		InMemoryResourceMatcher inMemoryResourceMatcher() {
-			return new InMemoryResourceMatcher();
-		}
-
-		@Bean
-		MatchUrlService matchUrlService() {
-			return new MatchUrlService();
-		}
-
-		@Bean
-		FhirContext fhirContext() {
-			return FhirContext.forR5();
-		}
-
-		@Bean
-        StorageSettings storageSettings() {
-			return new StorageSettings();
-		}
+	protected ResourceIndexedSearchParamToken extractCodeTokenParam(Encounter theEncounter) {
+		Coding coding = theEncounter.getClass_FirstRep().getCodingFirstRep();
+		return new ResourceIndexedSearchParamToken(new PartitionSettings(), "Encounter", "class", coding.getSystem(), coding.getCode());
 	}
 
 }
