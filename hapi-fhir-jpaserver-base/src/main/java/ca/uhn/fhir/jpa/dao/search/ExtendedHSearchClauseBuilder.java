@@ -259,7 +259,7 @@ public class ExtendedHSearchClauseBuilder {
 		if (isContainsSearch(theSearchParamName, stringAndOrTerms)) {
 			for (List<? extends IQueryParameterType> nextOrList : stringAndOrTerms) {
 				Set<String> orTerms =
-					TermHelper.makePrefixSearchTerm(extractOrStringParams(theSearchParamName, nextOrList));
+						TermHelper.makePrefixSearchTerm(extractOrStringParams(theSearchParamName, nextOrList));
 				for (String orTerm : orTerms) {
 					myRootClause.must(myRootContext.match().field(fieldName).matching(orTerm));
 				}
@@ -267,17 +267,17 @@ public class ExtendedHSearchClauseBuilder {
 		} else {
 			for (List<? extends IQueryParameterType> nextOrList : stringAndOrTerms) {
 				Set<String> orTerms =
-					TermHelper.makePrefixSearchTerm(extractOrStringParams(theSearchParamName, nextOrList));
+						TermHelper.makePrefixSearchTerm(extractOrStringParams(theSearchParamName, nextOrList));
 				ourLog.debug("addStringTextSearch {}, {}", theSearchParamName, orTerms);
 				if (!orTerms.isEmpty()) {
 					String query = orTerms.stream().map(s -> "( " + s + " )").collect(Collectors.joining(" | "));
 					myRootClause.must(myRootContext
-						.simpleQueryString()
-						.field(fieldName)
-						.matching(query)
-						.defaultOperator(
-							BooleanOperator
-								.AND)); // term value may contain multiple tokens.  Require all of them to
+							.simpleQueryString()
+							.field(fieldName)
+							.matching(query)
+							.defaultOperator(
+									BooleanOperator
+											.AND)); // term value may contain multiple tokens.  Require all of them to
 					// be
 					// present.
 
@@ -286,7 +286,6 @@ public class ExtendedHSearchClauseBuilder {
 				}
 			}
 		}
-
 	}
 
 	public void addStringExactSearch(String theSearchParamName, List<List<IQueryParameterType>> theStringAndOrTerms) {
@@ -876,13 +875,14 @@ public class ExtendedHSearchClauseBuilder {
 
 	private boolean hasAContainsModifier(List<List<IQueryParameterType>> stringAndOrTerms) {
 		return stringAndOrTerms.stream()
-			.flatMap(List::stream)
-			.anyMatch(next -> Constants.PARAMQUALIFIER_STRING_CONTAINS.equalsIgnoreCase(next.getQueryParameterQualifier()));
+				.flatMap(List::stream)
+				.anyMatch(next ->
+						Constants.PARAMQUALIFIER_STRING_CONTAINS.equalsIgnoreCase(next.getQueryParameterQualifier()));
 	}
 
 	private boolean isContainsSearch(String theSearchParamName, List<List<IQueryParameterType>> stringAndOrTerms) {
-		return (Constants.PARAM_TEXT.equalsIgnoreCase(theSearchParamName) || Constants.PARAM_CONTENT.equalsIgnoreCase(theSearchParamName)) && hasAContainsModifier(stringAndOrTerms);
+		return (Constants.PARAM_TEXT.equalsIgnoreCase(theSearchParamName)
+						|| Constants.PARAM_CONTENT.equalsIgnoreCase(theSearchParamName))
+				&& hasAContainsModifier(stringAndOrTerms);
 	}
-
-
 }

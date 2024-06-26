@@ -68,10 +68,12 @@ public class SpecialParam extends BaseParam /*implements IQueryParameterType*/ {
 	@Override
 	void doSetValueAsQueryToken(FhirContext theContext, String theParamName, String theQualifier, String theParameter) {
 		if (Constants.PARAMQUALIFIER_STRING_CONTAINS.equals(theQualifier)) {
-			if (theParamName.equalsIgnoreCase(Constants.PARAM_TEXT) || theParamName.equalsIgnoreCase(Constants.PARAM_CONTENT)) {
+			if (theParamName.equalsIgnoreCase(Constants.PARAM_TEXT)
+					|| theParamName.equalsIgnoreCase(Constants.PARAM_CONTENT)) {
 				setContains(true);
 			} else {
-				ourLog.debug("Attempted to set the :contains modifier on a special search parameter that was not `_text` or `_content`. This is not supported.");
+				ourLog.debug(
+						"Attempted to set the :contains modifier on a special search parameter that was not `_text` or `_content`. This is not supported.");
 			}
 		}
 		setValue(ParameterUtil.unescape(theParameter));
@@ -132,10 +134,10 @@ public class SpecialParam extends BaseParam /*implements IQueryParameterType*/ {
 	@Override
 	public int hashCode() {
 		return new HashCodeBuilder(17, 37)
-			.append(isContains())
-			.append(getValue())
-			.append(getMissing())
-			.toHashCode();
+				.append(isContains())
+				.append(getValue())
+				.append(getMissing())
+				.toHashCode();
 	}
 
 	@Override
