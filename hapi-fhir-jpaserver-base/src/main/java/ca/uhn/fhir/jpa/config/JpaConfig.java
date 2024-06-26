@@ -291,7 +291,7 @@ public class JpaConfig {
 		return b;
 	}
 
-	// FIXME KHS removing SubscriptionTriggeringProvider from this config will break hapi tests
+	// WIP KHS removing SubscriptionTriggeringProvider from this config will break hapi tests
 
 	@Bean
 	@Lazy
