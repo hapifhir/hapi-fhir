@@ -256,29 +256,37 @@ public class ExtendedHSearchClauseBuilder {
 				break;
 		}
 
-		for (List<? extends IQueryParameterType> nextOrList : stringAndOrTerms) {
-			Set<String> orTerms =
+		if (isContainsSearch(theSearchParamName, stringAndOrTerms)) {
+			for (List<? extends IQueryParameterType> nextOrList : stringAndOrTerms) {
+				Set<String> orTerms =
 					TermHelper.makePrefixSearchTerm(extractOrStringParams(theSearchParamName, nextOrList));
-			ourLog.debug("addStringTextSearch {}, {}", theSearchParamName, orTerms);
-			if (!orTerms.isEmpty()) {
-				String query = orTerms.stream().map(s -> "( " + s + " )").collect(Collectors.joining(" | "));
-				if (theSearchParamName.equalsIgnoreCase("_text")) {
-					myRootClause.must(myRootContext.match().field(fieldName).matching(query));
-				} else {
+				for (String orTerm : orTerms) {
+					myRootClause.must(myRootContext.match().field(fieldName).matching(orTerm));
+				}
+			}
+		} else {
+			for (List<? extends IQueryParameterType> nextOrList : stringAndOrTerms) {
+				Set<String> orTerms =
+					TermHelper.makePrefixSearchTerm(extractOrStringParams(theSearchParamName, nextOrList));
+				ourLog.debug("addStringTextSearch {}, {}", theSearchParamName, orTerms);
+				if (!orTerms.isEmpty()) {
+					String query = orTerms.stream().map(s -> "( " + s + " )").collect(Collectors.joining(" | "));
 					myRootClause.must(myRootContext
-							.simpleQueryString()
-							.field(fieldName)
-							.matching(query)
-							.defaultOperator(
-									BooleanOperator
-											.AND)); // term value may contain multiple tokens.  Require all of them to
+						.simpleQueryString()
+						.field(fieldName)
+						.matching(query)
+						.defaultOperator(
+							BooleanOperator
+								.AND)); // term value may contain multiple tokens.  Require all of them to
 					// be
 					// present.
+
+				} else {
+					ourLog.warn("No Terms found in query parameter {}", nextOrList);
 				}
-			} else {
-				ourLog.warn("No Terms found in query parameter {}", nextOrList);
 			}
 		}
+
 	}
 
 	public void addStringExactSearch(String theSearchParamName, List<List<IQueryParameterType>> theStringAndOrTerms) {
@@ -865,4 +873,16 @@ public class ExtendedHSearchClauseBuilder {
 
 		return compositeClause;
 	}
+
+	private boolean hasAContainsModifier(List<List<IQueryParameterType>> stringAndOrTerms) {
+		return stringAndOrTerms.stream()
+			.flatMap(List::stream)
+			.anyMatch(next -> Constants.PARAMQUALIFIER_STRING_CONTAINS.equalsIgnoreCase(next.getQueryParameterQualifier()));
+	}
+
+	private boolean isContainsSearch(String theSearchParamName, List<List<IQueryParameterType>> stringAndOrTerms) {
+		return (Constants.PARAM_TEXT.equalsIgnoreCase(theSearchParamName) || Constants.PARAM_CONTENT.equalsIgnoreCase(theSearchParamName)) && hasAContainsModifier(stringAndOrTerms);
+	}
+
+
 }

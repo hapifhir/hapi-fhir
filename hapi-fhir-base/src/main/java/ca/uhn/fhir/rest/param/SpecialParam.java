@@ -47,7 +47,11 @@ public class SpecialParam extends BaseParam /*implements IQueryParameterType*/ {
 
 	@Override
 	String doGetQueryParameterQualifier() {
-		return null;
+		if (myContains) {
+			return Constants.PARAMQUALIFIER_STRING_CONTAINS;
+		} else {
+			return null;
+		}
 	}
 
 	/**

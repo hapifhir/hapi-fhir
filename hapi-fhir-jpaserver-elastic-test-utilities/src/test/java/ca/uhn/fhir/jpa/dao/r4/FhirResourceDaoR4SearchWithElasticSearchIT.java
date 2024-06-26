@@ -439,25 +439,26 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		SearchRequest sr = SearchRequest.of(req -> req.index("resourcetable-000001").query(qb -> qb.bool(bb -> bb.must(bbm -> bbm.match(match -> match.field("myNarrativeText").query(slug))))));
 		SearchResponse<ObjectNode> search = elasticsearchHighLevelRestClient.search(sr, ObjectNode.class);
 
-		{ //_text works as a string param
-			map = new SearchParameterMap();
-			map.add(Constants.PARAM_TEXT, new StringParam(slug));
-			assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map))).containsExactlyInAnyOrder(toValues(id1, id3));
-
-			map = new SearchParameterMap();
-			map.add(Constants.PARAM_TEXT, new StringParam("blood"));
-			assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map))).containsExactlyInAnyOrder(toValues(id2));
-		}
-
 		{ //_text works as a special param
 			map = new SearchParameterMap();
-			map.add(Constants.PARAM_TEXT, new SpecialParam().setValue(slug));
+			map.add(Constants.PARAM_TEXT, new SpecialParam().setValue(slug).setContains(true));
 			assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map))).containsExactlyInAnyOrder(toValues(id1, id3));
 
 			map = new SearchParameterMap();
-			map.add(Constants.PARAM_TEXT, new SpecialParam().setValue("blood"));
+			map.add(Constants.PARAM_TEXT, new SpecialParam().setValue("blood").setContains(true));
 			assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map))).containsExactlyInAnyOrder(toValues(id2));
 		}
+
+		{ //_text works as a string param
+			map = new SearchParameterMap();
+			map.add(Constants.PARAM_TEXT, new StringParam(slug).setContains(true));
+			assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map))).containsExactlyInAnyOrder(toValues(id1, id3));
+
+			map = new SearchParameterMap();
+			map.add(Constants.PARAM_TEXT, new StringParam("blood").setContains(true));
+			assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map))).containsExactlyInAnyOrder(toValues(id2));
+		}
+
 	}
 
 	private String get15000CharacterNarrativeIncludingSlugAtEnd(String theSlug) {
