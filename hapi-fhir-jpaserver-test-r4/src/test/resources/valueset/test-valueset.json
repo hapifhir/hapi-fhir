@@ -1,0 +1,24 @@
+{
+	"resourceType": "ValueSet",
+	"id": "test-valueset",
+	"url": "http://terminology.smilecdr.com/test-valueset",
+	"version": "test",
+	"status": "active",
+	"experimental": true,
+	"date": "2024-06-17",
+	"publisher": "SmileCDR",
+	"description": "Test Valueset to reproduce an issue found in 2024.08.PRE-12",
+	"compose": {
+		"include": [
+			{
+				"system": "http://localhost/test-codes",
+				"concept": [
+					{
+						"code": "test-code",
+						"display": "A test code used for validation"
+					}
+				]
+			}
+		]
+	}
+}
