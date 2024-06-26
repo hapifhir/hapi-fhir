@@ -126,7 +126,7 @@ public class RuntimeSearchParam {
 			Collection<String> theBase) {
 		super();
 
-		myId = theId;
+		myId = theId != null ? theId.toUnqualifiedVersionless() : null;
 		myUri = theUri;
 		myName = theName;
 		myDescription = theDescription;
