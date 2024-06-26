@@ -969,6 +969,7 @@
 		<commons_io_version>2.11.0</commons_io_version>
 		<commons_lang3_version>3.14.0</commons_lang3_version>
 		<com_jamesmurty_utils_version>1.2</com_jamesmurty_utils_version>
+		<!-- Deliberately choosing this version because higher versions do not support < Java 21 -->
 		<derby_version>10.16.1.1</derby_version>
 		<error_prone_core_version>2.23.0</error_prone_core_version>
 		<mockito_version>5.8.0</mockito_version>
