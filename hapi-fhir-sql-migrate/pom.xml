@@ -53,11 +53,13 @@
 		<dependency>
 			<groupId>org.apache.derby</groupId>
 			<artifactId>derby</artifactId>
+			<version>${derby_version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.derby</groupId>
 			<artifactId>derbytools</artifactId>
+			<version>${derby_version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -152,7 +154,6 @@
 					</execution>
 				</executions>
 			</plugin>
-
 		</plugins>
 	</build>
 

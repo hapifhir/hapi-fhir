@@ -6,12 +6,16 @@ import ca.uhn.fhir.jpa.migrate.entity.HapiMigrationEntity;
 import ca.uhn.fhir.jpa.migrate.taskdef.AddTableRawSqlTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTest;
+import ca.uhn.fhir.jpa.migrate.tasks.api.TaskFlagEnum;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import jakarta.annotation.Nonnull;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import javax.sql.DataSource;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Properties;
@@ -21,11 +25,60 @@ import java.util.function.Supplier;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 
 public class SchemaMigratorTest extends BaseTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SchemaMigratorTest.class);
 
+	@Test
+	public void validate_withSkippableTasks_returnsSuccessful() throws SQLException {
+		// setup
+		Connection connection = mock(Connection.class);
+		DataSource dataSource = mock(DataSource.class);
+		DriverTypeEnum driverTypeEnum = DriverTypeEnum.POSTGRES_9_4; // does not matter
+		HapiMigrationStorageSvc migrationStorageSvc = mock(HapiMigrationStorageSvc.class);
+
+		// create some tasks
+		AddTableRawSqlTask taskA = new AddTableRawSqlTask("V4_1_0", "20191214.1");
+		taskA.setTableName("SOMETABLE_A");
+		taskA.addSql(driverTypeEnum, "create table SOMETABLE_A (PID bigint not null, TEXTCOL varchar(255))");
+
+		AddTableRawSqlTask taskB = new AddTableRawSqlTask("V4_1_0", "20191214.2");
+		taskB.setTableName("SOMETABLE_B");
+		taskB.addSql(driverTypeEnum, "create table SOMETABLE_B (PID bigint not null, TEXTCOL varchar(255))");
+
+		AddTableRawSqlTask taskC = new AddTableRawSqlTask("V4_1_0", "20191214.3");
+		taskC.setTableName("SOMETABLE_C");
+		taskC.addSql(driverTypeEnum, "create table SOMETABLE_C (PID bigint not null, TEXTCOL varchar(255))");
+
+		AddTableRawSqlTask taskD = new AddTableRawSqlTask("V4_1_0", "20191214.4");
+		taskD.setTableName("SOMETABLE_D");
+		taskD.addSql(driverTypeEnum, "create table SOMETABLE_D (PID bigint not null, TEXTCOL varchar(255))");
+
+		List<BaseTask> tasks = ImmutableList.of(taskA, taskB, taskC, taskD);
+		for (BaseTask t : tasks) {
+			t.addFlag(TaskFlagEnum.HEAVYWEIGHT_SKIP_BY_DEFAULT);
+		}
+		MigrationTaskList taskList = new MigrationTaskList(tasks);
+
+		// when
+		when(migrationStorageSvc.diff(any(MigrationTaskList.class)))
+			.thenReturn(taskList);
+		when(dataSource.getConnection())
+			.thenReturn(connection);
+
+		// create a migrator (with empty task list)
+		SchemaMigrator schemaMigrator = new SchemaMigrator(getUrl(), SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME, dataSource, new Properties(), new MigrationTaskList(), migrationStorageSvc);
+		schemaMigrator.setDriverType(driverTypeEnum);
+
+		// test
+		schemaMigrator.validate();
+
+		// good (no throw)
+	}
 
 	@ParameterizedTest(name = "{index}: {0}")
 	@MethodSource("data")
@@ -46,7 +99,6 @@ public class SchemaMigratorTest extends BaseTest {
 
 		schemaMigrator.validate();
 	}
-
 
 	@ParameterizedTest(name = "{index}: {0}")
 	@MethodSource("data")
