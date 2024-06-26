@@ -2008,6 +2008,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 			// Multiple AND parameters are not supported for unique combo params
 			if (nextValues.get(0).size() != 1) {
+				ourLog.debug("Search is not a candidate for unique combo searching - Multiple AND expressions found for the same parameter");
 				paramValuesAreValidForCombo = false;
 				break;
 			}
@@ -2016,6 +2017,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			for (IQueryParameterType nextOrValue : nextAndValue) {
 				if (nextOrValue instanceof DateParam) {
 					if (((DateParam) nextOrValue).getPrecision() != TemporalPrecisionEnum.DAY) {
+						ourLog.debug("Search is not a candidate for unique combo searching - Date search with non-DAY precision");
 						paramValuesAreValidForCombo = false;
 						break;
 					}
@@ -2028,6 +2030,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			if (nextParamDef.getParamType() == RestSearchParameterTypeEnum.REFERENCE) {
 				ReferenceParam param = (ReferenceParam) nextValues.get(0).get(0);
 				if (isBlank(param.getResourceType())) {
+					ourLog.debug("Search is not a candidate for unique combo searching - Reference with no type specified");
 					paramValuesAreValidForCombo = false;
 					break;
 				}
