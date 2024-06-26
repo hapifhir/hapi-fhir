@@ -23,6 +23,7 @@ import java.util.Set;
 import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -75,9 +76,7 @@ public class SchemaMigratorTest extends BaseTest {
 		schemaMigrator.setDriverType(driverTypeEnum);
 
 		// test
-		schemaMigrator.validate();
-
-		// good (no throw)
+		assertDoesNotThrow(schemaMigrator::validate);
 	}
 
 	@ParameterizedTest(name = "{index}: {0}")
