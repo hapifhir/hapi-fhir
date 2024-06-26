@@ -1,0 +1,5 @@
+---
+type: add
+issue: 6046
+title: "Added support for `:contains` parameter qualifier on the `_text` and `_content` Search Parameters. When using Hibernate Search, this will cause 
+the search to perform an substring match on the provided value. Documentation can be found [here](/hapi-fhir/docs/server_jpa/elastic.html#performing-fulltext-search-in-luceneelasticsearch)."
