@@ -9,4 +9,16 @@
 		<appender-ref ref="STDOUT" />
 	</root>
 
+	<logger name="org.hibernate.search.elasticsearch.request" additivity="false" level="trace">
+		<appender-ref ref="STDOUT" />
+	</logger>
+
+	<logger name="org.elasticsearch.client" level="debug" additivity="false">
+		<appender-ref ref="STDOUT" />
+	</logger>
+	<logger name="tracer" level="TRACE" additivity="false">
+		<appender-ref ref="STDOUT" />
+	</logger>
+
+
 </configuration>
