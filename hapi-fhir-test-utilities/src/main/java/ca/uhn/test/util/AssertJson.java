@@ -22,17 +22,17 @@ import static org.assertj.core.api.Fail.fail;
 /**
  * Assertj extension to ease testing json strings with few nested quoted strings
  */
-public class AssertJsn extends AbstractAssert<AssertJsn, String> {
+public class AssertJson extends AbstractAssert<AssertJson, String> {
 
-	public AssertJsn(String actual) {
-		super(actual, AssertJsn.class);
+	public AssertJson(String actual) {
+		super(actual, AssertJson.class);
 	}
 
-	public static AssertJsn assertThat(String actual) {
-		return new AssertJsn(actual);
+	public static AssertJson assertThat(String actual) {
+		return new AssertJson(actual);
 	}
 
-	public AssertJsn hasPath(String thePath) {
+	public AssertJson hasPath(String thePath) {
 		isNotNull();
 		isNotEmpty(thePath);
 
@@ -43,12 +43,12 @@ public class AssertJsn extends AbstractAssert<AssertJsn, String> {
 		return this;
 	}
 
-	private AssertJsn isNotEmpty(String thePath) {
+	private AssertJson isNotEmpty(String thePath) {
 		Assertions.assertThat(thePath).isNotEmpty();
 		return this;
 	}
 
-	public AssertJsn hasKeys(String... theKeys) {
+	public AssertJson hasKeys(String... theKeys) {
 		isNotNull();
 
 		Map<String, Object> map = getMap(actual);
@@ -59,7 +59,7 @@ public class AssertJsn extends AbstractAssert<AssertJsn, String> {
 		return this;
 	}
 
-	public AssertJsn hasExactlyKeys(String... theKeys) {
+	public AssertJson hasExactlyKeys(String... theKeys) {
 		isNotNull();
 
 		Map<String, Object> map = getMap(actual);
@@ -70,7 +70,7 @@ public class AssertJsn extends AbstractAssert<AssertJsn, String> {
 		return this;
 	}
 
-	public AssertJsn hasExactlyKeysWithValues(List<String> theKeys, List<? extends Serializable> theValues) {
+	public AssertJson hasExactlyKeysWithValues(List<String> theKeys, List<? extends Serializable> theValues) {
 		isNotNull();
 
 		if (!checkSizes(theKeys.size(), theValues.size())) {
@@ -91,7 +91,7 @@ public class AssertJsn extends AbstractAssert<AssertJsn, String> {
 	}
 
 
-	public AssertJsn hasKeyWithValue(String theKey, Object theExpectedValue) {
+	public AssertJson hasKeyWithValue(String theKey, Object theExpectedValue) {
 		isNotNull();
 
 		Map<String, Object> actualMap = getMap(actual);
@@ -197,7 +197,7 @@ public class AssertJsn extends AbstractAssert<AssertJsn, String> {
 		return true;
 	}
 
-	public AssertJsn hasKeysWithValues(List<String> theKeys, List<Object> theValues) {
+	public AssertJson hasKeysWithValues(List<String> theKeys, List<Object> theValues) {
 		isNotNull();
 
 		checkSizes(theKeys.size(), theValues.size());
@@ -252,14 +252,14 @@ public class AssertJsn extends AbstractAssert<AssertJsn, String> {
 	}
 
 
-	public AssertJsn hasPaths(String... thePaths) {
+	public AssertJson hasPaths(String... thePaths) {
 		for (String path : thePaths) {
 			hasPath(path);
 		}
 		return this;
 	}
 
-	public AssertJsn hasPathWithValue(String thePath, String theValue) {
+	public AssertJson hasPathWithValue(String thePath, String theValue) {
 		String[] pathElements = thePath.split("\\.");
 		if (pathElements.length == 1) {
 			hasKeyWithValue(thePath, theValue);
@@ -290,7 +290,7 @@ public class AssertJsn extends AbstractAssert<AssertJsn, String> {
 		return this;
 	}
 
-	public AssertJsn hasPathsWithValues(List<String> thePaths, List<String> theValues) {
+	public AssertJson hasPathsWithValues(List<String> thePaths, List<String> theValues) {
 		if (thePaths.size() != theValues.size()) {
 			fail("Paths size (" + thePaths.size() + ") is different than values size (" + theValues.size() + ")");
 			return this;

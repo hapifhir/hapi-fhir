@@ -5,10 +5,10 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static ca.uhn.test.util.AssertJsn.assertThat;
+import static ca.uhn.test.util.AssertJson.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-class AssertJsnTest {
+class AssertJsonTest {
 
 	private final String myJsonString = """
 			{
