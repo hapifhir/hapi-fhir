@@ -40,5 +40,4 @@ public class CrDiscoveryServiceR4Test extends BaseCrTest {
 			"}";
 		assertEquals(expected, actual);
 	}
-
 }
