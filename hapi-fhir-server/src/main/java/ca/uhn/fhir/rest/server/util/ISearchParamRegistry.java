@@ -40,6 +40,16 @@ import java.util.TreeSet;
 public interface ISearchParamRegistry {
 
 	/**
+	 * Return true if this registry is initialized and ready to handle
+	 * searches and use its cache.
+	 * Return false if cache has not been initialized.
+	 */
+	default boolean isInitialized() {
+		// default initialized to not break current implementers
+		return true;
+	}
+
+	/**
 	 * @return Returns {@literal null} if no match
 	 */
 	RuntimeSearchParam getActiveSearchParam(String theResourceName, String theParamName);

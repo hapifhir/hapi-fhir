@@ -89,6 +89,7 @@ public class ExtendedHSearchSearchBuilder {
 	public boolean canUseHibernateSearch(
 			String theResourceType, SearchParameterMap myParams, ISearchParamRegistry theSearchParamRegistry) {
 		boolean canUseHibernate = true;
+
 		ResourceSearchParams resourceActiveSearchParams = theSearchParamRegistry.getActiveSearchParams(theResourceType);
 		for (String paramName : myParams.keySet()) {
 			// is this parameter supported?
