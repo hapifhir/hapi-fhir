@@ -91,10 +91,7 @@ public class JpaSearchParamCache {
 	public Optional<RuntimeSearchParam> getActiveComboSearchParamById(String theResourceName, IIdType theId) {
 		IIdType idToFind = theId.toUnqualifiedVersionless();
 		return getActiveComboSearchParams(theResourceName).stream()
-				.filter((param) -> {
-					IIdType expected = param.getIdUnqualifiedVersionless();
-					return Objects.equals(idToFind, expected);
-				})
+				.filter((param) -> Objects.equals(idToFind, param.getIdUnqualifiedVersionless()))
 				.findFirst();
 	}
 
