@@ -30,7 +30,6 @@ import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.system.HapiSystemProperties;
-import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -324,7 +323,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 
 		ourLog.info("Registering the first search");
 		new Thread(() -> mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null, RequestPartitionId.allPartitions())).start();
-		await().until(iter::getCountReturned, Matchers.greaterThan(0));
+		await().untilAsserted(() -> assertThat(iter.getCountReturned()).isGreaterThan(0));
 
 		String searchId = mySvc.getActiveSearchIds().iterator().next();
 		CountDownLatch completionLatch = new CountDownLatch(1);

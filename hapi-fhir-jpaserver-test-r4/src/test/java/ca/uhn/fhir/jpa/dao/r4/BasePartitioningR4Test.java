@@ -20,6 +20,7 @@ import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -45,6 +46,8 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 	protected LocalDate myPartitionDate2;
 	protected int myPartitionId;
 	protected int myPartitionId2;
+	protected int myPartitionId3;
+	protected int myPartitionId4;
 	private boolean myHaveDroppedForcedIdUniqueConstraint;
 	@Autowired
 	private IPartitionLookupSvc myPartitionConfigSvc;
@@ -81,14 +84,16 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		myPartitionDate2 = LocalDate.of(2020, Month.FEBRUARY, 15);
 		myPartitionId = 1;
 		myPartitionId2 = 2;
+		myPartitionId3 = 3;
+		myPartitionId4 = 4;
 
 		myPartitionInterceptor = new MyReadWriteInterceptor();
 		mySrdInterceptorService.registerInterceptor(myPartitionInterceptor);
 
-		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1), null);
-		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(2).setName(PARTITION_2), null);
-		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(3).setName(PARTITION_3), null);
-		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(4).setName(PARTITION_4), null);
+		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(myPartitionId).setName(PARTITION_1), null);
+		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(myPartitionId2).setName(PARTITION_2), null);
+		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(myPartitionId3).setName(PARTITION_3), null);
+		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(myPartitionId4).setName(PARTITION_4), null);
 
 		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
 
@@ -96,6 +101,10 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		myPartitionInterceptor.addReadPartition(RequestPartitionId.fromPartitionNames(JpaConstants.DEFAULT_PARTITION_NAME, PARTITION_1, PARTITION_2, PARTITION_3, PARTITION_4));
 		myPatientDao.search(new SearchParameterMap().setLoadSynchronous(true), mySrd);
 
+		// Pre-fetch the partitions by ID
+		for (int i = 1; i <= 4; i++) {
+			myPartitionConfigSvc.getPartitionById(i);
+		}
 	}
 
 	@Override
@@ -110,7 +119,8 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 			});
 		}
 	}
-	protected void createUniqueCompositeSp() {
+
+	protected void createUniqueComboSp() {
 		addCreateDefaultPartition();
 		addReadDefaultPartition(); // one for search param validation
 		SearchParameter sp = new SearchParameter();
@@ -118,6 +128,17 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		sp.setType(Enumerations.SearchParamType.DATE);
 		sp.setCode("birthdate");
 		sp.setExpression("Patient.birthDate");
+		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sp.addBase("Patient");
+		mySearchParameterDao.update(sp, mySrd);
+
+		addCreateDefaultPartition();
+		addReadDefaultPartition(); // one for search param validation
+		sp = new SearchParameter();
+		sp.setId("SearchParameter/patient-family");
+		sp.setType(Enumerations.SearchParamType.STRING);
+		sp.setCode("family");
+		sp.setExpression("Patient.name[0].family");
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		sp.addBase("Patient");
 		mySearchParameterDao.update(sp, mySrd);
@@ -131,9 +152,55 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		sp.addComponent()
 			.setExpression("Patient")
 			.setDefinition("SearchParameter/patient-birthdate");
+		sp.addComponent()
+			.setExpression("Patient")
+			.setDefinition("SearchParameter/patient-family");
 		sp.addExtension()
 			.setUrl(HapiExtensions.EXT_SP_UNIQUE)
 			.setValue(new BooleanType(true));
+		mySearchParameterDao.update(sp, mySrd);
+
+		mySearchParamRegistry.forceRefresh();
+	}
+
+	protected void createNonUniqueComboSp() {
+		addCreateDefaultPartition();
+		addReadDefaultPartition(); // one for search param validation
+		SearchParameter sp = new SearchParameter();
+		sp.setId("SearchParameter/patient-family");
+		sp.setType(Enumerations.SearchParamType.STRING);
+		sp.setCode("family");
+		sp.setExpression("Patient.name.family");
+		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sp.addBase("Patient");
+		mySearchParameterDao.update(sp, mySrd);
+
+		addCreateDefaultPartition();
+		addReadDefaultPartition(); // one for search param validation
+		sp = new SearchParameter();
+		sp.setId("SearchParameter/patient-managingorg");
+		sp.setType(Enumerations.SearchParamType.REFERENCE);
+		sp.setCode(Patient.SP_ORGANIZATION);
+		sp.setExpression("Patient.managingOrganization");
+		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sp.addBase("Patient");
+		mySearchParameterDao.update(sp, mySrd);
+
+		addCreateDefaultPartition();
+		sp = new SearchParameter();
+		sp.setId("SearchParameter/patient-family-and-org");
+		sp.setType(Enumerations.SearchParamType.COMPOSITE);
+		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sp.addBase("Patient");
+		sp.addComponent()
+			.setExpression("Patient")
+			.setDefinition("SearchParameter/patient-family");
+		sp.addComponent()
+			.setExpression("Patient")
+			.setDefinition("SearchParameter/patient-managingorg");
+		sp.addExtension()
+			.setUrl(HapiExtensions.EXT_SP_UNIQUE)
+			.setValue(new BooleanType(false));
 		mySearchParameterDao.update(sp, mySrd);
 
 		mySearchParamRegistry.forceRefresh();

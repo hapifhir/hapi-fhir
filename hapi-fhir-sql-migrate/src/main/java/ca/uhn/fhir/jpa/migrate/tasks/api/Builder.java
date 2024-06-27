@@ -26,6 +26,7 @@ import ca.uhn.fhir.jpa.migrate.taskdef.AddColumnTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.AddForeignKeyTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.AddIdGeneratorTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.AddIndexTask;
+import ca.uhn.fhir.jpa.migrate.taskdef.AddPrimaryKeyTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.AddTableByColumnTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.AddTableRawSqlTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTableTask;
@@ -35,6 +36,7 @@ import ca.uhn.fhir.jpa.migrate.taskdef.DropColumnTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.DropForeignKeyTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.DropIdGeneratorTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.DropIndexTask;
+import ca.uhn.fhir.jpa.migrate.taskdef.DropPrimaryKeyTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.DropTableTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.ExecuteRawSqlTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.ExecuteTaskPrecondition;
@@ -47,6 +49,7 @@ import ca.uhn.fhir.jpa.migrate.taskdef.NopTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.RenameColumnTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.RenameIndexTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.RenameTableTask;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
 import org.intellij.lang.annotations.Language;
 import org.slf4j.Logger;
@@ -85,18 +88,17 @@ public class Builder {
 	}
 
 	public BuilderCompleteTask executeRawSql(String theVersion, @Language("SQL") String theSql) {
-		ExecuteRawSqlTask task = executeRawSqlOptional(false, theVersion, theSql);
+		ExecuteRawSqlTask task = executeRawSqlOptional(theVersion, theSql);
 		return new BuilderCompleteTask(task);
 	}
 
 	public void executeRawSqlStub(String theVersion, @Language("SQL") String theSql) {
-		executeRawSqlOptional(true, theVersion, theSql);
+		BuilderCompleteTask task = executeRawSql(theVersion, theSql);
+		task.withFlag(TaskFlagEnum.DO_NOTHING);
 	}
 
-	private ExecuteRawSqlTask executeRawSqlOptional(
-			boolean theDoNothing, String theVersion, @Language("SQL") String theSql) {
+	private ExecuteRawSqlTask executeRawSqlOptional(String theVersion, @Language("SQL") String theSql) {
 		ExecuteRawSqlTask task = new ExecuteRawSqlTask(myRelease, theVersion).addSql(theSql);
-		task.setDoNothing(theDoNothing);
 		mySink.addTask(task);
 		return task;
 	}
@@ -172,10 +174,10 @@ public class Builder {
 		addTask(task);
 	}
 
-	public DropIdGeneratorTask dropIdGenerator(String theVersion, String theIdGeneratorName) {
+	public BuilderCompleteTask dropIdGenerator(String theVersion, String theIdGeneratorName) {
 		DropIdGeneratorTask task = new DropIdGeneratorTask(myRelease, theVersion, theIdGeneratorName);
 		addTask(task);
-		return task;
+		return new BuilderCompleteTask(task);
 	}
 
 	public void addNop(String theVersion) {
@@ -199,7 +201,7 @@ public class Builder {
 		}
 
 		public BuilderCompleteTask dropIndex(String theVersion, String theIndexName) {
-			BaseTask task = dropIndexOptional(false, theVersion, theIndexName);
+			BaseTask task = dropIndexOptional(theVersion, theIndexName);
 			return new BuilderCompleteTask(task);
 		}
 
@@ -207,20 +209,20 @@ public class Builder {
 		 * Drop index without taking write lock on PG, Oracle, MSSQL.
 		 */
 		public BuilderCompleteTask dropIndexOnline(String theVersion, String theIndexName) {
-			DropIndexTask task = dropIndexOptional(false, theVersion, theIndexName);
+			DropIndexTask task = dropIndexOptional(theVersion, theIndexName);
 			task.setOnline(true);
 			return new BuilderCompleteTask(task);
 		}
 
 		public void dropIndexStub(String theVersion, String theIndexName) {
-			dropIndexOptional(true, theVersion, theIndexName);
+			DropIndexTask task = dropIndexOptional(theVersion, theIndexName);
+			task.addFlag(TaskFlagEnum.DO_NOTHING);
 		}
 
-		private DropIndexTask dropIndexOptional(boolean theDoNothing, String theVersion, String theIndexName) {
+		private DropIndexTask dropIndexOptional(String theVersion, String theIndexName) {
 			DropIndexTask task = new DropIndexTask(myRelease, theVersion);
 			task.setIndexName(theIndexName);
 			task.setTableName(myTableName);
-			task.setDoNothing(theDoNothing);
 			addTask(task);
 			return task;
 		}
@@ -230,24 +232,24 @@ public class Builder {
 		 */
 		@Deprecated
 		public void renameIndex(String theVersion, String theOldIndexName, String theNewIndexName) {
-			renameIndexOptional(false, theVersion, theOldIndexName, theNewIndexName);
+			renameIndexOptional(theVersion, theOldIndexName, theNewIndexName);
 		}
 
 		/**
 		 * @deprecated Do not rename indexes - It is too hard to figure out what happened if something goes wrong
 		 */
 		public void renameIndexStub(String theVersion, String theOldIndexName, String theNewIndexName) {
-			renameIndexOptional(true, theVersion, theOldIndexName, theNewIndexName);
+			RenameIndexTask task = renameIndexOptional(theVersion, theOldIndexName, theNewIndexName);
+			task.addFlag(TaskFlagEnum.DO_NOTHING);
 		}
 
-		private void renameIndexOptional(
-				boolean theDoNothing, String theVersion, String theOldIndexName, String theNewIndexName) {
+		private RenameIndexTask renameIndexOptional(String theVersion, String theOldIndexName, String theNewIndexName) {
 			RenameIndexTask task = new RenameIndexTask(myRelease, theVersion);
 			task.setOldIndexName(theOldIndexName);
 			task.setNewIndexName(theNewIndexName);
 			task.setTableName(myTableName);
-			task.setDoNothing(theDoNothing);
 			addTask(task);
+			return task;
 		}
 
 		public void dropThisTable(String theVersion) {
@@ -261,7 +263,13 @@ public class Builder {
 		}
 
 		public BuilderWithTableName.BuilderAddColumnWithName addColumn(String theVersion, String theColumnName) {
-			return new BuilderWithTableName.BuilderAddColumnWithName(myRelease, theVersion, theColumnName, this);
+			return new BuilderWithTableName.BuilderAddColumnWithName(myRelease, theVersion, theColumnName, null, this);
+		}
+
+		public BuilderWithTableName.BuilderAddColumnWithName addColumn(
+				String theVersion, String theColumnName, Object theDefaultValue) {
+			return new BuilderWithTableName.BuilderAddColumnWithName(
+					myRelease, theVersion, theColumnName, theDefaultValue, this);
 		}
 
 		public BuilderCompleteTask dropColumn(String theVersion, String theColumnName) {
@@ -318,6 +326,10 @@ public class Builder {
 			return Optional.ofNullable(myLastAddedTask);
 		}
 
+		public void addPrimaryKey(String theVersion, String... theColumnsInOrder) {
+			addTask(new AddPrimaryKeyTask(myRelease, theVersion, myTableName, theColumnsInOrder));
+		}
+
 		/**
 		 * @param theFkName          the name of the foreign key
 		 * @param theParentTableName the name of the table that exports the foreign key
@@ -363,6 +375,11 @@ public class Builder {
 			return new BuilderCompleteTask(task);
 		}
 
+		public void dropPrimaryKey(String theVersion) {
+			final DropPrimaryKeyTask task = new DropPrimaryKeyTask(myRelease, theVersion, myTableName);
+			addTask(task);
+		}
+
 		public class BuilderAddIndexWithName {
 			private final String myVersion;
 			private final String myIndexName;
@@ -388,27 +405,47 @@ public class Builder {
 				}
 
 				public void withColumnsStub(String... theColumnNames) {
-					withColumnsOptional(true, theColumnNames);
+					BuilderCompleteTask task = withColumns(theColumnNames);
+					task.withFlag(TaskFlagEnum.DO_NOTHING);
 				}
 
 				public BuilderCompleteTask withColumns(String... theColumnNames) {
-					BaseTask task = withColumnsOptional(false, theColumnNames);
-					return new BuilderCompleteTask(task);
-				}
-
-				private AddIndexTask withColumnsOptional(boolean theDoNothing, String... theColumnNames) {
 					AddIndexTask task = new AddIndexTask(myRelease, myVersion);
 					task.setTableName(myTableName);
 					task.setIndexName(myIndexName);
 					task.setUnique(myUnique);
 					task.setColumns(theColumnNames);
-					task.setDoNothing(theDoNothing);
 					task.setOnline(myOnline);
 					if (myIncludeColumns != null) {
 						task.setIncludeColumns(myIncludeColumns);
 					}
 					addTask(task);
-					return task;
+					return new BuilderCompleteTask(task);
+				}
+
+				/**
+				 * THis is strictly needed for SQL Server, as it will create filtered indexes on nullable columns, and we have to build a tail clause which matches what the SQL Server Hibernate dialect does.
+				 */
+				public BuilderCompleteTask withPossibleNullableColumns(ColumnAndNullable... theColumns) {
+					String[] columnNames = Arrays.stream(theColumns)
+							.map(ColumnAndNullable::getColumnName)
+							.toArray(String[]::new);
+					String[] nullableColumnNames = Arrays.stream(theColumns)
+							.filter(ColumnAndNullable::isNullable)
+							.map(ColumnAndNullable::getColumnName)
+							.toArray(String[]::new);
+					AddIndexTask task = new AddIndexTask(myRelease, myVersion);
+					task.setTableName(myTableName);
+					task.setIndexName(myIndexName);
+					task.setUnique(myUnique);
+					task.setColumns(columnNames);
+					task.setNullableColumns(nullableColumnNames);
+					task.setOnline(myOnline);
+					if (myIncludeColumns != null) {
+						task.setIncludeColumns(myIncludeColumns);
+					}
+					addTask(task);
+					return new BuilderCompleteTask(task);
 				}
 
 				public BuilderAddIndexUnique includeColumns(String... theIncludeColumns) {
@@ -453,18 +490,17 @@ public class Builder {
 			public class BuilderModifyColumnWithNameAndNullable {
 				private final String myVersion;
 				private final boolean myNullable;
-				private boolean myFailureAllowed;
 
 				public BuilderModifyColumnWithNameAndNullable(String theVersion, boolean theNullable) {
 					myVersion = theVersion;
 					myNullable = theNullable;
 				}
 
-				public void withType(ColumnTypeEnum theColumnType) {
-					withType(theColumnType, null);
+				public BuilderCompleteTask withType(ColumnTypeEnum theColumnType) {
+					return withType(theColumnType, null);
 				}
 
-				public void withType(ColumnTypeEnum theColumnType, Integer theLength) {
+				public BuilderCompleteTask withType(ColumnTypeEnum theColumnType, Integer theLength) {
 					if (theColumnType == ColumnTypeEnum.STRING) {
 						if (theLength == null || theLength == 0) {
 							throw new IllegalArgumentException(
@@ -478,6 +514,7 @@ public class Builder {
 					}
 
 					ModifyColumnTask task = new ModifyColumnTask(myRelease, myVersion);
+
 					task.setColumnName(myColumnName);
 					task.setTableName(myTableName);
 					if (theLength != null) {
@@ -485,13 +522,8 @@ public class Builder {
 					}
 					task.setNullable(myNullable);
 					task.setColumnType(theColumnType);
-					task.setFailureAllowed(myFailureAllowed);
 					addTask(task);
-				}
-
-				public BuilderModifyColumnWithNameAndNullable failureAllowed() {
-					myFailureAllowed = true;
-					return this;
+					return new BuilderCompleteTask(task);
 				}
 			}
 		}
@@ -533,16 +565,22 @@ public class Builder {
 			private final String myRelease;
 			private final String myVersion;
 			private final String myColumnName;
+
+			@Nullable
+			private final Object myDefaultValue;
+
 			private final BaseMigrationTasks.IAcceptsTasks myTaskSink;
 
 			public BuilderAddColumnWithName(
 					String theRelease,
 					String theVersion,
 					String theColumnName,
+					@Nullable Object theDefaultValue,
 					BaseMigrationTasks.IAcceptsTasks theTaskSink) {
 				myRelease = theRelease;
 				myVersion = theVersion;
 				myColumnName = theColumnName;
+				myDefaultValue = theDefaultValue;
 				myTaskSink = theTaskSink;
 			}
 
@@ -579,6 +617,7 @@ public class Builder {
 					if (theLength != null) {
 						task.setColumnLength(theLength);
 					}
+					task.setDefaultValue(myDefaultValue);
 					myTaskSink.addTask(task);
 
 					return new BuilderCompleteTask(task);
@@ -596,12 +635,12 @@ public class Builder {
 		}
 
 		public BuilderCompleteTask failureAllowed() {
-			myTask.setFailureAllowed(true);
+			myTask.addFlag(TaskFlagEnum.FAILURE_ALLOWED);
 			return this;
 		}
 
 		public BuilderCompleteTask doNothing() {
-			myTask.setDoNothing(true);
+			myTask.addFlag(TaskFlagEnum.DO_NOTHING);
 			return this;
 		}
 
@@ -646,12 +685,22 @@ public class Builder {
 		}
 
 		public BuilderCompleteTask runEvenDuringSchemaInitialization() {
-			myTask.setRunDuringSchemaInitialization(true);
+			myTask.addFlag(TaskFlagEnum.RUN_DURING_SCHEMA_INITIALIZATION);
 			return this;
 		}
 
 		public BuilderCompleteTask setTransactional(boolean theFlag) {
 			myTask.setTransactional(theFlag);
+			return this;
+		}
+
+		public BuilderCompleteTask heavyweightSkipByDefault() {
+			myTask.addFlag(TaskFlagEnum.HEAVYWEIGHT_SKIP_BY_DEFAULT);
+			return this;
+		}
+
+		public BuilderCompleteTask withFlag(TaskFlagEnum theFlag) {
+			myTask.addFlag(theFlag);
 			return this;
 		}
 	}
@@ -695,7 +744,7 @@ public class Builder {
 		}
 
 		public BuilderAddColumnWithName addColumn(String theColumnName) {
-			return new BuilderAddColumnWithName(myRelease, myVersion, theColumnName, this);
+			return new BuilderAddColumnWithName(myRelease, myVersion, theColumnName, null, this);
 		}
 
 		@Override
@@ -707,9 +756,8 @@ public class Builder {
 			}
 		}
 
-		public BuilderAddTableByColumns failureAllowed() {
-			myTask.setFailureAllowed(true);
-			return this;
+		public BuilderCompleteTask withFlags() {
+			return new BuilderCompleteTask(myTask);
 		}
 	}
 

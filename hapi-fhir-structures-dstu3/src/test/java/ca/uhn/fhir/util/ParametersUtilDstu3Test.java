@@ -1,7 +1,6 @@
 package ca.uhn.fhir.util;
 
 import ca.uhn.fhir.context.FhirContext;
-import org.hamcrest.Matchers;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.junit.jupiter.api.Test;

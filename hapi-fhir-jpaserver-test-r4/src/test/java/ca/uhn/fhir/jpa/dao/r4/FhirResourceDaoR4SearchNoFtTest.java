@@ -1180,7 +1180,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 //		params = new SearchParameterMap();
 //		params.setLoadSynchronous(true);
 //		params.add("_has", new HasParam("Observation", "subject", "device.identifier", "urn:system|DEVICEID"));
-//		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(params)), contains(pid0.getValue()));
+//		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(params))).contains(pid0.getValue());
 
 		// No targets exist
 		params = new SearchParameterMap();
@@ -4487,7 +4487,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		ArgumentCaptor<HookParams> captor = ArgumentCaptor.forClass(HookParams.class);
 		verify(interceptor, times(1)).invoke(ArgumentMatchers.eq(Pointcut.JPA_PERFTRACE_WARNING), captor.capture());
 		StorageProcessingMessage message = captor.getValue().get(StorageProcessingMessage.class);
-		assertEquals("This search uses an unqualified resource(a parameter in a chain without a resource type). This is less efficient than using a qualified type. If you know what you're looking for, try qualifying it using the form: 'entity:[resourceType]'", message.getMessage());
+		assertEquals("This search uses an unqualified resource(a parameter in a chain without a resource type). This is less efficient than using a qualified type. If you know what you're looking for, try qualifying it using the form: 'entity:[resourceType]=[id] or entity=[resourceType]/[id]'", message.getMessage());
 	}
 
 	@Test

@@ -22,22 +22,29 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.HapiMigrationException;
+import ca.uhn.fhir.jpa.migrate.tasks.api.TaskFlagEnum;
 import ca.uhn.fhir.system.HapiSystemProperties;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.flywaydb.core.api.MigrationVersion;
 import org.intellij.lang.annotations.Language;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -51,11 +58,42 @@ public abstract class BaseTask {
 	private static final Pattern versionPattern = Pattern.compile(MIGRATION_VERSION_PATTERN);
 	private final String myProductVersion;
 	private final String mySchemaVersion;
+	private final List<ExecuteTaskPrecondition> myPreconditions = new ArrayList<>();
+	private final EnumSet<TaskFlagEnum> myFlags = EnumSet.noneOf(TaskFlagEnum.class);
+	private final List<ExecutedStatement> myExecutedStatements = new ArrayList<>();
+	/**
+	 * Whether to check for existing tables
+	 * before generating SQL
+	 */
+	protected boolean myCheckForExistingTables = true;
+	/**
+	 * Whether to generate the SQL in a 'readable format'
+	 */
+	protected boolean myPrettyPrint = false;
+
 	private DriverTypeEnum.ConnectionProperties myConnectionProperties;
 	private DriverTypeEnum myDriverType;
 	private String myDescription;
 	private Integer myChangesCount = 0;
 	private boolean myDryRun;
+	private boolean myTransactional = true;
+	private Set<DriverTypeEnum> myOnlyAppliesToPlatforms = new HashSet<>();
+	private boolean myNoColumnShrink;
+
+	protected BaseTask(String theProductVersion, String theSchemaVersion) {
+		myProductVersion = theProductVersion;
+		mySchemaVersion = theSchemaVersion;
+	}
+
+	/**
+	 * Adds a flag if it's not already present, otherwise this call is ignored.
+	 *
+	 * @param theFlag The flag, must not be null
+	 */
+	public BaseTask addFlag(@Nonnull TaskFlagEnum theFlag) {
+		myFlags.add(theFlag);
+		return this;
+	}
 
 	/**
 	 * Some migrations can not be run in a transaction.
@@ -65,48 +103,12 @@ public abstract class BaseTask {
 		myTransactional = theTransactional;
 	}
 
-	private boolean myTransactional = true;
-	private boolean myDoNothing;
-	private List<ExecutedStatement> myExecutedStatements = new ArrayList<>();
-	private Set<DriverTypeEnum> myOnlyAppliesToPlatforms = new HashSet<>();
-	private boolean myNoColumnShrink;
-	private boolean myFailureAllowed;
-	private boolean myRunDuringSchemaInitialization;
-	/**
-	 * Whether or not to check for existing tables
-	 * before generating SQL
-	 */
-	protected boolean myCheckForExistingTables = true;
-
-	/**
-	 * Whether or not to generate the SQL in a 'readable format'
-	 */
-	protected boolean myPrettyPrint = false;
-
-	protected BaseTask(String theProductVersion, String theSchemaVersion) {
-		myProductVersion = theProductVersion;
-		mySchemaVersion = theSchemaVersion;
-	}
-
-	public boolean isRunDuringSchemaInitialization() {
-		return myRunDuringSchemaInitialization;
-	}
-
 	public void setPrettyPrint(boolean thePrettyPrint) {
 		myPrettyPrint = thePrettyPrint;
 	}
 
-	/**
-	 * Should this task run even if we're doing the very first initialization of an empty schema. By
-	 * default we skip most tasks during that pass, since they just take up time and the
-	 * schema should be fully initialized by the {@link InitializeSchemaTask}
-	 */
-	public void setRunDuringSchemaInitialization(boolean theRunDuringSchemaInitialization) {
-		myRunDuringSchemaInitialization = theRunDuringSchemaInitialization;
-	}
-
 	public void setOnlyAppliesToPlatforms(Set<DriverTypeEnum> theOnlyAppliesToPlatforms) {
-		Validate.notNull(theOnlyAppliesToPlatforms);
+		Validate.notNull(theOnlyAppliesToPlatforms, "theOnlyAppliesToPlatforms must not be null");
 		myOnlyAppliesToPlatforms = theOnlyAppliesToPlatforms;
 	}
 
@@ -174,6 +176,17 @@ public abstract class BaseTask {
 		captureExecutedStatement(theTableName, theSql, theArguments);
 	}
 
+	protected <T> T executeSqlWithResult(
+			@Language("SQL") String theSql, ResultSetExtractor<T> theResultSetExtractor, Object... theArguments) {
+		if (myTransactional) {
+			return getConnectionProperties()
+					.getTxTemplate()
+					.execute(t -> doExecuteSqlWithResult(theSql, theResultSetExtractor, theArguments));
+		}
+
+		return doExecuteSqlWithResult(theSql, theResultSetExtractor, theArguments);
+	}
+
 	protected void executeSqlListInTransaction(String theTableName, List<String> theSqlStatements) {
 		if (!isDryRun()) {
 			Integer changes;
@@ -188,7 +201,7 @@ public abstract class BaseTask {
 
 	private Integer doExecuteSqlList(List<String> theSqlStatements) {
 		int changesCount = 0;
-		for (String nextSql : theSqlStatements) {
+		for (@Language("SQL") String nextSql : theSqlStatements) {
 			changesCount += doExecuteSql(nextSql);
 		}
 
@@ -206,8 +219,10 @@ public abstract class BaseTask {
 			}
 			return changesCount;
 		} catch (DataAccessException e) {
-			if (myFailureAllowed) {
-				ourLog.info("Task {} did not exit successfully, but task is allowed to fail", getMigrationVersion());
+			if (myFlags.contains(TaskFlagEnum.FAILURE_ALLOWED)) {
+				ourLog.info(
+						"Task {} did not exit successfully on doExecuteSql(), but task is allowed to fail",
+						getMigrationVersion());
 				ourLog.debug("Error was: {}", e.getMessage(), e);
 				return 0;
 			} else {
@@ -217,9 +232,35 @@ public abstract class BaseTask {
 		}
 	}
 
+	@Nullable
+	private <T> T doExecuteSqlWithResult(
+			@Language("SQL") String theSql, ResultSetExtractor<T> theResultSetExtractor, Object... theArguments) {
+		final JdbcTemplate jdbcTemplate = getConnectionProperties().newJdbcTemplate();
+		// 0 means no timeout -- we use this for index rebuilds that may take time.
+		jdbcTemplate.setQueryTimeout(0);
+		try {
+			T result = jdbcTemplate.query(theSql, theResultSetExtractor, theArguments);
+			if (!HapiSystemProperties.isUnitTestModeEnabled()) {
+				logInfo(ourLog, "SQL \"{}\" returned result {}", theSql, result);
+			}
+			return result;
+		} catch (DataAccessException e) {
+			if (myFlags.contains(TaskFlagEnum.FAILURE_ALLOWED)) {
+				ourLog.info(
+						"Task {} did not exit successfully on doExecuteSqlWithResult(), but task is allowed to fail",
+						getMigrationVersion());
+				ourLog.debug("Error was: {}", e.getMessage(), e);
+				return null;
+			} else {
+				throw new HapiMigrationException(
+						Msg.code(2532) + "Failed during task " + getMigrationVersion() + ": " + e, e);
+			}
+		}
+	}
+
 	protected void captureExecutedStatement(
 			String theTableName, @Language("SQL") String theSql, Object... theArguments) {
-		myExecutedStatements.add(new ExecutedStatement(theTableName, theSql, theArguments));
+		myExecutedStatements.add(new ExecutedStatement(mySchemaVersion, theTableName, theSql, theArguments));
 	}
 
 	public DriverTypeEnum.ConnectionProperties getConnectionProperties() {
@@ -250,10 +291,8 @@ public abstract class BaseTask {
 		return getConnectionProperties().newJdbcTemplate();
 	}
 
-	private final List<ExecuteTaskPrecondition> myPreconditions = new ArrayList<>();
-
 	public void execute() throws SQLException {
-		if (myDoNothing) {
+		if (myFlags.contains(TaskFlagEnum.DO_NOTHING)) {
 			ourLog.info("Skipping stubbed task: {}", getDescription());
 			return;
 		}
@@ -278,14 +317,6 @@ public abstract class BaseTask {
 
 	protected abstract void doExecute() throws SQLException;
 
-	protected boolean isFailureAllowed() {
-		return myFailureAllowed;
-	}
-
-	public void setFailureAllowed(boolean theFailureAllowed) {
-		myFailureAllowed = theFailureAllowed;
-	}
-
 	public String getMigrationVersion() {
 		String releasePart = myProductVersion;
 		if (releasePart.startsWith("V")) {
@@ -296,6 +327,7 @@ public abstract class BaseTask {
 		return migrationVersion.getVersion();
 	}
 
+	@SuppressWarnings("StringConcatenationArgumentToLogCall")
 	protected void logInfo(Logger theLog, String theFormattedMessage, Object... theArguments) {
 		theLog.info(getMigrationVersion() + ": " + theFormattedMessage, theArguments);
 	}
@@ -306,23 +338,6 @@ public abstract class BaseTask {
 			throw new IllegalStateException(Msg.code(62) + "The version " + mySchemaVersion
 					+ " does not match the expected pattern " + MIGRATION_VERSION_PATTERN);
 		}
-	}
-
-	public void doNothing() {
-		setDoNothing(true);
-	}
-
-	public void failureAllowed() {
-		setFailureAllowed(true);
-	}
-
-	public boolean isDoNothing() {
-		return myDoNothing;
-	}
-
-	public BaseTask setDoNothing(boolean theDoNothing) {
-		myDoNothing = theDoNothing;
-		return this;
 	}
 
 	public void addPrecondition(ExecuteTaskPrecondition thePrecondition) {
@@ -343,7 +358,6 @@ public abstract class BaseTask {
 		if (theObject == null || getClass().equals(theObject.getClass()) == false) {
 			return false;
 		}
-		@SuppressWarnings("unchecked")
 		BaseTask otherObject = (BaseTask) theObject;
 
 		EqualsBuilder b = new EqualsBuilder();
@@ -357,15 +371,33 @@ public abstract class BaseTask {
 		return false;
 	}
 
+	public boolean isDoNothing() {
+		return myFlags.contains(TaskFlagEnum.DO_NOTHING);
+	}
+
+	public boolean isHeavyweightSkippableTask() {
+		return myFlags.contains(TaskFlagEnum.HEAVYWEIGHT_SKIP_BY_DEFAULT);
+	}
+
+	public boolean hasFlag(TaskFlagEnum theFlag) {
+		return myFlags.contains(theFlag);
+	}
+
 	public static class ExecutedStatement {
 		private final String mySql;
 		private final List<Object> myArguments;
 		private final String myTableName;
+		private final String mySchemaVersion;
 
-		public ExecutedStatement(String theDescription, String theSql, Object[] theArguments) {
+		public ExecutedStatement(String theSchemaVersion, String theDescription, String theSql, Object[] theArguments) {
+			mySchemaVersion = theSchemaVersion;
 			myTableName = theDescription;
 			mySql = theSql;
 			myArguments = theArguments != null ? Arrays.asList(theArguments) : Collections.emptyList();
+		}
+
+		public String getSchemaVersion() {
+			return mySchemaVersion;
 		}
 
 		public String getTableName() {
@@ -378,6 +410,15 @@ public abstract class BaseTask {
 
 		public List<Object> getArguments() {
 			return myArguments;
+		}
+
+		@Override
+		public String toString() {
+			return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+					.append("tableName", myTableName)
+					.append("sql", mySql)
+					.append("arguments", myArguments)
+					.toString();
 		}
 	}
 }

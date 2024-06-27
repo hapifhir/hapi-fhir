@@ -66,7 +66,7 @@ public class FhirResourceDaoDstu3SearchFtTest extends BaseJpaDstu3Test {
 //
 //		map = new SearchParameterMap();
 //		map.add(Observation.SP_CODE, new TokenParam(null, "blood").setModifier(TokenParamModifier.TEXT));
-//		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), empty());
+//		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map))).isEmpty();
 //
 //		map = new SearchParameterMap();
 //		map.add(Observation.SP_CODE, new TokenParam(null, "blood").setModifier(TokenParamModifier.TEXT));

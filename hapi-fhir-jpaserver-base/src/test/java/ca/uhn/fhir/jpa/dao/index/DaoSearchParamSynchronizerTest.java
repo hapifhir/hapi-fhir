@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.index;
 
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndex;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamNumber;
@@ -61,6 +62,7 @@ public class DaoSearchParamSynchronizerTest {
 		THE_SEARCH_PARAM_NUMBER.setResource(resourceTable);
 
 		subject.setEntityManager(entityManager);
+		subject.setStorageSettings(new JpaStorageSettings());
 	}
 
 	@Test

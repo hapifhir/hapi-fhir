@@ -26,6 +26,10 @@ import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.search.BaseSourceSearchParameterTestCases;
 import ca.uhn.fhir.jpa.search.CompositeSearchParameterTestCases;
 import ca.uhn.fhir.jpa.search.QuantitySearchParameterTestCases;
+import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
+import ca.uhn.fhir.jpa.search.lastn.ElasticsearchRestClientFactory;
+import ca.uhn.fhir.jpa.search.lastn.ElasticsearchSvcImpl;
+import ca.uhn.fhir.jpa.search.lastn.json.ObservationJson;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
@@ -41,6 +45,7 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.SpecialParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -54,8 +59,18 @@ import ca.uhn.fhir.test.utilities.LogbackLevelOverrideExtension;
 import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
+import ca.uhn.test.util.LogbackTestExtension;
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch.core.SearchRequest;
+import co.elastic.clients.elasticsearch.core.SearchResponse;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import jakarta.annotation.Nonnull;
+import jakarta.json.JsonValue;
 import jakarta.persistence.EntityManager;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.elasticsearch.client.RequestOptions;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -103,6 +118,7 @@ import org.springframework.test.context.support.DirtiesContextTestExecutionListe
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
+import org.testcontainers.elasticsearch.ElasticsearchContainer;
 
 import java.io.IOException;
 import java.net.URLEncoder;
@@ -118,6 +134,7 @@ import static ca.uhn.fhir.jpa.model.util.UcumServiceUtil.UCUM_CODESYSTEM_URL;
 import static ca.uhn.fhir.rest.api.Constants.CHARSET_UTF8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -168,6 +185,9 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 	TestDaoSearch myTestDaoSearch;
 	@RegisterExtension
 	LogbackLevelOverrideExtension myLogbackLevelOverrideExtension = new LogbackLevelOverrideExtension();
+
+	@RegisterExtension
+	LogbackTestExtension myLogbackTestExtension = new LogbackTestExtension();
 	@Autowired
 	@Qualifier("myCodeSystemDaoR4")
 	private IFhirResourceDao<CodeSystem> myCodeSystemDao;
@@ -203,9 +223,13 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 	private IFhirResourceDao<QuestionnaireResponse> myQuestionnaireResponseDao;
 	@Autowired
 	private TestHSearchEventDispatcher myHSearchEventDispatcher;
+	@Autowired
+	ElasticsearchContainer myElasticsearchContainer;
 
 	@Mock
 	private IHSearchEventListener mySearchEventListener;
+	@Autowired
+	private ElasticsearchSvcImpl myElasticsearchSvc;
 
 
 	@BeforeEach
@@ -294,7 +318,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 
 	}
 	@Test
-	public void testResourceTextSearch() {
+	public void testResourceContentSearch() {
 
 		Observation obs1 = new Observation();
 		obs1.getCode().setText("Systolic Blood Pressure");
@@ -311,14 +335,181 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 
 		SearchParameterMap map;
 
-		map = new SearchParameterMap();
-		map.add(ca.uhn.fhir.rest.api.Constants.PARAM_CONTENT, new StringParam("systolic"));
-		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map))).containsExactlyInAnyOrder(toValues(id1));
+		{ //Content works as String Param
+			map = new SearchParameterMap();
+			map.add(ca.uhn.fhir.rest.api.Constants.PARAM_CONTENT, new StringParam("systolic"));
+			assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map))).containsExactlyInAnyOrder(toValues(id1));
 
-		map = new SearchParameterMap();
-		map.add(Constants.PARAM_CONTENT, new StringParam("blood"));
-		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map))).containsExactlyInAnyOrder(toValues(id1, id2));
+			map = new SearchParameterMap();
+			map.add(Constants.PARAM_CONTENT, new StringParam("blood"));
+			assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map))).containsExactlyInAnyOrder(toValues(id1, id2));
+		}
+
+		{ //_content works as Special Param
+			map = new SearchParameterMap();
+			map.add(ca.uhn.fhir.rest.api.Constants.PARAM_CONTENT, new SpecialParam().setValue("systolic"));
+			assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map))).containsExactlyInAnyOrder(toValues(id1));
+
+			map = new SearchParameterMap();
+			map.add(Constants.PARAM_CONTENT, new SpecialParam().setValue("blood"));
+			assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map))).containsExactlyInAnyOrder(toValues(id1, id2));
+		}
 	}
+
+	@Test
+	public void testResourceTextSearch() {
+
+		Observation obs1 = new Observation();
+		obs1.getCode().setText("Systolic Blood Pressure");
+		obs1.setStatus(Observation.ObservationStatus.FINAL);
+		obs1.setValue(new Quantity(123));
+		obs1.getNoteFirstRep().setText("obs1");
+		obs1.getText().setDivAsString("systolic blood pressure");
+		obs1.getText().setStatus(Narrative.NarrativeStatus.ADDITIONAL);
+		IIdType id1 = myObservationDao.create(obs1, mySrd).getId().toUnqualifiedVersionless();
+
+		Observation obs2 = new Observation();
+		obs2.getCode().setText("Diastolic Blood Pressure");
+		obs2.setStatus(Observation.ObservationStatus.FINAL);
+		obs2.setValue(new Quantity(81));
+		obs2.getText().setDivAsString("diastolic blood pressure");
+		obs2.getText().setStatus(Narrative.NarrativeStatus.ADDITIONAL);
+		IIdType id2 = myObservationDao.create(obs2, mySrd).getId().toUnqualifiedVersionless();
+
+		SearchParameterMap map;
+
+		{ //_text works as a string param
+
+			map = new SearchParameterMap();
+			map.add(Constants.PARAM_TEXT, new StringParam("systolic"));
+			assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map))).containsExactlyInAnyOrder(toValues(id1));
+
+			map = new SearchParameterMap();
+			map.add(Constants.PARAM_TEXT, new StringParam("blood"));
+			assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map))).containsExactlyInAnyOrder(toValues(id1, id2));
+		}
+
+		{ //_text works as a special param
+
+			map = new SearchParameterMap();
+			map.add(Constants.PARAM_TEXT, new SpecialParam().setValue("systolic"));
+			assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map))).containsExactlyInAnyOrder(toValues(id1));
+
+			map = new SearchParameterMap();
+			map.add(Constants.PARAM_TEXT, new SpecialParam().setValue("blood"));
+			assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map))).containsExactlyInAnyOrder(toValues(id1, id2));
+		}
+	}
+
+	@Test
+	public void testTextContainsFunctionality() {
+		String slug = "my-special-@char!";
+		Observation obs1 = new Observation();
+		obs1.getCode().setText("Systolic Blood Pressure");
+		obs1.setStatus(Observation.ObservationStatus.FINAL);
+		obs1.setValue(new Quantity(123));
+		obs1.getNoteFirstRep().setText("obs1");
+		obs1.getText().setDivAsString(slug);
+		obs1.getText().setStatus(Narrative.NarrativeStatus.ADDITIONAL);
+		IIdType id1 = myObservationDao.create(obs1, mySrd).getId().toUnqualifiedVersionless();
+
+		Observation obs2 = new Observation();
+		obs2.getCode().setText("Diastolic Blood Pressure");
+		obs2.setStatus(Observation.ObservationStatus.FINAL);
+		obs2.setValue(new Quantity(81));
+		obs2.getText().setDivAsString("diastolic blood pressure");
+		obs2.getText().setStatus(Narrative.NarrativeStatus.ADDITIONAL);
+		myObservationDao.create(obs2, mySrd).getId().toUnqualifiedVersionless();
+
+
+		SearchParameterMap map;
+
+		{ //_text
+			//With :contains
+			map = new SearchParameterMap();
+			map.add(Constants.PARAM_TEXT, new SpecialParam().setValue(slug).setContains(true));
+			assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map))).containsExactlyInAnyOrder(toValues(id1));
+
+			//Without :contains
+			map = new SearchParameterMap();
+			map.add(Constants.PARAM_TEXT, new SpecialParam().setValue(slug));
+			assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map))).isEmpty();
+		}
+
+	}
+
+	@Test
+	public void testLudicrouslyLongNarrative() throws IOException {
+		String slug = "myveryveryveryveryveryveryveryveryveryeryveryveryveryveryveryveryveryveryeryveryveryveryveryveryveryveryveryeryveryveryveryveryveryveryveryveryeryveryveryveryveryveryveryveryverylongemailaddress@hotmail.com";
+
+		Observation obs1 = new Observation();
+		obs1.getCode().setText("Systolic Blood Pressure");
+		obs1.setStatus(Observation.ObservationStatus.FINAL);
+		obs1.setValue(new Quantity(123));
+		obs1.getNoteFirstRep().setText("obs1");
+		obs1.getText().setDivAsString(get15000CharacterNarrativeIncludingSlugAtStart(slug));
+		obs1.getText().setStatus(Narrative.NarrativeStatus.ADDITIONAL);
+		IIdType id1 = myObservationDao.create(obs1, mySrd).getId().toUnqualifiedVersionless();
+
+
+		Observation obs2 = new Observation();
+		obs2.getCode().setText("Diastolic Blood Pressure");
+		obs2.setStatus(Observation.ObservationStatus.FINAL);
+		obs2.setValue(new Quantity(81));
+		obs2.getText().setDivAsString("diastolic blood pressure");
+		obs2.getText().setStatus(Narrative.NarrativeStatus.ADDITIONAL);
+		IIdType id2 = myObservationDao.create(obs2, mySrd).getId().toUnqualifiedVersionless();
+
+		Observation obs3 = new Observation();
+		obs3.getCode().setText("Systolic Blood Pressure");
+		obs3.setStatus(Observation.ObservationStatus.FINAL);
+		obs3.setValue(new Quantity(323));
+		obs3.getNoteFirstRep().setText("obs3");
+		obs3.getText().setDivAsString(get15000CharacterNarrativeIncludingSlugAtEnd(slug));
+		obs3.getText().setStatus(Narrative.NarrativeStatus.ADDITIONAL);
+		IIdType id3 = myObservationDao.create(obs3, mySrd).getId().toUnqualifiedVersionless();
+
+
+		SearchParameterMap map;
+
+		{ //_text works as a special param
+			map = new SearchParameterMap();
+			map.add(Constants.PARAM_TEXT, new SpecialParam().setValue(slug).setContains(true));
+			assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map))).containsExactlyInAnyOrder(toValues(id1, id3));
+
+			map = new SearchParameterMap();
+			map.add(Constants.PARAM_TEXT, new SpecialParam().setValue("blood").setContains(true));
+			assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map))).containsExactlyInAnyOrder(toValues(id2));
+		}
+
+		{ //_text works as a string param
+			map = new SearchParameterMap();
+			map.add(Constants.PARAM_TEXT, new StringParam(slug).setContains(true));
+			assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map))).containsExactlyInAnyOrder(toValues(id1, id3));
+
+			map = new SearchParameterMap();
+			map.add(Constants.PARAM_TEXT, new StringParam("blood").setContains(true));
+			assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map))).containsExactlyInAnyOrder(toValues(id2));
+		}
+	}
+
+	private String get15000CharacterNarrativeIncludingSlugAtEnd(String theSlug) {
+		StringBuilder builder = new StringBuilder();
+		int remainingNarrativeLength = 15000 - theSlug.length();
+		builder.append(RandomStringUtils.randomAlphanumeric(remainingNarrativeLength));
+		builder.append(" ");
+		builder.append(theSlug);
+		return builder.toString();
+	}
+	private String get15000CharacterNarrativeIncludingSlugAtStart(String theSlug) {
+		StringBuilder builder = new StringBuilder();
+		int remainingNarrativeLength = 15000 - theSlug.length();
+		builder.append(theSlug);
+		builder.append(" ");
+		builder.append(RandomStringUtils.randomAlphanumeric(remainingNarrativeLength));
+		return builder.toString();
+	}
+
 
 	@Test
 	public void testResourceReferenceSearch() {
@@ -742,19 +933,21 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 	 */
 	@Test
 	public void testDirectPathWholeResourceNotIndexedWorks() {
+		// setup
+		myLogbackLevelOverrideExtension.setLogLevel(SearchBuilder.class, Level.WARN);
 		IIdType id1 = myTestDataBuilder.createObservation(List.of(myTestDataBuilder.withObservationCode("http://example.com/", "theCode")));
 
 		// set it after creating resource, so search doesn't find it in the index
 		myStorageSettings.setStoreResourceInHSearchIndex(true);
 
-		myCaptureQueriesListener.clear();
-
-		List<IBaseResource> result = searchForFastResources("Observation?code=theCode");
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		List<IBaseResource> result = searchForFastResources("Observation?code=theCode&_count=10&_total=accurate");
 
 		assertThat(result).hasSize(1);
 		assertEquals(((Observation) result.get(0)).getIdElement().getIdPart(), id1.getIdPart());
-		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).as("JPA search for IDs and for resources").isEqualTo(2);
+
+		List<ILoggingEvent> events = myLogbackTestExtension.filterLoggingEventsWithPredicate(e -> e.getLevel() == Level.WARN);
+		assertFalse(events.isEmpty());
+		assertTrue(events.stream().anyMatch(e -> e.getFormattedMessage().contains("Some resources were not found in index. Make sure all resources were indexed. Resorting to database search.")));
 
 		// restore changed property
 		JpaStorageSettings defaultConfig = new JpaStorageSettings();

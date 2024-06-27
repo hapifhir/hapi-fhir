@@ -50,6 +50,7 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -578,42 +579,53 @@ public class BundleUtil {
 		BaseRuntimeElementCompositeDefinition<?> searchChildContentsDef =
 				(BaseRuntimeElementCompositeDefinition<?>) searchChildDef.getChildByName("search");
 		BaseRuntimeChildDefinition searchModeChildDef = searchChildContentsDef.getChildByName("mode");
+		BaseRuntimeChildDefinition searchScoreChildDef = searchChildContentsDef.getChildByName("score");
 
 		List<SearchBundleEntryParts> retVal = new ArrayList<>();
 		for (IBase nextEntry : entries) {
 			SearchBundleEntryParts parts = getSearchBundleEntryParts(
-					fullUrlChildDef, resourceChildDef, searchChildDef, searchModeChildDef, nextEntry);
+					fullUrlChildDef,
+					resourceChildDef,
+					searchChildDef,
+					searchModeChildDef,
+					searchScoreChildDef,
+					nextEntry);
 			retVal.add(parts);
 		}
 		return retVal;
 	}
 
 	private static SearchBundleEntryParts getSearchBundleEntryParts(
-			BaseRuntimeChildDefinition fullUrlChildDef,
-			BaseRuntimeChildDefinition resourceChildDef,
-			BaseRuntimeChildDefinition searchChildDef,
-			BaseRuntimeChildDefinition searchModeChildDef,
+			BaseRuntimeChildDefinition theFullUrlChildDef,
+			BaseRuntimeChildDefinition theResourceChildDef,
+			BaseRuntimeChildDefinition theSearchChildDef,
+			BaseRuntimeChildDefinition theSearchModeChildDef,
+			BaseRuntimeChildDefinition theSearchScoreChildDef,
 			IBase entry) {
 		IBaseResource resource = null;
 		String matchMode = null;
+		BigDecimal searchScore = null;
 
-		String fullUrl = fullUrlChildDef
+		String fullUrl = theFullUrlChildDef
 				.getAccessor()
 				.getFirstValueOrNull(entry)
 				.map(t -> ((IPrimitiveType<?>) t).getValueAsString())
 				.orElse(null);
 
-		for (IBase nextResource : resourceChildDef.getAccessor().getValues(entry)) {
+		for (IBase nextResource : theResourceChildDef.getAccessor().getValues(entry)) {
 			resource = (IBaseResource) nextResource;
 		}
 
-		for (IBase nextSearch : searchChildDef.getAccessor().getValues(entry)) {
-			for (IBase nextUrl : searchModeChildDef.getAccessor().getValues(nextSearch)) {
+		for (IBase nextSearch : theSearchChildDef.getAccessor().getValues(entry)) {
+			for (IBase nextUrl : theSearchModeChildDef.getAccessor().getValues(nextSearch)) {
 				matchMode = ((IPrimitiveType<?>) nextUrl).getValueAsString();
+			}
+			for (IBase nextUrl : theSearchScoreChildDef.getAccessor().getValues(nextSearch)) {
+				searchScore = (BigDecimal) ((IPrimitiveType<?>) nextUrl).getValue();
 			}
 		}
 
-		return new SearchBundleEntryParts(fullUrl, resource, matchMode);
+		return new SearchBundleEntryParts(fullUrl, resource, matchMode, searchScore);
 	}
 
 	/**

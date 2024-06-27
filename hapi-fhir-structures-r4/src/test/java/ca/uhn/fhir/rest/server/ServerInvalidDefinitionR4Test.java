@@ -19,7 +19,6 @@ import ca.uhn.fhir.test.utilities.server.MockServletUtil;
 import com.google.common.collect.Lists;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
-import org.hamcrest.core.StringContains;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.IdType;

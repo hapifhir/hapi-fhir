@@ -208,6 +208,10 @@ public class RestServerR4Helper extends BaseRestServerHelper implements BeforeEa
 		return myRestServer.getPatientResourceProvider();
 	}
 
+	public void setPatientResourceProvider(HashMapResourceProvider<Patient> theResourceProvider) {
+		myRestServer.setPatientResourceProvider(theResourceProvider);
+	}
+
 	@Override
 	public HashMapResourceProvider<ConceptMap> getConceptMapResourceProvider() {
 		return myRestServer.getConceptMapResourceProvider();
@@ -385,6 +389,14 @@ public class RestServerR4Helper extends BaseRestServerHelper implements BeforeEa
 
 		public HashMapResourceProvider<Observation> getObservationResourceProvider() {
 			return myObservationResourceProvider;
+		}
+
+		public void setPatientResourceProvider(HashMapResourceProvider<Patient> theResourceProvider) {
+			myPatientResourceProvider.getStoredResources().forEach(theResourceProvider::store);
+
+			unregisterProvider(myPatientResourceProvider);
+			registerProvider(theResourceProvider);
+			myPatientResourceProvider = theResourceProvider;
 		}
 
 		public void setObservationResourceProvider(HashMapResourceProvider<Observation> theResourceProvider) {
