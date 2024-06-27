@@ -201,7 +201,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		Subscription subscription = createSubscription(databaseCriteria, null, ourNotificationListenerServer);
 		List<Coding> tag = subscription.getMeta().getTag();
 		assertEquals(HapiExtensions.EXT_SUBSCRIPTION_MATCHING_STRATEGY, tag.get(0).getSystem());
-		assertEquals(SubscriptionMatchingStrategy.DATABASE.toString(), tag.get(0).getCode());
+		assertEquals(SubscriptionMatchingStrategy.IN_MEMORY.toString(), tag.get(0).getCode());
 	}
 
 	@Test
@@ -607,8 +607,8 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		assertThat(tags).hasSize(1);
 		Coding tag = tags.get(0);
 		assertEquals(HapiExtensions.EXT_SUBSCRIPTION_MATCHING_STRATEGY, tag.getSystem());
-		assertEquals(SubscriptionMatchingStrategy.DATABASE.toString(), tag.getCode());
-		assertEquals("Database", tag.getDisplay());
+		assertEquals(SubscriptionMatchingStrategy.IN_MEMORY.toString(), tag.getCode());
+		assertEquals("In-memory", tag.getDisplay());
 
 		// Wait for subscription to be moved to active
 		await().until(() -> Subscription.SubscriptionStatus.ACTIVE.equals(myClient.read().resource(Subscription.class).withId(subscriptionId.toUnqualifiedVersionless()).execute().getStatus()));

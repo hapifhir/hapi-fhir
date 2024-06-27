@@ -8,6 +8,7 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
+import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorR5;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorService;
@@ -123,7 +124,7 @@ public class InMemoryResourceMatcherConfigurationR5Test {
 		}
 
 		@Bean
-		SearchParamExtractorR5 searchParamExtractorR5() {
+		ISearchParamExtractor searchParamExtractorR5() {
 			return new SearchParamExtractorR5();
 		}
 
