@@ -69,7 +69,9 @@ public class RequestTenantPartitionInterceptor {
 			throw new InternalErrorException(Msg.code(343) + "No partition ID has been specified");
 		}
 
-		if (tenantId.equals(ProviderConstants.ALL_PARTITIONS_NAME)) {
+		// for REQUEST_TENANT partition selection mode, allPartitions is supported when URL includes _ALL as the tenant
+		// else if no tenant is provided in the URL, DEFAULT will be used as per UrlBaseTenantIdentificationStrategy
+		if (tenantId.equals(ProviderConstants.ALL_PARTITIONS_TENANT_NAME)) {
 			return RequestPartitionId.allPartitions();
 		}
 		return RequestPartitionId.fromPartitionName(tenantId);

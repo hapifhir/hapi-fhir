@@ -26,10 +26,10 @@ import ca.uhn.fhir.jpa.api.svc.IDeleteExpungeSvc;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.util.ValidateUtil;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 import java.util.List;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 public class DeleteExpungeJobParametersValidator implements IJobParametersValidator<DeleteExpungeJobParameters> {
 	private final IUrlListValidator myUrlListValidator;

@@ -53,7 +53,7 @@ public class ProviderConstants {
 	public static final String PARTITION_MANAGEMENT_PARTITION_DESC = "description";
 
 	public static final String DEFAULT_PARTITION_NAME = "DEFAULT";
-	public static final String ALL_PARTITIONS_NAME = "_ALL";
+	public static final String ALL_PARTITIONS_TENANT_NAME = "_ALL";
 
 	/**
 	 * Operation name: diff
