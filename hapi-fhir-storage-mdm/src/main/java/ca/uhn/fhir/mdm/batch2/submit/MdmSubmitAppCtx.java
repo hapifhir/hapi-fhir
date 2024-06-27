@@ -21,7 +21,7 @@ package ca.uhn.fhir.mdm.batch2.submit;
 
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.api.VoidModel;
-import ca.uhn.fhir.batch2.jobs.chunk.PartitionedUrlChunkRangeJson;
+import ca.uhn.fhir.batch2.jobs.chunk.ChunkRangeJson;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.batch2.jobs.step.GenerateRangeChunksStep;
 import ca.uhn.fhir.batch2.jobs.step.LoadIdsStep;
@@ -39,11 +39,6 @@ public class MdmSubmitAppCtx {
 	public static final String MDM_SUBMIT_JOB_BEAN_NAME = "mdmSubmitJobDefinition";
 	public static String MDM_SUBMIT_JOB = "MDM_SUBMIT";
 
-	@Bean
-	public GenerateRangeChunksStep<MdmSubmitJobParameters> submitGenerateRangeChunksStep() {
-		return new GenerateRangeChunksStep<>();
-	}
-
 	@Bean(name = MDM_SUBMIT_JOB_BEAN_NAME)
 	public JobDefinition<MdmSubmitJobParameters> mdmSubmitJobDefinition(
 			IBatch2DaoSvc theBatch2DaoSvc,
@@ -60,7 +55,7 @@ public class MdmSubmitAppCtx {
 				.addFirstStep(
 						"generate-ranges",
 						"generate data ranges to submit to mdm",
-						PartitionedUrlChunkRangeJson.class,
+						ChunkRangeJson.class,
 						submitGenerateRangeChunksStep())
 				.addIntermediateStep(
 						"load-ids", "Load the IDs", ResourceIdListWorkChunkJson.class, loadIdsStep(theBatch2DaoSvc))
@@ -75,6 +70,11 @@ public class MdmSubmitAppCtx {
 	public MdmSubmitJobParametersValidator mdmSubmitJobParametersValidator(
 			MatchUrlService theMatchUrlService, FhirContext theFhirContext, IMdmSettings theMdmSettings) {
 		return new MdmSubmitJobParametersValidator(theMdmSettings, theMatchUrlService, theFhirContext);
+	}
+
+	@Bean
+	public GenerateRangeChunksStep<MdmSubmitJobParameters> submitGenerateRangeChunksStep() {
+		return new GenerateRangeChunksStep<>();
 	}
 
 	@Bean

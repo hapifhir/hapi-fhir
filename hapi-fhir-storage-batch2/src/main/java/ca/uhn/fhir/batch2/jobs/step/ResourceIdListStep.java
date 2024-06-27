@@ -27,7 +27,7 @@ import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.jobs.chunk.ChunkRangeJson;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.batch2.jobs.chunk.TypedPidJson;
-import ca.uhn.fhir.batch2.jobs.parameters.PartitionedJobParameters;
+import ca.uhn.fhir.batch2.jobs.parameters.JobParameters;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.pid.IResourcePidStream;
 import ca.uhn.fhir.util.Logs;
@@ -42,39 +42,35 @@ import java.util.stream.Stream;
 import static ca.uhn.fhir.util.StreamUtil.partition;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
-public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends ChunkRangeJson>
-		implements IJobStepWorker<PT, IT, ResourceIdListWorkChunkJson> {
+public class ResourceIdListStep<PT extends JobParameters>
+		implements IJobStepWorker<PT, ChunkRangeJson, ResourceIdListWorkChunkJson> {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 
 	protected static final int MAX_BATCH_OF_IDS = 500;
 
-	private final IIdChunkProducer<IT> myIdChunkProducer;
+	private final IIdChunkProducer<ChunkRangeJson> myIdChunkProducer;
 
-	public ResourceIdListStep(IIdChunkProducer<IT> theIdChunkProducer) {
+	public ResourceIdListStep(IIdChunkProducer<ChunkRangeJson> theIdChunkProducer) {
 		myIdChunkProducer = theIdChunkProducer;
 	}
 
 	@Nonnull
 	@Override
 	public RunOutcome run(
-			@Nonnull StepExecutionDetails<PT, IT> theStepExecutionDetails,
+			@Nonnull StepExecutionDetails<PT, ChunkRangeJson> theStepExecutionDetails,
 			@Nonnull IJobDataSink<ResourceIdListWorkChunkJson> theDataSink)
 			throws JobExecutionFailedException {
-		IT data = theStepExecutionDetails.getData();
+		ChunkRangeJson data = theStepExecutionDetails.getData();
 
 		Date start = data.getStart();
 		Date end = data.getEnd();
 		Integer batchSize = theStepExecutionDetails.getParameters().getBatchSize();
 
-		ourLog.info("Beginning scan for reindex IDs in range {} to {}", start, end);
-
-		RequestPartitionId requestPartitionId =
-				theStepExecutionDetails.getParameters().getRequestPartitionId();
+		ourLog.info("Beginning to submit chunks in range {} to {}", start, end);
 
 		int chunkSize = Math.min(defaultIfNull(batchSize, MAX_BATCH_OF_IDS), MAX_BATCH_OF_IDS);
-
-		final IResourcePidStream searchResult = myIdChunkProducer.fetchResourceIdStream(
-				start, end, requestPartitionId, theStepExecutionDetails.getData());
+		final IResourcePidStream searchResult =
+				myIdChunkProducer.fetchResourceIdStream(theStepExecutionDetails.getData());
 
 		searchResult.visitStreamNoResult(typedResourcePidStream -> {
 			AtomicInteger totalIdsFound = new AtomicInteger();
@@ -101,7 +97,7 @@ public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends 
 		if (theTypedPids.isEmpty()) {
 			return;
 		}
-		ourLog.info("Submitting work chunk with {} IDs", theTypedPids.size());
+		ourLog.info("Submitting work chunk in partition {} with {} IDs", theRequestPartitionId, theTypedPids.size());
 		ResourceIdListWorkChunkJson data = new ResourceIdListWorkChunkJson(theTypedPids, theRequestPartitionId);
 		ourLog.debug("IDs are: {}", data);
 		theDataSink.accept(data);

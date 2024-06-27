@@ -24,26 +24,25 @@ import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
-import ca.uhn.fhir.batch2.jobs.chunk.PartitionedUrlChunkRangeJson;
+import ca.uhn.fhir.batch2.jobs.chunk.ChunkRangeJson;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
-import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrlListJobParameters;
+import ca.uhn.fhir.batch2.jobs.parameters.JobParameters;
 import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
 import jakarta.annotation.Nonnull;
 
-public class LoadIdsStep<PT extends PartitionedUrlListJobParameters>
-		implements IJobStepWorker<PT, PartitionedUrlChunkRangeJson, ResourceIdListWorkChunkJson> {
-	private final ResourceIdListStep<PT, PartitionedUrlChunkRangeJson> myResourceIdListStep;
+public class LoadIdsStep<PT extends JobParameters>
+		implements IJobStepWorker<PT, ChunkRangeJson, ResourceIdListWorkChunkJson> {
+	private final ResourceIdListStep<PT> myResourceIdListStep;
 
 	public LoadIdsStep(IBatch2DaoSvc theBatch2DaoSvc) {
-		IIdChunkProducer<PartitionedUrlChunkRangeJson> idChunkProducer =
-				new PartitionedUrlListIdChunkProducer(theBatch2DaoSvc);
+		IIdChunkProducer<ChunkRangeJson> idChunkProducer = new ChunkProducer(theBatch2DaoSvc);
 		myResourceIdListStep = new ResourceIdListStep<>(idChunkProducer);
 	}
 
 	@Nonnull
 	@Override
 	public RunOutcome run(
-			@Nonnull StepExecutionDetails<PT, PartitionedUrlChunkRangeJson> theStepExecutionDetails,
+			@Nonnull StepExecutionDetails<PT, ChunkRangeJson> theStepExecutionDetails,
 			@Nonnull IJobDataSink<ResourceIdListWorkChunkJson> theDataSink)
 			throws JobExecutionFailedException {
 		return myResourceIdListStep.run(theStepExecutionDetails, theDataSink);

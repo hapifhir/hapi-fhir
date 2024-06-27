@@ -19,7 +19,7 @@
  */
 package ca.uhn.fhir.batch2.jobs.expunge;
 
-import ca.uhn.fhir.batch2.jobs.chunk.PartitionedUrlChunkRangeJson;
+import ca.uhn.fhir.batch2.jobs.chunk.ChunkRangeJson;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.batch2.jobs.parameters.UrlListValidator;
 import ca.uhn.fhir.batch2.jobs.step.GenerateRangeChunksStep;
@@ -59,7 +59,7 @@ public class DeleteExpungeAppCtx {
 				.addFirstStep(
 						"generate-ranges",
 						"Generate data ranges to expunge",
-						PartitionedUrlChunkRangeJson.class,
+						ChunkRangeJson.class,
 						expungeGenerateRangeChunksStep())
 				.addIntermediateStep(
 						"load-ids",
