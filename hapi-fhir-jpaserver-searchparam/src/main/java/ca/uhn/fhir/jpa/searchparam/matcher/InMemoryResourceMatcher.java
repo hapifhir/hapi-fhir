@@ -70,6 +70,7 @@ import org.springframework.context.ApplicationContext;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -637,6 +638,7 @@ public class InMemoryResourceMatcher {
 				.filter(IBaseReference.class::isInstance)
 				.map(IBaseReference.class::cast)
 				.map(IBaseReference::getResource)
+				.filter(Objects::nonNull)
 				.anyMatch(resource -> {
 					// Obtain the next parameter name, modifier and chain
 					String[] chains = referenceParam.getChain().split("\\.");
