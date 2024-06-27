@@ -437,6 +437,18 @@
 			"lat": 18.483402,
 			"lon": -69.929611,
 			"added": "2022-08-15"
+		},
+			{
+			"title": "STOCKART - Triatech",
+			"description": "Smart Healthcare Technologies - Automated Medication and Supply Management System",
+			"company": "Triatech Medical Solutions Inc.",
+			"contactName": "Muhammed Yasin Erdoğan",
+			"contactEmail": "yasin.erdogan@triatech.com.tr",
+			"link": "https://stockart.com",
+			"city": "İzmir, Turkey",
+			"lat": 38.316705,
+			"lon": -27.169738,
+			"added": "2023-03-01"
 		}
 	]
 }
