@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.cache;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -17,6 +18,7 @@ import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,13 +26,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.Mockito.mockStatic;
+
 
 public class ResourceChangeListenerRegistryImplIT extends BaseJpaR4Test {
 	private static final long TEST_REFRESH_INTERVAL = DateUtils.MILLIS_PER_DAY;
@@ -38,6 +45,9 @@ public class ResourceChangeListenerRegistryImplIT extends BaseJpaR4Test {
 	ResourceChangeListenerRegistryImpl myResourceChangeListenerRegistry;
 	@Autowired
 	IResourceChangeListenerCacheRefresher myResourceChangeListenerCacheRefresher;
+
+	@Autowired
+	private SearchParamRegistryImpl mySearchParamRegistry;
 
 	private final static String RESOURCE_NAME = "Patient";
 	private TestCallback myMaleTestCallback = new TestCallback("MALE");
@@ -52,6 +62,63 @@ public class ResourceChangeListenerRegistryImplIT extends BaseJpaR4Test {
 	public void after() {
 		myResourceChangeListenerRegistry.clearListenersForUnitTest();
 		myResourceChangeListenerRegistry.clearCachesForUnitTest();
+	}
+
+	@Test
+	public void forceRefresh_beforeSearchParametersInitialized_willNotFallIntoAnInfiniteLoop() {
+		// setup
+		int maxRetries = 3; // a small number for short tests
+		AtomicInteger counter = new AtomicInteger();
+		AtomicBoolean initCheck = new AtomicBoolean();
+
+		IResourceChangeListenerCache cache = myResourceChangeListenerRegistry.registerResourceResourceChangeListener(
+			"StructureDefinition",
+			SearchParameterMap.newSynchronous(),
+			new IResourceChangeListener() {
+				@Override
+				public void handleInit(Collection<IIdType> theResourceIds) {
+					initCheck.set(true);
+				}
+
+				@Override
+				public void handleChange(IResourceChangeEvent theResourceChangeEvent) {
+
+				}
+			},
+			100
+		);
+
+		assertTrue((cache instanceof ResourceChangeListenerCache));
+
+		// set the HSearchIndexing
+		boolean useAdvancedHSearch = myStorageSettings.isAdvancedHSearchIndexing();
+		myStorageSettings.setAdvancedHSearchIndexing(true);
+
+		// so they will be forced to be refreshed
+		mySearchParamRegistry.setActiveSearchParams(null);
+		try (MockedStatic<ResourceChangeListenerCache> cacheConstants = mockStatic(ResourceChangeListenerCache.class)) {
+			cacheConstants.when(ResourceChangeListenerCache::getMaxRetries).thenAnswer((args) -> {
+				if (counter.getAndIncrement() > maxRetries) {
+					// fail after a few tries to ensure we don't fall into an infinite loop
+					fail("This should not fall into an infinite loop");
+				}
+				return maxRetries;
+			});
+			cacheConstants.when(ResourceChangeListenerCache::now)
+				.thenCallRealMethod();
+
+			// test
+			ResourceChangeResult result = cache.forceRefresh();
+
+			// verify
+			assertEquals(0, result.created);
+			assertEquals(0, result.updated);
+			assertEquals(0, result.deleted);
+			assertTrue(initCheck.get());
+		} finally {
+			// reset for other tests
+			myStorageSettings.setAdvancedHSearchIndexing(useAdvancedHSearch);
+		}
 	}
 
 	@Test

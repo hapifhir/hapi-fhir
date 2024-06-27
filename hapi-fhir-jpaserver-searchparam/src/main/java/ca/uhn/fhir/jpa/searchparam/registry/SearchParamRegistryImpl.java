@@ -127,6 +127,7 @@ public class SearchParamRegistryImpl
 
 	private void requiresActiveSearchParams() {
 		if (myActiveSearchParams == null) {
+			// forced refreshes should not use a cache - we're forcibly refrsching it, after all
 			myResourceChangeListenerCache.forceRefresh();
 		}
 	}
@@ -220,7 +221,7 @@ public class SearchParamRegistryImpl
 			}
 		}
 
-		myActiveSearchParams = searchParams;
+		setActiveSearchParams(searchParams);
 
 		myJpaSearchParamCache.populateActiveSearchParams(
 				myInterceptorBroadcaster, myPhoneticEncoder, myActiveSearchParams);
@@ -422,9 +423,15 @@ public class SearchParamRegistryImpl
 		initializeActiveSearchParams(searchParams);
 	}
 
+	@Override
+	public boolean isInitialized() {
+		return myActiveSearchParams != null;
+	}
+
 	@VisibleForTesting
 	public void resetForUnitTest() {
 		myBuiltInSearchParams = null;
+		setActiveSearchParams(null);
 		handleInit(Collections.emptyList());
 	}
 
@@ -437,5 +444,10 @@ public class SearchParamRegistryImpl
 	@VisibleForTesting
 	public int getMaxManagedParamCountForUnitTests() {
 		return MAX_MANAGED_PARAM_COUNT;
+	}
+
+	@VisibleForTesting
+	public void setActiveSearchParams(RuntimeSearchParamCache theSearchParams) {
+		myActiveSearchParams = theSearchParams;
 	}
 }
