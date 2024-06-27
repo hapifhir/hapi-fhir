@@ -663,26 +663,34 @@ public class InMemoryResourceMatcher {
 
 					// Create new search parameter map to match the next resource
 					SearchParameterMap searchParameterMap = new SearchParameterMap();
-					if (resourceSearchParam.getParamType().equals(RestSearchParameterTypeEnum.REFERENCE)) {
-						searchParameterMap.add(
-								parameterName, new ReferenceParam(modifier, chain, referenceParam.getValue()));
-					} else {
-						TokenParam tokenParam;
-						if (referenceParam.getValue().contains("|")) {
-							String[] systemAndValue = referenceParam.getValue().split("\\|");
-							tokenParam = new TokenParam(systemAndValue[0], systemAndValue[1]);
-						} else {
-							tokenParam = new TokenParam(referenceParam.getValue());
-						}
-						tokenParam.setModifier(TokenParamModifier.forValue(":" + modifier));
-						searchParameterMap.add(parameterName, tokenParam);
-					}
+					IQueryParameterType theParam =
+							convertReferenceParam(referenceParam, resourceSearchParam, modifier, chain);
+					searchParameterMap.add(parameterName, theParam);
 
 					// Recursively match the chained resources
 					return searchParamMatcher
 							.match(searchParameterMap, resource)
 							.matched();
 				});
+	}
+
+	private static IQueryParameterType convertReferenceParam(
+			ReferenceParam referenceParam, RuntimeSearchParam resourceSearchParam, String modifier, String chain) {
+		if (resourceSearchParam.getParamType().equals(RestSearchParameterTypeEnum.REFERENCE)) {
+			return new ReferenceParam(modifier, chain, referenceParam.getValue());
+		} else if (resourceSearchParam.getParamType().equals(RestSearchParameterTypeEnum.STRING)) {
+			return new StringParam(referenceParam.getValue(), "exact".equals(modifier));
+		} else {
+			TokenParam tokenParam;
+			if (referenceParam.getValue().contains("|")) {
+				String[] systemAndValue = referenceParam.getValue().split("\\|");
+				tokenParam = new TokenParam(systemAndValue[0], systemAndValue[1]);
+			} else {
+				tokenParam = new TokenParam(referenceParam.getValue());
+			}
+			tokenParam.setModifier(TokenParamModifier.forValue(":" + modifier));
+			return tokenParam;
+		}
 	}
 
 	private boolean systemContainsCode(TokenParam theQueryParam, ResourceIndexedSearchParamToken theSearchParamToken) {
