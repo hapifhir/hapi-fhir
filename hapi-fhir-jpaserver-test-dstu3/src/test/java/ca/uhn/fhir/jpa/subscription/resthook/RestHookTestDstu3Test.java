@@ -619,8 +619,8 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		assertThat(tags).hasSize(1);
 		tag = tags.get(0);
 		assertEquals(HapiExtensions.EXT_SUBSCRIPTION_MATCHING_STRATEGY, tag.getSystem());
-		assertEquals(SubscriptionMatchingStrategy.DATABASE.toString(), tag.getCode());
-		assertEquals("Database", tag.getDisplay());
+		assertEquals(SubscriptionMatchingStrategy.IN_MEMORY.toString(), tag.getCode());
+		assertEquals("In-memory", tag.getDisplay());
 	}
 
 	@Test
