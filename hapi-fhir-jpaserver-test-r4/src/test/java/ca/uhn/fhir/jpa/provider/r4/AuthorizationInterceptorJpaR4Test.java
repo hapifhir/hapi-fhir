@@ -95,6 +95,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 
 	@Autowired
 	private SearchParamMatcher mySearchParamMatcher;
+
 	@Autowired
 	private ThreadSafeResourceDeleterSvc myThreadSafeResourceDeleterSvc;
 

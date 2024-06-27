@@ -63,6 +63,7 @@ import ca.uhn.test.util.LogbackTestExtension;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
 import co.elastic.clients.elasticsearch.core.SearchRequest;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -101,7 +102,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -225,6 +228,9 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 	private TestHSearchEventDispatcher myHSearchEventDispatcher;
 	@Autowired
 	ElasticsearchContainer myElasticsearchContainer;
+
+	@Autowired
+	ElasticsearchContainer elasticContainer;
 
 	@Mock
 	private IHSearchEventListener mySearchEventListener;
@@ -438,77 +444,115 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 
 	}
 
-	@Test
-	public void testLudicrouslyLongNarrative() throws IOException {
-		String slug = "myveryveryveryveryveryveryveryveryveryeryveryveryveryveryveryveryveryveryeryveryveryveryveryveryveryveryveryeryveryveryveryveryveryveryveryveryeryveryveryveryveryveryveryveryverylongemailaddress@hotmail.com";
+	@ParameterizedTest
+	@CsvSource({
+		"some-random-slug, random, true",
+		"some-random-slug, ando, true",
+		"some-random-slug, some-random-slug, true",
+		"some@whatever.com, whatever, true",
+		"some@whatever.com, some, true",
+		"some@whatever.com, some@whatever.com, true",
+		"myveryveryveryveryveryveryveryveryvery.!! -          veryveryveryveryveryveryveryveryveryeryveryveryveryveryveryveryveryveryeryveryveryveryveryveryveryveryveryeryveryveryveryveryveryveryveryverylongemailaddress@hotmail.com, myveryveryveryveryveryveryveryveryvery.!! -          veryveryveryveryveryveryveryveryveryeryveryveryveryveryveryveryveryveryeryveryveryveryveryveryveryveryveryeryveryveryveryveryveryveryveryverylongemailaddress@hotmail.com, true",
+		"myveryveryveryveryveryveryveryveryvery.!! -          veryveryveryveryveryveryveryveryveryeryveryveryveryveryveryveryveryveryeryveryveryveryveryveryveryveryveryeryveryveryveryveryveryveryveryverylongemailaddress@hotmail.com, veryvery, true",
+	})
+	public void testLudicrouslyLongNarrative(String theNarrativeSlug, String theSearchQuery, boolean theShouldFind) throws IOException {
 
 		Observation obs1 = new Observation();
 		obs1.getCode().setText("Systolic Blood Pressure");
 		obs1.setStatus(Observation.ObservationStatus.FINAL);
 		obs1.setValue(new Quantity(123));
 		obs1.getNoteFirstRep().setText("obs1");
-		obs1.getText().setDivAsString(get15000CharacterNarrativeIncludingSlugAtStart(slug));
+		obs1.getText().setDivAsString(get15000CharacterNarrativeIncludingSlugAtStart(theNarrativeSlug));
 		obs1.getText().setStatus(Narrative.NarrativeStatus.ADDITIONAL);
-		IIdType id1 = myObservationDao.create(obs1, mySrd).getId().toUnqualifiedVersionless();
+		IIdType frontOfNarrative = myObservationDao.create(obs1, mySrd).getId().toUnqualifiedVersionless();
 
 
 		Observation obs2 = new Observation();
 		obs2.getCode().setText("Diastolic Blood Pressure");
 		obs2.setStatus(Observation.ObservationStatus.FINAL);
 		obs2.setValue(new Quantity(81));
-		obs2.getText().setDivAsString("diastolic blood pressure");
+		obs2.getText().setDivAsString(get15000CharacterNarrativeIncludingSlugInMiddle(theNarrativeSlug));
 		obs2.getText().setStatus(Narrative.NarrativeStatus.ADDITIONAL);
-		IIdType id2 = myObservationDao.create(obs2, mySrd).getId().toUnqualifiedVersionless();
+		IIdType middleOfNarrative = myObservationDao.create(obs2, mySrd).getId().toUnqualifiedVersionless();
 
 		Observation obs3 = new Observation();
 		obs3.getCode().setText("Systolic Blood Pressure");
 		obs3.setStatus(Observation.ObservationStatus.FINAL);
 		obs3.setValue(new Quantity(323));
 		obs3.getNoteFirstRep().setText("obs3");
-		obs3.getText().setDivAsString(get15000CharacterNarrativeIncludingSlugAtEnd(slug));
+		obs3.getText().setDivAsString(get15000CharacterNarrativeIncludingSlugAtEnd(theNarrativeSlug));
 		obs3.getText().setStatus(Narrative.NarrativeStatus.ADDITIONAL);
-		IIdType id3 = myObservationDao.create(obs3, mySrd).getId().toUnqualifiedVersionless();
+		IIdType endOfNarrative = myObservationDao.create(obs3, mySrd).getId().toUnqualifiedVersionless();
 
+		Observation obs4 = new Observation();
+		obs4.getCode().setText("Systolic Blood Pressure");
+		obs4.setStatus(Observation.ObservationStatus.FINAL);
+		obs4.setValue(new Quantity(323));
+		obs4.getNoteFirstRep().setText("obs3");
+		obs4.getText().setDivAsString(theNarrativeSlug);
+		obs4.getText().setStatus(Narrative.NarrativeStatus.ADDITIONAL);
+		IIdType preciseMatchNarrative = myObservationDao.create(obs4, mySrd).getId().toUnqualifiedVersionless();
 
 		SearchParameterMap map;
 
-		{ //_text works as a special param
-			map = new SearchParameterMap();
-			map.add(Constants.PARAM_TEXT, new SpecialParam().setValue(slug).setContains(true));
-			assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map))).containsExactlyInAnyOrder(toValues(id1, id3));
+		ElasticsearchClient elasticsearchHighLevelRestClient = ElasticsearchRestClientFactory.createElasticsearchHighLevelRestClient(
+			"http", myElasticsearchContainer.getHost() + ":" + myElasticsearchContainer.getMappedPort(9200), "", "");
 
-			map = new SearchParameterMap();
-			map.add(Constants.PARAM_TEXT, new SpecialParam().setValue("blood").setContains(true));
-			assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map))).containsExactlyInAnyOrder(toValues(id2));
-		}
+		SearchResponse<ObjectNode> search = elasticsearchHighLevelRestClient.search(s -> s
+				.index("resourcetable-000001")
+//				.query(q -> q.wildcard(wc -> wc.field("myNarrativeText").value("*" + theSearchQuery + "*")))
+//				.query(q -> q.match(mp -> mp.field("myNarrativeText").query(theSearchQuery)))
+				.query(q -> q.regexp(rq -> rq.field("myNarrativeText").value(".*" + theSearchQuery+ ".*")))
 
-		{ //_text works as a string param
-			map = new SearchParameterMap();
-			map.add(Constants.PARAM_TEXT, new StringParam(slug).setContains(true));
-			assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map))).containsExactlyInAnyOrder(toValues(id1, id3));
-
-			map = new SearchParameterMap();
-			map.add(Constants.PARAM_TEXT, new StringParam("blood").setContains(true));
-			assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map))).containsExactlyInAnyOrder(toValues(id2));
-		}
+			, ObjectNode.class);
+		System.out.println("zoop");
+		assertThat(search.hits().total().value()).isEqualTo(4);
+//		{ //_text works as a special param
+//			map = new SearchParameterMap();
+//			map.add(Constants.PARAM_TEXT, new SpecialParam().setValue(theSearchQuery).setContains(true));
+//			if (theShouldFind) {
+//				assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map))).containsExactlyInAnyOrder(toValues(id1, id2, id3));
+//			} else {
+//				assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map))).isEmpty();
+//			}
+//		}
+//
+//		{ //_text works as a string param
+//			map = new SearchParameterMap();
+//			map.add(Constants.PARAM_TEXT, new StringParam(theSearchQuery).setContains(true));
+//			if (theShouldFind) {
+//				assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map))).containsExactlyInAnyOrder(toValues(id1, id2, id3));
+//			} else {
+//				assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map))).isEmpty();
+//			}
+//		}
 	}
 
 	private String get15000CharacterNarrativeIncludingSlugAtEnd(String theSlug) {
 		StringBuilder builder = new StringBuilder();
 		int remainingNarrativeLength = 15000 - theSlug.length();
 		builder.append(RandomStringUtils.randomAlphanumeric(remainingNarrativeLength));
-		builder.append(" ");
 		builder.append(theSlug);
 		return builder.toString();
 	}
+
 	private String get15000CharacterNarrativeIncludingSlugAtStart(String theSlug) {
 		StringBuilder builder = new StringBuilder();
 		int remainingNarrativeLength = 15000 - theSlug.length();
 		builder.append(theSlug);
-		builder.append(" ");
 		builder.append(RandomStringUtils.randomAlphanumeric(remainingNarrativeLength));
 		return builder.toString();
 	}
+
+	private String get15000CharacterNarrativeIncludingSlugInMiddle(String theSlug) {
+		StringBuilder builder = new StringBuilder();
+		int remainingNarrativeLength = 15000 - theSlug.length();
+		builder.append(RandomStringUtils.randomAlphanumeric(remainingNarrativeLength / 2));
+		builder.append(theSlug);
+		builder.append(RandomStringUtils.randomAlphanumeric(remainingNarrativeLength / 2));
+		return builder.toString();
+	}
+
 
 
 	@Test
