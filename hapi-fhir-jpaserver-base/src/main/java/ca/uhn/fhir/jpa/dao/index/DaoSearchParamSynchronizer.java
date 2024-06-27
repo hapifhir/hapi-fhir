@@ -19,18 +19,24 @@
  */
 package ca.uhn.fhir.jpa.dao.index;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceIndexedComboStringUniqueDao;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndex;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.util.AddRemoveCount;
+import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import com.google.common.annotations.VisibleForTesting;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.PersistenceContextType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -44,13 +50,18 @@ import java.util.Set;
 
 @Service
 public class DaoSearchParamSynchronizer {
-	private static final Logger ourLog = LoggerFactory.getLogger(DaoSearchParamSynchronizer.class);
-
-	@Autowired
-	private StorageSettings myStorageSettings;
 
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	protected EntityManager myEntityManager;
+
+	@Autowired
+	private JpaStorageSettings myStorageSettings;
+
+	@Autowired
+	private IResourceIndexedComboStringUniqueDao myResourceIndexedCompositeStringUniqueDao;
+
+	@Autowired
+	private FhirContext myFhirContext;
 
 	public AddRemoveCount synchronizeSearchParamsToDatabase(
 			ResourceIndexedSearchParams theParams,
@@ -58,16 +69,27 @@ public class DaoSearchParamSynchronizer {
 			ResourceIndexedSearchParams existingParams) {
 		AddRemoveCount retVal = new AddRemoveCount();
 
-		synchronize(theEntity, retVal, theParams.myStringParams, existingParams.myStringParams);
-		synchronize(theEntity, retVal, theParams.myTokenParams, existingParams.myTokenParams);
-		synchronize(theEntity, retVal, theParams.myNumberParams, existingParams.myNumberParams);
-		synchronize(theEntity, retVal, theParams.myQuantityParams, existingParams.myQuantityParams);
-		synchronize(theEntity, retVal, theParams.myQuantityNormalizedParams, existingParams.myQuantityNormalizedParams);
-		synchronize(theEntity, retVal, theParams.myDateParams, existingParams.myDateParams);
-		synchronize(theEntity, retVal, theParams.myUriParams, existingParams.myUriParams);
-		synchronize(theEntity, retVal, theParams.myCoordsParams, existingParams.myCoordsParams);
-		synchronize(theEntity, retVal, theParams.myLinks, existingParams.myLinks);
-		synchronize(theEntity, retVal, theParams.myComboTokenNonUnique, existingParams.myComboTokenNonUnique);
+		synchronize(theEntity, retVal, theParams.myStringParams, existingParams.myStringParams, null);
+		synchronize(theEntity, retVal, theParams.myTokenParams, existingParams.myTokenParams, null);
+		synchronize(theEntity, retVal, theParams.myNumberParams, existingParams.myNumberParams, null);
+		synchronize(theEntity, retVal, theParams.myQuantityParams, existingParams.myQuantityParams, null);
+		synchronize(
+				theEntity,
+				retVal,
+				theParams.myQuantityNormalizedParams,
+				existingParams.myQuantityNormalizedParams,
+				null);
+		synchronize(theEntity, retVal, theParams.myDateParams, existingParams.myDateParams, null);
+		synchronize(theEntity, retVal, theParams.myUriParams, existingParams.myUriParams, null);
+		synchronize(theEntity, retVal, theParams.myCoordsParams, existingParams.myCoordsParams, null);
+		synchronize(theEntity, retVal, theParams.myLinks, existingParams.myLinks, null);
+		synchronize(theEntity, retVal, theParams.myComboTokenNonUnique, existingParams.myComboTokenNonUnique, null);
+		synchronize(
+				theEntity,
+				retVal,
+				theParams.myComboStringUniques,
+				existingParams.myComboStringUniques,
+				new UniqueIndexPreExistenceChecker());
 
 		// make sure links are indexed
 		theEntity.setResourceLinks(theParams.myLinks);
@@ -76,20 +98,21 @@ public class DaoSearchParamSynchronizer {
 	}
 
 	@VisibleForTesting
-	public void setStorageSettings(StorageSettings theStorageSettings) {
-		this.myStorageSettings = theStorageSettings;
+	public void setEntityManager(EntityManager theEntityManager) {
+		myEntityManager = theEntityManager;
 	}
 
 	@VisibleForTesting
-	public void setEntityManager(EntityManager theEntityManager) {
-		myEntityManager = theEntityManager;
+	public void setStorageSettings(JpaStorageSettings theStorageSettings) {
+		myStorageSettings = theStorageSettings;
 	}
 
 	private <T extends BaseResourceIndex> void synchronize(
 			ResourceTable theEntity,
 			AddRemoveCount theAddRemoveCount,
 			Collection<T> theNewParams,
-			Collection<T> theExistingParams) {
+			Collection<T> theExistingParams,
+			@Nullable IPreSaveHook<T> theAddParamPreSaveHook) {
 		Collection<T> newParams = theNewParams;
 		for (T next : newParams) {
 			next.setPartitionId(theEntity.getPartitionId());
@@ -112,6 +135,7 @@ public class DaoSearchParamSynchronizer {
 		Set<T> existingParamsAsSet = new HashSet<>(theExistingParams.size());
 		for (Iterator<T> iterator = theExistingParams.iterator(); iterator.hasNext(); ) {
 			T next = iterator.next();
+			next.setPlaceholderHashesIfMissing();
 			if (!existingParamsAsSet.add(next)) {
 				iterator.remove();
 				myEntityManager.remove(next);
@@ -126,6 +150,11 @@ public class DaoSearchParamSynchronizer {
 
 		List<T> paramsToRemove = subtract(theExistingParams, newParams);
 		List<T> paramsToAdd = subtract(newParams, theExistingParams);
+
+		if (theAddParamPreSaveHook != null) {
+			theAddParamPreSaveHook.preSave(paramsToRemove, paramsToAdd);
+		}
+
 		tryToReuseIndexEntities(paramsToRemove, paramsToAdd);
 		updateExistingParamsIfRequired(theExistingParams, paramsToAdd, newParams, paramsToRemove);
 
@@ -138,6 +167,7 @@ public class DaoSearchParamSynchronizer {
 			}
 			myEntityManager.remove(next);
 		}
+
 		for (T next : paramsToAdd) {
 			myEntityManager.merge(next);
 		}
@@ -248,5 +278,65 @@ public class DaoSearchParamSynchronizer {
 			}
 		}
 		return retVal;
+	}
+
+	private interface IPreSaveHook<T> {
+
+		void preSave(Collection<T> theParamsToRemove, Collection<T> theParamsToAdd);
+	}
+
+	private class UniqueIndexPreExistenceChecker implements IPreSaveHook<ResourceIndexedComboStringUnique> {
+
+		@Override
+		public void preSave(
+				Collection<ResourceIndexedComboStringUnique> theParamsToRemove,
+				Collection<ResourceIndexedComboStringUnique> theParamsToAdd) {
+			if (myStorageSettings.isUniqueIndexesCheckedBeforeSave()) {
+				for (ResourceIndexedComboStringUnique theIndex : theParamsToAdd) {
+					ResourceIndexedComboStringUnique existing =
+							myResourceIndexedCompositeStringUniqueDao.findByQueryString(theIndex.getIndexString());
+					if (existing != null) {
+
+						/*
+						 * If we're reindexing, and the previous index row is being updated
+						 * to add previously missing hashes, we may falsely detect that the index
+						 * creation is going to fail.
+						 */
+						boolean existingIndexIsScheduledForRemoval = false;
+						for (var next : theParamsToRemove) {
+							if (existing == next) {
+								existingIndexIsScheduledForRemoval = true;
+								break;
+							}
+						}
+						if (existingIndexIsScheduledForRemoval) {
+							continue;
+						}
+
+						String searchParameterId = "(unknown)";
+						if (theIndex.getSearchParameterId() != null) {
+							searchParameterId = theIndex.getSearchParameterId().getValue();
+						}
+
+						String msg = myFhirContext
+								.getLocalizer()
+								.getMessage(
+										BaseHapiFhirDao.class,
+										"uniqueIndexConflictFailure",
+										existing.getResource().getResourceType(),
+										theIndex.getIndexString(),
+										existing.getResource()
+												.getIdDt()
+												.toUnqualifiedVersionless()
+												.getValue(),
+										searchParameterId);
+
+						// Use ResourceVersionConflictException here because the HapiTransactionService
+						// catches this and can retry it if needed
+						throw new ResourceVersionConflictException(Msg.code(1093) + msg);
+					}
+				}
+			}
+		}
 	}
 }

@@ -48,9 +48,11 @@ import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
 import ca.uhn.fhir.jpa.searchparam.util.JpaParamUtil;
 import ca.uhn.fhir.jpa.searchparam.util.RuntimeSearchParamHelper;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
+import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.FhirTerser;
@@ -563,6 +565,14 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			if (paramsListForCompositePart != null) {
 				for (BaseResourceIndexedSearchParam nextParam : paramsListForCompositePart) {
 					IQueryParameterType nextParamAsClientParam = nextParam.toQueryParameterType();
+
+					if (nextParamAsClientParam instanceof DateParam) {
+						DateParam date = (DateParam) nextParamAsClientParam;
+						if (date.getPrecision() != TemporalPrecisionEnum.DAY) {
+							continue;
+						}
+					}
+
 					String value = nextParamAsClientParam.getValueAsQueryToken(myContext);
 
 					RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam(theResourceType, key);
@@ -578,6 +588,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 					}
 				}
 			}
+
 			if (linksForCompositePart != null) {
 				for (ResourceLink nextLink : linksForCompositePart) {
 					if (linksForCompositePartWantPaths.contains(nextLink.getSourcePath())) {
@@ -942,7 +953,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			for (int i = 0; i < values.size(); i++) {
 				IBase nextObject = values.get(i);
 				if (nextObject instanceof IBaseExtension) {
-					IBaseExtension nextExtension = (IBaseExtension) nextObject;
+					IBaseExtension<?, ?> nextExtension = (IBaseExtension<?, ?>) nextObject;
 					nextObject = nextExtension.getValue();
 					values.set(i, nextObject);
 				}
@@ -1740,7 +1751,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		}
 	}
 
-	@SuppressWarnings({"unchecked", "UnnecessaryLocalVariable"})
+	@SuppressWarnings({"UnnecessaryLocalVariable"})
 	private void createStringIndexIfNotBlank(
 			String theResourceType,
 			Set<? extends BaseResourceIndexedSearchParam> theParams,

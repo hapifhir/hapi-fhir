@@ -118,7 +118,7 @@ public abstract class BaseColumnCalculatorTask extends BaseTableColumnTask {
 					try {
 						next.get();
 					} catch (Exception e) {
-						throw new SQLException(Msg.code(69) + e);
+						throw new SQLException(Msg.code(69) + e, e);
 					}
 				}
 			}
@@ -168,8 +168,9 @@ public abstract class BaseColumnCalculatorTask extends BaseTableColumnTask {
 				rejectedExecutionHandler);
 	}
 
-	public void setPidColumnName(String thePidColumnName) {
+	public BaseColumnCalculatorTask setPidColumnName(String thePidColumnName) {
 		myPidColumnName = thePidColumnName;
+		return this;
 	}
 
 	private Future<?> updateRows(List<Map<String, Object>> theRows) {
