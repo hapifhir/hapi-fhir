@@ -970,7 +970,7 @@
 		<commons_lang3_version>3.14.0</commons_lang3_version>
 		<com_jamesmurty_utils_version>1.2</com_jamesmurty_utils_version>
 		<!-- Note: Derby is held to 10.16.x deliberately, as the 10.17+ version requires Java 21 to build -->
-		<derby_version>10.16.1.1</derby_version>
+		<derby_version>10.15.2.0</derby_version>
 		<error_prone_core_version>2.23.0</error_prone_core_version>
 		<mockito_version>5.8.0</mockito_version>
 		<nullaway_version>0.7.9</nullaway_version>
