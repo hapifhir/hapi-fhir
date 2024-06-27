@@ -72,8 +72,10 @@ public class SchemaMigrator {
 		try (Connection connection = myDataSource.getConnection()) {
 			MigrationTaskList unappliedMigrations = myHapiMigrationStorageSvc.diff(myMigrationTasks);
 
-			if (unappliedMigrations.size() > 0) {
+			// remove skippable tasks
+			MigrationTaskList unappliedUnskippable = unappliedMigrations.getUnskippableTasks();
 
+			if (unappliedUnskippable.size() > 0) {
 				String url = connection.getMetaData().getURL();
 				throw new ConfigurationException(Msg.code(27) + "The database schema for " + url + " is out of date.  "
 						+ "Current database schema version is "
