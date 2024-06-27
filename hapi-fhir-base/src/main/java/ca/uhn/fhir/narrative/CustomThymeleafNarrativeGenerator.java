@@ -70,7 +70,7 @@ public class CustomThymeleafNarrativeGenerator extends BaseThymeleafNarrativeGen
 	public NarrativeTemplateManifest getManifest() {
 		NarrativeTemplateManifest retVal = myManifest;
 		if (myManifest == null) {
-			Validate.isTrue(myPropertyFile != null, "Neither a property file or a manifest has been provided");
+			Validate.notNull(myPropertyFile, "Neither a property file or a manifest has been provided");
 			retVal = NarrativeTemplateManifest.forManifestFileLocation(myPropertyFile);
 			setManifest(retVal);
 		}
