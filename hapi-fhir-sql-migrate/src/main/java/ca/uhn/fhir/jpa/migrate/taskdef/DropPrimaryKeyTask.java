@@ -60,7 +60,7 @@ public class DropPrimaryKeyTask extends BaseTableTask {
 
 		@Nullable
 		final String primaryKeyName = primaryKeyNameSql != null
-				? executeSqlWithResult(primaryKeyNameSql, getTableNameWithDatabaseExpectedCase())
+				? newJdbcTemplate().queryForObject("some sql", String.clasS); 
 				: null;
 
 		ourLog.debug("primaryKeyName: {} for driver: {}", primaryKeyName, getDriverType());
