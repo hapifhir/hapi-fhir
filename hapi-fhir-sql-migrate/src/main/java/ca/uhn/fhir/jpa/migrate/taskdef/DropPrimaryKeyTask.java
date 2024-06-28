@@ -60,43 +60,12 @@ public class DropPrimaryKeyTask extends BaseTableTask {
 
 		@Nullable
 		final String primaryKeyName = primaryKeyNameSql != null
-				? newJdbcTemplate().queryForObject("some sql", String.clasS); 
+				? newJdbcTemplate().queryForObject(primaryKeyNameSql, String.class, getTableNameWithDatabaseExpectedCase())
 				: null;
 
 		ourLog.debug("primaryKeyName: {} for driver: {}", primaryKeyName, getDriverType());
 
 		return generateDropPrimaryKeySql(primaryKeyName);
-	}
-
-	private String executeSqlWithResult(@Language("SQL") String theSql, Object... theArguments) {
-		String retVal = "STUB_VALUE";
-		if (!isDryRun()) {
-			try {
-				final JdbcTemplate jdbcTemplate = newJdbcTemplate();
-				if (isTransactional()) {
-					retVal = getConnectionProperties()
-							.getTxTemplate()
-							.execute(t -> jdbcTemplate.queryForObject(theSql, String.class, theArguments));
-				} else {
-					retVal = jdbcTemplate.queryForObject(theSql, String.class, theArguments);
-				}
-			} catch (DataAccessException e) {
-				if (hasFlag(TaskFlagEnum.FAILURE_ALLOWED)) {
-					ourLog.info(
-							"Task {} did not exit successfully on executeSqlWithResult(), but task is allowed to fail",
-							getMigrationVersion());
-					ourLog.debug("Error was: {}", e.getMessage(), e);
-					return null;
-				} else {
-					throw new HapiMigrationException(
-							Msg.code(2532) + "Failed during task " + getMigrationVersion() + ": " + e, e);
-				}
-			}
-		}
-
-		captureExecutedStatement(getTableName(), theSql, theArguments);
-
-		return retVal;
 	}
 
 	private String getTableNameWithDatabaseExpectedCase() {
