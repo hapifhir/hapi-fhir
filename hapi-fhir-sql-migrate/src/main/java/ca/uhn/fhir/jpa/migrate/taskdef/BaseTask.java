@@ -25,7 +25,6 @@ import ca.uhn.fhir.jpa.migrate.HapiMigrationException;
 import ca.uhn.fhir.jpa.migrate.tasks.api.TaskFlagEnum;
 import ca.uhn.fhir.system.HapiSystemProperties;
 import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -37,7 +36,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.sql.SQLException;
@@ -93,6 +91,10 @@ public abstract class BaseTask {
 	public BaseTask addFlag(@Nonnull TaskFlagEnum theFlag) {
 		myFlags.add(theFlag);
 		return this;
+	}
+
+	public boolean isTransactional() {
+		return myTransactional;
 	}
 
 	/**
@@ -176,17 +178,6 @@ public abstract class BaseTask {
 		captureExecutedStatement(theTableName, theSql, theArguments);
 	}
 
-	protected <T> T executeSqlWithResult(
-			@Language("SQL") String theSql, ResultSetExtractor<T> theResultSetExtractor, Object... theArguments) {
-		if (myTransactional) {
-			return getConnectionProperties()
-					.getTxTemplate()
-					.execute(t -> doExecuteSqlWithResult(theSql, theResultSetExtractor, theArguments));
-		}
-
-		return doExecuteSqlWithResult(theSql, theResultSetExtractor, theArguments);
-	}
-
 	protected void executeSqlListInTransaction(String theTableName, List<String> theSqlStatements) {
 		if (!isDryRun()) {
 			Integer changes;
@@ -228,32 +219,6 @@ public abstract class BaseTask {
 			} else {
 				throw new HapiMigrationException(
 						Msg.code(61) + "Failed during task " + getMigrationVersion() + ": " + e, e);
-			}
-		}
-	}
-
-	@Nullable
-	private <T> T doExecuteSqlWithResult(
-			@Language("SQL") String theSql, ResultSetExtractor<T> theResultSetExtractor, Object... theArguments) {
-		final JdbcTemplate jdbcTemplate = getConnectionProperties().newJdbcTemplate();
-		// 0 means no timeout -- we use this for index rebuilds that may take time.
-		jdbcTemplate.setQueryTimeout(0);
-		try {
-			T result = jdbcTemplate.query(theSql, theResultSetExtractor, theArguments);
-			if (!HapiSystemProperties.isUnitTestModeEnabled()) {
-				logInfo(ourLog, "SQL \"{}\" returned result {}", theSql, result);
-			}
-			return result;
-		} catch (DataAccessException e) {
-			if (myFlags.contains(TaskFlagEnum.FAILURE_ALLOWED)) {
-				ourLog.info(
-						"Task {} did not exit successfully on doExecuteSqlWithResult(), but task is allowed to fail",
-						getMigrationVersion());
-				ourLog.debug("Error was: {}", e.getMessage(), e);
-				return null;
-			} else {
-				throw new HapiMigrationException(
-						Msg.code(2532) + "Failed during task " + getMigrationVersion() + ": " + e, e);
 			}
 		}
 	}

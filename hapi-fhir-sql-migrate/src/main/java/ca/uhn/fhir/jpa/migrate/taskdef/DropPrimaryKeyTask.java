@@ -21,12 +21,15 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
+import ca.uhn.fhir.jpa.migrate.HapiMigrationException;
+import ca.uhn.fhir.jpa.migrate.tasks.api.TaskFlagEnum;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.intellij.lang.annotations.Language;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.jdbc.core.ResultSetExtractor;
+import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.sql.SQLException;
 
@@ -51,33 +54,49 @@ public class DropPrimaryKeyTask extends BaseTableTask {
 	private String generateSql() {
 		ourLog.debug("DropPrimaryKeyTask.generateSql()");
 
-		final ResultSetExtractor<String> resultSetExtractor = rs -> {
-			if (rs.next()) {
-				final String singleResult = rs.getString(1);
-
-				if (rs.next()) {
-					throw new IllegalArgumentException(Msg.code(2533)
-							+ "Expecting only a single result for the table primary but got multiple for task: "
-							+ getMigrationVersion());
-				}
-
-				return singleResult;
-			}
-			return null;
-		};
-
 		@Nullable
 		@Language("SQL")
 		final String primaryKeyNameSql = generatePrimaryKeyNameSql();
 
 		@Nullable
 		final String primaryKeyName = primaryKeyNameSql != null
-				? executeSqlWithResult(primaryKeyNameSql, resultSetExtractor, getTableNameWithDatabaseExpectedCase())
+				? executeSqlWithResult(primaryKeyNameSql, getTableNameWithDatabaseExpectedCase())
 				: null;
 
 		ourLog.debug("primaryKeyName: {} for driver: {}", primaryKeyName, getDriverType());
 
 		return generateDropPrimaryKeySql(primaryKeyName);
+	}
+
+	private String executeSqlWithResult(@Language("SQL") String theSql, Object... theArguments) {
+		String retVal = "STUB_VALUE";
+		if (!isDryRun()) {
+			try {
+				final JdbcTemplate jdbcTemplate = newJdbcTemplate();
+				if (isTransactional()) {
+					retVal = getConnectionProperties()
+							.getTxTemplate()
+							.execute(t -> jdbcTemplate.queryForObject(theSql, String.class, theArguments));
+				} else {
+					retVal = jdbcTemplate.queryForObject(theSql, String.class, theArguments);
+				}
+			} catch (DataAccessException e) {
+				if (hasFlag(TaskFlagEnum.FAILURE_ALLOWED)) {
+					ourLog.info(
+							"Task {} did not exit successfully on executeSqlWithResult(), but task is allowed to fail",
+							getMigrationVersion());
+					ourLog.debug("Error was: {}", e.getMessage(), e);
+					return null;
+				} else {
+					throw new HapiMigrationException(
+							Msg.code(2532) + "Failed during task " + getMigrationVersion() + ": " + e, e);
+				}
+			}
+		}
+
+		captureExecutedStatement(getTableName(), theSql, theArguments);
+
+		return retVal;
 	}
 
 	private String getTableNameWithDatabaseExpectedCase() {
