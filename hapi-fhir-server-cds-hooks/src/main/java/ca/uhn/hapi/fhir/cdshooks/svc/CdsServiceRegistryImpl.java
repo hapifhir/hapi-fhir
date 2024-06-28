@@ -31,7 +31,7 @@ import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceRequestJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServicesJson;
-import ca.uhn.hapi.fhir.cdshooks.serializer.CdsHooksExtensionDeserializer;
+import ca.uhn.hapi.fhir.cdshooks.serializer.CdsServiceRequestJsonDeserializer;
 import ca.uhn.hapi.fhir.cdshooks.svc.cr.ICdsCrServiceFactory;
 import ca.uhn.hapi.fhir.cdshooks.svc.cr.discovery.ICrDiscoveryServiceFactory;
 import ca.uhn.hapi.fhir.cdshooks.svc.prefetch.CdsPrefetchSvc;
@@ -67,7 +67,7 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 		myCdsPrefetchSvc = theCdsPrefetchSvc;
 		myObjectMapper = theObjectMapper;
 		SimpleModule module = new SimpleModule();
-		module.addDeserializer(CdsHooksExtension.class, new CdsHooksExtensionDeserializer(this, myObjectMapper));
+		module.addDeserializer(CdsServiceRequestJson.class, new CdsServiceRequestJsonDeserializer(this, myObjectMapper));
 		myObjectMapper.registerModule(module);
 		myCdsCrServiceFactory = theCdsCrServiceFactory;
 		myCrDiscoveryServiceFactory = theCrDiscoveryServiceFactory;
@@ -169,6 +169,9 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 			CdsServiceJson theCdsServiceJson,
 			boolean theAllowAutoFhirClientPrefetch,
 			String theModuleId) {
+		if(theCdsServiceJson.getExtensionClass() == null) {
+			theCdsServiceJson.setExtensionClass(CdsHooksExtension.class);
+		}
 		myServiceCache.registerDynamicService(
 				theServiceId, theServiceFunction, theCdsServiceJson, theAllowAutoFhirClientPrefetch, theModuleId);
 	}
@@ -214,5 +217,9 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 				}
 			}
 		}
+	}
+
+	public CdsServiceJson getCdsServiceJson(String theString) {
+		return myServiceCache.getCdsServiceJson(theString);
 	}
 }
