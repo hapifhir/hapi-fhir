@@ -93,10 +93,6 @@ public abstract class BaseTask {
 		return this;
 	}
 
-	public boolean isTransactional() {
-		return myTransactional;
-	}
-
 	/**
 	 * Some migrations can not be run in a transaction.
 	 * When this is true, {@link BaseTask#executeSql} will run without a transaction
