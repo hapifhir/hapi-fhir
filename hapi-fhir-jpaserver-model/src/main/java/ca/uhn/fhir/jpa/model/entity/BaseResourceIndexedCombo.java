@@ -20,26 +20,25 @@
 package ca.uhn.fhir.jpa.model.entity;
 
 import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
+import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.Transient;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-/**
- * Provides a common interface used to extract Combo Unique ({@link ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique})
- * and Combo Non-Unique ({@link ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboTokenNonUnique}) SearchParameters
- */
-public interface IResourceIndexComboSearchParameter {
+@MappedSuperclass
+public abstract class BaseResourceIndexedCombo extends BaseResourceIndex implements IResourceIndexComboSearchParameter {
 
-	/**
-	 * Will be in the exact form <code>[resourceType]/[id]</code>
-	 */
-	@Nullable // if it never got set, e.g. on a row pulled from the DB
-	IIdType getSearchParameterId();
+	@Transient
+	private IIdType mySearchParameterId;
 
-	void setSearchParameterId(@Nonnull IIdType theSearchParameterId);
+	@Override
+	public IIdType getSearchParameterId() {
+		return mySearchParameterId;
+	}
 
-	String getIndexString();
-
-	ResourceTable getResource();
-
-	void setResource(ResourceTable theResourceTable);
+	@Override
+	public void setSearchParameterId(@Nonnull IIdType theSearchParameterId) {
+		assert theSearchParameterId.hasResourceType();
+		assert theSearchParameterId.hasIdPart();
+		mySearchParameterId = theSearchParameterId.toUnqualifiedVersionless();
+	}
 }

@@ -11,11 +11,13 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.BundleUtil;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -124,6 +126,25 @@ public class ReindexTestHelper {
 		return daoMethodOutcome;
 	}
 
+	public void createNonUniqueStatusAndCodeSearchParameter() {
+		createCodeSearchParameter();
+		createStatusSearchParameter();
+		SearchParameter uniqueCodeSp = new SearchParameter();
+		uniqueCodeSp.setId("SearchParameter/nonunique-status-code");
+		uniqueCodeSp.addExtension(new Extension().setUrl("http://hapifhir.io/fhir/StructureDefinition/sp-unique").setValue(new BooleanType(false)));
+		uniqueCodeSp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		uniqueCodeSp.setCode("observation-status-and-code");
+		uniqueCodeSp.addBase("Observation");
+		uniqueCodeSp.setType(Enumerations.SearchParamType.COMPOSITE);
+		uniqueCodeSp.setExpression("Observation");
+		uniqueCodeSp.addComponent(new SearchParameter.SearchParameterComponentComponent().setDefinition("SearchParameter/clinical-code").setExpression("Observation"));
+		uniqueCodeSp.addComponent(new SearchParameter.SearchParameterComponentComponent().setDefinition("SearchParameter/clinical-status").setExpression("Observation"));
+
+		mySearchParameterDao.update(uniqueCodeSp);
+		mySearchParamRegistry.forceRefresh();
+	}
+
+
 	public DaoMethodOutcome createCodeSearchParameter() {
 		SearchParameter codeSp = new SearchParameter();
 		codeSp.setId("SearchParameter/clinical-code");
@@ -132,6 +153,20 @@ public class ReindexTestHelper {
 		codeSp.addBase("Observation");
 		codeSp.setType(Enumerations.SearchParamType.TOKEN);
 		codeSp.setExpression("Observation.code");
+
+		DaoMethodOutcome daoMethodOutcome = mySearchParameterDao.update(codeSp);
+		mySearchParamRegistry.forceRefresh();
+		return daoMethodOutcome;
+	}
+
+	public DaoMethodOutcome createStatusSearchParameter() {
+		SearchParameter codeSp = new SearchParameter();
+		codeSp.setId("SearchParameter/clinical-status");
+		codeSp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		codeSp.setCode("status");
+		codeSp.addBase("Observation");
+		codeSp.setType(Enumerations.SearchParamType.TOKEN);
+		codeSp.setExpression("Observation.status");
 
 		DaoMethodOutcome daoMethodOutcome = mySearchParameterDao.update(codeSp);
 		mySearchParamRegistry.forceRefresh();
@@ -151,13 +186,14 @@ public class ReindexTestHelper {
 		return observation;
 	}
 
-	public IIdType createObservationWithCode() {
-		Observation observation = buildObservationWithCode();
+	public IIdType createObservationWithStatusAndCode() {
+		Observation observation = buildObservationWithStatusAndCode();
 		return myObservationDao.create(observation).getId();
 	}
 
-	public Observation buildObservationWithCode() {
+	public Observation buildObservationWithStatusAndCode() {
 		Observation observation = new Observation();
+		observation.setStatus(Observation.ObservationStatus.FINAL);
 		CodeableConcept codeableConcept = new CodeableConcept();
 		codeableConcept.addCoding(new Coding().setCode("29463-7").setSystem("http://loinc.org").setDisplay("Body Weight"));
 		observation.setCode(codeableConcept);
@@ -205,5 +241,29 @@ public class ReindexTestHelper {
 			.cacheControl(new CacheControlDirective().setNoCache(true))
 			.execute();
 		return BundleUtil.toListOfResourceIds(myFhirContext, result);
+	}
+
+	/**
+	 * Creates a transaction bundle with 20 Observations which will create rows for indexes
+	 * created by {@link #createNonUniqueStatusAndCodeSearchParameter()} and
+	 * {@link #createUniqueCodeSearchParameter()}.
+	 */
+	public Bundle createTransactionBundleWith20Observation(boolean theUseClientAssignedIds) {
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		for (int i = 0; i < 20; i++) {
+			Observation observation = new Observation();
+			if (theUseClientAssignedIds) {
+				observation.setId("OBS" + i);
+			}
+			observation.addIdentifier().setSystem("http://foo").setValue("ident" + i);
+			observation.setStatus(Observation.ObservationStatus.FINAL);
+			observation.getCode().addCoding().setSystem("http://foo").setCode("" + i);
+			if (theUseClientAssignedIds) {
+				bb.addTransactionUpdateEntry(observation);
+			} else {
+				bb.addTransactionCreateEntry(observation);
+			}
+		}
+		return bb.getBundleTyped();
 	}
 }

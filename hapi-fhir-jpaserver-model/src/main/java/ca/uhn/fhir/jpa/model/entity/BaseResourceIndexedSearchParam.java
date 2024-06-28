@@ -66,7 +66,7 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 	protected Long myHashIdentity;
 
 	@GenericField
-	@Column(name = "SP_UPDATED")
+	@Column(name = "SP_UPDATED", nullable = true)
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date myUpdated;
 

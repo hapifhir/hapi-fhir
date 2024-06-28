@@ -56,4 +56,14 @@ public abstract class BaseResourceIndex extends BasePartitionable implements Ser
 	public abstract boolean equals(Object obj);
 
 	public abstract <T extends BaseResourceIndex> void copyMutableValuesFrom(T theSource);
+
+	/**
+	 * This is called when reindexing a resource on the previously existing index rows. This method
+	 * should set zero/0 values for the hashes, in order to avoid any calculating hashes on existing
+	 * rows failing. This is important only in cases where hashes are not present on the existing rows,
+	 * which would only be the case if new hash columns have been added.
+	 */
+	public void setPlaceholderHashesIfMissing() {
+		// nothing by default
+	}
 }
