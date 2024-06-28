@@ -21,13 +21,13 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class JobPartitionProviderTest {
+public class JpaJobPartitionProviderTest {
 	@Mock
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 	@Mock
 	private IPartitionLookupSvc myPartitionLookupSvc;
 	@InjectMocks
-	private JobPartitionProvider myJobPartitionProvider;
+	private JpaPartitionProvider myJobPartitionProvider;
 
 	@Test
 	public void getPartitions_requestSpecificPartition_returnsPartition() {
