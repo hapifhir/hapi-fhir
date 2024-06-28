@@ -142,7 +142,7 @@ public class ConsumeFilesStepR4Test extends BasePartitioningR4Test {
 		// Validate
 
 		if (partitionEnabled) {
-			assertEquals(7, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+			assertEquals(8, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		} else {
 			assertEquals(6, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		}

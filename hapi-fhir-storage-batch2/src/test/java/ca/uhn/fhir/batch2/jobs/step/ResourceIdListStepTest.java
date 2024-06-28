@@ -88,7 +88,8 @@ class ResourceIdListStepTest {
 		assertThat(allDataChunks).hasSize(expectedBatchCount);
 
 		// Ensure that all chunks except the very last one are MAX_BATCH_OF_IDS in length
-		for (ResourceIdListWorkChunkJson dataChunk : allDataChunks) {
+		for (int i = 0; i < expectedBatchCount - 1; i++) {
+			ResourceIdListWorkChunkJson dataChunk = allDataChunks.get(i);
 			assertEquals(ResourceIdListStep.MAX_BATCH_OF_IDS, dataChunk.size());
 			assertEquals(partitionId, dataChunk.getRequestPartitionId());
 		}

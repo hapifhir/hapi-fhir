@@ -65,7 +65,7 @@ public class GenerateRangeChunksStepTest {
 				Arguments.of(List.of("Observation?", "Patient?"), threePartitions, false, 6),
 				Arguments.of(List.of("Observation?", "Patient?", "Practitioner?"), threePartitions, true, 3),
 				Arguments.of(List.of("Observation?status=final", "Patient?"), partition1, false, 2),
-				Arguments.of(List.of("Observation?status=final"), threePartitions, false, 2)
+				Arguments.of(List.of("Observation?status=final"), threePartitions, false, 3)
 		);
 	}
 

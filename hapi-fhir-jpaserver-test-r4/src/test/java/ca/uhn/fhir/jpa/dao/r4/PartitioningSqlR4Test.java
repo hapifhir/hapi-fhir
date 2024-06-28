@@ -2883,7 +2883,6 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		createPatient(withPartition(1), withActiveTrue());
 
 		myCaptureQueriesListener.clear();
-		addReadDefaultPartition();
 		Bundle outcome = mySystemDao.transaction(mySrd, input.get());
 		ourLog.debug("Resp: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();

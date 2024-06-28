@@ -7,7 +7,6 @@ import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.batch2.jobs.parameters.JobParameters;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunk;
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.pid.HomogeneousResourcePidList;
 import ca.uhn.fhir.jpa.api.pid.IResourcePidList;
 import ca.uhn.fhir.jpa.api.pid.IResourcePidStream;
@@ -62,7 +61,7 @@ public class LoadIdsStepTest {
 	@Test
 	public void testGenerateSteps() {
 		JobParameters parameters = new JobParameters();
-		ChunkRangeJson range = new ChunkRangeJson(DATE_1, DATE_END).setPartitionId(RequestPartitionId.allPartitions());
+		ChunkRangeJson range = new ChunkRangeJson(DATE_1, DATE_END);
 		String instanceId = "instance-id";
 		JobInstance jobInstance = JobInstance.fromInstanceId(instanceId);
 		String chunkId = "chunk-id";
@@ -70,8 +69,7 @@ public class LoadIdsStepTest {
 
 		// First Execution
 
-		when(myBatch2DaoSvc.fetchResourceIdStream(eq(DATE_1), eq(DATE_END), isNull(), isNull()))
-			.thenReturn(createIdChunk());
+		when(myBatch2DaoSvc.fetchResourceIdStream(eq(DATE_1), eq(DATE_END), isNull(), isNull())).thenReturn(createIdChunk());
 
 		mySvc.run(details, mySink);
 
