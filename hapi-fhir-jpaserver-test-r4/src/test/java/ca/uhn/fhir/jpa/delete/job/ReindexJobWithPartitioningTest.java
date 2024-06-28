@@ -42,6 +42,7 @@ public class ReindexJobWithPartitioningTest extends BaseJpaR4Test {
 
 		RequestPartitionId partition1 = RequestPartitionId.fromPartitionId(1);
 		RequestPartitionId partition2 = RequestPartitionId.fromPartitionId(2);
+		RequestPartitionId defaultPartition = RequestPartitionId.defaultPartition();
 
 		Observation observation1 = buildResource("Observation", withStatus(Observation.ObservationStatus.FINAL.toCode()));
 		myObservationDao.create(observation1, new SystemRequestDetails().setRequestPartitionId(partition1));
@@ -54,6 +55,8 @@ public class ReindexJobWithPartitioningTest extends BaseJpaR4Test {
 		myPatientDao.create(patient1, new SystemRequestDetails().setRequestPartitionId(partition1));
 		Patient patient2 = buildResource("Patient", withActiveFalse());
 		myPatientDao.create(patient2, new SystemRequestDetails().setRequestPartitionId(partition2));
+		Patient patient3 = buildResource("Patient", withActiveFalse());
+		myPatientDao.create(patient3, new SystemRequestDetails().setRequestPartitionId(defaultPartition));
 	}
 
 	@AfterEach
@@ -63,17 +66,30 @@ public class ReindexJobWithPartitioningTest extends BaseJpaR4Test {
 	}
 
 	public static Stream<Arguments> getReindexParameters() {
-		List<RequestPartitionId> allPartitions = List.of(RequestPartitionId.fromPartitionId(1), RequestPartitionId.fromPartitionId(2));
+		List<RequestPartitionId> twoPartitions = List.of(RequestPartitionId.fromPartitionId(1), RequestPartitionId.fromPartitionId(2));
 		List<RequestPartitionId> partition1 = List.of(RequestPartitionId.fromPartitionId(1));
+		List<RequestPartitionId> allPartitions = List.of(RequestPartitionId.allPartitions());
 		return Stream.of(
-				Arguments.of(List.of(), List.of(), false, 5),
+				// includes all resources from all partitions - partition 1, partition 2 and default partition
+				Arguments.of(List.of(), List.of(), false, 6),
+				// includes all Observations
+				Arguments.of(List.of("Observation?"), twoPartitions, false, 3),
+				// includes all Observations
 				Arguments.of(List.of("Observation?"), allPartitions, false, 3),
 				Arguments.of(List.of("Observation?"), List.of(), false, 0),
+				// includes Observations in partition 1
 				Arguments.of(List.of("Observation?"), partition1, true, 2),
-				Arguments.of(List.of("Observation?", "Patient?"), allPartitions, false, 5),
-				Arguments.of(List.of("Observation?", "Patient?"), allPartitions, true, 3),
-				Arguments.of(List.of("Observation?status=final", "Patient?"), allPartitions, false, 4),
-				Arguments.of(List.of("Observation?status=final", "Patient?"), allPartitions, true, 2),
+				// includes all Patients from all partitions - partition 1, partition 2 and default partition
+				Arguments.of(List.of("Patient?"), allPartitions, false, 3),
+				// includes Patients and Observations in partitions 1 and 2
+				Arguments.of(List.of("Observation?", "Patient?"), twoPartitions, false, 5),
+				// includes Observations from partition 1 and Patients from partition 2
+				Arguments.of(List.of("Observation?", "Patient?"), twoPartitions, true, 3),
+				// includes final Observations and Patients from partitions 1 and 2
+				Arguments.of(List.of("Observation?status=final", "Patient?"), twoPartitions, false, 4),
+				// includes final Observations from partition 1 and Patients from partition 2
+				Arguments.of(List.of("Observation?status=final", "Patient?"), twoPartitions, true, 2),
+				// includes final Observations and Patients from partitions 1
 				Arguments.of(List.of("Observation?status=final", "Patient?"), partition1, false, 2)
 		);
 	}
