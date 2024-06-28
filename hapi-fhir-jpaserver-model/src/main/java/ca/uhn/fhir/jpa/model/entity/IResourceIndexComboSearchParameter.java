@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 /**
@@ -27,9 +29,13 @@ import org.hl7.fhir.instance.model.api.IIdType;
  */
 public interface IResourceIndexComboSearchParameter {
 
+	/**
+	 * Will be in the exact form <code>[resourceType]/[id]</code>
+	 */
+	@Nullable // if it never got set, e.g. on a row pulled from the DB
 	IIdType getSearchParameterId();
 
-	void setSearchParameterId(IIdType theSearchParameterId);
+	void setSearchParameterId(@Nonnull IIdType theSearchParameterId);
 
 	String getIndexString();
 

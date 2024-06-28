@@ -76,17 +76,17 @@ public class JpaSearchParamCacheTest {
 
 	@Test
 	public void testGetActiveComboParamByIdPresent(){
-		IIdType id1 = new IdType(1);
+		IIdType id1 = new IdType("SearchParameter/1");
 		RuntimeSearchParam sp1 = createSearchParam(id1, ComboSearchParamType.NON_UNIQUE);
 
-		IIdType id2 = new IdType(2);
+		IIdType id2 = new IdType("SearchParameter/2");
 		RuntimeSearchParam sp2 = createSearchParam(id2, ComboSearchParamType.NON_UNIQUE);
 
 		setActiveComboSearchParams(RESOURCE_TYPE, List.of(sp1, sp2));
 
 		Optional<RuntimeSearchParam> found = myJpaSearchParamCache.getActiveComboSearchParamById(RESOURCE_TYPE, id1);
 		assertThat(found).isPresent();
-		assertEquals(id1, found.get().getId());
+		assertEquals(id1, found.get().getIdUnqualifiedVersionless());
 	}
 
 	@Test
@@ -143,7 +143,7 @@ public class JpaSearchParamCacheTest {
 
 	private RuntimeSearchParam createSearchParam(IIdType theId, ComboSearchParamType theType){
 		RuntimeSearchParam sp = mock(RuntimeSearchParam.class);
-		when(sp.getId()).thenReturn(theId);
+		when(sp.getIdUnqualifiedVersionless()).thenReturn(theId);
 		when(sp.getComboSearchParamType()).thenReturn(theType);
 		return sp;
 	}
@@ -154,7 +154,7 @@ public class JpaSearchParamCacheTest {
 		myJpaSearchParamCache.setActiveComboSearchParams(activeComboParams);
 	}
 
-	private class TestableJpaSearchParamCache extends JpaSearchParamCache {
+	private static class TestableJpaSearchParamCache extends JpaSearchParamCache {
 		public void setActiveComboSearchParams(Map<String, List<RuntimeSearchParam>> theActiveComboSearchParams){
 			myActiveComboSearchParams = theActiveComboSearchParams;
 		}
