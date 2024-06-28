@@ -69,6 +69,7 @@ import ca.uhn.fhir.jpa.searchparam.util.JpaParamUtil;
 import ca.uhn.fhir.jpa.searchparam.util.LastNParameterHelper;
 import ca.uhn.fhir.jpa.util.BaseIterator;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
+import ca.uhn.fhir.jpa.util.PermutationBuilder;
 import ca.uhn.fhir.jpa.util.QueryChunker;
 import ca.uhn.fhir.jpa.util.SqlQueryList;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -83,6 +84,7 @@ import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.param.BaseParamWithPrefix;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParameterUtil;
@@ -125,6 +127,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -137,6 +140,7 @@ import java.util.stream.Collectors;
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.UNDESIRED_RESOURCE_LINKAGES_FOR_EVERYTHING_ON_PATIENT_INSTANCE;
 import static ca.uhn.fhir.jpa.search.builder.QueryStack.LOCATION_POSITION;
 import static ca.uhn.fhir.jpa.search.builder.QueryStack.SearchForIdsParams.with;
+import static java.util.Objects.requireNonNull;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -1910,9 +1914,11 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		if (comboParam != null) {
 			Collections.sort(comboParamNames);
 
-			if (!validateParamValuesAreValidForComboParam(theParams, comboParamNames)) {
+			if (!validateParamValuesAreValidForComboParam(theRequest, theParams, comboParamNames)) {
 				return;
 			}
+
+			// FIXME: abort if too many permutations
 
 			applyComboSearchParam(theQueryStack, theParams, theRequest, comboParamNames, comboParam);
 		}
@@ -1927,101 +1933,111 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		// Since we're going to remove elements below
 		theParams.values().forEach(this::ensureSubListsAreWritable);
 
-		StringBuilder theSearchBuilder = new StringBuilder();
-		theSearchBuilder.append(myResourceName);
-		theSearchBuilder.append("?");
-
-		boolean first = true;
+		List<List<IQueryParameterType>> inputs = new ArrayList<>();
 		for (String nextParamName : theComboParamNames) {
-			List<List<IQueryParameterType>> nextValues = theParams.get(nextParamName);
+			List<IQueryParameterType> nextValues = theParams.get(nextParamName).remove(0);
+			inputs.add(nextValues);
+		}
 
-			// This should never happen, but this safety check was added along the way and
-			// presumably must save us in some specific race condition. I am preserving it
-			// in a refactor of this code base. 20240429
-			if (nextValues.isEmpty()) {
-				ourLog.error(
-						"query parameter {} is unexpectedly empty. Encountered while considering {} index for {}",
-						nextParamName,
-						theComboParam.getName(),
-						theRequest.getCompleteUrl());
-				continue;
-			}
+		List<List<IQueryParameterType>> inputPermutations = PermutationBuilder.calculatePermutations(inputs);
+		List<String> indexStrings = new ArrayList<>(PermutationBuilder.calculatePermutationCount(inputs));
+		for (List<IQueryParameterType> nextPermutation : inputPermutations) {
 
-			List<? extends IQueryParameterType> nextAnd = nextValues.remove(0);
-			IQueryParameterType nextOr = nextAnd.remove(0);
-			String nextOrValue = nextOr.getValueAsQueryToken(myContext);
+			StringBuilder searchStringBuilder = new StringBuilder();
+			searchStringBuilder.append(myResourceName);
+			searchStringBuilder.append("?");
 
-			RuntimeSearchParam nextParamDef = mySearchParamRegistry.getActiveSearchParam(myResourceName, nextParamName);
-			if (theComboParam.getComboSearchParamType() == ComboSearchParamType.NON_UNIQUE) {
-				if (nextParamDef.getParamType() == RestSearchParameterTypeEnum.STRING) {
-					nextOrValue = StringUtil.normalizeStringForSearchIndexing(nextOrValue);
+			boolean first = true;
+			for (int paramIndex = 0; paramIndex < theComboParamNames.size(); paramIndex++) {
+
+				String nextParamName = theComboParamNames.get(paramIndex);
+				IQueryParameterType nextOr = nextPermutation.get(paramIndex);
+				String nextOrValue = nextOr.getValueAsQueryToken(myContext);
+
+				RuntimeSearchParam nextParamDef = mySearchParamRegistry.getActiveSearchParam(myResourceName, nextParamName);
+				if (theComboParam.getComboSearchParamType() == ComboSearchParamType.NON_UNIQUE) {
+					if (nextParamDef.getParamType() == RestSearchParameterTypeEnum.STRING) {
+						nextOrValue = StringUtil.normalizeStringForSearchIndexing(nextOrValue);
+					}
 				}
+
+				if (first) {
+					first = false;
+				} else {
+					searchStringBuilder.append('&');
+				}
+
+				nextParamName = UrlUtil.escapeUrlParam(nextParamName);
+				nextOrValue = UrlUtil.escapeUrlParam(nextOrValue);
+
+				searchStringBuilder.append(nextParamName).append('=').append(nextOrValue);
 			}
 
-			if (first) {
-				first = false;
-			} else {
-				theSearchBuilder.append('&');
-			}
-
-			nextParamName = UrlUtil.escapeUrlParam(nextParamName);
-			nextOrValue = UrlUtil.escapeUrlParam(nextOrValue);
-
-			theSearchBuilder.append(nextParamName).append('=').append(nextOrValue);
-		}
-
-		if (theSearchBuilder != null) {
-			String indexString = theSearchBuilder.toString();
+			String indexString = searchStringBuilder.toString();
 			ourLog.debug(
-					"Checking for {} combo index for query: {}", theComboParam.getComboSearchParamType(), indexString);
+				"Checking for {} combo index for query: {}", theComboParam.getComboSearchParamType(), indexString);
 
-			// Interceptor broadcast: JPA_PERFTRACE_INFO
-			StorageProcessingMessage msg = new StorageProcessingMessage()
-					.setMessage("Using " + theComboParam.getComboSearchParamType() + " index for query for search: "
-							+ indexString);
-			HookParams params = new HookParams()
-					.add(RequestDetails.class, theRequest)
-					.addIfMatchesType(ServletRequestDetails.class, theRequest)
-					.add(StorageProcessingMessage.class, msg);
-			CompositeInterceptorBroadcaster.doCallHooks(
-					myInterceptorBroadcaster, theRequest, Pointcut.JPA_PERFTRACE_INFO, params);
-
-			switch (theComboParam.getComboSearchParamType()) {
-				case UNIQUE:
-					theQueryStack.addPredicateCompositeUnique(indexString, myRequestPartitionId);
-					break;
-				case NON_UNIQUE:
-					theQueryStack.addPredicateCompositeNonUnique(indexString, myRequestPartitionId);
-					break;
-			}
-
-			// Remove any empty parameters remaining after this
-			theParams.clean();
+			indexStrings.add(indexString);
 		}
+
+		// Just to make sure we're stable for tests
+		indexStrings.sort(Comparator.naturalOrder());
+
+		// Interceptor broadcast: JPA_PERFTRACE_INFO
+		String indexStringForLog = indexStrings.size() > 1 ? indexStrings.toString() : indexStrings.get(0);
+		StorageProcessingMessage msg = new StorageProcessingMessage()
+				.setMessage("Using " + theComboParam.getComboSearchParamType() + " index(es) for query for search: "
+						+ indexStringForLog);
+		HookParams params = new HookParams()
+				.add(RequestDetails.class, theRequest)
+				.addIfMatchesType(ServletRequestDetails.class, theRequest)
+				.add(StorageProcessingMessage.class, msg);
+		CompositeInterceptorBroadcaster.doCallHooks(
+				myInterceptorBroadcaster, theRequest, Pointcut.JPA_PERFTRACE_INFO, params);
+
+		switch (requireNonNull(theComboParam.getComboSearchParamType())) {
+			case UNIQUE:
+				theQueryStack.addPredicateCompositeUnique(indexStrings, myRequestPartitionId);
+				break;
+			case NON_UNIQUE:
+				theQueryStack.addPredicateCompositeNonUnique(indexStrings, myRequestPartitionId);
+				break;
+		}
+
+		// Remove any empty parameters remaining after this
+		theParams.clean();
 	}
 
 	private boolean validateParamValuesAreValidForComboParam(
-			@Nonnull SearchParameterMap theParams, List<String> comboParamNames) {
+			RequestDetails theRequest, @Nonnull SearchParameterMap theParams, List<String> comboParamNames) {
 		boolean paramValuesAreValidForCombo = true;
 		for (String nextParamName : comboParamNames) {
 			List<List<IQueryParameterType>> nextValues = theParams.get(nextParamName);
 
-			// Multiple AND parameters are not supported for unique combo params
-			if (nextValues.get(0).size() != 1) {
-				ourLog.debug(
-						"Search is not a candidate for unique combo searching - Multiple AND expressions found for the same parameter");
+			if (nextValues.isEmpty()) {
 				paramValuesAreValidForCombo = false;
 				break;
 			}
 
-			List<IQueryParameterType> nextAndValue = nextValues.get(0);
-			for (IQueryParameterType nextOrValue : nextAndValue) {
-				if (nextOrValue instanceof DateParam) {
-					if (((DateParam) nextOrValue).getPrecision() != TemporalPrecisionEnum.DAY) {
-						ourLog.debug(
-								"Search is not a candidate for unique combo searching - Date search with non-DAY precision");
-						paramValuesAreValidForCombo = false;
-						break;
+			for (List<IQueryParameterType> nextAndValue : nextValues) {
+				for (IQueryParameterType nextOrValue : nextAndValue) {
+					if (nextOrValue instanceof DateParam) {
+						DateParam dateParam = (DateParam) nextOrValue;
+						if (dateParam.getPrecision() != TemporalPrecisionEnum.DAY) {
+							String message = "Search with params " + comboParamNames + " is not a candidate for combo searching - Date search with non-DAY precision for parameter '" + nextParamName + "'";
+							firePerformanceInfo(theRequest, message);
+							paramValuesAreValidForCombo = false;
+							break;
+						}
+					}
+					if (nextOrValue instanceof BaseParamWithPrefix) {
+						BaseParamWithPrefix<?> paramWithPrefix = (BaseParamWithPrefix<?>) nextOrValue;
+						if (paramWithPrefix.getPrefix() != null) {
+							String message = "Search with params " + comboParamNames + " is not a candidate for combo searching - Parameter '" + nextParamName + "' has prefix: '" + paramWithPrefix.getPrefix().getValue() + "'";
+							firePerformanceInfo(theRequest, message);
+							paramValuesAreValidForCombo = false;
+							break;
+						}
 					}
 				}
 			}
@@ -2416,8 +2432,20 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		}
 	}
 
+	private void firePerformanceInfo(RequestDetails theRequest, String theMessage) {
+		// Only log at debug level since these messages aren't considered important enough
+		// that we should be cluttering the system log, but they are important to the
+		// specific query being executed to we'll INFO level them there
+		ourLog.debug(theMessage);
+		firePerformanceMessage(theRequest, theMessage, Pointcut.JPA_PERFTRACE_INFO);
+	}
+
 	private void firePerformanceWarning(RequestDetails theRequest, String theMessage) {
 		ourLog.warn(theMessage);
+		firePerformanceMessage(theRequest, theMessage, Pointcut.JPA_PERFTRACE_WARNING);
+	}
+
+	private void firePerformanceMessage(RequestDetails theRequest, String theMessage, Pointcut pointcut) {
 		StorageProcessingMessage message = new StorageProcessingMessage();
 		message.setMessage(theMessage);
 		HookParams params = new HookParams()
@@ -2425,7 +2453,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				.addIfMatchesType(ServletRequestDetails.class, theRequest)
 				.add(StorageProcessingMessage.class, message);
 		CompositeInterceptorBroadcaster.doCallHooks(
-				myInterceptorBroadcaster, theRequest, Pointcut.JPA_PERFTRACE_WARNING, params);
+				myInterceptorBroadcaster, theRequest, pointcut, params);
 	}
 
 	public static int getMaximumPageSize() {

@@ -23,7 +23,10 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
+import com.healthmarketscience.sqlbuilder.InCondition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
+
+import java.util.List;
 
 public class ComboUniqueSearchParameterPredicateBuilder extends BaseSearchParamPredicateBuilder {
 
@@ -38,8 +41,13 @@ public class ComboUniqueSearchParameterPredicateBuilder extends BaseSearchParamP
 		myColumnString = getTable().addColumn("IDX_STRING");
 	}
 
-	public Condition createPredicateIndexString(RequestPartitionId theRequestPartitionId, String theIndexString) {
-		BinaryCondition predicate = BinaryCondition.equalTo(myColumnString, generatePlaceholder(theIndexString));
+	public Condition createPredicateIndexString(RequestPartitionId theRequestPartitionId, List<String> theIndexStrings) {
+		Condition predicate;
+		if (theIndexStrings.size() == 1) {
+			predicate = BinaryCondition.equalTo(myColumnString, generatePlaceholder(theIndexStrings.get(0)));
+		} else {
+			predicate = new InCondition(myColumnString, generatePlaceholders(theIndexStrings));
+		}
 		return combineWithRequestPartitionIdPredicate(theRequestPartitionId, predicate);
 	}
 }

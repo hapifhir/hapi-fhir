@@ -13,6 +13,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.util.JpaParamUtil;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.DateOrListParam;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
@@ -471,10 +472,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		myCaptureQueriesListener.logFirstSelectQueryForCurrentThread();
 		assertThat(toUnqualifiedVersionlessIdValues(outcome)).containsExactlyInAnyOrder(id1);
 		unformattedSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
-		assertThat(unformattedSql).contains("HASH_SYS_AND_VALUE IN ('4101160957635429999','-3122824860083758210')");
-		assertThat(unformattedSql).doesNotContain(("IDX_STRING"));
-		assertThat(unformattedSql).doesNotContain(("RES_DELETED_AT"));
-		assertThat(unformattedSql).doesNotContain(("RES_TYPE"));
+		assertEquals("SELECT t0.RES_ID FROM HFJ_IDX_CMP_STRING_UNIQ t0 WHERE (t0.IDX_STRING IN ('Patient?identifier=urn%7C111','Patient?identifier=urn%7C222') )", unformattedSql);
 
 		// Not matching the composite SP at all
 		myCaptureQueriesListener.clear();
@@ -1111,6 +1109,40 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 	}
 
 	@Test
+	public void testOrQuery() {
+		myStorageSettings.setAdvancedHSearchIndexing(false);
+		createUniqueBirthdateAndGenderSps();
+
+		Patient pt1 = new Patient();
+		pt1.setGender(Enumerations.AdministrativeGender.MALE);
+		pt1.setBirthDateElement(new DateType("2011-01-01"));
+		IIdType id1 = myPatientDao.create(pt1, mySrd).getId().toUnqualifiedVersionless();
+
+		Patient pt2 = new Patient();
+		pt2.setGender(Enumerations.AdministrativeGender.MALE);
+		pt2.setBirthDateElement(new DateType("2011-01-02"));
+		IIdType id2 = myPatientDao.create(pt2, mySrd).getId().toUnqualifiedVersionless();
+
+		myCaptureQueriesListener.clear();
+		myMessages.clear();
+		SearchParameterMap params = new SearchParameterMap();
+		params.setLoadSynchronousUpTo(100);
+		params.add("gender", new TokenParam("http://hl7.org/fhir/administrative-gender", "male"));
+		params.add("birthdate", new DateOrListParam().addOr(new DateParam("2011-01-01")).addOr(new DateParam("2011-01-02")));
+		myCaptureQueriesListener.clear();
+		IBundleProvider results = myPatientDao.search(params, mySrd);
+		myCaptureQueriesListener.logFirstSelectQueryForCurrentThread();
+		assertThat(toUnqualifiedVersionlessIdValues(results)).containsExactlyInAnyOrder(id1.getValue(), id2.getValue());
+
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false))
+			.contains("SELECT t0.RES_ID FROM HFJ_IDX_CMP_STRING_UNIQ t0 WHERE (t0.IDX_STRING IN ('Patient?birthdate=2011-01-01&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale','Patient?birthdate=2011-01-02&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale') )");
+		logCapturedMessages();
+		assertThat(myMessages.toString()).contains("Using UNIQUE index(es) for query for search: [Patient?birthdate=2011-01-01&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale, Patient?birthdate=2011-01-02&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale]");
+		myMessages.clear();
+
+	}
+
+	@Test
 	public void testSearchSynchronousUsingUniqueComposite() {
 		myStorageSettings.setAdvancedHSearchIndexing(false);
 		createUniqueBirthdateAndGenderSps();
@@ -1136,7 +1168,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		assertThat(toUnqualifiedVersionlessIdValues(results)).containsExactlyInAnyOrder(id1.getValue());
 
 		logCapturedMessages();
-		assertThat(myMessages.toString()).contains("Using UNIQUE index for query for search: Patient?birthdate=2011-01-01&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale");
+		assertThat(myMessages.toString()).contains("Using UNIQUE index(es) for query for search: Patient?birthdate=2011-01-01&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale");
 		myMessages.clear();
 
 	}
@@ -1164,7 +1196,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		String searchId = results.getUuid();
 		assertThat(toUnqualifiedVersionlessIdValues(results)).containsExactlyInAnyOrder(id1);
 		logCapturedMessages();
-		assertThat(myMessages.toString()).contains("Using UNIQUE index for query for search: Patient?birthdate=2011-01-01&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale");
+		assertThat(myMessages.toString()).contains("Using UNIQUE index(es) for query for search: Patient?birthdate=2011-01-01&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale");
 		myMessages.clear();
 
 		// Other order
@@ -1188,7 +1220,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		results = myPatientDao.search(params, mySrd);
 		assertThat(toUnqualifiedVersionlessIdValues(results)).isEmpty();
 		logCapturedMessages();
-		assertThat(myMessages.toString()).contains("Using UNIQUE index for query for search: Patient?birthdate=2011-01-03&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale");
+		assertThat(myMessages.toString()).contains("Using UNIQUE index(es) for query for search: Patient?birthdate=2011-01-03&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale");
 		myMessages.clear();
 
 		myMessages.clear();
@@ -1270,7 +1302,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		IIdType id1 = myPatientDao.update(pt1, "Patient?name=FAMILY1&organization:Organization=ORG", mySrd).getId().toUnqualifiedVersionless();
 
 		logCapturedMessages();
-		assertThat(myMessages.toString()).contains("Using UNIQUE index for query for search: Patient?name=FAMILY1&organization=Organization%2FORG");
+		assertThat(myMessages.toString()).contains("Using UNIQUE index(es) for query for search: Patient?name=FAMILY1&organization=Organization%2FORG");
 		myMessages.clear();
 
 		runInTransaction(() -> {
@@ -1289,7 +1321,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		IIdType id2 = myPatientDao.update(pt1, "Patient?name=FAMILY1&organization:Organization=ORG", mySrd).getId().toUnqualifiedVersionless();
 
 		logCapturedMessages();
-		assertThat(myMessages.toString()).contains("Using UNIQUE index for query for search: Patient?name=FAMILY1&organization=Organization%2FORG");
+		assertThat(myMessages.toString()).contains("Using UNIQUE index(es) for query for search: Patient?name=FAMILY1&organization=Organization%2FORG");
 		myMessages.clear();
 		runInTransaction(() -> {
 			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedComboStringUniqueDao.findAll();
@@ -1646,7 +1678,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		assertThat(toUnqualifiedVersionlessIdValues(results)).containsExactlyInAnyOrder(id2.getValue());
 
 		logCapturedMessages();
-		assertThat(myMessages.toString()).contains("Using UNIQUE index for query for search: Patient?birthdate=2011-01-01&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale");
+		assertThat(myMessages.toString()).contains("Using UNIQUE index(es) for query for search: Patient?birthdate=2011-01-01&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale");
 		myMessages.clear();
 
 	}
