@@ -21,15 +21,11 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
-import ca.uhn.fhir.jpa.migrate.HapiMigrationException;
-import ca.uhn.fhir.jpa.migrate.tasks.api.TaskFlagEnum;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.intellij.lang.annotations.Language;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.dao.DataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.sql.SQLException;
 
@@ -60,7 +56,8 @@ public class DropPrimaryKeyTask extends BaseTableTask {
 
 		@Nullable
 		final String primaryKeyName = primaryKeyNameSql != null
-				? newJdbcTemplate().queryForObject(primaryKeyNameSql, String.class, getTableNameWithDatabaseExpectedCase())
+				? newJdbcTemplate()
+						.queryForObject(primaryKeyNameSql, String.class, getTableNameWithDatabaseExpectedCase())
 				: null;
 
 		ourLog.debug("primaryKeyName: {} for driver: {}", primaryKeyName, getDriverType());
