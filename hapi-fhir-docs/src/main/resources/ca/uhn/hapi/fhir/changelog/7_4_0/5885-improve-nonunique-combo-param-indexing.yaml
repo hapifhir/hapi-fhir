@@ -1,0 +1,6 @@
+---
+type: perf
+issue: 5885
+title: "Indexing for non-unique combo Search Parameters has been improved,
+  using a new hash-based index that should perform significantly better in
+  many circumstances."

@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
+import jakarta.annotation.Nonnull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,12 +34,6 @@ public class AddColumnTask extends BaseTableColumnTypeTask {
 
 	public static AddColumnTask lowerCase(Set<ColumnDriverMappingOverride> theColumnDriverMappingOverrides) {
 		return new AddColumnTask(null, null, ColumnNameCase.ALL_LOWER, theColumnDriverMappingOverrides);
-	}
-
-	public AddColumnTask() {
-		this(null, null);
-		setDryRun(true);
-		myCheckForExistingTables = false;
 	}
 
 	public AddColumnTask(String theProductVersion, String theSchemaVersion) {
@@ -80,16 +75,20 @@ public class AddColumnTask extends BaseTableColumnTypeTask {
 			case MYSQL_5_7:
 			case MARIADB_10_1:
 				// Quote the column name as "SYSTEM" is a reserved word in MySQL
-				sql = "alter table " + getTableName() + " add column `" + getColumnName() + "` " + typeStatement;
+				sql = "alter table " + getTableName() + " add column `" + getColumnName() + "` " + typeStatement
+						+ buildDefaultClauseIfApplicable();
 				break;
 			case DERBY_EMBEDDED:
 			case POSTGRES_9_4:
-				sql = "alter table " + getTableName() + " add column " + getColumnName() + " " + typeStatement;
+			case COCKROACHDB_21_1:
+				sql = "alter table " + getTableName() + " add column " + getColumnName() + " " + typeStatement
+						+ buildDefaultClauseIfApplicable();
 				break;
 			case MSSQL_2012:
 			case ORACLE_12C:
 			case H2_EMBEDDED:
-				sql = "alter table " + getTableName() + " add " + getColumnName() + " " + typeStatement;
+				sql = "alter table " + getTableName() + " add " + getColumnName() + " " + typeStatement
+						+ buildDefaultClauseIfApplicable();
 				break;
 			default:
 				throw new IllegalStateException(Msg.code(60));
@@ -97,6 +96,11 @@ public class AddColumnTask extends BaseTableColumnTypeTask {
 
 		logInfo(ourLog, "Adding column {} of type {} to table {}", getColumnName(), getSqlType(), getTableName());
 		executeSql(getTableName(), sql);
+	}
+
+	@Nonnull
+	private String buildDefaultClauseIfApplicable() {
+		return buildString(getDefaultValue(), (obj -> " default " + obj), "");
 	}
 
 	public String getTypeStatement() {

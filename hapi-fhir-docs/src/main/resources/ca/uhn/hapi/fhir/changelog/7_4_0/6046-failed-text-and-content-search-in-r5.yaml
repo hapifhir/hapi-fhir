@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 6046
+title: "Previously, using `_text` and `_content` searches in Hibernate Search in R5 was not supported. This issue has been fixed."

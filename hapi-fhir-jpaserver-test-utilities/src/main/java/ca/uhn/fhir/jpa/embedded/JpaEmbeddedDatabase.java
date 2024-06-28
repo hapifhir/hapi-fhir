@@ -113,8 +113,7 @@ public abstract class JpaEmbeddedDatabase {
 	}
 
 	public void executeSqlAsBatch(List<String> theStatements) {
-		try {
-			Statement statement = myConnection.createStatement();
+		try (final Statement statement = myConnection.createStatement()) {
 			for (String sql : theStatements) {
 				if (!StringUtils.isBlank(sql)) {
 					statement.addBatch(sql);

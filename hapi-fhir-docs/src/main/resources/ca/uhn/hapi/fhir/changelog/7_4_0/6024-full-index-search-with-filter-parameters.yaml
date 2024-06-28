@@ -1,0 +1,10 @@
+---
+type: fix
+issue: 6024
+title: "Fixed a bug in search where requesting a count with HSearch indexing
+        and FilterParameter enabled and using the _filter parameter would result
+        in inaccurate results being returned.
+        This happened because the count query would use an incorrect set of parameters
+        to find the count, and the regular search when then try and ensure its results
+        matched the count query (which it couldn't because it had different parameters).
+"

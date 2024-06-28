@@ -908,7 +908,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			RequestDetails theRequestDetails,
 			TransactionDetails theTransactionDetails) {
 		StopWatch w = new StopWatch();
-		TransactionDetails transactionDetails = new TransactionDetails();
+		TransactionDetails transactionDetails =
+				theTransactionDetails != null ? theTransactionDetails : new TransactionDetails();
 		List<ResourceTable> deletedResources = new ArrayList<>();
 
 		List<IResourcePersistentId<?>> resolvedIds =
@@ -923,6 +924,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			deletedResources.add(entity);
 
 			T resourceToDelete = myJpaStorageResourceParser.toResource(myResourceType, entity, null, false);
+
+			transactionDetails.addDeletedResourceId(pid);
 
 			// Notify IServerOperationInterceptors about pre-action call
 			HookParams hooks = new HookParams()
@@ -987,8 +990,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				theUrl,
 				deletedResources.size(),
 				w.getMillis());
-
-		theTransactionDetails.addDeletedResourceIds(theResourceIds);
 
 		DeleteMethodOutcome retVal = new DeleteMethodOutcome();
 		retVal.setDeletedEntities(deletedResources);
@@ -1627,6 +1628,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			T resource = (T) myJpaStorageResourceParser.toResource(entity, false);
 			reindexSearchParameters(resource, entity, theTransactionDetails);
 		} catch (Exception e) {
+			ourLog.warn("Failure during reindex: {}", e.toString());
 			theReindexOutcome.addWarning("Failed to reindex resource " + entity.getIdDt() + ": " + e);
 			myResourceTableDao.updateIndexStatus(entity.getId(), INDEX_STATUS_INDEXING_FAILED);
 		}

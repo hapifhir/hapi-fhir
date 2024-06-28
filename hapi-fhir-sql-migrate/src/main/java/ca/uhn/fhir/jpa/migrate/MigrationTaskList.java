@@ -29,6 +29,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class MigrationTaskList implements Iterable<BaseTask> {
@@ -60,6 +61,12 @@ public class MigrationTaskList implements Iterable<BaseTask> {
 						!theAppliedMigrationVersions.contains(MigrationVersion.fromVersion(task.getMigrationVersion())))
 				.collect(Collectors.toList());
 		return new MigrationTaskList(unappliedTasks);
+	}
+
+	public MigrationTaskList getUnskippableTasks() {
+		List<BaseTask> tasks =
+				myTasks.stream().filter(t -> !t.isHeavyweightSkippableTask()).collect(Collectors.toList());
+		return new MigrationTaskList(tasks);
 	}
 
 	public void append(Iterable<BaseTask> theMigrationTasks) {
@@ -94,5 +101,13 @@ public class MigrationTaskList implements Iterable<BaseTask> {
 				.map(MigrationVersion::toString)
 				.reduce((first, second) -> second)
 				.orElse(null);
+	}
+
+	public void removeIf(Predicate<BaseTask> theFilter) {
+		myTasks.removeIf(theFilter);
+	}
+
+	public BaseTask[] toTaskArray() {
+		return myTasks.toArray(new BaseTask[0]);
 	}
 }

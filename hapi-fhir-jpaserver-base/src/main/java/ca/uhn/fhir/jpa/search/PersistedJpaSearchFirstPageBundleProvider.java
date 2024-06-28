@@ -79,7 +79,7 @@ public class PersistedJpaSearchFirstPageBundleProvider extends PersistedJpaBundl
 		ourLog.trace("Done fetching search resource PIDs");
 
 		int countOfPids = pids.size();
-		;
+
 		int maxSize = Math.min(theToIndex - theFromIndex, countOfPids);
 		thePageBuilder.setTotalRequestedResourcesFetched(countOfPids);
 

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.searchparam.extractor;
 
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
@@ -7,6 +8,8 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import com.google.common.collect.Lists;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import java.util.Date;
 import java.util.List;
@@ -103,4 +106,35 @@ public class ResourceIndexedSearchParamsTest {
 		assertThat(values).as(values.toString()).isEmpty();
 	}
 
+	@ParameterizedTest
+	@CsvSource({
+		"name,  name,                      , false, true",
+		"name,  NAME,                      , false, true",
+		"name,  name,                  7000, false, true",
+		"name,  param,                     , false, false",
+		"name,  param,                 7000, false, false",
+		"    ,  name,  -1575415002568401616, true,  true",
+		"param, name,  -1575415002568401616, true,  true",
+		"    ,  param, -1575415002568401616, true,  false",
+		"name,  param, -1575415002568401616, true,  false",
+	})
+	public void testIsMatchSearchParams_matchesByParamNameOrHashIdentity(String theParamName,
+																		 String theExpectedParamName,
+																		 Long theHashIdentity,
+																		 boolean theIndexStorageOptimized,
+																		 boolean theShouldMatch) {
+		// setup
+		StorageSettings storageSettings = new StorageSettings();
+		storageSettings.setIndexStorageOptimized(theIndexStorageOptimized);
+		ResourceIndexedSearchParamString param = new ResourceIndexedSearchParamString();
+		param.setResourceType("Patient");
+		param.setParamName(theParamName);
+		param.setHashIdentity(theHashIdentity);
+
+		// execute
+		boolean isMatch = ResourceIndexedSearchParams.isMatchSearchParam(storageSettings, "Patient", theExpectedParamName, param);
+
+		// validate
+		assertThat(isMatch).isEqualTo(theShouldMatch);
+	}
 }

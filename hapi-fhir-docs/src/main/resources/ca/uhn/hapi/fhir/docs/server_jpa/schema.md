@@ -443,7 +443,9 @@ In some configurations, the partition ID is also factored into the hashes.
 
 <img src="/hapi-fhir/docs/images/jpa_erd_search_indexes.svg" alt="Search Indexes" style="width: 100%; max-width: 900px;"/>
 
-## Columns
+<a name="HFJ_SPIDX_common"/>
+
+## Common Search Index Columns
 
 The following columns are common to **all HFJ_SPIDX_xxx tables**.
 
@@ -502,7 +504,7 @@ The following columns are common to **all HFJ_SPIDX_xxx tables**.
             <td>SP_NAME</td>
             <td></td>
             <td>String</td>
-            <td></td>
+            <td>Nullable</td>
             <td>
                 This is the name of the search parameter being indexed. 
             </td>        
@@ -511,7 +513,7 @@ The following columns are common to **all HFJ_SPIDX_xxx tables**.
             <td>RES_TYPE</td>
             <td></td>
             <td>String</td>
-            <td></td>
+            <td>Nullable</td>
             <td>
                 This is the name of the resource being indexed.
             </td>        
@@ -555,6 +557,8 @@ Range queries with DateTime parameters (e.g. `Observation?date=ge2021-01-01T10:3
 Sorting is done by the SP_VALUE_LOW column.
 
 ## Columns
+
+Note: This table has the columns listed below, but it also has all common columns listed above in [Common Search Index Columns](#HFJ_SPIDX_common).
 
 <table class="table table-striped table-condensed">
     <thead>
@@ -625,6 +629,8 @@ Range queries and sorting use the HASH_IDENTITY and SP_VALUE columns.
 
 ## Columns
 
+Note: This table has the columns listed below, but it also has all common columns listed above in [Common Search Index Columns](#HFJ_SPIDX_common).
+
 <table class="table table-striped table-condensed">
     <thead>
         <tr>
@@ -659,6 +665,8 @@ Range queries (e.g. `Observation?valueQuantity=gt100|http://unitsofmeasure.org|m
 Sorting is done via the HASH_IDENTITY and SP_VALUE columns.
 
 ## Columns
+
+Note: This table has the columns listed below, but it also has all common columns listed above in [Common Search Index Columns](#HFJ_SPIDX_common).
 
 <table class="table table-striped table-condensed">
     <thead>
@@ -753,6 +761,8 @@ Sorting is done via the HASH_IDENTITY and SP_VALUE_NORMALIZED columns.
 
 ## Columns
 
+Note: This table has the columns listed below, but it also has all common columns listed above in [Common Search Index Columns](#HFJ_SPIDX_common).
+
 <table class="table table-striped table-condensed">
     <thead>
         <tr>
@@ -805,6 +815,8 @@ All three are exact searches and use the hashes: HASH_VALUE, HASH_SYS_AND_VALUE,
 Sorting is done via the HASH_IDENTITY and SP_VALUE columns.
 
 ## Columns
+
+Note: This table has the columns listed below, but it also has all common columns listed above in [Common Search Index Columns](#HFJ_SPIDX_common).
 
 <table class="table table-striped table-condensed">
     <thead>
@@ -876,6 +888,8 @@ Sorting is done via the HASH_IDENTITY and SP_URI columns.
 
 ## Columns
 
+Note: This table has the columns listed below, but it also has all common columns listed above in [Common Search Index Columns](#HFJ_SPIDX_common).
+
 <table class="table table-striped table-condensed">
     <thead>
         <tr>
@@ -903,6 +917,138 @@ Sorting is done via the HASH_IDENTITY and SP_URI columns.
             <td></td>
             <td>
                 The uri string extracted by the SearchParameter.
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+
+# HFJ_IDX_CMB_TOK_NU: Combo Non-Unique Search Param
+
+This table is used to index [Non-Unique Combo Search Parameters](https://smilecdr.com/docs/fhir_standard/fhir_search_custom_search_parameters.html#combo-search-index-parameters). 
+
+## Columns
+
+<table class="table table-striped table-condensed">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Relationships</th>
+            <th>Datatype</th>
+            <th>Nullable</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>PID</td>
+            <td></td>
+            <td>Long</td>
+            <td></td>
+            <td>
+                A unique persistent identifier for the given index row.  
+            </td>
+        </tr>
+        <tr>
+            <td>RES_ID</td>
+            <td>FK to <a href="#HFJ_RESOURCE">HFJ_RESOURCE</a></td>
+            <td>Long</td>
+            <td></td>
+            <td>
+                Contains the PID of the resource being indexed.  
+            </td>
+        </tr>
+        <tr>
+            <td>IDX_STRING</td>
+            <td></td>
+            <td>String</td>
+            <td></td>
+            <td>
+                This column contains a FHIR search expression indicating what is being indexed. For example, if a 
+                non-unique combo search parameter is present which indexes a combination of Observation#code and
+                Observation#status, this column might contain a value such as
+                <code>Observation?code=http://loinc.org|1234-5&status=final</code>
+            </td>
+        </tr>
+        <tr>
+            <td>HASH_COMPLETE</td>
+            <td></td>
+            <td>Long</td>
+            <td></td>
+            <td>
+                This column contains a hash of the value in column <code>IDX_STRING</code>.
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<a name="HFJ_IDX_CMP_STRING_UNIQ"/>
+
+# HFJ_IDX_CMP_STRING_UNIQ: Combo Unique Search Param
+
+This table is used to index [Unique Combo Search Parameters](https://smilecdr.com/docs/fhir_standard/fhir_search_custom_search_parameters.html#combo-search-index-parameters).
+
+## Columns
+
+<table class="table table-striped table-condensed">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Relationships</th>
+            <th>Datatype</th>
+            <th>Nullable</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>PID</td>
+            <td></td>
+            <td>Long</td>
+            <td></td>
+            <td>
+                A unique persistent identifier for the given index row.  
+            </td>
+        </tr>
+        <tr>
+            <td>RES_ID</td>
+            <td>FK to <a href="#HFJ_RESOURCE">HFJ_RESOURCE</a></td>
+            <td>Long</td>
+            <td></td>
+            <td>
+                Contains the PID of the resource being indexed.  
+            </td>
+        </tr>
+        <tr>
+            <td>IDX_STRING</td>
+            <td></td>
+            <td>String</td>
+            <td></td>
+            <td>
+                This column contains a FHIR search expression indicating what is being indexed. For example, if a 
+                unique combo search parameter is present which indexes a combination of Observation#code and
+                Observation#status, this column might contain a value such as
+                <code>Observation?code=http://loinc.org|1234-5&status=final</code>
+            </td>
+        </tr>
+        <tr>
+            <td>HASH_COMPLETE</td>
+            <td></td>
+            <td>Long</td>
+            <td></td>
+            <td>
+                This column contains a hash of the value in column <code>IDX_STRING</code>.
+            </td>
+        </tr>
+        <tr>
+            <td>HASH_COMPLETE_2</td>
+            <td></td>
+            <td>Long</td>
+            <td></td>
+            <td>
+                This column contains an additional hash of the value in column <code>IDX_STRING</code>, using a
+                static salt of the value prior to the hashing. This is done in order to increase the number
+                of bits used to hash the index string from 64 to 128.
             </td>
         </tr>
     </tbody>
