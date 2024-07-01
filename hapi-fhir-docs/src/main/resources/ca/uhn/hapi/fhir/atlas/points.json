@@ -437,6 +437,18 @@
 			"lat": 18.483402,
 			"lon": -69.929611,
 			"added": "2022-08-15"
+		},
+			{
+			"title": "Agni",
+			"description": "Mobile and web apps for public health delivery",
+			"company": "Lattice Innovations",
+			"contactName": "Binay Yadav",
+			"contactEmail": "binay@thelattice.in",
+			"link": "https://www.thelattice.in",
+			"city": "Delhi, India",
+			"lat": 28.5254,
+			"lon": 77.2801,
+			"added": "2024-07-01"
 		}
 	]
 }
