@@ -49,6 +49,7 @@ class SerializationTest {
 	private static final String PARENT_KEY = "parentKey";
 	private static final String DAUGHTER = "Athaliah";
 	private final FhirContext ourFhirContext = FhirContext.forR4();
+	// TODO: Fix me Adi
 	private final ObjectMapper ourObjectMapper = new CdsHooksObjectMapperFactory(ourFhirContext).newMapper();
 	public String myResponseJson;
 	@Value("classpath:CdsServiceRequestJson.json")

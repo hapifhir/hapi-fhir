@@ -3,6 +3,7 @@ package ca.uhn.hapi.fhir.cdshooks.controller;
 import ca.uhn.hapi.fhir.cdshooks.api.CdsService;
 import ca.uhn.hapi.fhir.cdshooks.api.CdsServiceFeedback;
 import ca.uhn.hapi.fhir.cdshooks.api.CdsServicePrefetch;
+import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceAcceptedSuggestionJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceFeedbackJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceIndicatorEnum;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceRequestJson;
@@ -10,6 +11,9 @@ import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseCardJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseCardSourceJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseJson;
 import org.hl7.fhir.r4.model.Patient;
+
+import java.util.List;
+import java.util.UUID;
 
 public class ExampleCdsService {
 	@CdsService(value = "example-service",
@@ -33,7 +37,8 @@ public class ExampleCdsService {
 	}
 
 	@CdsServiceFeedback("example-service")
-	public String exampleServiceFeedback(CdsServiceFeedbackJson theFeedback) {
-		return "{\"message\": \"Thank you for your feedback dated " + theFeedback.getOutcomeTimestamp() + "!\"}";
+	public CdsServiceFeedbackJson feedback(CdsServiceFeedbackJson theFeedback) {
+		theFeedback.setAcceptedSuggestions(List.of(new CdsServiceAcceptedSuggestionJson().setId(UUID.randomUUID().toString())));
+		return theFeedback;
 	}
 }

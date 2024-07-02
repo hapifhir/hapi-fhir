@@ -25,16 +25,19 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsMethod;
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsServiceMethod;
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsServiceRegistry;
+import ca.uhn.hapi.fhir.cdshooks.api.json.CdsHooksExtension;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceFeedbackJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceRequestJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServicesJson;
+import ca.uhn.hapi.fhir.cdshooks.serializer.CdsServiceRequestJsonDeserializer;
 import ca.uhn.hapi.fhir.cdshooks.svc.cr.ICdsCrServiceFactory;
 import ca.uhn.hapi.fhir.cdshooks.svc.cr.discovery.ICrDiscoveryServiceFactory;
 import ca.uhn.hapi.fhir.cdshooks.svc.prefetch.CdsPrefetchSvc;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.PostConstruct;
 import org.apache.commons.lang3.Validate;
@@ -63,6 +66,10 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 		myCdsHooksContextBooter = theCdsHooksContextBooter;
 		myCdsPrefetchSvc = theCdsPrefetchSvc;
 		myObjectMapper = theObjectMapper;
+		SimpleModule module = new SimpleModule();
+		module.addDeserializer(
+				CdsServiceRequestJson.class, new CdsServiceRequestJsonDeserializer(this, myObjectMapper));
+		myObjectMapper.registerModule(module);
 		myCdsCrServiceFactory = theCdsCrServiceFactory;
 		myCrDiscoveryServiceFactory = theCrDiscoveryServiceFactory;
 	}
@@ -90,16 +97,33 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 		String json;
 		if (result instanceof String) {
 			json = (String) result;
+			return buildResponseFromString(theServiceId, result, json);
 		} else {
-			try {
-				json = myObjectMapper.writeValueAsString(result);
-			} catch (JsonProcessingException e) {
-				throw new ConfigurationException(
-						Msg.code(2389) + "Failed to json serialize Cds service response of type "
-								+ result.getClass().getName() + " when calling CDS Hook Service " + theServiceId,
-						e);
-			}
+			return buildResponseFromImplementation(theServiceId, result);
 		}
+	}
+
+	private CdsServiceResponseJson buildResponseFromImplementation(String theServiceId, Object result) {
+		String json;
+		try {
+			json = myObjectMapper.writeValueAsString(result);
+			return (CdsServiceResponseJson) result;
+		} catch (JsonProcessingException e) {
+			throw new ConfigurationException(
+					Msg.code(2389) + "Failed to json serialize Cds service response of type "
+							+ result.getClass().getName() + " when calling CDS Hook Service " + theServiceId,
+					e);
+		} catch (ClassCastException e) {
+			throw new ConfigurationException(
+					Msg.code(2389)
+							+ "Failed to cast Cds service response to CdsServiceResponseJson when calling CDS Hook Service "
+							+ theServiceId + ". The type " + result.getClass().getName()
+							+ " cannot be casted to CdsServiceResponseJson",
+					e);
+		}
+	}
+
+	private CdsServiceResponseJson buildResponseFromString(String theServiceId, Object result, String json) {
 		try {
 			return myObjectMapper.readValue(json, CdsServiceResponseJson.class);
 		} catch (JsonProcessingException e) {
@@ -146,6 +170,9 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 			CdsServiceJson theCdsServiceJson,
 			boolean theAllowAutoFhirClientPrefetch,
 			String theModuleId) {
+		if (theCdsServiceJson.getExtensionClass() == null) {
+			theCdsServiceJson.setExtensionClass(CdsHooksExtension.class);
+		}
 		myServiceCache.registerDynamicService(
 				theServiceId, theServiceFunction, theCdsServiceJson, theAllowAutoFhirClientPrefetch, theModuleId);
 	}
@@ -191,5 +218,9 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 				}
 			}
 		}
+	}
+
+	public CdsServiceJson getCdsServiceJson(String theString) {
+		return myServiceCache.getCdsServiceJson(theString);
 	}
 }
