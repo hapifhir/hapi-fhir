@@ -57,7 +57,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.dstu3.model.Location;
 import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
+import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -68,6 +70,7 @@ import org.springframework.context.ApplicationContext;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -97,6 +100,12 @@ public class InMemoryResourceMatcher {
 
 	@Autowired
 	IndexedSearchParamExtractor myIndexedSearchParamExtractor;
+
+	@Autowired
+	ISearchParamExtractor searchParamExtractor;
+
+	@Autowired
+	SearchParamMatcher searchParamMatcher;
 
 	@Autowired
 	private MatchUrlService myMatchUrlService;
@@ -270,7 +279,13 @@ public class InMemoryResourceMatcher {
 				return InMemoryMatchResult.fromBoolean(matchProfilesAndOr(theAndOrParams, theResource));
 			default:
 				return matchResourceParam(
-						myStorageSettings, theParamName, theAndOrParams, theSearchParams, resourceName, paramDef);
+						myStorageSettings,
+						theParamName,
+						theAndOrParams,
+						theSearchParams,
+						resourceName,
+						paramDef,
+						theResource);
 		}
 	}
 
@@ -301,11 +316,6 @@ public class InMemoryResourceMatcher {
 			String theParamName, RuntimeSearchParam theParamDef, IQueryParameterType theParam) {
 		// Assume we're ok until we find evidence we aren't
 		InMemoryMatchResult checkUnsupportedResult = InMemoryMatchResult.successfulMatch();
-
-		if (hasChain(theParam)) {
-			checkUnsupportedResult = InMemoryMatchResult.unsupportedFromParameterAndReason(
-					theParamName + "." + ((ReferenceParam) theParam).getChain(), InMemoryMatchResult.CHAIN);
-		}
 
 		if (checkUnsupportedResult.supported()) {
 			checkUnsupportedResult = checkUnsupportedQualifiers(theParamName, theParamDef, theParam);
@@ -466,7 +476,8 @@ public class InMemoryResourceMatcher {
 			List<List<IQueryParameterType>> theAndOrParams,
 			ResourceIndexedSearchParams theSearchParams,
 			String theResourceName,
-			RuntimeSearchParam theParamDef) {
+			RuntimeSearchParam theParamDef,
+			IBaseResource theResource) {
 		if (theParamDef != null) {
 			switch (theParamDef.getParamType()) {
 				case QUANTITY:
@@ -486,7 +497,8 @@ public class InMemoryResourceMatcher {
 										theParamName,
 										theParamDef,
 										nextAnd,
-										theSearchParams)));
+										theSearchParams,
+										theResource)));
 					}
 				case COMPOSITE:
 				case HAS:
@@ -511,18 +523,31 @@ public class InMemoryResourceMatcher {
 			String theParamName,
 			RuntimeSearchParam theParamDef,
 			List<? extends IQueryParameterType> theOrList,
-			ResourceIndexedSearchParams theSearchParams) {
+			ResourceIndexedSearchParams theSearchParams,
+			IBaseResource theResource) {
 
 		boolean isNegativeTest = isNegative(theParamDef, theOrList);
 		// negative tests like :not and :not-in must not match any or-clause, so we invert the quantifier.
 		if (isNegativeTest) {
 			return theOrList.stream()
 					.allMatch(token -> matchParam(
-							theStorageSettings, theResourceName, theParamName, theParamDef, theSearchParams, token));
+							theStorageSettings,
+							theResourceName,
+							theParamName,
+							theParamDef,
+							theSearchParams,
+							token,
+							theResource));
 		} else {
 			return theOrList.stream()
 					.anyMatch(token -> matchParam(
-							theStorageSettings, theResourceName, theParamName, theParamDef, theSearchParams, token));
+							theStorageSettings,
+							theResourceName,
+							theParamName,
+							theParamDef,
+							theSearchParams,
+							token,
+							theResource));
 		}
 	}
 
@@ -545,14 +570,17 @@ public class InMemoryResourceMatcher {
 			String theParamName,
 			RuntimeSearchParam theParamDef,
 			ResourceIndexedSearchParams theSearchParams,
-			IQueryParameterType theToken) {
+			IQueryParameterType theToken,
+			IBaseResource theResource) {
 		if (theParamDef.getParamType().equals(RestSearchParameterTypeEnum.TOKEN)) {
 			return matchTokenParam(
 					theStorageSettings, theResourceName, theParamName, theParamDef, theSearchParams, (TokenParam)
 							theToken);
-		} else {
-			return theSearchParams.matchParam(theStorageSettings, theResourceName, theParamName, theParamDef, theToken);
+		} else if (theParamDef.getParamType().equals(RestSearchParameterTypeEnum.REFERENCE)
+				&& ((ReferenceParam) theToken).getChain() != null) {
+			return matchChainedReferenceParam(theParamName, theResourceName, theResource, (ReferenceParam) theToken);
 		}
+		return theSearchParams.matchParam(theStorageSettings, theResourceName, theParamName, theParamDef, theToken);
 	}
 
 	/**
@@ -596,6 +624,75 @@ public class InMemoryResourceMatcher {
 		} else {
 			return theSearchParams.matchParam(
 					theStorageSettings, theResourceName, theParamName, theParamDef, theQueryParam);
+		}
+	}
+
+	private boolean matchChainedReferenceParam(
+			String theParamName, String theResourceName, IBaseResource theResource, ReferenceParam referenceParam) {
+		// Obtain the next parameter and chain
+		String[] chains = referenceParam.getChain().split("\\.");
+		String parameterNameWithModifier = chains[0];
+		String chain = chains.length > 1 ? StringUtils.join(chains, ".", 1, chains.length) : null;
+
+		// Obtain the next parameter name and modifier
+		String[] parameterNameAndModifier = parameterNameWithModifier.split(":");
+		String parameterName = parameterNameAndModifier[0];
+		String modifier = parameterNameAndModifier.length > 1 ? parameterNameAndModifier[1] : null;
+
+		RuntimeSearchParam activeSearchParam =
+				mySearchParamRegistry.getActiveSearchParam(theResourceName, theParamName);
+
+		List<? extends IBase> bases = searchParamExtractor
+				.getPathValueExtractor(theResource, activeSearchParam.getPath())
+				.get();
+
+		return bases.stream()
+				.filter(IBaseReference.class::isInstance)
+				.map(IBaseReference.class::cast)
+				.map(IBaseReference::getResource)
+				.filter(Objects::nonNull)
+				.anyMatch(resource -> {
+					// Find the path of next search parameter in the next resource
+					RuntimeSearchParam resourceSearchParam = mySearchParamRegistry.getActiveSearchParam(
+							resource.getIdElement().getResourceType(), parameterName);
+					// Make sure the search param exists and modifier matches with next resource
+					if (resourceSearchParam == null
+							|| (referenceParam.getResourceType() != null
+									&& !referenceParam
+											.getResourceType()
+											.equals(resource.getIdElement().getResourceType()))) {
+						return false;
+					}
+
+					// Create new search parameter map to match the next resource
+					SearchParameterMap searchParameterMap = new SearchParameterMap();
+					IQueryParameterType theParam =
+							convertReferenceParam(referenceParam, resourceSearchParam, modifier, chain);
+					searchParameterMap.add(parameterName, theParam);
+
+					// Recursively match the chained resources
+					return searchParamMatcher
+							.match(searchParameterMap, resource)
+							.matched();
+				});
+	}
+
+	private static IQueryParameterType convertReferenceParam(
+			ReferenceParam referenceParam, RuntimeSearchParam resourceSearchParam, String modifier, String chain) {
+		if (resourceSearchParam.getParamType().equals(RestSearchParameterTypeEnum.REFERENCE)) {
+			return new ReferenceParam(modifier, chain, referenceParam.getValue());
+		} else if (resourceSearchParam.getParamType().equals(RestSearchParameterTypeEnum.STRING)) {
+			return new StringParam(referenceParam.getValue(), "exact".equals(modifier));
+		} else {
+			TokenParam tokenParam;
+			if (referenceParam.getValue().contains("|")) {
+				String[] systemAndValue = referenceParam.getValue().split("\\|");
+				tokenParam = new TokenParam(systemAndValue[0], systemAndValue[1]);
+			} else {
+				tokenParam = new TokenParam(referenceParam.getValue());
+			}
+			tokenParam.setModifier(TokenParamModifier.forValue(":" + modifier));
+			return tokenParam;
 		}
 	}
 
@@ -691,6 +788,8 @@ public class InMemoryResourceMatcher {
 					default:
 						return false;
 				}
+			case REFERENCE:
+				return true;
 			default:
 				return false;
 		}

@@ -144,6 +144,12 @@ public class InMemorySubscriptionMatcherR4Test {
 		return mySearchParamMatcher.match(criteria, theResource, null);
 	}
 
+	private void assertSupported(Resource resource, SearchParameterMap theParams) {
+		InMemoryMatchResult result = match(resource, theParams);
+		assertTrue(result.supported());
+		assertEquals(SubscriptionMatchingStrategy.IN_MEMORY, mySubscriptionStrategyEvaluator.determineStrategy(getCriteria(resource, theParams)));
+	}
+
 	private void assertUnsupported(Resource resource, SearchParameterMap theParams) {
 		InMemoryMatchResult result = match(resource, theParams);
 		assertFalse(result.supported());
@@ -155,7 +161,7 @@ public class InMemorySubscriptionMatcherR4Test {
 	  */
 
 	@Test
-	public void testChainReferenceUnsupported() {
+	public void testChainReferenceSupported() {
 		Encounter enc1 = new Encounter();
 		IIdType pid1 = new IdType("Patient", 1L);
 		enc1.getSubject().setReference(pid1.getValue());
@@ -164,7 +170,7 @@ public class InMemorySubscriptionMatcherR4Test {
 
 		map = new SearchParameterMap();
 		map.add(Encounter.SP_SUBJECT, new ReferenceParam("subject", "foo|bar").setChain("identifier"));
-		assertUnsupported(enc1, map);
+		assertSupported(enc1, map);
 
 		MedicationAdministration ma = new MedicationAdministration();
 		IIdType mid1 = new IdType("Medication", 1L);
@@ -172,7 +178,7 @@ public class InMemorySubscriptionMatcherR4Test {
 
 		map = new SearchParameterMap();
 		map.add(MedicationAdministration.SP_MEDICATION, new ReferenceAndListParam().addAnd(new ReferenceOrListParam().add(new ReferenceParam("code", "04823543"))));
-		assertUnsupported(ma, map);
+		assertSupported(ma, map);
 	}
 
 	@Test
@@ -597,7 +603,7 @@ public class InMemorySubscriptionMatcherR4Test {
 		obs02.setSubject(new Reference(patientId02));
 
 		SearchParameterMap params = new SearchParameterMap().add(Observation.SP_SUBJECT, new ReferenceParam(Patient.SP_IDENTIFIER, "urn:system|testSearchResourceLinkWithChain01"));
-		assertUnsupported(obs01, params);
+		assertSupported(obs01, params);
 	}
 
 	@Test

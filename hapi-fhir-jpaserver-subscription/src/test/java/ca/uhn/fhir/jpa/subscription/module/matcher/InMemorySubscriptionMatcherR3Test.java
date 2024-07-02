@@ -49,6 +49,11 @@ public class InMemorySubscriptionMatcherR3Test extends BaseSubscriptionDstu3Test
 	@Autowired
     StorageSettings myStorageSettings;
 
+	private void assertSupported(IBaseResource resource, String criteria) {
+		assertTrue(mySearchParamMatcher.match(criteria, resource, null).supported());
+		assertEquals(SubscriptionMatchingStrategy.IN_MEMORY, mySubscriptionStrategyEvaluator.determineStrategy(criteria));
+	}
+
 	private void assertUnsupported(IBaseResource resource, String criteria) {
 		assertFalse(mySearchParamMatcher.match(criteria, resource, null).supported());
 		assertEquals(SubscriptionMatchingStrategy.DATABASE, mySubscriptionStrategyEvaluator.determineStrategy(criteria));
@@ -185,17 +190,17 @@ public class InMemorySubscriptionMatcherR3Test extends BaseSubscriptionDstu3Test
 	}
 
 	@Test
-	public void testObservationContextTypeUnsupported() {
+	public void testObservationContextTypeSupported() {
 		String criteria = "Observation?code=17861-6&context.type=IHD";
 		{
 			Observation obs = new Observation();
 			obs.getCode().addCoding().setCode("XXX");
-			assertNotMatched(obs, criteria, SubscriptionMatchingStrategy.DATABASE);
+			assertNotMatched(obs, criteria, SubscriptionMatchingStrategy.IN_MEMORY);
 		}
 		{
 			Observation obs = new Observation();
 			obs.getCode().addCoding().setCode("17861-6");
-			assertUnsupported(obs, criteria);
+			assertSupported(obs, criteria);
 		}
 	}
 
@@ -206,12 +211,12 @@ public class InMemorySubscriptionMatcherR3Test extends BaseSubscriptionDstu3Test
 		{
 			Observation obs = new Observation();
 			obs.getCode().addCoding().setCode("XXX");
-			assertNotMatched(obs, criteria, SubscriptionMatchingStrategy.DATABASE);
+			assertNotMatched(obs, criteria, SubscriptionMatchingStrategy.IN_MEMORY);
 		}
 		{
 			Observation obs = new Observation();
 			obs.getCode().addCoding().setCode("17861-6");
-			assertUnsupported(obs, criteria);
+			assertSupported(obs, criteria);
 		}
 	}
 
@@ -299,12 +304,12 @@ public class InMemorySubscriptionMatcherR3Test extends BaseSubscriptionDstu3Test
 		{
 			Observation obs = new Observation();
 			obs.getCode().addCoding().setCode("FR_Org1Blood2nd");
-			assertUnsupported(obs, criteria);
+			assertSupported(obs, criteria);
 		}
 		{
 			Observation obs = new Observation();
 			obs.getCode().addCoding().setCode("XXX");
-			assertNotMatched(obs, criteria, SubscriptionMatchingStrategy.DATABASE);
+			assertNotMatched(obs, criteria, SubscriptionMatchingStrategy.IN_MEMORY);
 		}
 	}
 

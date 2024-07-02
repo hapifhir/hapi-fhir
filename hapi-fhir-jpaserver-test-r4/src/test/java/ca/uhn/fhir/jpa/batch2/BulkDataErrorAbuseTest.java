@@ -24,6 +24,7 @@ import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -98,29 +99,33 @@ public class BulkDataErrorAbuseTest extends BaseResourceProviderR4Test {
 
 	private void duAbuseTest(int taskExecutions) {
 		// Create some resources
-		Patient patient = new Patient();
-		patient.setId("PING1");
-		patient.setGender(Enumerations.AdministrativeGender.FEMALE);
-		patient.setActive(true);
-		myClient.update().resource(patient).execute();
+		Patient patient1 = new Patient();
+		patient1.setId("PING1");
+		patient1.setGender(Enumerations.AdministrativeGender.FEMALE);
+		patient1.setActive(true);
+		myClient.update().resource(patient1).execute();
 
-		patient = new Patient();
-		patient.setId("PING2");
-		patient.setGender(Enumerations.AdministrativeGender.MALE);
-		patient.setActive(true);
-		myClient.update().resource(patient).execute();
+		Patient patient2 = new Patient();
+		patient2.setId("PING2");
+		patient2.setGender(Enumerations.AdministrativeGender.MALE);
+		patient2.setActive(true);
+		myClient.update().resource(patient2).execute();
 
-		patient = new Patient();
-		patient.setId("PNING3");
-		patient.setGender(Enumerations.AdministrativeGender.MALE);
-		patient.setActive(true);
-		myClient.update().resource(patient).execute();
+		Patient patient3 = new Patient();
+		patient3.setId("PNING3");
+		patient3.setGender(Enumerations.AdministrativeGender.MALE);
+		patient3.setActive(true);
+		myClient.update().resource(patient3).execute();
 
 		Group group = new Group();
 		group.setId("Group/G2");
 		group.setActive(true);
-		group.addMember().getEntity().setReference("Patient/PING1");
-		group.addMember().getEntity().setReference("Patient/PING2");
+		Reference entity = group.addMember().getEntity();
+		entity.setReference("Patient/PING1");
+		entity.setResource(patient1);
+		Reference entity1 = group.addMember().getEntity();
+		entity1.setReference("Patient/PING2");
+		entity1.setResource(patient2);
 		myClient.update().resource(group).execute();
 
 		// set the export options

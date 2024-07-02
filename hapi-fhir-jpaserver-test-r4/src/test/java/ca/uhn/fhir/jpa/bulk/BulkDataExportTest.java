@@ -1183,19 +1183,16 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void testValidateParameters_InvalidPostFetch_UnsupportedParam() {
+	public void testValidateParameters_ValidPostFetch_SupportedParam() {
 		// Setup
 		final BulkExportJobParameters options = createOptionsWithPostFetchFilterUrl("Observation?subject.identifier=blah");
 
 		// Test
 		try {
 			startNewJob(options);
-			fail();
 		} catch (InvalidRequestException e) {
-
-			// Verify
-			assertThat(e.getMessage()).contains("Chained parameters are not supported");
-
+			// Fail
+			fail();
 		}
 	}
 
