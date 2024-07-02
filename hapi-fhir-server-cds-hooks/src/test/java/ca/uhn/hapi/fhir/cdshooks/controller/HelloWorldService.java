@@ -5,6 +5,7 @@ import ca.uhn.hapi.fhir.cdshooks.api.CdsService;
 import ca.uhn.hapi.fhir.cdshooks.api.CdsServiceFeedback;
 import ca.uhn.hapi.fhir.cdshooks.api.CdsServicePrefetch;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsHooksExtension;
+import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceAcceptedSuggestionJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceFeedbackJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceIndicatorEnum;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceRequestJson;
@@ -17,6 +18,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 public class HelloWorldService implements IPointcutLatch {
 	public static final String TEST_HOOK = "hello-world";
@@ -57,9 +59,10 @@ public class HelloWorldService implements IPointcutLatch {
 	}
 
 	@CdsServiceFeedback(TEST_HOOK_WORLD_ID)
-	public String feedback(CdsServiceFeedbackJson theFeedback) {
+	public CdsServiceFeedbackJson feedback(CdsServiceFeedbackJson theFeedback) {
 		myPointcutLatch.call(theFeedback);
-		return "{\"message\": \"Thank you for your feedback dated " + theFeedback.getOutcomeTimestamp() + "!\"}";
+		theFeedback.setAcceptedSuggestions(List.of(new CdsServiceAcceptedSuggestionJson().setId(UUID.randomUUID().toString())));
+		return theFeedback;
 	}
 
 	@CdsService(value = TEST_HOOK_UNIVERSE_ID,

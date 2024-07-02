@@ -54,7 +54,7 @@ public interface ICdsServiceRegistry {
 	 * @param theCdsServiceFeedbackJson the request
 	 * @return the response
 	 */
-	String callFeedback(String theServiceId, CdsServiceFeedbackJson theCdsServiceFeedbackJson);
+	CdsServiceFeedbackJson callFeedback(String theServiceId, CdsServiceFeedbackJson theCdsServiceFeedbackJson);
 
 	/**
 	 * Register a new CDS Service with the endpoint.

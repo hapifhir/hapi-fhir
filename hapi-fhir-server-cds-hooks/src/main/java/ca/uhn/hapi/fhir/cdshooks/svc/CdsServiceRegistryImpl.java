@@ -156,10 +156,9 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 	}
 
 	@Override
-	public String callFeedback(String theServiceId, CdsServiceFeedbackJson theCdsServiceFeedbackJson) {
+	public CdsServiceFeedbackJson callFeedback(String theServiceId, CdsServiceFeedbackJson theCdsServiceFeedbackJson) {
 		ICdsMethod feedbackMethod = getCdsFeedbackMethodOrThrowException(theServiceId);
 		Object response = feedbackMethod.invoke(myObjectMapper, theCdsServiceFeedbackJson, theServiceId);
-
 		return encodeFeedbackResponse(theServiceId, theCdsServiceFeedbackJson, response);
 	}
 
@@ -198,26 +197,18 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 		}
 	}
 
-	private String encodeFeedbackResponse(
+	private CdsServiceFeedbackJson encodeFeedbackResponse(
 			String theServiceId, CdsServiceFeedbackJson theCdsServiceFeedbackJson, Object response) {
-		if (response instanceof String) {
-			return (String) response;
-		} else {
-			try {
-				// Try to json encode the response
-				return myObjectMapper.writeValueAsString(response);
-			} catch (JsonProcessingException e) {
-				try {
-					ourLog.warn("Failed to deserialize response from {} feedback method", theServiceId, e);
-					// Just send back what we received
-					return myObjectMapper.writeValueAsString(theCdsServiceFeedbackJson);
-				} catch (JsonProcessingException f) {
-					ourLog.error("Failed to deserialize request parameter to {} feedback method", theServiceId, e);
-					// Okay then...
-					return "{}";
-				}
+		try {
+			if (response instanceof String) {
+				return myObjectMapper.readValue((String) response, CdsServiceFeedbackJson.class);
+			} else {
+				return (CdsServiceFeedbackJson) response;
 			}
+		} catch (JsonProcessingException e) {
+			throw new ConfigurationException(e.getMessage());
 		}
+
 	}
 
 	public CdsServiceJson getCdsServiceJson(String theString) {
