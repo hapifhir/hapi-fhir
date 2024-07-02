@@ -371,12 +371,13 @@ public class ValidationSupportChain implements IValidationSupport {
 				if (retVal != null) {
 					if (ourLog.isDebugEnabled()) {
 						ourLog.debug(
-								"Code {}|{} '{}' in ValueSet {} validated by {}",
+								"Code {}|{} '{}' in ValueSet {} validated by {} result: {}",
 								theCodeSystem,
 								theCode,
 								theDisplay,
 								theValueSetUrl,
-								next.getName());
+								next.getName(),
+								retVal.getMessage() != null ? retVal.getMessage() : "Success");
 					}
 					return retVal;
 				}
@@ -401,12 +402,13 @@ public class ValidationSupportChain implements IValidationSupport {
 				if (retVal != null) {
 					if (ourLog.isDebugEnabled()) {
 						ourLog.debug(
-								"Code {}|{} '{}' in ValueSet {} validated by {}",
+								"Code {}|{} '{}' in ValueSet {} validated by {} result: {}",
 								theCodeSystem,
 								theCode,
 								theDisplay,
 								theValueSet.getIdElement(),
-								next.getName());
+								next.getName(),
+								retVal.getMessage() != null ? retVal.getMessage() : "Success");
 					}
 					return retVal;
 				}
@@ -444,5 +446,19 @@ public class ValidationSupportChain implements IValidationSupport {
 			}
 		}
 		return null;
+	}
+	/**
+	 * See VersionSpecificWorkerContextWrapper#validateCode in hapi-fhir-validation.
+	 * <p>
+	 * If true, validation for codings will return a positive result if AT LEAST ONE coding is valid.
+	 * If false, validation for codings will return a positive result if there is ALL codings are valid.
+	 * </p>
+	 * @return if the application has configured validation to use logical AND, as opposed to logical OR, which is the default
+	 */
+	public boolean oneCodingIsSufficient = false; // default value from parent Interface (it's the wrong way round !!!)
+
+	@Override
+	public boolean isEnabledValidationForCodingsLogicalAnd() { // should be named ....LogicalAny
+		return oneCodingIsSufficient;
 	}
 }
