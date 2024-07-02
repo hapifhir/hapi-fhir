@@ -208,7 +208,6 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 		} catch (JsonProcessingException e) {
 			throw new ConfigurationException(e.getMessage());
 		}
-
 	}
 
 	public CdsServiceJson getCdsServiceJson(String theString) {
