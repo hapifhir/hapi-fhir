@@ -67,7 +67,8 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 		myCdsPrefetchSvc = theCdsPrefetchSvc;
 		myObjectMapper = theObjectMapper;
 		SimpleModule module = new SimpleModule();
-		module.addDeserializer(CdsServiceRequestJson.class, new CdsServiceRequestJsonDeserializer(this, myObjectMapper));
+		module.addDeserializer(
+				CdsServiceRequestJson.class, new CdsServiceRequestJsonDeserializer(this, myObjectMapper));
 		myObjectMapper.registerModule(module);
 		myCdsCrServiceFactory = theCdsCrServiceFactory;
 		myCrDiscoveryServiceFactory = theCrDiscoveryServiceFactory;
@@ -169,7 +170,7 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 			CdsServiceJson theCdsServiceJson,
 			boolean theAllowAutoFhirClientPrefetch,
 			String theModuleId) {
-		if(theCdsServiceJson.getExtensionClass() == null) {
+		if (theCdsServiceJson.getExtensionClass() == null) {
 			theCdsServiceJson.setExtensionClass(CdsHooksExtension.class);
 		}
 		myServiceCache.registerDynamicService(

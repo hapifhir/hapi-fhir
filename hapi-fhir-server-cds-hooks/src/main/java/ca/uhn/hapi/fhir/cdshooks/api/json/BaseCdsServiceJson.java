@@ -31,6 +31,7 @@ public abstract class BaseCdsServiceJson implements IModelJson {
 
 	@JsonProperty(value = "extension")
 	CdsHooksExtension myExtension;
+
 	private Class<? extends CdsHooksExtension> myExtensionClass;
 
 	public CdsHooksExtension getExtension() {
@@ -46,7 +47,7 @@ public abstract class BaseCdsServiceJson implements IModelJson {
 		this.myExtensionClass = theClass;
 	}
 
-	 public Class<? extends CdsHooksExtension> getExtensionClass() {
+	public Class<? extends CdsHooksExtension> getExtensionClass() {
 		return myExtensionClass;
 	}
 }

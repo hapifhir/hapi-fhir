@@ -28,7 +28,8 @@ public class CdsServiceRequestJsonDeserializer extends StdDeserializer<CdsServic
 	private final FhirContext myFhirContext = FhirContext.forR4();
 	private final IParser myParser = myFhirContext.newJsonParser().setPrettyPrint(true);
 
-	public CdsServiceRequestJsonDeserializer(CdsServiceRegistryImpl theCdsServiceRegistry, ObjectMapper theObjectMapper) {
+	public CdsServiceRequestJsonDeserializer(
+			CdsServiceRegistryImpl theCdsServiceRegistry, ObjectMapper theObjectMapper) {
 		super(CdsServiceRequestJson.class);
 		myCdsServiceRegistry = theCdsServiceRegistry;
 		myObjectMapper = theObjectMapper;
@@ -36,7 +37,7 @@ public class CdsServiceRequestJsonDeserializer extends StdDeserializer<CdsServic
 
 	@Override
 	public CdsServiceRequestJson deserialize(JsonParser theJsonParser, DeserializationContext theDeserializationContext)
-		throws IOException {
+			throws IOException {
 		ObjectMapper objectMapper = new ObjectMapper();
 		SimpleModule module = new SimpleModule();
 		module.addDeserializer(IBaseResource.class, new FhirResourceDeserializer(myFhirContext));
@@ -46,21 +47,20 @@ public class CdsServiceRequestJsonDeserializer extends StdDeserializer<CdsServic
 		JsonNode hookNode = cdsServiceRequestJsonNode.get("hook");
 		JsonNode extensionNode = cdsServiceRequestJsonNode.get("extension");
 		JsonNode requestContext = cdsServiceRequestJsonNode.get("context");
-		CdsServiceRequestJson cdsServiceRequestJson1 = objectMapper.treeToValue(cdsServiceRequestJsonNode, CdsServiceRequestJson.class);
-		if(extensionNode != null) {
+		CdsServiceRequestJson cdsServiceRequestJson1 =
+				objectMapper.treeToValue(cdsServiceRequestJsonNode, CdsServiceRequestJson.class);
+		if (extensionNode != null) {
 			CdsServiceJson cdsServicesJson = myCdsServiceRegistry.getCdsServiceJson(hookNode.textValue());
 			Class<? extends CdsHooksExtension> extensionClass = cdsServicesJson.getExtensionClass();
-			if(extensionClass == null) {
+			if (extensionClass == null) {
 				extensionClass = CdsHooksExtension.class;
 			}
-			CdsHooksExtension myRequestExtension = objectMapper.readValue(extensionNode.toString(),
-				extensionClass);
+			CdsHooksExtension myRequestExtension = objectMapper.readValue(extensionNode.toString(), extensionClass);
 			cdsServiceRequestJson1.setExtension(myRequestExtension);
 		}
 
-		if(requestContext != null) {
-			LinkedHashMap<String, Object> map = objectMapper.readValue(
-				requestContext.toString(), LinkedHashMap.class);
+		if (requestContext != null) {
+			LinkedHashMap<String, Object> map = objectMapper.readValue(requestContext.toString(), LinkedHashMap.class);
 			cdsServiceRequestJson1.setContext(getContext(map));
 		}
 		return cdsServiceRequestJson1;
@@ -81,6 +81,4 @@ public class CdsServiceRequestJsonDeserializer extends StdDeserializer<CdsServic
 		}
 		return retval;
 	}
-
-
 }
