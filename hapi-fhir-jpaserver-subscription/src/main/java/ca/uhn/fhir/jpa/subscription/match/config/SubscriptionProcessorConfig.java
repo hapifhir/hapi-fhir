@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.subscription.match.config;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelRegistry;
@@ -56,7 +57,7 @@ import org.springframework.context.annotation.Scope;
  * This Spring config should be imported by a system that pulls messages off of the
  * matching queue for processing, and handles delivery
  */
-@Import(SubscriptionModelConfig.class)
+@Import({SubscriptionModelConfig.class, SubscriptionSettings.class})
 public class SubscriptionProcessorConfig {
 
 	@Bean

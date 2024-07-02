@@ -22,6 +22,7 @@ package ca.uhn.fhir.spring.boot.autoconfigure;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jaxrs.server.AbstractJaxRsProvider;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.channel.ChannelConfig;
 import ca.uhn.fhir.jpa.config.HapiJpaConfig;
 import ca.uhn.fhir.jpa.config.JpaDstu2Config;
 import ca.uhn.fhir.jpa.config.dstu3.JpaDstu3Config;
@@ -30,7 +31,6 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.provider.BaseJpaProvider;
 import ca.uhn.fhir.jpa.provider.BaseJpaSystemProvider;
 import ca.uhn.fhir.jpa.searchparam.submit.config.SearchParamSubmitterConfig;
-import ca.uhn.fhir.jpa.subscription.channel.config.SubscriptionChannelConfig;
 import ca.uhn.fhir.jpa.subscription.match.config.SubscriptionProcessorConfig;
 import ca.uhn.fhir.jpa.subscription.submit.config.SubscriptionSubmitterConfig;
 import ca.uhn.fhir.okhttp.client.OkHttpRestfulClientFactory;
@@ -176,7 +176,7 @@ public class FhirAutoConfiguration {
 		@Configuration
 		@EntityScan(basePackages = {"ca.uhn.fhir.jpa.entity", "ca.uhn.fhir.jpa.model.entity"})
 		@Import({
-			SubscriptionChannelConfig.class,
+			ChannelConfig.class,
 			SubscriptionProcessorConfig.class,
 			SubscriptionSubmitterConfig.class,
 			SearchParamSubmitterConfig.class
