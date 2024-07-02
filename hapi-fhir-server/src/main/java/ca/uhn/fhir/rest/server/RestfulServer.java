@@ -1047,7 +1047,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			String requestFullPath = StringUtils.defaultString(theRequest.getRequestURI());
 			String servletPath = StringUtils.defaultString(theRequest.getServletPath());
 			StringBuffer requestUrl = theRequest.getRequestURL();
-			String servletContextPath = IncomingRequestAddressStrategy.determineServletContextPath(theRequest, this);
+			String servletContextPath = myServerAddressStrategy.determineServletContextPath(theRequest, this);
 
 			/*
 			 * Just for debugging..
