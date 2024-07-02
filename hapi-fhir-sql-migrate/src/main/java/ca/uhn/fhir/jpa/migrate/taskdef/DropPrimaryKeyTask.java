@@ -26,7 +26,6 @@ import jakarta.annotation.Nullable;
 import org.intellij.lang.annotations.Language;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.jdbc.core.ResultSetExtractor;
 
 import java.sql.SQLException;
 
@@ -51,28 +50,14 @@ public class DropPrimaryKeyTask extends BaseTableTask {
 	private String generateSql() {
 		ourLog.debug("DropPrimaryKeyTask.generateSql()");
 
-		final ResultSetExtractor<String> resultSetExtractor = rs -> {
-			if (rs.next()) {
-				final String singleResult = rs.getString(1);
-
-				if (rs.next()) {
-					throw new IllegalArgumentException(Msg.code(2533)
-							+ "Expecting only a single result for the table primary but got multiple for task: "
-							+ getMigrationVersion());
-				}
-
-				return singleResult;
-			}
-			return null;
-		};
-
 		@Nullable
 		@Language("SQL")
 		final String primaryKeyNameSql = generatePrimaryKeyNameSql();
 
 		@Nullable
 		final String primaryKeyName = primaryKeyNameSql != null
-				? executeSqlWithResult(primaryKeyNameSql, resultSetExtractor, getTableNameWithDatabaseExpectedCase())
+				? newJdbcTemplate()
+						.queryForObject(primaryKeyNameSql, String.class, getTableNameWithDatabaseExpectedCase())
 				: null;
 
 		ourLog.debug("primaryKeyName: {} for driver: {}", primaryKeyName, getDriverType());
