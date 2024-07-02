@@ -19,7 +19,7 @@
  */
 package ca.uhn.fhir.mdm.batch2.clear;
 
-import ca.uhn.fhir.batch2.jobs.parameters.PartitionedJobParameters;
+import ca.uhn.fhir.batch2.jobs.parameters.JobParameters;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.annotation.Nonnull;
 import jakarta.validation.constraints.Pattern;
@@ -28,7 +28,7 @@ import org.apache.commons.lang3.Validate;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MdmClearJobParameters extends PartitionedJobParameters {
+public class MdmClearJobParameters extends JobParameters {
 	@JsonProperty("resourceType")
 	@Nonnull
 	private List<@Pattern(regexp = "^[A-Z][A-Za-z]+$", message = "If populated, must be a valid resource type'") String>

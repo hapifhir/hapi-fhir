@@ -1,0 +1,7 @@
+---
+type: add
+issue: 6008
+title: "Previously, when partitioning is enabled, the reindex job could only be run against one partition.
+The reindex job parameters can now accept a list of partitions or all partitions (list of RequestPartitionId or RequestPartitionId.allPartitions). 
+In the future, the functionality can be extended to other bulk operations run via batch2 jobs (e.g. $delete-expunge, $export).
+"

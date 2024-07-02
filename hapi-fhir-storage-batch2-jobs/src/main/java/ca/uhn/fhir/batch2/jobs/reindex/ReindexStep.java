@@ -103,7 +103,7 @@ public class ReindexStep implements IJobStepWorker<ReindexJobParameters, Resourc
 		myHapiTransactionService
 				.withRequest(requestDetails)
 				.withTransactionDetails(transactionDetails)
-				.withRequestPartitionId(theJobParameters.getRequestPartitionId())
+				.withRequestPartitionId(data.getRequestPartitionId())
 				.execute(reindexJob);
 
 		return new RunOutcome(data.size());

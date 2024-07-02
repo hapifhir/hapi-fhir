@@ -312,6 +312,29 @@ public class ReindexJobTest extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testReindex_byMultipleUrls_indexesMatchingResources() {
+		// setup
+		createObservation(withStatus(Observation.ObservationStatus.FINAL.toCode()));
+		createObservation(withStatus(Observation.ObservationStatus.CANCELLED.toCode()));
+		createPatient(withActiveTrue());
+		createPatient(withActiveFalse());
+
+		// Only reindex one of them
+		ReindexJobParameters parameters = new ReindexJobParameters();
+		parameters.addUrl("Observation?status=final");
+		parameters.addUrl("Patient?");
+
+		// execute
+		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
+		startRequest.setJobDefinitionId(ReindexAppCtx.JOB_REINDEX);
+		startRequest.setParameters(parameters);
+		Batch2JobStartResponse res = myJobCoordinator.startInstance(startRequest);
+		JobInstance jobInstance = myBatch2JobHelper.awaitJobCompletion(res);
+
+		assertThat(jobInstance.getCombinedRecordsProcessed()).isEqualTo(3);
+	}
+
+	@Test
 	public void testReindexDeletedResources_byUrl_willRemoveDeletedResourceEntriesFromIndexTables(){
 		IIdType obsId = myReindexTestHelper.createObservationWithAlleleExtension(Observation.ObservationStatus.FINAL);
 

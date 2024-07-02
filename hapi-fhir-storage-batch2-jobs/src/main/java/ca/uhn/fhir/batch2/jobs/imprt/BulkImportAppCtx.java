@@ -32,7 +32,7 @@ public class BulkImportAppCtx {
 	public static final int PARAM_MAXIMUM_BATCH_SIZE_DEFAULT = 800; // Avoid the 1000 SQL param limit
 
 	@Bean
-	public JobDefinition bulkImport2JobDefinition() {
+	public JobDefinition<BulkImportJobParameters> bulkImport2JobDefinition() {
 		return JobDefinition.newBuilder()
 				.setJobDefinitionId(JOB_BULK_IMPORT_PULL)
 				.setJobDescription("FHIR Bulk Import using pull-based data source")

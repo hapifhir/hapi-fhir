@@ -200,7 +200,7 @@ public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 			myPatientDao.search(map);
 			fail();
 		} catch (InternalErrorException e) {
-			assertEquals(Msg.code(1319) + "No interceptor provided a value for pointcut: STORAGE_PARTITION_IDENTIFY_READ", e.getMessage());
+			assertEquals(Msg.code(1319) + "No interceptor provided a value for pointcuts: [STORAGE_PARTITION_IDENTIFY_ANY, STORAGE_PARTITION_IDENTIFY_READ]", e.getMessage());
 		}
 	}
 

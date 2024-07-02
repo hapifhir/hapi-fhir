@@ -53,6 +53,7 @@ public class ProviderConstants {
 	public static final String PARTITION_MANAGEMENT_PARTITION_DESC = "description";
 
 	public static final String DEFAULT_PARTITION_NAME = "DEFAULT";
+	public static final String ALL_PARTITIONS_TENANT_NAME = "_ALL";
 
 	/**
 	 * Operation name: diff
@@ -212,6 +213,7 @@ public class ProviderConstants {
 	/**
 	 * Whether all resource types should be reindexed
 	 */
+	@Deprecated(since = "7.3.4")
 	public static final String OPERATION_REINDEX_PARAM_EVERYTHING = "everything";
 
 	/**

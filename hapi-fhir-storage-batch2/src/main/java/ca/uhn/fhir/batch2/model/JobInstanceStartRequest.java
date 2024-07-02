@@ -82,6 +82,12 @@ public class JobInstanceStartRequest implements IModelJson {
 		myParameters = theParameters;
 	}
 
+	/**
+	 * Sets the parameters for the job.
+	 * Please note that these need to be backward compatible as we do not have a way to migrate them to a different structure at the moment.
+	 * @param theParameters the parameters
+	 * @return the current instance.
+	 */
 	public JobInstanceStartRequest setParameters(IModelJson theParameters) {
 		myParameters = JsonUtil.serializeWithSensitiveData(theParameters);
 		return this;

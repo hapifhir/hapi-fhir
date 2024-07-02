@@ -15,6 +15,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -40,9 +42,10 @@ public class ReindexStepTest {
 	public void testMethodReindex_withRequestPartitionId_willExecuteWithPartitionId(){
 		// given
 		Integer expectedPartitionId = 1;
-		ResourceIdListWorkChunkJson data = new ResourceIdListWorkChunkJson();
+		RequestPartitionId partitionId = RequestPartitionId.fromPartitionId(expectedPartitionId);
+		ResourceIdListWorkChunkJson data = new ResourceIdListWorkChunkJson(List.of(), partitionId);
 		ReindexJobParameters reindexJobParameters = new ReindexJobParameters();
-		reindexJobParameters.setRequestPartitionId(RequestPartitionId.fromPartitionId(expectedPartitionId));
+		reindexJobParameters.setRequestPartitionId(partitionId);
 		when(myHapiTransactionService.withRequest(any())).thenCallRealMethod();
 		when(myHapiTransactionService.buildExecutionBuilder(any())).thenCallRealMethod();
 

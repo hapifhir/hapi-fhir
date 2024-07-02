@@ -37,8 +37,6 @@ public class ReindexJobParametersValidatorTest {
 		parameters.addUrl(theUrl);
 
 		// test
-		List<String> errors = myValidator.validate(null, parameters);
-
-		return errors;
+		return myValidator.validate(null, parameters);
 	}
 }

@@ -19,6 +19,6 @@
  */
 package ca.uhn.fhir.mdm.batch2.submit;
 
-import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrlListJobParameters;
+import ca.uhn.fhir.batch2.jobs.parameters.JobParameters;
 
-public class MdmSubmitJobParameters extends PartitionedUrlListJobParameters {}
+public class MdmSubmitJobParameters extends JobParameters {}

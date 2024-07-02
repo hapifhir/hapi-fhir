@@ -1,6 +1,6 @@
 /*-
  * #%L
- * hapi-fhir-storage-mdm
+ * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
  * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
@@ -17,34 +17,34 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.mdm.batch2;
+package ca.uhn.fhir.batch2.jobs.step;
 
 import ca.uhn.fhir.batch2.jobs.chunk.ChunkRangeJson;
-import ca.uhn.fhir.batch2.jobs.step.IIdChunkProducer;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.pid.IResourcePidStream;
-import ca.uhn.fhir.jpa.api.svc.IGoldenResourceSearchSvc;
+import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
+import ca.uhn.fhir.util.Logs;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-public class MdmIdChunkProducer implements IIdChunkProducer<ChunkRangeJson> {
-	private static final Logger ourLog = LoggerFactory.getLogger(MdmIdChunkProducer.class);
-	private final IGoldenResourceSearchSvc myGoldenResourceSearchSvc;
+public class ChunkProducer implements IIdChunkProducer<ChunkRangeJson> {
+	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
+	private final IBatch2DaoSvc myBatch2DaoSvc;
 
-	public MdmIdChunkProducer(IGoldenResourceSearchSvc theGoldenResourceSearchSvc) {
-		myGoldenResourceSearchSvc = theGoldenResourceSearchSvc;
+	public ChunkProducer(IBatch2DaoSvc theBatch2DaoSvc) {
+		myBatch2DaoSvc = theBatch2DaoSvc;
 	}
 
 	@Override
 	public IResourcePidStream fetchResourceIdStream(ChunkRangeJson theData) {
-		String resourceType = theData.getResourceType();
-
+		String theUrl = theData.getUrl();
+		RequestPartitionId targetPartitionId = theData.getPartitionId();
 		ourLog.info(
-				"Fetching golden resource ID chunk for resource type {} - Range {} - {}",
-				resourceType,
+				"Fetching resource ID chunk in partition {} for URL {} - Range {} - {}",
+				targetPartitionId,
+				theUrl,
 				theData.getStart(),
 				theData.getEnd());
 
-		return myGoldenResourceSearchSvc.fetchGoldenResourceIdStream(
-				theData.getStart(), theData.getEnd(), theData.getPartitionId(), resourceType);
+		return myBatch2DaoSvc.fetchResourceIdStream(theData.getStart(), theData.getEnd(), targetPartitionId, theUrl);
 	}
 }
