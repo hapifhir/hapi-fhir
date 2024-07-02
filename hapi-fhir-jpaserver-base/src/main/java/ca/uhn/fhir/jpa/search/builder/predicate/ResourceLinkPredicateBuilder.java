@@ -396,6 +396,12 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 			ReferenceParam theReferenceParam,
 			RequestDetails theRequest,
 			RequestPartitionId theRequestPartitionId) {
+		ourLog.info("PRESENTATION: addPredicateReferenceWithChain(): theResourceName: {}, theParamName: {}, theList: {}", theResourceName, theParamName,
+			theList.stream()
+				.filter(ReferenceParam.class::isInstance)
+				.map(ReferenceParam.class::cast)
+				.map(referenceParam -> String.format("\nchain: %s, value: %s, idPart: %s", referenceParam.getChain(), referenceParam.getValue(), referenceParam.getIdPart()))
+				.collect(Collectors.toList()));
 
 		/*
 		 * Which resource types can the given chained parameter actually link to? This might be a list
@@ -437,6 +443,20 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 
 		String chain = theReferenceParam.getChain();
 
+		// LUKETODO:  this is where the bug fix makes a difference
+		/*
+		theReferenceParam:  ReferenceParam[chain=payor:Organization._has:List:item:_id,value=list1]
+
+		GOOD:
+		chain = "payor"
+		remainingChain = "_has:List:item:_id"
+		qualifier= :Organization
+
+		BAD:
+		chain= "_has"
+		remainingChain = null
+		qualifier= :List:item:_id
+		 */
 		String remainingChain = null;
 		int chainDotIndex = chain.indexOf('.');
 		if (chainDotIndex != -1) {
