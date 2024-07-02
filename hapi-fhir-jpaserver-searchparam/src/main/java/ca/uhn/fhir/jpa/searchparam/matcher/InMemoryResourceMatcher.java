@@ -629,26 +629,29 @@ public class InMemoryResourceMatcher {
 
 	private boolean matchChainedReferenceParam(
 			String theParamName, String theResourceName, IBaseResource theResource, ReferenceParam referenceParam) {
+		// Obtain the next parameter and chain
+		String[] chains = referenceParam.getChain().split("\\.");
+		String parameterNameWithModifier = chains[0];
+		String chain = chains.length > 1 ? StringUtils.join(chains, ".", 1, chains.length) : null;
+
+		// Obtain the next parameter name and modifier
+		String[] parameterNameAndModifier = parameterNameWithModifier.split(":");
+		String parameterName = parameterNameAndModifier[0];
+		String modifier = parameterNameAndModifier.length > 1 ? parameterNameAndModifier[1] : null;
+
 		RuntimeSearchParam activeSearchParam =
 				mySearchParamRegistry.getActiveSearchParam(theResourceName, theParamName);
+
 		List<? extends IBase> bases = searchParamExtractor
 				.getPathValueExtractor(theResource, activeSearchParam.getPath())
 				.get();
+
 		return bases.stream()
 				.filter(IBaseReference.class::isInstance)
 				.map(IBaseReference.class::cast)
 				.map(IBaseReference::getResource)
 				.filter(Objects::nonNull)
 				.anyMatch(resource -> {
-					// Obtain the next parameter name, modifier and chain
-					String[] chains = referenceParam.getChain().split("\\.");
-					String parameterNameWithModifier = chains[0];
-					String chain = chains.length > 1 ? StringUtils.join(chains, ".", 1, chains.length) : null;
-
-					String[] parameterNameAndModifier = parameterNameWithModifier.split(":");
-					String parameterName = parameterNameAndModifier[0];
-					String modifier = parameterNameAndModifier.length > 1 ? parameterNameAndModifier[1] : null;
-
 					// Find the path of next search parameter in the next resource
 					RuntimeSearchParam resourceSearchParam = mySearchParamRegistry.getActiveSearchParam(
 							resource.getIdElement().getResourceType(), parameterName);
