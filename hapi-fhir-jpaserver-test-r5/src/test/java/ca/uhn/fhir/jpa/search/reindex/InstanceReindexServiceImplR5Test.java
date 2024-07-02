@@ -81,7 +81,7 @@ public class InstanceReindexServiceImplR5Test extends BaseJpaR5Test {
 
 		IIdType id = createPatient(withFamily("Simpson"), withGiven("Homer"));
 
-		runInTransaction(this::logAllNonUniqueIndexes);
+		runInTransaction((Runnable) this::logAllNonUniqueIndexes);
 
 		Parameters outcome = (Parameters) mySvc.reindexDryRun(new SystemRequestDetails(), id, null);
 		ourLog.info("Output:{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
