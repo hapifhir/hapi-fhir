@@ -87,6 +87,8 @@ public class ValidateCommand extends BaseCommand {
 				"igpack",
 				true,
 				"If specified, provides the filename of an IGPack file to include in validation");
+		addOptionalOption(
+				retVal, null, "oneCode", false, "Validate allowing one coding to satisfy CodeableConcept binding");
 		addOptionalOption(retVal, "x", "xsd", false, "Validate using Schemas");
 		addOptionalOption(retVal, "s", "sch", false, "Validate using Schematrons");
 		addOptionalOption(retVal, "e", "encoding", "encoding", "File encoding (default is UTF-8)");
@@ -168,7 +170,6 @@ public class ValidateCommand extends BaseCommand {
 					val.registerValidatorModule(instanceValidator);
 					validationSupportChain =
 							ValidationSupportChainCreator.getValidationSupportChainR4(ctx, theCommandLine);
-					validationSupportChain.oneCodingIsSufficient = true;
 					instanceValidator.setValidationSupport(validationSupportChain);
 					break;
 				}
@@ -176,6 +177,10 @@ public class ValidateCommand extends BaseCommand {
 					throw new ParseException(
 							Msg.code(1620) + "Profile validation (-p) is not supported for this FHIR version");
 			}
+
+			// Do we allow CodeableConcepts to be satisfied by only one coding?
+			// Useful when we are using additionalBindings.
+			validationSupportChain.oneCodingIsSufficient = theCommandLine.hasOption("oneCode");
 
 			// If they want to do profile validation - there might be a whole IG to load...
 			if (theCommandLine.hasOption("igpack")) {
