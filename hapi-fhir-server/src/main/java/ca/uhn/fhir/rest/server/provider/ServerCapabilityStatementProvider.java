@@ -209,7 +209,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 		IBase text = terser.addElement(retVal, "text");
 		terser.addElement(text, "status", "generated");
 		terser.addElement(
-			text, "div", "<div xmlns=\"http://www.w3.org/1999/xhtml\">" + configuration.getServerName() + "</div>");
+				text, "div", "<div xmlns=\"http://www.w3.org/1999/xhtml\">" + configuration.getServerName() + "</div>");
 		terser.addElement(retVal, "publisher", myPublisher);
 		terser.addElement(retVal, "date", conformanceDate(configuration));
 		terser.addElement(
