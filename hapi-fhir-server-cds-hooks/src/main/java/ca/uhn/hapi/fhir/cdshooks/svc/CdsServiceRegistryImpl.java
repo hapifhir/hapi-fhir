@@ -138,8 +138,8 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 	@Override
 	public CdsServiceJson getCdsServiceJson(String theServiceId) {
 		CdsServiceJson cdsServiceJson = myServiceCache.getCdsServiceJson(theServiceId);
-		if(cdsServiceJson == null) {
-			throw new IllegalArgumentException("No service with " + theServiceId +  " is registered.");
+		if (cdsServiceJson == null) {
+			throw new IllegalArgumentException("No service with " + theServiceId + " is registered.");
 		}
 		return cdsServiceJson;
 	}
@@ -149,7 +149,7 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 		ICdsMethod retval = myServiceCache.getServiceMethod(theId);
 		if (retval == null) {
 			throw new ResourceNotFoundException(
-				Msg.code(2391) + "No service with id " + theId + " is registered on this server");
+					Msg.code(2391) + "No service with id " + theId + " is registered on this server");
 		}
 		return retval;
 	}
@@ -157,7 +157,7 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 	@Nonnull
 	CdsServiceResponseJson encodeServiceResponse(String theServiceId, Object result) {
 		if (result instanceof String) {
-			return buildResponseFromString(theServiceId, result, (String)result);
+			return buildResponseFromString(theServiceId, result, (String) result);
 		} else {
 			return buildResponseFromImplementation(theServiceId, result);
 		}
@@ -168,7 +168,7 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 		ICdsMethod retval = myServiceCache.getFeedbackMethod(theId);
 		if (retval == null) {
 			throw new ResourceNotFoundException(
-				Msg.code(2392) + "No feedback service with id " + theId + " is registered on this server");
+					Msg.code(2392) + "No feedback service with id " + theId + " is registered on this server");
 		}
 		return retval;
 	}
@@ -187,11 +187,12 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 			return (CdsServiceResponseJson) theResult;
 		} catch (ClassCastException e) {
 			throw new ConfigurationException(
-				Msg.code(2389)
-					+ "Failed to cast Cds service response to CdsServiceResponseJson when calling CDS Hook Service "
-					+ theServiceId + ". The type " + theResult.getClass().getName()
-					+ " cannot be casted to CdsServiceResponseJson",
-				e);
+					Msg.code(2389)
+							+ "Failed to cast Cds service response to CdsServiceResponseJson when calling CDS Hook Service "
+							+ theServiceId + ". The type "
+							+ theResult.getClass().getName()
+							+ " cannot be casted to CdsServiceResponseJson",
+					e);
 		}
 	}
 
@@ -200,10 +201,10 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 			return myObjectMapper.readValue(theJson, CdsServiceResponseJson.class);
 		} catch (JsonProcessingException e) {
 			throw new ConfigurationException(
-				Msg.code(2390) + "Failed to json deserialize Cds service response of type "
-					+ theResult.getClass().getName() + " when calling CDS Hook Service " + theServiceId
-					+ ".  Json: " + theJson,
-				e);
+					Msg.code(2390) + "Failed to json deserialize Cds service response of type "
+							+ theResult.getClass().getName() + " when calling CDS Hook Service " + theServiceId
+							+ ".  Json: " + theJson,
+					e);
 		}
 	}
 
@@ -211,7 +212,8 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 		try {
 			return (CdsServiceFeedbackJson) theResponse;
 		} catch (ClassCastException e) {
-			throw new ClassCastException("Failed to cast feedback response CdsServiceFeedbackJson for service " + theServiceId + ". " + e.getMessage());
+			throw new ClassCastException("Failed to cast feedback response CdsServiceFeedbackJson for service "
+					+ theServiceId + ". " + e.getMessage());
 		}
 	}
 
@@ -219,7 +221,8 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 		try {
 			return myObjectMapper.readValue(theResponse, CdsServiceFeedbackJson.class);
 		} catch (JsonProcessingException e) {
-			throw new RuntimeException("Failed to serialize json Cds Feedback response for service " + theServiceId + ". " + e.getMessage());
+			throw new RuntimeException("Failed to serialize json Cds Feedback response for service " + theServiceId
+					+ ". " + e.getMessage());
 		}
 	}
 
