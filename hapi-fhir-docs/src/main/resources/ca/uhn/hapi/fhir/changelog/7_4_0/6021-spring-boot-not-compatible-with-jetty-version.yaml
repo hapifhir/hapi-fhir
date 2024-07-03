@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 6021
+title: "The updated Spring Boot was not compatible with jetty version 12.0.3.
+        Jetty has been updated to 12.0.9, fixing this issue."

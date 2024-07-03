@@ -18,6 +18,9 @@ import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
 import org.eclipse.jetty.ee10.servlet.ServletHandler;
 import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.util.resource.PathResource;
+import org.eclipse.jetty.util.resource.PathResourceFactory;
+import org.eclipse.jetty.util.resource.Resource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Composition;
@@ -59,6 +62,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.util.List;
 import java.util.Optional;
@@ -110,7 +114,11 @@ public class WebTest {
 			ServletContextHandler contextHandler = new MyServletContextHandler();
 			contextHandler.setAllowNullPathInContext(true);
 			contextHandler.setServletHandler(servletHandler);
-			contextHandler.setBaseResourceAsString("hapi-fhir-testpage-overlay/src/main/webapp");
+			Resource base = new PathResourceFactory().newResource("hapi-fhir-testpage-overlay/src/main/webapp");
+			if (!base.exists()) {
+				base = new PathResourceFactory().newResource("src/main/webapp");
+			}
+			contextHandler.setBaseResource(base);
 
 			ourOverlayServer = new Server(0);
 			ourOverlayServer.setHandler(contextHandler);
