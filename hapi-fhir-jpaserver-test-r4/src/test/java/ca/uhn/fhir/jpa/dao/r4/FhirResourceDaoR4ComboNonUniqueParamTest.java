@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboTokenNonUnique;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.submit.interceptor.SearchParamValidatingInterceptor;
 import ca.uhn.fhir.jpa.util.SqlQuery;
@@ -58,6 +59,8 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 
 	@AfterEach
 	public void restoreInterceptor() {
+		myStorageSettings.setIndexMissingFields(new StorageSettings().getIndexMissingFields());
+
 		if (myInterceptorFound) {
 			myInterceptorService.unregisterInterceptor(mySearchParamValidatingInterceptor);
 		}
@@ -759,6 +762,58 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 			if (theUseComparator) {
 				assertComboIndexNotUsed();
 				assertThat(myMessages.toString()).contains("INFO Search with params [date, note-text] is not a candidate for combo searching - Parameter 'date' has prefix: 'le'");
+			} else {
+				assertComboIndexUsed();
+			}
+
+		}
+
+		@ParameterizedTest
+		@ValueSource(booleans = {true, false})
+		public void testStringModifier(boolean theUseExact) {
+			IIdType id1 = createObservation("2021-01-02");
+			createObservation("2023-01-02");
+
+			SearchParameterMap params = SearchParameterMap
+				.newSynchronous()
+				.add("note-text", new StringParam("Hello").setExact(theUseExact))
+				.add("date", new DateParam("2021-01-02"));
+			myCaptureQueriesListener.clear();
+			IBundleProvider results = myObservationDao.search(params, mySrd);
+			List<String> actual = toUnqualifiedVersionlessIdValues(results);
+			myCaptureQueriesListener.logSelectQueries();
+			assertThat(actual).contains(id1.toUnqualifiedVersionless().getValue());
+
+			if (theUseExact) {
+				assertComboIndexNotUsed();
+				assertThat(myMessages.toString()).contains("INFO Search with params [date, note-text] is not a candidate for combo searching - Parameter 'note-text' has modifier: ':exact'");
+			} else {
+				assertComboIndexUsed();
+			}
+
+		}
+
+		@ParameterizedTest
+		@ValueSource(booleans = {true, false})
+		public void testMissing(boolean theUseMissing) {
+			myStorageSettings.setIndexMissingFields(StorageSettings.IndexEnabledEnum.ENABLED);
+
+			IIdType id1 = createObservation("2021-01-02");
+			createObservation("2023-01-02");
+
+			SearchParameterMap params = SearchParameterMap
+				.newSynchronous()
+				.add("note-text", new StringParam("Hello").setMissing(theUseMissing ? false : null))
+				.add("date", new DateParam("2021-01-02"));
+			myCaptureQueriesListener.clear();
+			IBundleProvider results = myObservationDao.search(params, mySrd);
+			List<String> actual = toUnqualifiedVersionlessIdValues(results);
+			myCaptureQueriesListener.logSelectQueries();
+			assertThat(actual).contains(id1.toUnqualifiedVersionless().getValue());
+
+			if (theUseMissing) {
+				assertComboIndexNotUsed();
+				assertThat(myMessages.toString()).contains("INFO Search with params [date, note-text] is not a candidate for combo searching - Parameter 'note-text' has modifier: ':missing'");
 			} else {
 				assertComboIndexUsed();
 			}

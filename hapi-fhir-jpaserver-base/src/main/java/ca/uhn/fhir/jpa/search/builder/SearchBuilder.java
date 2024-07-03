@@ -314,9 +314,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	 * parameters all have no modifiers.
 	 */
 	private boolean isCompositeUniqueSpCandidate() {
-		return myStorageSettings.isUniqueIndexesEnabled()
-				&& myParams.getEverythingMode() == null
-				&& myParams.isAllParametersHaveNoModifier();
+		return myStorageSettings.isUniqueIndexesEnabled() && myParams.getEverythingMode() == null;
 	}
 
 	@SuppressWarnings("ConstantConditions")
@@ -1954,7 +1952,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				IQueryParameterType nextOr = nextPermutation.get(paramIndex);
 				String nextOrValue = nextOr.getValueAsQueryToken(myContext);
 
-				RuntimeSearchParam nextParamDef = mySearchParamRegistry.getActiveSearchParam(myResourceName, nextParamName);
+				RuntimeSearchParam nextParamDef =
+						mySearchParamRegistry.getActiveSearchParam(myResourceName, nextParamName);
 				if (theComboParam.getComboSearchParamType() == ComboSearchParamType.NON_UNIQUE) {
 					if (nextParamDef.getParamType() == RestSearchParameterTypeEnum.STRING) {
 						nextOrValue = StringUtil.normalizeStringForSearchIndexing(nextOrValue);
@@ -1975,7 +1974,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 			String indexString = searchStringBuilder.toString();
 			ourLog.debug(
-				"Checking for {} combo index for query: {}", theComboParam.getComboSearchParamType(), indexString);
+					"Checking for {} combo index for query: {}", theComboParam.getComboSearchParamType(), indexString);
 
 			indexStrings.add(indexString);
 		}
@@ -2008,10 +2007,16 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		theParams.clean();
 	}
 
+	/**
+	 * Returns {@literal true} if the actual parameter instances in a given query are actually usable for
+	 * searching against a combo param with the given parameter names. This might be {@literal false} if
+	 * parameters have modifiers (e.g. <code>?name:exact=SIMPSON</code>), prefixes
+	 * (e.g. <code>?date=gt2024-02-01</code>), etc.
+	 */
 	private boolean validateParamValuesAreValidForComboParam(
-			RequestDetails theRequest, @Nonnull SearchParameterMap theParams, List<String> comboParamNames) {
+			RequestDetails theRequest, @Nonnull SearchParameterMap theParams, List<String> theComboParamNames) {
 		boolean paramValuesAreValidForCombo = true;
-		for (String nextParamName : comboParamNames) {
+		for (String nextParamName : theComboParamNames) {
 			List<List<IQueryParameterType>> nextValues = theParams.get(nextParamName);
 
 			if (nextValues.isEmpty()) {
@@ -2024,7 +2029,9 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					if (nextOrValue instanceof DateParam) {
 						DateParam dateParam = (DateParam) nextOrValue;
 						if (dateParam.getPrecision() != TemporalPrecisionEnum.DAY) {
-							String message = "Search with params " + comboParamNames + " is not a candidate for combo searching - Date search with non-DAY precision for parameter '" + nextParamName + "'";
+							String message = "Search with params " + theComboParamNames
+									+ " is not a candidate for combo searching - Date search with non-DAY precision for parameter '"
+									+ nextParamName + "'";
 							firePerformanceInfo(theRequest, message);
 							paramValuesAreValidForCombo = false;
 							break;
@@ -2033,11 +2040,22 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					if (nextOrValue instanceof BaseParamWithPrefix) {
 						BaseParamWithPrefix<?> paramWithPrefix = (BaseParamWithPrefix<?>) nextOrValue;
 						if (paramWithPrefix.getPrefix() != null) {
-							String message = "Search with params " + comboParamNames + " is not a candidate for combo searching - Parameter '" + nextParamName + "' has prefix: '" + paramWithPrefix.getPrefix().getValue() + "'";
+							String message = "Search with params " + theComboParamNames
+									+ " is not a candidate for combo searching - Parameter '" + nextParamName
+									+ "' has prefix: '"
+									+ paramWithPrefix.getPrefix().getValue() + "'";
 							firePerformanceInfo(theRequest, message);
 							paramValuesAreValidForCombo = false;
 							break;
 						}
+					}
+					if (isNotBlank(nextOrValue.getQueryParameterQualifier())) {
+						String message = "Search with params " + theComboParamNames
+								+ " is not a candidate for combo searching - Parameter '" + nextParamName
+								+ "' has modifier: '" + nextOrValue.getQueryParameterQualifier() + "'";
+						firePerformanceInfo(theRequest, message);
+						paramValuesAreValidForCombo = false;
+						break;
 					}
 				}
 			}
@@ -2452,8 +2470,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				.add(RequestDetails.class, theRequest)
 				.addIfMatchesType(ServletRequestDetails.class, theRequest)
 				.add(StorageProcessingMessage.class, message);
-		CompositeInterceptorBroadcaster.doCallHooks(
-				myInterceptorBroadcaster, theRequest, pointcut, params);
+		CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, pointcut, params);
 	}
 
 	public static int getMaximumPageSize() {

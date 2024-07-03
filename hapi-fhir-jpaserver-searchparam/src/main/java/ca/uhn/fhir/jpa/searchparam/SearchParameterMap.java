@@ -354,22 +354,6 @@ public class SearchParameterMap implements Serializable {
 	}
 
 	/**
-	 * This will only return true if all parameters have no modifier of any kind
-	 */
-	public boolean isAllParametersHaveNoModifier() {
-		for (List<List<IQueryParameterType>> nextParamName : values()) {
-			for (List<IQueryParameterType> nextAnd : nextParamName) {
-				for (IQueryParameterType nextOr : nextAnd) {
-					if (isNotBlank(nextOr.getQueryParameterQualifier())) {
-						return false;
-					}
-				}
-			}
-		}
-		return true;
-	}
-
-	/**
 	 * If set, tells the server to load these results synchronously, and not to load
 	 * more than X results
 	 */

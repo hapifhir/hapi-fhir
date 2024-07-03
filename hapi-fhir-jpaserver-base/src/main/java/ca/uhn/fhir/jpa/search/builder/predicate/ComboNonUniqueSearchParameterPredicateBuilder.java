@@ -44,19 +44,20 @@ public class ComboNonUniqueSearchParameterPredicateBuilder extends BaseSearchPar
 		myColumnHashComplete = getTable().addColumn("HASH_COMPLETE");
 	}
 
-	public Condition createPredicateHashComplete(RequestPartitionId theRequestPartitionId, List<String> theIndexStrings) {
+	public Condition createPredicateHashComplete(
+			RequestPartitionId theRequestPartitionId, List<String> theIndexStrings) {
 		PartitionablePartitionId partitionId =
-			PartitionablePartitionId.toStoragePartition(theRequestPartitionId, getPartitionSettings());
+				PartitionablePartitionId.toStoragePartition(theRequestPartitionId, getPartitionSettings());
 		Condition predicate;
 		if (theIndexStrings.size() == 1) {
 			long hash = ResourceIndexedComboTokenNonUnique.calculateHashComplete(
-				getPartitionSettings(), partitionId, theIndexStrings.get(0));
+					getPartitionSettings(), partitionId, theIndexStrings.get(0));
 			predicate = BinaryCondition.equalTo(myColumnHashComplete, generatePlaceholder(hash));
 		} else {
-			List<Long> hashes = theIndexStrings
-				.stream()
-				.map(t -> ResourceIndexedComboTokenNonUnique.calculateHashComplete(getPartitionSettings(), partitionId, t))
-				.collect(Collectors.toList());
+			List<Long> hashes = theIndexStrings.stream()
+					.map(t -> ResourceIndexedComboTokenNonUnique.calculateHashComplete(
+							getPartitionSettings(), partitionId, t))
+					.collect(Collectors.toList());
 			predicate = new InCondition(myColumnHashComplete, generatePlaceholders(hashes));
 		}
 		return combineWithRequestPartitionIdPredicate(theRequestPartitionId, predicate);

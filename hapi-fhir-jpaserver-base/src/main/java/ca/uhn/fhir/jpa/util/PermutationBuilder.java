@@ -65,13 +65,15 @@ public class PermutationBuilder {
 	 * @param <T>          The type associated with {@literal theInput}. The actual type doesn't matter, this method does not look at the
 	 *                     values at all other than to copy them to the output lists.
 	 */
-	private static <T> void doCalculatePermutationsIntoIndicesArrayAndPopulateList(int thePositionX, int[] theIndices, List<List<T>> theInput, List<List<T>> theOutput) {
+	private static <T> void doCalculatePermutationsIntoIndicesArrayAndPopulateList(
+			int thePositionX, int[] theIndices, List<List<T>> theInput, List<List<T>> theOutput) {
 		if (thePositionX != theInput.size()) {
 			// If we're not at the end of the list of input vectors, recursively self-invoke once for each
 			// possible option at the current position in the list of input vectors.
 			for (int positionY = 0; positionY < theInput.get(thePositionX).size(); positionY++) {
 				theIndices[thePositionX] = positionY;
-				doCalculatePermutationsIntoIndicesArrayAndPopulateList(thePositionX + 1, theIndices, theInput, theOutput);
+				doCalculatePermutationsIntoIndicesArrayAndPopulateList(
+						thePositionX + 1, theIndices, theInput, theOutput);
 			}
 		} else {
 			// If we're at the end of the list of input vectors, then we've been passed the
@@ -97,5 +99,4 @@ public class PermutationBuilder {
 		}
 		return retVal;
 	}
-
 }
