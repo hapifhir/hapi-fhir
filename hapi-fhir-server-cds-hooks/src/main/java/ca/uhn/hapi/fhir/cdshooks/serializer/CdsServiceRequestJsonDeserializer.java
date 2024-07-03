@@ -81,7 +81,7 @@ public class CdsServiceRequestJsonDeserializer extends StdDeserializer<CdsServic
 	CdsServiceRequestContextJson deserializeRequestContext(LinkedHashMap<String, Object> theMap)
 			throws JsonProcessingException {
 		final CdsServiceRequestContextJson cdsServiceRequestContextJson = new CdsServiceRequestContextJson();
-		for (Map.Entry<String,Object> entry : theMap.entrySet()) {
+		for (Map.Entry<String, Object> entry : theMap.entrySet()) {
 			String key = entry.getKey();
 			Object value = entry.getValue();
 			// Convert LinkedHashMap entries to Resources
