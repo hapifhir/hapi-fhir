@@ -2026,40 +2026,39 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			List<IQueryParameterType> nextAndValue = nextValues.get(0);
 			paramOrValues.add(nextAndValue);
 
-				for (IQueryParameterType nextOrValue : nextAndValue) {
-					if (nextOrValue instanceof DateParam) {
-						DateParam dateParam = (DateParam) nextOrValue;
-						if (dateParam.getPrecision() != TemporalPrecisionEnum.DAY) {
-							String message = "Search with params " + theComboParamNames
-									+ " is not a candidate for combo searching - Date search with non-DAY precision for parameter '"
-									+ nextParamName + "'";
-							firePerformanceInfo(theRequest, message);
-							paramValuesAreValidForCombo = false;
-							break;
-						}
-					}
-					if (nextOrValue instanceof BaseParamWithPrefix) {
-						BaseParamWithPrefix<?> paramWithPrefix = (BaseParamWithPrefix<?>) nextOrValue;
-						if (paramWithPrefix.getPrefix() != null) {
-							String message = "Search with params " + theComboParamNames
-									+ " is not a candidate for combo searching - Parameter '" + nextParamName
-									+ "' has prefix: '"
-									+ paramWithPrefix.getPrefix().getValue() + "'";
-							firePerformanceInfo(theRequest, message);
-							paramValuesAreValidForCombo = false;
-							break;
-						}
-					}
-					if (isNotBlank(nextOrValue.getQueryParameterQualifier())) {
+			for (IQueryParameterType nextOrValue : nextAndValue) {
+				if (nextOrValue instanceof DateParam) {
+					DateParam dateParam = (DateParam) nextOrValue;
+					if (dateParam.getPrecision() != TemporalPrecisionEnum.DAY) {
 						String message = "Search with params " + theComboParamNames
-								+ " is not a candidate for combo searching - Parameter '" + nextParamName
-								+ "' has modifier: '" + nextOrValue.getQueryParameterQualifier() + "'";
+								+ " is not a candidate for combo searching - Date search with non-DAY precision for parameter '"
+								+ nextParamName + "'";
 						firePerformanceInfo(theRequest, message);
 						paramValuesAreValidForCombo = false;
 						break;
 					}
 				}
-
+				if (nextOrValue instanceof BaseParamWithPrefix) {
+					BaseParamWithPrefix<?> paramWithPrefix = (BaseParamWithPrefix<?>) nextOrValue;
+					if (paramWithPrefix.getPrefix() != null) {
+						String message = "Search with params " + theComboParamNames
+								+ " is not a candidate for combo searching - Parameter '" + nextParamName
+								+ "' has prefix: '"
+								+ paramWithPrefix.getPrefix().getValue() + "'";
+						firePerformanceInfo(theRequest, message);
+						paramValuesAreValidForCombo = false;
+						break;
+					}
+				}
+				if (isNotBlank(nextOrValue.getQueryParameterQualifier())) {
+					String message = "Search with params " + theComboParamNames
+							+ " is not a candidate for combo searching - Parameter '" + nextParamName
+							+ "' has modifier: '" + nextOrValue.getQueryParameterQualifier() + "'";
+					firePerformanceInfo(theRequest, message);
+					paramValuesAreValidForCombo = false;
+					break;
+				}
+			}
 
 			// Reference params are only eligible for using a composite index if they
 			// are qualified
@@ -2077,7 +2076,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 		if (PermutationBuilder.calculatePermutationCount(paramOrValues) > 500) {
 			ourLog.debug(
-				"Search is not a candidate for unique combo searching - Too many OR values would result in too many permutations");
+					"Search is not a candidate for unique combo searching - Too many OR values would result in too many permutations");
 			paramValuesAreValidForCombo = false;
 		}
 
