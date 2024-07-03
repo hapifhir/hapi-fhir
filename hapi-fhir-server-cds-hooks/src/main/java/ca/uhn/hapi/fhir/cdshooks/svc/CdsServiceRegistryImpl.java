@@ -60,11 +60,12 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 	private final ICrDiscoveryServiceFactory myCrDiscoveryServiceFactory;
 
 	public CdsServiceRegistryImpl(
-		CdsHooksContextBooter theCdsHooksContextBooter,
-		CdsPrefetchSvc theCdsPrefetchSvc,
-		ObjectMapper theObjectMapper,
-		ICdsCrServiceFactory theCdsCrServiceFactory,
-		ICrDiscoveryServiceFactory theCrDiscoveryServiceFactory, FhirContext theFhirContext) {
+			CdsHooksContextBooter theCdsHooksContextBooter,
+			CdsPrefetchSvc theCdsPrefetchSvc,
+			ObjectMapper theObjectMapper,
+			ICdsCrServiceFactory theCdsCrServiceFactory,
+			ICrDiscoveryServiceFactory theCrDiscoveryServiceFactory,
+			FhirContext theFhirContext) {
 		myCdsHooksContextBooter = theCdsHooksContextBooter;
 		myCdsPrefetchSvc = theCdsPrefetchSvc;
 		myObjectMapper = theObjectMapper;

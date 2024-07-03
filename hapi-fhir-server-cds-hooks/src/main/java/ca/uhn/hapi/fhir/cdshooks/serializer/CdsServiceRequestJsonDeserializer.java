@@ -20,6 +20,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.io.IOException;
 import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class CdsServiceRequestJsonDeserializer extends StdDeserializer<CdsServiceRequestJson> {
 
@@ -28,8 +29,7 @@ public class CdsServiceRequestJsonDeserializer extends StdDeserializer<CdsServic
 	private final FhirContext myFhirContext;
 	private final IParser myParser;
 
-	public CdsServiceRequestJsonDeserializer(
-		CdsServiceRegistryImpl theCdsServiceRegistry, FhirContext theFhirContext) {
+	public CdsServiceRequestJsonDeserializer(CdsServiceRegistryImpl theCdsServiceRegistry, FhirContext theFhirContext) {
 		super(CdsServiceRequestJson.class);
 		myCdsServiceRegistry = theCdsServiceRegistry;
 		myFhirContext = theFhirContext;
@@ -54,7 +54,8 @@ public class CdsServiceRequestJsonDeserializer extends StdDeserializer<CdsServic
 			cdsServiceRequestJson.setExtension(myRequestExtension);
 		}
 		if (requestContext != null) {
-			LinkedHashMap<String, Object> map = myObjectMapper.readValue(requestContext.toString(), LinkedHashMap.class);
+			LinkedHashMap<String, Object> map =
+					myObjectMapper.readValue(requestContext.toString(), LinkedHashMap.class);
 			cdsServiceRequestJson.setContext(deserializeRequestContext(map));
 		}
 		return cdsServiceRequestJson;
@@ -77,10 +78,12 @@ public class CdsServiceRequestJsonDeserializer extends StdDeserializer<CdsServic
 		return myObjectMapper.readValue(theExtension, extensionClass);
 	}
 
-	CdsServiceRequestContextJson deserializeRequestContext(LinkedHashMap<String, Object> theMap) throws JsonProcessingException {
+	CdsServiceRequestContextJson deserializeRequestContext(LinkedHashMap<String, Object> theMap)
+			throws JsonProcessingException {
 		final CdsServiceRequestContextJson cdsServiceRequestContextJson = new CdsServiceRequestContextJson();
-		for (String key : theMap.keySet()) {
-			Object value = theMap.get(key);
+		for (Map.Entry<String,Object> entry : theMap.entrySet()) {
+			String key = entry.getKey();
+			Object value = entry.getValue();
 			// Convert LinkedHashMap entries to Resources
 			if (value instanceof LinkedHashMap) {
 				String json = myObjectMapper.writeValueAsString(value);
