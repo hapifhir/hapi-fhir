@@ -20,6 +20,7 @@
 package ca.uhn.hapi.fhir.cdshooks.svc;
 
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsMethod;
@@ -59,19 +60,19 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 	private final ICrDiscoveryServiceFactory myCrDiscoveryServiceFactory;
 
 	public CdsServiceRegistryImpl(
-			CdsHooksContextBooter theCdsHooksContextBooter,
-			CdsPrefetchSvc theCdsPrefetchSvc,
-			ObjectMapper theObjectMapper,
-			ICdsCrServiceFactory theCdsCrServiceFactory,
-			ICrDiscoveryServiceFactory theCrDiscoveryServiceFactory) {
+		CdsHooksContextBooter theCdsHooksContextBooter,
+		CdsPrefetchSvc theCdsPrefetchSvc,
+		ObjectMapper theObjectMapper,
+		ICdsCrServiceFactory theCdsCrServiceFactory,
+		ICrDiscoveryServiceFactory theCrDiscoveryServiceFactory, FhirContext theFhirContext) {
 		myCdsHooksContextBooter = theCdsHooksContextBooter;
 		myCdsPrefetchSvc = theCdsPrefetchSvc;
 		myObjectMapper = theObjectMapper;
 		// registering this deserializer here to
-		// avoid circular dependencies
+		// avoid circular dependency
 		SimpleModule module = new SimpleModule();
 		module.addDeserializer(
-				CdsServiceRequestJson.class, new CdsServiceRequestJsonDeserializer(this, myObjectMapper));
+				CdsServiceRequestJson.class, new CdsServiceRequestJsonDeserializer(this, theFhirContext));
 		myObjectMapper.registerModule(module);
 		myCdsCrServiceFactory = theCdsCrServiceFactory;
 		myCrDiscoveryServiceFactory = theCrDiscoveryServiceFactory;

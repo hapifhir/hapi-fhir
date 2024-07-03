@@ -1,6 +1,7 @@
 package ca.uhn.hapi.fhir.cdshooks.svc;
 
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceFeedbackJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseJson;
@@ -33,11 +34,12 @@ class CdsServiceRegistryImplTest {
 	@Mock
 	private CdsServiceCache myCdsServiceCache;
 	private final ObjectMapper myObjectMapper = new ObjectMapper();
+	private final FhirContext myFhirContext = FhirContext.forR4();
 	private CdsServiceRegistryImpl myFixture;
 
 	@BeforeEach()
 	void setup() {
-		myFixture = new CdsServiceRegistryImpl(myCdsHooksContextBooter, myCdsPrefetchSvc, myObjectMapper, myCdsCrServiceFactory, myCrDiscoveryServiceFactory);
+		myFixture = new CdsServiceRegistryImpl(myCdsHooksContextBooter, myCdsPrefetchSvc, myObjectMapper, myCdsCrServiceFactory, myCrDiscoveryServiceFactory, myFhirContext);
 	}
 
 	@Test

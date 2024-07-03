@@ -25,60 +25,71 @@ public class CdsServiceRequestJsonDeserializer extends StdDeserializer<CdsServic
 
 	private final CdsServiceRegistryImpl myCdsServiceRegistry;
 	private final ObjectMapper myObjectMapper;
-	private final FhirContext myFhirContext = FhirContext.forR4();
-	private final IParser myParser = myFhirContext.newJsonParser().setPrettyPrint(true);
+	private final FhirContext myFhirContext;
+	private final IParser myParser;
 
 	public CdsServiceRequestJsonDeserializer(
-			CdsServiceRegistryImpl theCdsServiceRegistry, ObjectMapper theObjectMapper) {
+		CdsServiceRegistryImpl theCdsServiceRegistry, FhirContext theFhirContext) {
 		super(CdsServiceRequestJson.class);
 		myCdsServiceRegistry = theCdsServiceRegistry;
-		myObjectMapper = theObjectMapper;
+		myFhirContext = theFhirContext;
+		myParser = myFhirContext.newJsonParser().setPrettyPrint(true);
+		// Using a new object mapper as the object mapper available via constructor injection will have
+		// CdsServiceRequestJsonDeserializer configured against itself and using it will result into loop
+		myObjectMapper = new ObjectMapper();
+		configureObjectMapper(myObjectMapper);
 	}
 
 	@Override
 	public CdsServiceRequestJson deserialize(JsonParser theJsonParser, DeserializationContext theDeserializationContext)
 			throws IOException {
-		ObjectMapper objectMapper = new ObjectMapper();
-		SimpleModule module = new SimpleModule();
-		module.addDeserializer(IBaseResource.class, new FhirResourceDeserializer(myFhirContext));
-		objectMapper.registerModule(module);
-		objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-		JsonNode cdsServiceRequestJsonNode = theJsonParser.getCodec().readTree(theJsonParser);
-		JsonNode hookNode = cdsServiceRequestJsonNode.get("hook");
-		JsonNode extensionNode = cdsServiceRequestJsonNode.get("extension");
-		JsonNode requestContext = cdsServiceRequestJsonNode.get("context");
-		CdsServiceRequestJson cdsServiceRequestJson1 =
-				objectMapper.treeToValue(cdsServiceRequestJsonNode, CdsServiceRequestJson.class);
+		final JsonNode cdsServiceRequestJsonNode = theJsonParser.getCodec().readTree(theJsonParser);
+		final JsonNode hookNode = cdsServiceRequestJsonNode.get("hook");
+		final JsonNode extensionNode = cdsServiceRequestJsonNode.get("extension");
+		final JsonNode requestContext = cdsServiceRequestJsonNode.get("context");
+		final CdsServiceRequestJson cdsServiceRequestJson =
+				myObjectMapper.treeToValue(cdsServiceRequestJsonNode, CdsServiceRequestJson.class);
 		if (extensionNode != null) {
-			CdsServiceJson cdsServicesJson = myCdsServiceRegistry.getCdsServiceJson(hookNode.textValue());
-			Class<? extends CdsHooksExtension> extensionClass = cdsServicesJson.getExtensionClass();
-			if (extensionClass == null) {
-				extensionClass = CdsHooksExtension.class;
-			}
-			CdsHooksExtension myRequestExtension = objectMapper.readValue(extensionNode.toString(), extensionClass);
-			cdsServiceRequestJson1.setExtension(myRequestExtension);
+			CdsHooksExtension myRequestExtension = deserializeExtension(hookNode.textValue(), extensionNode.toString());
+			cdsServiceRequestJson.setExtension(myRequestExtension);
 		}
-
 		if (requestContext != null) {
-			LinkedHashMap<String, Object> map = objectMapper.readValue(requestContext.toString(), LinkedHashMap.class);
-			cdsServiceRequestJson1.setContext(getContext(map));
+			LinkedHashMap<String, Object> map = myObjectMapper.readValue(requestContext.toString(), LinkedHashMap.class);
+			cdsServiceRequestJson.setContext(deserializeRequestContext(map));
 		}
-		return cdsServiceRequestJson1;
+		return cdsServiceRequestJson;
 	}
 
-	CdsServiceRequestContextJson getContext(LinkedHashMap<String, Object> theMap) throws JsonProcessingException {
-		CdsServiceRequestContextJson retval = new CdsServiceRequestContextJson();
+	void configureObjectMapper(ObjectMapper theObjectMapper) {
+		SimpleModule module = new SimpleModule();
+		module.addDeserializer(IBaseResource.class, new FhirResourceDeserializer(myFhirContext));
+		theObjectMapper.registerModule(module);
+		// set this as we will need to ignore properties which are not defined by specific implementation.
+		theObjectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+	}
+
+	CdsHooksExtension deserializeExtension(String theServiceId, String theExtension) throws JsonProcessingException {
+		final CdsServiceJson cdsServicesJson = myCdsServiceRegistry.getCdsServiceJson(theServiceId);
+		Class<? extends CdsHooksExtension> extensionClass = cdsServicesJson.getExtensionClass();
+		if (extensionClass == null) {
+			return null;
+		}
+		return myObjectMapper.readValue(theExtension, extensionClass);
+	}
+
+	CdsServiceRequestContextJson deserializeRequestContext(LinkedHashMap<String, Object> theMap) throws JsonProcessingException {
+		final CdsServiceRequestContextJson cdsServiceRequestContextJson = new CdsServiceRequestContextJson();
 		for (String key : theMap.keySet()) {
 			Object value = theMap.get(key);
 			// Convert LinkedHashMap entries to Resources
 			if (value instanceof LinkedHashMap) {
 				String json = myObjectMapper.writeValueAsString(value);
 				IBaseResource resource = myParser.parseResource(json);
-				retval.put(key, resource);
+				cdsServiceRequestContextJson.put(key, resource);
 			} else {
-				retval.put(key, value);
+				cdsServiceRequestContextJson.put(key, value);
 			}
 		}
-		return retval;
+		return cdsServiceRequestContextJson;
 	}
 }
