@@ -75,7 +75,7 @@ class CdsServiceRegistryImplTest {
 		// execute & validate
 		assertThatExceptionOfType(RuntimeException.class).isThrownBy(() -> {
 			myFixture.encodeFeedbackResponse(SERVICE_ID, invalidString);
-		}).withMessageContaining("Failed to serialize json Cds Feedback response for service service-id.");
+		}).withMessageContaining("HAPI-2538: Failed to serialize json Cds Feedback response for service service-id.");
 	}
 
 	@Test
@@ -85,7 +85,7 @@ class CdsServiceRegistryImplTest {
 		// execute & validate
 		assertThatExceptionOfType(ClassCastException.class).isThrownBy(() -> {
 			myFixture.encodeFeedbackResponse(SERVICE_ID, invalidObject);
-		}).withMessageContaining("Failed to cast feedback response CdsServiceFeedbackJson for service service-id.");
+		}).withMessageContaining("HAPI-2537: Failed to cast feedback response CdsServiceFeedbackJson for service service-id.");
 	}
 
 	@Test
@@ -174,6 +174,6 @@ class CdsServiceRegistryImplTest {
 		// execute & validate
 		assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
 			myFixture.getCdsServiceJson(serviceId);
-		}).withMessage("No service with " + serviceId +  " is registered.");
+		}).withMessage("HAPI-2536: No service with " + serviceId +  " is registered.");
 	}
 }

@@ -143,7 +143,7 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 	public CdsServiceJson getCdsServiceJson(String theServiceId) {
 		CdsServiceJson cdsServiceJson = myServiceCache.getCdsServiceJson(theServiceId);
 		if (cdsServiceJson == null) {
-			throw new IllegalArgumentException("No service with " + theServiceId + " is registered.");
+			throw new IllegalArgumentException(Msg.code(2536) + "No service with " + theServiceId + " is registered.");
 		}
 		return cdsServiceJson;
 	}
@@ -216,7 +216,7 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 		try {
 			return (CdsServiceFeedbackJson) theResponse;
 		} catch (ClassCastException e) {
-			throw new ClassCastException("Failed to cast feedback response CdsServiceFeedbackJson for service "
+			throw new ClassCastException(Msg.code(2537) + "Failed to cast feedback response CdsServiceFeedbackJson for service "
 					+ theServiceId + ". " + e.getMessage());
 		}
 	}
@@ -225,7 +225,7 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 		try {
 			return myObjectMapper.readValue(theResponse, CdsServiceFeedbackJson.class);
 		} catch (JsonProcessingException e) {
-			throw new RuntimeException("Failed to serialize json Cds Feedback response for service " + theServiceId
+			throw new RuntimeException(Msg.code(2538) + "Failed to serialize json Cds Feedback response for service " + theServiceId
 					+ ". " + e.getMessage());
 		}
 	}
