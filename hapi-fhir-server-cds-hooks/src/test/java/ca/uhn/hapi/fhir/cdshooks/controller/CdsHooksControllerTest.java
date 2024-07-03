@@ -11,7 +11,6 @@ import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseJson;
 import ca.uhn.hapi.fhir.cdshooks.config.CdsHooksConfig;
 import ca.uhn.hapi.fhir.cdshooks.config.TestCdsHooksConfig;
 import ca.uhn.hapi.fhir.cdshooks.svc.prefetch.CdsPrefetchFhirClientSvc;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.Nonnull;
@@ -70,7 +69,6 @@ public class CdsHooksControllerTest {
 
 	@BeforeEach
 	public void before() {
-		myObjectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
 		myMockMvc = MockMvcBuilders.standaloneSetup(new CdsHooksController(myCdsHooksRegistry))
 			.setMessageConverters(new MappingJackson2HttpMessageConverter(myObjectMapper))
 			.build();
