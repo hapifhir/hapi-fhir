@@ -7,10 +7,12 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.submit.interceptor.SearchParamValidatingInterceptor;
 import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.DateOrListParam;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
+import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
@@ -430,6 +432,77 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		assertThat(myMessages.get(0)).contains("This search uses an unqualified resource");
 	}
 
+
+	/**
+	 * If there are two parameters as a part of a combo param, and we have
+	 * multiple AND repetitions for both, then we can just join on the
+	 * combo index twice.
+	 */
+	@Test
+	public void testMultipleAndCombinations_EqualNumbers() {
+		createStringAndStringCombo_FamilyAndGiven();
+
+		createPatient(
+			withId("A"),
+			withFamily("SIMPSON"), withGiven("HOMER"),
+			withFamily("jones"), withGiven("frank")
+		);
+		createPatient(
+			withId("B"),
+			withFamily("SIMPSON"), withGiven("MARGE")
+		);
+
+		SearchParameterMap params = SearchParameterMap.newSynchronous();
+		params.add("family", new StringAndListParam().addAnd(new StringParam("simpson")).addAnd(new StringParam("JONES")));
+		params.add("given", new StringAndListParam().addAnd(new StringParam("homer")).addAnd(new StringParam("frank")));
+		myCaptureQueriesListener.clear();
+		IBundleProvider results = myPatientDao.search(params, mySrd);
+		List<String> actual = toUnqualifiedVersionlessIdValues(results);
+		myCaptureQueriesListener.logSelectQueries();
+		assertThat(actual).contains("Patient/A");
+
+		String expected = "SELECT t0.RES_ID FROM HFJ_IDX_CMB_TOK_NU t0 INNER JOIN HFJ_IDX_CMB_TOK_NU t1 ON (t0.RES_ID = t1.RES_ID) WHERE ((t0.HASH_COMPLETE = '822090206952728926') AND (t1.HASH_COMPLETE = '-8088946700286918311'))";
+		assertEquals(expected, myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false));
+
+	}
+
+	/**
+	 * If there are two parameters as a part of a combo param, and we have
+	 * multiple AND repetitions for one but not the other, than we'll use
+	 * the combo index for the first pair, but we don't create a second pair.
+	 * We could probably optimize this to use the combo index for both, but
+	 * it's not clear that this would actually help and this is probably
+	 * a pretty contrived use case.
+	 */
+	@Test
+	public void testMultipleAndCombinations_NonEqualNumbers() {
+		createStringAndStringCombo_FamilyAndGiven();
+
+		createPatient(
+			withId("A"),
+			withFamily("SIMPSON"), withGiven("HOMER"),
+			withFamily("jones"), withGiven("frank")
+		);
+		createPatient(
+			withId("B"),
+			withFamily("SIMPSON"), withGiven("MARGE")
+		);
+
+		SearchParameterMap params = SearchParameterMap.newSynchronous();
+		params.add("family", new StringAndListParam().addAnd(new StringParam("simpson")).addAnd(new StringParam("JONES")));
+		params.add("given", new StringAndListParam().addAnd(new StringParam("homer")));
+		myCaptureQueriesListener.clear();
+		IBundleProvider results = myPatientDao.search(params, mySrd);
+		List<String> actual = toUnqualifiedVersionlessIdValues(results);
+		myCaptureQueriesListener.logSelectQueries();
+		assertThat(actual).contains("Patient/A");
+
+		String expected = "SELECT t0.RES_ID FROM HFJ_IDX_CMB_TOK_NU t0 INNER JOIN HFJ_SPIDX_STRING t1 ON (t0.RES_ID = t1.RES_ID) WHERE ((t0.HASH_COMPLETE = '822090206952728926') AND ((t1.HASH_NORM_PREFIX = '-3664262414674370905') AND (t1.SP_VALUE_NORMALIZED LIKE 'JONES%')))";
+		assertEquals(expected, myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false));
+
+	}
+
+
 	@Test
 	public void testOrQuery() {
 		createTokenAndReferenceCombo_FamilyAndOrganization();
@@ -494,6 +567,46 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		sp.addComponent()
 			.setExpression("Patient")
 			.setDefinition("SearchParameter/patient-birthdate");
+		sp.addExtension()
+			.setUrl(HapiExtensions.EXT_SP_UNIQUE)
+			.setValue(new BooleanType(false));
+		mySearchParameterDao.update(sp, mySrd);
+
+		mySearchParamRegistry.forceRefresh();
+
+		myMessages.clear();
+	}
+
+	private void createStringAndStringCombo_FamilyAndGiven() {
+		SearchParameter sp = new SearchParameter();
+		sp.setId("SearchParameter/patient-family");
+		sp.setType(Enumerations.SearchParamType.STRING);
+		sp.setCode("family");
+		sp.setExpression("Patient.name.family");
+		sp.setStatus(PublicationStatus.ACTIVE);
+		sp.addBase("Patient");
+		mySearchParameterDao.update(sp, mySrd);
+
+		sp = new SearchParameter();
+		sp.setId("SearchParameter/patient-given");
+		sp.setType(Enumerations.SearchParamType.STRING);
+		sp.setCode("given");
+		sp.setExpression("Patient.name.given");
+		sp.setStatus(PublicationStatus.ACTIVE);
+		sp.addBase("Patient");
+		mySearchParameterDao.update(sp, mySrd);
+
+		sp = new SearchParameter();
+		sp.setId("SearchParameter/patient-names");
+		sp.setType(Enumerations.SearchParamType.COMPOSITE);
+		sp.setStatus(PublicationStatus.ACTIVE);
+		sp.addBase("Patient");
+		sp.addComponent()
+			.setExpression("Patient")
+			.setDefinition("SearchParameter/patient-family");
+		sp.addComponent()
+			.setExpression("Patient")
+			.setDefinition("SearchParameter/patient-given");
 		sp.addExtension()
 			.setUrl(HapiExtensions.EXT_SP_UNIQUE)
 			.setValue(new BooleanType(false));
@@ -700,6 +813,34 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 
 			myMessages.clear();
 		}
+
+		@Test
+		public void testTooManyPermutations() {
+			// Test
+			StringOrListParam noteTextParam = new StringOrListParam();
+			DateOrListParam dateParam = new DateOrListParam();
+			for (int i = 0; i < 30; i++) {
+				noteTextParam.add(new StringParam("A" + i));
+				noteTextParam.add(new StringParam("B" + i));
+				noteTextParam.add(new StringParam("C" + i));
+				noteTextParam.add(new StringParam("D" + i));
+				dateParam.add(new DateParam("2020-01-" + String.format("%02d", i+1)));
+			}
+
+			SearchParameterMap params = SearchParameterMap
+				.newSynchronous()
+				.add("note-text", noteTextParam)
+				.add("date", dateParam);
+			myCaptureQueriesListener.clear();
+			IBundleProvider results = myObservationDao.search(params, mySrd);
+			assertThat(toUnqualifiedIdValues(results)).isEmpty();
+
+			// Verify
+			myCaptureQueriesListener.logSelectQueries();
+			String formatted = myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, true);
+			assertThat(formatted).doesNotContain("HFJ_IDX_CMB_TOK_NU");
+		}
+
 
 		/**
 		 * Can't create or search for combo params with dateTimes that don't have DAY precision

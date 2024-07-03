@@ -1912,13 +1912,12 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		if (comboParam != null) {
 			Collections.sort(comboParamNames);
 
-			if (!validateParamValuesAreValidForComboParam(theRequest, theParams, comboParamNames)) {
-				return;
+			// Since we're going to remove elements below
+			theParams.values().forEach(this::ensureSubListsAreWritable);
+
+			while (validateParamValuesAreValidForComboParam(theRequest, theParams, comboParamNames)) {
+				applyComboSearchParam(theQueryStack, theParams, theRequest, comboParamNames, comboParam);
 			}
-
-			// FIXME: abort if too many permutations
-
-			applyComboSearchParam(theQueryStack, theParams, theRequest, comboParamNames, comboParam);
 		}
 	}
 
@@ -1928,8 +1927,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			RequestDetails theRequest,
 			List<String> theComboParamNames,
 			RuntimeSearchParam theComboParam) {
-		// Since we're going to remove elements below
-		theParams.values().forEach(this::ensureSubListsAreWritable);
 
 		List<List<IQueryParameterType>> inputs = new ArrayList<>();
 		for (String nextParamName : theComboParamNames) {
@@ -2016,15 +2013,19 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	private boolean validateParamValuesAreValidForComboParam(
 			RequestDetails theRequest, @Nonnull SearchParameterMap theParams, List<String> theComboParamNames) {
 		boolean paramValuesAreValidForCombo = true;
+		List<List<IQueryParameterType>> paramOrValues = new ArrayList<>(theComboParamNames.size());
+
 		for (String nextParamName : theComboParamNames) {
 			List<List<IQueryParameterType>> nextValues = theParams.get(nextParamName);
 
-			if (nextValues.isEmpty()) {
+			if (nextValues == null || nextValues.isEmpty()) {
 				paramValuesAreValidForCombo = false;
 				break;
 			}
 
-			for (List<IQueryParameterType> nextAndValue : nextValues) {
+			List<IQueryParameterType> nextAndValue = nextValues.get(0);
+			paramOrValues.add(nextAndValue);
+
 				for (IQueryParameterType nextOrValue : nextAndValue) {
 					if (nextOrValue instanceof DateParam) {
 						DateParam dateParam = (DateParam) nextOrValue;
@@ -2058,7 +2059,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 						break;
 					}
 				}
-			}
+
 
 			// Reference params are only eligible for using a composite index if they
 			// are qualified
@@ -2073,6 +2074,13 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				}
 			}
 		}
+
+		if (PermutationBuilder.calculatePermutationCount(paramOrValues) > 500) {
+			ourLog.debug(
+				"Search is not a candidate for unique combo searching - Too many OR values would result in too many permutations");
+			paramValuesAreValidForCombo = false;
+		}
+
 		return paramValuesAreValidForCombo;
 	}
 
