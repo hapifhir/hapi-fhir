@@ -52,7 +52,9 @@ public class PhoneticEncoderMatcher implements IMdmFieldMatcher {
 
 			return matches(leftString, rightString);
 		}
-		ourLog.warn("Class {} is not an instance of PrimitiveType, unable to evaluate match field", theLeftBase.getClass().getName());
+		ourLog.warn(
+				"Class {} is not an instance of PrimitiveType, unable to evaluate match field",
+				theLeftBase.getClass().getName());
 		return false;
 	}
 }
