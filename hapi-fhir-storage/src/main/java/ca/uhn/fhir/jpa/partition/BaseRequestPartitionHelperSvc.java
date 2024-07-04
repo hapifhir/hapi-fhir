@@ -143,7 +143,6 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 
 		validateRequestPartitionNotNull(
 				requestPartitionId, Pointcut.STORAGE_PARTITION_IDENTIFY_ANY, Pointcut.STORAGE_PARTITION_IDENTIFY_READ);
-		validateRequestPartition(requestPartitionId, resourceType);
 
 		ourLog.info("Read with partition: {}", requestPartitionId);
 
@@ -178,7 +177,7 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 			return validateAndNormalizePartition(
 					requestPartitionId, theRequestDetails, theRequestDetails.getResourceName());
 		}
-		return requestPartitionId;
+		return null;
 	}
 
 	/**
@@ -274,8 +273,7 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 				requestPartitionId,
 				Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE,
 				Pointcut.STORAGE_PARTITION_IDENTIFY_ANY);
-		validateSinglePartitionForCreate(requestPartitionId);
-		validateRequestPartition(requestPartitionId, theResourceType);
+		validatePartitionForCreate(requestPartitionId, theResourceType);
 
 		ourLog.info("Create with partition: {}", requestPartitionId);
 
@@ -351,18 +349,19 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 		return theResourceType != null && !isResourcePartitionable(theResourceType);
 	}
 
-	private void validateSinglePartitionForCreate(RequestPartitionId theRequestPartitionId) {
+	private void validatePartitionForCreate(RequestPartitionId theRequestPartitionId, String theResourceName) {
 		if (theRequestPartitionId.hasPartitionIds()) {
-			validateSinglePartitionIdOrNameForCreate(theRequestPartitionId.getPartitionIds());
+			validateSinglePartitionIdOrName(theRequestPartitionId.getPartitionIds());
 		}
-		validateSinglePartitionIdOrNameForCreate(theRequestPartitionId.getPartitionNames());
-	}
+		validateSinglePartitionIdOrName(theRequestPartitionId.getPartitionNames());
 
-	private void validateRequestPartition(RequestPartitionId theRequestPartitionId, String theResourceName) {
 		// Make sure we're not using one of the conformance resources in a non-default partition
 		if (theRequestPartitionId.isDefaultPartition() || theRequestPartitionId.isAllPartitions()) {
 			return;
 		}
+
+		// TODO MM: check if we need to validate using the configured value PartitionSettings.defaultPartition
+		// however that is only used for read and not for create at the moment
 		if ((theRequestPartitionId.hasPartitionIds()
 						&& !theRequestPartitionId.getPartitionIds().contains(null))
 				|| (theRequestPartitionId.hasPartitionNames()
@@ -380,14 +379,14 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 		}
 	}
 
-	private void validateRequestPartitionNotNull(RequestPartitionId theRequestPartitionId, Pointcut... thePointcuts) {
+	private static void validateRequestPartitionNotNull(RequestPartitionId theRequestPartitionId, Pointcut... thePointcuts) {
 		if (theRequestPartitionId == null) {
 			throw new InternalErrorException(
 					Msg.code(1319) + "No interceptor provided a value for pointcuts: " + Arrays.toString(thePointcuts));
 		}
 	}
 
-	private void validateSinglePartitionIdOrNameForCreate(@Nullable List<?> thePartitionIds) {
+	private static void validateSinglePartitionIdOrName(@Nullable List<?> thePartitionIds) {
 		if (thePartitionIds != null && thePartitionIds.size() != 1) {
 			throw new InternalErrorException(
 					Msg.code(1320) + "RequestPartitionId must contain a single partition for create operations, found: "
