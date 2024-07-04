@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 	<head>
-		<title th:insert="~{window-title :: home}" />
+		<th:block th:insert="~{window-title :: home}" />
 		<th:block th:insert="~{tmpl-head :: head}" />
 		<th:block th:insert="~{tmpl-buttonclick-handler :: handler}" />
 	</head>
