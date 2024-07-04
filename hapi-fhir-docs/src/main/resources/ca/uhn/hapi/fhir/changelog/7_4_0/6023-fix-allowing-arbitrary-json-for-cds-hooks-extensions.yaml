@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 6024
+title: "Previously, CDS hooks supported arbitrary extensions as String. This behaviour has now been corrected to JSON."
