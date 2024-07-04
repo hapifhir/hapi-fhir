@@ -45,9 +45,14 @@ public class PhoneticEncoderMatcher implements IMdmFieldMatcher {
 
 	@Override
 	public boolean matches(IBase theLeftBase, IBase theRightBase, MdmMatcherJson theParams) {
-		String leftString = StringMatcherUtils.extractString((IPrimitiveType<?>) theLeftBase, theParams.getExact());
-		String rightString = StringMatcherUtils.extractString((IPrimitiveType<?>) theRightBase, theParams.getExact());
+		if (theLeftBase instanceof IPrimitiveType && theRightBase instanceof IPrimitiveType) {
+			String leftString = StringMatcherUtils.extractString((IPrimitiveType<?>) theLeftBase, theParams.getExact());
+			String rightString =
+					StringMatcherUtils.extractString((IPrimitiveType<?>) theRightBase, theParams.getExact());
 
-		return matches(leftString, rightString);
+			return matches(leftString, rightString);
+		}
+		ourLog.warn("Class {} is not an instance of PrimitiveType, unable to evaluate match field", theLeftBase.getClass().getName());
+		return false;
 	}
 }
