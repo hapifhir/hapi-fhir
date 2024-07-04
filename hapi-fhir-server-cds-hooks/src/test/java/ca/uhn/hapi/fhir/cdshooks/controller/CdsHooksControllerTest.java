@@ -10,6 +10,7 @@ import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseCardJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseJson;
 import ca.uhn.hapi.fhir.cdshooks.config.CdsHooksConfig;
 import ca.uhn.hapi.fhir.cdshooks.config.TestCdsHooksConfig;
+import ca.uhn.hapi.fhir.cdshooks.custom.extensions.model.RequestExtension;
 import ca.uhn.hapi.fhir.cdshooks.svc.prefetch.CdsPrefetchFhirClientSvc;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -135,11 +136,11 @@ public class CdsHooksControllerTest {
 
 	@Test
 	void testCallHelloUniverse() throws Exception {
-		MyRequestExtension myRequestExtension = new MyRequestExtension();
-		myRequestExtension.setConfigItem("request-config-item");
+		RequestExtension requestExtension = new RequestExtension();
+		requestExtension.setConfigItem("request-config-item");
 
 		CdsServiceRequestJson request = new CdsServiceRequestJson();
-		request.setExtension(myRequestExtension);
+		request.setExtension(requestExtension);
 		request.setFhirServer(TEST_FHIR_SERVER);
 		request.setHook(HelloWorldService.TEST_HOOK_UNIVERSE_ID);
 

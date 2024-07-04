@@ -2,7 +2,7 @@ package ca.uhn.hapi.fhir.cdshooks.svc;
 
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsHooksExtension;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import ca.uhn.hapi.fhir.cdshooks.custom.extensions.model.ExampleExtension;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -20,7 +20,7 @@ class CdsHooksContextBooterTest {
 	@Test
 	void serializeExtensionsReturnsNullWhenInputIsEmptyString() {
 		// execute
-		final CdsHooksExtension actual = myFixture.serializeExtensions("", CustomExtension.class);
+		final CdsHooksExtension actual = myFixture.serializeExtensions("", ExampleExtension.class);
 		// validate
 		assertThat(actual).isNull();
 	}
@@ -32,7 +32,7 @@ class CdsHooksContextBooterTest {
 			" at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 4]";
 		// execute & validate
 		assertThatThrownBy(
-			() -> myFixture.serializeExtensions("abc", CustomExtension.class))
+			() -> myFixture.serializeExtensions("abc", ExampleExtension.class))
 			.isInstanceOf(UnprocessableEntityException.class)
 			.hasMessage(expected);
 	}
@@ -42,15 +42,9 @@ class CdsHooksContextBooterTest {
 		// setup
 		final String input = "{\n\"example-property\": \"some-value\" }";
 		// execute
-		final CustomExtension actual = (CustomExtension) myFixture.serializeExtensions(input, CustomExtension.class);
+		final ExampleExtension actual = (ExampleExtension) myFixture.serializeExtensions(input, ExampleExtension.class);
 		// validate
-		assertThat(actual.myExampleProperty).isEqualTo("some-value");
-	}
-
-
-	private static class CustomExtension extends CdsHooksExtension {
-		@JsonProperty("example-property")
-		String myExampleProperty;
+		assertThat(actual.getExampleProperty()).isEqualTo("some-value");
 	}
 
 }

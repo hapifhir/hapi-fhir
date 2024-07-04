@@ -4,8 +4,8 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsHooksExtension;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceRequestContextJson;
+import ca.uhn.hapi.fhir.cdshooks.custom.extensions.model.ExampleExtension;
 import ca.uhn.hapi.fhir.cdshooks.svc.CdsServiceRegistryImpl;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hl7.fhir.r4.model.Patient;
@@ -53,12 +53,12 @@ class CdsServiceRequestJsonDeserializerTest {
 		""";
 		final CdsServiceJson cdsServiceJson = new CdsServiceJson();
 		cdsServiceJson.setId(serviceId);
-		cdsServiceJson.setExtensionClass(CustomExtension.class);
+		cdsServiceJson.setExtensionClass(ExampleExtension.class);
 		doReturn(cdsServiceJson).when(myCdsServiceRegistry).getCdsServiceJson(serviceId);
 		// execute
-		final CustomExtension actual = (CustomExtension) myFixture.deserializeExtension(serviceId, extension);
+		final ExampleExtension actual = (ExampleExtension) myFixture.deserializeExtension(serviceId, extension);
 		// validate
-		assertThat(actual.myExampleProperty).isEqualTo("example-value");
+		assertThat(actual.getExampleProperty()).isEqualTo("example-value");
 	}
 
 	@Test
@@ -73,12 +73,12 @@ class CdsServiceRequestJsonDeserializerTest {
 		""";
 		final CdsServiceJson cdsServiceJson = new CdsServiceJson();
 		cdsServiceJson.setId(serviceId);
-		cdsServiceJson.setExtensionClass(CustomExtension.class);
+		cdsServiceJson.setExtensionClass(ExampleExtension.class);
 		doReturn(cdsServiceJson).when(myCdsServiceRegistry).getCdsServiceJson(serviceId);
 		// execute
-		final CustomExtension actual = (CustomExtension) myFixture.deserializeExtension(serviceId, extension);
+		final ExampleExtension actual = (ExampleExtension) myFixture.deserializeExtension(serviceId, extension);
 		// validate
-		assertThat(actual.myExampleProperty).isEqualTo("example-value");
+		assertThat(actual.getExampleProperty()).isEqualTo("example-value");
 	}
 
 	@Test
@@ -113,10 +113,5 @@ class CdsServiceRequestJsonDeserializerTest {
 		// validate
 		assertThat(actual.get("encounterId")).isEqualTo(encounterId);
 		assertThat(actual.get("patient")).usingRecursiveComparison().isEqualTo(patientContext);
-	}
-
-	private static class CustomExtension extends CdsHooksExtension {
-		@JsonProperty("example-property")
-		String myExampleProperty;
 	}
 }

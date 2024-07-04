@@ -4,7 +4,6 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.hapi.fhir.cdshooks.api.CdsService;
 import ca.uhn.hapi.fhir.cdshooks.api.CdsServiceFeedback;
 import ca.uhn.hapi.fhir.cdshooks.api.CdsServicePrefetch;
-import ca.uhn.hapi.fhir.cdshooks.api.json.CdsHooksExtension;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceAcceptedSuggestionJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceFeedbackJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceIndicatorEnum;
@@ -12,9 +11,11 @@ import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceRequestJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseCardJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseCardSourceJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseJson;
+import ca.uhn.hapi.fhir.cdshooks.custom.extensions.model.ConfigurationExtension;
+import ca.uhn.hapi.fhir.cdshooks.custom.extensions.model.RequestExtension;
+import ca.uhn.hapi.fhir.cdshooks.custom.extensions.model.ResponseExtension;
 import ca.uhn.test.concurrency.IPointcutLatch;
 import ca.uhn.test.concurrency.PointcutLatch;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Date;
 import java.util.List;
@@ -50,7 +51,7 @@ public class HelloWorldService implements IPointcutLatch {
 		cdsServiceResponseCardJson.setIndicator(CdsServiceIndicatorEnum.WARNING);
 		cdsServiceResponseCardJson.setDetail("This is a test.  Do not be alarmed.");
 		cdsServiceResponseCardJson.setSource(new CdsServiceResponseCardSourceJson().setLabel("World Greeter"));
-		final MyCdsHooksExtension extension = new MyCdsHooksExtension();
+		final ResponseExtension extension = new ResponseExtension();
 		extension.setTimestamp(new Date());
 		extension.setPractitionerSpecialty(CDS_HOOKS_EXTENSION_VALUE_PRACTITIONER_SPECIALITY);
 		cdsServiceResponseCardJson.setExtension(extension);
@@ -78,7 +79,7 @@ public class HelloWorldService implements IPointcutLatch {
    				"example-config-item": "example-value"
    		}
 		""",
-		extensionClass = MyRequestExtension.class)
+		extensionClass = RequestExtension.class)
 	public CdsServiceResponseJson helloUniverse(CdsServiceRequestJson theCdsServiceRequestJson) {
 		final CdsServiceResponseJson cdsServiceResponseJson = new CdsServiceResponseJson();
 		final CdsServiceResponseCardJson cdsServiceResponseCardJson = new CdsServiceResponseCardJson();
@@ -104,7 +105,7 @@ public class HelloWorldService implements IPointcutLatch {
 			"example-client-conformance": "http://hooks.example.org/fhir/102/Conformance/patientview"
 		}
 		""",
-		extensionClass = HelloWorldServiceExtension.class)
+		extensionClass = ConfigurationExtension.class)
 	public CdsServiceResponseJson playback(CdsServiceRequestJson theCdsServiceRequestJson) {
 		final CdsServiceResponseJson cdsServiceResponseJson = new CdsServiceResponseJson();
 		final CdsServiceResponseCardJson cdsServiceResponseCardJson = new CdsServiceResponseCardJson();
@@ -131,28 +132,5 @@ public class HelloWorldService implements IPointcutLatch {
 	@Override
 	public List<HookParams> awaitExpected() throws InterruptedException {
 		return myPointcutLatch.awaitExpected();
-	}
-
-	private class MyCdsHooksExtension extends CdsHooksExtension {
-		@JsonProperty(value = "timestamp", required = true)
-		private Date myDate;
-		@JsonProperty(value = "myextension-practitionerspecialty", required = true)
-		private String myPractitionerSpecialty;
-
-		MyCdsHooksExtension() {}
-
-		private void setTimestamp(Date theDate) {
-			myDate = theDate;
-		}
-
-		private void setPractitionerSpecialty(String thePractitionerSpecialty) {
-			myPractitionerSpecialty = thePractitionerSpecialty;
-		}
-
-	}
-
-	private static class HelloWorldServiceExtension extends CdsHooksExtension {
-		@JsonProperty("example-client-conformance")
-		String myExampleClientConformance;
 	}
 }
