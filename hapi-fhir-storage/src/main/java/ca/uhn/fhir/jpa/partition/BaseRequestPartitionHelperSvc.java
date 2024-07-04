@@ -144,8 +144,6 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 		validateRequestPartitionNotNull(
 				requestPartitionId, Pointcut.STORAGE_PARTITION_IDENTIFY_ANY, Pointcut.STORAGE_PARTITION_IDENTIFY_READ);
 
-		ourLog.info("Read with partition: {}", requestPartitionId);
-
 		return validateAndNormalizePartition(requestPartitionId, requestDetails, resourceType);
 	}
 
@@ -274,8 +272,6 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 				Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE,
 				Pointcut.STORAGE_PARTITION_IDENTIFY_ANY);
 		validatePartitionForCreate(requestPartitionId, theResourceType);
-
-		ourLog.info("Create with partition: {}", requestPartitionId);
 
 		return validateAndNormalizePartition(requestPartitionId, requestDetails, theResourceType);
 	}
