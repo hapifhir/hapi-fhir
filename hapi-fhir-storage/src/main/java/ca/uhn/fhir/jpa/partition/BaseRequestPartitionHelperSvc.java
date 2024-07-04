@@ -375,7 +375,8 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 		}
 	}
 
-	private static void validateRequestPartitionNotNull(RequestPartitionId theRequestPartitionId, Pointcut... thePointcuts) {
+	private static void validateRequestPartitionNotNull(
+			RequestPartitionId theRequestPartitionId, Pointcut... thePointcuts) {
 		if (theRequestPartitionId == null) {
 			throw new InternalErrorException(
 					Msg.code(1319) + "No interceptor provided a value for pointcuts: " + Arrays.toString(thePointcuts));
