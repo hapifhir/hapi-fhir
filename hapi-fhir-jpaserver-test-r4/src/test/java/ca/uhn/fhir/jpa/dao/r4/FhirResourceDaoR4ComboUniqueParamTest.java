@@ -445,7 +445,6 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 	}
 
 
-	// FIXME: AAAAAAAAAAA
 	@Test
 	public void testDoubleMatchingOnAnd_Search_TwoOrValues() {
 		Pair<String, String> ids = prepareDoubleMatchingSearchParameterAndPatient();
