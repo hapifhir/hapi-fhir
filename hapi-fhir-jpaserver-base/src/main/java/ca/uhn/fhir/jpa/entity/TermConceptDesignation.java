@@ -56,6 +56,7 @@ public class TermConceptDesignation implements Serializable {
 
 	public static final int MAX_LENGTH = 500;
 	public static final int MAX_VAL_LENGTH = 2000;
+	public static final int MAX_VAL_LENGTH_VAL = 4000;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(
@@ -82,7 +83,7 @@ public class TermConceptDesignation implements Serializable {
 	@Column(name = "USE_DISPLAY", nullable = true, length = MAX_LENGTH)
 	private String myUseDisplay;
 
-	@Column(name = "VAL", nullable = false, length = MAX_VAL_LENGTH)
+	@Column(name = "VAL", nullable = false, length = MAX_VAL_LENGTH_VAL)
 	private String myValue;
 	/**
 	 * TODO: Make this non-null
@@ -150,7 +151,9 @@ public class TermConceptDesignation implements Serializable {
 	public TermConceptDesignation setValue(@Nonnull String theValue) {
 		ValidateUtil.isNotBlankOrThrowIllegalArgument(theValue, "theValue must not be null or empty");
 		ValidateUtil.isNotTooLongOrThrowIllegalArgument(
-				theValue, MAX_VAL_LENGTH, "Value exceeds maximum length (" + MAX_VAL_LENGTH + "): " + length(theValue));
+				theValue,
+				MAX_VAL_LENGTH_VAL,
+				"Value exceeds maximum length (" + MAX_VAL_LENGTH_VAL + "): " + length(theValue));
 		myValue = theValue;
 		return this;
 	}

@@ -1,0 +1,4 @@
+---
+type: add
+issue: 6079
+title: "It is now possible to save TermConceptDesignations with values over 2,000 characters, up to 4,000."

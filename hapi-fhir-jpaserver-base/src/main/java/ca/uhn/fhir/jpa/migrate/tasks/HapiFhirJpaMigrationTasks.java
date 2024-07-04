@@ -440,6 +440,13 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 													t.getString("IDX_STRING")))
 									.setColumnName("HASH_COMPLETE"));
 		}
+
+		{
+			version.onTable("TRM_CONCEPT_DESIG")
+					.modifyColumn("20240704.1", "VAL")
+					.nonNullable()
+					.withType(ColumnTypeEnum.STRING, 4000);
+		}
 	}
 
 	protected void init720() {
