@@ -36,6 +36,31 @@ class PermutationBuilderTest {
 		);
 	}
 
+	@Test
+	public void testCalculatePermutations_OneDimensonalInputOnX() {
+		List<List<String>> input = List.of(
+			List.of("A0", "A1")
+		);
+
+		List<List<String>> output = PermutationBuilder.calculatePermutations(input);
+		assertThat(output).containsExactlyInAnyOrder(
+			List.of("A0"),
+			List.of("A1")
+		);
+	}
+
+	@Test
+	public void testCalculatePermutations_OneDimensonalInputOnY() {
+		List<List<String>> input = List.of(
+			List.of("A0"),
+			List.of("B0")
+		);
+
+		List<List<String>> output = PermutationBuilder.calculatePermutations(input);
+		assertThat(output).containsExactlyInAnyOrder(
+			List.of("A0", "B0")
+		);
+	}
 
 	@Test
 	public void testCalculatePermutationCount() {

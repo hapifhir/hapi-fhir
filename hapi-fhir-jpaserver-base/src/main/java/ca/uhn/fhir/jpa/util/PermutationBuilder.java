@@ -45,9 +45,6 @@ public class PermutationBuilder {
 	 * @since 7.4.0
 	 */
 	public static <T> List<List<T>> calculatePermutations(List<List<T>> theInput) {
-		if (theInput.size() == 1) {
-			return theInput;
-		}
 		List<List<T>> listToPopulate = new ArrayList<>(calculatePermutationCount(theInput));
 		int[] indices = new int[theInput.size()];
 		doCalculatePermutationsIntoIndicesArrayAndPopulateList(0, indices, theInput, listToPopulate);

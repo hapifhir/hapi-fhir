@@ -13,6 +13,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.util.JpaParamUtil;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.DateAndListParam;
 import ca.uhn.fhir.rest.param.DateOrListParam;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -22,6 +23,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.HapiExtensions;
 import jakarta.annotation.Nonnull;
+import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -61,9 +63,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 
-public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
+public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4ComboUniqueParamIT.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4ComboUniqueParamTest.class);
 
 	@Autowired
 	private IJobCoordinator myJobCoordinator;
@@ -383,9 +385,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		IIdType id = myPatientDao.create(pt, mySrd).getId().toUnqualifiedVersionless();
 		myCaptureQueriesListener.logInsertQueries();
 
-		List<ResourceIndexedComboStringUnique> values = runInTransaction(()->{
-			return myResourceIndexedComboStringUniqueDao.findAllForResourceIdForUnitTest(id.getIdPartAsLong());
-		});
+		List<ResourceIndexedComboStringUnique> values = runInTransaction(()-> myResourceIndexedComboStringUniqueDao.findAllForResourceIdForUnitTest(id.getIdPartAsLong()));
 		assertEquals(2, values.size());
 		values.sort(Comparator.comparing(ResourceIndexedComboStringUnique::getIndexString));
 		assertEquals("Patient?identifier=urn%7C111", values.get(0).getIndexString());
@@ -418,7 +418,115 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 	}
 
 	@Test
-	public void testDoubleMatchingOnAnd_Search() {
+	public void testDoubleMatchingOnAnd_Search_TwoAndValues() {
+		Pair<String, String> ids = prepareDoubleMatchingSearchParameterAndPatient();
+		String id1 = ids.getLeft();
+
+		// Two AND values
+		myCaptureQueriesListener.clear();
+		SearchParameterMap sp = new SearchParameterMap();
+		sp.setLoadSynchronous(true);
+		sp.add("identifier",
+			new TokenAndListParam()
+				.addAnd(new TokenParam("urn", "111"))
+				.addAnd(new TokenParam("urn", "222"))
+		);
+		IBundleProvider outcome = myPatientDao.search(sp, mySrd);
+		myCaptureQueriesListener.logFirstSelectQueryForCurrentThread();
+		String unformattedSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
+		assertThat(unformattedSql).containsSubsequence(
+			"IDX_STRING = 'Patient?identifier=urn%7C111'",
+			"IDX_STRING = 'Patient?identifier=urn%7C222'"
+		);
+		assertThat(unformattedSql).doesNotContain(("HFJ_SPIDX_TOKEN"));
+		assertThat(unformattedSql).doesNotContain(("RES_DELETED_AT"));
+		assertThat(unformattedSql).doesNotContain(("RES_TYPE"));
+		assertThat(toUnqualifiedVersionlessIdValues(outcome)).containsExactlyInAnyOrder(id1);
+	}
+
+
+	// FIXME: AAAAAAAAAAA
+	@Test
+	public void testDoubleMatchingOnAnd_Search_TwoOrValues() {
+		Pair<String, String> ids = prepareDoubleMatchingSearchParameterAndPatient();
+		String id1 = ids.getLeft();
+
+		// Two OR values on the same resource - Currently composite SPs don't work for this
+		myCaptureQueriesListener.clear();
+		SearchParameterMap sp = new SearchParameterMap();
+		sp.setLoadSynchronous(true);
+		sp.add("identifier",
+			new TokenAndListParam()
+				.addAnd(new TokenParam("urn", "111"), new TokenParam("urn", "222"))
+		);
+		IBundleProvider outcome = myPatientDao.search(sp, mySrd);
+		myCaptureQueriesListener.logFirstSelectQueryForCurrentThread();
+		assertThat(toUnqualifiedVersionlessIdValues(outcome)).containsExactlyInAnyOrder(id1);
+		String unformattedSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
+		assertEquals("SELECT t0.RES_ID FROM HFJ_IDX_CMP_STRING_UNIQ t0 WHERE (t0.IDX_STRING IN ('Patient?identifier=urn%7C111','Patient?identifier=urn%7C222') )", unformattedSql);
+
+	}
+
+
+	@Test
+	public void testDoubleMatchingOnAnd_Search_TwoAndOrValues() {
+		myStorageSettings.setUniqueIndexesCheckedBeforeSave(false);
+
+		createUniqueBirthdateAndGenderSps();
+
+		Patient pt1 = new Patient();
+		pt1.setGender(Enumerations.AdministrativeGender.MALE);
+		pt1.setBirthDateElement(new DateType("2011-01-01"));
+		String id1 = myPatientDao.create(pt1, mySrd).getId().toUnqualifiedVersionless().getValue();
+
+		// Two OR values on the same resource - Currently composite SPs don't work for this
+		myCaptureQueriesListener.clear();
+		SearchParameterMap sp = new SearchParameterMap();
+		sp.setLoadSynchronous(true);
+		sp.add(Patient.SP_GENDER,
+			new TokenAndListParam()
+				.addAnd(new TokenParam("http://hl7.org/fhir/administrative-gender","male"), new TokenParam( "http://hl7.org/fhir/administrative-gender","female"))
+		);
+		sp.add(Patient.SP_BIRTHDATE,
+			new DateAndListParam()
+				.addAnd(new DateParam("2011-01-01"), new DateParam( "2011-02-02"))
+		);
+		IBundleProvider outcome = myPatientDao.search(sp, mySrd);
+		myCaptureQueriesListener.logFirstSelectQueryForCurrentThread();
+		assertThat(toUnqualifiedVersionlessIdValues(outcome)).containsExactlyInAnyOrder(id1);
+		String unformattedSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
+		assertEquals("SELECT t0.RES_ID FROM HFJ_IDX_CMP_STRING_UNIQ t0 WHERE (t0.IDX_STRING IN ('Patient?birthdate=2011-01-01&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cfemale','Patient?birthdate=2011-01-01&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale','Patient?birthdate=2011-02-02&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cfemale','Patient?birthdate=2011-02-02&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale') )", unformattedSql);
+	}
+
+
+
+	@Test
+	public void testDoubleMatchingOnAnd_Search_NonMatching() {
+		Pair<String, String> ids = prepareDoubleMatchingSearchParameterAndPatient();
+		String id1 = ids.getLeft();
+		String id2 = ids.getRight();
+
+		String unformattedSql;
+
+		// Not matching the composite SP at all
+		myCaptureQueriesListener.clear();
+		SearchParameterMap sp = new SearchParameterMap();
+		sp.setLoadSynchronous(true);
+		sp.add("active",
+			new TokenAndListParam()
+				.addAnd(new TokenParam(null, "true"))
+		);
+		IBundleProvider outcome = myPatientDao.search(sp, mySrd);
+		myCaptureQueriesListener.logFirstSelectQueryForCurrentThread();
+		assertThat(toUnqualifiedVersionlessIdValues(outcome)).containsExactlyInAnyOrder(id1, id2);
+		unformattedSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
+		assertThat(unformattedSql).doesNotContain(("IDX_STRING"));
+		assertThat(unformattedSql).doesNotContain(("RES_DELETED_AT"));
+		assertThat(unformattedSql).doesNotContain(("RES_TYPE"));
+
+	}
+
+	private Pair<String, String> prepareDoubleMatchingSearchParameterAndPatient() {
 		myStorageSettings.setAdvancedHSearchIndexing(false);
 		createUniqueIndexPatientIdentifier();
 
@@ -438,58 +546,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		pt.addIdentifier().setSystem("urn").setValue("444");
 		myPatientDao.create(pt, mySrd);
 
-		String unformattedSql;
-
-		// Two AND values
-		myCaptureQueriesListener.clear();
-		SearchParameterMap sp = new SearchParameterMap();
-		sp.setLoadSynchronous(true);
-		sp.add("identifier",
-			new TokenAndListParam()
-				.addAnd(new TokenParam("urn", "111"))
-				.addAnd(new TokenParam("urn", "222"))
-		);
-		IBundleProvider outcome = myPatientDao.search(sp, mySrd);
-		myCaptureQueriesListener.logFirstSelectQueryForCurrentThread();
-		unformattedSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
-		assertThat(unformattedSql).containsSubsequence(
-			"IDX_STRING = 'Patient?identifier=urn%7C111'",
-			"HASH_SYS_AND_VALUE = '-3122824860083758210'"
-		);
-		assertThat(unformattedSql).doesNotContain(("RES_DELETED_AT"));
-		assertThat(unformattedSql).doesNotContain(("RES_TYPE"));
-		assertThat(toUnqualifiedVersionlessIdValues(outcome)).containsExactlyInAnyOrder(id1);
-
-		// Two OR values on the same resource - Currently composite SPs don't work for this
-		myCaptureQueriesListener.clear();
-		sp = new SearchParameterMap();
-		sp.setLoadSynchronous(true);
-		sp.add("identifier",
-			new TokenAndListParam()
-				.addAnd(new TokenParam("urn", "111"), new TokenParam("urn", "222"))
-		);
-		outcome = myPatientDao.search(sp, mySrd);
-		myCaptureQueriesListener.logFirstSelectQueryForCurrentThread();
-		assertThat(toUnqualifiedVersionlessIdValues(outcome)).containsExactlyInAnyOrder(id1);
-		unformattedSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
-		assertEquals("SELECT t0.RES_ID FROM HFJ_IDX_CMP_STRING_UNIQ t0 WHERE (t0.IDX_STRING IN ('Patient?identifier=urn%7C111','Patient?identifier=urn%7C222') )", unformattedSql);
-
-		// Not matching the composite SP at all
-		myCaptureQueriesListener.clear();
-		sp = new SearchParameterMap();
-		sp.setLoadSynchronous(true);
-		sp.add("active",
-			new TokenAndListParam()
-				.addAnd(new TokenParam(null, "true"))
-		);
-		outcome = myPatientDao.search(sp, mySrd);
-		myCaptureQueriesListener.logFirstSelectQueryForCurrentThread();
-		assertThat(toUnqualifiedVersionlessIdValues(outcome)).containsExactlyInAnyOrder(id1, id2);
-		unformattedSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
-		assertThat(unformattedSql).doesNotContain(("IDX_STRING"));
-		assertThat(unformattedSql).doesNotContain(("RES_DELETED_AT"));
-		assertThat(unformattedSql).doesNotContain(("RES_TYPE"));
-
+		return Pair.of(id1, id2);
 	}
 
 	@Test
