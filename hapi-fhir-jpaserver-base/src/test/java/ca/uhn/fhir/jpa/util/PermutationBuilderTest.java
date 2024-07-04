@@ -7,6 +7,8 @@ import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class PermutationBuilderTest {
@@ -47,19 +49,35 @@ class PermutationBuilderTest {
 			List.of("A0"),
 			List.of("A1")
 		);
+		assertNotSame(input, output);
 	}
 
 	@Test
 	public void testCalculatePermutations_OneDimensonalInputOnY() {
 		List<List<String>> input = List.of(
 			List.of("A0"),
-			List.of("B0")
+			List.of("B0"),
+			List.of("C0")
 		);
 
 		List<List<String>> output = PermutationBuilder.calculatePermutations(input);
 		assertThat(output).containsExactlyInAnyOrder(
-			List.of("A0", "B0")
+			List.of("A0", "B0", "C0")
 		);
+		assertNotSame(input, output);
+	}
+
+	@Test
+	public void testCalculatePermutations_OneDimensonalInputOnXandY() {
+		List<List<String>> input = List.of(
+			List.of("A0")
+		);
+
+		List<List<String>> output = PermutationBuilder.calculatePermutations(input);
+		assertThat(output).containsExactlyInAnyOrder(
+			List.of("A0")
+		);
+		assertNotSame(input, output);
 	}
 
 	@Test

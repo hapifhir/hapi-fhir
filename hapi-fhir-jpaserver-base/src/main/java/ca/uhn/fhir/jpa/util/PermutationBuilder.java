@@ -36,7 +36,7 @@ public class PermutationBuilder {
 	 *   ]
 	 * </pre>
 	 * <p>
-	 * This method may or may not return a newly created list.
+	 * This method will return a newly created list and will not modify the input lists.
 	 * </p>
 	 *
 	 * @param theInput A list of lists to calculate permutations of
