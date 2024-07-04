@@ -48,5 +48,4 @@ public class DateAndListParam extends BaseAndListParam<DateOrListParam> {
 		addValue(orListParam);
 		return this;
 	}
-
 }
