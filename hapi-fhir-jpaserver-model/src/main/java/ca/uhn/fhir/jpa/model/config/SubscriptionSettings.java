@@ -19,5 +19,21 @@
  */
 package ca.uhn.fhir.jpa.model.config;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 // Empty subclass to avoid bean wiring conflicts in projects that want to define a different implementation
-public class SubscriptionSettings extends BaseSubscriptionSettings {}
+public class SubscriptionSettings extends BaseSubscriptionSettings {
+	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionSettings.class);
+
+	static {
+		// FIXME KHS
+		ourLog.info("Initializing SubscriptionSettings");
+	}
+
+	public SubscriptionSettings() {
+		super();
+		// FIXME KHS remove
+		ourLog.info("Initializing SubscriptionSettings");
+	}
+}
