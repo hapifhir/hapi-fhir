@@ -54,16 +54,18 @@ public class AsyncResourceModifiedSubmitterSvc {
 		int limit = getLimit();
 		do {
 			// we always take the 0th page, because we're deleting the elements as we process them
-			Page<IPersistedResourceModifiedMessage> persistedResourceModifiedMsgsPage = myResourceModifiedMessagePersistenceSvc.findAllOrderedByCreatedTime(
-				PageRequest.of(0, limit));
+			Page<IPersistedResourceModifiedMessage> persistedResourceModifiedMsgsPage =
+					myResourceModifiedMessagePersistenceSvc.findAllOrderedByCreatedTime(PageRequest.of(0, limit));
 			ourLog.debug(
-				"Attempting to submit {} resources to consumer channel.", persistedResourceModifiedMsgsPage.getTotalElements());
+					"Attempting to submit {} resources to consumer channel.",
+					persistedResourceModifiedMsgsPage.getTotalElements());
 
 			hasMoreToFetch = persistedResourceModifiedMsgsPage.hasNext();
 
-			for (IPersistedResourceModifiedMessage persistedResourceModifiedMessage : persistedResourceModifiedMsgsPage) {
-				boolean wasProcessed =
-					myResourceModifiedConsumer.submitPersisedResourceModifiedMessage(persistedResourceModifiedMessage);
+			for (IPersistedResourceModifiedMessage persistedResourceModifiedMessage :
+					persistedResourceModifiedMsgsPage) {
+				boolean wasProcessed = myResourceModifiedConsumer.submitPersisedResourceModifiedMessage(
+						persistedResourceModifiedMessage);
 
 				if (!wasProcessed) {
 					// we're not fetching anymore no matter what
