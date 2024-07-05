@@ -29,6 +29,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
+import static ca.uhn.fhir.rest.server.util.ISearchParamRegistry.isAllowedForContext;
 
 public class ResourceSearchParams {
 	private final String myResourceName;
@@ -48,7 +49,19 @@ public class ResourceSearchParams {
 		return myMap.values();
 	}
 
-	public static ResourceSearchParams empty(String theResourceName) {
+	public ResourceSearchParams toFilteredForContext(ISearchParamRegistry.ContextEnum theContext) {
+		Map<String, RuntimeSearchParam> filteredMap = new HashMap<>(myMap.size());
+		for (var nextEntry : myMap.entrySet()) {
+			String key = nextEntry.getKey();
+			RuntimeSearchParam nextParam = nextEntry.getValue();
+			if (isAllowedForContext(nextParam, theContext)) {
+				filteredMap.put(key, nextParam);
+			}
+		}
+		return new ResourceSearchParams(myResourceName, filteredMap);
+	}
+
+    public static ResourceSearchParams empty(String theResourceName) {
 		return new ResourceSearchParams(theResourceName, Collections.emptyMap());
 	}
 

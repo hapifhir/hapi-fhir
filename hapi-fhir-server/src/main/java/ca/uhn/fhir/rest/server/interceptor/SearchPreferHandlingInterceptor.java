@@ -130,7 +130,7 @@ public class SearchPreferHandlingInterceptor {
 				}
 			}
 
-			RuntimeSearchParam activeSearchParam = searchParamRetriever.getActiveSearchParam(resourceName, paramName);
+			RuntimeSearchParam activeSearchParam = searchParamRetriever.getActiveSearchParam(resourceName, paramName, ISearchParamRegistry.ContextEnum.SEARCH);
 			if (activeSearchParam == null) {
 
 				if (theHandling == PreferHandlingEnum.LENIENT) {
@@ -145,7 +145,7 @@ public class SearchPreferHandlingInterceptor {
 
 					// Strict handling
 					List<String> allowedParams =
-							searchParamRetriever.getActiveSearchParams(resourceName).getSearchParamNames().stream()
+							searchParamRetriever.getActiveSearchParams(resourceName, ISearchParamRegistry.ContextEnum.SEARCH).getSearchParamNames().stream()
 									.sorted()
 									.distinct()
 									.collect(Collectors.toList());

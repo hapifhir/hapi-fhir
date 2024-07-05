@@ -14,6 +14,8 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -26,9 +28,9 @@ public class FhirPathResourceMatcherR4Test extends BaseMdmRulesR4Test {
 	@BeforeEach
 	public void before() {
 		super.before();
-		when(mySearchParamRetriever.getActiveSearchParam("Patient", "birthdate")).thenReturn(mock(RuntimeSearchParam.class));
-		when(mySearchParamRetriever.getActiveSearchParam("Patient", "identifier")).thenReturn(mock(RuntimeSearchParam.class));
-		when(mySearchParamRetriever.getActiveSearchParam("Patient", "active")).thenReturn(mock(RuntimeSearchParam.class));
+		when(mySearchParamRetriever.getActiveSearchParam(eq("Patient"), eq("birthdate"), any())).thenReturn(mock(RuntimeSearchParam.class));
+		when(mySearchParamRetriever.getActiveSearchParam(eq("Patient"), eq("identifier"), any())).thenReturn(mock(RuntimeSearchParam.class));
+		when(mySearchParamRetriever.getActiveSearchParam(eq("Patient"), eq("active"), any())).thenReturn(mock(RuntimeSearchParam.class));
 
 		{
 			myLeft = new Patient();

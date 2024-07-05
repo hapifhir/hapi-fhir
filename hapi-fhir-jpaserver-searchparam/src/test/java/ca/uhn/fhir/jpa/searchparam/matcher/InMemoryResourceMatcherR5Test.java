@@ -86,13 +86,13 @@ public class InMemoryResourceMatcherR5Test {
 	@BeforeEach
 	public void before() {
 		RuntimeSearchParam dateSearchParam = new RuntimeSearchParam(null, null, null, null, "Observation.effective", RestSearchParameterTypeEnum.DATE, null, null, RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, null, null, null);
-		when(mySearchParamRegistry.getActiveSearchParam("Observation", "date")).thenReturn(dateSearchParam);
+		when(mySearchParamRegistry.getActiveSearchParam(eq("Observation"), eq("date"), any())).thenReturn(dateSearchParam);
 
 		RuntimeSearchParam codeSearchParam = new RuntimeSearchParam(null, null, null, null, "Observation.code", RestSearchParameterTypeEnum.TOKEN, null, null, RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, null, null, null);
-		when(mySearchParamRegistry.getActiveSearchParam("Observation", "code")).thenReturn(codeSearchParam);
+		when(mySearchParamRegistry.getActiveSearchParam(eq("Observation"), eq("code"), any())).thenReturn(codeSearchParam);
 
 		RuntimeSearchParam encSearchParam = new RuntimeSearchParam(null, null, null, null, "Observation.encounter", RestSearchParameterTypeEnum.REFERENCE, null, null, RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, null, null, null);
-		when(mySearchParamRegistry.getActiveSearchParam("Observation", "encounter")).thenReturn(encSearchParam);
+		when(mySearchParamRegistry.getActiveSearchParam(eq("Observation"), eq("encounter"), any())).thenReturn(encSearchParam);
 
 		myObservation = new Observation();
 		myObservation.getMeta().setSource(TEST_SOURCE);

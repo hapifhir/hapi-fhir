@@ -25,6 +25,7 @@ import ca.uhn.fhir.context.phonetic.IPhoneticEncoder;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -52,12 +53,12 @@ public interface ISearchParamRegistry {
 	/**
 	 * @return Returns {@literal null} if no match
 	 */
-	RuntimeSearchParam getActiveSearchParam(String theResourceName, String theParamName);
+	RuntimeSearchParam getActiveSearchParam(String theResourceName, String theParamName, @Nullable ContextEnum theContext);
 
 	/**
 	 * @return Returns all active search params for the given resource
 	 */
-	ResourceSearchParams getActiveSearchParams(String theResourceName);
+	ResourceSearchParams getActiveSearchParams(String theResourceName, @Nullable ContextEnum theContext);
 
 	/**
 	 * Request that the cache be refreshed now, in the current thread
@@ -77,13 +78,13 @@ public interface ISearchParamRegistry {
 	 */
 	default void setPhoneticEncoder(IPhoneticEncoder thePhoneticEncoder) {}
 
-	default List<RuntimeSearchParam> getActiveComboSearchParams(String theResourceName) {
+	default List<RuntimeSearchParam> getActiveComboSearchParams(String theResourceName, ContextEnum theContext) {
 		return Collections.emptyList();
 	}
 
 	// TODO ND remove default implementation
 	default List<RuntimeSearchParam> getActiveComboSearchParams(
-			String theResourceName, ComboSearchParamType theParamType) {
+			String theResourceName, ComboSearchParamType theParamType, ContextEnum theContext) {
 		return Collections.emptyList();
 	}
 
@@ -92,7 +93,7 @@ public interface ISearchParamRegistry {
 		return Optional.empty();
 	}
 
-	default List<RuntimeSearchParam> getActiveComboSearchParams(String theResourceName, Set<String> theParamNames) {
+	default List<RuntimeSearchParam> getActiveComboSearchParams(String theResourceName, Set<String> theParamNames, ContextEnum theContext) {
 		return Collections.emptyList();
 	}
 
@@ -101,9 +102,9 @@ public interface ISearchParamRegistry {
 	 * creating error messages for users as opposed to actual search processing. It will include meta parameters
 	 * such as <code>_id</code> and <code>_lastUpdated</code>.
 	 */
-	default Collection<String> getValidSearchParameterNamesIncludingMeta(String theResourceName) {
+	default Collection<String> getValidSearchParameterNamesIncludingMeta(String theResourceName, ContextEnum theContext) {
 		TreeSet<String> retval;
-		ResourceSearchParams activeSearchParams = getActiveSearchParams(theResourceName);
+		ResourceSearchParams activeSearchParams = getActiveSearchParams(theResourceName, theContext);
 		if (activeSearchParams == null) {
 			retval = new TreeSet<>();
 		} else {
@@ -120,7 +121,7 @@ public interface ISearchParamRegistry {
 	 * @return Returns <code>null</code> if it can't be found
 	 */
 	@Nullable
-	RuntimeSearchParam getActiveSearchParamByUrl(String theUrl);
+	RuntimeSearchParam getActiveSearchParamByUrl(String theUrl, ContextEnum theContext);
 
 	/**
 	 * Find a search param for a resource. First, check the resource itself, then check the top-level `Resource` resource.
@@ -130,10 +131,10 @@ public interface ISearchParamRegistry {
 	 *
 	 * @return the {@link RuntimeSearchParam} that is found.
 	 */
-	default RuntimeSearchParam getRuntimeSearchParam(String theResourceType, String theParamName) {
-		RuntimeSearchParam availableSearchParamDef = getActiveSearchParam(theResourceType, theParamName);
+	default RuntimeSearchParam getRuntimeSearchParam(String theResourceType, String theParamName, ContextEnum theContext) {
+		RuntimeSearchParam availableSearchParamDef = getActiveSearchParam(theResourceType, theParamName, theContext);
 		if (availableSearchParamDef == null) {
-			availableSearchParamDef = getActiveSearchParam("Resource", theParamName);
+			availableSearchParamDef = getActiveSearchParam("Resource", theParamName, theContext);
 		}
 		if (availableSearchParamDef == null) {
 			throw new InvalidRequestException(
@@ -149,13 +150,35 @@ public interface ISearchParamRegistry {
 	 *
 	 * @return the {@link ResourceSearchParams} that has all the search params.
 	 */
-	default ResourceSearchParams getRuntimeSearchParams(String theResourceType) {
+	// FIXME: can this be removed?
+	default ResourceSearchParams getRuntimeSearchParams(String theResourceType, ContextEnum theContext) {
 		ResourceSearchParams availableSearchParams =
-				getActiveSearchParams(theResourceType).makeCopy();
-		ResourceSearchParams resourceSearchParams = getActiveSearchParams("Resource");
+				getActiveSearchParams(theResourceType, theContext).makeCopy();
+		ResourceSearchParams resourceSearchParams = getActiveSearchParams("Resource", theContext);
 		resourceSearchParams
 				.getSearchParamNames()
 				.forEach(param -> availableSearchParams.addSearchParamIfAbsent(param, resourceSearchParams.get(param)));
 		return availableSearchParams;
 	}
+
+
+	enum ContextEnum {
+
+		INDEX,
+		SEARCH,
+		SORT
+
+	}
+
+	static boolean isAllowedForContext(@Nonnull RuntimeSearchParam theSearchParam, @Nullable ContextEnum theContext) {
+		/*
+		 * I'm thinking that a future enhancement might be to allow a SearchParameter to declare that it
+		 * is supported for searching or for sorting or for both - But for now these are one and the same.
+		 */
+		if (theContext == ContextEnum.SEARCH || theContext == ContextEnum.SORT) {
+			return theSearchParam.isEnabledForSearching();
+		}
+		return true;
+	}
+
 }

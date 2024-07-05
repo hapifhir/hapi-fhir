@@ -423,7 +423,7 @@ public class JpaBulkExportProcessorTest {
 
 		// when
 		RuntimeSearchParam searchParam = new RuntimeSearchParam(new IdType("1"), "", "", "", "", RestSearchParameterTypeEnum.STRING, Collections.singleton(""), Collections.singleton(""), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, Collections.singleton(""));
-		when(mySearchParamRegistry.getActiveSearchParam(any(), any())).thenReturn(searchParam);
+		when(mySearchParamRegistry.getActiveSearchParam(any(), any(), any())).thenReturn(searchParam);
 		// expandAllPatientPidsFromGroup
 		when(myDaoRegistry.getResourceDao(eq("Group")))
 			.thenReturn(groupDao);

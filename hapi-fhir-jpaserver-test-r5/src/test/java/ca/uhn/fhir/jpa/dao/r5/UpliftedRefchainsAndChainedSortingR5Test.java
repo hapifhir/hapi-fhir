@@ -140,7 +140,7 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 	public void testCreate_BundleWithComposition_UsingSimpleUplift() {
 		// Setup
 
-		RuntimeSearchParam subjectSp = mySearchParamRegistry.getRuntimeSearchParam("Bundle", "composition");
+		RuntimeSearchParam subjectSp = mySearchParamRegistry.getRuntimeSearchParam("Bundle", "composition", null);
 		SearchParameter sp = new SearchParameter();
 		Extension upliftRefChain = sp.addExtension().setUrl(HapiExtensions.EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN);
 		upliftRefChain.addExtension(HapiExtensions.EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN_PARAM_CODE, new CodeType("type"));
@@ -1058,7 +1058,7 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 	}
 
 	private void createSearchParam_EncounterSubject_WithUpliftOnName() {
-		RuntimeSearchParam subjectSp = mySearchParamRegistry.getRuntimeSearchParam("Encounter", "subject");
+		RuntimeSearchParam subjectSp = mySearchParamRegistry.getRuntimeSearchParam("Encounter", "subject", null);
 		SearchParameter sp = new SearchParameter();
 		Extension upliftRefChain = sp.addExtension().setUrl(HapiExtensions.EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN);
 		upliftRefChain.addExtension(HapiExtensions.EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN_PARAM_CODE, new CodeType("name"));

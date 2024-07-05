@@ -519,7 +519,7 @@ public abstract class BaseStorageDao {
 			return;
 		}
 
-		ResourceSearchParams searchParams = mySearchParamRegistry.getActiveSearchParams(getResourceName());
+		ResourceSearchParams searchParams = mySearchParamRegistry.getActiveSearchParams(getResourceName(), ISearchParamRegistry.ContextEnum.SEARCH);
 
 		Set<String> paramNames = theSource.keySet();
 		for (String nextParamName : paramNames) {
@@ -527,21 +527,34 @@ public abstract class BaseStorageDao {
 			RuntimeSearchParam param = searchParams.get(qualifiedParamName.getParamName());
 			if (param == null) {
 				Collection<String> validNames =
-						mySearchParamRegistry.getValidSearchParameterNamesIncludingMeta(getResourceName());
-				String msg = getContext()
+						mySearchParamRegistry.getValidSearchParameterNamesIncludingMeta(getResourceName(), ISearchParamRegistry.ContextEnum.SEARCH);
+				RuntimeSearchParam notEnabledForSearchParam = mySearchParamRegistry.getActiveSearchParam(getResourceName(), qualifiedParamName.getParamName(), null);
+				if (notEnabledForSearchParam != null) {
+					String msg = getContext()
 						.getLocalizer()
 						.getMessageSanitized(
-								BaseStorageDao.class,
-								"invalidSearchParameter",
-								qualifiedParamName.getParamName(),
-								getResourceName(),
-								validNames);
-				throw new InvalidRequestException(Msg.code(524) + msg);
+							BaseStorageDao.class,
+							"invalidSearchParameterNotEnabledForSearch",
+							qualifiedParamName.getParamName(),
+							getResourceName(),
+							validNames);
+					throw new InvalidRequestException(Msg.code(2539) + msg);
+				} else {
+					String msg = getContext()
+						.getLocalizer()
+						.getMessageSanitized(
+							BaseStorageDao.class,
+							"invalidSearchParameter",
+							qualifiedParamName.getParamName(),
+							getResourceName(),
+							validNames);
+					throw new InvalidRequestException(Msg.code(524) + msg);
+				}
 			}
 
 			// Should not be null since the check above would have caught it
 			RuntimeSearchParam paramDef =
-					mySearchParamRegistry.getActiveSearchParam(getResourceName(), qualifiedParamName.getParamName());
+					mySearchParamRegistry.getActiveSearchParam(getResourceName(), qualifiedParamName.getParamName(), ISearchParamRegistry.ContextEnum.SEARCH);
 
 			for (String nextValue : theSource.get(nextParamName)) {
 				QualifiedParamList qualifiedParam = QualifiedParamList.splitQueryStringByCommasIgnoreEscape(

@@ -23,6 +23,8 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -68,13 +70,13 @@ class HSearchSortHelperImplTest {
 	void testGetParamType() {
 		SortSpec sortSpec = new SortSpec();
 		sortSpec.setParamName("_tag");
-		when(mockSearchParamRegistry.getActiveSearchParams("Observation")).thenReturn(mockResourceSearchParams);
+		when(mockSearchParamRegistry.getActiveSearchParams(eq("Observation"), any())).thenReturn(mockResourceSearchParams);
 		when(mockResourceSearchParams.get("the-param-name")).thenReturn(mockRuntimeSearchParam);
 		when(mockRuntimeSearchParam.getParamType()).thenReturn(RestSearchParameterTypeEnum.TOKEN);
 
 		Optional<RestSearchParameterTypeEnum> paramType = tested.getParamType("Observation", "the-param-name");
 
-		verify(mockSearchParamRegistry, times(1)).getActiveSearchParams("Observation");
+		verify(mockSearchParamRegistry, times(1)).getActiveSearchParams(eq("Observation"), any());
 		verify(mockResourceSearchParams, times(1)).get("the-param-name");
 		assertFalse(paramType.isEmpty());
 	}

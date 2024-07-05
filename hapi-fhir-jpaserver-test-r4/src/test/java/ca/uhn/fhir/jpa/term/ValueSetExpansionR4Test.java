@@ -104,7 +104,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 
 	@Test
 	public void testValueSetUrlSP() {
-		RuntimeSearchParam sp = mySearchParamRegistry.getActiveSearchParam("ValueSet", "url");
+		RuntimeSearchParam sp = mySearchParamRegistry.getActiveSearchParam("ValueSet", "url", null);
 		assertEquals("url", sp.getName());
 	}
 

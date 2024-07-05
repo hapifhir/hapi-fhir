@@ -60,34 +60,35 @@ public class RuntimeSearchParam {
 	private final List<Component> myComponents;
 	private final IIdType myIdUnqualifiedVersionless;
 	private IPhoneticEncoder myPhoneticEncoder;
+	private boolean myEnabledForSearching = true;
 
 	/**
 	 * Constructor
 	 */
 	public RuntimeSearchParam(
-			IIdType theId,
-			String theUri,
-			String theName,
-			String theDescription,
-			String thePath,
-			RestSearchParameterTypeEnum theParamType,
-			Set<String> theProvidesMembershipInCompartments,
-			Set<String> theTargets,
-			RuntimeSearchParamStatusEnum theStatus,
-			Collection<String> theBase) {
+		IIdType theId,
+		String theUri,
+		String theName,
+		String theDescription,
+		String thePath,
+		RestSearchParameterTypeEnum theParamType,
+		Set<String> theProvidesMembershipInCompartments,
+		Set<String> theTargets,
+		RuntimeSearchParamStatusEnum theStatus,
+		Collection<String> theBase) {
 		this(
-				theId,
-				theUri,
-				theName,
-				theDescription,
-				thePath,
-				theParamType,
-				theProvidesMembershipInCompartments,
-				theTargets,
-				theStatus,
-				null,
-				Collections.emptyList(),
-				theBase);
+			theId,
+			theUri,
+			theName,
+			theDescription,
+			thePath,
+			theParamType,
+			theProvidesMembershipInCompartments,
+			theTargets,
+			theStatus,
+			null,
+			Collections.emptyList(),
+			theBase);
 	}
 
 	/**
@@ -95,36 +96,36 @@ public class RuntimeSearchParam {
 	 */
 	public RuntimeSearchParam(RuntimeSearchParam theSp) {
 		this(
-				theSp.getId(),
-				theSp.getUri(),
-				theSp.getName(),
-				theSp.getDescription(),
-				theSp.getPath(),
-				theSp.getParamType(),
-				theSp.getProvidesMembershipInCompartments(),
-				theSp.getTargets(),
-				theSp.getStatus(),
-				theSp.getComboSearchParamType(),
-				theSp.getComponents(),
-				theSp.getBase());
+			theSp.getId(),
+			theSp.getUri(),
+			theSp.getName(),
+			theSp.getDescription(),
+			theSp.getPath(),
+			theSp.getParamType(),
+			theSp.getProvidesMembershipInCompartments(),
+			theSp.getTargets(),
+			theSp.getStatus(),
+			theSp.getComboSearchParamType(),
+			theSp.getComponents(),
+			theSp.getBase());
 	}
 
 	/**
 	 * Constructor
 	 */
 	public RuntimeSearchParam(
-			IIdType theId,
-			String theUri,
-			String theName,
-			String theDescription,
-			String thePath,
-			RestSearchParameterTypeEnum theParamType,
-			Set<String> theProvidesMembershipInCompartments,
-			Set<String> theTargets,
-			RuntimeSearchParamStatusEnum theStatus,
-			ComboSearchParamType theComboSearchParamType,
-			List<Component> theComponents,
-			Collection<String> theBase) {
+		IIdType theId,
+		String theUri,
+		String theName,
+		String theDescription,
+		String thePath,
+		RestSearchParameterTypeEnum theParamType,
+		Set<String> theProvidesMembershipInCompartments,
+		Set<String> theTargets,
+		RuntimeSearchParamStatusEnum theStatus,
+		ComboSearchParamType theComboSearchParamType,
+		List<Component> theComponents,
+		Collection<String> theBase) {
 		super();
 
 		myId = theId;
@@ -166,6 +167,24 @@ public class RuntimeSearchParam {
 		}
 	}
 
+	/**
+	 * Is this search parameter actually enabled for being used in searches (as opposed to only being used for
+	 * generating indexes, which might be desired while the search parameter is still being indexed). This
+	 * setting defaults to {@literal true} if it isn't set otherwise.
+	 */
+	public boolean isEnabledForSearching() {
+		return myEnabledForSearching;
+	}
+
+	/**
+	 * Is this search parameter actually enabled for being used in searches (as opposed to only being used for
+	 * generating indexes, which might be desired while the search parameter is still being indexed). This
+	 * setting defaults to {@literal true} if it isn't set otherwise.
+	 */
+	public void setEnabledForSearching(boolean theEnabledForSearching) {
+		myEnabledForSearching = theEnabledForSearching;
+	}
+
 	public List<Component> getComponents() {
 		return myComponents;
 	}
@@ -204,12 +223,12 @@ public class RuntimeSearchParam {
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-				.append("base", myBase)
-				.append("name", myName)
-				.append("path", myPath)
-				.append("id", myId)
-				.append("uri", myUri)
-				.toString();
+			.append("base", myBase)
+			.append("name", myName)
+			.append("path", myPath)
+			.append("id", myId)
+			.append("uri", myUri)
+			.toString();
 	}
 
 	public IIdType getId() {
@@ -233,21 +252,21 @@ public class RuntimeSearchParam {
 		RuntimeSearchParam that = (RuntimeSearchParam) theO;
 
 		return new EqualsBuilder()
-				.append(getId(), that.getId())
-				.append(getName(), that.getName())
-				.append(getPath(), that.getPath())
-				.append(getUri(), that.getUri())
-				.isEquals();
+			.append(getId(), that.getId())
+			.append(getName(), that.getName())
+			.append(getPath(), that.getPath())
+			.append(getUri(), that.getUri())
+			.isEquals();
 	}
 
 	@Override
 	public int hashCode() {
 		return new HashCodeBuilder(17, 37)
-				.append(getId())
-				.append(getName())
-				.append(getPath())
-				.append(getUri())
-				.toHashCode();
+			.append(getId())
+			.append(getName())
+			.append(getPath())
+			.append(getUri())
+			.toHashCode();
 	}
 
 	public Set<String> getBase() {
@@ -361,13 +380,6 @@ public class RuntimeSearchParam {
 		return !myUpliftRefchains.isEmpty();
 	}
 
-	public enum RuntimeSearchParamStatusEnum {
-		ACTIVE,
-		DRAFT,
-		RETIRED,
-		UNKNOWN
-	}
-
 	/**
 	 * This method tests whether a given FHIRPath expression <i>could</i>
 	 * possibly apply to the given resource type.
@@ -413,6 +425,13 @@ public class RuntimeSearchParam {
 		return false;
 	}
 
+	public enum RuntimeSearchParamStatusEnum {
+		ACTIVE,
+		DRAFT,
+		RETIRED,
+		UNKNOWN
+	}
+
 	public static class Component {
 		private final String myExpression;
 		private final String myReference;
@@ -428,9 +447,9 @@ public class RuntimeSearchParam {
 		@Override
 		public String toString() {
 			return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-					.append("expression", myExpression)
-					.append("reference", myReference)
-					.toString();
+				.append("expression", myExpression)
+				.append("reference", myReference)
+				.toString();
 		}
 
 		public String getExpression() {

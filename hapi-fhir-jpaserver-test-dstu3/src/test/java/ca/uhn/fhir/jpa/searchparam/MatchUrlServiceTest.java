@@ -1,7 +1,5 @@
 package ca.uhn.fhir.jpa.searchparam;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
@@ -22,10 +20,10 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.assertj.core.api.Assertions.within;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -44,7 +42,7 @@ public class MatchUrlServiceTest extends BaseJpaTest {
 	public void testTranslateMatchUrl() {
 		RuntimeResourceDefinition resourceDef = ourCtx.getResourceDefinition(Condition.class);
 		ISearchParamRegistry searchParamRegistry = mock(ISearchParamRegistry.class);
-		when(searchParamRegistry.getActiveSearchParam(any(), eq("patient"))).thenReturn(resourceDef.getSearchParam("patient"));
+		when(searchParamRegistry.getActiveSearchParam(any(), eq("patient"), any())).thenReturn(resourceDef.getSearchParam("patient"));
 		SearchParameterMap match = myMatchUrlService.translateMatchUrl("Condition?patient=304&_lastUpdated=>2011-01-01T11:12:21.0000Z", resourceDef);
 		assertEquals("2011-01-01T11:12:21.0000Z", match.getLastUpdated().getLowerBound().getValueAsString());
 		assertEquals(ReferenceParam.class, match.get("patient").get(0).get(0).getClass());

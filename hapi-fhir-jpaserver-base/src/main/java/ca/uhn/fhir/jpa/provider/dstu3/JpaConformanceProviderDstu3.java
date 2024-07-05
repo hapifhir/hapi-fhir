@@ -191,10 +191,10 @@ public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.se
 		 */
 		ResourceSearchParams searchParams;
 		ResourceSearchParams serverConfigurationActiveSearchParams =
-				myServerConfiguration.getActiveSearchParams(theResourceName);
+				myServerConfiguration.getActiveSearchParams(theResourceName, ISearchParamRegistry.ContextEnum.SEARCH);
 		if (mySearchParamRegistry != null) {
 			searchParams =
-					mySearchParamRegistry.getActiveSearchParams(theResourceName).makeCopy();
+					mySearchParamRegistry.getActiveSearchParams(theResourceName, ISearchParamRegistry.ContextEnum.SEARCH).makeCopy();
 			if (searchParams == null) {
 				return ResourceSearchParams.empty(theResourceName);
 			}
@@ -230,7 +230,7 @@ public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.se
 					continue;
 				}
 				ResourceSearchParams activeSearchParams =
-						mySearchParamRegistry.getActiveSearchParams(otherResourceType);
+						mySearchParamRegistry.getActiveSearchParams(otherResourceType, ISearchParamRegistry.ContextEnum.SEARCH);
 				activeSearchParams.values().stream()
 						.filter(t -> isNotBlank(t.getName()))
 						.filter(t -> t.getTargets().contains(resourcename))
