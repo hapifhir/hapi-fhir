@@ -7,7 +7,8 @@ import java.util.List;
 
 /**
  * Provides the list of partitions that a job should run against.
- * TODO MM: Consider moving UrlPartitioner calls to this class once other operations need to be MegaScale enabled.
+ * TODO MM: Consider moving UrlPartitioner calls to this class once other batch operations need to support running
+ * across all partitions on a multitenant FHIR server.
  * That way all partitioning related logic exists only here for batch jobs.
  * After that PartitionedUrl#myRequestPartitionId can be marked as deprecated.
  */

@@ -7,10 +7,13 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 
 import java.util.List;
 
-public class JobPartitionProvider implements IJobPartitionProvider {
+/**
+ * Basic implementation which provides the partition list for a certain request which is composed of a single partition.
+ */
+public class SimpleJobPartitionProvider implements IJobPartitionProvider {
 	protected final IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 
-	public JobPartitionProvider(IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
+	public SimpleJobPartitionProvider(IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
 		myRequestPartitionHelperSvc = theRequestPartitionHelperSvc;
 	}
 

@@ -27,7 +27,7 @@ public class JpaJobPartitionProviderTest {
 	@Mock
 	private IPartitionLookupSvc myPartitionLookupSvc;
 	@InjectMocks
-	private JpaPartitionProvider myJobPartitionProvider;
+	private JpaJobPartitionProvider myJobPartitionProvider;
 
 	@Test
 	public void getPartitions_requestSpecificPartition_returnsPartition() {

@@ -159,7 +159,6 @@ public class BulkDataImportProvider {
 		RequestPartitionId partitionId =
 				myRequestPartitionHelperService.determineReadPartitionForRequestForServerOperation(
 						theRequestDetails, JpaConstants.OPERATION_IMPORT);
-		// TODO MM: I believe this is already checked as part of
 		myRequestPartitionHelperService.validateHasPartitionPermissions(theRequestDetails, "Binary", partitionId);
 		jobParameters.setPartitionId(partitionId);
 

@@ -59,6 +59,6 @@ public class JpaBatch2Config extends BaseBatch2Config {
 	@Bean
 	public IJobPartitionProvider jobPartitionProvider(
 			IRequestPartitionHelperSvc theRequestPartitionHelperSvc, IPartitionLookupSvc thePartitionLookupSvc) {
-		return new JpaPartitionProvider(theRequestPartitionHelperSvc, thePartitionLookupSvc);
+		return new JpaJobPartitionProvider(theRequestPartitionHelperSvc, thePartitionLookupSvc);
 	}
 }

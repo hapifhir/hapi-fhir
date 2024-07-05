@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.batch2;
 
-import ca.uhn.fhir.batch2.coordinator.JobPartitionProvider;
+import ca.uhn.fhir.batch2.api.IJobPartitionProvider;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
@@ -11,15 +11,18 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * The default implementation, which uses {@link IRequestPartitionHelperSvc} and {@link IPartitionLookupSvc} to compute the partition to run a batch2 job.
- * The ladder will be used to handle cases when the job is configured to run against all partitions (bulk system operation).
+ * The default JPA implementation, which uses {@link IRequestPartitionHelperSvc} and {@link IPartitionLookupSvc}
+ * to compute the partition to run a batch2 job.
+ * The latter will be used to handle cases when the job is configured to run against all partitions
+ * (bulk system operation) and will return the actual list with all the configured partitions.
  */
-public class JpaPartitionProvider extends JobPartitionProvider {
+public class JpaJobPartitionProvider implements IJobPartitionProvider {
+	protected final IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 	private final IPartitionLookupSvc myPartitionLookupSvc;
 
-	public JpaPartitionProvider(
+	public JpaJobPartitionProvider(
 			IRequestPartitionHelperSvc theRequestPartitionHelperSvc, IPartitionLookupSvc thePartitionLookupSvc) {
-		super(theRequestPartitionHelperSvc);
+		myRequestPartitionHelperSvc = theRequestPartitionHelperSvc;
 		myPartitionLookupSvc = thePartitionLookupSvc;
 	}
 

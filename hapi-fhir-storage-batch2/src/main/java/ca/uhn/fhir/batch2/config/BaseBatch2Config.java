@@ -27,8 +27,8 @@ import ca.uhn.fhir.batch2.api.IReductionStepExecutorService;
 import ca.uhn.fhir.batch2.channel.BatchJobSender;
 import ca.uhn.fhir.batch2.coordinator.JobCoordinatorImpl;
 import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
-import ca.uhn.fhir.batch2.coordinator.JobPartitionProvider;
 import ca.uhn.fhir.batch2.coordinator.ReductionStepExecutorServiceImpl;
+import ca.uhn.fhir.batch2.coordinator.SimpleJobPartitionProvider;
 import ca.uhn.fhir.batch2.coordinator.WorkChunkProcessor;
 import ca.uhn.fhir.batch2.maintenance.JobMaintenanceServiceImpl;
 import ca.uhn.fhir.batch2.model.JobWorkNotificationJsonMessage;
@@ -145,6 +145,6 @@ public abstract class BaseBatch2Config {
 
 	@Bean
 	public IJobPartitionProvider jobPartitionProvider(IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
-		return new JobPartitionProvider(theRequestPartitionHelperSvc);
+		return new SimpleJobPartitionProvider(theRequestPartitionHelperSvc);
 	}
 }

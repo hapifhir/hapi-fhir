@@ -17,11 +17,11 @@ import java.util.List;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class JobPartitionProviderTest {
+public class SimpleJobPartitionProviderTest {
 	@Mock
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 	@InjectMocks
-	private JobPartitionProvider myJobPartitionProvider;
+	private SimpleJobPartitionProvider myJobPartitionProvider;
 
 	@Test
 	public void getPartitions_requestSpecificPartition_returnsPartition() {
