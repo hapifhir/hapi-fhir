@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 6083
+title: "Address care-gaps bug for handling missing improvement notation validation, and group level measure scoring definition.
+Bug fix for evaluate-measure subject-list where contained List resource was setting invalid references. Bumping to latest version
+of clinical reasoning 3.8.
+"
