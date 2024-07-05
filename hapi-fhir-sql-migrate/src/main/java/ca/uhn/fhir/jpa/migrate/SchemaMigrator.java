@@ -67,7 +67,7 @@ public class SchemaMigrator {
 		mySkipValidation = jpaProperties.containsKey(AvailableSettings.HBM2DDL_AUTO)
 				&& "update".equals(jpaProperties.getProperty(AvailableSettings.HBM2DDL_AUTO));
 		myHapiMigrationStorageSvc = theHapiMigrationStorageSvc;
-		//Skip the skipped versions here.
+		// Skip the skipped versions here.
 		myMigrationTasks.setDoNothingOnSkippedTasks(theSkipVersions);
 	}
 
