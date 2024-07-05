@@ -153,7 +153,7 @@ public class TermConceptDesignation implements Serializable {
 		return Objects.nonNull(myValueVc) ? myValueVc: myValue;
 	}
 
-	public TermConceptDesignation setValueVc(@Nonnull String theValueVc) {
+	public TermConceptDesignation setValue(@Nonnull String theValueVc) {
 		myValue = theValueVc;
 		return this;
 	}
