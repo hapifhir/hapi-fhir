@@ -211,7 +211,8 @@ public class HapiMigrator {
 			if (isBlank(description)) {
 				description = theTask.getClass().getSimpleName();
 			}
-			String prefix = String.format("Failure executing task '%s', for driver: %s aborting! Cause: ", description, getDriverType());
+			String prefix = String.format(
+					"Failure executing task '%s', for driver: %s aborting! Cause: ", description, getDriverType());
 			throw new HapiMigrationException(Msg.code(47) + prefix + e, theMigrationResult, e);
 		}
 	}

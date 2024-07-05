@@ -1396,14 +1396,6 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 
 		assertThat(termConceptDesignationFromDb.getValue())
 			.isEqualTo(stringWith8000Chars);
-
-		final String stringWith8001Chars = IntStream.range(0, 8001)
-			.mapToObj(anInt -> "A")
-			.collect(Collectors.joining());
-
-		assertThatThrownBy(() -> myTermConceptDesignationDao.save(new TermConceptDesignation()
-			.setValue(stringWith8001Chars)))
-			.isInstanceOf(IllegalArgumentException.class);
 	}
 
 	private ArrayList<String> toCodesContains(List<ValueSetExpansionContainsComponent> theContains) {

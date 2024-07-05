@@ -58,7 +58,6 @@ public class TermConceptDesignation implements Serializable {
 
 	public static final int MAX_LENGTH = 500;
 	public static final int MAX_VAL_LENGTH = 2000;
-	public static final int MAX_VAL_LENGTH_VAL = 8000;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(
@@ -85,10 +84,10 @@ public class TermConceptDesignation implements Serializable {
 	@Column(name = "USE_DISPLAY", nullable = true, length = MAX_LENGTH)
 	private String myUseDisplay;
 
-	@Column(name = "VAL", nullable = false, length = MAX_VAL_LENGTH)
+	@Column(name = "VAL", nullable = true, length = MAX_VAL_LENGTH)
 	private String myValue;
 
-	@Column(name = "VAL_VC", nullable = false, length = Length.LONG32)
+	@Column(name = "VAL_VC", nullable = true, length = Length.LONG32)
 	private String myValueVc;
 	/**
 	 * TODO: Make this non-null
@@ -150,11 +149,11 @@ public class TermConceptDesignation implements Serializable {
 	}
 
 	public String getValue() {
-		return Objects.nonNull(myValueVc) ? myValueVc: myValue;
+		return Objects.nonNull(myValueVc) ? myValueVc : myValue;
 	}
 
 	public TermConceptDesignation setValue(@Nonnull String theValueVc) {
-		myValue = theValueVc;
+		myValueVc = theValueVc;
 		return this;
 	}
 

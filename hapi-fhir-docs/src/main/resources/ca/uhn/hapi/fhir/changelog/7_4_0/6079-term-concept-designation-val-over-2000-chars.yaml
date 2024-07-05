@@ -2,4 +2,4 @@
 type: add
 issue: 6079
 jira: SMILE-8644
-title: "It is now possible to save TermConceptDesignations with values over 2,000 characters, up to 8,000."
+title: "It is now possible to save TermConceptDesignations with values over 2,000 characters."
