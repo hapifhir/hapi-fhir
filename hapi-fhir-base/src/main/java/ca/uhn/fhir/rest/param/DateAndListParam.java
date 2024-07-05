@@ -19,7 +19,7 @@
  */
 package ca.uhn.fhir.rest.param;
 
-import ca.uhn.fhir.util.CoverageIgnore;
+import org.apache.commons.lang3.Validate;
 
 public class DateAndListParam extends BaseAndListParam<DateOrListParam> {
 
@@ -28,10 +28,24 @@ public class DateAndListParam extends BaseAndListParam<DateOrListParam> {
 		return new DateOrListParam();
 	}
 
-	@CoverageIgnore
 	@Override
 	public DateAndListParam addAnd(DateOrListParam theValue) {
 		addValue(theValue);
+		return this;
+	}
+
+	/**
+	 * @param theValue The OR values
+	 * @return Returns a reference to this for convenient chaining
+	 * @since 7.4.0
+	 */
+	public DateAndListParam addAnd(DateParam... theValue) {
+		Validate.notNull(theValue, "theValue must not be null");
+		DateOrListParam orListParam = new DateOrListParam();
+		for (DateParam next : theValue) {
+			orListParam.add(next);
+		}
+		addValue(orListParam);
 		return this;
 	}
 }
