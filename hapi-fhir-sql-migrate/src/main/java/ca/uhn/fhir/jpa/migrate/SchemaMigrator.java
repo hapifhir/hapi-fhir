@@ -38,8 +38,10 @@ public class SchemaMigrator {
 	private final String mySchemaName;
 	private final DataSource myDataSource;
 	private final boolean mySkipValidation;
+	private final boolean myRunHeavyweightMigrationTasks;
 	private final String myMigrationTableName;
 	private final MigrationTaskList myMigrationTasks;
+	private final String mySkipVersions;
 	private DriverTypeEnum myDriverType;
 	private List<IHapiMigrationCallback> myCallbacks = Collections.emptyList();
 	private final HapiMigrationStorageSvc myHapiMigrationStorageSvc;
@@ -51,6 +53,8 @@ public class SchemaMigrator {
 			String theSchemaName,
 			String theMigrationTableName,
 			DataSource theDataSource,
+			boolean theEnableHeavyweighTtasks,
+			String theSkipVersions,
 			Properties jpaProperties,
 			MigrationTaskList theMigrationTasks,
 			HapiMigrationStorageSvc theHapiMigrationStorageSvc) {
@@ -58,10 +62,13 @@ public class SchemaMigrator {
 		myDataSource = theDataSource;
 		myMigrationTableName = theMigrationTableName;
 		myMigrationTasks = theMigrationTasks;
-
+		myRunHeavyweightMigrationTasks = theEnableHeavyweighTtasks;
+		mySkipVersions = theSkipVersions;
 		mySkipValidation = jpaProperties.containsKey(AvailableSettings.HBM2DDL_AUTO)
 				&& "update".equals(jpaProperties.getProperty(AvailableSettings.HBM2DDL_AUTO));
 		myHapiMigrationStorageSvc = theHapiMigrationStorageSvc;
+		//Skip the skipped versions here.
+		myMigrationTasks.setDoNothingOnSkippedTasks(theSkipVersions);
 	}
 
 	public void validate() {
@@ -111,6 +118,7 @@ public class SchemaMigrator {
 		migrator = new HapiMigrator(myMigrationTableName, myDataSource, myDriverType);
 		migrator.addTasks(myMigrationTasks);
 		migrator.setCallbacks(myCallbacks);
+		migrator.setRunHeavyweightSkippableTasks(myRunHeavyweightMigrationTasks);
 		return migrator;
 	}
 
