@@ -21,9 +21,8 @@ package ca.uhn.fhir.jpa.search.builder.predicate;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
-import com.healthmarketscience.sqlbuilder.BinaryCondition;
+import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import com.healthmarketscience.sqlbuilder.Condition;
-import com.healthmarketscience.sqlbuilder.InCondition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 
 import java.util.List;
@@ -43,12 +42,8 @@ public class ComboUniqueSearchParameterPredicateBuilder extends BaseSearchParamP
 
 	public Condition createPredicateIndexString(
 			RequestPartitionId theRequestPartitionId, List<String> theIndexStrings) {
-		Condition predicate;
-		if (theIndexStrings.size() == 1) {
-			predicate = BinaryCondition.equalTo(myColumnString, generatePlaceholder(theIndexStrings.get(0)));
-		} else {
-			predicate = new InCondition(myColumnString, generatePlaceholders(theIndexStrings));
-		}
+		Condition predicate =
+				QueryParameterUtils.toEqualToOrInPredicate(myColumnString, generatePlaceholders(theIndexStrings));
 		return combineWithRequestPartitionIdPredicate(theRequestPartitionId, predicate);
 	}
 }

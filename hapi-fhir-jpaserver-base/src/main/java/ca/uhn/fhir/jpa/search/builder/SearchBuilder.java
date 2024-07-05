@@ -68,8 +68,8 @@ import ca.uhn.fhir.jpa.searchparam.util.Dstu3DistanceHelper;
 import ca.uhn.fhir.jpa.searchparam.util.JpaParamUtil;
 import ca.uhn.fhir.jpa.searchparam.util.LastNParameterHelper;
 import ca.uhn.fhir.jpa.util.BaseIterator;
+import ca.uhn.fhir.jpa.util.CartesianProductUtil;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
-import ca.uhn.fhir.jpa.util.PermutationBuilder;
 import ca.uhn.fhir.jpa.util.QueryChunker;
 import ca.uhn.fhir.jpa.util.SqlQueryList;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -100,6 +100,7 @@ import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.StringUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Streams;
 import com.healthmarketscience.sqlbuilder.Condition;
 import jakarta.annotation.Nonnull;
@@ -1915,6 +1916,21 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			// Since we're going to remove elements below
 			theParams.values().forEach(this::ensureSubListsAreWritable);
 
+			/*
+			 * Apply search against the combo param index in a loop:
+			 *
+			 * 1. First we check whether the actual parameter values in the
+			 * parameter map are actually usable for searching against the combo
+			 * param index. E.g. no search modifiers, date comparators, etc.,
+			 * since these mean you can't use the combo index.
+			 *
+			 * 2. Apply and create the join SQl. We remove parameter values from
+			 * the map as we apply them, so any parameter values remaining in the
+			 * map after each loop haven't yet been factored into the SQL.
+			 *
+			 * The loop allows us to create multiple combo index joins if there
+			 * are multiple AND expressions for the related parameters.
+			 */
 			while (validateParamValuesAreValidForComboParam(theRequest, theParams, comboParamNames)) {
 				applyComboSearchParam(theQueryStack, theParams, theRequest, comboParamNames, comboParam);
 			}
@@ -1934,8 +1950,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			inputs.add(nextValues);
 		}
 
-		List<List<IQueryParameterType>> inputPermutations = PermutationBuilder.calculatePermutations(inputs);
-		List<String> indexStrings = new ArrayList<>(PermutationBuilder.calculatePermutationCount(inputs));
+		List<List<IQueryParameterType>> inputPermutations = Lists.cartesianProduct(inputs);
+		List<String> indexStrings = new ArrayList<>(CartesianProductUtil.calculateCartesianProductSize(inputs));
 		for (List<IQueryParameterType> nextPermutation : inputPermutations) {
 
 			StringBuilder searchStringBuilder = new StringBuilder();
@@ -2074,7 +2090,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			}
 		}
 
-		if (PermutationBuilder.calculatePermutationCount(paramOrValues) > 500) {
+		if (CartesianProductUtil.calculateCartesianProductSize(paramOrValues) > 500) {
 			ourLog.debug(
 					"Search is not a candidate for unique combo searching - Too many OR values would result in too many permutations");
 			paramValuesAreValidForCombo = false;

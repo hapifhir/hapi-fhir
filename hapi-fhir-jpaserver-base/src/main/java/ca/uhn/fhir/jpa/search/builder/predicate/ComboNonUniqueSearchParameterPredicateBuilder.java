@@ -23,9 +23,8 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboTokenNonUnique;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
-import com.healthmarketscience.sqlbuilder.BinaryCondition;
+import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import com.healthmarketscience.sqlbuilder.Condition;
-import com.healthmarketscience.sqlbuilder.InCondition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 
 import java.util.List;
@@ -48,18 +47,12 @@ public class ComboNonUniqueSearchParameterPredicateBuilder extends BaseSearchPar
 			RequestPartitionId theRequestPartitionId, List<String> theIndexStrings) {
 		PartitionablePartitionId partitionId =
 				PartitionablePartitionId.toStoragePartition(theRequestPartitionId, getPartitionSettings());
-		Condition predicate;
-		if (theIndexStrings.size() == 1) {
-			long hash = ResourceIndexedComboTokenNonUnique.calculateHashComplete(
-					getPartitionSettings(), partitionId, theIndexStrings.get(0));
-			predicate = BinaryCondition.equalTo(myColumnHashComplete, generatePlaceholder(hash));
-		} else {
-			List<Long> hashes = theIndexStrings.stream()
-					.map(t -> ResourceIndexedComboTokenNonUnique.calculateHashComplete(
-							getPartitionSettings(), partitionId, t))
-					.collect(Collectors.toList());
-			predicate = new InCondition(myColumnHashComplete, generatePlaceholders(hashes));
-		}
+		List<Long> hashes = theIndexStrings.stream()
+				.map(t -> ResourceIndexedComboTokenNonUnique.calculateHashComplete(
+						getPartitionSettings(), partitionId, t))
+				.collect(Collectors.toList());
+		Condition predicate =
+				QueryParameterUtils.toEqualToOrInPredicate(myColumnHashComplete, generatePlaceholders(hashes));
 		return combineWithRequestPartitionIdPredicate(theRequestPartitionId, predicate);
 	}
 }
