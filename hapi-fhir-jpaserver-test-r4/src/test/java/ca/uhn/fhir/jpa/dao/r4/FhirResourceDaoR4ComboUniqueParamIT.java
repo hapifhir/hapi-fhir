@@ -1343,7 +1343,9 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 
 		Patient pt1 = new Patient();
 		pt1.addName().setFamily("FAMILY1");
-		pt1.setManagingOrganization(new Reference("Organization/ORG"));
+		Reference r1 = new Reference("Organization/ORG");
+		r1.setResource(org);
+		pt1.setManagingOrganization(r1);
 		IIdType id1 = myPatientDao.update(pt1, "Patient?name=FAMILY1&organization.name=ORG", mySrd).getId().toUnqualifiedVersionless();
 
 		runInTransaction(() -> {
@@ -1357,7 +1359,9 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 
 		pt1 = new Patient();
 		pt1.addName().setFamily("FAMILY1");
-		pt1.setManagingOrganization(new Reference("Organization/ORG"));
+		Reference r2 = new Reference("Organization/ORG");
+		r1.setResource(org);
+		pt1.setManagingOrganization(r2);
 		myPatientDao.update(pt1, "Patient?name=FAMILY1&organization.name=ORG", mySrd).getId().toUnqualifiedVersionless();
 
 		runInTransaction(() -> {
