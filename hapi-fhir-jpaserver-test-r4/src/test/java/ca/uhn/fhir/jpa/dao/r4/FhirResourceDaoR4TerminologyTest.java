@@ -52,6 +52,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -1378,13 +1379,13 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 
 	@Test
 	void termConceptDesignationOver2000CharVal() {
-		final String stringWith4000Chars = IntStream.range(0, 4000)
+		final String stringWith8000Chars = IntStream.range(0, 8000)
 			.mapToObj(anInt -> "A")
 			.collect(Collectors.joining());
 
-		final TermConceptDesignation termConceptDesignation = new TermConceptDesignation()
-			.setValue(stringWith4000Chars);
-		myTermConceptDesignationDao.save(termConceptDesignation);
+		final TermConceptDesignation termConceptDesignation8000Chars = new TermConceptDesignation()
+			.setValue(stringWith8000Chars);
+		myTermConceptDesignationDao.save(termConceptDesignation8000Chars);
 
 		final List<TermConceptDesignation> allTermConceptDesignations  = myTermConceptDesignationDao.findAll();
 
@@ -1394,7 +1395,15 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 		final TermConceptDesignation termConceptDesignationFromDb = allTermConceptDesignations.get(0);
 
 		assertThat(termConceptDesignationFromDb.getValue())
-			.isEqualTo(stringWith4000Chars);
+			.isEqualTo(stringWith8000Chars);
+
+		final String stringWith8001Chars = IntStream.range(0, 8001)
+			.mapToObj(anInt -> "A")
+			.collect(Collectors.joining());
+
+		assertThatThrownBy(() -> myTermConceptDesignationDao.save(new TermConceptDesignation()
+			.setValue(stringWith8001Chars)))
+			.isInstanceOf(IllegalArgumentException.class);
 	}
 
 	private ArrayList<String> toCodesContains(List<ValueSetExpansionContainsComponent> theContains) {

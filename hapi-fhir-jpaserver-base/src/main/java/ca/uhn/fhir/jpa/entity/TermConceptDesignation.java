@@ -56,7 +56,7 @@ public class TermConceptDesignation implements Serializable {
 
 	public static final int MAX_LENGTH = 500;
 	public static final int MAX_VAL_LENGTH = 2000;
-	public static final int MAX_VAL_LENGTH_VAL = 4000;
+	public static final int MAX_VAL_LENGTH_VAL = 8000;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(
