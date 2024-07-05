@@ -35,8 +35,10 @@ import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hibernate.Length;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 import static org.apache.commons.lang3.StringUtils.left;
 import static org.apache.commons.lang3.StringUtils.length;
@@ -83,8 +85,11 @@ public class TermConceptDesignation implements Serializable {
 	@Column(name = "USE_DISPLAY", nullable = true, length = MAX_LENGTH)
 	private String myUseDisplay;
 
-	@Column(name = "VAL", nullable = false, length = MAX_VAL_LENGTH_VAL)
+	@Column(name = "VAL", nullable = false, length = MAX_VAL_LENGTH)
 	private String myValue;
+
+	@Column(name = "VAL_VC", nullable = false, length = Length.LONG32)
+	private String myValueVc;
 	/**
 	 * TODO: Make this non-null
 	 *
@@ -145,16 +150,11 @@ public class TermConceptDesignation implements Serializable {
 	}
 
 	public String getValue() {
-		return myValue;
+		return Objects.nonNull(myValueVc) ? myValueVc: myValue;
 	}
 
-	public TermConceptDesignation setValue(@Nonnull String theValue) {
-		ValidateUtil.isNotBlankOrThrowIllegalArgument(theValue, "theValue must not be null or empty");
-		ValidateUtil.isNotTooLongOrThrowIllegalArgument(
-				theValue,
-				MAX_VAL_LENGTH_VAL,
-				"Value exceeds maximum length (" + MAX_VAL_LENGTH_VAL + "): " + length(theValue));
-		myValue = theValue;
+	public TermConceptDesignation setValueVc(@Nonnull String theValueVc) {
+		myValue = theValueVc;
 		return this;
 	}
 
