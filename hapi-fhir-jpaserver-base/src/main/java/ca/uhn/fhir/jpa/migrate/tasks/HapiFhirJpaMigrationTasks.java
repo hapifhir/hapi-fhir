@@ -443,12 +443,12 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		{
 			version.onTable("TRM_CONCEPT_DESIG")
-					.modifyColumn("20240705.5", "VAL")
+					.modifyColumn("20240705.10", "VAL")
 					.nullable()
 					.withType(ColumnTypeEnum.STRING, 2000);
 
 			version.onTable("TRM_CONCEPT_DESIG")
-					.addColumn("20240705.10", "VAL_VC")
+					.addColumn("20240705.20", "VAL_VC")
 					.nullable()
 					.type(ColumnTypeEnum.TEXT);
 		}
