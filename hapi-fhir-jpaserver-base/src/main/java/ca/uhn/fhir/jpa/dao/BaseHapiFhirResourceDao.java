@@ -1398,13 +1398,13 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			IIdType theResourceId, MT theMetaDel, RequestDetails theRequest) {
 
 		RequestPartitionId requestPartitionId =
-			myRequestPartitionHelperService.determineReadPartitionForRequestForServerOperation(
-				theRequest, JpaConstants.OPERATION_META_DELETE);
+				myRequestPartitionHelperService.determineReadPartitionForRequestForServerOperation(
+						theRequest, JpaConstants.OPERATION_META_DELETE);
 
 		myTransactionService
-			.withRequest(theRequest)
-			.withRequestPartitionId(requestPartitionId)
-			.execute(() -> doMetaDeleteOperation(theResourceId, theMetaDel, theRequest, requestPartitionId));
+				.withRequest(theRequest)
+				.withRequestPartitionId(requestPartitionId)
+				.execute(() -> doMetaDeleteOperation(theResourceId, theMetaDel, theRequest, requestPartitionId));
 
 		@SuppressWarnings("unchecked")
 		MT retVal = (MT) metaGetOperation(theMetaDel.getClass(), theResourceId, theRequest);
@@ -1413,7 +1413,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	@Transactional
 	public <MT extends IBaseMetaType> void doMetaDeleteOperation(
-		IIdType theResourceId, MT theMetaDel, RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
+			IIdType theResourceId, MT theMetaDel, RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
 		TransactionDetails transactionDetails = new TransactionDetails();
 		StopWatch w = new StopWatch();
 
@@ -1425,7 +1425,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		ResourceTable latestVersion = readEntityLatestVersion(theResourceId, theRequestPartitionId, transactionDetails);
 		boolean nonVersionedTags =
-			myStorageSettings.getTagStorageMode() != JpaStorageSettings.TagStorageModeEnum.VERSIONED;
+				myStorageSettings.getTagStorageMode() != JpaStorageSettings.TagStorageModeEnum.VERSIONED;
 
 		if (latestVersion.getVersion() != entity.getVersion() || nonVersionedTags) {
 			doMetaDelete(theMetaDel, entity, theRequest, transactionDetails);
@@ -1433,7 +1433,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			doMetaDelete(theMetaDel, latestVersion, theRequest, transactionDetails);
 			// Also update history entry
 			ResourceHistoryTable history = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(
-				entity.getId(), entity.getVersion());
+					entity.getId(), entity.getVersion());
 			doMetaDelete(theMetaDel, history, theRequest, transactionDetails);
 		}
 
