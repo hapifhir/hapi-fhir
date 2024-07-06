@@ -48,15 +48,17 @@ public class PartitionedUrl implements IModelJson {
 		return myUrl;
 	}
 
-	public void setUrl(String theUrl) {
+	public PartitionedUrl setUrl(String theUrl) {
 		myUrl = theUrl;
+		return this;
 	}
 
 	public RequestPartitionId getRequestPartitionId() {
 		return myRequestPartitionId;
 	}
 
-	public void setRequestPartitionId(RequestPartitionId theRequestPartitionId) {
+	public PartitionedUrl setRequestPartitionId(RequestPartitionId theRequestPartitionId) {
 		myRequestPartitionId = theRequestPartitionId;
+		return this;
 	}
 }
