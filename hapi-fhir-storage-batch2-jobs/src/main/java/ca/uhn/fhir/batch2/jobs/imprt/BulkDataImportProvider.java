@@ -159,10 +159,8 @@ public class BulkDataImportProvider {
 		RequestPartitionId partitionId =
 				myRequestPartitionHelperService.determineReadPartitionForRequestForServerOperation(
 						theRequestDetails, JpaConstants.OPERATION_IMPORT);
-		if (!partitionId.isAllPartitions()) {
-			myRequestPartitionHelperService.validateHasPartitionPermissions(theRequestDetails, "Binary", partitionId);
-			jobParameters.setPartitionId(partitionId);
-		}
+		myRequestPartitionHelperService.validateHasPartitionPermissions(theRequestDetails, "Binary", partitionId);
+		jobParameters.setPartitionId(partitionId);
 
 		// Extract all the URLs and order them in the order that is least
 		// likely to result in conflict (e.g. Patients before Observations
