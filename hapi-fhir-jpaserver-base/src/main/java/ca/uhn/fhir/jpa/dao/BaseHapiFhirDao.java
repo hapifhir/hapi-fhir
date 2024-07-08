@@ -1284,10 +1284,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 								myInterceptorBroadcaster, theRequest, Pointcut.JPA_PERFTRACE_INFO, params);
 					}
 				}
-
-				// Synchronize composite params
-				mySearchParamWithInlineReferencesExtractor.storeUniqueComboParameters(
-						newParams, entity, existingParams);
 			}
 		}
 

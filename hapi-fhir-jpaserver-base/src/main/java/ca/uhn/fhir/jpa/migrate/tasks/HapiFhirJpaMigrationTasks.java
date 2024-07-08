@@ -32,10 +32,12 @@ import ca.uhn.fhir.jpa.migrate.taskdef.ForceIdMigrationCopyTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.ForceIdMigrationFixTask;
 import ca.uhn.fhir.jpa.migrate.tasks.api.BaseMigrationTasks;
 import ca.uhn.fhir.jpa.migrate.tasks.api.Builder;
+import ca.uhn.fhir.jpa.migrate.tasks.api.ColumnAndNullable;
 import ca.uhn.fhir.jpa.migrate.tasks.api.TaskFlagEnum;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
@@ -127,7 +129,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 	protected void init740() {
 		// Start of migrations from 7.2 to 7.4
 
-		Builder version = forVersion(VersionEnum.V7_4_0);
+		final Builder version = forVersion(VersionEnum.V7_4_0);
 
 		{
 			version.onTable("HFJ_RES_SEARCH_URL")
@@ -347,6 +349,96 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 					.nullable()
 					.withType(ColumnTypeEnum.STRING, 100)
 					.failureAllowed();
+
+			{
+				// Please see https://github.com/hapifhir/hapi-fhir/issues/6033 for why we're doing this
+				version.onTable("HFJ_RES_SEARCH_URL")
+						.addColumn("20240618.2", "PARTITION_ID", -1)
+						.nullable()
+						.type(ColumnTypeEnum.INT);
+
+				version.onTable("HFJ_RES_SEARCH_URL")
+						.addColumn("20240618.3", "PARTITION_DATE")
+						.nullable()
+						.type(ColumnTypeEnum.DATE_ONLY);
+
+				version.executeRawSql("20240618.4", "UPDATE HFJ_RES_SEARCH_URL SET PARTITION_ID = -1");
+
+				version.onTable("HFJ_RES_SEARCH_URL")
+						.modifyColumn("20240618.5", "PARTITION_ID")
+						.nonNullable()
+						.withType(ColumnTypeEnum.INT);
+
+				version.onTable("HFJ_RES_SEARCH_URL").dropPrimaryKey("20240618.6");
+
+				version.onTable("HFJ_RES_SEARCH_URL").addPrimaryKey("20240618.7", "RES_SEARCH_URL", "PARTITION_ID");
+			}
+		}
+
+		{
+			// Note that these are recreations of a previous migration from 6.6.0. The original migration had these set
+			// as unique,
+			// which causes SQL Server to create a filtered index. See
+			// https://www.sqlshack.com/introduction-to-sql-server-filtered-indexes/
+			// What this means for hibernate search is that for any column that is nullable, the SQLServerDialect will
+			// omit the whole row from the index if
+			// the value of the nullable column is actually null. Removing the uniqueness constraint works around this
+			// problem.
+			Builder.BuilderWithTableName uriTable = version.onTable("HFJ_SPIDX_URI");
+
+			uriTable.dropIndex("20240620.10", "IDX_SP_URI_HASH_URI_V2");
+			uriTable.dropIndex("20240620.20", "IDX_SP_URI_HASH_IDENTITY_V2");
+
+			uriTable.addIndex("20240620.30", "IDX_SP_URI_HASH_URI_V2")
+					.unique(false)
+					.online(true)
+					.withPossibleNullableColumns(
+							new ColumnAndNullable("HASH_URI", true),
+							new ColumnAndNullable("RES_ID", false),
+							new ColumnAndNullable("PARTITION_ID", true));
+			uriTable.addIndex("20240620.40", "IDX_SP_URI_HASH_IDENTITY_V2")
+					.unique(false)
+					.online(true)
+					.withPossibleNullableColumns(
+							new ColumnAndNullable("HASH_IDENTITY", true),
+							new ColumnAndNullable("SP_URI", true),
+							new ColumnAndNullable("RES_ID", false),
+							new ColumnAndNullable("PARTITION_ID", true));
+		}
+
+		/*
+		 * Add hash columns to the combo param index tables
+		 */
+		{
+			version.onTable("HFJ_IDX_CMB_TOK_NU")
+					.addIndex("20240625.10", "IDX_IDXCMBTOKNU_HASHC")
+					.unique(false)
+					.withColumns("HASH_COMPLETE", "RES_ID", "PARTITION_ID");
+			version.onTable("HFJ_IDX_CMP_STRING_UNIQ")
+					.addColumn("20240625.20", "HASH_COMPLETE")
+					.nullable()
+					.type(ColumnTypeEnum.LONG);
+			version.onTable("HFJ_IDX_CMP_STRING_UNIQ")
+					.addColumn("20240625.30", "HASH_COMPLETE_2")
+					.nullable()
+					.type(ColumnTypeEnum.LONG);
+			version.onTable("HFJ_IDX_CMP_STRING_UNIQ")
+					.addTask(
+							new CalculateHashesTask(VersionEnum.V7_4_0, "20240625.40") {
+								@Override
+								protected boolean shouldSkipTask() {
+									return false;
+								}
+							}.setPidColumnName("PID")
+									.addCalculator(
+											"HASH_COMPLETE",
+											t -> ResourceIndexedComboStringUnique.calculateHashComplete(
+													t.getString("IDX_STRING")))
+									.addCalculator(
+											"HASH_COMPLETE_2",
+											t -> ResourceIndexedComboStringUnique.calculateHashComplete2(
+													t.getString("IDX_STRING")))
+									.setColumnName("HASH_COMPLETE"));
 
 			{ // These migrations permit much longer values to be stored in SPIDX_TOKEN and SPIDX_STRING value
 				// components.

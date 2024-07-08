@@ -63,6 +63,12 @@ public class MigrationTaskList implements Iterable<BaseTask> {
 		return new MigrationTaskList(unappliedTasks);
 	}
 
+	public MigrationTaskList getUnskippableTasks() {
+		List<BaseTask> tasks =
+				myTasks.stream().filter(t -> !t.isHeavyweightSkippableTask()).collect(Collectors.toList());
+		return new MigrationTaskList(tasks);
+	}
+
 	public void append(Iterable<BaseTask> theMigrationTasks) {
 		for (BaseTask next : theMigrationTasks) {
 			myTasks.add(next);

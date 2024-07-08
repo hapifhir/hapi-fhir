@@ -8,5 +8,17 @@
 	<root level="info">
 		<appender-ref ref="STDOUT" />
 	</root>
+<!--Uncomment the below if you are doing Elasticsearch debugging -->
+
+<!--	<logger name="org.hibernate.search.elasticsearch.request" additivity="false" level="trace">-->
+<!--		<appender-ref ref="STDOUT" />-->
+<!--	</logger>-->
+<!--	<logger name="org.elasticsearch.client" level="debug" additivity="false">-->
+<!--		<appender-ref ref="STDOUT" />-->
+<!--	</logger>-->
+<!--	<logger name="tracer" level="TRACE" additivity="false">-->
+<!--		<appender-ref ref="STDOUT" />-->
+<!--	</logger>-->
+
 
 </configuration>

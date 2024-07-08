@@ -22,15 +22,20 @@ package ca.uhn.fhir.util.bundle;
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
+import java.math.BigDecimal;
+
 public class SearchBundleEntryParts {
 	private final IBaseResource myResource;
 	private final BundleEntrySearchModeEnum mySearchMode;
+	private final BigDecimal mySearchScore;
 	private final String myFullUrl;
 
-	public SearchBundleEntryParts(String theFullUrl, IBaseResource theResource, String theSearchMode) {
+	public SearchBundleEntryParts(
+			String theFullUrl, IBaseResource theResource, String theSearchMode, BigDecimal theSearchScore) {
 		myFullUrl = theFullUrl;
 		myResource = theResource;
 		mySearchMode = BundleEntrySearchModeEnum.forCode(theSearchMode);
+		mySearchScore = theSearchScore;
 	}
 
 	public String getFullUrl() {
@@ -43,5 +48,9 @@ public class SearchBundleEntryParts {
 
 	public BundleEntrySearchModeEnum getSearchMode() {
 		return mySearchMode;
+	}
+
+	public BigDecimal getSearchScore() {
+		return mySearchScore;
 	}
 }

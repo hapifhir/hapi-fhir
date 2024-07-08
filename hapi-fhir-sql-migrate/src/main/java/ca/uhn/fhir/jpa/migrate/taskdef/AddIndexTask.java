@@ -34,6 +34,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class AddIndexTask extends BaseTableTask {
 
@@ -41,6 +42,7 @@ public class AddIndexTask extends BaseTableTask {
 
 	private String myIndexName;
 	private List<String> myColumns;
+	private List<String> myNullableColumns;
 	private Boolean myUnique;
 	private List<String> myIncludeColumns = Collections.emptyList();
 	/** Should the operation avoid taking a lock on the table */
@@ -62,6 +64,14 @@ public class AddIndexTask extends BaseTableTask {
 
 	public void setUnique(boolean theUnique) {
 		myUnique = theUnique;
+	}
+
+	public List<String> getNullableColumns() {
+		return myNullableColumns;
+	}
+
+	public void setNullableColumns(List<String> theNullableColumns) {
+		this.myNullableColumns = theNullableColumns;
 	}
 
 	@Override
@@ -171,20 +181,25 @@ public class AddIndexTask extends BaseTableTask {
 
 	@Nonnull
 	private String buildMSSqlNotNullWhereClause() {
-		String mssqlWhereClause;
-		mssqlWhereClause = " WHERE (";
-		for (int i = 0; i < myColumns.size(); i++) {
-			mssqlWhereClause += myColumns.get(i) + " IS NOT NULL ";
-			if (i < myColumns.size() - 1) {
-				mssqlWhereClause += "AND ";
-			}
+		String mssqlWhereClause = "";
+		if (myNullableColumns == null || myNullableColumns.isEmpty()) {
+			return mssqlWhereClause;
 		}
+
+		mssqlWhereClause = " WHERE (";
+		mssqlWhereClause += myNullableColumns.stream()
+				.map(column -> column + " IS NOT NULL ")
+				.collect(Collectors.joining("AND"));
 		mssqlWhereClause += ")";
 		return mssqlWhereClause;
 	}
 
 	public void setColumns(String... theColumns) {
 		setColumns(Arrays.asList(theColumns));
+	}
+
+	public void setNullableColumns(String... theColumns) {
+		setNullableColumns(Arrays.asList(theColumns));
 	}
 
 	public void setIncludeColumns(String... theIncludeColumns) {

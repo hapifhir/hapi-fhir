@@ -45,6 +45,7 @@ import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Resource;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -180,6 +181,10 @@ public class R4BundleFactory implements IVersionSpecificBundleFactory {
 			BundleEntrySearchModeEnum searchMode = ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.get(nextAsResource);
 			if (searchMode != null) {
 				entry.getSearch().getModeElement().setValueAsString(searchMode.getCode());
+			}
+			BigDecimal searchScore = ResourceMetadataKeyEnum.ENTRY_SEARCH_SCORE.get(nextAsResource);
+			if (searchScore != null) {
+				entry.getSearch().getScoreElement().setValue(searchScore);
 			}
 		}
 
