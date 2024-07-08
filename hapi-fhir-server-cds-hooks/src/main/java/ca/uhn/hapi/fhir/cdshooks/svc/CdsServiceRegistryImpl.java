@@ -69,8 +69,9 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 		myCdsHooksContextBooter = theCdsHooksContextBooter;
 		myCdsPrefetchSvc = theCdsPrefetchSvc;
 		myObjectMapper = theObjectMapper;
-		// registering this deserializer here to
-		// avoid circular dependency
+		// registering this deserializer here instead of
+		// CdsHooksObjectMapperFactory to avoid circular
+		// dependency
 		SimpleModule module = new SimpleModule();
 		module.addDeserializer(
 				CdsServiceRequestJson.class, new CdsServiceRequestJsonDeserializer(this, theFhirContext));
