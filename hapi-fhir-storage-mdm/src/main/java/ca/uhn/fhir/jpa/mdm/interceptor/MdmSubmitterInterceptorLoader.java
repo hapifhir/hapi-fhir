@@ -50,6 +50,8 @@ public class MdmSubmitterInterceptorLoader {
 	@Autowired
 	private IInterceptorService myInterceptorService;
 
+	public MdmSubmitterInterceptorLoader() {}
+
 	@PostConstruct
 	public void loadInterceptors() {
 		if (!myMdmSettings.isEnabled()) {
