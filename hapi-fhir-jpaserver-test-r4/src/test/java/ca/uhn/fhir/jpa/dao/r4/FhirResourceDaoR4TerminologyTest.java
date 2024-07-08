@@ -6,6 +6,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
+import ca.uhn.fhir.jpa.entity.TermConceptDesignation;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -48,8 +49,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -1372,6 +1375,27 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 			assertEquals("Unable to find imported value set http://hl7.org/fhir/ValueSet/FOO", e.getMessage());
 		}
 
+	}
+
+	@Test
+	void termConceptDesignationOver2000CharVal() {
+		final String stringWith8000Chars = IntStream.range(0, 8000)
+			.mapToObj(anInt -> "B")
+			.collect(Collectors.joining());
+
+		final TermConceptDesignation termConceptDesignation8000Chars = new TermConceptDesignation()
+			.setValue(stringWith8000Chars);
+		myTermConceptDesignationDao.save(termConceptDesignation8000Chars);
+
+		final List<TermConceptDesignation> allTermConceptDesignations  = myTermConceptDesignationDao.findAll();
+
+		assertThat(allTermConceptDesignations)
+			.hasSize(1);
+
+		final TermConceptDesignation termConceptDesignationFromDb = allTermConceptDesignations.get(0);
+
+		assertThat(termConceptDesignationFromDb.getValue())
+			.isEqualTo(stringWith8000Chars);
 	}
 
 	private ArrayList<String> toCodesContains(List<ValueSetExpansionContainsComponent> theContains) {
