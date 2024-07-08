@@ -12,9 +12,8 @@ import ca.uhn.fhir.rest.server.interceptor.auth.IAuthorizationSearchParamMatcher
 import ca.uhn.fhir.rest.server.interceptor.auth.PolicyEnum;
 import ca.uhn.fhir.rest.server.interceptor.auth.RuleBuilder;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
-import ca.uhn.test.util.LogEventIterableAssert;
 import ca.uhn.test.util.LogbackTestExtension;
-import ch.qos.logback.classic.Level;
+import ca.uhn.test.util.LogbackTestExtensionAssert;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -272,7 +271,7 @@ class FhirQueryRuleImplTest implements ITestDataBuilder {
 
 			// then
 			assertNull(verdict);
-			LogEventIterableAssert.assertThat(myLogCapture.getLogEvents()).hasEventWithLevelAndMessageContains(Level.WARN, "unsupported chain XXX");
+			LogbackTestExtensionAssert.assertThat(myLogCapture).hasWarn("unsupported chain XXX");
 		}
 
 		@Test
@@ -287,7 +286,7 @@ class FhirQueryRuleImplTest implements ITestDataBuilder {
 
 			// then
 			assertEquals(PolicyEnum.DENY, verdict.getDecision());
-			LogEventIterableAssert.assertThat(myLogCapture.getLogEvents()).hasEventWithLevelAndMessageContains(Level.WARN, "unsupported chain XXX");
+			LogbackTestExtensionAssert.assertThat(myLogCapture).hasWarn("unsupported chain XXX");
 		}
 
 		/**
@@ -306,7 +305,7 @@ class FhirQueryRuleImplTest implements ITestDataBuilder {
 
 			// then
 			assertNull(verdict);
-			LogEventIterableAssert.assertThat(myLogCapture.getLogEvents()).hasEventWithLevelAndMessageContains(Level.WARN, "No matcher provided");
+			LogbackTestExtensionAssert.assertThat(myLogCapture).hasWarn("No matcher provided");
 		}
 
 	}

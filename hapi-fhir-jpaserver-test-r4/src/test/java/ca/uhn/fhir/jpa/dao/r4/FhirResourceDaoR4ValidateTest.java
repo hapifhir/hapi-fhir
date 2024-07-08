@@ -111,7 +111,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
+public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4ValidateTest.class);
 	@Autowired
 	private IValidatorModule myValidatorModule;
@@ -129,7 +129,7 @@ class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	private InMemoryTerminologyServerValidationSupport myInMemoryTerminologyServerValidationSupport;
 
 	@AfterEach
-	void after() {
+	public void after() {
 		FhirInstanceValidator val = AopTestUtils.getTargetObject(myValidatorModule);
 		val.setBestPracticeWarningLevel(BestPracticeWarningLevel.Warning);
 
@@ -150,7 +150,7 @@ class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	void testValidateCodeInValueSetWithUnknownCodeSystem_FailValidation() {
+	public void testValidateCodeInValueSetWithUnknownCodeSystem_FailValidation() {
 		createStructureDefWithBindingToUnknownCs(true);
 
 		Observation obs = createObservationForUnknownCodeSystemTest();
@@ -177,7 +177,7 @@ class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	void testValidateCodeInEnumeratedValueSetWithUnknownCodeSystem_Information() {
+	public void testValidateCodeInEnumeratedValueSetWithUnknownCodeSystem_Information() {
 		myUnknownCodeSystemWarningValidationSupport.setNonExistentCodeSystemSeverity(IValidationSupport.IssueSeverity.INFORMATION);
 
 		createStructureDefWithBindingToUnknownCs(true);
@@ -211,7 +211,7 @@ class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	 * By default, an unknown code system should fail validation
 	 */
 	@Test
-	void testValidateCodeInEnumeratedValueSetWithUnknownCodeSystem_Warning() {
+	public void testValidateCodeInEnumeratedValueSetWithUnknownCodeSystem_Warning() {
 		// set to warning
 		myUnknownCodeSystemWarningValidationSupport.setNonExistentCodeSystemSeverity(IValidationSupport.IssueSeverity.WARNING);
 
@@ -244,7 +244,7 @@ class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	void testValidateCodeInEnumeratedValueSetWithUnknownCodeSystem_Error() {
+	public void testValidateCodeInEnumeratedValueSetWithUnknownCodeSystem_Error() {
 		myUnknownCodeSystemWarningValidationSupport.setNonExistentCodeSystemSeverity(IValidationSupport.IssueSeverity.ERROR);
 
 		createStructureDefWithBindingToUnknownCs(true);
@@ -284,7 +284,7 @@ class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 
 	@Test
-	void testValidateCodeInNonEnumeratedValueSetWithUnknownCodeSystem_Information() {
+	public void testValidateCodeInNonEnumeratedValueSetWithUnknownCodeSystem_Information() {
 		myUnknownCodeSystemWarningValidationSupport.setNonExistentCodeSystemSeverity(IValidationSupport.IssueSeverity.INFORMATION);
 
 		createStructureDefWithBindingToUnknownCs(false);
@@ -317,7 +317,7 @@ class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	 * By default, an unknown code system should fail validation
 	 */
 	@Test
-	void testValidateCodeInNonEnumeratedValueSetWithUnknownCodeSystem_Warning() {
+	public void testValidateCodeInNonEnumeratedValueSetWithUnknownCodeSystem_Warning() {
 		// set to warning
 		myUnknownCodeSystemWarningValidationSupport.setNonExistentCodeSystemSeverity(IValidationSupport.IssueSeverity.WARNING);
 
@@ -348,7 +348,7 @@ class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	void testValidateCodeInNonEnumeratedValueSetWithUnknownCodeSystem_Error() {
+	public void testValidateCodeInNonEnumeratedValueSetWithUnknownCodeSystem_Error() {
 		myUnknownCodeSystemWarningValidationSupport.setNonExistentCodeSystemSeverity(IValidationSupport.IssueSeverity.ERROR);
 
 		createStructureDefWithBindingToUnknownCs(false);
@@ -390,7 +390,10 @@ class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		assertThat(notInValueSetError.getLocation()).hasSize(2);
 		assertEquals("Observation.value.ofType(Quantity)", notInValueSetError.getLocation().get(0).getValue());
 		assertEquals("Line[27] Col[4]", notInValueSetError.getLocation().get(1).getValue());
+
+
 	}
+
 
 	private Observation createObservationForUnknownCodeSystemTest() {
 		Observation obs = new Observation();
@@ -407,7 +410,7 @@ class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	void testValidateCodeInValueSet_InferredCodeSystem_WarningOnUnknown() {
+	public void testValidateCodeInValueSet_InferredCodeSystem_WarningOnUnknown() {
 		// set to warning
 		myUnknownCodeSystemWarningValidationSupport.setNonExistentCodeSystemSeverity(IValidationSupport.IssueSeverity.WARNING);
 
@@ -423,10 +426,11 @@ class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		encoded = encode(oo);
 		ourLog.info(encoded);
 		assertThat(oo.getIssueFirstRep().getDiagnostics()).contains("No issues detected during validation");
+
 	}
 
 	@Test
-	void testValidateCodeInValueSet_InferredCodeSystem_ErrorOnUnknown() {
+	public void testValidateCodeInValueSet_InferredCodeSystem_ErrorOnUnknown() {
 		// set to warning
 		myUnknownCodeSystemWarningValidationSupport.setNonExistentCodeSystemSeverity(IValidationSupport.IssueSeverity.ERROR);
 
@@ -442,9 +446,11 @@ class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		encoded = encode(oo);
 		ourLog.info(encoded);
 		assertThat(oo.getIssueFirstRep().getDiagnostics()).contains("No issues detected during validation");
+
 	}
 
-	private void createStructureDefWithBindingToUnknownCs(boolean theEnumeratedCodeSystem) {
+
+	public void createStructureDefWithBindingToUnknownCs(boolean theEnumeratedCodeSystem) {
 		myValidationSupport.fetchCodeSystem("http://not-exist"); // preload DefaultProfileValidationSupport
 
 		ValueSet vs = new ValueSet();
@@ -474,7 +480,7 @@ class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	void testGenerateSnapshotOnStructureDefinitionWithNoBase() {
+	public void testGenerateSnapshotOnStructureDefinitionWithNoBase() {
 
 		// No base populated here, which isn't valid
 		StructureDefinition sd = new StructureDefinition();
@@ -520,7 +526,7 @@ class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	 * Use a valueset that explicitly brings in some UCUM codes
 	 */
 	@Test
-	void testValidateCodeInValueSetWithBuiltInCodeSystem() throws IOException {
+	public void testValidateCodeInValueSetWithBuiltInCodeSystem() throws IOException {
 		myValueSetDao.create(loadResourceFromClasspath(ValueSet.class, "/r4/bl/bb-vs.json"));
 		myStructureDefinitionDao.create(loadResourceFromClasspath(StructureDefinition.class, "/r4/bl/bb-sd.json"));
 
@@ -573,10 +579,12 @@ class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		outcomeStr = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 		ourLog.info("Validation outcome: {}", outcomeStr);
 		assertThat(outcomeStr).contains("provided (http://unitsofmeasure.org#cm) was not found in the value set");
+
 	}
 
+
 	@Test
-	void testValidateCodeUsingQuantityBinding() throws IOException {
+	public void testValidateCodeUsingQuantityBinding() throws IOException {
 		myValueSetDao.create(loadResourceFromClasspath(ValueSet.class, "/r4/bl/bb-vs.json"));
 		myStructureDefinitionDao.create(loadResourceFromClasspath(StructureDefinition.class, "/r4/bl/bb-sd.json"));
 
@@ -612,7 +620,7 @@ class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	 * the in-memory expander
 	 */
 	@Test
-	void testValidateCode_InMemoryExpansionAgainstHugeValueSet() throws Exception {
+	public void testValidateCode_InMemoryExpansionAgainstHugeValueSet() throws Exception {
 		myStorageSettings.setPreExpandValueSets(false);
 
 		ValueSet vs = new ValueSet();
@@ -702,10 +710,12 @@ class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		oo = validateAndReturnOutcome(obs);
 		assertThat(oo.getIssueFirstRep().getDiagnostics()).as(encode(oo)).isEqualTo("No issues detected during validation");
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+
+
 	}
 
 	@Test
-	void testValidateProfileTargetType_PolicyCheckValid() throws IOException {
+	public void testValidateProfileTargetType_PolicyCheckValid() throws IOException {
 		myValidationSettings.setLocalReferenceValidationDefaultPolicy(ReferenceValidationPolicy.CHECK_VALID);
 
 		StructureDefinition profile = loadResourceFromClasspath(StructureDefinition.class, "/r4/profile-vitalsigns-all-loinc.json");
@@ -772,10 +782,11 @@ class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		oo = validateAndReturnOutcome(obs);
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
 		assertThat(oo.getIssueFirstRep().getDiagnostics()).as(encode(oo)).isEqualTo("No issues detected during validation");
+
 	}
 
 	@Test
-	void testValidateProfileTargetType_PolicyCheckExistsAndType() throws IOException {
+	public void testValidateProfileTargetType_PolicyCheckExistsAndType() throws IOException {
 		myValidationSettings.setLocalReferenceValidationDefaultPolicy(ReferenceValidationPolicy.CHECK_EXISTS_AND_TYPE);
 
 		StructureDefinition profile = loadResourceFromClasspath(StructureDefinition.class, "/r4/profile-vitalsigns-all-loinc.json");
@@ -841,10 +852,12 @@ class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		oo = validateAndReturnOutcome(obs);
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
 		assertThat(oo.getIssueFirstRep().getDiagnostics()).as(encode(oo)).isEqualTo("No issues detected during validation");
+
 	}
 
+
 	@Test
-	void testValidateProfileTargetType_PolicyCheckExists() throws IOException {
+	public void testValidateProfileTargetType_PolicyCheckExists() throws IOException {
 		myValidationSettings.setLocalReferenceValidationDefaultPolicy(ReferenceValidationPolicy.CHECK_EXISTS);
 
 		StructureDefinition profile = loadResourceFromClasspath(StructureDefinition.class, "/r4/profile-vitalsigns-all-loinc.json");
@@ -908,10 +921,12 @@ class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		oo = validateAndReturnOutcome(obs);
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
 		assertThat(oo.getIssueFirstRep().getDiagnostics()).as(encode(oo)).isEqualTo("No issues detected during validation");
+
 	}
 
+
 	@Test
-	void testValidateValueSet() {
+	public void testValidateValueSet() {
 		String input = "{\n" +
 			"  \"resourceType\": \"ValueSet\",\n" +
 			"  \"meta\": {\n" +
@@ -963,7 +978,7 @@ class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	void testValidateWithFragmentCodeSystem_NoDirectBinding() throws IOException {
+	public void testValidateWithFragmentCodeSystem_NoDirectBinding() throws IOException {
 		myCodeSystemDao.create(loadResourceFromClasspath(CodeSystem.class, "/r4/fragment/codesystem.json"));
 
 		Location location = new Location();
@@ -990,7 +1005,7 @@ class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	 * We should generate a warning if a code can't be found but the codesystem is a fragment
 	 */
 	@Test
-	void testValidateWithFragmentCodeSystem_WithDirectBinding() throws IOException {
+	public void testValidateWithFragmentCodeSystem_WithDirectBinding() throws IOException {
 		myStructureDefinitionDao.create(loadResourceFromClasspath(StructureDefinition.class, "/r4/fragment/structuredefinition.json"));
 		myCodeSystemDao.create(loadResourceFromClasspath(CodeSystem.class, "/r4/fragment/codesystem.json"));
 		myValueSetDao.create(loadResourceFromClasspath(ValueSet.class, "/r4/fragment/valueset.json"));
@@ -1038,7 +1053,7 @@ class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	void testIsCodeSystemSupported() {
+	public void testIsCodeSystemSupported() {
 		ValidationSupportContext ctx = new ValidationSupportContext(myValidationSupport);
 
 		boolean outcome = myValidationSupport.isCodeSystemSupported(ctx, "http://terminology.hl7.org/CodeSystem/v2-0203-FOO");
@@ -1057,7 +1072,7 @@ class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	 * the in-memory expander
 	 */
 	@Test
-	void testValidateCode_PreExpansionAgainstHugeValueSet() throws Exception {
+	public void testValidateCode_PreExpansionAgainstHugeValueSet() throws Exception {
 		myStorageSettings.setPreExpandValueSets(true);
 
 		// Add a bunch of codes
@@ -1131,13 +1146,14 @@ class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		obs.getCategoryFirstRep().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("FOO");
 		oo = validateAndReturnOutcome(obs);
 		assertThat(oo.getIssueFirstRep().getDiagnostics()).as(encode(oo)).isEqualTo("Unknown code 'http://terminology.hl7.org/CodeSystem/observation-category#FOO'");
+
 	}
 
 	/**
 	 * Make sure that we do something sane when validating throws an unexpected exception
 	 */
 	@Test
-	void testValidate_ValidationSupportThrowsException() {
+	public void testValidate_ValidationSupportThrowsException() {
 		IValidationSupport validationSupport = mock(IValidationSupport.class);
 		when(validationSupport.validateCodeInValueSet(any(), any(), any(), any(), any(), any())).thenAnswer(t -> {
 			// This will fail with a constraint error
@@ -1181,7 +1197,7 @@ class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	 */
 	@Test
 	@Disabled
-	void testValidate_TermSvcHasDatabaseRollback() {
+	public void testValidate_TermSvcHasDatabaseRollback() {
 		TermReadSvcImpl.setInvokeOnNextCallForUnitTest(() -> {
 			try {
 				myResourceTableDao.save(new ResourceTable());
@@ -1214,7 +1230,7 @@ class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	 * Make sure that we do something sane when validating throws an unexpected exception
 	 */
 	@Test
-	void testValidate_TermSvcHasNpe() {
+	public void testValidate_TermSvcHasNpe() {
 
 		CodeSystem cs = new CodeSystem();
 		cs.setUrl("http://FOO");
@@ -1246,7 +1262,7 @@ class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	void testValidateCodeableConceptWithNoSystem() {
+	public void testValidateCodeableConceptWithNoSystem() {
 		AllergyIntolerance allergy = new AllergyIntolerance();
 		allergy.getText().setStatus(Narrative.NarrativeStatus.GENERATED).getDiv().setValue("<div>hi!</div>");
 		allergy.getClinicalStatus().addCoding().setSystem(null).setCode("active").setDisplay("Active");
@@ -1288,7 +1304,7 @@ class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	void testValidateStructureDefinition() throws Exception {
+	public void testValidateStructureDefinition() throws Exception {
 		String input = IOUtils.toString(getClass().getResourceAsStream("/r4/sd-david-dhtest7.json"), StandardCharsets.UTF_8);
 		StructureDefinition sd = myFhirContext.newJsonParser().parseResource(StructureDefinition.class, input);
 
@@ -1313,7 +1329,7 @@ class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	void testValidateDocument() throws Exception {
+	public void testValidateDocument() throws Exception {
 		String input = IOUtils.toString(getClass().getResourceAsStream("/r4/document-bundle.json"), StandardCharsets.UTF_8);
 		Bundle document = myFhirContext.newJsonParser().parseResource(Bundle.class, input);
 
@@ -1327,7 +1343,7 @@ class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 	@Test
 	@Disabled
-	void testValidateResourceContainingProfileDeclarationJson() throws Exception {
+	public void testValidateResourceContainingProfileDeclarationJson() throws Exception {
 		String methodName = "testValidateResourceContainingProfileDeclarationJson";
 		OperationOutcome outcome = doTestValidateResourceContainingProfileDeclaration(methodName, EncodingEnum.JSON);
 
@@ -1340,7 +1356,7 @@ class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 	@Test
 	@Disabled
-	void testValidateResourceContainingProfileDeclarationXml() throws Exception {
+	public void testValidateResourceContainingProfileDeclarationXml() throws Exception {
 		String methodName = "testValidateResourceContainingProfileDeclarationXml";
 		OperationOutcome outcome = doTestValidateResourceContainingProfileDeclaration(methodName, EncodingEnum.XML);
 
@@ -1352,7 +1368,7 @@ class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	void testValidateUsingExternallyDefinedCode() {
+	public void testValidateUsingExternallyDefinedCode() {
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setUrl("http://foo");
 		codeSystem.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
@@ -1381,10 +1397,11 @@ class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		assertEquals(1, OperationOutcomeUtil.getIssueCount(myFhirContext, oo));
 		assertThat(OperationOutcomeUtil.getFirstIssueDetails(myFhirContext, oo)).contains("None of the codings provided are in the value set 'IdentifierType'");
 		assertThat(OperationOutcomeUtil.getFirstIssueDetails(myFhirContext, oo)).contains("a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = http://foo#bar)");
+
 	}
 
 	@Test
-	void testValidateUsingExternallyDefinedCodeMisMatchDisplay_InMemory_ShouldLogWarning() {
+	public void testValidateUsingExternallyDefinedCodeMisMatchDisplay_InMemory_ShouldLogWarning() {
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setUrl("http://foo");
 		codeSystem.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
@@ -1474,7 +1491,7 @@ class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	void validateResource_withUnknownMetaProfileurl_validatesButLogsWarning() {
+	public void validateResource_withUnknownMetaProfileurl_validatesButLogsWarning() {
 		// setup
 		IParser parser = myFhirContext.newJsonParser();
 
@@ -1511,7 +1528,7 @@ class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	void validateResource_withMetaProfileWithVersion_validatesAsExpected() {
+	public void validateResource_withMetaProfileWithVersion_validatesAsExpected() {
 		// setup
 		IParser parser = myFhirContext.newJsonParser();
 
@@ -1644,7 +1661,7 @@ class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	void testValidateResourceContainingProfileDeclarationInvalid() {
+	public void testValidateResourceContainingProfileDeclarationInvalid() {
 		String methodName = "testValidateResourceContainingProfileDeclarationInvalid";
 
 		Observation input = new Observation();
@@ -1668,7 +1685,7 @@ class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	void testValidateBundleContainingResourceContainingProfileDeclarationInvalid() {
+	public void testValidateBundleContainingResourceContainingProfileDeclarationInvalid() {
 		String methodName = "testValidateResourceContainingProfileDeclarationInvalid";
 
 		Observation observation = new Observation();
@@ -1701,7 +1718,7 @@ class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	void testValidateWithCanonicalReference() {
+	public void testValidateWithCanonicalReference() {
 		FhirInstanceValidator val = AopTestUtils.getTargetObject(myValidatorModule);
 		val.setBestPracticeWarningLevel(BestPracticeWarningLevel.Ignore);
 
@@ -1741,7 +1758,7 @@ class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	void testValidateCapabilityStatement() {
+	public void testValidateCapabilityStatement() {
 
 		SearchParameter sp = new SearchParameter();
 		sp.setUrl("http://example.com/name");
@@ -1838,7 +1855,7 @@ class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	void testValidateForCreate() {
+	public void testValidateForCreate() {
 		String methodName = "testValidateForCreate";
 
 		Patient pat = new Patient();
@@ -1858,7 +1875,7 @@ class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	void testValidateForUpdate() {
+	public void testValidateForUpdate() {
 		String methodName = "testValidateForUpdate";
 
 		Patient pat = new Patient();
@@ -1878,7 +1895,7 @@ class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	void testValidateRawResourceForUpdateWithId() {
+	public void testValidateRawResourceForUpdateWithId() {
 		String methodName = "testValidateForUpdate";
 		Patient pat = new Patient();
 		pat.setId("Patient/123");
@@ -1890,7 +1907,7 @@ class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	void testValidateRawResourceForUpdateWithNoId() {
+	public void testValidateRawResourceForUpdateWithNoId() {
 		String methodName = "testValidateForUpdate";
 		Patient pat = new Patient();
 		pat.addName().setFamily(methodName);
@@ -1907,7 +1924,7 @@ class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	void testValidateForUpdateWithContained() {
+	public void testValidateForUpdateWithContained() {
 		String methodName = "testValidateForUpdate";
 
 		Organization org = new Organization();
@@ -1930,7 +1947,7 @@ class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	void testValidateForDelete() {
+	public void testValidateForDelete() {
 		String methodName = "testValidateForDelete";
 
 		Organization org = new Organization();
@@ -1966,7 +1983,7 @@ class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	void testValidateForDeleteWithReferentialIntegrityDisabled() {
+	public void testValidateForDeleteWithReferentialIntegrityDisabled() {
 		myStorageSettings.setEnforceReferentialIntegrityOnDelete(false);
 		String methodName = "testValidateForDelete";
 
@@ -2006,7 +2023,7 @@ class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	void testValidateUsCoreR4Content() throws IOException {
+	public void testValidateUsCoreR4Content() throws IOException {
 		myStorageSettings.setAllowExternalReferences(true);
 
 		upload("/r4/uscore/CodeSystem-cdcrec.json");
@@ -2057,7 +2074,7 @@ class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	void testValidateQuestionnaireResponseWithCanonicalReference() {
+	public void testValidateQuestionnaireResponseWithCanonicalReference() {
 
 		Questionnaire q = new Questionnaire();
 		q.setId("q");
@@ -2105,7 +2122,7 @@ class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	void testValidateQuestionnaireResponseWithUnknownReference() {
+	public void testValidateQuestionnaireResponseWithUnknownReference() {
 
 		Questionnaire q = new Questionnaire();
 		q.setId("q");
@@ -2131,7 +2148,7 @@ class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 
 	@Test
-	void testValidateCodeInUnknownCodeSystemWithRequiredBinding() throws IOException {
+	public void testValidateCodeInUnknownCodeSystemWithRequiredBinding() throws IOException {
 		Condition condition = loadResourceFromClasspath(Condition.class, "/r4/code-in-unknown-system-with-required-binding.xml");
 
 		MethodOutcome result = myConditionDao.validate(condition, null, null, null, null, null, null);
@@ -2160,7 +2177,7 @@ class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	 */
 	@Test
 	@Disabled
-	void testValidateNewQuestionnaireFormat() throws Exception {
+	public void testValidateNewQuestionnaireFormat() throws Exception {
 		String input = IOUtils.toString(FhirResourceDaoR4ValidateTest.class.getResourceAsStream("/questionnaire_r4.xml"));
 		try {
 			MethodOutcome results = myQuestionnaireDao.validate(null, null, input, EncodingEnum.XML, ValidationModeEnum.UPDATE, null, mySrd);
@@ -2181,7 +2198,7 @@ class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		private static final Patient PATIENT_WITH_FAKE_URL = createPatient("https://www.i.do.not.exist.com");
 
 		@Test
-		void createStructDefThenValidatePatientWithRealUrl() throws IOException {
+		public void createStructDefThenValidatePatientWithRealUrl() throws IOException {
 			// setup
 			createStructureDefinitionInDao();
 
@@ -2193,7 +2210,7 @@ class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		}
 
 		@Test
-		void validatePatientWithFakeUrlStructDefThenValidatePatientWithRealUrl() throws IOException {
+		public void validatePatientWithFakeUrlStructDefThenValidatePatientWithRealUrl() throws IOException {
 			// setup
 			final String outcomePatientValidateFakeUrl = validate(PATIENT_WITH_FAKE_URL);
 			assertTrue(outcomePatientValidateFakeUrl.contains(I18nConstants.VALIDATION_VAL_PROFILE_UNKNOWN_NOT_POLICY));
@@ -2207,7 +2224,7 @@ class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		}
 
 		@Test
-		void validatePatientRealUrlThenCreateStructDefThenValidatePatientWithRealUrl() throws IOException {
+		public void validatePatientRealUrlThenCreateStructDefThenValidatePatientWithRealUrl() throws IOException {
 			// setup
 			final String outcomePatientValidateInitial = validate(PATIENT_WITH_REAL_URL);
 			assertTrue(outcomePatientValidateInitial.contains(I18nConstants.VALIDATION_VAL_PROFILE_UNKNOWN_NOT_POLICY));
@@ -2254,7 +2271,7 @@ class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 			"ERROR,       false",
 			"ERROR,       true",
 	})
-	void testValidateWrongDisplayOnRequiredBinding(IValidationSupport.IssueSeverity theDisplayCodeMismatchIssueSeverity, boolean thePreCalculateExpansion) {
+	public void testValidateWrongDisplayOnRequiredBinding(IValidationSupport.IssueSeverity theDisplayCodeMismatchIssueSeverity, boolean thePreCalculateExpansion) {
 		myStorageSettings.setIssueSeverityForCodeDisplayMismatch(theDisplayCodeMismatchIssueSeverity);
 		myInMemoryTerminologyServerValidationSupport.setIssueSeverityForCodeDisplayMismatch(theDisplayCodeMismatchIssueSeverity);
 
@@ -2353,7 +2370,7 @@ class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	 * See #1780
 	 */
 	@Test
-	void testExpand() {
+	public void testExpand() {
 
 		ValueSet vs = new ValueSet();
 		vs.setUrl("test.com/testValueSet");
@@ -2373,7 +2390,7 @@ class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 
 	@Test
-	void testKnownCodeSystemUnknownValueSetUri() {
+	public void testKnownCodeSystemUnknownValueSetUri() {
 		String loincCode = "10013-1";
 
 		addLoincCodeToCodeSystemDao(loincCode);
@@ -2394,7 +2411,7 @@ class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	void testValidateObservationWithVitalSignsLoincCode() {
+	public void testValidateObservationWithVitalSignsLoincCode() {
 		Observation obs = new Observation();
 		obs.setStatus(ObservationStatus.FINAL);
 		obs.setCode(

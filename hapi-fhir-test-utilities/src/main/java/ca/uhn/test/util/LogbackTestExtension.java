@@ -126,7 +126,7 @@ public class LogbackTestExtension implements BeforeEachCallback, AfterEachCallba
 	}
 
 	@Nonnull
-	public List<String> getMessages() {
+	public List<String> getLogMessages() {
 		return getLogEvents().stream().map(ILoggingEvent::getMessage).toList();
 	}
 

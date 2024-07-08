@@ -5,8 +5,8 @@ import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceRequestJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseCardJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseJson;
-import ca.uhn.test.util.LogEventIterableAssert;
 import ca.uhn.test.util.LogbackTestExtension;
+import ca.uhn.test.util.LogbackTestExtensionAssert;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import jakarta.annotation.Nonnull;
@@ -68,7 +68,7 @@ class CdsServiceCacheTest {
 		assertTrue(cdsMethod.isAllowAutoFhirClientPrefetch());
 		assertThat(myFixture.myCdsServiceJson.getServices()).hasSize(1);
 		assertEquals(cdsServiceJson, myFixture.myCdsServiceJson.getServices().get(0));
-		LogEventIterableAssert.assertThat(myLogCapture.getLogEvents()).hasEventWithLevelAndMessageContains(Level.ERROR, expectedLogMessage);
+		LogbackTestExtensionAssert.assertThat(myLogCapture).hasError(expectedLogMessage);
 
 	}
 
@@ -96,7 +96,7 @@ class CdsServiceCacheTest {
 		final ICdsMethod actual = myFixture.unregisterServiceMethod(TEST_KEY, MODULE_ID);
 		// validate
 		assertNull(actual);
-		LogEventIterableAssert.assertThat(myLogCapture.getLogEvents()).hasEventWithLevelAndMessageContains(Level.ERROR, expectedLogMessage);
+		LogbackTestExtensionAssert.assertThat(myLogCapture).hasError(expectedLogMessage);
 	}
 
 	@Nonnull

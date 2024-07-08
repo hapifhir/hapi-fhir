@@ -6,8 +6,8 @@ import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.test.utilities.RestServerR4Helper;
 import ca.uhn.fhir.test.utilities.TlsAuthenticationTestHelper;
 import ca.uhn.fhir.util.ParametersUtil;
-import ca.uhn.test.util.LogEventIterableAssert;
 import ca.uhn.test.util.LogbackTestExtension;
+import ca.uhn.test.util.LogbackTestExtensionAssert;
 import ch.qos.logback.classic.Logger;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,6 +30,7 @@ import static org.mockito.Mockito.spy;
 @ExtendWith(MockitoExtension.class)
 class ReindexTerminologyCommandTest {
 
+	private static final String FAILURE_MESSAGE = "FAILURE";
 	private final FhirContext myContext = FhirContext.forR4();
 
 	@Spy
@@ -68,9 +69,8 @@ class ReindexTerminologyCommandTest {
 		);
 		runAppWithStartupHook(args, getLoggingStartupHook());
 
-		LogEventIterableAssert.assertThat(myAppLogCapture.getLogEvents()).hasNoFailureMessages();
+		LogbackTestExtensionAssert.assertThat(myAppLogCapture).doesNotHave(FAILURE_MESSAGE);
 	}
-
 
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})
@@ -131,8 +131,9 @@ class ReindexTerminologyCommandTest {
 		);
 		runAppWithStartupHook(args, getLoggingStartupHook());
 
-		LogEventIterableAssert.assertThat(myAppLogCapture.getLogEvents()).hasAtLeastOneFailureMessage();
-		LogEventIterableAssert.assertThat(myAppLogCapture.getLogEvents()).hasAtLeastOneEventWithMessage("Internal error. Command result unknown. Check system logs for details");
+		LogbackTestExtensionAssert.assertThat(myAppLogCapture)
+			.has(FAILURE_MESSAGE)
+			.has("Internal error. Command result unknown. Check system logs for details");
 	}
 
 	@ParameterizedTest
@@ -155,8 +156,9 @@ class ReindexTerminologyCommandTest {
 		);
 		runAppWithStartupHook(args, getLoggingStartupHook());
 
-		LogEventIterableAssert.assertThat(myAppLogCapture.getLogEvents()).hasAtLeastOneFailureMessage();
-		LogEventIterableAssert.assertThat(myAppLogCapture.getLogEvents()).hasAtLeastOneEventWithMessage("Freetext service is not configured. Operation didn't run.");
+		LogbackTestExtensionAssert.assertThat(myAppLogCapture)
+			.has(FAILURE_MESSAGE)
+			.has("Freetext service is not configured. Operation didn't run.");
 	}
 
 	static void runAppWithStartupHook(String[] args, Consumer<BaseApp> startupHook) {

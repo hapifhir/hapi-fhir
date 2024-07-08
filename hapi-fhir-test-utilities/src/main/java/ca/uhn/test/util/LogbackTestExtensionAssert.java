@@ -19,16 +19,15 @@ import org.assertj.core.api.Condition;
 import java.util.List;
 import java.util.function.Predicate;
 
-import static ca.uhn.test.util.LoggingEventPredicates.*;
 import static ca.uhn.test.util.LoggingEventPredicates.makeAnyMatch;
-import static ca.uhn.test.util.LoggingEventPredicates.makeLoggerNameContains;
+import static ca.uhn.test.util.LoggingEventPredicates.makeLevelEquals;
+import static ca.uhn.test.util.LoggingEventPredicates.makeMessageContains;
 
 
 public class LogbackTestExtensionAssert extends AbstractAssert<LogbackTestExtensionAssert, LogbackTestExtension> {
 
 	private static final String HAS_ERROR_MSG_1 = "has logging message with message containing %s";
 	private static final String HAS_ERROR_MSG_2 = "has logging message with level %s and message containing %s";
-	private static final String HAS_ERROR_MSG_3 = "has logging message with logger name %s and message containing %s";
 
 	@Nonnull
 	public static LogbackTestExtensionAssert assertThat(@Nonnull LogbackTestExtension theLogbackTestExtension) {
@@ -41,12 +40,14 @@ public class LogbackTestExtensionAssert extends AbstractAssert<LogbackTestExtens
 
 	@Nonnull
 	public LogbackTestExtensionAssert containsExactly(@Nonnull String ... theMessages) {
-		Assertions.assertThat(actual.getMessages()).containsExactly(theMessages);
+		isNotNull();
+		Assertions.assertThat(actual.getLogMessages()).containsExactly(theMessages);
 		return this;
 	}
 
 	@Nonnull
 	public LogbackTestExtensionAssert has(@Nonnull String theMessage) {
+		isNotNull();
 		final Predicate<ILoggingEvent> predicate = makeMessageContains(theMessage);
 		final Condition<List<? extends ILoggingEvent>> condition =
 			new Condition<>(makeAnyMatch(predicate), HAS_ERROR_MSG_1, theMessage);
@@ -55,6 +56,7 @@ public class LogbackTestExtensionAssert extends AbstractAssert<LogbackTestExtens
 	}
 
 	public LogbackTestExtensionAssert doesNotHave(@Nonnull String theMessage) {
+		isNotNull();
 		final Predicate<ILoggingEvent> predicate = makeMessageContains(theMessage);
 		final Condition<List<? extends ILoggingEvent>> condition =
 			new Condition<>(makeAnyMatch(predicate), HAS_ERROR_MSG_1, theMessage);
@@ -62,9 +64,9 @@ public class LogbackTestExtensionAssert extends AbstractAssert<LogbackTestExtens
 		return this;
 	}
 
-
 	@Nonnull
 	public LogbackTestExtensionAssert hasError(@Nonnull String theMessage) {
+		isNotNull();
 		final Predicate<ILoggingEvent> predicate = makeLevelEquals(Level.ERROR)
 			.and(makeMessageContains(theMessage));
 		final Condition<List<? extends ILoggingEvent>> condition =
@@ -75,6 +77,7 @@ public class LogbackTestExtensionAssert extends AbstractAssert<LogbackTestExtens
 
 	@Nonnull
 	public LogbackTestExtensionAssert hasInfo(@Nonnull String theMessage) {
+		isNotNull();
 		final Predicate<ILoggingEvent> predicate = makeLevelEquals(Level.INFO)
 			.and(makeMessageContains(theMessage));
 		final Condition<List<? extends ILoggingEvent>> condition =
@@ -84,7 +87,18 @@ public class LogbackTestExtensionAssert extends AbstractAssert<LogbackTestExtens
 	}
 
 	@Nonnull
+	public LogbackTestExtensionAssert doesNotHaveInfo(@Nonnull String theMessage) {
+		isNotNull();
+		final Predicate<ILoggingEvent> predicate = makeLevelEquals(Level.INFO).and(makeMessageContains(theMessage));
+		final Condition<List<? extends ILoggingEvent>> condition =
+			new Condition<>(makeAnyMatch(predicate), HAS_ERROR_MSG_2, Level.INFO, theMessage);
+		Assertions.assertThat(actual.getLogEvents()).doesNotHave(condition);
+		return this;
+	}
+
+	@Nonnull
 	public LogbackTestExtensionAssert hasWarn(@Nonnull String theMessage) {
+		isNotNull();
 		final Predicate<ILoggingEvent> predicate = makeLevelEquals(Level.WARN)
 			.and(makeMessageContains(theMessage));
 		final Condition<List<? extends ILoggingEvent>> condition =
@@ -95,11 +109,19 @@ public class LogbackTestExtensionAssert extends AbstractAssert<LogbackTestExtens
 
 	@Nonnull
 	public LogbackTestExtensionAssert hasDebug(@Nonnull String theMessage) {
+		isNotNull();
 		final Predicate<ILoggingEvent> predicate = makeLevelEquals(Level.DEBUG)
 			.and(makeMessageContains(theMessage));
 		final Condition<List<? extends ILoggingEvent>> condition =
 			new Condition<>(makeAnyMatch(predicate), HAS_ERROR_MSG_2, Level.DEBUG, theMessage);
 		Assertions.assertThat(actual.getLogEvents()).has(condition);
+		return this;
+	}
+
+	@Nonnull
+	public LogbackTestExtensionAssert anyMatch(@Nonnull Predicate<ILoggingEvent> thePredicate) {
+		isNotNull();
+		Assertions.assertThat(actual.getLogEvents()).anyMatch(thePredicate);
 		return this;
 	}
 
@@ -111,12 +133,14 @@ public class LogbackTestExtensionAssert extends AbstractAssert<LogbackTestExtens
 
 	@Nonnull
 	public LogbackTestExtensionAssert isNotEmpty() {
+		isNotNull();
 		Assertions.assertThat(actual.getLogEvents()).isNotEmpty();
 		return this;
 	}
 
 	@Nonnull
 	public LogbackTestExtensionAssert hasSize(int theExpected) {
+		isNotNull();
 		Assertions.assertThat(actual.getLogEvents()).hasSize(theExpected);
 		return this;
 	}

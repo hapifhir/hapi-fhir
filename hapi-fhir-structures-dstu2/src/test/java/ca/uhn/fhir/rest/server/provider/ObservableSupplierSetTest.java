@@ -27,13 +27,13 @@ class ObservableSupplierSetTest {
 	final LogbackTestExtension myLogger = new LogbackTestExtension((ch.qos.logback.classic.Logger) LoggerFactory.getLogger(ObservableSupplierSet.class));
 
 	@BeforeEach
-	void before() {
+	public void before() {
 		myObservableSupplierSet.attach(myObserver);
 		myObserver.assertCalls(0, 0);
 	}
 
 	@Test
-	void observersNotifiedByAddRemove() {
+	public void observersNotifiedByAddRemove() {
 		Supplier<Object> supplier = myCounter::incrementAndGet;
 		myObservableSupplierSet.addSupplier(supplier);
 		myObserver.assertCalls(1, 0);
@@ -42,11 +42,11 @@ class ObservableSupplierSetTest {
 		assertEquals(1, myCounter.get());
 		myObservableSupplierSet.removeSupplier(supplier);
 		myObserver.assertCalls(1, 1);
-		assertThat(myObservableSupplierSet.getSupplierResults()).isEmpty();
+		assertThat(myObservableSupplierSet.getSupplierResults()).hasSize(0);
 	}
 
 	@Test
-	void testRemoveWrongSupplier() {
+	public void testRemoveWrongSupplier() {
         myObservableSupplierSet.addSupplier(myCounter::incrementAndGet);
 		myObserver.assertCalls(1, 0);
 		assertEquals(0, myCounter.get());
@@ -63,7 +63,7 @@ class ObservableSupplierSetTest {
 	}
 
 	@Test
-	void testDetach() {
+	public void testDetach() {
 		myObservableSupplierSet.addSupplier(myCounter::incrementAndGet);
 		myObserver.assertCalls(1, 0);
 		assertThat(myObservableSupplierSet.getSupplierResults()).hasSize(1);

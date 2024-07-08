@@ -46,8 +46,8 @@ public final class LoggingEventPredicates {
 	}
 
 	@Nonnull
-	public static Predicate<ILoggingEvent> makeLoggerNameContains(@Nonnull String theLoggerName) {
-		return loggingEvent -> loggingEvent.getLoggerName().equals(theLoggerName);
+	public static Predicate<ILoggingEvent> makeExceptionMessageContains(@Nonnull String theExceptionMessage) {
+		return loggingEvent -> loggingEvent.getThrowableProxy().getMessage().contains(theExceptionMessage);
 	}
 
 	@Nonnull
