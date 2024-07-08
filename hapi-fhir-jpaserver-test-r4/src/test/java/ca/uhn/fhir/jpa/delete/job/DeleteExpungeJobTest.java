@@ -20,8 +20,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class DeleteExpungeJobTest extends BaseJpaR4Test {
 	@Autowired
@@ -62,7 +62,8 @@ public class DeleteExpungeJobTest extends BaseJpaR4Test {
 		assertEquals(2, myDiagnosticReportDao.search(SearchParameterMap.newSynchronous()).size());
 
 		DeleteExpungeJobParameters jobParameters = new DeleteExpungeJobParameters();
-		jobParameters.addUrl("Observation?subject.active=false").addUrl("DiagnosticReport?subject.active=false");
+		jobParameters.addUrl("Observation?subject.active=false");
+		jobParameters.addUrl("DiagnosticReport?subject.active=false");
 
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
 		startRequest.setParameters(jobParameters);

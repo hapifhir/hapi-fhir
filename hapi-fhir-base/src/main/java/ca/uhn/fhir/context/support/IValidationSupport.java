@@ -1209,12 +1209,23 @@ public interface IValidationSupport {
 	}
 
 	/**
-	 * See VersionSpecificWorkerContextWrapper#validateCode in hapi-fhir-validation.
+	 * <p
+	 * Warning: This method's behaviour and naming is preserved for backwards compatibility, BUT the actual naming and
+	 * function are not aligned.
+	 * </p
 	 * <p>
-	 * If true, validation for codings will return a positive result if all codings are valid.
-	 * If false, validation for codings will return a positive result if there is any coding that is valid.
-	 *
-	 * @return if the application has configured validation to use logical AND, as opposed to logical OR, which is the default
+	 * See VersionSpecificWorkerContextWrapper#validateCode in hapi-fhir-validation, and the refer to the values below
+	 * for the behaviour associated with each value.
+	 * </p>
+	 * <p>
+	 *   <ul>
+	 *     <li>If <code>false</code> (default setting) the validation for codings will return a positive result only if
+	 *     ALL codings are valid.</li>
+	 * 	   <li>If <code>true</code> the validation for codings will return a positive result if ANY codings are valid.
+	 * 	   </li>
+	 * 	  </ul>
+	 * </p>
+	 * @return true or false depending on the desired coding validation behaviour.
 	 */
 	default boolean isEnabledValidationForCodingsLogicalAnd() {
 		return false;
