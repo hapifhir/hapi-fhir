@@ -105,7 +105,7 @@ public class ResourceMatcherR4Test extends BaseMdmRulesR4Test {
 		verify(myAppender, times(1)).doAppend(myLoggingEvent.capture());
 		ILoggingEvent event = myLoggingEvent.getValue();
 		assertEquals(Level.WARN, event.getLevel());
-		assertEquals("Class org.hl7.fhir.r4.model.HumanName is not an instance of PrimitiveType, unable to evaluate match field", event.getFormattedMessage());
+		assertEquals("Unable to evaluate match between HumanName and HumanName because they are not an instance of PrimitiveType.", event.getFormattedMessage());
 
 		logger.detachAppender(myAppender);
 		verifyNoMoreInteractions(myAppender);
