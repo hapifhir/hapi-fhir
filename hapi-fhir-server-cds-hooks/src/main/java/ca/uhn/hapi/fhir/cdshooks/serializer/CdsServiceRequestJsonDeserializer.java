@@ -34,7 +34,8 @@ public class CdsServiceRequestJsonDeserializer extends StdDeserializer<CdsServic
 		myCdsServiceRegistry = theCdsServiceRegistry;
 		myFhirContext = theFhirContext;
 		myParser = myFhirContext.newJsonParser().setPrettyPrint(true);
-		// We create a new ObjectMapper instead of using the one from the ApplicationContext to avoid an infinite loop during deserialization.
+		// We create a new ObjectMapper instead of using the one from the ApplicationContext to avoid an infinite loop
+		// during deserialization.
 		myObjectMapper = new ObjectMapper();
 		configureObjectMapper(myObjectMapper);
 	}
