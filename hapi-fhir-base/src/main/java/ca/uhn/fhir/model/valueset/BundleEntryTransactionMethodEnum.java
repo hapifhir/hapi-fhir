@@ -36,8 +36,8 @@ public enum BundleEntryTransactionMethodEnum {
 	GET("GET", "http://hl7.org/fhir/http-verb"),
 	POST("POST", "http://hl7.org/fhir/http-verb"),
 	PUT("PUT", "http://hl7.org/fhir/http-verb"),
-	DELETE("DELETE", "http://hl7.org/fhir/http-verb"),
-	;
+	PATCH("PATCH", "http://hl7.org/fhir/http-verb"),
+	DELETE("DELETE", "http://hl7.org/fhir/http-verb");
 
 	/**
 	 * Identifier for this Value Set:
