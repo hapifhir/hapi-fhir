@@ -77,7 +77,7 @@ public abstract class BaseTest {
 //			}
 //		});
 //
-//		return retVal.stream();
+		return retVal.stream();
 	}
 
 	public void before(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
