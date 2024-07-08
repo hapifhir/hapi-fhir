@@ -1380,7 +1380,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 	@Test
 	void termConceptDesignationOver2000CharVal() {
 		final String stringWith8000Chars = IntStream.range(0, 8000)
-			.mapToObj(anInt -> "A")
+			.mapToObj(anInt -> "B")
 			.collect(Collectors.joining());
 
 		final TermConceptDesignation termConceptDesignation8000Chars = new TermConceptDesignation()
