@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
+import static ca.uhn.test.util.LoggingEventPredicates.makeMessageContains;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -26,13 +27,13 @@ class ObservableSupplierSetTest {
 	final LogbackTestExtension myLogger = new LogbackTestExtension((ch.qos.logback.classic.Logger) LoggerFactory.getLogger(ObservableSupplierSet.class));
 
 	@BeforeEach
-	public void before() {
+	void before() {
 		myObservableSupplierSet.attach(myObserver);
 		myObserver.assertCalls(0, 0);
 	}
 
 	@Test
-	public void observersNotifiedByAddRemove() {
+	void observersNotifiedByAddRemove() {
 		Supplier<Object> supplier = myCounter::incrementAndGet;
 		myObservableSupplierSet.addSupplier(supplier);
 		myObserver.assertCalls(1, 0);
@@ -41,11 +42,11 @@ class ObservableSupplierSetTest {
 		assertEquals(1, myCounter.get());
 		myObservableSupplierSet.removeSupplier(supplier);
 		myObserver.assertCalls(1, 1);
-		assertThat(myObservableSupplierSet.getSupplierResults()).hasSize(0);
+		assertThat(myObservableSupplierSet.getSupplierResults()).isEmpty();
 	}
 
 	@Test
-	public void testRemoveWrongSupplier() {
+	void testRemoveWrongSupplier() {
         myObservableSupplierSet.addSupplier(myCounter::incrementAndGet);
 		myObserver.assertCalls(1, 0);
 		assertEquals(0, myCounter.get());
@@ -56,13 +57,13 @@ class ObservableSupplierSetTest {
 		myObservableSupplierSet.removeSupplier(myCounter::incrementAndGet);
 		myObserver.assertCalls(1, 0);
 		assertThat(myObservableSupplierSet.getSupplierResults()).hasSize(1);
-		List<ILoggingEvent> events = myLogger.filterLoggingEventsWithMessageContaining("Failed to remove supplier");
+        List<ILoggingEvent> events = myLogger.getLogEvents(makeMessageContains("Failed to remove supplier"));
 		assertThat(events).hasSize(1);
 		assertEquals(Level.WARN, events.get(0).getLevel());
 	}
 
 	@Test
-	public void testDetach() {
+	void testDetach() {
 		myObservableSupplierSet.addSupplier(myCounter::incrementAndGet);
 		myObserver.assertCalls(1, 0);
 		assertThat(myObservableSupplierSet.getSupplierResults()).hasSize(1);

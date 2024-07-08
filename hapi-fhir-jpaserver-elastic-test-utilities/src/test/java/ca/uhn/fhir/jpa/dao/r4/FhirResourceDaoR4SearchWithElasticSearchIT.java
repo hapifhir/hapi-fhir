@@ -27,9 +27,7 @@ import ca.uhn.fhir.jpa.search.BaseSourceSearchParameterTestCases;
 import ca.uhn.fhir.jpa.search.CompositeSearchParameterTestCases;
 import ca.uhn.fhir.jpa.search.QuantitySearchParameterTestCases;
 import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
-import ca.uhn.fhir.jpa.search.lastn.ElasticsearchRestClientFactory;
 import ca.uhn.fhir.jpa.search.lastn.ElasticsearchSvcImpl;
-import ca.uhn.fhir.jpa.search.lastn.json.ObservationJson;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
@@ -62,15 +60,9 @@ import ca.uhn.fhir.validation.ValidationResult;
 import ca.uhn.test.util.LogbackTestExtension;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.spi.ILoggingEvent;
-import co.elastic.clients.elasticsearch.ElasticsearchClient;
-import co.elastic.clients.elasticsearch.core.SearchRequest;
-import co.elastic.clients.elasticsearch.core.SearchResponse;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import jakarta.annotation.Nonnull;
-import jakarta.json.JsonValue;
 import jakarta.persistence.EntityManager;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.elasticsearch.client.RequestOptions;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -274,7 +266,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 
 
 	class ElasticPerformanceTracingInterceptor {
-		private List<StorageProcessingMessage> messages = new ArrayList<>();
+		private final List<StorageProcessingMessage> messages = new ArrayList<>();
 
 		@Hook(Pointcut.JPA_PERFTRACE_INFO)
 		public void logPerformance(StorageProcessingMessage theMessage) {
@@ -286,7 +278,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		}
 	}
 	@Test
-	public void testFullTextSearchesArePerformanceLogged() {
+	void testFullTextSearchesArePerformanceLogged() {
 
 		ElasticPerformanceTracingInterceptor elasticPerformanceTracingInterceptor = new ElasticPerformanceTracingInterceptor();
 		myInterceptorRegistry.registerInterceptor(elasticPerformanceTracingInterceptor);
@@ -315,10 +307,10 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		assertThat(storageProcessingMessage.getMessage()).contains("\"query\":\"( blood* )\"");
 
 		myInterceptorRegistry.unregisterInterceptor(elasticPerformanceTracingInterceptor);
-
 	}
+
 	@Test
-	public void testResourceContentSearch() {
+	void testResourceContentSearch() {
 
 		Observation obs1 = new Observation();
 		obs1.getCode().setText("Systolic Blood Pressure");
@@ -357,7 +349,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 	}
 
 	@Test
-	public void testResourceTextSearch() {
+	void testResourceTextSearch() {
 
 		Observation obs1 = new Observation();
 		obs1.getCode().setText("Systolic Blood Pressure");
@@ -402,7 +394,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 	}
 
 	@Test
-	public void testTextContainsFunctionality() {
+	void testTextContainsFunctionality() {
 		String slug = "my-special-@char!";
 		Observation obs1 = new Observation();
 		obs1.getCode().setText("Systolic Blood Pressure");
@@ -439,7 +431,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 	}
 
 	@Test
-	public void testLudicrouslyLongNarrative() throws IOException {
+	void testLudicrouslyLongNarrative() throws IOException {
 		String slug = "myveryveryveryveryveryveryveryveryveryeryveryveryveryveryveryveryveryveryeryveryveryveryveryveryveryveryveryeryveryveryveryveryveryveryveryveryeryveryveryveryveryveryveryveryverylongemailaddress@hotmail.com";
 
 		Observation obs1 = new Observation();
@@ -512,7 +504,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 
 
 	@Test
-	public void testResourceReferenceSearch() {
+	void testResourceReferenceSearch() {
 		IIdType patId, encId, obsId;
 
 		{
@@ -574,7 +566,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 	}
 
 	@Test
-	public void testResourceCodeTokenSearch() {
+	void testResourceCodeTokenSearch() {
 		IIdType id1, id2, id2b, id3;
 
 		String system = "http://loinc.org";
@@ -640,7 +632,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 	}
 
 	@Test
-	public void testResourceCodeTextSearch() {
+	void testResourceCodeTextSearch() {
 		IIdType id1, id2, id3, id4;
 
 		{
@@ -760,7 +752,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 	}
 
 	@Test
-	public void testResourceReferenceSearchForCanonicalReferences() {
+	void testResourceReferenceSearchForCanonicalReferences() {
 		String questionnaireCanonicalUrl = "https://test.fhir.org/R4/Questionnaire/xl-5000-q";
 
 		Questionnaire questionnaire = new Questionnaire();
@@ -785,7 +777,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 	}
 
 	@Test
-	public void testStringSearch() {
+	void testStringSearch() {
 		IIdType id1, id2, id3, id4, id5, id6;
 
 		{
@@ -932,7 +924,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 	 * This test validates that behaviour.
 	 */
 	@Test
-	public void testDirectPathWholeResourceNotIndexedWorks() {
+	void testDirectPathWholeResourceNotIndexedWorks() {
 		// setup
 		myLogbackLevelOverrideExtension.setLogLevel(SearchBuilder.class, Level.WARN);
 		IIdType id1 = myTestDataBuilder.createObservation(List.of(myTestDataBuilder.withObservationCode("http://example.com/", "theCode")));
@@ -945,7 +937,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		assertThat(result).hasSize(1);
 		assertEquals(((Observation) result.get(0)).getIdElement().getIdPart(), id1.getIdPart());
 
-		List<ILoggingEvent> events = myLogbackTestExtension.filterLoggingEventsWithPredicate(e -> e.getLevel() == Level.WARN);
+		List<ILoggingEvent> events = myLogbackTestExtension.getLogEvents(e -> e.getLevel() == Level.WARN);
 		assertFalse(events.isEmpty());
 		assertTrue(events.stream().anyMatch(e -> e.getFormattedMessage().contains("Some resources were not found in index. Make sure all resources were indexed. Resorting to database search.")));
 
@@ -955,7 +947,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 	}
 
 	@Test
-	public void testExpandWithIsAInExternalValueSet() {
+	void testExpandWithIsAInExternalValueSet() {
 		createExternalCsAndLocalVs();
 
 		ValueSet vs = new ValueSet();
@@ -971,7 +963,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 	}
 
 	@Test
-	public void testExpandWithFilter() {
+	void testExpandWithFilter() {
 		createExternalCsAndLocalVs();
 
 		ValueSet vs = new ValueSet();
@@ -989,7 +981,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 	}
 
 	@Test
-	public void testExpandWithFilterContainsLeftMatchingValue() {
+	void testExpandWithFilterContainsLeftMatchingValue() {
 		createExternalCsAndLocalVs();
 
 		ValueSet vs = new ValueSet();
@@ -1007,7 +999,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 	}
 
 	@Test
-	public void testExpandWithFilterContainsNotLeftMatchingValue() {
+	void testExpandWithFilterContainsNotLeftMatchingValue() {
 		createExternalCsAndLocalVs();
 
 		ValueSet vs = new ValueSet();
@@ -1025,7 +1017,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 	}
 
 	@Test
-	public void testExpandVsWithMultiInclude_All() throws IOException {
+	void testExpandVsWithMultiInclude_All() throws IOException {
 		CodeSystem cs = loadResource(myFhirCtx, CodeSystem.class, "/r4/expand-multi-cs.json");
 		myCodeSystemDao.update(cs);
 
@@ -1046,7 +1038,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 	}
 
 	@Test
-	public void testExpandVsWithMultiInclude_Some() throws IOException {
+	void testExpandVsWithMultiInclude_Some() throws IOException {
 		CodeSystem cs = loadResource(myFhirCtx, CodeSystem.class, "/r4/expand-multi-cs.json");
 		myCodeSystemDao.update(cs);
 
@@ -1163,7 +1155,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 
 	@Disabled("keeping to debug search scrolling")
 	@Test
-	public void withoutCount() {
+	void withoutCount() {
 		createObservations(600);
 
 		SearchParameterMap map = new SearchParameterMap();
@@ -1226,7 +1218,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 	}
 
 	@Nested
-	public class StringTextSearch {
+	class StringTextSearch {
 
 		@Test
 		void secondWordFound() {
@@ -1291,7 +1283,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		}
 
 		@Nested
-		public class DocumentationSamplesTests {
+		class DocumentationSamplesTests {
 
 			@Test
 			void line1() {
@@ -1348,7 +1340,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 	}
 
 	@Nested
-	public class TokenTextSearch {
+	class TokenTextSearch {
 
 		@Test
 		void secondWordFound() {
@@ -1403,7 +1395,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 	}
 
 	@Nested
-	public class WithContainedIndexingIT {
+	class WithContainedIndexingIT {
 		@BeforeEach
 		public void enableContains() {
 			// we don't support chained or contained yet, but turn it on to test we don't blow up.
@@ -1422,7 +1414,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		 * https://github.com/hapifhir/hapi-fhir/issues/3371
 		 */
 		@Test
-		public void ignoreContainedResources_noError() {
+		void ignoreContainedResources_noError() {
 			// given
 			String json =
 				"{" +
@@ -1458,7 +1450,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 	 * when we can satisfy the queries completely from Hibernate Search.
 	 */
 	@Nested
-	public class FastPath {
+	class FastPath {
 
 		@BeforeEach
 		public void enableResourceStorage() {
@@ -1472,7 +1464,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 
 
 		@Test
-		public void simpleTokenSkipsSql() {
+		void simpleTokenSkipsSql() {
 			IIdType id = myTestDataBuilder.createObservation(List.of(myTestDataBuilder.withObservationCode("http://example.com/", "theCode")));
 			myCaptureQueriesListener.clear();
 			myHSearchEventDispatcher.register(mySearchEventListener);
@@ -1490,7 +1482,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 
 
 		@Test
-		public void sortDoesntRequireSqlAnymore() {
+		void sortDoesntRequireSqlAnymore() {
 
 			IIdType id = myTestDataBuilder.createObservation(List.of(myTestDataBuilder.withObservationCode("http://example.com/", "theCode")));
 			myCaptureQueriesListener.clear();
@@ -1505,7 +1497,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		}
 
 		@Test
-		public void deletedResourceNotFound() {
+		void deletedResourceNotFound() {
 
 			IIdType id = myTestDataBuilder.createObservation(List.of(myTestDataBuilder.withObservationCode("http://example.com/", "theCode")));
 			myObservationDao.delete(id);
@@ -1520,7 +1512,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		}
 
 		@Test
-		public void forcedIdSurvivesWithNoSql() {
+		void forcedIdSurvivesWithNoSql() {
 			IIdType id = myTestDataBuilder.createObservation(List.of(
 				myTestDataBuilder.withObservationCode("http://example.com/", "theCode"),
 				myTestDataBuilder.withId("forcedid")));
@@ -1543,7 +1535,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		 * Since we lost the id, also check tags in case someone changes metadata processing during ingestion.
 		 */
 		@Test
-		public void tagsSurvive() {
+		void tagsSurvive() {
 			IIdType id = myTestDataBuilder.createObservation(List.of(
 				myTestDataBuilder.withObservationCode("http://example.com/", "theCode"),
 				myTestDataBuilder.withTag("http://example.com", "aTag")));
@@ -1576,7 +1568,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		}
 
 		@Test
-		public void noDirectSearchWhenNotSynchronousOrOffsetQuery() {
+		void noDirectSearchWhenNotSynchronousOrOffsetQuery() {
 			myTestDataBuilder.createObservation(asArray(myTestDataBuilder.withObservationCode("http://example.com/", "code-1")));
 			myTestDataBuilder.createObservation(asArray(myTestDataBuilder.withObservationCode("http://example.com/", "code-2")));
 			myTestDataBuilder.createObservation(asArray(myTestDataBuilder.withObservationCode("http://example.com/", "code-3")));
@@ -1595,7 +1587,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 
 
 		@Test
-		public void directSearchForOffsetQuery() {
+		void directSearchForOffsetQuery() {
 			myTestDataBuilder.createObservation(asArray(myTestDataBuilder.withObservationCode("http://example.com/", "code-1")));
 			IIdType idCode2 = myTestDataBuilder.createObservation(asArray(myTestDataBuilder.withObservationCode("http://example.com/", "code-2")));
 			IIdType idCode3 = myTestDataBuilder.createObservation(asArray(myTestDataBuilder.withObservationCode("http://example.com/", "code-3")));
@@ -1622,7 +1614,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 	}
 
 	@Nested
-	public class TagTypesSearch {
+	class TagTypesSearch {
 
 		@BeforeEach
 		public void enableResourceStorage() {
@@ -1635,7 +1627,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		}
 
 		@Test
-		public void tagTagSearch() {
+		void tagTagSearch() {
 			String id = myTestDataBuilder.createObservation(List.of(
 				myTestDataBuilder.withObservationCode("http://example.com/", "theCode"),
 				myTestDataBuilder.withTag("http://example.com", "aTag"))).getIdPart();
@@ -1648,7 +1640,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		}
 
 		@Test
-		public void tagSecuritySearch() {
+		void tagSecuritySearch() {
 			String id = myTestDataBuilder.createObservation(List.of(
 				myTestDataBuilder.withObservationCode("http://example.com/", "theCode"),
 				myTestDataBuilder.withSecurity("http://example.com", "security-label"))).getIdPart();
@@ -1661,7 +1653,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		}
 
 		@Test
-		public void tokenAndOrCombinedSearch() {
+		void tokenAndOrCombinedSearch() {
 			String id = myTestDataBuilder.createObservation(List.of(
 				myTestDataBuilder.withObservationCode("http://example.com/", "theCode"),
 				myTestDataBuilder.withSecurity("http://example.com", "security-label"),
@@ -1677,7 +1669,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		}
 
 		@Test
-		public void tokenAndOrCombinedSearch_failing_and_with_multiple_or() {
+		void tokenAndOrCombinedSearch_failing_and_with_multiple_or() {
 			myTestDataBuilder.createObservation(List.of(
 				myTestDataBuilder.withObservationCode("http://example.com/", "theCode"),
 				myTestDataBuilder.withTag("http://example.com", "aTag"),
@@ -1693,7 +1685,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		}
 
 		@Test
-		public void tokenAndOrCombinedSearch_failing_and_with_single_or() {
+		void tokenAndOrCombinedSearch_failing_and_with_single_or() {
 			myTestDataBuilder.createObservation(List.of(
 				myTestDataBuilder.withObservationCode("http://example.com/", "theCode"),
 				myTestDataBuilder.withTag("http://example.com", "aTag"),
@@ -1709,7 +1701,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		}
 
 		@Test
-		public void uriAndOrCombinedSearch() {
+		void uriAndOrCombinedSearch() {
 			String id = myTestDataBuilder.createObservation(List.of(
 				myTestDataBuilder.withObservationCode("http://example.com/", "theCode"),
 				myTestDataBuilder.withProfile("http://example.com/theProfile"),
@@ -1725,7 +1717,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		}
 
 		@Test
-		public void tagProfileSearch() {
+		void tagProfileSearch() {
 			String id = myTestDataBuilder.createObservation(List.of(
 				myTestDataBuilder.withObservationCode("http://example.com/", "theCode"),
 				myTestDataBuilder.withProfile("http://example.com/theProfile"))).getIdPart();
@@ -1738,7 +1730,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		}
 
 		@Test
-		public void tagSourceSearch() {
+		void tagSourceSearch() {
 			String id = myTestDataBuilder.createObservation(List.of(
 				myTestDataBuilder.withObservationCode("http://example.com/", "theCode"),
 				myTestDataBuilder.withSource("http://example.com/theSource"))).getIdPart();
@@ -1753,10 +1745,10 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 	}
 
 	@Nested
-	public class LastUpdatedTests {
+	class LastUpdatedTests {
 
 		private String myOldObsId, myNewObsId;
-		private String myOldLastUpdatedDateTime = "2017-03-24T03:21:47";
+		private final String myOldLastUpdatedDateTime = "2017-03-24T03:21:47";
 
 		@BeforeEach
 		public void enableResourceStorage() {
@@ -1777,7 +1769,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		}
 
 		@Test
-		public void eq() {
+		void eq() {
 			myCaptureQueriesListener.clear();
 			List<String> allIds = myTestDaoSearch.searchForIds("/Observation?_lastUpdated=eq" + myOldLastUpdatedDateTime);
 
@@ -1786,7 +1778,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		}
 
 		@Test
-		public void eqLessPrecisionRequest() {
+		void eqLessPrecisionRequest() {
 			myCaptureQueriesListener.clear();
 			List<String> allIds = myTestDaoSearch.searchForIds("/Observation?_lastUpdated=eq2017-03-24");
 
@@ -1795,7 +1787,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		}
 
 		@Test
-		public void ne() {
+		void ne() {
 			myCaptureQueriesListener.clear();
 			List<String> allIds = myTestDaoSearch.searchForIds("/Observation?_lastUpdated=ne" + myOldLastUpdatedDateTime);
 
@@ -1813,7 +1805,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		}
 
 		@Test
-		public void ge() {
+		void ge() {
 			myCaptureQueriesListener.clear();
 			List<String> allIds = myTestDaoSearch.searchForIds("/Observation?_lastUpdated=ge" + myOldLastUpdatedDateTime);
 
@@ -1831,7 +1823,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		}
 
 		@Test
-		public void le() {
+		void le() {
 			myCaptureQueriesListener.clear();
 			List<String> allIds = myTestDaoSearch.searchForIds("/Observation?_lastUpdated=le" + myOldLastUpdatedDateTime);
 
@@ -1843,11 +1835,11 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 	}
 
 	@Nested
-	public class TotalParameter {
+	class TotalParameter {
 
 		@ParameterizedTest
 		@EnumSource(SearchTotalModeEnum.class)
-		public void totalParamSkipsSql(SearchTotalModeEnum theTotalModeEnum) {
+		void totalParamSkipsSql(SearchTotalModeEnum theTotalModeEnum) {
 			myTestDataBuilder.createObservation(asArray(myTestDataBuilder.withObservationCode("http://example.com/", "theCode")));
 
 			myCaptureQueriesListener.clear();
@@ -1858,7 +1850,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 
 
 		@Test
-		public void totalIsCorrect() {
+		void totalIsCorrect() {
 			myTestDataBuilder.createObservation(asArray(myTestDataBuilder.withObservationCode("http://example.com/", "code-1")));
 			myTestDataBuilder.createObservation(asArray(myTestDataBuilder.withObservationCode("http://example.com/", "code-2")));
 			myTestDataBuilder.createObservation(asArray(myTestDataBuilder.withObservationCode("http://example.com/", "code-3")));
@@ -1870,7 +1862,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 	}
 
 	@Nested
-	public class OffsetParameter {
+	class OffsetParameter {
 
 		@BeforeEach
 		public void enableResourceStorage() {
@@ -1879,7 +1871,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 
 
 		@Test
-		public void offsetNoCount() {
+		void offsetNoCount() {
 			myTestDataBuilder.createObservation(asArray(myTestDataBuilder.withObservationCode("http://example.com/", "code-1")));
 			IIdType idCode2 = myTestDataBuilder.createObservation(asArray(myTestDataBuilder.withObservationCode("http://example.com/", "code-2")));
 			IIdType idCode3 = myTestDataBuilder.createObservation(asArray(myTestDataBuilder.withObservationCode("http://example.com/", "code-3")));
@@ -1895,7 +1887,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 
 
 		@Test
-		public void offsetAndCount() {
+		void offsetAndCount() {
 			myTestDataBuilder.createObservation(asArray(myTestDataBuilder.withObservationCode("http://example.com/", "code-1")));
 			IIdType idCode2 = myTestDataBuilder.createObservation(asArray(myTestDataBuilder.withObservationCode("http://example.com/", "code-2")));
 			myTestDataBuilder.createObservation(asArray(myTestDataBuilder.withObservationCode("http://example.com/", "code-3")));
@@ -1910,7 +1902,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		}
 
 		@Test
-		public void offsetAndCountReturnsMoreThan50() {
+		void offsetAndCountReturnsMoreThan50() {
 			for (int i = 0; i < 60; i++) {
 				myTestDataBuilder.createObservation(asArray(myTestDataBuilder.withObservationCode("http://example.com/", "code-" + i)));
 			}
@@ -1926,7 +1918,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 	}
 
 	@Nested
-	public class SortParameter {
+	class SortParameter {
 
 		@BeforeEach
 		void setUp() {
@@ -1954,7 +1946,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		}
 
 		@Test
-		public void directResourceLoadWhenSorting() {
+		void directResourceLoadWhenSorting() {
 			String idA = myTestDataBuilder.createObservation(List.of(myTestDataBuilder.withObservationCode("http://example.com/", "code-a"))).getIdPart();
 			String idC = myTestDataBuilder.createObservation(List.of(myTestDataBuilder.withObservationCode("http://example.com/", "code-c"))).getIdPart();
 			String idB = myTestDataBuilder.createObservation(List.of(myTestDataBuilder.withObservationCode("http://example.com/", "code-b"))).getIdPart();
@@ -1964,7 +1956,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 			List<IBaseResource> result = searchForFastResources("Observation?_sort=-code");
 			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 
-			assertThat(result.stream().map(r -> r.getIdElement().getIdPart()).collect(Collectors.toList())).containsExactly(idC, idB, idA);
+			assertThat(result.stream().map(r -> r.getIdElement().getIdPart()).toList()).containsExactly(idC, idB, idA);
 			assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).as("we build the bundle with no sql").isEqualTo(0);
 
 			// only one hibernate search took place
@@ -1975,10 +1967,10 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		public class OneProperty {
 
 			@Nested
-			public class NotIncludingNulls {
+			class NotIncludingNulls {
 
 				@Test
-				public void byTokenSystemFirst() {
+				void byTokenSystemFirst() {
 					String id1 = myTestDataBuilder.createObservation(List.of(
 						myTestDataBuilder.withTag("http://example.orgA", "aTagD")
 					)).getIdPart();
@@ -1995,7 +1987,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 				}
 
 				@Test
-				public void byTokenCode() {
+				void byTokenCode() {
 					String id1 = myTestDataBuilder.createObservation(List.of(
 						myTestDataBuilder.withTag("http://example.org", "aTagA")
 					)).getIdPart();
@@ -2012,7 +2004,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 				}
 
 				@Test
-				public void byDate() {
+				void byDate() {
 					// check milli level precision
 					String id1 = createObservation(List.of(withId("20-000"), withEffectiveDate("2017-01-20T03:21:47.000"))).getIdPart();
 					String id2 = createObservation(List.of(withId("24-002"), withEffectiveDate("2017-01-24T03:21:47.002"))).getIdPart();
@@ -2029,7 +2021,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 				}
 
 				@Test
-				public void byValueString() {
+				void byValueString() {
 					String id1 = myTestDataBuilder.createObservation(List.of(
 						myTestDataBuilder.withResourcePrimitiveAttribute("valueString", "a-string-value-1")
 					)).getIdPart();
@@ -2046,7 +2038,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 				}
 
 				@Test
-				public void byQuantity() {
+				void byQuantity() {
 					String id1 = myTestDataBuilder.createObservation(List.of(
 						myTestDataBuilder.withQuantityAtPath("valueQuantity", 50, UCUM_CODESYSTEM_URL, "10*3/L")
 					)).getIdPart();
@@ -2063,7 +2055,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 				}
 
 				@Test
-				public void byUri() {
+				void byUri() {
 					String id1 = myTestDataBuilder.createObservation(List.of(
 						myTestDataBuilder.withTag("http://example.org", "aTag")
 					)).getIdPart();
@@ -2080,7 +2072,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 				}
 
 				@Test
-				public void byReference() {
+				void byReference() {
 					Patient patient1 = new Patient();
 					IIdType patId1 = myPatientDao.create(patient1, mySrd).getId();
 
@@ -2104,7 +2096,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 				}
 
 				@Test
-				public void byNumber() {
+				void byNumber() {
 					String raId1 = createRiskAssessmentWithPredictionProbability(0.23).getIdPart();
 					String raId2 = createRiskAssessmentWithPredictionProbability(0.38).getIdPart();
 					String raId3 = createRiskAssessmentWithPredictionProbability(0.76).getIdPart();
@@ -2118,7 +2110,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 				}
 
 				@Test
-				public void sortWithOffset() {
+				void sortWithOffset() {
 					String raId1 = createRiskAssessmentWithPredictionProbability(0.23).getIdPart();
 					String raId2 = createRiskAssessmentWithPredictionProbability(0.38).getIdPart();
 					String raId3 = createRiskAssessmentWithPredictionProbability(0.76).getIdPart();
@@ -2134,10 +2126,10 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 			}
 
 			@Nested
-			public class IncludingNulls {
+			class IncludingNulls {
 
 				@Test
-				public void byToken() {
+				void byToken() {
 					String id1 = myTestDataBuilder.createObservation(List.of(
 						myTestDataBuilder.withObservationCode("http://example.com/", "the-code-1")
 					)).getIdPart();
@@ -2154,7 +2146,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 				}
 
 				@Test
-				public void byDate() {
+				void byDate() {
 					String id1 = myTestDataBuilder.createObservation(List.of(
 						myTestDataBuilder.withObservationCode("http://example.com/", "the-code-1")
 					)).getIdPart();
@@ -2171,7 +2163,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 				}
 
 				@Test
-				public void byValueString() {
+				void byValueString() {
 					String id1 = myTestDataBuilder.createObservation(List.of(
 						myTestDataBuilder.withObservationCode("http://example.com/", "the-code-1")
 					)).getIdPart();
@@ -2188,7 +2180,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 				}
 
 				@Test
-				public void byQuantity() {
+				void byQuantity() {
 					String id1 = myTestDataBuilder.createObservation(List.of(
 						myTestDataBuilder.withObservationCode("http://example.com/", "the-code-1")
 					)).getIdPart();
@@ -2205,7 +2197,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 				}
 
 				@Test
-				public void byUri() {
+				void byUri() {
 					String id1 = myTestDataBuilder.createObservation(List.of(
 						myTestDataBuilder.withObservationCode("http://example.com/", "the-code-1")
 					)).getIdPart();
@@ -2222,7 +2214,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 				}
 
 				@Test
-				public void byReference() {
+				void byReference() {
 					Observation obs1 = new Observation();
 					String obsId1 = myObservationDao.create(obs1, mySrd).getId().toUnqualifiedVersionless().getIdPart();
 
@@ -2242,7 +2234,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 				}
 
 				@Test
-				public void byNumber() {
+				void byNumber() {
 					String raId1 = createRiskAssessmentWithPredictionProbability(0.23).getIdPart();
 					String raId2 = createRiskAssessment().getIdPart();
 
@@ -2259,10 +2251,10 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		}
 
 		@Nested
-		public class CombinedProperties {
+		class CombinedProperties {
 
 			@Test
-			public void byTokenAndDate() {
+			void byTokenAndDate() {
 				String id1 = myTestDataBuilder.createObservation(List.of(
 					myTestDataBuilder.withObservationCode("http://example.com/", "the-code-1"),
 					myTestDataBuilder.withEffectiveDate("2017-01-20T03:21:47"),
@@ -2286,7 +2278,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 			}
 
 			@Test
-			public void byTokenAndValueString() {
+			void byTokenAndValueString() {
 				String id1 = myTestDataBuilder.createObservation(List.of(
 					myTestDataBuilder.withObservationCode("http://example.com/", "the-code-1"),
 					myTestDataBuilder.withEffectiveDate("2017-01-20T03:21:47"),
@@ -2312,7 +2304,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 			}
 
 			@Test
-			public void byTokenAndQuantity() {
+			void byTokenAndQuantity() {
 				String id1 = myTestDataBuilder.createObservation(List.of(
 					myTestDataBuilder.withTag("http://example.org", "aTag"),
 					myTestDataBuilder.withQuantityAtPath("valueQuantity", 50, UCUM_CODESYSTEM_URL, "10*3/L")
@@ -2331,7 +2323,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 			}
 
 			@Test
-			public void allTogetherNow() {
+			void allTogetherNow() {
 				String id1 = myTestDataBuilder.createObservation(List.of(
 					myTestDataBuilder.withObservationCode("http://example.com/", "the-code-1"),
 					myTestDataBuilder.withEffectiveDate("2017-01-20T03:21:47"),
@@ -2358,7 +2350,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 	}
 
 	@Nested
-	public class NumberParameter {
+	class NumberParameter {
 
 		@BeforeEach
 		public void enableContainsAndLucene() {
@@ -2380,7 +2372,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		}
 
 		@Test
-		public void noExtraSql() {
+		void noExtraSql() {
 			IIdType raId1 = createRiskAssessmentWithPredictionProbability(.25);
 
 			myCaptureQueriesListener.clear();
@@ -2414,7 +2406,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		 * The following tests are to validate the specification implementation
 		 */
 		@Nested
-		public class TestSpecCasesUsingSignificantFigures {
+		class TestSpecCasesUsingSignificantFigures {
 
 			@Test
 			void specCase1() {
@@ -2497,7 +2489,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 
 	@Disabled("while finding out strategy for this fix")
 	@Nested
-	public class ReferenceParameter {
+	class ReferenceParameter {
 
 		@BeforeEach
 		public void setup() {
@@ -2511,7 +2503,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		}
 
 		@Test
-		public void observationSubjectReferenceTest() {
+		void observationSubjectReferenceTest() {
 			Patient patient = new Patient();
 			DaoMethodOutcome outcome = myPatientDao.create(patient, mySrd);
 			IIdType patId = outcome.getId();
