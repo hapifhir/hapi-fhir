@@ -11,7 +11,7 @@ import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceRequestJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseCardJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseCardSourceJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseJson;
-import ca.uhn.hapi.fhir.cdshooks.custom.extensions.model.ConfigurationExtension;
+import ca.uhn.hapi.fhir.cdshooks.custom.extensions.model.ExampleConfigExtension;
 import ca.uhn.hapi.fhir.cdshooks.custom.extensions.model.RequestExtension;
 import ca.uhn.hapi.fhir.cdshooks.custom.extensions.model.ResponseExtension;
 import ca.uhn.test.concurrency.IPointcutLatch;
@@ -105,7 +105,7 @@ public class HelloWorldService implements IPointcutLatch {
 			"example-client-conformance": "http://hooks.example.org/fhir/102/Conformance/patientview"
 		}
 		""",
-		extensionClass = ConfigurationExtension.class)
+		extensionClass = ExampleConfigExtension.class)
 	public CdsServiceResponseJson playback(CdsServiceRequestJson theCdsServiceRequestJson) {
 		final CdsServiceResponseJson cdsServiceResponseJson = new CdsServiceResponseJson();
 		final CdsServiceResponseCardJson cdsServiceResponseCardJson = new CdsServiceResponseCardJson();
