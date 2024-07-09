@@ -68,7 +68,7 @@ class CdsServiceCacheTest {
 		assertTrue(cdsMethod.isAllowAutoFhirClientPrefetch());
 		assertThat(myFixture.myCdsServiceJson.getServices()).hasSize(1);
 		assertEquals(cdsServiceJson, myFixture.myCdsServiceJson.getServices().get(0));
-		LogbackTestExtensionAssert.assertThat(myLogCapture).hasError(expectedLogMessage);
+		LogbackTestExtensionAssert.assertThat(myLogCapture).hasErrorMessage(expectedLogMessage);
 
 	}
 
@@ -96,7 +96,7 @@ class CdsServiceCacheTest {
 		final ICdsMethod actual = myFixture.unregisterServiceMethod(TEST_KEY, MODULE_ID);
 		// validate
 		assertNull(actual);
-		LogbackTestExtensionAssert.assertThat(myLogCapture).hasError(expectedLogMessage);
+		LogbackTestExtensionAssert.assertThat(myLogCapture).hasErrorMessage(expectedLogMessage);
 	}
 
 	@Nonnull

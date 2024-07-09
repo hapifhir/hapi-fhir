@@ -69,7 +69,7 @@ class ReindexTerminologyCommandTest {
 		);
 		runAppWithStartupHook(args, getLoggingStartupHook());
 
-		LogbackTestExtensionAssert.assertThat(myAppLogCapture).doesNotHave(FAILURE_MESSAGE);
+		LogbackTestExtensionAssert.assertThat(myAppLogCapture).doesNotHaveMessage(FAILURE_MESSAGE);
 	}
 
 	@ParameterizedTest
@@ -132,8 +132,8 @@ class ReindexTerminologyCommandTest {
 		runAppWithStartupHook(args, getLoggingStartupHook());
 
 		LogbackTestExtensionAssert.assertThat(myAppLogCapture)
-			.has(FAILURE_MESSAGE)
-			.has("Internal error. Command result unknown. Check system logs for details");
+			.hasMessage(FAILURE_MESSAGE)
+			.hasMessage("Internal error. Command result unknown. Check system logs for details");
 	}
 
 	@ParameterizedTest
@@ -157,8 +157,8 @@ class ReindexTerminologyCommandTest {
 		runAppWithStartupHook(args, getLoggingStartupHook());
 
 		LogbackTestExtensionAssert.assertThat(myAppLogCapture)
-			.has(FAILURE_MESSAGE)
-			.has("Freetext service is not configured. Operation didn't run.");
+			.hasMessage(FAILURE_MESSAGE)
+			.hasMessage("Freetext service is not configured. Operation didn't run.");
 	}
 
 	static void runAppWithStartupHook(String[] args, Consumer<BaseApp> startupHook) {

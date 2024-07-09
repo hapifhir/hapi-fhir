@@ -271,7 +271,7 @@ class FhirQueryRuleImplTest implements ITestDataBuilder {
 
 			// then
 			assertNull(verdict);
-			LogbackTestExtensionAssert.assertThat(myLogCapture).hasWarn("unsupported chain XXX");
+			LogbackTestExtensionAssert.assertThat(myLogCapture).hasWarnMessage("unsupported chain XXX");
 		}
 
 		@Test
@@ -286,7 +286,7 @@ class FhirQueryRuleImplTest implements ITestDataBuilder {
 
 			// then
 			assertEquals(PolicyEnum.DENY, verdict.getDecision());
-			LogbackTestExtensionAssert.assertThat(myLogCapture).hasWarn("unsupported chain XXX");
+			LogbackTestExtensionAssert.assertThat(myLogCapture).hasWarnMessage("unsupported chain XXX");
 		}
 
 		/**
@@ -305,7 +305,7 @@ class FhirQueryRuleImplTest implements ITestDataBuilder {
 
 			// then
 			assertNull(verdict);
-			LogbackTestExtensionAssert.assertThat(myLogCapture).hasWarn("No matcher provided");
+			LogbackTestExtensionAssert.assertThat(myLogCapture).hasWarnMessage("No matcher provided");
 		}
 
 	}

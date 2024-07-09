@@ -124,8 +124,8 @@ public class SubscriptionLoaderTest {
 		verify(mySubscriptionDao)
 			.searchForResources(any(SearchParameterMap.class), any(SystemRequestDetails.class));
 
-		LogbackTestExtensionAssert.assertThat(myLogCapture).hasError(
+		LogbackTestExtensionAssert.assertThat(myLogCapture).hasErrorMessage(
 			"Subscription " + subscription.getIdElement().getIdPart() + " could not be activated.");
-		LogbackTestExtensionAssert.assertThat(myLogCapture).has(subscription.getError());
+		LogbackTestExtensionAssert.assertThat(myLogCapture).hasMessage(subscription.getError());
 	}
 }

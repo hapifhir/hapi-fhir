@@ -38,15 +38,18 @@ public class LogbackTestExtensionAssert extends AbstractAssert<LogbackTestExtens
 		super(theLogbackTestExtension, selfType);
 	}
 
+	/**
+	 * Verifies that messages contains exactly the given values and nothing else, in order.
+	 */
 	@Nonnull
-	public LogbackTestExtensionAssert containsExactly(@Nonnull String ... theMessages) {
+	public LogbackTestExtensionAssert containsExactMessages(@Nonnull String ... theMessages) {
 		isNotNull();
 		Assertions.assertThat(actual.getLogMessages()).containsExactly(theMessages);
 		return this;
 	}
 
 	@Nonnull
-	public LogbackTestExtensionAssert has(@Nonnull String theMessage) {
+	public LogbackTestExtensionAssert hasMessage(@Nonnull String theMessage) {
 		isNotNull();
 		final Predicate<ILoggingEvent> predicate = makeMessageContains(theMessage);
 		final Condition<List<? extends ILoggingEvent>> condition =
@@ -55,7 +58,7 @@ public class LogbackTestExtensionAssert extends AbstractAssert<LogbackTestExtens
 		return this;
 	}
 
-	public LogbackTestExtensionAssert doesNotHave(@Nonnull String theMessage) {
+	public LogbackTestExtensionAssert doesNotHaveMessage(@Nonnull String theMessage) {
 		isNotNull();
 		final Predicate<ILoggingEvent> predicate = makeMessageContains(theMessage);
 		final Condition<List<? extends ILoggingEvent>> condition =
@@ -65,7 +68,7 @@ public class LogbackTestExtensionAssert extends AbstractAssert<LogbackTestExtens
 	}
 
 	@Nonnull
-	public LogbackTestExtensionAssert hasError(@Nonnull String theMessage) {
+	public LogbackTestExtensionAssert hasErrorMessage(@Nonnull String theMessage) {
 		isNotNull();
 		final Predicate<ILoggingEvent> predicate = makeLevelEquals(Level.ERROR)
 			.and(makeMessageContains(theMessage));
@@ -76,7 +79,7 @@ public class LogbackTestExtensionAssert extends AbstractAssert<LogbackTestExtens
 	}
 
 	@Nonnull
-	public LogbackTestExtensionAssert hasInfo(@Nonnull String theMessage) {
+	public LogbackTestExtensionAssert hasInfoMessage(@Nonnull String theMessage) {
 		isNotNull();
 		final Predicate<ILoggingEvent> predicate = makeLevelEquals(Level.INFO)
 			.and(makeMessageContains(theMessage));
@@ -87,7 +90,7 @@ public class LogbackTestExtensionAssert extends AbstractAssert<LogbackTestExtens
 	}
 
 	@Nonnull
-	public LogbackTestExtensionAssert doesNotHaveInfo(@Nonnull String theMessage) {
+	public LogbackTestExtensionAssert doesNotHaveInfoMessage(@Nonnull String theMessage) {
 		isNotNull();
 		final Predicate<ILoggingEvent> predicate = makeLevelEquals(Level.INFO).and(makeMessageContains(theMessage));
 		final Condition<List<? extends ILoggingEvent>> condition =
@@ -97,7 +100,7 @@ public class LogbackTestExtensionAssert extends AbstractAssert<LogbackTestExtens
 	}
 
 	@Nonnull
-	public LogbackTestExtensionAssert hasWarn(@Nonnull String theMessage) {
+	public LogbackTestExtensionAssert hasWarnMessage(@Nonnull String theMessage) {
 		isNotNull();
 		final Predicate<ILoggingEvent> predicate = makeLevelEquals(Level.WARN)
 			.and(makeMessageContains(theMessage));
@@ -108,7 +111,7 @@ public class LogbackTestExtensionAssert extends AbstractAssert<LogbackTestExtens
 	}
 
 	@Nonnull
-	public LogbackTestExtensionAssert hasDebug(@Nonnull String theMessage) {
+	public LogbackTestExtensionAssert hasDebugMessage(@Nonnull String theMessage) {
 		isNotNull();
 		final Predicate<ILoggingEvent> predicate = makeLevelEquals(Level.DEBUG)
 			.and(makeMessageContains(theMessage));

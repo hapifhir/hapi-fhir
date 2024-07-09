@@ -947,7 +947,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		assertThat(result).hasSize(1);
 		assertEquals(((Observation) result.get(0)).getIdElement().getIdPart(), id1.getIdPart());
 
-		LogbackTestExtensionAssert.assertThat(myLogbackTestExtension).hasWarn("Some resources were not found in index. Make sure all resources were indexed. Resorting to database search.");
+		LogbackTestExtensionAssert.assertThat(myLogbackTestExtension).hasWarnMessage("Some resources were not found in index. Make sure all resources were indexed. Resorting to database search.");
 
 		// restore changed property
 		JpaStorageSettings defaultConfig = new JpaStorageSettings();
