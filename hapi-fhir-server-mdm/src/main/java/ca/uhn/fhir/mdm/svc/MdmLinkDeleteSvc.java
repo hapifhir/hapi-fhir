@@ -40,6 +40,8 @@ public class MdmLinkDeleteSvc {
 	@Autowired
 	private IIdHelperService myIdHelperService;
 
+	public MdmLinkDeleteSvc() {}
+
 	/**
 	 * Delete all {@link ca.uhn.fhir.mdm.api.IMdmLink} records that implements this interface.  (Used by Expunge.)
 	 *

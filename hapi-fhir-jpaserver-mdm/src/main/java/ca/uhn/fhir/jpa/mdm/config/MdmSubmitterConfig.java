@@ -35,12 +35,6 @@ import org.springframework.context.annotation.Lazy;
 @Configuration
 @Import(MdmCommonConfig.class)
 public class MdmSubmitterConfig {
-
-	@Bean
-	MdmSubmitterInterceptorLoader mdmSubmitterInterceptorLoader() {
-		return new MdmSubmitterInterceptorLoader();
-	}
-
 	@Bean
 	MdmSearchParamSvc mdmSearchParamSvc() {
 		return new MdmSearchParamSvc();
