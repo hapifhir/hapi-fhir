@@ -3419,8 +3419,8 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		org.getNameElement().setValue("testTokenParamWhichIsTooLong");
 		org.addType().addCoding().setSystem(longStr1).setCode(longStr2);
 
-		String subStr1 = longStr1.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH);
-		String subStr2 = longStr2.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH);
+		String subStr1 = longStr1.substring(0, ResourceIndexedSearchParamToken.MAX_LENGTH);
+		String subStr2 = longStr2.substring(0, ResourceIndexedSearchParamToken.MAX_LENGTH);
 		List<IResourcePersistentId> val = myOrganizationDao.searchForIds(new SearchParameterMap("type", new TokenParam(subStr1, subStr2)), null);
 		int initial = val.size();
 
