@@ -19,6 +19,8 @@
  */
 package ca.uhn.hapi.fhir.cdshooks.api;
 
+import ca.uhn.hapi.fhir.cdshooks.api.json.CdsHooksExtension;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -72,4 +74,6 @@ public @interface CdsService {
 	 * An arbitrary string which will be used to store stringify JSON
 	 */
 	String extension() default "";
+
+	Class<? extends CdsHooksExtension> extensionClass() default CdsHooksExtension.class;
 }

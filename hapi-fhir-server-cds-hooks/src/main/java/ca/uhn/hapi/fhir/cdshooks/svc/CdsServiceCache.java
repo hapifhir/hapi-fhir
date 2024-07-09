@@ -131,4 +131,11 @@ public class CdsServiceCache {
 		}
 		return result;
 	}
+
+	CdsServiceJson getCdsServiceJson(String theString) {
+		return myCdsServiceJson.getServices().stream()
+				.filter(x -> x.getId().equals(theString))
+				.findFirst()
+				.orElse(null);
+	}
 }
