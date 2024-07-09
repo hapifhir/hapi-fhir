@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.HapiMigrationException;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -11,7 +12,6 @@ import java.util.Set;
 import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class RenameColumnTaskTest extends BaseTest {
@@ -148,7 +148,7 @@ public class RenameColumnTaskTest extends BaseTest {
 	@ParameterizedTest(name = "{index}: {0}")
 	@MethodSource("data")
 	public void testBothExistDeleteTargetFirstDataExistsInSourceAndTarget(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
-		before(theTestDatabaseDetails);
+		final DriverTypeEnum driverType = before(theTestDatabaseDetails);
 
 		executeSql("create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255), myTextCol varchar(255))");
 		executeSql("INSERT INTO SOMETABLE (PID, TEXTCOL, myTextCol) VALUES (123, 'AAA', 'BBB')");
@@ -165,7 +165,12 @@ public class RenameColumnTaskTest extends BaseTest {
 			getMigrator().migrate();
 			fail();
 		} catch (HapiMigrationException e) {
-			assertEquals(Msg.code(47) + "Failure executing task \"Drop an index\", aborting! Cause: java.sql.SQLException: " + Msg.code(54) + "Can not rename SOMETABLE.myTextCol to TEXTCOL because both columns exist and data exists in TEXTCOL", e.getMessage());
+			final String expectedError =
+				String.format("%sFailure executing task 'Drop an index', for driver: %s, aborting! Cause: java.sql.SQLException: %sCan not rename SOMETABLE.myTextCol to TEXTCOL because both columns exist and data exists in TEXTCOL",
+					Msg.code(47),
+					driverType.name(),
+					Msg.code(54));
+			assertThat(e.getMessage()).isEqualTo(expectedError);
 		}
 
 	}
@@ -234,7 +239,7 @@ public class RenameColumnTaskTest extends BaseTest {
 	@ParameterizedTest(name = "{index}: {0}")
 	@MethodSource("data")
 	public void testNeitherColumnExists(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
-		before(theTestDatabaseDetails);
+		final DriverTypeEnum driverType = before(theTestDatabaseDetails);
 
 		executeSql("create table SOMETABLE (PID bigint not null)");
 
@@ -248,7 +253,12 @@ public class RenameColumnTaskTest extends BaseTest {
 			getMigrator().migrate();
 			fail();
 		} catch (HapiMigrationException e) {
-			assertEquals(Msg.code(47) + "Failure executing task \"RenameColumnTask\", aborting! Cause: java.sql.SQLException: " + Msg.code(56) + "Can not rename SOMETABLE.myTextCol to TEXTCOL because neither column exists!", e.getMessage());
+			final String expectedError =
+				String.format("%sFailure executing task 'RenameColumnTask', for driver: %s, aborting! Cause: java.sql.SQLException: %sCan not rename SOMETABLE.myTextCol to TEXTCOL because neither column exists!",
+					Msg.code(47),
+					driverType.name(),
+					Msg.code(56));
+			assertThat(e.getMessage()).isEqualTo(expectedError);
 		}
 
 
@@ -274,7 +284,7 @@ public class RenameColumnTaskTest extends BaseTest {
 	@ParameterizedTest(name = "{index}: {0}")
 	@MethodSource("data")
 	public void testBothColumnsExist(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
-		before(theTestDatabaseDetails);
+		final DriverTypeEnum driverType = before(theTestDatabaseDetails);
 
 		executeSql("create table SOMETABLE (PID bigint not null, PID2 bigint)");
 
@@ -288,7 +298,12 @@ public class RenameColumnTaskTest extends BaseTest {
 			getMigrator().migrate();
 			fail();
 		} catch (HapiMigrationException e) {
-			assertEquals(Msg.code(47) + "Failure executing task \"RenameColumnTask\", aborting! Cause: java.sql.SQLException: " + Msg.code(55) + "Can not rename SOMETABLE.PID to PID2 because both columns exist!", e.getMessage());
+			final String expectedError =
+				String.format("%sFailure executing task 'RenameColumnTask', for driver: %s, aborting! Cause: java.sql.SQLException: %sCan not rename SOMETABLE.PID to PID2 because both columns exist!",
+					Msg.code(47),
+					driverType.name(),
+					Msg.code(55));
+			assertThat(e.getMessage()).isEqualTo(expectedError);
 		}
 
 
