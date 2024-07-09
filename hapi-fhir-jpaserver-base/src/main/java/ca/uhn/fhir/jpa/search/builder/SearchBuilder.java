@@ -351,7 +351,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	 */
 	@Override
 	public void setPreviouslyAddedResourcePids(@Nonnull List<JpaPid> thePidSet) {
-		myPidSet = new HashSet<>(thePidSet);
+		myPidSet = new LinkedHashSet<>(thePidSet);
 	}
 
 	@SuppressWarnings("ConstantConditions")
@@ -367,7 +367,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		init(theParams, theSearchRuntimeDetails.getSearchUuid(), theRequestPartitionId);
 
 		if (myPidSet == null) {
-			myPidSet = new HashSet<>();
+			// using LinkedHashSet instead of HashSet to guarantee order in Set
+			myPidSet = new LinkedHashSet<>();
 		}
 
 		return new QueryIterator(theSearchRuntimeDetails, theRequest);
@@ -1408,6 +1409,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		}
 
 		List<JpaPid> nextRoundMatches = new ArrayList<>(matches);
+		// using LinkedHashSet instead of HashSet to guarantee order in Set
 		HashSet<JpaPid> allAdded = new LinkedHashSet<>();
 		HashSet<JpaPid> original = new LinkedHashSet<>(matches);
 		ArrayList<Include> includes = new ArrayList<>(currentIncludes);
@@ -2212,7 +2214,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		private JpaPid myNext;
 
 		IncludesIterator(Set<JpaPid> thePidSet, RequestDetails theRequest) {
-			myCurrentPids = new HashSet<>(thePidSet);
+			// using LinkedHashSet instead of HashSet to guarantee order in Set
+			myCurrentPids = new LinkedHashSet<>(thePidSet);
 			myCurrentIterator = null;
 			myRequest = theRequest;
 		}
@@ -2361,11 +2364,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					 * assigns the results iterator
 					 * and populates the myQueryList.
 					 */
-					if (myParams.getEverythingMode() != null) {
-						initializeIteratorQuery(0, myMaxResultsToFetch);
-					} else {
-						initializeIteratorQuery(myOffset, myMaxResultsToFetch);
-					}
+					initializeIteratorQuery(myOffset, myMaxResultsToFetch);
 				}
 
 				if (myNext == null) {
@@ -2485,11 +2484,18 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		}
 
 		private void initializeIteratorQuery(Integer theOffset, Integer theMaxResultsToFetch) {
+			Integer offset = theOffset;
 			if (myQueryList.isEmpty()) {
 				// Capture times for Lucene/Elasticsearch queries as well
 				mySearchRuntimeDetails.setQueryStopwatch(new StopWatch());
+
+				// setting offset to 0 to fetch all resource ids to guarantee
+				// correct output result for everything operation
+				if (myParams.getEverythingMode() != null) {
+					offset = 0;
+				}
 				myQueryList = createQuery(
-						myParams, mySort, theOffset, theMaxResultsToFetch, false, myRequest, mySearchRuntimeDetails);
+						myParams, mySort, offset, theMaxResultsToFetch, false, myRequest, mySearchRuntimeDetails);
 			}
 
 			mySearchRuntimeDetails.setQueryStopwatch(new StopWatch());
