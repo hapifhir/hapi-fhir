@@ -1363,6 +1363,37 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 			validateEverythingBundle(output);
 		}
 
+		@Test
+		public void testPagingOverEverything_onPatientTypeWithNotLinkedPatients_returnsCorrectBundles() {
+			String methodName = "testEverythingPatientTypeWithIdParameter";
+
+			p1Id = createPatient(methodName, "1");
+			p2Id = createPatient(methodName, "2");
+			p3Id = createPatient(methodName, "3");
+			p4Id = createPatient(methodName, "3");
+
+			// Test patients without links
+			Parameters parameters = new Parameters();
+			addOffsetAndCount(parameters, 0, 1);
+
+			Parameters output = myClient.operation().onType(Patient.class).named("everything").withParameters(parameters).execute();
+			Bundle bundle = (Bundle) output.getParameter().get(0).getResource();
+			assertThat(bundle.getEntry()).hasSize(1);
+			assertThat(toUnqualifiedVersionlessIds(bundle)).containsOnly(p1Id);
+
+			// second page
+			Bundle nextBundle = getNextBundle(bundle);
+			validateNextBundle(nextBundle, 1, p2Id);
+
+			// third page
+			nextBundle = getNextBundle(nextBundle);
+			validateNextBundle(nextBundle, 1, p3Id);
+
+			// fourth page
+			nextBundle = getNextBundle(nextBundle);
+			validateNextBundle(nextBundle, 1, p4Id);
+		}
+
 		private void addOffsetAndCount(Parameters theParameters, int theOffset, int theCount) {
 			theParameters.addParameter(new Parameters.ParametersParameterComponent()
 				.setName("_count").setValue(new UnsignedIntType(theCount)));
@@ -1447,6 +1478,10 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 		Encounter e1 = new Encounter();
 		e1.setLanguage(methodName + s);
 		return myClient.create().resource(e1).execute().getId().toUnqualifiedVersionless();
+	}
+
+	public IIdType createPatient(String theMethodName, String theIndex) {
+		return createPatientWithIndexAtOrganization(theMethodName, theIndex, null);
 	}
 
 	public IIdType createPatientWithIndexAtOrganization(String theMethodName, String theIndex, IIdType theOrganizationId) {

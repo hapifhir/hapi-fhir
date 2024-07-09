@@ -132,6 +132,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -1407,8 +1408,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		}
 
 		List<JpaPid> nextRoundMatches = new ArrayList<>(matches);
-		HashSet<JpaPid> allAdded = new HashSet<>();
-		HashSet<JpaPid> original = new HashSet<>(matches);
+		HashSet<JpaPid> allAdded = new LinkedHashSet<>();
+		HashSet<JpaPid> original = new LinkedHashSet<>(matches);
 		ArrayList<Include> includes = new ArrayList<>(currentIncludes);
 
 		int roundCounts = 0;
@@ -1418,7 +1419,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		do {
 			roundCounts++;
 
-			HashSet<JpaPid> pidsToInclude = new HashSet<>();
+			HashSet<JpaPid> pidsToInclude = new LinkedHashSet<>();
 
 			for (Iterator<Include> iter = includes.iterator(); iter.hasNext(); ) {
 				Include nextInclude = iter.next();
@@ -2388,16 +2389,10 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 						if (nextLong != null) {
 							JpaPid next = JpaPid.fromId(nextLong);
-							if (myPidSet.add(next)) {
-								if (myParams.getEverythingMode() != null
-										&& myOffset != null
-										&& myOffset >= myPidSet.size()) {
-									mySkipCount++;
-								} else {
-									myNext = next;
-									myNonSkipCount++;
-									break;
-								}
+							if (myPidSet.add(next) && doNotSkipNextPidForEverything()) {
+								myNext = next;
+								myNonSkipCount++;
+								break;
 							} else {
 								mySkipCount++;
 							}
@@ -2427,14 +2422,10 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					if (myIncludesIterator != null) {
 						while (myIncludesIterator.hasNext()) {
 							JpaPid next = myIncludesIterator.next();
-							if (next != null)
-								if (myPidSet.add(next)) {
-									if (myParams.getEverythingMode() == null
-											|| (myOffset != null && myOffset < myPidSet.size())) {
-										myNext = next;
-										break;
-									}
-								}
+							if (next != null && myPidSet.add(next) && doNotSkipNextPidForEverything()) {
+								myNext = next;
+								break;
+							}
 						}
 						if (myNext == null) {
 							myNext = NO_MORE;
@@ -2471,6 +2462,10 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				CompositeInterceptorBroadcaster.doCallHooks(
 						myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_SEARCH_SELECT_COMPLETE, params);
 			}
+		}
+
+		private boolean doNotSkipNextPidForEverything() {
+			return !(myParams.getEverythingMode() != null && (myOffset != null && myOffset >= myPidSet.size()));
 		}
 
 		private void callPerformanceTracingHook(Long theNextLong) {
