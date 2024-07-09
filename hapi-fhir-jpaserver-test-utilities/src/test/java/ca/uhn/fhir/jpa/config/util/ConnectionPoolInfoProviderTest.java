@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.config.util;
 
-import ca.uhn.fhir.jpa.config.r4.JpaR4Config;
 import net.ttddyy.dsproxy.support.ProxyDataSource;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,7 +13,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import javax.sql.DataSource;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -44,15 +43,15 @@ class ConnectionPoolInfoProviderTest {
 		@Test
 		void testGetMaxWaitMillis() {
 			Optional<Long> resOpt = tested.getMaxWaitMillis();
-			assertTrue(resOpt.isPresent());
-			assertEquals(MAX_WAIT_MILLIS, resOpt.get());
+			assertThat(resOpt).isPresent();
+			assertThat(resOpt).contains(MAX_WAIT_MILLIS);
 		}
 
 		@Test
 		void testGetMaxConnectionSize() {
 			Optional<Integer> resOpt = tested.getTotalConnectionSize();
-			assertTrue(resOpt.isPresent());
-			assertEquals(MAX_CONNECTIONS_TOTAL, resOpt.get());
+			assertThat(resOpt).isPresent();
+			assertThat(resOpt).contains(MAX_CONNECTIONS_TOTAL);
 		}
 
 	}

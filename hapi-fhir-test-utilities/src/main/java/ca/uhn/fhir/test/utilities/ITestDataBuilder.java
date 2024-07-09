@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Test Utilities
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,8 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.MetaUtil;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
@@ -38,15 +40,12 @@ import org.hl7.fhir.r4.model.InstantType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Date;
 import java.util.function.Consumer;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.matchesPattern;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * This is an experiment to see if we can make test data creation for storage unit tests a bit more readable.
@@ -174,7 +173,7 @@ public interface ITestDataBuilder {
 
 	default ICreationArgument withId(String theId) {
 		return t -> {
-			assertThat(theId, matchesPattern("[a-zA-Z0-9-]+"));
+			assertThat(theId).matches("[a-zA-Z0-9-]+");
 			((IBaseResource)t).setId(theId);
 		};
 	}

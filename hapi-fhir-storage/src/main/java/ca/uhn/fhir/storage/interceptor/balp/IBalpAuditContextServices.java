@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,12 +21,11 @@ package ca.uhn.fhir.storage.interceptor.balp;
 
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.AuditEvent;
 import org.hl7.fhir.r4.model.Reference;
-
-import javax.annotation.Nonnull;
 
 /**
  * This interface is intended to be implemented in order to supply implementation
@@ -95,7 +94,7 @@ public interface IBalpAuditContextServices {
 			@Nonnull RequestDetails theRequestDetails,
 			@Nonnull IBaseResource theResource,
 			@Nonnull IIdType theResourceId) {
-		String serverBaseUrl = theRequestDetails.getServerBaseForRequest();
+		String serverBaseUrl = theRequestDetails.getFhirServerBase();
 		String resourceName = theResourceId.getResourceType();
 		return theResourceId.withServerBase(serverBaseUrl, resourceName).getValue();
 	}

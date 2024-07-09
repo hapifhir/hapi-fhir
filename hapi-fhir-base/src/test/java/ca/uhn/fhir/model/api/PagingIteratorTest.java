@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -55,14 +56,14 @@ public class PagingIteratorTest {
 
 		String next = myPagingIterator.next();
 		assertNotNull(next);
-		assertFalse(next.isEmpty());
+		assertThat(next).isNotEmpty();
 	}
 
 	@Test
 	public void next_fetchTest_fetchesAndReturns() {
 		// 3 cases to make sure we get the edge cases
 		for (int adj : new int[] { -1, 0, 1 }) {
-			int size = PagingIterator.PAGE_SIZE + adj;
+			int size = PagingIterator.DEFAULT_PAGE_SIZE + adj;
 
 			myPagingIterator = createPagingIterator(size);
 
@@ -84,7 +85,7 @@ public class PagingIteratorTest {
 			myPagingIterator.next();
 			fail();
 		} catch (NoSuchElementException ex) {
-			assertTrue(ex.getMessage().contains("Nothing to fetch"));
+			assertThat(ex.getMessage()).contains("Nothing to fetch");
 		}
 	}
 }

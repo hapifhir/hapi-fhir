@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,11 @@
  */
 package ca.uhn.fhir.rest.server.mail;
 
+import jakarta.annotation.Nonnull;
 import org.simplejavamail.api.email.Email;
 import org.simplejavamail.api.mailer.AsyncResponse;
 
 import java.util.List;
-import javax.annotation.Nonnull;
 
 public interface IMailSvc {
 	void sendMail(@Nonnull List<Email> theEmails);

@@ -4,7 +4,7 @@ package ca.uhn.fhir.subscription.api;
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import ca.uhn.fhir.jpa.model.entity.IPersistedResourceModifiedMessagePK;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * An implementer of this interface will provide {@link ResourceModifiedMessage} persistence services.
@@ -61,10 +62,29 @@ public interface IResourceModifiedMessagePersistenceSvc {
 	/**
 	 * Restore a resourceModifiedMessage to its pre persistence representation.
 	 *
-	 * @param thePersistedResourceModifiedMessage The message needing restoration.
+	 * @param theResourceModifiedMessage The message needing restoration.
 	 * @return The resourceModifiedMessage in its pre persistence form.
 	 */
-	ResourceModifiedMessage inflatePersistedResourceModifiedMessage(
+	ResourceModifiedMessage inflatePersistedResourceModifiedMessage(ResourceModifiedMessage theResourceModifiedMessage);
+
+	/**
+	 * Restore a resourceModifiedMessage to its pre persistence representation or null if the resource does not exist.
+	 *
+	 * @param theResourceModifiedMessage
+	 * @return An Optional containing The resourceModifiedMessage in its pre persistence form or null when the resource
+	 * does not exist
+	 */
+	Optional<ResourceModifiedMessage> inflatePersistedResourceModifiedMessageOrNull(
+			ResourceModifiedMessage theResourceModifiedMessage);
+
+	/**
+	 * Create a ResourceModifiedMessage without its pre persistence representation, i.e. without the resource body in
+	 * payload
+	 *
+	 * @param thePersistedResourceModifiedMessage The message needing creation
+	 * @return The resourceModifiedMessage without its pre persistence form
+	 */
+	ResourceModifiedMessage createResourceModifiedMessageFromEntityWithoutInflation(
 			IPersistedResourceModifiedMessage thePersistedResourceModifiedMessage);
 
 	/**

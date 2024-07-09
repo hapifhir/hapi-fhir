@@ -1,12 +1,11 @@
 package ca.uhn.fhir.i18n;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.hamcrest.MatcherAssert.assertThat;
+import org.junit.jupiter.api.Test;
 
 import java.util.Set;
 
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class HapiLocalizerTest {
 
@@ -16,7 +15,7 @@ public class HapiLocalizerTest {
 
 		assertEquals("some message", loc.newMessageFormat("some message").format(new Object[]{}));
 		assertEquals("var1 {var2} var3 {var4}", loc.newMessageFormat("var1 {var2} var3 {var4}").format(new Object[]{}));
-		assertEquals("var1 A var3 B", loc.newMessageFormat("var1 {0} var3 {1}").format(new Object[]{ "A", "B"}));
+		assertEquals("var1 A var3 B", loc.newMessageFormat("var1 {0} var3 {1}").format(new Object[]{"A", "B"}));
 	}
 
 	
@@ -24,7 +23,7 @@ public class HapiLocalizerTest {
 	public void testAllKeys() {
 		HapiLocalizer svc = new HapiLocalizer();
 		Set<String> allKeys = svc.getAllKeys();
-		assertThat(allKeys, not(empty()));
+		assertThat(allKeys).isNotEmpty();
 		
 		for (String next : allKeys) {
 			svc.getMessage(next);
@@ -35,7 +34,7 @@ public class HapiLocalizerTest {
 	public void testGetVersion() {
 		HapiLocalizer svc = new HapiLocalizer();
 		String version = svc.getMessage("hapi.version");
-		assertThat(version, matchesPattern("[0-9]+.*"));
+		assertThat(version).matches("[0-9]+.*");
 	}
 	
 }

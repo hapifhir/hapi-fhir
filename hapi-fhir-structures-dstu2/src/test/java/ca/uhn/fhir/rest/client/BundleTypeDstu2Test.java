@@ -19,7 +19,6 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicStatusLine;
-import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,8 +30,7 @@ import java.io.StringReader;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -79,13 +77,13 @@ public class BundleTypeDstu2Test {
 
 		HttpUriRequest value = capt.getValue();
 
-		assertTrue(value instanceof HttpPost, "Expected request of type POST on long params list");
+		assertThat(value instanceof HttpPost).as("Expected request of type POST on long params list").isTrue();
 		HttpPost post = (HttpPost) value;
 		String body = IOUtils.toString(post.getEntity().getContent());
 		IOUtils.closeQuietly(post.getEntity().getContent());
 		ourLog.info(body);
 
-		assertThat(body, Matchers.containsString("<type value=\"" + BundleTypeEnum.TRANSACTION.getCode()));
+		assertThat(body).contains("<type value=\"" + BundleTypeEnum.TRANSACTION.getCode());
 	}
 	
 	
@@ -97,7 +95,7 @@ public class BundleTypeDstu2Test {
 		client.registerInterceptor(new LoggingInterceptor(true));
 		Bundle result = client.search().forResource(Patient.class).where(Patient.NAME.matches().value("Alice")).returnBundle(Bundle.class).execute();
 		
-		System.out.println(result.getEntry().size());
+		ourLog.info("size is " + result.getEntry().size());
 		
 	}
 	

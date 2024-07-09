@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Test Utilities
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,21 +21,31 @@ package ca.uhn.fhir.test.utilities.server;
 
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.test.utilities.JettyUtil;
+import jakarta.annotation.PreDestroy;
+import jakarta.servlet.DispatcherType;
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.FilterConfig;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.Validate;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.eclipse.jetty.ee10.servlet.FilterHolder;
+import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
+import org.eclipse.jetty.ee10.servlet.ServletHolder;
+import org.eclipse.jetty.ee10.websocket.jakarta.server.config.JakartaWebSocketServletContainerInitializer;
 import org.eclipse.jetty.io.Connection;
 import org.eclipse.jetty.io.Connection.Listener;
 import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
-import org.eclipse.jetty.server.handler.HandlerList;
-import org.eclipse.jetty.servlet.FilterHolder;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
-import org.eclipse.jetty.websocket.server.config.JettyWebSocketServletContainerInitializer;
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
@@ -47,16 +57,6 @@ import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 
-import javax.annotation.PreDestroy;
-import javax.servlet.DispatcherType;
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -64,6 +64,7 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Consumer;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -83,6 +84,7 @@ public abstract class BaseJettyServerExtension<T extends BaseJettyServerExtensio
 	private Class<? extends WebSocketConfigurer> myEnableSpringWebsocketSupport;
 	private String myEnableSpringWebsocketContextPath;
 	private long myIdleTimeoutMillis = 30000;
+	private final List<Consumer<Server>> myBeforeStartServerConsumers = new ArrayList<>();
 
 	/**
 	 * Sets the Jetty server "idle timeout" in millis. This is the amount of time that
@@ -93,19 +95,30 @@ public abstract class BaseJettyServerExtension<T extends BaseJettyServerExtensio
 	 * 30000.
 	 */
 	public T withIdleTimeout(long theIdleTimeoutMillis) {
+		Validate.isTrue(myServer == null, "Server is already started");
 		myIdleTimeoutMillis = theIdleTimeoutMillis;
 		return (T) this;
 	}
 
 	@SuppressWarnings("unchecked")
 	public T withContextPath(String theContextPath) {
+		Validate.isTrue(myServer == null, "Server is already started");
 		myContextPath = defaultString(theContextPath);
 		return (T) this;
 	}
 
 	public T withServletFilter(Filter theFilter) {
+		Validate.isTrue(myServer == null, "Server is already started");
 		Validate.notNull(theFilter, "theFilter must not be null");
 		myServletFilters.add(theFilter);
+		return (T) this;
+	}
+
+	@SuppressWarnings("unchecked")
+	public T withServerBeforeStarted(Consumer<Server> theConsumer) {
+		Validate.isTrue(myServer == null, "Server is already started");
+		Validate.notNull(theConsumer, "theConsumer must not be null");
+		myBeforeStartServerConsumers.add(theConsumer);
 		return (T) this;
 	}
 
@@ -175,7 +188,7 @@ public abstract class BaseJettyServerExtension<T extends BaseJettyServerExtensio
 
 		ServletHolder servletHolder = new ServletHolder(provideServlet());
 
-		HandlerList handlerList = new HandlerList();
+		List<Handler> handlerList = new ArrayList<>();
 
 		ServletContextHandler contextHandler = new ServletContextHandler();
 		contextHandler.setContextPath(myContextPath);
@@ -184,7 +197,7 @@ public abstract class BaseJettyServerExtension<T extends BaseJettyServerExtensio
 		for (Filter next : myServletFilters) {
 			contextHandler.addFilter(new FilterHolder(next), "/*", EnumSet.allOf(DispatcherType.class));
 		}
-		handlerList.addHandler(contextHandler);
+		handlerList.add(contextHandler);
 
 		if (myEnableSpringWebsocketSupport != null) {
 
@@ -200,14 +213,20 @@ public abstract class BaseJettyServerExtension<T extends BaseJettyServerExtensio
 
 			ServletContextHandler servletContextHandler = new ServletContextHandler();
 			servletContextHandler.setContextPath(myEnableSpringWebsocketContextPath);
-			servletContextHandler.setAllowNullPathInfo(true);
+			servletContextHandler.setAllowNullPathInContext(true);
 			servletContextHandler.addServlet(new ServletHolder(dispatcherServlet), "/*");
-			JettyWebSocketServletContainerInitializer.configure(servletContextHandler, null);
 
-			handlerList.addHandler(servletContextHandler);
+			JakartaWebSocketServletContainerInitializer.configure(servletContextHandler, null);
+
+			handlerList.add(servletContextHandler);
 		}
 
-		myServer.setHandler(handlerList);
+		myServer.setHandler(new Handler.Sequence(handlerList));
+
+		for (Consumer<Server> next : myBeforeStartServerConsumers) {
+			next.accept(myServer);
+		}
+
 		myServer.start();
 
 		myPort = JettyUtil.getPortForStartedServer(myServer);

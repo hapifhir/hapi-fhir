@@ -6,18 +6,15 @@ import ca.uhn.fhir.jpa.term.UploadStatistics;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.CapturingInterceptor;
-import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.ParseException;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.r4.model.IdType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
@@ -30,12 +27,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.hamcrest.CoreMatchers.hasItems;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
@@ -46,33 +41,29 @@ public class HeaderPassthroughOptionTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(HeaderPassthroughOptionTest.class);
 
 	final String FHIR_VERSION = "r4";
-	private FhirContext myCtx = FhirContext.forR4();
-	private Server myServer;
-	private int myPort;
+	private final FhirContext myCtx = FhirContext.forR4Cached();
 	private final String headerKey1 = "test-header-key-1";
 	private final String headerValue1 = "test header value-1";
 	private static final String ourConceptsFileName = "target/concepts.csv";
 	private static final String ourHierarchyFileName = "target/hierarchy.csv";
+	private static final AtomicInteger ourFilenameCounter = new AtomicInteger();
 	private final CapturingInterceptor myCapturingInterceptor = new CapturingInterceptor();
 	private final UploadTerminologyCommand testedCommand =
 		new RequestCapturingUploadTerminologyCommand(myCapturingInterceptor);
+	private final TerminologyUploaderProvider myProvider = new TerminologyUploaderProvider();
 
 	@Mock
 	protected ITermLoaderSvc myTermLoaderSvc;
-	private static final AtomicInteger ourFilenameCounter = new AtomicInteger();
+
+	@RegisterExtension
+	public RestfulServerExtension myServer = new RestfulServerExtension(myCtx)
+		.registerProvider(myProvider);
 
 	@BeforeEach
-	public void beforeEach() throws Exception {
-		myServer = new Server(0);
-		TerminologyUploaderProvider provider = new TerminologyUploaderProvider(myCtx, myTermLoaderSvc);
-		ServletHandler proxyHandler = new ServletHandler();
-		RestfulServer servlet = new RestfulServer(myCtx);
-		servlet.registerProvider(provider);
-		ServletHolder servletHolder = new ServletHolder(servlet);
-		proxyHandler.addServletWithMapping(servletHolder, "/*");
-		myServer.setHandler(proxyHandler);
-		JettyUtil.startServer(myServer);
-		myPort = JettyUtil.getPortForStartedServer(myServer);
+	public void beforeEach() {
+		myProvider.setContext(myCtx);
+		myProvider.setTerminologyLoaderSvc(myTermLoaderSvc);
+
 		when(myTermLoaderSvc.loadCustom(eq("http://foo"), anyList(), any()))
 			.thenReturn(new UploadStatistics(100, new IdType("CodeSystem/101")));
 	}
@@ -85,7 +76,7 @@ public class HeaderPassthroughOptionTest {
 		String[] args = new String[]{
 			"-v", FHIR_VERSION,
 			"-m", "SNAPSHOT",
-			"-t", "http://localhost:" + myPort,
+			"-t", myServer.getBaseUrl(),
 			"-u", "http://foo",
 			"-d", getConceptFilename(filenameCounter),
 			"-d", getHierarchyFilename(filenameCounter),
@@ -99,10 +90,10 @@ public class HeaderPassthroughOptionTest {
 		Map<String, List<String>> allHeaders = myCapturingInterceptor.getLastRequest().getAllHeaders();
 		assertFalse(allHeaders.isEmpty());
 
-		assertTrue(allHeaders.containsKey(headerKey1));
-		assertEquals(1, allHeaders.get(headerKey1).size());
+		assertThat(allHeaders).containsKey(headerKey1);
+		assertThat(allHeaders.get(headerKey1)).hasSize(1);
 
-		assertThat(allHeaders.get(headerKey1), hasItems(headerValue1));
+		assertThat(allHeaders.get(headerKey1)).contains(headerValue1);
 	}
 
 	@Test
@@ -115,7 +106,7 @@ public class HeaderPassthroughOptionTest {
 		String[] args = new String[]{
 			"-v", FHIR_VERSION,
 			"-m", "SNAPSHOT",
-			"-t", "http://localhost:" + myPort,
+			"-t", myServer.getBaseUrl(),
 			"-u", "http://foo",
 			"-d", getConceptFilename(filenameCounter),
 			"-d", getHierarchyFilename(filenameCounter),
@@ -129,10 +120,10 @@ public class HeaderPassthroughOptionTest {
 		assertNotNull(myCapturingInterceptor.getLastRequest());
 		Map<String, List<String>> allHeaders = myCapturingInterceptor.getLastRequest().getAllHeaders();
 		assertFalse(allHeaders.isEmpty());
-		assertEquals(2, allHeaders.get(headerKey1).size());
+		assertThat(allHeaders.get(headerKey1)).hasSize(2);
 
-		assertTrue(allHeaders.containsKey(headerKey1));
-		assertEquals(2, allHeaders.get(headerKey1).size());
+		assertThat(allHeaders).containsKey(headerKey1);
+		assertThat(allHeaders.get(headerKey1)).hasSize(2);
 
 		assertEquals(headerValue1, allHeaders.get(headerKey1).get(0));
 		assertEquals(headerValue2, allHeaders.get(headerKey1).get(1));
@@ -149,7 +140,7 @@ public class HeaderPassthroughOptionTest {
 		String[] args = new String[]{
 			"-v", FHIR_VERSION,
 			"-m", "SNAPSHOT",
-			"-t", "http://localhost:" + myPort,
+			"-t", myServer.getBaseUrl(),
 			"-u", "http://foo",
 			"-d", getConceptFilename(filenameCounter),
 			"-d", getHierarchyFilename(filenameCounter),
@@ -164,13 +155,13 @@ public class HeaderPassthroughOptionTest {
 		Map<String, List<String>> allHeaders = myCapturingInterceptor.getLastRequest().getAllHeaders();
 		assertFalse(allHeaders.isEmpty());
 
-		assertTrue(allHeaders.containsKey(headerKey1));
-		assertEquals(1, allHeaders.get(headerKey1).size());
-		assertThat(allHeaders.get(headerKey1), hasItems(headerValue1));
+		assertThat(allHeaders).containsKey(headerKey1);
+		assertThat(allHeaders.get(headerKey1)).hasSize(1);
+		assertThat(allHeaders.get(headerKey1)).contains(headerValue1);
 
-		assertTrue(allHeaders.containsKey(headerKey2));
-		assertEquals(1, allHeaders.get(headerKey2).size());
-		assertThat(allHeaders.get(headerKey2), hasItems(headerValue2));
+		assertThat(allHeaders).containsKey(headerKey2);
+		assertThat(allHeaders.get(headerKey2)).hasSize(1);
+		assertThat(allHeaders.get(headerKey2)).contains(headerValue2);
 	}
 
 	private static void writeConceptAndHierarchyFiles(int theFilenameCounter) throws IOException {

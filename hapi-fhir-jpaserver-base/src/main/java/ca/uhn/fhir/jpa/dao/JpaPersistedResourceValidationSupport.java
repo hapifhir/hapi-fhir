@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,11 +31,14 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.sl.cache.Cache;
 import ca.uhn.fhir.sl.cache.CacheFactory;
+import jakarta.annotation.Nullable;
+import jakarta.annotation.PostConstruct;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -57,8 +60,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
-import javax.annotation.Nullable;
-import javax.annotation.PostConstruct;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_LOW;
@@ -90,6 +91,9 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 	// TermReadSvcImpl calls these methods as a part of its "isCodeSystemSupported" calls.
 	// We should modify CachingValidationSupport to cache the results of "isXXXSupported"
 	// at which point we could do away with this cache
+	// TODO:  LD: This cache seems to supersede the cache in CachingValidationSupport, as that cache is set to
+	// 10 minutes, but this 1 minute cache now determines the expiry.
+	// This new behaviour was introduced between the 7.0.0 release and the current master (7.2.0)
 	private Cache<String, IBaseResource> myLoadCache = CacheFactory.build(TimeUnit.MINUTES.toMillis(1), 1000);
 
 	/**
@@ -101,6 +105,11 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 		myFhirContext = theFhirContext;
 
 		myNoMatch = myFhirContext.getResourceDefinition("Basic").newInstance();
+	}
+
+	@Override
+	public String getName() {
+		return myFhirContext.getVersion().getVersion() + " JPA Validation Support";
 	}
 
 	@Override
@@ -167,7 +176,7 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 		}
 		IBundleProvider search = myDaoRegistry
 				.getResourceDao("StructureDefinition")
-				.search(new SearchParameterMap().setLoadSynchronousUpTo(1000));
+				.search(new SearchParameterMap().setLoadSynchronousUpTo(1000), new SystemRequestDetails());
 		return (List<T>) search.getResources(0, 1000);
 	}
 
@@ -182,6 +191,9 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 		IBaseResource fetched = myLoadCache.get(key, t -> doFetchResource(theClass, theUri));
 
 		if (fetched == myNoMatch) {
+			ourLog.debug(
+					"Invalidating cache entry for URI: {} since the result of the underlying query is empty", theUri);
+			myLoadCache.invalidate(key);
 			return null;
 		}
 

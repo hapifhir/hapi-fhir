@@ -14,8 +14,10 @@ import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.test.utilities.HttpClientExtension;
+import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
@@ -23,37 +25,37 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class UpdateDstu2Test {
-	private static CloseableHttpClient ourClient;
-	private static FhirContext ourCtx = FhirContext.forDstu2();
+	private static final FhirContext ourCtx = FhirContext.forDstu2Cached();
 	private static String ourLastConditionalUrl;
 	private static IdDt ourLastId;
 	private static IdDt ourLastIdParam;
 	private static boolean ourLastRequestWasSearch;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(UpdateDstu2Test.class);
-	private static int ourPort;
-	private static Server ourServer;
 	private static InstantDt ourSetLastUpdated;
-	
+
+	@RegisterExtension
+	private RestfulServerExtension ourServer  = new RestfulServerExtension(ourCtx)
+		.setDefaultResponseEncoding(EncodingEnum.XML)
+		.registerProvider(new PatientProvider())
+		.withPagingProvider(new FifoMemoryPagingProvider(100))
+		.setDefaultPrettyPrint(false);
+
+	@RegisterExtension
+	private HttpClientExtension ourClient = new HttpClientExtension();
+
 
 	@BeforeEach
 	public void before() {
@@ -71,7 +73,7 @@ public class UpdateDstu2Test {
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("002");
 
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_pretty=true");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_pretty=true");
 
 		HttpResponse status = ourClient.execute(httpGet);
 
@@ -93,7 +95,7 @@ public class UpdateDstu2Test {
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("002");
 
-		HttpPut httpPost = new HttpPut("http://localhost:" + ourPort + "/Patient?identifier=system%7C001");
+		HttpPut httpPost = new HttpPut(ourServer.getBaseUrl() + "/Patient?identifier=system%7C001");
 		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		HttpResponse status = ourClient.execute(httpPost);
@@ -104,9 +106,9 @@ public class UpdateDstu2Test {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals(null, status.getFirstHeader("location"));
-		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("content-location").getValue());
-		
+		assertNull(status.getFirstHeader("location"));
+		assertEquals(ourServer.getBaseUrl() + "/Patient/001/_history/002", status.getFirstHeader("content-location").getValue());
+
 		assertNull(ourLastId.getValue());
 		assertNull(ourLastIdParam);
 		assertEquals("Patient?identifier=system%7C001", ourLastConditionalUrl);
@@ -121,7 +123,7 @@ public class UpdateDstu2Test {
 		patient.setId("2");
 		patient.addIdentifier().setValue("002");
 
-		HttpPut httpPost = new HttpPut("http://localhost:" + ourPort + "/Patient/2");
+		HttpPut httpPost = new HttpPut(ourServer.getBaseUrl() + "/Patient/2");
 		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		HttpResponse status = ourClient.execute(httpPost);
@@ -132,9 +134,9 @@ public class UpdateDstu2Test {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals(null, status.getFirstHeader("location"));
-		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("content-location").getValue());
-		
+		assertNull(status.getFirstHeader("location"));
+		assertEquals(ourServer.getBaseUrl() + "/Patient/001/_history/002", status.getFirstHeader("content-location").getValue());
+
 		assertEquals("Patient/2", ourLastId.toUnqualified().getValue());
 		assertEquals("Patient/2", ourLastIdParam.toUnqualified().getValue());
 		assertNull(ourLastConditionalUrl);
@@ -144,32 +146,10 @@ public class UpdateDstu2Test {
 	
 	@AfterAll
 	public static void afterClassClearContext() throws Exception {
-		JettyUtil.closeServer(ourServer);
 		TestUtil.randomizeLocaleAndTimezone();
 	}
 		
 	
-	@BeforeAll
-	public static void beforeClass() throws Exception {
-		ourServer = new Server(0);
-
-		PatientProvider patientProvider = new PatientProvider();
-
-		ServletHandler proxyHandler = new ServletHandler();
-		RestfulServer servlet = new RestfulServer(ourCtx);
-		servlet.setResourceProviders(patientProvider);
-		ServletHolder servletHolder = new ServletHolder(servlet);
-		proxyHandler.addServletWithMapping(servletHolder, "/*");
-		ourServer.setHandler(proxyHandler);
-		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
-
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-		HttpClientBuilder builder = HttpClientBuilder.create();
-		builder.setConnectionManager(connectionManager);
-		ourClient = builder.build();
-
-	}
 	
 	public static class PatientProvider implements IResourceProvider {
 

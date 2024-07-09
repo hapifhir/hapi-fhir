@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server - Master Data Management
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import ca.uhn.fhir.mdm.api.IGoldenResourceMergerSvc;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.IMdmLinkSvc;
+import ca.uhn.fhir.mdm.api.IMdmResourceDaoSvc;
 import ca.uhn.fhir.mdm.api.IMdmSurvivorshipService;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
@@ -74,7 +75,7 @@ public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
 	IIdHelperService myIdHelperService;
 
 	@Autowired
-	MdmResourceDaoSvc myMdmResourceDaoSvc;
+	IMdmResourceDaoSvc myMdmResourceDaoSvc;
 
 	@Autowired
 	MdmPartitionHelper myMdmPartitionHelper;
@@ -165,6 +166,7 @@ public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
 			HookParams params = new HookParams();
 			params.add(MdmMergeEvent.class, event);
 			params.add(RequestDetails.class, theParams.getRequestDetails());
+			params.add(MdmTransactionContext.class, theParams.getMdmTransactionContext());
 			myInterceptorBroadcaster.callHooks(Pointcut.MDM_POST_MERGE_GOLDEN_RESOURCES, params);
 		}
 	}

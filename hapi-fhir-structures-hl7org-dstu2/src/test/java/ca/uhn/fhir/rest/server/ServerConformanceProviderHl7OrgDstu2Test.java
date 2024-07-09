@@ -29,6 +29,8 @@ import ca.uhn.fhir.rest.server.method.SearchMethodBinding;
 import ca.uhn.fhir.rest.server.method.SearchParameter;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.system.HapiSystemProperties;
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.http.HttpServletRequest;
 import org.hl7.fhir.dstu2.hapi.rest.server.ServerConformanceProvider;
 import org.hl7.fhir.dstu2.model.Conformance;
 import org.hl7.fhir.dstu2.model.Conformance.ConditionalDeleteStatus;
@@ -45,15 +47,11 @@ import org.hl7.fhir.dstu2.model.StringType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.Test;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.http.HttpServletRequest;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.not;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -101,7 +99,7 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 
 		ConformanceRestResourceComponent res = conformance.getRest().get(0).getResource().get(1);
 		assertEquals("Patient", res.getType());
-		
+
 		assertTrue(res.getConditionalCreate());
 		assertEquals(ConditionalDeleteStatus.SINGLE, res.getConditionalDelete());
 		assertTrue(res.getConditionalUpdate());
@@ -123,7 +121,7 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 
-		assertEquals(1, conformance.getRest().get(0).getOperation().size());
+		assertThat(conformance.getRest().get(0).getOperation()).hasSize(1);
 		assertEquals("$everything", conformance.getRest().get(0).getOperation().get(0).getName());
 		assertEquals("OperationDefinition/Patient-i-everything", conformance.getRest().get(0).getOperation().get(0).getDefinition().getReference());
 	}
@@ -165,7 +163,7 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 		ourLog.info(conf);
 
 		conf = ourCtx.newXmlParser().setPrettyPrint(false).encodeResourceToString(conformance);
-		assertThat(conf, containsString("<interaction><code value=\"" + TypeRestfulInteraction.HISTORYINSTANCE.toCode() + "\"/></interaction>"));
+		assertThat(conf).contains("<interaction><code value=\"" + TypeRestfulInteraction.HISTORYINSTANCE.toCode() + "\"/></interaction>");
 	}
 
 	@Test
@@ -196,9 +194,9 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 
-		assertThat(conf, containsString("<documentation value=\"The patient's identifier\"/>"));
-		assertThat(conf, containsString("<documentation value=\"The patient's name\"/>"));
-		assertThat(conf, containsString("<type value=\"token\"/>"));
+		assertThat(conf).contains("<documentation value=\"The patient's identifier\"/>");
+		assertThat(conf).contains("<documentation value=\"The patient's name\"/>");
+		assertThat(conf).contains("<type value=\"token\"/>");
 	}
 
 	@Test
@@ -218,7 +216,7 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 
 		ConformanceRestResourceComponent res = conformance.getRest().get(0).getResource().get(1);
 		assertEquals("Patient", res.getType());
-		
+
 		assertNull(res.getConditionalCreateElement().getValue());
 		assertNull(res.getConditionalDeleteElement().getValue());
 		assertNull(res.getConditionalUpdateElement().getValue());
@@ -252,8 +250,8 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 
-		assertThat(conf, containsString("<documentation value=\"The patient's identifier (MRN or other card number)\"/>"));
-		assertThat(conf, containsString("<type value=\"token\"/>"));
+		assertThat(conf).contains("<documentation value=\"The patient's identifier (MRN or other card number)\"/>");
+		assertThat(conf).contains("<type value=\"token\"/>");
 
 	}
 
@@ -283,7 +281,7 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 
 		assertEquals(DiagnosticReport.SP_DATE, res.getSearchParam().get(2).getName());
 
-		assertEquals(1, res.getSearchInclude().size());
+		assertThat(res.getSearchInclude()).hasSize(1);
 		assertEquals("DiagnosticReport.result", res.getSearchInclude().get(0).getValue());
 	}
 
@@ -303,8 +301,8 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 		ourLog.info(conf);
 
 		conf = ourCtx.newXmlParser().setPrettyPrint(false).encodeResourceToString(conformance);
-		assertThat(conf, containsString("<interaction><code value=\"vread\"/></interaction>"));
-		assertThat(conf, containsString("<interaction><code value=\"read\"/></interaction>"));
+		assertThat(conf).contains("<interaction><code value=\"vread\"/></interaction>");
+		assertThat(conf).contains("<interaction><code value=\"read\"/></interaction>");
 	}
 
 	@Test
@@ -323,8 +321,8 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 		ourLog.info(conf);
 
 		conf = ourCtx.newXmlParser().setPrettyPrint(false).encodeResourceToString(conformance);
-		assertThat(conf, not(containsString("<interaction><code value=\"vread\"/></interaction>")));
-		assertThat(conf, containsString("<interaction><code value=\"read\"/></interaction>"));
+		assertThat(conf).doesNotContain("<interaction><code value=\"vread\"/></interaction>");
+		assertThat(conf).contains("<interaction><code value=\"read\"/></interaction>");
 	}
 
 	@Test
@@ -354,9 +352,9 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
-		
-		assertThat(conf, containsString("<documentation value=\"The patient's identifier (MRN or other card number)\"/>"));
-		assertThat(conf, containsString("<type value=\"token\"/>"));
+
+		assertThat(conf).contains("<documentation value=\"The patient's identifier (MRN or other card number)\"/>");
+		assertThat(conf).contains("<type value=\"token\"/>");
 
 	}
 
@@ -376,7 +374,7 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 		ourLog.info(conf);
 
 		conf = ourCtx.newXmlParser().setPrettyPrint(false).encodeResourceToString(conformance);
-		assertThat(conf, containsString("<interaction><code value=\"" + SystemRestfulInteraction.HISTORYSYSTEM.toCode() + "\"/></interaction>"));
+		assertThat(conf).contains("<interaction><code value=\"" + SystemRestfulInteraction.HISTORYSYSTEM.toCode() + "\"/></interaction>");
 	}
 
 	@Test
@@ -395,7 +393,7 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 		ourLog.info(conf);
 
 		conf = ourCtx.newXmlParser().setPrettyPrint(false).encodeResourceToString(conformance);
-		assertThat(conf, containsString("<interaction><code value=\"" + TypeRestfulInteraction.HISTORYTYPE.toCode() + "\"/></interaction>"));
+		assertThat(conf).contains("<interaction><code value=\"" + TypeRestfulInteraction.HISTORYTYPE.toCode() + "\"/></interaction>");
 	}
 
 	@Test
@@ -492,7 +490,7 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 		@Operation(name = "plain", idempotent = true, returnParameters= {
 			@OperationParam(min=1, max=2, name="out1", type=StringType.class)
 		})
-		public IBundleProvider everything(javax.servlet.http.HttpServletRequest theServletRequest, @IdParam IdType theId, @OperationParam(name = "start") DateType theStart, @OperationParam(name = "end") DateType theEnd) {
+		public IBundleProvider everything(jakarta.servlet.http.HttpServletRequest theServletRequest, @IdParam IdType theId, @OperationParam(name = "start") DateType theStart, @OperationParam(name = "end") DateType theEnd) {
 			return null;
 		}
 
@@ -501,7 +499,7 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 	public static class ProviderWithExtendedOperationReturningBundle implements IResourceProvider {
 
 		@Operation(name = "everything", idempotent = true)
-		public IBundleProvider everything(javax.servlet.http.HttpServletRequest theServletRequest, @IdParam IdType theId, @OperationParam(name = "start") DateType theStart, @OperationParam(name = "end") DateType theEnd) {
+		public IBundleProvider everything(jakarta.servlet.http.HttpServletRequest theServletRequest, @IdParam IdType theId, @OperationParam(name = "start") DateType theStart, @OperationParam(name = "end") DateType theEnd) {
 			return null;
 		}
 

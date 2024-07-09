@@ -1,0 +1,5 @@
+---
+type: add
+issue: 5428
+title: "Add support for non-standard _pid SearchParameter to the the JPA engine.
+  This new SP provides an efficient tie-breaking sort key."

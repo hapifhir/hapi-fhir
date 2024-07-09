@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 5431
+jira: SMILE-7589
+title: "Previously, using VersionCanonicalizer to convert a CapabilityStatement from R5 to DSTU2 would fail. This is now fixed."

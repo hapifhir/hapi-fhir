@@ -17,6 +17,7 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -33,20 +34,16 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static ca.uhn.fhir.mdm.api.MdmMatchOutcome.POSSIBLE_MATCH;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.atLeastOnce;
@@ -153,8 +150,8 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 						}
 
 						// we have < batch size, but it should be the total deleted still
-						assertTrue( deletedTotal < batchSize, msg);
-						assertEquals(deletedTotal, deletedCount, msg);
+						assertThat(deletedTotal < batchSize).as(msg).isTrue();
+						assertThat(deletedCount).as(msg).isEqualTo(deletedTotal);
 					} else {
 						// pointless, but...
 						assertTrue(contains);
@@ -185,7 +182,7 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 		assertLinkCount(3);
 
 		List<IBaseResource> allGoldenPatients = getAllGoldenPatients();
-		assertThat(allGoldenPatients, hasSize(2));
+		assertThat(allGoldenPatients).hasSize(2);
 
 		IIdType redirectedGoldenPatientId = allGoldenPatients.get(0).getIdElement().toVersionless();
 		IIdType goldenPatientId = allGoldenPatients.get(1).getIdElement().toVersionless();
@@ -197,8 +194,8 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 
 		Patient redirectedGoldenPatient = myPatientDao.read(redirectedGoldenPatientId, myRequestDetails);
 		List<Coding> patientTags = redirectedGoldenPatient.getMeta().getTag();
-		assertTrue(patientTags.stream()
-			.anyMatch(tag -> tag.getCode().equals(MdmConstants.CODE_GOLDEN_RECORD_REDIRECTED)));
+		assertThat(patientTags.stream()
+			.anyMatch(tag -> tag.getCode().equals(MdmConstants.CODE_GOLDEN_RECORD_REDIRECTED))).isTrue();
 
 		assertLinkCount(4);
 		clearMdmLinks();
@@ -219,26 +216,26 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 	}
 
 	private void assertNoGoldenPatientsExist() {
-		assertThat(getAllGoldenPatients(), hasSize(0));
+		assertThat(getAllGoldenPatients()).hasSize(0);
 	}
 
 	private void assertNoPatientLinksExist() {
-		assertThat(getPatientLinks(), hasSize(0));
+		assertThat(getPatientLinks()).hasSize(0);
 	}
 
 	private void assertNoHistoricalLinksExist(List<String> theGoldenResourceIds, List<String> theResourceIds) {
-		assertThat(getHistoricalLinks(theGoldenResourceIds, theResourceIds), hasSize(0));
+		assertThat(getHistoricalLinks(theGoldenResourceIds, theResourceIds)).hasSize(0);
 	}
 
 	private void assertNoPractitionerLinksExist() {
-		assertThat(getPractitionerLinks(), hasSize(0));
+		assertThat(getPractitionerLinks()).hasSize(0);
 	}
 
 	@Test
 	public void testClearPatientLinks() {
 		assertLinkCount(2);
 		Patient read = myPatientDao.read(new IdDt(mySourcePatientId.getValueAsString()).toVersionless());
-		assertThat(read, is(notNullValue()));
+		assertNotNull(read);
 		clearMdmLinks("Patient");
 		assertNoPatientLinksExist();
 		try {
@@ -257,11 +254,11 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 		createPatientAndUpdateLinks(buildJanePatient());
 		Patient patientAndUpdateLinks = createPatientAndUpdateLinks(buildJanePatient());
 		IAnyResource goldenResource = getGoldenResourceFromTargetResource(patientAndUpdateLinks);
-		assertThat(goldenResource, is(notNullValue()));
+		assertNotNull(goldenResource);
 		clearMdmLinks();
 		assertNoPatientLinksExist();
 		goldenResource = getGoldenResourceFromTargetResource(patientAndUpdateLinks);
-		assertThat(goldenResource, is(nullValue()));
+		assertNull(goldenResource);
 	}
 
 	@Test
@@ -279,7 +276,7 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 
 		assertNoPatientLinksExist();
 		IBundleProvider search = myPatientDao.search(buildGoldenResourceParameterMap());
-		assertThat(search.size(), is(equalTo(0)));
+		assertEquals(0, search.size());
 	}
 
 	/**
@@ -327,7 +324,7 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 
 		assertNoPatientLinksExist();
 		IBundleProvider search = myPatientDao.search(buildGoldenResourceParameterMap());
-		assertThat(search.size(), is(equalTo(0)));
+		assertEquals(0, search.size());
 
 	}
 
@@ -342,7 +339,7 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 	public void testClearPractitionerLinks() {
 		assertLinkCount(2);
 		Practitioner read = myPractitionerDao.read(new IdDt(myPractitionerGoldenResourceId.getValueAsString()).toVersionless());
-		assertThat(read, is(notNullValue()));
+		assertNotNull(read);
 		clearMdmLinks("Practitioner");
 		assertNoPractitionerLinksExist();
 		try {
@@ -358,7 +355,7 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 			myMdmProvider.clearMdmLinks(getResourceNames("Observation"), null, myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), is(equalTo("HAPI-1500: $mdm-clear does not support resource type: Observation")));
+			assertEquals("HAPI-1500: $mdm-clear does not support resource type: Observation", e.getMessage());
 		}
 	}
 

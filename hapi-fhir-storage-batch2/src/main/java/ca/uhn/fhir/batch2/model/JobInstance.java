@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -116,6 +116,12 @@ public class JobInstance implements IModelJson, IJobInstance {
 	@JsonProperty(value = "warningMessages", access = JsonProperty.Access.READ_ONLY)
 	private String myWarningMessages;
 
+	@JsonProperty(value = "triggeringUsername", access = JsonProperty.Access.READ_ONLY)
+	private String myTriggeringUsername;
+
+	@JsonProperty(value = "triggeringClientId", access = JsonProperty.Access.READ_ONLY)
+	private String myTriggeringClientId;
+
 	/**
 	 * Constructor
 	 */
@@ -149,6 +155,8 @@ public class JobInstance implements IModelJson, IJobInstance {
 		setCurrentGatedStepId(theJobInstance.getCurrentGatedStepId());
 		setReport(theJobInstance.getReport());
 		setWarningMessages(theJobInstance.getWarningMessages());
+		setTriggeringUsername(theJobInstance.getTriggeringUsername());
+		setTriggeringClientId(theJobInstance.getTriggeringClientId());
 	}
 
 	public String getJobDefinitionId() {
@@ -375,6 +383,24 @@ public class JobInstance implements IModelJson, IJobInstance {
 		myReport = theReport;
 	}
 
+	public String getTriggeringUsername() {
+		return myTriggeringUsername;
+	}
+
+	public JobInstance setTriggeringUsername(String theTriggeringUsername) {
+		myTriggeringUsername = theTriggeringUsername;
+		return this;
+	}
+
+	public String getTriggeringClientId() {
+		return myTriggeringClientId;
+	}
+
+	public JobInstance setTriggeringClientId(String theTriggeringClientId) {
+		myTriggeringClientId = theTriggeringClientId;
+		return this;
+	}
+
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
@@ -396,6 +422,8 @@ public class JobInstance implements IModelJson, IJobInstance {
 				.append("estimatedTimeRemaining", myEstimatedTimeRemaining)
 				.append("report", myReport)
 				.append("warningMessages", myWarningMessages)
+				.append("triggeringUsername", myTriggeringUsername)
+				.append("triggeringClientId", myTriggeringClientId)
 				.toString();
 	}
 

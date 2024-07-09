@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server - Master Data Management
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ import ca.uhn.fhir.jpa.mdm.svc.MdmLinkUpdaterSvcImpl;
 import ca.uhn.fhir.jpa.mdm.svc.MdmMatchFinderSvcImpl;
 import ca.uhn.fhir.jpa.mdm.svc.MdmMatchLinkSvc;
 import ca.uhn.fhir.jpa.mdm.svc.MdmModelConverterSvcImpl;
-import ca.uhn.fhir.jpa.mdm.svc.MdmResourceDaoSvc;
+import ca.uhn.fhir.jpa.mdm.svc.MdmResourceDaoSvcImpl;
 import ca.uhn.fhir.jpa.mdm.svc.MdmResourceFilteringSvc;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.CandidateSearcher;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.FindCandidateByEidSvc;
@@ -57,6 +57,7 @@ import ca.uhn.fhir.mdm.api.IMdmLinkQuerySvc;
 import ca.uhn.fhir.mdm.api.IMdmLinkSvc;
 import ca.uhn.fhir.mdm.api.IMdmLinkUpdaterSvc;
 import ca.uhn.fhir.mdm.api.IMdmMatchFinderSvc;
+import ca.uhn.fhir.mdm.api.IMdmResourceDaoSvc;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.batch2.MdmBatch2Config;
 import ca.uhn.fhir.mdm.blocklist.svc.IBlockListRuleProvider;
@@ -123,8 +124,8 @@ public class MdmConsumerConfig {
 	}
 
 	@Bean
-	MdmResourceDaoSvc mdmResourceDaoSvc() {
-		return new MdmResourceDaoSvc();
+	IMdmResourceDaoSvc mdmResourceDaoSvc() {
+		return new MdmResourceDaoSvcImpl();
 	}
 
 	@Bean

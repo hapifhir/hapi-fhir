@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -38,12 +39,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.startsWith;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourceProviderR4Test {
@@ -96,7 +92,7 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 		spMap.addInclude(QuestionnaireResponse.INCLUDE_QUESTIONNAIRE);
 		spMap.add("_id", new TokenParam("my-questionnaire-response"));
 		IBundleProvider search = myQuestionnaireResponseDao.search(spMap);
-		assertThat(search.size(), is(equalTo(2)));
+		assertEquals(2, search.size());
 	}
 
 	@SuppressWarnings("unused")
@@ -118,7 +114,7 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 			myClient.create().resource(qr1).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(myFhirContext.newJsonParser().encodeResourceToString(e.getOperationOutcome()), containsString("Answer value must be of the type string"));
+			assertThat(myFhirContext.newJsonParser().encodeResourceToString(e.getOperationOutcome())).contains("Answer value must be of the type string");
 		}
 	}
 
@@ -159,7 +155,7 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 			.byUrl("QuestionnaireResponse?_id=" + qrIdType.toUnqualifiedVersionless()  + "&_include=QuestionnaireResponse:questionnaire")
 			.returnBundle(Bundle.class)
 			.execute();
-		assertThat(results.getEntry().size(), is(equalTo(2)));
+		assertThat(results.getEntry()).hasSize(2);
 
 		List<String> expectedIds = new ArrayList<>();
 		expectedIds.add(qrIdType.getValue());
@@ -223,7 +219,7 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 			ourLog.info("Response: {}", responseString);
 			assertEquals(201, response.getStatusLine().getStatusCode());
 			String newIdString = response.getFirstHeader(ca.uhn.fhir.rest.api.Constants.HEADER_LOCATION_LC).getValue();
-			assertThat(newIdString, startsWith(myServerBase + "/QuestionnaireResponse/"));
+			assertThat(newIdString).startsWith(myServerBase + "/QuestionnaireResponse/");
 			id2 = new IdType(newIdString);
 		} finally {
 			IOUtils.closeQuietly(response);
@@ -234,7 +230,7 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 		try {
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info("Response: {}", responseString);
-			assertThat(responseString, containsString("Exclusion Criteria"));
+			assertThat(responseString).contains("Exclusion Criteria");
 		} finally {
 			IOUtils.closeQuietly(response);
 		}
@@ -249,7 +245,7 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 		try {
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info("Response: {}", responseString);
-			assertThat(responseString, containsString("No resource supplied for $validate operation"));
+			assertThat(responseString).contains("No resource supplied for $validate operation");
 			assertEquals(400, response.getStatusLine().getStatusCode());
 		} finally {
 			IOUtils.closeQuietly(response);
@@ -291,7 +287,7 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 		try {
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info("Response: {}", responseString);
-			assertThat(responseString, containsString("Resource has no ID"));
+			assertThat(responseString).contains("Resource has no ID");
 			assertEquals(422, response.getStatusLine().getStatusCode());
 		} finally {
 			IOUtils.closeQuietly(response);

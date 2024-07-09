@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.dao.data;
 
+import ca.uhn.fhir.jpa.dao.data.custom.IForcedIdQueries;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -34,9 +35,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 @Transactional(propagation = Propagation.MANDATORY)
-public interface IResourceTableDao extends JpaRepository<ResourceTable, Long>, IHapiFhirJpaRepository {
+public interface IResourceTableDao
+		extends JpaRepository<ResourceTable, Long>, IHapiFhirJpaRepository, IForcedIdQueries {
 
 	@Query("SELECT t.myId FROM ResourceTable t WHERE t.myDeleted IS NOT NULL")
 	Slice<Long> findIdsOfDeletedResources(Pageable thePageable);
@@ -63,13 +66,10 @@ public interface IResourceTableDao extends JpaRepository<ResourceTable, Long>, I
 	Slice<Long> findIdsOfResourcesWithinUpdatedRangeOrderedFromOldest(
 			Pageable thePage, @Param("low") Date theLow, @Param("high") Date theHigh);
 
-	/**
-	 * @return List of arrays containing [PID, resourceType, lastUpdated]
-	 */
 	@Query(
 			"SELECT t.myId, t.myResourceType, t.myUpdated FROM ResourceTable t WHERE t.myUpdated >= :low AND t.myUpdated <= :high ORDER BY t.myUpdated ASC")
-	Slice<Object[]> findIdsTypesAndUpdateTimesOfResourcesWithinUpdatedRangeOrderedFromOldest(
-			Pageable thePage, @Param("low") Date theLow, @Param("high") Date theHigh);
+	Stream<Object[]> streamIdsTypesAndUpdateTimesOfResourcesWithinUpdatedRangeOrderedFromOldest(
+			@Param("low") Date theLow, @Param("high") Date theHigh);
 
 	/**
 	 * @return List of arrays containing [PID, resourceType, lastUpdated]
@@ -82,6 +82,13 @@ public interface IResourceTableDao extends JpaRepository<ResourceTable, Long>, I
 			@Param("high") Date theHigh,
 			@Param("partition_ids") List<Integer> theRequestPartitionIds);
 
+	@Query(
+			"SELECT t.myId, t.myResourceType, t.myUpdated FROM ResourceTable t WHERE t.myUpdated >= :low AND t.myUpdated <= :high AND t.myPartitionIdValue IN (:partition_ids) ORDER BY t.myUpdated ASC")
+	Stream<Object[]> streamIdsTypesAndUpdateTimesOfResourcesWithinUpdatedRangeOrderedFromOldestForPartitionIds(
+			@Param("low") Date theLow,
+			@Param("high") Date theHigh,
+			@Param("partition_ids") List<Integer> theRequestPartitionIds);
+
 	/**
 	 * @return List of arrays containing [PID, resourceType, lastUpdated]
 	 */
@@ -89,6 +96,11 @@ public interface IResourceTableDao extends JpaRepository<ResourceTable, Long>, I
 			"SELECT t.myId, t.myResourceType, t.myUpdated FROM ResourceTable t WHERE t.myUpdated >= :low AND t.myUpdated <= :high ORDER BY t.myUpdated ASC")
 	Slice<Object[]> findIdsTypesAndUpdateTimesOfResourcesWithinUpdatedRangeOrderedFromOldestForDefaultPartition(
 			Pageable thePage, @Param("low") Date theLow, @Param("high") Date theHigh);
+
+	@Query(
+			"SELECT t.myId, t.myResourceType, t.myUpdated FROM ResourceTable t WHERE t.myUpdated >= :low AND t.myUpdated <= :high ORDER BY t.myUpdated ASC")
+	Stream<Object[]> streamIdsTypesAndUpdateTimesOfResourcesWithinUpdatedRangeOrderedFromOldestForDefaultPartition(
+			@Param("low") Date theLow, @Param("high") Date theHigh);
 
 	// TODO in the future, consider sorting by pid as well so batch jobs process in the same order across restarts
 	@Query(
@@ -165,25 +177,26 @@ public interface IResourceTableDao extends JpaRepository<ResourceTable, Long>, I
 	@Query("SELECT t.myId, t.myResourceType, t.myVersion FROM ResourceTable t WHERE t.myId IN ( :pid )")
 	Collection<Object[]> getResourceVersionsForPid(@Param("pid") List<Long> pid);
 
-	@Query(
-			"SELECT t FROM ResourceTable t LEFT JOIN FETCH t.myForcedId WHERE t.myPartitionId.myPartitionId IS NULL AND t.myId = :pid")
+	@Query("SELECT t FROM ResourceTable t WHERE t.myPartitionId.myPartitionId IS NULL AND t.myId = :pid")
 	Optional<ResourceTable> readByPartitionIdNull(@Param("pid") Long theResourceId);
 
-	@Query(
-			"SELECT t FROM ResourceTable t LEFT JOIN FETCH t.myForcedId WHERE t.myPartitionId.myPartitionId = :partitionId AND t.myId = :pid")
+	@Query("SELECT t FROM ResourceTable t WHERE t.myPartitionId.myPartitionId = :partitionId AND t.myId = :pid")
 	Optional<ResourceTable> readByPartitionId(
 			@Param("partitionId") int thePartitionId, @Param("pid") Long theResourceId);
 
 	@Query(
-			"SELECT t FROM ResourceTable t LEFT JOIN FETCH t.myForcedId WHERE (t.myPartitionId.myPartitionId IS NULL OR t.myPartitionId.myPartitionId IN (:partitionIds)) AND t.myId = :pid")
+			"SELECT t FROM ResourceTable t WHERE (t.myPartitionId.myPartitionId IS NULL OR t.myPartitionId.myPartitionId IN (:partitionIds)) AND t.myId = :pid")
 	Optional<ResourceTable> readByPartitionIdsOrNull(
 			@Param("partitionIds") Collection<Integer> thrValues, @Param("pid") Long theResourceId);
 
-	@Query(
-			"SELECT t FROM ResourceTable t LEFT JOIN FETCH t.myForcedId WHERE t.myPartitionId.myPartitionId IN (:partitionIds) AND t.myId = :pid")
+	@Query("SELECT t FROM ResourceTable t WHERE t.myPartitionId.myPartitionId IN (:partitionIds) AND t.myId = :pid")
 	Optional<ResourceTable> readByPartitionIds(
 			@Param("partitionIds") Collection<Integer> thrValues, @Param("pid") Long theResourceId);
 
-	@Query("SELECT t FROM ResourceTable t LEFT JOIN FETCH t.myForcedId WHERE t.myId IN :pids")
+	@Query("SELECT t FROM ResourceTable t WHERE t.myId IN :pids")
 	List<ResourceTable> findAllByIdAndLoadForcedIds(@Param("pids") List<Long> thePids);
+
+	@Query("SELECT t FROM ResourceTable t where t.myResourceType = :restype and t.myFhirId = :fhirId")
+	Optional<ResourceTable> findByTypeAndFhirId(
+			@Param("restype") String theResourceName, @Param("fhirId") String theFhirId);
 }

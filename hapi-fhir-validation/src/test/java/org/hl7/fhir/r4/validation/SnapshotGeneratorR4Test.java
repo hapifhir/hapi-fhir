@@ -1,11 +1,12 @@
 package org.hl7.fhir.r4.validation;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
+import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import org.apache.commons.io.IOUtils;
-import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.SnapshotGeneratingValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -18,10 +19,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class SnapshotGeneratorR4Test {
+
+public class SnapshotGeneratorR4Test extends BaseValidationTestWithInlineMocks {
 
 	private FhirContext myFhirCtx = FhirContext.forR4();
 	private static final Logger ourLog = LoggerFactory.getLogger(SnapshotGeneratorR4Test.class);
@@ -41,7 +43,7 @@ public class SnapshotGeneratorR4Test {
 
 		ourLog.debug(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(snapshot));
 
-		assertEquals(54, snapshot.getSnapshot().getElement().size());
+		assertThat(snapshot.getSnapshot().getElement()).hasSize(54);
 	}
 
 

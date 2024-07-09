@@ -23,8 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import static ca.uhn.fhir.jpa.dao.BaseHapiFhirDao.INDEX_STATUS_INDEXED;
 import static ca.uhn.fhir.jpa.dao.BaseHapiFhirDao.INDEX_STATUS_INDEXING_FAILED;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -64,7 +63,7 @@ public class ReindexStepTest extends BaseJpaR4Test {
 
 		// Verify
 		assertEquals(2, outcome.getRecordsProcessed());
-		assertEquals(6, myCaptureQueriesListener.logSelectQueries().size());
+		assertEquals(5, myCaptureQueriesListener.logSelectQueries().size());
 		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
 		myCaptureQueriesListener.logUpdateQueries();
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
@@ -95,7 +94,7 @@ public class ReindexStepTest extends BaseJpaR4Test {
 
 		// Verify
 		assertEquals(2, outcome.getRecordsProcessed());
-		assertEquals(8, myCaptureQueriesListener.logSelectQueries().size());
+		assertEquals(7, myCaptureQueriesListener.logSelectQueries().size());
 		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
@@ -128,7 +127,7 @@ public class ReindexStepTest extends BaseJpaR4Test {
 
 		// Verify
 		assertEquals(2, outcome.getRecordsProcessed());
-		assertEquals(6, myCaptureQueriesListener.logSelectQueries().size());
+		assertEquals(5, myCaptureQueriesListener.logSelectQueries().size());
 		// name, family, phonetic, deceased, active
 		assertEquals(5, myCaptureQueriesListener.countInsertQueries());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
@@ -196,7 +195,7 @@ public class ReindexStepTest extends BaseJpaR4Test {
 
 		// Verify
 		assertEquals(2, outcome.getRecordsProcessed());
-		assertEquals(10, myCaptureQueriesListener.logSelectQueries().size());
+		assertEquals(9, myCaptureQueriesListener.logSelectQueries().size());
 		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
 		assertEquals(4, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
@@ -241,7 +240,7 @@ public class ReindexStepTest extends BaseJpaR4Test {
 
 		// Verify
 		assertEquals(4, outcome.getRecordsProcessed());
-		assertEquals(9, myCaptureQueriesListener.logSelectQueries().size());
+		assertEquals(8, myCaptureQueriesListener.logSelectQueries().size());
 		assertEquals(5, myCaptureQueriesListener.countInsertQueries());
 		assertEquals(2, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
@@ -251,7 +250,7 @@ public class ReindexStepTest extends BaseJpaR4Test {
 		verify(myDataSink, times(1)).recoveredError(myErrorCaptor.capture());
 		String message = myErrorCaptor.getValue();
 		message = message.replace("Observation.subject.where(resolve() is Patient)", "Observation.subject"); // depending on whether subject or patient gets indexed first
-		assertThat(message, containsString("HAPI-0928: Failed to parse database resource"));
+		assertThat(message).contains("HAPI-0928: Failed to parse database resource");
 
 		runInTransaction(() -> {
 			ResourceTable table = myResourceTableDao.findById(idPatientToInvalidate).orElseThrow();

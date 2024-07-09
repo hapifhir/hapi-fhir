@@ -19,7 +19,9 @@ import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
+import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
 import org.hl7.fhir.r4.model.IdType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -65,6 +67,8 @@ public class WebsocketConnectionValidatorTest {
 	SubscriptionRegistry mySubscriptionRegistry;
 	@MockBean
 	ISearchParamRegistry mySearchParamRegistry;
+	@MockBean
+	SubscriptionSettings mySubscriptionSettings;
 
 	@Autowired
 	WebsocketConnectionValidator myWebsocketConnectionValidator;
@@ -144,6 +148,11 @@ public class WebsocketConnectionValidatorTest {
 		@Bean
 		public IEmailSender emailSender(){
 			return mock(IEmailSender.class);
+		}
+
+		@Bean
+		public IResourceModifiedMessagePersistenceSvc resourceModifiedMessagePersistenceSvc(){
+			return mock(IResourceModifiedMessagePersistenceSvc.class);
 		}
 
 	}

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.client;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -39,7 +40,7 @@ import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -108,7 +109,7 @@ public class OperationClientDstu3Test {
 		ourLog.info(requestBody);
 		Parameters request = ourCtx.newJsonParser().parseResource(Parameters.class, requestBody);
 		assertEquals("http://foo/$nonrepeating", value.getURI().toASCIIString());
-		assertEquals(2, request.getParameter().size());
+		assertThat(request.getParameter()).hasSize(2);
 		assertEquals("valstr", request.getParameter().get(0).getName());
 		assertEquals("str", ((StringType) request.getParameter().get(0).getValue()).getValue());
 		assertEquals("valtok", request.getParameter().get(1).getName());
@@ -143,7 +144,7 @@ public class OperationClientDstu3Test {
 		ourLog.info(requestBody);
 		Parameters request = ourCtx.newJsonParser().parseResource(Parameters.class, requestBody);
 		assertEquals("http://foo/$nonrepeating", value.getURI().toASCIIString());
-		assertEquals(2, request.getParameter().size());
+		assertThat(request.getParameter()).hasSize(2);
 		assertEquals("valstr", request.getParameter().get(0).getName());
 		assertEquals("str", ((StringType) request.getParameter().get(0).getValue()).getValue());
 		assertEquals("valtok", request.getParameter().get(1).getName());

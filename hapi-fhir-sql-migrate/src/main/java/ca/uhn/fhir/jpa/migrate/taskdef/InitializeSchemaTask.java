@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Server - SQL Migration
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import ca.uhn.fhir.jpa.migrate.tasks.api.ISchemaInitializationProvider;
+import ca.uhn.fhir.jpa.migrate.tasks.api.TaskFlagEnum;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.slf4j.Logger;
@@ -44,11 +45,7 @@ public class InitializeSchemaTask extends BaseTask {
 		super(theProductVersion, theSchemaVersion);
 		mySchemaInitializationProvider = theSchemaInitializationProvider;
 		setDescription(DESCRIPTION_PREFIX + mySchemaInitializationProvider.getSchemaDescription());
-	}
-
-	@Override
-	public boolean isRunDuringSchemaInitialization() {
-		return true;
+		addFlag(TaskFlagEnum.RUN_DURING_SCHEMA_INITIALIZATION);
 	}
 
 	@Override
@@ -102,12 +99,12 @@ public class InitializeSchemaTask extends BaseTask {
 	@Override
 	protected void generateEquals(EqualsBuilder theBuilder, BaseTask theOtherObject) {
 		InitializeSchemaTask otherObject = (InitializeSchemaTask) theOtherObject;
-		theBuilder.append(mySchemaInitializationProvider, otherObject.mySchemaInitializationProvider);
+		theBuilder.append(getSchemaInitializationProvider(), otherObject.getSchemaInitializationProvider());
 	}
 
 	@Override
 	protected void generateHashCode(HashCodeBuilder theBuilder) {
-		theBuilder.append(mySchemaInitializationProvider);
+		theBuilder.append(getSchemaInitializationProvider());
 	}
 
 	public ISchemaInitializationProvider getSchemaInitializationProvider() {

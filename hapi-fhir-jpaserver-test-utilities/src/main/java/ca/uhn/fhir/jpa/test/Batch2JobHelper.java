@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server Test Utilities
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,10 +32,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.thymeleaf.util.ArrayUtils;
 
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static org.awaitility.Awaitility.await;
@@ -70,37 +73,40 @@ public class Batch2JobHelper {
 		return awaitJobHasStatusWithoutMaintenancePass(theBatchJobId, StatusEnum.COMPLETED);
 	}
 
-	public JobInstance awaitJobCancelled(String theBatchJobId) {
-		return awaitJobHasStatus(theBatchJobId, StatusEnum.CANCELLED);
+	public JobInstance awaitJobCancelled(String theInstanceId) {
+		return awaitJobHasStatus(theInstanceId, StatusEnum.CANCELLED);
 	}
 
-	public JobInstance awaitJobCompletion(String theBatchJobId, int theSecondsToWait) {
-		return awaitJobHasStatus(theBatchJobId, theSecondsToWait, StatusEnum.COMPLETED);
+	public JobInstance awaitJobCompletion(String theInstanceId, int theSecondsToWait) {
+		return awaitJobHasStatus(theInstanceId, theSecondsToWait, StatusEnum.COMPLETED);
 	}
 
-	public JobInstance awaitJobHasStatus(String theBatchJobId, StatusEnum... theExpectedStatus) {
-		return awaitJobHasStatus(theBatchJobId, 10, theExpectedStatus);
+	public JobInstance awaitJobHasStatus(String theInstanceId, StatusEnum... theExpectedStatus) {
+		return awaitJobHasStatus(theInstanceId, 10, theExpectedStatus);
 	}
 
-	public JobInstance awaitJobHasStatusWithoutMaintenancePass(String theBatchJobId, StatusEnum... theExpectedStatus) {
-		return awaitJobawaitJobHasStatusWithoutMaintenancePass(theBatchJobId, 10, theExpectedStatus);
+	public JobInstance awaitJobHasStatusWithoutMaintenancePass(String theInstanceId, StatusEnum... theExpectedStatus) {
+		return awaitJobawaitJobHasStatusWithoutMaintenancePass(theInstanceId, 10, theExpectedStatus);
 	}
 
-	public JobInstance awaitJobHasStatus(String theBatchJobId, int theSecondsToWait, StatusEnum... theExpectedStatus) {
+	public JobInstance awaitJobHasStatus(String theInstanceId, int theSecondsToWait, StatusEnum... theExpectedStatus) {
 		assert !TransactionSynchronizationManager.isActualTransactionActive();
 
+		AtomicInteger checkCount = new AtomicInteger();
 		try {
 			await()
 				.atMost(theSecondsToWait, TimeUnit.SECONDS)
+				.pollDelay(100, TimeUnit.MILLISECONDS)
 				.until(() -> {
+					checkCount.getAndIncrement();
 					boolean inFinalStatus = false;
 					if (ArrayUtils.contains(theExpectedStatus, StatusEnum.COMPLETED) && !ArrayUtils.contains(theExpectedStatus, StatusEnum.FAILED)) {
-						inFinalStatus = hasStatus(theBatchJobId, StatusEnum.FAILED);
+						inFinalStatus = hasStatus(theInstanceId, StatusEnum.FAILED);
 					}
 					if (ArrayUtils.contains(theExpectedStatus, StatusEnum.FAILED) && !ArrayUtils.contains(theExpectedStatus, StatusEnum.COMPLETED)) {
-						inFinalStatus = hasStatus(theBatchJobId, StatusEnum.COMPLETED);
+						inFinalStatus = hasStatus(theInstanceId, StatusEnum.COMPLETED);
 					}
-					boolean retVal = checkStatusWithMaintenancePass(theBatchJobId, theExpectedStatus);
+					boolean retVal = checkStatusWithMaintenancePass(theInstanceId, theExpectedStatus);
 					if (!retVal && inFinalStatus) {
 						// Fail fast - If we hit one of these statuses and it's not the one we want, abort
 						throw new ConditionTimeoutException("Already in failed/completed status");
@@ -112,10 +118,12 @@ public class Batch2JobHelper {
 				.stream()
 				.map(t -> t.getInstanceId() + " " + t.getJobDefinitionId() + "/" + t.getStatus().name())
 				.collect(Collectors.joining("\n"));
-			String currentStatus = myJobCoordinator.getInstance(theBatchJobId).getStatus().name();
-			fail("Job " + theBatchJobId + " still has status " + currentStatus + " - All statuses:\n" + statuses);
+			String currentStatus = myJobCoordinator.getInstance(theInstanceId).getStatus().name();
+			fail("Job " + theInstanceId + " still has status " + currentStatus
+				+ " after " + checkCount.get() + " checks in " + theSecondsToWait + " seconds."
+				+ " - All statuses:\n" + statuses);
 		}
-		return myJobCoordinator.getInstance(theBatchJobId);
+		return myJobCoordinator.getInstance(theInstanceId);
 	}
 
 	public JobInstance awaitJobawaitJobHasStatusWithoutMaintenancePass(String theBatchJobId, int theSecondsToWait, StatusEnum... theExpectedStatus) {
@@ -136,34 +144,65 @@ public class Batch2JobHelper {
 		return myJobCoordinator.getInstance(theBatchJobId);
 	}
 
-	private boolean checkStatusWithMaintenancePass(String theBatchJobId, StatusEnum... theExpectedStatuses) throws InterruptedException {
-		if (hasStatus(theBatchJobId, theExpectedStatuses)) {
+	private boolean checkStatusWithMaintenancePass(String theInstanceId, StatusEnum... theExpectedStatuses) throws InterruptedException {
+		if (hasStatus(theInstanceId, theExpectedStatuses)) {
 			return true;
 		}
 		myJobMaintenanceService.runMaintenancePass();
-		return hasStatus(theBatchJobId, theExpectedStatuses);
+		return hasStatus(theInstanceId, theExpectedStatuses);
 	}
 
-	private boolean hasStatus(String theBatchJobId, StatusEnum... theExpectedStatuses) {
-		StatusEnum status = getStatus(theBatchJobId);
-		ourLog.debug("Checking status of {} in {}: is {}", theBatchJobId, theExpectedStatuses, status);
+	private boolean hasStatus(String theInstanceId, StatusEnum... theExpectedStatuses) {
+		StatusEnum status = getStatus(theInstanceId);
+		ourLog.debug("Checking status of {} in {}: is {}", theInstanceId, theExpectedStatuses, status);
 		return ArrayUtils.contains(theExpectedStatuses, status);
 	}
 
-	private StatusEnum getStatus(String theBatchJobId) {
-		return myJobCoordinator.getInstance(theBatchJobId).getStatus();
+	private StatusEnum getStatus(String theInstanceId) {
+		return myJobCoordinator.getInstance(theInstanceId).getStatus();
 	}
 
 	public JobInstance awaitJobFailure(Batch2JobStartResponse theStartResponse) {
 		return awaitJobFailure(theStartResponse.getInstanceId());
 	}
 
-	public JobInstance awaitJobFailure(String theJobId) {
-		return awaitJobHasStatus(theJobId, StatusEnum.ERRORED, StatusEnum.FAILED);
+	public JobInstance awaitJobFailure(String theInstanceId) {
+		return awaitJobHasStatus(theInstanceId, StatusEnum.ERRORED, StatusEnum.FAILED);
 	}
 
-	public void awaitJobInProgress(String theBatchJobId) {
-		await().until(() -> checkStatusWithMaintenancePass(theBatchJobId, StatusEnum.IN_PROGRESS));
+	public void awaitJobHasStatusWithForcedMaintenanceRuns(String theInstanceId, StatusEnum theStatusEnum) {
+		AtomicInteger counter = new AtomicInteger();
+		try {
+			await()
+				.atMost(Duration.of(10, ChronoUnit.SECONDS))
+				.until(() -> {
+					counter.getAndIncrement();
+					forceRunMaintenancePass();
+					return hasStatus(theInstanceId, theStatusEnum);
+				});
+		} catch (ConditionTimeoutException ex) {
+			StatusEnum status = getStatus(theInstanceId);
+			String msg = String.format(
+				"Job %s has state %s after 10s timeout and %d checks",
+				theInstanceId,
+				status.name(),
+				counter.get()
+			);
+		}
+	}
+
+	public void awaitJobInProgress(String theInstanceId) {
+		try {
+			await()
+				.atMost(Duration.of(10, ChronoUnit.SECONDS))
+				.until(() -> checkStatusWithMaintenancePass(theInstanceId, StatusEnum.IN_PROGRESS));
+		} catch (ConditionTimeoutException ex) {
+			StatusEnum statusEnum = getStatus(theInstanceId);
+			String msg = String.format("Job %s still has status %s after 10 seconds.",
+				theInstanceId,
+				statusEnum.name());
+			fail(msg);
+		}
 	}
 
 	public void assertNotFastTracking(String theInstanceId) {
@@ -175,11 +214,25 @@ public class Batch2JobHelper {
 	}
 
 	public void awaitGatedStepId(String theExpectedGatedStepId, String theInstanceId) {
-		await().until(() -> theExpectedGatedStepId.equals(myJobCoordinator.getInstance(theInstanceId).getCurrentGatedStepId()));
+		try {
+			await().until(() -> {
+				String currentGatedStepId = myJobCoordinator.getInstance(theInstanceId).getCurrentGatedStepId();
+				return theExpectedGatedStepId.equals(currentGatedStepId);
+			});
+		} catch (ConditionTimeoutException ex) {
+			JobInstance instance = myJobCoordinator.getInstance(theInstanceId);
+			String msg = String.format("Instance %s of Job %s never got to step %s. Current step %s, current status %s.",
+				theInstanceId,
+				instance.getJobDefinitionId(),
+				theExpectedGatedStepId,
+				instance.getCurrentGatedStepId(),
+				instance.getStatus().name());
+			fail(msg);
+		}
 	}
 
-	public long getCombinedRecordsProcessed(String theJobId) {
-		JobInstance job = myJobCoordinator.getInstance(theJobId);
+	public long getCombinedRecordsProcessed(String theInstanceId) {
+		JobInstance job = myJobCoordinator.getInstance(theInstanceId);
 		return job.getCombinedRecordsProcessed();
 	}
 
@@ -223,6 +276,33 @@ public class Batch2JobHelper {
 		awaitNoJobsRunning(false);
 	}
 
+	public boolean hasRunningJobs() {
+		HashMap<String, String> map = new HashMap<>();
+		List<JobInstance> jobs = myJobCoordinator.getInstances(1000, 1);
+		// "All Jobs" assumes at least one job exists
+		if (jobs.isEmpty()) {
+			return false;
+		}
+
+		for (JobInstance job : jobs) {
+			if (job.getStatus().isIncomplete()) {
+				map.put(job.getInstanceId(), job.getJobDefinitionId() + " : " + job.getStatus().name());
+			}
+		}
+
+		if (!map.isEmpty()) {
+			ourLog.error(
+				"Found Running Jobs "
+				+ map.keySet().stream()
+					.map(k -> k + " : " + map.get(k))
+					.collect(Collectors.joining("\n"))
+			);
+
+			return true;
+		}
+		return false;
+	}
+
 	public void awaitNoJobsRunning(boolean theExpectAtLeastOneJobToExist) {
 		HashMap<String, String> map = new HashMap<>();
 		Awaitility.await().atMost(10, TimeUnit.SECONDS)
@@ -253,6 +333,10 @@ public class Batch2JobHelper {
 
 	public void runMaintenancePass() {
 		myJobMaintenanceService.runMaintenancePass();
+	}
+
+	public void enableMaintenanceRunner(boolean theEnabled) {
+		myJobMaintenanceService.enableMaintenancePass(theEnabled);
 	}
 
 	/**

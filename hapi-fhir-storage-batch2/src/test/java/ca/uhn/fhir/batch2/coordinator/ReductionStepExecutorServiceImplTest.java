@@ -20,6 +20,8 @@ import ca.uhn.fhir.jpa.dao.tx.NonTransactionalHapiTransactionService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -40,6 +42,7 @@ import static ca.uhn.fhir.batch2.coordinator.WorkChunkProcessorTest.createWorkCh
 import static ca.uhn.fhir.batch2.coordinator.WorkChunkProcessorTest.getTestJobInstance;
 import static ca.uhn.fhir.batch2.model.StatusEnum.ERRORED;
 import static ca.uhn.fhir.batch2.model.StatusEnum.IN_PROGRESS;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -62,10 +65,6 @@ public class ReductionStepExecutorServiceImplTest {
 	private IJobPersistence myJobPersistence;
 	@Mock
 	private IReductionStepWorker<TestJobParameters, StepInputData, StepOutputData> myReductionStepWorker;
-	//	@Mock
-//	private JobDefinitionStep<TestJobParameters, StepInputData, StepOutputData> myPreviousStep;
-//	@Mock
-//	private JobDefinitionStep<TestJobParameters, StepInputData, StepOutputData> myCurrentStep;
 	private ReductionStepExecutorServiceImpl mySvc;
 	private final JobDefinitionRegistry myJobDefinitionRegistry = new JobDefinitionRegistry();
 
@@ -74,19 +73,23 @@ public class ReductionStepExecutorServiceImplTest {
 		mySvc = new ReductionStepExecutorServiceImpl(myJobPersistence, myTransactionService, myJobDefinitionRegistry);
 	}
 
-
-	@Test
+	// QUEUED, IN_PROGRESS are supported because of backwards compatibility
+	// these statuses will stop being supported after 7.6
+	@SuppressWarnings({"unchecked", "rawtypes"})
+	@ParameterizedTest
+	@EnumSource(value = WorkChunkStatusEnum.class, names = { "REDUCTION_READY", "QUEUED", "IN_PROGRESS" })
 	public void doExecution_reductionWithChunkFailed_marksAllFutureChunksAsFailedButPreviousAsSuccess() {
 		// setup
 		List<String> chunkIds = Arrays.asList("chunk1", "chunk2");
 		List<WorkChunk> chunks = new ArrayList<>();
 		for (String id : chunkIds) {
-			chunks.add(createWorkChunk(id));
+			WorkChunk chunk = createWorkChunk(id);
+			chunk.setStatus(WorkChunkStatusEnum.REDUCTION_READY);
+			chunks.add(chunk);
 		}
 		JobInstance jobInstance = getTestJobInstance();
 		jobInstance.setStatus(StatusEnum.IN_PROGRESS);
 		JobWorkCursor<TestJobParameters, StepInputData, StepOutputData> workCursor = mock(JobWorkCursor.class);
-
 
 		// when
 		when(workCursor.getCurrentStep()).thenReturn((JobDefinitionStep<TestJobParameters, StepInputData, StepOutputData>) createJobDefinition().getSteps().get(1));
@@ -113,33 +116,34 @@ public class ReductionStepExecutorServiceImplTest {
 				statusCaptor.capture(),
 				any()
 			);
-		assertEquals(2, submittedListIds.getAllValues().size());
+		assertThat(submittedListIds.getAllValues()).hasSize(2);
 		List<String> list1 = submittedListIds.getAllValues().get(0);
 		List<String> list2 = submittedListIds.getAllValues().get(1);
-		assertTrue(list1.contains(chunkIds.get(0)));
-		assertTrue(list2.contains(chunkIds.get(1)));
+		assertThat(list1).contains(chunkIds.get(0));
+		assertThat(list2).contains(chunkIds.get(1));
 
 		// assumes the order of which is called first
 		// successes, then failures
-		assertEquals(2, statusCaptor.getAllValues().size());
+		assertThat(statusCaptor.getAllValues()).hasSize(2);
 		List<WorkChunkStatusEnum> statuses = statusCaptor.getAllValues();
 		assertEquals(WorkChunkStatusEnum.COMPLETED, statuses.get(0));
 		assertEquals(WorkChunkStatusEnum.FAILED, statuses.get(1));
 	}
 
-
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	@Test
 	public void doExecution_reductionStepWithValidInput_executesAsExpected() {
 		// setup
 		List<String> chunkIds = Arrays.asList("chunk1", "chunk2");
 		List<WorkChunk> chunks = new ArrayList<>();
 		for (String id : chunkIds) {
-			chunks.add(createWorkChunk(id));
+			WorkChunk chunk = createWorkChunk(id);
+			chunk.setStatus(WorkChunkStatusEnum.REDUCTION_READY);
+			chunks.add(chunk);
 		}
 		JobInstance jobInstance = getTestJobInstance();
 		jobInstance.setStatus(StatusEnum.IN_PROGRESS);
 		JobWorkCursor<TestJobParameters, StepInputData, StepOutputData> workCursor = mock(JobWorkCursor.class);
-
 
 		// when
 		when(workCursor.getCurrentStep()).thenReturn((JobDefinitionStep<TestJobParameters, StepInputData, StepOutputData>) createJobDefinition().getSteps().get(1));
@@ -161,9 +165,9 @@ public class ReductionStepExecutorServiceImplTest {
 		verify(myReductionStepWorker, times(chunks.size()))
 			.consume(chunkCaptor.capture());
 		List<ChunkExecutionDetails> chunksSubmitted = chunkCaptor.getAllValues();
-		assertEquals(chunks.size(), chunksSubmitted.size());
+		assertThat(chunksSubmitted).hasSize(chunks.size());
 		for (ChunkExecutionDetails submitted : chunksSubmitted) {
-			assertTrue(chunkIds.contains(submitted.getChunkId()));
+			assertThat(chunkIds).contains(submitted.getChunkId());
 		}
 
 		assertTrue(result.isSuccessful());
@@ -171,21 +175,24 @@ public class ReductionStepExecutorServiceImplTest {
 		verify(myJobPersistence).markWorkChunksWithStatusAndWipeData(eq(INSTANCE_ID),
 			chunkIdCaptor.capture(), eq(WorkChunkStatusEnum.COMPLETED), eq(null));
 		List<String> capturedIds = chunkIdCaptor.getValue();
-		assertEquals(chunkIds.size(), capturedIds.size());
+		assertThat(capturedIds).hasSize(chunkIds.size());
 		for (String chunkId : chunkIds) {
-			assertTrue(capturedIds.contains(chunkId));
+			assertThat(capturedIds).contains(chunkId);
 		}
 
 	}
 
-
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	@Test
 	public void doExecution_reductionStepWithErrors_returnsFalseAndMarksPreviousChunksFailed() {
 		// setup
 		List<String> chunkIds = Arrays.asList("chunk1", "chunk2");
 		List<WorkChunk> chunks = new ArrayList<>();
 		for (String id : chunkIds) {
-			chunks.add(createWorkChunk(id));
+			WorkChunk chunk = createWorkChunk(id);
+			// reduction steps are done with REDUCTION_READY workchunks
+			chunk.setStatus(WorkChunkStatusEnum.REDUCTION_READY);
+			chunks.add(chunk);
 		}
 		JobInstance jobInstance = getTestJobInstance();
 		jobInstance.setStatus(StatusEnum.IN_PROGRESS);
@@ -214,8 +221,8 @@ public class ReductionStepExecutorServiceImplTest {
 			String cId = chunkIdsCaptured.get(i);
 			String error = errorsCaptured.get(i);
 
-			assertTrue(chunkIds.contains(cId));
-			assertTrue(error.contains("Reduction step failed to execute chunk reduction for chunk"));
+			assertThat(chunkIds).contains(cId);
+			assertThat(error).contains("Reduction step failed to execute chunk reduction for chunk");
 		}
 		verify(myJobPersistence, never())
 			.markWorkChunksWithStatusAndWipeData(anyString(), anyList(), any(), anyString());

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
@@ -40,6 +41,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistryController;
 import ca.uhn.fhir.jpa.searchparam.util.SearchParameterHelper;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -48,6 +50,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.SearchParameterUtil;
 import com.google.common.annotations.VisibleForTesting;
+import jakarta.annotation.PostConstruct;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -64,13 +67,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import javax.annotation.Nonnull;
-import javax.annotation.PostConstruct;
 
 import static ca.uhn.fhir.jpa.packages.util.PackageUtils.DEFAULT_INSTALL_TYPES;
-import static org.apache.commons.lang3.StringUtils.defaultString;
+import static ca.uhn.fhir.util.SearchParameterUtil.getBaseAsStrings;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
@@ -111,6 +113,9 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 	@Autowired
 	private PackageResourceParsingSvc myPackageResourceParsingSvc;
+
+	@Autowired
+	private JpaStorageSettings myStorageSettings;
 
 	/**
 	 * Constructor
@@ -251,7 +256,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 			for (IBaseResource next : resources) {
 				try {
 					next = isStructureDefinitionWithoutSnapshot(next) ? generateSnapshot(next) : next;
-					create(next, theInstallationSpec, theOutcome);
+					install(next, theInstallationSpec, theOutcome);
 				} catch (Exception e) {
 					ourLog.warn(
 							"Failed to upload resource of type {} with ID {} - Error: {}",
@@ -345,83 +350,42 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	 * ============================= Utility methods ===============================
 	 */
 	@VisibleForTesting
-	void create(
+	void install(
 			IBaseResource theResource,
 			PackageInstallationSpec theInstallationSpec,
 			PackageInstallOutcomeJson theOutcome) {
-		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theResource.getClass());
-		SearchParameterMap map = createSearchParameterMapFor(theResource);
-		IBundleProvider searchResult = searchResource(dao, map);
-		if (validForUpload(theResource)) {
-			if (searchResult.isEmpty()) {
 
-				ourLog.info("Creating new resource matching {}", map.toNormalizedQueryString(myFhirContext));
-				theOutcome.incrementResourcesInstalled(myFhirContext.getResourceType(theResource));
-
-				IIdType id = theResource.getIdElement();
-
-				if (id.isEmpty()) {
-					createResource(dao, theResource);
-					ourLog.info("Created resource with new id");
-				} else {
-					if (id.isIdPartValidLong()) {
-						String newIdPart = "npm-" + id.getIdPart();
-						id.setParts(id.getBaseUrl(), id.getResourceType(), newIdPart, id.getVersionIdPart());
-					}
-
-					try {
-						updateResource(dao, theResource);
-
-						ourLog.info("Created resource with existing id");
-					} catch (ResourceVersionConflictException exception) {
-						final Optional<IBaseResource> optResource = readResourceById(dao, id);
-
-						final String existingResourceUrlOrNull = optResource
-								.filter(MetadataResource.class::isInstance)
-								.map(MetadataResource.class::cast)
-								.map(MetadataResource::getUrl)
-								.orElse(null);
-						final String newResourceUrlOrNull = (theResource instanceof MetadataResource)
-								? ((MetadataResource) theResource).getUrl()
-								: null;
-
-						ourLog.error(
-								"Version conflict error:  This is possibly due to a collision between ValueSets from different IGs that are coincidentally using the same resource ID: [{}] and new resource URL: [{}], with the exisitng resource having URL: [{}].  Ignoring this update and continuing:  The first IG wins.  ",
-								id.getIdPart(),
-								newResourceUrlOrNull,
-								existingResourceUrlOrNull,
-								exception);
-					}
-				}
-			} else {
-				if (theInstallationSpec.isReloadExisting()) {
-					ourLog.info("Updating existing resource matching {}", map.toNormalizedQueryString(myFhirContext));
-					theResource.setId(searchResult
-							.getResources(0, 1)
-							.get(0)
-							.getIdElement()
-							.toUnqualifiedVersionless());
-					DaoMethodOutcome outcome = updateResource(dao, theResource);
-					if (!outcome.isNop()) {
-						theOutcome.incrementResourcesInstalled(myFhirContext.getResourceType(theResource));
-					}
-				} else {
-					ourLog.info(
-							"Skipping update of existing resource matching {}",
-							map.toNormalizedQueryString(myFhirContext));
-				}
-			}
-		} else {
+		if (!validForUpload(theResource)) {
 			ourLog.warn(
 					"Failed to upload resource of type {} with ID {} - Error: Resource failed validation",
 					theResource.fhirType(),
 					theResource.getIdElement().getValue());
+			return;
+		}
+
+		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theResource.getClass());
+		SearchParameterMap map = createSearchParameterMapFor(theResource);
+		IBundleProvider searchResult = searchResource(dao, map);
+
+		String resourceQuery = map.toNormalizedQueryString(myFhirContext);
+		if (!searchResult.isEmpty() && !theInstallationSpec.isReloadExisting()) {
+			ourLog.info("Skipping update of existing resource matching {}", resourceQuery);
+			return;
+		}
+		if (!searchResult.isEmpty()) {
+			ourLog.info("Updating existing resource matching {}", resourceQuery);
+		}
+		IBaseResource existingResource =
+				!searchResult.isEmpty() ? searchResult.getResources(0, 1).get(0) : null;
+		boolean isInstalled = createOrUpdateResource(dao, theResource, existingResource);
+		if (isInstalled) {
+			theOutcome.incrementResourcesInstalled(myFhirContext.getResourceType(theResource));
 		}
 	}
 
 	private Optional<IBaseResource> readResourceById(IFhirResourceDao dao, IIdType id) {
 		try {
-			return Optional.ofNullable(dao.read(id.toUnqualifiedVersionless(), newSystemRequestDetails()));
+			return Optional.ofNullable(dao.read(id.toUnqualifiedVersionless(), createRequestDetails()));
 
 		} catch (Exception exception) {
 			// ignore because we're running this query to help build the log
@@ -432,30 +396,112 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	}
 
 	private IBundleProvider searchResource(IFhirResourceDao theDao, SearchParameterMap theMap) {
-		return theDao.search(theMap, newSystemRequestDetails());
+		return theDao.search(theMap, createRequestDetails());
 	}
 
-	@Nonnull
-	private SystemRequestDetails newSystemRequestDetails() {
-		return new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.defaultPartition());
-	}
+	protected boolean createOrUpdateResource(
+			IFhirResourceDao theDao, IBaseResource theResource, IBaseResource theExistingResource) {
+		final IIdType id = theResource.getIdElement();
 
-	private void createResource(IFhirResourceDao theDao, IBaseResource theResource) {
-		if (myPartitionSettings.isPartitioningEnabled()) {
-			SystemRequestDetails requestDetails = newSystemRequestDetails();
-			theDao.create(theResource, requestDetails);
-		} else {
-			theDao.create(theResource);
+		if (theExistingResource == null && id.isEmpty()) {
+			ourLog.debug("Install resource without id will be created");
+			theDao.create(theResource, createRequestDetails());
+			return true;
 		}
+
+		if (theExistingResource == null && !id.isEmpty() && id.isIdPartValidLong()) {
+			String newIdPart = "npm-" + id.getIdPart();
+			id.setParts(id.getBaseUrl(), id.getResourceType(), newIdPart, id.getVersionIdPart());
+		}
+
+		boolean isExistingUpdated = updateExistingResourceIfNecessary(theDao, theResource, theExistingResource);
+		boolean shouldOverrideId = theExistingResource != null && !isExistingUpdated;
+
+		if (shouldOverrideId) {
+			ourLog.debug(
+					"Existing resource {} will be overridden with installed resource {}",
+					theExistingResource.getIdElement(),
+					id);
+			theResource.setId(theExistingResource.getIdElement().toUnqualifiedVersionless());
+		} else {
+			ourLog.debug("Install resource {} will be created", id);
+		}
+
+		DaoMethodOutcome outcome = updateResource(theDao, theResource);
+		return outcome != null && !outcome.isNop();
 	}
 
-	DaoMethodOutcome updateResource(IFhirResourceDao theDao, IBaseResource theResource) {
-		if (myPartitionSettings.isPartitioningEnabled()) {
-			SystemRequestDetails requestDetails = newSystemRequestDetails();
-			return theDao.update(theResource, requestDetails);
-		} else {
-			return theDao.update(theResource, new SystemRequestDetails());
+	private boolean updateExistingResourceIfNecessary(
+			IFhirResourceDao theDao, IBaseResource theResource, IBaseResource theExistingResource) {
+		if (!"SearchParameter".equals(theResource.getClass().getSimpleName())) {
+			return false;
 		}
+		if (theExistingResource == null) {
+			return false;
+		}
+		if (theExistingResource
+				.getIdElement()
+				.getIdPart()
+				.equals(theResource.getIdElement().getIdPart())) {
+			return false;
+		}
+		Collection<String> remainingBaseList = new HashSet<>(getBaseAsStrings(myFhirContext, theExistingResource));
+		remainingBaseList.removeAll(getBaseAsStrings(myFhirContext, theResource));
+		if (remainingBaseList.isEmpty()) {
+			return false;
+		}
+		myFhirContext
+				.getResourceDefinition(theExistingResource)
+				.getChildByName("base")
+				.getMutator()
+				.setValue(theExistingResource, null);
+
+		for (String baseResourceName : remainingBaseList) {
+			myFhirContext.newTerser().addElement(theExistingResource, "base", baseResourceName);
+		}
+		ourLog.info(
+				"Existing SearchParameter {} will be updated with base {}",
+				theExistingResource.getIdElement().getIdPart(),
+				remainingBaseList);
+		updateResource(theDao, theExistingResource);
+		return true;
+	}
+
+	private DaoMethodOutcome updateResource(IFhirResourceDao theDao, IBaseResource theResource) {
+		DaoMethodOutcome outcome = null;
+
+		IIdType id = theResource.getIdElement();
+		RequestDetails requestDetails = createRequestDetails();
+
+		try {
+			outcome = theDao.update(theResource, requestDetails);
+		} catch (ResourceVersionConflictException exception) {
+			final Optional<IBaseResource> optResource = readResourceById(theDao, id);
+
+			final String existingResourceUrlOrNull = optResource
+					.filter(MetadataResource.class::isInstance)
+					.map(MetadataResource.class::cast)
+					.map(MetadataResource::getUrl)
+					.orElse(null);
+			final String newResourceUrlOrNull =
+					(theResource instanceof MetadataResource) ? ((MetadataResource) theResource).getUrl() : null;
+
+			ourLog.error(
+					"Version conflict error: This is possibly due to a collision between ValueSets from different IGs that are coincidentally using the same resource ID: [{}] and new resource URL: [{}], with the exisitng resource having URL: [{}].  Ignoring this update and continuing:  The first IG wins.  ",
+					id.getIdPart(),
+					newResourceUrlOrNull,
+					existingResourceUrlOrNull,
+					exception);
+		}
+		return outcome;
+	}
+
+	private RequestDetails createRequestDetails() {
+		SystemRequestDetails requestDetails = new SystemRequestDetails();
+		if (myPartitionSettings.isPartitioningEnabled()) {
+			requestDetails.setRequestPartitionId(RequestPartitionId.defaultPartition());
+		}
+		return requestDetails;
 	}
 
 	boolean validForUpload(IBaseResource theResource) {
@@ -463,7 +509,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		if ("SearchParameter".equals(resourceType)) {
 
 			String code = SearchParameterUtil.getCode(myFhirContext, theResource);
-			if (defaultString(code).startsWith("_")) {
+			if (!isBlank(code) && code.startsWith("_")) {
 				ourLog.warn(
 						"Failed to validate resource of type {} with url {} - Error: Resource code starts with \"_\"",
 						theResource.fhirType(),
@@ -480,7 +526,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 				return false;
 			}
 
-			if (SearchParameterUtil.getBaseAsStrings(myFhirContext, theResource).isEmpty()) {
+			if (getBaseAsStrings(myFhirContext, theResource).isEmpty()) {
 				ourLog.warn(
 						"Failed to validate resource of type {} with url {} - Error: Resource base is empty",
 						theResource.fhirType(),
@@ -505,7 +551,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	 * and {@link org.hl7.fhir.r4.model.Communication}, the status field doesn't necessarily need to be set to 'active'
 	 * for that resource to be eligible for upload via packages. For example, all {@link org.hl7.fhir.r4.model.Subscription}
 	 * have a status of {@link org.hl7.fhir.r4.model.Subscription.SubscriptionStatus#REQUESTED} when they are originally
-	 * inserted into the database, so we accept that value for {@link org.hl7.fhir.r4.model.Subscription} isntead.
+	 * inserted into the database, so we accept that value for {@link org.hl7.fhir.r4.model.Subscription} instead.
 	 * Furthermore, {@link org.hl7.fhir.r4.model.DocumentReference} and {@link org.hl7.fhir.r4.model.Communication} can
 	 * exist with a wide variety of values for status that include ones such as
 	 * {@link org.hl7.fhir.r4.model.Communication.CommunicationStatus#ENTEREDINERROR},
@@ -517,6 +563,9 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	 * @return {@link Boolean#TRUE} if the status value of this resource is acceptable for package upload.
 	 */
 	private boolean isValidResourceStatusForPackageUpload(IBaseResource theResource) {
+		if (!myStorageSettings.isValidateResourceStatusForPackageUpload()) {
+			return true;
+		}
 		List<IPrimitiveType> statusTypes =
 				myFhirContext.newFhirPath().evaluate(theResource, "status", IPrimitiveType.class);
 		// Resource does not have a status field
@@ -560,20 +609,21 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		}
 	}
 
-	private SearchParameterMap createSearchParameterMapFor(IBaseResource resource) {
-		if (resource.getClass().getSimpleName().equals("NamingSystem")) {
-			String uniqueId = extractUniqeIdFromNamingSystem(resource);
+	private SearchParameterMap createSearchParameterMapFor(IBaseResource theResource) {
+		String resourceType = theResource.getClass().getSimpleName();
+		if ("NamingSystem".equals(resourceType)) {
+			String uniqueId = extractUniqeIdFromNamingSystem(theResource);
 			return SearchParameterMap.newSynchronous().add("value", new StringParam(uniqueId).setExact(true));
-		} else if (resource.getClass().getSimpleName().equals("Subscription")) {
-			String id = extractIdFromSubscription(resource);
+		} else if ("Subscription".equals(resourceType)) {
+			String id = extractSimpleValue(theResource, "id");
 			return SearchParameterMap.newSynchronous().add("_id", new TokenParam(id));
-		} else if (resource.getClass().getSimpleName().equals("SearchParameter")) {
-			return buildSearchParameterMapForSearchParameter(resource);
-		} else if (resourceHasUrlElement(resource)) {
-			String url = extractUniqueUrlFromMetadataResource(resource);
+		} else if ("SearchParameter".equals(resourceType)) {
+			return buildSearchParameterMapForSearchParameter(theResource);
+		} else if (resourceHasUrlElement(theResource)) {
+			String url = extractSimpleValue(theResource, "url");
 			return SearchParameterMap.newSynchronous().add("url", new UriParam(url));
 		} else {
-			TokenParam identifierToken = extractIdentifierFromOtherResourceTypes(resource);
+			TokenParam identifierToken = extractIdentifierFromOtherResourceTypes(theResource);
 			return SearchParameterMap.newSynchronous().add("identifier", identifierToken);
 		}
 	}
@@ -593,7 +643,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		}
 
 		if (resourceHasUrlElement(theResource)) {
-			String url = extractUniqueUrlFromMetadataResource(theResource);
+			String url = extractSimpleValue(theResource, "url");
 			return SearchParameterMap.newSynchronous().add("url", new UriParam(url));
 		} else {
 			TokenParam identifierToken = extractIdentifierFromOtherResourceTypes(theResource);
@@ -601,38 +651,32 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		}
 	}
 
-	private String extractUniqeIdFromNamingSystem(IBaseResource resource) {
-		FhirTerser terser = myFhirContext.newTerser();
-		IBase uniqueIdComponent = (IBase) terser.getSingleValueOrNull(resource, "uniqueId");
+	private String extractUniqeIdFromNamingSystem(IBaseResource theResource) {
+		IBase uniqueIdComponent = (IBase) extractValue(theResource, "uniqueId");
 		if (uniqueIdComponent == null) {
 			throw new ImplementationGuideInstallationException(
 					Msg.code(1291) + "NamingSystem does not have uniqueId component.");
 		}
-		IPrimitiveType<?> asPrimitiveType = (IPrimitiveType<?>) terser.getSingleValueOrNull(uniqueIdComponent, "value");
-		return (String) asPrimitiveType.getValue();
+		return extractSimpleValue(uniqueIdComponent, "value");
 	}
 
-	private String extractIdFromSubscription(IBaseResource resource) {
-		FhirTerser terser = myFhirContext.newTerser();
-		IPrimitiveType<?> asPrimitiveType = (IPrimitiveType<?>) terser.getSingleValueOrNull(resource, "id");
-		return (String) asPrimitiveType.getValue();
-	}
-
-	private String extractUniqueUrlFromMetadataResource(IBaseResource resource) {
-		FhirTerser terser = myFhirContext.newTerser();
-		IPrimitiveType<?> asPrimitiveType = (IPrimitiveType<?>) terser.getSingleValueOrNull(resource, "url");
-		return (String) asPrimitiveType.getValue();
-	}
-
-	private TokenParam extractIdentifierFromOtherResourceTypes(IBaseResource resource) {
-		FhirTerser terser = myFhirContext.newTerser();
-		Identifier identifier = (Identifier) terser.getSingleValueOrNull(resource, "identifier");
+	private TokenParam extractIdentifierFromOtherResourceTypes(IBaseResource theResource) {
+		Identifier identifier = (Identifier) extractValue(theResource, "identifier");
 		if (identifier != null) {
 			return new TokenParam(identifier.getSystem(), identifier.getValue());
 		} else {
 			throw new UnsupportedOperationException(Msg.code(1292)
 					+ "Resources in a package must have a url or identifier to be loaded by the package installer.");
 		}
+	}
+
+	private Object extractValue(IBase theResource, String thePath) {
+		return myFhirContext.newTerser().getSingleValueOrNull(theResource, thePath);
+	}
+
+	private String extractSimpleValue(IBase theResource, String thePath) {
+		IPrimitiveType<?> asPrimitiveType = (IPrimitiveType<?>) extractValue(theResource, thePath);
+		return (String) asPrimitiveType.getValue();
 	}
 
 	private boolean resourceHasUrlElement(IBaseResource resource) {

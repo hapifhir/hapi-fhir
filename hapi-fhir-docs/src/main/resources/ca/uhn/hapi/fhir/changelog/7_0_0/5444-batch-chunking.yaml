@@ -1,0 +1,4 @@
+---
+type: change
+issue: 5444
+title: "The reindexing and mdm-clear batch jobs now stream results internally for more reliable operation."

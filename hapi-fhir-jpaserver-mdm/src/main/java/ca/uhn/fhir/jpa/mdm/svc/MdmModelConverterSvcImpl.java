@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server - Master Data Management
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,14 +27,19 @@ import ca.uhn.fhir.mdm.model.mdmevents.MdmLinkJson;
 import ca.uhn.fhir.mdm.model.mdmevents.MdmLinkWithRevisionJson;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
 public class MdmModelConverterSvcImpl implements IMdmModelConverterSvc {
 
+	@SuppressWarnings("rawtypes")
 	@Autowired
 	IIdHelperService myIdHelperService;
 
 	@Autowired
 	private IMdmSettings myMdmSettings;
 
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	@Override
 	public MdmLinkJson toJson(IMdmLink theLink) {
 		MdmLinkJson retVal = new MdmLinkJson();
@@ -43,19 +48,29 @@ public class MdmModelConverterSvcImpl implements IMdmModelConverterSvc {
 				.toVersionless()
 				.getValue();
 		retVal.setSourceId(sourceId);
+		if (theLink.getSourcePersistenceId() != null) {
+			retVal.setSourcePid(theLink.getSourcePersistenceId());
+		}
 		String goldenResourceId = myIdHelperService
 				.resourceIdFromPidOrThrowException(theLink.getGoldenResourcePersistenceId(), theLink.getMdmSourceType())
 				.toVersionless()
 				.getValue();
 		retVal.setGoldenResourceId(goldenResourceId);
+		if (theLink.getGoldenResourcePersistenceId() != null) {
+			retVal.setGoldenPid(theLink.getGoldenResourcePersistenceId());
+		}
 		retVal.setCreated(theLink.getCreated());
 		retVal.setEidMatch(theLink.getEidMatch());
 		retVal.setLinkSource(theLink.getLinkSource());
 		retVal.setMatchResult(theLink.getMatchResult());
 		retVal.setLinkCreatedNewResource(theLink.getHadToCreateNewGoldenResource());
-		retVal.setScore(theLink.getScore());
+		Double score = theLink.getScore() == null
+				? null
+				: BigDecimal.valueOf(theLink.getScore())
+						.setScale(4, RoundingMode.HALF_UP)
+						.doubleValue();
+		retVal.setScore(score);
 		retVal.setUpdated(theLink.getUpdated());
-		retVal.setVector(theLink.getVector());
 		retVal.setVersion(theLink.getVersion());
 		retVal.setRuleCount(theLink.getRuleCount());
 		retVal.translateAndSetRule(myMdmSettings.getMdmRules(), theLink.getVector());

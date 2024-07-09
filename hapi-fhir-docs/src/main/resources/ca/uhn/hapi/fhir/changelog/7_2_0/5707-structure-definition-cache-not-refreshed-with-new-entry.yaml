@@ -1,0 +1,8 @@
+---
+type: fix
+issue: 5707
+jira: SMILE-7270
+title: "Previously, with validation active, when a user POSTed a resource with a meta profile with a non-existent 
+        StructureDefinition URL, then POSTed the StructureDefinition, POSTing the same or another patient with that same 
+        meta profile URL would still fail with a VALIDATION_VAL_PROFILE_UNKNOWN_NOT_POLICY validation error.
+        This has been fixed."

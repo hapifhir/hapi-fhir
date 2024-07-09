@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.search.reindex;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
@@ -16,8 +17,8 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.SearchParamPresentEntity;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.test.utilities.HtmlUtil;
-import com.gargoylesoftware.htmlunit.html.HtmlPage;
-import com.gargoylesoftware.htmlunit.html.HtmlTable;
+import org.htmlunit.html.HtmlPage;
+import org.htmlunit.html.HtmlTable;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
@@ -25,13 +26,13 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Date;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests the narrative generation in {@link InstanceReindexServiceImpl}. This is a separate test
@@ -307,7 +308,7 @@ public class InstanceReindexServiceImplNarrativeR5Test {
 
 	@Nonnull
 	private static ResourceIndexedSearchParams newParams() {
-		return new ResourceIndexedSearchParams();
+		return ResourceIndexedSearchParams.withSets();
 	}
 
 }

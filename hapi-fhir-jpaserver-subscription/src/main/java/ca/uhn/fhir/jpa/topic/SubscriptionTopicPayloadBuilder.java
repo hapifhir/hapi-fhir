@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,12 +23,14 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
+import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.topic.status.INotificationStatusBuilder;
 import ca.uhn.fhir.jpa.topic.status.R4BNotificationStatusBuilder;
 import ca.uhn.fhir.jpa.topic.status.R4NotificationStatusBuilder;
 import ca.uhn.fhir.jpa.topic.status.R5NotificationStatusBuilder;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.util.BundleBuilder;
+import org.apache.commons.lang3.ObjectUtils;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.Bundle;
@@ -36,6 +38,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+
+import static org.hl7.fhir.r5.model.Subscription.SubscriptionPayloadContent.FULLRESOURCE;
 
 public class SubscriptionTopicPayloadBuilder {
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionTopicPayloadBuilder.class);
@@ -73,7 +77,7 @@ public class SubscriptionTopicPayloadBuilder {
 				myNotificationStatusBuilder.buildNotificationStatus(theResources, theActiveSubscription, theTopicUrl);
 		bundleBuilder.addCollectionEntry(notificationStatus);
 
-		addResources(bundleBuilder, theResources, theRestOperationType);
+		addResources(theResources, theActiveSubscription.getSubscription(), theRestOperationType, bundleBuilder);
 		// WIP STR5 add support for notificationShape include, revinclude
 
 		// Note we need to set the bundle type after we add the resources since adding the resources automatically sets
@@ -87,7 +91,46 @@ public class SubscriptionTopicPayloadBuilder {
 		return retval;
 	}
 
-	private static void addResources(
+	private void addResources(
+			List<IBaseResource> theResources,
+			CanonicalSubscription theCanonicalSubscription,
+			RestOperationTypeEnum theRestOperationType,
+			BundleBuilder theBundleBuilder) {
+
+		org.hl7.fhir.r5.model.Subscription.SubscriptionPayloadContent content =
+				ObjectUtils.defaultIfNull(theCanonicalSubscription.getContent(), FULLRESOURCE);
+
+		switch (content) {
+			case EMPTY:
+				// skip adding resource to the Bundle
+				break;
+			case IDONLY:
+				addIdOnly(theBundleBuilder, theResources, theRestOperationType);
+				break;
+			case FULLRESOURCE:
+				addFullResources(theBundleBuilder, theResources, theRestOperationType);
+				break;
+		}
+	}
+
+	private void addIdOnly(
+			BundleBuilder bundleBuilder, List<IBaseResource> theResources, RestOperationTypeEnum theRestOperationType) {
+		for (IBaseResource resource : theResources) {
+			switch (theRestOperationType) {
+				case CREATE:
+					bundleBuilder.addTransactionCreateEntryIdOnly(resource);
+					break;
+				case UPDATE:
+					bundleBuilder.addTransactionUpdateIdOnlyEntry(resource);
+					break;
+				case DELETE:
+					bundleBuilder.addTransactionDeleteEntry(resource);
+					break;
+			}
+		}
+	}
+
+	private void addFullResources(
 			BundleBuilder bundleBuilder, List<IBaseResource> theResources, RestOperationTypeEnum theRestOperationType) {
 		for (IBaseResource resource : theResources) {
 			switch (theRestOperationType) {

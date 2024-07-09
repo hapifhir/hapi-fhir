@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.provider;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.dstu2.BaseJpaDstu2Test;
@@ -18,8 +20,8 @@ import ca.uhn.fhir.rest.client.interceptor.SimpleRequestHeaderInterceptor;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
+import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,11 +30,7 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.nullValue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class SystemProviderTransactionSearchDstu2Test extends BaseJpaDstu2Test {
 
@@ -132,12 +130,12 @@ public class SystemProviderTransactionSearchDstu2Test extends BaseJpaDstu2Test {
 		Bundle output = myClient.transaction().withBundle(input).execute();
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
 
-		assertEquals(1, output.getEntry().size());
+		assertThat(output.getEntry()).hasSize(1);
 		Bundle respBundle = (Bundle) output.getEntry().get(0).getResource();
-		assertEquals(5, respBundle.getEntry().size());
-		assertEquals(null, respBundle.getLink("next"));
+		assertThat(respBundle.getEntry()).hasSize(5);
+		assertNull(respBundle.getLink("next"));
 		List<String> actualIds = toIds(respBundle);
-		assertThat(actualIds, contains(ids.subList(0, 5).toArray(new String[0])));
+		assertThat(actualIds).containsExactly(ids.subList(0, 5).toArray(new String[0]));
 	}
 
 	@Test
@@ -155,18 +153,18 @@ public class SystemProviderTransactionSearchDstu2Test extends BaseJpaDstu2Test {
 		Bundle output = myClient.transaction().withBundle(input).execute();
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
 
-		assertEquals(1, output.getEntry().size());
+		assertThat(output.getEntry()).hasSize(1);
 		Bundle respBundle = (Bundle) output.getEntry().get(0).getResource();
-		assertEquals(5, respBundle.getEntry().size());
+		assertThat(respBundle.getEntry()).hasSize(5);
 		List<String> actualIds = toIds(respBundle);
-		assertThat(actualIds, contains(ids.subList(0, 5).toArray(new String[0])));
+		assertThat(actualIds).containsExactly(ids.subList(0, 5).toArray(new String[0]));
 
 		String nextPageLink = respBundle.getLink("next").getUrl();
 		output = myClient.loadPage().byUrl(nextPageLink).andReturnBundle(Bundle.class).execute();
 		respBundle = output;
-		assertEquals(5, respBundle.getEntry().size());
+		assertThat(respBundle.getEntry()).hasSize(5);
 		actualIds = toIds(respBundle);
-		assertThat(actualIds, contains(ids.subList(5, 10).toArray(new String[0])));
+		assertThat(actualIds).containsExactly(ids.subList(5, 10).toArray(new String[0]));
 	}
 
 	/**
@@ -190,13 +188,13 @@ public class SystemProviderTransactionSearchDstu2Test extends BaseJpaDstu2Test {
 		Bundle output = myClient.transaction().withBundle(input).execute();
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
 
-		assertEquals(30, output.getEntry().size());
+		assertThat(output.getEntry()).hasSize(30);
 		for (int i = 0; i < 30; i++) {
 			Bundle respBundle = (Bundle) output.getEntry().get(i).getResource();
-			assertEquals(5, respBundle.getEntry().size());
-			assertThat(respBundle.getLink("next").getUrl(), not(nullValue()));
+			assertThat(respBundle.getEntry()).hasSize(5);
+			assertNotNull(respBundle.getLink("next").getUrl());
 			List<String> actualIds = toIds(respBundle);
-			assertThat(actualIds, contains(ids.subList(0, 5).toArray(new String[0])));
+			assertThat(actualIds).containsExactly(ids.subList(0, 5).toArray(new String[0]));
 		}
 	}
 
@@ -217,12 +215,12 @@ public class SystemProviderTransactionSearchDstu2Test extends BaseJpaDstu2Test {
 		Bundle output = myClient.transaction().withBundle(input).execute();
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
 
-		assertEquals(1, output.getEntry().size());
+		assertThat(output.getEntry()).hasSize(1);
 		Bundle respBundle = (Bundle) output.getEntry().get(0).getResource();
-		assertEquals(5, respBundle.getEntry().size());
-		assertEquals(null, respBundle.getLink("next"));
+		assertThat(respBundle.getEntry()).hasSize(5);
+		assertNull(respBundle.getLink("next"));
 		List<String> actualIds = toIds(respBundle);
-		assertThat(actualIds, contains(ids.subList(0, 5).toArray(new String[0])));
+		assertThat(actualIds).containsExactly(ids.subList(0, 5).toArray(new String[0]));
 	}
 
 	@Test
@@ -240,18 +238,18 @@ public class SystemProviderTransactionSearchDstu2Test extends BaseJpaDstu2Test {
 		Bundle output = myClient.transaction().withBundle(input).execute();
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
 
-		assertEquals(1, output.getEntry().size());
+		assertThat(output.getEntry()).hasSize(1);
 		Bundle respBundle = (Bundle) output.getEntry().get(0).getResource();
-		assertEquals(5, respBundle.getEntry().size());
+		assertThat(respBundle.getEntry()).hasSize(5);
 		List<String> actualIds = toIds(respBundle);
-		assertThat(actualIds, contains(ids.subList(0, 5).toArray(new String[0])));
+		assertThat(actualIds).containsExactly(ids.subList(0, 5).toArray(new String[0]));
 
 		String nextPageLink = respBundle.getLink("next").getUrl();
 		output = myClient.loadPage().byUrl(nextPageLink).andReturnBundle(Bundle.class).execute();
 		respBundle = output;
-		assertEquals(5, respBundle.getEntry().size());
+		assertThat(respBundle.getEntry()).hasSize(5);
 		actualIds = toIds(respBundle);
-		assertThat(actualIds, contains(ids.subList(5, 10).toArray(new String[0])));
+		assertThat(actualIds).containsExactly(ids.subList(5, 10).toArray(new String[0]));
 	}
 
 	/**
@@ -275,13 +273,13 @@ public class SystemProviderTransactionSearchDstu2Test extends BaseJpaDstu2Test {
 		Bundle output = myClient.transaction().withBundle(input).execute();
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
 
-		assertEquals(30, output.getEntry().size());
+		assertThat(output.getEntry()).hasSize(30);
 		for (int i = 0; i < 30; i++) {
 			Bundle respBundle = (Bundle) output.getEntry().get(i).getResource();
-			assertEquals(5, respBundle.getEntry().size());
-			assertThat(respBundle.getLink("next").getUrl(), not(nullValue()));
+			assertThat(respBundle.getEntry()).hasSize(5);
+			assertNotNull(respBundle.getLink("next").getUrl());
 			List<String> actualIds = toIds(respBundle);
-			assertThat(actualIds, contains(ids.subList(0, 5).toArray(new String[0])));
+			assertThat(actualIds).containsExactly(ids.subList(0, 5).toArray(new String[0]));
 		}
 	}
 

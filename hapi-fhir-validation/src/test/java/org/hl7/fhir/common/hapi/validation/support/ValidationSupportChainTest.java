@@ -5,16 +5,17 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
 import ca.uhn.fhir.i18n.Msg;
-import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.junit.jupiter.api.Test;
 
-
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class ValidationSupportChainTest {
+public class ValidationSupportChainTest extends BaseValidationTestWithInlineMocks {
 
 
 	@Test
@@ -57,8 +58,8 @@ public class ValidationSupportChainTest {
 		final byte[] actualBinaryContent1 = validationSupportChain.fetchBinary(EXPECTED_BINARY_KEY_1 );
 		final byte[] actualBinaryContent2 = validationSupportChain.fetchBinary(EXPECTED_BINARY_KEY_2 );
 
-		assertArrayEquals(EXPECTED_BINARY_CONTENT_1, actualBinaryContent1);
-		assertArrayEquals(EXPECTED_BINARY_CONTENT_2, actualBinaryContent2);
+		assertThat(actualBinaryContent1).containsExactly(EXPECTED_BINARY_CONTENT_1);
+		assertThat(actualBinaryContent2).containsExactly(EXPECTED_BINARY_CONTENT_2);
 		assertNull(validationSupportChain.fetchBinary("nonExistentKey"));
 	}
 

@@ -5,8 +5,8 @@ import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import org.junit.jupiter.api.BeforeEach;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.Enumeration;
 
 import static org.mockito.Mockito.mock;

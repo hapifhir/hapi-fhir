@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.search.builder.predicate;
 
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
@@ -35,6 +36,7 @@ public class ResourceTablePredicateBuilder extends BaseJoiningPredicateBuilder {
 	private final DbColumn myColumnResType;
 	private final DbColumn myColumnLastUpdated;
 	private final DbColumn myColumnLanguage;
+	private final DbColumn myColumnFhirId;
 
 	/**
 	 * Constructor
@@ -42,10 +44,11 @@ public class ResourceTablePredicateBuilder extends BaseJoiningPredicateBuilder {
 	public ResourceTablePredicateBuilder(SearchQueryBuilder theSearchSqlBuilder) {
 		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_RESOURCE"));
 		myColumnResId = getTable().addColumn("RES_ID");
-		myColumnResType = getTable().addColumn("RES_TYPE");
+		myColumnResType = getTable().addColumn(ResourceTable.RES_TYPE);
 		myColumnResDeletedAt = getTable().addColumn("RES_DELETED_AT");
 		myColumnLastUpdated = getTable().addColumn("RES_UPDATED");
 		myColumnLanguage = getTable().addColumn("RES_LANGUAGE");
+		myColumnFhirId = getTable().addColumn(ResourceTable.FHIR_ID);
 	}
 
 	@Override
@@ -76,5 +79,9 @@ public class ResourceTablePredicateBuilder extends BaseJoiningPredicateBuilder {
 
 	public DbColumn getColumnLastUpdated() {
 		return myColumnLastUpdated;
+	}
+
+	public DbColumn getColumnFhirId() {
+		return myColumnFhirId;
 	}
 }

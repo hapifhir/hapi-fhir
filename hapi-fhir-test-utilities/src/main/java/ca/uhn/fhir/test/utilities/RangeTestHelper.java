@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Test Utilities
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,7 @@
  */
 package ca.uhn.fhir.test.utilities;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.both;
-import static org.hamcrest.Matchers.greaterThanOrEqualTo;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.lessThanOrEqualTo;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class RangeTestHelper {
 
@@ -38,7 +33,10 @@ public class RangeTestHelper {
 	public static void checkInRange(double theBase, double theRange, double theValue) {
 		double lowerBound = theBase - theRange;
 		double upperBound = theBase + theRange;
-		checkWithinBounds(lowerBound, upperBound, theValue);
+		assertThat(theValue)
+			.isGreaterThanOrEqualTo(lowerBound)
+			.isLessThanOrEqualTo(upperBound);
+
 	}
 
 	public static void checkInRange(String theBase, String theValue) {
@@ -63,18 +61,17 @@ public class RangeTestHelper {
 		checkInRange(base, theRange, value);
 	}
 
-	public static void checkWithinBounds(double theLowerBound, double theUpperBound, double theValue) {
-		assertThat(theValue, is(both(greaterThanOrEqualTo(theLowerBound)).and(lessThanOrEqualTo(theUpperBound))));
-	}
-
 	public static void checkWithinBounds(String theLowerBound, String theUpperBound, String theValue) {
-		assertNotNull(theLowerBound, "theLowerBound");
-		assertNotNull(theUpperBound, "theUpperBound");
-		assertNotNull(theValue, "theValue");
+		assertThat(theLowerBound).as("theLowerBound").isNotNull();
+		assertThat(theUpperBound).as("theUpperBound").isNotNull();
+		assertThat(theValue).as("theValue").isNotNull();
 		double lowerBound = Double.parseDouble(theLowerBound);
 		double upperBound = Double.parseDouble(theUpperBound);
 		double value = Double.parseDouble(theValue);
-		checkWithinBounds(lowerBound, upperBound, value);
+		assertThat(value)
+			.isGreaterThanOrEqualTo(lowerBound)
+			.isLessThanOrEqualTo(upperBound);
+
 	}
 
 

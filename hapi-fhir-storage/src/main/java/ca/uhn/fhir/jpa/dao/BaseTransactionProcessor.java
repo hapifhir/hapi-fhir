@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,6 +58,7 @@ import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.DeferredInterceptorBroadcasts;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
@@ -84,6 +85,7 @@ import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.dstu3.model.Bundle;
@@ -124,7 +126,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
 
 import static ca.uhn.fhir.util.StringUtil.toUtf8String;
 import static java.util.Objects.isNull;
@@ -1680,13 +1681,10 @@ public abstract class BaseTransactionProcessor {
 				if (newId != null) {
 					ourLog.debug(" * Replacing resource ref {} with {}", nextId, newId);
 
-					addRollbackReferenceRestore(theTransactionDetails, resourceReference);
 					if (theReferencesToAutoVersion.contains(resourceReference)) {
-						resourceReference.setReference(newId.getValue());
-						resourceReference.setResource(null);
+						replaceResourceReference(newId, resourceReference, theTransactionDetails);
 					} else {
-						resourceReference.setReference(newId.toVersionless().getValue());
-						resourceReference.setResource(null);
+						replaceResourceReference(newId.toVersionless(), resourceReference, theTransactionDetails);
 					}
 				}
 			} else if (nextId.getValue().startsWith("urn:")) {
@@ -1724,9 +1722,15 @@ public abstract class BaseTransactionProcessor {
 					DaoMethodOutcome outcome = theIdToPersistedOutcome.get(nextId);
 
 					if (outcome != null && !outcome.isNop() && !Boolean.TRUE.equals(outcome.getCreated())) {
-						addRollbackReferenceRestore(theTransactionDetails, resourceReference);
-						resourceReference.setReference(nextId.getValue());
-						resourceReference.setResource(null);
+						replaceResourceReference(nextId, resourceReference, theTransactionDetails);
+					}
+
+					// if referenced resource is not in transaction but exists in the DB, resolving its version
+					IResourcePersistentId persistedReferenceId = resourceVersionMap.getResourcePersistentId(nextId);
+					if (outcome == null && persistedReferenceId != null && persistedReferenceId.getVersion() != null) {
+						IIdType newReferenceId = nextId.withVersion(
+								persistedReferenceId.getVersion().toString());
+						replaceResourceReference(newReferenceId, resourceReference, theTransactionDetails);
 					}
 				}
 			}
@@ -1741,16 +1745,18 @@ public abstract class BaseTransactionProcessor {
 				continue; // No substitution on the resource ID itself!
 			}
 			String nextUriString = nextRef.getValueAsString();
-			if (theIdSubstitutions.containsSource(nextUriString)) {
-				IIdType newId = theIdSubstitutions.getForSource(nextUriString);
-				ourLog.debug(" * Replacing resource ref {} with {}", nextUriString, newId);
+			if (isNotBlank(nextUriString)) {
+				if (theIdSubstitutions.containsSource(nextUriString)) {
+					IIdType newId = theIdSubstitutions.getForSource(nextUriString);
+					ourLog.debug(" * Replacing resource ref {} with {}", nextUriString, newId);
 
-				String existingValue = nextRef.getValueAsString();
-				theTransactionDetails.addRollbackUndoAction(() -> nextRef.setValueAsString(existingValue));
+					String existingValue = nextRef.getValueAsString();
+					theTransactionDetails.addRollbackUndoAction(() -> nextRef.setValueAsString(existingValue));
 
-				nextRef.setValueAsString(newId.toVersionless().getValue());
-			} else {
-				ourLog.debug(" * Reference [{}] does not exist in bundle", nextUriString);
+					nextRef.setValueAsString(newId.toVersionless().getValue());
+				} else {
+					ourLog.debug(" * Reference [{}] does not exist in bundle", nextUriString);
+				}
 			}
 		}
 
@@ -1802,16 +1808,20 @@ public abstract class BaseTransactionProcessor {
 
 			theDaoMethodOutcome.setId(newId);
 
-			IIdType target = theIdSubstitutions.getForSource(newId);
-			if (target != null) {
-				target.setValue(newId.getValue());
-			}
+			theIdSubstitutions.updateTargets(newId);
 
 			if (theDaoMethodOutcome.getOperationOutcome() != null) {
 				IBase responseEntry = entriesToProcess.getResponseBundleEntryWithVersionlessComparison(newId);
 				myVersionAdapter.setResponseOutcome(responseEntry, theDaoMethodOutcome.getOperationOutcome());
 			}
 		}
+	}
+
+	private void replaceResourceReference(
+			IIdType theReferenceId, IBaseReference theResourceReference, TransactionDetails theTransactionDetails) {
+		addRollbackReferenceRestore(theTransactionDetails, theResourceReference);
+		theResourceReference.setReference(theReferenceId.getValue());
+		theResourceReference.setResource(null);
 	}
 
 	private void addRollbackReferenceRestore(
@@ -1836,7 +1846,7 @@ public abstract class BaseTransactionProcessor {
 				.filter(t -> t.getEntity().getDeleted() == null)
 				.filter(t -> t.getResource() != null)
 				.forEach(t -> resourceToIndexedParams.put(
-						t.getResource(), new ResourceIndexedSearchParams((ResourceTable) t.getEntity())));
+						t.getResource(), ResourceIndexedSearchParams.withLists((ResourceTable) t.getEntity())));
 
 		for (Map.Entry<String, Class<? extends IBaseResource>> nextEntry : conditionalRequestUrls.entrySet()) {
 			String matchUrl = nextEntry.getKey();
@@ -2245,8 +2255,7 @@ public abstract class BaseTransactionProcessor {
 	public static String performIdSubstitutionsInMatchUrl(IdSubstitutionMap theIdSubstitutions, String theMatchUrl) {
 		String matchUrl = theMatchUrl;
 		if (isNotBlank(matchUrl) && !theIdSubstitutions.isEmpty()) {
-
-			int startIdx = matchUrl.indexOf('?');
+			int startIdx = 0;
 			while (startIdx != -1) {
 
 				int endIdx = matchUrl.indexOf('&', startIdx + 1);

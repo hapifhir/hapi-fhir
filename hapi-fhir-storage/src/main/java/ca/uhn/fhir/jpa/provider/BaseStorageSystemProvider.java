@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,6 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.springframework.beans.factory.annotation.Required;
 
 public abstract class BaseStorageSystemProvider<T, MT> extends BaseJpaProvider {
 	protected IFhirSystemDao<T, MT> myDao;
@@ -74,7 +73,6 @@ public abstract class BaseStorageSystemProvider<T, MT> extends BaseJpaProvider {
 		return myDao;
 	}
 
-	@Required
 	public void setDao(IFhirSystemDao<T, MT> theDao) {
 		myDao = theDao;
 	}

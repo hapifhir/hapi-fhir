@@ -1,7 +1,6 @@
 package ca.uhn.fhir.rest.server.interceptor;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.api.BundleInclusionRule;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -16,61 +15,79 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.ResponseDetails;
-import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
+import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
-import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.test.utilities.HttpClientExtension;
+import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.ArgumentCaptor;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 public class ServerActionInterceptorTest {
 
-	private static CloseableHttpClient ourClient;
-	private static FhirContext ourCtx = FhirContext.forDstu2();
-	private static int ourPort;
-	private static Server ourServer;
-	private static IServerInterceptor ourInterceptor;
-	private static IGenericClient ourFhirClient;
+	private static final FhirContext ourCtx = FhirContext.forDstu2Cached();
+	private IServerInterceptor myInterceptor;
+
+	@RegisterExtension
+	public static final RestfulServerExtension ourServer  = new RestfulServerExtension(ourCtx)
+		.setDefaultResponseEncoding(EncodingEnum.XML)
+		.registerInterceptor(new ResponseHighlighterInterceptor())
+		.registerProvider(new DummyPatientResourceProvider())
+		.registerProvider(new DummyObservationResourceProvider())
+		.registerProvider(new PlainProvider())
+		.withPagingProvider(new FifoMemoryPagingProvider(100))
+		.setDefaultPrettyPrint(false);
+
+	@RegisterExtension
+	public static final HttpClientExtension ourClient = new HttpClientExtension();
+
+	@BeforeEach
+	public void before() {
+		myInterceptor = mock(InterceptorAdapter.class);
+		ourServer.registerInterceptor(myInterceptor);
+
+		when(myInterceptor.incomingRequestPreProcessed(any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
+		when(myInterceptor.incomingRequestPostProcessed(any(RequestDetails.class), any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
+		when(myInterceptor.outgoingResponse(any(RequestDetails.class), any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
+		when(myInterceptor.outgoingResponse(any(RequestDetails.class), any(IBaseResource.class), any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
+		when(myInterceptor.outgoingResponse(any(RequestDetails.class), any(ResponseDetails.class), any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
+	}
+
+	@AfterEach
+	public void after() {
+		ourServer.unregisterInterceptor(myInterceptor);
+	}
 
 	@Test
 	public void testRead() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/123");
 		CloseableHttpResponse status = ourClient.execute(httpGet);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
 
 		ArgumentCaptor<RequestDetails> detailsCapt = ArgumentCaptor.forClass(RequestDetails.class);
-		verify(ourInterceptor).incomingRequestPreHandled(eq(RestOperationTypeEnum.READ), detailsCapt.capture());
+		verify(myInterceptor).incomingRequestPreHandled(eq(RestOperationTypeEnum.READ), detailsCapt.capture());
 
 		RequestDetails details = detailsCapt.getValue();
 		assertEquals("Patient/123", details.getId().getValue());
@@ -78,14 +95,14 @@ public class ServerActionInterceptorTest {
 
 	@Test
 	public void testVRead() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123/_history/456");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/123/_history/456");
 		CloseableHttpResponse status = ourClient.execute(httpGet);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
 
 		ArgumentCaptor<RequestDetails> detailsCapt = ArgumentCaptor.forClass(RequestDetails.class);
-		verify(ourInterceptor).incomingRequestPreHandled(eq(RestOperationTypeEnum.VREAD), detailsCapt.capture());
+		verify(myInterceptor).incomingRequestPreHandled(eq(RestOperationTypeEnum.VREAD), detailsCapt.capture());
 
 		RequestDetails details = detailsCapt.getValue();
 		assertEquals("Patient/123/_history/456", details.getId().getValue());
@@ -95,10 +112,10 @@ public class ServerActionInterceptorTest {
 	public void testCreate() throws Exception {
 		Patient patient = new Patient();
 		patient.addName().addFamily("FAMILY");
-		ourFhirClient.create().resource(patient).execute();
+		ourServer.getFhirClient().create().resource(patient).execute();
 
 		ArgumentCaptor<RequestDetails> detailsCapt = ArgumentCaptor.forClass(RequestDetails.class);
-		verify(ourInterceptor).incomingRequestPreHandled(eq(RestOperationTypeEnum.CREATE), detailsCapt.capture());
+		verify(myInterceptor).incomingRequestPreHandled(eq(RestOperationTypeEnum.CREATE), detailsCapt.capture());
 
 		RequestDetails details = detailsCapt.getValue();
 		assertEquals("Patient", details.getResourceName());
@@ -110,10 +127,10 @@ public class ServerActionInterceptorTest {
 	public void testCreateWhereMethodHasNoResourceParam() throws Exception {
 		Observation observation = new Observation();
 		observation.getCode().setText("OBSCODE");
-		ourFhirClient.create().resource(observation).execute();
+		ourServer.getFhirClient().create().resource(observation).execute();
 
 		ArgumentCaptor<RequestDetails> detailsCapt = ArgumentCaptor.forClass(RequestDetails.class);
-		verify(ourInterceptor).incomingRequestPreHandled(eq(RestOperationTypeEnum.CREATE), detailsCapt.capture());
+		verify(myInterceptor).incomingRequestPreHandled(eq(RestOperationTypeEnum.CREATE), detailsCapt.capture());
 
 		RequestDetails details = detailsCapt.getValue();
 		assertEquals("Observation", details.getResourceName());
@@ -126,10 +143,10 @@ public class ServerActionInterceptorTest {
 		Patient patient = new Patient();
 		patient.addName().addFamily("FAMILY");
 		patient.setId("Patient/123");
-		ourFhirClient.update().resource(patient).execute();
+		ourServer.getFhirClient().update().resource(patient).execute();
 
 		ArgumentCaptor<RequestDetails> detailsCapt = ArgumentCaptor.forClass(RequestDetails.class);
-		verify(ourInterceptor).incomingRequestPreHandled(eq(RestOperationTypeEnum.UPDATE), detailsCapt.capture());
+		verify(myInterceptor).incomingRequestPreHandled(eq(RestOperationTypeEnum.UPDATE), detailsCapt.capture());
 
 		RequestDetails details = detailsCapt.getValue();
 		assertEquals("Patient", details.getResourceName());
@@ -141,91 +158,48 @@ public class ServerActionInterceptorTest {
 
 	@Test
 	public void testHistorySystem() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/_history");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/_history");
 		CloseableHttpResponse status = ourClient.execute(httpGet);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
 
 		ArgumentCaptor<RequestDetails> detailsCapt = ArgumentCaptor.forClass(RequestDetails.class);
-		verify(ourInterceptor).incomingRequestPreHandled(eq(RestOperationTypeEnum.HISTORY_SYSTEM), detailsCapt.capture());
+		verify(myInterceptor).incomingRequestPreHandled(eq(RestOperationTypeEnum.HISTORY_SYSTEM), detailsCapt.capture());
 	}
 
 	@Test
 	public void testHistoryType() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/_history");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/_history");
 		CloseableHttpResponse status = ourClient.execute(httpGet);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
 
 		ArgumentCaptor<RequestDetails> detailsCapt = ArgumentCaptor.forClass(RequestDetails.class);
-		verify(ourInterceptor).incomingRequestPreHandled(eq(RestOperationTypeEnum.HISTORY_TYPE), detailsCapt.capture());
+		verify(myInterceptor).incomingRequestPreHandled(eq(RestOperationTypeEnum.HISTORY_TYPE), detailsCapt.capture());
 		assertEquals("Patient", detailsCapt.getValue().getResourceName());
 	}
 
 	@Test
 	public void testHistoryInstance() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123/_history");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/123/_history");
 		CloseableHttpResponse status = ourClient.execute(httpGet);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
 
 		ArgumentCaptor<RequestDetails> detailsCapt = ArgumentCaptor.forClass(RequestDetails.class);
-		verify(ourInterceptor).incomingRequestPreHandled(eq(RestOperationTypeEnum.HISTORY_INSTANCE), detailsCapt.capture());
+		verify(myInterceptor).incomingRequestPreHandled(eq(RestOperationTypeEnum.HISTORY_INSTANCE), detailsCapt.capture());
 		assertEquals("Patient", detailsCapt.getValue().getResourceName());
 		assertEquals("Patient/123", detailsCapt.getValue().getId().getValue());
 	}
 
-	@BeforeEach
-	public void before() {
-		reset(ourInterceptor);
-
-		when(ourInterceptor.incomingRequestPreProcessed(any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
-		when(ourInterceptor.incomingRequestPostProcessed(any(RequestDetails.class), any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
-		when(ourInterceptor.outgoingResponse(any(RequestDetails.class), any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
-		when(ourInterceptor.outgoingResponse(any(RequestDetails.class), any(IBaseResource.class), any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
-		when(ourInterceptor.outgoingResponse(any(RequestDetails.class), any(ResponseDetails.class), any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
-	}
-
 	@AfterAll
 	public static void afterClassClearContext() throws Exception {
-		JettyUtil.closeServer(ourServer);
 		TestUtil.randomizeLocaleAndTimezone();
 	}
 
-	@BeforeAll
-	public static void beforeClass() throws Exception {
-		ourServer = new Server(0);
-
-		ServletHandler proxyHandler = new ServletHandler();
-		RestfulServer servlet = new RestfulServer(ourCtx);
-		servlet.registerInterceptor(new ResponseHighlighterInterceptor());
-		servlet.setResourceProviders(new DummyPatientResourceProvider(), new DummyObservationResourceProvider());
-		servlet.setPlainProviders(new PlainProvider());
-		servlet.setBundleInclusionRule(BundleInclusionRule.BASED_ON_RESOURCE_PRESENCE);
-		servlet.setDefaultResponseEncoding(EncodingEnum.XML);
-
-		ServletHolder servletHolder = new ServletHolder(servlet);
-		proxyHandler.addServletWithMapping(servletHolder, "/*");
-		ourServer.setHandler(proxyHandler);
-		JettyUtil.startServer(ourServer);
-		ourPort = JettyUtil.getPortForStartedServer(ourServer);
-
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-		HttpClientBuilder builder = HttpClientBuilder.create();
-		builder.setConnectionManager(connectionManager);
-		ourClient = builder.build();
-
-		ourInterceptor = mock(InterceptorAdapter.class);
-		servlet.registerInterceptor(ourInterceptor);
-
-		ourCtx.getRestfulClientFactory().setSocketTimeout(240 * 1000);
-		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
-		ourFhirClient = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort);
-
-	}
 
 	public static class PlainProvider {
 

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,9 @@ package ca.uhn.fhir.context;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseReference;
@@ -45,6 +47,7 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 	private Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> myDatatypeToElementDefinition;
 	private String myReferenceSuffix;
 	private List<Class<? extends IBaseResource>> myResourceTypes;
+	private List<Class<? extends IBase>> mySpecializationChoiceTypes = Collections.emptyList();
 
 	/**
 	 * Constructor
@@ -70,8 +73,13 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 		super(theField, theChildAnnotation, theDescriptionAnnotation, theElementName);
 	}
 
-	void setChoiceTypes(List<Class<? extends IBase>> theChoiceTypes) {
+	void setChoiceTypes(
+			@Nonnull List<Class<? extends IBase>> theChoiceTypes,
+			@Nonnull List<Class<? extends IBase>> theSpecializationChoiceTypes) {
+		Validate.notNull(theChoiceTypes, "theChoiceTypes must not be null");
+		Validate.notNull(theSpecializationChoiceTypes, "theSpecializationChoiceTypes must not be null");
 		myChoiceTypes = Collections.unmodifiableList(theChoiceTypes);
+		mySpecializationChoiceTypes = Collections.unmodifiableList(theSpecializationChoiceTypes);
 	}
 
 	public List<Class<? extends IBase>> getChoices() {
@@ -96,14 +104,28 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 	void sealAndInitialize(
 			FhirContext theContext,
 			Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
-		myNameToChildDefinition = new HashMap<String, BaseRuntimeElementDefinition<?>>();
-		myDatatypeToElementName = new HashMap<Class<? extends IBase>, String>();
-		myDatatypeToElementDefinition = new HashMap<Class<? extends IBase>, BaseRuntimeElementDefinition<?>>();
-		myResourceTypes = new ArrayList<Class<? extends IBaseResource>>();
+		myNameToChildDefinition = new HashMap<>();
+		myDatatypeToElementName = new HashMap<>();
+		myDatatypeToElementDefinition = new HashMap<>();
+		myResourceTypes = new ArrayList<>();
 
 		myReferenceSuffix = "Reference";
 
-		for (Class<? extends IBase> next : myChoiceTypes) {
+		sealAndInitializeChoiceTypes(theContext, theClassToElementDefinitions, mySpecializationChoiceTypes, true);
+		sealAndInitializeChoiceTypes(theContext, theClassToElementDefinitions, myChoiceTypes, false);
+
+		myNameToChildDefinition = Collections.unmodifiableMap(myNameToChildDefinition);
+		myDatatypeToElementName = Collections.unmodifiableMap(myDatatypeToElementName);
+		myDatatypeToElementDefinition = Collections.unmodifiableMap(myDatatypeToElementDefinition);
+		myResourceTypes = Collections.unmodifiableList(myResourceTypes);
+	}
+
+	private void sealAndInitializeChoiceTypes(
+			FhirContext theContext,
+			Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions,
+			List<Class<? extends IBase>> choiceTypes,
+			boolean theIsSpecilization) {
+		for (Class<? extends IBase> next : choiceTypes) {
 
 			String elementName = null;
 			BaseRuntimeElementDefinition<?> nextDef;
@@ -112,8 +134,10 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 				elementName = getElementName() + StringUtils.capitalize(next.getSimpleName());
 				nextDef = findResourceReferenceDefinition(theClassToElementDefinitions);
 
-				myNameToChildDefinition.put(getElementName() + "Reference", nextDef);
-				myNameToChildDefinition.put(getElementName() + "Resource", nextDef);
+				if (!theIsSpecilization) {
+					myNameToChildDefinition.put(getElementName() + "Reference", nextDef);
+					myNameToChildDefinition.put(getElementName() + "Resource", nextDef);
+				}
 
 				myResourceTypes.add((Class<? extends IBaseResource>) next);
 
@@ -147,19 +171,21 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 			}
 
 			// I don't see how elementName could be null here, but eclipse complains..
-			if (elementName != null) {
-				if (myNameToChildDefinition.containsKey(elementName) == false || !nonPreferred) {
+			if (!theIsSpecilization) {
+				if (elementName != null) {
+					if (!myNameToChildDefinition.containsKey(elementName) || !nonPreferred) {
+						myNameToChildDefinition.put(elementName, nextDef);
+					}
+				}
+
+				/*
+				 * If this is a resource reference, the element name is "fooNameReference"
+				 */
+				if (IBaseResource.class.isAssignableFrom(next) || IBaseReference.class.isAssignableFrom(next)) {
+					next = theContext.getVersion().getResourceReferenceType();
+					elementName = getElementName() + myReferenceSuffix;
 					myNameToChildDefinition.put(elementName, nextDef);
 				}
-			}
-
-			/*
-			 * If this is a resource reference, the element name is "fooNameReference"
-			 */
-			if (IBaseResource.class.isAssignableFrom(next) || IBaseReference.class.isAssignableFrom(next)) {
-				next = theContext.getVersion().getResourceReferenceType();
-				elementName = getElementName() + myReferenceSuffix;
-				myNameToChildDefinition.put(elementName, nextDef);
 			}
 
 			myDatatypeToElementDefinition.put(next, nextDef);
@@ -175,11 +201,6 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 				myDatatypeToElementName.put(next, elementName);
 			}
 		}
-
-		myNameToChildDefinition = Collections.unmodifiableMap(myNameToChildDefinition);
-		myDatatypeToElementName = Collections.unmodifiableMap(myDatatypeToElementName);
-		myDatatypeToElementDefinition = Collections.unmodifiableMap(myDatatypeToElementDefinition);
-		myResourceTypes = Collections.unmodifiableList(myResourceTypes);
 	}
 
 	public List<Class<? extends IBaseResource>> getResourceTypes() {
@@ -188,8 +209,7 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 
 	@Override
 	public String getChildNameByDatatype(Class<? extends IBase> theDatatype) {
-		String retVal = myDatatypeToElementName.get(theDatatype);
-		return retVal;
+		return myDatatypeToElementName.get(theDatatype);
 	}
 
 	@Override

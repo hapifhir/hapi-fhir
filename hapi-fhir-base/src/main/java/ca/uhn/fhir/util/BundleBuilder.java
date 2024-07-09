@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,8 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.primitive.IdDt;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
@@ -36,8 +38,6 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import java.util.Date;
 import java.util.Objects;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 /**
  * This class can be used to build a Bundle resource to be used as a FHIR transaction. Convenience methods provide
@@ -196,11 +196,7 @@ public class BundleBuilder {
 	public UpdateBuilder addTransactionUpdateEntry(IBaseResource theResource) {
 		Validate.notNull(theResource, "theResource must not be null");
 
-		IIdType id = theResource.getIdElement();
-		if (id.hasIdPart() && !id.hasResourceType()) {
-			String resourceType = myContext.getResourceType(theResource);
-			id = id.withResourceType(resourceType);
-		}
+		IIdType id = getIdTypeForUpdate(theResource);
 
 		String requestUrl = id.toUnqualifiedVersionless().getValue();
 		String fullUrl = id.getValue();
@@ -225,11 +221,27 @@ public class BundleBuilder {
 		myEntryRequestUrlChild.getMutator().setValue(request, url);
 
 		// Bundle.entry.request.method
-		IPrimitiveType<?> method = (IPrimitiveType<?>)
-				myEntryRequestMethodDef.newInstance(myEntryRequestMethodChild.getInstanceConstructorArguments());
-		method.setValueAsString(theHttpVerb);
-		myEntryRequestMethodChild.getMutator().setValue(request, method);
+		addRequestMethod(request, theHttpVerb);
 		return url;
+	}
+
+	/**
+	 * Adds an entry containing an update (UPDATE) request without the body of the resource.
+	 * Also sets the Bundle.type value to "transaction" if it is not already set.
+	 *
+	 * @param theResource The resource to update.
+	 */
+	public void addTransactionUpdateIdOnlyEntry(IBaseResource theResource) {
+		setBundleField("type", "transaction");
+
+		Validate.notNull(theResource, "theResource must not be null");
+
+		IIdType id = getIdTypeForUpdate(theResource);
+		String requestUrl = id.toUnqualifiedVersionless().getValue();
+		String fullUrl = id.getValue();
+		String httpMethod = "PUT";
+
+		addIdOnlyEntry(requestUrl, httpMethod, fullUrl);
 	}
 
 	/**
@@ -239,26 +251,65 @@ public class BundleBuilder {
 	 * @param theResource The resource to create
 	 */
 	public CreateBuilder addTransactionCreateEntry(IBaseResource theResource) {
+		return addTransactionCreateEntry(theResource, null);
+	}
+
+	/**
+	 * Adds an entry containing an create (POST) request.
+	 * Also sets the Bundle.type value to "transaction" if it is not already set.
+	 *
+	 * @param theResource The resource to create
+	 * @param theFullUrl The fullUrl to attach to the entry.  If null, will default to the resource ID.
+	 */
+	public CreateBuilder addTransactionCreateEntry(IBaseResource theResource, @Nullable String theFullUrl) {
 		setBundleField("type", "transaction");
 
-		IBase request =
-				addEntryAndReturnRequest(theResource, theResource.getIdElement().getValue());
+		IBase request = addEntryAndReturnRequest(
+				theResource,
+				theFullUrl != null ? theFullUrl : theResource.getIdElement().getValue());
 
 		String resourceType = myContext.getResourceType(theResource);
 
 		// Bundle.entry.request.url
-		IPrimitiveType<?> url =
-				(IPrimitiveType<?>) myContext.getElementDefinition("uri").newInstance();
-		url.setValueAsString(resourceType);
-		myEntryRequestUrlChild.getMutator().setValue(request, url);
+		addRequestUrl(request, resourceType);
 
-		// Bundle.entry.request.url
-		IPrimitiveType<?> method = (IPrimitiveType<?>)
-				myEntryRequestMethodDef.newInstance(myEntryRequestMethodChild.getInstanceConstructorArguments());
-		method.setValueAsString("POST");
-		myEntryRequestMethodChild.getMutator().setValue(request, method);
+		// Bundle.entry.request.method
+		addRequestMethod(request, "POST");
 
 		return new CreateBuilder(request);
+	}
+
+	/**
+	 * Adds an entry containing a create (POST) request without the body of the resource.
+	 * Also sets the Bundle.type value to "transaction" if it is not already set.
+	 *
+	 * @param theResource The resource to create
+	 */
+	public void addTransactionCreateEntryIdOnly(IBaseResource theResource) {
+		setBundleField("type", "transaction");
+
+		String requestUrl = myContext.getResourceType(theResource);
+		String fullUrl = theResource.getIdElement().getValue();
+		String httpMethod = "POST";
+
+		addIdOnlyEntry(requestUrl, httpMethod, fullUrl);
+	}
+
+	private void addIdOnlyEntry(String theRequestUrl, String theHttpMethod, String theFullUrl) {
+		IBase entry = addEntry();
+
+		// Bundle.entry.request
+		IBase request = myEntryRequestDef.newInstance();
+		myEntryRequestChild.getMutator().setValue(entry, request);
+
+		// Bundle.entry.request.url
+		addRequestUrl(request, theRequestUrl);
+
+		// Bundle.entry.request.method
+		addRequestMethod(request, theHttpMethod);
+
+		// Bundle.entry.fullUrl
+		addFullUrl(entry, theFullUrl);
 	}
 
 	/**
@@ -341,18 +392,42 @@ public class BundleBuilder {
 		IBase request = addEntryAndReturnRequest();
 
 		// Bundle.entry.request.url
-		IPrimitiveType<?> url =
-				(IPrimitiveType<?>) myContext.getElementDefinition("uri").newInstance();
-		url.setValueAsString(theDeleteUrl);
-		myEntryRequestUrlChild.getMutator().setValue(request, url);
+		addRequestUrl(request, theDeleteUrl);
 
 		// Bundle.entry.request.method
-		IPrimitiveType<?> method = (IPrimitiveType<?>)
-				myEntryRequestMethodDef.newInstance(myEntryRequestMethodChild.getInstanceConstructorArguments());
-		method.setValueAsString("DELETE");
-		myEntryRequestMethodChild.getMutator().setValue(request, method);
+		addRequestMethod(request, "DELETE");
 
 		return new DeleteBuilder();
+	}
+
+	private IIdType getIdTypeForUpdate(IBaseResource theResource) {
+		IIdType id = theResource.getIdElement();
+		if (id.hasIdPart() && !id.hasResourceType()) {
+			String resourceType = myContext.getResourceType(theResource);
+			id = id.withResourceType(resourceType);
+		}
+		return id;
+	}
+
+	private void addFullUrl(IBase theEntry, String theFullUrl) {
+		IPrimitiveType<?> fullUrl =
+				(IPrimitiveType<?>) myContext.getElementDefinition("uri").newInstance();
+		fullUrl.setValueAsString(theFullUrl);
+		myEntryFullUrlChild.getMutator().setValue(theEntry, fullUrl);
+	}
+
+	private void addRequestUrl(IBase request, String theRequestUrl) {
+		IPrimitiveType<?> url =
+				(IPrimitiveType<?>) myContext.getElementDefinition("uri").newInstance();
+		url.setValueAsString(theRequestUrl);
+		myEntryRequestUrlChild.getMutator().setValue(request, url);
+	}
+
+	private void addRequestMethod(IBase theRequest, String theMethod) {
+		IPrimitiveType<?> method = (IPrimitiveType<?>)
+				myEntryRequestMethodDef.newInstance(myEntryRequestMethodChild.getInstanceConstructorArguments());
+		method.setValueAsString(theMethod);
+		myEntryRequestMethodChild.getMutator().setValue(theRequest, method);
 	}
 
 	/**
@@ -360,7 +435,7 @@ public class BundleBuilder {
 	 */
 	public void addCollectionEntry(IBaseResource theResource) {
 		setType("collection");
-		addEntryAndReturnRequest(theResource, theResource.getIdElement().getValue());
+		addEntryAndReturnRequest(theResource);
 	}
 
 	/**
@@ -368,7 +443,7 @@ public class BundleBuilder {
 	 */
 	public void addDocumentEntry(IBaseResource theResource) {
 		setType("document");
-		addEntryAndReturnRequest(theResource, theResource.getIdElement().getValue());
+		addEntryAndReturnRequest(theResource);
 	}
 
 	/**
@@ -400,16 +475,21 @@ public class BundleBuilder {
 		return (IBaseBackboneElement) searchInstance;
 	}
 
+	private IBase addEntryAndReturnRequest(IBaseResource theResource) {
+		IIdType id = theResource.getIdElement();
+		if (id.hasVersionIdPart()) {
+			id = id.toVersionless();
+		}
+		return addEntryAndReturnRequest(theResource, id.getValue());
+	}
+
 	private IBase addEntryAndReturnRequest(IBaseResource theResource, String theFullUrl) {
 		Validate.notNull(theResource, "theResource must not be null");
 
 		IBase entry = addEntry();
 
 		// Bundle.entry.fullUrl
-		IPrimitiveType<?> fullUrl =
-				(IPrimitiveType<?>) myContext.getElementDefinition("uri").newInstance();
-		fullUrl.setValueAsString(theFullUrl);
-		myEntryFullUrlChild.getMutator().setValue(entry, fullUrl);
+		addFullUrl(entry, theFullUrl);
 
 		// Bundle.entry.resource
 		myEntryResourceChild.getMutator().setValue(entry, theResource);
@@ -544,6 +624,16 @@ public class BundleBuilder {
 	public void setTimestamp(@Nonnull IPrimitiveType<Date> theTimestamp) {
 		FhirTerser terser = myContext.newTerser();
 		terser.setElement(myBundle, "Bundle.timestamp", theTimestamp.getValueAsString());
+	}
+
+	/**
+	 * Adds a profile URL to <code>Bundle.meta.profile</code>
+	 *
+	 * @since 7.4.0
+	 */
+	public void addProfile(String theProfile) {
+		FhirTerser terser = myContext.newTerser();
+		terser.addElement(myBundle, "Bundle.meta.profile", theProfile);
 	}
 
 	public class DeleteBuilder extends BaseOperationBuilder {

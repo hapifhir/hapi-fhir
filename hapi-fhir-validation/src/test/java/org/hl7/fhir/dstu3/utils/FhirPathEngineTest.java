@@ -2,17 +2,18 @@ package org.hl7.fhir.dstu3.utils;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
+import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.dstu3.model.Base;
 import org.hl7.fhir.dstu3.model.BooleanType;
-import org.hl7.fhir.dstu3.model.ContactPoint;
 import org.hl7.fhir.dstu3.model.DateTimeType;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.Specimen;
 import org.hl7.fhir.dstu3.model.StringType;
+import org.hl7.fhir.dstu3.fhirpath.FHIRPathEngine;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -20,11 +21,12 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class FhirPathEngineTest {
+public class FhirPathEngineTest extends BaseValidationTestWithInlineMocks {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirPathEngineTest.class);
 	private static FhirContext ourCtx = FhirContext.forDstu3();
@@ -36,7 +38,7 @@ public class FhirPathEngineTest {
 		obs.setValue(new StringType("FOO"));
 
 		List<Base> value = ourEngine.evaluate(obs, "Observation.value.as(String)");
-		assertEquals(1, value.size());
+		assertThat(value).hasSize(1);
 		assertEquals("FOO", ((StringType) value.get(0)).getValue());
 	}
 
@@ -53,7 +55,7 @@ public class FhirPathEngineTest {
 		o.setSpecimen(new Reference("#FOO"));
 
 		List<Base> value = ourEngine.evaluate(o, "Observation.specimen.resolve().receivedTime");
-		assertEquals(1, value.size());
+		assertThat(value).hasSize(1);
 		assertEquals("2011-01-01", ((DateTimeType) value.get(0)).getValueAsString());
 	}
 

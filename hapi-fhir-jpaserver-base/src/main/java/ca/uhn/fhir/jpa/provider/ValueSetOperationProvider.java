@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.jpa.provider;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport.CodeValidationResult;
@@ -40,6 +39,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.ParametersUtil;
 import com.google.common.annotations.VisibleForTesting;
+import jakarta.servlet.http.HttpServletRequest;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -54,17 +54,12 @@ import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.util.Optional;
 import java.util.function.Supplier;
-import javax.servlet.http.HttpServletRequest;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class ValueSetOperationProvider extends BaseJpaProvider {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ValueSetOperationProvider.class);
-	public static final String SOURCE_DETAILS = "sourceDetails";
-	public static final String RESULT = "result";
-	public static final String MESSAGE = "message";
-	public static final String DISPLAY = "display";
 
 	@Autowired
 	protected IValidationSupport myValidationSupport;
@@ -149,10 +144,10 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 			idempotent = true,
 			typeName = "ValueSet",
 			returnParameters = {
-				@OperationParam(name = RESULT, typeName = "boolean", min = 1),
-				@OperationParam(name = MESSAGE, typeName = "string"),
-				@OperationParam(name = DISPLAY, typeName = "string"),
-				@OperationParam(name = SOURCE_DETAILS, typeName = "string")
+				@OperationParam(name = CodeValidationResult.RESULT, typeName = "boolean", min = 1),
+				@OperationParam(name = CodeValidationResult.MESSAGE, typeName = "string"),
+				@OperationParam(name = CodeValidationResult.DISPLAY, typeName = "string"),
+				@OperationParam(name = CodeValidationResult.SOURCE_DETAILS, typeName = "string")
 			})
 	public IBaseParameters validateCode(
 			HttpServletRequest theServletRequest,
@@ -164,7 +159,8 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 			@OperationParam(name = "system", min = 0, max = 1, typeName = "uri") IPrimitiveType<String> theSystem,
 			@OperationParam(name = "systemVersion", min = 0, max = 1, typeName = "string")
 					IPrimitiveType<String> theSystemVersion,
-			@OperationParam(name = DISPLAY, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theDisplay,
+			@OperationParam(name = CodeValidationResult.DISPLAY, min = 0, max = 1, typeName = "string")
+					IPrimitiveType<String> theDisplay,
 			@OperationParam(name = "coding", min = 0, max = 1, typeName = "Coding") IBaseCoding theCoding,
 			@OperationParam(name = "codeableConcept", min = 0, max = 1, typeName = "CodeableConcept")
 					ICompositeType theCodeableConcept,
@@ -228,7 +224,7 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 						theCodeableConcept,
 						theRequestDetails);
 			}
-			return toValidateCodeResult(getContext(), result);
+			return result.toParameters(getContext());
 		} finally {
 			endRequest(theServletRequest);
 		}
@@ -256,7 +252,9 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 			name = ProviderConstants.OPERATION_INVALIDATE_EXPANSION,
 			idempotent = false,
 			typeName = "ValueSet",
-			returnParameters = {@OperationParam(name = MESSAGE, typeName = "string", min = 1, max = 1)})
+			returnParameters = {
+				@OperationParam(name = CodeValidationResult.MESSAGE, typeName = "string", min = 1, max = 1)
+			})
 	public IBaseParameters invalidateValueSetExpansion(
 			@IdParam IIdType theValueSetId, RequestDetails theRequestDetails, HttpServletRequest theServletRequest) {
 		startRequest(theServletRequest);
@@ -265,7 +263,7 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 			String outcome = myTermReadSvc.invalidatePreCalculatedExpansion(theValueSetId, theRequestDetails);
 
 			IBaseParameters retVal = ParametersUtil.newInstance(getContext());
-			ParametersUtil.addParameterToParametersString(getContext(), retVal, MESSAGE, outcome);
+			ParametersUtil.addParameterToParametersString(getContext(), retVal, CodeValidationResult.MESSAGE, outcome);
 			return retVal;
 
 		} finally {
@@ -325,23 +323,5 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 		}
 
 		return options;
-	}
-
-	public static IBaseParameters toValidateCodeResult(FhirContext theContext, CodeValidationResult theResult) {
-		IBaseParameters retVal = ParametersUtil.newInstance(theContext);
-
-		ParametersUtil.addParameterToParametersBoolean(theContext, retVal, RESULT, theResult.isOk());
-		if (isNotBlank(theResult.getMessage())) {
-			ParametersUtil.addParameterToParametersString(theContext, retVal, MESSAGE, theResult.getMessage());
-		}
-		if (isNotBlank(theResult.getDisplay())) {
-			ParametersUtil.addParameterToParametersString(theContext, retVal, DISPLAY, theResult.getDisplay());
-		}
-		if (isNotBlank(theResult.getSourceDetails())) {
-			ParametersUtil.addParameterToParametersString(
-					theContext, retVal, SOURCE_DETAILS, theResult.getSourceDetails());
-		}
-
-		return retVal;
 	}
 }

@@ -7,7 +7,7 @@ jobs:
    -  job: setup
       displayName: setup-and-cache-build
       timeoutInMinutes: 60
-      container: maven:3.8-openjdk-17
+      container: maven:3.9-eclipse-temurin-21-jammy
       pool:
          vmImage: ubuntu-latest
       steps:
@@ -23,11 +23,11 @@ jobs:
                script: mkdir -p $(MAVEN_CACHE_FOLDER); pwd; ls -al $(MAVEN_CACHE_FOLDER)
          -  task: Maven@3
             env:
-               JAVA_HOME_11_X64: /usr/java/openjdk-17
+               JAVA_HOME_11_X64: /opt/java/openjdk
             inputs:
                goals: 'install'
                # These are Maven CLI options (and show up in the build logs) - "-nsu"=Don't update snapshots. We can remove this when Maven OSS is more healthy
-               options: '-P CI,FASTINSTALL -Dmaven.test.skip -e -B -Dmaven.repo.local=$(MAVEN_CACHE_FOLDER) -Dmaven.javadoc.skip=true -Dmaven.wagon.http.pool=false -Dhttp.keepAlive=false -Dstyle.color=always -Djansi.force=true'
+               options: '-P CI,CHECKSTYLE -Dmaven.test.skip -e -B -Dmaven.repo.local=$(MAVEN_CACHE_FOLDER) -Dmaven.javadoc.skip=true -Dmaven.wagon.http.pool=false -Dhttp.keepAlive=false -Dstyle.color=always -Djansi.force=true'
                # These are JVM options (and don't show up in the build logs)
                mavenOptions: '-Xmx1024m $(MAVEN_OPTS) -Dorg.slf4j.simpleLogger.showDateTime=true -Dorg.slf4j.simpleLogger.dateTimeFormat=HH:mm:ss,SSS -Duser.timezone=America/Toronto'
                jdkVersionOption: 1.11
@@ -36,7 +36,7 @@ jobs:
          timeoutInMinutes: 60
          displayName: ${{ p.name }}
          dependsOn: [ 'setup' ]
-         container: maven:3.8-openjdk-17
+         container: maven:3.9-eclipse-temurin-21-jammy
          pool:
             vmImage: ubuntu-latest
          steps:
@@ -55,12 +55,12 @@ jobs:
                   path: $(MAVEN_CACHE_FOLDER)
             -  task: Maven@3
                env:
-                  JAVA_HOME_11_X64: /usr/java/openjdk-17
+                  JAVA_HOME_11_X64: /opt/java/openjdk
                inputs:
                   mavenPomFile: '$(System.DefaultWorkingDirectory)/pom.xml'
                   goals: 'clean verify jacoco:report -pl ${{ p.module }}'
                   # These are Maven CLI options (and show up in the build logs) - "-nsu"=Don't update snapshots. We can remove this when Maven OSS is more healthy
-                  options: '-P JACOCO,CI,ERRORPRONE -e -B -Dmaven.repo.local=$(MAVEN_CACHE_FOLDER) -Dmaven.wagon.http.pool=false -Dhttp.keepAlive=false -Dstyle.color=always -Djansi.force=true'
+                  options: '-P JACOCO,CI -e -B -Dmaven.repo.local=$(MAVEN_CACHE_FOLDER) -Dmaven.wagon.http.pool=false -Dhttp.keepAlive=false -Dstyle.color=always -Djansi.force=true'
                   # These are JVM options (and don't show up in the build logs)
                   mavenOptions: '-Xmx1024m $(MAVEN_OPTS) -Dorg.slf4j.simpleLogger.showDateTime=true -Dorg.slf4j.simpleLogger.dateTimeFormat=HH:mm:ss,SSS -Duser.timezone=America/Toronto'
                   jdkVersionOption: 1.11
@@ -90,7 +90,7 @@ jobs:
          vmImage: ubuntu-latest
       timeoutInMinutes: 60
       displayName: generate_test_reports
-      container: maven:3.8-openjdk-17
+      container: maven:3.9-eclipse-temurin-21-jammy
       dependsOn:
          -  ${{ each p in parameters.modules }}:
             - ${{ p.name }}
@@ -119,7 +119,7 @@ jobs:
                   targetFolder: '$(System.DefaultWorkingDirectory)/${{ p.module }}/target/'
          -  task: Maven@3
             env:
-               JAVA_HOME_11_X64: /usr/java/openjdk-17
+               JAVA_HOME_11_X64: /opt/java/openjdk
             inputs:
                mavenPomFile: '$(System.DefaultWorkingDirectory)/pom.xml'
                goals: 'jacoco:report-aggregate'

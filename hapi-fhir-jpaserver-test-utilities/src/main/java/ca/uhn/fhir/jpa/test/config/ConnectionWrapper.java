@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server Test Utilities
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,13 +38,15 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Executor;
 
+@SuppressWarnings("SqlSourceToSinkFlow")
 public class ConnectionWrapper implements Connection {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ConnectionWrapper.class);
 
-	private Connection myWrap;
+	private final Connection myWrap;
 
 	public ConnectionWrapper(Connection theConnection) {
+		ourLog.trace("new connection - {}", theConnection);
 		myWrap = theConnection;
 	}
 
@@ -60,11 +62,13 @@ public class ConnectionWrapper implements Connection {
 
 	@Override
 	public void close() throws SQLException {
+		ourLog.trace("close connection - {}", myWrap);
 		myWrap.close();
 	}
 
 	@Override
 	public void commit() throws SQLException {
+		if (ourLog.isTraceEnabled()) { ourLog.trace("commit: {}", myWrap.hashCode()); }
 		myWrap.commit();
 	}
 

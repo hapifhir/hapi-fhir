@@ -1,6 +1,8 @@
 
 package ca.uhn.fhir.jpa.subscription.resthook;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
@@ -15,8 +17,8 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import com.google.common.collect.Lists;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
+import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -34,8 +36,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test the rest-hook subscriptions
@@ -196,8 +197,8 @@ public class RestHookTestWithInterceptorRegisteredToStorageSettingsR4Test extend
 		waitForSize(5, ourUpdatedObservations);
 
 		assertFalse(subscription1.getId().equals(subscription2.getId()));
-		assertFalse(observation1.getId().isEmpty());
-		assertFalse(observation2.getId().isEmpty());
+		assertThat(observation1.getId()).isNotEmpty();
+		assertThat(observation2.getId()).isNotEmpty();
 	}
 
 	// TODO KHS this test has been failing intermittently
@@ -272,8 +273,8 @@ public class RestHookTestWithInterceptorRegisteredToStorageSettingsR4Test extend
 		ourLog.info("Have observations: {}", toUnqualifiedVersionlessIds(ourUpdatedObservations));
 
 		assertFalse(subscription1.getId().equals(subscription2.getId()));
-		assertFalse(observation1.getId().isEmpty());
-		assertFalse(observation2.getId().isEmpty());
+		assertThat(observation1.getId()).isNotEmpty();
+		assertThat(observation2.getId()).isNotEmpty();
 	}
 
 	@BeforeAll

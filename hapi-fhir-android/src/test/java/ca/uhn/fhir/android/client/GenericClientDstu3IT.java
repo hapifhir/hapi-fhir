@@ -37,9 +37,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
-import static org.hamcrest.CoreMatchers.startsWith;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -126,7 +124,7 @@ public class GenericClientDstu3IT {
 		Request request = capt.getAllValues().get(0);
 		ourLog.info(request.headers().toString());
 
-		assertThat(request.url().toString(), startsWith("http://example.com/fhir/Binary"));
+		assertThat(request.url().toString()).startsWith("http://example.com/fhir/Binary");
 		validateUserAgent(capt);
 
 		assertEquals(Constants.CT_FHIR_JSON_NEW + ";charset=utf-8", request.body().contentType().toString().toLowerCase().replace(" ", ""));
@@ -201,7 +199,7 @@ public class GenericClientDstu3IT {
 
 		assertEquals(Constants.CT_FHIR_JSON_NEW + ";charset=utf-8", request.body().contentType().toString().toLowerCase().replace(" ", ""));
 		assertEquals(Constants.HEADER_ACCEPT_VALUE_JSON_NON_LEGACY, request.header("Accept"));
-		assertArrayEquals(new byte[] { 0, 1, 2, 3, 4 }, ourCtx.newJsonParser().parseResource(Binary.class, extractBodyAsString(capt)).getContent());
+		assertThat(ourCtx.newJsonParser().parseResource(Binary.class, extractBodyAsString(capt)).getContent()).containsExactly(new byte[]{0, 1, 2, 3, 4});
 
 	}
 
@@ -209,7 +207,7 @@ public class GenericClientDstu3IT {
 	@Test
 	public void testClientFailures() {
 		ResponseBody body = mock(ResponseBody.class);
-		when(body.source()).thenThrow(IllegalStateException.class, RuntimeException.class);
+		when(body.byteStream()).thenThrow(IllegalStateException.class, RuntimeException.class);
 		
 		myHttpResponse = new Response.Builder()
 				.request(myRequest)
@@ -270,7 +268,7 @@ public class GenericClientDstu3IT {
 		assertNull(outcome.getOperationOutcome());
 		assertNotNull(outcome.getResource());
 
-		assertEquals(1, capt.getAllValues().size());
+		assertThat(capt.getAllValues()).hasSize(1);
 		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">FINAL VALUE</div>", ((Patient) outcome.getResource()).getText().getDivAsString());
 		assertEquals("http://example.com/fhir/Patient?_format=json", capt.getAllValues().get(0).url().toString());
 	}

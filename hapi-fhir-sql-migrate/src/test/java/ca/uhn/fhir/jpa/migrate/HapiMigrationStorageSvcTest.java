@@ -15,8 +15,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -32,7 +31,7 @@ class HapiMigrationStorageSvcTest extends BaseMigrationTest {
 	void diff_oneNew_returnsNew() {
 		createTasks();
 		Set<MigrationVersion> appliedMigrations = ourHapiMigrationStorageSvc.fetchAppliedMigrationVersions();
-		assertThat(appliedMigrations, hasSize(6));
+		assertThat(appliedMigrations).hasSize(6);
 
 		MigrationTaskList taskList = buildTasks();
 		String version = "20210722.4";
@@ -129,7 +128,7 @@ class HapiMigrationStorageSvcTest extends BaseMigrationTest {
 		return taskList;
 	}
 
-	public Builder forVersion(MigrationTaskList theTaskList) {
+	public static Builder forVersion(MigrationTaskList theTaskList) {
 		BaseMigrationTasks.IAcceptsTasks sink = theTask -> {
 			theTask.validate();
 			theTaskList.add(theTask);

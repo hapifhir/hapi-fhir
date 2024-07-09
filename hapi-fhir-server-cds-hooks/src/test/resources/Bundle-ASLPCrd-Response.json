@@ -1,0 +1,388 @@
+{
+	"resourceType": "Bundle",
+	"id": "ASLPCrd",
+	"type": "collection",
+	"entry": [
+		{
+			"resource": {
+				"resourceType": "RequestGroup",
+				"id": "ASLPCrd",
+				"instantiatesCanonical": [
+					"http://example.org/sdh/dtr/aslp/PlanDefinition/ASLPCrd|1.0.0"
+				],
+				"status": "draft",
+				"intent": "proposal",
+				"subject": {
+					"reference": "positive"
+				},
+				"action": [
+					{
+						"extension": [
+							{
+								"url": null,
+								"valueString": "warning"
+							}
+						],
+						"title": "Patient requires prior authoriztion for a sleep study",
+						"description": "Patient requires prior authorization due to: history of diabetes. Please open your DTR application and complete Questionniare",
+						"resource": {
+							"reference": "Task/ASLPCrd"
+						}
+					}
+				]
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Task",
+				"id": "ASLPCrd",
+				"meta": {
+					"versionId": "1"
+				},
+				"extension": [
+					{
+						"url": "http://hl7.org/fhir/aphl/StructureDefinition/condition",
+						"valueExpression": {
+							"language": "text/cql-identifier",
+							"expression": "Is Prior Auth Required"
+						}
+					},
+					{
+						"url": "http://hl7.org/fhir/aphl/StructureDefinition/input",
+						"valueDataRequirement": {
+							"type": "ServiceRequest",
+							"profile": [
+								"http://example.org/sdh/dtr/aslp/StructureDefinition/aslp-sleep-study-order"
+							]
+						}
+					}
+				],
+				"basedOn": [
+					{
+						"reference": "RequestGroup/ASLPCrd",
+						"type": "RequestGroup"
+					}
+				],
+				"status": "draft",
+				"intent": "proposal",
+				"code": {
+					"coding": [
+						{
+							"system": "http://hl7.org/fhir/uv/cpg/CodeSystem/cpg-activity-type",
+							"code": "collect-information",
+							"display": "Collect Information"
+						}
+					]
+				},
+				"for": {
+					"reference": "positive"
+				},
+				"input": [
+					{
+						"type": {
+							"coding": [
+								{
+									"code": "collect-information"
+								}
+							]
+						},
+						"valueCanonical": "http://example.org/sdh/dtr/aslp/Questionnaire/ASLPA1"
+					},
+					{
+						"type": {
+							"coding": [
+								{
+									"code": "collect-information"
+								}
+							]
+						},
+						"valueCanonical": "http://example.org/sdh/dtr/aslp/Questionnaire/ASLPA2"
+					}
+				]
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Questionnaire",
+				"id": "ASLPCrd",
+				"item": [
+					{
+						"linkId": "1",
+						"definition": "http://example.org/sdh/dtr/aslp/StructureDefinition/aslp-sleep-study-order",
+						"text": "ASLP Sleep Study Order",
+						"type": "group",
+						"item": [
+							{
+								"linkId": "1.1",
+								"definition": "http://example.org/sdh/dtr/aslp/StructureDefinition/aslp-sleep-study-order#ServiceRequest.code",
+								"text": "Sleep Study",
+								"type": "choice",
+								"required": true,
+								"answerOption": [
+									{
+										"valueCoding": {
+											"system": "http://example.org/sdh/dtr/aslp/CodeSystem/aslp-codes",
+											"code": "ASLP.A1.DE2",
+											"display": "Home sleep apnea testing (HSAT)"
+										}
+									},
+									{
+										"valueCoding": {
+											"system": "http://example.org/sdh/dtr/aslp/CodeSystem/aslp-codes",
+											"code": "ASLP.A1.DE3",
+											"display": "Peripheral artery tonometry (PAT)"
+										}
+									},
+									{
+										"valueCoding": {
+											"system": "http://example.org/sdh/dtr/aslp/CodeSystem/aslp-codes",
+											"code": "ASLP.A1.DE4",
+											"display": "Actigraphy"
+										}
+									},
+									{
+										"valueCoding": {
+											"system": "http://example.org/sdh/dtr/aslp/CodeSystem/aslp-codes",
+											"code": "ASLP.A1.DE5",
+											"display": "Prescreening devices or procedures"
+										}
+									},
+									{
+										"valueCoding": {
+											"system": "http://example.org/sdh/dtr/aslp/CodeSystem/aslp-codes",
+											"code": "ASLP.A1.DE6",
+											"display": "Acoustic pharyngometry"
+										}
+									},
+									{
+										"valueCoding": {
+											"system": "http://example.org/sdh/dtr/aslp/CodeSystem/aslp-codes",
+											"code": "ASLP.A1.DE7",
+											"display": "Digital therapeutics"
+										}
+									},
+									{
+										"valueCoding": {
+											"system": "http://example.org/sdh/dtr/aslp/CodeSystem/aslp-codes",
+											"code": "ASLP.A1.DE8",
+											"display": "Home oximetry monitoring"
+										}
+									},
+									{
+										"valueCoding": {
+											"system": "http://example.org/sdh/dtr/aslp/CodeSystem/aslp-codes",
+											"code": "ASLP.A1.DE9",
+											"display": "Polysomnogram"
+										}
+									},
+									{
+										"valueCoding": {
+											"system": "http://example.org/sdh/dtr/aslp/CodeSystem/aslp-codes",
+											"code": "ASLP.A1.DE10",
+											"display": "Facility-based positive airway pressure (PAP) titration study"
+										}
+									},
+									{
+										"valueCoding": {
+											"system": "http://example.org/sdh/dtr/aslp/CodeSystem/aslp-codes",
+											"code": "ASLP.A1.DE11",
+											"display": "Facility-based, daytime, abbreviated, cardiorespiratory sleep studies (PAP NAP testing)"
+										}
+									},
+									{
+										"valueCoding": {
+											"system": "http://example.org/sdh/dtr/aslp/CodeSystem/aslp-codes",
+											"code": "ASLP.A1.DE12",
+											"display": "Multiple sleep latency test (MSLT)"
+										}
+									},
+									{
+										"valueCoding": {
+											"system": "http://example.org/sdh/dtr/aslp/CodeSystem/aslp-codes",
+											"code": "ASLP.A1.DE13",
+											"display": "Maintenance of wakefulness test (MWT)"
+										}
+									},
+									{
+										"valueCoding": {
+											"system": "http://example.org/sdh/dtr/aslp/CodeSystem/aslp-codes",
+											"code": "ASLP.A1.DE14",
+											"display": "Artificial intelligence (AI)"
+										}
+									}
+								],
+								"initial": [
+									{
+										"valueCoding": {
+											"system": "http://example.org/sdh/dtr/aslp/CodeSystem/aslp-codes",
+											"code": "ASLP.A1.DE2",
+											"display": "Home sleep apnea testing (HSAT)"
+										}
+									},
+									{
+										"valueCoding": {
+											"system": "http://example.org/sdh/dtr/aslp/CodeSystem/aslp-codes",
+											"code": "ASLP.A1.DE14",
+											"display": "Artificial intelligence (AI)"
+										}
+									}
+								]
+							},
+							{
+								"linkId": "1.2",
+								"definition": "http://example.org/sdh/dtr/aslp/StructureDefinition/aslp-sleep-study-order#ServiceRequest.occurrence[x]",
+								"text": "Sleep Study Date",
+								"type": "dateTime",
+								"required": true,
+								"initial": [
+									{
+										"valueDateTime": "2023-04-10T08:00:00.000Z"
+									},
+									{
+										"valueDateTime": "2023-04-15T08:00:00.000Z"
+									}
+								]
+							}
+						]
+					},
+					{
+						"linkId": "2",
+						"definition": "http://example.org/sdh/dtr/aslp/StructureDefinition/aslp-diagnosis-of-obstructive-sleep-apnea",
+						"text": "ASLP Diagnosis of Obstructive Sleep Apnea",
+						"type": "group",
+						"item": [
+							{
+								"linkId": "2.1",
+								"definition": "http://example.org/sdh/dtr/aslp/StructureDefinition/aslp-diagnosis-of-obstructive-sleep-apnea#Condition.code",
+								"text": "Diagnosis of Obstructive Sleep Apnea",
+								"type": "choice",
+								"required": true,
+								"answerOption": [
+									{
+										"valueCoding": {
+											"system": "http://example.org/sdh/dtr/aslp/CodeSystem/aslp-codes",
+											"code": "ASLP.A1.DE17",
+											"display": "Obstructive sleep apnea (OSA)"
+										}
+									}
+								]
+							}
+						]
+					},
+					{
+						"linkId": "3",
+						"definition": "http://example.org/sdh/dtr/aslp/StructureDefinition/aslp-history-of-hypertension",
+						"text": "ASLP History of Hypertension",
+						"type": "group",
+						"item": [
+							{
+								"linkId": "3.1",
+								"text": "An error occurred during item creation: null",
+								"type": "display"
+							},
+							{
+								"linkId": "3.2",
+								"definition": "http://example.org/sdh/dtr/aslp/StructureDefinition/aslp-history-of-hypertension#Observation.value[x]",
+								"text": "History of Hypertension",
+								"type": "boolean",
+								"required": true
+							}
+						]
+					},
+					{
+						"linkId": "4",
+						"definition": "http://example.org/sdh/dtr/aslp/StructureDefinition/aslp-history-of-diabetes",
+						"text": "ASLP History of Diabetes",
+						"type": "group",
+						"item": [
+							{
+								"linkId": "4.1",
+								"text": "An error occurred during item creation: null",
+								"type": "display"
+							},
+							{
+								"linkId": "4.2",
+								"definition": "http://example.org/sdh/dtr/aslp/StructureDefinition/aslp-history-of-diabetes#Observation.value[x]",
+								"text": "History of Diabetes",
+								"type": "boolean",
+								"required": true
+							}
+						]
+					},
+					{
+						"linkId": "5",
+						"definition": "http://example.org/sdh/dtr/aslp/StructureDefinition/aslp-neck-circumference",
+						"text": "ASLP Neck Circumference",
+						"type": "group",
+						"item": [
+							{
+								"linkId": "5.1",
+								"text": "An error occurred during item creation: null",
+								"type": "display"
+							},
+							{
+								"linkId": "5.2",
+								"text": "An error occurred during item creation: Unknown QuestionnaireItemType code 'Quantity'",
+								"type": "display"
+							}
+						]
+					},
+					{
+						"linkId": "6",
+						"definition": "http://example.org/sdh/dtr/aslp/StructureDefinition/aslp-height",
+						"text": "ASLP Height",
+						"type": "group",
+						"item": [
+							{
+								"linkId": "6.1",
+								"text": "An error occurred during item creation: null",
+								"type": "display"
+							},
+							{
+								"linkId": "6.2",
+								"text": "An error occurred during item creation: Unknown QuestionnaireItemType code 'Quantity'",
+								"type": "display"
+							}
+						]
+					},
+					{
+						"linkId": "7",
+						"definition": "http://example.org/sdh/dtr/aslp/StructureDefinition/aslp-weight",
+						"text": "ASLP Weight",
+						"type": "group",
+						"item": [
+							{
+								"linkId": "7.1",
+								"text": "An error occurred during item creation: null",
+								"type": "display"
+							},
+							{
+								"linkId": "7.2",
+								"text": "An error occurred during item creation: Unknown QuestionnaireItemType code 'Quantity'",
+								"type": "display"
+							}
+						]
+					},
+					{
+						"linkId": "8",
+						"definition": "http://example.org/sdh/dtr/aslp/StructureDefinition/aslp-bmi",
+						"text": "ASLP BMI",
+						"type": "group",
+						"item": [
+							{
+								"linkId": "8.1",
+								"text": "An error occurred during item creation: null",
+								"type": "display"
+							},
+							{
+								"linkId": "8.2",
+								"text": "An error occurred during item creation: Unknown QuestionnaireItemType code 'Quantity'",
+								"type": "display"
+							}
+						]
+					}
+				]
+			}
+		}
+	]
+}

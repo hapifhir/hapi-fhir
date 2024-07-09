@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.term.config;
 
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.term.TermConceptDaoSvc;
 import ca.uhn.fhir.jpa.term.TermDeferredStorageSvcImpl;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemDeleteJobSvc;
@@ -41,7 +42,7 @@ public class TermCodeSystemConfig {
 	}
 
 	@Bean
-	public TermConceptDaoSvc termConceptDaoSvc() {
-		return new TermConceptDaoSvc();
+	public TermConceptDaoSvc termConceptDaoSvc(JpaStorageSettings theJpaStorageSettings) {
+		return new TermConceptDaoSvc().setSupportLegacyLob(theJpaStorageSettings.isWriteToLegacyLobColumns());
 	}
 }

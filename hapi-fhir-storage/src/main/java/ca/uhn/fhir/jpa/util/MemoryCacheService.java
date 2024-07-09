@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import ca.uhn.fhir.jpa.api.model.TranslationQuery;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.sl.cache.Cache;
 import ca.uhn.fhir.sl.cache.CacheFactory;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.springframework.transaction.support.TransactionSynchronization;
@@ -33,7 +34,6 @@ import java.util.Collection;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.function.Function;
-import javax.annotation.Nonnull;
 
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -77,6 +77,7 @@ public class MemoryCacheService {
 				case HISTORY_COUNT:
 				case TAG_DEFINITION:
 				case RESOURCE_CONDITIONAL_CREATE_VERSION:
+				case FHIRPATH_EXPRESSION:
 				default:
 					timeoutSeconds = SECONDS.convert(1, MINUTES);
 					maximumSize = 10000;
@@ -193,6 +194,7 @@ public class MemoryCacheService {
 		TAG_DEFINITION(TagDefinitionCacheKey.class),
 		RESOURCE_LOOKUP(String.class),
 		FORCED_ID_TO_PID(String.class),
+		FHIRPATH_EXPRESSION(String.class),
 		/**
 		 * Key type: {@literal Long}
 		 * Value type: {@literal Optional<String>}

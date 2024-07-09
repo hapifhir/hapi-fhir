@@ -2,7 +2,7 @@
  * #%L
  * hapi-fhir-storage-batch2-jobs
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.util.StopWatch;
+import jakarta.annotation.Nonnull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +49,6 @@ import org.springframework.transaction.support.TransactionCallback;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import javax.annotation.Nonnull;
 
 public class ReindexStep implements IJobStepWorker<ReindexJobParameters, ResourceIdListWorkChunkJson, VoidModel> {
 
@@ -103,7 +103,7 @@ public class ReindexStep implements IJobStepWorker<ReindexJobParameters, Resourc
 		myHapiTransactionService
 				.withRequest(requestDetails)
 				.withTransactionDetails(transactionDetails)
-				.withRequestPartitionId(theJobParameters.getRequestPartitionId())
+				.withRequestPartitionId(data.getRequestPartitionId())
 				.execute(reindexJob);
 
 		return new RunOutcome(data.size());

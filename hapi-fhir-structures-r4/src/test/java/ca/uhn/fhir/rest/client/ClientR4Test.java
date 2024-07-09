@@ -57,8 +57,6 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicStatusLine;
-import org.hamcrest.core.StringContains;
-import org.hamcrest.core.StringEndsWith;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
@@ -90,11 +88,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.either;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.not;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -202,7 +196,7 @@ public class ClientR4Test {
 
 		assertEquals(HttpPost.class, capt.getValue().getClass());
 		HttpPost post = (HttpPost) capt.getValue();
-		assertThat(IOUtils.toString(post.getEntity().getContent(), Charsets.UTF_8), StringContains.containsString("{\"resourceType\":\"Patient\""));
+		assertThat(IOUtils.toString(post.getEntity().getContent(), Charsets.UTF_8)).contains("{\"resourceType\":\"Patient\"");
 		assertEquals("http://example.com/fhir/Patient/100/_history/200", response.getId().getValue());
 		assertEquals(EncodingEnum.JSON.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(0).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
 		assertEquals("200", response.getId().getVersionIdPart());
@@ -222,9 +216,8 @@ public class ClientR4Test {
 
 		try {
 			ourCtx.newRestfulClient(ITestClient.class, "http://foo").createPatient(patient);
-			fail();
-		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), StringContains.containsString("foobar"));
+			fail();		} catch (InvalidRequestException e) {
+			assertThat(e.getMessage()).contains("foobar");
 		}
 	}
 
@@ -265,12 +258,12 @@ public class ClientR4Test {
 		HttpPost post = (HttpPost) capt.getValue();
 		String requestBody = IOUtils.toString(post.getEntity().getContent(), Charsets.UTF_8);
 		ourLog.info("Request body: {}", requestBody);
-		assertThat(requestBody, StringContains.containsString("{\"resourceType\":\"Patient\""));
+		assertThat(requestBody).contains("{\"resourceType\":\"Patient\"");
 		Bundle requestBundle = ourCtx.newJsonParser().parseResource(Bundle.class, requestBody);
 
 		assertEquals("123", requestBundle.getEntry().get(0).getResource().getIdElement().getIdPart());
-		assertThat(requestBody, containsString("\"id\":\"123\""));
-		assertThat(requestBody, not(containsString("\"id\":\"ABC\"")));
+		assertThat(requestBody).contains("\"id\":\"123\"");
+		assertThat(requestBody).doesNotContain("\"id\":\"ABC\"");
 	}
 
 	/**
@@ -295,7 +288,7 @@ public class ClientR4Test {
 
 		assertEquals(HttpPost.class, capt.getValue().getClass());
 		HttpPost post = (HttpPost) capt.getValue();
-		assertThat(IOUtils.toString(post.getEntity().getContent(), Charsets.UTF_8), StringContains.containsString("\"Patient"));
+		assertThat(IOUtils.toString(post.getEntity().getContent(), Charsets.UTF_8)).contains("\"Patient");
 		assertEquals("http://example.com/fhir/Patient/100/_history/200", response.getId().getValue());
 		assertEquals("200", response.getId().getVersionIdPart());
 	}
@@ -337,8 +330,7 @@ public class ClientR4Test {
 
 		try {
 			ourCtx.newRestfulClient(ITestClientWithCreateWithInvalidParameterType.class, "http://foo");
-			fail();
-		} catch (ConfigurationException e) {
+			fail();		} catch (ConfigurationException e) {
 			assertEquals(Msg.code(1435) + "Method 'createPatient' is annotated with @ResourceParam but has a type that is not an implementation of org.hl7.fhir.instance.model.api.IBaseResource", e.getMessage());
 		}
 	}
@@ -359,8 +351,7 @@ public class ClientR4Test {
 
 		try {
 			ourCtx.newRestfulClient(ITestClientWithCreateWithValidAndInvalidParameterType.class, "http://foo");
-			fail();
-		} catch (ConfigurationException e) {
+			fail();		} catch (ConfigurationException e) {
 			assertEquals(Msg.code(1438) + "Parameter #2/2 of method 'createPatient' on type 'ca.uhn.fhir.rest.client.ClientR4Test.ITestClientWithCreateWithValidAndInvalidParameterType' has no recognized FHIR interface parameter annotations. Don't know how to handle this parameter", e.getMessage());
 		}
 	}
@@ -440,7 +431,7 @@ public class ClientR4Test {
 
 		assertEquals("http://foo/Patient/111/_history", capt.getValue().getURI().toString());
 
-		assertEquals(2, response.getEntry().size());
+		assertThat(response.getEntry()).hasSize(2);
 
 		verifyHistoryBundleWithTwoResults(response);
 	}
@@ -478,7 +469,7 @@ public class ClientR4Test {
 
 		assertEquals("http://foo/_history", capt.getValue().getURI().toString());
 
-		assertEquals(2, response.getEntry().size());
+		assertThat(response.getEntry()).hasSize(2);
 
 		verifyHistoryBundleWithTwoResults(response);
 	}
@@ -506,14 +497,14 @@ public class ClientR4Test {
 		expectedDateString = expectedDateString.replace(":", "%3A").replace("+", "%2B");
 
 		client.getHistoryPatientInstance(new IdType("111"), new InstantType("2012-01-02T12:01:02"), new IntegerType(12));
-		assertThat(capt.getAllValues().get(0).getURI().toString(), containsString("http://foo/Patient/111/_history?"));
-		assertThat(capt.getAllValues().get(0).getURI().toString(), containsString("_since=" + expectedDateString.replaceAll("\\..*", "")));
-		assertThat(capt.getAllValues().get(0).getURI().toString(), containsString("_count=12"));
+		assertThat(capt.getAllValues().get(0).getURI().toString()).contains("http://foo/Patient/111/_history?");
+		assertThat(capt.getAllValues().get(0).getURI().toString()).contains("_since=" + expectedDateString.replaceAll("\\..*", ""));
+		assertThat(capt.getAllValues().get(0).getURI().toString()).contains("_count=12");
 
 		client.getHistoryPatientInstance(new IdType("111"), new InstantType("2012-01-02T12:01:02").getValue(), new IntegerType(12).getValue());
-		assertThat(capt.getAllValues().get(1).getURI().toString(), containsString("http://foo/Patient/111/_history?"));
-		assertThat(capt.getAllValues().get(1).getURI().toString(), containsString("_since=" + expectedDateString));
-		assertThat(capt.getAllValues().get(1).getURI().toString(), containsString("_count=12"));
+		assertThat(capt.getAllValues().get(1).getURI().toString()).contains("http://foo/Patient/111/_history?");
+		assertThat(capt.getAllValues().get(1).getURI().toString()).contains("_since=" + expectedDateString);
+		assertThat(capt.getAllValues().get(1).getURI().toString()).contains("_count=12");
 
 		client.getHistoryPatientInstance(new IdType("111"), null, new IntegerType(12));
 		assertEquals("http://foo/Patient/111/_history?_count=12", capt.getAllValues().get(2).getURI().toString());
@@ -541,9 +532,8 @@ public class ClientR4Test {
 
 		try {
 			client.read(new IdType("8"));
-			fail();
-		} catch (UnsupportedOperationException e) {
-			assertThat(e.getMessage(), containsString("annotation"));
+			fail();		} catch (UnsupportedOperationException e) {
+			assertThat(e.getMessage()).contains("annotation");
 		}
 
 	}
@@ -585,7 +575,7 @@ public class ClientR4Test {
 
 		List<Coding> tags = response.getMeta().getTag();
 		assertNotNull(tags);
-		assertEquals(1, tags.size());
+		assertThat(tags).hasSize(1);
 		assertEquals("http://foo/tagdefinition.html", tags.get(0).getCode());
 		assertEquals("http://hl7.org/fhir/tag", tags.get(0).getSystem());
 		assertEquals("Some tag", tags.get(0).getDisplay());
@@ -607,10 +597,9 @@ public class ClientR4Test {
 		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
 		try {
 			client.getPatientById(new IdType("111"));
-			fail();
-		} catch (InternalErrorException e) {
-			assertThat(e.getMessage(), containsString("INTERNAL"));
-			assertThat(e.getResponseBody(), containsString("Internal Failure"));
+			fail();		} catch (InternalErrorException e) {
+			assertThat(e.getMessage()).contains("INTERNAL");
+			assertThat(e.getResponseBody()).contains("Internal Failure");
 		}
 
 	}
@@ -634,8 +623,7 @@ public class ClientR4Test {
 		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
 		try {
 			client.getPatientById(new IdType("111"));
-			fail();
-		} catch (ResourceNotFoundException e) {
+			fail();		} catch (ResourceNotFoundException e) {
 			// good
 		}
 
@@ -711,9 +699,8 @@ public class ClientR4Test {
 
 		try {
 			client.getPatientByCompartmentAndDob(new IdType(""), new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, "2011-01-02"));
-			fail();
-		} catch (InvalidRequestException e) {
-			assertThat(e.toString(), containsString("null or empty for compartment"));
+			fail();		} catch (InvalidRequestException e) {
+			assertThat(e.toString()).contains("null or empty for compartment");
 		}
 
 	}
@@ -978,7 +965,7 @@ public class ClientR4Test {
 		StringOrListParam orListParam4 = new StringOrListParam().addOr(new StringParam("E|E", true));
 		client.findPatient(andListParam.addAnd(orListParam1).addAnd(orListParam2).addAnd(orListParam3).addAnd(orListParam4));
 
-		assertThat(capt.getValue().getURI().toString(), containsString("%3A"));
+		assertThat(capt.getValue().getURI().toString()).contains("%3A");
 		assertEquals("http://foo/Patient?param=NE\\,NE,NE\\,NE&param=NE\\\\NE&param:exact=E\\$E&param:exact=E\\|E", UrlUtil.unescape(capt.getValue().getURI().toString()));
 
 	}
@@ -1115,8 +1102,7 @@ public class ClientR4Test {
 		ITestClientWithUnannotatedMethod client = ourCtx.newRestfulClient(ITestClientWithUnannotatedMethod.class, "http://foo");
 		try {
 			client.getPatientWithAt(new InstantType("2010-10-01T01:02:03.0Z"));
-			fail();
-		} catch (UnsupportedOperationException e) {
+			fail();		} catch (UnsupportedOperationException e) {
 			assertEquals(Msg.code(1403) + "The method 'getPatientWithAt' in type ITestClientWithUnannotatedMethod has no handler. Did you forget to annotate it with a RESTful method annotation?", e.getMessage());
 		}
 
@@ -1212,7 +1198,9 @@ public class ClientR4Test {
 		idx++;
 
 		client.getPatientWithIncludes(Arrays.asList(SummaryEnum.COUNT, SummaryEnum.DATA));
-		assertThat(capt.getAllValues().get(idx).getURI().toString(), either(equalTo("http://foo/Patient?_summary=data&_summary=count")).or(equalTo("http://foo/Patient?_summary=count&_summary=data")));
+		assertThat(capt.getAllValues().get(idx).getURI().toString()).isIn(
+			 "http://foo/Patient?_summary=data&_summary=count",
+			 "http://foo/Patient?_summary=count&_summary=data");
 		idx++;
 
 		client.getPatientWithIncludes(new ArrayList<SummaryEnum>());
@@ -1238,8 +1226,8 @@ public class ClientR4Test {
 
 		assertEquals(HttpPut.class, capt.getValue().getClass());
 		HttpPut post = (HttpPut) capt.getValue();
-		assertThat(post.getURI().toASCIIString(), StringEndsWith.endsWith("/Patient/100"));
-		assertThat(IOUtils.toString(post.getEntity().getContent(), Charsets.UTF_8), StringContains.containsString("\"Patient"));
+		assertThat(post.getURI().toASCIIString()).endsWith("/Patient/100");
+		assertThat(IOUtils.toString(post.getEntity().getContent(), Charsets.UTF_8)).contains("\"Patient");
 		assertEquals("http://example.com/fhir/Patient/100/_history/200", response.getId().getValue());
 		assertEquals("200", response.getId().getVersionIdPart());
 		assertEquals(EncodingEnum.JSON.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(0).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
@@ -1286,8 +1274,7 @@ public class ClientR4Test {
 
 			ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
 			client.updatePatient(new IdType("Patient/100/_history/200"), patient);
-			fail();
-		} catch (ResourceVersionConflictException e) {
+			fail();		} catch (ResourceVersionConflictException e) {
 			assertEquals("HTTP 409 Conflict", e.getMessage());
 		}
 	}
@@ -1310,8 +1297,8 @@ public class ClientR4Test {
 
 		assertEquals(HttpPut.class, capt.getValue().getClass());
 		HttpPut post = (HttpPut) capt.getValue();
-		assertThat(post.getURI().toASCIIString(), StringEndsWith.endsWith("/Patient/100"));
-		assertThat(IOUtils.toString(post.getEntity().getContent(), Charsets.UTF_8), StringContains.containsString("\"Patient"));
+		assertThat(post.getURI().toASCIIString()).endsWith("/Patient/100");
+		assertThat(IOUtils.toString(post.getEntity().getContent(), Charsets.UTF_8)).contains("\"Patient");
 		assertEquals("http://example.com/fhir/Patient/100/_history/200", response.getId().getValue());
 		assertEquals("200", response.getId().getVersionIdPart());
 	}
@@ -1334,8 +1321,8 @@ public class ClientR4Test {
 
 		assertEquals(HttpPost.class, capt.getValue().getClass());
 		HttpPost post = (HttpPost) capt.getValue();
-		assertThat(post.getURI().toASCIIString(), StringEndsWith.endsWith("/Patient/$validate"));
-		assertThat(IOUtils.toString(post.getEntity().getContent(), Charsets.UTF_8), StringContains.containsString("\"Patient"));
+		assertThat(post.getURI().toASCIIString()).endsWith("/Patient/$validate");
+		assertThat(IOUtils.toString(post.getEntity().getContent(), Charsets.UTF_8)).contains("\"Patient");
 		assertNull(response.getOperationOutcome());
 		assertNull(response.getResource());
 	}
@@ -1355,8 +1342,7 @@ public class ClientR4Test {
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://testValidateServerBaseWithInvalidResponse");
 		try {
 			client.read().resource("Patient").withId("1").execute();
-			fail();
-		} catch (FhirClientConnectionException e) {
+			fail();		} catch (FhirClientConnectionException e) {
 			assertEquals(Msg.code(1357) + "Failed to retrieve the server metadata statement during client initialization. URL used was http://testValidateServerBaseWithInvalidResponse/metadata", e.getMessage());
 		}
 
@@ -1384,8 +1370,8 @@ public class ClientR4Test {
 
 		assertEquals(HttpPost.class, capt.getValue().getClass());
 		HttpPost post = (HttpPost) capt.getValue();
-		assertThat(post.getURI().toASCIIString(), StringEndsWith.endsWith("/Patient/$validate"));
-		assertThat(IOUtils.toString(post.getEntity().getContent(), Charsets.UTF_8), StringContains.containsString("\"Patient"));
+		assertThat(post.getURI().toASCIIString()).endsWith("/Patient/$validate");
+		assertThat(IOUtils.toString(post.getEntity().getContent(), Charsets.UTF_8)).contains("\"Patient");
 		assertNotNull(response.getOperationOutcome());
 		assertEquals("ALL GOOD", ((OperationOutcome) response.getOperationOutcome()).getIssueFirstRep().getDiagnostics());
 		assertNull(response.getResource());
@@ -1488,7 +1474,7 @@ public class ClientR4Test {
 	}
 
 	private void verifyHistoryBundleWithTwoResults(Bundle response) {
-		assertEquals(2, response.getEntry().size());
+		assertThat(response.getEntry()).hasSize(2);
 		// Older resource
 		{
 			BundleEntryComponent olderEntry = response.getEntry().get(0);

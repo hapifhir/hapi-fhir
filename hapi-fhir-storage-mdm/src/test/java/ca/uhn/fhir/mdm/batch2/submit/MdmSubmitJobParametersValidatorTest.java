@@ -13,10 +13,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -47,8 +45,8 @@ class MdmSubmitJobParametersValidatorTest {
 		MdmSubmitJobParameters parameters = new MdmSubmitJobParameters();
 		parameters.addUrl("Practitioner?name=foo");
 		List<String> errors = myValidator.validate(null, parameters);
-		assertThat(errors, hasSize(1));
-		assertThat(errors.get(0), is(equalTo("Resource type Practitioner is not supported by MDM. Check your MDM settings")));
+		assertThat(errors).hasSize(1);
+		assertEquals("Resource type Practitioner is not supported by MDM. Check your MDM settings", errors.get(0));
 	}
 
 	@Test
@@ -58,8 +56,8 @@ class MdmSubmitJobParametersValidatorTest {
 		MdmSubmitJobParameters parameters = new MdmSubmitJobParameters();
 		parameters.addUrl("Practitioner?death-date=foo");
 		List<String> errors = myValidator.validate(null, parameters);
-		assertThat(errors, hasSize(1));
-		assertThat(errors.get(0), is(equalTo("Invalid request detected: Can't find death-date!")));
+		assertThat(errors).hasSize(1);
+		assertEquals("Invalid request detected: Can't find death-date!", errors.get(0));
 	}
 
 }

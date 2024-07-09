@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - CDS Hooks
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@
 package ca.uhn.hapi.fhir.cdshooks.api.json;
 
 import ca.uhn.fhir.model.api.IModelJson;
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.Collections;
@@ -29,6 +30,8 @@ import java.util.Map;
 import java.util.Set;
 
 public class CdsServiceRequestContextJson extends BaseCdsServiceJson implements IModelJson {
+
+	@JsonAnyGetter
 	private Map<String, Object> myMap;
 
 	public String getString(String theKey) {

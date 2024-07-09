@@ -1,0 +1,4 @@
+---
+type: add
+issue: 5375
+title: "Add settings for CDS Services using CDS on FHIR.  Also removed the dependency on Spring Boot from the CR configs used by CDS Hooks."

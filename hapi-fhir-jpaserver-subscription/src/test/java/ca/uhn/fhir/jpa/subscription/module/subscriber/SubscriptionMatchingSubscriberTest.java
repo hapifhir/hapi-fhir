@@ -14,9 +14,11 @@ import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.module.standalone.BaseBlockingQueueSubscribableChannelDstu3Test;
+import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.messaging.BaseResourceModifiedMessage;
+import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
 import ca.uhn.fhir.util.HapiExtensions;
 import com.google.common.collect.Lists;
 import org.hl7.fhir.dstu3.model.BooleanType;
@@ -26,6 +28,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Answers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -33,9 +37,12 @@ import org.mockito.Mockito;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionCriteriaParser.TypeEnum.STARTYPE_EXPRESSION;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
@@ -57,7 +64,7 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 
 	@AfterEach
 	public void afterEach() {
-		myStorageSettings.setCrossPartitionSubscriptionEnabled(new JpaStorageSettings().isCrossPartitionSubscriptionEnabled());
+		mySubscriptionSettings.setCrossPartitionSubscriptionEnabled(new SubscriptionSettings().isCrossPartitionSubscriptionEnabled());
 	}
 
 	@Test
@@ -81,7 +88,7 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		mySubscriptionResourceMatched.awaitExpected();
 		ourObservationListener.awaitExpected();
 
-		assertEquals(1, ourContentTypes.size());
+		assertThat(ourContentTypes).hasSize(1);
 		assertEquals(Constants.CT_FHIR_JSON_NEW, ourContentTypes.get(0));
 	}
 
@@ -106,7 +113,7 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		mySubscriptionResourceMatched.awaitExpected();
 		ourObservationListener.awaitExpected();
 
-		assertEquals(1, ourContentTypes.size());
+		assertThat(ourContentTypes).hasSize(1);
 		assertEquals(Constants.CT_FHIR_XML_NEW, ourContentTypes.get(0));
 	}
 
@@ -126,7 +133,7 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		mySubscriptionResourceMatched.awaitExpected();
 		ourObservationListener.awaitExpected();
 
-		assertEquals(1, ourContentTypes.size());
+		assertThat(ourContentTypes).hasSize(1);
 		assertEquals(Constants.CT_FHIR_XML_NEW, ourContentTypes.get(0));
 	}
 
@@ -153,7 +160,7 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		ourObservationListener.clear();
 		mySubscriptionAfterDelivery.awaitExpected();
 
-		assertEquals(0, ourContentTypes.size());
+		assertThat(ourContentTypes).isEmpty();
 	}
 
 
@@ -181,7 +188,7 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		mySubscriptionResourceMatched.awaitExpected();
 		ourObservationListener.awaitExpected();
 
-		assertEquals(2, ourContentTypes.size());
+		assertThat(ourContentTypes).hasSize(2);
 		assertEquals(Constants.CT_FHIR_XML_NEW, ourContentTypes.get(0));
 	}
 
@@ -225,8 +232,10 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		ourObservationListener.awaitExpected();
 	}
 
-	@Test
-	public void testSubscriptionAndResourceOnDiffPartitionNotMatch() throws InterruptedException {
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	public void testSubscriptionAndResourceOnDiffPartitionNotMatch(boolean theIsCrossPartitionEnabled) throws InterruptedException {
+		mySubscriptionSettings.setCrossPartitionSubscriptionEnabled(theIsCrossPartitionEnabled);
 		myPartitionSettings.setPartitioningEnabled(true);
 		String payload = "application/fhir+json";
 
@@ -238,13 +247,18 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		mockSubscriptionRead(requestPartitionId, subscription);
 		sendSubscription(subscription, requestPartitionId, true);
 
-		mySubscriptionResourceNotMatched.setExpectedCount(1);
-		sendObservation(code, "SNOMED-CT", RequestPartitionId.fromPartitionId(0));
-		mySubscriptionResourceNotMatched.awaitExpected();
+		final ThrowsInterrupted throwsInterrupted = () -> sendObservation(code, "SNOMED-CT", RequestPartitionId.fromPartitionId(0));
+		if (theIsCrossPartitionEnabled) {
+			runWithinLatchLogicExpectSuccess(throwsInterrupted);
+		} else {
+			runWithLatchLogicExpectFailure(throwsInterrupted);
+		}
 	}
 
-	@Test
-	public void testSubscriptionAndResourceOnDiffPartitionNotMatchPart2() throws InterruptedException {
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	public void testSubscriptionAndResourceOnDiffPartitionNotMatchPart2(boolean theIsCrossPartitionEnabled) throws InterruptedException {
+		mySubscriptionSettings.setCrossPartitionSubscriptionEnabled(theIsCrossPartitionEnabled);
 		myPartitionSettings.setPartitioningEnabled(true);
 		String payload = "application/fhir+json";
 
@@ -256,13 +270,19 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		mockSubscriptionRead(requestPartitionId, subscription);
 		sendSubscription(subscription, requestPartitionId, true);
 
-		mySubscriptionResourceNotMatched.setExpectedCount(1);
-		sendObservation(code, "SNOMED-CT", RequestPartitionId.fromPartitionId(1));
-		mySubscriptionResourceNotMatched.awaitExpected();
+		final ThrowsInterrupted throwsInterrupted = () -> sendObservation(code, "SNOMED-CT", RequestPartitionId.fromPartitionId(1));
+
+		if (theIsCrossPartitionEnabled) {
+			runWithinLatchLogicExpectSuccess(throwsInterrupted);
+		} else {
+			runWithLatchLogicExpectFailure(throwsInterrupted);
+		}
 	}
 
-	@Test
-	public void testSubscriptionOnDefaultPartitionAndResourceOnDiffPartitionNotMatch() throws InterruptedException {
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	public void testSubscriptionOnDefaultPartitionAndResourceOnDiffPartitionNotMatch(boolean theIsCrossPartitionEnabled) throws InterruptedException {
+		mySubscriptionSettings.setCrossPartitionSubscriptionEnabled(theIsCrossPartitionEnabled);
 		myPartitionSettings.setPartitioningEnabled(true);
 		String payload = "application/fhir+json";
 
@@ -274,13 +294,19 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		mockSubscriptionRead(requestPartitionId, subscription);
 		sendSubscription(subscription, requestPartitionId, true);
 
-		mySubscriptionResourceNotMatched.setExpectedCount(1);
-		sendObservation(code, "SNOMED-CT", RequestPartitionId.fromPartitionId(1));
-		mySubscriptionResourceNotMatched.awaitExpected();
+		final ThrowsInterrupted throwsInterrupted = () -> sendObservation(code, "SNOMED-CT", RequestPartitionId.fromPartitionId(1));
+
+		if (theIsCrossPartitionEnabled) {
+			runWithinLatchLogicExpectSuccess(throwsInterrupted);
+		} else {
+			runWithLatchLogicExpectFailure(throwsInterrupted);
+		}
 	}
 
-	@Test
-	public void testSubscriptionOnAPartitionAndResourceOnDefaultPartitionNotMatch() throws InterruptedException {
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	public void testSubscriptionOnAPartitionAndResourceOnDefaultPartitionNotMatch(boolean theIsCrossPartitionEnabled) throws InterruptedException {
+		mySubscriptionSettings.setCrossPartitionSubscriptionEnabled(theIsCrossPartitionEnabled);
 		myPartitionSettings.setPartitioningEnabled(true);
 		String payload = "application/fhir+json";
 
@@ -292,9 +318,13 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		mockSubscriptionRead(requestPartitionId, subscription);
 		sendSubscription(subscription, requestPartitionId, true);
 
-		mySubscriptionResourceNotMatched.setExpectedCount(1);
-		sendObservation(code, "SNOMED-CT", RequestPartitionId.defaultPartition());
-		mySubscriptionResourceNotMatched.awaitExpected();
+		final ThrowsInterrupted throwsInterrupted = () -> sendObservation(code, "SNOMED-CT", RequestPartitionId.defaultPartition());
+
+		if (theIsCrossPartitionEnabled) {
+			runWithinLatchLogicExpectSuccess(throwsInterrupted);
+		} else {
+			runWithLatchLogicExpectFailure(throwsInterrupted);
+		}
 	}
 
 	@Test
@@ -318,8 +348,10 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		ourObservationListener.awaitExpected();
 	}
 
-	@Test
-	public void testSubscriptionOnOnePartitionDoNotMatchResourceOnMultiplePartitions() throws InterruptedException {
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	public void testSubscriptionOnOnePartitionDoNotMatchResourceOnMultiplePartitions(boolean theIsCrossPartitionEnabled) throws InterruptedException {
+		mySubscriptionSettings.setCrossPartitionSubscriptionEnabled(theIsCrossPartitionEnabled);
 		myPartitionSettings.setPartitioningEnabled(true);
 		String payload = "application/fhir+json";
 
@@ -331,16 +363,19 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		mockSubscriptionRead(requestPartitionId, subscription);
 		sendSubscription(subscription, requestPartitionId, true);
 
-		mySubscriptionResourceNotMatched.setExpectedCount(1);
-		List<Integer> partitionId = Collections.synchronizedList(Lists.newArrayList(0, 2));
-		sendObservation(code, "SNOMED-CT", RequestPartitionId.fromPartitionIds(partitionId));
-		mySubscriptionResourceNotMatched.awaitExpected();
+		final ThrowsInterrupted throwsInterrupted = () -> sendObservation(code, "SNOMED-CT", RequestPartitionId.fromPartitionIds(Collections.synchronizedList(Lists.newArrayList(0, 2))));
+
+		if (theIsCrossPartitionEnabled) {
+			runWithinLatchLogicExpectSuccess(throwsInterrupted);
+		} else {
+			runWithLatchLogicExpectFailure(throwsInterrupted);
+		}
 	}
 
 	@Test
 	public void testCrossPartitionSubscriptionForResourceOnTheSamePartitionMatch() throws InterruptedException {
 		myPartitionSettings.setPartitioningEnabled(true);
-		myStorageSettings.setCrossPartitionSubscriptionEnabled(true);
+		mySubscriptionSettings.setCrossPartitionSubscriptionEnabled(true);
 		String payload = "application/fhir+json";
 
 		String code = "1000000050";
@@ -362,7 +397,7 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 	@Test
 	public void testCrossPartitionSubscriptionForResourceOnDifferentPartitionMatch() throws InterruptedException {
 		myPartitionSettings.setPartitioningEnabled(true);
-		myStorageSettings.setCrossPartitionSubscriptionEnabled(true);
+		mySubscriptionSettings.setCrossPartitionSubscriptionEnabled(true);
 		String payload = "application/fhir+json";
 
 		String code = "1000000050";
@@ -385,7 +420,7 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 	@Test
 	public void testCrossPartitionSubscriptionForMultipleResourceOnDifferentPartitionMatch() throws InterruptedException {
 		myPartitionSettings.setPartitioningEnabled(true);
-		myStorageSettings.setCrossPartitionSubscriptionEnabled(true);
+		mySubscriptionSettings.setCrossPartitionSubscriptionEnabled(true);
 		String payload = "application/fhir+json";
 
 		String code = "1000000050";
@@ -434,6 +469,8 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		SubscriptionCriteriaParser.SubscriptionCriteria mySubscriptionCriteria;
 		@Mock
 		SubscriptionMatchDeliverer mySubscriptionMatchDeliverer;
+		@Mock
+		IResourceModifiedMessagePersistenceSvc myResourceModifiedMessagePersistenceSvc;
 		@InjectMocks
 		SubscriptionMatchingSubscriber subscriber;
 
@@ -445,6 +482,7 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 			when(myInterceptorBroadcaster.callHooks(
 				eq(Pointcut.SUBSCRIPTION_BEFORE_PERSISTED_RESOURCE_CHECKED), any(HookParams.class))).thenReturn(true);
 			when(mySubscriptionRegistry.getAll()).thenReturn(Collections.emptyList());
+			when(myResourceModifiedMessagePersistenceSvc.inflatePersistedResourceModifiedMessageOrNull(any())).thenReturn(Optional.ofNullable(message));
 
 			subscriber.matchActiveSubscriptionsAndDeliver(message);
 
@@ -465,10 +503,11 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 			when(myActiveSubscription.getCriteria()).thenReturn(mySubscriptionCriteria);
 			when(myActiveSubscription.getId()).thenReturn("Patient/123");
 			when(mySubscriptionCriteria.getType()).thenReturn(STARTYPE_EXPRESSION);
+			when(myResourceModifiedMessagePersistenceSvc.inflatePersistedResourceModifiedMessageOrNull(any())).thenReturn(Optional.ofNullable(message));
 
 			subscriber.matchActiveSubscriptionsAndDeliver(message);
 
-			verify(myCanonicalSubscription, atLeastOnce()).getSendDeleteMessages();
+			verify(myCanonicalSubscription).getSendDeleteMessages();
 		}
 
 		@Test
@@ -486,6 +525,7 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 			when(myNonDeleteSubscription.getCriteria()).thenReturn(mySubscriptionCriteria);
 			when(myNonDeleteSubscription.getId()).thenReturn("Patient/123");
 			when(mySubscriptionCriteria.getType()).thenReturn(STARTYPE_EXPRESSION);
+			when(myResourceModifiedMessagePersistenceSvc.inflatePersistedResourceModifiedMessageOrNull(any())).thenReturn(Optional.ofNullable(message));
 
 			subscriber.matchActiveSubscriptionsAndDeliver(message);
 
@@ -505,10 +545,38 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 			when(myActiveSubscription.getId()).thenReturn("Patient/123");
 			when(mySubscriptionCriteria.getType()).thenReturn(STARTYPE_EXPRESSION);
 			when(myCanonicalSubscription.getSendDeleteMessages()).thenReturn(true);
+			when(myResourceModifiedMessagePersistenceSvc.inflatePersistedResourceModifiedMessageOrNull(any())).thenReturn(Optional.ofNullable(message));
 
 			subscriber.matchActiveSubscriptionsAndDeliver(message);
 
 			verify(message, atLeastOnce()).getPayloadId(null);
+		}
+	}
+
+	private interface ThrowsInterrupted {
+		void runOrThrow() throws InterruptedException;
+	}
+
+	private void runWithLatchLogicExpectFailure(ThrowsInterrupted theRunnable) {
+		try {
+			mySubscriptionResourceNotMatched.setExpectedCount(1);
+			theRunnable.runOrThrow();
+			mySubscriptionResourceNotMatched.awaitExpected();
+		} catch (InterruptedException exception) {
+			Thread.currentThread().interrupt();
+		}
+	}
+
+	private void runWithinLatchLogicExpectSuccess(ThrowsInterrupted theRunnable) {
+		try {
+			ourObservationListener.setExpectedCount(1);
+			mySubscriptionResourceMatched.setExpectedCount(1);
+			theRunnable.runOrThrow();
+			mySubscriptionResourceMatched.awaitExpected();
+			ourObservationListener.awaitExpected();
+		} catch (InterruptedException exception) {
+			Thread.currentThread().interrupt();
+			fail();
 		}
 	}
 }

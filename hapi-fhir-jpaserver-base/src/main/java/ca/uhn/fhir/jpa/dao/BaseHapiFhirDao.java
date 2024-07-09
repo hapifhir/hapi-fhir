@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,6 @@ import ca.uhn.fhir.jpa.api.dao.IJpaDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
-import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
@@ -85,7 +84,6 @@ import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.InterceptorInvocationTimingEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
@@ -105,8 +103,18 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Sets;
 import com.google.common.hash.HashCode;
-import com.google.common.hash.HashFunction;
-import com.google.common.hash.Hashing;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+import jakarta.annotation.PostConstruct;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.PersistenceContextType;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -136,9 +144,7 @@ import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -149,18 +155,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.annotation.PostConstruct;
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
-import javax.persistence.PersistenceContextType;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 import javax.xml.stream.events.Characters;
 import javax.xml.stream.events.XMLEvent;
 
@@ -199,9 +193,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 	@Autowired
 	protected IIdHelperService<JpaPid> myIdHelperService;
-
-	@Autowired
-	protected IForcedIdDao myForcedIdDao;
 
 	@Autowired
 	protected ISearchCoordinatorSvc<JpaPid> mySearchCoordinatorSvc;
@@ -266,6 +257,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	@Autowired
 	private PlatformTransactionManager myTransactionManager;
 
+	@Autowired
+	protected ResourceHistoryCalculator myResourceHistoryCalculator;
+
 	protected final CodingSpy myCodingSpy = new CodingSpy();
 
 	@VisibleForTesting
@@ -277,6 +271,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	@VisibleForTesting
 	public void setSearchParamPresenceSvc(ISearchParamPresenceSvc theSearchParamPresenceSvc) {
 		mySearchParamPresenceSvc = theSearchParamPresenceSvc;
+	}
+
+	@VisibleForTesting
+	public void setResourceHistoryCalculator(ResourceHistoryCalculator theResourceHistoryCalculator) {
+		myResourceHistoryCalculator = theResourceHistoryCalculator;
 	}
 
 	@Override
@@ -679,20 +678,15 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 					theEntity.setFhirVersion(myContext.getVersion().getVersion());
 
-					HashFunction sha256 = Hashing.sha256();
-					HashCode hashCode;
-					String encodedResource = encodeResource(theResource, encoding, excludeElements, myContext);
-					if (myStorageSettings.getInlineResourceTextBelowSize() > 0
-							&& encodedResource.length() < myStorageSettings.getInlineResourceTextBelowSize()) {
-						resourceText = encodedResource;
-						resourceBinary = null;
-						encoding = ResourceEncodingEnum.JSON;
-						hashCode = sha256.hashUnencodedChars(encodedResource);
-					} else {
-						resourceText = null;
-						resourceBinary = getResourceBinary(encoding, encodedResource);
-						hashCode = sha256.hashBytes(resourceBinary);
-					}
+					// TODO:  LD: Once 2024-02 it out the door we should consider further refactoring here to move
+					// more of this logic within the calculator and eliminate more local variables
+					final ResourceHistoryState calculate = myResourceHistoryCalculator.calculateResourceHistoryState(
+							theResource, encoding, excludeElements);
+
+					resourceText = calculate.getResourceText();
+					resourceBinary = calculate.getResourceBinary();
+					encoding = calculate.getEncoding(); // This may be a no-op
+					final HashCode hashCode = calculate.getHashCode();
 
 					String hashSha256 = hashCode.toString();
 					if (!hashSha256.equals(theEntity.getHashSha256())) {
@@ -753,7 +747,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				if (currentHistoryVersion == null || !currentHistoryVersion.hasResource()) {
 					changed = true;
 				} else {
-					changed = !Arrays.equals(currentHistoryVersion.getResource(), resourceBinary);
+					// TODO:  LD: Once 2024-02 it out the door we should consider further refactoring here to move
+					// more of this logic within the calculator and eliminate more local variables
+					changed = myResourceHistoryCalculator.isResourceHistoryChanged(
+							currentHistoryVersion, resourceBinary, resourceText);
 				}
 			}
 		}
@@ -765,32 +762,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		retVal.setChanged(changed);
 
 		return retVal;
-	}
-
-	/**
-	 * helper for returning the encoded byte array of the input resource string based on the encoding.
-	 *
-	 * @param encoding        the encoding to used
-	 * @param encodedResource the resource to encode
-	 * @return byte array of the resource
-	 */
-	@Nonnull
-	private byte[] getResourceBinary(ResourceEncodingEnum encoding, String encodedResource) {
-		byte[] resourceBinary;
-		switch (encoding) {
-			case JSON:
-				resourceBinary = encodedResource.getBytes(StandardCharsets.UTF_8);
-				break;
-			case JSONC:
-				resourceBinary = GZipUtil.compress(encodedResource);
-				break;
-			default:
-			case DEL:
-			case ESR:
-				resourceBinary = new byte[0];
-				break;
-		}
-		return resourceBinary;
 	}
 
 	/**
@@ -1126,7 +1097,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 							() -> new IdentityHashMap<>());
 			existingParams = existingSearchParams.get(entity);
 			if (existingParams == null) {
-				existingParams = new ResourceIndexedSearchParams(entity);
+				existingParams = ResourceIndexedSearchParams.withLists(entity);
 				/*
 				 * If we have lots of resource links, this proactively fetches the targets so
 				 * that we don't look them up one-by-one when comparing the new set to the
@@ -1148,7 +1119,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			// TODO: is this IF statement always true? Try removing it
 			if (thePerformIndexing || theEntity.getVersion() == 1) {
 
-				newParams = new ResourceIndexedSearchParams();
+				newParams = ResourceIndexedSearchParams.withSets();
 
 				RequestPartitionId requestPartitionId;
 				if (!myPartitionSettings.isPartitioningEnabled()) {
@@ -1228,10 +1199,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		 */
 		if (entity.getId() == null) {
 			myEntityManager.persist(entity);
-
-			if (entity.getForcedId() != null) {
-				myEntityManager.persist(entity.getForcedId());
-			}
 
 			postPersist(entity, (T) theResource, theRequest);
 
@@ -1317,10 +1284,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 								myInterceptorBroadcaster, theRequest, Pointcut.JPA_PERFTRACE_INFO, params);
 					}
 				}
-
-				// Synchronize composite params
-				mySearchParamWithInlineReferencesExtractor.storeUniqueComboParameters(
-						newParams, entity, existingParams);
 			}
 		}
 
@@ -1436,9 +1399,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			ResourceEncodingEnum encoding = myStorageSettings.getResourceEncoding();
 			List<String> excludeElements = new ArrayList<>(8);
 			getExcludedElements(historyEntity.getResourceType(), excludeElements, theResource.getMeta());
-			String encodedResourceString = encodeResource(theResource, encoding, excludeElements, myContext);
-			byte[] resourceBinary = getResourceBinary(encoding, encodedResourceString);
-			boolean changed = !Arrays.equals(historyEntity.getResource(), resourceBinary);
+			String encodedResourceString =
+					myResourceHistoryCalculator.encodeResource(theResource, encoding, excludeElements);
+			byte[] resourceBinary = ResourceHistoryCalculator.getResourceBinary(encoding, encodedResourceString);
+			final boolean changed = myResourceHistoryCalculator.isResourceHistoryChanged(
+					historyEntity, resourceBinary, encodedResourceString);
 
 			historyEntity.setUpdated(theTransactionDetails.getTransactionDate());
 
@@ -1450,12 +1415,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				return historyEntity;
 			}
 
-			if (getStorageSettings().getInlineResourceTextBelowSize() > 0
-					&& encodedResourceString.length() < getStorageSettings().getInlineResourceTextBelowSize()) {
-				populateEncodedResource(encodedResource, encodedResourceString, null, ResourceEncodingEnum.JSON);
-			} else {
-				populateEncodedResource(encodedResource, null, resourceBinary, encoding);
-			}
+			myResourceHistoryCalculator.populateEncodedResource(
+					encodedResource, encodedResourceString, resourceBinary, encoding);
 		}
 		/*
 		 * Save the resource itself to the resourceHistoryTable
@@ -1978,16 +1939,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				break;
 		}
 		return resourceText;
-	}
-
-	public static String encodeResource(
-			IBaseResource theResource,
-			ResourceEncodingEnum theEncoding,
-			List<String> theExcludeElements,
-			FhirContext theContext) {
-		IParser parser = theEncoding.newParser(theContext);
-		parser.setDontEncodeElements(theExcludeElements);
-		return parser.encodeResourceToString(theResource);
 	}
 
 	private static String parseNarrativeTextIntoWords(IBaseResource theResource) {

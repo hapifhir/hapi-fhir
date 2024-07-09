@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 5640
+jira: SMILE-7977
+title: "Clinical reasoning version bump to address reported 'null pointer' error that is encountered when running $evaluate-measure against a measure with an omitted measure.group.population.id"

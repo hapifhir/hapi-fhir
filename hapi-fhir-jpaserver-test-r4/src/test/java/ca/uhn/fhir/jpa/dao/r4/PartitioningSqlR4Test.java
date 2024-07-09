@@ -15,13 +15,13 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTag;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
@@ -50,12 +50,12 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.BundleBuilder;
 import org.apache.commons.lang3.StringUtils;
-import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
@@ -70,6 +70,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -87,20 +89,14 @@ import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.util.TestUtil.sleepAtLeast;
 import static org.apache.commons.lang3.StringUtils.countMatches;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.anyOf;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.matchesPattern;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.startsWith;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.fail;
+
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -173,16 +169,15 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		IIdType obsId = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
 		List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueriesForCurrentThread();
-		assertEquals(2, selectQueries.size());
-		// Look up the partition
-		assertThat(selectQueries.get(0).getSql(true, false).toLowerCase(), containsString(" from hfj_partition "));
+		assertEquals(1, selectQueries.size());
 		// Look up the referenced subject/patient
-		assertThat(selectQueries.get(1).getSql(true, false).toLowerCase(), containsString(" from hfj_resource "));
-		assertEquals(0, StringUtils.countMatches(selectQueries.get(1).getSql(true, false).toLowerCase(), "partition"));
+		String sql = selectQueries.get(0).getSql(true, false).toLowerCase();
+		assertThat(sql).contains(" from hfj_resource ");
+		assertEquals(0, StringUtils.countMatches(selectQueries.get(0).getSql(true, false).toLowerCase(), "partition"));
 
 		runInTransaction(() -> {
 			List<ResourceLink> resLinks = myResourceLinkDao.findAll();
-			ourLog.info("Resource links:\n{}", resLinks.toString());
+			ourLog.info("Resource links:\n{}", resLinks);
 			assertEquals(2, resLinks.size());
 			assertEquals(obsId.getIdPartAsLong(), resLinks.get(0).getSourceResourcePid());
 			assertEquals(patientId.getIdPartAsLong(), resLinks.get(0).getTargetResourcePid());
@@ -207,7 +202,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), startsWith(Msg.code(1094) + "Resource Patient/" + patientId.getIdPart() + " not found, specified in path: Observation.subject"));
+			assertThat(e.getMessage()).startsWith(Msg.code(1094) + "Resource Patient/" + patientId.getIdPart() + " not found, specified in path: Observation.subject");
 		}
 
 	}
@@ -231,7 +226,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		runInTransaction(() -> {
 			List<ResourceLink> resLinks = myResourceLinkDao.findAll();
-			ourLog.info("Resource links:\n{}", resLinks.toString());
+			ourLog.info("Resource links:\n{}", resLinks);
 			assertEquals(2, resLinks.size());
 			assertEquals(obsId.getIdPartAsLong(), resLinks.get(0).getSourceResourcePid());
 			assertEquals(patientId.getIdPart(), resLinks.get(0).getTargetResourceId());
@@ -257,7 +252,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), startsWith(Msg.code(1094) + "Resource Patient/ONE not found, specified in path: Observation.subject"));
+			assertThat(e.getMessage()).startsWith(Msg.code(1094) + "Resource Patient/ONE not found, specified in path: Observation.subject");
 		}
 
 	}
@@ -278,7 +273,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		runInTransaction(() -> {
 			List<ResourceLink> resLinks = myResourceLinkDao.findAll();
-			ourLog.info("Resource links:\n{}", resLinks.toString());
+			ourLog.info("Resource links:\n{}", resLinks);
 			assertEquals(2, resLinks.size());
 			assertEquals(obsId.getIdPartAsLong(), resLinks.get(0).getSourceResourcePid());
 			assertEquals(patientId.getIdPartAsLong(), resLinks.get(0).getTargetResourcePid());
@@ -302,7 +297,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		runInTransaction(() -> {
 			List<ResourceLink> resLinks = myResourceLinkDao.findAll();
-			ourLog.info("Resource links:\n{}", resLinks.toString());
+			ourLog.info("Resource links:\n{}", resLinks);
 			assertEquals(2, resLinks.size());
 			assertEquals(obsId.getIdPartAsLong(), resLinks.get(0).getSourceResourcePid());
 			assertEquals(patientId.getIdPart(), resLinks.get(0).getTargetResourceId());
@@ -404,7 +399,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testCreate_ServerId_WithPartition() {
-		createUniqueCompositeSp();
+		createUniqueComboSp();
 		createRequestId();
 
 		addCreatePartition(myPartitionId, myPartitionDate);
@@ -417,7 +412,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		p.getMeta().addTag("http://system", "code", "diisplay");
 		p.addName().setFamily("FAM");
 		p.addIdentifier().setSystem("system").setValue("value");
-		p.setBirthDate(new Date());
+		p.setBirthDateElement(new DateType("2020-01-01"));
 		p.getManagingOrganization().setReferenceElement(orgId);
 		Long patientId = myPatientDao.create(p, mySrd).getId().getIdPartAsLong();
 
@@ -478,17 +473,20 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			assertLocalDateFromDbMatches(myPartitionDate, presents.get(0).getPartitionId().getPartitionDate());
 
 			// HFJ_IDX_CMP_STRING_UNIQ
-			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAllForResourceIdForUnitTest(patientId);
+			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedComboStringUniqueDao.findAllForResourceIdForUnitTest(patientId);
 			assertEquals(1, uniques.size());
 			assertEquals(myPartitionId, uniques.get(0).getPartitionId().getPartitionId().intValue());
 			assertLocalDateFromDbMatches(myPartitionDate, uniques.get(0).getPartitionId().getPartitionDate());
 		});
 
+		myCaptureQueriesListener.clear();
+
+
 	}
 
 	@Test
 	public void testCreate_ServerId_DefaultPartition() {
-		createUniqueCompositeSp();
+		createUniqueComboSp();
 		createRequestId();
 
 		addCreateDefaultPartition(myPartitionDate);
@@ -508,66 +506,66 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		runInTransaction(() -> {
 			// HFJ_RESOURCE
 			ResourceTable resourceTable = myResourceTableDao.findById(patientId).orElseThrow(IllegalArgumentException::new);
-			assertEquals(null, resourceTable.getPartitionId().getPartitionId());
+            assertNull(resourceTable.getPartitionId().getPartitionId());
 			assertLocalDateFromDbMatches(myPartitionDate, resourceTable.getPartitionId().getPartitionDate());
 
 			// HFJ_RES_TAG
 			List<ResourceTag> tags = myResourceTagDao.findAll();
 			assertEquals(1, tags.size());
-			assertEquals(null, tags.get(0).getPartitionId().getPartitionId());
+            assertNull(tags.get(0).getPartitionId().getPartitionId());
 			assertLocalDateFromDbMatches(myPartitionDate, tags.get(0).getPartitionId().getPartitionDate());
 
 			// HFJ_RES_VER
 			ResourceHistoryTable version = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(patientId, 1L);
-			assertEquals(null, version.getPartitionId().getPartitionId());
+            assertNull(version.getPartitionId().getPartitionId());
 			assertLocalDateFromDbMatches(myPartitionDate, version.getPartitionId().getPartitionDate());
 
 			// HFJ_HISTORY_TAG
 			List<ResourceHistoryTag> historyTags = myResourceHistoryTagDao.findAll();
 			assertEquals(1, historyTags.size());
-			assertEquals(null, historyTags.get(0).getPartitionId().getPartitionId());
+            assertNull(historyTags.get(0).getPartitionId().getPartitionId());
 			assertLocalDateFromDbMatches(myPartitionDate, historyTags.get(0).getPartitionId().getPartitionDate());
 
 			// HFJ_RES_VER_PROV
 			assertNotNull(version.getProvenance());
-			assertEquals(null, version.getProvenance().getPartitionId().getPartitionId());
+            assertNull(version.getProvenance().getPartitionId().getPartitionId());
 			assertLocalDateFromDbMatches(myPartitionDate, version.getProvenance().getPartitionId().getPartitionDate());
 
 			// HFJ_SPIDX_STRING
 			List<ResourceIndexedSearchParamString> strings = myResourceIndexedSearchParamStringDao.findAllForResourceId(patientId);
 			String stringsDesc = strings.stream().map(ResourceIndexedSearchParamString::toString).sorted().collect(Collectors.joining("\n * "));
 			ourLog.info("\n * {}", stringsDesc);
-			assertThat(stringsDesc, not(containsString("_text")));
-			assertThat(stringsDesc, not(containsString("_content")));
+			assertThat(stringsDesc).doesNotContain("_text");
+			assertThat(stringsDesc).doesNotContain("_content");
 			assertEquals(9, strings.size(), stringsDesc);
-			assertEquals(null, strings.get(0).getPartitionId().getPartitionId());
+            assertNull(strings.get(0).getPartitionId().getPartitionId());
 			assertLocalDateFromDbMatches(myPartitionDate, strings.get(0).getPartitionId().getPartitionDate());
 
 			// HFJ_SPIDX_DATE
 			List<ResourceIndexedSearchParamDate> dates = myResourceIndexedSearchParamDateDao.findAllForResourceId(patientId);
 			ourLog.info("\n * {}", dates.stream().map(ResourceIndexedSearchParamDate::toString).collect(Collectors.joining("\n * ")));
 			assertEquals(2, dates.size());
-			assertEquals(null, dates.get(0).getPartitionId().getPartitionId());
+            assertNull(dates.get(0).getPartitionId().getPartitionId());
 			assertLocalDateFromDbMatches(myPartitionDate, dates.get(0).getPartitionId().getPartitionDate());
-			assertEquals(null, dates.get(1).getPartitionId().getPartitionId());
+            assertNull(dates.get(1).getPartitionId().getPartitionId());
 			assertLocalDateFromDbMatches(myPartitionDate, dates.get(1).getPartitionId().getPartitionDate());
 
 			// HFJ_RES_LINK
 			List<ResourceLink> resourceLinks = myResourceLinkDao.findAllForSourceResourceId(patientId);
 			assertEquals(1, resourceLinks.size());
-			assertEquals(null, resourceLinks.get(0).getPartitionId().getPartitionId());
+            assertNull(resourceLinks.get(0).getPartitionId().getPartitionId());
 			assertLocalDateFromDbMatches(myPartitionDate, resourceLinks.get(0).getPartitionId().getPartitionDate());
 
 			// HFJ_RES_PARAM_PRESENT
 			List<SearchParamPresentEntity> presents = mySearchParamPresentDao.findAllForResource(resourceTable);
 			assertEquals(3, presents.size());
-			assertEquals(null, presents.get(0).getPartitionId().getPartitionId());
+            assertNull(presents.get(0).getPartitionId().getPartitionId());
 			assertLocalDateFromDbMatches(myPartitionDate, presents.get(0).getPartitionId().getPartitionDate());
 
 			// HFJ_IDX_CMP_STRING_UNIQ
-			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAllForResourceIdForUnitTest(patientId);
+			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedComboStringUniqueDao.findAllForResourceIdForUnitTest(patientId);
 			assertEquals(1, uniques.size());
-			assertEquals(null, uniques.get(0).getPartitionId().getPartitionId());
+            assertNull(uniques.get(0).getPartitionId().getPartitionId());
 			assertLocalDateFromDbMatches(myPartitionDate, uniques.get(0).getPartitionId().getPartitionDate());
 		});
 
@@ -589,13 +587,13 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		myPatientDao.update(p, mySrd);
 
 		runInTransaction(() -> {
-			// HFJ_FORCED_ID
-			List<ForcedId> forcedIds = myForcedIdDao.findAll();
-			assertEquals(2, forcedIds.size());
-			assertEquals(myPartitionId, forcedIds.get(0).getPartitionId().getPartitionId().intValue());
-			assertLocalDateFromDbMatches(myPartitionDate, forcedIds.get(0).getPartitionId().getPartitionDate());
-			assertEquals(myPartitionId, forcedIds.get(1).getPartitionId().getPartitionId().intValue());
-			assertLocalDateFromDbMatches(myPartitionDate, forcedIds.get(1).getPartitionId().getPartitionDate());
+			ResourceTable orgResourceTable = myResourceTableDao.findByTypeAndFhirId("Organization", "org").orElseThrow(IllegalArgumentException::new);
+			assertEquals(myPartitionId, orgResourceTable.getPartitionId().getPartitionId().intValue());
+			assertLocalDateFromDbMatches(myPartitionDate, orgResourceTable.getPartitionId().getPartitionDate());
+
+			ResourceTable patientResourceTable = myResourceTableDao.findByTypeAndFhirId("Patient", "pat").orElseThrow(IllegalArgumentException::new);
+			assertEquals(myPartitionId, patientResourceTable.getPartitionId().getPartitionId().intValue());
+			assertLocalDateFromDbMatches(myPartitionDate, patientResourceTable.getPartitionId().getPartitionDate());
 		});
 
 	}
@@ -615,11 +613,11 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		myPatientDao.update(p, mySrd);
 
 		runInTransaction(() -> {
-			// HFJ_FORCED_ID
-			List<ForcedId> forcedIds = myForcedIdDao.findAll();
-			assertEquals(2, forcedIds.size());
-			assertEquals(null, forcedIds.get(0).getPartitionId());
-			assertEquals(null, forcedIds.get(1).getPartitionId());
+			ResourceTable orgResourceTable = myResourceTableDao.findByTypeAndFhirId("Organization", "org").orElseThrow(IllegalArgumentException::new);
+			assertNull(orgResourceTable.getPartitionId());
+
+			ResourceTable patientResourceTable = myResourceTableDao.findByTypeAndFhirId("Patient", "pat").orElseThrow(IllegalArgumentException::new);
+			assertNull(patientResourceTable.getPartitionId());
 		});
 
 	}
@@ -639,13 +637,13 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		myPatientDao.update(p, mySrd);
 
 		runInTransaction(() -> {
-			// HFJ_FORCED_ID
-			List<ForcedId> forcedIds = myForcedIdDao.findAll();
-			assertEquals(2, forcedIds.size());
-			assertEquals(null, forcedIds.get(0).getPartitionId().getPartitionId());
-			assertLocalDateFromDbMatches(myPartitionDate, forcedIds.get(0).getPartitionId().getPartitionDate());
-			assertEquals(null, forcedIds.get(1).getPartitionId().getPartitionId());
-			assertLocalDateFromDbMatches(myPartitionDate, forcedIds.get(1).getPartitionId().getPartitionDate());
+			ResourceTable orgResourceTable = myResourceTableDao.findByTypeAndFhirId("Organization", "org").orElseThrow(IllegalArgumentException::new);
+			assertNull(orgResourceTable.getPartitionId().getPartitionId());
+			assertLocalDateFromDbMatches(myPartitionDate, orgResourceTable.getPartitionId().getPartitionDate());
+
+			ResourceTable patientResourceTable = myResourceTableDao.findByTypeAndFhirId("Patient", "pat").orElseThrow(IllegalArgumentException::new);
+			assertNull(patientResourceTable.getPartitionId().getPartitionId());
+			assertLocalDateFromDbMatches(myPartitionDate, patientResourceTable.getPartitionId().getPartitionDate());
 		});
 
 	}
@@ -653,7 +651,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testCreateInTransaction_ServerId_WithPartition() {
-		createUniqueCompositeSp();
+		createUniqueComboSp();
 		createRequestId();
 
 		addCreatePartition(myPartitionId, myPartitionDate);
@@ -724,7 +722,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		startRequest.setJobDefinitionId(DeleteExpungeAppCtx.JOB_DELETE_EXPUNGE);
 
 		// execute
-		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(startRequest);
+		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(mySrd, startRequest);
 
 		// Validate
 		JobInstance outcome = myBatch2JobHelper.awaitJobCompletion(startResponse);
@@ -826,7 +824,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			assertLocalDateFromDbMatches(expected, actual);
 
 			// HFJ_SPIDX_TOKEN
-			ourLog.info("Tokens:\n * {}", myResourceIndexedSearchParamTokenDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
+			ourLog.info("Tokens:\n * {}", myResourceIndexedSearchParamTokenDao.findAll().stream().map(ResourceIndexedSearchParamToken::toString).collect(Collectors.joining("\n * ")));
 			assertEquals(3, myResourceIndexedSearchParamTokenDao.countForResourceId(patientId));
 		});
 
@@ -848,7 +846,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			assertLocalDateFromDbMatches(myPartitionDate, resourceTable.getPartitionId().getPartitionDate());
 
 			// HFJ_SPIDX_TOKEN
-			ourLog.info("Tokens:\n * {}", myResourceIndexedSearchParamTokenDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
+			ourLog.info("Tokens:\n * {}", myResourceIndexedSearchParamTokenDao.findAll().stream().map(ResourceIndexedSearchParamToken::toString).collect(Collectors.joining("\n * ")));
 			assertEquals(3, myResourceIndexedSearchParamTokenDao.countForResourceId(patientId));
 
 			// HFJ_RES_VER
@@ -876,8 +874,8 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			ourLog.info("Search SQL:\n{}", searchSql);
 
 			// Only the read columns should be used, no criteria use partition
-			assertEquals(2, StringUtils.countMatches(searchSql, "PARTITION_ID as "));
-			assertEquals(2, StringUtils.countMatches(searchSql, "PARTITION_ID"));
+			assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID,"));
+			assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID"));
 		}
 		{
 			addReadAllPartitions();
@@ -888,8 +886,8 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			ourLog.info("Search SQL:\n{}", searchSql);
 
 			// Only the read columns should be used, no criteria use partition
-			assertEquals(2, StringUtils.countMatches(searchSql, "PARTITION_ID as "));
-			assertEquals(2, StringUtils.countMatches(searchSql, "PARTITION_ID"));
+			assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID,"));
+			assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID"));
 		}
 	}
 
@@ -910,7 +908,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			ourLog.info("Search SQL:\n{}", searchSql);
 
 			// Only the read columns should be used, no criteria use partition
-			assertEquals(2, StringUtils.countMatches(searchSql, "PARTITION_ID as "), searchSql);
+			assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID,"), searchSql);
 			assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID='1'"), searchSql);
 		}
 
@@ -921,7 +919,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 				myPatientDao.read(patientIdNull, mySrd).getIdElement().toUnqualifiedVersionless();
 				fail();
 			} catch (ResourceNotFoundException e) {
-				assertThat(e.getMessage(), matchesPattern(Msg.code(1996) + "Resource Patient/[0-9]+ is not known"));
+				assertThat(e.getMessage()).matches(Msg.code(1996) + "Resource Patient/[0-9]+ is not known");
 			}
 		}
 
@@ -932,7 +930,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 				myPatientDao.read(patientId2, mySrd).getIdElement().toUnqualifiedVersionless();
 				fail();
 			} catch (ResourceNotFoundException e) {
-				assertThat(e.getMessage(), matchesPattern(Msg.code(1996) + "Resource Patient/[0-9]+ is not known"));
+				assertThat(e.getMessage()).matches(Msg.code(1996) + "Resource Patient/[0-9]+ is not known");
 			}
 		}
 	}
@@ -954,7 +952,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 			// Only the read columns should be used, but no selectors on partition ID
 			String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
-			assertEquals(2, StringUtils.countMatches(searchSql, "PARTITION_ID as "), searchSql);
+			assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID,"), searchSql);
 			assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID in ("), searchSql);
 		}
 
@@ -967,7 +965,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 			// Only the read columns should be used, but no selectors on partition ID
 			String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
-			assertEquals(2, StringUtils.countMatches(searchSql, "PARTITION_ID as "), searchSql);
+			assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID,"), searchSql);
 			assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID is null"), searchSql);
 		}
 
@@ -1008,7 +1006,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 			// Only the read columns should be used, but no selectors on partition ID
 			String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
-			assertEquals(2, StringUtils.countMatches(searchSql, "PARTITION_ID as "), searchSql);
+			assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID,"), searchSql);
 			assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID in ("), searchSql);
 		}
 
@@ -1022,7 +1020,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 			// Only the read columns should be used, but no selectors on partition ID
 			String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
-			assertEquals(2, StringUtils.countMatches(searchSql, "PARTITION_ID as "), searchSql);
+			assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID,"), searchSql);
 			assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID is null"), searchSql);
 		}
 
@@ -1064,7 +1062,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			ourLog.info("Search SQL:\n{}", searchSql);
 
 			// Only the read columns should be used, no criteria use partition
-			assertEquals(2, StringUtils.countMatches(searchSql, "PARTITION_ID as "));
+			assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID,"));
 			assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID is null"));
 		}
 
@@ -1075,7 +1073,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 				myPatientDao.read(patientId1, mySrd).getIdElement().toUnqualifiedVersionless();
 				fail();
 			} catch (ResourceNotFoundException e) {
-				assertThat(e.getMessage(), matchesPattern(Msg.code(1996) + "Resource Patient/[0-9]+ is not known"));
+				assertThat(e.getMessage()).matches(Msg.code(1996) + "Resource Patient/[0-9]+ is not known");
 			}
 		}
 	}
@@ -1149,7 +1147,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			myPatientDao.read(patientIdNull, mySrd).getIdElement().toUnqualifiedVersionless();
 			fail();
 		} catch (ResourceNotFoundException e) {
-			assertThat(e.getMessage(), matchesPattern(Msg.code(2001) + "Resource Patient/NULL is not known"));
+			assertThat(e.getMessage()).matches(Msg.code(2001) + "Resource Patient/NULL is not known");
 		}
 
 		// Read in wrong Partition
@@ -1158,7 +1156,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			myPatientDao.read(patientId2, mySrd).getIdElement().toUnqualifiedVersionless();
 			fail();
 		} catch (ResourceNotFoundException e) {
-			assertThat(e.getMessage(), matchesPattern(Msg.code(2001) + "Resource Patient/TWO is not known"));
+			assertThat(e.getMessage()).matches(Msg.code(2001) + "Resource Patient/TWO is not known");
 		}
 
 		// Read in wrong Partition
@@ -1167,7 +1165,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			myPatientDao.read(patientId1, mySrd).getIdElement().toUnqualifiedVersionless();
 			fail();
 		} catch (ResourceNotFoundException e) {
-			assertThat(e.getMessage(), matchesPattern(Msg.code(2001) + "Resource Patient/ONE is not known"));
+			assertThat(e.getMessage()).matches(Msg.code(2001) + "Resource Patient/ONE is not known");
 		}
 
 		// Read in correct Partition
@@ -1194,7 +1192,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			myPatientDao.read(patientId1, mySrd).getIdElement().toUnqualifiedVersionless();
 			fail();
 		} catch (ResourceNotFoundException e) {
-			assertThat(e.getMessage(), matchesPattern(Msg.code(2001) + "Resource Patient/ONE is not known"));
+			assertThat(e.getMessage()).matches(Msg.code(2001) + "Resource Patient/ONE is not known");
 		}
 
 		// Read in wrong Partition
@@ -1203,7 +1201,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			myPatientDao.read(patientId2, mySrd).getIdElement().toUnqualifiedVersionless();
 			fail();
 		} catch (ResourceNotFoundException e) {
-			assertThat(e.getMessage(), matchesPattern(Msg.code(2001) + "Resource Patient/TWO is not known"));
+			assertThat(e.getMessage()).matches(Msg.code(2001) + "Resource Patient/TWO is not known");
 		}
 	}
 
@@ -1269,8 +1267,8 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			ourLog.info("Search SQL:\n{}", searchSql);
 
 			// Only the read columns should be used, no criteria use partition
-			assertThat(searchSql, searchSql, containsString("PARTITION_ID = '1'"));
-			assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID"), searchSql);
+			assertThat(searchSql).as(searchSql).contains("PARTITION_ID = '1'");
+			assertThat(StringUtils.countMatches(searchSql, "PARTITION_ID")).as(searchSql).isEqualTo(1);
 		}
 
 		// Read in null Partition
@@ -1321,8 +1319,8 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			ourLog.info("Search SQL:\n{}", searchSql);
 
 			// Only the read columns should be used, no criteria use partition
-			assertThat(searchSql, searchSql, containsString("PARTITION_ID = '1'"));
-			assertEquals(2, StringUtils.countMatches(searchSql, "PARTITION_ID"), searchSql); // If this switches to 1 that would be fine
+			assertThat(searchSql).as(searchSql).contains("PARTITION_ID = '1'");
+			assertThat(StringUtils.countMatches(searchSql, "PARTITION_ID")).as(searchSql).isEqualTo(2); // If this switches to 1 that would be fine
 		}
 
 		// Read in null Partition
@@ -1376,8 +1374,8 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			ourLog.info("Search SQL:\n{}", searchSql);
 
 			// Only the read columns should be used, no criteria use partition
-			assertThat(searchSql, searchSql, containsString("PARTITION_ID IN ('1')"));
-			assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID"), searchSql);
+			assertThat(searchSql).as(searchSql).contains("PARTITION_ID IN ('1')");
+			assertThat(StringUtils.countMatches(searchSql, "PARTITION_ID")).as(searchSql).isEqualTo(1);
 		}
 
 		// Read in null Partition
@@ -1429,14 +1427,14 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			// First SQL resolves the forced ID
 			String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false).toUpperCase();
 			ourLog.info("Search SQL:\n{}", searchSql);
-			assertThat(searchSql, searchSql, containsString("PARTITION_ID IN ('1')"));
-			assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID"), searchSql);
+			assertThat(searchSql).as(searchSql).contains("PARTITION_ID IN ('1')");
+			assertThat(StringUtils.countMatches(searchSql, "PARTITION_ID")).as(searchSql).isEqualTo(1);
 
 			// Second SQL performs the search
 			searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, false).toUpperCase();
 			ourLog.info("Search SQL:\n{}", searchSql);
-			assertThat(searchSql, searchSql, containsString("PARTITION_ID = '1'"));
-			assertEquals(2, StringUtils.countMatches(searchSql, "PARTITION_ID"), searchSql); // If this switches to 1 that would be fine
+			assertThat(searchSql).as(searchSql).contains("PARTITION_ID = '1'");
+			assertThat(StringUtils.countMatches(searchSql, "PARTITION_ID")).as(searchSql).isEqualTo(2); // If this switches to 1 that would be fine
 		}
 
 		// Read in null Partition
@@ -1481,7 +1479,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			map.setLoadSynchronous(true);
 			IBundleProvider results = myPatientDao.search(map, mySrd);
 			List<IIdType> ids = toUnqualifiedVersionlessIds(results);
-			assertThat(ids, contains(patientIdNull, patientId1, patientId2));
+			assertThat(ids).containsExactly(patientIdNull, patientId1, patientId2);
 
 			String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 			ourLog.info("Search SQL:\n{}", searchSql);
@@ -1498,7 +1496,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			map.setLoadSynchronous(true);
 			IBundleProvider results = myPatientDao.search(map, mySrd);
 			List<IIdType> ids = toUnqualifiedVersionlessIds(results);
-			assertThat(ids, contains(patientIdNull, patientId1, patientId2));
+			assertThat(ids).containsExactly(patientIdNull, patientId1, patientId2);
 
 			String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 			ourLog.info("Search SQL:\n{}", searchSql);
@@ -1523,12 +1521,12 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			map.setLoadSynchronous(true);
 			IBundleProvider results = myPatientDao.search(map, mySrd);
 			List<IIdType> ids = toUnqualifiedVersionlessIds(results);
-			assertThat(ids, contains(patientId1));
+			assertThat(ids).containsExactly(patientId1);
 
 			ourLog.info("Search SQL:\n{}", myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true));
 			String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
-			assertEquals(1, StringUtils.countMatches(searchSql, "t0.PARTITION_ID = '1'"), searchSql);
-			assertEquals(1, StringUtils.countMatches(searchSql, "SP_MISSING = 'true'"), searchSql);
+			assertThat(StringUtils.countMatches(searchSql, "t0.PARTITION_ID = '1'")).as(searchSql).isEqualTo(1);
+			assertThat(StringUtils.countMatches(searchSql, "SP_MISSING = 'true'")).as(searchSql).isEqualTo(1);
 		}
 
 		// :missing=false
@@ -1540,7 +1538,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			map.setLoadSynchronous(true);
 			IBundleProvider results = myPatientDao.search(map, mySrd);
 			List<IIdType> ids = toUnqualifiedVersionlessIds(results);
-			assertThat(ids, contains(patientId1));
+			assertThat(ids).containsExactly(patientId1);
 
 			ourLog.info("Search SQL:\n{}", myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true));
 			String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
@@ -1564,7 +1562,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			map.setLoadSynchronous(true);
 			IBundleProvider results = myPatientDao.search(map, mySrd);
 			List<IIdType> ids = toUnqualifiedVersionlessIds(results);
-			assertThat(ids, contains(patientIdNull));
+			assertThat(ids).containsExactly(patientIdNull);
 
 			String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 			ourLog.info("Search SQL:\n{}", searchSql);
@@ -1581,7 +1579,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			map.setLoadSynchronous(true);
 			IBundleProvider results = myPatientDao.search(map, mySrd);
 			List<IIdType> ids = toUnqualifiedVersionlessIds(results);
-			assertThat(ids, contains(patientIdNull));
+			assertThat(ids).containsExactly(patientIdNull);
 
 			String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 			ourLog.info("Search SQL:\n{}", searchSql);
@@ -1607,7 +1605,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			map.setLoadSynchronous(true);
 			IBundleProvider results = myPatientDao.search(map, mySrd);
 			List<IIdType> ids = toUnqualifiedVersionlessIds(results);
-			assertThat(ids, contains(patientIdNull, patientId1, patientId2));
+			assertThat(ids).containsExactly(patientIdNull, patientId1, patientId2);
 
 			String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 			ourLog.info("Search SQL:\n{}", searchSql);
@@ -1634,14 +1632,14 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			map.setLoadSynchronous(true);
 			IBundleProvider results = myPatientDao.search(map, mySrd);
 			List<IIdType> ids = toUnqualifiedVersionlessIds(results);
-			assertThat(ids, contains(patientId1));
+			assertThat(ids).containsExactly(patientId1);
 
 			ourLog.info("Search SQL:\n{}", myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true));
 			String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
-			assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID"), searchSql);
-			assertEquals(1, StringUtils.countMatches(searchSql, "t0.PARTITION_ID = '1'"), searchSql);
-			assertEquals(1, StringUtils.countMatches(searchSql, "HFJ_RES_PARAM_PRESENT"), searchSql);
-			assertEquals(1, StringUtils.countMatches(searchSql, "HASH_PRESENCE = '-3438137196820602023'"), searchSql);
+			assertThat(StringUtils.countMatches(searchSql, "PARTITION_ID")).as(searchSql).isEqualTo(1);
+			assertThat(StringUtils.countMatches(searchSql, "t0.PARTITION_ID = '1'")).as(searchSql).isEqualTo(1);
+			assertThat(StringUtils.countMatches(searchSql, "HFJ_RES_PARAM_PRESENT")).as(searchSql).isEqualTo(1);
+			assertThat(StringUtils.countMatches(searchSql, "HASH_PRESENCE = '-3438137196820602023'")).as(searchSql).isEqualTo(1);
 		}
 	}
 
@@ -1662,14 +1660,14 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			map.setLoadSynchronous(true);
 			IBundleProvider results = myPatientDao.search(map, mySrd);
 			List<IIdType> ids = toUnqualifiedVersionlessIds(results);
-			assertThat(ids, contains(patientId1));
+			assertThat(ids).containsExactly(patientId1);
 
 			ourLog.info("Search SQL:\n{}", myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true));
 			String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
-			assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID"), searchSql);
-			assertEquals(1, StringUtils.countMatches(searchSql, "t0.PARTITION_ID = '1'"), searchSql);
-			assertEquals(1, StringUtils.countMatches(searchSql, "HFJ_RES_PARAM_PRESENT"), searchSql);
-			assertEquals(1, StringUtils.countMatches(searchSql, "HASH_PRESENCE = '1919227773735728687'"), searchSql);
+			assertThat(StringUtils.countMatches(searchSql, "PARTITION_ID")).as(searchSql).isEqualTo(1);
+			assertThat(StringUtils.countMatches(searchSql, "t0.PARTITION_ID = '1'")).as(searchSql).isEqualTo(1);
+			assertThat(StringUtils.countMatches(searchSql, "HFJ_RES_PARAM_PRESENT")).as(searchSql).isEqualTo(1);
+			assertThat(StringUtils.countMatches(searchSql, "HASH_PRESENCE = '1919227773735728687'")).as(searchSql).isEqualTo(1);
 		}
 	}
 
@@ -1688,14 +1686,14 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			map.setLoadSynchronous(true);
 			IBundleProvider results = myPatientDao.search(map, mySrd);
 			List<IIdType> ids = toUnqualifiedVersionlessIds(results);
-			assertThat(ids, contains(patientIdDefault));
+			assertThat(ids).containsExactly(patientIdDefault);
 
 			String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 			ourLog.info("Search SQL:\n{}", searchSql);
-			assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID"), searchSql);
-			assertEquals(1, StringUtils.countMatches(searchSql, "t0.PARTITION_ID IS NULL"), searchSql);
-			assertEquals(1, StringUtils.countMatches(searchSql, "HFJ_RES_PARAM_PRESENT"), searchSql);
-			assertEquals(1, StringUtils.countMatches(searchSql, "HASH_PRESENCE = '1919227773735728687'"), searchSql);
+			assertThat(StringUtils.countMatches(searchSql, "PARTITION_ID")).as(searchSql).isEqualTo(1);
+			assertThat(StringUtils.countMatches(searchSql, "t0.PARTITION_ID IS NULL")).as(searchSql).isEqualTo(1);
+			assertThat(StringUtils.countMatches(searchSql, "HFJ_RES_PARAM_PRESENT")).as(searchSql).isEqualTo(1);
+			assertThat(StringUtils.countMatches(searchSql, "HASH_PRESENCE = '1919227773735728687'")).as(searchSql).isEqualTo(1);
 		}
 	}
 
@@ -1713,7 +1711,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		map.setLoadSynchronous(true);
 		IBundleProvider results = myPatientDao.search(map, mySrd);
 		List<IIdType> ids = toUnqualifiedVersionlessIds(results);
-		assertThat(ids, contains(patientIdNull, patientId1, patientId2));
+		assertThat(ids).containsExactly(patientIdNull, patientId1, patientId2);
 
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		ourLog.info("Search SQL:\n{}", searchSql);
@@ -1733,7 +1731,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		map.setLoadSynchronous(true);
 		IBundleProvider results = myPatientDao.search(map, mySrd);
 		List<IIdType> ids = toUnqualifiedVersionlessIds(results);
-		assertThat(ids, contains(patientId1));
+		assertThat(ids).containsExactly(patientId1);
 
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		ourLog.info("Search SQL:\n{}", searchSql);
@@ -1754,11 +1752,11 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		map.setLoadSynchronous(true);
 		IBundleProvider results = myPatientDao.search(map, mySrd);
 		List<IIdType> ids = toUnqualifiedVersionlessIds(results);
-		assertThat(ids, Matchers.contains(patientId1, patientId2));
+		assertThat(ids).containsExactly(patientId1, patientId2);
 
 		ourLog.info("Search SQL:\n{}", myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true));
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
-		assertThat(searchSql, containsString("PARTITION_ID IN ('1','2')"));
+		assertThat(searchSql).contains("PARTITION_ID IN ('1','2')");
 	}
 
 	@Test
@@ -1775,12 +1773,12 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		map.setLoadSynchronous(true);
 		IBundleProvider results = myPatientDao.search(map, mySrd);
 		List<IIdType> ids = toUnqualifiedVersionlessIds(results);
-		assertThat(ids.toString(), ids, Matchers.containsInAnyOrder(patientIdNull, patientId2));
+		assertThat(ids).as(ids.toString()).containsExactlyInAnyOrder(patientIdNull, patientId2);
 
 		ourLog.info("Search SQL:\n{}", myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true));
 		String sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
-		assertThat(sql, sql, containsString("PARTITION_ID = '2'"));
-		assertThat(sql, sql, containsString("PARTITION_ID IS NULL"));
+		assertThat(sql).as(sql).contains("PARTITION_ID = '2'");
+		assertThat(sql).as(sql).contains("PARTITION_ID IS NULL");
 	}
 
 	@Test
@@ -1803,7 +1801,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		map.setLoadSynchronous(true);
 		IBundleProvider results = myPatientDao.search(map, mySrd);
 		List<IIdType> ids = toUnqualifiedVersionlessIds(results);
-		assertThat(ids, contains(patientIdNull, patientId1, patientId2));
+		assertThat(ids).containsExactly(patientIdNull, patientId1, patientId2);
 
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		ourLog.info("Search SQL:\n{}", searchSql);
@@ -1819,7 +1817,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		map.setLoadSynchronous(true);
 		results = myPatientDao.search(map, mySrd);
 		ids = toUnqualifiedVersionlessIds(results);
-		assertThat(ids, contains(patientIdNull, patientId1, patientId2));
+		assertThat(ids).containsExactly(patientIdNull, patientId1, patientId2);
 
 		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		ourLog.info("Search SQL:\n{}", searchSql);
@@ -1835,7 +1833,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		map.setLoadSynchronous(true);
 		results = myPatientDao.search(map, mySrd);
 		ids = toUnqualifiedVersionlessIds(results);
-		assertThat(ids, contains(patientIdNull, patientId1, patientId2));
+		assertThat(ids).containsExactly(patientIdNull, patientId1, patientId2);
 
 		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		ourLog.info("Search SQL:\n{}", searchSql);
@@ -1851,7 +1849,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		map.setLoadSynchronous(true);
 		results = myPatientDao.search(map, mySrd);
 		ids = toUnqualifiedVersionlessIds(results);
-		assertThat(ids, contains(patientIdNull, patientId1, patientId2));
+		assertThat(ids).containsExactly(patientIdNull, patientId1, patientId2);
 
 		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		ourLog.info("Search SQL:\n{}", searchSql);
@@ -1877,7 +1875,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		// Date param
 
 		runInTransaction(() -> {
-			ourLog.info("Date indexes:\n * {}", myResourceIndexedSearchParamDateDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
+			ourLog.info("Date indexes:\n * {}", myResourceIndexedSearchParamDateDao.findAll().stream().map(ResourceIndexedSearchParamDate::toString).collect(Collectors.joining("\n * ")));
 		});
 		addReadPartition(1);
 		myCaptureQueriesListener.clear();
@@ -1888,12 +1886,12 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		IBundleProvider results = myPatientDao.search(map, mySrd);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		List<IIdType> ids = toUnqualifiedVersionlessIds(results);
-		assertThat(ids, contains(patientId1));
+		assertThat(ids).containsExactly(patientId1);
 
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		ourLog.info("Search SQL:\n{}", searchSql);
-		assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID"), searchSql);
-		assertEquals(1, StringUtils.countMatches(searchSql, "SP_VALUE_LOW"), searchSql);
+		assertThat(StringUtils.countMatches(searchSql, "PARTITION_ID")).as(searchSql).isEqualTo(1);
+		assertThat(StringUtils.countMatches(searchSql, "SP_VALUE_LOW")).as(searchSql).isEqualTo(1);
 
 		// Date OR param
 
@@ -1904,7 +1902,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		map.setLoadSynchronous(true);
 		results = myPatientDao.search(map, mySrd);
 		ids = toUnqualifiedVersionlessIds(results);
-		assertThat(ids, contains(patientId1));
+		assertThat(ids).containsExactly(patientId1);
 
 		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		ourLog.info("Search SQL:\n{}", searchSql);
@@ -1920,7 +1918,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		map.setLoadSynchronous(true);
 		results = myPatientDao.search(map, mySrd);
 		ids = toUnqualifiedVersionlessIds(results);
-		assertThat(ids, contains(patientId1));
+		assertThat(ids).containsExactly(patientId1);
 
 		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		ourLog.info("Search SQL:\n{}", searchSql);
@@ -1936,7 +1934,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		map.setLoadSynchronous(true);
 		results = myPatientDao.search(map, mySrd);
 		ids = toUnqualifiedVersionlessIds(results);
-		assertThat(ids, contains(patientId1));
+		assertThat(ids).containsExactly(patientId1);
 
 		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		ourLog.info("Search SQL:\n{}", searchSql);
@@ -1968,7 +1966,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		map.setLoadSynchronous(true);
 		IBundleProvider results = myPatientDao.search(map, mySrd);
 		List<IIdType> ids = toUnqualifiedVersionlessIds(results);
-		assertThat(ids, contains(patientIdNull));
+		assertThat(ids).containsExactly(patientIdNull);
 
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		ourLog.info("Search SQL:\n{}", searchSql);
@@ -1984,7 +1982,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		map.setLoadSynchronous(true);
 		results = myPatientDao.search(map, mySrd);
 		ids = toUnqualifiedVersionlessIds(results);
-		assertThat(ids, contains(patientIdNull));
+		assertThat(ids).containsExactly(patientIdNull);
 
 		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		ourLog.info("Search SQL:\n{}", searchSql);
@@ -2000,7 +1998,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		map.setLoadSynchronous(true);
 		results = myPatientDao.search(map, mySrd);
 		ids = toUnqualifiedVersionlessIds(results);
-		assertThat(ids, contains(patientIdNull));
+		assertThat(ids).containsExactly(patientIdNull);
 
 		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		ourLog.info("Search SQL:\n{}", searchSql);
@@ -2016,7 +2014,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		map.setLoadSynchronous(true);
 		results = myPatientDao.search(map, mySrd);
 		ids = toUnqualifiedVersionlessIds(results);
-		assertThat(ids, contains(patientIdNull));
+		assertThat(ids).containsExactly(patientIdNull);
 
 		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		ourLog.info("Search SQL:\n{}", searchSql);
@@ -2048,7 +2046,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		map.setLoadSynchronous(true);
 		IBundleProvider results = myPatientDao.search(map, mySrd);
 		List<IIdType> ids = toUnqualifiedVersionlessIds(results);
-		assertThat(ids, contains(patientIdNull));
+		assertThat(ids).containsExactly(patientIdNull);
 
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
 		ourLog.info("Search SQL:\n{}", searchSql);
@@ -2086,11 +2084,11 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		myCaptureQueriesListener.clear();
 		IBundleProvider outcome = myPractitionerDao.search(params, mySrd);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread(1);
-		assertEquals(1, outcome.getResources(0, 1).size());
+		assertThat(outcome.getResources(0, 1)).hasSize(1);
 
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		ourLog.info("Search SQL:\n{}", searchSql);
-		assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID"), searchSql);
+		assertThat(StringUtils.countMatches(searchSql, "PARTITION_ID")).as(searchSql).isEqualTo(1);
 	}
 
 
@@ -2110,7 +2108,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		map.setLoadSynchronous(true);
 		IBundleProvider results = myPatientDao.search(map, mySrd);
 		List<IIdType> ids = toUnqualifiedVersionlessIds(results);
-		assertThat(ids, contains(patientIdNull, patientId1, patientId2));
+		assertThat(ids).containsExactly(patientIdNull, patientId1, patientId2);
 
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		ourLog.info("Search SQL:\n{}", searchSql);
@@ -2132,7 +2130,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		map.setLoadSynchronous(true);
 		IBundleProvider results = myPatientDao.search(map, mySrd);
 		List<IIdType> ids = toUnqualifiedVersionlessIds(results);
-		assertThat(ids, contains(patientIdNull));
+		assertThat(ids).containsExactly(patientIdNull);
 
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		ourLog.info("Search SQL:\n{}", searchSql);
@@ -2157,7 +2155,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		IBundleProvider results = myPatientDao.search(map, mySrd);
 		List<IIdType> ids = toUnqualifiedVersionlessIds(results);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertThat(ids, contains(patientId1));
+		assertThat(ids).containsExactly(patientId1);
 
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		ourLog.info("Search SQL:\n{}", searchSql);
@@ -2189,11 +2187,11 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			myCaptureQueriesListener.clear();
 			IBundleProvider results = myPatientDao.search(map, mySrd);
 			List<IIdType> ids = toUnqualifiedVersionlessIds(results);
-			assertThat(ids.toString(), ids, Matchers.containsInAnyOrder(patientId1, patientId2));
+			assertThat(ids).as(ids.toString()).containsExactlyInAnyOrder(patientId1, patientId2);
 
 			ourLog.info("Search SQL:\n{}", myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true));
 			String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
-			assertThat(searchSql, containsString("PARTITION_ID IN ('1','2')"));
+			assertThat(searchSql).contains("PARTITION_ID IN ('1','2')");
 			assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID"));
 		}
 
@@ -2205,12 +2203,12 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			IBundleProvider results = myPatientDao.search(map, mySrd);
 			List<IIdType> ids = toUnqualifiedVersionlessIds(results);
 			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-			assertThat(ids.toString(), ids, Matchers.containsInAnyOrder(patientId1, patientIdNull));
+			assertThat(ids).as(ids.toString()).containsExactlyInAnyOrder(patientId1, patientIdNull);
 
 			ourLog.info("Search SQL:\n{}", myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true));
 			String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
-			assertThat(searchSql, containsString("PARTITION_ID IS NULL"));
-			assertThat(searchSql, containsString("PARTITION_ID = '1'"));
+			assertThat(searchSql).contains("PARTITION_ID IS NULL");
+			assertThat(searchSql).contains("PARTITION_ID = '1'");
 			assertEquals(2, StringUtils.countMatches(searchSql, "PARTITION_ID"));
 		}
 	}
@@ -2267,7 +2265,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		map.setLoadSynchronous(true);
 		IBundleProvider results = myPatientDao.search(map, mySrd);
 		List<IIdType> ids = toUnqualifiedVersionlessIds(results);
-		assertThat(ids, contains(patientIdNull));
+		assertThat(ids).containsExactly(patientIdNull);
 
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		ourLog.info("Search SQL:\n{}", searchSql);
@@ -2296,7 +2294,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		IBundleProvider results = myPatientDao.search(map, mySrd);
 		List<IIdType> ids = toUnqualifiedVersionlessIds(results);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertThat(ids.toString(), ids, contains(patientId1));
+		assertThat(ids).as(ids.toString()).containsExactly(patientId1);
 
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		ourLog.info("Search SQL:\n{}", searchSql);
@@ -2334,7 +2332,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		List<IIdType> ids = toUnqualifiedVersionlessIds(results);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 
-		assertEquals(10, ids.size(), () -> ids.toString());
+		assertThat(ids.size()).as(() -> ids.toString()).isEqualTo(10);
 	}
 
 	@Test
@@ -2353,7 +2351,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		map.setLoadSynchronous(true);
 		IBundleProvider results = myPatientDao.search(map, mySrd);
 		List<IIdType> ids = toUnqualifiedVersionlessIds(results);
-		assertThat(ids, contains(patientIdNull, patientId1, patientId2));
+		assertThat(ids).containsExactly(patientIdNull, patientId1, patientId2);
 
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		ourLog.info("Search SQL:\n{}", searchSql);
@@ -2370,13 +2368,13 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		map.setLoadSynchronous(true);
 		results = myPatientDao.search(map, mySrd);
 		ids = toUnqualifiedVersionlessIds(results);
-		assertThat(ids, contains(patientIdNull, patientId1));
+		assertThat(ids).containsExactly(patientIdNull, patientId1);
 
 		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		ourLog.info("Search SQL:\n{}", searchSql);
-		assertEquals(0, StringUtils.countMatches(searchSql, "PARTITION_ID"), searchSql);
-		assertEquals(1, StringUtils.countMatches(searchSql, "TAG_SYSTEM = 'http://system'"), searchSql);
-		assertEquals(1, StringUtils.countMatches(searchSql, ".HASH_SYS_AND_VALUE ="), searchSql);
+		assertThat(StringUtils.countMatches(searchSql, "PARTITION_ID")).as(searchSql).isEqualTo(0);
+		assertThat(StringUtils.countMatches(searchSql, "TAG_SYSTEM = 'http://system'")).as(searchSql).isEqualTo(1);
+		assertThat(StringUtils.countMatches(searchSql, ".HASH_SYS_AND_VALUE =")).as(searchSql).isEqualTo(1);
 
 
 	}
@@ -2402,7 +2400,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID IS NULL"));
 		assertEquals(1, StringUtils.countMatches(searchSql, "TAG_SYSTEM = 'http://system'"));
 
-		assertThat(ids.toString(), ids, contains(patientIdNull));
+		assertThat(ids).as(ids.toString()).containsExactly(patientIdNull);
 	}
 
 	@Test
@@ -2422,7 +2420,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		map.setLoadSynchronous(true);
 		IBundleProvider results = myPatientDao.search(map, mySrd);
 		List<IIdType> ids = toUnqualifiedVersionlessIds(results);
-		assertThat(ids, contains(patientId1));
+		assertThat(ids).containsExactly(patientId1);
 
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		ourLog.info("Search SQL:\n{}", searchSql);
@@ -2444,7 +2442,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		map.setLoadSynchronous(true);
 		IBundleProvider results = myPatientDao.search(map, mySrd);
 		List<IIdType> ids = toUnqualifiedVersionlessIds(results);
-		assertThat(ids, contains(patientIdNull, patientId1, patientId2));
+		assertThat(ids).containsExactly(patientIdNull, patientId1, patientId2);
 
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		ourLog.info("Search SQL:\n{}", searchSql);
@@ -2468,7 +2466,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		IBundleProvider results = myPatientDao.search(map, mySrd);
 		List<IIdType> ids = toUnqualifiedVersionlessIds(results);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
-		assertThat(ids, contains(patientId1));
+		assertThat(ids).containsExactly(patientId1);
 
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		ourLog.info("Search SQL:\n{}", searchSql);
@@ -2495,7 +2493,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		map.setLoadSynchronous(true);
 		IBundleProvider results = myPatientDao.search(map, mySrd);
 		List<IIdType> ids = toUnqualifiedVersionlessIds(results);
-		assertThat(ids, contains(patientIdNull, patientId1, patientId2));
+		assertThat(ids).containsExactly(patientIdNull, patientId1, patientId2);
 
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		ourLog.info("Search SQL:\n{}", searchSql);
@@ -2520,7 +2518,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		map.setLoadSynchronous(true);
 		IBundleProvider results = myPatientDao.search(map, mySrd);
 		List<IIdType> ids = toUnqualifiedVersionlessIds(results);
-		assertThat(ids, contains(patientId1));
+		assertThat(ids).containsExactly(patientId1);
 
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		ourLog.info("Search SQL:\n{}", searchSql);
@@ -2530,48 +2528,50 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testSearch_UniqueParam_SearchAllPartitions() {
-		createUniqueCompositeSp();
+		createUniqueComboSp();
 
-		IIdType id = createPatient(withPartition(1), withBirthdate("2020-01-01"));
+		IIdType id = createPatient(withPartition(1), withBirthdate("2020-01-01"), withFamily("FAM"));
 
 		addReadAllPartitions();
 
 		myCaptureQueriesListener.clear();
 		SearchParameterMap map = new SearchParameterMap();
+		map.add(Patient.SP_FAMILY, new StringParam("FAM"));
 		map.add(Patient.SP_BIRTHDATE, new DateParam("2020-01-01"));
 		map.setLoadSynchronous(true);
 		IBundleProvider results = myPatientDao.search(map, mySrd);
 		List<IIdType> ids = toUnqualifiedVersionlessIds(results);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertThat(ids, contains(id));
+		assertThat(ids).containsExactly(id);
 
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		ourLog.info("Search SQL:\n{}", searchSql);
-		assertEquals(0, StringUtils.countMatches(searchSql, "PARTITION_ID"));
-		assertEquals(1, StringUtils.countMatches(searchSql, "IDX_STRING = 'Patient?birthdate=2020-01-01'"));
+		assertThat(searchSql).doesNotContain("PARTITION_ID");
+		assertThat(searchSql).containsOnlyOnce("IDX_STRING = 'Patient?birthdate=2020-01-01&family=FAM'");
 	}
 
 
 	@Test
 	public void testSearch_UniqueParam_SearchOnePartition() {
-		createUniqueCompositeSp();
+		createUniqueComboSp();
 
-		IIdType id = createPatient(withPartition(1), withBirthdate("2020-01-01"));
+		IIdType id = createPatient(withPartition(1), withBirthdate("2020-01-01"), withFamily("FAM"));
 
 		addReadPartition(1);
 		myCaptureQueriesListener.clear();
 		SearchParameterMap map = new SearchParameterMap();
+		map.add(Patient.SP_FAMILY, new StringParam("FAM"));
 		map.add(Patient.SP_BIRTHDATE, new DateParam("2020-01-01"));
 		map.setLoadSynchronous(true);
 		IBundleProvider results = myPatientDao.search(map, mySrd);
 		List<IIdType> ids = toUnqualifiedVersionlessIds(results);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertThat(ids, contains(id));
+		assertThat(ids).containsExactly(id);
 
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		ourLog.info("Search SQL:\n{}", searchSql);
-		assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID"));
-		assertEquals(1, StringUtils.countMatches(searchSql, "IDX_STRING = 'Patient?birthdate=2020-01-01'"));
+		assertThat(searchSql).containsOnlyOnce( "PARTITION_ID = '1'");
+		assertThat(searchSql).containsOnlyOnce("IDX_STRING = 'Patient?birthdate=2020-01-01&family=FAM'");
 
 		// Same query, different partition
 		addReadPartition(2);
@@ -2582,13 +2582,73 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		results = myPatientDao.search(map, mySrd);
 		ids = toUnqualifiedVersionlessIds(results);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertThat(ids, Matchers.empty());
+		assertThat(ids).isEmpty();
 
 	}
 
+
+	@ParameterizedTest
+	@ValueSource(strings = {"ALL", "ONE", "MANY"})
+	public void testSearch_NonUniqueComboParam(String theReadPartitions) {
+		createNonUniqueComboSp();
+
+		IIdType orgId = createOrganization(withId("A"), withPartition(myPartitionId), withName("My Org")).toUnqualifiedVersionless();
+		IIdType orgId2 = createOrganization(withId("B"), withPartition(myPartitionId2), withName("My Org")).toUnqualifiedVersionless();
+		// Matching
+		IIdType patientId = createPatient(withPartition(myPartitionId), withFamily("FAMILY"), withOrganization(orgId));
+		// Non matching
+		createPatient(withPartition(myPartitionId), withFamily("WRONG"), withOrganization(orgId));
+		createPatient(withPartition(myPartitionId2), withFamily("FAMILY"), withOrganization(orgId2));
+
+		logAllNonUniqueIndexes();
+
+		switch (theReadPartitions) {
+			case "ALL":
+				addReadAllPartitions();
+				break;
+			case "ONE":
+				addReadPartition(myPartitionId);
+				break;
+			case "MANY":
+				addReadPartition(myPartitionId, myPartitionId4);
+				break;
+			default:
+				throw new IllegalStateException();
+		}
+		myCaptureQueriesListener.clear();
+		SearchParameterMap map = new SearchParameterMap();
+		map.add(Patient.SP_FAMILY, new StringParam("FAMILY"));
+		map.add(Patient.SP_ORGANIZATION, new ReferenceParam(orgId));
+		map.setLoadSynchronous(true);
+		IBundleProvider results = myPatientDao.search(map, mySrd);
+		List<IIdType> ids = toUnqualifiedVersionlessIds(results);
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertThat(ids).containsExactly(patientId);
+
+		ourLog.info("Search SQL:\n{}", myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true));
+		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
+
+		switch (theReadPartitions) {
+			case "ALL":
+				assertThat(searchSql).doesNotContain("t0.PARTITION_ID");
+				break;
+			case "ONE":
+				assertThat(searchSql).contains("t0.PARTITION_ID = '1'");
+				break;
+			case "MANY":
+				assertThat(searchSql).contains("t0.PARTITION_ID IN ('1','4')");
+				break;
+			default:
+				throw new IllegalStateException();
+		}
+
+		assertThat(searchSql).containsOnlyOnce("t0.HASH_COMPLETE = '-2879121558074554863'");
+	}
+
+
 	@Test
 	public void testSearch_RefParam_TargetPid_SearchOnePartition() {
-		createUniqueCompositeSp();
+		createUniqueComboSp();
 
 		IIdType patientId = createPatient(withPartition(myPartitionId), withBirthdate("2020-01-01"));
 		IIdType observationId = createObservation(withPartition(myPartitionId), withSubject(patientId));
@@ -2601,14 +2661,14 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		IBundleProvider results = myObservationDao.search(map, mySrd);
 		List<IIdType> ids = toUnqualifiedVersionlessIds(results);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertThat(ids, contains(observationId));
+		assertThat(ids).containsExactly(observationId);
 
 		ourLog.info("Search SQL:\n{}", myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true));
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
-		assertEquals(1, StringUtils.countMatches(searchSql, "t0.PARTITION_ID = '1'"), searchSql);
-		assertEquals(1, StringUtils.countMatches(searchSql, "t0.SRC_PATH = 'Observation.subject'"), searchSql);
-		assertEquals(1, StringUtils.countMatches(searchSql, "t0.TARGET_RESOURCE_ID = '" + patientId.getIdPartAsLong() + "'"), searchSql);
-		assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID"), searchSql);
+		assertThat(StringUtils.countMatches(searchSql, "t0.PARTITION_ID = '1'")).as(searchSql).isEqualTo(1);
+		assertThat(StringUtils.countMatches(searchSql, "t0.SRC_PATH = 'Observation.subject'")).as(searchSql).isEqualTo(1);
+		assertThat(StringUtils.countMatches(searchSql, "t0.TARGET_RESOURCE_ID = '" + patientId.getIdPartAsLong() + "'")).as(searchSql).isEqualTo(1);
+		assertThat(StringUtils.countMatches(searchSql, "PARTITION_ID")).as(searchSql).isEqualTo(1);
 
 		// Same query, different partition
 		addReadPartition(2);
@@ -2619,13 +2679,13 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		results = myObservationDao.search(map, mySrd);
 		ids = toUnqualifiedVersionlessIds(results);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertThat(ids, Matchers.empty());
+		assertThat(ids).isEmpty();
 
 	}
 
 	@Test
 	public void testSearch_RefParam_TargetPid_SearchDefaultPartition() {
-		createUniqueCompositeSp();
+		createUniqueComboSp();
 
 		IIdType patientId = createPatient(withPartition(null), withBirthdate("2020-01-01"));
 		IIdType observationId = createObservation(withPartition(null), withSubject(patientId));
@@ -2638,7 +2698,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		map.setLoadSynchronous(true);
 		IBundleProvider results = myObservationDao.search(map, mySrd);
 		List<IIdType> ids = toUnqualifiedVersionlessIds(results);
-		assertThat(ids, contains(observationId));
+		assertThat(ids).containsExactly(observationId);
 
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
 		ourLog.info("Search SQL:\n{}", searchSql);
@@ -2656,13 +2716,13 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		results = myObservationDao.search(map, mySrd);
 		ids = toUnqualifiedVersionlessIds(results);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertThat(ids, Matchers.empty());
+		assertThat(ids).isEmpty();
 
 	}
 
 	@Test
 	public void testSearch_RefParam_TargetForcedId_SearchOnePartition() {
-		createUniqueCompositeSp();
+		createUniqueComboSp();
 
 		IIdType patientId = createPatient(withPartition(myPartitionId), withId("ONE"), withBirthdate("2020-01-01"));
 		IIdType observationId = createObservation(withPartition(myPartitionId), withSubject(patientId));
@@ -2675,12 +2735,12 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		IBundleProvider results = myObservationDao.search(map, mySrd);
 		List<IIdType> ids = toUnqualifiedVersionlessIds(results);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertThat(ids, contains(observationId));
+		assertThat(ids).containsExactly(observationId);
 
 		ourLog.info("Search SQL:\n{}", myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true));
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
-		assertEquals(1, StringUtils.countMatches(searchSql.toUpperCase(Locale.US), "PARTITION_ID = '1'"), searchSql);
-		assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID"), searchSql);
+		assertThat(StringUtils.countMatches(searchSql.toUpperCase(Locale.US), "PARTITION_ID = '1'")).as(searchSql).isEqualTo(1);
+		assertThat(StringUtils.countMatches(searchSql, "PARTITION_ID")).as(searchSql).isEqualTo(1);
 
 		// Same query, different partition
 		addReadPartition(2);
@@ -2691,7 +2751,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		results = myObservationDao.search(map, mySrd);
 		ids = toUnqualifiedVersionlessIds(results);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertThat(ids, Matchers.empty());
+		assertThat(ids).isEmpty();
 
 	}
 
@@ -2725,14 +2785,14 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		IBundleProvider outcome = myObservationDao.search(map, mySrd);
 		List<String> actual = toUnqualifiedVersionlessIdValues(outcome);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertThat(actual, containsInAnyOrder("Observation/OBS1", "Observation/OBS2"));
+		assertThat(actual).containsExactlyInAnyOrder("Observation/OBS1", "Observation/OBS2");
 
 	}
 
 
 	@Test
 	public void testSearch_RefParam_TargetForcedId_SearchDefaultPartition() {
-		createUniqueCompositeSp();
+		createUniqueComboSp();
 
 		IIdType patientId = createPatient(withPartition(null), withId("ONE"), withBirthdate("2020-01-01"));
 		IIdType observationId = createObservation(withPartition(null), withSubject(patientId));
@@ -2745,12 +2805,12 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		map.setLoadSynchronous(true);
 		IBundleProvider results = myObservationDao.search(map, mySrd);
 		List<IIdType> ids = toUnqualifiedVersionlessIds(results);
-		assertThat(ids, contains(observationId));
+		assertThat(ids).containsExactly(observationId);
 
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		ourLog.info("Search SQL:\n{}", searchSql);
-		assertEquals(1, StringUtils.countMatches(searchSql.toUpperCase(Locale.US), "PARTITION_ID IS NULL"), searchSql);
-		assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID"), searchSql);
+		assertThat(StringUtils.countMatches(searchSql.toUpperCase(Locale.US), "PARTITION_ID IS NULL")).as(searchSql).isEqualTo(1);
+		assertThat(StringUtils.countMatches(searchSql, "PARTITION_ID")).as(searchSql).isEqualTo(1);
 
 		// Same query, different partition
 		addReadPartition(2);
@@ -2761,7 +2821,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		results = myObservationDao.search(map, mySrd);
 		ids = toUnqualifiedVersionlessIds(results);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertThat(ids, Matchers.empty());
+		assertThat(ids).isEmpty();
 
 	}
 
@@ -2827,8 +2887,8 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		ourLog.debug("Resp: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertEquals(2, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
-		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false), containsString("esourcein0_.PARTITION_ID in ('1')"));
-		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false), containsString("HASH_SYS_AND_VALUE in ('7432183691485874662' , '-3772330830566471409'"));
+		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false)).contains("rispt1_0.PARTITION_ID in ('1')");
+		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false)).contains("rispt1_0.HASH_SYS_AND_VALUE in ('7432183691485874662','-3772330830566471409','-4132452001562191669')");
 		myCaptureQueriesListener.logInsertQueriesForCurrentThread();
 		assertEquals(45, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		myCaptureQueriesListener.logUpdateQueriesForCurrentThread();
@@ -2843,7 +2903,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		outcome = mySystemDao.transaction(mySrd, input.get());
 		ourLog.debug("Resp: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertEquals(9, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(8, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		myCaptureQueriesListener.logInsertQueriesForCurrentThread();
 		assertEquals(4, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		myCaptureQueriesListener.logUpdateQueriesForCurrentThread();
@@ -2860,7 +2920,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		outcome = mySystemDao.transaction(mySrd, input.get());
 		ourLog.debug("Resp: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertEquals(8, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(7, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		myCaptureQueriesListener.logInsertQueriesForCurrentThread();
 		assertEquals(4, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		myCaptureQueriesListener.logUpdateQueriesForCurrentThread();
@@ -2875,7 +2935,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		outcome = mySystemDao.transaction(mySrd, input.get());
 		ourLog.debug("Resp: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertEquals(6, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(5, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		myCaptureQueriesListener.logInsertQueriesForCurrentThread();
 		assertEquals(4, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		myCaptureQueriesListener.logUpdateQueriesForCurrentThread();
@@ -2898,14 +2958,14 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		Bundle output = mySystemDao.transaction(requestDetails, input);
 		myCaptureQueriesListener.logSelectQueries();
 
-		assertEquals(18, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
-		assertEquals(6607, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(17, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(6189, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(418, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 		assertEquals(2, myCaptureQueriesListener.countCommits());
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 
-		assertEquals(input.getEntry().size(), output.getEntry().size());
+		assertThat(output.getEntry()).hasSize(input.getEntry().size());
 
 		runInTransaction(()->{
 			assertEquals(437, myResourceTableDao.count());
@@ -2925,14 +2985,14 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		output = mySystemDao.transaction(requestDetails, input);
 		myCaptureQueriesListener.logSelectQueries();
 
-		assertEquals(29, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(26, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 		assertEquals(1, myCaptureQueriesListener.countCommits());
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 
-		assertEquals(input.getEntry().size(), output.getEntry().size());
+		assertThat(output.getEntry()).hasSize(input.getEntry().size());
 
 		runInTransaction(()->{
 			assertEquals(437, myResourceTableDao.count());
@@ -2974,24 +3034,24 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		IBundleProvider results = myPatientDao.history(id, null, null, null, mySrd);
 		assertEquals(2, results.sizeOrThrowNpe());
 		List<String> ids = toUnqualifiedIdValues(results);
-		assertThat(ids, contains(id.withVersion("2").getValue(), id.withVersion("1").getValue()));
+		assertThat(ids).containsExactly(id.withVersion("2").getValue(), id.withVersion("1").getValue());
 
-		assertEquals(3, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread()).hasSize(3);
 
 		// Resolve resource
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		ourLog.info("SQL:{}", searchSql);
-		assertEquals(1, countMatches(searchSql, "PARTITION_ID="), searchSql);
+		assertThat(countMatches(searchSql, "PARTITION_ID=")).as(searchSql).isEqualTo(1);
 
 		// Fetch history resource
 		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, true);
 		ourLog.info("SQL:{}", searchSql);
-		assertEquals(1, countMatches(searchSql, "PARTITION_ID in"), searchSql);
+		assertThat(countMatches(searchSql, "rht1_0.PARTITION_ID in")).as(searchSql).isEqualTo(1);
 
 		// Fetch history resource
 		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(2).getSql(true, true);
 		ourLog.info("SQL:{}", searchSql);
-		assertEquals(1, countMatches(searchSql, "PARTITION_ID in"), searchSql.replace(" ", "").toUpperCase());
+		assertThat(countMatches(searchSql, "rht1_0.PARTITION_ID in")).as(searchSql.replace(" ", "").toUpperCase()).isEqualTo(1);
 	}
 
 	@Test
@@ -3030,9 +3090,9 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		IBundleProvider results = myPatientDao.history(id, null, null, null, mySrd);
 		assertEquals(2, results.sizeOrThrowNpe());
 		List<String> ids = toUnqualifiedIdValues(results);
-		assertThat(ids, contains(id.withVersion("2").getValue(), id.withVersion("1").getValue()));
+		assertThat(ids).containsExactly(id.withVersion("2").getValue(), id.withVersion("1").getValue());
 
-		assertEquals(3, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread()).hasSize(3);
 
 		// Fetch history resource
 		String sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
@@ -3066,7 +3126,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		IBundleProvider results = myPatientDao.history(id, null, null, null, mySrd);
 		assertEquals(2, results.sizeOrThrowNpe());
 		List<String> ids = toUnqualifiedIdValues(results);
-		assertThat(ids, contains(id.withVersion("2").getValue(), id.withVersion("1").getValue()));
+		assertThat(ids).containsExactly(id.withVersion("2").getValue(), id.withVersion("1").getValue());
 	}
 
 	@Test
@@ -3095,20 +3155,20 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		IBundleProvider results = mySystemDao.history(null, null, null, mySrd);
 		assertEquals(2, results.sizeOrThrowNpe());
 		List<String> ids = toUnqualifiedIdValues(results);
-		assertThat(ids, contains(id1B.withVersion("1").getValue(), id1A.withVersion("1").getValue()));
+		assertThat(ids).containsExactly(id1B.withVersion("1").getValue(), id1A.withVersion("1").getValue());
 
-		assertEquals(2, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread()).hasSize(2);
 
 		// Count
 		ourLog.info("SQL:{}", myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true));
 		String sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false).toUpperCase();
-		assertEquals(1, countMatches(sql, "COUNT("), sql);
-		assertEquals(1, countMatches(sql, "PARTITION_ID IN ('1')"), sql);
+		assertThat(countMatches(sql, "COUNT(")).as(sql).isEqualTo(1);
+		assertThat(countMatches(sql, "RHT1_0.PARTITION_ID IN ('1')")).as(sql).isEqualTo(1);
 
 		// Fetch history
 		sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, false).toUpperCase();
 		ourLog.info("SQL:{}", sql);
-		assertEquals(1, countMatches(sql, "PARTITION_ID IN ('1')"), sql);
+		assertThat(countMatches(sql, "RHT1_0.PARTITION_ID IN ('1')")).as(sql).isEqualTo(1);
 
 	}
 
@@ -3127,20 +3187,20 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		IBundleProvider results = mySystemDao.history(null, null, null, mySrd);
 		assertEquals(2, results.sizeOrThrowNpe());
 		List<String> ids = toUnqualifiedIdValues(results);
-		assertThat(ids, contains(id1B.withVersion("1").getValue(), id1A.withVersion("1").getValue()));
+		assertThat(ids).containsExactly(id1B.withVersion("1").getValue(), id1A.withVersion("1").getValue());
 
-		assertEquals(2, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread()).hasSize(2);
 
 		// Count
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		ourLog.info("SQL:{}", searchSql);
-		assertEquals(1, countMatches(searchSql, "PARTITION_ID is null"), searchSql);
+		assertThat(countMatches(searchSql, "rht1_0.PARTITION_ID is null")).as(searchSql).isEqualTo(1);
 
 		// Fetch history resource
 		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, true);
 		ourLog.info("SQL:{}", searchSql);
-		assertEquals(0, countMatches(searchSql, "PARTITION_ID="), searchSql.replace(" ", "").toUpperCase());
-		assertEquals(0, countMatches(searchSql, "PARTITION_IDIN"), searchSql.replace(" ", "").toUpperCase());
+		assertThat(countMatches(searchSql, "PARTITION_ID=")).as(searchSql.replace(" ", "").toUpperCase()).isEqualTo(0);
+		assertThat(countMatches(searchSql, "PARTITION_IDIN")).as(searchSql.replace(" ", "").toUpperCase()).isEqualTo(0);
 	}
 
 	@Test
@@ -3164,7 +3224,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			IBundleProvider results = mySystemDao.history(null, null, null, mySrd);
 			assertEquals(4, results.sizeOrThrowNpe());
 			List<String> ids = toUnqualifiedVersionlessIdValues(results);
-			assertThat(ids, contains(id22, id21, idNull2, idNull1));
+			assertThat(ids).containsExactly(id22, id21, idNull2, idNull1);
 		}
 
 		// Multiple Partitions With Null
@@ -3174,7 +3234,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			IBundleProvider results = mySystemDao.history(null, null, null, mySrd);
 			assertEquals(4, results.sizeOrThrowNpe());
 			List<String> ids = toUnqualifiedVersionlessIdValues(results);
-			assertThat(ids, contains(id32, id22, id31, id21));
+			assertThat(ids).containsExactly(id32, id22, id31, id21);
 		}
 
 	}
@@ -3205,20 +3265,20 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		IBundleProvider results = myPatientDao.history(null, null, null, mySrd);
 		assertEquals(2, results.sizeOrThrowNpe());
 		List<String> ids = toUnqualifiedIdValues(results);
-		assertThat(ids, contains(id1B.withVersion("1").getValue(), id1A.withVersion("1").getValue()));
+		assertThat(ids).containsExactly(id1B.withVersion("1").getValue(), id1A.withVersion("1").getValue());
 
-		assertEquals(2, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread()).hasSize(2);
 
 		// Count
 		String sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false).toUpperCase();
 		ourLog.info("SQL:{}", sql);
-		assertEquals(1, countMatches(sql, "COUNT("), sql);
-		assertEquals(1, countMatches(sql, "PARTITION_ID IN ('1')"), sql);
+		assertThat(countMatches(sql, "COUNT(")).as(sql).isEqualTo(1);
+		assertThat(countMatches(sql, "RHT1_0.PARTITION_ID IN ('1')")).as(sql).isEqualTo(1);
 
 		// History
 		sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, false).toUpperCase();
 		ourLog.info("SQL:{}", sql);
-		assertEquals(1, countMatches(sql, "PARTITION_ID IN ('1')"), sql);
+		assertThat(countMatches(sql, "RHT1_0.PARTITION_ID IN ('1')")).as(sql).isEqualTo(1);
 	}
 
 
@@ -3237,19 +3297,19 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		IBundleProvider results = myPatientDao.history(null, null, null, mySrd);
 		assertEquals(2, results.sizeOrThrowNpe());
 		List<String> ids = toUnqualifiedIdValues(results);
-		assertThat(ids, contains(id1B.withVersion("1").getValue(), id1A.withVersion("1").getValue()));
+		assertThat(ids).containsExactly(id1B.withVersion("1").getValue(), id1A.withVersion("1").getValue());
 
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertEquals(2, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread()).hasSize(2);
 
 		// Resolve resource
 		String sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true).toUpperCase();
-		assertEquals(1, countMatches(sql, "PARTITION_ID IS NULL"));
+		assertThat(countMatches(sql, "RHT1_0.PARTITION_ID IS NULL")).as(sql).isEqualTo(1);
 		assertEquals(1, countMatches(sql, "PARTITION_ID"));
 
 		// Fetch history resource
 		sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, true).toUpperCase();
-		assertEquals(1, countMatches(sql, "PARTITION_ID IS NULL"));
+		assertThat(countMatches(sql, "RHT1_0.PARTITION_ID IS NULL")).as(sql).isEqualTo(1);
 
 	}
 
@@ -3296,8 +3356,13 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		LocalDate expMinus1 = theExpected.minusDays(1);
 		LocalDate expMinus2 = theExpected.minusDays(2);
 		LocalDate expPlus1 = theExpected.plusDays(1);
-		assertThat(theActual,
-			anyOf(equalTo(theExpected), equalTo(expMinus1), equalTo(expMinus2), equalTo(expPlus1)));
+		assertThat(theActual)
+			.satisfiesAnyOf(
+				arg -> assertThat(arg).isEqualTo(theExpected),
+				arg -> assertThat(arg).isEqualTo(expMinus1),
+				arg -> assertThat(arg).isEqualTo(expMinus2),
+				arg -> assertThat(arg).isEqualTo(expPlus1)
+			);
 	}
 
 }

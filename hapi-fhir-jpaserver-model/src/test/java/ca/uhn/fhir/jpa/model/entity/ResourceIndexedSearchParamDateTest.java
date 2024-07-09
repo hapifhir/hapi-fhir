@@ -3,15 +3,17 @@ package ca.uhn.fhir.jpa.model.entity;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.Calendar;
 import java.util.Date;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ResourceIndexedSearchParamDateTest {
 
@@ -42,9 +44,7 @@ public class ResourceIndexedSearchParamDateTest {
 		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate(new PartitionSettings(), "Patient", "SomeResource", null, null, null, null, "SomeValue");
 		ResourceIndexedSearchParamDate param2 = new ResourceIndexedSearchParamDate(new PartitionSettings(), "Patient", "SomeResource", null, null, null, null, "SomeValue");
 
-		assertTrue(param.equals(param2));
-		assertTrue(param2.equals(param));
-		assertEquals(param.hashCode(), param2.hashCode());
+		validateEquals(param, param2);
 	}
 
 	@Test
@@ -52,9 +52,7 @@ public class ResourceIndexedSearchParamDateTest {
 		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate(new PartitionSettings(), "Patient", "SomeResource", date1A, null, date2A, null, "SomeValue");
 		ResourceIndexedSearchParamDate param2 = new ResourceIndexedSearchParamDate(new PartitionSettings(), "Patient", "SomeResource", date1B, null, date2B, null, "SomeValue");
 
-		assertTrue(param.equals(param2));
-		assertTrue(param2.equals(param));
-		assertEquals(param.hashCode(), param2.hashCode());
+		validateEquals(param, param2);
 	}
 
 	@Test
@@ -62,9 +60,7 @@ public class ResourceIndexedSearchParamDateTest {
 		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate(new PartitionSettings(), "Patient", "SomeResource", timestamp1A, null, timestamp2A, null, "SomeValue");
 		ResourceIndexedSearchParamDate param2 = new ResourceIndexedSearchParamDate(new PartitionSettings(), "Patient", "SomeResource", timestamp1B, null, timestamp2B, null, "SomeValue");
 
-		assertTrue(param.equals(param2));
-		assertTrue(param2.equals(param));
-		assertEquals(param.hashCode(), param2.hashCode());
+		validateEquals(param, param2);
 	}
 
 	// Scenario that occurs when updating a resource with a date search parameter. One date will be a java.util.Date, the
@@ -74,9 +70,23 @@ public class ResourceIndexedSearchParamDateTest {
 		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate(new PartitionSettings(), "Patient", "SomeResource", date1A, null, date2A, null, "SomeValue");
 		ResourceIndexedSearchParamDate param2 = new ResourceIndexedSearchParamDate(new PartitionSettings(), "Patient", "SomeResource", timestamp1A, null, timestamp2A, null, "SomeValue");
 
-		assertTrue(param.equals(param2));
-		assertTrue(param2.equals(param));
-		assertEquals(param.hashCode(), param2.hashCode());
+		validateEquals(param, param2);
+	}
+
+	@Test
+	public void equalsIsTrueForOptimizedSearchParam() {
+		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate(new PartitionSettings(), "Patient", "SomeResource", date1A, null, date2A, null, "SomeValue");
+		ResourceIndexedSearchParamDate param2 = new ResourceIndexedSearchParamDate(new PartitionSettings(), "Patient", "SomeResource", date1A, null, date2A, null, "SomeValue");
+
+		param2.optimizeIndexStorage();
+
+		validateEquals(param, param2);
+	}
+
+	private void validateEquals(ResourceIndexedSearchParamDate theParam, ResourceIndexedSearchParamDate theParam2) {
+		assertEquals(theParam, theParam2);
+		assertEquals(theParam2, theParam);
+		assertEquals(theParam.hashCode(), theParam2.hashCode());
 	}
 
 	@Test
@@ -84,9 +94,7 @@ public class ResourceIndexedSearchParamDateTest {
 		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate(new PartitionSettings(), "Patient", "SomeResource", date1A, null, date2A, null, "SomeValue");
 		ResourceIndexedSearchParamDate param2 = new ResourceIndexedSearchParamDate(new PartitionSettings(), "Patient", "SomeResource", date2A, null, date1A, null, "SomeValue");
 
-		assertFalse(param.equals(param2));
-		assertFalse(param2.equals(param));
-		assertNotEquals(param.hashCode(), param2.hashCode());
+		validateNotEquals(param, param2);
 	}
 
 	@Test
@@ -94,9 +102,7 @@ public class ResourceIndexedSearchParamDateTest {
 		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate(new PartitionSettings(), "Patient", "SomeResource", date1A, null, date2A, null, "SomeValue");
 		ResourceIndexedSearchParamDate param2 = new ResourceIndexedSearchParamDate(new PartitionSettings(), "Patient", "SomeResource", null, null, null, null, "SomeValue");
 
-		assertFalse(param.equals(param2));
-		assertFalse(param2.equals(param));
-		assertNotEquals(param.hashCode(), param2.hashCode());
+		validateNotEquals(param, param2);
 	}
 
 	@Test
@@ -104,9 +110,7 @@ public class ResourceIndexedSearchParamDateTest {
 		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate(new PartitionSettings(), "Patient", "SomeResource", timestamp1A, null, timestamp2A, null, "SomeValue");
 		ResourceIndexedSearchParamDate param2 = new ResourceIndexedSearchParamDate(new PartitionSettings(), "Patient", "SomeResource", timestamp2A, null, timestamp1A, null, "SomeValue");
 
-		assertFalse(param.equals(param2));
-		assertFalse(param2.equals(param));
-		assertNotEquals(param.hashCode(), param2.hashCode());
+		validateNotEquals(param, param2);
 	}
 
 	@Test
@@ -114,14 +118,18 @@ public class ResourceIndexedSearchParamDateTest {
 		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate(new PartitionSettings(), "Patient", "SomeResource", date1A, null, date2A, null, "SomeValue");
 		ResourceIndexedSearchParamDate param2 = new ResourceIndexedSearchParamDate(new PartitionSettings(), "Patient", "SomeResource", timestamp2A, null, timestamp1A, null, "SomeValue");
 
-		assertFalse(param.equals(param2));
-		assertFalse(param2.equals(param));
-		assertNotEquals(param.hashCode(), param2.hashCode());
+		validateNotEquals(param, param2);
+	}
+
+	private void validateNotEquals(ResourceIndexedSearchParamDate theParam, ResourceIndexedSearchParamDate theParam2) {
+		assertNotEquals(theParam, theParam2);
+		assertNotEquals(theParam2, theParam);
+		assertThat(theParam2.hashCode()).isNotEqualTo(theParam.hashCode());
 	}
 
 
 	@Test
-	public void testEquals() {
+	public void testEqualsAndHashCode_withSameParams_equalsIsTrueAndHashCodeIsSame() {
 		ResourceIndexedSearchParamDate val1 = new ResourceIndexedSearchParamDate()
 			.setValueHigh(new Date(100000000L))
 			.setValueLow(new Date(111111111L));
@@ -132,9 +140,47 @@ public class ResourceIndexedSearchParamDateTest {
 			.setValueLow(new Date(111111111L));
 		val2.setPartitionSettings(new PartitionSettings());
 		val2.calculateHashes();
-		assertEquals(val1, val1);
-		assertEquals(val1, val2);
-		assertNotEquals(val1, null);
-		assertNotEquals(val1, "");
+		validateEquals(val1, val2);
+	}
+
+	@ParameterizedTest
+	@CsvSource({
+		"Patient,     param, 2018-04-25T14:05:15.953Z, 2019-04-25T14:05:15.953Z, false, " +
+		"Observation, param, 2018-04-25T14:05:15.953Z, 2019-04-25T14:05:15.953Z, false, ResourceType is different",
+		"Patient,     param, 2018-04-25T14:05:15.953Z, 2019-04-25T14:05:15.953Z, false,     " +
+		"Patient,     name,  2018-04-25T14:05:15.953Z, 2019-04-25T14:05:15.953Z, false, ParamName is different",
+		"Patient,     param, 2017-04-25T14:05:15.953Z, 2019-04-25T14:05:15.953Z, false, " +
+		"Patient,     param, 2018-04-25T14:05:15.953Z, 2019-04-25T14:05:15.953Z, false, LowDate is different",
+		"Patient,     param, 2018-04-25T14:05:15.953Z, 2019-04-25T14:05:15.953Z, false, " +
+		"Patient,     param, 2018-04-25T14:05:15.953Z, 2020-04-25T14:05:15.953Z, false, HighDate is different",
+		"Patient,     param, 2018-04-25T14:05:15.953Z, 2019-04-25T14:05:15.953Z, true, " +
+		"Patient,     param, 2018-04-25T14:05:15.953Z, 2019-04-25T14:05:15.953Z, false, Missing is different",
+	})
+	public void testEqualsAndHashCode_withDifferentParams_equalsIsFalseAndHashCodeIsDifferent(String theFirstResourceType,
+																							  String theFirstParamName,
+																							  String theFirstLowDate,
+																							  String theFirstHighDate,
+																							  boolean theFirstMissing,
+																							  String theSecondResourceType,
+																							  String theSecondParamName,
+																							  String theSecondLowDate,
+																							  String theSecondHighDate,
+																							  boolean theSecondMissing,
+																							  String theMessage) {
+		Date firstLowDate = Date.from(Instant.parse(theFirstLowDate));
+		Date firstHighDate = Date.from(Instant.parse(theFirstHighDate));
+		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate(new PartitionSettings(),
+			theFirstResourceType, theFirstParamName, firstLowDate, theFirstLowDate, firstHighDate, theFirstHighDate, null);
+		param.setMissing(theFirstMissing);
+
+		Date secondLowDate = Date.from(Instant.parse(theSecondLowDate));
+		Date secondHighDate = Date.from(Instant.parse(theSecondHighDate));
+		ResourceIndexedSearchParamDate param2 = new ResourceIndexedSearchParamDate(new PartitionSettings(),
+			theSecondResourceType, theSecondParamName, secondLowDate, theSecondLowDate, secondHighDate, theSecondHighDate, null);
+		param2.setMissing(theSecondMissing);
+
+		assertNotEquals(param, param2, theMessage);
+		assertNotEquals(param2, param, theMessage);
+		assertNotEquals(param.hashCode(), param2.hashCode(), theMessage);
 	}
 }

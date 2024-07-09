@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,9 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import com.google.common.collect.Lists;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -39,7 +41,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import javax.annotation.Nonnull;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
@@ -234,6 +235,11 @@ public class RuleBuilder implements IAuthRuleBuilder {
 					RequestPartitionId partitionId =
 							(RequestPartitionId) theResource.getUserData(Constants.RESOURCE_PARTITION_ID);
 					if (partitionId != null) {
+						if (partitionId.hasDefaultPartitionId()
+								&& myTenantIds.contains(ProviderConstants.DEFAULT_PARTITION_NAME)) {
+							return myOutcome;
+						}
+
 						String partitionNameOrNull = partitionId.getFirstPartitionNameOrNull();
 						if (partitionNameOrNull == null || !myTenantIds.contains(partitionNameOrNull)) {
 							return !myOutcome;
@@ -252,6 +258,7 @@ public class RuleBuilder implements IAuthRuleBuilder {
 		private final String myRuleName;
 		private RuleBuilderRuleOp myReadRuleBuilder;
 		private RuleBuilderRuleOp myWriteRuleBuilder;
+		private RuleBuilderBulkExport ruleBuilderBulkExport;
 
 		RuleBuilderRule(PolicyEnum theRuleMode, String theRuleName) {
 			myRuleMode = theRuleMode;
@@ -333,7 +340,10 @@ public class RuleBuilder implements IAuthRuleBuilder {
 
 		@Override
 		public IAuthRuleBuilderRuleBulkExport bulkExport() {
-			return new RuleBuilderBulkExport();
+			if (ruleBuilderBulkExport == null) {
+				ruleBuilderBulkExport = new RuleBuilderBulkExport();
+			}
+			return ruleBuilderBulkExport;
 		}
 
 		@Override
@@ -727,6 +737,20 @@ public class RuleBuilder implements IAuthRuleBuilder {
 				}
 
 				@Override
+				public IAuthRuleBuilderOperationNamedAndScoped onInstances(Collection<IIdType> theInstanceIds) {
+					Validate.notNull(theInstanceIds, "theInstanceIds must not be null");
+					theInstanceIds.forEach(instanceId -> Validate.notBlank(
+							instanceId.getResourceType(),
+							"at least one of theInstanceIds does not have a resource type"));
+					theInstanceIds.forEach(instanceId -> Validate.notBlank(
+							instanceId.getIdPart(), "at least one of theInstanceIds does not have an ID part"));
+
+					final OperationRule rule = createRule();
+					rule.appliesToInstances(new ArrayList<>(theInstanceIds));
+					return new RuleBuilderOperationNamedAndScoped(rule);
+				}
+
+				@Override
 				public IAuthRuleBuilderOperationNamedAndScoped onInstancesOfType(
 						Class<? extends IBaseResource> theType) {
 					validateType(theType);
@@ -859,6 +883,7 @@ public class RuleBuilder implements IAuthRuleBuilder {
 		}
 
 		private class RuleBuilderBulkExport implements IAuthRuleBuilderRuleBulkExport {
+			private RuleBulkExportImpl myRuleBulkExport;
 
 			@Override
 			public IAuthRuleBuilderRuleBulkExportWithTarget groupExportOnGroup(@Nonnull String theFocusResourceId) {
@@ -871,13 +896,59 @@ public class RuleBuilder implements IAuthRuleBuilder {
 			}
 
 			@Override
-			public IAuthRuleBuilderRuleBulkExportWithTarget patientExportOnPatient(@Nonnull String theFocusResourceId) {
-				RuleBulkExportImpl rule = new RuleBulkExportImpl(myRuleName);
-				rule.setAppliesToPatientExport(theFocusResourceId);
-				rule.setMode(myRuleMode);
-				myRules.add(rule);
+			public IAuthRuleBuilderRuleBulkExportWithTarget patientExportOnAllPatients() {
+				if (myRuleBulkExport == null) {
+					RuleBulkExportImpl rule = new RuleBulkExportImpl(myRuleName);
+					rule.setMode(myRuleMode);
+					myRuleBulkExport = rule;
+				}
+				myRuleBulkExport.setAppliesToPatientExportAllPatients();
 
-				return new RuleBuilderBulkExportWithTarget(rule);
+				// prevent duplicate rules being added
+				if (!myRules.contains(myRuleBulkExport)) {
+					myRules.add(myRuleBulkExport);
+				}
+
+				return new RuleBuilderBulkExportWithTarget(myRuleBulkExport);
+			}
+
+			@Override
+			public IAuthRuleBuilderRuleBulkExportWithTarget patientExportOnPatient(@Nonnull String theFocusResourceId) {
+				if (myRuleBulkExport == null) {
+					RuleBulkExportImpl rule = new RuleBulkExportImpl(myRuleName);
+					rule.setAppliesToPatientExport(theFocusResourceId);
+					rule.setMode(myRuleMode);
+					myRuleBulkExport = rule;
+				} else {
+					myRuleBulkExport.setAppliesToPatientExport(theFocusResourceId);
+				}
+
+				// prevent duplicate rules being added
+				if (!myRules.contains(myRuleBulkExport)) {
+					myRules.add(myRuleBulkExport);
+				}
+
+				return new RuleBuilderBulkExportWithTarget(myRuleBulkExport);
+			}
+
+			@Override
+			public IAuthRuleBuilderRuleBulkExportWithTarget patientExportOnPatientStrings(
+					@Nonnull Collection<String> theFocusResourceIds) {
+				if (myRuleBulkExport == null) {
+					RuleBulkExportImpl rule = new RuleBulkExportImpl(myRuleName);
+					rule.setAppliesToPatientExport(theFocusResourceIds);
+					rule.setMode(myRuleMode);
+					myRuleBulkExport = rule;
+				} else {
+					myRuleBulkExport.setAppliesToPatientExport(theFocusResourceIds);
+				}
+
+				// prevent duplicate rules being added
+				if (!myRules.contains(myRuleBulkExport)) {
+					myRules.add(myRuleBulkExport);
+				}
+
+				return new RuleBuilderBulkExportWithTarget(myRuleBulkExport);
 			}
 
 			@Override

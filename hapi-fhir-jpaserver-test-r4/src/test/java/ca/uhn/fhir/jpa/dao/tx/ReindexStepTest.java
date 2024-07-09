@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.tx;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
@@ -14,9 +15,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.IsNull.notNullValue;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -40,10 +42,12 @@ public class ReindexStepTest {
 	public void testMethodReindex_withRequestPartitionId_willExecuteWithPartitionId(){
 		// given
 		Integer expectedPartitionId = 1;
-		ResourceIdListWorkChunkJson data = new ResourceIdListWorkChunkJson();
+		RequestPartitionId partitionId = RequestPartitionId.fromPartitionId(expectedPartitionId);
+		ResourceIdListWorkChunkJson data = new ResourceIdListWorkChunkJson(List.of(), partitionId);
 		ReindexJobParameters reindexJobParameters = new ReindexJobParameters();
-		reindexJobParameters.setRequestPartitionId(RequestPartitionId.fromPartitionId(expectedPartitionId));
+		reindexJobParameters.setRequestPartitionId(partitionId);
 		when(myHapiTransactionService.withRequest(any())).thenCallRealMethod();
+		when(myHapiTransactionService.buildExecutionBuilder(any())).thenCallRealMethod();
 
 		// when
 		myReindexStep.doReindex(data, myDataSink, "index-id", "chunk-id", reindexJobParameters);
@@ -58,7 +62,7 @@ public class ReindexStepTest {
 		HapiTransactionService.ExecutionBuilder methodArgumentExceptionBuilder = builderArgumentCaptor.getValue();
 		RequestPartitionId methodArgumentRequestPartitionId = methodArgumentExceptionBuilder.getRequestPartitionIdForTesting();
 
-		assertThat(methodArgumentRequestPartitionId, notNullValue());
-		assertThat(methodArgumentRequestPartitionId.getFirstPartitionIdOrNull(), equalTo(theExpectedPartitionId));
+		assertNotNull(methodArgumentRequestPartitionId);
+		assertEquals(theExpectedPartitionId, methodArgumentRequestPartitionId.getFirstPartitionIdOrNull());
 	}
 }

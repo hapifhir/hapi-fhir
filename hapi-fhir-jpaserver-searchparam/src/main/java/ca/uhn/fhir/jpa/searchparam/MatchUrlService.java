@@ -1,8 +1,8 @@
 /*-
  * #%L
- * HAPI FHIR Search Parameters
+ * HAPI FHIR JPA - Search Parameters
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -127,12 +127,18 @@ public class MatchUrlService {
 						&& !paramList.isEmpty()
 						&& !paramList.get(0).isEmpty()) {
 					String totalModeEnumStr = paramList.get(0).get(0);
-					try {
-						paramMap.setSearchTotalMode(SearchTotalModeEnum.valueOf(totalModeEnumStr));
-					} catch (IllegalArgumentException e) {
-						throw new InvalidRequestException(Msg.code(2078) + "Invalid "
-								+ Constants.PARAM_SEARCH_TOTAL_MODE + " value: " + totalModeEnumStr);
+					SearchTotalModeEnum searchTotalMode = SearchTotalModeEnum.fromCode(totalModeEnumStr);
+					if (searchTotalMode == null) {
+						// We had an oops here supporting the UPPER CASE enum instead of the FHIR code for _total.
+						// Keep supporting it in case someone is using it.
+						try {
+							paramMap.setSearchTotalMode(SearchTotalModeEnum.valueOf(totalModeEnumStr));
+						} catch (IllegalArgumentException e) {
+							throw new InvalidRequestException(Msg.code(2078) + "Invalid "
+									+ Constants.PARAM_SEARCH_TOTAL_MODE + " value: " + totalModeEnumStr);
+						}
 					}
+					paramMap.setSearchTotalMode(searchTotalMode);
 				}
 			} else if (Constants.PARAM_OFFSET.equals(nextParamName)) {
 				if (paramList != null

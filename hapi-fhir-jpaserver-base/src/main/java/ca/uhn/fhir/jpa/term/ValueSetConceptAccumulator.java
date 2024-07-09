@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,11 +27,11 @@ import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSetConceptDesignation;
 import ca.uhn.fhir.util.ValidateUtil;
+import jakarta.annotation.Nonnull;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import javax.annotation.Nonnull;
 
 import static org.apache.commons.lang3.StringUtils.isAnyBlank;
 import static org.apache.commons.lang3.StringUtils.isNoneBlank;
@@ -47,6 +47,8 @@ public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 	private int myConceptsSaved;
 	private int myDesignationsSaved;
 	private int myConceptsExcluded;
+
+	private boolean mySupportLegacyLob = false;
 
 	public ValueSetConceptAccumulator(
 			@Nonnull TermValueSet theTermValueSet,
@@ -184,6 +186,10 @@ public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 		concept.setSourceConceptPid(theSourceConceptPid);
 		concept.setSourceConceptDirectParentPids(theSourceConceptDirectParentPids);
 
+		if (!mySupportLegacyLob) {
+			concept.clearSourceConceptDirectParentPidsLob();
+		}
+
 		myValueSetConceptDao.save(concept);
 		myValueSetDao.save(myTermValueSet.incrementTotalConcepts());
 
@@ -253,4 +259,9 @@ public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 	// TODO: DM 2019-07-16 - If so, we should also populate TermValueSetConceptProperty entities here.
 	// TODO: DM 2019-07-30 - Expansions don't include the properties themselves; they may be needed to facilitate
 	// filters and parameterized expansions.
+
+	public ValueSetConceptAccumulator setSupportLegacyLob(boolean theSupportLegacyLob) {
+		mySupportLegacyLob = theSupportLegacyLob;
+		return this;
+	}
 }

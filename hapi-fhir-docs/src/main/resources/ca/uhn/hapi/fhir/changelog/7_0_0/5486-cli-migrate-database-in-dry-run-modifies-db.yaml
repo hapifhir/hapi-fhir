@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 5486
+jira: SMILE-7457
+backport: 6.8.6,6.10.1
+title: "Previously, testing database migration with cli migrate-database command in dry-run mode would insert in the
+migration task table.  The issue has been fixed."

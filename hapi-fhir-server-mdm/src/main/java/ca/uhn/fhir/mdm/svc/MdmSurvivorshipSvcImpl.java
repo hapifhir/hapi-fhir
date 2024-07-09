@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,11 @@
 package ca.uhn.fhir.mdm.svc;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.mdm.api.IMdmLinkQuerySvc;
 import ca.uhn.fhir.mdm.api.IMdmSurvivorshipService;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
@@ -31,6 +33,7 @@ import ca.uhn.fhir.mdm.api.params.MdmQuerySearchParameters;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.model.mdmevents.MdmLinkJson;
 import ca.uhn.fhir.mdm.util.GoldenResourceHelper;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.util.TerserUtil;
@@ -39,9 +42,16 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.data.domain.Page;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 public class MdmSurvivorshipSvcImpl implements IMdmSurvivorshipService {
+	private static final Pattern IS_UUID =
+			Pattern.compile("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}");
 
 	protected final FhirContext myFhirContext;
 
@@ -52,17 +62,21 @@ public class MdmSurvivorshipSvcImpl implements IMdmSurvivorshipService {
 
 	private final IIdHelperService<?> myIIdHelperService;
 
+	private final HapiTransactionService myTransactionService;
+
 	public MdmSurvivorshipSvcImpl(
 			FhirContext theFhirContext,
 			GoldenResourceHelper theResourceHelper,
 			DaoRegistry theDaoRegistry,
 			IMdmLinkQuerySvc theLinkQuerySvc,
-			IIdHelperService<?> theIIdHelperService) {
+			IIdHelperService<?> theIIdHelperService,
+			HapiTransactionService theHapiTransactionService) {
 		myFhirContext = theFhirContext;
 		myGoldenResourceHelper = theResourceHelper;
 		myDaoRegistry = theDaoRegistry;
 		myMdmLinkQuerySvc = theLinkQuerySvc;
 		myIIdHelperService = theIIdHelperService;
+		myTransactionService = theHapiTransactionService;
 	}
 
 	// this logic is custom in smile vs hapi
@@ -113,11 +127,20 @@ public class MdmSurvivorshipSvcImpl implements IMdmSurvivorshipService {
 
 		// save it
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(goldenResource.fhirType());
-		dao.update(toSave, new SystemRequestDetails());
+
+		SystemRequestDetails requestDetails = new SystemRequestDetails();
+		// if using partitions, we should save to the correct partition
+		Object resourcePartitionIdObj = toSave.getUserData(Constants.RESOURCE_PARTITION_ID);
+		if (resourcePartitionIdObj instanceof RequestPartitionId) {
+			RequestPartitionId partitionId = (RequestPartitionId) resourcePartitionIdObj;
+			requestDetails.setRequestPartitionId(partitionId);
+		}
+		dao.update(toSave, requestDetails);
 
 		return (T) toSave;
 	}
 
+	@SuppressWarnings("rawtypes")
 	private Stream<IBaseResource> getMatchedSourceIdsByLinkUpdateDate(
 			IBaseResource theGoldenResource, MdmTransactionContext theMdmTransactionContext) {
 		String resourceType = theGoldenResource.fhirType();
@@ -129,20 +152,30 @@ public class MdmSurvivorshipSvcImpl implements IMdmSurvivorshipService {
 		searchParameters.setMatchResult(MdmMatchResultEnum.MATCH);
 		Page<MdmLinkJson> linksQuery = myMdmLinkQuerySvc.queryLinks(searchParameters, theMdmTransactionContext);
 
-		return linksQuery.get().map(link -> {
+		// we want it ordered
+		List<String> sourceIds = new ArrayList<>();
+		linksQuery.forEach(link -> {
 			String sourceId = link.getSourceId();
+			// we want only the id part, not the resource type
+			sourceId = sourceId.replace(resourceType + "/", "");
+			sourceIds.add(sourceId);
+		});
+		Map<String, IResourcePersistentId> sourceIdToPid = new HashMap<>();
+		if (!sourceIds.isEmpty()) {
+			// we cannot call resolveResourcePersistentIds if there are no ids to call it with
+			myTransactionService
+					.withRequest(new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.allPartitions()))
+					.execute(() -> {
+						Map<String, ? extends IResourcePersistentId> ids =
+								myIIdHelperService.resolveResourcePersistentIds(
+										RequestPartitionId.allPartitions(), resourceType, sourceIds);
+						sourceIdToPid.putAll(ids);
+					});
+		}
 
-			// +1 because of "/" in id: "ResourceType/Id"
-			IResourcePersistentId<?> pid = getResourcePID(sourceId.substring(resourceType.length() + 1), resourceType);
-
-			// this might be a bit unperformant
-			// but it depends how many links there are
-			// per golden resource (unlikely to be thousands)
+		return sourceIds.stream().map(id -> {
+			IResourcePersistentId<?> pid = sourceIdToPid.get(id);
 			return dao.readByPid(pid);
 		});
-	}
-
-	private IResourcePersistentId<?> getResourcePID(String theId, String theResourceType) {
-		return myIIdHelperService.newPidFromStringIdAndResourceName(theId, theResourceType);
 	}
 }

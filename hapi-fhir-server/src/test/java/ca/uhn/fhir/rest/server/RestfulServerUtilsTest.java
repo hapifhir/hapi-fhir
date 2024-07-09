@@ -1,13 +1,20 @@
 package ca.uhn.fhir.rest.server;
 
-import ca.uhn.fhir.rest.api.*;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.DeleteCascadeModeEnum;
+import ca.uhn.fhir.rest.api.PreferHandlingEnum;
+import ca.uhn.fhir.rest.api.PreferHeader;
+import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -15,13 +22,17 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import static ca.uhn.fhir.rest.api.RequestTypeEnum.GET;
+import static ca.uhn.fhir.rest.api.RequestTypeEnum.POST;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -47,14 +58,14 @@ public class RestfulServerUtilsTest {
 	@Test
 	public void testParsePreferAsync() {
 		PreferHeader header = RestfulServerUtils.parsePreferHeader(null, "respond-async");
-		assertEquals(null, header.getReturn());
+		assertNull(header.getReturn());
 		assertTrue(header.getRespondAsync());
 	}
 
 	@Test
 	public void testParseHandlingLenient() {
 		PreferHeader header = RestfulServerUtils.parsePreferHeader(null, "handling=lenient");
-		assertEquals(null, header.getReturn());
+		assertNull(header.getReturn());
 		assertFalse(header.getRespondAsync());
 		assertEquals(PreferHandlingEnum.LENIENT, header.getHanding());
 	}
@@ -107,8 +118,7 @@ public class RestfulServerUtilsTest {
 		if (theExpectedMaxRounds != null && theExpectedMaxRounds == -1) {
 			try {
 				RestfulServerUtils.extractDeleteCascadeParameter(myRequestDetails);
-				fail();
-			} catch (InvalidRequestException e) {
+				fail();			} catch (InvalidRequestException e) {
 				// good
 			}
 		} else {
@@ -138,17 +148,44 @@ public class RestfulServerUtilsTest {
 		//When
 		String linkSelf = RestfulServerUtils.createLinkSelf(baseUrl, servletRequestDetails);
 		//Then
-		assertThat(linkSelf, is(containsString("http://localhost:8000/$my-operation?")));
-		assertThat(linkSelf, is(containsString("_format=json")));
-		assertThat(linkSelf, is(containsString("_count=10")));
-		assertThat(linkSelf, is(containsString("_offset=100")));
+		assertThat(linkSelf).contains("http://localhost:8000/$my-operation?");
+		assertThat(linkSelf).contains("_format=json");
+		assertThat(linkSelf).contains("_count=10");
+		assertThat(linkSelf).contains("_offset=100");
 
 
 		//When
 		String linkSelfWithoutGivenParameters = RestfulServerUtils.createLinkSelfWithoutGivenParameters(baseUrl, servletRequestDetails, paramsToRemove);
 		//Then
-		assertThat(linkSelfWithoutGivenParameters, is(containsString("http://localhost:8000/$my-operation?")));
-		assertThat(linkSelfWithoutGivenParameters, is(containsString("_format=json")));
+		assertThat(linkSelfWithoutGivenParameters).contains("http://localhost:8000/$my-operation?");
+		assertThat(linkSelfWithoutGivenParameters).contains("_format=json");
+	}
 
+	@ParameterizedTest
+	@MethodSource("testParameters")
+	public void testCreateSelfLinks_withDifferentResourcePathAndTenantId(String theServerBaseUrl, String theRequestPath,
+	String theTenantId, String theExpectedUrl) {
+		//When
+		ServletRequestDetails servletRequestDetails = new ServletRequestDetails();
+		servletRequestDetails.setRequestType(POST);
+		servletRequestDetails.setTenantId(StringUtils.defaultString(theTenantId));
+		servletRequestDetails.setRequestPath(StringUtils.defaultString(theRequestPath));
+
+		//Then
+		String linkSelfWithoutGivenParameters = RestfulServerUtils.createLinkSelfWithoutGivenParameters(theServerBaseUrl, servletRequestDetails, null);
+		//Test
+		assertEquals(theExpectedUrl, linkSelfWithoutGivenParameters);
+	}
+	static Stream<Arguments> testParameters(){
+		return Stream.of(
+			Arguments.of("http://localhost:8000/Partition-B","" ,"Partition-B","http://localhost:8000/Partition-B"),
+			Arguments.of("http://localhost:8000/Partition-B","Partition-B" ,"Partition-B","http://localhost:8000/Partition-B"),
+			Arguments.of("http://localhost:8000/Partition-B","Partition-B/Patient" ,"Partition-B","http://localhost:8000/Partition-B/Patient"),
+			Arguments.of("http://localhost:8000/Partition-B","Partition-B/$my-operation" ,"Partition-B","http://localhost:8000/Partition-B/$my-operation"),
+			Arguments.of("http://localhost:8000","","","http://localhost:8000"),
+			Arguments.of("", "","",""),
+			Arguments.of("http://localhost:8000","Patient","","http://localhost:8000/Patient"),
+			Arguments.of("http://localhost:8000/Patient","","","http://localhost:8000/Patient")
+		);
 	}
 }

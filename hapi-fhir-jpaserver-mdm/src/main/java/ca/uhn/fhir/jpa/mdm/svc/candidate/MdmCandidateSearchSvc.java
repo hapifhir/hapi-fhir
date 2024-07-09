@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server - Master Data Management
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -159,7 +159,8 @@ public class MdmCandidateSearchSvc {
 				myCandidateSearcher.search(theResourceType, resourceCriteria, theRequestPartitionId);
 		if (!bundleProvider.isPresent()) {
 			throw new TooManyCandidatesException(Msg.code(762) + "More than " + myMdmSettings.getCandidateSearchLimit()
-					+ " candidate matches found for " + resourceCriteria + ".  Aborting mdm matching.");
+					+ " candidate matches found for " + resourceCriteria + ".  Aborting mdm matching. Updating the "
+					+ "candidate search parameters is strongly recommended for better performance of MDM.");
 		}
 		List<IBaseResource> resources = bundleProvider.get().getAllResources();
 

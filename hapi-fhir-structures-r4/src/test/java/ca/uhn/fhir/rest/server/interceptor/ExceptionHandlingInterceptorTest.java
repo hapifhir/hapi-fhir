@@ -11,30 +11,20 @@ import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
-import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
-import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
-import org.hamcrest.core.StringContains;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -42,9 +32,8 @@ import org.opentest4j.AssertionFailedError;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ExceptionHandlingInterceptorTest {
@@ -85,8 +74,8 @@ public class ExceptionHandlingInterceptorTest {
 			ourLog.info(responseContent);
 			assertEquals(500, status.getStatusLine().getStatusCode());
 			OperationOutcome oo = (OperationOutcome) ourCtx.newXmlParser().parseResource(responseContent);
-			assertThat(oo.getIssueFirstRep().getDiagnosticsElement().getValue(), StringContains.containsString("Exception Text"));
-			assertThat(oo.getIssueFirstRep().getDiagnosticsElement().getValue(), (StringContains.containsString("InternalErrorException: Exception Text")));
+			assertThat(oo.getIssueFirstRep().getDiagnosticsElement().getValue()).contains("Exception Text");
+			assertThat(oo.getIssueFirstRep().getDiagnosticsElement().getValue()).contains("InternalErrorException: Exception Text");
 		}
 	}
 
@@ -110,7 +99,7 @@ public class ExceptionHandlingInterceptorTest {
 		assertEquals(500, status.getStatusLine().getStatusCode());
 		OperationOutcome oo = (OperationOutcome) ourCtx.newXmlParser().parseResource(responseContent);
 		ourLog.debug(ourCtx.newXmlParser().encodeResourceToString(oo));
-		assertThat(oo.getIssueFirstRep().getDiagnosticsElement().getValue(), StringContains.containsString("Simulated IOException"));
+		assertThat(oo.getIssueFirstRep().getDiagnosticsElement().getValue()).contains("Simulated IOException");
 	}
 
 	@Test
@@ -123,8 +112,8 @@ public class ExceptionHandlingInterceptorTest {
 			ourLog.info(responseContent);
 			assertEquals(500, status.getStatusLine().getStatusCode());
 			OperationOutcome oo = (OperationOutcome) ourCtx.newXmlParser().parseResource(responseContent);
-			assertThat(oo.getIssueFirstRep().getDiagnosticsElement().getValue(), StringContains.containsString("Exception Text"));
-			assertThat(oo.getIssueFirstRep().getDiagnosticsElement().getValue(), (StringContains.containsString("InternalErrorException: Exception Text")));
+			assertThat(oo.getIssueFirstRep().getDiagnosticsElement().getValue()).contains("Exception Text");
+			assertThat(oo.getIssueFirstRep().getDiagnosticsElement().getValue()).contains("InternalErrorException: Exception Text");
 		}
 	}
 

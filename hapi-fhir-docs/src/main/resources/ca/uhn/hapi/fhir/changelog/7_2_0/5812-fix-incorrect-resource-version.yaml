@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 5812
+title: "Previously, the 'planDefinition' resource parameter for the Dstu3 version of PlanDefinition/$apply was incorrectly defined as an R4 resource.  This issue has been fixed."

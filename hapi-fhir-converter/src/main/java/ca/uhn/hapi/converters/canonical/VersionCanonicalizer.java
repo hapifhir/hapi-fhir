@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Converter
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import ca.uhn.fhir.util.HapiExtensions;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_10_40;
 import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_10_50;
@@ -69,7 +70,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -250,7 +250,8 @@ public class VersionCanonicalizer {
 		String packageUserData = (String) theResource.getUserData("package");
 		if (packageUserData != null) {
 			retVal.setUserData("package", packageUserData);
-			retVal.setSourcePackage(new PackageInformation(packageUserData, new Date()));
+			retVal.setSourcePackage(new PackageInformation(
+					packageUserData, theResource.getStructureFhirVersionEnum().getFhirVersionString(), new Date()));
 		}
 		return retVal;
 	}
@@ -458,7 +459,7 @@ public class VersionCanonicalizer {
 		@Override
 		public IBaseParameters parametersFromCanonical(Parameters theParameters) {
 			Resource converted = VersionConvertorFactory_10_40.convertResource(theParameters, ADVISOR_10_40);
-			return (IBaseParameters) reencodeToHl7Org(converted);
+			return (IBaseParameters) reencodeFromHl7Org(converted);
 		}
 
 		@Override
@@ -470,7 +471,7 @@ public class VersionCanonicalizer {
 		@Override
 		public IBaseResource structureDefinitionFromCanonical(StructureDefinition theResource) {
 			Resource converted = VersionConvertorFactory_10_50.convertResource(theResource, ADVISOR_10_50);
-			return reencodeToHl7Org(converted);
+			return reencodeFromHl7Org(converted);
 		}
 
 		@Override
@@ -514,7 +515,7 @@ public class VersionCanonicalizer {
 		@Override
 		public IBaseConformance capabilityStatementFromCanonical(CapabilityStatement theResource) {
 			Resource converted = VersionConvertorFactory_10_50.convertResource(theResource, ADVISOR_10_50);
-			return (IBaseConformance) reencodeToHl7Org(converted);
+			return (IBaseConformance) reencodeFromHl7Org(converted);
 		}
 
 		private Resource reencodeToHl7Org(IBaseResource theInput) {

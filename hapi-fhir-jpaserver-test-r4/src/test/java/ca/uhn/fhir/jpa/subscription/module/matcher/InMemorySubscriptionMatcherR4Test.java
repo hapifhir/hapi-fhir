@@ -1,8 +1,12 @@
 package ca.uhn.fhir.jpa.subscription.module.matcher;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
@@ -38,13 +42,9 @@ import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.param.UriParam;
-import ca.uhn.fhir.rest.param.UriParamQualifierEnum;
-import org.apache.commons.io.Charsets;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.Basic;
-import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Condition;
@@ -54,15 +54,12 @@ import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Enumerations;
-import org.hl7.fhir.r4.model.HealthcareService;
 import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.InsurancePlan;
 import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.MedicationAdministration;
 import org.hl7.fhir.r4.model.MolecularSequence;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
-import org.hl7.fhir.r4.model.OrganizationAffiliation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.PractitionerRole;
@@ -86,21 +83,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
 import java.math.BigDecimal;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
+
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {TestR4Config.class, TestHSearchAddInConfig.NoFT.class})
@@ -128,15 +120,15 @@ public class InMemorySubscriptionMatcherR4Test {
 
 	private void assertMatched(Resource resource, SearchParameterMap params) {
 		InMemoryMatchResult result = match(resource, params);
-		assertTrue(result.supported(), result.getUnsupportedReason());
+		assertThat(result.supported()).as(result.getUnsupportedReason()).isTrue();
 		assertTrue(result.matched());
 		assertEquals(SubscriptionMatchingStrategy.IN_MEMORY, mySubscriptionStrategyEvaluator.determineStrategy(getCriteria(resource, params)));
 	}
 
 	private void assertNotMatched(Resource theResource, SearchParameterMap theParams) {
 		InMemoryMatchResult result = match(theResource, theParams);
-		assertTrue(result.supported(), result.getUnsupportedReason());
-		assertFalse(result.matched(), "Failed on ID: " + theResource.getId());
+		assertThat(result.supported()).as(result.getUnsupportedReason()).isTrue();
+		assertThat(result.matched()).as("Failed on ID: " + theResource.getId()).isFalse();
 		assertEquals(SubscriptionMatchingStrategy.IN_MEMORY, mySubscriptionStrategyEvaluator.determineStrategy(getCriteria(theResource, theParams)));
 	}
 
@@ -734,7 +726,7 @@ public class InMemorySubscriptionMatcherR4Test {
 	@Test
 	public void testSearchStringParamReallyLong() {
 		String methodName = "testSearchStringParamReallyLong";
-		String value = StringUtils.rightPad(methodName, 200, 'a');
+		String value = StringUtils.rightPad(methodName, ResourceIndexedSearchParamString.MAX_LENGTH, 'a');
 
 		Patient patient = new Patient();
 		patient.addIdentifier().setSystem("urn:system").setValue("001");

@@ -4,6 +4,8 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.test.BaseFhirVersionParameterizedTest;
 import com.google.common.net.MediaType;
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.core.Response;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,19 +15,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.SSLException;
-import javax.net.ssl.SSLHandshakeException;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import static org.hamcrest.CoreMatchers.hasItem;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.IsNot.not;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+
 
 /**
  * Created by Sebastien Riviere on 31/07/2017.
@@ -57,7 +55,7 @@ public class JaxRsRestfulClientFactoryTest extends BaseFhirVersionParameterizedT
 		final Client result = factory.getNativeClientClient();
 		assertNotNull(result);
 		ourLog.info("Classes: {}", result.getConfiguration().getClasses());
-		assertThat(result.getConfiguration().getClasses(), not(hasItem(ca.uhn.fhir.jaxrs.client.MyFilter.class)));
+		assertThat(result.getConfiguration().getClasses()).doesNotContain(ca.uhn.fhir.jaxrs.client.MyFilter.class);
 	}
 
 	@Test
@@ -66,7 +64,7 @@ public class JaxRsRestfulClientFactoryTest extends BaseFhirVersionParameterizedT
 		final Client result = factory.getNativeClientClient();
 		assertNotNull(result);
 		ourLog.info("Classes: {}", result.getConfiguration().getClasses());
-		assertThat(result.getConfiguration().getClasses(), hasItem(ca.uhn.fhir.jaxrs.client.MyFilter.class));
+		assertThat(result.getConfiguration().getClasses()).contains(ca.uhn.fhir.jaxrs.client.MyFilter.class);
 	}
 
 	@ParameterizedTest

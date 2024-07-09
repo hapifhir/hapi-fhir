@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,8 @@ import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
 import ca.uhn.fhir.rest.api.server.IPreResourceShowDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.ResponseDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -38,6 +40,8 @@ import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationConstants;
 import ca.uhn.fhir.rest.server.util.ICachedSearchDetails;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.IModelVisitor2;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -178,18 +182,29 @@ public class ConsentInterceptor {
 		}
 	}
 
+	/**
+	 * Check if this request is eligible for cached search results.
+	 * We can't use a cached result if consent may use canSeeResource.
+	 * This checks for AUTHORIZED requests, and the responses from shouldProcessCanSeeResource()
+	 * to see if this holds.
+	 * @return may the request be satisfied from cache.
+	 */
 	@Hook(value = Pointcut.STORAGE_PRECHECK_FOR_CACHED_SEARCH)
-	public boolean interceptPreCheckForCachedSearch(RequestDetails theRequestDetails) {
-		if (isRequestAuthorized(theRequestDetails)) {
-			return true;
-		}
-		return false;
+	public boolean interceptPreCheckForCachedSearch(@Nonnull RequestDetails theRequestDetails) {
+		return !isProcessCanSeeResource(theRequestDetails, null);
 	}
 
+	/**
+	 * Check if the search results from this request might be reused by later searches.
+	 * We can't use a cached result if consent may use canSeeResource.
+	 * This checks for AUTHORIZED requests, and the responses from shouldProcessCanSeeResource()
+	 * to see if this holds.
+	 * If not, marks the result as single-use.
+	 */
 	@Hook(value = Pointcut.STORAGE_PRESEARCH_REGISTERED)
 	public void interceptPreSearchRegistered(
 			RequestDetails theRequestDetails, ICachedSearchDetails theCachedSearchDetails) {
-		if (!isRequestAuthorized(theRequestDetails)) {
+		if (isProcessCanSeeResource(theRequestDetails, null)) {
 			theCachedSearchDetails.setCannotBeReused();
 		}
 	}
@@ -197,28 +212,10 @@ public class ConsentInterceptor {
 	@Hook(value = Pointcut.STORAGE_PREACCESS_RESOURCES)
 	public void interceptPreAccess(
 			RequestDetails theRequestDetails, IPreResourceAccessDetails thePreResourceAccessDetails) {
-		if (isRequestAuthorized(theRequestDetails)) {
-			return;
-		}
-		if (isSkipServiceForRequest(theRequestDetails)) {
-			return;
-		}
-		if (myConsentService.isEmpty()) {
-			return;
-		}
 
-		// First check if we should be calling canSeeResource for the individual
-		// consent services
+		// Flags for each service
 		boolean[] processConsentSvcs = new boolean[myConsentService.size()];
-		boolean processAnyConsentSvcs = false;
-		for (int consentSvcIdx = 0; consentSvcIdx < myConsentService.size(); consentSvcIdx++) {
-			IConsentService nextService = myConsentService.get(consentSvcIdx);
-
-			boolean shouldCallCanSeeResource =
-					nextService.shouldProcessCanSeeResource(theRequestDetails, myContextConsentServices);
-			processAnyConsentSvcs |= shouldCallCanSeeResource;
-			processConsentSvcs[consentSvcIdx] = shouldCallCanSeeResource;
-		}
+		boolean processAnyConsentSvcs = isProcessCanSeeResource(theRequestDetails, processConsentSvcs);
 
 		if (!processAnyConsentSvcs) {
 			return;
@@ -260,6 +257,39 @@ public class ConsentInterceptor {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Is canSeeResource() active in any services?
+	 * @param theProcessConsentSvcsFlags filled in with the responses from shouldProcessCanSeeResource each service
+	 * @return true of any service responded true to shouldProcessCanSeeResource()
+	 */
+	private boolean isProcessCanSeeResource(
+			@Nonnull RequestDetails theRequestDetails, @Nullable boolean[] theProcessConsentSvcsFlags) {
+		if (isRequestAuthorized(theRequestDetails)) {
+			return false;
+		}
+		if (isSkipServiceForRequest(theRequestDetails)) {
+			return false;
+		}
+		if (myConsentService.isEmpty()) {
+			return false;
+		}
+
+		if (theProcessConsentSvcsFlags == null) {
+			theProcessConsentSvcsFlags = new boolean[myConsentService.size()];
+		}
+		Validate.isTrue(theProcessConsentSvcsFlags.length == myConsentService.size());
+		boolean processAnyConsentSvcs = false;
+		for (int consentSvcIdx = 0; consentSvcIdx < myConsentService.size(); consentSvcIdx++) {
+			IConsentService nextService = myConsentService.get(consentSvcIdx);
+
+			boolean shouldCallCanSeeResource =
+					nextService.shouldProcessCanSeeResource(theRequestDetails, myContextConsentServices);
+			processAnyConsentSvcs |= shouldCallCanSeeResource;
+			theProcessConsentSvcsFlags[consentSvcIdx] = shouldCallCanSeeResource;
+		}
+		return processAnyConsentSvcs;
 	}
 
 	@Hook(value = Pointcut.STORAGE_PRESHOW_RESOURCES)
@@ -469,6 +499,37 @@ public class ConsentInterceptor {
 		}
 	}
 
+	protected RequestDetails getRequestDetailsForCurrentExportOperation(
+			BulkExportJobParameters theParameters, IBaseResource theBaseResource) {
+		// bulk exports are system operations
+		SystemRequestDetails details = new SystemRequestDetails();
+		return details;
+	}
+
+	@Hook(value = Pointcut.STORAGE_BULK_EXPORT_RESOURCE_INCLUSION)
+	public boolean shouldBulkExportIncludeResource(BulkExportJobParameters theParameters, IBaseResource theResource) {
+		RequestDetails requestDetails = getRequestDetailsForCurrentExportOperation(theParameters, theResource);
+
+		for (IConsentService next : myConsentService) {
+			ConsentOutcome nextOutcome = next.willSeeResource(requestDetails, theResource, myContextConsentServices);
+
+			ConsentOperationStatusEnum status = nextOutcome.getStatus();
+			switch (status) {
+				case AUTHORIZED:
+				case PROCEED:
+					// go to the next
+					break;
+				case REJECT:
+					// if any consent service rejects,
+					// reject the resource
+					return false;
+			}
+		}
+
+		// default is to include the resource
+		return true;
+	}
+
 	private boolean isRequestAuthorized(RequestDetails theRequestDetails) {
 		boolean retVal = false;
 		if (theRequestDetails != null) {
@@ -487,11 +548,11 @@ public class ConsentInterceptor {
 	}
 
 	private boolean isMetaOperation(RequestDetails theRequestDetails) {
-		return OPERATION_META.equals(theRequestDetails.getOperation());
+		return theRequestDetails != null && OPERATION_META.equals(theRequestDetails.getOperation());
 	}
 
 	private boolean isMetadataPath(RequestDetails theRequestDetails) {
-		return URL_TOKEN_METADATA.equals(theRequestDetails.getRequestPath());
+		return theRequestDetails != null && URL_TOKEN_METADATA.equals(theRequestDetails.getRequestPath());
 	}
 
 	private void validateParameter(Map<String, String[]> theParameterMap) {

@@ -17,18 +17,17 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.provider.HashMapResourceProvider;
+import org.eclipse.jetty.ee10.webapp.WebAppContext;
+import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.handler.HandlerCollection;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
-import org.eclipse.jetty.webapp.WebAppContext;
+import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
+import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.Patient;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -61,7 +60,7 @@ public class OverlayTestApp {
 			WebAppContext overlayHandler = new WebAppContext();
 			overlayHandler.setContextPath("/testpage/base");
 			overlayHandler.setDescriptor("hapi-fhir-testpage-overlay/src/test/resources/web.xml");
-			overlayHandler.setResourceBase("hapi-fhir-testpage-overlay/src/main/webapp");
+			overlayHandler.setBaseResourceAsString("hapi-fhir-testpage-overlay/src/main/webapp");
 			overlayHandler.setParentLoaderPriority(true);
 
 			FhirContext ctx = FhirContext.forR4Cached();
@@ -76,7 +75,7 @@ public class OverlayTestApp {
 			servletHolder.setServlet(restfulServer);
 			proxyHandler.addServlet(servletHolder, "/fhir/*");
 
-			server.setHandler(new HandlerCollection(overlayHandler, proxyHandler));
+			server.setHandler(new Handler.Sequence(overlayHandler, proxyHandler));
 
 			server.start();
 

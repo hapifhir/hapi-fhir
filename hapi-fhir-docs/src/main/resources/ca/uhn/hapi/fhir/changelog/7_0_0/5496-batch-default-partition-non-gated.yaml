@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 5496
+title: "Ensure batch jobs target the default partition for non-gated steps."

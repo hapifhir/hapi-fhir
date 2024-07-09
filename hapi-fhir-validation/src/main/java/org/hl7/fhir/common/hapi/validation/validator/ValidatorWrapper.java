@@ -14,8 +14,8 @@ import org.apache.commons.io.input.ReaderInputStream;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r5.context.IWorkerContext;
 import org.hl7.fhir.r5.elementmodel.Manager;
+import org.hl7.fhir.r5.fhirpath.FHIRPathEngine;
 import org.hl7.fhir.r5.model.StructureDefinition;
-import org.hl7.fhir.r5.utils.FHIRPathEngine;
 import org.hl7.fhir.r5.utils.XVerExtensionManager;
 import org.hl7.fhir.r5.utils.validation.IValidationPolicyAdvisor;
 import org.hl7.fhir.r5.utils.validation.IValidatorResourceFetcher;
@@ -120,7 +120,7 @@ class ValidatorWrapper {
 		try {
 			v = new InstanceValidator(theWorkerContext, evaluationCtx, xverManager);
 		} catch (Exception e) {
-			throw new ConfigurationException(Msg.code(648) + e);
+			throw new ConfigurationException(Msg.code(648) + e.getMessage(), e);
 		}
 
 		v.setAssumeValidRestReferences(isAssumeValidRestReferences());

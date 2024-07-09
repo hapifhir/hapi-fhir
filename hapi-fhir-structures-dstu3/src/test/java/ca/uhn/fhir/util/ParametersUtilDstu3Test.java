@@ -1,13 +1,13 @@
 package ca.uhn.fhir.util;
 
 import ca.uhn.fhir.context.FhirContext;
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.Matchers;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ParametersUtilDstu3Test {
 
@@ -29,7 +29,7 @@ public class ParametersUtilDstu3Test {
 			.setValue(new StringType("VALUE4"));
 
 		List<String> values = ParametersUtil.getNamedParameterValuesAsString(FhirContext.forDstu3(), p, "foo");
-		MatcherAssert.assertThat(values, Matchers.contains("VALUE1", "VALUE2"));
+		assertThat(values).containsExactly("VALUE1", "VALUE2");
 	}
 
 }

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JAX-RS Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,17 +22,21 @@ package ca.uhn.fhir.jaxrs.client;
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
 import ca.uhn.fhir.rest.client.impl.BaseHttpResponse;
 import ca.uhn.fhir.util.StopWatch;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
+import java.io.StringReader;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
 /**
- * A Http Response based on JaxRs. This is an adapter around the class {@link javax.ws.rs.core.Response Response}
+ * A Http Response based on JaxRs. This is an adapter around the class {@link jakarta.ws.rs.core.Response Response}
  * @author Peter Van Houte | peter.vanhoute@agfa.com | Agfa Healthcare
  */
 public class JaxRsHttpResponse extends BaseHttpResponse implements IHttpResponse {

@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -7,6 +9,7 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.util.ExtensionConstants;
 import org.apache.commons.io.IOUtils;
+import org.apache.http.Header;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.hl7.fhir.r4.model.CapabilityStatement;
@@ -15,16 +18,21 @@ import org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestResource
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
+
 
 public class ServerR4Test extends BaseResourceProviderR4Test {
 
@@ -141,4 +149,26 @@ public class ServerR4Test extends BaseResourceProviderR4Test {
 
 	}
 
+
+	@ParameterizedTest
+	@ValueSource(strings = {"x-request-id", "X-Request-Id", "X-Request-ID", "X-REQUEST-ID"})
+	public void testXRequestIdHeaderRetainsCase(String theXRequestIdHeaderKey) throws Exception {
+		HttpGet get = new HttpGet(myServerBase + "/Patient");
+		String xRequestIdHeaderValue = "abc123";
+		get.addHeader(theXRequestIdHeaderKey, xRequestIdHeaderValue);
+
+		try (CloseableHttpResponse response = ourHttpClient.execute(get)) {
+			assertEquals(200, response.getStatusLine().getStatusCode());
+
+			String responseContent = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.debug(responseContent);
+
+			List<Header> xRequestIdHeaders = Arrays.stream(response.getAllHeaders())
+				.filter(header -> theXRequestIdHeaderKey.equals(header.getName()))
+				.toList();
+
+			assertEquals(1, xRequestIdHeaders.size());
+			assertEquals(xRequestIdHeaderValue, xRequestIdHeaders.get(0).getValue());
+		}
+	}
 }

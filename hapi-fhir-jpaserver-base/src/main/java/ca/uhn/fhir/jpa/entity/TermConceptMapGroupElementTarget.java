@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,20 @@
 package ca.uhn.fhir.jpa.entity;
 
 import ca.uhn.fhir.util.ValidateUtil;
+import jakarta.annotation.Nonnull;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.ForeignKey;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.Table;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -27,8 +41,6 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.r4.model.Enumerations.ConceptMapEquivalence;
 
 import java.io.Serializable;
-import javax.annotation.Nonnull;
-import javax.persistence.*;
 
 import static org.apache.commons.lang3.StringUtils.length;
 
@@ -58,7 +70,7 @@ public class TermConceptMapGroupElementTarget implements Serializable {
 			foreignKey = @ForeignKey(name = "FK_TCMGETARGET_ELEMENT"))
 	private TermConceptMapGroupElement myConceptMapGroupElement;
 
-	@Column(name = "TARGET_CODE", nullable = false, length = TermConcept.MAX_CODE_LENGTH)
+	@Column(name = "TARGET_CODE", nullable = true, length = TermConcept.MAX_CODE_LENGTH)
 	private String myCode;
 
 	@Column(name = "TARGET_DISPLAY", nullable = true, length = TermConcept.MAX_DISP_LENGTH)

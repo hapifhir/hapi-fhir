@@ -1,8 +1,8 @@
 /*-
  * #%L
- * HAPI FHIR Search Parameters
+ * HAPI FHIR JPA - Search Parameters
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import com.google.common.annotations.VisibleForTesting;
+import jakarta.transaction.Transactional;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.quartz.JobExecutionContext;
@@ -57,7 +58,7 @@ public class ResourceChangeListenerCacheRefresherImpl
 	/**
 	 * All cache entries are checked at this interval to see if they need to be refreshed
 	 */
-	static long LOCAL_REFRESH_INTERVAL_MS = 10 * DateUtils.MILLIS_PER_SECOND;
+	static final long LOCAL_REFRESH_INTERVAL_MS = 10 * DateUtils.MILLIS_PER_SECOND;
 
 	@Autowired
 	private IResourceVersionSvc myResourceVersionSvc;
@@ -133,8 +134,12 @@ public class ResourceChangeListenerCacheRefresherImpl
 	}
 
 	@Override
+	// Suspend any current transaction while we sync with the db.
+	// This avoids lock conflicts while reading the resource versions.
+	@Transactional(Transactional.TxType.NOT_SUPPORTED)
 	public ResourceChangeResult refreshCacheAndNotifyListener(IResourceChangeListenerCache theCache) {
 		ResourceChangeResult retVal = new ResourceChangeResult();
+
 		if (isStopping()) {
 			ourLog.info("Context is stopping, aborting cache refresh");
 			return retVal;
@@ -144,8 +149,10 @@ public class ResourceChangeListenerCacheRefresherImpl
 			return retVal;
 		}
 		SearchParameterMap searchParamMap = theCache.getSearchParameterMap();
+
 		ResourceVersionMap newResourceVersionMap =
 				myResourceVersionSvc.getVersionMap(theCache.getResourceName(), searchParamMap);
+
 		retVal = retVal.plus(notifyListener(theCache, newResourceVersionMap));
 
 		return retVal;
@@ -154,7 +161,7 @@ public class ResourceChangeListenerCacheRefresherImpl
 	/**
 	 * Notify a listener with all matching resources if it hasn't been initialized yet, otherwise only notify it if
 	 * any resources have changed
-	 * @param theCache
+	 * @param theCache the target
 	 * @param theNewResourceVersionMap the measured new resources
 	 * @return the list of created, updated and deleted ids
 	 */

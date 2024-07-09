@@ -1,26 +1,18 @@
-This release introduces significant a change to the mechanism performing submission of resource modification events
-to the message broker.  Previously, an event would be submitted as part of the synchronous transaction
-modifying a resource.  Synchronous submission yielded responsive publishing with the caveat that events would be dropped
-upon submission failure.
+This release contains a large breaking change for authors of interceptors. Internally, HAPI-FHIR has swapped from using `javax.*` to `jakarta.*` packages. Please see [the migration guide](/hapi-fhir/docs/interceptors/jakarta_upgrade.html) for more information.  Without manual intervention, the majority of interceptors will fail at runtime unless they are upgraded.
 
-We have replaced the synchronous mechanism with a two stage process.  Events are initially stored in
-database upon completion of the transaction and subsequently submitted to the broker by a scheduled task.
-This new asynchronous submission mechanism will introduce a slight delay in event publishing.  It is our view that such
-delay is largely compensated by the capability to retry submission upon failure which will eliminate event losses.
+## Possible New Indexes on PostgresSQL
 
+* This affects only clients running PostgreSQL who have a locale/collation that is NOT 'C'
+* For those clients, the migration will detect this condition and add new indexes to:
+    * hfj_spidx_string
+    * hfj_spidx_uri
+* This is meant to address performance issues for these clients on GET queries whose resulting SQL uses "LIKE" clauses
 
-There are some potentially breaking changes: 
-* On resource retrieval and before storage, tags, security label and profile collections in resource meta will be 
-sorted in lexicographical order. The order of the elements for Coding types (i.e. tags and security labels) is defined 
-by the (security, code) pair of each element. This normally should not break any clients because these properties are 
-sets according to the FHIR specification, and hence the order of the elements in these collections should not matter. 
-Also with this change the following side effects can be observed:
-   - If using INLINE tag storage mode, the first update request to a resource which has tags, security 
-     labels or profiles could create a superfluous resource version if the update request does not really introduce any 
-     change to the resource. This is because the persisted tags, security labels, and profile may not be sorted in 
-     lexicographical order, and this would be interpreted as a new resource version since the tags would be sorted 
-     before storage after this change. If the update request actually changes the resource, there is no concern here.
-     Also, subsequent updates will not create an additional version because of ordering of the meta properties anymore. 
-   - These meta collections are sorted in place by the storage layer before persisting the resource, so any piece of 
-     code that is calling storage layer directly should not be passing in unmodifiable collections, as it would 
-     result in an error. 
+These are the new indexes that will be created:
+
+```sql
+CREATE INDEX idx_sp_string_hash_nrm_pattern_ops ON public.hfj_spidx_string USING btree (hash_norm_prefix, sp_value_normalized varchar_pattern_ops, res_id, partition_id);
+```
+```sql
+CREATE UNIQUE INDEX idx_sp_uri_hash_identity_pattern_ops ON public.hfj_spidx_uri USING btree (hash_identity, sp_uri varchar_pattern_ops, res_id, partition_id);
+```

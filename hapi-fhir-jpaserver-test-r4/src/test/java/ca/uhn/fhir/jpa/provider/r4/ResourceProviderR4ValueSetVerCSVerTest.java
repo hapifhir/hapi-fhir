@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
@@ -42,24 +44,18 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 import java.io.IOException;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.containsStringIgnoringCase;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+
 
 public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProviderR4Test {
 
@@ -196,7 +192,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		ConceptSetComponent include = myLocalVs.getCompose().addInclude();
 		include.setSystem(theCodeSystemUrl);
 		include.setVersion(theValueSetVersion);
-		include.addFilter().setProperty("concept").setOp(FilterOperator.ISA).setValue("ParentA");
+		include.addFilter().setProperty("concept").setOp(FilterOperator.DESCENDENTOF).setValue("ParentA");
 		return myLocalVs;
 
 	}
@@ -220,19 +216,19 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp, containsString("<ValueSet xmlns=\"http://hl7.org/fhir\">"));
-		assertThat(resp, containsString("<expansion>"));
-		assertThat(resp, containsString("<contains>"));
-		assertThat(resp, containsString("<system value=\"http://acme.org\"/>"));
-		assertThat(resp, containsString("<code value=\"8450-9\"/>"));
-		assertThat(resp, containsString("<display value=\"Systolic blood pressure--expiration\"/>"));
-		assertThat(resp, containsString("</contains>"));
-		assertThat(resp, containsString("<contains>"));
-		assertThat(resp, containsString("<system value=\"http://acme.org\"/>"));
-		assertThat(resp, containsString("<code value=\"11378-7\"/>"));
-		assertThat(resp, containsString("<display value=\"Systolic blood pressure at First encounter\"/>"));
-		assertThat(resp, containsString("</contains>"));
-		assertThat(resp, containsString("</expansion>"));
+		assertThat(resp).contains("<ValueSet xmlns=\"http://hl7.org/fhir\">");
+		assertThat(resp).contains("<expansion>");
+		assertThat(resp).contains("<contains>");
+		assertThat(resp).contains("<system value=\"http://acme.org\"/>");
+		assertThat(resp).contains("<code value=\"8450-9\"/>");
+		assertThat(resp).contains("<display value=\"Systolic blood pressure--expiration\"/>");
+		assertThat(resp).contains("</contains>");
+		assertThat(resp).contains("<contains>");
+		assertThat(resp).contains("<system value=\"http://acme.org\"/>");
+		assertThat(resp).contains("<code value=\"11378-7\"/>");
+		assertThat(resp).contains("<display value=\"Systolic blood pressure at First encounter\"/>");
+		assertThat(resp).contains("</contains>");
+		assertThat(resp).contains("</expansion>");
 
 		// Test with v2 of ValueSet
 		respParam = myClient
@@ -245,19 +241,19 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp, containsString("<ValueSet xmlns=\"http://hl7.org/fhir\">"));
-		assertThat(resp, containsString("<expansion>"));
-		assertThat(resp, containsString("<contains>"));
-		assertThat(resp, containsString("<system value=\"http://acme.org\"/>"));
-		assertThat(resp, containsString("<code value=\"8450-9\"/>"));
-		assertThat(resp, containsString("<display value=\"Systolic blood pressure--expiration v2\"/>"));
-		assertThat(resp, containsString("</contains>"));
-		assertThat(resp, containsString("<contains>"));
-		assertThat(resp, containsString("<system value=\"http://acme.org\"/>"));
-		assertThat(resp, containsString("<code value=\"11378-7\"/>"));
-		assertThat(resp, containsString("<display value=\"Systolic blood pressure at First encounter v2\"/>"));
-		assertThat(resp, containsString("</contains>"));
-		assertThat(resp, containsString("</expansion>"));
+		assertThat(resp).contains("<ValueSet xmlns=\"http://hl7.org/fhir\">");
+		assertThat(resp).contains("<expansion>");
+		assertThat(resp).contains("<contains>");
+		assertThat(resp).contains("<system value=\"http://acme.org\"/>");
+		assertThat(resp).contains("<code value=\"8450-9\"/>");
+		assertThat(resp).contains("<display value=\"Systolic blood pressure--expiration v2\"/>");
+		assertThat(resp).contains("</contains>");
+		assertThat(resp).contains("<contains>");
+		assertThat(resp).contains("<system value=\"http://acme.org\"/>");
+		assertThat(resp).contains("<code value=\"11378-7\"/>");
+		assertThat(resp).contains("<display value=\"Systolic blood pressure at First encounter v2\"/>");
+		assertThat(resp).contains("</contains>");
+		assertThat(resp).contains("</expansion>");
 
 	}
 
@@ -284,19 +280,19 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp, containsString("<ValueSet xmlns=\"http://hl7.org/fhir\">"));
-		assertThat(resp, containsString("<expansion>"));
-		assertThat(resp, containsString("<contains>"));
-		assertThat(resp, containsString("<system value=\"http://acme.org\"/>"));
-		assertThat(resp, containsString("<code value=\"8450-9\"/>"));
-		assertThat(resp, containsString("<display value=\"Systolic blood pressure--expiration\"/>"));
-		assertThat(resp, containsString("</contains>"));
-		assertThat(resp, containsString("<contains>"));
-		assertThat(resp, containsString("<system value=\"http://acme.org\"/>"));
-		assertThat(resp, containsString("<code value=\"11378-7\"/>"));
-		assertThat(resp, containsString("<display value=\"Systolic blood pressure at First encounter\"/>"));
-		assertThat(resp, containsString("</contains>"));
-		assertThat(resp, containsString("</expansion>"));
+		assertThat(resp).contains("<ValueSet xmlns=\"http://hl7.org/fhir\">");
+		assertThat(resp).contains("<expansion>");
+		assertThat(resp).contains("<contains>");
+		assertThat(resp).contains("<system value=\"http://acme.org\"/>");
+		assertThat(resp).contains("<code value=\"8450-9\"/>");
+		assertThat(resp).contains("<display value=\"Systolic blood pressure--expiration\"/>");
+		assertThat(resp).contains("</contains>");
+		assertThat(resp).contains("<contains>");
+		assertThat(resp).contains("<system value=\"http://acme.org\"/>");
+		assertThat(resp).contains("<code value=\"11378-7\"/>");
+		assertThat(resp).contains("<display value=\"Systolic blood pressure at First encounter\"/>");
+		assertThat(resp).contains("</contains>");
+		assertThat(resp).contains("</expansion>");
 
 		// Verify v2 ValueSet
 		respParam = myClient
@@ -309,19 +305,19 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp, containsString("<ValueSet xmlns=\"http://hl7.org/fhir\">"));
-		assertThat(resp, containsString("<expansion>"));
-		assertThat(resp, containsString("<contains>"));
-		assertThat(resp, containsString("<system value=\"http://acme.org\"/>"));
-		assertThat(resp, containsString("<code value=\"8450-9\"/>"));
-		assertThat(resp, containsString("<display value=\"Systolic blood pressure--expiration v2\"/>"));
-		assertThat(resp, containsString("</contains>"));
-		assertThat(resp, containsString("<contains>"));
-		assertThat(resp, containsString("<system value=\"http://acme.org\"/>"));
-		assertThat(resp, containsString("<code value=\"11378-7\"/>"));
-		assertThat(resp, containsString("<display value=\"Systolic blood pressure at First encounter v2\"/>"));
-		assertThat(resp, containsString("</contains>"));
-		assertThat(resp, containsString("</expansion>"));
+		assertThat(resp).contains("<ValueSet xmlns=\"http://hl7.org/fhir\">");
+		assertThat(resp).contains("<expansion>");
+		assertThat(resp).contains("<contains>");
+		assertThat(resp).contains("<system value=\"http://acme.org\"/>");
+		assertThat(resp).contains("<code value=\"8450-9\"/>");
+		assertThat(resp).contains("<display value=\"Systolic blood pressure--expiration v2\"/>");
+		assertThat(resp).contains("</contains>");
+		assertThat(resp).contains("<contains>");
+		assertThat(resp).contains("<system value=\"http://acme.org\"/>");
+		assertThat(resp).contains("<code value=\"11378-7\"/>");
+		assertThat(resp).contains("<display value=\"Systolic blood pressure at First encounter v2\"/>");
+		assertThat(resp).contains("</contains>");
+		assertThat(resp).contains("</expansion>");
 
 	}
 
@@ -340,8 +336,8 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp, containsString("<display value=\"Systolic blood pressure at First encounter\"/>"));
-		assertThat(resp, not(containsString("\"Foo Code\"")));
+		assertThat(resp).contains("<display value=\"Systolic blood pressure at First encounter\"/>");
+		assertThat(resp).doesNotContain("\"Foo Code\"");
 
 		// Verify ValueSet v2
 		respParam = myClient
@@ -354,8 +350,8 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp, containsString("<display value=\"Systolic blood pressure at First encounter v2\"/>"));
-		assertThat(resp, not(containsString("\"Foo Code\"")));
+		assertThat(resp).contains("<display value=\"Systolic blood pressure at First encounter v2\"/>");
+		assertThat(resp).doesNotContain("\"Foo Code\"");
 
 	}
 
@@ -383,7 +379,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp, containsString("<display value=\"Systolic blood pressure at First encounter\"/>"));
+		assertThat(resp).contains("<display value=\"Systolic blood pressure at First encounter\"/>");
 
 		// Validate ValueSet v2
 		respParam = myClient
@@ -396,8 +392,8 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp, containsString("<display value=\"Systolic blood pressure at First encounter v2\"/>"));
-		assertThat(resp, not(containsString("\"Foo Code\"")));
+		assertThat(resp).contains("<display value=\"Systolic blood pressure at First encounter v2\"/>");
+		assertThat(resp).doesNotContain("\"Foo Code\"");
 
 	}
 
@@ -417,9 +413,9 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp, stringContainsInOrder(
+		assertThat(resp).containsSubsequence(
 			"<code value=\"11378-7\"/>",
-			"<display value=\"Systolic blood pressure at First encounter\"/>"));
+			"<display value=\"Systolic blood pressure at First encounter\"/>");
 
 		// Check expansion of multi-versioned ValueSet with version set to null
 		respParam = myClient
@@ -433,9 +429,9 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		// Should return v2 as this was the last version loaded.
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp, stringContainsInOrder(
+		assertThat(resp).containsSubsequence(
 			"<code value=\"11378-7\"/>",
-			"<display value=\"Systolic blood pressure at First encounter v2\"/>"));
+			"<display value=\"Systolic blood pressure at First encounter v2\"/>");
 
 		// Check expansion of version 2
 		respParam = myClient
@@ -449,9 +445,9 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp, stringContainsInOrder(
+		assertThat(resp).containsSubsequence(
 			"<code value=\"11378-7\"/>",
-			"<display value=\"Systolic blood pressure at First encounter v2\"/>"));
+			"<display value=\"Systolic blood pressure at First encounter v2\"/>");
 
 	}
 
@@ -472,9 +468,9 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp, stringContainsInOrder(
+		assertThat(resp).containsSubsequence(
 			"<code value=\"11378-7\"/>",
-			"<display value=\"Systolic blood pressure at First encounter\"/>"));
+			"<display value=\"Systolic blood pressure at First encounter\"/>");
 
 		// Check expansion of multi-versioned ValueSet with version set to null
 		respParam = myClient
@@ -488,9 +484,9 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		// Should return v2 as this was the last version loaded.
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp, stringContainsInOrder(
+		assertThat(resp).containsSubsequence(
 			"<code value=\"11378-7\"/>",
-			"<display value=\"Systolic blood pressure at First encounter v2\"/>"));
+			"<display value=\"Systolic blood pressure at First encounter v2\"/>");
 
 		// Check expansion of version 2
 		respParam = myClient
@@ -504,9 +500,9 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp, stringContainsInOrder(
+		assertThat(resp).containsSubsequence(
 			"<code value=\"11378-7\"/>",
-			"<display value=\"Systolic blood pressure at First encounter v2\"/>"));
+			"<display value=\"Systolic blood pressure at First encounter v2\"/>");
 
 	}
 
@@ -553,9 +549,9 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp, stringContainsInOrder(
+		assertThat(resp).containsSubsequence(
 			"<code value=\"11378-7\"/>",
-			"<display value=\"Systolic blood pressure at First encounter\"/>"));
+			"<display value=\"Systolic blood pressure at First encounter\"/>");
 
 		// Check expansion of multi-versioned ValueSet with version set to null
 		respParam = myClient
@@ -569,9 +565,9 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		// Should return v2 as this was the last version loaded.
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp, stringContainsInOrder(
+		assertThat(resp).containsSubsequence(
 			"<code value=\"11378-7\"/>",
-			"<display value=\"Systolic blood pressure at First encounter v2\"/>"));
+			"<display value=\"Systolic blood pressure at First encounter v2\"/>");
 
 		// Check expansion of version 2
 		respParam = myClient
@@ -585,9 +581,9 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp, stringContainsInOrder(
+		assertThat(resp).containsSubsequence(
 			"<code value=\"11378-7\"/>",
-			"<display value=\"Systolic blood pressure at First encounter v2\"/>"));
+			"<display value=\"Systolic blood pressure at First encounter v2\"/>");
 
 	}
 
@@ -630,9 +626,9 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		// Should return v2 as this was the last updated.
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp, stringContainsInOrder(
+		assertThat(resp).containsSubsequence(
 			"<code value=\"11378-7\"/>",
-			"<display value=\"Systolic blood pressure at First encounter v2\"/>"));
+			"<display value=\"Systolic blood pressure at First encounter v2\"/>");
 
 		// Test with version 1 specified.
 		toExpand.setVersion("1");
@@ -651,9 +647,9 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		// Should return v1.
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp, stringContainsInOrder(
+		assertThat(resp).containsSubsequence(
 			"<code value=\"11378-7\"/>",
-			"<display value=\"Systolic blood pressure at First encounter\"/>"));
+			"<display value=\"Systolic blood pressure at First encounter\"/>");
 
 		// Test with version 2 specified.
 		toExpand.setVersion("2");
@@ -672,9 +668,9 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		// Should return v2.
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp, stringContainsInOrder(
+		assertThat(resp).containsSubsequence(
 			"<code value=\"11378-7\"/>",
-			"<display value=\"Systolic blood pressure at First encounter v2\"/>"));
+			"<display value=\"Systolic blood pressure at First encounter v2\"/>");
 
 	}
 
@@ -699,9 +695,9 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		// Should return v2 as this was the last updated.
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp, stringContainsInOrder(
+		assertThat(resp).containsSubsequence(
 			"<code value=\"11378-7\"/>",
-			"<display value=\"Systolic blood pressure at First encounter v2\"/>"));
+			"<display value=\"Systolic blood pressure at First encounter v2\"/>");
 
 		// Test with version 1 specified.
 		toExpand.setVersion("1");
@@ -720,9 +716,9 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		// Should return v1.
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp, stringContainsInOrder(
+		assertThat(resp).containsSubsequence(
 			"<code value=\"11378-7\"/>",
-			"<display value=\"Systolic blood pressure at First encounter\"/>"));
+			"<display value=\"Systolic blood pressure at First encounter\"/>");
 
 		// Test with version 2 specified.
 		toExpand.setVersion("2");
@@ -741,9 +737,9 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		// Should return v2.
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp, stringContainsInOrder(
+		assertThat(resp).containsSubsequence(
 			"<code value=\"11378-7\"/>",
-			"<display value=\"Systolic blood pressure at First encounter v2\"/>"));
+			"<display value=\"Systolic blood pressure at First encounter v2\"/>");
 
 
 	}
@@ -766,9 +762,9 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 
-		assertThat(resp, containsStringIgnoringCase("<display value=\"Child AAA1\"/>"));
-		assertThat(resp, containsStringIgnoringCase("<display value=\"Child AAB1\"/>"));
-		assertThat(resp, not(containsStringIgnoringCase("<display value=\"Parent A1\"/>")));
+		assertThat(resp).containsIgnoringCase("<display value=\"Child AAA1\"/>");
+		assertThat(resp).containsIgnoringCase("<display value=\"Child AAB1\"/>");
+		assertThat(resp).doesNotContainIgnoringCase("<display value=\"Parent A1\"/>");
 
 		myLocalVs_v2.setId("");
 		respParam = myClient
@@ -782,9 +778,9 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 
-		assertThat(resp, containsStringIgnoringCase("<display value=\"Child AAA2\"/>"));
-		assertThat(resp, containsStringIgnoringCase("<display value=\"Child AAB2\"/>"));
-		assertThat(resp, not(containsStringIgnoringCase("<display value=\"Parent A2\"/>")));
+		assertThat(resp).containsIgnoringCase("<display value=\"Child AAA2\"/>");
+		assertThat(resp).containsIgnoringCase("<display value=\"Child AAB2\"/>");
+		assertThat(resp).doesNotContainIgnoringCase("<display value=\"Parent A2\"/>");
 
 	}
 
@@ -806,9 +802,9 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 
-		assertThat(resp, containsStringIgnoringCase("<display value=\"Child AAA1\"/>"));
-		assertThat(resp, containsStringIgnoringCase("<display value=\"Child AAB1\"/>"));
-		assertThat(resp, not(containsStringIgnoringCase("<display value=\"Parent A1\"/>")));
+		assertThat(resp).containsIgnoringCase("<display value=\"Child AAA1\"/>");
+		assertThat(resp).containsIgnoringCase("<display value=\"Child AAB1\"/>");
+		assertThat(resp).doesNotContainIgnoringCase("<display value=\"Parent A1\"/>");
 
 		// Validate ValueSet v2
 		respParam = myClient
@@ -822,9 +818,9 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 
-		assertThat(resp, containsStringIgnoringCase("<display value=\"Child AAA2\"/>"));
-		assertThat(resp, containsStringIgnoringCase("<display value=\"Child AAB2\"/>"));
-		assertThat(resp, not(containsStringIgnoringCase("<display value=\"Parent A2\"/>")));
+		assertThat(resp).containsIgnoringCase("<display value=\"Child AAA2\"/>");
+		assertThat(resp).containsIgnoringCase("<display value=\"Child AAB2\"/>");
+		assertThat(resp).doesNotContainIgnoringCase("<display value=\"Parent A2\"/>");
 
 	}
 
@@ -842,15 +838,15 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 			.execute();
 
 		// Canonical expand should only return most recently updated version, v2.
-		assertEquals(1, respParam.getParameter().size());
+		assertThat(respParam.getParameter()).hasSize(1);
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 
-		assertThat(resp, containsStringIgnoringCase("<display value=\"Child AAA2\"/>"));
-		assertThat(resp, containsStringIgnoringCase("<display value=\"Child AAB2\"/>"));
-		assertThat(resp, not(containsStringIgnoringCase("<display value=\"Parent A2\"/>")));
+		assertThat(resp).containsIgnoringCase("<display value=\"Child AAA2\"/>");
+		assertThat(resp).containsIgnoringCase("<display value=\"Child AAB2\"/>");
+		assertThat(resp).doesNotContainIgnoringCase("<display value=\"Parent A2\"/>");
 
 	}
 
@@ -879,7 +875,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 			.returnResourceType(ValueSet.class)
 			.execute();
 		ourLog.debug("Expanded: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expanded));
-		assertEquals(1, expanded.getExpansion().getContains().size());
+		assertThat(expanded.getExpansion().getContains()).hasSize(1);
 
 		// Update the CodeSystem Version and Codes
 		cs = new CodeSystem();
@@ -904,7 +900,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 			.returnResourceType(ValueSet.class)
 			.execute();
 		ourLog.debug("Expanded: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expanded));
-		assertEquals(1, expanded.getExpansion().getContains().size());
+		assertThat(expanded.getExpansion().getContains()).hasSize(1);
 	}
 
 
@@ -1099,21 +1095,21 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 			assertEquals(TermValueSetPreExpansionStatusEnum.EXPANDED, termValueSet.getExpansionStatus());
 
 			TermValueSetConcept concept = assertTermValueSetContainsConceptAndIsInDeclaredOrder(termValueSet, "http://acme.org", "8450-9", "Systolic blood pressure--expiration v2", 2);
-			assertThat(concept.getSystemVersion(), is(equalTo("2")));
+			assertEquals("2", concept.getSystemVersion());
 			assertTermConceptContainsDesignation(concept, "nl", "http://snomed.info/sct", "900000000000013009", "Synonym", "Systolische bloeddruk - expiratie");
 			assertTermConceptContainsDesignation(concept, "sv", "http://snomed.info/sct", "900000000000013009", "Synonym", "Systoliskt blodtryck - utgång");
 
 			TermValueSetConcept termValueSetConcept1 = assertTermValueSetContainsConceptAndIsInDeclaredOrder(termValueSet, "http://acme.org", "11378-7", "Systolic blood pressure at First encounter v2", 0);
-			assertThat(termValueSetConcept1.getSystemVersion(), is(equalTo("2")));
+			assertEquals("2", termValueSetConcept1.getSystemVersion());
 
 			// ...
 
 			TermValueSetConcept otherConcept = assertTermValueSetContainsConceptAndIsInDeclaredOrder(termValueSet, "http://acme.org", "8491-3", "Systolic blood pressure 1 hour minimum v2", 1);
-			assertThat(otherConcept.getSystemVersion(), is(equalTo("2")));
+			assertEquals("2", otherConcept.getSystemVersion());
 			assertTermConceptContainsDesignation(otherConcept, "nl", "http://snomed.info/sct", "900000000000013009", "Synonym", "Systolische bloeddruk minimaal 1 uur");
 
 			TermValueSetConcept termValueSetConcept = assertTermValueSetContainsConceptAndIsInDeclaredOrder(termValueSet, "http://acme.org", "8492-1", "Systolic blood pressure 8 hour minimum v2", 0);
-			assertThat(termValueSetConcept.getSystemVersion(), is(equalTo("2")));
+			assertEquals("2", termValueSetConcept.getSystemVersion());
 		});
 	}
 
@@ -1676,7 +1672,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 			persistLocalVs(createLocalVs(URL_MY_CODE_SYSTEM, "1"));
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), containsString("Can not create multiple ValueSet resources with ValueSet.url \"" + URL_MY_VALUE_SET + "\" and ValueSet.version \"1\", already have one with resource ID: "));
+			assertThat(e.getMessage()).contains("Can not create multiple ValueSet resources with ValueSet.url \"" + URL_MY_VALUE_SET + "\" and ValueSet.version \"1\", already have one with resource ID: ");
 		}
 
 	}

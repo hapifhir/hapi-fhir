@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.RequestFormatParamStyleEnum;
 import ca.uhn.fhir.rest.api.SummaryEnum;
+import ca.uhn.fhir.rest.client.api.ClientResponseContext;
 import ca.uhn.fhir.rest.client.api.IHttpClient;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
@@ -57,6 +58,7 @@ import ca.uhn.fhir.util.BinaryUtil;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 import ca.uhn.fhir.util.XmlDetectionUtil;
 import com.google.common.base.Charsets;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -78,7 +80,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import javax.annotation.Nonnull;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -352,11 +353,23 @@ public abstract class BaseClient implements IRestfulClient {
 
 			response = httpRequest.execute();
 
+			final Class<? extends IBaseResource> returnType = (binding instanceof ResourceResponseHandler)
+					? ((ResourceResponseHandler<? extends IBaseResource>) binding).getReturnType()
+					: null;
+
+			final ClientResponseContext clientResponseContext =
+					new ClientResponseContext(httpRequest, response, this, getFhirContext(), returnType);
 			HookParams responseParams = new HookParams();
 			responseParams.add(IHttpRequest.class, httpRequest);
 			responseParams.add(IHttpResponse.class, response);
 			responseParams.add(IRestfulClient.class, this);
+			responseParams.add(ClientResponseContext.class, clientResponseContext);
+
 			getInterceptorService().callHooks(Pointcut.CLIENT_RESPONSE, responseParams);
+
+			// Replace the contents of the response with whatever the hook returned, or the same response as before if
+			// it no-op'd
+			response = clientResponseContext.getHttpResponse();
 
 			String mimeType;
 			if (Constants.STATUS_HTTP_204_NO_CONTENT == response.getStatus()) {
@@ -643,6 +656,10 @@ public abstract class BaseClient implements IRestfulClient {
 			myId = theId;
 			myPreferResponseTypes = thePreferResponseTypes;
 			myAllowHtmlResponse = theAllowHtmlResponse;
+		}
+
+		public Class<T> getReturnType() {
+			return myReturnType;
 		}
 
 		@Override

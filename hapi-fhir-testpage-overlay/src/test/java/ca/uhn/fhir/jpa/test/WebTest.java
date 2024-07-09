@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.test;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.fql.executor.HfqlDataTypeEnum;
 import ca.uhn.fhir.jpa.fql.executor.IHfqlExecutor;
@@ -7,65 +8,70 @@ import ca.uhn.fhir.jpa.fql.executor.StaticHfqlExecutionResult;
 import ca.uhn.fhir.jpa.fql.provider.HfqlRestProvider;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
-import ca.uhn.fhir.rest.annotation.Validate;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.test.utilities.MockMvcWebConnectionForHtmlUnit3;
 import ca.uhn.fhir.test.utilities.server.HashMapResourceProviderExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
-import com.gargoylesoftware.css.parser.CSSErrorHandler;
-import com.gargoylesoftware.htmlunit.Page;
-import com.gargoylesoftware.htmlunit.SilentCssErrorHandler;
-import com.gargoylesoftware.htmlunit.WebClient;
-import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
-import com.gargoylesoftware.htmlunit.html.HtmlButton;
-import com.gargoylesoftware.htmlunit.html.HtmlPage;
-import com.gargoylesoftware.htmlunit.html.HtmlTable;
-import com.gargoylesoftware.htmlunit.html.HtmlTableCell;
-import com.gargoylesoftware.htmlunit.html.HtmlTableRow;
-import com.gargoylesoftware.htmlunit.html.HtmlTextArea;
-import com.gargoylesoftware.htmlunit.html.XHtmlPage;
+import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
+import org.eclipse.jetty.ee10.servlet.ServletHandler;
+import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.handler.ContextHandler;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.util.resource.PathResource;
+import org.eclipse.jetty.util.resource.PathResourceFactory;
+import org.eclipse.jetty.util.resource.Resource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Composition;
-import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
+import org.htmlunit.SilentCssErrorHandler;
+import org.htmlunit.WebClient;
+import org.htmlunit.cssparser.parser.CSSErrorHandler;
+import org.htmlunit.html.HtmlAnchor;
+import org.htmlunit.html.HtmlButton;
+import org.htmlunit.html.HtmlElement;
+import org.htmlunit.html.HtmlPage;
+import org.htmlunit.html.HtmlTable;
+import org.htmlunit.html.HtmlTableCell;
+import org.htmlunit.html.HtmlTableRow;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.htmlunit.MockMvcWebConnection;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -106,9 +112,13 @@ public class WebTest {
 			servletHandler.addServletWithMapping(holder, "/*");
 
 			ServletContextHandler contextHandler = new MyServletContextHandler();
-			contextHandler.setAllowNullPathInfo(true);
+			contextHandler.setAllowNullPathInContext(true);
 			contextHandler.setServletHandler(servletHandler);
-			contextHandler.setResourceBase("hapi-fhir-testpage-overlay/src/main/webapp");
+			Resource base = new PathResourceFactory().newResource("hapi-fhir-testpage-overlay/src/main/webapp");
+			if (!base.exists()) {
+				base = new PathResourceFactory().newResource("src/main/webapp");
+			}
+			contextHandler.setBaseResource(base);
 
 			ourOverlayServer = new Server(0);
 			ourOverlayServer.setHandler(contextHandler);
@@ -118,7 +128,7 @@ public class WebTest {
 		}
 
 		myWebClient = new WebClient();
-		myWebClient.setWebConnection(new MockMvcWebConnection(ourMockMvc, myWebClient));
+		myWebClient.setWebConnection(new MockMvcWebConnectionForHtmlUnit3(ourMockMvc, myWebClient));
 		myWebClient.getOptions().setJavaScriptEnabled(true);
 		myWebClient.getOptions().setCssEnabled(false);
 		CSSErrorHandler errorHandler = new SilentCssErrorHandler();
@@ -145,7 +155,7 @@ public class WebTest {
 		HtmlPage searchResultPage = searchButton.click();
 		HtmlTable controlsTable = searchResultPage.getHtmlElementById("resultControlsTable");
 		List<HtmlTableRow> controlRows = controlsTable.getBodies().get(0).getRows();
-		assertEquals(5, controlRows.size());
+		assertThat(controlRows).hasSize(5);
 		assertEquals("Read Update $summary $validate", controlRows.get(0).getCell(0).asNormalizedText());
 		assertEquals("Patient/A0/_history/1", controlRows.get(0).getCell(1).asNormalizedText());
 		assertEquals("Patient/A4/_history/1", controlRows.get(4).getCell(1).asNormalizedText());
@@ -169,7 +179,7 @@ public class WebTest {
 		HtmlPage searchResultPage = historyButton.click();
 		HtmlTable controlsTable = searchResultPage.getHtmlElementById("resultControlsTable");
 		List<HtmlTableRow> controlRows = controlsTable.getBodies().get(0).getRows();
-		assertEquals(5, controlRows.size());
+		assertThat(controlRows).hasSize(5);
 		ourLog.info(controlRows.get(0).asXml());
 		assertEquals("Patient/A4/_history/1", controlRows.get(0).getCell(1).asNormalizedText());
 		assertEquals("Patient/A0/_history/1", controlRows.get(4).getCell(1).asNormalizedText());
@@ -193,7 +203,48 @@ public class WebTest {
 			.orElseThrow()
 			.click();
 
-		assertThat(summaryPage.asNormalizedText(), containsString("Result Narrative\t\nHELLO WORLD DOCUMENT"));
+		assertThat(summaryPage.asNormalizedText()).contains("Result Narrative\t\nHELLO WORLD DOCUMENT");
+	}
+
+	private static Stream<Arguments> getButtonMappingPredicates() {
+		Predicate<HtmlElement> readButtonPredicate = t -> t.getAttribute("value").equals("read");
+		Predicate<HtmlElement> summaryButtonPredicate = t -> t.asNormalizedText().equals("$summary");
+		return Stream.of(arguments(readButtonPredicate), arguments(summaryButtonPredicate));
+	}
+
+	@ParameterizedTest
+	@MethodSource(value = "getButtonMappingPredicates")
+	public void testInvokeOperation_withReflectedXssAttack_resultHtmlIsSanitized(
+		Predicate<HtmlElement> theButtonMappingPredicate) throws IOException {
+
+		register5Patients();
+
+		HtmlPage searchResultPage = searchForPatients();
+		HtmlTable controlsTable = searchResultPage.getHtmlElementById("resultControlsTable");
+		List<HtmlTableRow> controlRows = controlsTable.getBodies().get(0).getRows();
+		HtmlTableCell controlsCell = controlRows.get(0).getCell(0);
+
+		// find the button
+		HtmlElement summaryButton = controlsCell
+			.getElementsByTagName("button")
+			.stream()
+			.filter(theButtonMappingPredicate)
+			.findFirst()
+			.orElseThrow();
+
+		// alter button attributes to imitate Reflected XSS attack
+		summaryButton.setAttribute("data2", "A0%3Cscript%3Ealert(2)%3C/script%3E");
+		summaryButton.setAttribute("data3", "%24diff%3Cscript%3Ealert(1)%3C/script%3E");
+		HtmlPage summaryPage = summaryButton.click();
+
+		// validate that there is no <script> span in result summary page
+		Optional<HtmlElement> scriptSpans = summaryPage.getHtmlElementById("requestUrlAnchor")
+			.getElementsByTagName("span")
+			.stream()
+			.filter(span -> span.asXml().contains("<script>"))
+			.findAny();
+
+		assertTrue(scriptSpans.isEmpty());
 	}
 
 	@Test
@@ -214,7 +265,7 @@ public class WebTest {
 			.orElseThrow()
 			.click();
 
-		assertThat(summaryPage.asNormalizedText(), containsString("\"diagnostics\": \"VALIDATION FAILURE\""));
+		assertThat(summaryPage.asNormalizedText()).contains("\"diagnostics\": \"VALIDATION FAILURE\"");
 	}
 
 	@Test
@@ -234,7 +285,7 @@ public class WebTest {
 			.orElseThrow()
 			.click();
 
-		assertThat(diffPage.asNormalizedText(), containsString("\"resourceType\": \"Parameters\""));
+		assertThat(diffPage.asNormalizedText()).contains("\"resourceType\": \"Parameters\"");
 	}
 
 
@@ -263,7 +314,7 @@ public class WebTest {
 
 		HtmlTable table = (HtmlTable) resultsPage.getElementById("resultsTable");
 		ourLog.info(table.asXml());
-		assertThat(table.asNormalizedText(), containsString("Simpson"));
+		assertThat(table.asNormalizedText()).contains("Simpson");
 	}
 
 
@@ -336,14 +387,30 @@ public class WebTest {
 
 		public MyServletContextHandler() {
 			super();
-			_scontext = new ContextHandler.Context() {
+		}
+
+		@Override
+		public ServletContextApi newServletContextApi() {
+			return new ServletContextApi(){
 				@Override
-				public URL getResource(String thePath) {
+				public InputStream getResourceAsStream(String thePath) {
+					try {
+						URL url = getResource(thePath);
+						return url.openStream();
+					} catch (IOException e) {
+						throw new InternalErrorException(e);
+					}
+				}
+
+
+				@Override
+				public URL getResource(String thePath) throws MalformedURLException {
 					File parent = new File("hapi-fhir-testpage-overlay/src/main/webapp").getAbsoluteFile();
 					if (!parent.exists()) {
 						parent = new File("src/main/webapp").getAbsoluteFile();
 					}
 					File file = new File(parent, thePath);
+					URL url = null;
 					try {
 						return file.toURI().toURL();
 					} catch (MalformedURLException e) {
@@ -352,6 +419,8 @@ public class WebTest {
 				}
 			};
 		}
+
+
 	}
 
 	@AfterAll

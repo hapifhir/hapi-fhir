@@ -11,8 +11,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -40,7 +39,7 @@ class RuleFilteringConsentServiceTest {
 
 		ConsentOutcome consentDecision = myRuleFilteringConsentService.canSeeResource(myRequestDetails, null, null);
 
-		assertThat(consentDecision.getStatus(), equalTo(ConsentOperationStatusEnum.PROCEED));
+		assertEquals(ConsentOperationStatusEnum.PROCEED, consentDecision.getStatus());
 
 	}
 
@@ -51,6 +50,6 @@ class RuleFilteringConsentServiceTest {
 
 		ConsentOutcome consentDecision = myRuleFilteringConsentService.canSeeResource(myRequestDetails, null, null);
 
-		assertThat(consentDecision.getStatus(), equalTo(ConsentOperationStatusEnum.REJECT));
+		assertEquals(ConsentOperationStatusEnum.REJECT, consentDecision.getStatus());
 	}
 }

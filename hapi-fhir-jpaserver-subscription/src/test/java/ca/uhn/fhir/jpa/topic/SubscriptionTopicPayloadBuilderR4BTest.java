@@ -8,74 +8,178 @@ import ca.uhn.fhir.util.BundleUtil;
 import org.hl7.fhir.r4b.model.Bundle;
 import org.hl7.fhir.r4b.model.Encounter;
 import org.hl7.fhir.r4b.model.Resource;
-import org.junit.jupiter.api.Test;
+import org.hl7.fhir.r4b.model.SubscriptionStatus;
+import org.hl7.fhir.r5.model.Subscription;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class SubscriptionTopicPayloadBuilderR4BTest {
 	private static final String TEST_TOPIC_URL = "test-builder-topic-url";
 	FhirContext ourFhirContext = FhirContext.forR4BCached();
-	@Test
-	public void testBuildPayloadDelete() {
-		// setup
-		var svc = new SubscriptionTopicPayloadBuilder(ourFhirContext);
-		var encounter = new Encounter();
-		encounter.setId("Encounter/1");
-		CanonicalSubscription sub = new CanonicalSubscription();
-		ActiveSubscription subscription = new ActiveSubscription(sub, "test");
+	private SubscriptionTopicPayloadBuilder myStPayloadBuilder;
+	private Encounter myEncounter;
+	private CanonicalSubscription myCanonicalSubscription;
+	private ActiveSubscription myActiveSubscription;
 
-		// run
-		Bundle payload = (Bundle)svc.buildPayload(List.of(encounter), subscription, TEST_TOPIC_URL, RestOperationTypeEnum.DELETE);
-
-		// verify
-		List<Resource> resources = BundleUtil.toListOfResourcesOfType(ourFhirContext, payload, Resource.class);
-		assertEquals(1, resources.size());
-		assertEquals("SubscriptionStatus", resources.get(0).getResourceType().name());
-
-		assertEquals(Bundle.HTTPVerb.DELETE, payload.getEntry().get(1).getRequest().getMethod());
+	@BeforeEach
+	void before() {
+		myStPayloadBuilder = new SubscriptionTopicPayloadBuilder(ourFhirContext);
+		myEncounter = new Encounter();
+		myEncounter.setId("Encounter/1");
+		myCanonicalSubscription = new CanonicalSubscription();
+		myCanonicalSubscription.setTopicSubscription(true);
+		myActiveSubscription = new ActiveSubscription(myCanonicalSubscription, "test");
 	}
 
-	@Test
-	public void testBuildPayloadUpdate() {
+	@ParameterizedTest
+	@ValueSource(strings = {
+			"full-resource",
+			"" // payload content not provided
+	})
+	public void testBuildPayload_deleteWithFullResourceContent_returnsCorrectPayload(String thePayloadContent) {
 		// setup
-		var svc = new SubscriptionTopicPayloadBuilder(ourFhirContext);
-		var encounter = new Encounter();
-		encounter.setId("Encounter/1");
-		CanonicalSubscription sub = new CanonicalSubscription();
-		ActiveSubscription subscription = new ActiveSubscription(sub, "test");
+		Subscription.SubscriptionPayloadContent payloadContent =
+				Subscription.SubscriptionPayloadContent.fromCode(thePayloadContent);
+		myCanonicalSubscription.getTopicSubscription().setContent(payloadContent);
 
 		// run
-		Bundle payload = (Bundle)svc.buildPayload(List.of(encounter), subscription, TEST_TOPIC_URL, RestOperationTypeEnum.UPDATE);
+		Bundle payload = (Bundle) myStPayloadBuilder.buildPayload(List.of(myEncounter), myActiveSubscription, TEST_TOPIC_URL, RestOperationTypeEnum.DELETE);
 
-		// verify
+		// verify Bundle size
+		assertThat(payload.getEntry()).hasSize(2);
 		List<Resource> resources = BundleUtil.toListOfResourcesOfType(ourFhirContext, payload, Resource.class);
-		assertEquals(2, resources.size());
-		assertEquals("SubscriptionStatus", resources.get(0).getResourceType().name());
-		assertEquals("Encounter", resources.get(1).getResourceType().name());
+		assertThat(resources).hasSize(1);
 
-		assertEquals(Bundle.HTTPVerb.PUT, payload.getEntry().get(1).getRequest().getMethod());
+		// verify SubscriptionStatus.notificationEvent.focus
+		verifySubscriptionStatusNotificationEvent(resources.get(0));
+
+		// verify Encounter entry
+		Bundle.BundleEntryComponent encounterEntry = payload.getEntry().get(1);
+		assertNull(encounterEntry.getResource());
+		assertNull(encounterEntry.getFullUrl());
+		verifyRequestParameters(encounterEntry, org.hl7.fhir.r5.model.Bundle.HTTPVerb.DELETE.name(), "Encounter/1");
 	}
 
-	@Test
-	public void testBuildPayloadCreate() {
+	@ParameterizedTest
+	@CsvSource({
+			"create, POST  , full-resource, Encounter/1, Encounter",
+			"update, PUT   , full-resource, Encounter/1, Encounter/1",
+			"create, POST  , 			  , Encounter/1, Encounter",
+			"update, PUT   ,              , Encounter/1, Encounter/1",
+	})
+	public void testBuildPayload_createUpdateWithFullResourceContent_returnsCorrectPayload(String theRestOperationType,
+																						   String theHttpMethod,
+																						   String thePayloadContent,
+																						   String theFullUrl,
+																						   String theRequestUrl) {
 		// setup
-		var svc = new SubscriptionTopicPayloadBuilder(ourFhirContext);
-		var encounter = new Encounter();
-		encounter.setId("Encounter/1");
-		CanonicalSubscription sub = new CanonicalSubscription();
-		ActiveSubscription subscription = new ActiveSubscription(sub, "test");
+		Subscription.SubscriptionPayloadContent payloadContent =
+				Subscription.SubscriptionPayloadContent.fromCode(thePayloadContent);
+
+		myCanonicalSubscription.getTopicSubscription().setContent(payloadContent);
+		RestOperationTypeEnum restOperationType = RestOperationTypeEnum.forCode(theRestOperationType);
 
 		// run
-		Bundle payload = (Bundle)svc.buildPayload(List.of(encounter), subscription, TEST_TOPIC_URL, RestOperationTypeEnum.CREATE);
+		Bundle payload = (Bundle) myStPayloadBuilder.buildPayload(List.of(myEncounter), myActiveSubscription, TEST_TOPIC_URL, restOperationType);
 
-		// verify
+		// verify Bundle size
+		assertThat(payload.getEntry()).hasSize(2);
 		List<Resource> resources = BundleUtil.toListOfResourcesOfType(ourFhirContext, payload, Resource.class);
-		assertEquals(2, resources.size());
-		assertEquals("SubscriptionStatus", resources.get(0).getResourceType().name());
-		assertEquals("Encounter", resources.get(1).getResourceType().name());
+		assertThat(resources).hasSize(2);
 
-		assertEquals(Bundle.HTTPVerb.POST, payload.getEntry().get(1).getRequest().getMethod());
+		// verify SubscriptionStatus.notificationEvent.focus
+		verifySubscriptionStatusNotificationEvent(resources.get(0));
+
+		// verify Encounter entry
+		Bundle.BundleEntryComponent encounterEntry = payload.getEntry().get(1);
+		assertEquals("Encounter", resources.get(1).getResourceType().name());
+		assertEquals(myEncounter, resources.get(1));
+		assertEquals(theFullUrl, encounterEntry.getFullUrl());
+		verifyRequestParameters(encounterEntry, theHttpMethod, theRequestUrl);
+	}
+
+	@ParameterizedTest
+	@CsvSource({
+			"create, POST  , Encounter/1, Encounter",
+			"update, PUT   , Encounter/1, Encounter/1",
+			"delete, DELETE, 			, Encounter/1"
+	})
+	public void testBuildPayload_withIdOnlyContent_returnsCorrectPayload(String theRestOperationType,
+																		 String theHttpMethod, String theFullUrl,
+																		 String theRequestUrl) {
+		// setup
+		myCanonicalSubscription.getTopicSubscription().setContent(Subscription.SubscriptionPayloadContent.IDONLY);
+		RestOperationTypeEnum restOperationType = RestOperationTypeEnum.forCode(theRestOperationType);
+
+		// run
+		Bundle payload = (Bundle) myStPayloadBuilder.buildPayload(List.of(myEncounter), myActiveSubscription, TEST_TOPIC_URL, restOperationType);
+
+		// verify Bundle size
+		assertThat(payload.getEntry()).hasSize(2);
+		List<Resource> resources = BundleUtil.toListOfResourcesOfType(ourFhirContext, payload, Resource.class);
+		assertThat(resources).hasSize(1);
+
+		// verify SubscriptionStatus.notificationEvent.focus
+		verifySubscriptionStatusNotificationEvent(resources.get(0));
+
+		// verify Encounter entry
+		Bundle.BundleEntryComponent encounterEntry = payload.getEntry().get(1);
+		assertNull(encounterEntry.getResource());
+		assertEquals(theFullUrl, encounterEntry.getFullUrl());
+		verifyRequestParameters(encounterEntry, theHttpMethod, theRequestUrl);
+	}
+
+	@ParameterizedTest
+	@CsvSource({
+			"create",
+			"update",
+			"delete"
+	})
+	public void testBuildPayload_withEmptyContent_returnsCorrectPayload(String theRestOperationType) {
+		// setup
+		myCanonicalSubscription.getTopicSubscription().setContent(Subscription.SubscriptionPayloadContent.EMPTY);
+		RestOperationTypeEnum restOperationType = RestOperationTypeEnum.forCode(theRestOperationType);
+
+		// run
+		Bundle payload = (Bundle) myStPayloadBuilder.buildPayload(List.of(myEncounter), myActiveSubscription, TEST_TOPIC_URL, restOperationType);
+
+		// verify Bundle size
+		assertThat(payload.getEntry()).hasSize(1);
+		List<Resource> resources = BundleUtil.toListOfResourcesOfType(ourFhirContext, payload, Resource.class);
+		assertThat(resources).hasSize(1);
+
+		// verify SubscriptionStatus.notificationEvent.focus
+		assertEquals("SubscriptionStatus", resources.get(0).getResourceType().name());
+		assertThat(((SubscriptionStatus) resources.get(0)).getNotificationEvent()).hasSize(1);
+		SubscriptionStatus.SubscriptionStatusNotificationEventComponent notificationEvent =
+				((SubscriptionStatus) resources.get(0)).getNotificationEventFirstRep();
+		assertFalse(notificationEvent.hasFocus());
+	}
+
+	private void verifyRequestParameters(Bundle.BundleEntryComponent theEncounterEntry,
+										 String theHttpMethod, String theRequestUrl) {
+		assertNotNull(theEncounterEntry.getRequest());
+		assertEquals(theHttpMethod, theEncounterEntry.getRequest().getMethod().name());
+		assertEquals(theRequestUrl, theEncounterEntry.getRequest().getUrl());
+	}
+
+	private void verifySubscriptionStatusNotificationEvent(Resource theResource) {
+		assertEquals("SubscriptionStatus", theResource.getResourceType().name());
+		assertThat(((SubscriptionStatus) theResource).getNotificationEvent()).hasSize(1);
+		SubscriptionStatus.SubscriptionStatusNotificationEventComponent notificationEvent =
+				((SubscriptionStatus) theResource).getNotificationEventFirstRep();
+		assertTrue(notificationEvent.hasFocus());
+		assertEquals(myEncounter.getId(), notificationEvent.getFocus().getReference());
 	}
 }
