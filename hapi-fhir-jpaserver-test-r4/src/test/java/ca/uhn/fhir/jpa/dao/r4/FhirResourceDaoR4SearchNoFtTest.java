@@ -3723,7 +3723,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	@Test
 	public void testSearchStringParamReallyLong() {
 		String methodName = "testSearchStringParamReallyLong";
-		String value = StringUtils.rightPad(methodName, 200, 'a');
+		String value = StringUtils.rightPad(methodName, ResourceIndexedSearchParamString.MAX_LENGTH, 'a');
 
 		IIdType longId;
 		IIdType shortId;

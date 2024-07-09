@@ -32,9 +32,6 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test helper to collect logback lines.
@@ -80,7 +77,11 @@ public class LogbackTestExtension implements BeforeEachCallback, AfterEachCallba
 		this((Logger) theLogger);
 	}
 
-	public java.util.List<ILoggingEvent> getLogEvents() {
+	/**
+	 * Returns a copy to avoid concurrent modification errors.
+	 * @return A copy of the log events so far.
+	 */
+	public List<ILoggingEvent> getLogEvents() {
 		return new ArrayList<>(myListAppender.list);
 	}
 
@@ -120,37 +121,13 @@ public class LogbackTestExtension implements BeforeEachCallback, AfterEachCallba
 		}
 	}
 
-	public List<ILoggingEvent> filterLoggingEventsWithMessageEqualTo(String theMessageText) {
-		return filterLoggingEventsWithPredicate(loggingEvent -> loggingEvent.getFormattedMessage().equals(theMessageText));
-	}
-
-	public List<ILoggingEvent> filterLoggingEventsWithMessageContaining(String theMessageText) {
-		return filterLoggingEventsWithPredicate(loggingEvent -> loggingEvent.getFormattedMessage().contains(theMessageText));
-	}
-
-	public List<ILoggingEvent> filterLoggingEventsWithPredicate(Predicate<ILoggingEvent> theLoggingEventPredicate) {
-		return getLogEvents().stream().filter(theLoggingEventPredicate).collect(Collectors.toList());
+	public List<ILoggingEvent> getLogEvents(Predicate<ILoggingEvent> thePredicate) {
+		return getLogEvents().stream().filter(thePredicate).toList();
 	}
 
 	@Nonnull
 	public List<String> getLogMessages() {
-		return getLogEvents().stream().map(ILoggingEvent::getMessage).collect(Collectors.toList());
+		return getLogEvents().stream().map(ILoggingEvent::getMessage).toList();
 	}
 
-	public static void assertEventWithLevelAndMessageContains(List<ILoggingEvent> events, @Nonnull Level theLevel, @Nonnull String thePartialMessage) {
-		assertThat(events).anySatisfy(event -> LogbackEventAssert.assertThat(theLevel, thePartialMessage).matches(event));
-	}
-
-	public static void assertEventWithLevel(List<ILoggingEvent> events, @Nonnull Level theLevel) {
-		assertThat(events).anySatisfy(event -> LogbackEventAssert.assertThat(theLevel, null).matches(event));
-	}
-
-	public static void assertEventWithMessageContains(List<ILoggingEvent> events, @Nonnull String thePartialMessage) {
-		assertThat(events).anySatisfy(event -> LogbackEventAssert.assertThat(null, thePartialMessage).matches(event));
-	}
-
-	public static void assertEventWithLevelAndMessageAndThrew(List<ILoggingEvent> events, @Nonnull Level theLevel,
-															  @Nonnull String thePartialMessage, @Nonnull String theThrown) {
-		assertThat(events).anySatisfy(event -> LogbackEventAssert.assertThat(theLevel, thePartialMessage, theThrown).matches(event));
-	}
 }
