@@ -136,7 +136,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.UNDESIRED_RESOURCE_LINKAGES_FOR_EVERYTHING_ON_PATIENT_INSTANCE;
@@ -767,7 +766,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 		JdbcTemplate jdbcTemplate = initializeJdbcTemplate(theMaximumResults);
 
-		Set<Long> targetPids = new TreeSet<>();
+		Set<Long> targetPids = new HashSet<>();
 		if (myParams.get(IAnyResource.SP_RES_ID) != null) {
 
 			extractTargetPidsFromIdParams(targetPids);
@@ -798,6 +797,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			// we add a search executor to fetch unlinked patients first
 			theSearchQueryExecutors.add(new ResolvedSearchQueryExecutor(output));
 		}
+
 		List<String> typeSourceResources = new ArrayList<>();
 		if (myParams.get(Constants.PARAM_TYPE) != null) {
 			typeSourceResources.addAll(extractTypeSourceResourcesFromParams());
@@ -809,11 +809,9 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		// Add PID list predicate for full text search and/or lastn operation
 		addPidListPredicate(thePidList, sqlBuilder);
 
-		// Last updated
-		addLastUpdatePredicate(sqlBuilder);
-
 		/*
 		 * If offset is present, we want deduplicate the results by using GROUP BY
+		 * ORDER BY is required to make sure we return unique results for each page
 		 */
 		if (theOffset != null) {
 			queryStack3.addGrouping();
@@ -2344,19 +2342,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 				// If we don't have a query yet, create one
 				if (myResultsIterator == null) {
-					if (myMaxResultsToFetch == null) {
-						if (myParams.getLoadSynchronousUpTo() != null) {
-							myMaxResultsToFetch = myParams.getLoadSynchronousUpTo();
-						} else if (myParams.getOffset() != null
-								&& myParams.getCount() != null
-								&& myParams.getEverythingMode() != null) {
-							myMaxResultsToFetch = myParams.getOffset() + myParams.getCount();
-						} else if (myParams.getOffset() != null && myParams.getCount() != null) {
-							myMaxResultsToFetch = myParams.getCount();
-						} else {
-							myMaxResultsToFetch = myStorageSettings.getFetchSizeDefaultMaximum();
-						}
-					}
+					myMaxResultsToFetch = calculateMaxResultsToFetch();
 
 					/*
 					 * assigns the results iterator
@@ -2458,6 +2444,18 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 						.add(SearchRuntimeDetails.class, mySearchRuntimeDetails);
 				CompositeInterceptorBroadcaster.doCallHooks(
 						myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_SEARCH_SELECT_COMPLETE, params);
+			}
+		}
+
+		private Integer calculateMaxResultsToFetch() {
+			if (myParams.getLoadSynchronousUpTo() != null) {
+				return myParams.getLoadSynchronousUpTo();
+			} else if (myParams.getOffset() != null && myParams.getCount() != null) {
+				return myParams.getEverythingMode() != null
+						? myParams.getOffset() + myParams.getCount()
+						: myParams.getCount();
+			} else {
+				return myStorageSettings.getFetchSizeDefaultMaximum();
 			}
 		}
 
