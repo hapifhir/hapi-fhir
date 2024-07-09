@@ -2098,7 +2098,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	void testValidateQuestionnaireResponseWithLocalReference() {
+	public void testValidateQuestionnaireResponseWithLocalReference() {
 
 		Questionnaire q = new Questionnaire();
 		q.setId("q");
