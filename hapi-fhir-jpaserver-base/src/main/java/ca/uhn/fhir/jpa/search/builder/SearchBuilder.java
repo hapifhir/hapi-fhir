@@ -615,15 +615,15 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			List<Long> thePidList,
 			List<ISearchQueryExecutor> theSearchQueryExecutors) {
 		if (myParams.getEverythingMode() != null) {
-			createChunkedQueryForEverything(
+			createChunkedQueryForEverythingSearch(
 					theParams, theOffset, theMaximumResults, theCountOnlyFlag, thePidList, theSearchQueryExecutors);
 		} else {
-			createChunkedQueryGeneral(
+			createChunkedQueryNormalSearch(
 					theParams, sort, theOffset, theCountOnlyFlag, theRequest, thePidList, theSearchQueryExecutors);
 		}
 	}
 
-	private void createChunkedQueryGeneral(
+	private void createChunkedQueryNormalSearch(
 			SearchParameterMap theParams,
 			SortSpec sort,
 			Integer theOffset,
@@ -683,16 +683,10 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		}
 
 		// Add PID list predicate for full text search and/or lastn operation
-		if (thePidList != null && thePidList.size() > 0) {
-			sqlBuilder.addResourceIdsPredicate(thePidList);
-		}
+		addPidListPredicate(thePidList, sqlBuilder);
 
 		// Last updated
-		DateRangeParam lu = myParams.getLastUpdated();
-		if (lu != null && !lu.isEmpty()) {
-			Condition lastUpdatedPredicates = sqlBuilder.addPredicateLastUpdated(lu);
-			sqlBuilder.addPredicate(lastUpdatedPredicates);
-		}
+		addLastUpdatePredicate(sqlBuilder);
 
 		/*
 		 * Exclude the pids already in the previous iterator. This is an optimization, as opposed
@@ -739,6 +733,11 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		/*
 		 * Now perform the search
 		 */
+		executeSearch(theOffset, theSearchQueryExecutors, sqlBuilder);
+	}
+
+	private void executeSearch(
+			Integer theOffset, List<ISearchQueryExecutor> theSearchQueryExecutors, SearchQueryBuilder sqlBuilder) {
 		GeneratedSql generatedSql = sqlBuilder.generate(theOffset, myMaxResultsToFetch);
 		if (!generatedSql.isMatchNothing()) {
 			SearchQueryExecutor executor =
@@ -747,7 +746,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		}
 	}
 
-	private void createChunkedQueryForEverything(
+	private void createChunkedQueryForEverythingSearch(
 			SearchParameterMap theParams,
 			Integer theOffset,
 			Integer theMaximumResults,
@@ -810,16 +809,10 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				myResourceName, typeSourceResources, targetPids.toArray(new Long[0]));
 
 		// Add PID list predicate for full text search and/or lastn operation
-		if (thePidList != null && !thePidList.isEmpty()) {
-			sqlBuilder.addResourceIdsPredicate(thePidList);
-		}
+		addPidListPredicate(thePidList, sqlBuilder);
 
 		// Last updated
-		DateRangeParam lu = myParams.getLastUpdated();
-		if (lu != null && !lu.isEmpty()) {
-			Condition lastUpdatedPredicates = sqlBuilder.addPredicateLastUpdated(lu);
-			sqlBuilder.addPredicate(lastUpdatedPredicates);
-		}
+		addLastUpdatePredicate(sqlBuilder);
 
 		/*
 		 * If offset is present, we want deduplicate the results by using GROUP BY
@@ -833,11 +826,20 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		/*
 		 * Now perform the search
 		 */
-		GeneratedSql generatedSql = sqlBuilder.generate(theOffset, myMaxResultsToFetch);
-		if (!generatedSql.isMatchNothing()) {
-			SearchQueryExecutor executor =
-					mySqlBuilderFactory.newSearchQueryExecutor(generatedSql, myMaxResultsToFetch);
-			theSearchQueryExecutors.add(executor);
+		executeSearch(theOffset, theSearchQueryExecutors, sqlBuilder);
+	}
+
+	private void addPidListPredicate(List<Long> thePidList, SearchQueryBuilder sqlBuilder) {
+		if (thePidList != null && !thePidList.isEmpty()) {
+			sqlBuilder.addResourceIdsPredicate(thePidList);
+		}
+	}
+
+	private void addLastUpdatePredicate(SearchQueryBuilder theSqlBuilder) {
+		DateRangeParam lu = myParams.getLastUpdated();
+		if (lu != null && !lu.isEmpty()) {
+			Condition lastUpdatedPredicates = theSqlBuilder.addPredicateLastUpdated(lu);
+			theSqlBuilder.addPredicate(lastUpdatedPredicates);
 		}
 	}
 
