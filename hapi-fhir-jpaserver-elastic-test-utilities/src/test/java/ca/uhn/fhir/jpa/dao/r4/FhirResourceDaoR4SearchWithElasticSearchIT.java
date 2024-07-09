@@ -83,6 +83,8 @@ import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.RiskAssessment;
+import org.hl7.fhir.r4.model.SearchParameter;
+import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.AfterEach;
@@ -214,6 +216,12 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 	@Qualifier("myQuestionnaireResponseDaoR4")
 	private IFhirResourceDao<QuestionnaireResponse> myQuestionnaireResponseDao;
 	@Autowired
+	@Qualifier("myServiceRequestDaoR4")
+	private IFhirResourceDao<ServiceRequest> myServiceRequestDao;
+	@Autowired
+	@Qualifier("mySearchParameterDaoR4")
+	private IFhirResourceDao<SearchParameter> mySearchParameterDao;
+	@Autowired
 	private TestHSearchEventDispatcher myHSearchEventDispatcher;
 	@Autowired
 	ElasticsearchContainer myElasticsearchContainer;
@@ -277,6 +285,8 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 			return messages;
 		}
 	}
+
+
 	@Test
 	public void testFullTextSearchesArePerformanceLogged() {
 
