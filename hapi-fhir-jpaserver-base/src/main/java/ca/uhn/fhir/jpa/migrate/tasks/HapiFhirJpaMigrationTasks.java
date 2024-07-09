@@ -457,6 +457,18 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 						.failureAllowed();
 			}
 		}
+
+		{
+			version.onTable("TRM_CONCEPT_DESIG")
+					.modifyColumn("20240705.10", "VAL")
+					.nullable()
+					.withType(ColumnTypeEnum.STRING, 2000);
+
+			version.onTable("TRM_CONCEPT_DESIG")
+					.addColumn("20240705.20", "VAL_VC")
+					.nullable()
+					.type(ColumnTypeEnum.TEXT);
+		}
 	}
 
 	protected void init720() {

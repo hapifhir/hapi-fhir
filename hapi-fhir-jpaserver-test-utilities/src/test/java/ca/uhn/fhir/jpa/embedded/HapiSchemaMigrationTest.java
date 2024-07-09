@@ -26,7 +26,6 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
@@ -37,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.Set;
 
 import static ca.uhn.fhir.jpa.embedded.HapiEmbeddedDatabasesExtension.FIRST_TESTED_VERSION;
 import static ca.uhn.fhir.jpa.migrate.SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME;
@@ -59,9 +59,13 @@ public class HapiSchemaMigrationTest {
 	private static final String METADATA_IS_NULLABLE_YES = "YES";
 
 	private static final String TABLE_HFJ_RES_SEARCH_URL = "HFJ_RES_SEARCH_URL";
+	private static final String TABLE_TRM_CONCEPT_DESIG = "TRM_CONCEPT_DESIG";
 	private static final String COLUMN_RES_SEARCH_URL = "RES_SEARCH_URL";
 	private static final String COLUMN_PARTITION_ID = "PARTITION_ID";
 	private static final String COLUMN_PARTITION_DATE = "PARTITION_DATE";
+
+	private static final String COLUMN_VAL = "VAL";
+	private static final String COLUMN_VAL_VC = "VAL_VC";
 
 	private static final String NULL_PLACEHOLDER = "[NULL]";
 
@@ -121,6 +125,8 @@ public class HapiSchemaMigrationTest {
 		verifyForcedIdMigration(dataSource);
 
 		verifyHfjResSearchUrlMigration(database, theDriverType);
+
+		verifyTrm_Concept_Desig(database, theDriverType);
 	}
 
 	/**
@@ -177,8 +183,6 @@ public class HapiSchemaMigrationTest {
 				}
 			}
 
-			ourLog.info("6145: actualColumnResults: {}", actualColumnResults);
-
 			final List<Map<String,String>> actualPrimaryKeyResults = new ArrayList<>();
 
 			try (final ResultSet primaryKeyResultSet = tableMetaData.getPrimaryKeys(null, null, TABLE_HFJ_RES_SEARCH_URL)) {
@@ -208,6 +212,61 @@ public class HapiSchemaMigrationTest {
 		}
 	}
 
+	private void verifyTrm_Concept_Desig(JpaEmbeddedDatabase theDatabase, DriverTypeEnum theDriverType) throws SQLException {
+		final List<Map<String, Object>> allCount = theDatabase.query(String.format("SELECT count(*) FROM %s", TABLE_TRM_CONCEPT_DESIG));
+		final List<Map<String, Object>> nonNullValCount = theDatabase.query(String.format("SELECT count(*) FROM %s WHERE %s IS NOT NULL", TABLE_TRM_CONCEPT_DESIG, COLUMN_VAL));
+		final List<Map<String, Object>> nullValVcCount = theDatabase.query(String.format("SELECT count(*) FROM %s WHERE %s IS NULL", TABLE_TRM_CONCEPT_DESIG, COLUMN_VAL_VC));
+
+		assertThat(nonNullValCount).hasSize(1);
+		final Collection<Object> queryResultValuesVal = nonNullValCount.get(0).values();
+		assertThat(queryResultValuesVal).hasSize(1);
+		final Object queryResultValueVal = queryResultValuesVal.iterator().next();
+		assertThat(queryResultValueVal).isInstanceOf(Number.class);
+		if (queryResultValueVal instanceof Number queryResultNumber) {
+			assertThat(queryResultNumber.intValue()).isEqualTo(1);
+		}
+
+		assertThat(nullValVcCount).hasSize(1);
+		final Collection<Object> queryResultValuesValVc = nullValVcCount.get(0).values();
+		assertThat(queryResultValuesValVc).hasSize(1);
+		final Object queryResultValueValVc = queryResultValuesValVc.iterator().next();
+		assertThat(queryResultValueValVc).isInstanceOf(Number.class);
+		if (queryResultValueValVc instanceof Number queryResultNumber) {
+			assertThat(queryResultNumber.intValue()).isEqualTo(1);
+		}
+
+		final Object allCountValue = allCount.get(0).values().iterator().next();
+		if (allCountValue instanceof Number allCountNumber) {
+			assertThat(allCountNumber.intValue()).isEqualTo(1);
+		}
+
+		try (final Connection connection = theDatabase.getDataSource().getConnection()) {
+			final DatabaseMetaData tableMetaData = connection.getMetaData();
+
+			final List<Map<String, String>> actualColumnResults = new ArrayList<>();
+			try (final ResultSet columnsResultSet = tableMetaData.getColumns(null, null, getTableNameWithDbSpecificCase(theDriverType, TABLE_TRM_CONCEPT_DESIG), null)) {
+				while (columnsResultSet.next()) {
+					final Map<String, String> columnMap = new HashMap<>();
+					actualColumnResults.add(columnMap);
+
+					extractAndAddToMap(columnsResultSet, columnMap, METADATA_COLUMN_NAME);
+					extractAndAddToMap(columnsResultSet, columnMap, METADATA_DATA_TYPE);
+					extractAndAddToMap(columnsResultSet, columnMap, METADATA_IS_NULLABLE);
+					extractAndAddToMap(columnsResultSet, columnMap, METADATA_DEFAULT_VALUE);
+				}
+
+				assertThat(actualColumnResults).contains(addExpectedColumnMetadata(COLUMN_VAL, Integer.toString(Types.VARCHAR), METADATA_IS_NULLABLE_YES, null));
+				assertThat(actualColumnResults).contains(addExpectedColumnMetadata(COLUMN_VAL_VC, getExpectedSqlTypeForValVc(theDriverType), METADATA_IS_NULLABLE_YES, null));
+			}
+		}
+	}
+
+	private String getTableNameWithDbSpecificCase(DriverTypeEnum theDriverType, String theTableName) {
+		return Set.of(DriverTypeEnum.ORACLE_12C, DriverTypeEnum.H2_EMBEDDED).contains(theDriverType)
+			? theTableName
+			: theTableName.toLowerCase();
+	}
+
 	@Nonnull
 	private Map<String, String> addExpectedColumnMetadata(String theColumnName, String theDataType, String theNullable, @Nullable String theDefaultValue) {
 		return Map.of(METADATA_COLUMN_NAME, theColumnName,
@@ -233,6 +292,12 @@ public class HapiSchemaMigrationTest {
 		return DriverTypeEnum.ORACLE_12C == theDriverType
 			? Integer.toString(Types.TIMESTAMP)
 			: Integer.toString(Types.DATE);
+	}
+
+	private String getExpectedSqlTypeForValVc(DriverTypeEnum theDriverType) {
+		return Set.of(DriverTypeEnum.ORACLE_12C, DriverTypeEnum.H2_EMBEDDED).contains(theDriverType)
+			? Integer.toString(Types.CLOB)
+			: Integer.toString(Types.VARCHAR);
 	}
 
 	private void extractAndAddToMap(ResultSet theResultSet, Map<String,String> theMap, String theColumn) throws SQLException {

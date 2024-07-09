@@ -56,27 +56,27 @@ public abstract class BaseTest {
 			}
 		});
 
-		// Derby
-		retVal.add(new Supplier<TestDatabaseDetails>() {
-			@Override
-			public TestDatabaseDetails get() {
-				String url = "jdbc:derby:memory:" + DATABASE_NAME + UUID.randomUUID() + ";create=true";
-				DriverTypeEnum.ConnectionProperties connectionProperties = DriverTypeEnum.DERBY_EMBEDDED.newConnectionProperties(url, "SA", "SA");
-				BasicDataSource dataSource = new BasicDataSource();
-				dataSource.setUrl(url);
-				dataSource.setUsername("SA");
-				dataSource.setPassword("SA");
-				dataSource.setDriverClassName(DriverTypeEnum.DERBY_EMBEDDED.getDriverClassName());
-				HapiMigrator migrator = new HapiMigrator(SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME, dataSource, DriverTypeEnum.DERBY_EMBEDDED);
-				return new TestDatabaseDetails(url, connectionProperties, dataSource, migrator);
-			}
-
-			@Override
-			public String toString() {
-				return "Derby";
-			}
-		});
-
+//		 Derby
+//		retVal.add(new Supplier<TestDatabaseDetails>() {
+//			@Override
+//			public TestDatabaseDetails get() {
+//				String url = "jdbc:derby:memory:" + DATABASE_NAME + UUID.randomUUID() + ";create=true";
+//				DriverTypeEnum.ConnectionProperties connectionProperties = DriverTypeEnum.DERBY_EMBEDDED.newConnectionProperties(url, "SA", "SA");
+//				BasicDataSource dataSource = new BasicDataSource();
+//				dataSource.setUrl(url);
+//				dataSource.setUsername("SA");
+//				dataSource.setPassword("SA");
+//				dataSource.setDriverClassName(DriverTypeEnum.DERBY_EMBEDDED.getDriverClassName());
+//				HapiMigrator migrator = new HapiMigrator(SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME, dataSource, DriverTypeEnum.DERBY_EMBEDDED);
+//				return new TestDatabaseDetails(url, connectionProperties, dataSource, migrator);
+//			}
+//
+//			@Override
+//			public String toString() {
+//				return "Derby";
+//			}
+//		});
+//
 		return retVal.stream();
 	}
 

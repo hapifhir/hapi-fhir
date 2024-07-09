@@ -1,9 +1,7 @@
 package ca.uhn.fhir.batch2.jobs.reindex;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.api.IJobPartitionProvider;
 import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrl;
 import ca.uhn.fhir.batch2.jobs.parameters.UrlPartitioner;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
@@ -33,9 +31,15 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -59,6 +63,8 @@ public class ReindexProviderTest {
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 	@Mock
 	private UrlPartitioner myUrlPartitioner;
+	@Mock
+	private IJobPartitionProvider myJobPartitionProvider;
 
 	@Captor
 	private ArgumentCaptor<JobInstanceStartRequest> myStartRequestCaptor;
@@ -72,7 +78,7 @@ public class ReindexProviderTest {
 
 		when(myJobCoordinator.startInstance(isNotNull(), any()))
 			.thenReturn(createJobStartResponse());
-		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForServerOperation(any(), any())).thenReturn(RequestPartitionId.allPartitions());
+		when(myJobPartitionProvider.getPartitions(any(), any())).thenReturn(List.of(RequestPartitionId.allPartitions()));
 	}
 
 	private Batch2JobStartResponse createJobStartResponse() {
@@ -96,11 +102,7 @@ public class ReindexProviderTest {
 		input.addParameter(ProviderConstants.OPERATION_REINDEX_PARAM_BATCH_SIZE, new DecimalType(batchSize));
 
 		ourLog.debug(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
-
-		PartitionedUrl partitionedUrl = new PartitionedUrl();
-		partitionedUrl.setUrl(url);
-		partitionedUrl.setRequestPartitionId(RequestPartitionId.defaultPartition());
-		when(myUrlPartitioner.partitionUrl(anyString(), any())).thenReturn(partitionedUrl);
+		when(myUrlPartitioner.partitionUrl(anyString(), any())).thenReturn(new PartitionedUrl().setUrl(url).setRequestPartitionId(RequestPartitionId.defaultPartition()));
 
 		// Execute
 

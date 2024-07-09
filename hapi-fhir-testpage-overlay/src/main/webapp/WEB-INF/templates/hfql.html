@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 	<head>
-		<title th:include="window-title :: hfql" />
-		<th:block th:include="tmpl-head :: head" />
-		<script th:include="tmpl-buttonclick-handler :: handler" />
+		<title th:replace="~{window-title :: hfql}" />
+		<th:block th:insert="~{tmpl-head :: head}" />
+		<th:block th:insert="~{tmpl-buttonclick-handler :: handler}" />
 
       <style type="text/css" media="screen">
          #editor {
@@ -30,18 +30,18 @@
 		<input type="hidden" id="serverId" name="serverId" th:value="${serverId}"></input> 
 		<input th:if="${_csrf} != null" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 
-		<div th:replace="tmpl-navbar-top :: top" ></div>
+		<div th:replace="~{tmpl-navbar-top :: top}" ></div>
 		
 		<div class="container-fluid">
 			<div class="row">
 
-				<div th:replace="tmpl-navbar-left :: left" ></div>
+				<div th:replace="~{tmpl-navbar-left :: left}" ></div>
 
 				<div class="col-sm-9 col-sm-offset-3 col-md-9 col-md-offset-3 main" style="height: calc(100% - 200px);">
 
-					<div th:replace="tmpl-banner :: banner"></div>
+					<div th:replace="~{tmpl-banner :: banner}"></div>
 
-               <div th:replace="tmpl-hfql-banner-card :: banner"></div>
+               <div th:replace="~{tmpl-hfql-banner-card :: banner}"></div>
 
                <!-- ************************************************ -->
                <!-- ** SQL Editor                                 ** -->

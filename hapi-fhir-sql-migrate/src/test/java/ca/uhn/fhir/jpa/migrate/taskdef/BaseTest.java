@@ -107,7 +107,7 @@ public abstract class BaseTest {
 		return retVal.stream();
 	}
 
-	public void before(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
+	public DriverTypeEnum before(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
 		TestDatabaseDetails testDatabaseDetails = theTestDatabaseDetails.get();
 		myUrl = testDatabaseDetails.myUrl;
 		myConnectionProperties = testDatabaseDetails.myConnectionProperties;
@@ -117,6 +117,8 @@ public abstract class BaseTest {
 
 		myHapiMigrationDao.createMigrationTableIfRequired();
 		myHapiMigrationStorageSvc = new HapiMigrationStorageSvc(myHapiMigrationDao);
+
+		return testDatabaseDetails.getDriverType();
 	}
 
 	public String getUrl() {

@@ -1,8 +1,5 @@
 package ca.uhn.fhir.jpa.bulk.imprt2;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.jobs.imprt.ConsumeFilesStep;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
@@ -24,6 +21,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @TestMethodOrder(MethodOrderer.MethodName.class)
@@ -141,15 +141,17 @@ public class ConsumeFilesStepR4Test extends BasePartitioningR4Test {
 
 		// Validate
 
-		if (partitionEnabled) {
-			assertEquals(7, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
-		} else {
-			assertEquals(6, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
-		}
+		int expectedSelectQueryCount = partitionEnabled ? 8 : 6;
+		assertEquals(expectedSelectQueryCount, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		assertEquals(2, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(4, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
-		assertEquals(1, myCaptureQueriesListener.countCommits());
+
+		// PartitionLookupSvcImpl#lookupPartitionByName generates one additional commit
+		// because it executes in a transaction (calls executeInTransaction)
+		// we may want to change that in the future
+		int expectedCommitCount = partitionEnabled ? 2 : 1;
+		assertEquals(expectedCommitCount, myCaptureQueriesListener.countCommits());
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 
 		patient = myPatientDao.read(new IdType("Patient/A"), mySrd);

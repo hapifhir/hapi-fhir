@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 6063
+title: "Removing deprecated thymeleaf syntax from existing templates,
+        so as to avoid deprecation warnings in logs.
+"

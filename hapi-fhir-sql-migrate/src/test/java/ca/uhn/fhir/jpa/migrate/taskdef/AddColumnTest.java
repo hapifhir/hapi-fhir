@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.HapiMigrationException;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import ca.uhn.fhir.jpa.migrate.tasks.api.BaseMigrationTasks;
@@ -77,7 +79,7 @@ public class AddColumnTest extends BaseTest {
 	@ParameterizedTest(name = "{index}: {0}")
 	@MethodSource("data")
 	public void testAddColumnToNonExistentTable_Failing(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
-		before(theTestDatabaseDetails);
+		final DriverTypeEnum driverType = before(theTestDatabaseDetails);
 
 		BaseMigrationTasks<VersionEnum> tasks = new BaseMigrationTasks<>();
 		tasks
@@ -92,7 +94,12 @@ public class AddColumnTest extends BaseTest {
 			getMigrator().migrate();
 			fail();
 		} catch (HapiMigrationException e) {
-			assertThat(e.getMessage()).startsWith("HAPI-0047: Failure executing task \"Add column FOO_COLUMN on table FOO_TABLE\", aborting! Cause: ca.uhn.fhir.jpa.migrate.HapiMigrationException: HAPI-0061: Failed during task 4.0.0.2001.01: ");
+			final String expectedError =
+				String.format("%sFailure executing task 'Add column FOO_COLUMN on table FOO_TABLE', for driver: %s, aborting! Cause: ca.uhn.fhir.jpa.migrate.HapiMigrationException: %sFailed during task 4.0.0.2001.01: ",
+					Msg.code(47),
+					driverType.name(),
+					Msg.code(61));
+			assertThat(e.getMessage()).startsWith(expectedError);
 		}
 	}
 
