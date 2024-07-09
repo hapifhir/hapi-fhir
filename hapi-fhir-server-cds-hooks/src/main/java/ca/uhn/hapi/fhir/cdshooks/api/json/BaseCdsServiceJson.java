@@ -24,18 +24,29 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * @see <a href=" https://cds-hooks.hl7.org/1.0/#extensions">For reading more about Extension support in CDS hooks</a>
+ * Example can be found <a href="https://build.fhir.org/ig/HL7/davinci-crd/deviations.html#configuration-options-extension">here</a>
  */
 public abstract class BaseCdsServiceJson implements IModelJson {
 
-	@JsonProperty(value = "extension", required = true)
-	String myExtension;
+	@JsonProperty(value = "extension")
+	CdsHooksExtension myExtension;
 
-	public String getExtension() {
+	private Class<? extends CdsHooksExtension> myExtensionClass;
+
+	public CdsHooksExtension getExtension() {
 		return myExtension;
 	}
 
-	public BaseCdsServiceJson setExtension(String theExtension) {
+	public BaseCdsServiceJson setExtension(CdsHooksExtension theExtension) {
 		this.myExtension = theExtension;
 		return this;
+	}
+
+	public void setExtensionClass(Class<? extends CdsHooksExtension> theClass) {
+		this.myExtensionClass = theClass;
+	}
+
+	public Class<? extends CdsHooksExtension> getExtensionClass() {
+		return myExtensionClass;
 	}
 }

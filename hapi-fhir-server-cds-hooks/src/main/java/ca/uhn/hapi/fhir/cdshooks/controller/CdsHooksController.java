@@ -94,13 +94,12 @@ public class CdsHooksController {
 			path = "{cds_hook}/feedback",
 			method = {RequestMethod.POST},
 			consumes = {MediaType.APPLICATION_JSON_VALUE})
-	public ResponseEntity<String> cdsServiceFeedback(
+	public ResponseEntity<CdsServiceFeedbackJson> cdsServiceFeedback(
 			@PathVariable("cds_hook") String theCdsHook,
 			@RequestBody CdsServiceFeedbackJson theCdsServiceFeedbackJson) {
-		String json = myCdsServiceRegistry.callFeedback(theCdsHook, theCdsServiceFeedbackJson);
-
+		CdsServiceFeedbackJson response = myCdsServiceRegistry.callFeedback(theCdsHook, theCdsServiceFeedbackJson);
 		return ResponseEntity.status(200)
 				.contentType(MediaType.APPLICATION_JSON)
-				.body(json);
+				.body(response);
 	}
 }
