@@ -1272,33 +1272,35 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 			String methodName = "testEverythingPatientInstanceOffset";
 			createPatientResources(methodName);
 
-			// Test paging works.
 			// There are 4 results, lets make 4 pages of 1.
 			Parameters parameters = new Parameters();
 			addOffsetAndCount(parameters, 0, 1);
 
 			Parameters output = myClient.operation().onInstance(p1Id).named("everything").withParameters(parameters).execute();
 			Bundle bundle = (Bundle) output.getParameter().get(0).getResource();
-			assertThat(bundle.getEntry()).hasSize(1);
-			assertThat(toUnqualifiedVersionlessIds(bundle)).containsOnly(p1Id);
+			// first page
+			List<IIdType> results = new ArrayList<>(validateAndGetIdListFromBundle(bundle, 1));
 
 			// second page
 			Bundle nextBundle = getNextBundle(bundle);
-			validateNextBundle(nextBundle, 1, c1Id);
+			results.addAll(validateAndGetIdListFromBundle(nextBundle, 1));
 
 			// third page
 			nextBundle = getNextBundle(nextBundle);
-			validateNextBundle(nextBundle, 1, o1Id);
+			results.addAll(validateAndGetIdListFromBundle(nextBundle, 1));
 
 			// fourth page
 			nextBundle = getNextBundle(nextBundle);
-			validateNextBundle(nextBundle, 1, e1Id);
+			results.addAll(validateAndGetIdListFromBundle(nextBundle, 1));
+
+			// no next link
+			assertNull(nextBundle.getLink("next"));
+			assertThat(results).containsOnly(p1Id, c1Id, o1Id, e1Id);
 		}
 
 		@Test
 		public void testPagingOverEverything_onPatientType_returnsCorrectBundles() {
 			String methodName = "testEverythingPatientTypeOffset";
-			//createPatientResources(methodName);
 			createPatientResources(methodName);
 
 			// Test paging works.
@@ -1365,12 +1367,12 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 
 		@Test
 		public void testPagingOverEverything_onPatientTypeWithNotLinkedPatients_returnsCorrectBundles() {
-			String methodName = "testEverythingPatientTypeWithIdParameter";
+			String methodName = "testEverythingPatientTypeWithNotLinkedPatients";
 
 			p1Id = createPatient(methodName, "1");
 			p2Id = createPatient(methodName, "2");
 			p3Id = createPatient(methodName, "3");
-			p4Id = createPatient(methodName, "3");
+			p4Id = createPatient(methodName, "4");
 
 			// Test patients without links
 			Parameters parameters = new Parameters();
@@ -1378,20 +1380,23 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 
 			Parameters output = myClient.operation().onType(Patient.class).named("everything").withParameters(parameters).execute();
 			Bundle bundle = (Bundle) output.getParameter().get(0).getResource();
-			assertThat(bundle.getEntry()).hasSize(1);
-			assertThat(toUnqualifiedVersionlessIds(bundle)).containsOnly(p1Id);
+			List<IIdType> results = new ArrayList<>(validateAndGetIdListFromBundle(bundle, 1));
 
 			// second page
 			Bundle nextBundle = getNextBundle(bundle);
-			validateNextBundle(nextBundle, 1, p2Id);
+			results.addAll(validateAndGetIdListFromBundle(nextBundle, 1));
 
 			// third page
 			nextBundle = getNextBundle(nextBundle);
-			validateNextBundle(nextBundle, 1, p3Id);
+			results.addAll(validateAndGetIdListFromBundle(nextBundle, 1));
 
 			// fourth page
 			nextBundle = getNextBundle(nextBundle);
-			validateNextBundle(nextBundle, 1, p4Id);
+			results.addAll(validateAndGetIdListFromBundle(nextBundle, 1));
+
+			// no next link
+			assertNull(nextBundle.getLink("next"));
+			assertThat(results).containsOnly(p1Id, p2Id, p3Id, p4Id);
 		}
 
 		private void addOffsetAndCount(Parameters theParameters, int theOffset, int theCount) {
@@ -1403,20 +1408,25 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 
 		private void validateEverythingBundle(Parameters theParameters) {
 			Bundle bundle = (Bundle) theParameters.getParameter().get(0).getResource();
-			assertThat(bundle.getEntry()).hasSize(4);
-			assertThat(toUnqualifiedVersionlessIds(bundle)).containsExactly(p1Id, p2Id, p3Id, p4Id);
+			// first page
+			List<IIdType> results = new ArrayList<>(validateAndGetIdListFromBundle(bundle, 4));
 
 			// second page
 			Bundle nextBundle = getNextBundle(bundle);
-			validateNextBundle(nextBundle, 4, c1Id, c2Id, c3Id, c4Id);
+			results.addAll(validateAndGetIdListFromBundle(nextBundle, 4));
 
 			// third page
 			nextBundle = getNextBundle(nextBundle);
-			validateNextBundle(nextBundle, 4, o1Id, e1Id, o2Id, o3Id);
+			results.addAll(validateAndGetIdListFromBundle(nextBundle, 4));
 
 			// fourth page
 			nextBundle = getNextBundle(nextBundle);
-			validateNextBundle(nextBundle, 1, o4Id);
+			results.addAll(validateAndGetIdListFromBundle(nextBundle, 1));
+
+			// no next link
+			assertNull(nextBundle.getLink("next"));
+			// make sure all resources are returned, order doesn't matter
+			assertThat(results).containsOnly(p1Id, p2Id, p3Id, p4Id, c1Id, c2Id, c3Id, c4Id, o1Id, e1Id, o2Id, o3Id, o4Id);
 		}
 
 		private Bundle getNextBundle(Bundle theBundle) {
@@ -1429,6 +1439,12 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 			assertThat(theBundle.getEntry()).hasSize(theSize);
 			List<IIdType> bundleIds = toUnqualifiedVersionlessIds(theBundle);
 			assertThat(bundleIds).containsExactly(theIds);
+		}
+
+		private List<IIdType> validateAndGetIdListFromBundle(Bundle theBundle, int theSize) {
+			assertEquals(Bundle.BundleType.SEARCHSET, theBundle.getType());
+			assertThat(theBundle.getEntry()).hasSize(theSize);
+			return toUnqualifiedVersionlessIds(theBundle);
 		}
 
 		private void createPatientResources(String theMethodName) {

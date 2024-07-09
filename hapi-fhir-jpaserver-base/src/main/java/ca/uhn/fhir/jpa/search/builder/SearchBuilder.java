@@ -132,7 +132,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -351,7 +350,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	 */
 	@Override
 	public void setPreviouslyAddedResourcePids(@Nonnull List<JpaPid> thePidSet) {
-		myPidSet = new LinkedHashSet<>(thePidSet);
+		myPidSet = new HashSet<>(thePidSet);
 	}
 
 	@SuppressWarnings("ConstantConditions")
@@ -367,8 +366,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		init(theParams, theSearchRuntimeDetails.getSearchUuid(), theRequestPartitionId);
 
 		if (myPidSet == null) {
-			// using LinkedHashSet instead of HashSet to guarantee order in Set
-			myPidSet = new LinkedHashSet<>();
+			myPidSet = new HashSet<>();
 		}
 
 		return new QueryIterator(theSearchRuntimeDetails, theRequest);
@@ -1411,9 +1409,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		}
 
 		List<JpaPid> nextRoundMatches = new ArrayList<>(matches);
-		// using LinkedHashSet instead of HashSet to guarantee order in Set
-		HashSet<JpaPid> allAdded = new LinkedHashSet<>();
-		HashSet<JpaPid> original = new LinkedHashSet<>(matches);
+		HashSet<JpaPid> allAdded = new HashSet<>();
+		HashSet<JpaPid> original = new HashSet<>(matches);
 		ArrayList<Include> includes = new ArrayList<>(currentIncludes);
 
 		int roundCounts = 0;
@@ -1423,7 +1420,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		do {
 			roundCounts++;
 
-			HashSet<JpaPid> pidsToInclude = new LinkedHashSet<>();
+			HashSet<JpaPid> pidsToInclude = new HashSet<>();
 
 			for (Iterator<Include> iter = includes.iterator(); iter.hasNext(); ) {
 				Include nextInclude = iter.next();
@@ -2216,8 +2213,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		private JpaPid myNext;
 
 		IncludesIterator(Set<JpaPid> thePidSet, RequestDetails theRequest) {
-			// using LinkedHashSet instead of HashSet to guarantee order in Set
-			myCurrentPids = new LinkedHashSet<>(thePidSet);
+			myCurrentPids = new HashSet<>(thePidSet);
 			myCurrentIterator = null;
 			myRequest = theRequest;
 		}
