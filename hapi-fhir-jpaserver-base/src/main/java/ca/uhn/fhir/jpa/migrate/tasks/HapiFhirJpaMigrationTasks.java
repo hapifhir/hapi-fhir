@@ -440,23 +440,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 													t.getString("IDX_STRING")))
 									.setColumnName("HASH_COMPLETE"));
 
-			{ // These migrations permit much longer values to be stored in SPIDX_TOKEN and SPIDX_STRING value
-				Builder.BuilderWithTableName spidxString = version.onTable("HFJ_SPIDX_STRING");
-				// components.
-				// This is mostly helpful for `:contains` searches on long values, since exact searches use the hash
-				// anyhow.
-				spidxString
-						.modifyColumn("20240708.10", "SP_VALUE_EXACT")
-						.nullable()
-						.withType(ColumnTypeEnum.STRING, 768)
-						.failureAllowed();
-				spidxString
-						.modifyColumn("20240708.20", "SP_VALUE_NORMALIZED")
-						.nullable()
-						.withType(ColumnTypeEnum.STRING, 768)
-						.failureAllowed();
-			}
-		}
+
 
 		{
 			version.onTable("TRM_CONCEPT_DESIG")
@@ -468,6 +452,23 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 					.addColumn("20240705.20", "VAL_VC")
 					.nullable()
 					.type(ColumnTypeEnum.TEXT);
+		}
+			{ // These migrations permit much longer values to be stored in SPIDX_TOKEN and SPIDX_STRING value
+				Builder.BuilderWithTableName spidxString = version.onTable("HFJ_SPIDX_STRING");
+				// components.
+				// This is mostly helpful for `:contains` searches on long values, since exact searches use the hash
+				// anyhow.
+				spidxString
+					.modifyColumn("20240708.10", "SP_VALUE_EXACT")
+					.nullable()
+					.withType(ColumnTypeEnum.STRING, 768)
+					.failureAllowed();
+				spidxString
+					.modifyColumn("20240708.20", "SP_VALUE_NORMALIZED")
+					.nullable()
+					.withType(ColumnTypeEnum.STRING, 768)
+					.failureAllowed();
+			}
 		}
 	}
 
