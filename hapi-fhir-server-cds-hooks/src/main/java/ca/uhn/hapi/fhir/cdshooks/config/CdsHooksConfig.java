@@ -98,13 +98,15 @@ public class CdsHooksConfig {
 			CdsPrefetchSvc theCdsPrefetchSvc,
 			@Qualifier(CDS_HOOKS_OBJECT_MAPPER_FACTORY) ObjectMapper theObjectMapper,
 			ICdsCrServiceFactory theCdsCrServiceFactory,
-			ICrDiscoveryServiceFactory theCrDiscoveryServiceFactory) {
+			ICrDiscoveryServiceFactory theCrDiscoveryServiceFactory,
+			FhirContext theFhirContext) {
 		return new CdsServiceRegistryImpl(
 				theCdsHooksContextBooter,
 				theCdsPrefetchSvc,
 				theObjectMapper,
 				theCdsCrServiceFactory,
-				theCrDiscoveryServiceFactory);
+				theCrDiscoveryServiceFactory,
+				theFhirContext);
 	}
 
 	@Bean
