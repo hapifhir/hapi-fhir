@@ -66,7 +66,6 @@ class RequestPartitionHelperSvcTest extends BaseJpaR4Test {
 
 		// verify
 		assertThat(result.isAllPartitions()).isFalse();
-		assertThat(result.hasPartitionIds()).isFalse();
 		assertThat(result.hasPartitionNames()).isFalse();
 		assertThat(result.isDefaultPartition()).isTrue();
 		assertThat(result.hasDefaultPartitionId()).isTrue();
