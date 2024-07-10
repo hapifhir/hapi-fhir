@@ -21,12 +21,9 @@ package ca.uhn.test.util;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.filter.ThresholdFilter;
-import ch.qos.logback.classic.spi.ILoggingEvent;
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
-
-import java.util.List;
 
 /**
  * This is a static wrapper around LogbackTestExtension for use in IT tests when you need to assert on App
@@ -64,16 +61,8 @@ public class StaticLogbackTestExtension implements BeforeAllCallback, AfterAllCa
 		myLogbackTestExtension.afterEach(theExtensionContext);
 	}
 
-	public List<ILoggingEvent> filterLoggingEventsWithMessageEqualTo(String theMessageText) {
-		return myLogbackTestExtension.filterLoggingEventsWithMessageEqualTo(theMessageText);
-	}
-
-	/**
-	 * Returns a copy to avoid concurrent modification errors.
-	 * @return A copy of the log events so far.
-	 */
-	public java.util.List<ILoggingEvent> getLogEvents() {
-		return myLogbackTestExtension.getLogEvents();
+	public LogbackTestExtension getLogbackTestExtension() {
+		return myLogbackTestExtension;
 	}
 
 }
