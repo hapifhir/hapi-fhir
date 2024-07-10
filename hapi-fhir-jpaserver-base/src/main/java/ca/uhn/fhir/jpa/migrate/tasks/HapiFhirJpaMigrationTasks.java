@@ -473,9 +473,9 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		 * Adding new column to ResourceLink
 		 */
 		version.onTable("HFJ_RES_LINK")
-			.addColumn("20240710.1", "TARGET_RESOURCE_URL_VERSION")
-			.nullable()
-			.type(ColumnTypeEnum.STRING, 50);
+				.addColumn("20240710.1", "TARGET_RESOURCE_URL_VERSION")
+				.nullable()
+				.type(ColumnTypeEnum.STRING, 50);
 	}
 
 	protected void init720() {

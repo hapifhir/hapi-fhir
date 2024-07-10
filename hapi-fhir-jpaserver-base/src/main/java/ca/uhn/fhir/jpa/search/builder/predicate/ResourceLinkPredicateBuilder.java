@@ -331,21 +331,22 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 
 		Condition targetUrlsCondition = null;
 		if (!theTargetQualifiedUrls.isEmpty()) {
-			//TODO - these urls may have versions
+			// TODO - these urls may have versions
 			AtomicBoolean hasVersions = new AtomicBoolean();
 			List<UrlUtil.UrlAndVersion> urlAndVersions = theTargetQualifiedUrls.stream()
-				.map((url) -> {
-					UrlUtil.UrlAndVersion urlAndVersion = UrlUtil.parseUrlWithVersion(url);
-					if (isNotBlank(urlAndVersion.Version)) {
-						hasVersions.set(true);
-					}
-					return urlAndVersion;
-				}).collect(Collectors.toList());
+					.map((url) -> {
+						UrlUtil.UrlAndVersion urlAndVersion = UrlUtil.parseUrlWithVersion(url);
+						if (isNotBlank(urlAndVersion.Version)) {
+							hasVersions.set(true);
+						}
+						return urlAndVersion;
+					})
+					.collect(Collectors.toList());
 
 			if (!hasVersions.get()) {
 				List<String> placeholders = generatePlaceholders(theTargetQualifiedUrls);
 				targetUrlsCondition =
-					QueryParameterUtils.toEqualToOrInPredicate(myColumnTargetResourceUrl, placeholders, theInverse);
+						QueryParameterUtils.toEqualToOrInPredicate(myColumnTargetResourceUrl, placeholders, theInverse);
 			} else {
 				// there may be some versions or not on these values
 				List<Condition> conditions = new ArrayList<>();
@@ -360,9 +361,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 					} else {
 						versionCondition = BinaryCondition.EMPTY;
 					}
-					conditions.add(
-						QueryParameterUtils.toAndPredicate(urlCondition, versionCondition)
-					);
+					conditions.add(QueryParameterUtils.toAndPredicate(urlCondition, versionCondition));
 				}
 				// or is the default for multiple query params
 				targetUrlsCondition = QueryParameterUtils.toOrPredicate(conditions);
