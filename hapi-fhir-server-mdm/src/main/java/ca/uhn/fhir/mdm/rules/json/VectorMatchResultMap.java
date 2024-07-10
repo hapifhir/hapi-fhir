@@ -22,14 +22,13 @@ package ca.uhn.fhir.mdm.rules.json;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
-import jakarta.annotation.Nonnull;
 
+import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
 
 public class VectorMatchResultMap {
 	private final MdmRulesJson myMdmRulesJson;
