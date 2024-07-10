@@ -59,6 +59,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
@@ -86,6 +87,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -93,6 +95,7 @@ import static ca.uhn.fhir.jpa.search.builder.QueryStack.SearchForIdsParams.with;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_TYPE;
 import static ca.uhn.fhir.rest.api.Constants.VALID_MODIFIERS;
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
 public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder implements ICanMakeMissingParamPredicate {
@@ -103,6 +106,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 	private final DbColumn myColumnSrcPath;
 	private final DbColumn myColumnTargetResourceId;
 	private final DbColumn myColumnTargetResourceUrl;
+	private final DbColumn myColumnTargetResourceVersion;
 	private final DbColumn myColumnSrcResourceId;
 	private final DbColumn myColumnTargetResourceType;
 	private final QueryStack myQueryStack;
@@ -137,6 +141,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 		myColumnSrcPath = getTable().addColumn("SRC_PATH");
 		myColumnTargetResourceId = getTable().addColumn("TARGET_RESOURCE_ID");
 		myColumnTargetResourceUrl = getTable().addColumn("TARGET_RESOURCE_URL");
+		myColumnTargetResourceVersion = getTable().addColumn("TARGET_RESOURCE_URL_VERSION");
 		myColumnTargetResourceType = getTable().addColumn("TARGET_RESOURCE_TYPE");
 
 		myReversed = theReversed;
@@ -326,9 +331,42 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 
 		Condition targetUrlsCondition = null;
 		if (!theTargetQualifiedUrls.isEmpty()) {
-			List<String> placeholders = generatePlaceholders(theTargetQualifiedUrls);
-			targetUrlsCondition =
+			//TODO - these urls may have versions
+			AtomicBoolean hasVersions = new AtomicBoolean();
+			List<UrlUtil.UrlAndVersion> urlAndVersions = theTargetQualifiedUrls.stream()
+				.map((url) -> {
+					UrlUtil.UrlAndVersion urlAndVersion = UrlUtil.parseUrlWithVersion(url);
+					if (isNotBlank(urlAndVersion.Version)) {
+						hasVersions.set(true);
+					}
+					return urlAndVersion;
+				}).collect(Collectors.toList());
+
+			if (!hasVersions.get()) {
+				List<String> placeholders = generatePlaceholders(theTargetQualifiedUrls);
+				targetUrlsCondition =
 					QueryParameterUtils.toEqualToOrInPredicate(myColumnTargetResourceUrl, placeholders, theInverse);
+			} else {
+				// there may be some versions or not on these values
+				List<Condition> conditions = new ArrayList<>();
+				for (UrlUtil.UrlAndVersion urlAndVersion : urlAndVersions) {
+					String urlPlaceholder = generatePlaceholder(urlAndVersion.URL);
+					Condition urlCondition = BinaryCondition.equalTo(myColumnTargetResourceUrl, urlPlaceholder);
+					Condition versionCondition;
+					if (isNotBlank(urlAndVersion.Version)) {
+						// url and version
+						String versionPlaceholder = generatePlaceholder(urlAndVersion.Version);
+						versionCondition = BinaryCondition.equalTo(myColumnTargetResourceVersion, versionPlaceholder);
+					} else {
+						versionCondition = BinaryCondition.EMPTY;
+					}
+					conditions.add(
+						QueryParameterUtils.toAndPredicate(urlCondition, versionCondition)
+					);
+				}
+				// or is the default for multiple query params
+				targetUrlsCondition = QueryParameterUtils.toOrPredicate(conditions);
+			}
 		}
 
 		Condition joinedCondition;

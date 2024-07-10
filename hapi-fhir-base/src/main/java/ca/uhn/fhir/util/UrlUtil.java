@@ -638,6 +638,48 @@ public class UrlUtil {
 				Msg.code(2419) + String.format("Provided URI is not valid: %s", theUri), theCause);
 	}
 
+	/**
+	 * Parses a url with a version appended to url + version.
+	 * If no version is present, just a url is returned.
+	 * @param theUrl a url, potentially with version (http://example.com|1.2.3
+	 * @return the parsed url and version
+	 */
+	public static UrlAndVersion parseUrlWithVersion(@Nonnull String theUrl) {
+		UrlAndVersion retVal = new UrlAndVersion();
+		retVal.URL = theUrl;
+		if (theUrl.contains("|")) {
+			String[] parts = theUrl.split("\\|");
+			if (parts.length == 2) {
+				retVal.URL = parts[0];
+				retVal.Version = parts[1];
+			} else {
+				String msg = String.format("Invalid number of parts. Expected 2, found %d", parts.length);
+				ourLog.warn(msg);
+				retVal.addError(msg);
+			}
+		}
+		return retVal;
+	}
+
+	public static class UrlAndVersion {
+		public String URL;
+		public String Version;
+
+		private final List<String> myErrors = new ArrayList<>();
+
+		public void addError(String theError) {
+			myErrors.add(theError);
+		}
+
+		public List<String> getErrors() {
+			return myErrors;
+		}
+
+		public boolean hasErrors() {
+			return !myErrors.isEmpty();
+		}
+	}
+
 	public static class UrlParts {
 		private String myParams;
 		private String myResourceId;

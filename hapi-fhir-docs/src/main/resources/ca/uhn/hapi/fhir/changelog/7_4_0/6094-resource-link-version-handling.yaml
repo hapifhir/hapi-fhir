@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 6094
+title: "Searching on canonical urls with version (eg: http://example.com|1.2.3)
+        was not handled correctly. This has been fixed.
+"

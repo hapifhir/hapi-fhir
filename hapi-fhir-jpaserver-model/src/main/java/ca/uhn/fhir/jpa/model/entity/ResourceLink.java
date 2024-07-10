@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
+import ca.uhn.fhir.util.UrlUtil;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -42,6 +43,8 @@ import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextFi
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.Date;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Entity
 @Table(
@@ -104,9 +107,20 @@ public class ResourceLink extends BaseResourceIndex {
 	@FullTextField
 	private String myTargetResourceType;
 
+	/**
+	 * The resource url (without version)
+	 */
 	@Column(name = "TARGET_RESOURCE_URL", length = 200, nullable = true)
 	@FullTextField
 	private String myTargetResourceUrl;
+
+	/**
+	 * The version portion of the url.
+	 * Together with myTargetResourceUrl would be separated by a pipe (|) character
+	 * eg: http://example.com|1.0
+	 */
+	@Column(name = "TARGET_RESOURCE_URL_VERSION", length = 50, nullable = true)
+	private String myTargetResourceUrlVersion;
 
 	@Column(name = "TARGET_RESOURCE_VERSION", nullable = true)
 	private Long myTargetResourceVersion;
@@ -165,6 +179,7 @@ public class ResourceLink extends BaseResourceIndex {
 		b.append(mySourcePath, obj.mySourcePath);
 		b.append(mySourceResource, obj.mySourceResource);
 		b.append(myTargetResourceUrl, obj.myTargetResourceUrl);
+		b.append(myTargetResourceUrlVersion, obj.myTargetResourceUrlVersion);
 		b.append(myTargetResourceType, obj.myTargetResourceType);
 		b.append(myTargetResourceVersion, obj.myTargetResourceVersion);
 		// In cases where we are extracting links from a resource that has not yet been persisted, the target resource
@@ -188,6 +203,7 @@ public class ResourceLink extends BaseResourceIndex {
 		myTargetResourceType = source.getTargetResourceType();
 		myTargetResourceVersion = source.getTargetResourceVersion();
 		myTargetResourceUrl = source.getTargetResourceUrl();
+		myTargetResourceUrlVersion = source.getTargetResourceUrlVersion();
 	}
 
 	public String getSourcePath() {
@@ -224,6 +240,14 @@ public class ResourceLink extends BaseResourceIndex {
 		return myTargetResourceUrl;
 	}
 
+	public String getTargetResourceUrlVersion() {
+		return myTargetResourceUrlVersion;
+	}
+
+	public void setTargetResourceUrlVersion(String theVersion) {
+		myTargetResourceUrlVersion = theVersion;
+	}
+
 	public void setTargetResourceUrl(IIdType theTargetResourceUrl) {
 		Validate.isTrue(theTargetResourceUrl.hasBaseUrl());
 		Validate.isTrue(theTargetResourceUrl.hasResourceType());
@@ -238,7 +262,13 @@ public class ResourceLink extends BaseResourceIndex {
 		//		}
 
 		myTargetResourceType = theTargetResourceUrl.getResourceType();
-		myTargetResourceUrl = theTargetResourceUrl.getValue();
+		setTargetResourceUrlInternal(theTargetResourceUrl.getValue());
+	}
+
+	private void setTargetResourceUrlInternal(String theUrl) {
+		UrlUtil.UrlAndVersion urlAndVersion = UrlUtil.parseUrlWithVersion(theUrl);
+		myTargetResourceUrl = urlAndVersion.URL;
+		setTargetResourceUrlVersion(urlAndVersion.Version);
 	}
 
 	public Long getTargetResourcePid() {
@@ -249,7 +279,7 @@ public class ResourceLink extends BaseResourceIndex {
 		Validate.notBlank(theTargetResourceUrl);
 
 		myTargetResourceType = "(unknown)";
-		myTargetResourceUrl = theTargetResourceUrl;
+		setTargetResourceUrlInternal(theTargetResourceUrl);
 	}
 
 	public Date getUpdated() {
@@ -286,6 +316,9 @@ public class ResourceLink extends BaseResourceIndex {
 		b.append(mySourcePath);
 		b.append(mySourceResource);
 		b.append(myTargetResourceUrl);
+		if (isNotBlank(myTargetResourceUrlVersion)) {
+			b.append(myTargetResourceUrlVersion);
+		}
 		b.append(myTargetResourceVersion);
 
 		// In cases where we are extracting links from a resource that has not yet been persisted, the target resource
@@ -309,6 +342,7 @@ public class ResourceLink extends BaseResourceIndex {
 		b.append(", targetResType=").append(myTargetResourceType);
 		b.append(", targetResVersion=").append(myTargetResourceVersion);
 		b.append(", targetResUrl=").append(myTargetResourceUrl);
+		b.append(", targetResUrlVer=").append(myTargetResourceUrlVersion);
 
 		b.append("]");
 		return b.toString();
@@ -336,6 +370,7 @@ public class ResourceLink extends BaseResourceIndex {
 			retVal.myTargetResourceId = myTargetResource.getIdDt().getIdPart();
 		}
 		retVal.myTargetResourceUrl = myTargetResourceUrl;
+		retVal.myTargetResourceUrlVersion = myTargetResourceUrlVersion;
 		retVal.myTargetResourceVersion = myTargetResourceVersion;
 		return retVal;
 	}

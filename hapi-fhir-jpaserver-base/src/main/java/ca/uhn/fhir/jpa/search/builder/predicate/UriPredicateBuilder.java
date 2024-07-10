@@ -151,7 +151,6 @@ public class UriPredicateBuilder extends BaseSearchParamPredicateBuilder {
 					codePredicates.add(hashAndUriPredicate);
 
 				} else {
-
 					Condition uriPredicate = null;
 					if (theOperation == null || theOperation == SearchFilterParser.CompareOperation.eq) {
 						long hashUri = ResourceIndexedSearchParamUri.calculateHashUri(

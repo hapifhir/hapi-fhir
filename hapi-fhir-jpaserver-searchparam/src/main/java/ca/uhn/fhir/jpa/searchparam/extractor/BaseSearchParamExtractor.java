@@ -80,6 +80,9 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
+import javax.measure.quantity.Quantity;
+import javax.measure.unit.NonSI;
+import javax.measure.unit.Unit;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -93,9 +96,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
-import javax.measure.quantity.Quantity;
-import javax.measure.unit.NonSI;
-import javax.measure.unit.Unit;
 
 import static ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum.DATE;
 import static ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum.REFERENCE;
@@ -2169,12 +2169,6 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 						}
 
 						if (parsed.isAbsolute()) {
-							String refValue =
-									fakeReference.getReferenceElement().getValue();
-							if (refValue.contains("|")) {
-								fakeReference.setReference(refValue.substring(0, refValue.indexOf('|')));
-							}
-
 							myPathAndRef = new PathAndRef(theSearchParam.getName(), thePath, fakeReference, true);
 							theParams.add(myPathAndRef);
 							break;
