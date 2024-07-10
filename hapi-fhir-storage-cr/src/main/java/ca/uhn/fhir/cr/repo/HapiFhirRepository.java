@@ -28,7 +28,6 @@ import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.RestfulServer;
@@ -87,10 +86,10 @@ public class HapiFhirRepository implements Repository {
 	public <I extends IIdType, P extends IBaseParameters> MethodOutcome patch(
 			I theId, P thePatchParameters, Map<String, String> theHeaders) {
 		var details = startWith(myRequestDetails).addHeaders(theHeaders).create();
-		// defaulting PatchType to FHIR_PATCH_JSON as this is required for patch operation
+		// TODO update FHIR patchType once FHIRPATCH bug has been fixed
 		return myDaoRegistry
 				.getResourceDao(theId.getResourceType())
-				.patch(theId, null, PatchTypeEnum.FHIR_PATCH_JSON, null, thePatchParameters, details);
+				.patch(theId, null, null, null, thePatchParameters, details);
 	}
 
 	@Override
