@@ -231,13 +231,13 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 		}
 
 		RequestDetails requestDetails = theRequest;
+		boolean nonPartitionableResource = isResourceNonPartitionable(theResourceType);
+
 		// TODO GGG eventually, theRequest will not be allowed to be null here, and we will pass through
 		// SystemRequestDetails instead.
-		if (theRequest == null) {
-			requestDetails = new SystemRequestDetails();
+		if ((theRequest == null || theRequest instanceof SystemRequestDetails) && nonPartitionableResource) {
+			return RequestPartitionId.defaultPartition();
 		}
-
-		boolean nonPartitionableResource = isResourceNonPartitionable(theResourceType);
 
 		RequestPartitionId requestPartitionId = null;
 		if (theRequest instanceof SystemRequestDetails
