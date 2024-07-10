@@ -2342,7 +2342,9 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 				// If we don't have a query yet, create one
 				if (myResultsIterator == null) {
-					myMaxResultsToFetch = calculateMaxResultsToFetch();
+					if (myMaxResultsToFetch == null) {
+						myMaxResultsToFetch = calculateMaxResultsToFetch();
+					}
 
 					/*
 					 * assigns the results iterator
