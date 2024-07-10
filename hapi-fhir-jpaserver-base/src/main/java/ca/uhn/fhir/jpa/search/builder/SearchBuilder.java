@@ -825,9 +825,9 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		executeSearch(theOffset, theSearchQueryExecutors, sqlBuilder);
 	}
 
-	private void addPidListPredicate(List<Long> thePidList, SearchQueryBuilder sqlBuilder) {
+	private void addPidListPredicate(List<Long> thePidList, SearchQueryBuilder theSqlBuilder) {
 		if (thePidList != null && !thePidList.isEmpty()) {
-			sqlBuilder.addResourceIdsPredicate(thePidList);
+			theSqlBuilder.addResourceIdsPredicate(thePidList);
 		}
 	}
 
@@ -2488,7 +2488,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				mySearchRuntimeDetails.setQueryStopwatch(new StopWatch());
 
 				// setting offset to 0 to fetch all resource ids to guarantee
-				// correct output result for everything operation
+				// correct output result for everything operation during paging
 				if (myParams.getEverythingMode() != null) {
 					offset = 0;
 				}

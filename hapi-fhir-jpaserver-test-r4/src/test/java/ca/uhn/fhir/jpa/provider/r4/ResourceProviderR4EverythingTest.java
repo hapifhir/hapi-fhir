@@ -1265,6 +1265,7 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 		private IIdType p4Id;
 		private IIdType c4Id;
 
+		// Resource id not linked to any Patient
 		private IIdType c5Id;
 
 		@Test
@@ -1276,9 +1277,9 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 			Parameters parameters = new Parameters();
 			addOffsetAndCount(parameters, 0, 1);
 
+			// first page
 			Parameters output = myClient.operation().onInstance(p1Id).named("everything").withParameters(parameters).execute();
 			Bundle bundle = (Bundle) output.getParameter().get(0).getResource();
-			// first page
 			List<IIdType> results = new ArrayList<>(validateAndGetIdListFromBundle(bundle, 1));
 
 			// second page
@@ -1312,10 +1313,9 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 			validateEverythingBundle(output);
 		}
 
-
 		@Test
-		public void testPagingOverEverything_onPatientTypeWithAndIdAndParameter_returnsCorrectBundles() {
-			String methodName = "testEverythingPatientTypeWithIdParameter";
+		public void testPagingOverEverything_onPatientTypeWithAndIdParameter_returnsCorrectBundles() {
+			String methodName = "testEverythingPatientTypeWithAndIdParameter";
 			createPatientResources(methodName);
 
 			// Test 4 patients using and List
@@ -1333,8 +1333,8 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 		}
 
 		@Test
-		public void testPagingOverEverything_onPatientTypeWithAndIdOrParameter_returnsCorrectBundles() {
-			String methodName = "testEverythingPatientTypeWithIdParameter";
+		public void testPagingOverEverything_onPatientTypeWithOrIdParameter_returnsCorrectBundles() {
+			String methodName = "testEverythingPatientTypeWithOrIdParameter";
 			createPatientResources(methodName);
 
 			// Test 4 patients using or List
@@ -1350,7 +1350,7 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 
 		@Test
 		public void testPagingOverEverything_onPatientTypeWithOrAndIdParameter_returnsCorrectBundles() {
-			String methodName = "testEverythingPatientTypeWithIdParameter";
+			String methodName = "testEverythingPatientTypeWithOrAndIdParameter";
 			createPatientResources(methodName);
 
 			// Test combining 2 or-listed params
@@ -1369,6 +1369,7 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 		public void testPagingOverEverything_onPatientTypeWithNotLinkedPatients_returnsCorrectBundles() {
 			String methodName = "testEverythingPatientTypeWithNotLinkedPatients";
 
+			// setup
 			p1Id = createPatient(methodName, "1");
 			p2Id = createPatient(methodName, "2");
 			p3Id = createPatient(methodName, "3");
@@ -1378,6 +1379,7 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 			Parameters parameters = new Parameters();
 			addOffsetAndCount(parameters, 0, 1);
 
+			// first page
 			Parameters output = myClient.operation().onType(Patient.class).named("everything").withParameters(parameters).execute();
 			Bundle bundle = (Bundle) output.getParameter().get(0).getResource();
 			List<IIdType> results = new ArrayList<>(validateAndGetIdListFromBundle(bundle, 1));
@@ -1407,8 +1409,8 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 		}
 
 		private void validateEverythingBundle(Parameters theParameters) {
-			Bundle bundle = (Bundle) theParameters.getParameter().get(0).getResource();
 			// first page
+			Bundle bundle = (Bundle) theParameters.getParameter().get(0).getResource();
 			List<IIdType> results = new ArrayList<>(validateAndGetIdListFromBundle(bundle, 4));
 
 			// second page
@@ -1432,13 +1434,6 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 		private Bundle getNextBundle(Bundle theBundle) {
 			String next = theBundle.getLink("next").getUrl();
 			return myClient.loadPage().byUrl(next).andReturnBundle(Bundle.class).execute();
-		}
-
-		private void validateNextBundle(Bundle theBundle, int theSize, IIdType... theIds) {
-			assertEquals(Bundle.BundleType.SEARCHSET, theBundle.getType());
-			assertThat(theBundle.getEntry()).hasSize(theSize);
-			List<IIdType> bundleIds = toUnqualifiedVersionlessIds(theBundle);
-			assertThat(bundleIds).containsExactly(theIds);
 		}
 
 		private List<IIdType> validateAndGetIdListFromBundle(Bundle theBundle, int theSize) {
@@ -1469,7 +1464,7 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 			p4Id = createPatientWithIndexAtOrganization(theMethodName, "4", o4Id);
 			c4Id = createConditionForPatient(theMethodName, "4", p4Id);
 
-			// No Patient Stuff
+			// Resource not linked to any Patient
 			c5Id = createConditionForPatient(theMethodName, "5", null);
 		}
 	}
@@ -1484,15 +1479,15 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 			.execute();
 	}
 
-	private IIdType createOrganization(String methodName, String s) {
+	private IIdType createOrganization(String methodName, String theIndex) {
 		Organization o1 = new Organization();
-		o1.setName(methodName + s);
+		o1.setName(methodName + theIndex);
 		return myClient.create().resource(o1).execute().getId().toUnqualifiedVersionless();
 	}
 
-	private IIdType createEncounter(String methodName, String s) {
+	private IIdType createEncounter(String methodName, String theIndex) {
 		Encounter e1 = new Encounter();
-		e1.setLanguage(methodName + s);
+		e1.setLanguage(methodName + theIndex);
 		return myClient.create().resource(e1).execute().getId().toUnqualifiedVersionless();
 	}
 
