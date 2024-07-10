@@ -331,7 +331,6 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 
 		Condition targetUrlsCondition = null;
 		if (!theTargetQualifiedUrls.isEmpty()) {
-			// TODO - these urls may have versions
 			AtomicBoolean hasVersions = new AtomicBoolean();
 			List<UrlUtil.UrlAndVersion> urlAndVersions = theTargetQualifiedUrls.stream()
 					.map((url) -> {
@@ -344,6 +343,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 					.collect(Collectors.toList());
 
 			if (!hasVersions.get()) {
+				// no versions on links
 				List<String> placeholders = generatePlaceholders(theTargetQualifiedUrls);
 				targetUrlsCondition =
 						QueryParameterUtils.toEqualToOrInPredicate(myColumnTargetResourceUrl, placeholders, theInverse);
