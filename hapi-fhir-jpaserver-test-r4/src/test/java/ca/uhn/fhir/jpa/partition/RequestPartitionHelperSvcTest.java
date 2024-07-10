@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.partition;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.data.IPartitionDao;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
@@ -8,6 +7,7 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,6 +18,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Set;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -50,6 +52,23 @@ class RequestPartitionHelperSvcTest extends BaseJpaR4Test {
 
 		myPatient = new Patient();
 		myPatient.setId(new IdType("Patient", "123", "1"));
+	}
+
+	@Test
+	public void testDetermineReadPartitionForSystemRequest_whenResourceIsNonPartitionable_returnsDefaultPartition() {
+		// setup
+		SystemRequestDetails srd = new SystemRequestDetails();
+		srd.setRequestPartitionId(RequestPartitionId.allPartitions());
+
+		// execute
+		ConceptMap conceptMap = new ConceptMap();
+		RequestPartitionId result = mySvc.determineCreatePartitionForRequest(srd, conceptMap, conceptMap.fhirType());
+
+		// verify
+		assertThat(result.isAllPartitions()).isFalse();
+		assertThat(result.hasPartitionNames()).isFalse();
+		assertThat(result.isDefaultPartition()).isTrue();
+		assertThat(result.hasDefaultPartitionId()).isTrue();
 	}
 
 	@Test
