@@ -256,6 +256,9 @@ public abstract class BaseMdmProvider {
 					.setGoldenResourceIds(List.of(sourceId, goldenId));
 
 			List<MdmLinkWithRevisionJson> result = myMdmControllerSvc.queryLinkHistory(params, theRequestDetails);
+			// If there is a POSSIBLE_DUPLICATE, a user merged two resources with *pre-existing* POSSIBLE_DUPLICATE link
+			// so the initial match result is POSSIBLE_DUPLICATE
+			// If no POSSIBLE_DUPLICATE, a user merged two *unlinked* GRs, so the initial match result is REDIRECT
 			return containsPossibleDuplicate(result)
 					? MdmMatchResultEnum.POSSIBLE_DUPLICATE
 					: MdmMatchResultEnum.REDIRECT;
