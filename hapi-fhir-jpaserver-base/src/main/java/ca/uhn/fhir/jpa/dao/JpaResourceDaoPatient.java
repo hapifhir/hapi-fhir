@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.jpa.dao;
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
 import ca.uhn.fhir.jpa.api.dao.PatientEverythingParameters;
@@ -73,8 +72,7 @@ public class JpaResourceDaoPatient<T extends IBaseResource> extends BaseHapiFhir
 			paramMap.setCount(theCount.getValue());
 		}
 		if (theOffset != null) {
-			throw new IllegalArgumentException(
-					Msg.code(1106) + "Everything operation does not support offset searching");
+			paramMap.setOffset(theOffset.getValue());
 		}
 		if (theContent != null) {
 			paramMap.add(Constants.PARAM_CONTENT, theContent);
