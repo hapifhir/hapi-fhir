@@ -295,7 +295,6 @@ public abstract class BaseMdmProvider {
 				resultPart,
 				"matchResult",
 				mdmLink.getMatchResult().name());
-		ParametersUtil.addPartDecimal(myFhirContext, resultPart, "score", mdmLink.getScore());
 		ParametersUtil.addPartString(
 				myFhirContext, resultPart, "linkSource", mdmLink.getLinkSource().name());
 		ParametersUtil.addPartBoolean(myFhirContext, resultPart, "eidMatch", mdmLink.getEidMatch());
