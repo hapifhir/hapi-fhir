@@ -123,7 +123,7 @@ public class MdmModelConverterSvcImplTest extends BaseMdmR4Test {
 
 		// make sure vector is not converted
 		mdmLinkJson.setVector(null);
-		mdmLinkJson.translateAndSetRule(myMdmSettings.getMdmRules(), theVector);// todo jdjd should this be double score now?? -- no vector is a bitmask
+		mdmLinkJson.translateAndSetRule(myMdmSettings.getMdmRules(), theVector);
 
 		return mdmLinkJson;
 	}
