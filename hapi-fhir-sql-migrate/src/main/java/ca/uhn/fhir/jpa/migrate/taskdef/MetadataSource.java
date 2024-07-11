@@ -37,11 +37,16 @@ public class MetadataSource {
 			case COCKROACHDB_21_1:
 				return true;
 			case MSSQL_2012:
+				// use a deny-list instead of allow list, so we have a better failure mode for new/unknown versions.
+				// Better to fail in dev than run with a table lock in production.
 				String mssqlEdition = getEdition(theConnectionProperties);
-				return mssqlEdition.startsWith("Enterprise");
+				return mssqlEdition == null || // some weird version without an edition?
+					(!mssqlEdition.startsWith("Developer Edition") &&
+					!mssqlEdition.startsWith("Standard Edition"));
 			case ORACLE_12C:
 				String oracleEdition = getEdition(theConnectionProperties);
-				return oracleEdition.contains("Enterprise");
+				return oracleEdition == null || // weird unknown version - try, and maybe fail.
+					oracleEdition.contains("Enterprise");
 			default:
 				return false;
 		}

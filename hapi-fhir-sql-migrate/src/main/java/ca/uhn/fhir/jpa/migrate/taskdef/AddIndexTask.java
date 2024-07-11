@@ -33,6 +33,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -43,7 +44,7 @@ public class AddIndexTask extends BaseTableTask {
 	private String myIndexName;
 	private List<String> myColumns;
 	private List<String> myNullableColumns;
-	private Boolean myUnique;
+	private boolean myUnique = false;
 	private List<String> myIncludeColumns = Collections.emptyList();
 	/** Should the operation avoid taking a lock on the table */
 	private boolean myOnline;
@@ -79,7 +80,7 @@ public class AddIndexTask extends BaseTableTask {
 		super.validate();
 		Validate.notBlank(myIndexName, "Index name not specified");
 		Validate.isTrue(
-				myColumns.size() > 0,
+				!myColumns.isEmpty(),
 				"Columns not specified for AddIndexTask " + myIndexName + " on table " + getTableName());
 		Validate.notNull(myUnique, "Uniqueness not specified");
 		setDescription("Add " + myIndexName + " index to table " + getTableName());
@@ -207,7 +208,7 @@ public class AddIndexTask extends BaseTableTask {
 	}
 
 	private void setIncludeColumns(List<String> theIncludeColumns) {
-		Validate.notNull(theIncludeColumns);
+		Objects.requireNonNull(theIncludeColumns);
 		myIncludeColumns = theIncludeColumns;
 	}
 

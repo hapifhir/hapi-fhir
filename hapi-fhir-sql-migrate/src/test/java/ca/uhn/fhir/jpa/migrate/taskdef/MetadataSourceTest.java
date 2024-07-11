@@ -35,7 +35,9 @@ class MetadataSourceTest {
 		"MSSQL_2012,Developer Edition (64-bit),false",
 		"MSSQL_2012,Developer Edition (64-bit),false",
 		"MSSQL_2012,Standard Edition (64-bit),false",
-		"MSSQL_2012,Enterprise Edition (64-bit),true"
+		"MSSQL_2012,Enterprise Edition (64-bit),true",
+		"MSSQL_2012,Azure SQL Edge Developer (64-bit),true",
+		"MSSQL_2012,Azure SQL Edge Premium (64-bit),true"
 	})
 	void isOnlineIndexSupported(DriverTypeEnum theType, String theEdition, boolean theSupportedFlag) {
 		// stub out our Sql Server edition lookup

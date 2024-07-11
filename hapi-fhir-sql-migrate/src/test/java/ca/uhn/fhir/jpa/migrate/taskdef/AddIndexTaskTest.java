@@ -178,7 +178,7 @@ public class AddIndexTaskTest extends BaseTest {
 			public void platformSyntaxWhenOn(DriverTypeEnum theDriver) {
 				myTask.setDriverType(theDriver);
 				myTask.setOnline(true);
-				DriverTypeEnum.ConnectionProperties props;
+
 				Mockito.when(mockMetadataSource.isOnlineIndexSupported(Mockito.any())).thenReturn(true);
 				mySql = myTask.generateSql();
 				switch (theDriver) {
