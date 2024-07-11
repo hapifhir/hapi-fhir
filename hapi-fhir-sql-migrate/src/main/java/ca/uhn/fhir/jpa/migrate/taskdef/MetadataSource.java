@@ -40,13 +40,14 @@ public class MetadataSource {
 				// use a deny-list instead of allow list, so we have a better failure mode for new/unknown versions.
 				// Better to fail in dev than run with a table lock in production.
 				String mssqlEdition = getEdition(theConnectionProperties);
-				return mssqlEdition == null || // some weird version without an edition?
-					(!mssqlEdition.startsWith("Developer Edition") &&
-					!mssqlEdition.startsWith("Standard Edition"));
+				return mssqlEdition == null // some weird version without an edition?
+						||
+						// these versions don't support ONLINE index creation
+						(!mssqlEdition.startsWith("Developer Edition") && !mssqlEdition.startsWith("Standard Edition"));
 			case ORACLE_12C:
 				String oracleEdition = getEdition(theConnectionProperties);
-				return oracleEdition == null || // weird unknown version - try, and maybe fail.
-					oracleEdition.contains("Enterprise");
+				return oracleEdition == null // weird unknown version - try, and maybe fail.
+						|| oracleEdition.contains("Enterprise");
 			default:
 				return false;
 		}
