@@ -2148,7 +2148,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 					String typeName = toTypeName(theValue);
 					IPrimitiveType<?> valuePrimitive = (IPrimitiveType<?>) theValue;
 					IBaseReference fakeReference = (IBaseReference)
-							myContext.getElementDefinition("Reference").newInstance();
+						myContext.getElementDefinition("Reference").newInstance();
 					fakeReference.setReference(valuePrimitive.getValueAsString());
 
 					// Canonical has a root type of "uri"
@@ -2170,15 +2170,33 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 						if (parsed.isAbsolute()) {
 							String refValue =
-									fakeReference.getReferenceElement().getValue();
+								fakeReference.getReferenceElement().getValue();
+
+							myPathAndRef = new PathAndRef(theSearchParam.getName(), thePath, fakeReference, true);
+							theParams.add(myPathAndRef);
+
+							/*
+							 * If we have a versioned canonical uri,
+							 * we will index both the version and unversioned uri
+							 * (ie: uri|version and uri)
+							 * This will allow searching to work on both versioned and non-versioned.
+							 *
+							 * HOWEVER
+							 * Includes could also include multiple resources if a non-versioned uri
+							 * is used.
+							 */
 							if (refValue.contains("|")) {
+								// extract the non-versioned AND the versioned above so both searches work.
+								fakeReference = (IBaseReference)
+									myContext.getElementDefinition("Reference").newInstance();
 								fakeReference.setReference(refValue.substring(0, refValue.indexOf('|')));
 							}
 
 							myPathAndRef = new PathAndRef(theSearchParam.getName(), thePath, fakeReference, true);
 							theParams.add(myPathAndRef);
-							break;
 						}
+
+						break;
 					}
 
 					theParams.addWarning("Ignoring canonical reference (indexing canonical is not yet supported)");
