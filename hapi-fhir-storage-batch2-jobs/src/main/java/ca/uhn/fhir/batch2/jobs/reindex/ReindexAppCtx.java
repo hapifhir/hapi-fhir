@@ -20,7 +20,10 @@
 package ca.uhn.fhir.batch2.jobs.reindex;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
-import ca.uhn.fhir.batch2.jobs.chunk.PartitionedUrlChunkRangeJson;
+import ca.uhn.fhir.batch2.api.IJobPartitionProvider;
+import ca.uhn.fhir.batch2.api.IJobStepWorker;
+import ca.uhn.fhir.batch2.api.VoidModel;
+import ca.uhn.fhir.batch2.jobs.chunk.ChunkRangeJson;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.batch2.jobs.parameters.UrlListValidator;
 import ca.uhn.fhir.batch2.jobs.parameters.UrlPartitioner;
@@ -29,7 +32,6 @@ import ca.uhn.fhir.batch2.jobs.step.LoadIdsStep;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
-import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -51,20 +53,26 @@ public class ReindexAppCtx {
 				.addFirstStep(
 						"generate-ranges",
 						"Generate data ranges to reindex",
-						PartitionedUrlChunkRangeJson.class,
+						ChunkRangeJson.class,
 						reindexGenerateRangeChunksStep())
 				.addIntermediateStep(
 						"load-ids",
 						"Load IDs of resources to reindex",
 						ResourceIdListWorkChunkJson.class,
-						new LoadIdsStep(theBatch2DaoSvc))
+						reindexLoadIdsStep(theBatch2DaoSvc))
 				.addLastStep("reindex", "Perform the resource reindex", reindexStep())
 				.build();
 	}
 
 	@Bean
-	public GenerateRangeChunksStep reindexGenerateRangeChunksStep() {
-		return new ReindexGenerateRangeChunksStep();
+	public IJobStepWorker<ReindexJobParameters, VoidModel, ChunkRangeJson> reindexGenerateRangeChunksStep() {
+		return new GenerateRangeChunksStep<>();
+	}
+
+	@Bean
+	public IJobStepWorker<ReindexJobParameters, ChunkRangeJson, ResourceIdListWorkChunkJson> reindexLoadIdsStep(
+			IBatch2DaoSvc theBatch2DaoSvc) {
+		return new LoadIdsStep<>(theBatch2DaoSvc);
 	}
 
 	@Bean
@@ -82,8 +90,8 @@ public class ReindexAppCtx {
 	public ReindexProvider reindexProvider(
 			FhirContext theFhirContext,
 			IJobCoordinator theJobCoordinator,
-			IRequestPartitionHelperSvc theRequestPartitionHelperSvc,
+			IJobPartitionProvider theJobPartitionHandler,
 			UrlPartitioner theUrlPartitioner) {
-		return new ReindexProvider(theFhirContext, theJobCoordinator, theRequestPartitionHelperSvc, theUrlPartitioner);
+		return new ReindexProvider(theFhirContext, theJobCoordinator, theJobPartitionHandler, theUrlPartitioner);
 	}
 }

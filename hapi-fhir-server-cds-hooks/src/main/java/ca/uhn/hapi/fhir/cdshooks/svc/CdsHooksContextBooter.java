@@ -25,6 +25,7 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.hapi.fhir.cdshooks.api.CdsService;
 import ca.uhn.hapi.fhir.cdshooks.api.CdsServiceFeedback;
 import ca.uhn.hapi.fhir.cdshooks.api.CdsServicePrefetch;
+import ca.uhn.hapi.fhir.cdshooks.api.json.CdsHooksExtension;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceJson;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -85,7 +86,8 @@ public class CdsHooksContextBooter {
 				cdsServiceJson.setHook(annotation.hook());
 				cdsServiceJson.setDescription(annotation.description());
 				cdsServiceJson.setTitle(annotation.title());
-				cdsServiceJson.setExtension(validateJson(annotation.extension()));
+				cdsServiceJson.setExtension(serializeExtensions(annotation.extension(), annotation.extensionClass()));
+				cdsServiceJson.setExtensionClass(annotation.extensionClass());
 				for (CdsServicePrefetch prefetch : annotation.prefetch()) {
 					cdsServiceJson.addPrefetch(prefetch.value(), prefetch.query());
 					cdsServiceJson.addSource(prefetch.value(), prefetch.source());
@@ -104,14 +106,13 @@ public class CdsHooksContextBooter {
 		}
 	}
 
-	protected String validateJson(String theExtension) {
+	CdsHooksExtension serializeExtensions(String theExtension, Class<? extends CdsHooksExtension> theClass) {
 		if (StringUtils.isEmpty(theExtension)) {
 			return null;
 		}
 		try {
 			final ObjectMapper mapper = new ObjectMapper();
-			mapper.readTree(theExtension);
-			return theExtension;
+			return mapper.readValue(theExtension, theClass);
 		} catch (JsonProcessingException e) {
 			final String message = String.format("Invalid JSON: %s", e.getMessage());
 			ourLog.debug(message);
