@@ -1485,6 +1485,11 @@ public class QueryStack {
 		mySqlBuilder.getSelect().addGroupings(firstPredicateBuilder.getResourceIdColumn());
 	}
 
+	public void addOrdering() {
+		BaseJoiningPredicateBuilder firstPredicateBuilder = mySqlBuilder.getOrCreateFirstPredicateBuilder();
+		mySqlBuilder.getSelect().addOrderings(firstPredicateBuilder.getResourceIdColumn());
+	}
+
 	public Condition createPredicateReferenceForEmbeddedChainedSearchResource(
 			@Nullable DbColumn theSourceJoinColumn,
 			String theResourceName,

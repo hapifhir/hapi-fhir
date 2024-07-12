@@ -68,6 +68,7 @@ import ca.uhn.fhir.jpa.searchparam.util.Dstu3DistanceHelper;
 import ca.uhn.fhir.jpa.searchparam.util.JpaParamUtil;
 import ca.uhn.fhir.jpa.searchparam.util.LastNParameterHelper;
 import ca.uhn.fhir.jpa.util.BaseIterator;
+import ca.uhn.fhir.jpa.util.CartesianProductUtil;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.PermutationBuilder;
 import ca.uhn.fhir.jpa.util.QueryChunker;
@@ -100,6 +101,7 @@ import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.StringUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Streams;
 import com.healthmarketscience.sqlbuilder.Condition;
 import jakarta.annotation.Nonnull;
@@ -570,8 +572,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	 *
 	 * @param theTargetPids
 	 */
-	private void extractTargetPidsFromIdParams(
-			HashSet<Long> theTargetPids, List<ISearchQueryExecutor> theSearchQueryExecutors) {
+	private void extractTargetPidsFromIdParams(Set<Long> theTargetPids) {
 		// get all the IQueryParameterType objects
 		// for _id -> these should all be StringParam values
 		HashSet<String> ids = new HashSet<>();
@@ -600,10 +601,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		for (JpaPid pid : idToPid.values()) {
 			theTargetPids.add(pid.getId());
 		}
-
-		// add the target pids to our executors as the first
-		// results iterator to go through
-		theSearchQueryExecutors.add(new ResolvedSearchQueryExecutor(new ArrayList<>(theTargetPids)));
 	}
 
 	private void createChunkedQuery(
@@ -615,13 +612,29 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			RequestDetails theRequest,
 			List<Long> thePidList,
 			List<ISearchQueryExecutor> theSearchQueryExecutors) {
-		String sqlBuilderResourceName = myParams.getEverythingMode() == null ? myResourceName : null;
+		if (myParams.getEverythingMode() != null) {
+			createChunkedQueryForEverythingSearch(
+					theParams, theOffset, theMaximumResults, theCountOnlyFlag, thePidList, theSearchQueryExecutors);
+		} else {
+			createChunkedQueryNormalSearch(
+					theParams, sort, theOffset, theCountOnlyFlag, theRequest, thePidList, theSearchQueryExecutors);
+		}
+	}
+
+	private void createChunkedQueryNormalSearch(
+			SearchParameterMap theParams,
+			SortSpec sort,
+			Integer theOffset,
+			boolean theCountOnlyFlag,
+			RequestDetails theRequest,
+			List<Long> thePidList,
+			List<ISearchQueryExecutor> theSearchQueryExecutors) {
 		SearchQueryBuilder sqlBuilder = new SearchQueryBuilder(
 				myContext,
 				myStorageSettings,
 				myPartitionSettings,
 				myRequestPartitionId,
-				sqlBuilderResourceName,
+				myResourceName,
 				mySqlBuilderFactory,
 				myDialectProvider,
 				theCountOnlyFlag);
@@ -639,67 +652,22 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			}
 		}
 
-		JdbcTemplate jdbcTemplate = new JdbcTemplate(myEntityManagerFactory.getDataSource());
-		jdbcTemplate.setFetchSize(myFetchSize);
-		if (theMaximumResults != null) {
-			jdbcTemplate.setMaxRows(theMaximumResults);
+		/*
+		 * If we're doing a filter, always use the resource table as the root - This avoids the possibility of
+		 * specific filters with ORs as their root from working around the natural resource type / deletion
+		 * status / partition IDs built into queries.
+		 */
+		if (theParams.containsKey(Constants.PARAM_FILTER)) {
+			Condition partitionIdPredicate = sqlBuilder
+					.getOrCreateResourceTablePredicateBuilder()
+					.createPartitionIdPredicate(myRequestPartitionId);
+			if (partitionIdPredicate != null) {
+				sqlBuilder.addPredicate(partitionIdPredicate);
+			}
 		}
 
-		if (myParams.getEverythingMode() != null) {
-			HashSet<Long> targetPids = new HashSet<>();
-			if (myParams.get(IAnyResource.SP_RES_ID) != null) {
-				// will add an initial search executor for
-				// _id params
-				extractTargetPidsFromIdParams(targetPids, theSearchQueryExecutors);
-			} else {
-				// For Everything queries, we make the query root by the ResourceLink table, since this query
-				// is basically a reverse-include search. For type/Everything (as opposed to instance/Everything)
-				// the one problem with this approach is that it doesn't catch Patients that have absolutely
-				// nothing linked to them. So we do one additional query to make sure we catch those too.
-				SearchQueryBuilder fetchPidsSqlBuilder = new SearchQueryBuilder(
-						myContext,
-						myStorageSettings,
-						myPartitionSettings,
-						myRequestPartitionId,
-						myResourceName,
-						mySqlBuilderFactory,
-						myDialectProvider,
-						theCountOnlyFlag);
-				GeneratedSql allTargetsSql = fetchPidsSqlBuilder.generate(theOffset, myMaxResultsToFetch);
-				String sql = allTargetsSql.getSql();
-				Object[] args = allTargetsSql.getBindVariables().toArray(new Object[0]);
-
-				List<Long> output = jdbcTemplate.query(sql, args, new SingleColumnRowMapper<>(Long.class));
-
-				// we add a search executor to fetch unlinked patients first
-				theSearchQueryExecutors.add(new ResolvedSearchQueryExecutor(output));
-			}
-
-			List<String> typeSourceResources = new ArrayList<>();
-			if (myParams.get(Constants.PARAM_TYPE) != null) {
-				typeSourceResources.addAll(extractTypeSourceResourcesFromParams());
-			}
-
-			queryStack3.addPredicateEverythingOperation(
-					myResourceName, typeSourceResources, targetPids.toArray(new Long[0]));
-		} else {
-			/*
-			 * If we're doing a filter, always use the resource table as the root - This avoids the possibility of
-			 * specific filters with ORs as their root from working around the natural resource type / deletion
-			 * status / partition IDs built into queries.
-			 */
-			if (theParams.containsKey(Constants.PARAM_FILTER)) {
-				Condition partitionIdPredicate = sqlBuilder
-						.getOrCreateResourceTablePredicateBuilder()
-						.createPartitionIdPredicate(myRequestPartitionId);
-				if (partitionIdPredicate != null) {
-					sqlBuilder.addPredicate(partitionIdPredicate);
-				}
-			}
-
-			// Normal search
-			searchForIdsWithAndOr(sqlBuilder, queryStack3, myParams, theRequest);
-		}
+		// Normal search
+		searchForIdsWithAndOr(sqlBuilder, queryStack3, myParams, theRequest);
 
 		// If we haven't added any predicates yet, we're doing a search for all resources. Make sure we add the
 		// partition ID predicate in that case.
@@ -713,16 +681,10 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		}
 
 		// Add PID list predicate for full text search and/or lastn operation
-		if (thePidList != null && thePidList.size() > 0) {
-			sqlBuilder.addResourceIdsPredicate(thePidList);
-		}
+		addPidListPredicate(thePidList, sqlBuilder);
 
 		// Last updated
-		DateRangeParam lu = myParams.getLastUpdated();
-		if (lu != null && !lu.isEmpty()) {
-			Condition lastUpdatedPredicates = sqlBuilder.addPredicateLastUpdated(lu);
-			sqlBuilder.addPredicate(lastUpdatedPredicates);
-		}
+		addLastUpdatePredicate(sqlBuilder);
 
 		/*
 		 * Exclude the pids already in the previous iterator. This is an optimization, as opposed
@@ -769,12 +731,122 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		/*
 		 * Now perform the search
 		 */
+		executeSearch(theOffset, theSearchQueryExecutors, sqlBuilder);
+	}
+
+	private void executeSearch(
+			Integer theOffset, List<ISearchQueryExecutor> theSearchQueryExecutors, SearchQueryBuilder sqlBuilder) {
 		GeneratedSql generatedSql = sqlBuilder.generate(theOffset, myMaxResultsToFetch);
 		if (!generatedSql.isMatchNothing()) {
 			SearchQueryExecutor executor =
 					mySqlBuilderFactory.newSearchQueryExecutor(generatedSql, myMaxResultsToFetch);
 			theSearchQueryExecutors.add(executor);
 		}
+	}
+
+	private void createChunkedQueryForEverythingSearch(
+			SearchParameterMap theParams,
+			Integer theOffset,
+			Integer theMaximumResults,
+			boolean theCountOnlyFlag,
+			List<Long> thePidList,
+			List<ISearchQueryExecutor> theSearchQueryExecutors) {
+
+		SearchQueryBuilder sqlBuilder = new SearchQueryBuilder(
+				myContext,
+				myStorageSettings,
+				myPartitionSettings,
+				myRequestPartitionId,
+				null,
+				mySqlBuilderFactory,
+				myDialectProvider,
+				theCountOnlyFlag);
+
+		QueryStack queryStack3 = new QueryStack(
+				theParams, myStorageSettings, myContext, sqlBuilder, mySearchParamRegistry, myPartitionSettings);
+
+		JdbcTemplate jdbcTemplate = initializeJdbcTemplate(theMaximumResults);
+
+		Set<Long> targetPids = new HashSet<>();
+		if (myParams.get(IAnyResource.SP_RES_ID) != null) {
+
+			extractTargetPidsFromIdParams(targetPids);
+
+			// add the target pids to our executors as the first
+			// results iterator to go through
+			theSearchQueryExecutors.add(new ResolvedSearchQueryExecutor(new ArrayList<>(targetPids)));
+		} else {
+			// For Everything queries, we make the query root by the ResourceLink table, since this query
+			// is basically a reverse-include search. For type/Everything (as opposed to instance/Everything)
+			// the one problem with this approach is that it doesn't catch Patients that have absolutely
+			// nothing linked to them. So we do one additional query to make sure we catch those too.
+			SearchQueryBuilder fetchPidsSqlBuilder = new SearchQueryBuilder(
+					myContext,
+					myStorageSettings,
+					myPartitionSettings,
+					myRequestPartitionId,
+					myResourceName,
+					mySqlBuilderFactory,
+					myDialectProvider,
+					theCountOnlyFlag);
+			GeneratedSql allTargetsSql = fetchPidsSqlBuilder.generate(theOffset, myMaxResultsToFetch);
+			String sql = allTargetsSql.getSql();
+			Object[] args = allTargetsSql.getBindVariables().toArray(new Object[0]);
+
+			List<Long> output = jdbcTemplate.query(sql, args, new SingleColumnRowMapper<>(Long.class));
+
+			// we add a search executor to fetch unlinked patients first
+			theSearchQueryExecutors.add(new ResolvedSearchQueryExecutor(output));
+		}
+
+		List<String> typeSourceResources = new ArrayList<>();
+		if (myParams.get(Constants.PARAM_TYPE) != null) {
+			typeSourceResources.addAll(extractTypeSourceResourcesFromParams());
+		}
+
+		queryStack3.addPredicateEverythingOperation(
+				myResourceName, typeSourceResources, targetPids.toArray(new Long[0]));
+
+		// Add PID list predicate for full text search and/or lastn operation
+		addPidListPredicate(thePidList, sqlBuilder);
+
+		/*
+		 * If offset is present, we want deduplicate the results by using GROUP BY
+		 * ORDER BY is required to make sure we return unique results for each page
+		 */
+		if (theOffset != null) {
+			queryStack3.addGrouping();
+			queryStack3.addOrdering();
+			queryStack3.setUseAggregate(true);
+		}
+
+		/*
+		 * Now perform the search
+		 */
+		executeSearch(theOffset, theSearchQueryExecutors, sqlBuilder);
+	}
+
+	private void addPidListPredicate(List<Long> thePidList, SearchQueryBuilder theSqlBuilder) {
+		if (thePidList != null && !thePidList.isEmpty()) {
+			theSqlBuilder.addResourceIdsPredicate(thePidList);
+		}
+	}
+
+	private void addLastUpdatePredicate(SearchQueryBuilder theSqlBuilder) {
+		DateRangeParam lu = myParams.getLastUpdated();
+		if (lu != null && !lu.isEmpty()) {
+			Condition lastUpdatedPredicates = theSqlBuilder.addPredicateLastUpdated(lu);
+			theSqlBuilder.addPredicate(lastUpdatedPredicates);
+		}
+	}
+
+	private JdbcTemplate initializeJdbcTemplate(Integer theMaximumResults) {
+		JdbcTemplate jdbcTemplate = new JdbcTemplate(myEntityManagerFactory.getDataSource());
+		jdbcTemplate.setFetchSize(myFetchSize);
+		if (theMaximumResults != null) {
+			jdbcTemplate.setMaxRows(theMaximumResults);
+		}
+		return jdbcTemplate;
 	}
 
 	private Collection<String> extractTypeSourceResourcesFromParams() {
@@ -1921,6 +1993,21 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			// Since we're going to remove elements below
 			theParams.values().forEach(this::ensureSubListsAreWritable);
 
+			/*
+			 * Apply search against the combo param index in a loop:
+			 *
+			 * 1. First we check whether the actual parameter values in the
+			 * parameter map are actually usable for searching against the combo
+			 * param index. E.g. no search modifiers, date comparators, etc.,
+			 * since these mean you can't use the combo index.
+			 *
+			 * 2. Apply and create the join SQl. We remove parameter values from
+			 * the map as we apply them, so any parameter values remaining in the
+			 * map after each loop haven't yet been factored into the SQL.
+			 *
+			 * The loop allows us to create multiple combo index joins if there
+			 * are multiple AND expressions for the related parameters.
+			 */
 			while (validateParamValuesAreValidForComboParam(theRequest, theParams, comboParamNames)) {
 				applyComboSearchParam(theQueryStack, theParams, theRequest, comboParamNames, comboParam);
 			}
@@ -1940,8 +2027,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			inputs.add(nextValues);
 		}
 
-		List<List<IQueryParameterType>> inputPermutations = PermutationBuilder.calculatePermutations(inputs);
-		List<String> indexStrings = new ArrayList<>(PermutationBuilder.calculatePermutationCount(inputs));
+		List<List<IQueryParameterType>> inputPermutations = Lists.cartesianProduct(inputs);
+		List<String> indexStrings = new ArrayList<>(CartesianProductUtil.calculateCartesianProductSize(inputs));
 		for (List<IQueryParameterType> nextPermutation : inputPermutations) {
 
 			StringBuilder searchStringBuilder = new StringBuilder();
@@ -1955,8 +2042,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				IQueryParameterType nextOr = nextPermutation.get(paramIndex);
 				String nextOrValue = nextOr.getValueAsQueryToken(myContext);
 
-				RuntimeSearchParam nextParamDef = mySearchParamRegistry.getActiveSearchParam(
-						myResourceName, nextParamName, ISearchParamRegistry.ContextEnum.SEARCH);
+				RuntimeSearchParam nextParamDef =
+						mySearchParamRegistry.getActiveSearchParam(myResourceName, nextParamName);
 				if (theComboParam.getComboSearchParamType() == ComboSearchParamType.NON_UNIQUE) {
 					if (nextParamDef.getParamType() == RestSearchParameterTypeEnum.STRING) {
 						nextOrValue = StringUtil.normalizeStringForSearchIndexing(nextOrValue);
@@ -2081,7 +2168,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			}
 		}
 
-		if (PermutationBuilder.calculatePermutationCount(paramOrValues) > 500) {
+		if (CartesianProductUtil.calculateCartesianProductSize(paramOrValues) > 500) {
 			ourLog.debug(
 					"Search is not a candidate for unique combo searching - Too many OR values would result in too many permutations");
 			paramValuesAreValidForCombo = false;
@@ -2264,13 +2351,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				// If we don't have a query yet, create one
 				if (myResultsIterator == null) {
 					if (myMaxResultsToFetch == null) {
-						if (myParams.getLoadSynchronousUpTo() != null) {
-							myMaxResultsToFetch = myParams.getLoadSynchronousUpTo();
-						} else if (myParams.getOffset() != null && myParams.getCount() != null) {
-							myMaxResultsToFetch = myParams.getCount();
-						} else {
-							myMaxResultsToFetch = myStorageSettings.getFetchSizeDefaultMaximum();
-						}
+						myMaxResultsToFetch = calculateMaxResultsToFetch();
 					}
 
 					/*
@@ -2296,19 +2377,12 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 						Long nextLong = myResultsIterator.next();
 						if (myHavePerfTraceFoundIdHook) {
-							HookParams params = new HookParams()
-									.add(Integer.class, System.identityHashCode(this))
-									.add(Object.class, nextLong);
-							CompositeInterceptorBroadcaster.doCallHooks(
-									myInterceptorBroadcaster,
-									myRequest,
-									Pointcut.JPA_PERFTRACE_SEARCH_FOUND_ID,
-									params);
+							callPerformanceTracingHook(nextLong);
 						}
 
 						if (nextLong != null) {
 							JpaPid next = JpaPid.fromId(nextLong);
-							if (myPidSet.add(next)) {
+							if (myPidSet.add(next) && doNotSkipNextPidForEverything()) {
 								myNext = next;
 								myNonSkipCount++;
 								break;
@@ -2341,11 +2415,10 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					if (myIncludesIterator != null) {
 						while (myIncludesIterator.hasNext()) {
 							JpaPid next = myIncludesIterator.next();
-							if (next != null)
-								if (myPidSet.add(next)) {
-									myNext = next;
-									break;
-								}
+							if (next != null && myPidSet.add(next) && doNotSkipNextPidForEverything()) {
+								myNext = next;
+								break;
+							}
 						}
 						if (myNext == null) {
 							myNext = NO_MORE;
@@ -2384,6 +2457,30 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			}
 		}
 
+		private Integer calculateMaxResultsToFetch() {
+			if (myParams.getLoadSynchronousUpTo() != null) {
+				return myParams.getLoadSynchronousUpTo();
+			} else if (myParams.getOffset() != null && myParams.getCount() != null) {
+				return myParams.getEverythingMode() != null
+						? myParams.getOffset() + myParams.getCount()
+						: myParams.getCount();
+			} else {
+				return myStorageSettings.getFetchSizeDefaultMaximum();
+			}
+		}
+
+		private boolean doNotSkipNextPidForEverything() {
+			return !(myParams.getEverythingMode() != null && (myOffset != null && myOffset >= myPidSet.size()));
+		}
+
+		private void callPerformanceTracingHook(Long theNextLong) {
+			HookParams params = new HookParams()
+					.add(Integer.class, System.identityHashCode(this))
+					.add(Object.class, theNextLong);
+			CompositeInterceptorBroadcaster.doCallHooks(
+					myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_SEARCH_FOUND_ID, params);
+		}
+
 		private void sendProcessingMsgAndFirePerformanceHook() {
 			String msg = "Pass completed with no matching results seeking rows "
 					+ myPidSet.size() + "-" + mySkipCount
@@ -2393,11 +2490,18 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		}
 
 		private void initializeIteratorQuery(Integer theOffset, Integer theMaxResultsToFetch) {
+			Integer offset = theOffset;
 			if (myQueryList.isEmpty()) {
 				// Capture times for Lucene/Elasticsearch queries as well
 				mySearchRuntimeDetails.setQueryStopwatch(new StopWatch());
+
+				// setting offset to 0 to fetch all resource ids to guarantee
+				// correct output result for everything operation during paging
+				if (myParams.getEverythingMode() != null) {
+					offset = 0;
+				}
 				myQueryList = createQuery(
-						myParams, mySort, theOffset, theMaxResultsToFetch, false, myRequest, mySearchRuntimeDetails);
+						myParams, mySort, offset, theMaxResultsToFetch, false, myRequest, mySearchRuntimeDetails);
 			}
 
 			mySearchRuntimeDetails.setQueryStopwatch(new StopWatch());

@@ -73,7 +73,7 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 	/*
 	 * Note that MYSQL chokes on unique indexes for lengths > 255 so be careful here
 	 */
-	public static final int MAX_LENGTH = 200;
+	public static final int MAX_LENGTH = 768;
 	public static final int HASH_PREFIX_LENGTH = 1;
 	private static final long serialVersionUID = 1L;
 	public static final String HFJ_SPIDX_STRING = "HFJ_SPIDX_STRING";

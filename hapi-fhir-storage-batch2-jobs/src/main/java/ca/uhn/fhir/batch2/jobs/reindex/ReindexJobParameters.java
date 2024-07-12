@@ -19,14 +19,14 @@
  */
 package ca.uhn.fhir.batch2.jobs.reindex;
 
-import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrlListJobParameters;
+import ca.uhn.fhir.batch2.jobs.parameters.JobParameters;
 import ca.uhn.fhir.jpa.api.dao.ReindexParameters;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.annotation.Nullable;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
-public class ReindexJobParameters extends PartitionedUrlListJobParameters {
+public class ReindexJobParameters extends JobParameters {
 
 	public static final String OPTIMIZE_STORAGE = "optimizeStorage";
 	public static final String REINDEX_SEARCH_PARAMETERS = "reindexSearchParameters";

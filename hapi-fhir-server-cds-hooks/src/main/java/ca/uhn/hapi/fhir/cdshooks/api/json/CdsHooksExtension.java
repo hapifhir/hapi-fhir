@@ -1,6 +1,6 @@
 /*-
  * #%L
- * hapi-fhir-storage-mdm
+ * HAPI FHIR - CDS Hooks
  * %%
  * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
@@ -17,24 +17,12 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.mdm.batch2;
+package ca.uhn.hapi.fhir.cdshooks.api.json;
 
-import ca.uhn.fhir.batch2.jobs.chunk.ChunkRangeJson;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
+import ca.uhn.fhir.model.api.IModelJson;
 
-public class MdmChunkRangeJson extends ChunkRangeJson {
-	@Nonnull
-	@JsonProperty("resourceType")
-	private String myResourceType;
-
-	@Nonnull
-	public String getResourceType() {
-		return myResourceType;
-	}
-
-	public void setResourceType(@Nullable String theResourceType) {
-		myResourceType = theResourceType;
-	}
-}
+/**
+ * Users can define CDS Hooks extensions by extending this class.
+ * Implementors can extend this class for defining their custom extensions.
+ */
+public class CdsHooksExtension implements IModelJson {}
