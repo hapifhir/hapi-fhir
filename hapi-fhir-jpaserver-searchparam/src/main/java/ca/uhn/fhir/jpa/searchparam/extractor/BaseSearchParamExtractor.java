@@ -2148,7 +2148,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 					String typeName = toTypeName(theValue);
 					IPrimitiveType<?> valuePrimitive = (IPrimitiveType<?>) theValue;
 					IBaseReference fakeReference = (IBaseReference)
-						myContext.getElementDefinition("Reference").newInstance();
+							myContext.getElementDefinition("Reference").newInstance();
 					fakeReference.setReference(valuePrimitive.getValueAsString());
 
 					// Canonical has a root type of "uri"
@@ -2170,7 +2170,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 						if (parsed.isAbsolute()) {
 							String refValue =
-								fakeReference.getReferenceElement().getValue();
+									fakeReference.getReferenceElement().getValue();
 
 							myPathAndRef = new PathAndRef(theSearchParam.getName(), thePath, fakeReference, true);
 							theParams.add(myPathAndRef);
@@ -2187,8 +2187,9 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 							 */
 							if (refValue.contains("|")) {
 								// extract the non-versioned AND the versioned above so both searches work.
-								fakeReference = (IBaseReference)
-									myContext.getElementDefinition("Reference").newInstance();
+								fakeReference = (IBaseReference) myContext
+										.getElementDefinition("Reference")
+										.newInstance();
 								fakeReference.setReference(refValue.substring(0, refValue.indexOf('|')));
 							}
 
