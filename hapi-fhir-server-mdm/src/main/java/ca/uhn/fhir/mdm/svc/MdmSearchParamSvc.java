@@ -67,7 +67,8 @@ public class MdmSearchParamSvc {
 	public List<String> getValueFromResourceForSearchParam(IBaseResource theResource, String theSearchParam) {
 		String resourceType = myFhirContext.getResourceType(theResource);
 		String searchParam = SearchParameterUtil.stripModifier(theSearchParam);
-		RuntimeSearchParam activeSearchParam = mySearchParamRegistry.getActiveSearchParam(resourceType, searchParam, ISearchParamRegistry.ContextEnum.SEARCH);
+		RuntimeSearchParam activeSearchParam = mySearchParamRegistry.getActiveSearchParam(
+				resourceType, searchParam, ISearchParamRegistry.ContextEnum.SEARCH);
 		return mySearchParamExtractorService.extractParamValuesAsStrings(activeSearchParam, theResource);
 	}
 

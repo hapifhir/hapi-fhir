@@ -401,8 +401,8 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 				 */
 				ResourceSearchParams searchParams;
 				ISearchParamRegistry searchParamRegistry;
-				ResourceSearchParams serverConfigurationActiveSearchParams =
-						serverConfiguration.getActiveSearchParams(resourceName, ISearchParamRegistry.ContextEnum.SEARCH);
+				ResourceSearchParams serverConfigurationActiveSearchParams = serverConfiguration.getActiveSearchParams(
+						resourceName, ISearchParamRegistry.ContextEnum.SEARCH);
 				if (mySearchParamRegistry != null) {
 					searchParamRegistry = mySearchParamRegistry;
 					searchParams = mySearchParamRegistry

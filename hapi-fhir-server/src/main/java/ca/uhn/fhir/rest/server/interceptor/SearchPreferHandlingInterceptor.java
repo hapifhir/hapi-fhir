@@ -130,7 +130,8 @@ public class SearchPreferHandlingInterceptor {
 				}
 			}
 
-			RuntimeSearchParam activeSearchParam = searchParamRetriever.getActiveSearchParam(resourceName, paramName, ISearchParamRegistry.ContextEnum.SEARCH);
+			RuntimeSearchParam activeSearchParam = searchParamRetriever.getActiveSearchParam(
+					resourceName, paramName, ISearchParamRegistry.ContextEnum.SEARCH);
 			if (activeSearchParam == null) {
 
 				if (theHandling == PreferHandlingEnum.LENIENT) {
@@ -144,11 +145,13 @@ public class SearchPreferHandlingInterceptor {
 				} else {
 
 					// Strict handling
-					List<String> allowedParams =
-							searchParamRetriever.getActiveSearchParams(resourceName, ISearchParamRegistry.ContextEnum.SEARCH).getSearchParamNames().stream()
-									.sorted()
-									.distinct()
-									.collect(Collectors.toList());
+					List<String> allowedParams = searchParamRetriever
+							.getActiveSearchParams(resourceName, ISearchParamRegistry.ContextEnum.SEARCH)
+							.getSearchParamNames()
+							.stream()
+							.sorted()
+							.distinct()
+							.collect(Collectors.toList());
 					HapiLocalizer localizer = theRequestDetails.getFhirContext().getLocalizer();
 					String msg = localizer.getMessage(
 							"ca.uhn.fhir.jpa.dao.BaseStorageDao.invalidSearchParameter",

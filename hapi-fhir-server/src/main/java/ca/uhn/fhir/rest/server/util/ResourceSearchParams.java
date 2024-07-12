@@ -29,6 +29,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
+
 import static ca.uhn.fhir.rest.server.util.ISearchParamRegistry.isAllowedForContext;
 
 public class ResourceSearchParams {
@@ -61,7 +62,7 @@ public class ResourceSearchParams {
 		return new ResourceSearchParams(myResourceName, filteredMap);
 	}
 
-    public static ResourceSearchParams empty(String theResourceName) {
+	public static ResourceSearchParams empty(String theResourceName) {
 		return new ResourceSearchParams(theResourceName, Collections.emptyMap());
 	}
 

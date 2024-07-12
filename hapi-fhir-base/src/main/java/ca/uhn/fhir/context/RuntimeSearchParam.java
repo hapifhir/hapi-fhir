@@ -66,29 +66,29 @@ public class RuntimeSearchParam {
 	 * Constructor
 	 */
 	public RuntimeSearchParam(
-		IIdType theId,
-		String theUri,
-		String theName,
-		String theDescription,
-		String thePath,
-		RestSearchParameterTypeEnum theParamType,
-		Set<String> theProvidesMembershipInCompartments,
-		Set<String> theTargets,
-		RuntimeSearchParamStatusEnum theStatus,
-		Collection<String> theBase) {
+			IIdType theId,
+			String theUri,
+			String theName,
+			String theDescription,
+			String thePath,
+			RestSearchParameterTypeEnum theParamType,
+			Set<String> theProvidesMembershipInCompartments,
+			Set<String> theTargets,
+			RuntimeSearchParamStatusEnum theStatus,
+			Collection<String> theBase) {
 		this(
-			theId,
-			theUri,
-			theName,
-			theDescription,
-			thePath,
-			theParamType,
-			theProvidesMembershipInCompartments,
-			theTargets,
-			theStatus,
-			null,
-			Collections.emptyList(),
-			theBase);
+				theId,
+				theUri,
+				theName,
+				theDescription,
+				thePath,
+				theParamType,
+				theProvidesMembershipInCompartments,
+				theTargets,
+				theStatus,
+				null,
+				Collections.emptyList(),
+				theBase);
 	}
 
 	/**
@@ -96,36 +96,36 @@ public class RuntimeSearchParam {
 	 */
 	public RuntimeSearchParam(RuntimeSearchParam theSp) {
 		this(
-			theSp.getId(),
-			theSp.getUri(),
-			theSp.getName(),
-			theSp.getDescription(),
-			theSp.getPath(),
-			theSp.getParamType(),
-			theSp.getProvidesMembershipInCompartments(),
-			theSp.getTargets(),
-			theSp.getStatus(),
-			theSp.getComboSearchParamType(),
-			theSp.getComponents(),
-			theSp.getBase());
+				theSp.getId(),
+				theSp.getUri(),
+				theSp.getName(),
+				theSp.getDescription(),
+				theSp.getPath(),
+				theSp.getParamType(),
+				theSp.getProvidesMembershipInCompartments(),
+				theSp.getTargets(),
+				theSp.getStatus(),
+				theSp.getComboSearchParamType(),
+				theSp.getComponents(),
+				theSp.getBase());
 	}
 
 	/**
 	 * Constructor
 	 */
 	public RuntimeSearchParam(
-		IIdType theId,
-		String theUri,
-		String theName,
-		String theDescription,
-		String thePath,
-		RestSearchParameterTypeEnum theParamType,
-		Set<String> theProvidesMembershipInCompartments,
-		Set<String> theTargets,
-		RuntimeSearchParamStatusEnum theStatus,
-		ComboSearchParamType theComboSearchParamType,
-		List<Component> theComponents,
-		Collection<String> theBase) {
+			IIdType theId,
+			String theUri,
+			String theName,
+			String theDescription,
+			String thePath,
+			RestSearchParameterTypeEnum theParamType,
+			Set<String> theProvidesMembershipInCompartments,
+			Set<String> theTargets,
+			RuntimeSearchParamStatusEnum theStatus,
+			ComboSearchParamType theComboSearchParamType,
+			List<Component> theComponents,
+			Collection<String> theBase) {
 		super();
 
 		myId = theId;
@@ -223,12 +223,12 @@ public class RuntimeSearchParam {
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-			.append("base", myBase)
-			.append("name", myName)
-			.append("path", myPath)
-			.append("id", myId)
-			.append("uri", myUri)
-			.toString();
+				.append("base", myBase)
+				.append("name", myName)
+				.append("path", myPath)
+				.append("id", myId)
+				.append("uri", myUri)
+				.toString();
 	}
 
 	public IIdType getId() {
@@ -252,21 +252,21 @@ public class RuntimeSearchParam {
 		RuntimeSearchParam that = (RuntimeSearchParam) theO;
 
 		return new EqualsBuilder()
-			.append(getId(), that.getId())
-			.append(getName(), that.getName())
-			.append(getPath(), that.getPath())
-			.append(getUri(), that.getUri())
-			.isEquals();
+				.append(getId(), that.getId())
+				.append(getName(), that.getName())
+				.append(getPath(), that.getPath())
+				.append(getUri(), that.getUri())
+				.isEquals();
 	}
 
 	@Override
 	public int hashCode() {
 		return new HashCodeBuilder(17, 37)
-			.append(getId())
-			.append(getName())
-			.append(getPath())
-			.append(getUri())
-			.toHashCode();
+				.append(getId())
+				.append(getName())
+				.append(getPath())
+				.append(getUri())
+				.toHashCode();
 	}
 
 	public Set<String> getBase() {
@@ -447,9 +447,9 @@ public class RuntimeSearchParam {
 		@Override
 		public String toString() {
 			return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-				.append("expression", myExpression)
-				.append("reference", myReference)
-				.toString();
+					.append("expression", myExpression)
+					.append("reference", myReference)
+					.toString();
 		}
 
 		public String getExpression() {

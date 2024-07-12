@@ -69,6 +69,7 @@ public class SearchParameterDisabledForQueryingR5Test extends BaseResourceProvid
 		createPatient(withId("A"), withFamily("SIMPSON"), withGiven("HOMER"));
 
 		SearchParameter sp = theParameters.mySearchParameter;
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(sp));
 		mySearchParameterDao.update(sp, mySrd);
 		mySearchParamRegistry.forceRefresh();
 
@@ -209,7 +210,10 @@ public class SearchParameterDisabledForQueryingR5Test extends BaseResourceProvid
 	}
 
 	private static @Nonnull SearchParameter createSearchParameterBuiltIn(Boolean theEnabledForSearching) {
-		return createSearchParameter(theEnabledForSearching, "family", "Patient.name.family");
+		SearchParameter retVal = createSearchParameter(theEnabledForSearching, "family", "Patient.name.family");
+		retVal.setId("individual-family");
+		retVal.setUrl("http://hl7.org/fhir/SearchParameter/individual-family");
+		return retVal;
 	}
 
 	private static @Nonnull SearchParameter createSearchParameterCustom(Boolean theEnabledForSearching) {

@@ -466,7 +466,8 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 
 			RuntimeSearchParam param = null;
 			if (!isMeta) {
-				param = mySearchParamRegistry.getActiveSearchParam(nextType, chain, ISearchParamRegistry.ContextEnum.SEARCH);
+				param = mySearchParamRegistry.getActiveSearchParam(
+						nextType, chain, ISearchParamRegistry.ContextEnum.SEARCH);
 				if (param == null) {
 					ourLog.debug("Type {} doesn't have search param {}", nextType, param);
 					continue;
@@ -555,8 +556,8 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 			resourceTypes = determineResourceTypes(Collections.singleton(theResourceName), theParamName);
 
 			if (resourceTypes.isEmpty()) {
-				RuntimeSearchParam searchParamByName =
-						mySearchParamRegistry.getActiveSearchParam(theResourceName, theParamName, ISearchParamRegistry.ContextEnum.SEARCH);
+				RuntimeSearchParam searchParamByName = mySearchParamRegistry.getActiveSearchParam(
+						theResourceName, theParamName, ISearchParamRegistry.ContextEnum.SEARCH);
 				if (searchParamByName == null) {
 					throw new InternalErrorException(Msg.code(1244) + "Could not find parameter " + theParamName);
 				}
@@ -628,7 +629,8 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 		if (linkIndex == -1) {
 			Set<Class<? extends IBaseResource>> resourceTypes = new HashSet<>();
 			for (String resourceName : theResourceNames) {
-				RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam(resourceName, theParamNameChain, ISearchParamRegistry.ContextEnum.SEARCH);
+				RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam(
+						resourceName, theParamNameChain, ISearchParamRegistry.ContextEnum.SEARCH);
 
 				if (param != null && param.hasTargets()) {
 					Set<String> targetTypes = param.getTargets();
@@ -644,7 +646,8 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 			String paramNameTail = theParamNameChain.substring(linkIndex + 1);
 			Set<String> targetResourceTypeNames = new HashSet<>();
 			for (String resourceName : theResourceNames) {
-				RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam(resourceName, paramNameHead, ISearchParamRegistry.ContextEnum.SEARCH);
+				RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam(
+						resourceName, paramNameHead, ISearchParamRegistry.ContextEnum.SEARCH);
 
 				if (param != null && param.hasTargets()) {
 					targetResourceTypeNames.addAll(param.getTargets());
@@ -656,7 +659,8 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 
 	public List<String> createResourceLinkPaths(
 			String theResourceName, String theParamName, List<String> theParamQualifiers) {
-		RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam(theResourceName, theParamName, ISearchParamRegistry.ContextEnum.SEARCH);
+		RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam(
+				theResourceName, theParamName, ISearchParamRegistry.ContextEnum.SEARCH);
 		if (param != null) {
 			List<String> path = param.getPathsSplit();
 
@@ -687,7 +691,8 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 					? theParamQualifiers.subList(1, theParamQualifiers.size())
 					: List.of();
 
-			param = mySearchParamRegistry.getActiveSearchParam(theResourceName, paramNameHead, ISearchParamRegistry.ContextEnum.SEARCH);
+			param = mySearchParamRegistry.getActiveSearchParam(
+					theResourceName, paramNameHead, ISearchParamRegistry.ContextEnum.SEARCH);
 			if (param != null) {
 				Set<String> tailPaths = param.getTargets().stream()
 						.filter(t -> isBlank(qualifier) || qualifier.equals(t))

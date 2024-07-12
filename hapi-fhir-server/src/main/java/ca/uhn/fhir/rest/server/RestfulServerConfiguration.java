@@ -420,7 +420,8 @@ public class RestfulServerConfiguration implements ISearchParamRegistry {
 	}
 
 	@Override
-	public RuntimeSearchParam getActiveSearchParam(String theResourceName, String theParamName, ContextEnum theContext) {
+	public RuntimeSearchParam getActiveSearchParam(
+			String theResourceName, String theParamName, ContextEnum theContext) {
 		return getActiveSearchParams(theResourceName, theContext).get(theParamName);
 	}
 

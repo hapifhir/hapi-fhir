@@ -196,8 +196,8 @@ public class SearchParamExtractorService {
 			});
 
 			// Everything else
-			ResourceSearchParams activeSearchParams =
-					mySearchParamRegistry.getActiveSearchParams(theEntity.getResourceType(), ISearchParamRegistry.ContextEnum.INDEX);
+			ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams(
+					theEntity.getResourceType(), ISearchParamRegistry.ContextEnum.INDEX);
 			theNewParams.findMissingSearchParams(myPartitionSettings, myStorageSettings, theEntity, activeSearchParams);
 		}
 
@@ -225,7 +225,8 @@ public class SearchParamExtractorService {
 			retval.put(nextKey, Boolean.TRUE);
 		}
 
-		ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams(entity.getResourceType(), ISearchParamRegistry.ContextEnum.INDEX);
+		ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams(
+				entity.getResourceType(), ISearchParamRegistry.ContextEnum.INDEX);
 		activeSearchParams.getReferenceSearchParamNames().forEach(key -> retval.putIfAbsent(key, Boolean.FALSE));
 		return retval;
 	}
@@ -305,8 +306,8 @@ public class SearchParamExtractorService {
 			@Override
 			public ISearchParamExtractor.ISearchParamFilter getSearchParamFilter(@Nonnull PathAndRef thePathAndRef) {
 				String searchParamName = thePathAndRef.getSearchParamName();
-				RuntimeSearchParam searchParam =
-						mySearchParamRegistry.getActiveSearchParam(theEntity.getResourceType(), searchParamName, ISearchParamRegistry.ContextEnum.INDEX);
+				RuntimeSearchParam searchParam = mySearchParamRegistry.getActiveSearchParam(
+						theEntity.getResourceType(), searchParamName, ISearchParamRegistry.ContextEnum.INDEX);
 				Set<String> upliftRefchainCodes = searchParam.getUpliftRefchainCodes();
 				if (upliftRefchainCodes.isEmpty()) {
 					return ISearchParamExtractor.NO_PARAMS;
@@ -530,7 +531,9 @@ public class SearchParamExtractorService {
 				}
 
 				RuntimeSearchParam searchParam = mySearchParamRegistry.getActiveSearchParam(
-						sourceResourceName, nextPathAndRef.getSearchParamName(), ISearchParamRegistry.ContextEnum.INDEX);
+						sourceResourceName,
+						nextPathAndRef.getSearchParamName(),
+						ISearchParamRegistry.ContextEnum.INDEX);
 				extractResourceLinks(
 						theRequestPartitionId,
 						theExistingParams,

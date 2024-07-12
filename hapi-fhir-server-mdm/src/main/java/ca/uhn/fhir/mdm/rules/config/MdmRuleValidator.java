@@ -128,7 +128,9 @@ public class MdmRuleValidator implements IMdmRuleValidator {
 	}
 
 	public void validateTypeHasIdentifier(String theResourceType) {
-		if (mySearchParamRetriever.getActiveSearchParam(theResourceType, "identifier", ISearchParamRegistry.ContextEnum.SEARCH) == null) {
+		if (mySearchParamRetriever.getActiveSearchParam(
+						theResourceType, "identifier", ISearchParamRegistry.ContextEnum.SEARCH)
+				== null) {
 			throw new ConfigurationException(
 					Msg.code(1510) + "Resource Type " + theResourceType
 							+ " is not supported, as it does not have an 'identifier' field, which is necessary for MDM workflow.");
@@ -163,7 +165,9 @@ public class MdmRuleValidator implements IMdmRuleValidator {
 
 	private void validateResourceSearchParam(String theFieldName, String theResourceType, String theSearchParam) {
 		String searchParam = SearchParameterUtil.stripModifier(theSearchParam);
-		if (mySearchParamRetriever.getActiveSearchParam(theResourceType, searchParam, ISearchParamRegistry.ContextEnum.SEARCH) == null) {
+		if (mySearchParamRetriever.getActiveSearchParam(
+						theResourceType, searchParam, ISearchParamRegistry.ContextEnum.SEARCH)
+				== null) {
 			throw new ConfigurationException(Msg.code(1511) + "Error in " + theFieldName + ": " + theResourceType
 					+ " does not have a search parameter called '" + theSearchParam + "'");
 		}

@@ -105,8 +105,8 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId> implements
 		RuntimeResourceDefinition resourceDef = myContext.getResourceDefinition(resourceType);
 		Class<? extends IBaseResource> type = resourceDef.getImplementingClass();
 
-		RuntimeSearchParam searchParam =
-				mySearchParamRegistry.getActiveSearchParam(theSourceResourceName, thePathAndRef.getSearchParamName(), ISearchParamRegistry.ContextEnum.SEARCH);
+		RuntimeSearchParam searchParam = mySearchParamRegistry.getActiveSearchParam(
+				theSourceResourceName, thePathAndRef.getSearchParamName(), ISearchParamRegistry.ContextEnum.SEARCH);
 
 		T persistentId = null;
 		if (theTransactionDetails != null) {

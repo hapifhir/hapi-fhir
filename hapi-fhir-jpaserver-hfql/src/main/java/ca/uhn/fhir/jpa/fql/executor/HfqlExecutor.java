@@ -207,7 +207,8 @@ public class HfqlExecutor implements IHfqlExecutor {
 	 */
 	private void massageWhereClauses(HfqlStatement theStatement) {
 		String fromResourceName = theStatement.getFromResourceName();
-		ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams(fromResourceName, ISearchParamRegistry.ContextEnum.SEARCH);
+		ResourceSearchParams activeSearchParams =
+				mySearchParamRegistry.getActiveSearchParams(fromResourceName, ISearchParamRegistry.ContextEnum.SEARCH);
 
 		for (HfqlStatement.WhereClause nextWhereClause : theStatement.getWhereClauses()) {
 
@@ -311,7 +312,9 @@ public class HfqlExecutor implements IHfqlExecutor {
 				QualifierDetails qualifiedParamName = QualifierDetails.extractQualifiersFromParameterName(paramName);
 
 				RuntimeSearchParam searchParam = mySearchParamRegistry.getActiveSearchParam(
-						statement.getFromResourceName(), qualifiedParamName.getParamName(), ISearchParamRegistry.ContextEnum.SEARCH);
+						statement.getFromResourceName(),
+						qualifiedParamName.getParamName(),
+						ISearchParamRegistry.ContextEnum.SEARCH);
 				if (searchParam == null) {
 					throw newInvalidRequestExceptionUnknownSearchParameter(paramName);
 				}

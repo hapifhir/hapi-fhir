@@ -250,7 +250,8 @@ public class InMemoryResourceMatcher {
 		}
 
 		String resourceName = theResourceDefinition.getName();
-		RuntimeSearchParam paramDef = mySearchParamRegistry.getActiveSearchParam(resourceName, theParamName, ISearchParamRegistry.ContextEnum.SEARCH);
+		RuntimeSearchParam paramDef = mySearchParamRegistry.getActiveSearchParam(
+				resourceName, theParamName, ISearchParamRegistry.ContextEnum.SEARCH);
 		InMemoryMatchResult checkUnsupportedResult =
 				checkForUnsupportedParameters(theParamName, paramDef, theAndOrParams);
 		if (!checkUnsupportedResult.supported()) {

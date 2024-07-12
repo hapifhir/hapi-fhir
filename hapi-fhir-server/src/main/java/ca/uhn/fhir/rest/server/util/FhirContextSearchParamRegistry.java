@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+
 import static ca.uhn.fhir.rest.server.util.ISearchParamRegistry.isAllowedForContext;
 
 public class FhirContextSearchParamRegistry implements ISearchParamRegistry {
@@ -55,7 +56,8 @@ public class FhirContextSearchParamRegistry implements ISearchParamRegistry {
 	}
 
 	@Override
-	public RuntimeSearchParam getActiveSearchParam(String theResourceName, String theParamName, ContextEnum theContext) {
+	public RuntimeSearchParam getActiveSearchParam(
+			String theResourceName, String theParamName, ContextEnum theContext) {
 		return getActiveSearchParams(theResourceName, theContext).get(theParamName);
 	}
 
@@ -83,7 +85,8 @@ public class FhirContextSearchParamRegistry implements ISearchParamRegistry {
 	}
 
 	@Override
-	public List<RuntimeSearchParam> getActiveComboSearchParams(String theResourceName, Set<String> theParamNames, ContextEnum theContext) {
+	public List<RuntimeSearchParam> getActiveComboSearchParams(
+			String theResourceName, Set<String> theParamNames, ContextEnum theContext) {
 		throw new UnsupportedOperationException(Msg.code(2066));
 	}
 

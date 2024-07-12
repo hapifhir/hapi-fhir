@@ -90,7 +90,8 @@ public class ExtendedHSearchSearchBuilder {
 			String theResourceType, SearchParameterMap myParams, ISearchParamRegistry theSearchParamRegistry) {
 		boolean canUseHibernate = true;
 
-		ResourceSearchParams resourceActiveSearchParams = theSearchParamRegistry.getActiveSearchParams(theResourceType, ISearchParamRegistry.ContextEnum.SEARCH);
+		ResourceSearchParams resourceActiveSearchParams =
+				theSearchParamRegistry.getActiveSearchParams(theResourceType, ISearchParamRegistry.ContextEnum.SEARCH);
 		for (String paramName : myParams.keySet()) {
 			// is this parameter supported?
 			if (!supportsSearchParameter(paramName, resourceActiveSearchParams)) {
@@ -216,7 +217,8 @@ public class ExtendedHSearchSearchBuilder {
 
 		// copy the keys to avoid concurrent modification error
 		ArrayList<String> paramNames = compileParamNames(searchParameterMap);
-		ResourceSearchParams activeSearchParams = searchParamRegistry.getActiveSearchParams(resourceType, ISearchParamRegistry.ContextEnum.SEARCH);
+		ResourceSearchParams activeSearchParams =
+				searchParamRegistry.getActiveSearchParams(resourceType, ISearchParamRegistry.ContextEnum.SEARCH);
 		for (String nextParam : paramNames) {
 			if (!supportsSearchParameter(nextParam, activeSearchParams)) {
 				// ignore magic params handled in JPA
