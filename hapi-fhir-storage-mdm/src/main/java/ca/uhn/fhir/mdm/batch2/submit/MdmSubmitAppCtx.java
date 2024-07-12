@@ -58,7 +58,10 @@ public class MdmSubmitAppCtx {
 						ChunkRangeJson.class,
 						submitGenerateRangeChunksStep())
 				.addIntermediateStep(
-						"load-ids", "Load the IDs", ResourceIdListWorkChunkJson.class, loadIdsStep(theBatch2DaoSvc))
+						"load-ids",
+						"Load the IDs",
+						ResourceIdListWorkChunkJson.class,
+						mdmSubmitLoadIdsStep(theBatch2DaoSvc))
 				.addLastStep(
 						"inflate-and-submit-resources",
 						"Inflate and Submit resources",
@@ -78,7 +81,7 @@ public class MdmSubmitAppCtx {
 	}
 
 	@Bean
-	public LoadIdsStep<MdmSubmitJobParameters> loadIdsStep(IBatch2DaoSvc theBatch2DaoSvc) {
+	public LoadIdsStep<MdmSubmitJobParameters> mdmSubmitLoadIdsStep(IBatch2DaoSvc theBatch2DaoSvc) {
 		return new LoadIdsStep<>(theBatch2DaoSvc);
 	}
 

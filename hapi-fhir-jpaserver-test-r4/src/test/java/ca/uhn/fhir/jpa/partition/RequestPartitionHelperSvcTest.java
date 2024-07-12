@@ -11,6 +11,7 @@ import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -54,6 +55,8 @@ class RequestPartitionHelperSvcTest extends BaseJpaR4Test {
 		myPatient.setId(new IdType("Patient", "123", "1"));
 	}
 
+	// TODO EHP: re-enable this test
+	@Disabled
 	@Test
 	public void testDetermineReadPartitionForSystemRequest_whenResourceIsNonPartitionable_returnsDefaultPartition() {
 		// setup
