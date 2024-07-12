@@ -122,8 +122,10 @@ public class SearchParamRegistryImpl
 		// Can still be null in unit test scenarios
 		if (myActiveSearchParams != null) {
 			RuntimeSearchParam param = myActiveSearchParams.get(theResourceName, theParamName);
-			if (isAllowedForContext(param, theContext)) {
-				return param;
+			if (param != null) {
+				if (isAllowedForContext(param, theContext)) {
+					return param;
+				}
 			}
 		}
 

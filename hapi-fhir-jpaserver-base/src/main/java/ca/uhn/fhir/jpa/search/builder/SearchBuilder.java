@@ -70,7 +70,6 @@ import ca.uhn.fhir.jpa.searchparam.util.LastNParameterHelper;
 import ca.uhn.fhir.jpa.util.BaseIterator;
 import ca.uhn.fhir.jpa.util.CartesianProductUtil;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
-import ca.uhn.fhir.jpa.util.PermutationBuilder;
 import ca.uhn.fhir.jpa.util.QueryChunker;
 import ca.uhn.fhir.jpa.util.SqlQueryList;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -943,7 +942,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			theQueryStack.addSortOnLastUpdated(ascending);
 
 		} else {
-			// FIXME: test for activation
 			RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam(
 					myResourceName, theSort.getParamName(), ISearchParamRegistry.ContextEnum.SORT);
 
@@ -2043,7 +2041,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				String nextOrValue = nextOr.getValueAsQueryToken(myContext);
 
 				RuntimeSearchParam nextParamDef =
-						mySearchParamRegistry.getActiveSearchParam(myResourceName, nextParamName);
+						mySearchParamRegistry.getActiveSearchParam(myResourceName, nextParamName, ISearchParamRegistry.ContextEnum.SEARCH);
 				if (theComboParam.getComboSearchParamType() == ComboSearchParamType.NON_UNIQUE) {
 					if (nextParamDef.getParamType() == RestSearchParameterTypeEnum.STRING) {
 						nextOrValue = StringUtil.normalizeStringForSearchIndexing(nextOrValue);

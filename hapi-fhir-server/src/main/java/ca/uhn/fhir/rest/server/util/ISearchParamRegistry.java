@@ -165,7 +165,6 @@ public interface ISearchParamRegistry {
 	 * @param theResourceType the resource type.
 	 * @return the {@link ResourceSearchParams} that has all the search params.
 	 */
-	// FIXME: can this be removed?
 	default ResourceSearchParams getRuntimeSearchParams(String theResourceType, ContextEnum theContext) {
 		ResourceSearchParams availableSearchParams =
 				getActiveSearchParams(theResourceType, theContext).makeCopy();
