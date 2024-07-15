@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 6094
+title: "Fix for regression of searches for canonical uris using a version
+        (eg: http://example.com|1.2.3).
+"
