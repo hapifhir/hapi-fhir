@@ -9,13 +9,20 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionDao;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.NonTransactionalHapiTransactionService;
+import ca.uhn.fhir.jpa.dao.validation.SearchParameterDaoValidator;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.packages.loader.PackageResourceParsingSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistryController;
 import ca.uhn.fhir.jpa.searchparam.util.SearchParameterHelper;
+import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
+import ca.uhn.test.util.LogbackTestExtension;
+import ca.uhn.test.util.LogbackTestExtensionAssert;
+import ch.qos.logback.classic.Logger;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -24,6 +31,7 @@ import org.hl7.fhir.r4.model.Communication;
 import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.utilities.npm.NpmPackage;
@@ -31,6 +39,7 @@ import org.hl7.fhir.utilities.npm.PackageGenerator;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -40,6 +49,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -52,8 +62,14 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -62,6 +78,10 @@ import static org.mockito.Mockito.when;
 public class PackageInstallerSvcImplTest {
 	public static final String PACKAGE_VERSION = "1.0";
 	public static final String PACKAGE_ID_1 = "package1";
+
+
+	@RegisterExtension
+	LogbackTestExtension myLogCapture = new LogbackTestExtension(LoggerFactory.getLogger(PackageInstallerSvcImpl.class));
 
 	@Mock
 	private INpmPackageVersionDao myPackageVersionDao;
@@ -83,6 +103,13 @@ public class PackageInstallerSvcImplTest {
 	private SearchParameterMap mySearchParameterMap;
 	@Mock
 	private JpaStorageSettings myStorageSettings;
+
+	@Mock
+	private VersionCanonicalizer myVersionCanonicalizerMock;
+
+	@Mock
+	private SearchParameterDaoValidator mySearchParameterDaoValidatorMock;
+
 	@Spy
 	private FhirContext myCtx = FhirContext.forR4Cached();
 	@Spy
@@ -91,6 +118,8 @@ public class PackageInstallerSvcImplTest {
 	private PackageResourceParsingSvc myPackageResourceParsingSvc = new PackageResourceParsingSvc(myCtx);
 	@Spy
 	private PartitionSettings myPartitionSettings = new PartitionSettings();
+
+
 	@InjectMocks
 	private PackageInstallerSvcImpl mySvc;
 
@@ -110,65 +139,96 @@ public class PackageInstallerSvcImplTest {
 
 	@Nested
 	class ValidForUploadTest {
+
 		public static Stream<Arguments> parametersIsValidForUpload() {
-			SearchParameter sp1 = new SearchParameter();
-			sp1.setCode("_id");
+			// Patient resource doesn't have a status element in FHIR spec
+			Patient resourceWithNoStatusElementInSpec = new Patient();
 
-			SearchParameter sp2 = new SearchParameter();
-			sp2.setCode("name");
-			sp2.setExpression("Patient.name");
-			sp2.setStatus(Enumerations.PublicationStatus.ACTIVE);
+			SearchParameter spWithActiveStatus = new SearchParameter();
+			spWithActiveStatus.setStatus(Enumerations.PublicationStatus.ACTIVE);
 
-			SearchParameter sp3 = new SearchParameter();
-			sp3.setCode("name");
-			sp3.addBase("Patient");
-			sp3.setStatus(Enumerations.PublicationStatus.ACTIVE);
+			SearchParameter spWithDraftStatus = new SearchParameter();
+			spWithDraftStatus.setStatus(Enumerations.PublicationStatus.DRAFT);
 
-			SearchParameter sp4 = new SearchParameter();
-			sp4.setCode("name");
-			sp4.addBase("Patient");
-			sp4.setExpression("Patient.name");
-			sp4.setStatus(Enumerations.PublicationStatus.ACTIVE);
-
-			SearchParameter sp5 = new SearchParameter();
-			sp5.setCode("name");
-			sp5.addBase("Patient");
-			sp5.setExpression("Patient.name");
-			sp5.setStatus(Enumerations.PublicationStatus.DRAFT);
+			SearchParameter spWithNullStatus = new SearchParameter();
+			spWithNullStatus.setStatus(null);
 
 			return Stream.of(
-					arguments(sp1, false, false),
-					arguments(sp2, false, true),
-					arguments(sp3, false, true),
-					arguments(sp4, true, true),
-					arguments(sp5, true, false),
-					arguments(createSubscription(Subscription.SubscriptionStatus.REQUESTED), true, true),
-					arguments(createSubscription(Subscription.SubscriptionStatus.ERROR), true, false),
-					arguments(createSubscription(Subscription.SubscriptionStatus.ACTIVE), true, false),
-					arguments(createDocumentReference(Enumerations.DocumentReferenceStatus.ENTEREDINERROR), true, true),
-					arguments(createDocumentReference(Enumerations.DocumentReferenceStatus.NULL), true, false),
-					arguments(createDocumentReference(null), true, false),
-					arguments(createCommunication(Communication.CommunicationStatus.NOTDONE), true, true),
-					arguments(createCommunication(Communication.CommunicationStatus.NULL), true, false),
-					arguments(createCommunication(null), true, false));
+					arguments(resourceWithNoStatusElementInSpec, true),
+					arguments(spWithActiveStatus, true),
+					arguments(spWithNullStatus, false),
+					arguments(spWithDraftStatus, false),
+					arguments(createSubscription(Subscription.SubscriptionStatus.REQUESTED), true),
+					arguments(createSubscription(Subscription.SubscriptionStatus.ERROR), false),
+					arguments(createSubscription(Subscription.SubscriptionStatus.ACTIVE), false),
+					arguments(createDocumentReference(Enumerations.DocumentReferenceStatus.ENTEREDINERROR), true),
+					arguments(createDocumentReference(Enumerations.DocumentReferenceStatus.NULL), false),
+					arguments(createDocumentReference(null), false),
+					arguments(createCommunication(Communication.CommunicationStatus.NOTDONE), true),
+					arguments(createCommunication(Communication.CommunicationStatus.NULL), false),
+					arguments(createCommunication(null), false));
 		}
 
 		@ParameterizedTest
 		@MethodSource(value = "parametersIsValidForUpload")
-		public void testValidForUpload_withResource(IBaseResource theResource,
-																  boolean theTheMeetsOtherFilterCriteria,
-																  boolean theMeetsStatusFilterCriteria) {
-			if (theTheMeetsOtherFilterCriteria) {
-				when(myStorageSettings.isValidateResourceStatusForPackageUpload()).thenReturn(true);
+		public void testValidForUpload_WhenStatusValidationSettingIsEnabled_ValidatesResourceStatus(IBaseResource theResource,
+																				 		  boolean theExpectedResultForStatusValidation) {
+			if (theResource.fhirType().equals("SearchParameter")) {
+				setupSearchParameterValidationMocksForSuccess();
 			}
-			assertEquals(theTheMeetsOtherFilterCriteria && theMeetsStatusFilterCriteria, mySvc.validForUpload(theResource));
+			when(myStorageSettings.isValidateResourceStatusForPackageUpload()).thenReturn(true);
+			assertEquals(theExpectedResultForStatusValidation, mySvc.validForUpload(theResource));
+		}
 
-			if (theTheMeetsOtherFilterCriteria) {
-				when(myStorageSettings.isValidateResourceStatusForPackageUpload()).thenReturn(false);
+		@ParameterizedTest
+		@MethodSource(value = "parametersIsValidForUpload")
+		public void testValidForUpload_WhenStatusValidationSettingIsDisabled_DoesNotValidateResourceStatus(IBaseResource theResource) {
+			if (theResource.fhirType().equals("SearchParameter")) {
+				setupSearchParameterValidationMocksForSuccess();
 			}
-			assertEquals(theTheMeetsOtherFilterCriteria, mySvc.validForUpload(theResource));
+			when(myStorageSettings.isValidateResourceStatusForPackageUpload()).thenReturn(false);
+			//all resources should pass status validation in this case, so expect true always
+			assertTrue(mySvc.validForUpload(theResource));
+		}
+
+		@Test
+		public void testValidForUpload_WhenSearchParameterIsInvalid_ReturnsFalse() {
+
+			final String validationExceptionMessage = "This SP is invalid!!";
+			final String spURL = "http://myspurl.example/invalidsp";
+			SearchParameter spR4 = new SearchParameter();
+			spR4.setUrl(spURL);
+			org.hl7.fhir.r5.model.SearchParameter spR5 = new org.hl7.fhir.r5.model.SearchParameter();
+
+			when(myVersionCanonicalizerMock.searchParameterToCanonical(spR4)).thenReturn(spR5);
+			doThrow(new UnprocessableEntityException(validationExceptionMessage)).
+				when(mySearchParameterDaoValidatorMock).validate(spR5);
+
+			assertFalse(mySvc.validForUpload(spR4));
+
+			final String expectedLogMessage = String.format(
+				"The SearchParameter with URL %s is invalid. Validation Error: %s", spURL, validationExceptionMessage);
+			LogbackTestExtensionAssert.assertThat(myLogCapture).hasErrorMessage(expectedLogMessage);
+		}
+
+		@Test
+		public void testValidForUpload_WhenSearchParameterValidatorThrowsAnExceptionOtherThanUnprocessableEntityException_ThenThrows() {
+
+			SearchParameter spR4 = new SearchParameter();
+			org.hl7.fhir.r5.model.SearchParameter spR5 = new org.hl7.fhir.r5.model.SearchParameter();
+
+			RuntimeException notAnUnprocessableEntityException = new RuntimeException("should not be caught");
+			when(myVersionCanonicalizerMock.searchParameterToCanonical(spR4)).thenReturn(spR5);
+			doThrow(notAnUnprocessableEntityException).
+				when(mySearchParameterDaoValidatorMock).validate(spR5);
+
+			Exception actualExceptionThrown = assertThrows(Exception.class, () -> mySvc.validForUpload(spR4));
+			assertEquals(notAnUnprocessableEntityException, actualExceptionThrown);
 		}
 	}
+
+
+
 
 	@Test
 	public void testDontTryToInstallDuplicateCodeSystem_CodeSystemAlreadyExistsWithDifferentId() throws IOException {
@@ -296,6 +356,11 @@ public class PackageInstallerSvcImplTest {
 		return pkg;
 	}
 
+	private void setupSearchParameterValidationMocksForSuccess() {
+		when(myVersionCanonicalizerMock.searchParameterToCanonical(any())).thenReturn(new org.hl7.fhir.r5.model.SearchParameter());
+		doNothing().when(mySearchParameterDaoValidatorMock).validate(any());
+	}
+
 	private static SearchParameter createSearchParameter(String theId, Collection<String> theBase) {
 		SearchParameter searchParameter = new SearchParameter();
 		if (theId != null) {
@@ -330,4 +395,5 @@ public class PackageInstallerSvcImplTest {
 		communication.setStatus(theCommunicationStatus);
 		return communication;
 	}
+
 }
