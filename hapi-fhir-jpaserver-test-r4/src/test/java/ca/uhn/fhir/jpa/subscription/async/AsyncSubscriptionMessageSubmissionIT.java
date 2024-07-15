@@ -124,9 +124,9 @@ public class AsyncSubscriptionMessageSubmissionIT extends BaseSubscriptionsR4Tes
 		waitForQueueToDrain();
 		assertCountOfResourcesNeedingSubmission(0);
 
-		List<ILoggingEvent> events = myLogbackTestExtension.getLogEvents().stream().filter(e -> {
+		List<ILoggingEvent> events = myLogbackTestExtension.getLogEvents(e -> {
 			return e.getLevel() == Level.DEBUG && e.getFormattedMessage().contains("Attempting to submit");
-		}).toList();
+		});
 		assertEquals(factor, events.size());
 	}
 
