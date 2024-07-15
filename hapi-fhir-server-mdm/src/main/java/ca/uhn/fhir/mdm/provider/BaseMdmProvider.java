@@ -265,13 +265,13 @@ public abstract class BaseMdmProvider {
 		}
 
 		// Get first match result with given source and golden ID
-		Optional<MdmLinkWithRevisionJson> r = theRevisionList.stream()
+		Optional<MdmLinkWithRevisionJson> theEarliestRevision = theRevisionList.stream()
 				.filter(revision -> revision.getMdmLink().getSourceId().equals(sourceId))
 				.filter(revision -> revision.getMdmLink().getGoldenResourceId().equals(goldenId))
 				.min(Comparator.comparing(MdmLinkWithRevisionJson::getRevisionNumber));
 
-		return r.isPresent()
-				? r.get().getMdmLink().getMatchResult()
+		return theEarliestRevision.isPresent()
+				? theEarliestRevision.get().getMdmLink().getMatchResult()
 				: theToMatch.getMdmLink().getMatchResult();
 	}
 
