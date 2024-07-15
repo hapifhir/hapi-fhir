@@ -55,25 +55,6 @@ class RequestPartitionHelperSvcTest extends BaseJpaR4Test {
 		myPatient.setId(new IdType("Patient", "123", "1"));
 	}
 
-	// TODO EHP: re-enable this test
-	@Disabled
-	@Test
-	public void testDetermineReadPartitionForSystemRequest_whenResourceIsNonPartitionable_returnsDefaultPartition() {
-		// setup
-		SystemRequestDetails srd = new SystemRequestDetails();
-		srd.setRequestPartitionId(RequestPartitionId.allPartitions());
-
-		// execute
-		ConceptMap conceptMap = new ConceptMap();
-		RequestPartitionId result = mySvc.determineCreatePartitionForRequest(srd, conceptMap, conceptMap.fhirType());
-
-		// verify
-		assertThat(result.isAllPartitions()).isFalse();
-		assertThat(result.hasPartitionNames()).isFalse();
-		assertThat(result.isDefaultPartition()).isTrue();
-		assertThat(result.hasDefaultPartitionId()).isTrue();
-	}
-
 	@Test
 	public void testDetermineReadPartitionForSystemRequest_withPartitionIdOnly_returnsCorrectPartition() {
 		// setup
