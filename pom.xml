@@ -924,6 +924,10 @@
 		 <id>melihaydogd</id>
 		 <name>Ahmet Melih Aydoğdu</name>
     </developer>
+	 <developer>
+		 <id>alexrkopp</id>
+		 <name>Alex Kopp</name>
+    </developer>
 	</developers>
 
 	<licenses>
