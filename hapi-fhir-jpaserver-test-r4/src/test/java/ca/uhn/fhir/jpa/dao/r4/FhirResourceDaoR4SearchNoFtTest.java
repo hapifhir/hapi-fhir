@@ -3723,7 +3723,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	@Test
 	public void testSearchStringParamReallyLong() {
 		String methodName = "testSearchStringParamReallyLong";
-		String value = StringUtils.rightPad(methodName, 200, 'a');
+		String value = StringUtils.rightPad(methodName, ResourceIndexedSearchParamString.MAX_LENGTH, 'a');
 
 		IIdType longId;
 		IIdType shortId;
@@ -4487,7 +4487,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		ArgumentCaptor<HookParams> captor = ArgumentCaptor.forClass(HookParams.class);
 		verify(interceptor, times(1)).invoke(ArgumentMatchers.eq(Pointcut.JPA_PERFTRACE_WARNING), captor.capture());
 		StorageProcessingMessage message = captor.getValue().get(StorageProcessingMessage.class);
-		assertEquals("This search uses an unqualified resource(a parameter in a chain without a resource type). This is less efficient than using a qualified type. If you know what you're looking for, try qualifying it using the form: 'entity:[resourceType]'", message.getMessage());
+		assertEquals("This search uses an unqualified resource(a parameter in a chain without a resource type). This is less efficient than using a qualified type. If you know what you're looking for, try qualifying it using the form: 'entity:[resourceType]=[id] or entity=[resourceType]/[id]'", message.getMessage());
 	}
 
 	@Test

@@ -515,6 +515,49 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 		myTestDaoSearch.assertSearchFindsOnly("search by server assigned id", "Patient?family=smith&_pid=" + id, id);
 	}
 
+	@Nested
+	public class CanonicalReferences {
+
+		@Test
+		void testCanonicalReferenceSearchNoVersion() {
+			// given
+			IIdType reportId = myDataBuilder.createResourceFromJson("""
+				{
+				   "resourceType": "MeasureReport",
+				   "measure": "http://StructureDefinition.com"
+				}
+				""");
+
+			myTestDaoSearch.assertSearchNotFound("unversioned search finds MeasureReport by canonical reference",
+				"MeasureReport?measure=http://StructureDefinition.com|1.2.3", reportId);
+			myTestDaoSearch.assertSearchFinds("versioned search finds MeasureReport by canonical reference with right version",
+				"MeasureReport?measure=http://StructureDefinition.com", reportId);
+		}
+
+		/**
+		 * Hapi bug - https://github.com/hapifhir/hapi-fhir/issues/6094
+		 */
+		@Test
+		void testCanonicalReferenceSearch() {
+			// given
+			IIdType reportId = myDataBuilder.createResourceFromJson("""
+				{
+				   "resourceType": "MeasureReport",
+				   "measure": "http://StructureDefinition.com|1.2.3"
+				}
+				""");
+
+			// when
+			myTestDaoSearch.assertSearchFinds("unversioned search finds MeasureReport by canonical reference",
+				"MeasureReport?measure=http://StructureDefinition.com", reportId);
+			myTestDaoSearch.assertSearchFinds("versioned search finds MeasureReport by canonical reference with right version",
+				"MeasureReport?measure=http://StructureDefinition.com|1.2.3", reportId);
+			myTestDaoSearch.assertSearchNotFound("versioned search does not find MeasureReport by canonical reference with wrong version",
+				"MeasureReport?measure=http://StructureDefinition.com|2.0", reportId);
+		}
+
+	}
+
 	@Test
 	void testSortByPid() {
 

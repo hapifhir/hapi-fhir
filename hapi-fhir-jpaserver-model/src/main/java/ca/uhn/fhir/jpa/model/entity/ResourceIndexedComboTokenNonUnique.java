@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.util.SearchParamHash;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ForeignKey;
@@ -37,18 +38,17 @@ import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.hl7.fhir.instance.model.api.IIdType;
-
-import static ca.uhn.fhir.jpa.model.util.SearchParamHash.hashSearchParam;
 
 @Entity
 @Table(
 		name = "HFJ_IDX_CMB_TOK_NU",
 		indexes = {
+			// TODO: The hash index was added in 7.4.0 - In 7.6.0 we should drop the string index
 			@Index(name = "IDX_IDXCMBTOKNU_STR", columnList = "IDX_STRING", unique = false),
+			@Index(name = "IDX_IDXCMBTOKNU_HASHC", columnList = "HASH_COMPLETE,RES_ID,PARTITION_ID", unique = false),
 			@Index(name = "IDX_IDXCMBTOKNU_RES", columnList = "RES_ID", unique = false)
 		})
-public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndex
+public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndexedCombo
 		implements Comparable<ResourceIndexedComboTokenNonUnique>, IResourceIndexComboSearchParameter {
 
 	@SequenceGenerator(name = "SEQ_IDXCMBTOKNU_ID", sequenceName = "SEQ_IDXCMBTOKNU_ID")
@@ -76,9 +76,6 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndex
 	@Transient
 	private transient PartitionSettings myPartitionSettings;
 
-	@Transient
-	private IIdType mySearchParameterId;
-
 	/**
 	 * Constructor
 	 */
@@ -105,6 +102,8 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndex
 
 	@Override
 	public boolean equals(Object theO) {
+		calculateHashes();
+
 		if (this == theO) {
 			return true;
 		}
@@ -116,7 +115,7 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndex
 		ResourceIndexedComboTokenNonUnique that = (ResourceIndexedComboTokenNonUnique) theO;
 
 		EqualsBuilder b = new EqualsBuilder();
-		b.append(myIndexString, that.myIndexString);
+		b.append(getHashComplete(), that.getHashComplete());
 		return b.isEquals();
 	}
 
@@ -157,7 +156,11 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndex
 
 	@Override
 	public int hashCode() {
-		return new HashCodeBuilder(17, 37).append(myIndexString).toHashCode();
+		calculateHashes();
+
+		HashCodeBuilder builder = new HashCodeBuilder(17, 37);
+		builder.append(getHashComplete());
+		return builder.toHashCode();
 	}
 
 	public PartitionSettings getPartitionSettings() {
@@ -206,27 +209,6 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndex
 	public static long calculateHashComplete(
 			PartitionSettings partitionSettings, PartitionablePartitionId thePartitionId, String queryString) {
 		RequestPartitionId requestPartitionId = PartitionablePartitionId.toRequestPartitionId(thePartitionId);
-		return hashSearchParam(partitionSettings, requestPartitionId, queryString);
-	}
-
-	public static long calculateHashComplete(
-			PartitionSettings partitionSettings, RequestPartitionId partitionId, String queryString) {
-		return hashSearchParam(partitionSettings, partitionId, queryString);
-	}
-
-	/**
-	 * Note: This field is not persisted, so it will only be populated for new indexes
-	 */
-	@Override
-	public void setSearchParameterId(IIdType theSearchParameterId) {
-		mySearchParameterId = theSearchParameterId;
-	}
-
-	/**
-	 * Note: This field is not persisted, so it will only be populated for new indexes
-	 */
-	@Override
-	public IIdType getSearchParameterId() {
-		return mySearchParameterId;
+		return SearchParamHash.hashSearchParam(partitionSettings, requestPartitionId, queryString);
 	}
 }

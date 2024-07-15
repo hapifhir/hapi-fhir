@@ -1,7 +1,5 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexAppCtx;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
@@ -15,6 +13,8 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.util.JpaParamUtil;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.DateAndListParam;
+import ca.uhn.fhir.rest.param.DateOrListParam;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
@@ -22,6 +22,8 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.HapiExtensions;
+import jakarta.annotation.Nonnull;
+import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -46,8 +48,8 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import jakarta.annotation.Nonnull;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -55,21 +57,22 @@ import java.util.stream.Collectors;
 import static ca.uhn.fhir.jpa.dao.BaseHapiFhirDao.INDEX_STATUS_INDEXED;
 import static ca.uhn.fhir.jpa.dao.BaseHapiFhirDao.INDEX_STATUS_INDEXING_FAILED;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 
-public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
+public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4ComboUniqueParamIT.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4ComboUniqueParamTest.class);
 
 	@Autowired
 	private IJobCoordinator myJobCoordinator;
 
 	@AfterEach
 	public void purgeUniqueIndexes() {
-		myResourceIndexedCompositeStringUniqueDao.deleteAll();
+		myResourceIndexedComboStringUniqueDao.deleteAll();
 	}
 
 	private void createUniqueBirthdateAndGenderSps() {
@@ -80,7 +83,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		sp.setExpression("Patient.gender");
 		sp.setStatus(PublicationStatus.ACTIVE);
 		sp.addBase("Patient");
-		mySearchParameterDao.update(sp);
+		mySearchParameterDao.update(sp, mySrd);
 
 		sp = new SearchParameter();
 		sp.setId("SearchParameter/patient-birthdate");
@@ -89,7 +92,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		sp.setExpression("Patient.birthDate");
 		sp.setStatus(PublicationStatus.ACTIVE);
 		sp.addBase("Patient");
-		mySearchParameterDao.update(sp);
+		mySearchParameterDao.update(sp, mySrd);
 
 		sp = new SearchParameter();
 		sp.setId("SearchParameter/patient-gender-birthdate");
@@ -105,7 +108,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		sp.addExtension()
 			.setUrl(HapiExtensions.EXT_SP_UNIQUE)
 			.setValue(new BooleanType(true));
-		mySearchParameterDao.update(sp);
+		mySearchParameterDao.update(sp, mySrd);
 
 		mySearchParamRegistry.forceRefresh();
 
@@ -120,7 +123,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		sp.setType(Enumerations.SearchParamType.REFERENCE);
 		sp.setStatus(PublicationStatus.ACTIVE);
 		sp.addBase("Coverage");
-		mySearchParameterDao.update(sp);
+		mySearchParameterDao.update(sp, mySrd);
 
 		sp = new SearchParameter();
 		sp.setId("SearchParameter/coverage-identifier");
@@ -129,7 +132,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		sp.setType(Enumerations.SearchParamType.TOKEN);
 		sp.setStatus(PublicationStatus.ACTIVE);
 		sp.addBase("Coverage");
-		mySearchParameterDao.update(sp);
+		mySearchParameterDao.update(sp, mySrd);
 
 		sp = new SearchParameter();
 		sp.setId("SearchParameter/coverage-beneficiary-identifier");
@@ -147,7 +150,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		sp.addExtension()
 			.setUrl(HapiExtensions.EXT_SP_UNIQUE)
 			.setValue(new BooleanType(true));
-		mySearchParameterDao.update(sp);
+		mySearchParameterDao.update(sp, mySrd);
 		mySearchParamRegistry.forceRefresh();
 	}
 
@@ -160,7 +163,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		sp.setType(Enumerations.SearchParamType.REFERENCE);
 		sp.setStatus(PublicationStatus.ACTIVE);
 		sp.addBase("Observation");
-		mySearchParameterDao.update(sp);
+		mySearchParameterDao.update(sp, mySrd);
 
 		sp = new SearchParameter();
 		sp.setId("SearchParameter/observation-uniq-subject");
@@ -175,7 +178,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		sp.addExtension()
 			.setUrl(HapiExtensions.EXT_SP_UNIQUE)
 			.setValue(new BooleanType(true));
-		mySearchParameterDao.update(sp);
+		mySearchParameterDao.update(sp, mySrd);
 		mySearchParamRegistry.forceRefresh();
 	}
 
@@ -188,7 +191,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		sp.setType(Enumerations.SearchParamType.TOKEN);
 		sp.setStatus(PublicationStatus.ACTIVE);
 		sp.addBase("Patient");
-		mySearchParameterDao.update(sp);
+		mySearchParameterDao.update(sp, mySrd);
 
 		sp = new SearchParameter();
 		sp.setId("SearchParameter/patient-uniq-identifier");
@@ -203,7 +206,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		sp.addExtension()
 			.setUrl(HapiExtensions.EXT_SP_UNIQUE)
 			.setValue(new BooleanType(true));
-		mySearchParameterDao.update(sp);
+		mySearchParameterDao.update(sp, mySrd);
 		mySearchParamRegistry.forceRefresh();
 	}
 
@@ -216,7 +219,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		sp.setType(Enumerations.SearchParamType.TOKEN);
 		sp.setStatus(PublicationStatus.ACTIVE);
 		sp.addBase("Patient");
-		mySearchParameterDao.update(sp);
+		mySearchParameterDao.update(sp, mySrd);
 
 		sp = new SearchParameter();
 		sp.setId("SearchParameter/patient-uniq-identifier");
@@ -231,7 +234,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		sp.addExtension()
 			.setUrl(HapiExtensions.EXT_SP_UNIQUE)
 			.setValue(new BooleanType(true));
-		mySearchParameterDao.update(sp);
+		mySearchParameterDao.update(sp, mySrd);
 		mySearchParamRegistry.forceRefresh();
 	}
 
@@ -243,7 +246,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		sp.setExpression("Patient.name");
 		sp.setStatus(PublicationStatus.ACTIVE);
 		sp.addBase("Patient");
-		mySearchParameterDao.update(sp);
+		mySearchParameterDao.update(sp, mySrd);
 
 		sp = new SearchParameter();
 		sp.setId("SearchParameter/patient-organization");
@@ -252,7 +255,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		sp.setExpression("Patient.managingOrganization");
 		sp.setStatus(PublicationStatus.ACTIVE);
 		sp.addBase("Patient");
-		mySearchParameterDao.update(sp);
+		mySearchParameterDao.update(sp, mySrd);
 
 		sp = new SearchParameter();
 		sp.setId("SearchParameter/patient-name-organization");
@@ -268,7 +271,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		sp.addExtension()
 			.setUrl(HapiExtensions.EXT_SP_UNIQUE)
 			.setValue(new BooleanType(true));
-		mySearchParameterDao.update(sp);
+		mySearchParameterDao.update(sp, mySrd);
 
 		mySearchParamRegistry.forceRefresh();
 	}
@@ -282,7 +285,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		sp.setStatus(PublicationStatus.ACTIVE);
 		sp.addBase("Observation");
 		sp.addTarget("Patient");
-		mySearchParameterDao.update(sp);
+		mySearchParameterDao.update(sp, mySrd);
 
 		sp = new SearchParameter();
 		sp.setId("SearchParameter/obs-effective");
@@ -291,7 +294,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		sp.setExpression("Observation.effective");
 		sp.setStatus(PublicationStatus.ACTIVE);
 		sp.addBase("Observation");
-		mySearchParameterDao.update(sp);
+		mySearchParameterDao.update(sp, mySrd);
 
 		sp = new SearchParameter();
 		sp.setId("SearchParameter/obs-code");
@@ -300,7 +303,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		sp.setExpression("Observation.code");
 		sp.setStatus(PublicationStatus.ACTIVE);
 		sp.addBase("Observation");
-		mySearchParameterDao.update(sp);
+		mySearchParameterDao.update(sp, mySrd);
 
 		sp = new SearchParameter();
 		sp.setId("SearchParameter/observation-subject-date-code");
@@ -320,7 +323,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		sp.addExtension()
 			.setUrl(HapiExtensions.EXT_SP_UNIQUE)
 			.setValue(new BooleanType(true));
-		mySearchParameterDao.update(sp);
+		mySearchParameterDao.update(sp, mySrd);
 
 		mySearchParamRegistry.forceRefresh();
 	}
@@ -339,7 +342,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 			.setValue(new BooleanType(true));
 
 		try {
-			mySearchParameterDao.create(sp);
+			mySearchParameterDao.create(sp, mySrd);
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertEquals(Msg.code(1115) + "SearchParameter is marked as unique but has no components", e.getMessage());
@@ -361,16 +364,15 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 			.setValue(new BooleanType(true));
 
 		try {
-			mySearchParameterDao.create(sp);
+			mySearchParameterDao.create(sp, mySrd);
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertEquals(Msg.code(1116) + "SearchParameter is marked as unique but is missing component.definition", e.getMessage());
 		}
 	}
 
-
 	@Test
-	public void testDoubleMatchingOnAnd_Search() {
+	public void testHashesCalculated() {
 		myStorageSettings.setAdvancedHSearchIndexing(false);
 		createUniqueIndexPatientIdentifier();
 
@@ -378,19 +380,47 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		pt.setActive(true);
 		pt.addIdentifier().setSystem("urn").setValue("111");
 		pt.addIdentifier().setSystem("urn").setValue("222");
-		String id1 = myPatientDao.create(pt).getId().toUnqualifiedVersionless().getValue();
+
+		myCaptureQueriesListener.clear();
+		IIdType id = myPatientDao.create(pt, mySrd).getId().toUnqualifiedVersionless();
+		myCaptureQueriesListener.logInsertQueries();
+
+		List<ResourceIndexedComboStringUnique> values = runInTransaction(()-> myResourceIndexedComboStringUniqueDao.findAllForResourceIdForUnitTest(id.getIdPartAsLong()));
+		assertEquals(2, values.size());
+		values.sort(Comparator.comparing(ResourceIndexedComboStringUnique::getIndexString));
+		assertEquals("Patient?identifier=urn%7C111", values.get(0).getIndexString());
+		assertEquals(1719691123901055728L, values.get(0).getHashComplete());
+		assertEquals(-8172870218136407824L, values.get(0).getHashComplete2());
+		assertEquals("Patient?identifier=urn%7C222", values.get(1).getIndexString());
+		assertEquals(7615522755370797441L, values.get(1).getHashComplete());
+		assertEquals(1496354762750275623L, values.get(1).getHashComplete2());
+
+		// Update the values
 
 		pt = new Patient();
+		pt.setId(id.toUnqualifiedVersionless());
 		pt.setActive(true);
+		pt.addIdentifier().setSystem("urn").setValue("111");
 		pt.addIdentifier().setSystem("urn").setValue("333");
-		String id2 = myPatientDao.create(pt).getId().toUnqualifiedVersionless().getValue();
+		myPatientDao.update(pt, mySrd);
 
-		pt = new Patient();
-		pt.setActive(false);
-		pt.addIdentifier().setSystem("urn").setValue("444");
-		myPatientDao.create(pt);
+		values = runInTransaction(()->{
+			return myResourceIndexedComboStringUniqueDao.findAllForResourceIdForUnitTest(id.getIdPartAsLong());
+		});
+		assertEquals(2, values.size());
+		values.sort(Comparator.comparing(ResourceIndexedComboStringUnique::getIndexString));
+		assertEquals("Patient?identifier=urn%7C111", values.get(0).getIndexString());
+		assertEquals(1719691123901055728L, values.get(0).getHashComplete());
+		assertEquals(-8172870218136407824L, values.get(0).getHashComplete2());
+		assertEquals("Patient?identifier=urn%7C333", values.get(1).getIndexString());
+		assertEquals(3049342026616784675L, values.get(1).getHashComplete());
+		assertEquals(-2327712097368275295L, values.get(1).getHashComplete2());
+	}
 
-		String unformattedSql;
+	@Test
+	public void testDoubleMatchingOnAnd_Search_TwoAndValues() {
+		Pair<String, String> ids = prepareDoubleMatchingSearchParameterAndPatient();
+		String id1 = ids.getLeft();
 
 		// Two AND values
 		myCaptureQueriesListener.clear();
@@ -401,43 +431,91 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 				.addAnd(new TokenParam("urn", "111"))
 				.addAnd(new TokenParam("urn", "222"))
 		);
-		IBundleProvider outcome = myPatientDao.search(sp);
+		IBundleProvider outcome = myPatientDao.search(sp, mySrd);
 		myCaptureQueriesListener.logFirstSelectQueryForCurrentThread();
-		unformattedSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
+		String unformattedSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
 		assertThat(unformattedSql).containsSubsequence(
 			"IDX_STRING = 'Patient?identifier=urn%7C111'",
-			"HASH_SYS_AND_VALUE = '-3122824860083758210'"
+			"IDX_STRING = 'Patient?identifier=urn%7C222'"
 		);
+		assertThat(unformattedSql).doesNotContain(("HFJ_SPIDX_TOKEN"));
 		assertThat(unformattedSql).doesNotContain(("RES_DELETED_AT"));
 		assertThat(unformattedSql).doesNotContain(("RES_TYPE"));
 		assertThat(toUnqualifiedVersionlessIdValues(outcome)).containsExactlyInAnyOrder(id1);
+	}
+
+
+	@Test
+	public void testDoubleMatchingOnAnd_Search_TwoOrValues() {
+		Pair<String, String> ids = prepareDoubleMatchingSearchParameterAndPatient();
+		String id1 = ids.getLeft();
 
 		// Two OR values on the same resource - Currently composite SPs don't work for this
 		myCaptureQueriesListener.clear();
-		sp = new SearchParameterMap();
+		SearchParameterMap sp = new SearchParameterMap();
 		sp.setLoadSynchronous(true);
 		sp.add("identifier",
 			new TokenAndListParam()
 				.addAnd(new TokenParam("urn", "111"), new TokenParam("urn", "222"))
 		);
-		outcome = myPatientDao.search(sp);
+		IBundleProvider outcome = myPatientDao.search(sp, mySrd);
 		myCaptureQueriesListener.logFirstSelectQueryForCurrentThread();
 		assertThat(toUnqualifiedVersionlessIdValues(outcome)).containsExactlyInAnyOrder(id1);
-		unformattedSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
-		assertThat(unformattedSql).contains("HASH_SYS_AND_VALUE IN ('4101160957635429999','-3122824860083758210')");
-		assertThat(unformattedSql).doesNotContain(("IDX_STRING"));
-		assertThat(unformattedSql).doesNotContain(("RES_DELETED_AT"));
-		assertThat(unformattedSql).doesNotContain(("RES_TYPE"));
+		String unformattedSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
+		assertEquals("SELECT t0.RES_ID FROM HFJ_IDX_CMP_STRING_UNIQ t0 WHERE (t0.IDX_STRING IN ('Patient?identifier=urn%7C111','Patient?identifier=urn%7C222') )", unformattedSql);
+
+	}
+
+
+	@Test
+	public void testDoubleMatchingOnAnd_Search_TwoAndOrValues() {
+		myStorageSettings.setUniqueIndexesCheckedBeforeSave(false);
+
+		createUniqueBirthdateAndGenderSps();
+
+		Patient pt1 = new Patient();
+		pt1.setGender(Enumerations.AdministrativeGender.MALE);
+		pt1.setBirthDateElement(new DateType("2011-01-01"));
+		String id1 = myPatientDao.create(pt1, mySrd).getId().toUnqualifiedVersionless().getValue();
+
+		// Two OR values on the same resource - Currently composite SPs don't work for this
+		myCaptureQueriesListener.clear();
+		SearchParameterMap sp = new SearchParameterMap();
+		sp.setLoadSynchronous(true);
+		sp.add(Patient.SP_GENDER,
+			new TokenAndListParam()
+				.addAnd(new TokenParam("http://hl7.org/fhir/administrative-gender","male"), new TokenParam( "http://hl7.org/fhir/administrative-gender","female"))
+		);
+		sp.add(Patient.SP_BIRTHDATE,
+			new DateAndListParam()
+				.addAnd(new DateParam("2011-01-01"), new DateParam( "2011-02-02"))
+		);
+		IBundleProvider outcome = myPatientDao.search(sp, mySrd);
+		myCaptureQueriesListener.logFirstSelectQueryForCurrentThread();
+		assertThat(toUnqualifiedVersionlessIdValues(outcome)).containsExactlyInAnyOrder(id1);
+		String unformattedSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
+		assertEquals("SELECT t0.RES_ID FROM HFJ_IDX_CMP_STRING_UNIQ t0 WHERE (t0.IDX_STRING IN ('Patient?birthdate=2011-01-01&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cfemale','Patient?birthdate=2011-01-01&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale','Patient?birthdate=2011-02-02&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cfemale','Patient?birthdate=2011-02-02&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale') )", unformattedSql);
+	}
+
+
+
+	@Test
+	public void testDoubleMatchingOnAnd_Search_NonMatching() {
+		Pair<String, String> ids = prepareDoubleMatchingSearchParameterAndPatient();
+		String id1 = ids.getLeft();
+		String id2 = ids.getRight();
+
+		String unformattedSql;
 
 		// Not matching the composite SP at all
 		myCaptureQueriesListener.clear();
-		sp = new SearchParameterMap();
+		SearchParameterMap sp = new SearchParameterMap();
 		sp.setLoadSynchronous(true);
 		sp.add("active",
 			new TokenAndListParam()
 				.addAnd(new TokenParam(null, "true"))
 		);
-		outcome = myPatientDao.search(sp);
+		IBundleProvider outcome = myPatientDao.search(sp, mySrd);
 		myCaptureQueriesListener.logFirstSelectQueryForCurrentThread();
 		assertThat(toUnqualifiedVersionlessIdValues(outcome)).containsExactlyInAnyOrder(id1, id2);
 		unformattedSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
@@ -445,6 +523,29 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		assertThat(unformattedSql).doesNotContain(("RES_DELETED_AT"));
 		assertThat(unformattedSql).doesNotContain(("RES_TYPE"));
 
+	}
+
+	private Pair<String, String> prepareDoubleMatchingSearchParameterAndPatient() {
+		myStorageSettings.setAdvancedHSearchIndexing(false);
+		createUniqueIndexPatientIdentifier();
+
+		Patient pt = new Patient();
+		pt.setActive(true);
+		pt.addIdentifier().setSystem("urn").setValue("111");
+		pt.addIdentifier().setSystem("urn").setValue("222");
+		String id1 = myPatientDao.create(pt, mySrd).getId().toUnqualifiedVersionless().getValue();
+
+		pt = new Patient();
+		pt.setActive(true);
+		pt.addIdentifier().setSystem("urn").setValue("333");
+		String id2 = myPatientDao.create(pt, mySrd).getId().toUnqualifiedVersionless().getValue();
+
+		pt = new Patient();
+		pt.setActive(false);
+		pt.addIdentifier().setSystem("urn").setValue("444");
+		myPatientDao.create(pt, mySrd);
+
+		return Pair.of(id1, id2);
 	}
 
 	@Test
@@ -458,7 +559,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		sp.setType(Enumerations.SearchParamType.REFERENCE);
 		sp.addBase(ServiceRequest.class.getSimpleName());
 		sp.setExpression("ServiceRequest.subject.where(resolve() is Patient)");
-		String patientParamId = mySearchParameterDao.create(sp).getId().toUnqualifiedVersionless().getValue();
+		String patientParamId = mySearchParameterDao.create(sp, mySrd).getId().toUnqualifiedVersionless().getValue();
 
 		sp = new SearchParameter();
 		sp.setStatus(PublicationStatus.ACTIVE);
@@ -467,7 +568,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		sp.setType(Enumerations.SearchParamType.REFERENCE);
 		sp.addBase(ServiceRequest.class.getSimpleName());
 		sp.setExpression("ServiceRequest.performer");
-		String performerParamId = mySearchParameterDao.create(sp).getId().toUnqualifiedVersionless().getValue();
+		String performerParamId = mySearchParameterDao.create(sp, mySrd).getId().toUnqualifiedVersionless().getValue();
 
 		sp = new SearchParameter();
 		sp.setStatus(PublicationStatus.ACTIVE);
@@ -476,7 +577,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		sp.setType(Enumerations.SearchParamType.TOKEN);
 		sp.addBase(ServiceRequest.class.getSimpleName());
 		sp.setExpression("ServiceRequest.identifier");
-		String identifierParamId = mySearchParameterDao.create(sp).getId().toUnqualifiedVersionless().getValue();
+		String identifierParamId = mySearchParameterDao.create(sp, mySrd).getId().toUnqualifiedVersionless().getValue();
 
 		sp = new SearchParameter();
 		sp.setId("SearchParameter/patient-uniq-identifier");
@@ -497,32 +598,32 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		sp.addExtension()
 			.setUrl(HapiExtensions.EXT_SP_UNIQUE)
 			.setValue(new BooleanType(true));
-		mySearchParameterDao.create(sp);
+		mySearchParameterDao.create(sp, mySrd);
 		mySearchParamRegistry.forceRefresh();
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(sp));
 
 		// Now create matching/non-matching resources
 		Patient pt = new Patient();
 		pt.setActive(true);
-		IIdType ptId = myPatientDao.create(pt).getId().toUnqualifiedVersionless();
+		IIdType ptId = myPatientDao.create(pt, mySrd).getId().toUnqualifiedVersionless();
 
 		Practitioner pract = new Practitioner();
 		pract.setActive(true);
-		IIdType practId = myPractitionerDao.create(pract).getId().toUnqualifiedVersionless();
+		IIdType practId = myPractitionerDao.create(pract, mySrd).getId().toUnqualifiedVersionless();
 
 		ServiceRequest sr = new ServiceRequest();
 		sr.addIdentifier().setSystem("sys").setValue("111");
 		sr.addIdentifier().setSystem("sys").setValue("222");
 		sr.setSubject(new Reference(ptId));
 		sr.addPerformer(new Reference(practId));
-		String srId = myServiceRequestDao.create(sr).getId().toUnqualifiedVersionless().getValue();
+		String srId = myServiceRequestDao.create(sr, mySrd).getId().toUnqualifiedVersionless().getValue();
 
 		sr = new ServiceRequest();
 		sr.addIdentifier().setSystem("sys").setValue("888");
 		sr.addIdentifier().setSystem("sys").setValue("999");
 		sr.setSubject(new Reference(ptId));
 		sr.addPerformer(new Reference(practId));
-		myServiceRequestDao.create(sr).getId().toUnqualifiedVersionless().getValue();
+		myServiceRequestDao.create(sr, mySrd).getId().toUnqualifiedVersionless().getValue();
 
 		String unformattedSql;
 
@@ -537,7 +638,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		);
 		map.add("patient", new ReferenceParam(ptId.getValue()));
 		map.add("performer", new ReferenceParam(practId.getValue()));
-		IBundleProvider outcome = myServiceRequestDao.search(map);
+		IBundleProvider outcome = myServiceRequestDao.search(map, mySrd);
 		myCaptureQueriesListener.logFirstSelectQueryForCurrentThread();
 		assertThat(toUnqualifiedVersionlessIdValues(outcome)).containsExactlyInAnyOrder(srId);
 		unformattedSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
@@ -559,7 +660,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		);
 		map.add("patient", new ReferenceParam(ptId.getIdPart()));
 		map.add("performer", new ReferenceParam(practId.getIdPart()));
-		outcome = myServiceRequestDao.search(map);
+		outcome = myServiceRequestDao.search(map, mySrd);
 		myCaptureQueriesListener.logFirstSelectQueryForCurrentThread();
 		assertThat(toUnqualifiedVersionlessIdValues(outcome)).containsExactlyInAnyOrder(srId);
 		unformattedSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
@@ -611,7 +712,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 
 		// Make sure entries are saved
 		runInTransaction(() -> {
-			List<ResourceIndexedComboStringUnique> all = myResourceIndexedCompositeStringUniqueDao.findAll();
+			List<ResourceIndexedComboStringUnique> all = myResourceIndexedComboStringUniqueDao.findAll();
 			assertEquals(2, all.size());
 		});
 
@@ -655,7 +756,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus status) {
-				List<ResourceIndexedComboStringUnique> all = myResourceIndexedCompositeStringUniqueDao.findAll();
+				List<ResourceIndexedComboStringUnique> all = myResourceIndexedComboStringUniqueDao.findAll();
 				assertEquals(2, all.size());
 			}
 		});
@@ -678,7 +779,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 
 		Patient pt1 = new Patient();
 		pt1.setActive(true);
-		IIdType id1 = myPatientDao.create(pt1).getId().toUnqualifiedVersionless();
+		IIdType id1 = myPatientDao.create(pt1, mySrd).getId().toUnqualifiedVersionless();
 
 		/*
 		 * Both of the following resources will match the unique index we'll
@@ -690,13 +791,13 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		obs.getCode().addCoding().setSystem("foo").setCode("bar");
 		obs.setSubject(new Reference(pt1.getIdElement().toUnqualifiedVersionless().getValue()));
 		obs.setEffective(new DateTimeType("2011-01-01"));
-		IIdType id2 = myObservationDao.create(obs).getId().toUnqualifiedVersionless();
+		IIdType id2 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
 		obs = new Observation();
 		obs.getCode().addCoding().setSystem("foo").setCode("bar");
 		obs.setSubject(new Reference(pt1.getIdElement().toUnqualifiedVersionless().getValue()));
 		obs.setEffective(new DateTimeType("2011-01-01"));
-		IIdType id3 = myObservationDao.create(obs).getId().toUnqualifiedVersionless();
+		IIdType id3 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
 		ourLog.info("ID1: {}  - ID2: {}  - ID3: {}", id1, id2, id3);
 
@@ -709,14 +810,14 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		executeReindex();
 
 		runInTransaction(() -> {
-			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
+			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedComboStringUniqueDao.findAll();
 			assertEquals(1, uniques.size(), uniques.toString());
 			assertThat(uniques.get(0).getResource().getIdDt().toUnqualifiedVersionless().getValue()).isIn(
 				"Observation/" + id2.getIdPart(),
 				"Observation/" + id3.getIdPart());
 			assertEquals("Observation?code=foo%7Cbar&date=2011-01-01&subject=Patient%2F" + id1.getIdPart(), uniques.get(0).getIndexString());
 
-			myResourceIndexedCompositeStringUniqueDao.deleteAll();
+			myResourceIndexedComboStringUniqueDao.deleteAll();
 		});
 
 		assertThat(mySearchParamRegistry.getActiveComboSearchParams("Observation")).hasSize(1);
@@ -724,7 +825,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		executeReindex();
 
 		runInTransaction(() -> {
-			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
+			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedComboStringUniqueDao.findAll();
 			assertEquals(1, uniques.size(), uniques.toString());
 			assertThat(uniques.get(0).getResource().getIdDt().toUnqualifiedVersionless().getValue()).isIn(
 				"Observation/" + id2.getIdPart(),
@@ -743,10 +844,10 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		Patient pt1 = new Patient();
 		pt1.setGender(Enumerations.AdministrativeGender.MALE);
 		pt1.setBirthDateElement(new DateType("2011-01-01"));
-		myPatientDao.create(pt1).getId().toUnqualifiedVersionless();
+		myPatientDao.create(pt1, mySrd).getId().toUnqualifiedVersionless();
 
 		try {
-			myPatientDao.create(pt1).getId().toUnqualifiedVersionless();
+			myPatientDao.create(pt1, mySrd).getId().toUnqualifiedVersionless();
 			fail();
 		} catch (ResourceVersionConflictException e) {
 			assertEquals(Msg.code(550) + Msg.code(824) + "The operation has failed with a unique index constraint failure. This probably means that the operation was trying to create/update a resource that would have resulted in a duplicate value for a unique index.", e.getMessage());
@@ -760,10 +861,10 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		Patient pt1 = new Patient();
 		pt1.setGender(Enumerations.AdministrativeGender.MALE);
 		pt1.setBirthDateElement(new DateType("2011-01-01"));
-		IIdType id1 = myPatientDao.create(pt1).getId().toUnqualifiedVersionless();
+		myPatientDao.create(pt1, mySrd);
 
 		try {
-			myPatientDao.create(pt1).getId().toUnqualifiedVersionless();
+			myPatientDao.create(pt1, mySrd);
 			fail();
 		} catch (ResourceVersionConflictException e) {
 			assertThat(e.getMessage()).contains("new unique index created by SearchParameter/patient-gender-birthdate");
@@ -777,13 +878,13 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		Patient pt = new Patient();
 		pt.addIdentifier().setSystem("urn").setValue("111");
 		pt.addIdentifier().setSystem("urn").setValue("222");
-		myPatientDao.create(pt);
+		myPatientDao.create(pt, mySrd);
 
 		pt = new Patient();
 		pt.addIdentifier().setSystem("urn").setValue("111");
 		pt.addIdentifier().setSystem("urn").setValue("222");
 		try {
-			myPatientDao.create(pt);
+			myPatientDao.create(pt, mySrd);
 			fail();
 		} catch (ResourceVersionConflictException e) {
 			// good
@@ -792,12 +893,12 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		pt = new Patient();
 		pt.addIdentifier().setSystem("urn").setValue("333");
 		pt.addIdentifier().setSystem("urn").setValue("222");
-		myPatientDao.create(pt);
+		myPatientDao.create(pt, mySrd);
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus status) {
-				List<ResourceIndexedComboStringUnique> all = myResourceIndexedCompositeStringUniqueDao.findAll();
+				List<ResourceIndexedComboStringUnique> all = myResourceIndexedComboStringUniqueDao.findAll();
 				assertEquals(2, all.size());
 			}
 		});
@@ -810,12 +911,12 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 
 		Patient pt = new Patient();
 		pt.addIdentifier().setSystem("urn").setValue("111");
-		IIdType id = myPatientDao.create(pt).getId().toUnqualifiedVersionless();
+		IIdType id = myPatientDao.create(pt, mySrd).getId().toUnqualifiedVersionless();
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus status) {
-				List<ResourceIndexedComboStringUnique> all = myResourceIndexedCompositeStringUniqueDao.findAll();
+				List<ResourceIndexedComboStringUnique> all = myResourceIndexedComboStringUniqueDao.findAll();
 				assertEquals(1, all.size());
 			}
 		});
@@ -823,18 +924,18 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		pt = new Patient();
 		pt.addIdentifier().setSystem("urn").setValue("111");
 		pt.setActive(true);
-		String version = myPatientDao.update(pt, "Patient?first-identifier=urn|111").getId().getVersionIdPart();
+		String version = myPatientDao.update(pt, "Patient?first-identifier=urn|111", mySrd).getId().getVersionIdPart();
 		assertEquals("2", version);
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus status) {
-				List<ResourceIndexedComboStringUnique> all = myResourceIndexedCompositeStringUniqueDao.findAll();
+				List<ResourceIndexedComboStringUnique> all = myResourceIndexedComboStringUniqueDao.findAll();
 				assertEquals(1, all.size());
 			}
 		});
 
-		pt = myPatientDao.read(id);
+		pt = myPatientDao.read(id, mySrd);
 		assertTrue(pt.getActive());
 
 	}
@@ -844,17 +945,17 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		Patient pt2 = new Patient();
 		pt2.setGender(Enumerations.AdministrativeGender.MALE);
 		pt2.setBirthDateElement(new DateType("2011-01-02"));
-		IIdType id2 = myPatientDao.create(pt2).getId().toUnqualifiedVersionless();
+		IIdType id2 = myPatientDao.create(pt2, mySrd).getId().toUnqualifiedVersionless();
 
 		Coverage cov = new Coverage();
 		cov.getBeneficiary().setReference(id2.getValue());
 		cov.addIdentifier().setSystem("urn:foo:bar").setValue("123");
-		IIdType id3 = myCoverageDao.create(cov).getId().toUnqualifiedVersionless();
+		IIdType id3 = myCoverageDao.create(cov, mySrd).getId().toUnqualifiedVersionless();
 
 		createUniqueIndexCoverageBeneficiary();
 
 		runInTransaction(() -> {
-			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
+			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedComboStringUniqueDao.findAll();
 			assertEquals(0, uniques.size(), uniques.toString());
 		});
 
@@ -873,7 +974,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		});
 
 		runInTransaction(() -> {
-			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
+			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedComboStringUniqueDao.findAll();
 			ourLog.info("** Uniques: {}", uniques);
 			assertEquals(1, uniques.size(), uniques.toString());
 			assertEquals("Coverage/" + id3.getIdPart(), uniques.get(0).getResource().getIdDt().toUnqualifiedVersionless().getValue());
@@ -901,102 +1002,103 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 	public void testIndexTransactionWithMatchUrl2() {
 		createUniqueIndexCoverageBeneficiary();
 
-		String input = "{\n" +
-			"  \"resourceType\": \"Bundle\",\n" +
-			"  \"type\": \"transaction\",\n" +
-			"  \"entry\": [\n" +
-			"    {\n" +
-			"      \"fullUrl\": \"urn:uuid:d2a46176-8e15-405d-bbda-baea1a9dc7f3\",\n" +
-			"      \"resource\": {\n" +
-			"        \"resourceType\": \"Patient\",\n" +
-			"        \"identifier\": [\n" +
-			"          {\n" +
-			"            \"use\": \"official\",\n" +
-			"            \"type\": {\n" +
-			"              \"coding\": [\n" +
-			"                {\n" +
-			"                  \"system\": \"http://hl7.org/fhir/v2/0203\",\n" +
-			"                  \"code\": \"MR\"\n" +
-			"                }\n" +
-			"              ]\n" +
-			"            },\n" +
-			"            \"system\": \"FOOORG:FOOSITE:patientid:MR:R\",\n" +
-			"            \"value\": \"007811959\"\n" +
-			"          }\n" +
-			"        ]\n" +
-			"      },\n" +
-			"      \"request\": {\n" +
-			"        \"method\": \"PUT\",\n" +
-			"        \"url\": \"/Patient?identifier=FOOORG%3AFOOSITE%3Apatientid%3AMR%3AR%7C007811959%2CFOOORG%3AFOOSITE%3Apatientid%3AMR%3AB%7C000929990%2CFOOORG%3AFOOSITE%3Apatientid%3API%3APH%7C00589363%2Chttp%3A%2F%2Fhl7.org%2Ffhir%2Fsid%2Fus-ssn%7C657-01-8133\"\n" +
-			"      }\n" +
-			"    },\n" +
-			"    {\n" +
-			"      \"fullUrl\": \"urn:uuid:b58ff639-11d1-4dac-942f-abf4f9a625d7\",\n" +
-			"      \"resource\": {\n" +
-			"        \"resourceType\": \"Coverage\",\n" +
-			"        \"identifier\": [\n" +
-			"          {\n" +
-			"            \"system\": \"FOOORG:FOOSITE:coverage:planId\",\n" +
-			"            \"value\": \"0403-010101\"\n" +
-			"          }\n" +
-			"        ],\n" +
-			"        \"beneficiary\": {\n" +
-			"          \"reference\": \"urn:uuid:d2a46176-8e15-405d-bbda-baea1a9dc7f3\"\n" +
-			"        }\n" +
-			"      },\n" +
-			"      \"request\": {\n" +
-			"        \"method\": \"PUT\",\n" +
-			"        \"url\": \"/Coverage?beneficiary=urn%3Auuid%3Ad2a46176-8e15-405d-bbda-baea1a9dc7f3&identifier=FOOORG%3AFOOSITE%3Acoverage%3AplanId%7C0403-010101\"\n" +
-			"      }\n" +
-			"    },\n" +
-			"    {\n" +
-			"      \"fullUrl\": \"urn:uuid:13f5da1a-6601-4c1a-82c9-41527be23fa0\",\n" +
-			"      \"resource\": {\n" +
-			"        \"resourceType\": \"Coverage\",\n" +
-			"        \"contained\": [\n" +
-			"          {\n" +
-			"            \"resourceType\": \"RelatedPerson\",\n" +
-			"            \"id\": \"1\",\n" +
-			"            \"name\": [\n" +
-			"              {\n" +
-			"                \"family\": \"SMITH\",\n" +
-			"                \"given\": [\n" +
-			"                  \"FAKER\"\n" +
-			"                ]\n" +
-			"              }\n" +
-			"            ]\n" +
-			"          },\n" +
-			"          {\n" +
-			"            \"resourceType\": \"Organization\",\n" +
-			"            \"id\": \"2\",\n" +
-			"            \"name\": \"MEDICAID\"\n" +
-			"          }\n" +
-			"        ],\n" +
-			"        \"identifier\": [\n" +
-			"          {\n" +
-			"            \"system\": \"FOOORG:FOOSITE:coverage:planId\",\n" +
-			"            \"value\": \"0404-010101\"\n" +
-			"          }\n" +
-			"        ],\n" +
-			"        \"policyHolder\": {\n" +
-			"          \"reference\": \"#1\"\n" +
-			"        },\n" +
-			"        \"beneficiary\": {\n" +
-			"          \"reference\": \"urn:uuid:d2a46176-8e15-405d-bbda-baea1a9dc7f3\"\n" +
-			"        },\n" +
-			"        \"payor\": [\n" +
-			"          {\n" +
-			"            \"reference\": \"#2\"\n" +
-			"          }\n" +
-			"        ]\n" +
-			"      },\n" +
-			"      \"request\": {\n" +
-			"        \"method\": \"PUT\",\n" +
-			"        \"url\": \"/Coverage?beneficiary=urn%3Auuid%3Ad2a46176-8e15-405d-bbda-baea1a9dc7f3&identifier=FOOORG%3AFOOSITE%3Acoverage%3AplanId%7C0404-010101\"\n" +
-			"      }\n" +
-			"    }\n" +
-			"  ]\n" +
-			"}";
+		String input = """
+			{
+			  "resourceType": "Bundle",
+			  "type": "transaction",
+			  "entry": [
+			    {
+			      "fullUrl": "urn:uuid:d2a46176-8e15-405d-bbda-baea1a9dc7f3",
+			      "resource": {
+			        "resourceType": "Patient",
+			        "identifier": [
+			          {
+			            "use": "official",
+			            "type": {
+			              "coding": [
+			                {
+			                  "system": "http://hl7.org/fhir/v2/0203",
+			                  "code": "MR"
+			                }
+			              ]
+			            },
+			            "system": "FOOORG:FOOSITE:patientid:MR:R",
+			            "value": "007811959"
+			          }
+			        ]
+			      },
+			      "request": {
+			        "method": "PUT",
+			        "url": "/Patient?identifier=FOOORG%3AFOOSITE%3Apatientid%3AMR%3AR%7C007811959%2CFOOORG%3AFOOSITE%3Apatientid%3AMR%3AB%7C000929990%2CFOOORG%3AFOOSITE%3Apatientid%3API%3APH%7C00589363%2Chttp%3A%2F%2Fhl7.org%2Ffhir%2Fsid%2Fus-ssn%7C657-01-8133"
+			      }
+			    },
+			    {
+			      "fullUrl": "urn:uuid:b58ff639-11d1-4dac-942f-abf4f9a625d7",
+			      "resource": {
+			        "resourceType": "Coverage",
+			        "identifier": [
+			          {
+			            "system": "FOOORG:FOOSITE:coverage:planId",
+			            "value": "0403-010101"
+			          }
+			        ],
+			        "beneficiary": {
+			          "reference": "urn:uuid:d2a46176-8e15-405d-bbda-baea1a9dc7f3"
+			        }
+			      },
+			      "request": {
+			        "method": "PUT",
+			        "url": "/Coverage?beneficiary=urn%3Auuid%3Ad2a46176-8e15-405d-bbda-baea1a9dc7f3&identifier=FOOORG%3AFOOSITE%3Acoverage%3AplanId%7C0403-010101"
+			      }
+			    },
+			    {
+			      "fullUrl": "urn:uuid:13f5da1a-6601-4c1a-82c9-41527be23fa0",
+			      "resource": {
+			        "resourceType": "Coverage",
+			        "contained": [
+			          {
+			            "resourceType": "RelatedPerson",
+			            "id": "1",
+			            "name": [
+			              {
+			                "family": "SMITH",
+			                "given": [
+			                  "FAKER"
+			                ]
+			              }
+			            ]
+			          },
+			          {
+			            "resourceType": "Organization",
+			            "id": "2",
+			            "name": "MEDICAID"
+			          }
+			        ],
+			        "identifier": [
+			          {
+			            "system": "FOOORG:FOOSITE:coverage:planId",
+			            "value": "0404-010101"
+			          }
+			        ],
+			        "policyHolder": {
+			          "reference": "#1"
+			        },
+			        "beneficiary": {
+			          "reference": "urn:uuid:d2a46176-8e15-405d-bbda-baea1a9dc7f3"
+			        },
+			        "payor": [
+			          {
+			            "reference": "#2"
+			          }
+			        ]
+			      },
+			      "request": {
+			        "method": "PUT",
+			        "url": "/Coverage?beneficiary=urn%3Auuid%3Ad2a46176-8e15-405d-bbda-baea1a9dc7f3&identifier=FOOORG%3AFOOSITE%3Acoverage%3AplanId%7C0404-010101"
+			      }
+			    }
+			  ]
+			}""";
 
 		Bundle inputBundle = myFhirContext.newJsonParser().parseResource(Bundle.class, input);
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(inputBundle));
@@ -1041,24 +1143,58 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		Patient pt = new Patient();
 		pt.addIdentifier().setSystem("urn").setValue("111");
 		pt.addIdentifier().setSystem("urn").setValue("222");
-		IIdType ptid = myPatientDao.create(pt).getId().toUnqualifiedVersionless();
+		IIdType ptid = myPatientDao.create(pt, mySrd).getId().toUnqualifiedVersionless();
 
 		Encounter enc = new Encounter();
 		enc.setSubject(new Reference(ptid));
-		IIdType encid = myEncounterDao.create(enc).getId().toUnqualifiedVersionless();
+		IIdType encid = myEncounterDao.create(enc, mySrd).getId().toUnqualifiedVersionless();
 
 		Observation obs = new Observation();
 		obs.setSubject(new Reference(ptid));
 		obs.setEncounter(new Reference(encid));
-		myObservationDao.create(obs);
+		myObservationDao.create(obs, mySrd);
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus status) {
-				List<ResourceIndexedComboStringUnique> all = myResourceIndexedCompositeStringUniqueDao.findAll();
+				List<ResourceIndexedComboStringUnique> all = myResourceIndexedComboStringUniqueDao.findAll();
 				assertEquals(1, all.size(), all.toString());
 			}
 		});
+
+	}
+
+	@Test
+	public void testOrQuery() {
+		myStorageSettings.setAdvancedHSearchIndexing(false);
+		createUniqueBirthdateAndGenderSps();
+
+		Patient pt1 = new Patient();
+		pt1.setGender(Enumerations.AdministrativeGender.MALE);
+		pt1.setBirthDateElement(new DateType("2011-01-01"));
+		IIdType id1 = myPatientDao.create(pt1, mySrd).getId().toUnqualifiedVersionless();
+
+		Patient pt2 = new Patient();
+		pt2.setGender(Enumerations.AdministrativeGender.MALE);
+		pt2.setBirthDateElement(new DateType("2011-01-02"));
+		IIdType id2 = myPatientDao.create(pt2, mySrd).getId().toUnqualifiedVersionless();
+
+		myCaptureQueriesListener.clear();
+		myMessages.clear();
+		SearchParameterMap params = new SearchParameterMap();
+		params.setLoadSynchronousUpTo(100);
+		params.add("gender", new TokenParam("http://hl7.org/fhir/administrative-gender", "male"));
+		params.add("birthdate", new DateOrListParam().addOr(new DateParam("2011-01-01")).addOr(new DateParam("2011-01-02")));
+		myCaptureQueriesListener.clear();
+		IBundleProvider results = myPatientDao.search(params, mySrd);
+		myCaptureQueriesListener.logFirstSelectQueryForCurrentThread();
+		assertThat(toUnqualifiedVersionlessIdValues(results)).containsExactlyInAnyOrder(id1.getValue(), id2.getValue());
+
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false))
+			.contains("SELECT t0.RES_ID FROM HFJ_IDX_CMP_STRING_UNIQ t0 WHERE (t0.IDX_STRING IN ('Patient?birthdate=2011-01-01&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale','Patient?birthdate=2011-01-02&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale') )");
+		logCapturedMessages();
+		assertThat(myMessages.toString()).contains("Using UNIQUE index(es) for query for search: [Patient?birthdate=2011-01-01&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale, Patient?birthdate=2011-01-02&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale]");
+		myMessages.clear();
 
 	}
 
@@ -1070,12 +1206,12 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		Patient pt1 = new Patient();
 		pt1.setGender(Enumerations.AdministrativeGender.MALE);
 		pt1.setBirthDateElement(new DateType("2011-01-01"));
-		IIdType id1 = myPatientDao.create(pt1).getId().toUnqualifiedVersionless();
+		IIdType id1 = myPatientDao.create(pt1, mySrd).getId().toUnqualifiedVersionless();
 
 		Patient pt2 = new Patient();
 		pt2.setGender(Enumerations.AdministrativeGender.MALE);
 		pt2.setBirthDateElement(new DateType("2011-01-02"));
-		myPatientDao.create(pt2).getId().toUnqualifiedVersionless();
+		myPatientDao.create(pt2, mySrd).getId().toUnqualifiedVersionless();
 
 		myCaptureQueriesListener.clear();
 		myMessages.clear();
@@ -1088,7 +1224,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		assertThat(toUnqualifiedVersionlessIdValues(results)).containsExactlyInAnyOrder(id1.getValue());
 
 		logCapturedMessages();
-		assertThat(myMessages.toString()).contains("Using UNIQUE index for query for search: Patient?birthdate=2011-01-01&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale");
+		assertThat(myMessages.toString()).contains("Using UNIQUE index(es) for query for search: Patient?birthdate=2011-01-01&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale");
 		myMessages.clear();
 
 	}
@@ -1101,12 +1237,12 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		Patient pt1 = new Patient();
 		pt1.setGender(Enumerations.AdministrativeGender.MALE);
 		pt1.setBirthDateElement(new DateType("2011-01-01"));
-		String id1 = myPatientDao.create(pt1).getId().toUnqualifiedVersionless().getValue();
+		String id1 = myPatientDao.create(pt1, mySrd).getId().toUnqualifiedVersionless().getValue();
 
 		Patient pt2 = new Patient();
 		pt2.setGender(Enumerations.AdministrativeGender.MALE);
 		pt2.setBirthDateElement(new DateType("2011-01-02"));
-		myPatientDao.create(pt2).getId().toUnqualifiedVersionless();
+		myPatientDao.create(pt2, mySrd).getId().toUnqualifiedVersionless();
 
 		myMessages.clear();
 		SearchParameterMap params = new SearchParameterMap();
@@ -1116,7 +1252,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		String searchId = results.getUuid();
 		assertThat(toUnqualifiedVersionlessIdValues(results)).containsExactlyInAnyOrder(id1);
 		logCapturedMessages();
-		assertThat(myMessages.toString()).contains("Using UNIQUE index for query for search: Patient?birthdate=2011-01-01&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale");
+		assertThat(myMessages.toString()).contains("Using UNIQUE index(es) for query for search: Patient?birthdate=2011-01-01&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale");
 		myMessages.clear();
 
 		// Other order
@@ -1140,7 +1276,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		results = myPatientDao.search(params, mySrd);
 		assertThat(toUnqualifiedVersionlessIdValues(results)).isEmpty();
 		logCapturedMessages();
-		assertThat(myMessages.toString()).contains("Using UNIQUE index for query for search: Patient?birthdate=2011-01-03&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale");
+		assertThat(myMessages.toString()).contains("Using UNIQUE index(es) for query for search: Patient?birthdate=2011-01-03&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale");
 		myMessages.clear();
 
 		myMessages.clear();
@@ -1163,9 +1299,9 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		Patient pt1 = new Patient();
 		pt1.setGender(Enumerations.AdministrativeGender.MALE);
 		pt1.setBirthDateElement(new DateType("2011-01-01"));
-		IIdType id1 = myPatientDao.create(pt1).getId().toUnqualifiedVersionless();
+		IIdType id1 = myPatientDao.create(pt1, mySrd).getId().toUnqualifiedVersionless();
 
-		List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
+		List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedComboStringUniqueDao.findAll();
 		assertThat(uniques.size()).as(uniques.toString()).isEqualTo(1);
 		assertEquals("Patient/" + id1.getIdPart(), uniques.get(0).getResource().getIdDt().toUnqualifiedVersionless().getValue());
 		assertEquals("Patient?birthdate=2011-01-01&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale", uniques.get(0).getIndexString());
@@ -1177,28 +1313,28 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 
 		runInTransaction(() -> {
 			List<ResourceIndexedComboStringUnique> uniques;
-			uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
+			uniques = myResourceIndexedComboStringUniqueDao.findAll();
 			assertEquals(0, uniques.size(), uniques.toString());
 		});
 
 		Patient pt1 = new Patient();
 		pt1.setActive(true);
-		IIdType id1 = myPatientDao.create(pt1).getId().toUnqualifiedVersionless();
+		IIdType id1 = myPatientDao.create(pt1, mySrd).getId().toUnqualifiedVersionless();
 
 		Observation obs = new Observation();
 		obs.getCode().addCoding().setSystem("foo").setCode("bar");
 		obs.setSubject(new Reference(pt1.getIdElement().toUnqualifiedVersionless().getValue()));
 		obs.setEffective(new DateTimeType("2011-01-01"));
-		IIdType id2 = myObservationDao.create(obs).getId().toUnqualifiedVersionless();
+		IIdType id2 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
 		Patient pt2 = new Patient();
 		pt2.setActive(false);
-		IIdType id3 = myPatientDao.create(pt1).getId().toUnqualifiedVersionless();
+		IIdType id3 = myPatientDao.create(pt1, mySrd).getId().toUnqualifiedVersionless();
 
 		ourLog.info("ID1: {}  -  ID2: {}   - ID3:  {}", id1, id2, id3);
 
 		runInTransaction(() -> {
-			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
+			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedComboStringUniqueDao.findAll();
 			assertEquals(1, uniques.size(), uniques.toString());
 			assertEquals("Observation/" + id2.getIdPart(), uniques.get(0).getResource().getIdDt().toUnqualifiedVersionless().getValue());
 			assertEquals("Observation?code=foo%7Cbar&date=2011-01-01&subject=Patient%2F" + id1.getIdPart(), uniques.get(0).getIndexString());
@@ -1213,7 +1349,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		Organization org = new Organization();
 		org.setId("Organization/ORG");
 		org.setName("ORG");
-		myOrganizationDao.update(org);
+		myOrganizationDao.update(org, mySrd);
 
 		Patient pt1 = new Patient();
 		pt1.addName().setFamily("FAMILY1");
@@ -1222,11 +1358,11 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		IIdType id1 = myPatientDao.update(pt1, "Patient?name=FAMILY1&organization:Organization=ORG", mySrd).getId().toUnqualifiedVersionless();
 
 		logCapturedMessages();
-		assertThat(myMessages.toString()).contains("Using UNIQUE index for query for search: Patient?name=FAMILY1&organization=Organization%2FORG");
+		assertThat(myMessages.toString()).contains("Using UNIQUE index(es) for query for search: Patient?name=FAMILY1&organization=Organization%2FORG");
 		myMessages.clear();
 
 		runInTransaction(() -> {
-			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
+			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedComboStringUniqueDao.findAll();
 			assertEquals(1, uniques.size());
 			assertEquals("Patient/" + id1.getIdPart(), uniques.get(0).getResource().getIdDt().toUnqualifiedVersionless().getValue());
 			assertEquals("Patient?name=FAMILY1&organization=Organization%2FORG", uniques.get(0).getIndexString());
@@ -1241,10 +1377,10 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		IIdType id2 = myPatientDao.update(pt1, "Patient?name=FAMILY1&organization:Organization=ORG", mySrd).getId().toUnqualifiedVersionless();
 
 		logCapturedMessages();
-		assertThat(myMessages.toString()).contains("Using UNIQUE index for query for search: Patient?name=FAMILY1&organization=Organization%2FORG");
+		assertThat(myMessages.toString()).contains("Using UNIQUE index(es) for query for search: Patient?name=FAMILY1&organization=Organization%2FORG");
 		myMessages.clear();
 		runInTransaction(() -> {
-			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
+			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedComboStringUniqueDao.findAll();
 			assertEquals(1, uniques.size());
 			assertEquals("Patient/" + id2.getIdPart(), uniques.get(0).getResource().getIdDt().toUnqualifiedVersionless().getValue());
 			assertEquals("Patient?name=FAMILY1&organization=Organization%2FORG", uniques.get(0).getIndexString());
@@ -1259,7 +1395,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		Organization org = new Organization();
 		org.setId("Organization/ORG");
 		org.setName("ORG");
-		myOrganizationDao.update(org);
+		myOrganizationDao.update(org, mySrd);
 
 		Patient pt1 = new Patient();
 		pt1.addName()
@@ -1268,9 +1404,9 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 			.addGiven("GIVEN2")
 			.addGiven("GIVEN2"); // GIVEN2 happens twice
 		pt1.setManagingOrganization(new Reference("Organization/ORG"));
-		IIdType id1 = myPatientDao.create(pt1).getId().toUnqualifiedVersionless();
+		IIdType id1 = myPatientDao.create(pt1, mySrd).getId().toUnqualifiedVersionless();
 
-		List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
+		List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedComboStringUniqueDao.findAll();
 		Collections.sort(uniques);
 
 		assertThat(uniques).hasSize(3);
@@ -1291,15 +1427,15 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		Organization org = new Organization();
 		org.setId("Organization/ORG");
 		org.setName("ORG");
-		myOrganizationDao.update(org);
+		myOrganizationDao.update(org, mySrd);
 
 		Patient pt1 = new Patient();
 		pt1.addName().setFamily("FAMILY1");
 		pt1.setManagingOrganization(new Reference("Organization/ORG"));
-		IIdType id1 = myPatientDao.update(pt1, "Patient?name=FAMILY1&organization.name=ORG").getId().toUnqualifiedVersionless();
+		IIdType id1 = myPatientDao.update(pt1, "Patient?name=FAMILY1&organization.name=ORG", mySrd).getId().toUnqualifiedVersionless();
 
 		runInTransaction(() -> {
-			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
+			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedComboStringUniqueDao.findAll();
 			assertEquals(1, uniques.size());
 			assertEquals("Patient/" + id1.getIdPart(), uniques.get(0).getResource().getIdDt().toUnqualifiedVersionless().getValue());
 			assertEquals("Patient?name=FAMILY1&organization=Organization%2FORG", uniques.get(0).getIndexString());
@@ -1310,10 +1446,10 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		pt1 = new Patient();
 		pt1.addName().setFamily("FAMILY1");
 		pt1.setManagingOrganization(new Reference("Organization/ORG"));
-		myPatientDao.update(pt1, "Patient?name=FAMILY1&organization.name=ORG").getId().toUnqualifiedVersionless();
+		myPatientDao.update(pt1, "Patient?name=FAMILY1&organization.name=ORG", mySrd).getId().toUnqualifiedVersionless();
 
 		runInTransaction(() -> {
-			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
+			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedComboStringUniqueDao.findAll();
 			assertEquals(1, uniques.size());
 			assertEquals("Patient/" + id1.getIdPart(), uniques.get(0).getResource().getIdDt().toUnqualifiedVersionless().getValue());
 			assertEquals("Patient?name=FAMILY1&organization=Organization%2FORG", uniques.get(0).getIndexString());
@@ -1327,7 +1463,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		Organization org = new Organization();
 		org.setId("Organization/ORG");
 		org.setName("ORG");
-		myOrganizationDao.update(org);
+		myOrganizationDao.update(org, mySrd);
 
 		Bundle bundle = new Bundle();
 		bundle.setType(Bundle.BundleType.TRANSACTION);
@@ -1358,7 +1494,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		IIdType id1 = new IdType(resp.getEntry().get(1).getResponse().getLocation());
 
 		runInTransaction(() -> {
-			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
+			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedComboStringUniqueDao.findAll();
 			assertEquals(1, uniques.size());
 			assertEquals("Patient/" + id1.getIdPart(), uniques.get(0).getResource().getIdDt().toUnqualifiedVersionless().getValue());
 			assertEquals("Patient?name=FAMILY1&organization=Organization%2FORG", uniques.get(0).getIndexString());
@@ -1395,7 +1531,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		IdType id2 = new IdType(resp.getEntry().get(1).getResponse().getLocation());
 
 		runInTransaction(() -> {
-			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
+			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedComboStringUniqueDao.findAll();
 			assertEquals(1, uniques.size());
 			assertEquals("Patient/" + id2.getIdPart(), uniques.get(0).getResource().getIdDt().toUnqualifiedVersionless().getValue());
 			assertEquals("Patient?name=FAMILY1&organization=Organization%2FORG", uniques.get(0).getIndexString());
@@ -1410,26 +1546,26 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 
 		pt = new Patient();
 		pt.setGender(Enumerations.AdministrativeGender.MALE);
-		myPatientDao.create(pt).getId().toUnqualifiedVersionless();
+		myPatientDao.create(pt, mySrd).getId().toUnqualifiedVersionless();
 		runInTransaction(() -> {
-			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
+			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedComboStringUniqueDao.findAll();
 			assertEquals(0, uniques.size(), uniques.toString());
 		});
 
 		pt = new Patient();
-		myPatientDao.create(pt).getId().toUnqualifiedVersionless();
+		myPatientDao.create(pt, mySrd).getId().toUnqualifiedVersionless();
 		runInTransaction(() -> {
-			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
+			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedComboStringUniqueDao.findAll();
 			assertEquals(0, uniques.size(), uniques.toString());
 		});
 
 		pt = new Patient();
 		pt.setBirthDateElement(new DateType());
 		pt.setGender(Enumerations.AdministrativeGender.MALE);
-		myPatientDao.create(pt).getId().toUnqualifiedVersionless();
+		myPatientDao.create(pt, mySrd).getId().toUnqualifiedVersionless();
 
 		runInTransaction(() -> {
-			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
+			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedComboStringUniqueDao.findAll();
 			assertEquals(0, uniques.size(), uniques.toString());
 		});
 	}
@@ -1441,15 +1577,15 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		Organization org = new Organization();
 		org.setId("Organization/ORG");
 		org.setName("ORG");
-		myOrganizationDao.update(org);
+		myOrganizationDao.update(org, mySrd);
 
 		Patient pt;
 
 		pt = new Patient();
 		pt.setManagingOrganization(new Reference("Organization/ORG"));
-		myPatientDao.create(pt).getId().toUnqualifiedVersionless();
+		myPatientDao.create(pt, mySrd).getId().toUnqualifiedVersionless();
 		runInTransaction(() -> {
-			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
+			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedComboStringUniqueDao.findAll();
 			assertEquals(0, uniques.size(), uniques.toString());
 		});
 
@@ -1459,17 +1595,17 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 			.addGiven("GIVEN1")
 			.addGiven("GIVEN2")
 			.addGiven("GIVEN2"); // GIVEN2 happens twice
-		myPatientDao.create(pt).getId().toUnqualifiedVersionless();
+		myPatientDao.create(pt, mySrd).getId().toUnqualifiedVersionless();
 		runInTransaction(() -> {
-			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
+			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedComboStringUniqueDao.findAll();
 			assertEquals(0, uniques.size(), uniques.toString());
 		});
 		pt = new Patient();
 		pt.setActive(true);
-		myPatientDao.create(pt).getId().toUnqualifiedVersionless();
+		myPatientDao.create(pt, mySrd).getId().toUnqualifiedVersionless();
 
 		runInTransaction(() -> {
-			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
+			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedComboStringUniqueDao.findAll();
 			assertEquals(0, uniques.size(), uniques.toString());
 		});
 	}
@@ -1480,35 +1616,33 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 
 		Patient pt1 = new Patient();
 		pt1.setActive(true);
-		IIdType id1 = myPatientDao.create(pt1).getId().toUnqualifiedVersionless();
+		IIdType id1 = myPatientDao.create(pt1, mySrd).getId().toUnqualifiedVersionless();
 
 		Observation obs = new Observation();
 		obs.getCode().addCoding().setSystem("foo").setCode("bar");
 		obs.setSubject(new Reference(pt1.getIdElement().toUnqualifiedVersionless().getValue()));
 		obs.setEffective(new DateTimeType("2011-01-01"));
-		IIdType id2 = myObservationDao.create(obs).getId().toUnqualifiedVersionless();
+		IIdType id2 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
 		Patient pt2 = new Patient();
 		pt2.setActive(false);
-		myPatientDao.create(pt1).getId().toUnqualifiedVersionless();
+		myPatientDao.create(pt1, mySrd).getId().toUnqualifiedVersionless();
 
 		executeReindex();
 
 		runInTransaction(() -> {
-			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
+			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedComboStringUniqueDao.findAll();
 			assertEquals(1, uniques.size(), uniques.toString());
 			assertEquals("Observation/" + id2.getIdPart(), uniques.get(0).getResource().getIdDt().toUnqualifiedVersionless().getValue());
 			assertEquals("Observation?code=foo%7Cbar&date=2011-01-01&subject=Patient%2F" + id1.getIdPart(), uniques.get(0).getIndexString());
 		});
 
-		runInTransaction(() -> {
-			myResourceIndexedCompositeStringUniqueDao.deleteAll();
-		});
+		runInTransaction(() -> myResourceIndexedComboStringUniqueDao.deleteAll());
 
 		executeReindex();
 
 		runInTransaction(() -> {
-			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
+			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedComboStringUniqueDao.findAll();
 			assertEquals(1, uniques.size(), uniques.toString());
 			assertEquals("Observation/" + id2.getIdPart(), uniques.get(0).getResource().getIdDt().toUnqualifiedVersionless().getValue());
 			assertEquals("Observation?code=foo%7Cbar&date=2011-01-01&subject=Patient%2F" + id1.getIdPart(), uniques.get(0).getIndexString());
@@ -1538,10 +1672,10 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		Patient pt1 = new Patient();
 		pt1.setGender(Enumerations.AdministrativeGender.MALE);
 		pt1.setBirthDateElement(new DateType("2011-01-01"));
-		IIdType id1 = myPatientDao.create(pt1).getId().toUnqualifiedVersionless();
+		myPatientDao.create(pt1, mySrd);
 
 		try {
-			myPatientDao.create(pt1).getId().toUnqualifiedVersionless();
+			myPatientDao.create(pt1, mySrd).getId().toUnqualifiedVersionless();
 			fail();
 		} catch (ResourceVersionConflictException e) {
 			assertThat(e.getMessage()).contains("new unique index created by SearchParameter/patient-gender-birthdate");
@@ -1549,14 +1683,14 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 
 		Patient pt2 = new Patient();
 		pt2.setGender(Enumerations.AdministrativeGender.MALE);
-		IIdType id2 = myPatientDao.create(pt2).getId().toUnqualifiedVersionless();
+		IIdType id2 = myPatientDao.create(pt2, mySrd).getId().toUnqualifiedVersionless();
 
 		pt2 = new Patient();
 		pt2.setId(id2);
 		pt2.setGender(Enumerations.AdministrativeGender.MALE);
 		pt2.setBirthDateElement(new DateType("2011-01-01"));
 		try {
-			myPatientDao.update(pt2);
+			myPatientDao.update(pt2, mySrd);
 			fail();
 		} catch (ResourceVersionConflictException e) {
 			assertThat(e.getMessage()).contains("new unique index created by SearchParameter/patient-gender-birthdate");
@@ -1572,7 +1706,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		Patient pt1 = new Patient();
 		pt1.setGender(Enumerations.AdministrativeGender.MALE);
 		pt1.setBirthDateElement(new DateType("2011-01-01"));
-		IIdType id1 = myPatientDao.create(pt1).getId().toUnqualified();
+		IIdType id1 = myPatientDao.create(pt1, mySrd).getId().toUnqualified();
 		assertNotNull(id1);
 
 		ourLog.info("** Replacing");
@@ -1581,14 +1715,14 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		pt1.setId(id1);
 		pt1.setGender(Enumerations.AdministrativeGender.FEMALE);
 		pt1.setBirthDateElement(new DateType("2011-01-01"));
-		id1 = myPatientDao.update(pt1).getId().toUnqualified();
+		id1 = myPatientDao.update(pt1, mySrd).getId().toUnqualified();
 		assertNotNull(id1);
 		assertEquals("2", id1.getVersionIdPart());
 
 		Patient pt2 = new Patient();
 		pt2.setGender(Enumerations.AdministrativeGender.MALE);
 		pt2.setBirthDateElement(new DateType("2011-01-01"));
-		IIdType id2 = myPatientDao.create(pt2).getId().toUnqualifiedVersionless();
+		IIdType id2 = myPatientDao.create(pt2, mySrd).getId().toUnqualifiedVersionless();
 
 		myMessages.clear();
 		SearchParameterMap params = new SearchParameterMap();
@@ -1596,10 +1730,11 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		params.add("birthdate", new DateParam("2011-01-01"));
 		IBundleProvider results = myPatientDao.search(params, mySrd);
 		String searchId = results.getUuid();
+		assertThat(searchId).isNotBlank();
 		assertThat(toUnqualifiedVersionlessIdValues(results)).containsExactlyInAnyOrder(id2.getValue());
 
 		logCapturedMessages();
-		assertThat(myMessages.toString()).contains("Using UNIQUE index for query for search: Patient?birthdate=2011-01-01&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale");
+		assertThat(myMessages.toString()).contains("Using UNIQUE index(es) for query for search: Patient?birthdate=2011-01-01&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale");
 		myMessages.clear();
 
 	}

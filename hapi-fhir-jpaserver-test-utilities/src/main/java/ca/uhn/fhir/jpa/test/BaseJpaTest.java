@@ -37,6 +37,7 @@ import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.JpaPersistedResourceValidationSupport;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceIndexedComboStringUniqueDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedComboTokensNonUniqueDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamCoordsDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamDateDao;
@@ -61,6 +62,7 @@ import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSetConceptDesignation;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboTokenNonUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamCoords;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
@@ -232,6 +234,8 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected IResourceIndexedSearchParamCoordsDao myResourceIndexedSearchParamCoordsDao;
 	@Autowired
 	protected IResourceIndexedComboTokensNonUniqueDao myResourceIndexedComboTokensNonUniqueDao;
+	@Autowired
+	protected IResourceIndexedComboStringUniqueDao myResourceIndexedComboStringUniqueDao;
 	@Autowired(required = false)
 	protected IFulltextSearchSvc myFulltestSearchSvc;
 	@Autowired(required = false)
@@ -532,6 +536,12 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected void logAllNonUniqueIndexes() {
 		runInTransaction(() -> {
 			ourLog.info("Non unique indexes:\n * {}", myResourceIndexedComboTokensNonUniqueDao.findAll().stream().map(ResourceIndexedComboTokenNonUnique::toString).collect(Collectors.joining("\n * ")));
+		});
+	}
+
+	protected void logAllUniqueIndexes() {
+		runInTransaction(() -> {
+			ourLog.info("Unique indexes:\n * {}", myResourceIndexedComboStringUniqueDao.findAll().stream().map(ResourceIndexedComboStringUnique::toString).collect(Collectors.joining("\n * ")));
 		});
 	}
 

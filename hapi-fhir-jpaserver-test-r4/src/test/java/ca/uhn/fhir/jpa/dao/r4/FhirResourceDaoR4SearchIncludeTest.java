@@ -48,6 +48,7 @@ import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -121,7 +122,6 @@ public class FhirResourceDaoR4SearchIncludeTest extends BaseJpaR4Test {
 		qrIrrelevant.setQuestionnaire("http://fooIrrelevant");
 		myQuestionnaireResponseDao.update(qrIrrelevant, mySrd);
 
-
 		IBundleProvider outcome;
 		IFhirResourceDao<?> dao;
 		SearchParameterMap map;
@@ -182,7 +182,11 @@ public class FhirResourceDaoR4SearchIncludeTest extends BaseJpaR4Test {
 			// (or somehow made things worse) and the search for the canonical target is no longer the 4th
 			// SQL query
 			assertThat(searchForCanonicalReferencesQuery.getSql(true, false)).contains("rispu1_0.HASH_IDENTITY in ('-600769180185160063')");
-			assertThat(searchForCanonicalReferencesQuery.getSql(true, false)).contains("rispu1_0.SP_URI in ('http://foo')");
+			assertTrue(
+				searchForCanonicalReferencesQuery.getSql(true, false).contains("rispu1_0.SP_URI in ('http://foo')")
+				|| searchForCanonicalReferencesQuery.getSql(true, false).contains("rispu1_0.SP_URI in ('http://foo','http://foo|1.0')"),
+				searchForCanonicalReferencesQuery.getSql(true, false)
+			);
 		}
 
 	}

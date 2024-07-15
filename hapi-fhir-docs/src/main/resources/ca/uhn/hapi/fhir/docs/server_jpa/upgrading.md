@@ -21,6 +21,7 @@ You may use the following command to get detailed help on the options:
 Note the arguments:
 
 * `-d [dialect]` &ndash; This indicates the database dialect to use. See the detailed help for a list of options
+* `--enable-heavyweight-migrations` &ndash; If this flag is set, additional migration tasks will be executed that are considered unnecessary to execute on a database with a significant amount of data loaded. This option is not generally necessary.
 
 # Oracle Support
 

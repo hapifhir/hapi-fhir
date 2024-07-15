@@ -1,3 +1,14 @@
+## Derby JARs removed from HAPI-FHIR 
+As of Derby 17, in order to support JDK17, the jars must be built from source, as the default package supports JDK21. Due to a [high severity vulnerability](https://github.com/hapifhir/hapi-fhir/issues/5471) in older versions, and a lack of appetite to host 
+a forked packaged version of Derby, the Derby JARs have been removed from the HAPI-FHIR distribution. For those who wish to continue to use Derby, you may still do so, but the following jars must be manually added
+to your classpath: 
+
+- [derby](https://mvnrepository.com/artifact/org.apache.derby/derby)
+- [derbyclient](https://mvnrepository.com/artifact/org.apache.derby/derbyclient)
+- [derbyshared](https://mvnrepository.com/artifact/org.apache.derby/derbyshared) 
+- [derbynet](https://mvnrepository.com/artifact/org.apache.derby/derbynet)
+- [derbytools](https://mvnrepository.com/artifact/org.apache.derby/derbytools)
+
 ## Possible migration errors on SQL Server (MSSQL)
 
 * This affects only clients running SQL Server (MSSQL) who have custom indexes on `HFJ_SPIDX` tables, which

@@ -41,12 +41,13 @@ import java.util.stream.Collectors;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class FhirResourceDaoR4ConcurrentCreateTest extends BaseJpaR4Test {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoR4ConcurrentCreateTest.class);
+
+	private static final boolean IS_SEARCH_URL_DUPLICATE_ACROSS_PARTITIONS_ENABLED_FALSE = false;
 
 	ThreadGaterPointcutLatch myThreadGaterPointcutLatchInterceptor;
 	UserRequestRetryVersionConflictsInterceptor myUserRequestRetryVersionConflictsInterceptor;
@@ -132,12 +133,12 @@ public class FhirResourceDaoR4ConcurrentCreateTest extends BaseJpaR4Test {
 		final ResourceTable resTable4 = myResourceTableDao.save(createResTable());
 
 		Date tooOldBy10Minutes = cutOffTimeMinus(tenMinutes);
-		ResourceSearchUrlEntity tooOld1 = ResourceSearchUrlEntity.from("Observation?identifier=20210427133226.444", resTable1).setCreatedTime(tooOldBy10Minutes);
-		ResourceSearchUrlEntity tooOld2 = ResourceSearchUrlEntity.from("Observation?identifier=20210427133226.445", resTable2).setCreatedTime(tooOldBy10Minutes);
+		ResourceSearchUrlEntity tooOld1 = ResourceSearchUrlEntity.from("Observation?identifier=20210427133226.444", resTable1, IS_SEARCH_URL_DUPLICATE_ACROSS_PARTITIONS_ENABLED_FALSE).setCreatedTime(tooOldBy10Minutes);
+		ResourceSearchUrlEntity tooOld2 = ResourceSearchUrlEntity.from("Observation?identifier=20210427133226.445", resTable2, IS_SEARCH_URL_DUPLICATE_ACROSS_PARTITIONS_ENABLED_FALSE).setCreatedTime(tooOldBy10Minutes);
 
 		Date tooNewBy10Minutes = cutOffTimePlus(tenMinutes);
-		ResourceSearchUrlEntity tooNew1 = ResourceSearchUrlEntity.from("Observation?identifier=20210427133226.446", resTable3).setCreatedTime(tooNewBy10Minutes);
-		ResourceSearchUrlEntity tooNew2 =ResourceSearchUrlEntity.from("Observation?identifier=20210427133226.447", resTable4).setCreatedTime(tooNewBy10Minutes);
+		ResourceSearchUrlEntity tooNew1 = ResourceSearchUrlEntity.from("Observation?identifier=20210427133226.446", resTable3, IS_SEARCH_URL_DUPLICATE_ACROSS_PARTITIONS_ENABLED_FALSE).setCreatedTime(tooNewBy10Minutes);
+		ResourceSearchUrlEntity tooNew2 =ResourceSearchUrlEntity.from("Observation?identifier=20210427133226.447", resTable4, IS_SEARCH_URL_DUPLICATE_ACROSS_PARTITIONS_ENABLED_FALSE).setCreatedTime(tooNewBy10Minutes);
 
 		myResourceSearchUrlDao.saveAll(asList(tooOld1, tooOld2, tooNew1, tooNew2));
 
@@ -165,8 +166,8 @@ public class FhirResourceDaoR4ConcurrentCreateTest extends BaseJpaR4Test {
 		final ResourceTable resTable1 = myResourceTableDao.save(createResTable());
 		final ResourceTable resTable2 = myResourceTableDao.save(createResTable());
 
-		ResourceSearchUrlEntity entry1 = ResourceSearchUrlEntity.from("Observation?identifier=20210427133226.444", resTable1);
-		ResourceSearchUrlEntity entry2 = ResourceSearchUrlEntity.from("Observation?identifier=20210427133226.445", resTable2);
+		ResourceSearchUrlEntity entry1 = ResourceSearchUrlEntity.from("Observation?identifier=20210427133226.444", resTable1, IS_SEARCH_URL_DUPLICATE_ACROSS_PARTITIONS_ENABLED_FALSE);
+		ResourceSearchUrlEntity entry2 = ResourceSearchUrlEntity.from("Observation?identifier=20210427133226.445", resTable2, IS_SEARCH_URL_DUPLICATE_ACROSS_PARTITIONS_ENABLED_FALSE);
 		myResourceSearchUrlDao.saveAll(asList(entry1, entry2));
 
 		// when

@@ -20,13 +20,12 @@
 package ca.uhn.fhir.batch2.jobs.reindex;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.api.IJobPartitionProvider;
 import ca.uhn.fhir.batch2.jobs.parameters.UrlPartitioner;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.ReindexParameters;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
-import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -50,7 +49,7 @@ public class ReindexProvider {
 
 	private final FhirContext myFhirContext;
 	private final IJobCoordinator myJobCoordinator;
-	private final IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
+	private final IJobPartitionProvider myJobPartitionProvider;
 	private final UrlPartitioner myUrlPartitioner;
 
 	/**
@@ -59,11 +58,11 @@ public class ReindexProvider {
 	public ReindexProvider(
 			FhirContext theFhirContext,
 			IJobCoordinator theJobCoordinator,
-			IRequestPartitionHelperSvc theRequestPartitionHelperSvc,
+			IJobPartitionProvider theJobPartitionProvider,
 			UrlPartitioner theUrlPartitioner) {
 		myFhirContext = theFhirContext;
 		myJobCoordinator = theJobCoordinator;
-		myRequestPartitionHelperSvc = theRequestPartitionHelperSvc;
+		myJobPartitionProvider = theJobPartitionProvider;
 		myUrlPartitioner = theUrlPartitioner;
 	}
 
@@ -128,10 +127,9 @@ public class ReindexProvider {
 					.forEach(params::addPartitionedUrl);
 		}
 
-		RequestPartitionId requestPartition =
-				myRequestPartitionHelperSvc.determineReadPartitionForRequestForServerOperation(
-						theRequestDetails, ProviderConstants.OPERATION_REINDEX);
-		params.setRequestPartitionId(requestPartition);
+		myJobPartitionProvider
+				.getPartitions(theRequestDetails, ProviderConstants.OPERATION_REINDEX)
+				.forEach(params::addRequestPartitionId);
 
 		JobInstanceStartRequest request = new JobInstanceStartRequest();
 		request.setJobDefinitionId(ReindexAppCtx.JOB_REINDEX);

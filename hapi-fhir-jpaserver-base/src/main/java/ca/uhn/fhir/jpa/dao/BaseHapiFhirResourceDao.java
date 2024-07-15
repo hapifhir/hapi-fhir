@@ -1027,19 +1027,19 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		List<TagDefinition> tags = toTagList(theMetaAdd);
 		for (TagDefinition nextDef : tags) {
 
-			boolean hasTag = false;
+			boolean entityHasTag = false;
 			for (BaseTag next : new ArrayList<>(theEntity.getTags())) {
 				if (Objects.equals(next.getTag().getTagType(), nextDef.getTagType())
 						&& Objects.equals(next.getTag().getSystem(), nextDef.getSystem())
 						&& Objects.equals(next.getTag().getCode(), nextDef.getCode())
 						&& Objects.equals(next.getTag().getVersion(), nextDef.getVersion())
 						&& Objects.equals(next.getTag().getUserSelected(), nextDef.getUserSelected())) {
-					hasTag = true;
+					entityHasTag = true;
 					break;
 				}
 			}
 
-			if (!hasTag) {
+			if (!entityHasTag) {
 				theEntity.setHasTags(true);
 
 				TagDefinition def = getTagOrNull(
@@ -1351,15 +1351,33 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	@Transactional
 	public <MT extends IBaseMetaType> MT metaAddOperation(
 			IIdType theResourceId, MT theMetaAdd, RequestDetails theRequest) {
+
+		RequestPartitionId requestPartitionId =
+				myRequestPartitionHelperService.determineReadPartitionForRequestForServerOperation(
+						theRequest, JpaConstants.OPERATION_META_ADD);
+
+		myTransactionService
+				.withRequest(theRequest)
+				.withRequestPartitionId(requestPartitionId)
+				.execute(() -> doMetaAddOperation(theResourceId, theMetaAdd, theRequest, requestPartitionId));
+
+		@SuppressWarnings("unchecked")
+		MT retVal = (MT) metaGetOperation(theMetaAdd.getClass(), theResourceId, theRequest);
+		return retVal;
+	}
+
+	protected <MT extends IBaseMetaType> void doMetaAddOperation(
+			IIdType theResourceId, MT theMetaAdd, RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
 		TransactionDetails transactionDetails = new TransactionDetails();
 
 		StopWatch w = new StopWatch();
-		BaseHasResource entity = readEntity(theResourceId, theRequest);
-		if (entity == null) {
+		BaseHasResource entity = readEntity(theResourceId, true, theRequest, theRequestPartitionId);
+
+		if (isNull(entity)) {
 			throw new ResourceNotFoundException(Msg.code(1993) + theResourceId);
 		}
 
-		ResourceTable latestVersion = readEntityLatestVersion(theResourceId, theRequest, transactionDetails);
+		ResourceTable latestVersion = readEntityLatestVersion(theResourceId, theRequestPartitionId, transactionDetails);
 		if (latestVersion.getVersion() != entity.getVersion()) {
 			doMetaAdd(theMetaAdd, entity, theRequest, transactionDetails);
 		} else {
@@ -1372,27 +1390,43 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 
 		ourLog.debug("Processed metaAddOperation on {} in {}ms", theResourceId, w.getMillisAndRestart());
-
-		@SuppressWarnings("unchecked")
-		MT retVal = (MT) metaGetOperation(theMetaAdd.getClass(), theResourceId, theRequest);
-		return retVal;
 	}
 
 	@Override
 	@Transactional
 	public <MT extends IBaseMetaType> MT metaDeleteOperation(
 			IIdType theResourceId, MT theMetaDel, RequestDetails theRequest) {
-		TransactionDetails transactionDetails = new TransactionDetails();
 
+		RequestPartitionId requestPartitionId =
+				myRequestPartitionHelperService.determineReadPartitionForRequestForServerOperation(
+						theRequest, JpaConstants.OPERATION_META_DELETE);
+
+		myTransactionService
+				.withRequest(theRequest)
+				.withRequestPartitionId(requestPartitionId)
+				.execute(() -> doMetaDeleteOperation(theResourceId, theMetaDel, theRequest, requestPartitionId));
+
+		@SuppressWarnings("unchecked")
+		MT retVal = (MT) metaGetOperation(theMetaDel.getClass(), theResourceId, theRequest);
+		return retVal;
+	}
+
+	@Transactional
+	public <MT extends IBaseMetaType> void doMetaDeleteOperation(
+			IIdType theResourceId, MT theMetaDel, RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
+		TransactionDetails transactionDetails = new TransactionDetails();
 		StopWatch w = new StopWatch();
-		BaseHasResource entity = readEntity(theResourceId, theRequest);
-		if (entity == null) {
+
+		BaseHasResource entity = readEntity(theResourceId, true, theRequest, theRequestPartitionId);
+
+		if (isNull(entity)) {
 			throw new ResourceNotFoundException(Msg.code(1994) + theResourceId);
 		}
 
-		ResourceTable latestVersion = readEntityLatestVersion(theResourceId, theRequest, transactionDetails);
+		ResourceTable latestVersion = readEntityLatestVersion(theResourceId, theRequestPartitionId, transactionDetails);
 		boolean nonVersionedTags =
 				myStorageSettings.getTagStorageMode() != JpaStorageSettings.TagStorageModeEnum.VERSIONED;
+
 		if (latestVersion.getVersion() != entity.getVersion() || nonVersionedTags) {
 			doMetaDelete(theMetaDel, entity, theRequest, transactionDetails);
 		} else {
@@ -1404,10 +1438,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 
 		ourLog.debug("Processed metaDeleteOperation on {} in {}ms", theResourceId.getValue(), w.getMillisAndRestart());
-
-		@SuppressWarnings("unchecked")
-		MT retVal = (MT) metaGetOperation(theMetaDel.getClass(), theResourceId, theRequest);
-		return retVal;
 	}
 
 	@Override
@@ -1628,6 +1658,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			T resource = (T) myJpaStorageResourceParser.toResource(entity, false);
 			reindexSearchParameters(resource, entity, theTransactionDetails);
 		} catch (Exception e) {
+			ourLog.warn("Failure during reindex: {}", e.toString());
 			theReindexOutcome.addWarning("Failed to reindex resource " + entity.getIdDt() + ": " + e);
 			myResourceTableDao.updateIndexStatus(entity.getId(), INDEX_STATUS_INDEXING_FAILED);
 		}
@@ -1824,7 +1855,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			IIdType theId, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails) {
 		RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequestForRead(
 				theRequestDetails, getResourceName(), theId);
-		return readEntityLatestVersion(theId, requestPartitionId, theTransactionDetails);
+
+		return myTransactionService
+				.withRequest(theRequestDetails)
+				.withRequestPartitionId(requestPartitionId)
+				.execute(() -> readEntityLatestVersion(theId, requestPartitionId, theTransactionDetails));
 	}
 
 	@Nonnull

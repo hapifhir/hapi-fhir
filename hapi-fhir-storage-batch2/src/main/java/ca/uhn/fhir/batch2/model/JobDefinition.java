@@ -256,7 +256,7 @@ public class JobDefinition<PT extends IModelJson> {
 		 * Adds a processing step for this job.
 		 *
 		 * @param theStepId          A unique identifier for this step. This only needs to be unique within the scope
-		 *                           of the individual job definition (i.e. diuplicates are fine for different jobs, or
+		 *                           of the individual job definition (i.e. duplicates are fine for different jobs, or
 		 *                           even different versions of the same job)
 		 * @param theStepDescription A description of this step
 		 * @param theStepWorker      The worker that will actually perform this step

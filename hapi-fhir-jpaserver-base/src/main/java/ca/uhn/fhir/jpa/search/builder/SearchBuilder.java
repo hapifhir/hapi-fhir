@@ -68,12 +68,14 @@ import ca.uhn.fhir.jpa.searchparam.util.Dstu3DistanceHelper;
 import ca.uhn.fhir.jpa.searchparam.util.JpaParamUtil;
 import ca.uhn.fhir.jpa.searchparam.util.LastNParameterHelper;
 import ca.uhn.fhir.jpa.util.BaseIterator;
+import ca.uhn.fhir.jpa.util.CartesianProductUtil;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.QueryChunker;
 import ca.uhn.fhir.jpa.util.SqlQueryList;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
@@ -82,6 +84,8 @@ import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.param.BaseParamWithPrefix;
+import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -96,6 +100,7 @@ import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.StringUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Streams;
 import com.healthmarketscience.sqlbuilder.Condition;
 import jakarta.annotation.Nonnull;
@@ -123,6 +128,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -135,6 +141,7 @@ import java.util.stream.Collectors;
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.UNDESIRED_RESOURCE_LINKAGES_FOR_EVERYTHING_ON_PATIENT_INSTANCE;
 import static ca.uhn.fhir.jpa.search.builder.QueryStack.LOCATION_POSITION;
 import static ca.uhn.fhir.jpa.search.builder.QueryStack.SearchForIdsParams.with;
+import static java.util.Objects.requireNonNull;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -308,9 +315,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	 * parameters all have no modifiers.
 	 */
 	private boolean isCompositeUniqueSpCandidate() {
-		return myStorageSettings.isUniqueIndexesEnabled()
-				&& myParams.getEverythingMode() == null
-				&& myParams.isAllParametersHaveNoModifier();
+		return myStorageSettings.isUniqueIndexesEnabled() && myParams.getEverythingMode() == null;
 	}
 
 	@SuppressWarnings("ConstantConditions")
@@ -566,8 +571,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	 *
 	 * @param theTargetPids
 	 */
-	private void extractTargetPidsFromIdParams(
-			HashSet<Long> theTargetPids, List<ISearchQueryExecutor> theSearchQueryExecutors) {
+	private void extractTargetPidsFromIdParams(Set<Long> theTargetPids) {
 		// get all the IQueryParameterType objects
 		// for _id -> these should all be StringParam values
 		HashSet<String> ids = new HashSet<>();
@@ -596,10 +600,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		for (JpaPid pid : idToPid.values()) {
 			theTargetPids.add(pid.getId());
 		}
-
-		// add the target pids to our executors as the first
-		// results iterator to go through
-		theSearchQueryExecutors.add(new ResolvedSearchQueryExecutor(new ArrayList<>(theTargetPids)));
 	}
 
 	private void createChunkedQuery(
@@ -611,13 +611,29 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			RequestDetails theRequest,
 			List<Long> thePidList,
 			List<ISearchQueryExecutor> theSearchQueryExecutors) {
-		String sqlBuilderResourceName = myParams.getEverythingMode() == null ? myResourceName : null;
+		if (myParams.getEverythingMode() != null) {
+			createChunkedQueryForEverythingSearch(
+					theParams, theOffset, theMaximumResults, theCountOnlyFlag, thePidList, theSearchQueryExecutors);
+		} else {
+			createChunkedQueryNormalSearch(
+					theParams, sort, theOffset, theCountOnlyFlag, theRequest, thePidList, theSearchQueryExecutors);
+		}
+	}
+
+	private void createChunkedQueryNormalSearch(
+			SearchParameterMap theParams,
+			SortSpec sort,
+			Integer theOffset,
+			boolean theCountOnlyFlag,
+			RequestDetails theRequest,
+			List<Long> thePidList,
+			List<ISearchQueryExecutor> theSearchQueryExecutors) {
 		SearchQueryBuilder sqlBuilder = new SearchQueryBuilder(
 				myContext,
 				myStorageSettings,
 				myPartitionSettings,
 				myRequestPartitionId,
-				sqlBuilderResourceName,
+				myResourceName,
 				mySqlBuilderFactory,
 				myDialectProvider,
 				theCountOnlyFlag);
@@ -635,67 +651,22 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			}
 		}
 
-		JdbcTemplate jdbcTemplate = new JdbcTemplate(myEntityManagerFactory.getDataSource());
-		jdbcTemplate.setFetchSize(myFetchSize);
-		if (theMaximumResults != null) {
-			jdbcTemplate.setMaxRows(theMaximumResults);
+		/*
+		 * If we're doing a filter, always use the resource table as the root - This avoids the possibility of
+		 * specific filters with ORs as their root from working around the natural resource type / deletion
+		 * status / partition IDs built into queries.
+		 */
+		if (theParams.containsKey(Constants.PARAM_FILTER)) {
+			Condition partitionIdPredicate = sqlBuilder
+					.getOrCreateResourceTablePredicateBuilder()
+					.createPartitionIdPredicate(myRequestPartitionId);
+			if (partitionIdPredicate != null) {
+				sqlBuilder.addPredicate(partitionIdPredicate);
+			}
 		}
 
-		if (myParams.getEverythingMode() != null) {
-			HashSet<Long> targetPids = new HashSet<>();
-			if (myParams.get(IAnyResource.SP_RES_ID) != null) {
-				// will add an initial search executor for
-				// _id params
-				extractTargetPidsFromIdParams(targetPids, theSearchQueryExecutors);
-			} else {
-				// For Everything queries, we make the query root by the ResourceLink table, since this query
-				// is basically a reverse-include search. For type/Everything (as opposed to instance/Everything)
-				// the one problem with this approach is that it doesn't catch Patients that have absolutely
-				// nothing linked to them. So we do one additional query to make sure we catch those too.
-				SearchQueryBuilder fetchPidsSqlBuilder = new SearchQueryBuilder(
-						myContext,
-						myStorageSettings,
-						myPartitionSettings,
-						myRequestPartitionId,
-						myResourceName,
-						mySqlBuilderFactory,
-						myDialectProvider,
-						theCountOnlyFlag);
-				GeneratedSql allTargetsSql = fetchPidsSqlBuilder.generate(theOffset, myMaxResultsToFetch);
-				String sql = allTargetsSql.getSql();
-				Object[] args = allTargetsSql.getBindVariables().toArray(new Object[0]);
-
-				List<Long> output = jdbcTemplate.query(sql, args, new SingleColumnRowMapper<>(Long.class));
-
-				// we add a search executor to fetch unlinked patients first
-				theSearchQueryExecutors.add(new ResolvedSearchQueryExecutor(output));
-			}
-
-			List<String> typeSourceResources = new ArrayList<>();
-			if (myParams.get(Constants.PARAM_TYPE) != null) {
-				typeSourceResources.addAll(extractTypeSourceResourcesFromParams());
-			}
-
-			queryStack3.addPredicateEverythingOperation(
-					myResourceName, typeSourceResources, targetPids.toArray(new Long[0]));
-		} else {
-			/*
-			 * If we're doing a filter, always use the resource table as the root - This avoids the possibility of
-			 * specific filters with ORs as their root from working around the natural resource type / deletion
-			 * status / partition IDs built into queries.
-			 */
-			if (theParams.containsKey(Constants.PARAM_FILTER)) {
-				Condition partitionIdPredicate = sqlBuilder
-						.getOrCreateResourceTablePredicateBuilder()
-						.createPartitionIdPredicate(myRequestPartitionId);
-				if (partitionIdPredicate != null) {
-					sqlBuilder.addPredicate(partitionIdPredicate);
-				}
-			}
-
-			// Normal search
-			searchForIdsWithAndOr(sqlBuilder, queryStack3, myParams, theRequest);
-		}
+		// Normal search
+		searchForIdsWithAndOr(sqlBuilder, queryStack3, myParams, theRequest);
 
 		// If we haven't added any predicates yet, we're doing a search for all resources. Make sure we add the
 		// partition ID predicate in that case.
@@ -709,16 +680,10 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		}
 
 		// Add PID list predicate for full text search and/or lastn operation
-		if (thePidList != null && thePidList.size() > 0) {
-			sqlBuilder.addResourceIdsPredicate(thePidList);
-		}
+		addPidListPredicate(thePidList, sqlBuilder);
 
 		// Last updated
-		DateRangeParam lu = myParams.getLastUpdated();
-		if (lu != null && !lu.isEmpty()) {
-			Condition lastUpdatedPredicates = sqlBuilder.addPredicateLastUpdated(lu);
-			sqlBuilder.addPredicate(lastUpdatedPredicates);
-		}
+		addLastUpdatePredicate(sqlBuilder);
 
 		/*
 		 * Exclude the pids already in the previous iterator. This is an optimization, as opposed
@@ -765,12 +730,122 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		/*
 		 * Now perform the search
 		 */
+		executeSearch(theOffset, theSearchQueryExecutors, sqlBuilder);
+	}
+
+	private void executeSearch(
+			Integer theOffset, List<ISearchQueryExecutor> theSearchQueryExecutors, SearchQueryBuilder sqlBuilder) {
 		GeneratedSql generatedSql = sqlBuilder.generate(theOffset, myMaxResultsToFetch);
 		if (!generatedSql.isMatchNothing()) {
 			SearchQueryExecutor executor =
 					mySqlBuilderFactory.newSearchQueryExecutor(generatedSql, myMaxResultsToFetch);
 			theSearchQueryExecutors.add(executor);
 		}
+	}
+
+	private void createChunkedQueryForEverythingSearch(
+			SearchParameterMap theParams,
+			Integer theOffset,
+			Integer theMaximumResults,
+			boolean theCountOnlyFlag,
+			List<Long> thePidList,
+			List<ISearchQueryExecutor> theSearchQueryExecutors) {
+
+		SearchQueryBuilder sqlBuilder = new SearchQueryBuilder(
+				myContext,
+				myStorageSettings,
+				myPartitionSettings,
+				myRequestPartitionId,
+				null,
+				mySqlBuilderFactory,
+				myDialectProvider,
+				theCountOnlyFlag);
+
+		QueryStack queryStack3 = new QueryStack(
+				theParams, myStorageSettings, myContext, sqlBuilder, mySearchParamRegistry, myPartitionSettings);
+
+		JdbcTemplate jdbcTemplate = initializeJdbcTemplate(theMaximumResults);
+
+		Set<Long> targetPids = new HashSet<>();
+		if (myParams.get(IAnyResource.SP_RES_ID) != null) {
+
+			extractTargetPidsFromIdParams(targetPids);
+
+			// add the target pids to our executors as the first
+			// results iterator to go through
+			theSearchQueryExecutors.add(new ResolvedSearchQueryExecutor(new ArrayList<>(targetPids)));
+		} else {
+			// For Everything queries, we make the query root by the ResourceLink table, since this query
+			// is basically a reverse-include search. For type/Everything (as opposed to instance/Everything)
+			// the one problem with this approach is that it doesn't catch Patients that have absolutely
+			// nothing linked to them. So we do one additional query to make sure we catch those too.
+			SearchQueryBuilder fetchPidsSqlBuilder = new SearchQueryBuilder(
+					myContext,
+					myStorageSettings,
+					myPartitionSettings,
+					myRequestPartitionId,
+					myResourceName,
+					mySqlBuilderFactory,
+					myDialectProvider,
+					theCountOnlyFlag);
+			GeneratedSql allTargetsSql = fetchPidsSqlBuilder.generate(theOffset, myMaxResultsToFetch);
+			String sql = allTargetsSql.getSql();
+			Object[] args = allTargetsSql.getBindVariables().toArray(new Object[0]);
+
+			List<Long> output = jdbcTemplate.query(sql, args, new SingleColumnRowMapper<>(Long.class));
+
+			// we add a search executor to fetch unlinked patients first
+			theSearchQueryExecutors.add(new ResolvedSearchQueryExecutor(output));
+		}
+
+		List<String> typeSourceResources = new ArrayList<>();
+		if (myParams.get(Constants.PARAM_TYPE) != null) {
+			typeSourceResources.addAll(extractTypeSourceResourcesFromParams());
+		}
+
+		queryStack3.addPredicateEverythingOperation(
+				myResourceName, typeSourceResources, targetPids.toArray(new Long[0]));
+
+		// Add PID list predicate for full text search and/or lastn operation
+		addPidListPredicate(thePidList, sqlBuilder);
+
+		/*
+		 * If offset is present, we want deduplicate the results by using GROUP BY
+		 * ORDER BY is required to make sure we return unique results for each page
+		 */
+		if (theOffset != null) {
+			queryStack3.addGrouping();
+			queryStack3.addOrdering();
+			queryStack3.setUseAggregate(true);
+		}
+
+		/*
+		 * Now perform the search
+		 */
+		executeSearch(theOffset, theSearchQueryExecutors, sqlBuilder);
+	}
+
+	private void addPidListPredicate(List<Long> thePidList, SearchQueryBuilder theSqlBuilder) {
+		if (thePidList != null && !thePidList.isEmpty()) {
+			theSqlBuilder.addResourceIdsPredicate(thePidList);
+		}
+	}
+
+	private void addLastUpdatePredicate(SearchQueryBuilder theSqlBuilder) {
+		DateRangeParam lu = myParams.getLastUpdated();
+		if (lu != null && !lu.isEmpty()) {
+			Condition lastUpdatedPredicates = theSqlBuilder.addPredicateLastUpdated(lu);
+			theSqlBuilder.addPredicate(lastUpdatedPredicates);
+		}
+	}
+
+	private JdbcTemplate initializeJdbcTemplate(Integer theMaximumResults) {
+		JdbcTemplate jdbcTemplate = new JdbcTemplate(myEntityManagerFactory.getDataSource());
+		jdbcTemplate.setFetchSize(myFetchSize);
+		if (theMaximumResults != null) {
+			jdbcTemplate.setMaxRows(theMaximumResults);
+		}
+		return jdbcTemplate;
 	}
 
 	private Collection<String> extractTypeSourceResourcesFromParams() {
@@ -1879,12 +1954,12 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	}
 
 	private void attemptComboUniqueSpProcessing(
-			QueryStack theQueryStack3, @Nonnull SearchParameterMap theParams, RequestDetails theRequest) {
+			QueryStack theQueryStack, @Nonnull SearchParameterMap theParams, RequestDetails theRequest) {
 		RuntimeSearchParam comboParam = null;
 		List<String> comboParamNames = null;
 		List<RuntimeSearchParam> exactMatchParams =
 				mySearchParamRegistry.getActiveComboSearchParams(myResourceName, theParams.keySet());
-		if (exactMatchParams.size() > 0) {
+		if (!exactMatchParams.isEmpty()) {
 			comboParam = exactMatchParams.get(0);
 			comboParamNames = new ArrayList<>(theParams.keySet());
 		}
@@ -1906,52 +1981,63 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		}
 
 		if (comboParam != null) {
+			Collections.sort(comboParamNames);
+
 			// Since we're going to remove elements below
 			theParams.values().forEach(this::ensureSubListsAreWritable);
 
-			StringBuilder sb = new StringBuilder();
-			sb.append(myResourceName);
-			sb.append("?");
+			/*
+			 * Apply search against the combo param index in a loop:
+			 *
+			 * 1. First we check whether the actual parameter values in the
+			 * parameter map are actually usable for searching against the combo
+			 * param index. E.g. no search modifiers, date comparators, etc.,
+			 * since these mean you can't use the combo index.
+			 *
+			 * 2. Apply and create the join SQl. We remove parameter values from
+			 * the map as we apply them, so any parameter values remaining in the
+			 * map after each loop haven't yet been factored into the SQL.
+			 *
+			 * The loop allows us to create multiple combo index joins if there
+			 * are multiple AND expressions for the related parameters.
+			 */
+			while (validateParamValuesAreValidForComboParam(theRequest, theParams, comboParamNames)) {
+				applyComboSearchParam(theQueryStack, theParams, theRequest, comboParamNames, comboParam);
+			}
+		}
+	}
+
+	private void applyComboSearchParam(
+			QueryStack theQueryStack,
+			@Nonnull SearchParameterMap theParams,
+			RequestDetails theRequest,
+			List<String> theComboParamNames,
+			RuntimeSearchParam theComboParam) {
+
+		List<List<IQueryParameterType>> inputs = new ArrayList<>();
+		for (String nextParamName : theComboParamNames) {
+			List<IQueryParameterType> nextValues = theParams.get(nextParamName).remove(0);
+			inputs.add(nextValues);
+		}
+
+		List<List<IQueryParameterType>> inputPermutations = Lists.cartesianProduct(inputs);
+		List<String> indexStrings = new ArrayList<>(CartesianProductUtil.calculateCartesianProductSize(inputs));
+		for (List<IQueryParameterType> nextPermutation : inputPermutations) {
+
+			StringBuilder searchStringBuilder = new StringBuilder();
+			searchStringBuilder.append(myResourceName);
+			searchStringBuilder.append("?");
 
 			boolean first = true;
+			for (int paramIndex = 0; paramIndex < theComboParamNames.size(); paramIndex++) {
 
-			Collections.sort(comboParamNames);
-			for (String nextParamName : comboParamNames) {
-				List<List<IQueryParameterType>> nextValues = theParams.get(nextParamName);
-
-				// TODO Hack to fix weird IOOB on the next stanza until James comes back and makes sense of this.
-				if (nextValues.isEmpty()) {
-					ourLog.error(
-							"query parameter {} is unexpectedly empty. Encountered while considering {} index for {}",
-							nextParamName,
-							comboParam.getName(),
-							theRequest.getCompleteUrl());
-					sb = null;
-					break;
-				}
-
-				if (nextValues.get(0).size() != 1) {
-					sb = null;
-					break;
-				}
-
-				// Reference params are only eligible for using a composite index if they
-				// are qualified
-				RuntimeSearchParam nextParamDef =
-						mySearchParamRegistry.getActiveSearchParam(myResourceName, nextParamName);
-				if (nextParamDef.getParamType() == RestSearchParameterTypeEnum.REFERENCE) {
-					ReferenceParam param = (ReferenceParam) nextValues.get(0).get(0);
-					if (isBlank(param.getResourceType())) {
-						sb = null;
-						break;
-					}
-				}
-
-				List<? extends IQueryParameterType> nextAnd = nextValues.remove(0);
-				IQueryParameterType nextOr = nextAnd.remove(0);
+				String nextParamName = theComboParamNames.get(paramIndex);
+				IQueryParameterType nextOr = nextPermutation.get(paramIndex);
 				String nextOrValue = nextOr.getValueAsQueryToken(myContext);
 
-				if (comboParam.getComboSearchParamType() == ComboSearchParamType.NON_UNIQUE) {
+				RuntimeSearchParam nextParamDef =
+						mySearchParamRegistry.getActiveSearchParam(myResourceName, nextParamName);
+				if (theComboParam.getComboSearchParamType() == ComboSearchParamType.NON_UNIQUE) {
 					if (nextParamDef.getParamType() == RestSearchParameterTypeEnum.STRING) {
 						nextOrValue = StringUtil.normalizeStringForSearchIndexing(nextOrValue);
 					}
@@ -1960,44 +2046,127 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				if (first) {
 					first = false;
 				} else {
-					sb.append('&');
+					searchStringBuilder.append('&');
 				}
 
 				nextParamName = UrlUtil.escapeUrlParam(nextParamName);
 				nextOrValue = UrlUtil.escapeUrlParam(nextOrValue);
 
-				sb.append(nextParamName).append('=').append(nextOrValue);
+				searchStringBuilder.append(nextParamName).append('=').append(nextOrValue);
 			}
 
-			if (sb != null) {
-				String indexString = sb.toString();
-				ourLog.debug(
-						"Checking for {} combo index for query: {}", comboParam.getComboSearchParamType(), indexString);
+			String indexString = searchStringBuilder.toString();
+			ourLog.debug(
+					"Checking for {} combo index for query: {}", theComboParam.getComboSearchParamType(), indexString);
 
-				// Interceptor broadcast: JPA_PERFTRACE_INFO
-				StorageProcessingMessage msg = new StorageProcessingMessage()
-						.setMessage("Using " + comboParam.getComboSearchParamType() + " index for query for search: "
-								+ indexString);
-				HookParams params = new HookParams()
-						.add(RequestDetails.class, theRequest)
-						.addIfMatchesType(ServletRequestDetails.class, theRequest)
-						.add(StorageProcessingMessage.class, msg);
-				CompositeInterceptorBroadcaster.doCallHooks(
-						myInterceptorBroadcaster, theRequest, Pointcut.JPA_PERFTRACE_INFO, params);
+			indexStrings.add(indexString);
+		}
 
-				switch (comboParam.getComboSearchParamType()) {
-					case UNIQUE:
-						theQueryStack3.addPredicateCompositeUnique(indexString, myRequestPartitionId);
+		// Just to make sure we're stable for tests
+		indexStrings.sort(Comparator.naturalOrder());
+
+		// Interceptor broadcast: JPA_PERFTRACE_INFO
+		String indexStringForLog = indexStrings.size() > 1 ? indexStrings.toString() : indexStrings.get(0);
+		StorageProcessingMessage msg = new StorageProcessingMessage()
+				.setMessage("Using " + theComboParam.getComboSearchParamType() + " index(es) for query for search: "
+						+ indexStringForLog);
+		HookParams params = new HookParams()
+				.add(RequestDetails.class, theRequest)
+				.addIfMatchesType(ServletRequestDetails.class, theRequest)
+				.add(StorageProcessingMessage.class, msg);
+		CompositeInterceptorBroadcaster.doCallHooks(
+				myInterceptorBroadcaster, theRequest, Pointcut.JPA_PERFTRACE_INFO, params);
+
+		switch (requireNonNull(theComboParam.getComboSearchParamType())) {
+			case UNIQUE:
+				theQueryStack.addPredicateCompositeUnique(indexStrings, myRequestPartitionId);
+				break;
+			case NON_UNIQUE:
+				theQueryStack.addPredicateCompositeNonUnique(indexStrings, myRequestPartitionId);
+				break;
+		}
+
+		// Remove any empty parameters remaining after this
+		theParams.clean();
+	}
+
+	/**
+	 * Returns {@literal true} if the actual parameter instances in a given query are actually usable for
+	 * searching against a combo param with the given parameter names. This might be {@literal false} if
+	 * parameters have modifiers (e.g. <code>?name:exact=SIMPSON</code>), prefixes
+	 * (e.g. <code>?date=gt2024-02-01</code>), etc.
+	 */
+	private boolean validateParamValuesAreValidForComboParam(
+			RequestDetails theRequest, @Nonnull SearchParameterMap theParams, List<String> theComboParamNames) {
+		boolean paramValuesAreValidForCombo = true;
+		List<List<IQueryParameterType>> paramOrValues = new ArrayList<>(theComboParamNames.size());
+
+		for (String nextParamName : theComboParamNames) {
+			List<List<IQueryParameterType>> nextValues = theParams.get(nextParamName);
+
+			if (nextValues == null || nextValues.isEmpty()) {
+				paramValuesAreValidForCombo = false;
+				break;
+			}
+
+			List<IQueryParameterType> nextAndValue = nextValues.get(0);
+			paramOrValues.add(nextAndValue);
+
+			for (IQueryParameterType nextOrValue : nextAndValue) {
+				if (nextOrValue instanceof DateParam) {
+					DateParam dateParam = (DateParam) nextOrValue;
+					if (dateParam.getPrecision() != TemporalPrecisionEnum.DAY) {
+						String message = "Search with params " + theComboParamNames
+								+ " is not a candidate for combo searching - Date search with non-DAY precision for parameter '"
+								+ nextParamName + "'";
+						firePerformanceInfo(theRequest, message);
+						paramValuesAreValidForCombo = false;
 						break;
-					case NON_UNIQUE:
-						theQueryStack3.addPredicateCompositeNonUnique(indexString, myRequestPartitionId);
-						break;
+					}
 				}
+				if (nextOrValue instanceof BaseParamWithPrefix) {
+					BaseParamWithPrefix<?> paramWithPrefix = (BaseParamWithPrefix<?>) nextOrValue;
+					if (paramWithPrefix.getPrefix() != null) {
+						String message = "Search with params " + theComboParamNames
+								+ " is not a candidate for combo searching - Parameter '" + nextParamName
+								+ "' has prefix: '"
+								+ paramWithPrefix.getPrefix().getValue() + "'";
+						firePerformanceInfo(theRequest, message);
+						paramValuesAreValidForCombo = false;
+						break;
+					}
+				}
+				if (isNotBlank(nextOrValue.getQueryParameterQualifier())) {
+					String message = "Search with params " + theComboParamNames
+							+ " is not a candidate for combo searching - Parameter '" + nextParamName
+							+ "' has modifier: '" + nextOrValue.getQueryParameterQualifier() + "'";
+					firePerformanceInfo(theRequest, message);
+					paramValuesAreValidForCombo = false;
+					break;
+				}
+			}
 
-				// Remove any empty parameters remaining after this
-				theParams.clean();
+			// Reference params are only eligible for using a composite index if they
+			// are qualified
+			RuntimeSearchParam nextParamDef = mySearchParamRegistry.getActiveSearchParam(myResourceName, nextParamName);
+			if (nextParamDef.getParamType() == RestSearchParameterTypeEnum.REFERENCE) {
+				ReferenceParam param = (ReferenceParam) nextValues.get(0).get(0);
+				if (isBlank(param.getResourceType())) {
+					ourLog.debug(
+							"Search is not a candidate for unique combo searching - Reference with no type specified");
+					paramValuesAreValidForCombo = false;
+					break;
+				}
 			}
 		}
+
+		if (CartesianProductUtil.calculateCartesianProductSize(paramOrValues) > 500) {
+			ourLog.debug(
+					"Search is not a candidate for unique combo searching - Too many OR values would result in too many permutations");
+			paramValuesAreValidForCombo = false;
+		}
+
+		return paramValuesAreValidForCombo;
 	}
 
 	private <T> void ensureSubListsAreWritable(List<List<T>> theListOfLists) {
@@ -2174,13 +2343,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				// If we don't have a query yet, create one
 				if (myResultsIterator == null) {
 					if (myMaxResultsToFetch == null) {
-						if (myParams.getLoadSynchronousUpTo() != null) {
-							myMaxResultsToFetch = myParams.getLoadSynchronousUpTo();
-						} else if (myParams.getOffset() != null && myParams.getCount() != null) {
-							myMaxResultsToFetch = myParams.getCount();
-						} else {
-							myMaxResultsToFetch = myStorageSettings.getFetchSizeDefaultMaximum();
-						}
+						myMaxResultsToFetch = calculateMaxResultsToFetch();
 					}
 
 					/*
@@ -2206,19 +2369,12 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 						Long nextLong = myResultsIterator.next();
 						if (myHavePerfTraceFoundIdHook) {
-							HookParams params = new HookParams()
-									.add(Integer.class, System.identityHashCode(this))
-									.add(Object.class, nextLong);
-							CompositeInterceptorBroadcaster.doCallHooks(
-									myInterceptorBroadcaster,
-									myRequest,
-									Pointcut.JPA_PERFTRACE_SEARCH_FOUND_ID,
-									params);
+							callPerformanceTracingHook(nextLong);
 						}
 
 						if (nextLong != null) {
 							JpaPid next = JpaPid.fromId(nextLong);
-							if (myPidSet.add(next)) {
+							if (myPidSet.add(next) && doNotSkipNextPidForEverything()) {
 								myNext = next;
 								myNonSkipCount++;
 								break;
@@ -2251,11 +2407,10 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					if (myIncludesIterator != null) {
 						while (myIncludesIterator.hasNext()) {
 							JpaPid next = myIncludesIterator.next();
-							if (next != null)
-								if (myPidSet.add(next)) {
-									myNext = next;
-									break;
-								}
+							if (next != null && myPidSet.add(next) && doNotSkipNextPidForEverything()) {
+								myNext = next;
+								break;
+							}
 						}
 						if (myNext == null) {
 							myNext = NO_MORE;
@@ -2294,6 +2449,30 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			}
 		}
 
+		private Integer calculateMaxResultsToFetch() {
+			if (myParams.getLoadSynchronousUpTo() != null) {
+				return myParams.getLoadSynchronousUpTo();
+			} else if (myParams.getOffset() != null && myParams.getCount() != null) {
+				return myParams.getEverythingMode() != null
+						? myParams.getOffset() + myParams.getCount()
+						: myParams.getCount();
+			} else {
+				return myStorageSettings.getFetchSizeDefaultMaximum();
+			}
+		}
+
+		private boolean doNotSkipNextPidForEverything() {
+			return !(myParams.getEverythingMode() != null && (myOffset != null && myOffset >= myPidSet.size()));
+		}
+
+		private void callPerformanceTracingHook(Long theNextLong) {
+			HookParams params = new HookParams()
+					.add(Integer.class, System.identityHashCode(this))
+					.add(Object.class, theNextLong);
+			CompositeInterceptorBroadcaster.doCallHooks(
+					myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_SEARCH_FOUND_ID, params);
+		}
+
 		private void sendProcessingMsgAndFirePerformanceHook() {
 			String msg = "Pass completed with no matching results seeking rows "
 					+ myPidSet.size() + "-" + mySkipCount
@@ -2303,11 +2482,18 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		}
 
 		private void initializeIteratorQuery(Integer theOffset, Integer theMaxResultsToFetch) {
+			Integer offset = theOffset;
 			if (myQueryList.isEmpty()) {
 				// Capture times for Lucene/Elasticsearch queries as well
 				mySearchRuntimeDetails.setQueryStopwatch(new StopWatch());
+
+				// setting offset to 0 to fetch all resource ids to guarantee
+				// correct output result for everything operation during paging
+				if (myParams.getEverythingMode() != null) {
+					offset = 0;
+				}
 				myQueryList = createQuery(
-						myParams, mySort, theOffset, theMaxResultsToFetch, false, myRequest, mySearchRuntimeDetails);
+						myParams, mySort, offset, theMaxResultsToFetch, false, myRequest, mySearchRuntimeDetails);
 			}
 
 			mySearchRuntimeDetails.setQueryStopwatch(new StopWatch());
@@ -2374,16 +2560,27 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		}
 	}
 
+	private void firePerformanceInfo(RequestDetails theRequest, String theMessage) {
+		// Only log at debug level since these messages aren't considered important enough
+		// that we should be cluttering the system log, but they are important to the
+		// specific query being executed to we'll INFO level them there
+		ourLog.debug(theMessage);
+		firePerformanceMessage(theRequest, theMessage, Pointcut.JPA_PERFTRACE_INFO);
+	}
+
 	private void firePerformanceWarning(RequestDetails theRequest, String theMessage) {
 		ourLog.warn(theMessage);
+		firePerformanceMessage(theRequest, theMessage, Pointcut.JPA_PERFTRACE_WARNING);
+	}
+
+	private void firePerformanceMessage(RequestDetails theRequest, String theMessage, Pointcut pointcut) {
 		StorageProcessingMessage message = new StorageProcessingMessage();
 		message.setMessage(theMessage);
 		HookParams params = new HookParams()
 				.add(RequestDetails.class, theRequest)
 				.addIfMatchesType(ServletRequestDetails.class, theRequest)
 				.add(StorageProcessingMessage.class, message);
-		CompositeInterceptorBroadcaster.doCallHooks(
-				myInterceptorBroadcaster, theRequest, Pointcut.JPA_PERFTRACE_WARNING, params);
+		CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, pointcut, params);
 	}
 
 	public static int getMaximumPageSize() {
