@@ -32,8 +32,8 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.validation.IValidatorModule;
+import ca.uhn.test.util.LogbackTestExtensionAssert;
 import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.spi.ILoggingEvent;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.UnknownCodeSystemWarningValidationSupport;
@@ -103,6 +103,7 @@ import static org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTermi
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_LOW;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -1514,7 +1515,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 		// validator
 		assertNotNull(outcome);
-		assertTrue(outcome.getOperationOutcome() instanceof OperationOutcome);
+		assertInstanceOf(OperationOutcome.class, outcome.getOperationOutcome());
 		List<OperationOutcome.OperationOutcomeIssueComponent> issues = ((OperationOutcome) outcome.getOperationOutcome()).getIssue();
 		assertFalse(issues.isEmpty());
 		List<OperationOutcome.OperationOutcomeIssueComponent> errors = issues.stream()
@@ -1523,12 +1524,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		// we have errors
 		assertFalse(errors.isEmpty());
 
-		List<ILoggingEvent> events = myLogbackTestExtension.filterLoggingEventsWithPredicate(e -> {
-			return e.getLevel() == Level.WARN;
-		});
-		// and we have warning logs
-		assertFalse(events.isEmpty());
-		assertTrue(events.stream().anyMatch(e -> e.getFormattedMessage().contains("Unrecognized profile uri")));
+		LogbackTestExtensionAssert.assertThat(myLogbackTestExtension).hasWarnMessage("Unrecognized profile uri");
 	}
 
 	@Test
@@ -1654,7 +1650,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 		// verify
 		assertNotNull(outcome);
-		assertTrue(outcome.getOperationOutcome() instanceof OperationOutcome);
+		assertInstanceOf(OperationOutcome.class, outcome.getOperationOutcome());
 		List<OperationOutcome.OperationOutcomeIssueComponent> issues = ((OperationOutcome) outcome.getOperationOutcome()).getIssue();
 		assertFalse(issues.isEmpty());
 		List<OperationOutcome.OperationOutcomeIssueComponent> errors = issues.stream()

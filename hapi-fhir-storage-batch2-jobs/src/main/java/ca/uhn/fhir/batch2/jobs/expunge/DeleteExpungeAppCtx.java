@@ -65,7 +65,7 @@ public class DeleteExpungeAppCtx {
 						"load-ids",
 						"Load IDs of resources to expunge",
 						ResourceIdListWorkChunkJson.class,
-						loadIdsStep(theBatch2DaoSvc))
+						expungeLoadIdsStep(theBatch2DaoSvc))
 				.addLastStep(
 						"expunge",
 						"Perform the resource expunge",
@@ -85,7 +85,7 @@ public class DeleteExpungeAppCtx {
 	}
 
 	@Bean
-	public LoadIdsStep<DeleteExpungeJobParameters> loadIdsStep(IBatch2DaoSvc theBatch2DaoSvc) {
+	public LoadIdsStep<DeleteExpungeJobParameters> expungeLoadIdsStep(IBatch2DaoSvc theBatch2DaoSvc) {
 		return new LoadIdsStep<>(theBatch2DaoSvc);
 	}
 

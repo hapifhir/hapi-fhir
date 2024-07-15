@@ -27,9 +27,7 @@ import ca.uhn.fhir.jpa.search.BaseSourceSearchParameterTestCases;
 import ca.uhn.fhir.jpa.search.CompositeSearchParameterTestCases;
 import ca.uhn.fhir.jpa.search.QuantitySearchParameterTestCases;
 import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
-import ca.uhn.fhir.jpa.search.lastn.ElasticsearchRestClientFactory;
 import ca.uhn.fhir.jpa.search.lastn.ElasticsearchSvcImpl;
-import ca.uhn.fhir.jpa.search.lastn.json.ObservationJson;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
@@ -60,17 +58,11 @@ import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
 import ca.uhn.test.util.LogbackTestExtension;
+import ca.uhn.test.util.LogbackTestExtensionAssert;
 import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import co.elastic.clients.elasticsearch.ElasticsearchClient;
-import co.elastic.clients.elasticsearch.core.SearchRequest;
-import co.elastic.clients.elasticsearch.core.SearchResponse;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import jakarta.annotation.Nonnull;
-import jakarta.json.JsonValue;
 import jakarta.persistence.EntityManager;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.elasticsearch.client.RequestOptions;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -282,7 +274,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 
 
 	class ElasticPerformanceTracingInterceptor {
-		private List<StorageProcessingMessage> messages = new ArrayList<>();
+		private final List<StorageProcessingMessage> messages = new ArrayList<>();
 
 		@Hook(Pointcut.JPA_PERFTRACE_INFO)
 		public void logPerformance(StorageProcessingMessage theMessage) {
@@ -955,9 +947,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		assertThat(result).hasSize(1);
 		assertEquals(((Observation) result.get(0)).getIdElement().getIdPart(), id1.getIdPart());
 
-		List<ILoggingEvent> events = myLogbackTestExtension.filterLoggingEventsWithPredicate(e -> e.getLevel() == Level.WARN);
-		assertFalse(events.isEmpty());
-		assertTrue(events.stream().anyMatch(e -> e.getFormattedMessage().contains("Some resources were not found in index. Make sure all resources were indexed. Resorting to database search.")));
+		LogbackTestExtensionAssert.assertThat(myLogbackTestExtension).hasWarnMessage("Some resources were not found in index. Make sure all resources were indexed. Resorting to database search.");
 
 		// restore changed property
 		JpaStorageSettings defaultConfig = new JpaStorageSettings();
@@ -1766,7 +1756,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 	public class LastUpdatedTests {
 
 		private String myOldObsId, myNewObsId;
-		private String myOldLastUpdatedDateTime = "2017-03-24T03:21:47";
+		private final String myOldLastUpdatedDateTime = "2017-03-24T03:21:47";
 
 		@BeforeEach
 		public void enableResourceStorage() {
