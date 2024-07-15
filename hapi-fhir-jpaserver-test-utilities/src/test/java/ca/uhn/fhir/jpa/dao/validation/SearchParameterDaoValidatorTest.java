@@ -114,9 +114,9 @@ public class SearchParameterDaoValidatorTest {
     }
 
     @ParameterizedTest
-    @MethodSource("extensionProvider")
-    public void testMethodValidate_nonUniqueComboAndCompositeSearchParamWithComponentOfTypeReference_isNotAllowed(Extension theExtension) {
-        SearchParameter sp = createSearchParameter(COMPOSITE, "SearchParameter/patient-code", "patient-code", "Observation");
+    @MethodSource("extensionAndRootLevelExpressionProvider")
+    public void testMethodValidate_nonUniqueComboAndCompositeSearchParamWithComponentOfTypeReference_isNotAllowed(Extension theExtension, String theRootLevelExpression) {
+        SearchParameter sp = createSearchParameter(COMPOSITE, "SearchParameter/patient-code", "patient-code", theRootLevelExpression);
         sp.addExtension(theExtension);
 
         sp.addComponent(new SearchParameterComponentComponent().setDefinition(SP_COMPONENT_DEFINITION_OF_TYPE_TOKEN));
@@ -205,22 +205,35 @@ public class SearchParameterDaoValidatorTest {
         return retVal;
     }
 
-    static Stream<Arguments> extensionProvider() {
-        return Stream.of(
-                Arguments.of(
-                        new Extension(HapiExtensions.EXT_SP_UNIQUE, new BooleanType(false))), // composite SP of type combo with non-unique index
-                Arguments.of((Object) null) // composite SP
-        );
-    }
+	private static Extension createUniquenessExtension(boolean theIsUnique) {
+		return new Extension(HapiExtensions.EXT_SP_UNIQUE, new BooleanType(theIsUnique));
+	}
+
+	static Stream<Arguments> extensionAndRootLevelExpressionProvider() {
+		return Stream.of(
+			// composite SP of type combo with non-unique index, and expression at root level
+			Arguments.of(createUniquenessExtension(false), "Observation"),
+			// composite SP of type combo with non-unique index with null expression at root level
+			Arguments.of(createUniquenessExtension(false), null),
+			// composite SP with expression at root level
+		    Arguments.of((Object) null, "Observation"),
+			// composite SP with null expression at root level
+			Arguments.of((Object) null, null)
+
+		);
+	}
+
 
     static Stream<Arguments> comboSpProvider() {
         return Stream.of(
                 Arguments.of(createSearchParameter(Enumerations.SearchParamType.COMPOSITE, "SearchParameter/any-type", "any-type", "Observation")
-                        .addExtension(new Extension(HapiExtensions.EXT_SP_UNIQUE, new BooleanType(false)))), // composite SP of type combo with non-unique index
+                        .addExtension(createUniquenessExtension(false))), // composite SP of type combo with non-unique
+			// index
 
                 Arguments.of(createSearchParameter(Enumerations.SearchParamType.COMPOSITE, "SearchParameter/any-type", "any-type", "Observation")
-                        .addExtension(new Extension(HapiExtensions.EXT_SP_UNIQUE, new BooleanType(true)))) // composite SP of type combo with unique index
-        );
+                        .addExtension(createUniquenessExtension(true))) // composite SP of type combo with unique index
+
+		);
     }
 
     static Stream<Arguments> compositeSpProvider() {

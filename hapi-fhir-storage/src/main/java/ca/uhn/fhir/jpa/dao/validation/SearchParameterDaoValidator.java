@@ -98,31 +98,30 @@ public class SearchParameterDaoValidator {
 			return;
 		}
 
-		// Search parameters must have a base
-		if (isCompositeWithoutBase(searchParameter)) {
+		// Search parameters must have a base except for Composite ones (for which consider it optional)
+		if (isWithoutBase(searchParameter) && !isCompositeSp(searchParameter)) {
 			throw new UnprocessableEntityException(Msg.code(1113) + "SearchParameter.base is missing");
 		}
 
-		// Do we have a valid expression
-		if (isCompositeWithoutExpression(searchParameter)) {
-
-			// this is ok
-
-		} else if (isBlank(searchParameter.getExpression())) {
-
+		// Search parameters must have an expression except for the Composite ones (for which consider it optional)
+		if (isBlank(searchParameter.getExpression()) && !isCompositeSp(searchParameter)) {
 			throw new UnprocessableEntityException(Msg.code(1114) + "SearchParameter.expression is missing");
-
-		} else {
-
-			FhirVersionEnum fhirVersion = myFhirContext.getVersion().getVersion();
-			if (fhirVersion.isOlderThan(FhirVersionEnum.DSTU3)) {
-				// omitting validation for DSTU2_HL7ORG, DSTU2_1 and DSTU2
-			} else {
-				maybeValidateCompositeSpForUniqueIndexing(searchParameter);
-				maybeValidateSearchParameterExpressionsOnSave(searchParameter);
-				maybeValidateCompositeWithComponent(searchParameter);
-			}
 		}
+
+		FhirVersionEnum fhirVersion = myFhirContext.getVersion().getVersion();
+		if (fhirVersion.isOlderThan(FhirVersionEnum.DSTU3)) {
+			// omitting validation for DSTU2_HL7ORG, DSTU2_1 and DSTU2
+			return;
+		}
+
+		maybeValidateCompositeSpForUniqueIndexing(searchParameter);
+		if (!isBlank(searchParameter.getExpression())) {
+			// above we validated the expression is not blank for a non-composite SP.
+			// So, this validation happens for all non-composite SPs and
+			// composite SPs that have an expression at root level
+			maybeValidateSearchParameterExpressionsOnSave(searchParameter);
+		}
+		maybeValidateCompositeWithComponent(searchParameter);
 	}
 
 	private boolean isCompositeSp(SearchParameter theSearchParameter) {
@@ -130,15 +129,10 @@ public class SearchParameterDaoValidator {
 				&& theSearchParameter.getType().equals(Enumerations.SearchParamType.COMPOSITE);
 	}
 
-	private boolean isCompositeWithoutBase(SearchParameter searchParameter) {
+	private boolean isWithoutBase(SearchParameter searchParameter) {
 		return ElementUtil.isEmpty(searchParameter.getBase())
 				&& ElementUtil.isEmpty(
-						searchParameter.getExtensionsByUrl(HapiExtensions.EXTENSION_SEARCHPARAM_CUSTOM_BASE_RESOURCE))
-				&& !isCompositeSp(searchParameter);
-	}
-
-	private boolean isCompositeWithoutExpression(SearchParameter searchParameter) {
-		return isCompositeSp(searchParameter) && isBlank(searchParameter.getExpression());
+						searchParameter.getExtensionsByUrl(HapiExtensions.EXTENSION_SEARCHPARAM_CUSTOM_BASE_RESOURCE));
 	}
 
 	private boolean isCompositeWithComponent(SearchParameter theSearchParameter) {
