@@ -2182,8 +2182,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 							 * This will allow searching to work on both versioned and non-versioned.
 							 *
 							 * HOWEVER
-							 * Includes could also include multiple resources if a non-versioned uri
-							 * is used.
+							 * This doesn't actually fix chained searching (MeasureReport?measure.identifier=...)
 							 */
 							if (refValue.contains("|")) {
 								// extract the non-versioned AND the versioned above so both searches work.
