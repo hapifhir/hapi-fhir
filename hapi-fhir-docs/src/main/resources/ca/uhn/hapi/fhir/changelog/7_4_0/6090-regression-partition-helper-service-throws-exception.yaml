@@ -1,4 +1,0 @@
----
-type: fix
-issue: 6090
-title: "A regression caused partition resolution to fail when creating non-partitionable resources.  The issue is fixed."
