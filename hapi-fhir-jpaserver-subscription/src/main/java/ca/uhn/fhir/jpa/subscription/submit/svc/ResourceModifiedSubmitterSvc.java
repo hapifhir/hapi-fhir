@@ -143,7 +143,6 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 			boolean processed = true;
 			ResourceModifiedMessage resourceModifiedMessage = null;
 
-			// TODO - batch these
 			try {
 				// delete the entry to lock the row to ensure unique processing
 				boolean wasDeleted = deletePersistedResourceModifiedMessage(
