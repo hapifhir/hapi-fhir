@@ -2171,14 +2171,32 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 						if (parsed.isAbsolute()) {
 							String refValue =
 									fakeReference.getReferenceElement().getValue();
+
+							myPathAndRef = new PathAndRef(theSearchParam.getName(), thePath, fakeReference, true);
+							theParams.add(myPathAndRef);
+
+							/*
+							 * If we have a versioned canonical uri,
+							 * we will index both the version and unversioned uri
+							 * (ie: uri|version and uri)
+							 * This will allow searching to work on both versioned and non-versioned.
+							 *
+							 * HOWEVER
+							 * This doesn't actually fix chained searching (MeasureReport?measure.identifier=...)
+							 */
 							if (refValue.contains("|")) {
+								// extract the non-versioned AND the versioned above so both searches work.
+								fakeReference = (IBaseReference) myContext
+										.getElementDefinition("Reference")
+										.newInstance();
 								fakeReference.setReference(refValue.substring(0, refValue.indexOf('|')));
 							}
 
 							myPathAndRef = new PathAndRef(theSearchParam.getName(), thePath, fakeReference, true);
 							theParams.add(myPathAndRef);
-							break;
 						}
+
+						break;
 					}
 
 					theParams.addWarning("Ignoring canonical reference (indexing canonical is not yet supported)");
