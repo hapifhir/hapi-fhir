@@ -16,7 +16,7 @@ public class SqlServerAzureCollectedMigrationTests extends BaseCollectedMigratio
 				DockerImageName.parse("mcr.microsoft.com/azure-sql-edge:latest")
 					.asCompatibleSubstituteFor("mcr.microsoft.com/mssql/server"))
 				.withEnv("ACCEPT_EULA", "Y")
-				.withEnv("MSSQL_PID", "Premium"));
+				.withEnv("MSSQL_PID", "Premium")); // Product id: Azure Premium vs Standard
 
 	@Override
 	@Nonnull

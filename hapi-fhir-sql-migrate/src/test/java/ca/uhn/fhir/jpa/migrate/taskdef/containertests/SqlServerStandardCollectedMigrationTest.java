@@ -16,7 +16,7 @@ public class SqlServerStandardCollectedMigrationTest extends BaseCollectedMigrat
 			DriverTypeEnum.MSSQL_2012,
 			new MSSQLServerContainer<>("mcr.microsoft.com/mssql/server:2019-latest")
 		.withEnv("ACCEPT_EULA", "Y")
-		.withEnv("MSSQL_PID", "Standard")
+		.withEnv("MSSQL_PID", "Standard") // Product id: Sql Server Enterprise vs Standard vs Developer vs ????
 		);
 
 	@Override
