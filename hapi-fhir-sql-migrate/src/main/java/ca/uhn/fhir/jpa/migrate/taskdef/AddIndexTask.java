@@ -44,7 +44,7 @@ public class AddIndexTask extends BaseTableTask {
 	private String myIndexName;
 	private List<String> myColumns;
 	private List<String> myNullableColumns;
-	private boolean myUnique = false;
+	private Boolean myUnique = false;
 	private List<String> myIncludeColumns = Collections.emptyList();
 	/** Should the operation avoid taking a lock on the table */
 	private boolean myOnline;
@@ -183,7 +183,7 @@ public class AddIndexTask extends BaseTableTask {
 		return sql;
 	}
 
-	private static @javax.annotation.Nonnull String buildOnlineCreateWithTryCatchFallback(String bareCreateSql) {
+	private static @Nonnull String buildOnlineCreateWithTryCatchFallback(String bareCreateSql) {
 		// Some "Editions" of Sql Server do not support ONLINE.
 		// @format:off
 		return "BEGIN TRY -- try first online, without locking the table \n"
