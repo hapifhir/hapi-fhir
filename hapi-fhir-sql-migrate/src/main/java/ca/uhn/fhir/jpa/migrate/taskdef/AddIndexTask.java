@@ -183,6 +183,28 @@ public class AddIndexTask extends BaseTableTask {
 		return sql;
 	}
 
+	/**
+	 * Wrap a Sql Server create index in a try/catch to try it first ONLINE
+	 * (meaning no table locks), and on failure, without ONLINE (locking the table).
+	 *
+	 * This try-catch syntax was manually tested via sql
+	 * {@code
+	 * BEGIN TRY
+	 * 	EXEC('create index FOO on TABLE_A (col1)  WITH (ONLINE = ON)');
+	 * 	select 'Online-OK';
+	 * END TRY
+	 * BEGIN CATCH
+	 * 	create index FOO on TABLE_A (col1);
+	 * 	select 'Offline';
+	 * END CATCH;
+	 * -- Then inspect the result set - Online-OK means it ran the ONLINE version.
+	 * -- Note: we use EXEC() in the online path to lower the severity of the error
+	 * -- so the CATCH can catch it.
+	 * }
+	 *
+	 * @param bareCreateSql
+	 * @return
+	 */
 	private static @Nonnull String buildOnlineCreateWithTryCatchFallback(String bareCreateSql) {
 		// Some "Editions" of Sql Server do not support ONLINE.
 		// @format:off
