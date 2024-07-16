@@ -1,12 +1,11 @@
 package ca.uhn.fhir.jpa.migrate.taskdef.containertests;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
-import ca.uhn.fhir.jpa.migrate.taskdef.AbstractMigrationTaskSuite;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 @Testcontainers(disabledWithoutDocker=true)
 public class Postgres12MigrationTest extends AbstractMigrationTaskSuite {

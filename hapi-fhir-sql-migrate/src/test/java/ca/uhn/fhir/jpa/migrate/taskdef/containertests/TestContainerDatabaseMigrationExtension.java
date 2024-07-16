@@ -9,8 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.JdbcDatabaseContainer;
 
-import javax.annotation.Nonnull;
-import java.util.function.Consumer;
+import jakarta.annotation.Nonnull;
 
 /**
  * Starts a database from TestContainers, and exposes ConnectionProperties for the migrator.
@@ -23,8 +22,7 @@ public class TestContainerDatabaseMigrationExtension implements BeforeAllCallbac
 
 	public TestContainerDatabaseMigrationExtension(
 			DriverTypeEnum theDriverTypeEnum,
-			JdbcDatabaseContainer<?> theJdbcDatabaseContainer,
-			Consumer<JdbcDatabaseContainer<?>> ...theModifiers) {
+			JdbcDatabaseContainer<?> theJdbcDatabaseContainer) {
 		myDriverTypeEnum = theDriverTypeEnum;
 		myJdbcDatabaseContainer = theJdbcDatabaseContainer
 			// use a random password to avoid having open ports on hard-coded passwords

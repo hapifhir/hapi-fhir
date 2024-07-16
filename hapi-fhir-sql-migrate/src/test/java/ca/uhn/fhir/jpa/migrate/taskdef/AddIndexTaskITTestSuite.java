@@ -13,19 +13,20 @@ import java.util.concurrent.TimeUnit;
 /**
  * Integration tests for AddIndexTask.
  */
-public interface AddIndexTaskTestSuite extends BaseMigrationTaskTestSuite {
+public interface AddIndexTaskITTestSuite extends BaseMigrationTaskTestSuite {
 
 	@Test
 	default void testAddIndexOnline_createsIndex() throws SQLException {
 		// given
 		Builder builder = getSupport().getBuilder();
-		Builder.BuilderAddTableByColumns tableBuilder = builder.addTableByColumns("1", "TABLE_A", "id");
+		String tableName = "TABLE_ADD" + System.currentTimeMillis();
+		Builder.BuilderAddTableByColumns tableBuilder = builder.addTableByColumns("1", tableName, "id");
 		tableBuilder.addColumn("id").nonNullable().type(ColumnTypeEnum.LONG);
 		tableBuilder.addColumn("col1").nullable().type(ColumnTypeEnum.STRING, 100);
 		getSupport().executeAndClearPendingTasks();
 
 		// when
-		builder.onTable("TABLE_A")
+		builder.onTable(tableName)
 			.addIndex("2", "FOO")
 			.unique(false)
 			.online(true)
@@ -36,7 +37,7 @@ public interface AddIndexTaskTestSuite extends BaseMigrationTaskTestSuite {
 
 		// we wait since the ONLINE path is async.
 		Awaitility.await("index FOO exists").atMost(10, TimeUnit.SECONDS).untilAsserted(
-			() -> Assertions.assertThat(JdbcUtils.getIndexNames(getSupport().getConnectionProperties(), "TABLE_A")).contains("FOO"));
+			() -> Assertions.assertThat(JdbcUtils.getIndexNames(getSupport().getConnectionProperties(), tableName)).contains("FOO"));
 	}
 
 }

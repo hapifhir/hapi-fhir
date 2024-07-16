@@ -1,11 +1,10 @@
 package ca.uhn.fhir.jpa.migrate.taskdef.containertests;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
-import ca.uhn.fhir.jpa.migrate.taskdef.AbstractMigrationTaskSuite;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.testcontainers.containers.MSSQLServerContainer;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 public class SqlServerEnterpriseMigrationTests extends AbstractMigrationTaskSuite {
 	@RegisterExtension

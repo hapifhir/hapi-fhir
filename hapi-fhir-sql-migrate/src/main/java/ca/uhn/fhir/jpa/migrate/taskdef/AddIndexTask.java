@@ -152,7 +152,7 @@ public class AddIndexTask extends BaseTableTask {
 		}
 		// Should we do this non-transactionally?  Avoids a write-lock, but introduces weird failure modes.
 		String postgresOnlineClause = "";
-		String msSqlOracleOnlineClause = "";
+		String oracleOnlineClause = "";
 		if (myOnline) {
 			switch (getDriverType()) {
 				case POSTGRES_9_4:
@@ -164,34 +164,36 @@ public class AddIndexTask extends BaseTableTask {
 				case ORACLE_12C:
 					// todo: delete this once we figure out how run Oracle try-catch as well.
 					if (myMetadataSource.isOnlineIndexSupported(getConnectionProperties())) {
-						msSqlOracleOnlineClause = " ONLINE DEFERRED INVALIDATION";
+						oracleOnlineClause = " ONLINE DEFERRED INVALIDATION";
 					}
-					break;
-				case MSSQL_2012:
-					msSqlOracleOnlineClause = " WITH (ONLINE = ON)";
 					break;
 				default:
 			}
 		}
 
 		String bareCreateSql = "create " + unique + "index " + postgresOnlineClause + myIndexName + " on "
-			+ getTableName() + "(" + columns + ")" + includeClause + mssqlWhereClause;
+				+ getTableName() + "(" + columns + ")" + includeClause + mssqlWhereClause + oracleOnlineClause;
+
 		String sql;
 		if (myOnline && DriverTypeEnum.MSSQL_2012 == getDriverType()) {
-			// Some "Editions" of Sql Server do not support ONLINE.
-			// @format:off
-			sql = "BEGIN TRY -- try first online, without locking the table \n"
-					+ "    EXEC('" + bareCreateSql + msSqlOracleOnlineClause + "');\n"
-					+ "END TRY \n"
-					+ "BEGIN CATCH -- for Editions of Sql Server that don't support ONLINE, run with table locks \n"
-					+ bareCreateSql
-					+ "; \n"
-					+ "END CATCH;";
-			// @format:on
+			sql = buildOnlineCreateWithTryCatchFallback(bareCreateSql);
 		} else {
 			sql = bareCreateSql;
 		}
 		return sql;
+	}
+
+	private static @javax.annotation.Nonnull String buildOnlineCreateWithTryCatchFallback(String bareCreateSql) {
+		// Some "Editions" of Sql Server do not support ONLINE.
+		// @format:off
+		return "BEGIN TRY -- try first online, without locking the table \n"
+				+ "    EXEC('" + bareCreateSql + " WITH (ONLINE = ON)');\n"
+				+ "END TRY \n"
+				+ "BEGIN CATCH -- for Editions of Sql Server that don't support ONLINE, run with table locks \n"
+				+ bareCreateSql
+				+ "; \n"
+				+ "END CATCH;";
+		// @format:on
 	}
 
 	@Nonnull

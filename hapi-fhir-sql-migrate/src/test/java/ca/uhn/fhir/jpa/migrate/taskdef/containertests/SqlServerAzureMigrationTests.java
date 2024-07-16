@@ -1,12 +1,11 @@
 package ca.uhn.fhir.jpa.migrate.taskdef.containertests;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
-import ca.uhn.fhir.jpa.migrate.taskdef.AbstractMigrationTaskSuite;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.testcontainers.containers.MSSQLServerContainer;
 import org.testcontainers.utility.DockerImageName;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 public class SqlServerAzureMigrationTests extends AbstractMigrationTaskSuite {
 	@RegisterExtension
@@ -23,4 +22,5 @@ public class SqlServerAzureMigrationTests extends AbstractMigrationTaskSuite {
 	@Nonnull
 	protected DriverTypeEnum.ConnectionProperties getConnectionProperties() {
 		return ourContainerExtension.getConnectionProperties();
-	}}
+	}
+}

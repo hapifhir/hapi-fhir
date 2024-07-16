@@ -1,11 +1,13 @@
-package ca.uhn.fhir.jpa.migrate.taskdef;
+package ca.uhn.fhir.jpa.migrate.taskdef.containertests;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
-import ca.uhn.fhir.jpa.migrate.taskdef.containertests.BaseMigrationTaskTestSuite;
+import ca.uhn.fhir.jpa.migrate.taskdef.AddIndexTaskITTestSuite;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 import static ca.uhn.fhir.jpa.migrate.taskdef.containertests.BaseMigrationTaskTestSuite.Support;
 
@@ -39,11 +41,17 @@ public abstract class AbstractMigrationTaskSuite {
 
 
 	@Nested
-	class AddIndexTaskTests implements AddIndexTaskTestSuite {
+	class AddIndexTaskTests implements AddIndexTaskITTestSuite {
 		@Override
 		public Support getSupport() {
 			return AbstractMigrationTaskSuite.this.getSupport();
 		}
+	}
+
+	@Test
+	void emptyTest() {
+		// an empty test to quiet sonar
+		Assertions.assertTrue(true);
 	}
 
 }

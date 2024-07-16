@@ -20,6 +20,7 @@ import java.util.function.Supplier;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@SuppressWarnings("SqlDialectInspection")
 @MockitoSettings(strictness = Strictness.LENIENT)
 public class AddIndexTaskTest extends BaseTest {
 
