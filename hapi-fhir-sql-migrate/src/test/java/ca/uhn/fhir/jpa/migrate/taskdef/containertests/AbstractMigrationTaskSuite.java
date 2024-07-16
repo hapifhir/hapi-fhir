@@ -49,7 +49,7 @@ public abstract class AbstractMigrationTaskSuite {
 	}
 
 	@Test
-	void emptyTest() {
+	void testNothing() {
 		// an empty test to quiet sonar
 		Assertions.assertTrue(true);
 	}
