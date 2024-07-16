@@ -3,20 +3,26 @@ package ca.uhn.fhir.jpa.migrate.taskdef.containertests;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.testcontainers.containers.MSSQLServerContainer;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import jakarta.annotation.Nonnull;
 
-public class SqlServerEnterpriseMigrationTests extends AbstractMigrationTaskSuite {
+@Testcontainers(disabledWithoutDocker=true)
+public class SqlServerStandardCollectedMigrationTest extends BaseCollectedMigrationTaskSuite {
+
 	@RegisterExtension
 	static TestContainerDatabaseMigrationExtension ourContainerExtension =
 		new TestContainerDatabaseMigrationExtension(
 			DriverTypeEnum.MSSQL_2012,
 			new MSSQLServerContainer<>("mcr.microsoft.com/mssql/server:2019-latest")
-				.withEnv("ACCEPT_EULA", "Y")
-				.withEnv("MSSQL_PID", "Enterprise"));
+		.withEnv("ACCEPT_EULA", "Y")
+		.withEnv("MSSQL_PID", "Standard")
+		);
 
 	@Override
 	@Nonnull
 	protected DriverTypeEnum.ConnectionProperties getConnectionProperties() {
 		return ourContainerExtension.getConnectionProperties();
-	}}
+	}
+
+}

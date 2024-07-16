@@ -9,7 +9,7 @@ import java.sql.SQLException;
 import java.util.LinkedList;
 
 /**
- * Mixin for abstract migration task test suites
+ * Mixin for a migration task test suite
  */
 public interface BaseMigrationTaskTestSuite {
 	Support getSupport();

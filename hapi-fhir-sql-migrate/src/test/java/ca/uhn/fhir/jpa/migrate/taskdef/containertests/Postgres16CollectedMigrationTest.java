@@ -8,13 +8,13 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import jakarta.annotation.Nonnull;
 
 @Testcontainers(disabledWithoutDocker=true)
-public class Postgres12MigrationTest extends AbstractMigrationTaskSuite {
+public class Postgres16CollectedMigrationTest extends BaseCollectedMigrationTaskSuite {
 
 	@RegisterExtension
 	static TestContainerDatabaseMigrationExtension ourContainerExtension =
 		new TestContainerDatabaseMigrationExtension(
 			DriverTypeEnum.POSTGRES_9_4,
-			new PostgreSQLContainer<>("postgres:12.2"));
+			new PostgreSQLContainer<>("postgres:16.3"));
 
 	@Override
 	@Nonnull

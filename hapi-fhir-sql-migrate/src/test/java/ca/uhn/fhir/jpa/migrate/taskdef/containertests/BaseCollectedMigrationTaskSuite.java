@@ -14,7 +14,7 @@ import static ca.uhn.fhir.jpa.migrate.taskdef.containertests.BaseMigrationTaskTe
 /**
  * Collects all our task suites in a single class so we can run them on each engine.
  */
-public abstract class AbstractMigrationTaskSuite {
+public abstract class BaseCollectedMigrationTaskSuite {
 
 	/**
 	 * Per-test supplier for db-access, migration task list, etc.
@@ -44,7 +44,7 @@ public abstract class AbstractMigrationTaskSuite {
 	class AddIndexTaskTests implements AddIndexTaskITTestSuite {
 		@Override
 		public Support getSupport() {
-			return AbstractMigrationTaskSuite.this.getSupport();
+			return BaseCollectedMigrationTaskSuite.this.getSupport();
 		}
 	}
 

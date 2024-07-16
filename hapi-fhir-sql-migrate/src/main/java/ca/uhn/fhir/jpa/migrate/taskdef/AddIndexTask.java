@@ -161,8 +161,11 @@ public class AddIndexTask extends BaseTableTask {
 					// This runs without a lock, and can't be done transactionally.
 					setTransactional(false);
 					break;
+				case MSSQL_2012:
+					// handled below in buildOnlineCreateWithTryCatchFallback()
+					break;
 				case ORACLE_12C:
-					// todo: delete this once we figure out how run Oracle try-catch as well.
+					// todo: delete this once we figure out how run Oracle try-catch to match MSSQL.
 					if (myMetadataSource.isOnlineIndexSupported(getConnectionProperties())) {
 						oracleOnlineClause = " ONLINE DEFERRED INVALIDATION";
 					}
