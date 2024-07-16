@@ -1,0 +1,26 @@
+package ca.uhn.fhir.jpa.migrate.taskdef.containertests;
+
+import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
+import ca.uhn.fhir.jpa.migrate.taskdef.AbstractMigrationTaskSuite;
+import org.junit.jupiter.api.extension.RegisterExtension;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Testcontainers;
+
+import javax.annotation.Nonnull;
+
+@Testcontainers(disabledWithoutDocker=true)
+public class Postgres16MigrationTest extends AbstractMigrationTaskSuite {
+
+	@RegisterExtension
+	static TestContainerDatabaseMigrationExtension ourContainerExtension =
+		new TestContainerDatabaseMigrationExtension(
+			DriverTypeEnum.POSTGRES_9_4,
+			new PostgreSQLContainer<>("postgres:16.3"));
+
+	@Override
+	@Nonnull
+	protected DriverTypeEnum.ConnectionProperties getConnectionProperties() {
+		return ourContainerExtension.getConnectionProperties();
+	}
+
+}

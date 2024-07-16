@@ -32,6 +32,7 @@ public class MetadataSource {
 	 */
 	public boolean isOnlineIndexSupported(DriverTypeEnum.ConnectionProperties theConnectionProperties) {
 
+		// todo: delete this once we figure out how run Oracle try-catch as well.
 		switch (theConnectionProperties.getDriverType()) {
 			case POSTGRES_9_4:
 			case COCKROACHDB_21_1:
@@ -43,7 +44,7 @@ public class MetadataSource {
 				return mssqlEdition == null // some weird version without an edition?
 						||
 						// these versions don't support ONLINE index creation
-						(!mssqlEdition.startsWith("Developer Edition") && !mssqlEdition.startsWith("Standard Edition"));
+						!mssqlEdition.startsWith("Standard Edition");
 			case ORACLE_12C:
 				String oracleEdition = getEdition(theConnectionProperties);
 				return oracleEdition == null // weird unknown version - try, and maybe fail.
