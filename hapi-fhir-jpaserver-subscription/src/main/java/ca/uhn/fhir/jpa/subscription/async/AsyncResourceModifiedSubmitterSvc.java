@@ -23,10 +23,11 @@ package ca.uhn.fhir.jpa.subscription.async;
 import ca.uhn.fhir.jpa.model.entity.IPersistedResourceModifiedMessage;
 import ca.uhn.fhir.subscription.api.IResourceModifiedConsumerWithRetries;
 import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
+import com.google.common.annotations.VisibleForTesting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 
 /**
  * The purpose of this service is to submit messages to the processing pipeline for which previous attempts at
@@ -35,6 +36,8 @@ import java.util.List;
  */
 public class AsyncResourceModifiedSubmitterSvc {
 	private static final Logger ourLog = LoggerFactory.getLogger(AsyncResourceModifiedSubmitterSvc.class);
+
+	public static final int MAX_LIMIT = 1000;
 
 	private final IResourceModifiedMessagePersistenceSvc myResourceModifiedMessagePersistenceSvc;
 	private final IResourceModifiedConsumerWithRetries myResourceModifiedConsumer;
@@ -47,21 +50,34 @@ public class AsyncResourceModifiedSubmitterSvc {
 	}
 
 	public void runDeliveryPass() {
+		boolean hasMoreToFetch = false;
+		int limit = getLimit();
+		do {
+			// we always take the 0th page, because we're deleting the elements as we process them
+			Page<IPersistedResourceModifiedMessage> persistedResourceModifiedMsgsPage =
+					myResourceModifiedMessagePersistenceSvc.findAllOrderedByCreatedTime(PageRequest.of(0, limit));
+			ourLog.debug(
+					"Attempting to submit {} resources to consumer channel.",
+					persistedResourceModifiedMsgsPage.getTotalElements());
 
-		List<IPersistedResourceModifiedMessage> allPersistedResourceModifiedMessages =
-				myResourceModifiedMessagePersistenceSvc.findAllOrderedByCreatedTime();
-		ourLog.debug(
-				"Attempting to submit {} resources to consumer channel.", allPersistedResourceModifiedMessages.size());
+			hasMoreToFetch = persistedResourceModifiedMsgsPage.hasNext();
 
-		for (IPersistedResourceModifiedMessage persistedResourceModifiedMessage :
-				allPersistedResourceModifiedMessages) {
+			for (IPersistedResourceModifiedMessage persistedResourceModifiedMessage :
+					persistedResourceModifiedMsgsPage) {
+				boolean wasProcessed = myResourceModifiedConsumer.submitPersisedResourceModifiedMessage(
+						persistedResourceModifiedMessage);
 
-			boolean wasProcessed =
-					myResourceModifiedConsumer.submitPersisedResourceModifiedMessage(persistedResourceModifiedMessage);
-
-			if (!wasProcessed) {
-				break;
+				if (!wasProcessed) {
+					// we're not fetching anymore no matter what
+					hasMoreToFetch = false;
+					break;
+				}
 			}
-		}
+		} while (hasMoreToFetch);
+	}
+
+	@VisibleForTesting
+	public static int getLimit() {
+		return MAX_LIMIT;
 	}
 }
