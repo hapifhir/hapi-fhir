@@ -119,8 +119,11 @@ public class DropIndexTask extends BaseTableTask {
 					break;
 				case MSSQL_2012:
 					// use a try-catch to try online first, and fail over to lock path.
-					sql.add(AddIndexTask.buildOnlineCreateWithTryCatchFallback(
-							"drop index " + getTableName() + "." + myIndexName));
+					String sqlServerDrop = "drop index " + getTableName() + "." + myIndexName;
+					if (myOnline) {
+						sqlServerDrop = AddIndexTask.buildOnlineCreateWithTryCatchFallback(sqlServerDrop);
+					}
+					sql.add(sqlServerDrop);
 					break;
 				case COCKROACHDB_21_1:
 					sql.add("drop index " + getTableName() + "@" + myIndexName);

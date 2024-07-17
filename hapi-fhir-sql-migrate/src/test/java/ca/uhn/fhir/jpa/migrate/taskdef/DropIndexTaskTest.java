@@ -182,12 +182,7 @@ public class DropIndexTaskTest extends BaseTest {
 					assertEquals(asList("drop index IDX_ANINDEX"), mySql);
 					break;
 				case MSSQL_2012:
-					assertEquals(asList("BEGIN TRY -- try first online, without locking the table \n" +
-						"    EXEC('drop index SOMETABLE.IDX_ANINDEX WITH (ONLINE = ON)');\n" +
-						"END TRY \n" +
-						"BEGIN CATCH -- for Editions of Sql Server that don't support ONLINE, run with table locks \n" +
-						"drop index SOMETABLE.IDX_ANINDEX; \n" +
-						"END CATCH;"), mySql);
+					assertEquals(asList("drop index SOMETABLE.IDX_ANINDEX"), mySql);
 					break;
 				case POSTGRES_9_4:
 					assertEquals(asList("drop index IDX_ANINDEX"), mySql);
