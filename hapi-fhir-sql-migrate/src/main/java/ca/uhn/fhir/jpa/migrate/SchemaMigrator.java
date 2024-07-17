@@ -32,6 +32,9 @@ import java.util.List;
 import java.util.Properties;
 import javax.sql.DataSource;
 
+/**
+ *
+ */
 public class SchemaMigrator {
 	public static final String HAPI_FHIR_MIGRATION_TABLENAME = "FLY_HFJ_MIGRATION";
 	private static final Logger ourLog = LoggerFactory.getLogger(SchemaMigrator.class);
