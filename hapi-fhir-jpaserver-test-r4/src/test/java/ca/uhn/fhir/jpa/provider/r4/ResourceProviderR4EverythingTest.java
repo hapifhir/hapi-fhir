@@ -42,6 +42,7 @@ import org.hl7.fhir.r4.model.UnsignedIntType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -1240,6 +1241,234 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 		assertThat(actualResourceIds).containsExactlyInAnyOrder(desiredPid, desiredPractitionerId, groupId);
 	}
 
+	@Nested
+	public class ResourceProviderR4EverythingWithOffsetTest {
+
+		// Patient 1 resources
+		private IIdType o1Id;
+		private IIdType e1Id;
+		private IIdType p1Id;
+		private IIdType c1Id;
+
+		// Patient 2 resources
+		private IIdType o2Id;
+		private IIdType p2Id;
+		private IIdType c2Id;
+
+		// Patient 3 resources
+		private IIdType o3Id;
+		private IIdType p3Id;
+		private IIdType c3Id;
+
+		// Patient 4 resources
+		private IIdType o4Id;
+		private IIdType p4Id;
+		private IIdType c4Id;
+
+		// Resource id not linked to any Patient
+		private IIdType c5Id;
+
+		@Test
+		public void testPagingOverEverything_onPatientInstance_returnsCorrectBundles() {
+			String methodName = "testEverythingPatientInstanceOffset";
+			createPatientResources(methodName);
+
+			// There are 4 results, lets make 4 pages of 1.
+			Parameters parameters = new Parameters();
+			addOffsetAndCount(parameters, 0, 1);
+
+			// first page
+			Parameters output = myClient.operation().onInstance(p1Id).named("everything").withParameters(parameters).execute();
+			Bundle bundle = (Bundle) output.getParameter().get(0).getResource();
+			List<IIdType> results = new ArrayList<>(validateAndGetIdListFromBundle(bundle, 1));
+
+			// second page
+			Bundle nextBundle = getNextBundle(bundle);
+			results.addAll(validateAndGetIdListFromBundle(nextBundle, 1));
+
+			// third page
+			nextBundle = getNextBundle(nextBundle);
+			results.addAll(validateAndGetIdListFromBundle(nextBundle, 1));
+
+			// fourth page
+			nextBundle = getNextBundle(nextBundle);
+			results.addAll(validateAndGetIdListFromBundle(nextBundle, 1));
+
+			// no next link
+			assertNull(nextBundle.getLink("next"));
+			assertThat(results).containsOnly(p1Id, c1Id, o1Id, e1Id);
+		}
+
+		@Test
+		public void testPagingOverEverything_onPatientType_returnsCorrectBundles() {
+			String methodName = "testEverythingPatientTypeOffset";
+			createPatientResources(methodName);
+
+			// Test paging works.
+			// There are 13 results, lets make 3 pages of 4 and 1 page of 1.
+			Parameters parameters = new Parameters();
+			addOffsetAndCount(parameters, 0, 4);
+
+			Parameters output = myClient.operation().onType(Patient.class).named("everything").withParameters(parameters).execute();
+			validateEverythingBundle(output);
+		}
+
+		@Test
+		public void testPagingOverEverything_onPatientTypeWithAndIdParameter_returnsCorrectBundles() {
+			String methodName = "testEverythingPatientTypeWithAndIdParameter";
+			createPatientResources(methodName);
+
+			// Test 4 patients using and List
+			// e.g. _id=1&_id=2&_id=3&_id=4
+			Parameters parameters = new Parameters();
+			parameters.addParameter("_id", p1Id.getIdPart());
+			parameters.addParameter("_id", p2Id.getIdPart());
+			parameters.addParameter("_id", p3Id.getIdPart());
+			parameters.addParameter("_id", p4Id.getIdPart());
+			// Test for Patient 1-4 with _count=4 and _offset=0 with paging
+			addOffsetAndCount(parameters, 0, 4);
+
+			Parameters output = myClient.operation().onType(Patient.class).named("everything").withParameters(parameters).execute();
+			validateEverythingBundle(output);
+		}
+
+		@Test
+		public void testPagingOverEverything_onPatientTypeWithOrIdParameter_returnsCorrectBundles() {
+			String methodName = "testEverythingPatientTypeWithOrIdParameter";
+			createPatientResources(methodName);
+
+			// Test 4 patients using or List
+			// e.g. _id=1,2,3,4
+			Parameters parameters = new Parameters();
+			parameters.addParameter("_id", p1Id.getIdPart() + "," + p2Id.getIdPart() + "," + p3Id.getIdPart() + "," + p4Id.getIdPart());
+			// Test for Patient 1-4 with _count=4 and _offset=0 with paging
+			addOffsetAndCount(parameters, 0, 4);
+
+			Parameters output = myClient.operation().onType(Patient.class).named("everything").withParameters(parameters).execute();
+			validateEverythingBundle(output);
+		}
+
+		@Test
+		public void testPagingOverEverything_onPatientTypeWithOrAndIdParameter_returnsCorrectBundles() {
+			String methodName = "testEverythingPatientTypeWithOrAndIdParameter";
+			createPatientResources(methodName);
+
+			// Test combining 2 or-listed params
+			// e.g. _id=1,2&_id=3,4
+			Parameters parameters = new Parameters();
+			parameters.addParameter("_id", p1Id.getIdPart() + "," + p2Id.getIdPart());
+			parameters.addParameter("_id", p3Id.getIdPart() + "," + p4Id.getIdPart());
+			// Test for Patient 1-4 with _count=4 and _offset=0 with paging
+			addOffsetAndCount(parameters, 0, 4);
+
+			Parameters output = myClient.operation().onType(Patient.class).named("everything").withParameters(parameters).execute();
+			validateEverythingBundle(output);
+		}
+
+		@Test
+		public void testPagingOverEverything_onPatientTypeWithNotLinkedPatients_returnsCorrectBundles() {
+			String methodName = "testEverythingPatientTypeWithNotLinkedPatients";
+
+			// setup
+			p1Id = createPatient(methodName, "1");
+			p2Id = createPatient(methodName, "2");
+			p3Id = createPatient(methodName, "3");
+			p4Id = createPatient(methodName, "4");
+
+			// Test patients without links
+			Parameters parameters = new Parameters();
+			addOffsetAndCount(parameters, 0, 1);
+
+			// first page
+			Parameters output = myClient.operation().onType(Patient.class).named("everything").withParameters(parameters).execute();
+			Bundle bundle = (Bundle) output.getParameter().get(0).getResource();
+			List<IIdType> results = new ArrayList<>(validateAndGetIdListFromBundle(bundle, 1));
+
+			// second page
+			Bundle nextBundle = getNextBundle(bundle);
+			results.addAll(validateAndGetIdListFromBundle(nextBundle, 1));
+
+			// third page
+			nextBundle = getNextBundle(nextBundle);
+			results.addAll(validateAndGetIdListFromBundle(nextBundle, 1));
+
+			// fourth page
+			nextBundle = getNextBundle(nextBundle);
+			results.addAll(validateAndGetIdListFromBundle(nextBundle, 1));
+
+			// no next link
+			assertNull(nextBundle.getLink("next"));
+			assertThat(results).containsOnly(p1Id, p2Id, p3Id, p4Id);
+		}
+
+		private void addOffsetAndCount(Parameters theParameters, int theOffset, int theCount) {
+			theParameters.addParameter(new Parameters.ParametersParameterComponent()
+				.setName("_count").setValue(new UnsignedIntType(theCount)));
+			theParameters.addParameter(new Parameters.ParametersParameterComponent()
+				.setName("_offset").setValue(new UnsignedIntType(theOffset)));
+		}
+
+		private void validateEverythingBundle(Parameters theParameters) {
+			// first page
+			Bundle bundle = (Bundle) theParameters.getParameter().get(0).getResource();
+			List<IIdType> results = new ArrayList<>(validateAndGetIdListFromBundle(bundle, 4));
+
+			// second page
+			Bundle nextBundle = getNextBundle(bundle);
+			results.addAll(validateAndGetIdListFromBundle(nextBundle, 4));
+
+			// third page
+			nextBundle = getNextBundle(nextBundle);
+			results.addAll(validateAndGetIdListFromBundle(nextBundle, 4));
+
+			// fourth page
+			nextBundle = getNextBundle(nextBundle);
+			results.addAll(validateAndGetIdListFromBundle(nextBundle, 1));
+
+			// no next link
+			assertNull(nextBundle.getLink("next"));
+			// make sure all resources are returned, order doesn't matter
+			assertThat(results).containsOnly(p1Id, p2Id, p3Id, p4Id, c1Id, c2Id, c3Id, c4Id, o1Id, e1Id, o2Id, o3Id, o4Id);
+		}
+
+		private Bundle getNextBundle(Bundle theBundle) {
+			String next = theBundle.getLink("next").getUrl();
+			return myClient.loadPage().byUrl(next).andReturnBundle(Bundle.class).execute();
+		}
+
+		private List<IIdType> validateAndGetIdListFromBundle(Bundle theBundle, int theSize) {
+			assertEquals(Bundle.BundleType.SEARCHSET, theBundle.getType());
+			assertThat(theBundle.getEntry()).hasSize(theSize);
+			return toUnqualifiedVersionlessIds(theBundle);
+		}
+
+		private void createPatientResources(String theMethodName) {
+			// Patient 1 resources
+			o1Id = createOrganization(theMethodName, "1");
+			e1Id = createEncounter(theMethodName, "1");
+			p1Id = createPatientWithIndexAtOrganization(theMethodName, "1", o1Id);
+			c1Id = createConditionWithEncounterForPatient(theMethodName, "1", p1Id, e1Id);
+
+			// Patient 2 resources
+			o2Id = createOrganization(theMethodName, "2");
+			p2Id = createPatientWithIndexAtOrganization(theMethodName, "2", o2Id);
+			c2Id = createConditionForPatient(theMethodName, "2", p2Id);
+
+			// Patient 3 resources
+			o3Id = createOrganization(theMethodName, "3");
+			p3Id = createPatientWithIndexAtOrganization(theMethodName, "3", o3Id);
+			c3Id = createConditionForPatient(theMethodName, "3", p3Id);
+
+			// Patient 4 resources
+			o4Id = createOrganization(theMethodName, "4");
+			p4Id = createPatientWithIndexAtOrganization(theMethodName, "4", o4Id);
+			c4Id = createConditionForPatient(theMethodName, "4", p4Id);
+
+			// Resource not linked to any Patient
+			c5Id = createConditionForPatient(theMethodName, "5", null);
+		}
+	}
+
 	private Bundle executeEverythingOperationOnInstance(IIdType theInstanceIdType) {
 		return myClient
 			.operation()
@@ -1250,10 +1479,20 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 			.execute();
 	}
 
-	private IIdType createOrganization(String methodName, String s) {
+	private IIdType createOrganization(String methodName, String theIndex) {
 		Organization o1 = new Organization();
-		o1.setName(methodName + s);
+		o1.setName(methodName + theIndex);
 		return myClient.create().resource(o1).execute().getId().toUnqualifiedVersionless();
+	}
+
+	private IIdType createEncounter(String methodName, String theIndex) {
+		Encounter e1 = new Encounter();
+		e1.setLanguage(methodName + theIndex);
+		return myClient.create().resource(e1).execute().getId().toUnqualifiedVersionless();
+	}
+
+	public IIdType createPatient(String theMethodName, String theIndex) {
+		return createPatientWithIndexAtOrganization(theMethodName, theIndex, null);
 	}
 
 	public IIdType createPatientWithIndexAtOrganization(String theMethodName, String theIndex, IIdType theOrganizationId) {
@@ -1265,13 +1504,22 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 	}
 
 	public IIdType createConditionForPatient(String theMethodName, String theIndex, IIdType thePatientId) {
+		return createConditionWithEncounterForPatient(theMethodName, theIndex, thePatientId, null);
+	}
+
+	public IIdType createConditionWithEncounterForPatient(String theMethodName,
+														  String theIndex,
+														  IIdType thePatientId,
+														  IIdType theEncounterId) {
 		Condition c = new Condition();
 		c.addIdentifier().setValue(theMethodName + theIndex);
 		if (thePatientId != null) {
 			c.getSubject().setReferenceElement(thePatientId);
 		}
-		IIdType cId = myClient.create().resource(c).execute().getId().toUnqualifiedVersionless();
-		return cId;
+		if (theEncounterId != null) {
+			c.setEncounter(new Reference(theEncounterId));
+		}
+		return myClient.create().resource(c).execute().getId().toUnqualifiedVersionless();
 	}
 
 	private IIdType createMedicationRequestForPatient(IIdType thePatientId, String theIndex) {

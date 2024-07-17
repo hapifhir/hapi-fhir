@@ -13,9 +13,8 @@ import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.subscription.SubscriptionConstants;
-import ca.uhn.test.util.LogEventIterableAssert;
 import ca.uhn.test.util.LogbackTestExtension;
-import ch.qos.logback.classic.Level;
+import ca.uhn.test.util.LogbackTestExtensionAssert;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Subscription;
 import org.junit.jupiter.api.BeforeEach;
@@ -125,10 +124,8 @@ public class SubscriptionLoaderTest {
 		verify(mySubscriptionDao)
 			.searchForResources(any(SearchParameterMap.class), any(SystemRequestDetails.class));
 
-		String expected = "Subscription "
-			+ subscription.getIdElement().getIdPart()
-			+ " could not be activated.";
-		LogEventIterableAssert.assertThat(myLogCapture.getLogEvents()).hasEventWithLevelAndMessageContains(Level.ERROR, expected);
-		LogEventIterableAssert.assertThat(myLogCapture.getLogEvents()).hasAtLeastOneEventWithMessage(subscription.getError());
+		LogbackTestExtensionAssert.assertThat(myLogCapture).hasErrorMessage(
+			"Subscription " + subscription.getIdElement().getIdPart() + " could not be activated.");
+		LogbackTestExtensionAssert.assertThat(myLogCapture).hasMessage(subscription.getError());
 	}
 }
