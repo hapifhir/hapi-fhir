@@ -16,6 +16,7 @@ import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.fhir.ucum.UcumService;
+import org.hl7.fhir.common.hapi.validation.support.ValidationSupportUtils;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.TerminologyServiceException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -757,10 +758,12 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 			throw new InternalErrorException(Msg.code(690) + e);
 		}
 
+		String system = ValidationSupportUtils.extractCodeSystemForCodeR5(theValueSet, code);
+
 		ConceptValidationOptions validationOptions =
 				convertConceptValidationOptions(theOptions).setInferSystem(true);
 
-		return doValidation(convertedVs, validationOptions, null, code, null);
+		return doValidation(convertedVs, validationOptions, system, code, null);
 	}
 
 	@Override

@@ -120,6 +120,12 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 	}
 
 	@Test
+	public void testValidateCode_withBlankCodeSystemAndValueSetUrl_returnsNull() {
+		IValidationSupport.CodeValidationResult outcome = mySvc.validateCode(null, null, null, CODE, DISPLAY, null);
+		assertNull(outcome);
+	}
+
+	@Test
 	public void testValidateCode_forValueSet_returnsCorrectly() {
 		createNextValueSetReturnParameters(true, DISPLAY, null);
 

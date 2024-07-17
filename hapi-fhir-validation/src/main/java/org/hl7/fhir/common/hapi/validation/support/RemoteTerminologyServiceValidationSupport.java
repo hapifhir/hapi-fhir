@@ -81,6 +81,12 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 			String theCode,
 			String theDisplay,
 			String theValueSetUrl) {
+
+		// Remote terminology services shouldn't be used to validate codes with an implied system
+		if (isBlank(theCodeSystem) && isBlank(theValueSetUrl)) {
+			return null;
+		}
+
 		return invokeRemoteValidateCode(theCodeSystem, theCode, theDisplay, theValueSetUrl, null);
 	}
 
@@ -99,7 +105,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 		// so let's try to get it from the VS if is not present
 		String codeSystem = theCodeSystem;
 		if (isNotBlank(theCode) && isBlank(codeSystem)) {
-			codeSystem = extractCodeSystemForCode((ValueSet) theValueSet, theCode);
+			codeSystem = ValidationSupportUtils.extractCodeSystemForCodeR4((ValueSet) theValueSet, theCode);
 		}
 
 		// Remote terminology services shouldn't be used to validate codes with an implied system
@@ -114,48 +120,6 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 			valueSetUrl = null;
 		}
 		return invokeRemoteValidateCode(codeSystem, theCode, theDisplay, valueSetUrl, valueSet);
-	}
-
-	/**
-	 * Try to obtain the codeSystem of the received code from the received ValueSet
-	 */
-	private String extractCodeSystemForCode(ValueSet theValueSet, String theCode) {
-		if (theValueSet.getCompose() == null
-				|| theValueSet.getCompose().getInclude() == null
-				|| theValueSet.getCompose().getInclude().isEmpty()) {
-			return null;
-		}
-
-		if (theValueSet.getCompose().getInclude().size() == 1) {
-			ValueSet.ConceptSetComponent include =
-					theValueSet.getCompose().getInclude().iterator().next();
-			return getVersionedCodeSystem(include);
-		}
-
-		// when component has more than one include, their codeSystem(s) could be different, so we need to make sure
-		// that we are picking up the system for the include filter to which the code corresponds
-		for (ValueSet.ConceptSetComponent include : theValueSet.getCompose().getInclude()) {
-			if (include.hasSystem()) {
-				for (ValueSet.ConceptReferenceComponent concept : include.getConcept()) {
-					if (concept.hasCodeElement() && concept.getCode().equals(theCode)) {
-						return getVersionedCodeSystem(include);
-					}
-				}
-			}
-		}
-
-		// at this point codeSystem couldn't be extracted for a multi-include ValueSet. Just on case it was
-		// because the format was not well handled, let's allow to watch the VS by an easy logging change
-		ourLog.trace("CodeSystem couldn't be extracted for code: {} for ValueSet: {}", theCode, theValueSet.getId());
-		return null;
-	}
-
-	private String getVersionedCodeSystem(ValueSet.ConceptSetComponent theComponent) {
-		String codeSystem = theComponent.getSystem();
-		if (!codeSystem.contains("|") && theComponent.hasVersion()) {
-			codeSystem += "|" + theComponent.getVersion();
-		}
-		return codeSystem;
 	}
 
 	@Override
