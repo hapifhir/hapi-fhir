@@ -208,7 +208,7 @@ public class AddIndexTask extends BaseTableTask {
 	 * @param bareCreateSql
 	 * @return
 	 */
-	private static @Nonnull String buildOnlineCreateWithTryCatchFallback(String bareCreateSql) {
+	static @Nonnull String buildOnlineCreateWithTryCatchFallback(String bareCreateSql) {
 		// Some "Editions" of Sql Server do not support ONLINE.
 		// @format:off
 		return "BEGIN TRY -- try first online, without locking the table \n"

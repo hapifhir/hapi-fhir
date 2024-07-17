@@ -191,7 +191,12 @@ public class AddIndexTaskTest extends BaseTest {
 						assertEquals("create index IDX_ANINDEX on SOMETABLE(PID, TEXTCOL) ONLINE DEFERRED INVALIDATION", mySql);
 						break;
 					case MSSQL_2012:
-						assertEquals("create index IDX_ANINDEX on SOMETABLE(PID, TEXTCOL) WITH (ONLINE = ON)", mySql);
+						assertEquals("BEGIN TRY -- try first online, without locking the table \n" +
+							"    EXEC('create index IDX_ANINDEX on SOMETABLE(PID, TEXTCOL) WITH (ONLINE = ON)');\n" +
+							"END TRY \n" +
+							"BEGIN CATCH -- for Editions of Sql Server that don't support ONLINE, run with table locks \n" +
+							"create index IDX_ANINDEX on SOMETABLE(PID, TEXTCOL); \n" +
+							"END CATCH;", mySql);
 						break;
 					default:
 						// unsupported is ok.  But it means we lock the table for a bit.
@@ -200,32 +205,19 @@ public class AddIndexTaskTest extends BaseTest {
 				}
 			}
 
+			/**
+			 * We sniff the edition of Oracle to detect support for ONLINE migrations.
+			 */
 			@ParameterizedTest(name = "{index}: {0}")
 			@ValueSource(booleans = { true, false } )
-			public void offForUnsupportedVersionsOfSqlServer(boolean theSupportedFlag) {
-				myTask.setDriverType(DriverTypeEnum.MSSQL_2012);
-				myTask.setOnline(true);
-				myTask.setMetadataSource(mockMetadataSource);
-				Mockito.when(mockMetadataSource.isOnlineIndexSupported(Mockito.any())).thenReturn(theSupportedFlag);
-
-				mySql = myTask.generateSql();
-				if (theSupportedFlag) {
-					assertEquals("create index IDX_ANINDEX on SOMETABLE(PID, TEXTCOL) WITH (ONLINE = ON)", mySql);
-				} else {
-					assertEquals("create index IDX_ANINDEX on SOMETABLE(PID, TEXTCOL)", mySql);
-				}
-			}
-
-			@ParameterizedTest(name = "{index}: {0}")
-			@ValueSource(booleans = { true, false } )
-			public void offForUnsupportedVersionsOfOracleServer(boolean theSupportedFlag) {
+			public void offForUnsupportedVersionsOfOracleServer(boolean theOnlineIndexingSupportedFlag) {
 				myTask.setDriverType(DriverTypeEnum.ORACLE_12C);
 				myTask.setOnline(true);
 				myTask.setMetadataSource(mockMetadataSource);
-				Mockito.when(mockMetadataSource.isOnlineIndexSupported(Mockito.any())).thenReturn(theSupportedFlag);
+				Mockito.when(mockMetadataSource.isOnlineIndexSupported(Mockito.any())).thenReturn(theOnlineIndexingSupportedFlag);
 
 				mySql = myTask.generateSql();
-				if (theSupportedFlag) {
+				if (theOnlineIndexingSupportedFlag) {
 					assertEquals("create index IDX_ANINDEX on SOMETABLE(PID, TEXTCOL) ONLINE DEFERRED INVALIDATION", mySql);
 				} else {
 					assertEquals("create index IDX_ANINDEX on SOMETABLE(PID, TEXTCOL)", mySql);

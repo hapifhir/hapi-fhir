@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef.containertests;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.taskdef.AddIndexTaskITTestSuite;
+import ca.uhn.fhir.jpa.migrate.taskdef.DropIndexTaskITTestSuite;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -42,6 +43,14 @@ public abstract class BaseCollectedMigrationTaskSuite {
 
 	@Nested
 	class AddIndexTaskTests implements AddIndexTaskITTestSuite {
+		@Override
+		public Support getSupport() {
+			return BaseCollectedMigrationTaskSuite.this.getSupport();
+		}
+	}
+
+	@Nested
+	class DropIndexTaskTests implements DropIndexTaskITTestSuite {
 		@Override
 		public Support getSupport() {
 			return BaseCollectedMigrationTaskSuite.this.getSupport();
