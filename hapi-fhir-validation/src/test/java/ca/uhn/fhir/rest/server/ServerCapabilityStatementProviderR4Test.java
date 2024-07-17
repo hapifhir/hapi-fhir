@@ -161,6 +161,29 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 	}
 
 	@Test
+	public void testNarrativeText() throws ServletException {
+		RestfulServer rs = new RestfulServer(myCtx);
+
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
+		rs.setServerConformanceProvider(sc);
+
+		rs.init(createServletConfig());
+
+		CapabilityStatement cs;
+		String narrativeText;
+
+		cs = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
+		narrativeText = cs.getText().getDivAsString();
+		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">HAPI FHIR Server</div>", narrativeText);
+
+		rs.setServerName("My Server Name");
+
+		cs = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
+		narrativeText = cs.getText().getDivAsString();
+		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">My Server Name</div>", narrativeText);
+	}
+
+	@Test
 	public void testFormats() throws ServletException {
 		RestfulServer rs = new RestfulServer(myCtx);
 		rs.setProviders(new ConditionalProvider());

@@ -96,6 +96,7 @@ public class Batch2JobHelper {
 		try {
 			await()
 				.atMost(theSecondsToWait, TimeUnit.SECONDS)
+				.pollDelay(100, TimeUnit.MILLISECONDS)
 				.until(() -> {
 					checkCount.getAndIncrement();
 					boolean inFinalStatus = false;

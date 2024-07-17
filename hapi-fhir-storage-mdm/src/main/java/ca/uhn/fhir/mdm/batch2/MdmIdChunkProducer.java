@@ -19,17 +19,14 @@
  */
 package ca.uhn.fhir.mdm.batch2;
 
+import ca.uhn.fhir.batch2.jobs.chunk.ChunkRangeJson;
 import ca.uhn.fhir.batch2.jobs.step.IIdChunkProducer;
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.pid.IResourcePidStream;
 import ca.uhn.fhir.jpa.api.svc.IGoldenResourceSearchSvc;
-import jakarta.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Date;
-
-public class MdmIdChunkProducer implements IIdChunkProducer<MdmChunkRangeJson> {
+public class MdmIdChunkProducer implements IIdChunkProducer<ChunkRangeJson> {
 	private static final Logger ourLog = LoggerFactory.getLogger(MdmIdChunkProducer.class);
 	private final IGoldenResourceSearchSvc myGoldenResourceSearchSvc;
 
@@ -38,17 +35,16 @@ public class MdmIdChunkProducer implements IIdChunkProducer<MdmChunkRangeJson> {
 	}
 
 	@Override
-	public IResourcePidStream fetchResourceIdStream(
-			Date theStart, Date theEnd, @Nullable RequestPartitionId theRequestPartitionId, MdmChunkRangeJson theData) {
+	public IResourcePidStream fetchResourceIdStream(ChunkRangeJson theData) {
 		String resourceType = theData.getResourceType();
 
 		ourLog.info(
 				"Fetching golden resource ID chunk for resource type {} - Range {} - {}",
 				resourceType,
-				theStart,
-				theEnd);
+				theData.getStart(),
+				theData.getEnd());
 
 		return myGoldenResourceSearchSvc.fetchGoldenResourceIdStream(
-				theStart, theEnd, theRequestPartitionId, resourceType);
+				theData.getStart(), theData.getEnd(), theData.getPartitionId(), resourceType);
 	}
 }

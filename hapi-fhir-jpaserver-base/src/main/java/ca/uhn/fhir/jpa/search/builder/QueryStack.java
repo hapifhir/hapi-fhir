@@ -1477,6 +1477,11 @@ public class QueryStack {
 		mySqlBuilder.getSelect().addGroupings(firstPredicateBuilder.getResourceIdColumn());
 	}
 
+	public void addOrdering() {
+		BaseJoiningPredicateBuilder firstPredicateBuilder = mySqlBuilder.getOrCreateFirstPredicateBuilder();
+		mySqlBuilder.getSelect().addOrderings(firstPredicateBuilder.getResourceIdColumn());
+	}
+
 	public Condition createPredicateReferenceForEmbeddedChainedSearchResource(
 			@Nullable DbColumn theSourceJoinColumn,
 			String theResourceName,
@@ -2779,16 +2784,16 @@ public class QueryStack {
 		}
 	}
 
-	public void addPredicateCompositeUnique(String theIndexString, RequestPartitionId theRequestPartitionId) {
+	public void addPredicateCompositeUnique(List<String> theIndexStrings, RequestPartitionId theRequestPartitionId) {
 		ComboUniqueSearchParameterPredicateBuilder predicateBuilder = mySqlBuilder.addComboUniquePredicateBuilder();
-		Condition predicate = predicateBuilder.createPredicateIndexString(theRequestPartitionId, theIndexString);
+		Condition predicate = predicateBuilder.createPredicateIndexString(theRequestPartitionId, theIndexStrings);
 		mySqlBuilder.addPredicate(predicate);
 	}
 
-	public void addPredicateCompositeNonUnique(String theIndexString, RequestPartitionId theRequestPartitionId) {
+	public void addPredicateCompositeNonUnique(List<String> theIndexStrings, RequestPartitionId theRequestPartitionId) {
 		ComboNonUniqueSearchParameterPredicateBuilder predicateBuilder =
 				mySqlBuilder.addComboNonUniquePredicateBuilder();
-		Condition predicate = predicateBuilder.createPredicateHashComplete(theRequestPartitionId, theIndexString);
+		Condition predicate = predicateBuilder.createPredicateHashComplete(theRequestPartitionId, theIndexStrings);
 		mySqlBuilder.addPredicate(predicate);
 	}
 

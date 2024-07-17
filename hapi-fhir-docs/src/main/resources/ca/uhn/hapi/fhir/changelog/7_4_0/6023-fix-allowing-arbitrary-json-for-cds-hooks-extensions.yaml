@@ -1,0 +1,4 @@
+---
+type: change
+issue: 6023
+title: "Previously, CDS hook extensions needed to be encoded as strings. This has been changed so that extensions are now properly provided as inline JSON."

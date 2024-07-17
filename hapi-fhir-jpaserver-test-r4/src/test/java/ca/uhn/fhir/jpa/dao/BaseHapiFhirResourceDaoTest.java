@@ -232,6 +232,9 @@ class BaseHapiFhirResourceDaoTest {
 		entity.setId(123L);
 		entity.setFhirId("456");
 
+		// set a transactionService that will actually execute the callback
+		mySvc.setTransactionService(new MockHapiTransactionService());
+
 		// mock
 		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForRead(
 			any(RequestDetails.class),

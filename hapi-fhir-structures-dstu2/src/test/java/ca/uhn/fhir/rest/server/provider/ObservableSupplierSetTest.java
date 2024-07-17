@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
+import static ca.uhn.test.util.LoggingEventPredicates.makeMessageContains;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -56,7 +57,7 @@ class ObservableSupplierSetTest {
 		myObservableSupplierSet.removeSupplier(myCounter::incrementAndGet);
 		myObserver.assertCalls(1, 0);
 		assertThat(myObservableSupplierSet.getSupplierResults()).hasSize(1);
-		List<ILoggingEvent> events = myLogger.filterLoggingEventsWithMessageContaining("Failed to remove supplier");
+        List<ILoggingEvent> events = myLogger.getLogEvents(makeMessageContains("Failed to remove supplier"));
 		assertThat(events).hasSize(1);
 		assertEquals(Level.WARN, events.get(0).getLevel());
 	}
