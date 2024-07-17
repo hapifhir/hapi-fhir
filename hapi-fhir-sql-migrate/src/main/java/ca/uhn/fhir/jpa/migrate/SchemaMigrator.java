@@ -33,20 +33,53 @@ import java.util.Properties;
 import javax.sql.DataSource;
 
 /**
+ * The SchemaMigrator class is responsible for managing and executing database schema migrations during standard bootup.
+ * It provides methods to validate the schema version and migrate the schema if necessary.
+ *
+ * This supports all the configuation needed to run via the CLI or via a bootup migrator. Specifically
+ * 1. Dry Run
+ * 2. Enable Heavyweight Tasks
+ * 3. Task Skipping
  *
  */
 public class SchemaMigrator {
 	public static final String HAPI_FHIR_MIGRATION_TABLENAME = "FLY_HFJ_MIGRATION";
 	private static final Logger ourLog = LoggerFactory.getLogger(SchemaMigrator.class);
+	/**
+	 * The Schema Name
+	 */
 	private final String mySchemaName;
+	/**
+	 * The datasource to connect to the Database with.
+	 */
 	private final DataSource myDataSource;
+	/**
+	 * Whether to skip validation of the schema
+	 */
 	private final boolean mySkipValidation;
+	/**
+	 * See {@link HapiMigrator#isRunHeavyweightSkippableTasks()}. Enables or disables Optional Heavyweight migrations
+	 */
 	private final boolean myRunHeavyweightMigrationTasks;
+	/**
+	 * The name of the table in which migrations are tracked.
+	 */
 	private final String myMigrationTableName;
+	/**
+	 * The actual task list, which will be filtered during construction, and having all Tasks enumerated in `theMigrationTasksToSkip` removed before execution.
+	 */
 	private final MigrationTaskList myMigrationTasks;
+	/**
+	 * See {@link HapiMigrator#isDryRun()}
+	 */
 	private final boolean myDryRun;
+
 	private DriverTypeEnum myDriverType;
+	/**
+	 * Inventory of callbacks to invoke for pre and post execution
+	 */
 	private List<IHapiMigrationCallback> myCallbacks = Collections.emptyList();
+
 	private final HapiMigrationStorageSvc myHapiMigrationStorageSvc;
 
 	/**
@@ -57,7 +90,7 @@ public class SchemaMigrator {
 			String theMigrationTableName,
 			DataSource theDataSource,
 			boolean theEnableHeavyweighTtasks,
-			String theSkipVersions,
+			String theMigrationTasksToSkip,
 			boolean theDryRun,
 			Properties jpaProperties,
 			MigrationTaskList theMigrationTasks,
@@ -71,8 +104,30 @@ public class SchemaMigrator {
 				&& "update".equals(jpaProperties.getProperty(AvailableSettings.HBM2DDL_AUTO));
 		myHapiMigrationStorageSvc = theHapiMigrationStorageSvc;
 		// Skip the skipped versions here.
-		myMigrationTasks.setDoNothingOnSkippedTasks(theSkipVersions);
+		myMigrationTasks.setDoNothingOnSkippedTasks(theMigrationTasksToSkip);
 		myDryRun = theDryRun;
+	}
+
+	/**
+	 * Temporary Dummy Constructor to remove once CDR side merges.
+	 */
+	public SchemaMigrator(
+		String theSchemaName,
+		String theMigrationTableName,
+		DataSource theDataSource,
+		Properties jpaProperties,
+		MigrationTaskList theMigrationTasks,
+		HapiMigrationStorageSvc theHapiMigrationStorageSvc) {
+		mySchemaName = theSchemaName;
+		myDataSource = theDataSource;
+		myMigrationTableName = theMigrationTableName;
+		myMigrationTasks = theMigrationTasks;
+		myRunHeavyweightMigrationTasks = false;
+		mySkipValidation = jpaProperties.containsKey(AvailableSettings.HBM2DDL_AUTO)
+			&& "update".equals(jpaProperties.getProperty(AvailableSettings.HBM2DDL_AUTO));
+		myHapiMigrationStorageSvc = theHapiMigrationStorageSvc;
+		// Skip the skipped versions here.
+		myDryRun = false;
 	}
 
 	public void validate() {
