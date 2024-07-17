@@ -37,6 +37,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 import javax.sql.DataSource;
@@ -51,8 +52,16 @@ public class HapiEmbeddedDatabasesExtension implements AfterAllCallback {
 
 	private final DatabaseInitializerHelper myDatabaseInitializerHelper = new DatabaseInitializerHelper();
 
-	public HapiEmbeddedDatabasesExtension() {
+	Map<DriverTypeEnum, Class<? extends JpaEmbeddedDatabase>> typeToDb = Map.of(
+		DriverTypeEnum.H2_EMBEDDED, H2EmbeddedDatabase.class,
+		DriverTypeEnum.POSTGRES_9_4, PostgresEmbeddedDatabase.class,
+		DriverTypeEnum.MSSQL_2012, MsSqlEmbeddedDatabase.class,
+		DriverTypeEnum.ORACLE_12C, OracleEmbeddedDatabase.class
+	);
+	record DatabaseConnectionInfo(DriverTypeEnum driver, String url, String username, String password){}
+	public HapiEmbeddedDatabasesExtension(DatabaseConnectionInfo... theDatabases) {
 		if (DockerRequiredCondition.isDockerAvailable()) {
+			theDatabases
 			myEmbeddedDatabases.add(new H2EmbeddedDatabase());
 			myEmbeddedDatabases.add(new PostgresEmbeddedDatabase());
 			myEmbeddedDatabases.add(new MsSqlEmbeddedDatabase());
