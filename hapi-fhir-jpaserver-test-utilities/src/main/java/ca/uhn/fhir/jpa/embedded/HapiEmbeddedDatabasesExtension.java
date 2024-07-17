@@ -56,7 +56,7 @@ public class HapiEmbeddedDatabasesExtension implements AfterAllCallback {
 			myEmbeddedDatabases.add(new H2EmbeddedDatabase());
 			myEmbeddedDatabases.add(new PostgresEmbeddedDatabase());
 			myEmbeddedDatabases.add(new MsSqlEmbeddedDatabase());
-			if (canUseOracle()) {
+			if (canUseOracle() || true) {
 				myEmbeddedDatabases.add(new OracleEmbeddedDatabase());
 			} else {
 				String message =
@@ -122,7 +122,7 @@ public class HapiEmbeddedDatabasesExtension implements AfterAllCallback {
 			arguments.add(Arguments.of(DriverTypeEnum.POSTGRES_9_4));
 			arguments.add(Arguments.of(DriverTypeEnum.MSSQL_2012));
 
-			if (canUseOracle()) {
+			if (canUseOracle() || true) {
 				arguments.add(Arguments.of(DriverTypeEnum.ORACLE_12C));
 			}
 
