@@ -9,8 +9,8 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 public class OracleCondition implements ExecutionCondition {
 
 	public static final String ENABLED_MSG = "Environment is able to run Oracle using TestContainers.";
-	public static final String DISABLED_MSG = "Environment is not able to run Oracle using TestContainers. If you " +
-		"are a Mac user, please ensure Colima is running. See: https://java.testcontainers.org/supported_docker_environment/#using-colima.";
+	public static final String DISABLED_MSG = "Environment is not able to run Oracle using TestContainers. If you "
+			+ "are a Mac user, please ensure Colima is running. See: https://java.testcontainers.org/supported_docker_environment/#using-colima.";
 
 	@Override
 	public ConditionEvaluationResult evaluateExecutionCondition(ExtensionContext theExtensionContext) {
