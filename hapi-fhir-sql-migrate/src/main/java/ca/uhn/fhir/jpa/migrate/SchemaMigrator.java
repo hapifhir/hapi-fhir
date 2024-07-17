@@ -112,19 +112,19 @@ public class SchemaMigrator {
 	 * Temporary Dummy Constructor to remove once CDR side merges.
 	 */
 	public SchemaMigrator(
-		String theSchemaName,
-		String theMigrationTableName,
-		DataSource theDataSource,
-		Properties jpaProperties,
-		MigrationTaskList theMigrationTasks,
-		HapiMigrationStorageSvc theHapiMigrationStorageSvc) {
+			String theSchemaName,
+			String theMigrationTableName,
+			DataSource theDataSource,
+			Properties jpaProperties,
+			MigrationTaskList theMigrationTasks,
+			HapiMigrationStorageSvc theHapiMigrationStorageSvc) {
 		mySchemaName = theSchemaName;
 		myDataSource = theDataSource;
 		myMigrationTableName = theMigrationTableName;
 		myMigrationTasks = theMigrationTasks;
 		myRunHeavyweightMigrationTasks = false;
 		mySkipValidation = jpaProperties.containsKey(AvailableSettings.HBM2DDL_AUTO)
-			&& "update".equals(jpaProperties.getProperty(AvailableSettings.HBM2DDL_AUTO));
+				&& "update".equals(jpaProperties.getProperty(AvailableSettings.HBM2DDL_AUTO));
 		myHapiMigrationStorageSvc = theHapiMigrationStorageSvc;
 		// Skip the skipped versions here.
 		myDryRun = false;
