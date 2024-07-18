@@ -43,9 +43,10 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.Date;
-import java.util.List;
 import java.util.Optional;
 
 import static ca.uhn.fhir.jpa.model.entity.PersistedResourceModifiedMessageEntityPK.with;
@@ -82,8 +83,10 @@ public class ResourceModifiedMessagePersistenceSvcImpl implements IResourceModif
 	}
 
 	@Override
-	public List<IPersistedResourceModifiedMessage> findAllOrderedByCreatedTime() {
-		return myHapiTransactionService.withSystemRequest().execute(myResourceModifiedDao::findAllOrderedByCreatedTime);
+	public Page<IPersistedResourceModifiedMessage> findAllOrderedByCreatedTime(Pageable thePageable) {
+		return myHapiTransactionService.withSystemRequest().execute(() -> {
+			return myResourceModifiedDao.findAllOrderedByCreatedTime(thePageable);
+		});
 	}
 
 	@Override
