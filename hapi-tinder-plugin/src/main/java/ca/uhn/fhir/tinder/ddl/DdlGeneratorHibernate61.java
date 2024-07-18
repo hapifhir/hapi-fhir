@@ -15,7 +15,10 @@ import org.hibernate.boot.registry.BootstrapServiceRegistry;
 import org.hibernate.boot.registry.BootstrapServiceRegistryBuilder;
 import org.hibernate.boot.registry.StandardServiceRegistry;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
+import org.hibernate.boot.spi.AdditionalMappingContributor;
 import org.hibernate.cfg.AvailableSettings;
+import org.hibernate.cfg.JdbcSettings;
+import org.hibernate.cfg.SchemaToolingSettings;
 import org.hibernate.engine.jdbc.connections.internal.UserSuppliedConnectionProviderImpl;
 import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
 import org.hibernate.tool.hbm2ddl.SchemaExport;
@@ -88,8 +91,8 @@ public class DdlGeneratorHibernate61 {
 
 			StandardServiceRegistryBuilder registryBuilder =
 					new StandardServiceRegistryBuilder(bootstrapServiceRegistry);
-			registryBuilder.applySetting(AvailableSettings.HBM2DDL_AUTO, "create");
-			registryBuilder.applySetting(AvailableSettings.DIALECT, dialectClassName);
+			registryBuilder.applySetting(SchemaToolingSettings.HBM2DDL_AUTO, "create");
+			registryBuilder.applySetting(JdbcSettings.DIALECT, dialectClassName);
 			registryBuilder.addService(ConnectionProvider.class, connectionProvider);
 			registryBuilder.addService(
 					ISequenceValueMassager.class, new ISequenceValueMassager.NoopSequenceValueMassager());

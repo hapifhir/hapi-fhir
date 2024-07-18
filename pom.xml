@@ -125,7 +125,8 @@
 		<module>hapi-fhir-spring-boot</module>
 		<module>hapi-fhir-jacoco</module>
 		<module>hapi-fhir-server-cds-hooks</module>
-	</modules>
+        <module>hapi-fhir-sql-hibernate-services</module>
+    </modules>
 
 	<dependencies>
 		<dependency>

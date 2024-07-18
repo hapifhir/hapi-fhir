@@ -4,7 +4,10 @@ import org.apache.commons.io.FileUtils;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.xml.transform.SourceLocator;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -41,5 +44,20 @@ class GenerateDdlMojoTest {
 		assertThat(contents).as(fileName).contains("CREATE SEQUENCE");
 	}
 
+	@Test
+	public void testPruneComplexId_Enabled() throws MojoExecutionException, MojoFailureException, IOException {
 
+		GenerateDdlMojo m = new GenerateDdlMojo();
+		m.packageNames = List.of("ca.uhn.fhir.tinder.ddl.test");
+		m.outputDirectory = "target/generate-ddl-plugin-test/";
+		m.dialects = List.of(
+			new GenerateDdlMojo.Dialect("ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgresDialect", "postgres.sql")
+		);
+		m.execute();
+
+		String contents = FileUtils.readFileToString(new File("target/generate-ddl-plugin-test/postgres.sql"), StandardCharsets.UTF_8).toUpperCase(Locale.ROOT);
+		ourLog.info("SQL: {}", contents);
+
+	}
+private static final Logger ourLog = LoggerFactory.getLogger(GenerateDdlMojoTest.class);
 }
