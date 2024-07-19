@@ -470,35 +470,42 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		}
 
 		{
-			// LUKETODO:  ca.uhn.fhir.jpa.migrate.HapiMigrationException: HAPI-0047: Failure executing task 'Execute raw sql', for driver: MSSQL_2012, aborting! Cause: ca.uhn.fhir.jpa.migrate.HapiMigrationException: HAPI-0061: Failed during task 7.4.0.20240719.10: org.springframework.jdbc.UncategorizedSQLException: PreparedStatementCallback; uncategorized SQLException for SQL [ALTER TABLE HFJ_RESOURCE ALTER COLUMN FHIR_ID varchar(64) COLLATE SQL_Latin1_General_CP1_CS_AS]; SQL state [S0001]; error code [5074]; The index 'IDX_RES_TYPE_FHIR_ID' is dependent on column 'FHIR_ID'.
+			// LUKETODO:  ca.uhn.fhir.jpa.migrate.HapiMigrationException: HAPI-0047: Failure executing task 'Execute raw
+			// sql', for driver: MSSQL_2012, aborting! Cause: ca.uhn.fhir.jpa.migrate.HapiMigrationException: HAPI-0061:
+			// Failed during task 7.4.0.20240719.10: org.springframework.jdbc.UncategorizedSQLException:
+			// PreparedStatementCallback; uncategorized SQLException for SQL [ALTER TABLE HFJ_RESOURCE ALTER COLUMN
+			// FHIR_ID varchar(64) COLLATE SQL_Latin1_General_CP1_CS_AS]; SQL state [S0001]; error code [5074]; The
+			// index 'IDX_RES_TYPE_FHIR_ID' is dependent on column 'FHIR_ID'.
 			// LUKETODO:  drop and recreate IDX_RES_TYPE_FHIR_ID
 			final Builder.BuilderWithTableName hfjResource = version.onTable("HFJ_RESOURCE");
 
 			hfjResource.dropIndex("20240719.10", "IDX_RES_FHIR_ID").onlyAppliesToPlatforms(DriverTypeEnum.MSSQL_2012);
 
-			hfjResource.dropIndex("20240719.20", "IDX_RES_TYPE_FHIR_ID").onlyAppliesToPlatforms(DriverTypeEnum.MSSQL_2012);
+			hfjResource
+					.dropIndex("20240719.20", "IDX_RES_TYPE_FHIR_ID")
+					.onlyAppliesToPlatforms(DriverTypeEnum.MSSQL_2012);
 
 			version.executeRawSql(
-				"20240719.30",
-				DriverTypeEnum.MSSQL_2012,
-				"ALTER TABLE HFJ_RESOURCE ALTER COLUMN FHIR_ID varchar(64) COLLATE SQL_Latin1_General_CP1_CS_AS");
+					"20240719.30",
+					DriverTypeEnum.MSSQL_2012,
+					"ALTER TABLE HFJ_RESOURCE ALTER COLUMN FHIR_ID varchar(64) COLLATE SQL_Latin1_General_CP1_CS_AS");
 
 			hfjResource
-				.addIndex("20240719.40", "IDX_RES_FHIR_ID")
-				.unique(false)
-				.online(true)
-				.withColumns("FHIR_ID")
-				.onlyAppliesToPlatforms(DriverTypeEnum.MSSQL_2012);
+					.addIndex("20240719.40", "IDX_RES_FHIR_ID")
+					.unique(false)
+					.online(true)
+					.withColumns("FHIR_ID")
+					.onlyAppliesToPlatforms(DriverTypeEnum.MSSQL_2012);
 
 			hfjResource
-				.addIndex("20240719.50", "IDX_RES_TYPE_FHIR_ID")
-				.unique(true)
-				.online(true)
-				// include res_id and our deleted flag so we can satisfy Observation?_sort=_id from the index on
-				// platforms that support it.
-				.includeColumns("RES_ID, RES_DELETED_AT")
-				.withColumns("RES_TYPE", "FHIR_ID")
-				.onlyAppliesToPlatforms(DriverTypeEnum.MSSQL_2012);
+					.addIndex("20240719.50", "IDX_RES_TYPE_FHIR_ID")
+					.unique(true)
+					.online(true)
+					// include res_id and our deleted flag so we can satisfy Observation?_sort=_id from the index on
+					// platforms that support it.
+					.includeColumns("RES_ID, RES_DELETED_AT")
+					.withColumns("RES_TYPE", "FHIR_ID")
+					.onlyAppliesToPlatforms(DriverTypeEnum.MSSQL_2012);
 		}
 	}
 
