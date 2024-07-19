@@ -148,5 +148,4 @@ public class StoredDetails implements IModelJson {
 		myBytes = theBytes;
 		return this;
 	}
-
 }
