@@ -137,9 +137,13 @@ public class OldStoredDetails implements IModelJson {
 
 	public StoredDetails toDetails() {
 		HashFunction hash = Hashing.sha256();
-		StoredDetails storedDetails = new StoredDetails(myBinaryContentId, myBytes, myContentType, new HashingInputStream(hash,new ByteArrayInputStream("whatever".getBytes())), myPublished);
+		StoredDetails storedDetails = new StoredDetails(
+				myBinaryContentId,
+				myBytes,
+				myContentType,
+				new HashingInputStream(hash, new ByteArrayInputStream("whatever".getBytes())),
+				myPublished);
 		storedDetails.setHash(myHash);
 		return storedDetails;
-
 	}
 }

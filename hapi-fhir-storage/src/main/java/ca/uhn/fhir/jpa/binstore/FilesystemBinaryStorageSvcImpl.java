@@ -113,7 +113,8 @@ public class FilesystemBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 		long count = countingInputStream.getByteCount();
 		StoredDetails details = null;
 		if (HapiSystemProperties.isUnitTestModeEnabled()) {
-			OldStoredDetails oldDetails  = new OldStoredDetails(id, count, theContentType, hashingInputStream, new Date());
+			OldStoredDetails oldDetails =
+					new OldStoredDetails(id, count, theContentType, hashingInputStream, new Date());
 			File descriptorFilename = getDescriptorFilename(storagePath, theResourceId, id);
 			ourLog.info("Writing to file: {}", descriptorFilename.getAbsolutePath());
 			try (FileWriter writer = new FileWriter(descriptorFilename)) {
