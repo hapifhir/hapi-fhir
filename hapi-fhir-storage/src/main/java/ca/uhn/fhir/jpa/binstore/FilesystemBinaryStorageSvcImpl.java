@@ -21,10 +21,12 @@ package ca.uhn.fhir.jpa.binstore;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.binary.api.OldStoredDetails;
 import ca.uhn.fhir.jpa.binary.api.StoredDetails;
 import ca.uhn.fhir.jpa.binary.svc.BaseBinaryStorageSvcImpl;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.system.HapiSystemProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -109,11 +111,22 @@ public class FilesystemBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 
 		// Write descriptor file
 		long count = countingInputStream.getByteCount();
-		StoredDetails details = new StoredDetails(id, count, theContentType, hashingInputStream, new Date());
-		File descriptorFilename = getDescriptorFilename(storagePath, theResourceId, id);
-		ourLog.info("Writing to file: {}", descriptorFilename.getAbsolutePath());
-		try (FileWriter writer = new FileWriter(descriptorFilename)) {
-			myJsonSerializer.writeValue(writer, details);
+		StoredDetails details = null;
+		if (HapiSystemProperties.isUnitTestModeEnabled()) {
+			OldStoredDetails oldDetails  = new OldStoredDetails(id, count, theContentType, hashingInputStream, new Date());
+			File descriptorFilename = getDescriptorFilename(storagePath, theResourceId, id);
+			ourLog.info("Writing to file: {}", descriptorFilename.getAbsolutePath());
+			try (FileWriter writer = new FileWriter(descriptorFilename)) {
+				myJsonSerializer.writeValue(writer, oldDetails);
+			}
+			details = oldDetails.toDetails();
+		} else {
+			details = new StoredDetails(id, count, theContentType, hashingInputStream, new Date());
+			File descriptorFilename = getDescriptorFilename(storagePath, theResourceId, id);
+			ourLog.info("Writing to file: {}", descriptorFilename.getAbsolutePath());
+			try (FileWriter writer = new FileWriter(descriptorFilename)) {
+				myJsonSerializer.writeValue(writer, details);
+			}
 		}
 
 		ourLog.info(

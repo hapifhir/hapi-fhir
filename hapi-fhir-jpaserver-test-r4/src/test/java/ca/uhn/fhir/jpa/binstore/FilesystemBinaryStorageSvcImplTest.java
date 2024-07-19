@@ -7,6 +7,7 @@ import ca.uhn.fhir.jpa.binary.api.StoredDetails;
 import ca.uhn.fhir.rest.server.exceptions.PayloadTooLargeException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.system.HapiSystemProperties;
 import org.apache.commons.io.FileUtils;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.IdType;
@@ -44,6 +45,29 @@ public class FilesystemBinaryStorageSvcImplTest {
 	@AfterEach
 	public void after() throws IOException {
 		FileUtils.deleteDirectory(myPath);
+	}
+
+	@Test
+	public void testStoreAndRetrievePostMigration() throws IOException {
+		HapiSystemProperties.enableUnitTestMode();
+		IIdType id = new IdType("Patient/123");
+		String contentType = "image/png";
+		StoredDetails outcome = mySvc.storeBinaryContent(id, null, contentType, new ByteArrayInputStream(SOME_BYTES), new ServletRequestDetails());
+
+		ourLog.info("Got id: {}", outcome);
+
+		StoredDetails details = mySvc.fetchBinaryContentDetails(id, outcome.getBinaryContentId());
+		assertEquals(16L, details.getBytes());
+		assertEquals(outcome.getBinaryContentId(), details.getBinaryContentId());
+		assertEquals("image/png", details.getContentType());
+		assertEquals("dc7197cfab936698bef7818975c185a9b88b71a0a0a2493deea487706ddf20cb", details.getHash());
+		assertNotNull(details.getPublished());
+
+		ByteArrayOutputStream capture = new ByteArrayOutputStream();
+		mySvc.writeBinaryContent(id, outcome.getBinaryContentId(), capture);
+
+		assertArrayEquals(SOME_BYTES, capture.toByteArray());
+		assertArrayEquals(SOME_BYTES, mySvc.fetchBinaryContent(id, outcome.getBinaryContentId()));
 	}
 
 	@Test
