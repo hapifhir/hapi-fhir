@@ -40,14 +40,7 @@ public class OracleEmbeddedDatabase extends JpaEmbeddedDatabase {
 	private final OracleContainer myContainer;
 
 	public OracleEmbeddedDatabase() {
-		// myContainer = new OracleContainer("gvenzl/oracle-xe:21-slim-faststart").withPrivilegedMode(true);
-		DockerImageName armImage = DockerImageName.parse("smile/oracle/database:19.3.0-ee")
-				.asCompatibleSubstituteFor("gvenzl/oracle-xe:21-slim-faststart");
-		myContainer = new OracleContainer(armImage)
-				.withPrivilegedMode(true)
-				.withDatabaseName("ORCLPDB1")
-				.withUsername("cdr")
-				.withPassword("SmileCDR");
+		myContainer = new OracleContainer("gvenzl/oracle-xe:21-slim-faststart").withPrivilegedMode(true);
 
 		myContainer.start();
 		super.initialize(
