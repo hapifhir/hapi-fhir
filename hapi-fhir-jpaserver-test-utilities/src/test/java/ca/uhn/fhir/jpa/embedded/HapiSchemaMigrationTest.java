@@ -25,6 +25,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
@@ -121,6 +122,51 @@ public class HapiSchemaMigrationTest {
 			new HapiForeignKeyIndexHelper()
 				.ensureAllForeignKeysAreIndexed(dataSource);
 		}
+
+		if (DriverTypeEnum.MSSQL_2012 == theDriverType) {
+			// LUKETODO:  figure out exactly to assert this this has the right collation
+			try (final Connection connection = database.getDataSource().getConnection()) {
+				try (final PreparedStatement preparedStatement = connection.prepareStatement("SELECT name, collation_name FROM sys.databases")) {
+					try (final ResultSet resultSet = preparedStatement.executeQuery()) {
+						while (resultSet.next()) {
+							final String name = resultSet.getString("name");
+							final String collationName = resultSet.getString("collation_name");
+							ourLog.info("Database collation: name: {} collationName: {}", name, collationName);
+						}
+					}
+				}
+				try (final PreparedStatement preparedStatement = connection.prepareStatement("SELECT name, collation_name FROM sys.columns")) {
+					try (final ResultSet resultSet = preparedStatement.executeQuery()) {
+						while (resultSet.next()) {
+							final String name = resultSet.getString("name");
+							final String collationName = resultSet.getString("collation_name");
+							ourLog.info("column collation: name: {} collationName: {}", name, collationName);
+						}
+					}
+				}
+				try (final PreparedStatement preparedStatement = connection.prepareStatement("SELECT t.name TableName, c.name ColumnName, collation_name FROM sys.columns c inner join sys.tables t on c.object_id = t.object_id")) {
+					try (final ResultSet resultSet = preparedStatement.executeQuery()) {
+						while (resultSet.next()) {
+							final String tableName = resultSet.getString("TableName");
+							final String columnName = resultSet.getString("ColumnName");
+							final String collationName = resultSet.getString("collation_name");
+							// LUKETODO:   tableName: HFJ_RESOURCE columnName: FHIR_ID collationName: SQL_Latin1_General_CP1_CS_AS
+							ourLog.info("table and column collation: tableName: {} columnName: {} collationName: {}", tableName, columnName, collationName);
+						}
+					}
+				}
+			}
+		}
+
+//		"SELECT name, collation_name FROM sys.databases;  "
+
+//		 "SELECT name, collation_name FROM sys.columns WHERE name = N'<insert character data type column name>'";
+
+		/*
+		SELECT t.name TableName, c.name ColumnName, collation_name
+		FROM sys.columns c
+		inner join sys.tables t on c.object_id = t.object_id;
+		 */
 
 		verifyForcedIdMigration(dataSource);
 
