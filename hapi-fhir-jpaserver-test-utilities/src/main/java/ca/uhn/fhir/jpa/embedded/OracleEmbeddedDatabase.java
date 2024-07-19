@@ -40,6 +40,7 @@ public class OracleEmbeddedDatabase extends JpaEmbeddedDatabase {
 
 	public OracleEmbeddedDatabase() {
 		myContainer = new OracleContainer("gvenzl/oracle-xe:21-slim-faststart").withPrivilegedMode(true);
+
 		myContainer.start();
 		super.initialize(
 				DriverTypeEnum.ORACLE_12C,
