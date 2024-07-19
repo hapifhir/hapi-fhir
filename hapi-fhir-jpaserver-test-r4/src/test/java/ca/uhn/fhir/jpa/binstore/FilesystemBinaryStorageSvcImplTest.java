@@ -8,6 +8,9 @@ import ca.uhn.fhir.rest.server.exceptions.PayloadTooLargeException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.system.HapiSystemProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import org.apache.commons.io.FileUtils;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.IdType;
@@ -20,11 +23,13 @@ import org.slf4j.LoggerFactory;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class FilesystemBinaryStorageSvcImplTest {
@@ -49,25 +54,23 @@ public class FilesystemBinaryStorageSvcImplTest {
 
 	@Test
 	public void testStoreAndRetrievePostMigration() throws IOException {
-		HapiSystemProperties.enableUnitTestMode();
-		IIdType id = new IdType("Patient/123");
-		String contentType = "image/png";
-		StoredDetails outcome = mySvc.storeBinaryContent(id, null, contentType, new ByteArrayInputStream(SOME_BYTES), new ServletRequestDetails());
+		String blobId = "some-blob-id";
+		String oldDescriptor = "{\n" +
+			"  \"blobId\" : \"" + blobId + "\",\n" +
+			"  \"bytes\" : 80926,\n" +
+			"  \"contentType\" : \"application/fhir+json\",\n" +
+			"  \"hash\" : \"f57596cefbee4c48c8493a2a57ef5f70c52a2c5afa0e48f57cfbf4f219eb0a38\",\n" +
+			"  \"published\" : \"2024-07-20T00:12:28.187+05:30\"\n" +
+			"}";
 
-		ourLog.info("Got id: {}", outcome);
+		ObjectMapper myJsonSerializer;
+		myJsonSerializer = new ObjectMapper();
+		myJsonSerializer.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+		myJsonSerializer.enable(SerializationFeature.INDENT_OUTPUT);
 
-		StoredDetails details = mySvc.fetchBinaryContentDetails(id, outcome.getBinaryContentId());
-		assertEquals(16L, details.getBytes());
-		assertEquals(outcome.getBinaryContentId(), details.getBinaryContentId());
-		assertEquals("image/png", details.getContentType());
-		assertEquals("dc7197cfab936698bef7818975c185a9b88b71a0a0a2493deea487706ddf20cb", details.getHash());
-		assertNotNull(details.getPublished());
+		StoredDetails storedDetails = myJsonSerializer.readValue(oldDescriptor, StoredDetails.class);
+		assertTrue(storedDetails.getBinaryContentId().equals(blobId));;
 
-		ByteArrayOutputStream capture = new ByteArrayOutputStream();
-		mySvc.writeBinaryContent(id, outcome.getBinaryContentId(), capture);
-
-		assertArrayEquals(SOME_BYTES, capture.toByteArray());
-		assertArrayEquals(SOME_BYTES, mySvc.fetchBinaryContent(id, outcome.getBinaryContentId()));
 	}
 
 	@Test
