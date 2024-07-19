@@ -493,7 +493,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				&& myParams != null
 				&& myParams.getSearchContainedMode() == SearchContainedModeEnum.FALSE
 				&& myFulltextSearchSvc.canUseHibernateSearch(myResourceName, myParams)
-				&& myFulltextSearchSvc.supportsAllSortTerms(myResourceName, myParams);
+				&& myFulltextSearchSvc.supportsAllSortTerms(myResourceName, myParams)
+				&& myParams.getEverythingMode() == null;
 	}
 
 	private void failIfUsed(String theParamName) {
