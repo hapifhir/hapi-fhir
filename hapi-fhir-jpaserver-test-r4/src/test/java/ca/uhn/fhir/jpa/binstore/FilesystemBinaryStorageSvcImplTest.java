@@ -7,7 +7,6 @@ import ca.uhn.fhir.jpa.binary.api.StoredDetails;
 import ca.uhn.fhir.rest.server.exceptions.PayloadTooLargeException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import ca.uhn.fhir.system.HapiSystemProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -23,7 +22,6 @@ import org.slf4j.LoggerFactory;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -52,6 +50,9 @@ public class FilesystemBinaryStorageSvcImplTest {
 		FileUtils.deleteDirectory(myPath);
 	}
 
+	/**
+	 * See https://github.com/hapifhir/hapi-fhir/pull/6134
+	 */
 	@Test
 	public void testStoreAndRetrievePostMigration() throws IOException {
 		String blobId = "some-blob-id";
