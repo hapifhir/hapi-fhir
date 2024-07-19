@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -19,7 +20,7 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
 
-public class DropIndexTest extends BaseTest {
+public class DropIndexTaskTest extends BaseTest {
 
 
 	@ParameterizedTest(name = "{index}: {0}")
@@ -251,7 +252,12 @@ public class DropIndexTest extends BaseTest {
 					assertThat(mySql, equalTo(asList("drop index IDX_ANINDEX ONLINE")));
 					break;
 				case MSSQL_2012:
-					assertThat(mySql, equalTo(asList("drop index SOMETABLE.IDX_ANINDEX")));
+					Assertions.assertEquals(asList("BEGIN TRY -- try first online, without locking the table \n" +
+						"    EXEC('drop index SOMETABLE.IDX_ANINDEX WITH (ONLINE = ON)');\n" +
+						"END TRY \n" +
+						"BEGIN CATCH -- for Editions of Sql Server that don't support ONLINE, run with table locks \n" +
+						"drop index SOMETABLE.IDX_ANINDEX; \n" +
+						"END CATCH;"), mySql);
 					break;
 				case POSTGRES_9_4:
 					assertThat(mySql, equalTo(asList("drop index CONCURRENTLY IDX_ANINDEX")));

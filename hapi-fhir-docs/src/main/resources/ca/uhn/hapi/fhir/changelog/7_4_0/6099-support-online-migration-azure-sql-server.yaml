@@ -1,0 +1,4 @@
+---
+type: perf
+issue: 6099
+title: "Database migrations that add or drop an index no longer lock tables when running on Azure Sql Server."
