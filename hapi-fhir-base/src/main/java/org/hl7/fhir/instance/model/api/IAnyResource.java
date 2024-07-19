@@ -22,6 +22,7 @@ package org.hl7.fhir.instance.model.api;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.rest.gclient.DateClientParam;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
+import ca.uhn.fhir.rest.gclient.UriClientParam;
 
 /**
  * An IBaseResource that has a FHIR version of DSTU3 or higher
@@ -96,17 +97,17 @@ public interface IAnyResource extends IBaseResource {
 			name = SP_RES_PROFILE,
 			path = "Resource.meta.profile",
 			description = "The profile of the resource",
-			type = "token")
+			type = "uri")
 
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>_profile</b>
 	 * <p>
 	 * Description: <b>The profile of a resource</b><br>
-	 * Type: <b>token</b><br>
+	 * Type: <b>uri</b><br>
 	 * Path: <b>Resource.meta.profile</b><br>
 	 * </p>
 	 */
-	TokenClientParam RES_PROFILE = new TokenClientParam(IAnyResource.SP_RES_PROFILE);
+	UriClientParam RES_PROFILE = new UriClientParam(IAnyResource.SP_RES_PROFILE);
 
 	String SP_RES_SECURITY = "_security";
 	/**
