@@ -1490,9 +1490,17 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 		output = myFhirValidator.validateWithResult(input);
 		all = logResultsAndReturnNonInformationalOnes(output);
 		assertThat(all).hasSize(3);
+		// validate first error, it has similar message as second error, but location is different
+		// as in R4 (as opposed to R4B/R5) Observation.value.ofType(Quantity) has no ValueSet binding,
+		// there is no `Unknown code for ValueSet` error message
 		assertThat(all.get(0).getMessage()).contains("Error processing unit 'Heck': The unit 'Heck' is unknown' at position 0 (for 'http://unitsofmeasure.org#Heck')");
+		assertThat(all.get(0).getLocationString()).contains("Observation.value.ofType(Quantity)");
+		// validate second error, it has similar message as first error, but location is different
 		assertThat(all.get(1).getMessage()).contains("Error processing unit 'Heck': The unit 'Heck' is unknown' at position 0 (for 'http://unitsofmeasure.org#Heck')");
+		assertThat(all.get(1).getLocationString()).contains("Observation.value.ofType(Quantity).code");
+		// validate third error
 		assertThat(all.get(2).getMessage()).contains("The value provided ('Heck') was not found in the value set 'Body Temperature Units'");
+		assertThat(all.get(2).getLocationString()).contains("Observation.value.ofType(Quantity).code");
 	}
 
 	@Test
