@@ -23,10 +23,8 @@ import ca.uhn.fhir.context.ComboSearchParamType;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.phonetic.IPhoneticEncoder;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import jakarta.annotation.Nullable;
-import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.Collection;
@@ -109,8 +107,6 @@ public interface ISearchParamRegistry {
 		} else {
 			retval = new TreeSet<>(activeSearchParams.getSearchParamNames());
 		}
-		retval.add(IAnyResource.SP_RES_ID);
-		retval.add(Constants.PARAM_LASTUPDATED);
 		return retval;
 	}
 
