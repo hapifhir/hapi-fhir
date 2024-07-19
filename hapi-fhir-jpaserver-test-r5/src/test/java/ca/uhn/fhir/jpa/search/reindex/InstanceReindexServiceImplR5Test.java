@@ -71,7 +71,7 @@ public class InstanceReindexServiceImplR5Test extends BaseJpaR5Test {
 			.map(t -> t.getName() + " " + getPartValue("Action", t) + " " + getPartValue("Type", t) + " " + getPartValue("Missing", t))
 			.sorted()
 			.toList();
-		assertThat(indexInstances).as(indexInstances.toString()).containsExactly("active NO_CHANGE Token true", "address NO_CHANGE String true", "address-city NO_CHANGE String true", "address-country NO_CHANGE String true", "address-postalcode NO_CHANGE String true", "address-state NO_CHANGE String true", "address-use NO_CHANGE Token true", "birthdate NO_CHANGE Date true", "death-date NO_CHANGE Date true", "email NO_CHANGE Token true", "gender NO_CHANGE Token true", "general-practitioner NO_CHANGE Reference true", "identifier NO_CHANGE Token true", "language NO_CHANGE Token true", "link NO_CHANGE Reference true", "organization NO_CHANGE Reference true", "part-agree NO_CHANGE Reference true", "phone NO_CHANGE Token true", "telecom NO_CHANGE Token true");
+		assertThat(indexInstances).as(indexInstances.toString()).containsExactly("_id NO_CHANGE Token true", "active NO_CHANGE Token true", "address NO_CHANGE String true", "address-city NO_CHANGE String true", "address-country NO_CHANGE String true", "address-postalcode NO_CHANGE String true", "address-state NO_CHANGE String true", "address-use NO_CHANGE Token true", "birthdate NO_CHANGE Date true", "death-date NO_CHANGE Date true", "email NO_CHANGE Token true", "gender NO_CHANGE Token true", "general-practitioner NO_CHANGE Reference true", "identifier NO_CHANGE Token true", "language NO_CHANGE Token true", "link NO_CHANGE Reference true", "organization NO_CHANGE Reference true", "part-agree NO_CHANGE Reference true", "phone NO_CHANGE Token true", "telecom NO_CHANGE Token true");
 	}
 
 
