@@ -109,7 +109,8 @@ public class FilesystemBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 
 		// Write descriptor file
 		long count = countingInputStream.getByteCount();
-		StoredDetails details = new StoredDetails(id, count, theContentType, hashingInputStream, new Date());
+		StoredDetails details = null;
+		details = new StoredDetails(id, count, theContentType, hashingInputStream, new Date());
 		File descriptorFilename = getDescriptorFilename(storagePath, theResourceId, id);
 		ourLog.info("Writing to file: {}", descriptorFilename.getAbsolutePath());
 		try (FileWriter writer = new FileWriter(descriptorFilename)) {
@@ -223,7 +224,7 @@ public class FilesystemBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 		return new File(theStoragePath, filename + theExtension);
 	}
 
-	private File getStoragePath(String theId, boolean theCreate) {
+	File getStoragePath(String theId, boolean theCreate) {
 		File path = myBasePath;
 		for (int i = 0; i < 10; i++) {
 			path = new File(path, theId.substring(i, i + 1));

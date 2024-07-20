@@ -7,6 +7,9 @@ import ca.uhn.fhir.jpa.binary.api.StoredDetails;
 import ca.uhn.fhir.rest.server.exceptions.PayloadTooLargeException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import org.apache.commons.io.FileUtils;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.IdType;
@@ -24,6 +27,7 @@ import java.io.IOException;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class FilesystemBinaryStorageSvcImplTest {
@@ -44,6 +48,30 @@ public class FilesystemBinaryStorageSvcImplTest {
 	@AfterEach
 	public void after() throws IOException {
 		FileUtils.deleteDirectory(myPath);
+	}
+
+	/**
+	 * See https://github.com/hapifhir/hapi-fhir/pull/6134
+	 */
+	@Test
+	public void testStoreAndRetrievePostMigration() throws IOException {
+		String blobId = "some-blob-id";
+		String oldDescriptor = "{\n" +
+			"  \"blobId\" : \"" + blobId + "\",\n" +
+			"  \"bytes\" : 80926,\n" +
+			"  \"contentType\" : \"application/fhir+json\",\n" +
+			"  \"hash\" : \"f57596cefbee4c48c8493a2a57ef5f70c52a2c5afa0e48f57cfbf4f219eb0a38\",\n" +
+			"  \"published\" : \"2024-07-20T00:12:28.187+05:30\"\n" +
+			"}";
+
+		ObjectMapper myJsonSerializer;
+		myJsonSerializer = new ObjectMapper();
+		myJsonSerializer.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+		myJsonSerializer.enable(SerializationFeature.INDENT_OUTPUT);
+
+		StoredDetails storedDetails = myJsonSerializer.readValue(oldDescriptor, StoredDetails.class);
+		assertTrue(storedDetails.getBinaryContentId().equals(blobId));;
+
 	}
 
 	@Test
