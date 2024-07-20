@@ -23,6 +23,7 @@ import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
+import ca.uhn.fhir.jpa.rp.r4.PatientResourceProvider;
 import ca.uhn.fhir.jpa.search.CompositeSearchParameterTestCases;
 import ca.uhn.fhir.jpa.search.QuantitySearchParameterTestCases;
 import ca.uhn.fhir.jpa.search.BaseSourceSearchParameterTestCases;
@@ -91,6 +92,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.ContextHierarchy;
@@ -215,6 +217,8 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 	private IFhirResourceDao<QuestionnaireResponse> myQuestionnaireResponseDao;
 	@Autowired
 	private TestHSearchEventDispatcher myHSearchEventDispatcher;
+	@Autowired
+	private PatientResourceProvider myPatientProvider;
 
 	@Mock
 	private IHSearchEventListener mySearchEventListener;
@@ -952,6 +956,16 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		}
 		return retVal;
 	}
+
+	@Test
+	public void testEverything() {
+		Patient p = new Patient();
+		p.setId("my-patient");
+		myPatientDao.create(p);
+		IBundleProvider iBundleProvider = myPatientProvider.patientTypeEverything(new MockHttpServletRequest(), null, null, null, null, null, null, null, null, null, null, mySrd);
+		assertEquals(iBundleProvider.getAllResources().size(),  1);
+	}
+
 
 	private void logAndValidateValueSet(ValueSet theResult) {
 		IParser parser = myFhirCtx.newXmlParser().setPrettyPrint(true);
