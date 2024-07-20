@@ -62,15 +62,15 @@ public class ExtendedHSearchSearchBuilder {
 	 * Are any of the queries supported by our indexing?
 	 */
 	public boolean isSupportsSomeOf(SearchParameterMap myParams) {
-		 boolean hasSort = myParams.getSort() != null;
-				boolean hasLastUpdated =  myParams.getLastUpdated() != null;
-				boolean hasSupportedSp =  myParams.entrySet().stream()
-						.filter(e -> !ourUnsafeSearchParmeters.contains(e.getKey()))
-						// each and clause may have a different modifier, so split down to the ORs
-						.flatMap(andList -> andList.getValue().stream())
-						.flatMap(Collection::stream)
-						.anyMatch(this::isParamTypeSupported);
-				return hasSort || hasLastUpdated || hasSupportedSp;
+		boolean hasSort = myParams.getSort() != null;
+		boolean hasLastUpdated = myParams.getLastUpdated() != null;
+		boolean hasSupportedSp = myParams.entrySet().stream()
+				.filter(e -> !ourUnsafeSearchParmeters.contains(e.getKey()))
+				// each and clause may have a different modifier, so split down to the ORs
+				.flatMap(andList -> andList.getValue().stream())
+				.flatMap(Collection::stream)
+				.anyMatch(this::isParamTypeSupported);
+		return hasSort || hasLastUpdated || hasSupportedSp;
 	}
 
 	/**

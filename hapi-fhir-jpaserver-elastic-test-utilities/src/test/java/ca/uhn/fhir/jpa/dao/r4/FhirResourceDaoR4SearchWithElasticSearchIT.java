@@ -66,6 +66,7 @@ import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.Encounter;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Narrative;
@@ -958,7 +959,8 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 	}
 
 	@Test
-	public void testEverything() {
+	public void testEverythingType() {
+		myStorageSettings.setAdvancedHSearchIndexing(true);
 		Patient p = new Patient();
 		p.setId("my-patient");
 		myPatientDao.create(p);
@@ -966,6 +968,15 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		assertEquals(iBundleProvider.getAllResources().size(),  1);
 	}
 
+	@Test
+	public void testEverythingInstance() {
+		myStorageSettings.setAdvancedHSearchIndexing(true);
+		Patient p = new Patient();
+		p.setId("my-patient");
+		myPatientDao.update(p);
+		IBundleProvider iBundleProvider = myPatientProvider.patientInstanceEverything(new MockHttpServletRequest(), new IdType("Patient/my-patient"), null, null, null, null, null, null, null, null, null, mySrd);
+		assertEquals(iBundleProvider.getAllResources().size(),  1);
+	}
 
 	private void logAndValidateValueSet(ValueSet theResult) {
 		IParser parser = myFhirCtx.newXmlParser().setPrettyPrint(true);
