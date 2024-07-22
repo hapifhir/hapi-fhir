@@ -45,6 +45,9 @@ import static org.hamcrest.Matchers.contains;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
+/**
+ * Store connection properties for the Cosmos db in a file in /tmp/cosmos.properties
+ */
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {
 	TestCosmosR4Config.class
