@@ -24,8 +24,6 @@ import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.param.HasAndListParam;
 import ca.uhn.fhir.rest.param.HasParam;
-import ca.uhn.fhir.rest.param.StringAndListParam;
-import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriAndListParam;
@@ -49,8 +47,8 @@ public class ResourceMetaParams {
 	static {
 		Map<String, Class<? extends IQueryParameterType>> resourceMetaParams = new HashMap<>();
 		Map<String, Class<? extends IQueryParameterAnd<?>>> resourceMetaAndParams = new HashMap<>();
-		resourceMetaParams.put(IAnyResource.SP_RES_ID, StringParam.class);
-		resourceMetaAndParams.put(IAnyResource.SP_RES_ID, StringAndListParam.class);
+		resourceMetaParams.put(IAnyResource.SP_RES_ID, TokenParam.class);
+		resourceMetaAndParams.put(IAnyResource.SP_RES_ID, TokenAndListParam.class);
 		resourceMetaParams.put(Constants.PARAM_PID, TokenParam.class);
 		resourceMetaAndParams.put(Constants.PARAM_PID, TokenAndListParam.class);
 		resourceMetaParams.put(Constants.PARAM_TAG, TokenParam.class);
