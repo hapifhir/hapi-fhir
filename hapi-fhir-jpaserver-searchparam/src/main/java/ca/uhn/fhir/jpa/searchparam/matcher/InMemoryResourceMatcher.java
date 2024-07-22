@@ -452,8 +452,8 @@ public class InMemoryResourceMatcher {
 
 	private boolean matchIdsOr(List<IQueryParameterType> theOrParams, IBaseResource theResource) {
 		return theOrParams.stream()
-				.anyMatch(param -> param instanceof StringParam
-						&& matchId(((StringParam) param).getValue(), theResource.getIdElement()));
+				.anyMatch(param -> param instanceof TokenParam
+						&& matchId(((TokenParam) param).getValue(), theResource.getIdElement()));
 	}
 
 	private boolean matchId(String theValue, IIdType theId) {
