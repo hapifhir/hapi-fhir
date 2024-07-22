@@ -13,6 +13,7 @@ import ca.uhn.fhir.util.VersionEnum;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -27,6 +28,7 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
@@ -69,6 +71,8 @@ public class HapiSchemaMigrationTest {
 	private static final String COLUMN_VAL_VC = "VAL_VC";
 
 	private static final String NULL_PLACEHOLDER = "[NULL]";
+	private static final String COLLATION_CASE_INSENSITIVE = "SQL_Latin1_General_CP1_CI_AS";
+	private static final String COLLATION_CASE_SENSITIVE = "SQL_Latin1_General_CP1_CS_AS";
 
 	static {
 		HapiSystemProperties.enableUnitTestMode();
@@ -123,56 +127,13 @@ public class HapiSchemaMigrationTest {
 				.ensureAllForeignKeysAreIndexed(dataSource);
 		}
 
-		if (DriverTypeEnum.MSSQL_2012 == theDriverType) {
-			// LUKETODO:  figure out exactly to assert this this has the right collation
-			try (final Connection connection = database.getDataSource().getConnection()) {
-				try (final PreparedStatement preparedStatement = connection.prepareStatement("SELECT name, collation_name FROM sys.databases")) {
-					try (final ResultSet resultSet = preparedStatement.executeQuery()) {
-						while (resultSet.next()) {
-							final String name = resultSet.getString("name");
-							final String collationName = resultSet.getString("collation_name");
-							ourLog.info("Database collation: name: {} collationName: {}", name, collationName);
-						}
-					}
-				}
-				try (final PreparedStatement preparedStatement = connection.prepareStatement("SELECT name, collation_name FROM sys.columns")) {
-					try (final ResultSet resultSet = preparedStatement.executeQuery()) {
-						while (resultSet.next()) {
-							final String name = resultSet.getString("name");
-							final String collationName = resultSet.getString("collation_name");
-							ourLog.info("column collation: name: {} collationName: {}", name, collationName);
-						}
-					}
-				}
-				try (final PreparedStatement preparedStatement = connection.prepareStatement("SELECT t.name TableName, c.name ColumnName, collation_name FROM sys.columns c inner join sys.tables t on c.object_id = t.object_id")) {
-					try (final ResultSet resultSet = preparedStatement.executeQuery()) {
-						while (resultSet.next()) {
-							final String tableName = resultSet.getString("TableName");
-							final String columnName = resultSet.getString("ColumnName");
-							final String collationName = resultSet.getString("collation_name");
-							// LUKETODO:   tableName: HFJ_RESOURCE columnName: FHIR_ID collationName: SQL_Latin1_General_CP1_CS_AS
-							ourLog.info("table and column collation: tableName: {} columnName: {} collationName: {}", tableName, columnName, collationName);
-						}
-					}
-				}
-			}
-		}
-
-//		"SELECT name, collation_name FROM sys.databases;  "
-
-//		 "SELECT name, collation_name FROM sys.columns WHERE name = N'<insert character data type column name>'";
-
-		/*
-		SELECT t.name TableName, c.name ColumnName, collation_name
-		FROM sys.columns c
-		inner join sys.tables t on c.object_id = t.object_id;
-		 */
-
 		verifyForcedIdMigration(dataSource);
 
 		verifyHfjResSearchUrlMigration(database, theDriverType);
 
 		verifyTrm_Concept_Desig(database, theDriverType);
+
+		verifyHfjResourceFhirIdCollation(database, theDriverType);
 	}
 
 	/**
@@ -216,7 +177,7 @@ public class HapiSchemaMigrationTest {
 		try (final Connection connection = theDatabase.getDataSource().getConnection()) {
 			final DatabaseMetaData tableMetaData = connection.getMetaData();
 
-			final List<Map<String,String>> actualColumnResults = new ArrayList<>();
+			final List<Map<String, String>> actualColumnResults = new ArrayList<>();
 			try (final ResultSet columnsResultSet = tableMetaData.getColumns(null, null, TABLE_HFJ_RES_SEARCH_URL, null)) {
 				while (columnsResultSet.next()) {
 					final Map<String, String> columnMap = new HashMap<>();
@@ -229,7 +190,7 @@ public class HapiSchemaMigrationTest {
 				}
 			}
 
-			final List<Map<String,String>> actualPrimaryKeyResults = new ArrayList<>();
+			final List<Map<String, String>> actualPrimaryKeyResults = new ArrayList<>();
 
 			try (final ResultSet primaryKeyResultSet = tableMetaData.getPrimaryKeys(null, null, TABLE_HFJ_RES_SEARCH_URL)) {
 				while (primaryKeyResultSet.next()) {
@@ -346,7 +307,7 @@ public class HapiSchemaMigrationTest {
 			: Integer.toString(Types.VARCHAR);
 	}
 
-	private void extractAndAddToMap(ResultSet theResultSet, Map<String,String> theMap, String theColumn) throws SQLException {
+	private void extractAndAddToMap(ResultSet theResultSet, Map<String, String> theMap, String theColumn) throws SQLException {
 		theMap.put(theColumn, Optional.ofNullable(theResultSet.getString(theColumn))
 			.map(defaultValueNonNull -> defaultValueNonNull.equals("((-1))") ? "-1" : defaultValueNonNull) // MSSQL returns "((-1))" for default value
 			.map(String::toUpperCase)
@@ -382,7 +343,6 @@ public class HapiSchemaMigrationTest {
 		dataSource.setUsername("SA");
 		dataSource.setPassword("SA");
 		dataSource.start();
-
 		MigrationTaskList migrationTasks = new HapiFhirJpaMigrationTasks(Collections.emptySet()).getTaskList(VersionEnum.V6_0_0, VersionEnum.V6_4_0);
 		HapiMigrationDao hapiMigrationDao = new HapiMigrationDao(dataSource, DriverTypeEnum.H2_EMBEDDED, HAPI_FHIR_MIGRATION_TABLENAME);
 		HapiMigrationStorageSvc hapiMigrationStorageSvc = new HapiMigrationStorageSvc(hapiMigrationDao);
@@ -394,5 +354,65 @@ public class HapiSchemaMigrationTest {
 		assertFalse(schemaMigrator.createMigrationTableIfRequired());
 		assertFalse(schemaMigrator.createMigrationTableIfRequired());
 
+	}
+
+	private void verifyHfjResourceFhirIdCollation(JpaEmbeddedDatabase database, DriverTypeEnum theDriverType) throws SQLException {
+		if (DriverTypeEnum.MSSQL_2012 == theDriverType) { // Other databases are unaffected by this migration and are irrelevant
+			try (final Connection connection = database.getDataSource().getConnection()) {
+				@Language("SQL")
+				final String databaseCollationSql = """
+					SELECT collation_name
+					FROM sys.databases
+					WHERE name = 'master'
+				""";
+
+				final Map<String, Object> databaseCollationRow = querySingleRow(connection, databaseCollationSql);
+				assertThat(databaseCollationRow.get("collation_name")).isEqualTo(COLLATION_CASE_INSENSITIVE);
+
+				@Language("SQL")
+				final String tableColumnSql = """
+					SELECT  c.collation_name
+					FROM sys.columns c
+					INNER JOIN sys.tables t on c.object_id = t.object_id
+					INNER JOIN sys.schemas s on t.schema_id = s.schema_id
+					INNER JOIN sys.databases d on s.principal_id = d.database_id
+					where d.name = 'master'
+					AND s.name = 'dbo'
+					AND t.name = 'HFJ_RESOURCE'
+					AND c.name = 'FHIR_ID';
+				""";
+
+				final Map<String, Object> tableColumnCollationRow = querySingleRow(connection, tableColumnSql);
+				assertThat(tableColumnCollationRow.get("collation_name")).isEqualTo(COLLATION_CASE_SENSITIVE);
+
+				// We have not changed the database collation, so we can reference the table and column names with the wrong
+				// case and the query will work
+				@Language("SQL")
+				final String fhirIdSql = """
+					SELECT fhir_id 
+					FROM hfj_resource 
+					WHERE fhir_id = '2029'
+				""";
+
+				final Map<String, Object> fhirIdRow = querySingleRow(connection, fhirIdSql);
+				assertThat(fhirIdRow.get("fhir_id")).isEqualTo("2029");
+			}
+		}
+	}
+
+	private Map<String,Object> querySingleRow(Connection connection, String theSql) throws SQLException {
+		final Map<String, Object> row = new HashMap<>();
+		try (final PreparedStatement preparedStatement = connection.prepareStatement(theSql)) {
+			try (final ResultSet resultSet = preparedStatement.executeQuery()) {
+				if (resultSet.next()) {
+					final ResultSetMetaData resultSetMetadata = resultSet.getMetaData();
+					for (int index = 1; index < resultSetMetadata.getColumnCount() +1; index++) {
+						row.put(resultSetMetadata.getColumnName(index), resultSet.getObject(index));
+					}
+				}
+			}
+		}
+
+		return row;
 	}
 }

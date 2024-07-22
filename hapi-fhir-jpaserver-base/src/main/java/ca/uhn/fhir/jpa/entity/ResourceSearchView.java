@@ -46,27 +46,27 @@ import java.util.Date;
 @SuppressWarnings("SqlDialectInspection")
 @Entity
 @Immutable
-@Subselect("SELECT h.pid               as pid,            "
-		+ "               r.res_id            as res_id,         "
-		+ "               h.res_type          as res_type,       "
-		+ "               h.res_version       as res_version,    "
+@Subselect("SELECT h.PID               as PID,            "
+		+ "               r.RES_ID            as RES_ID,         "
+		+ "               h.RES_TYPE          as RES_TYPE,       "
+		+ "               h.RES_VERSION       as RES_VERSION,    "
 		// FHIR version
-		+ "               h.res_ver           as res_ver,        "
+		+ "               h.RES_VER           as RES_VER,        "
 		// resource version
-		+ "               h.has_tags          as has_tags,       "
-		+ "               h.res_deleted_at    as res_deleted_at, "
-		+ "               h.res_published     as res_published,  "
-		+ "               h.res_updated       as res_updated,    "
-		+ "               h.res_text          as res_text,       "
-		+ "               h.res_text_vc       as res_text_vc,    "
-		+ "               h.res_encoding      as res_encoding,   "
+		+ "               h.HAS_TAGS          as HAS_TAGS,       "
+		+ "               h.RES_DELETED_AT    as RES_DELETED_AT, "
+		+ "               h.RES_PUBLISHED     as RES_PUBLISHED,  "
+		+ "               h.RES_UPDATED       as RES_UPDATED,    "
+		+ "               h.RES_TEXT          as RES_TEXT,       "
+		+ "               h.RES_TEXT_VC       as RES_TEXT_VC,    "
+		+ "               h.RES_ENCODING      as RES_ENCODING,   "
 		+ "               h.PARTITION_ID      as PARTITION_ID,   "
 		+ "               p.SOURCE_URI        as PROV_SOURCE_URI,"
 		+ "               p.REQUEST_ID        as PROV_REQUEST_ID,"
-		+ "               r.fhir_id         as FHIR_ID      "
+		+ "               r.FHIR_ID         as FHIR_ID      "
 		+ "FROM HFJ_RESOURCE r "
-		+ "    INNER JOIN HFJ_RES_VER h ON r.res_id = h.res_id and r.res_ver = h.res_ver"
-		+ "    LEFT OUTER JOIN HFJ_RES_VER_PROV p ON p.res_ver_pid = h.pid ")
+		+ "    INNER JOIN HFJ_RES_VER h ON r.RES_ID = h.RES_ID and r.RES_VER = h.RES_VER"
+		+ "    LEFT OUTER JOIN HFJ_RES_VER_PROV p ON p.RES_VER_PID = h.PID ")
 public class ResourceSearchView implements IBaseResourceEntity, Serializable {
 
 	private static final long serialVersionUID = 1L;
