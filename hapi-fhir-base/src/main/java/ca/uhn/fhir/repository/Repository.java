@@ -20,9 +20,7 @@ import java.util.Map;
 
 /**
  * <p>
- * NOTE: This API is still incubating. In particular, we're looking at ways to provide a fluent
- * pattern for it. The intent is to eventually promote it up to the HAPI FHIR core once all
- * stakeholders have reviewed and approved.
+ * This API is under-going active development, so it should be considered beta-level.
  * </p>
  *
  * <p>
@@ -41,7 +39,7 @@ import java.util.Map;
  * <p>
  * This interface also chooses to ignore return headers for most cases, preferring to return the
  * Java objects directly. In cases where this is not possible, or the additional headers are crucial
- * information, the HAPI's {@link MethodOutcome} is used.
+ * information, HAPI's {@link MethodOutcome} is used.
  * </p>
  *
  * <p>
@@ -59,11 +57,6 @@ import java.util.Map;
  * repository will try to invoke operations with "sensible" defaults. For example, by using the
  * standard FHIR search parameters. Discussion is on-going to determine what a "sensible" minimal
  * level of support for interactions should be.
- * </p>
- *
- * <p>
- * This API is under-going active development with contributors from multiple different
- * organizations, so it should be considered beta-level.
  * </p>
  *
  * @see <a href="https://www.hl7.org/fhir/http.html">FHIR REST API</a>
