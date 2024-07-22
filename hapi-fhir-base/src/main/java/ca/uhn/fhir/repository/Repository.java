@@ -8,14 +8,15 @@ import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import com.google.common.annotations.Beta;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -156,7 +157,7 @@ public interface Repository {
 	 * @return a MethodOutcome with the id of the patched resource
 	 */
 	default <I extends IIdType, P extends IBaseParameters> MethodOutcome patch(
-		I id, P patchParameters, Map<String, String> headers) {
+			I id, P patchParameters, Map<String, String> headers) {
 		throw new NotImplementedOperationException("patch is not supported by this repository");
 	}
 
@@ -213,7 +214,7 @@ public interface Repository {
 	 * @return a MethodOutcome with the id of the deleted resource
 	 */
 	<T extends IBaseResource, I extends IIdType> MethodOutcome delete(
-		Class<T> resourceType, I id, Map<String, String> headers);
+			Class<T> resourceType, I id, Map<String, String> headers);
 
 	// Querying starts here
 
@@ -230,7 +231,7 @@ public interface Repository {
 	 * @return a Bundle with the results of the search
 	 */
 	default <B extends IBaseBundle, T extends IBaseResource> B search(
-		Class<B> bundleType, Class<T> resourceType, Map<String, List<IQueryParameterType>> searchParameters) {
+			Class<B> bundleType, Class<T> resourceType, Map<String, List<IQueryParameterType>> searchParameters) {
 		return this.search(bundleType, resourceType, searchParameters, Collections.emptyMap());
 	}
 
@@ -248,10 +249,10 @@ public interface Repository {
 	 * @return a Bundle with the results of the search
 	 */
 	<B extends IBaseBundle, T extends IBaseResource> B search(
-		Class<B> bundleType,
-		Class<T> resourceType,
-		Map<String, List<IQueryParameterType>> searchParameters,
-		Map<String, String> headers);
+			Class<B> bundleType,
+			Class<T> resourceType,
+			Map<String, List<IQueryParameterType>> searchParameters,
+			Map<String, String> headers);
 
 	// Paging starts here
 
@@ -361,7 +362,7 @@ public interface Repository {
 	 * @return the results of the operation
 	 */
 	default <R extends IBaseResource, P extends IBaseParameters> R invoke(
-		String name, P parameters, Class<R> returnType) {
+			String name, P parameters, Class<R> returnType) {
 		return this.invoke(name, parameters, returnType, Collections.emptyMap());
 	}
 
@@ -379,7 +380,7 @@ public interface Repository {
 	 * @return the results of the operation
 	 */
 	default <R extends IBaseResource, P extends IBaseParameters> R invoke(
-		String name, P parameters, Class<R> returnType, Map<String, String> headers) {
+			String name, P parameters, Class<R> returnType, Map<String, String> headers) {
 		throw new NotImplementedOperationException("server-level invoke is not supported by this repository");
 	}
 
@@ -427,7 +428,7 @@ public interface Repository {
 	 * @return the results of the operation
 	 */
 	default <R extends IBaseResource, P extends IBaseParameters, T extends IBaseResource> R invoke(
-		Class<T> resourceType, String name, P parameters, Class<R> returnType) {
+			Class<T> resourceType, String name, P parameters, Class<R> returnType) {
 		return this.invoke(resourceType, name, parameters, returnType, Collections.emptyMap());
 	}
 
@@ -447,7 +448,7 @@ public interface Repository {
 	 * @return the results of the operation
 	 */
 	<R extends IBaseResource, P extends IBaseParameters, T extends IBaseResource> R invoke(
-		Class<T> resourceType, String name, P parameters, Class<R> returnType, Map<String, String> headers);
+			Class<T> resourceType, String name, P parameters, Class<R> returnType, Map<String, String> headers);
 
 	/**
 	 * Invokes a type-level operation on this repository
@@ -462,7 +463,7 @@ public interface Repository {
 	 * @return a MethodOutcome with a status code
 	 */
 	default <P extends IBaseParameters, T extends IBaseResource> MethodOutcome invoke(
-		Class<T> resourceType, String name, P parameters) {
+			Class<T> resourceType, String name, P parameters) {
 		return this.invoke(resourceType, name, parameters, Collections.emptyMap());
 	}
 
@@ -480,7 +481,7 @@ public interface Repository {
 	 * @return a MethodOutcome with a status code
 	 */
 	default <P extends IBaseParameters, T extends IBaseResource> MethodOutcome invoke(
-		Class<T> resourceType, String name, P parameters, Map<String, String> headers) {
+			Class<T> resourceType, String name, P parameters, Map<String, String> headers) {
 		throw new NotImplementedOperationException("type-level invoke is not supported by this repository");
 	}
 
@@ -499,7 +500,7 @@ public interface Repository {
 	 * @return the results of the operation
 	 */
 	default <R extends IBaseResource, P extends IBaseParameters, I extends IIdType> R invoke(
-		I id, String name, P parameters, Class<R> returnType) {
+			I id, String name, P parameters, Class<R> returnType) {
 		return this.invoke(id, name, parameters, returnType, Collections.emptyMap());
 	}
 
@@ -519,7 +520,7 @@ public interface Repository {
 	 * @return the results of the operation
 	 */
 	<R extends IBaseResource, P extends IBaseParameters, I extends IIdType> R invoke(
-		I id, String name, P parameters, Class<R> returnType, Map<String, String> headers);
+			I id, String name, P parameters, Class<R> returnType, Map<String, String> headers);
 
 	/**
 	 * Invokes an instance-level operation on this repository
@@ -551,7 +552,7 @@ public interface Repository {
 	 * @return a MethodOutcome with a status code
 	 */
 	default <P extends IBaseParameters, I extends IIdType> MethodOutcome invoke(
-		I id, String name, P parameters, Map<String, String> headers) {
+			I id, String name, P parameters, Map<String, String> headers) {
 		throw new NotImplementedOperationException("instance-level invoke is not supported by this repository");
 	}
 
@@ -585,7 +586,7 @@ public interface Repository {
 	 * @return a Bundle with the server history
 	 */
 	default <B extends IBaseBundle, P extends IBaseParameters> B history(
-		P parameters, Class<B> returnType, Map<String, String> headers) {
+			P parameters, Class<B> returnType, Map<String, String> headers) {
 		throw new NotImplementedOperationException("server-level history is not supported by this repository");
 	}
 
@@ -603,7 +604,7 @@ public interface Repository {
 	 * @return a Bundle with the type history
 	 */
 	default <B extends IBaseBundle, P extends IBaseParameters, T extends IBaseResource> B history(
-		Class<T> resourceType, P parameters, Class<B> returnType) {
+			Class<T> resourceType, P parameters, Class<B> returnType) {
 		return this.history(resourceType, parameters, returnType, Collections.emptyMap());
 	}
 
@@ -622,7 +623,7 @@ public interface Repository {
 	 * @return a Bundle with the type history
 	 */
 	default <B extends IBaseBundle, P extends IBaseParameters, T extends IBaseResource> B history(
-		Class<T> resourceType, P parameters, Class<B> returnType, Map<String, String> headers) {
+			Class<T> resourceType, P parameters, Class<B> returnType, Map<String, String> headers) {
 		throw new NotImplementedOperationException("type-level history is not supported by this repository");
 	}
 
@@ -640,7 +641,7 @@ public interface Repository {
 	 * @return a Bundle with the instance history
 	 */
 	default <B extends IBaseBundle, P extends IBaseParameters, I extends IIdType> B history(
-		I id, P parameters, Class<B> returnType) {
+			I id, P parameters, Class<B> returnType) {
 		return this.history(id, parameters, returnType, Collections.emptyMap());
 	}
 
@@ -659,7 +660,7 @@ public interface Repository {
 	 * @return a Bundle with the instance history
 	 */
 	default <B extends IBaseBundle, P extends IBaseParameters, I extends IIdType> B history(
-		I id, P parameters, Class<B> returnType, Map<String, String> headers) {
+			I id, P parameters, Class<B> returnType, Map<String, String> headers) {
 		throw new NotImplementedOperationException("instance-level history is not supported by this repository");
 	}
 
