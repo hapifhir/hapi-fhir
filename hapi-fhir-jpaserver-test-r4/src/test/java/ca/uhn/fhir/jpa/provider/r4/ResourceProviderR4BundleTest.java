@@ -79,8 +79,7 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 		Patient newPatient = new Patient();
 		newPatient.setId("my-patient");
 		newPatient.getTelecomFirstRep().setSystem(ContactPoint.ContactPointSystem.PHONE).setValue("123-456-7890");
-		myPatientDao.update(newPatient);
-		MethodOutcome execute = myClient.update().resource(newPatient).execute();
+		 myClient.update().resource(newPatient).execute();
 		String bundleString = "{\n" +
 			"\t\"resourceType\": \"Bundle\",\n" +
 			"\t\"type\": \"transaction\",\n" +
@@ -103,6 +102,7 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 		Patient execute1 = myClient.read().resource(Patient.class).withId("my-patient").execute();
 		assertThat(execute1).extracting(p -> p.getTelecomFirstRep().getValue()).isEqualTo("401123456");
 	}
+
 	/**
 	 * See #401
 	 */
