@@ -4,7 +4,6 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
-import ca.uhn.fhir.jpa.model.util.ResourceLinkUtil;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import com.google.common.collect.Lists;
 import org.junit.jupiter.api.BeforeEach;
@@ -78,7 +77,7 @@ public class ResourceIndexedSearchParamsTest {
 
 	private ResourceLink getResourceLinkForLocalReference(){
 
-		ResourceLinkUtil.ResourceLinkForLocalReferenceParams params = ResourceLinkUtil.ResourceLinkForLocalReferenceParams
+		ResourceLink.ResourceLinkForLocalReferenceParams params = ResourceLink.ResourceLinkForLocalReferenceParams
 			.instance()
 			.setSourcePath("organization")
 			.setSourceResource(mySource)
@@ -87,7 +86,7 @@ public class ResourceIndexedSearchParamsTest {
 			.setTargetResourceId(LONG_ID)
 			.setUpdated(new Date());
 
-		return ResourceLinkUtil.forLocalReference(params);
+		return ResourceLink.forLocalReference(params);
 
 	}
 

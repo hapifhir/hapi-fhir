@@ -20,8 +20,8 @@
 package ca.uhn.fhir.jpa.model.cross;
 
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 
-import java.time.LocalDate;
 import java.util.Date;
 
 public class JpaResourceLookup implements IResourceLookup<JpaPid> {
@@ -29,15 +29,15 @@ public class JpaResourceLookup implements IResourceLookup<JpaPid> {
 	private final String myResourceType;
 	private final Long myResourcePid;
 	private final Date myDeletedAt;
-	private final Integer myPartitionId;
-	private final LocalDate myPartitionDate;
+	private final PartitionablePartitionId myPartitionablePartitionId;
 
-	public JpaResourceLookup(String theResourceType, Long theResourcePid, Date theDeletedAt, Integer thePartitionId, LocalDate thePartitionDate) {
+
+	public JpaResourceLookup(String theResourceType, Long theResourcePid, Date theDeletedAt, PartitionablePartitionId thePartitionablePartitionId) {
 		myResourceType = theResourceType;
 		myResourcePid = theResourcePid;
 		myDeletedAt = theDeletedAt;
-		myPartitionId = thePartitionId;
-		myPartitionDate = thePartitionDate;
+		myPartitionablePartitionId = thePartitionablePartitionId;
+
 	}
 
 	@Override
@@ -53,7 +53,7 @@ public class JpaResourceLookup implements IResourceLookup<JpaPid> {
 	@Override
 	public JpaPid getPersistentId() {
 		JpaPid jpaPid = JpaPid.fromId(myResourcePid);
-		jpaPid.setPartitionId(myPartitionId).setPartitionDate(myPartitionDate);
+		jpaPid.setPartitionablePartitionId(myPartitionablePartitionId);
 
 		return jpaPid;
 	}

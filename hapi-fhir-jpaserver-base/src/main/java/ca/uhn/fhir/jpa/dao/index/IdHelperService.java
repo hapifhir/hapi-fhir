@@ -30,6 +30,7 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.cross.JpaResourceLookup;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
@@ -59,8 +60,6 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.IdType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -581,7 +580,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 					Integer partitionId = (Integer) next[4];
 					LocalDate partitionDate = (LocalDate) next[5];
 
-					JpaResourceLookup lookup = new JpaResourceLookup(resourceType, resourcePid, deletedAt, partitionId, partitionDate);
+					JpaResourceLookup lookup = new JpaResourceLookup(resourceType, resourcePid, deletedAt, PartitionablePartitionId.with(partitionId, partitionDate));
 					retVal.computeIfAbsent(forcedId, id -> new ArrayList<>()).add(lookup);
 
 					if (!myStorageSettings.isDeleteEnabled()) {
@@ -640,7 +639,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 				}
 			}
 			lookup.stream()
-					.map(t -> new JpaResourceLookup((String) t[0], (Long) t[1], (Date) t[2], (Integer) t[3], (LocalDate) t[4]))
+					.map(t -> new JpaResourceLookup((String) t[0], (Long) t[1], (Date) t[2], PartitionablePartitionId.with((Integer) t[3], (LocalDate) t[4])))
 					.forEach(t -> {
 						String id = t.getPersistentId().toString();
 						if (!theTargets.containsKey(id)) {
@@ -717,7 +716,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 		}
 
 		if (!myStorageSettings.isDeleteEnabled()) {
-			JpaResourceLookup lookup = new JpaResourceLookup(theResourceType, theJpaPid.getId(), theDeletedAt, theJpaPid.getPartitionId(), theJpaPid.getPartitionDate());
+			JpaResourceLookup lookup = new JpaResourceLookup(theResourceType, theJpaPid.getId(), theDeletedAt, theJpaPid.getPartitionablePartitionId());
 			String nextKey = theJpaPid.toString();
 			myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.RESOURCE_LOOKUP, nextKey, lookup);
 		}

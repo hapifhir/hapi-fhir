@@ -14,7 +14,6 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.SearchParamPresentEntity;
-import ca.uhn.fhir.jpa.model.util.ResourceLinkUtil;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.test.utilities.HtmlUtil;
 import jakarta.annotation.Nonnull;
@@ -155,7 +154,7 @@ public class InstanceReindexServiceImplNarrativeR5Test {
 	public void testIndexResourceLinkLogical() throws IOException {
 		// Setup
 		ResourceIndexedSearchParams newParams = newParams();
-		newParams.myLinks.add(ResourceLinkUtil.forLogicalReference("Observation.subject", myEntity, "http://foo/base/Patient/456", new Date()));
+		newParams.myLinks.add(ResourceLink.forLogicalReference("Observation.subject", myEntity, "http://foo/base/Patient/456", new Date()));
 
 		// Test
 		Parameters outcome = mySvc.buildIndexResponse(newParams(), newParams, true, Collections.emptyList());
@@ -176,7 +175,7 @@ public class InstanceReindexServiceImplNarrativeR5Test {
 	public void testIndexResourceLinkAbsolute() throws IOException {
 		// Setup
 		ResourceIndexedSearchParams newParams = newParams();
-		newParams.myLinks.add(ResourceLinkUtil.forAbsoluteReference("Observation.subject", myEntity, new IdType("http://foo/base/Patient/123"), new Date()));
+		newParams.myLinks.add(ResourceLink.forAbsoluteReference("Observation.subject", myEntity, new IdType("http://foo/base/Patient/123"), new Date()));
 
 		// Test
 		Parameters outcome = mySvc.buildIndexResponse(newParams(), newParams, true, Collections.emptyList());
@@ -313,7 +312,7 @@ public class InstanceReindexServiceImplNarrativeR5Test {
 
 	private ResourceLink getResourceLinkForLocalReference(){
 
-		ResourceLinkUtil.ResourceLinkForLocalReferenceParams params = ResourceLinkUtil.ResourceLinkForLocalReferenceParams
+		ResourceLink.ResourceLinkForLocalReferenceParams params = ResourceLink.ResourceLinkForLocalReferenceParams
 			.instance()
 			.setSourcePath("Observation.subject")
 			.setSourceResource(myEntity)
@@ -323,7 +322,7 @@ public class InstanceReindexServiceImplNarrativeR5Test {
 			.setUpdated(new Date())
 			.setTargetResourceVersion(555L);
 
-		return ResourceLinkUtil.forLocalReference(params);
+		return ResourceLink.forLocalReference(params);
 	}
 
 }
