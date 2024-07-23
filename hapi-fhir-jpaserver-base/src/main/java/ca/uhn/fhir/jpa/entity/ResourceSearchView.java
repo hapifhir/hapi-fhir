@@ -46,6 +46,8 @@ import java.util.Date;
 @SuppressWarnings("SqlDialectInspection")
 @Entity
 @Immutable
+// Ideally, all tables and columns should be in UPPERCASE if we ever choose to use a case-sensitive collation for MSSQL
+// and there's a risk that queries on lowercase database objects fail.
 @Subselect("SELECT h.PID               as PID,            "
 		+ "               r.RES_ID            as RES_ID,         "
 		+ "               h.RES_TYPE          as RES_TYPE,       "
