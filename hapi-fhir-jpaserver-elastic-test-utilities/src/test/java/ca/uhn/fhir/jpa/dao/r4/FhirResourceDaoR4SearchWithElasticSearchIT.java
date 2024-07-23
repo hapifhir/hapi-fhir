@@ -928,7 +928,10 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		// set it after creating resource, so search doesn't find it in the index
 		myStorageSettings.setStoreResourceInHSearchIndex(true);
 
-		List<IBaseResource> result = searchForFastResources("Observation?code=theCode&_count=10&_total=accurate");
+		myCaptureQueriesListener.clear();
+
+		List<IBaseResource> result = searchForFastResources("Observation?code=theCode");
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 
 		assertThat(result).hasSize(1);
 		assertEquals(((Observation) result.get(0)).getIdElement().getIdPart(), id1.getIdPart());
