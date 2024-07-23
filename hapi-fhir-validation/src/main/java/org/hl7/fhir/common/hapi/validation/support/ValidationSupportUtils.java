@@ -14,9 +14,7 @@ public final class ValidationSupportUtils {
 	 * Try to obtain the codeSystem of the received code from the input R4 ValueSet
 	 */
 	public static String extractCodeSystemForCodeR4(ValueSet theValueSet, String theCode) {
-		if (theValueSet == null
-				|| theValueSet.getCompose().getInclude() == null
-				|| theValueSet.getCompose().getInclude().isEmpty()) {
+		if (theValueSet == null || theValueSet.getCompose().getInclude().isEmpty()) {
 			return null;
 		}
 
@@ -55,9 +53,7 @@ public final class ValidationSupportUtils {
 	 * Try to obtain the codeSystem of the received code from the input R5 ValueSet
 	 */
 	public static String extractCodeSystemForCodeR5(org.hl7.fhir.r5.model.ValueSet theValueSet, String theCode) {
-		if (theValueSet == null
-				|| theValueSet.getCompose().getInclude() == null
-				|| theValueSet.getCompose().getInclude().isEmpty()) {
+		if (theValueSet == null || theValueSet.getCompose().getInclude().isEmpty()) {
 			return null;
 		}
 
