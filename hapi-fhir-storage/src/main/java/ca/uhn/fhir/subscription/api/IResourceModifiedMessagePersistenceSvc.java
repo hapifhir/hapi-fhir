@@ -23,8 +23,9 @@ package ca.uhn.fhir.subscription.api;
 import ca.uhn.fhir.jpa.model.entity.IPersistedResourceModifiedMessage;
 import ca.uhn.fhir.jpa.model.entity.IPersistedResourceModifiedMessagePK;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -38,10 +39,10 @@ public interface IResourceModifiedMessagePersistenceSvc {
 
 	/**
 	 * Find all persistedResourceModifiedMessage sorted by ascending created dates (oldest to newest).
-	 *
+	 * @param thePageable Page request
 	 * @return A sorted list of persistedResourceModifiedMessage needing submission.
 	 */
-	List<IPersistedResourceModifiedMessage> findAllOrderedByCreatedTime();
+	Page<IPersistedResourceModifiedMessage> findAllOrderedByCreatedTime(Pageable thePageable);
 
 	/**
 	 * Delete a persistedResourceModifiedMessage by its primary key.

@@ -76,6 +76,7 @@ public class ResourceModifiedEntity implements IPersistedResourceModifiedMessage
 		return this;
 	}
 
+	@Override
 	public Date getCreatedTime() {
 		return myCreatedTime;
 	}
