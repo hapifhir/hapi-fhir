@@ -76,6 +76,13 @@ public class HapiTransactionService implements IHapiTransactionService {
 	private static final ThreadLocal<RequestPartitionId> ourRequestPartitionThreadLocal = new ThreadLocal<>();
 	private static final ThreadLocal<HapiTransactionService> ourExistingTransaction = new ThreadLocal<>();
 
+	/**
+	 * Default value for {@link #setTransactionPropagationWhenChangingPartitions(Propagation)}
+	 *
+	 * @since 7.6.0
+	 */
+	public static final Propagation DEFAULT_TRANSACTION_PROPAGATION_WHEN_CHANGING_PARTITIONS = Propagation.REQUIRED;
+
 	@Autowired
 	protected IInterceptorBroadcaster myInterceptorBroadcaster;
 
@@ -88,7 +95,8 @@ public class HapiTransactionService implements IHapiTransactionService {
 	@Autowired
 	protected PartitionSettings myPartitionSettings;
 
-	private Propagation myTransactionPropagationWhenChangingPartitions = Propagation.REQUIRED;
+	private Propagation myTransactionPropagationWhenChangingPartitions =
+			DEFAULT_TRANSACTION_PROPAGATION_WHEN_CHANGING_PARTITIONS;
 
 	private SleepUtil mySleepUtil = new SleepUtil();
 
@@ -264,7 +272,7 @@ public class HapiTransactionService implements IHapiTransactionService {
 		try {
 			ourExistingTransaction.set(this);
 
-			if (myTransactionPropagationWhenChangingPartitions == Propagation.REQUIRES_NEW) {
+			if (isRequiresNewTransactionWhenChangingPartitions()) {
 				return executeInNewTransactionForPartitionChange(
 						theExecutionBuilder, theCallback, requestPartitionId, previousRequestPartitionId);
 			} else {
@@ -274,6 +282,11 @@ public class HapiTransactionService implements IHapiTransactionService {
 		} finally {
 			ourExistingTransaction.set(previousExistingTransaction);
 		}
+	}
+
+	@Override
+	public boolean isRequiresNewTransactionWhenChangingPartitions() {
+		return myTransactionPropagationWhenChangingPartitions == Propagation.REQUIRES_NEW;
 	}
 
 	@Nullable
@@ -567,7 +580,8 @@ public class HapiTransactionService implements IHapiTransactionService {
 		return TransactionSynchronizationManager.isActualTransactionActive()
 				&& (!TransactionSynchronizationManager.isCurrentTransactionReadOnly() || theExecutionBuilder.myReadOnly)
 				&& (theExecutionBuilder.myPropagation == null
-						|| theExecutionBuilder.myPropagation == Propagation.REQUIRED);
+						|| theExecutionBuilder.myPropagation
+								== DEFAULT_TRANSACTION_PROPAGATION_WHEN_CHANGING_PARTITIONS);
 	}
 
 	@Nullable

@@ -90,6 +90,15 @@ public interface IHapiTransactionService {
 			@Nonnull Isolation theIsolation,
 			@Nonnull ICallable<T> theCallback);
 
+	/**
+	 * Returns {@literal true} if this transaction service will open a new
+	 * transaction when the request partition is for a different partition than
+	 * the currently executing partition.
+	 *
+	 * @since 7.6.0
+	 */
+	boolean isRequiresNewTransactionWhenChangingPartitions();
+
 	interface IExecutionBuilder extends TransactionOperations {
 
 		IExecutionBuilder withIsolation(Isolation theIsolation);

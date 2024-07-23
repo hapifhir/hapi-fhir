@@ -113,6 +113,24 @@ public class ReadPartitionIdRequestDetails extends PartitionIdRequestDetails {
 				null, RestOperationTypeEnum.EXTENDED_OPERATION_SERVER, null, null, null, null, theOperationName);
 	}
 
+	/**
+	 * @since 7.6.0
+	 */
+	public static ReadPartitionIdRequestDetails forDelete(@Nonnull String theResourceType, @Nonnull IIdType theId) {
+		RestOperationTypeEnum op = RestOperationTypeEnum.DELETE;
+		return new ReadPartitionIdRequestDetails(
+				theResourceType, op, theId.withResourceType(theResourceType), null, null, null, null);
+	}
+
+	/**
+	 * @since 7.6.0
+	 */
+	public static ReadPartitionIdRequestDetails forPatch(String theResourceType, IIdType theId) {
+		RestOperationTypeEnum op = RestOperationTypeEnum.PATCH;
+		return new ReadPartitionIdRequestDetails(
+				theResourceType, op, theId.withResourceType(theResourceType), null, null, null, null);
+	}
+
 	public static ReadPartitionIdRequestDetails forRead(
 			String theResourceType, @Nonnull IIdType theId, boolean theIsVread) {
 		RestOperationTypeEnum op = theIsVread ? RestOperationTypeEnum.VREAD : RestOperationTypeEnum.READ;
