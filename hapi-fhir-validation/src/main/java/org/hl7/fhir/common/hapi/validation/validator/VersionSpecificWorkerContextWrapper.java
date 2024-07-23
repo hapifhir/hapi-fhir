@@ -26,11 +26,13 @@ import org.hl7.fhir.r5.context.IWorkerContextManager;
 import org.hl7.fhir.r5.model.CodeSystem;
 import org.hl7.fhir.r5.model.CodeableConcept;
 import org.hl7.fhir.r5.model.Coding;
+import org.hl7.fhir.r5.model.ElementDefinition;
 import org.hl7.fhir.r5.model.NamingSystem;
 import org.hl7.fhir.r5.model.OperationOutcome;
 import org.hl7.fhir.r5.model.PackageInformation;
 import org.hl7.fhir.r5.model.Parameters;
 import org.hl7.fhir.r5.model.Resource;
+import org.hl7.fhir.r5.model.StringType;
 import org.hl7.fhir.r5.model.StructureDefinition;
 import org.hl7.fhir.r5.model.ValueSet;
 import org.hl7.fhir.r5.profilemodel.PEBuilder;
@@ -67,7 +69,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	private final VersionCanonicalizer myVersionCanonicalizer;
 	private final LoadingCache<ResourceKey, IBaseResource> myFetchResourceCache;
 	private volatile List<StructureDefinition> myAllStructures;
-	private org.hl7.fhir.r5.model.Parameters myExpansionProfile;
+	private Parameters myExpansionProfile;
 
 	public VersionSpecificWorkerContextWrapper(
 			ValidationSupportContext theValidationSupportContext, VersionCanonicalizer theVersionCanonicalizer) {
@@ -216,7 +218,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	}
 
 	@Override
-	public org.hl7.fhir.r5.model.Parameters getExpansionParameters() {
+	public Parameters getExpansionParameters() {
 		return myExpansionProfile;
 	}
 
@@ -225,7 +227,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 		setExpansionProfile(expParameters);
 	}
 
-	public void setExpansionProfile(org.hl7.fhir.r5.model.Parameters expParameters) {
+	public void setExpansionProfile(Parameters expParameters) {
 		myExpansionProfile = expParameters;
 	}
 
@@ -319,7 +321,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 			issue.getDetails().setText(codeValidationIssue.getMessage());
 			issue.addExtension()
 					.setUrl("http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id")
-					.setValue(new org.hl7.fhir.r5.model.StringType("Terminology_PassThrough_TX_Message"));
+					.setValue(new StringType("Terminology_PassThrough_TX_Message"));
 			issues.add(issue);
 		}
 		return issues;
@@ -370,8 +372,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	}
 
 	@Override
-	public ValueSetExpansionOutcome expandVS(
-			org.hl7.fhir.r5.model.ValueSet source, boolean cacheOk, boolean Hierarchical) {
+	public ValueSetExpansionOutcome expandVS(ValueSet source, boolean cacheOk, boolean Hierarchical) {
 		IBaseResource convertedSource;
 		try {
 			convertedSource = myVersionCanonicalizer.valueSetFromValidatorCanonical(source);
@@ -382,7 +383,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 				.getRootValidationSupport()
 				.expandValueSet(myValidationSupportContext, null, convertedSource);
 
-		org.hl7.fhir.r5.model.ValueSet convertedResult = null;
+		ValueSet convertedResult = null;
 		if (expanded.getValueSet() != null) {
 			try {
 				convertedResult = myVersionCanonicalizer.valueSetToValidatorCanonical(expanded.getValueSet());
@@ -400,7 +401,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	@Override
 	public ValueSetExpansionOutcome expandVS(
 			Resource src,
-			org.hl7.fhir.r5.model.ElementDefinition.ElementDefinitionBindingComponent binding,
+			ElementDefinition.ElementDefinitionBindingComponent binding,
 			boolean cacheOk,
 			boolean Hierarchical) {
 		ValueSet valueSet = fetchResource(ValueSet.class, binding.getValueSet(), src);
@@ -428,14 +429,14 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	}
 
 	@Override
-	public org.hl7.fhir.r5.model.CodeSystem fetchCodeSystem(String system) {
+	public CodeSystem fetchCodeSystem(String system) {
 		IBaseResource fetched =
 				myValidationSupportContext.getRootValidationSupport().fetchCodeSystem(system);
 		if (fetched == null) {
 			return null;
 		}
 		try {
-			return (org.hl7.fhir.r5.model.CodeSystem) myVersionCanonicalizer.codeSystemToValidatorCanonical(fetched);
+			return myVersionCanonicalizer.codeSystemToValidatorCanonical(fetched);
 		} catch (FHIRException e) {
 			throw new InternalErrorException(Msg.code(665) + e);
 		}
@@ -449,7 +450,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 			return null;
 		}
 		try {
-			return (org.hl7.fhir.r5.model.CodeSystem) myVersionCanonicalizer.codeSystemToValidatorCanonical(fetched);
+			return myVersionCanonicalizer.codeSystemToValidatorCanonical(fetched);
 		} catch (FHIRException e) {
 			throw new InternalErrorException(Msg.code(1992) + e);
 		}
@@ -747,8 +748,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	}
 
 	@Override
-	public ValidationResult validateCode(
-			ValidationOptions theOptions, String code, org.hl7.fhir.r5.model.ValueSet theValueSet) {
+	public ValidationResult validateCode(ValidationOptions theOptions, String code, ValueSet theValueSet) {
 		IBaseResource convertedVs = null;
 		try {
 			if (theValueSet != null) {
@@ -767,10 +767,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	}
 
 	@Override
-	public ValidationResult validateCode(
-			ValidationOptions theOptions,
-			org.hl7.fhir.r5.model.Coding theCoding,
-			org.hl7.fhir.r5.model.ValueSet theValueSet) {
+	public ValidationResult validateCode(ValidationOptions theOptions, Coding theCoding, ValueSet theValueSet) {
 		IBaseResource convertedVs = null;
 
 		try {
@@ -871,10 +868,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	}
 
 	@Override
-	public ValidationResult validateCode(
-			ValidationOptions theOptions,
-			org.hl7.fhir.r5.model.CodeableConcept code,
-			org.hl7.fhir.r5.model.ValueSet theVs) {
+	public ValidationResult validateCode(ValidationOptions theOptions, CodeableConcept code, ValueSet theVs) {
 
 		List<ValidationResult> validationResultsOk = new ArrayList<>();
 		List<OperationOutcome.OperationOutcomeIssueComponent> issues = new ArrayList<>();
