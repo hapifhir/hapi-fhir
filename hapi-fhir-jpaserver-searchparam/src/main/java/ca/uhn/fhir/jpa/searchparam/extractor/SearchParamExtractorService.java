@@ -41,6 +41,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.SearchParamPresentEntity;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
+import ca.uhn.fhir.jpa.model.util.ResourceLinkUtil;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
@@ -71,6 +72,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.jpa.model.config.PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED;
+import static ca.uhn.fhir.jpa.model.util.ResourceLinkUtil.ResourceLinkForLocalReferenceParams;
+import static ca.uhn.fhir.jpa.model.util.ResourceLinkUtil.forLocalReference;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -103,26 +107,6 @@ public class SearchParamExtractorService {
 	@VisibleForTesting
 	public void setSearchParamExtractor(ISearchParamExtractor theSearchParamExtractor) {
 		mySearchParamExtractor = theSearchParamExtractor;
-	}
-
-	public void extractFromResource(
-			RequestPartitionId theRequestPartitionId,
-			RequestDetails theRequestDetails,
-			ResourceIndexedSearchParams theParams,
-			ResourceTable theEntity,
-			IBaseResource theResource,
-			TransactionDetails theTransactionDetails,
-			boolean theFailOnInvalidReference) {
-		extractFromResource(
-				theRequestPartitionId,
-				theRequestDetails,
-				theParams,
-				ResourceIndexedSearchParams.withSets(),
-				theEntity,
-				theResource,
-				theTransactionDetails,
-				theFailOnInvalidReference,
-				ISearchParamExtractor.ALL_PARAMS);
 	}
 
 	/**
@@ -608,7 +592,7 @@ public class SearchParamExtractorService {
 		if (LogicalReferenceHelper.isLogicalReference(myStorageSettings, nextId) || canonical) {
 			String value = nextId.getValue();
 			ResourceLink resourceLink =
-					ResourceLink.forLogicalReference(thePathAndRef.getPath(), theEntity, value, transactionDate);
+					ResourceLinkUtil.forLogicalReference(thePathAndRef.getPath(), theEntity, value, transactionDate);
 			if (theNewParams.myLinks.add(resourceLink)) {
 				ourLog.debug("Indexing remote resource reference URL: {}", nextId);
 			}
@@ -668,8 +652,8 @@ public class SearchParamExtractorService {
 						.getMessage(BaseSearchParamExtractor.class, "externalReferenceNotAllowed", nextId.getValue());
 				throw new InvalidRequestException(Msg.code(507) + msg);
 			} else {
-				ResourceLink resourceLink =
-						ResourceLink.forAbsoluteReference(thePathAndRef.getPath(), theEntity, nextId, transactionDate);
+				ResourceLink resourceLink = ResourceLinkUtil.forAbsoluteReference(
+						thePathAndRef.getPath(), theEntity, nextId, transactionDate);
 				if (theNewParams.myLinks.add(resourceLink)) {
 					ourLog.debug("Indexing remote resource reference URL: {}", nextId);
 				}
@@ -702,14 +686,19 @@ public class SearchParamExtractorService {
 			 * need to resolve it again
 			 */
 			myResourceLinkResolver.validateTypeOrThrowException(type);
-			resourceLink = ResourceLink.forLocalReference(
-					thePathAndRef.getPath(),
-					theEntity,
-					typeString,
-					resolvedTargetId.getId(),
-					targetId,
-					transactionDate,
-					targetVersionId);
+
+			ResourceLinkForLocalReferenceParams params = ResourceLinkForLocalReferenceParams.instance()
+					.setSourcePath(thePathAndRef.getPath())
+					.setSourceResource(theEntity)
+					.setTargetResourceType(typeString)
+					.setTargetResourcePid(resolvedTargetId.getId())
+					.setTargetResourceId(targetId)
+					.setUpdated(transactionDate)
+					.setTargetResourceVersion(targetVersionId)
+					.setTargetResourcePartitionId(resolvedTargetId.getPartitionId())
+					.setTargetResourcePartitionDate(resolvedTargetId.getPartitionDate());
+
+			resourceLink = forLocalReference(params);
 
 		} else if (theFailOnInvalidReference) {
 
@@ -748,6 +737,8 @@ public class SearchParamExtractorService {
 			} else {
 				// Cache the outcome in the current transaction in case there are more references
 				JpaPid persistentId = JpaPid.fromId(resourceLink.getTargetResourcePid());
+				persistentId.setPartitionId(resourceLink.getTargetResourcePartitionId());
+				persistentId.setPartitionDate(resourceLink.getTargetResourcePartitionDate());
 				theTransactionDetails.addResolvedResourceId(referenceElement, persistentId);
 			}
 
@@ -757,11 +748,15 @@ public class SearchParamExtractorService {
 			 * Just assume the reference is valid. This is used for in-memory matching since there
 			 * is no expectation of a database in this situation
 			 */
-			ResourceTable target;
-			target = new ResourceTable();
-			target.setResourceType(typeString);
-			resourceLink = ResourceLink.forLocalReference(
-					thePathAndRef.getPath(), theEntity, typeString, null, targetId, transactionDate, targetVersionId);
+			ResourceLinkForLocalReferenceParams params = ResourceLinkForLocalReferenceParams.instance()
+					.setSourcePath(thePathAndRef.getPath())
+					.setSourceResource(theEntity)
+					.setTargetResourceType(typeString)
+					.setTargetResourceId(targetId)
+					.setUpdated(transactionDate)
+					.setTargetResourceVersion(targetVersionId);
+
+			resourceLink = forLocalReference(params);
 		}
 
 		theNewParams.myLinks.add(resourceLink);
@@ -912,19 +907,25 @@ public class SearchParamExtractorService {
 			RequestDetails theRequest,
 			TransactionDetails theTransactionDetails) {
 		JpaPid resolvedResourceId = (JpaPid) theTransactionDetails.getResolvedResourceId(theNextId);
+
 		if (resolvedResourceId != null) {
 			String targetResourceType = theNextId.getResourceType();
 			Long targetResourcePid = resolvedResourceId.getId();
 			String targetResourceIdPart = theNextId.getIdPart();
 			Long targetVersion = theNextId.getVersionIdPartAsLong();
-			return ResourceLink.forLocalReference(
-					thePathAndRef.getPath(),
-					theEntity,
-					targetResourceType,
-					targetResourcePid,
-					targetResourceIdPart,
-					theUpdateTime,
-					targetVersion);
+
+			ResourceLinkForLocalReferenceParams params = ResourceLinkForLocalReferenceParams.instance()
+					.setSourcePath(thePathAndRef.getPath())
+					.setSourceResource(theEntity)
+					.setTargetResourceType(targetResourceType)
+					.setTargetResourcePid(targetResourcePid)
+					.setTargetResourceId(targetResourceIdPart)
+					.setUpdated(theUpdateTime)
+					.setTargetResourceVersion(targetVersion)
+					.setTargetResourcePartitionId(resolvedResourceId.getPartitionId())
+					.setTargetResourcePartitionDate(resolvedResourceId.getPartitionDate());
+
+			return ResourceLinkUtil.forLocalReference(params);
 		}
 
 		/*
@@ -936,8 +937,7 @@ public class SearchParamExtractorService {
 
 		IResourceLookup<JpaPid> targetResource;
 		if (myPartitionSettings.isPartitioningEnabled()) {
-			if (myPartitionSettings.getAllowReferencesAcrossPartitions()
-					== PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED) {
+			if (myPartitionSettings.getAllowReferencesAcrossPartitions() == ALLOWED_UNQUALIFIED) {
 
 				// Interceptor: Pointcut.JPA_CROSS_PARTITION_REFERENCE_DETECTED
 				if (CompositeInterceptorBroadcaster.hasHooks(
@@ -981,21 +981,26 @@ public class SearchParamExtractorService {
 		Long targetResourcePid = targetResource.getPersistentId().getId();
 		String targetResourceIdPart = theNextId.getIdPart();
 		Long targetVersion = theNextId.getVersionIdPartAsLong();
-		return ResourceLink.forLocalReference(
-				thePathAndRef.getPath(),
-				theEntity,
-				targetResourceType,
-				targetResourcePid,
-				targetResourceIdPart,
-				theUpdateTime,
-				targetVersion);
+
+		ResourceLinkForLocalReferenceParams params = ResourceLinkForLocalReferenceParams.instance()
+				.setSourcePath(thePathAndRef.getPath())
+				.setSourceResource(theEntity)
+				.setTargetResourceType(targetResourceType)
+				.setTargetResourcePid(targetResourcePid)
+				.setTargetResourceId(targetResourceIdPart)
+				.setUpdated(theUpdateTime)
+				.setTargetResourceVersion(targetVersion)
+				.setTargetResourcePartitionId(targetResource.getPersistentId().getPartitionId())
+				.setTargetResourcePartitionDate(targetResource.getPersistentId().getPartitionDate());
+
+		return ResourceLinkUtil.forLocalReference(params);
 	}
 
 	private RequestPartitionId determineResolverPartitionId(@Nonnull RequestPartitionId theRequestPartitionId) {
 		RequestPartitionId targetRequestPartitionId = theRequestPartitionId;
 		if (myPartitionSettings.isPartitioningEnabled()
 				&& myPartitionSettings.getAllowReferencesAcrossPartitions()
-						== PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED) {
+						== ALLOWED_UNQUALIFIED) {
 			targetRequestPartitionId = RequestPartitionId.allPartitions();
 		}
 		return targetRequestPartitionId;

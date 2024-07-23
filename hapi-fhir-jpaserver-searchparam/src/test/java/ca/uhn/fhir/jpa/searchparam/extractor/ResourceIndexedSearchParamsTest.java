@@ -4,6 +4,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
+import ca.uhn.fhir.jpa.model.util.ResourceLinkUtil;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import com.google.common.collect.Lists;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,7 +38,7 @@ public class ResourceIndexedSearchParamsTest {
 
 	@Test
 	public void matchResourceLinksStringCompareToLong() {
-		ResourceLink link = ResourceLink.forLocalReference("organization", mySource, "Organization", 123L, LONG_ID, new Date(), null);
+		ResourceLink link = getResourceLinkForLocalReference();
 		myParams.getResourceLinks().add(link);
 
 		ReferenceParam referenceParam = getReferenceParam(STRING_ID);
@@ -47,7 +48,7 @@ public class ResourceIndexedSearchParamsTest {
 
 	@Test
 	public void matchResourceLinksStringCompareToString() {
-		ResourceLink link = ResourceLink.forLocalReference("organization", mySource, "Organization", 123L, STRING_ID, new Date(), null);
+		ResourceLink link = getResourceLinkForLocalReference();
 		myParams.getResourceLinks().add(link);
 
 		ReferenceParam referenceParam = getReferenceParam(STRING_ID);
@@ -57,7 +58,7 @@ public class ResourceIndexedSearchParamsTest {
 
 	@Test
 	public void matchResourceLinksLongCompareToString() {
-		ResourceLink link = ResourceLink.forLocalReference("organization", mySource, "Organization", 123L, STRING_ID, new Date(), null);
+		ResourceLink link = getResourceLinkForLocalReference();
 		myParams.getResourceLinks().add(link);
 
 		ReferenceParam referenceParam = getReferenceParam(LONG_ID);
@@ -67,12 +68,27 @@ public class ResourceIndexedSearchParamsTest {
 
 	@Test
 	public void matchResourceLinksLongCompareToLong() {
-		ResourceLink link = ResourceLink.forLocalReference("organization", mySource, "Organization", 123L, LONG_ID, new Date(), null);
+		ResourceLink link = getResourceLinkForLocalReference();
 		myParams.getResourceLinks().add(link);
 
 		ReferenceParam referenceParam = getReferenceParam(LONG_ID);
 		boolean result = myParams.matchResourceLinks(myStorageSettings, "Patient", "organization", referenceParam, "organization");
 		assertTrue(result);
+	}
+
+	private ResourceLink getResourceLinkForLocalReference(){
+
+		ResourceLinkUtil.ResourceLinkForLocalReferenceParams params = ResourceLinkUtil.ResourceLinkForLocalReferenceParams
+			.instance()
+			.setSourcePath("organization")
+			.setSourceResource(mySource)
+			.setTargetResourceType("Organization")
+			.setTargetResourcePid(123L)
+			.setTargetResourceId(LONG_ID)
+			.setUpdated(new Date());
+
+		return ResourceLinkUtil.forLocalReference(params);
+
 	}
 
 	private ReferenceParam getReferenceParam(String theId) {

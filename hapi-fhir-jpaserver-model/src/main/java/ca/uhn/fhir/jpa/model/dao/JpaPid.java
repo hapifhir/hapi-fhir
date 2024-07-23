@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.model.dao;
 
 import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -34,6 +35,8 @@ import java.util.Set;
  */
 public class JpaPid extends BaseResourcePersistentId<Long> {
 	private final Long myId;
+	private Integer myPartitionId;
+	private LocalDate myPartitionDate;
 
 	private JpaPid(Long theId) {
 		super(null);
@@ -53,6 +56,24 @@ public class JpaPid extends BaseResourcePersistentId<Long> {
 	private JpaPid(Long theId, Long theVersion, String theResourceType) {
 		super(theVersion, theResourceType);
 		myId = theId;
+	}
+
+	public Integer getPartitionId() {
+		return myPartitionId;
+	}
+
+	public JpaPid setPartitionId(Integer thePartitionId) {
+		myPartitionId = thePartitionId;
+		return this;
+	}
+
+	public LocalDate getPartitionDate() {
+		return myPartitionDate;
+	}
+
+	public JpaPid setPartitionDate(LocalDate thePartitionDate) {
+		myPartitionDate = thePartitionDate;
+		return this;
 	}
 
 	public static List<Long> toLongList(Collection<JpaPid> thePids) {

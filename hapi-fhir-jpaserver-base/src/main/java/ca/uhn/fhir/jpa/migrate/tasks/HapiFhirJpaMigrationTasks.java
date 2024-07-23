@@ -468,6 +468,20 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 						.failureAllowed();
 			}
 		}
+
+		{
+			// Add target resource partition id/date columns to resource link
+			Builder.BuilderWithTableName resourceLinkTable = version.onTable("HFJ_RES_LINK");
+
+			resourceLinkTable
+					.addColumn("20240718.10", "TARGET_RES_PARTITION_ID")
+					.nullable()
+					.type(ColumnTypeEnum.INT);
+			resourceLinkTable
+					.addColumn("20240718.20", "TARGET_RES_PARTITION_DATE")
+					.nullable()
+					.type(ColumnTypeEnum.DATE_ONLY);
+		}
 	}
 
 	protected void init720() {

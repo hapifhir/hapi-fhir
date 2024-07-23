@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
-import jakarta.annotation.Nullable;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -41,6 +40,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 import org.hl7.fhir.instance.model.api.IIdType;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 @Entity
@@ -119,6 +119,12 @@ public class ResourceLink extends BaseResourceIndex {
 	@Transient
 	private transient String myTargetResourceId;
 
+	@Column(name = "TARGET_RES_PARTITION_ID", nullable = true, insertable = true, updatable = false)
+	private Integer myTargetResourcePartitionId;
+
+	@Column(name = "TARGET_RES_PARTITION_DATE", nullable = true, insertable = true, updatable = false)
+	private LocalDate myTargetResourcePartitionDate;
+
 	/**
 	 * Constructor
 	 */
@@ -188,6 +194,8 @@ public class ResourceLink extends BaseResourceIndex {
 		myTargetResourceType = source.getTargetResourceType();
 		myTargetResourceVersion = source.getTargetResourceVersion();
 		myTargetResourceUrl = source.getTargetResourceUrl();
+		myTargetResourcePartitionId = source.getTargetResourcePartitionId();
+		myTargetResourcePartitionDate = source.getTargetResourcePartitionDate();
 	}
 
 	public String getSourcePath() {
@@ -218,6 +226,24 @@ public class ResourceLink extends BaseResourceIndex {
 		myTargetResourceType = theResourceType;
 		myTargetResourcePid = theResourcePid;
 		myTargetResourceId = theTargetResourceId;
+	}
+
+	public Integer getTargetResourcePartitionId() {
+		return myTargetResourcePartitionId;
+	}
+
+	public LocalDate getTargetResourcePartitionDate() {
+		return myTargetResourcePartitionDate;
+	}
+
+	public ResourceLink setTargetResourcePartitionId(Integer theTargetResourcePartitionId) {
+		myTargetResourcePartitionId = theTargetResourcePartitionId;
+		return this;
+	}
+
+	public ResourceLink setTargetResourcePartitionDate(LocalDate theTargetResourcePartitionDate) {
+		myTargetResourcePartitionDate = theTargetResourcePartitionDate;
+		return this;
 	}
 
 	public String getTargetResourceUrl() {
@@ -337,49 +363,6 @@ public class ResourceLink extends BaseResourceIndex {
 		}
 		retVal.myTargetResourceUrl = myTargetResourceUrl;
 		retVal.myTargetResourceVersion = myTargetResourceVersion;
-		return retVal;
-	}
-
-	public static ResourceLink forAbsoluteReference(
-			String theSourcePath, ResourceTable theSourceResource, IIdType theTargetResourceUrl, Date theUpdated) {
-		ResourceLink retVal = new ResourceLink();
-		retVal.setSourcePath(theSourcePath);
-		retVal.setSourceResource(theSourceResource);
-		retVal.setTargetResourceUrl(theTargetResourceUrl);
-		retVal.setUpdated(theUpdated);
-		return retVal;
-	}
-
-	/**
-	 * Factory for canonical URL
-	 */
-	public static ResourceLink forLogicalReference(
-			String theSourcePath, ResourceTable theSourceResource, String theTargetResourceUrl, Date theUpdated) {
-		ResourceLink retVal = new ResourceLink();
-		retVal.setSourcePath(theSourcePath);
-		retVal.setSourceResource(theSourceResource);
-		retVal.setTargetResourceUrlCanonical(theTargetResourceUrl);
-		retVal.setUpdated(theUpdated);
-		return retVal;
-	}
-
-	/**
-	 * @param theTargetResourceVersion This should only be populated if the reference actually had a version
-	 */
-	public static ResourceLink forLocalReference(
-			String theSourcePath,
-			ResourceTable theSourceResource,
-			String theTargetResourceType,
-			Long theTargetResourcePid,
-			String theTargetResourceId,
-			Date theUpdated,
-			@Nullable Long theTargetResourceVersion) {
-		ResourceLink retVal = new ResourceLink();
-		retVal.setSourcePath(theSourcePath);
-		retVal.setSourceResource(theSourceResource);
-		retVal.setTargetResource(theTargetResourceType, theTargetResourcePid, theTargetResourceId);
-		retVal.setTargetResourceVersion(theTargetResourceVersion);
-		retVal.setUpdated(theUpdated);
 		return retVal;
 	}
 }

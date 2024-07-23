@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.search.reindex;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
@@ -15,24 +14,25 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.SearchParamPresentEntity;
+import ca.uhn.fhir.jpa.model.util.ResourceLinkUtil;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.test.utilities.HtmlUtil;
-import org.htmlunit.html.HtmlPage;
-import org.htmlunit.html.HtmlTable;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
+import org.htmlunit.html.HtmlPage;
+import org.htmlunit.html.HtmlTable;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jakarta.annotation.Nonnull;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Date;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Tests the narrative generation in {@link InstanceReindexServiceImpl}. This is a separate test
@@ -135,7 +135,7 @@ public class InstanceReindexServiceImplNarrativeR5Test {
 	public void testIndexResourceLink() throws IOException {
 		// Setup
 		ResourceIndexedSearchParams newParams = newParams();
-		newParams.myLinks.add(ResourceLink.forLocalReference("Observation.subject", myEntity, "Patient", 123L, "123", new Date(), 555L));
+		newParams.myLinks.add(getResourceLinkForLocalReference());
 
 		// Test
 		Parameters outcome = mySvc.buildIndexResponse(newParams(), newParams, true, Collections.emptyList());
@@ -155,7 +155,7 @@ public class InstanceReindexServiceImplNarrativeR5Test {
 	public void testIndexResourceLinkLogical() throws IOException {
 		// Setup
 		ResourceIndexedSearchParams newParams = newParams();
-		newParams.myLinks.add(ResourceLink.forLogicalReference("Observation.subject", myEntity, "http://foo/base/Patient/456", new Date()));
+		newParams.myLinks.add(ResourceLinkUtil.forLogicalReference("Observation.subject", myEntity, "http://foo/base/Patient/456", new Date()));
 
 		// Test
 		Parameters outcome = mySvc.buildIndexResponse(newParams(), newParams, true, Collections.emptyList());
@@ -176,7 +176,7 @@ public class InstanceReindexServiceImplNarrativeR5Test {
 	public void testIndexResourceLinkAbsolute() throws IOException {
 		// Setup
 		ResourceIndexedSearchParams newParams = newParams();
-		newParams.myLinks.add(ResourceLink.forAbsoluteReference("Observation.subject", myEntity, new IdType("http://foo/base/Patient/123"), new Date()));
+		newParams.myLinks.add(ResourceLinkUtil.forAbsoluteReference("Observation.subject", myEntity, new IdType("http://foo/base/Patient/123"), new Date()));
 
 		// Test
 		Parameters outcome = mySvc.buildIndexResponse(newParams(), newParams, true, Collections.emptyList());
@@ -309,6 +309,21 @@ public class InstanceReindexServiceImplNarrativeR5Test {
 	@Nonnull
 	private static ResourceIndexedSearchParams newParams() {
 		return ResourceIndexedSearchParams.withSets();
+	}
+
+	private ResourceLink getResourceLinkForLocalReference(){
+
+		ResourceLinkUtil.ResourceLinkForLocalReferenceParams params = ResourceLinkUtil.ResourceLinkForLocalReferenceParams
+			.instance()
+			.setSourcePath("Observation.subject")
+			.setSourceResource(myEntity)
+			.setTargetResourceType("Patient")
+			.setTargetResourcePid(123L)
+			.setTargetResourceId("123")
+			.setUpdated(new Date())
+			.setTargetResourceVersion(555L);
+
+		return ResourceLinkUtil.forLocalReference(params);
 	}
 
 }
