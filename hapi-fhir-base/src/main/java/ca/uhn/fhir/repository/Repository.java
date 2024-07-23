@@ -1,6 +1,7 @@
 package ca.uhn.fhir.repository;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
@@ -151,7 +152,7 @@ public interface Repository {
 	 */
 	default <I extends IIdType, P extends IBaseParameters> MethodOutcome patch(
 			I id, P patchParameters, Map<String, String> headers) {
-		throw new NotImplementedOperationException("patch is not supported by this repository");
+		return throwNotImplementedOperationException("patch is not supported by this repository");
 	}
 
 	/**
@@ -279,7 +280,7 @@ public interface Repository {
 	 * @return a Bundle
 	 */
 	default <B extends IBaseBundle> B link(Class<B> bundleType, String url, Map<String, String> headers) {
-		throw new NotImplementedOperationException("link is not supported by this repository");
+		return throwNotImplementedOperationException("link is not supported by this repository");
 	}
 
 	// Metadata starts here
@@ -308,7 +309,7 @@ public interface Repository {
 	 * @return a CapabilityStatement/Conformance with the repository's metadata
 	 */
 	default <C extends IBaseConformance> C capabilities(Class<C> resourceType, Map<String, String> headers) {
-		throw new NotImplementedOperationException("capabilities is not supported by this repository");
+		return throwNotImplementedOperationException("capabilities is not supported by this repository");
 	}
 
 	// Transactions starts here
@@ -337,7 +338,7 @@ public interface Repository {
 	 * @return a Bundle with the results of the transaction/batch
 	 */
 	default <B extends IBaseBundle> B transaction(B transaction, Map<String, String> headers) {
-		throw new NotImplementedOperationException("transaction is not supported by this repository");
+		return throwNotImplementedOperationException("transaction is not supported by this repository");
 	}
 
 	// Operations starts here
@@ -374,7 +375,7 @@ public interface Repository {
 	 */
 	default <R extends IBaseResource, P extends IBaseParameters> R invoke(
 			String name, P parameters, Class<R> returnType, Map<String, String> headers) {
-		throw new NotImplementedOperationException("server-level invoke is not supported by this repository");
+		return throwNotImplementedOperationException("server-level invoke is not supported by this repository");
 	}
 
 	/**
@@ -403,7 +404,7 @@ public interface Repository {
 	 * @return a MethodOutcome with a status code
 	 */
 	default <P extends IBaseParameters> MethodOutcome invoke(String name, P parameters, Map<String, String> headers) {
-		throw new NotImplementedOperationException("server-level invoke is not supported by this repository");
+		return throwNotImplementedOperationException("server-level invoke is not supported by this repository");
 	}
 
 	/**
@@ -475,7 +476,7 @@ public interface Repository {
 	 */
 	default <P extends IBaseParameters, T extends IBaseResource> MethodOutcome invoke(
 			Class<T> resourceType, String name, P parameters, Map<String, String> headers) {
-		throw new NotImplementedOperationException("type-level invoke is not supported by this repository");
+		return throwNotImplementedOperationException("type-level invoke is not supported by this repository");
 	}
 
 	/**
@@ -546,7 +547,7 @@ public interface Repository {
 	 */
 	default <P extends IBaseParameters, I extends IIdType> MethodOutcome invoke(
 			I id, String name, P parameters, Map<String, String> headers) {
-		throw new NotImplementedOperationException("instance-level invoke is not supported by this repository");
+		return throwNotImplementedOperationException("instance-level invoke is not supported by this repository");
 	}
 
 	// History starts here
@@ -580,7 +581,7 @@ public interface Repository {
 	 */
 	default <B extends IBaseBundle, P extends IBaseParameters> B history(
 			P parameters, Class<B> returnType, Map<String, String> headers) {
-		throw new NotImplementedOperationException("server-level history is not supported by this repository");
+		return throwNotImplementedOperationException("server-level history is not supported by this repository");
 	}
 
 	/**
@@ -617,7 +618,7 @@ public interface Repository {
 	 */
 	default <B extends IBaseBundle, P extends IBaseParameters, T extends IBaseResource> B history(
 			Class<T> resourceType, P parameters, Class<B> returnType, Map<String, String> headers) {
-		throw new NotImplementedOperationException("type-level history is not supported by this repository");
+		return throwNotImplementedOperationException("type-level history is not supported by this repository");
 	}
 
 	/**
@@ -654,7 +655,7 @@ public interface Repository {
 	 */
 	default <B extends IBaseBundle, P extends IBaseParameters, I extends IIdType> B history(
 			I id, P parameters, Class<B> returnType, Map<String, String> headers) {
-		throw new NotImplementedOperationException("instance-level history is not supported by this repository");
+		return throwNotImplementedOperationException("instance-level history is not supported by this repository");
 	}
 
 	/**
@@ -669,4 +670,8 @@ public interface Repository {
 	 * @return a FhirContext
 	 */
 	FhirContext fhirContext();
+
+	private static <T> T throwNotImplementedOperationException(String theMessage) {
+		throw new NotImplementedOperationException(Msg.code(2542) + theMessage);
+	}
 }
