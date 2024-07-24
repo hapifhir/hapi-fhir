@@ -135,7 +135,8 @@ public interface IResourceTableDao
 	 * This method returns a Collection where each row is an element in the collection. Each element in the collection
 	 * is an object array, where the order matters (the array represents columns returned by the query). Be careful if you change this query in any way.
 	 */
-	@Query("SELECT t.myResourceType, t.myId, t.myDeleted, t.myPartitionIdValue, t.myPartitionDateValue FROM ResourceTable t WHERE t.myId IN (:pid)")
+	@Query(
+			"SELECT t.myResourceType, t.myId, t.myDeleted, t.myPartitionIdValue, t.myPartitionDateValue FROM ResourceTable t WHERE t.myId IN (:pid)")
 	Collection<Object[]> findLookupFieldsByResourcePid(@Param("pid") List<Long> thePids);
 
 	/**

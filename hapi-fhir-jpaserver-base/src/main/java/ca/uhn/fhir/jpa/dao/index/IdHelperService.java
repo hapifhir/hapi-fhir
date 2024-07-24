@@ -580,7 +580,11 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 					Integer partitionId = (Integer) next[4];
 					LocalDate partitionDate = (LocalDate) next[5];
 
-					JpaResourceLookup lookup = new JpaResourceLookup(resourceType, resourcePid, deletedAt, PartitionablePartitionId.with(partitionId, partitionDate));
+					JpaResourceLookup lookup = new JpaResourceLookup(
+							resourceType,
+							resourcePid,
+							deletedAt,
+							PartitionablePartitionId.with(partitionId, partitionDate));
 					retVal.computeIfAbsent(forcedId, id -> new ArrayList<>()).add(lookup);
 
 					if (!myStorageSettings.isDeleteEnabled()) {
@@ -639,7 +643,11 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 				}
 			}
 			lookup.stream()
-					.map(t -> new JpaResourceLookup((String) t[0], (Long) t[1], (Date) t[2], PartitionablePartitionId.with((Integer) t[3], (LocalDate) t[4])))
+					.map(t -> new JpaResourceLookup(
+							(String) t[0],
+							(Long) t[1],
+							(Date) t[2],
+							PartitionablePartitionId.with((Integer) t[3], (LocalDate) t[4])))
 					.forEach(t -> {
 						String id = t.getPersistentId().toString();
 						if (!theTargets.containsKey(id)) {
@@ -716,7 +724,8 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 		}
 
 		if (!myStorageSettings.isDeleteEnabled()) {
-			JpaResourceLookup lookup = new JpaResourceLookup(theResourceType, theJpaPid.getId(), theDeletedAt, theJpaPid.getPartitionablePartitionId());
+			JpaResourceLookup lookup = new JpaResourceLookup(
+					theResourceType, theJpaPid.getId(), theDeletedAt, theJpaPid.getPartitionablePartitionId());
 			String nextKey = theJpaPid.toString();
 			myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.RESOURCE_LOOKUP, nextKey, lookup);
 		}

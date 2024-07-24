@@ -651,8 +651,8 @@ public class SearchParamExtractorService {
 						.getMessage(BaseSearchParamExtractor.class, "externalReferenceNotAllowed", nextId.getValue());
 				throw new InvalidRequestException(Msg.code(507) + msg);
 			} else {
-				ResourceLink resourceLink = ResourceLink.forAbsoluteReference(
-						thePathAndRef.getPath(), theEntity, nextId, transactionDate);
+				ResourceLink resourceLink =
+						ResourceLink.forAbsoluteReference(thePathAndRef.getPath(), theEntity, nextId, transactionDate);
 				if (theNewParams.myLinks.add(resourceLink)) {
 					ourLog.debug("Indexing remote resource reference URL: {}", nextId);
 				}
@@ -986,7 +986,8 @@ public class SearchParamExtractorService {
 				.setTargetResourceId(targetResourceIdPart)
 				.setUpdated(theUpdateTime)
 				.setTargetResourceVersion(targetVersion)
-				.setTargetResourcePartitionablePartitionId(targetResource.getPersistentId().getPartitionablePartitionId());
+				.setTargetResourcePartitionablePartitionId(
+						targetResource.getPersistentId().getPartitionablePartitionId());
 
 		return forLocalReference(params);
 	}
@@ -994,8 +995,7 @@ public class SearchParamExtractorService {
 	private RequestPartitionId determineResolverPartitionId(@Nonnull RequestPartitionId theRequestPartitionId) {
 		RequestPartitionId targetRequestPartitionId = theRequestPartitionId;
 		if (myPartitionSettings.isPartitioningEnabled()
-				&& myPartitionSettings.getAllowReferencesAcrossPartitions()
-						== ALLOWED_UNQUALIFIED) {
+				&& myPartitionSettings.getAllowReferencesAcrossPartitions() == ALLOWED_UNQUALIFIED) {
 			targetRequestPartitionId = RequestPartitionId.allPartitions();
 		}
 		return targetRequestPartitionId;

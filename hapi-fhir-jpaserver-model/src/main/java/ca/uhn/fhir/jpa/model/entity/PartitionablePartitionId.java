@@ -134,7 +134,8 @@ public class PartitionablePartitionId implements Cloneable {
 		return new PartitionablePartitionId(partitionId, theRequestPartitionId.getPartitionDate());
 	}
 
-	public static PartitionablePartitionId with(@Nullable Integer thePartitionId, @Nullable LocalDate thePartitionDate){
+	public static PartitionablePartitionId with(
+			@Nullable Integer thePartitionId, @Nullable LocalDate thePartitionDate) {
 		return new PartitionablePartitionId(thePartitionId, thePartitionDate);
 	}
 }

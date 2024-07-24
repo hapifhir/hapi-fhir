@@ -122,10 +122,8 @@ public class ResourceLink extends BaseResourceIndex {
 	private transient String myTargetResourceId;
 
 	@Embedded
-	@AttributeOverrides({
-		@AttributeOverride(name = "myPartitionId", column = @Column(name = "TARGET_RES_PARTITION_ID")),
-		@AttributeOverride(name = "myPartitionDate", column = @Column(name = "TARGET_RES_PARTITION_DATE"))
-	})
+	@AttributeOverride(name = "myPartitionId", column = @Column(name = "TARGET_RES_PARTITION_ID"))
+	@AttributeOverride(name = "myPartitionDate", column = @Column(name = "TARGET_RES_PARTITION_DATE"))
 	private PartitionablePartitionId myTargetResourcePartitionId;
 
 	/**
@@ -360,7 +358,7 @@ public class ResourceLink extends BaseResourceIndex {
 	}
 
 	public static ResourceLink forAbsoluteReference(
-		String theSourcePath, ResourceTable theSourceResource, IIdType theTargetResourceUrl, Date theUpdated) {
+			String theSourcePath, ResourceTable theSourceResource, IIdType theTargetResourceUrl, Date theUpdated) {
 		ResourceLink retVal = new ResourceLink();
 		retVal.setSourcePath(theSourcePath);
 		retVal.setSourceResource(theSourceResource);
@@ -373,7 +371,7 @@ public class ResourceLink extends BaseResourceIndex {
 	 * Factory for canonical URL
 	 */
 	public static ResourceLink forLogicalReference(
-		String theSourcePath, ResourceTable theSourceResource, String theTargetResourceUrl, Date theUpdated) {
+			String theSourcePath, ResourceTable theSourceResource, String theTargetResourceUrl, Date theUpdated) {
 		ResourceLink retVal = new ResourceLink();
 		retVal.setSourcePath(theSourcePath);
 		retVal.setSourceResource(theSourceResource);
@@ -382,17 +380,19 @@ public class ResourceLink extends BaseResourceIndex {
 		return retVal;
 	}
 
-	public static ResourceLink forLocalReference(ResourceLinkForLocalReferenceParams theResourceLinkForLocalReferenceParams) {
+	public static ResourceLink forLocalReference(
+			ResourceLinkForLocalReferenceParams theResourceLinkForLocalReferenceParams) {
 
 		ResourceLink retVal = new ResourceLink();
 		retVal.setSourcePath(theResourceLinkForLocalReferenceParams.getSourcePath());
 		retVal.setSourceResource(theResourceLinkForLocalReferenceParams.getSourceResource());
 		retVal.setTargetResource(
-			theResourceLinkForLocalReferenceParams.getTargetResourceType(),
-			theResourceLinkForLocalReferenceParams.getTargetResourcePid(),
-			theResourceLinkForLocalReferenceParams.getTargetResourceId());
+				theResourceLinkForLocalReferenceParams.getTargetResourceType(),
+				theResourceLinkForLocalReferenceParams.getTargetResourcePid(),
+				theResourceLinkForLocalReferenceParams.getTargetResourceId());
 
-		retVal.setTargetResourcePartitionId(theResourceLinkForLocalReferenceParams.getTargetResourcePartitionablePartitionId());
+		retVal.setTargetResourcePartitionId(
+				theResourceLinkForLocalReferenceParams.getTargetResourcePartitionablePartitionId());
 		retVal.setTargetResourceVersion(theResourceLinkForLocalReferenceParams.getTargetResourceVersion());
 		retVal.setUpdated(theResourceLinkForLocalReferenceParams.getUpdated());
 
@@ -483,7 +483,8 @@ public class ResourceLink extends BaseResourceIndex {
 			return myTargetResourcePartitionablePartitionId;
 		}
 
-		public ResourceLinkForLocalReferenceParams setTargetResourcePartitionablePartitionId(PartitionablePartitionId theTargetResourcePartitionablePartitionId) {
+		public ResourceLinkForLocalReferenceParams setTargetResourcePartitionablePartitionId(
+				PartitionablePartitionId theTargetResourcePartitionablePartitionId) {
 			myTargetResourcePartitionablePartitionId = theTargetResourcePartitionablePartitionId;
 			return this;
 		}

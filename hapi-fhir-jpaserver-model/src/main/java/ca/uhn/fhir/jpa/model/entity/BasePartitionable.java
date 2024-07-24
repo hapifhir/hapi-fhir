@@ -52,7 +52,6 @@ public abstract class BasePartitionable implements Serializable {
 	@Column(name = PartitionablePartitionId.PARTITION_DATE, insertable = false, updatable = false, nullable = true)
 	private LocalDate myPartitionDateValue;
 
-
 	@Nullable
 	public PartitionablePartitionId getPartitionId() {
 		return myPartitionId;
