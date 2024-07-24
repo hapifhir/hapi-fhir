@@ -45,6 +45,7 @@ import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Consent;
 import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Media;
@@ -107,6 +108,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -126,6 +128,7 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 	private FhirValidator myFhirValidator;
 	private ArrayList<String> myValidConcepts;
 	private Set<String> myValidSystems = new HashSet<>();
+	private Set<String> myValidValueSets = new HashSet<>();
 	private Map<String, StructureDefinition> myStructureDefinitionMap = new HashMap<>();
 	private CachingValidationSupport myValidationSupport;
 	private IValidationSupport myMockSupport;
@@ -133,6 +136,10 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 	private void addValidConcept(String theSystem, String theCode) {
 		myValidSystems.add(theSystem);
 		myValidConcepts.add(theSystem + "___" + theCode);
+	}
+
+	private void addValidValueSet(String theValueSetUrl) {
+		myValidValueSets.add(theValueSetUrl);
 	}
 
 	/**
@@ -262,6 +269,16 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 				String argument = theInvocation.getArgument(1, String.class);
 				boolean retVal = myValidSystems.contains(argument);
 				ourLog.debug("isCodeSystemSupported({}) : {}", argument, retVal);
+				return retVal;
+			}
+		});
+
+		when(myMockSupport.isValueSetSupported(any(), nullable(String.class))).thenAnswer(new Answer<Boolean>() {
+			@Override
+			public Boolean answer(InvocationOnMock theInvocation) {
+				String argument = theInvocation.getArgument(1, String.class);
+				boolean retVal = myValidValueSets.contains(argument);
+				ourLog.debug("isValueSetSupported({}) : {}", argument, retVal);
 				return retVal;
 			}
 		});
@@ -853,6 +870,25 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 		ValidationResult output = myFhirValidator.validateWithResult(vsContents);
 		logResultsAndReturnNonInformationalOnes(output);
 		assertTrue(output.isSuccessful());
+	}
+
+	@Test
+	public void testValidate_patientWithGenderCode_resolvesCodeSystemFromValueSet() {
+		// setup
+		Patient patient = new Patient();
+		patient.setGender(Enumerations.AdministrativeGender.MALE);
+
+		addValidConcept("http://hl7.org/fhir/administrative-gender", "male");
+		addValidValueSet("http://hl7.org/fhir/ValueSet/administrative-gender");
+
+		// execute
+		ValidationResult output = myFhirValidator.validateWithResult(patient);
+		logResultsAndReturnNonInformationalOnes(output);
+
+		// verify
+		assertTrue(output.isSuccessful());
+		verify(myMockSupport, times(1)).validateCodeInValueSet(any(), any(), eq("http://hl7.org/fhir/administrative-gender"), eq("male"), any(), any());
+		verify(myMockSupport, times(1)).validateCode(any(), any(), eq("http://hl7.org/fhir/administrative-gender"), eq("male"), any(), any());
 	}
 
 	@Test
