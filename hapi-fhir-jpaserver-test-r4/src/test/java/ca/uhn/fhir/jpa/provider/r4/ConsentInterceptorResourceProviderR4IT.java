@@ -1,7 +1,5 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -11,6 +9,7 @@ import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -46,6 +45,7 @@ import org.apache.http.entity.StringEntity;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Composition;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.IdType;
@@ -71,11 +71,12 @@ import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.leftPad;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -630,6 +631,73 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 
 	}
 
+	@Test
+	void testGetBundle_WhenWillSeeReturnsRejectForABundle_ReadingBundleThrowsResourceNotFound() {
+
+		myConsentInterceptor = new ConsentInterceptor(new ConsentSvcWillSeeRejectsBundlesAuthorizesOthers());
+		myServer.getRestfulServer().
+			getInterceptorService().registerInterceptor(myConsentInterceptor);
+
+		// create bundle
+		Bundle bundle = createDocumentBundle();
+		MethodOutcome createOutcome = myClient.create().resource(bundle).execute();
+		IIdType bundleId = createOutcome.getResource().getIdElement();
+
+		// read the created bundle back
+		ResourceNotFoundException ex = assertThrows(ResourceNotFoundException.class,
+			() -> myClient.read().resource(Bundle.class).withId(bundleId).execute());
+
+		assertEquals(404, ex.getStatusCode());
+	}
+
+	@Test
+	void testGetBundle_WhenWillSeeReturnsAuthorizedForABundle_ChildResourcesInTheBundleAreVisible() {
+
+		myConsentInterceptor = new ConsentInterceptor(new ConsentSvcWillSeeAuthorizesBundlesRejectsOthers());
+		myServer.getRestfulServer().
+			getInterceptorService().registerInterceptor(myConsentInterceptor);
+
+		// create bundle
+		Bundle bundle = createDocumentBundle();
+		MethodOutcome createOutcome = myClient.create().resource(bundle).execute();
+		IIdType bundleId = createOutcome.getResource().getIdElement();
+
+		// read the created bundle back
+		Bundle bundleRead = myClient.read().resource(Bundle.class).withId(bundleId).execute();
+
+		// since the consent service AUTHORIZED the bundle, the child resources in the bundle should be visible
+		// because willSeeResource won't be called for the child resources once the bundle is AUTHORIZED
+		assertEquals(2, bundleRead.getEntry().size());
+		Composition compositionEntry = (Composition) bundleRead.getEntry().get(0).getResource();
+		assertEquals("Composition/composition-in-bundle", compositionEntry.getId());
+		Patient patientEntry = (Patient) bundleRead.getEntry().get(1).getResource();
+		assertEquals("Patient/patient-in-bundle", patientEntry.getId());
+	}
+
+
+	@Test
+	void testGetBundle_WhenWillSeeReturnsProceedForABundle_WillSeeIsCalledForChildResourcesInTheBundle() {
+
+		myConsentInterceptor = new ConsentInterceptor(new ConsentSvcWillSeeProceedsBundlesRejectsOthers());
+		myServer.getRestfulServer().
+			getInterceptorService().registerInterceptor(myConsentInterceptor);
+
+
+		// create a bundle
+		Bundle bundle = createDocumentBundle();
+		MethodOutcome createOutcome = myClient.create().resource(bundle).execute();
+		IIdType bundleId = createOutcome.getResource().getIdElement();
+
+		//read the created bundle back
+		Bundle bundleRead = myClient.read().resource(Bundle.class).withId(bundleId).execute();
+
+
+		// since the consent service replies with PROCEED for the bundle in this test case,
+		// willSeeResource should be called for the child resources in the bundle and would be rejected by the
+		// consent service, so the child resources in the bundle should not be visible
+		assertEquals(0, bundleRead.getEntry().size());
+	}
+
 	/**
 	 * Make sure the default methods all work and allow the response to proceed
 	 */
@@ -736,7 +804,7 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 		// given
 		create50Observations();
 
-		myConsentInterceptor = new ConsentInterceptor(new ConsentSvcRejectWillSeeResource());
+		myConsentInterceptor = new ConsentInterceptor(new ConsentSvcWillSeeProceedsBundlesRejectsOthers());
 		myServer.getRestfulServer().getInterceptorService().registerInterceptor(myConsentInterceptor);
 
 		// when
@@ -754,7 +822,7 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 		// given
 		create50Observations();
 
-		myConsentInterceptor = new ConsentInterceptor(new ConsentSvcRejectWillSeeResource());
+		myConsentInterceptor = new ConsentInterceptor(new ConsentSvcWillSeeProceedsBundlesRejectsOthers());
 		myServer.getRestfulServer().getInterceptorService().registerInterceptor(myConsentInterceptor);
 
 		// when
@@ -765,6 +833,21 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 		String previous = BundleUtil.getLinkUrlOfType(myFhirContext, nextResults, "previous");
 		assertThat(previous).contains("_getpagesoffset=0");
 
+	}
+
+	private Bundle createDocumentBundle() {
+		Bundle bundle = new Bundle();
+		bundle.setType(Bundle.BundleType.DOCUMENT);
+
+		Composition composition = new Composition();
+		composition.setId("composition-in-bundle");
+
+		Patient patient = new Patient();
+		patient.setId("patient-in-bundle");
+
+		bundle.addEntry().setResource(composition);
+		bundle.addEntry().setResource(patient);
+		return bundle;
 	}
 
 	private void createPatientAndOrg() {
@@ -1095,7 +1178,7 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 
 	}
 
-	private static class ConsentSvcRejectWillSeeResource implements IConsentService {
+	private static class ConsentSvcWillSeeProceedsBundlesRejectsOthers implements IConsentService {
 		@Override
 		public ConsentOutcome willSeeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
 			if("Bundle".equals(theResource.fhirType())){
@@ -1105,5 +1188,27 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 		}
 
 	}
+	private static class ConsentSvcWillSeeAuthorizesBundlesRejectsOthers implements IConsentService {
+		@Override
+		public ConsentOutcome willSeeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
+			if("Bundle".equals(theResource.fhirType())){
+				return new ConsentOutcome(ConsentOperationStatusEnum.AUTHORIZED);
+			}
+			return new ConsentOutcome(ConsentOperationStatusEnum.REJECT);
+		}
+
+	}
+
+	private static class ConsentSvcWillSeeRejectsBundlesAuthorizesOthers implements IConsentService {
+		@Override
+		public ConsentOutcome willSeeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
+			if("Bundle".equals(theResource.fhirType())){
+				return new ConsentOutcome(ConsentOperationStatusEnum.REJECT);
+			}
+			return new ConsentOutcome(ConsentOperationStatusEnum.AUTHORIZED);
+		}
+
+	}
+
 
 }
