@@ -7,9 +7,11 @@ import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import jakarta.servlet.http.HttpServletRequest;
-import org.hl7.fhir.common.hapi.validation.ILookupCodeTest;
+import org.hl7.fhir.common.hapi.validation.IRemoteTerminologyLookupCodeTest;
 import org.hl7.fhir.common.hapi.validation.support.RemoteTerminologyServiceValidationSupport;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -31,6 +33,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.text.MessageFormat;
 import java.util.Calendar;
 import java.util.List;
 import java.util.stream.Stream;
@@ -42,7 +45,7 @@ import static ca.uhn.fhir.context.support.IValidationSupport.LookupCodeResult;
  * Version specific tests for CodeSystem $lookup against RemoteTerminologyValidationSupport.
  * @see RemoteTerminologyServiceValidationSupport
  */
-public class RemoteTerminologyLookupCodeR4Test implements ILookupCodeTest {
+public class RemoteTerminologyLookupCodeR4Test implements IRemoteTerminologyLookupCodeTest {
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
 	@RegisterExtension
 	public static RestfulServerExtension ourRestfulServerExtension = new RestfulServerExtension(ourCtx);
@@ -181,6 +184,12 @@ public class RemoteTerminologyLookupCodeR4Test implements ILookupCodeTest {
 		) {
 			myCode = theCode;
 			mySystemUrl = theSystem;
+			if (theSystem == null) {
+				throw new InvalidRequestException(MessageFormat.format(MESSAGE_RESPONSE_EMPTY, theCode));
+			}
+			if (!myLookupCodeResult.isFound()) {
+				throw new ResourceNotFoundException(MessageFormat.format(MESSAGE_RESPONSE_NOT_FOUND, theCode));
+			}
 			return myLookupCodeResult.toParameters(theRequestDetails.getFhirContext(), thePropertyNames);
 		}
 		@Override

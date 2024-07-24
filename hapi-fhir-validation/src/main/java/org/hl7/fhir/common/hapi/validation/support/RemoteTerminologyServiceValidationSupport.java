@@ -12,6 +12,8 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.IQuery;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.ParametersUtil;
 import jakarta.annotation.Nonnull;
@@ -204,43 +206,57 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 		FhirContext fhirContext = client.getFhirContext();
 		FhirVersionEnum fhirVersion = fhirContext.getVersion().getVersion();
 
-		switch (fhirVersion) {
-			case DSTU3:
-			case R4:
-				IBaseParameters params = ParametersUtil.newInstance(fhirContext);
-				ParametersUtil.addParameterToParametersString(fhirContext, params, "code", code);
-				if (!StringUtils.isEmpty(system)) {
-					ParametersUtil.addParameterToParametersString(fhirContext, params, "system", system);
-				}
-				if (!StringUtils.isEmpty(displayLanguage)) {
-					ParametersUtil.addParameterToParametersString(fhirContext, params, "language", displayLanguage);
-				}
-				for (String propertyName : theLookupCodeRequest.getPropertyNames()) {
-					ParametersUtil.addParameterToParametersCode(fhirContext, params, "property", propertyName);
-				}
-				Class<? extends IBaseResource> codeSystemClass =
-						myCtx.getResourceDefinition("CodeSystem").getImplementingClass();
-				IBaseParameters outcome = client.operation()
-						.onType(codeSystemClass)
-						.named("$lookup")
-						.withParameters(params)
-						.useHttpGet()
-						.execute();
-				if (outcome != null && !outcome.isEmpty()) {
-					switch (fhirVersion) {
-						case DSTU3:
-							return generateLookupCodeResultDstu3(
-									code, system, (org.hl7.fhir.dstu3.model.Parameters) outcome);
-						case R4:
-							return generateLookupCodeResultR4(code, system, (Parameters) outcome);
-					}
-				}
-				break;
-			default:
-				throw new UnsupportedOperationException(Msg.code(710) + "Unsupported FHIR version '"
-						+ fhirVersion.getFhirVersionString() + "'. Only DSTU3 and R4 are supported.");
+		if (fhirVersion.isNewerThan(FhirVersionEnum.R4) || fhirVersion.isOlderThan(FhirVersionEnum.DSTU3)) {
+			throw new UnsupportedOperationException(Msg.code(710) + "Unsupported FHIR version '"
+					+ fhirVersion.getFhirVersionString() + "'. Only DSTU3 and R4 are supported.");
 		}
-		return null;
+
+		IBaseParameters params = ParametersUtil.newInstance(fhirContext);
+		ParametersUtil.addParameterToParametersString(fhirContext, params, "code", code);
+		if (!StringUtils.isEmpty(system)) {
+			ParametersUtil.addParameterToParametersString(fhirContext, params, "system", system);
+		}
+		if (!StringUtils.isEmpty(displayLanguage)) {
+			ParametersUtil.addParameterToParametersString(fhirContext, params, "language", displayLanguage);
+		}
+		for (String propertyName : theLookupCodeRequest.getPropertyNames()) {
+			ParametersUtil.addParameterToParametersCode(fhirContext, params, "property", propertyName);
+		}
+		Class<? extends IBaseResource> codeSystemClass =
+				myCtx.getResourceDefinition("CodeSystem").getImplementingClass();
+		IBaseParameters outcome;
+		try {
+			outcome = client.operation()
+					.onType(codeSystemClass)
+					.named("$lookup")
+					.withParameters(params)
+					.useHttpGet()
+					.execute();
+		} catch (ResourceNotFoundException | InvalidRequestException e) {
+			ourLog.error(e.getMessage(), e);
+			LookupCodeResult result = LookupCodeResult.notFound(system, code);
+			result.setErrorMessage(getErrorMessage(
+					"codeNotFoundWithException",
+					system,
+					code,
+					client.getServerBase(),
+					String.valueOf(e.getStatusCode()),
+					e.getMessage()));
+			return result;
+		}
+		if (outcome != null && !outcome.isEmpty()) {
+			if (fhirVersion == FhirVersionEnum.DSTU3) {
+				return generateLookupCodeResultDstu3(code, system, (org.hl7.fhir.dstu3.model.Parameters) outcome);
+			}
+			if (fhirVersion == FhirVersionEnum.R4) {
+				return generateLookupCodeResultR4(code, system, (Parameters) outcome);
+			}
+		}
+		return LookupCodeResult.notFound(system, code);
+	}
+
+	protected String getErrorMessage(String errorCode, Object... theParams) {
+		return getFhirContext().getLocalizer().getMessage(getClass(), errorCode, theParams);
 	}
 
 	private LookupCodeResult generateLookupCodeResultDstu3(
@@ -278,6 +294,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 				case "abstract":
 					result.setCodeIsAbstract(Boolean.parseBoolean(parameterTypeAsString));
 					break;
+				default:
 			}
 		}
 		return result;
@@ -384,6 +401,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 				case "value":
 					conceptDesignation.setValue(designationComponent.getValue().toString());
 					break;
+				default:
 			}
 		}
 		return conceptDesignation;
@@ -422,6 +440,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 				case "abstract":
 					result.setCodeIsAbstract(Boolean.parseBoolean(parameterTypeAsString));
 					break;
+				default:
 			}
 		}
 		return result;
@@ -508,6 +527,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 				case "value":
 					conceptDesignation.setValue(designationComponentValue.toString());
 					break;
+				default:
 			}
 		}
 		return conceptDesignation;
@@ -589,6 +609,10 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 			retVal.registerInterceptor(next);
 		}
 		return retVal;
+	}
+
+	public String getBaseUrl() {
+		return myBaseUrl;
 	}
 
 	protected CodeValidationResult invokeRemoteValidateCode(
