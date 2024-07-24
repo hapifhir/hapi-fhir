@@ -5,6 +5,8 @@ import ca.uhn.fhir.context.support.LookupCodeRequest;
 import org.hl7.fhir.common.hapi.validation.support.RemoteTerminologyServiceValidationSupport;
 import org.junit.jupiter.api.Test;
 
+import java.text.MessageFormat;
+
 /**
  * Additional tests specific for Remote Terminology $lookup operation.
  * Please see base interface for additional tests, implementation agnostic.
@@ -12,7 +14,7 @@ import org.junit.jupiter.api.Test;
 public interface IRemoteTerminologyLookupCodeTest extends ILookupCodeTest {
 
 	String MESSAGE_RESPONSE_NOT_FOUND = "Code {0} was not found";
-	String MESSAGE_RESPONSE_EMPTY = "Code {0} got an empty response";
+	String MESSAGE_RESPONSE_INVALID = "Code {0} lookup is missing a system";
 
 	@Override
 	RemoteTerminologyServiceValidationSupport getService();
@@ -23,11 +25,12 @@ public interface IRemoteTerminologyLookupCodeTest extends ILookupCodeTest {
 		final String codeNotFound = "a";
 		final String system = CODE_SYSTEM;
 		final String codeAndSystem = system + "#" + codeNotFound;
+		final String exceptionMessage = MessageFormat.format(MESSAGE_RESPONSE_NOT_FOUND, codeNotFound);
 		LookupCodeResult result = new LookupCodeResult()
 				.setFound(false)
 				.setSearchedForCode(codeNotFound)
 				.setSearchedForSystem(system)
-				.setErrorMessage("Unknown code \"" + codeAndSystem + "\". The Remote Terminology server " + baseUrl + " returned 404: HTTP 404 Not Found: Code a was not found.");
+				.setErrorMessage("Unknown code \"" + codeAndSystem + "\". The Remote Terminology server " + baseUrl + " returned HTTP 404 Not Found: " + exceptionMessage);
 		getCodeSystemProvider().setLookupCodeResult(result);
 
 		LookupCodeRequest request =  new LookupCodeRequest(system, codeNotFound, null, null);
@@ -40,11 +43,12 @@ public interface IRemoteTerminologyLookupCodeTest extends ILookupCodeTest {
 		final String codeNotFound = "a";
 		final String system = null;
 		final String codeAndSystem = system + "#" + codeNotFound;
+		final String exceptionMessage = MessageFormat.format(MESSAGE_RESPONSE_INVALID, codeNotFound);
 		LookupCodeResult result = new LookupCodeResult()
 				.setFound(false)
 				.setSearchedForCode(codeNotFound)
 				.setSearchedForSystem(system)
-				.setErrorMessage("Unknown code \"" + codeAndSystem + "\". The Remote Terminology server " + baseUrl + " returned 400: HTTP 400 Bad Request: Code a got an empty response.");
+				.setErrorMessage("Unknown code \"" + codeAndSystem + "\". The Remote Terminology server " + baseUrl + " returned HTTP 400 Bad Request: " + exceptionMessage);
 		getCodeSystemProvider().setLookupCodeResult(result);
 
 		LookupCodeRequest request =  new LookupCodeRequest(system, codeNotFound, null, null);

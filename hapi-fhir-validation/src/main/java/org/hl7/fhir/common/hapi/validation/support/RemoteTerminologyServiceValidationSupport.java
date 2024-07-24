@@ -235,13 +235,8 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 		} catch (ResourceNotFoundException | InvalidRequestException e) {
 			ourLog.error(e.getMessage(), e);
 			LookupCodeResult result = LookupCodeResult.notFound(system, code);
-			result.setErrorMessage(getErrorMessage(
-					"codeNotFoundWithException",
-					system,
-					code,
-					client.getServerBase(),
-					String.valueOf(e.getStatusCode()),
-					e.getMessage()));
+			result.setErrorMessage(
+					getErrorMessage("unknownCodeInSystem", system, code, client.getServerBase(), e.getMessage()));
 			return result;
 		}
 		if (outcome != null && !outcome.isEmpty()) {

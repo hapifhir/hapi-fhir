@@ -185,7 +185,7 @@ public class RemoteTerminologyLookupCodeR4Test implements IRemoteTerminologyLook
 			myCode = theCode;
 			mySystemUrl = theSystem;
 			if (theSystem == null) {
-				throw new InvalidRequestException(MessageFormat.format(MESSAGE_RESPONSE_EMPTY, theCode));
+				throw new InvalidRequestException(MessageFormat.format(MESSAGE_RESPONSE_INVALID, theCode));
 			}
 			if (!myLookupCodeResult.isFound()) {
 				throw new ResourceNotFoundException(MessageFormat.format(MESSAGE_RESPONSE_NOT_FOUND, theCode));
