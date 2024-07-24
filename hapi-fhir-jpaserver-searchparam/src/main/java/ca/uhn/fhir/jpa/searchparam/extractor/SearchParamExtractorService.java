@@ -735,7 +735,7 @@ public class SearchParamExtractorService {
 			} else {
 				// Cache the outcome in the current transaction in case there are more references
 				JpaPid persistentId = JpaPid.fromId(resourceLink.getTargetResourcePid());
-				persistentId.setPartitionablePartitionId(resolvedTargetId.getPartitionablePartitionId());
+				persistentId.setPartitionablePartitionId(resourceLink.getTargetResourcePartitionId());
 				theTransactionDetails.addResolvedResourceId(referenceElement, persistentId);
 			}
 

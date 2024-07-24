@@ -90,13 +90,11 @@ import java.util.stream.Collectors;
 import static ca.uhn.fhir.util.TestUtil.sleepAtLeast;
 import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.fail;
-
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -173,7 +171,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		// Look up the referenced subject/patient
 		String sql = selectQueries.get(0).getSql(true, false).toLowerCase();
 		assertThat(sql).contains(" from hfj_resource ");
-		assertEquals(0, StringUtils.countMatches(selectQueries.get(0).getSql(true, false).toLowerCase(), "partition"));
+		assertEquals(2, StringUtils.countMatches(selectQueries.get(0).getSql(true, false).toLowerCase(), "partition"));
 
 		runInTransaction(() -> {
 			List<ResourceLink> resLinks = myResourceLinkDao.findAll();
@@ -181,6 +179,8 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			assertEquals(2, resLinks.size());
 			assertEquals(obsId.getIdPartAsLong(), resLinks.get(0).getSourceResourcePid());
 			assertEquals(patientId.getIdPartAsLong(), resLinks.get(0).getTargetResourcePid());
+			assertEquals(myPartitionId, resLinks.get(0).getTargetResourcePartitionId().getPartitionId());
+			assertLocalDateFromDbMatches(myPartitionDate, resLinks.get(0).getTargetResourcePartitionId().getPartitionDate());
 		});
 	}
 
@@ -465,6 +465,8 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			assertEquals(1, resourceLinks.size());
 			assertEquals(myPartitionId, resourceLinks.get(0).getPartitionId().getPartitionId().intValue());
 			assertLocalDateFromDbMatches(myPartitionDate, resourceLinks.get(0).getPartitionId().getPartitionDate());
+			assertEquals(myPartitionId, resourceLinks.get(0).getTargetResourcePartitionId().getPartitionId().intValue());
+			assertLocalDateFromDbMatches(myPartitionDate, resourceLinks.get(0).getTargetResourcePartitionId().getPartitionDate());
 
 			// HFJ_RES_PARAM_PRESENT
 			List<SearchParamPresentEntity> presents = mySearchParamPresentDao.findAllForResource(resourceTable);
