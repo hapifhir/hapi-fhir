@@ -1377,7 +1377,8 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 			// Only the read columns should be used, no criteria use partition
 			assertThat(searchSql).as(searchSql).contains("PARTITION_ID IN ('1')");
-			assertThat(StringUtils.countMatches(searchSql, "PARTITION_ID")).as(searchSql).isEqualTo(1);
+			assertThat(StringUtils.countMatches(searchSql, "PARTITION_ID,")).as(searchSql).isEqualTo(1);
+			assertThat(StringUtils.countMatches(searchSql, "PARTITION_DATE")).as(searchSql).isEqualTo(1);
 		}
 
 		// Read in null Partition
@@ -1430,7 +1431,8 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false).toUpperCase();
 			ourLog.info("Search SQL:\n{}", searchSql);
 			assertThat(searchSql).as(searchSql).contains("PARTITION_ID IN ('1')");
-			assertThat(StringUtils.countMatches(searchSql, "PARTITION_ID")).as(searchSql).isEqualTo(1);
+			assertThat(StringUtils.countMatches(searchSql, "PARTITION_ID,")).as(searchSql).isEqualTo(1);
+			assertThat(StringUtils.countMatches(searchSql, "PARTITION_DATE")).as(searchSql).isEqualTo(1);
 
 			// Second SQL performs the search
 			searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, false).toUpperCase();
@@ -2088,9 +2090,11 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread(1);
 		assertThat(outcome.getResources(0, 1)).hasSize(1);
 
-		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
+		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
 		ourLog.info("Search SQL:\n{}", searchSql);
-		assertThat(StringUtils.countMatches(searchSql, "PARTITION_ID")).as(searchSql).isEqualTo(1);
+		assertThat(searchSql).as(searchSql).contains("PARTITION_ID in ('1')");
+		assertThat(StringUtils.countMatches(searchSql, "PARTITION_ID,")).as(searchSql).isEqualTo(1);
+		assertThat(StringUtils.countMatches(searchSql, "PARTITION_DATE")).as(searchSql).isEqualTo(1);
 	}
 
 

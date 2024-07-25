@@ -37,7 +37,7 @@ public class ResourceIndexedSearchParamsTest {
 
 	@Test
 	public void matchResourceLinksStringCompareToLong() {
-		ResourceLink link = getResourceLinkForLocalReference();
+		ResourceLink link = getResourceLinkForLocalReference(LONG_ID);
 		myParams.getResourceLinks().add(link);
 
 		ReferenceParam referenceParam = getReferenceParam(STRING_ID);
@@ -47,7 +47,7 @@ public class ResourceIndexedSearchParamsTest {
 
 	@Test
 	public void matchResourceLinksStringCompareToString() {
-		ResourceLink link = getResourceLinkForLocalReference();
+		ResourceLink link = getResourceLinkForLocalReference(STRING_ID);
 		myParams.getResourceLinks().add(link);
 
 		ReferenceParam referenceParam = getReferenceParam(STRING_ID);
@@ -57,7 +57,7 @@ public class ResourceIndexedSearchParamsTest {
 
 	@Test
 	public void matchResourceLinksLongCompareToString() {
-		ResourceLink link = getResourceLinkForLocalReference();
+		ResourceLink link = getResourceLinkForLocalReference(STRING_ID);
 		myParams.getResourceLinks().add(link);
 
 		ReferenceParam referenceParam = getReferenceParam(LONG_ID);
@@ -67,7 +67,7 @@ public class ResourceIndexedSearchParamsTest {
 
 	@Test
 	public void matchResourceLinksLongCompareToLong() {
-		ResourceLink link = getResourceLinkForLocalReference();
+		ResourceLink link = getResourceLinkForLocalReference(LONG_ID);
 		myParams.getResourceLinks().add(link);
 
 		ReferenceParam referenceParam = getReferenceParam(LONG_ID);
@@ -75,7 +75,7 @@ public class ResourceIndexedSearchParamsTest {
 		assertTrue(result);
 	}
 
-	private ResourceLink getResourceLinkForLocalReference(){
+	private ResourceLink getResourceLinkForLocalReference(String theTargetResourceId){
 
 		ResourceLink.ResourceLinkForLocalReferenceParams params = ResourceLink.ResourceLinkForLocalReferenceParams
 			.instance()
@@ -83,7 +83,7 @@ public class ResourceIndexedSearchParamsTest {
 			.setSourceResource(mySource)
 			.setTargetResourceType("Organization")
 			.setTargetResourcePid(123L)
-			.setTargetResourceId(LONG_ID)
+			.setTargetResourceId(theTargetResourceId)
 			.setUpdated(new Date());
 
 		return ResourceLink.forLocalReference(params);

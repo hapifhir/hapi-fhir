@@ -485,9 +485,9 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		{
 			version.onTable(Search.HFJ_SEARCH)
-				.modifyColumn("20240722.1", Search.SEARCH_UUID)
-				.nullable()
-				.withType(ColumnTypeEnum.STRING, 48);
+					.modifyColumn("20240722.1", Search.SEARCH_UUID)
+					.nullable()
+					.withType(ColumnTypeEnum.STRING, 48);
 		}
 	}
 
