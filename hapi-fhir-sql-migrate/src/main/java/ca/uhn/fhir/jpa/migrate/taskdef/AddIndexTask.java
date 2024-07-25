@@ -33,6 +33,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -43,7 +44,7 @@ public class AddIndexTask extends BaseTableTask {
 	private String myIndexName;
 	private List<String> myColumns;
 	private List<String> myNullableColumns;
-	private Boolean myUnique;
+	private Boolean myUnique = false;
 	private List<String> myIncludeColumns = Collections.emptyList();
 	/** Should the operation avoid taking a lock on the table */
 	private boolean myOnline;
@@ -79,7 +80,7 @@ public class AddIndexTask extends BaseTableTask {
 		super.validate();
 		Validate.notBlank(myIndexName, "Index name not specified");
 		Validate.isTrue(
-				myColumns.size() > 0,
+				!myColumns.isEmpty(),
 				"Columns not specified for AddIndexTask " + myIndexName + " on table " + getTableName());
 		Validate.notNull(myUnique, "Uniqueness not specified");
 		setDescription("Add " + myIndexName + " index to table " + getTableName());
@@ -151,7 +152,7 @@ public class AddIndexTask extends BaseTableTask {
 		}
 		// Should we do this non-transactionally?  Avoids a write-lock, but introduces weird failure modes.
 		String postgresOnlineClause = "";
-		String msSqlOracleOnlineClause = "";
+		String oracleOnlineClause = "";
 		if (myOnline) {
 			switch (getDriverType()) {
 				case POSTGRES_9_4:
@@ -160,23 +161,64 @@ public class AddIndexTask extends BaseTableTask {
 					// This runs without a lock, and can't be done transactionally.
 					setTransactional(false);
 					break;
-				case ORACLE_12C:
-					if (myMetadataSource.isOnlineIndexSupported(getConnectionProperties())) {
-						msSqlOracleOnlineClause = " ONLINE DEFERRED INVALIDATION";
-					}
-					break;
 				case MSSQL_2012:
+					// handled below in buildOnlineCreateWithTryCatchFallback()
+					break;
+				case ORACLE_12C:
+					// todo: delete this once we figure out how run Oracle try-catch to match MSSQL.
 					if (myMetadataSource.isOnlineIndexSupported(getConnectionProperties())) {
-						msSqlOracleOnlineClause = " WITH (ONLINE = ON)";
+						oracleOnlineClause = " ONLINE DEFERRED INVALIDATION";
 					}
 					break;
 				default:
 			}
 		}
 
-		String sql = "create " + unique + "index " + postgresOnlineClause + myIndexName + " on " + getTableName() + "("
-				+ columns + ")" + includeClause + mssqlWhereClause + msSqlOracleOnlineClause;
+		String bareCreateSql = "create " + unique + "index " + postgresOnlineClause + myIndexName + " on "
+				+ getTableName() + "(" + columns + ")" + includeClause + mssqlWhereClause + oracleOnlineClause;
+
+		String sql;
+		if (myOnline && DriverTypeEnum.MSSQL_2012 == getDriverType()) {
+			sql = buildOnlineCreateWithTryCatchFallback(bareCreateSql);
+		} else {
+			sql = bareCreateSql;
+		}
 		return sql;
+	}
+
+	/**
+	 * Wrap a Sql Server create index in a try/catch to try it first ONLINE
+	 * (meaning no table locks), and on failure, without ONLINE (locking the table).
+	 *
+	 * This try-catch syntax was manually tested via sql
+	 * {@code
+	 * BEGIN TRY
+	 * 	EXEC('create index FOO on TABLE_A (col1)  WITH (ONLINE = ON)');
+	 * 	select 'Online-OK';
+	 * END TRY
+	 * BEGIN CATCH
+	 * 	create index FOO on TABLE_A (col1);
+	 * 	select 'Offline';
+	 * END CATCH;
+	 * -- Then inspect the result set - Online-OK means it ran the ONLINE version.
+	 * -- Note: we use EXEC() in the online path to lower the severity of the error
+	 * -- so the CATCH can catch it.
+	 * }
+	 *
+	 * @param bareCreateSql
+	 * @return
+	 */
+	static @Nonnull String buildOnlineCreateWithTryCatchFallback(String bareCreateSql) {
+		// Some "Editions" of Sql Server do not support ONLINE.
+		// @format:off
+		return "BEGIN TRY -- try first online, without locking the table \n"
+				+ "    EXEC('" + bareCreateSql + " WITH (ONLINE = ON)');\n"
+				+ "END TRY \n"
+				+ "BEGIN CATCH -- for Editions of Sql Server that don't support ONLINE, run with table locks \n"
+				+ bareCreateSql
+				+ "; \n"
+				+ "END CATCH;";
+		// @format:on
 	}
 
 	@Nonnull
@@ -207,7 +249,7 @@ public class AddIndexTask extends BaseTableTask {
 	}
 
 	private void setIncludeColumns(List<String> theIncludeColumns) {
-		Validate.notNull(theIncludeColumns);
+		Objects.requireNonNull(theIncludeColumns);
 		myIncludeColumns = theIncludeColumns;
 	}
 

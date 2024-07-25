@@ -13,6 +13,8 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
@@ -719,6 +721,22 @@ public class BaseDateTimeDtDstu2Test {
 
 		dt.setTimeZoneZulu(true);
 		assertEquals("2010-01-01T09:00:00.12345Z", dt.getValueAsString());
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {"2024-07-08T20:47:12.123+03:30", "2024-07-08T20:47:12.123 03:30"})
+	public void testParseTimeZonePositiveOffset(String theTimestampLiteral) {
+		myDateInstantParser.setTimeZone(TimeZone.getTimeZone("Asia/Tehran"));
+
+		final DateTimeDt dt = new DateTimeDt(theTimestampLiteral);
+
+		assertEquals(theTimestampLiteral, dt.getValueAsString());
+		assertEquals("2024-07-08 20:47:12.123", myDateInstantParser.format(dt.getValue()));
+		assertEquals("GMT+03:30", dt.getTimeZone().getID());
+		assertEquals(12600000, dt.getTimeZone().getRawOffset());
+
+		dt.setTimeZoneZulu(true);
+		assertEquals("2024-07-08T17:17:12.123Z", dt.getValueAsString());
 	}
 
 	@Test

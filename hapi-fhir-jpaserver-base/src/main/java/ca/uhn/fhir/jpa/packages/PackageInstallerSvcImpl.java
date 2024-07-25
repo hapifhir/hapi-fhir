@@ -34,6 +34,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionDao;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
+import ca.uhn.fhir.jpa.dao.validation.SearchParameterDaoValidator;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionEntity;
 import ca.uhn.fhir.jpa.packages.loader.PackageResourceParsingSvc;
@@ -47,8 +48,10 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.SearchParameterUtil;
+import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.PostConstruct;
 import org.apache.commons.lang3.Validate;
@@ -73,7 +76,6 @@ import java.util.Optional;
 
 import static ca.uhn.fhir.jpa.packages.util.PackageUtils.DEFAULT_INSTALL_TYPES;
 import static ca.uhn.fhir.util.SearchParameterUtil.getBaseAsStrings;
-import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
  * @since 5.1.0
@@ -116,6 +118,12 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 	@Autowired
 	private JpaStorageSettings myStorageSettings;
+
+	@Autowired
+	private SearchParameterDaoValidator mySearchParameterDaoValidator;
+
+	@Autowired
+	private VersionCanonicalizer myVersionCanonicalizer;
 
 	/**
 	 * Constructor
@@ -431,6 +439,23 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		return outcome != null && !outcome.isNop();
 	}
 
+	/*
+	 * This function helps preserve the resource types in the base of an existing SP when an overriding SP's base
+	 * covers only a subset of the existing base.
+	 *
+	 * For example, say for an existing SP,
+	 *  -  the current base is: [ResourceTypeA, ResourceTypeB]
+	 *   - the new base is: [ResourceTypeB]
+	 *
+	 * If we were to overwrite the existing SP's base to the new base ([ResourceTypeB]) then the
+	 * SP would stop working on ResourceTypeA, which would be a loss of functionality.
+	 *
+	 * Instead, this function updates the existing SP's base by removing the resource types that
+	 * are covered by the overriding SP.
+	 * In our example, this function updates the existing SP's base to [ResourceTypeA], so that the existing SP
+	 * still works on ResourceTypeA, and the caller then creates a new SP that covers ResourceTypeB.
+	 * https://github.com/hapifhir/hapi-fhir/issues/5366
+	 */
 	private boolean updateExistingResourceIfNecessary(
 			IFhirResourceDao theDao, IBaseResource theResource, IBaseResource theExistingResource) {
 		if (!"SearchParameter".equals(theResource.getClass().getSimpleName())) {
@@ -506,33 +531,9 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 	boolean validForUpload(IBaseResource theResource) {
 		String resourceType = myFhirContext.getResourceType(theResource);
-		if ("SearchParameter".equals(resourceType)) {
-
-			String code = SearchParameterUtil.getCode(myFhirContext, theResource);
-			if (!isBlank(code) && code.startsWith("_")) {
-				ourLog.warn(
-						"Failed to validate resource of type {} with url {} - Error: Resource code starts with \"_\"",
-						theResource.fhirType(),
-						SearchParameterUtil.getURL(myFhirContext, theResource));
-				return false;
-			}
-
-			String expression = SearchParameterUtil.getExpression(myFhirContext, theResource);
-			if (isBlank(expression)) {
-				ourLog.warn(
-						"Failed to validate resource of type {} with url {} - Error: Resource expression is blank",
-						theResource.fhirType(),
-						SearchParameterUtil.getURL(myFhirContext, theResource));
-				return false;
-			}
-
-			if (getBaseAsStrings(myFhirContext, theResource).isEmpty()) {
-				ourLog.warn(
-						"Failed to validate resource of type {} with url {} - Error: Resource base is empty",
-						theResource.fhirType(),
-						SearchParameterUtil.getURL(myFhirContext, theResource));
-				return false;
-			}
+		if ("SearchParameter".equals(resourceType) && !isValidSearchParameter(theResource)) {
+			// this is an invalid search parameter
+			return false;
 		}
 
 		if (!isValidResourceStatusForPackageUpload(theResource)) {
@@ -544,6 +545,21 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		}
 
 		return true;
+	}
+
+	private boolean isValidSearchParameter(IBaseResource theResource) {
+		try {
+			org.hl7.fhir.r5.model.SearchParameter searchParameter =
+					myVersionCanonicalizer.searchParameterToCanonical(theResource);
+			mySearchParameterDaoValidator.validate(searchParameter);
+			return true;
+		} catch (UnprocessableEntityException unprocessableEntityException) {
+			ourLog.error(
+					"The SearchParameter with URL {} is invalid. Validation Error: {}",
+					SearchParameterUtil.getURL(myFhirContext, theResource),
+					unprocessableEntityException.getMessage());
+			return false;
+		}
 	}
 
 	/**
@@ -569,9 +585,13 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		List<IPrimitiveType> statusTypes =
 				myFhirContext.newFhirPath().evaluate(theResource, "status", IPrimitiveType.class);
 		// Resource does not have a status field
-		if (statusTypes.isEmpty()) return true;
+		if (statusTypes.isEmpty()) {
+			return true;
+		}
 		// Resource has a null status field
-		if (statusTypes.get(0).getValue() == null) return false;
+		if (statusTypes.get(0).getValue() == null) {
+			return false;
+		}
 		// Resource has a status, and we need to check based on type
 		switch (theResource.fhirType()) {
 			case "Subscription":
