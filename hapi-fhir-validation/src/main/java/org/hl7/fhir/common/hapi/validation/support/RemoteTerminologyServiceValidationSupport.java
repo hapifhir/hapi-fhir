@@ -233,6 +233,10 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 					.useHttpGet()
 					.execute();
 		} catch (ResourceNotFoundException | InvalidRequestException e) {
+			// this can potentially be moved to an interceptor and be reused in other areas
+			// where we call a remote server or by the client as a custom interceptor
+			// that interceptor would alter the status code of the response and the body into a different format
+			// e.g. ClientResponseInterceptorModificationTemplate
 			ourLog.error(e.getMessage(), e);
 			LookupCodeResult result = LookupCodeResult.notFound(system, code);
 			result.setErrorMessage(
