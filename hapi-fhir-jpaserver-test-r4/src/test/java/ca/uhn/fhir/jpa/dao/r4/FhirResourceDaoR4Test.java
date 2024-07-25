@@ -4324,7 +4324,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void test() {
+	public void bundle1CreatesResourceByCondition_bundle2UpdatesExistingResourceToNotMatchConditionThenCreatesBySameCondition_shouldPass() {
 		// setup
 		IParser parser = myFhirContext.newJsonParser();
 		String idToReplace = "/Task/11852"; // in bundle 2

@@ -2457,8 +2457,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			RestOperationTypeEnum theOperationType,
 			TransactionDetails theTransactionDetails) {
 
-		// we stored a resource searchUrl at creation time to prevent resource duplication.  Let's remove the entry on
-		// the first update but guard against unnecessary trips to the database on subsequent ones.
 		/*
 		 * We stored a resource searchUrl at creation time to prevent resource duplication.
 		 * We'll clear any currently existing urls from the db, otherwise we could hit
