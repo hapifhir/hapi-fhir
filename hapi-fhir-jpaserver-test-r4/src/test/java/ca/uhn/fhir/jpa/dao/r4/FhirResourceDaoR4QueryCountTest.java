@@ -2315,7 +2315,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(4, myCaptureQueriesListener.countInsertQueries());
 		myCaptureQueriesListener.logUpdateQueries();
 		assertEquals(8, myCaptureQueriesListener.countUpdateQueries());
-		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+		assertEquals(4, myCaptureQueriesListener.countDeleteQueries());
 
 		/*
 		 * Third time with mass ingestion mode enabled
@@ -3104,7 +3104,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(3, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		assertEquals(6, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(1, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
-		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+		assertEquals(1, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 		assertEquals(1, myCaptureQueriesListener.countCommits());
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 
@@ -3496,8 +3496,8 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(6, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		myCaptureQueriesListener.logInsertQueries();
 		assertEquals(4, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
-		assertEquals(6, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
-		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+		assertEquals(7, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+		assertEquals(2, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 
 		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		IdType patientId = new IdType(outcome.getEntry().get(1).getResponse().getLocation());
@@ -3579,8 +3579,8 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertEquals(6, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		assertEquals(2, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
-		assertEquals(5, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
-		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+		assertEquals(6, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+		assertEquals(2, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 
 	}
 

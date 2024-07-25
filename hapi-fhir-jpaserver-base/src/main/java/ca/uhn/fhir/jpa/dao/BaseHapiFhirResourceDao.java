@@ -2266,12 +2266,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	@Override
 	public DaoMethodOutcome update(
-			T theResource,
-			String theMatchUrl,
-			boolean thePerformIndexing,
-			boolean theForceUpdateVersion,
-			RequestDetails theRequest,
-			@Nonnull TransactionDetails theTransactionDetails) {
+		T theResource,
+		String theMatchUrl,
+		boolean thePerformIndexing,
+		boolean theForceUpdateVersion,
+		RequestDetails theRequest,
+		@Nonnull TransactionDetails theTransactionDetails) {
 		if (theResource == null) {
 			String msg = getContext().getLocalizer().getMessage(BaseStorageDao.class, "missingBody");
 			throw new InvalidRequestException(Msg.code(986) + msg);
@@ -2458,10 +2458,14 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			TransactionDetails theTransactionDetails) {
 
 		// we stored a resource searchUrl at creation time to prevent resource duplication.  Let's remove the entry on
-		// the
-		// first update but guard against unnecessary trips to the database on subsequent ones.
+		// the first update but guard against unnecessary trips to the database on subsequent ones.
+		/*
+		 * We stored a resource searchUrl at creation time to prevent resource duplication.
+		 * We'll clear any currently existing urls from the db, otherwise we could hit
+		 * duplicate index violations if we try to add another (after this create/update)
+		 */
 		ResourceTable entity = (ResourceTable) theEntity;
-		if (entity.isSearchUrlPresent() && thePerformIndexing) {
+		if (entity.isSearchUrlPresent()) {
 			myResourceSearchUrlSvc.deleteByResId(
 					(Long) theEntity.getPersistentId().getId());
 			entity.setSearchUrlPresent(false);
