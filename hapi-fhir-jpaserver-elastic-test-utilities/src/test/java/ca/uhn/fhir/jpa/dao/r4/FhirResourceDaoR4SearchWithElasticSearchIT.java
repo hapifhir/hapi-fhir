@@ -73,6 +73,7 @@ import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.Encounter;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Narrative;
@@ -101,6 +102,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.ContextHierarchy;
@@ -118,6 +120,7 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -126,11 +129,13 @@ import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.model.util.UcumServiceUtil.UCUM_CODESYSTEM_URL;
 import static ca.uhn.fhir.rest.api.Constants.CHARSET_UTF8;
+import static ca.uhn.fhir.rest.api.Constants.HEADER_CACHE_CONTROL;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
 @ExtendWith(MockitoExtension.class)
@@ -228,6 +233,8 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 
 	@Mock
 	private IHSearchEventListener mySearchEventListener;
+	@Autowired
+	private PatientResourceProvider myPatientRpR4;
 	@Autowired
 	private ElasticsearchSvcImpl myElasticsearchSvc;
 
@@ -952,6 +959,24 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		// restore changed property
 		JpaStorageSettings defaultConfig = new JpaStorageSettings();
 		myStorageSettings.setStoreResourceInHSearchIndex(defaultConfig.isStoreResourceInHSearchIndex());
+	}
+
+	@Test
+	public void testEverythingType() {
+		Patient p = new Patient();
+		p.setId("my-patient");
+		myPatientDao.update(p);
+		IBundleProvider iBundleProvider = myPatientRpR4.patientTypeEverything(new MockHttpServletRequest(), null, null, null, null, null, null, null, null, null, null, mySrd);
+		assertEquals(iBundleProvider.getAllResources().size(),  1);
+	}
+
+	@Test
+	public void testEverythingInstance() {
+		Patient p = new Patient();
+		p.setId("my-patient");
+		myPatientDao.update(p);
+		IBundleProvider iBundleProvider = myPatientRpR4.patientInstanceEverything(new MockHttpServletRequest(), new IdType("Patient/my-patient"), null, null, null, null, null, null, null, null, null, mySrd);
+		assertEquals(iBundleProvider.getAllResources().size(),  1);
 	}
 
 	@Test

@@ -321,6 +321,10 @@ public class DatabaseBinaryContentStorageSvcImplTest extends BaseJpaR4Test {
 		// then
 		verify(mockedEntityManager, times(1)).persist(captor.capture());
 		BinaryStorageEntity capturedBinaryStorageEntity = captor.getValue();
+				// then
+				assertThat(binaryStorageEntity.hasStorageContent(), is(true));
+				assertThat(binaryStorageEntity.hasBlob(), is(false));
+		});
 
 		assertTrue(capturedBinaryStorageEntity.hasBlob());
 		assertTrue(capturedBinaryStorageEntity.hasStorageContent());
