@@ -2266,12 +2266,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	@Override
 	public DaoMethodOutcome update(
-		T theResource,
-		String theMatchUrl,
-		boolean thePerformIndexing,
-		boolean theForceUpdateVersion,
-		RequestDetails theRequest,
-		@Nonnull TransactionDetails theTransactionDetails) {
+			T theResource,
+			String theMatchUrl,
+			boolean thePerformIndexing,
+			boolean theForceUpdateVersion,
+			RequestDetails theRequest,
+			@Nonnull TransactionDetails theTransactionDetails) {
 		if (theResource == null) {
 			String msg = getContext().getLocalizer().getMessage(BaseStorageDao.class, "missingBody");
 			throw new InvalidRequestException(Msg.code(986) + msg);
