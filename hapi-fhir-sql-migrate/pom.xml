@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>7.3.12-SNAPSHOT</version>
+		<version>7.2.2</version>
 
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
@@ -54,13 +54,11 @@
 			<groupId>org.apache.derby</groupId>
 			<artifactId>derby</artifactId>
 			<scope>test</scope>
-			<version>10.16.1.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.derby</groupId>
 			<artifactId>derbytools</artifactId>
 			<scope>test</scope>
-			<version>10.16.1.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.postgresql</groupId>
@@ -192,6 +190,7 @@
 					</execution>
 				</executions>
 			</plugin>
+
 		</plugins>
 	</build>
 

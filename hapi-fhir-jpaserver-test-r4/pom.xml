@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>7.3.12-SNAPSHOT</version>
+		<version>7.2.2</version>
 
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
@@ -32,6 +32,17 @@
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-storage-batch2-test-utilities</artifactId>
 			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.exparity</groupId>
+			<artifactId>hamcrest-date</artifactId>
+			<exclusions>
+				<exclusion>
+					<artifactId>*</artifactId>
+					<groupId>*</groupId>
+				</exclusion>
+			</exclusions>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

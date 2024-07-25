@@ -874,6 +874,47 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		assertTrue(actualIds.containsAll(List.of(id3, id2, id1)));
 	}
 
+
+	@Test
+	void testChainedSortWithNulls() {
+		final IIdType practitionerId1 = createPractitioner(withFamily("Chan"));
+		final IIdType practitionerId2 = createPractitioner(withFamily("Jones"));
+
+		final String id1 = createPatient(withFamily("Smithy")).getIdPart();
+		final String id2 = createPatient(withFamily("Smithwick"),
+			withReference("generalPractitioner", practitionerId2)).getIdPart();
+		final String id3 = createPatient(
+			withFamily("Smith"),
+			withReference("generalPractitioner", practitionerId1)).getIdPart();
+
+
+		final IBundleProvider iBundleProvider = myTestDaoSearch.searchForBundleProvider("Patient?_total=ACCURATE&_sort=Practitioner:general-practitioner.family");
+		final List<IBaseResource> allResources = iBundleProvider.getAllResources();
+		assertEquals(3, iBundleProvider.size());
+		assertEquals(3, allResources.size());
+
+		final List<String> actualIds = allResources.stream().map(IBaseResource::getIdElement).map(IIdType::getIdPart).toList();
+		assertTrue(actualIds.containsAll(List.of(id1, id2, id3)));
+	}
+
+	@Test
+	void testChainedReverseStringSort() {
+		final IIdType practitionerId = createPractitioner(withFamily("Jones"));
+
+		final String id1 = createPatient(withFamily("Smithy")).getIdPart();
+		final String id2 = createPatient(withFamily("Smithwick")).getIdPart();
+		final String id3 = createPatient(
+			withFamily("Smith"),
+			withReference("generalPractitioner", practitionerId)).getIdPart();
+
+		final IBundleProvider iBundleProvider = myTestDaoSearch.searchForBundleProvider("Patient?_total=ACCURATE&_sort=-Practitioner:general-practitioner.family");
+		assertEquals(3, iBundleProvider.size());
+
+		final List<IBaseResource> allResources = iBundleProvider.getAllResources();
+		final List<String> actualIds = allResources.stream().map(IBaseResource::getIdElement).map(IIdType::getIdPart).toList();
+		assertTrue(actualIds.containsAll(List.of(id3, id2, id1)));
+	}
+
 	/**
 	 * Observation:focus is a Reference(Any) so it can't be used in a sort chain because
 	 * this would be horribly, horribly inefficient.

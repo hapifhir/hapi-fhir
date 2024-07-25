@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -248,7 +249,7 @@ public class DropIndexTaskTest extends BaseTest {
 					assertEquals(asList("drop index IDX_ANINDEX ONLINE"), mySql);
 					break;
 				case MSSQL_2012:
-					assertEquals(asList("BEGIN TRY -- try first online, without locking the table \n" +
+					Assertions.assertEquals(asList("BEGIN TRY -- try first online, without locking the table \n" +
 						"    EXEC('drop index SOMETABLE.IDX_ANINDEX WITH (ONLINE = ON)');\n" +
 						"END TRY \n" +
 						"BEGIN CATCH -- for Editions of Sql Server that don't support ONLINE, run with table locks \n" +

@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>7.3.12-SNAPSHOT</version>
+		<version>7.2.2</version>
 
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
@@ -49,7 +49,6 @@
 			<artifactId>org.hl7.fhir.r4</artifactId>
 			<version>${fhir_core_version}</version>
 		</dependency>
-
 
 		<!-- Logging -->
 		<dependency>
@@ -157,24 +156,13 @@
 			</exclusions>
 		</dependency>
 		<dependency>
+			<groupId>org.hamcrest</groupId>
+			<artifactId>hamcrest</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter</artifactId>
 			<scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.assertj</groupId>
-			<artifactId>assertj-core</artifactId>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>net.javacrumbs.json-unit</groupId>
-			<artifactId>json-unit-assertj</artifactId>
-			<scope>compile</scope>
-		</dependency>
-		<!-- TODO KHS remove hamcrest -->
-		<dependency>
-			<groupId>org.hamcrest</groupId>
-			<artifactId>hamcrest</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
@@ -211,40 +199,34 @@
 			<artifactId>mockito-core</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.assertj</groupId>
-			<artifactId>assertj-core</artifactId>
+			<groupId>com.github.seregamorph</groupId>
+			<artifactId>hamcrest-more-matchers</artifactId>
+			<version>0.1</version>
+			<scope>test</scope>
 		</dependency>
-		<!-- FIXME KHS do we need this?
-<dependency>
-	<groupId>com.github.seregamorph</groupId>
-	<artifactId>hamcrest-more-matchers</artifactId>
-	<version>0.1</version>
-	<scope>test</scope>
-</dependency>
--->
-</dependencies>
+	</dependencies>
 
-<build>
-<plugins>
-	<plugin>
-		<groupId>org.apache.maven.plugins</groupId>
-		<artifactId>maven-surefire-plugin</artifactId>
-	</plugin>
-	<plugin>
-		<groupId>org.apache.maven.plugins</groupId>
-		<artifactId>maven-resources-plugin</artifactId>
-		<configuration>
-			<nonFilteredFileExtensions>
-				<nonFilteredFileExtension>p12</nonFilteredFileExtension>
-			</nonFilteredFileExtensions>
-		</configuration>
-	</plugin>
-</plugins>
-<resources>
-	<resource>
-		<directory>src/main/resources</directory>
-		<filtering>true</filtering>
-	</resource>
-</resources>
-</build>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+				<configuration>
+					<nonFilteredFileExtensions>
+						<nonFilteredFileExtension>p12</nonFilteredFileExtension>
+					</nonFilteredFileExtensions>
+				</configuration>
+			</plugin>
+		</plugins>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+			</resource>
+		</resources>
+	</build>
 </project>
