@@ -101,7 +101,7 @@ public class FhirTerser {
 		return newList;
 	}
 
-	private ExtensionDt createEmptyExtensionDt(IBaseExtension theBaseExtension, String theUrl) {
+	private ExtensionDt createEmptyExtensionDt(IBaseExtension<?, ?> theBaseExtension, String theUrl) {
 		return createEmptyExtensionDt(theBaseExtension, false, theUrl);
 	}
 
@@ -113,27 +113,27 @@ public class FhirTerser {
 	}
 
 	private ExtensionDt createEmptyExtensionDt(
-			ISupportsUndeclaredExtensions theSupportsUndeclaredExtensions, String theUrl) {
+		ISupportsUndeclaredExtensions theSupportsUndeclaredExtensions, String theUrl) {
 		return createEmptyExtensionDt(theSupportsUndeclaredExtensions, false, theUrl);
 	}
 
 	private ExtensionDt createEmptyExtensionDt(
-			ISupportsUndeclaredExtensions theSupportsUndeclaredExtensions, boolean theIsModifier, String theUrl) {
+		ISupportsUndeclaredExtensions theSupportsUndeclaredExtensions, boolean theIsModifier, String theUrl) {
 		return theSupportsUndeclaredExtensions.addUndeclaredExtension(theIsModifier, theUrl);
 	}
 
-	private IBaseExtension createEmptyExtension(IBaseHasExtensions theBaseHasExtensions, String theUrl) {
-		return (IBaseExtension) theBaseHasExtensions.addExtension().setUrl(theUrl);
+	private IBaseExtension<?, ?> createEmptyExtension(IBaseHasExtensions theBaseHasExtensions, String theUrl) {
+		return (IBaseExtension<?, ?>) theBaseHasExtensions.addExtension().setUrl(theUrl);
 	}
 
-	private IBaseExtension createEmptyModifierExtension(
-			IBaseHasModifierExtensions theBaseHasModifierExtensions, String theUrl) {
-		return (IBaseExtension)
-				theBaseHasModifierExtensions.addModifierExtension().setUrl(theUrl);
+	private IBaseExtension<?, ?> createEmptyModifierExtension(
+		IBaseHasModifierExtensions theBaseHasModifierExtensions, String theUrl) {
+		return (IBaseExtension<?, ?>)
+			theBaseHasModifierExtensions.addModifierExtension().setUrl(theUrl);
 	}
 
 	private ExtensionDt createEmptyModifierExtensionDt(
-			ISupportsUndeclaredExtensions theSupportsUndeclaredExtensions, String theUrl) {
+		ISupportsUndeclaredExtensions theSupportsUndeclaredExtensions, String theUrl) {
 		return createEmptyExtensionDt(theSupportsUndeclaredExtensions, true, theUrl);
 	}
 
@@ -402,12 +402,12 @@ public class FhirTerser {
 	}
 
 	public Optional<String> getSinglePrimitiveValue(IBase theTarget, String thePath) {
-		return getSingleValue(theTarget, thePath, IPrimitiveType.class).map(t -> t.getValueAsString());
+		return getSingleValue(theTarget, thePath, IPrimitiveType.class).map(IPrimitiveType::getValueAsString);
 	}
 
 	public String getSinglePrimitiveValueOrNull(IBase theTarget, String thePath) {
 		return getSingleValue(theTarget, thePath, IPrimitiveType.class)
-				.map(t -> t.getValueAsString())
+			.map(IPrimitiveType::getValueAsString)
 				.orElse(null);
 	}
 
@@ -487,7 +487,7 @@ public class FhirTerser {
 			} else {
 				// DSTU3+
 				final String extensionUrlForLambda = extensionUrl;
-				List<IBaseExtension> extensions = Collections.emptyList();
+				List<IBaseExtension<?, ?>> extensions = Collections.emptyList();
 				if (theCurrentObj instanceof IBaseHasExtensions) {
 					extensions = ((IBaseHasExtensions) theCurrentObj)
 							.getExtension().stream()
@@ -505,7 +505,7 @@ public class FhirTerser {
 					}
 				}
 
-				for (IBaseExtension next : extensions) {
+				for (IBaseExtension<?, ?> next : extensions) {
 					if (theWantedClass.isAssignableFrom(next.getClass())) {
 						retVal.add((T) next);
 					}
@@ -581,7 +581,7 @@ public class FhirTerser {
 			} else {
 				// DSTU3+
 				final String extensionUrlForLambda = extensionUrl;
-				List<IBaseExtension> extensions = Collections.emptyList();
+				List<IBaseExtension<?, ?>> extensions = Collections.emptyList();
 
 				if (theCurrentObj instanceof IBaseHasModifierExtensions) {
 					extensions = ((IBaseHasModifierExtensions) theCurrentObj)
@@ -602,7 +602,7 @@ public class FhirTerser {
 					}
 				}
 
-				for (IBaseExtension next : extensions) {
+				for (IBaseExtension<?, ?> next : extensions) {
 					if (theWantedClass.isAssignableFrom(next.getClass())) {
 						retVal.add((T) next);
 					}
@@ -1203,7 +1203,6 @@ public class FhirTerser {
 	public void visit(IBase theElement, IModelVisitor2 theVisitor) {
 		BaseRuntimeElementDefinition<?> def = myContext.getElementDefinition(theElement.getClass());
 		if (def instanceof BaseRuntimeElementCompositeDefinition) {
-			BaseRuntimeElementCompositeDefinition<?> defComposite = (BaseRuntimeElementCompositeDefinition<?>) def;
 			visit(theElement, null, def, theVisitor, new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
 		} else if (theElement instanceof IBaseExtension) {
 			theVisitor.acceptUndeclaredExtension(
@@ -1562,7 +1561,7 @@ public class FhirTerser {
 				throw new DataFormatException(Msg.code(1796) + "Invalid path " + thePath + ": Element of type "
 						+ def.getName() + " has no child named " + nextPart + ". Valid names: "
 						+ def.getChildrenAndExtension().stream()
-								.map(t -> t.getElementName())
+					.map(BaseRuntimeChildDefinition::getElementName)
 								.sorted()
 								.collect(Collectors.joining(", ")));
 			}
