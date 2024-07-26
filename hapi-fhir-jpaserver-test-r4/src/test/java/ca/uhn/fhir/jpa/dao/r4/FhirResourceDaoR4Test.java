@@ -4408,15 +4408,6 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		IFhirSystemDao<Bundle, ?> systemDao = myDaoRegistry.getSystemDao();
 		RequestDetails reqDets = new SystemRequestDetails();
 
-		Function<String, Task> verifyTaskCreated = (id) -> {
-			Task task = myTaskDao.read(new IdType(id), reqDets);
-			assertNotNull(task);
-			assertFalse(task.getIdentifier().isEmpty());
-			assertTrue(task.getIdentifier().stream().anyMatch(i -> i.getSystem().equals(identifierSystem)));
-
-			return task;
-		};
-
 		Bundle createdBundle;
 		String id;
 		{
@@ -4438,7 +4429,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 			}
 
 			// verify task creation
-			Task task = verifyTaskCreated.apply(id);
+			Task task = getTaskForId(id, identifierSystem);
 			assertTrue(task.getIdentifier().stream().anyMatch(i -> i.getSystem().equals(identifierSystem) && i.getValue().equals("t1")));
 		}
 
@@ -4462,7 +4453,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 			assertTrue(createdBundle.getEntry().stream().anyMatch(e -> e.getResponse() != null && e.getResponse().getLocation().equals(id + "/_history/2")));
 
 			// verify task update
-			Task task = verifyTaskCreated.apply(id);
+			Task task = getTaskForId(id, identifierSystem);
 			assertTrue(task.getIdentifier().stream().anyMatch(i -> i.getSystem().equals(identifierSystem) && i.getValue().equals("t2")));
 
 			// post again; should succeed (not throw)
@@ -4472,6 +4463,15 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 			assertTrue(createdBundle.getEntry().stream()
 				.anyMatch(e -> e.getResponse() != null && e.getResponse().getStatus().contains("201 Created")));
 		}
+	}
+
+	private Task getTaskForId(String theId, String theIdentifier) {
+		Task task = myTaskDao.read(new IdType(theId), new SystemRequestDetails());
+		assertNotNull(task);
+		assertFalse(task.getIdentifier().isEmpty());
+		assertTrue(task.getIdentifier().stream().anyMatch(i -> i.getSystem().equals(theIdentifier)));
+
+		return task;
 	}
 
 	public static void assertConflictException(String theResourceType, ResourceVersionConflictException e) {
