@@ -150,14 +150,8 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			List<IBase> theEntries,
 			StopWatch theTransactionStopWatch) {
 
-		ITransactionProcessorVersionAdapter versionAdapter = getVersionAdapter();
-		RequestPartitionId requestPartitionId = null;
-		if (!myPartitionSettings.isPartitioningEnabled()) {
-			requestPartitionId = RequestPartitionId.allPartitions();
-		} else {
-			// If all entries in the transaction point to the exact same partition, we'll try and do a pre-fetch
-			requestPartitionId = super.determineRequestPartitionIdForWriteEntries(theRequest, theEntries);
-		}
+		ITransactionProcessorVersionAdapter<?, ?> versionAdapter = getVersionAdapter();
+		RequestPartitionId requestPartitionId = super.determineRequestPartitionIdForWriteEntries(theRequest, theEntries);
 
 		if (requestPartitionId != null) {
 			preFetch(theTransactionDetails, theEntries, versionAdapter, requestPartitionId);
