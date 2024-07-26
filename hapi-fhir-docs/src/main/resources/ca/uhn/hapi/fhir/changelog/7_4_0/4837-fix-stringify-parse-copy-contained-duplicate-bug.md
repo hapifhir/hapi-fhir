@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 4837
+title: "In the case where a resource was serialized, deserialized, copied and resereialized it resulted in duplication of contained resources. This has been corrected."

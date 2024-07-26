@@ -1820,10 +1820,10 @@ public class FhirTerser {
 			if (idFromMap != null) {
 				return idFromMap;
 			} else {
-				var checkAllIdsForStringMatch = getResourceToIdMap().values().stream()
+				return getResourceToIdMap().values().stream()
 						.filter(id -> theNext.getIdElement().getIdPart().equals(id.getIdPart()))
-						.findAny();
-				return checkAllIdsForStringMatch.orElse(null);
+						.findAny()
+						.orElse(null);
 			}
 		}
 
