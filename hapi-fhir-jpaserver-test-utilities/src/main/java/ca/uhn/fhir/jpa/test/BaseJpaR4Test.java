@@ -740,7 +740,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		dao.update(resourceParsed);
 	}
 
-	protected void assertHierarchyContains(String... theStrings) {
+	protected void assertHierarchyContainsExactly(String... theStrings) {
 		List<String> hierarchy = runInTransaction(() -> {
 			List<String> hierarchyHolder = new ArrayList<>();
 			TermCodeSystem codeSystem = myTermCodeSystemDao.findAll().iterator().next();

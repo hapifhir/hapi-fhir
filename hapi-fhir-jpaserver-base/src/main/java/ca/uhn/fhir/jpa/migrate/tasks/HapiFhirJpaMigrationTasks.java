@@ -49,6 +49,7 @@ import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.VersionEnum;
 import org.apache.commons.lang3.StringUtils;
+import org.intellij.lang.annotations.Language;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -413,6 +414,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			version.onTable("HFJ_IDX_CMB_TOK_NU")
 					.addIndex("20240625.10", "IDX_IDXCMBTOKNU_HASHC")
 					.unique(false)
+					.online(true)
 					.withColumns("HASH_COMPLETE", "RES_ID", "PARTITION_ID");
 			version.onTable("HFJ_IDX_CMP_STRING_UNIQ")
 					.addColumn("20240625.20", "HASH_COMPLETE")
@@ -471,8 +473,56 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		version.onTable(Search.HFJ_SEARCH)
 				.modifyColumn("20240722.1", Search.SEARCH_UUID)
-				.nullable()
+				.nonNullable()
 				.withType(ColumnTypeEnum.STRING, 48);
+
+		{
+			final Builder.BuilderWithTableName hfjResource = version.onTable("HFJ_RESOURCE");
+
+			@Language(("SQL"))
+			final String onlyIfSql = "SELECT CASE CHARINDEX('_CI_', COLLATION_NAME) WHEN 0 THEN 0 ELSE 1 END "
+					+ "FROM INFORMATION_SCHEMA.COLUMNS "
+					+ "WHERE TABLE_SCHEMA = SCHEMA_NAME() "
+					+ "AND TABLE_NAME = 'HFJ_RESOURCE' "
+					+ "AND COLUMN_NAME = 'FHIR_ID' ";
+			final String onlyfIReason =
+					"Skipping change to HFJ_RESOURCE.FHIR_ID collation to SQL_Latin1_General_CP1_CS_AS because it is already using it";
+
+			hfjResource
+					.dropIndex("20240724.10", "IDX_RES_FHIR_ID")
+					.onlyAppliesToPlatforms(DriverTypeEnum.MSSQL_2012)
+					.onlyIf(onlyIfSql, onlyfIReason);
+
+			hfjResource
+					.dropIndex("20240724.20", "IDX_RES_TYPE_FHIR_ID")
+					.onlyAppliesToPlatforms(DriverTypeEnum.MSSQL_2012)
+					.onlyIf(onlyIfSql, onlyfIReason);
+
+			version.executeRawSql(
+							"20240724.30",
+							"ALTER TABLE HFJ_RESOURCE ALTER COLUMN FHIR_ID varchar(64) COLLATE SQL_Latin1_General_CP1_CS_AS")
+					.onlyAppliesToPlatforms(DriverTypeEnum.MSSQL_2012)
+					.onlyIf(onlyIfSql, onlyfIReason);
+
+			hfjResource
+					.addIndex("20240724.40", "IDX_RES_FHIR_ID")
+					.unique(false)
+					.online(true)
+					.withColumns("FHIR_ID")
+					.onlyAppliesToPlatforms(DriverTypeEnum.MSSQL_2012)
+					.onlyIf(onlyIfSql, onlyfIReason);
+
+			hfjResource
+					.addIndex("20240724.50", "IDX_RES_TYPE_FHIR_ID")
+					.unique(true)
+					.online(true)
+					// include res_id and our deleted flag so we can satisfy Observation?_sort=_id from the index on
+					// platforms that support it.
+					.includeColumns("RES_ID, RES_DELETED_AT")
+					.withColumns("RES_TYPE", "FHIR_ID")
+					.onlyAppliesToPlatforms(DriverTypeEnum.MSSQL_2012)
+					.onlyIf(onlyIfSql, onlyfIReason);
+		}
 	}
 
 	protected void init720() {
@@ -976,7 +1026,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		version.onTable(Search.HFJ_SEARCH)
 				.addColumn("20230215.1", Search.SEARCH_UUID)
 				.nullable()
-				.type(ColumnTypeEnum.STRING, Search.SEARCH_UUID_COLUMN_LENGTH);
+				.type(ColumnTypeEnum.STRING, 48);
 		version.onTable(BulkImportJobEntity.HFJ_BLK_IMPORT_JOB)
 				.addColumn("20230215.2", BulkImportJobEntity.JOB_ID)
 				.nullable()
@@ -3096,7 +3146,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		version.onTable("HFJ_SEARCH")
 				.modifyColumn("20190814.7", "SEARCH_UUID")
 				.nonNullable()
-				.withType(ColumnTypeEnum.STRING, Search.SEARCH_UUID_COLUMN_LENGTH);
+				.withType(ColumnTypeEnum.STRING, 36);
 
 		version.onTable("HFJ_SEARCH_PARM").dropThisTable("20190814.8");
 
