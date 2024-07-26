@@ -1817,7 +1817,15 @@ public class FhirTerser {
 			if (getResourceToIdMap() == null) {
 				return null;
 			}
-			return getResourceToIdMap().get(theNext);
+			var idFromMap = getResourceToIdMap().get(theNext);
+			if (idFromMap != null) {
+				return idFromMap;
+			} else {
+				var checkAllIdsForStringMatch = getResourceToIdMap().values().stream()
+					.filter(id -> theNext.getIdElement().getIdPart().equals(id.getIdPart()))
+					.findAny();
+				return checkAllIdsForStringMatch.orElse(null);
+			}
 		}
 
 		private List<IBaseResource> getOrCreateResourceList() {
