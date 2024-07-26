@@ -1071,8 +1071,9 @@ public interface IValidationSupport {
 			}
 		}
 
-		public void setErrorMessage(String theErrorMessage) {
+		public LookupCodeResult setErrorMessage(String theErrorMessage) {
 			myErrorMessage = theErrorMessage;
+			return this;
 		}
 
 		public String getErrorMessage() {
