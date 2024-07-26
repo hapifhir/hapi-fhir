@@ -26,6 +26,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.interceptor.model.TransactionWriteOperationsDetails;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -41,15 +42,18 @@ import ca.uhn.fhir.jpa.cache.ResourcePersistentIdMap;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictUtil;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
+import ca.uhn.fhir.model.valueset.BundleEntryTransactionMethodEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
@@ -86,6 +90,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.dstu3.model.Bundle;
@@ -98,6 +103,7 @@ import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.IdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -142,6 +148,9 @@ public abstract class BaseTransactionProcessor {
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseTransactionProcessor.class);
 
 	@Autowired
+	private IRequestPartitionHelperSvc myRequestPartitionHelperService;
+
+	@Autowired
 	private PlatformTransactionManager myTxManager;
 
 	@Autowired
@@ -162,6 +171,9 @@ public abstract class BaseTransactionProcessor {
 
 	@Autowired
 	private StorageSettings myStorageSettings;
+
+	@Autowired
+	private PartitionSettings myPartitionSettings;
 
 	@Autowired
 	private InMemoryResourceMatcher myInMemoryResourceMatcher;
@@ -374,9 +386,6 @@ public abstract class BaseTransactionProcessor {
 				myVersionAdapter.getEntries(theRequest).size());
 
 		long start = System.currentTimeMillis();
-
-		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
-		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 
 		IBaseBundle response =
 				myVersionAdapter.createBundle(org.hl7.fhir.r4.model.Bundle.BundleType.BATCHRESPONSE.toCode());
@@ -701,9 +710,13 @@ public abstract class BaseTransactionProcessor {
 		};
 		EntriesToProcessMap entriesToProcess;
 
+		RequestPartitionId requestPartitionId =
+				determineRequestPartitionIdForWriteEntries(theRequestDetails, theEntries);
+
 		try {
 			entriesToProcess = myHapiTransactionService
 					.withRequest(theRequestDetails)
+					.withRequestPartitionId(requestPartitionId)
 					.withTransactionDetails(theTransactionDetails)
 					.execute(txCallback);
 		} finally {
@@ -726,9 +739,81 @@ public abstract class BaseTransactionProcessor {
 		}
 	}
 
+	@Nullable
+	protected RequestPartitionId determineRequestPartitionIdForWriteEntries(
+			RequestDetails theRequestDetails, List<IBase> theEntries) {
+		if (!myPartitionSettings.isPartitioningEnabled()) {
+			return RequestPartitionId.allPartitions();
+		}
+
+		RequestPartitionId retVal = null;
+
+		for (var nextEntry : theEntries) {
+			RequestPartitionId nextRequestPartitionId = null;
+			String verb = myVersionAdapter.getEntryRequestVerb(myContext, nextEntry);
+			if (isNotBlank(verb)) {
+				BundleEntryTransactionMethodEnum verbEnum = BundleEntryTransactionMethodEnum.valueOf(verb);
+				switch (verbEnum) {
+					case GET:
+						continue;
+					case DELETE: {
+						String requestUrl = myVersionAdapter.getEntryRequestUrl(nextEntry);
+						if (isNotBlank(requestUrl)) {
+							IdType id = new IdType(requestUrl);
+							String resourceType = id.getResourceType();
+							ReadPartitionIdRequestDetails details =
+									ReadPartitionIdRequestDetails.forDelete(resourceType, id);
+							nextRequestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequest(
+									theRequestDetails, details);
+						}
+						break;
+					}
+					case PATCH: {
+						String requestUrl = myVersionAdapter.getEntryRequestUrl(nextEntry);
+						if (isNotBlank(requestUrl)) {
+							IdType id = new IdType(requestUrl);
+							String resourceType = id.getResourceType();
+							ReadPartitionIdRequestDetails details =
+									ReadPartitionIdRequestDetails.forPatch(resourceType, id);
+							nextRequestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequest(
+									theRequestDetails, details);
+						}
+						break;
+					}
+					case POST:
+					case PUT: {
+						IBaseResource resource = myVersionAdapter.getResource(nextEntry);
+						if (resource != null) {
+							String resourceType = myContext.getResourceType(resource);
+							nextRequestPartitionId = myRequestPartitionHelperService.determineCreatePartitionForRequest(
+								theRequestDetails, resource, resourceType);
+						}
+					}
+				}
+			}
+
+			if (nextRequestPartitionId == null) {
+				// continue
+			} else if (retVal == null) {
+				retVal = nextRequestPartitionId;
+			} else if (!retVal.equals(nextRequestPartitionId)) {
+				if (myHapiTransactionService.isRequiresNewTransactionWhenChangingPartitions()) {
+					String msg = myContext
+						.getLocalizer()
+						.getMessage(BaseTransactionProcessor.class, "multiplePartitionAccesses", theEntries.size());
+					throw new InvalidRequestException(Msg.code(2541) + msg);
+				} else {
+					retVal = retVal.mergeIds(nextRequestPartitionId);
+				}
+			}
+		}
+
+		return retVal;
+	}
+
 	private boolean haveWriteOperationsHooks(RequestDetails theRequestDetails) {
 		return CompositeInterceptorBroadcaster.hasHooks(
-						Pointcut.STORAGE_TRANSACTION_WRITE_OPERATIONS_PRE, myInterceptorBroadcaster, theRequestDetails)
+			Pointcut.STORAGE_TRANSACTION_WRITE_OPERATIONS_PRE, myInterceptorBroadcaster, theRequestDetails)
 				|| CompositeInterceptorBroadcaster.hasHooks(
 						Pointcut.STORAGE_TRANSACTION_WRITE_OPERATIONS_POST,
 						myInterceptorBroadcaster,
@@ -782,13 +867,13 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	/**
-	 * This method is called for nested bundles (e.g. if we received a transaction with an entry that
-	 * was a GET search, this method is called on the bundle for the search result, that will be placed in the
-	 * outer bundle). This method applies the _summary and _content parameters to the output of
-	 * that bundle.
-	 * <p>
-	 * TODO: This isn't the most efficient way of doing this.. hopefully we can come up with something better in the future.
-	 */
+     * This method is called for nested bundles (e.g. if we received a transaction with an entry that
+     * was a GET search, this method is called on the bundle for the search result, that will be placed in the
+     * outer bundle). This method applies the _summary and _content parameters to the output of
+     * that bundle.
+     * <p>
+     * TODO: This isn't the most efficient way of doing this.. hopefully we can come up with something better in the future.
+     */
 	private IBaseResource filterNestedBundle(RequestDetails theRequestDetails, IBaseResource theResource) {
 		IParser p = myContext.newJsonParser();
 		RestfulServerUtils.configureResponseParser(theRequestDetails, p);
@@ -805,8 +890,8 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	/**
-	 * Searches for duplicate conditional creates and consolidates them.
-	 */
+     * Searches for duplicate conditional creates and consolidates them.
+     */
 	@SuppressWarnings("unchecked")
 	private void consolidateDuplicateConditionals(
 			RequestDetails theRequestDetails, String theActionName, List<IBase> theEntries) {
@@ -899,9 +984,9 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	/**
-	 * Iterates over all entries, and if it finds any which have references which match the fullUrl of the entry that was consolidated out
-	 * replace them with our new consolidated UUID
-	 */
+     * Iterates over all entries, and if it finds any which have references which match the fullUrl of the entry that was consolidated out
+     * replace them with our new consolidated UUID
+     */
 	private void replaceReferencesInEntriesWithConsolidatedUUID(
 			List<IBase> theEntries, String theEntryFullUrl, String existingUuid) {
 		for (IBase nextEntry : theEntries) {
@@ -927,13 +1012,13 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	/**
-	 * Retrieves the next resource id (IIdType) from the base resource and next request entry.
-	 *
-	 * @param theBaseResource - base resource
-	 * @param theNextReqEntry - next request entry
-	 * @param theAllIds       - set of all IIdType values
-	 * @return
-	 */
+     * Retrieves the next resource id (IIdType) from the base resource and next request entry.
+     *
+     * @param theBaseResource - base resource
+     * @param theNextReqEntry - next request entry
+     * @param theAllIds       - set of all IIdType values
+     * @return
+     */
 	private IIdType getNextResourceIdFromBaseResource(
 			IBaseResource theBaseResource, IBase theNextReqEntry, Set<IIdType> theAllIds) {
 		IIdType nextResourceId = null;
@@ -1000,8 +1085,8 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	/**
-	 * After pre-hooks have been called
-	 */
+     * After pre-hooks have been called
+     */
 	@SuppressWarnings({"unchecked", "rawtypes"})
 	protected EntriesToProcessMap doTransactionWriteOperations(
 			final RequestDetails theRequest,
@@ -1409,11 +1494,11 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	/**
-	 * Check for if a resource id should be matched in a conditional update
-	 * If the FHIR version is older than R4, it follows the old specifications and does not match
-	 * If the resource id has been resolved, then it is an existing resource and does not need to be matched
-	 * If the resource id is local or a placeholder, the id is temporary and should not be matched
-	 */
+     * Check for if a resource id should be matched in a conditional update
+     * If the FHIR version is older than R4, it follows the old specifications and does not match
+     * If the resource id has been resolved, then it is an existing resource and does not need to be matched
+     * If the resource id is local or a placeholder, the id is temporary and should not be matched
+     */
 	private boolean shouldConditionalUpdateMatchId(TransactionDetails theTransactionDetails, IIdType theId) {
 		if (myContext.getVersion().getVersion().isOlderThan(FhirVersionEnum.R4)) {
 			return false;
@@ -1447,9 +1532,9 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	/**
-	 * After transaction processing and resolution of indexes and references, we want to validate that the resources that were stored _actually_
-	 * match the conditional URLs that they were brought in on.
-	 */
+     * After transaction processing and resolution of indexes and references, we want to validate that the resources that were stored _actually_
+     * match the conditional URLs that they were brought in on.
+     */
 	private void validateAllInsertsMatchTheirConditionalUrls(
 			Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome,
 			Map<String, IIdType> conditionalUrlToIdMap,
@@ -1484,12 +1569,12 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	/**
-	 * Checks for any delete conflicts.
-	 *
-	 * @param theDeleteConflicts  - set of delete conflicts
-	 * @param theDeletedResources - set of deleted resources
-	 * @param theUpdatedResources - list of updated resources
-	 */
+     * Checks for any delete conflicts.
+     *
+     * @param theDeleteConflicts  - set of delete conflicts
+     * @param theDeletedResources - set of deleted resources
+     * @param theUpdatedResources - list of updated resources
+     */
 	private void checkForDeleteConflicts(
 			DeleteConflictList theDeleteConflicts,
 			Set<String> theDeletedResources,
@@ -1539,27 +1624,27 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	/**
-	 * This method replaces any placeholder references in the
-	 * source transaction Bundle with their actual targets, then stores the resource contents and indexes
-	 * in the database. This is trickier than you'd think because of a couple of possibilities during the
-	 * save:
-	 * * There may be resources that have not changed (e.g. an update/PUT with a resource body identical
-	 * to what is already in the database)
-	 * * There may be resources with auto-versioned references, meaning we're replacing certain references
-	 * in the resource with a versioned references, referencing the current version at the time of the
-	 * transaction processing
-	 * * There may by auto-versioned references pointing to these unchanged targets
-	 * <p>
-	 * If we're not doing any auto-versioned references, we'll just iterate through all resources in the
-	 * transaction and save them one at a time.
-	 * <p>
-	 * However, if we have any auto-versioned references we do this in 2 passes: First the resources from the
-	 * transaction that don't have any auto-versioned references are stored. We do them first since there's
-	 * a chance they may be a NOP and we'll need to account for their version number not actually changing.
-	 * Then we do a second pass for any resources that have auto-versioned references. These happen in a separate
-	 * pass because it's too complex to try and insert the auto-versioned references and still
-	 * account for NOPs, so we block NOPs in that pass.
-	 */
+     * This method replaces any placeholder references in the
+     * source transaction Bundle with their actual targets, then stores the resource contents and indexes
+     * in the database. This is trickier than you'd think because of a couple of possibilities during the
+     * save:
+     * * There may be resources that have not changed (e.g. an update/PUT with a resource body identical
+     * to what is already in the database)
+     * * There may be resources with auto-versioned references, meaning we're replacing certain references
+     * in the resource with a versioned references, referencing the current version at the time of the
+     * transaction processing
+     * * There may by auto-versioned references pointing to these unchanged targets
+     * <p>
+     * If we're not doing any auto-versioned references, we'll just iterate through all resources in the
+     * transaction and save them one at a time.
+     * <p>
+     * However, if we have any auto-versioned references we do this in 2 passes: First the resources from the
+     * transaction that don't have any auto-versioned references are stored. We do them first since there's
+     * a chance they may be a NOP and we'll need to account for their version number not actually changing.
+     * Then we do a second pass for any resources that have auto-versioned references. These happen in a separate
+     * pass because it's too complex to try and insert the auto-versioned references and still
+     * account for NOPs, so we block NOPs in that pass.
+     */
 	private void resolveReferencesThenSaveAndIndexResources(
 			RequestDetails theRequest,
 			TransactionDetails theTransactionDetails,
@@ -1940,12 +2025,12 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	/**
-	 * Extracts the transaction url from the entry and verifies it's:
-	 * * not null or blank
-	 * * is a relative url matching the resourceType it is about
-	 * <p>
-	 * Returns the transaction url (or throws an InvalidRequestException if url is not valid)
-	 */
+     * Extracts the transaction url from the entry and verifies it's:
+     * * not null or blank
+     * * is a relative url matching the resourceType it is about
+     * <p>
+     * Returns the transaction url (or throws an InvalidRequestException if url is not valid)
+     */
 	private String extractAndVerifyTransactionUrlForEntry(IBase theEntry, String theVerb) {
 		String url = extractTransactionUrlOrThrowException(theEntry, theVerb);
 
@@ -1959,12 +2044,12 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	/**
-	 * Returns true if the provided url is a valid entry request.url.
-	 * <p>
-	 * This means:
-	 * a) not an absolute url (does not start with http/https)
-	 * b) starts with either a ResourceType or /ResourceType
-	 */
+     * Returns true if the provided url is a valid entry request.url.
+     * <p>
+     * This means:
+     * a) not an absolute url (does not start with http/https)
+     * b) starts with either a ResourceType or /ResourceType
+     */
 	private boolean isValidResourceTypeUrl(@Nonnull String theUrl) {
 		if (UrlUtil.isAbsolute(theUrl)) {
 			return false;
@@ -1989,9 +2074,9 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	/**
-	 * Extracts the transaction url from the entry and verifies that it is not null/blank
-	 * and returns it
-	 */
+     * Extracts the transaction url from the entry and verifies that it is not null/blank
+     * and returns it
+     */
 	private String extractTransactionUrlOrThrowException(IBase nextEntry, String verb) {
 		String url = myVersionAdapter.getEntryRequestUrl(nextEntry);
 		if (isBlank(url)) {
@@ -2043,14 +2128,14 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	/**
-	 * Transaction Order, per the spec:
-	 * <p>
-	 * Process any DELETE interactions
-	 * Process any POST interactions
-	 * Process any PUT interactions
-	 * Process any PATCH interactions
-	 * Process any GET interactions
-	 */
+     * Transaction Order, per the spec:
+     * <p>
+     * Process any DELETE interactions
+     * Process any POST interactions
+     * Process any PUT interactions
+     * Process any PATCH interactions
+     * Process any GET interactions
+     */
 	// @formatter:off
 	public class TransactionSorter implements Comparator<IBase> {
 
