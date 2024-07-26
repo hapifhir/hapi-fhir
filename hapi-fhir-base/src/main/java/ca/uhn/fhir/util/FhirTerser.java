@@ -113,12 +113,12 @@ public class FhirTerser {
 	}
 
 	private ExtensionDt createEmptyExtensionDt(
-		ISupportsUndeclaredExtensions theSupportsUndeclaredExtensions, String theUrl) {
+			ISupportsUndeclaredExtensions theSupportsUndeclaredExtensions, String theUrl) {
 		return createEmptyExtensionDt(theSupportsUndeclaredExtensions, false, theUrl);
 	}
 
 	private ExtensionDt createEmptyExtensionDt(
-		ISupportsUndeclaredExtensions theSupportsUndeclaredExtensions, boolean theIsModifier, String theUrl) {
+			ISupportsUndeclaredExtensions theSupportsUndeclaredExtensions, boolean theIsModifier, String theUrl) {
 		return theSupportsUndeclaredExtensions.addUndeclaredExtension(theIsModifier, theUrl);
 	}
 
@@ -127,13 +127,13 @@ public class FhirTerser {
 	}
 
 	private IBaseExtension<?, ?> createEmptyModifierExtension(
-		IBaseHasModifierExtensions theBaseHasModifierExtensions, String theUrl) {
+			IBaseHasModifierExtensions theBaseHasModifierExtensions, String theUrl) {
 		return (IBaseExtension<?, ?>)
-			theBaseHasModifierExtensions.addModifierExtension().setUrl(theUrl);
+				theBaseHasModifierExtensions.addModifierExtension().setUrl(theUrl);
 	}
 
 	private ExtensionDt createEmptyModifierExtensionDt(
-		ISupportsUndeclaredExtensions theSupportsUndeclaredExtensions, String theUrl) {
+			ISupportsUndeclaredExtensions theSupportsUndeclaredExtensions, String theUrl) {
 		return createEmptyExtensionDt(theSupportsUndeclaredExtensions, true, theUrl);
 	}
 
@@ -407,7 +407,7 @@ public class FhirTerser {
 
 	public String getSinglePrimitiveValueOrNull(IBase theTarget, String thePath) {
 		return getSingleValue(theTarget, thePath, IPrimitiveType.class)
-			.map(IPrimitiveType::getValueAsString)
+				.map(IPrimitiveType::getValueAsString)
 				.orElse(null);
 	}
 
@@ -1561,7 +1561,7 @@ public class FhirTerser {
 				throw new DataFormatException(Msg.code(1796) + "Invalid path " + thePath + ": Element of type "
 						+ def.getName() + " has no child named " + nextPart + ". Valid names: "
 						+ def.getChildrenAndExtension().stream()
-					.map(BaseRuntimeChildDefinition::getElementName)
+								.map(BaseRuntimeChildDefinition::getElementName)
 								.sorted()
 								.collect(Collectors.joining(", ")));
 			}
@@ -1821,8 +1821,8 @@ public class FhirTerser {
 				return idFromMap;
 			} else {
 				var checkAllIdsForStringMatch = getResourceToIdMap().values().stream()
-					.filter(id -> theNext.getIdElement().getIdPart().equals(id.getIdPart()))
-					.findAny();
+						.filter(id -> theNext.getIdElement().getIdPart().equals(id.getIdPart()))
+						.findAny();
 				return checkAllIdsForStringMatch.orElse(null);
 			}
 		}
