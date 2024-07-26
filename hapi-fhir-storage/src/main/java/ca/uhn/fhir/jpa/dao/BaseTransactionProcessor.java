@@ -740,7 +740,7 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	@Nullable
-	private RequestPartitionId determineRequestPartitionIdForWriteEntries(
+	protected RequestPartitionId determineRequestPartitionIdForWriteEntries(
 			RequestDetails theRequestDetails, List<IBase> theEntries) {
 		if (!myPartitionSettings.isPartitioningEnabled()
 				|| !myHapiTransactionService.isRequiresNewTransactionWhenChangingPartitions()) {

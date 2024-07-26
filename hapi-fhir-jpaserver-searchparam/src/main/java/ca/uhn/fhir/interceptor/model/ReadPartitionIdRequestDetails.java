@@ -114,7 +114,7 @@ public class ReadPartitionIdRequestDetails extends PartitionIdRequestDetails {
 	}
 
 	/**
-	 * @since 7.6.0
+	 * @since 7.4.0
 	 */
 	public static ReadPartitionIdRequestDetails forDelete(@Nonnull String theResourceType, @Nonnull IIdType theId) {
 		RestOperationTypeEnum op = RestOperationTypeEnum.DELETE;
@@ -123,7 +123,7 @@ public class ReadPartitionIdRequestDetails extends PartitionIdRequestDetails {
 	}
 
 	/**
-	 * @since 7.6.0
+	 * @since 7.4.0
 	 */
 	public static ReadPartitionIdRequestDetails forPatch(String theResourceType, IIdType theId) {
 		RestOperationTypeEnum op = RestOperationTypeEnum.PATCH;

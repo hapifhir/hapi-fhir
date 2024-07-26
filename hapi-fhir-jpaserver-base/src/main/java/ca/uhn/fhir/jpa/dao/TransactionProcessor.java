@@ -156,7 +156,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			requestPartitionId = RequestPartitionId.allPartitions();
 		} else {
 			// If all entries in the transaction point to the exact same partition, we'll try and do a pre-fetch
-			requestPartitionId = getSinglePartitionForAllEntriesOrNull(theRequest, theEntries, versionAdapter);
+			requestPartitionId = super.determineRequestPartitionIdForWriteEntries(theRequest, theEntries);
 		}
 
 		if (requestPartitionId != null) {
@@ -470,24 +470,6 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			theOutputSearchParameterMapsToResolve.add(new MatchUrlToResolve(
 					theRequestUrl, matchUrlSearchMap, resourceDefinition, theShouldPreFetchResourceBody));
 		}
-	}
-
-	private RequestPartitionId getSinglePartitionForAllEntriesOrNull(
-			RequestDetails theRequest, List<IBase> theEntries, ITransactionProcessorVersionAdapter versionAdapter) {
-		RequestPartitionId retVal = null;
-		Set<RequestPartitionId> requestPartitionIdsForAllEntries = new HashSet<>();
-		for (IBase nextEntry : theEntries) {
-			IBaseResource resource = versionAdapter.getResource(nextEntry);
-			if (resource != null) {
-				RequestPartitionId requestPartition = myRequestPartitionSvc.determineCreatePartitionForRequest(
-						theRequest, resource, myFhirContext.getResourceType(resource));
-				requestPartitionIdsForAllEntries.add(requestPartition);
-			}
-		}
-		if (requestPartitionIdsForAllEntries.size() == 1) {
-			retVal = requestPartitionIdsForAllEntries.iterator().next();
-		}
-		return retVal;
 	}
 
 	/**

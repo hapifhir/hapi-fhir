@@ -12,10 +12,14 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.util.BundleBuilder;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -24,7 +28,9 @@ import org.springframework.transaction.annotation.Propagation;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class PartitionedStrictTransactionR4Test extends BasePartitioningR4Test {
 
@@ -41,7 +47,7 @@ public class PartitionedStrictTransactionR4Test extends BasePartitioningR4Test {
 	public void after() {
 		super.after();
 		myTransactionService.setTransactionPropagationWhenChangingPartitions(HapiTransactionService.DEFAULT_TRANSACTION_PROPAGATION_WHEN_CHANGING_PARTITIONS);
-		myInterceptorRegistry.unregisterInterceptorsIf(t->t instanceof MyPartitionSelectorInterceptor);
+		myInterceptorRegistry.unregisterInterceptorsIf(t -> t instanceof MyPartitionSelectorInterceptor);
 	}
 
 	/**
@@ -103,7 +109,46 @@ public class PartitionedStrictTransactionR4Test extends BasePartitioningR4Test {
 		IdType id = new IdType(output.getEntry().get(0).getResponse().getLocation());
 		assertEquals("2", id.getVersionIdPart());
 
-		assertThrows(ResourceGoneException.class, ()->myPatientDao.read(id.toUnqualifiedVersionless(), mySrd));
+		assertThrows(ResourceGoneException.class, () -> myPatientDao.read(id.toUnqualifiedVersionless(), mySrd));
+	}
+
+	@Test
+	public void testSinglePartitionPatch() {
+		IIdType id = createPatient(withId("A"), withActiveTrue());
+		assertTrue(myPatientDao.read(id.toUnqualifiedVersionless(), mySrd).getActive());
+
+		Parameters patch = new Parameters();
+		Parameters.ParametersParameterComponent operation = patch.addParameter();
+		operation.setName("operation");
+		operation
+			.addPart()
+			.setName("type")
+			.setValue(new CodeType("replace"));
+		operation
+			.addPart()
+			.setName("path")
+			.setValue(new StringType("Patient.active"));
+		operation
+			.addPart()
+			.setName("name")
+			.setValue(new CodeType("false"));
+
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionFhirPatchEntry(new IdType("Patient/A"), patch);
+		Bundle input = bb.getBundleTyped();
+
+
+		// Test
+		myCaptureQueriesListener.clear();
+		Bundle output = mySystemDao.transaction(mySrd, input);
+
+		// Verify
+		assertEquals(1, myCaptureQueriesListener.countCommits());
+		assertEquals(0, myCaptureQueriesListener.countRollbacks());
+		id = new IdType(output.getEntry().get(0).getResponse().getLocation());
+		assertEquals("2", id.getVersionIdPart());
+
+		assertFalse(myPatientDao.read(id.toUnqualifiedVersionless(), mySrd).getActive());
 	}
 
 	@Test
@@ -146,8 +191,8 @@ public class PartitionedStrictTransactionR4Test extends BasePartitioningR4Test {
 		}
 
 		@Nonnull
-		private RequestPartitionId selectPartition(String resourceType) {
-			switch (resourceType) {
+		private RequestPartitionId selectPartition(String theResourceType) {
+			switch (theResourceType) {
 				case "Patient":
 					return RequestPartitionId.fromPartitionId(myPartitionId);
 				case "Observation":
@@ -156,7 +201,7 @@ public class PartitionedStrictTransactionR4Test extends BasePartitioningR4Test {
 				case "Organization":
 					return RequestPartitionId.defaultPartition();
 				default:
-					throw new InternalErrorException("Don't know how to handle resource type");
+					throw new InternalErrorException("Don't know how to handle resource type: " + theResourceType);
 			}
 		}
 

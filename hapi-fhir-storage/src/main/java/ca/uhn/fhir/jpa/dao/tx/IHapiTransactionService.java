@@ -95,7 +95,7 @@ public interface IHapiTransactionService {
 	 * transaction when the request partition is for a different partition than
 	 * the currently executing partition.
 	 *
-	 * @since 7.6.0
+	 * @since 7.4.0
 	 */
 	boolean isRequiresNewTransactionWhenChangingPartitions();
 
