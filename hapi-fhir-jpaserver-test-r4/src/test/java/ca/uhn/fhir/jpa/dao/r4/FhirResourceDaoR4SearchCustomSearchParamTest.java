@@ -360,7 +360,22 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 	}
 
 	@Test
-	public void testCreateInvalidParamNoPath() {
+	public void testCreateCompositeParamNoExpressionAtRootLevel() {
+		// allow composite search parameter to have no expression element at root level on the resource
+		SearchParameter fooSp = new SearchParameter();
+		fooSp.addBase("Patient");
+		fooSp.setCode("foo");
+		fooSp.setType(Enumerations.SearchParamType.COMPOSITE);
+		fooSp.setTitle("FOO SP");
+		fooSp.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
+
+		// Ensure that no exceptions are thrown
+		mySearchParameterDao.create(fooSp, mySrd);
+		mySearchParamRegistry.forceRefresh();
+	}
+
+	@Test
+	public void testCreateInvalidParamNoExpression() {
 		SearchParameter fooSp = new SearchParameter();
 		fooSp.addBase("Patient");
 		fooSp.setCode("foo");

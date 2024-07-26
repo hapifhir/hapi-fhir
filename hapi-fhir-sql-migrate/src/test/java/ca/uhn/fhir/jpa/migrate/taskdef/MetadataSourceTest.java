@@ -30,12 +30,14 @@ class MetadataSourceTest {
 		"ORACLE_12C,Oracle Database 19c Enterprise Edition Release 19.0.0.0.0 - Production,true",
 		"ORACLE_12C,Oracle Database 19c Express Edition Release 11.2.0.2.0 - 64bit Production,false",
 		"COCKROACHDB_21_1,,true",
-		// sql server only supports it in Enterprise
+		// sql server only supports it in Enterprise and Developer
 		// https://docs.microsoft.com/en-us/sql/sql-server/editions-and-components-of-sql-server-2019?view=sql-server-ver16#RDBMSHA
-		"MSSQL_2012,Developer Edition (64-bit),false",
-		"MSSQL_2012,Developer Edition (64-bit),false",
+		"MSSQL_2012,Developer Edition (64-bit),true",
+		"MSSQL_2012,Developer Edition (64-bit),true",
 		"MSSQL_2012,Standard Edition (64-bit),false",
-		"MSSQL_2012,Enterprise Edition (64-bit),true"
+		"MSSQL_2012,Enterprise Edition (64-bit),true",
+		"MSSQL_2012,Azure SQL Edge Developer (64-bit),true",
+		"MSSQL_2012,Azure SQL Edge Premium (64-bit),true"
 	})
 	void isOnlineIndexSupported(DriverTypeEnum theType, String theEdition, boolean theSupportedFlag) {
 		// stub out our Sql Server edition lookup
