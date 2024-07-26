@@ -414,6 +414,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			version.onTable("HFJ_IDX_CMB_TOK_NU")
 					.addIndex("20240625.10", "IDX_IDXCMBTOKNU_HASHC")
 					.unique(false)
+					.online(true)
 					.withColumns("HASH_COMPLETE", "RES_ID", "PARTITION_ID");
 			version.onTable("HFJ_IDX_CMP_STRING_UNIQ")
 					.addColumn("20240625.20", "HASH_COMPLETE")
