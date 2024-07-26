@@ -1531,7 +1531,7 @@ public class FhirTerserR4Test {
    }
 
    @Test
-   void test_parser() {
+   void copyingAndParsingCreatesDuplicateContainedResources() {
 	  var input = new Library();
 	  var params = new Parameters();
 	  var id = "#expansion-parameters-ecr";
@@ -1542,12 +1542,12 @@ public class FhirTerserR4Test {
 	  input.addContained(params);
 	  input.addExtension(paramsExt);
 	  final var parser = FhirContext.forR4Cached().newJsonParser();
-	  var unparsed = parser.encodeResourceToString(input);
-	  var parsed = parser.parseResource(unparsed);
+	  var stringified = parser.encodeResourceToString(input);
+	  var parsed = parser.parseResource(stringified);
 	  var copy = ((Library) parsed).copy();
 	  assertEquals(1, copy.getContained().size());
-	  var unparsedCopy = parser.encodeResourceToString(copy);
-	  var parsedCopy = parser.parseResource(unparsedCopy);
+	  var stringifiedCopy = parser.encodeResourceToString(copy);
+	  var parsedCopy = parser.parseResource(stringifiedCopy);
 	  assertEquals(1, ((Library) parsedCopy).getContained().size());
    }
 
