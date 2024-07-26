@@ -472,7 +472,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		version.onTable(Search.HFJ_SEARCH)
 				.modifyColumn("20240722.1", Search.SEARCH_UUID)
-				.nullable()
+				.nonNullable()
 				.withType(ColumnTypeEnum.STRING, 48);
 
 		{
@@ -1025,7 +1025,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		version.onTable(Search.HFJ_SEARCH)
 				.addColumn("20230215.1", Search.SEARCH_UUID)
 				.nullable()
-				.type(ColumnTypeEnum.STRING, Search.SEARCH_UUID_COLUMN_LENGTH);
+				.type(ColumnTypeEnum.STRING, 48);
 		version.onTable(BulkImportJobEntity.HFJ_BLK_IMPORT_JOB)
 				.addColumn("20230215.2", BulkImportJobEntity.JOB_ID)
 				.nullable()
@@ -3145,7 +3145,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		version.onTable("HFJ_SEARCH")
 				.modifyColumn("20190814.7", "SEARCH_UUID")
 				.nonNullable()
-				.withType(ColumnTypeEnum.STRING, Search.SEARCH_UUID_COLUMN_LENGTH);
+				.withType(ColumnTypeEnum.STRING, 36);
 
 		version.onTable("HFJ_SEARCH_PARM").dropThisTable("20190814.8");
 
