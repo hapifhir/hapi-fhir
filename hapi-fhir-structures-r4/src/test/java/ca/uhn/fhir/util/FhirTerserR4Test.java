@@ -21,6 +21,7 @@ import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.MarkdownType;
 import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.MedicationAdministration;
@@ -28,6 +29,7 @@ import org.hl7.fhir.r4.model.MedicationRequest;
 import org.hl7.fhir.r4.model.Money;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Patient.LinkType;
 import org.hl7.fhir.r4.model.Practitioner;
@@ -1520,23 +1522,44 @@ public class FhirTerserR4Test {
 		assertTrue(result.get());
 	}
 
-	private List<String> toStrings(List<StringType> theStrings) {
-		ArrayList<String> retVal = new ArrayList<>();
-		for (StringType next : theStrings) {
-			retVal.add(next.getValue());
-		}
-		return retVal;
-	}
+   private List<String> toStrings(List<StringType> theStrings) {
+	  ArrayList<String> retVal = new ArrayList<>();
+	  for (StringType next : theStrings) {
+		 retVal.add(next.getValue());
+	  }
+	  return retVal;
+   }
 
-	/**
-	 * See http://stackoverflow.com/questions/182636/how-to-determine-the-class-of-a-generic-type
-	 */
-	private static abstract class ClassGetter<T> {
-		@SuppressWarnings("unchecked")
-		public final Class<T> get() {
-			final ParameterizedType superclass = (ParameterizedType) getClass().getGenericSuperclass();
-			Type type = superclass.getActualTypeArguments()[0];
-			if (type instanceof ParameterizedType) {
+   @Test
+   void test_parser() {
+	  var input = new Library();
+	  var params = new Parameters();
+	  var id = "#expansion-parameters-ecr";
+	  params.setId(id);
+	  params.addParameter("system-version", new StringType("test2"));
+	  var paramsExt = new Extension();
+	  paramsExt.setUrl("test").setValue(new Reference(id));
+	  input.addContained(params);
+	  input.addExtension(paramsExt);
+	  final var parser = FhirContext.forR4Cached().newJsonParser();
+	  var unparsed = parser.encodeResourceToString(input);
+	  var parsed = parser.parseResource(unparsed);
+	  var copy = ((Library) parsed).copy();
+	  assertEquals(1, copy.getContained().size());
+	  var unparsedCopy = parser.encodeResourceToString(copy);
+	  var parsedCopy = parser.parseResource(unparsedCopy);
+	  assertEquals(1, ((Library) parsedCopy).getContained().size());
+   }
+
+   /**
+	* See http://stackoverflow.com/questions/182636/how-to-determine-the-class-of-a-generic-type
+	*/
+   private static abstract class ClassGetter<T> {
+	  @SuppressWarnings("unchecked")
+	  public final Class<T> get() {
+		 final ParameterizedType superclass = (ParameterizedType) getClass().getGenericSuperclass();
+		 Type type = superclass.getActualTypeArguments()[0];
+		 if (type instanceof ParameterizedType) {
 				return (Class<T>) ((ParameterizedType) type).getOwnerType();
 			}
 			return (Class<T>) type;
