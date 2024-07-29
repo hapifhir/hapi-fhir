@@ -21,6 +21,8 @@ import ca.uhn.fhir.rest.client.api.IHttpResponse;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.ParametersUtil;
 import com.google.common.collect.Lists;
@@ -45,11 +47,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -116,12 +122,6 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 	@Test
 	public void testValidateCode_withBlankCode_returnsNull() {
 		IValidationSupport.CodeValidationResult outcome = mySvc.validateCode(null, null, CODE_SYSTEM, "", DISPLAY, VALUE_SET_URL);
-		assertNull(outcome);
-	}
-
-	@Test
-	public void testValidateCode_withBlankCodeSystemAndValueSetUrl_returnsNull() {
-		IValidationSupport.CodeValidationResult outcome = mySvc.validateCode(null, null, null, CODE, DISPLAY, null);
 		assertNull(outcome);
 	}
 
@@ -213,20 +213,6 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 		assertEquals(CODE_SYSTEM, myValueSetProvider.myLastSystem.getValue());
 		assertEquals(VALUE_SET_URL, myValueSetProvider.myLastUrl.getValueAsString());
 		assertNull(myValueSetProvider.myLastValueSet);
-	}
-
-	/**
-	 * Remote terminology services shouldn't be used to validate codes with an implied system
-	 */
-	@Test
-	public void testValidateCodeInValueSet_InferSystem() {
-		createNextValueSetReturnParameters(true, DISPLAY, null);
-
-		ValueSet valueSet = new ValueSet();
-		valueSet.setUrl(VALUE_SET_URL);
-
-		IValidationSupport.CodeValidationResult outcome = mySvc.validateCodeInValueSet(null, new ConceptValidationOptions().setInferSystem(true), null, CODE, DISPLAY, valueSet);
-		assertNull(outcome);
 	}
 
 	@Test
@@ -348,16 +334,27 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 			IValidationSupport.CodeValidationResult outcome = mySvc.validateCodeInValueSet(null,
 				new ConceptValidationOptions().setInferSystem(true), null, CODE, DISPLAY, valueSet);
 
-			// validate service doesn't do early return (as when no code system is present)
+			// validate service doesn't return error message (as when no code system is present)
 			assertNotNull(outcome);
+			assertNull(outcome.getMessage());
+			assertTrue(outcome.isOk());
 		}
 
 
 		@Nested
 		public class MultiComposeIncludeValueSet {
 
-			@Test
-			public void SystemNotPresentReturnsNull() {
+			public static Stream<Arguments> getRemoteTerminologyServerExceptions() {
+				return Stream.of(
+					Arguments.of(new ResourceNotFoundException("System Not Present"), "404 Not Found: System Not Present"),
+					Arguments.of(new InvalidRequestException("Invalid Request"), "400 Bad Request: Invalid Request")
+				);
+			}
+
+			@ParameterizedTest
+			@MethodSource(value = "getRemoteTerminologyServerExceptions")
+			public void systemNotPresent_returnsValidationResultWithError(Exception theException, String theMessage) {
+				myValueSetProvider.myNextValidateCodeException = theException;
 				createNextValueSetReturnParameters(true, DISPLAY, null);
 
 				ValueSet valueSet = new ValueSet();
@@ -368,12 +365,17 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 				IValidationSupport.CodeValidationResult outcome = mySvc.validateCodeInValueSet(null,
 					new ConceptValidationOptions().setInferSystem(true), null, CODE, DISPLAY, valueSet);
 
-				assertNull(outcome);
+				assertNotNull(outcome);
+				assertNotNull(outcome.getMessage());
+				assertTrue(outcome.getMessage().contains("Unknown code \"null#CODE\" for ValueSet with URL \"http://value.set/url\". The Remote Terminology server http://"));
+				assertTrue(outcome.getMessage().contains(theMessage));
 			}
 
 
-			@Test
-			public void SystemPresentCodeNotPresentReturnsNull() {
+			@ParameterizedTest
+			@MethodSource(value = "getRemoteTerminologyServerExceptions")
+			public void systemPresentCodeNotPresent_returnsValidationResultWithError(Exception theException, String theMessage) {
+				myValueSetProvider.myNextValidateCodeException = theException;
 				createNextValueSetReturnParameters(true, DISPLAY, null);
 
 				ValueSet valueSet = new ValueSet();
@@ -388,7 +390,10 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 				IValidationSupport.CodeValidationResult outcome = mySvc.validateCodeInValueSet(null,
 					new ConceptValidationOptions().setInferSystem(true), null, CODE, DISPLAY, valueSet);
 
-				assertNull(outcome);
+				assertNotNull(outcome);
+				assertNotNull(outcome.getMessage());
+				assertTrue(outcome.getMessage().contains("Unknown code \"null#CODE\" for ValueSet with URL \"http://value.set/url\". The Remote Terminology server http://"));
+				assertTrue(outcome.getMessage().contains(theMessage));
 			}
 
 
@@ -537,6 +542,7 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 		private UriType mySystemUrl;
 		private CodeType myCode;
 		private IValidationSupport.CodeValidationResult myNextValidationResult;
+		private Exception myException;
 
 		@Override
 		public Class<? extends IBaseResource> getResourceType() {
@@ -554,9 +560,12 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 			@OperationParam(name = "url", min = 0, max = 1) UriType theSystem,
 			@OperationParam(name = "code", min = 0, max = 1) CodeType theCode,
 			@OperationParam(name = "display", min = 0, max = 1) StringType theDisplay
-		) {
+		) throws Exception {
 			myCode = theCode;
 			mySystemUrl = theSystem;
+			if (myException != null) {
+				throw myException;
+			}
 			return myNextValidationResult.toParameters(ourCtx);
 		}
 
@@ -572,6 +581,7 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 
 	private static class MyValueSetProvider implements IResourceProvider {
 		private Parameters myNextReturnParams;
+		private Exception myNextValidateCodeException;
 		private List<ValueSet> myNextReturnValueSets;
 		private UriType myLastUrl;
 		private CodeType myLastCode;
@@ -595,13 +605,16 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 			@OperationParam(name = "system", min = 0, max = 1) UriType theSystem,
 			@OperationParam(name = "display", min = 0, max = 1) StringType theDisplay,
 			@OperationParam(name = "valueSet") ValueSet theValueSet
-		) {
+		) throws Exception {
 			myInvocationCount++;
 			myLastUrl = theValueSetUrl;
 			myLastCode = theCode;
 			myLastSystem = theSystem;
 			myLastDisplay = theDisplay;
 			myLastValueSet = theValueSet;
+			if (myNextValidateCodeException != null) {
+				throw myNextValidateCodeException;
+			}
 			return myNextReturnParams;
 		}
 

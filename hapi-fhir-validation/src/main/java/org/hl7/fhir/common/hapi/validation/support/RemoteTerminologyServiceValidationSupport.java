@@ -84,11 +84,6 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 			String theDisplay,
 			String theValueSetUrl) {
 
-		// Remote terminology services shouldn't be used to validate codes with an implied system
-		if (isBlank(theCodeSystem) && isBlank(theValueSetUrl)) {
-			return null;
-		}
-
 		return invokeRemoteValidateCode(theCodeSystem, theCode, theDisplay, theValueSetUrl, null);
 	}
 
@@ -108,11 +103,6 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 		String codeSystem = theCodeSystem;
 		if (isNotBlank(theCode) && isBlank(codeSystem)) {
 			codeSystem = ValidationSupportUtils.extractCodeSystemForCodeR4((ValueSet) theValueSet, theCode);
-		}
-
-		// Remote terminology services shouldn't be used to validate codes with an implied system
-		if (isBlank(codeSystem)) {
-			return null;
 		}
 
 		String valueSetUrl = DefaultProfileValidationSupport.getConformanceResourceUrl(myCtx, valueSet);
@@ -594,11 +584,22 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 			resourceType = "CodeSystem";
 		}
 
-		IBaseParameters output = client.operation()
-				.onType(resourceType)
-				.named("validate-code")
-				.withParameters(input)
-				.execute();
+		IBaseParameters output;
+		try {
+			output = client.operation()
+					.onType(resourceType)
+					.named("validate-code")
+					.withParameters(input)
+					.execute();
+		} catch (ResourceNotFoundException | InvalidRequestException ex) {
+			ourLog.error(ex.getMessage(), ex);
+			CodeValidationResult result = new CodeValidationResult();
+			result.setSeverity(IssueSeverity.ERROR);
+			String errorMessage = buildErrorMessage(
+					theCodeSystem, theCode, theValueSetUrl, theValueSet, client.getServerBase(), ex.getMessage());
+			result.setMessage(errorMessage);
+			return result;
+		}
 
 		List<String> resultValues = ParametersUtil.getNamedParameterValuesAsString(getFhirContext(), output, "result");
 		if (resultValues.isEmpty() || isBlank(resultValues.get(0))) {
@@ -628,6 +629,21 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 			}
 		}
 		return retVal;
+	}
+
+	private String buildErrorMessage(
+			String theCodeSystem,
+			String theCode,
+			String theValueSetUrl,
+			IBaseResource theValueSet,
+			String theServerUrl,
+			String theServerMessage) {
+		if (theValueSetUrl == null && theValueSet == null) {
+			return getErrorMessage("unknownCodeInSystem", theCodeSystem, theCode, theServerUrl, theServerMessage);
+		} else {
+			return getErrorMessage(
+					"unknownCodeInValueSet", theCodeSystem, theCode, theValueSetUrl, theServerUrl, theServerMessage);
+		}
 	}
 
 	protected IBaseParameters buildValidateCodeInputParameters(
