@@ -17,7 +17,7 @@ public final class ValidationSupportUtils {
 		} else if (theValueSet instanceof ValueSet) {
 			return extractCodeSystemForCodeR4((ValueSet) theValueSet, theCode);
 		} else if (theValueSet instanceof org.hl7.fhir.r5.model.ValueSet) {
-			extractCodeSystemForCodeR5((org.hl7.fhir.r5.model.ValueSet) theValueSet, theCode);
+			return extractCodeSystemForCodeR5((org.hl7.fhir.r5.model.ValueSet) theValueSet, theCode);
 		}
 		return null;
 	}
