@@ -758,7 +758,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 			throw new InternalErrorException(Msg.code(690) + e);
 		}
 
-		String system = ValidationSupportUtils.extractCodeSystemForCodeR5(theValueSet, code);
+		String system = ValidationSupportUtils.extractCodeSystemForCode(theValueSet, code);
 
 		ConceptValidationOptions validationOptions =
 				convertConceptValidationOptions(theOptions).setInferSystem(true);

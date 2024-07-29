@@ -33,7 +33,6 @@ import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r4.model.Property;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Type;
-import org.hl7.fhir.r4.model.ValueSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -102,7 +101,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 		// so let's try to get it from the VS if is not present
 		String codeSystem = theCodeSystem;
 		if (isNotBlank(theCode) && isBlank(codeSystem)) {
-			codeSystem = ValidationSupportUtils.extractCodeSystemForCodeR4((ValueSet) theValueSet, theCode);
+			codeSystem = ValidationSupportUtils.extractCodeSystemForCode(theValueSet, theCode);
 		}
 
 		String valueSetUrl = DefaultProfileValidationSupport.getConformanceResourceUrl(myCtx, valueSet);
