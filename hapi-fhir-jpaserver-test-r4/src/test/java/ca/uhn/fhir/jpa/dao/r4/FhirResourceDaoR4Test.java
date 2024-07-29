@@ -1,12 +1,10 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
 import ca.uhn.fhir.jpa.api.pid.StreamTemplate;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
@@ -33,11 +31,13 @@ import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
 import ca.uhn.fhir.model.valueset.BundleEntryTransactionMethodEnum;
+import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.param.DateParam;
@@ -114,8 +114,10 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.SimpleQuantity;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.StructureDefinition;
+import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Timing;
 import org.hl7.fhir.r4.model.UriType;
+import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -142,6 +144,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -150,9 +153,12 @@ import static ca.uhn.fhir.rest.api.Constants.PARAM_HAS;
 import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 @SuppressWarnings({"unchecked", "deprecation", "Duplicates"})
@@ -4314,6 +4320,158 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 				.collect(Collectors.toSet()));
 
 		assertEquals(ids, createdIds);
+	}
+
+	@Test
+	public void bundle1CreatesResourceByCondition_bundle2UpdatesExistingResourceToNotMatchConditionThenCreatesBySameCondition_shouldPass() {
+		// setup
+		IParser parser = myFhirContext.newJsonParser();
+		String idToReplace = "/Task/11852"; // in bundle 2
+		String identifierSystem = "https://tempuri.org";
+		Bundle bundle1;
+		Bundle bundle2;
+		{
+			@Language("JSON")
+			String bundleStr = """
+					{
+					    "resourceType": "Bundle",
+					    "type": "transaction",
+					    "entry": [
+					        {
+					            "fullUrl": "urn:uuid:1fee7dea-c2a8-47b1-80a9-a681457cc44f",
+					            "resource": {
+					                "resourceType": "Task",
+					                "identifier": [
+					                    {
+					                        "system": "https://tempuri.org",
+					                        "value": "t1"
+					                    }
+					                ]
+					            },
+					            "request": {
+					                "method": "POST",
+					                "url": "/Task",
+					                "ifNoneExist": "identifier=https://tempuri.org|t1"
+					            }
+					        }
+					    ]
+					}
+				""";
+			bundle1 = parser.parseResource(Bundle.class, bundleStr);
+		}
+		{
+			@Language("JSON")
+			String bundleStr = """
+					{
+					    "resourceType": "Bundle",
+					    "type": "transaction",
+					    "entry": [
+					        {
+					            "fullUrl": "urn:uuid:1fee7dea-c2a8-47b1-80a9-a681457cc44f",
+					            "resource": {
+					                "resourceType": "Task",
+					                "identifier": [
+					                    {
+					                        "system": "https://tempuri.org",
+					                        "value": "t1"
+					                    }
+					                ]
+					            },
+					            "request": {
+					                "method": "POST",
+					                "url": "/Task",
+					                "ifNoneExist": "identifier=https://tempuri.org|t1"
+					            }
+					        },
+					        {
+					            "fullUrl": "http://localhost:8000/Task/11852",
+					            "resource": {
+					                "resourceType": "Task",
+					                "identifier": [
+					                    {
+					                        "system": "https://tempuri.org",
+					                        "value": "t2"
+					                    }
+					                ]
+					            },
+					            "request": {
+					                "method": "PUT",
+					                "url": "/Task/11852"
+					            }
+					        }
+					    ]
+					}
+				""";
+			bundle2 = parser.parseResource(Bundle.class, bundleStr);
+		}
+
+		IFhirSystemDao<Bundle, ?> systemDao = myDaoRegistry.getSystemDao();
+		RequestDetails reqDets = new SystemRequestDetails();
+
+		Bundle createdBundle;
+		String id;
+		{
+			// create bundle1
+			createdBundle = systemDao.transaction(reqDets, bundle1);
+			assertNotNull(createdBundle);
+			assertFalse(createdBundle.getEntry().isEmpty());
+			Optional<BundleEntryComponent> entry = createdBundle.getEntry()
+				.stream().filter(e -> e.getResponse() != null && e.getResponse().getStatus().contains("201 Created"))
+				.findFirst();
+			assertTrue(entry.isPresent());
+			String idAndVersion = entry.get().getResponse().getLocation();
+
+			if (idAndVersion.contains("/_history")) {
+				IIdType idt = new IdType(idAndVersion);
+				id = idt.toVersionless().getValue();
+			} else {
+				id = idAndVersion;
+			}
+
+			// verify task creation
+			Task task = getTaskForId(id, identifierSystem);
+			assertTrue(task.getIdentifier().stream().anyMatch(i -> i.getSystem().equals(identifierSystem) && i.getValue().equals("t1")));
+		}
+
+		// update second bundle to use already-saved-Task's id
+		Optional<BundleEntryComponent> entryComponent = bundle2.getEntry().stream()
+			.filter(e -> e.getRequest().getUrl().equals(idToReplace))
+			.findFirst();
+		assertTrue(entryComponent.isPresent());
+		BundleEntryComponent entry = entryComponent.get();
+		entry.getRequest().setUrl(id);
+		entry.setFullUrl(entry.getFullUrl().replace(idToReplace, id));
+
+		{
+			// post second bundle first time
+			createdBundle = systemDao.transaction(reqDets, bundle2);
+			assertNotNull(createdBundle);
+			// check that the Task is recognized, but not recreated
+			assertFalse(createdBundle.getEntry().stream().anyMatch(e -> e.getResponse() != null && e.getResponse().getStatus().contains("201")));
+			// but the Task should have been updated
+			// (changing it to not match the identifier anymore)
+			assertTrue(createdBundle.getEntry().stream().anyMatch(e -> e.getResponse() != null && e.getResponse().getLocation().equals(id + "/_history/2")));
+
+			// verify task update
+			Task task = getTaskForId(id, identifierSystem);
+			assertTrue(task.getIdentifier().stream().anyMatch(i -> i.getSystem().equals(identifierSystem) && i.getValue().equals("t2")));
+
+			// post again; should succeed (not throw)
+			createdBundle = systemDao.transaction(reqDets, bundle2);
+			assertNotNull(createdBundle);
+			// should have created the second task
+			assertTrue(createdBundle.getEntry().stream()
+				.anyMatch(e -> e.getResponse() != null && e.getResponse().getStatus().contains("201 Created")));
+		}
+	}
+
+	private Task getTaskForId(String theId, String theIdentifier) {
+		Task task = myTaskDao.read(new IdType(theId), new SystemRequestDetails());
+		assertNotNull(task);
+		assertFalse(task.getIdentifier().isEmpty());
+		assertTrue(task.getIdentifier().stream().anyMatch(i -> i.getSystem().equals(theIdentifier)));
+
+		return task;
 	}
 
 	public static void assertConflictException(String theResourceType, ResourceVersionConflictException e) {
