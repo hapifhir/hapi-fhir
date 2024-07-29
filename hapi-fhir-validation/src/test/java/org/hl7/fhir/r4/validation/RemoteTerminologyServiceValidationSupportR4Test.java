@@ -125,6 +125,52 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 		assertNull(outcome);
 	}
 
+	public static Stream<Arguments> getRemoteTerminologyServerResponses() {
+		return Stream.of(
+			Arguments.of(new ResourceNotFoundException("System Not Present"), "404 Not Found: System Not Present",
+				"Unknown code \"null#CODE\". The Remote Terminology server", null, null),
+			Arguments.of(new InvalidRequestException("Invalid Request"), "400 Bad Request: Invalid Request",
+				"Unknown code \"null#CODE\". The Remote Terminology server", null, null),
+			Arguments.of(new ResourceNotFoundException("System Not Present"), "404 Not Found: System Not Present",
+				"Unknown code \"NotFoundSystem#CODE\". The Remote Terminology server", "NotFoundSystem", null),
+			Arguments.of(new InvalidRequestException("Invalid Request"), "400 Bad Request: Invalid Request",
+				"Unknown code \"InvalidSystem#CODE\". The Remote Terminology server", "InvalidSystem", null),
+			Arguments.of(new ResourceNotFoundException("System Not Present"), "404 Not Found: System Not Present",
+				"Unknown code \"null#CODE\" for ValueSet with URL \"NotFoundValueSetUrl\". The Remote Terminology server",
+				null, "NotFoundValueSetUrl"),
+			Arguments.of(new InvalidRequestException("Invalid Request"), "400 Bad Request: Invalid Request",
+				"Unknown code \"null#CODE\" for ValueSet with URL \"InvalidValueSetUrl\". The Remote Terminology server", null, "InvalidValueSetUrl"),
+			Arguments.of(new ResourceNotFoundException("System Not Present"), "404 Not Found: System Not Present",
+				"Unknown code \"NotFoundSystem#CODE\" for ValueSet with URL \"NotFoundValueSetUrl\". The Remote Terminology server",
+				"NotFoundSystem", "NotFoundValueSetUrl"),
+			Arguments.of(new InvalidRequestException("Invalid Request"), "400 Bad Request: Invalid Request",
+				"Unknown code \"InvalidSystem#CODE\" for ValueSet with URL \"InvalidValueSetUrl\". The Remote Terminology server", "InvalidSystem", "InvalidValueSetUrl")
+		);
+	}
+
+	@ParameterizedTest
+	@MethodSource(value = "getRemoteTerminologyServerResponses")
+	public void testValidateCode_codeSystemAndValueSetUrlAreIncorrect_returnsValidationResultWithError(Exception theException,
+																									   String theServerMessage,
+																									   String theValidationMessage,
+																									   String theCodeSystem,
+																									   String theValueSetUrl) {
+		myCodeSystemProvider.myNextValidateCodeException = theException;
+		myValueSetProvider.myNextValidateCodeException = theException;
+		IValidationSupport.CodeValidationResult outcome = mySvc.validateCode(null, null, theCodeSystem, CODE, DISPLAY, theValueSetUrl);
+
+		validateValidationErrorResult(outcome, theValidationMessage, theServerMessage);
+	}
+
+	private static void validateValidationErrorResult(IValidationSupport.CodeValidationResult outcome, String... theMessages) {
+		assertNotNull(outcome);
+		assertEquals(IValidationSupport.IssueSeverity.ERROR, outcome.getSeverity());
+		assertNotNull(outcome.getMessage());
+		for (String message : theMessages) {
+			assertTrue(outcome.getMessage().contains(message));
+		}
+	}
+
 	@Test
 	public void testValidateCode_forValueSet_returnsCorrectly() {
 		createNextValueSetReturnParameters(true, DISPLAY, null);
@@ -353,28 +399,26 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 
 			@ParameterizedTest
 			@MethodSource(value = "getRemoteTerminologyServerExceptions")
-			public void systemNotPresent_returnsValidationResultWithError(Exception theException, String theMessage) {
+			public void systemNotPresent_returnsValidationResultWithError(Exception theException, String theServerMessage) {
 				myValueSetProvider.myNextValidateCodeException = theException;
 				createNextValueSetReturnParameters(true, DISPLAY, null);
 
 				ValueSet valueSet = new ValueSet();
 				valueSet.setUrl(VALUE_SET_URL);
 				valueSet.setCompose(new ValueSet.ValueSetComposeComponent().setInclude(
-					Lists.newArrayList(new ValueSet.ConceptSetComponent(), new ValueSet.ConceptSetComponent()) ));
+					Lists.newArrayList(new ValueSet.ConceptSetComponent(), new ValueSet.ConceptSetComponent())));
 
 				IValidationSupport.CodeValidationResult outcome = mySvc.validateCodeInValueSet(null,
 					new ConceptValidationOptions().setInferSystem(true), null, CODE, DISPLAY, valueSet);
 
-				assertNotNull(outcome);
-				assertNotNull(outcome.getMessage());
-				assertTrue(outcome.getMessage().contains("Unknown code \"null#CODE\" for ValueSet with URL \"http://value.set/url\". The Remote Terminology server http://"));
-				assertTrue(outcome.getMessage().contains(theMessage));
+				String unknownCodeForValueSetError = "Unknown code \"null#CODE\" for ValueSet with URL \"http://value.set/url\". The Remote Terminology server http://";
+				validateValidationErrorResult(outcome, unknownCodeForValueSetError, theServerMessage);
 			}
 
 
 			@ParameterizedTest
 			@MethodSource(value = "getRemoteTerminologyServerExceptions")
-			public void systemPresentCodeNotPresent_returnsValidationResultWithError(Exception theException, String theMessage) {
+			public void systemPresentCodeNotPresent_returnsValidationResultWithError(Exception theException, String theServerMessage) {
 				myValueSetProvider.myNextValidateCodeException = theException;
 				createNextValueSetReturnParameters(true, DISPLAY, null);
 
@@ -385,15 +429,13 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 				valueSet.setCompose(new ValueSet.ValueSetComposeComponent().setInclude(
 					Lists.newArrayList(
 						new ValueSet.ConceptSetComponent().setSystem(systemUrl),
-						new ValueSet.ConceptSetComponent().setSystem(systemUrl2)) ));
+						new ValueSet.ConceptSetComponent().setSystem(systemUrl2))));
 
 				IValidationSupport.CodeValidationResult outcome = mySvc.validateCodeInValueSet(null,
 					new ConceptValidationOptions().setInferSystem(true), null, CODE, DISPLAY, valueSet);
 
-				assertNotNull(outcome);
-				assertNotNull(outcome.getMessage());
-				assertTrue(outcome.getMessage().contains("Unknown code \"null#CODE\" for ValueSet with URL \"http://value.set/url\". The Remote Terminology server http://"));
-				assertTrue(outcome.getMessage().contains(theMessage));
+				String unknownCodeForValueSetError = "Unknown code \"null#CODE\" for ValueSet with URL \"http://value.set/url\". The Remote Terminology server http://";
+				validateValidationErrorResult(outcome, unknownCodeForValueSetError, theServerMessage);
 			}
 
 
@@ -537,12 +579,12 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 
 	static private class MyCodeSystemProvider implements IResourceProvider {
 		private SummaryEnum myLastSummaryParam;
+		private Exception myNextValidateCodeException;
 		private UriParam myLastUrlParam;
 		private List<CodeSystem> myNextReturnCodeSystems;
 		private UriType mySystemUrl;
 		private CodeType myCode;
 		private IValidationSupport.CodeValidationResult myNextValidationResult;
-		private Exception myException;
 
 		@Override
 		public Class<? extends IBaseResource> getResourceType() {
@@ -563,8 +605,8 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 		) throws Exception {
 			myCode = theCode;
 			mySystemUrl = theSystem;
-			if (myException != null) {
-				throw myException;
+			if (myNextValidateCodeException != null) {
+				throw myNextValidateCodeException;
 			}
 			return myNextValidationResult.toParameters(ourCtx);
 		}
