@@ -34,7 +34,7 @@ import org.springframework.context.annotation.Lazy;
 @Import(SubscriptionConfig.class)
 public class SubscriptionTopicConfig {
 	@Bean
-	SubscriptionTopicMatchingSubscriber subscriptionTopicMatchingSubscriber(
+	public SubscriptionTopicMatchingSubscriber subscriptionTopicMatchingSubscriber(
 			FhirContext theFhirContext, MemoryCacheService memoryCacheService) {
 		switch (theFhirContext.getVersion().getVersion()) {
 			case R5:
@@ -47,19 +47,19 @@ public class SubscriptionTopicConfig {
 
 	@Bean
 	@Lazy
-	SubscriptionTopicRegistry subscriptionTopicRegistry() {
+	public SubscriptionTopicRegistry subscriptionTopicRegistry() {
 		return new SubscriptionTopicRegistry();
 	}
 
 	@Bean
 	@Lazy
-	SubscriptionTopicSupport subscriptionTopicSupport(
+	public SubscriptionTopicSupport subscriptionTopicSupport(
 			FhirContext theFhirContext, DaoRegistry theDaoRegistry, SearchParamMatcher theSearchParamMatcher) {
 		return new SubscriptionTopicSupport(theFhirContext, theDaoRegistry, theSearchParamMatcher);
 	}
 
 	@Bean
-	SubscriptionTopicLoader subscriptionTopicLoader(FhirContext theFhirContext) {
+	public SubscriptionTopicLoader subscriptionTopicLoader(FhirContext theFhirContext) {
 		switch (theFhirContext.getVersion().getVersion()) {
 			case R5:
 			case R4B:
@@ -70,7 +70,7 @@ public class SubscriptionTopicConfig {
 	}
 
 	@Bean
-	SubscriptionTopicRegisteringSubscriber subscriptionTopicRegisteringSubscriber(FhirContext theFhirContext) {
+	public SubscriptionTopicRegisteringSubscriber subscriptionTopicRegisteringSubscriber(FhirContext theFhirContext) {
 		switch (theFhirContext.getVersion().getVersion()) {
 			case R5:
 			case R4B:
@@ -81,7 +81,7 @@ public class SubscriptionTopicConfig {
 	}
 
 	@Bean
-	SubscriptionTopicValidatingInterceptor subscriptionTopicValidatingInterceptor(
+	public SubscriptionTopicValidatingInterceptor subscriptionTopicValidatingInterceptor(
 			FhirContext theFhirContext, SubscriptionQueryValidator theSubscriptionQueryValidator) {
 		switch (theFhirContext.getVersion().getVersion()) {
 			case R5:
