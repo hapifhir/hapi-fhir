@@ -26,6 +26,9 @@ import ca.uhn.fhir.rest.client.api.Header;
 import ca.uhn.fhir.rest.client.api.IHttpClient;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.IRestfulClientFactory;
+import ca.uhn.fhir.rest.client.model.AsHttpRequestParams;
+import ca.uhn.fhir.rest.client.model.CreateRequestParameters;
+import ca.uhn.fhir.rest.param.HttpClientRequestParameters;
 import ca.uhn.fhir.util.UrlUtil;
 
 import java.util.ArrayList;
@@ -58,27 +61,55 @@ public abstract class BaseHttpClientInvocation {
 	 *            The encoding to use for any serialized content sent to the
 	 *            server
 	 */
+	@Deprecated
 	public abstract IHttpRequest asHttpRequest(
 			String theUrlBase,
 			Map<String, List<String>> theExtraParams,
 			EncodingEnum theEncoding,
 			Boolean thePrettyPrint);
 
+	// TODO implement
+	public IHttpRequest asHttpRequest(AsHttpRequestParams theParams) {
+		return asHttpRequest(
+				theParams.getUrlBase(),
+				theParams.getExtraParams(),
+				theParams.getEncodingEnum(),
+				theParams.getPrettyPrint());
+	}
+
+	/**
+	 * Use {@link #createHttpRequest(CreateRequestParameters)}
+	 */
+	@Deprecated
+	protected IHttpRequest createHttpRequest(String theUrl, EncodingEnum theEncoding, RequestTypeEnum theRequestType) {
+		return createHttpRequest(new CreateRequestParameters()
+				.setUrl(theUrl)
+				.setEncodingEnum(theEncoding)
+				.setRequestTypeEnum(theRequestType));
+	}
+
 	/**
 	 * Create an HTTP request for the given url, encoding and request-type
-	 *
-	 * @param theUrl
-	 *            The complete FHIR url to which the http request will be sent
-	 * @param theEncoding
-	 *            The encoding to use for any serialized content sent to the
-	 *            server
-	 * @param theRequestType
-	 *            the type of HTTP request (GET, DELETE, ..)
 	 */
-	protected IHttpRequest createHttpRequest(String theUrl, EncodingEnum theEncoding, RequestTypeEnum theRequestType) {
-		IHttpClient httpClient = getRestfulClientFactory()
-				.getHttpClient(new StringBuilder(theUrl), null, null, theRequestType, myHeaders);
-		return httpClient.createGetRequest(getContext(), theEncoding);
+	protected IHttpRequest createHttpRequest(CreateRequestParameters theParameters) {
+		IHttpClient httpClient;
+		if (theParameters.getClient() != null) {
+			httpClient = theParameters.getClient();
+		} else {
+			httpClient = getRestfulClientFactory()
+					.getHttpClient(
+							new StringBuilder(theParameters.getUrl()),
+							null,
+							null,
+							theParameters.getRequestTypeEnum(),
+							myHeaders);
+		}
+		// todo
+		HttpClientRequestParameters clientRequestParameters =
+				new HttpClientRequestParameters(theParameters.getUrl(), RequestTypeEnum.GET);
+		clientRequestParameters.setEncodingEnum(theParameters.getEncodingEnum());
+		return httpClient.createRequest(clientRequestParameters);
+		//		return httpClient.createGetRequest(getContext(), theParameters.getEncodingEnum());
 	}
 
 	/**

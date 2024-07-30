@@ -69,6 +69,8 @@ import ca.uhn.fhir.rest.client.method.SearchMethodBinding;
 import ca.uhn.fhir.rest.client.method.SortParameter;
 import ca.uhn.fhir.rest.client.method.TransactionMethodBinding;
 import ca.uhn.fhir.rest.client.method.ValidateMethodBindingDstu2Plus;
+import ca.uhn.fhir.rest.client.model.AsHttpRequestParams;
+import ca.uhn.fhir.rest.client.model.InvokeClientParameters;
 import ca.uhn.fhir.rest.gclient.IBaseQuery;
 import ca.uhn.fhir.rest.gclient.IClientExecutable;
 import ca.uhn.fhir.rest.gclient.ICreate;
@@ -179,7 +181,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	private static final String I18N_INCOMPLETE_URI_FOR_READ = GenericClient.class.getName() + ".incompleteUriForRead";
 	private static final String I18N_NO_VERSION_ID_FOR_VREAD = GenericClient.class.getName() + ".noVersionIdForVread";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(GenericClient.class);
-	private FhirContext myContext;
+	private final FhirContext myContext;
 	private IHttpRequest myLastRequest;
 	private boolean myLogRequestAndResponse;
 
@@ -194,17 +196,41 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	@Override
 	public IFetchConformanceUntyped capabilities() {
-		return new FetchConformanceInternal();
+		return capabilities(ClientType.DEPRECATED);
+	}
+
+	@Override
+	public IFetchConformanceUntyped capabilities(ClientType theClientType) {
+		if (theClientType == ClientType.PRESERVED) {
+			return new FetchConformanceInternal(myClient);
+		}
+		return new FetchConformanceInternal(null);
 	}
 
 	@Override
 	public ICreate create() {
-		return new CreateInternal();
+		return create(ClientType.DEPRECATED);
+	}
+
+	@Override
+	public ICreate create(ClientType theClientType) {
+		if (theClientType == ClientType.PRESERVED) {
+			return new CreateInternal(myClient);
+		}
+		return new CreateInternal(null);
 	}
 
 	@Override
 	public IDelete delete() {
-		return new DeleteInternal();
+		return delete(ClientType.DEPRECATED);
+	}
+
+	@Override
+	public IDelete delete(ClientType theClientType) {
+		if (theClientType == ClientType.PRESERVED) {
+			return new DeleteInternal(myClient);
+		}
+		return new DeleteInternal(null);
 	}
 
 	private <T extends IBaseResource> T doReadOrVRead(
@@ -240,8 +266,15 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			}
 		}
 		if (isKeepResponses()) {
-			myLastRequest = invocation.asHttpRequest(
-					getServerBase(), createExtraParams(theCustomAcceptHeaderValue), getEncoding(), isPrettyPrint());
+			AsHttpRequestParams params = new AsHttpRequestParams()
+					.setExtraParams(createExtraParams(theCustomAcceptHeaderValue))
+					.setUrlBase(getServerBase())
+					.setClient(myClient)
+					.setEncodingEnum(getEncoding())
+					.setPrettyPrint(isPrettyPrint());
+			//			myLastRequest = invocation.asHttpRequest(
+			//					getServerBase(), createExtraParams(theCustomAcceptHeaderValue), getEncoding(), isPrettyPrint());
+			myLastRequest = invocation.asHttpRequest(params);
 		}
 
 		if (theIfVersionMatches != null) {
@@ -253,18 +286,29 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				new ResourceResponseHandler<>(theType, (Class<? extends IBaseResource>) null, id, allowHtmlResponse);
 
 		if (theNotModifiedHandler == null) {
-			return invokeClient(
-					myContext,
-					binding,
-					invocation,
-					theEncoding,
-					thePrettyPrint,
-					myLogRequestAndResponse,
-					theSummary,
-					theSubsetElements,
-					null,
-					theCustomAcceptHeaderValue,
-					theCustomHeaders);
+			//			return invokeClient(
+			//					myContext,
+			//					binding,
+			//					invocation,
+			//					theEncoding,
+			//					thePrettyPrint,
+			//					myLogRequestAndResponse,
+			//					theSummary,
+			//					theSubsetElements,
+			//					null,
+			//					theCustomAcceptHeaderValue,
+			//					theCustomHeaders);
+			return invokeClient(new InvokeClientParameters<T>()
+					.setContext(myContext)
+					.setBinding(binding)
+					.setClientInvocation(invocation)
+					.setEncoding(theEncoding)
+					.setPrettyPrint(thePrettyPrint)
+					.setTheLogRequestAndResponse(myLogRequestAndResponse)
+					.setSummaryMode(theSummary)
+					.setSubsetElements(theSubsetElements)
+					.setCustomAcceptHeader(theCustomAcceptHeaderValue)
+					.setCustomHeaders(theCustomHeaders));
 		}
 		try {
 			return invokeClient(
@@ -286,7 +330,15 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	@Override
 	public IFetchConformanceUntyped fetchConformance() {
-		return new FetchConformanceInternal();
+		return fetchConformance(ClientType.DEPRECATED);
+	}
+
+	@Override
+	public IFetchConformanceUntyped fetchConformance(ClientType theClientType) {
+		if (theClientType == ClientType.PRESERVED) {
+			return new FetchConformanceInternal(myClient);
+		}
+		return new FetchConformanceInternal(null);
 	}
 
 	@Override
@@ -319,7 +371,15 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	@Override
 	public IHistory history() {
-		return new HistoryInternal();
+		return history(ClientType.DEPRECATED);
+	}
+
+	@Override
+	public IHistory history(ClientType theClientType) {
+		if (theClientType == ClientType.PRESERVED) {
+			return new HistoryInternal(myClient);
+		}
+		return new HistoryInternal(null);
 	}
 
 	/**
@@ -345,22 +405,55 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	@Override
 	public IMeta meta() {
-		return new MetaInternal();
+		return meta(ClientType.DEPRECATED);
+	}
+
+	@Override
+	public IMeta meta(ClientType theClientType) {
+		if (theClientType == ClientType.PRESERVED) {
+			return new MetaInternal(myClient);
+		}
+		return new MetaInternal(null);
 	}
 
 	@Override
 	public IOperation operation() {
-		return new OperationInternal();
+		return operation(ClientType.DEPRECATED);
+	}
+
+	@Override
+	public IOperation operation(ClientType theClientType) {
+		if (theClientType == ClientType.PRESERVED) {
+			return new OperationInternal(myClient);
+		}
+		return new OperationInternal(null);
 	}
 
 	@Override
 	public IPatch patch() {
-		return new PatchInternal();
+		return patch(ClientType.DEPRECATED);
+	}
+
+	@Override
+	public IPatch patch(ClientType theClientType) {
+		if (theClientType == ClientType.PRESERVED && myClient != null) {
+			return new PatchInternal(myClient);
+		}
+		return new PatchInternal(null);
 	}
 
 	@Override
 	public IRead read() {
-		return new ReadInternal();
+		return read(ClientType.DEPRECATED);
+	}
+
+	@Override
+	public IRead read(ClientType theClientType) {
+		if (theClientType == ClientType.PRESERVED && myClient != null) {
+			return new ReadInternal(myClient);
+		}
+		// deprecated
+		return new ReadInternal(null);
 	}
 
 	@Override
@@ -394,8 +487,17 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	@Override
+	public IUntypedQuery search(ClientType theClientType) {
+		if (theClientType == ClientType.PRESERVED) {
+			return new SearchInternal<>(myClient);
+		}
+		return new SearchInternal<>(null);
+	}
+
+	@SuppressWarnings({"rawtypes", "unchecked"})
+	@Override
 	public IUntypedQuery search() {
-		return new SearchInternal();
+		return search(ClientType.DEPRECATED);
 	}
 
 	private String toResourceName(Class<? extends IBaseResource> theType) {
@@ -404,12 +506,28 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	@Override
 	public ITransaction transaction() {
-		return new TransactionInternal();
+		return transaction(ClientType.DEPRECATED);
+	}
+
+	@Override
+	public ITransaction transaction(ClientType theClientType) {
+		if (theClientType == ClientType.PRESERVED) {
+			return new TransactionInternal(myClient);
+		}
+		return new TransactionInternal(null);
 	}
 
 	@Override
 	public IUpdate update() {
-		return new UpdateInternal();
+		return update(ClientType.DEPRECATED);
+	}
+
+	@Override
+	public IUpdate update(ClientType theClientType) {
+		if (theClientType == ClientType.PRESERVED) {
+			return new UpdateInternal(myClient);
+		}
+		return new UpdateInternal(null);
 	}
 
 	@Override
@@ -432,7 +550,15 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	@Override
 	public IValidate validate() {
-		return new ValidateInternal();
+		return validate(ClientType.DEPRECATED);
+	}
+
+	@Override
+	public IValidate validate(ClientType theClientType) {
+		if (theClientType == ClientType.PRESERVED) {
+			return new ValidateInternal(myClient);
+		}
+		return new ValidateInternal(null);
 	}
 
 	@Override
@@ -483,6 +609,12 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		private List<Class<? extends IBaseResource>> myPreferResponseTypes;
 		private boolean myQueryLogRequestAndResponse;
 		private Set<String> mySubsetElements;
+
+		private final IHttpClient myPreservedClient;
+
+		public BaseClientExecutable(IHttpClient theClient) {
+			myPreservedClient = theClient;
+		}
 
 		public String getCustomAcceptHeaderValue() {
 			return myCustomAcceptHeaderValue;
@@ -582,18 +714,19 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				myLastRequest = theInvocation.asHttpRequest(getServerBase(), theParams, getEncoding(), myPrettyPrint);
 			}
 
-			Z resp = invokeClient(
-					myContext,
-					theHandler,
-					theInvocation,
-					myParamEncoding,
-					myPrettyPrint,
-					myQueryLogRequestAndResponse || myLogRequestAndResponse,
-					mySummaryMode,
-					mySubsetElements,
-					myCacheControlDirective,
-					myCustomAcceptHeaderValue,
-					myCustomHeaderValues);
+			InvokeClientParameters<Z> params = new InvokeClientParameters<Z>()
+					.setContext(myContext)
+					.setBinding(theHandler)
+					.setClientInvocation(theInvocation)
+					.setEncoding(myParamEncoding)
+					.setPrettyPrint(myPrettyPrint)
+					.setTheLogRequestAndResponse(myQueryLogRequestAndResponse || myLogRequestAndResponse)
+					.setSummaryMode(mySummaryMode)
+					.setSubsetElements(mySubsetElements)
+					.setCacheControlDirective(myCacheControlDirective)
+					.setCustomAcceptHeader(myCustomAcceptHeaderValue)
+					.setCustomHeaders(myCustomHeaderValues);
+			Z resp = invokeClient(params);
 			return resp;
 		}
 
@@ -643,7 +776,11 @@ public class GenericClient extends BaseClient implements IGenericClient {
 					EXEC extends IClientExecutable<?, OUTPUT>, QUERY extends IBaseQuery<QUERY>, OUTPUT>
 			extends BaseClientExecutable<EXEC, OUTPUT> implements IBaseQuery<QUERY> {
 
-		private Map<String, List<String>> myParams = new LinkedHashMap<>();
+		private final Map<String, List<String>> myParams = new LinkedHashMap<>();
+
+		public BaseSearch(IHttpClient theClient) {
+			super(theClient);
+		}
 
 		@Override
 		public QUERY and(ICriterion<?> theCriterion) {
@@ -709,6 +846,10 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		private IBaseResource myResource;
 		private String myResourceBody;
 		private String mySearchUrl;
+
+		public CreateInternal(IHttpClient theClient) {
+			super(theClient);
+		}
 
 		@Override
 		public ICreateWithQuery conditional() {
@@ -779,6 +920,10 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		private String myResourceType;
 		private String mySearchUrl;
 		private DeleteCascadeModeEnum myCascadeMode;
+
+		public DeleteInternal(IHttpClient theClient) {
+			super(theClient);
+		}
 
 		@Override
 		public MethodOutcome execute() {
@@ -888,6 +1033,10 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			implements IFetchConformanceUntyped, IFetchConformanceTyped {
 		private RuntimeResourceDefinition myType;
 
+		public FetchConformanceInternal(IHttpClient theClient) {
+			super(theClient);
+		}
+
 		@Override
 		public Object execute() {
 			ResourceResponseHandler binding = new ResourceResponseHandler(myType.getImplementingClass());
@@ -918,6 +1067,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		private PagingHttpMethodEnum myPagingHttpMethod = PagingHttpMethodEnum.GET;
 
 		public GetPageInternal(String theUrl, Class<? extends IBaseBundle> theBundleType) {
+			super(null);
 			myUrl = theUrl;
 			myBundleType = theBundleType;
 		}
@@ -946,6 +1096,10 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		private IPrimitiveType mySince;
 		private Class<? extends IBaseResource> myType;
 		private DateRangeParam myAt;
+
+		public HistoryInternal(IHttpClient theClient) {
+			super(theClient);
+		}
 
 		@SuppressWarnings("unchecked")
 		@Override
@@ -1129,6 +1283,10 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		private String myOnType;
 		private MetaOperation myOperation;
 
+		public MetaInternal(IHttpClient theClient) {
+			super(theClient);
+		}
+
 		@Override
 		public IMetaAddOrDeleteUnsourced add() {
 			myOperation = MetaOperation.ADD;
@@ -1302,6 +1460,10 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		private Class<? extends IBaseResource> myType;
 		private boolean myUseHttpGet;
 		private boolean myReturnMethodOutcome;
+
+		public OperationInternal(IHttpClient theClient) {
+			super(theClient);
+		}
 
 		@SuppressWarnings("unchecked")
 		private void addParam(String theName, IBase theValue) {
@@ -1716,6 +1878,10 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	private class PatchInternal extends BaseSearch<IPatchExecutable, IPatchWithQueryTyped, MethodOutcome>
 			implements IPatch, IPatchWithBody, IPatchExecutable, IPatchWithQuery, IPatchWithQueryTyped {
 
+		public PatchInternal(IHttpClient theClient) {
+			super(theClient);
+		}
+
 		private boolean myConditional;
 		private IIdType myId;
 		private String myPatchBody;
@@ -1844,6 +2010,10 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		private String myIfVersionMatches;
 		private ICallable myNotModifiedHandler;
 		private RuntimeResourceDefinition myType;
+
+		public ReadInternal(IHttpClient theClient) {
+			super(theClient);
+		}
 
 		@Override
 		public Object execute() { // AAA
@@ -2038,7 +2208,8 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		private List<TokenParam> myTags = new ArrayList<>();
 		private SearchTotalModeEnum myTotalMode;
 
-		public SearchInternal() {
+		public SearchInternal(IHttpClient theClient) {
+			super(theClient);
 			myResourceType = null;
 			myResourceName = null;
 			mySearchUrl = null;
@@ -2348,20 +2519,37 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		private EncodingEnum myRawBundleEncoding;
 		private List<? extends IBaseResource> myResources;
 
-		public TransactionExecutable(IBaseBundle theBundle) {
-			myBaseBundle = theBundle;
+		public TransactionExecutable(IHttpClient theClient, IBaseBundle theBundle) {
+			this(theClient, null, theBundle, null);
 		}
 
-		public TransactionExecutable(List<? extends IBaseResource> theResources) {
-			myResources = theResources;
+		public TransactionExecutable(IHttpClient theClient, List<? extends IBaseResource> theResources) {
+			this(theClient, null, null, theResources);
 		}
 
-		public TransactionExecutable(String theBundle) {
-			myRawBundle = theBundle;
-			myRawBundleEncoding = EncodingEnum.detectEncodingNoDefault(myRawBundle);
-			if (myRawBundleEncoding == null) {
-				throw new IllegalArgumentException(Msg.code(1395)
-						+ myContext.getLocalizer().getMessage(GenericClient.class, "cantDetermineRequestType"));
+		public TransactionExecutable(IHttpClient theClient, String theStrBundle) {
+			this(theClient, theStrBundle, null, null);
+		}
+
+		public TransactionExecutable(
+				IHttpClient theClient,
+				String theStrBundle,
+				IBaseBundle theBundle,
+				List<? extends IBaseResource> theResources) {
+			super(theClient);
+			if (theBundle != null) {
+				myBaseBundle = theBundle;
+			}
+			if (theStrBundle != null) {
+				myRawBundle = theStrBundle;
+				myRawBundleEncoding = EncodingEnum.detectEncodingNoDefault(myRawBundle);
+				if (myRawBundleEncoding == null) {
+					throw new IllegalArgumentException(Msg.code(1395)
+							+ myContext.getLocalizer().getMessage(GenericClient.class, "cantDetermineRequestType"));
+				}
+			}
+			if (theResources != null) {
+				myResources = theResources;
 			}
 		}
 
@@ -2402,16 +2590,22 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	private final class TransactionInternal implements ITransaction {
 
+		private IHttpClient myClient;
+
+		public TransactionInternal(IHttpClient theClient) {
+			myClient = theClient;
+		}
+
 		@Override
 		public ITransactionTyped<String> withBundle(String theBundle) {
 			Validate.notBlank(theBundle, "theBundle must not be null");
-			return new TransactionExecutable<String>(theBundle);
+			return new TransactionExecutable<String>(myClient, theBundle);
 		}
 
 		@Override
 		public <T extends IBaseBundle> ITransactionTyped<T> withBundle(T theBundle) {
 			Validate.notNull(theBundle, "theBundle must not be null");
-			return new TransactionExecutable<T>(theBundle);
+			return new TransactionExecutable<T>(myClient, theBundle);
 		}
 
 		@Override
@@ -2432,7 +2626,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				}
 			}
 
-			return new TransactionExecutable<>(theResources);
+			return new TransactionExecutable<>(myClient, theResources);
 		}
 	}
 
@@ -2446,6 +2640,10 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		private String myResourceBody;
 		private String mySearchUrl;
 		private boolean myIsHistoryRewrite;
+
+		public UpdateInternal(IHttpClient theClient) {
+			super(theClient);
+		}
 
 		@Override
 		public IUpdateTyped historyRewrite() {
@@ -2562,6 +2760,10 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	private class ValidateInternal extends BaseClientExecutable<IValidateUntyped, MethodOutcome>
 			implements IValidate, IValidateUntyped {
 		private IBaseResource myResource;
+
+		public ValidateInternal(IHttpClient theClient) {
+			super(theClient);
+		}
 
 		@Override
 		public MethodOutcome execute() {

@@ -42,20 +42,31 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public interface IGenericClient extends IRestfulClient {
 
+	public enum ClientType {
+		PRESERVED,
+		DEPRECATED
+	}
+
 	/**
 	 * Fetch the capability statement for the server
 	 */
 	IFetchConformanceUntyped capabilities();
+
+	IFetchConformanceUntyped capabilities(ClientType theClientType);
 
 	/**
 	 * Fluent method for the "create" operation, which creates a new resource instance on the server
 	 */
 	ICreate create();
 
+	ICreate create(ClientType theClientType);
+
 	/**
 	 * Fluent method for the "delete" operation, which performs a logical delete on a server resource
 	 */
 	IDelete delete();
+
+	IDelete delete(ClientType theClientType);
 
 	/**
 	 * Retrieves the server's conformance statement
@@ -63,6 +74,8 @@ public interface IGenericClient extends IRestfulClient {
 	 * @deprecated As of HAPI 3.0.0 this method has been deprecated, as the operation is now called "capabilities". Use {@link #capabilities()} instead
 	 */
 	IFetchConformanceUntyped fetchConformance();
+
+	IFetchConformanceUntyped fetchConformance(ClientType theClientType);
 
 	/**
 	 * Force the client to fetch the server's conformance statement and validate that it is appropriate for this client.
@@ -79,6 +92,8 @@ public interface IGenericClient extends IRestfulClient {
 	 */
 	IHistory history();
 
+	IHistory history(ClientType theClientType);
+
 	/**
 	 * Loads the previous/next bundle of resources from a paged set, using the link specified in the "link type=next" tag within the atom bundle.
 	 */
@@ -92,20 +107,28 @@ public interface IGenericClient extends IRestfulClient {
 	 */
 	IMeta meta();
 
+	IMeta meta(ClientType theClientType);
+
 	/**
 	 * Implementation of the FHIR "extended operations" action
 	 */
 	IOperation operation();
+
+	IOperation operation(ClientType theClientType);
 
 	/**
 	 * Fluent method for the "patch" operation, which performs a logical patch on a server resource
 	 */
 	IPatch patch();
 
+	IPatch patch(ClientType theClientType);
+
 	/**
 	 * Fluent method for "read" and "vread" methods.
 	 */
 	IRead read();
+
+	IRead read(ClientType theClientType);
 
 	/**
 	 * Implementation of the "instance read" method.
@@ -159,6 +182,8 @@ public interface IGenericClient extends IRestfulClient {
 	 */
 	<T extends IBaseBundle> IUntypedQuery<T> search();
 
+	<T extends IBaseBundle> IUntypedQuery<T> search(ClientType theClientType);
+
 	/**
 	 * If set to <code>true</code>, the client will log all requests and all responses. This is probably not a good production setting since it will result in a lot of extra logging, but it can be
 	 * useful for troubleshooting.
@@ -177,6 +202,8 @@ public interface IGenericClient extends IRestfulClient {
 	 */
 	ITransaction transaction();
 
+	ITransaction transaction(ClientType theClientType);
+
 	/**
 	 * Remove an intercaptor that was previously registered using {@link IRestfulClient#registerInterceptor(Object)}
 	 */
@@ -187,6 +214,8 @@ public interface IGenericClient extends IRestfulClient {
 	 * Fluent method for the "update" operation, which updates a resource instance on the server
 	 */
 	IUpdate update();
+
+	IUpdate update(ClientType theClientType);
 
 	/**
 	 * Implementation of the "instance update" method.
@@ -218,6 +247,8 @@ public interface IGenericClient extends IRestfulClient {
 	 * Validate a resource
 	 */
 	IValidate validate();
+
+	IValidate validate(ClientType theClientType);
 
 	/**
 	 * Implementation of the "type validate" method.

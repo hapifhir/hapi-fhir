@@ -21,6 +21,7 @@ package ca.uhn.fhir.rest.client.api;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.param.HttpClientRequestParameters;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 
 import java.util.List;
@@ -66,5 +67,8 @@ public interface IHttpClient {
 	 * @param theEncoding the request encoding
 	 * @return the http request to be executed
 	 */
+	@Deprecated
 	IHttpRequest createGetRequest(FhirContext theContext, EncodingEnum theEncoding);
+
+	IHttpRequest createRequest(HttpClientRequestParameters theParameters);
 }

@@ -29,6 +29,7 @@ import ca.uhn.fhir.rest.client.api.IHttpClient;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.client.method.MethodUtil;
+import ca.uhn.fhir.rest.param.HttpClientRequestParameters;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 
 import java.util.List;
@@ -39,7 +40,7 @@ public abstract class BaseHttpClient implements IHttpClient {
 	private final List<Header> myHeaders;
 	private final Map<String, List<String>> myIfNoneExistParams;
 	private final String myIfNoneExistString;
-	protected final RequestTypeEnum myRequestType;
+	protected RequestTypeEnum myRequestType;
 	protected final StringBuilder myUrl;
 
 	/**
@@ -108,11 +109,19 @@ public abstract class BaseHttpClient implements IHttpClient {
 
 	@Override
 	public IHttpRequest createGetRequest(FhirContext theContext, EncodingEnum theEncoding) {
-		IHttpRequest retVal = createHttpRequest();
+		IHttpRequest retVal = createRequest(new HttpClientRequestParameters(myUrl.toString(), RequestTypeEnum.GET));
 		addHeadersToRequest(retVal, theEncoding, theContext);
 		return retVal;
 	}
 
+	//	@Override
+	//	public IHttpRequest createRequest(HttpClientRequestParameters theParameters) {
+	//
+	//	}
+
+	//	protected abstract IHttpRequest createHttpRequest(CreateHttpRequestParameters theCreateHttpRequestParameters);
+
+	@Deprecated
 	protected abstract IHttpRequest createHttpRequest();
 
 	protected abstract IHttpRequest createHttpRequest(byte[] theContent);
