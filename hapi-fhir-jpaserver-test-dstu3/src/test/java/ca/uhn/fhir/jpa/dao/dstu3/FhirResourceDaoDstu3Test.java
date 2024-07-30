@@ -1,8 +1,5 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
-import static org.hl7.fhir.instance.model.api.IAnyResource.SP_RES_PROFILE;
-import static org.hl7.fhir.instance.model.api.IAnyResource.SP_RES_SECURITY;
-import static org.hl7.fhir.instance.model.api.IAnyResource.SP_RES_TAG;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -36,7 +33,6 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -46,7 +42,6 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -2087,102 +2082,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 			found = toList(myPatientDao.search(new SearchParameterMap(Patient.SP_BIRTHDATE + "AAAA", new DateParam(ParamPrefixEnum.GREATERTHAN, "2000-01-01")).setLoadSynchronous(true)));
 			assertThat(found).isEmpty();
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(1223) + "Unknown search parameter \"birthdateAAAA\" for resource type \"Patient\". Valid search parameters for this search are: [_id, _lastUpdated, _profile, _security, _tag, active, address, address-city, address-country, address-postalcode, address-state, address-use, animal-breed, animal-species, birthdate, death-date, deceased, email, family, gender, general-practitioner, given, identifier, language, link, name, organization, phone, phonetic, telecom]", e.getMessage());
-		}
-	}
-
-	@Test
-	public void testPersistSearchParamTag() {
-		Coding TEST_PARAM_VALUE_CODING_1 = new Coding("test-system", "test-code-1", null);
-		Coding TEST_PARAM_VALUE_CODING_2 = new Coding("test-system", "test-code-2", null);
-
-		List<Patient> found = toList(myPatientDao.search(new SearchParameterMap(SP_RES_TAG, new TokenParam(TEST_PARAM_VALUE_CODING_1)).setLoadSynchronous(true), new SystemRequestDetails()));
-		int initialSizeCoding1 = found.size();
-
-		found = toList(myPatientDao.search(new SearchParameterMap(SP_RES_TAG, new TokenParam(TEST_PARAM_VALUE_CODING_2)).setLoadSynchronous(true), new SystemRequestDetails()));
-		int initialSizeCoding2 = found.size();
-
-		Patient patient = new Patient();
-		patient.addIdentifier().setSystem("urn:system").setValue("001");
-		patient.getMeta().addTag(TEST_PARAM_VALUE_CODING_1);
-
-		myPatientDao.create(patient, mySrd);
-
-		found = toList(myPatientDao.search(new SearchParameterMap(SP_RES_TAG, new TokenParam(TEST_PARAM_VALUE_CODING_1)).setLoadSynchronous(true), new SystemRequestDetails()));
-		assertThat(found).hasSize(1 + initialSizeCoding1);
-
-		found = toList(myPatientDao.search(new SearchParameterMap(SP_RES_TAG, new TokenParam(TEST_PARAM_VALUE_CODING_2)).setLoadSynchronous(true), new SystemRequestDetails()));
-		assertThat(found).hasSize(initialSizeCoding2);
-
-		// If this throws an exception, that would be an acceptable outcome as well..
-		try {
-			found = toList(myPatientDao.search(new SearchParameterMap(SP_RES_TAG + "AAAA", new TokenParam(TEST_PARAM_VALUE_CODING_1)).setLoadSynchronous(true), new SystemRequestDetails()));
-			assertThat(found).isEmpty();
-		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(1223) + "Unknown search parameter \"" + SP_RES_TAG+"AAAA" + "\" for resource type \"Patient\". Valid search parameters for this search are: [_id, _lastUpdated, _profile, _security, _tag, active, address, address-city, address-country, address-postalcode, address-state, address-use, animal-breed, animal-species, birthdate, death-date, deceased, email, family, gender, general-practitioner, given, identifier, language, link, name, organization, phone, phonetic, telecom]", e.getMessage());
-		}
-	}
-
-	@Test
-	public void testPersistSearchParamProfile() {
-		String profileA = "profile-AAA";
-		String profileB = "profile-BBB";
-		List<Patient> found = toList(myPatientDao.search(new SearchParameterMap(SP_RES_PROFILE, new UriParam(profileA)).setLoadSynchronous(true), new SystemRequestDetails()));
-		int initialSizeProfileA = found.size();
-
-		found = toList(myPatientDao.search(new SearchParameterMap(SP_RES_PROFILE, new UriParam(profileB)).setLoadSynchronous(true), new SystemRequestDetails()));
-		int initialSizeProfileB = found.size();
-
-		Patient patient = new Patient();
-		patient.addIdentifier().setSystem("urn:system").setValue("001");
-		patient.getMeta().addProfile(profileA);
-
-		myPatientDao.create(patient, mySrd);
-
-		found = toList(myPatientDao.search(new SearchParameterMap(SP_RES_PROFILE, new UriParam(profileA)).setLoadSynchronous(true), new SystemRequestDetails()));
-		assertThat(found).hasSize(1 + initialSizeProfileA);
-
-		found = toList(myPatientDao.search(new SearchParameterMap(SP_RES_PROFILE, new UriParam(profileB)).setLoadSynchronous(true), new SystemRequestDetails()));
-		assertThat(found).hasSize(initialSizeProfileB);
-
-		// If this throws an exception, that would be an acceptable outcome as well..
-		try {
-			found = toList(myPatientDao.search(new SearchParameterMap(SP_RES_PROFILE + "AAAA", new UriParam(profileA)).setLoadSynchronous(true), new SystemRequestDetails()));
-			assertThat(found).isEmpty();
-		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(1223) + "Unknown search parameter \"" + SP_RES_PROFILE+"AAAA" + "\" for resource type \"Patient\". Valid search parameters for this search are: [_id, _lastUpdated, _profile, _security, _tag, active, address, address-city, address-country, address-postalcode, address-state, address-use, animal-breed, animal-species, birthdate, death-date, deceased, email, family, gender, general-practitioner, given, identifier, language, link, name, organization, phone, phonetic, telecom]", e.getMessage());
-		}
-	}
-
-	@Test
-	public void testPersistSearchParamSecurity() {
-		Coding TEST_PARAM_VALUE_CODING_1 = new Coding("test-system", "test-code-1", null);
-		Coding TEST_PARAM_VALUE_CODING_2 = new Coding("test-system", "test-code-2", null);
-
-		List<Patient> found = toList(myPatientDao.search(new SearchParameterMap(SP_RES_SECURITY, new TokenParam(TEST_PARAM_VALUE_CODING_1)).setLoadSynchronous(true), new SystemRequestDetails()));
-		int initialSizeSecurityA = found.size();
-
-		found = toList(myPatientDao.search(new SearchParameterMap(SP_RES_SECURITY, new TokenParam(TEST_PARAM_VALUE_CODING_2)).setLoadSynchronous(true), new SystemRequestDetails()));
-		int initialSizeSecurityB = found.size();
-
-		Patient patient = new Patient();
-		patient.addIdentifier().setSystem("urn:system").setValue("001");
-		patient.getMeta().addSecurity(TEST_PARAM_VALUE_CODING_1);
-
-		myPatientDao.create(patient, mySrd);
-
-		found = toList(myPatientDao.search(new SearchParameterMap(SP_RES_SECURITY, new TokenParam(TEST_PARAM_VALUE_CODING_1)).setLoadSynchronous(true), new SystemRequestDetails()));
-		assertThat(found).hasSize(1 + initialSizeSecurityA);
-
-		found = toList(myPatientDao.search(new SearchParameterMap(SP_RES_SECURITY, new TokenParam(TEST_PARAM_VALUE_CODING_2)).setLoadSynchronous(true), new SystemRequestDetails()));
-		assertThat(found).hasSize(initialSizeSecurityB);
-
-		// If this throws an exception, that would be an acceptable outcome as well..
-		try {
-			found = toList(myPatientDao.search(new SearchParameterMap(SP_RES_SECURITY + "AAAA", new TokenParam(TEST_PARAM_VALUE_CODING_1)).setLoadSynchronous(true), new SystemRequestDetails()));
-			assertThat(found).isEmpty();
-		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(1223) + "Unknown search parameter \"" + SP_RES_SECURITY+"AAAA" + "\" for resource type \"Patient\". Valid search parameters for this search are: [_id, _lastUpdated, _profile, _security, _tag, active, address, address-city, address-country, address-postalcode, address-state, address-use, animal-breed, animal-species, birthdate, death-date, deceased, email, family, gender, general-practitioner, given, identifier, language, link, name, organization, phone, phonetic, telecom]", e.getMessage());
+			assertEquals(Msg.code(1223) + "Unknown search parameter \"birthdateAAAA\" for resource type \"Patient\". Valid search parameters for this search are: [_id, _lastUpdated, active, address, address-city, address-country, address-postalcode, address-state, address-use, animal-breed, animal-species, birthdate, death-date, deceased, email, family, gender, general-practitioner, given, identifier, language, link, name, organization, phone, phonetic, telecom]", e.getMessage());
 		}
 	}
 
