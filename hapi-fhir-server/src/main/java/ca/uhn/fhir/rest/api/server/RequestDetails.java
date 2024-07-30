@@ -30,6 +30,7 @@ import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -39,6 +40,7 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -507,6 +509,8 @@ public abstract class RequestDetails {
 
 	public final byte[] loadRequestContents() {
 		if (myRequestContents == null) {
+			// goofy hack - Never try to read the stream twice.
+			myRequestContents = "PLACEHOLDER WHEN READING FROM BAD STREAM".getBytes(StandardCharsets.UTF_8);
 			myRequestContents = getByteStreamRequestContents();
 		}
 		return getRequestContentsIfLoaded();
