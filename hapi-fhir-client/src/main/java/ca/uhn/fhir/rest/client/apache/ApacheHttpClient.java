@@ -132,12 +132,6 @@ public class ApacheHttpClient extends BaseHttpClient implements IHttpClient {
 		return new ApacheHttpRequest(myClient, request);
 	}
 
-	//	@Override
-	//	public IHttpRequest createHttpRequest(CreateHttpRequestParameters theCreateHttpRequestParameters) {
-	//		HttpRequestBase request = constructRequestBase(theCreateHttpRequestParameters);
-	//		return new ApacheHttpRequest(myClient, request);
-	//	}
-
 	@Override
 	protected IHttpRequest createHttpRequest() {
 		return createHttpRequest((HttpEntity) null);

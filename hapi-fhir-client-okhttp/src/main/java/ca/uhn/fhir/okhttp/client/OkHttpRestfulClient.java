@@ -29,6 +29,7 @@ import ca.uhn.fhir.rest.client.api.IHttpClient;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.client.method.MethodUtil;
+import ca.uhn.fhir.rest.param.HttpClientRequestParameters;
 import okhttp3.Call;
 import okhttp3.FormBody;
 import okhttp3.MediaType;
@@ -124,6 +125,15 @@ public class OkHttpRestfulClient implements IHttpClient {
 	@Override
 	public IHttpRequest createGetRequest(FhirContext theContext, EncodingEnum theEncoding) {
 		initBaseRequest(theContext, theEncoding, null);
+		return myRequest;
+	}
+
+	@Override
+	public IHttpRequest createRequest(HttpClientRequestParameters theParameters) {
+		initBaseRequest(
+				theParameters.getFhirContext(),
+				theParameters.getEncodingEnum(),
+				createPostBody(theParameters.getByteContents(), theParameters.getContents()));
 		return myRequest;
 	}
 
