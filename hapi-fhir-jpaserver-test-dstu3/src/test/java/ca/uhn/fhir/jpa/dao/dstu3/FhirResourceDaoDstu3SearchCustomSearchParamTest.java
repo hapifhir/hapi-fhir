@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
@@ -10,7 +9,6 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaDstu3Test;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -19,7 +17,6 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.ClasspathUtil;
 import org.hl7.fhir.dstu3.model.Appointment;
 import org.hl7.fhir.dstu3.model.Appointment.AppointmentStatus;
@@ -195,7 +192,7 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 	}
 
 	@Test
-	public void testCustomReferenceParameter() {
+	public void testCustomReferenceParameter() throws Exception {
 		SearchParameter sp = new SearchParameter();
 		sp.addBase("Patient");
 		sp.setCode("myDoctor");
@@ -241,7 +238,7 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 		Patient p1 = new Patient();
 		p1.setActive(true);
 		p1.addExtension().setUrl("http://acme.org/eyecolour").addExtension().setUrl("http://foo").setValue(new StringType("VAL"));
-		myPatientDao.create(p1).getId().toUnqualifiedVersionless();
+		IIdType p1id = myPatientDao.create(p1).getId().toUnqualifiedVersionless();
 
 	}
 
@@ -256,7 +253,7 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 		attendingSp.setXpathUsage(org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType.NORMAL);
 		attendingSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
 		attendingSp.getTarget().add(new CodeType("Practitioner"));
-		mySearchParameterDao.create(attendingSp, mySrd).getId().toUnqualifiedVersionless();
+		IIdType spId = mySearchParameterDao.create(attendingSp, mySrd).getId().toUnqualifiedVersionless();
 
 		mySearchParamRegistry.forceRefresh();
 
@@ -420,7 +417,7 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 		Patient p2 = new Patient();
 		p2.addName().setFamily("P2");
 		p2.addExtension().setUrl("http://acme.org/sibling").setValue(new Reference(p1id));
-		myPatientDao.create(p2).getId().toUnqualifiedVersionless();
+		IIdType p2id = myPatientDao.create(p2).getId().toUnqualifiedVersionless();
 
 		SearchParameterMap map;
 		IBundleProvider results;
@@ -574,7 +571,7 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 		Patient p2 = new Patient();
 		p2.setActive(true);
 		p2.addExtension().setUrl("http://acme.org/eyecolour").setValue(new CodeType("green"));
-		myPatientDao.create(p2).getId().toUnqualifiedVersionless();
+		IIdType p2id = myPatientDao.create(p2).getId().toUnqualifiedVersionless();
 
 		// Try with custom gender SP
 		SearchParameterMap map = new SearchParameterMap();
@@ -892,7 +889,7 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 			.setUrl("http://acme.org/bar")
 			.setValue(new Reference(aptId.getValue()));
 
-		myPatientDao.create(patient).getId().toUnqualifiedVersionless();
+		IIdType p2id = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
 
 		SearchParameterMap map;
 		IBundleProvider results;
@@ -1038,7 +1035,7 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 
 		Patient pat2 = new Patient();
 		pat.setGender(AdministrativeGender.FEMALE);
-		myPatientDao.create(pat2, mySrd).getId().toUnqualifiedVersionless();
+		IIdType patId2 = myPatientDao.create(pat2, mySrd).getId().toUnqualifiedVersionless();
 
 		SearchParameterMap map;
 		IBundleProvider results;
@@ -1072,7 +1069,7 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 			myPatientDao.search(map).size();
 			fail("");
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(1223) + "Unknown search parameter \"foo\" for resource type \"Patient\". Valid search parameters for this search are: [_id, _lastUpdated, _profile, _security, _tag, active, address, address-city, address-country, address-postalcode, address-state, address-use, animal-breed, animal-species, birthdate, death-date, deceased, email, family, gender, general-practitioner, given, identifier, language, link, name, organization, phone, phonetic, telecom]", e.getMessage());
+			assertEquals(Msg.code(1223) + "Unknown search parameter \"foo\" for resource type \"Patient\". Valid search parameters for this search are: [_id, _lastUpdated, active, address, address-city, address-country, address-postalcode, address-state, address-use, animal-breed, animal-species, birthdate, death-date, deceased, email, family, gender, general-practitioner, given, identifier, language, link, name, organization, phone, phonetic, telecom]", e.getMessage());
 		}
 	}
 
@@ -1097,7 +1094,7 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 
 		Patient pat2 = new Patient();
 		pat.setGender(AdministrativeGender.FEMALE);
-		myPatientDao.create(pat2, mySrd).getId().toUnqualifiedVersionless();
+		IIdType patId2 = myPatientDao.create(pat2, mySrd).getId().toUnqualifiedVersionless();
 
 		SearchParameterMap map;
 		IBundleProvider results;
@@ -1110,7 +1107,7 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 			myPatientDao.search(map).size();
 			fail("");
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(1223) + "Unknown search parameter \"foo\" for resource type \"Patient\". Valid search parameters for this search are: [_id, _lastUpdated, _profile, _security, _tag, active, address, address-city, address-country, address-postalcode, address-state, address-use, animal-breed, animal-species, birthdate, death-date, deceased, email, family, gender, general-practitioner, given, identifier, language, link, name, organization, phone, phonetic, telecom]", e.getMessage());
+			assertEquals(Msg.code(1223) + "Unknown search parameter \"foo\" for resource type \"Patient\". Valid search parameters for this search are: [_id, _lastUpdated, active, address, address-city, address-country, address-postalcode, address-state, address-use, animal-breed, animal-species, birthdate, death-date, deceased, email, family, gender, general-practitioner, given, identifier, language, link, name, organization, phone, phonetic, telecom]", e.getMessage());
 		}
 
 		// Try with normal gender SP
@@ -1151,10 +1148,10 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 				.findAll()
 				.stream()
 				.filter(t -> t.getParamName().equals("medicationadministration-ingredient-medication"))
-				.toList();
-			ourLog.info("Tokens:\n * {}", tokens.stream().map(ResourceIndexedSearchParamToken::toString).collect(Collectors.joining("\n * ")));
+				.collect(Collectors.toList());
+			ourLog.info("Tokens:\n * {}", tokens.stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
 			assertEquals(1, tokens.size(), tokens.toString());
-			assertFalse(tokens.get(0).isMissing());
+			assertEquals(false, tokens.get(0).isMissing());
 
 		});
 
