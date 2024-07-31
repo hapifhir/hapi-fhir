@@ -108,10 +108,15 @@ public class HapiEmbeddedDatabasesExtension implements AfterAllCallback {
 		try {
 			myDatabaseInitializerHelper.insertPersistenceTestData(getEmbeddedDatabase(theDriverType), theVersionEnum);
 		} catch (Exception theE) {
-			ourLog.info(
-					"Could not insert persistence test data most likely because we don't have any for version {} and driver {}",
-					theVersionEnum,
-					theDriverType);
+			if (theE.getMessage().contains("Error loading file: migration/releases/")) {
+				ourLog.info(
+						"Could not insert persistence test data most likely because we don't have any for version {} and driver {}",
+						theVersionEnum,
+						theDriverType);
+			} else {
+				// throw insertion Exceptions (not relate to script loading)
+				throw theE;
+			}
 		}
 	}
 
