@@ -114,7 +114,7 @@ public class HapiEmbeddedDatabasesExtension implements AfterAllCallback {
 						theVersionEnum,
 						theDriverType);
 			} else {
-				// throw insertion Exceptions (not relate to script loading)
+				// throw sql execution Exceptions
 				throw theE;
 			}
 		}
