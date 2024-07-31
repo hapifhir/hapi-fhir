@@ -1038,6 +1038,9 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 
 		theRequest.setAttribute(SERVLET_CONTEXT_ATTRIBUTE, getServletContext());
 
+		// keep track of any unhandled exceptions in case the exception handler throws another exception
+		Throwable unhandledException = null;
+
 		try {
 
 			/* ***********************************
@@ -1205,6 +1208,8 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 
 		} catch (NotModifiedException | AuthenticationException e) {
 
+			unhandledException = e;
+
 			HookParams handleExceptionParams = new HookParams();
 			handleExceptionParams.add(RequestDetails.class, requestDetails);
 			handleExceptionParams.add(ServletRequestDetails.class, requestDetails);
@@ -1216,8 +1221,11 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			}
 
 			writeExceptionToResponse(theResponse, e);
+			unhandledException = null;
 
 		} catch (Throwable e) {
+
+			unhandledException = e;
 
 			/*
 			 * We have caught an exception during request processing. This might be because a handling method threw
@@ -1285,8 +1293,14 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			 * If nobody handles it, default behaviour is to stream back the OperationOutcome to the client.
 			 */
 			DEFAULT_EXCEPTION_HANDLER.handleException(requestDetails, exception, theRequest, theResponse);
+			unhandledException = null;
 
 		} finally {
+
+			if (unhandledException != null) {
+				ourLog.error("Exception handling threw an exception.  Initial exception was: ", unhandledException);
+				unhandledException = null;
+			}
 
 			HookParams params = new HookParams();
 			params.add(RequestDetails.class, requestDetails);
