@@ -41,7 +41,7 @@ public abstract class BaseHttpClient implements IHttpClient {
 	private final Map<String, List<String>> myIfNoneExistParams;
 	private final String myIfNoneExistString;
 	protected RequestTypeEnum myRequestType;
-	protected final StringBuilder myUrl;
+	protected StringBuilder myUrl;
 
 	/**
 	 * Constructor
@@ -57,6 +57,11 @@ public abstract class BaseHttpClient implements IHttpClient {
 		this.myIfNoneExistString = theIfNoneExistString;
 		this.myRequestType = theRequestType;
 		this.myHeaders = theHeaders;
+	}
+
+	@Override
+	public void setNewUrl(StringBuilder theUrl) {
+		myUrl = theUrl;
 	}
 
 	private void addHeaderIfNoneExist(IHttpRequest result) {

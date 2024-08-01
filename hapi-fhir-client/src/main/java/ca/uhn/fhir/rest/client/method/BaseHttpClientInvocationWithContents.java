@@ -145,6 +145,9 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		if (theParams.getClient() != null) {
 			// use the provided one
 			httpClient = theParams.getClient();
+			// update the url to the one we want (in case the
+			// previous client did not have the correct one
+			httpClient.setNewUrl(url);
 		} else {
 			// make a new one
 			httpClient = getRestfulClientFactory()
@@ -167,6 +170,7 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		}
 
 		if (myParams != null) {
+
 			IHttpRequest request = httpClient.createParamRequest(getContext(), myParams, encoding);
 			return request;
 		}

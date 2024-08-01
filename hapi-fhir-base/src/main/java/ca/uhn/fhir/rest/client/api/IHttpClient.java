@@ -73,4 +73,12 @@ public interface IHttpClient {
 	IHttpRequest createRequest(HttpClientRequestParameters theParameters);
 
 	void addHeadersToRequest(IHttpRequest theRequest, EncodingEnum theEncodingEnum, FhirContext theContext);
+
+	/**
+	 * Updates the client's url;
+	 * This is used when we reuse a client for multiple different requests
+	 * (ex, searches, or fetching the /metadata endpoint followed by whatever
+	 * the actual endpoint is, etc)
+	 */
+	void setNewUrl(StringBuilder theUrl);
 }

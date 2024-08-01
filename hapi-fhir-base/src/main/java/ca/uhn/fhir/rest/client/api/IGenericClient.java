@@ -99,6 +99,8 @@ public interface IGenericClient extends IRestfulClient {
 	 */
 	IGetPage loadPage();
 
+	IGetPage loadPage(ClientType theClientType);
+
 	/**
 	 * Fluent method for the "meta" operations, which can be used to get, add and remove tags and other
 	 * Meta elements from a resource or across the server.

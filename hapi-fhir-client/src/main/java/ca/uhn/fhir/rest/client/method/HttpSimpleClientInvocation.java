@@ -63,7 +63,8 @@ public class HttpSimpleClientInvocation extends BaseHttpClientInvocation {
 	@Override
 	public IHttpRequest asHttpRequest(AsHttpRequestParams theParams) {
 		CreateRequestParameters parameters = new CreateRequestParameters();
-		parameters.setUrl(theParams.getUrlBase());
+//		parameters.setUrl(myUrl == null ? theParams.getUrlBase() : myUrl);
+		parameters.setUrl(myUrl);
 		parameters.setEncodingEnum(theParams.getEncodingEnum());
 		parameters.setRequestTypeEnum(myPagingHttpMethod.getRequestType());
 		parameters.setClient(theParams.getClient());

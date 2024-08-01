@@ -114,7 +114,9 @@ public class ApacheHttpClient extends BaseHttpClient implements IHttpClient {
 	}
 
 	private HttpRequestBase constructRequestBase(HttpEntity theEntity) {
-		HttpClientRequestParameters parameters = new HttpClientRequestParameters(myUrl.toString(), myRequestType);
+		// request type for requests with bodies is POST
+		RequestTypeEnum requestType = myRequestType == null ? RequestTypeEnum.POST : myRequestType;
+		HttpClientRequestParameters parameters = new HttpClientRequestParameters(myUrl.toString(), requestType);
 		return constructRequestBase(parameters, theEntity);
 	}
 
@@ -128,6 +130,7 @@ public class ApacheHttpClient extends BaseHttpClient implements IHttpClient {
 
 	@Override
 	public IHttpRequest createRequest(HttpClientRequestParameters theParameters) {
+		myUrl = new StringBuilder(theParameters.getUrl());
 		HttpRequestBase request = constructRequestBase(theParameters, getEntityFromParameters(theParameters));
 		return new ApacheHttpRequest(myClient, request);
 	}

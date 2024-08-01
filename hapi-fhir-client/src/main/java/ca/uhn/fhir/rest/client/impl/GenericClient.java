@@ -400,7 +400,15 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	@Override
 	public IGetPage loadPage() {
-		return new LoadPageInternal();
+		return loadPage(ClientType.DEPRECATED);
+	}
+
+	@Override
+	public IGetPage loadPage(ClientType theClientType) {
+		if (theClientType == ClientType.PRESERVED) {
+			return new LoadPageInternal(myClient);
+		}
+		return new LoadPageInternal(null);
 	}
 
 	@Override
@@ -711,7 +719,15 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				IClientResponseHandler<Z> theHandler,
 				BaseHttpClientInvocation theInvocation) {
 			if (isKeepResponses()) {
-				myLastRequest = theInvocation.asHttpRequest(getServerBase(), theParams, getEncoding(), myPrettyPrint);
+//				myLastRequest = theInvocation.asHttpRequest(getServerBase(), theParams, getEncoding(), myPrettyPrint);
+				myLastRequest = theInvocation.asHttpRequest(
+					new AsHttpRequestParams()
+						.setUrlBase(getServerBase())
+						.setClient(myClient)
+						.setExtraParams(theParams)
+						.setEncodingEnum(getParamEncoding())
+						.setPrettyPrint(myPrettyPrint)
+				);
 			}
 
 			InvokeClientParameters<Z> params = new InvokeClientParameters<Z>()
@@ -1060,13 +1076,13 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	private class GetPageInternal extends BaseClientExecutable<IGetPageTyped<Object>, Object>
 			implements IGetPageTyped<Object> {
 
-		private Class<? extends IBaseBundle> myBundleType;
-		private String myUrl;
+		private final Class<? extends IBaseBundle> myBundleType;
+		private final String myUrl;
 
 		private PagingHttpMethodEnum myPagingHttpMethod = PagingHttpMethodEnum.GET;
 
-		public GetPageInternal(String theUrl, Class<? extends IBaseBundle> theBundleType) {
-			super(null);
+		public GetPageInternal(IHttpClient theClient, String theUrl, Class<? extends IBaseBundle> theBundleType) {
+			super(theClient);
 			myUrl = theUrl;
 			myBundleType = theBundleType;
 		}
@@ -1209,10 +1225,16 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		private static final String PREVIOUS = "previous";
 		private String myPageUrl;
 
+		private IHttpClient myClient;
+
+		public LoadPageInternal(IHttpClient theClient) {
+			myClient = theClient;
+		}
+
 		@Override
 		public <T extends IBaseBundle> IGetPageTyped andReturnBundle(Class<T> theBundleType) {
 			Validate.notNull(theBundleType, "theBundleType must not be null");
-			return new GetPageInternal(myPageUrl, theBundleType);
+			return new GetPageInternal(myClient, myPageUrl, theBundleType);
 		}
 
 		@Override
@@ -2267,7 +2289,6 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 		@Override
 		public OUTPUT execute() {
-
 			Map<String, List<String>> params = getParamMap();
 
 			for (TokenParam next : myTags) {
