@@ -71,4 +71,6 @@ public interface IHttpClient {
 	IHttpRequest createGetRequest(FhirContext theContext, EncodingEnum theEncoding);
 
 	IHttpRequest createRequest(HttpClientRequestParameters theParameters);
+
+	void addHeadersToRequest(IHttpRequest theRequest, EncodingEnum theEncodingEnum, FhirContext theContext);
 }

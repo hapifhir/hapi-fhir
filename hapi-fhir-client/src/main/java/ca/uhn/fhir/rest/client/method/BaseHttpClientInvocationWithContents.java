@@ -24,12 +24,17 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.client.apache.ApacheHttpClient;
+import ca.uhn.fhir.rest.client.api.Header;
 import ca.uhn.fhir.rest.client.api.IHttpClient;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
+import ca.uhn.fhir.rest.client.model.AsHttpRequestParams;
+import ca.uhn.fhir.rest.param.HttpClientRequestParameters;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
@@ -106,6 +111,21 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 			EncodingEnum theEncoding,
 			Boolean thePrettyPrint)
 			throws DataFormatException {
+		return asHttpRequest(
+			new AsHttpRequestParams().setUrlBase(theUrlBase)
+				.setExtraParams(theExtraParams)
+				.setEncodingEnum(theEncoding)
+				.setPrettyPrint(thePrettyPrint)
+		);
+	}
+
+	@Override
+	public IHttpRequest asHttpRequest(AsHttpRequestParams theParams) {
+		String theUrlBase = theParams.getUrlBase();
+		Map<String, List<String>> theExtraParams = theParams.getExtraParams();
+		EncodingEnum theEncoding = theParams.getEncodingEnum();
+		Boolean thePrettyPrint = theParams.getPrettyPrint();
+
 		StringBuilder url = new StringBuilder();
 
 		if (myUrlPath == null) {
@@ -121,8 +141,15 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		}
 
 		appendExtraParamsWithQuestionMark(theExtraParams, url, url.indexOf("?") == -1);
-		IHttpClient httpClient = getRestfulClientFactory()
+		IHttpClient httpClient;
+		if (theParams.getClient() != null) {
+			// use the provided one
+			httpClient = theParams.getClient();
+		} else {
+			// make a new one
+			httpClient = getRestfulClientFactory()
 				.getHttpClient(url, myIfNoneExistParams, myIfNoneExistString, getRequestType(), getHeaders());
+		}
 
 		if (myResource != null && IBaseBinary.class.isAssignableFrom(myResource.getClass())) {
 			IBaseBinary binary = (IBaseBinary) myResource;
@@ -140,12 +167,28 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		}
 
 		if (myParams != null) {
-			return httpClient.createParamRequest(getContext(), myParams, encoding);
+			IHttpRequest request = httpClient.createParamRequest(getContext(), myParams, encoding);
+			return request;
 		}
 		encoding = ObjectUtils.defaultIfNull(encoding, EncodingEnum.JSON);
 		String contents = encodeContents(thePrettyPrint, encoding);
 		String contentType = getContentType(encoding);
-		return httpClient.createByteRequest(getContext(), contents, contentType, encoding);
+		HttpClientRequestParameters parameters = new HttpClientRequestParameters(
+			url.toString(),
+			getRequestType()
+		);
+		parameters.setContents(contents);
+		parameters.setContentType(contentType);
+		parameters.setFhirContext(getContext());
+		parameters.setEncodingEnum(encoding);
+		IHttpRequest request = httpClient.createRequest(parameters);
+		for (Header header : getHeaders()) {
+			request.addHeader(header.getName(), header.getValue());
+		}
+		httpClient.addHeadersToRequest(request, theEncoding, parameters.getFhirContext());
+		request.addHeader(Constants.HEADER_CONTENT_TYPE, contentType + Constants.HEADER_SUFFIX_CT_UTF_8);
+		return request;
+//		return httpClient.createByteRequest(getContext(), contents, contentType, encoding);
 	}
 
 	private String getContentType(EncodingEnum encoding) {

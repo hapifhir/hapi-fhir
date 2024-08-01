@@ -70,6 +70,7 @@ public abstract class BaseHttpClientInvocation {
 
 	// TODO implement
 	public IHttpRequest asHttpRequest(AsHttpRequestParams theParams) {
+
 		return asHttpRequest(
 				theParams.getUrlBase(),
 				theParams.getExtraParams(),
@@ -106,7 +107,7 @@ public abstract class BaseHttpClientInvocation {
 		}
 		// todo
 		HttpClientRequestParameters clientRequestParameters =
-				new HttpClientRequestParameters(theParameters.getUrl(), RequestTypeEnum.GET);
+				new HttpClientRequestParameters(theParameters.getUrl(), theParameters.getRequestTypeEnum());
 		clientRequestParameters.setEncodingEnum(theParameters.getEncodingEnum());
 		return httpClient.createRequest(clientRequestParameters);
 		//		return httpClient.createGetRequest(getContext(), theParameters.getEncodingEnum());

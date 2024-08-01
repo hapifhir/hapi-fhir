@@ -25,6 +25,8 @@ import ca.uhn.fhir.rest.api.PagingHttpMethodEnum;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.UrlSourceEnum;
 import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
+import ca.uhn.fhir.rest.client.model.AsHttpRequestParams;
+import ca.uhn.fhir.rest.client.model.CreateRequestParameters;
 
 import java.util.List;
 import java.util.Map;
@@ -49,9 +51,28 @@ public class HttpSimpleClientInvocation extends BaseHttpClientInvocation {
 			Map<String, List<String>> theExtraParams,
 			EncodingEnum theEncoding,
 			Boolean thePrettyPrint) {
-		IHttpRequest retVal = createHttpRequest(myUrl, theEncoding, myPagingHttpMethod.getRequestType());
-		retVal.setUrlSource(myUrlSource);
-		return retVal;
+		return asHttpRequest(
+			new AsHttpRequestParams()
+				.setUrlBase(myUrl)
+				.setExtraParams(theExtraParams)
+				.setEncodingEnum(theEncoding)
+				.setPrettyPrint(thePrettyPrint)
+		);
+	}
+
+	@Override
+	public IHttpRequest asHttpRequest(AsHttpRequestParams theParams) {
+		CreateRequestParameters parameters = new CreateRequestParameters();
+		parameters.setUrl(theParams.getUrlBase());
+		parameters.setEncodingEnum(theParams.getEncodingEnum());
+		parameters.setRequestTypeEnum(myPagingHttpMethod.getRequestType());
+		parameters.setClient(theParams.getClient());
+		IHttpRequest request = createHttpRequest(parameters);
+		request.setUrlSource(myUrlSource);
+		return request;
+//		IHttpRequest retVal = createHttpRequest(myUrl, theEncoding, myPagingHttpMethod.getRequestType());
+//		retVal.setUrlSource(myUrlSource);
+//		return retVal;
 	}
 
 	public void setUrlSource(UrlSourceEnum theUrlSource) {

@@ -927,7 +927,6 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 		@Override
 		public MethodOutcome execute() {
-
 			Map<String, List<String>> additionalParams = new HashMap<>();
 			if (myCascadeMode != null) {
 				switch (myCascadeMode) {
