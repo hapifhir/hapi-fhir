@@ -1,8 +1,10 @@
 package ca.uhn.fhir.jpa.mdm.provider;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.rules.config.MdmSettings;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -30,6 +32,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -245,16 +248,25 @@ public class MdmProviderBatchR4Test extends BaseLinkR4Test {
 		Patient janePatient = createPatientAndUpdateLinks(buildJanePatient());
 		Patient janePatient2 = createPatientAndUpdateLinks(buildJanePatient());
 		assertLinkCount(5);
-
+		final AtomicBoolean mdmSubmitBeforeMessageDeliveryHookCalled = new AtomicBoolean();
+		final Object interceptor =  new Object() {
+			@Hook(Pointcut.MDM_SUBMIT_BEFORE_MESSAGE_DELIVERY)
+			ResourceModifiedJsonMessage hookMethod(ResourceModifiedJsonMessage theResourceModifiedJsonMessage) {
+				mdmSubmitBeforeMessageDeliveryHookCalled.set(true);
+				return theResourceModifiedJsonMessage;
+			}
+		};
+		myInterceptorService.registerInterceptor(interceptor);
 		// When
 		clearMdmLinks();
 		afterMdmLatch.runWithExpectedCount(3, () -> {
 			myMdmProvider.mdmBatchPatientType(null , null, theSyncOrAsyncRequest);
 		});
-
 		// Then
+		assertThat(mdmSubmitBeforeMessageDeliveryHookCalled).isTrue();
 		updatePatientAndUpdateLinks(janePatient);
 		updatePatientAndUpdateLinks(janePatient2);
 		assertLinkCount(3);
+		myInterceptorService.unregisterInterceptor(interceptor);
 	}
 }
