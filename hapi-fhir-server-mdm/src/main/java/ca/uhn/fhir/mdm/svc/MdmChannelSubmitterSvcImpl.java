@@ -20,6 +20,9 @@
 package ca.uhn.fhir.mdm.svc;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
@@ -44,10 +47,12 @@ public class MdmChannelSubmitterSvcImpl implements IMdmChannelSubmitterSvc {
 
 	private MessageChannel myMdmChannelProducer;
 
-	private FhirContext myFhirContext;
+	private final FhirContext myFhirContext;
 
-	private IChannelFactory myChannelFactory;
+	private final IChannelFactory myChannelFactory;
 
+	@Autowired
+	private IInterceptorBroadcaster myInterceptorBroadcaster;
 	@Override
 	public void submitResourceToMdmChannel(IBaseResource theResource) {
 		ResourceModifiedJsonMessage resourceModifiedJsonMessage = new ResourceModifiedJsonMessage();
@@ -59,6 +64,11 @@ public class MdmChannelSubmitterSvcImpl implements IMdmChannelSubmitterSvc {
 				(RequestPartitionId) theResource.getUserData(Constants.RESOURCE_PARTITION_ID));
 		resourceModifiedMessage.setOperationType(ResourceModifiedMessage.OperationTypeEnum.MANUALLY_TRIGGERED);
 		resourceModifiedJsonMessage.setPayload(resourceModifiedMessage);
+		if (myInterceptorBroadcaster.hasHooks(Pointcut.MDM_SUBMIT_BEFORE_MESSAGE_DELIVERY)) {
+			final HookParams params = new HookParams()
+				.add(ResourceModifiedJsonMessage.class, resourceModifiedJsonMessage);
+			resourceModifiedJsonMessage = (ResourceModifiedJsonMessage) myInterceptorBroadcaster.callHooksAndReturnObject(Pointcut.MDM_SUBMIT_BEFORE_MESSAGE_DELIVERY, params);
+		}
 		boolean success = getMdmChannelProducer().send(resourceModifiedJsonMessage);
 		if (!success) {
 			ourLog.error("Failed to submit {} to MDM Channel.", resourceModifiedMessage.getPayloadId());
