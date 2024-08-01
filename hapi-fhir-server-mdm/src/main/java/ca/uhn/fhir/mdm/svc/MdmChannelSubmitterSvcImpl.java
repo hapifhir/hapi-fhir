@@ -53,6 +53,7 @@ public class MdmChannelSubmitterSvcImpl implements IMdmChannelSubmitterSvc {
 
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
+
 	@Override
 	public void submitResourceToMdmChannel(IBaseResource theResource) {
 		ResourceModifiedJsonMessage resourceModifiedJsonMessage = new ResourceModifiedJsonMessage();
@@ -65,9 +66,11 @@ public class MdmChannelSubmitterSvcImpl implements IMdmChannelSubmitterSvc {
 		resourceModifiedMessage.setOperationType(ResourceModifiedMessage.OperationTypeEnum.MANUALLY_TRIGGERED);
 		resourceModifiedJsonMessage.setPayload(resourceModifiedMessage);
 		if (myInterceptorBroadcaster.hasHooks(Pointcut.MDM_SUBMIT_BEFORE_MESSAGE_DELIVERY)) {
-			final HookParams params = new HookParams()
-				.add(ResourceModifiedJsonMessage.class, resourceModifiedJsonMessage);
-			resourceModifiedJsonMessage = (ResourceModifiedJsonMessage) myInterceptorBroadcaster.callHooksAndReturnObject(Pointcut.MDM_SUBMIT_BEFORE_MESSAGE_DELIVERY, params);
+			final HookParams params =
+					new HookParams().add(ResourceModifiedJsonMessage.class, resourceModifiedJsonMessage);
+			resourceModifiedJsonMessage =
+					(ResourceModifiedJsonMessage) myInterceptorBroadcaster.callHooksAndReturnObject(
+							Pointcut.MDM_SUBMIT_BEFORE_MESSAGE_DELIVERY, params);
 		}
 		boolean success = getMdmChannelProducer().send(resourceModifiedJsonMessage);
 		if (!success) {
