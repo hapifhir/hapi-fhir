@@ -25,6 +25,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Provides the list of {@link PartitionedUrl} that a job should run against.
@@ -47,6 +48,6 @@ public interface IJobPartitionProvider {
 	 * @return the list of {@link PartitionedUrl}
 	 */
 	default List<PartitionedUrl> getPartitionedUrls(RequestDetails theRequestDetails, @NotNull List<String> theUrls) {
-		throw new UnsupportedOperationException("Not implemented yet");
+		return theUrls.stream().map(url -> new PartitionedUrl().setUrl(url)).collect(Collectors.toList());
 	}
 }

@@ -69,38 +69,40 @@ public class ReindexJobWithPartitioningTest extends BaseJpaR4Test {
 		RequestPartitionId partition2 = RequestPartitionId.fromPartitionId(2);
 		RequestPartitionId allPartitions = RequestPartitionId.allPartitions();
 		return Stream.of(
-				// 1. includes all resources without specifying a url or a partition
+				// 1. includes all resources
 				Arguments.of(List.of(), 6),
-				// 2. includes all resources in all partitions
+				// 2. includes all resources from partition 1
+				Arguments.of(List.of(new PartitionedUrl().setRequestPartitionId(partition1)), 3),
+				// 3. includes all resources in all partitions
 				Arguments.of(List.of(new PartitionedUrl().setUrl("").setRequestPartitionId(allPartitions)), 6),
-				// 3. includes all Observations in partition 1 and partition 2
+				// 4. includes all Observations in partition 1 and partition 2
 				Arguments.of(
 						List.of(
 							new PartitionedUrl().setUrl("Observation?").setRequestPartitionId(partition1),
 							new PartitionedUrl().setUrl("Observation?").setRequestPartitionId(partition2)
 						), 3),
-				// 4. includes all Observations in all partitions (partition 1, partition 2 and default partition)
+				// 5. includes all Observations in all partitions (partition 1, partition 2 and default partition)
 				Arguments.of(
 						List.of(
 							new PartitionedUrl().setUrl("Observation?").setRequestPartitionId(allPartitions)),
 						3),
-				// 5. includes all Observations in partition 1
+				// 6. includes all Observations in partition 1
 				Arguments.of(
 						List.of(
 								new PartitionedUrl().setUrl("Observation?").setRequestPartitionId(partition1)),
 						2),
-				// 6. includes all Patients from all all partitions
+				// 7. includes all Patients from all all partitions
 				Arguments.of(
 						List.of(
 								new PartitionedUrl().setUrl("Patient?").setRequestPartitionId(allPartitions)
 						), 3),
-				// 7. includes Patients and Observations in partitions 1 and 2
+				// 8. includes Patients and Observations in partitions 1 and 2
 				Arguments.of(
 						List.of(
 								new PartitionedUrl().setUrl("Observation?").setRequestPartitionId(partition1),
 								new PartitionedUrl().setUrl("Patient?").setRequestPartitionId(partition2)
 						), 3),
-				// 8. includes final Observations and Patients from partitions 1 and 2
+				// 9. includes final Observations and Patients from partitions 1 and 2
 				Arguments.of(
 						List.of(
 								new PartitionedUrl().setUrl("Observation?").setRequestPartitionId(partition1),
@@ -108,14 +110,14 @@ public class ReindexJobWithPartitioningTest extends BaseJpaR4Test {
 								new PartitionedUrl().setUrl("Patient?").setRequestPartitionId(partition1),
 								new PartitionedUrl().setUrl("Patient?").setRequestPartitionId(partition2)
 						), 5),
-				// 9. includes final Observations from partition 1 and Patients from partition 2
+				// 10. includes final Observations from partition 1 and Patients from partition 2
 				Arguments.of(
 						List.of(
 								new PartitionedUrl().setUrl("Observation?status=final").setRequestPartitionId(partition1),
 								new PartitionedUrl().setUrl("Observation?status=final").setRequestPartitionId(partition2),
 								new PartitionedUrl().setUrl("Patient?").setRequestPartitionId(partition2)
 						), 3),
-				// 10. includes final Observations and Patients from partitions 1
+				// 11. includes final Observations and Patients from partitions 1
 				Arguments.of(
 						List.of(
 								new PartitionedUrl().setUrl("Observation?status=final").setRequestPartitionId(partition1),

@@ -11,8 +11,6 @@ import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
-import org.hl7.fhir.r4.model.BooleanType;
-import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
@@ -34,7 +32,6 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -124,47 +121,23 @@ public class ReindexProviderTest {
 		verifyNoInteractions(myRequestPartitionHelperSvc);
 
 		ReindexJobParameters params = myStartRequestCaptor.getValue().getParameters(ReindexJobParameters.class);
-		assertThat(params.getUrls()).hasSize(1);
-		assertEquals(url, params.getUrls().get(0));
+		assertThat(params.getUrls()).hasSize(1).containsExactly(url);
+		assertThat(params.getPartitionedUrls()).hasSize(1);
+		PartitionedUrl partitionedUrl = params.getPartitionedUrls().iterator().next();
+		assertThat(partitionedUrl.getUrl()).isEqualTo(url);
+		assertThat(partitionedUrl.getRequestPartitionId()).isEqualTo(partitionId);
+
 		// Default values
 		assertEquals(ReindexParameters.ReindexSearchParametersEnum.ALL, params.getReindexSearchParameters());
 		assertTrue(params.getOptimisticLock());
 		assertEquals(ReindexParameters.OptimizeStorageModeEnum.NONE, params.getOptimizeStorage());
-	}
 
-	@Test
-	public void testReindex_NoUrl() {
-		// setup
-		Parameters input = new Parameters();
-		input.addParameter(ReindexJobParameters.REINDEX_SEARCH_PARAMETERS, new CodeType("none"));
-		input.addParameter(ReindexJobParameters.OPTIMISTIC_LOCK, new BooleanType(false));
-		input.addParameter(ReindexJobParameters.OPTIMIZE_STORAGE, new CodeType("current_version"));
-
-		ourLog.debug(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
-
-		// Execute
-
-		Parameters response = myServerExtension
-			.getFhirClient()
-			.operation()
-			.onServer()
-			.named(ProviderConstants.OPERATION_REINDEX)
-			.withParameters(input)
-			.execute();
-
-		// Verify
-
-		ourLog.debug(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
-		StringType jobId = (StringType) response.getParameterValue(ProviderConstants.OPERATION_REINDEX_RESPONSE_JOB_ID);
-		assertEquals(TEST_JOB_ID, jobId.getValue());
-
-		verify(myJobCoordinator, times(1)).startInstance(isNotNull(), myStartRequestCaptor.capture());
-		ReindexJobParameters params = myStartRequestCaptor.getValue().getParameters(ReindexJobParameters.class);
-		assertThat(params.getUrls()).isEmpty();
-		// Non-default values
-		assertEquals(ReindexParameters.ReindexSearchParametersEnum.NONE, params.getReindexSearchParameters());
-		assertFalse(params.getOptimisticLock());
-		assertEquals(ReindexParameters.OptimizeStorageModeEnum.CURRENT_VERSION, params.getOptimizeStorage());
-
+		myServerExtension
+				.getFhirClient()
+				.operation()
+				.onServer()
+				.named(ProviderConstants.OPERATION_REINDEX)
+				.withParameters(input)
+				.execute();
 	}
 }

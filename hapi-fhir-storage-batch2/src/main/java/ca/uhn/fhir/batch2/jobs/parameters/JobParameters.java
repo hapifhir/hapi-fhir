@@ -36,7 +36,8 @@ import java.util.stream.Collectors;
  */
 public class JobParameters implements IModelJson {
 	@JsonProperty(value = "partitionId")
-	private List<RequestPartitionId> myRequestPartitionIds;
+	@Nullable
+	private RequestPartitionId myRequestPartitionId;
 
 	@JsonProperty("batchSize")
 	private Integer myBatchSize;
@@ -45,31 +46,12 @@ public class JobParameters implements IModelJson {
 	private List<PartitionedUrl> myPartitionedUrls;
 
 	public void setRequestPartitionId(@Nullable RequestPartitionId theRequestPartitionId) {
-		if (theRequestPartitionId != null) {
-			myRequestPartitionIds = List.of(theRequestPartitionId);
-		}
+		myRequestPartitionId = theRequestPartitionId;
 	}
 
 	@Nullable
 	public RequestPartitionId getRequestPartitionId() {
-		return getFirstRequestPartitionIdOrNull();
-	}
-
-	@Nullable
-	private RequestPartitionId getFirstRequestPartitionIdOrNull() {
-		return myRequestPartitionIds == null || myRequestPartitionIds.isEmpty() ? null : myRequestPartitionIds.get(0);
-	}
-
-	@Nonnull
-	public List<RequestPartitionId> getRequestPartitionIds() {
-		if (myRequestPartitionIds == null) {
-			myRequestPartitionIds = new ArrayList<>();
-		}
-		return myRequestPartitionIds;
-	}
-
-	public void addRequestPartitionId(RequestPartitionId theRequestPartitionId) {
-		getRequestPartitionIds().add(theRequestPartitionId);
+		return myRequestPartitionId;
 	}
 
 	public void setBatchSize(int theBatchSize) {
@@ -93,13 +75,14 @@ public class JobParameters implements IModelJson {
 	}
 
 	public void addUrl(@Nonnull String theUrl) {
-		getPartitionedUrls().add(new PartitionedUrl().setUrl(theUrl));
+		RequestPartitionId partitionId = getRequestPartitionId();
+		getPartitionedUrls().add(new PartitionedUrl().setUrl(theUrl).setRequestPartitionId(partitionId));
 	}
 
 	public List<String> getUrls() {
 		return getPartitionedUrls().stream()
 				.map(PartitionedUrl::getUrl)
-				.filter(StringUtils::isBlank)
+				.filter(url -> !StringUtils.isBlank(url))
 				.collect(Collectors.toList());
 	}
 }
