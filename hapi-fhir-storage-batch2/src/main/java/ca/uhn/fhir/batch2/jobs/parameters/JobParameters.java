@@ -75,8 +75,7 @@ public class JobParameters implements IModelJson {
 	}
 
 	public void addUrl(@Nonnull String theUrl) {
-		RequestPartitionId partitionId = getRequestPartitionId();
-		getPartitionedUrls().add(new PartitionedUrl().setUrl(theUrl).setRequestPartitionId(partitionId));
+		getPartitionedUrls().add(new PartitionedUrl().setUrl(theUrl));
 	}
 
 	public List<String> getUrls() {
