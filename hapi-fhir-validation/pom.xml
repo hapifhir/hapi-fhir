@@ -308,6 +308,13 @@
 			<version>${project.version}</version>
 			<scope>test</scope>
 		</dependency>
+
+		<dependency>
+			<groupId>org.hl7.fhir.testcases</groupId>
+			<artifactId>fhir-test-cases</artifactId>
+			<scope>test</scope>
+		</dependency>
+
     </dependencies>
 
 	<reporting>

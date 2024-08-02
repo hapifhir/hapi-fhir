@@ -362,7 +362,8 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 			params.setBatchSize(theBatchSize.getValue().intValue());
 		}
 		RequestPartitionId partitionId = RequestPartitionId.allPartitions();
-		theUrls.forEach(url -> params.addPartitionedUrl(new PartitionedUrl().setUrl(url).setRequestPartitionId(partitionId)));
+		theUrls.forEach(
+				url -> params.addPartitionedUrl(new PartitionedUrl().setUrl(url).setRequestPartitionId(partitionId)));
 
 		JobInstanceStartRequest request = new JobInstanceStartRequest();
 		request.setParameters(params);
