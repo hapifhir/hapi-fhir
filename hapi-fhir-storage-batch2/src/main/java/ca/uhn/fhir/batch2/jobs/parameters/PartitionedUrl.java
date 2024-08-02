@@ -27,22 +27,14 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 public class PartitionedUrl implements IModelJson {
-	@Override
-	public String toString() {
-		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
-		b.append("partition", myRequestPartitionId);
-		b.append("myUrl", myUrl);
-		return b.toString();
-	}
-
 	@JsonProperty("url")
 	@Pattern(
 			regexp = "^[A-Z][A-Za-z0-9]+\\?.*",
 			message = "If populated, URL must be a search URL in the form '{resourceType}?[params]'")
-	String myUrl;
+	private String myUrl;
 
 	@JsonProperty("requestPartitionId")
-	RequestPartitionId myRequestPartitionId;
+	private RequestPartitionId myRequestPartitionId;
 
 	public String getUrl() {
 		return myUrl;
@@ -60,5 +52,13 @@ public class PartitionedUrl implements IModelJson {
 	public PartitionedUrl setRequestPartitionId(RequestPartitionId theRequestPartitionId) {
 		myRequestPartitionId = theRequestPartitionId;
 		return this;
+	}
+
+	@Override
+	public String toString() {
+		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
+		b.append("myRequestPartitionId", myRequestPartitionId);
+		b.append("myUrl", myUrl);
+		return b.toString();
 	}
 }

@@ -102,11 +102,16 @@ public class DeleteExpungeJobSubmitterImpl implements IDeleteExpungeJobSubmitter
 				.forEach(deleteExpungeJobParameters::addPartitionedUrl);
 		deleteExpungeJobParameters.setBatchSize(theBatchSize);
 
+		// TODO MM: apply changes similar to ReindexProvider to compute the PartitionedUrl list using
+		// IJobPartitionProvider.
+		// so that feature https://github.com/hapifhir/hapi-fhir/issues/6008 can be implemented for this operation
 		// Also set top level partition in case there are no urls
-		RequestPartitionId requestPartition =
-				myRequestPartitionHelperSvc.determineReadPartitionForRequestForServerOperation(
-						theRequestDetails, ProviderConstants.OPERATION_DELETE_EXPUNGE);
-		deleteExpungeJobParameters.setRequestPartitionId(requestPartition);
+		if (theUrlsToDeleteExpunge.isEmpty()) { // fix for https://github.com/hapifhir/hapi-fhir/issues/6179
+			RequestPartitionId requestPartition =
+					myRequestPartitionHelperSvc.determineReadPartitionForRequestForServerOperation(
+							theRequestDetails, ProviderConstants.OPERATION_DELETE_EXPUNGE);
+			deleteExpungeJobParameters.setRequestPartitionId(requestPartition);
+		}
 		deleteExpungeJobParameters.setCascade(theCascade);
 		deleteExpungeJobParameters.setCascadeMaxRounds(theCascadeMaxRounds);
 

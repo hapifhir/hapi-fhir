@@ -68,6 +68,6 @@ public class DeleteExpungeJobParametersValidator implements IJobParametersValida
 						theRequestDetails, null, partitionedUrl.getRequestPartitionId());
 			}
 		}
-		return myUrlListValidator.validatePartitionedUrls(theParameters.getPartitionedUrls());
+		return myUrlListValidator.validateUrls(theParameters.getUrls());
 	}
 }

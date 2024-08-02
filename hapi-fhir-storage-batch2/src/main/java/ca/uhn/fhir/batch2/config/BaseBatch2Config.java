@@ -25,17 +25,19 @@ import ca.uhn.fhir.batch2.api.IJobPartitionProvider;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.IReductionStepExecutorService;
 import ca.uhn.fhir.batch2.channel.BatchJobSender;
+import ca.uhn.fhir.batch2.coordinator.DefaultJobPartitionProvider;
 import ca.uhn.fhir.batch2.coordinator.JobCoordinatorImpl;
 import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
 import ca.uhn.fhir.batch2.coordinator.ReductionStepExecutorServiceImpl;
-import ca.uhn.fhir.batch2.coordinator.SimpleJobPartitionProvider;
 import ca.uhn.fhir.batch2.coordinator.WorkChunkProcessor;
 import ca.uhn.fhir.batch2.maintenance.JobMaintenanceServiceImpl;
 import ca.uhn.fhir.batch2.model.JobWorkNotificationJsonMessage;
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
+import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
@@ -144,7 +146,10 @@ public abstract class BaseBatch2Config {
 	}
 
 	@Bean
-	public IJobPartitionProvider jobPartitionProvider(IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
-		return new SimpleJobPartitionProvider(theRequestPartitionHelperSvc);
+	public IJobPartitionProvider jobPartitionProvider(
+			FhirContext theFhirContext,
+			IRequestPartitionHelperSvc theRequestPartitionHelperSvc,
+			MatchUrlService theMatchUrlService) {
+		return new DefaultJobPartitionProvider(theFhirContext, theRequestPartitionHelperSvc, theMatchUrlService);
 	}
 }

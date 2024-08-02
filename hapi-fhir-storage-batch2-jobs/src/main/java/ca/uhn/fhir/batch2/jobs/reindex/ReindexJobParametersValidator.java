@@ -20,41 +20,40 @@
 package ca.uhn.fhir.batch2.jobs.reindex;
 
 import ca.uhn.fhir.batch2.api.IJobParametersValidator;
-import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrl;
-import ca.uhn.fhir.batch2.jobs.parameters.UrlListValidator;
+import ca.uhn.fhir.batch2.jobs.parameters.IUrlListValidator;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class ReindexJobParametersValidator implements IJobParametersValidator<ReindexJobParameters> {
 
-	private final UrlListValidator myUrlListValidator;
+	private final IUrlListValidator myUrlListValidator;
 
-	public ReindexJobParametersValidator(UrlListValidator theUrlListValidator) {
+	public ReindexJobParametersValidator(IUrlListValidator theUrlListValidator) {
 		myUrlListValidator = theUrlListValidator;
 	}
 
 	@Nullable
 	@Override
 	public List<String> validate(RequestDetails theRequestDetails, @Nonnull ReindexJobParameters theParameters) {
-		List<String> errors = myUrlListValidator.validatePartitionedUrls(theParameters.getPartitionedUrls());
+		List<String> errors = myUrlListValidator.validateUrls(theParameters.getUrls());
 
 		if (errors == null || errors.isEmpty()) {
 			// only check if there's no other errors (new list to fix immutable issues)
 			errors = new ArrayList<>();
-			List<PartitionedUrl> urls = theParameters.getPartitionedUrls();
-			for (PartitionedUrl purl : urls) {
-				String url = purl.getUrl();
-
+			for (String url : theParameters.getUrls()) {
+				if (StringUtils.isBlank(url)) {
+					continue;
+				}
 				if (url.contains(" ") || url.contains("\n") || url.contains("\t")) {
 					errors.add("Invalid URL. URL cannot contain spaces : " + url);
 				}
 			}
 		}
-
 		return errors;
 	}
 }

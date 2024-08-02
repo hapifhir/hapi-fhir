@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.reindex;
+package ca.uhn.fhir.jpa.batch2;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -41,8 +41,10 @@ import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.DateRangeUtil;
+import ca.uhn.fhir.util.Logs;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 
 import java.util.Date;
@@ -50,7 +52,7 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(Batch2DaoSvcImpl.class);
+	private static final org.slf4j.Logger ourLog = Logs.getBatchTroubleshootingLog();
 
 	private final IResourceTableDao myResourceTableDao;
 
@@ -83,7 +85,7 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 	@Override
 	public IResourcePidStream fetchResourceIdStream(
 			Date theStart, Date theEnd, RequestPartitionId theRequestPartitionId, String theUrl) {
-		if (theUrl == null) {
+		if (StringUtils.isBlank(theUrl)) {
 			return makeStreamResult(
 					theRequestPartitionId, () -> streamResourceIdsNoUrl(theStart, theEnd, theRequestPartitionId));
 		} else {
@@ -127,6 +129,10 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 		return new TypedResourceStream(theRequestPartitionId, streamTemplate);
 	}
 
+	/**
+	 * At the moment there is no use-case for this method.
+	 * This can be cleaned up at a later point in time if there is no use for it.
+	 */
 	@Nonnull
 	private Stream<TypedResourcePid> streamResourceIdsNoUrl(
 			Date theStart, Date theEnd, RequestPartitionId theRequestPartitionId) {

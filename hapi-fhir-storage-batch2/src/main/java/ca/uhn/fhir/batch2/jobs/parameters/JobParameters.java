@@ -22,12 +22,13 @@ package ca.uhn.fhir.batch2.jobs.parameters;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Can be used to configure parameters for batch2 jobs.
@@ -95,22 +96,10 @@ public class JobParameters implements IModelJson {
 		getPartitionedUrls().add(new PartitionedUrl().setUrl(theUrl));
 	}
 
-	@VisibleForTesting
-	public static JobParameters from(
-			List<String> theUrls, List<RequestPartitionId> thePartitions, boolean theShouldAssignPartitionToUrl) {
-		JobParameters parameters = new JobParameters();
-		if (theShouldAssignPartitionToUrl) {
-			assert theUrls.size() == thePartitions.size();
-			for (int i = 0; i < theUrls.size(); i++) {
-				PartitionedUrl partitionedUrl = new PartitionedUrl();
-				partitionedUrl.setUrl(theUrls.get(i));
-				partitionedUrl.setRequestPartitionId(thePartitions.get(i));
-				parameters.addPartitionedUrl(partitionedUrl);
-			}
-		} else {
-			theUrls.forEach(url -> parameters.addPartitionedUrl(new PartitionedUrl().setUrl(url)));
-			thePartitions.forEach(parameters::addRequestPartitionId);
-		}
-		return parameters;
+	public List<String> getUrls() {
+		return getPartitionedUrls().stream()
+				.map(PartitionedUrl::getUrl)
+				.filter(StringUtils::isBlank)
+				.collect(Collectors.toList());
 	}
 }

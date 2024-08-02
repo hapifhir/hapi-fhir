@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.jobs.expunge.DeleteExpungeAppCtx;
 import ca.uhn.fhir.batch2.jobs.expunge.DeleteExpungeJobParameters;
+import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrl;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -90,13 +91,11 @@ import java.util.stream.Collectors;
 import static ca.uhn.fhir.util.TestUtil.sleepAtLeast;
 import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.fail;
-
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -713,8 +712,10 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		assertEquals(1, myObservationDao.search(SearchParameterMap.newSynchronous(), mySrd).size());
 
 		DeleteExpungeJobParameters jobParameters = new DeleteExpungeJobParameters();
-		jobParameters.addUrl("Patient?_id=" + p1.getIdPart() + "," + p2.getIdPart());
-		jobParameters.setRequestPartitionId(RequestPartitionId.fromPartitionId(myPartitionId));
+		PartitionedUrl partitionedUrl = new PartitionedUrl()
+				.setUrl("Patient?_id=" + p1.getIdPart() + "," + p2.getIdPart())
+				.setRequestPartitionId(RequestPartitionId.fromPartitionId(myPartitionId));
+		jobParameters.addPartitionedUrl(partitionedUrl);
 		jobParameters.setCascade(true);
 
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();

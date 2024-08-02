@@ -3,7 +3,6 @@ package ca.uhn.fhir.batch2.jobs.reindex;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.IJobPartitionProvider;
 import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrl;
-import ca.uhn.fhir.batch2.jobs.parameters.UrlPartitioner;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
@@ -38,11 +37,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -54,15 +53,14 @@ public class ReindexProviderTest {
 	private final FhirContext myCtx = FhirContext.forR4Cached();
 
 	@RegisterExtension
-	private final RestfulServerExtension myServerExtension = new RestfulServerExtension(myCtx);
+	public final RestfulServerExtension myServerExtension = new RestfulServerExtension(myCtx);
 
 	@Mock
 	private IJobCoordinator myJobCoordinator;
 
 	@Mock
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
-	@Mock
-	private UrlPartitioner myUrlPartitioner;
+
 	@Mock
 	private IJobPartitionProvider myJobPartitionProvider;
 
@@ -78,7 +76,6 @@ public class ReindexProviderTest {
 
 		when(myJobCoordinator.startInstance(isNotNull(), any()))
 			.thenReturn(createJobStartResponse());
-		when(myJobPartitionProvider.getPartitions(any(), any())).thenReturn(List.of(RequestPartitionId.allPartitions()));
 	}
 
 	private Batch2JobStartResponse createJobStartResponse() {
@@ -101,8 +98,10 @@ public class ReindexProviderTest {
 		input.addParameter(ProviderConstants.OPERATION_REINDEX_PARAM_URL, url);
 		input.addParameter(ProviderConstants.OPERATION_REINDEX_PARAM_BATCH_SIZE, new DecimalType(batchSize));
 
+		RequestPartitionId partitionId = RequestPartitionId.fromPartitionId(1);
+		when(myJobPartitionProvider.getPartitionedUrls(any(), any())).thenReturn(List.of(new PartitionedUrl().setUrl(url).setRequestPartitionId(partitionId)));
+
 		ourLog.debug(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
-		when(myUrlPartitioner.partitionUrl(anyString(), any())).thenReturn(new PartitionedUrl().setUrl(url).setRequestPartitionId(RequestPartitionId.defaultPartition()));
 
 		// Execute
 
@@ -121,9 +120,12 @@ public class ReindexProviderTest {
 		assertEquals(TEST_JOB_ID, jobId.getValue());
 
 		verify(myJobCoordinator, times(1)).startInstance(isNotNull(), myStartRequestCaptor.capture());
+		verify(myJobPartitionProvider, times(1)).getPartitionedUrls(any(), eq(List.of(url)));
+		verifyNoInteractions(myRequestPartitionHelperSvc);
+
 		ReindexJobParameters params = myStartRequestCaptor.getValue().getParameters(ReindexJobParameters.class);
-		assertThat(params.getPartitionedUrls()).hasSize(1);
-		assertEquals(url, params.getPartitionedUrls().get(0).getUrl());
+		assertThat(params.getUrls()).hasSize(1);
+		assertEquals(url, params.getUrls().get(0));
 		// Default values
 		assertEquals(ReindexParameters.ReindexSearchParametersEnum.ALL, params.getReindexSearchParameters());
 		assertTrue(params.getOptimisticLock());
@@ -158,7 +160,7 @@ public class ReindexProviderTest {
 
 		verify(myJobCoordinator, times(1)).startInstance(isNotNull(), myStartRequestCaptor.capture());
 		ReindexJobParameters params = myStartRequestCaptor.getValue().getParameters(ReindexJobParameters.class);
-		assertThat(params.getPartitionedUrls()).isEmpty();
+		assertThat(params.getUrls()).isEmpty();
 		// Non-default values
 		assertEquals(ReindexParameters.ReindexSearchParametersEnum.NONE, params.getReindexSearchParameters());
 		assertFalse(params.getOptimisticLock());
