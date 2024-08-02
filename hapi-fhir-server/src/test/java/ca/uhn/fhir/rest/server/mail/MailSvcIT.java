@@ -4,6 +4,7 @@ import com.icegreen.greenmail.junit5.GreenMailExtension;
 import com.icegreen.greenmail.util.GreenMailUtil;
 import com.icegreen.greenmail.util.ServerSetupTest;
 import jakarta.annotation.Nonnull;
+import jakarta.mail.internet.MimeMessage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -11,7 +12,6 @@ import org.simplejavamail.MailException;
 import org.simplejavamail.api.email.Email;
 import org.simplejavamail.email.EmailBuilder;
 
-import javax.mail.internet.MimeMessage;
 import java.util.Arrays;
 import java.util.List;
 
@@ -86,13 +86,14 @@ public class MailSvcIT {
 	@Test
 	public void testSendMailWithInvalidToAddressExpectErrorHandler() {
 		// setup
-		final Email email = withEmail("xyz");
+		String invalidEmailAdress = "xyz";
+		final Email email = withEmail(invalidEmailAdress);
 		// execute
 		fixture.sendMail(email,
 			() -> fail("Should not execute on Success"),
 			(e) -> {
 				assertTrue(e instanceof MailException);
-				assertEquals("Invalid TO address: " + email, e.getMessage());
+				assertEquals("Invalid TO address: " + invalidEmailAdress, e.getMessage());
 			});
 		// validate
 		assertTrue(ourGreenMail.waitForIncomingEmail(1000, 0));

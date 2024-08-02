@@ -70,6 +70,11 @@
 			<artifactId>jakarta.servlet-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>jakarta.mail</groupId>
+			<artifactId>jakarta.mail-api</artifactId>
+			<optional>true</optional>
+		</dependency>
 
 		<!-- test dependencies -->
 		<dependency>
