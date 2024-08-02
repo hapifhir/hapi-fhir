@@ -23,9 +23,18 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Pattern;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+/**
+ * Represents the pair of partition and (search) url, which can be used to configure batch2 jobs.
+ * It will be used to determine which FHIR resources are selected for the job.
+ * Please note that the url is a partial url, which means it does not include server base and tenantId,
+ * and it starts with the with resource type.
+ * e.g. Patient?, Observation?status=final
+ */
 public class PartitionedUrl implements IModelJson {
 	@JsonProperty("url")
 	@Pattern(
@@ -57,8 +66,31 @@ public class PartitionedUrl implements IModelJson {
 	@Override
 	public String toString() {
 		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
-		b.append("myRequestPartitionId", myRequestPartitionId);
 		b.append("myUrl", myUrl);
+		b.append("myRequestPartitionId", myRequestPartitionId);
 		return b.toString();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (!(obj instanceof PartitionedUrl)) {
+			return false;
+		}
+		PartitionedUrl other = (PartitionedUrl)obj;
+		EqualsBuilder b = new EqualsBuilder();
+		b.append(myUrl, other.myUrl);
+		b.append(myRequestPartitionId, other.myRequestPartitionId);
+		return b.isEquals();
+	}
+
+	@Override
+	public int hashCode() {
+		HashCodeBuilder b = new HashCodeBuilder();
+		b.append(myRequestPartitionId);
+		b.append(myUrl);
+		return b.hashCode();
 	}
 }

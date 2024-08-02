@@ -14,6 +14,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -35,18 +37,22 @@ public interface IJobPartitionProviderTest {
 
 		setupResourceNameUrlWithPartition(requestDetails, "Patient", RequestPartitionId.fromPartitionId(1));
 		setupResourceNameUrlWithPartition(requestDetails, "Observation", RequestPartitionId.fromPartitionId(2));
-		Set<String> resourceTypes = Set.of("Patient", "Observation");
+		setupResourceNameUrlWithPartition(requestDetails, "Practitioner", null);
+		setupResourceNameUrlWithPartition(requestDetails, "SearchParameter", RequestPartitionId.defaultPartition());
+
+		Set<String> resourceTypes = Set.of("Patient", "Observation", "Practitioner", "SearchParameter");
 		when(getFhirContext().getResourceTypes()).thenReturn(resourceTypes);
 		List<PartitionedUrl> partitionedUrls = List.of(
 				new PartitionedUrl().setUrl("Patient?").setRequestPartitionId(RequestPartitionId.fromPartitionId(1)),
 				new PartitionedUrl().setUrl("Observation?").setRequestPartitionId(RequestPartitionId.fromPartitionId(2)),
-				new PartitionedUrl().setUrl("Practitioner?"));
+				new PartitionedUrl().setUrl("Practitioner?"),
+				new PartitionedUrl().setUrl("SearchParameter?").setRequestPartitionId(RequestPartitionId.defaultPartition()));
 
 		verifyGetPartitionedUrls(requestDetails, List.of(), partitionedUrls);
 	}
 
 	@Test
-	default void getPartitionedUrls_specificPartitionsForEachUrl_returnsCorrectly() {
+	default void getPartitionedUrls_withUrlsSpecificPartitions_returnsCorrectly() {
 		// setup
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
 
@@ -62,18 +68,34 @@ public interface IJobPartitionProviderTest {
 		verifyGetPartitionedUrls(requestDetails, urls, partitionedUrls);
 	}
 
-	default void verifyGetPartitionedUrls(RequestDetails theRequestDetails, List<String> theUrls, List<PartitionedUrl> thePartitionedUrls) {
+	@Test
+	default void getPartitionedUrls_someUrlsAssociatedWithAllPartitions_returnsCorrectly() {
+		// setup
+		SystemRequestDetails requestDetails = new SystemRequestDetails();
+
+		List<RequestPartitionId> partitionIds = List.of(
+				RequestPartitionId.fromPartitionIds(1),
+				RequestPartitionId.fromPartitionIds(2)
+		);
+
+		setupResourceNameUrlWithPartition(requestDetails, "Patient", RequestPartitionId.allPartitions());
+		setupResourceNameUrlWithPartition(requestDetails, "Observation", RequestPartitionId.fromPartitionId(1));
+		setupPartitions(partitionIds);
+
+		List<String> urls = List.of("Patient?", "Observation?");
+		Set<PartitionedUrl> partitionedUrls = new LinkedHashSet<>();
+		partitionIds.forEach(p -> partitionedUrls.add(new PartitionedUrl().setUrl("Patient?").setRequestPartitionId(p)));
+		partitionedUrls.add(new PartitionedUrl().setUrl("Patient?").setRequestPartitionId(RequestPartitionId.defaultPartition()));
+		partitionedUrls.add(new PartitionedUrl().setUrl("Observation?").setRequestPartitionId(RequestPartitionId.fromPartitionIds(1)));
+		verifyGetPartitionedUrls(requestDetails, urls, partitionedUrls);
+	}
+
+	default void verifyGetPartitionedUrls(RequestDetails theRequestDetails, List<String> theUrls, Collection<PartitionedUrl> thePartitionedUrls) {
 		// test
 		List<PartitionedUrl> actualPartitionedUrls = getJobPartitionProvider().getPartitionedUrls(theRequestDetails, theUrls);
 
 		// verify
-		assertThat(actualPartitionedUrls).hasSize(thePartitionedUrls.size());
-		for (int i = 0; i < actualPartitionedUrls.size(); i++) {
-			PartitionedUrl actualPartitionedUrl = actualPartitionedUrls.get(i);
-			PartitionedUrl expectedPartitionedUrl = thePartitionedUrls.get(i);
-			assertThat(actualPartitionedUrl.getRequestPartitionId()).isEqualTo(expectedPartitionedUrl.getRequestPartitionId());
-			assertThat(actualPartitionedUrl.getUrl()).isEqualTo(expectedPartitionedUrl.getUrl());
-		}
+		assertThat(actualPartitionedUrls).hasSize(thePartitionedUrls.size()).containsExactlyInAnyOrder(thePartitionedUrls.toArray(new PartitionedUrl[0]));
 	}
 
 	default void setupResourceNameUrlWithPartition(RequestDetails theRequestDetails, String theResourceName, RequestPartitionId thePartitionId) {
@@ -86,4 +108,6 @@ public interface IJobPartitionProviderTest {
 
 		when(getRequestPartitionHelper().determineReadPartitionForRequestForSearchType(theRequestDetails, theResourceName, searchParameterMap)).thenReturn(thePartitionId);
 	}
+
+	void setupPartitions(List<RequestPartitionId> thePartitionIds);
 }

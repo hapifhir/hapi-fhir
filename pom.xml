@@ -1306,7 +1306,7 @@
 			<dependency>
 				<groupId>org.hl7.fhir.testcases</groupId>
 				<artifactId>fhir-test-cases</artifactId>
-				<version>1.5.15</version>
+				<version>1.1.14</version>
 			</dependency>
 			<dependency>
 				<groupId>org.jdom</groupId>

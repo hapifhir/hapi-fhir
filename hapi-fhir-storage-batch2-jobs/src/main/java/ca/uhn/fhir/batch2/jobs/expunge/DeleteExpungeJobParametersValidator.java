@@ -55,9 +55,6 @@ public class DeleteExpungeJobParametersValidator implements IJobParametersValida
 		}
 
 		// Verify that the user has access to all requested partitions
-		myRequestPartitionHelperSvc.validateHasPartitionPermissions(
-				theRequestDetails, null, theParameters.getRequestPartitionId());
-
 		for (PartitionedUrl partitionedUrl : theParameters.getPartitionedUrls()) {
 			String url = partitionedUrl.getUrl();
 			ValidateUtil.isTrueOrThrowInvalidRequest(

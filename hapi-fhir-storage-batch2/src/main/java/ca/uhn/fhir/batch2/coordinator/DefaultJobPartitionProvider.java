@@ -30,7 +30,9 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -95,7 +97,7 @@ public class DefaultJobPartitionProvider implements IJobPartitionProvider {
 
 		// handle (bulk) system operations that are typically configured with RequestPartitionId.allPartitions()
 		// populate the actual list of all partitions, if that is supported
-		List<RequestPartitionId> allPartitions = getAllPartitions();
+		Set<RequestPartitionId> allPartitions = new LinkedHashSet<>(getAllPartitions());
 		if (!allPartitions.isEmpty()) {
 			allPartitions.add(RequestPartitionId.defaultPartition());
 		}

@@ -20,6 +20,7 @@
 package ca.uhn.fhir.batch2.jobs.expunge;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrl;
 import ca.uhn.fhir.batch2.jobs.parameters.UrlPartitioner;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirContext;
@@ -110,7 +111,7 @@ public class DeleteExpungeJobSubmitterImpl implements IDeleteExpungeJobSubmitter
 			RequestPartitionId requestPartition =
 					myRequestPartitionHelperSvc.determineReadPartitionForRequestForServerOperation(
 							theRequestDetails, ProviderConstants.OPERATION_DELETE_EXPUNGE);
-			deleteExpungeJobParameters.setRequestPartitionId(requestPartition);
+			deleteExpungeJobParameters.addPartitionedUrl(new PartitionedUrl().setRequestPartitionId(requestPartition));
 		}
 		deleteExpungeJobParameters.setCascade(theCascade);
 		deleteExpungeJobParameters.setCascadeMaxRounds(theCascadeMaxRounds);
