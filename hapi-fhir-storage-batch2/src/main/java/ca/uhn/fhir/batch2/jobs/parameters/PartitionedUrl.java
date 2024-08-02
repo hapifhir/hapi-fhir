@@ -79,7 +79,7 @@ public class PartitionedUrl implements IModelJson {
 		if (!(obj instanceof PartitionedUrl)) {
 			return false;
 		}
-		PartitionedUrl other = (PartitionedUrl)obj;
+		PartitionedUrl other = (PartitionedUrl) obj;
 		EqualsBuilder b = new EqualsBuilder();
 		b.append(myUrl, other.myUrl);
 		b.append(myRequestPartitionId, other.myRequestPartitionId);
