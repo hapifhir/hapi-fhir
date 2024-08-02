@@ -642,7 +642,7 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 		return myMdmLinkDao.save(mdmLink);
 	}
 
-	protected MdmLink createGoldenPatientAndLinkToSourcePatient(MdmMatchResultEnum theMdmMatchResultEnum, MdmLinkSourceEnum theMdmLinkSourceEnum, String theVersion, Date theCreateTime, Date theUpdateTime, boolean theLinkCreatedNewResource) {
+	protected MdmLink createGoldenPatientAndLinkToSourcePatient(MdmMatchResultEnum theMdmMatchResultEnum, MdmLinkSourceEnum theMdmLinkSourceEnum, String theVersion, Date theCreateTime, Date theUpdateTime, boolean theLinkCreatedNewResource, Long theVector) {
 		final Patient goldenPatient = createPatient();
 		final Patient sourcePatient = createPatient();
 
@@ -655,6 +655,7 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 		mdmLink.setGoldenResourcePersistenceId(runInTransaction(()->myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), goldenPatient)));
 		mdmLink.setSourcePersistenceId(runInTransaction(()->myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), sourcePatient)));
 		mdmLink.setHadToCreateNewGoldenResource(theLinkCreatedNewResource);
+		mdmLink.setVector(theVector);
 
 		return myMdmLinkDao.save(mdmLink);
 	}

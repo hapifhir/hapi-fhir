@@ -9,10 +9,16 @@ import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.param.TokenParam;
+import com.github.dnault.xmlpatch.repackaged.org.jaxen.util.SingletonList;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.NamingSystem;
+import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.hl7.fhir.utilities.npm.PackageGenerator;
@@ -147,6 +153,24 @@ public class PackageInstallerSvcImplCreateTest extends BaseJpaR4Test {
 		assertEquals(SECOND_IG_URL_SECOND_OID, actualValueSet2.getUrl());
 		assertEquals(version2, actualValueSet2.getVersion());
 		assertEquals(copyright2, actualValueSet2.getCopyright());
+	}
+
+	@Test
+	void installCompositeSearchParameterWithNoExpressionAtRoot() throws IOException {
+		final String spCode = "my-test-composite-sp-with-no-expression";
+		SearchParameter spR4 = new SearchParameter();
+		spR4.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		spR4.setType(Enumerations.SearchParamType.COMPOSITE);
+		spR4.setBase(List.of(new CodeType("Patient")));
+		spR4.setCode(spCode);
+
+		install(spR4);
+
+		// verify the SP is created
+		SearchParameterMap map = SearchParameterMap.newSynchronous()
+			.add(SearchParameter.SP_CODE, new TokenParam(spCode));
+		IBundleProvider outcome = mySearchParameterDao.search(map);
+		assertEquals(1, outcome.size());
 	}
 
 	@Nonnull

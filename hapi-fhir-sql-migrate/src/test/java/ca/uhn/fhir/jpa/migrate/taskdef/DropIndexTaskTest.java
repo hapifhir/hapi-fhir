@@ -16,7 +16,7 @@ import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class DropIndexTest extends BaseTest {
+public class DropIndexTaskTest extends BaseTest {
 
 
 	@ParameterizedTest(name = "{index}: {0}")
@@ -248,7 +248,12 @@ public class DropIndexTest extends BaseTest {
 					assertEquals(asList("drop index IDX_ANINDEX ONLINE"), mySql);
 					break;
 				case MSSQL_2012:
-					assertEquals(asList("drop index SOMETABLE.IDX_ANINDEX"), mySql);
+					assertEquals(asList("BEGIN TRY -- try first online, without locking the table \n" +
+						"    EXEC('drop index SOMETABLE.IDX_ANINDEX WITH (ONLINE = ON)');\n" +
+						"END TRY \n" +
+						"BEGIN CATCH -- for Editions of Sql Server that don't support ONLINE, run with table locks \n" +
+						"drop index SOMETABLE.IDX_ANINDEX; \n" +
+						"END CATCH;"), mySql);
 					break;
 				case POSTGRES_9_4:
 					assertEquals(asList("drop index CONCURRENTLY IDX_ANINDEX"), mySql);
