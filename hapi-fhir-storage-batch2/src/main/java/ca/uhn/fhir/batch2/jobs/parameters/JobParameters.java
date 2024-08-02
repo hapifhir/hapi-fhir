@@ -67,6 +67,10 @@ public class JobParameters implements IModelJson {
 		if (myPartitionedUrls == null) {
 			myPartitionedUrls = new ArrayList<>();
 		}
+		// TODO MM: added for backward compatibility, it can be removed once requestPartitionId is deprecated
+		myPartitionedUrls.stream()
+				.filter(thePartitionedUrl -> thePartitionedUrl.getRequestPartitionId() == null)
+				.forEach(thePartitionedUrl -> thePartitionedUrl.setRequestPartitionId(myRequestPartitionId));
 		return myPartitionedUrls;
 	}
 

@@ -104,7 +104,7 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 		String jobId = BatchHelperR4.jobIdFromBatch2Parameters(response);
 		myBatch2JobHelper.awaitJobCompletion(jobId);
 
-		assertThat(interceptor.requestPartitionIds).hasSize(4);
+		assertThat(interceptor.requestPartitionIds).hasSize(3);
 		RequestPartitionId partitionId = interceptor.requestPartitionIds.get(0);
 		assertEquals(TENANT_B_ID, partitionId.getFirstPartitionIdOrNull());
 		assertEquals(TENANT_B, partitionId.getFirstPartitionNameOrNull());
