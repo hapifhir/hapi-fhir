@@ -151,13 +151,11 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 	 */
 	private boolean processSubscription(
 			ResourceModifiedMessage theMsg, IIdType theResourceId, ActiveSubscription theActiveSubscription) {
-		// skip if the partitions don't match
+
 		CanonicalSubscription subscription = theActiveSubscription.getSubscription();
-		if (subscription != null
-				&& theMsg.getPartitionId() != null
-				&& theMsg.getPartitionId().hasPartitionIds()
-				&& !subscription.getCrossPartitionEnabled()
-				&& !theMsg.getPartitionId().hasPartitionId(subscription.getRequestPartitionId())) {
+		boolean isMsgPartitionMatchingSubscriptionPartition = isMsgPartitionMatchingSubscriptionPartition(theMsg, subscription);
+
+		if (!isMsgPartitionMatchingSubscriptionPartition && !subscription.isCrossPartitionEnabled()) {
 			return false;
 		}
 		String nextSubscriptionId = theActiveSubscription.getId();
@@ -211,6 +209,14 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 
 		IBaseResource payload = theMsg.getNewPayload(myFhirContext);
 		return mySubscriptionMatchDeliverer.deliverPayload(payload, theMsg, theActiveSubscription, matchResult);
+	}
+
+	private boolean isMsgPartitionMatchingSubscriptionPartition(ResourceModifiedMessage theMsg, CanonicalSubscription theSubscription) {
+		return (theSubscription != null
+			&& theMsg.getPartitionId() != null
+			&& theMsg.getPartitionId().hasPartitionIds()
+			&& theMsg.getPartitionId().hasPartitionId(theSubscription.getRequestPartitionId()));
+
 	}
 
 	private boolean resourceTypeIsAppropriateForSubscription(
