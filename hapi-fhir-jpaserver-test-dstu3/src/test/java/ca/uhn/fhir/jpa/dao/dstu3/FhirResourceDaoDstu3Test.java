@@ -116,6 +116,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -188,7 +189,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		SearchParameterMap map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		map.add("_tag", new TokenParam(methodName, methodName));
-		assertEquals(1, myOrganizationDao.search(map).size().intValue());
+		assertEquals(1, Objects.requireNonNull(myOrganizationDao.search(map).size()).intValue());
 
 		myOrganizationDao.delete(orgId, mySrd);
 
