@@ -4,8 +4,8 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionCriteriaParser;
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionMatchDeliverer;
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionMatchingSubscriber;
@@ -14,7 +14,6 @@ import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.module.standalone.BaseBlockingQueueSubscribableChannelDstu3Test;
-import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.messaging.BaseResourceModifiedMessage;
@@ -234,54 +233,7 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})
-	public void testSubscriptionAndResourceOnDiffPartitionNotMatch(boolean theIsCrossPartitionEnabled) throws InterruptedException {
-		mySubscriptionSettings.setCrossPartitionSubscriptionEnabled(theIsCrossPartitionEnabled);
-		myPartitionSettings.setPartitioningEnabled(true);
-		String payload = "application/fhir+json";
-
-		String code = "1000000050";
-		String criteria = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
-
-		RequestPartitionId requestPartitionId = RequestPartitionId.fromPartitionId(1);
-		Subscription subscription = makeActiveSubscription(criteria, payload, ourListenerServerBase);
-		mockSubscriptionRead(requestPartitionId, subscription);
-		sendSubscription(subscription, requestPartitionId, true);
-
-		final ThrowsInterrupted throwsInterrupted = () -> sendObservation(code, "SNOMED-CT", RequestPartitionId.fromPartitionId(0));
-		if (theIsCrossPartitionEnabled) {
-			runWithinLatchLogicExpectSuccess(throwsInterrupted);
-		} else {
-			runWithLatchLogicExpectFailure(throwsInterrupted);
-		}
-	}
-
-	@ParameterizedTest
-	@ValueSource(booleans = {true, false})
-	public void testSubscriptionAndResourceOnDiffPartitionNotMatchPart2(boolean theIsCrossPartitionEnabled) throws InterruptedException {
-		mySubscriptionSettings.setCrossPartitionSubscriptionEnabled(theIsCrossPartitionEnabled);
-		myPartitionSettings.setPartitioningEnabled(true);
-		String payload = "application/fhir+json";
-
-		String code = "1000000050";
-		String criteria = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
-
-		RequestPartitionId requestPartitionId = RequestPartitionId.fromPartitionId(0);
-		Subscription subscription = makeActiveSubscription(criteria, payload, ourListenerServerBase);
-		mockSubscriptionRead(requestPartitionId, subscription);
-		sendSubscription(subscription, requestPartitionId, true);
-
-		final ThrowsInterrupted throwsInterrupted = () -> sendObservation(code, "SNOMED-CT", RequestPartitionId.fromPartitionId(1));
-
-		if (theIsCrossPartitionEnabled) {
-			runWithinLatchLogicExpectSuccess(throwsInterrupted);
-		} else {
-			runWithLatchLogicExpectFailure(throwsInterrupted);
-		}
-	}
-
-	@ParameterizedTest
-	@ValueSource(booleans = {true, false})
-	public void testSubscriptionOnDefaultPartitionAndResourceOnDiffPartitionNotMatch(boolean theIsCrossPartitionEnabled) throws InterruptedException {
+	public void testSubscriptionMatching_whenSubcriptionAndResourceOnDiffPartition_matchesWhenIsCrossPartitionSubscription(boolean theIsCrossPartitionEnabled) throws InterruptedException {
 		mySubscriptionSettings.setCrossPartitionSubscriptionEnabled(theIsCrossPartitionEnabled);
 		myPartitionSettings.setPartitioningEnabled(true);
 		String payload = "application/fhir+json";
@@ -291,35 +243,11 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 
 		RequestPartitionId requestPartitionId = RequestPartitionId.defaultPartition();
 		Subscription subscription = makeActiveSubscription(criteria, payload, ourListenerServerBase);
+		subscription.addExtension(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION, new org.hl7.fhir.dstu3.model.BooleanType().setValue(true));
 		mockSubscriptionRead(requestPartitionId, subscription);
 		sendSubscription(subscription, requestPartitionId, true);
 
-		final ThrowsInterrupted throwsInterrupted = () -> sendObservation(code, "SNOMED-CT", RequestPartitionId.fromPartitionId(1));
-
-		if (theIsCrossPartitionEnabled) {
-			runWithinLatchLogicExpectSuccess(throwsInterrupted);
-		} else {
-			runWithLatchLogicExpectFailure(throwsInterrupted);
-		}
-	}
-
-	@ParameterizedTest
-	@ValueSource(booleans = {true, false})
-	public void testSubscriptionOnAPartitionAndResourceOnDefaultPartitionNotMatch(boolean theIsCrossPartitionEnabled) throws InterruptedException {
-		mySubscriptionSettings.setCrossPartitionSubscriptionEnabled(theIsCrossPartitionEnabled);
-		myPartitionSettings.setPartitioningEnabled(true);
-		String payload = "application/fhir+json";
-
-		String code = "1000000050";
-		String criteria = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
-
-		RequestPartitionId requestPartitionId = RequestPartitionId.fromPartitionId(1);
-		Subscription subscription = makeActiveSubscription(criteria, payload, ourListenerServerBase);
-		mockSubscriptionRead(requestPartitionId, subscription);
-		sendSubscription(subscription, requestPartitionId, true);
-
-		final ThrowsInterrupted throwsInterrupted = () -> sendObservation(code, "SNOMED-CT", RequestPartitionId.defaultPartition());
-
+		final ThrowsInterrupted throwsInterrupted = () -> sendObservation(code, "SNOMED-CT", RequestPartitionId.fromPartitionId(0));
 		if (theIsCrossPartitionEnabled) {
 			runWithinLatchLogicExpectSuccess(throwsInterrupted);
 		} else {
@@ -358,8 +286,9 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		String code = "1000000050";
 		String criteria = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 
-		RequestPartitionId requestPartitionId = RequestPartitionId.fromPartitionId(1);
+		RequestPartitionId requestPartitionId = RequestPartitionId.defaultPartition();
 		Subscription subscription = makeActiveSubscription(criteria, payload, ourListenerServerBase);
+		subscription.addExtension(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION, new org.hl7.fhir.dstu3.model.BooleanType().setValue(true));
 		mockSubscriptionRead(requestPartitionId, subscription);
 		sendSubscription(subscription, requestPartitionId, true);
 

@@ -134,7 +134,7 @@ public class SubscriptionCanonicalizer {
 	private boolean extractDeleteExtensionDstu2(ca.uhn.fhir.model.dstu2.resource.Subscription theSubscription) {
 		return theSubscription.getChannel().getUndeclaredExtensionsByUrl(EX_SEND_DELETE_MESSAGES).stream()
 				.map(ExtensionDt::getValue)
-				.map(value -> (BooleanDt) value)
+				.map(BooleanDt.class::cast)
 				.map(BasePrimitive::getValue)
 				.findFirst()
 				.orElse(false);
@@ -401,7 +401,7 @@ public class SubscriptionCanonicalizer {
 		}
 
 		List<Extension> topicExts = subscription.getExtensionsByUrl("http://hl7.org/fhir/subscription/topics");
-		if (topicExts.size() > 0) {
+		if (!topicExts.isEmpty()) {
 			IBaseReference ref = (IBaseReference) topicExts.get(0).getValueAsPrimitive();
 			if (!"EventDefinition".equals(ref.getReferenceElement().getResourceType())) {
 				throw new PreconditionFailedException(Msg.code(563) + "Topic reference must be an EventDefinition");
@@ -499,7 +499,7 @@ public class SubscriptionCanonicalizer {
 
 		List<org.hl7.fhir.r4b.model.Extension> topicExts =
 				subscription.getExtensionsByUrl("http://hl7.org/fhir/subscription/topics");
-		if (topicExts.size() > 0) {
+		if (!topicExts.isEmpty()) {
 			IBaseReference ref = (IBaseReference) topicExts.get(0).getValueAsPrimitive();
 			if (!"EventDefinition".equals(ref.getReferenceElement().getResourceType())) {
 				throw new PreconditionFailedException(Msg.code(566) + "Topic reference must be an EventDefinition");
@@ -531,7 +531,7 @@ public class SubscriptionCanonicalizer {
 
 		List<org.hl7.fhir.r5.model.Extension> topicExts =
 				subscription.getExtensionsByUrl("http://hl7.org/fhir/subscription/topics");
-		if (topicExts.size() > 0) {
+		if (!topicExts.isEmpty()) {
 			IBaseReference ref = (IBaseReference) topicExts.get(0).getValueAsPrimitive();
 			if (!"EventDefinition".equals(ref.getReferenceElement().getResourceType())) {
 				throw new PreconditionFailedException(Msg.code(2325) + "Topic reference must be an EventDefinition");
@@ -568,9 +568,7 @@ public class SubscriptionCanonicalizer {
 		retVal.getTopicSubscription().setTopic(subscription.getTopic());
 		retVal.setChannelType(getChannelType(subscription));
 
-		subscription.getFilterBy().forEach(filter -> {
-			retVal.getTopicSubscription().addFilter(convertFilter(filter));
-		});
+		subscription.getFilterBy().forEach(filter -> retVal.getTopicSubscription().addFilter(convertFilter(filter)));
 
 		retVal.getTopicSubscription().setHeartbeatPeriod(subscription.getHeartbeatPeriod());
 		retVal.getTopicSubscription().setMaxCount(subscription.getMaxCount());
@@ -783,17 +781,21 @@ public class SubscriptionCanonicalizer {
 
 	private boolean handleCrossPartition(IBaseResource theSubscription) {
 		RequestPartitionId requestPartitionId =
-			(RequestPartitionId) theSubscription.getUserData(Constants.RESOURCE_PARTITION_ID);
+				(RequestPartitionId) theSubscription.getUserData(Constants.RESOURCE_PARTITION_ID);
 
 		boolean isSubscriptionCreatedOnDefaultPartition = false;
 
-		if(nonNull(requestPartitionId)){
-			isSubscriptionCreatedOnDefaultPartition =  requestPartitionId.isDefaultPartition();
+		if (nonNull(requestPartitionId)) {
+			isSubscriptionCreatedOnDefaultPartition = requestPartitionId.isDefaultPartition();
 		}
 
-		boolean isSubscriptionDefinededAsCrossPartitionSubscription = SubscriptionUtil.isDefinedAsCrossPartitionSubcription(theSubscription);
-		boolean isGlobalSettingCrossPartitionSubscriptionEnabled = mySubscriptionSettings.isCrossPartitionSubscriptionEnabled();
+		boolean isSubscriptionDefinededAsCrossPartitionSubscription =
+				SubscriptionUtil.isDefinedAsCrossPartitionSubcription(theSubscription);
+		boolean isGlobalSettingCrossPartitionSubscriptionEnabled =
+				mySubscriptionSettings.isCrossPartitionSubscriptionEnabled();
 
-		return isSubscriptionCreatedOnDefaultPartition && isSubscriptionDefinededAsCrossPartitionSubscription && isGlobalSettingCrossPartitionSubscriptionEnabled;
+		return isSubscriptionCreatedOnDefaultPartition
+				&& isSubscriptionDefinededAsCrossPartitionSubscription
+				&& isGlobalSettingCrossPartitionSubscriptionEnabled;
 	}
 }

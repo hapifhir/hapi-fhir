@@ -332,6 +332,14 @@ public class RequestPartitionId implements IModelJson {
 		return new RequestPartitionId(thePartitionNames, thePartitionIds, thePartitionDate);
 	}
 
+	public static boolean isDefaultPartition(@Nullable RequestPartitionId thePartitionId) {
+		if (thePartitionId == null) {
+			return false;
+		}
+
+		return thePartitionId.isDefaultPartition();
+	}
+
 	/**
 	 * Create a string representation suitable for use as a cache key. Null aware.
 	 * <p>

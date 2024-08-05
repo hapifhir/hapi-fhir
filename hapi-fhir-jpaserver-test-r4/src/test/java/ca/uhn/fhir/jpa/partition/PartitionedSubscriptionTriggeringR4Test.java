@@ -60,6 +60,7 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 	public static final RequestPartitionId REQ_PART_1 = RequestPartitionId.fromPartitionNames(PARTITION_1);
 	static final String PARTITION_2 = "PART-2";
 	public static final RequestPartitionId REQ_PART_2 = RequestPartitionId.fromPartitionNames(PARTITION_2);
+	public static final RequestPartitionId REQ_PART_DEFAULT = RequestPartitionId.defaultPartition();
 
 	protected MyReadWriteInterceptor myPartitionInterceptor;
 	protected LocalDate myPartitionDate;
@@ -127,7 +128,7 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 		Subscription subscription = newSubscription(criteria1, payload);
 
-		assertEquals(mySrdInterceptorService.getAllRegisteredInterceptors().size(), 1);
+		assertThat(mySrdInterceptorService.getAllRegisteredInterceptors()).hasSize(1);
 
 		myDaoRegistry.getResourceDao("Subscription").create(subscription, mySrd);
 
@@ -150,13 +151,13 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 		mySubscriptionSettings.setCrossPartitionSubscriptionEnabled(theIsCrossPartitionEnabled);
 		String payload = "application/fhir+json";
 
-		String code = "1000000050";
 		String criteria1 = "Patient?active=true";
 		Subscription subscription = newSubscription(criteria1, payload);
+		subscription.addExtension(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION, new org.hl7.fhir.r4.model.BooleanType().setValue(true));
 
-		assertEquals(mySrdInterceptorService.getAllRegisteredInterceptors().size(), 1);
+		assertThat(mySrdInterceptorService.getAllRegisteredInterceptors()).hasSize(1);
 
-		myDaoRegistry.getResourceDao("Subscription").create(subscription, mySrd);
+		myDaoRegistry.getResourceDao("Subscription").create(subscription, new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.defaultPartition()));
 
 		waitForActivatedSubscriptionCount(1);
 
@@ -186,7 +187,7 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})
-	public void testManualTriggeredSubscriptionDoesNotCheckOutsideOfPartition(boolean theIsCrossPartitionEnabled) throws Exception {
+	public void testManualTriggeredSubscriptionDoesNotMatchOnAllPartitions(boolean theIsCrossPartitionEnabled) throws Exception {
 		mySubscriptionSettings.setCrossPartitionSubscriptionEnabled(theIsCrossPartitionEnabled);
 		String payload = "application/fhir+json";
 		String code = "1000000050";
@@ -201,8 +202,9 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 		myPartitionInterceptor.setRequestPartitionId(REQ_PART_1);
 		IIdType observationIdPartitionOne = observation.create(createBaseObservation(code, "SNOMED-CT"), mySrd).getId();
 
-		//Given: We create a subscrioption on Partition 1
-		IIdType subscriptionId = myDaoRegistry.getResourceDao("Subscription").create(newSubscription(criteria1, payload), mySrd).getId();
+		//Given: We create a subscription on partition 1
+		Subscription subscription = newSubscription(criteria1, payload);
+		IIdType subscriptionId = myDaoRegistry.getResourceDao("Subscription").create(subscription, mySrd).getId();
 		waitForActivatedSubscriptionCount(1);
 
 		ArrayList<IPrimitiveType<String>> searchUrlList = new ArrayList<>();
@@ -213,14 +215,49 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 
 		waitForQueueToDrain();
 		List<Observation> resourceUpdates = BaseSubscriptionsR4Test.ourObservationProvider.getResourceUpdates();
-		if (theIsCrossPartitionEnabled) {
-			assertEquals(2, resourceUpdates.size());
-			assertEquals(Stream.of(observationIdPartitionOne, observationIdPartitionTwo).map(Object::toString).sorted().toList(),
-				resourceUpdates.stream().map(Resource::getId).sorted().toList());
-		} else {
-			assertEquals(1, resourceUpdates.size());
-			assertEquals(observationIdPartitionOne.toString(), resourceUpdates.get(0).getId());
-		}
+
+		assertEquals(1, resourceUpdates.size());
+		assertEquals(observationIdPartitionOne.toString(), resourceUpdates.get(0).getId());
+
+		String responseValue = resultParameters.getParameter().get(0).getValue().primitiveValue();
+		assertThat(responseValue).contains("Subscription triggering job submitted as JOB ID");
+	}
+
+	@Test
+	public void testManualTriggeredCrossPartitinedSubscriptionDoesMatchOnAllPartitions() throws Exception {
+		mySubscriptionSettings.setCrossPartitionSubscriptionEnabled(true);
+		String payload = "application/fhir+json";
+		String code = "1000000050";
+		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
+
+		//Given: We store a resource in partition 2
+		myPartitionInterceptor.setRequestPartitionId(REQ_PART_2);
+		final IFhirResourceDao observation = myDaoRegistry.getResourceDao("Observation");
+		IIdType observationIdPartitionTwo = observation.create(createBaseObservation(code, "SNOMED-CT"), mySrd).getId();
+
+		//Given: We store a similar resource in partition 1
+		myPartitionInterceptor.setRequestPartitionId(REQ_PART_1);
+		IIdType observationIdPartitionOne = observation.create(createBaseObservation(code, "SNOMED-CT"), mySrd).getId();
+
+		//Given: We create a subscription on the default partition
+		myPartitionInterceptor.setRequestPartitionId(REQ_PART_DEFAULT);
+		Subscription subscription = newSubscription(criteria1, payload);
+		subscription.addExtension(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION, new org.hl7.fhir.r4.model.BooleanType().setValue(true));
+		IIdType subscriptionId = myDaoRegistry.getResourceDao("Subscription").create(subscription, mySrd).getId();
+		waitForActivatedSubscriptionCount(1);
+
+		ArrayList<IPrimitiveType<String>> searchUrlList = new ArrayList<>();
+		searchUrlList.add(new StringDt("Observation?"));
+
+		Parameters resultParameters = (Parameters) mySubscriptionTriggeringSvc.triggerSubscription(null, searchUrlList, subscriptionId, mySrd);
+		mySubscriptionTriggeringSvc.runDeliveryPass();
+
+		waitForQueueToDrain();
+		List<Observation> resourceUpdates = BaseSubscriptionsR4Test.ourObservationProvider.getResourceUpdates();
+
+		assertEquals(2, resourceUpdates.size());
+		assertEquals(Stream.of(observationIdPartitionOne, observationIdPartitionTwo).map(Object::toString).sorted().toList(),
+			resourceUpdates.stream().map(Resource::getId).sorted().toList());
 
 		String responseValue = resultParameters.getParameter().get(0).getValue().primitiveValue();
 		assertThat(responseValue).contains("Subscription triggering job submitted as JOB ID");
@@ -273,7 +310,7 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 		// Create the subscription now
 		DaoMethodOutcome subscriptionOutcome = myDaoRegistry.getResourceDao("Subscription").create(newSubscription(criteria1, payload), mySrd);
 
-		assertEquals(mySrdInterceptorService.getAllRegisteredInterceptors().size(), 1);
+		assertThat(mySrdInterceptorService.getAllRegisteredInterceptors()).hasSize(1);
 
 		Subscription subscription = (Subscription) subscriptionOutcome.getResource();
 

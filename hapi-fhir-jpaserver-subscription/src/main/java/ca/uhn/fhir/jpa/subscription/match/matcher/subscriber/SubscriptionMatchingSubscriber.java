@@ -32,6 +32,7 @@ import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
 import jakarta.annotation.Nonnull;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
@@ -153,11 +154,15 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 			ResourceModifiedMessage theMsg, IIdType theResourceId, ActiveSubscription theActiveSubscription) {
 
 		CanonicalSubscription subscription = theActiveSubscription.getSubscription();
-		boolean isMsgPartitionMatchingSubscriptionPartition = isMsgPartitionMatchingSubscriptionPartition(theMsg, subscription);
 
-		if (!isMsgPartitionMatchingSubscriptionPartition && !subscription.isCrossPartitionEnabled()) {
+		if (subscription != null
+				&& theMsg.getPartitionId() != null
+				&& theMsg.getPartitionId().hasPartitionIds()
+				&& !subscription.isCrossPartitionEnabled()
+				&& !theMsg.getPartitionId().hasPartitionId(subscription.getRequestPartitionId())) {
 			return false;
 		}
+
 		String nextSubscriptionId = theActiveSubscription.getId();
 
 		if (isNotBlank(theMsg.getSubscriptionId())) {
@@ -209,14 +214,6 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 
 		IBaseResource payload = theMsg.getNewPayload(myFhirContext);
 		return mySubscriptionMatchDeliverer.deliverPayload(payload, theMsg, theActiveSubscription, matchResult);
-	}
-
-	private boolean isMsgPartitionMatchingSubscriptionPartition(ResourceModifiedMessage theMsg, CanonicalSubscription theSubscription) {
-		return (theSubscription != null
-			&& theMsg.getPartitionId() != null
-			&& theMsg.getPartitionId().hasPartitionIds()
-			&& theMsg.getPartitionId().hasPartitionId(theSubscription.getRequestPartitionId()));
-
 	}
 
 	private boolean resourceTypeIsAppropriateForSubscription(
