@@ -91,40 +91,23 @@ public class CanonicalSubscriptionTest {
 		assertTrue(sub1.equals(sub2));
 	}
 
-	@Test
-	public void testSerializeMultiPartitionSubscription(){
-		SubscriptionCanonicalizer canonicalizer = new SubscriptionCanonicalizer(FhirContext.forR4(), new SubscriptionSettings());
-		Subscription subscription = makeEmailSubscription();
-		subscription.addExtension(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION, new BooleanType().setValue(true));
-		CanonicalSubscription canonicalSubscription = canonicalizer.canonicalize(subscription);
-
-		assertEquals(canonicalSubscription.isCrossPartitionEnabled(), true);
-	}
-
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})
-	public void testSerializeIncorrectMultiPartitionSubscription(boolean theIsCrossPartitionEnabled){
+	public void testSubscriptionCrossPartitionEnabled_basedOnGlobalFlagAndExtensionFalse(boolean theIsCrossPartitionEnabled){
 		final SubscriptionSettings subscriptionSettings = buildSubscriptionSettings(theIsCrossPartitionEnabled);
 		SubscriptionCanonicalizer canonicalizer = new SubscriptionCanonicalizer(FhirContext.forR4(), subscriptionSettings);
-		Subscription subscription = makeEmailSubscription();
-		subscription.addExtension(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION, new StringType().setValue("false"));
-		CanonicalSubscription canonicalSubscription = canonicalizer.canonicalize(subscription);
 
-		assertEquals(canonicalSubscription.isCrossPartitionEnabled(), false);
-	}
+		Subscription subscriptionWithExtensionSetToStringFalse = makeEmailSubscription();
+		subscriptionWithExtensionSetToStringFalse.addExtension(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION, new StringType().setValue("false"));
 
-	@ParameterizedTest
-	@ValueSource(booleans = {true, false})
-	public void testSerializeNonMultiPartitionSubscription(boolean theIsCrossPartitionEnabled){
-		final SubscriptionSettings subscriptionSettings = buildSubscriptionSettings(theIsCrossPartitionEnabled);
-		SubscriptionCanonicalizer canonicalizer = new SubscriptionCanonicalizer(FhirContext.forR4(), subscriptionSettings);
-		Subscription subscription = makeEmailSubscription();
-		subscription.addExtension(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION, new BooleanType().setValue(false));
-		CanonicalSubscription canonicalSubscription = canonicalizer.canonicalize(subscription);
+		Subscription subscriptionWithExtensionSetToBooleanFalse = makeEmailSubscription();
+		subscriptionWithExtensionSetToBooleanFalse.addExtension(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION, new BooleanType().setValue(false));
 
-		System.out.print(canonicalSubscription);
+		CanonicalSubscription canonicalSubscriptionExtensionSetToStringFalse = canonicalizer.canonicalize(subscriptionWithExtensionSetToStringFalse);
+		CanonicalSubscription canonicalSubscriptionExtensionSetToBooleanFalse = canonicalizer.canonicalize(subscriptionWithExtensionSetToBooleanFalse);
 
-		assertEquals(canonicalSubscription.isCrossPartitionEnabled(), false);
+		assertEquals(canonicalSubscriptionExtensionSetToStringFalse.isCrossPartitionEnabled(), false);
+		assertEquals(canonicalSubscriptionExtensionSetToBooleanFalse.isCrossPartitionEnabled(), false);
 	}
 
 	static Stream<Arguments> requestPartitionIds() {
@@ -139,7 +122,7 @@ public class CanonicalSubscriptionTest {
 	@ParameterizedTest
 	@MethodSource("requestPartitionIds")
 	public void testSubscriptionCrossPartitionEnabled_basedOnGlobalFlagAndExtensionAndPartitionId(RequestPartitionId theRequestPartitionId, boolean theExpectedIsCrossPartitionEnabled){
-		final boolean globalIsCrossPartitionEnabled = true;
+		final boolean globalIsCrossPartitionEnabled = true;   // not required but to help understand what the test is doing.
 		SubscriptionCanonicalizer canonicalizer = new SubscriptionCanonicalizer(FhirContext.forR4(), buildSubscriptionSettings(globalIsCrossPartitionEnabled));
 
 		Subscription subscription = makeEmailSubscription();
