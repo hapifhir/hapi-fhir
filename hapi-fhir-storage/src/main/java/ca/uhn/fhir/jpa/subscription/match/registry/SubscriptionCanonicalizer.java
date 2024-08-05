@@ -568,7 +568,8 @@ public class SubscriptionCanonicalizer {
 		retVal.getTopicSubscription().setTopic(subscription.getTopic());
 		retVal.setChannelType(getChannelType(subscription));
 
-		subscription.getFilterBy().forEach(filter -> retVal.getTopicSubscription().addFilter(convertFilter(filter)));
+		subscription.getFilterBy().forEach(filter -> retVal.getTopicSubscription()
+				.addFilter(convertFilter(filter)));
 
 		retVal.getTopicSubscription().setHeartbeatPeriod(subscription.getHeartbeatPeriod());
 		retVal.getTopicSubscription().setMaxCount(subscription.getMaxCount());
