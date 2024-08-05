@@ -2597,41 +2597,6 @@
 					</executions>
 					<configuration>
 						<skip>true</skip>
-						<dialects>
-							<dialect>
-								<className>ca.uhn.fhir.jpa.model.dialect.HapiFhirDerbyDialect</className>
-								<targetFileName>derby.sql</targetFileName>
-							</dialect>
-							<dialect>
-								<className>ca.uhn.fhir.jpa.model.dialect.HapiFhirMySQLDialect</className>
-								<targetFileName>mysql.sql</targetFileName>
-							</dialect>
-							<dialect>
-								<className>ca.uhn.fhir.jpa.model.dialect.HapiFhirMariaDBDialect</className>
-								<targetFileName>mariadb.sql</targetFileName>
-							</dialect>
-							<dialect>
-								<className>ca.uhn.fhir.jpa.model.dialect.HapiFhirOracleDialect</className>
-								<targetFileName>oracle.sql</targetFileName>
-							</dialect>
-							<dialect>
-								<className>ca.uhn.fhir.jpa.model.dialect.HapiFhirSQLServerDialect</className>
-								<targetFileName>sqlserver.sql</targetFileName>
-							</dialect>
-							<dialect>
-								<className>ca.uhn.fhir.jpa.model.dialect.HapiFhirCockroachDialect</className>
-								<targetFileName>cockroachdb.sql</targetFileName>
-							</dialect>
-							<dialect>
-								<className>ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect</className>
-								<targetFileName>h2.sql</targetFileName>
-							</dialect>
-<!--							<dialect>-->
-<!--								<className>ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgresDialect</className>-->
-<!--								<targetFileName>postgres.sql</targetFileName>-->
-<!--								<appendFile>classpath:ca/uhn/fhir/jpa/docs/database/hapifhirpostgres94-init01.sql</appendFile>-->
-<!--							</dialect>-->
-						</dialects>
 					</configuration>
 				</plugin>
 
