@@ -79,11 +79,19 @@ public class ApacheHttpClient extends BaseHttpClient implements IHttpClient {
 				&& !theParameters.getFormParams().isEmpty()) {
 			return entityFromFormParams(theParameters.getFormParams());
 		}
-		// could be a get request
+		/*
+		 * Could be a get request.
+		 * This fallthrough is for legacy purposes; ideally we would use the request type
+		 * but legacy clients don't have it defined always.
+		 */
 		return null;
 	}
 
 	private HttpRequestBase constructRequestBase(HttpClientRequestParameters theParameters, HttpEntity theEntity) {
+		// we default to the parameters request type;
+		// but if that's not provided (as in legacy clients case)
+		// we'll use the client's request type instead.
+		// one of these will definitely be provided though.
 		RequestTypeEnum requestTypeEnum = theParameters.getRequestTypeEnum();
 		if (requestTypeEnum == null) {
 			requestTypeEnum = myRequestType;

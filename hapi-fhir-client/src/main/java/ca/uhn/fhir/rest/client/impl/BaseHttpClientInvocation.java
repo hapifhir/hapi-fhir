@@ -51,7 +51,7 @@ public abstract class BaseHttpClientInvocation {
 	}
 
 	/**
-	 * Create an HTTP request out of this client request
+	 * Create an HTTP request out of this client request.
 	 *
 	 * @param theUrlBase
 	 *            The FHIR server base url (with a trailing "/")
@@ -60,17 +60,19 @@ public abstract class BaseHttpClientInvocation {
 	 * @param theEncoding
 	 *            The encoding to use for any serialized content sent to the
 	 *            server
+	 *
+	 * @deprecated Use/Override {@link #asHttpRequest(AsHttpRequestParams)} instead.
 	 */
-	@Deprecated
+	@Deprecated(since = "7.5.0")
 	public abstract IHttpRequest asHttpRequest(
 			String theUrlBase,
 			Map<String, List<String>> theExtraParams,
 			EncodingEnum theEncoding,
 			Boolean thePrettyPrint);
 
-	// TODO implement
 	public IHttpRequest asHttpRequest(AsHttpRequestParams theParams) {
-
+		// default passes back to deprecated;
+		// this is to allow existing clients not to break
 		return asHttpRequest(
 				theParams.getUrlBase(),
 				theParams.getExtraParams(),
@@ -95,8 +97,11 @@ public abstract class BaseHttpClientInvocation {
 	protected IHttpRequest createHttpRequest(CreateRequestParameters theParameters) {
 		IHttpClient httpClient;
 		if (theParameters.getClient() != null) {
+			// reuse existing client
 			httpClient = theParameters.getClient();
+			httpClient.setNewUrl(new StringBuilder(theParameters.getUrl()));
 		} else {
+			// make a new client
 			httpClient = getRestfulClientFactory()
 					.getHttpClient(
 							new StringBuilder(theParameters.getUrl()),
@@ -105,14 +110,13 @@ public abstract class BaseHttpClientInvocation {
 							theParameters.getRequestTypeEnum(),
 							myHeaders);
 		}
-		// todo
+
 		HttpClientRequestParameters clientRequestParameters =
 				new HttpClientRequestParameters(theParameters.getUrl(), theParameters.getRequestTypeEnum());
 		clientRequestParameters.setEncodingEnum(theParameters.getEncodingEnum());
 		IHttpRequest request = httpClient.createRequest(clientRequestParameters);
 		httpClient.addHeadersToRequest(request, theParameters.getEncodingEnum(), getContext());
 		return request;
-		//		return httpClient.createGetRequest(getContext(), theParameters.getEncodingEnum());
 	}
 
 	/**

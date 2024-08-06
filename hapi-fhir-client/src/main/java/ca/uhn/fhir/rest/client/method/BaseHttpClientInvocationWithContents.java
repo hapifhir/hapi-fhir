@@ -28,7 +28,6 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
-import ca.uhn.fhir.rest.client.apache.ApacheHttpClient;
 import ca.uhn.fhir.rest.client.api.Header;
 import ca.uhn.fhir.rest.client.api.IHttpClient;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
@@ -191,7 +190,6 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		httpClient.addHeadersToRequest(request, theEncoding, parameters.getFhirContext());
 		request.addHeader(Constants.HEADER_CONTENT_TYPE, contentType + Constants.HEADER_SUFFIX_CT_UTF_8);
 		return request;
-//		return httpClient.createByteRequest(getContext(), contents, contentType, encoding);
 	}
 
 	private String getContentType(EncodingEnum encoding) {

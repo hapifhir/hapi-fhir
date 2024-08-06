@@ -196,7 +196,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	@Override
 	public IFetchConformanceUntyped capabilities() {
-		return capabilities(ClientType.DEPRECATED);
+		return capabilities(ClientType.LEGACY);
 	}
 
 	@Override
@@ -209,7 +209,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	@Override
 	public ICreate create() {
-		return create(ClientType.DEPRECATED);
+		return create(ClientType.LEGACY);
 	}
 
 	@Override
@@ -222,7 +222,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	@Override
 	public IDelete delete() {
-		return delete(ClientType.DEPRECATED);
+		return delete(ClientType.LEGACY);
 	}
 
 	@Override
@@ -272,8 +272,6 @@ public class GenericClient extends BaseClient implements IGenericClient {
 					.setClient(myClient)
 					.setEncodingEnum(getEncoding())
 					.setPrettyPrint(isPrettyPrint());
-			//			myLastRequest = invocation.asHttpRequest(
-			//					getServerBase(), createExtraParams(theCustomAcceptHeaderValue), getEncoding(), isPrettyPrint());
 			myLastRequest = invocation.asHttpRequest(params);
 		}
 
@@ -286,18 +284,6 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				new ResourceResponseHandler<>(theType, (Class<? extends IBaseResource>) null, id, allowHtmlResponse);
 
 		if (theNotModifiedHandler == null) {
-			//			return invokeClient(
-			//					myContext,
-			//					binding,
-			//					invocation,
-			//					theEncoding,
-			//					thePrettyPrint,
-			//					myLogRequestAndResponse,
-			//					theSummary,
-			//					theSubsetElements,
-			//					null,
-			//					theCustomAcceptHeaderValue,
-			//					theCustomHeaders);
 			return invokeClient(new InvokeClientParameters<T>()
 					.setContext(myContext)
 					.setBinding(binding)
@@ -330,7 +316,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	@Override
 	public IFetchConformanceUntyped fetchConformance() {
-		return fetchConformance(ClientType.DEPRECATED);
+		return fetchConformance(ClientType.LEGACY);
 	}
 
 	@Override
@@ -371,7 +357,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	@Override
 	public IHistory history() {
-		return history(ClientType.DEPRECATED);
+		return history(ClientType.LEGACY);
 	}
 
 	@Override
@@ -400,7 +386,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	@Override
 	public IGetPage loadPage() {
-		return loadPage(ClientType.DEPRECATED);
+		return loadPage(ClientType.LEGACY);
 	}
 
 	@Override
@@ -413,7 +399,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	@Override
 	public IMeta meta() {
-		return meta(ClientType.DEPRECATED);
+		return meta(ClientType.LEGACY);
 	}
 
 	@Override
@@ -426,7 +412,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	@Override
 	public IOperation operation() {
-		return operation(ClientType.DEPRECATED);
+		return operation(ClientType.LEGACY);
 	}
 
 	@Override
@@ -439,7 +425,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	@Override
 	public IPatch patch() {
-		return patch(ClientType.DEPRECATED);
+		return patch(ClientType.LEGACY);
 	}
 
 	@Override
@@ -452,7 +438,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	@Override
 	public IRead read() {
-		return read(ClientType.DEPRECATED);
+		return read(ClientType.LEGACY);
 	}
 
 	@Override
@@ -460,7 +446,6 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		if (theClientType == ClientType.PRESERVED && myClient != null) {
 			return new ReadInternal(myClient);
 		}
-		// deprecated
 		return new ReadInternal(null);
 	}
 
@@ -505,7 +490,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	@Override
 	public IUntypedQuery search() {
-		return search(ClientType.DEPRECATED);
+		return search(ClientType.LEGACY);
 	}
 
 	private String toResourceName(Class<? extends IBaseResource> theType) {
@@ -514,7 +499,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	@Override
 	public ITransaction transaction() {
-		return transaction(ClientType.DEPRECATED);
+		return transaction(ClientType.LEGACY);
 	}
 
 	@Override
@@ -527,7 +512,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	@Override
 	public IUpdate update() {
-		return update(ClientType.DEPRECATED);
+		return update(ClientType.LEGACY);
 	}
 
 	@Override
@@ -558,7 +543,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	@Override
 	public IValidate validate() {
-		return validate(ClientType.DEPRECATED);
+		return validate(ClientType.LEGACY);
 	}
 
 	@Override
@@ -719,7 +704,6 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				IClientResponseHandler<Z> theHandler,
 				BaseHttpClientInvocation theInvocation) {
 			if (isKeepResponses()) {
-//				myLastRequest = theInvocation.asHttpRequest(getServerBase(), theParams, getEncoding(), myPrettyPrint);
 				myLastRequest = theInvocation.asHttpRequest(
 					new AsHttpRequestParams()
 						.setUrlBase(getServerBase())

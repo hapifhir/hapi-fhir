@@ -34,10 +34,10 @@ import java.util.Map;
 
 public class HttpPatchClientInvocation extends BaseHttpClientInvocation {
 
-	private String myUrlPath;
+	private final String myUrlPath;
 	private Map<String, List<String>> myParams;
-	private String myContents;
-	private String myContentType;
+	private final String myContents;
+	private final String myContentType;
 
 	public HttpPatchClientInvocation(FhirContext theContext, IIdType theId, String theContentType, String theContents) {
 		super(theContext);

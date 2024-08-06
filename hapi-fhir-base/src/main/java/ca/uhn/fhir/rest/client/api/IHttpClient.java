@@ -61,15 +61,14 @@ public interface IHttpClient {
 	 */
 	IHttpRequest createBinaryRequest(FhirContext theContext, IBaseBinary theBinary);
 
-	/**
-	 * Create a normal http get request
-	 * @param theContext TODO
-	 * @param theEncoding the request encoding
-	 * @return the http request to be executed
-	 */
+
 	@Deprecated
 	IHttpRequest createGetRequest(FhirContext theContext, EncodingEnum theEncoding);
 
+	/**
+	 * Create a normal http request. The RequestType in the parameters will determine the type.
+	 * @return the http request to be executed
+	 */
 	IHttpRequest createRequest(HttpClientRequestParameters theParameters);
 
 	void addHeadersToRequest(IHttpRequest theRequest, EncodingEnum theEncodingEnum, FhirContext theContext);
@@ -78,7 +77,10 @@ public interface IHttpClient {
 	 * Updates the client's url;
 	 * This is used when we reuse a client for multiple different requests
 	 * (ex, searches, or fetching the /metadata endpoint followed by whatever
-	 * the actual endpoint is, etc)
+	 * the actual endpoint is, etc).
+	 *
+	 * Deprecated / Legacy clients do not use this (they create new clients for
+	 * every request)
 	 */
 	void setNewUrl(StringBuilder theUrl);
 }

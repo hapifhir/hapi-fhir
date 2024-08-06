@@ -124,14 +124,12 @@ public class HttpGetClientInvocation extends BaseHttpClientInvocation {
 
 		appendExtraParamsWithQuestionMark(theExtraParams, b, first);
 
-		// TODO - pass client down here
 		CreateRequestParameters createRequestParameters = new CreateRequestParameters()
 				.setRequestTypeEnum(RequestTypeEnum.GET)
 				.setEncodingEnum(theEncoding)
 				.setUrl(b.toString())
 				.setClient(theAsHttpRequestParams.getClient());
 		IHttpRequest retVal = super.createHttpRequest(createRequestParameters);
-		//		IHttpRequest retVal = super.createHttpRequest(b.toString(), theEncoding, RequestTypeEnum.GET);
 		retVal.setUrlSource(myUrlSource);
 
 		return retVal;

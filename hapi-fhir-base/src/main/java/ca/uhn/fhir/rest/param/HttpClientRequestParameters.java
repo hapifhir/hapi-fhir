@@ -10,28 +10,66 @@ import java.util.List;
 import java.util.Map;
 
 public class HttpClientRequestParameters {
-
+	/**
+	 * The fhir context used.
+	 */
 	private FhirContext myFhirContext;
-
+	/**
+	 * The encoding type (JSON, XML, etc) to use for the request.
+	 */
 	private EncodingEnum myEncodingEnum;
-
+	/**
+	 * The request type (GET, POST, PUT, etc)
+	 * Generally a required field.
+	 */
 	private RequestTypeEnum myRequestTypeEnum;
 
+	/**
+	 * Parameters
+	 */
 	private Map<String, List<String>> myParams;
 
+	/**
+	 * The content type to use (application/json, etc)
+	 */
 	private String myContentType;
 
+	/**
+	 * If the payload is a String, this is the content to attach.
+	 *
+	 * Only one of String/byte[]/form encoded url parameters can be used.
+	 * String contents will be used before byte contents which will be used
+	 * 		before FormUrlEncoded parameters.
+	 */
 	private String myContents;
 
+	/**
+	 * If the payload is a binary, this is the binary to attach
+	 */
 	private IBaseBinary myBaseBinary;
 
-	private String myUrl;
+	/**
+	 * The URL where the request is to be made.
+	 */
+	private final String myUrl;
 
-	// only for non-get requests
-	private String myStringContents;
-
+	/**
+	 * If the payload is a byte[], this is the content to attach.
+	 *
+	 * Only one of String/byte[]/form encoded url parameters can be used.
+	 * String contents will be used before byte contents which will be used
+	 * 		before FormUrlEncoded parameters.
+	 */
 	private byte[] myByteContents;
 
+	/**
+	 * If the payload is a set of form encoded url parameters, these are the
+	 * parameters to use.
+	 *
+	 * Only one of String/byte[]/form encoded url parameters can be used.
+	 * String contents will be used before byte contents which will be used
+	 * 		before FormUrlEncoded parameters.
+	 */
 	private Map<String, List<String>> myFormParams;
 
 	public HttpClientRequestParameters(String theUrl, @Nonnull RequestTypeEnum theRequestTypeEnum) {
@@ -97,14 +135,6 @@ public class HttpClientRequestParameters {
 
 	public String getUrl() {
 		return myUrl;
-	}
-
-	public String getStringContents() {
-		return myStringContents;
-	}
-
-	public void setStringContents(String theStringContents) {
-		myStringContents = theStringContents;
 	}
 
 	public byte[] getByteContents() {

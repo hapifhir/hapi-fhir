@@ -33,8 +33,8 @@ import java.util.Map;
 
 public class HttpDeleteClientInvocation extends BaseHttpClientInvocation {
 
-	private String myUrlPath;
-	private Map<String, List<String>> myParams;
+	private final String myUrlPath;
+	private final Map<String, List<String>> myParams;
 
 	public HttpDeleteClientInvocation(
 			FhirContext theContext, IIdType theId, Map<String, List<String>> theAdditionalParams) {
@@ -82,7 +82,6 @@ public class HttpDeleteClientInvocation extends BaseHttpClientInvocation {
 		appendExtraParamsWithQuestionMark(myParams, b, b.indexOf("?") == -1);
 		appendExtraParamsWithQuestionMark(theExtraParams, b, b.indexOf("?") == -1);
 
-//		return createHttpRequest(b.toString(), theEncoding, RequestTypeEnum.DELETE);
 		CreateRequestParameters requestParameters = new CreateRequestParameters();
 		requestParameters.setClient(theParams.getClient());
 		requestParameters.setRequestTypeEnum(RequestTypeEnum.DELETE);

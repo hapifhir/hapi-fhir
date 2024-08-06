@@ -87,8 +87,6 @@ public class ApacheRestfulClientFactory extends RestfulClientFactory {
 
 	public HttpClient getNativeHttpClient() {
 		if (myHttpClient == null) {
-			System.out.println("yyyy Socket timeout " + getSocketTimeout());
-			// TODO: Use of a deprecated method should be resolved.
 			RequestConfig defaultRequestConfig = RequestConfig.custom()
 					.setSocketTimeout(getSocketTimeout())
 					.setConnectTimeout(getConnectTimeout())
@@ -107,6 +105,7 @@ public class ApacheRestfulClientFactory extends RestfulClientFactory {
 			connectionManager.setDefaultMaxPerRoute(getPoolMaxPerRoute());
 			// default value for stale connection check
 			// this can be disabled (with a -ve value) if performance is bad
+			// but currently we are using the default for whatever reason
 			connectionManager.setValidateAfterInactivity(2000);
 			builder.setConnectionManager(connectionManager);
 

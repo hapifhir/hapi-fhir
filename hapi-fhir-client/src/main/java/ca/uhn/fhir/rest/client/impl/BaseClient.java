@@ -344,8 +344,7 @@ public abstract class BaseClient implements IRestfulClient {
 					.setEncodingEnum(encoding)
 					.setClient(myClient);
 			httpRequest = clientInvocation.asHttpRequest(asHttpRequestParams);
-			//			httpRequest = clientInvocation.asHttpRequest(myUrlBase, params, encoding, thePrettyPrint);
-			//
+
 			if (isNotBlank(theCustomAcceptHeader)) {
 				httpRequest.removeHeaders(Constants.HEADER_ACCEPT);
 				httpRequest.addHeader(Constants.HEADER_ACCEPT, theCustomAcceptHeader);

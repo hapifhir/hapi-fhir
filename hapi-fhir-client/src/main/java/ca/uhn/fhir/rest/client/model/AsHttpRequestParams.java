@@ -9,14 +9,29 @@ import java.util.List;
 import java.util.Map;
 
 public class AsHttpRequestParams {
+	/**
+	 * The URL for the request
+	 */
 	private String myUrlBase;
 
+	/**
+	 * Extra parameters
+	 */
 	private Map<String, List<String>> myExtraParams;
 
+	/**
+	 * Encoding to use (JSON, fhir+json, etc)
+	 */
 	private EncodingEnum myEncodingEnum;
 
+	/**
+	 * Whether logs should print pretty or not (for request parsing only)
+	 */
 	private Boolean myPrettyPrint;
 
+	/**
+	 * The client to use for this request
+	 */
 	private IHttpClient myClient;
 
 	public String getUrlBase() {

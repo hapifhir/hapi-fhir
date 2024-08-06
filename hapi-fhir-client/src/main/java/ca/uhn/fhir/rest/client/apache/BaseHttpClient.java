@@ -119,13 +119,6 @@ public abstract class BaseHttpClient implements IHttpClient {
 		return retVal;
 	}
 
-	//	@Override
-	//	public IHttpRequest createRequest(HttpClientRequestParameters theParameters) {
-	//
-	//	}
-
-	//	protected abstract IHttpRequest createHttpRequest(CreateHttpRequestParameters theCreateHttpRequestParameters);
-
 	@Deprecated
 	protected abstract IHttpRequest createHttpRequest();
 
