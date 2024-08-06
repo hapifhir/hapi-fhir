@@ -30,6 +30,7 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.cross.JpaResourceLookup;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
@@ -59,12 +60,11 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.IdType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -100,7 +100,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  */
 @Service
 public class IdHelperService implements IIdHelperService<JpaPid> {
-	private static final Logger ourLog = LoggerFactory.getLogger(IdHelperService.class);
 	public static final Predicate[] EMPTY_PREDICATE_ARRAY = new Predicate[0];
 	public static final String RESOURCE_PID = "RESOURCE_PID";
 
@@ -523,7 +522,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 		if (myStorageSettings.getResourceClientIdStrategy() != JpaStorageSettings.ClientIdStrategyEnum.ANY) {
 			List<Long> pids = theId.stream()
 					.filter(t -> isValidPid(t))
-					.map(t -> t.getIdPartAsLong())
+					.map(IIdType::getIdPartAsLong)
 					.collect(Collectors.toList());
 			if (!pids.isEmpty()) {
 				resolvePids(requestPartitionId, pids, retVal);
@@ -578,8 +577,14 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 					Long resourcePid = (Long) next[1];
 					String forcedId = (String) next[2];
 					Date deletedAt = (Date) next[3];
+					Integer partitionId = (Integer) next[4];
+					LocalDate partitionDate = (LocalDate) next[5];
 
-					JpaResourceLookup lookup = new JpaResourceLookup(resourceType, resourcePid, deletedAt);
+					JpaResourceLookup lookup = new JpaResourceLookup(
+							resourceType,
+							resourcePid,
+							deletedAt,
+							PartitionablePartitionId.with(partitionId, partitionDate));
 					retVal.computeIfAbsent(forcedId, id -> new ArrayList<>()).add(lookup);
 
 					if (!myStorageSettings.isDeleteEnabled()) {
@@ -638,7 +643,11 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 				}
 			}
 			lookup.stream()
-					.map(t -> new JpaResourceLookup((String) t[0], (Long) t[1], (Date) t[2]))
+					.map(t -> new JpaResourceLookup(
+							(String) t[0],
+							(Long) t[1],
+							(Date) t[2],
+							PartitionablePartitionId.with((Integer) t[3], (LocalDate) t[4])))
 					.forEach(t -> {
 						String id = t.getPersistentId().toString();
 						if (!theTargets.containsKey(id)) {
@@ -683,9 +692,8 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 					MemoryCacheService.CacheEnum.PID_TO_FORCED_ID, nextResourcePid, Optional.empty());
 		}
 		Map<JpaPid, Optional<String>> convertRetVal = new HashMap<>();
-		retVal.forEach((k, v) -> {
-			convertRetVal.put(JpaPid.fromId(k), v);
-		});
+		retVal.forEach((k, v) -> convertRetVal.put(JpaPid.fromId(k), v));
+
 		return new PersistentIdToForcedIdMap<>(convertRetVal);
 	}
 
@@ -716,7 +724,8 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 		}
 
 		if (!myStorageSettings.isDeleteEnabled()) {
-			JpaResourceLookup lookup = new JpaResourceLookup(theResourceType, theJpaPid.getId(), theDeletedAt);
+			JpaResourceLookup lookup = new JpaResourceLookup(
+					theResourceType, theJpaPid.getId(), theDeletedAt, theJpaPid.getPartitionablePartitionId());
 			String nextKey = theJpaPid.toString();
 			myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.RESOURCE_LOOKUP, nextKey, lookup);
 		}
@@ -744,8 +753,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 	@Nonnull
 	public List<JpaPid> getPidsOrThrowException(
 			@Nonnull RequestPartitionId theRequestPartitionId, List<IIdType> theIds) {
-		List<JpaPid> resourcePersistentIds = resolveResourcePersistentIdsWithCache(theRequestPartitionId, theIds);
-		return resourcePersistentIds;
+		return resolveResourcePersistentIdsWithCache(theRequestPartitionId, theIds);
 	}
 
 	@Override
