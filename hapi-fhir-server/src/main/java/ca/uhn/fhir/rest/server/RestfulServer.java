@@ -137,7 +137,6 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 * Default value for {@link #setDefaultPreferReturn(PreferReturnEnum)}
 	 */
 	public static final PreferReturnEnum DEFAULT_PREFER_RETURN = PreferReturnEnum.REPRESENTATION;
-
 	private static final ExceptionHandlingInterceptor DEFAULT_EXCEPTION_HANDLER = new ExceptionHandlingInterceptor();
 	private static final Logger ourLog = LoggerFactory.getLogger(RestfulServer.class);
 	private static final long serialVersionUID = 1L;
@@ -1298,7 +1297,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		} finally {
 
 			if (unhandledException != null) {
-				ourLog.error("Exception handling threw an exception.  Initial exception was: ", unhandledException);
+				ourLog.error(Msg.code(2544) + "Exception handling threw an exception.  Initial exception was: {}", unhandledException.getMessage(), unhandledException);
 				unhandledException = null;
 			}
 

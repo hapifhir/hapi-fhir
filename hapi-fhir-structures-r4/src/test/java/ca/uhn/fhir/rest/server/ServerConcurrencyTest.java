@@ -108,8 +108,6 @@ public class ServerConcurrencyTest {
 	void testExceptionThrownDuringExceptionHandler_bothExceptionsLogged() throws ServletException, IOException {
 	    // given
 		initRequestMocks("/Patient?active=true");
-		when(myRequest.getInputStream()).thenReturn(new DelegatingServletInputStream(StringInputStream.utf8("")));
-		when(myResponse.getWriter()).thenReturn(myWriter);
 		ourServer.getInterceptorService().registerAnonymousInterceptor(Pointcut.SERVER_OUTGOING_FAILURE_OPERATIONOUTCOME, (pointcut,params)->{
 			throw new RuntimeException("MARKER_2: Exception during exception processing");
 		});
@@ -123,7 +121,7 @@ public class ServerConcurrencyTest {
 
 	    // then
 		// both exceptions should be logged.
-		LogbackTestExtensionAssert.assertThat(myLogbackTestExtension).hasErrorMessage("MARKER_2");
+		LogbackTestExtensionAssert.assertThat(myLogbackTestExtension).hasErrorMessage("HAPI-2544");
 		LogbackTestExtensionAssert.assertThat(myLogbackTestExtension).hasErrorMessage(SEARCH_TIMEOUT_ERROR);
 	}
 	
@@ -139,7 +137,7 @@ public class ServerConcurrencyTest {
 		} else {
 			relativeUri = theURL;
 		}
-		when(myRequest.getRequestURI()).thenReturn(theURL);
+		when(myRequest.getRequestURI()).thenReturn(relativeUri);
 		when(myRequest.getRequestURL()).thenReturn(new StringBuffer(ourServer.getBaseUrl() + theURL));
 		when(myRequest.getHeader(any())).thenAnswer(t -> {
 			String header = t.getArgument(0, String.class);

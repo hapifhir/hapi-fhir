@@ -54,8 +54,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 public abstract class RequestDetails {
 
 	public static final byte[] BAD_STREAM_PLACEHOLDER =
-		// fixme KD - register a code here.
-		(Msg.code(9999) + "PLACEHOLDER WHEN READING FROM BAD STREAM").getBytes(StandardCharsets.UTF_8);
+		(Msg.code(2543) + "PLACEHOLDER WHEN READING FROM BAD STREAM").getBytes(StandardCharsets.UTF_8);
 	private final StopWatch myRequestStopwatch;
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 	private String myTenantId;
