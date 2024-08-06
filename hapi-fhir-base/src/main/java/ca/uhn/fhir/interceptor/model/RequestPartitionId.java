@@ -103,7 +103,7 @@ public class RequestPartitionId implements IModelJson {
 	 * Creates a new RequestPartitionId which includes all partition IDs from
 	 * this {@link RequestPartitionId} but also includes all IDs from the given
 	 * {@link RequestPartitionId}. Any duplicates are only included once, and
-	 * partition dates are ignored and not returned. This {@link RequestPartitionId}
+	 * partition names and dates are ignored and not returned. This {@link RequestPartitionId}
 	 * and {@literal theOther} are not modified.
 	 *
 	 * @since 7.4.0
