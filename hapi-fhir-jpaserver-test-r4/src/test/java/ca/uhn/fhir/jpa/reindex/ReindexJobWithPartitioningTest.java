@@ -12,12 +12,10 @@ import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
-import ca.uhn.fhir.rest.server.interceptor.partition.RequestTenantPartitionInterceptor;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -91,7 +89,7 @@ public class ReindexJobWithPartitioningTest extends BaseJpaR4Test {
 						List.of(
 								new PartitionedUrl().setUrl("Observation?").setRequestPartitionId(partition1)),
 						2),
-				// 7. includes all Patients from all all partitions
+				// 7. includes all Patients from	 all partitions
 				Arguments.of(
 						List.of(
 								new PartitionedUrl().setUrl("Patient?").setRequestPartitionId(allPartitions)
