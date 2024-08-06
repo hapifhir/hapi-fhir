@@ -126,7 +126,7 @@ public class CanonicalSubscriptionTest {
 
 		System.out.print(canonicalSubscription);
 
-		// for s Subscription to be a cross-partition subscription, u need 3 things:
+		// for a Subscription to be a cross-partition subscription, 3 things are required:
 		// - The Subs need to be created on the default partition
 		// - The Subs need to have extension EXTENSION_SUBSCRIPTION_CROSS_PARTITION set to true
 		// - Global flag CrossPartitionSubscriptionEnabled needs to be true
