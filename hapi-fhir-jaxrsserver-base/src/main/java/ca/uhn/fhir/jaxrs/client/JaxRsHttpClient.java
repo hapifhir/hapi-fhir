@@ -150,6 +150,16 @@ public class JaxRsHttpClient implements IHttpClient {
 		return request;
 	}
 
+	@Override
+	public void addHeadersToRequest(IHttpRequest theRequest, EncodingEnum theEncodingEnum, FhirContext theContext) {
+		// nothing to do for this client
+	}
+
+	@Override
+	public void setNewUrl(StringBuilder theUrl) {
+		myUrl = theUrl;
+	}
+
 	public void addHeadersToRequest(JaxRsHttpRequest theHttpRequest, EncodingEnum theEncoding, FhirContext theContext) {
 		if (myHeaders != null) {
 			for (Header next : myHeaders) {
