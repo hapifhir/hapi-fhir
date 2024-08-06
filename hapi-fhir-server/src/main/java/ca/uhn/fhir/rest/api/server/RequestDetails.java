@@ -528,7 +528,7 @@ public abstract class RequestDetails {
 		mySubRequest = theSubRequest;
 	}
 
-	synchronized public final byte[] loadRequestContents() {
+	public synchronized final byte[] loadRequestContents() {
 		if (myRequestContents == null) {
 			// Initialize the byte array to a non-null value to avoid repeated calls to getByteStreamRequestContents()
 			// which can occur when getByteStreamRequestContents() throws an Exception
