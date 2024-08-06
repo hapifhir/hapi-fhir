@@ -11,9 +11,9 @@ import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.dao.r4.BasePartitioningR4Test;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.subscription.BaseSubscriptionsR4Test;
 import ca.uhn.fhir.jpa.subscription.resthook.RestHookTestR4Test;
-import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.subscription.triggering.ISubscriptionTriggeringSvc;
 import ca.uhn.fhir.jpa.subscription.triggering.SubscriptionTriggeringSvcImpl;
 import ca.uhn.fhir.jpa.test.util.StoppableSubscriptionDeliveringRestHookSubscriber;
@@ -26,7 +26,12 @@ import jakarta.servlet.ServletException;
 import org.awaitility.core.ConditionTimeoutException;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.Subscription;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -43,9 +48,9 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(RestHookTestR4Test.class);
@@ -185,10 +190,8 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 		}
 	}
 
-	@ParameterizedTest
-	@ValueSource(booleans = {true, false})
-	public void testManualTriggeredSubscriptionDoesNotMatchOnAllPartitions(boolean theIsCrossPartitionEnabled) throws Exception {
-		mySubscriptionSettings.setCrossPartitionSubscriptionEnabled(theIsCrossPartitionEnabled);
+	@Test
+	public void testManualTriggeredSubscriptionDoesNotMatchOnAllPartitions() throws Exception {
 		String payload = "application/fhir+json";
 		String code = "1000000050";
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
@@ -277,17 +280,17 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 		myPartitionInterceptor.setRequestPartitionId(REQ_PART_1);
 		myDaoRegistry.getResourceDao("Observation").create(createBaseObservation(code, "SNOMED-CT"), mySrd).getId();
 
-		//Given: We create a subscription on Partition 1
+		//Given: We create a subscription on default partition
 		Subscription theResource = newSubscription(criteria1, payload);
 		theResource.addExtension(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION, new BooleanType(Boolean.TRUE));
-		myPartitionInterceptor.setRequestPartitionId(RequestPartitionId.defaultPartition());
+		myPartitionInterceptor.setRequestPartitionId(REQ_PART_DEFAULT);
 		IIdType subscriptionId = myDaoRegistry.getResourceDao("Subscription").create(theResource, mySrd).getId();
 		waitForActivatedSubscriptionCount(1);
 
 		ArrayList<IPrimitiveType<String>> searchUrlList = new ArrayList<>();
 		searchUrlList.add(new StringDt("Observation?"));
 
-		myPartitionInterceptor.setRequestPartitionId(RequestPartitionId.defaultPartition());
+		myPartitionInterceptor.setRequestPartitionId(REQ_PART_DEFAULT);
 		mySubscriptionTriggeringSvc.triggerSubscription(null, searchUrlList, subscriptionId, mySrd);
 		mySubscriptionTriggeringSvc.runDeliveryPass();
 

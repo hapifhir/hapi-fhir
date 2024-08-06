@@ -172,7 +172,7 @@ class SubscriptionCanonicalizerTest {
 
 	@ParameterizedTest
 	@MethodSource("crossPartitionParams")
-	void testCrossPartitionDstu2BWithExtension(RequestPartitionId theRequestPartitionId) {
+	void testSubscriptionCrossPartitionEnableProperty_forDstu2WithExtensionAndPartitions(RequestPartitionId theRequestPartitionId) {
 		final SubscriptionSettings subscriptionSettings = new SubscriptionSettings();
 		subscriptionSettings.setCrossPartitionSubscriptionEnabled(true);
 		final SubscriptionCanonicalizer subscriptionCanonicalizer = new SubscriptionCanonicalizer(FhirContext.forDstu2(), subscriptionSettings);
@@ -187,7 +187,7 @@ class SubscriptionCanonicalizerTest {
 
 	@ParameterizedTest
 	@MethodSource("crossPartitionParams")
-	void testCrossPartitionDstu3BWithExtension(RequestPartitionId theRequestPartitionId) {
+	void testSubscriptionCrossPartitionEnableProperty_forDstu3WithExtensionAndPartitions(RequestPartitionId theRequestPartitionId) {
 		final SubscriptionSettings subscriptionSettings = new SubscriptionSettings();
 		subscriptionSettings.setCrossPartitionSubscriptionEnabled(true);
 		final SubscriptionCanonicalizer subscriptionCanonicalizer = new SubscriptionCanonicalizer(FhirContext.forDstu3(), subscriptionSettings);
@@ -220,7 +220,7 @@ class SubscriptionCanonicalizerTest {
 
 	@ParameterizedTest
 	@MethodSource("crossPartitionParams")
-	void testCrossPartitionR4WithExtension(RequestPartitionId theRequestPartitionId) {
+	void testSubscriptionCrossPartitionEnableProperty_forR4WithExtensionAndPartitions(RequestPartitionId theRequestPartitionId) {
 		final SubscriptionSettings subscriptionSettings = new SubscriptionSettings();
 		subscriptionSettings.setCrossPartitionSubscriptionEnabled(true);
 
@@ -256,7 +256,7 @@ class SubscriptionCanonicalizerTest {
 
 	@ParameterizedTest
 	@MethodSource("crossPartitionParams")
-	void testCrossPartitionR4BWithExtension(RequestPartitionId theRequestPartitionId) {
+	void testSubscriptionCrossPartitionEnableProperty_forR4BWithExtensionAndPartitions(RequestPartitionId theRequestPartitionId) {
 		final SubscriptionSettings subscriptionSettings = new SubscriptionSettings();
 		subscriptionSettings.setCrossPartitionSubscriptionEnabled(true);
 		final SubscriptionCanonicalizer subscriptionCanonicalizer = new SubscriptionCanonicalizer(FhirContext.forR4BCached(), subscriptionSettings);
@@ -289,7 +289,7 @@ class SubscriptionCanonicalizerTest {
 
 	@ParameterizedTest
 	@MethodSource("crossPartitionParams")
-	void testCrossPartitionR5BWithExtension(RequestPartitionId theRequestPartitionId) {
+	void testSubscriptionCrossPartitionEnableProperty_forR5WithExtensionAndPartitions(RequestPartitionId theRequestPartitionId) {
 		final SubscriptionSettings subscriptionSettings = new SubscriptionSettings();
 		subscriptionSettings.setCrossPartitionSubscriptionEnabled(true);
 		final SubscriptionCanonicalizer subscriptionCanonicalizer = new SubscriptionCanonicalizer(FhirContext.forR5Cached(), subscriptionSettings);

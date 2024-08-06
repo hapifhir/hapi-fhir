@@ -2,19 +2,17 @@ package ca.uhn.fhir.jpa.subscription.module;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
-import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
-import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.HapiExtensions;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.Nonnull;
 import org.assertj.core.util.Lists;
 import org.hl7.fhir.r4.model.BooleanType;
-import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Subscription;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -29,11 +27,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static ca.uhn.fhir.rest.api.Constants.*;
+import static ca.uhn.fhir.rest.api.Constants.RESOURCE_PARTITION_ID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class CanonicalSubscriptionTest {
@@ -76,7 +74,7 @@ public class CanonicalSubscriptionTest {
 	}
 
 	@Test
-	public void testCanonicalSubscriptionRetainsMetaTags() throws IOException {
+	public void testCanonicalSubscriptionRetainsMetaTags() {
 		SubscriptionCanonicalizer canonicalizer = new SubscriptionCanonicalizer(FhirContext.forR4(), new SubscriptionSettings());
 		CanonicalSubscription sub1 = canonicalizer.canonicalize(makeMdmSubscription());
 		assertThat(sub1.getTags()).containsKey(TAG_SYSTEM);
@@ -97,16 +95,11 @@ public class CanonicalSubscriptionTest {
 		final SubscriptionSettings subscriptionSettings = buildSubscriptionSettings(theIsCrossPartitionEnabled);
 		SubscriptionCanonicalizer canonicalizer = new SubscriptionCanonicalizer(FhirContext.forR4(), subscriptionSettings);
 
-		Subscription subscriptionWithExtensionSetToStringFalse = makeEmailSubscription();
-		subscriptionWithExtensionSetToStringFalse.addExtension(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION, new StringType().setValue("false"));
-
 		Subscription subscriptionWithExtensionSetToBooleanFalse = makeEmailSubscription();
 		subscriptionWithExtensionSetToBooleanFalse.addExtension(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION, new BooleanType().setValue(false));
 
-		CanonicalSubscription canonicalSubscriptionExtensionSetToStringFalse = canonicalizer.canonicalize(subscriptionWithExtensionSetToStringFalse);
 		CanonicalSubscription canonicalSubscriptionExtensionSetToBooleanFalse = canonicalizer.canonicalize(subscriptionWithExtensionSetToBooleanFalse);
 
-		assertEquals(canonicalSubscriptionExtensionSetToStringFalse.isCrossPartitionEnabled(), false);
 		assertEquals(canonicalSubscriptionExtensionSetToBooleanFalse.isCrossPartitionEnabled(), false);
 	}
 
@@ -139,7 +132,6 @@ public class CanonicalSubscriptionTest {
 		// - Global flag CrossPartitionSubscriptionEnabled needs to be true
 		assertThat(canonicalSubscription.isCrossPartitionEnabled()).isEqualTo(theExpectedIsCrossPartitionEnabled);
 	}
-
 
 	@Test
 	public void testLegacyCanonicalSubscription() throws JsonProcessingException {

@@ -191,35 +191,16 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		assertEquals(Constants.CT_FHIR_XML_NEW, ourContentTypes.get(0));
 	}
 
-	@Test
-	public void testSubscriptionAndResourceOnTheSamePartitionMatch() throws InterruptedException {
+	@ParameterizedTest
+	@ValueSource(ints = {0,1})
+	public void testSubscriptionAndResourceOnTheSamePartitionMatch(int thePartitionId) throws InterruptedException {
 		myPartitionSettings.setPartitioningEnabled(true);
 		String payload = "application/fhir+json";
 
 		String code = "1000000050";
 		String criteria = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 
-		RequestPartitionId requestPartitionId = RequestPartitionId.fromPartitionId(0);
-		Subscription subscription = makeActiveSubscription(criteria, payload, ourListenerServerBase);
-		mockSubscriptionRead(requestPartitionId, subscription);
-		sendSubscription(subscription, requestPartitionId, true);
-
-		ourObservationListener.setExpectedCount(1);
-		mySubscriptionResourceMatched.setExpectedCount(1);
-		sendObservation(code, "SNOMED-CT", requestPartitionId);
-		mySubscriptionResourceMatched.awaitExpected();
-		ourObservationListener.awaitExpected();
-	}
-
-	@Test
-	public void testSubscriptionAndResourceOnTheSamePartitionMatchPart2() throws InterruptedException {
-		myPartitionSettings.setPartitioningEnabled(true);
-		String payload = "application/fhir+json";
-
-		String code = "1000000050";
-		String criteria = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
-
-		RequestPartitionId requestPartitionId = RequestPartitionId.fromPartitionId(1);
+		RequestPartitionId requestPartitionId = RequestPartitionId.fromPartitionId(thePartitionId);
 		Subscription subscription = makeActiveSubscription(criteria, payload, ourListenerServerBase);
 		mockSubscriptionRead(requestPartitionId, subscription);
 		sendSubscription(subscription, requestPartitionId, true);
@@ -233,7 +214,7 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})
-	public void testSubscriptionMatching_whenSubcriptionAndResourceOnDiffPartition_matchesWhenIsCrossPartitionSubscription(boolean theIsCrossPartitionEnabled) throws InterruptedException {
+	public void testSubscriptionCrossPartitionMatching_whenSubscriptionAndResourceOnDiffPartition_withGlobalFlagCrossPartitionSubscriptionEnable(boolean theIsCrossPartitionEnabled) throws InterruptedException {
 		mySubscriptionSettings.setCrossPartitionSubscriptionEnabled(theIsCrossPartitionEnabled);
 		myPartitionSettings.setPartitioningEnabled(true);
 		String payload = "application/fhir+json";
@@ -256,7 +237,7 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 	}
 
 	@Test
-	public void testSubscriptionOnOnePartitionMatchResourceOnMultiplePartitions() throws InterruptedException {
+	public void testSubscriptionOnOnePartition_whenResourceCreatedOnMultiplePartitions_matchesOnlyResourceCreatedOnSamePartition() throws InterruptedException {
 		myPartitionSettings.setPartitioningEnabled(true);
 		String payload = "application/fhir+json";
 
@@ -278,7 +259,7 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})
-	public void testSubscriptionOnOnePartitionDoNotMatchResourceOnMultiplePartitions(boolean theIsCrossPartitionEnabled) throws InterruptedException {
+	public void testSubscriptionCrossPartitionMatching_whenSubscriptionAndResourceOnDiffPartition_withGlobalFlagCrossPartitionSubscriptionEnable2(boolean theIsCrossPartitionEnabled) throws InterruptedException {
 		mySubscriptionSettings.setCrossPartitionSubscriptionEnabled(theIsCrossPartitionEnabled);
 		myPartitionSettings.setPartitioningEnabled(true);
 		String payload = "application/fhir+json";
