@@ -170,7 +170,6 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		}
 
 		if (myParams != null) {
-
 			IHttpRequest request = httpClient.createParamRequest(getContext(), myParams, encoding);
 			return request;
 		}
