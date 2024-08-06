@@ -54,7 +54,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 public abstract class RequestDetails {
 
 	public static final byte[] BAD_STREAM_PLACEHOLDER =
-		(Msg.code(2543) + "PLACEHOLDER WHEN READING FROM BAD STREAM").getBytes(StandardCharsets.UTF_8);
+			(Msg.code(2543) + "PLACEHOLDER WHEN READING FROM BAD STREAM").getBytes(StandardCharsets.UTF_8);
 	private final StopWatch myRequestStopwatch;
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 	private String myTenantId;
@@ -528,7 +528,7 @@ public abstract class RequestDetails {
 		mySubRequest = theSubRequest;
 	}
 
-	public synchronized final byte[] loadRequestContents() {
+	public final synchronized byte[] loadRequestContents() {
 		if (myRequestContents == null) {
 			// Initialize the byte array to a non-null value to avoid repeated calls to getByteStreamRequestContents()
 			// which can occur when getByteStreamRequestContents() throws an Exception
@@ -537,12 +537,13 @@ public abstract class RequestDetails {
 				myRequestContents = getByteStreamRequestContents();
 			} finally {
 				if (myRequestContents == null) {
-					// if reading the stream throws an exception, then our contents are still null, but the stream is dead.
+					// if reading the stream throws an exception, then our contents are still null, but the stream is
+					// dead.
 					// Set a placeholder value so nobody tries to read again.
 					myRequestContents = BAD_STREAM_PLACEHOLDER;
 				}
 			}
-			assert myRequestContents != null: "We must not re-read the stream.";
+			assert myRequestContents != null : "We must not re-read the stream.";
 		}
 		return getRequestContentsIfLoaded();
 	}
