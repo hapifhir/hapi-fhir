@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.mdm.svc;
 
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.mdm.api.IMdmLink;
+import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.MdmLinkWithRevision;
 import ca.uhn.fhir.mdm.model.mdmevents.MdmLinkJson;
 import ca.uhn.fhir.mdm.model.mdmevents.MdmLinkWithRevisionJson;
@@ -34,6 +35,9 @@ public class MdmModelConverterSvcImpl implements IMdmModelConverterSvc {
 	@SuppressWarnings("rawtypes")
 	@Autowired
 	IIdHelperService myIdHelperService;
+
+	@Autowired
+	private IMdmSettings myMdmSettings;
 
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	@Override
@@ -69,6 +73,7 @@ public class MdmModelConverterSvcImpl implements IMdmModelConverterSvc {
 		retVal.setUpdated(theLink.getUpdated());
 		retVal.setVersion(theLink.getVersion());
 		retVal.setRuleCount(theLink.getRuleCount());
+		retVal.translateAndSetRule(myMdmSettings.getMdmRules(), theLink.getVector());
 		return retVal;
 	}
 
