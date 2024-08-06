@@ -256,8 +256,7 @@ public class HapiTransactionService implements IHapiTransactionService {
 		}
 
 		ourLog.trace("Starting doExecute for RequestPartitionId {}", requestPartitionId);
-		if (!myPartitionSettings.isPartitioningEnabled()
-				|| Objects.equals(previousRequestPartitionId, requestPartitionId)) {
+		if (isCompatiblePartition(previousRequestPartitionId, requestPartitionId)) {
 			if (ourExistingTransaction.get() == this && canReuseExistingTransaction(theExecutionBuilder)) {
 				/*
 				 * If we're already in an active transaction, and it's for the right partition,
@@ -272,7 +271,7 @@ public class HapiTransactionService implements IHapiTransactionService {
 		try {
 			ourExistingTransaction.set(this);
 
-			if (isRequiresNewTransactionWhenChangingPartitions()) {
+			if (myTransactionPropagationWhenChangingPartitions == Propagation.REQUIRES_NEW) {
 				return executeInNewTransactionForPartitionChange(
 						theExecutionBuilder, theCallback, requestPartitionId, previousRequestPartitionId);
 			} else {
@@ -284,12 +283,12 @@ public class HapiTransactionService implements IHapiTransactionService {
 		}
 	}
 
-	@Override
-	public boolean isRequiresNewTransactionWhenChangingPartitions() {
-		return myTransactionPropagationWhenChangingPartitions == Propagation.REQUIRES_NEW;
+	public boolean isCompatiblePartition(RequestPartitionId theRequestPartitionId, RequestPartitionId theOtherRequestPartitionId) {
+		return !myPartitionSettings.isPartitioningEnabled() ||
+			Objects.equals(theRequestPartitionId, theOtherRequestPartitionId);
 	}
 
-	@Nullable
+@Nullable
 	private <T> T executeInNewTransactionForPartitionChange(
 			ExecutionBuilder theExecutionBuilder,
 			TransactionCallback<T> theCallback,
