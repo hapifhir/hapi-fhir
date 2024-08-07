@@ -51,13 +51,11 @@ public class HttpSimpleClientInvocation extends BaseHttpClientInvocation {
 			Map<String, List<String>> theExtraParams,
 			EncodingEnum theEncoding,
 			Boolean thePrettyPrint) {
-		return asHttpRequest(
-			new AsHttpRequestParams()
+		return asHttpRequest(new AsHttpRequestParams()
 				.setUrlBase(myUrl)
 				.setExtraParams(theExtraParams)
 				.setEncodingEnum(theEncoding)
-				.setPrettyPrint(thePrettyPrint)
-		);
+				.setPrettyPrint(thePrettyPrint));
 	}
 
 	@Override

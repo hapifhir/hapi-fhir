@@ -60,13 +60,11 @@ public class HttpPatchClientInvocation extends BaseHttpClientInvocation {
 			Map<String, List<String>> theExtraParams,
 			EncodingEnum theEncoding,
 			Boolean thePrettyPrint) {
-		return asHttpRequest(
-			new AsHttpRequestParams()
+		return asHttpRequest(new AsHttpRequestParams()
 				.setUrlBase(theUrlBase)
 				.setExtraParams(theExtraParams)
 				.setEncodingEnum(theEncoding)
-				.setPrettyPrint(thePrettyPrint)
-		);
+				.setPrettyPrint(thePrettyPrint));
 	}
 
 	@Override
@@ -86,7 +84,7 @@ public class HttpPatchClientInvocation extends BaseHttpClientInvocation {
 		appendExtraParamsWithQuestionMark(myParams, b, b.indexOf("?") == -1);
 		appendExtraParamsWithQuestionMark(theExtraParams, b, b.indexOf("?") == -1);
 
-//		return createHttpRequest(b.toString(), theEncoding, RequestTypeEnum.PATCH);
+		//		return createHttpRequest(b.toString(), theEncoding, RequestTypeEnum.PATCH);
 		CreateRequestParameters requestParameters = new CreateRequestParameters();
 		requestParameters.setClient(theParams.getClient());
 		requestParameters.setUrl(b.toString());
@@ -107,7 +105,12 @@ public class HttpPatchClientInvocation extends BaseHttpClientInvocation {
 		IHttpClient client;
 		if (theParameters.getClient() == null) {
 			client = getRestfulClientFactory()
-				.getHttpClient(new StringBuilder(theParameters.getUrl()), null, null, theParameters.getRequestTypeEnum(), getHeaders());
+					.getHttpClient(
+							new StringBuilder(theParameters.getUrl()),
+							null,
+							null,
+							theParameters.getRequestTypeEnum(),
+							getHeaders());
 		} else {
 			client = theParameters.getClient();
 		}

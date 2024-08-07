@@ -128,13 +128,23 @@ public class JaxRsHttpClient implements IHttpClient {
 			case POST:
 			case PUT:
 				if (theParameters.getBaseBinary() != null) {
-					entity = Entity.entity(theParameters.getBaseBinary().getContentAsBase64(), theParameters.getBaseBinary().getContentType());
+					entity = Entity.entity(
+							theParameters.getBaseBinary().getContentAsBase64(),
+							theParameters.getBaseBinary().getContentType());
 				} else if (theParameters.getByteContents() != null) {
-					entity = Entity.entity(theParameters.getByteContents(), theParameters.getContentType() + Constants.HEADER_SUFFIX_CT_UTF_8);
-					additionalHeaders.put(Constants.HEADER_CONTENT_TYPE, theParameters.getContentType() + Constants.HEADER_SUFFIX_CT_UTF_8);
+					entity = Entity.entity(
+							theParameters.getByteContents(),
+							theParameters.getContentType() + Constants.HEADER_SUFFIX_CT_UTF_8);
+					additionalHeaders.put(
+							Constants.HEADER_CONTENT_TYPE,
+							theParameters.getContentType() + Constants.HEADER_SUFFIX_CT_UTF_8);
 				} else if (isNotBlank(theParameters.getContents())) {
-					entity = Entity.entity(theParameters.getContents(), theParameters.getContentType() + Constants.HEADER_SUFFIX_CT_UTF_8);
-					additionalHeaders.put(Constants.HEADER_CONTENT_TYPE, theParameters.getContentType() + Constants.HEADER_SUFFIX_CT_UTF_8);
+					entity = Entity.entity(
+							theParameters.getContents(),
+							theParameters.getContentType() + Constants.HEADER_SUFFIX_CT_UTF_8);
+					additionalHeaders.put(
+							Constants.HEADER_CONTENT_TYPE,
+							theParameters.getContentType() + Constants.HEADER_SUFFIX_CT_UTF_8);
 				} else {
 					entity = getFormEntity(theParameters.getFormParams());
 				}

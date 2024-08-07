@@ -704,14 +704,12 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				IClientResponseHandler<Z> theHandler,
 				BaseHttpClientInvocation theInvocation) {
 			if (isKeepResponses()) {
-				myLastRequest = theInvocation.asHttpRequest(
-					new AsHttpRequestParams()
+				myLastRequest = theInvocation.asHttpRequest(new AsHttpRequestParams()
 						.setUrlBase(getServerBase())
 						.setClient(myClient)
 						.setExtraParams(theParams)
 						.setEncodingEnum(getParamEncoding())
-						.setPrettyPrint(myPrettyPrint)
-				);
+						.setPrettyPrint(myPrettyPrint));
 			}
 
 			InvokeClientParameters<Z> params = new InvokeClientParameters<Z>()

@@ -61,7 +61,6 @@ public interface IHttpClient {
 	 */
 	IHttpRequest createBinaryRequest(FhirContext theContext, IBaseBinary theBinary);
 
-
 	@Deprecated
 	IHttpRequest createGetRequest(FhirContext theContext, EncodingEnum theEncoding);
 

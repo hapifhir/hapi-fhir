@@ -110,12 +110,11 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 			EncodingEnum theEncoding,
 			Boolean thePrettyPrint)
 			throws DataFormatException {
-		return asHttpRequest(
-			new AsHttpRequestParams().setUrlBase(theUrlBase)
+		return asHttpRequest(new AsHttpRequestParams()
+				.setUrlBase(theUrlBase)
 				.setExtraParams(theExtraParams)
 				.setEncodingEnum(theEncoding)
-				.setPrettyPrint(thePrettyPrint)
-		);
+				.setPrettyPrint(thePrettyPrint));
 	}
 
 	@Override
@@ -150,7 +149,7 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		} else {
 			// make a new one
 			httpClient = getRestfulClientFactory()
-				.getHttpClient(url, myIfNoneExistParams, myIfNoneExistString, getRequestType(), getHeaders());
+					.getHttpClient(url, myIfNoneExistParams, myIfNoneExistString, getRequestType(), getHeaders());
 		}
 
 		if (myResource != null && IBaseBinary.class.isAssignableFrom(myResource.getClass())) {
@@ -175,10 +174,7 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		encoding = ObjectUtils.defaultIfNull(encoding, EncodingEnum.JSON);
 		String contents = encodeContents(thePrettyPrint, encoding);
 		String contentType = getContentType(encoding);
-		HttpClientRequestParameters parameters = new HttpClientRequestParameters(
-			url.toString(),
-			getRequestType()
-		);
+		HttpClientRequestParameters parameters = new HttpClientRequestParameters(url.toString(), getRequestType());
 		parameters.setContents(contents);
 		parameters.setContentType(contentType);
 		parameters.setFhirContext(getContext());
