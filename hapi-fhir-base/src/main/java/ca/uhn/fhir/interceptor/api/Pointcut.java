@@ -2527,7 +2527,7 @@ public enum Pointcut implements IPointcut {
 	 * <li>ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage</li>
 	 * </ul>
 	 * <p>
-	 * Hooks may return <code>ResourceModifiedJsonMessage</code> if they want to modify the message
+	 * Hooks may return the modified <code>ResourceModifiedJsonMessage</code> if they want to modify the message
 	 * </p>
 	 */
 	MDM_SUBMIT_BEFORE_MESSAGE_DELIVERY(
