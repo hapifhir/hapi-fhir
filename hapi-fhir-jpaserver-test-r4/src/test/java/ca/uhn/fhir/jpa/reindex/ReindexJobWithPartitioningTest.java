@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.reindex;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
-import ca.uhn.fhir.batch2.jobs.parameters.JobParameters;
+import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrlJobParameters;
 import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrl;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexAppCtx;
 import ca.uhn.fhir.batch2.model.JobInstance;
@@ -128,7 +128,7 @@ public class ReindexJobWithPartitioningTest extends BaseJpaR4Test {
 	@MethodSource(value = "getReindexParameters")
 	public void testReindex_withPartitionedUrls_indexesMatchingResources(List<PartitionedUrl> thePartitionedUrls,
 																								int theExpectedIndexedResourceCount) {
-		JobParameters parameters = new JobParameters();
+		PartitionedUrlJobParameters parameters = new PartitionedUrlJobParameters();
 		thePartitionedUrls.forEach(parameters::addPartitionedUrl);
 
 		// execute

@@ -85,9 +85,6 @@ public class DefaultJobPartitionProvider implements IJobPartitionProvider {
 		// handle (bulk) system operations that are typically configured with RequestPartitionId.allPartitions()
 		// populate the actual list of all partitions, if that is supported
 		Set<RequestPartitionId> allPartitions = new LinkedHashSet<>(getAllPartitions());
-		if (!allPartitions.isEmpty()) {
-			allPartitions.add(RequestPartitionId.defaultPartition());
-		}
 		List<PartitionedUrl> retVal = new ArrayList<>();
 		for (PartitionedUrl partitionedUrl : partitionedUrls) {
 			String url = partitionedUrl.getUrl();

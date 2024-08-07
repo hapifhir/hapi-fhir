@@ -4,7 +4,7 @@ import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.jobs.chunk.ChunkRangeJson;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
-import ca.uhn.fhir.batch2.jobs.parameters.JobParameters;
+import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrlJobParameters;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.jpa.api.pid.HomogeneousResourcePidList;
@@ -48,7 +48,7 @@ public class LoadIdsStepTest {
 	@Mock
 	private IJobDataSink<ResourceIdListWorkChunkJson> mySink;
 
-	private LoadIdsStep<JobParameters> mySvc;
+	private LoadIdsStep<PartitionedUrlJobParameters> mySvc;
 
 	@BeforeEach
 	public void before() {
@@ -60,12 +60,12 @@ public class LoadIdsStepTest {
 
 	@Test
 	public void testGenerateSteps() {
-		JobParameters parameters = new JobParameters();
+		PartitionedUrlJobParameters parameters = new PartitionedUrlJobParameters();
 		ChunkRangeJson range = new ChunkRangeJson(DATE_1, DATE_END);
 		String instanceId = "instance-id";
 		JobInstance jobInstance = JobInstance.fromInstanceId(instanceId);
 		String chunkId = "chunk-id";
-		StepExecutionDetails<JobParameters, ChunkRangeJson> details = new StepExecutionDetails<>(parameters, range, jobInstance, new WorkChunk().setId(chunkId));
+		StepExecutionDetails<PartitionedUrlJobParameters, ChunkRangeJson> details = new StepExecutionDetails<>(parameters, range, jobInstance, new WorkChunk().setId(chunkId));
 
 		// First Execution
 

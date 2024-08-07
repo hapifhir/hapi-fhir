@@ -4,7 +4,7 @@ import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.jobs.chunk.ChunkRangeJson;
-import ca.uhn.fhir.batch2.jobs.parameters.JobParameters;
+import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrlJobParameters;
 import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrl;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import org.junit.jupiter.api.AfterEach;
@@ -28,9 +28,9 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 public class GenerateRangeChunksStepTest {
 
-	private final GenerateRangeChunksStep<JobParameters> myStep = new GenerateRangeChunksStep<>();
+	private final GenerateRangeChunksStep<PartitionedUrlJobParameters> myStep = new GenerateRangeChunksStep<>();
 	@Mock
-	private StepExecutionDetails<JobParameters, VoidModel> myStepExecutionDetails;
+	private StepExecutionDetails<PartitionedUrlJobParameters, VoidModel> myStepExecutionDetails;
 	@Mock
 	private IJobDataSink<ChunkRangeJson> myJobDataSink;
 
@@ -60,7 +60,7 @@ public class GenerateRangeChunksStepTest {
 	@ParameterizedTest
 	@MethodSource(value = "getReindexParameters")
 	public void run_withParameters_producesExpectedChunks(List<PartitionedUrl> thePartitionedUrls) {
-		JobParameters parameters = new JobParameters();
+		PartitionedUrlJobParameters parameters = new PartitionedUrlJobParameters();
 		thePartitionedUrls.forEach(parameters::addPartitionedUrl);
 
 		when(myStepExecutionDetails.getParameters()).thenReturn(parameters);

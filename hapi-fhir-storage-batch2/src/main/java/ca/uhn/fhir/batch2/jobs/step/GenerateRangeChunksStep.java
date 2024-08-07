@@ -26,8 +26,8 @@ import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.jobs.chunk.ChunkRangeJson;
-import ca.uhn.fhir.batch2.jobs.parameters.JobParameters;
 import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrl;
+import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrlJobParameters;
 import ca.uhn.fhir.util.Logs;
 import jakarta.annotation.Nonnull;
 import org.slf4j.Logger;
@@ -38,7 +38,8 @@ import java.util.List;
 
 import static ca.uhn.fhir.batch2.util.Batch2Utils.BATCH_START_DATE;
 
-public class GenerateRangeChunksStep<PT extends JobParameters> implements IFirstJobStepWorker<PT, ChunkRangeJson> {
+public class GenerateRangeChunksStep<PT extends PartitionedUrlJobParameters>
+		implements IFirstJobStepWorker<PT, ChunkRangeJson> {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 
 	@Nonnull

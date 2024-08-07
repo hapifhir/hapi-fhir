@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
  * Can be used to configure parameters for batch2 jobs.
  * Please note that these need to be backward compatible as we do not have a way to migrate them to a different structure at the moment.
  */
-public class JobParameters implements IModelJson {
+public class PartitionedUrlJobParameters implements IModelJson {
 	@JsonProperty(value = "partitionId")
 	@Nullable
 	private RequestPartitionId myRequestPartitionId;
