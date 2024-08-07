@@ -43,9 +43,11 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.ConceptMap;
+import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
@@ -204,6 +206,15 @@ public class RestServerR4Helper extends BaseRestServerHelper implements BeforeEa
 	}
 
 	@Override
+	public HashMapResourceProvider<Encounter> getEncounterResourceProvider() {
+		return myRestServer.getEncounterResourceProvider();
+	}
+
+	public void setEncounterResourceProvider(HashMapResourceProvider<Encounter> theResourceProvider) {
+		myRestServer.setEncounterResourceProvider(theResourceProvider);
+	}
+
+	@Override
 	public HashMapResourceProvider<Patient> getPatientResourceProvider() {
 		return myRestServer.getPatientResourceProvider();
 	}
@@ -221,9 +232,15 @@ public class RestServerR4Helper extends BaseRestServerHelper implements BeforeEa
 		myRestServer.setConceptMapResourceProvider(theResourceProvider);
 	}
 
-	public void setPagingProvider(IPagingProvider thePagingProvider) {
-		myPagingProvider = thePagingProvider;
+	@Override
+	public HashMapResourceProvider<Practitioner> getPractitionerResourceProvider() {
+		return myRestServer.getPractitionerResourceProvider();
 	}
+
+	public void setPractitionerResourceProvider(HashMapResourceProvider<Practitioner> theResourceProvider) {
+		myRestServer.setPractitionerResourceProvider(theResourceProvider);
+	}
+
 
 	@Override
 	public IIdType createPatientWithId(String theId) {
@@ -291,8 +308,10 @@ public class RestServerR4Helper extends BaseRestServerHelper implements BeforeEa
 		private boolean myFailNextPut;
 		private HashMapResourceProvider<Patient> myPatientResourceProvider;
 		private HashMapResourceProvider<Observation> myObservationResourceProvider;
+		private HashMapResourceProvider<Encounter> myEncounterResourceProvider;
 		private HashMapResourceProvider<Organization> myOrganizationResourceProvider;
 		private HashMapResourceProvider<ConceptMap> myConceptMapResourceProvider;
+		private HashMapResourceProvider<Practitioner> myPractitionerResourceProvider;
 		private RestServerDstu3Helper.MyPlainProvider myPlainProvider;
 
 		private final boolean myInitialTransactionLatchEnabled;
@@ -407,6 +426,17 @@ public class RestServerR4Helper extends BaseRestServerHelper implements BeforeEa
 			myObservationResourceProvider = theResourceProvider;
 		}
 
+		public HashMapResourceProvider<Encounter> getEncounterResourceProvider() {
+			return myEncounterResourceProvider;
+		}
+		public void setEncounterResourceProvider(HashMapResourceProvider<Encounter> theResourceProvider) {
+			myEncounterResourceProvider.getStoredResources().forEach(theResourceProvider::store);
+
+			unregisterProvider(myEncounterResourceProvider);
+			registerProvider(theResourceProvider);
+			myEncounterResourceProvider = theResourceProvider;
+		}
+
 		public HashMapResourceProvider<Organization> getOrganizationResourceProvider() {
 			return myOrganizationResourceProvider;
 		}
@@ -423,6 +453,18 @@ public class RestServerR4Helper extends BaseRestServerHelper implements BeforeEa
 			myConceptMapResourceProvider = theResourceProvider;
 		}
 
+		public HashMapResourceProvider<Practitioner> getPractitionerResourceProvider() {
+			return myPractitionerResourceProvider;
+		}
+
+		public void setPractitionerResourceProvider(HashMapResourceProvider<Practitioner> theResourceProvider) {
+			myPractitionerResourceProvider.getStoredResources().forEach(theResourceProvider::store);
+
+			unregisterProvider(myPractitionerResourceProvider);
+			registerProvider(theResourceProvider);
+			myPractitionerResourceProvider = theResourceProvider;
+		}
+
 		public HashMapResourceProvider<Patient> getPatientResourceProvider() {
 			return myPatientResourceProvider;
 		}
@@ -436,10 +478,14 @@ public class RestServerR4Helper extends BaseRestServerHelper implements BeforeEa
 			registerProvider(myPatientResourceProvider);
 			myObservationResourceProvider = new MyHashMapResourceProvider<>(fhirContext, Observation.class);
 			registerProvider(myObservationResourceProvider);
+			myEncounterResourceProvider = new MyHashMapResourceProvider<>(fhirContext, Encounter.class);
+			registerProvider(myEncounterResourceProvider);
 			myOrganizationResourceProvider = new MyHashMapResourceProvider<>(fhirContext, Organization.class);
 			registerProvider(myOrganizationResourceProvider);
 			myConceptMapResourceProvider = new MyHashMapResourceProvider<>(fhirContext, ConceptMap.class);
 			registerProvider(myConceptMapResourceProvider);
+			myPractitionerResourceProvider = new MyHashMapResourceProvider<>(fhirContext, Practitioner.class);
+			registerProvider(myPractitionerResourceProvider);
 
 			myPlainProvider = new RestServerDstu3Helper.MyPlainProvider(myInitialTransactionLatchEnabled);
 			registerProvider(myPlainProvider);
