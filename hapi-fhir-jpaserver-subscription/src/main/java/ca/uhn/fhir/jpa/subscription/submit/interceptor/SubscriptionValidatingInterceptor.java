@@ -241,7 +241,7 @@ public class SubscriptionValidatingInterceptor {
 			RequestPartitionId theRequestPartitionId,
 			Pointcut thePointcut) {
 		// If the subscription has the cross partition tag
-		if (SubscriptionUtil.isCrossPartition(theSubscription)
+		if (SubscriptionUtil.isDefinedAsCrossPartitionSubcription(theSubscription)
 				&& !(theRequestDetails instanceof SystemRequestDetails)) {
 			if (!mySubscriptionSettings.isCrossPartitionSubscriptionEnabled()) {
 				throw new UnprocessableEntityException(

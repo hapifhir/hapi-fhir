@@ -1,43 +1,37 @@
 package ca.uhn.fhir.jpa.subscription.match.registry;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalTopicSubscriptionFilter;
-import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.model.api.ExtensionDt;
-import ca.uhn.fhir.model.api.IFhirVersion;
-import ca.uhn.fhir.model.dstu2.FhirDstu2;
 import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.subscription.SubscriptionConstants;
 import ca.uhn.fhir.subscription.SubscriptionTestDataHelper;
+import ca.uhn.fhir.util.HapiExtensions;
 import jakarta.annotation.Nonnull;
-import org.hl7.fhir.dstu3.hapi.ctx.FhirDstu3;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.hapi.ctx.FhirR4;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Subscription;
-import org.hl7.fhir.r4b.hapi.ctx.FhirR4B;
-import org.hl7.fhir.r5.hapi.ctx.FhirR5;
 import org.hl7.fhir.r5.model.Coding;
 import org.hl7.fhir.r5.model.Enumerations;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.stream.Stream;
 
 import static ca.uhn.fhir.rest.api.Constants.CT_FHIR_JSON_NEW;
+import static ca.uhn.fhir.rest.api.Constants.RESOURCE_PARTITION_ID;
 import static ca.uhn.fhir.util.HapiExtensions.EX_SEND_DELETE_MESSAGES;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 class SubscriptionCanonicalizerTest {
 
@@ -172,44 +166,158 @@ class SubscriptionCanonicalizerTest {
 		verifyChannelParameters(canonical, thePayloadContent);
 	}
 
-
-	private static Stream<Arguments> crossPartitionParams() {
-		return Stream.of(
-			arguments(true, FhirContext.forDstu2Cached()),
-			arguments(false, FhirContext.forDstu2Cached()),
-			arguments(true, FhirContext.forDstu3Cached()),
-			arguments(false, FhirContext.forDstu3Cached()),
-			arguments(true, FhirContext.forR4Cached()),
-			arguments(false, FhirContext.forR4Cached()),
-			arguments(true, FhirContext.forR4BCached()),
-			arguments(false, FhirContext.forR4BCached()),
-			arguments(true, FhirContext.forR5Cached()),
-			arguments(false, FhirContext.forR5Cached())
-		);
+	private static Stream<RequestPartitionId> crossPartitionParams() {
+		return Stream.of(null, RequestPartitionId.fromPartitionId(1), RequestPartitionId.defaultPartition()) ;
 	}
+
 	@ParameterizedTest
 	@MethodSource("crossPartitionParams")
-	void testCrossPartition(boolean theCrossPartitionSubscriptionEnabled, FhirContext theFhirContext) {
-		final IFhirVersion version = theFhirContext.getVersion();
-		IBaseResource subscription = null;
-		if (version instanceof FhirDstu2){
-			subscription = new ca.uhn.fhir.model.dstu2.resource.Subscription();
-		} else if (version instanceof FhirDstu3){
-			subscription = new org.hl7.fhir.dstu3.model.Subscription();
-		} else if (version instanceof FhirR4){
-			subscription = new Subscription();
-		} else if (version instanceof FhirR4B){
-			subscription = new org.hl7.fhir.r4b.model.Subscription();
-		} else if (version instanceof FhirR5){
-			subscription = new org.hl7.fhir.r5.model.Subscription();
+	void testSubscriptionCrossPartitionEnableProperty_forDstu2WithExtensionAndPartitions(RequestPartitionId theRequestPartitionId) {
+		final SubscriptionSettings subscriptionSettings = new SubscriptionSettings();
+		subscriptionSettings.setCrossPartitionSubscriptionEnabled(true);
+		final SubscriptionCanonicalizer subscriptionCanonicalizer = new SubscriptionCanonicalizer(FhirContext.forDstu2(), subscriptionSettings);
+
+		ca.uhn.fhir.model.dstu2.resource.Subscription subscriptionWithoutExtension = new ca.uhn.fhir.model.dstu2.resource.Subscription();
+		subscriptionWithoutExtension.setUserData(RESOURCE_PARTITION_ID, theRequestPartitionId);
+
+		final CanonicalSubscription canonicalSubscriptionWithoutExtension = subscriptionCanonicalizer.canonicalize(subscriptionWithoutExtension);
+
+		assertThat(canonicalSubscriptionWithoutExtension.isCrossPartitionEnabled()).isFalse();
+	}
+
+	@ParameterizedTest
+	@MethodSource("crossPartitionParams")
+	void testSubscriptionCrossPartitionEnableProperty_forDstu3WithExtensionAndPartitions(RequestPartitionId theRequestPartitionId) {
+		final SubscriptionSettings subscriptionSettings = new SubscriptionSettings();
+		subscriptionSettings.setCrossPartitionSubscriptionEnabled(true);
+		final SubscriptionCanonicalizer subscriptionCanonicalizer = new SubscriptionCanonicalizer(FhirContext.forDstu3(), subscriptionSettings);
+
+		org.hl7.fhir.dstu3.model.Subscription subscriptionWithoutExtension = new org.hl7.fhir.dstu3.model.Subscription();
+		subscriptionWithoutExtension.setUserData(RESOURCE_PARTITION_ID, theRequestPartitionId);
+
+		org.hl7.fhir.dstu3.model.Subscription subscriptionWithExtensionCrossPartitionTrue = new org.hl7.fhir.dstu3.model.Subscription();
+		subscriptionWithExtensionCrossPartitionTrue.setUserData(RESOURCE_PARTITION_ID, theRequestPartitionId);
+		subscriptionWithExtensionCrossPartitionTrue.addExtension(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION, new org.hl7.fhir.dstu3.model.BooleanType().setValue(true));
+
+		org.hl7.fhir.dstu3.model.Subscription subscriptionWithExtensionCrossPartitionFalse = new org.hl7.fhir.dstu3.model.Subscription();
+		subscriptionWithExtensionCrossPartitionFalse.setUserData(RESOURCE_PARTITION_ID, theRequestPartitionId);
+		subscriptionWithExtensionCrossPartitionFalse.addExtension(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION, new org.hl7.fhir.dstu3.model.BooleanType().setValue(false));
+
+		final CanonicalSubscription canonicalSubscriptionWithoutExtension = subscriptionCanonicalizer.canonicalize(subscriptionWithoutExtension);
+		final CanonicalSubscription canonicalSubscriptionWithExtensionCrossPartitionTrue = subscriptionCanonicalizer.canonicalize(subscriptionWithExtensionCrossPartitionTrue);
+		final CanonicalSubscription canonicalSubscriptionWithExtensionCrossPartitionFalse = subscriptionCanonicalizer.canonicalize(subscriptionWithExtensionCrossPartitionFalse);
+
+		if(RequestPartitionId.isDefaultPartition(theRequestPartitionId)){
+			assertThat(canonicalSubscriptionWithoutExtension.isCrossPartitionEnabled()).isFalse();
+			assertThat(canonicalSubscriptionWithExtensionCrossPartitionTrue.isCrossPartitionEnabled()).isTrue();
+			assertThat(canonicalSubscriptionWithExtensionCrossPartitionFalse.isCrossPartitionEnabled()).isFalse();
+		} else {
+			assertThat(canonicalSubscriptionWithoutExtension.isCrossPartitionEnabled()).isFalse();
+			assertThat(canonicalSubscriptionWithExtensionCrossPartitionTrue.isCrossPartitionEnabled()).isFalse();
+			assertThat(canonicalSubscriptionWithExtensionCrossPartitionFalse.isCrossPartitionEnabled()).isFalse();
+		}
+	}
+
+	@ParameterizedTest
+	@MethodSource("crossPartitionParams")
+	void testSubscriptionCrossPartitionEnableProperty_forR4WithExtensionAndPartitions(RequestPartitionId theRequestPartitionId) {
+		final SubscriptionSettings subscriptionSettings = new SubscriptionSettings();
+		subscriptionSettings.setCrossPartitionSubscriptionEnabled(true);
+
+		final SubscriptionCanonicalizer subscriptionCanonicalizer = new SubscriptionCanonicalizer(FhirContext.forR4Cached(), subscriptionSettings);
+
+		Subscription subscriptionWithoutExtension = new Subscription();
+		subscriptionWithoutExtension.setUserData(RESOURCE_PARTITION_ID, theRequestPartitionId);
+
+		Subscription subscriptionWithExtensionCrossPartitionTrue = new Subscription();
+		subscriptionWithExtensionCrossPartitionTrue.setUserData(RESOURCE_PARTITION_ID, theRequestPartitionId);
+		subscriptionWithExtensionCrossPartitionTrue.addExtension(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION, new org.hl7.fhir.r4.model.BooleanType().setValue(true));
+
+		Subscription subscriptionWithExtensionCrossPartitionFalse = new Subscription();
+		subscriptionWithExtensionCrossPartitionFalse.setUserData(RESOURCE_PARTITION_ID, theRequestPartitionId);
+		subscriptionWithExtensionCrossPartitionFalse.addExtension(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION, new org.hl7.fhir.r4.model.BooleanType().setValue(false));
+
+
+		final CanonicalSubscription canonicalSubscriptionWithoutExtension = subscriptionCanonicalizer.canonicalize(subscriptionWithoutExtension);
+		final CanonicalSubscription canonicalSubscriptionWithExtensionCrossPartitionTrue = subscriptionCanonicalizer.canonicalize(subscriptionWithExtensionCrossPartitionTrue);
+		final CanonicalSubscription canonicalSubscriptionWithExtensionCrossPartitionFalse = subscriptionCanonicalizer.canonicalize(subscriptionWithExtensionCrossPartitionFalse);
+
+		if(RequestPartitionId.isDefaultPartition(theRequestPartitionId)){
+			assertThat(canonicalSubscriptionWithoutExtension.isCrossPartitionEnabled()).isFalse();
+			assertThat(canonicalSubscriptionWithExtensionCrossPartitionTrue.isCrossPartitionEnabled()).isTrue();
+			assertThat(canonicalSubscriptionWithExtensionCrossPartitionFalse.isCrossPartitionEnabled()).isFalse();
+		} else {
+			assertThat(canonicalSubscriptionWithoutExtension.isCrossPartitionEnabled()).isFalse();
+			assertThat(canonicalSubscriptionWithExtensionCrossPartitionTrue.isCrossPartitionEnabled()).isFalse();
+			assertThat(canonicalSubscriptionWithExtensionCrossPartitionFalse.isCrossPartitionEnabled()).isFalse();
 		}
 
-		final SubscriptionSettings subscriptionSettings = new SubscriptionSettings();
-		subscriptionSettings.setCrossPartitionSubscriptionEnabled(theCrossPartitionSubscriptionEnabled);
-		final SubscriptionCanonicalizer subscriptionCanonicalizer = new SubscriptionCanonicalizer(theFhirContext, subscriptionSettings);
-		final CanonicalSubscription canonicalSubscription = subscriptionCanonicalizer.canonicalize(subscription);
+	}
 
-		assertEquals(theCrossPartitionSubscriptionEnabled, canonicalSubscription.getCrossPartitionEnabled());
+	@ParameterizedTest
+	@MethodSource("crossPartitionParams")
+	void testSubscriptionCrossPartitionEnableProperty_forR4BWithExtensionAndPartitions(RequestPartitionId theRequestPartitionId) {
+		final SubscriptionSettings subscriptionSettings = new SubscriptionSettings();
+		subscriptionSettings.setCrossPartitionSubscriptionEnabled(true);
+		final SubscriptionCanonicalizer subscriptionCanonicalizer = new SubscriptionCanonicalizer(FhirContext.forR4BCached(), subscriptionSettings);
+
+		org.hl7.fhir.r4b.model.Subscription subscriptionWithoutExtension = new org.hl7.fhir.r4b.model.Subscription();
+		subscriptionWithoutExtension.setUserData(RESOURCE_PARTITION_ID, theRequestPartitionId);
+
+		org.hl7.fhir.r4b.model.Subscription subscriptionWithExtensionCrossPartitionTrue = new org.hl7.fhir.r4b.model.Subscription();
+		subscriptionWithExtensionCrossPartitionTrue.setUserData(RESOURCE_PARTITION_ID, theRequestPartitionId);
+		subscriptionWithExtensionCrossPartitionTrue.addExtension(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION, new org.hl7.fhir.r4b.model.BooleanType().setValue(true));
+
+		org.hl7.fhir.r4b.model.Subscription subscriptionWithExtensionCrossPartitionFalse = new org.hl7.fhir.r4b.model.Subscription();
+		subscriptionWithExtensionCrossPartitionFalse.setUserData(RESOURCE_PARTITION_ID, theRequestPartitionId);
+		subscriptionWithExtensionCrossPartitionFalse.addExtension(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION, new org.hl7.fhir.r4b.model.BooleanType().setValue(false));
+
+		final CanonicalSubscription canonicalSubscriptionWithoutExtension = subscriptionCanonicalizer.canonicalize(subscriptionWithoutExtension);
+		final CanonicalSubscription canonicalSubscriptionWithExtensionCrossPartitionTrue = subscriptionCanonicalizer.canonicalize(subscriptionWithExtensionCrossPartitionTrue);
+		final CanonicalSubscription canonicalSubscriptionWithExtensionCrossPartitionFalse = subscriptionCanonicalizer.canonicalize(subscriptionWithExtensionCrossPartitionFalse);
+
+		if(RequestPartitionId.isDefaultPartition(theRequestPartitionId)){
+			assertThat(canonicalSubscriptionWithoutExtension.isCrossPartitionEnabled()).isFalse();
+			assertThat(canonicalSubscriptionWithExtensionCrossPartitionTrue.isCrossPartitionEnabled()).isTrue();
+			assertThat(canonicalSubscriptionWithExtensionCrossPartitionFalse.isCrossPartitionEnabled()).isFalse();
+		} else {
+			assertThat(canonicalSubscriptionWithoutExtension.isCrossPartitionEnabled()).isFalse();
+			assertThat(canonicalSubscriptionWithExtensionCrossPartitionTrue.isCrossPartitionEnabled()).isFalse();
+			assertThat(canonicalSubscriptionWithExtensionCrossPartitionFalse.isCrossPartitionEnabled()).isFalse();
+		}
+	}
+
+	@ParameterizedTest
+	@MethodSource("crossPartitionParams")
+	void testSubscriptionCrossPartitionEnableProperty_forR5WithExtensionAndPartitions(RequestPartitionId theRequestPartitionId) {
+		final SubscriptionSettings subscriptionSettings = new SubscriptionSettings();
+		subscriptionSettings.setCrossPartitionSubscriptionEnabled(true);
+		final SubscriptionCanonicalizer subscriptionCanonicalizer = new SubscriptionCanonicalizer(FhirContext.forR5Cached(), subscriptionSettings);
+
+		org.hl7.fhir.r5.model.Subscription subscriptionWithoutExtension = new org.hl7.fhir.r5.model.Subscription();
+		subscriptionWithoutExtension.setUserData(RESOURCE_PARTITION_ID, theRequestPartitionId);
+
+		org.hl7.fhir.r5.model.Subscription subscriptionWithExtensionCrossPartitionTrue = new org.hl7.fhir.r5.model.Subscription();
+		subscriptionWithExtensionCrossPartitionTrue.setUserData(RESOURCE_PARTITION_ID, theRequestPartitionId);
+		subscriptionWithExtensionCrossPartitionTrue.addExtension(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION, new org.hl7.fhir.r5.model.BooleanType().setValue(true));
+
+		org.hl7.fhir.r5.model.Subscription subscriptionWithExtensionCrossPartitionFalse = new org.hl7.fhir.r5.model.Subscription();
+		subscriptionWithExtensionCrossPartitionFalse.setUserData(RESOURCE_PARTITION_ID, theRequestPartitionId);
+		subscriptionWithExtensionCrossPartitionFalse.addExtension(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION, new org.hl7.fhir.r5.model.BooleanType().setValue(false));
+
+		final CanonicalSubscription canonicalSubscriptionWithoutExtension = subscriptionCanonicalizer.canonicalize(subscriptionWithoutExtension);
+		final CanonicalSubscription canonicalSubscriptionWithExtensionCrossPartitionTrue = subscriptionCanonicalizer.canonicalize(subscriptionWithExtensionCrossPartitionTrue);
+		final CanonicalSubscription canonicalSubscriptionWithExtensionCrossPartitionFalse = subscriptionCanonicalizer.canonicalize(subscriptionWithExtensionCrossPartitionFalse);
+
+		if(RequestPartitionId.isDefaultPartition(theRequestPartitionId)){
+			assertThat(canonicalSubscriptionWithoutExtension.isCrossPartitionEnabled()).isFalse();
+			assertThat(canonicalSubscriptionWithExtensionCrossPartitionTrue.isCrossPartitionEnabled()).isTrue();
+			assertThat(canonicalSubscriptionWithExtensionCrossPartitionFalse.isCrossPartitionEnabled()).isFalse();
+		} else {
+			assertThat(canonicalSubscriptionWithoutExtension.isCrossPartitionEnabled()).isFalse();
+			assertThat(canonicalSubscriptionWithExtensionCrossPartitionTrue.isCrossPartitionEnabled()).isFalse();
+			assertThat(canonicalSubscriptionWithExtensionCrossPartitionFalse.isCrossPartitionEnabled()).isFalse();
+		}
 	}
 
 	private org.hl7.fhir.r4b.model.Subscription buildR4BSubscription(String thePayloadContent) {
