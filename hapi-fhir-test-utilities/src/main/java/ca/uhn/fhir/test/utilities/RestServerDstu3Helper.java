@@ -35,9 +35,11 @@ import ca.uhn.test.concurrency.IPointcutLatch;
 import ca.uhn.test.concurrency.PointcutLatch;
 import jakarta.servlet.ServletException;
 import org.hl7.fhir.dstu3.model.ConceptMap;
+import org.hl7.fhir.dstu3.model.Encounter;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.Practitioner;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -238,8 +240,10 @@ public class RestServerDstu3Helper extends BaseRestServerHelper implements IPoin
 		private boolean myFailNextPut;
 		private HashMapResourceProvider<Patient> myPatientResourceProvider;
 		private HashMapResourceProvider<Observation> myObservationResourceProvider;
+		private HashMapResourceProvider<Encounter> myEncounterResourceProvider;
 		private HashMapResourceProvider<Organization> myOrganizationResourceProvider;
 		private HashMapResourceProvider<ConceptMap> myConceptMapResourceProvider;
+		private HashMapResourceProvider<Practitioner> myPractitionerResourceProvider;
 		private MyPlainProvider myPlainProvider;
 		private final boolean myInitialTransactionLatchEnabled;
 
@@ -304,6 +308,10 @@ public class RestServerDstu3Helper extends BaseRestServerHelper implements IPoin
 			return myConceptMapResourceProvider;
 		}
 
+		public HashMapResourceProvider<Practitioner> getPractitionerResourceProvider() {
+			return myPractitionerResourceProvider;
+		}
+
 		public HashMapResourceProvider<Patient> getPatientResourceProvider() {
 			return myPatientResourceProvider;
 		}
@@ -313,13 +321,13 @@ public class RestServerDstu3Helper extends BaseRestServerHelper implements IPoin
 			super.initialize();
 
 			FhirContext fhirContext = getFhirContext();
-			myPatientResourceProvider = new MyHashMapResourceProvider(fhirContext, Patient.class);
+			myPatientResourceProvider = new MyHashMapResourceProvider<>(fhirContext, Patient.class);
 			registerProvider(myPatientResourceProvider);
-			myObservationResourceProvider = new MyHashMapResourceProvider(fhirContext, Observation.class);
+			myObservationResourceProvider = new MyHashMapResourceProvider<>(fhirContext, Observation.class);
 			registerProvider(myObservationResourceProvider);
-			myOrganizationResourceProvider = new MyHashMapResourceProvider(fhirContext, Organization.class);
+			myOrganizationResourceProvider = new MyHashMapResourceProvider<>(fhirContext, Organization.class);
 			registerProvider(myOrganizationResourceProvider);
-			myConceptMapResourceProvider = new MyHashMapResourceProvider(fhirContext, ConceptMap.class);
+			myConceptMapResourceProvider = new MyHashMapResourceProvider<>(fhirContext, ConceptMap.class);
 			registerProvider(myConceptMapResourceProvider);
 
 			myPlainProvider = new MyPlainProvider(myInitialTransactionLatchEnabled);
@@ -327,7 +335,7 @@ public class RestServerDstu3Helper extends BaseRestServerHelper implements IPoin
 		}
 
 		public void setConceptMapResourceProvider(HashMapResourceProvider<ConceptMap> theResourceProvider) {
-			myConceptMapResourceProvider.getStoredResources().forEach(c -> theResourceProvider.store(c));
+			myConceptMapResourceProvider.getStoredResources().forEach(theResourceProvider::store);
 
 			unregisterProvider(myConceptMapResourceProvider);
 			registerProvider(theResourceProvider);
@@ -356,6 +364,11 @@ public class RestServerDstu3Helper extends BaseRestServerHelper implements IPoin
 	}
 
 	@Override
+	public IResourceProvider getEncounterResourceProvider() {
+		return myRestServer.myEncounterResourceProvider;
+	}
+
+	@Override
 	public HashMapResourceProvider<Patient> getPatientResourceProvider() {
 		return myRestServer.getPatientResourceProvider();
 	}
@@ -363,6 +376,11 @@ public class RestServerDstu3Helper extends BaseRestServerHelper implements IPoin
 	@Override
 	public HashMapResourceProvider<ConceptMap> getConceptMapResourceProvider() {
 		return myRestServer.getConceptMapResourceProvider();
+	}
+
+	@Override
+	public IResourceProvider getPractitionerResourceProvider() {
+		return myRestServer.getPractitionerResourceProvider();
 	}
 
 	@Override
