@@ -3,6 +3,7 @@ package ca.uhn.fhir.cli;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.client.apache.ApacheRestfulClientFactory;
+import ca.uhn.fhir.rest.client.api.IRestfulClientFactory;
 import ca.uhn.fhir.test.BaseFhirVersionParameterizedTest;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -10,6 +11,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.util.EntityUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -78,5 +80,14 @@ public class ApacheRestfulClientFactoryTest extends BaseFhirVersionParameterized
 			assertThat(e.getMessage()).contains("HAPI-1357: Failed to retrieve the server metadata statement during client initialization");
 			assertEquals(SSLHandshakeException.class, e.getCause().getCause().getClass());
 		}
+	}
+
+	@Test
+	public void testConnectionTimeToLive() {
+		ApacheRestfulClientFactory clientFactory = new ApacheRestfulClientFactory();
+
+		assertEquals(IRestfulClientFactory.DEFAULT_CONNECTION_TTL, clientFactory.getConnectionTimeToLive());
+		clientFactory.setConnectionTimeToLive(25000);
+		assertEquals(25000, clientFactory.getConnectionTimeToLive());
 	}
 }

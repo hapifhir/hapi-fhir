@@ -3,6 +3,7 @@ package ca.uhn.fhir.cli.client;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.rest.client.api.IRestfulClientFactory;
 import ca.uhn.fhir.test.BaseFhirVersionParameterizedTest;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -157,6 +158,17 @@ public class HapiFhirCliRestfulClientFactoryTest extends BaseFhirVersionParamete
 		} catch (UnsupportedOperationException e){
 			assertEquals(Msg.code(2120), e.getMessage());
 		}
+	}
+
+	@ParameterizedTest
+	@MethodSource("baseParamsProvider")
+	public void testConnectionTimeToLive(FhirVersionEnum theFhirVersion) {
+		FhirVersionParams fhirVersionParams = getFhirVersionParams(theFhirVersion);
+		HapiFhirCliRestfulClientFactory clientFactory = new HapiFhirCliRestfulClientFactory(fhirVersionParams.getFhirContext());
+
+		assertEquals(IRestfulClientFactory.DEFAULT_CONNECTION_TTL, clientFactory.getConnectionTimeToLive());
+		clientFactory.setConnectionTimeToLive(25000);
+		assertEquals(25000, clientFactory.getConnectionTimeToLive());
 	}
 
 }

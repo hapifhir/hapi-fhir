@@ -3,6 +3,7 @@ package ca.uhn.fhir.okhttp;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.okhttp.client.OkHttpRestfulClientFactory;
+import ca.uhn.fhir.rest.client.api.IRestfulClientFactory;
 import ca.uhn.fhir.test.BaseFhirVersionParameterizedTest;
 import okhttp3.Call;
 import okhttp3.OkHttpClient;
@@ -69,6 +70,13 @@ public class OkHttpRestfulClientFactoryTest extends BaseFhirVersionParameterized
 		clientFactory.setConnectTimeout(1516);
 
 		assertEquals(1516, ((OkHttpClient) clientFactory.getNativeClient()).connectTimeoutMillis());
+	}
+
+	@Test
+	public void testConnectionTimeToLive() {
+		assertEquals(IRestfulClientFactory.DEFAULT_CONNECTION_TTL, clientFactory.getConnectionTimeToLive());
+		clientFactory.setConnectionTimeToLive(25000);
+		assertEquals(25000, clientFactory.getConnectionTimeToLive());
 	}
 
 	@ParameterizedTest
