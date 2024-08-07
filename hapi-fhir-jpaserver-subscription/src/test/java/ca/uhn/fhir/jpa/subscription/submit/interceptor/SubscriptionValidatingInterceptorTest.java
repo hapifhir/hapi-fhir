@@ -4,15 +4,13 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.model.entity.StorageSettings;
+import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyEvaluator;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
-import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
@@ -29,6 +27,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -223,6 +222,23 @@ public class SubscriptionValidatingInterceptorTest {
 		SimpleBundleProvider simpleBundleProvider = new SimpleBundleProvider(List.of(topic));
 		when(mySubscriptionTopicDao.search(any(), any())).thenReturn(simpleBundleProvider);
 		mySubscriptionValidatingInterceptor.validateSubmittedSubscription(badSub, null, null, Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED);
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {
+		"acme.corp",
+		"https://acme.corp/badstuff-%%$^&& iuyi",
+		"ftp://acme.corp"})
+	public void testRestHookEndpointValidation_whenProvidedWithBadURLs(String theBadUrl) {
+		try {
+			Subscription subscriptionWithBadEndpoint = createSubscription();
+			subscriptionWithBadEndpoint.getChannel().setEndpoint(theBadUrl);
+
+			mySubscriptionValidatingInterceptor.validateSubmittedSubscription(subscriptionWithBadEndpoint, null, null, Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED);
+			fail("");
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
 	}
 
 
