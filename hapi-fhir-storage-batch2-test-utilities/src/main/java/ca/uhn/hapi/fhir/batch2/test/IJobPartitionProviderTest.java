@@ -42,13 +42,16 @@ public interface IJobPartitionProviderTest {
 
 		Set<String> resourceTypes = Set.of("Patient", "Observation", "Practitioner", "SearchParameter");
 		when(getFhirContext().getResourceTypes()).thenReturn(resourceTypes);
+
+		// execute and verify
 		List<PartitionedUrl> partitionedUrls = List.of(
 				new PartitionedUrl().setUrl("Patient?").setRequestPartitionId(RequestPartitionId.fromPartitionId(1)),
 				new PartitionedUrl().setUrl("Observation?").setRequestPartitionId(RequestPartitionId.fromPartitionId(2)),
 				new PartitionedUrl().setUrl("Practitioner?"),
 				new PartitionedUrl().setUrl("SearchParameter?").setRequestPartitionId(RequestPartitionId.defaultPartition()));
 
-		verifyGetPartitionedUrls(requestDetails, List.of(), partitionedUrls);
+		executeAndVerifyGetPartitionedUrls(requestDetails, List.of(), partitionedUrls);
+		executeAndVerifyGetPartitionedUrls(requestDetails, null, partitionedUrls);
 	}
 
 	@Test
@@ -59,13 +62,14 @@ public interface IJobPartitionProviderTest {
 		setupResourceNameUrlWithPartition(requestDetails, "Patient", RequestPartitionId.fromPartitionId(1));
 		setupResourceNameUrlWithPartition(requestDetails, "Observation", RequestPartitionId.fromPartitionId(2));
 		setupResourceNameUrlWithPartition(requestDetails, "Practitioner", null);
+
+		// execute and verify
 		List<String> urls = List.of("Patient?", "Observation?", "Practitioner?");
 		List<PartitionedUrl> partitionedUrls = List.of(
 				new PartitionedUrl().setUrl("Patient?").setRequestPartitionId(RequestPartitionId.fromPartitionId(1)),
 				new PartitionedUrl().setUrl("Observation?").setRequestPartitionId(RequestPartitionId.fromPartitionId(2)),
 				new PartitionedUrl().setUrl("Practitioner?"));
-
-		verifyGetPartitionedUrls(requestDetails, urls, partitionedUrls);
+		executeAndVerifyGetPartitionedUrls(requestDetails, urls, partitionedUrls);
 	}
 
 	@Test
@@ -82,15 +86,16 @@ public interface IJobPartitionProviderTest {
 		setupResourceNameUrlWithPartition(requestDetails, "Observation", RequestPartitionId.fromPartitionId(1));
 		setupPartitions(partitionIds);
 
+		// execute and verify
 		List<String> urls = List.of("Patient?", "Observation?");
 		Set<PartitionedUrl> partitionedUrls = new LinkedHashSet<>();
 		partitionIds.forEach(p -> partitionedUrls.add(new PartitionedUrl().setUrl("Patient?").setRequestPartitionId(p)));
 		partitionedUrls.add(new PartitionedUrl().setUrl("Patient?").setRequestPartitionId(RequestPartitionId.defaultPartition()));
 		partitionedUrls.add(new PartitionedUrl().setUrl("Observation?").setRequestPartitionId(RequestPartitionId.fromPartitionIds(1)));
-		verifyGetPartitionedUrls(requestDetails, urls, partitionedUrls);
+		executeAndVerifyGetPartitionedUrls(requestDetails, urls, partitionedUrls);
 	}
 
-	default void verifyGetPartitionedUrls(RequestDetails theRequestDetails, List<String> theUrls, Collection<PartitionedUrl> thePartitionedUrls) {
+	default void executeAndVerifyGetPartitionedUrls(RequestDetails theRequestDetails, List<String> theUrls, Collection<PartitionedUrl> thePartitionedUrls) {
 		// test
 		List<PartitionedUrl> actualPartitionedUrls = getJobPartitionProvider().getPartitionedUrls(theRequestDetails, theUrls);
 

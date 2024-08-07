@@ -22,7 +22,6 @@ package ca.uhn.fhir.batch2.api;
 import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrl;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -47,7 +46,7 @@ public interface IJobPartitionProvider {
 	 * @param theUrls the urls to run the job against
 	 * @return the list of {@link PartitionedUrl}
 	 */
-	default List<PartitionedUrl> getPartitionedUrls(RequestDetails theRequestDetails, @NotNull List<String> theUrls) {
+	default List<PartitionedUrl> getPartitionedUrls(RequestDetails theRequestDetails, List<String> theUrls) {
 		return theUrls.stream().map(url -> new PartitionedUrl().setUrl(url)).collect(Collectors.toList());
 	}
 }

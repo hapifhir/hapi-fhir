@@ -37,6 +37,7 @@ import java.util.stream.Collectors;
  * The latter will be used to handle cases when the job is configured to run against all partitions
  * (bulk system operation) and will return the actual list with all the configured partitions.
  */
+@Deprecated
 public class JpaJobPartitionProvider extends DefaultJobPartitionProvider {
 	private final IPartitionLookupSvc myPartitionLookupSvc;
 

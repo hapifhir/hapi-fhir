@@ -24,7 +24,6 @@ import ca.uhn.fhir.batch2.jobs.parameters.IUrlListValidator;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,9 +45,6 @@ public class ReindexJobParametersValidator implements IJobParametersValidator<Re
 			// only check if there's no other errors (new list to fix immutable issues)
 			errors = new ArrayList<>();
 			for (String url : theParameters.getUrls()) {
-				if (StringUtils.isBlank(url)) {
-					continue;
-				}
 				if (url.contains(" ") || url.contains("\n") || url.contains("\t")) {
 					errors.add("Invalid URL. URL cannot contain spaces : " + url);
 				}

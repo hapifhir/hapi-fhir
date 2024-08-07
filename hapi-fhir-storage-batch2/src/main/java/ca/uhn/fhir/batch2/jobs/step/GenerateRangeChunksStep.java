@@ -71,7 +71,7 @@ public class GenerateRangeChunksStep<PT extends JobParameters> implements IFirst
 
 	private void sendChunk(ChunkRangeJson theData, IJobDataSink<ChunkRangeJson> theDataSink) {
 		String url = theData.getUrl();
-		ourLog.info(
+		ourLog.trace(
 				"Creating chunks for [{}] from {} to {} for partition {}",
 				!StringUtils.isEmpty(url) ? url : "everything",
 				theData.getStart(),

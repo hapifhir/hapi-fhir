@@ -27,7 +27,6 @@ import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.ResourceSearch;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import jakarta.validation.constraints.NotNull;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -56,31 +55,19 @@ public class DefaultJobPartitionProvider implements IJobPartitionProvider {
 		myMatchUrlService = theMatchUrlService;
 	}
 
-	/**
-	 * Provides the list of {@link PartitionedUrl} to run job steps against, based on the request that initiates the job.
-	 * @param theRequestDetails the requestDetails
-	 * @param theOperation the operation being run which corresponds to the job
-	 * @return the list of {@link PartitionedUrl}
-	 */
 	public List<RequestPartitionId> getPartitions(RequestDetails theRequestDetails, String theOperation) {
 		RequestPartitionId partitionId = myRequestPartitionHelper.determineReadPartitionForRequestForServerOperation(
 				theRequestDetails, theOperation);
 		return List.of(partitionId);
 	}
 
-	/**
-	 * Provides the list of {@link PartitionedUrl} to run job steps against, based on the request that initiates the job
-	 * and the urls that it's configured with.
-	 * @param theRequestDetails the requestDetails
-	 * @param theUrls the urls to run the job against
-	 * @return the list of {@link PartitionedUrl}
-	 */
 	@Override
-	public List<PartitionedUrl> getPartitionedUrls(RequestDetails theRequestDetails, @NotNull List<String> theUrls) {
+	public List<PartitionedUrl> getPartitionedUrls(RequestDetails theRequestDetails, List<String> theUrls) {
 		List<String> urls = theUrls;
 
 		// if the url list is empty, use all the supported resource types to build the url list
-		if (theUrls.isEmpty()) {
+		// we can go back to no url scenario if all resource types point to the same partition
+		if (theUrls == null || theUrls.isEmpty()) {
 			urls = myFhirContext.getResourceTypes().stream()
 					.map(resourceType -> resourceType + "?")
 					.collect(Collectors.toList());
@@ -106,10 +93,9 @@ public class DefaultJobPartitionProvider implements IJobPartitionProvider {
 			String url = partitionedUrl.getUrl();
 			RequestPartitionId partitionId = partitionedUrl.getRequestPartitionId();
 			if (partitionId != null && partitionId.isAllPartitions() && !allPartitions.isEmpty()) {
-				List<PartitionedUrl> megaScalePartitionedUrls = allPartitions.stream()
+				allPartitions.stream()
 						.map(p -> (new PartitionedUrl().setUrl(url).setRequestPartitionId(p)))
-						.collect(Collectors.toList());
-				retVal.addAll(megaScalePartitionedUrls);
+						.forEach(retVal::add);
 			} else {
 				retVal.add(partitionedUrl);
 			}
@@ -119,7 +105,6 @@ public class DefaultJobPartitionProvider implements IJobPartitionProvider {
 	}
 
 	public List<RequestPartitionId> getAllPartitions() {
-		// likely allPartitions is not supported in this path
-		return List.of();
+		return List.of(RequestPartitionId.allPartitions());
 	}
 }

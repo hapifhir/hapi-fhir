@@ -82,7 +82,7 @@ public class Batch2JobHelper {
 	}
 
 	public JobInstance awaitJobHasStatus(String theInstanceId, StatusEnum... theExpectedStatus) {
-		return awaitJobHasStatus(theInstanceId, 1000, theExpectedStatus);
+		return awaitJobHasStatus(theInstanceId, 30, theExpectedStatus);
 	}
 
 	public JobInstance awaitJobHasStatusWithoutMaintenancePass(String theInstanceId, StatusEnum... theExpectedStatus) {

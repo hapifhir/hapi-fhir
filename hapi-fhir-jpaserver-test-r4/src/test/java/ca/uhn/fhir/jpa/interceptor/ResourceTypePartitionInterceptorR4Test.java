@@ -28,6 +28,7 @@ public class ResourceTypePartitionInterceptorR4Test extends BaseResourceProvider
 	@BeforeEach
 	public void before() {
 		myPartitionSettings.setPartitioningEnabled(true);
+		myPartitionSettings.setAllowReferencesAcrossPartitions(PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
 		myInterceptorRegistry.registerInterceptor(myPartitionInterceptor);
 
 		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(1).setName("PART-1"), null);
@@ -38,14 +39,13 @@ public class ResourceTypePartitionInterceptorR4Test extends BaseResourceProvider
 	@AfterEach
 	public void after() {
 		myPartitionSettings.setPartitioningEnabled(new PartitionSettings().isPartitioningEnabled());
+		myPartitionSettings.setAllowReferencesAcrossPartitions(new PartitionSettings().getAllowReferencesAcrossPartitions());
 		myInterceptorRegistry.unregisterInterceptor(myPartitionInterceptor);
 	}
 
 	@ParameterizedTest
 	@CsvSource(value = {"Patient?, 1", "Observation?, 1", ",3"})
 	public void reindex_withUrl_completesSuccessfully(String theUrl, int theExpectedIndexedResourceCount) {
-		myPartitionSettings.setAllowReferencesAcrossPartitions(PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
-
 		IIdType patientId = createPatient(withGiven("John"));
 		createObservation(withSubject(patientId));
 		createEncounter();
@@ -62,8 +62,6 @@ public class ResourceTypePartitionInterceptorR4Test extends BaseResourceProvider
 		String jobId = ((StringType)response.getParameterValue(ProviderConstants.OPERATION_REINDEX_RESPONSE_JOB_ID)).getValue();
 		myBatch2JobHelper.awaitJobHasStatus(jobId, StatusEnum.COMPLETED);
 		assertThat(myBatch2JobHelper.getCombinedRecordsProcessed(jobId)).isEqualTo(theExpectedIndexedResourceCount);
-
-		myPartitionSettings.setAllowReferencesAcrossPartitions(new PartitionSettings().getAllowReferencesAcrossPartitions());
 	}
 
 	public class MyPartitionSelectorInterceptor {

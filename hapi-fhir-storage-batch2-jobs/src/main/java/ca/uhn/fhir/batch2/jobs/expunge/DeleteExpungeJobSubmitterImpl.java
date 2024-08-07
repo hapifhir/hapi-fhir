@@ -23,7 +23,6 @@ import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrl;
 import ca.uhn.fhir.batch2.jobs.parameters.UrlPartitioner;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
@@ -32,7 +31,6 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
-import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IDeleteExpungeJobSubmitter;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
@@ -51,12 +49,6 @@ import static ca.uhn.fhir.batch2.jobs.expunge.DeleteExpungeAppCtx.JOB_DELETE_EXP
 public class DeleteExpungeJobSubmitterImpl implements IDeleteExpungeJobSubmitter {
 	@Autowired
 	IJobCoordinator myJobCoordinator;
-
-	@Autowired
-	FhirContext myFhirContext;
-
-	@Autowired
-	MatchUrlService myMatchUrlService;
 
 	@Autowired
 	IRequestPartitionHelperSvc myRequestPartitionHelperSvc;

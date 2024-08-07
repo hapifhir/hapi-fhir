@@ -66,7 +66,12 @@ public class ResourceIdListStep<PT extends JobParameters>
 		Date end = data.getEnd();
 		Integer batchSize = theStepExecutionDetails.getParameters().getBatchSize();
 
-		ourLog.info("Beginning to submit chunks in range {} to {}", start, end);
+		ourLog.trace(
+				"Beginning to submit chunks in range {} to {} for url {} and partitionId {}",
+				start,
+				end,
+				data.getUrl(),
+				data.getPartitionId());
 
 		int chunkSize = Math.min(defaultIfNull(batchSize, MAX_BATCH_OF_IDS), MAX_BATCH_OF_IDS);
 		final IResourcePidStream searchResult =
@@ -84,7 +89,12 @@ public class ResourceIdListStep<PT extends JobParameters>
 				chunkCount.getAndIncrement();
 				submitWorkChunk(idBatch, searchResult.getRequestPartitionId(), theDataSink);
 			});
-			ourLog.info("Submitted {} chunks with {} resource IDs", chunkCount, totalIdsFound);
+			ourLog.trace(
+					"Submitted {} chunks with {} resource IDs for url {} and partitionId {}",
+					chunkCount,
+					totalIdsFound,
+					data.getUrl(),
+					data.getPartitionId());
 		});
 
 		return RunOutcome.SUCCESS;
@@ -97,9 +107,9 @@ public class ResourceIdListStep<PT extends JobParameters>
 		if (theTypedPids.isEmpty()) {
 			return;
 		}
-		ourLog.info("Submitting work chunk in partition {} with {} IDs", theRequestPartitionId, theTypedPids.size());
+		ourLog.trace("Submitting work chunk in partition {} with {} IDs", theRequestPartitionId, theTypedPids.size());
 		ResourceIdListWorkChunkJson data = new ResourceIdListWorkChunkJson(theTypedPids, theRequestPartitionId);
-		ourLog.debug("IDs are: {}", data);
+		ourLog.trace("IDs are: {}", data);
 		theDataSink.accept(data);
 	}
 }
