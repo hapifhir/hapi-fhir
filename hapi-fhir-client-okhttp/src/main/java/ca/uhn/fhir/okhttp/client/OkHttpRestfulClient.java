@@ -137,6 +137,16 @@ public class OkHttpRestfulClient implements IHttpClient {
 		return myRequest;
 	}
 
+	@Override
+	public void addHeadersToRequest(IHttpRequest theRequest, EncodingEnum theEncodingEnum, FhirContext theContext) {
+		// not needed for this client
+	}
+
+	@Override
+	public void setNewUrl(StringBuilder theUrl) {
+		myUrl = theUrl;
+	}
+
 	private void addHeadersToRequest(
 			OkHttpRestfulRequest theHttpRequest, EncodingEnum theEncoding, FhirContext theContext) {
 		if (myHeaders != null) {
