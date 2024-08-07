@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
+import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrl;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexStep;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
@@ -45,7 +46,7 @@ public class ReindexStepTest {
 		RequestPartitionId partitionId = RequestPartitionId.fromPartitionId(expectedPartitionId);
 		ResourceIdListWorkChunkJson data = new ResourceIdListWorkChunkJson(List.of(), partitionId);
 		ReindexJobParameters reindexJobParameters = new ReindexJobParameters();
-		reindexJobParameters.setRequestPartitionId(partitionId);
+		reindexJobParameters.addPartitionedUrl(new PartitionedUrl().setRequestPartitionId(partitionId));
 		when(myHapiTransactionService.withRequest(any())).thenCallRealMethod();
 		when(myHapiTransactionService.buildExecutionBuilder(any())).thenCallRealMethod();
 

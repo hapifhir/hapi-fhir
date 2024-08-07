@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.mdm.svc;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrl;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.HookParams;
@@ -360,9 +361,9 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 		if (hasBatchSize) {
 			params.setBatchSize(theBatchSize.getValue().intValue());
 		}
-		params.setRequestPartitionId(RequestPartitionId.allPartitions());
-
-		theUrls.forEach(params::addUrl);
+		RequestPartitionId partitionId = RequestPartitionId.allPartitions();
+		theUrls.forEach(
+				url -> params.addPartitionedUrl(new PartitionedUrl().setUrl(url).setRequestPartitionId(partitionId)));
 
 		JobInstanceStartRequest request = new JobInstanceStartRequest();
 		request.setParameters(params);
