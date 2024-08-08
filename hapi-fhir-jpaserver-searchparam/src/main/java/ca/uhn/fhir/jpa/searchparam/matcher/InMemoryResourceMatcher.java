@@ -42,7 +42,6 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.BaseParamWithPrefix;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.ReferenceParam;
-import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.param.UriParam;
@@ -452,8 +451,8 @@ public class InMemoryResourceMatcher {
 
 	private boolean matchIdsOr(List<IQueryParameterType> theOrParams, IBaseResource theResource) {
 		return theOrParams.stream()
-				.anyMatch(param -> param instanceof StringParam
-						&& matchId(((StringParam) param).getValue(), theResource.getIdElement()));
+				.anyMatch(param -> param instanceof TokenParam
+						&& matchId(((TokenParam) param).getValue(), theResource.getIdElement()));
 	}
 
 	private boolean matchId(String theValue, IIdType theId) {
