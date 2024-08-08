@@ -1,6 +1,5 @@
 ---
 type: fix
-issue: 
 jira: SMILE-8652
 title: "When JPA servers are configured to always require a new database
   transaction when switching partitions, the server will now correctly
