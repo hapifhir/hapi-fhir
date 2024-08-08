@@ -1,8 +1,11 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.batch2.jobs.step.ResourceIdListStep;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
 import ca.uhn.fhir.jpa.dao.TestDaoSearch;
 import ca.uhn.fhir.jpa.test.BaseJpaTest;
 import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
@@ -30,7 +33,10 @@ import org.springframework.test.context.support.DependencyInjectionTestExecution
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 import org.springframework.transaction.PlatformTransactionManager;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
@@ -66,6 +72,8 @@ public class FhirResourceDaoR4QuerySandbox extends BaseJpaTest {
 	DaoTestDataBuilder myDataBuilder;
 	@Autowired
 	TestDaoSearch myTestDaoSearch;
+	@Autowired
+	IBatch2DaoSvc myBatch2DaoSvc;
 
 	@Override
 	protected PlatformTransactionManager getTxManager() {
@@ -160,6 +168,42 @@ public class FhirResourceDaoR4QuerySandbox extends BaseJpaTest {
 
 		final List<String> actualIds = allResources.stream().map(IBaseResource::getIdElement).map(IIdType::getIdPart).toList();
 		assertTrue(actualIds.containsAll(List.of(id1, id2, id3)));
+	}
+
+	// LUKETODO:   consider @Nested class
+	@Test
+	void testDeleteExpunge1() {
+//		SearchParameterMap[params={event=[[TokenParam[system=http://terminology.hl7.org/CodeSystem/v2-0003,value=], TokenParam[system=https://harris-chr.com/fhir/CodeSystem/arc-interface-trigger,value=]]]}]
+//		MessageHeader?event=http://terminology.hl7.org/CodeSystem/v2-0003|,https://harris-chr.com/fhir/CodeSystem/arc-interface-trigger|&_lastUpdated=ge2023-09-17T00:00:00.000000Z&_lastUpdated=le2025-09-23T23:59:59.999999Z&_expunge=true
+//		myTestDaoSearch.searchForResources("MessageHeader?event=http://terminology.hl7.org/CodeSystem/v2-0003|,https://harris-chr.com/fhir/CodeSystem/arc-interface-trigger|&_lastUpdated=ge2023-09-17T00:00:00.000000Z&_lastUpdated=le2025-09-23T23:59:59.999999Z&_expunge=true");
+		final LocalDateTime startDateTime = LocalDateTime.now().minusDays(2);
+		final Date startDate = Date.from(startDateTime.atZone(ZoneId.systemDefault()).toInstant());
+		final LocalDateTime endDateTime = LocalDateTime.now().minusDays(1);
+		final Date endDate = Date.from(endDateTime.atZone(ZoneId.systemDefault()).toInstant());
+
+		myBatch2DaoSvc.fetchResourceIdStream(startDate, endDate, RequestPartitionId.allPartitions(), "MessageHeader?event=http://terminology.hl7.org/CodeSystem/v2-0003|,https://harris-chr.com/fhir/CodeSystem/arc-interface-trigger|&_lastUpdated=ge2023-09-17T00:00:00.000000Z&_lastUpdated=le2025-09-23T23:59:59.999999Z&_expunge=true")
+			.visitStreamNoResult(x -> {
+				var z = x.toList();
+			});
+		final List<String> queries = myCapturedQueries.stream().toList();
+
+		ourLog.info("queries: {}", queries);
+	}
+
+	@Test
+	void testDeleteExpunge2() {
+		final LocalDateTime startDateTime = LocalDateTime.now().minusDays(2);
+		final Date startDate = Date.from(startDateTime.atZone(ZoneId.systemDefault()).toInstant());
+		final LocalDateTime endDateTime = LocalDateTime.now().minusDays(1);
+		final Date endDate = Date.from(endDateTime.atZone(ZoneId.systemDefault()).toInstant());
+
+		myBatch2DaoSvc.fetchResourceIdStream(startDate, endDate, RequestPartitionId.allPartitions(), "MessageHeader?_lastUpdated=ge2023-09-17T00:00:00.000000Z&_lastUpdated=le2025-09-23T23:59:59.999999Z&_expunge=true")
+			.visitStreamNoResult(x -> {
+				var z = x.toList();
+			});
+		final List<String> queries = myCapturedQueries.stream().toList();
+
+		ourLog.info("queries: {}", queries);
 	}
 
 	public static final class TestDirtiesContextTestExecutionListener extends DirtiesContextTestExecutionListener {

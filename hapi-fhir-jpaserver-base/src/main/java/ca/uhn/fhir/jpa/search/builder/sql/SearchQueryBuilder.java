@@ -646,6 +646,7 @@ public class SearchQueryBuilder {
 			ResourceTablePredicateBuilder resourceTable = mySqlBuilderFactory.resourceTable(this);
 			addTable(resourceTable, null);
 			if (theIncludeResourceTypeAndNonDeletedFlag) {
+				// LUKETODO:  this is where we add the RES_TYPE clause
 				Condition typeAndDeletionPredicate = resourceTable.createResourceTypeAndNonDeletedPredicates();
 				addPredicate(typeAndDeletionPredicate);
 			}
