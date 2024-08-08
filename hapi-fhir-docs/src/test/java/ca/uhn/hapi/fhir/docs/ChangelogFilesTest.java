@@ -38,6 +38,7 @@ public class ChangelogFilesTest {
 			if (nextFilename.equals("changes.yaml")) {
 				continue;
 			}
+
 			if (nextFilename.equals("version.yaml")) {
 				continue;
 			}
@@ -77,7 +78,7 @@ public class ChangelogFilesTest {
 				try {
 					Integer.parseInt(issue);
 				} catch (NumberFormatException e) {
-					fail("Invalid issue value in " + next);
+					fail("Invalid issue value in " + next + ". The `issue` field contained: " + issue);
 				}
 			}
 		}
