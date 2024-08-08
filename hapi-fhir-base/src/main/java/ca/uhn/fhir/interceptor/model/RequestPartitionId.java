@@ -116,8 +116,8 @@ public class RequestPartitionId implements IModelJson {
 		List<Integer> thisPartitionIds = getPartitionIds();
 		List<Integer> otherPartitionIds = theOther.getPartitionIds();
 		List<Integer> newPartitionIds = Stream.concat(thisPartitionIds.stream(), otherPartitionIds.stream())
-			.distinct()
-			.collect(Collectors.toList());
+				.distinct()
+				.collect(Collectors.toList());
 		return RequestPartitionId.fromPartitionIds(newPartitionIds);
 	}
 

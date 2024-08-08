@@ -23,6 +23,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.util.ICallable;
+import com.google.common.annotations.Beta;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.springframework.transaction.annotation.Isolation;
@@ -94,9 +95,13 @@ public interface IHapiTransactionService {
 	 * Returns {@literal true} if this transaction service will open a new
 	 * transaction when the request partition is for a different partition than
 	 * the currently executing partition.
+	 * <p>
+	 * This is an experimental API, subject to change in a future release.
+	 * </p>
 	 *
 	 * @since 7.4.0
 	 */
+	@Beta
 	boolean isRequiresNewTransactionWhenChangingPartitions();
 
 	interface IExecutionBuilder extends TransactionOperations {

@@ -151,7 +151,8 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			StopWatch theTransactionStopWatch) {
 
 		ITransactionProcessorVersionAdapter<?, ?> versionAdapter = getVersionAdapter();
-		RequestPartitionId requestPartitionId = super.determineRequestPartitionIdForWriteEntries(theRequest, theEntries);
+		RequestPartitionId requestPartitionId =
+				super.determineRequestPartitionIdForWriteEntries(theRequest, theEntries);
 
 		if (requestPartitionId != null) {
 			preFetch(theTransactionDetails, theEntries, versionAdapter, requestPartitionId);
