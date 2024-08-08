@@ -3,13 +3,14 @@ package org.hl7.fhir.common.hapi.validation.support;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.LenientErrorHandler;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.ClasspathUtil;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.utilities.TextFile;
 import org.hl7.fhir.utilities.npm.NpmPackage;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -31,11 +32,16 @@ public class NpmPackageValidationSupport extends PrePopulatedValidationSupport {
 		super(theFhirContext);
 	}
 
+	@Override
+	public String getName() {
+		return getFhirContext().getVersion().getVersion() + " NPM Package Validation Support";
+	}
+
 	/**
 	 * Load an NPM package using a classpath specification, e.g. <code>/path/to/resource/my_package.tgz</code>. The
 	 * classpath spec can optionally be prefixed with the string <code>classpath:</code>
 	 *
-	 * @throws InternalErrorException If the classpath file can't be found
+	 * @throws IOException If the classpath file can't be found
 	 */
 	public void loadPackageFromClasspath(String theClasspath) throws IOException {
 		try (InputStream is = ClasspathUtil.loadResourceAsStream(theClasspath)) {
@@ -44,6 +50,21 @@ public class NpmPackageValidationSupport extends PrePopulatedValidationSupport {
 				loadResourcesFromPackage(pkg);
 				loadBinariesFromPackage(pkg);
 			}
+		}
+	}
+
+	/**
+	 * Load an NPM package from the filesystem  e.g. <code>my_package.tgz</code>.
+	 *
+	 * @throws IOException If the package file can't be found
+	 */
+	public void loadPackageFromFile(String theFile) throws IOException {
+		File inFile = new File(theFile);
+		InputStream is = new FileInputStream(inFile);
+		NpmPackage pkg = NpmPackage.fromPackage(is);
+		if (pkg.getFolders().containsKey("package")) {
+			loadResourcesFromPackage(pkg);
+			loadBinariesFromPackage(pkg);
 		}
 	}
 
