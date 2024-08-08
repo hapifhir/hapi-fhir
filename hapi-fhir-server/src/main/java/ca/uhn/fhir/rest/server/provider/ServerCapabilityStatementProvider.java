@@ -318,6 +318,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 							case UPDATE:
 								terser.setElement(resource, "conditionalUpdate", "true");
 								break;
+							case UPDATE_REWRITE_HISTORY:
 							case HISTORY_INSTANCE:
 							case HISTORY_SYSTEM:
 							case HISTORY_TYPE:
@@ -401,12 +402,12 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 				 */
 				ResourceSearchParams searchParams;
 				ISearchParamRegistry searchParamRegistry;
-				ResourceSearchParams serverConfigurationActiveSearchParams =
-						serverConfiguration.getActiveSearchParams(resourceName);
+				ResourceSearchParams serverConfigurationActiveSearchParams = serverConfiguration.getActiveSearchParams(
+						resourceName, ISearchParamRegistry.ContextEnum.SEARCH);
 				if (mySearchParamRegistry != null) {
 					searchParamRegistry = mySearchParamRegistry;
 					searchParams = mySearchParamRegistry
-							.getActiveSearchParams(resourceName)
+							.getActiveSearchParams(resourceName, ISearchParamRegistry.ContextEnum.SEARCH)
 							.makeCopy();
 					for (String nextBuiltInSpName : serverConfigurationActiveSearchParams.getSearchParamNames()) {
 						if (nextBuiltInSpName.startsWith("_")
@@ -465,7 +466,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 							}
 
 							for (RuntimeSearchParam t : searchParamRegistry
-									.getActiveSearchParams(nextResourceName)
+									.getActiveSearchParams(nextResourceName, ISearchParamRegistry.ContextEnum.SEARCH)
 									.values()) {
 								if (t.getParamType() == RestSearchParameterTypeEnum.REFERENCE) {
 									if (isNotBlank(t.getName())) {

@@ -74,7 +74,7 @@ public class SearchParameterDaoValidator {
 			for (IPrimitiveType<?> nextBaseType : searchParameter.getBase()) {
 				String nextBase = nextBaseType.getValueAsString();
 				RuntimeSearchParam existingSearchParam =
-						mySearchParamRegistry.getActiveSearchParam(nextBase, searchParameter.getCode());
+						mySearchParamRegistry.getActiveSearchParam(nextBase, searchParameter.getCode(), null);
 				if (existingSearchParam != null) {
 					boolean isBuiltIn = existingSearchParam.getId() == null;
 					isBuiltIn |= existingSearchParam.getUri().startsWith("http://hl7.org/fhir/SearchParameter/");
@@ -221,7 +221,7 @@ public class SearchParameterDaoValidator {
 				.filter(SearchParameter.SearchParameterComponentComponent::hasDefinition)
 				.map(SearchParameter.SearchParameterComponentComponent::getDefinition)
 				.filter(Objects::nonNull)
-				.map(mySearchParamRegistry::getActiveSearchParamByUrl)
+				.map((String url) -> mySearchParamRegistry.getActiveSearchParamByUrl(url, null))
 				.filter(Objects::nonNull)
 				.forEach(theRuntimeSp -> validateComponentSpTypeAgainstWhiteList(
 						theRuntimeSp, getAllowedSearchParameterTypes(theSearchParameter)));

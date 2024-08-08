@@ -71,7 +71,7 @@ public class SubscriptionLoader extends BaseResourceCacheSynchronizer {
 	protected SearchParameterMap getSearchParameterMap() {
 		SearchParameterMap map = new SearchParameterMap();
 
-		if (mySearchParamRegistry.getActiveSearchParam("Subscription", "status") != null) {
+		if (mySearchParamRegistry.getActiveSearchParam("Subscription", "status", null) != null) {
 			map.add(
 					Subscription.SP_STATUS,
 					new TokenOrListParam()

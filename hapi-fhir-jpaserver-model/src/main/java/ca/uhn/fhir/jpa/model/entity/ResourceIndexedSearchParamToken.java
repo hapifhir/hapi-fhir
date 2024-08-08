@@ -56,7 +56,7 @@ import static org.apache.commons.lang3.StringUtils.trim;
 @EntityListeners(IndexStorageOptimizationListener.class)
 @Entity
 @Table(
-		name = "HFJ_SPIDX_TOKEN",
+		name = ResourceIndexedSearchParamToken.HFJ_SPIDX_TOKEN,
 		indexes = {
 			/*
 			 * Note: We previously had indexes with the following names,
@@ -78,6 +78,7 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 	public static final int MAX_LENGTH = 200;
 
 	private static final long serialVersionUID = 1L;
+	public static final String HFJ_SPIDX_TOKEN = "HFJ_SPIDX_TOKEN";
 
 	@FullTextField
 	@Column(name = "SP_SYSTEM", nullable = true, length = MAX_LENGTH)

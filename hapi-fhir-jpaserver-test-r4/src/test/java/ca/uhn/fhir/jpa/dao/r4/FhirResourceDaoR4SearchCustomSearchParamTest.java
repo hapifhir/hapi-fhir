@@ -254,9 +254,9 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		// check the 2 parameters are different
 		// when fetched from the system
 		RuntimeSearchParam paramdefault = mySearchParamRegistry.getActiveSearchParam("Patient",
-			"fuzzydefault");
+			"fuzzydefault", null);
 		RuntimeSearchParam parammodified = mySearchParamRegistry.getActiveSearchParam("Patient",
-			"fuzzymodified");
+			"fuzzymodified", null);
 
 		// verify the encoders are different!
 		assertThat(parammodified).isNotEqualTo(paramdefault);
@@ -594,7 +594,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 
 		mySearchParamRegistry.forceRefresh();
 
-		RuntimeSearchParam sp = mySearchParamRegistry.getActiveSearchParam("Patient", "family");
+		RuntimeSearchParam sp = mySearchParamRegistry.getActiveSearchParam("Patient", "family", null);
 		assertEquals(RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, sp.getStatus());
 	}
 
