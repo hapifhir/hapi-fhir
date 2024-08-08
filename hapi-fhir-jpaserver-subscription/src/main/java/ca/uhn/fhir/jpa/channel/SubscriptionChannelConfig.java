@@ -1,6 +1,6 @@
 /*-
  * #%L
- * HAPI FHIR JPA Model
+ * HAPI FHIR Subscription Server
  * %%
  * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
@@ -17,23 +17,17 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.model.config;
+package ca.uhn.fhir.jpa.channel;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
+import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
-// Empty subclass to avoid bean wiring conflicts in projects that want to define a different implementation
-public class SubscriptionSettings extends BaseSubscriptionSettings {
-	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionSettings.class);
-
-	static {
-		// FIXME KHS
-		ourLog.info("Initializing SubscriptionSettings");
-	}
-
-	public SubscriptionSettings() {
-		super();
-		// FIXME KHS remove
-		ourLog.info("Initializing SubscriptionSettings");
+@Configuration
+public class SubscriptionChannelConfig {
+	@Bean
+	public SubscriptionChannelFactory subscriptionChannelFactory(IChannelFactory theQueueChannelFactory) {
+		return new SubscriptionChannelFactory(theQueueChannelFactory);
 	}
 }

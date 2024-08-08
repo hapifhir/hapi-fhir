@@ -36,6 +36,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
+// WIP KHS register in subscription module
 public class SubscriptionTriggeringProvider implements IResourceProvider {
 	@Autowired
 	private FhirContext myFhirContext;

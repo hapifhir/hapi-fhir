@@ -84,11 +84,11 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 	public ResourceModifiedSubmitterSvc(
 			SubscriptionSettings theSubscriptionSettings,
 			SubscriptionChannelFactory theSubscriptionChannelFactory,
-			IResourceModifiedMessagePersistenceSvc resourceModifiedMessagePersistenceSvc,
+			IResourceModifiedMessagePersistenceSvc theResourceModifiedMessagePersistenceSvc,
 			IHapiTransactionService theHapiTransactionService) {
 		mySubscriptionSettings = theSubscriptionSettings;
 		mySubscriptionChannelFactory = theSubscriptionChannelFactory;
-		myResourceModifiedMessagePersistenceSvc = resourceModifiedMessagePersistenceSvc;
+		myResourceModifiedMessagePersistenceSvc = theResourceModifiedMessagePersistenceSvc;
 		myHapiTransactionService = theHapiTransactionService;
 	}
 

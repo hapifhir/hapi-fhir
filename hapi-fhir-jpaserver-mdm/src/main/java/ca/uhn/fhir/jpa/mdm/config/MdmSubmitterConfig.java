@@ -20,7 +20,6 @@
 package ca.uhn.fhir.jpa.mdm.config;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.mdm.interceptor.MdmSubmitterInterceptorLoader;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
 import ca.uhn.fhir.mdm.api.IMdmChannelSubmitterSvc;
 import ca.uhn.fhir.mdm.api.IMdmSubmitSvc;
@@ -35,12 +34,6 @@ import org.springframework.context.annotation.Lazy;
 @Configuration
 @Import(MdmCommonConfig.class)
 public class MdmSubmitterConfig {
-
-	@Bean
-	MdmSubmitterInterceptorLoader mdmSubmitterInterceptorLoader() {
-		return new MdmSubmitterInterceptorLoader();
-	}
-
 	@Bean
 	MdmSearchParamSvc mdmSearchParamSvc() {
 		return new MdmSearchParamSvc();

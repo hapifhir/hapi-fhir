@@ -56,7 +56,7 @@ import org.springframework.context.annotation.Scope;
  * This Spring config should be imported by a system that pulls messages off of the
  * matching queue for processing, and handles delivery
  */
-@Import(SubscriptionModelConfig.class)
+@Import({SubscriptionModelConfig.class})
 public class SubscriptionProcessorConfig {
 
 	@Bean

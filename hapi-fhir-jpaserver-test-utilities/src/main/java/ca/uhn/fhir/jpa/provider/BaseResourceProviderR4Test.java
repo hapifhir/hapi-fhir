@@ -91,7 +91,8 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 				s.registerProvider(myAppCtx.getBean(GraphQLProvider.class));
 				s.registerProvider(myAppCtx.getBean(ProcessMessageProvider.class));
 				s.registerProvider(myAppCtx.getBean(ReindexProvider.class));
-				s.registerProvider(myAppCtx.getBean(SubscriptionTriggeringProvider.class));
+				// FIXME KHS
+				//				s.registerProvider(myAppCtx.getBean(SubscriptionTriggeringProvider.class));
 				s.registerProvider(myAppCtx.getBean(TerminologyUploaderProvider.class));
 				s.registerProvider(myAppCtx.getBean(ValueSetOperationProvider.class));
 

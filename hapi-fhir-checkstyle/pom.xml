@@ -113,13 +113,13 @@
 							<sourceDirectories>
 								<!--scan base project directory to include all modules-->
 								<!--suppress UnresolvedMavenProperty -->
-								<directory>${maven.multiModuleProjectDirectory}/</directory>
+								<directory>.</directory>
 							</sourceDirectories>
 							<includeTestSourceDirectory>true</includeTestSourceDirectory>
 							<!--suppress UnresolvedMavenProperty -->
-							<configLocation>${maven.multiModuleProjectDirectory}/hapi-fhir-checkstyle/src/checkstyle/hapi-base-checkstyle.xml</configLocation>
+							<configLocation>hapi-fhir-checkstyle/src/checkstyle/hapi-base-checkstyle.xml</configLocation>
 							<!--suppress UnresolvedMavenProperty -->
-							<suppressionsLocation>${maven.multiModuleProjectDirectory}/hapi-fhir-checkstyle/src/checkstyle/hapi-base-checkstyle-suppression.xml</suppressionsLocation>
+							<suppressionsLocation>hapi-fhir-checkstyle/src/checkstyle/hapi-base-checkstyle-suppression.xml</suppressionsLocation>
 							<inputEncoding>UTF-8</inputEncoding>
 							<consoleOutput>true</consoleOutput>
 						</configuration>
