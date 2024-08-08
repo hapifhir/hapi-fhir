@@ -4,7 +4,10 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.test.config.TestR4Config;
+import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
+import ca.uhn.fhir.util.BundleBuilder;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -15,6 +18,7 @@ import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
 import org.hl7.fhir.r4.model.CarePlan;
 import org.hl7.fhir.r4.model.Condition;
+import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
@@ -26,6 +30,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
@@ -66,6 +71,36 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 		super.after();
 		myStorageSettings.setBundleBatchPoolSize(JpaStorageSettings.DEFAULT_BUNDLE_BATCH_POOL_SIZE);
 		myStorageSettings.setBundleBatchMaxPoolSize(JpaStorageSettings.DEFAULT_BUNDLE_BATCH_MAX_POOL_SIZE);
+	}
+
+
+	@Test
+	public void testPatchInTransactionBundleSupportsIfMatchTag() {
+		Patient newPatient = new Patient();
+		newPatient.setId("my-patient");
+		newPatient.getTelecomFirstRep().setSystem(ContactPoint.ContactPointSystem.PHONE).setValue("123-456-7890");
+		 myClient.update().resource(newPatient).execute();
+		String bundleString = "{\n" +
+			"\t\"resourceType\": \"Bundle\",\n" +
+			"\t\"type\": \"transaction\",\n" +
+			"\t\"entry\": [{\n" +
+			"\t\t\"fullUrl\": \"Patient/my-patient\",\n" +
+			"\t\t\"resource\": {\n" +
+			"\t\t\t\"resourceType\": \"Binary\",\n" +
+			"\t\t\t\"contentType\": \"application/json-patch+json\",\n" +
+			"\t\t\t\"data\": \"W3sib3AiOiJyZXBsYWNlIiwicGF0aCI6IlwvdGVsZWNvbVwvMFwvdmFsdWUiLCJ2YWx1ZSI6IjQwMTEyMzQ1NiJ9XQ==\"\n" +
+			"\t\t},\n" +
+			"\t\t\"request\": {\n" +
+			"\t\t\t\"method\": \"PATCH\",\n" +
+			"\t\t\t\"url\": \"Patient/my-patient\",\n" +
+			"\t\t\t\"ifMatch\": \"W/\\\"1\\\"\"\n" +
+			"\t\t}\n" +
+			"\t}]\n" +
+			"}";
+		Bundle bundle = myFhirContext.newJsonParser().parseResource(Bundle.class, bundleString);
+		myClient.transaction().withBundle(bundle).execute();
+		Patient execute1 = myClient.read().resource(Patient.class).withId("my-patient").execute();
+		assertThat(execute1).extracting(p -> p.getTelecomFirstRep().getValue()).isEqualTo("401123456");
 	}
 
 	/**
