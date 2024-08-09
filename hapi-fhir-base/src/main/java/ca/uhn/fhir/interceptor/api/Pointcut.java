@@ -2529,9 +2529,7 @@ public enum Pointcut implements IPointcut {
 	 * <li>ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage</li>
 	 * </ul>
 	 */
-	MDM_SUBMIT_PRE_MESSAGE_DELIVERY(
-			void.class,
-			"ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage"),
+	MDM_SUBMIT_PRE_MESSAGE_DELIVERY(void.class, "ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage"),
 
 	/**
 	 * <b>JPA Hook:</b>
