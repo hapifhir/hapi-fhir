@@ -20,6 +20,7 @@
 package ca.uhn.fhir.rest.api.server;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
@@ -30,6 +31,7 @@ import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -39,6 +41,7 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -50,6 +53,8 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public abstract class RequestDetails {
 
+	public static final byte[] BAD_STREAM_PLACEHOLDER =
+			(Msg.code(2543) + "PLACEHOLDER WHEN READING FROM BAD STREAM").getBytes(StandardCharsets.UTF_8);
 	private final StopWatch myRequestStopwatch;
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 	private String myTenantId;
@@ -523,9 +528,22 @@ public abstract class RequestDetails {
 		mySubRequest = theSubRequest;
 	}
 
-	public final byte[] loadRequestContents() {
+	public final synchronized byte[] loadRequestContents() {
 		if (myRequestContents == null) {
-			myRequestContents = getByteStreamRequestContents();
+			// Initialize the byte array to a non-null value to avoid repeated calls to getByteStreamRequestContents()
+			// which can occur when getByteStreamRequestContents() throws an Exception
+			myRequestContents = ArrayUtils.EMPTY_BYTE_ARRAY;
+			try {
+				myRequestContents = getByteStreamRequestContents();
+			} finally {
+				if (myRequestContents == null) {
+					// if reading the stream throws an exception, then our contents are still null, but the stream is
+					// dead.
+					// Set a placeholder value so nobody tries to read again.
+					myRequestContents = BAD_STREAM_PLACEHOLDER;
+				}
+			}
+			assert myRequestContents != null : "We must not re-read the stream.";
 		}
 		return getRequestContentsIfLoaded();
 	}
