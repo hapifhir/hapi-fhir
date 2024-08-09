@@ -40,6 +40,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
@@ -96,6 +97,28 @@ public class RequestPartitionId implements IModelJson {
 		myPartitionNames = null;
 		myPartitionIds = null;
 		myAllPartitions = true;
+	}
+
+	/**
+	 * Creates a new RequestPartitionId which includes all partition IDs from
+	 * this {@link RequestPartitionId} but also includes all IDs from the given
+	 * {@link RequestPartitionId}. Any duplicates are only included once, and
+	 * partition names and dates are ignored and not returned. This {@link RequestPartitionId}
+	 * and {@literal theOther} are not modified.
+	 *
+	 * @since 7.4.0
+	 */
+	public RequestPartitionId mergeIds(RequestPartitionId theOther) {
+		if (isAllPartitions() || theOther.isAllPartitions()) {
+			return RequestPartitionId.allPartitions();
+		}
+
+		List<Integer> thisPartitionIds = getPartitionIds();
+		List<Integer> otherPartitionIds = theOther.getPartitionIds();
+		List<Integer> newPartitionIds = Stream.concat(thisPartitionIds.stream(), otherPartitionIds.stream())
+				.distinct()
+				.collect(Collectors.toList());
+		return RequestPartitionId.fromPartitionIds(newPartitionIds);
 	}
 
 	public static RequestPartitionId fromJson(String theJson) throws JsonProcessingException {
