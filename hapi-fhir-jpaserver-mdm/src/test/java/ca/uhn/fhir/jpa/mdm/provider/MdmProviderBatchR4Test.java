@@ -250,10 +250,9 @@ public class MdmProviderBatchR4Test extends BaseLinkR4Test {
 		assertLinkCount(5);
 		final AtomicBoolean mdmSubmitBeforeMessageDeliveryHookCalled = new AtomicBoolean();
 		final Object interceptor =  new Object() {
-			@Hook(Pointcut.MDM_SUBMIT_BEFORE_MESSAGE_DELIVERY)
-			ResourceModifiedJsonMessage hookMethod(ResourceModifiedJsonMessage theResourceModifiedJsonMessage) {
+			@Hook(Pointcut.MDM_SUBMIT_PRE_MESSAGE_DELIVERY)
+			void hookMethod(ResourceModifiedJsonMessage theResourceModifiedJsonMessage) {
 				mdmSubmitBeforeMessageDeliveryHookCalled.set(true);
-				return theResourceModifiedJsonMessage;
 			}
 		};
 		myInterceptorService.registerInterceptor(interceptor);

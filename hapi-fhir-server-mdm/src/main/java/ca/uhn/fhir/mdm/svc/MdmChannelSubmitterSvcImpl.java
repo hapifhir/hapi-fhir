@@ -65,12 +65,10 @@ public class MdmChannelSubmitterSvcImpl implements IMdmChannelSubmitterSvc {
 				(RequestPartitionId) theResource.getUserData(Constants.RESOURCE_PARTITION_ID));
 		resourceModifiedMessage.setOperationType(ResourceModifiedMessage.OperationTypeEnum.MANUALLY_TRIGGERED);
 		resourceModifiedJsonMessage.setPayload(resourceModifiedMessage);
-		if (myInterceptorBroadcaster.hasHooks(Pointcut.MDM_SUBMIT_BEFORE_MESSAGE_DELIVERY)) {
+		if (myInterceptorBroadcaster.hasHooks(Pointcut.MDM_SUBMIT_PRE_MESSAGE_DELIVERY)) {
 			final HookParams params =
 					new HookParams().add(ResourceModifiedJsonMessage.class, resourceModifiedJsonMessage);
-			resourceModifiedJsonMessage =
-					(ResourceModifiedJsonMessage) myInterceptorBroadcaster.callHooksAndReturnObject(
-							Pointcut.MDM_SUBMIT_BEFORE_MESSAGE_DELIVERY, params);
+			myInterceptorBroadcaster.callHooks(Pointcut.MDM_SUBMIT_PRE_MESSAGE_DELIVERY, params);
 		}
 		boolean success = getMdmChannelProducer().send(resourceModifiedJsonMessage);
 		if (!success) {
