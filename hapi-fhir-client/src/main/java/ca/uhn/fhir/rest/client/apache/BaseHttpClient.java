@@ -38,8 +38,8 @@ import java.util.Map;
 public abstract class BaseHttpClient implements IHttpClient {
 
 	private final List<Header> myHeaders;
-	private final Map<String, List<String>> myIfNoneExistParams;
-	private final String myIfNoneExistString;
+	private Map<String, List<String>> myIfNoneExistParams;
+	private String myIfNoneExistString;
 	protected RequestTypeEnum myRequestType;
 	protected StringBuilder myUrl;
 
@@ -60,8 +60,10 @@ public abstract class BaseHttpClient implements IHttpClient {
 	}
 
 	@Override
-	public void setNewUrl(StringBuilder theUrl) {
+	public void setNewUrl(StringBuilder theUrl, String theIfNoneExistString, Map<String, List<String>> theIfNoneExistParams) {
 		myUrl = theUrl;
+		myIfNoneExistString = theIfNoneExistString;
+		myIfNoneExistParams = theIfNoneExistParams;
 	}
 
 	private void addHeaderIfNoneExist(IHttpRequest result) {

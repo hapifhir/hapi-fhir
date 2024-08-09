@@ -73,7 +73,9 @@ public interface IHttpClient {
 	void addHeadersToRequest(IHttpRequest theRequest, EncodingEnum theEncodingEnum, FhirContext theContext);
 
 	/**
-	 * Updates the client's url;
+	 * Updates the client's url, as well as the conditional create/update strings/params
+	 * (ie, the "if None Exists" stuff)
+	 *
 	 * This is used when we reuse a client for multiple different requests
 	 * (ex, searches, or fetching the /metadata endpoint followed by whatever
 	 * the actual endpoint is, etc).
@@ -81,5 +83,5 @@ public interface IHttpClient {
 	 * Deprecated / Legacy clients do not use this (they create new clients for
 	 * every request)
 	 */
-	void setNewUrl(StringBuilder theUrl);
+	void setNewUrl(StringBuilder theUrl, String theIfNoneExistsString, Map<String, List<String>> theIfNoneExistsParams);
 }

@@ -145,7 +145,7 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 			httpClient = theParams.getClient();
 			// update the url to the one we want (in case the
 			// previous client did not have the correct one
-			httpClient.setNewUrl(url);
+			httpClient.setNewUrl(url, myIfNoneExistString, myIfNoneExistParams);
 		} else {
 			// make a new one
 			httpClient = getRestfulClientFactory()

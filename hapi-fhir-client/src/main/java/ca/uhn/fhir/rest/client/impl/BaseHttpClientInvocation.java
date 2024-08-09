@@ -99,7 +99,7 @@ public abstract class BaseHttpClientInvocation {
 		if (theParameters.getClient() != null) {
 			// reuse existing client
 			httpClient = theParameters.getClient();
-			httpClient.setNewUrl(new StringBuilder(theParameters.getUrl()));
+			httpClient.setNewUrl(new StringBuilder(theParameters.getUrl()), null, null);
 		} else {
 			// make a new client
 			httpClient = getRestfulClientFactory()
