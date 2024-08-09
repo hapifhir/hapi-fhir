@@ -183,7 +183,7 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		for (Header header : getHeaders()) {
 			request.addHeader(header.getName(), header.getValue());
 		}
-		httpClient.addHeadersToRequest(request, theEncoding, parameters.getFhirContext());
+		httpClient.addHeadersToRequest(request, encoding, parameters.getFhirContext());
 		request.addHeader(Constants.HEADER_CONTENT_TYPE, contentType + Constants.HEADER_SUFFIX_CT_UTF_8);
 		return request;
 	}

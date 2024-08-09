@@ -9,6 +9,10 @@ import org.hl7.fhir.instance.model.api.IBaseBinary;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * This is a parameters object used for creating HttpClientRequests.
+ * This will allow extensibility without constant signature changes.
+ */
 public class HttpClientRequestParameters {
 	/**
 	 * The fhir context used.
