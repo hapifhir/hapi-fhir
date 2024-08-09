@@ -660,6 +660,8 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		addCreatePartition(myPartitionId, myPartitionDate);
 		addCreatePartition(myPartitionId, myPartitionDate);
 		addCreatePartition(myPartitionId, myPartitionDate);
+		addCreatePartition(myPartitionId, myPartitionDate);
+		addCreatePartition(myPartitionId, myPartitionDate);
 
 		Bundle input = new Bundle();
 		input.setType(Bundle.BundleType.TRANSACTION);
@@ -2881,7 +2883,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		ourLog.info("About to start transaction");
 
-		for (int i = 0; i < 40; i++) {
+		for (int i = 0; i < 60; i++) {
 			addCreatePartition(1, null);
 		}
 

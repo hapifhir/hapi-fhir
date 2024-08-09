@@ -173,7 +173,7 @@ public abstract class BaseTransactionProcessor {
 	private StorageSettings myStorageSettings;
 
 	@Autowired
-	private PartitionSettings myPartitionSettings;
+	PartitionSettings myPartitionSettings;
 
 	@Autowired
 	private InMemoryResourceMatcher myInMemoryResourceMatcher;
@@ -2129,6 +2129,11 @@ public abstract class BaseTransactionProcessor {
 			default:
 				return null;
 		}
+	}
+
+	@VisibleForTesting
+	public void setPartitionSettingsForUnitTest(PartitionSettings thePartitionSettings) {
+		myPartitionSettings = thePartitionSettings;
 	}
 
 	/**

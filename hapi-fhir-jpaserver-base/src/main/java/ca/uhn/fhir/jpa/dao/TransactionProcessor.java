@@ -27,7 +27,6 @@ import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.config.HapiFhirHibernateJpaDialect;
-import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
@@ -96,9 +95,6 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 
 	@Autowired
 	private IIdHelperService<JpaPid> myIdHelperService;
-
-	@Autowired
-	private PartitionSettings myPartitionSettings;
 
 	@Autowired
 	private JpaStorageSettings myStorageSettings;
@@ -545,11 +541,6 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			}
 			throw e;
 		}
-	}
-
-	@VisibleForTesting
-	public void setPartitionSettingsForUnitTest(PartitionSettings thePartitionSettings) {
-		myPartitionSettings = thePartitionSettings;
 	}
 
 	@VisibleForTesting
