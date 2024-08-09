@@ -23,6 +23,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.client.api.Header;
 import ca.uhn.fhir.rest.client.api.IHttpClient;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
@@ -122,6 +123,9 @@ public class HttpPatchClientInvocation extends BaseHttpClientInvocation {
 		params.setContentType(myContentType);
 		params.setFhirContext(getContext());
 		IHttpRequest req = client.createRequest(params);
+		for (Header h : getHeaders()) {
+			req.addHeader(h.getName(), h.getValue());
+		}
 		client.addHeadersToRequest(req, theParameters.getEncodingEnum(), getContext());
 		req.addHeader(Constants.HEADER_CONTENT_TYPE, params.getContentType() + Constants.HEADER_SUFFIX_CT_UTF_8);
 		return req;

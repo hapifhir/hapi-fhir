@@ -115,6 +115,9 @@ public abstract class BaseHttpClientInvocation {
 				new HttpClientRequestParameters(theParameters.getUrl(), theParameters.getRequestTypeEnum());
 		clientRequestParameters.setEncodingEnum(theParameters.getEncodingEnum());
 		IHttpRequest request = httpClient.createRequest(clientRequestParameters);
+		for (Header h : getHeaders()) {
+			request.addHeader(h.getName(), h.getValue());
+		}
 		httpClient.addHeadersToRequest(request, theParameters.getEncodingEnum(), getContext());
 		return request;
 	}
