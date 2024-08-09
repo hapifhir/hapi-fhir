@@ -23,7 +23,7 @@ INSERT INTO BT2_JOB_INSTANCE (
    UPDATE_TIME
 ) VALUES (
    'cf969d58-44a5-4493-89c1-437e637532eb',
-   0,
+   false,
    0,
    0,
    '2023-08-06 14:24:10.845',
@@ -40,9 +40,9 @@ INSERT INTO BT2_JOB_INSTANCE (
    200,
    'Error message',
    83006,
-   1,
+   true,
    72995,
-   0,
+   false,
    '2023-08-06 14:24:10.875'
 );
 

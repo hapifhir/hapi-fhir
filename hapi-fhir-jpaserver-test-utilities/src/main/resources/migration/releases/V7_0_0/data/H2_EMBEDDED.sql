@@ -28,7 +28,7 @@ INSERT INTO BT2_JOB_INSTANCE (
    CLIENT_ID
 ) VALUES (
    '79751e50-fbfc-479a-8e14-29bed1973d66',
-   0,
+   false,
    0,
    0,
    '2023-08-06 14:24:10.845',
@@ -46,10 +46,10 @@ INSERT INTO BT2_JOB_INSTANCE (
    'Error message',
    83006,
    '{"jobId":"7be85199-0136-406e-93b8-cbe44f15aa6c","batchSize":100}',
-   1,
+   true,
    72995,
    'report',
-   0,
+   false,
    '2023-08-06 14:24:10.875',
    'Failed to reindex resource because unique search parameter unique-code could not be enforced.',
    'triggeringUser',
