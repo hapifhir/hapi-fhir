@@ -1,0 +1,4 @@
+---
+type: add
+issue: 6182
+title: "A new Pointcut called `MDM_SUBMIT_PRE_MESSAGE_DELIVERY` has been added. If you wish to customize the `ResourceModifiedJsonMessage` sent to the broker, you can do so by implementing this Pointcut, and returning `ResourceModifiedJsonMessage`."

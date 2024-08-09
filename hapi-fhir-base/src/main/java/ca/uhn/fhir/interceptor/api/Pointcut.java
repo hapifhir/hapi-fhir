@@ -2516,6 +2516,22 @@ public enum Pointcut implements IPointcut {
 			void.class, "ca.uhn.fhir.rest.api.server.RequestDetails", "ca.uhn.fhir.mdm.model.mdmevents.MdmSubmitEvent"),
 
 	/**
+	 * <b>MDM_SUBMIT_PRE_MESSAGE_DELIVERY Hook:</b>
+	 * Invoked immediately before the delivery of a MESSAGE to the broker.
+	 * <p>
+	 * Hooks can make changes to the delivery payload.
+	 * Furthermore, modification can be made to the outgoing message,
+	 * for example adding headers or changing message key,
+	 * which will be used for the subsequent processing.
+	 * </p>
+	 * Hooks should accept the following parameters:
+	 * <ul>
+	 * <li>ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage</li>
+	 * </ul>
+	 */
+	MDM_SUBMIT_PRE_MESSAGE_DELIVERY(void.class, "ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage"),
+
+	/**
 	 * <b>JPA Hook:</b>
 	 * This hook is invoked when a cross-partition reference is about to be
 	 * stored in the database.
