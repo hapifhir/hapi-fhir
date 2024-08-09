@@ -50,8 +50,8 @@ import java.util.Map;
  */
 public class ApacheHttpRequest extends BaseHttpRequest implements IHttpRequest {
 
-	private HttpClient myClient;
-	private HttpRequestBase myRequest;
+	private final HttpClient myClient;
+	private final HttpRequestBase myRequest;
 
 	public ApacheHttpRequest(HttpClient theClient, HttpRequestBase theApacheRequest) {
 		this.myClient = theClient;
