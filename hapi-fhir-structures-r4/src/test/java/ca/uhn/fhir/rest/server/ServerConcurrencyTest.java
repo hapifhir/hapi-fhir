@@ -1,16 +1,22 @@
 package ca.uhn.fhir.rest.server;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
+import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
+import ca.uhn.test.util.LogbackTestExtension;
+import ca.uhn.test.util.LogbackTestExtensionAssert;
 import com.helger.commons.collection.iterate.EmptyEnumeration;
+import com.helger.commons.io.stream.StringInputStream;
 import jakarta.annotation.Nonnull;
 import jakarta.servlet.ReadListener;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletInputStream;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -36,10 +42,12 @@ import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Set;
 
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
@@ -52,6 +60,7 @@ public class ServerConcurrencyTest {
 	@RegisterExtension
 	private static final RestfulServerExtension ourServer = new RestfulServerExtension(ourCtx)
 		.registerProvider(new MyPatientProvider());
+	public static final String SEARCH_TIMEOUT_ERROR = "SEARCH_TIMEOUT_ERROR: Search timed out";
 	@RegisterExtension
 	private final HttpClientExtension myHttpClient = new HttpClientExtension();
 
@@ -62,10 +71,12 @@ public class ServerConcurrencyTest {
 	@Mock
 	private PrintWriter myWriter;
 	private HashMap<String, String> myHeaders;
+	@RegisterExtension
+	LogbackTestExtension myLogbackTestExtension = new LogbackTestExtension();
 
 	@Test
 	public void testExceptionClosingInputStream() throws IOException {
-		initRequestMocks();
+		initRequestMocks("/Patient");
 		DelegatingServletInputStream inputStream = createMockPatientBodyServletInputStream();
 		inputStream.setExceptionOnClose(true);
 		when(myRequest.getInputStream()).thenReturn(inputStream);
@@ -78,7 +89,7 @@ public class ServerConcurrencyTest {
 
 	@Test
 	public void testExceptionClosingOutputStream() throws IOException {
-		initRequestMocks();
+		initRequestMocks("/Patient");
 		when(myRequest.getInputStream()).thenReturn(createMockPatientBodyServletInputStream());
 		when(myResponse.getWriter()).thenReturn(myWriter);
 
@@ -90,12 +101,44 @@ public class ServerConcurrencyTest {
 		);
 	}
 
-	private void initRequestMocks() {
+	/**
+	 * Exception thrown during SERVER_OUTGOING_FAILURE_OPERATIONOUTCOME
+	 */
+	@Test
+	void testExceptionThrownDuringExceptionHandler_bothExceptionsLogged() throws ServletException, IOException {
+	    // given
+		initRequestMocks("/Patient?active=true");
+		ourServer.getInterceptorService().registerAnonymousInterceptor(Pointcut.SERVER_OUTGOING_FAILURE_OPERATIONOUTCOME, (pointcut,params)->{
+			throw new RuntimeException("MARKER_2: Exception during exception processing");
+		});
+
+		// when
+		try {
+			ourServer.getRestfulServer().handleRequest(RequestTypeEnum.GET, myRequest, myResponse);
+		} catch (Throwable e) {
+			// eat any ex that escapes.  We need to not depend on default logging.
+		}
+
+	    // then
+		// both exceptions should be logged.
+		LogbackTestExtensionAssert.assertThat(myLogbackTestExtension).hasErrorMessage("HAPI-2544");
+		LogbackTestExtensionAssert.assertThat(myLogbackTestExtension).hasErrorMessage(SEARCH_TIMEOUT_ERROR);
+	}
+	
+
+	private void initRequestMocks(String theURL) {
 		myHeaders = new HashMap<>();
 		myHeaders.put(Constants.HEADER_CONTENT_TYPE, Constants.CT_FHIR_JSON_NEW);
 
-		when(myRequest.getRequestURI()).thenReturn("/Patient");
-		when(myRequest.getRequestURL()).thenReturn(new StringBuffer(ourServer.getBaseUrl() + "/Patient"));
+		String relativeUri;
+		int endOfUri = theURL.indexOf("?");
+		if (endOfUri >= 0) {
+			relativeUri = theURL.substring(0,endOfUri);
+		} else {
+			relativeUri = theURL;
+		}
+		when(myRequest.getRequestURI()).thenReturn(relativeUri);
+		when(myRequest.getRequestURL()).thenReturn(new StringBuffer(ourServer.getBaseUrl() + theURL));
 		when(myRequest.getHeader(any())).thenAnswer(t -> {
 			String header = t.getArgument(0, String.class);
 			String value = myHeaders.get(header);
@@ -188,6 +231,11 @@ public class ServerConcurrencyTest {
 			return new MethodOutcome()
 				.setId(new IdType("Patient/A"))
 				.setOperationOutcome(oo);
+		}
+
+		@Search
+		public List<Patient> search() throws InterruptedException {
+			throw new InterruptedException(SEARCH_TIMEOUT_ERROR);
 		}
 
 
