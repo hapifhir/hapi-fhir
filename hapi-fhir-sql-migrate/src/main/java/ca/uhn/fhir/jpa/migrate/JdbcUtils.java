@@ -85,19 +85,16 @@ public class JdbcUtils {
 				try {
 					metadata = connection.getMetaData();
 
-					ResultSet indexes = getIndexInfo(theTableName, connection, metadata, false);
 					Set<String> indexNames = new HashSet<>();
-					while (indexes.next()) {
-						ourLog.debug("*** Next index: {}", new ColumnMapRowMapper().mapRow(indexes, 0));
-						String indexName = indexes.getString("INDEX_NAME");
-						indexNames.add(indexName);
-					}
 
-					indexes = getIndexInfo(theTableName, connection, metadata, true);
-					while (indexes.next()) {
-						ourLog.debug("*** Next index: {}", new ColumnMapRowMapper().mapRow(indexes, 0));
-						String indexName = indexes.getString("INDEX_NAME");
-						indexNames.add(indexName);
+					for (boolean unique : Set.of(false, true)) {
+						try (ResultSet indexes = getIndexInfo(theTableName, connection, metadata, unique)) {
+							while (indexes.next()) {
+								ourLog.debug("*** Next index: {}", new ColumnMapRowMapper().mapRow(indexes, 0));
+								String indexName = indexes.getString("INDEX_NAME");
+								indexNames.add(indexName);
+							}
+						}
 					}
 
 					indexNames = indexNames.stream()
@@ -124,13 +121,14 @@ public class JdbcUtils {
 				DatabaseMetaData metadata;
 				try {
 					metadata = connection.getMetaData();
-					ResultSet indexes = getIndexInfo(theTableName, connection, metadata, false);
+					try (ResultSet indexes = getIndexInfo(theTableName, connection, metadata, false)) {
 
-					while (indexes.next()) {
-						String indexName = indexes.getString("INDEX_NAME");
-						if (theIndexName.equalsIgnoreCase(indexName)) {
-							boolean nonUnique = indexes.getBoolean("NON_UNIQUE");
-							return !nonUnique;
+						while (indexes.next()) {
+							String indexName = indexes.getString("INDEX_NAME");
+							if (theIndexName.equalsIgnoreCase(indexName)) {
+								boolean nonUnique = indexes.getBoolean("NON_UNIQUE");
+								return !nonUnique;
+							}
 						}
 					}
 
@@ -171,65 +169,69 @@ public class JdbcUtils {
 					metadata = connection.getMetaData();
 					String catalog = connection.getCatalog();
 					String schema = connection.getSchema();
-					ResultSet indexes =
-							metadata.getColumns(catalog, schema, massageIdentifier(metadata, theTableName), null);
+					try (ResultSet indexes =
+							metadata.getColumns(catalog, schema, massageIdentifier(metadata, theTableName), null)) {
 
-					while (indexes.next()) {
+						while (indexes.next()) {
 
-						String tableName = indexes.getString("TABLE_NAME").toUpperCase(Locale.US);
-						if (!theTableName.equalsIgnoreCase(tableName)) {
-							continue;
-						}
-						String columnName = indexes.getString("COLUMN_NAME").toUpperCase(Locale.US);
-						if (!theColumnName.equalsIgnoreCase(columnName)) {
-							continue;
-						}
+							String tableName = indexes.getString("TABLE_NAME").toUpperCase(Locale.US);
+							if (!theTableName.equalsIgnoreCase(tableName)) {
+								continue;
+							}
+							String columnName = indexes.getString("COLUMN_NAME").toUpperCase(Locale.US);
+							if (!theColumnName.equalsIgnoreCase(columnName)) {
+								continue;
+							}
 
-						int dataType = indexes.getInt("DATA_TYPE");
-						Long length = indexes.getLong("COLUMN_SIZE");
-						switch (dataType) {
-							case Types.LONGVARCHAR:
-								return new ColumnType(ColumnTypeEnum.TEXT, length);
-							case Types.BIT:
-							case Types.BOOLEAN:
-								return new ColumnType(ColumnTypeEnum.BOOLEAN, length);
-							case Types.VARCHAR:
-								return new ColumnType(ColumnTypeEnum.STRING, length);
-							case Types.NUMERIC:
-							case Types.BIGINT:
-							case Types.DECIMAL:
-								return new ColumnType(ColumnTypeEnum.LONG, length);
-							case Types.INTEGER:
-								return new ColumnType(ColumnTypeEnum.INT, length);
-							case Types.TIMESTAMP:
-							case Types.TIMESTAMP_WITH_TIMEZONE:
-								return new ColumnType(ColumnTypeEnum.DATE_TIMESTAMP, length);
-							case Types.BLOB:
-								return new ColumnType(ColumnTypeEnum.BLOB, length);
-							case Types.LONGVARBINARY:
-								return new ColumnType(ColumnTypeEnum.BINARY, length);
-							case Types.VARBINARY:
-								if (DriverTypeEnum.MSSQL_2012.equals(theConnectionProperties.getDriverType())) {
-									// MS SQLServer seems to be mapping BLOB to VARBINARY under the covers, so we need
-									// to reverse that mapping
+							int dataType = indexes.getInt("DATA_TYPE");
+							Long length = indexes.getLong("COLUMN_SIZE");
+							switch (dataType) {
+								case Types.LONGVARCHAR:
+									return new ColumnType(ColumnTypeEnum.TEXT, length);
+								case Types.BIT:
+								case Types.BOOLEAN:
+									return new ColumnType(ColumnTypeEnum.BOOLEAN, length);
+								case Types.VARCHAR:
+									return new ColumnType(ColumnTypeEnum.STRING, length);
+								case Types.NUMERIC:
+								case Types.BIGINT:
+								case Types.DECIMAL:
+									return new ColumnType(ColumnTypeEnum.LONG, length);
+								case Types.INTEGER:
+									return new ColumnType(ColumnTypeEnum.INT, length);
+								case Types.TIMESTAMP:
+								case Types.TIMESTAMP_WITH_TIMEZONE:
+									return new ColumnType(ColumnTypeEnum.DATE_TIMESTAMP, length);
+								case Types.BLOB:
 									return new ColumnType(ColumnTypeEnum.BLOB, length);
+								case Types.LONGVARBINARY:
+									return new ColumnType(ColumnTypeEnum.BINARY, length);
+								case Types.VARBINARY:
+									if (DriverTypeEnum.MSSQL_2012.equals(theConnectionProperties.getDriverType())) {
+										// MS SQLServer seems to be mapping BLOB to VARBINARY under the covers,
+										// so we need to reverse that mapping
+										return new ColumnType(ColumnTypeEnum.BLOB, length);
 
-								} else {
+									} else {
+										throw new IllegalArgumentException(
+												Msg.code(33) + "Don't know how to handle datatype " + dataType
+														+ " for column " + theColumnName
+														+ " on table " + theTableName);
+									}
+								case Types.CLOB:
+									return new ColumnType(ColumnTypeEnum.CLOB, length);
+								case Types.DOUBLE:
+									return new ColumnType(ColumnTypeEnum.DOUBLE, length);
+								case Types.FLOAT:
+									return new ColumnType(ColumnTypeEnum.FLOAT, length);
+								case Types.TINYINT:
+									return new ColumnType(ColumnTypeEnum.TINYINT, length);
+								default:
 									throw new IllegalArgumentException(
-											Msg.code(33) + "Don't know how to handle datatype " + dataType
-													+ " for column " + theColumnName + " on table " + theTableName);
-								}
-							case Types.CLOB:
-								return new ColumnType(ColumnTypeEnum.CLOB, length);
-							case Types.DOUBLE:
-								return new ColumnType(ColumnTypeEnum.DOUBLE, length);
-							case Types.FLOAT:
-								return new ColumnType(ColumnTypeEnum.FLOAT, length);
-							case Types.TINYINT:
-								return new ColumnType(ColumnTypeEnum.TINYINT, length);
-							default:
-								throw new IllegalArgumentException(Msg.code(34) + "Don't know how to handle datatype "
-										+ dataType + " for column " + theColumnName + " on table " + theTableName);
+											Msg.code(34) + "Don't know how to handle datatype " + dataType
+													+ " for column " + theColumnName
+													+ " on table " + theTableName);
+							}
 						}
 					}
 
@@ -274,13 +276,13 @@ public class JdbcUtils {
 
 					Set<String> fkNames = new HashSet<>();
 					for (String nextParentTable : parentTables) {
-						ResultSet indexes = metadata.getCrossReference(
-								catalog, schema, nextParentTable, catalog, schema, foreignTable);
-
-						while (indexes.next()) {
-							String fkName = indexes.getString("FK_NAME");
-							fkName = fkName.toUpperCase(Locale.US);
-							fkNames.add(fkName);
+						try (ResultSet indexes = metadata.getCrossReference(
+								catalog, schema, nextParentTable, catalog, schema, foreignTable)) {
+							while (indexes.next()) {
+								String fkName = indexes.getString("FK_NAME");
+								fkName = fkName.toUpperCase(Locale.US);
+								fkNames.add(fkName);
+							}
 						}
 					}
 
@@ -317,14 +319,14 @@ public class JdbcUtils {
 
 					Set<String> fkNames = new HashSet<>();
 					for (String nextParentTable : parentTables) {
-						ResultSet indexes = metadata.getCrossReference(
-								catalog, schema, nextParentTable, catalog, schema, foreignTable);
-
-						while (indexes.next()) {
-							if (theForeignKeyColumn.equals(indexes.getString("FKCOLUMN_NAME"))) {
-								String fkName = indexes.getString("FK_NAME");
-								fkName = fkName.toUpperCase(Locale.US);
-								fkNames.add(fkName);
+						try (ResultSet indexes = metadata.getCrossReference(
+								catalog, schema, nextParentTable, catalog, schema, foreignTable)) {
+							while (indexes.next()) {
+								if (theForeignKeyColumn.equals(indexes.getString("FKCOLUMN_NAME"))) {
+									String fkName = indexes.getString("FK_NAME");
+									fkName = fkName.toUpperCase(Locale.US);
+									fkNames.add(fkName);
+								}
 							}
 						}
 					}
@@ -348,22 +350,24 @@ public class JdbcUtils {
 				DatabaseMetaData metadata;
 				try {
 					metadata = connection.getMetaData();
-					ResultSet indexes = metadata.getColumns(
+					LinkedCaseInsensitiveMap<String> columnNames = new LinkedCaseInsensitiveMap<>();
+
+					try (ResultSet indexes = metadata.getColumns(
 							connection.getCatalog(),
 							connection.getSchema(),
 							massageIdentifier(metadata, theTableName),
-							null);
+							null)) {
 
-					LinkedCaseInsensitiveMap<String> columnNames = new LinkedCaseInsensitiveMap<>();
-					while (indexes.next()) {
-						String tableName = indexes.getString("TABLE_NAME").toUpperCase(Locale.US);
-						if (!theTableName.equalsIgnoreCase(tableName)) {
-							continue;
+						while (indexes.next()) {
+							String tableName = indexes.getString("TABLE_NAME").toUpperCase(Locale.US);
+							if (!theTableName.equalsIgnoreCase(tableName)) {
+								continue;
+							}
+
+							String columnName = indexes.getString("COLUMN_NAME");
+							columnName = columnName.toUpperCase(Locale.US);
+							columnNames.put(columnName, columnName);
 						}
-
-						String columnName = indexes.getString("COLUMN_NAME");
-						columnName = columnName.toUpperCase(Locale.US);
-						columnNames.put(columnName, columnName);
 					}
 
 					return columnNames.keySet();
@@ -391,6 +395,7 @@ public class JdbcUtils {
 						SequenceInformationExtractor sequenceInformationExtractor =
 								dialect.getSequenceInformationExtractor();
 						ExtractionContext extractionContext = new ExtractionContext.EmptyExtractionContext() {
+
 							@Override
 							public Connection getJdbcConnection() {
 								return connection;
@@ -404,6 +409,7 @@ public class JdbcUtils {
 							@Override
 							public JdbcEnvironment getJdbcEnvironment() {
 								return new JdbcEnvironment() {
+
 									@Override
 									public Dialect getDialect() {
 										return dialect;
@@ -480,22 +486,25 @@ public class JdbcUtils {
 				DatabaseMetaData metadata;
 				try {
 					metadata = connection.getMetaData();
-					ResultSet tables = metadata.getTables(connection.getCatalog(), connection.getSchema(), null, null);
-
 					Set<String> columnNames = new HashSet<>();
-					while (tables.next()) {
-						String tableName = tables.getString("TABLE_NAME");
-						tableName = tableName.toUpperCase(Locale.US);
 
-						String tableType = tables.getString("TABLE_TYPE");
-						if ("SYSTEM TABLE".equalsIgnoreCase(tableType)) {
-							continue;
-						}
-						if (SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME.equalsIgnoreCase(tableName)) {
-							continue;
-						}
+					try (ResultSet tables =
+							metadata.getTables(connection.getCatalog(), connection.getSchema(), null, null)) {
 
-						columnNames.add(tableName);
+						while (tables.next()) {
+							String tableName = tables.getString("TABLE_NAME");
+							tableName = tableName.toUpperCase(Locale.US);
+
+							String tableType = tables.getString("TABLE_TYPE");
+							if ("SYSTEM TABLE".equalsIgnoreCase(tableType)) {
+								continue;
+							}
+							if (SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME.equalsIgnoreCase(tableName)) {
+								continue;
+							}
+
+							columnNames.add(tableName);
+						}
 					}
 
 					return columnNames;
@@ -516,26 +525,27 @@ public class JdbcUtils {
 				DatabaseMetaData metadata;
 				try {
 					metadata = connection.getMetaData();
-					ResultSet tables = metadata.getColumns(
+					try (ResultSet tables = metadata.getColumns(
 							connection.getCatalog(),
 							connection.getSchema(),
 							massageIdentifier(metadata, theTableName),
-							null);
+							null)) {
 
-					while (tables.next()) {
-						String tableName = tables.getString("TABLE_NAME").toUpperCase(Locale.US);
-						if (!theTableName.equalsIgnoreCase(tableName)) {
-							continue;
-						}
+						while (tables.next()) {
+							String tableName = tables.getString("TABLE_NAME").toUpperCase(Locale.US);
+							if (!theTableName.equalsIgnoreCase(tableName)) {
+								continue;
+							}
 
-						if (theColumnName.equalsIgnoreCase(tables.getString("COLUMN_NAME"))) {
-							String nullable = tables.getString("IS_NULLABLE");
-							if ("YES".equalsIgnoreCase(nullable)) {
-								return true;
-							} else if ("NO".equalsIgnoreCase(nullable)) {
-								return false;
-							} else {
-								throw new IllegalStateException(Msg.code(41) + "Unknown nullable: " + nullable);
+							if (theColumnName.equalsIgnoreCase(tables.getString("COLUMN_NAME"))) {
+								String nullable = tables.getString("IS_NULLABLE");
+								if ("YES".equalsIgnoreCase(nullable)) {
+									return true;
+								} else if ("NO".equalsIgnoreCase(nullable)) {
+									return false;
+								} else {
+									throw new IllegalStateException(Msg.code(41) + "Unknown nullable: " + nullable);
+								}
 							}
 						}
 					}
