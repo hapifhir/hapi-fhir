@@ -166,7 +166,8 @@ public class JaxRsHttpClient implements IHttpClient {
 	}
 
 	@Override
-	public void setNewUrl(StringBuilder theUrl, String theIfNoneExistString, Map<String, List<String>> theIfNoneExistParams) {
+	public void setNewUrl(
+			StringBuilder theUrl, String theIfNoneExistString, Map<String, List<String>> theIfNoneExistParams) {
 		myUrl = theUrl;
 		myIfNoneExistString = theIfNoneExistString;
 		myIfNoneExistParams = theIfNoneExistParams;

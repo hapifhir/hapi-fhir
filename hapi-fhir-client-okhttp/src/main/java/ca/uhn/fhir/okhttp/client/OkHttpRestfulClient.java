@@ -28,7 +28,6 @@ import ca.uhn.fhir.rest.client.api.HttpClientUtil;
 import ca.uhn.fhir.rest.client.api.IHttpClient;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
-import ca.uhn.fhir.rest.client.impl.RestfulClientFactory;
 import ca.uhn.fhir.rest.client.method.MethodUtil;
 import ca.uhn.fhir.rest.param.HttpClientRequestParameters;
 import okhttp3.Call;
@@ -88,11 +87,7 @@ public class OkHttpRestfulClient implements IHttpClient {
 	}
 
 	private void initBaseRequest(
-		FhirContext theContext,
-		EncodingEnum theEncoding,
-		RequestBody body,
-		RequestTypeEnum theRequestType
-	) {
+			FhirContext theContext, EncodingEnum theEncoding, RequestBody body, RequestTypeEnum theRequestType) {
 		RequestTypeEnum requestType = theRequestType != null ? theRequestType : myRequestType;
 		String sanitisedUrl = withTrailingQuestionMarkRemoved(myUrl.toString());
 		myRequest = new OkHttpRestfulRequest(myClient, sanitisedUrl, requestType, body);
@@ -123,7 +118,11 @@ public class OkHttpRestfulClient implements IHttpClient {
 
 	@Override
 	public IHttpRequest createBinaryRequest(FhirContext theContext, IBaseBinary theBinary) {
-		initBaseRequest(theContext, null, createPostBody(theBinary.getContent(), theBinary.getContentType()), RequestTypeEnum.POST);
+		initBaseRequest(
+				theContext,
+				null,
+				createPostBody(theBinary.getContent(), theBinary.getContentType()),
+				RequestTypeEnum.POST);
 		return myRequest;
 	}
 
@@ -143,25 +142,29 @@ public class OkHttpRestfulClient implements IHttpClient {
 		switch (theParameters.getRequestTypeEnum()) {
 			case POST:
 			case PUT:
-				if (theParameters.getFormParams() != null && !theParameters.getFormParams().isEmpty()) {
+				if (theParameters.getFormParams() != null
+						&& !theParameters.getFormParams().isEmpty()) {
 					requestBody = getFormBodyFromParams(theParameters.getFormParams());
 				} else if (theParameters.getByteContents() != null) {
 					requestBody = createPostBody(theParameters.getByteContents(), theParameters.getContentType());
 				} else if (isNotBlank(theParameters.getContents())) {
 					requestBody = createPostBody(theParameters.getContents(), theParameters.getContentType());
 				} else if (theParameters.getBaseBinary() != null) {
-					requestBody = createPostBody(theParameters.getBaseBinary().getContent(), theParameters.getContentType());
+					requestBody =
+							createPostBody(theParameters.getBaseBinary().getContent(), theParameters.getContentType());
 				} else {
-					ourLog.debug("No body contents found for HTTP-{}", theParameters.getRequestTypeEnum().name());
+					ourLog.debug(
+							"No body contents found for HTTP-{}",
+							theParameters.getRequestTypeEnum().name());
 				}
 
 				break;
 		}
 		initBaseRequest(
-			theParameters.getFhirContext(),
-			theParameters.getEncodingEnum(),
-			requestBody,
-			theParameters.getRequestTypeEnum());
+				theParameters.getFhirContext(),
+				theParameters.getEncodingEnum(),
+				requestBody,
+				theParameters.getRequestTypeEnum());
 		return myRequest;
 	}
 
@@ -171,7 +174,8 @@ public class OkHttpRestfulClient implements IHttpClient {
 	}
 
 	@Override
-	public void setNewUrl(StringBuilder theUrl, String theIfNoneExistString, Map<String, List<String>> theIfNoneExistParams) {
+	public void setNewUrl(
+			StringBuilder theUrl, String theIfNoneExistString, Map<String, List<String>> theIfNoneExistParams) {
 		myUrl = theUrl;
 		myIfNoneExistString = theIfNoneExistString;
 		myIfNoneExistParams = theIfNoneExistParams;

@@ -118,7 +118,8 @@ public class HttpPatchClientInvocation extends BaseHttpClientInvocation {
 			client.setNewUrl(new StringBuilder(theParameters.getUrl()), null, null);
 		}
 
-		HttpClientRequestParameters params = new HttpClientRequestParameters(theParameters.getUrl(), RequestTypeEnum.PATCH);
+		HttpClientRequestParameters params =
+				new HttpClientRequestParameters(theParameters.getUrl(), RequestTypeEnum.PATCH);
 		params.setContents(myContents);
 		params.setContentType(myContentType);
 		params.setFhirContext(getContext());
