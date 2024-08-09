@@ -20,6 +20,7 @@
 package ca.uhn.fhir.rest.client.method;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.client.api.IHttpClient;
@@ -27,6 +28,7 @@ import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.client.model.AsHttpRequestParams;
 import ca.uhn.fhir.rest.client.model.CreateRequestParameters;
+import ca.uhn.fhir.rest.param.HttpClientRequestParameters;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.List;
@@ -84,7 +86,6 @@ public class HttpPatchClientInvocation extends BaseHttpClientInvocation {
 		appendExtraParamsWithQuestionMark(myParams, b, b.indexOf("?") == -1);
 		appendExtraParamsWithQuestionMark(theExtraParams, b, b.indexOf("?") == -1);
 
-		//		return createHttpRequest(b.toString(), theEncoding, RequestTypeEnum.PATCH);
 		CreateRequestParameters requestParameters = new CreateRequestParameters();
 		requestParameters.setClient(theParams.getClient());
 		requestParameters.setUrl(b.toString());
@@ -113,8 +114,16 @@ public class HttpPatchClientInvocation extends BaseHttpClientInvocation {
 							getHeaders());
 		} else {
 			client = theParameters.getClient();
+			client.setNewUrl(new StringBuilder(theParameters.getUrl()), null, null);
 		}
-		// preserving behaviour
-		return client.createByteRequest(getContext(), myContents, myContentType, null);
+
+		HttpClientRequestParameters params = new HttpClientRequestParameters(theParameters.getUrl(), RequestTypeEnum.PATCH);
+		params.setContents(myContents);
+		params.setContentType(myContentType);
+		params.setFhirContext(getContext());
+		IHttpRequest req = client.createRequest(params);
+		client.addHeadersToRequest(req, theParameters.getEncodingEnum(), getContext());
+		req.addHeader(Constants.HEADER_CONTENT_TYPE, params.getContentType() + Constants.HEADER_SUFFIX_CT_UTF_8);
+		return req;
 	}
 }
