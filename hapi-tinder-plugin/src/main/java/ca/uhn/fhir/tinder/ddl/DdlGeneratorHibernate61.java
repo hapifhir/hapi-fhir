@@ -250,6 +250,7 @@ public class DdlGeneratorHibernate61 {
 			Resource resource = loader.getResource(prependFile);
 			try (Writer w = new FileWriter(outputFile, true)) {
 				w.append(resource.getContentAsString(StandardCharsets.UTF_8));
+				ourLog.info("Added contents of file: {}", prependFile);
 			} catch (IOException e) {
 				throw new MojoFailureException("Failed to write to file " + outputFile + ": " + e.getMessage(), e);
 			}

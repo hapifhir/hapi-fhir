@@ -44,8 +44,6 @@ public class GenerateDdlMojo extends AbstractMojo {
 
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
-		ourLog.info("skip parameter is: {}", skip);
-
 		if (skip) {
 			return;
 		}
