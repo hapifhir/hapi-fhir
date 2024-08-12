@@ -163,10 +163,11 @@ public class DeleteExpungeStep
 
 			myRecordCount = myDeleteExpungeSvc.deleteExpunge(persistentIds, myCascade, myCascadeMaxRounds, myChunkId);
 
-			ourLog.info("Delete expunge finished deleting {} resources  - Instance[{}] Chunk[{}]",
-				myRecordCount,
-				myInstanceId,
-				myChunkId);
+			ourLog.info(
+					"Delete expunge finished deleting {} resources  - Instance[{}] Chunk[{}]",
+					myRecordCount,
+					myInstanceId,
+					myChunkId);
 
 			return null;
 		}
