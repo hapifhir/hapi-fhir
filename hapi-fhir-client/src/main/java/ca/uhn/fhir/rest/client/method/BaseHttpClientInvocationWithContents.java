@@ -179,6 +179,7 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		parameters.setContentType(contentType);
 		parameters.setFhirContext(getContext());
 		parameters.setEncodingEnum(encoding);
+		parameters.setRequestTypeEnum(getRequestType());
 		IHttpRequest request = httpClient.createRequest(parameters);
 		for (Header header : getHeaders()) {
 			request.addHeader(header.getName(), header.getValue());

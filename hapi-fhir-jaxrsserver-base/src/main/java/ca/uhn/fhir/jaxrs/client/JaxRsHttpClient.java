@@ -88,6 +88,7 @@ public class JaxRsHttpClient implements IHttpClient {
 	public IHttpRequest createParamRequest(
 			FhirContext theContext, Map<String, List<String>> theParams, EncodingEnum theEncoding) {
 		Entity<Form> entity = getFormEntity(theParams);
+		myRequestType = RequestTypeEnum.POST;
 		JaxRsHttpRequest retVal = createHttpRequest(entity);
 		addHeadersToRequest(retVal, theEncoding, theContext);
 		return retVal;
@@ -124,6 +125,7 @@ public class JaxRsHttpClient implements IHttpClient {
 	public IHttpRequest createRequest(HttpClientRequestParameters theParameters) {
 		Map<String, String> additionalHeaders = new HashMap<>();
 		Entity<?> entity;
+		myRequestType = theParameters.getRequestTypeEnum();
 		switch (theParameters.getRequestTypeEnum()) {
 			case POST:
 			case PUT:

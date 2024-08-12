@@ -75,7 +75,6 @@ public class GenericJaxRsClientDstu2Test {
 	}
 
 	private String getPatientFeedWithOneResult() {
-
 		String msg = "<Bundle xmlns=\"http://hl7.org/fhir\">\n" +
 			"<id>d039f91a-cc3c-4013-988e-af4d8d0614bd</id>\n" +
 			"<entry>\n" +
@@ -108,24 +107,20 @@ public class GenericJaxRsClientDstu2Test {
 
 		IGenericClient client = ourCtx.newRestfulGenericClient(ourServer.getBaseUrl() + "/fhir");
 
-
 		client.fetchConformance().ofType(Conformance.class).execute();
 		assertEquals(ourServer.getBaseUrl() + "/fhir/metadata", CAPTURE_SERVLET.ourRequestUri);
 		assertThat(CAPTURE_SERVLET.ourRequestHeaders.get("Accept")).hasSize(1);
 		assertThat(CAPTURE_SERVLET.ourRequestHeaders.get("Accept").get(0).getValue()).contains(Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_LEGACY);
-
 
 		client.fetchConformance().ofType(Conformance.class).encodedJson().execute();
 		assertEquals(ourServer.getBaseUrl() + "/fhir/metadata?_format=json", CAPTURE_SERVLET.ourRequestUri);
 		assertThat(CAPTURE_SERVLET.ourRequestHeaders.get("Accept")).hasSize(1);
 		assertThat(CAPTURE_SERVLET.ourRequestHeaders.get("Accept").get(0).getValue()).contains(Constants.CT_FHIR_JSON);
 
-
 		client.fetchConformance().ofType(Conformance.class).encodedXml().execute();
 		assertEquals(ourServer.getBaseUrl() + "/fhir/metadata?_format=xml", CAPTURE_SERVLET.ourRequestUri);
 		assertThat(CAPTURE_SERVLET.ourRequestHeaders.get("Accept")).hasSize(1);
 		assertThat(CAPTURE_SERVLET.ourRequestHeaders.get("Accept").get(0).getValue()).contains(Constants.CT_FHIR_XML);
-
 	}
 
 	@Test
@@ -888,7 +883,6 @@ public class GenericJaxRsClientDstu2Test {
 				.withParameter(Parameters.class, "name1", weirdBase)
 				.execute();
 		});
-
 	}
 
 	@Test
@@ -900,12 +894,10 @@ public class GenericJaxRsClientDstu2Test {
 		outParams.addParameter().setValue(new StringDt("STRINGVALOUT2"));
 		final String respString = p.encodeResourceToString(outParams);
 
-
 		CAPTURE_SERVLET.ourResponseContentType = Constants.CT_FHIR_XML + "; charset=UTF-8";
 		CAPTURE_SERVLET.ourResponseBody = respString;
 
 		IGenericClient client = ourCtx.newRestfulGenericClient(ourServer.getBaseUrl() + "/fhir");
-
 
 		client
 			.operation()
@@ -916,9 +908,7 @@ public class GenericJaxRsClientDstu2Test {
 			.useHttpGet()
 			.execute();
 
-
 		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/1/$validate-code?code=8495-4&system=http%3A%2F%2Floinc.org", CAPTURE_SERVLET.ourRequestUri);
-
 
 		client
 			.operation()
@@ -926,7 +916,6 @@ public class GenericJaxRsClientDstu2Test {
 			.named("validate-code")
 			.withParameter(Parameters.class, "code", new CodeDt("8495-4"))
 			.andParameter("system", new UriDt("http://loinc.org"))
-			.encodedXml()
 			.encodedXml()
 			.execute();
 
