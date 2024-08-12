@@ -1,0 +1,8 @@
+---
+type: fix
+issue: 6208
+title: "Searching for resources by adding a parameter of `_lastUpdated` to the parameter
+        map (but not using the `_lastUpdated` special use-case parameter) while using
+        full text search could sometimes produce null pointers.
+        This has been fixed.
+"
