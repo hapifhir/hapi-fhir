@@ -419,6 +419,17 @@ class ModelScanner {
 					throw new ConfigurationException(Msg.code(1721) + "Search param " + searchParam.name()
 							+ " has an invalid type: " + searchParam.type());
 				}
+				/*
+				 * This is a HACK!
+				 * tinder generator jpa_resource_provider.vm already has _lastUpdated
+				 * manually added, so we're just going to manually skip this value
+				 * so we don't corrupt the PatientResourceProvider.java.
+				 *
+				 */
+				if (searchParam.name().equalsIgnoreCase("_lastUpdated")) {
+					continue;
+				}
+
 				Set<String> providesMembershipInCompartments;
 				providesMembershipInCompartments = new HashSet<>();
 				for (Compartment next : searchParam.providesMembershipIn()) {

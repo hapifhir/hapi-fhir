@@ -167,6 +167,8 @@ public class ${className}ResourceProvider extends
 #if ( $version != 'dstu' )
 			paramMap.setRevIncludes(theRevIncludes);
 			paramMap.setLastUpdated(theLastUpdated);
+			// we will add this manually here because ModelScanner ignores it
+			paramMap.add(ca.uhn.fhir.rest.api.Constants.PARAM_LASTUPDATED, theLastUpdated);
 #end
 			paramMap.setIncludes(theIncludes);
 			paramMap.setSort(theSort);

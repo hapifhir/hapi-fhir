@@ -59,11 +59,11 @@ public class SearchStrategyFactory {
 	public boolean isSupportsHSearchDirect(
 			String theResourceType, SearchParameterMap theParams, RequestDetails theRequestDetails) {
 		return myFulltextSearchSvc != null
-			&& myStorageSettings.isStoreResourceInHSearchIndex()
-			&& myStorageSettings.isAdvancedHSearchIndexing()
-			&& myFulltextSearchSvc.supportsAllOf(theParams)
-			&& theParams.getSummaryMode() == null
-			&& theParams.getSearchTotalMode() == null;
+				&& myStorageSettings.isStoreResourceInHSearchIndex()
+				&& myStorageSettings.isAdvancedHSearchIndexing()
+				&& myFulltextSearchSvc.supportsAllOf(theParams)
+				&& theParams.getSummaryMode() == null
+				&& theParams.getSearchTotalMode() == null;
 	}
 
 	public ISearchStrategy makeDirectStrategy(

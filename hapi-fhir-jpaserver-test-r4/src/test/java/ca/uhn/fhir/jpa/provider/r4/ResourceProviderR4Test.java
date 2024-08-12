@@ -29,6 +29,7 @@ import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.StrictErrorHandler;
+import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
@@ -1110,6 +1111,35 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		found = myClient.search().forResource(Organization.class).where(Organization.NAME.matches().value("rpr4_testCountParam_01")).count(999).returnBundle(Bundle.class).execute();
 		assertThat(found.getEntry()).hasSize(50);
 
+	}
+
+	@Test
+	public void testSearchByUrl() {
+		// setup
+		DateType dt = new DateType(new Date());
+		String nowStr = dt.getValueAsString();
+
+		boolean storeResourceInHSearch = myStorageSettings.isStoreResourceInHSearchIndex();
+		boolean advancedHSearch = myStorageSettings.isAdvancedHSearchIndexing();
+
+		try {
+			// use full text search
+			myStorageSettings.setStoreResourceInHSearchIndex(true);
+			myStorageSettings.setAdvancedHSearchIndexing(true);
+
+			// test
+			Bundle b = myClient.search()
+				.byUrl("Patient?_lastUpdated=" + nowStr)
+				.returnBundle(Bundle.class)
+				.cacheControl(CacheControlDirective.noCache())
+					.execute();
+
+			assertNotNull(b);
+		} finally {
+			// reset back to previous
+			myStorageSettings.setAdvancedHSearchIndexing(advancedHSearch);
+			myStorageSettings.setStoreResourceInHSearchIndex(storeResourceInHSearch);
+		}
 	}
 
 	@Test

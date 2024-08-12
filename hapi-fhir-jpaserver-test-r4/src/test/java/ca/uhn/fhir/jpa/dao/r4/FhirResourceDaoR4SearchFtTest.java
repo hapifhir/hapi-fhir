@@ -7,9 +7,6 @@ import ca.uhn.fhir.jpa.search.autocomplete.ValueSetAutocompleteOptions;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
-import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
@@ -20,7 +17,6 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import jakarta.servlet.http.HttpServletRequest;
 import org.assertj.core.api.AssertionsForInterfaceTypes;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Device;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
@@ -31,12 +27,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hl7.fhir.r4.model.Observation.SP_VALUE_QUANTITY;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 
@@ -503,38 +497,6 @@ public class FhirResourceDaoR4SearchFtTest extends BaseJpaR4Test {
 			fail("Expected exception");
 		} catch (IllegalStateException e) {
 			assertThat(e.getMessage()).startsWith(Msg.code(2070));
-		}
-	}
-
-	@Test
-	public void testSearchByUrl() {
-		// setup
-		DateType dt = new DateType(new Date());
-		String nowStr = dt.getValueAsString();
-
-		SearchParameterMap map = new SearchParameterMap();
-		map.setLoadSynchronous(true);
-		// we are explicitly not setting the _lastUpdated parameter
-		// but using a _lastUpdated parameter key
-		map.add("_lastUpdated", new DateParam(nowStr));
-
-		boolean storeResourceInHSearch = myStorageSettings.isStoreResourceInHSearchIndex();
-		boolean advancedHSearch = myStorageSettings.isAdvancedHSearchIndexing();
-
-		try {
-			// use full text search
-			myStorageSettings.setStoreResourceInHSearchIndex(true);
-			myStorageSettings.setAdvancedHSearchIndexing(true);
-
-			// test
-			IBundleProvider result = myPatientDao.search(map, new SystemRequestDetails());
-
-			// we just expect something - ie, no errors
-			assertNotNull(result);
-		} finally {
-			// reset back to previous
-			myStorageSettings.setAdvancedHSearchIndexing(advancedHSearch);
-			myStorageSettings.setStoreResourceInHSearchIndex(storeResourceInHSearch);
 		}
 	}
 
