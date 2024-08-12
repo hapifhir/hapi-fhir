@@ -1026,7 +1026,8 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		version.onTable(Search.HFJ_SEARCH)
 				.addColumn("20230215.1", Search.SEARCH_UUID)
 				.nullable()
-				.type(ColumnTypeEnum.STRING, 48);
+				.type(ColumnTypeEnum.STRING, 48)
+				.doNothing(); // This migration used add instead of modify, so was skipped.  See 20240722 for modify.
 		version.onTable(BulkImportJobEntity.HFJ_BLK_IMPORT_JOB)
 				.addColumn("20230215.2", BulkImportJobEntity.JOB_ID)
 				.nullable()
