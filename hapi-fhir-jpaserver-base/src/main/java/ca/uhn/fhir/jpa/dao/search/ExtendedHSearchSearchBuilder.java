@@ -271,9 +271,10 @@ public class ExtendedHSearchSearchBuilder {
 
 				case DATE:
 					boolean isLastUpdate = nextParam.equalsIgnoreCase("_lastupdated");
-					List<List<IQueryParameterType>> dateAndOrTerms = isLastUpdate && searchParameterMap.getLastUpdated() != null
-							? getLastUpdatedAndOrList(searchParameterMap)
-							: searchParameterMap.removeByNameUnmodified(nextParam);
+					List<List<IQueryParameterType>> dateAndOrTerms =
+							isLastUpdate && searchParameterMap.getLastUpdated() != null
+									? getLastUpdatedAndOrList(searchParameterMap)
+									: searchParameterMap.removeByNameUnmodified(nextParam);
 					theBuilder.addDateUnmodifiedSearch(nextParam, dateAndOrTerms);
 					break;
 
