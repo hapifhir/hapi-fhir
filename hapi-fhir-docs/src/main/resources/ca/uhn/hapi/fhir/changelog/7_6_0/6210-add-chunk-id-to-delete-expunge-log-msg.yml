@@ -1,0 +1,5 @@
+---
+type: add
+issue: 6210
+jira: SMILE-8428
+title: "The batch chunk ID has been added to the delete expunge log messages to make troubleshooting easier."
