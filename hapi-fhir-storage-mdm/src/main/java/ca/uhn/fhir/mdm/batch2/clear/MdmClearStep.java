@@ -145,7 +145,7 @@ public class MdmClearStep implements IJobStepWorker<MdmClearJobParameters, Resou
 
 			// use the expunge service to delete multiple resources at once efficiently
 			IDeleteExpungeSvc deleteExpungeSvc = myIMdmClearHelperSvc.getDeleteExpungeSvc();
-			int deletedRecords = deleteExpungeSvc.deleteExpunge(thePersistentIds, false, null);
+			int deletedRecords = deleteExpungeSvc.deleteExpunge(thePersistentIds, false, null, myChunkId);
 
 			ourLog.trace(
 					"Deleted {} of {} golden resources in {}",

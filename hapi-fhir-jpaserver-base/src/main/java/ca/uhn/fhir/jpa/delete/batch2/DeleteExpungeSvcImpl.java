@@ -48,19 +48,28 @@ public class DeleteExpungeSvcImpl implements IDeleteExpungeSvc<JpaPid> {
 	}
 
 	@Override
-	public int deleteExpunge(List<JpaPid> theJpaPids, boolean theCascade, Integer theCascadeMaxRounds) {
+	public int deleteExpunge(List<JpaPid> theJpaPids, boolean theCascade, Integer theCascadeMaxRounds, String theChunkId) {
 		DeleteExpungeSqlBuilder.DeleteExpungeSqlResult sqlResult =
 				myDeleteExpungeSqlBuilder.convertPidsToDeleteExpungeSql(theJpaPids, theCascade, theCascadeMaxRounds);
 		List<String> sqlList = sqlResult.getSqlStatements();
 
-		ourLog.debug("Executing {} delete expunge sql commands", sqlList.size());
+		String formattedChunkIdForLogMessage = theChunkId.isEmpty() ? "" : "Chunk[" + theChunkId + "] - ";
+
+		ourLog.debug("{}Executing {} delete expunge sql commands", formattedChunkIdForLogMessage, sqlList.size());
 		long totalDeleted = 0;
 		for (String sql : sqlList) {
 			ourLog.trace("Executing sql " + sql);
 			totalDeleted += myEntityManager.createNativeQuery(sql).executeUpdate();
 		}
+		// each sql statement is for different table, but its on the same resource ID
+		// eg. HFJ_HISTORY_TAG, HFJ_RES_VER_PROV, HFJ_IDX_CMP_STRING_UNIQ, but all for the same resource ID
+		// Basically, history, tag, versions, subscriptions, ETC
+		// but each delete on diff table results in the records total going up
+		// so this info statement for total deleted is actually the only place that totalDeleted is printed
+		// the return value of getRecordCount() is printed, but =/= to totalDeleted
+		// getRecordCount() is the number of resources actually deleted ie. theJpaPids.length
 
-		ourLog.info("{} records deleted", totalDeleted);
+		ourLog.info("{}Delete expunge sql commands affected {} rows", formattedChunkIdForLogMessage, totalDeleted); // todo jdjd
 		clearHibernateSearchIndex(theJpaPids);
 
 		// TODO KHS instead of logging progress, produce result chunks that get aggregated into a delete expunge report

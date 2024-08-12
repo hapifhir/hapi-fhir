@@ -25,7 +25,7 @@ import java.util.List;
 
 public interface IDeleteExpungeSvc<T extends IResourcePersistentId<?>> {
 
-	int deleteExpunge(List<T> thePersistentIds, boolean theCascade, Integer theCascadeMaxRounds);
+	int deleteExpunge(List<T> thePersistentIds, boolean theCascade, Integer theCascadeMaxRounds, String theChunkid);
 
 	boolean isCascadeSupported();
 }

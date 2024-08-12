@@ -352,7 +352,7 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 	@SuppressWarnings("unchecked")
 	private int deleteExpungeGoldenResource(IResourcePersistentId theGoldenPid) {
 		IDeleteExpungeSvc deleteExpungeSvc = myIMdmClearHelperSvc.getDeleteExpungeSvc();
-		return deleteExpungeSvc.deleteExpunge(new ArrayList<>(Collections.singleton(theGoldenPid)), false, null);
+		return deleteExpungeSvc.deleteExpunge(new ArrayList<>(Collections.singleton(theGoldenPid)), false, null, "");
 	}
 
 	private void forbidIfModifyingExternalEidOnTarget(IBaseResource theNewResource, IBaseResource theOldResource) {

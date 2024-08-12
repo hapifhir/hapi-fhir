@@ -19,7 +19,12 @@
  */
 package ca.uhn.fhir.batch2.jobs.expunge;
 
-import ca.uhn.fhir.batch2.api.*;
+import ca.uhn.fhir.batch2.api.IJobDataSink;
+import ca.uhn.fhir.batch2.api.IJobStepWorker;
+import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
+import ca.uhn.fhir.batch2.api.RunOutcome;
+import ca.uhn.fhir.batch2.api.StepExecutionDetails;
+import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.jpa.api.svc.IDeleteExpungeSvc;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
@@ -156,7 +161,12 @@ public class DeleteExpungeStep
 					myInstanceId,
 					myChunkId);
 
-			myRecordCount = myDeleteExpungeSvc.deleteExpunge(persistentIds, myCascade, myCascadeMaxRounds);
+			myRecordCount = myDeleteExpungeSvc.deleteExpunge(persistentIds, myCascade, myCascadeMaxRounds, myChunkId);
+
+			ourLog.info("Delete expunge finished deleting {} resources  - Instance[{}] Chunk[{}]",
+				myRecordCount,
+				myInstanceId,
+				myChunkId);
 
 			return null;
 		}

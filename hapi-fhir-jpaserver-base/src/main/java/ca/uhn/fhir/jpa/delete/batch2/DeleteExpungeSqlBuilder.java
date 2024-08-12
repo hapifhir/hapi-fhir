@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.dao.expunge.ResourceTableFKProvider;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import graphql.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,8 +57,9 @@ public class DeleteExpungeSqlBuilder {
 		myResourceLinkDao = theResourceLinkDao;
 	}
 
+	@VisibleForTesting
 	@Nonnull
-	DeleteExpungeSqlResult convertPidsToDeleteExpungeSql(
+	public DeleteExpungeSqlResult convertPidsToDeleteExpungeSql(
 			List<JpaPid> theJpaPids, boolean theCascade, Integer theCascadeMaxRounds) {
 
 		Set<Long> pids = JpaPid.toLongSet(theJpaPids);
