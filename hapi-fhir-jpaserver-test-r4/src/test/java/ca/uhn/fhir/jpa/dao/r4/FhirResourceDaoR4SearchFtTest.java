@@ -14,6 +14,7 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import jakarta.servlet.http.HttpServletRequest;
 import org.assertj.core.api.AssertionsForInterfaceTypes;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Device;
@@ -25,15 +26,12 @@ import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import jakarta.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.hl7.fhir.r4.model.Observation.SP_VALUE_QUANTITY;
 import static org.junit.jupiter.api.Assertions.fail;
-
 import static org.mockito.Mockito.mock;
 
 public class FhirResourceDaoR4SearchFtTest extends BaseJpaR4Test {
@@ -295,7 +293,6 @@ public class FhirResourceDaoR4SearchFtTest extends BaseJpaR4Test {
 		everythingParams.setContent(param);
 		actual = toUnqualifiedVersionlessIdValues(myPatientDao.patientInstanceEverything(request, mockSrd(), everythingParams, ptId1));
 		assertThat(actual).containsExactlyInAnyOrder(toValues(ptId1, obsId4));
-
 	}
 
 	@Test
@@ -502,7 +499,6 @@ public class FhirResourceDaoR4SearchFtTest extends BaseJpaR4Test {
 			assertThat(e.getMessage()).startsWith(Msg.code(2070));
 		}
 	}
-
 
 	@Test
 	public void testResourceQuantitySearch() {

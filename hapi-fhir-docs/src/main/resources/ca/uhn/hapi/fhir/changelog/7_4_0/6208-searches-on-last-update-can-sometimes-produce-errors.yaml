@@ -1,0 +1,11 @@
+---
+type: fix
+issue: 6208
+title: "Tinder generated ResourceProvider files were pulling in a duplicate `_lastUpdated` value.
+        This results in a broken signature for the providers, and a broken search.
+        As a workaround, we will skip search parameters named `_lastUpdated` because
+        these are already manually added to the search parameter map in jpa_resource_provider.vm.
+
+        THIS IS ONLY TO FIX A REGRESSION FOR RELEASE!
+        A REAL FIX IS FORTHCOMING IN A FUTHRE VERSION.
+"

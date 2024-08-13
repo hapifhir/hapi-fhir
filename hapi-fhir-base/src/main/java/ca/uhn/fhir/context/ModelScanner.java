@@ -419,6 +419,7 @@ class ModelScanner {
 					throw new ConfigurationException(Msg.code(1721) + "Search param " + searchParam.name()
 							+ " has an invalid type: " + searchParam.type());
 				}
+
 				Set<String> providesMembershipInCompartments;
 				providesMembershipInCompartments = new HashSet<>();
 				for (Compartment next : searchParam.providesMembershipIn()) {
