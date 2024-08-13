@@ -101,7 +101,6 @@ import ca.uhn.fhir.util.StringUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Streams;
 import com.healthmarketscience.sqlbuilder.Condition;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -404,8 +403,16 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				fulltextMatchIds = queryHibernateSearchForEverythingPids(theRequest);
 				resultCount = fulltextMatchIds.size();
 			} else {
-				fulltextExecutor = myFulltextSearchSvc.searchNotScrolled(
-						myResourceName, myParams, myMaxResultsToFetch, theRequest);
+				// todo performance MB - some queries must intersect with JPA (e.g. they have a chain, or we haven't
+				// enabled SP indexing).
+				// and some queries don't need JPA.  We only need the scroll when we need to intersect with JPA.
+				// It would be faster to have a non-scrolled search in this case, since creating the scroll requires
+				// extra work in Elastic.
+				// if (eligibleToSkipJPAQuery) fulltextExecutor = myFulltextSearchSvc.searchNotScrolled( ...
+
+				// we might need to intersect with JPA.  So we might need to traverse ALL results from lucene, not just
+				// a page.
+				fulltextExecutor = myFulltextSearchSvc.searchScrolled(myResourceName, myParams, theRequest);
 			}
 
 			if (fulltextExecutor == null) {
@@ -457,7 +464,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				// We break the pids into chunks that fit in the 1k limit for jdbc bind params.
 				new QueryChunker<Long>()
 						.chunk(
-								Streams.stream(fulltextExecutor).collect(Collectors.toList()),
+								fulltextExecutor,
+								SearchBuilder.getMaximumPageSize(),
 								t -> doCreateChunkedQueries(
 										theParams, t, theOffset, sort, theCountOnlyFlag, theRequest, queries));
 			}

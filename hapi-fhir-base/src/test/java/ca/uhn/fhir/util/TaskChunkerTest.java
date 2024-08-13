@@ -8,11 +8,14 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -46,5 +49,19 @@ public class TaskChunkerTest {
 		List<Integer> input = IntStream.range(startInclusive, endExclusive).boxed().toList();
 		return input;
 	}
+
+	@Test
+	void testIteratorChunk() {
+	    // given
+		Iterator<Integer> iter = List.of(1,2,3,4,5,6,7,8,9).iterator();
+		ArrayList<List<Integer>> result = new ArrayList<>();
+
+	    // when
+		new TaskChunker<Integer>().chunk(iter, 3, result::add);
+
+	    // then
+	    assertEquals(List.of(List.of(1,2,3), List.of(4,5,6), List.of(7,8,9)), result);
+	}
+
 
 }
