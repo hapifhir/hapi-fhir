@@ -1,11 +1,8 @@
 package ca.uhn.fhir.jpa.dao;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.api.IJobPartitionProvider;
 import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrl;
-import ca.uhn.fhir.batch2.jobs.parameters.UrlPartitioner;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirContext;
@@ -68,9 +65,10 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.junit.jupiter.api.Assertions.fail;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.isNotNull;
@@ -88,6 +86,9 @@ class BaseHapiFhirResourceDaoTest {
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 
 	@Mock
+	private IJobPartitionProvider myJobPartitionProvider;
+
+	@Mock
 	private IIdHelperService<JpaPid> myIdHelperService;
 
 	@Mock
@@ -101,9 +102,6 @@ class BaseHapiFhirResourceDaoTest {
 
 	@Mock
 	private IJpaStorageResourceParser myJpaStorageResourceParser;
-
-	@Mock
-	private UrlPartitioner myUrlPartitioner;
 
 	@Mock
 	private ApplicationContext myApplicationContext;
@@ -267,12 +265,12 @@ class BaseHapiFhirResourceDaoTest {
 	public void requestReindexForRelatedResources_withValidBase_includesUrlsInJobParameters() {
 		when(myStorageSettings.isMarkResourcesForReindexingUponSearchParameterChange()).thenReturn(true);
 
-		List<String> base = Lists.newArrayList("Patient", "Group");
+		RequestPartitionId partitionId = RequestPartitionId.fromPartitionId(1);
+		List<String> base = Lists.newArrayList("Patient", "Group", "Practitioner");
 
-		when(myUrlPartitioner.partitionUrl(any(), any())).thenAnswer(i -> {
-			PartitionedUrl partitionedUrl = new PartitionedUrl();
-			partitionedUrl.setUrl(i.getArgument(0));
-			return partitionedUrl;
+		when(myJobPartitionProvider.getPartitionedUrls(any(), any())).thenAnswer(i -> {
+			List<String> urls = i.getArgument(1);
+			return urls.stream().map(url -> new PartitionedUrl().setUrl(url).setRequestPartitionId(partitionId)).collect(Collectors.toList());
 		});
 
 		mySvc.requestReindexForRelatedResources(false, base, new ServletRequestDetails());
@@ -285,9 +283,12 @@ class BaseHapiFhirResourceDaoTest {
 		assertNotNull(actualRequest.getParameters());
 		ReindexJobParameters actualParameters = actualRequest.getParameters(ReindexJobParameters.class);
 
-		assertThat(actualParameters.getPartitionedUrls()).hasSize(2);
-		assertEquals("Patient?", actualParameters.getPartitionedUrls().get(0).getUrl());
-		assertEquals("Group?", actualParameters.getPartitionedUrls().get(1).getUrl());
+		assertThat(actualParameters.getPartitionedUrls()).hasSize(base.size());
+		for (int i = 0; i < base.size(); i++) {
+			PartitionedUrl partitionedUrl = actualParameters.getPartitionedUrls().get(i);
+			assertEquals(base.get(i) + "?", partitionedUrl.getUrl());
+			assertEquals(partitionId, partitionedUrl.getRequestPartitionId());
+		}
 	}
 
 	@Test

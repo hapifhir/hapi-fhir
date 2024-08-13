@@ -17,11 +17,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static ca.uhn.fhir.context.support.IValidationSupport.TYPE_CODING;
 import static ca.uhn.fhir.context.support.IValidationSupport.TYPE_GROUP;
 import static ca.uhn.fhir.context.support.IValidationSupport.TYPE_STRING;
 import static java.util.stream.IntStream.range;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hl7.fhir.common.hapi.validation.support.RemoteTerminologyServiceValidationSupport.createConceptProperty;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -54,7 +54,8 @@ public interface ILookupCodeTest {
 	default void lookupCode_forCodeSystemWithBlankCode_throwsException() {
 		try {
 			getService().lookupCode(null, new LookupCodeRequest(CODE_SYSTEM, ""));
-				fail();			} catch (IllegalArgumentException e) {
+			fail();
+		} catch (IllegalArgumentException e) {
 			assertEquals("theCode must be provided", e.getMessage());
 		}
 	}
@@ -63,6 +64,7 @@ public interface ILookupCodeTest {
 	default void lookupCode_forCodeSystemWithPropertyInvalidType_throwsException() {
 		// test
 		LookupCodeResult result = new LookupCodeResult();
+		result.setFound(true);
 		result.getProperties().add(new BaseConceptProperty("someProperty") {
 			public String getType() {
 				return "someUnsupportedType";
@@ -72,9 +74,10 @@ public interface ILookupCodeTest {
 
 		// test and verify
 		try {
-				getService().lookupCode(null, new LookupCodeRequest(CODE_SYSTEM, CODE, LANGUAGE, null));
-				fail();			} catch (InternalErrorException e) {
-				assertThat(e.getMessage()).contains("HAPI-1739: Don't know how to handle ");
+			getService().lookupCode(null, new LookupCodeRequest(CODE_SYSTEM, CODE, LANGUAGE, null));
+			fail();
+		} catch (InternalErrorException e) {
+			assertThat(e.getMessage()).contains("HAPI-1739: Don't know how to handle ");
 		}
 	}
 
@@ -101,6 +104,7 @@ public interface ILookupCodeTest {
 		ConceptDesignation designation1 = new ConceptDesignation().setUseCode(code1).setUseSystem("system1").setValue("value1").setLanguage("en");
 		ConceptDesignation designation2 = new ConceptDesignation().setUseCode(code2).setUseSystem("system2").setValue("value2").setLanguage("es");
 		LookupCodeResult result = new LookupCodeResult();
+		result.setFound(true);
 		result.getDesignations().add(designation1);
 		result.getDesignations().add(designation2);
 		getCodeSystemProvider().setLookupCodeResult(result);
@@ -184,6 +188,8 @@ public interface ILookupCodeTest {
 		assertNotNull(outcome);
 		assertEquals(theRequest.getCode(), getCodeSystemProvider().getCode());
 		assertEquals(theRequest.getSystem(), getCodeSystemProvider().getSystem());
+		assertEquals(theExpectedResult.isFound(), outcome.isFound());
+		assertEquals(theExpectedResult.getErrorMessage(), outcome.getErrorMessage());
 		assertEquals(theExpectedResult.getCodeSystemDisplayName(), outcome.getCodeSystemDisplayName());
 		assertEquals(theExpectedResult.getCodeDisplay(), outcome.getCodeDisplay());
 		assertEquals(theExpectedResult.getCodeSystemVersion(), outcome.getCodeSystemVersion());
@@ -199,6 +205,7 @@ public interface ILookupCodeTest {
 	default void verifyLookupWithConceptDesignation(final ConceptDesignation theConceptDesignation) {
 		// setup
 		LookupCodeResult result = new LookupCodeResult();
+		result.setFound(true);
 		result.getDesignations().add(theConceptDesignation);
 		getCodeSystemProvider().setLookupCodeResult(result);
 

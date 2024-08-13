@@ -1,0 +1,7 @@
+---
+type: fix
+jira: SMILE-8652
+title: "When JPA servers are configured to always require a new database
+  transaction when switching partitions, the server will now correctly
+  identify the correct partition for FHIR transaction operations, and
+  fail the operation if multiple partitions would be required."

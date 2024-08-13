@@ -65,7 +65,7 @@ public class SubscriptionUtil {
 		populatePrimitiveValue(theContext, theSubscription, "status", theStatus);
 	}
 
-	public static boolean isCrossPartition(IBaseResource theSubscription) {
+	public static boolean isDefinedAsCrossPartitionSubcription(IBaseResource theSubscription) {
 		if (theSubscription instanceof IBaseHasExtensions) {
 			IBaseExtension extension = ExtensionUtil.getExtensionByUrl(
 					theSubscription, HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION);

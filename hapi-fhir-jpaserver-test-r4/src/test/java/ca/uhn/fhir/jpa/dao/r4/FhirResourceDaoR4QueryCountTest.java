@@ -18,7 +18,7 @@ import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
 import ca.uhn.fhir.jpa.dao.data.ISearchParamPresentDao;
-import ca.uhn.fhir.jpa.delete.job.ReindexTestHelper;
+import ca.uhn.fhir.jpa.reindex.ReindexTestHelper;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
 import ca.uhn.fhir.jpa.interceptor.ForceOffsetSearchModeInterceptor;
@@ -595,11 +595,11 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 			fail(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
 		}
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertEquals(8, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		assertEquals(10, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
 		assertEquals(0, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
 		assertEquals(0, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
 		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
-		assertEquals(6, myCaptureQueriesListener.getCommitCount());
+		assertEquals(8, myCaptureQueriesListener.getCommitCount());
 
 		// Validate again (should rely only on caches)
 		myCaptureQueriesListener.clear();
@@ -2315,7 +2315,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(4, myCaptureQueriesListener.countInsertQueries());
 		myCaptureQueriesListener.logUpdateQueries();
 		assertEquals(8, myCaptureQueriesListener.countUpdateQueries());
-		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+		assertEquals(4, myCaptureQueriesListener.countDeleteQueries());
 
 		/*
 		 * Third time with mass ingestion mode enabled
@@ -3104,7 +3104,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(3, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		assertEquals(6, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(1, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
-		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+		assertEquals(1, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 		assertEquals(1, myCaptureQueriesListener.countCommits());
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 
@@ -3496,8 +3496,8 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(6, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		myCaptureQueriesListener.logInsertQueries();
 		assertEquals(4, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
-		assertEquals(6, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
-		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+		assertEquals(7, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+		assertEquals(2, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 
 		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		IdType patientId = new IdType(outcome.getEntry().get(1).getResponse().getLocation());
@@ -3579,8 +3579,8 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertEquals(6, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		assertEquals(2, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
-		assertEquals(5, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
-		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+		assertEquals(6, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+		assertEquals(2, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 
 	}
 
