@@ -919,15 +919,21 @@
 			<id>adriennesox</id>
 			<name>Adrienne Sox</name>
 			<organization>Galileo, Inc.</organization>
-    </developer>
-	 <developer>
-		 <id>melihaydogd</id>
-		 <name>Ahmet Melih Aydoğdu</name>
-    </developer>
-	 <developer>
-		 <id>alexrkopp</id>
-		 <name>Alex Kopp</name>
-    </developer>
+		</developer>
+		<developer>
+			<id>melihaydogd</id>
+			<name>Ahmet Melih Aydoğdu</name>
+		</developer>
+		<developer>
+			<id>alexrkopp</id>
+			<name>Alex Kopp</name>
+			<organization>athenahealth</organization>
+		</developer>
+		<developer>
+			<id>acoteathn</id>
+			<name>Alex Cote</name>
+			<organization>athenahealth</organization>
+		</developer>
 	</developers>
 
 	<licenses>
