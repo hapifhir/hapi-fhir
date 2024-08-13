@@ -86,8 +86,9 @@ public class ${className}ResourceProvider extends
 			HasAndListParam theHas, 
 
 #foreach ( $param in $searchParams ) #{if}(true) #{end} 
+			#if (${param.name} != "_lastUpdated")
 
-			@Description(shortDefinition="${param.description}")
+				@Description(shortDefinition="${param.description}")
 #if (${param.type} == 'string' )
 			@OptionalParam(name="${param.name}")
 			StringAndListParam the${param.nameCapitalized}, 
@@ -97,7 +98,7 @@ public class ${className}ResourceProvider extends
 #elseif (${param.type} == 'special' )
 			@OptionalParam(name="${param.name}")
 			SpecialAndListParam the${param.nameCapitalized},
-#elseif (${param.type} == 'date' )
+#elseif (${param.type} == 'date' && ${param.name} != "_lastUpdated")
 			@OptionalParam(name="${param.name}")
 			DateRangeParam the${param.nameCapitalized}, 
 #elseif (${param.type} == 'uri' )
@@ -115,6 +116,7 @@ public class ${className}ResourceProvider extends
 #elseif (${param.type} == 'composite' )
 			@OptionalParam(name="${param.name}", compositeTypes= { ${param.compositeTypes[0]}Param.class, ${param.compositeTypes[1]}Param.class })
 			CompositeAndListParam<${param.compositeTypes[0]}Param, ${param.compositeTypes[1]}Param> the${param.nameCapitalized},
+#end
 #end
 #end	
 
@@ -161,14 +163,15 @@ public class ${className}ResourceProvider extends
 			paramMap.add(ca.uhn.fhir.rest.api.Constants.PARAM_LANGUAGE, theResourceLanguage);
 
 			paramMap.add("_has", theHas);
-#foreach ( $param in $searchParams ) 
-			paramMap.add("${param.name}", the${param.nameCapitalized});
+#foreach ( $param in $searchParams )
+			#if (${param.name} != "_lastUpdated")
+				paramMap.add("${param.name}", the${param.nameCapitalized});
+			#end
 #end
 #if ( $version != 'dstu' )
 			paramMap.setRevIncludes(theRevIncludes);
 			paramMap.setLastUpdated(theLastUpdated);
-			// we will add this manually here because ModelScanner ignores it
-			paramMap.add(ca.uhn.fhir.rest.api.Constants.PARAM_LASTUPDATED, theLastUpdated);
+			paramMap.add("_lastUpdated", theLastUpdated);
 #end
 			paramMap.setIncludes(theIncludes);
 			paramMap.setSort(theSort);
