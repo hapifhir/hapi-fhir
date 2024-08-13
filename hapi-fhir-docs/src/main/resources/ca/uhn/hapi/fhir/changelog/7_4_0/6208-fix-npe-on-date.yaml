@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 6208
+title: "A regression was temporarily introduced which caused searches by `_lastUpdated` to fail with a NullPointerException when using Lucene as the backing search engine. This has been corrected"
