@@ -122,7 +122,7 @@ public class ${className}ResourceProvider extends
 			Map<String, List<String>> theAdditionalRawParams,
 
 	##DSTU2 is not an IAnyResource, yet supports LastUpdated, so we keep the magic SP in this case.
-	#if ( $version == 'dstu2' ))
+	#if ( $version == 'dstu2' )
 			@Description(shortDefinition="Only return resources which were last updated as specified by the given range")
 			@OptionalParam(name="_lastUpdated")
 			DateRangeParam the_lastUpdated,
