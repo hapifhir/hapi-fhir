@@ -111,7 +111,6 @@ import jakarta.persistence.Query;
 import jakarta.persistence.Tuple;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -205,9 +204,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 	@Autowired(required = false)
 	private IElasticsearchSvc myIElasticsearchSvc;
-
-	@Autowired
-	private FhirContext myCtx;
 
 	@Autowired
 	private IJpaStorageResourceParser myJpaStorageResourceParser;

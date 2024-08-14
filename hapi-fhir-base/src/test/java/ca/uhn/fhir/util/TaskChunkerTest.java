@@ -45,8 +45,7 @@ public class TaskChunkerTest {
 
 	@Nonnull
 	private static List<Integer> newIntRangeList(int startInclusive, int endExclusive) {
-		List<Integer> input = IntStream.range(startInclusive, endExclusive).boxed().toList();
-		return input;
+		return IntStream.range(startInclusive, endExclusive).boxed().toList();
 	}
 
 	@Test
