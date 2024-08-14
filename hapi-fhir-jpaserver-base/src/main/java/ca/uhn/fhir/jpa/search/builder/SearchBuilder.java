@@ -111,6 +111,7 @@ import jakarta.persistence.Query;
 import jakarta.persistence.Tuple;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -141,6 +142,7 @@ import static ca.uhn.fhir.jpa.model.util.JpaConstants.UNDESIRED_RESOURCE_LINKAGE
 import static ca.uhn.fhir.jpa.search.builder.QueryStack.LOCATION_POSITION;
 import static ca.uhn.fhir.jpa.search.builder.QueryStack.SearchForIdsParams.with;
 import static java.util.Objects.requireNonNull;
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -331,8 +333,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		init(theParams, theSearchUuid, theRequestPartitionId);
 
 		if (checkUseHibernateSearch()) {
-			long count = myFulltextSearchSvc.count(myResourceName, theParams.clone());
-			return count;
+			return myFulltextSearchSvc.count(myResourceName, theParams.clone());
 		}
 
 		List<ISearchQueryExecutor> queries = createQuery(theParams.clone(), null, null, null, true, theRequest, null);
@@ -896,7 +897,9 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 						.anyMatch(t -> t instanceof ReferenceParam);
 	}
 
-	private List<Long> normalizeIdListForLastNInClause(List<Long> lastnResourceIds) {
+	private List<Long> normalizeIdListForLastNInClause(List<Long> theLastnResourceIds) {
+		List<Long> retVal = theLastnResourceIds;
+
 		/*
 		The following is a workaround to a known issue involving Hibernate. If queries are used with "in" clauses with large and varying
 		numbers of parameters, this can overwhelm Hibernate's QueryPlanCache and deplete heap space. See the following link for more info:
@@ -905,29 +908,47 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		Normalizing the number of parameters in the "in" clause stabilizes the size of the QueryPlanCache, so long as the number of
 		arguments never exceeds the maximum specified below.
 		*/
-		int listSize = lastnResourceIds.size();
+		int listSize = theLastnResourceIds.size();
 
 		if (listSize > 1 && listSize < 10) {
-			padIdListWithPlaceholders(lastnResourceIds, 10);
+			retVal = padIdListWithPlaceholders(theLastnResourceIds, 10);
 		} else if (listSize > 10 && listSize < 50) {
-			padIdListWithPlaceholders(lastnResourceIds, 50);
+			retVal = padIdListWithPlaceholders(theLastnResourceIds, 50);
 		} else if (listSize > 50 && listSize < 100) {
-			padIdListWithPlaceholders(lastnResourceIds, 100);
+			retVal = padIdListWithPlaceholders(theLastnResourceIds, 100);
 		} else if (listSize > 100 && listSize < 200) {
-			padIdListWithPlaceholders(lastnResourceIds, 200);
+			retVal = padIdListWithPlaceholders(theLastnResourceIds, 200);
 		} else if (listSize > 200 && listSize < 500) {
-			padIdListWithPlaceholders(lastnResourceIds, 500);
+			retVal = padIdListWithPlaceholders(theLastnResourceIds, 500);
 		} else if (listSize > 500 && listSize < 800) {
-			padIdListWithPlaceholders(lastnResourceIds, 800);
+			retVal = padIdListWithPlaceholders(theLastnResourceIds, 800);
 		}
 
-		return lastnResourceIds;
+		return retVal;
 	}
 
-	private void padIdListWithPlaceholders(List<Long> theIdList, int preferredListSize) {
-		while (theIdList.size() < preferredListSize) {
-			theIdList.add(-1L);
+	private List<Long> padIdListWithPlaceholders(List<Long> theIdList, int preferredListSize) {
+		List<Long> retVal = theIdList;
+
+		if (isUnmodifiableList(theIdList)) {
+			retVal = new ArrayList<>(preferredListSize);
+			retVal.addAll(theIdList);
 		}
+
+		while (retVal.size() < preferredListSize) {
+			retVal.add(-1L);
+		}
+
+		return retVal;
+	}
+
+	private <T> boolean isUnmodifiableList(List<T> theList) {
+		try {
+			theList.addAll(Collections.emptyList());
+		} catch (Exception e) {
+			return true;
+		}
+		return false;
 	}
 
 	private void createSort(QueryStack theQueryStack, SortSpec theSort, SearchParameterMap theParams) {
@@ -1251,7 +1272,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		Map<Long, Collection<ResourceTag>> tagMap = new HashMap<>();
 
 		// -- no tags
-		if (thePidList.size() == 0) return tagMap;
+		if (thePidList.isEmpty()) return tagMap;
 
 		// -- get all tags for the idList
 		Collection<ResourceTag> tagList = myResourceTagDao.findByResourceIds(thePidList);
@@ -1391,7 +1412,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		EntityManager entityManager = theParameters.getEntityManager();
 		Integer maxCount = theParameters.getMaxCount();
 		FhirContext fhirContext = theParameters.getFhirContext();
-		DateRangeParam lastUpdated = theParameters.getLastUpdated();
 		RequestDetails request = theParameters.getRequestDetails();
 		String searchIdOrDescription = theParameters.getSearchIdOrDescription();
 		List<String> desiredResourceTypes = theParameters.getDesiredResourceTypes();
@@ -1930,11 +1950,10 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		}
 		assert !targetResourceTypes.isEmpty();
 
-		Set<Long> identityHashesForTypes = targetResourceTypes.stream()
+		return targetResourceTypes.stream()
 				.map(type -> BaseResourceIndexedSearchParam.calculateHashIdentity(
 						myPartitionSettings, myRequestPartitionId, type, "url"))
 				.collect(Collectors.toSet());
-		return identityHashesForTypes;
 	}
 
 	private <T> List<Collection<T>> partition(Collection<T> theNextRoundMatches, int theMaxLoad) {
@@ -2514,7 +2533,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 		private void retrieveNextIteratorQuery() {
 			close();
-			if (myQueryList != null && myQueryList.size() > 0) {
+			if (isNotEmpty(myQueryList)) {
 				myResultsIterator = myQueryList.remove(0);
 				myHasNextIteratorQuery = true;
 			} else {

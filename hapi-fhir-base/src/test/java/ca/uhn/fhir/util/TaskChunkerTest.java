@@ -15,7 +15,6 @@ import java.util.function.Consumer;
 import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -62,6 +61,5 @@ public class TaskChunkerTest {
 	    // then
 	    assertEquals(List.of(List.of(1,2,3), List.of(4,5,6), List.of(7,8,9)), result);
 	}
-
 
 }

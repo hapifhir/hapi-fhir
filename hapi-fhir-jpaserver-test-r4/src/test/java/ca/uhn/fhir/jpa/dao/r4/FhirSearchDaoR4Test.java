@@ -1,8 +1,9 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.search.builder.ISearchQueryExecutor;
+import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.Constants;
@@ -12,6 +13,7 @@ import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
+import org.apache.commons.collections4.IteratorUtils;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
@@ -19,9 +21,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class FhirSearchDaoR4Test extends BaseJpaR4Test {
 
@@ -51,11 +55,11 @@ public class FhirSearchDaoR4Test extends BaseJpaR4Test {
 			patient.addName().addGiven(content).setFamily("hirasawa");
 			id1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless().getIdPartAsLong();
 		}
-		Long id2;
+
 		{
 			Patient patient = new Patient();
 			patient.addName().addGiven("mio").setFamily("akiyama");
-			id2 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless().getIdPartAsLong();
+			myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless().getIdPartAsLong();
 		}
 
 		SearchParameterMap params = new SearchParameterMap();
@@ -255,6 +259,42 @@ public class FhirSearchDaoR4Test extends BaseJpaR4Test {
 			List<JpaPid> found = mySearchDao.search(resourceName, map, SystemRequestDetails.newSystemRequestAllPartitions());
 			assertThat(JpaPid.toLongList(found)).isEmpty();
 		}
+	}
+
+	@Test
+	public void testNarrativeSearchScrolled() {
+		final int numberOfPatientsToCreate = SearchBuilder.getMaximumPageSize() + 10;
+		List<Long> patientIds = new ArrayList<>(numberOfPatientsToCreate);
+
+		{
+			Patient patient = new Patient();
+			patient.getText().setDivAsString("<div>AAAS<p>FOO</p> CCC    </div>");
+			patientIds.add(myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless().getIdPartAsLong());
+		}
+
+		{
+			Patient patient = new Patient();
+			patient.getText().setDivAsString("<div>AAAB<p>FOO</p> CCC    </div>");
+			myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless().getIdPartAsLong();
+		}
+		{
+			Patient patient = new Patient();
+			patient.getText().setDivAsString("<div>ZZYZXY</div>");
+			myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless().getIdPartAsLong();
+		}
+
+		SearchParameterMap map;
+
+		StringAndListParam content = new StringAndListParam();
+		content.addAnd(new StringOrListParam().addOr(new StringParam("AAAS")));
+
+		map = new SearchParameterMap();
+		map.add(Constants.PARAM_TEXT, content);
+
+		ISearchQueryExecutor found = mySearchDao.searchScrolled("Patient", map, SystemRequestDetails.newSystemRequestAllPartitions());
+		assertThat(IteratorUtils.toList(found)).containsExactlyInAnyOrderElementsOf(patientIds);
+
+
 	}
 
 }

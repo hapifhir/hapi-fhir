@@ -185,10 +185,12 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		return doSearch(theResourceName, theParams, null, theMaxResultsToFetch, theRequestDetails);
 	}
 
+	@Transactional
 	@Override
 	public ISearchQueryExecutor searchScrolled(
 			String theResourceType, SearchParameterMap theParams, RequestDetails theRequestDetails) {
-		// perform an offset search instead of a scroll one, which doesn't allow for offset
+		validateHibernateSearchIsEnabled();
+
 		SearchQueryOptionsStep<?, Long, SearchLoadingOptionsStep, ?, ?> searchQueryOptionsStep =
 				getSearchQueryOptionsStep(theResourceType, theParams, null);
 		logQuery(searchQueryOptionsStep, theRequestDetails);
