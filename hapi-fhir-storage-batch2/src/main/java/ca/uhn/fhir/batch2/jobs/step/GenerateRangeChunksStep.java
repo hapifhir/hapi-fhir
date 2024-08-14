@@ -26,12 +26,10 @@ import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.jobs.chunk.ChunkRangeJson;
-import ca.uhn.fhir.batch2.jobs.parameters.JobParameters;
 import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrl;
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrlJobParameters;
 import ca.uhn.fhir.util.Logs;
 import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
 import org.slf4j.Logger;
 import org.thymeleaf.util.StringUtils;
 
@@ -40,7 +38,8 @@ import java.util.List;
 
 import static ca.uhn.fhir.batch2.util.Batch2Utils.BATCH_START_DATE;
 
-public class GenerateRangeChunksStep<PT extends JobParameters> implements IFirstJobStepWorker<PT, ChunkRangeJson> {
+public class GenerateRangeChunksStep<PT extends PartitionedUrlJobParameters>
+		implements IFirstJobStepWorker<PT, ChunkRangeJson> {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 
 	@Nonnull
@@ -54,69 +53,26 @@ public class GenerateRangeChunksStep<PT extends JobParameters> implements IFirst
 		Date start = BATCH_START_DATE;
 		Date end = new Date();
 
-		// there are partitions configured in either of the following lists, which are both optional
-		// the following code considers all use-cases
-		// the logic can be simplified once PartitionedUrl.myRequestPartitionId is deprecated
-		// @see IJobPartitionProvider
-
-		List<RequestPartitionId> partitionIds = params.getRequestPartitionIds();
 		List<PartitionedUrl> partitionedUrls = params.getPartitionedUrls();
 
-		if (partitionIds.isEmpty()) {
-			if (partitionedUrls.isEmpty()) {
-				ChunkRangeJson chunkRangeJson = new ChunkRangeJson(start, end);
-				sendChunk(chunkRangeJson, theDataSink);
-				return RunOutcome.SUCCESS;
-			}
+		if (!partitionedUrls.isEmpty()) {
 			partitionedUrls.forEach(partitionedUrl -> {
-				String url = partitionedUrl.getUrl();
-				RequestPartitionId partitionId = partitionedUrl.getRequestPartitionId();
-				ChunkRangeJson chunkRangeJson =
-						new ChunkRangeJson(start, end).setUrl(url).setPartitionId(partitionId);
+				ChunkRangeJson chunkRangeJson = new ChunkRangeJson(start, end)
+						.setUrl(partitionedUrl.getUrl())
+						.setPartitionId(partitionedUrl.getRequestPartitionId());
 				sendChunk(chunkRangeJson, theDataSink);
 			});
 			return RunOutcome.SUCCESS;
 		}
 
-		partitionIds.forEach(partitionId -> {
-			if (partitionedUrls.isEmpty()) {
-				ChunkRangeJson chunkRangeJson = new ChunkRangeJson(start, end).setPartitionId(partitionId);
-				sendChunk(chunkRangeJson, theDataSink);
-				return;
-			}
-			partitionedUrls.forEach(partitionedUrl -> {
-				String url = partitionedUrl.getUrl();
-				RequestPartitionId urlPartitionId = partitionedUrl.getRequestPartitionId();
-				RequestPartitionId narrowPartitionId = determineNarrowPartitionId(partitionId, urlPartitionId);
-				ChunkRangeJson chunkRangeJson =
-						new ChunkRangeJson(start, end).setUrl(url).setPartitionId(narrowPartitionId);
-				sendChunk(chunkRangeJson, theDataSink);
-			});
-		});
-
+		ChunkRangeJson chunkRangeJson = new ChunkRangeJson(start, end);
+		sendChunk(chunkRangeJson, theDataSink);
 		return RunOutcome.SUCCESS;
-	}
-
-	private RequestPartitionId determineNarrowPartitionId(
-			@Nonnull RequestPartitionId theRequestPartitionId,
-			@Nullable RequestPartitionId theOtherRequestPartitionId) {
-		if (theOtherRequestPartitionId == null) {
-			return theRequestPartitionId;
-		}
-		if (theRequestPartitionId.isAllPartitions() && !theOtherRequestPartitionId.isAllPartitions()) {
-			return theOtherRequestPartitionId;
-		}
-		if (theRequestPartitionId.isDefaultPartition()
-				&& !theOtherRequestPartitionId.isDefaultPartition()
-				&& !theOtherRequestPartitionId.isAllPartitions()) {
-			return theOtherRequestPartitionId;
-		}
-		return theRequestPartitionId;
 	}
 
 	private void sendChunk(ChunkRangeJson theData, IJobDataSink<ChunkRangeJson> theDataSink) {
 		String url = theData.getUrl();
-		ourLog.info(
+		ourLog.trace(
 				"Creating chunks for [{}] from {} to {} for partition {}",
 				!StringUtils.isEmpty(url) ? url : "everything",
 				theData.getStart(),

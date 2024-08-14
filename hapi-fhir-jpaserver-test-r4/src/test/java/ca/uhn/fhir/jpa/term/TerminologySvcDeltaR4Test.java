@@ -61,7 +61,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		delta.addRootConcept("RootA", "Root A");
 		delta.addRootConcept("RootB", "Root B");
 		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo/cs", delta);
-		assertHierarchyContains(
+		assertHierarchyContainsExactly(
 			"RootA seq=0",
 			"RootB seq=0"
 		);
@@ -70,7 +70,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		delta.addRootConcept("RootC", "Root C");
 		delta.addRootConcept("RootD", "Root D");
 		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo/cs", delta);
-		assertHierarchyContains(
+		assertHierarchyContainsExactly(
 			"RootA seq=0",
 			"RootB seq=0",
 			"RootC seq=0",
@@ -104,7 +104,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		ourLog.info("Starting testAddHierarchyConcepts");
 
 		createNotPresentCodeSystem();
-		assertHierarchyContains();
+		assertHierarchyContainsExactly();
 
 		ourLog.info("Have created code system");
 		runInTransaction(() -> {
@@ -117,7 +117,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		delta.addRootConcept("RootA", "Root A");
 		delta.addRootConcept("RootB", "Root B");
 		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo/cs", delta);
-		assertHierarchyContains(
+		assertHierarchyContainsExactly(
 			"RootA seq=0",
 			"RootB seq=0"
 		);
@@ -139,7 +139,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 
 		myCaptureQueriesListener.logAllQueriesForCurrentThread();
 
-		assertHierarchyContains(
+		assertHierarchyContainsExactly(
 			"RootA seq=0",
 			" ChildAA seq=0",
 			" ChildAB seq=1",
@@ -151,7 +151,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 	@Test
 	public void testAddMoveConceptFromOneParentToAnother() {
 		createNotPresentCodeSystem();
-		assertHierarchyContains();
+		assertHierarchyContainsExactly();
 
 		UploadStatistics outcome;
 		CustomTerminologySet delta;
@@ -162,7 +162,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 			.addChild(TermConceptParentChildLink.RelationshipTypeEnum.ISA).setCode("ChildAAA").setDisplay("Child AAA");
 		delta.addRootConcept("RootB", "Root B");
 		outcome = myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo/cs", delta);
-		assertHierarchyContains(
+		assertHierarchyContainsExactly(
 			"RootA seq=0",
 			" ChildAA seq=0",
 			"  ChildAAA seq=0",
@@ -174,7 +174,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		delta.addRootConcept("RootB", "Root B")
 			.addChild(TermConceptParentChildLink.RelationshipTypeEnum.ISA).setCode("ChildAA").setDisplay("Child AA");
 		outcome = myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo/cs", delta);
-		assertHierarchyContains(
+		assertHierarchyContainsExactly(
 			"RootA seq=0",
 			" ChildAA seq=0",
 			"  ChildAAA seq=0",
@@ -195,7 +195,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 	@Test
 	public void testReAddingConceptsDoesntRecreateExistingLinks() {
 		createNotPresentCodeSystem();
-		assertHierarchyContains();
+		assertHierarchyContainsExactly();
 
 		UploadStatistics outcome;
 		CustomTerminologySet delta;
@@ -206,7 +206,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		delta.addRootConcept("RootA", "Root A")
 			.addChild(TermConceptParentChildLink.RelationshipTypeEnum.ISA).setCode("ChildAA").setDisplay("Child AA");
 		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo/cs", delta);
-		assertHierarchyContains(
+		assertHierarchyContainsExactly(
 			"RootA seq=0",
 			" ChildAA seq=0"
 		);
@@ -223,7 +223,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 			.addChild(TermConceptParentChildLink.RelationshipTypeEnum.ISA).setCode("ChildAA").setDisplay("Child AA")
 			.addChild(TermConceptParentChildLink.RelationshipTypeEnum.ISA).setCode("ChildAAA").setDisplay("Child AAA");
 		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo/cs", delta);
-		assertHierarchyContains(
+		assertHierarchyContainsExactly(
 			"RootA seq=0",
 			" ChildAA seq=0",
 			"  ChildAAA seq=0"
@@ -242,7 +242,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 			.addChild(TermConceptParentChildLink.RelationshipTypeEnum.ISA).setCode("ChildAAA").setDisplay("Child AAA")
 			.addChild(TermConceptParentChildLink.RelationshipTypeEnum.ISA).setCode("ChildAAAA").setDisplay("Child AAAA");
 		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo/cs", delta);
-		assertHierarchyContains(
+		assertHierarchyContainsExactly(
 			"RootA seq=0",
 			" ChildAA seq=0",
 			"  ChildAAA seq=0",
@@ -293,7 +293,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo", set);
 
 		// Check so far
-		assertHierarchyContains(
+		assertHierarchyContainsExactly(
 			"ParentA seq=0",
 			" ChildA seq=0"
 		);
@@ -306,7 +306,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo", set);
 
 		// Check so far
-		assertHierarchyContains(
+		assertHierarchyContainsExactly(
 			"ParentA seq=0",
 			" ChildA seq=0",
 			"  ChildAA seq=0"
@@ -331,7 +331,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo", set);
 
 		// Check so far
-		assertHierarchyContains(
+		assertHierarchyContainsExactly(
 			"ParentA seq=0",
 			" ChildA seq=0"
 		);
@@ -344,7 +344,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo", set);
 
 		// Check so far
-		assertHierarchyContains(
+		assertHierarchyContainsExactly(
 			"ParentA seq=0",
 			" ChildA seq=0",
 			"  ChildAA seq=0"
@@ -416,7 +416,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 			expectedHierarchy.add(expected);
 		}
 
-		assertHierarchyContains(expectedHierarchy.toArray(new String[0]));
+		assertHierarchyContainsExactly(expectedHierarchy.toArray(new String[0]));
 
 	}
 

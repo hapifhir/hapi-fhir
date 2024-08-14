@@ -33,8 +33,21 @@ import java.util.Date;
 
 public class StoredDetails implements IModelJson {
 
-	@JsonProperty("binaryContentId")
+	@JsonProperty(value = "binaryContentId")
 	private String myBinaryContentId;
+
+	/**
+	 * This field exists to fix a break that changing this property name caused.
+	 * in 7.2.0 we went from blobId to binaryContentId. However this did not consider installations using filesystem
+	 * mode storage in which the data on disk was not updated, and needed to be Serialized/Deserialized at runtime.
+	 * Existing stored details used `blobId`. This causes Jackson deserialization failures which are tough to recover
+	 * from without manually modifying all those stored details
+	 * on disk.
+	 * This field is a relic to support old blobs post-upgrade to 7.2.0. It is not ever surfaced to the user, and is proxied
+	 * into `myBinaryContentId` when needed.
+	 */
+	@JsonProperty(value = "blobId")
+	private String myBlobId;
 
 	@JsonProperty("bytes")
 	private long myBytes;
@@ -77,7 +90,7 @@ public class StoredDetails implements IModelJson {
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this)
-				.append("binaryContentId", myBinaryContentId)
+				.append("binaryContentId", getBinaryContentId())
 				.append("bytes", myBytes)
 				.append("contentType", myContentType)
 				.append("hash", myHash)
@@ -115,7 +128,11 @@ public class StoredDetails implements IModelJson {
 
 	@Nonnull
 	public String getBinaryContentId() {
-		return myBinaryContentId;
+		if (myBinaryContentId == null && myBlobId != null) {
+			return myBlobId;
+		} else {
+			return myBinaryContentId;
+		}
 	}
 
 	public StoredDetails setBinaryContentId(String theBinaryContentId) {
