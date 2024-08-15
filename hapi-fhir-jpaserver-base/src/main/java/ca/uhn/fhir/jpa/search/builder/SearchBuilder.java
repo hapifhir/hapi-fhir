@@ -566,8 +566,9 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			boolean theCount,
 			RequestDetails theRequest,
 			ArrayList<ISearchQueryExecutor> theQueries) {
+
 		if (thePids.size() < getMaximumPageSize()) {
-			normalizeIdListForInClause(thePids);
+			thePids = normalizeIdListForInClause(thePids);
 		}
 		createChunkedQuery(theParams, sort, theOffset, thePids.size(), theCount, theRequest, thePids, theQueries);
 	}
