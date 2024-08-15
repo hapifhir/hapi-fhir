@@ -2,7 +2,6 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
-
 import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
@@ -296,7 +295,7 @@ public class FhirSearchDaoR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testLuceneSearchQueryIntersectingJpaQuery() {
+	public void testLuceneNarrativeSearchQueryIntersectingJpaQuery() {
 		final int numberOfPatientsToCreate = SearchBuilder.getMaximumPageSize() + 10;
 		List<String> expectedActivePatientIds = new ArrayList<>(numberOfPatientsToCreate);
 
@@ -322,6 +321,41 @@ public class FhirSearchDaoR4Test extends BaseJpaR4Test {
 
 		map.add("active", tokenAndListParam);
 		map.add(Constants.PARAM_TEXT, new StringParam("AAAS"));
+
+		IBundleProvider searchResultBundle = myPatientDao.search(map, mySrd);
+		List<String> resourceIdsFromSearchResult = searchResultBundle.getAllResourceIds();
+
+		assertThat(resourceIdsFromSearchResult).containsExactlyInAnyOrderElementsOf(expectedActivePatientIds);
+	}
+
+	@Test
+	public void testLuceneContentSearchQueryIntersectingJpaQuery() {
+		final int numberOfPatientsToCreate = SearchBuilder.getMaximumPageSize() + 10;
+		final String patientFamilyName = "Flanders";
+		List<String> expectedActivePatientIds = new ArrayList<>(numberOfPatientsToCreate);
+
+		// create active and non-active patients with the same narrative
+		for (int i = 0; i < numberOfPatientsToCreate; i++)
+		{
+			Patient activePatient = new Patient();
+			activePatient.addName().setFamily(patientFamilyName);
+			activePatient.setActive(true);
+			String patientId = myPatientDao.create(activePatient, mySrd).getId().toUnqualifiedVersionless().getIdPart();
+			expectedActivePatientIds.add(patientId);
+
+			Patient nonActivePatient = new Patient();
+			nonActivePatient.addName().setFamily(patientFamilyName);
+			nonActivePatient.setActive(false);
+			myPatientDao.create(nonActivePatient, mySrd);
+		}
+
+		SearchParameterMap map = new SearchParameterMap().setLoadSynchronous(true);
+
+		TokenAndListParam tokenAndListParam = new TokenAndListParam();
+		tokenAndListParam.addAnd(new TokenOrListParam().addOr(new TokenParam().setValue("true")));
+
+		map.add("active", tokenAndListParam);
+		map.add(Constants.PARAM_CONTENT, new StringParam(patientFamilyName));
 
 		IBundleProvider searchResultBundle = myPatientDao.search(map, mySrd);
 		List<String> resourceIdsFromSearchResult = searchResultBundle.getAllResourceIds();
