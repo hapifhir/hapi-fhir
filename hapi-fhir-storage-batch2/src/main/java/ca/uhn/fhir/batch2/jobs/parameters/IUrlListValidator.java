@@ -27,7 +27,4 @@ import java.util.List;
 public interface IUrlListValidator {
 	@Nullable
 	List<String> validateUrls(@Nonnull List<String> theUrls);
-
-	@Nullable
-	List<String> validatePartitionedUrls(@Nonnull List<PartitionedUrl> thePartitionedUrls);
 }

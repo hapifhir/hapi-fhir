@@ -1216,7 +1216,8 @@ public class FhirInstanceValidatorR4BTest extends BaseValidationTestWithInlineMo
 				"</Observation>";
 		ValidationResult output = myFhirValidator.validateWithResult(input);
 		logResultsAndReturnAll(output);
-		assertEquals("The value provided ('notvalidcode') was not found in the value set 'ObservationStatus' (http://hl7.org/fhir/ValueSet/observation-status|4.3.0), and a code is required from this value set  (error message = Unknown code 'notvalidcode' for in-memory expansion of ValueSet 'http://hl7.org/fhir/ValueSet/observation-status')", output.getMessages().get(0).getMessage());
+		assertThat(output.getMessages().get(0).getMessage()).contains("Unknown code 'http://hl7.org/fhir/observation-status#notvalidcode'");
+		assertThat(output.getMessages().get(1).getMessage()).contains("The value provided ('notvalidcode') was not found in the value set 'ObservationStatus' (http://hl7.org/fhir/ValueSet/observation-status|4.3.0), and a code is required from this value set  (error message = Unknown code 'http://hl7.org/fhir/observation-status#notvalidcode' for in-memory expansion of ValueSet 'http://hl7.org/fhir/ValueSet/observation-status')");
 	}
 
 	@Test
@@ -1366,10 +1367,19 @@ public class FhirInstanceValidatorR4BTest extends BaseValidationTestWithInlineMo
 		input.getValueQuantity().setCode("Heck");
 		output = myFhirValidator.validateWithResult(input);
 		all = logResultsAndReturnNonInformationalOnes(output);
-		assertThat(all).hasSize(2);
-		assertThat(all.get(0).getMessage()).contains("The Coding provided (http://unitsofmeasure.org#Heck) was not found in the value set 'Vital Signs Units' (http://hl7.org/fhir/ValueSet/ucum-vitals-common|4.3.0)");
-		assertThat(all.get(1).getMessage()).contains("The value provided ('Heck') was not found in the value set 'Body Temperature Units'");
-
+		assertThat(all).hasSize(3);
+		// validate first error, in R4B (as opposed to R4) Observation.value.ofType(Quantity) has ValueSet binding,
+		// so first error has `Unknown code for ValueSet` error message
+		assertThat(all.get(0).getMessage()).contains("The Coding provided (http://unitsofmeasure.org#Heck) was not found in the value set 'Vital Signs Units' " +
+			"(http://hl7.org/fhir/ValueSet/ucum-vitals-common|4.3.0), and a code should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable). " +
+			" (error message = Unknown code 'http://unitsofmeasure.org#Heck' for in-memory expansion of ValueSet 'http://hl7.org/fhir/ValueSet/ucum-vitals-common')");
+		assertThat(all.get(0).getLocationString()).contains("Observation.value.ofType(Quantity)");
+		// validate second error
+		assertThat(all.get(1).getMessage()).contains("Error processing unit 'Heck': The unit 'Heck' is unknown' at position 0 (for 'http://unitsofmeasure.org#Heck')");
+		assertThat(all.get(1).getLocationString()).contains("Observation.value.ofType(Quantity).code");
+		// validate third error
+		assertThat(all.get(2).getMessage()).contains("The value provided ('Heck') was not found in the value set 'Body Temperature Units'");
+		assertThat(all.get(2).getLocationString()).contains("Observation.value.ofType(Quantity).code");
 	}
 
 	@Test
@@ -1480,8 +1490,9 @@ public class FhirInstanceValidatorR4BTest extends BaseValidationTestWithInlineMo
 			}""";
 		ValidationResult output = myFhirValidator.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
-		assertThat(errors.size()).as(errors.toString()).isEqualTo(2);
-		assertThat(errors.get(1).getMessage()).contains("The value provided ('BLAH') was not found in the value set 'CurrencyCode' (http://hl7.org/fhir/ValueSet/currencies|4.3.0), and a code is required from this value set");
+		assertThat(errors.size()).as(errors.toString()).isEqualTo(3);
+		assertThat(errors.get(1).getMessage()).contains("Unknown code 'urn:iso:std:iso:4217#BLAH'");
+		assertThat(errors.get(2).getMessage()).contains("The value provided ('BLAH') was not found in the value set 'CurrencyCode' (http://hl7.org/fhir/ValueSet/currencies|4.3.0), and a code is required from this value set");
 
 
 	}
