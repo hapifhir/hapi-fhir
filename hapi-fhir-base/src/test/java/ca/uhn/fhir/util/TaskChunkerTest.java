@@ -3,16 +3,21 @@ package ca.uhn.fhir.util;
 import jakarta.annotation.Nonnull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.times;
@@ -48,17 +53,29 @@ public class TaskChunkerTest {
 		return IntStream.range(startInclusive, endExclusive).boxed().toList();
 	}
 
-	@Test
-	void testIteratorChunk() {
+	@ParameterizedTest
+	@MethodSource("testIteratorChunkArguments")
+	void testIteratorChunk(List<Integer> theListToChunk, List<List<Integer>> theExpectedChunks) {
 	    // given
-		Iterator<Integer> iter = List.of(1,2,3,4,5,6,7,8,9).iterator();
+		Iterator<Integer> iter = theListToChunk.iterator();
 		ArrayList<List<Integer>> result = new ArrayList<>();
 
 	    // when
 		new TaskChunker<Integer>().chunk(iter, 3, result::add);
 
 	    // then
-	    assertEquals(List.of(List.of(1,2,3), List.of(4,5,6), List.of(7,8,9)), result);
+	    assertEquals(theExpectedChunks, result);
+	}
+
+	public static Stream<Arguments> testIteratorChunkArguments() {
+		return Stream.of(
+			Arguments.of(Collections.emptyList(), Collections.emptyList()),
+			Arguments.of(List.of(1), List.of(List.of(1))),
+			Arguments.of(List.of(1,2), List.of(List.of(1,2))),
+			Arguments.of(List.of(1,2,3), List.of(List.of(1,2,3))),
+			Arguments.of(List.of(1,2,3,4), List.of(List.of(1,2,3), List.of(4))),
+			Arguments.of(List.of(1,2,3,4,5,6,7,8,9), List.of(List.of(1,2,3), List.of(4,5,6), List.of(7,8,9)))
+		);
 	}
 
 }

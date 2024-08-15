@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.jpa.search.builder.ISearchQueryExecutor;
+
 import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
@@ -13,7 +13,9 @@ import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
-import org.apache.commons.collections4.IteratorUtils;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
@@ -262,39 +264,69 @@ public class FhirSearchDaoR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testNarrativeSearchScrolled() {
+	public void testSearchNarrativeWithLuceneSearch() {
 		final int numberOfPatientsToCreate = SearchBuilder.getMaximumPageSize() + 10;
-		List<Long> patientIds = new ArrayList<>(numberOfPatientsToCreate);
+		List<String> expectedActivePatientIds = new ArrayList<>(numberOfPatientsToCreate);
 
+		for (int i = 0; i < numberOfPatientsToCreate; i++)
 		{
 			Patient patient = new Patient();
 			patient.getText().setDivAsString("<div>AAAS<p>FOO</p> CCC    </div>");
-			patientIds.add(myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless().getIdPartAsLong());
+			expectedActivePatientIds.add(myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless().getIdPart());
 		}
 
 		{
 			Patient patient = new Patient();
 			patient.getText().setDivAsString("<div>AAAB<p>FOO</p> CCC    </div>");
-			myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless().getIdPartAsLong();
+			myPatientDao.create(patient, mySrd);
 		}
 		{
 			Patient patient = new Patient();
 			patient.getText().setDivAsString("<div>ZZYZXY</div>");
-			myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless().getIdPartAsLong();
+			myPatientDao.create(patient, mySrd);
 		}
 
-		SearchParameterMap map;
+		SearchParameterMap map = new SearchParameterMap().setLoadSynchronous(true);
+		map.add(Constants.PARAM_TEXT, new StringParam("AAAS"));
 
-		StringAndListParam content = new StringAndListParam();
-		content.addAnd(new StringOrListParam().addOr(new StringParam("AAAS")));
+		IBundleProvider searchResultBundle = myPatientDao.search(map, mySrd);
+		List<String> resourceIdsFromSearchResult = searchResultBundle.getAllResourceIds();
 
-		map = new SearchParameterMap();
-		map.add(Constants.PARAM_TEXT, content);
+		assertThat(resourceIdsFromSearchResult).containsExactlyInAnyOrderElementsOf(expectedActivePatientIds);
+	}
 
-		ISearchQueryExecutor found = mySearchDao.searchScrolled("Patient", map, SystemRequestDetails.newSystemRequestAllPartitions());
-		assertThat(IteratorUtils.toList(found)).containsExactlyInAnyOrderElementsOf(patientIds);
+	@Test
+	public void testLuceneSearchQueryIntersectingJpaQuery() {
+		final int numberOfPatientsToCreate = SearchBuilder.getMaximumPageSize() + 10;
+		List<String> expectedActivePatientIds = new ArrayList<>(numberOfPatientsToCreate);
 
+		// create active and non-active patients with the same narrative
+		for (int i = 0; i < numberOfPatientsToCreate; i++)
+		{
+			Patient activePatient = new Patient();
+			activePatient.getText().setDivAsString("<div>AAAS<p>FOO</p> CCC    </div>");
+			activePatient.setActive(true);
+			String patientId = myPatientDao.create(activePatient, mySrd).getId().toUnqualifiedVersionless().getIdPart();
+			expectedActivePatientIds.add(patientId);
 
+			Patient nonActivePatient = new Patient();
+			nonActivePatient.getText().setDivAsString("<div>AAAS<p>FOO</p> CCC    </div>");
+			nonActivePatient.setActive(false);
+			myPatientDao.create(nonActivePatient, mySrd);
+		}
+
+		SearchParameterMap map = new SearchParameterMap().setLoadSynchronous(true);
+
+		TokenAndListParam tokenAndListParam = new TokenAndListParam();
+		tokenAndListParam.addAnd(new TokenOrListParam().addOr(new TokenParam().setValue("true")));
+
+		map.add("active", tokenAndListParam);
+		map.add(Constants.PARAM_TEXT, new StringParam("AAAS"));
+
+		IBundleProvider searchResultBundle = myPatientDao.search(map, mySrd);
+		List<String> resourceIdsFromSearchResult = searchResultBundle.getAllResourceIds();
+
+		assertThat(resourceIdsFromSearchResult).containsExactlyInAnyOrderElementsOf(expectedActivePatientIds);
 	}
 
 }

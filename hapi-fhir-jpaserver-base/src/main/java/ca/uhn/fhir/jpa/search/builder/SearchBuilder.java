@@ -140,6 +140,7 @@ import java.util.stream.Collectors;
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.UNDESIRED_RESOURCE_LINKAGES_FOR_EVERYTHING_ON_PATIENT_INSTANCE;
 import static ca.uhn.fhir.jpa.search.builder.QueryStack.LOCATION_POSITION;
 import static ca.uhn.fhir.jpa.search.builder.QueryStack.SearchForIdsParams.with;
+import static ca.uhn.fhir.jpa.util.InClauseNormalizer.*;
 import static java.util.Objects.requireNonNull;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.defaultString;
@@ -566,7 +567,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			RequestDetails theRequest,
 			ArrayList<ISearchQueryExecutor> theQueries) {
 		if (thePids.size() < getMaximumPageSize()) {
-			normalizeIdListForLastNInClause(thePids);
+			normalizeIdListForInClause(thePids);
 		}
 		createChunkedQuery(theParams, sort, theOffset, thePids.size(), theCount, theRequest, thePids, theQueries);
 	}
@@ -890,61 +891,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				&& theParams.values().stream()
 						.flatMap(Collection::stream)
 						.flatMap(Collection::stream)
-						.anyMatch(t -> t instanceof ReferenceParam);
-	}
-
-	private List<Long> normalizeIdListForLastNInClause(List<Long> theLastnResourceIds) {
-		List<Long> retVal = theLastnResourceIds;
-
-		/*
-		The following is a workaround to a known issue involving Hibernate. If queries are used with "in" clauses with large and varying
-		numbers of parameters, this can overwhelm Hibernate's QueryPlanCache and deplete heap space. See the following link for more info:
-		https://stackoverflow.com/questions/31557076/spring-hibernate-query-plan-cache-memory-usage.
-
-		Normalizing the number of parameters in the "in" clause stabilizes the size of the QueryPlanCache, so long as the number of
-		arguments never exceeds the maximum specified below.
-		*/
-		int listSize = theLastnResourceIds.size();
-
-		if (listSize > 1 && listSize < 10) {
-			retVal = padIdListWithPlaceholders(theLastnResourceIds, 10);
-		} else if (listSize > 10 && listSize < 50) {
-			retVal = padIdListWithPlaceholders(theLastnResourceIds, 50);
-		} else if (listSize > 50 && listSize < 100) {
-			retVal = padIdListWithPlaceholders(theLastnResourceIds, 100);
-		} else if (listSize > 100 && listSize < 200) {
-			retVal = padIdListWithPlaceholders(theLastnResourceIds, 200);
-		} else if (listSize > 200 && listSize < 500) {
-			retVal = padIdListWithPlaceholders(theLastnResourceIds, 500);
-		} else if (listSize > 500 && listSize < 800) {
-			retVal = padIdListWithPlaceholders(theLastnResourceIds, 800);
-		}
-
-		return retVal;
-	}
-
-	private List<Long> padIdListWithPlaceholders(List<Long> theIdList, int preferredListSize) {
-		List<Long> retVal = theIdList;
-
-		if (isUnmodifiableList(theIdList)) {
-			retVal = new ArrayList<>(preferredListSize);
-			retVal.addAll(theIdList);
-		}
-
-		while (retVal.size() < preferredListSize) {
-			retVal.add(-1L);
-		}
-
-		return retVal;
-	}
-
-	private <T> boolean isUnmodifiableList(List<T> theList) {
-		try {
-			theList.addAll(Collections.emptyList());
-		} catch (Exception e) {
-			return true;
-		}
-		return false;
+						.anyMatch(ReferenceParam.class::isInstance);
 	}
 
 	private void createSort(QueryStack theQueryStack, SortSpec theSort, SearchParameterMap theParams) {
@@ -1179,7 +1126,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 		List<Long> versionlessPids = JpaPid.toLongList(thePids);
 		if (versionlessPids.size() < getMaximumPageSize()) {
-			versionlessPids = normalizeIdListForLastNInClause(versionlessPids);
+			versionlessPids = normalizeIdListForInClause(versionlessPids);
 		}
 
 		// -- get the resource from the searchView
