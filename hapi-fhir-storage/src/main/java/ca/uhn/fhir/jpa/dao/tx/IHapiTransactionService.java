@@ -105,19 +105,6 @@ public interface IHapiTransactionService {
 		return true;
 	}
 
-	/**
-	 * Returns {@literal true} if this transaction service will open a new
-	 * transaction when the request partition is for a different partition than
-	 * the currently executing partition.
-	 * <p>
-	 * This is an experimental API, subject to change in a future release.
-	 * </p>
-	 *
-	 * @since 7.4.0
-	 */
-	@Beta
-	boolean isRequiresNewTransactionWhenChangingPartitions();
-
 	interface IExecutionBuilder extends TransactionOperations {
 
 		IExecutionBuilder withIsolation(Isolation theIsolation);
