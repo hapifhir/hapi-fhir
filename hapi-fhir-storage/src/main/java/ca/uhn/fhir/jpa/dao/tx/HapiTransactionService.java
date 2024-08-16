@@ -283,9 +283,15 @@ public class HapiTransactionService implements IHapiTransactionService {
 		}
 	}
 
+	boolean isRequiresNewTransactionWhenChangingPartitions() {
+		return myTransactionPropagationWhenChangingPartitions == Propagation.REQUIRES_NEW;
+	}
+
 	public boolean isCompatiblePartition(
 			RequestPartitionId theRequestPartitionId, RequestPartitionId theOtherRequestPartitionId) {
 		return !myPartitionSettings.isPartitioningEnabled()
+				|| !isRequiresNewTransactionWhenChangingPartitions()
+				|| theRequestPartitionId == null | theOtherRequestPartitionId == null
 				|| Objects.equals(theRequestPartitionId, theOtherRequestPartitionId);
 	}
 
