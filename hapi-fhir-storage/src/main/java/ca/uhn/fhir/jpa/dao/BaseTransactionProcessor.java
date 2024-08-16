@@ -753,59 +753,15 @@ public abstract class BaseTransactionProcessor {
 		RequestPartitionId txPartitionIdAccumulator = null;
 
 		for (var nextEntry : theEntries) {
-			RequestPartitionId nextWriteEntryRequestPartitionId = null;
-			String verb = myVersionAdapter.getEntryRequestVerb(myContext, nextEntry);
-			if (isNotBlank(verb)) {
-				BundleEntryTransactionMethodEnum verbEnum = BundleEntryTransactionMethodEnum.valueOf(verb);
-				switch (verbEnum) {
-					case GET:
-						continue;
-					case DELETE: {
-						String requestUrl = myVersionAdapter.getEntryRequestUrl(nextEntry);
-						if (isNotBlank(requestUrl)) {
-							IdType id = new IdType(requestUrl);
-							String resourceType = id.getResourceType();
-							ReadPartitionIdRequestDetails details =
-									ReadPartitionIdRequestDetails.forDelete(resourceType, id);
-							nextWriteEntryRequestPartitionId =
-									myRequestPartitionHelperService.determineReadPartitionForRequest(
-											theRequestDetails, details);
-						}
-						break;
-					}
-					case PATCH: {
-						String requestUrl = myVersionAdapter.getEntryRequestUrl(nextEntry);
-						if (isNotBlank(requestUrl)) {
-							IdType id = new IdType(requestUrl);
-							String resourceType = id.getResourceType();
-							ReadPartitionIdRequestDetails details =
-									ReadPartitionIdRequestDetails.forPatch(resourceType, id);
-							nextWriteEntryRequestPartitionId =
-									myRequestPartitionHelperService.determineReadPartitionForRequest(
-											theRequestDetails, details);
-						}
-						break;
-					}
-					case POST:
-					case PUT: {
-						IBaseResource resource = myVersionAdapter.getResource(nextEntry);
-						if (resource != null) {
-							String resourceType = myContext.getResourceType(resource);
-							nextWriteEntryRequestPartitionId =
-									myRequestPartitionHelperService.determineCreatePartitionForRequest(
-											theRequestDetails, resource, resourceType);
-						}
-					}
-				}
-			}
+			RequestPartitionId nextEntryRequestPartitionId = getEntryRequestPartitionId(theRequestDetails, nextEntry);
 
-			if (nextWriteEntryRequestPartitionId == null) {
+			if (nextEntryRequestPartitionId == null) {
 				// continue
 			} else if (txPartitionIdAccumulator == null) {
-				txPartitionIdAccumulator = nextWriteEntryRequestPartitionId;
+				txPartitionIdAccumulator = nextEntryRequestPartitionId;
 			} else if (myHapiTransactionService.isCompatiblePartition(
-					txPartitionIdAccumulator, nextWriteEntryRequestPartitionId)) {
-				txPartitionIdAccumulator = txPartitionIdAccumulator.mergeIds(nextWriteEntryRequestPartitionId);
+					txPartitionIdAccumulator, nextEntryRequestPartitionId)) {
+				txPartitionIdAccumulator = txPartitionIdAccumulator.mergeIds(nextEntryRequestPartitionId);
 			} else {
 				String msg = myContext
 						.getLocalizer()
@@ -815,6 +771,57 @@ public abstract class BaseTransactionProcessor {
 		}
 
 		return txPartitionIdAccumulator;
+	}
+
+	private @javax.annotation.Nullable RequestPartitionId getEntryRequestPartitionId(
+			RequestDetails theRequestDetails, IBase nextEntry) {
+		RequestPartitionId nextWriteEntryRequestPartitionId = null;
+		String verb = myVersionAdapter.getEntryRequestVerb(myContext, nextEntry);
+		if (isNotBlank(verb)) {
+			BundleEntryTransactionMethodEnum verbEnum = BundleEntryTransactionMethodEnum.valueOf(verb);
+			switch (verbEnum) {
+				case GET:
+					nextWriteEntryRequestPartitionId = null;
+					break;
+				case DELETE: {
+					String requestUrl = myVersionAdapter.getEntryRequestUrl(nextEntry);
+					if (isNotBlank(requestUrl)) {
+						IdType id = new IdType(requestUrl);
+						String resourceType = id.getResourceType();
+						ReadPartitionIdRequestDetails details =
+								ReadPartitionIdRequestDetails.forDelete(resourceType, id);
+						nextWriteEntryRequestPartitionId =
+								myRequestPartitionHelperService.determineReadPartitionForRequest(
+										theRequestDetails, details);
+					}
+					break;
+				}
+				case PATCH: {
+					String requestUrl = myVersionAdapter.getEntryRequestUrl(nextEntry);
+					if (isNotBlank(requestUrl)) {
+						IdType id = new IdType(requestUrl);
+						String resourceType = id.getResourceType();
+						ReadPartitionIdRequestDetails details =
+								ReadPartitionIdRequestDetails.forPatch(resourceType, id);
+						nextWriteEntryRequestPartitionId =
+								myRequestPartitionHelperService.determineReadPartitionForRequest(
+										theRequestDetails, details);
+					}
+					break;
+				}
+				case POST:
+				case PUT: {
+					IBaseResource resource = myVersionAdapter.getResource(nextEntry);
+					if (resource != null) {
+						String resourceType = myContext.getResourceType(resource);
+						nextWriteEntryRequestPartitionId =
+								myRequestPartitionHelperService.determineCreatePartitionForRequest(
+										theRequestDetails, resource, resourceType);
+					}
+				}
+			}
+		}
+		return nextWriteEntryRequestPartitionId;
 	}
 
 	private boolean haveWriteOperationsHooks(RequestDetails theRequestDetails) {
