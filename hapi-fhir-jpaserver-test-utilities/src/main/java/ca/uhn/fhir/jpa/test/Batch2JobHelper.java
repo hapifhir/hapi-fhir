@@ -173,38 +173,41 @@ public class Batch2JobHelper {
 		return awaitJobHasStatus(theInstanceId, StatusEnum.ERRORED, StatusEnum.FAILED);
 	}
 
-	public void awaitJobHasStatusWithForcedMaintenanceRuns(String theInstanceId, StatusEnum theStatusEnum) {
+	public void awaitJobHasStatusWithForcedMaintenanceRuns(String theInstanceId, StatusEnum... theStatusEnums) {
 		AtomicInteger counter = new AtomicInteger();
+		Duration waitDuration = DEFAULT_WAIT_DURATION;
 		try {
 			await()
-				.atMost(DEFAULT_WAIT_DURATION)
+				.atMost(waitDuration)
 				.until(() -> {
 					counter.getAndIncrement();
 					forceRunMaintenancePass();
-					return hasStatus(theInstanceId, theStatusEnum);
+					return hasStatus(theInstanceId, theStatusEnums);
 				});
 		} catch (ConditionTimeoutException ex) {
 			StatusEnum status = getStatus(theInstanceId);
-			throw new RuntimeException(String.format(
+			fail(String.format(
 				"Job %s has state %s after %s timeout and %d checks",
 				theInstanceId,
 				status.name(),
-				DEFAULT_WAIT_DURATION,
+				waitDuration,
 				counter.get()
 			), ex);
 		}
 	}
 
 	public void awaitJobInProgress(String theInstanceId) {
+		Duration waitDuration = DEFAULT_WAIT_DURATION;
 		try {
 			await()
-				.atMost(DEFAULT_WAIT_DURATION)
+				.atMost(waitDuration)
 				.until(() -> checkStatusWithMaintenancePass(theInstanceId, StatusEnum.IN_PROGRESS));
 		} catch (ConditionTimeoutException ex) {
 			StatusEnum statusEnum = getStatus(theInstanceId);
-			String msg = String.format("Job %s still has status %s after 10 seconds.",
+			String msg = String.format("Job %s still has status %s after %s seconds.",
 				theInstanceId,
-				statusEnum.name());
+				statusEnum.name(),
+				waitDuration);
 			fail(msg);
 		}
 	}
