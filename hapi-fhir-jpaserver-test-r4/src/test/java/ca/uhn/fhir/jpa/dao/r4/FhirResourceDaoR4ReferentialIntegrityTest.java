@@ -1,19 +1,26 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import java.util.stream.Stream;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class FhirResourceDaoR4ReferentialIntegrityTest extends BaseJpaR4Test {
@@ -25,49 +32,138 @@ public class FhirResourceDaoR4ReferentialIntegrityTest extends BaseJpaR4Test {
 		myStorageSettings.setEnforceReferenceTargetTypes(new JpaStorageSettings().isEnforceReferenceTargetTypes());
 	}
 
-	@Test
-	public void testCreateUnknownReferenceFail() throws Exception {
+	@ParameterizedTest
+	@MethodSource("paramsProvider_withResourceType")
+	public void testRefIntegrity_withUnknownReferenceIds(boolean theIsEnforceRefIntegrityEnabled,
+					 JpaStorageSettings.ClientIdStrategyEnum theClientIdStrategy,
+					 String theReferenceId) {
+		myStorageSettings.setEnforceReferentialIntegrityOnWrite(theIsEnforceRefIntegrityEnabled);
+		myStorageSettings.setEnforceReferenceTargetTypes(theIsEnforceRefIntegrityEnabled);
+		myStorageSettings.setResourceClientIdStrategy(theClientIdStrategy);
 
 		Patient p = new Patient();
-		p.setManagingOrganization(new Reference("Organization/AAA"));
+		p.setManagingOrganization(new Reference(theReferenceId));
+
+		if (theIsEnforceRefIntegrityEnabled) {
+			try {
+				myPatientDao.create(p);
+				fail();
+			} catch (InvalidRequestException e) {
+				assertEquals(Msg.code(1094) + "Resource " + theReferenceId + " not found, specified in path: Patient.managingOrganization", e.getMessage());
+			}
+		} else {
+			IIdType id = myPatientDao.create(p).getId().toUnqualifiedVersionless();
+			p = myPatientDao.read(id);
+			assertEquals(theReferenceId, p.getManagingOrganization().getReference());
+		}
+	}
+
+	private static Stream<Arguments> paramsProvider_withResourceType() {
+		return Stream.of(
+			Arguments.of(true, JpaStorageSettings.ClientIdStrategyEnum.ALPHANUMERIC, "Organization/123"),
+			Arguments.of(true, JpaStorageSettings.ClientIdStrategyEnum.ALPHANUMERIC, "Organization/A123"),
+			Arguments.of(true, JpaStorageSettings.ClientIdStrategyEnum.ANY, "Organization/123"),
+			Arguments.of(true, JpaStorageSettings.ClientIdStrategyEnum.ANY, "Organization/A123"),
+			Arguments.of(false, JpaStorageSettings.ClientIdStrategyEnum.ALPHANUMERIC, "Organization/123"),
+			Arguments.of(false, JpaStorageSettings.ClientIdStrategyEnum.ALPHANUMERIC, "Organization/A123"),
+			Arguments.of(false, JpaStorageSettings.ClientIdStrategyEnum.ANY, "Organization/123"),
+			Arguments.of(false, JpaStorageSettings.ClientIdStrategyEnum.ANY, "Organization/A123")
+		);
+	}
+
+	@Test
+	public void testRefIntegrity_withReferenceIdOfAnotherResourceType() {
+		myStorageSettings.setResourceClientIdStrategy(JpaStorageSettings.ClientIdStrategyEnum.ALPHANUMERIC);
+
+		Observation obs = new Observation();
+		IIdType obsId = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
+
+		Patient p = new Patient();
+		p.setManagingOrganization(new Reference(new IdType("Organization", obsId.getIdPart())));
+
 		try {
 			myPatientDao.create(p);
 			fail();
-		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(1094) + "Resource Organization/AAA not found, specified in path: Patient.managingOrganization", e.getMessage());
+		} catch (UnprocessableEntityException e) {
+			assertEquals(Msg.code(1095) + "Resource contains reference to unknown resource ID Organization/" + obsId.getIdPart(), e.getMessage());
 		}
 
-	}
-
-	@Test
-	public void testCreateUnknownReferenceAllowed() {
 		myStorageSettings.setEnforceReferentialIntegrityOnWrite(false);
-
-		Patient p = new Patient();
-		p.setManagingOrganization(new Reference("Organization/AAA"));
 		IIdType id = myPatientDao.create(p).getId().toUnqualifiedVersionless();
 
 		p = myPatientDao.read(id);
-		assertEquals("Organization/AAA", p.getManagingOrganization().getReference());
-
+		assertEquals("Organization/" + obsId.getIdPart(), p.getManagingOrganization().getReference());
 	}
 
-	@Test
-	public void testCreateUnknownReferenceAllowed_NumericId() {
-		myStorageSettings.setEnforceReferentialIntegrityOnWrite(false);
-		myStorageSettings.setEnforceReferenceTargetTypes(false);
+	@ParameterizedTest
+	@MethodSource("paramsProvider_noResourceType")
+	public void testRefIntegrity_withValidReferenceId_shouldAlwaysSucceed(boolean theIsEnforceRefIntegrityEnabled,
+					  JpaStorageSettings.ClientIdStrategyEnum theClientIdStrategy,
+					  String theReferenceId) {
+		myStorageSettings.setEnforceReferentialIntegrityOnWrite(theIsEnforceRefIntegrityEnabled);
+		myStorageSettings.setEnforceReferenceTargetTypes(theIsEnforceRefIntegrityEnabled);
+		myStorageSettings.setResourceClientIdStrategy(theClientIdStrategy);
+
+		Organization obs = new Organization();
+		obs.setId(theReferenceId);
+		myOrganizationDao.update(obs, mySrd);
+		String qualifiedReferenceId = "Organization/" + theReferenceId;
 
 		Patient p = new Patient();
-		p.setManagingOrganization(new Reference("Organization/123"));
+		p.setManagingOrganization(new Reference(qualifiedReferenceId));
 		IIdType id = myPatientDao.create(p).getId().toUnqualifiedVersionless();
 
 		p = myPatientDao.read(id);
-		assertEquals("Organization/123", p.getManagingOrganization().getReference());
+		assertEquals(qualifiedReferenceId, p.getManagingOrganization().getReference());
+	}
 
+	private static Stream<Arguments> paramsProvider_noResourceType() {
+		return Stream.of(
+			Arguments.of(true, JpaStorageSettings.ClientIdStrategyEnum.ALPHANUMERIC, "A123"),
+			Arguments.of(true, JpaStorageSettings.ClientIdStrategyEnum.ANY, "123"),
+			Arguments.of(true, JpaStorageSettings.ClientIdStrategyEnum.ANY, "A123"),
+			Arguments.of(false, JpaStorageSettings.ClientIdStrategyEnum.ALPHANUMERIC, "A123"),
+			Arguments.of(false, JpaStorageSettings.ClientIdStrategyEnum.ANY, "123"),
+			Arguments.of(false, JpaStorageSettings.ClientIdStrategyEnum.ANY, "A123")
+		);
+	}
+
+	@ParameterizedTest
+	@MethodSource("paramsProvider_noResourceType")
+	public void testRefIntegrity_withReferenceIdOfDeletedResource(boolean theIsEnforceRefIntegrityEnabled,
+					  JpaStorageSettings.ClientIdStrategyEnum theClientIdStrategy,
+					  String theReferenceId) {
+		myStorageSettings.setEnforceReferentialIntegrityOnWrite(theIsEnforceRefIntegrityEnabled);
+		myStorageSettings.setEnforceReferenceTargetTypes(theIsEnforceRefIntegrityEnabled);
+		myStorageSettings.setResourceClientIdStrategy(theClientIdStrategy);
+
+		Organization obs = new Organization();
+		obs.setId(theReferenceId);
+		IIdType obsId = myOrganizationDao.update(obs, mySrd).getId();
+		String qualifiedReferenceId = "Organization/" + theReferenceId;
+
+		myOrganizationDao.delete(obsId, mySrd);
+
+		Patient p = new Patient();
+		p.setManagingOrganization(new Reference(qualifiedReferenceId));
+
+		if (theIsEnforceRefIntegrityEnabled) {
+			try {
+				myPatientDao.create(p);
+				fail();
+			} catch (InvalidRequestException e) {
+				assertEquals(Msg.code(1096) + "Resource " + qualifiedReferenceId + " is deleted, specified in path: Patient.managingOrganization", e.getMessage());
+			}
+		} else {
+			IIdType id = myPatientDao.create(p).getId().toUnqualifiedVersionless();
+
+			p = myPatientDao.read(id);
+			assertEquals(qualifiedReferenceId, p.getManagingOrganization().getReference());
+		}
 	}
 
 	@Test
-	public void testDeleteFail() throws Exception {
+	public void testDeleteFail() {
 		Organization o = new Organization();
 		o.setName("FOO");
 		IIdType oid = myOrganizationDao.create(o).getId().toUnqualifiedVersionless();
@@ -89,7 +185,7 @@ public class FhirResourceDaoR4ReferentialIntegrityTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testDeleteAllow() throws Exception {
+	public void testDeleteAllow() {
 		myStorageSettings.setEnforceReferentialIntegrityOnDelete(false);
 
 		Organization o = new Organization();

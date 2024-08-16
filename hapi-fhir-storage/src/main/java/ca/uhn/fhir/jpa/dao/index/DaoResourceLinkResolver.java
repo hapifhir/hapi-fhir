@@ -179,12 +179,17 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId> implements
 	 * Otherwise, return false when resource types do not match or resource was deleted
 	 * and return true if the resolved resource is valid.
 	 */
-	private boolean validateResolvedResourceOrThrow(String resourceType, IResourceLookup resolvedResource, IIdType targetResourceId, String idPart, String sourcePath) {
+	private boolean validateResolvedResourceOrThrow(
+			String resourceType,
+			IResourceLookup resolvedResource,
+			IIdType targetResourceId,
+			String idPart,
+			String sourcePath) {
 		if (!resourceType.equals(resolvedResource.getResourceType())) {
 			ourLog.error(
 					"Resource with PID {} was of type {} and wanted {}",
 					resolvedResource.getPersistentId(),
-				resourceType,
+					resourceType,
 					resolvedResource.getResourceType());
 			if (!myStorageSettings.isEnforceReferentialIntegrityOnWrite()) {
 				return false;
