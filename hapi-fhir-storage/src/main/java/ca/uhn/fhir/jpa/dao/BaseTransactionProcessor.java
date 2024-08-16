@@ -750,10 +750,10 @@ public abstract class BaseTransactionProcessor {
 			return RequestPartitionId.allPartitions();
 		}
 
-		RequestPartitionId retVal = null;
+		RequestPartitionId txPartitionIdAccumulator = null;
 
 		for (var nextEntry : theEntries) {
-			RequestPartitionId nextRequestPartitionId = null;
+			RequestPartitionId nextWriteEntryRequestPartitionId = null;
 			String verb = myVersionAdapter.getEntryRequestVerb(myContext, nextEntry);
 			if (isNotBlank(verb)) {
 				BundleEntryTransactionMethodEnum verbEnum = BundleEntryTransactionMethodEnum.valueOf(verb);
@@ -767,8 +767,9 @@ public abstract class BaseTransactionProcessor {
 							String resourceType = id.getResourceType();
 							ReadPartitionIdRequestDetails details =
 									ReadPartitionIdRequestDetails.forDelete(resourceType, id);
-							nextRequestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequest(
-									theRequestDetails, details);
+							nextWriteEntryRequestPartitionId =
+									myRequestPartitionHelperService.determineReadPartitionForRequest(
+											theRequestDetails, details);
 						}
 						break;
 					}
@@ -779,8 +780,9 @@ public abstract class BaseTransactionProcessor {
 							String resourceType = id.getResourceType();
 							ReadPartitionIdRequestDetails details =
 									ReadPartitionIdRequestDetails.forPatch(resourceType, id);
-							nextRequestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequest(
-									theRequestDetails, details);
+							nextWriteEntryRequestPartitionId =
+									myRequestPartitionHelperService.determineReadPartitionForRequest(
+											theRequestDetails, details);
 						}
 						break;
 					}
@@ -789,19 +791,21 @@ public abstract class BaseTransactionProcessor {
 						IBaseResource resource = myVersionAdapter.getResource(nextEntry);
 						if (resource != null) {
 							String resourceType = myContext.getResourceType(resource);
-							nextRequestPartitionId = myRequestPartitionHelperService.determineCreatePartitionForRequest(
-									theRequestDetails, resource, resourceType);
+							nextWriteEntryRequestPartitionId =
+									myRequestPartitionHelperService.determineCreatePartitionForRequest(
+											theRequestDetails, resource, resourceType);
 						}
 					}
 				}
 			}
 
-			if (nextRequestPartitionId == null) {
+			if (nextWriteEntryRequestPartitionId == null) {
 				// continue
-			} else if (retVal == null) {
-				retVal = nextRequestPartitionId;
-			} else if (myHapiTransactionService.isCompatiblePartition(retVal, nextRequestPartitionId)) {
-				retVal = retVal.mergeIds(nextRequestPartitionId);
+			} else if (txPartitionIdAccumulator == null) {
+				txPartitionIdAccumulator = nextWriteEntryRequestPartitionId;
+			} else if (myHapiTransactionService.isCompatiblePartition(
+					txPartitionIdAccumulator, nextWriteEntryRequestPartitionId)) {
+				txPartitionIdAccumulator = txPartitionIdAccumulator.mergeIds(nextWriteEntryRequestPartitionId);
 			} else {
 				String msg = myContext
 						.getLocalizer()
@@ -810,7 +814,7 @@ public abstract class BaseTransactionProcessor {
 			}
 		}
 
-		return retVal;
+		return txPartitionIdAccumulator;
 	}
 
 	private boolean haveWriteOperationsHooks(RequestDetails theRequestDetails) {
