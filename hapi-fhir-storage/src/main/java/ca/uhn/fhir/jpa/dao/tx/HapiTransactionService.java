@@ -271,7 +271,7 @@ public class HapiTransactionService implements IHapiTransactionService {
 		try {
 			ourExistingTransaction.set(this);
 
-			if (myTransactionPropagationWhenChangingPartitions == Propagation.REQUIRES_NEW) {
+			if (isRequiresNewTransactionWhenChangingPartitions()) {
 				return executeInNewTransactionForPartitionChange(
 						theExecutionBuilder, theCallback, requestPartitionId, previousRequestPartitionId);
 			} else {
