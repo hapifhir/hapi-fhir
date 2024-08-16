@@ -773,8 +773,8 @@ public abstract class BaseTransactionProcessor {
 		return txPartitionIdAccumulator;
 	}
 
-	private @javax.annotation.Nullable RequestPartitionId getEntryRequestPartitionId(
-			RequestDetails theRequestDetails, IBase nextEntry) {
+	@Nullable
+	private RequestPartitionId getEntryRequestPartitionId(RequestDetails theRequestDetails, IBase nextEntry) {
 		RequestPartitionId nextWriteEntryRequestPartitionId = null;
 		String verb = myVersionAdapter.getEntryRequestVerb(myContext, nextEntry);
 		if (isNotBlank(verb)) {
