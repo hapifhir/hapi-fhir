@@ -800,15 +800,13 @@ public abstract class BaseTransactionProcessor {
 				// continue
 			} else if (retVal == null) {
 				retVal = nextRequestPartitionId;
-			} else if (!retVal.equals(nextRequestPartitionId)) {
-				if (myHapiTransactionService.isRequiresNewTransactionWhenChangingPartitions()) {
-					String msg = myContext
-							.getLocalizer()
-							.getMessage(BaseTransactionProcessor.class, "multiplePartitionAccesses", theEntries.size());
-					throw new InvalidRequestException(Msg.code(2541) + msg);
-				} else {
-					retVal = retVal.mergeIds(nextRequestPartitionId);
-				}
+			} else if (myHapiTransactionService.isCompatiblePartition(retVal, nextRequestPartitionId)) {
+				retVal = retVal.mergeIds(nextRequestPartitionId);
+			} else {
+				String msg = myContext
+						.getLocalizer()
+						.getMessage(BaseTransactionProcessor.class, "multiplePartitionAccesses", theEntries.size());
+				throw new InvalidRequestException(Msg.code(2541) + msg);
 			}
 		}
 
