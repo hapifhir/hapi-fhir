@@ -37,6 +37,7 @@ public class FhirResourceDaoR4ReferentialIntegrityTest extends BaseJpaR4Test {
 	public void testRefIntegrity_withUnknownReferenceIds(boolean theIsEnforceRefIntegrityEnabled,
 					 JpaStorageSettings.ClientIdStrategyEnum theClientIdStrategy,
 					 String theReferenceId) {
+		// Given
 		myStorageSettings.setEnforceReferentialIntegrityOnWrite(theIsEnforceRefIntegrityEnabled);
 		myStorageSettings.setEnforceReferenceTargetTypes(theIsEnforceRefIntegrityEnabled);
 		myStorageSettings.setResourceClientIdStrategy(theClientIdStrategy);
@@ -46,19 +47,26 @@ public class FhirResourceDaoR4ReferentialIntegrityTest extends BaseJpaR4Test {
 
 		if (theIsEnforceRefIntegrityEnabled) {
 			try {
+				// When
 				myPatientDao.create(p);
 				fail();
 			} catch (InvalidRequestException e) {
+				// Then
 				assertEquals(Msg.code(1094) + "Resource " + theReferenceId + " not found, specified in path: Patient.managingOrganization", e.getMessage());
 			}
 		} else {
+			// Disabled ref integrity on write case: all POSTs should succeed
+			// When
 			IIdType id = myPatientDao.create(p).getId().toUnqualifiedVersionless();
+			// Then
 			p = myPatientDao.read(id);
 			assertEquals(theReferenceId, p.getManagingOrganization().getReference());
 		}
 	}
 
 	private static Stream<Arguments> paramsProvider_withResourceType() {
+		// theIsEnforceRefIntegrityEnabled, theClientIdStrategy, theReferenceId
+		// note: client ID is tested since resolving the resource reference is different depending on the strategy
 		return Stream.of(
 			Arguments.of(true, JpaStorageSettings.ClientIdStrategyEnum.ALPHANUMERIC, "Organization/123"),
 			Arguments.of(true, JpaStorageSettings.ClientIdStrategyEnum.ALPHANUMERIC, "Organization/A123"),
@@ -73,24 +81,31 @@ public class FhirResourceDaoR4ReferentialIntegrityTest extends BaseJpaR4Test {
 
 	@Test
 	public void testRefIntegrity_withReferenceIdOfAnotherResourceType() {
+		// Given
 		myStorageSettings.setResourceClientIdStrategy(JpaStorageSettings.ClientIdStrategyEnum.ALPHANUMERIC);
 
+		// Create Observation with some ID...
 		Observation obs = new Observation();
 		IIdType obsId = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
+		// And reference a non-existing Organization resource with the same ID as the Observation
 		Patient p = new Patient();
 		p.setManagingOrganization(new Reference(new IdType("Organization", obsId.getIdPart())));
 
 		try {
+			// When
 			myPatientDao.create(p);
 			fail();
 		} catch (UnprocessableEntityException e) {
+			// Then: identify that it is the wrong resource type, since ref integrity is enabled
 			assertEquals(Msg.code(1095) + "Resource contains reference to unknown resource ID Organization/" + obsId.getIdPart(), e.getMessage());
 		}
 
+		// Given: now disable referential integrity on write
 		myStorageSettings.setEnforceReferentialIntegrityOnWrite(false);
+		// When
 		IIdType id = myPatientDao.create(p).getId().toUnqualifiedVersionless();
-
+		// Then: this should now succeed
 		p = myPatientDao.read(id);
 		assertEquals("Organization/" + obsId.getIdPart(), p.getManagingOrganization().getReference());
 	}
@@ -100,6 +115,7 @@ public class FhirResourceDaoR4ReferentialIntegrityTest extends BaseJpaR4Test {
 	public void testRefIntegrity_withValidReferenceId_shouldAlwaysSucceed(boolean theIsEnforceRefIntegrityEnabled,
 					  JpaStorageSettings.ClientIdStrategyEnum theClientIdStrategy,
 					  String theReferenceId) {
+		// Given
 		myStorageSettings.setEnforceReferentialIntegrityOnWrite(theIsEnforceRefIntegrityEnabled);
 		myStorageSettings.setEnforceReferenceTargetTypes(theIsEnforceRefIntegrityEnabled);
 		myStorageSettings.setResourceClientIdStrategy(theClientIdStrategy);
@@ -111,13 +127,18 @@ public class FhirResourceDaoR4ReferentialIntegrityTest extends BaseJpaR4Test {
 
 		Patient p = new Patient();
 		p.setManagingOrganization(new Reference(qualifiedReferenceId));
+
+		// When
 		IIdType id = myPatientDao.create(p).getId().toUnqualifiedVersionless();
 
+		// Then
 		p = myPatientDao.read(id);
 		assertEquals(qualifiedReferenceId, p.getManagingOrganization().getReference());
 	}
 
 	private static Stream<Arguments> paramsProvider_noResourceType() {
+		// theIsEnforceRefIntegrityEnabled, theClientIdStrategy, theReferenceId
+		// note: client ID is tested since resolving the resource reference is different depending on the strategy
 		return Stream.of(
 			Arguments.of(true, JpaStorageSettings.ClientIdStrategyEnum.ALPHANUMERIC, "A123"),
 			Arguments.of(true, JpaStorageSettings.ClientIdStrategyEnum.ANY, "123"),
@@ -133,6 +154,7 @@ public class FhirResourceDaoR4ReferentialIntegrityTest extends BaseJpaR4Test {
 	public void testRefIntegrity_withReferenceIdOfDeletedResource(boolean theIsEnforceRefIntegrityEnabled,
 					  JpaStorageSettings.ClientIdStrategyEnum theClientIdStrategy,
 					  String theReferenceId) {
+		// Given
 		myStorageSettings.setEnforceReferentialIntegrityOnWrite(theIsEnforceRefIntegrityEnabled);
 		myStorageSettings.setEnforceReferenceTargetTypes(theIsEnforceRefIntegrityEnabled);
 		myStorageSettings.setResourceClientIdStrategy(theClientIdStrategy);
@@ -149,14 +171,19 @@ public class FhirResourceDaoR4ReferentialIntegrityTest extends BaseJpaR4Test {
 
 		if (theIsEnforceRefIntegrityEnabled) {
 			try {
+				// When
 				myPatientDao.create(p);
 				fail();
 			} catch (InvalidRequestException e) {
+				// Then
 				assertEquals(Msg.code(1096) + "Resource " + qualifiedReferenceId + " is deleted, specified in path: Patient.managingOrganization", e.getMessage());
 			}
 		} else {
+			// Disabled ref integrity on write case: all POSTs should succeed
+			// When
 			IIdType id = myPatientDao.create(p).getId().toUnqualifiedVersionless();
 
+			// Then
 			p = myPatientDao.read(id);
 			assertEquals(qualifiedReferenceId, p.getManagingOrganization().getReference());
 		}
