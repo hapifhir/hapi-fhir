@@ -30,6 +30,7 @@ import java.util.Set;
 public abstract class BaseSubscriptionSettings {
 	public static final String DEFAULT_EMAIL_FROM_ADDRESS = "noreply@unknown.com";
 	public static final String DEFAULT_WEBSOCKET_CONTEXT_PATH = "/websocket";
+	public static final String DEFAULT_RESTHOOK_ENDPOINTURL_VALIDATION_REGEX = "((((http?|https?)://))([-%()_.!~*';/?:@&=+$,A-Za-z0-9])+)";
 
 	private final Set<Subscription.SubscriptionChannelType> mySupportedSubscriptionTypes = new HashSet<>();
 	private String myEmailFromAddress = DEFAULT_EMAIL_FROM_ADDRESS;
@@ -44,6 +45,13 @@ public abstract class BaseSubscriptionSettings {
 	 * Prevents any non IN-MEMORY Search params from being created by users.
 	 */
 	private boolean myAllowOnlyInMemorySubscriptions = false;
+
+	/**
+	 * @since 7.6.0
+	 *
+	 * Regex To perform validation on the endpoint URL for Subscription of type RESTHOOK.
+	 */
+	private String myRestHookEndpointUrlValidationgRegex = DEFAULT_RESTHOOK_ENDPOINTURL_VALIDATION_REGEX;
 
 	/**
 	 * This setting indicates which subscription channel types are supported by the server.  Any subscriptions submitted
@@ -234,5 +242,23 @@ public abstract class BaseSubscriptionSettings {
 	 */
 	public void setTriggerSubscriptionsForNonVersioningChanges(boolean theTriggerSubscriptionsForNonVersioningChanges) {
 		myTriggerSubscriptionsForNonVersioningChanges = theTriggerSubscriptionsForNonVersioningChanges;
+	}
+
+	/**
+	 * Provides the regex expression to perform endpoint URL validation If rest-hook subscriptions are supported.
+	 *
+	 * @since 7.6.0
+	 */
+	public String getRestHookEndpointUrlValidationgRegex() {
+		return myRestHookEndpointUrlValidationgRegex;
+	}
+
+	/**
+	 * If rest-hook subscriptions are supported, the regex expression that will be used to validate the endpoint URL
+	 *
+	 * @since 7.6.0
+	 */
+	public void setRestHookEndpointUrlValidationgRegex(String theRestHookEndpointUrlValidationgRegex) {
+		myRestHookEndpointUrlValidationgRegex = theRestHookEndpointUrlValidationgRegex;
 	}
 }

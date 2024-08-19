@@ -20,10 +20,16 @@
 package ca.uhn.fhir.jpa.subscription.config;
 
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyEvaluator;
-import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionQueryValidator;
+import ca.uhn.fhir.jpa.subscription.submit.interceptor.validation.IChannelTypeValidator;
+import ca.uhn.fhir.jpa.subscription.submit.interceptor.validation.RestHookChannelValidator;
+import ca.uhn.fhir.jpa.subscription.submit.interceptor.validation.SubscriptionChannelTypeValidatorFactory;
+import ca.uhn.fhir.jpa.subscription.submit.interceptor.validation.SubscriptionQueryValidator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.util.List;
 
 @Configuration
 public class SubscriptionConfig {
@@ -31,5 +37,15 @@ public class SubscriptionConfig {
 	public SubscriptionQueryValidator subscriptionQueryValidator(
 			DaoRegistry theDaoRegistry, SubscriptionStrategyEvaluator theSubscriptionStrategyEvaluator) {
 		return new SubscriptionQueryValidator(theDaoRegistry, theSubscriptionStrategyEvaluator);
+	}
+
+	@Bean
+	public IChannelTypeValidator restHookChannelValidator(SubscriptionSettings theSubscriptionSettings){
+		return new RestHookChannelValidator(theSubscriptionSettings.getRestHookEndpointUrlValidationgRegex());
+	}
+
+	@Bean
+	public SubscriptionChannelTypeValidatorFactory SubscriptionChannelTypeValidatorFactory(List<IChannelTypeValidator> theValidorList){
+		return new SubscriptionChannelTypeValidatorFactory(theValidorList);
 	}
 }
