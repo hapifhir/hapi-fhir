@@ -8,5 +8,4 @@ public interface IChannelTypeValidator {
 	void validateChannelType(CanonicalSubscription theSubscription);
 
 	CanonicalSubscriptionChannelType getSubscriptionChannelType();
-
 }

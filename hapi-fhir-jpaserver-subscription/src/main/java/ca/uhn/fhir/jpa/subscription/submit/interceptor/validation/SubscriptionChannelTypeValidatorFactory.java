@@ -6,14 +6,14 @@ import jakarta.annotation.Nonnull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
 public class SubscriptionChannelTypeValidatorFactory {
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionChannelTypeValidatorFactory.class);
 
-	private Map<CanonicalSubscriptionChannelType, IChannelTypeValidator> myValidators = new HashMap<>();
+	private Map<CanonicalSubscriptionChannelType, IChannelTypeValidator> myValidators = new EnumMap<>(CanonicalSubscriptionChannelType.class);
 
 	public SubscriptionChannelTypeValidatorFactory(@Nonnull List<IChannelTypeValidator> theValidorList) {
 		theValidorList.forEach(this::addChannelTypeValidator);
@@ -31,7 +31,9 @@ public class SubscriptionChannelTypeValidatorFactory {
 		return new IChannelTypeValidator() {
 			@Override
 			public void validateChannelType(CanonicalSubscription theSubscription) {
-				ourLog.debug("No validator for channel type {} was registered, will perform no-op validation.", theChannelType);
+				ourLog.debug(
+						"No validator for channel type {} was registered, will perform no-op validation.",
+						theChannelType);
 			}
 
 			@Override
@@ -40,6 +42,4 @@ public class SubscriptionChannelTypeValidatorFactory {
 			}
 		};
 	}
-
-
 }

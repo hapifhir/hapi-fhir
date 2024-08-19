@@ -40,12 +40,13 @@ public class SubscriptionConfig {
 	}
 
 	@Bean
-	public IChannelTypeValidator restHookChannelValidator(SubscriptionSettings theSubscriptionSettings){
+	public IChannelTypeValidator restHookChannelValidator(SubscriptionSettings theSubscriptionSettings) {
 		return new RestHookChannelValidator(theSubscriptionSettings.getRestHookEndpointUrlValidationgRegex());
 	}
 
 	@Bean
-	public SubscriptionChannelTypeValidatorFactory SubscriptionChannelTypeValidatorFactory(List<IChannelTypeValidator> theValidorList){
+	public SubscriptionChannelTypeValidatorFactory subscriptionChannelTypeValidatorFactory(
+			List<IChannelTypeValidator> theValidorList) {
 		return new SubscriptionChannelTypeValidatorFactory(theValidorList);
 	}
 }

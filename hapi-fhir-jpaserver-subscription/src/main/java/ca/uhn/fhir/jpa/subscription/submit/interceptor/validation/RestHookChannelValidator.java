@@ -17,7 +17,7 @@ public class RestHookChannelValidator implements IChannelTypeValidator {
 	private final Pattern myEndpointUrlValidationPattern;
 
 	public RestHookChannelValidator(@Nonnull String theRestHookEndpointUrlValidatingRegex) {
-		myEndpointUrlValidationPattern  = Pattern.compile(theRestHookEndpointUrlValidatingRegex);
+		myEndpointUrlValidationPattern = Pattern.compile(theRestHookEndpointUrlValidatingRegex);
 	}
 
 	@Override
@@ -36,24 +36,21 @@ public class RestHookChannelValidator implements IChannelTypeValidator {
 
 		if (isBlank(endpointUrl)) {
 			throw new UnprocessableEntityException(
-				Msg.code(21) + "Rest-hook subscriptions must have Subscription.channel.endpoint defined");
+					Msg.code(21) + "Rest-hook subscriptions must have Subscription.channel.endpoint defined");
 		}
 
 		Matcher matcher = myEndpointUrlValidationPattern.matcher(endpointUrl);
 
 		if (!matcher.matches()) {
-			throw new UnprocessableEntityException(
-				Msg.code(2545) + "endpoint " + endpointUrl + " failed validation."
-			);
+			throw new UnprocessableEntityException(Msg.code(2545) + "endpoint " + endpointUrl + " failed validation.");
 		}
-
 	}
 
 	protected void validateChannelPayload(CanonicalSubscription theResource) {
 		if (!isBlank(theResource.getPayloadString())
-			&& EncodingEnum.forContentType(theResource.getPayloadString()) == null) {
+				&& EncodingEnum.forContentType(theResource.getPayloadString()) == null) {
 			throw new UnprocessableEntityException(Msg.code(1985) + "Invalid value for Subscription.channel.payload: "
-				+ theResource.getPayloadString());
+					+ theResource.getPayloadString());
 		}
 	}
 }

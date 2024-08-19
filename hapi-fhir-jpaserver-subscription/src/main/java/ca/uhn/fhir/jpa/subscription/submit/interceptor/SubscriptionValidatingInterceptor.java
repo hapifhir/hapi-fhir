@@ -40,7 +40,6 @@ import ca.uhn.fhir.jpa.subscription.submit.interceptor.validation.IChannelTypeVa
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.validation.SubscriptionChannelTypeValidatorFactory;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.validation.SubscriptionQueryValidator;
 import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -173,7 +172,7 @@ public class SubscriptionValidatingInterceptor {
 
 			try {
 				SubscriptionMatchingStrategy strategy = mySubscriptionStrategyEvaluator.determineStrategy(subscription);
-				if (!(SubscriptionMatchingStrategy.IN_MEMORY == strategy)
+				if (SubscriptionMatchingStrategy.IN_MEMORY != strategy
 						&& mySubscriptionSettings.isOnlyAllowInMemorySubscriptions()) {
 					throw new InvalidRequestException(
 							Msg.code(2367)
@@ -327,7 +326,8 @@ public class SubscriptionValidatingInterceptor {
 			throw new UnprocessableEntityException(Msg.code(20) + "Subscription.channel.type must be populated");
 		}
 
-		IChannelTypeValidator iChannelTypeValidator = mySubscriptionChannelTypeValidatorFactory.getValidatorForChannelType(theSubscription.getChannelType());
+		IChannelTypeValidator iChannelTypeValidator =
+				mySubscriptionChannelTypeValidatorFactory.getValidatorForChannelType(theSubscription.getChannelType());
 		iChannelTypeValidator.validateChannelType(theSubscription);
 	}
 
