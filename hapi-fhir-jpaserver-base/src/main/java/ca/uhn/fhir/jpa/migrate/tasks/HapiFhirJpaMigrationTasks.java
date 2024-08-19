@@ -49,6 +49,7 @@ import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.VersionEnum;
 import org.apache.commons.lang3.StringUtils;
+import org.intellij.lang.annotations.Language;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -1043,7 +1044,6 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 				.nullable()
 				.type(ColumnTypeEnum.STRING, 48)
 				.doNothing(); // This migration used add instead of modify, so was skipped.  See 20240722 for modify.
-
 		version.onTable(BulkImportJobEntity.HFJ_BLK_IMPORT_JOB)
 				.addColumn("20230215.2", BulkImportJobEntity.JOB_ID)
 				.nullable()
