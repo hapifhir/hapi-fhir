@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 6179
+title: "Previously, the $reindex operation would fail when using a custom partitioning interceptor which decides the partition 
+based on the resource type in the request. This has been fixed, such that we avoid retrieving the resource type from 
+the request, rather we use the urls provided as parameters to the operation to determine the partitions."
