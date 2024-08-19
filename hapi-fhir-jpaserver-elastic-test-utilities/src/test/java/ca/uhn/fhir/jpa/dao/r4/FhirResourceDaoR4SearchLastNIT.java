@@ -59,8 +59,6 @@ public class FhirResourceDaoR4SearchLastNIT extends BaseR4SearchLastN {
 	@Mock
 	private IHSearchEventListener mySearchEventListener;
 
-
-
 	@Test
 	public void testLastNChunking() {
 

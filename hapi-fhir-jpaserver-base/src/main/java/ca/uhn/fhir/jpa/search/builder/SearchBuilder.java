@@ -74,6 +74,7 @@ import ca.uhn.fhir.jpa.util.SqlQueryList;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
@@ -82,6 +83,8 @@ import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.param.BaseParamWithPrefix;
+import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -97,6 +100,7 @@ import ca.uhn.fhir.util.StringUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Streams;
+import com.google.common.collect.Lists;
 import com.healthmarketscience.sqlbuilder.Condition;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -123,6 +127,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -135,6 +140,9 @@ import java.util.stream.Collectors;
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.UNDESIRED_RESOURCE_LINKAGES_FOR_EVERYTHING_ON_PATIENT_INSTANCE;
 import static ca.uhn.fhir.jpa.search.builder.QueryStack.LOCATION_POSITION;
 import static ca.uhn.fhir.jpa.search.builder.QueryStack.SearchForIdsParams.with;
+import static ca.uhn.fhir.jpa.util.InClauseNormalizer.*;
+import static java.util.Objects.requireNonNull;
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -327,8 +335,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		init(theParams, theSearchUuid, theRequestPartitionId);
 
 		if (checkUseHibernateSearch()) {
-			long count = myFulltextSearchSvc.count(myResourceName, theParams.clone());
-			return count;
+			return myFulltextSearchSvc.count(myResourceName, theParams.clone());
 		}
 
 		List<ISearchQueryExecutor> queries = createQuery(theParams.clone(), null, null, null, true, theRequest, null);
@@ -399,8 +406,16 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				fulltextMatchIds = queryHibernateSearchForEverythingPids(theRequest);
 				resultCount = fulltextMatchIds.size();
 			} else {
-				fulltextExecutor = myFulltextSearchSvc.searchNotScrolled(
-						myResourceName, myParams, myMaxResultsToFetch, theRequest);
+				// todo performance MB - some queries must intersect with JPA (e.g. they have a chain, or we haven't
+				// enabled SP indexing).
+				// and some queries don't need JPA.  We only need the scroll when we need to intersect with JPA.
+				// It would be faster to have a non-scrolled search in this case, since creating the scroll requires
+				// extra work in Elastic.
+				// if (eligibleToSkipJPAQuery) fulltextExecutor = myFulltextSearchSvc.searchNotScrolled( ...
+
+				// we might need to intersect with JPA.  So we might need to traverse ALL results from lucene, not just
+				// a page.
+				fulltextExecutor = myFulltextSearchSvc.searchScrolled(myResourceName, myParams, theRequest);
 			}
 
 			if (fulltextExecutor == null) {
@@ -452,7 +467,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				// We break the pids into chunks that fit in the 1k limit for jdbc bind params.
 				new QueryChunker<Long>()
 						.chunk(
-								Streams.stream(fulltextExecutor).collect(Collectors.toList()),
+								fulltextExecutor,
+								SearchBuilder.getMaximumPageSize(),
 								t -> doCreateChunkedQueries(
 										theParams, t, theOffset, sort, theCountOnlyFlag, theRequest, queries));
 			}
@@ -555,8 +571,9 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			boolean theCount,
 			RequestDetails theRequest,
 			ArrayList<ISearchQueryExecutor> theQueries) {
+
 		if (thePids.size() < getMaximumPageSize()) {
-			normalizeIdListForLastNInClause(thePids);
+			thePids = normalizeIdListForInClause(thePids);
 		}
 		createChunkedQuery(theParams, sort, theOffset, thePids.size(), theCount, theRequest, thePids, theQueries);
 	}
@@ -880,41 +897,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				&& theParams.values().stream()
 						.flatMap(Collection::stream)
 						.flatMap(Collection::stream)
-						.anyMatch(t -> t instanceof ReferenceParam);
-	}
-
-	private List<Long> normalizeIdListForLastNInClause(List<Long> lastnResourceIds) {
-		/*
-		The following is a workaround to a known issue involving Hibernate. If queries are used with "in" clauses with large and varying
-		numbers of parameters, this can overwhelm Hibernate's QueryPlanCache and deplete heap space. See the following link for more info:
-		https://stackoverflow.com/questions/31557076/spring-hibernate-query-plan-cache-memory-usage.
-
-		Normalizing the number of parameters in the "in" clause stabilizes the size of the QueryPlanCache, so long as the number of
-		arguments never exceeds the maximum specified below.
-		*/
-		int listSize = lastnResourceIds.size();
-
-		if (listSize > 1 && listSize < 10) {
-			padIdListWithPlaceholders(lastnResourceIds, 10);
-		} else if (listSize > 10 && listSize < 50) {
-			padIdListWithPlaceholders(lastnResourceIds, 50);
-		} else if (listSize > 50 && listSize < 100) {
-			padIdListWithPlaceholders(lastnResourceIds, 100);
-		} else if (listSize > 100 && listSize < 200) {
-			padIdListWithPlaceholders(lastnResourceIds, 200);
-		} else if (listSize > 200 && listSize < 500) {
-			padIdListWithPlaceholders(lastnResourceIds, 500);
-		} else if (listSize > 500 && listSize < 800) {
-			padIdListWithPlaceholders(lastnResourceIds, 800);
-		}
-
-		return lastnResourceIds;
-	}
-
-	private void padIdListWithPlaceholders(List<Long> theIdList, int preferredListSize) {
-		while (theIdList.size() < preferredListSize) {
-			theIdList.add(-1L);
-		}
+						.anyMatch(ReferenceParam.class::isInstance);
 	}
 
 	private void createSort(QueryStack theQueryStack, SortSpec theSort, SearchParameterMap theParams) {
@@ -1149,7 +1132,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 		List<Long> versionlessPids = JpaPid.toLongList(thePids);
 		if (versionlessPids.size() < getMaximumPageSize()) {
-			versionlessPids = normalizeIdListForLastNInClause(versionlessPids);
+			versionlessPids = normalizeIdListForInClause(versionlessPids);
 		}
 
 		// -- get the resource from the searchView
@@ -1238,7 +1221,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		Map<Long, Collection<ResourceTag>> tagMap = new HashMap<>();
 
 		// -- no tags
-		if (thePidList.size() == 0) return tagMap;
+		if (thePidList.isEmpty()) return tagMap;
 
 		// -- get all tags for the idList
 		Collection<ResourceTag> tagList = myResourceTagDao.findByResourceIds(thePidList);
@@ -1378,7 +1361,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		EntityManager entityManager = theParameters.getEntityManager();
 		Integer maxCount = theParameters.getMaxCount();
 		FhirContext fhirContext = theParameters.getFhirContext();
-		DateRangeParam lastUpdated = theParameters.getLastUpdated();
 		RequestDetails request = theParameters.getRequestDetails();
 		String searchIdOrDescription = theParameters.getSearchIdOrDescription();
 		List<String> desiredResourceTypes = theParameters.getDesiredResourceTypes();
@@ -1917,11 +1899,10 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		}
 		assert !targetResourceTypes.isEmpty();
 
-		Set<Long> identityHashesForTypes = targetResourceTypes.stream()
+		return targetResourceTypes.stream()
 				.map(type -> BaseResourceIndexedSearchParam.calculateHashIdentity(
 						myPartitionSettings, myRequestPartitionId, type, "url"))
 				.collect(Collectors.toSet());
-		return identityHashesForTypes;
 	}
 
 	private <T> List<Collection<T>> partition(Collection<T> theNextRoundMatches, int theMaxLoad) {
@@ -2407,7 +2388,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 		private void retrieveNextIteratorQuery() {
 			close();
-			if (myQueryList != null && myQueryList.size() > 0) {
+			if (isNotEmpty(myQueryList)) {
 				myResultsIterator = myQueryList.remove(0);
 				myHasNextIteratorQuery = true;
 			} else {
