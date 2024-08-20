@@ -45,6 +45,7 @@ import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Consent;
 import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Media;
@@ -107,6 +108,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -126,6 +128,7 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 	private FhirValidator myFhirValidator;
 	private ArrayList<String> myValidConcepts;
 	private Set<String> myValidSystems = new HashSet<>();
+	private Set<String> myValidValueSets = new HashSet<>();
 	private Map<String, StructureDefinition> myStructureDefinitionMap = new HashMap<>();
 	private CachingValidationSupport myValidationSupport;
 	private IValidationSupport myMockSupport;
@@ -133,6 +136,10 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 	private void addValidConcept(String theSystem, String theCode) {
 		myValidSystems.add(theSystem);
 		myValidConcepts.add(theSystem + "___" + theCode);
+	}
+
+	private void addValidValueSet(String theValueSetUrl) {
+		myValidValueSets.add(theValueSetUrl);
 	}
 
 	/**
@@ -262,6 +269,16 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 				String argument = theInvocation.getArgument(1, String.class);
 				boolean retVal = myValidSystems.contains(argument);
 				ourLog.debug("isCodeSystemSupported({}) : {}", argument, retVal);
+				return retVal;
+			}
+		});
+
+		when(myMockSupport.isValueSetSupported(any(), nullable(String.class))).thenAnswer(new Answer<Boolean>() {
+			@Override
+			public Boolean answer(InvocationOnMock theInvocation) {
+				String argument = theInvocation.getArgument(1, String.class);
+				boolean retVal = myValidValueSets.contains(argument);
+				ourLog.debug("isValueSetSupported({}) : {}", argument, retVal);
 				return retVal;
 			}
 		});
@@ -856,6 +873,25 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 	}
 
 	@Test
+	public void testValidate_patientWithGenderCode_resolvesCodeSystemFromValueSet() {
+		// setup
+		Patient patient = new Patient();
+		patient.setGender(Enumerations.AdministrativeGender.MALE);
+
+		addValidConcept("http://hl7.org/fhir/administrative-gender", "male");
+		addValidValueSet("http://hl7.org/fhir/ValueSet/administrative-gender");
+
+		// execute
+		ValidationResult output = myFhirValidator.validateWithResult(patient);
+		logResultsAndReturnNonInformationalOnes(output);
+
+		// verify
+		assertTrue(output.isSuccessful());
+		verify(myMockSupport, times(1)).validateCodeInValueSet(any(), any(), eq("http://hl7.org/fhir/administrative-gender"), eq("male"), any(), any());
+		verify(myMockSupport, times(1)).validateCode(any(), any(), eq("http://hl7.org/fhir/administrative-gender"), eq("male"), any(), any());
+	}
+
+	@Test
 	public void testValidateProfileWithExtension() throws IOException, FHIRException {
 		PrePopulatedValidationSupport valSupport = new PrePopulatedValidationSupport(ourCtx);
 		DefaultProfileValidationSupport defaultSupport = new DefaultProfileValidationSupport(ourCtx);
@@ -1298,7 +1334,8 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 				"</Observation>";
 		ValidationResult output = myFhirValidator.validateWithResult(input);
 		logResultsAndReturnAll(output);
-		assertEquals("The value provided ('notvalidcode') was not found in the value set 'ObservationStatus' (http://hl7.org/fhir/ValueSet/observation-status|4.0.1), and a code is required from this value set  (error message = Unknown code 'notvalidcode' for in-memory expansion of ValueSet 'http://hl7.org/fhir/ValueSet/observation-status')", output.getMessages().get(0).getMessage());
+		assertThat(output.getMessages().get(0).getMessage()).contains("Unknown code 'http://hl7.org/fhir/observation-status#notvalidcode'");
+		assertThat(output.getMessages().get(1).getMessage()).contains("The value provided ('notvalidcode') was not found in the value set 'ObservationStatus' (http://hl7.org/fhir/ValueSet/observation-status|4.0.1), and a code is required from this value set  (error message = Unknown code 'http://hl7.org/fhir/observation-status#notvalidcode' for in-memory expansion of ValueSet 'http://hl7.org/fhir/ValueSet/observation-status')");
 	}
 
 	@Test
@@ -1488,10 +1525,18 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 		input.getValueQuantity().setCode("Heck");
 		output = myFhirValidator.validateWithResult(input);
 		all = logResultsAndReturnNonInformationalOnes(output);
-		assertThat(all).hasSize(2);
+		assertThat(all).hasSize(3);
+		// validate first error, it has similar message as second error, but location is different
+		// as in R4 (as opposed to R4B/R5) Observation.value.ofType(Quantity) has no ValueSet binding,
+		// there is no `Unknown code for ValueSet` error message
 		assertThat(all.get(0).getMessage()).contains("Error processing unit 'Heck': The unit 'Heck' is unknown' at position 0 (for 'http://unitsofmeasure.org#Heck')");
-		assertThat(all.get(1).getMessage()).contains("The value provided ('Heck') was not found in the value set 'Body Temperature Units'");
-
+		assertThat(all.get(0).getLocationString()).contains("Observation.value.ofType(Quantity)");
+		// validate second error, it has similar message as first error, but location is different
+		assertThat(all.get(1).getMessage()).contains("Error processing unit 'Heck': The unit 'Heck' is unknown' at position 0 (for 'http://unitsofmeasure.org#Heck')");
+		assertThat(all.get(1).getLocationString()).contains("Observation.value.ofType(Quantity).code");
+		// validate third error
+		assertThat(all.get(2).getMessage()).contains("The value provided ('Heck') was not found in the value set 'Body Temperature Units'");
+		assertThat(all.get(2).getLocationString()).contains("Observation.value.ofType(Quantity).code");
 	}
 
 	@Test
@@ -1600,9 +1645,10 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 			"}";
 		ValidationResult output = myFhirValidator.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
-		assertThat(errors.size()).as(errors.toString()).isEqualTo(2);
-		assertThat(errors.get(1).getMessage()).contains("The value provided ('BLAH') was not found in the value set 'CurrencyCode' (http://hl7.org/fhir/ValueSet/currencies|4.0.1)");
-		assertThat(errors.get(1).getMessage()).contains("error message = Unknown code \"urn:iso:std:iso:4217#BLAH\"");
+		assertThat(errors.size()).as(errors.toString()).isEqualTo(3);
+		assertThat(errors.get(1).getMessage()).contains("Unknown code 'urn:iso:std:iso:4217#BLAH'");
+		assertThat(errors.get(2).getMessage()).contains("The value provided ('BLAH') was not found in the value set 'CurrencyCode' (http://hl7.org/fhir/ValueSet/currencies|4.0.1)");
+		assertThat(errors.get(2).getMessage()).contains("error message = Unknown code \"urn:iso:std:iso:4217#BLAH\"");
 
 
 	}

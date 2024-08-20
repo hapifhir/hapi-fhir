@@ -26,7 +26,6 @@ import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.jobs.chunk.ChunkRangeJson;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.batch2.jobs.parameters.UrlListValidator;
-import ca.uhn.fhir.batch2.jobs.parameters.UrlPartitioner;
 import ca.uhn.fhir.batch2.jobs.step.GenerateRangeChunksStep;
 import ca.uhn.fhir.batch2.jobs.step.LoadIdsStep;
 import ca.uhn.fhir.batch2.model.JobDefinition;
@@ -90,8 +89,7 @@ public class ReindexAppCtx {
 	public ReindexProvider reindexProvider(
 			FhirContext theFhirContext,
 			IJobCoordinator theJobCoordinator,
-			IJobPartitionProvider theJobPartitionHandler,
-			UrlPartitioner theUrlPartitioner) {
-		return new ReindexProvider(theFhirContext, theJobCoordinator, theJobPartitionHandler, theUrlPartitioner);
+			IJobPartitionProvider theJobPartitionHandler) {
+		return new ReindexProvider(theFhirContext, theJobCoordinator, theJobPartitionHandler);
 	}
 }

@@ -1,6 +1,5 @@
-package ca.uhn.fhir.jpa.delete.job;
+package ca.uhn.fhir.jpa.reindex;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexAppCtx;
@@ -41,17 +40,17 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 @SuppressWarnings("SqlDialectInspection")
 public class ReindexJobTest extends BaseJpaR4Test {
 
 	@Autowired
 	private IJobCoordinator myJobCoordinator;
-
 	@Autowired
 	private IJobPersistence myJobPersistence;
 

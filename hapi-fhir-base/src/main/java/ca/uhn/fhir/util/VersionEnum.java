@@ -154,6 +154,8 @@ public enum VersionEnum {
 
 	V7_1_0,
 	V7_2_0,
+	V7_2_1,
+	V7_2_2,
 
 	V7_3_0,
 	V7_4_0,

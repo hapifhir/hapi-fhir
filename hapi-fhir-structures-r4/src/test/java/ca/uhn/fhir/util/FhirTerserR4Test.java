@@ -21,6 +21,7 @@ import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.MarkdownType;
 import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.MedicationAdministration;
@@ -28,6 +29,7 @@ import org.hl7.fhir.r4.model.MedicationRequest;
 import org.hl7.fhir.r4.model.Money;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Patient.LinkType;
 import org.hl7.fhir.r4.model.Practitioner;
@@ -1526,6 +1528,27 @@ public class FhirTerserR4Test {
 			retVal.add(next.getValue());
 		}
 		return retVal;
+	}
+
+	@Test
+	void copyingAndParsingCreatesDuplicateContainedResources() {
+		var input = new Library();
+		var params = new Parameters();
+		var id = "#expansion-parameters-ecr";
+		params.setId(id);
+		params.addParameter("system-version", new StringType("test2"));
+		var paramsExt = new Extension();
+		paramsExt.setUrl("test").setValue(new Reference(id));
+		input.addContained(params);
+		input.addExtension(paramsExt);
+		final var parser = FhirContext.forR4Cached().newJsonParser();
+		var stringified = parser.encodeResourceToString(input);
+		var parsed = parser.parseResource(stringified);
+		var copy = ((Library) parsed).copy();
+		assertEquals(1, copy.getContained().size());
+		var stringifiedCopy = parser.encodeResourceToString(copy);
+		var parsedCopy = parser.parseResource(stringifiedCopy);
+		assertEquals(1, ((Library) parsedCopy).getContained().size());
 	}
 
 	/**

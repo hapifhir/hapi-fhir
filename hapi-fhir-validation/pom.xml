@@ -312,7 +312,6 @@
 		<dependency>
 			<groupId>org.hl7.fhir.testcases</groupId>
 			<artifactId>fhir-test-cases</artifactId>
-			<version>1.5.5-SNAPSHOT</version>
 			<scope>test</scope>
 		</dependency>
 

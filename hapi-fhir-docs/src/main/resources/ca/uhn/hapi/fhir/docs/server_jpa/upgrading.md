@@ -31,6 +31,12 @@ Note that the Oracle JDBC drivers are not distributed in the Maven Central repos
 java -cp hapi-fhir-cli.jar ca.uhn.fhir.cli.App migrate-database -d ORACLE_12C -u "[url]" -n "[username]" -p "[password]"
 ```
 
+# Oracle and Sql Server Locking Note
+
+Some versions of Oracle and Sql Server (e.g. Oracle Standard or Sql Server Standard) do NOT support adding or removing an index without locking the underlying table.
+If you run migrations while these systems are running,
+they will have unavoidable long pauses in activity during these changes.
+
 ## Migrating 3.4.0 to 3.5.0+
 
 As of HAPI FHIR 3.5.0 a new mechanism for creating the JPA index tables (HFJ_SPIDX_xxx) has been implemented. This new mechanism uses hashes in place of large multi-column indexes. This improves both lookup times as well as required storage space. This change also paves the way for future ability to provide efficient multi-tenant searches (which is not yet implemented but is planned as an incremental improvement).

@@ -31,7 +31,6 @@ import ca.uhn.fhir.rest.api.server.IPreResourceShowDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
-import ca.uhn.fhir.rest.server.interceptor.consent.ConsentInterceptor;
 import ca.uhn.fhir.util.BundleUtil;
 import com.google.common.collect.Lists;
 import jakarta.annotation.Nonnull;
@@ -508,8 +507,7 @@ public class AuthorizationInterceptor implements IRuleApplier {
 		}
 
 		// Don't check the value twice
-		IdentityHashMap<IBaseResource, Boolean> alreadySeenMap =
-				ConsentInterceptor.getAlreadySeenResourcesMap(theRequestDetails, myRequestSeenResourcesKey);
+		IdentityHashMap<IBaseResource, Boolean> alreadySeenMap = getAlreadySeenResourcesMap(theRequestDetails);
 		if (alreadySeenMap.putIfAbsent(theResponseObject, Boolean.TRUE) != null) {
 			return;
 		}
@@ -677,5 +675,16 @@ public class AuthorizationInterceptor implements IRuleApplier {
 		}
 
 		return theResource.getIdElement().getResourceType();
+	}
+
+	@SuppressWarnings("unchecked")
+	private IdentityHashMap<IBaseResource, Boolean> getAlreadySeenResourcesMap(RequestDetails theRequestDetails) {
+		IdentityHashMap<IBaseResource, Boolean> alreadySeenResources = (IdentityHashMap<IBaseResource, Boolean>)
+				theRequestDetails.getUserData().get(myRequestSeenResourcesKey);
+		if (alreadySeenResources == null) {
+			alreadySeenResources = new IdentityHashMap<>();
+			theRequestDetails.getUserData().put(myRequestSeenResourcesKey, alreadySeenResources);
+		}
+		return alreadySeenResources;
 	}
 }
