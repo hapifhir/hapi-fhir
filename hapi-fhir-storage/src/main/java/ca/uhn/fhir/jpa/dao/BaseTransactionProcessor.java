@@ -750,27 +750,24 @@ public abstract class BaseTransactionProcessor {
 			return RequestPartitionId.allPartitions();
 		}
 
-		RequestPartitionId txPartitionIdAccumulator = null;
+		return theEntries.stream()
+			.map(e->getEntryRequestPartitionId(theRequestDetails,e))
+			.reduce(null, (accumulator, nextPartition) -> {
+				if (accumulator == null) {
+					return nextPartition;
+				} else if (nextPartition == null) {
+					return accumulator;
+				} else {
+					if (!myHapiTransactionService.isCompatiblePartition(accumulator, nextPartition)) {
+						String msg = myContext
+							.getLocalizer()
+							.getMessage(BaseTransactionProcessor.class, "multiplePartitionAccesses", theEntries.size());
+						throw new InvalidRequestException(Msg.code(2541) + msg);
+					}
+					return accumulator.mergeIds(nextPartition);
+				}
+			});
 
-		for (var nextEntry : theEntries) {
-			RequestPartitionId nextEntryRequestPartitionId = getEntryRequestPartitionId(theRequestDetails, nextEntry);
-
-			if (nextEntryRequestPartitionId == null) {
-				// continue
-			} else if (txPartitionIdAccumulator == null) {
-				txPartitionIdAccumulator = nextEntryRequestPartitionId;
-			} else if (myHapiTransactionService.isCompatiblePartition(
-					txPartitionIdAccumulator, nextEntryRequestPartitionId)) {
-				txPartitionIdAccumulator = txPartitionIdAccumulator.mergeIds(nextEntryRequestPartitionId);
-			} else {
-				String msg = myContext
-						.getLocalizer()
-						.getMessage(BaseTransactionProcessor.class, "multiplePartitionAccesses", theEntries.size());
-				throw new InvalidRequestException(Msg.code(2541) + msg);
-			}
-		}
-
-		return txPartitionIdAccumulator;
 	}
 
 	@Nullable
