@@ -196,41 +196,17 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	@Override
 	public IFetchConformanceUntyped capabilities() {
-		return capabilities(ClientType.LEGACY);
-	}
-
-	@Override
-	public IFetchConformanceUntyped capabilities(ClientType theClientType) {
-		if (theClientType == ClientType.PRESERVED) {
-			return new FetchConformanceInternal(myClient);
-		}
-		return new FetchConformanceInternal(null);
+		return new FetchConformanceInternal(myClient);
 	}
 
 	@Override
 	public ICreate create() {
-		return create(ClientType.LEGACY);
-	}
-
-	@Override
-	public ICreate create(ClientType theClientType) {
-		if (theClientType == ClientType.PRESERVED) {
-			return new CreateInternal(myClient);
-		}
-		return new CreateInternal(null);
+		return new CreateInternal(myClient);
 	}
 
 	@Override
 	public IDelete delete() {
-		return delete(ClientType.LEGACY);
-	}
-
-	@Override
-	public IDelete delete(ClientType theClientType) {
-		if (theClientType == ClientType.PRESERVED) {
-			return new DeleteInternal(myClient);
-		}
-		return new DeleteInternal(null);
+		return new DeleteInternal(myClient);
 	}
 
 	private <T extends IBaseResource> T doReadOrVRead(
@@ -316,15 +292,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	@Override
 	public IFetchConformanceUntyped fetchConformance() {
-		return fetchConformance(ClientType.LEGACY);
-	}
-
-	@Override
-	public IFetchConformanceUntyped fetchConformance(ClientType theClientType) {
-		if (theClientType == ClientType.PRESERVED) {
-			return new FetchConformanceInternal(myClient);
-		}
-		return new FetchConformanceInternal(null);
+		return new FetchConformanceInternal(myClient);
 	}
 
 	@Override
@@ -357,15 +325,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	@Override
 	public IHistory history() {
-		return history(ClientType.LEGACY);
-	}
-
-	@Override
-	public IHistory history(ClientType theClientType) {
-		if (theClientType == ClientType.PRESERVED) {
-			return new HistoryInternal(myClient);
-		}
-		return new HistoryInternal(null);
+		return new HistoryInternal(myClient);
 	}
 
 	/**
@@ -386,67 +346,27 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	@Override
 	public IGetPage loadPage() {
-		return loadPage(ClientType.LEGACY);
-	}
-
-	@Override
-	public IGetPage loadPage(ClientType theClientType) {
-		if (theClientType == ClientType.PRESERVED) {
-			return new LoadPageInternal(myClient);
-		}
-		return new LoadPageInternal(null);
+		return new LoadPageInternal(myClient);
 	}
 
 	@Override
 	public IMeta meta() {
-		return meta(ClientType.LEGACY);
-	}
-
-	@Override
-	public IMeta meta(ClientType theClientType) {
-		if (theClientType == ClientType.PRESERVED) {
-			return new MetaInternal(myClient);
-		}
-		return new MetaInternal(null);
+		return new MetaInternal(myClient);
 	}
 
 	@Override
 	public IOperation operation() {
-		return operation(ClientType.LEGACY);
-	}
-
-	@Override
-	public IOperation operation(ClientType theClientType) {
-		if (theClientType == ClientType.PRESERVED) {
-			return new OperationInternal(myClient);
-		}
-		return new OperationInternal(null);
+		return new OperationInternal(myClient);
 	}
 
 	@Override
 	public IPatch patch() {
-		return patch(ClientType.LEGACY);
-	}
-
-	@Override
-	public IPatch patch(ClientType theClientType) {
-		if (theClientType == ClientType.PRESERVED && myClient != null) {
-			return new PatchInternal(myClient);
-		}
-		return new PatchInternal(null);
+		return new PatchInternal(myClient);
 	}
 
 	@Override
 	public IRead read() {
-		return read(ClientType.LEGACY);
-	}
-
-	@Override
-	public IRead read(ClientType theClientType) {
-		if (theClientType == ClientType.PRESERVED && myClient != null) {
-			return new ReadInternal(myClient);
-		}
-		return new ReadInternal(null);
+		return new ReadInternal(myClient);
 	}
 
 	@Override
@@ -480,17 +400,8 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	@Override
-	public IUntypedQuery search(ClientType theClientType) {
-		if (theClientType == ClientType.PRESERVED) {
-			return new SearchInternal<>(myClient);
-		}
-		return new SearchInternal<>(null);
-	}
-
-	@SuppressWarnings({"rawtypes", "unchecked"})
-	@Override
 	public IUntypedQuery search() {
-		return search(ClientType.LEGACY);
+		return new SearchInternal<>(myClient);
 	}
 
 	private String toResourceName(Class<? extends IBaseResource> theType) {
@@ -499,28 +410,12 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	@Override
 	public ITransaction transaction() {
-		return transaction(ClientType.LEGACY);
-	}
-
-	@Override
-	public ITransaction transaction(ClientType theClientType) {
-		if (theClientType == ClientType.PRESERVED) {
-			return new TransactionInternal(myClient);
-		}
-		return new TransactionInternal(null);
+		return new TransactionInternal(myClient);
 	}
 
 	@Override
 	public IUpdate update() {
-		return update(ClientType.LEGACY);
-	}
-
-	@Override
-	public IUpdate update(ClientType theClientType) {
-		if (theClientType == ClientType.PRESERVED) {
-			return new UpdateInternal(myClient);
-		}
-		return new UpdateInternal(null);
+		return new UpdateInternal(myClient);
 	}
 
 	@Override
@@ -543,15 +438,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	@Override
 	public IValidate validate() {
-		return validate(ClientType.LEGACY);
-	}
-
-	@Override
-	public IValidate validate(ClientType theClientType) {
-		if (theClientType == ClientType.PRESERVED) {
-			return new ValidateInternal(myClient);
-		}
-		return new ValidateInternal(null);
+		return new ValidateInternal(myClient);
 	}
 
 	@Override
