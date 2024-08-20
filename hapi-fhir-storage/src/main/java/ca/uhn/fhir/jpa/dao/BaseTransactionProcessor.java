@@ -757,17 +757,14 @@ public abstract class BaseTransactionProcessor {
 						return nextPartition;
 					} else if (nextPartition == null) {
 						return accumulator;
-					} else {
-						if (!myHapiTransactionService.isCompatiblePartition(accumulator, nextPartition)) {
-							String msg = myContext
-									.getLocalizer()
-									.getMessage(
-											BaseTransactionProcessor.class,
-											"multiplePartitionAccesses",
-											theEntries.size());
-							throw new InvalidRequestException(Msg.code(2541) + msg);
-						}
+					} else if (myHapiTransactionService.isCompatiblePartition(accumulator, nextPartition)) {
 						return accumulator.mergeIds(nextPartition);
+					} else {
+						String msg = myContext
+								.getLocalizer()
+								.getMessage(
+										BaseTransactionProcessor.class, "multiplePartitionAccesses", theEntries.size());
+						throw new InvalidRequestException(Msg.code(2541) + msg);
 					}
 				});
 	}
