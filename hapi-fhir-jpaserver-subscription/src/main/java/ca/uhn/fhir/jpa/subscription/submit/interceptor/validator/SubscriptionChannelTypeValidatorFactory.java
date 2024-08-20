@@ -13,7 +13,7 @@ import java.util.Map;
 public class SubscriptionChannelTypeValidatorFactory {
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionChannelTypeValidatorFactory.class);
 
-	private Map<CanonicalSubscriptionChannelType, IChannelTypeValidator> myValidators = new EnumMap<>(CanonicalSubscriptionChannelType.class);
+	private final Map<CanonicalSubscriptionChannelType, IChannelTypeValidator> myValidators = new EnumMap<>(CanonicalSubscriptionChannelType.class);
 
 	public SubscriptionChannelTypeValidatorFactory(@Nonnull List<IChannelTypeValidator> theValidorList) {
 		theValidorList.forEach(this::addChannelTypeValidator);

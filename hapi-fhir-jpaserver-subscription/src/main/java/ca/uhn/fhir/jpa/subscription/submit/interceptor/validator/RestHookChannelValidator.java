@@ -22,7 +22,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  */
 public class RestHookChannelValidator implements IChannelTypeValidator {
 
-	private IEndpointUrlValidationStrategy myEndpointUrlValidationStrategy;
+	private final IEndpointUrlValidationStrategy myEndpointUrlValidationStrategy;
 
 	/**
 	 * Constructor for a validator where the endpoint URL will
