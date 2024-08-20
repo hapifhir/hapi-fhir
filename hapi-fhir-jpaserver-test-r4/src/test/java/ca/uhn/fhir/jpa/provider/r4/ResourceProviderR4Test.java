@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.i18n.HapiLocalizer;
 import ca.uhn.fhir.i18n.Msg;
@@ -37,7 +36,6 @@ import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.client.apache.ApacheRestfulClientFactory;
 import ca.uhn.fhir.rest.client.apache.ResourceEntity;
 import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
@@ -167,6 +165,7 @@ import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.utilities.xhtml.NodeType;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -191,7 +190,6 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -977,30 +975,14 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		String clientHeader = "client";
 
 		// we register a delaying interceptor for all requests to this server
-		Object interceptor = new Object() {
-			@Hook(Pointcut.SERVER_INCOMING_REQUEST_PRE_PROCESSED)
-			public void intercept(HttpServletRequest theRequest) {
-				Instant start = Instant.now();
-				Instant endTime = Instant.now().plus(delay, ChronoUnit.MILLIS);
-
-				await()
-					.atLeast(socketTimeout, TimeUnit.MILLISECONDS)
-					.atMost(delay + socketTimeout, TimeUnit.MILLISECONDS)
-					.until(() -> {
-						return Instant.now().isAfter(endTime);
-					});
-
-				ourLog.info("Delayed {}ms for server request from {}",
-					Instant.now().toEpochMilli() - start.toEpochMilli(),
-					theRequest.getHeader(clientHeader));
-			}
-		};
+		Object interceptor = createDelayInterceptor(delay, socketTimeout, clientHeader);
+		myServer.getInterceptorService().registerInterceptor(interceptor);
 
 		myFhirContext.getRestfulClientFactory().setSocketTimeout(socketTimeout);
 		IGenericClient iGenericClient = myServer.getFhirClient();
-		try {
-			myServer.getInterceptorService().registerInterceptor(interceptor);
 
+		try {
+			//In theory, if we are throwing away the client, the socket timeout failure should not occur.
 			for (int i = 0; i < 10; i++) {
 				try {
 					// should fail
@@ -1019,6 +1001,27 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			myServer.getInterceptorService().unregisterInterceptor(interceptor);
 		}
 
+	}
+
+	private static @NotNull Object createDelayInterceptor(int delay, int socketTimeout, String clientHeader) {
+		return new Object() {
+			@Hook(Pointcut.SERVER_INCOMING_REQUEST_PRE_PROCESSED)
+			public void intercept(HttpServletRequest theRequest) {
+				Instant start = Instant.now();
+				Instant endTime = Instant.now().plus(delay, ChronoUnit.MILLIS);
+
+				await()
+					.atLeast(socketTimeout, TimeUnit.MILLISECONDS)
+					.atMost(delay + socketTimeout, TimeUnit.MILLISECONDS)
+					.until(() -> {
+						return Instant.now().isAfter(endTime);
+					});
+
+				ourLog.info("Delayed {}ms for server request from {}",
+					Instant.now().toEpochMilli() - start.toEpochMilli(),
+					theRequest.getHeader(clientHeader));
+			}
+		};
 	}
 
 	@Test
