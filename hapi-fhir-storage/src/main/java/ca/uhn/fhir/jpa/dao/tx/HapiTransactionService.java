@@ -283,7 +283,7 @@ public class HapiTransactionService implements IHapiTransactionService {
 		}
 	}
 
-	boolean isRequiresNewTransactionWhenChangingPartitions() {
+	protected boolean isRequiresNewTransactionWhenChangingPartitions() {
 		return myTransactionPropagationWhenChangingPartitions == Propagation.REQUIRES_NEW;
 	}
 
