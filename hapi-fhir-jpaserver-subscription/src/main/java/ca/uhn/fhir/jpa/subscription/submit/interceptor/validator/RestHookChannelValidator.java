@@ -55,7 +55,6 @@ public class RestHookChannelValidator implements IChannelTypeValidator {
 		}
 
 		myEndpointUrlValidationStrategy.validateEndpointUrl(endpointUrl);
-
 	}
 
 	protected void validateChannelPayload(CanonicalSubscription theResource) {
@@ -75,5 +74,4 @@ public class RestHookChannelValidator implements IChannelTypeValidator {
 	}
 
 	public static final IEndpointUrlValidationStrategy noOpEndpointUrlValidationStrategy = theEndpointUrl -> {};
-
 }

@@ -8,15 +8,16 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-public class RegexEndpointUrlValidationStrategy implements RestHookChannelValidator.IEndpointUrlValidationStrategy{
+public class RegexEndpointUrlValidationStrategy implements RestHookChannelValidator.IEndpointUrlValidationStrategy {
 
 	private final Pattern myEndpointUrlValidationPattern;
 
 	public RegexEndpointUrlValidationStrategy(@Nonnull String theEndpointUrlValidationRegex) {
-		try{
+		try {
 			myEndpointUrlValidationPattern = Pattern.compile(theEndpointUrlValidationRegex);
 		} catch (PatternSyntaxException e) {
-			throw new IllegalArgumentException(Msg.code(2546) + " invalid synthax for provided regex " + theEndpointUrlValidationRegex);
+			throw new IllegalArgumentException(
+					Msg.code(2546) + " invalid synthax for provided regex " + theEndpointUrlValidationRegex);
 		}
 	}
 
@@ -25,8 +26,8 @@ public class RegexEndpointUrlValidationStrategy implements RestHookChannelValida
 		Matcher matcher = myEndpointUrlValidationPattern.matcher(theEndpointUrl);
 
 		if (!matcher.matches()) {
-			throw new UnprocessableEntityException(Msg.code(2545) + "endpoint " + theEndpointUrl + " failed validation.");
+			throw new UnprocessableEntityException(
+					Msg.code(2545) + "endpoint " + theEndpointUrl + " failed validation.");
 		}
-
 	}
 }

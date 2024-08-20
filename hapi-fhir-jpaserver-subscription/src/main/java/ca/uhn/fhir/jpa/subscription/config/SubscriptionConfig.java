@@ -48,7 +48,9 @@ public class SubscriptionConfig {
 	public IChannelTypeValidator restHookChannelValidator(SubscriptionSettings theSubscriptionSettings) {
 		String endpointUrlValidationRegex = theSubscriptionSettings.getRestHookEndpointUrlValidationgRegex();
 
-		IEndpointUrlValidationStrategy iEndpointUrlValidationStrategy = isBlank(endpointUrlValidationRegex) ? noOpEndpointUrlValidationStrategy : new RegexEndpointUrlValidationStrategy(endpointUrlValidationRegex);
+		IEndpointUrlValidationStrategy iEndpointUrlValidationStrategy = isBlank(endpointUrlValidationRegex)
+				? noOpEndpointUrlValidationStrategy
+				: new RegexEndpointUrlValidationStrategy(endpointUrlValidationRegex);
 
 		return new RestHookChannelValidator(iEndpointUrlValidationStrategy);
 	}
