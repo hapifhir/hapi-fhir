@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.subscription.submit.interceptor.validation;
+package ca.uhn.fhir.jpa.subscription.submit.interceptor.validator;
 
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
@@ -38,7 +38,7 @@ public class SubscriptionChannelTypeValidatorFactory {
 
 			@Override
 			public CanonicalSubscriptionChannelType getSubscriptionChannelType() {
-				return CanonicalSubscriptionChannelType.NULL;
+				return theChannelType;
 			}
 		};
 	}

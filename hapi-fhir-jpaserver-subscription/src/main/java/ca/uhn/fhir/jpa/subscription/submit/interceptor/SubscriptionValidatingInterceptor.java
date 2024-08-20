@@ -36,9 +36,9 @@ import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyE
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
-import ca.uhn.fhir.jpa.subscription.submit.interceptor.validation.IChannelTypeValidator;
-import ca.uhn.fhir.jpa.subscription.submit.interceptor.validation.SubscriptionChannelTypeValidatorFactory;
-import ca.uhn.fhir.jpa.subscription.submit.interceptor.validation.SubscriptionQueryValidator;
+import ca.uhn.fhir.jpa.subscription.submit.interceptor.validator.IChannelTypeValidator;
+import ca.uhn.fhir.jpa.subscription.submit.interceptor.validator.SubscriptionChannelTypeValidatorFactory;
+import ca.uhn.fhir.jpa.subscription.submit.interceptor.validator.SubscriptionQueryValidator;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;

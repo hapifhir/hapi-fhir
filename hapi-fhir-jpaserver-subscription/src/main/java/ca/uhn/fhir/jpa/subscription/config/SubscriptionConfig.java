@@ -22,14 +22,19 @@ package ca.uhn.fhir.jpa.subscription.config;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyEvaluator;
-import ca.uhn.fhir.jpa.subscription.submit.interceptor.validation.IChannelTypeValidator;
-import ca.uhn.fhir.jpa.subscription.submit.interceptor.validation.RestHookChannelValidator;
-import ca.uhn.fhir.jpa.subscription.submit.interceptor.validation.SubscriptionChannelTypeValidatorFactory;
-import ca.uhn.fhir.jpa.subscription.submit.interceptor.validation.SubscriptionQueryValidator;
+import ca.uhn.fhir.jpa.subscription.submit.interceptor.validator.IChannelTypeValidator;
+import ca.uhn.fhir.jpa.subscription.submit.interceptor.validator.RegexEndpointUrlValidationStrategy;
+import ca.uhn.fhir.jpa.subscription.submit.interceptor.validator.RestHookChannelValidator;
+import ca.uhn.fhir.jpa.subscription.submit.interceptor.validator.SubscriptionChannelTypeValidatorFactory;
+import ca.uhn.fhir.jpa.subscription.submit.interceptor.validator.SubscriptionQueryValidator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.util.List;
+
+import static ca.uhn.fhir.jpa.subscription.submit.interceptor.validator.RestHookChannelValidator.IEndpointUrlValidationStrategy;
+import static ca.uhn.fhir.jpa.subscription.submit.interceptor.validator.RestHookChannelValidator.noOpEndpointUrlValidationStrategy;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 @Configuration
 public class SubscriptionConfig {
@@ -41,7 +46,11 @@ public class SubscriptionConfig {
 
 	@Bean
 	public IChannelTypeValidator restHookChannelValidator(SubscriptionSettings theSubscriptionSettings) {
-		return new RestHookChannelValidator(theSubscriptionSettings.getRestHookEndpointUrlValidationgRegex());
+		String endpointUrlValidationRegex = theSubscriptionSettings.getRestHookEndpointUrlValidationgRegex();
+
+		IEndpointUrlValidationStrategy iEndpointUrlValidationStrategy = isBlank(endpointUrlValidationRegex) ? noOpEndpointUrlValidationStrategy : new RegexEndpointUrlValidationStrategy(endpointUrlValidationRegex);
+
+		return new RestHookChannelValidator(iEndpointUrlValidationStrategy);
 	}
 
 	@Bean

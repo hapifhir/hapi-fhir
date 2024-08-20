@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.subscription.submit.interceptor.validation;
+package ca.uhn.fhir.jpa.subscription.submit.interceptor.validator;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
@@ -7,17 +7,32 @@ import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import jakarta.annotation.Nonnull;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
+/**
+ *
+ * Definition of a REST Hook channel validator that perform checks on the channel payload and endpoint URL.
+ *
+ * The channel payload will always evaluate in the same manner where endpoint URL validation can be extended beyond the
+ * minimal validation perform by this class.
+ *
+ * At a minimum, this class ensures that the provided URL is not blank or null.  Supplemental validation(s) should be
+ * encapsulated into a {@link IEndpointUrlValidationStrategy} and provided with the arg constructor.
+ *
+ */
 public class RestHookChannelValidator implements IChannelTypeValidator {
 
-	private final Pattern myEndpointUrlValidationPattern;
+	private IEndpointUrlValidationStrategy myEndpointUrlValidationStrategy;
 
-	public RestHookChannelValidator(@Nonnull String theRestHookEndpointUrlValidatingRegex) {
-		myEndpointUrlValidationPattern = Pattern.compile(theRestHookEndpointUrlValidatingRegex);
+	/**
+	 * Constructor for a validator where the endpoint URL will
+	 */
+	public RestHookChannelValidator() {
+		this(noOpEndpointUrlValidationStrategy);
+	}
+
+	public RestHookChannelValidator(@Nonnull IEndpointUrlValidationStrategy theEndpointUrlValidationStrategy) {
+		myEndpointUrlValidationStrategy = theEndpointUrlValidationStrategy;
 	}
 
 	@Override
@@ -39,11 +54,8 @@ public class RestHookChannelValidator implements IChannelTypeValidator {
 					Msg.code(21) + "Rest-hook subscriptions must have Subscription.channel.endpoint defined");
 		}
 
-		Matcher matcher = myEndpointUrlValidationPattern.matcher(endpointUrl);
+		myEndpointUrlValidationStrategy.validateEndpointUrl(endpointUrl);
 
-		if (!matcher.matches()) {
-			throw new UnprocessableEntityException(Msg.code(2545) + "endpoint " + endpointUrl + " failed validation.");
-		}
 	}
 
 	protected void validateChannelPayload(CanonicalSubscription theResource) {
@@ -53,4 +65,15 @@ public class RestHookChannelValidator implements IChannelTypeValidator {
 					+ theResource.getPayloadString());
 		}
 	}
+
+	/**
+	 * A concrete instantiation of this interface should provide tailored validation of an endpoint URL
+	 * throwing {@link RuntimeException} upon validation failure.
+	 */
+	public interface IEndpointUrlValidationStrategy {
+		void validateEndpointUrl(String theEndpointUrl);
+	}
+
+	public static final IEndpointUrlValidationStrategy noOpEndpointUrlValidationStrategy = theEndpointUrl -> {};
+
 }

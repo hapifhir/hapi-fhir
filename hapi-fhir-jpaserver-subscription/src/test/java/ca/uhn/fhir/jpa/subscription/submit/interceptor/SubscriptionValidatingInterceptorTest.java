@@ -11,8 +11,12 @@ import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyEvaluator;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
-import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
-import ca.uhn.fhir.jpa.subscription.submit.interceptor.validation.SubscriptionQueryValidator;
+import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
+import ca.uhn.fhir.jpa.subscription.submit.interceptor.validator.IChannelTypeValidator;
+import ca.uhn.fhir.jpa.subscription.submit.interceptor.validator.RegexEndpointUrlValidationStrategy;
+import ca.uhn.fhir.jpa.subscription.submit.interceptor.validator.RestHookChannelValidator;
+import ca.uhn.fhir.jpa.subscription.submit.interceptor.validator.SubscriptionChannelTypeValidatorFactory;
+import ca.uhn.fhir.jpa.subscription.submit.interceptor.validator.SubscriptionQueryValidator;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
@@ -35,6 +39,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -50,6 +55,8 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
@@ -70,6 +77,9 @@ public class SubscriptionValidatingInterceptorTest {
 	@Mock
 	private IFhirResourceDao<SubscriptionTopic> mySubscriptionTopicDao;
 	private FhirContext myFhirContext;
+
+	@SpyBean
+	private SubscriptionChannelTypeValidatorFactory mySubscriptionChannelTypeValidatorFactory;
 
 	@BeforeEach
 	public void before() {
@@ -224,6 +234,8 @@ public class SubscriptionValidatingInterceptorTest {
 		SimpleBundleProvider simpleBundleProvider = new SimpleBundleProvider(List.of(topic));
 		when(mySubscriptionTopicDao.search(any(), any())).thenReturn(simpleBundleProvider);
 		mySubscriptionValidatingInterceptor.validateSubmittedSubscription(badSub, null, null, Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED);
+
+		verify(mySubscriptionChannelTypeValidatorFactory, times(1)).getValidatorForChannelType(CanonicalSubscriptionChannelType.MESSAGE);
 	}
 
 	@ParameterizedTest
@@ -239,10 +251,10 @@ public class SubscriptionValidatingInterceptorTest {
 			mySubscriptionValidatingInterceptor.validateSubmittedSubscription(subscriptionWithBadEndpoint, null, null, Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED);
 			fail("");
 		} catch (Exception e) {
-			System.out.println(e.getMessage());
+			verify(mySubscriptionChannelTypeValidatorFactory, times(1)).getValidatorForChannelType(CanonicalSubscriptionChannelType.RESTHOOK);
+			assertThat(e.getMessage()).startsWith(Msg.code(2545));
 		}
 	}
-
 
 	private void initSubscription(IBaseResource theSubscription) {
 		setFhirContext(theSubscription);
@@ -315,6 +327,18 @@ public class SubscriptionValidatingInterceptorTest {
 		@Bean
         SubscriptionQueryValidator subscriptionQueryValidator(DaoRegistry theDaoRegistry, SubscriptionStrategyEvaluator theSubscriptionStrategyEvaluator) {
 			return new SubscriptionQueryValidator(theDaoRegistry, theSubscriptionStrategyEvaluator);
+		}
+
+		@Bean
+		public IChannelTypeValidator restHookChannelValidator() {
+			RegexEndpointUrlValidationStrategy regexEndpointUrlValidationStrategy = new RegexEndpointUrlValidationStrategy(new SubscriptionSettings().getRestHookEndpointUrlValidationgRegex());
+			return new RestHookChannelValidator(regexEndpointUrlValidationStrategy);
+		}
+
+		@Bean
+		public SubscriptionChannelTypeValidatorFactory subscriptionChannelTypeValidatorFactory(
+			List<IChannelTypeValidator> theValidorList) {
+			return new SubscriptionChannelTypeValidatorFactory(theValidorList);
 		}
 	}
 
