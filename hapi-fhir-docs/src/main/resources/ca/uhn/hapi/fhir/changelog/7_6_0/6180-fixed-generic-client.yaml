@@ -1,12 +1,6 @@
 ---
 type: fix
 issue: 6180
-title: "IGenericClients or IHttpClients created to make requests
-        would be thrown away and new ones created to make the request
-        along the chain.
-        This resulted in client settings being lost (since the client
-        was lost).
-        This hasn't been fixed, since the paths are so well used,
-        but a new path has been created to allow reusable clients
-        that will reuse the same settings for all subsequent requests.
+title: "Fixed GenericClient so that the IHttpClient (and settings used
+        to create it) are preserved for the lifetime of the client.
 "
