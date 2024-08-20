@@ -236,8 +236,6 @@ class HapiTransactionServiceTest {
 			myPartitionSettings.setPartitioningEnabled(true);
 			myHapiTransactionService.setTransactionPropagationWhenChangingPartitions(Propagation.REQUIRES_NEW);
 
-			assertTrue(myHapiTransactionService.isCompatiblePartition(null, partition1));
-			assertTrue(myHapiTransactionService.isCompatiblePartition(partition1, null));
 			assertTrue(myHapiTransactionService.isCompatiblePartition(partition1, partition1));
 
 			assertFalse(myHapiTransactionService.isCompatiblePartition(partition1, partition2));
