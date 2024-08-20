@@ -1940,6 +1940,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		theReq.setAttribute(REQUEST_START_TIME, new Date());
 
 		RequestTypeEnum method;
+
 		try {
 			method = RequestTypeEnum.valueOf(theReq.getMethod());
 		} catch (IllegalArgumentException e) {

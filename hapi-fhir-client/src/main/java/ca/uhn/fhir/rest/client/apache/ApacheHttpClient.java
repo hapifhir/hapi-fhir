@@ -23,7 +23,6 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.client.api.Header;
-import ca.uhn.fhir.rest.client.api.IHttpClient;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.apache.http.HttpEntity;
@@ -52,7 +51,7 @@ import java.util.Map.Entry;
  *
  * @author Peter Van Houte | peter.vanhoute@agfa.com | Agfa Healthcare
  */
-public class ApacheHttpClient extends BaseHttpClient implements IHttpClient {
+public class ApacheHttpClient extends BaseHttpClient {
 
 	private final HttpClient myClient;
 

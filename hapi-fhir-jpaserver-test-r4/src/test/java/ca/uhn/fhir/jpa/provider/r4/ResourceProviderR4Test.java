@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.i18n.HapiLocalizer;
 import ca.uhn.fhir.i18n.Msg;
@@ -36,6 +37,7 @@ import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.client.apache.ApacheRestfulClientFactory;
 import ca.uhn.fhir.rest.client.apache.ResourceEntity;
 import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
@@ -64,6 +66,7 @@ import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import jakarta.annotation.Nonnull;
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -188,6 +191,9 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -196,6 +202,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -205,6 +212,7 @@ import static ca.uhn.fhir.util.TestUtil.sleepAtLeast;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -959,6 +967,58 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		Bundle bundle = client.read().resource(Bundle.class).withId(id).execute();
 
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+	}
+
+	@Test
+	public void testReuseOfSettings() {
+		// setup
+		int socketTimeout = 700;
+		int delay = 1200;
+		String clientHeader = "client";
+
+		// we register a delaying interceptor for all requests to this server
+		Object interceptor = new Object() {
+			@Hook(Pointcut.SERVER_INCOMING_REQUEST_PRE_PROCESSED)
+			public void intercept(HttpServletRequest theRequest) {
+				Instant start = Instant.now();
+				Instant endTime = Instant.now().plus(delay, ChronoUnit.MILLIS);
+
+				await()
+					.atLeast(socketTimeout, TimeUnit.MILLISECONDS)
+					.atMost(delay + socketTimeout, TimeUnit.MILLISECONDS)
+					.until(() -> {
+						return Instant.now().isAfter(endTime);
+					});
+
+				ourLog.info("Delayed {}ms for server request from {}",
+					Instant.now().toEpochMilli() - start.toEpochMilli(),
+					theRequest.getHeader(clientHeader));
+			}
+		};
+
+		myFhirContext.getRestfulClientFactory().setSocketTimeout(socketTimeout);
+		IGenericClient iGenericClient = myServer.getFhirClient();
+		try {
+			myServer.getInterceptorService().registerInterceptor(interceptor);
+
+			for (int i = 0; i < 10; i++) {
+				try {
+					// should fail
+					iGenericClient.search()
+						.forResource("Patient")
+						.withAdditionalHeader(clientHeader, "client1")
+						.execute();
+					System.out.println("FAILED is " + i);
+					fail();
+				} catch (Exception ex) {
+					System.out.println("index is " + i);
+					assertTrue(ex.getMessage().contains("SocketTimeoutException"));
+				}
+			}
+		} finally {
+			myServer.getInterceptorService().unregisterInterceptor(interceptor);
+		}
+
 	}
 
 	@Test
