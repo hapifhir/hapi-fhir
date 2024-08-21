@@ -1,29 +1,24 @@
 package ca.uhn.fhir.jpa.model.pkspike;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
-import ca.uhn.fhir.jpa.config.HapiFhirLocalContainerEntityManagerFactoryBean;
 import ca.uhn.fhir.jpa.config.r4.FhirContextR4Config;
-import ca.uhn.fhir.jpa.config.util.HapiEntityManagerFactoryUtil;
-import ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect;
 import jakarta.annotation.Nonnull;
 import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
-import org.apache.commons.dbcp2.BasicDataSource;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.orm.jpa.EntityManagerFactoryUtils;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.sql.DataSource;
-import java.sql.SQLException;
-import java.util.Properties;
+import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -32,63 +27,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  */
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {
-	JpaBindingTest.Config.class, FhirContextR4Config.class
+	JPAConfig.class, FhirContextR4Config.class
 })
 public class JpaBindingTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(JpaBindingTest.class);
-
-	@Configuration
-	static class Config {
-
-		@Inject
-		FhirContext myFhirContext;
-
-		@Bean
-		DataSource datasource() {
-			BasicDataSource dataSource = new BasicDataSource();
-			dataSource.setDriver(new org.h2.Driver());
-			dataSource.setUrl("jdbc:h2:mem:testdb_r4");
-			dataSource.setMaxWaitMillis(30000);
-			dataSource.setUsername("");
-			dataSource.setPassword("");
-			dataSource.setMaxTotal(10);
-
-			return dataSource;
-		}
-
-
-		@Bean
-		public HapiFhirLocalContainerEntityManagerFactoryBean entityManagerFactory(
-//			ModuleMigrationMetadata theModuleMigrationMetadata,
-			ConfigurableListableBeanFactory theConfigurableListableBeanFactory,
-			DataSource theDataSource) {
-			HapiFhirLocalContainerEntityManagerFactoryBean retVal =
-				new HapiFhirLocalContainerEntityManagerFactoryBean(theConfigurableListableBeanFactory);
-
-			HapiEntityManagerFactoryUtil.configureEntityManagerFactory(retVal, myFhirContext, storageSettings());
-			Properties jpaProperties = new Properties();
-			jpaProperties.put("hibernate.search.enabled", "false");
-			jpaProperties.put("hibernate.format_sql", "false");
-			jpaProperties.put("hibernate.show_sql", "false");
-			jpaProperties.put("hibernate.hbm2ddl.auto", "update");
-			jpaProperties.put("hibernate.dialect", HapiFhirH2Dialect.class.getName());
-
-			retVal.setPersistenceUnitName("HapiPU");
-			retVal.setDataSource(theDataSource);
-			//retVal.setManagedTypes(PersistenceManagedTypes.of(ResourceTable.class.getName()));
-
-			retVal.setJpaProperties(jpaProperties);
-
-			return retVal;
-		}
-
-		@Bean
-		@Nonnull JpaStorageSettings storageSettings() {
-			JpaStorageSettings jpaStorageSettings = new JpaStorageSettings();
-			//jpaStorageSettings.setAdvancedHSearchIndexing();
-			return jpaStorageSettings;
-		}
-	}
 
 	@Inject
 	DataSource myDataSource;
@@ -96,21 +38,71 @@ public class JpaBindingTest {
 	@Inject
 	EntityManagerFactory myEntityManagerFactory;
 
+	@Inject
+	TransactionTemplate myTransactionTemplate;
+	JdbcTemplate myJdbcTemplate;
+
+	@BeforeEach
+	void setUp() {
+		myJdbcTemplate = new JdbcTemplate(myDataSource);
+	}
+
+	@AfterEach
+	void tearDown() {
+		myJdbcTemplate.execute("delete from res_join");
+		myJdbcTemplate.execute("delete from res_root");
+	}
+
 	@Test
-	void createResourceTable_roundTrip() throws SQLException {
-		ourLog.info("starting");
-	    // given
+	void roundTripResourceTable() {
+		// given
+		myJdbcTemplate.execute("insert into res_root values (-1, -1, 'hello!')");
 
-		var t = new JdbcTemplate(myDataSource);
+		myTransactionTemplate.execute(status -> {
+			var em = getEntityManagerOrThrow();
+			long count = em.createQuery("select count(*) from ResRootEntity", Long.class).getSingleResult();
+			assertEquals(1, count);
 
-		t.execute(" create table table_a (col_a numeric, col_b varchar)");
-		int rows = t.update("insert into table_a values (?, ?)", 22, "foo");
-		assertEquals(1, rows);
+			em.createQuery("from ResRootEntity", ResRootEntity.class).getResultStream().forEach(e-> assertEquals("hello!", e.getString()));
+			return true;
+		});
+	}
 
-		ourLog.info("done");
+	@Test
+	void roundTripJoin() {
+		// given
 
-		try(var em = myEntityManagerFactory.createEntityManager()) {
-			// empty
-		}
+		myTransactionTemplate.execute(status -> {
+			var em = getEntityManagerOrThrow();
+
+			ResRootEntity resRootEntity = new ResRootEntity();
+			resRootEntity.setString("hello world!");
+
+			ResJoinEntity join = new ResJoinEntity();
+			join.myResource = resRootEntity;
+			join.myString="child";
+
+			em.persist(resRootEntity);
+			em.persist(join);
+			em.flush();
+			em.clear();
+
+			ResRootEntity queryBack = em.find(ResRootEntity.class, resRootEntity.myId);
+			assertEquals("hello world!", queryBack.myString);
+			assertEquals(1, queryBack.myJoinEntities.size());
+			ResJoinEntity child = queryBack.myJoinEntities.iterator().next();
+			assertEquals(resRootEntity.myId, child.myResource.myId);
+			//assertEquals(resRootEntity.myPartitionId, child.myPartitionId);
+			assertEquals("child", child.myString);
+
+			long count = em.createQuery("select count(*) from ResRootEntity", Long.class).getSingleResult();
+			ourLog.info("found {} roots", count);
+			assertEquals(1, count);
+			return true;
+		});
+	}
+
+	@Nonnull EntityManager getEntityManagerOrThrow() {
+		return Objects.requireNonNull(EntityManagerFactoryUtils.getTransactionalEntityManager(myEntityManagerFactory));
 	}
 }
