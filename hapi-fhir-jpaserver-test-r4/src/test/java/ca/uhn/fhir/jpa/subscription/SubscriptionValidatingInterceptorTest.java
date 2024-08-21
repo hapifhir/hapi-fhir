@@ -39,6 +39,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.lenient;
@@ -218,7 +219,7 @@ public class SubscriptionValidatingInterceptorTest {
 	public void testValidate_Cross_Partition_Subscription() {
 		when(myDaoRegistry.isResourceTypeSupported("Patient")).thenReturn(true);
 		when(mySubscriptionSettings.isCrossPartitionSubscriptionEnabled()).thenReturn(true);
-		when(myRequestPartitionHelperSvc.determineCreatePartitionForRequest(isA(RequestDetails.class), isA(Subscription.class), "Subscription")).thenReturn(RequestPartitionId.defaultPartition());
+		when(myRequestPartitionHelperSvc.determineCreatePartitionForRequest(isA(RequestDetails.class), isA(Subscription.class), eq("Subscription"))).thenReturn(RequestPartitionId.defaultPartition());
 
 		Subscription subscription = new Subscription();
 		subscription.setStatus(Subscription.SubscriptionStatus.ACTIVE);
@@ -236,13 +237,13 @@ public class SubscriptionValidatingInterceptorTest {
 		assertDoesNotThrow(() -> mySvc.resourcePreCreate(subscription, requestDetails, null));
 		Mockito.verify(mySubscriptionSettings, times(1)).isCrossPartitionSubscriptionEnabled();
 		Mockito.verify(myDaoRegistry, times(1)).isResourceTypeSupported("Patient");
-		Mockito.verify(myRequestPartitionHelperSvc, times(1)).determineCreatePartitionForRequest(isA(RequestDetails.class), isA(Subscription.class),"Subscription");
+		Mockito.verify(myRequestPartitionHelperSvc, times(1)).determineCreatePartitionForRequest(isA(RequestDetails.class), isA(Subscription.class),eq("Subscription"));
 	}
 
 	@Test
 	public void testValidate_Cross_Partition_Subscription_On_Wrong_Partition() {
 		when(mySubscriptionSettings.isCrossPartitionSubscriptionEnabled()).thenReturn(true);
-		when(myRequestPartitionHelperSvc.determineCreatePartitionForRequest(isA(RequestDetails.class), isA(Subscription.class), "Subscription")).thenReturn(RequestPartitionId.fromPartitionId(1));
+		when(myRequestPartitionHelperSvc.determineCreatePartitionForRequest(isA(RequestDetails.class), isA(Subscription.class), eq("Subscription"))).thenReturn(RequestPartitionId.fromPartitionId(1));
 
 		Subscription subscription = new Subscription();
 		subscription.setStatus(Subscription.SubscriptionStatus.ACTIVE);
@@ -306,7 +307,7 @@ public class SubscriptionValidatingInterceptorTest {
 		mySvc.resourcePreCreate(subscription, requestDetails, null);
 		Mockito.verify(mySubscriptionSettings, never()).isCrossPartitionSubscriptionEnabled();
 		Mockito.verify(myDaoRegistry, times(1)).isResourceTypeSupported("Patient");
-		Mockito.verify(myRequestPartitionHelperSvc, never()).determineCreatePartitionForRequest(isA(RequestDetails.class), isA(Patient.class),"Patient");
+		Mockito.verify(myRequestPartitionHelperSvc, never()).determineCreatePartitionForRequest(isA(RequestDetails.class), isA(Patient.class),eq("Patient"));
 	}
 
 	@Test
@@ -336,6 +337,6 @@ public class SubscriptionValidatingInterceptorTest {
 
 		// verify
 		verify(mySubscriptionStrategyEvaluator).determineStrategy(any(CanonicalSubscription.class));
-		verify(mySubscriptionCanonicalizer, times(2)).setMatchingStrategyTag(subscription, nullable(SubscriptionMatchingStrategy.class));
+		verify(mySubscriptionCanonicalizer, times(2)).setMatchingStrategyTag(eq(subscription), nullable(SubscriptionMatchingStrategy.class));
 	}
 }
