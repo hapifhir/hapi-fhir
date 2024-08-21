@@ -1,21 +1,18 @@
 package ca.uhn.fhir.jpa.model.pkspike;
 
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamCoords;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.hibernate.annotations.OptimisticLock;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Set;
 
+@SuppressWarnings("JpaDataSourceORMInspection")
 @Entity
 @Table(
 	name = "RES_ROOT"

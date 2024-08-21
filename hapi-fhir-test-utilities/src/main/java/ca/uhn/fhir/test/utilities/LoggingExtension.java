@@ -59,12 +59,12 @@ public class LoggingExtension implements BeforeEachCallback, BeforeTestExecution
 	}
 
 	@Override
-	public void beforeTestExecution(ExtensionContext context) throws Exception {
+	public void beforeTestExecution(ExtensionContext context) {
 		getLoggerForTestClass(context).info("Starting test case [{}]", getMethodName(context));
 
 	}
 	@Override
-	public void afterTestExecution(ExtensionContext context) throws Exception {
+	public void afterTestExecution(ExtensionContext context) {
 		getLoggerForTestClass(context).info("Finished test case [{}]", getMethodName(context));
 	}
 

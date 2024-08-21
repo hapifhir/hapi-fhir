@@ -63,7 +63,11 @@ public class JpaBindingTest {
 			long count = em.createQuery("select count(*) from ResRootEntity", Long.class).getSingleResult();
 			assertEquals(1, count);
 
-			em.createQuery("from ResRootEntity", ResRootEntity.class).getResultStream().forEach(e-> assertEquals("hello!", e.getString()));
+			em.createQuery("from ResRootEntity", ResRootEntity.class).getResultStream().forEach(e-> {
+				assertEquals(-1, e.myId);
+				assertEquals(-1, e.myPartitionId);
+				assertEquals("hello!", e.getString());
+			});
 			return true;
 		});
 	}
