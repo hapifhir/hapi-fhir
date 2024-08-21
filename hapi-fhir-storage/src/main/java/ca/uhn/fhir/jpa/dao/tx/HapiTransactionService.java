@@ -578,7 +578,7 @@ public class HapiTransactionService implements IHapiTransactionService {
 	}
 
 	/**
-	 * Returns true if we alreadyt have an active transaction associated with the current thread, AND
+	 * Returns true if we already have an active transaction associated with the current thread, AND
 	 * either it's non-read-only or we only need a read-only transaction, AND
 	 * the newly requested transaction has a propagation of REQUIRED
 	 */
