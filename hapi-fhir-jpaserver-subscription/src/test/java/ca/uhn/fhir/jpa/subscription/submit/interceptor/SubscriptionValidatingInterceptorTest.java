@@ -90,8 +90,9 @@ public class SubscriptionValidatingInterceptorTest {
 	@ParameterizedTest
 	@MethodSource("subscriptionByFhirVersion345")
 	public void testEmptySub(IBaseResource theSubscription) {
+		setFhirContext(theSubscription);
+
 		try {
-			setFhirContext(theSubscription);
 			mySubscriptionValidatingInterceptor.resourcePreCreate(theSubscription, null, null);
 			fail();
 		} catch (UnprocessableEntityException e) {
@@ -103,8 +104,9 @@ public class SubscriptionValidatingInterceptorTest {
 	@ParameterizedTest
 	@MethodSource("subscriptionByFhirVersion34") // R5 subscriptions don't have criteria
 	public void testEmptyCriteria(IBaseResource theSubscription) {
+		initSubscription(theSubscription);
+
 		try {
-			initSubscription(theSubscription);
 			mySubscriptionValidatingInterceptor.resourcePreCreate(theSubscription, null, null);
 			fail();
 		} catch (UnprocessableEntityException e) {
@@ -116,9 +118,10 @@ public class SubscriptionValidatingInterceptorTest {
 	@ParameterizedTest
 	@MethodSource("subscriptionByFhirVersion34")
 	public void testBadCriteria(IBaseResource theSubscription) {
+		initSubscription(theSubscription);
+		SubscriptionUtil.setCriteria(myFhirContext, theSubscription, "Patient");
+
 		try {
-			initSubscription(theSubscription);
-			SubscriptionUtil.setCriteria(myFhirContext, theSubscription, "Patient");
 			mySubscriptionValidatingInterceptor.resourcePreCreate(theSubscription, null, null);
 			fail();
 		} catch (UnprocessableEntityException e) {
@@ -129,9 +132,10 @@ public class SubscriptionValidatingInterceptorTest {
 	@ParameterizedTest
 	@MethodSource("subscriptionByFhirVersion34")
 	public void testBadChannel(IBaseResource theSubscription) {
+		initSubscription(theSubscription);
+		SubscriptionUtil.setCriteria(myFhirContext, theSubscription, "Patient?");
+
 		try {
-			initSubscription(theSubscription);
-			SubscriptionUtil.setCriteria(myFhirContext, theSubscription, "Patient?");
 			mySubscriptionValidatingInterceptor.resourcePreCreate(theSubscription, null, null);
 			fail();
 		} catch (UnprocessableEntityException e) {
@@ -142,10 +146,11 @@ public class SubscriptionValidatingInterceptorTest {
 	@ParameterizedTest
 	@MethodSource("subscriptionByFhirVersion345")
 	public void testEmptyEndpoint(IBaseResource theSubscription) {
+		initSubscription(theSubscription);
+		SubscriptionUtil.setCriteria(myFhirContext, theSubscription, "Patient?");
+		SubscriptionUtil.setChannelType(myFhirContext, theSubscription, "message");
+
 		try {
-			initSubscription(theSubscription);
-			SubscriptionUtil.setCriteria(myFhirContext, theSubscription, "Patient?");
-			SubscriptionUtil.setChannelType(myFhirContext, theSubscription, "message");
 			mySubscriptionValidatingInterceptor.resourcePreCreate(theSubscription, null, null);
 			fail();
 		} catch (UnprocessableEntityException e) {
@@ -349,7 +354,7 @@ public class SubscriptionValidatingInterceptorTest {
 		subscription.setCriteria("Patient?");
 		final Subscription.SubscriptionChannelComponent channel = subscription.getChannel();
 		channel.setType(Subscription.SubscriptionChannelType.RESTHOOK);
-		channel.setEndpoint("channel");
+		channel.setEndpoint("http://acme.corp/");
 		return subscription;
 	}
 }

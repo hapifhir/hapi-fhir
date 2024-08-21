@@ -27,7 +27,7 @@ public class RegexEndpointUrlValidationStrategy implements RestHookChannelValida
 
 		if (!matcher.matches()) {
 			throw new UnprocessableEntityException(
-					Msg.code(2545) + "endpoint " + theEndpointUrl + " failed validation.");
+					Msg.code(2545) + "Failed validation for endpoint URL: " + theEndpointUrl);
 		}
 	}
 }

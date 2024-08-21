@@ -154,7 +154,7 @@ public class SubscriptionValidatingInterceptor {
 				break;
 		}
 
-		validatePermissions(theSubscription, subscription, theRequestDetails, theRequestPartitionId, thePointcut);
+		validatePermissions(theSubscription, theRequestDetails, theRequestPartitionId, thePointcut);
 
 		mySubscriptionCanonicalizer.setMatchingStrategyTag(theSubscription, null);
 
@@ -241,7 +241,6 @@ public class SubscriptionValidatingInterceptor {
 
 	protected void validatePermissions(
 			IBaseResource theSubscription,
-			CanonicalSubscription theCanonicalSubscription,
 			RequestDetails theRequestDetails,
 			RequestPartitionId theRequestPartitionId,
 			Pointcut thePointcut) {
@@ -359,5 +358,10 @@ public class SubscriptionValidatingInterceptor {
 			SubscriptionStrategyEvaluator theSubscriptionStrategyEvaluator) {
 		mySubscriptionStrategyEvaluator = theSubscriptionStrategyEvaluator;
 		mySubscriptionQueryValidator = new SubscriptionQueryValidator(myDaoRegistry, theSubscriptionStrategyEvaluator);
+	}
+
+	public void setSubscriptionChannelTypeValidatorFactoryForUnitTest(
+			SubscriptionChannelTypeValidatorFactory theSubscriptionChannelTypeValidatorFactory) {
+		mySubscriptionChannelTypeValidatorFactory = theSubscriptionChannelTypeValidatorFactory;
 	}
 }
