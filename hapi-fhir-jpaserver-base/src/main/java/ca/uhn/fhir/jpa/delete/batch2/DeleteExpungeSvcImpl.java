@@ -54,7 +54,7 @@ public class DeleteExpungeSvcImpl implements IDeleteExpungeSvc<JpaPid> {
 				myDeleteExpungeSqlBuilder.convertPidsToDeleteExpungeSql(theJpaPids, theCascade, theCascadeMaxRounds);
 		List<String> sqlList = sqlResult.getSqlStatements();
 
-		String formattedChunkIdForLogMessage = theChunkId.isEmpty() ? "" : "Chunk[" + theChunkId + "] - ";
+		String formattedChunkIdForLogMessage = theChunkId.isBlank() ? "" : "Chunk[" + theChunkId + "] - ";
 
 		ourLog.debug("{}Executing {} delete expunge sql commands", formattedChunkIdForLogMessage, sqlList.size());
 		long totalDeleted = 0;
