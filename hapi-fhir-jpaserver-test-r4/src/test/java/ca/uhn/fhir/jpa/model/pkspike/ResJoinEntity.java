@@ -31,6 +31,7 @@ public class ResJoinEntity {
 	@JoinColumn(
 		name = "RES_ID",
 		referencedColumnName = "RES_ID",
-		nullable = false)
+		nullable = false,
+		updatable = false)
 	ResRootEntity myResource;
 }

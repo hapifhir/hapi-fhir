@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.model.pkspike;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -44,7 +45,7 @@ public class ResRootEntity {
 	@Column(name = "STRING_COL")
 	String myString;
 
-	@OneToMany(mappedBy = "myResource")
+	@OneToMany(mappedBy = "myResource", fetch = FetchType.EAGER)
 	Collection<ResJoinEntity> myJoinEntities = new ArrayList<>();
 
 	@Override
