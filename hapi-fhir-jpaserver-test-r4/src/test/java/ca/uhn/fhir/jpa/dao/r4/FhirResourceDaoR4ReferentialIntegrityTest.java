@@ -34,7 +34,7 @@ public class FhirResourceDaoR4ReferentialIntegrityTest extends BaseJpaR4Test {
 
 	@ParameterizedTest
 	@MethodSource("paramsProvider_withResourceType")
-	public void testRefIntegrity_withUnknownReferenceIds(boolean theIsEnforceRefIntegrityEnabled,
+	public void referentialIntegrityOnWriteSetting_unknownIds_fullScopeTest(boolean theIsEnforceRefIntegrityEnabled,
 					 JpaStorageSettings.ClientIdStrategyEnum theClientIdStrategy,
 					 String theReferenceId) {
 		// Given
@@ -80,7 +80,7 @@ public class FhirResourceDaoR4ReferentialIntegrityTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testRefIntegrity_withReferenceIdOfAnotherResourceType() {
+	public void testRefIntegrityOnWrite_withReferenceIdOfAnotherResourceType() {
 		// Given
 		myStorageSettings.setResourceClientIdStrategy(JpaStorageSettings.ClientIdStrategyEnum.ALPHANUMERIC);
 
@@ -112,7 +112,7 @@ public class FhirResourceDaoR4ReferentialIntegrityTest extends BaseJpaR4Test {
 
 	@ParameterizedTest
 	@MethodSource("paramsProvider_noResourceType")
-	public void testRefIntegrity_withValidReferenceId_shouldAlwaysSucceed(boolean theIsEnforceRefIntegrityEnabled,
+	public void testRefIntegrityOnWrite_withValidReferenceId_shouldAlwaysSucceed(boolean theIsEnforceRefIntegrityEnabled,
 					  JpaStorageSettings.ClientIdStrategyEnum theClientIdStrategy,
 					  String theReferenceId) {
 		// Given
@@ -151,7 +151,7 @@ public class FhirResourceDaoR4ReferentialIntegrityTest extends BaseJpaR4Test {
 
 	@ParameterizedTest
 	@MethodSource("paramsProvider_noResourceType")
-	public void testRefIntegrity_withReferenceIdOfDeletedResource(boolean theIsEnforceRefIntegrityEnabled,
+	public void testRefIntegrityOnWrite_withReferenceIdOfDeletedResource(boolean theIsEnforceRefIntegrityEnabled,
 					  JpaStorageSettings.ClientIdStrategyEnum theClientIdStrategy,
 					  String theReferenceId) {
 		// Given
