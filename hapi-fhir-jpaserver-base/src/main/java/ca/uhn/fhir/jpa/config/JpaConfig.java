@@ -377,17 +377,17 @@ public class JpaConfig {
 
 	@Bean
 	public TaskScheduler taskScheduler() {
-		ConcurrentTaskScheduler retVal = new ConcurrentTaskScheduler();
-		retVal.setConcurrentExecutor(scheduledExecutorService().getObject());
-		retVal.setScheduledExecutor(scheduledExecutorService().getObject());
+		ConcurrentTaskScheduler retVal = new ConcurrentTaskScheduler(
+				scheduledExecutorService().getObject(),
+				scheduledExecutorService().getObject());
 		return retVal;
 	}
 
 	@Bean(name = TASK_EXECUTOR_NAME)
 	public AsyncTaskExecutor taskExecutor() {
-		ConcurrentTaskScheduler retVal = new ConcurrentTaskScheduler();
-		retVal.setConcurrentExecutor(scheduledExecutorService().getObject());
-		retVal.setScheduledExecutor(scheduledExecutorService().getObject());
+		ConcurrentTaskScheduler retVal = new ConcurrentTaskScheduler(
+				scheduledExecutorService().getObject(),
+				scheduledExecutorService().getObject());
 		return retVal;
 	}
 
