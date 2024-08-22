@@ -9,8 +9,8 @@ public class CompositeKeyTypesConfig {
 	@Bean
 	PersistenceManagedTypes getManagedTypes() {
 		return PersistenceManagedTypes.of(
-			ResRootCompositeEntity.class.getName()
-//			ResJoinCompositeEntity.class.getName()
+			ResRootCompositeEntity.class.getName(),
+			ResJoinCompositeEntity.class.getName()
 		);
 	}
 

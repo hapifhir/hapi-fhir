@@ -2,7 +2,6 @@ package ca.uhn.fhir.jpa.model.pkspike.composite;
 
 import com.google.common.base.Objects;
 import jakarta.persistence.Column;
-import jakarta.persistence.Embeddable;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -16,6 +15,10 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import java.util.ArrayList;
 import java.util.Collection;
 
+/**
+ * fixme MB IdClass vs embeddable?
+ *
+ */
 @SuppressWarnings("JpaDataSourceORMInspection")
 @Entity
 @Table(name = "RES_ROOT")
@@ -59,15 +62,15 @@ public class ResRootCompositeEntity {
 	@Column(name = "PARTITION_ID", nullable = true, insertable = true, updatable = false)
 	Integer myPartitionId;
 
-//	ResRootPK getPK() {
-//		return new ResRootPK(myId, myPartitionId);
-//	}
+	ResRootPK getPK() {
+		return new ResRootPK(myId, myPartitionId);
+	}
 
 	@Column(name = "STRING_COL")
 	String myString;
 
-//	@OneToMany(mappedBy = "myResource", fetch = FetchType.EAGER)
-//	Collection<ResJoinCompositeEntity> myJoinEntities = new ArrayList<>();
+	@OneToMany(mappedBy = "myResource", fetch = FetchType.EAGER)
+	Collection<ResJoinCompositeEntity> myJoinEntities = new ArrayList<>();
 
 	@Override
 	public String toString() {
