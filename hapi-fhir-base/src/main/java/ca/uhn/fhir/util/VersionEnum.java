@@ -172,7 +172,6 @@ public enum VersionEnum {
 		return ordinal() > theVersionEnum.ordinal();
 	}
 
-
 	public String getVersionedDocsSlug() {
 		if (VersionUtil.isSnapshot()) {
 			String semver = this.name().replace("V", "").replaceAll("_", ".");
