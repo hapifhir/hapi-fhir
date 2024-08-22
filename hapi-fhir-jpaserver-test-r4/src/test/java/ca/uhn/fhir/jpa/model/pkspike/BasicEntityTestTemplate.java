@@ -7,6 +7,9 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.orm.jpa.EntityManagerFactoryUtils;
@@ -80,17 +83,19 @@ abstract public class BasicEntityTestTemplate<R extends EntityFixture.IRootEntit
 	}
 
 
-	@Test
-	void roundTripJoin() {
+	@ParameterizedTest
+	@ValueSource(ints = 12)
+	@NullSource
+	void roundTripJoin(Integer thePartitionId) {
 		doInTx(em->{
 			var root = myEntityFixture.buildRootEntity();
-			root.setPartitionId(12);
+			root.setPartitionId(thePartitionId);
 			root.setString("parent");
 
 			var join = myEntityFixture.buildJoinEntity();
 			join.setParent(root);
 			join.setString("child");
-			join.setPartitionId(12);
+			join.setPartitionId(thePartitionId);
 			em.persist(root);
 			em.persist(join);
 
@@ -102,7 +107,7 @@ abstract public class BasicEntityTestTemplate<R extends EntityFixture.IRootEntit
 
 			assertEquals(root.getResId(), readback.getResId());
 			assertNotNull(readback.getResId());
-			assertEquals(12, readback.getPartitionId());
+			assertEquals(thePartitionId, readback.getPartitionId());
 			assertEquals("parent", readback.getString());
 
 			assertEquals(1, readback.getJoins().size());
@@ -110,25 +115,11 @@ abstract public class BasicEntityTestTemplate<R extends EntityFixture.IRootEntit
 			assertNotNull(joinReadback);
 			assertNotNull(joinReadback.getResId());
 			assertEquals(root.getResId(), joinReadback.getResId());
-			assertEquals(12, joinReadback.getPartitionId());
+			assertEquals(thePartitionId, joinReadback.getPartitionId());
 			assertEquals("child", joinReadback.getString());
 		});
-
-//
-//			ResRootEntity queryBack = em.find(ResRootEntity.class, resRootEntity.myId);
-//			assertEquals("hello world!", queryBack.myString);
-//			assertEquals(1, queryBack.myJoinEntities.size());
-//			ResJoinEntity child = queryBack.myJoinEntities.iterator().next();
-//			assertEquals(resRootEntity.myId, child.myResource.myId);
-//			assertEquals(resRootEntity.myPartitionId, child.myPartitionId);
-//			assertEquals("child", child.myString);
-//
-//			long count = em.createQuery("select count(*) from ResRootPartitionEntity", Long.class).getSingleResult();
-//			ourLog.info("found {} roots", count);
-//			assertEquals(1, count);
-//			return true;
-//		});
 	}
+
 	private void doInTx(Consumer<EntityManager> theCallback) {
 		myTransactionTemplate.execute(status-> {
 			theCallback.accept(getEntityManagerOrThrow());
