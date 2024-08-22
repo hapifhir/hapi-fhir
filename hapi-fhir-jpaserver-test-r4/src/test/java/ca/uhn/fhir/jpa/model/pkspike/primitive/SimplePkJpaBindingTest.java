@@ -1,6 +1,8 @@
-package ca.uhn.fhir.jpa.model.pkspike;
+package ca.uhn.fhir.jpa.model.pkspike.primitive;
 
 import ca.uhn.fhir.jpa.config.r4.FhirContextR4Config;
+import ca.uhn.fhir.jpa.model.pkspike.PKSpikeDefaultJPAConfig;
+import ca.uhn.fhir.jpa.model.pkspike.SchemaCleanerExtension;
 import jakarta.annotation.Nonnull;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
@@ -9,6 +11,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -27,10 +30,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  */
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {
-	JPAConfig.class, FhirContextR4Config.class
+	SimpleTypesConfig.class, PKSpikeDefaultJPAConfig.class, FhirContextR4Config.class
 })
-public class JpaBindingTest {
-	private static final Logger ourLog = LoggerFactory.getLogger(JpaBindingTest.class);
+public class SimplePkJpaBindingTest {
+	private static final Logger ourLog = LoggerFactory.getLogger(SimplePkJpaBindingTest.class);
 
 	@Inject
 	DataSource myDataSource;
@@ -42,15 +45,12 @@ public class JpaBindingTest {
 	TransactionTemplate myTransactionTemplate;
 	JdbcTemplate myJdbcTemplate;
 
+	@RegisterExtension
+	SchemaCleanerExtension mySchemaCleanerExtension = new SchemaCleanerExtension();
+
 	@BeforeEach
 	void setUp() {
 		myJdbcTemplate = new JdbcTemplate(myDataSource);
-	}
-
-	@AfterEach
-	void tearDown() {
-		myJdbcTemplate.execute("delete from res_join");
-		myJdbcTemplate.execute("delete from res_root");
 	}
 
 	@Test
@@ -60,7 +60,7 @@ public class JpaBindingTest {
 
 		myTransactionTemplate.execute(status -> {
 			var em = getEntityManagerOrThrow();
-			long count = em.createQuery("select count(*) from ResRootEntity", Long.class).getSingleResult();
+			long count = em.createQuery("select count(*) from ResRootEntity ", Long.class).getSingleResult();
 			assertEquals(1, count);
 
 			em.createQuery("from ResRootEntity", ResRootEntity.class).getResultStream().forEach(e-> {

@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.model.pkspike;
+package ca.uhn.fhir.jpa.model.pkspike.primitive;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -15,27 +15,10 @@ import java.util.Collection;
 
 @SuppressWarnings("JpaDataSourceORMInspection")
 @Entity
-@Table(
-	name = "RES_ROOT"
-//	uniqueConstraints = {
-//		@UniqueConstraint(
-//			name = IDX_RES_TYPE_FHIR_ID,
-//			columnNames = {"RES_TYPE", "FHIR_ID"})
-//	},
-//	indexes = {
-//		// Do not reuse previously used index name: IDX_INDEXSTATUS, IDX_RES_TYPE
-//		@Index(name = "IDX_RES_DATE", columnList = BaseHasResource.RES_UPDATED),
-//		@Index(name = "IDX_RES_FHIR_ID", columnList = "FHIR_ID"),
-//		@Index(
-//			name = "IDX_RES_TYPE_DEL_UPDATED",
-//			columnList = "RES_TYPE,RES_DELETED_AT,RES_UPDATED,PARTITION_ID,RES_ID"),
-//		@Index(name = "IDX_RES_RESID_UPDATED", columnList = "RES_ID, RES_UPDATED, PARTITION_ID")
-//	}
-	)
+@Table(name = "RES_ROOT")
 public class ResRootEntity {
 	@Id
-//	@GenericGenerator(name = "SEQ_RESOURCE_ID", type = ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator.class)
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@GeneratedValue()
 	@Column(name = "RES_ID")
 	Long myId;
 

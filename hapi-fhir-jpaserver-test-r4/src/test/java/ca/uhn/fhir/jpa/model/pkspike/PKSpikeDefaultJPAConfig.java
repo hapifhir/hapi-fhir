@@ -23,7 +23,7 @@ import java.time.Duration;
 import java.util.Properties;
 
 @Configuration
-class JPAConfig {
+public class PKSpikeDefaultJPAConfig {
 
 	@Inject
 	FhirContext myFhirContext;
@@ -32,7 +32,7 @@ class JPAConfig {
 	DataSource datasource() {
 		BasicDataSource dataSource = new BasicDataSource();
 		dataSource.setDriver(new org.h2.Driver());
-		dataSource.setUrl("jdbc:h2:mem:testdb_r4");
+		dataSource.setUrl("jdbc:h2:mem:testdb_r4" + System.currentTimeMillis());
 		dataSource.setMaxWait(Duration.ofMillis(30000));
 		dataSource.setUsername("");
 		dataSource.setPassword("");
@@ -48,7 +48,8 @@ class JPAConfig {
 	public HapiFhirLocalContainerEntityManagerFactoryBean entityManagerFactory(
 //			ModuleMigrationMetadata theModuleMigrationMetadata,
 		ConfigurableListableBeanFactory theConfigurableListableBeanFactory,
-		DataSource theDataSource) {
+		DataSource theDataSource,
+		PersistenceManagedTypes theManagedTypes) {
 		HapiFhirLocalContainerEntityManagerFactoryBean retVal =
 			new HapiFhirLocalContainerEntityManagerFactoryBean(theConfigurableListableBeanFactory);
 
@@ -67,10 +68,7 @@ class JPAConfig {
 
 		retVal.setPersistenceUnitName("HapiPU");
 		retVal.setDataSource(theDataSource);
-		retVal.setManagedTypes(PersistenceManagedTypes.of(
-			ResRootEntity.class.getName(),
-			ResJoinEntity.class.getName()
-			));
+		retVal.setManagedTypes(theManagedTypes);
 
 		retVal.setJpaProperties(jpaProperties);
 
