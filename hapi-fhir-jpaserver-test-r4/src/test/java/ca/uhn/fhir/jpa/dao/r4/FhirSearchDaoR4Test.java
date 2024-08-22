@@ -26,6 +26,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
@@ -294,7 +295,7 @@ public class FhirSearchDaoR4Test extends BaseJpaR4Test {
 		IBundleProvider searchResultBundle = myPatientDao.search(map, mySrd);
 		List<String> resourceIdsFromSearchResult = searchResultBundle.getAllResourceIds();
 
-		assertThat(resourceIdsFromSearchResult, containsInAnyOrder(expectedActivePatientIds));
+		assertThat(resourceIdsFromSearchResult).containsExactlyInAnyOrderElementsOf(expectedActivePatientIds);
 	}
 
 	@Test
@@ -328,7 +329,7 @@ public class FhirSearchDaoR4Test extends BaseJpaR4Test {
 		IBundleProvider searchResultBundle = myPatientDao.search(map, mySrd);
 		List<String> resourceIdsFromSearchResult = searchResultBundle.getAllResourceIds();
 
-		assertThat(resourceIdsFromSearchResult, containsInAnyOrder(expectedActivePatientIds));
+		assertThat(resourceIdsFromSearchResult).containsExactlyInAnyOrderElementsOf(expectedActivePatientIds);
 	}
 
 	@Test
@@ -363,7 +364,7 @@ public class FhirSearchDaoR4Test extends BaseJpaR4Test {
 		IBundleProvider searchResultBundle = myPatientDao.search(map, mySrd);
 		List<String> resourceIdsFromSearchResult = searchResultBundle.getAllResourceIds();
 
-		assertThat(resourceIdsFromSearchResult, containsInAnyOrder(expectedActivePatientIds));
+		assertThat(resourceIdsFromSearchResult).containsExactlyInAnyOrderElementsOf(expectedActivePatientIds);
 	}
 
 }
