@@ -1,11 +1,11 @@
-package ca.uhn.fhir.jpa.model.pkspike.composite;
+package ca.uhn.fhir.jpa.model.pkspike.embeddedid;
 
+import ca.uhn.fhir.jpa.model.pkspike.EntityFixture;
 import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.IdClass;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * fixme MB IdClass vs embeddable?
@@ -24,43 +25,23 @@ import java.util.Collection;
 @SuppressWarnings("JpaDataSourceORMInspection")
 @Entity
 @Table(name = "RES_ROOT")
-@IdClass(ResRootCompositeEntity.ResRootPK.class)
-public class ResRootCompositeEntity {
-	private static final Logger ourLog = LoggerFactory.getLogger(ResRootCompositeEntity.class);
+public class ResRootEmbeddedIdEntity implements EntityFixture.IRootEntity<ResJoinEmbeddedIdEntity> {
+	private static final Logger ourLog = LoggerFactory.getLogger(ResRootEmbeddedIdEntity.class);
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
-	@Column(name = "RES_ID")
-	Long myId;
+	@EmbeddedId
+	ResRootPK myId = new ResRootPK();
 
-	@Id
-	@Column(name = "PARTITION_ID", nullable = true, insertable = true, updatable = false)
+	@Column(name = "PARTITION_ID", nullable = true, insertable = false, updatable = false)
 	Integer myPartitionId;
-
-	ResRootPK getPK() {
-		return new ResRootPK(myId, myPartitionId);
-	}
 
 	@Column(name = "STRING_COL")
 	String myString;
 
 	@OneToMany(mappedBy = "myResource")
-	Collection<ResJoinCompositeEntity> myJoinEntities = new ArrayList<>();
+	Collection<ResJoinEmbeddedIdEntity> myJoinEntities = new ArrayList<>();
 
-	public ResRootCompositeEntity() {
+	public ResRootEmbeddedIdEntity() {
 		ourLog.info("new ResRootCompositeEntity()");
-	}
-
-	public Long getId() {
-		return myId;
-	}
-
-	public String getString() {
-		return myString;
-	}
-
-	public void setString(String theString) {
-		myString = theString;
 	}
 
 	@Override
@@ -68,13 +49,45 @@ public class ResRootCompositeEntity {
 		return ToStringBuilder.reflectionToString(this);
 	}
 
+	@Override
+	public Long getResId() {
+		return myId==null?null:myId.myId;
+	}
+
+	@Override
+	public void setPartitionId(Integer thePartitionId) {
+		myPartitionId = thePartitionId;
+		myId.myPartitionId = thePartitionId;
+	}
+
+	@Override
+	public Integer getPartitionId() {
+		return myPartitionId;
+	}
+
+	@Override
+	public String getString() {
+		return myString;
+	}
+
+	@Override
+	public void setString(String theString) {
+		myString = theString;
+	}
+
+	@Override
+	public Collection<ResJoinEmbeddedIdEntity> getJoins() {
+		return myJoinEntities;
+	}
+
+	@Embeddable
 	static class ResRootPK {
 		@GeneratedValue()
 		@Column(name = "RES_ID")
-		Long myId;
+		public Long myId;
 
 		@Column(name = "PARTITION_ID", nullable = true, insertable = true, updatable = false)
-		Integer myPartitionId;
+		public Integer myPartitionId;
 
 		/** For Hibernate */
 		protected ResRootPK() {}

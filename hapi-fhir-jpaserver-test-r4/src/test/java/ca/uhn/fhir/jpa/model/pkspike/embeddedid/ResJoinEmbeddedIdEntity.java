@@ -1,5 +1,6 @@
-package ca.uhn.fhir.jpa.model.pkspike.composite;
+package ca.uhn.fhir.jpa.model.pkspike.embeddedid;
 
+import ca.uhn.fhir.jpa.model.pkspike.EntityFixture;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -16,7 +17,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 @Table(
 	name = "RES_JOIN"
 )
-public class ResJoinCompositeEntity {
+public class ResJoinEmbeddedIdEntity implements EntityFixture.IJoinEntity<ResRootEmbeddedIdEntity> {
 	@Id
 //	@GenericGenerator(name = "SEQ_RESOURCE_ID", type = ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator.class)
 	@GeneratedValue(strategy = GenerationType.SEQUENCE)
@@ -35,11 +36,40 @@ public class ResJoinCompositeEntity {
 		@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID"),
 		@JoinColumn(name = "PARTITION_ID", referencedColumnName = "PARTITION_ID")
 	})
-	ResRootCompositeEntity myResource;
+	ResRootEmbeddedIdEntity myResource;
 
 	@Override
 	public String toString() {
 		return ToStringBuilder.reflectionToString(this);
 	}
 
+	@Override
+	public void setString(String theString) {
+		myString = theString;
+	}
+
+	@Override
+	public void setParent(ResRootEmbeddedIdEntity theRoot) {
+		myResource = theRoot;
+	}
+
+	@Override
+	public String getString() {
+		return myString;
+	}
+
+	@Override
+	public void setPartitionId(Integer thePartitionId) {
+		myPartitionId = thePartitionId;
+	}
+
+	@Override
+	public Integer getPartitionId() {
+		return myPartitionId;
+	}
+
+	@Override
+	public Long getResId() {
+		return myResource.getResId();
+	}
 }

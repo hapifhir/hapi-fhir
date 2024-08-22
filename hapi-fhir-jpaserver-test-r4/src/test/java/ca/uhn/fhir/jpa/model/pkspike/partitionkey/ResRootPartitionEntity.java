@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.model.pkspike.primitive;
+package ca.uhn.fhir.jpa.model.pkspike.partitionkey;
 
 import ca.uhn.fhir.jpa.model.pkspike.EntityFixture;
 import jakarta.persistence.Column;
@@ -10,6 +10,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hibernate.annotations.PartitionKey;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -18,12 +19,13 @@ import java.util.List;
 @SuppressWarnings("JpaDataSourceORMInspection")
 @Entity
 @Table(name = "RES_ROOT")
-public class ResRootEntity implements EntityFixture.IRootEntity<ResJoinEntity> {
+public class ResRootPartitionEntity implements EntityFixture.IRootEntity<ResJoinPartitionEntity> {
 	@Id
 	@GeneratedValue()
 	@Column(name = "RES_ID")
 	Long myId;
 
+	@PartitionKey
 	@Column(name = "PARTITION_ID", nullable = true, insertable = true, updatable = false)
 	Integer myPartitionId;
 
@@ -31,15 +33,28 @@ public class ResRootEntity implements EntityFixture.IRootEntity<ResJoinEntity> {
 	String myString;
 
 	@OneToMany(mappedBy = "myResource", fetch = FetchType.EAGER)
-	Collection<ResJoinEntity> myJoinEntities = new ArrayList<>();
+	Collection<ResJoinPartitionEntity> myJoinEntities = new ArrayList<>();
 
 	public Long getId() {
 		return myId;
 	}
 
+	public String getString() {
+		return myString;
+	}
+
+	public void setString(String theString) {
+		myString = theString;
+	}
+
 	@Override
-	public Long getResId() {
-		return myId;
+	public Collection<ResJoinPartitionEntity> getJoins() {
+		return myJoinEntities;
+	}
+
+	@Override
+	public String toString() {
+		return ToStringBuilder.reflectionToString(this, ToStringStyle.SIMPLE_STYLE);
 	}
 
 	@Override
@@ -52,21 +67,9 @@ public class ResRootEntity implements EntityFixture.IRootEntity<ResJoinEntity> {
 		return myPartitionId;
 	}
 
-	public String getString() {
-		return myString;
-	}
-
-	public void setString(String theString) {
-		myString = theString;
-	}
-
 	@Override
-	public Collection<ResJoinEntity> getJoins() {
-		return myJoinEntities;
+	public Long getResId() {
+		return myId;
 	}
 
-	@Override
-	public String toString() {
-		return ToStringBuilder.reflectionToString(this, ToStringStyle.SIMPLE_STYLE);
-	}
 }
