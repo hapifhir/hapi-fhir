@@ -10,11 +10,15 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.orm.jpa.EntityManagerFactoryUtils;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 
@@ -22,6 +26,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 abstract public class BasicEntityTestTemplate<R extends EntityFixture.IRootEntity<J>,J extends EntityFixture.IJoinEntity<R>> {
+	private static final Logger ourLog = LoggerFactory.getLogger(BasicEntityTestTemplate.class);
+
 	@Autowired
 	EntityManagerFactory myEntityManagerFactory;
 
@@ -38,6 +44,10 @@ abstract public class BasicEntityTestTemplate<R extends EntityFixture.IRootEntit
 
 	public BasicEntityTestTemplate(EntityFixture<R,J> theEntityFixture) {
 		myEntityFixture = theEntityFixture;
+	}
+
+	List<Integer> getPartitions() {
+		return List.of(null, 12);
 	}
 
 	@Test
@@ -62,11 +72,13 @@ abstract public class BasicEntityTestTemplate<R extends EntityFixture.IRootEntit
 		});
 	}
 
-	@Test
-	void roundTripResourceTable() {
+	@ParameterizedTest
+	@ValueSource(ints = 12)
+	@NullSource
+	void roundTripResourceTable(Integer thePartitionId) {
 		doInTx(em->{
 			R root = myEntityFixture.buildRootEntity();
-			root.setPartitionId(12);
+			root.setPartitionId(thePartitionId);
 			root.setString("goodbye!");
 			em.persist(root);
 
@@ -74,10 +86,12 @@ abstract public class BasicEntityTestTemplate<R extends EntityFixture.IRootEntit
 			em.clear();
 
 			Object id = myEntityManagerFactory.getPersistenceUnitUtil().getIdentifier(root);
+			ourLog.info("flushed root entity.  Id is {}", id);
 			R readback = em.find(myEntityFixture.myRootType, id);
+			assertNotNull(readback);
 			assertEquals(root.getResId(), readback.getResId());
 			assertNotNull(readback.getResId());
-			assertEquals(12, readback.getPartitionId());
+			assertEquals(thePartitionId, readback.getPartitionId());
 			assertEquals("goodbye!", readback.getString());
 		});
 	}
@@ -103,15 +117,19 @@ abstract public class BasicEntityTestTemplate<R extends EntityFixture.IRootEntit
 			em.clear();
 
 			Object id = myEntityManagerFactory.getPersistenceUnitUtil().getIdentifier(root);
+			ourLog.info("flushed root entity.  Id is {}", id);
 			R readback = em.find(myEntityFixture.myRootType, id);
 
+			assertNotNull(readback);
 			assertEquals(root.getResId(), readback.getResId());
 			assertNotNull(readback.getResId());
 			assertEquals(thePartitionId, readback.getPartitionId());
 			assertEquals("parent", readback.getString());
 
-			assertEquals(1, readback.getJoins().size());
-			J joinReadback = readback.getJoins().iterator().next();
+			Collection<J> joins = readback.getJoins();
+			assertNotNull(joins);
+			assertEquals(1, joins.size());
+			J joinReadback = joins.iterator().next();
 			assertNotNull(joinReadback);
 			assertNotNull(joinReadback.getResId());
 			assertEquals(root.getResId(), joinReadback.getResId());

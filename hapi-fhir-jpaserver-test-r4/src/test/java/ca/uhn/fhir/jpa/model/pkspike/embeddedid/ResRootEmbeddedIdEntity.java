@@ -11,12 +11,12 @@ import jakarta.persistence.Table;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 /**
  * fixme MB IdClass vs embeddable?
@@ -105,6 +105,11 @@ public class ResRootEmbeddedIdEntity implements EntityFixture.IRootEntity<ResJoi
 		@Override
 		public int hashCode() {
 			return HashCodeBuilder.reflectionHashCode(this);
+		}
+
+		@Override
+		public String toString() {
+			return ToStringBuilder.reflectionToString(this, ToStringStyle.SIMPLE_STYLE);
 		}
 	}
 
