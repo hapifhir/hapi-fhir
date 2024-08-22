@@ -294,7 +294,7 @@ public class FhirSearchDaoR4Test extends BaseJpaR4Test {
 		IBundleProvider searchResultBundle = myPatientDao.search(map, mySrd);
 		List<String> resourceIdsFromSearchResult = searchResultBundle.getAllResourceIds();
 
-		assertThat(resourceIdsFromSearchResult).containsExactlyInAnyOrderElementsOf(expectedActivePatientIds);
+		assertThat(resourceIdsFromSearchResult, containsInAnyOrder(expectedActivePatientIds));
 	}
 
 	@Test
@@ -328,7 +328,7 @@ public class FhirSearchDaoR4Test extends BaseJpaR4Test {
 		IBundleProvider searchResultBundle = myPatientDao.search(map, mySrd);
 		List<String> resourceIdsFromSearchResult = searchResultBundle.getAllResourceIds();
 
-		assertThat(resourceIdsFromSearchResult).containsExactlyInAnyOrderElementsOf(expectedActivePatientIds);
+		assertThat(resourceIdsFromSearchResult, containsInAnyOrder(expectedActivePatientIds));
 	}
 
 	@Test
@@ -363,7 +363,7 @@ public class FhirSearchDaoR4Test extends BaseJpaR4Test {
 		IBundleProvider searchResultBundle = myPatientDao.search(map, mySrd);
 		List<String> resourceIdsFromSearchResult = searchResultBundle.getAllResourceIds();
 
-		assertThat(resourceIdsFromSearchResult).containsExactlyInAnyOrderElementsOf(expectedActivePatientIds);
+		assertThat(resourceIdsFromSearchResult, containsInAnyOrder(expectedActivePatientIds));
 	}
 
 }
