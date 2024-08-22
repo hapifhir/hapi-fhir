@@ -19,9 +19,6 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 public class VersionEnumDocsSlugTest {
 
-	@Mock
-	VersionUtil myVersionUtils;
-
 	@Test
 	void testVersionedDocsSlugsWhileSnapshot() {
 
@@ -37,8 +34,6 @@ public class VersionEnumDocsSlugTest {
 			versionedDocsSlug = VersionEnum.V7_4_0.getVersionedDocsSlug();
 			assertThat(versionedDocsSlug).isEqualTo("7.4.PRE");
 		}
-
-
 	}
 
 	@Test
