@@ -54,7 +54,6 @@ public class PKSpikeDefaultJPAConfig {
 			new HapiFhirLocalContainerEntityManagerFactoryBean(theConfigurableListableBeanFactory);
 
 		retVal.setJpaDialect(new HapiFhirHibernateJpaDialect(myFhirContext.getLocalizer()));
-//		retVal.setPackagesToScan("ca.uhn.fhir.jpa.model.entity", "ca.uhn.fhir.jpa.entity");
 		HibernatePersistenceProvider persistenceProvider = new HibernatePersistenceProvider();
 		retVal.setPersistenceProvider(persistenceProvider);
 		Properties jpaProperties = new Properties();
@@ -62,7 +61,7 @@ public class PKSpikeDefaultJPAConfig {
 		jpaProperties.put("hibernate.format_sql", "false");
 		jpaProperties.put("hibernate.show_sql", "false");
 		jpaProperties.put("hibernate.integration.envers.enabled=false", "false");
-		//jpaProperties.put("hibernate.hbm2ddl.auto", "update");
+		jpaProperties.put("hibernate.hbm2ddl.auto", "none");
 		jpaProperties.put("hibernate.dialect", HapiFhirH2Dialect.class.getName());
 		retVal.setJpaProperties(jpaProperties);
 
@@ -92,7 +91,6 @@ public class PKSpikeDefaultJPAConfig {
 	@Nonnull
 	JpaStorageSettings storageSettings() {
 		JpaStorageSettings jpaStorageSettings = new JpaStorageSettings();
-		//jpaStorageSettings.setAdvancedHSearchIndexing();
 		return jpaStorageSettings;
 	}
 }

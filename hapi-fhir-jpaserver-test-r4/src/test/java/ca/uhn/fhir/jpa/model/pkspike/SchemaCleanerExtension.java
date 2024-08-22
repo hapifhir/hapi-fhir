@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.model.pkspike;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.springframework.context.ApplicationContext;

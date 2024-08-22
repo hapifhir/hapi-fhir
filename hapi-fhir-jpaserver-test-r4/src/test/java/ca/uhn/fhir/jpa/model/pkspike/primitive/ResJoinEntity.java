@@ -8,6 +8,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 @SuppressWarnings("JpaDataSourceORMInspection")
 @Entity
@@ -17,7 +19,7 @@ import jakarta.persistence.Table;
 public class ResJoinEntity {
 	@Id
 //	@GenericGenerator(name = "SEQ_RESOURCE_ID", type = ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator.class)
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@GeneratedValue(strategy = GenerationType.SEQUENCE)
 	@Column(name = "PID")
 	Long myId;
 	@Column(name = "PARTITION_ID", nullable = true, insertable = true, updatable = false)
@@ -34,4 +36,9 @@ public class ResJoinEntity {
 		nullable = false,
 		updatable = false)
 	ResRootEntity myResource;
+
+	@Override
+	public String toString() {
+		return ToStringBuilder.reflectionToString(this, ToStringStyle.SIMPLE_STYLE);
+	}
 }

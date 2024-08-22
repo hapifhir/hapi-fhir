@@ -4,11 +4,11 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -31,11 +31,6 @@ public class ResRootEntity {
 	@OneToMany(mappedBy = "myResource", fetch = FetchType.EAGER)
 	Collection<ResJoinEntity> myJoinEntities = new ArrayList<>();
 
-	@Override
-	public String toString() {
-		return ToStringBuilder.reflectionToString(this);
-	}
-
 	public Long getId() {
 		return myId;
 	}
@@ -46,5 +41,10 @@ public class ResRootEntity {
 
 	public void setString(String theString) {
 		myString = theString;
+	}
+
+	@Override
+	public String toString() {
+		return ToStringBuilder.reflectionToString(this, ToStringStyle.SIMPLE_STYLE);
 	}
 }

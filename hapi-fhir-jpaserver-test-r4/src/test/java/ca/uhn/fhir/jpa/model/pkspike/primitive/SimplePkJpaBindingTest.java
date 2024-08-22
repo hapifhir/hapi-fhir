@@ -7,7 +7,6 @@ import jakarta.annotation.Nonnull;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -96,7 +95,7 @@ public class SimplePkJpaBindingTest {
 			assertEquals(1, queryBack.myJoinEntities.size());
 			ResJoinEntity child = queryBack.myJoinEntities.iterator().next();
 			assertEquals(resRootEntity.myId, child.myResource.myId);
-			//assertEquals(resRootEntity.myPartitionId, child.myPartitionId);
+			assertEquals(resRootEntity.myPartitionId, child.myPartitionId);
 			assertEquals("child", child.myString);
 
 			long count = em.createQuery("select count(*) from ResRootEntity", Long.class).getSingleResult();
