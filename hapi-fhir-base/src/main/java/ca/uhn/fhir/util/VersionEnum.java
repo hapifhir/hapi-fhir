@@ -171,4 +171,24 @@ public enum VersionEnum {
 	public boolean isNewerThan(VersionEnum theVersionEnum) {
 		return ordinal() > theVersionEnum.ordinal();
 	}
+
+	public boolean isSnapshot() {
+			if (VersionUtil.getBuildVersion().contains(".PRE")) {
+				String basePreVersion =
+					VersionUtil.getBuildVersion().substring(0, 7).replace(".", "_");
+				String thisVersion = name().substring(1, 8);
+				if (basePreVersion.equals(thisVersion)) {
+					return true;
+				}
+			}
+			return false;
+	}
+
+	public String getVersionedDocsSlug() {
+		if (this.isSnapshot()) {
+			return this.name().replace("V", "").replaceAll("_", ".");
+		} else {
+			return this.name().replace("V", "").replaceAll("_", ".");
+		}
+	}
 }
