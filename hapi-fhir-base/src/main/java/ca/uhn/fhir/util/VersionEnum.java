@@ -173,12 +173,6 @@ public enum VersionEnum {
 	}
 
 	public String getVersionedDocsSlug() {
-		if (VersionUtil.isSnapshot()) {
-			String semver = this.name().replace("V", "").replaceAll("_", ".");
-			int finalPeriodIndex = semver.lastIndexOf(".");
-			return semver.substring(0, finalPeriodIndex) + ".PRE";
-		} else {
-			return this.name().replace("V", "").replaceAll("_", ".");
-		}
+		return this.name().replace("V", "").replaceAll("_", ".");
 	}
 }

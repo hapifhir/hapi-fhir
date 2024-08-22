@@ -21,7 +21,6 @@ public class VersionEnumDocsSlugTest {
 
 	@Test
 	void testVersionedDocsSlugsWhileSnapshot() {
-
 		try (MockedStatic<VersionUtil> versionUtil = Mockito.mockStatic(VersionUtil.class)) {
 			versionUtil.when(VersionUtil::isSnapshot).thenReturn(true);
 
