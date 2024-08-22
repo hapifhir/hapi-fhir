@@ -1585,7 +1585,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 			String sql = localReferenceQuery + " UNION " + canonicalQuery.getLeft();
 
-			if(myDialectProvider.getDialect() instanceof SQLServerDialect) {
+			if (myDialectProvider.getDialect() instanceof SQLServerDialect) {
 				sql += " order by r." + findPidFieldSqlColumn;
 			}
 
