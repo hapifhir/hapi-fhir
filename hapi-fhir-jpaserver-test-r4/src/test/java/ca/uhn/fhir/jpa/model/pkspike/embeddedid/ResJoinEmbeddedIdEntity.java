@@ -25,7 +25,8 @@ public class ResJoinEmbeddedIdEntity implements EntityFixture.IJoinEntity<ResRoo
 	Long myId;
 	@Column(name = "PARTITION_ID", nullable = true, insertable = false, updatable = false)
 	Integer myPartitionId;
-
+	@Column(name = "RES_ID", nullable = false, updatable = false, insertable = false)
+	Long myResourceId;
 	@Column(name = "STRING_COL")
 	String myString;
 
@@ -41,6 +42,11 @@ public class ResJoinEmbeddedIdEntity implements EntityFixture.IJoinEntity<ResRoo
 	@Override
 	public String toString() {
 		return ToStringBuilder.reflectionToString(this);
+	}
+
+	@Override
+	public Long getPid() {
+		return myId;
 	}
 
 	@Override
@@ -70,6 +76,7 @@ public class ResJoinEmbeddedIdEntity implements EntityFixture.IJoinEntity<ResRoo
 
 	@Override
 	public Long getResId() {
-		return myResource.getResId();
+		// fixme keep copy
+		return myResource==null?null:myResource.getResId();
 	}
 }

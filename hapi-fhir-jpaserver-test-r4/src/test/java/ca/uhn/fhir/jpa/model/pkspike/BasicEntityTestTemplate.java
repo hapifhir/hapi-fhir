@@ -9,8 +9,7 @@ import jakarta.persistence.criteria.Root;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.NullSource;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +17,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.orm.jpa.EntityManagerFactoryUtils;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -47,8 +47,13 @@ abstract public class BasicEntityTestTemplate<R extends EntityFixture.IRootEntit
 		myEntityFixture = theEntityFixture;
 	}
 
-	List<Integer> getPartitions() {
-		return List.of(null, 12);
+	static List<Integer> getPartitions(EntityFixture theFixture) {
+		var result = new ArrayList<Integer>();
+		if (theFixture.isSupportNullPartitionId()) {
+			result.add(null);
+		}
+		result.add(12);
+		return result;
 	}
 
 	@Test
@@ -74,8 +79,7 @@ abstract public class BasicEntityTestTemplate<R extends EntityFixture.IRootEntit
 	}
 
 	@ParameterizedTest
-	@ValueSource(ints = 12)
-	@NullSource
+	@MethodSource("getPartitions")
 	void roundTripResourceTable(Integer thePartitionId) {
 		doInTx(em->{
 			R root = myEntityFixture.buildRootEntity();
@@ -99,8 +103,7 @@ abstract public class BasicEntityTestTemplate<R extends EntityFixture.IRootEntit
 
 
 	@ParameterizedTest
-	@ValueSource(ints = 12)
-	@NullSource
+	@MethodSource("getPartitions")
 	void roundTripJoin(Integer thePartitionId) {
 		doInTx(em->{
 			var root = myEntityFixture.buildRootEntity();
@@ -140,19 +143,39 @@ abstract public class BasicEntityTestTemplate<R extends EntityFixture.IRootEntit
 	}
 
 	@ParameterizedTest
-	@ValueSource(ints = 12)
-	@NullSource
+	@MethodSource("getPartitions")
 	void fetchJoinQuery(Integer thePartitionId) {
 		doInTx(em -> {
-			CriteriaBuilder cb = em.getCriteriaBuilder();
+			var root0 = myEntityFixture.buildRootEntity();
+			root0.setPartitionId(thePartitionId);
+			root0.setString("parent");
 
+			var join0 = myEntityFixture.buildJoinEntity();
+			join0.setParent(root0);
+			join0.setString("child");
+			join0.setPartitionId(thePartitionId);
+
+			var join1 = myEntityFixture.buildJoinEntity();
+			join1.setParent(root0);
+			join1.setString("child1");
+			join1.setPartitionId(thePartitionId);
+
+			em.persist(root0);
+			em.persist(join0);
+			em.persist(join1);
+
+			em.flush();
+			em.clear();
+
+
+			CriteriaBuilder cb = em.getCriteriaBuilder();
 			CriteriaQuery<R> cr = cb.createQuery(myEntityFixture.myRootType);
 			Root<R> from = cr.from(myEntityFixture.myRootType);
 			from.fetch("myJoinEntities");
 			cr.select(from);
 
 			em.createQuery(cr).getResultStream()
-				.forEach(Object::toString);
+				.forEach(e-> ourLog.info("e: {}", e));
 
 		});
 	}
@@ -165,7 +188,7 @@ abstract public class BasicEntityTestTemplate<R extends EntityFixture.IRootEntit
 		});
 	}
 
-	private static long queryCountAll(EntityManager em, Class<? extends EntityFixture.IRootEntity> rootType) {
+	private long queryCountAll(EntityManager em, Class<R> rootType) {
 		CriteriaBuilder qb = em.getCriteriaBuilder();
 		CriteriaQuery<Long> cq = qb.createQuery(Long.class);
 		CriteriaQuery<Long> select = cq.select(qb.count(cq.from(rootType)));

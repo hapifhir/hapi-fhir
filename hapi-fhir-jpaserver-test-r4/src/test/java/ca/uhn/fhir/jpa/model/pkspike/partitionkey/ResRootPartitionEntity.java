@@ -14,7 +14,6 @@ import org.hibernate.annotations.PartitionKey;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 @SuppressWarnings("JpaDataSourceORMInspection")
 @Entity
@@ -54,7 +53,7 @@ public class ResRootPartitionEntity implements EntityFixture.IRootEntity<ResJoin
 
 	@Override
 	public String toString() {
-		return ToStringBuilder.reflectionToString(this, ToStringStyle.SIMPLE_STYLE);
+		return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
 	}
 
 	@Override

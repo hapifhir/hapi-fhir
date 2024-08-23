@@ -48,7 +48,12 @@ public class ResJoinEntity implements EntityFixture.IJoinEntity<ResRootEntity> {
 
 	@Override
 	public String toString() {
-		return ToStringBuilder.reflectionToString(this, ToStringStyle.SIMPLE_STYLE);
+		return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
+	}
+
+	@Override
+	public Long getPid() {
+		return myId;
 	}
 
 	@Override

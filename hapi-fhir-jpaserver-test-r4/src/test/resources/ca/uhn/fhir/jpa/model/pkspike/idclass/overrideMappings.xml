@@ -1,7 +1,0 @@
-<entity-mappings>
-	<entity class="ca.uhn.fhir.jpa.model.pkspike.idclass.ResRootIdClassEntity" name="ResRootIdClassEntity">
-		<attributes>
-			<id name="myId"/>
-		</attributes>
-	</entity>
-</entity-mappings>

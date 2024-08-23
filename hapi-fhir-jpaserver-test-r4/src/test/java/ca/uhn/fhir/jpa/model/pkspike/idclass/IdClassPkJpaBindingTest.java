@@ -4,14 +4,13 @@ import ca.uhn.fhir.jpa.config.r4.FhirContextR4Config;
 import ca.uhn.fhir.jpa.model.pkspike.BasicEntityTestTemplate;
 import ca.uhn.fhir.jpa.model.pkspike.EntityFixture;
 import ca.uhn.fhir.jpa.model.pkspike.PKSpikeDefaultJPAConfig;
+import ca.uhn.fhir.jpa.model.pkspike.ValueTypeBasedParameterResolver;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.ParameterResolver;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * Spike to assess variable binding against a db.
@@ -22,10 +21,14 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 })
 public class IdClassPkJpaBindingTest {
 
+	public static final EntityFixture<ResRootIdClassEntity, ResJoinIdClassEntity> ourFixture = EntityFixture.build(ResRootIdClassEntity.class, ResJoinIdClassEntity.class);
+	@RegisterExtension
+	static final ParameterResolver ourFixtureResolver = new ValueTypeBasedParameterResolver<>(ourFixture);
+
 	@Nested
 	class Common extends BasicEntityTestTemplate<ResRootIdClassEntity, ResJoinIdClassEntity> {
 		Common() {
-			super(EntityFixture.build(ResRootIdClassEntity.class, ResJoinIdClassEntity.class));
+			super(ourFixture);
 		}
 	}
 }

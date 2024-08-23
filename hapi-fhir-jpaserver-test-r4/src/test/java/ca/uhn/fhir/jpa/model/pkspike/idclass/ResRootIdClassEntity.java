@@ -35,13 +35,14 @@ public class ResRootIdClassEntity implements EntityFixture.IRootEntity<ResJoinId
 	@Column(name = "RES_ID")
 	Long myId;
 
-	@Id
+//	@Id
+	//@PartitionKey
 	@Column(name = "PARTITION_ID", nullable = true, insertable = true, updatable = false)
 	Integer myPartitionId;
 
-	ResRootPK getPK() {
-		return new ResRootPK(myId, myPartitionId);
-	}
+//	ResRootPK getPK() {
+//		return new ResRootPK(myId, myPartitionId);
+//	}
 
 	@Column(name = "STRING_COL")
 	String myString;
@@ -91,19 +92,17 @@ public class ResRootIdClassEntity implements EntityFixture.IRootEntity<ResJoinId
 	}
 
 	static class ResRootPK {
-		@GeneratedValue()
+		@Id
+		@GeneratedValue(strategy = GenerationType.AUTO)
 		@Column(name = "RES_ID")
 		Long myId;
 
-		@Column(name = "PARTITION_ID", nullable = true, insertable = true, updatable = false)
-		Integer myPartitionId;
+		/** for Hibernate */
+		public ResRootPK() {}
 
-		/** For Hibernate */
-		protected ResRootPK() {}
 
-		public ResRootPK(Long theId, Integer thePartitionId) {
+		public ResRootPK(Long theId) {
 			myId = theId;
-			myPartitionId = thePartitionId;
 		}
 
 		@Override
@@ -118,8 +117,24 @@ public class ResRootIdClassEntity implements EntityFixture.IRootEntity<ResJoinId
 
 		@Override
 		public String toString() {
-			return ToStringBuilder.reflectionToString(this, ToStringStyle.SIMPLE_STYLE);
+			return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
 		}
+	}
+
+	static class ResRootCompositePK extends ResRootPK {
+		@Column(name = "PARTITION_ID", nullable = true, insertable = true, updatable = false)
+		Integer myPartitionId;
+
+		/** for Hibernate */
+		public ResRootCompositePK() {}
+
+		public ResRootCompositePK(Long theId, Integer thePartitionId) {
+			super(theId);
+			myPartitionId = thePartitionId;
+		}
+
+
+
 	}
 
 }

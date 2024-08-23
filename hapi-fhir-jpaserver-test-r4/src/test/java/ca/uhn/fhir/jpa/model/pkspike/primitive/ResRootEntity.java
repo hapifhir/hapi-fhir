@@ -13,7 +13,6 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 @SuppressWarnings("JpaDataSourceORMInspection")
 @Entity
@@ -67,6 +66,6 @@ public class ResRootEntity implements EntityFixture.IRootEntity<ResJoinEntity> {
 
 	@Override
 	public String toString() {
-		return ToStringBuilder.reflectionToString(this, ToStringStyle.SIMPLE_STYLE);
+		return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
 	}
 }

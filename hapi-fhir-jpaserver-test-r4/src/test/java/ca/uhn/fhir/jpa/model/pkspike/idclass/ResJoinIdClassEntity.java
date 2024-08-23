@@ -19,11 +19,11 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 )
 public class ResJoinIdClassEntity implements EntityFixture.IJoinEntity<ResRootIdClassEntity> {
 	@Id
-//	@GenericGenerator(name = "SEQ_RESOURCE_ID", type = ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator.class)
 	@GeneratedValue(strategy = GenerationType.SEQUENCE)
 	@Column(name = "PID")
 	Long myId;
-	@Column(name = "PARTITION_ID", nullable = true, insertable = false, updatable = false)
+
+	@Column(name = "PARTITION_ID", nullable = true, insertable = true, updatable = false)
 	Integer myPartitionId;
 
 	@Column(name = "STRING_COL")
@@ -34,13 +34,18 @@ public class ResJoinIdClassEntity implements EntityFixture.IJoinEntity<ResRootId
 		optional = false)
 	@JoinColumns({
 		@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID"),
-		@JoinColumn(name = "PARTITION_ID", referencedColumnName = "PARTITION_ID")
+//		@JoinColumn(name = "PARTITION_ID", referencedColumnName = "PARTITION_ID")
 	})
 	ResRootIdClassEntity myResource;
 
 	@Override
 	public String toString() {
 		return ToStringBuilder.reflectionToString(this);
+	}
+
+	@Override
+	public Long getPid() {
+		return myId;
 	}
 
 	@Override
@@ -70,6 +75,7 @@ public class ResJoinIdClassEntity implements EntityFixture.IJoinEntity<ResRootId
 
 	@Override
 	public Long getResId() {
-		return myId;
+		// fixme keep copy
+		return myResource == null? null: myResource.myId;
 	}
 }

@@ -2,13 +2,20 @@ package ca.uhn.fhir.jpa.model.pkspike;
 
 import jakarta.annotation.Nonnull;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 
-public class EntityFixture<R extends EntityFixture.IRootEntity,J extends EntityFixture.IJoinEntity> {
+public class EntityFixture<R extends EntityFixture.IRootEntity<J>,J extends EntityFixture.IJoinEntity<R>> {
 
-	public static <R extends EntityFixture.IRootEntity,J extends EntityFixture.IJoinEntity> EntityFixture<R,J> build(Class<R> theRootType, Class<J> theJoinType) {
+	private boolean myNullPartitionSupportFlag = true;
+
+	public static <R extends EntityFixture.IRootEntity<J>,J extends EntityFixture.IJoinEntity<R>> EntityFixture<R,J> build(Class<R> theRootType, Class<J> theJoinType) {
 		return new EntityFixture<>(theRootType, theJoinType);
+	}
+
+	public static <R extends EntityFixture.IRootEntity<J>,J extends EntityFixture.IJoinEntity<R>> EntityFixture<R,J> buildNoNullPartition(Class<R> theRootType, Class<J> theJoinType) {
+		EntityFixture<R, J> entityFixture = new EntityFixture<>(theRootType, theJoinType);
+		entityFixture.myNullPartitionSupportFlag = false;
+		return entityFixture;
 	}
 
 	EntityFixture(Class<R> theRootType, Class<J> theJoinType) {
@@ -20,6 +27,10 @@ public class EntityFixture<R extends EntityFixture.IRootEntity,J extends EntityF
 		return buildInstance(myJoinType);
 	}
 
+	public boolean isSupportNullPartitionId() {
+		return myNullPartitionSupportFlag;
+	}
+
 	public interface IRootEntity<J> {
 		Long getResId();
 		void setPartitionId(Integer thePartitionId);
@@ -29,7 +40,8 @@ public class EntityFixture<R extends EntityFixture.IRootEntity,J extends EntityF
 
 		Collection<J> getJoins();
 	}
-	public interface IJoinEntity<P extends IRootEntity> {
+	public interface IJoinEntity<P> {
+		Long getPid();
 		void setString(String theString);
 
 		void setParent(P theRoot);
