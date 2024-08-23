@@ -26,7 +26,7 @@ public class ResJoinPartitionEntity implements EntityFixture.IJoinEntity<ResRoot
 	@Column(name = "PID")
 	Long myId;
 	@PartitionKey
-	@Column(name = "PARTITION_ID", nullable = true, insertable = false, updatable = false)
+	@Column(name = "PARTITION_ID", nullable = true, insertable = true, updatable = false)
 	Integer myPartitionId;
 
 	@Column(name = "STRING_COL")
@@ -38,8 +38,7 @@ public class ResJoinPartitionEntity implements EntityFixture.IJoinEntity<ResRoot
 	@ManyToOne(
 		optional = false)
 	@JoinColumns({
-		@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID", nullable = false, insertable = true, updatable = false),
-		@JoinColumn(name = "PARTITION_ID", referencedColumnName = "PARTITION_ID", nullable = true, insertable = true, updatable = false)
+		@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID", nullable = false, insertable = true, updatable = false)
 	})
 	ResRootPartitionEntity myResource;
 

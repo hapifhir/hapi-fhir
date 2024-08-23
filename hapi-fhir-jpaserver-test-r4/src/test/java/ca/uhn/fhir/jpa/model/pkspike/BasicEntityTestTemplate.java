@@ -47,7 +47,7 @@ abstract public class BasicEntityTestTemplate<R extends EntityFixture.IRootEntit
 		myEntityFixture = theEntityFixture;
 	}
 
-	static List<Integer> getPartitions(EntityFixture theFixture) {
+	static List<Integer> getPartitions(EntityFixture<?,?> theFixture) {
 		var result = new ArrayList<Integer>();
 		if (theFixture.isSupportNullPartitionId()) {
 			result.add(null);

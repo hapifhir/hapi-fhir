@@ -13,7 +13,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 /**
- * Spike to assess variable binding against a db.
+ * Use an IdClass even though the PK is only a single column.
+ * This allows us to extend the PK next door in the {@link IdClassPkCustomXmlJpaBindingTest}.
  */
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {
@@ -23,7 +24,7 @@ public class IdClassPkJpaBindingTest {
 
 	public static final EntityFixture<ResRootIdClassEntity, ResJoinIdClassEntity> ourFixture = EntityFixture.build(ResRootIdClassEntity.class, ResJoinIdClassEntity.class);
 	@RegisterExtension
-	static final ParameterResolver ourFixtureResolver = new ValueTypeBasedParameterResolver<>(ourFixture);
+	static final ParameterResolver ourFixtureResolver = ValueTypeBasedParameterResolver.build(ourFixture);
 
 	@Nested
 	class Common extends BasicEntityTestTemplate<ResRootIdClassEntity, ResJoinIdClassEntity> {

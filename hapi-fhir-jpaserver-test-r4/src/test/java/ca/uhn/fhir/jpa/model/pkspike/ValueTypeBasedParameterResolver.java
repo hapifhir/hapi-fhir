@@ -9,7 +9,11 @@ public class ValueTypeBasedParameterResolver<T> implements ParameterResolver {
 
 	private final T myValue;
 
-	public ValueTypeBasedParameterResolver(T theValue) {
+	public static <T> ValueTypeBasedParameterResolver<T> build(T theValue) {
+		return new ValueTypeBasedParameterResolver<>(theValue);
+	}
+
+	ValueTypeBasedParameterResolver(T theValue) {
 		myValue = theValue;
 	}
 
@@ -20,6 +24,10 @@ public class ValueTypeBasedParameterResolver<T> implements ParameterResolver {
 
 	@Override
 	public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext) throws ParameterResolutionException {
+		return myValue;
+	}
+
+	public T get() {
 		return myValue;
 	}
 }

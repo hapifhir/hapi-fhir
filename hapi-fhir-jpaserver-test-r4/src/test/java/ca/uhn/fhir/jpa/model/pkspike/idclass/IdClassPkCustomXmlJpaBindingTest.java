@@ -20,7 +20,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.util.function.Consumer;
 
 /**
- * Spike to assess variable binding against a db.
+ * Override the JPA annotations with an orm.xml file to add PARTITION_ID to the root PK, and the join expressions.
  */
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {
@@ -43,7 +43,7 @@ public class IdClassPkCustomXmlJpaBindingTest {
 
 	static final EntityFixture<ResRootIdClassEntity, ResJoinIdClassEntity> ourFixture = EntityFixture.buildNoNullPartition(ResRootIdClassEntity.class, ResJoinIdClassEntity.class);
 	@RegisterExtension
-	static final ParameterResolver ourFixtureResolver = new ValueTypeBasedParameterResolver<>(ourFixture);
+	static final ParameterResolver ourFixtureResolver = ValueTypeBasedParameterResolver.build(ourFixture);
 
 	@Nested
 	class Common extends BasicEntityTestTemplate<ResRootIdClassEntity, ResJoinIdClassEntity> {

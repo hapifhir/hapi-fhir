@@ -13,7 +13,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 /**
- * Spike to assess variable binding against a db.
+ * The simple scenario - single column keys and joins.
  */
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {
@@ -23,7 +23,7 @@ public class SimplePkJpaBindingTest {
 
 	public static final EntityFixture<ResRootEntity, ResJoinEntity> ourFixture = EntityFixture.build(ResRootEntity.class, ResJoinEntity.class);
 	@RegisterExtension
-	static final ParameterResolver ourFixtureResolver = new ValueTypeBasedParameterResolver<>(ourFixture);
+	static final ParameterResolver ourFixtureResolver = ValueTypeBasedParameterResolver.build(ourFixture);
 
 	@Nested
 	class Common extends BasicEntityTestTemplate<ResRootEntity, ResJoinEntity> {

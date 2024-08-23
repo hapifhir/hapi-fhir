@@ -21,14 +21,16 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 })
 public class EmbeddedIdPkJpaBindingTest {
 
+	static final EntityFixture<ResRootEmbeddedIdEntity, ResJoinEmbeddedIdEntity> ourFixture = EntityFixture.buildNoNullPartition(ResRootEmbeddedIdEntity.class, ResJoinEmbeddedIdEntity.class);
+
 	@RegisterExtension
-	static final ParameterResolver ourResolver = new ValueTypeBasedParameterResolver<>(EntityFixture.buildNoNullPartition(ResRootEmbeddedIdEntity.class, ResJoinEmbeddedIdEntity.class));
+	static final ParameterResolver ourResolver = ValueTypeBasedParameterResolver.build(ourFixture);
 
 
 	@Nested
 	class Common extends BasicEntityTestTemplate<ResRootEmbeddedIdEntity, ResJoinEmbeddedIdEntity> {
 		Common() {
-			super(EntityFixture.build(ResRootEmbeddedIdEntity.class, ResJoinEmbeddedIdEntity.class));
+			super(ourFixture);
 		}
 	}
 

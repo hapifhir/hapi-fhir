@@ -13,7 +13,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 /**
- * Spike to assess variable binding against a db.
+ * Try out the new @{@link org.hibernate.annotations.PartitionKey} annotation.
+ * This annotation annotates columns to include in entity update/delete statements, so they can be efficient in a partitioned table.
  */
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {
@@ -21,13 +22,13 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 })
 class PartitionJpaBindingTest {
 
-	static final EntityFixture<ResRootPartitionEntity, ResJoinPartitionEntity> ourConfig = EntityFixture.buildNoNullPartition(ResRootPartitionEntity.class, ResJoinPartitionEntity.class);
+	static final EntityFixture<ResRootPartitionEntity, ResJoinPartitionEntity> ourConfig = EntityFixture.build(ResRootPartitionEntity.class, ResJoinPartitionEntity.class);
 
 	@RegisterExtension
-	static final ParameterResolver ourResolver = new ValueTypeBasedParameterResolver(ourConfig);
+	static final ParameterResolver ourResolver = ValueTypeBasedParameterResolver.build(ourConfig);
 
 	@Nested
-	class Common extends BasicEntityTestTemplate {
+	class Common extends BasicEntityTestTemplate<ResRootPartitionEntity, ResJoinPartitionEntity> {
 		Common() {
 			super(ourConfig);
 		}
