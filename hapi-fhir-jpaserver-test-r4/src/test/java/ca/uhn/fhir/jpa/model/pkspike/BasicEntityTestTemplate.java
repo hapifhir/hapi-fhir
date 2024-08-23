@@ -5,6 +5,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -137,6 +138,25 @@ abstract public class BasicEntityTestTemplate<R extends EntityFixture.IRootEntit
 			assertEquals("child", joinReadback.getString());
 		});
 	}
+
+	@ParameterizedTest
+	@ValueSource(ints = 12)
+	@NullSource
+	void fetchJoinQuery(Integer thePartitionId) {
+		doInTx(em -> {
+			CriteriaBuilder cb = em.getCriteriaBuilder();
+
+			CriteriaQuery<R> cr = cb.createQuery(myEntityFixture.myRootType);
+			Root<R> from = cr.from(myEntityFixture.myRootType);
+			from.fetch("myJoinEntities");
+			cr.select(from);
+
+			em.createQuery(cr).getResultStream()
+				.forEach(Object::toString);
+
+		});
+	}
+
 
 	private void doInTx(Consumer<EntityManager> theCallback) {
 		myTransactionTemplate.execute(status-> {
