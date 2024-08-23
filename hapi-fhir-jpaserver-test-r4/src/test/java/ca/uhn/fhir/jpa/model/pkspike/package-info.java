@@ -7,7 +7,7 @@
  *   <li>See {@link ca.uhn.fhir.jpa.model.pkspike.embeddedid.EmbeddedIdPkJpaBindingTest} for an embedded Id class path. Does not support null partition_id.
  *   <li>See {@link ca.uhn.fhir.jpa.model.pkspike.partitionkey.PartitionJpaBindingTest} for the new Hibernate 6  @{@link org.hibernate.annotations.PartitionKey} annotation.  Does support null partition_id.
  *   <li>See {@link ca.uhn.fhir.jpa.model.pkspike.idclass.IdClassPkJpaBindingTest}.  Supports null partition_id.
- *   <li>See {@link ca.uhn.fhir.jpa.model.pkspike.idclass.IdClassPkCustomXmlJpaBindingTest} which overrides some mappings IdClassPkJpaBindingTest by using an orm.xml file.  Does not support null partition_id.
+ *   <li>See {@link ca.uhn.fhir.jpa.model.pkspike.idclass.IdClassPkCustomXmlJpaBindingTest} which adds PARTITION_ID to the pk and join to the mappings defined in IdClassPkJpaBindingTest by adding an orm.xml file.  Does not support null partition_id.
  * </ul>
  * <p>
  *     Things we learned:
