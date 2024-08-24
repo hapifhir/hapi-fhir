@@ -3,7 +3,7 @@ package ca.uhn.fhir.jpa.model.pkspike.idclass;
 import ca.uhn.fhir.jpa.config.HapiFhirLocalContainerEntityManagerFactoryBean;
 import ca.uhn.fhir.jpa.config.r4.FhirContextR4Config;
 import ca.uhn.fhir.jpa.model.pkspike.BasicEntityTestTemplate;
-import ca.uhn.fhir.jpa.model.pkspike.EntityFixture;
+import ca.uhn.fhir.jpa.model.pkspike.BasicEntityTestFixture;
 import ca.uhn.fhir.jpa.model.pkspike.PKSpikeDefaultJPAConfig;
 import ca.uhn.fhir.jpa.model.pkspike.ValueTypeBasedParameterResolver;
 import org.junit.jupiter.api.Nested;
@@ -41,7 +41,7 @@ public class IdClassPkCustomXmlJpaBindingTest {
 
 	}
 
-	static final EntityFixture<ResRootIdClassEntity, ResJoinIdClassEntity> ourFixture = EntityFixture.buildNoNullPartition(ResRootIdClassEntity.class, ResJoinIdClassEntity.class);
+	static final BasicEntityTestFixture<ResRootIdClassEntity, ResJoinIdClassEntity> ourFixture = BasicEntityTestFixture.buildNoNullPartition(ResRootIdClassEntity.class, ResJoinIdClassEntity.class);
 	@RegisterExtension
 	static final ParameterResolver ourFixtureResolver = ValueTypeBasedParameterResolver.build(ourFixture);
 

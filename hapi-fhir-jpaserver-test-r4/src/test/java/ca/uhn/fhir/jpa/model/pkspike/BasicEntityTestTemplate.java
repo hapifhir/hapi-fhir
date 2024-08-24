@@ -26,7 +26,7 @@ import java.util.function.Consumer;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-abstract public class BasicEntityTestTemplate<R extends EntityFixture.IRootEntity<J>,J extends EntityFixture.IJoinEntity<R>> {
+abstract public class BasicEntityTestTemplate<R extends IRootEntity<J>,J extends IJoinEntity<R>> {
 	private static final Logger ourLog = LoggerFactory.getLogger(BasicEntityTestTemplate.class);
 
 	@Autowired
@@ -41,13 +41,13 @@ abstract public class BasicEntityTestTemplate<R extends EntityFixture.IRootEntit
 	@RegisterExtension
 	SchemaCleanerExtension mySchemaCleanerExtension = new SchemaCleanerExtension();
 
-	final EntityFixture<R,J> myEntityFixture;
+	final BasicEntityTestFixture<R,J> myFixture;
 
-	public BasicEntityTestTemplate(EntityFixture<R,J> theEntityFixture) {
-		myEntityFixture = theEntityFixture;
+	public BasicEntityTestTemplate(BasicEntityTestFixture<R,J> theFixture) {
+		myFixture = theFixture;
 	}
 
-	static List<Integer> getPartitions(EntityFixture<?,?> theFixture) {
+	static List<Integer> getPartitions(BasicEntityTestFixture<?,?> theFixture) {
 		var result = new ArrayList<Integer>();
 		if (theFixture.isSupportNullPartitionId()) {
 			result.add(null);
@@ -62,14 +62,14 @@ abstract public class BasicEntityTestTemplate<R extends EntityFixture.IRootEntit
 		myJdbcTemplate.execute("insert into res_root(res_id, partition_id, string_col) values (-1, -1, 'hello!')");
 
 		doInTx(em->{
-			long count = queryCountAll(em, myEntityFixture.myRootType);
+			long count = queryCountAll(em, myFixture.myRootType);
 
 			assertEquals(1, count);
 
 			CriteriaBuilder cb = em.getCriteriaBuilder();
 
-			CriteriaQuery<R> cr = cb.createQuery(myEntityFixture.myRootType);
-			cr.select(cr.from(myEntityFixture.myRootType));
+			CriteriaQuery<R> cr = cb.createQuery(myFixture.myRootType);
+			cr.select(cr.from(myFixture.myRootType));
 			R readback = em.createQuery(cr).getSingleResult();
 
 			assertEquals(-1, readback.getResId());
@@ -82,7 +82,7 @@ abstract public class BasicEntityTestTemplate<R extends EntityFixture.IRootEntit
 	@MethodSource("getPartitions")
 	void roundTripResourceTable(Integer thePartitionId) {
 		doInTx(em->{
-			R root = myEntityFixture.buildRootEntity();
+			R root = myFixture.buildRootEntity();
 			root.setPartitionId(thePartitionId);
 			root.setString("goodbye!");
 			em.persist(root);
@@ -92,7 +92,7 @@ abstract public class BasicEntityTestTemplate<R extends EntityFixture.IRootEntit
 
 			Object id = myEntityManagerFactory.getPersistenceUnitUtil().getIdentifier(root);
 			ourLog.info("flushed root entity.  Id is {}", id);
-			R readback = em.find(myEntityFixture.myRootType, id);
+			R readback = em.find(myFixture.myRootType, id);
 			assertNotNull(readback);
 			assertEquals(root.getResId(), readback.getResId());
 			assertNotNull(readback.getResId());
@@ -106,11 +106,11 @@ abstract public class BasicEntityTestTemplate<R extends EntityFixture.IRootEntit
 	@MethodSource("getPartitions")
 	void roundTripJoin(Integer thePartitionId) {
 		doInTx(em->{
-			var root = myEntityFixture.buildRootEntity();
+			var root = myFixture.buildRootEntity();
 			root.setPartitionId(thePartitionId);
 			root.setString("parent");
 
-			var join = myEntityFixture.buildJoinEntity();
+			var join = myFixture.buildJoinEntity();
 			join.setParent(root);
 			join.setString("child");
 			join.setPartitionId(thePartitionId);
@@ -122,7 +122,7 @@ abstract public class BasicEntityTestTemplate<R extends EntityFixture.IRootEntit
 
 			Object id = myEntityManagerFactory.getPersistenceUnitUtil().getIdentifier(root);
 			ourLog.info("flushed root entity.  Id is {}", id);
-			R readback = em.find(myEntityFixture.myRootType, id);
+			R readback = em.find(myFixture.myRootType, id);
 
 			assertNotNull(readback);
 			assertEquals(root.getResId(), readback.getResId());
@@ -146,16 +146,16 @@ abstract public class BasicEntityTestTemplate<R extends EntityFixture.IRootEntit
 	@MethodSource("getPartitions")
 	void fetchJoinQuery(Integer thePartitionId) {
 		doInTx(em -> {
-			var root0 = myEntityFixture.buildRootEntity();
+			var root0 = myFixture.buildRootEntity();
 			root0.setPartitionId(thePartitionId);
 			root0.setString("parent");
 
-			var join0 = myEntityFixture.buildJoinEntity();
+			var join0 = myFixture.buildJoinEntity();
 			join0.setParent(root0);
 			join0.setString("child");
 			join0.setPartitionId(thePartitionId);
 
-			var join1 = myEntityFixture.buildJoinEntity();
+			var join1 = myFixture.buildJoinEntity();
 			join1.setParent(root0);
 			join1.setString("child1");
 			join1.setPartitionId(thePartitionId);
@@ -169,8 +169,8 @@ abstract public class BasicEntityTestTemplate<R extends EntityFixture.IRootEntit
 
 
 			CriteriaBuilder cb = em.getCriteriaBuilder();
-			CriteriaQuery<R> cr = cb.createQuery(myEntityFixture.myRootType);
-			Root<R> from = cr.from(myEntityFixture.myRootType);
+			CriteriaQuery<R> cr = cb.createQuery(myFixture.myRootType);
+			Root<R> from = cr.from(myFixture.myRootType);
 			from.fetch("myJoinEntities");
 			cr.select(from);
 

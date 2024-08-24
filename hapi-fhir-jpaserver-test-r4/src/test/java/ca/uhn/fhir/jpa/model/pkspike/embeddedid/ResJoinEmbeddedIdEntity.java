@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.model.pkspike.embeddedid;
 
-import ca.uhn.fhir.jpa.model.pkspike.EntityFixture;
+import ca.uhn.fhir.jpa.model.pkspike.IJoinEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -17,7 +17,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 @Table(
 	name = "RES_JOIN"
 )
-public class ResJoinEmbeddedIdEntity implements EntityFixture.IJoinEntity<ResRootEmbeddedIdEntity> {
+public class ResJoinEmbeddedIdEntity implements IJoinEntity<ResRootEmbeddedIdEntity> {
 	@Id
 //	@GenericGenerator(name = "SEQ_RESOURCE_ID", type = ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator.class)
 	@GeneratedValue(strategy = GenerationType.SEQUENCE)

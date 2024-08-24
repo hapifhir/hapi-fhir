@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.model.pkspike.idclass;
 
-import ca.uhn.fhir.jpa.model.pkspike.EntityFixture;
+import ca.uhn.fhir.jpa.model.pkspike.IRootEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -27,7 +27,7 @@ import java.util.Collection;
 @Entity
 @Table(name = "RES_ROOT")
 @IdClass(ResRootIdClassEntity.ResRootPK.class)
-public class ResRootIdClassEntity implements EntityFixture.IRootEntity<ResJoinIdClassEntity> {
+public class ResRootIdClassEntity implements IRootEntity<ResJoinIdClassEntity> {
 	private static final Logger ourLog = LoggerFactory.getLogger(ResRootIdClassEntity.class);
 
 	@Id

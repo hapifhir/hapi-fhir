@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.model.pkspike.idclass;
 
-import ca.uhn.fhir.jpa.model.pkspike.EntityFixture;
+import ca.uhn.fhir.jpa.model.pkspike.IJoinEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -17,7 +17,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 @Table(
 	name = "RES_JOIN"
 )
-public class ResJoinIdClassEntity implements EntityFixture.IJoinEntity<ResRootIdClassEntity> {
+public class ResJoinIdClassEntity implements IJoinEntity<ResRootIdClassEntity> {
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE)
 	@Column(name = "PID")

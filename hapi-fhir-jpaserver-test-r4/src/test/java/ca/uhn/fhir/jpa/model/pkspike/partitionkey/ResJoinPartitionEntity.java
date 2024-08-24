@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.model.pkspike.partitionkey;
 
-import ca.uhn.fhir.jpa.model.pkspike.EntityFixture;
+import ca.uhn.fhir.jpa.model.pkspike.IJoinEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -19,7 +19,7 @@ import org.hibernate.annotations.PartitionKey;
 @Table(
 	name = "RES_JOIN"
 )
-public class ResJoinPartitionEntity implements EntityFixture.IJoinEntity<ResRootPartitionEntity> {
+public class ResJoinPartitionEntity implements IJoinEntity<ResRootPartitionEntity> {
 	@Id
 //	@GenericGenerator(name = "SEQ_RESOURCE_ID", type = ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator.class)
 	@GeneratedValue(strategy = GenerationType.SEQUENCE)

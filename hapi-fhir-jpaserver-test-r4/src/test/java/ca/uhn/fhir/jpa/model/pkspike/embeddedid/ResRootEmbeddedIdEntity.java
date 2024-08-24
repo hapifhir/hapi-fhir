@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.model.pkspike.embeddedid;
 
-import ca.uhn.fhir.jpa.model.pkspike.EntityFixture;
+import ca.uhn.fhir.jpa.model.pkspike.IRootEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.EmbeddedId;
@@ -25,7 +25,7 @@ import java.util.Collection;
 @SuppressWarnings("JpaDataSourceORMInspection")
 @Entity
 @Table(name = "RES_ROOT")
-public class ResRootEmbeddedIdEntity implements EntityFixture.IRootEntity<ResJoinEmbeddedIdEntity> {
+public class ResRootEmbeddedIdEntity implements IRootEntity<ResJoinEmbeddedIdEntity> {
 	private static final Logger ourLog = LoggerFactory.getLogger(ResRootEmbeddedIdEntity.class);
 
 	@EmbeddedId

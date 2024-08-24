@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.model.pkspike.partitionkey;
 
 import ca.uhn.fhir.jpa.config.r4.FhirContextR4Config;
 import ca.uhn.fhir.jpa.model.pkspike.BasicEntityTestTemplate;
-import ca.uhn.fhir.jpa.model.pkspike.EntityFixture;
+import ca.uhn.fhir.jpa.model.pkspike.BasicEntityTestFixture;
 import ca.uhn.fhir.jpa.model.pkspike.PKSpikeDefaultJPAConfig;
 import ca.uhn.fhir.jpa.model.pkspike.ValueTypeBasedParameterResolver;
 import org.junit.jupiter.api.Nested;
@@ -22,7 +22,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 })
 class PartitionJpaBindingTest {
 
-	static final EntityFixture<ResRootPartitionEntity, ResJoinPartitionEntity> ourConfig = EntityFixture.build(ResRootPartitionEntity.class, ResJoinPartitionEntity.class);
+	static final BasicEntityTestFixture<ResRootPartitionEntity, ResJoinPartitionEntity> ourConfig = BasicEntityTestFixture.build(ResRootPartitionEntity.class, ResJoinPartitionEntity.class);
 
 	@RegisterExtension
 	static final ParameterResolver ourResolver = ValueTypeBasedParameterResolver.build(ourConfig);

@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.model.pkspike.idclass;
 
 import ca.uhn.fhir.jpa.config.r4.FhirContextR4Config;
 import ca.uhn.fhir.jpa.model.pkspike.BasicEntityTestTemplate;
-import ca.uhn.fhir.jpa.model.pkspike.EntityFixture;
+import ca.uhn.fhir.jpa.model.pkspike.BasicEntityTestFixture;
 import ca.uhn.fhir.jpa.model.pkspike.PKSpikeDefaultJPAConfig;
 import ca.uhn.fhir.jpa.model.pkspike.ValueTypeBasedParameterResolver;
 import org.junit.jupiter.api.Nested;
@@ -22,7 +22,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 })
 public class IdClassPkJpaBindingTest {
 
-	public static final EntityFixture<ResRootIdClassEntity, ResJoinIdClassEntity> ourFixture = EntityFixture.build(ResRootIdClassEntity.class, ResJoinIdClassEntity.class);
+	public static final BasicEntityTestFixture<ResRootIdClassEntity, ResJoinIdClassEntity> ourFixture = BasicEntityTestFixture.build(ResRootIdClassEntity.class, ResJoinIdClassEntity.class);
 	@RegisterExtension
 	static final ParameterResolver ourFixtureResolver = ValueTypeBasedParameterResolver.build(ourFixture);
 

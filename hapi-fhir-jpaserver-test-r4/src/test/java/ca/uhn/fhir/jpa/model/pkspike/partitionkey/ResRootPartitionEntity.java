@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.model.pkspike.partitionkey;
 
-import ca.uhn.fhir.jpa.model.pkspike.EntityFixture;
+import ca.uhn.fhir.jpa.model.pkspike.IRootEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -18,7 +18,7 @@ import java.util.Collection;
 @SuppressWarnings("JpaDataSourceORMInspection")
 @Entity
 @Table(name = "RES_ROOT")
-public class ResRootPartitionEntity implements EntityFixture.IRootEntity<ResJoinPartitionEntity> {
+public class ResRootPartitionEntity implements IRootEntity<ResJoinPartitionEntity> {
 	@Id
 	@GeneratedValue()
 	@Column(name = "RES_ID")

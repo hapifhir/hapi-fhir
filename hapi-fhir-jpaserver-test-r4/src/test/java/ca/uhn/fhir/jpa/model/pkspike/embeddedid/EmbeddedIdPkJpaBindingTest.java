@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.model.pkspike.embeddedid;
 
 import ca.uhn.fhir.jpa.config.r4.FhirContextR4Config;
 import ca.uhn.fhir.jpa.model.pkspike.BasicEntityTestTemplate;
-import ca.uhn.fhir.jpa.model.pkspike.EntityFixture;
+import ca.uhn.fhir.jpa.model.pkspike.BasicEntityTestFixture;
 import ca.uhn.fhir.jpa.model.pkspike.PKSpikeDefaultJPAConfig;
 import ca.uhn.fhir.jpa.model.pkspike.ValueTypeBasedParameterResolver;
 import org.junit.jupiter.api.Nested;
@@ -21,7 +21,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 })
 public class EmbeddedIdPkJpaBindingTest {
 
-	static final EntityFixture<ResRootEmbeddedIdEntity, ResJoinEmbeddedIdEntity> ourFixture = EntityFixture.buildNoNullPartition(ResRootEmbeddedIdEntity.class, ResJoinEmbeddedIdEntity.class);
+	static final BasicEntityTestFixture<ResRootEmbeddedIdEntity, ResJoinEmbeddedIdEntity> ourFixture = BasicEntityTestFixture.buildNoNullPartition(ResRootEmbeddedIdEntity.class, ResJoinEmbeddedIdEntity.class);
 
 	@RegisterExtension
 	static final ParameterResolver ourResolver = ValueTypeBasedParameterResolver.build(ourFixture);
