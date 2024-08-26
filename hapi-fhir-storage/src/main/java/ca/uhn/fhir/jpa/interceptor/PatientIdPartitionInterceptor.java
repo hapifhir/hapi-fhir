@@ -99,8 +99,8 @@ public class PatientIdPartitionInterceptor {
 						Msg.code(1321) + "Patient resource IDs must be client-assigned in patient compartment mode");
 			}
 		} else {
-			oCompartmentIdentity =
-					ResourceCompartmentUtil.getResourceCompartment("Patient", theResource, compartmentSps, mySearchParamExtractor);
+			oCompartmentIdentity = ResourceCompartmentUtil.getResourceCompartment(
+					"Patient", theResource, compartmentSps, mySearchParamExtractor);
 		}
 
 		return oCompartmentIdentity

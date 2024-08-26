@@ -52,10 +52,10 @@ public class ResourceCompartmentUtil {
 	 * @throws MethodNotAllowedException if received resource is of type "Patient" and ID is not assigned.
 	 */
 	public static Optional<String> getPatientCompartmentIdentity(
-		IBaseResource theResource, FhirContext theFhirContext, ISearchParamExtractor theSearchParamExtractor) {
+			IBaseResource theResource, FhirContext theFhirContext, ISearchParamExtractor theSearchParamExtractor) {
 		RuntimeResourceDefinition resourceDef = theFhirContext.getResourceDefinition(theResource);
 		List<RuntimeSearchParam> patientCompartmentSps =
-			ResourceCompartmentUtil.getPatientCompartmentSearchParams(resourceDef);
+				ResourceCompartmentUtil.getPatientCompartmentSearchParams(resourceDef);
 		if (patientCompartmentSps.isEmpty()) {
 			return Optional.empty();
 		}
@@ -64,7 +64,7 @@ public class ResourceCompartmentUtil {
 			String compartmentIdentity = theResource.getIdElement().getIdPart();
 			if (isBlank(compartmentIdentity)) {
 				throw new MethodNotAllowedException(
-					Msg.code(2475) + "Patient resource IDs must be client-assigned in patient compartment mode");
+						Msg.code(2475) + "Patient resource IDs must be client-assigned in patient compartment mode");
 			}
 			return Optional.of(compartmentIdentity);
 		}
@@ -81,26 +81,27 @@ public class ResourceCompartmentUtil {
 	 * @return optional compartment of the received resource
 	 */
 	public static Optional<String> getResourceCompartment(
-		String theCompartmentName,
-		IBaseResource theResource,
-		List<RuntimeSearchParam> theCompartmentSps,
-		ISearchParamExtractor mySearchParamExtractor) {
+			String theCompartmentName,
+			IBaseResource theResource,
+			List<RuntimeSearchParam> theCompartmentSps,
+			ISearchParamExtractor mySearchParamExtractor) {
 		return theCompartmentSps.stream()
-			.flatMap(param -> Arrays.stream(BaseSearchParamExtractor.splitPathsR4(param.getPath())))
-			.filter(StringUtils::isNotBlank)
-			.map(path -> mySearchParamExtractor
-				.getPathValueExtractor(theResource, path)
-				.get())
-			.filter(t -> !t.isEmpty())
-			.map(t -> t.get(0))
-			.filter(t -> t instanceof IBaseReference)
-			.map(t -> (IBaseReference) t)
-			.map(t -> t.getReferenceElement().getValue())
-			.map(IdType::new)
-			.filter(t -> theCompartmentName.equals(t.getResourceType())) // assume the compartment name matches the resource type
-			.map(IdType::getIdPart)
-			.filter(StringUtils::isNotBlank)
-			.findFirst();
+				.flatMap(param -> Arrays.stream(BaseSearchParamExtractor.splitPathsR4(param.getPath())))
+				.filter(StringUtils::isNotBlank)
+				.map(path -> mySearchParamExtractor
+						.getPathValueExtractor(theResource, path)
+						.get())
+				.filter(t -> !t.isEmpty())
+				.map(t -> t.get(0))
+				.filter(t -> t instanceof IBaseReference)
+				.map(t -> (IBaseReference) t)
+				.map(t -> t.getReferenceElement().getValue())
+				.map(IdType::new)
+				.filter(t -> theCompartmentName.equals(
+						t.getResourceType())) // assume the compartment name matches the resource type
+				.map(IdType::getIdPart)
+				.filter(StringUtils::isNotBlank)
+				.findFirst();
 	}
 
 	/**
@@ -113,9 +114,9 @@ public class ResourceCompartmentUtil {
 	@Nonnull
 	public static List<RuntimeSearchParam> getPatientCompartmentSearchParams(RuntimeResourceDefinition resourceDef) {
 		return resourceDef.getSearchParams().stream()
-			.filter(param -> param.getParamType() == RestSearchParameterTypeEnum.REFERENCE)
-			.filter(param -> param.getProvidesMembershipInCompartments() != null
-				&& param.getProvidesMembershipInCompartments().contains("Patient"))
-			.collect(Collectors.toList());
+				.filter(param -> param.getParamType() == RestSearchParameterTypeEnum.REFERENCE)
+				.filter(param -> param.getProvidesMembershipInCompartments() != null
+						&& param.getProvidesMembershipInCompartments().contains("Patient"))
+				.collect(Collectors.toList());
 	}
 }
