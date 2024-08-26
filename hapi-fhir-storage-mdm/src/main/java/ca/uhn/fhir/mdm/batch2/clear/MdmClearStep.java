@@ -26,6 +26,7 @@ import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
+import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.jpa.api.svc.IDeleteExpungeSvc;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.api.svc.IMdmClearHelperSvc;
@@ -96,7 +97,7 @@ public class MdmClearStep implements IJobStepWorker<MdmClearJobParameters, Resou
 		private final RequestDetails myRequestDetails;
 		private final TransactionDetails myTransactionDetails;
 		private final ResourceIdListWorkChunkJson myData;
-		private final String myChunkId;
+		private final WorkChunk myWorkChunk;
 		private final String myInstanceId;
 
 		public MdmClearJob(
@@ -107,7 +108,7 @@ public class MdmClearStep implements IJobStepWorker<MdmClearJobParameters, Resou
 			myTransactionDetails = theTransactionDetails;
 			myData = theStepExecutionDetails.getData();
 			myInstanceId = theStepExecutionDetails.getInstance().getInstanceId();
-			myChunkId = theStepExecutionDetails.getChunkId();
+			myWorkChunk = theStepExecutionDetails.getWorkChunk();
 		}
 
 		@SuppressWarnings("unchecked")
@@ -137,7 +138,7 @@ public class MdmClearStep implements IJobStepWorker<MdmClearJobParameters, Resou
 					"Starting mdm clear work chunk with {} resources - Instance[{}] Chunk[{}]",
 					thePersistentIds.size(),
 					myInstanceId,
-					myChunkId);
+					myWorkChunk);
 			StopWatch sw = new StopWatch();
 
 			myMdmLinkSvc.deleteLinksWithAnyReferenceToPids(thePersistentIds);
@@ -145,7 +146,7 @@ public class MdmClearStep implements IJobStepWorker<MdmClearJobParameters, Resou
 
 			// use the expunge service to delete multiple resources at once efficiently
 			IDeleteExpungeSvc deleteExpungeSvc = myIMdmClearHelperSvc.getDeleteExpungeSvc();
-			int deletedRecords = deleteExpungeSvc.deleteExpunge(thePersistentIds, false, null, myChunkId);
+			int deletedRecords = deleteExpungeSvc.deleteExpunge(thePersistentIds, false, null, myWorkChunk);
 
 			ourLog.trace(
 					"Deleted {} of {} golden resources in {}",
@@ -160,7 +161,7 @@ public class MdmClearStep implements IJobStepWorker<MdmClearJobParameters, Resou
 					sw,
 					sw.formatThroughput(thePersistentIds.size(), TimeUnit.SECONDS),
 					myInstanceId,
-					myChunkId);
+					myWorkChunk);
 
 			if (ourClearCompletionCallbackForUnitTest != null) {
 				ourClearCompletionCallbackForUnitTest.run();

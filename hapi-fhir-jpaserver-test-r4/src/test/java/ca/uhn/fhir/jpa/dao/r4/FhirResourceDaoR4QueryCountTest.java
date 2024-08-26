@@ -8,6 +8,7 @@ import ca.uhn.fhir.batch2.jobs.chunk.TypedPidJson;
 import ca.uhn.fhir.batch2.jobs.expunge.DeleteExpungeStep;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexStep;
+import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
@@ -853,9 +854,12 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		IJobDataSink<VoidModel> sink = mock(IJobDataSink.class);
 
+		WorkChunk workChunk = mock(WorkChunk.class);
+		when(workChunk.getId()).thenReturn("chunk-id");
+
 		// Test
 		myCaptureQueriesListener.clear();
-		RunOutcome outcome = myDeleteExpungeStep.doDeleteExpunge(new ResourceIdListWorkChunkJson(pids, null), sink, "instance-id", "chunk-id", false, null);
+		RunOutcome outcome = myDeleteExpungeStep.doDeleteExpunge(new ResourceIdListWorkChunkJson(pids, null), sink, "instance-id", workChunk, false, null);
 
 		// Verify
 		assertEquals(1, myCaptureQueriesListener.countSelectQueriesForCurrentThread());

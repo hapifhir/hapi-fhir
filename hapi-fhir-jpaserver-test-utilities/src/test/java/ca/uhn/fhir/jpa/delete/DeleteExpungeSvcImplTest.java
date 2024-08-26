@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.delete;
 
+import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.delete.batch2.DeleteExpungeSqlBuilder;
 import ca.uhn.fhir.jpa.delete.batch2.DeleteExpungeSvcImpl;
@@ -48,8 +49,10 @@ public class DeleteExpungeSvcImplTest {
 		logger.addAppender(myAppender);
 
 		when(myDeleteExpungeSqlBuilder.convertPidsToDeleteExpungeSql(Collections.emptyList(), false, 1)).thenReturn(mock(DeleteExpungeSqlBuilder.DeleteExpungeSqlResult.class));
+		WorkChunk workChunk = mock(WorkChunk.class);
+		when(workChunk.getId()).thenReturn("abc-123");
 
-		myDeleteExpungeSvc.deleteExpunge(Collections.emptyList(), false, 1, "abc-123");
+		myDeleteExpungeSvc.deleteExpunge(Collections.emptyList(), false, 1, workChunk);
 		verify(myAppender, atLeastOnce()).doAppend(myLoggingEvent.capture());
 		List<ILoggingEvent> events = myLoggingEvent.getAllValues();
 		assertEquals(Level.INFO, events.get(0).getLevel());

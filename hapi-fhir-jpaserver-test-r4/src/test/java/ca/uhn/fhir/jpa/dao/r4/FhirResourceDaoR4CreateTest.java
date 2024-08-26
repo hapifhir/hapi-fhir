@@ -1408,7 +1408,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 			final List<JpaPid> pidOrThrowException1 = List.of(pidOrThrowException);
 
 			final TransactionTemplate transactionTemplate = new TransactionTemplate(getTxManager());
-			transactionTemplate.execute(x -> myDeleteExpungeSvc.deleteExpunge(pidOrThrowException1, true, 10, ""));
+			transactionTemplate.execute(x -> myDeleteExpungeSvc.deleteExpunge(pidOrThrowException1, true, 10, null));
 		}
 	}
 
