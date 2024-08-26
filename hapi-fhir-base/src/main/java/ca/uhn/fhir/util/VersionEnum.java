@@ -156,7 +156,8 @@ public enum VersionEnum {
 	V7_2_0,
 	V7_2_1,
 	V7_2_2,
-	V7_2_3;
+	V7_2_3,
+	V7_2_4;
 
 	public static VersionEnum latestVersion() {
 		VersionEnum[] values = VersionEnum.values();
