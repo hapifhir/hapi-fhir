@@ -1833,7 +1833,7 @@
 			<dependency>
 				<groupId>org.htmlunit</groupId>
 				<artifactId>htmlunit</artifactId>
-				<version>3.9.0</version>
+				<version>3.11.0</version>
 				<exclusions>
 					<exclusion>
 						<!-- Don't let HTMLUnit bring in Jetty 9 -->
