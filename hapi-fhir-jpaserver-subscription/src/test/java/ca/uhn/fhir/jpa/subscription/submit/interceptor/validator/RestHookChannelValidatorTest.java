@@ -34,7 +34,7 @@ public class RestHookChannelValidatorTest {
 	}
 
 	@ParameterizedTest
-	@MethodSource("urlAndExpectedEvaluationResultProviderForMinimumValidation")
+	@MethodSource("urlAndExpectedEvaluationResultProviderForNoUrlValidation")
 	public void testRestHookChannelValidation_withMinimumUrlValidation(String theUrl, boolean theExpectedValidationResult){
 		RestHookChannelValidator restHookChannelValidator = new RestHookChannelValidator();
 
@@ -110,7 +110,7 @@ public class RestHookChannelValidatorTest {
 			Arguments.of("ftp://acme.corp", false));
 	}
 
-	static Stream<Arguments> urlAndExpectedEvaluationResultProviderForMinimumValidation() {
+	static Stream<Arguments> urlAndExpectedEvaluationResultProviderForNoUrlValidation() {
 		return Stream.of(
 			Arguments.of(null, false),
 			Arguments.of("", false),

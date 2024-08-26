@@ -257,7 +257,7 @@ public abstract class BaseSubscriptionSettings {
 	}
 
 	/**
-	 * If rest-hook subscriptions are supported, the regex expression that will be used to validate the endpoint URL.
+	 * Configure the regex expression that will be used to validate the endpoint URL.
 	 * Set to NULL or EMPTY for no endpoint URL validation.
 	 *
 	 * @since 7.6.0
