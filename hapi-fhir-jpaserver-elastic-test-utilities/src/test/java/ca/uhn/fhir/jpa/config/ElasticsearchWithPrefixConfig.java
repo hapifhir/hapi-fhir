@@ -13,6 +13,7 @@ import ca.uhn.fhir.jpa.test.config.BlockLargeNumbersOfParamsListener;
 import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch.indices.IndexSettings;
 import co.elastic.clients.elasticsearch.indices.PutTemplateResponse;
 import co.elastic.clients.json.JsonData;
 import net.ttddyy.dsproxy.listener.logging.SLF4JLogLevel;
@@ -129,7 +130,7 @@ public class ElasticsearchWithPrefixConfig {
 				.putTemplate(b -> b
 					.name("ngram-template")
 					.indexPatterns("*resourcetable-*", "*termconcept-*")
-					.settings(Map.of("index.max_ngram_diff", JsonData.of(50))));
+					.settings(new IndexSettings.Builder().maxNgramDiff(50).build()));
 			assert acknowledgedResponse.acknowledged();
 		} catch (IOException theE) {
 			theE.printStackTrace();
