@@ -100,7 +100,7 @@ public class PatientIdPartitionInterceptor {
 			}
 		} else {
 			oCompartmentIdentity =
-					ResourceCompartmentUtil.getResourceCompartment(theResource, compartmentSps, mySearchParamExtractor);
+					ResourceCompartmentUtil.getResourceCompartment("Patient", theResource, compartmentSps, mySearchParamExtractor);
 		}
 
 		return oCompartmentIdentity
