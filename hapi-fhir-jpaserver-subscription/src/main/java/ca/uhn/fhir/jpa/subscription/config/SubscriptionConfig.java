@@ -34,7 +34,6 @@ import java.util.List;
 
 import static ca.uhn.fhir.jpa.subscription.submit.interceptor.validator.RestHookChannelValidator.IEndpointUrlValidationStrategy;
 import static ca.uhn.fhir.jpa.subscription.submit.interceptor.validator.RestHookChannelValidator.noOpEndpointUrlValidationStrategy;
-import static org.apache.commons.lang3.StringUtils.isBlank;
 
 @Configuration
 public class SubscriptionConfig {
@@ -46,11 +45,12 @@ public class SubscriptionConfig {
 
 	@Bean
 	public IChannelTypeValidator restHookChannelValidator(SubscriptionSettings theSubscriptionSettings) {
-		String endpointUrlValidationRegex = theSubscriptionSettings.getRestHookEndpointUrlValidationgRegex();
+		IEndpointUrlValidationStrategy iEndpointUrlValidationStrategy = noOpEndpointUrlValidationStrategy;
 
-		IEndpointUrlValidationStrategy iEndpointUrlValidationStrategy = isBlank(endpointUrlValidationRegex)
-				? noOpEndpointUrlValidationStrategy
-				: new RegexEndpointUrlValidationStrategy(endpointUrlValidationRegex);
+		if (theSubscriptionSettings.hasRestHookEndpointUrlValidationRegex()) {
+			String endpointUrlValidationRegex = theSubscriptionSettings.getRestHookEndpointUrlValidationRegex();
+			iEndpointUrlValidationStrategy = new RegexEndpointUrlValidationStrategy(endpointUrlValidationRegex);
+		}
 
 		return new RestHookChannelValidator(iEndpointUrlValidationStrategy);
 	}

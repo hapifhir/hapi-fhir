@@ -336,7 +336,8 @@ public class SubscriptionValidatingInterceptorTest {
 
 		@Bean
 		public IChannelTypeValidator restHookChannelValidator() {
-			RegexEndpointUrlValidationStrategy regexEndpointUrlValidationStrategy = new RegexEndpointUrlValidationStrategy(new SubscriptionSettings().getRestHookEndpointUrlValidationgRegex());
+			String regex = new SubscriptionSettings().getRestHookEndpointUrlValidationRegex();
+			RegexEndpointUrlValidationStrategy regexEndpointUrlValidationStrategy = new RegexEndpointUrlValidationStrategy(regex);
 			return new RestHookChannelValidator(regexEndpointUrlValidationStrategy);
 		}
 

@@ -27,6 +27,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 public abstract class BaseSubscriptionSettings {
 	public static final String DEFAULT_EMAIL_FROM_ADDRESS = "noreply@unknown.com";
 	public static final String DEFAULT_WEBSOCKET_CONTEXT_PATH = "/websocket";
@@ -52,7 +54,7 @@ public abstract class BaseSubscriptionSettings {
 	 *
 	 * Regex To perform validation on the endpoint URL for Subscription of type RESTHOOK.
 	 */
-	private String myRestHookEndpointUrlValidationgRegex = DEFAULT_RESTHOOK_ENDPOINTURL_VALIDATION_REGEX;
+	private String myRestHookEndpointUrlValidationRegex = DEFAULT_RESTHOOK_ENDPOINTURL_VALIDATION_REGEX;
 
 	/**
 	 * This setting indicates which subscription channel types are supported by the server.  Any subscriptions submitted
@@ -247,19 +249,29 @@ public abstract class BaseSubscriptionSettings {
 
 	/**
 	 * Provides the regex expression to perform endpoint URL validation If rest-hook subscriptions are supported.
-	 *
+	 * Default value is {@link #DEFAULT_RESTHOOK_ENDPOINTURL_VALIDATION_REGEX}.
 	 * @since 7.6.0
 	 */
-	public String getRestHookEndpointUrlValidationgRegex() {
-		return myRestHookEndpointUrlValidationgRegex;
+	public String getRestHookEndpointUrlValidationRegex() {
+		return myRestHookEndpointUrlValidationRegex;
 	}
 
 	/**
-	 * If rest-hook subscriptions are supported, the regex expression that will be used to validate the endpoint URL
+	 * If rest-hook subscriptions are supported, the regex expression that will be used to validate the endpoint URL.
+	 * Set to NULL or EMPTY for no endpoint URL validation.
 	 *
 	 * @since 7.6.0
 	 */
-	public void setRestHookEndpointUrlValidationgRegex(String theRestHookEndpointUrlValidationgRegex) {
-		myRestHookEndpointUrlValidationgRegex = theRestHookEndpointUrlValidationgRegex;
+	public void setRestHookEndpointUrlValidationRegex(String theRestHookEndpointUrlValidationgRegex) {
+		myRestHookEndpointUrlValidationRegex = theRestHookEndpointUrlValidationgRegex;
+	}
+
+	/**
+	 * Whether an endpoint validation Regex was set for URL validation.
+	 *
+	 * @since 7.6.0
+	 */
+	public boolean hasRestHookEndpointUrlValidationRegex() {
+		return isNotBlank(myRestHookEndpointUrlValidationRegex);
 	}
 }
