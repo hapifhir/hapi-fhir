@@ -153,7 +153,7 @@ public class DeleteExpungeStep
 				ourLog.info(
 						"Starting delete expunge work chunk.  There are no resources to delete expunge - Instance[{}] Chunk[{}]",
 						myInstanceId,
-					workChunkId);
+						workChunkId);
 				return null;
 			}
 
@@ -161,7 +161,7 @@ public class DeleteExpungeStep
 					"Starting delete expunge work chunk with {} resources - Instance[{}] Chunk[{}]",
 					persistentIds.size(),
 					myInstanceId,
-				workChunkId);
+					workChunkId);
 
 			myRecordCount = myDeleteExpungeSvc.deleteExpunge(persistentIds, myCascade, myCascadeMaxRounds, myWorkChunk);
 
@@ -169,7 +169,7 @@ public class DeleteExpungeStep
 					"Delete expunge finished deleting {} resources  - Instance[{}] Chunk[{}]",
 					myRecordCount,
 					myInstanceId,
-				workChunkId);
+					workChunkId);
 
 			return null;
 		}

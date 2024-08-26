@@ -57,7 +57,8 @@ public class DeleteExpungeSvcImpl implements IDeleteExpungeSvc<JpaPid> {
 		List<String> sqlList = sqlResult.getSqlStatements();
 
 		String formattedChunkIdForLogMessage = "";
-		if (theWorkChunk instanceof WorkChunk && !((WorkChunk) theWorkChunk).getId().isBlank()) {
+		if (theWorkChunk instanceof WorkChunk
+				&& !((WorkChunk) theWorkChunk).getId().isBlank()) {
 			formattedChunkIdForLogMessage = "Chunk[" + ((WorkChunk) theWorkChunk).getId() + "] - ";
 		}
 
