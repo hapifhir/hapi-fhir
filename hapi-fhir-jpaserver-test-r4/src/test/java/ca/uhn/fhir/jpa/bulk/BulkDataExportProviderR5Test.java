@@ -230,7 +230,7 @@ public class BulkDataExportProviderR5Test {
 		assertEquals(Constants.CT_FHIR_NDJSON, params.getOutputFormat());
 		assertNotNull(params.getSince());
 		assertTrue(params.getFilters().contains(filter));
-		assertThat(params.getPostFetchFilterUrls().contains("Patient?_tag=foo"));
+		assertThat(params.getPostFetchFilterUrls()).contains("Patient?_tag=foo");
 	}
 
 	@Test

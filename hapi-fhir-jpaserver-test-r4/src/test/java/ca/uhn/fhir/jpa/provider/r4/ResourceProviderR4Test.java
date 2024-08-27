@@ -57,6 +57,7 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.ICachedSearchDetails;
+import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.TestUtil;
@@ -164,6 +165,7 @@ import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.utilities.xhtml.NodeType;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -937,6 +939,125 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		myCaptureQueriesListener.logSelectQueries(true, true);
 		return ids;
 	}
+
+	@Test
+	public void testBundleConditionalCreateLogic_OR() {
+		Identifier SYSTEM_A_VALUE_A = new Identifier().setSystem("system-a").setValue("value-a");
+		Identifier SYSTEM_B_VALUE_A = new Identifier().setSystem("system-b").setValue("value-a");
+
+		//Create Practitioner With SYSTEM_A_VALUE_A
+		Practitioner practOne = new Practitioner();
+		practOne.getNameFirstRep().setFamily("PRACT").addGiven("pre-existing-1");
+		practOne.addIdentifier(SYSTEM_A_VALUE_A);
+		myClient.create().resource(practOne).execute();
+
+		//Create Practitioner With SYSTEM_B_VALUE_A
+		Practitioner practTwo = new Practitioner();
+		practTwo.getNameFirstRep().setFamily("PRACT").addGiven("pre-existing-2");
+		practTwo.addIdentifier(SYSTEM_B_VALUE_A);
+		myClient.create().resource(practTwo).execute();
+
+		//To Check against OR conditions.
+		Practitioner practThree = new Practitioner();
+		practThree.addIdentifier(SYSTEM_A_VALUE_A);
+		practThree.addIdentifier(SYSTEM_B_VALUE_A);
+
+
+		//Conditional using `OR` on the identifier.
+		BundleBuilder builder = new BundleBuilder(myFhirContext);
+		builder.setType("transaction");
+		builder.addTransactionCreateEntry(practThree).conditional("Practitioner?identifier=system-a|value-a,system-b|value-a").andThen().getBundle();
+		Bundle bundle = builder.getBundleTyped();
+
+		logBundle(bundle);
+
+		//Attempting to execute this causes 412, because 2 resources come back from matching.
+		Bundle execute = myClient.transaction().withBundle(bundle).execute();
+		logBundle(execute);
+		assertThat(execute.getEntry().size()).isEqualTo(1);
+	}
+
+	@Test
+	public void testBundleConditionalCreateLogic_AND() {
+		Identifier SYSTEM_A_VALUE_A = new Identifier().setSystem("system-a").setValue("value-a");
+		Identifier SYSTEM_B_VALUE_A = new Identifier().setSystem("system-b").setValue("value-a");
+
+		//Create Practitioner With SYSTEM_A_VALUE_A
+		Practitioner practOne = new Practitioner();
+		practOne.getNameFirstRep().setFamily("PRACT").addGiven("pre-existing-1");
+		practOne.addIdentifier(SYSTEM_A_VALUE_A);
+		myClient.create().resource(practOne).execute();
+
+		//Create Practitioner With SYSTEM_B_VALUE_A
+		Practitioner practTwo = new Practitioner();
+		practTwo.getNameFirstRep().setFamily("PRACT").addGiven("pre-existing-2");
+		practTwo.addIdentifier(SYSTEM_B_VALUE_A);
+		myClient.create().resource(practTwo).execute();
+
+		//To Check against OR conditions.
+		Practitioner practThree = new Practitioner();
+		practThree.addIdentifier(SYSTEM_A_VALUE_A);
+		practThree.addIdentifier(SYSTEM_B_VALUE_A);
+
+
+		//Conditional using `AND` on the identifier.
+		BundleBuilder builder = new BundleBuilder(myFhirContext);
+		builder.setType("transaction");
+		builder.addTransactionCreateEntry(practThree).conditional("Practitioner?identifier=system-a|value-a&identifier=system-b|value-a").andThen().getBundle();
+		Bundle bundle = builder.getBundleTyped();
+
+		logBundle(bundle);
+
+		//This is permitted, because both individual resources do not conform to the indicated conditional.
+		Bundle execute = myClient.transaction().withBundle(bundle).execute();
+		logBundle(execute);
+		assertThat(execute.getEntry().size()).isEqualTo(1);
+	}
+
+	@Test
+	public void testBundleConditionalCreateLogic_AND() {
+		Identifier SYSTEM_A_VALUE_A = new Identifier().setSystem("system-a").setValue("value-a");
+		Identifier SYSTEM_B_VALUE_A = new Identifier().setSystem("system-b").setValue("value-a");
+
+		//Create Practitioner With SYSTEM_A_VALUE_A
+		Practitioner practOne = new Practitioner();
+		practOne.getNameFirstRep().setFamily("PRACT").addGiven("pre-existing-1");
+		practOne.addIdentifier(SYSTEM_A_VALUE_A);
+		myClient.create().resource(practOne).execute();
+
+		//Create Practitioner With SYSTEM_B_VALUE_A
+		Practitioner practTwo = new Practitioner();
+		practTwo.getNameFirstRep().setFamily("PRACT").addGiven("pre-existing-2");
+		practTwo.addIdentifier(SYSTEM_B_VALUE_A);
+		myClient.create().resource(practTwo).execute();
+
+		//To Check against OR conditions.
+		Practitioner practThree = new Practitioner();
+		practThree.addIdentifier(SYSTEM_A_VALUE_A);
+		practThree.addIdentifier(SYSTEM_B_VALUE_A);
+
+
+		//Conditional using `AND` on the identifier.
+		BundleBuilder builder = new BundleBuilder(myFhirContext);
+		builder.setType("transaction");
+		builder.addTransactionCreateEntry(practThree).conditional("Practitioner?identifier=system-a|value-a&identifier=system-b|value-a").andThen().getBundle();
+		Bundle bundle = builder.getBundleTyped();
+
+		logBundle(bundle);
+
+		//This is permitted, because both individual resources do not conform to the indicated conditional.
+		Bundle execute = myClient.transaction().withBundle(bundle).execute();
+		logBundle(execute);
+		assertThat(execute.getEntry().size()).isEqualTo(1);
+	}
+
+
+	private void logBundle(Bundle bundle) {
+		ourLog.info("*****");
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+		ourLog.info("*****");
+	}
+
 
 	@Test
 	@Disabled
