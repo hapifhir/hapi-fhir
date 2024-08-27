@@ -6,4 +6,5 @@ title: "Added a configuration setting for the TTL of HTTP connections to IRestfu
         1. ApacheRestfulClientFactory
         2. OkHttpRestfulClientFactory
         3. HapiFhirCliRestfulClientFactory
+        Thanks to Alex Kopp and Alex Cote for the contribution!
 "
