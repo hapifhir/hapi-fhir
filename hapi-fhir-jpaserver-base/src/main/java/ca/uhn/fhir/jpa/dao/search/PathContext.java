@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,13 +19,37 @@
  */
 package ca.uhn.fhir.jpa.dao.search;
 
-import org.hibernate.search.engine.search.predicate.dsl.*;
+import jakarta.annotation.Nonnull;
+import org.hibernate.search.engine.search.predicate.SearchPredicate;
+import org.hibernate.search.engine.search.predicate.dsl.BooleanPredicateClausesStep;
+import org.hibernate.search.engine.search.predicate.dsl.ExistsPredicateFieldStep;
+import org.hibernate.search.engine.search.predicate.dsl.MatchAllPredicateOptionsStep;
+import org.hibernate.search.engine.search.predicate.dsl.MatchIdPredicateMatchingStep;
+import org.hibernate.search.engine.search.predicate.dsl.MatchNonePredicateFinalStep;
+import org.hibernate.search.engine.search.predicate.dsl.MatchPredicateFieldStep;
+import org.hibernate.search.engine.search.predicate.dsl.NamedPredicateOptionsStep;
+import org.hibernate.search.engine.search.predicate.dsl.NestedPredicateClausesStep;
+import org.hibernate.search.engine.search.predicate.dsl.NestedPredicateFieldStep;
+import org.hibernate.search.engine.search.predicate.dsl.NestedPredicateOptionsStep;
+import org.hibernate.search.engine.search.predicate.dsl.NotPredicateFinalStep;
+import org.hibernate.search.engine.search.predicate.dsl.PhrasePredicateFieldStep;
+import org.hibernate.search.engine.search.predicate.dsl.PredicateFinalStep;
+import org.hibernate.search.engine.search.predicate.dsl.RangePredicateFieldStep;
+import org.hibernate.search.engine.search.predicate.dsl.RegexpPredicateFieldStep;
+import org.hibernate.search.engine.search.predicate.dsl.SearchPredicateFactory;
+import org.hibernate.search.engine.search.predicate.dsl.SearchPredicateFactoryExtension;
+import org.hibernate.search.engine.search.predicate.dsl.SearchPredicateFactoryExtensionIfSupportedStep;
+import org.hibernate.search.engine.search.predicate.dsl.SimpleBooleanPredicateClausesStep;
+import org.hibernate.search.engine.search.predicate.dsl.SimpleBooleanPredicateOptionsStep;
+import org.hibernate.search.engine.search.predicate.dsl.SimpleQueryStringPredicateFieldStep;
+import org.hibernate.search.engine.search.predicate.dsl.SpatialPredicateInitialStep;
+import org.hibernate.search.engine.search.predicate.dsl.TermsPredicateFieldStep;
+import org.hibernate.search.engine.search.predicate.dsl.WildcardPredicateFieldStep;
 import org.hibernate.search.util.common.annotation.Incubating;
 
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import javax.annotation.Nonnull;
 
 import static ca.uhn.fhir.jpa.dao.search.ExtendedHSearchClauseBuilder.PATH_JOINER;
 import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.NESTED_SEARCH_PARAM_ROOT;
@@ -108,80 +132,153 @@ class PathContext implements SearchPredicateFactory {
 
 	// implement SearchPredicateFactory
 
+	@Override
 	public MatchAllPredicateOptionsStep<?> matchAll() {
 		return myPredicateFactory.matchAll();
 	}
 
+	@Override
+	public MatchNonePredicateFinalStep matchNone() {
+		return myPredicateFactory.matchNone();
+	}
+
+	@Override
 	public MatchIdPredicateMatchingStep<?> id() {
 		return myPredicateFactory.id();
 	}
 
+	@Override
 	public BooleanPredicateClausesStep<?> bool() {
 		return myPredicateFactory.bool();
 	}
 
+	@Override
 	public PredicateFinalStep bool(Consumer<? super BooleanPredicateClausesStep<?>> clauseContributor) {
 		return myPredicateFactory.bool(clauseContributor);
 	}
 
+	@Override
+	public SimpleBooleanPredicateClausesStep<?> and() {
+		return myPredicateFactory.and();
+	}
+
+	@Override
+	public SimpleBooleanPredicateOptionsStep<?> and(
+			SearchPredicate theSearchPredicate, SearchPredicate... theSearchPredicates) {
+		return myPredicateFactory.and(theSearchPredicate, theSearchPredicates);
+	}
+
+	@Override
+	public SimpleBooleanPredicateOptionsStep<?> and(
+			PredicateFinalStep thePredicateFinalStep, PredicateFinalStep... thePredicateFinalSteps) {
+		return myPredicateFactory.and(thePredicateFinalStep, thePredicateFinalSteps);
+	}
+
+	@Override
+	public SimpleBooleanPredicateClausesStep<?> or() {
+		return myPredicateFactory.or();
+	}
+
+	@Override
+	public SimpleBooleanPredicateOptionsStep<?> or(
+			SearchPredicate theSearchPredicate, SearchPredicate... theSearchPredicates) {
+		return myPredicateFactory.or(theSearchPredicate, theSearchPredicates);
+	}
+
+	@Override
+	public SimpleBooleanPredicateOptionsStep<?> or(
+			PredicateFinalStep thePredicateFinalStep, PredicateFinalStep... thePredicateFinalSteps) {
+		return myPredicateFactory.or(thePredicateFinalStep, thePredicateFinalSteps);
+	}
+
+	@Override
+	public NotPredicateFinalStep not(SearchPredicate theSearchPredicate) {
+		return myPredicateFactory.not(theSearchPredicate);
+	}
+
+	@Override
+	public NotPredicateFinalStep not(PredicateFinalStep thePredicateFinalStep) {
+		return myPredicateFactory.not(thePredicateFinalStep);
+	}
+
+	@Override
 	public MatchPredicateFieldStep<?> match() {
 		return myPredicateFactory.match();
 	}
 
+	@Override
 	public RangePredicateFieldStep<?> range() {
 		return myPredicateFactory.range();
 	}
 
+	@Override
 	public PhrasePredicateFieldStep<?> phrase() {
 		return myPredicateFactory.phrase();
 	}
 
+	@Override
 	public WildcardPredicateFieldStep<?> wildcard() {
 		return myPredicateFactory.wildcard();
 	}
 
+	@Override
 	public RegexpPredicateFieldStep<?> regexp() {
 		return myPredicateFactory.regexp();
 	}
 
+	@Override
 	public TermsPredicateFieldStep<?> terms() {
 		return myPredicateFactory.terms();
 	}
 
+	@Override
 	public NestedPredicateFieldStep<?> nested() {
 		return myPredicateFactory.nested();
 	}
 
+	@Override
+	public NestedPredicateClausesStep<?> nested(String theObjectFieldPath) {
+		return myPredicateFactory.nested(theObjectFieldPath);
+	}
+
+	@Override
 	public SimpleQueryStringPredicateFieldStep<?> simpleQueryString() {
 		return myPredicateFactory.simpleQueryString();
 	}
 
+	@Override
 	public ExistsPredicateFieldStep<?> exists() {
 		return myPredicateFactory.exists();
 	}
 
+	@Override
 	public SpatialPredicateInitialStep spatial() {
 		return myPredicateFactory.spatial();
 	}
 
+	@Override
 	@Incubating
 	public NamedPredicateOptionsStep named(String path) {
 		return myPredicateFactory.named(path);
 	}
 
+	@Override
 	public <T> T extension(SearchPredicateFactoryExtension<T> extension) {
 		return myPredicateFactory.extension(extension);
 	}
 
+	@Override
 	public SearchPredicateFactoryExtensionIfSupportedStep extension() {
 		return myPredicateFactory.extension();
 	}
 
+	@Override
 	@Incubating
 	public SearchPredicateFactory withRoot(String objectFieldPath) {
 		return myPredicateFactory.withRoot(objectFieldPath);
 	}
 
+	@Override
 	@Incubating
 	public String toAbsolutePath(String relativeFieldPath) {
 		return myPredicateFactory.toAbsolutePath(relativeFieldPath);

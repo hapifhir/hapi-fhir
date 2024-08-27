@@ -1,10 +1,14 @@
 package ca.uhn.fhir.jpa.term;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 /*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,8 +53,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import javax.persistence.EntityManager;
-import javax.persistence.NonUniqueResultException;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NonUniqueResultException;
 import javax.sql.DataSource;
 import java.util.Arrays;
 import java.util.Collections;
@@ -59,11 +63,8 @@ import java.util.Optional;
 
 import static ca.uhn.fhir.jpa.term.TermReadSvcImpl.DEFAULT_MASS_INDEXER_OBJECT_LOADING_THREADS;
 import static ca.uhn.fhir.jpa.term.TermReadSvcImpl.MAX_MASS_INDEXER_OBJECT_LOADING_THREADS;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -143,7 +144,7 @@ class ITermReadSvcTest {
 		@Test
 		void startsWithGenericPlusSlashPlusIdReturnsValid() {
 			Optional<String> vsIdOpt = TermReadSvcUtil.getValueSetId("http://loinc.org/vs/some-vs-id");
-			assertTrue(vsIdOpt.isPresent());
+			assertThat(vsIdOpt).isPresent();
 		}
 
 	}
@@ -224,7 +225,7 @@ class ITermReadSvcTest {
 
 		@Test
 		void getNoneReturnsOptionalEmpty() {
-			when(myEntityManager.createQuery(anyString()).getResultList())
+			when(myEntityManager.createQuery(anyString()).setParameter(anyString(), any()).getResultList())
 				.thenReturn(Collections.emptyList());
 
 			Optional<IBaseResource> result = testedClass.readCodeSystemByForcedId("a-cs-id");
@@ -233,21 +234,21 @@ class ITermReadSvcTest {
 
 		@Test
 		void getMultipleThrows() {
-			when(myEntityManager.createQuery(anyString()).getResultList())
+			when(myEntityManager.createQuery(anyString()).setParameter(anyString(), any()).getResultList())
 				.thenReturn(Lists.newArrayList(resource1, resource2));
 
 			NonUniqueResultException thrown = assertThrows(
 				NonUniqueResultException.class,
 				() -> testedClass.readCodeSystemByForcedId("a-cs-id"));
 
-			assertTrue(thrown.getMessage().contains("More than one CodeSystem is pointed by forcedId:"));
+			assertThat(thrown.getMessage()).contains("More than one CodeSystem is pointed by forcedId:");
 		}
 
 		@Test
 		void getOneConvertToResource() {
 			ReflectionTestUtils.setField(testedClass, "myDaoRegistry", myDaoRegistry);
 
-			when(myEntityManager.createQuery(anyString()).getResultList())
+			when(myEntityManager.createQuery(anyString()).setParameter(anyString(), any()).getResultList())
 				.thenReturn(Lists.newArrayList(resource1));
 			when(myDaoRegistry.getResourceDao("CodeSystem")).thenReturn(myFhirResourceDao);
 			when(myJpaStorageResourceParser.toResource(resource1, false)).thenReturn(myCodeSystemResource);
@@ -290,12 +291,12 @@ class ITermReadSvcTest {
 				testedClass, "getTermConceptsFetchExceptionMsg", termConcepts, values);
 
 			assertNotNull(msg);
-			assertTrue(msg.contains("No TermConcept(s) were found"));
+			assertThat(msg).contains("No TermConcept(s) were found");
 			assertFalse(msg.contains(CODE_1));
-			assertTrue(msg.contains(CODE_2));
+			assertThat(msg).contains(CODE_2);
 			assertFalse(msg.contains(CODE_3));
 			assertFalse(msg.contains(CODE_4));
-			assertTrue(msg.contains(CODE_5));
+			assertThat(msg).contains(CODE_5);
 		}
 
 		@Test
@@ -311,9 +312,9 @@ class ITermReadSvcTest {
 				testedClass, "getTermConceptsFetchExceptionMsg", termConcepts, values);
 
 			assertNotNull(msg);
-			assertTrue(msg.contains("More TermConcepts were found than indicated codes"));
+			assertThat(msg).contains("More TermConcepts were found than indicated codes");
 			assertFalse(msg.contains("Queried codes: [" + CODE_3 + "]"));
-			assertTrue(msg.contains("Obtained TermConcept IDs, codes: [1, code-1; 3, code-3]"));
+			assertThat(msg).contains("Obtained TermConcept IDs, codes: [1, code-1; 3, code-3]");
 		}
 	}
 

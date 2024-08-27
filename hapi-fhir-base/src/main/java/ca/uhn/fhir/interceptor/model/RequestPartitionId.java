@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,8 @@ import ca.uhn.fhir.util.JsonUtil;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -36,9 +38,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import java.util.stream.Stream;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
@@ -97,12 +99,43 @@ public class RequestPartitionId implements IModelJson {
 		myAllPartitions = true;
 	}
 
+	/**
+	 * Creates a new RequestPartitionId which includes all partition IDs from
+	 * this {@link RequestPartitionId} but also includes all IDs from the given
+	 * {@link RequestPartitionId}. Any duplicates are only included once, and
+	 * partition names and dates are ignored and not returned. This {@link RequestPartitionId}
+	 * and {@literal theOther} are not modified.
+	 *
+	 * @since 7.4.0
+	 */
+	public RequestPartitionId mergeIds(RequestPartitionId theOther) {
+		if (isAllPartitions() || theOther.isAllPartitions()) {
+			return RequestPartitionId.allPartitions();
+		}
+
+		// don't know why this is required - otherwise PartitionedStrictTransactionR4Test fails
+		if (this.equals(theOther)) {
+			return this;
+		}
+
+		List<Integer> thisPartitionIds = getPartitionIds();
+		List<Integer> otherPartitionIds = theOther.getPartitionIds();
+		List<Integer> newPartitionIds = Stream.concat(thisPartitionIds.stream(), otherPartitionIds.stream())
+				.distinct()
+				.collect(Collectors.toList());
+		return RequestPartitionId.fromPartitionIds(newPartitionIds);
+	}
+
 	public static RequestPartitionId fromJson(String theJson) throws JsonProcessingException {
 		return ourObjectMapper.readValue(theJson, RequestPartitionId.class);
 	}
 
 	public boolean isAllPartitions() {
 		return myAllPartitions;
+	}
+
+	public boolean isPartitionCovered(Integer thePartitionId) {
+		return isAllPartitions() || getPartitionIds().contains(thePartitionId);
 	}
 
 	@Nullable
@@ -129,6 +162,9 @@ public class RequestPartitionId implements IModelJson {
 		}
 		if (hasPartitionNames()) {
 			b.append("names", getPartitionNames());
+		}
+		if (myAllPartitions) {
+			b.append("allPartitions", myAllPartitions);
 		}
 		return b.build();
 	}
@@ -212,7 +248,7 @@ public class RequestPartitionId implements IModelJson {
 	}
 
 	public List<Integer> getPartitionIdsWithoutDefault() {
-		return getPartitionIds().stream().filter(t -> t != null).collect(Collectors.toList());
+		return getPartitionIds().stream().filter(Objects::nonNull).collect(Collectors.toList());
 	}
 
 	@Nullable
@@ -322,6 +358,14 @@ public class RequestPartitionId implements IModelJson {
 	public static RequestPartitionId forPartitionIdsAndNames(
 			List<String> thePartitionNames, List<Integer> thePartitionIds, LocalDate thePartitionDate) {
 		return new RequestPartitionId(thePartitionNames, thePartitionIds, thePartitionDate);
+	}
+
+	public static boolean isDefaultPartition(@Nullable RequestPartitionId thePartitionId) {
+		if (thePartitionId == null) {
+			return false;
+		}
+
+		return thePartitionId.isDefaultPartition();
 	}
 
 	/**

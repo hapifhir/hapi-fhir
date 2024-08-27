@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.migrate.dao.HapiMigrationDao;
 import ca.uhn.fhir.jpa.migrate.entity.HapiMigrationEntity;
 import ca.uhn.fhir.system.HapiSystemProperties;
 import com.google.common.base.Charsets;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Test;
@@ -14,21 +15,24 @@ import org.springframework.jdbc.core.support.AbstractLobCreatingPreparedStatemen
 import org.springframework.jdbc.support.lob.DefaultLobHandler;
 import org.springframework.jdbc.support.lob.LobCreator;
 
-import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 
 import static ca.uhn.fhir.jpa.migrate.HapiMigrationLock.LOCK_PID;
 import static ca.uhn.fhir.jpa.migrate.HapiMigrationStorageSvc.LOCK_TYPE;
 import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class HapiClearMigrationLockCommandTest extends ConsoleOutputCapturingBaseTest {
@@ -61,9 +65,8 @@ public class HapiClearMigrationLockCommandTest extends ConsoleOutputCapturingBas
 		int beforeClearMigrationCount = dao.findAll().size();
 		try {
 			App.main(args);
-			fail();
-		} catch (CommandFailureException e) {
-			assertThat(e.getMessage(), containsString("HAPI-2152: Internal error: on unlocking, a competing lock was found"));
+			fail();		} catch (CommandFailureException e) {
+			assertThat(e.getMessage()).contains("HAPI-2152: Internal error: on unlocking, a competing lock was found");
 		}
 	}
 	@Test
@@ -86,7 +89,7 @@ public class HapiClearMigrationLockCommandTest extends ConsoleOutputCapturingBas
 		int afterClearMigrationCount = dao.findAll().size();
 		int removedRows = beforeClearMigrationCount - afterClearMigrationCount;
 		assertEquals(0, removedRows);
-		assertThat(getConsoleOutput(), containsString("Did not successfully remove lock entry. [uuid="+ lockUUID +"]"));
+		assertThat(getConsoleOutput()).contains("Did not successfully remove lock entry. [uuid=" + lockUUID + "]");
 	}
 	@Test
 	public void testMigrateAndClearExistingLock() throws IOException, SQLException {
@@ -110,7 +113,7 @@ public class HapiClearMigrationLockCommandTest extends ConsoleOutputCapturingBas
 		int removedRows = beforeClearMigrationCount - afterClearMigrationCount;
 
 		assertEquals(1, removedRows);
-		assertThat(getConsoleOutput(), containsString("Successfully removed lock entry. [uuid="+ lockUUID +"]"));
+		assertThat(getConsoleOutput()).contains("Successfully removed lock entry. [uuid=" + lockUUID + "]");
 	}
 
 	private record ConnectionData(DriverTypeEnum.ConnectionProperties connectionProperties, String url) {}

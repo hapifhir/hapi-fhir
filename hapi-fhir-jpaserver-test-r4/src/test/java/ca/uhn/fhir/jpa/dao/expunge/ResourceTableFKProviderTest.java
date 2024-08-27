@@ -6,9 +6,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.PersistenceContextType;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.PersistenceContextType;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -18,8 +18,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 
 class ResourceTableFKProviderTest extends BaseJpaR4Test {
@@ -68,6 +67,6 @@ class ResourceTableFKProviderTest extends BaseJpaR4Test {
 		// If this assertion fails, it means hapi-fhir has added a new foreign-key dependency to HFJ_RESOURCE.  To fix
 		// the test, add the missing key to myResourceTableFKProvider.getResourceForeignKeys()
 		List<ResourceForeignKey> actual = myResourceTableFKProvider.getResourceForeignKeys();
-		assertThat(actual, containsInAnyOrder(expected.toArray()));
+		assertThat(actual.toArray()).containsExactlyInAnyOrder(expected.toArray());
 	}
 }

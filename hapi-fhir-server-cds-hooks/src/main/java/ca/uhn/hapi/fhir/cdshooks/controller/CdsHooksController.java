@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - CDS Hooks
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -94,13 +94,12 @@ public class CdsHooksController {
 			path = "{cds_hook}/feedback",
 			method = {RequestMethod.POST},
 			consumes = {MediaType.APPLICATION_JSON_VALUE})
-	public ResponseEntity<String> cdsServiceFeedback(
+	public ResponseEntity<CdsServiceFeedbackJson> cdsServiceFeedback(
 			@PathVariable("cds_hook") String theCdsHook,
 			@RequestBody CdsServiceFeedbackJson theCdsServiceFeedbackJson) {
-		String json = myCdsServiceRegistry.callFeedback(theCdsHook, theCdsServiceFeedbackJson);
-
+		CdsServiceFeedbackJson response = myCdsServiceRegistry.callFeedback(theCdsHook, theCdsServiceFeedbackJson);
 		return ResponseEntity.status(200)
 				.contentType(MediaType.APPLICATION_JSON)
-				.body(json);
+				.body(response);
 	}
 }

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.config.HapiFhirHibernateJpaDialect;
-import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
@@ -44,6 +43,17 @@ import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
+import jakarta.annotation.Nullable;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.PersistenceContextType;
+import jakarta.persistence.PersistenceException;
+import jakarta.persistence.Tuple;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import org.apache.commons.lang3.Validate;
 import org.hibernate.internal.SessionImpl;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -64,17 +74,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import javax.annotation.Nullable;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.PersistenceContextType;
-import javax.persistence.PersistenceException;
-import javax.persistence.Tuple;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 
 import static ca.uhn.fhir.util.UrlUtil.determineResourceTypeInResourceUrl;
 import static org.apache.commons.lang3.StringUtils.countMatches;
@@ -96,9 +95,6 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 
 	@Autowired
 	private IIdHelperService<JpaPid> myIdHelperService;
-
-	@Autowired
-	private PartitionSettings myPartitionSettings;
 
 	@Autowired
 	private JpaStorageSettings myStorageSettings;
@@ -150,14 +146,9 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			List<IBase> theEntries,
 			StopWatch theTransactionStopWatch) {
 
-		ITransactionProcessorVersionAdapter versionAdapter = getVersionAdapter();
-		RequestPartitionId requestPartitionId = null;
-		if (!myPartitionSettings.isPartitioningEnabled()) {
-			requestPartitionId = RequestPartitionId.allPartitions();
-		} else {
-			// If all entries in the transaction point to the exact same partition, we'll try and do a pre-fetch
-			requestPartitionId = getSinglePartitionForAllEntriesOrNull(theRequest, theEntries, versionAdapter);
-		}
+		ITransactionProcessorVersionAdapter<?, ?> versionAdapter = getVersionAdapter();
+		RequestPartitionId requestPartitionId =
+				super.determineRequestPartitionIdForWriteEntries(theRequest, theEntries);
 
 		if (requestPartitionId != null) {
 			preFetch(theTransactionDetails, theEntries, versionAdapter, requestPartitionId);
@@ -367,29 +358,25 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			CriteriaBuilder cb = myEntityManager.getCriteriaBuilder();
 			CriteriaQuery<Tuple> cq = cb.createTupleQuery();
 			Root<ResourceIndexedSearchParamToken> from = cq.from(ResourceIndexedSearchParamToken.class);
-			cq.multiselect(
-					from.get("myResourcePid").as(Long.class),
-					from.get(theIndexColumnName).as(Long.class));
+			cq.multiselect(from.get("myResourcePid"), from.get(theIndexColumnName));
 
 			Predicate masterPredicate;
 			if (theHashesForIndexColumn.size() == 1) {
 				masterPredicate = cb.equal(
-						from.get(theIndexColumnName).as(Long.class),
+						from.get(theIndexColumnName),
 						theHashesForIndexColumn.iterator().next());
 			} else {
-				masterPredicate = from.get(theIndexColumnName).as(Long.class).in(theHashesForIndexColumn);
+				masterPredicate = from.get(theIndexColumnName).in(theHashesForIndexColumn);
 			}
 
 			if (myPartitionSettings.isPartitioningEnabled()
 					&& !myPartitionSettings.isIncludePartitionInSearchHashes()) {
 				if (theRequestPartitionId.isDefaultPartition()) {
-					Predicate partitionIdCriteria =
-							cb.isNull(from.get("myPartitionIdValue").as(Integer.class));
+					Predicate partitionIdCriteria = cb.isNull(from.get("myPartitionIdValue"));
 					masterPredicate = cb.and(partitionIdCriteria, masterPredicate);
 				} else if (!theRequestPartitionId.isAllPartitions()) {
-					Predicate partitionIdCriteria = from.get("myPartitionIdValue")
-							.as(Integer.class)
-							.in(theRequestPartitionId.getPartitionIds());
+					Predicate partitionIdCriteria =
+							from.get("myPartitionIdValue").in(theRequestPartitionId.getPartitionIds());
 					masterPredicate = cb.and(partitionIdCriteria, masterPredicate);
 				}
 			}
@@ -476,24 +463,6 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 		}
 	}
 
-	private RequestPartitionId getSinglePartitionForAllEntriesOrNull(
-			RequestDetails theRequest, List<IBase> theEntries, ITransactionProcessorVersionAdapter versionAdapter) {
-		RequestPartitionId retVal = null;
-		Set<RequestPartitionId> requestPartitionIdsForAllEntries = new HashSet<>();
-		for (IBase nextEntry : theEntries) {
-			IBaseResource resource = versionAdapter.getResource(nextEntry);
-			if (resource != null) {
-				RequestPartitionId requestPartition = myRequestPartitionSvc.determineCreatePartitionForRequest(
-						theRequest, resource, myFhirContext.getResourceType(resource));
-				requestPartitionIdsForAllEntries.add(requestPartition);
-			}
-		}
-		if (requestPartitionIdsForAllEntries.size() == 1) {
-			retVal = requestPartitionIdsForAllEntries.iterator().next();
-		}
-		return retVal;
-	}
-
 	/**
 	 * Given a token parameter, build the query predicate based on its hash. Uses system and value if both are available, otherwise just value.
 	 * If neither are available, it returns null.
@@ -572,11 +541,6 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			}
 			throw e;
 		}
-	}
-
-	@VisibleForTesting
-	public void setPartitionSettingsForUnitTest(PartitionSettings thePartitionSettings) {
-		myPartitionSettings = thePartitionSettings;
 	}
 
 	@VisibleForTesting

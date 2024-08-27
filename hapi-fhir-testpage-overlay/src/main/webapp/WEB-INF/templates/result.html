@@ -1,25 +1,25 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 	<head>
-		<title th:include="window-title :: result" />
-		<th:block th:include="tmpl-head :: head" />
-		<script th:include="tmpl-buttonclick-handler :: handler" />
+		<th:block th:insert="~{window-title :: result}" />
+		<th:block th:insert="~{tmpl-head :: head}" />
+		<th:block th:insert="~{tmpl-buttonclick-handler :: handler}" />
 	</head>
 
 	<body>
 		<form action="" method="get" id="outerForm">
 		<input type="hidden" id="serverId" name="serverId" th:value="${serverId}"/> 
 
-		<div th:replace="tmpl-navbar-top :: top" ></div>
+		<div th:replace="~{tmpl-navbar-top :: top}" ></div>
 		
 		<div class="container-fluid">
 			<div class="row">
 
-				<div th:replace="tmpl-navbar-left :: left" ></div>
+				<div th:replace="~{tmpl-navbar-left :: left}" ></div>
 
 				<div class="col-sm-9 col-sm-offset-3 col-md-9 col-md-offset-3 main">
 
-					<div th:replace="tmpl-banner :: banner"></div>
+					<div th:replace="~{tmpl-banner :: banner}"></div>
 
 					<!-- *************************************************** -->
 					<!-- ** Response                                      ** -->
@@ -129,10 +129,10 @@
 									<td style="border-width: 0px; padding: 0px;">
 
                               <th:block th:if="${bundle} != null">
-                                 <th:block th:replace="tmpl-result-controltable-hapi :: controltable"></th:block>
+                                 <th:block th:replace="~{tmpl-result-controltable-hapi :: controltable}"></th:block>
                               </th:block>
                               <th:block th:if="${riBundle} != null AND ( ${riBundle.type.name()} == 'SEARCHSET' OR ${riBundle.type.name()} == 'HISTORY' )">
-                                 <th:block th:replace="tmpl-result-controltable-ri :: controltable"></th:block>
+                                 <th:block th:replace="~{tmpl-result-controltable-ri :: controltable}"></th:block>
                               </th:block>
 
 										<div class="panel-heading">
@@ -210,6 +210,6 @@
 		</div>
 
 	</form>
-	<div th:replace="tmpl-footer :: footer" ></div>
+	<div th:replace="~{tmpl-footer :: footer}" ></div>
 </body>
 </html>

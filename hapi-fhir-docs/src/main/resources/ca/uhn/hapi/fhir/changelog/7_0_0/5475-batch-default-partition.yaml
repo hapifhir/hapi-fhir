@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 5475
+title: "Ensure batch2 jpa persistence always targets the default partition."

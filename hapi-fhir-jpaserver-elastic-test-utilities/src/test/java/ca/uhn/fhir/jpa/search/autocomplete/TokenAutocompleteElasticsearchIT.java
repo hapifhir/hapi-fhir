@@ -16,10 +16,8 @@ import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.storage.test.DaoTestDataBuilder;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
-import org.hamcrest.Description;
-import org.hamcrest.Matcher;
-import org.hamcrest.Matchers;
-import org.hamcrest.TypeSafeDiagnosingMatcher;
+import jakarta.persistence.EntityManager;
+import org.assertj.core.api.Condition;
 import org.hibernate.search.mapper.orm.Search;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -37,16 +35,11 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import javax.annotation.Nonnull;
-import javax.persistence.EntityManager;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Predicate;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(SpringExtension.class)
 @RequiresDocker
@@ -135,32 +128,41 @@ public class TokenAutocompleteElasticsearchIT extends BaseJpaTest {
 
 		List<TokenAutocompleteHit> codes;
 		codes = autocompleteSearch("Observation", "code", "text", "blo");
-		assertThat("finds blood pressure", codes, Matchers.hasItem(matchingSystemAndCode(mean_blood_pressure)));
+
+		assertThat(codes)
+    .as("finds blood pressure")
+    .haveAtLeastOne(matchingSystemAndCode(mean_blood_pressure));
 
 		codes = autocompleteSearch("Observation", "code", "text", "pressure");
-		assertThat("finds blood pressure", codes, Matchers.hasItem(matchingSystemAndCode(mean_blood_pressure)));
+		assertThat(codes)
+    .as("finds blood pressure")
+    .haveAtLeastOne(matchingSystemAndCode(mean_blood_pressure));
 
 		long hits = codes.stream()
 			.filter(c -> matchingSystemAndCode(mean_blood_pressure).matches(c))
 			.count();
-		assertThat("multiple matches returns single hit", hits, is(1L));
+		assertThat(hits).as("multiple matches returns single hit").isEqualTo(1L);
 
 		codes = autocompleteSearch("Observation", "code", "text", "nuclear");
-		assertThat("doesn't find nuclear", codes, is(empty()));
+		assertThat(codes).as("doesn't find nuclear").isEmpty();
 
 		codes = autocompleteSearch("Observation", "code", "text", null);
-		assertThat("empty filter finds some", codes, is(not(empty())));
-		assertThat("empty finds most common first", codes.get(0), matchingSystemAndCode(gram_positive_culture));
-		assertThat("empty finds most common first", codes.get(1), matchingSystemAndCode(mean_blood_pressure));
+		assertThat(codes).as("empty filter finds some").isNotEmpty();
+		assertThat(codes.get(0)).as("empty finds most common first").satisfies(matchingSystemAndCode(gram_positive_culture));
+		assertThat(codes.get(1)).as("empty finds most common first").satisfies(matchingSystemAndCode(mean_blood_pressure));
 
 		codes = autocompleteSearch("Observation", "code", null, "88262-1");
-		assertThat("matches by code value", codes, Matchers.hasItem(matchingSystemAndCode(gram_positive_culture)));
+		assertThat(codes)
+    .as("matches by code value")
+    .haveAtLeastOne(matchingSystemAndCode(gram_positive_culture));
 
 		codes = autocompleteSearch("Observation", "code", null, "8826");
-		assertThat("matches by code prefix", codes, Matchers.hasItem(matchingSystemAndCode(gram_positive_culture)));
+		assertThat(codes)
+    .as("matches by code prefix")
+    .haveAtLeastOne(matchingSystemAndCode(gram_positive_culture));
 
 		codes = autocompleteSearch("Observation", "code", null, null);
-		assertThat("null finds everything", codes, hasSize(13));
+		assertThat(codes).as("null finds everything").hasSize(13);
 
 	}
 
@@ -175,16 +177,21 @@ public class TokenAutocompleteElasticsearchIT extends BaseJpaTest {
 		createObservationWithCode(mean_blood_pressure);
 
 		List<TokenAutocompleteHit> codes = autocompleteSearch("Observation", "code", null, null);
-		assertThat("null finds all three codes", codes, hasSize(3));
+		assertThat(codes).as("null finds all three codes").hasSize(3);
 
 		codes = autocompleteSearch("Observation", "code", null, "789");
-		assertThat("token prefix finds the matching code", codes, Matchers.hasItem(matchingSystemAndCode(erythrocyte_by_volume)));
-		assertThat("token prefix finds only the matching code, not all codes on the resource", codes, Matchers.contains(matchingSystemAndCode(erythrocyte_by_volume)));
+		assertThat(codes)
+    .as("token prefix finds the matching code")
+    .haveAtLeastOne(matchingSystemAndCode(erythrocyte_by_volume));
+
+		assertThat(codes).as("token prefix finds only the matching code, not all codes on the resource").haveAtLeastOne(matchingSystemAndCode(erythrocyte_by_volume));
 
 		codes = autocompleteSearch("Observation", "code", "text", "erythrocyte");
-		assertThat("text finds the matching code", codes, Matchers.hasItem(matchingSystemAndCode(erythrocyte_by_volume)));
-		assertThat("text finds only the matching code, not all codes on the resource", codes, Matchers.contains(matchingSystemAndCode(erythrocyte_by_volume)));
+		assertThat(codes)
+    .as("text finds the matching code")
+    .haveAtLeastOne(matchingSystemAndCode(erythrocyte_by_volume));
 
+		assertThat(codes).as("text finds only the matching code, not all codes on the resource").haveAtLeastOne(matchingSystemAndCode(erythrocyte_by_volume));
 	}
 
 	List<TokenAutocompleteHit> autocompleteSearch(String theResourceType, String theSPName, String theModifier, String theSearchText) {
@@ -202,21 +209,13 @@ public class TokenAutocompleteElasticsearchIT extends BaseJpaTest {
 		return myObservationDao.create(obs1, mySrd).getId().toUnqualifiedVersionless();
 	}
 
-	@Nonnull
-	private Matcher<TokenAutocompleteHit> matchingSystemAndCode(IBaseCoding theCoding) {
-		return new TypeSafeDiagnosingMatcher<TokenAutocompleteHit>() {
-			private final String mySystemAndCode = theCoding.getSystem() + "|" + theCoding.getCode();
+	private Condition<TokenAutocompleteHit> matchingSystemAndCode(IBaseCoding theCoding) {
+		return new Condition<>(matchesSystemAndCode(theCoding), "search hit matching " + theCoding);
+	}
 
-			@Override
-			protected boolean matchesSafely(TokenAutocompleteHit item, Description mismatchDescription) {
-				return Objects.equals(mySystemAndCode, item.getSystemCode());
-
-			}
-			@Override
-			public void describeTo(Description description) {
-				description.appendText("search hit matching ").appendValue(mySystemAndCode);
-			}
-		};
+	private Predicate<TokenAutocompleteHit> matchesSystemAndCode(IBaseCoding theCoding) {
+		String expectedSystemAndCode = theCoding.getSystem() + "|" + theCoding.getCode();
+		return hit -> Objects.equals(expectedSystemAndCode, hit.getSystemCode());
 	}
 
 }

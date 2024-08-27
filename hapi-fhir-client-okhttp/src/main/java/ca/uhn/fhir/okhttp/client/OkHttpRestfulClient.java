@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR OkHttp Client
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -136,17 +136,12 @@ public class OkHttpRestfulClient implements IHttpClient {
 		}
 
 		addUserAgentHeader(theHttpRequest, theContext);
-		addAcceptCharsetHeader(theHttpRequest);
 		MethodUtil.addAcceptHeaderToRequest(theEncoding, theHttpRequest, theContext);
 		addIfNoneExistHeader(theHttpRequest);
 	}
 
 	private void addUserAgentHeader(OkHttpRestfulRequest theHttpRequest, FhirContext theContext) {
 		theHttpRequest.addHeader("User-Agent", HttpClientUtil.createUserAgentString(theContext, "okhttp"));
-	}
-
-	private void addAcceptCharsetHeader(OkHttpRestfulRequest theHttpRequest) {
-		theHttpRequest.addHeader("Accept-Charset", "utf-8");
 	}
 
 	private void addIfNoneExistHeader(IHttpRequest result) {

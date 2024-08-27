@@ -1,8 +1,11 @@
 package org.hl7.fhir.dstu2.hapi.validation;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.ValidationSupportContext;
+import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
 import ca.uhn.fhir.model.dstu2.composite.PeriodDt;
 import ca.uhn.fhir.model.dstu2.resource.Parameters;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
@@ -25,32 +28,96 @@ import org.hl7.fhir.dstu2.model.Observation.ObservationStatus;
 import org.hl7.fhir.dstu2.model.QuestionnaireResponse;
 import org.hl7.fhir.dstu2.model.QuestionnaireResponse.QuestionnaireResponseStatus;
 import org.hl7.fhir.dstu2.model.StringType;
+import org.hl7.fhir.dstu3.model.CodeSystem;
+import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.quality.Strictness;
+import org.mockito.stubbing.Answer;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.lessThan;
-import static org.hamcrest.Matchers.not;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.withSettings;
 
-public class FhirInstanceValidatorDstu2Test {
+public class FhirInstanceValidatorDstu2Test extends BaseValidationTestWithInlineMocks {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirInstanceValidatorDstu2Test.class);
 	private static FhirContext ourCtxDstu2 = FhirContext.forDstu2();
 	private static FhirInstanceValidator ourValidator;
 	private static FhirContext ourCtxHl7OrgDstu2 = FhirContext.forDstu2Hl7Org();
 
-	@BeforeAll
-	public static void beforeClass() {
+	private ArrayList<String> myValidConcepts;
+	private final Set<String> myValidSystems = new HashSet<>();
+
+	private void addValidConcept(String theSystem, String theCode) {
+		myValidSystems.add(theSystem);
+		myValidConcepts.add(theSystem + "___" + theCode);
+	}
+
+	@BeforeEach
+	public void beforeEach() {
+		myValidConcepts = new ArrayList<>();
+
 		DefaultProfileValidationSupport defaultProfileValidationSupport = new DefaultProfileValidationSupport(ourCtxDstu2);
-		IValidationSupport validationSupport = new ValidationSupportChain(defaultProfileValidationSupport, new InMemoryTerminologyServerValidationSupport(ourCtxDstu2));
+		IValidationSupport mockSupport = mock(IValidationSupport.class, withSettings().strictness(Strictness.LENIENT));
+		when(mockSupport.getFhirContext()).thenReturn(ourCtxDstu2);
+		when(mockSupport.isCodeSystemSupported(any(), nullable(String.class))).thenAnswer(new Answer<Boolean>() {
+			@Override
+			public Boolean answer(InvocationOnMock theInvocation) {
+				String url = (String) theInvocation.getArguments()[1];
+				boolean retVal = myValidSystems.contains(url);
+				ourLog.debug("isCodeSystemSupported({}) : {}", new Object[]{url, retVal});
+
+				return retVal;
+			}
+		});
+
+		when(mockSupport.validateCode(any(), any(), nullable(String.class), nullable(String.class), nullable(String.class), nullable(String.class))).thenAnswer(new Answer<IValidationSupport.CodeValidationResult>() {
+			@Override
+			public IValidationSupport.CodeValidationResult answer(InvocationOnMock theInvocation) {
+				ConceptValidationOptions options = theInvocation.getArgument(1, ConceptValidationOptions.class);
+				String system = theInvocation.getArgument(2, String.class);
+				String code = theInvocation.getArgument(3, String.class);
+				String display = theInvocation.getArgument(4, String.class);
+				String valueSetUrl = theInvocation.getArgument(5, String.class);
+				IValidationSupport.CodeValidationResult retVal;
+				if (myValidConcepts.contains(system + "___" + code)) {
+					retVal = new IValidationSupport.CodeValidationResult().setCode(code);
+				} else if (myValidSystems.contains(system)) {
+					return new IValidationSupport.CodeValidationResult().setSeverityCode(ValidationMessage.IssueSeverity.ERROR.toCode()).setMessage("Unknown code");
+				} else {
+					retVal = null;
+				}
+				ourLog.debug("validateCode({}, {}, {}, {}) : {}", system, code, display, valueSetUrl, retVal);
+				return retVal;
+			}
+		});
+
+		IValidationSupport validationSupport = new ValidationSupportChain(
+			mockSupport,
+			defaultProfileValidationSupport,
+			new InMemoryTerminologyServerValidationSupport(ourCtxDstu2));
+
+
+
 		ourValidator = new FhirInstanceValidator(validationSupport);
+
 	}
 
 	/**
@@ -71,6 +138,8 @@ public class FhirInstanceValidatorDstu2Test {
 
 	@Test
 	public void testObservation() {
+		addValidConcept("http://loinc.org", "12345");
+
 		Observation o = new Observation();
 		o.addIdentifier().setSystem("http://acme.org").setValue("1234");
 		o.setStatus(ObservationStatus.FINAL);
@@ -102,7 +171,7 @@ public class FhirInstanceValidatorDstu2Test {
 		PeriodDt period = new PeriodDt();
 		period.setStart(new DateTimeDt("2000-01-01T00:00:01+05:00"));
 		period.setEnd(new DateTimeDt("2000-01-01T00:00:00+04:00"));
-		assertThat(period.getStart().getTime(), lessThan(period.getEnd().getTime()));
+		assertThat(period.getStart().getTime()).isLessThan(period.getEnd().getTime());
 		procedure.setPerformed(period);
 
 		FhirValidator val = ourCtxDstu2.newValidator();
@@ -188,7 +257,7 @@ public class FhirInstanceValidatorDstu2Test {
 		ourLog.info(encoded);
 
 		assertFalse(result.isSuccessful());
-		assertThat(encoded, containsString("A parameter must have a value or a resource, but not both"));
+		assertThat(encoded).contains("A parameter must have a value or a resource, but not both");
 	}
 
 	@Test
@@ -211,7 +280,7 @@ public class FhirInstanceValidatorDstu2Test {
 		ourLog.info(encoded);
 
 		assertFalse(result.isSuccessful());
-		assertThat(encoded, containsString("A parameter must have a value or a resource, but not both"));
+		assertThat(encoded).contains("A parameter must have a value or a resource, but not both");
 	}
 
 	@Test
@@ -234,7 +303,7 @@ public class FhirInstanceValidatorDstu2Test {
 		ourLog.info(encoded);
 
 		assertTrue(result.isSuccessful());
-		assertThat(encoded, not(containsString("A parameter must have a value or a resource, but not both")));
+		assertThat(encoded).doesNotContain("A parameter must have a value or a resource, but not both");
 	}
 
 	@Test

@@ -8,7 +8,6 @@ import ca.uhn.fhir.parser.IParser;
 import com.google.common.collect.Sets;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.r4.model.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.ops4j.pax.exam.Configuration;
@@ -20,11 +19,8 @@ import org.ops4j.pax.exam.spi.reactors.PerClass;
 import static ca.uhn.fhir.tests.integration.karaf.PaxExamOptions.HAPI_FHIR_R4;
 import static ca.uhn.fhir.tests.integration.karaf.PaxExamOptions.KARAF;
 import static ca.uhn.fhir.tests.integration.karaf.PaxExamOptions.WRAP;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.core.IsNot.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.contains;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
@@ -132,11 +128,11 @@ public class R4JsonParserTest {
 		String encoded = parser.encodeResourceToString(b);
 		ourLog.info(encoded);
 
-		assertThat(encoded, containsString("BUNDLEID"));
-		assertThat(encoded, containsString("http://FOO"));
-		assertThat(encoded, containsString("PATIENTID"));
-		assertThat(encoded, containsString("http://BAR"));
-		assertThat(encoded, containsString("GIVEN"));
+		assertThat(encoded).contains("BUNDLEID"));
+		assertThat(encoded).contains("http://FOO"));
+		assertThat(encoded).contains("PATIENTID"));
+		assertThat(encoded).contains("http://BAR"));
+		assertThat(encoded).contains("GIVEN"));
 
 		b = parser.parseResource(Bundle.class, encoded);
 
@@ -157,7 +153,7 @@ public class R4JsonParserTest {
 		p.addName().setFamily(longString);
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p);
 
-		assertThat(encoded, containsString(longString));
+		assertThat(encoded).contains(longString));
 	}
 
 
@@ -174,12 +170,12 @@ public class R4JsonParserTest {
 		parser.setDontEncodeElements(Sets.newHashSet("id", "*.meta.versionId", "*.meta.lastUpdated"));
 		String output = parser.encodeResourceToString(p);
 
-		assertThat(output, containsString("FAMILY"));
-		assertThat(output, containsString("SYS"));
-		assertThat(output, containsString("CODE"));
-		assertThat(output, not(containsString("AAA")));
-		assertThat(output, not(containsString("BBB")));
-		assertThat(output, not(containsString("2011")));
+		assertThat(output).contains("FAMILY"));
+		assertThat(output).contains("SYS"));
+		assertThat(output).contains("CODE"));
+		assertThat(output).doesNotContain("AAA");
+		assertThat(output).doesNotContain("BBB");
+		assertThat(output).doesNotContain("2011");
 	}
 
 	@Test
@@ -220,8 +216,8 @@ public class R4JsonParserTest {
 		Patient parsed = jsonParser.parseResource(Patient.class, input);
 
 		ourLog.info(jsonParser.setPrettyPrint(true).encodeResourceToString(parsed));
-		assertThat(xmlParser.encodeResourceToString(parsed), containsString("Underweight"));
-		assertThat(jsonParser.encodeResourceToString(parsed), containsString("Underweight"));
+		assertThat(xmlParser.encodeResourceToString(parsed)).contains("Underweight"));
+		assertThat(jsonParser.encodeResourceToString(parsed)).contains("Underweight"));
 
 	}
 

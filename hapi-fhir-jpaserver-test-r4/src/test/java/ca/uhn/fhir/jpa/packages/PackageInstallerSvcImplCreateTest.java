@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.packages;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetDao;
@@ -7,26 +9,29 @@ import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.param.TokenParam;
+import com.github.dnault.xmlpatch.repackaged.org.jaxen.util.SingletonList;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.NamingSystem;
+import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.hl7.fhir.utilities.npm.PackageGenerator;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class PackageInstallerSvcImplCreateTest extends BaseJpaR4Test {
 	private static final String PACKAGE_ID_1 = "package1";
@@ -53,9 +58,9 @@ public class PackageInstallerSvcImplCreateTest extends BaseJpaR4Test {
 		final NamingSystem namingSystem = new NamingSystem();
 		namingSystem.getUniqueId().add(new NamingSystem.NamingSystemUniqueIdComponent().setValue("123"));
 
-		create(namingSystem);
+		install(namingSystem);
 
-		assertEquals(1, myNamingSystemDao.search(SearchParameterMap.newSynchronous(), REQUEST_DETAILS).getAllResources().size());
+		assertThat(myNamingSystemDao.search(SearchParameterMap.newSynchronous(), REQUEST_DETAILS).getAllResources()).hasSize(1);
 	}
 
 	@Test
@@ -123,7 +128,7 @@ public class PackageInstallerSvcImplCreateTest extends BaseJpaR4Test {
 
 		final List<TermValueSet> all2 = myTermValueSetDao.findAll();
 
-		assertEquals(2, all2.size());
+		assertThat(all2).hasSize(2);
 
 		final TermValueSet termValueSet1 = all2.get(0);
 		final TermValueSet termValueSet2 = all2.get(1);
@@ -133,7 +138,7 @@ public class PackageInstallerSvcImplCreateTest extends BaseJpaR4Test {
 
 		final List<ValueSet> allValueSets = getAllValueSets();
 
-		assertEquals(2, allValueSets.size());
+		assertThat(allValueSets).hasSize(2);
 
 		final ValueSet actualValueSet1 = allValueSets.get(0);
 
@@ -150,11 +155,29 @@ public class PackageInstallerSvcImplCreateTest extends BaseJpaR4Test {
 		assertEquals(copyright2, actualValueSet2.getCopyright());
 	}
 
+	@Test
+	void installCompositeSearchParameterWithNoExpressionAtRoot() throws IOException {
+		final String spCode = "my-test-composite-sp-with-no-expression";
+		SearchParameter spR4 = new SearchParameter();
+		spR4.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		spR4.setType(Enumerations.SearchParamType.COMPOSITE);
+		spR4.setBase(List.of(new CodeType("Patient")));
+		spR4.setCode(spCode);
+
+		install(spR4);
+
+		// verify the SP is created
+		SearchParameterMap map = SearchParameterMap.newSynchronous()
+			.add(SearchParameter.SP_CODE, new TokenParam(spCode));
+		IBundleProvider outcome = mySearchParameterDao.search(map);
+		assertEquals(1, outcome.size());
+	}
+
 	@Nonnull
 	private List<ValueSet> getAllValueSets() {
 		final List<IBaseResource> allResources = myValueSetDao.search(SearchParameterMap.newSynchronous(), REQUEST_DETAILS).getAllResources();
 
-		assertFalse(allResources.isEmpty());
+		assertThat(allResources).isNotEmpty();
 		assertTrue(allResources.get(0) instanceof ValueSet);
 
 		return allResources.stream()
@@ -166,7 +189,7 @@ public class PackageInstallerSvcImplCreateTest extends BaseJpaR4Test {
 	private ValueSet getFirstValueSet() {
 		final List<IBaseResource> allResources = myValueSetDao.search(SearchParameterMap.newSynchronous(), REQUEST_DETAILS).getAllResources();
 
-		assertEquals(1, allResources.size());
+		assertThat(allResources).hasSize(1);
 
 		final IBaseResource resource1 = allResources.get(0);
 		assertTrue(resource1 instanceof ValueSet);
@@ -178,13 +201,13 @@ public class PackageInstallerSvcImplCreateTest extends BaseJpaR4Test {
 	private TermValueSet getFirstTermValueSet() {
 		final List<TermValueSet> all2 = myTermValueSetDao.findAll();
 
-		assertEquals(1, all2.size());
+		assertThat(all2).hasSize(1);
 
 		return all2.get(0);
 	}
 
 	private void createValueSetAndCallCreate(String theOid, String theResourceVersion, String theValueSetVersion, String theUrl, String theCopyright) throws IOException {
-		create(createValueSet(theOid, theResourceVersion, theValueSetVersion, theUrl, theCopyright));
+		install(createValueSet(theOid, theResourceVersion, theValueSetVersion, theUrl, theCopyright));
 	}
 
 	@Nonnull
@@ -199,8 +222,8 @@ public class PackageInstallerSvcImplCreateTest extends BaseJpaR4Test {
 		return valueSetFromFirstIg;
 	}
 
-	private void create(IBaseResource theResource) throws IOException {
-		mySvc.create(theResource, createInstallationSpec(packageToBytes()), new PackageInstallOutcomeJson());
+	private void install(IBaseResource theResource) throws IOException {
+		mySvc.install(theResource, createInstallationSpec(packageToBytes()), new PackageInstallOutcomeJson());
 	}
 
 	@Nonnull

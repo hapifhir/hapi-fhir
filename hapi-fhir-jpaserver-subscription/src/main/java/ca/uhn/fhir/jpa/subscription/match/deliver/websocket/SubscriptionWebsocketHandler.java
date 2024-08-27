@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,8 @@ import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelRegi
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelWithHandlers;
 import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.IdType;
 import org.slf4j.Logger;
@@ -39,11 +41,10 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.io.IOException;
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
+import java.util.Optional;
 
 public class SubscriptionWebsocketHandler extends TextWebSocketHandler implements WebSocketHandler {
-	private static Logger ourLog = LoggerFactory.getLogger(SubscriptionWebsocketHandler.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionWebsocketHandler.class);
 
 	@Autowired
 	protected WebsocketConnectionValidator myWebsocketConnectionValidator;
@@ -51,14 +52,14 @@ public class SubscriptionWebsocketHandler extends TextWebSocketHandler implement
 	@Autowired
 	SubscriptionChannelRegistry mySubscriptionChannelRegistry;
 
+	private IState myState = new InitialState();
+
 	/**
 	 * Constructor
 	 */
 	public SubscriptionWebsocketHandler() {
 		super();
 	}
-
-	private IState myState = new InitialState();
 
 	@Override
 	public void afterConnectionClosed(WebSocketSession theSession, CloseStatus theStatus) throws Exception {
@@ -130,10 +131,17 @@ public class SubscriptionWebsocketHandler extends TextWebSocketHandler implement
 			subscriptionChannelWithHandlers.removeHandler(this);
 		}
 
-		private void deliver() {
+		/**
+		 * Send the payload to the client
+		 *
+		 * @param payload The payload
+		 */
+		private void deliver(String payload) {
 			try {
-				String payload = "ping " + myActiveSubscription.getId();
+				// Log it
 				ourLog.info("Sending WebSocket message: {}", payload);
+
+				// Send message
 				mySession.sendMessage(new TextMessage(payload));
 			} catch (IOException e) {
 				handleFailure(e);
@@ -145,14 +153,70 @@ public class SubscriptionWebsocketHandler extends TextWebSocketHandler implement
 			if (!(theMessage.getPayload() instanceof ResourceDeliveryMessage)) {
 				return;
 			}
+
 			try {
 				ResourceDeliveryMessage msg = (ResourceDeliveryMessage) theMessage.getPayload();
-				if (myActiveSubscription.getSubscription().equals(msg.getSubscription())) {
-					deliver();
-				}
+				handleSubscriptionPayload(msg);
 			} catch (Exception e) {
-				ourLog.error("Failure handling subscription payload", e);
-				throw new MessagingException(theMessage, Msg.code(6) + "Failure handling subscription payload", e);
+				handleException(theMessage, e);
+			}
+		}
+
+		/**
+		 * Handle the subscription payload
+		 *
+		 * @param msg The message
+		 */
+		private void handleSubscriptionPayload(ResourceDeliveryMessage msg) {
+			// Check if the subscription exists and is the same as the active subscription
+			if (!myActiveSubscription.getSubscription().equals(msg.getSubscription())) {
+				return;
+			}
+
+			// Default payload
+			String defaultPayload = "ping " + myActiveSubscription.getId();
+			String payload = defaultPayload;
+
+			// Check if the subscription is a topic subscription
+			if (msg.getSubscription().isTopicSubscription()) {
+				// Get the payload by content
+				payload = getPayloadByContent(msg).orElse(defaultPayload);
+			}
+
+			// Deliver the payload
+			deliver(payload);
+		}
+
+		/**
+		 * Handle the exception
+		 *
+		 * @param theMessage The message
+		 * @param e          The exception
+		 */
+		private void handleException(Message<?> theMessage, Exception e) {
+			ourLog.error("Failure handling subscription payload", e);
+			throw new MessagingException(theMessage, Msg.code(6) + "Failure handling subscription payload", e);
+		}
+
+		/**
+		 * Get the payload based on the subscription content
+		 *
+		 * @param msg The message
+		 * @return The payload
+		 */
+		private Optional<String> getPayloadByContent(ResourceDeliveryMessage msg) {
+			if (msg.getSubscription().getContent() == null) {
+				return Optional.empty();
+			}
+			switch (msg.getSubscription().getContent()) {
+				case IDONLY:
+					return Optional.of(msg.getPayloadId());
+				case FULLRESOURCE:
+					return Optional.of(msg.getPayloadString());
+				case EMPTY:
+				case NULL:
+				default:
+					return Optional.empty();
 			}
 		}
 

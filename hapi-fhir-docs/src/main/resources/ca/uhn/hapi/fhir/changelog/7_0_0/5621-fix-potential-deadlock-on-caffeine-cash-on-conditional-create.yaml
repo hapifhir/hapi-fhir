@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 5621
+backport: 6.10.4
+title: "Fixed a deadlock in resource conditional create."

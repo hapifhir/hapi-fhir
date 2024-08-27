@@ -1,0 +1,94 @@
+{
+	"hook" : "order-sign",
+	"hookInstance": "randomGUIDforthehookevent",
+	"fhirServer" : "https://localhost:8000",
+	"fhirAuthorization": {
+		"access_token": "sometoken",
+		"token_type": "Bearer",
+		"expires_in": 300000,
+		"scope": "",
+		"subject": "clientIdHeaderTest"
+	},
+	"context" : {
+		"patientId" : "Patient/123",
+		"draftOrders" : {
+			"resourceType": "Bundle",
+			"entry": [
+				{
+					"resource": {
+						"resourceType": "ServiceRequest",
+						"id": "SleepStudy",
+						"meta": {
+							"profile": [
+								"http://example.org/sdh/dtr/aslp/StructureDefinition/aslp-sleep-study-order",
+								"http://hl7.org/fhir/us/davinci-crd/StructureDefinition/profile-servicerequest"
+							]
+						},
+						"status": "draft",
+						"intent": "order",
+						"code": {
+							"coding": [
+								{
+									"system": "http://example.org/sdh/dtr/aslp/CodeSystem/aslp-codes",
+									"code": "ASLP.A1.DE2",
+									"display": "Home sleep apnea testing (HSAT)"
+								}
+							],
+							"text": "Home sleep apnea testing (HSAT)"
+						},
+						"subject": {
+							"reference": "Patient/positive"
+						},
+						"authoredOn": "2023-04-06",
+						"reasonReference": [
+							{
+								"reference": "Condition/SleepApnea"
+							}
+						],
+						"occurrenceDateTime": "2023-04-10T08:00:00.000Z",
+						"requester": {
+							"reference": "Practitioner/Practitioner-positive"
+						}
+					}
+				},
+				{
+					"resource": {
+						"resourceType": "ServiceRequest",
+						"id": "SleepStudy2",
+						"meta": {
+							"profile": [
+								"http://example.org/sdh/dtr/aslp/StructureDefinition/aslp-sleep-study-order",
+								"http://hl7.org/fhir/us/davinci-crd/StructureDefinition/profile-servicerequest"
+							]
+						},
+						"status": "draft",
+						"intent": "order",
+						"code": {
+							"coding": [
+								{
+									"system": "http://example.org/sdh/dtr/aslp/CodeSystem/aslp-codes",
+									"code": "ASLP.A1.DE14",
+									"display": "Artificial intelligence (AI)"
+								}
+							],
+							"text": "Artificial intelligence (AI)"
+						},
+						"subject": {
+							"reference": "Patient/positive"
+						},
+						"authoredOn": "2023-04-06",
+						"reasonReference": [
+							{
+								"reference": "Condition/SleepApnea"
+							}
+						],
+						"occurrenceDateTime": "2023-04-15T08:00:00.000Z",
+						"requester": {
+							"reference": "Practitioner/Practitioner-positive"
+						}
+					}
+				}
+			]
+		}
+	}
+}

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
@@ -31,31 +30,37 @@ import ca.uhn.fhir.jpa.api.svc.ISearchSvc;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
+import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.IHasScheduledJobs;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.IResourceModifiedConsumer;
+import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
-import ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.util.ParametersUtil;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.util.ValidateUtil;
+import com.google.common.collect.Lists;
+import jakarta.annotation.Nullable;
+import jakarta.annotation.PostConstruct;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.apache.commons.lang3.time.DateUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.dstu2.model.IdType;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -77,9 +82,8 @@ import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-import javax.annotation.Nullable;
-import javax.annotation.PostConstruct;
 
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.SUBSCRIPTION_TRIGGERING_PARAM_RESOURCE_ID;
 import static java.util.Objects.isNull;
@@ -101,10 +105,10 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 	private DaoRegistry myDaoRegistry;
 
 	@Autowired
-	private JpaStorageSettings myStorageSettings;
+	private SubscriptionSettings mySubscriptionSettings;
 
 	@Autowired
-	private ISearchCoordinatorSvc mySearchCoordinatorSvc;
+	private ISearchCoordinatorSvc<? extends IResourcePersistentId<?>> mySearchCoordinatorSvc;
 
 	@Autowired
 	private MatchUrlService myMatchUrlService;
@@ -122,33 +126,46 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 	private ISearchSvc mySearchService;
 
 	@Autowired
+	IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
+
+	@Autowired
 	private SearchBuilderFactory mySearchBuilderFactory;
+
+	@Autowired
+	private SubscriptionCanonicalizer mySubscriptionCanonicalizer;
 
 	@Override
 	public IBaseParameters triggerSubscription(
 			@Nullable List<IPrimitiveType<String>> theResourceIds,
 			@Nullable List<IPrimitiveType<String>> theSearchUrls,
-			@Nullable IIdType theSubscriptionId) {
+			@Nullable IIdType theSubscriptionId,
+			RequestDetails theRequestDetails) {
 
-		if (myStorageSettings.getSupportedSubscriptionTypes().isEmpty()) {
+		if (mySubscriptionSettings.getSupportedSubscriptionTypes().isEmpty()) {
 			throw new PreconditionFailedException(Msg.code(22) + "Subscription processing not active on this server");
 		}
 
-		// Throw a 404 if the subscription doesn't exist
+		RequestPartitionId requestPartitionId;
+
+		// Throw a 404 if the subscription doesn't exist, otherwise determine its partition.
 		if (theSubscriptionId != null) {
 			IFhirResourceDao<?> subscriptionDao = myDaoRegistry.getSubscriptionDao();
-			IIdType subscriptionId = theSubscriptionId;
-			if (!subscriptionId.hasResourceType()) {
-				subscriptionId = subscriptionId.withResourceType(ResourceTypeEnum.SUBSCRIPTION.getCode());
+			IBaseResource subscription = subscriptionDao.read(theSubscriptionId, theRequestDetails);
+			if (mySubscriptionCanonicalizer.canonicalize(subscription).isCrossPartitionEnabled()) {
+				requestPartitionId = RequestPartitionId.allPartitions();
+			} else {
+				// Otherwise, trust the partition passed in via tenant/interceptor.
+				requestPartitionId = myRequestPartitionHelperSvc.determineGenericPartitionForRequest(theRequestDetails);
 			}
-			subscriptionDao.read(subscriptionId, SystemRequestDetails.forAllPartitions());
+		} else {
+			// If we have no specific subscription, allow standard partition selection
+			requestPartitionId = myRequestPartitionHelperSvc.determineGenericPartitionForRequest(theRequestDetails);
 		}
 
 		List<IPrimitiveType<String>> resourceIds = defaultIfNull(theResourceIds, Collections.emptyList());
 		List<IPrimitiveType<String>> searchUrls = defaultIfNull(theSearchUrls, Collections.emptyList());
-
 		// Make sure we have at least one resource ID or search URL
-		if (resourceIds.size() == 0 && searchUrls.size() == 0) {
+		if (resourceIds.isEmpty() && searchUrls.isEmpty()) {
 			throw new InvalidRequestException(Msg.code(23) + "No resource IDs or search URLs specified for triggering");
 		}
 
@@ -173,6 +190,8 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 
 		SubscriptionTriggeringJobDetails jobDetails = new SubscriptionTriggeringJobDetails();
 		jobDetails.setJobId(UUID.randomUUID().toString());
+		jobDetails.setRequestPartitionId(
+				requestPartitionId == null ? RequestPartitionId.allPartitions() : requestPartitionId);
 		jobDetails.setRemainingResourceIds(
 				resourceIds.stream().map(IPrimitiveType::getValue).collect(Collectors.toList()));
 		jobDetails.setRemainingSearchUrls(
@@ -199,6 +218,15 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 		value.setValueAsString("Subscription triggering job submitted as JOB ID: " + jobDetails.myJobId);
 		ParametersUtil.addParameterToParameters(myFhirContext, retVal, "information", value);
 		return retVal;
+	}
+
+	@Override
+	public IBaseParameters triggerSubscription(
+			@Nullable List<IPrimitiveType<String>> theResourceIds,
+			@Nullable List<IPrimitiveType<String>> theSearchUrls,
+			@Nullable IIdType theSubscriptionId) {
+		return triggerSubscription(
+				theResourceIds, theSearchUrls, theSubscriptionId, SystemRequestDetails.newSystemRequestAllPartitions());
 	}
 
 	@Override
@@ -240,13 +268,12 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 		ourLog.info("Starting pass of subscription triggering job {}", theJobDetails.getJobId());
 
 		// Submit individual resources
-		int totalSubmitted = 0;
-		List<Pair<String, Future<Void>>> futures = new ArrayList<>();
-		while (theJobDetails.getRemainingResourceIds().size() > 0 && totalSubmitted < myMaxSubmitPerPass) {
-			totalSubmitted++;
+		AtomicInteger totalSubmitted = new AtomicInteger(0);
+		List<Future<?>> futures = new ArrayList<>();
+		while (!theJobDetails.getRemainingResourceIds().isEmpty() && totalSubmitted.get() < myMaxSubmitPerPass) {
+			totalSubmitted.incrementAndGet();
 			String nextResourceId = theJobDetails.getRemainingResourceIds().remove(0);
-			Future<Void> future = submitResource(theJobDetails.getSubscriptionId(), nextResourceId);
-			futures.add(Pair.of(nextResourceId, future));
+			submitResource(theJobDetails.getSubscriptionId(), theJobDetails.getRequestPartitionId(), nextResourceId);
 		}
 
 		// Make sure these all succeeded in submitting
@@ -260,7 +287,7 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 		// to the broker.  Note that querying of resource can be done synchronously or asynchronously
 		if (isInitialStep(theJobDetails)
 				&& isNotEmpty(theJobDetails.getRemainingSearchUrls())
-				&& totalSubmitted < myMaxSubmitPerPass) {
+				&& totalSubmitted.get() < myMaxSubmitPerPass) {
 
 			String nextSearchUrl = theJobDetails.getRemainingSearchUrls().remove(0);
 			RuntimeResourceDefinition resourceDef = UrlUtil.parseUrlResourceType(myFhirContext, nextSearchUrl);
@@ -271,20 +298,18 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 			IFhirResourceDao<?> callingDao = myDaoRegistry.getResourceDao(resourceType);
 
 			ourLog.info("Triggering job[{}] is starting a search for {}", theJobDetails.getJobId(), nextSearchUrl);
-
 			search = mySearchCoordinatorSvc.registerSearch(
 					callingDao,
 					params,
 					resourceType,
 					new CacheControlDirective(),
 					null,
-					RequestPartitionId.allPartitions());
+					theJobDetails.getRequestPartitionId());
 
 			if (isNull(search.getUuid())) {
 				// we don't have a search uuid i.e. we're setting up for synchronous processing
 				theJobDetails.setCurrentSearchUrl(nextSearchUrl);
 				theJobDetails.setCurrentOffset(params.getOffset());
-
 			} else {
 				// populate properties for asynchronous path
 				theJobDetails.setCurrentSearchUuid(search.getUuid());
@@ -295,144 +320,95 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 			theJobDetails.setCurrentSearchLastUploadedIndex(-1);
 		}
 
-		// processing step for synchronous processing mode
-		if (isNotBlank(theJobDetails.getCurrentSearchUrl()) && totalSubmitted < myMaxSubmitPerPass) {
-			List<IBaseResource> allCurrentResources;
-
-			int fromIndex = theJobDetails.getCurrentSearchLastUploadedIndex() + 1;
-
-			String searchUrl = theJobDetails.getCurrentSearchUrl();
-
-			ourLog.info(
-					"Triggered job [{}] - Starting synchronous processing at offset {} and index {}",
-					theJobDetails.getJobId(),
-					theJobDetails.getCurrentOffset(),
-					fromIndex);
-
-			int submittableCount = myMaxSubmitPerPass - totalSubmitted;
-			int toIndex = fromIndex + submittableCount;
-
-			if (nonNull(search) && !search.isEmpty()) {
-
-				// we already have data from the initial step so process as much as we can.
-				ourLog.info("Triggered job[{}] will process up to {} resources", theJobDetails.getJobId(), toIndex);
-				allCurrentResources = search.getResources(0, toIndex);
-
-			} else {
-				if (theJobDetails.getCurrentSearchCount() != null) {
-					toIndex = Math.min(toIndex, theJobDetails.getCurrentSearchCount());
-				}
-
-				RuntimeResourceDefinition resourceDef = UrlUtil.parseUrlResourceType(myFhirContext, searchUrl);
-				String queryPart = searchUrl.substring(searchUrl.indexOf('?'));
-				SearchParameterMap params = myMatchUrlService.translateMatchUrl(queryPart, resourceDef);
-				int offset = theJobDetails.getCurrentOffset() + fromIndex;
-				params.setOffset(offset);
-				params.setCount(toIndex);
-
-				ourLog.info(
-						"Triggered job[{}] requesting {} resources from offset {}",
-						theJobDetails.getJobId(),
-						toIndex,
-						offset);
-
-				search =
-						mySearchService.executeQuery(resourceDef.getName(), params, RequestPartitionId.allPartitions());
-				allCurrentResources = search.getAllResources();
-			}
-
-			ourLog.info(
-					"Triggered job[{}] delivering {} resources", theJobDetails.getJobId(), allCurrentResources.size());
-			int highestIndexSubmitted = theJobDetails.getCurrentSearchLastUploadedIndex();
-
-			for (IBaseResource nextResource : allCurrentResources) {
-				Future<Void> future = submitResource(theJobDetails.getSubscriptionId(), nextResource);
-				futures.add(Pair.of(nextResource.getIdElement().getIdPart(), future));
-				totalSubmitted++;
-				highestIndexSubmitted++;
-			}
-
-			if (validateFuturesAndReturnTrueIfWeShouldAbort(futures)) {
-				return;
-			}
-
-			theJobDetails.setCurrentSearchLastUploadedIndex(highestIndexSubmitted);
-
-			ourLog.info(
-					"Triggered job[{}] lastUploadedIndex is {}",
-					theJobDetails.getJobId(),
-					theJobDetails.getCurrentSearchLastUploadedIndex());
-
-			if (allCurrentResources.isEmpty()
-					|| nonNull(theJobDetails.getCurrentSearchCount())
-							&& toIndex >= theJobDetails.getCurrentSearchCount()) {
-				ourLog.info(
-						"Triggered job[{}] for search URL {} has completed ",
-						theJobDetails.getJobId(),
-						theJobDetails.getCurrentSearchUrl());
-				theJobDetails.setCurrentSearchResourceType(null);
-				theJobDetails.clearCurrentSearchUrl();
-				theJobDetails.setCurrentSearchLastUploadedIndex(-1);
-				theJobDetails.setCurrentSearchCount(null);
-			}
+		/*
+		 * Processing step for synchronous processing mode - This is only called if the
+		 * server is configured to force offset searches, ie using ForceSynchronousSearchInterceptor.
+		 * Otherwise, we'll always do async mode.
+		 */
+		if (isNotBlank(theJobDetails.getCurrentSearchUrl()) && totalSubmitted.get() < myMaxSubmitPerPass) {
+			processSynchronous(theJobDetails, totalSubmitted, futures, search);
 		}
 
 		// processing step for asynchronous processing mode
-		if (isNotBlank(theJobDetails.getCurrentSearchUuid()) && totalSubmitted < myMaxSubmitPerPass) {
-			int fromIndex = theJobDetails.getCurrentSearchLastUploadedIndex() + 1;
+		if (isNotBlank(theJobDetails.getCurrentSearchUuid()) && totalSubmitted.get() < myMaxSubmitPerPass) {
+			processAsynchronous(theJobDetails, totalSubmitted, futures);
+		}
 
-			IFhirResourceDao<?> resourceDao =
-					myDaoRegistry.getResourceDao(theJobDetails.getCurrentSearchResourceType());
+		ourLog.info(
+				"Subscription trigger job[{}] triggered {} resources in {}ms ({} res / second)",
+				theJobDetails.getJobId(),
+				totalSubmitted,
+				sw.getMillis(),
+				sw.getThroughput(totalSubmitted.get(), TimeUnit.SECONDS));
+	}
 
-			int maxQuerySize = myMaxSubmitPerPass - totalSubmitted;
-			int toIndex;
-			if (theJobDetails.getCurrentSearchCount() != null) {
-				toIndex = Math.min(fromIndex + maxQuerySize, theJobDetails.getCurrentSearchCount());
-			} else {
-				toIndex = fromIndex + maxQuerySize;
-			}
+	private void processAsynchronous(
+			SubscriptionTriggeringJobDetails theJobDetails, AtomicInteger totalSubmitted, List<Future<?>> futures) {
+		int fromIndex = theJobDetails.getCurrentSearchLastUploadedIndex() + 1;
 
-			ourLog.info(
-					"Triggering job[{}] search {} requesting resources {} - {}",
-					theJobDetails.getJobId(),
-					theJobDetails.getCurrentSearchUuid(),
-					fromIndex,
-					toIndex);
+		IFhirResourceDao<?> resourceDao = myDaoRegistry.getResourceDao(theJobDetails.getCurrentSearchResourceType());
 
-			List<IResourcePersistentId<?>> resourceIds;
-			RequestPartitionId requestPartitionId = RequestPartitionId.allPartitions();
-			resourceIds = mySearchCoordinatorSvc.getResources(
+		int maxQuerySize = myMaxSubmitPerPass - totalSubmitted.get();
+		int toIndex;
+		if (theJobDetails.getCurrentSearchCount() != null) {
+			toIndex = Math.min(fromIndex + maxQuerySize, theJobDetails.getCurrentSearchCount());
+		} else {
+			toIndex = fromIndex + maxQuerySize;
+		}
+
+		ourLog.info(
+				"Triggering job[{}] search {} requesting resources {} - {} from partition {}",
+				theJobDetails.getJobId(),
+				theJobDetails.getCurrentSearchUuid(),
+				fromIndex,
+				toIndex,
+				theJobDetails.getRequestPartitionId());
+
+		List<? extends IResourcePersistentId<?>> allResourceIds;
+		RequestPartitionId requestPartitionId = theJobDetails.getRequestPartitionId();
+		try {
+			allResourceIds = mySearchCoordinatorSvc.getResources(
 					theJobDetails.getCurrentSearchUuid(), fromIndex, toIndex, null, requestPartitionId);
+		} catch (ResourceGoneException e) {
+			ourLog.trace("Search has expired, submission is done.");
+			allResourceIds = new ArrayList<>();
+		}
 
-			ourLog.info("Triggering job[{}] delivering {} resources", theJobDetails.getJobId(), resourceIds.size());
-			int highestIndexSubmitted = theJobDetails.getCurrentSearchLastUploadedIndex();
+		ourLog.info("Triggering job[{}] delivering {} resources", theJobDetails.getJobId(), allResourceIds.size());
+		AtomicInteger highestIndexSubmitted = new AtomicInteger(theJobDetails.getCurrentSearchLastUploadedIndex());
 
-			String resourceType = myFhirContext.getResourceType(theJobDetails.getCurrentSearchResourceType());
-			RuntimeResourceDefinition resourceDef =
-					myFhirContext.getResourceDefinition(theJobDetails.getCurrentSearchResourceType());
-			ISearchBuilder searchBuilder = mySearchBuilderFactory.newSearchBuilder(
-					resourceDao, resourceType, resourceDef.getImplementingClass());
-			List<IBaseResource> listToPopulate = new ArrayList<>();
+		List<? extends List<? extends IResourcePersistentId<?>>> partitions = Lists.partition(allResourceIds, 100);
+		for (List<? extends IResourcePersistentId<?>> resourceIds : partitions) {
+			Runnable job = () -> {
+				String resourceType = myFhirContext.getResourceType(theJobDetails.getCurrentSearchResourceType());
+				RuntimeResourceDefinition resourceDef =
+						myFhirContext.getResourceDefinition(theJobDetails.getCurrentSearchResourceType());
+				ISearchBuilder searchBuilder = mySearchBuilderFactory.newSearchBuilder(
+						resourceDao, resourceType, resourceDef.getImplementingClass());
+				List<IBaseResource> listToPopulate = new ArrayList<>();
 
-			myTransactionService.withSystemRequest().execute(() -> {
-				searchBuilder.loadResourcesByPid(
-						resourceIds, Collections.emptyList(), listToPopulate, false, new SystemRequestDetails());
-			});
+				myTransactionService.withRequest(null).execute(() -> {
+					searchBuilder.loadResourcesByPid(
+							resourceIds, Collections.emptyList(), listToPopulate, false, new SystemRequestDetails());
+				});
 
-			for (IBaseResource nextResource : listToPopulate) {
-				Future<Void> future = submitResource(theJobDetails.getSubscriptionId(), nextResource);
-				futures.add(Pair.of(nextResource.getIdElement().getIdPart(), future));
-				totalSubmitted++;
-				highestIndexSubmitted++;
-			}
+				for (IBaseResource nextResource : listToPopulate) {
+					submitResource(
+							theJobDetails.getSubscriptionId(), theJobDetails.getRequestPartitionId(), nextResource);
+					totalSubmitted.incrementAndGet();
+					highestIndexSubmitted.incrementAndGet();
+				}
+			};
 
-			if (validateFuturesAndReturnTrueIfWeShouldAbort(futures)) {
-				return;
-			}
+			Future<?> future = myExecutorService.submit(job);
+			futures.add(future);
+		}
 
-			theJobDetails.setCurrentSearchLastUploadedIndex(highestIndexSubmitted);
+		if (!validateFuturesAndReturnTrueIfWeShouldAbort(futures)) {
 
-			if (resourceIds.size() == 0
+			theJobDetails.setCurrentSearchLastUploadedIndex(highestIndexSubmitted.get());
+
+			if (allResourceIds.isEmpty()
 					|| (theJobDetails.getCurrentSearchCount() != null
 							&& toIndex >= theJobDetails.getCurrentSearchCount())) {
 				ourLog.info(
@@ -445,13 +421,98 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 				theJobDetails.setCurrentSearchCount(null);
 			}
 		}
+	}
+
+	private void processSynchronous(
+			SubscriptionTriggeringJobDetails theJobDetails,
+			AtomicInteger totalSubmitted,
+			List<Future<?>> futures,
+			IBundleProvider search) {
+		List<IBaseResource> allCurrentResources;
+
+		int fromIndex = theJobDetails.getCurrentSearchLastUploadedIndex() + 1;
+
+		String searchUrl = theJobDetails.getCurrentSearchUrl();
 
 		ourLog.info(
-				"Subscription trigger job[{}] triggered {} resources in {}ms ({} res / second)",
+				"Triggered job [{}] - Starting synchronous processing at offset {} and index {} on partition {}",
 				theJobDetails.getJobId(),
-				totalSubmitted,
-				sw.getMillis(),
-				sw.getThroughput(totalSubmitted, TimeUnit.SECONDS));
+				theJobDetails.getCurrentOffset(),
+				fromIndex,
+				theJobDetails.getRequestPartitionId());
+
+		int submittableCount = myMaxSubmitPerPass - totalSubmitted.get();
+		int toIndex = fromIndex + submittableCount;
+
+		if (nonNull(search) && !search.isEmpty()) {
+
+			if (search.getCurrentPageSize() != null) {
+				toIndex = search.getCurrentPageSize();
+			}
+
+			// we already have data from the initial step so process as much as we can.
+			ourLog.info(
+					"Triggered job[{}] will process up to {} resources from partition {}",
+					theJobDetails.getJobId(),
+					toIndex,
+					theJobDetails.getRequestPartitionId());
+			allCurrentResources = search.getResources(0, toIndex);
+
+		} else {
+			if (theJobDetails.getCurrentSearchCount() != null) {
+				toIndex = Math.min(toIndex, theJobDetails.getCurrentSearchCount());
+			}
+
+			RuntimeResourceDefinition resourceDef = UrlUtil.parseUrlResourceType(myFhirContext, searchUrl);
+			String queryPart = searchUrl.substring(searchUrl.indexOf('?'));
+			SearchParameterMap params = myMatchUrlService.translateMatchUrl(queryPart, resourceDef);
+			int offset = theJobDetails.getCurrentOffset() + fromIndex;
+			params.setOffset(offset);
+			params.setCount(toIndex);
+
+			ourLog.info(
+					"Triggered job[{}] requesting {} resources from offset {}",
+					theJobDetails.getJobId(),
+					toIndex,
+					offset);
+
+			search = mySearchService.executeQuery(resourceDef.getName(), params, theJobDetails.getRequestPartitionId());
+			allCurrentResources = search.getResources(0, submittableCount);
+		}
+
+		ourLog.info("Triggered job[{}] delivering {} resources", theJobDetails.getJobId(), allCurrentResources.size());
+		AtomicInteger highestIndexSubmitted = new AtomicInteger(theJobDetails.getCurrentSearchLastUploadedIndex());
+
+		for (IBaseResource nextResource : allCurrentResources) {
+			Future<?> future = myExecutorService.submit(() -> submitResource(
+					theJobDetails.getSubscriptionId(), theJobDetails.getRequestPartitionId(), nextResource));
+			futures.add(future);
+			totalSubmitted.incrementAndGet();
+			highestIndexSubmitted.incrementAndGet();
+		}
+
+		if (!validateFuturesAndReturnTrueIfWeShouldAbort(futures)) {
+
+			theJobDetails.setCurrentSearchLastUploadedIndex(highestIndexSubmitted.get());
+
+			ourLog.info(
+					"Triggered job[{}] lastUploadedIndex is {}",
+					theJobDetails.getJobId(),
+					theJobDetails.getCurrentSearchLastUploadedIndex());
+
+			if (allCurrentResources.isEmpty()
+					|| nonNull(theJobDetails.getCurrentSearchCount())
+							&& toIndex > theJobDetails.getCurrentSearchCount()) {
+				ourLog.info(
+						"Triggered job[{}] for search URL {} has completed ",
+						theJobDetails.getJobId(),
+						theJobDetails.getCurrentSearchUrl());
+				theJobDetails.setCurrentSearchResourceType(null);
+				theJobDetails.clearCurrentSearchUrl();
+				theJobDetails.setCurrentSearchLastUploadedIndex(-1);
+				theJobDetails.setCurrentSearchCount(null);
+			}
+		}
 	}
 
 	private boolean isInitialStep(SubscriptionTriggeringJobDetails theJobDetails) {
@@ -462,34 +523,33 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 		return isInitialStep(theJobDetails);
 	}
 
-	private boolean validateFuturesAndReturnTrueIfWeShouldAbort(List<Pair<String, Future<Void>>> theIdToFutures) {
+	private boolean validateFuturesAndReturnTrueIfWeShouldAbort(List<Future<?>> theFutures) {
 
-		for (Pair<String, Future<Void>> next : theIdToFutures) {
-			String nextDeliveredId = next.getKey();
+		for (Future<?> nextFuture : theFutures) {
 			try {
-				Future<Void> nextFuture = next.getValue();
 				nextFuture.get();
-				ourLog.info("Finished redelivering {}", nextDeliveredId);
 			} catch (Exception e) {
-				ourLog.error("Failure triggering resource " + nextDeliveredId, e);
+				ourLog.error("Failure triggering resource", e);
 				return true;
 			}
 		}
 
 		// Clear the list since it will potentially get reused
-		theIdToFutures.clear();
+		theFutures.clear();
 		return false;
 	}
 
-	private Future<Void> submitResource(String theSubscriptionId, String theResourceIdToTrigger) {
+	private void submitResource(
+			String theSubscriptionId, RequestPartitionId theRequestPartitionId, String theResourceIdToTrigger) {
 		org.hl7.fhir.r4.model.IdType resourceId = new org.hl7.fhir.r4.model.IdType(theResourceIdToTrigger);
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(resourceId.getResourceType());
 		IBaseResource resourceToTrigger = dao.read(resourceId, SystemRequestDetails.forAllPartitions());
 
-		return submitResource(theSubscriptionId, resourceToTrigger);
+		submitResource(theSubscriptionId, theRequestPartitionId, resourceToTrigger);
 	}
 
-	private Future<Void> submitResource(String theSubscriptionId, IBaseResource theResourceToTrigger) {
+	private void submitResource(
+			String theSubscriptionId, RequestPartitionId theRequestPartitionId, IBaseResource theResourceToTrigger) {
 
 		ourLog.info(
 				"Submitting resource {} to subscription {}",
@@ -497,27 +557,29 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 				theSubscriptionId);
 
 		ResourceModifiedMessage msg = new ResourceModifiedMessage(
-				myFhirContext, theResourceToTrigger, ResourceModifiedMessage.OperationTypeEnum.UPDATE);
+				myFhirContext,
+				theResourceToTrigger,
+				ResourceModifiedMessage.OperationTypeEnum.MANUALLY_TRIGGERED,
+				theRequestPartitionId);
 		msg.setSubscriptionId(theSubscriptionId);
 
-		return myExecutorService.submit(() -> {
-			for (int i = 0; ; i++) {
-				try {
-					myResourceModifiedConsumer.submitResourceModified(msg);
-					break;
-				} catch (Exception e) {
-					if (i >= 3) {
-						throw new InternalErrorException(Msg.code(25) + e);
-					}
+		for (int i = 0; ; i++) {
+			try {
+				myResourceModifiedConsumer.submitResourceModified(msg);
+				break;
+			} catch (Exception e) {
+				if (i >= 3) {
+					throw new InternalErrorException(Msg.code(25) + e);
+				}
 
-					ourLog.warn(
-							"Exception while retriggering subscriptions (going to sleep and retry): {}", e.toString());
+				ourLog.warn("Exception while retriggering subscriptions (going to sleep and retry): {}", e.toString());
+				try {
 					Thread.sleep(1000);
+				} catch (InterruptedException ex) {
+					Thread.currentThread().interrupt();
 				}
 			}
-
-			return null;
-		});
+		}
 	}
 
 	public void cancelAll() {
@@ -609,6 +671,8 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 		private int myCurrentSearchLastUploadedIndex;
 		private int myCurrentOffset;
 
+		private RequestPartitionId myRequestPartitionId;
+
 		Integer getCurrentSearchCount() {
 			return myCurrentSearchCount;
 		}
@@ -691,6 +755,14 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 
 		public void setCurrentOffset(Integer theCurrentOffset) {
 			myCurrentOffset = ObjectUtils.defaultIfNull(theCurrentOffset, 0);
+		}
+
+		public void setRequestPartitionId(RequestPartitionId theRequestPartitionId) {
+			myRequestPartitionId = theRequestPartitionId;
+		}
+
+		public RequestPartitionId getRequestPartitionId() {
+			return myRequestPartitionId;
 		}
 	}
 }

@@ -15,7 +15,8 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
-import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.test.utilities.HttpClientExtension;
+import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.Header;
@@ -25,35 +26,33 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.io.IOException;
 import java.util.Date;
-import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class ETagServerTest {
 
-	private static CloseableHttpClient ourClient;
-	private static PoolingHttpClientConnectionManager ourConnectionManager;
-	private static FhirContext ourCtx;
+	private static final FhirContext ourCtx = FhirContext.forDstu2Cached();
 	private static IdDt ourLastId;
 
 	private static Date ourLastModifiedDate;
-	private static int ourPort;
 
-	private static Server ourServer;
+	@RegisterExtension
+	public static final RestfulServerExtension ourServer  = new RestfulServerExtension(ourCtx)
+		.setDefaultResponseEncoding(EncodingEnum.XML)
+		.registerProvider(new PatientProvider())
+		.withPagingProvider(new FifoMemoryPagingProvider(100))
+		.setDefaultPrettyPrint(false);
+
+	@RegisterExtension
+	public static final HttpClientExtension ourClient = new HttpClientExtension();
 
 
 	@BeforeEach
@@ -65,7 +64,7 @@ public class ETagServerTest {
 	public void testAutomaticNotModified() throws Exception {
 		ourLastModifiedDate = new InstantDt("2012-11-25T02:34:45.2222Z").getValue();
 
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/2");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/2");
 		httpGet.addHeader(Constants.HEADER_IF_NONE_MATCH, "\"222\"");
 		HttpResponse status = ourClient.execute(httpGet);
 		try {
@@ -82,7 +81,7 @@ public class ETagServerTest {
 	public void testETagHeader() throws Exception {
 		ourLastModifiedDate = new InstantDt("2012-11-25T02:34:45.2222Z").getValue();
 
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/2/_history/3");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/2/_history/3");
 		HttpResponse status = ourClient.execute(httpGet);
 		try {
 			String responseContent = IOUtils.toString(status.getEntity().getContent());
@@ -104,7 +103,7 @@ public class ETagServerTest {
 	public void testLastModifiedHeader() throws Exception {
 		ourLastModifiedDate = new InstantDt("2012-11-25T02:34:45.222Z").getValue();
 
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/2/_history/3");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/2/_history/3");
 		HttpResponse status = ourClient.execute(httpGet);
 		try {
 			String responseContent = IOUtils.toString(status.getEntity().getContent());
@@ -132,7 +131,7 @@ public class ETagServerTest {
 		String resBody = ourCtx.newXmlParser().encodeResourceToString(p);
 
 		HttpPut http;
-		http = new HttpPut("http://localhost:" + ourPort + "/Patient/2");
+		http = new HttpPut(ourServer.getBaseUrl() + "/Patient/2");
 		http.setEntity(new StringEntity(resBody, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		http.addHeader(Constants.HEADER_IF_MATCH, "\"221\"");
 		CloseableHttpResponse status = ourClient.execute(http);
@@ -154,7 +153,7 @@ public class ETagServerTest {
 		String resBody = ourCtx.newXmlParser().encodeResourceToString(p);
 
 		HttpPut http;
-		http = new HttpPut("http://localhost:" + ourPort + "/Patient/2");
+		http = new HttpPut(ourServer.getBaseUrl() + "/Patient/2");
 		http.setEntity(new StringEntity(resBody, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		http.addHeader(Constants.HEADER_IF_MATCH, "\"222\"");
 		CloseableHttpResponse status = ourClient.execute(http);
@@ -176,7 +175,7 @@ public class ETagServerTest {
 		String resBody = ourCtx.newXmlParser().encodeResourceToString(p);
 
 		HttpPut http;
-		http = new HttpPut("http://localhost:" + ourPort + "/Patient/2");
+		http = new HttpPut(ourServer.getBaseUrl() + "/Patient/2");
 		http.setEntity(new StringEntity(resBody, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		HttpResponse status = ourClient.execute(http);
 		try {
@@ -191,32 +190,7 @@ public class ETagServerTest {
 
 	@AfterAll
 	public static void afterClassClearContext() throws Exception {
-		JettyUtil.closeServer(ourServer);
 		TestUtil.randomizeLocaleAndTimezone();
-	}
-
-	@BeforeAll
-	public static void beforeClass() throws Exception {
-		ourServer = new Server(0);
-
-		PatientProvider patientProvider = new PatientProvider();
-
-		ServletHandler proxyHandler = new ServletHandler();
-		RestfulServer servlet = new RestfulServer(FhirContext.forDstu2());
-		ourCtx = servlet.getFhirContext();
-		servlet.setResourceProviders(patientProvider);
-		servlet.setDefaultResponseEncoding(EncodingEnum.XML);
-		ServletHolder servletHolder = new ServletHolder(servlet);
-		proxyHandler.addServletWithMapping(servletHolder, "/*");
-		ourServer.setHandler(proxyHandler);
-		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
-
-		ourConnectionManager = new PoolingHttpClientConnectionManager(50000, TimeUnit.MILLISECONDS);
-		HttpClientBuilder builder = HttpClientBuilder.create();
-		builder.setConnectionManager(ourConnectionManager);
-		ourClient = builder.build();
-
 	}
 
 	public static class PatientProvider implements IResourceProvider {

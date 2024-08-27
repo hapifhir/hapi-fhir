@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Server - SQL Migration
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,10 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.tasks.api.ISchemaInitializationProvider;
+import ca.uhn.fhir.util.ClasspathUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Charsets;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -33,7 +35,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import javax.annotation.Nonnull;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
@@ -71,11 +72,7 @@ public class SchemaInitializationProvider implements ISchemaInitializationProvid
 
 		String initScript = mySchemaFileClassPath + "/" + getInitScript(theDriverType);
 		try {
-			InputStream sqlFileInputStream = SchemaInitializationProvider.class.getResourceAsStream(initScript);
-			if (sqlFileInputStream == null) {
-				throw new ConfigurationException(
-						Msg.code(49) + "Schema initialization script " + initScript + " not found on classpath");
-			}
+			InputStream sqlFileInputStream = ClasspathUtil.loadResourceAsStream(initScript);
 			// Assumes no escaped semicolons...
 			String sqlString = IOUtils.toString(sqlFileInputStream, Charsets.UTF_8);
 			parseSqlFileIntoIndividualStatements(theDriverType, retval, sqlString);
@@ -91,7 +88,7 @@ public class SchemaInitializationProvider implements ISchemaInitializationProvid
 		String sqlString = theSqlString.replaceAll("--.*", "");
 
 		String sqlStringNoComments = preProcessSqlString(theDriverType, sqlString);
-		String[] statements = sqlStringNoComments.split("\\;");
+		String[] statements = sqlStringNoComments.split(";");
 		for (String statement : statements) {
 			String cleanedStatement = preProcessSqlStatement(theDriverType, statement);
 			if (!isBlank(cleanedStatement)) {

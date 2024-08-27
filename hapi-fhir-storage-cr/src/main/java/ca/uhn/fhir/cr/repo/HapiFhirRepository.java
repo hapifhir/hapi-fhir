@@ -4,7 +4,7 @@ package ca.uhn.fhir.cr.repo;
  * #%L
  * HAPI FHIR - Clinical Reasoning
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,7 +86,7 @@ public class HapiFhirRepository implements Repository {
 	public <I extends IIdType, P extends IBaseParameters> MethodOutcome patch(
 			I theId, P thePatchParameters, Map<String, String> theHeaders) {
 		var details = startWith(myRequestDetails).addHeaders(theHeaders).create();
-		// TODO: conditional url, patch type, patch body?
+		// TODO update FHIR patchType once FHIRPATCH bug has been fixed
 		return myDaoRegistry
 				.getResourceDao(theId.getResourceType())
 				.patch(theId, null, null, null, thePatchParameters, details);

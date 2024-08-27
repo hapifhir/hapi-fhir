@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.subscription.email;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.provider.dstu3.BaseResourceProviderDstu3Test;
 import ca.uhn.fhir.jpa.subscription.match.deliver.email.EmailSenderImpl;
@@ -32,9 +34,8 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import static ca.uhn.fhir.jpa.dao.DaoTestUtils.logAllInterceptors;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Test the rest-hook subscriptions
@@ -82,7 +83,7 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 		ourLog.info("After re-registering interceptors");
 		logAllInterceptors(myInterceptorRegistry);
 
-		myStorageSettings.setEmailFromAddress("123@hapifhir.io");
+		mySubscriptionSettings.setEmailFromAddress("123@hapifhir.io");
 	}
 
 	private Subscription createSubscription(String theCriteria, String thePayload, Consumer<Subscription>... theModifiers) throws InterruptedException {
@@ -199,7 +200,7 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 		assertTrue(ourGreenMail.waitForIncomingEmail(10000, 1));
 
 		List<MimeMessage> received = Arrays.asList(ourGreenMail.getReceivedMessages());
-		assertEquals(1, received.size());
+		assertThat(received).hasSize(1);
 		assertEquals(1, received.get(0).getFrom().length);
 		assertEquals("myfrom@from.com", ((InternetAddress) received.get(0).getFrom()[0]).getAddress());
 		assertEquals(1, received.get(0).getAllRecipients().length);
@@ -247,7 +248,7 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 		assertTrue(ourGreenMail.waitForIncomingEmail(10000, 1));
 
 		List<MimeMessage> received = Arrays.asList(ourGreenMail.getReceivedMessages());
-		assertEquals(1, received.size());
+		assertThat(received).hasSize(1);
 		assertEquals(1, received.get(0).getFrom().length);
 		assertEquals("myfrom@from.com", ((InternetAddress) received.get(0).getFrom()[0]).getAddress());
 		assertEquals(1, received.get(0).getAllRecipients().length);

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Test Utilities
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,10 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
 
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.HashSet;
+import java.util.List;
 
 public final class OperationRuleTestUtil {
 	private OperationRuleTestUtil() {}
@@ -51,8 +53,16 @@ public final class OperationRuleTestUtil {
 		return ((OperationRule) theRule).getAppliesToInstancesOfType();
 	}
 
+	public static boolean isAllowResourceAccess(IAuthRule theRule) {
+		return ((OperationRule) theRule).isAllowAllResourcesAccess();
+	}
+
 	public static boolean isAllowAllResponses(IAuthRule theRule) {
 		return ((OperationRule) theRule).isAllowAllResponses();
+	}
+
+	public static List<IIdType> getAppliesToIds(IAuthRule theRule) {
+		return ((OperationRule) theRule).getAppliesToIds();
 	}
 
 	public static String getGroupId(IAuthRule theRule) {

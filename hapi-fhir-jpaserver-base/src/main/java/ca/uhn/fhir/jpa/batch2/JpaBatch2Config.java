@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,16 +21,16 @@ package ca.uhn.fhir.jpa.batch2;
 
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.config.BaseBatch2Config;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.bulk.export.job.BulkExportJobConfig;
 import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
+import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkMetadataViewRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
+import jakarta.persistence.EntityManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Primary;
-
-import javax.persistence.EntityManager;
 
 @Configuration
 @Import({BulkExportJobConfig.class})
@@ -40,29 +40,16 @@ public class JpaBatch2Config extends BaseBatch2Config {
 	public IJobPersistence batch2JobInstancePersister(
 			IBatch2JobInstanceRepository theJobInstanceRepository,
 			IBatch2WorkChunkRepository theWorkChunkRepository,
+			IBatch2WorkChunkMetadataViewRepository theWorkChunkMetadataViewRepo,
 			IHapiTransactionService theTransactionService,
-			EntityManager theEntityManager) {
+			EntityManager theEntityManager,
+			IInterceptorBroadcaster theInterceptorBroadcaster) {
 		return new JpaJobPersistenceImpl(
-				theJobInstanceRepository, theWorkChunkRepository, theTransactionService, theEntityManager);
-	}
-
-	@Primary
-	@Bean
-	public IJobPersistence batch2JobInstancePersisterWrapper(
-			IBatch2JobInstanceRepository theJobInstanceRepository,
-			IBatch2WorkChunkRepository theWorkChunkRepository,
-			IHapiTransactionService theTransactionService,
-			EntityManager theEntityManager) {
-		IJobPersistence retVal = batch2JobInstancePersister(
-				theJobInstanceRepository, theWorkChunkRepository, theTransactionService, theEntityManager);
-		// Avoid H2 synchronization issues caused by
-		// https://github.com/h2database/h2database/issues/1808
-		// TODO: Update 2023-03-14 - The bug above appears to be fixed. I'm going to try
-		// disabing this and see if we can get away without it. If so, we can delete
-		// this entirely
-		//		if (HapiSystemProperties.isUnitTestModeEnabled()) {
-		//			retVal = ProxyUtil.synchronizedProxy(IJobPersistence.class, retVal);
-		//		}
-		return retVal;
+				theJobInstanceRepository,
+				theWorkChunkRepository,
+				theWorkChunkMetadataViewRepo,
+				theTransactionService,
+				theEntityManager,
+				theInterceptorBroadcaster);
 	}
 }

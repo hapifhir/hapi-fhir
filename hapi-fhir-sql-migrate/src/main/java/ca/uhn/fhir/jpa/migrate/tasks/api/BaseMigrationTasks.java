@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Server - SQL Migration
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,12 +24,14 @@ import ca.uhn.fhir.jpa.migrate.MigrationTaskList;
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.Validate;
 import org.flywaydb.core.api.MigrationVersion;
 
 import java.util.Collection;
-import javax.annotation.Nonnull;
+
+import static java.util.Objects.nonNull;
 
 public class BaseMigrationTasks<T extends Enum> {
 	MigrationVersion lastVersion;
@@ -71,7 +73,7 @@ public class BaseMigrationTasks<T extends Enum> {
 		return theRelease.name();
 	}
 
-	public MigrationTaskList getAllTasks(T[] theVersionEnumValues) {
+	public MigrationTaskList getAllTasks(T... theVersionEnumValues) {
 		MigrationTaskList retval = new MigrationTaskList();
 		for (T nextVersion : theVersionEnumValues) {
 			Collection<BaseTask> nextValues = myTasks.get(nextVersion);
@@ -80,8 +82,12 @@ public class BaseMigrationTasks<T extends Enum> {
 				retval.addAll(nextValues);
 			}
 		}
-
 		return retval;
+	}
+
+	public boolean hasTasksForVersion(T theRelease) {
+		Collection<BaseTask> baseTasks = myTasks.get(theRelease);
+		return nonNull(baseTasks) && !baseTasks.isEmpty();
 	}
 
 	protected BaseTask getTaskWithVersion(String theMigrationVersion) {

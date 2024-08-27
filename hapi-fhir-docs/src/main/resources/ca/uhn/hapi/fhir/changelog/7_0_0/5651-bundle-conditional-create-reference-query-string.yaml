@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 5651
+jira: SMILE-7855
+title: "Previously, conditional creates would fail with HAPI-0929 errors if there was no preceding '?'.
+        This has been fixed."

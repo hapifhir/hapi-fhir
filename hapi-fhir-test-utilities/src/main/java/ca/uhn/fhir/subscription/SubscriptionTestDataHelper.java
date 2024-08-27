@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Test Utilities
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,10 @@ public class SubscriptionTestDataHelper {
 	public static final String TEST_HEADER2 = "X-Bar: BAR";
 
 	public static Subscription buildR4TopicSubscription() {
+		return buildR4TopicSubscriptionWithContent("full-resource");
+	}
+
+	public static Subscription buildR4TopicSubscriptionWithContent(String theChannelPayloadContent) {
 		Subscription subscription = new Subscription();
 
 		// Standard R4 stuff
@@ -75,7 +79,7 @@ public class SubscriptionTestDataHelper {
 				.getPayloadElement()
 				.addExtension(
 						SubscriptionConstants.SUBSCRIPTION_TOPIC_CHANNEL_PAYLOAD_CONTENT,
-						new CodeType("full-resource"));
+						new CodeType(theChannelPayloadContent));
 
 		return subscription;
 	}

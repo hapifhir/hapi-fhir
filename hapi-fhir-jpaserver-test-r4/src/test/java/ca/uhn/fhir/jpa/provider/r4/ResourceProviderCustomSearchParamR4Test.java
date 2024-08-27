@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexAppCtx;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
 import ca.uhn.fhir.batch2.model.JobInstance;
@@ -58,15 +60,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+
 
 public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProviderR4Test {
 
@@ -244,12 +242,15 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 		mySearchParameterDao.create(fooSp, mySrd);
 
 		runInTransaction(() -> {
+			myBatch2JobHelper.forceRunMaintenancePass();
+
 			List<JobInstance> allJobs = myBatch2JobHelper.findJobsByDefinition(ReindexAppCtx.JOB_REINDEX);
 			assertEquals(1, allJobs.size());
 			assertEquals(1, allJobs.get(0).getParameters(ReindexJobParameters.class).getPartitionedUrls().size());
 			assertEquals("Patient?", allJobs.get(0).getParameters(ReindexJobParameters.class).getPartitionedUrls().get(0).getUrl());
 		});
 
+		myBatch2JobHelper.awaitNoJobsRunning();
 	}
 
 	@Test
@@ -291,7 +292,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 			ourLog.info(resp);
 			assertEquals(200, response.getStatusLine().getStatusCode());
 
-			assertThat(resp, containsString("<fullUrl value=\"http://localhost:" + myPort + "/fhir/context/Practitioner/"));
+			assertThat(resp).contains("<fullUrl value=\"http://localhost:" + myPort + "/fhir/context/Practitioner/");
 		} finally {
 			IOUtils.closeQuietly(response);
 		}
@@ -339,7 +340,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 
 		List<String> foundResources = toUnqualifiedVersionlessIdValues(bundle);
-		assertThat(foundResources, contains(p1id.getValue()));
+		assertThat(foundResources).containsExactly(p1id.getValue());
 	}
 
 
@@ -383,7 +384,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 			.returnBundle(Bundle.class)
 			.execute();
 		foundResources = toUnqualifiedVersionlessIdValues(result);
-		assertThat(foundResources, contains(obsId1.getValue()));
+		assertThat(foundResources).containsExactly(obsId1.getValue());
 
 	}
 
@@ -400,6 +401,9 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 		fooSp.setXpathUsage(org.hl7.fhir.r4.model.SearchParameter.XPathUsageType.NORMAL);
 		fooSp.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
 		mySearchParameterDao.create(fooSp, mySrd);
+
+		mySearchParamRegistry.forceRefresh();
+		assertNotNull(mySearchParamRegistry.getActiveSearchParam("Patient", "foo"));
 
 		Patient pat = new Patient();
 		pat.setGender(AdministrativeGender.MALE);
@@ -422,7 +426,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 			.execute();
 
 		foundResources = toUnqualifiedVersionlessIdValues(result);
-		assertThat(foundResources, contains(patId.getValue()));
+		assertThat(foundResources).containsExactly(patId.getValue());
 
 	}
 
@@ -462,7 +466,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 				.execute();
 
 		} catch (Exception e) {
-			assertThat(e.getMessage(), is(equalTo("HTTP 400 Bad Request: " + Msg.code(1882) + "Invalid date/time format: \"01-01-2020\"")));
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(1882) + "Invalid date/time format: \"01-01-2020\"", e.getMessage());
 		}
 
 		//Now with custom SP
@@ -475,7 +479,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 				.execute();
 
 		} catch (Exception e) {
-			assertThat(e.getMessage(), is(equalTo("HTTP 400 Bad Request: " + Msg.code(1882) + "Invalid date/time format: \"01-01-2020\"")));
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(1882) + "Invalid date/time format: \"01-01-2020\"", e.getMessage());
 		}
 	}
 
@@ -484,7 +488,6 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 	 */
 	@Test
 	public void testCustomParameterMatchingManyValues() {
-
 		List<String> found = new ArrayList<>();
 
 		class Interceptor {
@@ -496,7 +499,6 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 		Interceptor interceptor = new Interceptor();
 		myInterceptorRegistry.registerInterceptor(interceptor);
 		try {
-
 			int textIndex = 0;
 			List<Long> ids = new ArrayList<>();
 			for (int i = 0; i < 200; i++) {
@@ -550,8 +552,8 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 
 			runInTransaction(() -> {
 
-				List currentResults = myEntityManager.createNativeQuery("select distinct resourceta0_.RES_ID as col_0_0_ from HFJ_RESOURCE resourceta0_ left outer join HFJ_SPIDX_STRING myparamsst1_ on resourceta0_.RES_ID=myparamsst1_.RES_ID where myparamsst1_.HASH_NORM_PREFIX='5901791607832193956' and (myparamsst1_.SP_VALUE_NORMALIZED like 'SECTION%') limit '500'").getResultList();
-				List currentResources = myEntityManager.createNativeQuery("select resourceta0_.RES_ID as col_0_0_ from HFJ_RESOURCE resourceta0_").getResultList();
+				List currentResults = myEntityManager.createNativeQuery("select distinct r1_0.RES_ID as col_0_0_ from HFJ_RESOURCE r1_0 left outer join HFJ_SPIDX_STRING myparamsst1_ on r1_0.RES_ID=myparamsst1_.RES_ID where myparamsst1_.HASH_NORM_PREFIX='5901791607832193956' and (myparamsst1_.SP_VALUE_NORMALIZED like 'SECTION%') limit '500'").getResultList();
+				List currentResources = myEntityManager.createNativeQuery("select r1_0.RES_ID as col_0_0_ from HFJ_RESOURCE r1_0").getResultList();
 
 				List<Search> searches = mySearchEntityDao.findAll();
 				assertEquals(1, searches.size());
@@ -632,8 +634,8 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 			.execute();
 
 		List<String> foundResources = toUnqualifiedVersionlessIdValues(result);
-		assertEquals(1, foundResources.size());
-		assertThat(foundResources, contains(patId.getValue()));
+		assertThat(foundResources).hasSize(1);
+		assertThat(foundResources).containsExactly(patId.getValue());
 	}
 
 }

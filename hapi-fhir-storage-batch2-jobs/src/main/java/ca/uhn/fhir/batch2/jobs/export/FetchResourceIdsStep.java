@@ -2,7 +2,7 @@
  * #%L
  * hapi-fhir-storage-batch2-jobs
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,8 @@ import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
 import ca.uhn.fhir.jpa.bulk.export.model.ExportPIDIteratorParameters;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
+import com.google.common.annotations.VisibleForTesting;
+import jakarta.annotation.Nonnull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +44,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import javax.annotation.Nonnull;
 
 public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobParameters, ResourceIdList> {
 	private static final Logger ourLog = LoggerFactory.getLogger(FetchResourceIdsStep.class);
@@ -101,6 +102,8 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 						myBulkExportProcessor.getResourcePidIterator(providerParams);
 				List<BatchResourceId> idsToSubmit = new ArrayList<>();
 
+				int estimatedChunkSize = 0;
+
 				if (!pidIterator.hasNext()) {
 					ourLog.debug("Bulk Export generated an iterator with no results!");
 				}
@@ -120,17 +123,25 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 
 					idsToSubmit.add(batchResourceId);
 
+					if (estimatedChunkSize > 0) {
+						// Account for comma between array entries
+						estimatedChunkSize++;
+					}
+					estimatedChunkSize += batchResourceId.estimateSerializedSize();
+
 					// Make sure resources stored in each batch does not go over the max capacity
-					if (idsToSubmit.size() >= myStorageSettings.getBulkExportFileMaximumCapacity()) {
-						submitWorkChunk(idsToSubmit, resourceType, params, theDataSink);
+					if (idsToSubmit.size() >= myStorageSettings.getBulkExportFileMaximumCapacity()
+							|| estimatedChunkSize >= myStorageSettings.getBulkExportFileMaximumSize()) {
+						submitWorkChunk(idsToSubmit, resourceType, theDataSink);
 						submissionCount++;
 						idsToSubmit = new ArrayList<>();
+						estimatedChunkSize = 0;
 					}
 				}
 
 				// if we have any other Ids left, submit them now
 				if (!idsToSubmit.isEmpty()) {
-					submitWorkChunk(idsToSubmit, resourceType, params, theDataSink);
+					submitWorkChunk(idsToSubmit, resourceType, theDataSink);
 					submissionCount++;
 				}
 			}
@@ -149,7 +160,6 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 	private void submitWorkChunk(
 			List<BatchResourceId> theBatchResourceIds,
 			String theResourceType,
-			BulkExportJobParameters theParams,
 			IJobDataSink<ResourceIdList> theDataSink) {
 		ResourceIdList idList = new ResourceIdList();
 
@@ -158,5 +168,10 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 		idList.setResourceType(theResourceType);
 
 		theDataSink.accept(idList);
+	}
+
+	@VisibleForTesting
+	public void setBulkExportProcessorForUnitTest(IBulkExportProcessor theBulkExportProcessor) {
+		myBulkExportProcessor = theBulkExportProcessor;
 	}
 }

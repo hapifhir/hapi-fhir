@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 5700
+title: "Previously (this release cycle), when you call `RemoteTerminologyServiceValidationSupport` method `lookupCode` 
+with a `CodeSystem` that has properties that are not `string` or `Coding`, the method would throw an exception. 
+It should instead accept any type and convert any unsupported type to `string`. This has been fixed."

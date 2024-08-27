@@ -5,11 +5,10 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Set;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
+
 
 public class ModelR4BTest {
 
@@ -28,8 +27,7 @@ public class ModelR4BTest {
 		new InstantType("2019-01-01T00:00:00.000Z");
 		try {
 			new InstantType("2019-01-01T00:00Z");
-			fail();
-		} catch (IllegalArgumentException e) {
+			fail();		} catch (IllegalArgumentException e) {
 			// good
 		}
 	}
@@ -41,11 +39,7 @@ public class ModelR4BTest {
 			.getResourceDefinition("Observation")
 			.getSearchParam("performer")
 			.getProvidesMembershipInCompartments();
-		assertThat(compartments.toString(), compartments, containsInAnyOrder(
-			"Practitioner",
-			"Patient",
-			"RelatedPerson"
-		));
+		assertThat(compartments).as(compartments.toString()).containsExactlyInAnyOrder("Practitioner", "Patient", "RelatedPerson");
 	}
 
 

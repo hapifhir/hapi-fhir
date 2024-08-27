@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,20 +53,26 @@ public interface IMdmLinkJpaRepository
 	@Modifying
 	@Query(
 			value =
-					"DELETE FROM MPI_LINK_AUD f WHERE GOLDEN_RESOURCE_PID IN (:goldenPids) OR TARGET_PID IN (:goldenPids)",
+					"DELETE FROM MPI_LINK_AUD WHERE GOLDEN_RESOURCE_PID IN (:goldenPids) OR TARGET_PID IN (:goldenPids)",
 			nativeQuery = true)
 	void deleteLinksHistoryWithAnyReferenceToPids(@Param("goldenPids") List<Long> theResourcePids);
 
-	@Query("SELECT ml2.myGoldenResourcePid as goldenPid, ml2.mySourcePid as sourcePid FROM MdmLink ml2 "
-			+ "WHERE ml2.myMatchResult=:matchResult "
-			+ "AND ml2.myGoldenResourcePid IN ("
-			+ "SELECT ml.myGoldenResourcePid FROM MdmLink ml "
-			+ "INNER JOIN ResourceLink hrl "
-			+ "ON hrl.myTargetResourcePid=ml.mySourcePid "
-			+ "AND hrl.mySourceResourcePid=:groupPid "
-			+ "AND hrl.mySourcePath='Group.member.entity' "
-			+ "AND hrl.myTargetResourceType='Patient'"
-			+ ")")
+	// TODO:  LD:  the calling code in JpaBulkExportProcessor doesn't yet leverage the partition IDs, but maybe it
+	// should?
+	@Query(
+			"SELECT lookup_links.myGoldenResourcePid as goldenPid, gld_rt.myPartitionIdValue as goldenPartitionId, lookup_links.mySourcePid as sourcePid, lookup_links.myPartitionIdValue as sourcePartitionId "
+					+ "FROM MdmLink lookup_links "
+					+ "INNER JOIN ResourceTable gld_rt "
+					+ "on lookup_links.myGoldenResourcePid=gld_rt.myId "
+					+ "WHERE lookup_links.myMatchResult=:matchResult "
+					+ "AND lookup_links.myGoldenResourcePid IN ("
+					+ "SELECT inner_mdm_link.myGoldenResourcePid FROM MdmLink inner_mdm_link "
+					+ "INNER JOIN ResourceLink inner_res_link "
+					+ "ON inner_res_link.myTargetResourcePid=inner_mdm_link.mySourcePid "
+					+ "AND inner_res_link.mySourceResourcePid=:groupPid "
+					+ "AND inner_res_link.mySourcePath='Group.member.entity' "
+					+ "AND inner_res_link.myTargetResourceType='Patient'"
+					+ ")")
 	List<MdmPidTuple> expandPidsFromGroupPidGivenMatchResult(
 			@Param("groupPid") Long theGroupPid, @Param("matchResult") MdmMatchResultEnum theMdmMatchResultEnum);
 
@@ -77,15 +83,23 @@ public interface IMdmLinkJpaRepository
 	interface MdmPidTuple {
 		Long getGoldenPid();
 
+		Integer getGoldenPartitionId();
+
 		Long getSourcePid();
+
+		Integer getSourcePartitionId();
 	}
 
-	@Query("SELECT ml.myGoldenResourcePid as goldenPid, ml.mySourcePid as sourcePid " + "FROM MdmLink ml "
-			+ "INNER JOIN MdmLink ml2 "
-			+ "on ml.myGoldenResourcePid=ml2.myGoldenResourcePid "
-			+ "WHERE ml2.mySourcePid=:sourcePid "
-			+ "AND ml2.myMatchResult=:matchResult "
-			+ "AND ml.myMatchResult=:matchResult")
+	@Query(
+			"SELECT lookup_link.myGoldenResourcePid as goldenPid, gld_rt.myPartitionIdValue as goldenPartitionId, lookup_link.mySourcePid as sourcePid, lookup_link.myPartitionIdValue as sourcePartitionId "
+					+ "FROM MdmLink lookup_link "
+					+ "INNER JOIN MdmLink gld_link "
+					+ "on lookup_link.myGoldenResourcePid=gld_link.myGoldenResourcePid "
+					+ "INNER JOIN ResourceTable gld_rt "
+					+ "on gld_link.myGoldenResourcePid=gld_rt.myId "
+					+ "WHERE gld_link.mySourcePid=:sourcePid "
+					+ "AND gld_link.myMatchResult=:matchResult "
+					+ "AND lookup_link.myMatchResult=:matchResult")
 	List<MdmPidTuple> expandPidsBySourcePidAndMatchResult(
 			@Param("sourcePid") Long theSourcePid, @Param("matchResult") MdmMatchResultEnum theMdmMatchResultEnum);
 
@@ -99,7 +113,12 @@ public interface IMdmLinkJpaRepository
 			@Param("matchResult") MdmMatchResultEnum theMdmMatchResultEnumToExclude);
 
 	@Query(
-			"SELECT ml.myGoldenResourcePid as goldenPid, ml.mySourcePid as sourcePid FROM MdmLink ml WHERE ml.myGoldenResourcePid = :goldenPid and ml.myMatchResult = :matchResult")
+			"SELECT lookup_link.myGoldenResourcePid as goldenPid, gld_rt.myPartitionIdValue as goldenPartitionId, lookup_link.mySourcePid as sourcePid, lookup_link.myPartitionIdValue as sourcePartitionId "
+					+ "FROM MdmLink lookup_link "
+					+ "INNER JOIN ResourceTable gld_rt "
+					+ "on lookup_link.myGoldenResourcePid=gld_rt.myId "
+					+ "WHERE lookup_link.myGoldenResourcePid = :goldenPid "
+					+ "AND lookup_link.myMatchResult = :matchResult")
 	List<MdmPidTuple> expandPidsByGoldenResourcePidAndMatchResult(
 			@Param("goldenPid") Long theSourcePid, @Param("matchResult") MdmMatchResultEnum theMdmMatchResultEnum);
 

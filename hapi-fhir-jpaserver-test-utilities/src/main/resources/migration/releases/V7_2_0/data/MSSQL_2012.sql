@@ -1,0 +1,91 @@
+INSERT INTO TRM_CONCEPT (
+   PID,
+   CODEVAL,
+   CODESYSTEM_PID,
+   DISPLAY,
+   INDEX_STATUS,
+   PARENT_PIDS,
+   PARENT_PIDS_VC,
+   CODE_SEQUENCE,
+   CONCEPT_UPDATED
+) VALUES (
+   1,
+   'LA4393-0',
+   54,
+   'CR_1430_Reason no radiation',
+   1,
+   '1415721',
+   '1415721',
+   3,
+   '2024-05-01 17:02:39.139'
+ );
+
+INSERT INTO TRM_VALUESET_CONCEPT (
+   PID,
+   CODEVAL,
+   DISPLAY,
+   INDEX_STATUS,
+   VALUESET_ORDER,
+   SOURCE_DIRECT_PARENT_PIDS,
+   SOURCE_DIRECT_PARENT_PIDS_VC,
+   SOURCE_PID,
+   SYSTEM_URL,
+   SYSTEM_VER,
+   VALUESET_PID
+) VALUES (
+   1,
+   'LA4382-3',
+   'CR_1550_Radiation treatment location',
+   1,
+   2,
+   '1415722',
+   '1415722',
+   1,
+   'HTTP://LOINC.ORG',
+   'V2.67',
+   59
+);
+
+INSERT INTO TRM_CONCEPT_PROPERTY (
+   PID,
+   PROP_CODESYSTEM,
+   PROP_DISPLAY,
+   PROP_KEY,
+   PROP_TYPE,
+   PROP_VAL,
+   PROP_VAL_BIN,
+   PROP_VAL_LOB,
+   CS_VER_PID,
+   CONCEPT_PID
+) VALUES (
+   154,
+   'http://loinc.org',
+   'code-A',
+   'CODING',
+   1,
+   'LP98185-9',
+   8479927,
+   83006307,
+   54,
+   1
+);
+
+INSERT INTO HFJ_BINARY_STORAGE_BLOB (
+   BLOB_ID,
+   BLOB_DATA,
+   CONTENT_TYPE,
+   BLOB_HASH,
+   PUBLISHED_DATE,
+   RESOURCE_ID,
+   BLOB_SIZE,
+   STORAGE_CONTENT_BIN
+) VALUES (
+   '1',
+   72995,
+   'TEXT',
+   'dc7197cfab936698bef7818975c185a9b88b71a0a0a2493deea487706ddf20cb',
+   '2024-06-15 09:58:42.92',
+   '1678',
+   16,
+   7368816
+);

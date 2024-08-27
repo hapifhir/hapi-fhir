@@ -2,7 +2,7 @@
  * #%L
  * hapi-fhir-storage-batch2-jobs
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,13 +28,13 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.List;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -77,7 +77,8 @@ public class BulkExportJobParametersValidator implements IJobParametersValidator
 		// validate the exportId
 		if (!StringUtils.isBlank(theParameters.getExportIdentifier())) {
 
-			if (myBinaryStorageSvc != null && !myBinaryStorageSvc.isValidBlobId(theParameters.getExportIdentifier())) {
+			if (myBinaryStorageSvc != null
+					&& !myBinaryStorageSvc.isValidBinaryContentId(theParameters.getExportIdentifier())) {
 				errorMsgs.add("Export ID does not conform to the current blob storage implementation's limitations.");
 			}
 		}

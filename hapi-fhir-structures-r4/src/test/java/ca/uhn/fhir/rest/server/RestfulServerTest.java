@@ -10,26 +10,34 @@ import ca.uhn.fhir.rest.annotation.Metadata;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.server.IFhirVersionServer;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.hl7.fhir.instance.model.api.IBaseMetaType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.ListResource;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
 import java.io.Serializable;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.Mockito.mock;
 
 @ExtendWith(MockitoExtension.class)
 public class RestfulServerTest {
@@ -49,33 +57,33 @@ public class RestfulServerTest {
 		MyProvider2 provider2 = new MyProvider2();
 		myRestfulServer.registerProvider(provider2);
 
-		assertFalse(myRestfulServer.getProviderMethodBindings(provider).isEmpty());
-		assertFalse(myRestfulServer.getProviderMethodBindings(provider2).isEmpty());
+		assertThat(myRestfulServer.getProviderMethodBindings(provider)).isNotEmpty();
+		assertThat(myRestfulServer.getProviderMethodBindings(provider2)).isNotEmpty();
 
 		myRestfulServer.unregisterProvider(provider);
-		assertTrue(myRestfulServer.getProviderMethodBindings(provider).isEmpty());
-		assertFalse(myRestfulServer.getProviderMethodBindings(provider2).isEmpty());
+		assertThat(myRestfulServer.getProviderMethodBindings(provider)).isEmpty();
+		assertThat(myRestfulServer.getProviderMethodBindings(provider2)).isNotEmpty();
 	}
 
 	@Test
 	public void testRegisterProviders() {
 		//test register Plain Provider
 		myRestfulServer.registerProvider(new MyClassWithRestInterface());
-		assertEquals(1, myRestfulServer.getResourceProviders().size());
+		assertThat(myRestfulServer.getResourceProviders()).hasSize(1);
 		Object plainProvider = myRestfulServer.getResourceProviders().get(0);
 		assertTrue(plainProvider instanceof MyClassWithRestInterface);
 
 		//test register Resource Provider
 		myRestfulServer.registerProvider(new MyResourceProvider());
-		assertEquals(2, myRestfulServer.getResourceProviders().size());
+		assertThat(myRestfulServer.getResourceProviders()).hasSize(2);
 		IResourceProvider resourceProvider = myRestfulServer.getResourceProviders().get(1);
 		assertTrue(resourceProvider instanceof MyResourceProvider);
 
 		//test unregister providers
 		myRestfulServer.unregisterProvider(plainProvider);
-		assertFalse(myRestfulServer.getResourceProviders().isEmpty());
+		assertThat(myRestfulServer.getResourceProviders()).isNotEmpty();
 		myRestfulServer.unregisterProvider(resourceProvider);
-		assertTrue(myRestfulServer.getResourceProviders().isEmpty());
+		assertThat(myRestfulServer.getResourceProviders()).isEmpty();
 	}
 
 	@Test
@@ -88,6 +96,18 @@ public class RestfulServerTest {
 		}
 	}
 
+	@Test
+	public void exceptionHandling() {
+		final SystemRequestDetails requestDetails = new SystemRequestDetails();
+		requestDetails.setRequestType(RequestTypeEnum.GET);
+		requestDetails.setResourceName("InvalidResourceName");
+		myRestfulServer.registerProvider(new MyListResourceProvider());
+		assertThatThrownBy(
+			 () -> myRestfulServer.determineResourceMethod(requestDetails, "1234"))
+			 .isInstanceOf(ResourceNotFoundException.class)
+			 .hasMessageContaining("List")
+			 .hasMessageNotContaining("ListResource");
+	}
 
 	//--------- Scaffolding ---------//
 	private static class MyClassWithoutRestInterface implements Serializable {
@@ -141,6 +161,18 @@ public class RestfulServerTest {
 		}
 	}
 
+	private static class MyListResourceProvider implements IResourceProvider {
+		@Create
+		public MethodOutcome create(@ResourceParam IBaseResource theResource) {
+			return mock(MethodOutcome.class);
+		}
+
+		@Override
+		public Class<? extends IBaseResource> getResourceType() {
+			return ListResource.class;
+		}
+	}
+
 	private static class MyProvider implements IResourceProvider {
 		@Operation(name = "SHOW_ME_THE_MONEY", typeName = "MyResource")
 		public IBaseBundle match() {
@@ -165,7 +197,7 @@ public class RestfulServerTest {
 		}
 	}
 
-	@ResourceDef(name="MyResource")
+	@ResourceDef(name = "MyResource")
 	public static class MyResource implements IBaseResource {
 
 		@Override
@@ -224,7 +256,7 @@ public class RestfulServerTest {
 		}
 	}
 
-	@ResourceDef(name="MyResource2")
+	@ResourceDef(name = "MyResource2")
 	public static class MyResource2 extends MyResource {
 	}
 

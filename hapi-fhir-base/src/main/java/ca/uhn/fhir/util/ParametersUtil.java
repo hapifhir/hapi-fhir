@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.primitive.StringDt;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
@@ -45,7 +46,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import javax.annotation.Nullable;
 
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -209,7 +209,7 @@ public class ParametersUtil {
 	 *
 	 * @param theContext    The FhirContext
 	 * @param theParameters The Parameters resource
-	 * @param theName       The parametr name
+	 * @param theName       The parameter name
 	 * @param theValue      The parameter value (can be a {@link IBaseResource resource} or a {@link IBaseDatatype datatype})
 	 */
 	public static void addParameterToParameters(
@@ -248,7 +248,7 @@ public class ParametersUtil {
 
 	private static IBase createParameterRepetition(
 			FhirContext theContext,
-			IBaseResource theTargetResource,
+			IBase theTargetResource,
 			BaseRuntimeChildDefinition paramChild,
 			BaseRuntimeElementCompositeDefinition<?> paramChildElem,
 			String theName) {
@@ -403,8 +403,15 @@ public class ParametersUtil {
 	public static void addPartDecimal(FhirContext theContext, IBase theParameter, String theName, Double theValue) {
 		IPrimitiveType<BigDecimal> value = (IPrimitiveType<BigDecimal>)
 				theContext.getElementDefinition("decimal").newInstance();
-		value.setValue(theValue == null ? null : new BigDecimal(theValue));
-
+		if (theValue == null) {
+			value.setValue(null);
+		} else {
+			BigDecimal decimalValue = BigDecimal.valueOf(theValue);
+			if (decimalValue.scale() < 0) {
+				decimalValue = decimalValue.setScale(0);
+			}
+			value.setValue(decimalValue);
+		}
 		addPart(theContext, theParameter, theName, value);
 	}
 
@@ -426,7 +433,7 @@ public class ParametersUtil {
 		addPart(theContext, theParameter, theName, coding);
 	}
 
-	public static void addPart(FhirContext theContext, IBase theParameter, String theName, IBase theValue) {
+	public static IBase addPart(FhirContext theContext, IBase theParameter, String theName, @Nullable IBase theValue) {
 		BaseRuntimeElementCompositeDefinition<?> def =
 				(BaseRuntimeElementCompositeDefinition<?>) theContext.getElementDefinition(theParameter.getClass());
 		BaseRuntimeChildDefinition partChild = def.getChildByName("part");
@@ -441,11 +448,25 @@ public class ParametersUtil {
 		name.setValue(theName);
 		partChildElem.getChildByName("name").getMutator().addValue(part, name);
 
-		if (theValue instanceof IBaseResource) {
-			partChildElem.getChildByName("resource").getMutator().addValue(part, theValue);
-		} else {
-			partChildElem.getChildByName("value[x]").getMutator().addValue(part, theValue);
+		if (theValue != null) {
+			if (theValue instanceof IBaseResource) {
+				partChildElem.getChildByName("resource").getMutator().addValue(part, theValue);
+			} else {
+				partChildElem.getChildByName("value[x]").getMutator().addValue(part, theValue);
+			}
 		}
+		return part;
+	}
+
+	public static IBase createPart(FhirContext theContext, IBase thePart, String theName) {
+		BaseRuntimeElementCompositeDefinition<?> def =
+				(BaseRuntimeElementCompositeDefinition<?>) theContext.getElementDefinition(thePart.getClass());
+		BaseRuntimeChildDefinition partChild = def.getChildByName("part");
+
+		BaseRuntimeElementCompositeDefinition<?> partChildElem =
+				(BaseRuntimeElementCompositeDefinition<?>) partChild.getChildByName("part");
+
+		return createParameterRepetition(theContext, thePart, partChild, partChildElem, theName);
 	}
 
 	public static void addPartResource(

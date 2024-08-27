@@ -26,7 +26,7 @@ import org.hl7.fhir.r4b.model.Observation;
 import org.hl7.fhir.r4b.model.Organization;
 import org.hl7.fhir.r4b.model.Patient;
 import org.hl7.fhir.r4b.model.Subscription;
-import org.jetbrains.annotations.NotNull;
+import jakarta.annotation.Nonnull;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,8 +34,8 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.Nonnull;
-import javax.annotation.PostConstruct;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -125,7 +125,7 @@ public abstract class BaseSubscriptionsR4BTest extends BaseResourceProviderR4BTe
 		return createSubscription(theCriteria, thePayload, theExtension, id);
 	}
 
-	@NotNull
+	@Nonnull
 	protected Subscription createSubscription(String theCriteria, String thePayload, Extension theExtension, String id) {
 		Subscription subscription = newSubscription(theCriteria, thePayload);
 		if (theExtension != null) {

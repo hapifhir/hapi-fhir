@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +20,11 @@
 package ca.uhn.fhir.mdm.util;
 
 import ca.uhn.fhir.mdm.api.MdmConstants;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.Optional;
-import javax.annotation.Nonnull;
 
 public final class MdmResourceUtil {
 
@@ -118,12 +118,36 @@ public final class MdmResourceUtil {
 				MdmConstants.DISPLAY_GOLDEN_RECORD);
 	}
 
+	/**
+	 * Sets the provided resource as 'redirected' golden resource.
+	 * This is done when a Golden Resource has been deprecated
+	 * and is no longer the primary golden resource (for example,
+	 * after a merge of 2 golden resources).
+	 */
 	public static IBaseResource setGoldenResourceRedirected(IBaseResource theBaseResource) {
 		return setTagOnResource(
 				theBaseResource,
 				MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS,
 				MdmConstants.CODE_GOLDEN_RECORD_REDIRECTED,
 				MdmConstants.DISPLAY_GOLDEN_REDIRECT);
+	}
+
+	/**
+	 * Adds the BLOCKED tag to the golden resource.
+	 * Because this is called *before* a resource is saved,
+	 * we must add a new system/code combo to it
+	 * @param theBaseResource
+	 * @return
+	 */
+	public static IBaseResource setGoldenResourceAsBlockedResourceGoldenResource(IBaseResource theBaseResource) {
+		IBaseCoding tag = theBaseResource.getMeta().addTag();
+		tag.setSystem(MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS);
+		tag.setCode(MdmConstants.CODE_BLOCKED);
+		tag.setDisplay(MdmConstants.CODE_BLOCKED_DISPLAY);
+		tag.setUserSelected(false);
+		tag.setVersion("1");
+
+		return theBaseResource;
 	}
 
 	/**

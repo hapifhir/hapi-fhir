@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ package ca.uhn.fhir.jpa.topic.status;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
+import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
+import ca.uhn.fhir.jpa.topic.SubscriptionTopicUtil;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.Reference;
@@ -40,6 +42,7 @@ public class R5NotificationStatusBuilder implements INotificationStatusBuilder<S
 	public SubscriptionStatus buildNotificationStatus(
 			List<IBaseResource> theResources, ActiveSubscription theActiveSubscription, String theTopicUrl) {
 		long eventNumber = theActiveSubscription.getDeliveriesCount();
+		CanonicalSubscription canonicalSubscription = theActiveSubscription.getSubscription();
 
 		SubscriptionStatus subscriptionStatus = new SubscriptionStatus();
 		subscriptionStatus.setId(UUID.randomUUID().toString());
@@ -50,7 +53,7 @@ public class R5NotificationStatusBuilder implements INotificationStatusBuilder<S
 		SubscriptionStatus.SubscriptionStatusNotificationEventComponent event =
 				subscriptionStatus.addNotificationEvent();
 		event.setEventNumber(eventNumber);
-		if (theResources.size() > 0) {
+		if (!theResources.isEmpty() && !SubscriptionTopicUtil.isEmptyContentTopicSubscription(canonicalSubscription)) {
 			event.setFocus(new Reference(theResources.get(0).getIdElement()));
 		}
 		subscriptionStatus.setSubscription(

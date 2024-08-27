@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server - Master Data Management
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.mdm.broker;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
@@ -30,6 +31,7 @@ import ca.uhn.fhir.jpa.mdm.svc.MdmResourceFilteringSvc;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.TooManyCandidatesException;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
+import ca.uhn.fhir.jpa.topic.SubscriptionTopicUtil;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
@@ -39,6 +41,7 @@ import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.messaging.ResourceOperationMessage;
 import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -81,18 +84,24 @@ public class MdmMessageHandler implements MessageHandler {
 
 		ResourceModifiedMessage msg = ((ResourceModifiedJsonMessage) theMessage).getPayload();
 		try {
-			IBaseResource sourceResource = msg.getNewPayload(myFhirContext);
+			IBaseResource sourceResource = extractSourceResource(msg);
 
 			boolean toProcess = myMdmResourceFilteringSvc.shouldBeProcessed((IAnyResource) sourceResource);
 			if (toProcess) {
 				matchMdmAndUpdateLinks(sourceResource, msg);
 			}
-		} catch (TooManyCandidatesException e) {
-			ourLog.error(e.getMessage(), e);
-			// skip this one with an error message and continue processing
 		} catch (Exception e) {
 			ourLog.error("Failed to handle MDM Matching Resource:", e);
 			throw e;
+		}
+	}
+
+	private IBaseResource extractSourceResource(ResourceModifiedMessage theResourceModifiedMessage) {
+		IBaseResource sourceResource = theResourceModifiedMessage.getNewPayload(myFhirContext);
+		if (myFhirContext.getVersion().getVersion() == FhirVersionEnum.R5 && sourceResource instanceof IBaseBundle) {
+			return SubscriptionTopicUtil.extractResourceFromBundle(myFhirContext, (IBaseBundle) sourceResource);
+		} else {
+			return sourceResource;
 		}
 	}
 
@@ -123,6 +132,12 @@ public class MdmMessageHandler implements MessageHandler {
 					ourLog.trace("Not processing modified message for {}", theMsg.getOperationType());
 			}
 		} catch (Exception e) {
+			if (e instanceof TooManyCandidatesException) {
+				ourLog.debug(
+						"Failed to handle MDM Matching for resource: {} since candidate matches exceeded the "
+								+ "candidate search limit",
+						theSourceResource.getIdElement());
+			}
 			log(mdmContext, "Failure during MDM processing: " + e.getMessage(), e);
 			mdmContext.addTransactionLogMessage(e.getMessage());
 		} finally {

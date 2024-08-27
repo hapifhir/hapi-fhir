@@ -16,7 +16,6 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicStatusLine;
-import org.hamcrest.core.StringContains;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
@@ -30,7 +29,7 @@ import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
 import java.io.StringReader;
 import java.nio.charset.Charset;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -73,10 +72,9 @@ public class ExceptionHandlingTest {
 
 		try {
 			client.read().resource(Patient.class).withId(new IdType("Patient/1234")).execute();
-			fail();
-		} catch (InternalErrorException e) {
-			assertThat(e.getMessage(), StringContains.containsString("HTTP 500 Internal Error"));
-			assertThat(e.getMessage(), StringContains.containsString("Help I'm a bug"));
+			fail();		} catch (InternalErrorException e) {
+			assertThat(e.getMessage()).contains("HTTP 500 Internal Error");
+			assertThat(e.getMessage()).contains("Help I'm a bug");
 		}
 
 	}
@@ -98,10 +96,9 @@ public class ExceptionHandlingTest {
 
 		try {
         client.read().resource(Patient.class).withId(new IdType("Patient/1234")).execute();
-			fail();
-		} catch (InternalErrorException e) {
-			assertThat(e.getMessage(), StringContains.containsString("HTTP 500 Internal Error"));
-			assertThat(e.getMessage(), StringContains.containsString("Help I'm a bug"));
+			fail();		} catch (InternalErrorException e) {
+			assertThat(e.getMessage()).contains("HTTP 500 Internal Error");
+			assertThat(e.getMessage()).contains("Help I'm a bug");
 		}
 
 	}
@@ -123,10 +120,9 @@ public class ExceptionHandlingTest {
 
 		try {
         client.read().resource(Patient.class).withId(new IdType("Patient/1234")).execute();
-			fail();
-		} catch (InternalErrorException e) {
+			fail();		} catch (InternalErrorException e) {
 			assertEquals("HTTP 500 Internal Error", e.getMessage());
-			assertThat(e.getResponseBody(), StringContains.containsString("value=\"foo\""));
+			assertThat(e.getResponseBody()).contains("value=\"foo\"");
 		}
 
 	}
@@ -147,10 +143,9 @@ public class ExceptionHandlingTest {
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 		try {
         client.read().resource(Patient.class).withId(new IdType("Patient/1234")).execute();
-			fail();
-		} catch (InternalErrorException e) {
-			assertThat(e.getMessage(), StringContains.containsString("HTTP 500 Internal Error"));
-			assertThat(e.getMessage(), StringContains.containsString("Help I'm a bug"));
+			fail();		} catch (InternalErrorException e) {
+			assertThat(e.getMessage()).contains("HTTP 500 Internal Error");
+			assertThat(e.getMessage()).contains("Help I'm a bug");
 			assertNotNull(e.getOperationOutcome());
 			assertEquals("Help I'm a bug", ((OperationOutcome) e.getOperationOutcome()).getIssueFirstRep().getDiagnosticsElement().getValue());
 		}
@@ -173,10 +168,9 @@ public class ExceptionHandlingTest {
 		IMyClient client = ourCtx.newRestfulClient(IMyClient.class, "http://example.com/fhir");
 		try {
 			client.read(new IdType("Patient/1234"));
-			fail();
-		} catch (InternalErrorException e) {
-			assertThat(e.getMessage(), StringContains.containsString("HTTP 500 Internal Error"));
-			assertThat(e.getMessage(), StringContains.containsString("Help I'm a bug"));
+			fail();		} catch (InternalErrorException e) {
+			assertThat(e.getMessage()).contains("HTTP 500 Internal Error");
+			assertThat(e.getMessage()).contains("Help I'm a bug");
 			assertNotNull(e.getOperationOutcome());
 			assertEquals("Help I'm a bug", ((OperationOutcome) e.getOperationOutcome()).getIssueFirstRep().getDiagnosticsElement().getValue());
 		}

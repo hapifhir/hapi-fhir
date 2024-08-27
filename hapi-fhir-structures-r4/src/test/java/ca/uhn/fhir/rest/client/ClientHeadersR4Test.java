@@ -8,27 +8,30 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.util.TestUtil;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
+import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.fail;
+
 
 public class ClientHeadersR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ClientHeadersR4Test.class);
@@ -71,7 +74,7 @@ public class ClientHeadersR4Test {
 			.execute();
 
 		assertEquals("application/fhir+xml;q=1.0, application/xml+fhir;q=0.9", ourHeaders.get(Constants.HEADER_ACCEPT).get(0));
-		assertEquals(null, ourParams.get(Constants.PARAM_FORMAT));
+		assertNull(ourParams.get(Constants.PARAM_FORMAT));
 	}
 
 	@Test
@@ -98,7 +101,7 @@ public class ClientHeadersR4Test {
 			.execute();
 
 		assertEquals("application/fhir+json;q=1.0, application/json+fhir;q=0.9", ourHeaders.get(Constants.HEADER_ACCEPT).get(0));
-		assertEquals(null, ourParams.get(Constants.PARAM_FORMAT));
+		assertNull(ourParams.get(Constants.PARAM_FORMAT));
 	}
 
 	@Test
@@ -123,7 +126,7 @@ public class ClientHeadersR4Test {
 		MethodOutcome resp = myClient.create().resource(resp1).execute();
 
 		assertNotNull(resp);
-		assertEquals(1, ourHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
+		assertThat(ourHeaders.get(Constants.HEADER_CONTENT_TYPE)).hasSize(1);
 		assertEquals("application/fhir+json; charset=UTF-8", ourHeaders.get(Constants.HEADER_CONTENT_TYPE).get(0));
 	}
 
@@ -138,8 +141,7 @@ public class ClientHeadersR4Test {
 		protected void service(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 
 			if (ourHeaders != null) {
-				fail();
-			}
+				fail();			}
 			ourHeaders = new HashMap<>();
 			ourParams = new HashMap<>(req.getParameterMap());
 			ourMethod = req.getMethod();

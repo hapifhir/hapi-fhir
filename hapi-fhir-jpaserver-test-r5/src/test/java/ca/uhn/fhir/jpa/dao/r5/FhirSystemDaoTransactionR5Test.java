@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.util.BundleBuilder;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.r5.model.BooleanType;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.CodeType;
@@ -13,23 +14,23 @@ import org.hl7.fhir.r5.model.Parameters;
 import org.hl7.fhir.r5.model.Patient;
 import org.hl7.fhir.r5.model.Quantity;
 import org.hl7.fhir.r5.model.Reference;
+import org.hl7.fhir.r5.model.UriType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import javax.annotation.Nonnull;
+import java.io.IOException;
 import java.util.UUID;
 
 import static org.apache.commons.lang3.StringUtils.countMatches;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.endsWith;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.when;
 
 public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 
@@ -40,6 +41,7 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		myStorageSettings.setMatchUrlCacheEnabled(defaults.isMatchUrlCacheEnabled());
 		myStorageSettings.setDeleteEnabled(defaults.isDeleteEnabled());
 		myStorageSettings.setInlineResourceTextBelowSize(defaults.getInlineResourceTextBelowSize());
+		myStorageSettings.setAllowExternalReferences(defaults.isAllowExternalReferences());
 	}
 
 
@@ -89,14 +91,14 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		// One select to resolve the 3 match URLs
 		assertEquals(1, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		String firstSelectQuery = myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false);
-		assertEquals(1, countMatches(firstSelectQuery, "HASH_SYS_AND_VALUE in (? , ? , ? , ?)"), firstSelectQuery);
+		assertThat(countMatches(firstSelectQuery, "rispt1_0.HASH_SYS_AND_VALUE in (?,?,?,?)")).as(firstSelectQuery).isEqualTo(1);
 		assertEquals(23, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(3, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 		assertEquals(1, myCaptureQueriesListener.countCommits());
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 
-		assertEquals(4, output.getEntry().size());
+		assertThat(output.getEntry()).hasSize(4);
 
 		IdType patientId = new IdType(output.getEntry().get(1).getResponse().getLocation());
 		IdType observationId = new IdType(output.getEntry().get(2).getResponse().getLocation());
@@ -145,14 +147,14 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 
 		// Verify
 
-		assertEquals(theMatchUrlCacheEnabled ? 4 : 5, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(theMatchUrlCacheEnabled ? 3 : 4, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
-		assertEquals(0, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
-		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+		assertEquals(4, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+		assertEquals(4, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 		assertEquals(1, myCaptureQueriesListener.countCommits());
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 
-		assertEquals(4, output.getEntry().size());
+		assertThat(output.getEntry()).hasSize(4);
 
 		patientId = new IdType(output.getEntry().get(1).getResponse().getLocation());
 		observationId = new IdType(output.getEntry().get(2).getResponse().getLocation());
@@ -197,14 +199,14 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 
 		// Verify
 
-		assertEquals(theMatchUrlCacheEnabled ? 4 : 5, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(theMatchUrlCacheEnabled ? 3 : 4, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 		assertEquals(1, myCaptureQueriesListener.countCommits());
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 
-		assertEquals(3, output.getEntry().size());
+		assertThat(output.getEntry()).hasSize(3);
 
 		patientId = new IdType(output.getEntry().get(1).getResponse().getLocation());
 		observationId = new IdType(output.getEntry().get(2).getResponse().getLocation());
@@ -265,7 +267,7 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		assertEquals(1, myCaptureQueriesListener.countCommits());
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 
-		assertEquals(4, output.getEntry().size());
+		assertThat(output.getEntry()).hasSize(4);
 
 		runInTransaction(() -> {
 			assertEquals(5, myResourceTableDao.count());
@@ -302,7 +304,7 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		assertEquals(1, myCaptureQueriesListener.countCommits());
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 
-		assertEquals(4, output.getEntry().size());
+		assertThat(output.getEntry()).hasSize(4);
 
 		runInTransaction(() -> {
 			assertEquals(9, myResourceTableDao.count());
@@ -384,7 +386,7 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		assertEquals(1, myCaptureQueriesListener.countCommits());
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 
-		assertEquals(1, output.getEntry().size());
+		assertThat(output.getEntry()).hasSize(1);
 
 		runInTransaction(() -> {
 			assertEquals(2, myResourceTableDao.count());
@@ -441,25 +443,35 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		assertEquals("http://system", createdPatient.getIdentifierFirstRep().getSystem());
 		assertTrue(createdPatient.getActive());
 
-		assertEquals(2, output.getEntry().size());
+		assertThat(output.getEntry()).hasSize(2);
 	}
 
 
 	/**
 	 * If a conditional delete and conditional update are both used on the same condition,
 	 * the update should win.
+	 * We need to test this scenario with both empty and non-empty RequestDetails.requestId parameter,
+	 * as providing RequestDetails.requestId previously caused javax.persistence.EntityExistsException
+	 * during persistence of ResourceHistoryProvenanceEntity.
+	 *
+	 * @param theReturnRequestId if RequestDetails.requestId should return non-null value
 	 */
-	@Test
-	public void testConditionalDeleteAndConditionalUpdateOnSameResource() {
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	public void createBundle_withConditionalDeleteAndConditionalUpdateOnSameResource_updatesResource(boolean theReturnRequestId) {
 		Bundle outcome;
 		Patient actual;
+
+		if (theReturnRequestId) {
+			when(mySrd.getRequestId()).thenReturn("requestId");
+		}
 
 		// First pass (resource doesn't already exist)
 
 		outcome = mySystemDao.transaction(mySrd, createBundleWithConditionalDeleteAndConditionalUpdateOnSameResource(myFhirContext));
-		assertEquals(null, outcome.getEntry().get(0).getResponse().getLocation());
+		assertNull(outcome.getEntry().get(0).getResponse().getLocation());
 		assertEquals("204 No Content", outcome.getEntry().get(0).getResponse().getStatus());
-		assertThat(outcome.getEntry().get(1).getResponse().getLocation(), endsWith("_history/1"));
+		assertThat(outcome.getEntry().get(1).getResponse().getLocation()).endsWith("_history/1");
 		assertEquals("201 Created", outcome.getEntry().get(1).getResponse().getStatus());
 
 		IdType resourceId = new IdType(outcome.getEntry().get(1).getResponse().getLocation()).toUnqualifiedVersionless();
@@ -474,9 +486,9 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		outcome = mySystemDao.transaction(mySrd, createBundleWithConditionalDeleteAndConditionalUpdateOnSameResource(myFhirContext));
 		myCaptureQueriesListener.logUpdateQueries();
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
-		assertEquals(null, outcome.getEntry().get(0).getResponse().getLocation());
+		assertNull(outcome.getEntry().get(0).getResponse().getLocation());
 		assertEquals("204 No Content", outcome.getEntry().get(0).getResponse().getStatus());
-		assertThat(outcome.getEntry().get(1).getResponse().getLocation(), endsWith("_history/2"));
+		assertThat(outcome.getEntry().get(1).getResponse().getLocation()).endsWith("_history/2");
 		assertEquals("201 Created", outcome.getEntry().get(1).getResponse().getStatus());
 
 		logAllResources();
@@ -491,9 +503,9 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 
 		outcome = mySystemDao.transaction(mySrd, createBundleWithConditionalDeleteAndConditionalUpdateOnSameResource(myFhirContext));
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
-		assertEquals(null, outcome.getEntry().get(0).getResponse().getLocation());
+		assertNull(outcome.getEntry().get(0).getResponse().getLocation());
 		assertEquals("204 No Content", outcome.getEntry().get(0).getResponse().getStatus());
-		assertThat(outcome.getEntry().get(1).getResponse().getLocation(), endsWith("_history/3"));
+		assertThat(outcome.getEntry().get(1).getResponse().getLocation()).endsWith("_history/3");
 		assertEquals("201 Created", outcome.getEntry().get(1).getResponse().getStatus());
 
 		actual = myPatientDao.read(resourceId, mySrd);
@@ -501,6 +513,17 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		assertEquals("http://foo", actual.getIdentifierFirstRep().getSystem());
 		assertEquals("http://tag", actual.getMeta().getTagFirstRep().getSystem());
 	}
+
+
+	@Test
+	public void testExternalReference() throws IOException {
+		myStorageSettings.setAllowExternalReferences(true);
+
+		Bundle input = loadResourceFromClasspath(Bundle.class, "docref-test-bundle.json");
+		Bundle output = mySystemDao.transaction(mySrd, input);
+		assertThat(output.getEntry()).hasSize(1);
+	}
+
 
 
 	@Test
@@ -519,7 +542,7 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		} catch (PreconditionFailedException e) {
 
 			// Verify
-			assertThat(e.getMessage(), containsString("Multiple resources match this search"));
+			assertThat(e.getMessage()).contains("Multiple resources match this search");
 
 		}
 	}
@@ -536,9 +559,9 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		// First pass (resource doesn't already exist)
 
 		outcome = mySystemDao.transaction(mySrd, createBundleWithConditionalDeleteAndConditionalCreateOnSameResource(myFhirContext));
-		assertEquals(null, outcome.getEntry().get(0).getResponse().getLocation());
+		assertNull(outcome.getEntry().get(0).getResponse().getLocation());
 		assertEquals("204 No Content", outcome.getEntry().get(0).getResponse().getStatus());
-		assertThat(outcome.getEntry().get(1).getResponse().getLocation(), endsWith("_history/1"));
+		assertThat(outcome.getEntry().get(1).getResponse().getLocation()).endsWith("_history/1");
 		assertEquals("201 Created", outcome.getEntry().get(1).getResponse().getStatus());
 
 		IdType resourceId = new IdType(outcome.getEntry().get(1).getResponse().getLocation()).toUnqualifiedVersionless();
@@ -553,16 +576,16 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		outcome = mySystemDao.transaction(mySrd, createBundleWithConditionalDeleteAndConditionalCreateOnSameResource(myFhirContext));
 		myCaptureQueriesListener.logUpdateQueries();
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
-		assertEquals(null, outcome.getEntry().get(0).getResponse().getLocation());
+		assertNull(outcome.getEntry().get(0).getResponse().getLocation());
 		assertEquals("204 No Content", outcome.getEntry().get(0).getResponse().getStatus());
-		assertThat(outcome.getEntry().get(1).getResponse().getLocation(), endsWith("_history/1"));
+		assertThat(outcome.getEntry().get(1).getResponse().getLocation()).endsWith("_history/1");
 		assertEquals("201 Created", outcome.getEntry().get(1).getResponse().getStatus());
 
 		logAllResources();
 		logAllResourceVersions();
 
 		IdType resourceId2 = new IdType(outcome.getEntry().get(1).getResponse().getLocation()).toUnqualifiedVersionless();
-		assertNotEquals(resourceId.getIdPart(), resourceId2.getIdPart());
+		assertThat(resourceId2.getIdPart()).isNotEqualTo(resourceId.getIdPart());
 		actual = myPatientDao.read(resourceId2, mySrd);
 		assertEquals("1", actual.getIdElement().getVersionIdPart());
 		assertEquals("http://foo", actual.getIdentifierFirstRep().getSystem());
@@ -572,13 +595,13 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 
 		outcome = mySystemDao.transaction(mySrd, createBundleWithConditionalDeleteAndConditionalCreateOnSameResource(myFhirContext));
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
-		assertEquals(null, outcome.getEntry().get(0).getResponse().getLocation());
+		assertNull(outcome.getEntry().get(0).getResponse().getLocation());
 		assertEquals("204 No Content", outcome.getEntry().get(0).getResponse().getStatus());
-		assertThat(outcome.getEntry().get(1).getResponse().getLocation(), endsWith("_history/1"));
+		assertThat(outcome.getEntry().get(1).getResponse().getLocation()).endsWith("_history/1");
 		assertEquals("201 Created", outcome.getEntry().get(1).getResponse().getStatus());
 
 		IdType resourceId3 = new IdType(outcome.getEntry().get(1).getResponse().getLocation()).toUnqualifiedVersionless();
-		assertNotEquals(resourceId2.getIdPart(), resourceId3.getIdPart());
+		assertThat(resourceId3.getIdPart()).isNotEqualTo(resourceId2.getIdPart());
 		actual = myPatientDao.read(resourceId3, mySrd);
 		assertEquals("1", actual.getIdElement().getVersionIdPart());
 		assertEquals("http://foo", actual.getIdentifierFirstRep().getSystem());
@@ -598,7 +621,7 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		// First pass (resource doesn't already exist)
 
 		outcome = mySystemDao.transaction(mySrd, createBundleWithDeleteAndUpdateOnSameResource(myFhirContext));
-		assertEquals(null, outcome.getEntry().get(0).getResponse().getLocation());
+		assertNull(outcome.getEntry().get(0).getResponse().getLocation());
 		assertEquals("204 No Content", outcome.getEntry().get(0).getResponse().getStatus());
 		assertEquals("Patient/P/_history/1", outcome.getEntry().get(1).getResponse().getLocation());
 		assertEquals("201 Created", outcome.getEntry().get(1).getResponse().getStatus());
@@ -643,6 +666,30 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		assertEquals("http://tag", actual.getMeta().getTagFirstRep().getSystem());
 
 
+	}
+
+
+	/**
+	 * See #5110
+	 */
+	@Test
+	public void testTransactionWithMissingSystem() {
+        BundleBuilder bb = new BundleBuilder(myFhirContext);
+		Patient patient = new Patient();
+		patient.setId(IdType.newRandomUuid());
+
+		// The identifier has a system URI that has no value, only an extension
+		UriType system = new UriType();
+		system.addExtension("http://hl7.org/fhir/StructureDefinition/data-absent-reason", new CodeType("unknown"));
+		patient.addIdentifier().setValue("m123").setSystemElement(system);
+
+		patient.addName().setText("Jane Doe");
+		bb.addTransactionCreateEntry(patient);
+        Bundle inputBundle = bb.getBundleTyped();
+
+		Bundle outputBundle = mySystemDao.transaction(mySrd, inputBundle);
+
+		assertThat(outputBundle.getEntry().get(0).getResponse().getLocation()).matches("Patient/[0-9]+/_history/1");
 	}
 
 

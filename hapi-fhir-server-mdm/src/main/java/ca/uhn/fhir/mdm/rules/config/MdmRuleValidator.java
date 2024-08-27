@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -136,7 +136,10 @@ public class MdmRuleValidator implements IMdmRuleValidator {
 
 	private void validateSearchParams(MdmRulesJson theMdmRulesJson) {
 		ourLog.info("Validating search parameters {}", theMdmRulesJson.getCandidateSearchParams());
-
+		if (theMdmRulesJson.getCandidateSearchParams().isEmpty()) {
+			ourLog.warn("No candidate search parameter was found. Defining candidate search parameter is strongly "
+					+ "recommended for better performance of MDM");
+		}
 		for (MdmResourceSearchParamJson searchParams : theMdmRulesJson.getCandidateSearchParams()) {
 			searchParams
 					.iterator()

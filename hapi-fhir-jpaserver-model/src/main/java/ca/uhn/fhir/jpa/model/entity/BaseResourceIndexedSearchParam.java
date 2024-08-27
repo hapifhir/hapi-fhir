@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,40 +22,24 @@ package ca.uhn.fhir.jpa.model.entity;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.util.SearchParamHash;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.util.UrlUtil;
-import com.google.common.base.Charsets;
-import com.google.common.hash.HashCode;
-import com.google.common.hash.HashFunction;
-import com.google.common.hash.Hasher;
-import com.google.common.hash.Hashing;
+import jakarta.persistence.Column;
+import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import jakarta.persistence.Transient;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField;
 
 import java.util.Date;
 import java.util.List;
-import javax.persistence.Column;
-import javax.persistence.MappedSuperclass;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.Transient;
 
 @MappedSuperclass
 public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 	static final int MAX_SP_NAME = 100;
-	/**
-	 * Don't change this without careful consideration. You will break existing hashes!
-	 */
-	private static final HashFunction HASH_FUNCTION = Hashing.murmur3_128(0);
-
-	/**
-	 * Don't make this public 'cause nobody better be able to modify it!
-	 */
-	private static final byte[] DELIMITER_BYTES = "|".getBytes(Charsets.UTF_8);
-
 	private static final long serialVersionUID = 1L;
 
 	@GenericField
@@ -63,18 +47,26 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 	private boolean myMissing = false;
 
 	@FullTextField
-	@Column(name = "SP_NAME", length = MAX_SP_NAME, nullable = false)
+	@Column(name = "SP_NAME", length = MAX_SP_NAME)
 	private String myParamName;
 
 	@Column(name = "RES_ID", insertable = false, updatable = false, nullable = false)
 	private Long myResourcePid;
 
 	@FullTextField
-	@Column(name = "RES_TYPE", updatable = false, nullable = false, length = Constants.MAX_RESOURCE_NAME_LENGTH)
+	@Column(name = "RES_TYPE", length = Constants.MAX_RESOURCE_NAME_LENGTH)
 	private String myResourceType;
 
+	/**
+	 * Composite of resourceType, paramName, and partition info if configured.
+	 * Combined with the various date fields for a query.
+	 * Nullable to allow optimized storage.
+	 */
+	@Column(name = "HASH_IDENTITY", nullable = true)
+	protected Long myHashIdentity;
+
 	@GenericField
-	@Column(name = "SP_UPDATED", nullable = true) // TODO: make this false after HAPI 2.3
+	@Column(name = "SP_UPDATED", nullable = true)
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date myUpdated;
 
@@ -98,6 +90,28 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 		}
 	}
 
+	/**
+	 * Restore SP_NAME without clearing hashes
+	 */
+	public void restoreParamName(String theParamName) {
+		if (myParamName == null) {
+			myParamName = theParamName;
+		}
+	}
+
+	/**
+	 * Set SP_NAME, RES_TYPE, SP_UPDATED to null without clearing hashes
+	 */
+	public void optimizeIndexStorage() {
+		myParamName = null;
+		myResourceType = null;
+		myUpdated = null;
+	}
+
+	public boolean isIndexStorageOptimized() {
+		return myParamName == null || myResourceType == null || myUpdated == null;
+	}
+
 	// MB pushed these down to the individual SP classes so we could name the FK in the join annotation
 	/**
 	 * Get the Resource this SP indexes
@@ -111,6 +125,7 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 		BaseResourceIndexedSearchParam source = (BaseResourceIndexedSearchParam) theSource;
 		myMissing = source.myMissing;
 		myParamName = source.myParamName;
+		myResourceType = source.myResourceType;
 		myUpdated = source.myUpdated;
 		myStorageSettings = source.myStorageSettings;
 		myPartitionSettings = source.myPartitionSettings;
@@ -127,6 +142,14 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 
 	public void setResourceType(String theResourceType) {
 		myResourceType = theResourceType;
+	}
+
+	public void setHashIdentity(Long theHashIdentity) {
+		myHashIdentity = theHashIdentity;
+	}
+
+	public Long getHashIdentity() {
+		return myHashIdentity;
 	}
 
 	public Date getUpdated() {
@@ -184,7 +207,8 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 			RequestPartitionId theRequestPartitionId,
 			String theResourceType,
 			String theParamName) {
-		return hash(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName);
+		return SearchParamHash.hashSearchParam(
+				thePartitionSettings, theRequestPartitionId, theResourceType, theParamName);
 	}
 
 	public static long calculateHashIdentity(
@@ -200,42 +224,6 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 			values[i + 2] = theAdditionalValues.get(i);
 		}
 
-		return hash(thePartitionSettings, theRequestPartitionId, values);
-	}
-
-	/**
-	 * Applies a fast and consistent hashing algorithm to a set of strings
-	 */
-	static long hash(
-			PartitionSettings thePartitionSettings, RequestPartitionId theRequestPartitionId, String... theValues) {
-		Hasher hasher = HASH_FUNCTION.newHasher();
-
-		if (thePartitionSettings.isPartitioningEnabled()
-				&& thePartitionSettings.isIncludePartitionInSearchHashes()
-				&& theRequestPartitionId != null) {
-			if (theRequestPartitionId.getPartitionIds().size() > 1) {
-				throw new InternalErrorException(Msg.code(1527)
-						+ "Can not search multiple partitions when partitions are included in search hashes");
-			}
-			Integer partitionId = theRequestPartitionId.getFirstPartitionIdOrNull();
-			if (partitionId != null) {
-				hasher.putInt(partitionId);
-			}
-		}
-
-		for (String next : theValues) {
-			if (next == null) {
-				hasher.putByte((byte) 0);
-			} else {
-				next = UrlUtil.escapeUrlParam(next);
-				byte[] bytes = next.getBytes(Charsets.UTF_8);
-				hasher.putBytes(bytes);
-			}
-			hasher.putBytes(DELIMITER_BYTES);
-		}
-
-		HashCode hashCode = hasher.hash();
-		long retVal = hashCode.asLong();
-		return retVal;
+		return SearchParamHash.hashSearchParam(thePartitionSettings, theRequestPartitionId, values);
 	}
 }

@@ -36,7 +36,12 @@ import ca.uhn.fhir.to.model.ResourceRequest;
 import ca.uhn.fhir.to.model.TransactionRequest;
 import ca.uhn.fhir.to.util.HfqlRenderingUtil;
 import ca.uhn.fhir.util.StopWatch;
+import ca.uhn.fhir.util.UrlUtil;
 import com.google.gson.stream.JsonWriter;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.CapabilityStatement;
 import org.hl7.fhir.dstu3.model.CapabilityStatement.CapabilityStatementRestComponent;
@@ -61,10 +66,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
 
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.DIFF_OPERATION_NAME;
 import static ca.uhn.fhir.util.UrlUtil.sanitizeUrlPart;
@@ -279,7 +280,7 @@ public class Controller extends BaseController {
 			theModel.put("errorMsg", toDisplayError(e.toString(), e));
 			return "resource";
 		}
-		String id = sanitizeUrlPart(defaultString(theServletRequest.getParameter("id")));
+		String id = sanitizeUrlPart(UrlUtil.unescape(theServletRequest.getParameter("id")));
 		if (StringUtils.isBlank(id)) {
 			populateModelForResource(theServletRequest, theRequest, theModel);
 			theModel.put("errorMsg", toDisplayError("No ID specified", null));
@@ -287,7 +288,7 @@ public class Controller extends BaseController {
 		}
 		ResultType returnsResource = ResultType.RESOURCE;
 
-		String versionId = sanitizeUrlPart(defaultString(theServletRequest.getParameter("vid")));
+		String versionId = sanitizeUrlPart(UrlUtil.unescape((theServletRequest.getParameter("vid"))));
 		String outcomeDescription;
 		if (StringUtils.isBlank(versionId)) {
 			versionId = null;
@@ -800,9 +801,9 @@ public class Controller extends BaseController {
 			final BindingResult theBindingResult,
 			final ModelMap theModel) {
 
-		String instanceType = theReq.getParameter("instanceType");
-		String instanceId = theReq.getParameter("instanceId");
-		String operationName = theReq.getParameter("operationName");
+		String instanceType = sanitizeUrlPart((UrlUtil.unescape(theReq.getParameter("instanceType"))));
+		String instanceId = sanitizeUrlPart((UrlUtil.unescape(theReq.getParameter("instanceId"))));
+		String operationName = sanitizeUrlPart((UrlUtil.unescape(theReq.getParameter("operationName"))));
 
 		boolean finished = false;
 

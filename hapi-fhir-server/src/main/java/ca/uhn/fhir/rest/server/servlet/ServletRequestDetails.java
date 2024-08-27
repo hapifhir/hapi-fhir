@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,11 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import com.google.common.collect.ListMultimap;
+import com.google.common.collect.MultimapBuilder;
+import jakarta.annotation.Nonnull;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
 
@@ -45,9 +50,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.zip.GZIPInputStream;
-import javax.annotation.Nonnull;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
@@ -59,6 +61,7 @@ public class ServletRequestDetails extends RequestDetails {
 	private RestfulServer myServer;
 	private HttpServletRequest myServletRequest;
 	private HttpServletResponse myServletResponse;
+	private ListMultimap<String, String> myHeaders;
 
 	/**
 	 * Constructor for testing only
@@ -129,15 +132,61 @@ public class ServletRequestDetails extends RequestDetails {
 
 	@Override
 	public String getHeader(String name) {
+		// For efficiency, we only make a copy of the request headers if we need to
+		// modify them
+		if (myHeaders != null) {
+			List<String> values = myHeaders.get(name);
+			if (values.isEmpty()) {
+				return null;
+			} else {
+				return values.get(0);
+			}
+		}
 		return getServletRequest().getHeader(name);
 	}
 
 	@Override
 	public List<String> getHeaders(String name) {
+		// For efficiency, we only make a copy of the request headers if we need to
+		// modify them
+		if (myHeaders != null) {
+			return myHeaders.get(name);
+		}
 		Enumeration<String> headers = getServletRequest().getHeaders(name);
 		return headers == null
 				? Collections.emptyList()
 				: Collections.list(getServletRequest().getHeaders(name));
+	}
+
+	@Override
+	public void addHeader(String theName, String theValue) {
+		initHeaders();
+		myHeaders.put(theName, theValue);
+	}
+
+	@Override
+	public void setHeaders(String theName, List<String> theValue) {
+		initHeaders();
+		myHeaders.removeAll(theName);
+		myHeaders.putAll(theName, theValue);
+	}
+
+	private void initHeaders() {
+		if (myHeaders == null) {
+			// Make sure we are case-insensitive for header names
+			myHeaders = MultimapBuilder.treeKeys(String.CASE_INSENSITIVE_ORDER)
+					.arrayListValues()
+					.build();
+
+			Enumeration<String> headerNames = getServletRequest().getHeaderNames();
+			while (headerNames.hasMoreElements()) {
+				String nextName = headerNames.nextElement();
+				Enumeration<String> values = getServletRequest().getHeaders(nextName);
+				while (values.hasMoreElements()) {
+					myHeaders.put(nextName, values.nextElement());
+				}
+			}
+		}
 	}
 
 	@Override

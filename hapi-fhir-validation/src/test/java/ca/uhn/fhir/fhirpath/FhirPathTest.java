@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.TestUtil;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.HumanName;
@@ -11,17 +12,13 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import javax.annotation.Nonnull;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.endsWith;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
-public class FhirPathTest {
+public class FhirPathTest extends BaseValidationTestWithInlineMocks {
 
 	@ParameterizedTest
 	@MethodSource("provideContexts")
@@ -29,7 +26,7 @@ public class FhirPathTest {
 		IBaseResource resource = createPatientResourceWithTwoNames(theFhirContext);
 		IFhirPath fp = theFhirContext.newFhirPath();
 		List<IBase> names = fp.evaluate(resource, "Patient.name", IBase.class);
-		assertEquals(2, names.size());
+		assertThat(names).hasSize(2);
 	}
 
 	@SuppressWarnings("deprecation")
@@ -40,7 +37,7 @@ public class FhirPathTest {
 
 		IFhirPath fp = theFhirContext.newFluentPath();
 		List<IBase> names = fp.evaluate(p, "Patient.name", IBase.class);
-		assertEquals(2, names.size());
+		assertThat(names).hasSize(2);
 	}
 
 	@ParameterizedTest
@@ -50,7 +47,7 @@ public class FhirPathTest {
 
 		IFhirPath fp = theFhirContext.newFhirPath();
 		List<HumanName> names = fp.evaluate(p, "Patient.nameFOO", HumanName.class);
-		assertEquals(0, names.size());
+		assertThat(names).isEmpty();
 	}
 
 	@ParameterizedTest
@@ -62,7 +59,7 @@ public class FhirPathTest {
 		try {
 			fp.evaluate(p, "Patient....nameFOO", HumanName.class);
 		} catch (FhirPathExecutionException e) {
-			assertThat(e.getMessage(), containsString("termination at unexpected token"));
+			assertThat(e.getMessage()).contains("termination at unexpected token");
 		}
 	}
 
@@ -78,8 +75,7 @@ public class FhirPathTest {
 			fp.evaluate(p, "Patient.name", stringType);
 		} catch (FhirPathExecutionException e) {
 			String expected = "FhirPath expression returned unexpected type HumanName - Expected " + stringType.getName();
-			assertThat(e.getMessage(),
-				endsWith(expected));
+			assertThat(e.getMessage()).endsWith(expected);
 		}
 	}
 

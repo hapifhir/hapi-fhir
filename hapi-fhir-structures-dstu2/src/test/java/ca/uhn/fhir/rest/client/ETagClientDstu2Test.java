@@ -19,7 +19,6 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicStatusLine;
-import org.hamcrest.core.StringContains;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,9 +29,8 @@ import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
 import java.io.StringReader;
 import java.nio.charset.Charset;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -132,8 +130,7 @@ public class ETagClientDstu2Test {
 				.resource(Patient.class)
 				.withId(new IdDt("Patient/1234"))
 				.execute();
-			fail();
-		} catch (NotModifiedException e) {
+			fail();		} catch (NotModifiedException e) {
 			// good!
 		}
 		//@formatter:on
@@ -150,7 +147,7 @@ public class ETagClientDstu2Test {
 			.ifVersionMatches("9876").returnResource(expected)
 			.execute();
 		//@formatter:on
-		assertSame(expected, response);
+		assertThat(response).isSameAs(expected);
 		assertEquals("http://example.com/fhir/Patient/1234", capt.getAllValues().get(count).getURI().toString());
 		assertEquals("\"9876\"", capt.getAllValues().get(count).getHeaders(Constants.HEADER_IF_NONE_MATCH_LC)[0].getValue());
 		count++;
@@ -213,8 +210,7 @@ public class ETagClientDstu2Test {
 				.resource(getResource())
 				.withId(new IdDt("Patient/1234/_history/9876"))
 				.execute();
-			fail();
-		} catch (PreconditionFailedException e) {
+			fail();		} catch (PreconditionFailedException e) {
 			// good
 		}
 		//@formatter:on
@@ -231,8 +227,7 @@ public class ETagClientDstu2Test {
 				.update()
 				.resource(resource)
 				.execute();
-			fail();
-		} catch (PreconditionFailedException e) {
+			fail();		} catch (PreconditionFailedException e) {
 			// good
 		}
 		//@formatter:on
@@ -262,22 +257,22 @@ public class ETagClientDstu2Test {
 		int count = 0;
 
 		Patient response = client.read().resource(Patient.class).withId(new IdDt("Patient/1234")).execute();
-		assertThat(response.getNameFirstRep().getFamilyAsSingleString(), StringContains.containsString("Cardinal"));
+		assertThat(response.getNameFirstRep().getFamilyAsSingleString()).contains("Cardinal");
 		assertEquals("http://example.com/fhir/Patient/1234", capt.getAllValues().get(count++).getURI().toString());
 
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 		response = (Patient) client.read().resource("Patient").withId("1234").execute();
-		assertThat(response.getNameFirstRep().getFamilyAsSingleString(), StringContains.containsString("Cardinal"));
+		assertThat(response.getNameFirstRep().getFamilyAsSingleString()).contains("Cardinal");
 		assertEquals("http://example.com/fhir/Patient/1234", capt.getAllValues().get(count++).getURI().toString());
 
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 		response = client.read().resource(Patient.class).withIdAndVersion("1234", "22").execute();
-		assertThat(response.getNameFirstRep().getFamilyAsSingleString(), StringContains.containsString("Cardinal"));
+		assertThat(response.getNameFirstRep().getFamilyAsSingleString()).contains("Cardinal");
 		assertEquals("http://example.com/fhir/Patient/1234/_history/22", capt.getAllValues().get(count++).getURI().toString());
 
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 		response = client.read().resource(Patient.class).withUrl("http://foo/Patient/22").execute();
-		assertThat(response.getNameFirstRep().getFamilyAsSingleString(), StringContains.containsString("Cardinal"));
+		assertThat(response.getNameFirstRep().getFamilyAsSingleString()).contains("Cardinal");
 		assertEquals("http://foo/Patient/22", capt.getAllValues().get(count++).getURI().toString());
 
 	}

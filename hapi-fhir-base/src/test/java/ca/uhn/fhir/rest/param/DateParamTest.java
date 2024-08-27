@@ -14,10 +14,11 @@ import java.util.TimeZone;
 import static ca.uhn.fhir.rest.param.ParamPrefixEnum.EQUAL;
 import static ca.uhn.fhir.rest.param.ParamPrefixEnum.NOT_EQUAL;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.endsWith;
-import static org.hamcrest.Matchers.startsWith;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.fail;
+
 
 public class DateParamTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DateParamTest.class);
@@ -30,9 +31,9 @@ public class DateParamTest {
 		// too bad value is a j.u.Date instead of a new JSR-310 type
 		// DataParam parses using default tz, so go backwards.
 		ZonedDateTime zonedDateTime = input.getValue().toInstant().atZone(ZoneId.systemDefault());
-		assertEquals(2020,zonedDateTime.getYear());
-		assertEquals(Month.JANUARY,zonedDateTime.getMonth());
-		assertEquals(1,zonedDateTime.getDayOfMonth());
+		assertEquals(2020, zonedDateTime.getYear());
+		assertEquals(Month.JANUARY, zonedDateTime.getMonth());
+		assertEquals(1, zonedDateTime.getDayOfMonth());
 		assertNull(input.getPrefix());
 	}
 
@@ -145,8 +146,8 @@ public class DateParamTest {
 		InstantDt dt = new InstantDt(new Date(param.getValue().getTime()));
 		dt.setTimeZone(TimeZone.getTimeZone("America/Toronto"));
 		ourLog.debug("POST: " + dt.getValue());
-		assertThat(dt.getValueAsString(), startsWith("2016-06-09T"));
-		assertThat(dt.getValueAsString(), endsWith("8:00.000-04:00"));
+		assertThat(dt.getValueAsString()).startsWith("2016-06-09T");
+		assertThat(dt.getValueAsString()).endsWith("8:00.000-04:00");
 	}
 
 	@Test

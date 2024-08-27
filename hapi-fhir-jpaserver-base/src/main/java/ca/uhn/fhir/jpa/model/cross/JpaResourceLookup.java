@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,18 +20,26 @@
 package ca.uhn.fhir.jpa.model.cross;
 
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 
 import java.util.Date;
 
-public class JpaResourceLookup implements IResourceLookup {
+public class JpaResourceLookup implements IResourceLookup<JpaPid> {
+
 	private final String myResourceType;
 	private final Long myResourcePid;
 	private final Date myDeletedAt;
+	private final PartitionablePartitionId myPartitionablePartitionId;
 
-	public JpaResourceLookup(String theResourceType, Long theResourcePid, Date theDeletedAt) {
+	public JpaResourceLookup(
+			String theResourceType,
+			Long theResourcePid,
+			Date theDeletedAt,
+			PartitionablePartitionId thePartitionablePartitionId) {
 		myResourceType = theResourceType;
 		myResourcePid = theResourcePid;
 		myDeletedAt = theDeletedAt;
+		myPartitionablePartitionId = thePartitionablePartitionId;
 	}
 
 	@Override
@@ -46,6 +54,9 @@ public class JpaResourceLookup implements IResourceLookup {
 
 	@Override
 	public JpaPid getPersistentId() {
-		return JpaPid.fromId(myResourcePid);
+		JpaPid jpaPid = JpaPid.fromId(myResourcePid);
+		jpaPid.setPartitionablePartitionId(myPartitionablePartitionId);
+
+		return jpaPid;
 	}
 }

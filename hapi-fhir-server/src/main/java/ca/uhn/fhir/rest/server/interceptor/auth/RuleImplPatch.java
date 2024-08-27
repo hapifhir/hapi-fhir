@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,11 @@ import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.Set;
 
+/**
+ * @deprecated Users should be instead be granted more granular write permissions that cover PATCH operations.
+ * @since 7.2.0
+ */
+@Deprecated
 class RuleImplPatch extends BaseRule {
 	private boolean myAllRequests;
 

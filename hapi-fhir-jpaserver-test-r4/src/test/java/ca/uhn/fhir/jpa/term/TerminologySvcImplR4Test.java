@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.term;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
@@ -27,7 +29,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -35,15 +37,13 @@ import java.util.Optional;
 import java.util.Set;
 
 import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+
 
 public class TerminologySvcImplR4Test extends BaseTermR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(TerminologySvcImplR4Test.class);
@@ -369,10 +369,10 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
 
 		Set<TermConcept> codes = myTermSvc.findCodesBelow(id.getIdPartAsLong(), id.getVersionIdPartAsLong(), "A");
-		assertThat(toCodes(codes), containsInAnyOrder("A"));
+		assertThat(toCodes(codes)).containsExactlyInAnyOrder("A");
 
 		codes = myTermSvc.findCodesBelow(id.getIdPartAsLong(), id.getVersionIdPartAsLong(), "B");
-		assertThat(toCodes(codes), containsInAnyOrder("B"));
+		assertThat(toCodes(codes)).containsExactlyInAnyOrder("B");
 
 		runInTransaction(() -> {
 			List<TermCodeSystemVersion> termCodeSystemVersions = myTermCodeSystemVersionDao.findAll();
@@ -380,7 +380,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 			TermCodeSystemVersion termCodeSystemVersion_1 = termCodeSystemVersions.get(0);
 			assertEquals(termCodeSystemVersion_1.getConcepts().size(), 2);
 			Set<TermConcept> termConcepts = new HashSet<>(termCodeSystemVersion_1.getConcepts());
-			assertThat(toCodes(termConcepts), containsInAnyOrder("A", "B"));
+			assertThat(toCodes(termConcepts)).containsExactlyInAnyOrder("A", "B");
 
 			TermCodeSystem termCodeSystem = myTermCodeSystemDao.findByResourcePid(id.getIdPartAsLong());
 			assertEquals("1", termCodeSystem.getCurrentVersion().getCodeSystemVersionId());
@@ -393,7 +393,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 
 		IIdType id_v2 = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
 		codes = myTermSvc.findCodesBelow(id_v2.getIdPartAsLong(), id_v2.getVersionIdPartAsLong(), "C");
-		assertThat(toCodes(codes), containsInAnyOrder("C"));
+		assertThat(toCodes(codes)).containsExactlyInAnyOrder("C");
 
 		runInTransaction(() -> {
 			List<TermCodeSystemVersion> termCodeSystemVersions_updated = myTermCodeSystemVersionDao.findAll();
@@ -401,7 +401,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 			TermCodeSystemVersion termCodeSystemVersion_2 = termCodeSystemVersions_updated.get(1);
 			assertEquals(termCodeSystemVersion_2.getConcepts().size(), 3);
 			Set<TermConcept> termConcepts_updated = new HashSet<>(termCodeSystemVersion_2.getConcepts());
-			assertThat(toCodes(termConcepts_updated), containsInAnyOrder("A", "B", "C"));
+			assertThat(toCodes(termConcepts_updated)).containsExactlyInAnyOrder("A", "B", "C");
 
 			TermCodeSystem termCodeSystem = myTermCodeSystemDao.findByResourcePid(id_v2.getIdPartAsLong());
 			assertEquals("2", termCodeSystem.getCurrentVersion().getCodeSystemVersionId());
@@ -424,10 +424,10 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
 
 		Set<TermConcept> codes = myTermSvc.findCodesBelow(id.getIdPartAsLong(), id.getVersionIdPartAsLong(), "A");
-		assertThat(toCodes(codes), containsInAnyOrder("A"));
+		assertThat(toCodes(codes)).containsExactlyInAnyOrder("A");
 
 		codes = myTermSvc.findCodesBelow(id.getIdPartAsLong(), id.getVersionIdPartAsLong(), "B");
-		assertThat(toCodes(codes), containsInAnyOrder("B"));
+		assertThat(toCodes(codes)).containsExactlyInAnyOrder("B");
 
 		runInTransaction(() -> {
 			List<TermCodeSystemVersion> termCodeSystemVersions = myTermCodeSystemVersionDao.findAll();
@@ -435,7 +435,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 			TermCodeSystemVersion termCodeSystemVersion_1 = termCodeSystemVersions.get(0);
 			assertEquals(termCodeSystemVersion_1.getConcepts().size(), 2);
 			Set<TermConcept> termConcepts = new HashSet<>(termCodeSystemVersion_1.getConcepts());
-			assertThat(toCodes(termConcepts), containsInAnyOrder("A", "B"));
+			assertThat(toCodes(termConcepts)).containsExactlyInAnyOrder("A", "B");
 
 			TermCodeSystem termCodeSystem = myTermCodeSystemDao.findByResourcePid(id.getIdPartAsLong());
 			assertEquals("1", termCodeSystem.getCurrentVersion().getCodeSystemVersionId());
@@ -454,7 +454,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 			TermCodeSystemVersion termCodeSystemVersion_2 = termCodeSystemVersions_updated.get(0);
 			assertEquals(termCodeSystemVersion_2.getConcepts().size(), 2);
 			Set<TermConcept> termConcepts_updated = new HashSet<>(termCodeSystemVersion_2.getConcepts());
-			assertThat(toCodes(termConcepts_updated), containsInAnyOrder("A", "B"));
+			assertThat(toCodes(termConcepts_updated)).containsExactlyInAnyOrder("A", "B");
 
 			TermCodeSystem termCodeSystem = myTermCodeSystemDao.findByResourcePid(id_v2.getIdPartAsLong());
 			assertEquals("2", termCodeSystem.getCurrentVersion().getCodeSystemVersionId());
@@ -483,7 +483,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 			myTerminologyDeferredStorageSvc.saveAllDeferred();
 			myBatchJobHelper.awaitAllJobsOfJobDefinitionIdToComplete(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
 			return myTerminologyDeferredStorageSvc.isStorageQueueEmpty(true);
-			}, equalTo(true));
+			});
 
 		IValidationSupport.CodeValidationResult outcome;
 
@@ -527,10 +527,10 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
 
 		Set<TermConcept> codes = myTermSvc.findCodesBelow(id.getIdPartAsLong(), id.getVersionIdPartAsLong(), "A");
-		assertThat(toCodes(codes), containsInAnyOrder("A"));
+		assertThat(toCodes(codes)).containsExactlyInAnyOrder("A");
 
 		codes = myTermSvc.findCodesBelow(id.getIdPartAsLong(), id.getVersionIdPartAsLong(), "B");
-		assertThat(toCodes(codes), containsInAnyOrder("B"));
+		assertThat(toCodes(codes)).containsExactlyInAnyOrder("B");
 
 		runInTransaction(() -> {
 			List<TermCodeSystemVersion> termCodeSystemVersions = myTermCodeSystemVersionDao.findAll();
@@ -538,7 +538,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 			TermCodeSystemVersion termCodeSystemVersion_1 = termCodeSystemVersions.get(0);
 			assertEquals(termCodeSystemVersion_1.getConcepts().size(), 2);
 			Set<TermConcept> termConcepts = new HashSet<>(termCodeSystemVersion_1.getConcepts());
-			assertThat(toCodes(termConcepts), containsInAnyOrder("A", "B"));
+			assertThat(toCodes(termConcepts)).containsExactlyInAnyOrder("A", "B");
 
 			TermCodeSystem termCodeSystem = myTermCodeSystemDao.findByResourcePid(id.getIdPartAsLong());
 			assertEquals("1", termCodeSystem.getCurrentVersion().getCodeSystemVersionId());
@@ -556,7 +556,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 			TermCodeSystemVersion termCodeSystemVersion_2 = termCodeSystemVersions_updated.get(0);
 			assertEquals(termCodeSystemVersion_2.getConcepts().size(), 2);
 			Set<TermConcept> termConcepts_updated = new HashSet<>(termCodeSystemVersion_2.getConcepts());
-			assertThat(toCodes(termConcepts_updated), containsInAnyOrder("A", "B"));
+			assertThat(toCodes(termConcepts_updated)).containsExactlyInAnyOrder("A", "B");
 
 			TermCodeSystem termCodeSystem = myTermCodeSystemDao.findByResourcePid(id.getIdPartAsLong());
 			assertEquals("1", termCodeSystem.getCurrentVersion().getCodeSystemVersionId());

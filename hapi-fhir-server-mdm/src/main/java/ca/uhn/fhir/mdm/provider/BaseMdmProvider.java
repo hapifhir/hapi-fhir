@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,12 @@ package ca.uhn.fhir.mdm.provider;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.mdm.api.IMdmControllerSvc;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.api.paging.MdmPageLinkBuilder;
 import ca.uhn.fhir.mdm.api.paging.MdmPageLinkTuple;
 import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
+import ca.uhn.fhir.mdm.api.params.MdmHistorySearchParameters;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.model.mdmevents.MdmLinkJson;
 import ca.uhn.fhir.mdm.model.mdmevents.MdmLinkWithRevisionJson;
@@ -34,6 +36,8 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.ParametersUtil;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -42,18 +46,21 @@ import org.springframework.data.domain.Page;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 public abstract class BaseMdmProvider {
 
 	protected final FhirContext myFhirContext;
+	protected final IMdmControllerSvc myMdmControllerSvc;
 
-	public BaseMdmProvider(FhirContext theFhirContext) {
+	public BaseMdmProvider(FhirContext theFhirContext, IMdmControllerSvc theMdmControllerSvc) {
 		myFhirContext = theFhirContext;
+		myMdmControllerSvc = theMdmControllerSvc;
 	}
 
 	protected void validateMergeParameters(
@@ -214,7 +221,9 @@ public abstract class BaseMdmProvider {
 	}
 
 	protected void parametersFromMdmLinkRevisions(
-			IBaseParameters theRetVal, List<MdmLinkWithRevisionJson> theMdmLinkRevisions) {
+			IBaseParameters theRetVal,
+			List<MdmLinkWithRevisionJson> theMdmLinkRevisions,
+			ServletRequestDetails theRequestDetails) {
 		if (theMdmLinkRevisions.isEmpty()) {
 			final IBase resultPart = ParametersUtil.addParameterToParameters(
 					myFhirContext, theRetVal, "historical links not found for query parameters");
@@ -223,26 +232,72 @@ public abstract class BaseMdmProvider {
 					myFhirContext, resultPart, "theResults", "historical links not found for query parameters");
 		}
 
-		theMdmLinkRevisions.forEach(mdmLinkRevision -> parametersFromMdmLinkRevision(theRetVal, mdmLinkRevision));
+		theMdmLinkRevisions.forEach(mdmLinkRevision -> parametersFromMdmLinkRevision(
+				theRetVal,
+				mdmLinkRevision,
+				findInitialMatchResult(theMdmLinkRevisions, mdmLinkRevision, theRequestDetails)));
 	}
 
-	private void parametersFromMdmLinkRevision(IBaseParameters retVal, MdmLinkWithRevisionJson mdmLinkRevision) {
-		final IBase resultPart = ParametersUtil.addParameterToParameters(myFhirContext, retVal, "historical link");
-		final MdmLinkJson mdmLink = mdmLinkRevision.getMdmLink();
+	private MdmMatchResultEnum findInitialMatchResult(
+			List<MdmLinkWithRevisionJson> theRevisionList,
+			MdmLinkWithRevisionJson theToMatch,
+			ServletRequestDetails theRequestDetails) {
+		String sourceId = theToMatch.getMdmLink().getSourceId();
+		String goldenId = theToMatch.getMdmLink().getGoldenResourceId();
+
+		// In the REDIRECT case, both the goldenResourceId and sourceResourceId fields are actually both
+		// golden resources. Because of this, based on our history query, it's possible not all links
+		// involving that golden resource will show up in the results (eg. query for goldenResourceId = GR/1
+		// but sourceResourceId = GR/1 in the link history). Hence, we should re-query to find the initial
+		// match result.
+		if (theToMatch.getMdmLink().getMatchResult() == MdmMatchResultEnum.REDIRECT) {
+			MdmHistorySearchParameters params = new MdmHistorySearchParameters()
+					.setSourceIds(List.of(sourceId, goldenId))
+					.setGoldenResourceIds(List.of(sourceId, goldenId));
+
+			List<MdmLinkWithRevisionJson> result = myMdmControllerSvc.queryLinkHistory(params, theRequestDetails);
+			// If there is a POSSIBLE_DUPLICATE, a user merged two resources with *pre-existing* POSSIBLE_DUPLICATE link
+			// so the initial match result is POSSIBLE_DUPLICATE
+			// If no POSSIBLE_DUPLICATE, a user merged two *unlinked* GRs, so the initial match result is REDIRECT
+			return containsPossibleDuplicate(result)
+					? MdmMatchResultEnum.POSSIBLE_DUPLICATE
+					: MdmMatchResultEnum.REDIRECT;
+		}
+
+		// Get first match result with given source and golden ID
+		Optional<MdmLinkWithRevisionJson> theEarliestRevision = theRevisionList.stream()
+				.filter(revision -> revision.getMdmLink().getSourceId().equals(sourceId))
+				.filter(revision -> revision.getMdmLink().getGoldenResourceId().equals(goldenId))
+				.min(Comparator.comparing(MdmLinkWithRevisionJson::getRevisionNumber));
+
+		return theEarliestRevision.isPresent()
+				? theEarliestRevision.get().getMdmLink().getMatchResult()
+				: theToMatch.getMdmLink().getMatchResult();
+	}
+
+	private static boolean containsPossibleDuplicate(List<MdmLinkWithRevisionJson> result) {
+		return result.stream().anyMatch(t -> t.getMdmLink().getMatchResult() == MdmMatchResultEnum.POSSIBLE_DUPLICATE);
+	}
+
+	private void parametersFromMdmLinkRevision(
+			IBaseParameters theRetVal,
+			MdmLinkWithRevisionJson theMdmLinkRevision,
+			MdmMatchResultEnum theInitialAutoResult) {
+		final IBase resultPart = ParametersUtil.addParameterToParameters(myFhirContext, theRetVal, "historical link");
+		final MdmLinkJson mdmLink = theMdmLinkRevision.getMdmLink();
 
 		ParametersUtil.addPartString(myFhirContext, resultPart, "goldenResourceId", mdmLink.getGoldenResourceId());
 		ParametersUtil.addPartString(
 				myFhirContext,
 				resultPart,
 				"revisionTimestamp",
-				mdmLinkRevision.getRevisionTimestamp().toString());
+				theMdmLinkRevision.getRevisionTimestamp().toString());
 		ParametersUtil.addPartString(myFhirContext, resultPart, "sourceResourceId", mdmLink.getSourceId());
 		ParametersUtil.addPartString(
 				myFhirContext,
 				resultPart,
 				"matchResult",
 				mdmLink.getMatchResult().name());
-		ParametersUtil.addPartDecimal(myFhirContext, resultPart, "score", mdmLink.getScore());
 		ParametersUtil.addPartString(
 				myFhirContext, resultPart, "linkSource", mdmLink.getLinkSource().name());
 		ParametersUtil.addPartBoolean(myFhirContext, resultPart, "eidMatch", mdmLink.getEidMatch());
@@ -253,6 +308,16 @@ public abstract class BaseMdmProvider {
 				mdmLink.getCreated().getTime());
 		ParametersUtil.addPartDecimal(myFhirContext, resultPart, "linkUpdated", (double)
 				mdmLink.getUpdated().getTime());
+
+		IBase matchResultMapSubpart = ParametersUtil.createPart(myFhirContext, resultPart, "matchResultMap");
+
+		IBase matchedRulesSubpart = ParametersUtil.createPart(myFhirContext, matchResultMapSubpart, "matchedRules");
+		for (Map.Entry<String, MdmMatchResultEnum> entry : mdmLink.getRule()) {
+			ParametersUtil.addPartString(myFhirContext, matchedRulesSubpart, "rule", entry.getKey());
+		}
+
+		ParametersUtil.addPartString(
+				myFhirContext, matchResultMapSubpart, "initialMatchResult", theInitialAutoResult.name());
 	}
 
 	protected void addPagingParameters(

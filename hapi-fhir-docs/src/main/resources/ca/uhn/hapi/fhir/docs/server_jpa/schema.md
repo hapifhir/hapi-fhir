@@ -85,6 +85,15 @@ The HFJ_RESOURCE table indicates a single resource of any type in the database. 
             </td>        
         </tr>
         <tr>
+            <td>FHIR_ID</td>
+            <td></td>
+            <td>String</td>
+            <td></td>
+            <td>
+                Contains the FHIR Resource id element.  Either the PID, or the client-assigned id. 
+            </td>        
+        </tr>
+        <tr>
             <td>HASH_SHA256</td>
             <td></td>
             <td>Long</td>
@@ -242,25 +251,6 @@ The complete raw contents of the resource is stored in either the `RES_TEXT` or 
         </tr>
     </tbody>
 </table>     
-
-<a name="HFJ_FORCED_ID"/>
-
-# HFJ_FORCED_ID: Client Assigned/Visible Resource IDs
-
-By default, the **HFJ_RESOURCE.RES_ID** column is used as the resource ID for all server-assigned IDs. For example, if a Patient resource is created in a completely empty database, it will be assigned the ID `Patient/1` by the server and RES_ID will have a value of 1.
-
-However, when client-assigned IDs are used, these may contain text values to allow a client to create an ID such
-as `Patient/ABC`. When a client-assigned ID is given to a resource, a row is created in the **HFJ_RESOURCE** table. When
-an **HFJ_FORCED_ID** row exists corresponding to the equivalent **HFJ_RESOURCE** row, the RES_ID value is no longer
-visible or usable by FHIR clients and it becomes purely an internal ID to the JPA server.
-
-If the server has been configured with
-a [Resource Server ID Strategy](/apidocs/hapi-fhir-storage/undefined/ca/uhn/fhir/jpa/api/config/JpaStorageSettings.html#setResourceServerIdStrategy(ca.uhn.fhir.jpa.api.config.JpaStorageSettings.IdStrategyEnum))
-of [UUID](/apidocs/hapi-fhir-storage/undefined/ca/uhn/fhir/jpa/api/config/JpaStorageSettings.IdStrategyEnum.html#UUID), or the
-server has been configured with
-a [Resource Client ID Strategy](/apidocs/hapi-fhir-storage/undefined/ca/uhn/fhir/jpa/api/config/JpaStorageSettings.html#setResourceClientIdStrategy(ca.uhn.fhir.jpa.api.config.JpaStorageSettings.ClientIdStrategyEnum))
-of [ANY](/apidocs/hapi-fhir-storage/undefined/ca/uhn/fhir/jpa/api/config/JpaStorageSettings.ClientIdStrategyEnum.html#ANY)
-the server will create a Forced ID for all resources (not only resources having textual IDs).
 
 ## Columns
 
@@ -453,7 +443,9 @@ In some configurations, the partition ID is also factored into the hashes.
 
 <img src="/hapi-fhir/docs/images/jpa_erd_search_indexes.svg" alt="Search Indexes" style="width: 100%; max-width: 900px;"/>
 
-## Columns
+<a name="HFJ_SPIDX_common"/>
+
+## Common Search Index Columns
 
 The following columns are common to **all HFJ_SPIDX_xxx tables**.
 
@@ -512,7 +504,7 @@ The following columns are common to **all HFJ_SPIDX_xxx tables**.
             <td>SP_NAME</td>
             <td></td>
             <td>String</td>
-            <td></td>
+            <td>Nullable</td>
             <td>
                 This is the name of the search parameter being indexed. 
             </td>        
@@ -521,9 +513,18 @@ The following columns are common to **all HFJ_SPIDX_xxx tables**.
             <td>RES_TYPE</td>
             <td></td>
             <td>String</td>
-            <td></td>
+            <td>Nullable</td>
             <td>
                 This is the name of the resource being indexed.
+            </td>        
+        </tr>
+        <tr>
+            <td>HASH_IDENTITY</td>
+            <td></td>
+            <td>Long</td>
+            <td></td>
+            <td>
+                A hash of SP_NAME and RES_TYPE.  Used to narrow the table to a specific SearchParameter during sorting, and some queries.
             </td>        
         </tr>
         <tr>
@@ -550,11 +551,14 @@ The following columns are common to **all HFJ_SPIDX_xxx tables**.
 
 # HFJ_SPIDX_DATE: Date Search Parameters
 
-For any FHIR Search Parameter of type *date* that generates a database index, a row in the *HFJ_SPIDX_DATE* table will be created.
+For any FHIR Search Parameter of type [*date*](https://www.hl7.org/fhir/search.html#date) that generates a database index, a row in the `HFJ_SPIDX_DATE` table will be created.
+Range queries with Date parameters (e.g. `Observation?date=ge2020-01-01`) will query the HASH_IDENTITY, SP_VALUE_LOW_DATE_ORDINAL and/or SP_VALUE_HIGH_DATE_ORDINAL columns.
+Range queries with DateTime parameters (e.g. `Observation?date=ge2021-01-01T10:30:00`) will query the HASH_IDENTITY, SP_VALUE_LOW and/or SP_VALUE_HIGH columns.
+Sorting is done by the SP_VALUE_LOW column.
 
 ## Columns
 
-The following columns are common to **all HFJ_SPIDX_xxx tables**.
+Note: This table has the columns listed below, but it also has all common columns listed above in [Common Search Index Columns](#HFJ_SPIDX_common).
 
 <table class="table table-striped table-condensed">
     <thead>
@@ -617,3 +621,436 @@ The following columns are common to **all HFJ_SPIDX_xxx tables**.
         </tr>
     </tbody>
 </table>
+
+# HFJ_SPIDX_NUMBER: Number Search Parameters
+
+FHIR Search Parameters of type [*number*](https://www.hl7.org/fhir/search.html#number) produce rows in the `HFJ_SPIDX_NUMBER` table.
+Range queries and sorting use the HASH_IDENTITY and SP_VALUE columns.
+
+## Columns
+
+Note: This table has the columns listed below, but it also has all common columns listed above in [Common Search Index Columns](#HFJ_SPIDX_common).
+
+<table class="table table-striped table-condensed">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Relationships</th>
+            <th>Datatype</th>
+            <th>Nullable</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>SP_VALUE</td>
+            <td></td>
+            <td>Double</td>
+            <td>Not nullable</td>
+            <td>
+                This is the value extracted by the SearchParameter expression. 
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+
+
+# HFJ_SPIDX_QUANTITY: Quantity Search Parameters
+
+FHIR Search Parameters of type [*quantity*](https://www.hl7.org/fhir/search.html#quantity) produce rows in the `HFJ_SPIDX_QUANTITY` table.
+Range queries (e.g. `Observation?valueQuantity=gt100`) with no units provided will query the HASH_IDENTITY and SP_VALUE columns.
+Range queries (e.g. `Observation?valueQuantity=gt100||mmHg`) with a unit but not unit-sytem provided will use the HASH_IDENTITY_AND_UNITS and SP_VALUE columns.
+Range queries (e.g. `Observation?valueQuantity=gt100|http://unitsofmeasure.org|mmHg`) with a full system and unit will use the HASH_IDENTITY_SYS_UNITS and SP_VALUE columns.
+Sorting is done via the HASH_IDENTITY and SP_VALUE columns.
+
+## Columns
+
+Note: This table has the columns listed below, but it also has all common columns listed above in [Common Search Index Columns](#HFJ_SPIDX_common).
+
+<table class="table table-striped table-condensed">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Relationships</th>
+            <th>Datatype</th>
+            <th>Nullable</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>HASH_IDENTITY_AND_UNITS</td>
+            <td></td>
+            <td>Long</td>
+            <td></td>
+            <td>
+                A hash like HASH_IDENTITY that also includes the SP_UNITS column.
+            </td>
+        </tr>
+        <tr>
+            <td>HASH_IDENTITY_SYS_UNITS</td>
+            <td></td>
+            <td>Long</td>
+            <td></td>
+            <td>
+                A hash like HASH_IDENTITY that also includes the SP_SYSTEM and SP_UNITS columns.
+            </td>
+        </tr>
+        <tr>
+            <td>SP_SYSTEM</td>
+            <td></td>
+            <td>String</td>
+            <td></td>
+            <td>
+                The system of the quantity units.  e.g. "http://unitsofmeasure.org".
+            </td>
+        </tr>
+        <tr>
+            <td>SP_UNITS</td>
+            <td></td>
+            <td>String</td>
+            <td></td>
+            <td>
+                The units of the quantity.  E.g. "mg".
+            </td>
+        </tr>
+        <tr>
+            <td>SP_VALUE</td>
+            <td></td>
+            <td>Double</td>
+            <td></td>
+            <td>
+                This is the value extracted by the SearchParameter expression. 
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+# HFJ_SPIDX_QUANTITY_NRML: Normalized Quantity Search Parameters
+
+Hapi Fhir supports searching by normalized units when enabled (see https://hapifhir.io/hapi-fhir/apidocs/hapi-fhir-jpaserver-model/ca/uhn/fhir/jpa/model/entity/StorageSettings.html#getNormalizedQuantitySearchLevel()).
+When this feature is enabled, each row stored in HFJ_SPIDX_QUANTITY to also store a row in HFJ_SPIDX_QUANTITY_NRML in canonical UCUM units.
+E.g. a weight recorded in an Observation as 
+```
+"valueQuantity" : {
+    "value" : 172,
+    "unit" : "lb_av",
+    "system" : "http://unitsofmeasure.org",
+    "code" : "[lb_av]"
+  },
+```
+would match the search `Observation?valueQuantity=172`, 
+but would also match the search `Observation?valueQuantity=78|http://unitsofmeasure.org|kg`.
+The row in HFJ_SPIDX_QUANTITY would contain the value 172 pounds, while the HFJ_SPIDX_QUANTITY_NRML table would hold the equivalent 78 kg value.
+Only value searches that provide fully qualified units are eligible for normalized searches.
+Sorting only uses the HFJ_SPIDX_QUANTITY table.
+
+## Columns
+
+Same as HFJ_SPIDX_QUANTITY above, except the SP_VALUE, SP_SYSTEM, and SP_UNITS columns hold the converted value in canonical units instead of the value extracted by the SearchParameter.
+This table is only used for range queries with a unit which can be converted to canonical units.
+
+
+# HFJ_SPIDX_STRING: String Search Parameters
+
+FHIR Search Parameters of type [*string*](https://www.hl7.org/fhir/search.html#string) produce rows in the `HFJ_SPIDX_STRING` table.
+The default string search matches by prefix, ignoring case or accents.  This uses the HASH_IDENTITY column and a LIKE prefix clause on the SP_VALUE_NORMALIZED columns.
+The `:exact` string search matches exactly. This uses only the HASH_EXACT column.
+Sorting is done via the HASH_IDENTITY and SP_VALUE_NORMALIZED columns.
+
+## Columns
+
+Note: This table has the columns listed below, but it also has all common columns listed above in [Common Search Index Columns](#HFJ_SPIDX_common).
+
+<table class="table table-striped table-condensed">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Relationships</th>
+            <th>Datatype</th>
+            <th>Nullable</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>HASH_EXACT</td>
+            <td></td>
+            <td>Long</td>
+            <td></td>
+            <td>
+                A hash like HASH_IDENTITY that also includes the SP_VALUE_EXACT column.
+            </td>
+        </tr>
+        <tr>
+            <td>SP_VALUE_NORMALIZED</td>
+            <td></td>
+            <td>String</td>
+            <td></td>
+            <td>
+                An UPPERCASE string with accents removed.
+            </td>
+        </tr>
+        <tr>
+            <td>SP_VALUE_EXACT</td>
+            <td></td>
+            <td>String</td>
+            <td></td>
+            <td>
+                The extracted string unchanged.
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+# HFJ_SPIDX_TOKEN: Token Search Parameters
+
+FHIR Search Parameters of type [*token*](https://www.hl7.org/fhir/search.html#token) extract values of type Coding, code, and others.
+These produce rows in the `HFJ_SPIDX_TOKEN` table.
+The default token search accepts three parameter formats: matching the code (e.g. `Observation?code=15074-8`), 
+matching both system and code (e.g. `Observation?code=http://loinc.org|15074-8`), 
+or matching a system with any code  (e.g. `Observation?http://loinc.org|`).
+All three are exact searches and use the hashes: HASH_VALUE, HASH_SYS_AND_VALUE, and HASH_SYS respectively.
+Sorting is done via the HASH_IDENTITY and SP_VALUE columns.
+
+## Columns
+
+Note: This table has the columns listed below, but it also has all common columns listed above in [Common Search Index Columns](#HFJ_SPIDX_common).
+
+<table class="table table-striped table-condensed">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Relationships</th>
+            <th>Datatype</th>
+            <th>Nullable</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>HASH_VALUE</td>
+            <td></td>
+            <td>Long</td>
+            <td></td>
+            <td>
+                A hash like HASH_IDENTITY that also includes the SP_VALUE column.
+            </td>
+        </tr>
+        <tr>
+            <td>HASH_SYS_AND_VALUE</td>
+            <td></td>
+            <td>Long</td>
+            <td></td>
+            <td>
+                A hash like HASH_IDENTITY that also includes the SP_SYSTEM and SP_VALUE columns.
+            </td>
+        </tr>
+        <tr>
+            <td>HASH_SYS</td>
+            <td></td>
+            <td>Long</td>
+            <td></td>
+            <td>
+                A hash like HASH_IDENTITY that also includes the SP_SYSTEM column.
+            </td>
+        </tr>
+        <tr>
+            <td>SP_SYSTEM</td>
+            <td></td>
+            <td>String</td>
+            <td></td>
+            <td>
+                The system of the code.
+            </td>
+        </tr>
+        <tr>
+            <td>SP_VALUE</td>
+            <td></td>
+            <td>String</td>
+            <td></td>
+            <td>
+                This is the bare code value. 
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+
+# HFJ_SPIDX_URI: URI Search Parameters
+
+FHIR Search Parameters of type [*uri*](https://www.hl7.org/fhir/search.html#uri) produce rows in the `HFJ_SPIDX_URI` table.
+The default uri search matches the complete uri.  This uses the HASH_URI column for an exact match.
+A uri search with the `:above` modifier will match any prefix. This also uses the HASH_URI column, but also tests hashes of every prefix of the query value.
+A uri search with the `:below` modifier will match any extension. This query uses the HASH_IDENTITY and a LIKE prefix match of the SP_URI column.
+Sorting is done via the HASH_IDENTITY and SP_URI columns.
+
+## Columns
+
+Note: This table has the columns listed below, but it also has all common columns listed above in [Common Search Index Columns](#HFJ_SPIDX_common).
+
+<table class="table table-striped table-condensed">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Relationships</th>
+            <th>Datatype</th>
+            <th>Nullable</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>HASH_URI</td>
+            <td></td>
+            <td>Long</td>
+            <td></td>
+            <td>
+                A hash like HASH_IDENTITY that also includes the SP_URI column.
+            </td>
+        </tr>
+        <tr>
+            <td>SP_URI</td>
+            <td></td>
+            <td>String</td>
+            <td></td>
+            <td>
+                The uri string extracted by the SearchParameter.
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+
+# HFJ_IDX_CMB_TOK_NU: Combo Non-Unique Search Param
+
+This table is used to index [Non-Unique Combo Search Parameters](https://smilecdr.com/docs/fhir_standard/fhir_search_custom_search_parameters.html#combo-search-index-parameters). 
+
+## Columns
+
+<table class="table table-striped table-condensed">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Relationships</th>
+            <th>Datatype</th>
+            <th>Nullable</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>PID</td>
+            <td></td>
+            <td>Long</td>
+            <td></td>
+            <td>
+                A unique persistent identifier for the given index row.  
+            </td>
+        </tr>
+        <tr>
+            <td>RES_ID</td>
+            <td>FK to <a href="#HFJ_RESOURCE">HFJ_RESOURCE</a></td>
+            <td>Long</td>
+            <td></td>
+            <td>
+                Contains the PID of the resource being indexed.  
+            </td>
+        </tr>
+        <tr>
+            <td>IDX_STRING</td>
+            <td></td>
+            <td>String</td>
+            <td></td>
+            <td>
+                This column contains a FHIR search expression indicating what is being indexed. For example, if a 
+                non-unique combo search parameter is present which indexes a combination of Observation#code and
+                Observation#status, this column might contain a value such as
+                <code>Observation?code=http://loinc.org|1234-5&status=final</code>
+            </td>
+        </tr>
+        <tr>
+            <td>HASH_COMPLETE</td>
+            <td></td>
+            <td>Long</td>
+            <td></td>
+            <td>
+                This column contains a hash of the value in column <code>IDX_STRING</code>.
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<a name="HFJ_IDX_CMP_STRING_UNIQ"/>
+
+# HFJ_IDX_CMP_STRING_UNIQ: Combo Unique Search Param
+
+This table is used to index [Unique Combo Search Parameters](https://smilecdr.com/docs/fhir_standard/fhir_search_custom_search_parameters.html#combo-search-index-parameters).
+
+## Columns
+
+<table class="table table-striped table-condensed">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Relationships</th>
+            <th>Datatype</th>
+            <th>Nullable</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>PID</td>
+            <td></td>
+            <td>Long</td>
+            <td></td>
+            <td>
+                A unique persistent identifier for the given index row.  
+            </td>
+        </tr>
+        <tr>
+            <td>RES_ID</td>
+            <td>FK to <a href="#HFJ_RESOURCE">HFJ_RESOURCE</a></td>
+            <td>Long</td>
+            <td></td>
+            <td>
+                Contains the PID of the resource being indexed.  
+            </td>
+        </tr>
+        <tr>
+            <td>IDX_STRING</td>
+            <td></td>
+            <td>String</td>
+            <td></td>
+            <td>
+                This column contains a FHIR search expression indicating what is being indexed. For example, if a 
+                unique combo search parameter is present which indexes a combination of Observation#code and
+                Observation#status, this column might contain a value such as
+                <code>Observation?code=http://loinc.org|1234-5&status=final</code>
+            </td>
+        </tr>
+        <tr>
+            <td>HASH_COMPLETE</td>
+            <td></td>
+            <td>Long</td>
+            <td></td>
+            <td>
+                This column contains a hash of the value in column <code>IDX_STRING</code>.
+            </td>
+        </tr>
+        <tr>
+            <td>HASH_COMPLETE_2</td>
+            <td></td>
+            <td>Long</td>
+            <td></td>
+            <td>
+                This column contains an additional hash of the value in column <code>IDX_STRING</code>, using a
+                static salt of the value prior to the hashing. This is done in order to increase the number
+                of bits used to hash the index string from 64 to 128.
+            </td>
+        </tr>
+    </tbody>
+</table>
+

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.checks;
 
+import com.puppycrawl.tools.checkstyle.AbstractAutomaticBean;
 import com.puppycrawl.tools.checkstyle.Checker;
 import com.puppycrawl.tools.checkstyle.DefaultConfiguration;
 import com.puppycrawl.tools.checkstyle.DefaultLogger;
@@ -17,10 +18,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.endsWith;
-import static org.hamcrest.Matchers.startsWith;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class HapiErrorCodeCheckTest {
@@ -34,8 +32,8 @@ class HapiErrorCodeCheckTest {
 		files.add(getFile("BadClass.java"));
 
 		ByteArrayOutputStream errors = new ByteArrayOutputStream();
-		DefaultLogger listener = new DefaultLogger(NullOutputStream.NULL_OUTPUT_STREAM, AutomaticBean.OutputStreamOptions.CLOSE,
-			errors, AutomaticBean.OutputStreamOptions.CLOSE);
+		DefaultLogger listener = new DefaultLogger(NullOutputStream.NULL_OUTPUT_STREAM, AbstractAutomaticBean.OutputStreamOptions.CLOSE,
+			errors, AbstractAutomaticBean.OutputStreamOptions.CLOSE);
 		checker.addListener(listener);
 
 		// execute
@@ -45,12 +43,14 @@ class HapiErrorCodeCheckTest {
 		String[] errorLines = errors.toString().split("\r?\n");
 		Arrays.stream(errorLines).forEach(ourLog::info);
 		assertEquals(4, errorLines.length);
-		assertThat(errorLines[0], startsWith("[ERROR] "));
-		assertThat(errorLines[0], endsWith("BadClass.java:7: Exception thrown that does not call Msg.code() [HapiErrorCode]"));
-		assertThat(errorLines[1], startsWith("[ERROR] "));
-		assertThat(errorLines[1], containsString("Two different exception messages call Msg.code(2258)."));
-		assertThat(errorLines[2], containsString("Each thrown exception must call Msg.code() with a different code."));
-		assertThat(errorLines[3], containsString("Previously found at:"));
+		assertThat(errorLines[0])
+			.startsWith("[ERROR] ")
+			.endsWith("BadClass.java:7: Exception thrown that does not call Msg.code() [HapiErrorCode]");
+		assertThat(errorLines[1])
+			.startsWith("[ERROR] ")
+			.contains("Two different exception messages call Msg.code(2258).");
+		assertThat(errorLines[2]).contains("Each thrown exception must call Msg.code() with a different code.");
+		assertThat(errorLines[3]).contains("Previously found at:");
 	}
 
 	private Checker buildChecker() throws CheckstyleException {

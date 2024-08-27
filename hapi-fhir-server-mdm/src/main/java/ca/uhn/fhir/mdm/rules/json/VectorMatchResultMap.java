@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,12 +22,13 @@ package ca.uhn.fhir.mdm.rules.json;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
+import jakarta.annotation.Nonnull;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import javax.annotation.Nonnull;
+import java.util.stream.Collectors;
 
 public class VectorMatchResultMap {
 	private final MdmRulesJson myMdmRulesJson;
@@ -62,6 +63,16 @@ public class VectorMatchResultMap {
 			return MdmMatchResultEnum.POSSIBLE_MATCH;
 		}
 		return MdmMatchResultEnum.NO_MATCH;
+	}
+
+	public Set<String> getMatchedRules(Long theVector) {
+		if (theVector == null) {
+			return new HashSet<>();
+		}
+		return myVectorToFieldMatchNamesMap.entrySet().stream()
+				.filter(e -> ((e.getKey() & theVector) == e.getKey()))
+				.map(Map.Entry::getValue)
+				.collect(Collectors.toSet());
 	}
 
 	private void put(String theFieldMatchNames, MdmMatchResultEnum theMatchResult) {
@@ -103,5 +114,11 @@ public class VectorMatchResultMap {
 
 	public String getFieldMatchNames(long theVector) {
 		return myVectorToFieldMatchNamesMap.get(theVector);
+	}
+
+	public Set<String> getAllFieldMatchNames() {
+		return myVectorToFieldMatchNamesMap.keySet().stream()
+				.map(key -> myVectorToFieldMatchNamesMap.get(key))
+				.collect(Collectors.toSet());
 	}
 }

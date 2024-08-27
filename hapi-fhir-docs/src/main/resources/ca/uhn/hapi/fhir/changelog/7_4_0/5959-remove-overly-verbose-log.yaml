@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 5959
+title: "An overly verbose log in the JPA server about deleting stale searches has been reduced to DEBUG level."

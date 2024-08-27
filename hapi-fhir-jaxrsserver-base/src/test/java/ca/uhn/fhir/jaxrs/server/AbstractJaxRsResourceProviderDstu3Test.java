@@ -19,9 +19,9 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
+import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.CapabilityStatement;
@@ -51,10 +51,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
@@ -383,8 +383,8 @@ public class AbstractJaxRsResourceProviderDstu3Test {
 		when(mock.update(idCaptor.capture(), patientCaptor.capture(), conditionalCaptor.capture())).thenReturn(new MethodOutcome());
 		client.update().resource(createPatient(1)).conditional().where(Patient.IDENTIFIER.exactly().identifier("2")).execute();
 
-		assertEquals(null, patientCaptor.getValue().getIdElement().getIdPart());
-		assertEquals(null, patientCaptor.getValue().getIdElement().getVersionIdPart());
+		assertNull(patientCaptor.getValue().getIdElement().getIdPart());
+		assertNull(patientCaptor.getValue().getIdElement().getVersionIdPart());
 		assertEquals("Patient?identifier=2&_format=json", conditionalCaptor.getValue());
 	}
 
@@ -420,7 +420,7 @@ public class AbstractJaxRsResourceProviderDstu3Test {
 			fail();
 		} catch (final ResourceNotFoundException e) {
 			assertEquals(ResourceNotFoundException.STATUS_CODE, e.getStatusCode());
-			assertTrue(e.getMessage().contains("999955541264"));
+			assertThat(e.getMessage()).contains("999955541264");
 		}
 	}
 

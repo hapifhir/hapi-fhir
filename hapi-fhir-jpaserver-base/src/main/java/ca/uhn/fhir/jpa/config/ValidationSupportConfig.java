@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.JpaPersistedResourceValidationSupport;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChain;
@@ -30,6 +31,7 @@ import ca.uhn.fhir.jpa.validation.ValidatorPolicyAdvisor;
 import ca.uhn.fhir.jpa.validation.ValidatorResourceFetcher;
 import ca.uhn.fhir.validation.IInstanceValidatorModule;
 import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.common.hapi.validation.validator.HapiToHl7OrgDstu2ValidatingSupportWrapper;
@@ -43,6 +45,15 @@ public class ValidationSupportConfig {
 	@Bean(name = "myDefaultProfileValidationSupport")
 	public DefaultProfileValidationSupport defaultProfileValidationSupport(FhirContext theFhirContext) {
 		return new DefaultProfileValidationSupport(theFhirContext);
+	}
+
+	@Bean
+	public InMemoryTerminologyServerValidationSupport inMemoryTerminologyServerValidationSupport(
+			FhirContext theFhirContext, JpaStorageSettings theStorageSettings) {
+		InMemoryTerminologyServerValidationSupport retVal =
+				new InMemoryTerminologyServerValidationSupport(theFhirContext);
+		retVal.setIssueSeverityForCodeDisplayMismatch(theStorageSettings.getIssueSeverityForCodeDisplayMismatch());
+		return retVal;
 	}
 
 	@Bean(name = JpaConfig.JPA_VALIDATION_SUPPORT_CHAIN)

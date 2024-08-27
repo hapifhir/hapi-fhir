@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.util.ILockable;
 import ca.uhn.fhir.util.ReflectionUtil;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -32,7 +33,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import javax.annotation.Nullable;
 
 /**
  * This class returns the vocabulary that is shipped with the base FHIR
@@ -97,6 +97,11 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 		} else {
 			myFlush = () -> {};
 		}
+	}
+
+	@Override
+	public String getName() {
+		return myCtx.getVersion().getVersion() + " FHIR Standard Profile Validation Support";
 	}
 
 	@Override

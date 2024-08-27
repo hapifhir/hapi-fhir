@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,14 @@ public interface IAuthRuleBuilderOperationNamedAndScoped {
 	 * Responses for this operation will not be checked
 	 */
 	IAuthRuleBuilderRuleOpClassifierFinished andAllowAllResponses();
+
+	/**
+	 * Responses for this operation will not be checked and access to all resources is allowed. This
+	 * is intended for operations which are known to fetch a graph of resources that is known to be
+	 * safe, such as `$everything` which may access and fetch resources outside the patient's compartment
+	 * but enforces safety in what it fetches via strict SQL queries.
+	 */
+	IAuthRuleBuilderRuleOpClassifierFinished andAllowAllResponsesWithAllResourcesAccess();
 
 	/**
 	 * Responses for this operation must be authorized by other rules. For example, if this

@@ -1,15 +1,19 @@
 package ca.uhn.fhir.util;
 
-import static org.junit.jupiter.api.Assertions.*;
+import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.i18n.Msg;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-import ca.uhn.fhir.i18n.Msg;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
-import ca.uhn.fhir.context.ConfigurationException;
 
 public class ReflectionUtilTest {
 
@@ -25,7 +29,7 @@ public class ReflectionUtilTest {
 
 	@Test
 	public void testNewInstanceOrReturnNullWrong1() {
-		assertEquals(null, ReflectionUtil.newInstanceOrReturnNull("foo.Foo", List.class));
+		assertNull(ReflectionUtil.newInstanceOrReturnNull("foo.Foo", List.class));
 	}
 
 	@Test

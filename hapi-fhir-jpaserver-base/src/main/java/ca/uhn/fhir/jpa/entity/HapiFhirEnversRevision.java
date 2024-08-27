@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,13 @@
  */
 package ca.uhn.fhir.jpa.entity;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.Table;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hibernate.envers.RevisionEntity;
 import org.hibernate.envers.RevisionNumber;
@@ -26,13 +33,6 @@ import org.hibernate.envers.RevisionTimestamp;
 
 import java.io.Serializable;
 import java.util.Date;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
 
 /**
  * This class exists strictly to override the default names used to generate Hibernate Envers revision table.
@@ -58,7 +58,7 @@ public class HapiFhirEnversRevision implements Serializable {
 	@SequenceGenerator(name = "SEQ_HFJ_REVINFO", sequenceName = "SEQ_HFJ_REVINFO")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_HFJ_REVINFO")
 	@RevisionNumber
-	@Column(name = "REV")
+	@Column(name = "REV", nullable = false)
 	private long myRev;
 
 	@RevisionTimestamp

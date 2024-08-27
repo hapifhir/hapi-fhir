@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,12 +36,14 @@ import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.SpecialParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.util.DateUtils;
 import ca.uhn.fhir.util.NumericParamRangeUtil;
 import ca.uhn.fhir.util.StringUtil;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -66,7 +68,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
 
 import static ca.uhn.fhir.jpa.dao.search.PathContext.joinPath;
 import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.IDX_STRING_EXACT;
@@ -122,14 +123,12 @@ public class ExtendedHSearchClauseBuilder {
 	}
 
 	@Nonnull
-	private Set<String> extractOrStringParams(List<? extends IQueryParameterType> nextAnd) {
+	private Set<String> extractOrStringParams(String theSearchParamName, List<? extends IQueryParameterType> nextAnd) {
 		Set<String> terms = new HashSet<>();
 		for (IQueryParameterType nextOr : nextAnd) {
 			String nextValueTrimmed;
-			if (nextOr instanceof StringParam) {
-				StringParam nextOrString = (StringParam) nextOr;
-				nextValueTrimmed =
-						StringUtils.defaultString(nextOrString.getValue()).trim();
+			if (isStringParamOrEquivalent(theSearchParamName, nextOr)) {
+				nextValueTrimmed = getTrimmedStringValue(nextOr);
 			} else if (nextOr instanceof TokenParam) {
 				TokenParam nextOrToken = (TokenParam) nextOr;
 				nextValueTrimmed = nextOrToken.getValue();
@@ -148,6 +147,34 @@ public class ExtendedHSearchClauseBuilder {
 			}
 		}
 		return terms;
+	}
+
+	private String getTrimmedStringValue(IQueryParameterType nextOr) {
+		String value;
+		if (nextOr instanceof StringParam) {
+			value = ((StringParam) nextOr).getValue();
+		} else if (nextOr instanceof SpecialParam) {
+			value = ((SpecialParam) nextOr).getValue();
+		} else {
+			throw new IllegalArgumentException(Msg.code(2535)
+					+ "Failed to extract value for fulltext search from parameter. Needs to be a `string` parameter, or `_text` or `_content` special parameter."
+					+ nextOr);
+		}
+		return StringUtils.defaultString(value).trim();
+	}
+
+	/**
+	 * String Search params are valid, so are two special params, _content and _text.
+	 *
+	 * @param theSearchParamName The name of the SP
+	 * @param nextOr the or values of the query parameter.
+	 *
+	 * @return a boolean indicating whether we can treat this as a string.
+	 */
+	private static boolean isStringParamOrEquivalent(String theSearchParamName, IQueryParameterType nextOr) {
+		List<String> specialSearchParamsToTreatAsStrings = List.of(Constants.PARAM_TEXT, Constants.PARAM_CONTENT);
+		return (nextOr instanceof StringParam)
+				|| (nextOr instanceof SpecialParam && specialSearchParamsToTreatAsStrings.contains(theSearchParamName));
 	}
 
 	public void addTokenUnmodifiedSearch(String theSearchParamName, List<List<IQueryParameterType>> theAndOrTerms) {
@@ -229,22 +256,57 @@ public class ExtendedHSearchClauseBuilder {
 				break;
 		}
 
-		for (List<? extends IQueryParameterType> nextOrList : stringAndOrTerms) {
-			Set<String> orTerms = TermHelper.makePrefixSearchTerm(extractOrStringParams(nextOrList));
-			ourLog.debug("addStringTextSearch {}, {}", theSearchParamName, orTerms);
-			if (!orTerms.isEmpty()) {
-				String query = orTerms.stream().map(s -> "( " + s + " )").collect(Collectors.joining(" | "));
-				myRootClause.must(myRootContext
-						.simpleQueryString()
-						.field(fieldName)
-						.matching(query)
-						.defaultOperator(
-								BooleanOperator
-										.AND)); // term value may contain multiple tokens.  Require all of them to be
-				// present.
-			} else {
-				ourLog.warn("No Terms found in query parameter {}", nextOrList);
+		if (isContainsSearch(theSearchParamName, stringAndOrTerms)) {
+			for (List<? extends IQueryParameterType> nextOrList : stringAndOrTerms) {
+				addPreciseMatchClauses(theSearchParamName, nextOrList, fieldName);
 			}
+		} else {
+			for (List<? extends IQueryParameterType> nextOrList : stringAndOrTerms) {
+				addSimpleQueryMatchClauses(theSearchParamName, nextOrList, fieldName);
+			}
+		}
+	}
+
+	/**
+	 * This route is used for standard string searches, or `_text` or `_content`. For each term, we build a `simpleQueryString `element which allows hibernate search to search on normalized, analyzed, indexed fields.
+	 *
+	 * @param theSearchParamName The name of the search parameter
+	 * @param nextOrList the list of query parameters
+	 * @param fieldName  the field name in the index document to compare with.
+	 */
+	private void addSimpleQueryMatchClauses(
+			String theSearchParamName, List<? extends IQueryParameterType> nextOrList, String fieldName) {
+		Set<String> orTerms = TermHelper.makePrefixSearchTerm(extractOrStringParams(theSearchParamName, nextOrList));
+		ourLog.debug("addStringTextSearch {}, {}", theSearchParamName, orTerms);
+		if (!orTerms.isEmpty()) {
+			String query = orTerms.stream().map(s -> "( " + s + " )").collect(Collectors.joining(" | "));
+			myRootClause.must(myRootContext
+					.simpleQueryString()
+					.field(fieldName)
+					.matching(query)
+					.defaultOperator(
+							BooleanOperator.AND)); // term value may contain multiple tokens.  Require all of them to
+			// be
+			// present.
+
+		} else {
+			ourLog.warn("No Terms found in query parameter {}", nextOrList);
+		}
+	}
+
+	/**
+	 * Note that this `match()` operation is different from out standard behaviour, which uses simpleQueryString(). This `match()` forces a precise string match, Whereas `simpleQueryString()` uses a more nebulous
+	 * and loose check against a collection of terms. We only use this when we see ` _text:contains=` or `_content:contains=` search.
+	 *
+	 * @param theSearchParamName the Name of the search parameter
+	 * @param nextOrList the list of query parameters
+	 * @param fieldName the field name in the index document to compare with.
+	 */
+	private void addPreciseMatchClauses(
+			String theSearchParamName, List<? extends IQueryParameterType> nextOrList, String fieldName) {
+		Set<String> orTerms = TermHelper.makePrefixSearchTerm(extractOrStringParams(theSearchParamName, nextOrList));
+		for (String orTerm : orTerms) {
+			myRootClause.must(myRootContext.match().field(fieldName).matching(orTerm));
 		}
 	}
 
@@ -252,7 +314,7 @@ public class ExtendedHSearchClauseBuilder {
 		String fieldPath = joinPath(SEARCH_PARAM_ROOT, theSearchParamName, INDEX_TYPE_STRING, IDX_STRING_EXACT);
 
 		for (List<? extends IQueryParameterType> nextAnd : theStringAndOrTerms) {
-			Set<String> terms = extractOrStringParams(nextAnd);
+			Set<String> terms = extractOrStringParams(theSearchParamName, nextAnd);
 			ourLog.debug("addStringExactSearch {} {}", theSearchParamName, terms);
 			List<? extends PredicateFinalStep> orTerms = terms.stream()
 					.map(s -> myRootContext.match().field(fieldPath).matching(s))
@@ -266,7 +328,7 @@ public class ExtendedHSearchClauseBuilder {
 			String theSearchParamName, List<List<IQueryParameterType>> theStringAndOrTerms) {
 		String fieldPath = joinPath(SEARCH_PARAM_ROOT, theSearchParamName, INDEX_TYPE_STRING, IDX_STRING_NORMALIZED);
 		for (List<? extends IQueryParameterType> nextAnd : theStringAndOrTerms) {
-			Set<String> terms = extractOrStringParams(nextAnd);
+			Set<String> terms = extractOrStringParams(theSearchParamName, nextAnd);
 			ourLog.debug("addStringContainsSearch {} {}", theSearchParamName, terms);
 			List<? extends PredicateFinalStep> orTerms = terms.stream()
 					// wildcard is a term-level query, so queries aren't analyzed.  Do our own normalization first.
@@ -294,7 +356,7 @@ public class ExtendedHSearchClauseBuilder {
 			String theSearchParamName, List<List<IQueryParameterType>> theStringAndOrTerms) {
 		PathContext context = contextForFlatSP(theSearchParamName);
 		for (List<? extends IQueryParameterType> nextOrList : theStringAndOrTerms) {
-			Set<String> terms = extractOrStringParams(nextOrList);
+			Set<String> terms = extractOrStringParams(theSearchParamName, nextOrList);
 			ourLog.debug("addStringUnmodifiedSearch {} {}", theSearchParamName, terms);
 			List<PredicateFinalStep> orTerms = terms.stream()
 					.map(s -> buildStringUnmodifiedClause(s, context))
@@ -317,7 +379,7 @@ public class ExtendedHSearchClauseBuilder {
 			String theSearchParamName, List<List<IQueryParameterType>> theReferenceAndOrTerms) {
 		String fieldPath = joinPath(SEARCH_PARAM_ROOT, theSearchParamName, "reference", "value");
 		for (List<? extends IQueryParameterType> nextAnd : theReferenceAndOrTerms) {
-			Set<String> terms = extractOrStringParams(nextAnd);
+			Set<String> terms = extractOrStringParams(theSearchParamName, nextAnd);
 			ourLog.trace("reference unchained search {}", terms);
 
 			List<? extends PredicateFinalStep> orTerms = terms.stream()
@@ -831,5 +893,18 @@ public class ExtendedHSearchClauseBuilder {
 		}
 
 		return compositeClause;
+	}
+
+	private boolean hasAContainsModifier(List<List<IQueryParameterType>> stringAndOrTerms) {
+		return stringAndOrTerms.stream()
+				.flatMap(List::stream)
+				.anyMatch(next ->
+						Constants.PARAMQUALIFIER_STRING_CONTAINS.equalsIgnoreCase(next.getQueryParameterQualifier()));
+	}
+
+	private boolean isContainsSearch(String theSearchParamName, List<List<IQueryParameterType>> stringAndOrTerms) {
+		return (Constants.PARAM_TEXT.equalsIgnoreCase(theSearchParamName)
+						|| Constants.PARAM_CONTENT.equalsIgnoreCase(theSearchParamName))
+				&& hasAContainsModifier(stringAndOrTerms);
 	}
 }

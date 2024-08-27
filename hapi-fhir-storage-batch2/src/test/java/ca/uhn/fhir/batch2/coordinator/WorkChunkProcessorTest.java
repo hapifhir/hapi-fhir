@@ -21,6 +21,7 @@ import ca.uhn.fhir.batch2.model.WorkChunkCompletionEvent;
 import ca.uhn.fhir.batch2.model.WorkChunkData;
 import ca.uhn.fhir.batch2.model.WorkChunkErrorEvent;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
+import ca.uhn.fhir.jpa.dao.tx.NonTransactionalHapiTransactionService;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.JsonUtil;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,6 +34,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -217,7 +219,7 @@ public class WorkChunkProcessorTest {
 			runExceptionThrowingTest(new RuntimeException(msg));
 			fail("Expected Exception to be thrown");
 		} catch (JobStepFailedException jobStepFailedException) {
-			assertTrue(jobStepFailedException.getMessage().contains(msg));
+			assertThat(jobStepFailedException.getMessage()).contains(msg);
 		}
 	}
 
@@ -266,7 +268,7 @@ public class WorkChunkProcessorTest {
 				processedOutcomeSuccessfully = output.isSuccessful();
 			} catch (JobStepFailedException ex) {
 				ourLog.info("Caught error:", ex);
-				assertTrue(ex.getMessage().contains(errorMsg));
+				assertThat(ex.getMessage()).contains(errorMsg);
 				counter++;
 			}
 			/*
@@ -428,7 +430,7 @@ public class WorkChunkProcessorTest {
 	private class TestWorkChunkProcessor extends WorkChunkProcessor {
 
 		public TestWorkChunkProcessor(IJobPersistence thePersistence, BatchJobSender theSender) {
-			super(thePersistence, theSender);
+			super(thePersistence, theSender, new NonTransactionalHapiTransactionService());
 		}
 
 		@Override
@@ -487,7 +489,7 @@ public class WorkChunkProcessorTest {
 		WorkChunk chunk = new WorkChunk();
 		chunk.setInstanceId(INSTANCE_ID);
 		chunk.setId(theId);
-		chunk.setStatus(WorkChunkStatusEnum.QUEUED);
+		chunk.setStatus(WorkChunkStatusEnum.READY);
 		chunk.setData(JsonUtil.serialize(
 			new StepInputData()
 		));

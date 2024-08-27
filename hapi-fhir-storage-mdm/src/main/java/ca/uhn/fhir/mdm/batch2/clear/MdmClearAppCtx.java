@@ -2,7 +2,7 @@
  * #%L
  * hapi-fhir-storage-mdm
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,13 +19,13 @@
  */
 package ca.uhn.fhir.mdm.batch2.clear;
 
+import ca.uhn.fhir.batch2.jobs.chunk.ChunkRangeJson;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.svc.IGoldenResourceSearchSvc;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.batch2.LoadGoldenIdsStep;
-import ca.uhn.fhir.mdm.batch2.MdmChunkRangeJson;
 import ca.uhn.fhir.mdm.batch2.MdmGenerateRangeChunksStep;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -50,7 +50,7 @@ public class MdmClearAppCtx {
 				.addFirstStep(
 						"generate-ranges",
 						"Generate date ranges to Mdm Clear",
-						MdmChunkRangeJson.class,
+						ChunkRangeJson.class,
 						mdmGenerateRangeChunksStep())
 				.addIntermediateStep(
 						"find-golden-resource-ids",

@@ -1,5 +1,8 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTag;
 import ca.uhn.fhir.jpa.model.entity.TagDefinition;
@@ -36,15 +39,13 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.rest.api.Constants.PARAM_TAG;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+
 
 public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoR4MetaTest.class);
@@ -72,7 +73,7 @@ public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 
 		patient = myPatientDao.read(id, mySrd);
 		assertTrue(patient.getActive());
-		assertEquals(1, patient.getMeta().getExtensionsByUrl("http://foo").size());
+		assertThat(patient.getMeta().getExtensionsByUrl("http://foo")).hasSize(1);
 		assertEquals("hello", patient.getMeta().getExtensionByUrl("http://foo").getValueAsPrimitive().getValueAsString());
 	}
 
@@ -99,7 +100,7 @@ public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 		patient = (Patient) bundle.getEntryFirstRep().getResource();
 		assertTrue(patient.getActive());
-		assertEquals(1, patient.getMeta().getExtensionsByUrl("http://foo").size());
+		assertThat(patient.getMeta().getExtensionsByUrl("http://foo")).hasSize(1);
 		assertEquals("22", patient.getMeta().getVersionId());
 		assertEquals("http://foo", patient.getMeta().getProfile().get(0).getValue());
 		assertEquals("hello", patient.getMeta().getExtensionByUrl("http://foo").getValueAsPrimitive().getValueAsString());
@@ -124,9 +125,9 @@ public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 		myPatientDao.metaDeleteOperation(id, meta, mySrd);
 
 		patient = myPatientDao.read(id, mySrd);
-		assertThat(patient.getMeta().getProfile(), empty());
-		assertThat(patient.getMeta().getTag(), empty());
-		assertThat(patient.getMeta().getSecurity(), empty());
+		assertThat(patient.getMeta().getProfile()).isEmpty();
+		assertThat(patient.getMeta().getTag()).isEmpty();
+		assertThat(patient.getMeta().getSecurity()).isEmpty();
 	}
 
 	@Test
@@ -143,14 +144,14 @@ public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 		IIdType pid2 = myPatientDao.create(patient2, mySrd).getId();
 
 		patient1 = myPatientDao.read(pid1, mySrd);
-		assertEquals(1, patient1.getMeta().getTag().size());
-		assertEquals(0, patient1.getMeta().getSecurity().size());
+		assertThat(patient1.getMeta().getTag()).hasSize(1);
+		assertThat(patient1.getMeta().getSecurity()).isEmpty();
 		assertEquals("http://foo", patient1.getMeta().getTagFirstRep().getSystem());
 		assertEquals("bar", patient1.getMeta().getTagFirstRep().getCode());
 
 		patient2 = myPatientDao.read(pid2, mySrd);
-		assertEquals(0, patient2.getMeta().getTag().size());
-		assertEquals(1, patient2.getMeta().getSecurity().size());
+		assertThat(patient2.getMeta().getTag()).isEmpty();
+		assertThat(patient2.getMeta().getSecurity()).hasSize(1);
 		assertEquals("http://foo", patient2.getMeta().getSecurityFirstRep().getSystem());
 		assertEquals("bar", patient2.getMeta().getSecurityFirstRep().getCode());
 	}
@@ -241,7 +242,7 @@ public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 
 			// Update the patient to create a ResourceHistoryTag record
 			final List<Coding> tagsFromDbPatient = retrievedPatient.getMeta().getTag();
-			assertEquals(1, tagsFromDbPatient.size());
+			assertThat(tagsFromDbPatient).hasSize(1);
 
 			tagsFromDbPatient.get(0)
 				.setCode(expectedCode2)

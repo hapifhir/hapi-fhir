@@ -1,21 +1,22 @@
 package ca.uhn.fhir.jpa.searchparam.extractor;
 
-import ca.uhn.fhir.jpa.model.entity.StorageSettings;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import com.google.common.collect.Lists;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.empty;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ResourceIndexedSearchParamsTest {
@@ -31,12 +32,12 @@ public class ResourceIndexedSearchParamsTest {
 		mySource = new ResourceTable();
 		mySource.setResourceType("Patient");
 
-		myParams = new ResourceIndexedSearchParams(mySource);
+		myParams = ResourceIndexedSearchParams.withLists(mySource);
 	}
 
 	@Test
 	public void matchResourceLinksStringCompareToLong() {
-		ResourceLink link = ResourceLink.forLocalReference("organization", mySource, "Organization", 123L, LONG_ID, new Date(), null);
+		ResourceLink link = getResourceLinkForLocalReference(LONG_ID);
 		myParams.getResourceLinks().add(link);
 
 		ReferenceParam referenceParam = getReferenceParam(STRING_ID);
@@ -46,7 +47,7 @@ public class ResourceIndexedSearchParamsTest {
 
 	@Test
 	public void matchResourceLinksStringCompareToString() {
-		ResourceLink link = ResourceLink.forLocalReference("organization", mySource, "Organization", 123L, STRING_ID, new Date(), null);
+		ResourceLink link = getResourceLinkForLocalReference(STRING_ID);
 		myParams.getResourceLinks().add(link);
 
 		ReferenceParam referenceParam = getReferenceParam(STRING_ID);
@@ -56,7 +57,7 @@ public class ResourceIndexedSearchParamsTest {
 
 	@Test
 	public void matchResourceLinksLongCompareToString() {
-		ResourceLink link = ResourceLink.forLocalReference("organization", mySource, "Organization", 123L, STRING_ID, new Date(), null);
+		ResourceLink link = getResourceLinkForLocalReference(STRING_ID);
 		myParams.getResourceLinks().add(link);
 
 		ReferenceParam referenceParam = getReferenceParam(LONG_ID);
@@ -66,12 +67,27 @@ public class ResourceIndexedSearchParamsTest {
 
 	@Test
 	public void matchResourceLinksLongCompareToLong() {
-		ResourceLink link = ResourceLink.forLocalReference("organization", mySource, "Organization", 123L, LONG_ID, new Date(), null);
+		ResourceLink link = getResourceLinkForLocalReference(LONG_ID);
 		myParams.getResourceLinks().add(link);
 
 		ReferenceParam referenceParam = getReferenceParam(LONG_ID);
 		boolean result = myParams.matchResourceLinks(myStorageSettings, "Patient", "organization", referenceParam, "organization");
 		assertTrue(result);
+	}
+
+	private ResourceLink getResourceLinkForLocalReference(String theTargetResourceId){
+
+		ResourceLink.ResourceLinkForLocalReferenceParams params = ResourceLink.ResourceLinkForLocalReferenceParams
+			.instance()
+			.setSourcePath("organization")
+			.setSourceResource(mySource)
+			.setTargetResourceType("Organization")
+			.setTargetResourcePid(123L)
+			.setTargetResourceId(theTargetResourceId)
+			.setUpdated(new Date());
+
+		return ResourceLink.forLocalReference(params);
+
 	}
 
 	private ReferenceParam getReferenceParam(String theId) {
@@ -90,19 +106,50 @@ public class ResourceIndexedSearchParamsTest {
 			Lists.newArrayList("name=SMITH", "name=JOHN")
 		);
 		values = ResourceIndexedSearchParams.extractCompositeStringUniquesValueChains("Patient", partsChoices);
-		assertThat(values.toString(), values, containsInAnyOrder("Patient?gender=male&name=JOHN", "Patient?gender=male&name=SMITH"));
+		assertThat(values).as(values.toString()).containsExactlyInAnyOrder("Patient?gender=male&name=JOHN", "Patient?gender=male&name=SMITH");
 
 		partsChoices = Lists.newArrayList(
 			Lists.newArrayList("gender=male", ""),
 			Lists.newArrayList("name=SMITH", "name=JOHN", "")
 		);
 		values = ResourceIndexedSearchParams.extractCompositeStringUniquesValueChains("Patient", partsChoices);
-		assertThat(values.toString(), values, containsInAnyOrder("Patient?gender=male&name=JOHN", "Patient?gender=male&name=SMITH"));
+		assertThat(values).as(values.toString()).containsExactlyInAnyOrder("Patient?gender=male&name=JOHN", "Patient?gender=male&name=SMITH");
 
 		partsChoices = Lists.newArrayList(
 		);
 		values = ResourceIndexedSearchParams.extractCompositeStringUniquesValueChains("Patient", partsChoices);
-		assertThat(values.toString(), values, empty());
+		assertThat(values).as(values.toString()).isEmpty();
 	}
 
+	@ParameterizedTest
+	@CsvSource({
+		"name,  name,                      , false, true",
+		"name,  NAME,                      , false, true",
+		"name,  name,                  7000, false, true",
+		"name,  param,                     , false, false",
+		"name,  param,                 7000, false, false",
+		"    ,  name,  -1575415002568401616, true,  true",
+		"param, name,  -1575415002568401616, true,  true",
+		"    ,  param, -1575415002568401616, true,  false",
+		"name,  param, -1575415002568401616, true,  false",
+	})
+	public void testIsMatchSearchParams_matchesByParamNameOrHashIdentity(String theParamName,
+																		 String theExpectedParamName,
+																		 Long theHashIdentity,
+																		 boolean theIndexStorageOptimized,
+																		 boolean theShouldMatch) {
+		// setup
+		StorageSettings storageSettings = new StorageSettings();
+		storageSettings.setIndexStorageOptimized(theIndexStorageOptimized);
+		ResourceIndexedSearchParamString param = new ResourceIndexedSearchParamString();
+		param.setResourceType("Patient");
+		param.setParamName(theParamName);
+		param.setHashIdentity(theHashIdentity);
+
+		// execute
+		boolean isMatch = ResourceIndexedSearchParams.isMatchSearchParam(storageSettings, "Patient", theExpectedParamName, param);
+
+		// validate
+		assertThat(isMatch).isEqualTo(theShouldMatch);
+	}
 }

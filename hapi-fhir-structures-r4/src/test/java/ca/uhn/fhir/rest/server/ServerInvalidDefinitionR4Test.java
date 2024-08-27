@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
@@ -16,7 +17,8 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.test.utilities.server.MockServletUtil;
 import com.google.common.collect.Lists;
-import org.hamcrest.core.StringContains;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.IdType;
@@ -24,13 +26,12 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Test;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
+
 
 public class ServerInvalidDefinitionR4Test extends BaseR4ServerTest {
 
@@ -38,11 +39,10 @@ public class ServerInvalidDefinitionR4Test extends BaseR4ServerTest {
 	public void testWrongConditionalUrlType() throws Exception {
 		try {
 			startServer(new UpdateWithWrongConditionalUrlType());
-			fail();
-		} catch (ServletException e) {
-			assertThat(e.getCause().toString(), StringContains.containsString("ConfigurationException"));
-			assertThat(e.getCause().toString(), StringContains.containsString(
-				"Parameters annotated with @ConditionalUrlParam must be of type String, found incorrect parameter in method \"public ca.uhn.fhir.rest.api.MethodOutcome ca.uhn.fhir.rest.server.ServerInvalidDefinitionR4Test$UpdateWithWrongConditionalUrlType.update(ca.uhn.fhir.rest.param.TokenParam,org.hl7.fhir.r4.model.Patient)"));
+			fail();		} catch (ConfigurationException e) {
+			assertThat(e.getCause().toString()).contains("ConfigurationException");
+			assertThat(e.getCause().toString()).contains(
+				"Parameters annotated with @ConditionalUrlParam must be of type String, found incorrect parameter in method \"public ca.uhn.fhir.rest.api.MethodOutcome ca.uhn.fhir.rest.server.ServerInvalidDefinitionR4Test$UpdateWithWrongConditionalUrlType.update(ca.uhn.fhir.rest.param.TokenParam,org.hl7.fhir.r4.model.Patient)");
 		}
 	}
 
@@ -50,11 +50,9 @@ public class ServerInvalidDefinitionR4Test extends BaseR4ServerTest {
 	public void testWrongResourceType() throws Exception {
 		try {
 			startServer(new UpdateWithWrongResourceType());
-			fail();
-		} catch (ServletException e) {
-			assertThat(e.getCause().toString(), StringContains.containsString("ConfigurationException"));
-			assertThat(e.getCause().toString(), StringContains
-				.containsString("Method 'update' is annotated with @ResourceParam but has a type that is not an implementation of org.hl7.fhir.instance.model.api.IBaseResource or String or byte[]"));
+			fail();		} catch (ConfigurationException e) {
+			assertThat(e.getCause().toString()).contains("ConfigurationException");
+			assertThat(e.getCause().toString().contains("Method 'update' is annotated with @ResourceParam but has a type that is not an implementation of org.hl7.fhir.instance.model.api.IBaseResource or String or byte[]"));
 		}
 	}
 
@@ -62,10 +60,9 @@ public class ServerInvalidDefinitionR4Test extends BaseR4ServerTest {
 	public void testWrongValidateModeType() throws Exception {
 		try {
 			startServer(new ValidateWithWrongModeType());
-			fail();
-		} catch (ServletException e) {
-			assertThat(e.getCause().toString(), StringContains.containsString("ConfigurationException"));
-			assertThat(e.getCause().toString(), StringContains.containsString("Parameter annotated with @Validate.Mode must be of type ca.uhn.fhir.rest.api.ValidationModeEnum"));
+			fail();		} catch (ConfigurationException e) {
+			assertThat(e.getCause().toString()).contains("ConfigurationException");
+			assertThat(e.getCause().toString()).contains("Parameter annotated with @Validate.Mode must be of type ca.uhn.fhir.rest.api.ValidationModeEnum");
 		}
 	}
 
@@ -73,10 +70,9 @@ public class ServerInvalidDefinitionR4Test extends BaseR4ServerTest {
 	public void testWrongValidateProfileType() throws Exception {
 		try {
 			startServer(new ValidateWithWrongProfileType());
-			fail();
-		} catch (ServletException e) {
-			assertThat(e.getCause().toString(), StringContains.containsString("ConfigurationException"));
-			assertThat(e.getCause().toString(), StringContains.containsString("Parameter annotated with @Validate.Profile must be of type java.lang.String"));
+			fail();		} catch (ConfigurationException e) {
+			assertThat(e.getCause().toString()).contains("ConfigurationException");
+			assertThat(e.getCause().toString()).contains("Parameter annotated with @Validate.Profile must be of type java.lang.String");
 		}
 	}
 
@@ -93,9 +89,8 @@ public class ServerInvalidDefinitionR4Test extends BaseR4ServerTest {
 
 		try {
 			startServer(new MyProvider());
-			fail();
-		} catch (ServletException e) {
-			assertThat(e.getCause().toString(), StringContains.containsString(Msg.code(288) + "Failure scanning class MyProvider: "+ Msg.code(421) + "Illegal method parameter annotation @OptionalParam on method: public ca.uhn.fhir.rest.api.MethodOutcome ca.uhn.fhir.rest.server.ServerInvalidDefinitionR4Test$1MyProvider.update(org.hl7.fhir.r4.model.StringType)"));
+			fail();		} catch (ConfigurationException e) {
+			assertThat(e.toString()).contains(Msg.code(288) + "Failure scanning class MyProvider: "+ Msg.code(421) + "Illegal method parameter annotation @OptionalParam on method: public ca.uhn.fhir.rest.api.MethodOutcome ca.uhn.fhir.rest.server.ServerInvalidDefinitionR4Test$1MyProvider.update(org.hl7.fhir.r4.model.StringType)");
 		}
 	}
 
@@ -120,9 +115,8 @@ public class ServerInvalidDefinitionR4Test extends BaseR4ServerTest {
 
 		try {
 			startServer(provider);
-			fail();
-		} catch (ServletException e) {
-			assertEquals(Msg.code(288) + "Failure scanning class MyProvider: "+ Msg.code(404) + "@OperationParam detected on method that is not annotated with @Operation: public java.util.List<org.hl7.fhir.instance.model.api.IBaseResource> ca.uhn.fhir.rest.server.ServerInvalidDefinitionR4Test$2MyProvider.search(org.hl7.fhir.r4.model.StringType,org.hl7.fhir.r4.model.StringType)", e.getCause().getMessage());
+			fail();		} catch (ConfigurationException e) {
+			assertEquals(Msg.code(288) + "Failure scanning class MyProvider: " + Msg.code(404) + "@OperationParam detected on method that is not annotated with @Operation: public java.util.List<org.hl7.fhir.instance.model.api.IBaseResource> ca.uhn.fhir.rest.server.ServerInvalidDefinitionR4Test$2MyProvider.search(org.hl7.fhir.r4.model.StringType,org.hl7.fhir.r4.model.StringType)", e.getMessage());
 		}
 	}
 
@@ -202,9 +196,8 @@ public class ServerInvalidDefinitionR4Test extends BaseR4ServerTest {
 
 		try {
 			rs.init(MockServletUtil.createServletConfig());
-			fail();
-		} catch (ServletException e) {
-			assertEquals(Msg.code(297) + "Failed to initialize FHIR Restful server: "+ Msg.code(288) + "Failure scanning class PlainProviderWithExtendedOperationOnNoType: "+ Msg.code(425) + "@Operation method is an instance level method (it has an @IdParam parameter) but is not marked as global() and is not declared in a resource provider: everything", e.getMessage());
+			fail();		} catch (ServletException e) {
+			assertEquals(Msg.code(297) + "Failed to initialize FHIR Restful server: " + Msg.code(288) + "Failure scanning class PlainProviderWithExtendedOperationOnNoType: " + Msg.code(425) + "@Operation method is an instance level method (it has an @IdParam parameter) but is not marked as global() and is not declared in a resource provider: everything", e.getMessage());
 		}
 
 	}

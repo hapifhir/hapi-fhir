@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.mdm.interceptor;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
@@ -16,6 +17,7 @@ import ca.uhn.fhir.mdm.model.CanonicalEID;
 import ca.uhn.fhir.mdm.model.MdmCreateOrUpdateParams;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.rules.config.MdmSettings;
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -27,6 +29,8 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.ContactPoint;
+import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.Organization;
@@ -34,11 +38,14 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.test.context.ContextConfiguration;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -46,15 +53,10 @@ import static ca.uhn.fhir.mdm.api.MdmConstants.CODE_GOLDEN_RECORD_REDIRECTED;
 import static ca.uhn.fhir.mdm.api.MdmConstants.CODE_HAPI_MDM_MANAGED;
 import static ca.uhn.fhir.mdm.api.MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS;
 import static ca.uhn.fhir.mdm.api.MdmConstants.SYSTEM_MDM_MANAGED;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.startsWith;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.nullValue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -107,6 +109,70 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 		assertLinkCount(0);
 	}
 
+	@ParameterizedTest
+	@ValueSource(booleans = { true, false })
+	public void deleteResourcesByUrl_withMultipleDeleteCatchingSourceAndGoldenResource_deletesWithoutThrowing(boolean theIncludeOtherResources) throws InterruptedException {
+		// setup
+		boolean allowMultipleDelete = myStorageSettings.isAllowMultipleDelete();
+		myStorageSettings.setAllowMultipleDelete(true);
+
+		int linkCount = 0;
+		int resourceCount = 0;
+		myMdmHelper.createWithLatch(buildJanePatient());
+		resourceCount += 2; // patient + golden
+		linkCount++;
+
+		// add some other resources to make it more complex
+		if (theIncludeOtherResources) {
+			Date birthday = new Date();
+			Patient patient = new Patient();
+			patient.getNameFirstRep().addGiven("yui");
+			patient.setBirthDate(birthday);
+			patient.setTelecom(Collections.singletonList(new ContactPoint()
+				.setSystem(ContactPoint.ContactPointSystem.PHONE)
+				.setValue("555-567-5555")));
+			DateType dateType = new DateType(birthday);
+			patient.addIdentifier().setSystem(TEST_ID_SYSTEM).setValue("ID.YUI.123");
+			dateType.setPrecision(TemporalPrecisionEnum.DAY);
+			patient.setBirthDateElement(dateType);
+			patient.setActive(true);
+			for (int i = 0; i < 2; i++) {
+				String familyName = i == 0 ? "hirasawa" : "kotegawa";
+				patient.getNameFirstRep().setFamily(familyName);
+				myMdmHelper.createWithLatch(patient);
+				resourceCount++;
+				linkCount++; // every resource creation creates 1 link
+			}
+			resourceCount++; // for the Golden Resource
+
+			// verify we have at least this many resources
+			SearchParameterMap map = new SearchParameterMap();
+			map.setLoadSynchronous(true);
+			IBundleProvider provider = myPatientDao.search(map, new SystemRequestDetails());
+			assertEquals(resourceCount, provider.size());
+
+			// verify we have the links
+			assertEquals(linkCount, myMdmLinkDao.count());
+		}
+
+		try {
+			// test
+			// filter will delete everything
+			DeleteMethodOutcome outcome = myPatientDao.deleteByUrl("Patient?_lastUpdated=ge2024-01-01", new SystemRequestDetails());
+
+			// validation
+			assertNotNull(outcome);
+			List<MdmLink> links = myMdmLinkDao.findAll();
+			assertTrue(links.isEmpty());
+			SearchParameterMap map = new SearchParameterMap();
+			map.setLoadSynchronous(true);
+			IBundleProvider provider = myPatientDao.search(map, new SystemRequestDetails());
+			assertTrue(provider.getAllResources().isEmpty());
+		} finally {
+			myStorageSettings.setAllowMultipleDelete(allowMultipleDelete);
+		}
+	}
+
 	@Test
 	public void testGoldenResourceDeleted_whenOnlyMatchedResourceDeleted() throws InterruptedException {
 		// Given
@@ -120,7 +186,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 
 		// Then
 		List<IBaseResource> resources = myPatientDao.search(new SearchParameterMap(), SystemRequestDetails.forAllPartitions()).getAllResources();
-		assertTrue(resources.isEmpty());
+		assertThat(resources).isEmpty();
 		assertLinkCount(0);
 
 		try {
@@ -148,7 +214,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 
 		// Then
 		List<IBaseResource> resources = myPatientDao.search(new SearchParameterMap(), SystemRequestDetails.forAllPartitions()).getAllResources();
-		assertEquals(2, resources.size());
+		assertThat(resources).hasSize(2);
 
 		assertLinksMatchResult(MdmMatchResultEnum.MATCH);
 	}
@@ -172,12 +238,16 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 
 		assertLinksMatchResult(MdmMatchResultEnum.MATCH, MdmMatchResultEnum.POSSIBLE_MATCH, MdmMatchResultEnum.POSSIBLE_MATCH);
 
+		logAllTokenIndexes();
+
 		// When
-		myPatientDao.delete(paulPatient.getIdElement());
+		myPatientDao.delete(paulPatient.getIdElement(), new SystemRequestDetails());
+
+		logAllTokenIndexes();
 
 		// Then
 		List<IBaseResource> resources = myPatientDao.search(new SearchParameterMap(), SystemRequestDetails.forAllPartitions()).getAllResources();
-		assertEquals(3, resources.size());
+		assertThat(resources).hasSize(3);
 
 		assertLinksMatchResult(MdmMatchResultEnum.MATCH, MdmMatchResultEnum.POSSIBLE_MATCH);
 	}
@@ -218,7 +288,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 		   Paul 3 POSSIBLE_MATCH to GR2 --> KEPT
 		   GR1 POSSIBLE_DUPLICATE GR2 --> DELETED */
 		List<IBaseResource> resources = myPatientDao.search(new SearchParameterMap(), SystemRequestDetails.forAllPartitions()).getAllResources();
-		assertEquals(3, resources.size());
+		assertThat(resources).hasSize(3);
 
 		assertLinksMatchResult(MdmMatchResultEnum.MATCH, MdmMatchResultEnum.POSSIBLE_MATCH);
 	}
@@ -260,7 +330,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 		   Paul 3 POSSIBLE_MATCH to GR2 --> KEPT
 		   GR1 POSSIBLE_DUPLICATE GR2 --> DELETED */
 		List<IBaseResource> resources = myPatientDao.search(new SearchParameterMap(), SystemRequestDetails.forAllPartitions()).getAllResources();
-		assertEquals(3, resources.size());
+		assertThat(resources).hasSize(3);
 
 		assertLinksMatchResult(MdmMatchResultEnum.MATCH, MdmMatchResultEnum.POSSIBLE_MATCH);
 	}
@@ -304,7 +374,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 			myMdmHelper.doCreateResource(patient, true);
 			fail();
 		} catch (ForbiddenOperationException e) {
-			assertThat(e.getMessage(), startsWith("HAPI-0765: Cannot create or modify Resources that are managed by MDM."));
+			assertThat(e.getMessage()).startsWith("HAPI-0765: Cannot create or modify Resources that are managed by MDM.");
 		}
 	}
 
@@ -315,7 +385,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 			myMdmHelper.doCreateResource(patient, true);
 			fail();
 		} catch (ForbiddenOperationException e) {
-			assertThat(e.getMessage(), startsWith("HAPI-0765: Cannot create or modify Resources that are managed by MDM."));
+			assertThat(e.getMessage()).startsWith("HAPI-0765: Cannot create or modify Resources that are managed by MDM.");
 		}
 	}
 
@@ -327,7 +397,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 			myMdmHelper.doCreateResource(medication, true);
 			fail();
 		} catch (ForbiddenOperationException e) {
-			assertThat(e.getMessage(), startsWith("HAPI-0765: Cannot create or modify Resources that are managed by MDM."));
+			assertThat(e.getMessage()).startsWith("HAPI-0765: Cannot create or modify Resources that are managed by MDM.");
 		}
 	}
 
@@ -355,7 +425,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 			myMdmHelper.doCreateResource(organization, true);
 			fail();
 		} catch (ForbiddenOperationException e) {
-			assertThat(e.getMessage(), startsWith("HAPI-0765: Cannot create or modify Resources that are managed by MDM."));
+			assertThat(e.getMessage()).startsWith("HAPI-0765: Cannot create or modify Resources that are managed by MDM.");
 		}
 	}
 
@@ -383,7 +453,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 		List<IBaseResource> resources = search.getResources(0, search.size());
 
 		for (IBaseResource r : resources) {
-			assertThat(r.getMeta().getTag(SYSTEM_MDM_MANAGED, CODE_HAPI_MDM_MANAGED), is(notNullValue()));
+			assertNotNull(r.getMeta().getTag(SYSTEM_MDM_MANAGED, CODE_HAPI_MDM_MANAGED));
 		}
 	}
 
@@ -421,7 +491,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 			myMdmHelper.doUpdateResource(goldenResourcePatient, true);
 			fail();
 		} catch (ForbiddenOperationException e) {
-			assertThat(e.getMessage(), startsWith("HAPI-0765: Cannot create or modify Resources that are managed by MDM."));
+			assertThat(e.getMessage()).startsWith("HAPI-0765: Cannot create or modify Resources that are managed by MDM.");
 		}
 	}
 
@@ -432,10 +502,10 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 		TransactionLogMessages mdmTransactionLogMessages = wrapper.getLogMessages();
 
 		//There is no TransactionGuid here as there is no TransactionLog in this context.
-		assertThat(mdmTransactionLogMessages.getTransactionGuid(), is(nullValue()));
+		assertNull(mdmTransactionLogMessages.getTransactionGuid());
 
 		List<String> messages = mdmTransactionLogMessages.getValues();
-		assertThat(messages.isEmpty(), is(false));
+		assertEquals(false, messages.isEmpty());
 	}
 
 	@Test
@@ -453,8 +523,8 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 
 
 		List<CanonicalEID> externalEids = myEIDHelper.getExternalEid(patient);
-		assertThat(externalEids, hasSize(1));
-		assertThat("some_new_eid", is(equalTo(externalEids.get(0).getValue())));
+		assertThat(externalEids).hasSize(1);
+		assertEquals(externalEids.get(0).getValue(), "some_new_eid");
 	}
 
 	@Test
@@ -469,7 +539,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 			myMdmHelper.doUpdateResource(jane, true);
 			fail();
 		} catch (ForbiddenOperationException e) {
-			assertThat(e.getMessage(), is(equalTo("HAPI-0763: While running with EID updates disabled, EIDs may not be updated on source resources")));
+			assertEquals("HAPI-0763: While running with EID updates disabled, EIDs may not be updated on source resources", e.getMessage());
 		}
 		setPreventEidUpdates(false);
 	}
@@ -484,7 +554,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 			myMdmHelper.doCreateResource(patient, true);
 			fail();
 		} catch (ForbiddenOperationException e) {
-			assertThat(e.getMessage(), is(equalTo("HAPI-0766: While running with multiple EIDs disabled, source resources may have at most one EID.")));
+			assertEquals("HAPI-0766: While running with multiple EIDs disabled, source resources may have at most one EID.", e.getMessage());
 		}
 
 		setPreventMultipleEids(false);

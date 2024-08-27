@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,53 +20,55 @@
 package ca.uhn.fhir.jpa.entity;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.model.entity.IBaseResourceEntity;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.api.Constants;
+import jakarta.annotation.Nullable;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Id;
+import jakarta.persistence.Lob;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.Subselect;
 
 import java.io.Serializable;
 import java.util.Date;
-import javax.annotation.Nullable;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.Id;
-import javax.persistence.Lob;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 
 @SuppressWarnings("SqlDialectInspection")
 @Entity
 @Immutable
-@Subselect("SELECT h.pid               as pid,            " + "               r.res_id            as res_id,         "
-		+ "               h.res_type          as res_type,       "
-		+ "               h.res_version       as res_version,    "
-		+ // FHIR version
-		"               h.res_ver           as res_ver,        "
-		+ // resource version
-		"               h.has_tags          as has_tags,       "
-		+ "               h.res_deleted_at    as res_deleted_at, "
-		+ "               h.res_published     as res_published,  "
-		+ "               h.res_updated       as res_updated,    "
-		+ "               h.res_text          as res_text,       "
-		+ "               h.res_text_vc       as res_text_vc,    "
-		+ "               h.res_encoding      as res_encoding,   "
+// Ideally, all tables and columns should be in UPPERCASE if we ever choose to use a case-sensitive collation for MSSQL
+// and there's a risk that queries on lowercase database objects fail.
+@Subselect("SELECT h.PID               as PID,            "
+		+ "               r.RES_ID            as RES_ID,         "
+		+ "               h.RES_TYPE          as RES_TYPE,       "
+		+ "               h.RES_VERSION       as RES_VERSION,    "
+		// FHIR version
+		+ "               h.RES_VER           as RES_VER,        "
+		// resource version
+		+ "               h.HAS_TAGS          as HAS_TAGS,       "
+		+ "               h.RES_DELETED_AT    as RES_DELETED_AT, "
+		+ "               h.RES_PUBLISHED     as RES_PUBLISHED,  "
+		+ "               h.RES_UPDATED       as RES_UPDATED,    "
+		+ "               h.RES_TEXT          as RES_TEXT,       "
+		+ "               h.RES_TEXT_VC       as RES_TEXT_VC,    "
+		+ "               h.RES_ENCODING      as RES_ENCODING,   "
 		+ "               h.PARTITION_ID      as PARTITION_ID,   "
 		+ "               p.SOURCE_URI        as PROV_SOURCE_URI,"
 		+ "               p.REQUEST_ID        as PROV_REQUEST_ID,"
-		+ "               f.forced_id         as FORCED_PID      "
-		+ "FROM HFJ_RES_VER h "
-		+ "    LEFT OUTER JOIN HFJ_FORCED_ID f ON f.resource_pid = h.res_id "
-		+ "    LEFT OUTER JOIN HFJ_RES_VER_PROV p ON p.res_ver_pid = h.pid "
-		+ "    INNER JOIN HFJ_RESOURCE r       ON r.res_id = h.res_id and r.res_ver = h.res_ver")
+		+ "               r.FHIR_ID         as FHIR_ID      "
+		+ "FROM HFJ_RESOURCE r "
+		+ "    INNER JOIN HFJ_RES_VER h ON r.RES_ID = h.RES_ID and r.RES_VER = h.RES_VER"
+		+ "    LEFT OUTER JOIN HFJ_RES_VER_PROV p ON p.RES_VER_PID = h.PID ")
 public class ResourceSearchView implements IBaseResourceEntity, Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -120,13 +122,15 @@ public class ResourceSearchView implements IBaseResourceEntity, Serializable {
 	@Enumerated(EnumType.STRING)
 	private ResourceEncodingEnum myEncoding;
 
-	@Column(name = "FORCED_PID", length = ForcedId.MAX_FORCED_ID_LENGTH)
-	private String myForcedPid;
+	@Column(name = "FHIR_ID", length = ResourceTable.MAX_FORCED_ID_LENGTH)
+	private String myFhirId;
 
 	@Column(name = "PARTITION_ID")
 	private Integer myPartitionId;
 
-	public ResourceSearchView() {}
+	public ResourceSearchView() {
+		// public constructor for Hibernate
+	}
 
 	public String getResourceTextVc() {
 		return myResourceTextVc;
@@ -158,8 +162,8 @@ public class ResourceSearchView implements IBaseResourceEntity, Serializable {
 		myFhirVersion = theFhirVersion;
 	}
 
-	public String getForcedId() {
-		return myForcedPid;
+	public String getFhirId() {
+		return myFhirId;
 	}
 
 	@Override
@@ -169,12 +173,11 @@ public class ResourceSearchView implements IBaseResourceEntity, Serializable {
 
 	@Override
 	public IdDt getIdDt() {
-		if (myForcedPid == null) {
+		if (myFhirId == null) {
 			Long id = myResourceId;
 			return new IdDt(myResourceType + '/' + id + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
 		} else {
-			return new IdDt(
-					getResourceType() + '/' + getForcedId() + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
+			return new IdDt(getResourceType() + '/' + getFhirId() + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
 		}
 	}
 

@@ -1,5 +1,6 @@
 package android.util;
 
+@SuppressWarnings("checkstyle:NoPrintln")
 public class Log {
 
 	public static final int VERBOSE = 2;

@@ -21,6 +21,7 @@ You may use the following command to get detailed help on the options:
 Note the arguments:
 
 * `-d [dialect]` &ndash; This indicates the database dialect to use. See the detailed help for a list of options
+* `--enable-heavyweight-migrations` &ndash; If this flag is set, additional migration tasks will be executed that are considered unnecessary to execute on a database with a significant amount of data loaded. This option is not generally necessary.
 
 # Oracle Support
 
@@ -29,6 +30,12 @@ Note that the Oracle JDBC drivers are not distributed in the Maven Central repos
 ```bash
 java -cp hapi-fhir-cli.jar ca.uhn.fhir.cli.App migrate-database -d ORACLE_12C -u "[url]" -n "[username]" -p "[password]"
 ```
+
+# Oracle and Sql Server Locking Note
+
+Some versions of Oracle and Sql Server (e.g. Oracle Standard or Sql Server Standard) do NOT support adding or removing an index without locking the underlying table.
+If you run migrations while these systems are running,
+they will have unavoidable long pauses in activity during these changes.
 
 ## Migrating 3.4.0 to 3.5.0+
 

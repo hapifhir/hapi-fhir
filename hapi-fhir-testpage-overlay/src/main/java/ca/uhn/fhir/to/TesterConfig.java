@@ -4,17 +4,16 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.server.util.ITestingUiClientFactory;
+import jakarta.annotation.PostConstruct;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.springframework.beans.factory.annotation.Required;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import javax.annotation.PostConstruct;
 
 public class TesterConfig {
 	public static final String SYSPROP_FORCE_SERVERS = "ca.uhn.fhir.to.TesterConfig_SYSPROP_FORCE_SERVERS";
@@ -138,7 +137,6 @@ public class TesterConfig {
 		return inclusionChecker.shouldInclude(theResourceId);
 	}
 
-	@Required
 	public void setServers(List<String> theServers) {
 		List<String> servers = theServers;
 
@@ -154,7 +152,7 @@ public class TesterConfig {
 
 			if (nextSplit.length < 3) {
 				throw new IllegalArgumentException(
-						Msg.code(195) + "Invalid serveer line '" + nextRaw + "' - Must be comma separated");
+						Msg.code(195) + "Invalid server line '" + nextRaw + "' - Must be comma separated");
 			} else {
 				Validate.notBlank(nextSplit[0], "theId can not be blank");
 				Validate.notBlank(nextSplit[1], "theVersion can not be blank");

@@ -1,6 +1,7 @@
 package ca.uhn.fhir.rest.server;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -21,7 +22,6 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
-import org.hamcrest.Matchers;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.r4.model.Narrative;
@@ -35,15 +35,11 @@ import org.mockito.Mockito;
 
 import java.io.IOException;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.endsWith;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.startsWith;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 
-public class ResponseValidatingInterceptorR4Test {
+public class ResponseValidatingInterceptorR4Test extends BaseValidationTestWithInlineMocks {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResponseValidatingInterceptorR4Test.class);
 	@RegisterExtension
 	static HttpClientExtension ourClient = new HttpClientExtension();
@@ -101,7 +97,7 @@ public class ResponseValidatingInterceptorR4Test {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(500, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, containsString("\"diagnostics\": \"" + Msg.code(331) + "java.lang.NullPointerException: SOME MESSAGE\""));
+		assertThat(responseContent).contains("\"diagnostics\": \"" + Msg.code(331) + "java.lang.NullPointerException: SOME MESSAGE\"");
 	}
 
 	@SuppressWarnings("unchecked")
@@ -131,7 +127,7 @@ public class ResponseValidatingInterceptorR4Test {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(status.toString(), not(containsString("X-FHIR-Response-Validation")));
+		assertThat(status.toString()).doesNotContain("X-FHIR-Response-Validation");
 	}
 
 	@SuppressWarnings("unchecked")
@@ -161,7 +157,7 @@ public class ResponseValidatingInterceptorR4Test {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(500, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, containsString("\"diagnostics\": \"FOO\""));
+		assertThat(responseContent).contains("\"diagnostics\": \"FOO\"");
 	}
 
 	@SuppressWarnings("unchecked")
@@ -191,7 +187,7 @@ public class ResponseValidatingInterceptorR4Test {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(status.toString(), not(containsString("X-FHIR-Response-Validation")));
+		assertThat(status.toString()).doesNotContain("X-FHIR-Response-Validation");
 	}
 
 
@@ -210,7 +206,7 @@ public class ResponseValidatingInterceptorR4Test {
 			ourLog.info("Response was:\n{}", status);
 
 			assertEquals(204, status.getStatusLine().getStatusCode());
-			assertThat(status.toString(), not(containsString("X-FHIR-Response-Validation")));
+			assertThat(status.toString()).doesNotContain("X-FHIR-Response-Validation");
 		} finally {
 			IOUtils.closeQuietly(status);
 		}
@@ -277,8 +273,8 @@ public class ResponseValidatingInterceptorR4Test {
 			ourLog.trace("Response was:\n{}", responseContent);
 
 			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertThat(status.getFirstHeader("X-FHIR-Response-Validation").getValue(), endsWith("..."));
-			assertThat(status.getFirstHeader("X-FHIR-Response-Validation").getValue(), startsWith("{\"resourceType\":\"OperationOutcome\""));
+			assertThat(status.getFirstHeader("X-FHIR-Response-Validation").getValue()).endsWith("...");
+			assertThat(status.getFirstHeader("X-FHIR-Response-Validation").getValue()).startsWith("{\"resourceType\":\"OperationOutcome\"");
 		}
 		{
 			myInterceptor.setMaximumHeaderLength(100);
@@ -291,8 +287,8 @@ public class ResponseValidatingInterceptorR4Test {
 			ourLog.trace("Response was:\n{}", responseContent);
 
 			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertThat(status.getFirstHeader("X-FHIR-Response-Validation").getValue(), endsWith("..."));
-			assertThat(status.getFirstHeader("X-FHIR-Response-Validation").getValue(), startsWith("{\"resourceType\":\"OperationOutcome\""));
+			assertThat(status.getFirstHeader("X-FHIR-Response-Validation").getValue()).endsWith("...");
+			assertThat(status.getFirstHeader("X-FHIR-Response-Validation").getValue()).startsWith("{\"resourceType\":\"OperationOutcome\"");
 		}
 	}
 
@@ -316,8 +312,8 @@ public class ResponseValidatingInterceptorR4Test {
 		ourLog.trace("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(status.toString(), (containsString(
-			"X-FHIR-Response-Validation: {\"resourceType\":\"OperationOutcome\",\"issue\":[{\"severity\":\"information\",\"code\":\"informational\",\"diagnostics\":\"No issues detected\"}]}")));
+		assertThat(status.toString().contains(
+			"X-FHIR-Response-Validation: {\"resourceType\":\"OperationOutcome\",\"issue\":[{\"severity\":\"information\",\"code\":\"informational\",\"diagnostics\":\"No issues detected\"}]}"));
 	}
 
 	@Test
@@ -339,7 +335,7 @@ public class ResponseValidatingInterceptorR4Test {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(422, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, containsString("\"severity\": \"error\""));
+		assertThat(responseContent).contains("\"severity\": \"error\"");
 	}
 
 	@Test
@@ -361,7 +357,7 @@ public class ResponseValidatingInterceptorR4Test {
 		ourLog.trace("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(status.toString(), not(containsString("X-FHIR-Response-Validation")));
+		assertThat(status.toString()).doesNotContain("X-FHIR-Response-Validation");
 	}
 
 	@Test
@@ -386,7 +382,7 @@ public class ResponseValidatingInterceptorR4Test {
 		ourLog.trace("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(status.toString(), (containsString("X-FHIR-Response-Validation: NO ISSUES")));
+		assertThat(status.toString().contains("X-FHIR-Response-Validation: NO ISSUES"));
 	}
 
 	@Test
@@ -412,7 +408,7 @@ public class ResponseValidatingInterceptorR4Test {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(422, status.getStatusLine().getStatusCode());
-		assertThat(status.toString(), containsString("X-FHIR-Response-Validation"));
+		assertThat(status.toString()).contains("X-FHIR-Response-Validation");
 	}
 
 	/**
@@ -437,7 +433,7 @@ public class ResponseValidatingInterceptorR4Test {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(422, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, Matchers.containsString("\"severity\": \"error\""));
+		assertThat(responseContent).contains("\"severity\": \"error\"");
 	}
 
 	@Test
@@ -459,7 +455,7 @@ public class ResponseValidatingInterceptorR4Test {
 		ourLog.trace("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(status.toString(), not(containsString("X-FHIR-Response-Validation")));
+		assertThat(status.toString()).doesNotContain("X-FHIR-Response-Validation");
 	}
 
 	@Test
@@ -479,7 +475,7 @@ public class ResponseValidatingInterceptorR4Test {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(status.toString(), not(containsString("X-FHIR-Response-Validation")));
+		assertThat(status.toString()).doesNotContain("X-FHIR-Response-Validation");
 	}
 
 	@Test
@@ -500,7 +496,7 @@ public class ResponseValidatingInterceptorR4Test {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(status.toString(), (containsString("X-FHIR-Response-Validation")));
+		assertThat(status.toString().contains("X-FHIR-Response-Validation"));
 	}
 
 }

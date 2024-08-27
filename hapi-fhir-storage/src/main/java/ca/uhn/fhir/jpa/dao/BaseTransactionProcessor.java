@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.interceptor.model.TransactionWriteOperationsDetails;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -41,15 +42,18 @@ import ca.uhn.fhir.jpa.cache.ResourcePersistentIdMap;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictUtil;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
+import ca.uhn.fhir.model.valueset.BundleEntryTransactionMethodEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
@@ -58,6 +62,7 @@ import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.DeferredInterceptorBroadcasts;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
@@ -84,6 +89,8 @@ import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.dstu3.model.Bundle;
@@ -96,6 +103,7 @@ import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.IdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -124,7 +132,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
 
 import static ca.uhn.fhir.util.StringUtil.toUtf8String;
 import static java.util.Objects.isNull;
@@ -139,6 +146,9 @@ public abstract class BaseTransactionProcessor {
 	public static final Pattern UNQUALIFIED_MATCH_URL_START = Pattern.compile("^[a-zA-Z0-9_-]+=");
 	public static final Pattern INVALID_PLACEHOLDER_PATTERN = Pattern.compile("[a-zA-Z]+:.*");
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseTransactionProcessor.class);
+
+	@Autowired
+	private IRequestPartitionHelperSvc myRequestPartitionHelperService;
 
 	@Autowired
 	private PlatformTransactionManager myTxManager;
@@ -161,6 +171,9 @@ public abstract class BaseTransactionProcessor {
 
 	@Autowired
 	private StorageSettings myStorageSettings;
+
+	@Autowired
+	PartitionSettings myPartitionSettings;
 
 	@Autowired
 	private InMemoryResourceMatcher myInMemoryResourceMatcher;
@@ -373,9 +386,6 @@ public abstract class BaseTransactionProcessor {
 				myVersionAdapter.getEntries(theRequest).size());
 
 		long start = System.currentTimeMillis();
-
-		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
-		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 
 		IBaseBundle response =
 				myVersionAdapter.createBundle(org.hl7.fhir.r4.model.Bundle.BundleType.BATCHRESPONSE.toCode());
@@ -700,9 +710,13 @@ public abstract class BaseTransactionProcessor {
 		};
 		EntriesToProcessMap entriesToProcess;
 
+		RequestPartitionId requestPartitionId =
+				determineRequestPartitionIdForWriteEntries(theRequestDetails, theEntries);
+
 		try {
 			entriesToProcess = myHapiTransactionService
 					.withRequest(theRequestDetails)
+					.withRequestPartitionId(requestPartitionId)
 					.withTransactionDetails(theTransactionDetails)
 					.execute(txCallback);
 		} finally {
@@ -723,6 +737,87 @@ public abstract class BaseTransactionProcessor {
 			myVersionAdapter.setResponseLocation(nextEntry.getKey(), responseLocation);
 			myVersionAdapter.setResponseETag(nextEntry.getKey(), responseEtag);
 		}
+	}
+
+	/**
+	 * This method looks at the FHIR actions being performed in a List of bundle entries,
+	 * and determines the associated request partitions.
+	 */
+	@Nullable
+	protected RequestPartitionId determineRequestPartitionIdForWriteEntries(
+			RequestDetails theRequestDetails, List<IBase> theEntries) {
+		if (!myPartitionSettings.isPartitioningEnabled()) {
+			return RequestPartitionId.allPartitions();
+		}
+
+		return theEntries.stream()
+				.map(e -> getEntryRequestPartitionId(theRequestDetails, e))
+				.reduce(null, (accumulator, nextPartition) -> {
+					if (accumulator == null) {
+						return nextPartition;
+					} else if (nextPartition == null) {
+						return accumulator;
+					} else if (myHapiTransactionService.isCompatiblePartition(accumulator, nextPartition)) {
+						return accumulator.mergeIds(nextPartition);
+					} else {
+						String msg = myContext
+								.getLocalizer()
+								.getMessage(
+										BaseTransactionProcessor.class, "multiplePartitionAccesses", theEntries.size());
+						throw new InvalidRequestException(Msg.code(2541) + msg);
+					}
+				});
+	}
+
+	@Nullable
+	private RequestPartitionId getEntryRequestPartitionId(RequestDetails theRequestDetails, IBase nextEntry) {
+		RequestPartitionId nextWriteEntryRequestPartitionId = null;
+		String verb = myVersionAdapter.getEntryRequestVerb(myContext, nextEntry);
+		if (isNotBlank(verb)) {
+			BundleEntryTransactionMethodEnum verbEnum = BundleEntryTransactionMethodEnum.valueOf(verb);
+			switch (verbEnum) {
+				case GET:
+					nextWriteEntryRequestPartitionId = null;
+					break;
+				case DELETE: {
+					String requestUrl = myVersionAdapter.getEntryRequestUrl(nextEntry);
+					if (isNotBlank(requestUrl)) {
+						IdType id = new IdType(requestUrl);
+						String resourceType = id.getResourceType();
+						ReadPartitionIdRequestDetails details =
+								ReadPartitionIdRequestDetails.forDelete(resourceType, id);
+						nextWriteEntryRequestPartitionId =
+								myRequestPartitionHelperService.determineReadPartitionForRequest(
+										theRequestDetails, details);
+					}
+					break;
+				}
+				case PATCH: {
+					String requestUrl = myVersionAdapter.getEntryRequestUrl(nextEntry);
+					if (isNotBlank(requestUrl)) {
+						IdType id = new IdType(requestUrl);
+						String resourceType = id.getResourceType();
+						ReadPartitionIdRequestDetails details =
+								ReadPartitionIdRequestDetails.forPatch(resourceType, id);
+						nextWriteEntryRequestPartitionId =
+								myRequestPartitionHelperService.determineReadPartitionForRequest(
+										theRequestDetails, details);
+					}
+					break;
+				}
+				case POST:
+				case PUT: {
+					IBaseResource resource = myVersionAdapter.getResource(nextEntry);
+					if (resource != null) {
+						String resourceType = myContext.getResourceType(resource);
+						nextWriteEntryRequestPartitionId =
+								myRequestPartitionHelperService.determineCreatePartitionForRequest(
+										theRequestDetails, resource, resourceType);
+					}
+				}
+			}
+		}
+		return nextWriteEntryRequestPartitionId;
 	}
 
 	private boolean haveWriteOperationsHooks(RequestDetails theRequestDetails) {
@@ -1680,13 +1775,10 @@ public abstract class BaseTransactionProcessor {
 				if (newId != null) {
 					ourLog.debug(" * Replacing resource ref {} with {}", nextId, newId);
 
-					addRollbackReferenceRestore(theTransactionDetails, resourceReference);
 					if (theReferencesToAutoVersion.contains(resourceReference)) {
-						resourceReference.setReference(newId.getValue());
-						resourceReference.setResource(null);
+						replaceResourceReference(newId, resourceReference, theTransactionDetails);
 					} else {
-						resourceReference.setReference(newId.toVersionless().getValue());
-						resourceReference.setResource(null);
+						replaceResourceReference(newId.toVersionless(), resourceReference, theTransactionDetails);
 					}
 				}
 			} else if (nextId.getValue().startsWith("urn:")) {
@@ -1724,9 +1816,15 @@ public abstract class BaseTransactionProcessor {
 					DaoMethodOutcome outcome = theIdToPersistedOutcome.get(nextId);
 
 					if (outcome != null && !outcome.isNop() && !Boolean.TRUE.equals(outcome.getCreated())) {
-						addRollbackReferenceRestore(theTransactionDetails, resourceReference);
-						resourceReference.setReference(nextId.getValue());
-						resourceReference.setResource(null);
+						replaceResourceReference(nextId, resourceReference, theTransactionDetails);
+					}
+
+					// if referenced resource is not in transaction but exists in the DB, resolving its version
+					IResourcePersistentId persistedReferenceId = resourceVersionMap.getResourcePersistentId(nextId);
+					if (outcome == null && persistedReferenceId != null && persistedReferenceId.getVersion() != null) {
+						IIdType newReferenceId = nextId.withVersion(
+								persistedReferenceId.getVersion().toString());
+						replaceResourceReference(newReferenceId, resourceReference, theTransactionDetails);
 					}
 				}
 			}
@@ -1741,16 +1839,18 @@ public abstract class BaseTransactionProcessor {
 				continue; // No substitution on the resource ID itself!
 			}
 			String nextUriString = nextRef.getValueAsString();
-			if (theIdSubstitutions.containsSource(nextUriString)) {
-				IIdType newId = theIdSubstitutions.getForSource(nextUriString);
-				ourLog.debug(" * Replacing resource ref {} with {}", nextUriString, newId);
+			if (isNotBlank(nextUriString)) {
+				if (theIdSubstitutions.containsSource(nextUriString)) {
+					IIdType newId = theIdSubstitutions.getForSource(nextUriString);
+					ourLog.debug(" * Replacing resource ref {} with {}", nextUriString, newId);
 
-				String existingValue = nextRef.getValueAsString();
-				theTransactionDetails.addRollbackUndoAction(() -> nextRef.setValueAsString(existingValue));
+					String existingValue = nextRef.getValueAsString();
+					theTransactionDetails.addRollbackUndoAction(() -> nextRef.setValueAsString(existingValue));
 
-				nextRef.setValueAsString(newId.toVersionless().getValue());
-			} else {
-				ourLog.debug(" * Reference [{}] does not exist in bundle", nextUriString);
+					nextRef.setValueAsString(newId.toVersionless().getValue());
+				} else {
+					ourLog.debug(" * Reference [{}] does not exist in bundle", nextUriString);
+				}
 			}
 		}
 
@@ -1802,16 +1902,20 @@ public abstract class BaseTransactionProcessor {
 
 			theDaoMethodOutcome.setId(newId);
 
-			IIdType target = theIdSubstitutions.getForSource(newId);
-			if (target != null) {
-				target.setValue(newId.getValue());
-			}
+			theIdSubstitutions.updateTargets(newId);
 
 			if (theDaoMethodOutcome.getOperationOutcome() != null) {
 				IBase responseEntry = entriesToProcess.getResponseBundleEntryWithVersionlessComparison(newId);
 				myVersionAdapter.setResponseOutcome(responseEntry, theDaoMethodOutcome.getOperationOutcome());
 			}
 		}
+	}
+
+	private void replaceResourceReference(
+			IIdType theReferenceId, IBaseReference theResourceReference, TransactionDetails theTransactionDetails) {
+		addRollbackReferenceRestore(theTransactionDetails, theResourceReference);
+		theResourceReference.setReference(theReferenceId.getValue());
+		theResourceReference.setResource(null);
 	}
 
 	private void addRollbackReferenceRestore(
@@ -1836,7 +1940,7 @@ public abstract class BaseTransactionProcessor {
 				.filter(t -> t.getEntity().getDeleted() == null)
 				.filter(t -> t.getResource() != null)
 				.forEach(t -> resourceToIndexedParams.put(
-						t.getResource(), new ResourceIndexedSearchParams((ResourceTable) t.getEntity())));
+						t.getResource(), ResourceIndexedSearchParams.withLists((ResourceTable) t.getEntity())));
 
 		for (Map.Entry<String, Class<? extends IBaseResource>> nextEntry : conditionalRequestUrls.entrySet()) {
 			String matchUrl = nextEntry.getKey();
@@ -2030,6 +2134,11 @@ public abstract class BaseTransactionProcessor {
 			default:
 				return null;
 		}
+	}
+
+	@VisibleForTesting
+	public void setPartitionSettingsForUnitTest(PartitionSettings thePartitionSettings) {
+		myPartitionSettings = thePartitionSettings;
 	}
 
 	/**
@@ -2245,8 +2354,7 @@ public abstract class BaseTransactionProcessor {
 	public static String performIdSubstitutionsInMatchUrl(IdSubstitutionMap theIdSubstitutions, String theMatchUrl) {
 		String matchUrl = theMatchUrl;
 		if (isNotBlank(matchUrl) && !theIdSubstitutions.isEmpty()) {
-
-			int startIdx = matchUrl.indexOf('?');
+			int startIdx = 0;
 			while (startIdx != -1) {
 
 				int endIdx = matchUrl.indexOf('&', startIdx + 1);

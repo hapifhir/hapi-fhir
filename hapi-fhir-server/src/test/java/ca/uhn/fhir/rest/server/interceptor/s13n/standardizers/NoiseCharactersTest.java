@@ -2,8 +2,8 @@ package ca.uhn.fhir.rest.server.interceptor.s13n.standardizers;
 
 import org.junit.jupiter.api.Test;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class NoiseCharactersTest {
@@ -61,7 +61,7 @@ class NoiseCharactersTest {
 			, "#x0001 - #x - #x0000", "#x0000 #x0022"};
 
 		for (String i : invalidPatterns) {
-			assertThrows(IllegalArgumentException.class, () -> {
+			assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
 				myFilter.add(i);
 			});
 		}

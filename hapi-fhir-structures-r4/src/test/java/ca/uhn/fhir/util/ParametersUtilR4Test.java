@@ -1,7 +1,6 @@
 package ca.uhn.fhir.util;
 
 import ca.uhn.fhir.context.FhirContext;
-import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.r4.model.IntegerType;
@@ -9,14 +8,12 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ParametersUtilR4Test {
 	private static final String TEST_PERSON_ID = "Person/32768";
@@ -51,7 +48,7 @@ public class ParametersUtilR4Test {
 			.setValue(new StringType("VALUE4"));
 
 		List<String> values = ParametersUtil.getNamedParameterValuesAsString(FhirContext.forR4(), p, "foo");
-		assertThat(values, Matchers.contains("VALUE1", "VALUE2"));
+		assertThat(values).containsExactly("VALUE1", "VALUE2");
 	}
 
 	@Test
@@ -62,7 +59,7 @@ public class ParametersUtilR4Test {
 			.setValue(new IntegerType(123));
 
 		Optional<Integer> value = ParametersUtil.getNamedParameterValueAsInteger(FhirContext.forR4(), p, "foo");
-		assertTrue(value.isPresent());
+		assertThat(value).isPresent();
 		assertEquals(123, value.get().intValue());
 	}
 
@@ -74,9 +71,25 @@ public class ParametersUtilR4Test {
 			ParametersUtil.addPartString(ourFhirContext, resultPart, "personId", TEST_PERSON_ID);
 		}
 		List<String> values = ParametersUtil.getNamedParameterPartAsString(ourFhirContext, parameters, "link", "personId");
-		assertThat(values, hasSize(3));
-		assertThat(values.get(0), is(TEST_PERSON_ID));
-		assertThat(values.get(1), is(TEST_PERSON_ID));
-		assertThat(values.get(2), is(TEST_PERSON_ID));
+		assertThat(values).hasSize(3);
+		assertEquals(TEST_PERSON_ID, values.get(0));
+		assertEquals(TEST_PERSON_ID, values.get(1));
+		assertEquals(TEST_PERSON_ID, values.get(2));
+	}
+
+	@Test
+	public void testAddPartDecimalNoScientificNotation() {
+		// setup
+		Double decimalValue = Double.valueOf("10000000");
+		IBaseParameters parameters = ParametersUtil.newInstance(ourFhirContext);
+		IBase resultPart = ParametersUtil.addParameterToParameters(ourFhirContext, parameters, "link");
+
+		// execute
+		ParametersUtil.addPartDecimal(ourFhirContext, resultPart, "linkCreated", decimalValue);
+
+		// verify
+		String expected = BigDecimal.valueOf(decimalValue).toPlainString();
+		List<String> results = ParametersUtil.getNamedParameterPartAsString(ourFhirContext, parameters, "link", "linkCreated");
+		assertEquals(expected, results.get(0));
 	}
 }

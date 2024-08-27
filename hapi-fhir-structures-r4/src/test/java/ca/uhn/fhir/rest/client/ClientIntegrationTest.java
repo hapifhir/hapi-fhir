@@ -4,59 +4,48 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.client.apache.ApacheRestfulClientFactory;
 import ca.uhn.fhir.rest.client.api.IBasicClient;
 import ca.uhn.fhir.rest.client.impl.HttpBasicAuthInterceptor;
+import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
-import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.test.utilities.HttpClientExtension;
+import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.Validate;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.util.Collections;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ClientIntegrationTest {
-	private Server myServer;
-	private MyPatientResourceProvider myPatientProvider;
-	private static FhirContext ourCtx = FhirContext.forR4();
+	private MyPatientResourceProvider myPatientProvider = new MyPatientResourceProvider();
+	private static final FhirContext ourCtx = FhirContext.forR4Cached();
 
-	@BeforeEach
-	public void before() {
-		myServer = new Server(0);
+	@RegisterExtension
+	public RestfulServerExtension ourServer = new RestfulServerExtension(ourCtx)
+		 .registerProvider(myPatientProvider)
+		 .withPagingProvider(new FifoMemoryPagingProvider(100))
+		 .setDefaultResponseEncoding(EncodingEnum.XML);
 
-		myPatientProvider = new MyPatientResourceProvider();
-
-		ServletHandler proxyHandler = new ServletHandler();
-		RestfulServer servlet = new RestfulServer(ourCtx);
-		servlet.setResourceProviders(myPatientProvider);
-		ServletHolder servletHolder = new ServletHolder(servlet);
-		proxyHandler.addServletWithMapping(servletHolder, "/*");
-		myServer.setHandler(proxyHandler);
-
-	}
+	@RegisterExtension
+	private HttpClientExtension ourClient = new HttpClientExtension();
 
 	@SuppressWarnings("deprecation")
 	@Test
 	public void testClientSecurity() throws Exception {
-
-		JettyUtil.startServer(myServer);
-        int myPort = JettyUtil.getPortForStartedServer(myServer);
-
-		FhirContext ctx = FhirContext.forR4();
 
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		// PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
@@ -64,12 +53,13 @@ public class ClientIntegrationTest {
 		builder.addInterceptorFirst(new HttpBasicAuthInterceptor("foobar", "boobear"));
 
 		CloseableHttpClient httpClient = builder.build();
-		ctx.getRestfulClientFactory().setHttpClient(httpClient);
 
-		PatientClient client = ctx.newRestfulClient(PatientClient.class, "http://localhost:" + myPort + "/");
+		ourCtx.getRestfulClientFactory().setHttpClient(httpClient);
+
+		PatientClient client = ourCtx.newRestfulClient(PatientClient.class, ourServer.getBaseUrl() + "/");
 
 		List<Patient> actualPatients = client.searchForPatients(new StringDt("AAAABBBB"));
-		assertEquals(1, actualPatients.size());
+		assertThat(actualPatients).hasSize(1);
 		assertEquals("AAAABBBB", actualPatients.get(0).getNameFirstRep().getFamily());
 
 		assertEquals("Basic Zm9vYmFyOmJvb2JlYXI=", myPatientProvider.getAuthorizationHeader());
@@ -77,7 +67,7 @@ public class ClientIntegrationTest {
 
 	@AfterEach
 	public void after() throws Exception {
-		JettyUtil.closeServer(myServer);
+		ourCtx.setRestfulClientFactory(new ApacheRestfulClientFactory(ourCtx));
 	}
 
 	public static class MyPatientResourceProvider implements IResourceProvider {

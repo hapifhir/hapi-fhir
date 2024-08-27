@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -151,11 +151,25 @@ public class InternalCodingDt extends BaseCodingDt implements ICompositeDatatype
 	 * is consistent across versions. However this cannot consistently be assured. and When the meaning is not guaranteed to be consistent, the version SHOULD be exchanged
 	 * </p>
 	 */
-	public StringDt getVersion() {
+	@Override
+	public StringDt getVersionElement() {
 		if (myVersion == null) {
 			myVersion = new StringDt();
 		}
 		return myVersion;
+	}
+
+	@Override
+	public BooleanDt getUserSelectedElement() {
+		return new BooleanDt();
+	}
+
+	/**
+	 * Legacy name for {@link #getVersionElement()}
+	 */
+	@Deprecated(since = "7.0.0")
+	public StringDt getVersion() {
+		return getVersionElement();
 	}
 
 	/**

@@ -27,7 +27,6 @@ import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.HumanName;
-import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.MedicationDispense;
@@ -37,15 +36,16 @@ import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Narrative;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.PrimitiveType;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Type;
+import org.hl7.fhir.r4.model.codesystems.DataAbsentReason;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -54,6 +54,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.annotation.Nonnull;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -66,19 +67,12 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.hamcrest.core.IsNot.not;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+
 
 public class JsonParserR4Test extends BaseTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(JsonParserR4Test.class);
@@ -111,7 +105,7 @@ public class JsonParserR4Test extends BaseTest {
 			"}\n";
 		IBaseResource iBaseResource = ourCtx.newJsonParser().parseResource(binaryPayload);
 		String resourceType = iBaseResource.getIdElement().getResourceType();
-		assertThat(resourceType, is(equalTo("Binary")));
+		assertEquals("Binary", resourceType);
 
 		//Test a domain resource.
 		String observationPayload = "{\n" +
@@ -120,7 +114,7 @@ public class JsonParserR4Test extends BaseTest {
 			"}\n";
 		IBaseResource obs = ourCtx.newJsonParser().parseResource(observationPayload);
 		resourceType = obs.getIdElement().getResourceType();
-		assertThat(resourceType, is(equalTo("Observation")));
+		assertEquals("Observation", resourceType);
 	}
 
 	@Test
@@ -138,8 +132,7 @@ public class JsonParserR4Test extends BaseTest {
 
 		try {
 			ourCtx.newJsonParser().encodeResourceToString(p);
-			fail();
-		} catch (ConfigurationException e) {
+			fail();		} catch (ConfigurationException e) {
 			assertEquals(Msg.code(1844) + "Unable to encode extension, unrecognized child element type: ca.uhn.fhir.parser.JsonParserR4Test.MyUnknownPrimitiveType", e.getMessage());
 		}
 	}
@@ -161,7 +154,7 @@ public class JsonParserR4Test extends BaseTest {
 
 		String encoded = ourCtx.newJsonParser().encodeResourceToString(parsed);
 		ourLog.info(encoded);
-		assertThat(encoded, containsString("\"div\":\"" + expected.replace("\"", "\\\"") + "\""));
+		assertThat(encoded).contains("\"div\":\"" + expected.replace("\"", "\\\"") + "\"");
 	}
 
 	@Test
@@ -202,7 +195,7 @@ public class JsonParserR4Test extends BaseTest {
 
 		String asString = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle);
 		ourLog.info(asString);
-		assertThat(asString, not(containsString("{ }")));
+		assertThat(asString).doesNotContain("{ }");
 	}
 
 
@@ -230,7 +223,7 @@ public class JsonParserR4Test extends BaseTest {
 		String output = ctx.newJsonParser().setPrettyPrint(true).encodeResourceToString(qr);
 		ourLog.info(output);
 
-		assertThat(output, containsString("\"Questionnaire/123/_history/456\""));
+		assertThat(output).contains("\"Questionnaire/123/_history/456\"");
 	}
 
 	@Test
@@ -243,7 +236,7 @@ public class JsonParserR4Test extends BaseTest {
 		String output = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(qr);
 		ourLog.info(output);
 
-		assertThat(output, containsString("\n  \"resourceType\""));
+		assertThat(output).contains("\n  \"resourceType\"");
 	}
 
 	/**
@@ -264,7 +257,7 @@ public class JsonParserR4Test extends BaseTest {
 		ourLog.info(encoded);
 
 		int idx = encoded.indexOf("\"Medication\"");
-		assertNotEquals(-1, idx);
+		assertThat(idx).isNotEqualTo(-1);
 
 		idx = encoded.indexOf("\"Medication\"", idx + 1);
 		assertEquals(-1, idx);
@@ -329,7 +322,7 @@ public class JsonParserR4Test extends BaseTest {
 		ourLog.info(encoded);
 
 		int idx = encoded.indexOf("\"Medication\"");
-		assertNotEquals(-1, idx);
+		assertThat(idx).isNotEqualTo(-1);
 
 		idx = encoded.indexOf("\"Medication\"", idx + 1);
 		assertEquals(-1, idx);
@@ -362,7 +355,7 @@ public class JsonParserR4Test extends BaseTest {
 		ourLog.info(encoded);
 
 		int idx = encoded.indexOf("\"Medication\"");
-		assertNotEquals(-1, idx);
+		assertThat(idx).isNotEqualTo(-1);
 
 		idx = encoded.indexOf("\"Medication\"", idx + 1);
 		assertEquals(-1, idx);
@@ -440,10 +433,10 @@ public class JsonParserR4Test extends BaseTest {
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input);
 
 		ourLog.info("Encoded: {}", encoded);
-		assertThat(encoded, stringContainsInOrder(
+		assertThat(encoded).containsSubsequence(
 			"\"fullUrl\": \"urn:uuid:0.0.0.0\"",
 			"\"id\": \"1.1.1.1\""
-		));
+		);
 
 		input = ourCtx.newJsonParser().parseResource(Bundle.class, encoded);
 		assertEquals("urn:uuid:0.0.0.0", input.getEntry().get(0).getFullUrl());
@@ -475,10 +468,10 @@ public class JsonParserR4Test extends BaseTest {
 		Patient p = new Patient();
 		p.setId("1");
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p);
-		assertEquals("{\n" +
+		assertThat(encoded).isEqualTo("{\n" +
 			"  \"resourceType\": \"Patient\",\n" +
 			"  \"id\": \"1\"\n" +
-			"}", encoded);
+			"}");
 	}
 
 	@Test
@@ -492,14 +485,13 @@ public class JsonParserR4Test extends BaseTest {
 		IParser parser = ourCtx.newJsonParser();
 		String output = parser.encodeResourceToString(p);
 		ourLog.info("Output: {}", output);
-		assertThat(output, containsString("ROOT_VALUE"));
+		assertThat(output).contains("ROOT_VALUE");
 
 		// Strict error handler
 		try {
 			parser.setParserErrorHandler(new StrictErrorHandler());
 			parser.encodeResourceToString(p);
-			fail();
-		} catch (DataFormatException e) {
+			fail();		} catch (DataFormatException e) {
 			assertEquals(Msg.code(1822) + "Resource is missing required element 'url' in parent element 'Patient(res).extension'", e.getMessage());
 		}
 
@@ -521,8 +513,7 @@ public class JsonParserR4Test extends BaseTest {
 		IParser parser = ourCtx.newJsonParser();
 		try {
 			parser.encodeResourceToString(p);
-			fail();
-		} catch (DataFormatException e) {
+			fail();		} catch (DataFormatException e) {
 			assertEquals(Msg.code(1827) + "[element=\"Patient(res).extension\"] Extension contains both a value and nested extensions", e.getMessage());
 		}
 
@@ -530,8 +521,7 @@ public class JsonParserR4Test extends BaseTest {
 		try {
 			parser.setParserErrorHandler(new StrictErrorHandler());
 			parser.encodeResourceToString(p);
-			fail();
-		} catch (DataFormatException e) {
+			fail();		} catch (DataFormatException e) {
 			assertEquals(Msg.code(1827) + "[element=\"Patient(res).extension\"] Extension contains both a value and nested extensions", e.getMessage());
 		}
 
@@ -553,10 +543,10 @@ public class JsonParserR4Test extends BaseTest {
 		IParser parser = ourCtx.newJsonParser().setParserErrorHandler(errorHandler);
 		String output = parser.encodeResourceToString(p);
 		ourLog.info("Output: {}", output);
-		assertThat(output, containsString("http://root"));
-		assertThat(output, containsString("ROOT_VALUE"));
-		assertThat(output, containsString("http://child"));
-		assertThat(output, containsString("CHILD_VALUE"));
+		assertThat(output).contains("http://root");
+		assertThat(output).contains("ROOT_VALUE");
+		assertThat(output).contains("http://child");
+		assertThat(output).contains("CHILD_VALUE");
 		assertEquals(false, errorHandler.isErrorOnInvalidExtension());
 		assertEquals(false, errorHandler.isErrorOnInvalidValue());
 	}
@@ -652,11 +642,11 @@ public class JsonParserR4Test extends BaseTest {
 		String encoded = parser.encodeResourceToString(b);
 		ourLog.info(encoded);
 
-		assertThat(encoded, containsString("BUNDLEID"));
-		assertThat(encoded, containsString("http://FOO"));
-		assertThat(encoded, containsString("PATIENTID"));
-		assertThat(encoded, containsString("http://BAR"));
-		assertThat(encoded, containsString("GIVEN"));
+		assertThat(encoded).contains("BUNDLEID");
+		assertThat(encoded).contains("http://FOO");
+		assertThat(encoded).contains("PATIENTID");
+		assertThat(encoded).contains("http://BAR");
+		assertThat(encoded).contains("GIVEN");
 
 		b = parser.parseResource(Bundle.class, encoded);
 
@@ -679,15 +669,15 @@ public class JsonParserR4Test extends BaseTest {
 		String encoded = parser.encodeResourceToString(b);
 		ourLog.info(encoded);
 
-		assertThat(encoded, not(containsString("BUNDLEID")));
-		assertThat(encoded, not(containsString("http://FOO")));
-		assertThat(encoded, (containsString("PATIENTID")));
-		assertThat(encoded, (containsString("http://BAR")));
-		assertThat(encoded, containsString("GIVEN"));
+		assertThat(encoded).doesNotContain("BUNDLEID");
+		assertThat(encoded).doesNotContain("http://FOO");
+		assertThat(encoded).contains("PATIENTID");
+		assertThat(encoded).contains("http://BAR");
+		assertThat(encoded).contains("GIVEN");
 
 		b = parser.parseResource(Bundle.class, encoded);
 
-		assertNotEquals("BUNDLEID", b.getIdElement().getIdPart());
+		assertThat(b.getIdElement().getIdPart()).isNotEqualTo("BUNDLEID");
 		assertEquals("Patient/PATIENTID", b.getEntry().get(0).getResource().getId());
 		assertEquals("GIVEN", ((Patient) b.getEntry().get(0).getResource()).getNameFirstRep().getGivenAsSingleString());
 	}
@@ -705,16 +695,16 @@ public class JsonParserR4Test extends BaseTest {
 		String encoded = parser.encodeResourceToString(b);
 		ourLog.info(encoded);
 
-		assertThat(encoded, not(containsString("BUNDLEID")));
-		assertThat(encoded, not(containsString("http://FOO")));
-		assertThat(encoded, not(containsString("PATIENTID")));
-		assertThat(encoded, not(containsString("http://BAR")));
-		assertThat(encoded, containsString("GIVEN"));
+		assertThat(encoded).doesNotContain("BUNDLEID");
+		assertThat(encoded).doesNotContain("http://FOO");
+		assertThat(encoded).doesNotContain("PATIENTID");
+		assertThat(encoded).doesNotContain("http://BAR");
+		assertThat(encoded).contains("GIVEN");
 
 		b = parser.parseResource(Bundle.class, encoded);
 
-		assertNotEquals("BUNDLEID", b.getIdElement().getIdPart());
-		assertNotEquals("Patient/PATIENTID", b.getEntry().get(0).getResource().getId());
+		assertThat(b.getIdElement().getIdPart()).isNotEqualTo("BUNDLEID");
+		assertThat(b.getEntry().get(0).getResource().getId()).isNotEqualTo("Patient/PATIENTID");
 		assertEquals("GIVEN", ((Patient) b.getEntry().get(0).getResource()).getNameFirstRep().getGivenAsSingleString());
 	}
 
@@ -729,7 +719,7 @@ public class JsonParserR4Test extends BaseTest {
 		p.addName().setFamily(longString);
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p);
 
-		assertThat(encoded, containsString(longString));
+		assertThat(encoded).contains(longString);
 	}
 
 	@Test
@@ -770,8 +760,8 @@ public class JsonParserR4Test extends BaseTest {
 		Patient parsed = jsonParser.parseResource(Patient.class, input);
 
 		ourLog.info(jsonParser.setPrettyPrint(true).encodeResourceToString(parsed));
-		assertThat(xmlParser.encodeResourceToString(parsed), containsString("Underweight"));
-		assertThat(jsonParser.encodeResourceToString(parsed), containsString("Underweight"));
+		assertThat(xmlParser.encodeResourceToString(parsed)).contains("Underweight");
+		assertThat(jsonParser.encodeResourceToString(parsed)).contains("Underweight");
 
 	}
 
@@ -794,8 +784,7 @@ public class JsonParserR4Test extends BaseTest {
 		jsonParser.setParserErrorHandler(new StrictErrorHandler());
 		try {
 			jsonParser.parseResource(Patient.class, input);
-			fail();
-		} catch (DataFormatException e) {
+			fail();		} catch (DataFormatException e) {
 			assertEquals(Msg.code(1821) + "[element=\"value\"] Invalid attribute value \"\": Attribute value must not be empty (\"\")", e.getMessage());
 		}
 
@@ -899,7 +888,7 @@ public class JsonParserR4Test extends BaseTest {
 		ourLog.info(encoded);
 
 		int idx = encoded.indexOf(sectionText);
-		assertNotEquals(-1, idx);
+		assertThat(idx).isNotEqualTo(-1);
 	}
 
 
@@ -1169,6 +1158,18 @@ public class JsonParserR4Test extends BaseTest {
 	}
 
 	@Test
+	public void testEncodeToString_CompoundTypeWithReference() {
+		Identifier identifier = new Identifier();
+		identifier.setSystem("http://system.org");
+		identifier.setValue("123");
+		Reference reference = new Reference("Organization/1");
+		identifier.setAssigner(reference);
+		String expected = "{\"system\":\"http://system.org\",\"value\":\"123\",\"assigner\":{\"reference\":\"Organization/1\"}}";
+		String actual = ourCtx.newJsonParser().encodeToString(identifier);
+		assertEquals(expected, actual);
+	}
+
+	@Test
 	public void testEncodeToString_Resource() {
 		Patient p = new Patient();
 		p.setId("Patient/123");
@@ -1176,6 +1177,40 @@ public class JsonParserR4Test extends BaseTest {
 		String expected = "{\"resourceType\":\"Patient\",\"id\":\"123\",\"active\":true}";
 		String actual = ourCtx.newJsonParser().encodeToString(p);
 		assertEquals(expected, actual);
+	}
+
+	@Test
+	public void testObjectWithBothPrimitiverAndArrayAlternatives() {
+		String resource = "{\n" +
+			"    \"resourceType\": \"Practitioner\",\n" +
+			"    \"id\": \"1\",\n" +
+			"    \"name\": [{\n" +
+			"            \"_family\": {\n" +
+			"                \"extension\": [{\n" +
+			"                        \"url\": \"http://hl7.org/fhir/StructureDefinition/data-absent-reason\",\n" +
+			"                        \"valueString\": \"masked\"\n" +
+			"                    }\n" +
+			"                ]\n" +
+			"            },\n" +
+			"            \"given\": [\n" +
+			"                null\n" +
+			"            ],\n" +
+			"            \"_given\": [{\n" +
+			"                    \"extension\": [{\n" +
+			"                            \"url\": \"http://hl7.org/fhir/StructureDefinition/data-absent-reason\",\n" +
+			"                            \"valueString\": \"masked\"\n" +
+			"                        }\n" +
+			"                    ]\n" +
+			"                }\n" +
+			"            ]\n" +
+			"        }\n" +
+			"    ]\n" +
+			"}\n";
+		Practitioner practitioner = ourCtx.newJsonParser().parseResource(Practitioner.class, resource);
+		HumanName humanName = practitioner.getNameFirstRep();
+		StringType given = humanName.getGiven().get(0);
+		assertTrue(given.getExtension().stream().allMatch(ext -> DataAbsentReason.MASKED.toCode().equals(ext.getValue().primitiveValue())));
+		assertTrue(humanName.getFamilyElement().getExtension().stream().allMatch(ext -> DataAbsentReason.MASKED.toCode().equals(ext.getValue().primitiveValue())));
 	}
 
 	@Test
@@ -1200,6 +1235,87 @@ public class JsonParserR4Test extends BaseTest {
 		assertEquals(expected, actual);
 	}
 
+	@Test
+	public void testEncodeBundleWithCrossReferenceFullUrlsAndNoIds() {
+		Bundle bundle = createBundleWithCrossReferenceFullUrlsAndNoIds();
+
+		String output = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle);
+		ourLog.info(output);
+
+		assertThat(output).doesNotContain("\"contained\"");
+		assertThat(output).doesNotContain("\"id\"");
+		assertThat(output).containsSubsequence(
+			 "\"fullUrl\": \"urn:uuid:9e9187c1-db6d-4b6f-adc6-976153c65ed7\",",
+			 "\"resourceType\": \"Patient\"",
+			 "\"fullUrl\": \"urn:uuid:71d7ab79-a001-41dc-9a8e-b3e478ce1cbb\"",
+			 "\"resourceType\": \"Observation\"",
+			 "\"reference\": \"urn:uuid:9e9187c1-db6d-4b6f-adc6-976153c65ed7\""
+		);
+
+	}
+
+	@Test
+	public void testEncodeBundleWithCrossReferenceFullUrlsAndNoIds_NestedInParameters() {
+		Parameters parameters = createBundleWithCrossReferenceFullUrlsAndNoIds_NestedInParameters();
+
+		String output = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(parameters);
+		ourLog.info(output);
+
+		assertThat(output).doesNotContain("\"contained\"");
+		assertThat(output).doesNotContain("\"id\"");
+		assertThat(output).containsSubsequence(
+			 "\"resourceType\": \"Parameters\"",
+			 "\"name\": \"resource\"",
+			 "\"fullUrl\": \"urn:uuid:9e9187c1-db6d-4b6f-adc6-976153c65ed7\",",
+			 "\"resourceType\": \"Patient\"",
+			 "\"fullUrl\": \"urn:uuid:71d7ab79-a001-41dc-9a8e-b3e478ce1cbb\"",
+			 "\"resourceType\": \"Observation\"",
+			 "\"reference\": \"urn:uuid:9e9187c1-db6d-4b6f-adc6-976153c65ed7\""
+		);
+
+	}
+
+	@Test
+	public void testParseBundleWithCrossReferenceFullUrlsAndNoIds() {
+		Bundle bundle = createBundleWithCrossReferenceFullUrlsAndNoIds();
+		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle);
+
+		Bundle parsedBundle = ourCtx.newJsonParser().parseResource(Bundle.class, encoded);
+		assertEquals("urn:uuid:9e9187c1-db6d-4b6f-adc6-976153c65ed7", parsedBundle.getEntry().get(0).getFullUrl());
+		assertEquals("urn:uuid:9e9187c1-db6d-4b6f-adc6-976153c65ed7", parsedBundle.getEntry().get(0).getResource().getId());
+		assertEquals("urn:uuid:71d7ab79-a001-41dc-9a8e-b3e478ce1cbb", parsedBundle.getEntry().get(1).getFullUrl());
+		assertEquals("urn:uuid:71d7ab79-a001-41dc-9a8e-b3e478ce1cbb", parsedBundle.getEntry().get(1).getResource().getId());
+	}
+
+	@Nonnull
+	public static Bundle createBundleWithCrossReferenceFullUrlsAndNoIds() {
+		Bundle bundle = new Bundle();
+
+		Patient patient = new Patient();
+		patient.setActive(true);
+		bundle
+			 .addEntry()
+			 .setResource(patient)
+			 .setFullUrl("urn:uuid:9e9187c1-db6d-4b6f-adc6-976153c65ed7");
+
+		Observation observation = new Observation();
+		observation.getSubject().setReference("urn:uuid:9e9187c1-db6d-4b6f-adc6-976153c65ed7").setResource(patient);
+		bundle
+			 .addEntry()
+			 .setResource(observation)
+			 .setFullUrl("urn:uuid:71d7ab79-a001-41dc-9a8e-b3e478ce1cbb");
+		return bundle;
+	}
+
+	@Nonnull
+	public static Parameters createBundleWithCrossReferenceFullUrlsAndNoIds_NestedInParameters() {
+		Parameters retVal = new Parameters();
+		retVal
+			 .addParameter()
+			 .setName("resource")
+			 .setResource(createBundleWithCrossReferenceFullUrlsAndNoIds());
+		return retVal;
+	}
 
 	@Test
 	public void testPreCommentsToFhirComments() {
@@ -1221,7 +1337,7 @@ public class JsonParserR4Test extends BaseTest {
 		patient.getName().add(humanName2);
 
 		final String patientString = ourCtx.newJsonParser().encodeResourceToString(patient);
-		assertThat(patientString, is(not(containsString("fhir_comment"))));
+		assertThat(patientString).doesNotContain("fhir_comment");
 	}
 
 	@DatatypeDef(

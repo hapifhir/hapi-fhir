@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server Test Utilities
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,16 +21,16 @@ package ca.uhn.fhir.jpa.util;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.ValueSet;
 
 import java.util.List;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
 
 import static ca.uhn.fhir.util.HapiExtensions.EXT_VALUESET_EXPANSION_MESSAGE;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ValueSetTestUtil {
 
@@ -43,7 +43,7 @@ public class ValueSetTestUtil {
 	public String extractExpansionMessage(IBaseResource theValueSet) {
 		ValueSet outcome = myCanonicalizer.valueSetToCanonical(theValueSet);
 		List<Extension> extensions = outcome.getMeta().getExtensionsByUrl(EXT_VALUESET_EXPANSION_MESSAGE);
-		assertEquals(1, extensions.size());
+		assertThat(extensions).hasSize(1);
 		String expansionMessage = extensions.get(0).getValueAsPrimitive().getValueAsString();
 		return expansionMessage;
 	}

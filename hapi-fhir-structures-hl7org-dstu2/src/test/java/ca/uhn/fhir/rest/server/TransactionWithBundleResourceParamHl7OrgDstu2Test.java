@@ -15,8 +15,8 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.dstu2.model.Bundle;
 import org.hl7.fhir.dstu2.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu2.model.Bundle.HTTPVerb;
@@ -26,13 +26,14 @@ import org.hl7.fhir.dstu2.model.Conformance.SystemRestfulInteraction;
 import org.hl7.fhir.dstu2.model.IdType;
 import org.hl7.fhir.dstu2.model.OperationOutcome;
 import org.hl7.fhir.dstu2.model.Patient;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.TimeUnit;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -69,7 +70,7 @@ public class TransactionWithBundleResourceParamHl7OrgDstu2Test {
 				supportsTransaction = true;
 			}
 		}
-		
+
 		assertTrue(supportsTransaction);
 	}
 	
@@ -107,13 +108,13 @@ public class TransactionWithBundleResourceParamHl7OrgDstu2Test {
 		ourLog.info(responseContent);
 
 		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
-		assertEquals(3, bundle.getEntry().size());
+		assertThat(bundle.getEntry()).hasSize(3);
 
 		BundleEntryComponent entry0 = bundle.getEntry().get(0);
 		assertEquals("Patient/81/_history/91", entry0.getResponse().getLocation());
 
 		BundleEntryComponent entry1 = bundle.getEntry().get(1);
-		assertEquals( "Patient/82/_history/92", entry1.getResponse().getLocation());
+		assertEquals("Patient/82/_history/92", entry1.getResponse().getLocation());
 
 		BundleEntryComponent entry2 = bundle.getEntry().get(2);
 		assertEquals("Patient/123/_history/93", entry2.getResponse().getLocation());
@@ -154,13 +155,13 @@ public class TransactionWithBundleResourceParamHl7OrgDstu2Test {
 		ourLog.info(responseContent);
 
 		Bundle bundle = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
-		assertEquals(3, bundle.getEntry().size());
+		assertThat(bundle.getEntry()).hasSize(3);
 
 		BundleEntryComponent entry0 = bundle.getEntry().get(0);
 		assertEquals("Patient/81/_history/91", entry0.getResponse().getLocation());
 
 		BundleEntryComponent entry1 = bundle.getEntry().get(1);
-		assertEquals( "Patient/82/_history/92", entry1.getResponse().getLocation());
+		assertEquals("Patient/82/_history/92", entry1.getResponse().getLocation());
 
 		BundleEntryComponent entry2 = bundle.getEntry().get(2);
 		assertEquals("Patient/123/_history/93", entry2.getResponse().getLocation());
@@ -204,7 +205,7 @@ public class TransactionWithBundleResourceParamHl7OrgDstu2Test {
 		ourLog.info(responseContent);
 
 		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
-		assertEquals(4, bundle.getEntry().size());
+		assertThat(bundle.getEntry()).hasSize(4);
 
 		assertEquals(OperationOutcome.class, bundle.getEntry().get(0).getResource().getClass());
 
@@ -215,7 +216,7 @@ public class TransactionWithBundleResourceParamHl7OrgDstu2Test {
 		assertEquals("Patient/82/_history/92", entry1.getResponse().getLocation());
 
 		BundleEntryComponent entry2 = bundle.getEntry().get(3);
-		assertEquals( "Patient/3/_history/93", entry2.getResponse().getLocation());
+		assertEquals("Patient/3/_history/93", entry2.getResponse().getLocation());
 	}
 
 	@AfterAll
@@ -231,7 +232,7 @@ public class TransactionWithBundleResourceParamHl7OrgDstu2Test {
 		RestfulServer server = new RestfulServer(ourCtx);
 		server.setProviders(patientProvider);
 
-		org.eclipse.jetty.servlet.ServletContextHandler proxyHandler = new org.eclipse.jetty.servlet.ServletContextHandler();
+		org.eclipse.jetty.ee10.servlet.ServletContextHandler proxyHandler = new org.eclipse.jetty.ee10.servlet.ServletContextHandler();
 		proxyHandler.setContextPath("/");
 
 		ServletHolder handler = new ServletHolder();

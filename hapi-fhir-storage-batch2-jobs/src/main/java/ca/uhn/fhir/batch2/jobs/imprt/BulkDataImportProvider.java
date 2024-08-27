@@ -2,7 +2,7 @@
  * #%L
  * hapi-fhir-storage-batch2-jobs
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,8 @@ import ca.uhn.fhir.util.OperationOutcomeUtil;
 import ca.uhn.fhir.util.ParametersUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.util.ValidateUtil;
+import jakarta.annotation.Nonnull;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -56,8 +58,6 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import javax.annotation.Nonnull;
-import javax.servlet.http.HttpServletResponse;
 
 import static ca.uhn.fhir.batch2.jobs.export.BulkDataExportProvider.validatePreferAsyncHeader;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -76,13 +76,10 @@ public class BulkDataImportProvider {
 	public static final String PARAM_INPUT_TYPE = "type";
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkDataImportProvider.class);
 
-	@Autowired
 	private IJobCoordinator myJobCoordinator;
 
-	@Autowired
 	private FhirContext myFhirCtx;
 
-	@Autowired
 	private IRequestPartitionHelperSvc myRequestPartitionHelperService;
 
 	private volatile List<String> myResourceTypeOrder;
@@ -94,14 +91,17 @@ public class BulkDataImportProvider {
 		super();
 	}
 
+	@Autowired
 	public void setJobCoordinator(IJobCoordinator theJobCoordinator) {
 		myJobCoordinator = theJobCoordinator;
 	}
 
+	@Autowired
 	public void setFhirContext(FhirContext theCtx) {
 		myFhirCtx = theCtx;
 	}
 
+	@Autowired
 	public void setRequestPartitionHelperService(IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
 		myRequestPartitionHelperService = theRequestPartitionHelperSvc;
 	}
@@ -157,11 +157,10 @@ public class BulkDataImportProvider {
 		}
 
 		RequestPartitionId partitionId =
-				myRequestPartitionHelperService.determineReadPartitionForRequest(theRequestDetails, null);
-		if (partitionId != null && !partitionId.isAllPartitions()) {
-			myRequestPartitionHelperService.validateHasPartitionPermissions(theRequestDetails, "Binary", partitionId);
-			jobParameters.setPartitionId(partitionId);
-		}
+				myRequestPartitionHelperService.determineReadPartitionForRequestForServerOperation(
+						theRequestDetails, JpaConstants.OPERATION_IMPORT);
+		myRequestPartitionHelperService.validateHasPartitionPermissions(theRequestDetails, "Binary", partitionId);
+		jobParameters.setPartitionId(partitionId);
 
 		// Extract all the URLs and order them in the order that is least
 		// likely to result in conflict (e.g. Patients before Observations
@@ -234,7 +233,8 @@ public class BulkDataImportProvider {
 		if (parameters != null && parameters.getPartitionId() != null) {
 			// Determine and validate permissions for partition (if needed)
 			RequestPartitionId partitionId =
-					myRequestPartitionHelperService.determineReadPartitionForRequest(theRequestDetails, null);
+					myRequestPartitionHelperService.determineReadPartitionForRequestForServerOperation(
+							theRequestDetails, JpaConstants.OPERATION_IMPORT);
 			myRequestPartitionHelperService.validateHasPartitionPermissions(theRequestDetails, "Binary", partitionId);
 			if (!partitionId.equals(parameters.getPartitionId())) {
 				throw new InvalidRequestException(

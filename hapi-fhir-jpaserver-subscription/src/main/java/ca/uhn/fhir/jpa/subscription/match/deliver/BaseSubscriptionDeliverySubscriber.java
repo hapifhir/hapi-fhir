@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,9 @@ import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
+import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
 import ca.uhn.fhir.util.BundleBuilder;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.text.StringSubstitutor;
@@ -48,6 +50,7 @@ import org.springframework.messaging.MessagingException;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import static ca.uhn.fhir.jpa.subscription.util.SubscriptionUtil.createRequestDetailForPartitionedRequest;
 
@@ -59,6 +62,9 @@ public abstract class BaseSubscriptionDeliverySubscriber implements MessageHandl
 
 	@Autowired
 	protected SubscriptionRegistry mySubscriptionRegistry;
+
+	@Autowired
+	protected IResourceModifiedMessagePersistenceSvc myResourceModifiedMessagePersistenceSvc;
 
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
@@ -149,6 +155,13 @@ public abstract class BaseSubscriptionDeliverySubscriber implements MessageHandl
 		return builder.getBundle();
 	}
 
+	protected Optional<ResourceModifiedMessage> inflateResourceModifiedMessageFromDeliveryMessage(
+			ResourceDeliveryMessage theMsg) {
+		ResourceModifiedMessage payloadLess =
+				new ResourceModifiedMessage(theMsg.getPayloadId(myFhirContext), theMsg.getOperationType());
+		return myResourceModifiedMessagePersistenceSvc.inflatePersistedResourceModifiedMessageOrNull(payloadLess);
+	}
+
 	@VisibleForTesting
 	public void setFhirContextForUnitTest(FhirContext theCtx) {
 		myFhirContext = theCtx;
@@ -172,6 +185,12 @@ public abstract class BaseSubscriptionDeliverySubscriber implements MessageHandl
 	@VisibleForTesting
 	public void setMatchUrlServiceForUnitTest(MatchUrlService theMatchUrlService) {
 		myMatchUrlService = theMatchUrlService;
+	}
+
+	@VisibleForTesting
+	public void setResourceModifiedMessagePersistenceSvcForUnitTest(
+			IResourceModifiedMessagePersistenceSvc theResourceModifiedMessagePersistenceSvc) {
+		myResourceModifiedMessagePersistenceSvc = theResourceModifiedMessagePersistenceSvc;
 	}
 
 	public IInterceptorBroadcaster getInterceptorBroadcaster() {

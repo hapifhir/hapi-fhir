@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Server - SQL Migration
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -32,16 +33,18 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Set;
-import javax.annotation.Nonnull;
+import java.util.stream.Collectors;
 
 public class AddIndexTask extends BaseTableTask {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(AddIndexTask.class);
+	static final Logger ourLog = LoggerFactory.getLogger(AddIndexTask.class);
 
 	private String myIndexName;
 	private List<String> myColumns;
-	private Boolean myUnique;
+	private List<String> myNullableColumns;
+	private Boolean myUnique = false;
 	private List<String> myIncludeColumns = Collections.emptyList();
 	/** Should the operation avoid taking a lock on the table */
 	private boolean myOnline;
@@ -64,12 +67,20 @@ public class AddIndexTask extends BaseTableTask {
 		myUnique = theUnique;
 	}
 
+	public List<String> getNullableColumns() {
+		return myNullableColumns;
+	}
+
+	public void setNullableColumns(List<String> theNullableColumns) {
+		this.myNullableColumns = theNullableColumns;
+	}
+
 	@Override
 	public void validate() {
 		super.validate();
 		Validate.notBlank(myIndexName, "Index name not specified");
 		Validate.isTrue(
-				myColumns.size() > 0,
+				!myColumns.isEmpty(),
 				"Columns not specified for AddIndexTask " + myIndexName + " on table " + getTableName());
 		Validate.notNull(myUnique, "Uniqueness not specified");
 		setDescription("Add " + myIndexName + " index to table " + getTableName());
@@ -97,8 +108,15 @@ public class AddIndexTask extends BaseTableTask {
 		try {
 			executeSql(tableName, sql);
 		} catch (Exception e) {
-			if (e.toString().contains("already exists")) {
-				ourLog.warn("Index {} already exists", myIndexName);
+			String message = e.toString();
+			if (message.contains("already exists")
+					||
+					// The Oracle message is ORA-01408: such column list already indexed
+					// TODO KHS consider db-specific handling here that uses the error code instead of the message so
+					// this is language independent
+					//  e.g. if the db is Oracle than checking e.getErrorCode() == 1408 should detect this case
+					message.contains("already indexed")) {
+				ourLog.warn("Index {} already exists: {}", myIndexName, e.getMessage());
 			} else {
 				throw e;
 			}
@@ -134,7 +152,7 @@ public class AddIndexTask extends BaseTableTask {
 		}
 		// Should we do this non-transactionally?  Avoids a write-lock, but introduces weird failure modes.
 		String postgresOnlineClause = "";
-		String msSqlOracleOnlineClause = "";
+		String oracleOnlineClause = "";
 		if (myOnline) {
 			switch (getDriverType()) {
 				case POSTGRES_9_4:
@@ -143,35 +161,77 @@ public class AddIndexTask extends BaseTableTask {
 					// This runs without a lock, and can't be done transactionally.
 					setTransactional(false);
 					break;
-				case ORACLE_12C:
-					if (myMetadataSource.isOnlineIndexSupported(getConnectionProperties())) {
-						msSqlOracleOnlineClause = " ONLINE DEFERRED INVALIDATION";
-					}
-					break;
 				case MSSQL_2012:
+					// handled below in buildOnlineCreateWithTryCatchFallback()
+					break;
+				case ORACLE_12C:
+					// todo: delete this once we figure out how run Oracle try-catch to match MSSQL.
 					if (myMetadataSource.isOnlineIndexSupported(getConnectionProperties())) {
-						msSqlOracleOnlineClause = " WITH (ONLINE = ON)";
+						oracleOnlineClause = " ONLINE DEFERRED INVALIDATION";
 					}
 					break;
 				default:
 			}
 		}
 
-		String sql = "create " + unique + "index " + postgresOnlineClause + myIndexName + " on " + getTableName() + "("
-				+ columns + ")" + includeClause + mssqlWhereClause + msSqlOracleOnlineClause;
+		String bareCreateSql = "create " + unique + "index " + postgresOnlineClause + myIndexName + " on "
+				+ getTableName() + "(" + columns + ")" + includeClause + mssqlWhereClause + oracleOnlineClause;
+
+		String sql;
+		if (myOnline && DriverTypeEnum.MSSQL_2012 == getDriverType()) {
+			sql = buildOnlineCreateWithTryCatchFallback(bareCreateSql);
+		} else {
+			sql = bareCreateSql;
+		}
 		return sql;
+	}
+
+	/**
+	 * Wrap a Sql Server create index in a try/catch to try it first ONLINE
+	 * (meaning no table locks), and on failure, without ONLINE (locking the table).
+	 *
+	 * This try-catch syntax was manually tested via sql
+	 * {@code
+	 * BEGIN TRY
+	 * 	EXEC('create index FOO on TABLE_A (col1)  WITH (ONLINE = ON)');
+	 * 	select 'Online-OK';
+	 * END TRY
+	 * BEGIN CATCH
+	 * 	create index FOO on TABLE_A (col1);
+	 * 	select 'Offline';
+	 * END CATCH;
+	 * -- Then inspect the result set - Online-OK means it ran the ONLINE version.
+	 * -- Note: we use EXEC() in the online path to lower the severity of the error
+	 * -- so the CATCH can catch it.
+	 * }
+	 *
+	 * @param bareCreateSql
+	 * @return
+	 */
+	static @Nonnull String buildOnlineCreateWithTryCatchFallback(String bareCreateSql) {
+		// Some "Editions" of Sql Server do not support ONLINE.
+		// @format:off
+		return "BEGIN TRY -- try first online, without locking the table \n"
+				+ "    EXEC('" + bareCreateSql + " WITH (ONLINE = ON)');\n"
+				+ "END TRY \n"
+				+ "BEGIN CATCH -- for Editions of Sql Server that don't support ONLINE, run with table locks \n"
+				+ bareCreateSql
+				+ "; \n"
+				+ "END CATCH;";
+		// @format:on
 	}
 
 	@Nonnull
 	private String buildMSSqlNotNullWhereClause() {
-		String mssqlWhereClause;
-		mssqlWhereClause = " WHERE (";
-		for (int i = 0; i < myColumns.size(); i++) {
-			mssqlWhereClause += myColumns.get(i) + " IS NOT NULL ";
-			if (i < myColumns.size() - 1) {
-				mssqlWhereClause += "AND ";
-			}
+		String mssqlWhereClause = "";
+		if (myNullableColumns == null || myNullableColumns.isEmpty()) {
+			return mssqlWhereClause;
 		}
+
+		mssqlWhereClause = " WHERE (";
+		mssqlWhereClause += myNullableColumns.stream()
+				.map(column -> column + " IS NOT NULL ")
+				.collect(Collectors.joining("AND"));
 		mssqlWhereClause += ")";
 		return mssqlWhereClause;
 	}
@@ -180,12 +240,16 @@ public class AddIndexTask extends BaseTableTask {
 		setColumns(Arrays.asList(theColumns));
 	}
 
+	public void setNullableColumns(String... theColumns) {
+		setNullableColumns(Arrays.asList(theColumns));
+	}
+
 	public void setIncludeColumns(String... theIncludeColumns) {
 		setIncludeColumns(Arrays.asList(theIncludeColumns));
 	}
 
 	private void setIncludeColumns(List<String> theIncludeColumns) {
-		Validate.notNull(theIncludeColumns);
+		Objects.requireNonNull(theIncludeColumns);
 		myIncludeColumns = theIncludeColumns;
 	}
 

@@ -2,7 +2,7 @@
  * #%L
  * hapi-fhir-storage-mdm
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,16 +22,15 @@ package ca.uhn.fhir.jpa.mdm.interceptor;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
-import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.interceptor.IMdmStorageInterceptor;
 import ca.uhn.fhir.mdm.interceptor.MdmSearchExpandingInterceptor;
 import ca.uhn.fhir.mdm.log.Logs;
+import jakarta.annotation.PostConstruct;
 import org.hl7.fhir.dstu2.model.Subscription;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import javax.annotation.PostConstruct;
 
 public class MdmSubmitterInterceptorLoader {
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
@@ -40,10 +39,10 @@ public class MdmSubmitterInterceptorLoader {
 	private IMdmSettings myMdmSettings;
 
 	@Autowired
-	JpaStorageSettings myStorageSettings;
+	SubscriptionSettings mySubscriptionSettings;
 
-	@Autowired
-	private IMdmStorageInterceptor myIMdmStorageInterceptor;
+	@Autowired(required = false)
+	private IMdmStorageInterceptor myMdmStorageInterceptor;
 
 	@Autowired
 	private MdmSearchExpandingInterceptor myMdmSearchExpandingInterceptorInterceptor;
@@ -57,11 +56,15 @@ public class MdmSubmitterInterceptorLoader {
 			return;
 		}
 
-		if (!myStorageSettings.getSupportedSubscriptionTypes().contains(Subscription.SubscriptionChannelType.MESSAGE)) {
+		if (!mySubscriptionSettings
+				.getSupportedSubscriptionTypes()
+				.contains(Subscription.SubscriptionChannelType.MESSAGE)) {
 			throw new ConfigurationException(
 					Msg.code(2421) + "MDM requires Message Subscriptions to be enabled in the Storage Settings");
 		}
-		myInterceptorService.registerInterceptor(myIMdmStorageInterceptor);
+		if (myMdmStorageInterceptor != null) {
+			myInterceptorService.registerInterceptor(myMdmStorageInterceptor);
+		}
 		myInterceptorService.registerInterceptor(myMdmSearchExpandingInterceptorInterceptor);
 		ourLog.info("MDM interceptors registered");
 	}

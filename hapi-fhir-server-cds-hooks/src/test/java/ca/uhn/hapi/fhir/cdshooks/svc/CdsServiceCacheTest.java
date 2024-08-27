@@ -5,21 +5,20 @@ import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceRequestJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseCardJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseJson;
-import ca.uhn.test.util.LogbackCaptureTestExtension;
+import ca.uhn.test.util.LogbackTestExtension;
+import ca.uhn.test.util.LogbackTestExtensionAssert;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
+import jakarta.annotation.Nonnull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import javax.annotation.Nonnull;
 import java.util.function.Function;
 
-import static ca.uhn.test.util.LogbackCaptureTestExtension.eventWithLevelAndMessageContains;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -29,7 +28,7 @@ class CdsServiceCacheTest {
 	private static final String TEST_KEY = "testKey";
 	private static final String MODULE_ID = "moduleId";
 	@RegisterExtension
-	final LogbackCaptureTestExtension myLogCapture = new LogbackCaptureTestExtension((Logger) CdsServiceCache.ourLog, Level.ERROR);
+	final LogbackTestExtension myLogCapture = new LogbackTestExtension((Logger) CdsServiceCache.ourLog, Level.ERROR);
 	@InjectMocks
 	private CdsServiceCache myFixture;
 
@@ -41,12 +40,12 @@ class CdsServiceCacheTest {
 		// execute
 		myFixture.registerDynamicService(TEST_KEY, serviceFunction, cdsServiceJson, true, MODULE_ID);
 		// validate
-		assertEquals(1, myFixture.myServiceMap.size());
+		assertThat(myFixture.myServiceMap).hasSize(1);
 		final CdsDynamicPrefetchableServiceMethod cdsMethod = (CdsDynamicPrefetchableServiceMethod) myFixture.myServiceMap.get(TEST_KEY);
 		assertEquals(serviceFunction, cdsMethod.getFunction());
 		assertEquals(cdsServiceJson, cdsMethod.getCdsServiceJson());
 		assertTrue(cdsMethod.isAllowAutoFhirClientPrefetch());
-		assertEquals(1, myFixture.myCdsServiceJson.getServices().size());
+		assertThat(myFixture.myCdsServiceJson.getServices()).hasSize(1);
 		assertEquals(cdsServiceJson, myFixture.myCdsServiceJson.getServices().get(0));
 	}
 
@@ -62,14 +61,15 @@ class CdsServiceCacheTest {
 		myFixture.registerDynamicService(TEST_KEY, serviceFunction, cdsServiceJson, true, MODULE_ID);
 		myFixture.registerDynamicService(TEST_KEY, serviceFunction2, cdsServiceJson2, false, MODULE_ID);
 		// validate
-		assertEquals(1, myFixture.myServiceMap.size());
+		assertThat(myFixture.myServiceMap).hasSize(1);
 		final CdsDynamicPrefetchableServiceMethod cdsMethod = (CdsDynamicPrefetchableServiceMethod) myFixture.myServiceMap.get(TEST_KEY);
 		assertEquals(serviceFunction, cdsMethod.getFunction());
 		assertEquals(cdsServiceJson, cdsMethod.getCdsServiceJson());
 		assertTrue(cdsMethod.isAllowAutoFhirClientPrefetch());
-		assertEquals(1, myFixture.myCdsServiceJson.getServices().size());
+		assertThat(myFixture.myCdsServiceJson.getServices()).hasSize(1);
 		assertEquals(cdsServiceJson, myFixture.myCdsServiceJson.getServices().get(0));
-		assertThat(myLogCapture.getLogEvents(), contains(eventWithLevelAndMessageContains(Level.ERROR, expectedLogMessage)));
+		LogbackTestExtensionAssert.assertThat(myLogCapture).hasErrorMessage(expectedLogMessage);
+
 	}
 
 	@Test
@@ -85,7 +85,7 @@ class CdsServiceCacheTest {
 		assertEquals(serviceFunction, cdsMethod.getFunction());
 		assertEquals(cdsServiceJson, cdsMethod.getCdsServiceJson());
 		assertTrue(cdsMethod.isAllowAutoFhirClientPrefetch());
-		assertTrue(myFixture.myCdsServiceJson.getServices().isEmpty());
+		assertThat(myFixture.myCdsServiceJson.getServices()).isEmpty();
 	}
 
 	@Test
@@ -96,7 +96,7 @@ class CdsServiceCacheTest {
 		final ICdsMethod actual = myFixture.unregisterServiceMethod(TEST_KEY, MODULE_ID);
 		// validate
 		assertNull(actual);
-		assertThat(myLogCapture.getLogEvents(), contains(eventWithLevelAndMessageContains(Level.ERROR, expectedLogMessage)));
+		LogbackTestExtensionAssert.assertThat(myLogCapture).hasErrorMessage(expectedLogMessage);
 	}
 
 	@Nonnull

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,14 +28,16 @@ import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.WorkChunkCreateEvent;
 import ca.uhn.fhir.batch2.model.WorkChunkData;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.Logs;
+import jakarta.annotation.Nonnull;
 import org.slf4j.Logger;
+import org.springframework.transaction.annotation.Propagation;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-import javax.annotation.Nonnull;
 
 class JobDataSink<PT extends IModelJson, IT extends IModelJson, OT extends IModelJson>
 		extends BaseDataSink<PT, IT, OT> {
@@ -48,6 +50,8 @@ class JobDataSink<PT extends IModelJson, IT extends IModelJson, OT extends IMode
 	private final JobDefinitionStep<PT, OT, ?> myTargetStep;
 	private final AtomicInteger myChunkCounter = new AtomicInteger(0);
 	private final AtomicReference<String> myLastChunkId = new AtomicReference<>();
+	private final IHapiTransactionService myHapiTransactionService;
+
 	private final boolean myGatedExecution;
 
 	JobDataSink(
@@ -55,13 +59,15 @@ class JobDataSink<PT extends IModelJson, IT extends IModelJson, OT extends IMode
 			@Nonnull IJobPersistence theJobPersistence,
 			@Nonnull JobDefinition<?> theDefinition,
 			@Nonnull String theInstanceId,
-			@Nonnull JobWorkCursor<PT, IT, OT> theJobWorkCursor) {
+			@Nonnull JobWorkCursor<PT, IT, OT> theJobWorkCursor,
+			IHapiTransactionService theHapiTransactionService) {
 		super(theInstanceId, theJobWorkCursor);
 		myBatchJobSender = theBatchJobSender;
 		myJobPersistence = theJobPersistence;
 		myJobDefinitionId = theDefinition.getJobDefinitionId();
 		myJobDefinitionVersion = theDefinition.getJobDefinitionVersion();
 		myTargetStep = theJobWorkCursor.nextStep;
+		myHapiTransactionService = theHapiTransactionService;
 		myGatedExecution = theDefinition.isGatedExecution();
 	}
 
@@ -74,15 +80,34 @@ class JobDataSink<PT extends IModelJson, IT extends IModelJson, OT extends IMode
 		OT dataValue = theData.getData();
 		String dataValueString = JsonUtil.serialize(dataValue, false);
 
+		// once finished, create workchunks in READY state
 		WorkChunkCreateEvent batchWorkChunk = new WorkChunkCreateEvent(
-				myJobDefinitionId, myJobDefinitionVersion, targetStepId, instanceId, sequence, dataValueString);
-		String chunkId = myJobPersistence.onWorkChunkCreate(batchWorkChunk);
+				myJobDefinitionId,
+				myJobDefinitionVersion,
+				targetStepId,
+				instanceId,
+				sequence,
+				dataValueString,
+				myGatedExecution);
+		String chunkId = myHapiTransactionService
+				.withSystemRequestOnDefaultPartition()
+				.withPropagation(Propagation.REQUIRES_NEW)
+				.execute(() -> myJobPersistence.onWorkChunkCreate(batchWorkChunk));
+
 		myLastChunkId.set(chunkId);
 
 		if (!myGatedExecution) {
-			JobWorkNotification workNotification = new JobWorkNotification(
-					myJobDefinitionId, myJobDefinitionVersion, instanceId, targetStepId, chunkId);
-			myBatchJobSender.sendWorkChannelMessage(workNotification);
+			myJobPersistence.enqueueWorkChunkForProcessing(chunkId, updated -> {
+				if (updated == 1) {
+					JobWorkNotification workNotification = new JobWorkNotification(
+							myJobDefinitionId, myJobDefinitionVersion, instanceId, targetStepId, chunkId);
+					myBatchJobSender.sendWorkChannelMessage(workNotification);
+				} else {
+					ourLog.error(
+							"Expected to have updated 1 workchunk, but instead found {}. Chunk is not sent to queue.",
+							updated);
+				}
+			});
 		}
 	}
 

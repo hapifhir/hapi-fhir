@@ -4,6 +4,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.TermReindexingSvcImpl;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
+import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -16,10 +17,11 @@ import java.util.List;
 
 import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_DELETE_JOB_NAME;
 import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class FhirResourceDaoR4CodeSystemTest extends BaseJpaR4Test {
 
@@ -35,7 +37,7 @@ public class FhirResourceDaoR4CodeSystemTest extends BaseJpaR4Test {
 
 		myResourceReindexingSvc.markAllResourcesForReindexing();
 		int outcome = myResourceReindexingSvc.forceReindexingPass();
-		assertNotEquals(-1, outcome); // -1 means there was a failure
+		assertThat(outcome).isNotEqualTo(-1); // -1 means there was a failure
 
 		myTerminologyDeferredStorageSvc.saveDeferred();
 
@@ -190,6 +192,46 @@ public class FhirResourceDaoR4CodeSystemTest extends BaseJpaR4Test {
 		myTerminologyDeferredStorageSvc.saveDeferred();
 		return id;
 	}
+
+	@Test
+	public void testCodeSystemWithDuplicateCode() {
+		CodeSystem cs = new CodeSystem();
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.setUrl("http://foo");
+		cs.setVersion("1.0");
+		cs.addConcept().setCode("CODE0").setDisplay("Code0");
+		cs.addConcept().setCode("CODE1").setDisplay("Code1");
+		cs.addConcept().setCode("CODE1").setDisplay("Code1");
+		cs.addConcept().setCode("CODE2").setDisplay("Code2");
+
+		try {
+			myCodeSystemDao.create(cs, mySrd);
+			fail();
+		} catch (PreconditionFailedException e) {
+			assertThat(e.getMessage()).contains("Duplicate concept detected in CodeSystem: CODE1");
+		}
+	}
+
+	@Test
+	public void testCodeSystemWithDuplicateCodeInChild() {
+		CodeSystem cs = new CodeSystem();
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.setUrl("http://foo");
+		cs.setVersion("1.0");
+
+		CodeSystem.ConceptDefinitionComponent parent = cs.addConcept().setCode("CODE0").setDisplay("Code0");
+		parent.addConcept().setCode("CODE1").setDisplay("Code1");
+		parent.addConcept().setCode("CODE1").setDisplay("Code1");
+		cs.addConcept().setCode("CODE2").setDisplay("Code2");
+
+		try {
+			myCodeSystemDao.create(cs, mySrd);
+			fail();
+		} catch (PreconditionFailedException e) {
+			assertThat(e.getMessage()).contains("Duplicate concept detected in CodeSystem: CODE1");
+		}
+	}
+
 
 	@AfterAll
 	public static void afterClassClearContext() {

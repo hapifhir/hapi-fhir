@@ -1,7 +1,9 @@
 package ca.uhn.fhir.jpa.term;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
+import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.entity.TermConcept;
@@ -32,12 +34,11 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.leftPad;
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.matchesPattern;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+
 
 public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(TerminologySvcDeltaR4Test.class);
@@ -54,13 +55,13 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		createNotPresentCodeSystem();
 		ValueSet vs;
 		vs = expandNotPresentCodeSystem();
-		assertEquals(0, vs.getExpansion().getContains().size());
+		assertThat(vs.getExpansion().getContains()).isEmpty();
 
 		CustomTerminologySet delta = new CustomTerminologySet();
 		delta.addRootConcept("RootA", "Root A");
 		delta.addRootConcept("RootB", "Root B");
 		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo/cs", delta);
-		assertHierarchyContains(
+		assertHierarchyContainsExactly(
 			"RootA seq=0",
 			"RootB seq=0"
 		);
@@ -69,7 +70,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		delta.addRootConcept("RootC", "Root C");
 		delta.addRootConcept("RootD", "Root D");
 		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo/cs", delta);
-		assertHierarchyContains(
+		assertHierarchyContainsExactly(
 			"RootA seq=0",
 			"RootB seq=0",
 			"RootC seq=0",
@@ -82,7 +83,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		createNotPresentCodeSystem();
 		ValueSet vs;
 		vs = expandNotPresentCodeSystem();
-		assertEquals(0, vs.getExpansion().getContains().size());
+		assertThat(vs.getExpansion().getContains()).isEmpty();
 
 		CustomTerminologySet delta = new CustomTerminologySet();
 
@@ -103,7 +104,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		ourLog.info("Starting testAddHierarchyConcepts");
 
 		createNotPresentCodeSystem();
-		assertHierarchyContains();
+		assertHierarchyContainsExactly();
 
 		ourLog.info("Have created code system");
 		runInTransaction(() -> {
@@ -116,7 +117,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		delta.addRootConcept("RootA", "Root A");
 		delta.addRootConcept("RootB", "Root B");
 		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo/cs", delta);
-		assertHierarchyContains(
+		assertHierarchyContainsExactly(
 			"RootA seq=0",
 			"RootB seq=0"
 		);
@@ -138,7 +139,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 
 		myCaptureQueriesListener.logAllQueriesForCurrentThread();
 
-		assertHierarchyContains(
+		assertHierarchyContainsExactly(
 			"RootA seq=0",
 			" ChildAA seq=0",
 			" ChildAB seq=1",
@@ -150,7 +151,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 	@Test
 	public void testAddMoveConceptFromOneParentToAnother() {
 		createNotPresentCodeSystem();
-		assertHierarchyContains();
+		assertHierarchyContainsExactly();
 
 		UploadStatistics outcome;
 		CustomTerminologySet delta;
@@ -161,7 +162,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 			.addChild(TermConceptParentChildLink.RelationshipTypeEnum.ISA).setCode("ChildAAA").setDisplay("Child AAA");
 		delta.addRootConcept("RootB", "Root B");
 		outcome = myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo/cs", delta);
-		assertHierarchyContains(
+		assertHierarchyContainsExactly(
 			"RootA seq=0",
 			" ChildAA seq=0",
 			"  ChildAAA seq=0",
@@ -173,7 +174,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		delta.addRootConcept("RootB", "Root B")
 			.addChild(TermConceptParentChildLink.RelationshipTypeEnum.ISA).setCode("ChildAA").setDisplay("Child AA");
 		outcome = myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo/cs", delta);
-		assertHierarchyContains(
+		assertHierarchyContainsExactly(
 			"RootA seq=0",
 			" ChildAA seq=0",
 			"  ChildAAA seq=0",
@@ -186,7 +187,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		runInTransaction(() -> {
 			TermConcept concept = myTermSvc.findCode("http://foo/cs", "ChildAA").orElseThrow(() -> new IllegalStateException());
 			assertEquals(2, concept.getParents().size());
-			assertThat(concept.getParentPidsAsString(), matchesPattern("^[0-9]+ [0-9]+$"));
+			assertThat(concept.getParentPidsAsString()).matches("^[0-9]+ [0-9]+$");
 		});
 
 	}
@@ -194,7 +195,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 	@Test
 	public void testReAddingConceptsDoesntRecreateExistingLinks() {
 		createNotPresentCodeSystem();
-		assertHierarchyContains();
+		assertHierarchyContainsExactly();
 
 		UploadStatistics outcome;
 		CustomTerminologySet delta;
@@ -205,7 +206,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		delta.addRootConcept("RootA", "Root A")
 			.addChild(TermConceptParentChildLink.RelationshipTypeEnum.ISA).setCode("ChildAA").setDisplay("Child AA");
 		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo/cs", delta);
-		assertHierarchyContains(
+		assertHierarchyContainsExactly(
 			"RootA seq=0",
 			" ChildAA seq=0"
 		);
@@ -222,7 +223,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 			.addChild(TermConceptParentChildLink.RelationshipTypeEnum.ISA).setCode("ChildAA").setDisplay("Child AA")
 			.addChild(TermConceptParentChildLink.RelationshipTypeEnum.ISA).setCode("ChildAAA").setDisplay("Child AAA");
 		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo/cs", delta);
-		assertHierarchyContains(
+		assertHierarchyContainsExactly(
 			"RootA seq=0",
 			" ChildAA seq=0",
 			"  ChildAAA seq=0"
@@ -241,7 +242,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 			.addChild(TermConceptParentChildLink.RelationshipTypeEnum.ISA).setCode("ChildAAA").setDisplay("Child AAA")
 			.addChild(TermConceptParentChildLink.RelationshipTypeEnum.ISA).setCode("ChildAAAA").setDisplay("Child AAAA");
 		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo/cs", delta);
-		assertHierarchyContains(
+		assertHierarchyContainsExactly(
 			"RootA seq=0",
 			" ChildAA seq=0",
 			"  ChildAAA seq=0",
@@ -270,7 +271,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 			myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo", new CustomTerminologySet());
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), containsString("can not apply a delta - wrong content mode"));
+			assertThat(e.getMessage()).contains("can not apply a delta - wrong content mode");
 		}
 
 	}
@@ -292,7 +293,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo", set);
 
 		// Check so far
-		assertHierarchyContains(
+		assertHierarchyContainsExactly(
 			"ParentA seq=0",
 			" ChildA seq=0"
 		);
@@ -305,7 +306,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo", set);
 
 		// Check so far
-		assertHierarchyContains(
+		assertHierarchyContainsExactly(
 			"ParentA seq=0",
 			" ChildA seq=0",
 			"  ChildAA seq=0"
@@ -330,7 +331,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo", set);
 
 		// Check so far
-		assertHierarchyContains(
+		assertHierarchyContainsExactly(
 			"ParentA seq=0",
 			" ChildA seq=0"
 		);
@@ -343,7 +344,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo", set);
 
 		// Check so far
-		assertHierarchyContains(
+		assertHierarchyContainsExactly(
 			"ParentA seq=0",
 			" ChildA seq=0",
 			"  ChildAA seq=0"
@@ -369,7 +370,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		assertEquals("http://foo", outcome.getUrl());
 		assertEquals(CodeSystem.CodeSystemContentMode.NOTPRESENT, outcome.getContent());
 
-		IValidationSupport.LookupCodeResult lookup = myTermSvc.lookupCode(new ValidationSupportContext(myValidationSupport), "http://foo", "CBC", null);
+		IValidationSupport.LookupCodeResult lookup = myTermSvc.lookupCode(new ValidationSupportContext(myValidationSupport), new LookupCodeRequest("http://foo", "CBC"));
 		assertEquals("Complete Blood Count", lookup.getCodeDisplay());
 	}
 
@@ -381,7 +382,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		createNotPresentCodeSystem();
 		ValueSet vs;
 		vs = expandNotPresentCodeSystem();
-		assertEquals(0, vs.getExpansion().getContains().size());
+		assertThat(vs.getExpansion().getContains()).isEmpty();
 
 		CustomTerminologySet delta = new CustomTerminologySet();
 
@@ -415,7 +416,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 			expectedHierarchy.add(expected);
 		}
 
-		assertHierarchyContains(expectedHierarchy.toArray(new String[0]));
+		assertHierarchyContainsExactly(expectedHierarchy.toArray(new String[0]));
 
 	}
 
@@ -433,7 +434,8 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 
 		UploadStatistics outcome = myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo", delta);
 		assertEquals(2, outcome.getUpdatedConceptCount());
-		assertEquals("CODEA0", myTermSvc.lookupCode(new ValidationSupportContext(myValidationSupport), "http://foo", "codea", null).getCodeDisplay());
+		assertThat(myTermSvc.lookupCode(new ValidationSupportContext(myValidationSupport),
+			new LookupCodeRequest("http://foo", "codea")).getCodeDisplay()).isEqualTo("CODEA0");
 
 		// Add codes again with different display
 		delta = new CustomTerminologySet();
@@ -441,12 +443,14 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		delta.addRootConcept("codeb", "CODEB1");
 		outcome = myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo", delta);
 		assertEquals(2, outcome.getUpdatedConceptCount());
-		assertEquals("CODEA1", myTermSvc.lookupCode(new ValidationSupportContext(myValidationSupport), "http://foo", "codea", null).getCodeDisplay());
+		assertThat(myTermSvc.lookupCode(new ValidationSupportContext(myValidationSupport),
+			new LookupCodeRequest("http://foo", "codea")).getCodeDisplay()).isEqualTo("CODEA1");
 
 		// Add codes again with no changes
 		outcome = myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo", delta);
 		assertEquals(2, outcome.getUpdatedConceptCount());
-		assertEquals("CODEA1", myTermSvc.lookupCode(new ValidationSupportContext(myValidationSupport), "http://foo", "codea", null).getCodeDisplay());
+		assertThat(myTermSvc.lookupCode(new ValidationSupportContext(myValidationSupport),
+			new LookupCodeRequest("http://foo", "codea")).getCodeDisplay()).isEqualTo("CODEA1");
 	}
 
 	@Test
@@ -481,7 +485,8 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 			.setValue(new Coding("http://snomed.info", "1234567", "Choked on large meal (finding)"));
 		myCodeSystemDao.create(cs, mySrd);
 
-		IValidationSupport.LookupCodeResult result = myTermSvc.lookupCode(new ValidationSupportContext(myValidationSupport), "http://foo/cs", "lunch", null);
+		IValidationSupport.LookupCodeResult result = myTermSvc.lookupCode(new ValidationSupportContext(myValidationSupport),
+				new LookupCodeRequest("http://foo/cs", "lunch"));
 		assertEquals(true, result.isFound());
 		assertEquals("lunch", result.getSearchedForCode());
 		assertEquals("http://foo/cs", result.getSearchedForSystem());
@@ -505,7 +510,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 
 		List<Parameters.ParametersParameterComponent> properties = output.getParameter().stream().filter(t -> t.getName().equals("property")).collect(Collectors.toList());
 		assertEquals("code", properties.get(0).getPart().get(0).getName());
-		assertEquals("flavour", ((CodeType) properties.get(0).getPart().get(0).getValue()).getValueAsString());
+		assertEquals("flavour", ((StringType) properties.get(0).getPart().get(0).getValue()).getValueAsString());
 		assertEquals("value", properties.get(0).getPart().get(1).getName());
 		assertEquals("Hints of lime", ((StringType) properties.get(0).getPart().get(1).getValue()).getValueAsString());
 
@@ -589,7 +594,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		try {
 			myTermCodeSystemStorageSvc.applyDeltaCodeSystemsRemove("http://foo/cs", delta);
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), containsString("Unknown code system: http://foo"));
+			assertThat(e.getMessage()).contains("Unknown code system: http://foo");
 		}
 
 	}

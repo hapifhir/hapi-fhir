@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ public abstract class BaseJpaResourceProviderEncounter<T extends IBaseResource> 
 	 */
 	@Operation(name = JpaConstants.OPERATION_EVERYTHING, idempotent = true, bundleType = BundleTypeEnum.SEARCHSET)
 	public IBundleProvider EncounterInstanceEverything(
-			javax.servlet.http.HttpServletRequest theServletRequest,
+			jakarta.servlet.http.HttpServletRequest theServletRequest,
 			@IdParam IIdType theId,
 			@Description(
 							formalDefinition =
@@ -76,7 +76,7 @@ public abstract class BaseJpaResourceProviderEncounter<T extends IBaseResource> 
 	 */
 	@Operation(name = JpaConstants.OPERATION_EVERYTHING, idempotent = true, bundleType = BundleTypeEnum.SEARCHSET)
 	public IBundleProvider EncounterTypeEverything(
-			javax.servlet.http.HttpServletRequest theServletRequest,
+			jakarta.servlet.http.HttpServletRequest theServletRequest,
 			@Description(
 							formalDefinition =
 									"Results from this method are returned across multiple pages. This parameter controls the size of those pages.")

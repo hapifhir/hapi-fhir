@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -162,6 +162,16 @@ public class HapiExtensions {
 	 */
 	public static final String EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN =
 			"https://smilecdr.com/fhir/ns/StructureDefinition/searchparameter-uplift-refchain";
+
+	/**
+	 * This extension is used to enable auto version references at path for resource instances.
+	 * This extension should be of type <code>string</code> and should be
+	 * placed on the <code>Resource.meta</code> element.
+	 * It is allowed to add multiple extensions with different paths.
+	 */
+	public static final String EXTENSION_AUTO_VERSION_REFERENCES_AT_PATH =
+			"http://hapifhir.io/fhir/StructureDefinition/auto-version-references-at-path";
+
 	/**
 	 * This extension is used for "uplifted refchains" on search parameters. See the
 	 * HAPI FHIR documentation for an explanation of how these work.

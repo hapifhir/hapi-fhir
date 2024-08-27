@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.config.JpaConfig;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
@@ -32,14 +34,13 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 
 /*
  * This set of Unit Tests instantiates and injects an instance of
@@ -85,7 +86,7 @@ public class ResourceProviderR4RemoteTerminologyTest extends BaseResourceProvide
 
 	@Test
 	public void testValidateCodeOperationOnCodeSystem_byCodingAndUrlWhereSystemIsDifferent_throwsException() {
-		assertThrows(InvalidRequestException.class, () -> {
+		assertThatExceptionOfType(InvalidRequestException.class).isThrownBy(() -> {
 			Parameters respParam = myClient
 				.operation()
 				.onType(CodeSystem.class)
@@ -115,7 +116,7 @@ public class ResourceProviderR4RemoteTerminologyTest extends BaseResourceProvide
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(true, ((BooleanType)respParam.getParameterValue("result")).booleanValue());
+		assertEquals(true, ((BooleanType) respParam.getParameterValue("result")).booleanValue());
 		assertEquals(DISPLAY, respParam.getParameterValue("display").toString());
 	}
 
@@ -136,8 +137,8 @@ public class ResourceProviderR4RemoteTerminologyTest extends BaseResourceProvide
 		ourLog.info(resp);
 
 		assertFalse(((BooleanType) respParam.getParameterValue("result")).booleanValue());
-		assertEquals("Terminology service was unable to provide validation for " + INVALID_CODE_SYSTEM_URI +
-			"#P", respParam.getParameterValue("message").toString());
+		assertThat(respParam.getParameterValue("message").toString()).isEqualTo("Terminology service was unable to provide validation for " + INVALID_CODE_SYSTEM_URI +
+			"#P");
 	}
 
 	@Test
@@ -152,8 +153,8 @@ public class ResourceProviderR4RemoteTerminologyTest extends BaseResourceProvide
 				.execute();
 			fail();
 		} catch (InvalidRequestException exception) {
-			assertEquals("HTTP 400 Bad Request: HAPI-2352: Coding.system '" + CODE_SYSTEM_V2_0247_URI + "' " +
-				"does not equal param system '" + INVALID_CODE_SYSTEM_URI + "'. Unable to validate-code.", exception.getMessage());
+			assertThat(exception.getMessage()).isEqualTo("HTTP 400 Bad Request: HAPI-2352: Coding.system '" + CODE_SYSTEM_V2_0247_URI + "' " +
+				"does not equal param system '" + INVALID_CODE_SYSTEM_URI + "'. Unable to validate-code.");
 		}
 	}
 
@@ -178,7 +179,7 @@ public class ResourceProviderR4RemoteTerminologyTest extends BaseResourceProvide
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(true, ((BooleanType)respParam.getParameterValue("result")).booleanValue());
+		assertEquals(true, ((BooleanType) respParam.getParameterValue("result")).booleanValue());
 		assertEquals(DISPLAY, respParam.getParameterValue("display").toString());
 	}
 
@@ -202,7 +203,7 @@ public class ResourceProviderR4RemoteTerminologyTest extends BaseResourceProvide
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(true, ((BooleanType)respParam.getParameterValue("result")).booleanValue());
+		assertEquals(true, ((BooleanType) respParam.getParameterValue("result")).booleanValue());
 		assertEquals(DISPLAY_BODY_MASS_INDEX, respParam.getParameterValue("display").toString());
 	}
 
@@ -223,8 +224,8 @@ public class ResourceProviderR4RemoteTerminologyTest extends BaseResourceProvide
 		ourLog.info(resp);
 
 		assertFalse(((BooleanType) respParam.getParameterValue("result")).booleanValue());
-		assertEquals("Validator is unable to provide validation for P#" + CODE_SYSTEM_V2_0247_URI +
-			" - Unknown or unusable ValueSet[" + UNKNOWN_VALUE_SYSTEM_URI + "]", respParam.getParameterValue("message").toString());
+		assertThat(respParam.getParameterValue("message").toString()).isEqualTo("Validator is unable to provide validation for P#" + CODE_SYSTEM_V2_0247_URI +
+			" - Unknown or unusable ValueSet[" + UNKNOWN_VALUE_SYSTEM_URI + "]");
 	}
 
 	private void createNextCodeSystemReturnParameters(boolean theResult, String theDisplay, String theMessage) {
