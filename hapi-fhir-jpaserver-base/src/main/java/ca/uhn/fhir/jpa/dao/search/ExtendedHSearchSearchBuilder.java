@@ -59,7 +59,7 @@ public class ExtendedHSearchSearchBuilder {
 	/**
 	 * These params have complicated semantics, or are best resolved at the JPA layer for now.
 	 */
-	public static final Set<String> ourUnsafeSearchParmeters = Sets.newHashSet("_id", "_meta");
+	public static final Set<String> ourUnsafeSearchParmeters = Sets.newHashSet("_id", "_meta", "_count");
 
 	/**
 	 * Determine if ExtendedHibernateSearchBuilder can support this parameter
@@ -67,20 +67,22 @@ public class ExtendedHSearchSearchBuilder {
 	 * @param theActiveParamsForResourceType active search parameters for the desired resource type
 	 * @return whether or not this search parameter is supported in hibernate
 	 */
-	public boolean supportsSearchParameter(String theParamName, ResourceSearchParams theActiveParamsForResourceType) {
+	public boolean illegalForHibernateSearch(String theParamName, ResourceSearchParams theActiveParamsForResourceType) {
 		if (theActiveParamsForResourceType == null) {
-			return false;
+			return true;
 		}
 		if (ourUnsafeSearchParmeters.contains(theParamName)) {
-			return false;
+			return true;
 		}
 		if (!theActiveParamsForResourceType.containsParamName(theParamName)) {
-			return false;
+			return true;
 		}
-		return true;
+		return false;
 	}
 
 	/**
+	 * By default, do not use Hibernate Search.
+	 * If a Search Parameter is supported by hibernate search,
 	 * Are any of the queries supported by our indexing?
 	 * -
 	 * If not, do not use hibernate, because the results will
@@ -88,13 +90,13 @@ public class ExtendedHSearchSearchBuilder {
 	 */
 	public boolean canUseHibernateSearch(
 			String theResourceType, SearchParameterMap myParams, ISearchParamRegistry theSearchParamRegistry) {
-		boolean canUseHibernate = true;
+		boolean canUseHibernate = false;
 
 		ResourceSearchParams resourceActiveSearchParams =
 				theSearchParamRegistry.getActiveSearchParams(theResourceType, ISearchParamRegistry.ContextEnum.SEARCH);
 		for (String paramName : myParams.keySet()) {
 			// is this parameter supported?
-			if (!supportsSearchParameter(paramName, resourceActiveSearchParams)) {
+			if (illegalForHibernateSearch(paramName, resourceActiveSearchParams)) {
 				canUseHibernate = false;
 			} else {
 				// are the parameter values supported?
@@ -220,7 +222,7 @@ public class ExtendedHSearchSearchBuilder {
 		ResourceSearchParams activeSearchParams =
 				searchParamRegistry.getActiveSearchParams(resourceType, ISearchParamRegistry.ContextEnum.SEARCH);
 		for (String nextParam : paramNames) {
-			if (!supportsSearchParameter(nextParam, activeSearchParams)) {
+			if (illegalForHibernateSearch(nextParam, activeSearchParams)) {
 				// ignore magic params handled in JPA
 				continue;
 			}

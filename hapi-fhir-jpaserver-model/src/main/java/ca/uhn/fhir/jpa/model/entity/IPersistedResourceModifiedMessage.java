@@ -19,9 +19,13 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
+import java.util.Date;
+
 public interface IPersistedResourceModifiedMessage {
 
 	IPersistedResourceModifiedMessagePK getPersistedResourceModifiedMessagePk();
 
 	String getResourceType();
+
+	Date getCreatedTime();
 }

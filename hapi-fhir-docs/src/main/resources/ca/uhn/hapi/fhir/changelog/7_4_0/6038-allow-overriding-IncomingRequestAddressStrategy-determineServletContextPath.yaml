@@ -1,0 +1,5 @@
+---
+type: add
+issue: 6038
+title: "Allow overriding RestfulServer's contextPath determination by overriding IServerAddressStrategy.
+    Thanks to Alex Kopp (@alexrkopp) for the contribution!"

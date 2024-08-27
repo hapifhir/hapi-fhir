@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class VectorMatchResultMap {
 	private final MdmRulesJson myMdmRulesJson;
@@ -62,6 +63,16 @@ public class VectorMatchResultMap {
 			return MdmMatchResultEnum.POSSIBLE_MATCH;
 		}
 		return MdmMatchResultEnum.NO_MATCH;
+	}
+
+	public Set<String> getMatchedRules(Long theVector) {
+		if (theVector == null) {
+			return new HashSet<>();
+		}
+		return myVectorToFieldMatchNamesMap.entrySet().stream()
+				.filter(e -> ((e.getKey() & theVector) == e.getKey()))
+				.map(Map.Entry::getValue)
+				.collect(Collectors.toSet());
 	}
 
 	private void put(String theFieldMatchNames, MdmMatchResultEnum theMatchResult) {
@@ -103,5 +114,11 @@ public class VectorMatchResultMap {
 
 	public String getFieldMatchNames(long theVector) {
 		return myVectorToFieldMatchNamesMap.get(theVector);
+	}
+
+	public Set<String> getAllFieldMatchNames() {
+		return myVectorToFieldMatchNamesMap.keySet().stream()
+				.map(key -> myVectorToFieldMatchNamesMap.get(key))
+				.collect(Collectors.toSet());
 	}
 }

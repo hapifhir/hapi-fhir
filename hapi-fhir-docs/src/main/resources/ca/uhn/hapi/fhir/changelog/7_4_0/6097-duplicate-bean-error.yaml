@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 6097
+title: "Fixed a bug where booting the JPA Server Starter would get a duplicate bean error. This has been corrected. Thanks to [@subigre](https://github.com/subigre) for the fix!"

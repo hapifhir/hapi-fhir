@@ -19,10 +19,10 @@
  */
 package ca.uhn.fhir.batch2.jobs.expunge;
 
-import ca.uhn.fhir.batch2.jobs.parameters.JobParameters;
+import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrlJobParameters;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class DeleteExpungeJobParameters extends JobParameters {
+public class DeleteExpungeJobParameters extends PartitionedUrlJobParameters {
 	@JsonProperty("cascade")
 	private boolean myCascade;
 

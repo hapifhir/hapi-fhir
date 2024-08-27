@@ -1,11 +1,11 @@
 package ca.uhn.fhir.jpa.subscription.async;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
-import ca.uhn.fhir.jpa.subscription.BaseSubscriptionsR4Test;
+import ca.uhn.fhir.jpa.dao.data.IResourceModifiedDao;
 import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
-import ca.uhn.fhir.jpa.subscription.submit.interceptor.SynchronousSubscriptionMatcherInterceptor;
+import ca.uhn.fhir.jpa.model.entity.PersistedResourceModifiedMessageEntityPK;
+import ca.uhn.fhir.jpa.model.entity.ResourceModifiedEntity;
+import ca.uhn.fhir.jpa.subscription.BaseSubscriptionsR4Test;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
@@ -14,25 +14,39 @@ import ca.uhn.fhir.jpa.subscription.message.TestQueueConsumerHandler;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionMatcherInterceptor;
+import ca.uhn.fhir.jpa.subscription.submit.interceptor.SynchronousSubscriptionMatcherInterceptor;
 import ca.uhn.fhir.jpa.test.util.StoppableSubscriptionDeliveringRestHookSubscriber;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Subscription;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ContextConfiguration;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @ContextConfiguration(classes = {AsyncSubscriptionMessageSubmissionIT.SpringConfig.class})
 public class AsyncSubscriptionMessageSubmissionIT extends BaseSubscriptionsR4Test {
+	private static final Logger ourLog = LoggerFactory.getLogger(AsyncSubscriptionMessageSubmissionIT.class);
 
 	@SpyBean
 	IResourceModifiedConsumer myResourceModifiedConsumer;
@@ -48,6 +62,9 @@ public class AsyncSubscriptionMessageSubmissionIT extends BaseSubscriptionsR4Tes
 	@Autowired
 	StoppableSubscriptionDeliveringRestHookSubscriber myStoppableSubscriptionDeliveringRestHookSubscriber;
 	private TestQueueConsumerHandler<ResourceModifiedJsonMessage> myQueueConsumerHandler;
+
+	@Autowired
+	private IResourceModifiedDao myResourceModifiedDao;
 
 	@AfterEach
 	public void cleanupStoppableSubscriptionDeliveringRestHookSubscriber() {
@@ -71,6 +88,46 @@ public class AsyncSubscriptionMessageSubmissionIT extends BaseSubscriptionsR4Tes
 	@Test
 	public void testSpringInjects_BeanOfTypeSubscriptionMatchingInterceptor_whenBeanDeclarationIsOverwrittenLocally(){
 		assertFalse(mySubscriptionMatcherInterceptor instanceof SynchronousSubscriptionMatcherInterceptor);
+	}
+
+	@Test
+	public void runDeliveryPass_withManyResources_isBatchedAndKeepsResourceUsageDown() throws JsonProcessingException, InterruptedException {
+		// setup
+		myLogbackTestExtension.setUp(Level.DEBUG);
+
+		String resourceType = "Patient";
+		int factor = 5;
+		int numberOfResourcesToCreate = factor * AsyncResourceModifiedSubmitterSvc.MAX_LIMIT;
+
+		ResourceModifiedEntity entity = new ResourceModifiedEntity();
+		entity.setResourceType(resourceType);
+		PersistedResourceModifiedMessageEntityPK rpm = new PersistedResourceModifiedMessageEntityPK();
+		rpm.setResourceVersion("1");
+		entity.setResourceModifiedEntityPK(rpm);
+
+		// we reuse the same exact msg content to avoid
+		// the slowdown of serializing it over and over
+		SystemRequestDetails details = new SystemRequestDetails();
+		// create a large number of resources
+		for (int i = 0; i < numberOfResourcesToCreate; i++) {
+			Patient resource = new Patient();
+			resource.setId(resourceType + "/" + (1 + i));
+			myPatientDao.create(resource, details);
+		}
+
+		assertEquals(numberOfResourcesToCreate, myResourceModifiedDao.count());
+
+		// test
+		myAsyncResourceModifiedSubmitterSvc.runDeliveryPass();
+
+		// verification
+		waitForQueueToDrain();
+		assertCountOfResourcesNeedingSubmission(0);
+
+		List<ILoggingEvent> events = myLogbackTestExtension.getLogEvents(e -> {
+			return e.getLevel() == Level.DEBUG && e.getFormattedMessage().contains("Attempting to submit");
+		});
+		assertEquals(factor, events.size());
 	}
 
 	@Test
@@ -107,7 +164,9 @@ public class AsyncSubscriptionMessageSubmissionIT extends BaseSubscriptionsR4Tes
 	}
 
 	private void assertCountOfResourcesNeedingSubmission(int theExpectedCount) {
-		assertThat(myResourceModifiedMessagePersistenceSvc.findAllOrderedByCreatedTime()).hasSize(theExpectedCount);
+		assertThat(myResourceModifiedMessagePersistenceSvc.findAllOrderedByCreatedTime(
+			Pageable.unpaged()))
+			.hasSize(theExpectedCount);
 	}
 
 	private Subscription createAndSubmitSubscriptionWithCriteria(String theCriteria) {

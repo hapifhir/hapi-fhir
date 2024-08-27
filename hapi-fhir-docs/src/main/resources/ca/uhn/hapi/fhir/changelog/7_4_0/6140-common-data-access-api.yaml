@@ -1,0 +1,7 @@
+---
+type: change
+issue: 6140
+title: "An prototype interface to abstract data access across different types
+ of FHIR repositories (e.g. remote REST, local JPA) has been added to the `hapi-fhir-base` project.
+  Implementations of this interface will follow in future HAPI releases, and it will continue to evolve
+  as it's validated through implementation."

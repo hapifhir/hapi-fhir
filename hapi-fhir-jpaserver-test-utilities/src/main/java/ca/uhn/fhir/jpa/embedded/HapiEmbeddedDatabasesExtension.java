@@ -22,8 +22,6 @@ package ca.uhn.fhir.jpa.embedded;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.test.utilities.docker.DockerRequiredCondition;
 import ca.uhn.fhir.util.VersionEnum;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.SystemUtils;
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.provider.Arguments;
@@ -56,7 +54,7 @@ public class HapiEmbeddedDatabasesExtension implements AfterAllCallback {
 			myEmbeddedDatabases.add(new H2EmbeddedDatabase());
 			myEmbeddedDatabases.add(new PostgresEmbeddedDatabase());
 			myEmbeddedDatabases.add(new MsSqlEmbeddedDatabase());
-			if (canUseOracle()) {
+			if (OracleCondition.canUseOracle()) {
 				myEmbeddedDatabases.add(new OracleEmbeddedDatabase());
 			} else {
 				String message =
@@ -108,10 +106,15 @@ public class HapiEmbeddedDatabasesExtension implements AfterAllCallback {
 		try {
 			myDatabaseInitializerHelper.insertPersistenceTestData(getEmbeddedDatabase(theDriverType), theVersionEnum);
 		} catch (Exception theE) {
-			ourLog.info(
-					"Could not insert persistence test data most likely because we don't have any for version {} and driver {}",
-					theVersionEnum,
-					theDriverType);
+			if (theE.getMessage().contains("Error loading file: migration/releases/")) {
+				ourLog.info(
+						"Could not insert persistence test data most likely because we don't have any for version {} and driver {}",
+						theVersionEnum,
+						theDriverType);
+			} else {
+				// throw sql execution Exceptions
+				throw theE;
+			}
 		}
 	}
 
@@ -133,28 +136,11 @@ public class HapiEmbeddedDatabasesExtension implements AfterAllCallback {
 			arguments.add(Arguments.of(DriverTypeEnum.POSTGRES_9_4));
 			arguments.add(Arguments.of(DriverTypeEnum.MSSQL_2012));
 
-			if (canUseOracle()) {
+			if (OracleCondition.canUseOracle()) {
 				arguments.add(Arguments.of(DriverTypeEnum.ORACLE_12C));
 			}
 
 			return arguments.stream();
 		}
-	}
-
-	private static boolean canUseOracle() {
-		if (!isMac()) {
-			return true;
-		}
-		return isColimaConfigured();
-	}
-
-	private static boolean isMac() {
-		return SystemUtils.IS_OS_MAC || SystemUtils.IS_OS_MAC_OSX;
-	}
-
-	private static boolean isColimaConfigured() {
-		return StringUtils.isNotBlank(System.getenv("TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE"))
-				&& StringUtils.isNotBlank(System.getenv("DOCKER_HOST"))
-				&& System.getenv("DOCKER_HOST").contains("colima");
 	}
 }

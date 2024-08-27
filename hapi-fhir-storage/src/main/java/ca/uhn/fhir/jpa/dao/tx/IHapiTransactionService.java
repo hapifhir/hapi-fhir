@@ -23,6 +23,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.util.ICallable;
+import com.google.common.annotations.Beta;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.springframework.transaction.annotation.Isolation;
@@ -89,6 +90,20 @@ public interface IHapiTransactionService {
 			@Nonnull Propagation thePropagation,
 			@Nonnull Isolation theIsolation,
 			@Nonnull ICallable<T> theCallback);
+
+	/**
+	 * Are two RequestPartitionId values compatible within the same transaction?
+	 * <p>
+	 * This is an experimental API, subject to change in a future release.
+	 * </p>
+	 *
+	 * @since 7.4.0
+	 */
+	@Beta
+	default boolean isCompatiblePartition(
+			RequestPartitionId theRequestPartitionId, RequestPartitionId theOtherRequestPartitionId) {
+		return true;
+	}
 
 	interface IExecutionBuilder extends TransactionOperations {
 

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r5;
 
+import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrl;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexAppCtx;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
@@ -371,7 +372,7 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 
 			// do a reindex
 			ReindexJobParameters jobParameters = new ReindexJobParameters();
-			jobParameters.setRequestPartitionId(RequestPartitionId.allPartitions());
+			jobParameters.addPartitionedUrl(new PartitionedUrl().setRequestPartitionId(RequestPartitionId.allPartitions()));
 			JobInstanceStartRequest request = new JobInstanceStartRequest();
 			request.setJobDefinitionId(ReindexAppCtx.JOB_REINDEX);
 			request.setParameters(jobParameters);

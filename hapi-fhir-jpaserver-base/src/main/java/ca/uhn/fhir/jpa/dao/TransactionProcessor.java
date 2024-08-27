@@ -27,7 +27,6 @@ import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.config.HapiFhirHibernateJpaDialect;
-import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
@@ -98,9 +97,6 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 	private IIdHelperService<JpaPid> myIdHelperService;
 
 	@Autowired
-	private PartitionSettings myPartitionSettings;
-
-	@Autowired
 	private JpaStorageSettings myStorageSettings;
 
 	@Autowired
@@ -150,14 +146,9 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			List<IBase> theEntries,
 			StopWatch theTransactionStopWatch) {
 
-		ITransactionProcessorVersionAdapter versionAdapter = getVersionAdapter();
-		RequestPartitionId requestPartitionId = null;
-		if (!myPartitionSettings.isPartitioningEnabled()) {
-			requestPartitionId = RequestPartitionId.allPartitions();
-		} else {
-			// If all entries in the transaction point to the exact same partition, we'll try and do a pre-fetch
-			requestPartitionId = getSinglePartitionForAllEntriesOrNull(theRequest, theEntries, versionAdapter);
-		}
+		ITransactionProcessorVersionAdapter<?, ?> versionAdapter = getVersionAdapter();
+		RequestPartitionId requestPartitionId =
+				super.determineRequestPartitionIdForWriteEntries(theRequest, theEntries);
 
 		if (requestPartitionId != null) {
 			preFetch(theTransactionDetails, theEntries, versionAdapter, requestPartitionId);
@@ -472,24 +463,6 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 		}
 	}
 
-	private RequestPartitionId getSinglePartitionForAllEntriesOrNull(
-			RequestDetails theRequest, List<IBase> theEntries, ITransactionProcessorVersionAdapter versionAdapter) {
-		RequestPartitionId retVal = null;
-		Set<RequestPartitionId> requestPartitionIdsForAllEntries = new HashSet<>();
-		for (IBase nextEntry : theEntries) {
-			IBaseResource resource = versionAdapter.getResource(nextEntry);
-			if (resource != null) {
-				RequestPartitionId requestPartition = myRequestPartitionSvc.determineCreatePartitionForRequest(
-						theRequest, resource, myFhirContext.getResourceType(resource));
-				requestPartitionIdsForAllEntries.add(requestPartition);
-			}
-		}
-		if (requestPartitionIdsForAllEntries.size() == 1) {
-			retVal = requestPartitionIdsForAllEntries.iterator().next();
-		}
-		return retVal;
-	}
-
 	/**
 	 * Given a token parameter, build the query predicate based on its hash. Uses system and value if both are available, otherwise just value.
 	 * If neither are available, it returns null.
@@ -568,11 +541,6 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			}
 			throw e;
 		}
-	}
-
-	@VisibleForTesting
-	public void setPartitionSettingsForUnitTest(PartitionSettings thePartitionSettings) {
-		myPartitionSettings = thePartitionSettings;
 	}
 
 	@VisibleForTesting

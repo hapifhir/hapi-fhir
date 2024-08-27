@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.model.dao;
 
+import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
 
 import java.util.ArrayList;
@@ -34,6 +35,7 @@ import java.util.Set;
  */
 public class JpaPid extends BaseResourcePersistentId<Long> {
 	private final Long myId;
+	private PartitionablePartitionId myPartitionablePartitionId;
 
 	private JpaPid(Long theId) {
 		super(null);
@@ -53,6 +55,15 @@ public class JpaPid extends BaseResourcePersistentId<Long> {
 	private JpaPid(Long theId, Long theVersion, String theResourceType) {
 		super(theVersion, theResourceType);
 		myId = theId;
+	}
+
+	public PartitionablePartitionId getPartitionablePartitionId() {
+		return myPartitionablePartitionId;
+	}
+
+	public JpaPid setPartitionablePartitionId(PartitionablePartitionId thePartitionablePartitionId) {
+		myPartitionablePartitionId = thePartitionablePartitionId;
+		return this;
 	}
 
 	public static List<Long> toLongList(Collection<JpaPid> thePids) {

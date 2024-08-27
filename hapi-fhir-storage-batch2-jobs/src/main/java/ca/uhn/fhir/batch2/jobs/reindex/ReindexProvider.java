@@ -21,7 +21,6 @@ package ca.uhn.fhir.batch2.jobs.reindex;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.IJobPartitionProvider;
-import ca.uhn.fhir.batch2.jobs.parameters.UrlPartitioner;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.ReindexParameters;
@@ -41,6 +40,7 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters.OPTIMIZE_STORAGE;
 import static ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters.REINDEX_SEARCH_PARAMETERS;
@@ -50,7 +50,6 @@ public class ReindexProvider {
 	private final FhirContext myFhirContext;
 	private final IJobCoordinator myJobCoordinator;
 	private final IJobPartitionProvider myJobPartitionProvider;
-	private final UrlPartitioner myUrlPartitioner;
 
 	/**
 	 * Constructor
@@ -58,12 +57,10 @@ public class ReindexProvider {
 	public ReindexProvider(
 			FhirContext theFhirContext,
 			IJobCoordinator theJobCoordinator,
-			IJobPartitionProvider theJobPartitionProvider,
-			UrlPartitioner theUrlPartitioner) {
+			IJobPartitionProvider theJobPartitionProvider) {
 		myFhirContext = theFhirContext;
 		myJobCoordinator = theJobCoordinator;
 		myJobPartitionProvider = theJobPartitionProvider;
-		myUrlPartitioner = theUrlPartitioner;
 	}
 
 	@Operation(name = ProviderConstants.OPERATION_REINDEX, idempotent = false)
@@ -119,17 +116,15 @@ public class ReindexProvider {
 			params.setOptimisticLock(theOptimisticLock.getValue());
 		}
 
+		List<String> urls = List.of();
 		if (theUrlsToReindex != null) {
-			theUrlsToReindex.stream()
+			urls = theUrlsToReindex.stream()
 					.map(IPrimitiveType::getValue)
 					.filter(StringUtils::isNotBlank)
-					.map(url -> myUrlPartitioner.partitionUrl(url, theRequestDetails))
-					.forEach(params::addPartitionedUrl);
+					.collect(Collectors.toList());
 		}
 
-		myJobPartitionProvider
-				.getPartitions(theRequestDetails, ProviderConstants.OPERATION_REINDEX)
-				.forEach(params::addRequestPartitionId);
+		myJobPartitionProvider.getPartitionedUrls(theRequestDetails, urls).forEach(params::addPartitionedUrl);
 
 		JobInstanceStartRequest request = new JobInstanceStartRequest();
 		request.setJobDefinitionId(ReindexAppCtx.JOB_REINDEX);

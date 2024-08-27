@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.dao.tx;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.model.ResourceVersionConflictResolutionStrategy;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
@@ -13,6 +14,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.util.SleepUtil;
 import org.hibernate.exception.ConstraintViolationException;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -25,6 +27,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.support.TransactionCallback;
 
 import java.sql.SQLException;
@@ -32,7 +35,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -54,8 +59,8 @@ class HapiTransactionServiceTest {
 
 	@Mock
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvcMock;
-	@Mock
-	private PartitionSettings myPartitionSettingsMock;
+
+	private final PartitionSettings myPartitionSettings = new PartitionSettings();
 
 	@Mock
 	private SleepUtil mySleepUtilMock;
@@ -68,7 +73,7 @@ class HapiTransactionServiceTest {
 		myHapiTransactionService = new HapiTransactionService();
 		myHapiTransactionService.setTransactionManager(myTransactionManagerMock);
 		myHapiTransactionService.setInterceptorBroadcaster(myInterceptorBroadcasterMock);
-		myHapiTransactionService.setPartitionSettingsForUnitTest(myPartitionSettingsMock);
+		myHapiTransactionService.setPartitionSettingsForUnitTest(myPartitionSettings);
 		myHapiTransactionService.setRequestPartitionSvcForUnitTest(myRequestPartitionHelperSvcMock);
 		myHapiTransactionService.setSleepUtil(mySleepUtilMock);
 		mockInterceptorBroadcaster();
@@ -112,9 +117,7 @@ class HapiTransactionServiceTest {
 			throw theException;
 		};
 
-		Exception theExceptionThrownByDoExecute = assertThrows(Exception.class, () -> {
-			myHapiTransactionService.doExecute((HapiTransactionService.ExecutionBuilder) executionBuilder, transactionCallback);
-		});
+		Exception theExceptionThrownByDoExecute = assertThrows(Exception.class, () -> myHapiTransactionService.doExecute((HapiTransactionService.ExecutionBuilder) executionBuilder, transactionCallback));
 
 		assertEquals(theExpectedNumberOfCallsToTransactionCallback, numberOfCalls.get());
 		verify(mySleepUtilMock, times(theExpectedNumberOfCallsToTransactionCallback - 1))
@@ -190,5 +193,53 @@ class HapiTransactionServiceTest {
 		assertEquals(3, numberOfCalls.get());
 		verify(mySleepUtilMock, times(2))
 			.sleepAtLeast(anyLong(), anyBoolean());
+	}
+
+	/**
+	 * When are two RequestPartitionIds compatible, under different config?
+	 */
+	@Nested
+	class PartitionCompatibility {
+		RequestPartitionId partition1 = RequestPartitionId.fromPartitionId(1);
+		RequestPartitionId partition2 = RequestPartitionId.fromPartitionId(2);
+
+		@Test
+		void unPartitioned_anythingIsCompatibleWithAnything() {
+		    // given
+			myPartitionSettings.setPartitioningEnabled(false);
+			myHapiTransactionService.setTransactionPropagationWhenChangingPartitions(Propagation.REQUIRED);
+
+			assertTrue(myHapiTransactionService.isCompatiblePartition(null, partition1));
+			assertTrue(myHapiTransactionService.isCompatiblePartition(partition1, null));
+			assertTrue(myHapiTransactionService.isCompatiblePartition(partition1, partition1));
+			assertTrue(myHapiTransactionService.isCompatiblePartition(partition1, partition2));
+		}
+
+		@Test
+		void partitionedDefault_anythingIsCompatibleWithAnything() {
+			// given
+			myPartitionSettings.setPartitioningEnabled(true);
+			myHapiTransactionService.setTransactionPropagationWhenChangingPartitions(Propagation.REQUIRED);
+
+			assertTrue(myHapiTransactionService.isCompatiblePartition(null, partition1));
+			assertTrue(myHapiTransactionService.isCompatiblePartition(partition1, null));
+			assertTrue(myHapiTransactionService.isCompatiblePartition(partition1, partition1));
+			assertTrue(myHapiTransactionService.isCompatiblePartition(partition1, partition2));
+		}
+
+		/**
+		 * When changing partition requires a new transaction, only null and identical partitions are allowed.
+		 */
+		@Test
+		void partitionedRequiresNew_partitionIsOnlyCompatibleWithSelf() {
+			// given
+			myPartitionSettings.setPartitioningEnabled(true);
+			myHapiTransactionService.setTransactionPropagationWhenChangingPartitions(Propagation.REQUIRES_NEW);
+
+			assertTrue(myHapiTransactionService.isCompatiblePartition(partition1, partition1));
+
+			assertFalse(myHapiTransactionService.isCompatiblePartition(partition1, partition2));
+		}
+
 	}
 }

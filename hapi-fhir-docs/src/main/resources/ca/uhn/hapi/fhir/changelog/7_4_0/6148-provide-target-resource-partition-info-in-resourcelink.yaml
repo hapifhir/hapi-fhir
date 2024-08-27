@@ -1,0 +1,5 @@
+---
+type: add
+issue: 6148
+jira: SMILE-8613
+title: "Added the target resource partitionId and partitionDate to the resourceLink table."

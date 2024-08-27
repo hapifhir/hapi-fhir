@@ -37,6 +37,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboTokenNonUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
+import ca.uhn.fhir.jpa.model.entity.ResourceLink.ResourceLinkForLocalReferenceParams;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.SearchParamPresentEntity;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
@@ -71,6 +72,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.jpa.model.config.PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED;
+import static ca.uhn.fhir.jpa.model.entity.ResourceLink.forLocalReference;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -685,14 +688,18 @@ public class SearchParamExtractorService {
 			 * need to resolve it again
 			 */
 			myResourceLinkResolver.validateTypeOrThrowException(type);
-			resourceLink = ResourceLink.forLocalReference(
-					thePathAndRef.getPath(),
-					theEntity,
-					typeString,
-					resolvedTargetId.getId(),
-					targetId,
-					transactionDate,
-					targetVersionId);
+
+			ResourceLinkForLocalReferenceParams params = ResourceLinkForLocalReferenceParams.instance()
+					.setSourcePath(thePathAndRef.getPath())
+					.setSourceResource(theEntity)
+					.setTargetResourceType(typeString)
+					.setTargetResourcePid(resolvedTargetId.getId())
+					.setTargetResourceId(targetId)
+					.setUpdated(transactionDate)
+					.setTargetResourceVersion(targetVersionId)
+					.setTargetResourcePartitionablePartitionId(resolvedTargetId.getPartitionablePartitionId());
+
+			resourceLink = forLocalReference(params);
 
 		} else if (theFailOnInvalidReference) {
 
@@ -731,6 +738,7 @@ public class SearchParamExtractorService {
 			} else {
 				// Cache the outcome in the current transaction in case there are more references
 				JpaPid persistentId = JpaPid.fromId(resourceLink.getTargetResourcePid());
+				persistentId.setPartitionablePartitionId(resourceLink.getTargetResourcePartitionId());
 				theTransactionDetails.addResolvedResourceId(referenceElement, persistentId);
 			}
 
@@ -740,11 +748,15 @@ public class SearchParamExtractorService {
 			 * Just assume the reference is valid. This is used for in-memory matching since there
 			 * is no expectation of a database in this situation
 			 */
-			ResourceTable target;
-			target = new ResourceTable();
-			target.setResourceType(typeString);
-			resourceLink = ResourceLink.forLocalReference(
-					thePathAndRef.getPath(), theEntity, typeString, null, targetId, transactionDate, targetVersionId);
+			ResourceLinkForLocalReferenceParams params = ResourceLinkForLocalReferenceParams.instance()
+					.setSourcePath(thePathAndRef.getPath())
+					.setSourceResource(theEntity)
+					.setTargetResourceType(typeString)
+					.setTargetResourceId(targetId)
+					.setUpdated(transactionDate)
+					.setTargetResourceVersion(targetVersionId);
+
+			resourceLink = forLocalReference(params);
 		}
 
 		theNewParams.myLinks.add(resourceLink);
@@ -895,19 +907,24 @@ public class SearchParamExtractorService {
 			RequestDetails theRequest,
 			TransactionDetails theTransactionDetails) {
 		JpaPid resolvedResourceId = (JpaPid) theTransactionDetails.getResolvedResourceId(theNextId);
+
 		if (resolvedResourceId != null) {
 			String targetResourceType = theNextId.getResourceType();
 			Long targetResourcePid = resolvedResourceId.getId();
 			String targetResourceIdPart = theNextId.getIdPart();
 			Long targetVersion = theNextId.getVersionIdPartAsLong();
-			return ResourceLink.forLocalReference(
-					thePathAndRef.getPath(),
-					theEntity,
-					targetResourceType,
-					targetResourcePid,
-					targetResourceIdPart,
-					theUpdateTime,
-					targetVersion);
+
+			ResourceLinkForLocalReferenceParams params = ResourceLinkForLocalReferenceParams.instance()
+					.setSourcePath(thePathAndRef.getPath())
+					.setSourceResource(theEntity)
+					.setTargetResourceType(targetResourceType)
+					.setTargetResourcePid(targetResourcePid)
+					.setTargetResourceId(targetResourceIdPart)
+					.setUpdated(theUpdateTime)
+					.setTargetResourceVersion(targetVersion)
+					.setTargetResourcePartitionablePartitionId(resolvedResourceId.getPartitionablePartitionId());
+
+			return ResourceLink.forLocalReference(params);
 		}
 
 		/*
@@ -919,8 +936,7 @@ public class SearchParamExtractorService {
 
 		IResourceLookup<JpaPid> targetResource;
 		if (myPartitionSettings.isPartitioningEnabled()) {
-			if (myPartitionSettings.getAllowReferencesAcrossPartitions()
-					== PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED) {
+			if (myPartitionSettings.getAllowReferencesAcrossPartitions() == ALLOWED_UNQUALIFIED) {
 
 				// Interceptor: Pointcut.JPA_CROSS_PARTITION_REFERENCE_DETECTED
 				if (CompositeInterceptorBroadcaster.hasHooks(
@@ -964,21 +980,25 @@ public class SearchParamExtractorService {
 		Long targetResourcePid = targetResource.getPersistentId().getId();
 		String targetResourceIdPart = theNextId.getIdPart();
 		Long targetVersion = theNextId.getVersionIdPartAsLong();
-		return ResourceLink.forLocalReference(
-				thePathAndRef.getPath(),
-				theEntity,
-				targetResourceType,
-				targetResourcePid,
-				targetResourceIdPart,
-				theUpdateTime,
-				targetVersion);
+
+		ResourceLinkForLocalReferenceParams params = ResourceLinkForLocalReferenceParams.instance()
+				.setSourcePath(thePathAndRef.getPath())
+				.setSourceResource(theEntity)
+				.setTargetResourceType(targetResourceType)
+				.setTargetResourcePid(targetResourcePid)
+				.setTargetResourceId(targetResourceIdPart)
+				.setUpdated(theUpdateTime)
+				.setTargetResourceVersion(targetVersion)
+				.setTargetResourcePartitionablePartitionId(
+						targetResource.getPersistentId().getPartitionablePartitionId());
+
+		return forLocalReference(params);
 	}
 
 	private RequestPartitionId determineResolverPartitionId(@Nonnull RequestPartitionId theRequestPartitionId) {
 		RequestPartitionId targetRequestPartitionId = theRequestPartitionId;
 		if (myPartitionSettings.isPartitioningEnabled()
-				&& myPartitionSettings.getAllowReferencesAcrossPartitions()
-						== PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED) {
+				&& myPartitionSettings.getAllowReferencesAcrossPartitions() == ALLOWED_UNQUALIFIED) {
 			targetRequestPartitionId = RequestPartitionId.allPartitions();
 		}
 		return targetRequestPartitionId;

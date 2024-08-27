@@ -102,19 +102,19 @@ public class MatchUrlServiceTest extends BaseJpaTest {
 
 	@Test
 	void testTotal_fromStandardLowerCase() {
-	    // given
-	    // when
+		// given
+		// when
 		var map = myMatchUrlService.translateMatchUrl("Patient?family=smith&_total=none", ourCtx.getResourceDefinition("Patient"));
 
-	    // then
-	    assertEquals(SearchTotalModeEnum.NONE, map.getSearchTotalMode());
+		// then
+		assertEquals(SearchTotalModeEnum.NONE, map.getSearchTotalMode());
 	}
 
 	@Test
 	void testTotal_fromUpperCase() {
 		// given
 		// when
-		var map = myMatchUrlService.translateMatchUrl("Patient?family=smith&_total=none", ourCtx.getResourceDefinition("Patient"));
+		var map = myMatchUrlService.translateMatchUrl("Patient?family=smith&_total=NONE", ourCtx.getResourceDefinition("Patient"));
 
 		// then
 		assertEquals(SearchTotalModeEnum.NONE, map.getSearchTotalMode());
