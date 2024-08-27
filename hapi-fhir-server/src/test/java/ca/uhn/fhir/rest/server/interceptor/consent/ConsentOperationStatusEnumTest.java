@@ -128,8 +128,8 @@ class ConsentOperationStatusEnumTest {
 
 	@Test
 	void testStrengthOrder() {
-	    assertTrue(REJECT.getStrength() > AUTHORIZED.getStrength());
-	    assertTrue(AUTHORIZED.getStrength() > PROCEED.getStrength());
+	    assertTrue(REJECT.getPrecedence() > AUTHORIZED.getPrecedence());
+	    assertTrue(AUTHORIZED.getPrecedence() > PROCEED.getPrecedence());
 	}
 
 }

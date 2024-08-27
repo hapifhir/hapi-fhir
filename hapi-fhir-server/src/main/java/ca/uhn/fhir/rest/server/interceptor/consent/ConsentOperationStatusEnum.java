@@ -48,7 +48,7 @@ public enum ConsentOperationStatusEnum {
 	 * REJECT > AUTHORIZED > PROCEED.
 	 * @return 2/1/0 for REJECT/AUTHORIZED/PROCEED
 	 */
-	int getStrength() {
+	int getPrecedence() {
 		switch (this) {
 			case REJECT:
 				return 2;
@@ -84,6 +84,11 @@ public enum ConsentOperationStatusEnum {
 
 	/**
 	 * Evaluate all verdicts together, allowing any to veto (i.e. REJECT) the operation.
+	 * <ul>
+	 * <li>If any vote is REJECT, then the result is REJECT.
+	 * <li>If no vote is REJECT, and any vote is AUTHORIZED, then the result is AUTHORIZED.
+	 * <li>If no vote is REJECT or AUTHORIZED, the result is PROCEED.
+	 * </ul>
 	 *
 	 * @return REJECT if any reject, AUTHORIZED if no REJECT and some AUTHORIZED, PROCEED if empty or all PROCEED
 	 */
@@ -97,7 +102,7 @@ public enum ConsentOperationStatusEnum {
 	 * @return REJECT if either reject, AUTHORIZED if no REJECT and some AUTHORIZED, PROCEED otherwise
 	 */
 	public ConsentOperationStatusEnum parallelReduce(ConsentOperationStatusEnum theNextVerdict) {
-		if (theNextVerdict.getStrength() > this.getStrength()) {
+		if (theNextVerdict.getPrecedence() > this.getPrecedence()) {
 			return theNextVerdict;
 		} else {
 			return this;
