@@ -25,6 +25,7 @@ import jakarta.persistence.Embedded;
 import jakarta.persistence.MappedSuperclass;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 
 /**
  * This is the base class for entities with partitioning that does NOT include Hibernate Envers logging.
@@ -44,6 +45,13 @@ public abstract class BasePartitionable implements Serializable {
 	@Column(name = PartitionablePartitionId.PARTITION_ID, insertable = false, updatable = false, nullable = true)
 	private Integer myPartitionIdValue;
 
+	/**
+	 * This is here to support queries only, do not set this field directly
+	 */
+	@SuppressWarnings("unused")
+	@Column(name = PartitionablePartitionId.PARTITION_DATE, insertable = false, updatable = false, nullable = true)
+	private LocalDate myPartitionDateValue;
+
 	@Nullable
 	public PartitionablePartitionId getPartitionId() {
 		return myPartitionId;
@@ -57,6 +65,7 @@ public abstract class BasePartitionable implements Serializable {
 	public String toString() {
 		return "BasePartitionable{" + "myPartitionId="
 				+ myPartitionId + ", myPartitionIdValue="
-				+ myPartitionIdValue + '}';
+				+ myPartitionIdValue + ", myPartitionDateValue="
+				+ myPartitionDateValue + '}';
 	}
 }

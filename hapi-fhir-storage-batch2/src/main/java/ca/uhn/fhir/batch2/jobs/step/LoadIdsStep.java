@@ -26,11 +26,11 @@ import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.jobs.chunk.ChunkRangeJson;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
-import ca.uhn.fhir.batch2.jobs.parameters.JobParameters;
+import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrlJobParameters;
 import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
 import jakarta.annotation.Nonnull;
 
-public class LoadIdsStep<PT extends JobParameters>
+public class LoadIdsStep<PT extends PartitionedUrlJobParameters>
 		implements IJobStepWorker<PT, ChunkRangeJson, ResourceIdListWorkChunkJson> {
 	private final ResourceIdListStep<PT> myResourceIdListStep;
 

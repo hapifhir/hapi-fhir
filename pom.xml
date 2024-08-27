@@ -919,15 +919,21 @@
 			<id>adriennesox</id>
 			<name>Adrienne Sox</name>
 			<organization>Galileo, Inc.</organization>
-    </developer>
-	 <developer>
-		 <id>melihaydogd</id>
-		 <name>Ahmet Melih Aydoğdu</name>
-    </developer>
-	 <developer>
-		 <id>alexrkopp</id>
-		 <name>Alex Kopp</name>
-    </developer>
+		</developer>
+		<developer>
+			<id>melihaydogd</id>
+			<name>Ahmet Melih Aydoğdu</name>
+		</developer>
+		<developer>
+			<id>alexrkopp</id>
+			<name>Alex Kopp</name>
+			<organization>athenahealth</organization>
+		</developer>
+		<developer>
+			<id>acoteathn</id>
+			<name>Alex Cote</name>
+			<organization>athenahealth</organization>
+		</developer>
 	</developers>
 
 	<licenses>
@@ -1031,7 +1037,7 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<ebay_cors_filter_version>1.0.1</ebay_cors_filter_version>
 		<elastic_apm_version>1.44.0</elastic_apm_version>
-		<elasticsearch_version>8.11.1</elasticsearch_version>
+		<elasticsearch_version>8.14.3</elasticsearch_version>
 		<ucum_version>1.0.8</ucum_version>
 
 		<!-- Clinical Reasoning & CQL Support -->
@@ -1144,7 +1150,7 @@
 			<dependency>
 				<groupId>com.graphql-java</groupId>
 				<artifactId>graphql-java</artifactId>
-				<version>21.0</version>
+				<version>21.5</version>
 			</dependency>
 			<!-- mail start -->
 			<dependency>
@@ -1833,7 +1839,7 @@
 			<dependency>
 				<groupId>org.htmlunit</groupId>
 				<artifactId>htmlunit</artifactId>
-				<version>3.9.0</version>
+				<version>3.11.0</version>
 				<exclusions>
 					<exclusion>
 						<!-- Don't let HTMLUnit bring in Jetty 9 -->
@@ -2180,7 +2186,7 @@
 			<dependency>
 				<groupId>org.webjars.bower</groupId>
 				<artifactId>moment</artifactId>
-				<version>2.27.0</version>
+				<version>2.29.4</version>
 			</dependency>
 			<dependency>
 				<groupId>org.webjars.npm</groupId>

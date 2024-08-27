@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 5960
+backport: 7.2.1
+title: "Previously, queries with chained would fail to sort correctly with lucene and full text searches enabled.
+        This has been fixed."
