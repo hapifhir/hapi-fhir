@@ -48,6 +48,8 @@ class ConsentOperationStatusEnumTest {
 		Stream<ConsentOperationStatusEnum> consentOperationStatusEnumStream = Arrays.stream(theInput.split(" +"))
 			.map(String::trim)
 			.map(ConsentOperationStatusEnum::valueOf);
+
+		// when
 		ConsentOperationStatusEnum result = ConsentOperationStatusEnum.serialEvaluate(consentOperationStatusEnumStream);
 
 		assertEquals(theExpectedResult, result);
@@ -66,7 +68,8 @@ class ConsentOperationStatusEnumTest {
 		PROCEED   , AUTHORIZED, AUTHORIZED
 		""")
 	void testSerialReduction_choosesFirstVerdict(ConsentOperationStatusEnum theFirst, ConsentOperationStatusEnum theSecond, ConsentOperationStatusEnum theExpectedResult) {
-		// given
+
+		// when
 		ConsentOperationStatusEnum result = theFirst.serialReduce(theSecond);
 
 		assertEquals(theExpectedResult, result);
@@ -112,6 +115,8 @@ class ConsentOperationStatusEnumTest {
 		Stream<ConsentOperationStatusEnum> consentOperationStatusEnumStream = Arrays.stream(theInput.split(" +"))
 			.map(String::trim)
 			.map(ConsentOperationStatusEnum::valueOf);
+
+		// when
 		ConsentOperationStatusEnum result = ConsentOperationStatusEnum.parallelEvaluate(consentOperationStatusEnumStream);
 
 		assertEquals(theExpectedResult, result);

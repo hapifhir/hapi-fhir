@@ -46,9 +46,9 @@ public enum ConsentOperationStatusEnum {
 	/**
 	 * Assigns ordinals to the verdicts by strength:
 	 * REJECT > AUTHORIZED > PROCEED.
-	 * @return
+	 * @return 2/1/0 for REJECT/AUTHORIZED/PROCEED
 	 */
-	byte getStrength() {
+	int getStrength() {
 		switch (this) {
 			case REJECT:
 				return 2;
@@ -58,17 +58,18 @@ public enum ConsentOperationStatusEnum {
 			default:
 				return 0;
 		}
-
 	}
 	/**
 	 * Evaluate verdicts in order, taking the first "decision" (i.e. first non-PROCEED) verdict.
 	 *
 	 * @return the first decisive verdict, or PROCEED when empty or all PROCEED.
 	 */
-	public static ConsentOperationStatusEnum serialEvaluate(Stream<ConsentOperationStatusEnum> consentOperationStatusEnumStream) {
+	public static ConsentOperationStatusEnum serialEvaluate(
+			Stream<ConsentOperationStatusEnum> consentOperationStatusEnumStream) {
 		return consentOperationStatusEnumStream
-			.filter(verdict -> PROCEED != verdict)
-			.findFirst().orElse(PROCEED);
+				.filter(verdict -> PROCEED != verdict)
+				.findFirst()
+				.orElse(PROCEED);
 	}
 
 	/**
@@ -88,15 +89,14 @@ public enum ConsentOperationStatusEnum {
 		}
 	}
 
-
 	/**
 	 * Evaluate all verdicts together, allowing any to veto (i.e. REJECT) the operation.
 	 *
 	 * @return REJECT if any reject, AUTHORIZED if no REJECT and some AUTHORIZED, PROCEED if empty or all PROCEED
 	 */
-	public static ConsentOperationStatusEnum parallelEvaluate(Stream<ConsentOperationStatusEnum> consentOperationStatusEnumStream) {
-		return consentOperationStatusEnumStream
-			.reduce(PROCEED, ConsentOperationStatusEnum::parallelReduce);
+	public static ConsentOperationStatusEnum parallelEvaluate(
+			Stream<ConsentOperationStatusEnum> consentOperationStatusEnumStream) {
+		return consentOperationStatusEnumStream.reduce(PROCEED, ConsentOperationStatusEnum::parallelReduce);
 	}
 
 	/**
