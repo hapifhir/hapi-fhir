@@ -85,6 +85,7 @@ public class ResourceCompartmentUtil {
 			IBaseResource theResource,
 			List<RuntimeSearchParam> theCompartmentSps,
 			ISearchParamExtractor mySearchParamExtractor) {
+		// TODO KHS consolidate with FhirTerser.getCompartmentOwnersForResource()
 		return theCompartmentSps.stream()
 				.flatMap(param -> Arrays.stream(BaseSearchParamExtractor.splitPathsR4(param.getPath())))
 				.filter(StringUtils::isNotBlank)
