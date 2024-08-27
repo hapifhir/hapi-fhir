@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.rest.server.interceptor.consent;
 
+import java.util.stream.Stream;
+
 public enum ConsentOperationStatusEnum {
 
 	/**
@@ -39,4 +41,74 @@ public enum ConsentOperationStatusEnum {
 	 * counting/caching methods)
 	 */
 	AUTHORIZED,
+	;
+
+	/**
+	 * Assigns ordinals to the verdicts by strength:
+	 * REJECT > AUTHORIZED > PROCEED.
+	 * @return
+	 */
+	byte getStrength() {
+		switch (this) {
+			case REJECT:
+				return 2;
+			case AUTHORIZED:
+				return 1;
+			case PROCEED:
+			default:
+				return 0;
+		}
+
+	}
+	/**
+	 * Evaluate verdicts in order, taking the first "decision" (i.e. first non-PROCEED) verdict.
+	 *
+	 * @return the first decisive verdict, or PROCEED when empty or all PROCEED.
+	 */
+	public static ConsentOperationStatusEnum serialEvaluate(Stream<ConsentOperationStatusEnum> consentOperationStatusEnumStream) {
+		return consentOperationStatusEnumStream
+			.filter(verdict -> PROCEED != verdict)
+			.findFirst().orElse(PROCEED);
+	}
+
+	/**
+	 * Evaluate verdicts in order, taking the first "decision" (i.e. first non-PROCEED) verdict.
+	 *
+	 * @param theNextVerdict the next verdict to consider
+	 * @return the combined verdict
+	 */
+	public ConsentOperationStatusEnum serialReduce(ConsentOperationStatusEnum theNextVerdict) {
+		switch (this) {
+			case REJECT:
+			case AUTHORIZED:
+				return this;
+			case PROCEED:
+			default:
+				return theNextVerdict;
+		}
+	}
+
+
+	/**
+	 * Evaluate all verdicts together, allowing any to veto (i.e. REJECT) the operation.
+	 *
+	 * @return REJECT if any reject, AUTHORIZED if no REJECT and some AUTHORIZED, PROCEED if empty or all PROCEED
+	 */
+	public static ConsentOperationStatusEnum parallelEvaluate(Stream<ConsentOperationStatusEnum> consentOperationStatusEnumStream) {
+		return consentOperationStatusEnumStream
+			.reduce(PROCEED, ConsentOperationStatusEnum::parallelReduce);
+	}
+
+	/**
+	 * Evaluate two verdicts together, allowing either to veto (i.e. REJECT) the operation.
+	 *
+	 * @return REJECT if either reject, AUTHORIZED if no REJECT and some AUTHORIZED, PROCEED otherwise
+	 */
+	public ConsentOperationStatusEnum parallelReduce(ConsentOperationStatusEnum theNextVerdict) {
+		if (theNextVerdict.getStrength() > this.getStrength()) {
+			return theNextVerdict;
+		} else {
+			return this;
+		}
+	}
 }
