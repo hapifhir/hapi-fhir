@@ -39,6 +39,7 @@ import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.IdType;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -92,15 +93,15 @@ public class PatientIdPartitionInterceptor {
 
 		Optional<String> oCompartmentIdentity;
 		if (resourceDef.getName().equals("Patient")) {
-			oCompartmentIdentity =
-					Optional.ofNullable(theResource.getIdElement().getIdPart());
-			if (oCompartmentIdentity.isEmpty()) {
+			IIdType idElement = theResource.getIdElement();
+			oCompartmentIdentity = Optional.ofNullable(idElement.getIdPart());
+			if (idElement.isUuid() || oCompartmentIdentity.isEmpty()) {
 				throw new MethodNotAllowedException(
 						Msg.code(1321) + "Patient resource IDs must be client-assigned in patient compartment mode");
 			}
 		} else {
-			oCompartmentIdentity =
-					ResourceCompartmentUtil.getResourceCompartment(theResource, compartmentSps, mySearchParamExtractor);
+			oCompartmentIdentity = ResourceCompartmentUtil.getResourceCompartment(
+					"Patient", theResource, compartmentSps, mySearchParamExtractor);
 		}
 
 		return oCompartmentIdentity
