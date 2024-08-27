@@ -421,12 +421,13 @@ public class RestfulServerConfiguration implements ISearchParamRegistry {
 
 	@Override
 	public RuntimeSearchParam getActiveSearchParam(
-			String theResourceName, String theParamName, ContextEnum theContext) {
+			String theResourceName, String theParamName, SearchParamLookupContextEnum theContext) {
 		return getActiveSearchParams(theResourceName, theContext).get(theParamName);
 	}
 
 	@Override
-	public ResourceSearchParams getActiveSearchParams(@Nonnull String theResourceName, ContextEnum theContext) {
+	public ResourceSearchParams getActiveSearchParams(
+			@Nonnull String theResourceName, SearchParamLookupContextEnum theContext) {
 		Validate.notBlank(theResourceName, "theResourceName must not be null or blank");
 
 		ResourceSearchParams retval = new ResourceSearchParams(theResourceName);
@@ -443,7 +444,7 @@ public class RestfulServerConfiguration implements ISearchParamRegistry {
 
 	@Nullable
 	@Override
-	public RuntimeSearchParam getActiveSearchParamByUrl(String theUrl, ContextEnum theContext) {
+	public RuntimeSearchParam getActiveSearchParamByUrl(String theUrl, SearchParamLookupContextEnum theContext) {
 		throw new UnsupportedOperationException(Msg.code(286));
 	}
 

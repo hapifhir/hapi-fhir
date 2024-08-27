@@ -52,7 +52,7 @@ class ExtendedHSearchIndexExtractorTest implements ITestDataBuilder.WithSupport 
 		extractedParams.myCompositeParams.add(composite);
 
 		// run: now translate to HSearch
-		ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams("Observation", ISearchParamRegistry.ContextEnum.SEARCH);
+		ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams("Observation", ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 		ExtendedHSearchIndexExtractor extractor = new ExtendedHSearchIndexExtractor(
 			myJpaStorageSettings, myFhirContext, activeSearchParams, mySearchParamExtractor);
 		ExtendedHSearchIndexData indexData = extractor.extract(new Observation(), extractedParams);
@@ -75,7 +75,7 @@ class ExtendedHSearchIndexExtractorTest implements ITestDataBuilder.WithSupport 
 		searchParams.myQuantityParams.add(searchParamQuantity);
 
 		// run: now translate to HSearch
-		ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams("Patient", ISearchParamRegistry.ContextEnum.SEARCH);
+		ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams("Patient", ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 		ExtendedHSearchIndexExtractor extractor = new ExtendedHSearchIndexExtractor(
 			myJpaStorageSettings, myFhirContext, activeSearchParams, mySearchParamExtractor);
 		ExtendedHSearchIndexData indexData = extractor.extract(new SearchParameter(), searchParams);

@@ -403,11 +403,12 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 				ResourceSearchParams searchParams;
 				ISearchParamRegistry searchParamRegistry;
 				ResourceSearchParams serverConfigurationActiveSearchParams = serverConfiguration.getActiveSearchParams(
-						resourceName, ISearchParamRegistry.ContextEnum.SEARCH);
+						resourceName, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 				if (mySearchParamRegistry != null) {
 					searchParamRegistry = mySearchParamRegistry;
 					searchParams = mySearchParamRegistry
-							.getActiveSearchParams(resourceName, ISearchParamRegistry.ContextEnum.SEARCH)
+							.getActiveSearchParams(
+									resourceName, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH)
 							.makeCopy();
 					for (String nextBuiltInSpName : serverConfigurationActiveSearchParams.getSearchParamNames()) {
 						if (nextBuiltInSpName.startsWith("_")
@@ -466,7 +467,8 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 							}
 
 							for (RuntimeSearchParam t : searchParamRegistry
-									.getActiveSearchParams(nextResourceName, ISearchParamRegistry.ContextEnum.SEARCH)
+									.getActiveSearchParams(
+											nextResourceName, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH)
 									.values()) {
 								if (t.getParamType() == RestSearchParameterTypeEnum.REFERENCE) {
 									if (isNotBlank(t.getName())) {

@@ -35,7 +35,8 @@ import static ca.uhn.fhir.rest.server.util.ISearchParamRegistry.isAllowedForCont
 public class ResourceSearchParams {
 	private final String myResourceName;
 	private final Map<String, RuntimeSearchParam> myMap;
-	private final Map<ISearchParamRegistry.ContextEnum, ResourceSearchParams> myContextToParams = new HashMap<>();
+	private final Map<ISearchParamRegistry.SearchParamLookupContextEnum, ResourceSearchParams> myContextToParams =
+			new HashMap<>();
 
 	public ResourceSearchParams(String theResourceName) {
 		myResourceName = theResourceName;
@@ -55,7 +56,7 @@ public class ResourceSearchParams {
 	 * Returns a filtered view of this {@link ResourceSearchParams} instance if
 	 * any parameters are not valid for the given {@literal theContext}.
 	 */
-	public ResourceSearchParams toFilteredForContext(ISearchParamRegistry.ContextEnum theContext) {
+	public ResourceSearchParams toFilteredForContext(ISearchParamRegistry.SearchParamLookupContextEnum theContext) {
 		if (theContext == null) {
 			return this;
 		}

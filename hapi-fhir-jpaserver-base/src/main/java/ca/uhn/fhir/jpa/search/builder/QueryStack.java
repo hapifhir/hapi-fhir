@@ -316,7 +316,7 @@ public class QueryStack {
 
 		String targetType = null;
 		RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam(
-				theResourceName, theParamName, ISearchParamRegistry.ContextEnum.SEARCH);
+				theResourceName, theParamName, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 		if (theReferenceTargetType != null) {
 			targetType = theReferenceTargetType;
 		} else if (param.getTargets().size() > 1) {
@@ -333,20 +333,19 @@ public class QueryStack {
 		}
 
 		RuntimeSearchParam targetSearchParameter = mySearchParamRegistry.getActiveSearchParam(
-				targetType, theChain, ISearchParamRegistry.ContextEnum.SEARCH);
+				targetType, theChain, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 		if (targetSearchParameter == null) {
-			Collection<String> validSearchParameterNames =
-					mySearchParamRegistry
-							.getActiveSearchParams(targetType, ISearchParamRegistry.ContextEnum.SEARCH)
-							.values()
-							.stream()
-							.filter(t -> t.getParamType() == RestSearchParameterTypeEnum.STRING
-									|| t.getParamType() == RestSearchParameterTypeEnum.TOKEN
-									|| t.getParamType() == RestSearchParameterTypeEnum.DATE)
-							.map(RuntimeSearchParam::getName)
-							.sorted()
-							.distinct()
-							.collect(Collectors.toList());
+			Collection<String> validSearchParameterNames = mySearchParamRegistry
+					.getActiveSearchParams(targetType, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH)
+					.values()
+					.stream()
+					.filter(t -> t.getParamType() == RestSearchParameterTypeEnum.STRING
+							|| t.getParamType() == RestSearchParameterTypeEnum.TOKEN
+							|| t.getParamType() == RestSearchParameterTypeEnum.DATE)
+					.map(RuntimeSearchParam::getName)
+					.sorted()
+					.distinct()
+					.collect(Collectors.toList());
 			String msg = myFhirContext
 					.getLocalizer()
 					.getMessageSanitized(
@@ -1010,10 +1009,10 @@ public class QueryStack {
 			}
 			default:
 				RuntimeSearchParam searchParam = mySearchParamRegistry.getActiveSearchParam(
-						theResourceName, paramName, ISearchParamRegistry.ContextEnum.SEARCH);
+						theResourceName, paramName, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 				if (searchParam == null) {
 					Collection<String> validNames = mySearchParamRegistry.getValidSearchParameterNamesIncludingMeta(
-							theResourceName, ISearchParamRegistry.ContextEnum.SEARCH);
+							theResourceName, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 					String msg = myFhirContext
 							.getLocalizer()
 							.getMessageSanitized(
@@ -1172,13 +1171,13 @@ public class QueryStack {
 				// (e.g. the `code` in Patient?_has:Observation:subject:code=sys|val)
 				// exists on the target resource type.
 				RuntimeSearchParam owningParameterDef = mySearchParamRegistry.getRuntimeSearchParam(
-						targetResourceType, paramName, ISearchParamRegistry.ContextEnum.SEARCH);
+						targetResourceType, paramName, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 
 				// Ensure that the name of the back-referenced search param on the target (e.g. the `subject` in
 				// Patient?_has:Observation:subject:code=sys|val)
 				// exists on the target resource, or in the top-level Resource resource.
 				mySearchParamRegistry.getRuntimeSearchParam(
-						targetResourceType, paramReference, ISearchParamRegistry.ContextEnum.SEARCH);
+						targetResourceType, paramReference, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 
 				IQueryParameterAnd<?> parsedParam = JpaParamUtil.parseQueryParams(
 						mySearchParamRegistry, myFhirContext, owningParameterDef, paramName, parameters);
@@ -2464,7 +2463,7 @@ public class QueryStack {
 			RequestPartitionId theRequestPartitionId) {
 		List<Condition> andPredicates = new ArrayList<>();
 		RuntimeSearchParam nextParamDef = mySearchParamRegistry.getActiveSearchParam(
-				theResourceName, theParamName, ISearchParamRegistry.ContextEnum.SEARCH);
+				theResourceName, theParamName, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 		if (nextParamDef != null) {
 
 			if (myPartitionSettings.isPartitioningEnabled() && myPartitionSettings.isIncludePartitionInSearchHashes()) {
@@ -2682,7 +2681,8 @@ public class QueryStack {
 										theParamName,
 										theResourceName,
 										mySearchParamRegistry.getValidSearchParameterNamesIncludingMeta(
-												theResourceName, ISearchParamRegistry.ContextEnum.SEARCH));
+												theResourceName,
+												ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH));
 						throw new InvalidRequestException(Msg.code(1223) + msg);
 					} else {
 						String msg = myFhirContext
@@ -2693,7 +2693,8 @@ public class QueryStack {
 										theParamName,
 										theResourceName,
 										mySearchParamRegistry.getValidSearchParameterNamesIncludingMeta(
-												theResourceName, ISearchParamRegistry.ContextEnum.SEARCH));
+												theResourceName,
+												ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH));
 						throw new InvalidRequestException(Msg.code(2540) + msg);
 					}
 				}
@@ -2727,7 +2728,7 @@ public class QueryStack {
 			if (isNotBlank(param.getChain())) {
 				String fullName = theParamName + "." + param.getChain();
 				RuntimeSearchParam fullChainParam = mySearchParamRegistry.getActiveSearchParam(
-						theResourceName, fullName, ISearchParamRegistry.ContextEnum.SEARCH);
+						theResourceName, fullName, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 				if (fullChainParam != null) {
 					List<IQueryParameterType> swappedParamTypes = nextAnd.stream()
 							.map(t -> newParameterInstance(fullChainParam, null, t.getValueAsQueryToken(myFhirContext)))
@@ -2795,7 +2796,9 @@ public class QueryStack {
 						return true;
 					}
 					RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam(
-							theResourceType, theParameterName, ISearchParamRegistry.ContextEnum.SEARCH);
+							theResourceType,
+							theParameterName,
+							ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 					return param != null && param.hasUpliftRefchain(t);
 				});
 
@@ -3036,7 +3039,7 @@ public class QueryStack {
 				RuntimeSearchParam nextSearchParam = null;
 				if (isBlank(theResourceType) || theResourceType.equals(nextTarget)) {
 					nextSearchParam = mySearchParamRegistry.getActiveSearchParam(
-							nextTarget, nextParamName, ISearchParamRegistry.ContextEnum.SEARCH);
+							nextTarget, nextParamName, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 				}
 				if (nextSearchParam != null) {
 					searchParamFound = true;

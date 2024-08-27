@@ -519,8 +519,8 @@ public abstract class BaseStorageDao {
 			return;
 		}
 
-		ResourceSearchParams searchParams =
-				mySearchParamRegistry.getActiveSearchParams(getResourceName(), ISearchParamRegistry.ContextEnum.SEARCH);
+		ResourceSearchParams searchParams = mySearchParamRegistry.getActiveSearchParams(
+				getResourceName(), ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 
 		Set<String> paramNames = theSource.keySet();
 		for (String nextParamName : paramNames) {
@@ -528,7 +528,7 @@ public abstract class BaseStorageDao {
 			RuntimeSearchParam param = searchParams.get(qualifiedParamName.getParamName());
 			if (param == null) {
 				Collection<String> validNames = mySearchParamRegistry.getValidSearchParameterNamesIncludingMeta(
-						getResourceName(), ISearchParamRegistry.ContextEnum.SEARCH);
+						getResourceName(), ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 				RuntimeSearchParam notEnabledForSearchParam = mySearchParamRegistry.getActiveSearchParam(
 						getResourceName(), qualifiedParamName.getParamName(), null);
 				if (notEnabledForSearchParam != null) {
@@ -556,7 +556,9 @@ public abstract class BaseStorageDao {
 
 			// Should not be null since the check above would have caught it
 			RuntimeSearchParam paramDef = mySearchParamRegistry.getActiveSearchParam(
-					getResourceName(), qualifiedParamName.getParamName(), ISearchParamRegistry.ContextEnum.SEARCH);
+					getResourceName(),
+					qualifiedParamName.getParamName(),
+					ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 
 			for (String nextValue : theSource.get(nextParamName)) {
 				QualifiedParamList qualifiedParam = QualifiedParamList.splitQueryStringByCommasIgnoreEscape(

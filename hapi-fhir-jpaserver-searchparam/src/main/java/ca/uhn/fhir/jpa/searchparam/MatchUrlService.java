@@ -169,7 +169,9 @@ public class MatchUrlService {
 				// ignore these since they aren't search params (e.g. _sort)
 			} else {
 				RuntimeSearchParam paramDef = mySearchParamRegistry.getActiveSearchParam(
-						theResourceDefinition.getName(), nextParamName, ISearchParamRegistry.ContextEnum.SEARCH);
+						theResourceDefinition.getName(),
+						nextParamName,
+						ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 				if (paramDef == null) {
 					throw throwUnrecognizedParamException(theMatchUrl, theResourceDefinition, nextParamName);
 				}

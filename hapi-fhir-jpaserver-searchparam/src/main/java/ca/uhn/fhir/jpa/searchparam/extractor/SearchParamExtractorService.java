@@ -200,7 +200,7 @@ public class SearchParamExtractorService {
 
 			// Everything else
 			ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams(
-					theEntity.getResourceType(), ISearchParamRegistry.ContextEnum.INDEX);
+					theEntity.getResourceType(), ISearchParamRegistry.SearchParamLookupContextEnum.INDEX);
 			theNewParams.findMissingSearchParams(myPartitionSettings, myStorageSettings, theEntity, activeSearchParams);
 		}
 
@@ -229,7 +229,7 @@ public class SearchParamExtractorService {
 		}
 
 		ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams(
-				entity.getResourceType(), ISearchParamRegistry.ContextEnum.INDEX);
+				entity.getResourceType(), ISearchParamRegistry.SearchParamLookupContextEnum.INDEX);
 		activeSearchParams.getReferenceSearchParamNames().forEach(key -> retval.putIfAbsent(key, Boolean.FALSE));
 		return retval;
 	}
@@ -310,7 +310,9 @@ public class SearchParamExtractorService {
 			public ISearchParamExtractor.ISearchParamFilter getSearchParamFilter(@Nonnull PathAndRef thePathAndRef) {
 				String searchParamName = thePathAndRef.getSearchParamName();
 				RuntimeSearchParam searchParam = mySearchParamRegistry.getActiveSearchParam(
-						theEntity.getResourceType(), searchParamName, ISearchParamRegistry.ContextEnum.INDEX);
+						theEntity.getResourceType(),
+						searchParamName,
+						ISearchParamRegistry.SearchParamLookupContextEnum.INDEX);
 				Set<String> upliftRefchainCodes = searchParam.getUpliftRefchainCodes();
 				if (upliftRefchainCodes.isEmpty()) {
 					return ISearchParamExtractor.NO_PARAMS;
@@ -536,7 +538,7 @@ public class SearchParamExtractorService {
 				RuntimeSearchParam searchParam = mySearchParamRegistry.getActiveSearchParam(
 						sourceResourceName,
 						nextPathAndRef.getSearchParamName(),
-						ISearchParamRegistry.ContextEnum.INDEX);
+						ISearchParamRegistry.SearchParamLookupContextEnum.INDEX);
 				extractResourceLinks(
 						theRequestPartitionId,
 						theExistingParams,

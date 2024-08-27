@@ -116,7 +116,7 @@ public class SearchParamRegistryImpl
 
 	@Override
 	public RuntimeSearchParam getActiveSearchParam(
-			String theResourceName, String theParamName, ContextEnum theContext) {
+			String theResourceName, String theParamName, SearchParamLookupContextEnum theContext) {
 		requiresActiveSearchParams();
 
 		// Can still be null in unit test scenarios
@@ -134,10 +134,8 @@ public class SearchParamRegistryImpl
 
 	@Nonnull
 	@Override
-	public ResourceSearchParams getActiveSearchParams(String theResourceName, ContextEnum theContext) {
+	public ResourceSearchParams getActiveSearchParams(String theResourceName, SearchParamLookupContextEnum theContext) {
 		requiresActiveSearchParams();
-		// FIXME: figure out the methods that get called in high frequency calls (searching, indexing, in-memory)
-		// and make sure we have caches
 		return getActiveSearchParams().getSearchParamMap(theResourceName).toFilteredForContext(theContext);
 	}
 
@@ -149,20 +147,21 @@ public class SearchParamRegistryImpl
 	}
 
 	@Override
-	public List<RuntimeSearchParam> getActiveComboSearchParams(String theResourceName, ContextEnum theContext) {
+	public List<RuntimeSearchParam> getActiveComboSearchParams(
+			String theResourceName, SearchParamLookupContextEnum theContext) {
 		return filteredForContext(myJpaSearchParamCache.getActiveComboSearchParams(theResourceName), theContext);
 	}
 
 	@Override
 	public List<RuntimeSearchParam> getActiveComboSearchParams(
-			String theResourceName, ComboSearchParamType theParamType, ContextEnum theContext) {
+			String theResourceName, ComboSearchParamType theParamType, SearchParamLookupContextEnum theContext) {
 		return filteredForContext(
 				myJpaSearchParamCache.getActiveComboSearchParams(theResourceName, theParamType), theContext);
 	}
 
 	@Override
 	public List<RuntimeSearchParam> getActiveComboSearchParams(
-			String theResourceName, Set<String> theParamNames, ContextEnum theContext) {
+			String theResourceName, Set<String> theParamNames, SearchParamLookupContextEnum theContext) {
 		return filteredForContext(
 				myJpaSearchParamCache.getActiveComboSearchParams(theResourceName, theParamNames), theContext);
 	}
@@ -174,7 +173,7 @@ public class SearchParamRegistryImpl
 
 	@Nullable
 	@Override
-	public RuntimeSearchParam getActiveSearchParamByUrl(String theUrl, ContextEnum theContext) {
+	public RuntimeSearchParam getActiveSearchParamByUrl(String theUrl, SearchParamLookupContextEnum theContext) {
 		if (myActiveSearchParams != null) {
 			RuntimeSearchParam param = myActiveSearchParams.getByUrl(theUrl);
 			if (isAllowedForContext(param, theContext)) {
@@ -473,7 +472,7 @@ public class SearchParamRegistryImpl
 	}
 
 	private static List<RuntimeSearchParam> filteredForContext(
-			List<RuntimeSearchParam> theActiveComboSearchParams, ContextEnum theContext) {
+			List<RuntimeSearchParam> theActiveComboSearchParams, SearchParamLookupContextEnum theContext) {
 		return theActiveComboSearchParams.stream()
 				.filter(t -> isAllowedForContext(t, theContext))
 				.collect(Collectors.toList());
