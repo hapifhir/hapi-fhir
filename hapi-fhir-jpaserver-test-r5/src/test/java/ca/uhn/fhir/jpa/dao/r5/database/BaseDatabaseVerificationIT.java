@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.TestDaoSearch;
 import ca.uhn.fhir.jpa.embedded.JpaEmbeddedDatabase;
 import ca.uhn.fhir.jpa.migrate.HapiMigrationStorageSvc;
@@ -18,10 +19,12 @@ import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import ca.uhn.fhir.test.utilities.server.RestfulServerConfigurerExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
+import ca.uhn.fhir.util.ThreadPoolUtil;
 import ca.uhn.fhir.util.VersionEnum;
 import jakarta.persistence.EntityManagerFactory;
 import org.apache.commons.lang3.StringUtils;
@@ -44,15 +47,19 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.envers.repository.support.EnversRevisionRepositoryFactoryBean;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_EVERYTHING;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -158,6 +165,35 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
 
 		assertThat(values).as(values.toString()).containsExactlyInAnyOrder(expectedIds.toArray(new String[0]));
     }
+
+	@Test
+	public void testHighConcurrencyUpdatesToSameResource() throws InterruptedException {
+		createPatient(withId("A"), withActiveFalse());
+
+		ThreadPoolTaskExecutor threadPool = ThreadPoolUtil.newThreadPool(10, 10, "hcu-", 0);
+		List<Future<DaoMethodOutcome>> futures = new ArrayList<>(1000);
+		for (int i = 0; i < 1000; i++) {
+			Patient p = new Patient();
+			p.setId("Patient/A");
+			p.addIdentifier().setValue(Integer.toString(i));
+			futures.add(threadPool.submit(() -> myPatientDao.update(p, new SystemRequestDetails())));
+		}
+
+		for (var next : futures) {
+			try {
+				DaoMethodOutcome daoMethodOutcome = next.get();
+				ourLog.info("Got ID: {}", daoMethodOutcome.getId());
+			} catch (ExecutionException e) {
+				assertEquals(ResourceVersionConflictException.class, e.getCause().getClass());
+			}
+		}
+
+		Patient p = new Patient();
+		p.setId("Patient/A");
+		p.addIdentifier().setValue("0");
+		myPatientDao.update(p, new SystemRequestDetails());
+	}
+
 
 	@ParameterizedTest
 	@CsvSource(textBlock = """
