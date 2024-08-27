@@ -35,7 +35,7 @@ public class RestHookChannelValidatorTest {
 
 	@ParameterizedTest
 	@MethodSource("urlAndExpectedEvaluationResultProviderForNoUrlValidation")
-	public void testRestHookChannelValidation_withMinimumUrlValidation(String theUrl, boolean theExpectedValidationResult){
+	public void testRestHookChannelValidation_withNoUrlValidation(String theUrl, boolean theExpectedValidationResult){
 		RestHookChannelValidator restHookChannelValidator = new RestHookChannelValidator();
 
 		CanonicalSubscription subscription = createSubscription(theUrl, NO_PAYLOAD);

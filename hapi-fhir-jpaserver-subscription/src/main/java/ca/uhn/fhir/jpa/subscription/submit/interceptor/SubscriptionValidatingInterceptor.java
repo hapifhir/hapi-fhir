@@ -360,6 +360,7 @@ public class SubscriptionValidatingInterceptor {
 		mySubscriptionQueryValidator = new SubscriptionQueryValidator(myDaoRegistry, theSubscriptionStrategyEvaluator);
 	}
 
+	@VisibleForTesting
 	public void setSubscriptionChannelTypeValidatorFactoryForUnitTest(
 			SubscriptionChannelTypeValidatorFactory theSubscriptionChannelTypeValidatorFactory) {
 		mySubscriptionChannelTypeValidatorFactory = theSubscriptionChannelTypeValidatorFactory;
