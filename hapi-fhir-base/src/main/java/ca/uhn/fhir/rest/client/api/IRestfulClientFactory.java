@@ -37,7 +37,6 @@ public interface IRestfulClientFactory {
 	 */
 	public static final int DEFAULT_CONNECTION_REQUEST_TIMEOUT = 10000;
 
-
 	/**
 	 * Default value for {@link #getConnectionTimeToLive()}
 	 */
@@ -80,7 +79,6 @@ public interface IRestfulClientFactory {
 	 * </p>
 	 */
 	int getConnectTimeout();
-
 
 	/**
 	 * Gets the connection time to live, in milliseconds. This is the amount of time to keep connections alive for reuse.
