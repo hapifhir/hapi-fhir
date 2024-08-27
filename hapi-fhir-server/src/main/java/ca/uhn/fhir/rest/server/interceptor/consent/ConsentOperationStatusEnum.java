@@ -64,12 +64,8 @@ public enum ConsentOperationStatusEnum {
 	 *
 	 * @return the first decisive verdict, or PROCEED when empty or all PROCEED.
 	 */
-	public static ConsentOperationStatusEnum serialEvaluate(
-			Stream<ConsentOperationStatusEnum> consentOperationStatusEnumStream) {
-		return consentOperationStatusEnumStream
-				.filter(verdict -> PROCEED != verdict)
-				.findFirst()
-				.orElse(PROCEED);
+	public static ConsentOperationStatusEnum serialEvaluate(Stream<ConsentOperationStatusEnum> theVoteStream) {
+		return theVoteStream.filter(verdict -> PROCEED != verdict).findFirst().orElse(PROCEED);
 	}
 
 	/**
@@ -79,13 +75,10 @@ public enum ConsentOperationStatusEnum {
 	 * @return the combined verdict
 	 */
 	public ConsentOperationStatusEnum serialReduce(ConsentOperationStatusEnum theNextVerdict) {
-		switch (this) {
-			case REJECT:
-			case AUTHORIZED:
-				return this;
-			case PROCEED:
-			default:
-				return theNextVerdict;
+		if (this != PROCEED) {
+			return this;
+		} else {
+			return theNextVerdict;
 		}
 	}
 
@@ -94,9 +87,8 @@ public enum ConsentOperationStatusEnum {
 	 *
 	 * @return REJECT if any reject, AUTHORIZED if no REJECT and some AUTHORIZED, PROCEED if empty or all PROCEED
 	 */
-	public static ConsentOperationStatusEnum parallelEvaluate(
-			Stream<ConsentOperationStatusEnum> consentOperationStatusEnumStream) {
-		return consentOperationStatusEnumStream.reduce(PROCEED, ConsentOperationStatusEnum::parallelReduce);
+	public static ConsentOperationStatusEnum parallelEvaluate(Stream<ConsentOperationStatusEnum> theVoteStream) {
+		return theVoteStream.reduce(PROCEED, ConsentOperationStatusEnum::parallelReduce);
 	}
 
 	/**
