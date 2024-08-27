@@ -82,7 +82,6 @@ public class BaseMigrationTasks<T extends Enum> {
 				retval.addAll(nextValues);
 			}
 		}
-
 		return retval;
 	}
 

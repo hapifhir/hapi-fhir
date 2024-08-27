@@ -63,10 +63,17 @@ public class HapiMigrator {
 		return myDataSource;
 	}
 
+	/**
+	 * If set to true, instead of executing migrations, will instead simply print the SQL that would be executed against the connection.
+	 * @return A boolean indicating whether or not the migration should be a dry run
+	 */
 	public boolean isDryRun() {
 		return myDryRun;
 	}
 
+	/**
+	 * If set to true, instead of executing migrations, will instead simply print the SQL that would be executed against the connection.
+	 */
 	public void setDryRun(boolean theDryRun) {
 		myDryRun = theDryRun;
 	}

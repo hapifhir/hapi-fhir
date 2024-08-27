@@ -580,7 +580,10 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 		List<IBaseResource> output =
 				fireInterceptorsAndFilterAsNeeded(Lists.newArrayList(theResource), theRequestDetails);
 		if (output.size() == 1) {
-			return theResource;
+			// do not return theResource here but return whatever the interceptor returned in the list because
+			// the interceptor might have set the resource in the list to null (if it didn't want it to be returned).
+			// ConsentInterceptor might do this for example.
+			return (T) output.get(0);
 		} else {
 			return null;
 		}

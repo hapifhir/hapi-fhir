@@ -14,7 +14,6 @@ import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.JobWorkNotificationJsonMessage;
-import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
@@ -53,7 +52,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * {@link ca.uhn.fhir.batch2.maintenance.JobInstanceProcessor#cleanupInstance()}
 
  * For chunks:
- *   {@link ca.uhn.fhir.jpa.batch2.JpaJobPersistenceImpl#onWorkChunkCreate}
+ *   {@link JpaJobPersistenceImpl#onWorkChunkCreate}
  *   {@link JpaJobPersistenceImpl#onWorkChunkDequeue(String)}
  *   Chunk execution {@link ca.uhn.fhir.batch2.coordinator.StepExecutor#executeStep}
 */

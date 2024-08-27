@@ -90,4 +90,17 @@ public class MdmHistorySearchParameters {
 		return MdmControllerUtil.extractGoldenResourceIdDtOrNull(
 				ProviderConstants.MDM_QUERY_LINKS_GOLDEN_RESOURCE_ID, theTheGoldenResourceId);
 	}
+
+	public enum SearchOperatorEnum {
+		/**
+		 * Used to indicate we should perform an OR search between all IDs provided
+		 * ie. links only need at least 1 of the IDs provided in the search parameters
+		 */
+		OR,
+		/**
+		 * Used to indicate we should perform an AND search between all IDs provided
+		 * ie. links must contain all IDs provided in the search parameters
+		 */
+		AND
+	}
 }

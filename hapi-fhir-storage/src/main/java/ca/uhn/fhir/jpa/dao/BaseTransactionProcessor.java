@@ -26,6 +26,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.interceptor.model.TransactionWriteOperationsDetails;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -41,15 +42,18 @@ import ca.uhn.fhir.jpa.cache.ResourcePersistentIdMap;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictUtil;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
+import ca.uhn.fhir.model.valueset.BundleEntryTransactionMethodEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
@@ -86,6 +90,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.dstu3.model.Bundle;
@@ -98,6 +103,7 @@ import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.IdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -142,6 +148,9 @@ public abstract class BaseTransactionProcessor {
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseTransactionProcessor.class);
 
 	@Autowired
+	private IRequestPartitionHelperSvc myRequestPartitionHelperService;
+
+	@Autowired
 	private PlatformTransactionManager myTxManager;
 
 	@Autowired
@@ -162,6 +171,9 @@ public abstract class BaseTransactionProcessor {
 
 	@Autowired
 	private StorageSettings myStorageSettings;
+
+	@Autowired
+	PartitionSettings myPartitionSettings;
 
 	@Autowired
 	private InMemoryResourceMatcher myInMemoryResourceMatcher;
@@ -374,9 +386,6 @@ public abstract class BaseTransactionProcessor {
 				myVersionAdapter.getEntries(theRequest).size());
 
 		long start = System.currentTimeMillis();
-
-		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
-		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 
 		IBaseBundle response =
 				myVersionAdapter.createBundle(org.hl7.fhir.r4.model.Bundle.BundleType.BATCHRESPONSE.toCode());
@@ -701,9 +710,13 @@ public abstract class BaseTransactionProcessor {
 		};
 		EntriesToProcessMap entriesToProcess;
 
+		RequestPartitionId requestPartitionId =
+				determineRequestPartitionIdForWriteEntries(theRequestDetails, theEntries);
+
 		try {
 			entriesToProcess = myHapiTransactionService
 					.withRequest(theRequestDetails)
+					.withRequestPartitionId(requestPartitionId)
 					.withTransactionDetails(theTransactionDetails)
 					.execute(txCallback);
 		} finally {
@@ -724,6 +737,87 @@ public abstract class BaseTransactionProcessor {
 			myVersionAdapter.setResponseLocation(nextEntry.getKey(), responseLocation);
 			myVersionAdapter.setResponseETag(nextEntry.getKey(), responseEtag);
 		}
+	}
+
+	/**
+	 * This method looks at the FHIR actions being performed in a List of bundle entries,
+	 * and determines the associated request partitions.
+	 */
+	@Nullable
+	protected RequestPartitionId determineRequestPartitionIdForWriteEntries(
+			RequestDetails theRequestDetails, List<IBase> theEntries) {
+		if (!myPartitionSettings.isPartitioningEnabled()) {
+			return RequestPartitionId.allPartitions();
+		}
+
+		return theEntries.stream()
+				.map(e -> getEntryRequestPartitionId(theRequestDetails, e))
+				.reduce(null, (accumulator, nextPartition) -> {
+					if (accumulator == null) {
+						return nextPartition;
+					} else if (nextPartition == null) {
+						return accumulator;
+					} else if (myHapiTransactionService.isCompatiblePartition(accumulator, nextPartition)) {
+						return accumulator.mergeIds(nextPartition);
+					} else {
+						String msg = myContext
+								.getLocalizer()
+								.getMessage(
+										BaseTransactionProcessor.class, "multiplePartitionAccesses", theEntries.size());
+						throw new InvalidRequestException(Msg.code(2541) + msg);
+					}
+				});
+	}
+
+	@Nullable
+	private RequestPartitionId getEntryRequestPartitionId(RequestDetails theRequestDetails, IBase nextEntry) {
+		RequestPartitionId nextWriteEntryRequestPartitionId = null;
+		String verb = myVersionAdapter.getEntryRequestVerb(myContext, nextEntry);
+		if (isNotBlank(verb)) {
+			BundleEntryTransactionMethodEnum verbEnum = BundleEntryTransactionMethodEnum.valueOf(verb);
+			switch (verbEnum) {
+				case GET:
+					nextWriteEntryRequestPartitionId = null;
+					break;
+				case DELETE: {
+					String requestUrl = myVersionAdapter.getEntryRequestUrl(nextEntry);
+					if (isNotBlank(requestUrl)) {
+						IdType id = new IdType(requestUrl);
+						String resourceType = id.getResourceType();
+						ReadPartitionIdRequestDetails details =
+								ReadPartitionIdRequestDetails.forDelete(resourceType, id);
+						nextWriteEntryRequestPartitionId =
+								myRequestPartitionHelperService.determineReadPartitionForRequest(
+										theRequestDetails, details);
+					}
+					break;
+				}
+				case PATCH: {
+					String requestUrl = myVersionAdapter.getEntryRequestUrl(nextEntry);
+					if (isNotBlank(requestUrl)) {
+						IdType id = new IdType(requestUrl);
+						String resourceType = id.getResourceType();
+						ReadPartitionIdRequestDetails details =
+								ReadPartitionIdRequestDetails.forPatch(resourceType, id);
+						nextWriteEntryRequestPartitionId =
+								myRequestPartitionHelperService.determineReadPartitionForRequest(
+										theRequestDetails, details);
+					}
+					break;
+				}
+				case POST:
+				case PUT: {
+					IBaseResource resource = myVersionAdapter.getResource(nextEntry);
+					if (resource != null) {
+						String resourceType = myContext.getResourceType(resource);
+						nextWriteEntryRequestPartitionId =
+								myRequestPartitionHelperService.determineCreatePartitionForRequest(
+										theRequestDetails, resource, resourceType);
+					}
+				}
+			}
+		}
+		return nextWriteEntryRequestPartitionId;
 	}
 
 	private boolean haveWriteOperationsHooks(RequestDetails theRequestDetails) {
@@ -2040,6 +2134,11 @@ public abstract class BaseTransactionProcessor {
 			default:
 				return null;
 		}
+	}
+
+	@VisibleForTesting
+	public void setPartitionSettingsForUnitTest(PartitionSettings thePartitionSettings) {
+		myPartitionSettings = thePartitionSettings;
 	}
 
 	/**
