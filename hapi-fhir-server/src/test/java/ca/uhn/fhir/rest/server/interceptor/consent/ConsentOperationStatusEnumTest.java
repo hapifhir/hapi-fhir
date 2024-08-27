@@ -1,11 +1,15 @@
 package ca.uhn.fhir.rest.server.interceptor.consent;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 import java.util.Arrays;
 import java.util.stream.Stream;
 
+import static ca.uhn.fhir.rest.server.interceptor.consent.ConsentOperationStatusEnum.AUTHORIZED;
+import static ca.uhn.fhir.rest.server.interceptor.consent.ConsentOperationStatusEnum.PROCEED;
+import static ca.uhn.fhir.rest.server.interceptor.consent.ConsentOperationStatusEnum.REJECT;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ConsentOperationStatusEnumTest {
@@ -120,6 +124,12 @@ class ConsentOperationStatusEnumTest {
 		ConsentOperationStatusEnum result = ConsentOperationStatusEnum.parallelEvaluate(consentOperationStatusEnumStream);
 
 		assertEquals(theExpectedResult, result);
+	}
+
+	@Test
+	void testStrengthOrder() {
+	    assertTrue(REJECT.getStrength() > AUTHORIZED.getStrength());
+	    assertTrue(AUTHORIZED.getStrength() > PROCEED.getStrength());
 	}
 
 }
