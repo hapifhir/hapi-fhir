@@ -113,6 +113,11 @@ public class RequestPartitionId implements IModelJson {
 			return RequestPartitionId.allPartitions();
 		}
 
+		// don't know why this is required - otherwise PartitionedStrictTransactionR4Test fails
+		if (this.equals(theOther)) {
+			return this;
+		}
+
 		List<Integer> thisPartitionIds = getPartitionIds();
 		List<Integer> otherPartitionIds = theOther.getPartitionIds();
 		List<Integer> newPartitionIds = Stream.concat(thisPartitionIds.stream(), otherPartitionIds.stream())
