@@ -934,6 +934,10 @@
 			<name>Alex Cote</name>
 			<organization>athenahealth</organization>
 		</developer>
+		<developer>
+			<id>plchldr</id>
+			<name>Jonas Beyer</name>
+		</developer>
 	</developers>
 
 	<licenses>

@@ -30,6 +30,10 @@ import ca.uhn.fhir.jpa.subscription.model.config.SubscriptionModelConfig;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionMatcherInterceptor;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionSubmitInterceptorLoader;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionValidatingInterceptor;
+import ca.uhn.fhir.jpa.subscription.submit.interceptor.validator.IChannelTypeValidator;
+import ca.uhn.fhir.jpa.subscription.submit.interceptor.validator.RegexEndpointUrlValidationStrategy;
+import ca.uhn.fhir.jpa.subscription.submit.interceptor.validator.RestHookChannelValidator;
+import ca.uhn.fhir.jpa.subscription.submit.interceptor.validator.SubscriptionChannelTypeValidatorFactory;
 import ca.uhn.fhir.jpa.subscription.submit.svc.ResourceModifiedSubmitterSvc;
 import ca.uhn.fhir.jpa.subscription.triggering.ISubscriptionTriggeringSvc;
 import ca.uhn.fhir.jpa.subscription.triggering.SubscriptionTriggeringSvcImpl;
@@ -42,6 +46,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
+
+import java.util.List;
+
+import static ca.uhn.fhir.jpa.subscription.submit.interceptor.validator.RestHookChannelValidator.noOpEndpointUrlValidationStrategy;
 
 /**
  * This Spring config should be imported by a system that submits resources to the
@@ -102,5 +110,24 @@ public class SubscriptionSubmitterConfig {
 			IResourceModifiedConsumerWithRetries theResourceModifiedConsumer) {
 		return new AsyncResourceModifiedSubmitterSvc(
 				theIResourceModifiedMessagePersistenceSvc, theResourceModifiedConsumer);
+	}
+
+	@Bean
+	public IChannelTypeValidator restHookChannelValidator(SubscriptionSettings theSubscriptionSettings) {
+		RestHookChannelValidator.IEndpointUrlValidationStrategy iEndpointUrlValidationStrategy =
+				noOpEndpointUrlValidationStrategy;
+
+		if (theSubscriptionSettings.hasRestHookEndpointUrlValidationRegex()) {
+			String endpointUrlValidationRegex = theSubscriptionSettings.getRestHookEndpointUrlValidationRegex();
+			iEndpointUrlValidationStrategy = new RegexEndpointUrlValidationStrategy(endpointUrlValidationRegex);
+		}
+
+		return new RestHookChannelValidator(iEndpointUrlValidationStrategy);
+	}
+
+	@Bean
+	public SubscriptionChannelTypeValidatorFactory subscriptionChannelTypeValidatorFactory(
+			List<IChannelTypeValidator> theValidorList) {
+		return new SubscriptionChannelTypeValidatorFactory(theValidorList);
 	}
 }
