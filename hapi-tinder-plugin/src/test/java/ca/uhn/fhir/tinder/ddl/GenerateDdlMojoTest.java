@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Locale;
+import java.util.regex.Pattern;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -55,6 +56,31 @@ class GenerateDdlMojoTest {
 		String contents = FileUtils.readFileToString(new File("target/generate-ddl-plugin-test/postgres.sql"), StandardCharsets.UTF_8).toUpperCase(Locale.ROOT);
 		ourLog.info("SQL: {}", contents);
 
+		String[] sqlStatements = contents.replaceAll("\\s+", " ").split(";");
+		assertThat(sqlStatements).anyMatch(s -> Pattern.compile("CREATE TABLE ENTITY_WITH_COMPLEX_ID_CHILD .* PRIMARY KEY \\(PID\\)").matcher(s).find());
+		assertThat(sqlStatements).anyMatch(s -> Pattern.compile("CREATE TABLE ENTITY_WITH_COMPLEX_ID_PARENT .* PRIMARY KEY \\(PID\\)").matcher(s).find());
+		assertThat(sqlStatements).anyMatch(s -> Pattern.compile("ALTER TABLE IF EXISTS ENTITY_WITH_COMPLEX_ID_CHILD .* FOREIGN KEY \\(PARENT_PID\\)").matcher(s).find());
+	}
+
+	@Test
+	public void testPruneComplexId_Disabled() throws MojoExecutionException, MojoFailureException, IOException {
+
+		GenerateDdlMojo m = new GenerateDdlMojo();
+		m.packageNames = List.of("ca.uhn.fhir.tinder.ddl.test");
+		m.outputDirectory = "target/generate-ddl-plugin-test/";
+		m.dialects = List.of(
+			new GenerateDdlMojo.Dialect("ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgresDialect", "postgres.sql")
+		);
+		m.trimConditionalIdsFromPrimaryKeys = false;
+		m.execute();
+
+		String contents = FileUtils.readFileToString(new File("target/generate-ddl-plugin-test/postgres.sql"), StandardCharsets.UTF_8).toUpperCase(Locale.ROOT);
+		ourLog.info("SQL: {}", contents);
+
+		String[] sqlStatements = contents.replaceAll("\\s+", " ").split(";");
+		assertThat(sqlStatements).anyMatch(s -> Pattern.compile("CREATE TABLE ENTITY_WITH_COMPLEX_ID_CHILD .* PRIMARY KEY \\(PID, PARTITION_ID\\)").matcher(s).find());
+		assertThat(sqlStatements).anyMatch(s -> Pattern.compile("CREATE TABLE ENTITY_WITH_COMPLEX_ID_PARENT .* PRIMARY KEY \\(PID, PARTITION_ID\\)").matcher(s).find());
+		assertThat(sqlStatements).anyMatch(s -> Pattern.compile("ALTER TABLE IF EXISTS ENTITY_WITH_COMPLEX_ID_CHILD .* FOREIGN KEY \\(PARENT_PID, PARENT_PARTITION_ID\\)").matcher(s).find());
 	}
 
 	private static void verifySequence(String fileName) throws IOException {

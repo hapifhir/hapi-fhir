@@ -26,4 +26,7 @@ public class EntityWithComplexIdParent {
 	@ConditionalIdProperty
 	private Integer myPartitionId;
 
+	@Column(name = "NAME")
+	private String myName;
+
 }

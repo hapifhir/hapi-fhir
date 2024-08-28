@@ -1,6 +1,5 @@
 package ca.uhn.hapi.fhir.sql.hibernatesvc;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.hibernate.boot.ResourceStreamLocator;
 import org.hibernate.boot.spi.AdditionalMappingContributions;
 import org.hibernate.boot.spi.InFlightMetadataCollector;
@@ -10,15 +9,15 @@ import org.hibernate.mapping.BasicValue;
 import org.hibernate.mapping.Column;
 import org.hibernate.mapping.Component;
 import org.hibernate.mapping.ForeignKey;
-import org.hibernate.mapping.ManyToOne;
 import org.hibernate.mapping.PersistentClass;
 import org.hibernate.mapping.PrimaryKey;
 import org.hibernate.mapping.Property;
 import org.hibernate.mapping.Table;
-import org.hibernate.mapping.ToOne;
 
 import java.lang.reflect.Field;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class ConditionalIdMappingContributor implements org.hibernate.boot.spi.AdditionalMappingContributor {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ConditionalIdMappingContributor.class);
@@ -29,8 +28,6 @@ public class ConditionalIdMappingContributor implements org.hibernate.boot.spi.A
 	public ConditionalIdMappingContributor() {
 		super();
 	}
-
-	private IdentitySet<Column> myIdRemovedColumns = new IdentitySet<>();
 
 	@Override
 	public String getContributorName() {
@@ -56,7 +53,7 @@ public class ConditionalIdMappingContributor implements org.hibernate.boot.spi.A
 			PersistentClass persistentClass = nextEntry.getValue();
 			Table table = persistentClass.getTable();
 			for (ForeignKey foreignKey : table.getForeignKeys().values()) {
-				foreignKey.getColumns().removeIf(t->t.getName().equals("PARENT_PARTITION_ID"));
+				foreignKey.getColumns().removeIf(t -> t.getName().equals("PARENT_PARTITION_ID"));
 //				List<Column> referencedColumns = foreignKey.getReferencedColumns();
 //				for (int i = 0; i < referencedColumns.size(); i++) {
 //					Column referencedColumn = referencedColumns.get(i);
@@ -73,6 +70,9 @@ public class ConditionalIdMappingContributor implements org.hibernate.boot.spi.A
 
 	private void removeConditionalIdProperties(InFlightMetadataCollector theMetadata) {
 		for (var nextEntry : theMetadata.getEntityBindingMap().entrySet()) {
+			IdentitySet<Column> idRemovedColumns = new IdentitySet<>();
+			Set<String> idRemovedProperties = new HashSet<>();
+
 			Class<?> nextType;
 			try {
 				nextType = Class.forName(nextEntry.getKey());
@@ -100,15 +100,22 @@ public class ConditionalIdMappingContributor implements org.hibernate.boot.spi.A
 				ConditionalIdProperty remove = field.getAnnotation(ConditionalIdProperty.class);
 				if (remove != null) {
 					Property removedProperty = properties.remove(i);
-					myIdRemovedColumns.addAll(removedProperty.getColumns());
+					idRemovedColumns.addAll(removedProperty.getColumns());
+					idRemovedProperties.add(removedProperty.getName());
 					i--;
 				}
 			}
 
+			if (idRemovedColumns.isEmpty()) {
+				return;
+			}
+
+			next.getIdentifierMapper().getProperties().removeIf(t -> idRemovedProperties.contains(t.getName()));
+
 			Table table = next.getTable();
 			PrimaryKey pk = table.getPrimaryKey();
 			List<Column> pkColumns = pk.getColumns();
-			pkColumns.removeIf(t->myIdRemovedColumns.contains(t));
+			pkColumns.removeIf(t -> idRemovedColumns.contains(t));
 
 		}
 	}

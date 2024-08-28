@@ -40,4 +40,8 @@ public class EntityWithComplexIdChild {
 
 	@Column(name = "PARENT_PARTITION_ID", insertable = false, updatable = false)
 	private Long myParentPartitionId;
+
+	@Column(name = "NAME")
+	private String myName;
+
 }
