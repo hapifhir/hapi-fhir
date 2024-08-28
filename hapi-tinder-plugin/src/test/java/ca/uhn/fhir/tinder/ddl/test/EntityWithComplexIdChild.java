@@ -38,4 +38,6 @@ public class EntityWithComplexIdChild {
 	foreignKey = @ForeignKey(name="FK_COMPLEX_ID_PARENT_CHILD"))
 	private EntityWithComplexIdParent myParent;
 
+	@Column(name = "PARENT_PARTITION_ID", insertable = false, updatable = false)
+	private Long myParentPartitionId;
 }

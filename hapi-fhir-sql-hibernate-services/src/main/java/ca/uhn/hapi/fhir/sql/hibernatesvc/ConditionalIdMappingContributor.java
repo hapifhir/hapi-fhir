@@ -1,5 +1,6 @@
 package ca.uhn.hapi.fhir.sql.hibernatesvc;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.hibernate.boot.ResourceStreamLocator;
 import org.hibernate.boot.spi.AdditionalMappingContributions;
 import org.hibernate.boot.spi.InFlightMetadataCollector;
@@ -11,6 +12,7 @@ import org.hibernate.mapping.Component;
 import org.hibernate.mapping.ForeignKey;
 import org.hibernate.mapping.ManyToOne;
 import org.hibernate.mapping.PersistentClass;
+import org.hibernate.mapping.PrimaryKey;
 import org.hibernate.mapping.Property;
 import org.hibernate.mapping.Table;
 import org.hibernate.mapping.ToOne;
@@ -20,6 +22,13 @@ import java.util.List;
 
 public class ConditionalIdMappingContributor implements org.hibernate.boot.spi.AdditionalMappingContributor {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ConditionalIdMappingContributor.class);
+
+	/**
+	 * Constructor
+	 */
+	public ConditionalIdMappingContributor() {
+		super();
+	}
 
 	private IdentitySet<Column> myIdRemovedColumns = new IdentitySet<>();
 
@@ -35,12 +44,19 @@ public class ConditionalIdMappingContributor implements org.hibernate.boot.spi.A
 		ResourceStreamLocator theResourceStreamLocator,
 		MetadataBuildingContext theBuildingContext) {
 
-//		removeConditionalIdProperties(theMetadata);
-//
-//		for (var nextEntry : theMetadata.getEntityBindingMap().entrySet()) {
-//			PersistentClass persistentClass = nextEntry.getValue();
-//			Table table = persistentClass.getTable();
-//			for (ForeignKey foreignKey : table.getForeignKeys().values()) {
+		HapiHibernateDialectSettingsService hapiSettingsSvc = theMetadata.getBootstrapContext().getServiceRegistry().getService(HapiHibernateDialectSettingsService.class);
+		assert hapiSettingsSvc != null;
+		if (!hapiSettingsSvc.isTrimConditionalIdsFromPrimaryKeys()) {
+			return;
+		}
+
+		removeConditionalIdProperties(theMetadata);
+
+		for (var nextEntry : theMetadata.getEntityBindingMap().entrySet()) {
+			PersistentClass persistentClass = nextEntry.getValue();
+			Table table = persistentClass.getTable();
+			for (ForeignKey foreignKey : table.getForeignKeys().values()) {
+				foreignKey.getColumns().removeIf(t->t.getName().equals("PARENT_PARTITION_ID"));
 //				List<Column> referencedColumns = foreignKey.getReferencedColumns();
 //				for (int i = 0; i < referencedColumns.size(); i++) {
 //					Column referencedColumn = referencedColumns.get(i);
@@ -49,8 +65,8 @@ public class ConditionalIdMappingContributor implements org.hibernate.boot.spi.A
 //						i--;
 //					}
 //				}
-//			}
-//		}
+			}
+		}
 
 
 	}
@@ -88,6 +104,11 @@ public class ConditionalIdMappingContributor implements org.hibernate.boot.spi.A
 					i--;
 				}
 			}
+
+			Table table = next.getTable();
+			PrimaryKey pk = table.getPrimaryKey();
+			List<Column> pkColumns = pk.getColumns();
+			pkColumns.removeIf(t->myIdRemovedColumns.contains(t));
 
 		}
 	}

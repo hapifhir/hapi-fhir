@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.xml.transform.SourceLocator;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -17,6 +16,8 @@ import java.util.Locale;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class GenerateDdlMojoTest {
+
+	private static final Logger ourLog = LoggerFactory.getLogger(GenerateDdlMojoTest.class);
 
 	@Test
 	public void testGenerateSequences() throws MojoExecutionException, MojoFailureException, IOException {
@@ -39,11 +40,6 @@ class GenerateDdlMojoTest {
 
 	}
 
-	private static void verifySequence(String fileName) throws IOException {
-		String contents = FileUtils.readFileToString(new File("target/generate-ddl-plugin-test/" + fileName), StandardCharsets.UTF_8).toUpperCase(Locale.ROOT);
-		assertThat(contents).as(fileName).contains("CREATE SEQUENCE");
-	}
-
 	@Test
 	public void testPruneComplexId_Enabled() throws MojoExecutionException, MojoFailureException, IOException {
 
@@ -53,11 +49,16 @@ class GenerateDdlMojoTest {
 		m.dialects = List.of(
 			new GenerateDdlMojo.Dialect("ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgresDialect", "postgres.sql")
 		);
+		m.trimConditionalIdsFromPrimaryKeys = true;
 		m.execute();
 
 		String contents = FileUtils.readFileToString(new File("target/generate-ddl-plugin-test/postgres.sql"), StandardCharsets.UTF_8).toUpperCase(Locale.ROOT);
 		ourLog.info("SQL: {}", contents);
 
 	}
-private static final Logger ourLog = LoggerFactory.getLogger(GenerateDdlMojoTest.class);
+
+	private static void verifySequence(String fileName) throws IOException {
+		String contents = FileUtils.readFileToString(new File("target/generate-ddl-plugin-test/" + fileName), StandardCharsets.UTF_8).toUpperCase(Locale.ROOT);
+		assertThat(contents).as(fileName).contains("CREATE SEQUENCE");
+	}
 }

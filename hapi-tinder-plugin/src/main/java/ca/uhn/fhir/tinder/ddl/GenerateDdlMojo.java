@@ -36,6 +36,9 @@ public class GenerateDdlMojo extends AbstractMojo {
 	@Parameter
 	String outputDirectory;
 
+	@Parameter(defaultValue = "false")
+	boolean trimConditionalIdsFromPrimaryKeys;
+
 	@Parameter(defaultValue = "${project}", readonly = true)
 	private transient MavenProject project;
 
@@ -49,6 +52,7 @@ public class GenerateDdlMojo extends AbstractMojo {
 		}
 
 		DdlGeneratorHibernate61 generator = new DdlGeneratorHibernate61();
+		generator.getHapiHibernateDialectSettingsService().setTrimConditionalIdsFromPrimaryKeys(trimConditionalIdsFromPrimaryKeys);
 
 		for (String packageName : packageNames) {
 			String t = trim(packageName);
