@@ -7,7 +7,7 @@
 		<version>7.5.0-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>hapi-fhir-sql-hibernate-services</artifactId>
+	<artifactId>hapi-fhir-jpa-hibernate-services</artifactId>
 
 	<packaging>jar</packaging>
 

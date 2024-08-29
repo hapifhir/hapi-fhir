@@ -1,8 +1,10 @@
 package ca.uhn.fhir.tinder.ddl;
 
+import jakarta.annotation.Nonnull;
 import org.apache.commons.io.FileUtils;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +14,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Locale;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -57,9 +60,13 @@ class GenerateDdlMojoTest {
 		ourLog.info("SQL: {}", contents);
 
 		String[] sqlStatements = contents.replaceAll("\\s+", " ").split(";");
-		assertThat(sqlStatements).anyMatch(s -> Pattern.compile("CREATE TABLE ENTITY_WITH_COMPLEX_ID_CHILD .* PRIMARY KEY \\(PID\\)").matcher(s).find());
-		assertThat(sqlStatements).anyMatch(s -> Pattern.compile("CREATE TABLE ENTITY_WITH_COMPLEX_ID_PARENT .* PRIMARY KEY \\(PID\\)").matcher(s).find());
-		assertThat(sqlStatements).anyMatch(s -> Pattern.compile("ALTER TABLE IF EXISTS ENTITY_WITH_COMPLEX_ID_CHILD .* FOREIGN KEY \\(PARENT_PID\\)").matcher(s).find());
+		assertThat(sqlStatements).anyMatch(regex("CREATE TABLE ENTITY_WITH_COMPLEX_ID_PARENT .* PID .* PARTITION_ID .* NAME .* PRIMARY KEY \\(PID\\)"));
+		assertThat(sqlStatements).anyMatch(regex("CREATE TABLE ENTITY_WITH_COMPLEX_ID_CHILD .* PID .* PARTITION_ID .* NAME .* PARENT_PARTITION_ID .* PARENT_PID .* PRIMARY KEY \\(PID\\)"));
+		assertThat(sqlStatements).anyMatch(regex("ALTER TABLE IF EXISTS ENTITY_WITH_COMPLEX_ID_CHILD ADD CONSTRAINT FK_COMPLEX_ID_PARENT_CHILD FOREIGN KEY \\(PARENT_PID\\)"));
+
+		assertThat(sqlStatements).anyMatch(regex("CREATE TABLE ENTITY_WITH_EMBEDDED_ID_PARENT .* PID .* PARTITION_ID .* NAME .* PRIMARY KEY \\(PID\\)"));
+		assertThat(sqlStatements).anyMatch(regex("CREATE TABLE ENTITY_WITH_EMBEDDED_ID_CHILD .* PID .* PARTITION_ID .* NAME .* PARENT_PARTITION_ID .* PARENT_PID .* PRIMARY KEY \\(PID\\)"));
+		assertThat(sqlStatements).anyMatch(regex("ALTER TABLE IF EXISTS ENTITY_WITH_EMBEDDED_ID_CHILD ADD CONSTRAINT FK_EMBEDDED_ID_PARENT_CHILD FOREIGN KEY \\(PARENT_PID\\)"));
 	}
 
 	@Test
@@ -78,9 +85,18 @@ class GenerateDdlMojoTest {
 		ourLog.info("SQL: {}", contents);
 
 		String[] sqlStatements = contents.replaceAll("\\s+", " ").split(";");
-		assertThat(sqlStatements).anyMatch(s -> Pattern.compile("CREATE TABLE ENTITY_WITH_COMPLEX_ID_CHILD .* PRIMARY KEY \\(PID, PARTITION_ID\\)").matcher(s).find());
-		assertThat(sqlStatements).anyMatch(s -> Pattern.compile("CREATE TABLE ENTITY_WITH_COMPLEX_ID_PARENT .* PRIMARY KEY \\(PID, PARTITION_ID\\)").matcher(s).find());
-		assertThat(sqlStatements).anyMatch(s -> Pattern.compile("ALTER TABLE IF EXISTS ENTITY_WITH_COMPLEX_ID_CHILD .* FOREIGN KEY \\(PARENT_PID, PARENT_PARTITION_ID\\)").matcher(s).find());
+		assertThat(sqlStatements).anyMatch(regex("CREATE TABLE ENTITY_WITH_COMPLEX_ID_PARENT .* PID .* PARTITION_ID .* NAME .* PRIMARY KEY \\(PID, PARTITION_ID\\)"));
+		assertThat(sqlStatements).anyMatch(regex("CREATE TABLE ENTITY_WITH_COMPLEX_ID_CHILD .* PID .* PARTITION_ID .* NAME .* PARENT_PARTITION_ID .* PARENT_PID .* PRIMARY KEY \\(PID, PARTITION_ID\\)"));
+		assertThat(sqlStatements).anyMatch(regex("ALTER TABLE IF EXISTS ENTITY_WITH_COMPLEX_ID_CHILD ADD CONSTRAINT FK_COMPLEX_ID_PARENT_CHILD FOREIGN KEY \\(PARENT_PID, PARENT_PARTITION_ID\\)"));
+
+		assertThat(sqlStatements).anyMatch(regex("CREATE TABLE ENTITY_WITH_EMBEDDED_ID_PARENT .* PID .* PARTITION_ID .* NAME .* PRIMARY KEY \\(PID, PARTITION_ID\\)"));
+		assertThat(sqlStatements).anyMatch(regex("CREATE TABLE ENTITY_WITH_EMBEDDED_ID_CHILD .* PID .* PARTITION_ID .* NAME .* PARENT_PARTITION_ID .* PARENT_PID .* PRIMARY KEY \\(PID, PARTITION_ID\\)"));
+		assertThat(sqlStatements).anyMatch(regex("ALTER TABLE IF EXISTS ENTITY_WITH_EMBEDDED_ID_CHILD ADD CONSTRAINT FK_EMBEDDED_ID_PARENT_CHILD FOREIGN KEY \\(PARENT_PID, PARENT_PARTITION_ID\\)"));
+	}
+
+	@Nonnull
+	private static Predicate<String> regex(@Language("Regexp") String regex) {
+		return s -> Pattern.compile(regex).matcher(s).find();
 	}
 
 	private static void verifySequence(String fileName) throws IOException {

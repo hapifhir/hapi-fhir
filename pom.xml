@@ -125,7 +125,7 @@
 		<module>hapi-fhir-spring-boot</module>
 		<module>hapi-fhir-jacoco</module>
 		<module>hapi-fhir-server-cds-hooks</module>
-        <module>hapi-fhir-sql-hibernate-services</module>
+        <module>hapi-fhir-jpa-hibernate-services</module>
     </modules>
 
 	<dependencies>
@@ -1323,7 +1323,7 @@
 			<dependency>
 				<groupId>org.jetbrains</groupId>
 				<artifactId>annotations</artifactId>
-				<version>23.0.0</version>
+				<version>24.0.1</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-io</groupId>

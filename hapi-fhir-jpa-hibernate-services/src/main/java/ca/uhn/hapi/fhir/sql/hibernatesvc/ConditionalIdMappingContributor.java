@@ -1,5 +1,8 @@
 package ca.uhn.hapi.fhir.sql.hibernatesvc;
 
+import ca.uhn.fhir.context.ConfigurationException;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.hibernate.boot.ResourceStreamLocator;
 import org.hibernate.boot.spi.AdditionalMappingContributions;
 import org.hibernate.boot.spi.InFlightMetadataCollector;
@@ -13,6 +16,8 @@ import org.hibernate.mapping.PersistentClass;
 import org.hibernate.mapping.PrimaryKey;
 import org.hibernate.mapping.Property;
 import org.hibernate.mapping.Table;
+import org.hibernate.mapping.ToOne;
+import org.hibernate.mapping.Value;
 
 import java.lang.reflect.Field;
 import java.util.HashSet;
@@ -20,14 +25,6 @@ import java.util.List;
 import java.util.Set;
 
 public class ConditionalIdMappingContributor implements org.hibernate.boot.spi.AdditionalMappingContributor {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ConditionalIdMappingContributor.class);
-
-	/**
-	 * Constructor
-	 */
-	public ConditionalIdMappingContributor() {
-		super();
-	}
 
 	@Override
 	public String getContributorName() {
@@ -48,24 +45,6 @@ public class ConditionalIdMappingContributor implements org.hibernate.boot.spi.A
 		}
 
 		removeConditionalIdProperties(theMetadata);
-
-		for (var nextEntry : theMetadata.getEntityBindingMap().entrySet()) {
-			PersistentClass persistentClass = nextEntry.getValue();
-			Table table = persistentClass.getTable();
-			for (ForeignKey foreignKey : table.getForeignKeys().values()) {
-				foreignKey.getColumns().removeIf(t -> t.getName().equals("PARENT_PARTITION_ID"));
-//				List<Column> referencedColumns = foreignKey.getReferencedColumns();
-//				for (int i = 0; i < referencedColumns.size(); i++) {
-//					Column referencedColumn = referencedColumns.get(i);
-//					if (myIdRemovedColumns.contains(referencedColumn)) {
-//						referencedColumns.remove(i);
-//						i--;
-//					}
-//				}
-			}
-		}
-
-
 	}
 
 	private void removeConditionalIdProperties(InFlightMetadataCollector theMetadata) {
@@ -73,28 +52,29 @@ public class ConditionalIdMappingContributor implements org.hibernate.boot.spi.A
 			IdentitySet<Column> idRemovedColumns = new IdentitySet<>();
 			Set<String> idRemovedProperties = new HashSet<>();
 
-			Class<?> nextType;
+			Class<?> entityType;
 			try {
-				nextType = Class.forName(nextEntry.getKey());
+				entityType = Class.forName(nextEntry.getKey());
 			} catch (ClassNotFoundException e) {
 				throw new IllegalStateException(e);
 			}
 
-			PersistentClass next = nextEntry.getValue();
-			if (next.getIdentifier() instanceof BasicValue) {
+			PersistentClass entityPersistentClass = nextEntry.getValue();
+			if (entityPersistentClass.getIdentifier() instanceof BasicValue) {
 				continue;
 			}
 
-			Component identifier = (Component) next.getIdentifier();
+			Component identifier = (Component) entityPersistentClass.getIdentifier();
 			List<Property> properties = identifier.getProperties();
 			for (int i = 0; i < properties.size(); i++) {
 				Property property = properties.get(i);
 				String fieldName = property.getName();
-				Field field;
-				try {
-					field = nextType.getDeclaredField(fieldName);
-				} catch (NoSuchFieldException e) {
-					throw new IllegalStateException(e);
+				Field field = getField(entityType, fieldName);
+				if (field == null) {
+					field = getField(identifier.getComponentClass(), fieldName);
+				}
+				if (field == null) {
+					throw new ConfigurationException("Failed to find field " + fieldName + " on type: " + entityType.getName());
 				}
 
 				ConditionalIdProperty remove = field.getAnnotation(ConditionalIdProperty.class);
@@ -110,13 +90,39 @@ public class ConditionalIdMappingContributor implements org.hibernate.boot.spi.A
 				return;
 			}
 
-			next.getIdentifierMapper().getProperties().removeIf(t -> idRemovedProperties.contains(t.getName()));
+			if (entityPersistentClass.getIdentifierMapper() != null) {
+				entityPersistentClass.getIdentifierMapper().getProperties().removeIf(t -> idRemovedProperties.contains(t.getName()));
+			}
 
-			Table table = next.getTable();
+			Table table = entityPersistentClass.getTable();
 			PrimaryKey pk = table.getPrimaryKey();
 			List<Column> pkColumns = pk.getColumns();
-			pkColumns.removeIf(t -> idRemovedColumns.contains(t));
+			pkColumns.removeIf(idRemovedColumns::contains);
+
+			for (ForeignKey foreignKey : table.getForeignKeys().values()) {
+				Value value = foreignKey.getColumn(0).getValue();
+				if (value instanceof ToOne) {
+					ToOne manyToOne = (ToOne) value;
+					Field field = getField(entityType, manyToOne.getPropertyName());
+					ConditionalIdRelation conditionalIdRelation = field.getAnnotation(ConditionalIdRelation.class);
+					if (conditionalIdRelation != null) {
+						foreignKey.getColumns().removeIf(t->t.getName().equals(conditionalIdRelation.column()));
+						manyToOne.getColumns().removeIf(t->t.getName().equals(conditionalIdRelation.column()));
+					}
+				}
+			}
 
 		}
+	}
+
+	@Nullable
+	private static Field getField(Class<?> theType, String theFieldName) {
+		Field field;
+		try {
+			field = theType.getDeclaredField(theFieldName);
+		} catch (NoSuchFieldException e) {
+			field = null;
+		}
+		return field;
 	}
 }

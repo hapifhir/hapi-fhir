@@ -41,7 +41,7 @@
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-sql-hibernate-services</artifactId>
+			<artifactId>hapi-fhir-jpa-hibernate-services</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<!--
@@ -242,6 +242,11 @@
 		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.jetbrains</groupId>
+			<artifactId>annotations</artifactId>
 		</dependency>
 
 	</dependencies>

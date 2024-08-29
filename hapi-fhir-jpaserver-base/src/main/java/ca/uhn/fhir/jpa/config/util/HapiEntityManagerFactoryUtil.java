@@ -25,6 +25,7 @@ import ca.uhn.fhir.jpa.config.HapiFhirHibernateJpaDialect;
 import ca.uhn.fhir.jpa.config.HapiFhirLocalContainerEntityManagerFactoryBean;
 import ca.uhn.fhir.jpa.util.ISequenceValueMassager;
 import ca.uhn.fhir.util.ReflectionUtil;
+import ca.uhn.hapi.fhir.sql.hibernatesvc.HapiHibernateDialectSettingsService;
 import jakarta.persistence.spi.PersistenceUnitInfo;
 import org.hibernate.boot.registry.BootstrapServiceRegistry;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
@@ -98,10 +99,14 @@ public final class HapiEntityManagerFactoryUtil {
 
 			@Override
 			protected StandardServiceRegistryBuilder getStandardServiceRegistryBuilder(BootstrapServiceRegistry bsr) {
+				HapiHibernateDialectSettingsService service = new HapiHibernateDialectSettingsService();
+				service.setTrimConditionalIdsFromPrimaryKeys(true);
+
 				StandardServiceRegistryBuilder retVal = super.getStandardServiceRegistryBuilder(bsr);
 				ISequenceValueMassager sequenceValueMassager =
 						ReflectionUtil.newInstance(myStorageSettings.getSequenceValueMassagerClass());
 				retVal.addService(ISequenceValueMassager.class, sequenceValueMassager);
+				retVal.addService(HapiHibernateDialectSettingsService.class, service);
 				return retVal;
 			}
 		}
