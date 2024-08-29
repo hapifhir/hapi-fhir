@@ -22,7 +22,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 })
 class PartitionJpaBindingTest {
 
-	static final BasicEntityTestFixture<ResRootPartitionEntity, ResJoinPartitionEntity> ourConfig = BasicEntityTestFixture.build(ResRootPartitionEntity.class, ResJoinPartitionEntity.class);
+	static final BasicEntityTestFixture<ResRootPartitionEntity, ResJoinPartitionEntity> ourConfig = BasicEntityTestFixture.buildNoNullPartition(ResRootPartitionEntity.class, ResJoinPartitionEntity.class);
 
 	@RegisterExtension
 	static final ParameterResolver ourResolver = ValueTypeBasedParameterResolver.build(ourConfig);

@@ -104,6 +104,32 @@ abstract public class BasicEntityTestTemplate<R extends IRootEntity<J>,J extends
 
 	@ParameterizedTest
 	@MethodSource("getPartitions")
+	void updateResourceTable(Integer thePartitionId) {
+		doInTx(em->{
+			R root = myFixture.buildRootEntity();
+			root.setPartitionId(thePartitionId);
+			root.setString("hello!");
+			em.persist(root);
+
+			em.flush();
+			em.clear();
+
+			Object id = myEntityManagerFactory.getPersistenceUnitUtil().getIdentifier(root);
+			ourLog.info("flushed root entity.  Id is {}", id);
+			R readback = em.find(myFixture.myRootType, id);
+
+			readback.setString("goodbye!");
+			em.flush();
+			em.clear();
+
+			readback = em.find(myFixture.myRootType, id);
+			assertNotNull(readback);
+			assertEquals("goodbye!", readback.getString());
+		});
+	}
+
+	@ParameterizedTest
+	@MethodSource("getPartitions")
 	void roundTripJoin(Integer thePartitionId) {
 		doInTx(em->{
 			var root = myFixture.buildRootEntity();
@@ -167,15 +193,23 @@ abstract public class BasicEntityTestTemplate<R extends IRootEntity<J>,J extends
 			em.flush();
 			em.clear();
 
-
 			CriteriaBuilder cb = em.getCriteriaBuilder();
 			CriteriaQuery<R> cr = cb.createQuery(myFixture.myRootType);
 			Root<R> from = cr.from(myFixture.myRootType);
 			from.fetch("myJoinEntities");
 			cr.select(from);
 
-			em.createQuery(cr).getResultStream()
-				.forEach(e-> ourLog.info("e: {}", e));
+			List<R> resultList = em.createQuery(cr).getResultList();
+			assertEquals(1,resultList.size());
+
+			resultList.forEach(e-> {
+				ourLog.info("root: {}", e);
+				assertNotNull(e);
+				assertNotNull(e.getJoins());
+				assertEquals(2, e.getJoins().size());
+				assertNotNull(e.getJoins().iterator().next());
+				e.getJoins().forEach(j-> ourLog.info("join: {}", j));
+			});
 
 		});
 	}

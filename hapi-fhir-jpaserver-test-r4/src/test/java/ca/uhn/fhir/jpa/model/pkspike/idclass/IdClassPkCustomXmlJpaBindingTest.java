@@ -35,10 +35,9 @@ public class IdClassPkCustomXmlJpaBindingTest {
 		Consumer<HapiFhirLocalContainerEntityManagerFactoryBean> entityManagerFactoryCustomizer() {
 			return em->{
 				ourLog.info("Injecting custom persistence.xml");
-				em.setMappingResources("/ca/uhn/fhir/jpa/model/pkspike/idclass/orm.xml");
+				em.setMappingResources("/ca/uhn/fhir/jpa/model/pkspike/idclass/ormComposite.xml");
 			};
 		}
-
 	}
 
 	static final BasicEntityTestFixture<ResRootIdClassEntity, ResJoinIdClassEntity> ourFixture = BasicEntityTestFixture.buildNoNullPartition(ResRootIdClassEntity.class, ResJoinIdClassEntity.class);
