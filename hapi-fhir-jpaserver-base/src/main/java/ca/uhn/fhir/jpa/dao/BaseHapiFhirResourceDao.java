@@ -420,7 +420,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 								BaseStorageDao.class,
 								"transactionOperationWithMultipleMatchFailure",
 								"CREATE",
-								theMatchUrl,
+							myResourceName,
+							theMatchUrl,
 								match.size());
 				throw new PreconditionFailedException(Msg.code(958) + msg);
 			} else if (match.size() == 1) {
@@ -861,7 +862,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 										BaseStorageDao.class,
 										"transactionOperationWithMultipleMatchFailure",
 										"DELETE",
-										theUrl,
+									myResourceName,
+									theUrl,
 										resourceIds.size()));
 			}
 			// TODO: LD: There is a still a bug on slow deletes:  https://github.com/hapifhir/hapi-fhir/issues/5675
@@ -2335,7 +2337,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 								BaseStorageDao.class,
 								"transactionOperationWithMultipleMatchFailure",
 								"UPDATE",
-								theMatchUrl,
+							myResourceName,
+							theMatchUrl,
 								match.size());
 				throw new PreconditionFailedException(Msg.code(988) + msg);
 			} else if (match.size() == 1) {
