@@ -414,6 +414,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			version.onTable("HFJ_IDX_CMB_TOK_NU")
 					.addIndex("20240625.10", "IDX_IDXCMBTOKNU_HASHC")
 					.unique(false)
+					.online(true)
 					.withColumns("HASH_COMPLETE", "RES_ID", "PARTITION_ID");
 			version.onTable("HFJ_IDX_CMP_STRING_UNIQ")
 					.addColumn("20240625.20", "HASH_COMPLETE")
@@ -470,10 +471,26 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			}
 		}
 
-		version.onTable(Search.HFJ_SEARCH)
-				.modifyColumn("20240722.1", Search.SEARCH_UUID)
-				.nonNullable()
-				.withType(ColumnTypeEnum.STRING, 48);
+		{
+			// Add target resource partition id/date columns to resource link
+			Builder.BuilderWithTableName resourceLinkTable = version.onTable("HFJ_RES_LINK");
+
+			resourceLinkTable
+					.addColumn("20240718.10", "TARGET_RES_PARTITION_ID")
+					.nullable()
+					.type(ColumnTypeEnum.INT);
+			resourceLinkTable
+					.addColumn("20240718.20", "TARGET_RES_PARTITION_DATE")
+					.nullable()
+					.type(ColumnTypeEnum.DATE_ONLY);
+		}
+
+		{
+			version.onTable(Search.HFJ_SEARCH)
+					.modifyColumn("20240722.1", Search.SEARCH_UUID)
+					.nonNullable()
+					.withType(ColumnTypeEnum.STRING, 48);
+		}
 
 		{
 			final Builder.BuilderWithTableName hfjResource = version.onTable("HFJ_RESOURCE");

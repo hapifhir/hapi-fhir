@@ -656,7 +656,11 @@ public abstract class QuantitySearchParameterTestCases implements ITestDataBuild
 						.getIdPart(); // 70_000
 
 				// this search is not freetext because there is no freetext-known parameter name
-				List<String> allIds = myTestDaoSearch.searchForIds("/Observation?_sort=value-quantity");
+				// search by value quantity was added here because empty search params would cause the search to go
+				// through jpa search which does not
+				// support normalized quantity sorting.
+				List<String> allIds =
+						myTestDaoSearch.searchForIds("/Observation?value-quantity=ge0&_sort=value-quantity");
 				assertThat(allIds).containsExactly(idAlpha2, idAlpha1, idAlpha3);
 			}
 		}

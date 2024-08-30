@@ -475,6 +475,9 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 	}
 
 	private static String csvEscape(String theValue) {
+		if (theValue == null) {
+			return "";
+		}
 		return '"' + theValue.replace("\"", "\"\"").replace("\n", "\\n").replace("\r", "") + '"';
 	}
 }

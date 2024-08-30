@@ -105,10 +105,11 @@ public class HapiFhirCliRestfulClientFactory extends RestfulClientFactory {
 				Registry<ConnectionSocketFactory> registry = RegistryBuilder.<ConnectionSocketFactory>create()
 						.register("https", sslConnectionSocketFactory)
 						.build();
-				connectionManager =
-						new PoolingHttpClientConnectionManager(registry, null, null, null, 5000, TimeUnit.MILLISECONDS);
+				connectionManager = new PoolingHttpClientConnectionManager(
+						registry, null, null, null, getConnectionTimeToLive(), TimeUnit.MILLISECONDS);
 			} else {
-				connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+				connectionManager =
+						new PoolingHttpClientConnectionManager(getConnectionTimeToLive(), TimeUnit.MILLISECONDS);
 			}
 
 			connectionManager.setMaxTotal(getPoolMaxTotal());

@@ -37,7 +37,7 @@ public class ResourceIndexedSearchParamsTest {
 
 	@Test
 	public void matchResourceLinksStringCompareToLong() {
-		ResourceLink link = ResourceLink.forLocalReference("organization", mySource, "Organization", 123L, LONG_ID, new Date(), null);
+		ResourceLink link = getResourceLinkForLocalReference(LONG_ID);
 		myParams.getResourceLinks().add(link);
 
 		ReferenceParam referenceParam = getReferenceParam(STRING_ID);
@@ -47,7 +47,7 @@ public class ResourceIndexedSearchParamsTest {
 
 	@Test
 	public void matchResourceLinksStringCompareToString() {
-		ResourceLink link = ResourceLink.forLocalReference("organization", mySource, "Organization", 123L, STRING_ID, new Date(), null);
+		ResourceLink link = getResourceLinkForLocalReference(STRING_ID);
 		myParams.getResourceLinks().add(link);
 
 		ReferenceParam referenceParam = getReferenceParam(STRING_ID);
@@ -57,7 +57,7 @@ public class ResourceIndexedSearchParamsTest {
 
 	@Test
 	public void matchResourceLinksLongCompareToString() {
-		ResourceLink link = ResourceLink.forLocalReference("organization", mySource, "Organization", 123L, STRING_ID, new Date(), null);
+		ResourceLink link = getResourceLinkForLocalReference(STRING_ID);
 		myParams.getResourceLinks().add(link);
 
 		ReferenceParam referenceParam = getReferenceParam(LONG_ID);
@@ -67,12 +67,27 @@ public class ResourceIndexedSearchParamsTest {
 
 	@Test
 	public void matchResourceLinksLongCompareToLong() {
-		ResourceLink link = ResourceLink.forLocalReference("organization", mySource, "Organization", 123L, LONG_ID, new Date(), null);
+		ResourceLink link = getResourceLinkForLocalReference(LONG_ID);
 		myParams.getResourceLinks().add(link);
 
 		ReferenceParam referenceParam = getReferenceParam(LONG_ID);
 		boolean result = myParams.matchResourceLinks(myStorageSettings, "Patient", "organization", referenceParam, "organization");
 		assertTrue(result);
+	}
+
+	private ResourceLink getResourceLinkForLocalReference(String theTargetResourceId){
+
+		ResourceLink.ResourceLinkForLocalReferenceParams params = ResourceLink.ResourceLinkForLocalReferenceParams
+			.instance()
+			.setSourcePath("organization")
+			.setSourceResource(mySource)
+			.setTargetResourceType("Organization")
+			.setTargetResourcePid(123L)
+			.setTargetResourceId(theTargetResourceId)
+			.setUpdated(new Date());
+
+		return ResourceLink.forLocalReference(params);
+
 	}
 
 	private ReferenceParam getReferenceParam(String theId) {

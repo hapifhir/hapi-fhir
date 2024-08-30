@@ -763,7 +763,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 			myFirstStepLatch.awaitExpected();
 
 			// validate
-			myBatch2JobHelper.awaitJobHasStatusWithForcedMaintenanceRuns(instanceId, StatusEnum.IN_PROGRESS);
+			myBatch2JobHelper.awaitJobHasStatusWithForcedMaintenanceRuns(instanceId, StatusEnum.ERRORED);
 
 			// execute
 			ourLog.info("Cancel job {}", instanceId);

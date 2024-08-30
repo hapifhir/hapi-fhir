@@ -34,7 +34,7 @@ public class SubscriptionUtil {
 		RequestPartitionId requestPartitionId =
 				new PartitionablePartitionId(theSubscription.getRequestPartitionId(), null).toPartitionId();
 
-		if (theSubscription.getCrossPartitionEnabled()) {
+		if (theSubscription.isCrossPartitionEnabled()) {
 			requestPartitionId = RequestPartitionId.allPartitions();
 		}
 

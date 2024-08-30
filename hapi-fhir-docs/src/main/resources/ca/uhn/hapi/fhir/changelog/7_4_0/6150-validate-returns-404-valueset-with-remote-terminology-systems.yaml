@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 6150
+title: "Previously, the resource $validate operation would return a 404 when the associated profile uses a ValueSet 
+that has multiple includes referencing Remote Terminology CodeSystem resources. 
+This has been fixed to return a 200 with issues instead."
