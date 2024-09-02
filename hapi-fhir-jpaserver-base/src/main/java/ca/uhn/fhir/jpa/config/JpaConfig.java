@@ -166,6 +166,7 @@ import ca.uhn.fhir.jpa.term.config.TermCodeSystemConfig;
 import ca.uhn.fhir.jpa.util.JpaHapiTransactionService;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.util.PersistenceContextProvider;
+import ca.uhn.fhir.jpa.util.SqlQueryUtil;
 import ca.uhn.fhir.jpa.validation.ResourceLoaderImpl;
 import ca.uhn.fhir.jpa.validation.ValidationSettings;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
@@ -543,6 +544,11 @@ public class JpaConfig {
 	@Bean
 	public HibernatePropertiesProvider HibernatePropertiesProvider() {
 		return new HibernatePropertiesProvider();
+	}
+
+	@Bean
+	public SqlQueryUtil sqlQueryUtil() {
+		return new SqlQueryUtil(HibernatePropertiesProvider());
 	}
 
 	@Bean
