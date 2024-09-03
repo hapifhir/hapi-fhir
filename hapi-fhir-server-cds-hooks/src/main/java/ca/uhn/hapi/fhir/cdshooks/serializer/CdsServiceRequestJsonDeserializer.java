@@ -83,7 +83,8 @@ public class CdsServiceRequestJsonDeserializer extends StdDeserializer<CdsServic
 	}
 
 	private static String getServiceId() {
-		ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+		ServletRequestAttributes requestAttributes =
+				(ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
 		String path = requestAttributes.getRequest().getRequestURI();
 		return path.replace("/cds-services/", "");
 	}
