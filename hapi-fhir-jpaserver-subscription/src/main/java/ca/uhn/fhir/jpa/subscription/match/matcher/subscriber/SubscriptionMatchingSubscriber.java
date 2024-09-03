@@ -151,15 +151,17 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 	 */
 	private boolean processSubscription(
 			ResourceModifiedMessage theMsg, IIdType theResourceId, ActiveSubscription theActiveSubscription) {
-		// skip if the partitions don't match
+
 		CanonicalSubscription subscription = theActiveSubscription.getSubscription();
+
 		if (subscription != null
 				&& theMsg.getPartitionId() != null
 				&& theMsg.getPartitionId().hasPartitionIds()
-				&& !subscription.getCrossPartitionEnabled()
+				&& !subscription.isCrossPartitionEnabled()
 				&& !theMsg.getPartitionId().hasPartitionId(subscription.getRequestPartitionId())) {
 			return false;
 		}
+
 		String nextSubscriptionId = theActiveSubscription.getId();
 
 		if (isNotBlank(theMsg.getSubscriptionId())) {

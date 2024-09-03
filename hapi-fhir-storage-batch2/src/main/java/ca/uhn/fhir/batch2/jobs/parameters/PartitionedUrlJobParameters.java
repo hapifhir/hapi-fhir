@@ -22,20 +22,22 @@ package ca.uhn.fhir.batch2.jobs.parameters;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Can be used to configure parameters for batch2 jobs.
  * Please note that these need to be backward compatible as we do not have a way to migrate them to a different structure at the moment.
  */
-public class JobParameters implements IModelJson {
+public class PartitionedUrlJobParameters implements IModelJson {
 	@JsonProperty(value = "partitionId")
-	private List<RequestPartitionId> myRequestPartitionIds;
+	@Nullable
+	private RequestPartitionId myRequestPartitionId;
 
 	@JsonProperty("batchSize")
 	private Integer myBatchSize;
@@ -44,31 +46,12 @@ public class JobParameters implements IModelJson {
 	private List<PartitionedUrl> myPartitionedUrls;
 
 	public void setRequestPartitionId(@Nullable RequestPartitionId theRequestPartitionId) {
-		if (theRequestPartitionId != null) {
-			myRequestPartitionIds = List.of(theRequestPartitionId);
-		}
+		myRequestPartitionId = theRequestPartitionId;
 	}
 
 	@Nullable
 	public RequestPartitionId getRequestPartitionId() {
-		return getFirstRequestPartitionIdOrNull();
-	}
-
-	@Nullable
-	private RequestPartitionId getFirstRequestPartitionIdOrNull() {
-		return myRequestPartitionIds == null || myRequestPartitionIds.isEmpty() ? null : myRequestPartitionIds.get(0);
-	}
-
-	@Nonnull
-	public List<RequestPartitionId> getRequestPartitionIds() {
-		if (myRequestPartitionIds == null) {
-			myRequestPartitionIds = new ArrayList<>();
-		}
-		return myRequestPartitionIds;
-	}
-
-	public void addRequestPartitionId(RequestPartitionId theRequestPartitionId) {
-		getRequestPartitionIds().add(theRequestPartitionId);
+		return myRequestPartitionId;
 	}
 
 	public void setBatchSize(int theBatchSize) {
@@ -84,6 +67,10 @@ public class JobParameters implements IModelJson {
 		if (myPartitionedUrls == null) {
 			myPartitionedUrls = new ArrayList<>();
 		}
+		// TODO MM: added for backward compatibility, it can be removed once requestPartitionId is deprecated
+		myPartitionedUrls.stream()
+				.filter(thePartitionedUrl -> thePartitionedUrl.getRequestPartitionId() == null)
+				.forEach(thePartitionedUrl -> thePartitionedUrl.setRequestPartitionId(myRequestPartitionId));
 		return myPartitionedUrls;
 	}
 
@@ -95,22 +82,10 @@ public class JobParameters implements IModelJson {
 		getPartitionedUrls().add(new PartitionedUrl().setUrl(theUrl));
 	}
 
-	@VisibleForTesting
-	public static JobParameters from(
-			List<String> theUrls, List<RequestPartitionId> thePartitions, boolean theShouldAssignPartitionToUrl) {
-		JobParameters parameters = new JobParameters();
-		if (theShouldAssignPartitionToUrl) {
-			assert theUrls.size() == thePartitions.size();
-			for (int i = 0; i < theUrls.size(); i++) {
-				PartitionedUrl partitionedUrl = new PartitionedUrl();
-				partitionedUrl.setUrl(theUrls.get(i));
-				partitionedUrl.setRequestPartitionId(thePartitions.get(i));
-				parameters.addPartitionedUrl(partitionedUrl);
-			}
-		} else {
-			theUrls.forEach(url -> parameters.addPartitionedUrl(new PartitionedUrl().setUrl(url)));
-			thePartitions.forEach(parameters::addRequestPartitionId);
-		}
-		return parameters;
+	public List<String> getUrls() {
+		return getPartitionedUrls().stream()
+				.map(PartitionedUrl::getUrl)
+				.filter(url -> !StringUtils.isBlank(url))
+				.collect(Collectors.toList());
 	}
 }

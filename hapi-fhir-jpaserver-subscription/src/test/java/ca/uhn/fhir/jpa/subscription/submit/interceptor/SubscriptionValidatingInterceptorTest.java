@@ -4,15 +4,19 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.model.entity.StorageSettings;
+import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyEvaluator;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
-import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
+import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
+import ca.uhn.fhir.jpa.subscription.submit.interceptor.validator.IChannelTypeValidator;
+import ca.uhn.fhir.jpa.subscription.submit.interceptor.validator.RegexEndpointUrlValidationStrategy;
+import ca.uhn.fhir.jpa.subscription.submit.interceptor.validator.RestHookChannelValidator;
+import ca.uhn.fhir.jpa.subscription.submit.interceptor.validator.SubscriptionChannelTypeValidatorFactory;
+import ca.uhn.fhir.jpa.subscription.submit.interceptor.validator.SubscriptionQueryValidator;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
@@ -29,11 +33,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -49,6 +55,8 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
@@ -70,6 +78,9 @@ public class SubscriptionValidatingInterceptorTest {
 	private IFhirResourceDao<SubscriptionTopic> mySubscriptionTopicDao;
 	private FhirContext myFhirContext;
 
+	@SpyBean
+	private SubscriptionChannelTypeValidatorFactory mySubscriptionChannelTypeValidatorFactory;
+
 	@BeforeEach
 	public void before() {
 		setFhirContext(FhirVersionEnum.R4B);
@@ -79,8 +90,9 @@ public class SubscriptionValidatingInterceptorTest {
 	@ParameterizedTest
 	@MethodSource("subscriptionByFhirVersion345")
 	public void testEmptySub(IBaseResource theSubscription) {
+		setFhirContext(theSubscription);
+
 		try {
-			setFhirContext(theSubscription);
 			mySubscriptionValidatingInterceptor.resourcePreCreate(theSubscription, null, null);
 			fail();
 		} catch (UnprocessableEntityException e) {
@@ -92,8 +104,9 @@ public class SubscriptionValidatingInterceptorTest {
 	@ParameterizedTest
 	@MethodSource("subscriptionByFhirVersion34") // R5 subscriptions don't have criteria
 	public void testEmptyCriteria(IBaseResource theSubscription) {
+		initSubscription(theSubscription);
+
 		try {
-			initSubscription(theSubscription);
 			mySubscriptionValidatingInterceptor.resourcePreCreate(theSubscription, null, null);
 			fail();
 		} catch (UnprocessableEntityException e) {
@@ -105,9 +118,10 @@ public class SubscriptionValidatingInterceptorTest {
 	@ParameterizedTest
 	@MethodSource("subscriptionByFhirVersion34")
 	public void testBadCriteria(IBaseResource theSubscription) {
+		initSubscription(theSubscription);
+		SubscriptionUtil.setCriteria(myFhirContext, theSubscription, "Patient");
+
 		try {
-			initSubscription(theSubscription);
-			SubscriptionUtil.setCriteria(myFhirContext, theSubscription, "Patient");
 			mySubscriptionValidatingInterceptor.resourcePreCreate(theSubscription, null, null);
 			fail();
 		} catch (UnprocessableEntityException e) {
@@ -118,9 +132,10 @@ public class SubscriptionValidatingInterceptorTest {
 	@ParameterizedTest
 	@MethodSource("subscriptionByFhirVersion34")
 	public void testBadChannel(IBaseResource theSubscription) {
+		initSubscription(theSubscription);
+		SubscriptionUtil.setCriteria(myFhirContext, theSubscription, "Patient?");
+
 		try {
-			initSubscription(theSubscription);
-			SubscriptionUtil.setCriteria(myFhirContext, theSubscription, "Patient?");
 			mySubscriptionValidatingInterceptor.resourcePreCreate(theSubscription, null, null);
 			fail();
 		} catch (UnprocessableEntityException e) {
@@ -131,10 +146,11 @@ public class SubscriptionValidatingInterceptorTest {
 	@ParameterizedTest
 	@MethodSource("subscriptionByFhirVersion345")
 	public void testEmptyEndpoint(IBaseResource theSubscription) {
+		initSubscription(theSubscription);
+		SubscriptionUtil.setCriteria(myFhirContext, theSubscription, "Patient?");
+		SubscriptionUtil.setChannelType(myFhirContext, theSubscription, "message");
+
 		try {
-			initSubscription(theSubscription);
-			SubscriptionUtil.setCriteria(myFhirContext, theSubscription, "Patient?");
-			SubscriptionUtil.setChannelType(myFhirContext, theSubscription, "message");
 			mySubscriptionValidatingInterceptor.resourcePreCreate(theSubscription, null, null);
 			fail();
 		} catch (UnprocessableEntityException e) {
@@ -223,8 +239,27 @@ public class SubscriptionValidatingInterceptorTest {
 		SimpleBundleProvider simpleBundleProvider = new SimpleBundleProvider(List.of(topic));
 		when(mySubscriptionTopicDao.search(any(), any())).thenReturn(simpleBundleProvider);
 		mySubscriptionValidatingInterceptor.validateSubmittedSubscription(badSub, null, null, Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED);
+
+		verify(mySubscriptionChannelTypeValidatorFactory, times(1)).getValidatorForChannelType(CanonicalSubscriptionChannelType.MESSAGE);
 	}
 
+	@ParameterizedTest
+	@ValueSource(strings = {
+		"acme.corp",
+		"https://acme.corp/badstuff-%%$^&& iuyi",
+		"ftp://acme.corp"})
+	public void testRestHookEndpointValidation_whenProvidedWithBadURLs(String theBadUrl) {
+		try {
+			Subscription subscriptionWithBadEndpoint = createSubscription();
+			subscriptionWithBadEndpoint.getChannel().setEndpoint(theBadUrl);
+
+			mySubscriptionValidatingInterceptor.validateSubmittedSubscription(subscriptionWithBadEndpoint, null, null, Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED);
+			fail("");
+		} catch (Exception e) {
+			verify(mySubscriptionChannelTypeValidatorFactory, times(1)).getValidatorForChannelType(CanonicalSubscriptionChannelType.RESTHOOK);
+			assertThat(e.getMessage()).startsWith(Msg.code(2545));
+		}
+	}
 
 	private void initSubscription(IBaseResource theSubscription) {
 		setFhirContext(theSubscription);
@@ -295,8 +330,21 @@ public class SubscriptionValidatingInterceptorTest {
 		}
 
 		@Bean
-		SubscriptionQueryValidator subscriptionQueryValidator(DaoRegistry theDaoRegistry, SubscriptionStrategyEvaluator theSubscriptionStrategyEvaluator) {
+        SubscriptionQueryValidator subscriptionQueryValidator(DaoRegistry theDaoRegistry, SubscriptionStrategyEvaluator theSubscriptionStrategyEvaluator) {
 			return new SubscriptionQueryValidator(theDaoRegistry, theSubscriptionStrategyEvaluator);
+		}
+
+		@Bean
+		public IChannelTypeValidator restHookChannelValidator() {
+			String regex = new SubscriptionSettings().getRestHookEndpointUrlValidationRegex();
+			RegexEndpointUrlValidationStrategy regexEndpointUrlValidationStrategy = new RegexEndpointUrlValidationStrategy(regex);
+			return new RestHookChannelValidator(regexEndpointUrlValidationStrategy);
+		}
+
+		@Bean
+		public SubscriptionChannelTypeValidatorFactory subscriptionChannelTypeValidatorFactory(
+			List<IChannelTypeValidator> theValidorList) {
+			return new SubscriptionChannelTypeValidatorFactory(theValidorList);
 		}
 	}
 
@@ -307,7 +355,7 @@ public class SubscriptionValidatingInterceptorTest {
 		subscription.setCriteria("Patient?");
 		final Subscription.SubscriptionChannelComponent channel = subscription.getChannel();
 		channel.setType(Subscription.SubscriptionChannelType.RESTHOOK);
-		channel.setEndpoint("channel");
+		channel.setEndpoint("http://acme.corp/");
 		return subscription;
 	}
 }

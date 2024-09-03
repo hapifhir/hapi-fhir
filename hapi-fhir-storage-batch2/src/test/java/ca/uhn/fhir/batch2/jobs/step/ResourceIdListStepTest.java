@@ -5,7 +5,7 @@ import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.jobs.chunk.ChunkRangeJson;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
-import ca.uhn.fhir.batch2.jobs.parameters.JobParameters;
+import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrlJobParameters;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.pid.HomogeneousResourcePidList;
 import ca.uhn.fhir.jpa.api.pid.IResourcePidStream;
@@ -38,18 +38,18 @@ class ResourceIdListStepTest {
 	@Mock
 	private IIdChunkProducer<ChunkRangeJson> myIdChunkProducer;
 	@Mock
-	private StepExecutionDetails<JobParameters, ChunkRangeJson> myStepExecutionDetails;
+	private StepExecutionDetails<PartitionedUrlJobParameters, ChunkRangeJson> myStepExecutionDetails;
 	@Mock
 	private IJobDataSink<ResourceIdListWorkChunkJson> myDataSink;
 	@Mock
 	private ChunkRangeJson myData;
 	@Mock
-	private JobParameters myParameters;
+	private PartitionedUrlJobParameters myParameters;
 
 	@Captor
 	private ArgumentCaptor<ResourceIdListWorkChunkJson> myDataCaptor;
 
-	private ResourceIdListStep<JobParameters> myResourceIdListStep;
+	private ResourceIdListStep<PartitionedUrlJobParameters> myResourceIdListStep;
 
 	@BeforeEach
 	void beforeEach() {

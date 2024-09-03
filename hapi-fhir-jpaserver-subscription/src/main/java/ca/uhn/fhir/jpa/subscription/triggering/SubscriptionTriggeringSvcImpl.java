@@ -151,7 +151,7 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 		if (theSubscriptionId != null) {
 			IFhirResourceDao<?> subscriptionDao = myDaoRegistry.getSubscriptionDao();
 			IBaseResource subscription = subscriptionDao.read(theSubscriptionId, theRequestDetails);
-			if (mySubscriptionCanonicalizer.canonicalize(subscription).getCrossPartitionEnabled()) {
+			if (mySubscriptionCanonicalizer.canonicalize(subscription).isCrossPartitionEnabled()) {
 				requestPartitionId = RequestPartitionId.allPartitions();
 			} else {
 				// Otherwise, trust the partition passed in via tenant/interceptor.

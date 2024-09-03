@@ -1,7 +1,5 @@
 package ca.uhn.fhir.jpa.searchparam;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
@@ -22,10 +20,10 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.assertj.core.api.Assertions.within;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -104,19 +102,19 @@ public class MatchUrlServiceTest extends BaseJpaTest {
 
 	@Test
 	void testTotal_fromStandardLowerCase() {
-	    // given
-	    // when
+		// given
+		// when
 		var map = myMatchUrlService.translateMatchUrl("Patient?family=smith&_total=none", ourCtx.getResourceDefinition("Patient"));
 
-	    // then
-	    assertEquals(SearchTotalModeEnum.NONE, map.getSearchTotalMode());
+		// then
+		assertEquals(SearchTotalModeEnum.NONE, map.getSearchTotalMode());
 	}
 
 	@Test
 	void testTotal_fromUpperCase() {
 		// given
 		// when
-		var map = myMatchUrlService.translateMatchUrl("Patient?family=smith&_total=none", ourCtx.getResourceDefinition("Patient"));
+		var map = myMatchUrlService.translateMatchUrl("Patient?family=smith&_total=NONE", ourCtx.getResourceDefinition("Patient"));
 
 		// then
 		assertEquals(SearchTotalModeEnum.NONE, map.getSearchTotalMode());

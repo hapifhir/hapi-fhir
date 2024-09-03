@@ -1,7 +1,5 @@
 package ca.uhn.fhir.jpa.dao.index;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
@@ -29,6 +27,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.when;
@@ -87,13 +87,17 @@ public class IdHelperServiceTest {
 			"Patient",
 			123l,
 			"RED",
-			new Date()
+			new Date(),
+			null,
+			null
 		};
 		Object[] blueView = new Object[] {
 			"Patient",
 			456l,
 			"BLUE",
-			new Date()
+			new Date(),
+			null,
+			null
 		};
 
 		// when
@@ -155,11 +159,13 @@ public class IdHelperServiceTest {
 		String resourceType = "Patient";
 		String resourceForcedId = "AAA";
 
-		Object[] forcedIdView = new Object[4];
+		Object[] forcedIdView = new Object[6];
 		forcedIdView[0] = resourceType;
 		forcedIdView[1] = 1L;
 		forcedIdView[2] = resourceForcedId;
 		forcedIdView[3] = null;
+		forcedIdView[4] = null;
+		forcedIdView[5] = null;
 
 		Collection<Object[]> testForcedIdViews = new ArrayList<>();
 		testForcedIdViews.add(forcedIdView);

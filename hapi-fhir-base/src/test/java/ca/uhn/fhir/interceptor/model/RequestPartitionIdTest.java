@@ -42,6 +42,50 @@ public class RequestPartitionIdTest {
 	}
 
 	@Test
+	public void testMergeIds() {
+		RequestPartitionId input0 = RequestPartitionId.fromPartitionIds(1, 2, 3);
+		RequestPartitionId input1 = RequestPartitionId.fromPartitionIds(1, 2, 4);
+
+		RequestPartitionId actual = input0.mergeIds(input1);
+		RequestPartitionId expected = RequestPartitionId.fromPartitionIds(1, 2, 3, 4);
+		assertEquals(expected, actual);
+
+	}
+
+	@Test
+	public void testMergeIds_ThisAllPartitions() {
+		RequestPartitionId input0 = RequestPartitionId.allPartitions();
+		RequestPartitionId input1 = RequestPartitionId.fromPartitionIds(1, 2, 4);
+
+		RequestPartitionId actual = input0.mergeIds(input1);
+		RequestPartitionId expected = RequestPartitionId.allPartitions();
+		assertEquals(expected, actual);
+
+	}
+
+	@Test
+	public void testMergeIds_OtherAllPartitions() {
+		RequestPartitionId input0 = RequestPartitionId.fromPartitionIds(1, 2, 3);
+		RequestPartitionId input1 = RequestPartitionId.allPartitions();
+
+		RequestPartitionId actual = input0.mergeIds(input1);
+		RequestPartitionId expected = RequestPartitionId.allPartitions();
+		assertEquals(expected, actual);
+
+	}
+
+	@Test
+	public void testMergeIds_IncludesDefault() {
+		RequestPartitionId input0 = RequestPartitionId.fromPartitionIds(1, 2, 3);
+		RequestPartitionId input1 = RequestPartitionId.defaultPartition();
+
+		RequestPartitionId actual = input0.mergeIds(input1);
+		RequestPartitionId expected = RequestPartitionId.fromPartitionIds(1, 2, 3, null);
+		assertEquals(expected, actual);
+
+	}
+
+	@Test
 	public void testSerDeserSer() throws JsonProcessingException {
 		{
 			RequestPartitionId start = RequestPartitionId.fromPartitionId(123, LocalDate.of(2020, 1, 1));

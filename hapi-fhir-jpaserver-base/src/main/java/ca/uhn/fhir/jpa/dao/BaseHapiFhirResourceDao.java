@@ -20,7 +20,7 @@
 package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
-import ca.uhn.fhir.batch2.jobs.parameters.UrlPartitioner;
+import ca.uhn.fhir.batch2.api.IJobPartitionProvider;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexAppCtx;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
@@ -103,7 +103,6 @@ import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.util.ReflectionUtil;
@@ -194,6 +193,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	private IRequestPartitionHelperSvc myRequestPartitionHelperService;
 
 	@Autowired
+	private IJobPartitionProvider myJobPartitionProvider;
+
+	@Autowired
 	private MatchUrlService myMatchUrlService;
 
 	@Autowired
@@ -213,9 +215,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	private MemoryCacheService myMemoryCacheService;
 
 	private TransactionTemplate myTxTemplate;
-
-	@Autowired
-	private UrlPartitioner myUrlPartitioner;
 
 	@Autowired
 	private ResourceSearchUrlSvc myResourceSearchUrlSvc;
@@ -421,6 +420,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 								BaseStorageDao.class,
 								"transactionOperationWithMultipleMatchFailure",
 								"CREATE",
+								myResourceName,
 								theMatchUrl,
 								match.size());
 				throw new PreconditionFailedException(Msg.code(958) + msg);
@@ -862,6 +862,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 										BaseStorageDao.class,
 										"transactionOperationWithMultipleMatchFailure",
 										"DELETE",
+										myResourceName,
 										theUrl,
 										resourceIds.size()));
 			}
@@ -1306,14 +1307,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 			ReindexJobParameters params = new ReindexJobParameters();
 
+			List<String> urls = List.of();
 			if (!isCommonSearchParam(theBase)) {
-				addAllResourcesTypesToReindex(theBase, theRequestDetails, params);
+				urls = theBase.stream().map(t -> t + "?").collect(Collectors.toList());
 			}
 
-			RequestPartitionId requestPartition =
-					myRequestPartitionHelperService.determineReadPartitionForRequestForServerOperation(
-							theRequestDetails, ProviderConstants.OPERATION_REINDEX);
-			params.setRequestPartitionId(requestPartition);
+			myJobPartitionProvider.getPartitionedUrls(theRequestDetails, urls).forEach(params::addPartitionedUrl);
 
 			JobInstanceStartRequest request = new JobInstanceStartRequest();
 			request.setJobDefinitionId(ReindexAppCtx.JOB_REINDEX);
@@ -1332,14 +1331,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 		Object shouldSkip = theRequestDetails.getUserData().getOrDefault(JpaConstants.SKIP_REINDEX_ON_UPDATE, false);
 		return Boolean.parseBoolean(shouldSkip.toString());
-	}
-
-	private void addAllResourcesTypesToReindex(
-			List<String> theBase, RequestDetails theRequestDetails, ReindexJobParameters params) {
-		theBase.stream()
-				.map(t -> t + "?")
-				.map(url -> myUrlPartitioner.partitionUrl(url, theRequestDetails))
-				.forEach(params::addPartitionedUrl);
 	}
 
 	private boolean isCommonSearchParam(List<String> theBase) {
@@ -2346,6 +2337,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 								BaseStorageDao.class,
 								"transactionOperationWithMultipleMatchFailure",
 								"UPDATE",
+								myResourceName,
 								theMatchUrl,
 								match.size());
 				throw new PreconditionFailedException(Msg.code(988) + msg);
@@ -2457,11 +2449,13 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			RestOperationTypeEnum theOperationType,
 			TransactionDetails theTransactionDetails) {
 
-		// we stored a resource searchUrl at creation time to prevent resource duplication.  Let's remove the entry on
-		// the
-		// first update but guard against unnecessary trips to the database on subsequent ones.
+		/*
+		 * We stored a resource searchUrl at creation time to prevent resource duplication.
+		 * We'll clear any currently existing urls from the db, otherwise we could hit
+		 * duplicate index violations if we try to add another (after this create/update)
+		 */
 		ResourceTable entity = (ResourceTable) theEntity;
-		if (entity.isSearchUrlPresent() && thePerformIndexing) {
+		if (entity.isSearchUrlPresent()) {
 			myResourceSearchUrlSvc.deleteByResId(
 					(Long) theEntity.getPersistentId().getId());
 			entity.setSearchUrlPresent(false);

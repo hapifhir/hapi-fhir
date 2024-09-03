@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 6123
+title: "`IAnyResource` `_id` search parameter was missing `path` property value, which resulted in extractor not 
+    working when standard search parameters were instantiated from defined context. This has been fixed, and also 
+    `_LastUpdated`, `_tag`, `_profile`, and `_security` parameter definitions were added to the class."

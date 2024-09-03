@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 6156
+title: "Index IDX_IDXCMBTOKNU_HASHC on table HFJ_IDX_CMB_TOK_NU's migration
+        is now marked as online (concurrent).
+"

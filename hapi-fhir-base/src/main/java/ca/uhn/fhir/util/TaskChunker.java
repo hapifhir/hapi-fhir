@@ -20,10 +20,12 @@ package ca.uhn.fhir.util;
  * #L%
  */
 
+import com.google.common.collect.Streams;
 import jakarta.annotation.Nonnull;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -56,5 +58,10 @@ public class TaskChunker<T> {
 	@Nonnull
 	public <T> Stream<List<T>> chunk(Stream<T> theStream, int theChunkSize) {
 		return StreamUtil.partition(theStream, theChunkSize);
+	}
+
+	@Nonnull
+	public void chunk(Iterator<T> theIterator, int theChunkSize, Consumer<List<T>> theListConsumer) {
+		chunk(Streams.stream(theIterator), theChunkSize).forEach(theListConsumer);
 	}
 }

@@ -8,11 +8,17 @@ import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
 import ca.uhn.fhir.i18n.HapiLocalizer;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import org.hl7.fhir.r5.model.Resource;
+import org.hl7.fhir.r5.model.ValueSet;
+import org.hl7.fhir.utilities.validation.ValidationOptions;
 import org.junit.jupiter.api.Test;
 import org.mockito.quality.Strictness;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
 
@@ -66,6 +72,28 @@ public class VersionSpecificWorkerContextWrapperTest extends BaseValidationTestW
 		VersionSpecificWorkerContextWrapper wrapper = new VersionSpecificWorkerContextWrapper(mockContext, versionCanonicalizer);
 
 		wrapper.cacheResource(mock(Resource.class));
+	}
+
+	@Test
+	public void validateCode_normally_resolvesCodeSystemFromValueSet() {
+		// setup
+		IValidationSupport validationSupport = mockValidationSupport();
+		ValidationSupportContext mockContext = mockValidationSupportContext(validationSupport);
+		VersionCanonicalizer versionCanonicalizer = new VersionCanonicalizer(FhirContext.forR5Cached());
+		VersionSpecificWorkerContextWrapper wrapper = new VersionSpecificWorkerContextWrapper(mockContext, versionCanonicalizer);
+
+		ValueSet valueSet = new ValueSet();
+		valueSet.getCompose().addInclude().setSystem("http://codesystems.com/system").addConcept().setCode("code0");
+		valueSet.getCompose().addInclude().setSystem("http://codesystems.com/system2").addConcept().setCode("code2");
+		when(validationSupport.fetchResource(eq(ValueSet.class), eq("http://somevalueset"))).thenReturn(valueSet);
+		when(validationSupport.validateCodeInValueSet(any(), any(), any(), any(), any(), any())).thenReturn(new IValidationSupport.CodeValidationResult());
+
+		// execute
+		wrapper.validateCode(new ValidationOptions(), "code0", valueSet);
+
+		// verify
+		verify(validationSupport, times(1)).validateCodeInValueSet(any(), any(), eq("http://codesystems.com/system"), eq("code0"), any(), any());
+		verify(validationSupport, times(1)).validateCode(any(), any(), eq("http://codesystems.com/system"), eq("code0"), any(), any());
 	}
 
 	private IValidationSupport mockValidationSupportWithTwoBinaries() {

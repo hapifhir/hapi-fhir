@@ -19,19 +19,18 @@
  */
 package ca.uhn.fhir.batch2.api;
 
+import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrl;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
- * Provides the list of partitions that a job should run against.
- * TODO MM: Consider moving UrlPartitioner calls to this class once other batch operations need to support running
- * across all partitions on a multitenant FHIR server.
- * That way all partitioning related logic exists only here for batch jobs.
- * After that PartitionedUrl#myRequestPartitionId can be marked as deprecated.
+ * Provides the list of {@link PartitionedUrl} that a job should run against.
  */
 public interface IJobPartitionProvider {
+
 	/**
 	 * Provides the list of partitions to run job steps against, based on the request that initiates the job.
 	 * @param theRequestDetails the requestDetails
@@ -40,5 +39,14 @@ public interface IJobPartitionProvider {
 	 */
 	List<RequestPartitionId> getPartitions(RequestDetails theRequestDetails, String theOperation);
 
-	// List<RequestPartitionId> getPartitions(RequestDetails theRequestDetails, String theOperation, String theUrls);
+	/**
+	 * Provides the list of {@link PartitionedUrl} to run job steps against, based on the request that initiates the job
+	 * and the urls that it's configured with.
+	 * @param theRequestDetails the requestDetails
+	 * @param theUrls the urls to run the job against
+	 * @return the list of {@link PartitionedUrl}
+	 */
+	default List<PartitionedUrl> getPartitionedUrls(RequestDetails theRequestDetails, List<String> theUrls) {
+		return theUrls.stream().map(url -> new PartitionedUrl().setUrl(url)).collect(Collectors.toList());
+	}
 }
