@@ -36,6 +36,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.io.IOException;
 import java.util.LinkedHashMap;
@@ -62,14 +64,14 @@ public class CdsServiceRequestJsonDeserializer extends StdDeserializer<CdsServic
 	@Override
 	public CdsServiceRequestJson deserialize(JsonParser theJsonParser, DeserializationContext theDeserializationContext)
 			throws IOException {
+		final String serviceId = getServiceId();
 		final JsonNode cdsServiceRequestJsonNode = theJsonParser.getCodec().readTree(theJsonParser);
-		final JsonNode hookNode = cdsServiceRequestJsonNode.get("hook");
 		final JsonNode extensionNode = cdsServiceRequestJsonNode.get("extension");
 		final JsonNode requestContext = cdsServiceRequestJsonNode.get("context");
 		final CdsServiceRequestJson cdsServiceRequestJson =
 				myObjectMapper.treeToValue(cdsServiceRequestJsonNode, CdsServiceRequestJson.class);
 		if (extensionNode != null) {
-			CdsHooksExtension myRequestExtension = deserializeExtension(hookNode.textValue(), extensionNode.toString());
+			CdsHooksExtension myRequestExtension = deserializeExtension(serviceId, extensionNode.toString());
 			cdsServiceRequestJson.setExtension(myRequestExtension);
 		}
 		if (requestContext != null) {
@@ -78,6 +80,12 @@ public class CdsServiceRequestJsonDeserializer extends StdDeserializer<CdsServic
 			cdsServiceRequestJson.setContext(deserializeRequestContext(map));
 		}
 		return cdsServiceRequestJson;
+	}
+
+	private static String getServiceId() {
+		ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+		String path = requestAttributes.getRequest().getRequestURI();
+		return path.replace("/cds-services/", "");
 	}
 
 	void configureObjectMapper(ObjectMapper theObjectMapper) {
