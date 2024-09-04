@@ -45,8 +45,8 @@ public class ResourceCompartmentUtil {
 	/**
 	 * Extract, if exists, the patient compartment identity of the received resource.
 	 * It must be invoked in patient compartment mode.
-	 * @param theResource the resource to which extract the patient compartment identity
-	 * @param theFhirContext the active FhirContext
+	 * @param theResource             the resource to which extract the patient compartment identity
+	 * @param theFhirContext          the active FhirContext
 	 * @param theSearchParamExtractor the configured search parameter extractor
 	 * @return the optional patient compartment identifier
 	 * @throws MethodNotAllowedException if received resource is of type "Patient" and ID is not assigned.
@@ -69,20 +69,23 @@ public class ResourceCompartmentUtil {
 			return Optional.of(compartmentIdentity);
 		}
 
-		return getResourceCompartment(theResource, patientCompartmentSps, theSearchParamExtractor);
+		return getResourceCompartment("Patient", theResource, patientCompartmentSps, theSearchParamExtractor);
 	}
 
 	/**
 	 * Extracts and returns an optional compartment of the received resource
-	 * @param theResource source resource which compartment is extracted
-	 * @param theCompartmentSps the RuntimeSearchParam list involving the searched compartment
+	 * @param theCompartmentName     the name of the compartment
+	 * @param theResource            source resource which compartment is extracted
+	 * @param theCompartmentSps      the RuntimeSearchParam list involving the searched compartment
 	 * @param mySearchParamExtractor the ISearchParamExtractor to be used to extract the parameter values
 	 * @return optional compartment of the received resource
 	 */
 	public static Optional<String> getResourceCompartment(
+			String theCompartmentName,
 			IBaseResource theResource,
 			List<RuntimeSearchParam> theCompartmentSps,
 			ISearchParamExtractor mySearchParamExtractor) {
+		// TODO KHS consolidate with FhirTerser.getCompartmentOwnersForResource()
 		return theCompartmentSps.stream()
 				.flatMap(param -> Arrays.stream(BaseSearchParamExtractor.splitPathsR4(param.getPath())))
 				.filter(StringUtils::isNotBlank)
@@ -94,7 +97,10 @@ public class ResourceCompartmentUtil {
 				.filter(t -> t instanceof IBaseReference)
 				.map(t -> (IBaseReference) t)
 				.map(t -> t.getReferenceElement().getValue())
-				.map(t -> new IdType(t).getIdPart())
+				.map(IdType::new)
+				.filter(t -> theCompartmentName.equals(
+						t.getResourceType())) // assume the compartment name matches the resource type
+				.map(IdType::getIdPart)
 				.filter(StringUtils::isNotBlank)
 				.findFirst();
 	}

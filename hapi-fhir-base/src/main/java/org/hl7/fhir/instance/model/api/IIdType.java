@@ -120,6 +120,13 @@ public interface IIdType extends IPrimitiveType<String> {
 	 */
 	boolean isVersionIdPartValidLong();
 
+	/**
+	 * @return true if the id begins with "urn:uuid:"
+	 */
+	default boolean isUuid() {
+		return getValue() != null && getValue().startsWith("urn:uuid:");
+	}
+
 	@Override
 	IIdType setValue(String theString);
 
