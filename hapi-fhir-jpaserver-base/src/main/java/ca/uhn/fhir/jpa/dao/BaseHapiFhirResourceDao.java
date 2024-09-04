@@ -420,6 +420,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 								BaseStorageDao.class,
 								"transactionOperationWithMultipleMatchFailure",
 								"CREATE",
+								myResourceName,
 								theMatchUrl,
 								match.size());
 				throw new PreconditionFailedException(Msg.code(958) + msg);
@@ -861,6 +862,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 										BaseStorageDao.class,
 										"transactionOperationWithMultipleMatchFailure",
 										"DELETE",
+										myResourceName,
 										theUrl,
 										resourceIds.size()));
 			}
@@ -2335,6 +2337,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 								BaseStorageDao.class,
 								"transactionOperationWithMultipleMatchFailure",
 								"UPDATE",
+								myResourceName,
 								theMatchUrl,
 								match.size());
 				throw new PreconditionFailedException(Msg.code(988) + msg);
