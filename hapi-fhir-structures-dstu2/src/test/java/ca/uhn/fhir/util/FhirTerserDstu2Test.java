@@ -12,6 +12,7 @@ import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.dstu2.resource.Organization;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
+import ca.uhn.fhir.model.dstu2.resource.Practitioner;
 import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.MarkdownDt;
 import ca.uhn.fhir.model.primitive.StringDt;
@@ -181,6 +182,19 @@ public class FhirTerserDstu2Test {
 		 assertEquals("AAA", ((StringDt) obs.getValue()).getValue());
 		 assertEquals("COMMENTS", obs.getComments());
    }
+
+	@Test
+	public void testCloneIntoReferenceWithResource() {
+		// set up
+		Practitioner practitioner = new Practitioner();
+		ResourceReferenceDt source = new ResourceReferenceDt(practitioner);
+		ResourceReferenceDt target = new ResourceReferenceDt();
+
+		// execute
+		ourCtx.newTerser().cloneInto(source, target, false);
+
+		assertThat(target.getResource()).isSameAs(practitioner);
+	}
 
 	@Test
 	public void testGetAllPopulatedChildElementsOfTypeDescendsIntoContained() {
