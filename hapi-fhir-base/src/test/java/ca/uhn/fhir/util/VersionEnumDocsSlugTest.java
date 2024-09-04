@@ -25,13 +25,13 @@ public class VersionEnumDocsSlugTest {
 			versionUtil.when(VersionUtil::isSnapshot).thenReturn(true);
 
 			String versionedDocsSlug = VersionEnum.V5_0_1.getVersionedDocsSlug();
-			assertThat(versionedDocsSlug).isEqualTo("5.0.PRE");
+			assertThat(versionedDocsSlug).isEqualTo("5.0.1");
 
 			versionedDocsSlug = VersionEnum.V7_0_0.getVersionedDocsSlug();
-			assertThat(versionedDocsSlug).isEqualTo("7.0.PRE");
+			assertThat(versionedDocsSlug).isEqualTo("7.0.0");
 
 			versionedDocsSlug = VersionEnum.V7_4_0.getVersionedDocsSlug();
-			assertThat(versionedDocsSlug).isEqualTo("7.4.PRE");
+			assertThat(versionedDocsSlug).isEqualTo("7.4.0");
 		}
 	}
 
