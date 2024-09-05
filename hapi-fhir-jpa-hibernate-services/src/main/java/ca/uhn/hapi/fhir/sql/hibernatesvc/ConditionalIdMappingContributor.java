@@ -3,8 +3,10 @@ package ca.uhn.hapi.fhir.sql.hibernatesvc;
 import ca.uhn.fhir.context.ConfigurationException;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinColumns;
+import org.apache.commons.lang3.Validate;
 import org.hibernate.boot.ResourceStreamLocator;
-import org.hibernate.boot.internal.MetadataImpl;
 import org.hibernate.boot.spi.AdditionalMappingContributions;
 import org.hibernate.boot.spi.InFlightMetadataCollector;
 import org.hibernate.boot.spi.MetadataBuildingContext;
@@ -29,12 +31,16 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
 public class ConditionalIdMappingContributor implements org.hibernate.boot.spi.AdditionalMappingContributor {
 
 	@Override
 	public String getContributorName() {
 		return "PkCleaningMappingContributor";
 	}
+
+	private final Set<String> myQualifiedIdRemovedColumnNames = new HashSet<>();
 
 	@Override
 	public void contribute(
@@ -53,19 +59,14 @@ public class ConditionalIdMappingContributor implements org.hibernate.boot.spi.A
 	}
 
 	private void removeConditionalIdProperties(InFlightMetadataCollector theMetadata) {
-		Set<String> qualifiedIdRemovedColumnNames = new HashSet<>();
 
 		for (var nextEntry : theMetadata.getEntityBindingMap().entrySet()) {
 			IdentitySet<Column> idRemovedColumns = new IdentitySet<>();
 			Set<String> idRemovedColumnNames = new HashSet<>();
 			Set<String> idRemovedProperties = new HashSet<>();
 
-			Class<?> entityType;
-			try {
-				entityType = Class.forName(nextEntry.getKey());
-			} catch (ClassNotFoundException e) {
-				throw new IllegalStateException(e);
-			}
+			String entityTypeName = nextEntry.getKey();
+			Class<?> entityType = getType(entityTypeName);
 
 			PersistentClass entityPersistentClass = nextEntry.getValue();
 			Table table = entityPersistentClass.getTable();
@@ -91,7 +92,7 @@ public class ConditionalIdMappingContributor implements org.hibernate.boot.spi.A
 					Property removedProperty = properties.remove(i);
 					idRemovedColumns.addAll(removedProperty.getColumns());
 					idRemovedColumnNames.addAll(removedProperty.getColumns().stream().map(Column::getName).collect(Collectors.toSet()));
-					qualifiedIdRemovedColumnNames.addAll(removedProperty.getColumns().stream().map(theColumn -> table.getName() + "#" + theColumn.getName()).collect(Collectors.toSet()));
+					removedProperty.getColumns().stream().map(theColumn -> table.getName() + "#" + theColumn.getName()).forEach(myQualifiedIdRemovedColumnNames::add);
 					idRemovedProperties.add(removedProperty.getName());
 					i--;
 
@@ -169,11 +170,45 @@ public class ConditionalIdMappingContributor implements org.hibernate.boot.spi.A
 				if (value instanceof ToOne) {
 					ToOne manyToOne = (ToOne) value;
 
-					manyToOne.getColumns().removeIf(t->qualifiedIdRemovedColumnNames.contains(t.getName()));
-					foreignKey.getColumns().removeIf(t->qualifiedIdRemovedColumnNames.contains(t.getName()));
+					String targetTableName = theMetadata.getEntityBindingMap().get(manyToOne.getReferencedEntityName()).getTable().getName();
+
+					Class<?> entityType = getType(nextEntry.getKey());
+					Field field = getField(entityType, manyToOne.getPropertyName());
+					Validate.notNull(field, "Unable to find field %s on entity %s", manyToOne.getPropertyName(), entityType.getName());
+					JoinColumns joinColumns = field.getAnnotation(JoinColumns.class);
+					Set<String> columnNamesToRemoveFromFks = new HashSet<>();
+					if (joinColumns != null) {
+
+						for (JoinColumn joinColumn : joinColumns.value()) {
+							String targetColumnName = joinColumn.referencedColumnName();
+							String sourceColumnName = joinColumn.name();
+							if (isBlank(targetColumnName)) {
+								targetColumnName = sourceColumnName;
+							}
+							if (myQualifiedIdRemovedColumnNames.contains(targetTableName + "#" + targetColumnName)) {
+								columnNamesToRemoveFromFks.add(sourceColumnName);
+							}
+						}
+					}
+
+					manyToOne.getColumns().removeIf(t-> columnNamesToRemoveFromFks.contains(t.getName()));
+					foreignKey.getColumns().removeIf(t-> columnNamesToRemoveFromFks.contains(t.getName()));
+				} else {
+
 				}
 			}
 		}
+	}
+
+	@Nonnull
+	private static Class<?> getType(String entityTypeName) {
+		Class<?> entityType;
+		try {
+			entityType = Class.forName(entityTypeName);
+		} catch (ClassNotFoundException e) {
+			throw new IllegalStateException(e);
+		}
+		return entityType;
 	}
 
 	@Nullable
