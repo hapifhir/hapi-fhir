@@ -170,7 +170,16 @@ public enum VersionEnum {
 		return values[values.length - 1];
 	}
 
+	public static VersionEnum forVersion(String theVersionString) {
+		String constantName = "V" + (theVersionString.replace('.', '_'));
+		return valueOf(constantName);
+	}
+
 	public boolean isNewerThan(VersionEnum theVersionEnum) {
 		return ordinal() > theVersionEnum.ordinal();
+	}
+
+	public String getVersionedDocsSlug() {
+		return this.name().replace("V", "").replaceAll("_", ".");
 	}
 }
