@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
+import ca.uhn.hapi.fhir.sql.hibernatesvc.ConditionalIdProperty;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 
@@ -45,7 +46,8 @@ public class ResourceSearchUrlEntityPK implements Serializable {
 	// Weird field name isto ensure that this the first key in the index
 	private String my_A_SearchUrl;
 
-	@Column(name = PARTITION_ID_COLUMN_NAME, nullable = false, insertable = true, updatable = false)
+	@Column(name = PARTITION_ID_COLUMN_NAME, nullable = false, insertable = false, updatable = false)
+	@ConditionalIdProperty
 	// Weird field name isto ensure that this the second key in the index
 	private Integer my_B_PartitionId;
 

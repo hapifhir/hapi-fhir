@@ -25,7 +25,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import java.io.Serializable;
 
 @MappedSuperclass
-public abstract class BaseResourceIndex extends BasePartitionable implements Serializable {
+public abstract class BaseResourceIndex implements Serializable {
 
 	public abstract Long getId();
 
@@ -35,13 +35,9 @@ public abstract class BaseResourceIndex extends BasePartitionable implements Ser
 
 	public abstract void clearHashes();
 
-	@Override
-	public void setPartitionId(PartitionablePartitionId thePartitionId) {
-		if (ObjectUtils.notEqual(getPartitionId(), thePartitionId)) {
-			super.setPartitionId(thePartitionId);
-			clearHashes();
-		}
-	}
+	public abstract void setPartitionId(PartitionablePartitionId thePartitionId);
+
+	public abstract PartitionablePartitionId getPartitionId();
 
 	/**
 	 * Subclasses must implement
@@ -66,4 +62,6 @@ public abstract class BaseResourceIndex extends BasePartitionable implements Ser
 	public void setPlaceholderHashesIfMissing() {
 		// nothing by default
 	}
+
+	public abstract void setResourceId(Long theId);
 }

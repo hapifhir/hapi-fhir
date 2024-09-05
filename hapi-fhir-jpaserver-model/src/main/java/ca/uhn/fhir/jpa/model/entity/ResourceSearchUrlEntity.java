@@ -26,6 +26,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.ForeignKey;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinColumns;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
@@ -62,11 +63,17 @@ public class ResourceSearchUrlEntity {
 	private ResourceSearchUrlEntityPK myPk;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(
+	@JoinColumns(value = {
+		@JoinColumn(
 			name = "RES_ID",
 			nullable = false,
-			updatable = false,
-			foreignKey = @ForeignKey(name = "FK_RES_SEARCH_URL_RESOURCE"))
+			updatable = false),
+		@JoinColumn(
+			name = "PARTITION_ID",
+			nullable = false,
+			updatable = false)
+	}, foreignKey = @ForeignKey(name = "FK_RES_SEARCH_URL_RESOURCE")
+	)
 	private ResourceTable myResourceTable;
 
 	@Column(name = "RES_ID", updatable = false, nullable = false, insertable = false)

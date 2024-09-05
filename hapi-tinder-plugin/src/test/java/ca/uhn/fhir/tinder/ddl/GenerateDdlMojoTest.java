@@ -67,6 +67,9 @@ class GenerateDdlMojoTest {
 		assertThat(sqlStatements).anyMatch(regex("CREATE TABLE ENTITY_WITH_EMBEDDED_ID_PARENT .* PID .* PARTITION_ID .* NAME .* PRIMARY KEY \\(PID\\)"));
 		assertThat(sqlStatements).anyMatch(regex("CREATE TABLE ENTITY_WITH_EMBEDDED_ID_CHILD .* PID .* PARTITION_ID .* NAME .* PARENT_PARTITION_ID .* PARENT_PID .* PRIMARY KEY \\(PID\\)"));
 		assertThat(sqlStatements).anyMatch(regex("ALTER TABLE IF EXISTS ENTITY_WITH_EMBEDDED_ID_CHILD ADD CONSTRAINT FK_EMBEDDED_ID_PARENT_CHILD FOREIGN KEY \\(PARENT_PID\\)"));
+
+		// Should not be NOT NULL
+		assertThat(sqlStatements).anyMatch(substring("PARTITION_ID INTEGER,"));
 	}
 
 	@Test
@@ -92,11 +95,19 @@ class GenerateDdlMojoTest {
 		assertThat(sqlStatements).anyMatch(regex("CREATE TABLE ENTITY_WITH_EMBEDDED_ID_PARENT .* PID .* PARTITION_ID .* NAME .* PRIMARY KEY \\(PID, PARTITION_ID\\)"));
 		assertThat(sqlStatements).anyMatch(regex("CREATE TABLE ENTITY_WITH_EMBEDDED_ID_CHILD .* PID .* PARTITION_ID .* NAME .* PARENT_PARTITION_ID .* PARENT_PID .* PRIMARY KEY \\(PID, PARTITION_ID\\)"));
 		assertThat(sqlStatements).anyMatch(regex("ALTER TABLE IF EXISTS ENTITY_WITH_EMBEDDED_ID_CHILD ADD CONSTRAINT FK_EMBEDDED_ID_PARENT_CHILD FOREIGN KEY \\(PARENT_PID, PARENT_PARTITION_ID\\)"));
+
+		// Part of the PK, should be NOT NULL
+		assertThat(sqlStatements).anyMatch(substring("PARTITION_ID INTEGER NOT NULL,"));
 	}
 
 	@Nonnull
-	private static Predicate<String> regex(@Language("Regexp") String regex) {
-		return s -> Pattern.compile(regex).matcher(s).find();
+	private static Predicate<String> regex(@Language("Regexp") String theRegex) {
+		return s -> Pattern.compile(theRegex).matcher(s).find();
+	}
+
+	@Nonnull
+	private static Predicate<String> substring(@Language("Regexp") String theSubstring) {
+		return s -> s.contains(theSubstring);
 	}
 
 	private static void verifySequence(String fileName) throws IOException {

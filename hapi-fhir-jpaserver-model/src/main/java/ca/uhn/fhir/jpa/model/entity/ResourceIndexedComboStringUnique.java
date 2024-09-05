@@ -20,17 +20,22 @@
 package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.jpa.model.util.SearchParamHash;
+import ca.uhn.hapi.fhir.sql.hibernatesvc.ConditionalIdProperty;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.IdClass;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinColumns;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -38,6 +43,8 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IIdType;
+
+import static ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId.PARTITION_ID;
 
 /**
  * NOTE ON LIMITATIONS HERE
@@ -69,6 +76,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 					columnList = "RES_ID",
 					unique = false)
 		})
+@IdClass(ResourceIndexedSearchParamCoords.ResourceIndexedSearchParamCoordsId.class)
 public class ResourceIndexedComboStringUnique extends BaseResourceIndexedCombo
 		implements Comparable<ResourceIndexedComboStringUnique>, IResourceIndexComboSearchParameter {
 
@@ -82,10 +90,27 @@ public class ResourceIndexedComboStringUnique extends BaseResourceIndexedCombo
 	@Column(name = "PID")
 	private Long myId;
 
-	@ManyToOne
-	@JoinColumn(
-			name = "RES_ID",
+	@Id
+	@Column(name = PARTITION_ID)
+	@ConditionalIdProperty
+	private Integer myPartitionIdValue;
+
+	@ManyToOne(
+		optional = false,
+		fetch = FetchType.LAZY,
+		cascade = {})
+	@JoinColumns(value = {
+		@JoinColumn(name = "RES_ID",
 			referencedColumnName = "RES_ID",
+			insertable = false,
+			updatable = false,
+			nullable = false),
+		@JoinColumn(name = "PARTITION_ID",
+			referencedColumnName = "PARTITION_ID",
+			insertable = false,
+			updatable = false,
+			nullable = false)
+	},
 			foreignKey = @ForeignKey(name = "FK_IDXCMPSTRUNIQ_RES_ID"))
 	private ResourceTable myResource;
 
@@ -127,13 +152,6 @@ public class ResourceIndexedComboStringUnique extends BaseResourceIndexedCombo
 
 	@Column(name = "IDX_STRING", nullable = false, length = MAX_STRING_LENGTH)
 	private String myIndexString;
-
-	/**
-	 * This is here to support queries only, do not set this field directly
-	 */
-	@SuppressWarnings("unused")
-	@Column(name = PartitionablePartitionId.PARTITION_ID, insertable = false, updatable = false, nullable = true)
-	private Integer myPartitionIdValue;
 
 	/**
 	 * Constructor
@@ -184,6 +202,11 @@ public class ResourceIndexedComboStringUnique extends BaseResourceIndexedCombo
 		myIndexString = source.myIndexString;
 		myHashComplete = source.myHashComplete;
 		myHashComplete2 = source.myHashComplete2;
+	}
+
+	@Override
+	public void setResourceId(Long theResourceId) {
+		myResourceId = theResourceId;
 	}
 
 	@Override
@@ -241,6 +264,19 @@ public class ResourceIndexedComboStringUnique extends BaseResourceIndexedCombo
 		if (myHashComplete2 == null) {
 			myHashComplete2 = 0L;
 		}
+	}
+
+	@Override
+	public void setPartitionId(PartitionablePartitionId thePartitionId) {
+		if (ObjectUtils.notEqual(getPartitionId(), thePartitionId)) {
+			clearHashes();
+			myPartitionIdValue = thePartitionId.getPartitionId();
+		}
+	}
+
+	@Override
+	public PartitionablePartitionId getPartitionId() {
+		return PartitionablePartitionId.with(myPartitionIdValue, null);
 	}
 
 	@Override

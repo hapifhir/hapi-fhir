@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
+import ca.uhn.hapi.fhir.sql.hibernatesvc.ConditionalIdProperty;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -26,8 +27,10 @@ import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.IdClass;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinColumns;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
@@ -36,6 +39,8 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+
+import static ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId.PARTITION_ID;
 
 @Entity
 @Table(
@@ -49,6 +54,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 					name = "IDX_RESTAG_TAGID",
 					columnNames = {"RES_ID", "TAG_ID"})
 		})
+@IdClass(ResourceTable.ResourceTableId.class)
 public class ResourceTag extends BaseTag {
 
 	private static final long serialVersionUID = 1L;
@@ -59,16 +65,33 @@ public class ResourceTag extends BaseTag {
 	@Column(name = "PID")
 	private Long myId;
 
+	@Id
+	@Column(name = PARTITION_ID)
+	@ConditionalIdProperty
+	private Integer myPartitionIdValue;
+
 	@ManyToOne(
 			cascade = {},
 			fetch = FetchType.LAZY)
-	@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID", foreignKey = @ForeignKey(name = "FK_RESTAG_RESOURCE"))
+	@JoinColumns(value = {
+		@JoinColumn(
+			name = "RES_ID",
+			referencedColumnName = "RES_ID",
+		insertable = false,
+		updatable = false),
+		@JoinColumn(
+			name = "PARTITION_ID",
+			referencedColumnName = "PARTITION_ID",
+		insertable = false,
+		updatable = false)
+	},
+		foreignKey = @ForeignKey(name = "FK_RESTAG_RESOURCE"))
 	private ResourceTable myResource;
 
 	@Column(name = "RES_TYPE", length = ResourceTable.RESTYPE_LEN, nullable = false)
 	private String myResourceType;
 
-	@Column(name = "RES_ID", insertable = false, updatable = false)
+	@Column(name = "RES_ID", updatable = false)
 	private Long myResourceId;
 
 	/**
@@ -90,6 +113,15 @@ public class ResourceTag extends BaseTag {
 		setPartitionId(theRequestPartitionId);
 	}
 
+	public void setPartitionId(PartitionablePartitionId theRequestPartitionId) {
+		myPartitionIdValue = theRequestPartitionId.getPartitionId();
+	}
+
+	public PartitionablePartitionId getPartitionId() {
+		return PartitionablePartitionId.with(myPartitionIdValue, null);
+	}
+
+
 	public Long getResourceId() {
 		return myResourceId;
 	}
@@ -104,6 +136,7 @@ public class ResourceTag extends BaseTag {
 
 	public void setResource(ResourceTable theResource) {
 		myResource = theResource;
+		myResourceId = theResource.getId();
 	}
 
 	public String getResourceType() {

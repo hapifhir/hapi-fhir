@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.ConfigurationException;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.hibernate.boot.ResourceStreamLocator;
+import org.hibernate.boot.internal.MetadataImpl;
 import org.hibernate.boot.spi.AdditionalMappingContributions;
 import org.hibernate.boot.spi.InFlightMetadataCollector;
 import org.hibernate.boot.spi.MetadataBuildingContext;
@@ -18,11 +19,15 @@ import org.hibernate.mapping.Property;
 import org.hibernate.mapping.Table;
 import org.hibernate.mapping.ToOne;
 import org.hibernate.mapping.Value;
+import org.hibernate.type.ComponentType;
+import org.hibernate.type.CompositeType;
+import org.hibernate.type.EmbeddedComponentType;
 
 import java.lang.reflect.Field;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class ConditionalIdMappingContributor implements org.hibernate.boot.spi.AdditionalMappingContributor {
 
@@ -48,8 +53,11 @@ public class ConditionalIdMappingContributor implements org.hibernate.boot.spi.A
 	}
 
 	private void removeConditionalIdProperties(InFlightMetadataCollector theMetadata) {
+		Set<String> qualifiedIdRemovedColumnNames = new HashSet<>();
+
 		for (var nextEntry : theMetadata.getEntityBindingMap().entrySet()) {
 			IdentitySet<Column> idRemovedColumns = new IdentitySet<>();
+			Set<String> idRemovedColumnNames = new HashSet<>();
 			Set<String> idRemovedProperties = new HashSet<>();
 
 			Class<?> entityType;
@@ -60,6 +68,7 @@ public class ConditionalIdMappingContributor implements org.hibernate.boot.spi.A
 			}
 
 			PersistentClass entityPersistentClass = nextEntry.getValue();
+			Table table = entityPersistentClass.getTable();
 			if (entityPersistentClass.getIdentifier() instanceof BasicValue) {
 				continue;
 			}
@@ -81,20 +90,52 @@ public class ConditionalIdMappingContributor implements org.hibernate.boot.spi.A
 				if (remove != null) {
 					Property removedProperty = properties.remove(i);
 					idRemovedColumns.addAll(removedProperty.getColumns());
+					idRemovedColumnNames.addAll(removedProperty.getColumns().stream().map(Column::getName).collect(Collectors.toSet()));
+					qualifiedIdRemovedColumnNames.addAll(removedProperty.getColumns().stream().map(theColumn -> table.getName() + "#" + theColumn.getName()).collect(Collectors.toSet()));
 					idRemovedProperties.add(removedProperty.getName());
 					i--;
+
+					for (Column next : entityPersistentClass.getTable().getColumns()) {
+						if (idRemovedColumnNames.contains(next.getName())) {
+							next.setNullable(true);
+						}
+					}
 				}
 			}
 
 			if (idRemovedColumns.isEmpty()) {
-				return;
+				continue;
 			}
 
-			if (entityPersistentClass.getIdentifierMapper() != null) {
-				entityPersistentClass.getIdentifierMapper().getProperties().removeIf(t -> idRemovedProperties.contains(t.getName()));
+			identifier.getSelectables().removeIf(t -> idRemovedColumnNames.contains(t.getText()));
+
+			Component identifierMapper = entityPersistentClass.getIdentifierMapper();
+			if (identifierMapper != null) {
+				identifierMapper.getProperties().removeIf(t -> idRemovedProperties.contains(t.getName()));
+				identifierMapper.getSelectables().removeIf(t -> idRemovedColumnNames.contains(t.getText()));
+				CompositeType type = identifierMapper.getType();
+				if (type instanceof ComponentType) {
+					ComponentType ect = (ComponentType) type;
+
+					Component wrapped = new Component(identifierMapper.getBuildingContext(), identifierMapper);
+					wrapped.setComponentClassName(identifierMapper.getComponentClassName());
+					identifierMapper.getProperties().forEach(wrapped::addProperty);
+
+					EmbeddedComponentType filtered = new EmbeddedComponentType(wrapped, ect.getOriginalPropertyOrder());
+					filtered.injectMappingModelPart(ect.getMappingModelPart(), null);
+					try {
+						Class<? extends Component> identifierMapperClass = identifierMapper.getClass();
+						Field field = identifierMapperClass.getDeclaredField("type");
+						field.setAccessible(true);
+						field.set(identifierMapper, filtered);
+						field.set(wrapped, filtered);
+					} catch (NoSuchFieldException | IllegalAccessException e) {
+						throw new IllegalStateException(e);
+					}
+
+				}
 			}
 
-			Table table = entityPersistentClass.getTable();
 			PrimaryKey pk = table.getPrimaryKey();
 			List<Column> pkColumns = pk.getColumns();
 			pkColumns.removeIf(idRemovedColumns::contains);
@@ -103,15 +144,35 @@ public class ConditionalIdMappingContributor implements org.hibernate.boot.spi.A
 				Value value = foreignKey.getColumn(0).getValue();
 				if (value instanceof ToOne) {
 					ToOne manyToOne = (ToOne) value;
-					Field field = getField(entityType, manyToOne.getPropertyName());
-					ConditionalIdRelation conditionalIdRelation = field.getAnnotation(ConditionalIdRelation.class);
-					if (conditionalIdRelation != null) {
-						foreignKey.getColumns().removeIf(t->t.getName().equals(conditionalIdRelation.column()));
-						manyToOne.getColumns().removeIf(t->t.getName().equals(conditionalIdRelation.column()));
-					}
+//					String propertyName = manyToOne.getPropertyName();
+//					Field field = getField(entityType, propertyName);
+//					ConditionalIdRelation conditionalIdRelation = field.getAnnotation(ConditionalIdRelation.class);
+//					if (conditionalIdRelation != null) {
+//						foreignKey.getColumns().removeIf(t->t.getName().equals(conditionalIdRelation.column()));
+//						manyToOne.getColumns().removeIf(t->t.getName().equals(conditionalIdRelation.column()));
+//					}
+
+//					manyToOne.getColumns().removeIf(t->idRemovedColumnNames.contains(t.getName()));
+//					foreignKey.getColumns().removeIf(t->idRemovedColumnNames.contains(t.getName()));
+
 				}
 			}
 
+		}
+
+		// Adjust foreign keys
+		for (var nextEntry : theMetadata.getEntityBindingMap().entrySet()) {
+			PersistentClass entityPersistentClass = nextEntry.getValue();
+			Table table = entityPersistentClass.getTable();
+			for (ForeignKey foreignKey : table.getForeignKeys().values()) {
+				Value value = foreignKey.getColumn(0).getValue();
+				if (value instanceof ToOne) {
+					ToOne manyToOne = (ToOne) value;
+
+					manyToOne.getColumns().removeIf(t->qualifiedIdRemovedColumnNames.contains(t.getName()));
+					foreignKey.getColumns().removeIf(t->qualifiedIdRemovedColumnNames.contains(t.getName()));
+				}
+			}
 		}
 	}
 
@@ -121,8 +182,17 @@ public class ConditionalIdMappingContributor implements org.hibernate.boot.spi.A
 		try {
 			field = theType.getDeclaredField(theFieldName);
 		} catch (NoSuchFieldException e) {
-			field = null;
+			try {
+				field = theType.getField(theFieldName);
+			} catch (NoSuchFieldException theE) {
+				field = null;
+			}
 		}
+
+		if (field == null && theType.getSuperclass() != null) {
+			field = getField(theType.getSuperclass(), theFieldName);
+		}
+
 		return field;
 	}
 }

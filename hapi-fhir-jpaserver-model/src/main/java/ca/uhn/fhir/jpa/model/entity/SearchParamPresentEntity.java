@@ -21,14 +21,17 @@ package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.hapi.fhir.sql.hibernatesvc.ConditionalIdProperty;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.IdClass;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinColumns;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.SequenceGenerator;
@@ -42,6 +45,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.io.Serializable;
 
+import static ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId.PARTITION_ID;
 import static ca.uhn.fhir.jpa.model.util.SearchParamHash.hashSearchParam;
 
 @Entity
@@ -52,7 +56,8 @@ import static ca.uhn.fhir.jpa.model.util.SearchParamHash.hashSearchParam;
 			@Index(name = "IDX_RESPARMPRESENT_RESID", columnList = "RES_ID"),
 			@Index(name = "IDX_RESPARMPRESENT_HASHPRES", columnList = "HASH_PRESENCE")
 		})
-public class SearchParamPresentEntity extends BasePartitionable implements Serializable {
+@IdClass(ResourceTable.ResourceTableId.class)
+public class SearchParamPresentEntity implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -62,18 +67,32 @@ public class SearchParamPresentEntity extends BasePartitionable implements Seria
 	@Column(name = "PID")
 	private Long myId;
 
+	@Id
+	@Column(name = PARTITION_ID)
+	@ConditionalIdProperty
+	private Integer myPartitionIdValue;
+
 	@Column(name = "SP_PRESENT", nullable = false)
 	private boolean myPresent;
 
 	@ManyToOne()
-	@JoinColumn(
-			name = "RES_ID",
-			referencedColumnName = "RES_ID",
-			nullable = false,
-			foreignKey = @ForeignKey(name = "FK_RESPARMPRES_RESID"))
+	@JoinColumns(value = {
+		@JoinColumn(
+				name = "RES_ID",
+				referencedColumnName = "RES_ID",
+				insertable = false,
+				updatable = false,
+				nullable = false),
+		@JoinColumn(
+				name = "PARTITION_ID",
+				referencedColumnName = "PARTITION_ID",
+				insertable = false,
+				updatable = false,
+				nullable = false),
+	},foreignKey = @ForeignKey(name = "FK_RESPARMPRES_RESID"))
 	private ResourceTable myResource;
 
-	@Column(name = "RES_ID", nullable = false, insertable = false, updatable = false)
+	@Column(name = "RES_ID", nullable = false, updatable = false)
 	private Long myResourcePid;
 
 	@Transient
@@ -135,6 +154,7 @@ public class SearchParamPresentEntity extends BasePartitionable implements Seria
 
 	public void setResource(ResourceTable theResourceTable) {
 		myResource = theResourceTable;
+		myResourcePid = theResourceTable.getId();
 	}
 
 	public boolean isPresent() {
@@ -188,7 +208,7 @@ public class SearchParamPresentEntity extends BasePartitionable implements Seria
 	 * Copy all mutable values from the given source
 	 */
 	public void updateValues(SearchParamPresentEntity theSource) {
-		super.setPartitionId(theSource.getPartitionId());
+		setPartitionId(theSource.getPartitionId());
 		setResource(theSource.getResource());
 		setPartitionSettings(theSource.getPartitionSettings());
 		setHashPresence(theSource.getHashPresence());
@@ -216,4 +236,13 @@ public class SearchParamPresentEntity extends BasePartitionable implements Seria
 		String string = thePresent != null ? Boolean.toString(thePresent) : Boolean.toString(false);
 		return hashSearchParam(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, string);
 	}
+
+	public void setPartitionId(PartitionablePartitionId theStoragePartition) {
+		myPartitionIdValue = theStoragePartition.getPartitionId();
+	}
+
+	public PartitionablePartitionId getPartitionId() {
+		return PartitionablePartitionId.with(myPartitionIdValue, null);
+	}
+
 }

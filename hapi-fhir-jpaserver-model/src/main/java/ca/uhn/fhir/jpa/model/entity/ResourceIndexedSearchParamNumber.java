@@ -23,6 +23,7 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.listener.IndexStorageOptimizationListener;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.NumberParam;
+import ca.uhn.hapi.fhir.sql.hibernatesvc.ConditionalIdProperty;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Entity;
@@ -32,11 +33,14 @@ import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.IdClass;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinColumns;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -48,6 +52,8 @@ import org.hibernate.type.SqlTypes;
 import java.math.BigDecimal;
 import java.util.Objects;
 
+import static ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId.PARTITION_ID;
+
 @Embeddable
 @EntityListeners(IndexStorageOptimizationListener.class)
 @Entity
@@ -58,6 +64,7 @@ import java.util.Objects;
 			@Index(name = "IDX_SP_NUMBER_HASH_VAL_V2", columnList = "HASH_IDENTITY,SP_VALUE,RES_ID,PARTITION_ID"),
 			@Index(name = "IDX_SP_NUMBER_RESID_V2", columnList = "RES_ID, HASH_IDENTITY, SP_VALUE, PARTITION_ID")
 		})
+@IdClass(ResourceIndexedSearchParamCoords.ResourceIndexedSearchParamCoordsId.class)
 public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchParam {
 
 	private static final long serialVersionUID = 1L;
@@ -68,21 +75,38 @@ public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchP
 	public BigDecimal myValue;
 
 	@Id
+	@Column(name = PARTITION_ID)
+	@ConditionalIdProperty
+	private Integer myPartitionIdValue;
+
+	@Id
 	@SequenceGenerator(name = "SEQ_SPIDX_NUMBER", sequenceName = "SEQ_SPIDX_NUMBER")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SPIDX_NUMBER")
 	@Column(name = "SP_ID")
 	private Long myId;
 
 	@ManyToOne(
-			optional = false,
-			fetch = FetchType.LAZY,
-			cascade = {})
-	@JoinColumn(
-			foreignKey = @ForeignKey(name = "FK_SP_NUMBER_RES"),
-			name = "RES_ID",
+		optional = false,
+		fetch = FetchType.LAZY,
+		cascade = {})
+	@JoinColumns(value = {
+		@JoinColumn(name = "RES_ID",
 			referencedColumnName = "RES_ID",
+			insertable = false,
+			updatable = false,
+			nullable = false),
+		@JoinColumn(name = "PARTITION_ID",
+			referencedColumnName = "PARTITION_ID",
+			insertable = false,
+			updatable = false,
 			nullable = false)
+	},
+			foreignKey = @ForeignKey(name = "FK_SP_NUMBER_RES"))
 	private ResourceTable myResource;
+
+	@Column(name = "RES_ID")
+	private Long myResourceId;
+
 
 	public ResourceIndexedSearchParamNumber() {}
 
@@ -104,8 +128,26 @@ public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchP
 	}
 
 	@Override
+	public void setResourceId(Long theResourceId) {
+		myResourceId = theResourceId;
+	}
+
+	@Override
 	public void clearHashes() {
 		myHashIdentity = null;
+	}
+
+	@Override
+	public void setPartitionId(PartitionablePartitionId thePartitionId) {
+		if (ObjectUtils.notEqual(getPartitionId(), thePartitionId)) {
+			clearHashes();
+			myPartitionIdValue = thePartitionId.getPartitionId();
+		}
+	}
+
+	@Override
+	public PartitionablePartitionId getPartitionId() {
+		return PartitionablePartitionId.with(myPartitionIdValue, null);
 	}
 
 	@Override

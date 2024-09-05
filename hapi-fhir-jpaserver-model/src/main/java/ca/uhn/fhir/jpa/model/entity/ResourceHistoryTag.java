@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
+import ca.uhn.hapi.fhir.sql.hibernatesvc.ConditionalIdProperty;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Entity;
@@ -26,14 +27,18 @@ import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.IdClass;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinColumns;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
 import java.io.Serializable;
+
+import static ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId.PARTITION_ID;
 
 @Embeddable
 @Entity
@@ -45,6 +50,7 @@ import java.io.Serializable;
 					columnNames = {"RES_VER_PID", "TAG_ID"}),
 		},
 		indexes = {@Index(name = "IDX_RESHISTTAG_RESID", columnList = "RES_ID")})
+@IdClass(ResourceTable.ResourceTableId.class)
 public class ResourceHistoryTag extends BaseTag implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -55,15 +61,30 @@ public class ResourceHistoryTag extends BaseTag implements Serializable {
 	@Column(name = "PID")
 	private Long myId;
 
+	@Id
+	@Column(name = PARTITION_ID)
+	@ConditionalIdProperty
+	private Integer myPartitionIdValue;
+
 	@ManyToOne()
-	@JoinColumn(
+	@JoinColumns(value = {
+		@JoinColumn(
 			name = "RES_VER_PID",
 			referencedColumnName = "PID",
 			nullable = false,
+		insertable = false,
+		updatable = false),
+		@JoinColumn(
+			name = "PARTITION_ID",
+			referencedColumnName = "PARTITION_ID",
+			nullable = false,
+		insertable = false,
+		updatable = false)
+			},
 			foreignKey = @ForeignKey(name = "FK_HISTORYTAG_HISTORY"))
 	private ResourceHistoryTable myResourceHistory;
 
-	@Column(name = "RES_VER_PID", insertable = false, updatable = false, nullable = false)
+	@Column(name = "RES_VER_PID", updatable = false, nullable = false)
 	private Long myResourceHistoryPid;
 
 	@Column(name = "RES_TYPE", length = ResourceTable.RESTYPE_LEN, nullable = false)
@@ -94,6 +115,10 @@ public class ResourceHistoryTag extends BaseTag implements Serializable {
 		setPartitionId(theRequestPartitionId);
 	}
 
+	private void setPartitionId(PartitionablePartitionId theRequestPartitionId) {
+		myPartitionIdValue = theRequestPartitionId.getPartitionId();
+	}
+
 	public String getResourceType() {
 		return myResourceType;
 	}
@@ -116,6 +141,7 @@ public class ResourceHistoryTag extends BaseTag implements Serializable {
 
 	public void setResource(ResourceHistoryTable theResourceHistory) {
 		myResourceHistory = theResourceHistory;
+		myResourceHistoryPid = theResourceHistory.getId();
 	}
 
 	public Long getId() {

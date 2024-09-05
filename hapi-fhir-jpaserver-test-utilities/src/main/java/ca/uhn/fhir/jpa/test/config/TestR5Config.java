@@ -30,6 +30,7 @@ import ca.uhn.fhir.jpa.config.r5.JpaR5Config;
 import ca.uhn.fhir.jpa.config.util.HapiEntityManagerFactoryUtil;
 import ca.uhn.fhir.jpa.fql.provider.HfqlRestProviderCtxConfig;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicConfig;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
@@ -41,6 +42,7 @@ import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -92,6 +94,9 @@ public class TestR5Config {
 
 		}
 	}
+
+	@Value("${" + JpaConstants.HAPI_INCLUDE_PARTITION_IDS_IN_PKS + ":false}")
+	private boolean myIncludePartitionIdsInPks;
 
 	@Autowired
 	TestHSearchAddInConfig.IHSearchConfigurer hibernateSearchConfigurer;
@@ -188,6 +193,7 @@ public class TestR5Config {
 
 	protected Properties jpaProperties() {
 		Properties extraProperties = new Properties();
+		extraProperties.put(JpaConstants.HAPI_INCLUDE_PARTITION_IDS_IN_PKS, Boolean.toString(myIncludePartitionIdsInPks));
 		extraProperties.put("hibernate.format_sql", "false");
 		extraProperties.put("hibernate.show_sql", "false");
 		extraProperties.put("hibernate.hbm2ddl.auto", "update");

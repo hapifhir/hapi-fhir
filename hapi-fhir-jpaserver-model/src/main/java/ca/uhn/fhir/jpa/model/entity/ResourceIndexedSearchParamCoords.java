@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.model.entity;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.listener.IndexStorageOptimizationListener;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.hapi.fhir.sql.hibernatesvc.ConditionalIdProperty;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
@@ -32,15 +33,20 @@ import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.IdClass;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinColumns;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+
+import static ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId.PARTITION_ID;
 
 @Embeddable
 @EntityListeners(IndexStorageOptimizationListener.class)
@@ -54,6 +60,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 			@Index(name = "IDX_SP_COORDS_UPDATED", columnList = "SP_UPDATED"),
 			@Index(name = "IDX_SP_COORDS_RESID", columnList = "RES_ID")
 		})
+@IdClass(ResourceIndexedSearchParamCoords.ResourceIndexedSearchParamCoordsId.class)
 public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchParam {
 
 	public static final int MAX_LENGTH = 100;
@@ -72,16 +79,32 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 	@Column(name = "SP_ID")
 	private Long myId;
 
+	@Id
+	@Column(name = PARTITION_ID)
+	@ConditionalIdProperty
+	private Integer myPartitionIdValue;
+
 	@ManyToOne(
 			optional = false,
 			fetch = FetchType.LAZY,
 			cascade = {})
-	@JoinColumn(
-			foreignKey = @ForeignKey(name = "FKC97MPK37OKWU8QVTCEG2NH9VN"),
-			name = "RES_ID",
+	@JoinColumns(value = {
+		@JoinColumn(name = "RES_ID",
 			referencedColumnName = "RES_ID",
+			insertable = false,
+			updatable = false,
+			nullable = false),
+		@JoinColumn(name = "PARTITION_ID",
+			referencedColumnName = "PARTITION_ID",
+			insertable = false,
+			updatable = false,
 			nullable = false)
+	},
+			foreignKey = @ForeignKey(name = "FKC97MPK37OKWU8QVTCEG2NH9VN"))
 	private ResourceTable myResource;
+
+	@Column(name = "RES_ID")
+	private Long myResourceId;
 
 	public ResourceIndexedSearchParamCoords() {}
 
@@ -102,6 +125,19 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 	@Override
 	public void clearHashes() {
 		myHashIdentity = null;
+	}
+
+	@Override
+	public void setPartitionId(PartitionablePartitionId thePartitionId) {
+		if (ObjectUtils.notEqual(getPartitionId(), thePartitionId)) {
+			clearHashes();
+			myPartitionIdValue = thePartitionId.getPartitionId();
+		}
+	}
+
+	@Override
+	public PartitionablePartitionId getPartitionId() {
+		return PartitionablePartitionId.with(myPartitionIdValue, null);
 	}
 
 	@Override
@@ -142,6 +178,11 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 		myLatitude = source.getLatitude();
 		myLongitude = source.getLongitude();
 		myHashIdentity = source.myHashIdentity;
+	}
+
+	@Override
+	public void setResourceId(Long theResourceId) {
+		myResourceId = theResourceId;
 	}
 
 	@Override
@@ -213,5 +254,10 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 		myResource = theResource;
 		setResourceType(theResource.getResourceType());
 		return this;
+	}
+
+	public static class ResourceIndexedSearchParamCoordsId {
+		private Long myId;
+		private Integer myPartitionIdValue;
 	}
 }

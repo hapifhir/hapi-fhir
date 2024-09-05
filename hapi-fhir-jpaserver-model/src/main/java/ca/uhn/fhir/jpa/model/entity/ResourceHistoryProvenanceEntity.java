@@ -20,20 +20,25 @@
 package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.hapi.fhir.sql.hibernatesvc.ConditionalIdProperty;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ForeignKey;
 import jakarta.persistence.Id;
+import jakarta.persistence.IdClass;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinColumns;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MapsId;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.checkerframework.checker.units.qual.C;
 
+import static ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId.PARTITION_ID;
 import static ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable.SOURCE_URI_LENGTH;
 
 @Table(
@@ -44,30 +49,58 @@ import static ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable.SOURCE_URI_LENGT
 			@Index(name = "IDX_RESVERPROV_RES_PID", columnList = "RES_PID")
 		})
 @Entity
-public class ResourceHistoryProvenanceEntity extends BasePartitionable {
+@IdClass(ResourceHistoryProvenanceEntity.ResourceHistoryTableId.class)
+public class ResourceHistoryProvenanceEntity {
 
 	@Id
 	@Column(name = "RES_VER_PID")
 	private Long myId;
 
+	@Id
+	@Column(name = PARTITION_ID)
+	@ConditionalIdProperty
+	private Integer myPartitionIdValue;
+
 	@OneToOne(fetch = FetchType.LAZY)
-	@JoinColumn(
+	@JoinColumns(value={
+		@JoinColumn(
 			name = "RES_VER_PID",
 			referencedColumnName = "PID",
-			foreignKey = @ForeignKey(name = "FK_RESVERPROV_RESVER_PID"),
 			nullable = false,
 			insertable = false,
 			updatable = false)
+		, @JoinColumn(
+			name = PARTITION_ID,
+			referencedColumnName = PARTITION_ID,
+			nullable = false,
+			insertable = false,
+			updatable = false)
+		}, foreignKey = @ForeignKey(name = "FK_RESVERPROV_RESVER_PID")
+	)
 	@MapsId
 	private ResourceHistoryTable myResourceHistoryTable;
 
 	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumns(value = {
 	@JoinColumn(
 			name = "RES_PID",
 			referencedColumnName = "RES_ID",
-			foreignKey = @ForeignKey(name = "FK_RESVERPROV_RES_PID"),
+			insertable = false,
+			updatable = false,
+			nullable = false),
+		@JoinColumn(
+			name = "PARTITION_ID",
+			referencedColumnName = "PARTITION_ID",
+			insertable = false,
+			updatable = false,
 			nullable = false)
+	}
+		,
+			foreignKey = @ForeignKey(name = "FK_RESVERPROV_RES_PID"))
 	private ResourceTable myResourceTable;
+
+	@Column(name = "RES_PID")
+	private Long myResourceId;
 
 	@Column(name = "SOURCE_URI", length = SOURCE_URI_LENGTH, nullable = true)
 	private String mySourceUri;
@@ -93,6 +126,7 @@ public class ResourceHistoryProvenanceEntity extends BasePartitionable {
 
 	public void setResourceTable(ResourceTable theResourceTable) {
 		myResourceTable = theResourceTable;
+		myResourceId = theResourceTable.getId();
 	}
 
 	public void setResourceHistoryTable(ResourceHistoryTable theResourceHistoryTable) {
@@ -118,4 +152,14 @@ public class ResourceHistoryProvenanceEntity extends BasePartitionable {
 	public Long getId() {
 		return myId;
 	}
+
+	public void setPartitionId(PartitionablePartitionId thePartitionId) {
+		myPartitionIdValue = thePartitionId.getPartitionId();
+	}
+
+	public static class ResourceHistoryTableId {
+		private Long myId;
+		private Integer myPartitionIdValue;
+	}
+
 }

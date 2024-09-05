@@ -115,6 +115,7 @@ public class DaoSearchParamSynchronizer {
 			@Nullable IPreSaveHook<T> theAddParamPreSaveHook) {
 		Collection<T> newParams = theNewParams;
 		for (T next : newParams) {
+			next.setResourceId(theEntity.getId());
 			next.setPartitionId(theEntity.getPartitionId());
 			next.calculateHashes();
 		}
@@ -169,7 +170,11 @@ public class DaoSearchParamSynchronizer {
 		}
 
 		for (T next : paramsToAdd) {
-			myEntityManager.merge(next);
+			if (next.getId() == null) {
+				myEntityManager.persist(next);
+			} else {
+				myEntityManager.merge(next);
+			}
 		}
 
 		// TODO:  are there any unintended consequences to fixing this bug?
