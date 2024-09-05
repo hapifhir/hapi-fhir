@@ -7,6 +7,7 @@ import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Claim;
+import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -15,12 +16,14 @@ import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.PrimitiveType;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Test;
 
 import java.util.Date;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -398,6 +401,21 @@ class TerserUtilTest {
 		assertTrue(p2.getAddress().get(1).hasExtension());
 	}
 
+	@Test
+	public void testMergeWithReference() {
+		Practitioner practitioner = new Practitioner();
+		practitioner.setId(UUID.randomUUID().toString());
+		practitioner.addName().setFamily("Smith").addGiven("Jane");
+
+		Condition c1 = new Condition();
+		c1.setRecorder(new Reference(practitioner));
+
+		Condition c2 = new Condition();
+
+		TerserUtil.mergeField(ourFhirContext, "recorder", c1, c2);
+
+		assertThat(c2.getRecorder().getResource()).isSameAs(practitioner);
+	}
 
 	@Test
 	void testCloneWithDuplicateNonPrimitives() {
