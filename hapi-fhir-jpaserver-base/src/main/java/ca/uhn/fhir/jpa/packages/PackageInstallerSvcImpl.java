@@ -588,7 +588,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		if (statusTypes.isEmpty()) {
 			return true;
 		}
-		// Resource has a no status field, or an explicitly null one
+		// Resource has no status field, or an explicitly null one
 		if (!statusTypes.get(0).hasValue() || statusTypes.get(0).getValue() == null) {
 			return false;
 		}
