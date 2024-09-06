@@ -17,35 +17,37 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.ips.jpa.section;
+package ca.uhn.fhir.jpa.ips.strategy.section;
 
 import ca.uhn.fhir.jpa.ips.api.IpsSectionContext;
-import ca.uhn.fhir.jpa.ips.jpa.JpaSectionSearchStrategy;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import jakarta.annotation.Nonnull;
-import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.MedicationStatement;
 
-public class VitalSignsJpaSectionSearchStrategy extends JpaSectionSearchStrategy<Observation> {
+public class MedicationSummarySectionSearchStrategyMedicationStatement
+		extends SectionSearchStrategy<MedicationStatement> {
 
 	@Override
 	public void massageResourceSearch(
-			@Nonnull IpsSectionContext<Observation> theIpsSectionContext,
+			@Nonnull IpsSectionContext<MedicationStatement> theIpsSectionContext,
 			@Nonnull SearchParameterMap theSearchParameterMap) {
+		theSearchParameterMap.addInclude(MedicationStatement.INCLUDE_MEDICATION);
 		theSearchParameterMap.add(
-				Observation.SP_CATEGORY,
+				MedicationStatement.SP_STATUS,
 				new TokenOrListParam()
 						.addOr(new TokenParam(
-								"http://terminology.hl7.org/CodeSystem/observation-category", "vital-signs")));
-	}
-
-	@Override
-	public boolean shouldInclude(
-			@Nonnull IpsSectionContext<Observation> theIpsSectionContext, @Nonnull Observation theCandidate) {
-		// code filtering not yet applied
-		return theCandidate.getStatus() != Observation.ObservationStatus.CANCELLED
-				&& theCandidate.getStatus() != Observation.ObservationStatus.ENTEREDINERROR
-				&& theCandidate.getStatus() != Observation.ObservationStatus.PRELIMINARY;
+								MedicationStatement.MedicationStatementStatus.ACTIVE.getSystem(),
+								MedicationStatement.MedicationStatementStatus.ACTIVE.toCode()))
+						.addOr(new TokenParam(
+								MedicationStatement.MedicationStatementStatus.INTENDED.getSystem(),
+								MedicationStatement.MedicationStatementStatus.INTENDED.toCode()))
+						.addOr(new TokenParam(
+								MedicationStatement.MedicationStatementStatus.UNKNOWN.getSystem(),
+								MedicationStatement.MedicationStatementStatus.UNKNOWN.toCode()))
+						.addOr(new TokenParam(
+								MedicationStatement.MedicationStatementStatus.ONHOLD.getSystem(),
+								MedicationStatement.MedicationStatementStatus.ONHOLD.toCode())));
 	}
 }

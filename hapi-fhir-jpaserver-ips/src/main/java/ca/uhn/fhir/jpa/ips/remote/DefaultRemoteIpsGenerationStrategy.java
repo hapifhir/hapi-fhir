@@ -17,11 +17,11 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.ips.jpa;
+package ca.uhn.fhir.jpa.ips.remote;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.ips.api.Section;
+import ca.uhn.fhir.jpa.ips.strategy.section.SectionSearchStrategyCollection;
 import ca.uhn.fhir.jpa.ips.strategy.AllergyIntoleranceNoInfoR4Generator;
 import ca.uhn.fhir.jpa.ips.strategy.BaseIpsGenerationStrategy;
 import ca.uhn.fhir.jpa.ips.strategy.MedicationNoInfoR4Generator;
@@ -42,19 +42,21 @@ import ca.uhn.fhir.jpa.ips.strategy.section.PlanOfCareSectionSearchStrategy;
 import ca.uhn.fhir.jpa.ips.strategy.section.PregnancySectionSearchStrategy;
 import ca.uhn.fhir.jpa.ips.strategy.section.ProblemListSectionSearchStrategy;
 import ca.uhn.fhir.jpa.ips.strategy.section.ProceduresSectionSearchStrategy;
-import ca.uhn.fhir.jpa.ips.strategy.section.SectionSearchStrategyCollection;
 import ca.uhn.fhir.jpa.ips.strategy.section.SocialHistorySectionSearchStrategy;
 import ca.uhn.fhir.jpa.ips.strategy.section.VitalSignsSectionSearchStrategy;
-import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.RequestFormatParamStyleEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.util.ValidateUtil;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.AllergyIntolerance;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CarePlan;
 import org.hl7.fhir.r4.model.ClinicalImpression;
 import org.hl7.fhir.r4.model.Condition;
@@ -73,14 +75,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.thymeleaf.util.Validate;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 /**
  * This {@link ca.uhn.fhir.jpa.ips.api.IIpsGenerationStrategy generation strategy} contains default rules for fetching
  * IPS section contents for each of the base (universal realm) IPS definition sections. It fetches contents for each
- * section from the JPA server repository.
+ * section from a remote FHIR Server.
  * <p>
  * This class can be used directly, but it can also be subclassed and extended if you want to
  * create an IPS strategy that is based on the defaults but add or change the inclusion rules or
@@ -90,7 +94,7 @@ import java.util.function.Function;
  * you don't want to include, and add your own as well.
  * </p>
  */
-public class DefaultJpaIpsGenerationStrategy extends BaseIpsGenerationStrategy {
+public class DefaultRemoteIpsGenerationStrategy extends BaseIpsGenerationStrategy {
 
 	public static final String SECTION_CODE_ALLERGY_INTOLERANCE = "48765-2";
 	public static final String SECTION_CODE_MEDICATION_SUMMARY = "10160-0";
@@ -109,20 +113,28 @@ public class DefaultJpaIpsGenerationStrategy extends BaseIpsGenerationStrategy {
 	public static final String SECTION_SYSTEM_LOINC = ITermLoaderSvc.LOINC_URI;
 	private final List<Function<Section, Section>> myGlobalSectionCustomizers = new ArrayList<>();
 
-	@Autowired
-	private DaoRegistry myDaoRegistry;
+	private String myRemoteUrl;
+
+	private IGenericClient myClient;
 
 	@Autowired
 	private FhirContext myFhirContext;
 
 	private boolean myInitialized;
 
-	public void setDaoRegistry(DaoRegistry theDaoRegistry) {
-		myDaoRegistry = theDaoRegistry;
+	public void setRemoteUrl(String theRemoteUrl) {
+		myRemoteUrl = theRemoteUrl;
 	}
 
 	public void setFhirContext(FhirContext theFhirContext) {
 		myFhirContext = theFhirContext;
+	}
+
+	protected IGenericClient getClient() {
+		IGenericClient client = myFhirContext.newRestfulGenericClient(myRemoteUrl);
+		client.setEncoding(EncodingEnum.JSON);
+		client.setFormatParamStyle(RequestFormatParamStyleEnum.NONE);
+		return client;
 	}
 
 	/**
@@ -138,7 +150,8 @@ public class DefaultJpaIpsGenerationStrategy extends BaseIpsGenerationStrategy {
 	@Override
 	public final void initialize() {
 		Validate.isTrue(!myInitialized, "Strategy must not be initialized twice");
-		Validate.isTrue(myDaoRegistry != null, "No DaoRegistry has been supplied");
+		Validate.isTrue(myRemoteUrl != null, "No RemoteUrl has been supplied");
+		myClient = getClient();
 		Validate.isTrue(myFhirContext != null, "No FhirContext has been supplied");
 		addSections();
 		myInitialized = true;
@@ -147,23 +160,28 @@ public class DefaultJpaIpsGenerationStrategy extends BaseIpsGenerationStrategy {
 	@Nonnull
 	@Override
 	public IBaseResource fetchPatient(IIdType thePatientId, RequestDetails theRequestDetails) {
-		return myDaoRegistry.getResourceDao("Patient").read(thePatientId, theRequestDetails);
+		return myClient.read().resource("Patient").withId(thePatientId).execute();
 	}
 
 	@Nonnull
 	@Override
 	public IBaseResource fetchPatient(TokenParam thePatientIdentifier, RequestDetails theRequestDetails) {
-		SearchParameterMap searchParameterMap =
-				new SearchParameterMap().setLoadSynchronousUpTo(2).add(Patient.SP_IDENTIFIER, thePatientIdentifier);
-		IBundleProvider searchResults =
-				myDaoRegistry.getResourceDao("Patient").search(searchParameterMap, theRequestDetails);
+		Map<String, List<IQueryParameterType>> searchParameterMap = new HashMap<>();
+		searchParameterMap.put(Patient.SP_IDENTIFIER, List.of(thePatientIdentifier));
+
+		Bundle searchResults = myClient.search()
+				.forResource("Patient")
+				.where(searchParameterMap)
+				.returnBundle(Bundle.class)
+				.execute();
 
 		ValidateUtil.isTrueOrThrowResourceNotFound(
-				searchResults.sizeOrThrowNpe() > 0, "No Patient could be found matching given identifier");
+				!searchResults.getEntry().isEmpty(), "No Patient could be found matching given identifier");
 		ValidateUtil.isTrueOrThrowInvalidRequest(
-				searchResults.sizeOrThrowNpe() == 1, "Multiple Patient resources were found matching given identifier");
+				searchResults.getEntry().size() == 1,
+				"Multiple Patient resources were found matching given identifier");
 
-		return searchResults.getResources(0, 1).get(0);
+		return searchResults.getEntry().get(0).getResource();
 	}
 
 	/**
@@ -204,7 +222,7 @@ public class DefaultJpaIpsGenerationStrategy extends BaseIpsGenerationStrategy {
 				.addStrategy(AllergyIntolerance.class, new AllergyIntoleranceSectionSearchStrategy())
 				.build();
 
-		addJpaSection(section, searchStrategyCollection);
+		addCustomizedSection(section, searchStrategyCollection);
 	}
 
 	protected void addJpaSectionMedicationSummary() {
@@ -231,7 +249,7 @@ public class DefaultJpaIpsGenerationStrategy extends BaseIpsGenerationStrategy {
 				.addStrategy(MedicationStatement.class, new MedicationSummarySectionSearchStrategyMedicationStatement())
 				.build();
 
-		addJpaSection(section, searchStrategyCollection);
+		addCustomizedSection(section, searchStrategyCollection);
 	}
 
 	protected void addJpaSectionProblemList() {
@@ -250,7 +268,7 @@ public class DefaultJpaIpsGenerationStrategy extends BaseIpsGenerationStrategy {
 				.addStrategy(Condition.class, new ProblemListSectionSearchStrategy())
 				.build();
 
-		addJpaSection(section, searchStrategyCollection);
+		addCustomizedSection(section, searchStrategyCollection);
 	}
 
 	protected void addJpaSectionImmunizations() {
@@ -268,7 +286,7 @@ public class DefaultJpaIpsGenerationStrategy extends BaseIpsGenerationStrategy {
 				.addStrategy(Immunization.class, new ImmunizationsSectionSearchStrategy())
 				.build();
 
-		addJpaSection(section, searchStrategyCollection);
+		addCustomizedSection(section, searchStrategyCollection);
 	}
 
 	protected void addJpaSectionProcedures() {
@@ -286,7 +304,7 @@ public class DefaultJpaIpsGenerationStrategy extends BaseIpsGenerationStrategy {
 				.addStrategy(Procedure.class, new ProceduresSectionSearchStrategy())
 				.build();
 
-		addJpaSection(section, searchStrategyCollection);
+		addCustomizedSection(section, searchStrategyCollection);
 	}
 
 	protected void addJpaSectionMedicalDevices() {
@@ -304,7 +322,7 @@ public class DefaultJpaIpsGenerationStrategy extends BaseIpsGenerationStrategy {
 				.addStrategy(DeviceUseStatement.class, new MedicalDevicesSectionSearchStrategy())
 				.build();
 
-		addJpaSection(section, searchStrategyCollection);
+		addCustomizedSection(section, searchStrategyCollection);
 	}
 
 	protected void addJpaSectionDiagnosticResults() {
@@ -324,7 +342,7 @@ public class DefaultJpaIpsGenerationStrategy extends BaseIpsGenerationStrategy {
 				.addStrategy(Observation.class, new DiagnosticResultsSectionSearchStrategyObservation())
 				.build();
 
-		addJpaSection(section, searchStrategyCollection);
+		addCustomizedSection(section, searchStrategyCollection);
 	}
 
 	protected void addJpaSectionVitalSigns() {
@@ -342,7 +360,7 @@ public class DefaultJpaIpsGenerationStrategy extends BaseIpsGenerationStrategy {
 				.addStrategy(Observation.class, new VitalSignsSectionSearchStrategy())
 				.build();
 
-		addJpaSection(section, searchStrategyCollection);
+		addCustomizedSection(section, searchStrategyCollection);
 	}
 
 	protected void addJpaSectionPregnancy() {
@@ -360,7 +378,7 @@ public class DefaultJpaIpsGenerationStrategy extends BaseIpsGenerationStrategy {
 				.addStrategy(Observation.class, new PregnancySectionSearchStrategy())
 				.build();
 
-		addJpaSection(section, searchStrategyCollection);
+		addCustomizedSection(section, searchStrategyCollection);
 	}
 
 	protected void addJpaSectionSocialHistory() {
@@ -378,7 +396,7 @@ public class DefaultJpaIpsGenerationStrategy extends BaseIpsGenerationStrategy {
 				.addStrategy(Observation.class, new SocialHistorySectionSearchStrategy())
 				.build();
 
-		addJpaSection(section, searchStrategyCollection);
+		addCustomizedSection(section, searchStrategyCollection);
 	}
 
 	protected void addJpaSectionIllnessHistory() {
@@ -396,7 +414,7 @@ public class DefaultJpaIpsGenerationStrategy extends BaseIpsGenerationStrategy {
 				.addStrategy(Condition.class, new IllnessHistorySectionSearchStrategy())
 				.build();
 
-		addJpaSection(section, searchStrategyCollection);
+		addCustomizedSection(section, searchStrategyCollection);
 	}
 
 	protected void addJpaSectionFunctionalStatus() {
@@ -414,7 +432,7 @@ public class DefaultJpaIpsGenerationStrategy extends BaseIpsGenerationStrategy {
 				.addStrategy(ClinicalImpression.class, new FunctionalStatusSectionSearchStrategy())
 				.build();
 
-		addJpaSection(section, searchStrategyCollection);
+		addCustomizedSection(section, searchStrategyCollection);
 	}
 
 	protected void addJpaSectionPlanOfCare() {
@@ -432,7 +450,7 @@ public class DefaultJpaIpsGenerationStrategy extends BaseIpsGenerationStrategy {
 				.addStrategy(CarePlan.class, new PlanOfCareSectionSearchStrategy())
 				.build();
 
-		addJpaSection(section, searchStrategyCollection);
+		addCustomizedSection(section, searchStrategyCollection);
 	}
 
 	protected void addJpaSectionAdvanceDirectives() {
@@ -450,10 +468,10 @@ public class DefaultJpaIpsGenerationStrategy extends BaseIpsGenerationStrategy {
 				.addStrategy(Consent.class, new AdvanceDirectivesSectionSearchStrategy())
 				.build();
 
-		addJpaSection(section, searchStrategyCollection);
+		addCustomizedSection(section, searchStrategyCollection);
 	}
 
-	protected void addJpaSection(
+	protected void addCustomizedSection(
 			Section theSection, SectionSearchStrategyCollection theSectionSearchStrategyCollection) {
 		Section section = theSection;
 		for (var next : myGlobalSectionCustomizers) {
@@ -471,6 +489,6 @@ public class DefaultJpaIpsGenerationStrategy extends BaseIpsGenerationStrategy {
 
 		addSection(
 				section,
-				new JpaSectionResourceSupplier(theSectionSearchStrategyCollection, myDaoRegistry, myFhirContext));
+				new RemoteSectionResourceSupplier(theSectionSearchStrategyCollection, myClient, myFhirContext));
 	}
 }

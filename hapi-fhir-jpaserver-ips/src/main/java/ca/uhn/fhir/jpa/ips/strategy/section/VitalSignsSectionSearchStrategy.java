@@ -17,34 +17,34 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.ips.jpa.section;
+package ca.uhn.fhir.jpa.ips.strategy.section;
 
 import ca.uhn.fhir.jpa.ips.api.IpsSectionContext;
-import ca.uhn.fhir.jpa.ips.jpa.JpaSectionSearchStrategy;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.rest.api.SortOrderEnum;
-import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import jakarta.annotation.Nonnull;
-import org.hl7.fhir.r4.model.Immunization;
+import org.hl7.fhir.r4.model.Observation;
 
-public class ImmunizationsJpaSectionSearchStrategy extends JpaSectionSearchStrategy<Immunization> {
+public class VitalSignsSectionSearchStrategy extends SectionSearchStrategy<Observation> {
 
 	@Override
 	public void massageResourceSearch(
-			@Nonnull IpsSectionContext<Immunization> theIpsSectionContext,
+			@Nonnull IpsSectionContext<Observation> theIpsSectionContext,
 			@Nonnull SearchParameterMap theSearchParameterMap) {
-		theSearchParameterMap.setSort(new SortSpec(Immunization.SP_DATE).setOrder(SortOrderEnum.DESC));
-		theSearchParameterMap.addInclude(Immunization.INCLUDE_MANUFACTURER);
+		theSearchParameterMap.add(
+				Observation.SP_CATEGORY,
+				new TokenOrListParam()
+						.addOr(new TokenParam(
+								"http://terminology.hl7.org/CodeSystem/observation-category", "vital-signs")));
 	}
 
-	@SuppressWarnings("RedundantIfStatement")
 	@Override
 	public boolean shouldInclude(
-			@Nonnull IpsSectionContext<Immunization> theIpsSectionContext, @Nonnull Immunization theCandidate) {
-		if (theCandidate.getStatus() == Immunization.ImmunizationStatus.ENTEREDINERROR) {
-			return false;
-		}
-
-		return true;
+			@Nonnull IpsSectionContext<Observation> theIpsSectionContext, @Nonnull Observation theCandidate) {
+		// code filtering not yet applied
+		return theCandidate.getStatus() != Observation.ObservationStatus.CANCELLED
+				&& theCandidate.getStatus() != Observation.ObservationStatus.ENTEREDINERROR
+				&& theCandidate.getStatus() != Observation.ObservationStatus.PRELIMINARY;
 	}
 }

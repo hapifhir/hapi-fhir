@@ -17,13 +17,11 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.ips.jpa;
+package ca.uhn.fhir.jpa.ips.remote;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.ips.api.ISectionResourceSupplier;
 import ca.uhn.fhir.jpa.ips.api.IpsContext;
 import ca.uhn.fhir.jpa.ips.api.IpsSectionContext;
@@ -32,12 +30,13 @@ import ca.uhn.fhir.jpa.ips.strategy.section.SectionSearchStrategyCollection;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.Observation;
 import org.thymeleaf.util.Validate;
@@ -47,22 +46,23 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class JpaSectionResourceSupplier implements ISectionResourceSupplier {
+public class RemoteSectionResourceSupplier implements ISectionResourceSupplier {
 	public static final int CHUNK_SIZE = 10;
 
 	private final SectionSearchStrategyCollection mySectionSearchStrategyCollection;
-	private final DaoRegistry myDaoRegistry;
+
+	private final IGenericClient myClient;
 	private final FhirContext myFhirContext;
 
-	public JpaSectionResourceSupplier(
+	public RemoteSectionResourceSupplier(
 			@Nonnull SectionSearchStrategyCollection theSectionSearchStrategyCollection,
-			@Nonnull DaoRegistry theDaoRegistry,
+			@Nonnull IGenericClient theClient,
 			@Nonnull FhirContext theFhirContext) {
 		Validate.notNull(theSectionSearchStrategyCollection, "theSectionSearchStrategyCollection must not be null");
-		Validate.notNull(theDaoRegistry, "theDaoRegistry must not be null");
+		Validate.notNull(theClient, "theClient must not be null");
 		Validate.notNull(theFhirContext, "theFhirContext must not be null");
 		mySectionSearchStrategyCollection = theSectionSearchStrategyCollection;
-		myDaoRegistry = theDaoRegistry;
+		myClient = theClient;
 		myFhirContext = theFhirContext;
 	}
 
@@ -75,19 +75,29 @@ public class JpaSectionResourceSupplier implements ISectionResourceSupplier {
 				mySectionSearchStrategyCollection.getSearchStrategy(theIpsSectionContext.getResourceType());
 
 		SearchParameterMap searchParameterMap = new SearchParameterMap();
-
-		String subjectSp = determinePatientCompartmentSearchParameterName(theIpsSectionContext.getResourceType());
-		searchParameterMap.add(subjectSp, new ReferenceParam(theIpsContext.getSubjectId()));
+		searchParameterMap.add(
+				determinePatientCompartmentSearchParameterName(theIpsSectionContext.getResourceType()),
+				new ReferenceParam(theIpsContext.getSubjectId()));
+		searchParameterMap.setCount(CHUNK_SIZE);
 
 		searchStrategy.massageResourceSearch(theIpsSectionContext, searchParameterMap);
 
-		IFhirResourceDao<T> dao = myDaoRegistry.getResourceDao(theIpsSectionContext.getResourceType());
-		IBundleProvider searchResult = dao.search(searchParameterMap, theRequestDetails);
-
+		// Need to search with pagination to be able to retrieve all resources
 		List<ResourceEntry> retVal = null;
 		for (int startIndex = 0; ; startIndex += CHUNK_SIZE) {
-			int endIndex = startIndex + CHUNK_SIZE;
-			List<IBaseResource> resources = searchResult.getResources(startIndex, endIndex);
+			searchParameterMap.setOffset(startIndex);
+
+			List<IBaseResource> resources = myClient
+					.search()
+					.byUrl(theIpsSectionContext.getResourceType().getSimpleName()
+							+ searchParameterMap.toNormalizedQueryString(myFhirContext))
+					.returnBundle(Bundle.class)
+					.execute()
+					.getEntry()
+					.stream()
+					.map(Bundle.BundleEntryComponent::getResource)
+					.collect(Collectors.toList());
+
 			if (resources.isEmpty()) {
 				break;
 			}

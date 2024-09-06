@@ -17,25 +17,34 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.ips.jpa.section;
+package ca.uhn.fhir.jpa.ips.strategy.section;
 
 import ca.uhn.fhir.jpa.ips.api.IpsSectionContext;
-import ca.uhn.fhir.jpa.ips.jpa.JpaSectionSearchStrategy;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import jakarta.annotation.Nonnull;
-import org.hl7.fhir.r4.model.Consent;
+import org.hl7.fhir.r4.model.MedicationAdministration;
 
-public class AdvanceDirectivesJpaSectionSearchStrategy extends JpaSectionSearchStrategy<Consent> {
+public class MedicationSummarySectionSearchStrategyMedicationAdministration
+		extends SectionSearchStrategy<MedicationAdministration> {
 
 	@Override
 	public void massageResourceSearch(
-			@Nonnull IpsSectionContext theIpsSectionContext, @Nonnull SearchParameterMap theSearchParameterMap) {
+			@Nonnull IpsSectionContext<MedicationAdministration> theIpsSectionContext,
+			@Nonnull SearchParameterMap theSearchParameterMap) {
+		theSearchParameterMap.addInclude(MedicationAdministration.INCLUDE_MEDICATION);
 		theSearchParameterMap.add(
-				Consent.SP_STATUS,
+				MedicationAdministration.SP_STATUS,
 				new TokenOrListParam()
 						.addOr(new TokenParam(
-								Consent.ConsentState.ACTIVE.getSystem(), Consent.ConsentState.ACTIVE.toCode())));
+								MedicationAdministration.MedicationAdministrationStatus.INPROGRESS.getSystem(),
+								MedicationAdministration.MedicationAdministrationStatus.INPROGRESS.toCode()))
+						.addOr(new TokenParam(
+								MedicationAdministration.MedicationAdministrationStatus.UNKNOWN.getSystem(),
+								MedicationAdministration.MedicationAdministrationStatus.UNKNOWN.toCode()))
+						.addOr(new TokenParam(
+								MedicationAdministration.MedicationAdministrationStatus.ONHOLD.getSystem(),
+								MedicationAdministration.MedicationAdministrationStatus.ONHOLD.toCode())));
 	}
 }

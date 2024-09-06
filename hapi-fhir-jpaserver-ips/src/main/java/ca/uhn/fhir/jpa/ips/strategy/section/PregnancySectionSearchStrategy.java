@@ -17,10 +17,9 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.ips.jpa.section;
+package ca.uhn.fhir.jpa.ips.strategy.section;
 
 import ca.uhn.fhir.jpa.ips.api.IpsSectionContext;
-import ca.uhn.fhir.jpa.ips.jpa.JpaSectionSearchStrategy;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -29,7 +28,7 @@ import org.hl7.fhir.r4.model.Observation;
 
 import static ca.uhn.fhir.jpa.term.api.ITermLoaderSvc.LOINC_URI;
 
-public class PregnancyJpaSectionSearchStrategy extends JpaSectionSearchStrategy<Observation> {
+public class PregnancySectionSearchStrategy extends SectionSearchStrategy<Observation> {
 
 	public static final String LOINC_CODE_PREGNANCY_STATUS = "82810-3";
 	public static final String LOINC_CODE_NUMBER_BIRTHS_LIVE = "11636-8";

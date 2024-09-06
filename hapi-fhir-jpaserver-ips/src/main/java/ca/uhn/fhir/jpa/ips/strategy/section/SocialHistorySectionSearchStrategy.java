@@ -17,31 +17,37 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.ips.jpa.section;
+package ca.uhn.fhir.jpa.ips.strategy.section;
 
 import ca.uhn.fhir.jpa.ips.api.IpsSectionContext;
-import ca.uhn.fhir.jpa.ips.jpa.JpaSectionSearchStrategy;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import jakarta.annotation.Nonnull;
-import org.hl7.fhir.r4.model.DeviceUseStatement;
+import org.hl7.fhir.r4.model.Observation;
 
-public class MedicalDevicesJpaSectionSearchStrategy extends JpaSectionSearchStrategy<DeviceUseStatement> {
+public class SocialHistorySectionSearchStrategy extends SectionSearchStrategy<Observation> {
 
 	@Override
 	public void massageResourceSearch(
-			@Nonnull IpsSectionContext<DeviceUseStatement> theIpsSectionContext,
+			@Nonnull IpsSectionContext<Observation> theIpsSectionContext,
 			@Nonnull SearchParameterMap theSearchParameterMap) {
-		theSearchParameterMap.addInclude(DeviceUseStatement.INCLUDE_DEVICE);
+		theSearchParameterMap.add(
+				Observation.SP_CATEGORY,
+				new TokenOrListParam()
+						.addOr(new TokenParam(
+								"http://terminology.hl7.org/CodeSystem/observation-category", "social-history")));
 	}
 
 	@SuppressWarnings("RedundantIfStatement")
 	@Override
 	public boolean shouldInclude(
-			@Nonnull IpsSectionContext<DeviceUseStatement> theIpsSectionContext,
-			@Nonnull DeviceUseStatement theCandidate) {
-		if (theCandidate.getStatus() == DeviceUseStatement.DeviceUseStatementStatus.ENTEREDINERROR) {
+			@Nonnull IpsSectionContext<Observation> theIpsSectionContext, @Nonnull Observation theCandidate) {
+		// code filtering not yet applied
+		if (theCandidate.getStatus() == Observation.ObservationStatus.PRELIMINARY) {
 			return false;
 		}
+
 		return true;
 	}
 }

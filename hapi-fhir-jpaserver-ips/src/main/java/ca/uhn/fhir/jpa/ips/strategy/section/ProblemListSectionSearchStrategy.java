@@ -17,21 +17,27 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.ips.jpa.section;
+package ca.uhn.fhir.jpa.ips.strategy.section;
 
 import ca.uhn.fhir.jpa.ips.api.IpsSectionContext;
-import ca.uhn.fhir.jpa.ips.jpa.JpaSectionSearchStrategy;
 import jakarta.annotation.Nonnull;
-import org.hl7.fhir.r4.model.Procedure;
+import org.hl7.fhir.r4.model.Condition;
 
-public class ProceduresJpaSectionSearchStrategy extends JpaSectionSearchStrategy<Procedure> {
+public class ProblemListSectionSearchStrategy extends SectionSearchStrategy<Condition> {
 
 	@SuppressWarnings("RedundantIfStatement")
 	@Override
 	public boolean shouldInclude(
-			@Nonnull IpsSectionContext<Procedure> theIpsSectionContext, @Nonnull Procedure theCandidate) {
-		if (theCandidate.getStatus() == Procedure.ProcedureStatus.ENTEREDINERROR
-				|| theCandidate.getStatus() == Procedure.ProcedureStatus.NOTDONE) {
+			@Nonnull IpsSectionContext<Condition> theIpsSectionContext, @Nonnull Condition theCandidate) {
+		if (theCandidate
+						.getClinicalStatus()
+						.hasCoding("http://terminology.hl7.org/CodeSystem/condition-clinical", "inactive")
+				|| theCandidate
+						.getClinicalStatus()
+						.hasCoding("http://terminology.hl7.org/CodeSystem/condition-clinical", "resolved")
+				|| theCandidate
+						.getVerificationStatus()
+						.hasCoding("http://terminology.hl7.org/CodeSystem/condition-ver-status", "entered-in-error")) {
 			return false;
 		}
 

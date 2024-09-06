@@ -17,38 +17,34 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.ips.jpa.section;
+package ca.uhn.fhir.jpa.ips.strategy.section;
 
 import ca.uhn.fhir.jpa.ips.api.IpsSectionContext;
-import ca.uhn.fhir.jpa.ips.jpa.JpaSectionSearchStrategy;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import jakarta.annotation.Nonnull;
-import org.hl7.fhir.r4.model.MedicationStatement;
+import org.hl7.fhir.r4.model.MedicationDispense;
 
-public class MedicationSummaryJpaSectionSearchStrategyMedicationStatement
-		extends JpaSectionSearchStrategy<MedicationStatement> {
+public class MedicationSummarySectionSearchStrategyMedicationDispense
+		extends SectionSearchStrategy<MedicationDispense> {
 
 	@Override
 	public void massageResourceSearch(
-			@Nonnull IpsSectionContext<MedicationStatement> theIpsSectionContext,
+			@Nonnull IpsSectionContext<MedicationDispense> theIpsSectionContext,
 			@Nonnull SearchParameterMap theSearchParameterMap) {
-		theSearchParameterMap.addInclude(MedicationStatement.INCLUDE_MEDICATION);
+		theSearchParameterMap.addInclude(MedicationDispense.INCLUDE_MEDICATION);
 		theSearchParameterMap.add(
-				MedicationStatement.SP_STATUS,
+				MedicationDispense.SP_STATUS,
 				new TokenOrListParam()
 						.addOr(new TokenParam(
-								MedicationStatement.MedicationStatementStatus.ACTIVE.getSystem(),
-								MedicationStatement.MedicationStatementStatus.ACTIVE.toCode()))
+								MedicationDispense.MedicationDispenseStatus.INPROGRESS.getSystem(),
+								MedicationDispense.MedicationDispenseStatus.INPROGRESS.toCode()))
 						.addOr(new TokenParam(
-								MedicationStatement.MedicationStatementStatus.INTENDED.getSystem(),
-								MedicationStatement.MedicationStatementStatus.INTENDED.toCode()))
+								MedicationDispense.MedicationDispenseStatus.UNKNOWN.getSystem(),
+								MedicationDispense.MedicationDispenseStatus.UNKNOWN.toCode()))
 						.addOr(new TokenParam(
-								MedicationStatement.MedicationStatementStatus.UNKNOWN.getSystem(),
-								MedicationStatement.MedicationStatementStatus.UNKNOWN.toCode()))
-						.addOr(new TokenParam(
-								MedicationStatement.MedicationStatementStatus.ONHOLD.getSystem(),
-								MedicationStatement.MedicationStatementStatus.ONHOLD.toCode())));
+								MedicationDispense.MedicationDispenseStatus.ONHOLD.getSystem(),
+								MedicationDispense.MedicationDispenseStatus.ONHOLD.toCode())));
 	}
 }

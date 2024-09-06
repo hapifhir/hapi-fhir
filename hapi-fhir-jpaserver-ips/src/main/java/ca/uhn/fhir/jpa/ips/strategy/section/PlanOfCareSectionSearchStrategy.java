@@ -17,35 +17,30 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.ips.jpa.section;
+package ca.uhn.fhir.jpa.ips.strategy.section;
 
 import ca.uhn.fhir.jpa.ips.api.IpsSectionContext;
-import ca.uhn.fhir.jpa.ips.jpa.JpaSectionSearchStrategy;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import jakarta.annotation.Nonnull;
-import org.hl7.fhir.r4.model.MedicationRequest;
+import org.hl7.fhir.r4.model.CarePlan;
 
-public class MedicationSummaryJpaSectionSearchStrategyMedicationRequest
-		extends JpaSectionSearchStrategy<MedicationRequest> {
+public class PlanOfCareSectionSearchStrategy extends SectionSearchStrategy<CarePlan> {
 
 	@Override
 	public void massageResourceSearch(
-			@Nonnull IpsSectionContext<MedicationRequest> theIpsSectionContext,
+			@Nonnull IpsSectionContext<CarePlan> theIpsSectionContext,
 			@Nonnull SearchParameterMap theSearchParameterMap) {
-		theSearchParameterMap.addInclude(MedicationRequest.INCLUDE_MEDICATION);
 		theSearchParameterMap.add(
-				MedicationRequest.SP_STATUS,
+				CarePlan.SP_STATUS,
 				new TokenOrListParam()
 						.addOr(new TokenParam(
-								MedicationRequest.MedicationRequestStatus.ACTIVE.getSystem(),
-								MedicationRequest.MedicationRequestStatus.ACTIVE.toCode()))
+								CarePlan.CarePlanStatus.ACTIVE.getSystem(), CarePlan.CarePlanStatus.ACTIVE.toCode()))
 						.addOr(new TokenParam(
-								MedicationRequest.MedicationRequestStatus.UNKNOWN.getSystem(),
-								MedicationRequest.MedicationRequestStatus.UNKNOWN.toCode()))
+								CarePlan.CarePlanStatus.ONHOLD.getSystem(), CarePlan.CarePlanStatus.ONHOLD.toCode()))
 						.addOr(new TokenParam(
-								MedicationRequest.MedicationRequestStatus.ONHOLD.getSystem(),
-								MedicationRequest.MedicationRequestStatus.ONHOLD.toCode())));
+								CarePlan.CarePlanStatus.UNKNOWN.getSystem(),
+								CarePlan.CarePlanStatus.UNKNOWN.toCode())));
 	}
 }

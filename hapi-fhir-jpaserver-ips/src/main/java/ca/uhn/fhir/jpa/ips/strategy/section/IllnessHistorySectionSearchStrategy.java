@@ -17,24 +17,36 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.ips.jpa.section;
+package ca.uhn.fhir.jpa.ips.strategy.section;
 
 import ca.uhn.fhir.jpa.ips.api.IpsSectionContext;
-import ca.uhn.fhir.jpa.ips.jpa.JpaSectionSearchStrategy;
 import jakarta.annotation.Nonnull;
-import org.hl7.fhir.r4.model.ClinicalImpression;
+import org.hl7.fhir.r4.model.Condition;
 
-public class FunctionalStatusJpaSectionSearchStrategy extends JpaSectionSearchStrategy<ClinicalImpression> {
+public class IllnessHistorySectionSearchStrategy extends SectionSearchStrategy<Condition> {
 
 	@SuppressWarnings("RedundantIfStatement")
 	@Override
 	public boolean shouldInclude(
-			@Nonnull IpsSectionContext<ClinicalImpression> theIpsSectionContext,
-			@Nonnull ClinicalImpression theCandidate) {
-		if (theCandidate.getStatus() == ClinicalImpression.ClinicalImpressionStatus.INPROGRESS
-				|| theCandidate.getStatus() == ClinicalImpression.ClinicalImpressionStatus.ENTEREDINERROR) {
+			@Nonnull IpsSectionContext<Condition> theIpsSectionContext, @Nonnull Condition theCandidate) {
+		if (theCandidate
+				.getVerificationStatus()
+				.hasCoding("http://terminology.hl7.org/CodeSystem/condition-ver-status", "entered-in-error")) {
 			return false;
 		}
-		return true;
+
+		if (theCandidate
+						.getClinicalStatus()
+						.hasCoding("http://terminology.hl7.org/CodeSystem/condition-clinical", "inactive")
+				|| theCandidate
+						.getClinicalStatus()
+						.hasCoding("http://terminology.hl7.org/CodeSystem/condition-clinical", "resolved")
+				|| theCandidate
+						.getClinicalStatus()
+						.hasCoding("http://terminology.hl7.org/CodeSystem/condition-clinical", "remission")) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 }

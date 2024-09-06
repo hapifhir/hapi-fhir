@@ -17,17 +17,16 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.ips.jpa.section;
+package ca.uhn.fhir.jpa.ips.strategy.section;
 
 import ca.uhn.fhir.jpa.ips.api.IpsSectionContext;
-import ca.uhn.fhir.jpa.ips.jpa.JpaSectionSearchStrategy;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.r4.model.Observation;
 
-public class SocialHistoryJpaSectionSearchStrategy extends JpaSectionSearchStrategy<Observation> {
+public class DiagnosticResultsSectionSearchStrategyObservation extends SectionSearchStrategy<Observation> {
 
 	@Override
 	public void massageResourceSearch(
@@ -37,7 +36,7 @@ public class SocialHistoryJpaSectionSearchStrategy extends JpaSectionSearchStrat
 				Observation.SP_CATEGORY,
 				new TokenOrListParam()
 						.addOr(new TokenParam(
-								"http://terminology.hl7.org/CodeSystem/observation-category", "social-history")));
+								"http://terminology.hl7.org/CodeSystem/observation-category", "laboratory")));
 	}
 
 	@SuppressWarnings("RedundantIfStatement")
@@ -45,7 +44,9 @@ public class SocialHistoryJpaSectionSearchStrategy extends JpaSectionSearchStrat
 	public boolean shouldInclude(
 			@Nonnull IpsSectionContext<Observation> theIpsSectionContext, @Nonnull Observation theCandidate) {
 		// code filtering not yet applied
-		if (theCandidate.getStatus() == Observation.ObservationStatus.PRELIMINARY) {
+		if (theCandidate.getStatus() == Observation.ObservationStatus.CANCELLED
+				|| theCandidate.getStatus() == Observation.ObservationStatus.ENTEREDINERROR
+				|| theCandidate.getStatus() == Observation.ObservationStatus.PRELIMINARY) {
 			return false;
 		}
 

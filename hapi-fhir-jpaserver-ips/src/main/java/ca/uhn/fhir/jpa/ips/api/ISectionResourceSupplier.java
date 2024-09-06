@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.ips.api;
 
+import ca.uhn.fhir.jpa.ips.strategy.section.ISectionSearchStrategy;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -39,7 +40,7 @@ import java.util.List;
  * an IPS document. If your resources can be collected by querying a JPS
  * repository, you can use {@link ca.uhn.fhir.jpa.ips.jpa.JpaSectionResourceSupplier}
  * as the implementation of this interface, and
- * {@link ca.uhn.fhir.jpa.ips.jpa.IJpaSectionSearchStrategy} becomes the class
+ * {@link ISectionSearchStrategy} becomes the class
  * that is used to define your searches.
  * </p>
  *

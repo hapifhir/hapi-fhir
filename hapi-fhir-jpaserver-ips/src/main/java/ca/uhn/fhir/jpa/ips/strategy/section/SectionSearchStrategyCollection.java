@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.ips.jpa;
+package ca.uhn.fhir.jpa.ips.strategy.section;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
@@ -25,17 +25,17 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-public class JpaSectionSearchStrategyCollection {
+public class SectionSearchStrategyCollection {
 
 	private Map<Class<? extends IBaseResource>, Object> mySearchStrategies;
 
-	private JpaSectionSearchStrategyCollection(Map<Class<? extends IBaseResource>, Object> theSearchStrategies) {
+	private SectionSearchStrategyCollection(Map<Class<? extends IBaseResource>, Object> theSearchStrategies) {
 		mySearchStrategies = theSearchStrategies;
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T extends IBaseResource> IJpaSectionSearchStrategy<T> getSearchStrategy(Class<T> theClass) {
-		return (IJpaSectionSearchStrategy<T>) mySearchStrategies.get(theClass);
+	public <T extends IBaseResource> ISectionSearchStrategy<T> getSearchStrategy(Class<T> theClass) {
+		return (ISectionSearchStrategy<T>) mySearchStrategies.get(theClass);
 	}
 
 	public Collection<Class<? extends IBaseResource>> getResourceTypes() {
@@ -50,13 +50,13 @@ public class JpaSectionSearchStrategyCollection {
 		private Map<Class<? extends IBaseResource>, Object> mySearchStrategies = new HashMap<>();
 
 		public <T extends IBaseResource> JpaSectionSearchStrategyCollectionBuilder addStrategy(
-				Class<T> theType, IJpaSectionSearchStrategy<T> theSearchStrategy) {
+				Class<T> theType, ISectionSearchStrategy<T> theSearchStrategy) {
 			mySearchStrategies.put(theType, theSearchStrategy);
 			return this;
 		}
 
-		public JpaSectionSearchStrategyCollection build() {
-			return new JpaSectionSearchStrategyCollection(mySearchStrategies);
+		public SectionSearchStrategyCollection build() {
+			return new SectionSearchStrategyCollection(mySearchStrategies);
 		}
 	}
 }

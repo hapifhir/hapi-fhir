@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.ips.jpa;
+package ca.uhn.fhir.jpa.ips.strategy.section;
 
 import ca.uhn.fhir.jpa.ips.api.IpsSectionContext;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -30,7 +30,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
  *
  * @since 7.2.0
  */
-public interface IJpaSectionSearchStrategy<T extends IBaseResource> {
+public interface ISectionSearchStrategy<T extends IBaseResource> {
 
 	/**
 	 * This method can manipulate the {@link SearchParameterMap} that will

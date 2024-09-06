@@ -17,26 +17,27 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.ips.jpa.section;
+package ca.uhn.fhir.jpa.ips.strategy.section;
 
 import ca.uhn.fhir.jpa.ips.api.IpsSectionContext;
-import ca.uhn.fhir.jpa.ips.jpa.JpaSectionSearchStrategy;
 import jakarta.annotation.Nonnull;
-import org.hl7.fhir.r4.model.DiagnosticReport;
+import org.hl7.fhir.r4.model.AllergyIntolerance;
 
-public class DiagnosticResultsJpaSectionSearchStrategyDiagnosticReport
-		extends JpaSectionSearchStrategy<DiagnosticReport> {
+public class AllergyIntoleranceSectionSearchStrategy extends SectionSearchStrategy<AllergyIntolerance> {
 
-	@SuppressWarnings("RedundantIfStatement")
 	@Override
 	public boolean shouldInclude(
-			@Nonnull IpsSectionContext theIpsSectionContext, @Nonnull DiagnosticReport theCandidate) {
-		if (theCandidate.getStatus() == DiagnosticReport.DiagnosticReportStatus.CANCELLED
-				|| theCandidate.getStatus() == DiagnosticReport.DiagnosticReportStatus.ENTEREDINERROR
-				|| theCandidate.getStatus() == DiagnosticReport.DiagnosticReportStatus.PRELIMINARY) {
-			return false;
-		}
-
-		return true;
+			@Nonnull IpsSectionContext theIpsSectionContext, @Nonnull AllergyIntolerance theCandidate) {
+		return !theCandidate
+						.getClinicalStatus()
+						.hasCoding("http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical", "inactive")
+				&& !theCandidate
+						.getClinicalStatus()
+						.hasCoding("http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical", "resolved")
+				&& !theCandidate
+						.getVerificationStatus()
+						.hasCoding(
+								"http://terminology.hl7.org/CodeSystem/allergyintolerance-verification",
+								"entered-in-error");
 	}
 }

@@ -17,11 +17,11 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.ips.jpa;
+package ca.uhn.fhir.jpa.ips.strategy.section;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-public class JpaSectionSearchStrategy<T extends IBaseResource> implements IJpaSectionSearchStrategy<T> {
+public class SectionSearchStrategy<T extends IBaseResource> implements ISectionSearchStrategy<T> {
 
 	// nothing for now, interface has default methods
 

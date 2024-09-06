@@ -17,31 +17,30 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.ips.jpa.section;
+package ca.uhn.fhir.jpa.ips.strategy.section;
 
 import ca.uhn.fhir.jpa.ips.api.IpsSectionContext;
-import ca.uhn.fhir.jpa.ips.jpa.JpaSectionSearchStrategy;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.rest.param.TokenOrListParam;
-import ca.uhn.fhir.rest.param.TokenParam;
 import jakarta.annotation.Nonnull;
-import org.hl7.fhir.r4.model.CarePlan;
+import org.hl7.fhir.r4.model.DeviceUseStatement;
 
-public class PlanOfCareJpaSectionSearchStrategy extends JpaSectionSearchStrategy<CarePlan> {
+public class MedicalDevicesSectionSearchStrategy extends SectionSearchStrategy<DeviceUseStatement> {
 
 	@Override
 	public void massageResourceSearch(
-			@Nonnull IpsSectionContext<CarePlan> theIpsSectionContext,
+			@Nonnull IpsSectionContext<DeviceUseStatement> theIpsSectionContext,
 			@Nonnull SearchParameterMap theSearchParameterMap) {
-		theSearchParameterMap.add(
-				CarePlan.SP_STATUS,
-				new TokenOrListParam()
-						.addOr(new TokenParam(
-								CarePlan.CarePlanStatus.ACTIVE.getSystem(), CarePlan.CarePlanStatus.ACTIVE.toCode()))
-						.addOr(new TokenParam(
-								CarePlan.CarePlanStatus.ONHOLD.getSystem(), CarePlan.CarePlanStatus.ONHOLD.toCode()))
-						.addOr(new TokenParam(
-								CarePlan.CarePlanStatus.UNKNOWN.getSystem(),
-								CarePlan.CarePlanStatus.UNKNOWN.toCode())));
+		theSearchParameterMap.addInclude(DeviceUseStatement.INCLUDE_DEVICE);
+	}
+
+	@SuppressWarnings("RedundantIfStatement")
+	@Override
+	public boolean shouldInclude(
+			@Nonnull IpsSectionContext<DeviceUseStatement> theIpsSectionContext,
+			@Nonnull DeviceUseStatement theCandidate) {
+		if (theCandidate.getStatus() == DeviceUseStatement.DeviceUseStatementStatus.ENTEREDINERROR) {
+			return false;
+		}
+		return true;
 	}
 }
