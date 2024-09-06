@@ -253,16 +253,15 @@ class WorkChannelMessageHandler implements MessageHandler {
 							.flatMap(MessageProcess::buildStepExecutor));
 
 			processingPreparation.ifPresentOrElse(
-				// all the setup is happy and committed.  Do the work.
-				process -> process.myStepExector.executeStep(),
-				() -> {
-					// discard the chunk
-					ourLog.debug("Discarding chunk notification {}", workNotification);
-				});
+					// all the setup is happy and committed.  Do the work.
+					process -> process.myStepExector.executeStep(),
+					() -> {
+						// discard the chunk
+						ourLog.debug("Discarding chunk notification {}", workNotification);
+					});
 		} finally {
 			BatchJobTracingContext.clearBatchJobsIds();
 		}
-
 	}
 
 	/**
@@ -305,5 +304,4 @@ class WorkChannelMessageHandler implements MessageHandler {
 			MDC.remove(CHUNK_ID);
 		}
 	}
-
 }
