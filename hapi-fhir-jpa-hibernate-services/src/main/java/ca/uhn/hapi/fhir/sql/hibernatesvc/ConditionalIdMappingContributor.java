@@ -11,7 +11,6 @@ import org.hibernate.boot.spi.AdditionalMappingContributions;
 import org.hibernate.boot.spi.InFlightMetadataCollector;
 import org.hibernate.boot.spi.MetadataBuildingContext;
 import org.hibernate.internal.util.collections.IdentitySet;
-import org.hibernate.mapping.Bag;
 import org.hibernate.mapping.BasicValue;
 import org.hibernate.mapping.Collection;
 import org.hibernate.mapping.Column;
@@ -43,14 +42,13 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 public class ConditionalIdMappingContributor implements org.hibernate.boot.spi.AdditionalMappingContributor {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ConditionalIdMappingContributor.class);
+	private final Set<String> myQualifiedIdRemovedColumnNames = new HashSet<>();
 	private Map<String, Class<?>> myTableNameToEntityType;
 
 	@Override
 	public String getContributorName() {
 		return "PkCleaningMappingContributor";
 	}
-
-	private final Set<String> myQualifiedIdRemovedColumnNames = new HashSet<>();
 
 	@Override
 	public void contribute(
@@ -69,7 +67,7 @@ public class ConditionalIdMappingContributor implements org.hibernate.boot.spi.A
 			.getEntityBindingMap()
 			.values()
 			.stream()
-				.collect(Collectors.toMap(t->t.getTable().getName(), t->getType(t.getClassName())));
+			.collect(Collectors.toMap(t -> t.getTable().getName(), t -> getType(t.getClassName())));
 
 		removeConditionalIdProperties(theMetadata);
 	}
@@ -118,6 +116,13 @@ public class ConditionalIdMappingContributor implements org.hibernate.boot.spi.A
 							next.setNullable(true);
 						}
 					}
+
+					// We're removing it from the identifierMapper so we need to add it to the
+					// entity class itself instead
+					entityPersistentClass.addProperty(removedProperty);
+//					addToCollectionUsingReflection(entityPersistentClass, "properties", removedProperty);
+//					addToCollectionUsingReflection(entityPersistentClass, "declaredProperties", removedProperty);
+
 				}
 			}
 
@@ -126,6 +131,7 @@ public class ConditionalIdMappingContributor implements org.hibernate.boot.spi.A
 			}
 
 			identifier.getSelectables().removeIf(t -> idRemovedColumnNames.contains(t.getText()));
+			identifier.getColumns().removeIf(t -> idRemovedColumnNames.contains(t.getName()));
 
 			Component identifierMapper = entityPersistentClass.getIdentifierMapper();
 			if (identifierMapper != null) {
@@ -173,14 +179,14 @@ public class ConditionalIdMappingContributor implements org.hibernate.boot.spi.A
 					String propertyName = manyToOne.getPropertyName();
 					Set<String> columnNamesToRemoveFromFks = determineFilteredColumnNamesInForeignKey(entityType, propertyName, targetTableName);
 
-					manyToOne.getColumns().removeIf(t-> columnNamesToRemoveFromFks.contains(t.getName()));
-					foreignKey.getColumns().removeIf(t-> columnNamesToRemoveFromFks.contains(t.getName()));
+					manyToOne.getColumns().removeIf(t -> columnNamesToRemoveFromFks.contains(t.getName()));
+					foreignKey.getColumns().removeIf(t -> columnNamesToRemoveFromFks.contains(t.getName()));
 
-					columnNamesToRemoveFromFks.forEach(t->myQualifiedIdRemovedColumnNames.add(table.getName() + "#" + t));
+					columnNamesToRemoveFromFks.forEach(t -> myQualifiedIdRemovedColumnNames.add(table.getName() + "#" + t));
 
 				} else {
 
-					foreignKey.getColumns().removeIf(t-> myQualifiedIdRemovedColumnNames.contains(foreignKey.getReferencedTable().getName() + "#" + t.getName()));
+					foreignKey.getColumns().removeIf(t -> myQualifiedIdRemovedColumnNames.contains(foreignKey.getReferencedTable().getName() + "#" + t.getName()));
 
 				}
 			}
@@ -203,7 +209,7 @@ public class ConditionalIdMappingContributor implements org.hibernate.boot.spi.A
 					if (propertyKey instanceof DependantValue) {
 						DependantValue dependantValue = (DependantValue) propertyKey;
 
-						dependantValue.getColumns().removeIf(t->myQualifiedIdRemovedColumnNames.contains(propertyValueBag.getCollectionTable().getName() + "#" + t.getName()));
+						dependantValue.getColumns().removeIf(t -> myQualifiedIdRemovedColumnNames.contains(propertyValueBag.getCollectionTable().getName() + "#" + t.getName()));
 						dependantValue.copy(); // FIXME: remove
 					}
 				}

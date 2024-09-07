@@ -47,7 +47,6 @@ public class ResourceSearchUrlEntityPK implements Serializable {
 	private String my_A_SearchUrl;
 
 	@Column(name = PARTITION_ID_COLUMN_NAME, nullable = false, insertable = false, updatable = false)
-	@ConditionalIdProperty
 	// Weird field name isto ensure that this the second key in the index
 	private Integer my_B_PartitionId;
 

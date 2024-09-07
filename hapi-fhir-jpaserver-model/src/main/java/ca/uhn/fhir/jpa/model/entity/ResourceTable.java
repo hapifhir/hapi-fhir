@@ -1060,8 +1060,17 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	}
 
 	public static class ResourceTableId {
+		// FIXME: reuse the same composite ID class everywhere, and implement hashcode/equals
 		private Long myId;
 		private Integer myPartitionIdValue;
+
+		public ResourceTableId() {
+			// nothing
+		}
+
+		public ResourceTableId(Long theId) {
+			myId = theId;
+		}
 	}
 
 	/**
