@@ -11,10 +11,14 @@ import org.hibernate.boot.spi.AdditionalMappingContributions;
 import org.hibernate.boot.spi.InFlightMetadataCollector;
 import org.hibernate.boot.spi.MetadataBuildingContext;
 import org.hibernate.internal.util.collections.IdentitySet;
+import org.hibernate.mapping.Bag;
 import org.hibernate.mapping.BasicValue;
+import org.hibernate.mapping.Collection;
 import org.hibernate.mapping.Column;
 import org.hibernate.mapping.Component;
+import org.hibernate.mapping.DependantValue;
 import org.hibernate.mapping.ForeignKey;
+import org.hibernate.mapping.KeyValue;
 import org.hibernate.mapping.PersistentClass;
 import org.hibernate.mapping.PrimaryKey;
 import org.hibernate.mapping.Property;
@@ -24,16 +28,22 @@ import org.hibernate.mapping.Value;
 import org.hibernate.type.ComponentType;
 import org.hibernate.type.CompositeType;
 import org.hibernate.type.EmbeddedComponentType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class ConditionalIdMappingContributor implements org.hibernate.boot.spi.AdditionalMappingContributor {
+
+	private static final Logger ourLog = LoggerFactory.getLogger(ConditionalIdMappingContributor.class);
+	private Map<String, Class<?>> myTableNameToEntityType;
 
 	@Override
 	public String getContributorName() {
@@ -55,11 +65,18 @@ public class ConditionalIdMappingContributor implements org.hibernate.boot.spi.A
 			return;
 		}
 
+		myTableNameToEntityType = theMetadata
+			.getEntityBindingMap()
+			.values()
+			.stream()
+				.collect(Collectors.toMap(t->t.getTable().getName(), t->getType(t.getClassName())));
+
 		removeConditionalIdProperties(theMetadata);
 	}
 
 	private void removeConditionalIdProperties(InFlightMetadataCollector theMetadata) {
 
+		// Adjust primary keys
 		for (var nextEntry : theMetadata.getEntityBindingMap().entrySet()) {
 			IdentitySet<Column> idRemovedColumns = new IdentitySet<>();
 			Set<String> idRemovedColumnNames = new HashSet<>();
@@ -140,28 +157,9 @@ public class ConditionalIdMappingContributor implements org.hibernate.boot.spi.A
 			PrimaryKey pk = table.getPrimaryKey();
 			List<Column> pkColumns = pk.getColumns();
 			pkColumns.removeIf(idRemovedColumns::contains);
-
-			for (ForeignKey foreignKey : table.getForeignKeys().values()) {
-				Value value = foreignKey.getColumn(0).getValue();
-				if (value instanceof ToOne) {
-					ToOne manyToOne = (ToOne) value;
-//					String propertyName = manyToOne.getPropertyName();
-//					Field field = getField(entityType, propertyName);
-//					ConditionalIdRelation conditionalIdRelation = field.getAnnotation(ConditionalIdRelation.class);
-//					if (conditionalIdRelation != null) {
-//						foreignKey.getColumns().removeIf(t->t.getName().equals(conditionalIdRelation.column()));
-//						manyToOne.getColumns().removeIf(t->t.getName().equals(conditionalIdRelation.column()));
-//					}
-
-//					manyToOne.getColumns().removeIf(t->idRemovedColumnNames.contains(t.getName()));
-//					foreignKey.getColumns().removeIf(t->idRemovedColumnNames.contains(t.getName()));
-
-				}
-			}
-
 		}
 
-		// Adjust foreign keys
+		// Adjust relations with local filtered columns (e.g. ManyToOne)
 		for (var nextEntry : theMetadata.getEntityBindingMap().entrySet()) {
 			PersistentClass entityPersistentClass = nextEntry.getValue();
 			Table table = entityPersistentClass.getTable();
@@ -171,33 +169,69 @@ public class ConditionalIdMappingContributor implements org.hibernate.boot.spi.A
 					ToOne manyToOne = (ToOne) value;
 
 					String targetTableName = theMetadata.getEntityBindingMap().get(manyToOne.getReferencedEntityName()).getTable().getName();
-
 					Class<?> entityType = getType(nextEntry.getKey());
-					Field field = getField(entityType, manyToOne.getPropertyName());
-					Validate.notNull(field, "Unable to find field %s on entity %s", manyToOne.getPropertyName(), entityType.getName());
-					JoinColumns joinColumns = field.getAnnotation(JoinColumns.class);
-					Set<String> columnNamesToRemoveFromFks = new HashSet<>();
-					if (joinColumns != null) {
-
-						for (JoinColumn joinColumn : joinColumns.value()) {
-							String targetColumnName = joinColumn.referencedColumnName();
-							String sourceColumnName = joinColumn.name();
-							if (isBlank(targetColumnName)) {
-								targetColumnName = sourceColumnName;
-							}
-							if (myQualifiedIdRemovedColumnNames.contains(targetTableName + "#" + targetColumnName)) {
-								columnNamesToRemoveFromFks.add(sourceColumnName);
-							}
-						}
-					}
+					String propertyName = manyToOne.getPropertyName();
+					Set<String> columnNamesToRemoveFromFks = determineFilteredColumnNamesInForeignKey(entityType, propertyName, targetTableName);
 
 					manyToOne.getColumns().removeIf(t-> columnNamesToRemoveFromFks.contains(t.getName()));
 					foreignKey.getColumns().removeIf(t-> columnNamesToRemoveFromFks.contains(t.getName()));
+
+					columnNamesToRemoveFromFks.forEach(t->myQualifiedIdRemovedColumnNames.add(table.getName() + "#" + t));
+
 				} else {
+
+					foreignKey.getColumns().removeIf(t-> myQualifiedIdRemovedColumnNames.contains(foreignKey.getReferencedTable().getName() + "#" + t.getName()));
 
 				}
 			}
 		}
+
+
+		// Adjust relations with remote filtered columns (e.g. OneToMany)
+		for (var nextEntry : theMetadata.getEntityBindingMap().entrySet()) {
+			PersistentClass entityPersistentClass = nextEntry.getValue();
+			Table table = entityPersistentClass.getTable();
+			if (table.getName().equals("HFJ_RESOURCE")) {
+				ourLog.trace(table.getName()); // FIXME: remove
+			}
+
+			for (Property property : entityPersistentClass.getProperties()) {
+				Value propertyValue = property.getValue();
+				if (propertyValue instanceof Collection) {
+					Collection propertyValueBag = (Collection) propertyValue;
+					KeyValue propertyKey = propertyValueBag.getKey();
+					if (propertyKey instanceof DependantValue) {
+						DependantValue dependantValue = (DependantValue) propertyKey;
+
+						dependantValue.getColumns().removeIf(t->myQualifiedIdRemovedColumnNames.contains(propertyValueBag.getCollectionTable().getName() + "#" + t.getName()));
+						dependantValue.copy(); // FIXME: remove
+					}
+				}
+			}
+		}
+
+	}
+
+	@Nonnull
+	private Set<String> determineFilteredColumnNamesInForeignKey(Class<?> theEntityType, String thePropertyName, String theTargetTableName) {
+		Field field = getField(theEntityType, thePropertyName);
+		Validate.notNull(field, "Unable to find field %s on entity %s", thePropertyName, theEntityType.getName());
+		JoinColumns joinColumns = field.getAnnotation(JoinColumns.class);
+		Set<String> columnNamesToRemoveFromFks = new HashSet<>();
+		if (joinColumns != null) {
+
+			for (JoinColumn joinColumn : joinColumns.value()) {
+				String targetColumnName = joinColumn.referencedColumnName();
+				String sourceColumnName = joinColumn.name();
+				if (isBlank(targetColumnName)) {
+					targetColumnName = sourceColumnName;
+				}
+				if (myQualifiedIdRemovedColumnNames.contains(theTargetTableName + "#" + targetColumnName)) {
+					columnNamesToRemoveFromFks.add(sourceColumnName);
+				}
+			}
+		}
+		return columnNamesToRemoveFromFks;
 	}
 
 	@Nonnull
