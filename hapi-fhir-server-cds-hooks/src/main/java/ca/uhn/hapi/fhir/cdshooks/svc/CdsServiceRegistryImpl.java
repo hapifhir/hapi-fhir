@@ -20,7 +20,6 @@
 package ca.uhn.hapi.fhir.cdshooks.svc;
 
 import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsMethod;
@@ -38,7 +37,6 @@ import ca.uhn.hapi.fhir.cdshooks.svc.cr.discovery.ICrDiscoveryServiceFactory;
 import ca.uhn.hapi.fhir.cdshooks.svc.prefetch.CdsPrefetchSvc;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.PostConstruct;
@@ -50,7 +48,7 @@ import java.util.function.Function;
 
 public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 	private static final Logger ourLog = LoggerFactory.getLogger(CdsServiceRegistryImpl.class);
-
+	private final CdsServiceRequestJsonDeserializer myCdsServiceRequestJsonDeserializer;
 	private CdsServiceCache myServiceCache;
 
 	private final CdsHooksContextBooter myCdsHooksContextBooter;
@@ -60,24 +58,18 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 	private final ICrDiscoveryServiceFactory myCrDiscoveryServiceFactory;
 
 	public CdsServiceRegistryImpl(
-			CdsHooksContextBooter theCdsHooksContextBooter,
-			CdsPrefetchSvc theCdsPrefetchSvc,
-			ObjectMapper theObjectMapper,
-			ICdsCrServiceFactory theCdsCrServiceFactory,
-			ICrDiscoveryServiceFactory theCrDiscoveryServiceFactory,
-			FhirContext theFhirContext) {
+		CdsHooksContextBooter theCdsHooksContextBooter,
+		CdsPrefetchSvc theCdsPrefetchSvc,
+		ObjectMapper theObjectMapper,
+		ICdsCrServiceFactory theCdsCrServiceFactory,
+		ICrDiscoveryServiceFactory theCrDiscoveryServiceFactory,
+		CdsServiceRequestJsonDeserializer theCdsServiceRequestJsonDeserializer) {
 		myCdsHooksContextBooter = theCdsHooksContextBooter;
 		myCdsPrefetchSvc = theCdsPrefetchSvc;
 		myObjectMapper = theObjectMapper;
-		// registering this deserializer here instead of
-		// CdsHooksObjectMapperFactory to avoid circular
-		// dependency
-		SimpleModule module = new SimpleModule();
-		module.addDeserializer(
-				CdsServiceRequestJson.class, new CdsServiceRequestJsonDeserializer(this, theFhirContext));
-		myObjectMapper.registerModule(module);
 		myCdsCrServiceFactory = theCdsCrServiceFactory;
 		myCrDiscoveryServiceFactory = theCrDiscoveryServiceFactory;
+		myCdsServiceRequestJsonDeserializer = theCdsServiceRequestJsonDeserializer;
 	}
 
 	@PostConstruct
@@ -96,6 +88,13 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 		myCdsPrefetchSvc.augmentRequest(theCdsServiceRequestJson, serviceMethod);
 		Object response = serviceMethod.invoke(myObjectMapper, theCdsServiceRequestJson, theServiceId);
 		return encodeServiceResponse(theServiceId, response);
+	}
+
+	@Override
+	public CdsServiceResponseJson callServiceWithId(String theServiceId, Object theCdsServiceRequestJson) {
+		CdsServiceJson cdsServiceJson = getCdsServiceJson(theServiceId);
+		CdsServiceRequestJson deserialize = myCdsServiceRequestJsonDeserializer.deserialize(cdsServiceJson, theCdsServiceRequestJson);
+		return callService(theServiceId, deserialize);
 	}
 
 	@Override

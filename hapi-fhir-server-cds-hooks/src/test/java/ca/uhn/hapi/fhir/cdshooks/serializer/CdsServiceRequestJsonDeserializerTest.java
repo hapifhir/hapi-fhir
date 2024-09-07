@@ -1,106 +1,97 @@
 package ca.uhn.hapi.fhir.cdshooks.serializer;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.hapi.fhir.cdshooks.api.json.CdsHooksExtension;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceRequestContextJson;
+import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceRequestJson;
 import ca.uhn.hapi.fhir.cdshooks.custom.extensions.model.ExampleExtension;
-import ca.uhn.hapi.fhir.cdshooks.svc.CdsServiceRegistryImpl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.LinkedHashMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.doReturn;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @ExtendWith(MockitoExtension.class)
 class CdsServiceRequestJsonDeserializerTest {
-	@Mock
-	private CdsServiceRegistryImpl myCdsServiceRegistry;
+	private static final String SERVICE_ID = "service-id";
+	private static final String EXAMPLE_PROPERTY_VALUE = "example-value";
+	private static final String EXAMPLE_PROPERTY_KEY = "example-property";
 	private final FhirContext myFhirContext = FhirContext.forR4();
 	private CdsServiceRequestJsonDeserializer myFixture;
 
 	@BeforeEach()
 	void setup() {
-		myFixture = new CdsServiceRequestJsonDeserializer(myCdsServiceRegistry, myFhirContext);
+		myFixture = new CdsServiceRequestJsonDeserializer(myFhirContext, new ObjectMapper());
 	}
 
 	@Test
-	void configureObjectMapper() {
+	void deserialize_shouldDeserialize_whenValidCdsServiceRequestWithExtensionReceived() {
 		// setup
-		ObjectMapper input = new ObjectMapper();
+		final CdsServiceJson cdsServiceJson = withCdsServiceJsonIncludingExtensionClass();
+		final LinkedHashMap<String, Object> extension = withExtension();
+		final LinkedHashMap<String, Object> request = withRequest(extension);
 		// execute
-		myFixture.configureObjectMapper(input);
+		final CdsServiceRequestJson actual = myFixture.deserialize(cdsServiceJson, request);
 		// validate
-		assertThat(input.getRegisteredModuleIds()).hasSize(1);
+		assertThat(actual.getExtension()).isInstanceOf(ExampleExtension.class);
+		final ExampleExtension actualExtension = (ExampleExtension) actual.getExtension();
+		assertThat(actualExtension.getExampleProperty()).isEqualTo(EXAMPLE_PROPERTY_VALUE);
 	}
 
 	@Test
-	void deserializeExtensionWhenClassFoundShouldDeserializeExtension() throws JsonProcessingException {
+	void deserialize_shouldIgnoreExtraFieldsInsideExtension_whenExtensionContainsMoreFieldsThanDefinedInClass() {
 		// setup
-		final String serviceId = "service-id";
-		final String extension = """
-		{
-			"example-property": "example-value"
-		}
-		""";
+		final CdsServiceJson cdsServiceJson = withCdsServiceJsonIncludingExtensionClass();
+		final LinkedHashMap<String, Object> extension = withExtension();
+		extension.put("example-extra-property", "example-extra-value");
+		final LinkedHashMap<String, Object> request = withRequest(extension);
+		// execute
+		final CdsServiceRequestJson actual = myFixture.deserialize(cdsServiceJson, request);
+		// validate
+		assertThat(actual.getExtension()).isInstanceOf(ExampleExtension.class);
+		final ExampleExtension actualExtension = (ExampleExtension) actual.getExtension();
+		assertThat(actualExtension.getExampleProperty()).isEqualTo(EXAMPLE_PROPERTY_VALUE);
+	}
+
+	@Test
+	void deserialize_shouldThrow_whenCdsServiceRequestIncludesInvalidProperty() {
+		// setup
+		final CdsServiceJson cdsServiceJson = withCdsServiceJsonIncludingExtensionClass();
+		final LinkedHashMap<String, Object> extension = withExtension();
+		final LinkedHashMap<String, Object> request = withRequest(extension);
+		request.put("invalid-key", "some-value");
+		// execute & validate
+		assertThatThrownBy(
+			() -> myFixture.deserialize(cdsServiceJson, request))
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessageContaining("Invalid CdsServiceRequest received.");
+	}
+
+	@Test
+	void deserialize_shouldReturnNullExtension_whenNotClassFound() {
+		// setup
 		final CdsServiceJson cdsServiceJson = new CdsServiceJson();
-		cdsServiceJson.setId(serviceId);
-		cdsServiceJson.setExtensionClass(ExampleExtension.class);
-		doReturn(cdsServiceJson).when(myCdsServiceRegistry).getCdsServiceJson(serviceId);
+		cdsServiceJson.setId(SERVICE_ID);
+		final LinkedHashMap<String, Object> extension = withExtension();
+		extension.put("example-extra-property", "example-extra-value");
+		final LinkedHashMap<String, Object> request = withRequest(extension);
 		// execute
-		final ExampleExtension actual = (ExampleExtension) myFixture.deserializeExtension(serviceId, extension);
+		final CdsServiceRequestJson actual = myFixture.deserialize(cdsServiceJson, request);
 		// validate
-		assertThat(actual.getExampleProperty()).isEqualTo("example-value");
+		assertThat(actual.getExtension()).isNull();
 	}
 
 	@Test
-	void deserializeExtensionWhenClassFoundButExtensionHasExtraPropertiesShouldIgnoreExtraProperties() throws JsonProcessingException {
-		// setup
-		final String serviceId = "service-id";
-		final String extension = """
-		{
-			"example-property": "example-value",
-			"example-extra-property": "example-extra-value"
-		}
-		""";
-		final CdsServiceJson cdsServiceJson = new CdsServiceJson();
-		cdsServiceJson.setId(serviceId);
-		cdsServiceJson.setExtensionClass(ExampleExtension.class);
-		doReturn(cdsServiceJson).when(myCdsServiceRegistry).getCdsServiceJson(serviceId);
-		// execute
-		final ExampleExtension actual = (ExampleExtension) myFixture.deserializeExtension(serviceId, extension);
-		// validate
-		assertThat(actual.getExampleProperty()).isEqualTo("example-value");
-	}
-
-	@Test
-	void deserializeExtensionWhenNotClassFoundShouldReturnNull() throws JsonProcessingException {
-		// setup
-		final String serviceId = "service-id";
-		final String extension = """
-		{
-			"example-property": "example-value"
-		}
-		""";
-		final CdsServiceJson cdsServiceJson = new CdsServiceJson();
-		cdsServiceJson.setId(serviceId);
-		doReturn(cdsServiceJson).when(myCdsServiceRegistry).getCdsServiceJson(serviceId);
-		// execute
-		final CdsHooksExtension actual = myFixture.deserializeExtension(serviceId, extension);
-		// validate
-		assertThat(actual).isNull();
-	}
-
-	@Test
-	void deserializeRequestContextShouldDeserializeValidContext() throws JsonProcessingException {
+	void deserializeRequestContext_shouldDeserialize_whenContextIsValid() throws JsonProcessingException {
 		// setup
 		final String encounterId = "123";
 		final Patient patientContext = new Patient();
@@ -113,5 +104,27 @@ class CdsServiceRequestJsonDeserializerTest {
 		// validate
 		assertThat(actual.get("encounterId")).isEqualTo(encounterId);
 		assertThat(actual.get("patient")).usingRecursiveComparison().isEqualTo(patientContext);
+	}
+
+	@Nonnull
+	private static LinkedHashMap<String, Object> withExtension() {
+		final LinkedHashMap<String, Object> extension = new LinkedHashMap<>();
+		extension.put(EXAMPLE_PROPERTY_KEY, EXAMPLE_PROPERTY_VALUE);
+		return extension;
+	}
+
+	@Nonnull
+	private static CdsServiceJson withCdsServiceJsonIncludingExtensionClass() {
+		final CdsServiceJson cdsServiceJson = new CdsServiceJson();
+		cdsServiceJson.setId(SERVICE_ID);
+		cdsServiceJson.setExtensionClass(ExampleExtension.class);
+		return cdsServiceJson;
+	}
+
+	@Nonnull
+	private static LinkedHashMap<String, Object> withRequest(@Nonnull LinkedHashMap<String, Object> theExtension) {
+		final LinkedHashMap<String, Object> request = new LinkedHashMap<>();
+		request.put("extension", theExtension);
+		return request;
 	}
 }
