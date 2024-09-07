@@ -58,12 +58,12 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 	private final ICrDiscoveryServiceFactory myCrDiscoveryServiceFactory;
 
 	public CdsServiceRegistryImpl(
-		CdsHooksContextBooter theCdsHooksContextBooter,
-		CdsPrefetchSvc theCdsPrefetchSvc,
-		ObjectMapper theObjectMapper,
-		ICdsCrServiceFactory theCdsCrServiceFactory,
-		ICrDiscoveryServiceFactory theCrDiscoveryServiceFactory,
-		CdsServiceRequestJsonDeserializer theCdsServiceRequestJsonDeserializer) {
+			CdsHooksContextBooter theCdsHooksContextBooter,
+			CdsPrefetchSvc theCdsPrefetchSvc,
+			ObjectMapper theObjectMapper,
+			ICdsCrServiceFactory theCdsCrServiceFactory,
+			ICrDiscoveryServiceFactory theCrDiscoveryServiceFactory,
+			CdsServiceRequestJsonDeserializer theCdsServiceRequestJsonDeserializer) {
 		myCdsHooksContextBooter = theCdsHooksContextBooter;
 		myCdsPrefetchSvc = theCdsPrefetchSvc;
 		myObjectMapper = theObjectMapper;
@@ -93,7 +93,8 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 	@Override
 	public CdsServiceResponseJson callServiceWithId(String theServiceId, Object theCdsServiceRequestJson) {
 		CdsServiceJson cdsServiceJson = getCdsServiceJson(theServiceId);
-		CdsServiceRequestJson deserialize = myCdsServiceRequestJsonDeserializer.deserialize(cdsServiceJson, theCdsServiceRequestJson);
+		CdsServiceRequestJson deserialize =
+				myCdsServiceRequestJsonDeserializer.deserialize(cdsServiceJson, theCdsServiceRequestJson);
 		return callService(theServiceId, deserialize);
 	}
 

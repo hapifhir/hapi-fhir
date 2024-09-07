@@ -101,7 +101,8 @@ public class CdsHooksConfig {
 			ICdsCrServiceFactory theCdsCrServiceFactory,
 			ICrDiscoveryServiceFactory theCrDiscoveryServiceFactory,
 			FhirContext theFhirContext) {
-		final CdsServiceRequestJsonDeserializer cdsServiceRequestJsonDeserializer = new CdsServiceRequestJsonDeserializer(theFhirContext, theObjectMapper);
+		final CdsServiceRequestJsonDeserializer cdsServiceRequestJsonDeserializer =
+				new CdsServiceRequestJsonDeserializer(theFhirContext, theObjectMapper);
 		return new CdsServiceRegistryImpl(
 				theCdsHooksContextBooter,
 				theCdsPrefetchSvc,

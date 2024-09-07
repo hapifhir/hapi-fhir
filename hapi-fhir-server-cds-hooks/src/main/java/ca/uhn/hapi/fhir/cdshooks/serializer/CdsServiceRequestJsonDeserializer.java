@@ -40,27 +40,31 @@ public class CdsServiceRequestJsonDeserializer {
 	private final FhirContext myFhirContext;
 	private final IParser myParser;
 
-	public CdsServiceRequestJsonDeserializer(@Nonnull FhirContext theFhirContext, @Nonnull ObjectMapper theObjectMapper) {
+	public CdsServiceRequestJsonDeserializer(
+			@Nonnull FhirContext theFhirContext, @Nonnull ObjectMapper theObjectMapper) {
 		myFhirContext = theFhirContext;
 		myParser = myFhirContext.newJsonParser().setPrettyPrint(true);
 		myObjectMapper = theObjectMapper;
 	}
 
-	public CdsServiceRequestJson deserialize(@Nonnull CdsServiceJson theCdsServiceJson, @Nonnull Object theCdsServiceRequestJson) {
-		final JsonNode cdsServiceRequestJsonNode = myObjectMapper.convertValue(theCdsServiceRequestJson, JsonNode.class);
+	public CdsServiceRequestJson deserialize(
+			@Nonnull CdsServiceJson theCdsServiceJson, @Nonnull Object theCdsServiceRequestJson) {
+		final JsonNode cdsServiceRequestJsonNode =
+				myObjectMapper.convertValue(theCdsServiceRequestJson, JsonNode.class);
 		final JsonNode extensionNode = cdsServiceRequestJsonNode.get("extension");
 		final JsonNode requestContextNode = cdsServiceRequestJsonNode.get("context");
 		// TODO: Adi add validation for required fields
 		try {
 			final CdsServiceRequestJson cdsServiceRequestJson =
-				myObjectMapper.convertValue(cdsServiceRequestJsonNode, CdsServiceRequestJson.class);
+					myObjectMapper.convertValue(cdsServiceRequestJsonNode, CdsServiceRequestJson.class);
 			if (extensionNode != null) {
-				CdsHooksExtension myRequestExtension = deserializeExtension(theCdsServiceJson, extensionNode.toString());
+				CdsHooksExtension myRequestExtension =
+						deserializeExtension(theCdsServiceJson, extensionNode.toString());
 				cdsServiceRequestJson.setExtension(myRequestExtension);
 			}
 			if (requestContextNode != null) {
 				LinkedHashMap<String, Object> map =
-					myObjectMapper.readValue(requestContextNode.toString(), LinkedHashMap.class);
+						myObjectMapper.readValue(requestContextNode.toString(), LinkedHashMap.class);
 				cdsServiceRequestJson.setContext(deserializeRequestContext(map));
 			}
 			return cdsServiceRequestJson;
@@ -69,7 +73,8 @@ public class CdsServiceRequestJsonDeserializer {
 		}
 	}
 
-	private CdsHooksExtension deserializeExtension(@Nonnull CdsServiceJson theCdsServiceJson, @Nonnull String theExtension) throws JsonProcessingException {
+	private CdsHooksExtension deserializeExtension(
+			@Nonnull CdsServiceJson theCdsServiceJson, @Nonnull String theExtension) throws JsonProcessingException {
 		Class<? extends CdsHooksExtension> extensionClass = theCdsServiceJson.getExtensionClass();
 		if (extensionClass == null) {
 			return null;
