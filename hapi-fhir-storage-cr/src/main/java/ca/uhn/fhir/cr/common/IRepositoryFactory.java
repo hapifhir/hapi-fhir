@@ -23,6 +23,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.opencds.cqf.fhir.api.Repository;
 
 @FunctionalInterface
+// LUKETODO:  either do a bump or create a separate Factory interface
 public interface IRepositoryFactory {
 	Repository create(RequestDetails theRequestDetails);
 }
