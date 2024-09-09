@@ -83,6 +83,7 @@ class CdsServiceRequestJsonDeserializerTest {
 		assertThatThrownBy(
 			() -> myFixture.deserialize(cdsServiceJson, request))
 			.isInstanceOf(InvalidRequestException.class)
+			.hasMessageContaining("HAPI-2551:")
 			.hasMessageContaining("Invalid CdsServiceRequest received.");
 	}
 
@@ -111,6 +112,7 @@ class CdsServiceRequestJsonDeserializerTest {
 		// execute and validate
 		assertThatThrownBy(() -> myFixture.deserialize(cdsServiceJson, request))
 			.isInstanceOf(InvalidRequestException.class)
+			.hasMessageContaining("HAPI-2549:")
 			.hasMessageContaining("hook cannot be null for a CdsServiceRequest.");
 	}
 
@@ -124,6 +126,7 @@ class CdsServiceRequestJsonDeserializerTest {
 		// execute and validate
 		assertThatThrownBy(() -> myFixture.deserialize(cdsServiceJson, request))
 			.isInstanceOf(InvalidRequestException.class)
+			.hasMessageContaining("HAPI-2550:")
 			.hasMessageContaining("context cannot be null for a CdsServiceRequest.");
 	}
 
@@ -137,7 +140,8 @@ class CdsServiceRequestJsonDeserializerTest {
 		// execute and validate
 		assertThatThrownBy(() -> myFixture.deserialize(cdsServiceJson, request))
 			.isInstanceOf(InvalidRequestException.class)
-				.hasMessageContaining("hookInstance cannot be null for a CdsServiceRequest.");
+			.hasMessageContaining("HAPI-2548:")
+			.hasMessageContaining("hookInstance cannot be null for a CdsServiceRequest.");
 	}
 
 	@Test

@@ -20,6 +20,7 @@
 package ca.uhn.hapi.fhir.cdshooks.serializer;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsHooksExtension;
@@ -57,10 +58,10 @@ public class CdsServiceRequestJsonDeserializer {
 		final JsonNode hookIdNode = cdsServiceRequestJsonNode.get("hook");
 		try {
 			if (hookInstanceNode == null) {
-				throw new InvalidRequestException("hookInstance cannot be null for a CdsServiceRequest.");
+				throw new InvalidRequestException(Msg.code(2548) + "hookInstance cannot be null for a CdsServiceRequest.");
 			}
 			if (hookIdNode == null) {
-				throw new InvalidRequestException("hook cannot be null for a CdsServiceRequest.");
+				throw new InvalidRequestException(Msg.code(2549) +"hook cannot be null for a CdsServiceRequest.");
 			}
 			final CdsServiceRequestJson cdsServiceRequestJson =
 					myObjectMapper.convertValue(cdsServiceRequestJsonNode, CdsServiceRequestJson.class);
@@ -74,11 +75,11 @@ public class CdsServiceRequestJsonDeserializer {
 						myObjectMapper.readValue(requestContextNode.toString(), LinkedHashMap.class);
 				cdsServiceRequestJson.setContext(deserializeContext(map));
 			} else {
-				throw new InvalidRequestException("context cannot be null for a CdsServiceRequest.");
+				throw new InvalidRequestException(Msg.code(2550) +"context cannot be null for a CdsServiceRequest.");
 			}
 			return cdsServiceRequestJson;
 		} catch (JsonProcessingException | IllegalArgumentException theEx) {
-			throw new InvalidRequestException("Invalid CdsServiceRequest received. " + theEx);
+			throw new InvalidRequestException(Msg.code(2551) +"Invalid CdsServiceRequest received. " + theEx);
 		}
 	}
 
