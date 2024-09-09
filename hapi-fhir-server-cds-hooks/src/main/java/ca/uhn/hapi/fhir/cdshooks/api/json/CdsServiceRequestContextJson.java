@@ -21,6 +21,7 @@ package ca.uhn.hapi.fhir.cdshooks.api.json;
 
 import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.Collections;
@@ -29,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class CdsServiceRequestContextJson extends BaseCdsServiceJson implements IModelJson {
 
 	@JsonAnyGetter

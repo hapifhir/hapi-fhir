@@ -12,25 +12,23 @@ import jakarta.annotation.Nonnull;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.LinkedHashMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-@ExtendWith(MockitoExtension.class)
 class CdsServiceRequestJsonDeserializerTest {
 	private static final String SERVICE_ID = "service-id";
 	private static final String EXAMPLE_PROPERTY_VALUE = "example-value";
 	private static final String EXAMPLE_PROPERTY_KEY = "example-property";
 	private final FhirContext myFhirContext = FhirContext.forR4();
+	private final ObjectMapper myObjectMapper = new ObjectMapper();
 	private CdsServiceRequestJsonDeserializer myFixture;
 
 	@BeforeEach()
 	void setup() {
-		myFixture = new CdsServiceRequestJsonDeserializer(myFhirContext, new ObjectMapper());
+		myFixture = new CdsServiceRequestJsonDeserializer(myFhirContext, myObjectMapper);
 	}
 
 	@Test
@@ -54,12 +52,16 @@ class CdsServiceRequestJsonDeserializerTest {
 		final LinkedHashMap<String, Object> extension = withExtension();
 		extension.put("example-extra-property", "example-extra-value");
 		final LinkedHashMap<String, Object> request = withRequest(extension);
+		final LinkedHashMap<String, Object> context = new LinkedHashMap<>();
+		context.put("encounterId", "Encounter/123");
+		request.put("context", context);
 		// execute
 		final CdsServiceRequestJson actual = myFixture.deserialize(cdsServiceJson, request);
 		// validate
 		assertThat(actual.getExtension()).isInstanceOf(ExampleExtension.class);
 		final ExampleExtension actualExtension = (ExampleExtension) actual.getExtension();
 		assertThat(actualExtension.getExampleProperty()).isEqualTo(EXAMPLE_PROPERTY_VALUE);
+		assertThat(actual.getContext().get("encounterId")).isEqualTo("Encounter/123");
 	}
 
 	@Test
