@@ -58,10 +58,11 @@ public class CdsServiceRequestJsonDeserializer {
 		final JsonNode hookIdNode = cdsServiceRequestJsonNode.get("hook");
 		try {
 			if (hookInstanceNode == null) {
-				throw new InvalidRequestException(Msg.code(2548) + "hookInstance cannot be null for a CdsServiceRequest.");
+				throw new InvalidRequestException(
+						Msg.code(2548) + "hookInstance cannot be null for a CdsServiceRequest.");
 			}
 			if (hookIdNode == null) {
-				throw new InvalidRequestException(Msg.code(2549) +"hook cannot be null for a CdsServiceRequest.");
+				throw new InvalidRequestException(Msg.code(2549) + "hook cannot be null for a CdsServiceRequest.");
 			}
 			final CdsServiceRequestJson cdsServiceRequestJson =
 					myObjectMapper.convertValue(cdsServiceRequestJsonNode, CdsServiceRequestJson.class);
@@ -75,11 +76,11 @@ public class CdsServiceRequestJsonDeserializer {
 						myObjectMapper.readValue(requestContextNode.toString(), LinkedHashMap.class);
 				cdsServiceRequestJson.setContext(deserializeContext(map));
 			} else {
-				throw new InvalidRequestException(Msg.code(2550) +"context cannot be null for a CdsServiceRequest.");
+				throw new InvalidRequestException(Msg.code(2550) + "context cannot be null for a CdsServiceRequest.");
 			}
 			return cdsServiceRequestJson;
 		} catch (JsonProcessingException | IllegalArgumentException theEx) {
-			throw new InvalidRequestException(Msg.code(2551) +"Invalid CdsServiceRequest received. " + theEx);
+			throw new InvalidRequestException(Msg.code(2551) + "Invalid CdsServiceRequest received. " + theEx);
 		}
 	}
 
