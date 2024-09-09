@@ -14,6 +14,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.LinkedHashMap;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -22,6 +23,7 @@ class CdsServiceRequestJsonDeserializerTest {
 	private static final String SERVICE_ID = "service-id";
 	private static final String EXAMPLE_PROPERTY_VALUE = "example-value";
 	private static final String EXAMPLE_PROPERTY_KEY = "example-property";
+	private static final String HOOK_ID = "hook-id";
 	private final FhirContext myFhirContext = FhirContext.forR4();
 	private final ObjectMapper myObjectMapper = new ObjectMapper();
 	private CdsServiceRequestJsonDeserializer myFixture;
@@ -37,6 +39,7 @@ class CdsServiceRequestJsonDeserializerTest {
 		final CdsServiceJson cdsServiceJson = withCdsServiceJsonIncludingExtensionClass();
 		final LinkedHashMap<String, Object> extension = withExtension();
 		final LinkedHashMap<String, Object> request = withRequest(extension);
+		request.put("context", withContext());
 		// execute
 		final CdsServiceRequestJson actual = myFixture.deserialize(cdsServiceJson, request);
 		// validate
@@ -52,9 +55,7 @@ class CdsServiceRequestJsonDeserializerTest {
 		final LinkedHashMap<String, Object> extension = withExtension();
 		extension.put("example-extra-property", "example-extra-value");
 		final LinkedHashMap<String, Object> request = withRequest(extension);
-		final LinkedHashMap<String, Object> context = new LinkedHashMap<>();
-		context.put("encounterId", "Encounter/123");
-		request.put("context", context);
+		request.put("context", withContext());
 		// execute
 		final CdsServiceRequestJson actual = myFixture.deserialize(cdsServiceJson, request);
 		// validate
@@ -62,6 +63,13 @@ class CdsServiceRequestJsonDeserializerTest {
 		final ExampleExtension actualExtension = (ExampleExtension) actual.getExtension();
 		assertThat(actualExtension.getExampleProperty()).isEqualTo(EXAMPLE_PROPERTY_VALUE);
 		assertThat(actual.getContext().get("encounterId")).isEqualTo("Encounter/123");
+	}
+
+	@Nonnull
+	private static LinkedHashMap<String, Object> withContext() {
+		final LinkedHashMap<String, Object> context = new LinkedHashMap<>();
+		context.put("encounterId", "Encounter/123");
+		return context;
 	}
 
 	@Test
@@ -86,10 +94,50 @@ class CdsServiceRequestJsonDeserializerTest {
 		final LinkedHashMap<String, Object> extension = withExtension();
 		extension.put("example-extra-property", "example-extra-value");
 		final LinkedHashMap<String, Object> request = withRequest(extension);
+		request.put("context", withContext());
 		// execute
 		final CdsServiceRequestJson actual = myFixture.deserialize(cdsServiceJson, request);
 		// validate
 		assertThat(actual.getExtension()).isNull();
+	}
+
+	@Test
+	void deserialize_shouldThrow_whenHookNotFoundInRequest() {
+		// setup
+		final CdsServiceJson cdsServiceJson = withCdsServiceJsonIncludingExtensionClass();
+		final LinkedHashMap<String, Object> request = new LinkedHashMap<>();
+		request.put("context", withContext());
+		request.put("hookInstance", UUID.randomUUID().toString());
+		// execute and validate
+		assertThatThrownBy(() -> myFixture.deserialize(cdsServiceJson, request))
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessageContaining("hook cannot be null for a CdsServiceRequest.");
+	}
+
+	@Test
+	void deserialize_shouldThrow_whenContextNotFoundInRequest() {
+		// setup
+		final CdsServiceJson cdsServiceJson = withCdsServiceJsonIncludingExtensionClass();
+		final LinkedHashMap<String, Object> request = new LinkedHashMap<>();
+		request.put("hook", HOOK_ID);
+		request.put("hookInstance", UUID.randomUUID().toString());
+		// execute and validate
+		assertThatThrownBy(() -> myFixture.deserialize(cdsServiceJson, request))
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessageContaining("context cannot be null for a CdsServiceRequest.");
+	}
+
+	@Test
+	void deserialize_shouldThrow_whenHookInstanceNotFoundInRequest() {
+		// setup
+		final CdsServiceJson cdsServiceJson = withCdsServiceJsonIncludingExtensionClass();
+		final LinkedHashMap<String, Object> request = new LinkedHashMap<>();
+		request.put("context", withContext());
+		request.put("hook", HOOK_ID);
+		// execute and validate
+		assertThatThrownBy(() -> myFixture.deserialize(cdsServiceJson, request))
+			.isInstanceOf(InvalidRequestException.class)
+				.hasMessageContaining("hookInstance cannot be null for a CdsServiceRequest.");
 	}
 
 	@Test
@@ -102,7 +150,7 @@ class CdsServiceRequestJsonDeserializerTest {
 		input.put("encounterId", encounterId);
 		input.put("patient", patientContext);
 		// execute
-		final CdsServiceRequestContextJson actual = myFixture.deserializeRequestContext(input);
+		final CdsServiceRequestContextJson actual = myFixture.deserializeContext(input);
 		// validate
 		assertThat(actual.get("encounterId")).isEqualTo(encounterId);
 		assertThat(actual.get("patient")).usingRecursiveComparison().isEqualTo(patientContext);
@@ -120,6 +168,7 @@ class CdsServiceRequestJsonDeserializerTest {
 		final CdsServiceJson cdsServiceJson = new CdsServiceJson();
 		cdsServiceJson.setId(SERVICE_ID);
 		cdsServiceJson.setExtensionClass(ExampleExtension.class);
+		cdsServiceJson.setHook(HOOK_ID);
 		return cdsServiceJson;
 	}
 
@@ -127,6 +176,8 @@ class CdsServiceRequestJsonDeserializerTest {
 	private static LinkedHashMap<String, Object> withRequest(@Nonnull LinkedHashMap<String, Object> theExtension) {
 		final LinkedHashMap<String, Object> request = new LinkedHashMap<>();
 		request.put("extension", theExtension);
+		request.put("hookInstance", UUID.randomUUID().toString());
+		request.put("hook", HOOK_ID);
 		return request;
 	}
 }

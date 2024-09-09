@@ -53,8 +53,15 @@ public class CdsServiceRequestJsonDeserializer {
 				myObjectMapper.convertValue(theCdsServiceRequestJson, JsonNode.class);
 		final JsonNode extensionNode = cdsServiceRequestJsonNode.get("extension");
 		final JsonNode requestContextNode = cdsServiceRequestJsonNode.get("context");
-		// TODO: Adi add validation for required fields
+		final JsonNode hookInstanceNode = cdsServiceRequestJsonNode.get("hookInstance");
+		final JsonNode hookIdNode = cdsServiceRequestJsonNode.get("hook");
 		try {
+			if(hookInstanceNode == null) {
+				throw new InvalidRequestException("hookInstance cannot be null for a CdsServiceRequest.");
+			}
+			if(hookIdNode == null) {
+				throw new InvalidRequestException("hook cannot be null for a CdsServiceRequest.");
+			}
 			final CdsServiceRequestJson cdsServiceRequestJson =
 					myObjectMapper.convertValue(cdsServiceRequestJsonNode, CdsServiceRequestJson.class);
 			if (extensionNode != null) {
@@ -64,8 +71,10 @@ public class CdsServiceRequestJsonDeserializer {
 			}
 			if (requestContextNode != null) {
 				LinkedHashMap<String, Object> map =
-						myObjectMapper.readValue(requestContextNode.toString(), LinkedHashMap.class);
-				cdsServiceRequestJson.setContext(deserializeRequestContext(map));
+					myObjectMapper.readValue(requestContextNode.toString(), LinkedHashMap.class);
+				cdsServiceRequestJson.setContext(deserializeContext(map));
+			} else {
+				throw new InvalidRequestException("context cannot be null for a CdsServiceRequest.");
 			}
 			return cdsServiceRequestJson;
 		} catch (JsonProcessingException | IllegalArgumentException theEx) {
@@ -82,7 +91,7 @@ public class CdsServiceRequestJsonDeserializer {
 		return myObjectMapper.readValue(theExtension, extensionClass);
 	}
 
-	CdsServiceRequestContextJson deserializeRequestContext(LinkedHashMap<String, Object> theMap)
+	CdsServiceRequestContextJson deserializeContext(LinkedHashMap<String, Object> theMap)
 			throws JsonProcessingException {
 		final CdsServiceRequestContextJson cdsServiceRequestContextJson = new CdsServiceRequestContextJson();
 		for (Map.Entry<String, Object> entry : theMap.entrySet()) {
