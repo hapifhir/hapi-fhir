@@ -194,6 +194,14 @@ public class FhirTerser {
 					+ theTarget.getClass().getName());
 		}
 
+		if (theSource instanceof IBaseReference && theTarget instanceof IBaseReference) {
+			IBaseReference sourceReference = (IBaseReference) theSource;
+			IBaseReference targetReference = (IBaseReference) theTarget;
+			if (sourceReference.getResource() != null) {
+				targetReference.setResource(sourceReference.getResource());
+			}
+		}
+
 		BaseRuntimeElementCompositeDefinition<?> sourceDef =
 				(BaseRuntimeElementCompositeDefinition<?>) myContext.getElementDefinition(theSource.getClass());
 		BaseRuntimeElementCompositeDefinition<?> targetDef =

@@ -136,6 +136,7 @@ public enum VersionEnum {
 	V6_8_5,
 	V6_8_6,
 	V6_8_7,
+	V6_8_8,
 
 	V6_9_0,
 
@@ -170,7 +171,16 @@ public enum VersionEnum {
 		return values[values.length - 1];
 	}
 
+	public static VersionEnum forVersion(String theVersionString) {
+		String constantName = "V" + (theVersionString.replace('.', '_'));
+		return valueOf(constantName);
+	}
+
 	public boolean isNewerThan(VersionEnum theVersionEnum) {
 		return ordinal() > theVersionEnum.ordinal();
+	}
+
+	public String getVersionedDocsSlug() {
+		return this.name().replace("V", "").replaceAll("_", ".");
 	}
 }
