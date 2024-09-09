@@ -56,10 +56,10 @@ public class CdsServiceRequestJsonDeserializer {
 		final JsonNode hookInstanceNode = cdsServiceRequestJsonNode.get("hookInstance");
 		final JsonNode hookIdNode = cdsServiceRequestJsonNode.get("hook");
 		try {
-			if(hookInstanceNode == null) {
+			if (hookInstanceNode == null) {
 				throw new InvalidRequestException("hookInstance cannot be null for a CdsServiceRequest.");
 			}
-			if(hookIdNode == null) {
+			if (hookIdNode == null) {
 				throw new InvalidRequestException("hook cannot be null for a CdsServiceRequest.");
 			}
 			final CdsServiceRequestJson cdsServiceRequestJson =
@@ -71,7 +71,7 @@ public class CdsServiceRequestJsonDeserializer {
 			}
 			if (requestContextNode != null) {
 				LinkedHashMap<String, Object> map =
-					myObjectMapper.readValue(requestContextNode.toString(), LinkedHashMap.class);
+						myObjectMapper.readValue(requestContextNode.toString(), LinkedHashMap.class);
 				cdsServiceRequestJson.setContext(deserializeContext(map));
 			} else {
 				throw new InvalidRequestException("context cannot be null for a CdsServiceRequest.");
