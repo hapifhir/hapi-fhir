@@ -50,7 +50,7 @@ import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.model.entity.BaseTag;
-import ca.uhn.fhir.jpa.model.entity.IdAndPartitionIdValue;
+import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
@@ -124,6 +124,7 @@ import jakarta.persistence.NoResultException;
 import jakarta.persistence.TypedQuery;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.function.TriFunction;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseMetaType;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
@@ -154,7 +155,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
-import java.util.function.BiFunction;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -1501,7 +1501,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		StopWatch w = new StopWatch();
 		JpaPid jpaPid = (JpaPid) thePid;
 
-		Optional<ResourceTable> entity = myResourceTableDao.findById(jpaPid.getId());
+		Optional<ResourceTable> entity = myResourceTableDao.findById(jpaPid.toIdAndPartitionId());
 		if (entity.isEmpty()) {
 			throw new ResourceNotFoundException(Msg.code(975) + "No resource found with PID " + jpaPid);
 		}
@@ -1739,7 +1739,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				requestPartitionId, getResourceName(), theId.getIdPart());
 		Set<Integer> readPartitions = null;
 		if (requestPartitionId.isAllPartitions()) {
-			entity = myEntityManager.find(ResourceTable.class, new IdAndPartitionIdValue(pid.getId()));
+			entity = myEntityManager.find(ResourceTable.class, new IdAndPartitionId(pid.getId()));
 		} else {
 			readPartitions = myRequestPartitionHelperService.toReadPartitions(requestPartitionId);
 			if (readPartitions.size() == 1) {
@@ -2127,7 +2127,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	private <V> List<V> searchForTransformedIds(
 			SearchParameterMap theParams,
 			RequestDetails theRequest,
-			BiFunction<RequestDetails, Stream<JpaPid>, Stream<V>> transform) {
+			TriFunction<RequestDetails, Stream<JpaPid>, RequestPartitionId, Stream<V>> transform) {
 		RequestPartitionId requestPartitionId =
 				myRequestPartitionHelperService.determineReadPartitionForRequestForSearchType(
 						theRequest, myResourceName, theParams);
@@ -2144,7 +2144,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					Stream<JpaPid> pidStream =
 							builder.createQueryStream(theParams, searchRuntimeDetails, theRequest, requestPartitionId);
 
-					Stream<V> transformedStream = transform.apply(theRequest, pidStream);
+					Stream<V> transformedStream = transform.apply(theRequest, pidStream, requestPartitionId);
 
 					return transformedStream.collect(Collectors.toList());
 				});
@@ -2154,9 +2154,15 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	 * Fetch the resources in chunks and apply PreAccess/PreShow interceptors.
 	 */
 	@Nonnull
-	private Stream<T> pidsToResource(RequestDetails theRequest, Stream<JpaPid> pidStream) {
+	private Stream<T> pidsToResource(RequestDetails theRequest, Stream<JpaPid> thePidStream, RequestPartitionId theRequestPartitionId) {
 		ISearchBuilder<JpaPid> searchBuilder =
 				mySearchBuilderFactory.newSearchBuilder(this, getResourceName(), getResourceType());
+
+		Stream<JpaPid> pidStream = thePidStream;
+		if (theRequestPartitionId.getPartitionIds().size() == 1) {
+			pidStream = pidStream.map(t->t.setPartitionIdIfNotAlreadySet(theRequestPartitionId.getPartitionIds().get(0)));
+		}
+
 		@SuppressWarnings("unchecked")
 		Stream<T> resourceStream = (Stream<T>) new QueryChunker<>()
 				.chunk(pidStream, SearchBuilder.getMaximumPageSize())
@@ -2171,11 +2177,18 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	 * get the Ids from the ResourceTable entities in chunks.
 	 */
 	@Nonnull
-	private Stream<IIdType> pidsToIds(RequestDetails theRequestDetails, Stream<JpaPid> thePidStream) {
-		Stream<Long> longStream = thePidStream.map(JpaPid::getId);
+	private Stream<IIdType> pidsToIds(RequestDetails theRequestDetails, Stream<JpaPid> thePidStream, RequestPartitionId theRequestPartitionId) {
+
+		Stream<JpaPid> pidStream = thePidStream;
+
+		if (!theRequestPartitionId.isAllPartitions() && theRequestPartitionId.getPartitionIds().size() == 1) {
+			pidStream = pidStream.map(t->t.setPartitionIdIfNotAlreadySet(theRequestPartitionId.getPartitionIds().get(0)));
+		}
+
+		Stream<IdAndPartitionId> idStream = pidStream.map(t->t.toIdAndPartitionId());
 
 		return new QueryChunker<>()
-				.chunk(longStream, SearchBuilder.getMaximumPageSize())
+				.chunk(idStream, SearchBuilder.getMaximumPageSize())
 				.flatMap(ids -> myResourceTableDao.findAllById(ids).stream())
 				.map(ResourceTable::getIdDt);
 	}

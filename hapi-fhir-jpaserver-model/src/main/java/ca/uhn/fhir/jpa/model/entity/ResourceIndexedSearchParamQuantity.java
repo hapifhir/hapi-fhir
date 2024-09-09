@@ -71,7 +71,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 					columnList =
 							"RES_ID,HASH_IDENTITY,HASH_IDENTITY_SYS_UNITS,HASH_IDENTITY_AND_UNITS,SP_VALUE,PARTITION_ID")
 		})
-@IdClass(IdAndPartitionIdValue.class)
+@IdClass(IdAndPartitionId.class)
 public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearchParamQuantity {
 
 	private static final long serialVersionUID = 1L;

@@ -75,7 +75,7 @@ import static org.apache.commons.lang3.StringUtils.trim;
 					name = "IDX_SP_TOKEN_RESID_V2",
 					columnList = "RES_ID,HASH_SYS_AND_VALUE,HASH_VALUE,HASH_SYS,HASH_IDENTITY,PARTITION_ID")
 		})
-@IdClass(IdAndPartitionIdValue.class)
+@IdClass(IdAndPartitionId.class)
 public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchParam {
 
 	public static final int MAX_LENGTH = 200;

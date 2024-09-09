@@ -99,7 +99,7 @@ import static ca.uhn.fhir.jpa.model.entity.ResourceTable.IDX_RES_TYPE_FHIR_ID;
 			@Index(name = "IDX_RES_RESID_UPDATED", columnList = "RES_ID, RES_UPDATED, PARTITION_ID")
 		})
 @NamedEntityGraph(name = "Resource.noJoins")
-@IdClass(IdAndPartitionIdValue.class)
+@IdClass(IdAndPartitionId.class)
 public class ResourceTable extends BaseHasResource implements Serializable, IBasePersistedResource<JpaPid> {
 	public static final int RESTYPE_LEN = 40;
 	public static final String HFJ_RESOURCE = "HFJ_RESOURCE";
@@ -1039,6 +1039,10 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 
 	public String asTypedFhirResourceId() {
 		return getResourceType() + "/" + getFhirId();
+	}
+
+	public IdAndPartitionId toPid() {
+		return new IdAndPartitionId(myId, myPartitionIdValue);
 	}
 
 	/**

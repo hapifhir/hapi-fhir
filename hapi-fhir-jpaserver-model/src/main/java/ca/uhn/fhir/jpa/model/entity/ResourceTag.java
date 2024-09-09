@@ -51,7 +51,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 					name = "IDX_RESTAG_TAGID",
 					columnNames = {"RES_ID", "TAG_ID"})
 		})
-@IdClass(IdAndPartitionIdValue.class)
+@IdClass(IdAndPartitionId.class)
 public class ResourceTag extends BaseTag {
 
 	private static final long serialVersionUID = 1L;

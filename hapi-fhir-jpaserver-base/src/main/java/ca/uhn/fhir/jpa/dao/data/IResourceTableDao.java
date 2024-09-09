@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.dao.data;
 
 import ca.uhn.fhir.jpa.dao.data.custom.IForcedIdQueries;
+import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -39,7 +40,7 @@ import java.util.stream.Stream;
 
 @Transactional(propagation = Propagation.MANDATORY)
 public interface IResourceTableDao
-		extends JpaRepository<ResourceTable, Long>, IHapiFhirJpaRepository, IForcedIdQueries {
+		extends JpaRepository<ResourceTable, IdAndPartitionId>, IHapiFhirJpaRepository, IForcedIdQueries {
 
 	@Query("SELECT t.myId FROM ResourceTable t WHERE t.myDeleted IS NOT NULL")
 	Slice<Long> findIdsOfDeletedResources(Pageable thePageable);
@@ -122,10 +123,6 @@ public interface IResourceTableDao
 	@Modifying
 	@Query("UPDATE ResourceTable t SET t.myIndexStatus = :status WHERE t.myId = :id")
 	void updateIndexStatus(@Param("id") Long theId, @Param("status") Long theIndexStatus);
-
-	@Modifying
-	@Query("UPDATE ResourceTable t SET t.myUpdated = :updated WHERE t.myId = :id")
-	void updateLastUpdated(@Param("id") Long theId, @Param("updated") Date theUpdated);
 
 	@Modifying
 	@Query("DELETE FROM ResourceTable t WHERE t.myId = :pid")

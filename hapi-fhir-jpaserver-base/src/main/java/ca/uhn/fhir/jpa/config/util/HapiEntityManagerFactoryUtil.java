@@ -40,6 +40,8 @@ import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 
 import java.util.Map;
 
+import static org.apache.commons.lang3.StringUtils.defaultString;
+
 public final class HapiEntityManagerFactoryUtil {
 	private HapiEntityManagerFactoryUtil() {
 	}
@@ -85,7 +87,7 @@ public final class HapiEntityManagerFactoryUtil {
 			PersistenceUnitInfo info, Map<?, ?> theIntegration) {
 
 			String includePartitionIdsInPksString = (String) theIntegration.get(JpaConstants.HAPI_INCLUDE_PARTITION_IDS_IN_PKS);
-			Validate.notBlank(includePartitionIdsInPksString, "Missing hibernate property: %s", JpaConstants.HAPI_INCLUDE_PARTITION_IDS_IN_PKS);
+			includePartitionIdsInPksString = defaultString(includePartitionIdsInPksString, JpaConstants.HAPI_INCLUDE_PARTITION_IDS_IN_PKS_DEFAULT);
 			boolean includePartitionIdsInPks = Boolean.parseBoolean(includePartitionIdsInPksString);
 
 			return new MyEntityManagerFactoryBuilderImpl(info, theIntegration) {

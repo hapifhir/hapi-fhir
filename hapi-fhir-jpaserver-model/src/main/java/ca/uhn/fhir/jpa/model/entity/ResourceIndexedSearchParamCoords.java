@@ -56,7 +56,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 			@Index(name = "IDX_SP_COORDS_UPDATED", columnList = "SP_UPDATED"),
 			@Index(name = "IDX_SP_COORDS_RESID", columnList = "RES_ID")
 		})
-@IdClass(IdAndPartitionIdValue.class)
+@IdClass(IdAndPartitionId.class)
 public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchParam {
 
 	public static final int MAX_LENGTH = 100;

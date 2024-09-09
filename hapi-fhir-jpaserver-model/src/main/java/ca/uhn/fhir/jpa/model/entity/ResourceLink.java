@@ -60,7 +60,7 @@ import java.util.Date;
 					name = "IDX_RL_TGT_v2",
 					columnList = "TARGET_RESOURCE_ID, SRC_PATH, SRC_RESOURCE_ID, TARGET_RESOURCE_TYPE,PARTITION_ID")
 		})
-@IdClass(IdAndPartitionIdValue.class)
+@IdClass(IdAndPartitionId.class)
 public class ResourceLink extends BaseResourceIndex {
 
 	public static final int SRC_PATH_LENGTH = 500;

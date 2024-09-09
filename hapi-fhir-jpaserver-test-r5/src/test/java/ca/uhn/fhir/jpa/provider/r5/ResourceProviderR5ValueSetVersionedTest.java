@@ -12,6 +12,7 @@ import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -1452,7 +1453,7 @@ public class ResourceProviderR5ValueSetVersionedTest extends BaseResourceProvide
 		codeSystem.setContent(CodeSystemContentMode.NOTPRESENT);
 		IIdType id = theCodeSystemDao.create(codeSystem, theRequestDetails).getId().toUnqualified();
 
-		ResourceTable table = theResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
+		ResourceTable table = theResourceTableDao.findById(new IdAndPartitionId(id.getIdPartAsLong())).orElseThrow(IllegalStateException::new);
 
 		TermCodeSystemVersion cs = new TermCodeSystemVersion();
 		cs.setResource(table);
@@ -1486,7 +1487,7 @@ public class ResourceProviderR5ValueSetVersionedTest extends BaseResourceProvide
 		codeSystem.setContent(CodeSystemContentMode.NOTPRESENT);
 		IIdType id = theCodeSystemDao.create(codeSystem, theRequestDetails).getId().toUnqualified();
 
-		ResourceTable table = theResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
+		ResourceTable table = theResourceTableDao.findById(new IdAndPartitionId(id.getIdPartAsLong())).orElseThrow(IllegalStateException::new);
 
 		TermCodeSystemVersion cs = new TermCodeSystemVersion();
 		cs.setResource(table);

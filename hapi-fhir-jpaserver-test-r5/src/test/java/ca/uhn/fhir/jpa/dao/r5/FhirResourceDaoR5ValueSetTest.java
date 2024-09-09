@@ -10,6 +10,7 @@ import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
+import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
@@ -268,7 +269,7 @@ public class FhirResourceDaoR5ValueSetTest extends BaseJpaR5Test {
 		vs.setName("Hello");
 		assertEquals("2", myValueSetDao.update(vs, mySrd).getId().getVersionIdPart());
 		runInTransaction(()->{
-			Optional<ResourceTable> resource = myResourceTableDao.findById(id.getIdPartAsLong());
+			Optional<ResourceTable> resource = myResourceTableDao.findById(new IdAndPartitionId(id.getIdPartAsLong()));
 			assertTrue(resource.isPresent());
 		});
 
@@ -288,7 +289,7 @@ public class FhirResourceDaoR5ValueSetTest extends BaseJpaR5Test {
 
 		// Verify expunged
 		runInTransaction(()->{
-			Optional<ResourceTable> resource = myResourceTableDao.findById(id.getIdPartAsLong());
+			Optional<ResourceTable> resource = myResourceTableDao.findById(new IdAndPartitionId(id.getIdPartAsLong()));
 			assertFalse(resource.isPresent());
 		});
 	}

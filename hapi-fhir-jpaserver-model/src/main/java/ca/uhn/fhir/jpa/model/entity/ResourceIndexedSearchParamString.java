@@ -71,7 +71,7 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 			@Index(name = "IDX_SP_STRING_HASH_EXCT_V2", columnList = "HASH_EXACT,RES_ID,PARTITION_ID"),
 			@Index(name = "IDX_SP_STRING_RESID_V2", columnList = "RES_ID,HASH_NORM_PREFIX,PARTITION_ID")
 		})
-@IdClass(IdAndPartitionIdValue.class)
+@IdClass(IdAndPartitionId.class)
 public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchParam {
 
 	/*

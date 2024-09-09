@@ -9,6 +9,7 @@ import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -160,7 +161,7 @@ public class CrossPartitionReferencesTest extends BaseJpaR5Test {
 		IIdType patientId = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
 		ourLog.info("Patient ID: {}", patientId);
 		runInTransaction(() -> {
-			ResourceTable resourceTable = myResourceTableDao.findById(patientId.getIdPartAsLong()).orElseThrow();
+			ResourceTable resourceTable = myResourceTableDao.findById(new IdAndPartitionId(patientId.getIdPartAsLong())).orElseThrow();
 			assertEquals(1, resourceTable.getPartitionId().getPartitionId());
 		});
 
@@ -179,7 +180,7 @@ public class CrossPartitionReferencesTest extends BaseJpaR5Test {
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 
 		runInTransaction(() -> {
-			ResourceTable resourceTable = myResourceTableDao.findById(observationId.getIdPartAsLong()).orElseThrow();
+			ResourceTable resourceTable = myResourceTableDao.findById(new IdAndPartitionId(observationId.getIdPartAsLong())).orElseThrow();
 			assertEquals(2, resourceTable.getPartitionId().getPartitionId());
 		});
 

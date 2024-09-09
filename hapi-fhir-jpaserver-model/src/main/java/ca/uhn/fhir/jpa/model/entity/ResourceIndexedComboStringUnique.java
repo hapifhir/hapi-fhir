@@ -72,7 +72,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 					columnList = "RES_ID",
 					unique = false)
 		})
-@IdClass(IdAndPartitionIdValue.class)
+@IdClass(IdAndPartitionId.class)
 public class ResourceIndexedComboStringUnique extends BaseResourceIndexedCombo
 		implements Comparable<ResourceIndexedComboStringUnique>, IResourceIndexComboSearchParameter {
 

@@ -54,7 +54,7 @@ import static ca.uhn.fhir.jpa.model.util.SearchParamHash.hashSearchParam;
 			@Index(name = "IDX_RESPARMPRESENT_RESID", columnList = "RES_ID"),
 			@Index(name = "IDX_RESPARMPRESENT_HASHPRES", columnList = "HASH_PRESENCE")
 		})
-@IdClass(IdAndPartitionIdValue.class)
+@IdClass(IdAndPartitionId.class)
 public class SearchParamPresentEntity extends BasePartitionable implements Serializable {
 
 	private static final long serialVersionUID = 1L;

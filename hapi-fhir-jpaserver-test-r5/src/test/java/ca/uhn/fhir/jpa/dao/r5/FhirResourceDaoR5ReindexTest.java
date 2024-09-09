@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.dao.r5;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
@@ -36,7 +37,7 @@ public class FhirResourceDaoR5ReindexTest extends BaseJpaR5Test {
 
 		runInTransaction(() -> {
 			assertEquals(1, myEntityManager.createNativeQuery("UPDATE HFJ_RESOURCE set sp_uri_present = true").executeUpdate());
-			ResourceTable table = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow();
+			ResourceTable table = myResourceTableDao.findById(new IdAndPartitionId(id.getIdPartAsLong())).orElseThrow();
 			assertTrue(table.isParamsUriPopulated());
 			ResourceIndexedSearchParamUri uri = new ResourceIndexedSearchParamUri(new PartitionSettings(), "SearchParameter", "url", "http://foo");
 			uri.setResource(table);
@@ -50,7 +51,7 @@ public class FhirResourceDaoR5ReindexTest extends BaseJpaR5Test {
 		assertEquals("REMOVE", outcome.getParameter("UriIndexes").getPartFirstRep().getPartFirstRep().getValueCodeType().getValue());
 
 		runInTransaction(() -> {
-			ResourceTable table = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow();
+			ResourceTable table = myResourceTableDao.findById(new IdAndPartitionId(id.getIdPartAsLong())).orElseThrow();
 			assertFalse(table.isParamsUriPopulated());
 		});
 	}

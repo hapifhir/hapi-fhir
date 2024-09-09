@@ -51,7 +51,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 			@Index(name = "IDX_IDXCMBTOKNU_HASHC", columnList = "HASH_COMPLETE,RES_ID,PARTITION_ID", unique = false),
 			@Index(name = "IDX_IDXCMBTOKNU_RES", columnList = "RES_ID", unique = false)
 		})
-@IdClass(IdAndPartitionIdValue.class)
+@IdClass(IdAndPartitionId.class)
 public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndexedCombo
 		implements Comparable<ResourceIndexedComboTokenNonUnique>, IResourceIndexComboSearchParameter {
 

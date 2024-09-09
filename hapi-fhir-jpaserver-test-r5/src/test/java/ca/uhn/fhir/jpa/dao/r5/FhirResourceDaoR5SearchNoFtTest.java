@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r5;
 
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
@@ -14,6 +15,7 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import jakarta.persistence.Id;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.ClinicalUseDefinition;
 import org.hl7.fhir.r5.model.CodeableConcept;
@@ -159,7 +161,7 @@ public class FhirResourceDaoR5SearchNoFtTest extends BaseJpaR5Test {
 		assertEquals(3, outcome.size().intValue());
 
         runInTransaction(() -> {
-            ResourceTable table = myResourceTableDao.findById(id).orElseThrow(() -> new IllegalArgumentException());
+            ResourceTable table = myResourceTableDao.findById(new IdAndPartitionId(id)).orElseThrow(() -> new IllegalArgumentException());
             table.setDeleted(new Date());
             myResourceTableDao.save(table);
         });

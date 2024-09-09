@@ -44,7 +44,7 @@ public abstract class BasePartitionable implements Serializable {
 	@Id
 	@ConditionalIdProperty
 	@Column(name = PartitionablePartitionId.PARTITION_ID)
-	private Integer myPartitionIdValue;
+	Integer myPartitionIdValue;
 
 	/**
 	 * This is here to support queries only, do not set this field directly

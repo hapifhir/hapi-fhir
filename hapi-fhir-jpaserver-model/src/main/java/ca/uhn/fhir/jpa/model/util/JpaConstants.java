@@ -302,8 +302,9 @@ public class JpaConstants {
 	public static final Set<String> UNDESIRED_RESOURCE_LINKAGES_FOR_EVERYTHING_ON_PATIENT_INSTANCE =
 			Set.of("Provenance", "List", "Group");
     public static final String HAPI_INCLUDE_PARTITION_IDS_IN_PKS = "hapi.include_partition_ids_in_pks";
+	public static final String HAPI_INCLUDE_PARTITION_IDS_IN_PKS_DEFAULT = "false";
 
-    /**
+	/**
 	 * Non-instantiable
 	 */
 	private JpaConstants() {

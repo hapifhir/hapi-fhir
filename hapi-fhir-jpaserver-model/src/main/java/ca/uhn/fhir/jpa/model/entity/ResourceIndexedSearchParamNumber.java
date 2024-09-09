@@ -60,7 +60,7 @@ import java.util.Objects;
 			@Index(name = "IDX_SP_NUMBER_HASH_VAL_V2", columnList = "HASH_IDENTITY,SP_VALUE,RES_ID,PARTITION_ID"),
 			@Index(name = "IDX_SP_NUMBER_RESID_V2", columnList = "RES_ID, HASH_IDENTITY, SP_VALUE, PARTITION_ID")
 		})
-@IdClass(IdAndPartitionIdValue.class)
+@IdClass(IdAndPartitionId.class)
 public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchParam {
 
 	private static final long serialVersionUID = 1L;

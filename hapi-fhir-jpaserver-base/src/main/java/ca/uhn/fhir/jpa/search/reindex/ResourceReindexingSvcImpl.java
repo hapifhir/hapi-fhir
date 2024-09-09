@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceReindexJobDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.entity.ResourceReindexJobEntity;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.IHasScheduledJobs;
@@ -429,13 +430,14 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc, IHasSc
 		});
 	}
 
-	private void markResourceAsIndexingFailed(final long theId) {
+	private void markResourceAsIndexingFailed(final JpaPid theId) {
 		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
 		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 		txTemplate.execute((TransactionCallback<Void>) theStatus -> {
 			ourLog.info("Marking resource with PID {} as indexing_failed", theId);
 
-			myResourceTableDao.updateIndexStatus(theId, BaseHapiFhirDao.INDEX_STATUS_INDEXING_FAILED);
+			// FIXME: restore
+//			myResourceTableDao.updateIndexStatus(theId, BaseHapiFhirDao.INDEX_STATUS_INDEXING_FAILED);
 
 			Query q = myEntityManager.createQuery("DELETE FROM ResourceTag t WHERE t.myResourceId = :id");
 			q.setParameter("id", theId);
@@ -492,12 +494,14 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc, IHasSc
 	}
 
 	private class ResourceReindexingTask implements Callable<Date> {
-		private final Long myNextId;
+		private final JpaPid myNextId;
 		private final AtomicInteger myCounter;
 		private Date myUpdated;
 
 		ResourceReindexingTask(Long theNextId, AtomicInteger theCounter) {
-			myNextId = theNextId;
+			// FIXME: restore
+//			myNextId = theNextId;
+			myNextId = null;
 			myCounter = theCounter;
 		}
 
@@ -533,8 +537,9 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc, IHasSc
 		private Throwable readResourceAndReindex() {
 			Throwable reindexFailure;
 			reindexFailure = myTxTemplate.execute(t -> {
-				ResourceTable resourceTable =
-						myResourceTableDao.findById(myNextId).orElseThrow(IllegalStateException::new);
+				ResourceTable resourceTable = null; // FIXME: restore
+//				ResourceTable resourceTable =
+//						myResourceTableDao.findById(myNextId).orElseThrow(IllegalStateException::new);
 				myUpdated = resourceTable.getUpdatedDate();
 
 				try {

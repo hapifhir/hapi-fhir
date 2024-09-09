@@ -81,7 +81,7 @@ import java.util.Date;
 					columnList =
 							"RES_ID,HASH_IDENTITY,SP_VALUE_LOW,SP_VALUE_HIGH,SP_VALUE_LOW_DATE_ORDINAL,SP_VALUE_HIGH_DATE_ORDINAL,PARTITION_ID"),
 		})
-@IdClass(IdAndPartitionIdValue.class)
+@IdClass(IdAndPartitionId.class)
 public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchParam {
 
 	private static final long serialVersionUID = 1L;

@@ -61,12 +61,6 @@ public class ResourceReindexer {
 		myFhirContext = theFhirContext;
 	}
 
-	public void readAndReindexResourceByPid(Long theResourcePid) {
-		ResourceTable resourceTable =
-				myResourceTableDao.findById(theResourcePid).orElseThrow(IllegalStateException::new);
-		reindexResourceEntity(resourceTable);
-	}
-
 	public void reindexResourceEntity(ResourceTable theResourceTable) {
 		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(theResourceTable.getResourceType());
 		long expectedVersion = theResourceTable.getVersion();

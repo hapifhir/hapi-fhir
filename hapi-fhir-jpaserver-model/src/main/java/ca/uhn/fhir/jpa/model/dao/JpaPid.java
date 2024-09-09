@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.model.dao;
 
+import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
 
@@ -64,6 +65,17 @@ public class JpaPid extends BaseResourcePersistentId<Long> {
 	public JpaPid setPartitionablePartitionId(PartitionablePartitionId thePartitionablePartitionId) {
 		myPartitionablePartitionId = thePartitionablePartitionId;
 		return this;
+	}
+
+	public JpaPid setPartitionIdIfNotAlreadySet(Integer thePartitionId) {
+		if (myPartitionablePartitionId == null) {
+			myPartitionablePartitionId = PartitionablePartitionId.with(thePartitionId, null);
+		}
+		return this;
+	}
+
+	public IdAndPartitionId toIdAndPartitionId() {
+		return new IdAndPartitionId(myId, myPartitionablePartitionId.getPartitionId());
 	}
 
 	public static List<Long> toLongList(Collection<JpaPid> thePids) {
@@ -128,5 +140,11 @@ public class JpaPid extends BaseResourcePersistentId<Long> {
 	@Override
 	public String toString() {
 		return myId.toString();
+	}
+
+	public static JpaPid fromId(IdAndPartitionId theId) {
+		JpaPid retVal = new JpaPid(theId.getId());
+		retVal.setPartitionIdIfNotAlreadySet(theId.getPartitionIdValue());
+		return retVal;
 	}
 }

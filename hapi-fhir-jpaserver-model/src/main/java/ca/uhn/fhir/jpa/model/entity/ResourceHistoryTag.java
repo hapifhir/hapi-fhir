@@ -47,7 +47,7 @@ import java.io.Serializable;
 					columnNames = {"RES_VER_PID", "TAG_ID"}),
 		},
 		indexes = {@Index(name = "IDX_RESHISTTAG_RESID", columnList = "RES_ID")})
-@IdClass(IdAndPartitionIdValue.class)
+@IdClass(IdAndPartitionId.class)
 public class ResourceHistoryTag extends BaseTag implements Serializable {
 
 	private static final long serialVersionUID = 1L;

@@ -45,6 +45,7 @@ import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchParamPresentDao;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
@@ -53,6 +54,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
+import jakarta.persistence.Id;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -300,7 +302,11 @@ public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid
 
 	protected void expungeCurrentVersionOfResource(
 			RequestDetails theRequestDetails, Long theResourceId, AtomicInteger theRemainingCount) {
-		ResourceTable resource = myResourceTableDao.findById(theResourceId).orElseThrow(IllegalStateException::new);
+
+		// FIXME: make this method take a Pid
+		IdAndPartitionId id = new IdAndPartitionId(theResourceId);
+
+		ResourceTable resource = myResourceTableDao.findById(id).orElseThrow(IllegalStateException::new);
 
 		ResourceHistoryTable currentVersion = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(
 				resource.getId(), resource.getVersion());
@@ -328,7 +334,7 @@ public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid
 	@Transactional
 	public void deleteAllSearchParams(JpaPid theResourceId) {
 		Long theResourceLongId = theResourceId.getId();
-		ResourceTable resource = myResourceTableDao.findById(theResourceLongId).orElse(null);
+		ResourceTable resource = myResourceTableDao.findById(theResourceId.toIdAndPartitionId()).orElse(null);
 
 		if (resource == null || resource.isParamsUriPopulated()) {
 			myResourceIndexedSearchParamUriDao.deleteByResourceId(theResourceLongId);

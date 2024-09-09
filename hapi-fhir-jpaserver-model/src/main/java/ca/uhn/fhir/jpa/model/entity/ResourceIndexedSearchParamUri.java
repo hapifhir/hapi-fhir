@@ -62,7 +62,7 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 			// for index create/delete
 			@Index(name = "IDX_SP_URI_COORDS", columnList = "RES_ID")
 		})
-@IdClass(IdAndPartitionIdValue.class)
+@IdClass(IdAndPartitionId.class)
 public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchParam {
 
 	/*
