@@ -86,7 +86,7 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 	public CdsServiceResponseJson callService(String theServiceId, Object theCdsServiceRequestJson) {
 		final CdsServiceJson cdsServiceJson = getCdsServiceJson(theServiceId);
 		final CdsServiceRequestJson deserializedRequest =
-			myCdsServiceRequestJsonDeserializer.deserialize(cdsServiceJson, theCdsServiceRequestJson);
+				myCdsServiceRequestJsonDeserializer.deserialize(cdsServiceJson, theCdsServiceRequestJson);
 		ICdsServiceMethod serviceMethod = (ICdsServiceMethod) getCdsServiceMethodOrThrowException(theServiceId);
 		myCdsPrefetchSvc.augmentRequest(deserializedRequest, serviceMethod);
 		Object response = serviceMethod.invoke(myObjectMapper, deserializedRequest, theServiceId);
