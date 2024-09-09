@@ -73,7 +73,7 @@ public class CdsHooksController {
 			consumes = {MediaType.APPLICATION_JSON_VALUE})
 	public ResponseEntity<CdsServiceResponseJson> cdsServiceRequest(
 			@PathVariable("cds_hook") String theCdsHook, @RequestBody Object theCdsServiceRequestJson) {
-		CdsServiceResponseJson response = myCdsServiceRegistry.callServiceWithId(theCdsHook, theCdsServiceRequestJson);
+		CdsServiceResponseJson response = myCdsServiceRegistry.callService(theCdsHook, theCdsServiceRequestJson);
 		return ResponseEntity.status(200)
 				.contentType(MediaType.APPLICATION_JSON)
 				.body(response);

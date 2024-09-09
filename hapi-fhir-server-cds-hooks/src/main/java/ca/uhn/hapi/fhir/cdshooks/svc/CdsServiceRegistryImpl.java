@@ -83,19 +83,14 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 	}
 
 	@Override
-	public CdsServiceResponseJson callService(String theServiceId, CdsServiceRequestJson theCdsServiceRequestJson) {
+	public CdsServiceResponseJson callService(String theServiceId, Object theCdsServiceRequestJson) {
+		final CdsServiceJson cdsServiceJson = getCdsServiceJson(theServiceId);
+		final CdsServiceRequestJson deserializedRequest =
+			myCdsServiceRequestJsonDeserializer.deserialize(cdsServiceJson, theCdsServiceRequestJson);
 		ICdsServiceMethod serviceMethod = (ICdsServiceMethod) getCdsServiceMethodOrThrowException(theServiceId);
-		myCdsPrefetchSvc.augmentRequest(theCdsServiceRequestJson, serviceMethod);
-		Object response = serviceMethod.invoke(myObjectMapper, theCdsServiceRequestJson, theServiceId);
+		myCdsPrefetchSvc.augmentRequest(deserializedRequest, serviceMethod);
+		Object response = serviceMethod.invoke(myObjectMapper, deserializedRequest, theServiceId);
 		return encodeServiceResponse(theServiceId, response);
-	}
-
-	@Override
-	public CdsServiceResponseJson callServiceWithId(String theServiceId, Object theCdsServiceRequestJson) {
-		CdsServiceJson cdsServiceJson = getCdsServiceJson(theServiceId);
-		CdsServiceRequestJson deserialize =
-				myCdsServiceRequestJsonDeserializer.deserialize(cdsServiceJson, theCdsServiceRequestJson);
-		return callService(theServiceId, deserialize);
 	}
 
 	@Override
