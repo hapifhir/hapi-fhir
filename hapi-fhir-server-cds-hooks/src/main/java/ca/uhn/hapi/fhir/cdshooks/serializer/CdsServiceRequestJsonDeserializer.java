@@ -60,8 +60,7 @@ public class CdsServiceRequestJsonDeserializer {
 			final JsonNode extensionNode = cdsServiceRequestJsonNode.get("extension");
 			final CdsServiceRequestJson cdsServiceRequestJson =
 					myObjectMapper.convertValue(cdsServiceRequestJsonNode, CdsServiceRequestJson.class);
-			LinkedHashMap<String, Object> map =
-				myObjectMapper.readValue(contextNode.toString(), LinkedHashMap.class);
+			LinkedHashMap<String, Object> map = myObjectMapper.readValue(contextNode.toString(), LinkedHashMap.class);
 			cdsServiceRequestJson.setContext(deserializeContext(map));
 			if (extensionNode != null) {
 				CdsHooksExtension myRequestExtension =
@@ -75,7 +74,7 @@ public class CdsServiceRequestJsonDeserializer {
 	}
 
 	CdsServiceRequestContextJson deserializeContext(LinkedHashMap<String, Object> theMap)
-		throws JsonProcessingException {
+			throws JsonProcessingException {
 		final CdsServiceRequestContextJson cdsServiceRequestContextJson = new CdsServiceRequestContextJson();
 		for (Map.Entry<String, Object> entry : theMap.entrySet()) {
 			String key = entry.getKey();
@@ -93,7 +92,7 @@ public class CdsServiceRequestJsonDeserializer {
 	}
 
 	private CdsHooksExtension deserializeExtension(
-		@Nonnull CdsServiceJson theCdsServiceJson, @Nonnull String theExtension) throws JsonProcessingException {
+			@Nonnull CdsServiceJson theCdsServiceJson, @Nonnull String theExtension) throws JsonProcessingException {
 		Class<? extends CdsHooksExtension> extensionClass = theCdsServiceJson.getExtensionClass();
 		if (extensionClass == null) {
 			return null;
@@ -109,15 +108,13 @@ public class CdsServiceRequestJsonDeserializer {
 
 	private void validateHookInstance(JsonNode hookInstanceNode) {
 		if (hookInstanceNode == null) {
-			throw new InvalidRequestException(
-					Msg.code(2548) + "hookInstance cannot be null for a CdsServiceRequest.");
+			throw new InvalidRequestException(Msg.code(2548) + "hookInstance cannot be null for a CdsServiceRequest.");
 		}
 	}
 
 	private void validateContext(JsonNode requestContextNode) {
-		if(requestContextNode == null) {
+		if (requestContextNode == null) {
 			throw new InvalidRequestException(Msg.code(2550) + "context cannot be null for a CdsServiceRequest.");
 		}
 	}
-
 }
