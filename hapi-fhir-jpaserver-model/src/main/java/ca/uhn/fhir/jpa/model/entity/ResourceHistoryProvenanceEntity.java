@@ -20,7 +20,6 @@
 package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.hapi.fhir.sql.hibernatesvc.ConditionalIdProperty;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -36,7 +35,6 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.checkerframework.checker.units.qual.C;
 
 import static ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId.PARTITION_ID;
 import static ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable.SOURCE_URI_LENGTH;
@@ -49,17 +47,12 @@ import static ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable.SOURCE_URI_LENGT
 			@Index(name = "IDX_RESVERPROV_RES_PID", columnList = "RES_PID")
 		})
 @Entity
-@IdClass(ResourceHistoryProvenanceEntity.ResourceHistoryTableId.class)
-public class ResourceHistoryProvenanceEntity {
+@IdClass(IdAndPartitionIdValue.class)
+public class ResourceHistoryProvenanceEntity extends BasePartitionable {
 
 	@Id
 	@Column(name = "RES_VER_PID")
 	private Long myId;
-
-	@Id
-	@Column(name = PARTITION_ID)
-	@ConditionalIdProperty
-	private Integer myPartitionIdValue;
 
 	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumns(value={
@@ -151,15 +144,6 @@ public class ResourceHistoryProvenanceEntity {
 
 	public Long getId() {
 		return myId;
-	}
-
-	public void setPartitionId(PartitionablePartitionId thePartitionId) {
-		myPartitionIdValue = thePartitionId.getPartitionId();
-	}
-
-	public static class ResourceHistoryTableId {
-		private Long myId;
-		private Integer myPartitionIdValue;
 	}
 
 }

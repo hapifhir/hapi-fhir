@@ -21,7 +21,6 @@ package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.hapi.fhir.sql.hibernatesvc.ConditionalIdProperty;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ForeignKey;
@@ -45,7 +44,6 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.io.Serializable;
 
-import static ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId.PARTITION_ID;
 import static ca.uhn.fhir.jpa.model.util.SearchParamHash.hashSearchParam;
 
 @Entity
@@ -56,8 +54,8 @@ import static ca.uhn.fhir.jpa.model.util.SearchParamHash.hashSearchParam;
 			@Index(name = "IDX_RESPARMPRESENT_RESID", columnList = "RES_ID"),
 			@Index(name = "IDX_RESPARMPRESENT_HASHPRES", columnList = "HASH_PRESENCE")
 		})
-@IdClass(ResourceTable.ResourceTableId.class)
-public class SearchParamPresentEntity implements Serializable {
+@IdClass(IdAndPartitionIdValue.class)
+public class SearchParamPresentEntity extends BasePartitionable implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -66,11 +64,6 @@ public class SearchParamPresentEntity implements Serializable {
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_RESPARMPRESENT_ID")
 	@Column(name = "PID")
 	private Long myId;
-
-	@Id
-	@Column(name = PARTITION_ID)
-	@ConditionalIdProperty
-	private Integer myPartitionIdValue;
 
 	@Column(name = "SP_PRESENT", nullable = false)
 	private boolean myPresent;
@@ -235,14 +228,6 @@ public class SearchParamPresentEntity implements Serializable {
 			Boolean thePresent) {
 		String string = thePresent != null ? Boolean.toString(thePresent) : Boolean.toString(false);
 		return hashSearchParam(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, string);
-	}
-
-	public void setPartitionId(PartitionablePartitionId theStoragePartition) {
-		myPartitionIdValue = theStoragePartition.getPartitionId();
-	}
-
-	public PartitionablePartitionId getPartitionId() {
-		return PartitionablePartitionId.with(myPartitionIdValue, null);
 	}
 
 }

@@ -20,7 +20,6 @@
 package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.jpa.model.util.SearchParamHash;
-import ca.uhn.hapi.fhir.sql.hibernatesvc.ConditionalIdProperty;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -35,7 +34,6 @@ import jakarta.persistence.JoinColumns;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -43,8 +41,6 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IIdType;
-
-import static ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId.PARTITION_ID;
 
 /**
  * NOTE ON LIMITATIONS HERE
@@ -76,7 +72,7 @@ import static ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId.PARTITION_ID
 					columnList = "RES_ID",
 					unique = false)
 		})
-@IdClass(ResourceIndexedSearchParamCoords.ResourceIndexedSearchParamCoordsId.class)
+@IdClass(IdAndPartitionIdValue.class)
 public class ResourceIndexedComboStringUnique extends BaseResourceIndexedCombo
 		implements Comparable<ResourceIndexedComboStringUnique>, IResourceIndexComboSearchParameter {
 
@@ -89,11 +85,6 @@ public class ResourceIndexedComboStringUnique extends BaseResourceIndexedCombo
 	@Id
 	@Column(name = "PID")
 	private Long myId;
-
-	@Id
-	@Column(name = PARTITION_ID)
-	@ConditionalIdProperty
-	private Integer myPartitionIdValue;
 
 	@ManyToOne(
 		optional = false,
@@ -264,19 +255,6 @@ public class ResourceIndexedComboStringUnique extends BaseResourceIndexedCombo
 		if (myHashComplete2 == null) {
 			myHashComplete2 = 0L;
 		}
-	}
-
-	@Override
-	public void setPartitionId(PartitionablePartitionId thePartitionId) {
-		if (ObjectUtils.notEqual(getPartitionId(), thePartitionId)) {
-			clearHashes();
-			myPartitionIdValue = thePartitionId.getPartitionId();
-		}
-	}
-
-	@Override
-	public PartitionablePartitionId getPartitionId() {
-		return PartitionablePartitionId.with(myPartitionIdValue, null);
 	}
 
 	@Override

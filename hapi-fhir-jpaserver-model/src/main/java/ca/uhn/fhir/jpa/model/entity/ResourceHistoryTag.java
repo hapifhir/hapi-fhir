@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
-import ca.uhn.hapi.fhir.sql.hibernatesvc.ConditionalIdProperty;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Entity;
@@ -38,8 +37,6 @@ import jakarta.persistence.UniqueConstraint;
 
 import java.io.Serializable;
 
-import static ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId.PARTITION_ID;
-
 @Embeddable
 @Entity
 @Table(
@@ -50,7 +47,7 @@ import static ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId.PARTITION_ID
 					columnNames = {"RES_VER_PID", "TAG_ID"}),
 		},
 		indexes = {@Index(name = "IDX_RESHISTTAG_RESID", columnList = "RES_ID")})
-@IdClass(ResourceTable.ResourceTableId.class)
+@IdClass(IdAndPartitionIdValue.class)
 public class ResourceHistoryTag extends BaseTag implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -60,11 +57,6 @@ public class ResourceHistoryTag extends BaseTag implements Serializable {
 	@Id
 	@Column(name = "PID")
 	private Long myId;
-
-	@Id
-	@Column(name = PARTITION_ID)
-	@ConditionalIdProperty
-	private Integer myPartitionIdValue;
 
 	@ManyToOne()
 	@JoinColumns(value = {
@@ -113,10 +105,6 @@ public class ResourceHistoryTag extends BaseTag implements Serializable {
 		setResourceId(theResourceHistoryTable.getResourceId());
 		setResourceType(theResourceHistoryTable.getResourceType());
 		setPartitionId(theRequestPartitionId);
-	}
-
-	private void setPartitionId(PartitionablePartitionId theRequestPartitionId) {
-		myPartitionIdValue = theRequestPartitionId.getPartitionId();
 	}
 
 	public String getResourceType() {

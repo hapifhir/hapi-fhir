@@ -22,7 +22,6 @@ package ca.uhn.fhir.jpa.model.entity;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.listener.IndexStorageOptimizationListener;
 import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.hapi.fhir.sql.hibernatesvc.ConditionalIdProperty;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
@@ -40,13 +39,10 @@ import jakarta.persistence.JoinColumns;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-
-import static ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId.PARTITION_ID;
 
 @Embeddable
 @EntityListeners(IndexStorageOptimizationListener.class)
@@ -60,7 +56,7 @@ import static ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId.PARTITION_ID
 			@Index(name = "IDX_SP_COORDS_UPDATED", columnList = "SP_UPDATED"),
 			@Index(name = "IDX_SP_COORDS_RESID", columnList = "RES_ID")
 		})
-@IdClass(ResourceIndexedSearchParamCoords.ResourceIndexedSearchParamCoordsId.class)
+@IdClass(IdAndPartitionIdValue.class)
 public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchParam {
 
 	public static final int MAX_LENGTH = 100;
@@ -78,11 +74,6 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SPIDX_COORDS")
 	@Column(name = "SP_ID")
 	private Long myId;
-
-	@Id
-	@Column(name = PARTITION_ID)
-	@ConditionalIdProperty
-	private Integer myPartitionIdValue;
 
 	@ManyToOne(
 			optional = false,
@@ -125,19 +116,6 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 	@Override
 	public void clearHashes() {
 		myHashIdentity = null;
-	}
-
-	@Override
-	public void setPartitionId(PartitionablePartitionId thePartitionId) {
-		if (ObjectUtils.notEqual(getPartitionId(), thePartitionId)) {
-			clearHashes();
-			myPartitionIdValue = thePartitionId.getPartitionId();
-		}
-	}
-
-	@Override
-	public PartitionablePartitionId getPartitionId() {
-		return PartitionablePartitionId.with(myPartitionIdValue, null);
 	}
 
 	@Override
@@ -256,8 +234,4 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 		return this;
 	}
 
-	public static class ResourceIndexedSearchParamCoordsId {
-		private Long myId;
-		private Integer myPartitionIdValue;
-	}
 }

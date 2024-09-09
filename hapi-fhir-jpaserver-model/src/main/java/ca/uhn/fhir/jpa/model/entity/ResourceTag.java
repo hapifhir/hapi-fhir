@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
-import ca.uhn.hapi.fhir.sql.hibernatesvc.ConditionalIdProperty;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -40,8 +39,6 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-import static ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId.PARTITION_ID;
-
 @Entity
 @Table(
 		name = "HFJ_RES_TAG",
@@ -54,7 +51,7 @@ import static ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId.PARTITION_ID
 					name = "IDX_RESTAG_TAGID",
 					columnNames = {"RES_ID", "TAG_ID"})
 		})
-@IdClass(ResourceTable.ResourceTableId.class)
+@IdClass(IdAndPartitionIdValue.class)
 public class ResourceTag extends BaseTag {
 
 	private static final long serialVersionUID = 1L;
@@ -64,11 +61,6 @@ public class ResourceTag extends BaseTag {
 	@Id
 	@Column(name = "PID")
 	private Long myId;
-
-	@Id
-	@Column(name = PARTITION_ID)
-	@ConditionalIdProperty
-	private Integer myPartitionIdValue;
 
 	@ManyToOne(
 			cascade = {},
@@ -112,15 +104,6 @@ public class ResourceTag extends BaseTag {
 		setResourceType(theResourceTable.getResourceType());
 		setPartitionId(theRequestPartitionId);
 	}
-
-	public void setPartitionId(PartitionablePartitionId theRequestPartitionId) {
-		myPartitionIdValue = theRequestPartitionId.getPartitionId();
-	}
-
-	public PartitionablePartitionId getPartitionId() {
-		return PartitionablePartitionId.with(myPartitionIdValue, null);
-	}
-
 
 	public Long getResourceId() {
 		return myResourceId;

@@ -24,7 +24,6 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.listener.IndexStorageOptimizationListener;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.UriParam;
-import ca.uhn.hapi.fhir.sql.hibernatesvc.ConditionalIdProperty;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Entity;
@@ -41,14 +40,12 @@ import jakarta.persistence.JoinColumns;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 
-import static ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId.PARTITION_ID;
 import static ca.uhn.fhir.jpa.model.util.SearchParamHash.hashSearchParam;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 
@@ -65,7 +62,7 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 			// for index create/delete
 			@Index(name = "IDX_SP_URI_COORDS", columnList = "RES_ID")
 		})
-@IdClass(ResourceIndexedSearchParamCoords.ResourceIndexedSearchParamCoordsId.class)
+@IdClass(IdAndPartitionIdValue.class)
 public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchParam {
 
 	/*
@@ -86,11 +83,6 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SPIDX_URI")
 	@Column(name = "SP_ID")
 	private Long myId;
-
-	@Id
-	@Column(name = PARTITION_ID)
-	@ConditionalIdProperty
-	private Integer myPartitionIdValue;
 
 	/**
 	 * @since 3.4.0 - At some point this should be made not-null
@@ -158,19 +150,6 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 	public void clearHashes() {
 		myHashIdentity = null;
 		myHashUri = null;
-	}
-
-	@Override
-	public void setPartitionId(PartitionablePartitionId thePartitionId) {
-		if (ObjectUtils.notEqual(getPartitionId(), thePartitionId)) {
-			clearHashes();
-			myPartitionIdValue = thePartitionId.getPartitionId();
-		}
-	}
-
-	@Override
-	public PartitionablePartitionId getPartitionId() {
-		return PartitionablePartitionId.with(myPartitionIdValue, null);
 	}
 
 	@Override

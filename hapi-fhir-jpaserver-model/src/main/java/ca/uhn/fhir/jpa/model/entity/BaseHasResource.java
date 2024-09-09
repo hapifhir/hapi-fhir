@@ -36,7 +36,7 @@ import java.util.Collection;
 import java.util.Date;
 
 @MappedSuperclass
-public abstract class BaseHasResource
+public abstract class BaseHasResource extends BasePartitionable
 		implements IBaseResourceEntity, IBasePersistedResource<JpaPid>, Serializable {
 
 	public static final String RES_PUBLISHED = "RES_PUBLISHED";

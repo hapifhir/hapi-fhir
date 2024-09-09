@@ -25,7 +25,6 @@ import ca.uhn.fhir.jpa.model.listener.IndexStorageOptimizationListener;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.hapi.fhir.sql.hibernatesvc.ConditionalIdProperty;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Entity;
@@ -44,7 +43,6 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -52,7 +50,6 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 
-import static ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId.PARTITION_ID;
 import static ca.uhn.fhir.jpa.model.util.SearchParamHash.hashSearchParam;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.trim;
@@ -78,7 +75,7 @@ import static org.apache.commons.lang3.StringUtils.trim;
 					name = "IDX_SP_TOKEN_RESID_V2",
 					columnList = "RES_ID,HASH_SYS_AND_VALUE,HASH_VALUE,HASH_SYS,HASH_IDENTITY,PARTITION_ID")
 		})
-@IdClass(ResourceIndexedSearchParamCoords.ResourceIndexedSearchParamCoordsId.class)
+@IdClass(IdAndPartitionIdValue.class)
 public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchParam {
 
 	public static final int MAX_LENGTH = 200;
@@ -99,11 +96,6 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SPIDX_TOKEN")
 	@Column(name = "SP_ID")
 	private Long myId;
-
-	@Id
-	@Column(name = PARTITION_ID)
-	@ConditionalIdProperty
-	private Integer myPartitionIdValue;
 
 	/**
 	 * @since 3.4.0 - At some point this should be made not-null
@@ -206,19 +198,6 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 		myHashSystem = null;
 		myHashSystemAndValue = null;
 		myHashValue = null;
-	}
-
-	@Override
-	public void setPartitionId(PartitionablePartitionId thePartitionId) {
-		if (ObjectUtils.notEqual(getPartitionId(), thePartitionId)) {
-			clearHashes();
-			myPartitionIdValue = thePartitionId.getPartitionId();
-		}
-	}
-
-	@Override
-	public PartitionablePartitionId getPartitionId() {
-		return PartitionablePartitionId.with(myPartitionIdValue, null);
 	}
 
 	@Override

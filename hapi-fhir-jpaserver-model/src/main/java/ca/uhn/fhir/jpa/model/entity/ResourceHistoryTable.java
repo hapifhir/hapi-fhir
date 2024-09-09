@@ -22,8 +22,6 @@ package ca.uhn.fhir.jpa.model.entity;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.hapi.fhir.sql.hibernatesvc.ConditionalIdProperty;
-import jakarta.annotation.Nullable;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -55,8 +53,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import static ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId.PARTITION_ID;
-
 @Entity
 @Table(
 		name = ResourceHistoryTable.HFJ_RES_VER,
@@ -70,7 +66,7 @@ import static ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId.PARTITION_ID
 			@Index(name = "IDX_RESVER_ID_DATE", columnList = "RES_ID,RES_UPDATED"),
 			@Index(name = "IDX_RESVER_DATE", columnList = "RES_UPDATED,RES_ID")
 		})
-@IdClass(ResourceHistoryTable.ResourceHistoryTableId.class)
+@IdClass(IdAndPartitionIdValue.class)
 public class ResourceHistoryTable extends BaseHasResource implements Serializable {
 	public static final String IDX_RESVER_ID_VER = "IDX_RESVER_ID_VER";
 	public static final int SOURCE_URI_LENGTH = 100;
@@ -89,11 +85,6 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_RESOURCE_HISTORY_ID")
 	@Column(name = "PID")
 	private Long myId;
-
-	@Id
-	@Column(name = PARTITION_ID)
-	@ConditionalIdProperty
-	private Integer myPartitionIdValue;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumns(value = {
@@ -288,12 +279,6 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 		return myResourceVersion;
 	}
 
-	@Nullable
-	@Override
-	public PartitionablePartitionId getPartitionId() {
-		return PartitionablePartitionId.with(myPartitionIdValue, null);
-	}
-
 	public void setVersion(long theVersion) {
 		myResourceVersion = theVersion;
 	}
@@ -361,15 +346,6 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 
 	public void setTransientForcedId(String theTransientForcedId) {
 		myTransientForcedId = theTransientForcedId;
-	}
-
-	public void setPartitionId(PartitionablePartitionId thePartitionId) {
-		myPartitionIdValue = thePartitionId.getPartitionId();
-	}
-
-	public static class ResourceHistoryTableId {
-		private Long myId;
-		private Integer myPartitionIdValue;
 	}
 
 }

@@ -24,7 +24,6 @@ import ca.uhn.fhir.jpa.model.listener.IndexStorageOptimizationListener;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.QuantityParam;
-import ca.uhn.hapi.fhir.sql.hibernatesvc.ConditionalIdProperty;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Entity;
@@ -41,7 +40,6 @@ import jakarta.persistence.JoinColumns;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -52,7 +50,6 @@ import org.hibernate.search.mapper.pojo.mapping.definition.annotation.ScaledNumb
 import java.math.BigDecimal;
 import java.util.Objects;
 
-import static ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId.PARTITION_ID;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -80,7 +77,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  * @since 5.3.0
  *
  */
-@IdClass(ResourceIndexedSearchParamCoords.ResourceIndexedSearchParamCoordsId.class)
+@IdClass(IdAndPartitionIdValue.class)
 public class ResourceIndexedSearchParamQuantityNormalized extends BaseResourceIndexedSearchParamQuantity {
 
 	private static final long serialVersionUID = 1L;
@@ -90,11 +87,6 @@ public class ResourceIndexedSearchParamQuantityNormalized extends BaseResourceIn
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SPIDX_QUANTITY_NRML")
 	@Column(name = "SP_ID")
 	private Long myId;
-
-	@Id
-	@Column(name = PARTITION_ID)
-	@ConditionalIdProperty
-	private Integer myPartitionIdValue;
 
 	// Changed to double here for storing the value after converted to the CanonicalForm due to BigDecimal maps
 	// NUMBER(19,2)
@@ -192,19 +184,6 @@ public class ResourceIndexedSearchParamQuantityNormalized extends BaseResourceIn
 	@Override
 	public IQueryParameterType toQueryParameterType() {
 		return new QuantityParam(null, getValue(), getSystem(), getUnits());
-	}
-
-	@Override
-	public void setPartitionId(PartitionablePartitionId thePartitionId) {
-		if (ObjectUtils.notEqual(getPartitionId(), thePartitionId)) {
-			clearHashes();
-			myPartitionIdValue = thePartitionId.getPartitionId();
-		}
-	}
-
-	@Override
-	public PartitionablePartitionId getPartitionId() {
-		return PartitionablePartitionId.with(myPartitionIdValue, null);
 	}
 
 	@Override

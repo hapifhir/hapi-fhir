@@ -27,9 +27,7 @@ import ca.uhn.fhir.jpa.model.search.ResourceTableRoutingBinder;
 import ca.uhn.fhir.jpa.model.search.SearchParamTextPropertyBinder;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.hapi.fhir.sql.hibernatesvc.ConditionalIdProperty;
 import com.google.common.annotations.VisibleForTesting;
-import jakarta.annotation.Nullable;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -80,7 +78,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId.PARTITION_ID;
 import static ca.uhn.fhir.jpa.model.entity.ResourceTable.IDX_RES_TYPE_FHIR_ID;
 
 @Indexed(routingBinder = @RoutingBinderRef(type = ResourceTableRoutingBinder.class))
@@ -102,7 +99,7 @@ import static ca.uhn.fhir.jpa.model.entity.ResourceTable.IDX_RES_TYPE_FHIR_ID;
 			@Index(name = "IDX_RES_RESID_UPDATED", columnList = "RES_ID, RES_UPDATED, PARTITION_ID")
 		})
 @NamedEntityGraph(name = "Resource.noJoins")
-@IdClass(ResourceTable.ResourceTableId.class)
+@IdClass(IdAndPartitionIdValue.class)
 public class ResourceTable extends BaseHasResource implements Serializable, IBasePersistedResource<JpaPid> {
 	public static final int RESTYPE_LEN = 40;
 	public static final String HFJ_RESOURCE = "HFJ_RESOURCE";
@@ -160,11 +157,6 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@GenericField(projectable = Projectable.YES)
 	@DocumentId
 	private Long myId;
-
-	@Id
-	@Column(name = PARTITION_ID)
-	@ConditionalIdProperty
-	private Integer myPartitionIdValue;
 
 	@Column(name = PartitionablePartitionId.PARTITION_DATE, nullable = true)
 	private LocalDate myPartitionDateValue;
@@ -696,12 +688,6 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		return myVersion;
 	}
 
-	@Nullable
-	@Override
-	public PartitionablePartitionId getPartitionId() {
-		return PartitionablePartitionId.with(myPartitionIdValue, null);
-	}
-
 	/**
 	 * Sets the version on this entity to {@literal 1}. This should only be called
 	 * on resources that are not yet persisted. After that time the version number
@@ -1053,24 +1039,6 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 
 	public String asTypedFhirResourceId() {
 		return getResourceType() + "/" + getFhirId();
-	}
-
-	public void setPartitionId(PartitionablePartitionId theStoragePartition) {
-		myPartitionIdValue = theStoragePartition.getPartitionId();
-	}
-
-	public static class ResourceTableId {
-		// FIXME: reuse the same composite ID class everywhere, and implement hashcode/equals
-		private Long myId;
-		private Integer myPartitionIdValue;
-
-		public ResourceTableId() {
-			// nothing
-		}
-
-		public ResourceTableId(Long theId) {
-			myId = theId;
-		}
 	}
 
 	/**
