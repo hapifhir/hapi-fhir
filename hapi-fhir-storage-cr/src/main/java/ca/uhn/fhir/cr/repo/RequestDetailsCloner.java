@@ -46,6 +46,14 @@ class RequestDetailsCloner {
 		newDetails.setCompartmentName(null);
 		newDetails.setResponse(theDetails.getResponse());
 
+		// LUKETODO: wait on JP about this:
+		//		if (theDetails instanceof SystemRequestDetails) {
+		//			final SystemRequestDetails inputParamAsSystemRequestDetails = (SystemRequestDetails) theDetails;
+		//
+		//			newDetails.setTenantId(inputParamAsSystemRequestDetails.getTenantId());
+		//			newDetails.setRequestPartitionId(inputParamAsSystemRequestDetails.getRequestPartitionId());
+		//		}
+		//
 		return new DetailsBuilder(newDetails);
 	}
 
