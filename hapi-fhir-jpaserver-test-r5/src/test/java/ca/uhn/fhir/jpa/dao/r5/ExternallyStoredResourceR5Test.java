@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.esr.ExternallyStoredResourceAddress;
 import ca.uhn.fhir.jpa.esr.ExternallyStoredResourceAddressMetadataKey;
 import ca.uhn.fhir.jpa.esr.ExternallyStoredResourceServiceRegistry;
 import ca.uhn.fhir.jpa.esr.IExternallyStoredResourceService;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
@@ -51,7 +52,7 @@ public class ExternallyStoredResourceR5Test extends BaseJpaR5Test {
 
 		// Verify
 		runInTransaction(()->{
-			ResourceTable resource = myResourceTableDao.getReferenceById(new IdAndPartitionId(id.getIdPartAsLong()));
+			ResourceTable resource = myResourceTableDao.getReferenceById(JpaPid.fromId(id.getIdPartAsLong()));
 			assertNotNull(resource);
 			ResourceHistoryTable history = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(id.getIdPartAsLong(), 1L);
 			assertNotNull(history);

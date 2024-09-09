@@ -305,7 +305,7 @@ public class ResourceReindexingSvcImplTest {
 		when(myResourceTableDao.findById(any())).thenAnswer(t -> {
 			ResourceTable retVal = new ResourceTable();
 			Long id = (Long) t.getArguments()[0];
-			retVal.setId(id);
+			retVal.setIdForUnitTest(id);
 			retVal.setResourceType(theResourceTypes[id.intValue()]);
 			retVal.setUpdated(new Date(theUpdatedTimes[id.intValue()]));
 			return Optional.of(retVal);

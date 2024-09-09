@@ -30,6 +30,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinColumns;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
@@ -75,16 +76,27 @@ public class TermCodeSystemVersion implements Serializable {
 	private Long myId;
 
 	@OneToOne(fetch = FetchType.LAZY)
-	@JoinColumn(
+	@JoinColumns(value = {
+		@JoinColumn(
 			name = "RES_ID",
 			referencedColumnName = "RES_ID",
 			nullable = false,
-			updatable = false,
-			foreignKey = @ForeignKey(name = "FK_CODESYSVER_RES_ID"))
+			insertable = false,
+			updatable = false),
+		@JoinColumn(
+			name = "PARTITION_ID",
+			referencedColumnName = "PARTITION_ID",
+			nullable = false,
+			insertable = false,
+			updatable = false)
+	}, foreignKey = @ForeignKey(name = "FK_CODESYSVER_RES_ID"))
 	private ResourceTable myResource;
 
-	@Column(name = "RES_ID", nullable = false, insertable = false, updatable = false)
+	@Column(name = "RES_ID", nullable = false)
 	private Long myResourcePid;
+
+	@Column(name = "RES_PARTITION_ID", nullable = true)
+	private Integer myResourcePartitionId;
 
 	@Column(name = "CS_VERSION_ID", nullable = true, updatable = true, length = MAX_VERSION_LENGTH)
 	private String myCodeSystemVersionId;
@@ -157,6 +169,8 @@ public class TermCodeSystemVersion implements Serializable {
 
 	public TermCodeSystemVersion setResource(ResourceTable theResource) {
 		myResource = theResource;
+		myResourcePid = theResource.getResourceId();
+		myResourcePartitionId = theResource.getPersistentId().getPartitionId();
 		return this;
 	}
 

@@ -37,18 +37,12 @@ import java.time.LocalDate;
 @MappedSuperclass
 public abstract class BasePartitionable implements Serializable {
 
-	/**
-	 * This is here to support queries only, do not set this field directly
-	 */
 	@SuppressWarnings("unused")
 	@Id
 	@ConditionalIdProperty
 	@Column(name = PartitionablePartitionId.PARTITION_ID)
 	Integer myPartitionIdValue;
 
-	/**
-	 * This is here to support queries only, do not set this field directly
-	 */
 	@SuppressWarnings("unused")
 	@Column(name = PartitionablePartitionId.PARTITION_DATE, insertable = false, updatable = false, nullable = true)
 	private LocalDate myPartitionDateValue;

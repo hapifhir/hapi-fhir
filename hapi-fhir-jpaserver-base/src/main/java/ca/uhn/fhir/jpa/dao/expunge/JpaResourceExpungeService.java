@@ -304,7 +304,7 @@ public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid
 			RequestDetails theRequestDetails, Long theResourceId, AtomicInteger theRemainingCount) {
 
 		// FIXME: make this method take a Pid
-		IdAndPartitionId id = new IdAndPartitionId(theResourceId);
+		JpaPid id = JpaPid.fromId(theResourceId);
 
 		ResourceTable resource = myResourceTableDao.findById(id).orElseThrow(IllegalStateException::new);
 
@@ -334,7 +334,7 @@ public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid
 	@Transactional
 	public void deleteAllSearchParams(JpaPid theResourceId) {
 		Long theResourceLongId = theResourceId.getId();
-		ResourceTable resource = myResourceTableDao.findById(theResourceId.toIdAndPartitionId()).orElse(null);
+		ResourceTable resource = myResourceTableDao.findById(theResourceId).orElse(null);
 
 		if (resource == null || resource.isParamsUriPopulated()) {
 			myResourceIndexedSearchParamUriDao.deleteByResourceId(theResourceLongId);

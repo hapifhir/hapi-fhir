@@ -30,7 +30,7 @@ public class ResourceTableTest {
 	public void testPopulateId(Long theResId, String theFhirId, String theExpected) {
 		// Given
 		ResourceTable t = new ResourceTable();
-		t.setId(theResId);
+		t.setIdForUnitTest(theResId);
 		t.setFhirId(theFhirId);
 		t.setResourceType(new Patient().getResourceType().name());
 		t.setVersionForUnitTest(1);

@@ -18,7 +18,6 @@ import ca.uhn.fhir.jpa.cache.ResourceChangeListenerCacheRefresherImpl;
 import ca.uhn.fhir.jpa.cache.ResourceChangeListenerRegistryImpl;
 import ca.uhn.fhir.jpa.cache.ResourcePersistentIdMap;
 import ca.uhn.fhir.jpa.cache.ResourceVersionMap;
-import ca.uhn.fhir.jpa.config.HibernatePropertiesProvider;
 import ca.uhn.fhir.jpa.dao.IJpaStorageResourceParser;
 import ca.uhn.fhir.jpa.dao.JpaResourceDao;
 import ca.uhn.fhir.jpa.dao.ResourceHistoryCalculator;
@@ -61,7 +60,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Answers;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -585,7 +583,7 @@ public class GiantTransactionPerfTest {
 		public void persist(Object entity) {
 			myPersistCount.add(entity);
 			if (entity instanceof ResourceTable) {
-				((ResourceTable) entity).setId(ourNextId++);
+				((ResourceTable) entity).setIdForUnitTest(ourNextId++);
 			}
 		}
 

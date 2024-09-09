@@ -30,7 +30,6 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.cross.JpaResourceLookup;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
@@ -486,7 +485,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 			// This is only called when we know the resource exists.
 			// So this optional is only empty when there is no hfj_forced_id table
 			// note: this is obsolete with the new fhir_id column, and will go away.
-			forcedId = myResourceTableDao.findById(theId.toIdAndPartitionId()).map(ResourceTable::asTypedFhirResourceId);
+			forcedId = myResourceTableDao.findById(theId).map(ResourceTable::asTypedFhirResourceId);
 			myMemoryCacheService.put(MemoryCacheService.CacheEnum.PID_TO_FORCED_ID, theId.getId(), forcedId);
 		}
 
@@ -667,18 +666,17 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 	@Override
 	public PersistentIdToForcedIdMap<JpaPid> translatePidsToForcedIds(Set<JpaPid> theResourceIds) {
 		assert myDontCheckActiveTransactionForUnitTest || TransactionSynchronizationManager.isSynchronizationActive();
-		Set<IdAndPartitionId> thePids = theResourceIds.stream().map(JpaPid::toIdAndPartitionId).collect(Collectors.toSet());
-		HashMap<IdAndPartitionId, Optional<String>> retVal = new HashMap<>(
-				myMemoryCacheService.getAllPresent(MemoryCacheService.CacheEnum.PID_TO_FORCED_ID, thePids));
+		HashMap<JpaPid, Optional<String>> retVal = new HashMap<>(
+				myMemoryCacheService.getAllPresent(MemoryCacheService.CacheEnum.PID_TO_FORCED_ID, theResourceIds));
 
-		List<IdAndPartitionId> remainingPids =
-				thePids.stream().filter(t -> !retVal.containsKey(t)).collect(Collectors.toList());
+		List<JpaPid> remainingPids =
+				theResourceIds.stream().filter(t -> !retVal.containsKey(t)).collect(Collectors.toList());
 
-		new QueryChunker<IdAndPartitionId>().chunk(remainingPids, t -> {
+		new QueryChunker<JpaPid>().chunk(remainingPids, t -> {
 			List<ResourceTable> resourceEntities = myResourceTableDao.findAllById(t);
 
 			for (ResourceTable nextResourceEntity : resourceEntities) {
-				IdAndPartitionId nextResourcePid = nextResourceEntity.toPid();
+				JpaPid nextResourcePid = nextResourceEntity.getPersistentId();
 				Optional<String> nextForcedId = Optional.of(nextResourceEntity.asTypedFhirResourceId());
 				retVal.put(nextResourcePid, nextForcedId);
 				myMemoryCacheService.putAfterCommit(
@@ -686,14 +684,13 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 			}
 		});
 
-		remainingPids = thePids.stream().filter(t -> !retVal.containsKey(t)).collect(Collectors.toList());
-		for (IdAndPartitionId nextResourcePid : remainingPids) {
+		remainingPids = theResourceIds.stream().filter(t -> !retVal.containsKey(t)).collect(Collectors.toList());
+		for (JpaPid nextResourcePid : remainingPids) {
 			retVal.put(nextResourcePid, Optional.empty());
 			myMemoryCacheService.putAfterCommit(
 					MemoryCacheService.CacheEnum.PID_TO_FORCED_ID, nextResourcePid, Optional.empty());
 		}
-		Map<JpaPid, Optional<String>> convertRetVal = new HashMap<>();
-		retVal.forEach((k, v) -> convertRetVal.put(JpaPid.fromId(k), v));
+		Map<JpaPid, Optional<String>> convertRetVal = new HashMap<>(retVal);
 
 		return new PersistentIdToForcedIdMap<>(convertRetVal);
 	}
@@ -801,7 +798,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 
 	@Override
 	public IIdType resourceIdFromPidOrThrowException(JpaPid thePid, String theResourceType) {
-		Optional<ResourceTable> optionalResource = myResourceTableDao.findById(thePid.toIdAndPartitionId());
+		Optional<ResourceTable> optionalResource = myResourceTableDao.findById(thePid);
 		if (optionalResource.isEmpty()) {
 			throw new ResourceNotFoundException(Msg.code(2124) + "Requested resource not found");
 		}

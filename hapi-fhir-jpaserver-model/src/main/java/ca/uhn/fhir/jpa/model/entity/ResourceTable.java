@@ -28,13 +28,12 @@ import ca.uhn.fhir.jpa.model.search.SearchParamTextPropertyBinder;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import com.google.common.annotations.VisibleForTesting;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
+import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import jakarta.persistence.IdClass;
 import jakarta.persistence.Index;
 import jakarta.persistence.NamedEntityGraph;
@@ -51,15 +50,12 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.Session;
 import org.hibernate.annotations.GenerationTime;
 import org.hibernate.annotations.GeneratorType;
-import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.OptimisticLock;
 import org.hibernate.search.engine.backend.types.Projectable;
 import org.hibernate.search.engine.backend.types.Searchable;
 import org.hibernate.search.mapper.pojo.bridge.mapping.annotation.PropertyBinderRef;
 import org.hibernate.search.mapper.pojo.bridge.mapping.annotation.RoutingBinderRef;
-import org.hibernate.search.mapper.pojo.mapping.definition.annotation.DocumentId;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
-import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexingDependency;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.ObjectPath;
@@ -99,7 +95,6 @@ import static ca.uhn.fhir.jpa.model.entity.ResourceTable.IDX_RES_TYPE_FHIR_ID;
 			@Index(name = "IDX_RES_RESID_UPDATED", columnList = "RES_ID, RES_UPDATED, PARTITION_ID")
 		})
 @NamedEntityGraph(name = "Resource.noJoins")
-@IdClass(IdAndPartitionId.class)
 public class ResourceTable extends BaseHasResource implements Serializable, IBasePersistedResource<JpaPid> {
 	public static final int RESTYPE_LEN = 40;
 	public static final String HFJ_RESOURCE = "HFJ_RESOURCE";
@@ -150,13 +145,8 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@OptimisticLock(excluded = true)
 	private boolean myHasLinks;
 
-	@Id
-	@GenericGenerator(name = "SEQ_RESOURCE_ID", type = ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator.class)
-	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_RESOURCE_ID")
-	@Column(name = "RES_ID")
-	@GenericField(projectable = Projectable.YES)
-	@DocumentId
-	private Long myId;
+	@EmbeddedId
+	private JpaPid myPid;
 
 	@Column(name = PartitionablePartitionId.PARTITION_DATE, nullable = true)
 	private LocalDate myPartitionDateValue;
@@ -493,13 +483,14 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		myHashSha256 = theHashSha256;
 	}
 
+	// FIXME: change this method to return JpaPid
 	@Override
 	public Long getId() {
-		return myId;
+		return myPid.getId();
 	}
 
-	public void setId(Long theId) {
-		myId = theId;
+	public void setIdForUnitTest(Long theId) {
+		myPid = JpaPid.fromId(theId);
 	}
 
 	public Long getIndexStatus() {
@@ -688,13 +679,19 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		return myVersion;
 	}
 
+	@Nullable
+	@Override
+	public PartitionablePartitionId getPartitionId() {
+		return myPid.getPartitionablePartitionId();
+	}
+
 	/**
 	 * Sets the version on this entity to {@literal 1}. This should only be called
 	 * on resources that are not yet persisted. After that time the version number
 	 * is managed by hibernate.
 	 */
 	public void initializeVersion() {
-		assert myId == null;
+		assert myPid == null || myPid.getId() == null;
 		myVersion = 1;
 	}
 
@@ -885,7 +882,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 			createVersionTags = false;
 		}
 
-		retVal.setResourceId(myId);
+		retVal.setResourceId(myPid.getId());
 		retVal.setResourceType(myResourceType);
 		retVal.setTransientForcedId(getFhirId());
 		retVal.setFhirVersion(getFhirVersion());
@@ -919,7 +916,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@Override
 	public String toString() {
 		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
-		b.append("pid", myId);
+		b.append("pid", myPid);
 		b.append("fhirId", myFhirId);
 		b.append("resourceType", myResourceType);
 		b.append("version", myVersion);
@@ -1041,8 +1038,11 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		return getResourceType() + "/" + getFhirId();
 	}
 
-	public IdAndPartitionId toPid() {
-		return new IdAndPartitionId(myId, myPartitionIdValue);
+	public void setPartitionId(PartitionablePartitionId theStoragePartition) {
+		if (myPid == null) {
+			myPid = new JpaPid();
+		}
+		myPid.setPartitionId(theStoragePartition.getPartitionId());
 	}
 
 	/**
@@ -1055,7 +1055,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		@Override
 		public String generateValue(Session session, Object owner) {
 			ResourceTable that = (ResourceTable) owner;
-			return that.myFhirId != null ? that.myFhirId : that.myId.toString();
+			return that.myFhirId != null ? that.myFhirId : that.myPid.getId().toString();
 		}
 	}
 }

@@ -22,6 +22,8 @@ package ca.uhn.fhir.jpa.model.entity;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.hapi.fhir.sql.hibernatesvc.ConditionalIdProperty;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -50,6 +52,7 @@ import org.hibernate.Length;
 import org.hibernate.annotations.OptimisticLock;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -85,6 +88,21 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_RESOURCE_HISTORY_ID")
 	@Column(name = "PID")
 	private Long myId;
+
+	@Id
+	@ConditionalIdProperty
+	@Column(name = PartitionablePartitionId.PARTITION_ID)
+	private Integer myPartitionIdValue;
+
+	@SuppressWarnings("unused")
+	@Column(name = PartitionablePartitionId.PARTITION_DATE, insertable = false, updatable = false, nullable = true)
+	private LocalDate myPartitionDateValue;
+
+	@Override
+	@Nullable
+	public PartitionablePartitionId getPartitionId() {
+		return PartitionablePartitionId.with(myPartitionIdValue, myPartitionDateValue);
+	}
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumns(value = {
@@ -348,4 +366,10 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 		myTransientForcedId = theTransientForcedId;
 	}
 
+	public void setPartitionId(PartitionablePartitionId thePartitionablePartitionId) {
+		if (thePartitionablePartitionId != null) {
+			myPartitionIdValue = thePartitionablePartitionId.getPartitionId();
+			myPartitionDateValue = thePartitionablePartitionId.getPartitionDate();
+		}
+	}
 }

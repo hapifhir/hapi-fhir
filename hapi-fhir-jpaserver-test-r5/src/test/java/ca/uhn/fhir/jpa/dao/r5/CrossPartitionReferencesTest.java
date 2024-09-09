@@ -161,7 +161,7 @@ public class CrossPartitionReferencesTest extends BaseJpaR5Test {
 		IIdType patientId = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
 		ourLog.info("Patient ID: {}", patientId);
 		runInTransaction(() -> {
-			ResourceTable resourceTable = myResourceTableDao.findById(new IdAndPartitionId(patientId.getIdPartAsLong())).orElseThrow();
+			ResourceTable resourceTable = myResourceTableDao.findById(JpaPid.fromId(patientId.getIdPartAsLong())).orElseThrow();
 			assertEquals(1, resourceTable.getPartitionId().getPartitionId());
 		});
 
@@ -180,7 +180,7 @@ public class CrossPartitionReferencesTest extends BaseJpaR5Test {
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 
 		runInTransaction(() -> {
-			ResourceTable resourceTable = myResourceTableDao.findById(new IdAndPartitionId(observationId.getIdPartAsLong())).orElseThrow();
+			ResourceTable resourceTable = myResourceTableDao.findById(JpaPid.fromId(observationId.getIdPartAsLong())).orElseThrow();
 			assertEquals(2, resourceTable.getPartitionId().getPartitionId());
 		});
 

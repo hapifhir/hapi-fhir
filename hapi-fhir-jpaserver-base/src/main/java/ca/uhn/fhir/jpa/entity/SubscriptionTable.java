@@ -27,6 +27,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinColumns;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
@@ -56,16 +57,27 @@ public class SubscriptionTable {
 	@Column(name = "PID", insertable = false, updatable = false)
 	private Long myId;
 
-	@Column(name = "RES_ID", insertable = false, updatable = false)
+	@Column(name = "RES_ID")
 	private Long myResId;
 
+	@Column(name = "PARTITION_ID")
+	private Integer myPartitionId;
+
 	@OneToOne()
+	@JoinColumns(value = {
 	@JoinColumn(
 			name = "RES_ID",
-			insertable = true,
+			insertable = false,
 			updatable = false,
-			referencedColumnName = "RES_ID",
-			foreignKey = @ForeignKey(name = "FK_SUBSC_RESOURCE_ID"))
+			nullable = false,
+			referencedColumnName = "RES_ID"),
+	@JoinColumn(
+			name = "PARTITION_ID",
+			insertable = false,
+			updatable = false,
+			nullable = false,
+			referencedColumnName = "PARTITION_ID")},
+		foreignKey = @ForeignKey(name = "FK_SUBSC_RESOURCE_ID"))
 	private ResourceTable mySubscriptionResource;
 
 	/**
@@ -93,5 +105,7 @@ public class SubscriptionTable {
 
 	public void setSubscriptionResource(ResourceTable theSubscriptionResource) {
 		mySubscriptionResource = theSubscriptionResource;
+		myResId = theSubscriptionResource.getId();
+		myPartitionId = theSubscriptionResource.getPersistentId().getPartitionId();
 	}
 }

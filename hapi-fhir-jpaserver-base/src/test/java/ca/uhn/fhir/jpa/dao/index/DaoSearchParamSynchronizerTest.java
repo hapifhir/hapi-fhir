@@ -57,7 +57,7 @@ public class DaoSearchParamSynchronizerTest {
 		existingParams = ResourceIndexedSearchParams.withLists(existingEntity);
 
 		final ResourceTable resourceTable = new ResourceTable();
-		resourceTable.setId(1L);
+		resourceTable.setIdForUnitTest(1L);
 		EXISTING_SEARCH_PARAM_NUMBER.setResource(resourceTable);
 		THE_SEARCH_PARAM_NUMBER.setResource(resourceTable);
 

@@ -227,7 +227,7 @@ class BaseHapiFhirResourceDaoTest {
 		RequestPartitionId partitionId = Mockito.mock(RequestPartitionId.class);
 		JpaPid jpaPid = JpaPid.fromIdAndVersion(123L, 1L);
 		ResourceTable entity = new ResourceTable();
-		entity.setId(123L);
+		entity.setIdForUnitTest(123L);
 		entity.setFhirId("456");
 
 		// set a transactionService that will actually execute the callback

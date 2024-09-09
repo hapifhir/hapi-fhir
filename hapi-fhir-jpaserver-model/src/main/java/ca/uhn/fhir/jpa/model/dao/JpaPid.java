@@ -22,6 +22,16 @@ package ca.uhn.fhir.jpa.model.dao;
 import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
+import ca.uhn.hapi.fhir.sql.hibernatesvc.ConditionalIdProperty;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.search.engine.backend.types.Projectable;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.DocumentId;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -34,9 +44,27 @@ import java.util.Set;
  * JPA implementation of IResourcePersistentId.  JPA uses a Long as the primary key.  This class should be used in any
  * context where the pid is known to be a Long.
  */
+@Embeddable
 public class JpaPid extends BaseResourcePersistentId<Long> {
-	private final Long myId;
-	private PartitionablePartitionId myPartitionablePartitionId;
+
+	@GenericGenerator(name = "SEQ_RESOURCE_ID", type = ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator.class)
+	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_RESOURCE_ID")
+	@Column(name = "RES_ID")
+	@GenericField(projectable = Projectable.YES)
+	@DocumentId(identifierBridge = JpaPidIdentifierBridge)
+	private Long myId;
+
+	@ConditionalIdProperty
+	@Column(name = PartitionablePartitionId.PARTITION_ID)
+	private Integer myPartitionIdValue;
+
+	/**
+	 * Constructor - Do not call this directly, only used for
+	 * JPA instantiation
+	 */
+	public JpaPid() {
+		super(null);
+	}
 
 	private JpaPid(Long theId) {
 		super(null);
@@ -59,23 +87,27 @@ public class JpaPid extends BaseResourcePersistentId<Long> {
 	}
 
 	public PartitionablePartitionId getPartitionablePartitionId() {
-		return myPartitionablePartitionId;
+		return new PartitionablePartitionId(myPartitionIdValue, null);
 	}
 
 	public JpaPid setPartitionablePartitionId(PartitionablePartitionId thePartitionablePartitionId) {
-		myPartitionablePartitionId = thePartitionablePartitionId;
+		myPartitionIdValue = thePartitionablePartitionId != null ? thePartitionablePartitionId.getPartitionId() : null;
 		return this;
 	}
 
 	public JpaPid setPartitionIdIfNotAlreadySet(Integer thePartitionId) {
-		if (myPartitionablePartitionId == null) {
-			myPartitionablePartitionId = PartitionablePartitionId.with(thePartitionId, null);
+		if (myPartitionIdValue == null) {
+			myPartitionIdValue = thePartitionId;
 		}
 		return this;
 	}
 
-	public IdAndPartitionId toIdAndPartitionId() {
-		return new IdAndPartitionId(myId, myPartitionablePartitionId.getPartitionId());
+	public void setPartitionId(Integer thePartitionId) {
+		myPartitionIdValue = thePartitionId;
+	}
+
+	public Integer getPartitionId() {
+		return myPartitionIdValue;
 	}
 
 	public static List<Long> toLongList(Collection<JpaPid> thePids) {
@@ -139,7 +171,7 @@ public class JpaPid extends BaseResourcePersistentId<Long> {
 
 	@Override
 	public String toString() {
-		return myId.toString();
+		return myPartitionIdValue != null ? myPartitionIdValue +"/" + myId.toString() : myId.toString();
 	}
 
 	public static JpaPid fromId(IdAndPartitionId theId) {

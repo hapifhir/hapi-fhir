@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.util;
 
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.TranslationQuery;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.sl.cache.Cache;
 import ca.uhn.fhir.sl.cache.CacheFactory;
@@ -199,7 +200,7 @@ public class MemoryCacheService {
 		 * Key type: {@literal Long}
 		 * Value type: {@literal Optional<String>}
 		 */
-		PID_TO_FORCED_ID(Long.class),
+		PID_TO_FORCED_ID(JpaPid.class),
 		CONCEPT_TRANSLATION(TranslationQuery.class),
 		MATCH_URL(String.class),
 		CONCEPT_TRANSLATION_REVERSE(TranslationQuery.class),

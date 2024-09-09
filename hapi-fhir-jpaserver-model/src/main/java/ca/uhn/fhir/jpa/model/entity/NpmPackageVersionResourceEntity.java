@@ -30,6 +30,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinColumns;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
@@ -66,12 +67,27 @@ public class NpmPackageVersionResourceEntity {
 	private NpmPackageVersionEntity myPackageVersion;
 
 	@ManyToOne
-	@JoinColumn(
+	@JoinColumns(value = {
+		@JoinColumn(
 			name = "BINARY_RES_ID",
 			referencedColumnName = "RES_ID",
 			nullable = false,
-			foreignKey = @ForeignKey(name = "FK_NPM_PKVR_RESID"))
+			insertable = false,
+			updatable = false),
+		@JoinColumn(
+			name = "PARTITION_ID",
+			referencedColumnName = "PARTITION_ID",
+			nullable = false,
+			insertable = false,
+			updatable = false)
+	}, foreignKey = @ForeignKey(name = "FK_NPM_PKVR_RESID"))
 	private ResourceTable myResourceBinary;
+
+	@Column(name = "BINARY_RES_ID", nullable = false)
+	private Long myResourcePid;
+
+	@Column(name = "PARTITION_ID", nullable = false)
+	private Integer myPartitionId;
 
 	@Column(name = "FILE_DIR", length = 200)
 	private String myDirectory;
@@ -125,6 +141,8 @@ public class NpmPackageVersionResourceEntity {
 
 	public void setResourceBinary(ResourceTable theResourceBinary) {
 		myResourceBinary = theResourceBinary;
+		myResourcePid = theResourceBinary.getResourceId();
+		myPartitionId = theResourceBinary.getPersistentId().getPartitionId();
 	}
 
 	public String getFhirVersionId() {

@@ -110,7 +110,7 @@ public class SearchParamRegistryImplTest {
 	private static ResourceTable createEntity(long theId, int theVersion) {
 		ResourceTable searchParamEntity = new ResourceTable();
 		searchParamEntity.setResourceType("SearchParameter");
-		searchParamEntity.setId(theId);
+		searchParamEntity.setIdForUnitTest(theId);
 		searchParamEntity.setVersionForUnitTest(theVersion);
 		return searchParamEntity;
 	}

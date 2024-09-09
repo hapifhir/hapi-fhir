@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.dao.data;
 
 import ca.uhn.fhir.jpa.dao.data.custom.IForcedIdQueries;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import org.springframework.data.domain.Pageable;
@@ -40,16 +41,18 @@ import java.util.stream.Stream;
 
 @Transactional(propagation = Propagation.MANDATORY)
 public interface IResourceTableDao
-		extends JpaRepository<ResourceTable, IdAndPartitionId>, IHapiFhirJpaRepository, IForcedIdQueries {
+		extends JpaRepository<ResourceTable, JpaPid>, IHapiFhirJpaRepository, IForcedIdQueries {
 
-	@Query("SELECT t.myId FROM ResourceTable t WHERE t.myDeleted IS NOT NULL")
+	// FIXME: replace myPid.myId to myPid and change return types here
+	
+	@Query("SELECT t.myPid.myId FROM ResourceTable t WHERE t.myDeleted IS NOT NULL")
 	Slice<Long> findIdsOfDeletedResources(Pageable thePageable);
 
-	@Query("SELECT t.myId FROM ResourceTable t WHERE t.myResourceType = :restype AND t.myDeleted IS NOT NULL")
+	@Query("SELECT t.myPid.myId FROM ResourceTable t WHERE t.myResourceType = :restype AND t.myDeleted IS NOT NULL")
 	Slice<Long> findIdsOfDeletedResourcesOfType(Pageable thePageable, @Param("restype") String theResourceName);
 
 	@Query(
-			"SELECT t.myId FROM ResourceTable t WHERE t.myId = :resid AND t.myResourceType = :restype AND t.myDeleted IS NOT NULL")
+			"SELECT t.myPid.myId FROM ResourceTable t WHERE t.myPid.myId = :resid AND t.myResourceType = :restype AND t.myDeleted IS NOT NULL")
 	Slice<Long> findIdsOfDeletedResourcesOfType(
 			Pageable thePageable, @Param("resid") Long theResourceId, @Param("restype") String theResourceName);
 
@@ -58,17 +61,17 @@ public interface IResourceTableDao
 	List<Map<?, ?>> getResourceCounts();
 
 	@Query(
-			"SELECT t.myId FROM ResourceTable t WHERE t.myUpdated >= :low AND t.myUpdated <= :high ORDER BY t.myUpdated DESC")
+			"SELECT t.myPid.myId FROM ResourceTable t WHERE t.myUpdated >= :low AND t.myUpdated <= :high ORDER BY t.myUpdated DESC")
 	Slice<Long> findIdsOfResourcesWithinUpdatedRangeOrderedFromNewest(
 			Pageable thePage, @Param("low") Date theLow, @Param("high") Date theHigh);
 
 	@Query(
-			"SELECT t.myId FROM ResourceTable t WHERE t.myUpdated >= :low AND t.myUpdated <= :high ORDER BY t.myUpdated ASC")
+			"SELECT t.myPid.myId FROM ResourceTable t WHERE t.myUpdated >= :low AND t.myUpdated <= :high ORDER BY t.myUpdated ASC")
 	Slice<Long> findIdsOfResourcesWithinUpdatedRangeOrderedFromOldest(
 			Pageable thePage, @Param("low") Date theLow, @Param("high") Date theHigh);
 
 	@Query(
-			"SELECT t.myId, t.myResourceType, t.myUpdated FROM ResourceTable t WHERE t.myUpdated >= :low AND t.myUpdated <= :high ORDER BY t.myUpdated ASC")
+			"SELECT t.myPid.myId, t.myResourceType, t.myUpdated FROM ResourceTable t WHERE t.myUpdated >= :low AND t.myUpdated <= :high ORDER BY t.myUpdated ASC")
 	Stream<Object[]> streamIdsTypesAndUpdateTimesOfResourcesWithinUpdatedRangeOrderedFromOldest(
 			@Param("low") Date theLow, @Param("high") Date theHigh);
 
@@ -76,7 +79,7 @@ public interface IResourceTableDao
 	 * @return List of arrays containing [PID, resourceType, lastUpdated]
 	 */
 	@Query(
-			"SELECT t.myId, t.myResourceType, t.myUpdated FROM ResourceTable t WHERE t.myUpdated >= :low AND t.myUpdated <= :high AND t.myPartitionIdValue IN (:partition_ids) ORDER BY t.myUpdated ASC")
+			"SELECT t.myPid.myId, t.myResourceType, t.myUpdated FROM ResourceTable t WHERE t.myUpdated >= :low AND t.myUpdated <= :high AND t.myPartitionIdValue IN (:partition_ids) ORDER BY t.myUpdated ASC")
 	Slice<Object[]> findIdsTypesAndUpdateTimesOfResourcesWithinUpdatedRangeOrderedFromOldestForPartitionIds(
 			Pageable thePage,
 			@Param("low") Date theLow,
@@ -84,7 +87,7 @@ public interface IResourceTableDao
 			@Param("partition_ids") List<Integer> theRequestPartitionIds);
 
 	@Query(
-			"SELECT t.myId, t.myResourceType, t.myUpdated FROM ResourceTable t WHERE t.myUpdated >= :low AND t.myUpdated <= :high AND t.myPartitionIdValue IN (:partition_ids) ORDER BY t.myUpdated ASC")
+			"SELECT t.myPid.myId, t.myResourceType, t.myUpdated FROM ResourceTable t WHERE t.myUpdated >= :low AND t.myUpdated <= :high AND t.myPartitionIdValue IN (:partition_ids) ORDER BY t.myUpdated ASC")
 	Stream<Object[]> streamIdsTypesAndUpdateTimesOfResourcesWithinUpdatedRangeOrderedFromOldestForPartitionIds(
 			@Param("low") Date theLow,
 			@Param("high") Date theHigh,
@@ -94,18 +97,18 @@ public interface IResourceTableDao
 	 * @return List of arrays containing [PID, resourceType, lastUpdated]
 	 */
 	@Query(
-			"SELECT t.myId, t.myResourceType, t.myUpdated FROM ResourceTable t WHERE t.myUpdated >= :low AND t.myUpdated <= :high ORDER BY t.myUpdated ASC")
+			"SELECT t.myPid.myId, t.myResourceType, t.myUpdated FROM ResourceTable t WHERE t.myUpdated >= :low AND t.myUpdated <= :high ORDER BY t.myUpdated ASC")
 	Slice<Object[]> findIdsTypesAndUpdateTimesOfResourcesWithinUpdatedRangeOrderedFromOldestForDefaultPartition(
 			Pageable thePage, @Param("low") Date theLow, @Param("high") Date theHigh);
 
 	@Query(
-			"SELECT t.myId, t.myResourceType, t.myUpdated FROM ResourceTable t WHERE t.myUpdated >= :low AND t.myUpdated <= :high ORDER BY t.myUpdated ASC")
+			"SELECT t.myPid.myId, t.myResourceType, t.myUpdated FROM ResourceTable t WHERE t.myUpdated >= :low AND t.myUpdated <= :high ORDER BY t.myUpdated ASC")
 	Stream<Object[]> streamIdsTypesAndUpdateTimesOfResourcesWithinUpdatedRangeOrderedFromOldestForDefaultPartition(
 			@Param("low") Date theLow, @Param("high") Date theHigh);
 
 	// TODO in the future, consider sorting by pid as well so batch jobs process in the same order across restarts
 	@Query(
-			"SELECT t.myId FROM ResourceTable t WHERE t.myUpdated >= :low AND t.myUpdated <= :high AND t.myPartitionIdValue = :partition_id ORDER BY t.myUpdated ASC")
+			"SELECT t.myPid.myId FROM ResourceTable t WHERE t.myUpdated >= :low AND t.myUpdated <= :high AND t.myPartitionIdValue = :partition_id ORDER BY t.myUpdated ASC")
 	Slice<Long> findIdsOfPartitionedResourcesWithinUpdatedRangeOrderedFromOldest(
 			Pageable thePage,
 			@Param("low") Date theLow,
@@ -113,7 +116,7 @@ public interface IResourceTableDao
 			@Param("partition_id") Integer theRequestPartitionId);
 
 	@Query(
-			"SELECT t.myId FROM ResourceTable t WHERE t.myUpdated >= :low AND t.myUpdated <= :high AND t.myResourceType = :restype ORDER BY t.myUpdated ASC")
+			"SELECT t.myPid.myId FROM ResourceTable t WHERE t.myUpdated >= :low AND t.myUpdated <= :high AND t.myResourceType = :restype ORDER BY t.myUpdated ASC")
 	Slice<Long> findIdsOfResourcesWithinUpdatedRangeOrderedFromOldest(
 			Pageable thePage,
 			@Param("restype") String theResourceType,
@@ -121,11 +124,11 @@ public interface IResourceTableDao
 			@Param("high") Date theHigh);
 
 	@Modifying
-	@Query("UPDATE ResourceTable t SET t.myIndexStatus = :status WHERE t.myId = :id")
+	@Query("UPDATE ResourceTable t SET t.myIndexStatus = :status WHERE t.myPid.myId = :id")
 	void updateIndexStatus(@Param("id") Long theId, @Param("status") Long theIndexStatus);
 
 	@Modifying
-	@Query("DELETE FROM ResourceTable t WHERE t.myId = :pid")
+	@Query("DELETE FROM ResourceTable t WHERE t.myPid.myId = :pid")
 	void deleteByPid(@Param("pid") Long theId);
 
 	/**
@@ -133,7 +136,7 @@ public interface IResourceTableDao
 	 * is an object array, where the order matters (the array represents columns returned by the query). Be careful if you change this query in any way.
 	 */
 	@Query(
-			"SELECT t.myResourceType, t.myId, t.myDeleted, t.myPartitionIdValue, t.myPartitionDateValue FROM ResourceTable t WHERE t.myId IN (:pid)")
+			"SELECT t.myResourceType, t.myPid.myId, t.myDeleted, t.myPartitionIdValue, t.myPartitionDateValue FROM ResourceTable t WHERE t.myPid.myId IN (:pid)")
 	Collection<Object[]> findLookupFieldsByResourcePid(@Param("pid") List<Long> thePids);
 
 	/**
@@ -141,7 +144,7 @@ public interface IResourceTableDao
 	 * is an object array, where the order matters (the array represents columns returned by the query). Be careful if you change this query in any way.
 	 */
 	@Query(
-			"SELECT t.myResourceType, t.myId, t.myDeleted, t.myPartitionIdValue, t.myPartitionDateValue FROM ResourceTable t WHERE t.myId IN (:pid) AND t.myPartitionIdValue IN :partition_id")
+			"SELECT t.myResourceType, t.myPid.myId, t.myDeleted, t.myPartitionIdValue, t.myPartitionDateValue FROM ResourceTable t WHERE t.myPid.myId IN (:pid) AND t.myPartitionIdValue IN :partition_id")
 	Collection<Object[]> findLookupFieldsByResourcePidInPartitionIds(
 			@Param("pid") List<Long> thePids, @Param("partition_id") Collection<Integer> thePartitionId);
 
@@ -150,7 +153,7 @@ public interface IResourceTableDao
 	 * is an object array, where the order matters (the array represents columns returned by the query). Be careful if you change this query in any way.
 	 */
 	@Query(
-			"SELECT t.myResourceType, t.myId, t.myDeleted, t.myPartitionIdValue, t.myPartitionDateValue FROM ResourceTable t WHERE t.myId IN (:pid) AND (t.myPartitionIdValue IS NULL OR t.myPartitionIdValue IN :partition_id)")
+			"SELECT t.myResourceType, t.myPid.myId, t.myDeleted, t.myPartitionIdValue, t.myPartitionDateValue FROM ResourceTable t WHERE t.myPid.myId IN (:pid) AND (t.myPartitionIdValue IS NULL OR t.myPartitionIdValue IN :partition_id)")
 	Collection<Object[]> findLookupFieldsByResourcePidInPartitionIdsOrNullPartition(
 			@Param("pid") List<Long> thePids, @Param("partition_id") Collection<Integer> thePartitionId);
 
@@ -159,10 +162,10 @@ public interface IResourceTableDao
 	 * is an object array, where the order matters (the array represents columns returned by the query). Be careful if you change this query in any way.
 	 */
 	@Query(
-			"SELECT t.myResourceType, t.myId, t.myDeleted, t.myPartitionIdValue, t.myPartitionDateValue FROM ResourceTable t WHERE t.myId IN (:pid) AND t.myPartitionIdValue IS NULL")
+			"SELECT t.myResourceType, t.myPid.myId, t.myDeleted, t.myPartitionIdValue, t.myPartitionDateValue FROM ResourceTable t WHERE t.myPid.myId IN (:pid) AND t.myPartitionIdValue IS NULL")
 	Collection<Object[]> findLookupFieldsByResourcePidInPartitionNull(@Param("pid") List<Long> thePids);
 
-	@Query("SELECT t.myVersion FROM ResourceTable t WHERE t.myId = :pid")
+	@Query("SELECT t.myVersion FROM ResourceTable t WHERE t.myPid.myId = :pid")
 	Long findCurrentVersionByPid(@Param("pid") Long thePid);
 
 	/**
@@ -172,26 +175,26 @@ public interface IResourceTableDao
 	 * @param pid - list of pids to get versions for
 	 * @return
 	 */
-	@Query("SELECT t.myId, t.myResourceType, t.myVersion FROM ResourceTable t WHERE t.myId IN ( :pid )")
+	@Query("SELECT t.myPid.myId, t.myResourceType, t.myVersion FROM ResourceTable t WHERE t.myPid.myId IN ( :pid )")
 	Collection<Object[]> getResourceVersionsForPid(@Param("pid") List<Long> pid);
 
-	@Query("SELECT t FROM ResourceTable t WHERE t.myPartitionIdValue IS NULL AND t.myId = :pid")
+	@Query("SELECT t FROM ResourceTable t WHERE t.myPartitionIdValue IS NULL AND t.myPid.myId = :pid")
 	Optional<ResourceTable> readByPartitionIdNull(@Param("pid") Long theResourceId);
 
-	@Query("SELECT t FROM ResourceTable t WHERE t.myPartitionIdValue = :partitionId AND t.myId = :pid")
+	@Query("SELECT t FROM ResourceTable t WHERE t.myPartitionIdValue = :partitionId AND t.myPid.myId = :pid")
 	Optional<ResourceTable> readByPartitionId(
 			@Param("partitionId") int thePartitionId, @Param("pid") Long theResourceId);
 
 	@Query(
-			"SELECT t FROM ResourceTable t WHERE (t.myPartitionIdValue IS NULL OR t.myPartitionIdValue IN (:partitionIds)) AND t.myId = :pid")
+			"SELECT t FROM ResourceTable t WHERE (t.myPartitionIdValue IS NULL OR t.myPartitionIdValue IN (:partitionIds)) AND t.myPid.myId = :pid")
 	Optional<ResourceTable> readByPartitionIdsOrNull(
 			@Param("partitionIds") Collection<Integer> thrValues, @Param("pid") Long theResourceId);
 
-	@Query("SELECT t FROM ResourceTable t WHERE t.myPartitionIdValue IN (:partitionIds) AND t.myId = :pid")
+	@Query("SELECT t FROM ResourceTable t WHERE t.myPartitionIdValue IN (:partitionIds) AND t.myPid.myId = :pid")
 	Optional<ResourceTable> readByPartitionIds(
 			@Param("partitionIds") Collection<Integer> thrValues, @Param("pid") Long theResourceId);
 
-	@Query("SELECT t FROM ResourceTable t WHERE t.myId IN :pids")
+	@Query("SELECT t FROM ResourceTable t WHERE t.myPid.myId IN :pids")
 	List<ResourceTable> findAllByIdAndLoadForcedIds(@Param("pids") List<Long> thePids);
 
 	@Query("SELECT t FROM ResourceTable t where t.myResourceType = :restype and t.myFhirId = :fhirId")

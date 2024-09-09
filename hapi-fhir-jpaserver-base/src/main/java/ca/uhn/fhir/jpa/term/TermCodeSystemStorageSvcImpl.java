@@ -384,7 +384,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 		JpaPid codeSystemResourcePid = myIdHelperService.resolveResourcePersistentIds(
 				RequestPartitionId.defaultPartition(), csId.getResourceType(), csId.getIdPart());
-		ResourceTable resource = myResourceTableDao.getOne(codeSystemResourcePid.toIdAndPartitionId());
+		ResourceTable resource = myResourceTableDao.getOne(codeSystemResourcePid);
 
 		ourLog.info("CodeSystem resource has ID: {}", csId.getValue());
 

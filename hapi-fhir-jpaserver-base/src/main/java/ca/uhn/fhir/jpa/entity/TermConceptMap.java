@@ -30,6 +30,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinColumns;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.SequenceGenerator;
@@ -77,16 +78,27 @@ public class TermConceptMap implements Serializable {
 	private Long myId;
 
 	@OneToOne()
-	@JoinColumn(
+	@JoinColumns(value = {
+		@JoinColumn(
 			name = "RES_ID",
 			referencedColumnName = "RES_ID",
 			nullable = false,
-			updatable = false,
-			foreignKey = @ForeignKey(name = "FK_TRMCONCEPTMAP_RES"))
+			insertable = false,
+			updatable = false),
+		@JoinColumn(
+			name = "PARTITION_ID",
+			referencedColumnName = "PARTITION_ID",
+			nullable = false,
+			insertable = false,
+			updatable = false)
+	}, foreignKey = @ForeignKey(name = "FK_TRMCONCEPTMAP_RES"))
 	private ResourceTable myResource;
 
-	@Column(name = "RES_ID", insertable = false, updatable = false)
+	@Column(name = "RES_ID")
 	private Long myResourcePid;
+
+	@Column(name = "PARTITION_ID")
+	private Integer myPartitionId;
 
 	@Column(name = "SOURCE_URL", nullable = true, length = TermValueSet.MAX_URL_LENGTH)
 	private String mySource;
@@ -121,15 +133,8 @@ public class TermConceptMap implements Serializable {
 
 	public TermConceptMap setResource(ResourceTable theResource) {
 		myResource = theResource;
-		return this;
-	}
-
-	public Long getResourcePid() {
-		return myResourcePid;
-	}
-
-	public TermConceptMap setResourcePid(Long theResourcePid) {
-		myResourcePid = theResourcePid;
+		myResourcePid = theResource.getId();
+		myPartitionId = theResource.getPersistentId().getPartitionId();
 		return this;
 	}
 

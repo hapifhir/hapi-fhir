@@ -31,6 +31,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinColumns;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
@@ -85,16 +86,27 @@ public class TermCodeSystem implements Serializable {
 	private Long myPid;
 
 	@OneToOne(fetch = FetchType.LAZY)
-	@JoinColumn(
+	@JoinColumns(value = {
+		@JoinColumn(
 			name = "RES_ID",
 			referencedColumnName = "RES_ID",
 			nullable = false,
-			updatable = true,
-			foreignKey = @ForeignKey(name = "FK_TRMCODESYSTEM_RES"))
+			updatable = false,
+			insertable = false),
+		@JoinColumn(
+			name = "PARTITION_ID",
+			referencedColumnName = "PARTITION_ID",
+			nullable = false,
+			updatable = false,
+			insertable = false)
+	}, foreignKey = @ForeignKey(name = "FK_TRMCODESYSTEM_RES"))
 	private ResourceTable myResource;
 
-	@Column(name = "RES_ID", insertable = false, updatable = false)
+	@Column(name = "RES_ID", nullable = false)
 	private Long myResourcePid;
+
+	@Column(name = "PARTITION_ID", nullable = false)
+	private Integer myPartitionId;
 
 	@Column(name = "CS_NAME", nullable = true, length = MAX_NAME_LENGTH)
 	private String myName;
@@ -172,6 +184,8 @@ public class TermCodeSystem implements Serializable {
 
 	public TermCodeSystem setResource(ResourceTable theResource) {
 		myResource = theResource;
+		myResourcePid = theResource.getId();
+		myPartitionId = theResource.getPersistentId().getPartitionId();
 		return this;
 	}
 

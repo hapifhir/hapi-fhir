@@ -1501,7 +1501,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		StopWatch w = new StopWatch();
 		JpaPid jpaPid = (JpaPid) thePid;
 
-		Optional<ResourceTable> entity = myResourceTableDao.findById(jpaPid.toIdAndPartitionId());
+		Optional<ResourceTable> entity = myResourceTableDao.findById(jpaPid);
 		if (entity.isEmpty()) {
 			throw new ResourceNotFoundException(Msg.code(975) + "No resource found with PID " + jpaPid);
 		}
@@ -2185,10 +2185,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			pidStream = pidStream.map(t->t.setPartitionIdIfNotAlreadySet(theRequestPartitionId.getPartitionIds().get(0)));
 		}
 
-		Stream<IdAndPartitionId> idStream = pidStream.map(t->t.toIdAndPartitionId());
-
 		return new QueryChunker<>()
-				.chunk(idStream, SearchBuilder.getMaximumPageSize())
+				.chunk(pidStream, SearchBuilder.getMaximumPageSize())
 				.flatMap(ids -> myResourceTableDao.findAllById(ids).stream())
 				.map(ResourceTable::getIdDt);
 	}
