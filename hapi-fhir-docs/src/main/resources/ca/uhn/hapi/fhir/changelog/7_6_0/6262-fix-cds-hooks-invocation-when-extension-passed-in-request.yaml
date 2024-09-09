@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 6262
+title: "Previously, when a `extension` was passed in as a part of the CDS hooks request, it would result in a `400 service not found`. This behaviour has now been fixed."
