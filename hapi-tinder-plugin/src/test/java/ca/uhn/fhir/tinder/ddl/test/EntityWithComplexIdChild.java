@@ -1,7 +1,6 @@
 package ca.uhn.fhir.tinder.ddl.test;
 
 import ca.uhn.hapi.fhir.sql.hibernatesvc.ConditionalIdProperty;
-import ca.uhn.hapi.fhir.sql.hibernatesvc.ConditionalIdRelation;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ForeignKey;
@@ -31,7 +30,6 @@ public class EntityWithComplexIdChild {
 	@ConditionalIdProperty
 	private Integer myPartitionId;
 
-	@ConditionalIdRelation(column = "PARENT_PARTITION_ID")
 	@ManyToOne
 	@JoinColumns(value = {
 		@JoinColumn(name = "PARENT_PID", referencedColumnName = "PID"),
