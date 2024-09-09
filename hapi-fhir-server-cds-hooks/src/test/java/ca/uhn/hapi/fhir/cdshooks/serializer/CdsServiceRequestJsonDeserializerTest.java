@@ -79,6 +79,7 @@ class CdsServiceRequestJsonDeserializerTest {
 		final LinkedHashMap<String, Object> extension = withExtension();
 		final LinkedHashMap<String, Object> request = withRequest(extension);
 		request.put("invalid-key", "some-value");
+		request.put("context", withContext());
 		// execute & validate
 		assertThatThrownBy(
 			() -> myFixture.deserialize(cdsServiceJson, request))

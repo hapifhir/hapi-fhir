@@ -52,31 +52,21 @@ public class CdsServiceRequestJsonDeserializer {
 			@Nonnull CdsServiceJson theCdsServiceJson, @Nonnull Object theCdsServiceRequestJson) {
 		final JsonNode cdsServiceRequestJsonNode =
 				myObjectMapper.convertValue(theCdsServiceRequestJson, JsonNode.class);
-		final JsonNode extensionNode = cdsServiceRequestJsonNode.get("extension");
-		final JsonNode requestContextNode = cdsServiceRequestJsonNode.get("context");
-		final JsonNode hookInstanceNode = cdsServiceRequestJsonNode.get("hookInstance");
-		final JsonNode hookIdNode = cdsServiceRequestJsonNode.get("hook");
+		final JsonNode contextNode = cdsServiceRequestJsonNode.get("context");
+		validateHookInstance(cdsServiceRequestJsonNode.get("hookInstance"));
+		validateHook(cdsServiceRequestJsonNode.get("hook"));
+		validateContext(contextNode);
 		try {
-			if (hookInstanceNode == null) {
-				throw new InvalidRequestException(
-						Msg.code(2548) + "hookInstance cannot be null for a CdsServiceRequest.");
-			}
-			if (hookIdNode == null) {
-				throw new InvalidRequestException(Msg.code(2549) + "hook cannot be null for a CdsServiceRequest.");
-			}
+			final JsonNode extensionNode = cdsServiceRequestJsonNode.get("extension");
 			final CdsServiceRequestJson cdsServiceRequestJson =
 					myObjectMapper.convertValue(cdsServiceRequestJsonNode, CdsServiceRequestJson.class);
+			LinkedHashMap<String, Object> map =
+				myObjectMapper.readValue(contextNode.toString(), LinkedHashMap.class);
+			cdsServiceRequestJson.setContext(deserializeContext(map));
 			if (extensionNode != null) {
 				CdsHooksExtension myRequestExtension =
 						deserializeExtension(theCdsServiceJson, extensionNode.toString());
 				cdsServiceRequestJson.setExtension(myRequestExtension);
-			}
-			if (requestContextNode != null) {
-				LinkedHashMap<String, Object> map =
-						myObjectMapper.readValue(requestContextNode.toString(), LinkedHashMap.class);
-				cdsServiceRequestJson.setContext(deserializeContext(map));
-			} else {
-				throw new InvalidRequestException(Msg.code(2550) + "context cannot be null for a CdsServiceRequest.");
 			}
 			return cdsServiceRequestJson;
 		} catch (JsonProcessingException | IllegalArgumentException theEx) {
@@ -84,17 +74,8 @@ public class CdsServiceRequestJsonDeserializer {
 		}
 	}
 
-	private CdsHooksExtension deserializeExtension(
-			@Nonnull CdsServiceJson theCdsServiceJson, @Nonnull String theExtension) throws JsonProcessingException {
-		Class<? extends CdsHooksExtension> extensionClass = theCdsServiceJson.getExtensionClass();
-		if (extensionClass == null) {
-			return null;
-		}
-		return myObjectMapper.readValue(theExtension, extensionClass);
-	}
-
 	CdsServiceRequestContextJson deserializeContext(LinkedHashMap<String, Object> theMap)
-			throws JsonProcessingException {
+		throws JsonProcessingException {
 		final CdsServiceRequestContextJson cdsServiceRequestContextJson = new CdsServiceRequestContextJson();
 		for (Map.Entry<String, Object> entry : theMap.entrySet()) {
 			String key = entry.getKey();
@@ -110,4 +91,33 @@ public class CdsServiceRequestJsonDeserializer {
 		}
 		return cdsServiceRequestContextJson;
 	}
+
+	private CdsHooksExtension deserializeExtension(
+		@Nonnull CdsServiceJson theCdsServiceJson, @Nonnull String theExtension) throws JsonProcessingException {
+		Class<? extends CdsHooksExtension> extensionClass = theCdsServiceJson.getExtensionClass();
+		if (extensionClass == null) {
+			return null;
+		}
+		return myObjectMapper.readValue(theExtension, extensionClass);
+	}
+
+	private void validateHook(JsonNode hookIdNode) {
+		if (hookIdNode == null) {
+			throw new InvalidRequestException(Msg.code(2549) + "hook cannot be null for a CdsServiceRequest.");
+		}
+	}
+
+	private void validateHookInstance(JsonNode hookInstanceNode) {
+		if (hookInstanceNode == null) {
+			throw new InvalidRequestException(
+					Msg.code(2548) + "hookInstance cannot be null for a CdsServiceRequest.");
+		}
+	}
+
+	private void validateContext(JsonNode requestContextNode) {
+		if(requestContextNode == null) {
+			throw new InvalidRequestException(Msg.code(2550) + "context cannot be null for a CdsServiceRequest.");
+		}
+	}
+
 }
