@@ -1,0 +1,10 @@
+---
+type: fix
+issue: 6258
+title: "The AuthorizationInterceptor handling for operations has been improved
+  so that operation rules now directly test the contents of response Bundle
+  or Parameters objects returned by the operation when configure to require
+  explicit response authorization. This fixes a regression in 7.4.0 where
+  operation responses could sometimes be denied even if appropriate
+  permissions were granted to view resources in a response bundle. Thanks to
+  Gijsbert van den Brink for reporting the issue with a sample test!"

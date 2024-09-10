@@ -4230,7 +4230,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		RequestDetails requestDetails = new SystemRequestDetails();
 		requestDetails.setResourceName("Bundle");
 
-		List<IBaseResource> resources = AuthorizationInterceptor.toListOfResourcesAndExcludeContainer(searchSet, ourCtx);
+		List<IBaseResource> resources = AuthorizationInterceptor.toListOfResourcesAndExcludeContainerUnlessStandalone(searchSet, ourCtx);
 		assertEquals(1, resources.size());
 		assertTrue(resources.contains(bundle));
 	}
@@ -4247,7 +4247,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		RequestDetails requestDetails = new SystemRequestDetails();
 		requestDetails.setResourceName("Patient");
 
-		List<IBaseResource> resources = AuthorizationInterceptor.toListOfResourcesAndExcludeContainer(searchSet, ourCtx);
+		List<IBaseResource> resources = AuthorizationInterceptor.toListOfResourcesAndExcludeContainerUnlessStandalone(searchSet, ourCtx);
 		assertEquals(2, resources.size());
 		assertTrue(resources.contains(patient1));
 		assertTrue(resources.contains(patient2));
