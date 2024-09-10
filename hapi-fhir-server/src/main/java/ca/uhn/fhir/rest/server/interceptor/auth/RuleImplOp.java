@@ -835,14 +835,23 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 	}
 
 	@Nullable
-	private static Verdict applyRulesToResponseBundle(RequestDetails theRequestDetails, IBaseResource theOutputResource, IRuleApplier theRuleApplier, Pointcut thePointcut) {
-		List<IBaseResource> outputResources = AuthorizationInterceptor.toListOfResourcesAndExcludeContainerUnlessStandalone(
-			theOutputResource, theRequestDetails.getFhirContext());
+	private static Verdict applyRulesToResponseBundle(
+			RequestDetails theRequestDetails,
+			IBaseResource theOutputResource,
+			IRuleApplier theRuleApplier,
+			Pointcut thePointcut) {
+		List<IBaseResource> outputResources =
+				AuthorizationInterceptor.toListOfResourcesAndExcludeContainerUnlessStandalone(
+						theOutputResource, theRequestDetails.getFhirContext());
 		return applyRulesToResponseResources(theRequestDetails, theRuleApplier, thePointcut, outputResources);
 	}
 
 	@Nullable
-	public static Verdict applyRulesToResponseResources(RequestDetails theRequestDetails, IRuleApplier theRuleApplier, Pointcut thePointcut, List<IBaseResource> outputResources) {
+	public static Verdict applyRulesToResponseResources(
+			RequestDetails theRequestDetails,
+			IRuleApplier theRuleApplier,
+			Pointcut thePointcut,
+			List<IBaseResource> outputResources) {
 		Verdict verdict = null;
 		for (IBaseResource nextResource : outputResources) {
 			if (nextResource == null) {

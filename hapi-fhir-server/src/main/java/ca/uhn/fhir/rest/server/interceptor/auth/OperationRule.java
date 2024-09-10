@@ -98,14 +98,6 @@ class OperationRule extends BaseRule implements IAuthRule {
 			Pointcut thePointcut) {
 		FhirContext ctx = theRequestDetails.getServer().getFhirContext();
 
-		// Operation rules apply to the execution of the operation itself, not to side effects like
-		// loading resources (that will presumably be reflected in the response). Those loads need
-		// to be explicitly authorized
-		if (!myAllowAllResourcesAccess && isResourceAccess(thePointcut)) {
-//			return null;
-			// FIXME: remove
-		}
-
 		boolean applies = false;
 		switch (theOperation) {
 			case EXTENDED_OPERATION_SERVER:
@@ -174,26 +166,28 @@ class OperationRule extends BaseRule implements IAuthRule {
 		if (theOutputResource == null) {
 			// This is the request part
 			return newVerdict(
-				theOperation,
-				theRequestDetails,
-				theInputResource,
-				theInputResourceId,
-				theOutputResource,
-				theRuleApplier);
-		} else {
-			// This is the response part, so we might want to check all of the
-			// resources in the response
-			if (myAllowAllResponses) {
-				return newVerdict(
 					theOperation,
 					theRequestDetails,
 					theInputResource,
 					theInputResourceId,
 					theOutputResource,
 					theRuleApplier);
+		} else {
+			// This is the response part, so we might want to check all of the
+			// resources in the response
+			if (myAllowAllResponses) {
+				return newVerdict(
+						theOperation,
+						theRequestDetails,
+						theInputResource,
+						theInputResourceId,
+						theOutputResource,
+						theRuleApplier);
 			} else {
-				List<IBaseResource> outputResources = AuthorizationInterceptor.toListOfResourcesAndExcludeContainer(					theOutputResource, theRequestDetails.getFhirContext());
-				return RuleImplOp.applyRulesToResponseResources(theRequestDetails, theRuleApplier, thePointcut, outputResources);
+				List<IBaseResource> outputResources = AuthorizationInterceptor.toListOfResourcesAndExcludeContainer(
+						theOutputResource, theRequestDetails.getFhirContext());
+				return RuleImplOp.applyRulesToResponseResources(
+						theRequestDetails, theRuleApplier, thePointcut, outputResources);
 			}
 		}
 	}

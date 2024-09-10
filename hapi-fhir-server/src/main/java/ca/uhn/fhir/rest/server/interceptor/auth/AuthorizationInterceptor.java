@@ -593,7 +593,8 @@ public class AuthorizationInterceptor implements IRuleApplier {
 	}
 
 	@Nonnull
-	public static List<IBaseResource> toListOfResourcesAndExcludeContainer(IBaseResource theResponseObject, FhirContext fhirContext) {
+	public static List<IBaseResource> toListOfResourcesAndExcludeContainer(
+			IBaseResource theResponseObject, FhirContext fhirContext) {
 		List<IBaseResource> retVal;
 		retVal = fhirContext.newTerser().getAllPopulatedChildElementsOfType(theResponseObject, IBaseResource.class);
 
