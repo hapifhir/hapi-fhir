@@ -64,8 +64,11 @@ public abstract class TestDefinitions implements ITestDataBuilder {
 	@Test
 	public void testReadServerAssignedId() {
 		// Setup
+		myCaptureQueriesListener.clear();
 		myPartitionSelectorInterceptor.setNextPartitionId(PARTITION_1);
 		long id = createPatient(withActiveTrue()).getIdPartAsLong();
+		myParentTest.logAllResources();
+		myCaptureQueriesListener.logInsertQueries();
 
 		// Test
 		myCaptureQueriesListener.clear();

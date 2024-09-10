@@ -58,7 +58,7 @@ public interface ITermCodeSystemVersionDao extends JpaRepository<TermCodeSystemV
 	List<TermCodeSystemVersion> findByCodeSystemResourcePid(@Param("resource_id") Long theCodeSystemResourcePid);
 
 	@Query(
-			"SELECT cs FROM TermCodeSystemVersion cs WHERE cs.myCodeSystemHavingThisVersionAsCurrentVersionIfAny.myResource.myId = :resource_id")
+			"SELECT cs FROM TermCodeSystemVersion cs WHERE cs.myCodeSystemHavingThisVersionAsCurrentVersionIfAny.myResource.myPid.myId = :resource_id")
 	TermCodeSystemVersion findCurrentVersionForCodeSystemResourcePid(
 			@Param("resource_id") Long theCodeSystemResourcePid);
 }

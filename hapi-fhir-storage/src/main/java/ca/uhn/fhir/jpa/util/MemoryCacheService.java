@@ -131,7 +131,7 @@ public class MemoryCacheService {
 	}
 
 	public <K, V> void put(CacheEnum theCache, K theKey, V theValue) {
-		assert theCache.getKeyType().isAssignableFrom(theKey.getClass());
+		assert theCache.getKeyType().isAssignableFrom(theKey.getClass()) : "Key type " + theKey.getClass() + " doesn't match expected " + theCache.getKeyType() + " for cache " + theCache;
 		doPut(theCache, theKey, theValue);
 	}
 
@@ -151,6 +151,7 @@ public class MemoryCacheService {
 	 * in order to avoid cache poisoning.
 	 */
 	public <K, V> void putAfterCommit(CacheEnum theCache, K theKey, V theValue) {
+		assert theCache.getKeyType().isAssignableFrom(theKey.getClass()) : "Key type " + theKey.getClass() + " doesn't match expected " + theCache.getKeyType() + " for cache " + theCache;
 		if (TransactionSynchronizationManager.isSynchronizationActive()) {
 			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
 				@Override

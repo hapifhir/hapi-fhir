@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.dao.data;
 
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -54,19 +55,19 @@ public interface IResourceHistoryTableDao extends JpaRepository<ResourceHistoryT
 			Pageable thePage, @Param("resId") Long theId, @Param("dontWantVersion") Long theDontWantVersion);
 
 	@Query("" + "SELECT v.myId FROM ResourceHistoryTable v "
-			+ "LEFT OUTER JOIN ResourceTable t ON (v.myResourceId = t.myId) "
+			+ "LEFT OUTER JOIN ResourceTable t ON (v.myResourceTable = t) "
 			+ "WHERE v.myResourceVersion <> t.myVersion AND "
-			+ "t.myId = :resId")
-	Slice<Long> findIdsOfPreviousVersionsOfResourceId(Pageable thePage, @Param("resId") Long theResourceId);
+			+ "t.myPid = :resId")
+	Slice<Long> findIdsOfPreviousVersionsOfResourceId(Pageable thePage, @Param("resId") JpaPid theResourceId);
 
 	@Query("" + "SELECT v.myId FROM ResourceHistoryTable v "
-			+ "LEFT OUTER JOIN ResourceTable t ON (v.myResourceId = t.myId) "
+			+ "LEFT OUTER JOIN ResourceTable t ON (v.myResourceTable = t) "
 			+ "WHERE v.myResourceVersion <> t.myVersion AND "
 			+ "t.myResourceType = :restype")
 	Slice<Long> findIdsOfPreviousVersionsOfResources(Pageable thePage, @Param("restype") String theResourceName);
 
 	@Query("" + "SELECT v.myId FROM ResourceHistoryTable v "
-			+ "LEFT OUTER JOIN ResourceTable t ON (v.myResourceId = t.myId) "
+			+ "LEFT OUTER JOIN ResourceTable t ON (v.myResourceTable = t) "
 			+ "WHERE v.myResourceVersion <> t.myVersion")
 	Slice<Long> findIdsOfPreviousVersionsOfResources(Pageable thePage);
 

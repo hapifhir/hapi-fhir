@@ -22,11 +22,13 @@ package ca.uhn.fhir.jpa.model.entity;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.dao.JpaPidIdentifierBridge;
 import ca.uhn.fhir.jpa.model.search.ExtendedHSearchIndexData;
 import ca.uhn.fhir.jpa.model.search.ResourceTableRoutingBinder;
 import ca.uhn.fhir.jpa.model.search.SearchParamTextPropertyBinder;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.hapi.fhir.sql.hibernatesvc.ConditionalIdProperty;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.CascadeType;
@@ -53,8 +55,10 @@ import org.hibernate.annotations.GeneratorType;
 import org.hibernate.annotations.OptimisticLock;
 import org.hibernate.search.engine.backend.types.Projectable;
 import org.hibernate.search.engine.backend.types.Searchable;
+import org.hibernate.search.mapper.pojo.bridge.mapping.annotation.IdentifierBridgeRef;
 import org.hibernate.search.mapper.pojo.bridge.mapping.annotation.PropertyBinderRef;
 import org.hibernate.search.mapper.pojo.bridge.mapping.annotation.RoutingBinderRef;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.DocumentId;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexingDependency;
@@ -146,7 +150,11 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	private boolean myHasLinks;
 
 	@EmbeddedId
+	@DocumentId(identifierBridge = @IdentifierBridgeRef(type = JpaPidIdentifierBridge.class))
 	private JpaPid myPid;
+
+	@Column(name = PartitionablePartitionId.PARTITION_ID, nullable = true, insertable = false, updatable = false)
+	private Integer myPartitionIdValue;
 
 	@Column(name = PartitionablePartitionId.PARTITION_DATE, nullable = true)
 	private LocalDate myPartitionDateValue;
@@ -682,7 +690,11 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@Nullable
 	@Override
 	public PartitionablePartitionId getPartitionId() {
-		return myPid.getPartitionablePartitionId();
+		PartitionablePartitionId retVal = myPid.getPartitionablePartitionId();
+		if (myPartitionIdValue != null) {
+			retVal.setPartitionId(myPartitionIdValue);
+		}
+		return retVal;
 	}
 
 	/**
@@ -920,8 +932,8 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		b.append("fhirId", myFhirId);
 		b.append("resourceType", myResourceType);
 		b.append("version", myVersion);
-		if (getPartitionId() != null) {
-			b.append("partitionId", getPartitionId().getPartitionId());
+		if (myPartitionIdValue != null) {
+			b.append("partitionId", myPartitionIdValue);
 		}
 		b.append("lastUpdated", getUpdated().getValueAsString());
 		if (getDeleted() != null) {
@@ -1043,6 +1055,8 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 			myPid = new JpaPid();
 		}
 		myPid.setPartitionId(theStoragePartition.getPartitionId());
+		myPartitionIdValue = theStoragePartition.getPartitionId();
+		myPartitionDateValue = theStoragePartition.getPartitionDate();
 	}
 
 	/**

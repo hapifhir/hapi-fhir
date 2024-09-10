@@ -481,7 +481,7 @@ public abstract class BaseJpaTest extends BaseTest {
 		});
 	}
 
-	protected int logAllResources() {
+	public int logAllResources() {
 		return runInTransaction(() -> {
 			List<ResourceTable> resources = myResourceTableDao.findAll();
 			ourLog.info("Resources:\n * {}", resources.stream().map(ResourceTable::toString).collect(Collectors.joining("\n * ")));

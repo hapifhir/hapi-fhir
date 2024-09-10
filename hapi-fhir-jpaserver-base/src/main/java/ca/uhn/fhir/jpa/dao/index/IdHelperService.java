@@ -219,6 +219,9 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 			if (!idRequiresForcedId(id)) {
 				// is already a PID
 				retVal = JpaPid.fromId(Long.parseLong(id));
+				if (theRequestPartitionId.hasPartitionIds() && !theRequestPartitionId.getPartitionIds().isEmpty()) {
+					retVal.setPartitionId(theRequestPartitionId.getPartitionIds().get(0));
+				}
 				retVals.put(id, retVal);
 			} else {
 				// is a forced id
@@ -712,13 +715,13 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 
 			myMemoryCacheService.putAfterCommit(
 					MemoryCacheService.CacheEnum.PID_TO_FORCED_ID,
-					theJpaPid.getId(),
+					theJpaPid,
 					Optional.of(theResourceType + "/" + theForcedId));
 			String key = toForcedIdToPidKey(theRequestPartitionId, theResourceType, theForcedId);
 			myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.FORCED_ID_TO_PID, key, theJpaPid);
 		} else {
 			myMemoryCacheService.putAfterCommit(
-					MemoryCacheService.CacheEnum.PID_TO_FORCED_ID, theJpaPid.getId(), Optional.empty());
+					MemoryCacheService.CacheEnum.PID_TO_FORCED_ID, theJpaPid, Optional.empty());
 		}
 
 		if (!myStorageSettings.isDeleteEnabled()) {

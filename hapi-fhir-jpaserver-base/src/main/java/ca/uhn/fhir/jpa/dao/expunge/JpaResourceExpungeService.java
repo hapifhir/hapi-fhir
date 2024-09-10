@@ -164,7 +164,7 @@ public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid
 				ids = toSlice(myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(
 						theJpaPid.getId(), theJpaPid.getVersion()));
 			} else {
-				ids = myResourceHistoryTableDao.findIdsOfPreviousVersionsOfResourceId(page, theJpaPid.getId());
+				ids = myResourceHistoryTableDao.findIdsOfPreviousVersionsOfResourceId(page, theJpaPid);
 			}
 		} else {
 			if (theResourceName != null) {

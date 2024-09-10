@@ -1741,7 +1741,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				requestPartitionId, getResourceName(), theId.getIdPart());
 		Set<Integer> readPartitions = null;
 		if (requestPartitionId.isAllPartitions()) {
-			entity = myEntityManager.find(ResourceTable.class, new IdAndPartitionId(pid.getId()));
+			entity = myEntityManager.find(ResourceTable.class, pid);
 		} else {
 			readPartitions = myRequestPartitionHelperService.toReadPartitions(requestPartitionId);
 			if (readPartitions.size() == 1) {

@@ -46,7 +46,7 @@ public interface ITermValueSetDao extends JpaRepository<TermValueSet, Long>, IHa
 
 	@Query(
 			value =
-					"SELECT vs FROM TermValueSet vs INNER JOIN ResourceTable r ON r.myId = vs.myResourcePid WHERE vs.myUrl = :url ORDER BY r.myUpdated DESC")
+					"SELECT vs FROM TermValueSet vs INNER JOIN ResourceTable r ON r = vs.myResource WHERE vs.myUrl = :url ORDER BY r.myUpdated DESC")
 	List<TermValueSet> findTermValueSetByUrl(Pageable thePage, @Param("url") String theUrl);
 
 	/**

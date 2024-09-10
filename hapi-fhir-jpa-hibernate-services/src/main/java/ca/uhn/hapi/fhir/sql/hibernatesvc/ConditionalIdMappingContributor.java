@@ -31,6 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -70,11 +71,16 @@ public class ConditionalIdMappingContributor implements org.hibernate.boot.spi.A
 			.collect(Collectors.toMap(t -> t.getTable().getName(), t -> getType(t.getClassName())));
 
 		removeConditionalIdProperties(theMetadata);
+
+		// FIXME: remove
+		theMetadata.getEntityBindingMap();
 	}
 
+	@SuppressWarnings("unchecked")
 	private void removeConditionalIdProperties(InFlightMetadataCollector theMetadata) {
 
-		// Adjust primary keys
+		// Adjust primary keys - this handles @IdClass PKs, which are the
+		// ones we use in most places
 		for (var nextEntry : theMetadata.getEntityBindingMap().entrySet()) {
 			IdentitySet<Column> idRemovedColumns = new IdentitySet<>();
 			Set<String> idRemovedColumnNames = new HashSet<>();
@@ -165,6 +171,54 @@ public class ConditionalIdMappingContributor implements org.hibernate.boot.spi.A
 			pkColumns.removeIf(idRemovedColumns::contains);
 		}
 
+		// Adjust composites - This handles @EmbeddedId PKs like JpaPid
+		theMetadata.visitRegisteredComponents(c -> {
+			Class<?> componentType = c.getComponentClass();
+			String tableName = c.getTable().getName();
+
+			for (Property next : new ArrayList<>(c.getProperties())) {
+				Field field = getField(componentType, next.getName());
+				ConditionalIdProperty annotation = field.getAnnotation(ConditionalIdProperty.class);
+				if (annotation != null) {
+					c.getProperties().remove(next);
+
+					jakarta.persistence.Column column = field.getAnnotation(jakarta.persistence.Column.class);
+					String columnName = column.name();
+					myQualifiedIdRemovedColumnNames.add(tableName + "#" + columnName);
+
+					PrimaryKey primaryKey = c.getTable().getPrimaryKey();
+					primaryKey.getColumns().removeIf(t->myQualifiedIdRemovedColumnNames.contains(tableName + "#" + t.getName()));
+
+					for (Column nextColumn : c.getTable().getColumns()) {
+						if (myQualifiedIdRemovedColumnNames.contains(tableName + "#" + nextColumn.getName())) {
+							nextColumn.setNullable(true);
+						}
+					}
+
+					List<Property> properties = c.getOwner().getProperties();
+					for (Property nextProperty : properties) {
+						if (nextProperty.getName().equals(next.getName())) {
+							BasicValue value = (BasicValue) nextProperty.getValue();
+							Field insertabilityField = getField(value.getClass(), "insertability");
+							insertabilityField.setAccessible(true);
+							try {
+								List<Boolean> insertability = (List<Boolean>) insertabilityField.get(value);
+								insertability.set(0, Boolean.TRUE);
+							} catch (IllegalAccessException e) {
+								throw new IllegalStateException(e);
+							}
+						}
+					}
+				}
+			}
+
+			c.getColumns().removeIf(t-> {
+				String name = tableName + "#" + t.getName();
+				return myQualifiedIdRemovedColumnNames.contains(name);
+			});
+			c.getSelectables().removeIf(t->myQualifiedIdRemovedColumnNames.contains(tableName + "#" + t.getText()));
+		});
+
 		// Adjust relations with local filtered columns (e.g. ManyToOne)
 		for (var nextEntry : theMetadata.getEntityBindingMap().entrySet()) {
 			PersistentClass entityPersistentClass = nextEntry.getValue();
@@ -210,7 +264,11 @@ public class ConditionalIdMappingContributor implements org.hibernate.boot.spi.A
 						DependantValue dependantValue = (DependantValue) propertyKey;
 
 						dependantValue.getColumns().removeIf(t -> myQualifiedIdRemovedColumnNames.contains(propertyValueBag.getCollectionTable().getName() + "#" + t.getName()));
-						dependantValue.copy(); // FIXME: remove
+
+//						KeyValue wrappedValue = dependantValue.getWrappedValue();
+//						if (wrappedValue instanceof Component) {}
+//
+//						dependantValue.copy(); // FIXME: remove
 					}
 				}
 			}
