@@ -19,12 +19,14 @@
  */
 package ca.uhn.fhir.cr.common;
 
-import ca.uhn.fhir.cr.repo.HapiFhirRepository;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import com.google.common.annotations.Beta;
+import org.opencds.cqf.fhir.api.Repository;
 
 @FunctionalInterface
 @Beta
-public interface IRepositoryFactory {
-	HapiFhirRepository create(RequestDetails theRequestDetails);
+// TODO: LD:  To preserve backward compatibility, leave IRepositoryFactory unchanged but slowly migrate any calling
+// 			  code to use the below:
+public interface IRepositoryFactoryForInterface {
+	Repository create(RequestDetails theRequestDetails);
 }
