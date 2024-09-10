@@ -302,7 +302,7 @@ public class ResourceReindexingSvcImplTest {
 	}
 
 	private void mockWhenResourceTableFindById(long[] theUpdatedTimes, String[] theResourceTypes) {
-		when(myResourceTableDao.findById(any())).thenAnswer(t -> {
+		when(myResourceTableDao.findById(any(JpaPid.class))).thenAnswer(t -> {
 			ResourceTable retVal = new ResourceTable();
 			Long id = (Long) t.getArguments()[0];
 			retVal.setIdForUnitTest(id);

@@ -9,7 +9,6 @@ import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -35,8 +34,6 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
-
-import jakarta.annotation.Nonnull;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -161,7 +158,7 @@ public class CrossPartitionReferencesTest extends BaseJpaR5Test {
 		IIdType patientId = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
 		ourLog.info("Patient ID: {}", patientId);
 		runInTransaction(() -> {
-			ResourceTable resourceTable = myResourceTableDao.findById(JpaPid.fromId(patientId.getIdPartAsLong())).orElseThrow();
+			ResourceTable resourceTable = myResourceTableDao.findById(patientId.getIdPartAsLong()).orElseThrow();
 			assertEquals(1, resourceTable.getPartitionId().getPartitionId());
 		});
 
@@ -180,7 +177,7 @@ public class CrossPartitionReferencesTest extends BaseJpaR5Test {
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 
 		runInTransaction(() -> {
-			ResourceTable resourceTable = myResourceTableDao.findById(JpaPid.fromId(observationId.getIdPartAsLong())).orElseThrow();
+			ResourceTable resourceTable = myResourceTableDao.findById(observationId.getIdPartAsLong()).orElseThrow();
 			assertEquals(2, resourceTable.getPartitionId().getPartitionId());
 		});
 

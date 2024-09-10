@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.dao.data;
 
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -30,7 +31,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-public interface IResourceHistoryTableDao extends JpaRepository<ResourceHistoryTable, Long>, IHapiFhirJpaRepository {
+public interface IResourceHistoryTableDao extends JpaRepository<ResourceHistoryTable, IdAndPartitionId>, IHapiFhirJpaRepository {
 
 	/**
 	 * This is really only intended for unit tests - There can be many versions of resources in

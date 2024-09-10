@@ -1,7 +1,5 @@
 package ca.uhn.fhir.jpa.dao.r5;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
@@ -10,8 +8,6 @@ import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
-import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
@@ -40,10 +36,12 @@ import java.io.IOException;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class FhirResourceDaoR5ValueSetTest extends BaseJpaR5Test {
 
@@ -270,7 +268,7 @@ public class FhirResourceDaoR5ValueSetTest extends BaseJpaR5Test {
 		vs.setName("Hello");
 		assertEquals("2", myValueSetDao.update(vs, mySrd).getId().getVersionIdPart());
 		runInTransaction(()->{
-			Optional<ResourceTable> resource = myResourceTableDao.findById(JpaPid.fromId(id.getIdPartAsLong()));
+			Optional<ResourceTable> resource = myResourceTableDao.findById(id.getIdPartAsLong());
 			assertTrue(resource.isPresent());
 		});
 
@@ -290,7 +288,7 @@ public class FhirResourceDaoR5ValueSetTest extends BaseJpaR5Test {
 
 		// Verify expunged
 		runInTransaction(()->{
-			Optional<ResourceTable> resource = myResourceTableDao.findById(JpaPid.fromId(id.getIdPartAsLong()));
+			Optional<ResourceTable> resource = myResourceTableDao.findById(id.getIdPartAsLong());
 			assertFalse(resource.isPresent());
 		});
 	}

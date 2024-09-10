@@ -64,19 +64,19 @@ public class ResourceHistoryTag extends BaseTag implements Serializable {
 			name = "RES_VER_PID",
 			referencedColumnName = "PID",
 			nullable = false,
-		insertable = false,
+		insertable = true,
 		updatable = false),
 		@JoinColumn(
 			name = "PARTITION_ID",
 			referencedColumnName = "PARTITION_ID",
 			nullable = false,
-		insertable = false,
+		insertable = true,
 		updatable = false)
 			},
 			foreignKey = @ForeignKey(name = "FK_HISTORYTAG_HISTORY"))
 	private ResourceHistoryTable myResourceHistory;
 
-	@Column(name = "RES_VER_PID", updatable = false, nullable = false)
+	@Column(name = "RES_VER_PID", insertable = false, updatable = false, nullable = false)
 	private Long myResourceHistoryPid;
 
 	@Column(name = "RES_TYPE", length = ResourceTable.RESTYPE_LEN, nullable = false)

@@ -922,7 +922,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			JpaPid jpaPid = (JpaPid) pid;
 
 			// This shouldn't actually need to hit the DB because we pre-fetch above
-			ResourceTable entity = myEntityManager.find(ResourceTable.class, jpaPid.getId());
+			ResourceTable entity = myEntityManager.find(ResourceTable.class, jpaPid);
 			deletedResources.add(entity);
 
 			T resourceToDelete = myJpaStorageResourceParser.toResource(myResourceType, entity, null, false);
@@ -1876,7 +1876,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					theRequestPartitionId, getResourceName(), theId.getIdPart());
 		}
 
-		ResourceTable entity = myEntityManager.find(ResourceTable.class, persistentId.getId());
+		ResourceTable entity = myEntityManager.find(ResourceTable.class, persistentId);
 		if (entity == null) {
 			throw new ResourceNotFoundException(Msg.code(1998) + theId);
 		}

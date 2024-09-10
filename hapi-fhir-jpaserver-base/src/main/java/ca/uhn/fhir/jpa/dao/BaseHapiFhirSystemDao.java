@@ -190,9 +190,9 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 	public <P extends IResourcePersistentId> void preFetchResources(
 			List<P> theResolvedIds, boolean thePreFetchIndexes) {
 		HapiTransactionService.requireTransaction();
-		List<Long> pids = theResolvedIds.stream().map(t -> ((JpaPid) t).getId()).collect(Collectors.toList());
+		List<JpaPid> pids = theResolvedIds.stream().map(t -> ((JpaPid) t)).collect(Collectors.toList());
 
-		new QueryChunker<Long>().chunk(pids, idChunk -> {
+		new QueryChunker<JpaPid>().chunk(pids, idChunk -> {
 
 			/*
 			 * Pre-fetch the resources we're touching in this transaction in mass - this reduced the
@@ -244,15 +244,15 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 	}
 
 	@Nonnull
-	private List<ResourceTable> prefetchResourceTableHistoryAndProvenance(List<Long> idChunk) {
+	private List<ResourceTable> prefetchResourceTableHistoryAndProvenance(List<JpaPid> idChunk) {
 		assert idChunk.size() < SearchConstants.MAX_PAGE_SIZE : "assume pre-chunked";
 
 		Query query = myEntityManager.createQuery("select r, h "
 				+ " FROM ResourceTable r "
 				+ " LEFT JOIN fetch ResourceHistoryTable h "
-				+ "      on r.myVersion = h.myResourceVersion and r.id = h.myResourceId "
+				+ "      on r.myVersion = h.myResourceVersion and r = h.myResourceTable "
 				+ " left join fetch h.myProvenance "
-				+ " WHERE r.myId IN ( :IDS ) ");
+				+ " WHERE r.myPid IN ( :IDS ) ");
 		query.setParameter("IDS", idChunk);
 
 		@SuppressWarnings("unchecked")

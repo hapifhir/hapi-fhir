@@ -1,8 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r5;
 
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
-import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
@@ -16,7 +14,6 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import jakarta.persistence.Id;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.ClinicalUseDefinition;
 import org.hl7.fhir.r5.model.CodeableConcept;
@@ -42,9 +39,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 @ContextConfiguration(classes = TestHSearchAddInConfig.NoFT.class)
 @SuppressWarnings({"Duplicates"})
@@ -162,7 +159,7 @@ public class FhirResourceDaoR5SearchNoFtTest extends BaseJpaR5Test {
 		assertEquals(3, outcome.size().intValue());
 
         runInTransaction(() -> {
-            ResourceTable table = myResourceTableDao.findById(JpaPid.fromId(id)).orElseThrow(() -> new IllegalArgumentException());
+            ResourceTable table = myResourceTableDao.findById(id).orElseThrow(() -> new IllegalArgumentException());
             table.setDeleted(new Date());
             myResourceTableDao.save(table);
         });

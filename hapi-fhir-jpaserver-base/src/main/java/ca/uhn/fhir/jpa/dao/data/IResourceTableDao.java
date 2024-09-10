@@ -21,7 +21,6 @@ package ca.uhn.fhir.jpa.dao.data;
 
 import ca.uhn.fhir.jpa.dao.data.custom.IForcedIdQueries;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -194,10 +193,15 @@ public interface IResourceTableDao
 	Optional<ResourceTable> readByPartitionIds(
 			@Param("partitionIds") Collection<Integer> thrValues, @Param("pid") Long theResourceId);
 
-	@Query("SELECT t FROM ResourceTable t WHERE t.myPid.myId IN :pids")
-	List<ResourceTable> findAllByIdAndLoadForcedIds(@Param("pids") List<Long> thePids);
+	@Query("SELECT t FROM ResourceTable t WHERE t.myPid IN :pids")
+	List<ResourceTable> findAllByIdAndLoadForcedIds(@Param("pids") List<JpaPid> thePids);
 
 	@Query("SELECT t FROM ResourceTable t where t.myResourceType = :restype and t.myFhirId = :fhirId")
 	Optional<ResourceTable> findByTypeAndFhirId(
 			@Param("restype") String theResourceName, @Param("fhirId") String theFhirId);
+
+	default Optional<ResourceTable> findById(Long theId) {
+		return findById(JpaPid.fromId(theId));
+	}
+
 }
