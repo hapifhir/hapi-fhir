@@ -470,6 +470,19 @@ public class FhirTerserR4Test {
 		assertEquals("BBB", target.getValueStringType().getId());
 	}
 
+	@Test
+	public void testCloneIntoReferenceWithResource() {
+		// set up
+		Practitioner practitioner = new Practitioner();
+		Reference source = new Reference(practitioner);
+		Reference target = new Reference();
+
+		// execute
+		myCtx.newTerser().cloneInto(source, target, false);
+
+		assertThat(target.getResource()).isSameAs(practitioner);
+	}
+
 
 	@Test
 	public void testGetAllPopulatedChildElementsOfTypeDescendsIntoContained() {
