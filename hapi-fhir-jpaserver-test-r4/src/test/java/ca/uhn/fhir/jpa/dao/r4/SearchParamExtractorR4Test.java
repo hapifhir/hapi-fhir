@@ -22,6 +22,7 @@ import ca.uhn.fhir.rest.server.util.FhirContextSearchParamRegistry;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import ca.uhn.fhir.util.HapiExtensions;
 import com.google.common.collect.Sets;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
@@ -61,6 +62,41 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 	private final FhirContextSearchParamRegistry mySearchParamRegistry = new FhirContextSearchParamRegistry(ourCtx);
 	private final PartitionSettings myPartitionSettings = new PartitionSettings();
 	final StorageSettings myStorageSettings = new StorageSettings();
+
+	@Test
+	void testLinkExtraction() {
+		// given
+		Observation o = ourCtx.newJsonParser().parseResource(Observation.class, """
+			{
+			  "resourceType": "Observation",
+			  "id": "123",
+			  "subject": {
+			    "identifier": {
+			      "system": "https://example.org/mrn",
+			      "value": "12345"
+			    }
+			  },
+			  "performer": [{
+			    "identifier": {
+			      "system": "https://example.org/mrn",
+			      "value": "12345"
+			    }
+			  }]
+			}
+		""");
+
+		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new StorageSettings(), new PartitionSettings(), ourCtx, mySearchParamRegistry);
+
+		RuntimeSearchParam activeSearchParam = mySearchParamRegistry.getActiveSearchParam("Observation", "performer:Practitioner");
+		List<IBase> elements = extractor.extractValues(activeSearchParam.getPath(), o);
+
+		//ISearchParamExtractor.SearchParamSet<PathAndRef> pathAndRefs = extractor.extractResourceLinks(o, true);
+
+		for (IBase element : elements) {
+			System.out.println(ourCtx.newJsonParser().encodeToString(element));
+		}
+		//System.out.println(pathAndRefs);
+	}
 
 	@Test
 	public void testParamWithOrInPath() {

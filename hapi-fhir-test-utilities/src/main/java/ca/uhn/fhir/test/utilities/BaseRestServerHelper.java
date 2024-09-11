@@ -183,10 +183,12 @@ public abstract class BaseRestServerHelper {
 	public abstract boolean registerInterceptor(Object theInterceptorAdapter);
 
 	public abstract IResourceProvider getObservationResourceProvider();
+	public abstract IResourceProvider getEncounterResourceProvider();
 
 	public abstract IResourceProvider getPatientResourceProvider();
 
 	public abstract IResourceProvider getConceptMapResourceProvider();
+	public abstract IResourceProvider getPractitionerResourceProvider();
 
 	public abstract IIdType createPatientWithId(String theId);
 
