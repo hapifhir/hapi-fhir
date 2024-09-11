@@ -35,7 +35,8 @@ public class RepositoryConfig {
 		return requestDetails -> repositoryFactory(theDaoRegistry, requestDetails, theRestfulServer);
 	}
 
-	private HapiFhirRepository repositoryFactory(DaoRegistry theDaoRegistry, RequestDetails theRequestDetails, RestfulServer theRestfulServer) {
+	private HapiFhirRepository repositoryFactory(
+			DaoRegistry theDaoRegistry, RequestDetails theRequestDetails, RestfulServer theRestfulServer) {
 		return new HapiFhirRepository(theDaoRegistry, theRequestDetails, theRestfulServer);
 	}
 }
