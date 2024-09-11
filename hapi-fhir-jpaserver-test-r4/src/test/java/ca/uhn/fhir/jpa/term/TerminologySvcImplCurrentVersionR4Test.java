@@ -199,13 +199,15 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 
 	private void validateValueLookup(String theCurrentVersion, Collection<String> allVersions) {
 		IValidationSupport.LookupCodeResult resultNoVer = myValidationSupport.lookupCode(
-			new ValidationSupportContext(myValidationSupport), new LookupCodeRequest(BASE_LOINC_URL, VS_NO_VERSIONED_ON_UPLOAD_FIRST_CODE));
+			new ValidationSupportContext(myValidationSupport),
+			new LookupCodeRequest(BASE_LOINC_URL, VS_NO_VERSIONED_ON_UPLOAD_FIRST_CODE));
 		assertNotNull(resultNoVer);
 		String expectedNoVer = prefixWithVersion(theCurrentVersion, VS_NO_VERSIONED_ON_UPLOAD_FIRST_DISPLAY);
 		assertEquals(expectedNoVer, resultNoVer.getCodeDisplay());
 
 		IValidationSupport.LookupCodeResult resultWithVer = myValidationSupport.lookupCode(
-			new ValidationSupportContext(myValidationSupport), new LookupCodeRequest(BASE_LOINC_URL, VS_VERSIONED_ON_UPLOAD_FIRST_CODE));
+			new ValidationSupportContext(myValidationSupport),
+			new LookupCodeRequest(BASE_LOINC_URL, VS_VERSIONED_ON_UPLOAD_FIRST_CODE));
 		assertNotNull(resultWithVer);
 		String expectedWithVer = prefixWithVersion(theCurrentVersion, VS_VERSIONED_ON_UPLOAD_FIRST_DISPLAY);
 		assertEquals(expectedWithVer, resultWithVer.getCodeDisplay());
@@ -354,7 +356,7 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 	 * no the CodeSystem version.
 	 */
 	private void validateValueSetSearchForVersion(String theVersion) {
-		// for no versioned VS (VS version, different than  CS version)
+		// for no versioned VS (VS version, different from CS version)
 
 		SearchParameterMap paramsUploadNoVer = new SearchParameterMap("url", new UriParam(VS_NO_VERSIONED_ON_UPLOAD));
 		paramsUploadNoVer.add("version", new TokenParam(theVersion));
@@ -427,7 +429,7 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 		// _ current CS is present and has no version
 		CodeSystem codeSystem = myCodeSystemDao.read(new IdType(LOINC_LOW), myRequestDetails);
 		String csString = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem);
-		ourLog.info("CodeSystem:\n" + csString);
+		ourLog.info("CodeSystem:\n {}", csString);
 
 		HashSet<String> shouldNotBePresentVersions = new HashSet<>(possibleVersions);
 		theAllVersions.forEach(shouldNotBePresentVersions::remove);
