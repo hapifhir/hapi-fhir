@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.migrate.taskdef.ArbitrarySqlTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.CalculateHashesTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.CalculateOrdinalDatesTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.ColumnTypeEnum;
+import ca.uhn.fhir.jpa.migrate.taskdef.ExecuteRawSqlTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.ForceIdMigrationCopyTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.ForceIdMigrationFixTask;
 import ca.uhn.fhir.jpa.migrate.tasks.api.BaseMigrationTasks;
@@ -125,6 +126,20 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init700();
 		init720();
 		init740();
+		init760();
+	}
+
+	@SuppressWarnings("SqlResolve")
+	protected void init760() {
+		// Start of migrations from 7.2 to 7.4
+
+		final Builder version = forVersion(VersionEnum.V7_6_0);
+
+		// activate citus
+		ExecuteRawSqlTask executeRawSqlTask = new ExecuteRawSqlTask(version.getRelease(), "20240909.1");
+		executeRawSqlTask.addSql(DriverTypeEnum.POSTGRES_9_4, "SELECT create_distributed_table('hfj_resource', 'partition_id');");
+		executeRawSqlTask.addFlag(TaskFlagEnum.RUN_DURING_SCHEMA_INITIALIZATION);
+		version.addTask(executeRawSqlTask);
 	}
 
 	protected void init740() {
