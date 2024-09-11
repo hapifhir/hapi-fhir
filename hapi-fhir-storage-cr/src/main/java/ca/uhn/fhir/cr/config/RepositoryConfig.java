@@ -20,7 +20,6 @@
 package ca.uhn.fhir.cr.config;
 
 import ca.uhn.fhir.cr.common.IRepositoryFactory;
-import ca.uhn.fhir.cr.common.IRepositoryFactoryForInterface;
 import ca.uhn.fhir.cr.repo.HapiFhirRepository;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -30,10 +29,6 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class RepositoryConfig {
-	@Bean
-	IRepositoryFactoryForInterface repositoryFactory(DaoRegistry theDaoRegistry, RestfulServer theRestfulServer) {
-		return requestDetails -> repositoryFactory(theDaoRegistry, requestDetails, theRestfulServer);
-	}
 
 	@Bean
 	IRepositoryFactory repositoryFactoryForHapiFhir(DaoRegistry theDaoRegistry, RestfulServer theRestfulServer) {
