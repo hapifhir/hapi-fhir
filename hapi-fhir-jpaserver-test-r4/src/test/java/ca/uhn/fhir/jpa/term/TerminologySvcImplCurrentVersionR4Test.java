@@ -176,17 +176,7 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 
 
 	private void validateValidateCode(String theCurrentVersion, Collection<String> allVersions) {
-		IValidationSupport.CodeValidationResult resultNoVersioned = myCodeSystemDao.validateCode(null,
-			new UriType(BASE_LOINC_URL), null, new CodeType(VS_NO_VERSIONED_ON_UPLOAD_FIRST_CODE),
-			null, null, null, null);
-		assertNotNull(resultNoVersioned);
-		assertEquals(prefixWithVersion(theCurrentVersion, VS_NO_VERSIONED_ON_UPLOAD_FIRST_DISPLAY), resultNoVersioned.getDisplay());
-
-		IValidationSupport.CodeValidationResult resultVersioned = myCodeSystemDao.validateCode(null,
-			new UriType(BASE_LOINC_URL), null, new CodeType(VS_VERSIONED_ON_UPLOAD_FIRST_CODE),
-			null, null, null, null);
-		assertNotNull(resultVersioned);
-		assertEquals(prefixWithVersion(theCurrentVersion, VS_VERSIONED_ON_UPLOAD_FIRST_DISPLAY), resultVersioned.getDisplay());
+		validateValidateCodeForVersion(theCurrentVersion);
 
 		allVersions.forEach(this::validateValidateCodeForVersion);
 	}
