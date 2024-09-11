@@ -119,7 +119,8 @@ public class ResourceHistoryProvenanceEntity extends BasePartitionable {
 
 	public void setResourceTable(ResourceTable theResourceTable) {
 		myResourceTable = theResourceTable;
-		myResourceId = theResourceTable.getId();
+		myResourceId = theResourceTable.getId().getId();
+		myPartitionIdValue = theResourceTable.getPartitionId().getPartitionId();
 	}
 
 	public void setResourceHistoryTable(ResourceHistoryTable theResourceHistoryTable) {

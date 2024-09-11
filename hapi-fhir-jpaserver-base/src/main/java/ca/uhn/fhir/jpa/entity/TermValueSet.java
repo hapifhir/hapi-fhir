@@ -172,7 +172,7 @@ public class TermValueSet implements Serializable {
 
 	public TermValueSet setResource(ResourceTable theResource) {
 		myResource = theResource;
-		myResourcePid = theResource.getId();
+		myResourcePid = theResource.getId().getId();
 		myPartitionId = theResource.getPersistentId().getPartitionId();
 		return this;
 	}

@@ -264,11 +264,11 @@ public class MdmLink extends AuditableBasePartitionable implements IMdmLink<JpaP
 
 	public MdmLink setGoldenResource(ResourceTable theGoldenResource) {
 		myGoldenResource = theGoldenResource;
-		myGoldenResourcePid = theGoldenResource.getId();
+		myGoldenResourcePid = theGoldenResource.getId().getId();
 		myGoldenResourcePartitionId = theGoldenResource.getPersistentId().getPartitionId();
 
 		myPerson = theGoldenResource;
-		myPersonPid = theGoldenResource.getId();
+		myPersonPid = theGoldenResource.getId().getId();
 		myPersonPartitionId = theGoldenResource.getPersistentId().getPartitionId();
 
 		return this;
@@ -305,7 +305,8 @@ public class MdmLink extends AuditableBasePartitionable implements IMdmLink<JpaP
 
 	public MdmLink setSource(ResourceTable theSource) {
 		mySource = theSource;
-		mySourcePid = theSource.getId();
+		mySourcePid = theSource.getId().getId();
+		mySourcePartitionId = theSource.getPersistentId().getPartitionId();
 		return this;
 	}
 

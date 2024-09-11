@@ -1255,7 +1255,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		 */
 		if (thePerformIndexing) {
 			if (newParams == null) {
-				myExpungeService.deleteAllSearchParams(JpaPid.fromId(entity.getId()));
+				myExpungeService.deleteAllSearchParams(entity.getId());
 				entity.clearAllParamsPopulated();
 			} else {
 
@@ -1481,7 +1481,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			 * in which case we'll still create a new one
 			 */
 			historyEntry = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(
-					theEntity.getResourceId(), resourceVersion - 1);
+					theEntity.getId(), resourceVersion - 1);
 			if (historyEntry != null) {
 				reusingHistoryEntity = true;
 				theEntity.populateHistoryEntityVersionAndDates(historyEntry);

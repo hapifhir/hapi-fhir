@@ -197,7 +197,7 @@ public class NpmPackageVersionEntity {
 
 	public void setPackageBinary(ResourceTable thePackageBinary) {
 		myPackageBinary = thePackageBinary;
-		myPackageBinaryResourceId = thePackageBinary.getResourceId();
+		myPackageBinaryResourceId = thePackageBinary.getId().getId();
 		myPackageBinaryPartitionId = thePackageBinary.getPersistentId().getPartitionId();
 	}
 

@@ -846,7 +846,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		List<TypedPidJson> pids = runInTransaction(() -> myResourceTableDao
 			.findAll()
 			.stream()
-			.map(t -> new TypedPidJson(t.getResourceType(), Long.toString(t.getResourceId())))
+			.map(t -> new TypedPidJson(t.getResourceType(), t.getResourceId()))
 			.collect(Collectors.toList()));
 
 		runInTransaction(()-> assertEquals(10, myResourceTableDao.count()));

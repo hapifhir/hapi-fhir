@@ -26,15 +26,12 @@ import ca.uhn.hapi.fhir.sql.hibernatesvc.ConditionalIdProperty;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
+import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ForeignKey;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.IdClass;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinColumns;
@@ -42,7 +39,6 @@ import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
-import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import jakarta.persistence.UniqueConstraint;
@@ -69,8 +65,7 @@ import java.util.Collection;
 			@Index(name = "IDX_RESVER_ID_DATE", columnList = "RES_ID,RES_UPDATED"),
 			@Index(name = "IDX_RESVER_DATE", columnList = "RES_UPDATED,RES_ID")
 		})
-@IdClass(IdAndPartitionId.class)
-public class ResourceHistoryTable extends BaseHasResource implements Serializable {
+public class ResourceHistoryTable extends BaseHasResource<ResourceHistoryTablePk> implements Serializable {
 	public static final String IDX_RESVER_ID_VER = "IDX_RESVER_ID_VER";
 	public static final int SOURCE_URI_LENGTH = 100;
 	/**
@@ -83,13 +78,9 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	public static final String HFJ_RES_VER = "HFJ_RES_VER";
 	private static final long serialVersionUID = 1L;
 
-	@Id
-	@SequenceGenerator(name = "SEQ_RESOURCE_HISTORY_ID", sequenceName = "SEQ_RESOURCE_HISTORY_ID")
-	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_RESOURCE_HISTORY_ID")
-	@Column(name = "PID")
-	private Long myId;
+	@EmbeddedId
+	private ResourceHistoryTablePk myId;
 
-	@Id
 	@ConditionalIdProperty
 	@Column(name = PartitionablePartitionId.PARTITION_ID)
 	private Integer myPartitionIdValue;
@@ -240,21 +231,21 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	}
 
 	@Override
-	public Long getId() {
+	public ResourceHistoryTablePk getId() {
 		return myId;
 	}
 
 	/**
 	 * Do not delete, required for java bean introspection
 	 */
-	public Long getMyId() {
-		return myId;
+	public ResourceHistoryTablePk getMyId() {
+		return getId();
 	}
 
 	/**
 	 * Do not delete, required for java bean introspection
 	 */
-	public void setMyId(Long theId) {
+	public void setMyId(ResourceHistoryTablePk theId) {
 		myId = theId;
 	}
 
@@ -267,8 +258,10 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	}
 
 	@Override
-	public Long getResourceId() {
-		return myResourceId;
+	public JpaPid getResourceId() {
+		JpaPid retVal = JpaPid.fromIdAndVersionAndResourceType(myResourceId, myResourceVersion, myResourceType);
+		retVal.setPartitionId(myPartitionIdValue);
+		return retVal;
 	}
 
 	public void setResourceId(Long theResourceId) {

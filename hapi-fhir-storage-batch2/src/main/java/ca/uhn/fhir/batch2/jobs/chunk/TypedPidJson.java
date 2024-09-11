@@ -20,6 +20,7 @@
 package ca.uhn.fhir.batch2.jobs.chunk;
 
 import ca.uhn.fhir.jpa.api.pid.TypedResourcePid;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -43,6 +44,12 @@ public class TypedPidJson implements IModelJson {
 	public TypedPidJson(TypedResourcePid theTypedResourcePid) {
 		myResourceType = theTypedResourcePid.resourceType;
 		myPid = theTypedResourcePid.id.toString();
+	}
+
+	public TypedPidJson(String theResourceType, JpaPid theResourceId) {
+		// FIXME: should this class incorporate the partition ID?
+		myResourceType = theResourceType;
+		myPid = theResourceId.getId().toString();
 	}
 
 	@Override

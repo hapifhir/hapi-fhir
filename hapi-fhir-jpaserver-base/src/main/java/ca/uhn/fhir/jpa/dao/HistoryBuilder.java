@@ -53,7 +53,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.util.QueryParameterUtils.toPredicateArray;
 
@@ -64,7 +63,7 @@ public class HistoryBuilder {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(HistoryBuilder.class);
 	private final String myResourceType;
-	private final Long myResourceId;
+	private final JpaPid myResourceId;
 	private final Date myRangeStartInclusive;
 	private final Date myRangeEndInclusive;
 
@@ -81,14 +80,14 @@ public class HistoryBuilder {
 	private FhirContext myCtx;
 
 	@Autowired
-	private IIdHelperService myIdHelperService;
+	private IIdHelperService<JpaPid> myIdHelperService;
 
 	/**
 	 * Constructor
 	 */
 	public HistoryBuilder(
 			@Nullable String theResourceType,
-			@Nullable Long theResourceId,
+			@Nullable JpaPid theResourceId,
 			@Nullable Date theRangeStartInclusive,
 			@Nullable Date theRangeEndInclusive) {
 		myResourceType = theResourceType;
@@ -109,7 +108,6 @@ public class HistoryBuilder {
 		return query.getSingleResult();
 	}
 
-	@SuppressWarnings("OptionalIsPresent")
 	public List<ResourceHistoryTable> fetchEntities(
 			RequestPartitionId thePartitionId,
 			Integer theOffset,
@@ -150,21 +148,19 @@ public class HistoryBuilder {
 		query.setMaxResults(theToIndex - theFromIndex);
 
 		List<ResourceHistoryTable> tables = query.getResultList();
-		if (tables.size() > 0) {
-			ImmutableListMultimap<Long, ResourceHistoryTable> resourceIdToHistoryEntries =
+		if (!tables.isEmpty()) {
+			ImmutableListMultimap<JpaPid, ResourceHistoryTable> resourceIdToHistoryEntries =
 					Multimaps.index(tables, ResourceHistoryTable::getResourceId);
-			Set<JpaPid> pids = resourceIdToHistoryEntries.keySet().stream()
-					.map(JpaPid::fromId)
-					.collect(Collectors.toSet());
-			PersistentIdToForcedIdMap pidToForcedId = myIdHelperService.translatePidsToForcedIds(pids);
+			Set<JpaPid> pids = resourceIdToHistoryEntries.keySet();
+			PersistentIdToForcedIdMap<JpaPid> pidToForcedId = myIdHelperService.translatePidsToForcedIds(pids);
 			ourLog.trace("Translated IDs: {}", pidToForcedId.getResourcePersistentIdOptionalMap());
 
-			for (Long nextResourceId : resourceIdToHistoryEntries.keySet()) {
+			for (JpaPid nextResourceId : resourceIdToHistoryEntries.keySet()) {
 				List<ResourceHistoryTable> historyTables = resourceIdToHistoryEntries.get(nextResourceId);
 
 				String resourceId;
 
-				Optional<String> forcedId = pidToForcedId.get(JpaPid.fromId(nextResourceId));
+				Optional<String> forcedId = pidToForcedId.get(nextResourceId);
 				if (forcedId.isPresent()) {
 					resourceId = forcedId.get();
 					// IdHelperService returns a forcedId with the '<resourceType>/' prefix
@@ -196,25 +192,37 @@ public class HistoryBuilder {
 			HistorySearchStyleEnum theHistorySearchStyle) {
 		List<Predicate> predicates = new ArrayList<>();
 
-		if (!thePartitionId.isAllPartitions()) {
-			if (thePartitionId.isDefaultPartition()) {
-				predicates.add(theCriteriaBuilder.isNull(theFrom.get("myPartitionIdValue")));
-			} else if (thePartitionId.hasDefaultPartitionId()) {
-				predicates.add(theCriteriaBuilder.or(
+		if (myResourceId != null) {
+
+			predicates.add(theCriteriaBuilder.equal(theFrom.get("myResourceId"), myResourceId.getId()));
+			if (myPartitionSettings.isPartitioningEnabled()) {
+				if (myResourceId.getPartitionId() != null) {
+					predicates.add(theCriteriaBuilder.equal(theFrom.get("myPartitionIdValue"), myResourceId.getPartitionId()));
+				} else {
+					predicates.add(theCriteriaBuilder.isNull(theFrom.get("myResourceId")));
+				}
+			}
+
+		} else {
+
+			if (!thePartitionId.isAllPartitions()) {
+				if (thePartitionId.isDefaultPartition()) {
+					predicates.add(theCriteriaBuilder.isNull(theFrom.get("myPartitionIdValue")));
+				} else if (thePartitionId.hasDefaultPartitionId()) {
+					predicates.add(theCriteriaBuilder.or(
 						theCriteriaBuilder.isNull(theFrom.get("myPartitionIdValue")),
 						theFrom.get("myPartitionIdValue").in(thePartitionId.getPartitionIdsWithoutDefault())));
-			} else {
-				predicates.add(theFrom.get("myPartitionIdValue").in(thePartitionId.getPartitionIds()));
+				} else {
+					predicates.add(theFrom.get("myPartitionIdValue").in(thePartitionId.getPartitionIds()));
+				}
 			}
-		}
 
-		if (myResourceId != null) {
-			predicates.add(theCriteriaBuilder.equal(theFrom.get("myResourceId"), myResourceId));
-		} else if (myResourceType != null) {
-			validateNotSearchingAllPartitions(thePartitionId);
-			predicates.add(theCriteriaBuilder.equal(theFrom.get("myResourceType"), myResourceType));
-		} else {
-			validateNotSearchingAllPartitions(thePartitionId);
+			if (myResourceType != null) {
+				validateNotSearchingAllPartitions(thePartitionId);
+				predicates.add(theCriteriaBuilder.equal(theFrom.get("myResourceType"), myResourceType));
+			} else {
+				validateNotSearchingAllPartitions(thePartitionId);
+			}
 		}
 
 		if (myRangeStartInclusive != null) {

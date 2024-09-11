@@ -28,15 +28,14 @@ import ca.uhn.fhir.jpa.model.search.ResourceTableRoutingBinder;
 import ca.uhn.fhir.jpa.model.search.SearchParamTextPropertyBinder;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.hapi.fhir.sql.hibernatesvc.ConditionalIdProperty;
 import com.google.common.annotations.VisibleForTesting;
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.IdClass;
 import jakarta.persistence.Index;
 import jakarta.persistence.NamedEntityGraph;
 import jakarta.persistence.OneToMany;
@@ -99,7 +98,7 @@ import static ca.uhn.fhir.jpa.model.entity.ResourceTable.IDX_RES_TYPE_FHIR_ID;
 			@Index(name = "IDX_RES_RESID_UPDATED", columnList = "RES_ID, RES_UPDATED, PARTITION_ID")
 		})
 @NamedEntityGraph(name = "Resource.noJoins")
-public class ResourceTable extends BaseHasResource implements Serializable, IBasePersistedResource<JpaPid> {
+public class ResourceTable extends BaseHasResource<JpaPid> implements Serializable, IBasePersistedResource<JpaPid> {
 	public static final int RESTYPE_LEN = 40;
 	public static final String HFJ_RESOURCE = "HFJ_RESOURCE";
 	public static final String RES_TYPE = "RES_TYPE";
@@ -491,12 +490,18 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		myHashSha256 = theHashSha256;
 	}
 
-	// FIXME: change this method to return JpaPid
 	@Override
-	public Long getId() {
-		return myPid.getId();
+	public JpaPid getId() {
+		JpaPid retVal = JpaPid.fromIdAndVersionAndResourceType(myPid.getId(), myVersion, myResourceType);
+		if (myPid.getPartitionId() != null) {
+			retVal.setPartitionId(myPid.getPartitionId());
+		} else {
+			retVal.setPartitionId(myPartitionIdValue);
+		}
+		return retVal;
 	}
 
+	@VisibleForTesting
 	public void setIdForUnitTest(Long theId) {
 		myPid = JpaPid.fromId(theId);
 	}
@@ -645,7 +650,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	}
 
 	@Override
-	public Long getResourceId() {
+	public JpaPid getResourceId() {
 		return getId();
 	}
 
@@ -687,7 +692,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		return myVersion;
 	}
 
-	@Nullable
+	@Nonnull
 	@Override
 	public PartitionablePartitionId getPartitionId() {
 		PartitionablePartitionId retVal = myPid.getPartitionablePartitionId();
@@ -974,7 +979,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 
 	@Override
 	public JpaPid getPersistentId() {
-		return JpaPid.fromId(getId());
+		return getId();
 	}
 
 	@Override
@@ -995,7 +1000,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		if (myFhirId != null && !myFhirId.isEmpty()) {
 			resourceId = myFhirId;
 		} else {
-			Long id = this.getResourceId();
+			Long id = getResourceId().getId();
 			resourceId = Long.toString(id);
 		}
 		retVal.setValue(getResourceType() + '/' + resourceId + '/' + Constants.PARAM_HISTORY + '/' + getVersion());

@@ -303,7 +303,7 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 			List<ResourceTable> theEntities) {
 
 		// Which entities need this prefetch?
-		List<Long> idSubset = theEntities.stream()
+		List<JpaPid> idSubset = theEntities.stream()
 				.filter(theEntityPredicate)
 				.map(ResourceTable::getId)
 				.collect(Collectors.toList());
@@ -313,7 +313,7 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 			return;
 		}
 
-		String jqlQuery = "FROM ResourceTable r " + theJoinClause + " WHERE r.myId IN ( :IDS )";
+		String jqlQuery = "FROM ResourceTable r " + theJoinClause + " WHERE r.myPid IN ( :IDS )";
 
 		TypedQuery<ResourceTable> query = myEntityManager.createQuery(jqlQuery, ResourceTable.class);
 		query.setParameter("IDS", idSubset);

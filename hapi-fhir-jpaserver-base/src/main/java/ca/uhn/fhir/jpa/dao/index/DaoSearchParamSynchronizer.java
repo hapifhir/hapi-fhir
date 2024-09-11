@@ -115,7 +115,7 @@ public class DaoSearchParamSynchronizer {
 			@Nullable IPreSaveHook<T> theAddParamPreSaveHook) {
 		Collection<T> newParams = theNewParams;
 		for (T next : newParams) {
-			next.setResourceId(theEntity.getId());
+			next.setResourceId(theEntity.getId().getId());
 			next.setPartitionId(theEntity.getPartitionId());
 			next.calculateHashes();
 		}

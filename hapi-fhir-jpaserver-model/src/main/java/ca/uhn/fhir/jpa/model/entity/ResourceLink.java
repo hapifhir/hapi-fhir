@@ -242,8 +242,9 @@ public class ResourceLink extends BaseResourceIndex {
 
 	public void setSourceResource(ResourceTable theSourceResource) {
 		mySourceResource = theSourceResource;
-		mySourceResourcePid = theSourceResource.getId();
+		mySourceResourcePid = theSourceResource.getId().getId();
 		mySourceResourceType = theSourceResource.getResourceType();
+		setPartitionId(theSourceResource.getPartitionId());
 	}
 
 	public void setTargetResource(String theResourceType, Long theResourcePid, String theTargetResourceId) {
@@ -368,8 +369,9 @@ public class ResourceLink extends BaseResourceIndex {
 	public ResourceLink cloneWithoutTargetPid() {
 		ResourceLink retVal = new ResourceLink();
 		retVal.mySourceResource = mySourceResource;
-		retVal.mySourceResourcePid = mySourceResource.getId();
+		retVal.mySourceResourcePid = mySourceResource.getId().getId();
 		retVal.mySourceResourceType = mySourceResource.getResourceType();
+		retVal.myPartitionIdValue = mySourceResource.getPartitionId().getPartitionId();
 		retVal.mySourcePath = mySourcePath;
 		retVal.myUpdated = myUpdated;
 		retVal.myTargetResourceType = myTargetResourceType;

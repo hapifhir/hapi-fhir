@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.dao.data;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
+import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTablePk;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -31,56 +32,58 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-public interface IResourceHistoryTableDao extends JpaRepository<ResourceHistoryTable, IdAndPartitionId>, IHapiFhirJpaRepository {
+public interface IResourceHistoryTableDao extends JpaRepository<ResourceHistoryTable, ResourceHistoryTablePk>, IHapiFhirJpaRepository {
+
+	// FIXME: see if we can avoid the myResourceTable.myPid in this class
 
 	/**
 	 * This is really only intended for unit tests - There can be many versions of resources in
 	 * the real world, use a pageable query for real uses.
 	 */
-	@Query("SELECT t FROM ResourceHistoryTable t WHERE t.myResourceId = :resId ORDER BY t.myResourceVersion ASC")
-	List<ResourceHistoryTable> findAllVersionsForResourceIdInOrder(@Param("resId") Long theId);
+	@Query("SELECT t FROM ResourceHistoryTable t WHERE t.myResourceTable.myPid = :resId ORDER BY t.myResourceVersion ASC")
+	List<ResourceHistoryTable> findAllVersionsForResourceIdInOrder(@Param("resId") JpaPid theId);
 
 	@Query(
-			"SELECT t FROM ResourceHistoryTable t LEFT OUTER JOIN FETCH t.myProvenance WHERE t.myResourceId = :id AND t.myResourceVersion = :version")
+			"SELECT t FROM ResourceHistoryTable t LEFT OUTER JOIN FETCH t.myProvenance WHERE t.myResourceTable.myPid = :id AND t.myResourceVersion = :version")
 	ResourceHistoryTable findForIdAndVersionAndFetchProvenance(
-			@Param("id") long theId, @Param("version") long theVersion);
+			@Param("id") JpaPid theId, @Param("version") long theVersion);
 
 	@Query(
-			"SELECT t.myId FROM ResourceHistoryTable t WHERE t.myResourceId = :resId AND t.myResourceVersion <> :dontWantVersion")
+			"SELECT t.myId FROM ResourceHistoryTable t WHERE t.myResourceTable.myPid = :resId AND t.myResourceVersion <> :dontWantVersion")
 	Slice<Long> findForResourceId(
-			Pageable thePage, @Param("resId") Long theId, @Param("dontWantVersion") Long theDontWantVersion);
+			Pageable thePage, @Param("resId") JpaPid theId, @Param("dontWantVersion") Long theDontWantVersion);
 
 	@Query(
-			"SELECT t FROM ResourceHistoryTable t LEFT OUTER JOIN FETCH t.myProvenance WHERE t.myResourceId = :resId AND t.myResourceVersion <> :dontWantVersion")
+			"SELECT t FROM ResourceHistoryTable t LEFT OUTER JOIN FETCH t.myProvenance WHERE t.myResourceTable.myPid = :resId AND t.myResourceVersion <> :dontWantVersion")
 	Slice<ResourceHistoryTable> findForResourceIdAndReturnEntitiesAndFetchProvenance(
-			Pageable thePage, @Param("resId") Long theId, @Param("dontWantVersion") Long theDontWantVersion);
+			Pageable thePage, @Param("resId") JpaPid theId, @Param("dontWantVersion") Long theDontWantVersion);
 
 	@Query("" + "SELECT v.myId FROM ResourceHistoryTable v "
 			+ "LEFT OUTER JOIN ResourceTable t ON (v.myResourceTable = t) "
 			+ "WHERE v.myResourceVersion <> t.myVersion AND "
 			+ "t.myPid = :resId")
-	Slice<Long> findIdsOfPreviousVersionsOfResourceId(Pageable thePage, @Param("resId") JpaPid theResourceId);
+	Slice<ResourceHistoryTablePk> findIdsOfPreviousVersionsOfResourceId(Pageable thePage, @Param("resId") JpaPid theResourceId);
 
 	@Query("" + "SELECT v.myId FROM ResourceHistoryTable v "
 			+ "LEFT OUTER JOIN ResourceTable t ON (v.myResourceTable = t) "
 			+ "WHERE v.myResourceVersion <> t.myVersion AND "
 			+ "t.myResourceType = :restype")
-	Slice<Long> findIdsOfPreviousVersionsOfResources(Pageable thePage, @Param("restype") String theResourceName);
+	Slice<ResourceHistoryTablePk> findIdsOfPreviousVersionsOfResources(Pageable thePage, @Param("restype") String theResourceName);
 
 	@Query("" + "SELECT v.myId FROM ResourceHistoryTable v "
 			+ "LEFT OUTER JOIN ResourceTable t ON (v.myResourceTable = t) "
 			+ "WHERE v.myResourceVersion <> t.myVersion")
-	Slice<Long> findIdsOfPreviousVersionsOfResources(Pageable thePage);
+	Slice<ResourceHistoryTablePk> findIdsOfPreviousVersionsOfResources(Pageable thePage);
 
 	@Modifying
 	@Query(
-			"UPDATE ResourceHistoryTable r SET r.myResourceVersion = :newVersion WHERE r.myResourceId = :id AND r.myResourceVersion = :oldVersion")
+			"UPDATE ResourceHistoryTable r SET r.myResourceVersion = :newVersion WHERE r.myResourceTable.myPid = :id AND r.myResourceVersion = :oldVersion")
 	void updateVersion(
-			@Param("id") long theId, @Param("oldVersion") long theOldVersion, @Param("newVersion") long theNewVersion);
+			@Param("id") JpaPid theId, @Param("oldVersion") long theOldVersion, @Param("newVersion") long theNewVersion);
 
 	@Modifying
 	@Query("DELETE FROM ResourceHistoryTable t WHERE t.myId = :pid")
-	void deleteByPid(@Param("pid") Long theId);
+	void deleteByPid(@Param("pid") ResourceHistoryTablePk theId);
 
 	/**
 	 * This method is only for use in unit tests - It is used to move the stored resource body contents from the new

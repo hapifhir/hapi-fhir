@@ -102,7 +102,7 @@ public class ResourceHistoryTag extends BaseTag implements Serializable {
 		this();
 		setTag(theTag);
 		setResource(theResourceHistoryTable);
-		setResourceId(theResourceHistoryTable.getResourceId());
+		setResourceId(theResourceHistoryTable.getResourceId().getId());
 		setResourceType(theResourceHistoryTable.getResourceType());
 		setPartitionId(theRequestPartitionId);
 	}
@@ -129,7 +129,7 @@ public class ResourceHistoryTag extends BaseTag implements Serializable {
 
 	public void setResource(ResourceHistoryTable theResourceHistory) {
 		myResourceHistory = theResourceHistory;
-		myResourceHistoryPid = theResourceHistory.getId();
+		myResourceHistoryPid = theResourceHistory.getId().getId();
 	}
 
 	public Long getId() {

@@ -473,7 +473,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	public void deleteValueSetForResource(ResourceTable theResourceTable) {
 		// Get existing entity so it can be deleted.
 		Optional<TermValueSet> optionalExistingTermValueSetById =
-				myTermValueSetDao.findByResourcePid(theResourceTable.getId());
+				myTermValueSetDao.findByResourcePid(theResourceTable.getId().getId());
 
 		if (optionalExistingTermValueSetById.isPresent()) {
 			TermValueSet existingTermValueSet = optionalExistingTermValueSetById.get();
@@ -2351,7 +2351,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		}
 		TermCodeSystemVersion csv = cs.getCurrentVersion();
 
-		Set<TermConcept> codes = findCodesAbove(cs.getResource().getId(), csv.getPid(), theCode);
+		Set<TermConcept> codes = findCodesAbove(cs.getResource().getId().getId(), csv.getPid(), theCode);
 		return toVersionIndependentConcepts(theSystem, codes);
 	}
 
@@ -2388,7 +2388,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		}
 		TermCodeSystemVersion csv = cs.getCurrentVersion();
 
-		Set<TermConcept> codes = findCodesBelow(cs.getResource().getId(), csv.getPid(), theCode);
+		Set<TermConcept> codes = findCodesBelow(cs.getResource().getId().getId(), csv.getPid(), theCode);
 		return toVersionIndependentConcepts(theSystem, codes);
 	}
 

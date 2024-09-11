@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
@@ -79,6 +80,9 @@ public class ResourceSearchUrlEntity {
 	@Column(name = "RES_ID", updatable = false, nullable = false, insertable = false)
 	private Long myResourcePid;
 
+	@Column(name = "PARTITION_ID", updatable = false, nullable = false, insertable = false)
+	private Integer myPartitionIdValue;
+
 	@Column(name = "PARTITION_DATE", nullable = true, insertable = true, updatable = false)
 	private LocalDate myPartitionDate;
 
@@ -108,9 +112,9 @@ public class ResourceSearchUrlEntity {
 		return this;
 	}
 
-	public Long getResourcePid() {
+	public JpaPid getResourcePid() {
 		if (myResourcePid != null) {
-			return myResourcePid;
+			return JpaPid.fromId(myResourcePid, myPartitionIdValue);
 		}
 		return myResourceTable.getResourceId();
 	}
@@ -126,6 +130,7 @@ public class ResourceSearchUrlEntity {
 
 	public ResourceSearchUrlEntity setResourceTable(ResourceTable myResourceTable) {
 		this.myResourceTable = myResourceTable;
+		this.myPartitionIdValue = myResourceTable.getPartitionId().getPartitionId();
 		return this;
 	}
 

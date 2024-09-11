@@ -184,7 +184,7 @@ public class TermCodeSystem implements Serializable {
 
 	public TermCodeSystem setResource(ResourceTable theResource) {
 		myResource = theResource;
-		myResourcePid = theResource.getId();
+		myResourcePid = theResource.getId().getId();
 		myPartitionId = theResource.getPersistentId().getPartitionId();
 		return this;
 	}

@@ -280,7 +280,7 @@ public class ResourceReindexingSvcImplTest {
 
 		// verify
 		assertEquals(0, count);
-		verify(myResourceTableDao, times(1)).updateIndexStatus(eq(0L), eq(BaseHapiFhirDao.INDEX_STATUS_INDEXING_FAILED));
+		verify(myResourceTableDao, times(1)).updateIndexStatus(eq(JpaPid.fromId(0L)), eq(BaseHapiFhirDao.INDEX_STATUS_INDEXING_FAILED));
 	}
 
 	@Test

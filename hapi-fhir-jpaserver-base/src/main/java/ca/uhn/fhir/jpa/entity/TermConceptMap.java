@@ -133,7 +133,7 @@ public class TermConceptMap implements Serializable {
 
 	public TermConceptMap setResource(ResourceTable theResource) {
 		myResource = theResource;
-		myResourcePid = theResource.getId();
+		myResourcePid = theResource.getId().getId();
 		myPartitionId = theResource.getPersistentId().getPartitionId();
 		return this;
 	}

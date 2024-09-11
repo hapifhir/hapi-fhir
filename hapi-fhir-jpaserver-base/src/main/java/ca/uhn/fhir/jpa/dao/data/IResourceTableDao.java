@@ -44,15 +44,15 @@ public interface IResourceTableDao
 
 	// FIXME: replace myPid.myId to myPid and change return types here
 	
-	@Query("SELECT t.myPid.myId FROM ResourceTable t WHERE t.myDeleted IS NOT NULL")
-	Slice<Long> findIdsOfDeletedResources(Pageable thePageable);
+	@Query("SELECT t.myPid FROM ResourceTable t WHERE t.myDeleted IS NOT NULL")
+	Slice<JpaPid> findIdsOfDeletedResources(Pageable thePageable);
 
-	@Query("SELECT t.myPid.myId FROM ResourceTable t WHERE t.myResourceType = :restype AND t.myDeleted IS NOT NULL")
-	Slice<Long> findIdsOfDeletedResourcesOfType(Pageable thePageable, @Param("restype") String theResourceName);
+	@Query("SELECT t.myPid FROM ResourceTable t WHERE t.myResourceType = :restype AND t.myDeleted IS NOT NULL")
+	Slice<JpaPid> findIdsOfDeletedResourcesOfType(Pageable thePageable, @Param("restype") String theResourceName);
 
 	@Query(
-			"SELECT t.myPid.myId FROM ResourceTable t WHERE t.myPid.myId = :resid AND t.myResourceType = :restype AND t.myDeleted IS NOT NULL")
-	Slice<Long> findIdsOfDeletedResourcesOfType(
+			"SELECT t.myPid FROM ResourceTable t WHERE t.myPid.myId = :resid AND t.myResourceType = :restype AND t.myDeleted IS NOT NULL")
+	Slice<JpaPid> findIdsOfDeletedResourcesOfType(
 			Pageable thePageable, @Param("resid") Long theResourceId, @Param("restype") String theResourceName);
 
 	@Query(
@@ -60,13 +60,13 @@ public interface IResourceTableDao
 	List<Map<?, ?>> getResourceCounts();
 
 	@Query(
-			"SELECT t.myPid.myId FROM ResourceTable t WHERE t.myUpdated >= :low AND t.myUpdated <= :high ORDER BY t.myUpdated DESC")
-	Slice<Long> findIdsOfResourcesWithinUpdatedRangeOrderedFromNewest(
+			"SELECT t.myPid FROM ResourceTable t WHERE t.myUpdated >= :low AND t.myUpdated <= :high ORDER BY t.myUpdated DESC")
+	Slice<JpaPid> findIdsOfResourcesWithinUpdatedRangeOrderedFromNewest(
 			Pageable thePage, @Param("low") Date theLow, @Param("high") Date theHigh);
 
 	@Query(
-			"SELECT t.myPid.myId FROM ResourceTable t WHERE t.myUpdated >= :low AND t.myUpdated <= :high ORDER BY t.myUpdated ASC")
-	Slice<Long> findIdsOfResourcesWithinUpdatedRangeOrderedFromOldest(
+			"SELECT t.myPid FROM ResourceTable t WHERE t.myUpdated >= :low AND t.myUpdated <= :high ORDER BY t.myUpdated ASC")
+	Slice<JpaPid> findIdsOfResourcesWithinUpdatedRangeOrderedFromOldest(
 			Pageable thePage, @Param("low") Date theLow, @Param("high") Date theHigh);
 
 	@Query(
@@ -107,24 +107,24 @@ public interface IResourceTableDao
 
 	// TODO in the future, consider sorting by pid as well so batch jobs process in the same order across restarts
 	@Query(
-			"SELECT t.myPid.myId FROM ResourceTable t WHERE t.myUpdated >= :low AND t.myUpdated <= :high AND t.myPartitionIdValue = :partition_id ORDER BY t.myUpdated ASC")
-	Slice<Long> findIdsOfPartitionedResourcesWithinUpdatedRangeOrderedFromOldest(
+			"SELECT t.myPid FROM ResourceTable t WHERE t.myUpdated >= :low AND t.myUpdated <= :high AND t.myPartitionIdValue = :partition_id ORDER BY t.myUpdated ASC")
+	Slice<JpaPid> findIdsOfPartitionedResourcesWithinUpdatedRangeOrderedFromOldest(
 			Pageable thePage,
 			@Param("low") Date theLow,
 			@Param("high") Date theHigh,
 			@Param("partition_id") Integer theRequestPartitionId);
 
 	@Query(
-			"SELECT t.myPid.myId FROM ResourceTable t WHERE t.myUpdated >= :low AND t.myUpdated <= :high AND t.myResourceType = :restype ORDER BY t.myUpdated ASC")
-	Slice<Long> findIdsOfResourcesWithinUpdatedRangeOrderedFromOldest(
+			"SELECT t.myPid FROM ResourceTable t WHERE t.myUpdated >= :low AND t.myUpdated <= :high AND t.myResourceType = :restype ORDER BY t.myUpdated ASC")
+	Slice<JpaPid> findIdsOfResourcesWithinUpdatedRangeOrderedFromOldest(
 			Pageable thePage,
 			@Param("restype") String theResourceType,
 			@Param("low") Date theLow,
 			@Param("high") Date theHigh);
 
 	@Modifying
-	@Query("UPDATE ResourceTable t SET t.myIndexStatus = :status WHERE t.myPid.myId = :id")
-	void updateIndexStatus(@Param("id") Long theId, @Param("status") Long theIndexStatus);
+	@Query("UPDATE ResourceTable t SET t.myIndexStatus = :status WHERE t.myPid = :id")
+	void updateIndexStatus(@Param("id") JpaPid theId, @Param("status") Long theIndexStatus);
 
 	@Modifying
 	@Query("DELETE FROM ResourceTable t WHERE t.myPid.myId = :pid")

@@ -100,7 +100,7 @@ public class ResourceTag extends BaseTag {
 			ResourceTable theResourceTable, TagDefinition theTag, PartitionablePartitionId theRequestPartitionId) {
 		setTag(theTag);
 		setResource(theResourceTable);
-		setResourceId(theResourceTable.getId());
+		setResourceId(theResourceTable.getId().getId());
 		setResourceType(theResourceTable.getResourceType());
 		setPartitionId(theRequestPartitionId);
 	}
@@ -119,7 +119,8 @@ public class ResourceTag extends BaseTag {
 
 	public void setResource(ResourceTable theResource) {
 		myResource = theResource;
-		myResourceId = theResource.getId();
+		myResourceId = theResource.getId().getId();
+		myPartitionIdValue = theResource.getPartitionId().getPartitionId();
 	}
 
 	public String getResourceType() {

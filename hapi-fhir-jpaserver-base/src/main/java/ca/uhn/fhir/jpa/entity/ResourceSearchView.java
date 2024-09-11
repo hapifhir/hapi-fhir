@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.entity;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.IBaseResourceEntity;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
@@ -69,7 +70,7 @@ import java.util.Date;
 		+ "FROM HFJ_RESOURCE r "
 		+ "    INNER JOIN HFJ_RES_VER h ON r.RES_ID = h.RES_ID and r.RES_VER = h.RES_VER"
 		+ "    LEFT OUTER JOIN HFJ_RES_VER_PROV p ON p.RES_VER_PID = h.PID ")
-public class ResourceSearchView implements IBaseResourceEntity, Serializable {
+public class ResourceSearchView implements IBaseResourceEntity<JpaPid>, Serializable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -167,8 +168,8 @@ public class ResourceSearchView implements IBaseResourceEntity, Serializable {
 	}
 
 	@Override
-	public Long getId() {
-		return myResourceId;
+	public JpaPid getId() {
+		return JpaPid.fromId(myResourceId, myPartitionId);
 	}
 
 	@Override
@@ -195,8 +196,8 @@ public class ResourceSearchView implements IBaseResourceEntity, Serializable {
 	}
 
 	@Override
-	public Long getResourceId() {
-		return myResourceId;
+	public JpaPid getResourceId() {
+		return getId();
 	}
 
 	@Override

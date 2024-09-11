@@ -25,10 +25,14 @@ import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public interface IResourceExpungeService<T extends IResourcePersistentId> {
-	List<T> findHistoricalVersionsOfDeletedResources(String theResourceName, T theResourceId, int theI);
+/**
+ * @param <T> The resource PID type
+ * @param <VPK> The resource version PID type
+ */
+public interface IResourceExpungeService<T extends IResourcePersistentId<?>, VPK> {
+	List<VPK> findHistoricalVersionsOfDeletedResources(String theResourceName, T theResourceId, int theI);
 
-	List<T> findHistoricalVersionsOfNonDeletedResources(String theResourceName, T theResourceId, int theI);
+	List<VPK> findHistoricalVersionsOfNonDeletedResources(String theResourceName, T theResourceId, int theI);
 
 	void expungeHistoricalVersions(
 			RequestDetails theRequestDetails, List<T> thePartition, AtomicInteger theRemainingCount);

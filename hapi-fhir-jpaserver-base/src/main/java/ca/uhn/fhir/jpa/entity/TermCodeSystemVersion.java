@@ -172,7 +172,7 @@ public class TermCodeSystemVersion implements Serializable {
 
 	public TermCodeSystemVersion setResource(ResourceTable theResource) {
 		myResource = theResource;
-		myResourcePid = theResource.getResourceId();
+		myResourcePid = theResource.getId().getId();
 		myResourcePartitionId = theResource.getPersistentId().getPartitionId();
 		return this;
 	}

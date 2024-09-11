@@ -36,8 +36,8 @@ import java.util.Collection;
 import java.util.Date;
 
 @MappedSuperclass
-public abstract class BaseHasResource
-		implements IBaseResourceEntity, IBasePersistedResource<JpaPid>, Serializable {
+public abstract class BaseHasResource<T> // FIXME: remove generic from here and IBaseResourceEntity?
+		implements IBaseResourceEntity<T>, IBasePersistedResource<JpaPid>, Serializable {
 
 	public static final String RES_PUBLISHED = "RES_PUBLISHED";
 	public static final String RES_UPDATED = "RES_UPDATED";

@@ -27,11 +27,8 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.search.engine.backend.types.Projectable;
-import org.hibernate.search.mapper.pojo.bridge.mapping.annotation.IdentifierBridgeRef;
-import org.hibernate.search.mapper.pojo.mapping.definition.annotation.DocumentId;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField;
 
 import java.util.ArrayList;
@@ -138,6 +135,12 @@ public class JpaPid extends BaseResourcePersistentId<Long> {
 		return new JpaPid(theId);
 	}
 
+	public static JpaPid fromId(Long theResourceId, Integer thePartitionId) {
+		JpaPid retVal = new JpaPid(theResourceId);
+		retVal.setPartitionId(thePartitionId);
+		return retVal;
+	}
+
 	public static JpaPid fromIdAndVersion(Long theId, Long theVersion) {
 		return new JpaPid(theId, theVersion);
 	}
@@ -152,16 +155,16 @@ public class JpaPid extends BaseResourcePersistentId<Long> {
 
 	@Override
 	public boolean equals(Object theO) {
-		if (this == theO) return true;
-		if (theO == null || getClass() != theO.getClass()) return false;
-		if (!super.equals(theO)) return false;
+		if (this == theO){ return true;}
+		if (!(theO instanceof JpaPid)) {return false;}
+		if (!super.equals(theO)) {return false;}
 		JpaPid jpaPid = (JpaPid) theO;
-		return myId.equals(jpaPid.myId);
+		return Objects.equals(myId, jpaPid.myId) && Objects.equals(myPartitionIdValue, jpaPid.myPartitionIdValue);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(super.hashCode(), myId);
+		return Objects.hash(myId, myPartitionIdValue);
 	}
 
 	@Override
@@ -179,4 +182,5 @@ public class JpaPid extends BaseResourcePersistentId<Long> {
 		retVal.setPartitionIdIfNotAlreadySet(theId.getPartitionIdValue());
 		return retVal;
 	}
+
 }

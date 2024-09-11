@@ -561,7 +561,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				thePerformIndexing);
 
 		// Store the resource forced ID if necessary
-		JpaPid jpaPid = JpaPid.fromId(updatedEntity.getResourceId());
+		JpaPid jpaPid = updatedEntity.getId();
 
 		// Populate the resource with its actual final stored ID from the entity
 		theResource.setId(entity.getIdDt());
@@ -738,7 +738,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					Msg.code(961) + "Trying to delete " + theId + " but this is not the current version");
 		}
 
-		JpaPid persistentId = JpaPid.fromId(entity.getResourceId());
+		JpaPid persistentId = entity.getId();
 		theTransactionDetails.addDeletedResourceId(persistentId);
 
 		// Don't delete again if it's already deleted
@@ -1001,7 +1001,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	protected ResourceTable updateEntityForDelete(
 			RequestDetails theRequest, TransactionDetails theTransactionDetails, ResourceTable theEntity) {
-		myResourceSearchUrlSvc.deleteByResId(theEntity.getId());
+		myResourceSearchUrlSvc.deleteByResId(theEntity.getId().getId());
 		Date updateTime = new Date();
 		return updateEntity(theRequest, null, theEntity, updateTime, true, true, theTransactionDetails, false, true);
 	}
@@ -1021,7 +1021,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	private <MT extends IBaseMetaType> void doMetaAdd(
 			MT theMetaAdd,
-			BaseHasResource theEntity,
+			BaseHasResource<?> theEntity,
 			RequestDetails theRequestDetails,
 			TransactionDetails theTransactionDetails) {
 		IBaseResource oldVersion = myJpaStorageResourceParser.toResource(theEntity, false);
@@ -1030,7 +1030,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		for (TagDefinition nextDef : tags) {
 
 			boolean entityHasTag = false;
-			for (BaseTag next : new ArrayList<>(theEntity.getTags())) {
+			for (BaseTag next : theEntity.getTags()) {
 				if (Objects.equals(next.getTag().getTagType(), nextDef.getTagType())
 						&& Objects.equals(next.getTag().getSystem(), nextDef.getSystem())
 						&& Objects.equals(next.getTag().getCode(), nextDef.getCode())
@@ -1165,11 +1165,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			IIdType theId, ExpungeOptions theExpungeOptions, RequestDetails theRequest) {
 		TransactionTemplate txTemplate = new TransactionTemplate(myPlatformTransactionManager);
 
-		BaseHasResource entity = txTemplate.execute(t -> readEntity(theId, theRequest));
+		BaseHasResource<?> entity = txTemplate.execute(t -> readEntity(theId, theRequest));
 		Validate.notNull(entity, "Resource with ID %s not found in database", theId);
 
 		if (theId.hasVersionIdPart()) {
-			BaseHasResource currentVersion;
+			BaseHasResource<?> currentVersion;
 			currentVersion = txTemplate.execute(t -> readEntity(theId.toVersionless(), theRequest));
 			Validate.notNull(
 					currentVersion,
@@ -1184,13 +1184,13 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 			return myExpungeService.expunge(
 					getResourceName(),
-					JpaPid.fromIdAndVersion(entity.getResourceId(), entity.getVersion()),
+					entity.getResourceId(),
 					theExpungeOptions,
 					theRequest);
 		}
 
 		return myExpungeService.expunge(
-				getResourceName(), JpaPid.fromId(entity.getResourceId()), theExpungeOptions, theRequest);
+				getResourceName(), entity.getResourceId(), theExpungeOptions, theRequest);
 	}
 
 	@Override
@@ -1246,7 +1246,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					return myPersistedJpaBundleProviderFactory.history(
 							theRequest,
 							myResourceName,
-							entity.getId(),
+							entity.getResourceId(),
 							theSince,
 							theUntil,
 							theOffset,
@@ -1276,7 +1276,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					return myPersistedJpaBundleProviderFactory.history(
 							theRequest,
 							myResourceName,
-							entity.getId(),
+							entity.getResourceId(),
 							theHistorySearchDateRangeParam.getLowerBoundAsInstant(),
 							theHistorySearchDateRangeParam.getUpperBoundAsInstant(),
 							theHistorySearchDateRangeParam.getOffset(),
@@ -1377,7 +1377,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 			// Also update history entry
 			ResourceHistoryTable history = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(
-					entity.getId(), entity.getVersion());
+					entity.getResourceId(), entity.getVersion());
 			doMetaAdd(theMetaAdd, history, theRequest, transactionDetails);
 		}
 
@@ -1425,7 +1425,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			doMetaDelete(theMetaDel, latestVersion, theRequest, transactionDetails);
 			// Also update history entry
 			ResourceHistoryTable history = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(
-					entity.getId(), entity.getVersion());
+					entity.getResourceId(), entity.getVersion());
 			doMetaDelete(theMetaDel, history, theRequest, transactionDetails);
 		}
 
@@ -1436,7 +1436,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	public <MT extends IBaseMetaType> MT metaGetOperation(Class<MT> theType, IIdType theId, RequestDetails theRequest) {
 		return myTransactionService.withRequest(theRequest).execute(() -> {
 			Set<TagDefinition> tagDefs = new HashSet<>();
-			BaseHasResource entity = readEntity(theId, theRequest);
+			BaseHasResource<?> entity = readEntity(theId, theRequest);
 			for (BaseTag next : entity.getTags()) {
 				tagDefs.add(next.getTag());
 			}
@@ -1895,7 +1895,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	public void removeTag(
 			IIdType theId, TagTypeEnum theTagType, String theScheme, String theTerm, RequestDetails theRequest) {
 		StopWatch w = new StopWatch();
-		BaseHasResource entity = readEntity(theId, theRequest);
+		BaseHasResource<?> entity = readEntity(theId, theRequest);
 		if (entity == null) {
 			throw new ResourceNotFoundException(Msg.code(1999) + theId);
 		}

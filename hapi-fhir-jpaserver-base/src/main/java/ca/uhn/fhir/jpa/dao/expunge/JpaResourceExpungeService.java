@@ -47,6 +47,7 @@ import ca.uhn.fhir.jpa.dao.data.ISearchParamPresentDao;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
+import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTablePk;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -76,7 +77,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
-public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid> {
+public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid, ResourceHistoryTablePk> {
 	private static final Logger ourLog = LoggerFactory.getLogger(JpaResourceExpungeService.class);
 
 	@Autowired
@@ -150,19 +151,19 @@ public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid
 
 	@Override
 	@Transactional
-	public List<JpaPid> findHistoricalVersionsOfNonDeletedResources(
+	public List<ResourceHistoryTablePk> findHistoricalVersionsOfNonDeletedResources(
 			String theResourceName, JpaPid theJpaPid, int theRemainingCount) {
 		if (isEmptyQuery(theRemainingCount)) {
-			return Collections.EMPTY_LIST;
+			return Collections.emptyList();
 		}
 
 		Pageable page = PageRequest.of(0, theRemainingCount);
 
-		Slice<Long> ids;
+		Slice<ResourceHistoryTablePk> ids;
 		if (theJpaPid != null && theJpaPid.getId() != null) {
 			if (theJpaPid.getVersion() != null) {
 				ids = toSlice(myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(
-						theJpaPid.getId(), theJpaPid.getVersion()));
+						theJpaPid, theJpaPid.getVersion()));
 			} else {
 				ids = myResourceHistoryTableDao.findIdsOfPreviousVersionsOfResourceId(page, theJpaPid);
 			}
@@ -174,15 +175,15 @@ public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid
 			}
 		}
 
-		return JpaPid.fromLongList(ids.getContent());
+		return ids.getContent();
 	}
 
 	@Override
 	@Transactional
-	public List<JpaPid> findHistoricalVersionsOfDeletedResources(
+	public List<ResourceHistoryTablePk> findHistoricalVersionsOfDeletedResources(
 			String theResourceName, JpaPid theResourceId, int theRemainingCount) {
 		if (isEmptyQuery(theRemainingCount)) {
-			return Collections.EMPTY_LIST;
+			return Collections.emptyList();
 		}
 
 		Pageable page = PageRequest.of(0, theRemainingCount);
@@ -203,7 +204,7 @@ public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid
 				ourLog.info("Expunging {} deleted resources (all types)", ids.getNumberOfElements());
 			}
 		}
-		return JpaPid.fromLongList(ids.getContent());
+		return ids.getContent();
 	}
 
 	@Override
@@ -396,7 +397,7 @@ public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid
 		}
 	}
 
-	private Slice<Long> toSlice(ResourceHistoryTable myVersion) {
+	private Slice<ResourceHistoryTablePk> toSlice(ResourceHistoryTable myVersion) {
 		Validate.notNull(myVersion);
 		return new SliceImpl<>(Collections.singletonList(myVersion.getId()));
 	}

@@ -105,7 +105,7 @@ public class SubscriptionTable {
 
 	public void setSubscriptionResource(ResourceTable theSubscriptionResource) {
 		mySubscriptionResource = theSubscriptionResource;
-		myResId = theSubscriptionResource.getId();
-		myPartitionId = theSubscriptionResource.getPersistentId().getPartitionId();
+		myResId = theSubscriptionResource.getId().getId();
+		myPartitionId = theSubscriptionResource.getPartitionId().getPartitionId();
 	}
 }

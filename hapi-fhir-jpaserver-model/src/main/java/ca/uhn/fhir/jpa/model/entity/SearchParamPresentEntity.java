@@ -147,7 +147,8 @@ public class SearchParamPresentEntity extends BasePartitionable implements Seria
 
 	public void setResource(ResourceTable theResourceTable) {
 		myResource = theResourceTable;
-		myResourcePid = theResourceTable.getId();
+		myResourcePid = theResourceTable.getId().getId();
+		myPartitionIdValue = theResourceTable.getPartitionId().getPartitionId();
 	}
 
 	public boolean isPresent() {

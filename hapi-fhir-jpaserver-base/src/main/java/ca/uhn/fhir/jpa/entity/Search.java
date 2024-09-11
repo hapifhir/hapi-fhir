@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.entity;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.Include;
@@ -28,6 +29,7 @@ import ca.uhn.fhir.rest.param.HistorySearchStyleEnum;
 import ca.uhn.fhir.rest.server.util.ICachedSearchDetails;
 import ca.uhn.fhir.system.HapiSystemProperties;
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.Basic;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -71,12 +73,12 @@ import static org.apache.commons.lang3.StringUtils.left;
 
 @Entity
 @Table(
-		name = Search.HFJ_SEARCH,
-		uniqueConstraints = {@UniqueConstraint(name = "IDX_SEARCH_UUID", columnNames = "SEARCH_UUID")},
-		indexes = {
-			@Index(name = "IDX_SEARCH_RESTYPE_HASHS", columnList = "RESOURCE_TYPE,SEARCH_QUERY_STRING_HASH,CREATED"),
-			@Index(name = "IDX_SEARCH_CREATED", columnList = "CREATED")
-		})
+	name = Search.HFJ_SEARCH,
+	uniqueConstraints = {@UniqueConstraint(name = "IDX_SEARCH_UUID", columnNames = "SEARCH_UUID")},
+	indexes = {
+		@Index(name = "IDX_SEARCH_RESTYPE_HASHS", columnList = "RESOURCE_TYPE,SEARCH_QUERY_STRING_HASH,CREATED"),
+		@Index(name = "IDX_SEARCH_CREATED", columnList = "CREATED")
+	})
 public class Search implements ICachedSearchDetails, Serializable {
 
 	/**
@@ -87,12 +89,11 @@ public class Search implements ICachedSearchDetails, Serializable {
 	public static final int SEARCH_UUID_COLUMN_LENGTH = 48;
 
 	public static final String HFJ_SEARCH = "HFJ_SEARCH";
+	public static final String SEARCH_UUID = "SEARCH_UUID";
 	private static final int MAX_SEARCH_QUERY_STRING = 10000;
 	private static final int FAILURE_MESSAGE_LENGTH = 500;
 	private static final long serialVersionUID = 1L;
 	private static final Logger ourLog = LoggerFactory.getLogger(Search.class);
-	public static final String SEARCH_UUID = "SEARCH_UUID";
-
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "CREATED", nullable = false, updatable = false)
 	private Date myCreated;
@@ -139,10 +140,10 @@ public class Search implements ICachedSearchDetails, Serializable {
 
 	@Column(name = "RESOURCE_ID", nullable = true)
 	private Long myResourceId;
-
+	@Column(name = "PARTITION_ID", nullable = true)
+	private Integer myPartitionId;
 	@Column(name = "RESOURCE_TYPE", length = 200, nullable = true)
 	private String myResourceType;
-
 	/**
 	 * Note that this field may have the request partition IDs prepended to it
 	 */
@@ -150,46 +151,35 @@ public class Search implements ICachedSearchDetails, Serializable {
 	@Basic(fetch = FetchType.LAZY)
 	@Column(name = "SEARCH_QUERY_STRING", nullable = true, updatable = false, length = MAX_SEARCH_QUERY_STRING)
 	private String mySearchQueryString;
-
 	/**
 	 * Note that this field may have the request partition IDs prepended to it
 	 */
 	@Column(name = "SEARCH_QUERY_STRING_VC", nullable = true, length = Length.LONG32)
 	private String mySearchQueryStringVc;
-
 	@Column(name = "SEARCH_QUERY_STRING_HASH", nullable = true, updatable = false)
 	private Integer mySearchQueryStringHash;
-
 	@Enumerated(EnumType.ORDINAL)
 	@Column(name = "SEARCH_TYPE", nullable = false)
 	@JdbcTypeCode(SqlTypes.INTEGER)
 	private SearchTypeEnum mySearchType;
-
 	@Enumerated(EnumType.STRING)
 	@Column(name = "SEARCH_STATUS", nullable = false, length = 10)
 	private SearchStatusEnum myStatus;
-
 	@Column(name = "TOTAL_COUNT", nullable = true)
 	private Integer myTotalCount;
-
 	@Column(name = SEARCH_UUID, length = SEARCH_UUID_COLUMN_LENGTH, nullable = false, updatable = false)
 	private String myUuid;
-
 	@SuppressWarnings("unused")
 	@Version
 	@Column(name = "OPTLOCK_VERSION", nullable = true)
 	private Integer myVersion;
-
 	@Lob // TODO: VC column added in 7.2.0 - Remove non-VC column later
 	@Column(name = "SEARCH_PARAM_MAP", nullable = true)
 	private byte[] mySearchParameterMap;
-
 	@Column(name = "SEARCH_PARAM_MAP_BIN", nullable = true, length = Length.LONG32)
 	private byte[] mySearchParameterMapBin;
-
 	@Transient
 	private transient SearchParameterMap mySearchParameterMapTransient;
-
 	/**
 	 * This isn't currently persisted in the DB as it's only used for offset mode. We could
 	 * change this if needed in the future.
@@ -202,7 +192,6 @@ public class Search implements ICachedSearchDetails, Serializable {
 	 */
 	@Transient
 	private Integer mySizeModeSize;
-
 	/**
 	 * This isn't currently persisted in the DB. When there is search criteria defined in the
 	 * search parameter, this is used to keep the search criteria type.
@@ -224,15 +213,15 @@ public class Search implements ICachedSearchDetails, Serializable {
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this)
-				.append("myLastUpdatedHigh", myLastUpdatedHigh)
-				.append("myLastUpdatedLow", myLastUpdatedLow)
-				.append("myNumFound", myNumFound)
-				.append("myNumBlocked", myNumBlocked)
-				.append("myStatus", myStatus)
-				.append("myTotalCount", myTotalCount)
-				.append("myUuid", myUuid)
-				.append("myVersion", myVersion)
-				.toString();
+			.append("myLastUpdatedHigh", myLastUpdatedHigh)
+			.append("myLastUpdatedLow", myLastUpdatedLow)
+			.append("myNumFound", myNumFound)
+			.append("myNumBlocked", myNumBlocked)
+			.append("myStatus", myStatus)
+			.append("myTotalCount", myTotalCount)
+			.append("myUuid", myUuid)
+			.append("myVersion", myVersion)
+			.toString();
 	}
 
 	public int getNumBlocked() {
@@ -341,12 +330,14 @@ public class Search implements ICachedSearchDetails, Serializable {
 		myPreferredPageSize = thePreferredPageSize;
 	}
 
-	public Long getResourceId() {
-		return myResourceId;
+	@Nullable
+	public JpaPid getResourceId() {
+		return myResourceId != null ? JpaPid.fromId(myResourceId, myPartitionId) : null;
 	}
 
-	public void setResourceId(Long theResourceId) {
-		myResourceId = theResourceId;
+	public void setResourceId(@Nullable JpaPid theResourceId) {
+			myResourceId = theResourceId != null ? theResourceId.getId() : null;
+			myPartitionId = theResourceId != null ? theResourceId.getPartitionId() : null;
 	}
 
 	public String getResourceType() {
@@ -518,7 +509,7 @@ public class Search implements ICachedSearchDetails, Serializable {
 
 	@Nonnull
 	public static String createSearchQueryStringForStorage(
-			@Nonnull String theSearchQueryString, @Nonnull RequestPartitionId theRequestPartitionId) {
+		@Nonnull String theSearchQueryString, @Nonnull RequestPartitionId theRequestPartitionId) {
 		String searchQueryString = theSearchQueryString;
 		if (!theRequestPartitionId.isAllPartitions()) {
 			searchQueryString = RequestPartitionId.stringifyForKey(theRequestPartitionId) + " " + searchQueryString;

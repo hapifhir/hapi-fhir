@@ -31,6 +31,7 @@ import ca.uhn.fhir.jpa.esr.ExternallyStoredResourceServiceRegistry;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
+import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTablePk;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -353,23 +354,25 @@ public class GiantTransactionPerfTest {
 	private static class MockResourceHistoryTableDao implements IResourceHistoryTableDao {
 		private int mySaveCount;
 
+
 		@Override
-		public List<ResourceHistoryTable> findAllVersionsForResourceIdInOrder(Long theId) {
+		public List<ResourceHistoryTable> findAllVersionsForResourceIdInOrder(JpaPid theId) {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
-		public ResourceHistoryTable findForIdAndVersionAndFetchProvenance(long theId, long theVersion) {
+		public ResourceHistoryTable findForIdAndVersionAndFetchProvenance(JpaPid theId, long theVersion) {
+			throw new UnsupportedOperationException();
+
+		}
+
+		@Override
+		public Slice<Long> findForResourceId(Pageable thePage, JpaPid theId, Long theDontWantVersion) {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
-		public Slice<Long> findForResourceId(Pageable thePage, Long theId, Long theDontWantVersion) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public Slice<ResourceHistoryTable> findForResourceIdAndReturnEntitiesAndFetchProvenance(Pageable thePage, Long theId, Long theDontWantVersion) {
+		public Slice<ResourceHistoryTable> findForResourceIdAndReturnEntitiesAndFetchProvenance(Pageable thePage, JpaPid theId, Long theDontWantVersion) {
 			throw new UnsupportedOperationException();
 		}
 
@@ -389,12 +392,12 @@ public class GiantTransactionPerfTest {
 		}
 
 		@Override
-		public void updateVersion(long theId, long theOldVersion, long theNewVersion) {
+		public void updateVersion(JpaPid theId, long theOldVersion, long theNewVersion) {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
-		public void deleteByPid(Long theId) {
+		public void deleteByPid(ResourceHistoryTablePk theId) {
 			throw new UnsupportedOperationException();
 		}
 
@@ -423,7 +426,7 @@ public class GiantTransactionPerfTest {
 
 		@Nonnull
 		@Override
-		public List<ResourceHistoryTable> findAllById(@Nonnull Iterable<Long> ids) {
+		public List<ResourceHistoryTable> findAllById(@Nonnull Iterable<ResourceHistoryTablePk> ids) {
 			throw new UnsupportedOperationException();
 		}
 
@@ -433,7 +436,7 @@ public class GiantTransactionPerfTest {
 		}
 
 		@Override
-		public void deleteById(@Nonnull Long theLong) {
+		public void deleteById(@Nonnull ResourceHistoryTablePk theLong) {
 			throw new UnsupportedOperationException();
 		}
 
@@ -443,7 +446,7 @@ public class GiantTransactionPerfTest {
 		}
 
 		@Override
-		public void deleteAllById(@Nonnull Iterable<? extends Long> ids) {
+		public void deleteAllById(@Nonnull Iterable<? extends ResourceHistoryTablePk> ids) {
 			throw new UnsupportedOperationException();
 		}
 
@@ -472,12 +475,12 @@ public class GiantTransactionPerfTest {
 
 		@Nonnull
 		@Override
-		public Optional<ResourceHistoryTable> findById(@Nonnull Long theLong) {
+		public Optional<ResourceHistoryTable> findById(@Nonnull ResourceHistoryTablePk theLong) {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
-		public boolean existsById(@Nonnull Long theLong) {
+		public boolean existsById(@Nonnull ResourceHistoryTablePk theLong) {
 			throw new UnsupportedOperationException();
 		}
 
@@ -509,7 +512,7 @@ public class GiantTransactionPerfTest {
 		}
 
 		@Override
-		public void deleteAllByIdInBatch(@Nonnull Iterable<Long> ids) {
+		public void deleteAllByIdInBatch(@Nonnull Iterable<ResourceHistoryTablePk> ids) {
 			throw new UnsupportedOperationException();
 		}
 
@@ -519,17 +522,17 @@ public class GiantTransactionPerfTest {
 		}
 
 		@Override
-		public ResourceHistoryTable getOne(@Nonnull Long theLong) {
+		public ResourceHistoryTable getOne(@Nonnull ResourceHistoryTablePk theLong) {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
-		public ResourceHistoryTable getById(@Nonnull Long theLong) {
+		public ResourceHistoryTable getById(@Nonnull ResourceHistoryTablePk theLong) {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
-		public ResourceHistoryTable getReferenceById(@Nonnull Long theLong) {
+		public ResourceHistoryTable getReferenceById(@Nonnull ResourceHistoryTablePk theLong) {
 			throw new UnsupportedOperationException();
 		}
 

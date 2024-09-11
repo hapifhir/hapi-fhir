@@ -26,6 +26,7 @@ import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.sl.cache.Cache;
 import ca.uhn.fhir.sl.cache.CacheFactory;
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.springframework.transaction.support.TransactionSynchronization;
@@ -270,14 +271,22 @@ public class MemoryCacheService {
 	public static class HistoryCountKey {
 		private final String myTypeName;
 		private final Long myInstanceId;
+		private final Integer myPartitionId;
 		private final int myHashCode;
 
-		private HistoryCountKey(String theTypeName, Long theInstanceId) {
+		private HistoryCountKey(@Nullable String theTypeName, @Nullable JpaPid theInstanceId) {
 			myTypeName = theTypeName;
-			myInstanceId = theInstanceId;
+			if (theInstanceId != null) {
+				myInstanceId = theInstanceId.getId();
+				myPartitionId = theInstanceId.getPartitionId();
+			} else {
+				myInstanceId = null;
+				myPartitionId = null;
+			}
 			myHashCode = new HashCodeBuilder()
 					.append(myTypeName)
 					.append(myInstanceId)
+					.append(myPartitionId)
 					.toHashCode();
 		}
 
@@ -290,8 +299,7 @@ public class MemoryCacheService {
 			return new HistoryCountKey(theType, null);
 		}
 
-		public static HistoryCountKey forInstance(@Nonnull Long theInstanceId) {
-			assert theInstanceId != null;
+		public static HistoryCountKey forInstance(@Nonnull JpaPid theInstanceId) {
 			return new HistoryCountKey(null, theInstanceId);
 		}
 
