@@ -287,25 +287,12 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 			assertEquals(prefixWithVersion(theCurrentVersion, VS_VERSIONED_ON_UPLOAD_FIRST_DISPLAY), termConceptVerCsvNoVer.getDisplay());
 
 			if (theCurrentVersion != null) {
-				TermConcept termConceptNoVerCsvVer = (TermConcept) myEntityManager.createQuery(
-					"select tc from TermConcept tc join fetch tc.myCodeSystem tcsv where tc.myCode = '" +
-						VS_NO_VERSIONED_ON_UPLOAD_FIRST_CODE + "' and tcsv.myCodeSystemVersionId = '" + theCurrentVersion + "'").getSingleResult();
-				assertNotNull(termConceptNoVerCsvVer);
-				// data should have version because it was loaded with a version
-				assertEquals(prefixWithVersion(theCurrentVersion, VS_NO_VERSIONED_ON_UPLOAD_FIRST_DISPLAY), termConceptNoVerCsvVer.getDisplay());
-
-				TermConcept termConceptVerCsvVer = (TermConcept) myEntityManager.createQuery(
-					"select tc from TermConcept tc join fetch tc.myCodeSystem tcsv where tc.myCode = '" +
-						VS_VERSIONED_ON_UPLOAD_FIRST_CODE + "' and tcsv.myCodeSystemVersionId = '" + theCurrentVersion + "'").getSingleResult();
-				assertNotNull(termConceptVerCsvVer);
-				// data should have version because it was loaded with a version
-				assertEquals(prefixWithVersion(theCurrentVersion, VS_VERSIONED_ON_UPLOAD_FIRST_DISPLAY), termConceptVerCsvVer.getDisplay());
+				validateExpandedTermConceptsForVersion(theCurrentVersion);
 			}
 
 			theAllVersions.forEach(this::validateExpandedTermConceptsForVersion);
 		});
 	}
-
 
 	private void validateExpandedTermConceptsForVersion(String theVersion) {
 		TermConcept termConceptNoVer = (TermConcept) myEntityManager.createQuery(
