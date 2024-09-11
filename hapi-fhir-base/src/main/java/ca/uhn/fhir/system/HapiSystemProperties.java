@@ -38,6 +38,7 @@ public final class HapiSystemProperties {
 	static final long DEFAULT_TEST_SYSTEM_PROP_VALIDATION_RESOURCE_CACHES_MS = 10 * DateUtils.MILLIS_PER_SECOND;
 	static final String PREVENT_INVALIDATING_CONDITIONAL_MATCH_CRITERIA =
 			"hapi.storage.prevent_invalidating_conditional_match_criteria";
+	static final String UNIT_TEST_HAPI_RUN_ALL_MIGRATIONS = "unit_test_mode_run_all_migrations";
 
 	private HapiSystemProperties() {}
 
@@ -74,8 +75,6 @@ public final class HapiSystemProperties {
 
 	/**
 	 * Set the validation resource cache expireAfterWrite timeout in milliseconds
-	 *
-	 * @param theMillis
 	 */
 	public static void setTestValidationResourceCachesMs(long theMillis) {
 		System.setProperty(TEST_SYSTEM_PROP_VALIDATION_RESOURCE_CACHES_MS, "" + theMillis);
@@ -142,9 +141,6 @@ public final class HapiSystemProperties {
 		System.setProperty(DISABLE_STATUS_BASED_REINDEX, Boolean.TRUE.toString());
 	}
 
-	/**
-	 * This property sets {@link JpaStorageSettings#setStatusBasedReindexingDisabled(Boolean)} to true when the system starts up.
-	 */
 	public static void enableStatusBasedReindex() {
 		System.clearProperty(DISABLE_STATUS_BASED_REINDEX);
 	}
@@ -165,4 +161,14 @@ public final class HapiSystemProperties {
 		return Boolean.parseBoolean(System.getProperty(
 				HapiSystemProperties.PREVENT_INVALIDATING_CONDITIONAL_MATCH_CRITERIA, Boolean.FALSE.toString()));
 	}
+
+	public static boolean isRunAllMigrations() {
+		return Boolean.parseBoolean(System.getProperty(
+			UNIT_TEST_HAPI_RUN_ALL_MIGRATIONS, Boolean.FALSE.toString()));
+	}
+
+	public static void enableRunAllMigrations(boolean theFlag) {
+		System.setProperty(UNIT_TEST_HAPI_RUN_ALL_MIGRATIONS, Boolean.toString(theFlag));
+	}
+
 }

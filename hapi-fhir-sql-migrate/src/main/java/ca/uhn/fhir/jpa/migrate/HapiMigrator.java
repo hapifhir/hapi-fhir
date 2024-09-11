@@ -65,7 +65,7 @@ public class HapiMigrator {
 
 	/**
 	 * If set to true, instead of executing migrations, will instead simply print the SQL that would be executed against the connection.
-	 * @return A boolean indicating whether or not the migration should be a dry run
+	 * @return A boolean indicating whether the migration should be a dry run
 	 */
 	public boolean isDryRun() {
 		return myDryRun;
@@ -235,7 +235,7 @@ public class HapiMigrator {
 	}
 
 	public void addTasks(Iterable<BaseTask> theMigrationTasks) {
-		if (HapiSystemProperties.isUnitTestModeEnabled()) {
+		if (HapiSystemProperties.isUnitTestModeEnabled() && !HapiSystemProperties.isRunAllMigrations()) {
 			// Tests only need to initialize the schemas. No need to run all the migrations for every test.
 			for (BaseTask task : theMigrationTasks) {
 				if (task instanceof InitializeSchemaTask) {
