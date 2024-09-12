@@ -26,7 +26,9 @@ import org.cqframework.cql.cql2elm.LibraryBuilder;
 import org.opencds.cqf.fhir.cql.CqlEngineOptions;
 import org.opencds.cqf.fhir.cql.CqlOptions;
 
-// LUKETODO:  javadoc
+/**
+ * Common CQL properties shared with downstream modules.
+ */
 public class TestCqlProperties {
 
 	//cql settings

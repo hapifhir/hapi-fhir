@@ -47,7 +47,9 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-// LUKETODO:  javadoc
+/**
+ * Common hapi-fhir clinical reasoning config specifically for R4 shared with downstream modules.
+ */
 @Configuration
 @Import({TestCrConfig.class, CrR4Config.class})
 public class TestCrR4Config {

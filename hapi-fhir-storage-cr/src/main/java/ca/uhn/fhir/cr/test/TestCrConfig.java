@@ -66,7 +66,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 
-// LUKETODO:  javadoc
+/**
+ * Common hapi-fhir clinical reasoning config shared with downstream modules.
+ */
 @Configuration
 @Import({SubscriptionSubmitterConfig.class, SubscriptionChannelConfig.class})
 public class TestCrConfig {
@@ -97,7 +99,9 @@ public class TestCrConfig {
 	}
 	@Bean
 	public TestCqlProperties testCqlProperties(){
-		return new TestCqlProperties();}
+		return new TestCqlProperties();
+	}
+
 	@Bean
 	public JpaStorageSettings storageSettings() {
 		JpaStorageSettings storageSettings = new JpaStorageSettings();
