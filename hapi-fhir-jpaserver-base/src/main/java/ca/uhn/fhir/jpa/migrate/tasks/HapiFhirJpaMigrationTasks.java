@@ -539,19 +539,6 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 					.onlyAppliesToPlatforms(DriverTypeEnum.MSSQL_2012)
 					.onlyIf(onlyIfSql, onlyfIReason);
 		}
-
-		// dropping unneeded indexes
-		{
-			final Builder.BuilderWithTableName hfjResource = version.onTable("HFJ_RESOURCE");
-
-			hfjResource.dropColumn("20240912.1", "myNarrativeTextEdgeNGram");
-			hfjResource.dropColumn("20240912.2", "myNarrativeTextNGram");
-			hfjResource.dropColumn("20240912.3", "myNarrativeTextPhonetic");
-
-			hfjResource.dropColumn("20240912.4", "myContentTextEdgeNGram");
-			hfjResource.dropColumn("20240912.5", "myContentTextNGram");
-			hfjResource.dropColumn("20240912.6", "myContentTextPhonetic");
-		}
 	}
 
 	protected void init720() {
