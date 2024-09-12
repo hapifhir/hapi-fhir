@@ -1,0 +1,8 @@
+---
+type: remove
+issue: 6283
+title: "HFJ_RESOURCE table had the following fields that were not being used by
+        any code: myNarrativeTextEdgeNGram, myNarrativeTextNGram, myNarrativeTextPhonetic, 
+        myContentTextEdgeNGram, myContentTextNGram, myContentTextPhonetic.
+        These have been removed.
+"
