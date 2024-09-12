@@ -40,5 +40,4 @@ public class VersionEnumTest {
 		assertThat(versions).contains(version);
 	}
 
-
 }

@@ -40,6 +40,7 @@ public class HashMapResourceProviderExtension<T extends IBaseResource> extends H
 
 	private final RestfulServerExtension myRestfulServerExtension;
 	private boolean myClearBetweenTests = true;
+	private boolean myInitialized = false;
 	private final List<T> myUpdates = new ArrayList<>();
 
 	/**
@@ -55,7 +56,9 @@ public class HashMapResourceProviderExtension<T extends IBaseResource> extends H
 
 	@Override
 	public void afterEach(ExtensionContext context) throws Exception {
-		myRestfulServerExtension.getRestfulServer().unregisterProvider(HashMapResourceProviderExtension.this);
+		if (myClearBetweenTests) {
+			myRestfulServerExtension.getRestfulServer().unregisterProvider(HashMapResourceProviderExtension.this);
+		}
 	}
 
 	@Override
@@ -77,8 +80,11 @@ public class HashMapResourceProviderExtension<T extends IBaseResource> extends H
 		if (myClearBetweenTests) {
 			clear();
 			clearCounts();
+			myRestfulServerExtension.getRestfulServer().registerProvider(HashMapResourceProviderExtension.this);
+		} else if (!myInitialized) {
+			myInitialized = true;
+			myRestfulServerExtension.getRestfulServer().registerProvider(HashMapResourceProviderExtension.this);
 		}
-		myRestfulServerExtension.getRestfulServer().registerProvider(HashMapResourceProviderExtension.this);
 	}
 
 	@Override

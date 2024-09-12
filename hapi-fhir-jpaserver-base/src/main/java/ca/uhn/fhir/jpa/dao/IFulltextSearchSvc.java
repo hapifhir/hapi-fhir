@@ -63,6 +63,17 @@ public interface IFulltextSearchSvc {
 			RequestDetails theRequestDetails);
 
 	/**
+	 * Query the index for a complete iterator of ALL results. (scrollable search result).
+	 *
+	 * @param theResourceName      e.g. Patient
+	 * @param theParams            The search query
+	 * @param theRequestDetails The request details
+	 * @return Iterator of result PIDs
+	 */
+	ISearchQueryExecutor searchScrolled(
+			String theResourceName, SearchParameterMap theParams, RequestDetails theRequestDetails);
+
+	/**
 	 * Autocomplete search for NIH $expand contextDirection=existing
 	 * @param theOptions operation options
 	 * @return a ValueSet with the search hits as the expansion.
