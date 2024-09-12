@@ -36,7 +36,8 @@ public class RepositoryConfig {
 	}
 
 	@Bean
-	RepositoryFactoryForRepositoryInterface repositoryFactoryForInterface(DaoRegistry theDaoRegistry, RestfulServer theRestfulServer) {
+	RepositoryFactoryForRepositoryInterface repositoryFactoryForInterface(
+			DaoRegistry theDaoRegistry, RestfulServer theRestfulServer) {
 		return rd -> new HapiFhirRepository(theDaoRegistry, rd, theRestfulServer);
 	}
 }
