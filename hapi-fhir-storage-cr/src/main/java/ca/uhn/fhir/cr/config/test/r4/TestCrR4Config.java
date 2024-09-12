@@ -17,10 +17,12 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.cr.test;
+package ca.uhn.fhir.cr.config.test.r4;
 
 import ca.uhn.fhir.cr.common.CqlThreadFactory;
 import ca.uhn.fhir.cr.config.r4.CrR4Config;
+import ca.uhn.fhir.cr.config.test.TestCqlProperties;
+import ca.uhn.fhir.cr.config.test.TestCrConfig;
 import org.cqframework.cql.cql2elm.CqlCompilerOptions;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.cqframework.cql.cql2elm.model.Model;

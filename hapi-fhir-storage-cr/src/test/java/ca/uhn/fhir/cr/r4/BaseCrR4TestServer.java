@@ -7,7 +7,7 @@ import ca.uhn.fhir.cr.config.r4.ApplyOperationConfig;
 import ca.uhn.fhir.cr.config.r4.ExtractOperationConfig;
 import ca.uhn.fhir.cr.config.r4.PackageOperationConfig;
 import ca.uhn.fhir.cr.config.r4.PopulateOperationConfig;
-import ca.uhn.fhir.cr.test.TestCrR4Config;
+import ca.uhn.fhir.cr.config.test.r4.TestCrR4Config;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
