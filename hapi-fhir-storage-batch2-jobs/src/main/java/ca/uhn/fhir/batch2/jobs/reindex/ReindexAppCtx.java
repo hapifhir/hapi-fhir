@@ -59,7 +59,9 @@ public class ReindexAppCtx {
 						"Load IDs of resources to reindex",
 						ResourceIdListWorkChunkJson.class,
 						reindexLoadIdsStep(theBatch2DaoSvc))
-				.addLastStep("reindex", "Perform the resource reindex", reindexStep())
+				.addLastStep("reindex",
+					"Perform the resource reindex",
+					reindexStep())
 				.build();
 	}
 

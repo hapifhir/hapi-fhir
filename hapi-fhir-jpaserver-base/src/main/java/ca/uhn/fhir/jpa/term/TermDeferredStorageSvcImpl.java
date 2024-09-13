@@ -436,7 +436,7 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc, IHas
 		return retVal;
 	}
 
-	private boolean isJobsExecuting() {
+	public boolean isJobsExecuting() {
 		cleanseEndedJobs();
 
 		return !myJobExecutions.isEmpty();
