@@ -221,6 +221,28 @@ public class RestServerR4Helper extends BaseRestServerHelper implements BeforeEa
 		myRestServer.setConceptMapResourceProvider(theResourceProvider);
 	}
 
+	public <T extends IBaseResource> HashMapResourceProvider<T> getResourceProvider(Class<T> theResourceType) {
+		@SuppressWarnings("unchecked")
+		HashMapResourceProvider<T> resourceProvider = (HashMapResourceProvider<T>) myRestServer.myResourceProvidersMap.get(theResourceType);
+		assert resourceProvider != null : "No resource provider defined for resource type: '" + theResourceType + "'" ;
+		return resourceProvider;
+	}
+
+	public <T extends IBaseResource> void setResourceProvider(HashMapResourceProvider<T> theResourceProvider) {
+		assert theResourceProvider.getResourceType() != null : "resourceProvider doesn't have a resourceType";
+		@SuppressWarnings("unchecked")
+		HashMapResourceProvider<T> resourceProvider = (HashMapResourceProvider<T>) myRestServer.myResourceProvidersMap.get(theResourceProvider.getResourceType());
+
+		if (resourceProvider != null) {
+			resourceProvider.getStoredResources().forEach(theResourceProvider::store);
+			myRestServer.unregisterProvider(resourceProvider);
+		}
+
+		registerProvider(theResourceProvider);
+		myRestServer.myResourceProvidersMap.put(theResourceProvider.getResourceType(), theResourceProvider);
+	}
+
+
 	public void setPagingProvider(IPagingProvider thePagingProvider) {
 		myPagingProvider = thePagingProvider;
 	}
@@ -294,6 +316,8 @@ public class RestServerR4Helper extends BaseRestServerHelper implements BeforeEa
 		private HashMapResourceProvider<Organization> myOrganizationResourceProvider;
 		private HashMapResourceProvider<ConceptMap> myConceptMapResourceProvider;
 		private RestServerDstu3Helper.MyPlainProvider myPlainProvider;
+
+		private final Map<Class<?>, HashMapResourceProvider<?>> myResourceProvidersMap = new HashMap<>();
 
 		private final boolean myInitialTransactionLatchEnabled;
 
