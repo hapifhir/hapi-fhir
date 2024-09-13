@@ -121,21 +121,6 @@ public class ResourceTable extends BaseHasResource<JpaPid> implements Serializab
 			searchable = Searchable.YES,
 			projectable = Projectable.YES,
 			analyzer = "standardAnalyzer")
-	@FullTextField(
-			name = "myContentTextEdgeNGram",
-			searchable = Searchable.YES,
-			projectable = Projectable.NO,
-			analyzer = "autocompleteEdgeAnalyzer")
-	@FullTextField(
-			name = "myContentTextNGram",
-			searchable = Searchable.YES,
-			projectable = Projectable.NO,
-			analyzer = "autocompleteNGramAnalyzer")
-	@FullTextField(
-			name = "myContentTextPhonetic",
-			searchable = Searchable.YES,
-			projectable = Projectable.NO,
-			analyzer = "autocompletePhoneticAnalyzer")
 	@OptimisticLock(excluded = true)
 	@IndexingDependency(derivedFrom = @ObjectPath(@PropertyValue(propertyName = "myVersion")))
 	private String myContentText;
@@ -176,21 +161,6 @@ public class ResourceTable extends BaseHasResource<JpaPid> implements Serializab
 			searchable = Searchable.YES,
 			projectable = Projectable.YES,
 			analyzer = "standardAnalyzer")
-	@FullTextField(
-			name = "myNarrativeTextEdgeNGram",
-			searchable = Searchable.YES,
-			projectable = Projectable.NO,
-			analyzer = "autocompleteEdgeAnalyzer")
-	@FullTextField(
-			name = "myNarrativeTextNGram",
-			searchable = Searchable.YES,
-			projectable = Projectable.NO,
-			analyzer = "autocompleteNGramAnalyzer")
-	@FullTextField(
-			name = "myNarrativeTextPhonetic",
-			searchable = Searchable.YES,
-			projectable = Projectable.NO,
-			analyzer = "autocompletePhoneticAnalyzer")
 	@OptimisticLock(excluded = true)
 	@IndexingDependency(derivedFrom = @ObjectPath(@PropertyValue(propertyName = "myVersion")))
 	private String myNarrativeText;
