@@ -153,15 +153,22 @@ public class JpaPid extends BaseResourcePersistentId<Long> {
 		return new JpaPid(theId, theVersion, theResourceType);
 	}
 
+	/**
+	 * Note that equals and hashCode for this object only consider the ID and Partition ID because
+	 * this class gets used as cache keys
+	 */
 	@Override
 	public boolean equals(Object theO) {
 		if (this == theO){ return true;}
 		if (!(theO instanceof JpaPid)) {return false;}
-		if (!super.equals(theO)) {return false;}
 		JpaPid jpaPid = (JpaPid) theO;
 		return Objects.equals(myId, jpaPid.myId) && Objects.equals(myPartitionIdValue, jpaPid.myPartitionIdValue);
 	}
 
+	/**
+	 * Note that equals and hashCode for this object only consider the ID and Partition ID because
+	 * this class gets used as cache keys
+	 */
 	@Override
 	public int hashCode() {
 		return Objects.hash(myId, myPartitionIdValue);
