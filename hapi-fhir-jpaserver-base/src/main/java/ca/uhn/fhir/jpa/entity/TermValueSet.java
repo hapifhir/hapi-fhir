@@ -107,7 +107,7 @@ public class TermValueSet implements Serializable {
 	@Column(name = "RES_ID", nullable = false)
 	private Long myResourcePid;
 
-	@Column(name = "PARTITION_ID", nullable = false)
+	@Column(name = "PARTITION_ID", nullable = true)
 	private Integer myPartitionId;
 
 	@Column(name = "VSNAME", nullable = true, length = MAX_NAME_LENGTH)

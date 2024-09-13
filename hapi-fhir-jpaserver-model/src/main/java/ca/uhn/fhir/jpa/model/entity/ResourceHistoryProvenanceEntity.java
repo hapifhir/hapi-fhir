@@ -33,6 +33,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MapsId;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -54,23 +55,24 @@ public class ResourceHistoryProvenanceEntity extends BasePartitionable {
 	@Column(name = "RES_VER_PID")
 	private Long myId;
 
-	@OneToOne(fetch = FetchType.LAZY)
-	@JoinColumns(value={
-		@JoinColumn(
-			name = "RES_VER_PID",
-			referencedColumnName = "PID",
-			nullable = false,
-			insertable = false,
-			updatable = false)
-		, @JoinColumn(
-			name = PARTITION_ID,
-			referencedColumnName = PARTITION_ID,
-			nullable = false,
-			insertable = false,
-			updatable = false)
-		}, foreignKey = @ForeignKey(name = "FK_RESVERPROV_RESVER_PID")
-	)
-	private ResourceHistoryTable myResourceHistoryTable;
+//	@OneToOne(fetch = FetchType.LAZY)
+//	@JoinColumns(value={
+//		@JoinColumn(
+//			name = "RES_VER_PID",
+//			referencedColumnName = "PID",
+//			nullable = false,
+//			insertable = false,
+//			updatable = false)
+//		, @JoinColumn(
+//			name = PARTITION_ID,
+//			referencedColumnName = PARTITION_ID,
+//			nullable = false,
+//			insertable = false,
+//			updatable = false)
+//		}, foreignKey = @ForeignKey(name = "FK_RESVERPROV_RESVER_PID")
+//	)
+@Transient
+private transient ResourceHistoryTable myResourceHistoryTable;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumns(value = {

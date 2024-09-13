@@ -120,7 +120,8 @@ public class HistoryBuilder {
 
 		addPredicatesToQuery(cb, thePartitionId, criteriaQuery, from, theHistorySearchStyle);
 
-		from.fetch("myProvenance", JoinType.LEFT);
+		// FIXME: fetched provenance
+//		from.fetch("myProvenance", JoinType.LEFT);
 
 		/*
 		 * The sort on myUpdated is the important one for _history operations, but there are

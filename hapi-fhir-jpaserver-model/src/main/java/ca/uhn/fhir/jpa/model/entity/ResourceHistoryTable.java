@@ -139,10 +139,12 @@ public class ResourceHistoryTable extends BaseHasResource<ResourceHistoryTablePk
 	@OptimisticLock(excluded = true)
 	private ResourceEncodingEnum myEncoding;
 
-	@OneToOne(
-			mappedBy = "myResourceHistoryTable",
-			cascade = {CascadeType.REMOVE})
-	private ResourceHistoryProvenanceEntity myProvenance;
+	// FIXME: implement this another way
+//	@OneToOne(
+//			mappedBy = "myResourceHistoryTable",
+//			cascade = {CascadeType.REMOVE})
+	@Transient
+	private transient ResourceHistoryProvenanceEntity myProvenance;
 
 	// TODO: This was added in 6.8.0 - In the future we should drop ResourceHistoryProvenanceEntity
 	@Column(name = "SOURCE_URI", length = SOURCE_URI_LENGTH, nullable = true)

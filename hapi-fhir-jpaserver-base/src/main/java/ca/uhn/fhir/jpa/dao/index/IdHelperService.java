@@ -383,7 +383,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 		 * Only PG, and MSSql support INCLUDE COLUMNS.
 		 * @see AddIndexTask.generateSql
 		 */
-		criteriaQuery.multiselect(from.get("myId.myId"), from.get("myId.myPartitionIdValue"), from.get("myResourceType"), from.get("myFhirId"));
+		criteriaQuery.multiselect(from.get("myPid"), from.get("myPartitionIdValue"), from.get("myResourceType"), from.get("myFhirId"));
 
 		// one create one clause per id.
 		List<Predicate> predicates = new ArrayList<>(theIds.size());
@@ -409,17 +409,17 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 		List<Tuple> results = query.getResultList();
 		for (Tuple nextId : results) {
 			// Check if the nextId has a resource ID. It may have a null resource ID if a commit is still pending.
-			Long resourceId = nextId.get(0, Long.class);
-			Integer partitionId = nextId.get(0, Integer.class);
+			JpaPid pid = nextId.get(0, JpaPid.class);
+			Integer partitionId = nextId.get(1, Integer.class);
 			String resourceType = nextId.get(2, String.class);
 			String forcedId = nextId.get(3, String.class);
-			if (resourceId != null) {
-				JpaPid jpaPid = JpaPid.fromId(resourceId, partitionId);
-				populateAssociatedResourceId(resourceType, forcedId, jpaPid);
-				theOutputListToPopulate.add(jpaPid);
+			if (pid != null && pid.getId() != null) {
+				pid.setPartitionId(partitionId);
+				populateAssociatedResourceId(resourceType, forcedId, pid);
+				theOutputListToPopulate.add(pid);
 
 				String key = toForcedIdToPidKey(theRequestPartitionId, resourceType, forcedId);
-				myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.FORCED_ID_TO_PID, key, jpaPid);
+				myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.FORCED_ID_TO_PID, key, pid);
 			}
 		}
 	}
@@ -479,18 +479,19 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 		return retVal;
 	}
 
+	@SuppressWarnings("OptionalAssignedToNull")
 	@Override
 	public Optional<String> translatePidIdToForcedIdWithCache(JpaPid theId) {
 		// do getIfPresent and then put to avoid doing I/O inside the cache.
 		Optional<String> forcedId =
-				myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.PID_TO_FORCED_ID, theId.getId());
+				myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.PID_TO_FORCED_ID, theId);
 
 		if (forcedId == null) {
 			// This is only called when we know the resource exists.
 			// So this optional is only empty when there is no hfj_forced_id table
 			// note: this is obsolete with the new fhir_id column, and will go away.
 			forcedId = myResourceTableDao.findById(theId).map(ResourceTable::asTypedFhirResourceId);
-			myMemoryCacheService.put(MemoryCacheService.CacheEnum.PID_TO_FORCED_ID, theId.getId(), forcedId);
+			myMemoryCacheService.put(MemoryCacheService.CacheEnum.PID_TO_FORCED_ID, theId, forcedId);
 		}
 
 		return forcedId;

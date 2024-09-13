@@ -247,11 +247,12 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 	private List<ResourceTable> prefetchResourceTableHistoryAndProvenance(List<JpaPid> idChunk) {
 		assert idChunk.size() < SearchConstants.MAX_PAGE_SIZE : "assume pre-chunked";
 
+		// FIXME: this fetched provenance
 		Query query = myEntityManager.createQuery("select r, h "
 				+ " FROM ResourceTable r "
 				+ " LEFT JOIN fetch ResourceHistoryTable h "
 				+ "      on r.myVersion = h.myResourceVersion and r = h.myResourceTable "
-				+ " left join fetch h.myProvenance "
+//				+ " left join fetch h.myProvenance "
 				+ " WHERE r.myPid IN ( :IDS ) ");
 		query.setParameter("IDS", idChunk);
 

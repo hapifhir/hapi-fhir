@@ -43,8 +43,9 @@ public interface IResourceHistoryTableDao extends JpaRepository<ResourceHistoryT
 	@Query("SELECT t FROM ResourceHistoryTable t WHERE t.myResourceTable.myPid = :resId ORDER BY t.myResourceVersion ASC")
 	List<ResourceHistoryTable> findAllVersionsForResourceIdInOrder(@Param("resId") JpaPid theId);
 
+	// FIXME: this fetched provenance
 	@Query(
-			"SELECT t FROM ResourceHistoryTable t LEFT OUTER JOIN FETCH t.myProvenance WHERE t.myResourceTable.myPid = :id AND t.myResourceVersion = :version")
+			"SELECT t FROM ResourceHistoryTable t WHERE t.myResourceTable.myPid = :id AND t.myResourceVersion = :version")
 	ResourceHistoryTable findForIdAndVersionAndFetchProvenance(
 			@Param("id") JpaPid theId, @Param("version") long theVersion);
 
@@ -53,8 +54,9 @@ public interface IResourceHistoryTableDao extends JpaRepository<ResourceHistoryT
 	Slice<ResourceHistoryTablePk> findForResourceId(
 			Pageable thePage, @Param("resId") JpaPid theId, @Param("dontWantVersion") Long theDontWantVersion);
 
+	// FIXME: this fetched provenance
 	@Query(
-			"SELECT t FROM ResourceHistoryTable t LEFT OUTER JOIN FETCH t.myProvenance WHERE t.myResourceTable.myPid = :resId AND t.myResourceVersion <> :dontWantVersion")
+			"SELECT t FROM ResourceHistoryTable t WHERE t.myResourceTable.myPid = :resId AND t.myResourceVersion <> :dontWantVersion")
 	Slice<ResourceHistoryTable> findForResourceIdAndReturnEntitiesAndFetchProvenance(
 			Pageable thePage, @Param("resId") JpaPid theId, @Param("dontWantVersion") Long theDontWantVersion);
 

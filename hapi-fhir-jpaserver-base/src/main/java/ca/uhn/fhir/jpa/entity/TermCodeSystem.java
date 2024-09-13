@@ -105,7 +105,7 @@ public class TermCodeSystem implements Serializable {
 	@Column(name = "RES_ID", nullable = false)
 	private Long myResourcePid;
 
-	@Column(name = "PARTITION_ID", nullable = false)
+	@Column(name = "PARTITION_ID", nullable = true)
 	private Integer myPartitionId;
 
 	@Column(name = "CS_NAME", nullable = true, length = MAX_NAME_LENGTH)

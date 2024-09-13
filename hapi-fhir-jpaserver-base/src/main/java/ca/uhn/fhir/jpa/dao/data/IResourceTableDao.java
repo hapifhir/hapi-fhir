@@ -164,7 +164,7 @@ public interface IResourceTableDao
 			"SELECT t.myResourceType, t.myPid.myId, t.myDeleted, t.myPartitionIdValue, t.myPartitionDateValue FROM ResourceTable t WHERE t.myPid.myId IN (:pid) AND t.myPartitionIdValue IS NULL")
 	Collection<Object[]> findLookupFieldsByResourcePidInPartitionNull(@Param("pid") List<Long> thePids);
 
-	@Query("SELECT t.myVersion FROM ResourceTable t WHERE t.myPid.myId = :pid")
+	@Query("SELECT t.myVersion FROM ResourceTable t WHERE t.myPid = :pid")
 	Long findCurrentVersionByPid(@Param("pid") JpaPid thePid);
 
 	/**

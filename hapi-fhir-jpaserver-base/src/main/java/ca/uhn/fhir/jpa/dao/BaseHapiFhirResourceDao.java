@@ -1624,9 +1624,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		// We use the main entity as the lock object since all the index rows hang off it.
 		ResourceTable entity;
 		if (theReindexParameters.isOptimisticLock()) {
-			entity = myEntityManager.find(ResourceTable.class, jpaPid.getId(), LockModeType.OPTIMISTIC);
+			entity = myEntityManager.find(ResourceTable.class, jpaPid, LockModeType.OPTIMISTIC);
 		} else {
-			entity = myEntityManager.find(ResourceTable.class, jpaPid.getId());
+			entity = myEntityManager.find(ResourceTable.class, jpaPid);
 		}
 
 		if (entity == null) {
@@ -1839,7 +1839,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			RequestDetails theRequestDetails,
 			TransactionDetails theTransactionDetails) {
 		JpaPid jpaPid = (JpaPid) thePersistentId;
-		return myEntityManager.find(ResourceTable.class, jpaPid.getId());
+		return myEntityManager.find(ResourceTable.class, jpaPid);
 	}
 
 	@Override
@@ -2357,7 +2357,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				throw new PreconditionFailedException(Msg.code(988) + msg);
 			} else if (match.size() == 1) {
 				JpaPid pid = match.iterator().next();
-				entity = myEntityManager.find(ResourceTable.class, pid.getId());
+				entity = myEntityManager.find(ResourceTable.class, pid);
 				resourceId = entity.getIdDt();
 				if (myFhirContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.R4)
 						&& theResource.getIdElement().getIdPart() != null) {

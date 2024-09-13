@@ -298,10 +298,6 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 				detectDuplicatesInCodeSystem(theCodeSystem);
 
-				Long pid = (Long) theCodeSystem.getUserData(RESOURCE_PID_KEY);
-				assert pid != null;
-				JpaPid codeSystemResourcePid = JpaPid.fromId(pid);
-
 				/*
 				 * If this is a not-present codesystem and codesystem version already exists, we don't want to
 				 * overwrite the existing version since that will wipe out the existing concepts. We do create
