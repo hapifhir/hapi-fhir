@@ -94,7 +94,7 @@ public class TermConceptMap implements Serializable {
 	}, foreignKey = @ForeignKey(name = "FK_TRMCONCEPTMAP_RES"))
 	private ResourceTable myResource;
 
-	@Column(name = "RES_ID")
+	@Column(name = "RES_ID", nullable = false)
 	private Long myResourcePid;
 
 	@Column(name = "PARTITION_ID")

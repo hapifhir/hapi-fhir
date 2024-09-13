@@ -106,7 +106,7 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 			foreignKey = @ForeignKey(name = "FK_SPIDXSTR_RESOURCE"))
 	private ResourceTable myResource;
 
-	@Column(name = "RES_ID")
+	@Column(name = "RES_ID", nullable = false)
 	private Long myResourceId;
 
 	@Column(name = "SP_VALUE_EXACT", length = MAX_LENGTH, nullable = true)

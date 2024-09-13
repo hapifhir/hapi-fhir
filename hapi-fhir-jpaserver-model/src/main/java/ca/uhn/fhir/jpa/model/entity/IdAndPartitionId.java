@@ -1,5 +1,8 @@
 package ca.uhn.fhir.jpa.model.entity;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
 import java.util.Objects;
 
 public class IdAndPartitionId {
@@ -43,6 +46,14 @@ public class IdAndPartitionId {
 		if (!(theO instanceof IdAndPartitionId)) return false;
 		IdAndPartitionId that = (IdAndPartitionId) theO;
 		return Objects.equals(myId, that.myId) && Objects.equals(myPartitionIdValue, that.myPartitionIdValue);
+	}
+
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+			.append("id", myId)
+			.append("partitionId", myPartitionIdValue)
+			.toString();
 	}
 
 	@Override

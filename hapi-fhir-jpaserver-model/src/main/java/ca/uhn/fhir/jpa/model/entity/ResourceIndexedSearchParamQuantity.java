@@ -105,7 +105,7 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 			foreignKey = @ForeignKey(name = "FK_SP_QUANTITY_RES"))
 	private ResourceTable myResource;
 
-	@Column(name = "RES_ID")
+	@Column(name = "RES_ID", nullable = false)
 	private Long myResourceId;
 
 	public ResourceIndexedSearchParamQuantity() {

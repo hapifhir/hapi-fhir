@@ -105,7 +105,7 @@ public class ResourceIndexedComboStringUnique extends BaseResourceIndexedCombo
 			foreignKey = @ForeignKey(name = "FK_IDXCMPSTRUNIQ_RES_ID"))
 	private ResourceTable myResource;
 
-	@Column(name = "RES_ID", insertable = false, updatable = false)
+	@Column(name = "RES_ID", updatable = false, nullable = false)
 	private Long myResourceId;
 
 	// TODO: These hashes were added in 7.4.0 - They aren't used or indexed yet, but

@@ -1088,6 +1088,8 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
             assertEquals(20L, myResourceIndexedComboTokensNonUniqueDao.count());
         });
 
+		logAllUniqueIndexes();
+
         ReindexJobParameters params = new ReindexJobParameters()
                 .setOptimizeStorage(ReindexParameters.OptimizeStorageModeEnum.NONE)
                 .setReindexSearchParameters(ReindexParameters.ReindexSearchParametersEnum.ALL)
@@ -1099,6 +1101,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(20, outcome.getRecordsProcessed());
 
         // validate
+		myCaptureQueriesListener.logSelectQueries();
         assertEquals(4, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
         assertEquals(0, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
         assertEquals(0, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());

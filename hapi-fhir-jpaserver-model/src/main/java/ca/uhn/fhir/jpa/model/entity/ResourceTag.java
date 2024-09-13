@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -31,6 +32,7 @@ import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinColumns;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
@@ -83,7 +85,7 @@ public class ResourceTag extends BaseTag {
 	@Column(name = "RES_TYPE", length = ResourceTable.RESTYPE_LEN, nullable = false)
 	private String myResourceType;
 
-	@Column(name = "RES_ID", updatable = false)
+	@Column(name = "RES_ID", updatable = false, nullable = false)
 	private Long myResourceId;
 
 	/**
@@ -105,8 +107,8 @@ public class ResourceTag extends BaseTag {
 		setPartitionId(theRequestPartitionId);
 	}
 
-	public Long getResourceId() {
-		return myResourceId;
+	public JpaPid getResourceId() {
+		return JpaPid.fromId(myResourceId, myPartitionIdValue);
 	}
 
 	public void setResourceId(Long theResourceId) {
@@ -129,6 +131,12 @@ public class ResourceTag extends BaseTag {
 
 	public void setResourceType(String theResourceType) {
 		myResourceType = theResourceType;
+	}
+
+	@PrePersist
+	public void prePersist() {
+		myResourceId = myResource.getId().getId();
+		myPartitionIdValue = myResource.getId().getPartitionId();
 	}
 
 	@Override

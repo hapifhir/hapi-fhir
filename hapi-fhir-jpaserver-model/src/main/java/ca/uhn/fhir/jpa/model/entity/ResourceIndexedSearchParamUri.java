@@ -109,7 +109,7 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 			foreignKey = @ForeignKey(name = "FKGXSREUTYMMFJUWDSWV3Y887DO"))
 	private ResourceTable myResource;
 
-	@Column(name = "RES_ID")
+	@Column(name = "RES_ID", nullable = false)
 	private Long myResourceId;
 
 

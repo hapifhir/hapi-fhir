@@ -80,7 +80,7 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndexedCombo
 			foreignKey = @ForeignKey(name = "FK_IDXCMBTOKNU_RES_ID"))
 	private ResourceTable myResource;
 
-	@Column(name = "RES_ID", insertable = false, updatable = false)
+	@Column(name = "RES_ID", updatable = false, nullable = false)
 	private Long myResourceId;
 
 	@Column(name = "HASH_COMPLETE", nullable = false)

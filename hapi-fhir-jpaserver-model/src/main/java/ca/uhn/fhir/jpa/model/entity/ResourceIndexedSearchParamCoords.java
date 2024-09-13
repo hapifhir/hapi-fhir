@@ -94,7 +94,7 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 			foreignKey = @ForeignKey(name = "FKC97MPK37OKWU8QVTCEG2NH9VN"))
 	private ResourceTable myResource;
 
-	@Column(name = "RES_ID")
+	@Column(name = "RES_ID", nullable = false)
 	private Long myResourceId;
 
 	public ResourceIndexedSearchParamCoords() {}

@@ -114,7 +114,7 @@ public class ResourceIndexedSearchParamQuantityNormalized extends BaseResourceIn
 			foreignKey = @ForeignKey(name = "FK_SP_QUANTITYNM_RES"))
 	private ResourceTable myResource;
 
-	@Column(name = "RES_ID")
+	@Column(name = "RES_ID", nullable = false)
 	private Long myResourceId;
 
 	public ResourceIndexedSearchParamQuantityNormalized() {

@@ -57,7 +57,7 @@ public class SubscriptionTable {
 	@Column(name = "PID", insertable = false, updatable = false)
 	private Long myId;
 
-	@Column(name = "RES_ID")
+	@Column(name = "RES_ID", nullable = false)
 	private Long myResId;
 
 	@Column(name = "PARTITION_ID")
