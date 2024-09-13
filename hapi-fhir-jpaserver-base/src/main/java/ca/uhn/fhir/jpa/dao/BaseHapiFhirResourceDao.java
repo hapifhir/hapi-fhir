@@ -2162,7 +2162,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				mySearchBuilderFactory.newSearchBuilder(this, getResourceName(), getResourceType());
 
 		Stream<JpaPid> pidStream = thePidStream;
-		if (theRequestPartitionId.getPartitionIds().size() == 1) {
+		// FIXME: what should we do otherwise?
+		if (theRequestPartitionId.hasPartitionIds() && theRequestPartitionId.getPartitionIds().size() == 1) {
 			pidStream = pidStream.map(t->t.setPartitionIdIfNotAlreadySet(theRequestPartitionId.getPartitionIds().get(0)));
 		}
 

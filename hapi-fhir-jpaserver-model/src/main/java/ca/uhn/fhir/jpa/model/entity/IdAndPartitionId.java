@@ -25,6 +25,14 @@ public class IdAndPartitionId {
 		return myId;
 	}
 
+	public void setId(Long theId) {
+		myId = theId;
+	}
+
+	public void setPartitionIdValue(Integer thePartitionIdValue) {
+		myPartitionIdValue = thePartitionIdValue;
+	}
+
 	public Integer getPartitionIdValue() {
 		return myPartitionIdValue;
 	}

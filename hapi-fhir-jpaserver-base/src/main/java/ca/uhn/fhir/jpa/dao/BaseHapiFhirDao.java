@@ -1197,7 +1197,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		/*
 		 * Save the resource itself
 		 */
-		if (entity.getId() == null) {
+		if (entity.getId() == null || entity.getId().getId() == null) {
 			myEntityManager.persist(entity);
 
 			postPersist(entity, (T) theResource, theRequest);

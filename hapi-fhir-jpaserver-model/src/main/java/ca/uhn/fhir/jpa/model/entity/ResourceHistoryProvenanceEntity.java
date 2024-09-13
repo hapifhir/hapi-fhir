@@ -70,7 +70,6 @@ public class ResourceHistoryProvenanceEntity extends BasePartitionable {
 			updatable = false)
 		}, foreignKey = @ForeignKey(name = "FK_RESVERPROV_RESVER_PID")
 	)
-	@MapsId
 	private ResourceHistoryTable myResourceHistoryTable;
 
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -124,7 +123,8 @@ public class ResourceHistoryProvenanceEntity extends BasePartitionable {
 	}
 
 	public void setResourceHistoryTable(ResourceHistoryTable theResourceHistoryTable) {
-		myResourceHistoryTable = theResourceHistoryTable;
+		myId = theResourceHistoryTable.getId().getId();
+		assert myId != null;
 	}
 
 	public String getSourceUri() {

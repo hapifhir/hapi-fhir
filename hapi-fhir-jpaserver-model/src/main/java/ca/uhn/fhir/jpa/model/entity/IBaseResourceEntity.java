@@ -23,6 +23,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
 import java.util.Date;
@@ -36,6 +37,7 @@ public interface IBaseResourceEntity<T> {
 
 	FhirVersionEnum getFhirVersion();
 
+	@Nonnull
 	T getId();
 
 	IdDt getIdDt();

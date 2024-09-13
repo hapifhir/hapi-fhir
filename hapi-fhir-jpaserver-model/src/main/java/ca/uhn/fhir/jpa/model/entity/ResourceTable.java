@@ -490,6 +490,7 @@ public class ResourceTable extends BaseHasResource<JpaPid> implements Serializab
 		myHashSha256 = theHashSha256;
 	}
 
+	@Nonnull
 	@Override
 	public JpaPid getId() {
 		JpaPid retVal = JpaPid.fromIdAndVersionAndResourceType(myPid.getId(), myVersion, myResourceType);

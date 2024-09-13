@@ -23,6 +23,7 @@ import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.hapi.fhir.sql.hibernatesvc.ConditionalIdProperty;
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -142,6 +143,7 @@ public class ResourceHistoryTable extends BaseHasResource<ResourceHistoryTablePk
 			mappedBy = "myResourceHistoryTable",
 			cascade = {CascadeType.REMOVE})
 	private ResourceHistoryProvenanceEntity myProvenance;
+
 	// TODO: This was added in 6.8.0 - In the future we should drop ResourceHistoryProvenanceEntity
 	@Column(name = "SOURCE_URI", length = SOURCE_URI_LENGTH, nullable = true)
 	private String mySourceUri;
@@ -229,6 +231,7 @@ public class ResourceHistoryTable extends BaseHasResource<ResourceHistoryTablePk
 		myEncoding = theEncoding;
 	}
 
+	@Nonnull
 	@Override
 	public ResourceHistoryTablePk getId() {
 		if (myId == null) {

@@ -29,6 +29,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.api.Constants;
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -167,7 +168,8 @@ public class ResourceSearchView implements IBaseResourceEntity<JpaPid>, Serializ
 		return myFhirId;
 	}
 
-	@Override
+	@Nonnull
+    @Override
 	public JpaPid getId() {
 		return JpaPid.fromId(myResourceId, myPartitionId);
 	}
