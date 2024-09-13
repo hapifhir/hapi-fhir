@@ -1,0 +1,10 @@
+---
+type: remove
+issue: 6283
+title: "Hibernate Search Fulltext fields which were unused
+        have been removed from indexing.
+        This will reduce storage usage in Lucene and Elasticsearch.
+        The fields that were removed are: `myNarrativeTextEdgeNGram`,
+        `myNarrativeTextNGram`, `myNarrativeTextPhonetic`, `myContentTextEdgeNGram`,
+        `myContentTextNGram`, `myContentTextPhonetic`. 
+"
