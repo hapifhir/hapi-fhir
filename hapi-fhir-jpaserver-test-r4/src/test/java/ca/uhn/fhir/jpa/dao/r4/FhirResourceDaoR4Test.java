@@ -287,7 +287,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		IIdType id1 = myPatientDao.create(pt1).getId().toUnqualifiedVersionless();
 
 		runInTransaction(() -> {
-			assertThat(myResourceIndexedSearchParamTokenDao.countForResourceId(id1.getIdPartAsLong())).isGreaterThan(0);
+			assertThat(myResourceIndexedSearchParamTokenDao.countForResourceId(JpaPid.fromId(id1.getIdPartAsLong()))).isGreaterThan(0);
 			Optional<ResourceTable> tableOpt = myResourceTableDao.findById(id1.getIdPartAsLong());
 			assertTrue(tableOpt.isPresent());
 			assertEquals(BaseHapiFhirDao.INDEX_STATUS_INDEXED, tableOpt.get().getIndexStatus().longValue());
@@ -314,7 +314,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 			Optional<ResourceTable> tableOpt = myResourceTableDao.findById(id1.getIdPartAsLong());
 			assertTrue(tableOpt.isPresent());
 			assertEquals(BaseHapiFhirDao.INDEX_STATUS_INDEXED, tableOpt.get().getIndexStatus().longValue());
-			assertThat(myResourceIndexedSearchParamTokenDao.countForResourceId(id1.getIdPartAsLong())).isLessThanOrEqualTo(0);
+			assertThat(myResourceIndexedSearchParamTokenDao.countForResourceId(JpaPid.fromId(id1.getIdPartAsLong()))).isLessThanOrEqualTo(0);
 		});
 	}
 
@@ -397,7 +397,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		IIdType id1 = myPatientDao.create(pt1).getId().toUnqualifiedVersionless();
 
 		runInTransaction(() -> {
-			assertThat(myResourceIndexedSearchParamTokenDao.countForResourceId(id1.getIdPartAsLong())).isGreaterThan(0);
+			assertThat(myResourceIndexedSearchParamTokenDao.countForResourceId(JpaPid.fromId(id1.getIdPartAsLong()))).isGreaterThan(0);
 			Optional<ResourceTable> tableOpt = myResourceTableDao.findById(id1.getIdPartAsLong());
 			assertTrue(tableOpt.isPresent());
 			assertEquals(BaseHapiFhirDao.INDEX_STATUS_INDEXED, tableOpt.get().getIndexStatus().longValue());
@@ -424,7 +424,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 			Optional<ResourceTable> tableOpt = myResourceTableDao.findById(id1.getIdPartAsLong());
 			assertTrue(tableOpt.isPresent());
 			assertEquals(BaseHapiFhirDao.INDEX_STATUS_INDEXED, tableOpt.get().getIndexStatus().longValue());
-			assertThat(myResourceIndexedSearchParamTokenDao.countForResourceId(id1.getIdPartAsLong())).isLessThanOrEqualTo(0);
+			assertThat(myResourceIndexedSearchParamTokenDao.countForResourceId(JpaPid.fromId(id1.getIdPartAsLong()))).isLessThanOrEqualTo(0);
 		});
 
 
@@ -2528,10 +2528,10 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 
 		// then
 		runInTransaction(() -> {
-			Long obsertionId = idDt.getIdPartAsLong();
-			Long resourceCurrentVersion = myResourceTableDao.findCurrentVersionByPid(obsertionId);
-			int resourceVersionCount = myResourceHistoryTableDao.findAllVersionsForResourceIdInOrder(obsertionId).size();
-			int indexedTokenCount = myResourceIndexedSearchParamTokenDao.countForResourceId(obsertionId);
+			JpaPid observationId = JpaPid.fromId(idDt.getIdPartAsLong());
+			Long resourceCurrentVersion = myResourceTableDao.findCurrentVersionByPid(observationId);
+			int resourceVersionCount = myResourceHistoryTableDao.findAllVersionsForResourceIdInOrder(observationId).size();
+			int indexedTokenCount = myResourceIndexedSearchParamTokenDao.countForResourceId(observationId);
 
 			assertEquals(2L, resourceCurrentVersion);
 			assertEquals(2, resourceVersionCount);
@@ -2954,7 +2954,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		tx.execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
-				ResourceHistoryTable table = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(id.getIdPartAsLong(), 1L);
+				ResourceHistoryTable table = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(JpaPid.fromId(id.getIdPartAsLong()), 1L);
 				String newContent = myFhirContext.newJsonParser().encodeResourceToString(p);
 				newContent = newContent.replace("male", "foo");
 				table.setResourceTextVc(newContent);

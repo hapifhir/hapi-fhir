@@ -1115,13 +1115,13 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			boolean theForHistoryOperation,
 			Map<JpaPid, Integer> thePosition) {
 
-		Map<Long, Long> resourcePidToVersion = null;
+		Map<JpaPid, Long> resourcePidToVersion = null;
 		for (JpaPid next : thePids) {
 			if (next.getVersion() != null && myStorageSettings.isRespectVersionsForSearchIncludes()) {
 				if (resourcePidToVersion == null) {
 					resourcePidToVersion = new HashMap<>();
 				}
-				resourcePidToVersion.put((next).getId(), next.getVersion());
+				resourcePidToVersion.put(next, next.getVersion());
 			}
 		}
 
@@ -1135,9 +1135,9 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				myResourceSearchViewDao.findByResourceIds(versionlessPids);
 
 		// -- preload all tags with tag definition if any
-		Map<Long, Collection<ResourceTag>> tagMap = getResourceTagMap(resourceSearchViewList);
+		Map<JpaPid, Collection<ResourceTag>> tagMap = getResourceTagMap(resourceSearchViewList);
 
-		for (IBaseResourceEntity next : resourceSearchViewList) {
+		for (IBaseResourceEntity<JpaPid> next : resourceSearchViewList) {
 			if (next.getDeleted() != null) {
 				continue;
 			}
@@ -1145,7 +1145,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			Class<? extends IBaseResource> resourceType =
 					myContext.getResourceDefinition(next.getResourceType()).getImplementingClass();
 
-			JpaPid resourceId = JpaPid.fromId(next.getResourceId());
+			JpaPid resourceId = next.getResourceId();
 
 			/*
 			 * If a specific version is requested via an include, we'll replace the current version
@@ -1198,13 +1198,13 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		}
 	}
 
-	private Map<Long, Collection<ResourceTag>> getResourceTagMap(
-			Collection<? extends IBaseResourceEntity> theResourceSearchViewList) {
+	private Map<JpaPid, Collection<ResourceTag>> getResourceTagMap(
+			Collection<? extends IBaseResourceEntity<JpaPid>> theResourceSearchViewList) {
 
-		List<Long> idList = new ArrayList<>(theResourceSearchViewList.size());
+		List<JpaPid> idList = new ArrayList<>(theResourceSearchViewList.size());
 
 		// -- find all resource has tags
-		for (IBaseResourceEntity resource : theResourceSearchViewList) {
+		for (IBaseResourceEntity<JpaPid> resource : theResourceSearchViewList) {
 			if (resource.isHasTags()) idList.add(resource.getId());
 		}
 
@@ -1212,8 +1212,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	}
 
 	@Nonnull
-	private Map<Long, Collection<ResourceTag>> getPidToTagMap(List<Long> thePidList) {
-		Map<Long, Collection<ResourceTag>> tagMap = new HashMap<>();
+	private Map<JpaPid, Collection<ResourceTag>> getPidToTagMap(List<JpaPid> thePidList) {
+		Map<JpaPid, Collection<ResourceTag>> tagMap = new HashMap<>();
 
 		// -- no tags
 		if (thePidList.isEmpty()) return tagMap;
@@ -1226,12 +1226,12 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		Collection<ResourceTag> tagCol;
 		for (ResourceTag tag : tagList) {
 
-			resourceId = JpaPid.fromId(tag.getResourceId());
-			tagCol = tagMap.get(resourceId.getId());
+			resourceId = tag.getResource().getResourceId();
+			tagCol = tagMap.get(resourceId);
 			if (tagCol == null) {
 				tagCol = new ArrayList<>();
 				tagCol.add(tag);
-				tagMap.put(resourceId.getId(), tagCol);
+				tagMap.put(resourceId, tagCol);
 			} else {
 				tagCol.add(tag);
 			}

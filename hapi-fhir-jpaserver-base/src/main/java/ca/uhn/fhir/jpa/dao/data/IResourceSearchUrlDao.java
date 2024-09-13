@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.dao.data;
 
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceSearchUrlEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -34,6 +35,6 @@ public interface IResourceSearchUrlDao extends JpaRepository<ResourceSearchUrlEn
 	int deleteAllWhereCreatedBefore(@Param("cutoff") Date theCutoff);
 
 	@Modifying
-	@Query("DELETE FROM ResourceSearchUrlEntity s WHERE (s.myResourcePid = :resID)")
-	int deleteByResId(@Param("resID") long resId);
+	@Query("DELETE FROM ResourceSearchUrlEntity s WHERE (s.myResourceTable.myPid = :resID)")
+	int deleteByResId(@Param("resID") JpaPid resId);
 }

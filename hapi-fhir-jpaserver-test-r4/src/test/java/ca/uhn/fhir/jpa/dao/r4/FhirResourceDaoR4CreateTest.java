@@ -612,7 +612,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		assertTrue(p.getActive());
 
 		// Pick an ID that was already used as an internal PID
-		Long newId = runInTransaction(() -> myResourceTableDao.findIdsOfResourcesWithinUpdatedRangeOrderedFromNewest(
+		JpaPid newId = runInTransaction(() -> myResourceTableDao.findIdsOfResourcesWithinUpdatedRangeOrderedFromNewest(
 			PageRequest.of(0, 1),
 			DateUtils.addDays(new Date(), -1),
 			DateUtils.addDays(new Date(), 1)
@@ -624,7 +624,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		p.addName().setFamily("FAM");
 		IIdType id1 = myPatientDao.update(p).getId();
 
-		assertEquals(Long.toString(newId), id1.getIdPart());
+		assertEquals(Long.toString(newId.getId()), id1.getIdPart());
 		assertEquals("1", id1.getVersionIdPart());
 
 		// Read it back
@@ -637,7 +637,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		p.addName().setFamily("FAM2");
 		id1 = myPatientDao.update(p).getId();
 
-		assertEquals(Long.toString(newId), id1.getIdPart());
+		assertEquals(Long.toString(newId.getId()), id1.getIdPart());
 		assertEquals("2", id1.getVersionIdPart());
 
 		p = myPatientDao.read(id1);

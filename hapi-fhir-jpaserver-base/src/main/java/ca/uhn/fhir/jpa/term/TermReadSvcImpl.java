@@ -473,7 +473,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	public void deleteValueSetForResource(ResourceTable theResourceTable) {
 		// Get existing entity so it can be deleted.
 		Optional<TermValueSet> optionalExistingTermValueSetById =
-				myTermValueSetDao.findByResourcePid(theResourceTable.getId().getId());
+				myTermValueSetDao.findByResourcePid(theResourceTable.getId());
 
 		if (optionalExistingTermValueSetById.isPresent()) {
 			TermValueSet existingTermValueSet = optionalExistingTermValueSetById.get();
@@ -2077,7 +2077,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 
 	private Optional<TermValueSet> fetchValueSetEntity(ValueSet theValueSet) {
 		JpaPid valueSetResourcePid = getValueSetResourcePersistentId(theValueSet);
-		return myTermValueSetDao.findByResourcePid(valueSetResourcePid.getId());
+		return myTermValueSetDao.findByResourcePid(valueSetResourcePid);
 	}
 
 	private JpaPid getValueSetResourcePersistentId(ValueSet theValueSet) {
@@ -2128,7 +2128,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		}
 
 		TermValueSet valueSetEntity = myTermValueSetDao
-				.findByResourcePid(valueSetResourcePid.getId())
+				.findByResourcePid(valueSetResourcePid)
 				.orElseThrow(IllegalStateException::new);
 		String timingDescription = toHumanReadableExpansionTimestamp(valueSetEntity);
 		String preExpansionMessage = myContext
@@ -2834,7 +2834,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		// If we don't have a PID, this came from some source other than the JPA
 		// database, so we don't need to check if it's pre-expanded or not
 		if (valueSet instanceof IAnyResource) {
-			Long pid = IDao.RESOURCE_PID.get((IAnyResource) valueSet);
+			JpaPid pid = IDao.RESOURCE_PID.get((IAnyResource) valueSet);
 			if (pid != null) {
 				TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
 				retVal = txTemplate.execute(tx -> {

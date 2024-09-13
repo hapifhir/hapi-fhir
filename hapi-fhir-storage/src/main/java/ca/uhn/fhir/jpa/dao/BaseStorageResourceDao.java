@@ -296,7 +296,7 @@ public abstract class BaseStorageResourceDao<T extends IBaseResource> extends Ba
 				theTransactionDetails);
 	}
 
-	public static void validateResourceType(IBasePersistedResource theEntity, String theResourceName) {
+	public static void validateResourceType(IBasePersistedResource<?> theEntity, String theResourceName) {
 		if (!theResourceName.equals(theEntity.getResourceType())) {
 			throw new ResourceNotFoundException(Msg.code(935) + "Resource with ID "
 					+ theEntity.getIdDt().getIdPart() + " exists but it is not of type " + theResourceName

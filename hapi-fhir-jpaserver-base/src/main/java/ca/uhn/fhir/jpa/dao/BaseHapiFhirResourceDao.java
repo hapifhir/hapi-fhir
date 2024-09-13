@@ -50,6 +50,7 @@ import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.model.entity.BaseTag;
+import ca.uhn.fhir.jpa.model.entity.IBaseResourceEntity;
 import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
@@ -476,7 +477,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 							Long version = myMemoryCacheService.getIfPresent(
 									MemoryCacheService.CacheEnum.RESOURCE_CONDITIONAL_CREATE_VERSION, pid.getId());
 							if (version == null) {
-								version = myResourceTableDao.findCurrentVersionByPid(pid.getId());
+								version = myResourceTableDao.findCurrentVersionByPid(pid);
 								if (version != null) {
 									myMemoryCacheService.putAfterCommit(
 											MemoryCacheService.CacheEnum.RESOURCE_CONDITIONAL_CREATE_VERSION,
@@ -1001,7 +1002,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	protected ResourceTable updateEntityForDelete(
 			RequestDetails theRequest, TransactionDetails theTransactionDetails, ResourceTable theEntity) {
-		myResourceSearchUrlSvc.deleteByResId(theEntity.getId().getId());
+		myResourceSearchUrlSvc.deleteByResId(theEntity.getId());
 		Date updateTime = new Date();
 		return updateEntity(theRequest, null, theEntity, updateTime, true, true, theTransactionDetails, false, true);
 	}
@@ -1550,10 +1551,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		assert TransactionSynchronizationManager.isActualTransactionActive();
 
 		StopWatch w = new StopWatch();
-		BaseHasResource entity = readEntity(theId, true, theRequest, theRequestPartitionId);
+		BaseHasResource<?> entity = readEntity(theId, true, theRequest, theRequestPartitionId);
 		validateResourceType(entity);
 
-		T retVal = myJpaStorageResourceParser.toResource(myResourceType, entity, null, false);
+		T retVal = myJpaStorageResourceParser.toResource(myResourceType, (IBaseResourceEntity<JpaPid>) entity, null, false);
 
 		if (!theDeletedOk) {
 			if (isDeleted(entity)) {
@@ -1729,14 +1730,14 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 	}
 
-	private BaseHasResource readEntity(
+	private BaseHasResource<?> readEntity(
 			IIdType theId,
 			boolean theCheckForForcedId,
 			RequestDetails theRequest,
 			RequestPartitionId requestPartitionId) {
 		validateResourceTypeAndThrowInvalidRequestException(theId);
 
-		BaseHasResource entity;
+		BaseHasResource<?> entity;
 		JpaPid pid = myIdHelperService.resolveResourcePersistentIds(
 				requestPartitionId, getResourceName(), theId.getIdPart());
 		Set<Integer> readPartitions = null;
@@ -2468,8 +2469,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		 */
 		ResourceTable entity = (ResourceTable) theEntity;
 		if (entity.isSearchUrlPresent()) {
-			myResourceSearchUrlSvc.deleteByResId(
-					(Long) theEntity.getPersistentId().getId());
+			myResourceSearchUrlSvc.deleteByResId(entity.getPersistentId());
 			entity.setSearchUrlPresent(false);
 		}
 
@@ -2648,7 +2648,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 	}
 
-	private void validateResourceType(BaseHasResource entity) {
+	private void validateResourceType(IBasePersistedResource<?> entity) {
 		validateResourceType(entity, myResourceName);
 	}
 

@@ -23,6 +23,7 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
+import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTablePk;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import com.google.common.annotations.VisibleForTesting;
@@ -91,7 +92,7 @@ public class ExpungeOperation implements Callable<ExpungeOutcome> {
 	}
 
 	private void expungeDeletedResources() {
-		List<IResourcePersistentId> resourceIds = findHistoricalVersionsOfDeletedResources();
+		List<?> resourceIds = findHistoricalVersionsOfDeletedResources();
 
 		deleteHistoricalVersions(resourceIds);
 		if (expungeLimitReached()) {
@@ -101,7 +102,7 @@ public class ExpungeOperation implements Callable<ExpungeOutcome> {
 		deleteCurrentVersionsOfDeletedResources(resourceIds);
 	}
 
-	private List<IResourcePersistentId> findHistoricalVersionsOfDeletedResources() {
+	private List<?> findHistoricalVersionsOfDeletedResources() {
 		List<IResourcePersistentId> retVal = getPartitionAwareSupplier()
 				.supplyInPartitionedContext(() -> myResourceExpungeService.findHistoricalVersionsOfDeletedResources(
 						myResourceName, myResourceId, myRemainingCount.get()));
@@ -119,9 +120,9 @@ public class ExpungeOperation implements Callable<ExpungeOutcome> {
 	}
 
 	private void expungeOldVersions() {
-		List<IResourcePersistentId> historicalIds = getPartitionAwareSupplier()
-				.supplyInPartitionedContext(() -> myResourceExpungeService.findHistoricalVersionsOfNonDeletedResources(
-						myResourceName, myResourceId, myRemainingCount.get()));
+		List<?> historicalIds = getPartitionAwareSupplier()
+			.supplyInPartitionedContext(() -> myResourceExpungeService.findHistoricalVersionsOfNonDeletedResources(
+				myResourceName, myResourceId, myRemainingCount.get()));
 
 		getPartitionRunner()
 				.runInPartitionedThreads(
@@ -144,7 +145,7 @@ public class ExpungeOperation implements Callable<ExpungeOutcome> {
 				myRequestDetails);
 	}
 
-	private void deleteCurrentVersionsOfDeletedResources(List<IResourcePersistentId> theResourceIds) {
+	private void deleteCurrentVersionsOfDeletedResources(List<?> theResourceIds) {
 		getPartitionRunner()
 				.runInPartitionedThreads(
 						theResourceIds,
@@ -152,7 +153,7 @@ public class ExpungeOperation implements Callable<ExpungeOutcome> {
 								myRequestDetails, partition, myRemainingCount));
 	}
 
-	private void deleteHistoricalVersions(List<IResourcePersistentId> theResourceIds) {
+	private void deleteHistoricalVersions(List<?> theResourceIds) {
 		getPartitionRunner()
 				.runInPartitionedThreads(
 						theResourceIds,

@@ -36,6 +36,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -168,7 +169,7 @@ public class ConditionalIdMappingContributor implements org.hibernate.boot.spi.A
 
 			PrimaryKey pk = table.getPrimaryKey();
 			List<Column> pkColumns = pk.getColumns();
-			pkColumns.removeIf(idRemovedColumns::contains);
+			removeColumns(pkColumns, idRemovedColumns::contains);
 		}
 
 		// Adjust composites - This handles @EmbeddedId PKs like JpaPid
@@ -233,8 +234,8 @@ public class ConditionalIdMappingContributor implements org.hibernate.boot.spi.A
 					String propertyName = manyToOne.getPropertyName();
 					Set<String> columnNamesToRemoveFromFks = determineFilteredColumnNamesInForeignKey(entityType, propertyName, targetTableName);
 
-					manyToOne.getColumns().removeIf(t -> columnNamesToRemoveFromFks.contains(t.getName()));
-					foreignKey.getColumns().removeIf(t -> columnNamesToRemoveFromFks.contains(t.getName()));
+					removeColumns(manyToOne.getColumns(), t1 -> columnNamesToRemoveFromFks.contains(t1.getName()));
+					removeColumns(foreignKey.getColumns(), t1 -> columnNamesToRemoveFromFks.contains(t1.getName()));
 
 					columnNamesToRemoveFromFks.forEach(t -> myQualifiedIdRemovedColumnNames.add(table.getName() + "#" + t));
 
@@ -274,6 +275,22 @@ public class ConditionalIdMappingContributor implements org.hibernate.boot.spi.A
 			}
 		}
 
+	}
+
+	private static void removeColumns(List<Column> theColumnList, Predicate<Column> theRemoveIfPredicate) {
+		for (int listIndex = 0; listIndex < theColumnList.size(); listIndex++) {
+			Column column = theColumnList.get(listIndex);
+			if (theRemoveIfPredicate.test(column)) {
+				theColumnList.remove(listIndex);
+				for (int remainingIndex = listIndex; remainingIndex < theColumnList.size(); remainingIndex++) {
+					Column remainingColumn = theColumnList.get(remainingIndex);
+					if (remainingColumn.getTypeIndex() > 0) {
+						remainingColumn.setTypeIndex(remainingColumn.getTypeIndex() - 1);
+					}
+				}
+				listIndex--;
+			}
+		}
 	}
 
 	@Nonnull

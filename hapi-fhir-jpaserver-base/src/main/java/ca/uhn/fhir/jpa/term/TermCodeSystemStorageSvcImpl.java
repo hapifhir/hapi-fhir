@@ -314,8 +314,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 						TermCodeSystemVersion codeSystemVersion =
 								getExistingTermCodeSystemVersion(termCodeSystem.getPid(), theCodeSystem.getVersion());
 						if (codeSystemVersion != null) {
-							TermCodeSystem myCodeSystemEntity = getOrCreateDistinctTermCodeSystem(
-									codeSystemResourcePid,
+							getOrCreateDistinctTermCodeSystem(
 									theCodeSystem.getUrl(),
 									theCodeSystem.getUrl(),
 									theCodeSystem.getVersion(),
@@ -332,7 +331,6 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 				persCs.getConcepts().addAll(TermReadSvcImpl.toPersistedConcepts(theCodeSystem.getConcept(), persCs));
 				ourLog.debug("Code system has {} concepts", persCs.getConcepts().size());
 				storeNewCodeSystemVersion(
-						codeSystemResourcePid,
 						codeSystemUrl,
 						theCodeSystem.getName(),
 						theCodeSystem.getVersion(),
@@ -391,7 +389,6 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		populateCodeSystemVersionProperties(theCodeSystemVersion, theCodeSystemResource, resource);
 
 		storeNewCodeSystemVersion(
-				codeSystemResourcePid,
 				theCodeSystemResource.getUrl(),
 				theCodeSystemResource.getName(),
 				theCodeSystemResource.getVersion(),
@@ -408,7 +405,6 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 	@Override
 	@Transactional
 	public void storeNewCodeSystemVersion(
-			IResourcePersistentId theCodeSystemResourcePid,
 			String theSystemUri,
 			String theSystemName,
 			String theCodeSystemVersionId,
@@ -424,14 +420,13 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		ValidateUtil.isNotBlankOrThrowInvalidRequest(theSystemUri, "No system URI supplied");
 
 		TermCodeSystem codeSystem = getOrCreateDistinctTermCodeSystem(
-				theCodeSystemResourcePid,
 				theSystemUri,
 				theSystemName,
 				theCodeSystemVersionId,
 				theCodeSystemResourceTable);
 
 		List<TermCodeSystemVersion> existing =
-				myCodeSystemVersionDao.findByCodeSystemResourcePid(((JpaPid) theCodeSystemResourcePid).getId());
+				myCodeSystemVersionDao.findByCodeSystemResourcePid(theCodeSystemResourceTable.getResourceId());
 		for (TermCodeSystemVersion next : existing) {
 			if (Objects.equals(next.getCodeSystemVersionId(), theCodeSystemVersionId)
 					&& myConceptDao.countByCodeSystemVersion(next.getPid()) == 0) {
@@ -452,7 +447,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 				 * multiple CodeSystem resources with CodeSystem.version set differently (as opposed to
 				 * multiple versions of the same CodeSystem, where CodeSystem.meta.versionId is different)
 				 */
-				next.setCodeSystemVersionId("DELETED_" + UUID.randomUUID().toString());
+				next.setCodeSystemVersionId("DELETED_" + UUID.randomUUID());
 				myCodeSystemVersionDao.saveAndFlush(next);
 				myDeferredStorageSvc.deleteCodeSystemVersion(next);
 			}
@@ -714,14 +709,13 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 	@Nonnull
 	private TermCodeSystem getOrCreateDistinctTermCodeSystem(
-			IResourcePersistentId theCodeSystemResourcePid,
 			String theSystemUri,
 			String theSystemName,
 			String theSystemVersionId,
 			ResourceTable theCodeSystemResourceTable) {
 		TermCodeSystem codeSystem = myCodeSystemDao.findByCodeSystemUri(theSystemUri);
 		if (codeSystem == null) {
-			codeSystem = myCodeSystemDao.findByResourcePid(((JpaPid) theCodeSystemResourcePid).getId());
+			codeSystem = myCodeSystemDao.findByResourcePid((theCodeSystemResourceTable.getId()));
 			if (codeSystem == null) {
 				codeSystem = new TermCodeSystem();
 			}

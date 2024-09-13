@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.dao.data;
 
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -32,8 +33,8 @@ import java.util.Optional;
 
 public interface ITermValueSetDao extends JpaRepository<TermValueSet, Long>, IHapiFhirJpaRepository {
 
-	@Query("SELECT vs FROM TermValueSet vs WHERE vs.myResourcePid = :resource_pid")
-	Optional<TermValueSet> findByResourcePid(@Param("resource_pid") Long theResourcePid);
+	@Query("SELECT vs FROM TermValueSet vs WHERE vs.myResource.myPid = :resource_pid")
+	Optional<TermValueSet> findByResourcePid(@Param("resource_pid") JpaPid theResourcePid);
 
 	// Keeping for backwards compatibility but recommend using findTermValueSetByUrlAndNullVersion instead.
 	@Deprecated

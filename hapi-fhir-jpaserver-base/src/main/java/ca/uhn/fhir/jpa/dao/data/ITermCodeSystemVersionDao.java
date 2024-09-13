@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.dao.data;
 
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -54,8 +55,8 @@ public interface ITermCodeSystemVersionDao extends JpaRepository<TermCodeSystemV
 			"SELECT cs FROM TermCodeSystemVersion cs WHERE cs.myCodeSystemPid = :codesystem_pid AND cs.myCodeSystemVersionId IS NULL")
 	TermCodeSystemVersion findByCodeSystemPidVersionIsNull(@Param("codesystem_pid") Long theCodeSystemPid);
 
-	@Query("SELECT cs FROM TermCodeSystemVersion cs WHERE cs.myResourcePid = :resource_id")
-	List<TermCodeSystemVersion> findByCodeSystemResourcePid(@Param("resource_id") Long theCodeSystemResourcePid);
+	@Query("SELECT cs FROM TermCodeSystemVersion cs WHERE cs.myResource.myPid = :resource_id")
+	List<TermCodeSystemVersion> findByCodeSystemResourcePid(@Param("resource_id") JpaPid theCodeSystemResourcePid);
 
 	@Query(
 			"SELECT cs FROM TermCodeSystemVersion cs WHERE cs.myCodeSystemHavingThisVersionAsCurrentVersionIfAny.myResource.myPid.myId = :resource_id")

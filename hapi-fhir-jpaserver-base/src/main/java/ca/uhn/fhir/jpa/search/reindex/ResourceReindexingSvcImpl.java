@@ -24,7 +24,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceReindexJobDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.entity.ResourceReindexJobEntity;
@@ -80,9 +79,9 @@ import java.util.stream.Collectors;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
- * @see ca.uhn.fhir.jpa.reindex.job.ReindexJobConfig
  * @deprecated Use the Batch2 {@link ca.uhn.fhir.batch2.api.IJobCoordinator#startInstance(JobInstanceStartRequest)} instead.
  */
+@SuppressWarnings({"removal", "DeprecatedIsStillUsed"})
 @Deprecated
 public class ResourceReindexingSvcImpl implements IResourceReindexingSvc, IHasScheduledJobs {
 
@@ -336,7 +335,7 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc, IHasSc
 
 		// Query for resources within threshold
 		StopWatch pageSw = new StopWatch();
-		Slice<Long> range = myTxTemplate.execute(t -> {
+		Slice<JpaPid> range = myTxTemplate.execute(t -> {
 			PageRequest page = PageRequest.of(0, PASS_SIZE);
 			if (isNotBlank(theJob.getResourceType())) {
 				return myResourceTableDao.findIdsOfResourcesWithinUpdatedRangeOrderedFromOldest(
@@ -498,10 +497,8 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc, IHasSc
 		private final AtomicInteger myCounter;
 		private Date myUpdated;
 
-		ResourceReindexingTask(Long theNextId, AtomicInteger theCounter) {
-			// FIXME: restore
-//			myNextId = theNextId;
-			myNextId = null;
+		ResourceReindexingTask(JpaPid theNextId, AtomicInteger theCounter) {
+			myNextId = theNextId;
 			myCounter = theCounter;
 		}
 

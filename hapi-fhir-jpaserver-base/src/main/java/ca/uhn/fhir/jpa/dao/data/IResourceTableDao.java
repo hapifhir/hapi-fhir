@@ -127,8 +127,8 @@ public interface IResourceTableDao
 	void updateIndexStatus(@Param("id") JpaPid theId, @Param("status") Long theIndexStatus);
 
 	@Modifying
-	@Query("DELETE FROM ResourceTable t WHERE t.myPid.myId = :pid")
-	void deleteByPid(@Param("pid") Long theId);
+	@Query("DELETE FROM ResourceTable t WHERE t.myPid = :pid")
+	void deleteByPid(@Param("pid") JpaPid theId);
 
 	/**
 	 * This method returns a Collection where each row is an element in the collection. Each element in the collection
@@ -165,7 +165,7 @@ public interface IResourceTableDao
 	Collection<Object[]> findLookupFieldsByResourcePidInPartitionNull(@Param("pid") List<Long> thePids);
 
 	@Query("SELECT t.myVersion FROM ResourceTable t WHERE t.myPid.myId = :pid")
-	Long findCurrentVersionByPid(@Param("pid") Long thePid);
+	Long findCurrentVersionByPid(@Param("pid") JpaPid thePid);
 
 	/**
 	 * This query will return rows with the following values:

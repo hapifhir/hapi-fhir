@@ -367,7 +367,7 @@ public class GiantTransactionPerfTest {
 		}
 
 		@Override
-		public Slice<Long> findForResourceId(Pageable thePage, JpaPid theId, Long theDontWantVersion) {
+		public Slice<ResourceHistoryTablePk> findForResourceId(Pageable thePage, JpaPid theId, Long theDontWantVersion) {
 			throw new UnsupportedOperationException();
 		}
 
@@ -377,17 +377,17 @@ public class GiantTransactionPerfTest {
 		}
 
 		@Override
-		public Slice<Long> findIdsOfPreviousVersionsOfResourceId(Pageable thePage, JpaPid theResourceId) {
+		public Slice<ResourceHistoryTablePk> findIdsOfPreviousVersionsOfResourceId(Pageable thePage, JpaPid theResourceId) {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
-		public Slice<Long> findIdsOfPreviousVersionsOfResources(Pageable thePage, String theResourceName) {
+		public Slice<ResourceHistoryTablePk> findIdsOfPreviousVersionsOfResources(Pageable thePage, String theResourceName) {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
-		public Slice<Long> findIdsOfPreviousVersionsOfResources(Pageable thePage) {
+		public Slice<ResourceHistoryTablePk> findIdsOfPreviousVersionsOfResources(Pageable thePage) {
 			throw new UnsupportedOperationException();
 		}
 
@@ -402,7 +402,7 @@ public class GiantTransactionPerfTest {
 		}
 
 		@Override
-		public void updateNonInlinedContents(byte[] theText, long thePid) {
+		public void updateNonInlinedContents(byte[] theText, ResourceHistoryTablePk thePid) {
 			throw new UnsupportedOperationException();
 		}
 

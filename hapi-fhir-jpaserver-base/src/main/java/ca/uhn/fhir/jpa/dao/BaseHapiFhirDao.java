@@ -1340,11 +1340,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		}
 	}
 
-	public IBasePersistedResource updateHistoryEntity(
+	public IBasePersistedResource<?> updateHistoryEntity(
 			RequestDetails theRequest,
 			T theResource,
-			IBasePersistedResource theEntity,
-			IBasePersistedResource theHistoryEntity,
+			IBasePersistedResource<?> theEntity,
+			IBasePersistedResource<?> theHistoryEntity,
 			IIdType theResourceId,
 			TransactionDetails theTransactionDetails,
 			boolean isUpdatingCurrent) {
@@ -1717,9 +1717,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 	protected void addPidToResource(IResourceLookup<JpaPid> theEntity, IBaseResource theResource) {
 		if (theResource instanceof IAnyResource) {
-			IDao.RESOURCE_PID.put(theResource, theEntity.getPersistentId().getId());
+			IDao.RESOURCE_PID.put(theResource, theEntity.getPersistentId());
 		} else if (theResource instanceof IResource) {
-			IDao.RESOURCE_PID.put(theResource, theEntity.getPersistentId().getId());
+			IDao.RESOURCE_PID.put(theResource, theEntity.getPersistentId());
 		}
 	}
 

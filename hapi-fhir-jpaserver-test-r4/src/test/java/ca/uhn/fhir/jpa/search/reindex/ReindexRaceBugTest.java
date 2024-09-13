@@ -62,11 +62,11 @@ class ReindexRaceBugTest extends BaseJpaR4Test {
 		ourLog.info("An observation is created");
 
 		var observationCreateOutcome = callInFreshTx((tx, rd) -> {
-			Observation o = (Observation) buildResource("Observation", withEffectiveDate("2021-01-01T00:00:00"));
+			Observation o = buildResource("Observation", withEffectiveDate("2021-01-01T00:00:00"));
 			return myObservationDao.create(o, rd);
 		});
 		IIdType observationId = observationCreateOutcome.getId().toVersionless();
-		long observationPid = Long.parseLong(observationCreateOutcome.getId().getIdPart());
+		JpaPid observationPid = JpaPid.fromIdAndResourceType(observationCreateOutcome.getId().getIdPartAsLong(), "Observation");
 
 		assertThat(getSPIDXDateCount(observationPid)).as("date index row for date").isEqualTo(1);
 
@@ -109,7 +109,7 @@ class ReindexRaceBugTest extends BaseJpaR4Test {
 
 						phaser.assertInPhase(Steps.RUN_REINDEX);
 						ourLog.info("Run $reindex");
-						myObservationDao.reindex(JpaPid.fromIdAndResourceType(observationPid, "Observation"), reindexParameters, rd, new TransactionDetails());
+						myObservationDao.reindex(observationPid, reindexParameters, rd, new TransactionDetails());
 
 						ourLog.info("$reindex done release main thread to delete");
 						phaser.arriveAndAwaitSharedEndOf(Steps.RUN_REINDEX);
@@ -180,7 +180,7 @@ class ReindexRaceBugTest extends BaseJpaR4Test {
 	}
 
 
-	int getSPIDXDateCount(long observationPid) {
+	int getSPIDXDateCount(JpaPid observationPid) {
 		return callInFreshTx((rd, tx) ->
 			myResourceIndexedSearchParamDateDao.findAllForResourceId(observationPid).size());
 	}

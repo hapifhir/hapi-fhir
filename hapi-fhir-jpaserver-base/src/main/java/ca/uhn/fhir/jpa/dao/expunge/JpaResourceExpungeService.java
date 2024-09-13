@@ -24,8 +24,6 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
-import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.IJpaStorageResourceParser;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryProvenanceDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
@@ -45,7 +43,6 @@ import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchParamPresentDao;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTablePk;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -55,7 +52,6 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
-import jakarta.persistence.Id;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -123,16 +119,10 @@ public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid
 	private IResourceTagDao myResourceTagDao;
 
 	@Autowired
-	private IIdHelperService myIdHelperService;
-
-	@Autowired
 	private IResourceHistoryTagDao myResourceHistoryTagDao;
 
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
-
-	@Autowired
-	private DaoRegistry myDaoRegistry;
 
 	@Autowired
 	private IResourceHistoryProvenanceDao myResourceHistoryProvenanceTableDao;
@@ -152,7 +142,7 @@ public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid
 	@Override
 	@Transactional
 	public List<ResourceHistoryTablePk> findHistoricalVersionsOfNonDeletedResources(
-			String theResourceName, JpaPid theJpaPid, int theRemainingCount) {
+		String theResourceName, JpaPid theJpaPid, int theRemainingCount) {
 		if (isEmptyQuery(theRemainingCount)) {
 			return Collections.emptyList();
 		}
@@ -163,7 +153,7 @@ public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid
 		if (theJpaPid != null && theJpaPid.getId() != null) {
 			if (theJpaPid.getVersion() != null) {
 				ids = toSlice(myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(
-						theJpaPid, theJpaPid.getVersion()));
+					theJpaPid, theJpaPid.getVersion()));
 			} else {
 				ids = myResourceHistoryTableDao.findIdsOfPreviousVersionsOfResourceId(page, theJpaPid);
 			}
@@ -180,21 +170,21 @@ public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid
 
 	@Override
 	@Transactional
-	public List<ResourceHistoryTablePk> findHistoricalVersionsOfDeletedResources(
-			String theResourceName, JpaPid theResourceId, int theRemainingCount) {
+	public List<JpaPid> findHistoricalVersionsOfDeletedResources(
+		String theResourceName, JpaPid theResourceId, int theRemainingCount) {
 		if (isEmptyQuery(theRemainingCount)) {
 			return Collections.emptyList();
 		}
 
 		Pageable page = PageRequest.of(0, theRemainingCount);
-		Slice<Long> ids;
+		Slice<JpaPid> ids;
 		if (theResourceId != null) {
 			ids = myResourceTableDao.findIdsOfDeletedResourcesOfType(page, theResourceId.getId(), theResourceName);
 			ourLog.info(
-					"Expunging {} deleted resources of type[{}] and ID[{}]",
-					ids.getNumberOfElements(),
-					theResourceName,
-					theResourceId);
+				"Expunging {} deleted resources of type[{}] and ID[{}]",
+				ids.getNumberOfElements(),
+				theResourceName,
+				theResourceId);
 		} else {
 			if (theResourceName != null) {
 				ids = myResourceTableDao.findIdsOfDeletedResourcesOfType(page, theResourceName);
@@ -210,7 +200,7 @@ public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid
 	@Override
 	@Transactional
 	public void expungeCurrentVersionOfResources(
-			RequestDetails theRequestDetails, List<JpaPid> theResourceIds, AtomicInteger theRemainingCount) {
+		RequestDetails theRequestDetails, List<JpaPid> theResourceIds, AtomicInteger theRemainingCount) {
 		for (JpaPid next : theResourceIds) {
 			expungeCurrentVersionOfResource(theRequestDetails, (next).getId(), theRemainingCount);
 			if (expungeLimitReached(theRemainingCount)) {
@@ -234,9 +224,9 @@ public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid
 	}
 
 	private void expungeHistoricalVersion(
-			RequestDetails theRequestDetails, Long theNextVersionId, AtomicInteger theRemainingCount) {
+		RequestDetails theRequestDetails, ResourceHistoryTablePk theNextVersionId, AtomicInteger theRemainingCount) {
 		ResourceHistoryTable version =
-				myResourceHistoryTableDao.findById(theNextVersionId).orElseThrow(IllegalArgumentException::new);
+			myResourceHistoryTableDao.findById(theNextVersionId).orElseThrow(IllegalArgumentException::new);
 		IdDt id = version.getIdDt();
 		ourLog.info("Deleting resource version {}", id.getValue());
 
@@ -244,7 +234,7 @@ public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid
 
 		if (version.getProvenance() != null) {
 			myResourceHistoryProvenanceTableDao.deleteByPid(
-					version.getProvenance().getId());
+				version.getProvenance().getId());
 		}
 
 		myResourceHistoryTagDao.deleteByPid(version.getId());
@@ -254,22 +244,22 @@ public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid
 	}
 
 	private void callHooks(
-			RequestDetails theRequestDetails,
-			AtomicInteger theRemainingCount,
-			ResourceHistoryTable theVersion,
-			IdDt theId) {
+		RequestDetails theRequestDetails,
+		AtomicInteger theRemainingCount,
+		ResourceHistoryTable theVersion,
+		IdDt theId) {
 		final AtomicInteger counter = new AtomicInteger();
 		if (CompositeInterceptorBroadcaster.hasHooks(
-				Pointcut.STORAGE_PRESTORAGE_EXPUNGE_RESOURCE, myInterceptorBroadcaster, theRequestDetails)) {
+			Pointcut.STORAGE_PRESTORAGE_EXPUNGE_RESOURCE, myInterceptorBroadcaster, theRequestDetails)) {
 			IBaseResource resource = myJpaStorageResourceParser.toResource(theVersion, false);
 			HookParams params = new HookParams()
-					.add(AtomicInteger.class, counter)
-					.add(IIdType.class, theId)
-					.add(IBaseResource.class, resource)
-					.add(RequestDetails.class, theRequestDetails)
-					.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
+				.add(AtomicInteger.class, counter)
+				.add(IIdType.class, theId)
+				.add(IBaseResource.class, resource)
+				.add(RequestDetails.class, theRequestDetails)
+				.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
 			CompositeInterceptorBroadcaster.doCallHooks(
-					myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_PRESTORAGE_EXPUNGE_RESOURCE, params);
+				myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_PRESTORAGE_EXPUNGE_RESOURCE, params);
 		}
 		theRemainingCount.addAndGet(-1 * counter.get());
 	}
@@ -277,7 +267,7 @@ public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid
 	@Override
 	@Transactional
 	public void expungeHistoricalVersionsOfIds(
-			RequestDetails theRequestDetails, List<JpaPid> theResourceIds, AtomicInteger theRemainingCount) {
+		RequestDetails theRequestDetails, List<JpaPid> theResourceIds, AtomicInteger theRemainingCount) {
 		List<ResourceTable> resourcesToDelete = myResourceTableDao.findAllByIdAndLoadForcedIds(theResourceIds);
 		for (ResourceTable next : resourcesToDelete) {
 			expungeHistoricalVersionsOfId(theRequestDetails, next, theRemainingCount);
@@ -290,9 +280,9 @@ public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid
 	@Override
 	@Transactional
 	public void expungeHistoricalVersions(
-			RequestDetails theRequestDetails, List<JpaPid> theHistoricalIds, AtomicInteger theRemainingCount) {
-		for (JpaPid next : theHistoricalIds) {
-			expungeHistoricalVersion(theRequestDetails, (next).getId(), theRemainingCount);
+		RequestDetails theRequestDetails, List<ResourceHistoryTablePk> theHistoricalIds, AtomicInteger theRemainingCount) {
+		for (ResourceHistoryTablePk next : theHistoricalIds) {
+			expungeHistoricalVersion(theRequestDetails, next, theRemainingCount);
 			if (expungeLimitReached(theRemainingCount)) {
 				return;
 			}
@@ -300,7 +290,7 @@ public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid
 	}
 
 	protected void expungeCurrentVersionOfResource(
-			RequestDetails theRequestDetails, Long theResourceId, AtomicInteger theRemainingCount) {
+		RequestDetails theRequestDetails, Long theResourceId, AtomicInteger theRemainingCount) {
 
 		// FIXME: make this method take a Pid
 		JpaPid id = JpaPid.fromId(theResourceId);
@@ -308,13 +298,13 @@ public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid
 		ResourceTable resource = myResourceTableDao.findById(id).orElseThrow(IllegalStateException::new);
 
 		ResourceHistoryTable currentVersion = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(
-				resource.getId(), resource.getVersion());
+			resource.getId(), resource.getVersion());
 		if (currentVersion != null) {
 			expungeHistoricalVersion(theRequestDetails, currentVersion.getId(), theRemainingCount);
 		}
 
 		ourLog.info(
-				"Expunging current version of resource {}", resource.getIdDt().getValue());
+			"Expunging current version of resource {}", resource.getIdDt().getValue());
 
 		try {
 			if (resource.isHasTags()) {
@@ -324,57 +314,56 @@ public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid
 			myResourceTableDao.deleteByPid(resource.getId());
 		} catch (DataIntegrityViolationException e) {
 			throw new PreconditionFailedException(Msg.code(2415)
-					+ "The resource could not be expunged. It is likely due to unfinished asynchronous deletions, please try again later: "
-					+ e);
+				+ "The resource could not be expunged. It is likely due to unfinished asynchronous deletions, please try again later: "
+				+ e);
 		}
 	}
 
 	@Override
 	@Transactional
 	public void deleteAllSearchParams(JpaPid theResourceId) {
-		Long theResourceLongId = theResourceId.getId();
 		ResourceTable resource = myResourceTableDao.findById(theResourceId).orElse(null);
 
 		if (resource == null || resource.isParamsUriPopulated()) {
-			myResourceIndexedSearchParamUriDao.deleteByResourceId(theResourceLongId);
+			myResourceIndexedSearchParamUriDao.deleteByResourceId(theResourceId);
 		}
 		if (resource == null || resource.isParamsCoordsPopulated()) {
-			myResourceIndexedSearchParamCoordsDao.deleteByResourceId(theResourceLongId);
+			myResourceIndexedSearchParamCoordsDao.deleteByResourceId(theResourceId);
 		}
 		if (resource == null || resource.isParamsDatePopulated()) {
-			myResourceIndexedSearchParamDateDao.deleteByResourceId(theResourceLongId);
+			myResourceIndexedSearchParamDateDao.deleteByResourceId(theResourceId);
 		}
 		if (resource == null || resource.isParamsNumberPopulated()) {
-			myResourceIndexedSearchParamNumberDao.deleteByResourceId(theResourceLongId);
+			myResourceIndexedSearchParamNumberDao.deleteByResourceId(theResourceId);
 		}
 		if (resource == null || resource.isParamsQuantityPopulated()) {
-			myResourceIndexedSearchParamQuantityDao.deleteByResourceId(theResourceLongId);
+			myResourceIndexedSearchParamQuantityDao.deleteByResourceId(theResourceId);
 		}
 		if (resource == null || resource.isParamsQuantityNormalizedPopulated()) {
-			myResourceIndexedSearchParamQuantityNormalizedDao.deleteByResourceId(theResourceLongId);
+			myResourceIndexedSearchParamQuantityNormalizedDao.deleteByResourceId(theResourceId);
 		}
 		if (resource == null || resource.isParamsStringPopulated()) {
-			myResourceIndexedSearchParamStringDao.deleteByResourceId(theResourceLongId);
+			myResourceIndexedSearchParamStringDao.deleteByResourceId(theResourceId);
 		}
 		if (resource == null || resource.isParamsTokenPopulated()) {
-			myResourceIndexedSearchParamTokenDao.deleteByResourceId(theResourceLongId);
+			myResourceIndexedSearchParamTokenDao.deleteByResourceId(theResourceId);
 		}
 		if (resource == null || resource.isParamsComboStringUniquePresent()) {
-			myResourceIndexedCompositeStringUniqueDao.deleteByResourceId(theResourceLongId);
+			myResourceIndexedCompositeStringUniqueDao.deleteByResourceId(theResourceId);
 		}
 		if (resource == null || resource.isParamsComboTokensNonUniquePresent()) {
-			myResourceIndexedComboTokensNonUniqueDao.deleteByResourceId(theResourceLongId);
+			myResourceIndexedComboTokensNonUniqueDao.deleteByResourceId(theResourceId);
 		}
 		if (myStorageSettings.getIndexMissingFields() == JpaStorageSettings.IndexEnabledEnum.ENABLED) {
-			mySearchParamPresentDao.deleteByResourceId(theResourceLongId);
+			mySearchParamPresentDao.deleteByResourceId(theResourceId);
 		}
 		if (resource == null || resource.isHasLinks()) {
-			myResourceLinkDao.deleteByResourceId(theResourceLongId);
+			myResourceLinkDao.deleteByResourceId(theResourceId);
 		}
 	}
 
 	private void expungeHistoricalVersionsOfId(
-			RequestDetails theRequestDetails, ResourceTable theResource, AtomicInteger theRemainingCount) {
+		RequestDetails theRequestDetails, ResourceTable theResource, AtomicInteger theRemainingCount) {
 		Pageable page;
 		synchronized (theRemainingCount) {
 			if (expungeLimitReached(theRemainingCount)) {
@@ -383,13 +372,13 @@ public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid
 			page = PageRequest.of(0, theRemainingCount.get());
 		}
 
-		Slice<Long> versionIds =
-				myResourceHistoryTableDao.findForResourceId(page, theResource.getId(), theResource.getVersion());
+		Slice<ResourceHistoryTablePk> versionIds =
+			myResourceHistoryTableDao.findForResourceId(page, theResource.getId(), theResource.getVersion());
 		ourLog.debug(
-				"Found {} versions of resource {} to expunge",
-				versionIds.getNumberOfElements(),
-				theResource.getIdDt().getValue());
-		for (Long nextVersionId : versionIds) {
+			"Found {} versions of resource {} to expunge",
+			versionIds.getNumberOfElements(),
+			theResource.getIdDt().getValue());
+		for (ResourceHistoryTablePk nextVersionId : versionIds) {
 			expungeHistoricalVersion(theRequestDetails, nextVersionId, theRemainingCount);
 			if (expungeLimitReached(theRemainingCount)) {
 				return;
@@ -397,9 +386,9 @@ public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid
 		}
 	}
 
-	private Slice<ResourceHistoryTablePk> toSlice(ResourceHistoryTable myVersion) {
-		Validate.notNull(myVersion);
-		return new SliceImpl<>(Collections.singletonList(myVersion.getId()));
+	private Slice<ResourceHistoryTablePk> toSlice(ResourceHistoryTable theVersion) {
+		Validate.notNull(theVersion, "theVersion must not be null");
+		return new SliceImpl<>(Collections.singletonList(theVersion.getId()));
 	}
 
 	private boolean isEmptyQuery(int theCount) {

@@ -127,7 +127,7 @@ public class StaleSearchDeletingSvcR4Test extends BaseResourceProviderR4Test {
 			for (int i = 0; i < 50; i++) {
 				SearchResult sr = new SearchResult(search);
 				sr.setOrder(i);
-				sr.setResourcePid(resource.getId());
+				sr.setResourcePid(resource.getId().getId());
 				mySearchResultDao.save(sr);
 			}
 		});

@@ -439,7 +439,9 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 
 	@Override
 	public BaseResourceIndexedSearchParam setResource(ResourceTable theResource) {
-		myResource = theResource;
+		// FIXME: should we remove this everywhere and just replace with a setResourceType?
+		// Keeping it is causing a transient failure issue with the resource table
+//		myResource = theResource;
 		setResourceType(theResource.getResourceType());
 		return this;
 	}

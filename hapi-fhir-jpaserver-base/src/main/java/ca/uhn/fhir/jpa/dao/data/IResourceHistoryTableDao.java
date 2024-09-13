@@ -50,7 +50,7 @@ public interface IResourceHistoryTableDao extends JpaRepository<ResourceHistoryT
 
 	@Query(
 			"SELECT t.myId FROM ResourceHistoryTable t WHERE t.myResourceTable.myPid = :resId AND t.myResourceVersion <> :dontWantVersion")
-	Slice<Long> findForResourceId(
+	Slice<ResourceHistoryTablePk> findForResourceId(
 			Pageable thePage, @Param("resId") JpaPid theId, @Param("dontWantVersion") Long theDontWantVersion);
 
 	@Query(
@@ -95,5 +95,5 @@ public interface IResourceHistoryTableDao extends JpaRepository<ResourceHistoryT
 	@Modifying
 	@Query(
 			"UPDATE ResourceHistoryTable r SET r.myResourceTextVc = null, r.myResource = :text, r.myEncoding = 'JSONC' WHERE r.myId = :pid")
-	void updateNonInlinedContents(@Param("text") byte[] theText, @Param("pid") long thePid);
+	void updateNonInlinedContents(@Param("text") byte[] theText, @Param("pid") ResourceHistoryTablePk thePid);
 }

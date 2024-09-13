@@ -604,11 +604,11 @@ public class LoincFullLoadR4SandboxIT extends BaseJpaTest {
 			@SuppressWarnings("unchecked")
 			List<ResourceTable> vsList = (List<ResourceTable>) q1.getResultList();
 			assertEquals(1, vsList.size());
-			long vsLongId = vsList.get(0).getId();
+			long vsLongId = vsList.get(0).getId().getId();
 			ValueSet vs = (ValueSet) myJpaStorageResourceParser.toResource(vsList.get(0), false);
 			assertNotNull(vs);
 
-			Query q2 = myEntityManager.createQuery("from TermValueSet where myResource = " + vsLongId);
+			Query q2 = myEntityManager.createQuery("from TermValueSet where myResourcePid = " + vsLongId);
 			@SuppressWarnings("unchecked")
 			List<TermValueSet> tvsList = (List<TermValueSet>) q2.getResultList();
 			assertEquals(1, tvsList.size());

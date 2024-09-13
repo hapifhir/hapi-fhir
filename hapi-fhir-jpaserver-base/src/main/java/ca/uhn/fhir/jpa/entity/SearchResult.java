@@ -104,6 +104,7 @@ public class SearchResult implements Serializable {
 		return myResourcePid;
 	}
 
+	// FIXME: add partition ID
 	public SearchResult setResourcePid(Long theResourcePid) {
 		myResourcePid = theResourcePid;
 		return this;

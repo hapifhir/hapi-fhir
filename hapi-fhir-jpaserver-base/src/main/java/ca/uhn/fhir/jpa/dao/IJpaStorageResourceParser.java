@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.dao;
 
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.BaseTag;
 import ca.uhn.fhir.jpa.model.entity.IBaseResourceEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
@@ -27,7 +28,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.Collection;
 
-public interface IJpaStorageResourceParser extends IStorageResourceParser {
+public interface IJpaStorageResourceParser extends IStorageResourceParser<JpaPid> {
 
 	/**
 	 * Convert a storage entity into a FHIR resource model instance. This method may return null if the entity is not
@@ -35,7 +36,7 @@ public interface IJpaStorageResourceParser extends IStorageResourceParser {
 	 */
 	<R extends IBaseResource> R toResource(
 			Class<R> theResourceType,
-			IBaseResourceEntity theEntity,
+			IBaseResourceEntity<?> theEntity,
 			Collection<ResourceTag> theTagList,
 			boolean theForHistoryOperation);
 
@@ -44,7 +45,7 @@ public interface IJpaStorageResourceParser extends IStorageResourceParser {
 	 * objects pulled from the database
 	 */
 	<R extends IBaseResource> R populateResourceMetadata(
-			IBaseResourceEntity theEntitySource,
+			IBaseResourceEntity<?> theEntitySource,
 			boolean theForHistoryOperation,
 			@Nullable Collection<? extends BaseTag> tagList,
 			long theVersion,
@@ -57,5 +58,5 @@ public interface IJpaStorageResourceParser extends IStorageResourceParser {
 	 * @param theEntitySource The source
 	 * @param theResourceTarget The target
 	 */
-	void updateResourceMetadata(IBaseResourceEntity theEntitySource, IBaseResource theResourceTarget);
+	void updateResourceMetadata(IBaseResourceEntity<?> theEntitySource, IBaseResource theResourceTarget);
 }

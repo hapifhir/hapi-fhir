@@ -16,6 +16,7 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTag;
@@ -178,7 +179,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			List<ResourceLink> resLinks = myResourceLinkDao.findAll();
 			ourLog.info("Resource links:\n{}", resLinks);
 			assertEquals(2, resLinks.size());
-			assertEquals(obsId.getIdPartAsLong(), resLinks.get(0).getSourceResourcePid());
+			assertEquals(obsId.getIdPartAsLong(), resLinks.get(0).getSourceResourcePk().getId());
 			assertEquals(patientId.getIdPartAsLong(), resLinks.get(0).getTargetResourcePid());
 			assertEquals(myPartitionId, resLinks.get(0).getTargetResourcePartitionId().getPartitionId());
 			assertLocalDateFromDbMatches(myPartitionDate, resLinks.get(0).getTargetResourcePartitionId().getPartitionDate());
@@ -229,7 +230,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			List<ResourceLink> resLinks = myResourceLinkDao.findAll();
 			ourLog.info("Resource links:\n{}", resLinks);
 			assertEquals(2, resLinks.size());
-			assertEquals(obsId.getIdPartAsLong(), resLinks.get(0).getSourceResourcePid());
+			assertEquals(obsId.getIdPartAsLong(), resLinks.get(0).getSourceResourcePk().getId());
 			assertEquals(patientId.getIdPart(), resLinks.get(0).getTargetResourceId());
 		});
 	}
@@ -276,7 +277,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			List<ResourceLink> resLinks = myResourceLinkDao.findAll();
 			ourLog.info("Resource links:\n{}", resLinks);
 			assertEquals(2, resLinks.size());
-			assertEquals(obsId.getIdPartAsLong(), resLinks.get(0).getSourceResourcePid());
+			assertEquals(obsId.getIdPartAsLong(), resLinks.get(0).getSourceResourcePk().getId());
 			assertEquals(patientId.getIdPartAsLong(), resLinks.get(0).getTargetResourcePid());
 		});
 	}
@@ -300,7 +301,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			List<ResourceLink> resLinks = myResourceLinkDao.findAll();
 			ourLog.info("Resource links:\n{}", resLinks);
 			assertEquals(2, resLinks.size());
-			assertEquals(obsId.getIdPartAsLong(), resLinks.get(0).getSourceResourcePid());
+			assertEquals(obsId.getIdPartAsLong(), resLinks.get(0).getSourceResourcePk().getId());
 			assertEquals(patientId.getIdPart(), resLinks.get(0).getTargetResourceId());
 		});
 	}
@@ -415,7 +416,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		p.addIdentifier().setSystem("system").setValue("value");
 		p.setBirthDateElement(new DateType("2020-01-01"));
 		p.getManagingOrganization().setReferenceElement(orgId);
-		Long patientId = myPatientDao.create(p, mySrd).getId().getIdPartAsLong();
+		JpaPid patientId = JpaPid.fromId(myPatientDao.create(p, mySrd).getId().getIdPartAsLong());
 
 		runInTransaction(() -> {
 			// HFJ_RESOURCE
@@ -504,7 +505,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		p.addIdentifier().setSystem("system").setValue("value");
 		p.setBirthDate(new Date());
 		p.getManagingOrganization().setReferenceElement(orgId);
-		Long patientId = myPatientDao.create(p, mySrd).getId().getIdPartAsLong();
+		JpaPid patientId = JpaPid.fromId(myPatientDao.create(p, mySrd).getId().getIdPartAsLong());
 
 		runInTransaction(() -> {
 			// HFJ_RESOURCE
@@ -687,7 +688,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			.getRequest().setUrl("Patient").setMethod(Bundle.HTTPVerb.POST);
 		Bundle output = mySystemDao.transaction(mySrd, input);
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
-		Long patientId = new IdType(output.getEntry().get(1).getResponse().getLocation()).getIdPartAsLong();
+		JpaPid patientId = JpaPid.fromId(new IdType(output.getEntry().get(1).getResponse().getLocation()).getIdPartAsLong());
 
 		assertPersistedPartitionIdMatches(patientId);
 	}
@@ -744,7 +745,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		assertNotGone(o2);
 	}
 
-	private void assertPersistedPartitionIdMatches(Long patientId) {
+	private void assertPersistedPartitionIdMatches(JpaPid patientId) {
 		runInTransaction(() -> {
 			// HFJ_RESOURCE
 			ResourceTable resourceTable = myResourceTableDao.findById(patientId).orElseThrow(IllegalArgumentException::new);
@@ -762,7 +763,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		Patient patient = new Patient();
 		patient.getMeta().addTag("http://system", "code", "display");
 		patient.setActive(true);
-		Long patientId = myPatientDao.create(patient, mySrd).getId().getIdPartAsLong();
+		JpaPid patientId = JpaPid.fromId(myPatientDao.create(patient, mySrd).getId().getIdPartAsLong());
 		assertPersistedPartitionIdMatches(patientId);
 
 		// Update that resource
@@ -820,7 +821,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		Patient p = new Patient();
 		p.setActive(false);
 		p.addIdentifier().setValue("12345");
-		Long patientId = myPatientDao.update(p, "Patient?identifier=12345", mySrd).getId().getIdPartAsLong();
+		JpaPid patientId = JpaPid.fromId(myPatientDao.update(p, "Patient?identifier=12345", mySrd).getId().getIdPartAsLong());
 		runInTransaction(() -> {
 			// HFJ_RESOURCE
 			assertEquals(1, myResourceTableDao.count());

@@ -81,7 +81,6 @@ public class ResourceHistoryTable extends BaseHasResource<ResourceHistoryTablePk
 	@EmbeddedId
 	private ResourceHistoryTablePk myId;
 
-	@ConditionalIdProperty
 	@Column(name = PartitionablePartitionId.PARTITION_ID)
 	private Integer myPartitionIdValue;
 
@@ -232,6 +231,9 @@ public class ResourceHistoryTable extends BaseHasResource<ResourceHistoryTablePk
 
 	@Override
 	public ResourceHistoryTablePk getId() {
+		if (myId == null) {
+			myId = new ResourceHistoryTablePk();
+		}
 		return myId;
 	}
 
@@ -361,8 +363,13 @@ public class ResourceHistoryTable extends BaseHasResource<ResourceHistoryTablePk
 
 	public void setPartitionId(PartitionablePartitionId thePartitionablePartitionId) {
 		if (thePartitionablePartitionId != null) {
+			getId().setPartitionIdValue(thePartitionablePartitionId.getPartitionId());
 			myPartitionIdValue = thePartitionablePartitionId.getPartitionId();
 			myPartitionDateValue = thePartitionablePartitionId.getPartitionDate();
+		} else {
+			getId().setPartitionIdValue(null);
+			myPartitionIdValue = null;
+			myPartitionDateValue = null;
 		}
 	}
 }

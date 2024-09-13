@@ -13,6 +13,7 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.ReindexParameters;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboTokenNonUnique;
@@ -338,7 +339,7 @@ public class ReindexJobTest extends BaseJpaR4Test {
 		IIdType obsId = myReindexTestHelper.createObservationWithAlleleExtension(Observation.ObservationStatus.FINAL);
 
 		runInTransaction(() -> {
-			int entriesInSpIndexTokenTable = myResourceIndexedSearchParamTokenDao.countForResourceId(obsId.getIdPartAsLong());
+			int entriesInSpIndexTokenTable = myResourceIndexedSearchParamTokenDao.countForResourceId(JpaPid.fromId(obsId.getIdPartAsLong()));
 			assertEquals(1, entriesInSpIndexTokenTable);
 
 			// simulate resource deletion
@@ -363,7 +364,7 @@ public class ReindexJobTest extends BaseJpaR4Test {
 
 		// then
 		runInTransaction(() -> {
-			int entriesInSpIndexTokenTablePostReindexing = myResourceIndexedSearchParamTokenDao.countForResourceId(obsId.getIdPartAsLong());
+			int entriesInSpIndexTokenTablePostReindexing = myResourceIndexedSearchParamTokenDao.countForResourceId(JpaPid.fromId(obsId.getIdPartAsLong()));
 			assertEquals(0, entriesInSpIndexTokenTablePostReindexing);
 		});
 	}

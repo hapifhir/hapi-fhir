@@ -7,6 +7,7 @@ import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexStep;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -116,8 +117,8 @@ public class ReindexStepTest extends BaseJpaR4Test {
 		data.addTypedPid("Patient", id1);
 
 		runInTransaction(() -> {
-			myResourceIndexedSearchParamStringDao.deleteByResourceId(id0);
-			myResourceIndexedSearchParamTokenDao.deleteByResourceId(id0);
+			myResourceIndexedSearchParamStringDao.deleteByResourceId(JpaPid.fromId(id0));
+			myResourceIndexedSearchParamTokenDao.deleteByResourceId(JpaPid.fromId(id0));
 		});
 
 		// Execute
@@ -229,8 +230,8 @@ public class ReindexStepTest extends BaseJpaR4Test {
 			// Also set the current index status to errored on one, so it can be reset
 			assertEquals(1, myEntityManager.createNativeQuery("UPDATE HFJ_RESOURCE SET SP_INDEX_STATUS = 2 WHERE RES_ID = " + id0).executeUpdate());
 
-			myResourceIndexedSearchParamStringDao.deleteByResourceId(id0);
-			myResourceIndexedSearchParamTokenDao.deleteByResourceId(id0);
+			myResourceIndexedSearchParamStringDao.deleteByResourceId(JpaPid.fromId(id0));
+			myResourceIndexedSearchParamTokenDao.deleteByResourceId(JpaPid.fromId(id0));
 		});
 
 		// Execute

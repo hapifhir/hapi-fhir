@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
@@ -232,8 +234,8 @@ public class ResourceLink extends BaseResourceIndex {
 		mySourcePath = theSourcePath;
 	}
 
-	public Long getSourceResourcePid() {
-		return mySourceResourcePid;
+	public JpaPid getSourceResourcePk() {
+		return JpaPid.fromId(mySourceResourcePid, myPartitionIdValue);
 	}
 
 	public ResourceTable getSourceResource() {

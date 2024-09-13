@@ -60,7 +60,7 @@ public class DeleteExpungeSqlBuilder {
 	DeleteExpungeSqlResult convertPidsToDeleteExpungeSql(
 			List<JpaPid> theJpaPids, boolean theCascade, Integer theCascadeMaxRounds) {
 
-		Set<Long> pids = JpaPid.toLongSet(theJpaPids);
+		Set<JpaPid> pids = Set.copyOf(theJpaPids);
 		validateOkToDeleteAndExpunge(pids, theCascade, theCascadeMaxRounds);
 
 		List<String> rawSql = new ArrayList<>();
@@ -78,13 +78,13 @@ public class DeleteExpungeSqlBuilder {
 		return new DeleteExpungeSqlResult(rawSql, pids.size());
 	}
 
-	public void validateOkToDeleteAndExpunge(Set<Long> thePids, boolean theCascade, Integer theCascadeMaxRounds) {
+	public void validateOkToDeleteAndExpunge(Set<JpaPid> thePids, boolean theCascade, Integer theCascadeMaxRounds) {
 		if (!myStorageSettings.isEnforceReferentialIntegrityOnDelete()) {
 			ourLog.info("Referential integrity on delete disabled.  Skipping referential integrity check.");
 			return;
 		}
 
-		List<JpaPid> targetPidsAsResourceIds = JpaPid.fromLongList(thePids);
+		List<JpaPid> targetPidsAsResourceIds = List.copyOf(thePids);
 		List<ResourceLink> conflictResourceLinks = Collections.synchronizedList(new ArrayList<>());
 		findResourceLinksWithTargetPidIn(targetPidsAsResourceIds, targetPidsAsResourceIds, conflictResourceLinks);
 
@@ -106,9 +106,9 @@ public class DeleteExpungeSqlBuilder {
 			while (true) {
 				List<JpaPid> addedThisRound = new ArrayList<>();
 				for (ResourceLink next : conflictResourceLinks) {
-					Long nextPid = next.getSourceResourcePid();
+					JpaPid nextPid = next.getSourceResourcePk();
 					if (thePids.add(nextPid)) {
-						addedThisRound.add(JpaPid.fromId(nextPid));
+						addedThisRound.add(nextPid);
 					}
 				}
 
@@ -135,7 +135,7 @@ public class DeleteExpungeSqlBuilder {
 		// we arrive here, those sessions are closed. So instead, we resolve them from PIDs, which are eagerly loaded.
 		String sourceResourceId = myIdHelper
 				.resourceIdFromPidOrThrowException(
-						JpaPid.fromId(firstConflict.getSourceResourcePid()), firstConflict.getSourceResourceType())
+						firstConflict.getSourceResourcePk(), firstConflict.getSourceResourceType())
 				.toVersionless()
 				.getValue();
 		String targetResourceId = myIdHelper
@@ -153,19 +153,17 @@ public class DeleteExpungeSqlBuilder {
 			List<JpaPid> theAllTargetPids,
 			List<JpaPid> theSomeTargetPids,
 			List<ResourceLink> theConflictResourceLinks) {
-		List<Long> allTargetPidsAsLongs = JpaPid.toLongList(theAllTargetPids);
-		List<Long> someTargetPidsAsLongs = JpaPid.toLongList(theSomeTargetPids);
 		// We only need to find one conflict, so if we found one already in an earlier partition run, we can skip the
 		// rest of the searches
 		if (theConflictResourceLinks.isEmpty()) {
 			List<ResourceLink> conflictResourceLinks =
-					myResourceLinkDao.findWithTargetPidIn(someTargetPidsAsLongs).stream()
+					myResourceLinkDao.findWithTargetPidIn((theSomeTargetPids)).stream()
 							// Filter out resource links for which we are planning to delete the source.
 							// theAllTargetPids contains a list of all the pids we are planning to delete.  So we only
 							// want
 							// to consider a link to be a conflict if the source of that link is not in
 							// theAllTargetPids.
-							.filter(link -> !allTargetPidsAsLongs.contains(link.getSourceResourcePid()))
+							.filter(link -> !(theAllTargetPids).contains(link.getSourceResourcePk()))
 							.collect(Collectors.toList());
 
 			// We do this in two steps to avoid lock contention on this synchronized list

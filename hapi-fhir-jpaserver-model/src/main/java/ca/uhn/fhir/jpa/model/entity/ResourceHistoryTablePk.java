@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.model.entity;
 
 
+import ca.uhn.fhir.rest.api.server.storage.IResourceVersionPersistentId;
 import ca.uhn.hapi.fhir.sql.hibernatesvc.ConditionalIdProperty;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
@@ -13,13 +14,12 @@ import java.io.Serializable;
 import java.util.Objects;
 
 @Embeddable
-public class ResourceHistoryTablePk implements Serializable {
+public class ResourceHistoryTablePk implements IResourceVersionPersistentId, Serializable {
 
-	@Id
 	@SequenceGenerator(name = "SEQ_RESOURCE_HISTORY_ID", sequenceName = "SEQ_RESOURCE_HISTORY_ID")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_RESOURCE_HISTORY_ID")
 	@Column(name = "PID")
-	private Long myId;
+	private Long myVersionId;
 
 	@ConditionalIdProperty
 	@Column(name = PartitionablePartitionId.PARTITION_ID)
@@ -34,12 +34,12 @@ public class ResourceHistoryTablePk implements Serializable {
 			return false;
 		}
 		ResourceHistoryTablePk that = (ResourceHistoryTablePk) theO;
-		return Objects.equals(myId, that.myId) && Objects.equals(myPartitionIdValue, that.myPartitionIdValue);
+		return Objects.equals(myVersionId, that.myVersionId) && Objects.equals(myPartitionIdValue, that.myPartitionIdValue);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(myId, myPartitionIdValue);
+		return Objects.hash(myVersionId, myPartitionIdValue);
 	}
 
 	public void setPartitionIdValue(Integer thePartitionIdValue) {
@@ -47,6 +47,6 @@ public class ResourceHistoryTablePk implements Serializable {
 	}
 
 	public Long getId() {
-		return myId;
+		return myVersionId;
 	}
 }
