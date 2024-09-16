@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.search.builder.sql;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.search.builder.ISearchQueryExecutor;
 import ca.uhn.fhir.jpa.util.ScrollableResultsIterator;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -42,7 +43,7 @@ import java.util.Objects;
 
 public class SearchQueryExecutor implements ISearchQueryExecutor {
 
-	private static final Long NO_MORE = -1L;
+	private static final JpaPid NO_MORE = JpaPid.fromId(-1L);
 	private static final SearchQueryExecutor NO_VALUE_EXECUTOR = new SearchQueryExecutor();
 	private static final Object[] EMPTY_OBJECT_ARRAY = new Object[0];
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchQueryExecutor.class);
@@ -53,7 +54,7 @@ public class SearchQueryExecutor implements ISearchQueryExecutor {
 
 	private boolean myQueryInitialized;
 	private ScrollableResultsIterator<Object> myResultSet;
-	private Long myNext;
+	private JpaPid myNext;
 
 	/**
 	 * Constructor
@@ -86,10 +87,10 @@ public class SearchQueryExecutor implements ISearchQueryExecutor {
 	}
 
 	@Override
-	public Long next() {
+	public JpaPid next() {
 		fetchNext();
 		Validate.isTrue(hasNext(), "Can not call next() right now, no data remains");
-		Long next = myNext;
+		JpaPid next = myNext;
 		myNext = null;
 		return next;
 	}
@@ -146,13 +147,23 @@ public class SearchQueryExecutor implements ISearchQueryExecutor {
 					myNext = NO_MORE;
 				} else {
 					Object nextRow = Objects.requireNonNull(myResultSet.next());
-					Number next;
+					// We should typically get two columns back, the first is the partition ID and the second
+					// is the resource ID. But if we're doing a count query, we'll get a single column in an array
+					// or maybe even just a single non array value depending on how the platform handles it.
 					if (nextRow instanceof Number) {
-						next = (Number) nextRow;
+						long count = ((Number) nextRow).longValue();
+						myNext = JpaPid.fromId(count, null);
 					} else {
-						next = (Number) ((Object[]) nextRow)[0];
+						Object[] nextRowAsArray = (Object[]) nextRow;
+						if (nextRowAsArray.length == 1) {
+							Long count = (Long) nextRowAsArray[0];
+							myNext = JpaPid.fromId(count, null);
+						} else {
+							Integer nextPartitionId = (Integer) nextRowAsArray[0];
+							Long nextResourceId = (Long) nextRowAsArray[1];
+							myNext = JpaPid.fromId(nextResourceId, nextPartitionId);
+						}
 					}
-					myNext = next.longValue();
 				}
 
 			} catch (Exception e) {

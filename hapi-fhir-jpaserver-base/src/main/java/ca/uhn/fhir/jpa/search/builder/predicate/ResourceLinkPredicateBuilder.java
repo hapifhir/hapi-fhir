@@ -771,7 +771,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 
 	@Nonnull
 	public Condition createEverythingPredicate(
-			String theResourceName, List<String> theSourceResourceNames, Long... theTargetPids) {
+			String theResourceName, List<String> theSourceResourceNames, JpaPid... theTargetPids) {
 		Condition condition;
 
 		if (theTargetPids != null && theTargetPids.length >= 1) {

@@ -191,7 +191,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 			String theResourceType, SearchParameterMap theParams, RequestDetails theRequestDetails) {
 		validateHibernateSearchIsEnabled();
 
-		SearchQueryOptionsStep<?, Long, SearchLoadingOptionsStep, ?, ?> searchQueryOptionsStep =
+		SearchQueryOptionsStep<?, JpaPid, SearchLoadingOptionsStep, ?, ?> searchQueryOptionsStep =
 				getSearchQueryOptionsStep(theResourceType, theParams, null);
 		logQuery(searchQueryOptionsStep, theRequestDetails);
 
@@ -211,10 +211,10 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		int count = getMaxFetchSize(theParams, theMaxResultsToFetch);
 
 		// perform an offset search instead of a scroll one, which doesn't allow for offset
-		SearchQueryOptionsStep<?, Long, SearchLoadingOptionsStep, ?, ?> searchQueryOptionsStep =
+		SearchQueryOptionsStep<?, JpaPid, SearchLoadingOptionsStep, ?, ?> searchQueryOptionsStep =
 				getSearchQueryOptionsStep(theResourceType, theParams, theReferencingPid);
 		logQuery(searchQueryOptionsStep, theRequestDetails);
-		List<Long> longs = searchQueryOptionsStep.fetchHits(offset, count);
+		List<JpaPid> longs = searchQueryOptionsStep.fetchHits(offset, count);
 
 		// indicate param was already processed, otherwise queries DB to process it
 		theParams.setOffset(null);
@@ -235,17 +235,17 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	}
 
 	@SuppressWarnings("rawtypes")
-	private SearchQueryOptionsStep<?, Long, SearchLoadingOptionsStep, ?, ?> getSearchQueryOptionsStep(
+	private SearchQueryOptionsStep<?, JpaPid, SearchLoadingOptionsStep, ?, ?> getSearchQueryOptionsStep(
 			String theResourceType, SearchParameterMap theParams, IResourcePersistentId theReferencingPid) {
 
 		dispatchEvent(IHSearchEventListener.HSearchEventType.SEARCH);
-		var query = getSearchSession()
-				.search(ResourceTable.class)
-				// The document id is the PK which is pid.  We use this instead of _myId to avoid fetching the doc body.
-				.select(
-						// adapt the String docRef.id() to the Long that it really is.
-						f -> f.composite(docRef -> Long.valueOf(docRef.id()), f.documentReference()))
-				.where(f -> buildWhereClause(f, theResourceType, theParams, theReferencingPid));
+		SearchQueryOptionsStep<?, JpaPid, SearchLoadingOptionsStep, ?, ?> query = getSearchSession()
+			.search(ResourceTable.class)
+			// The document id is the PK which is pid.  We use this instead of _myId to avoid fetching the doc body.
+			.select(
+				// adapt the String docRef.id() to the Long that it really is.
+				f -> f.composite(docRef -> JpaPid.fromId(Long.valueOf(docRef.id())), f.documentReference()))
+			.where(f -> buildWhereClause(f, theResourceType, theParams, theReferencingPid));
 
 		if (theParams.getSort() != null) {
 			query.sort(f -> myExtendedFulltextSortHelper.getSortClauses(f, theParams.getSort(), theResourceType));
@@ -385,7 +385,6 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	@SuppressWarnings("rawtypes")
 	private List<IResourcePersistentId> toList(ISearchQueryExecutor theSearchResultStream, long theMaxSize) {
 		return StreamSupport.stream(Spliterators.spliteratorUnknownSize(theSearchResultStream, 0), false)
-				.map(JpaPid::fromId)
 				.limit(theMaxSize)
 				.collect(Collectors.toList());
 	}
@@ -472,7 +471,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 
 	@Override
 	public long count(String theResourceName, SearchParameterMap theParams) {
-		SearchQueryOptionsStep<?, Long, SearchLoadingOptionsStep, ?, ?> queryOptionsStep =
+		SearchQueryOptionsStep<?, JpaPid, SearchLoadingOptionsStep, ?, ?> queryOptionsStep =
 				getSearchQueryOptionsStep(theResourceName, theParams, null);
 
 		return queryOptionsStep.fetchTotalHitCount();

@@ -111,6 +111,7 @@ public class SearchQueryBuilder {
 	private boolean myNeedResourceTableRoot;
 	private int myNextNearnessColumnId = 0;
 	private DbColumn mySelectedResourceIdColumn;
+	private DbColumn mySelectedPartitionIdColumn;
 
 	/**
 	 * Constructor
@@ -434,7 +435,8 @@ public class SearchQueryBuilder {
 							FunctionCall.count().setIsDistinct(true).addColumnParams(root.getResourceIdColumn()));
 				} else {
 					mySelectedResourceIdColumn = root.getResourceIdColumn();
-					mySelect.addColumns(mySelectedResourceIdColumn);
+					mySelectedPartitionIdColumn = root.getPartitionIdColumn();
+					mySelect.addColumns(mySelectedPartitionIdColumn, mySelectedResourceIdColumn);
 				}
 				mySelect.addFromTable(root.getTable());
 				myFirstPredicateBuilder = root;
@@ -759,9 +761,14 @@ public class SearchQueryBuilder {
 		return false;
 	}
 
-	public void addResourceIdsPredicate(List<Long> thePidList) {
+	public void addResourceIdsPredicate(List<JpaPid> thePidList) {
+
+		// FIXME: make this partition aware where needed
+		List<Long> pidList = thePidList
+			.stream().map(JpaPid::getId).collect(Collectors.toList());
+
 		DbColumn resourceIdColumn = getOrCreateFirstPredicateBuilder().getResourceIdColumn();
-		InCondition predicate = new InCondition(resourceIdColumn, generatePlaceholders(thePidList));
+		InCondition predicate = new InCondition(resourceIdColumn, generatePlaceholders(pidList));
 		addPredicate(predicate);
 	}
 

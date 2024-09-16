@@ -46,7 +46,7 @@ public class SearchQueryExecutors {
 			}
 
 			@Override
-			public Long next() {
+			public JpaPid next() {
 				myCount += 1;
 				return theExecutor.next();
 			}
@@ -54,7 +54,7 @@ public class SearchQueryExecutors {
 	}
 
 	@Nonnull
-	public static ISearchQueryExecutor from(List<Long> rawPids) {
+	public static ISearchQueryExecutor from(List<JpaPid> rawPids) {
 		return new ResolvedSearchQueryExecutor(rawPids);
 	}
 
@@ -66,6 +66,7 @@ public class SearchQueryExecutors {
 		return new JpaPidQueryAdaptor(theIterable.iterator());
 	}
 
+	// FIXME: still needed?
 	static class JpaPidQueryAdaptor implements ISearchQueryExecutor {
 		final Iterator<JpaPid> myIterator;
 
@@ -82,9 +83,8 @@ public class SearchQueryExecutors {
 		}
 
 		@Override
-		public Long next() {
-			JpaPid next = myIterator.next();
-			return next == null ? null : next.getId();
+		public JpaPid next() {
+			return myIterator.next();
 		}
 	}
 }

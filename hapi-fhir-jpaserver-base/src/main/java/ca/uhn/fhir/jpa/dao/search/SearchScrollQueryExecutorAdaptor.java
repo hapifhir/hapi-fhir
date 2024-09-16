@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.dao.search;
 
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.search.builder.ISearchQueryExecutor;
 import org.hibernate.search.engine.search.query.SearchScroll;
 import org.hibernate.search.engine.search.query.SearchScrollResult;
@@ -29,10 +30,10 @@ import java.util.Iterator;
  * Adapt Hibernate Search SearchScroll paging result to our ISearchQueryExecutor
  */
 public class SearchScrollQueryExecutorAdaptor implements ISearchQueryExecutor {
-	private final SearchScroll<Long> myScroll;
-	private Iterator<Long> myCurrentIterator;
+	private final SearchScroll<JpaPid> myScroll;
+	private Iterator<JpaPid> myCurrentIterator;
 
-	public SearchScrollQueryExecutorAdaptor(SearchScroll<Long> theScroll) {
+	public SearchScrollQueryExecutorAdaptor(SearchScroll<JpaPid> theScroll) {
 		myScroll = theScroll;
 		advanceNextScrollPage();
 	}
@@ -42,7 +43,7 @@ public class SearchScrollQueryExecutorAdaptor implements ISearchQueryExecutor {
 	 * Note: the last page will have 0 hits.
 	 */
 	private void advanceNextScrollPage() {
-		SearchScrollResult<Long> scrollResults = myScroll.next();
+		SearchScrollResult<JpaPid> scrollResults = myScroll.next();
 		myCurrentIterator = scrollResults.hits().iterator();
 	}
 
@@ -57,8 +58,8 @@ public class SearchScrollQueryExecutorAdaptor implements ISearchQueryExecutor {
 	}
 
 	@Override
-	public Long next() {
-		Long result = myCurrentIterator.next();
+	public JpaPid next() {
+		JpaPid result = myCurrentIterator.next();
 		// was this the last in the current scroll page?
 		if (!myCurrentIterator.hasNext()) {
 			advanceNextScrollPage();

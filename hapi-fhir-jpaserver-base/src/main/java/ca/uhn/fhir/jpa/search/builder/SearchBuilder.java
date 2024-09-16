@@ -163,6 +163,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 	public static final int MAXIMUM_PAGE_SIZE_FOR_TESTING = 50;
 	public static final String RESOURCE_ID_ALIAS = "resource_id";
+	public static final String PARTITION_ID_ALIAS = "partition_id";
 	public static final String RESOURCE_VERSION_ALIAS = "resource_version";
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchBuilder.class);
 	private static final JpaPid NO_MORE = JpaPid.fromId(-1L);
@@ -171,6 +172,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	private static final String MY_TARGET_RESOURCE_TYPE = "myTargetResourceType";
 	private static final String MY_SOURCE_RESOURCE_TYPE = "mySourceResourceType";
 	private static final String MY_TARGET_RESOURCE_VERSION = "myTargetResourceVersion";
+	public static final JpaPid[] EMPTY_JPA_PID_ARRAY = new JpaPid[0];
 	public static boolean myUseMaxPageSize50ForTest = false;
 	protected final IInterceptorBroadcaster myInterceptorBroadcaster;
 	protected final IResourceTagDao myResourceTagDao;
@@ -337,7 +339,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		if (queries.isEmpty()) {
 			return 0L;
 		} else {
-			return queries.get(0).next();
+			JpaPid jpaPid = queries.get(0).next();
+			return jpaPid.getId();
 		}
 	}
 
@@ -460,7 +463,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				ourLog.trace("Query needs db after HSearch.  Chunking.");
 				// Finish the query in the database for the rest of the search parameters, sorting, partitioning, etc.
 				// We break the pids into chunks that fit in the 1k limit for jdbc bind params.
-				new QueryChunker<Long>()
+				new QueryChunker<JpaPid>()
 						.chunk(
 								fulltextExecutor,
 								SearchBuilder.getMaximumPageSize(),
@@ -560,7 +563,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 	private void doCreateChunkedQueries(
 			SearchParameterMap theParams,
-			List<Long> thePids,
+			List<JpaPid> thePids,
 			Integer theOffset,
 			SortSpec sort,
 			boolean theCount,
@@ -578,7 +581,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	 *
 	 * @param theTargetPids
 	 */
-	private void extractTargetPidsFromIdParams(Set<Long> theTargetPids) {
+	private void extractTargetPidsFromIdParams(Set<JpaPid> theTargetPids) {
 		// get all the IQueryParameterType objects
 		// for _id -> these should all be StringParam values
 		HashSet<String> ids = new HashSet<>();
@@ -604,9 +607,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				myRequestPartitionId, myResourceName, new ArrayList<>(ids));
 
 		// add the pids to targetPids
-		for (JpaPid pid : idToPid.values()) {
-			theTargetPids.add(pid.getId());
-		}
+		theTargetPids.addAll(idToPid.values());
 	}
 
 	private void createChunkedQuery(
@@ -616,7 +617,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			Integer theMaximumResults,
 			boolean theCountOnlyFlag,
 			RequestDetails theRequest,
-			List<Long> thePidList,
+			List<JpaPid> thePidList,
 			List<ISearchQueryExecutor> theSearchQueryExecutors) {
 		if (myParams.getEverythingMode() != null) {
 			createChunkedQueryForEverythingSearch(
@@ -633,7 +634,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			Integer theOffset,
 			boolean theCountOnlyFlag,
 			RequestDetails theRequest,
-			List<Long> thePidList,
+			List<JpaPid> thePidList,
 			List<ISearchQueryExecutor> theSearchQueryExecutors) {
 		SearchQueryBuilder sqlBuilder = new SearchQueryBuilder(
 				myContext,
@@ -755,7 +756,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			Integer theOffset,
 			Integer theMaximumResults,
 			boolean theCountOnlyFlag,
-			List<Long> thePidList,
+			List<JpaPid> thePidList,
 			List<ISearchQueryExecutor> theSearchQueryExecutors) {
 
 		SearchQueryBuilder sqlBuilder = new SearchQueryBuilder(
@@ -773,7 +774,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 		JdbcTemplate jdbcTemplate = initializeJdbcTemplate(theMaximumResults);
 
-		Set<Long> targetPids = new HashSet<>();
+		Set<JpaPid> targetPids = new HashSet<>();
 		if (myParams.get(IAnyResource.SP_RES_ID) != null) {
 
 			extractTargetPidsFromIdParams(targetPids);
@@ -799,7 +800,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			String sql = allTargetsSql.getSql();
 			Object[] args = allTargetsSql.getBindVariables().toArray(new Object[0]);
 
-			List<Long> output = jdbcTemplate.query(sql, args, new SingleColumnRowMapper<>(Long.class));
+			List<JpaPid> output = jdbcTemplate.query(sql, args, new JpaPidRowMapper());
 
 			// we add a search executor to fetch unlinked patients first
 			theSearchQueryExecutors.add(new ResolvedSearchQueryExecutor(output));
@@ -811,7 +812,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		}
 
 		queryStack3.addPredicateEverythingOperation(
-				myResourceName, typeSourceResources, targetPids.toArray(new Long[0]));
+				myResourceName, typeSourceResources, targetPids.toArray(EMPTY_JPA_PID_ARRAY));
 
 		// Add PID list predicate for full text search and/or lastn operation
 		addPidListPredicate(thePidList, sqlBuilder);
@@ -832,7 +833,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		executeSearch(theOffset, theSearchQueryExecutors, sqlBuilder);
 	}
 
-	private void addPidListPredicate(List<Long> thePidList, SearchQueryBuilder theSqlBuilder) {
+	private void addPidListPredicate(List<JpaPid> thePidList, SearchQueryBuilder theSqlBuilder) {
 		if (thePidList != null && !thePidList.isEmpty()) {
 			theSqlBuilder.addResourceIdsPredicate(thePidList);
 		}
@@ -1113,7 +1114,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			Collection<JpaPid> theIncludedPids,
 			List<IBaseResource> theResourceListToPopulate,
 			boolean theForHistoryOperation,
-			Map<JpaPid, Integer> thePosition) {
+			Map<Long, Integer> thePosition) {
 
 		Map<JpaPid, Long> resourcePidToVersion = null;
 		for (JpaPid next : thePids) {
@@ -1125,14 +1126,17 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			}
 		}
 
-		List<Long> versionlessPids = JpaPid.toLongList(thePids);
+		List<JpaPid> versionlessPids = new ArrayList<>(thePids);
 		if (versionlessPids.size() < getMaximumPageSize()) {
 			versionlessPids = normalizeIdListForInClause(versionlessPids);
 		}
 
+		// FIXME: add ability to be partitioned here
+		List<Long> rawPids = versionlessPids.stream().map(t -> t.getId()).collect(Collectors.toList());
+
 		// -- get the resource from the searchView
 		Collection<ResourceSearchView> resourceSearchViewList =
-				myResourceSearchViewDao.findByResourceIds(versionlessPids);
+				myResourceSearchViewDao.findByResourceIds(rawPids);
 
 		// -- preload all tags with tag definition if any
 		Map<JpaPid, Collection<ResourceTag>> tagMap = getResourceTagMap(resourceSearchViewList);
@@ -1182,7 +1186,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				continue;
 			}
 
-			Integer index = thePosition.get(resourceId);
+			Integer index = thePosition.get(resourceId.getId());
 			if (index == null) {
 				ourLog.warn("Got back unexpected resource PID {}", resourceId);
 				continue;
@@ -1226,7 +1230,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		Collection<ResourceTag> tagCol;
 		for (ResourceTag tag : tagList) {
 
-			resourceId = tag.getResource().getResourceId();
+			resourceId = tag.getResourceId();
 			tagCol = tagMap.get(resourceId);
 			if (tagCol == null) {
 				tagCol = new ArrayList<>();
@@ -1255,9 +1259,9 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		// when running asserts
 		assert new HashSet<>(thePids).size() == thePids.size() : "PID list contains duplicates: " + thePids;
 
-		Map<JpaPid, Integer> position = new HashMap<>();
+		Map<Long, Integer> position = new HashMap<>();
 		for (JpaPid next : thePids) {
-			position.put(next, theResourceListToPopulate.size());
+			position.put(next.getId(), theResourceListToPopulate.size());
 			theResourceListToPopulate.add(null);
 		}
 
@@ -2338,15 +2342,14 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 							}
 						}
 
-						Long nextLong = myResultsIterator.next();
+						JpaPid nextPid = myResultsIterator.next();
 						if (myHavePerfTraceFoundIdHook) {
-							callPerformanceTracingHook(nextLong);
+							callPerformanceTracingHook(nextPid);
 						}
 
-						if (nextLong != null) {
-							JpaPid next = JpaPid.fromId(nextLong);
-							if (myPidSet.add(next) && doNotSkipNextPidForEverything()) {
-								myNext = next;
+						if (nextPid != null) {
+							if (myPidSet.add(nextPid) && doNotSkipNextPidForEverything()) {
+								myNext = nextPid;
 								myNonSkipCount++;
 								break;
 							} else {
@@ -2436,10 +2439,10 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			return !(myParams.getEverythingMode() != null && (myOffset != null && myOffset >= myPidSet.size()));
 		}
 
-		private void callPerformanceTracingHook(Long theNextLong) {
+		private void callPerformanceTracingHook(JpaPid theNextPid) {
 			HookParams params = new HookParams()
 					.add(Integer.class, System.identityHashCode(this))
-					.add(Object.class, theNextLong);
+					.add(Object.class, theNextPid);
 			CompositeInterceptorBroadcaster.doCallHooks(
 					myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_SEARCH_FOUND_ID, params);
 		}
