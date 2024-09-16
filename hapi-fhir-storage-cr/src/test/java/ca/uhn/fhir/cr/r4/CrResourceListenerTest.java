@@ -1,6 +1,6 @@
 package ca.uhn.fhir.cr.r4;
 
-import ca.uhn.fhir.jpa.cache.ResourceChangeListenerCacheRefresherImpl;
+import ca.uhn.fhir.jpa.cache.IResourceChangeListenerCacheRefresher;
 import ca.uhn.fhir.jpa.cache.ResourceChangeListenerRegistryImpl;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.IdType;
@@ -16,13 +16,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @ExtendWith(SpringExtension.class)
-public class CrResourceListenerTests extends BaseCrR4TestServer {
+public class CrResourceListenerTest extends BaseCrR4TestServer {
 	@Autowired
 	EvaluationSettings myEvaluationSettings;
 	@Autowired
 	ResourceChangeListenerRegistryImpl myResourceChangeListenerRegistry;
 	@Autowired
-	ResourceChangeListenerCacheRefresherImpl myResourceChangeListenerCacheRefresher;
+	IResourceChangeListenerCacheRefresher myResourceChangeListenerCacheRefresher;
 
 
 	public MeasureReport runEvaluateMeasure(String periodStart, String periodEnd, String subject, String measureId, String reportType, String practitioner){
@@ -118,7 +118,7 @@ public class CrResourceListenerTests extends BaseCrR4TestServer {
 		myResourceChangeListenerCacheRefresher.refreshExpiredCachesAndNotifyListeners();
 
 		//cache should be invalidated for matching library name and version
-		assertThat(myEvaluationSettings.getLibraryCache()).hasSize(6);
+		assertThat(myEvaluationSettings.getLibraryCache()).hasSize(7);
 	}
 
 	@Test
