@@ -497,9 +497,10 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 		IIdType id = theResource.getIdElement();
 		RequestDetails requestDetails = createRequestDetails();
+		String query = createSearchParameterMapFor(theResource).toNormalizedQueryString(myFhirContext);
 
 		try {
-			outcome = theDao.update(theResource, requestDetails);
+			outcome = theDao.update(theResource, query, requestDetails);
 		} catch (ResourceVersionConflictException exception) {
 			final Optional<IBaseResource> optResource = readResourceById(theDao, id);
 
