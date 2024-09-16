@@ -51,7 +51,7 @@ public abstract class BaseJoiningPredicateBuilder extends BasePredicateBuilder {
 
 	public abstract DbColumn getResourceIdColumn();
 
-	DbColumn getPartitionIdColumn() {
+	public DbColumn getPartitionIdColumn() {
 		return myColumnPartitionId;
 	}
 

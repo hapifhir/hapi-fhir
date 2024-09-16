@@ -1226,7 +1226,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		Collection<ResourceTag> tagCol;
 		for (ResourceTag tag : tagList) {
 
-			resourceId = tag.getResourceId();
+			resourceId = tag.getResource().getResourceId();
 			tagCol = tagMap.get(resourceId);
 			if (tagCol == null) {
 				tagCol = new ArrayList<>();

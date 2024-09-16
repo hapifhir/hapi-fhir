@@ -1539,29 +1539,12 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		boolean haveSource = isNotBlank(source) && shouldStoreSource;
 		boolean haveRequestId = isNotBlank(requestId) && shouldStoreRequestId;
 		if (haveSource || haveRequestId) {
-			ResourceHistoryProvenanceEntity provenance = null;
-			if (reusingHistoryEntity) {
-				/*
-				 * If version history is disabled, then we may be reusing
-				 * a previous history entity. If that's the case, let's try
-				 * to reuse the previous provenance entity too.
-				 */
-				provenance = historyEntry.getProvenance();
-			}
-			if (provenance == null) {
-				provenance = historyEntry.toProvenance();
-			}
-			provenance.setResourceHistoryTable(historyEntry);
-			provenance.setResourceTable(theEntity);
-			provenance.setPartitionId(theEntity.getPartitionId());
 			if (haveRequestId) {
 				String persistedRequestId = left(requestId, Constants.REQUEST_ID_LENGTH);
-				provenance.setRequestId(persistedRequestId);
 				historyEntry.setRequestId(persistedRequestId);
 			}
 			if (haveSource) {
 				String persistedSource = left(source, ResourceHistoryTable.SOURCE_URI_LENGTH);
-				provenance.setSourceUri(persistedSource);
 				historyEntry.setSourceUri(persistedSource);
 			}
 			if (theResource != null) {
@@ -1571,8 +1554,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 						shouldStoreRequestId ? requestId : null,
 						theResource);
 			}
-
-			myEntityManager.persist(provenance);
 		}
 	}
 

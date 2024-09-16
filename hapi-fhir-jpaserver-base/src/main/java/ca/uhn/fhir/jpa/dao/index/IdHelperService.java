@@ -654,7 +654,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 							(Date) t[2],
 							PartitionablePartitionId.with((Integer) t[3], (LocalDate) t[4])))
 					.forEach(t -> {
-						String id = t.getPersistentId().toString();
+						String id = t.getPersistentId().getId().toString();
 						if (!theTargets.containsKey(id)) {
 							theTargets.put(id, new ArrayList<>());
 						}

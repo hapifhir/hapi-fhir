@@ -65,8 +65,8 @@ public class ResourceProviderR5ValueSetVersionedTest extends BaseResourceProvide
 	private IIdType myExtensionalVsId_v2;
 	private IIdType myLocalValueSetId_v1;
 	private IIdType myLocalValueSetId_v2;
-	private Long myExtensionalVsIdOnResourceTable_v1;
-	private Long myExtensionalVsIdOnResourceTable_v2;
+	private JpaPid myExtensionalVsIdOnResourceTable_v1;
+	private JpaPid myExtensionalVsIdOnResourceTable_v2;
 	private ValueSet myLocalVs_v1;
 	private ValueSet myLocalVs_v2;
 
@@ -122,13 +122,13 @@ public class ResourceProviderR5ValueSetVersionedTest extends BaseResourceProvide
 		valueSet.setId("ValueSet/vs1");
 		valueSet.getCompose().getInclude().get(0).setVersion("1");
 		myExtensionalVsId_v1 = persistSingleValueSet(valueSet, HttpVerb.POST);
-		myExtensionalVsIdOnResourceTable_v1 = (Long) myValueSetDao.readEntity(myExtensionalVsId_v1, null).getPersistentId().getId();
+		myExtensionalVsIdOnResourceTable_v1 = (JpaPid) myValueSetDao.readEntity(myExtensionalVsId_v1, null).getPersistentId();
 
 		valueSet.setVersion("2");
 		valueSet.setId("ValueSet/vs2");
 		valueSet.getCompose().getInclude().get(0).setVersion("2");
 		myExtensionalVsId_v2 = persistSingleValueSet(valueSet, HttpVerb.POST);
-		myExtensionalVsIdOnResourceTable_v2 = (Long) myValueSetDao.readEntity(myExtensionalVsId_v2, null).getPersistentId().getId();
+		myExtensionalVsIdOnResourceTable_v2 = (JpaPid) myValueSetDao.readEntity(myExtensionalVsId_v2, null).getPersistentId();
 
 	}
 
@@ -1059,7 +1059,7 @@ public class ResourceProviderR5ValueSetVersionedTest extends BaseResourceProvide
 
 	}
 
-	private void validateTermValueSetNotExpanded(String theValueSetName, String theVersion, Long theId) {
+	private void validateTermValueSetNotExpanded(String theValueSetName, String theVersion, JpaPid theId) {
 		runInTransaction(() -> {
 			Optional<TermValueSet> optionalValueSetByResourcePid = myTermValueSetDao.findByResourcePid(theId);
 			assertTrue(optionalValueSetByResourcePid.isPresent());
@@ -1475,7 +1475,7 @@ public class ResourceProviderR5ValueSetVersionedTest extends BaseResourceProvide
 		TermConcept parentB = new TermConcept(cs, "ParentB").setDisplay("Parent B");
 		cs.getConcepts().add(parentB);
 
-		theTermCodeSystemStorageSvc.storeNewCodeSystemVersion(JpaPid.fromId(table.getId()), URL_MY_CODE_SYSTEM, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
+		theTermCodeSystemStorageSvc.storeNewCodeSystemVersion(URL_MY_CODE_SYSTEM, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
 		return codeSystem;
 	}
 
@@ -1509,7 +1509,7 @@ public class ResourceProviderR5ValueSetVersionedTest extends BaseResourceProvide
 		TermConcept parentB = new TermConcept(cs, "ParentB").setDisplay("Parent B" + theCodeSystemVersion);
 		cs.getConcepts().add(parentB);
 
-		theTermCodeSystemStorageSvc.storeNewCodeSystemVersion(JpaPid.fromId(table.getId()), URL_MY_CODE_SYSTEM, "SYSTEM NAME", theCodeSystemVersion, cs, table);
+		theTermCodeSystemStorageSvc.storeNewCodeSystemVersion(URL_MY_CODE_SYSTEM, "SYSTEM NAME", theCodeSystemVersion, cs, table);
 		return codeSystem;
 	}
 

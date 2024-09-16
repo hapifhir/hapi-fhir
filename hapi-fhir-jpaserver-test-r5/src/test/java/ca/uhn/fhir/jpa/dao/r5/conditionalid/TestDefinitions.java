@@ -7,6 +7,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoObservation;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.r5.BaseJpaR5Test;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -96,7 +97,7 @@ public abstract class TestDefinitions implements ITestDataBuilder {
 		myPartitionSelectorInterceptor.setNextPartitionId(PARTITION_1);
 		createPatient(withId("A"), withActiveTrue());
 
-		Long id = runInTransaction(() -> myResourceTableDao.findByTypeAndFhirId("Patient", "A").orElseThrow().getId());
+		JpaPid id = runInTransaction(() -> myResourceTableDao.findByTypeAndFhirId("Patient", "A").orElseThrow().getId());
 
 		// Test
 		myCaptureQueriesListener.clear();
@@ -109,14 +110,14 @@ public abstract class TestDefinitions implements ITestDataBuilder {
 			assertThat(getSelectSql(1)).endsWith(" from HFJ_RESOURCE rt1_0 where rt1_0.PARTITION_ID='1' and rt1_0.RES_ID='" + id + "'");
 		} else {
 			assertThat(getSelectSql(0)).endsWith(" where rt1_0.RES_TYPE='Patient' and rt1_0.FHIR_ID in ('A')");
-			assertThat(getSelectSql(1)).endsWith(" from HFJ_RESOURCE rt1_0 where rt1_0.RES_ID='" + id + "'");
+			assertThat(getSelectSql(1)).endsWith(" from HFJ_RESOURCE rt1_0 where rt1_0.RES_ID='" + id.getId() + "'");
 		}
 		if (myIncludePartitionIdsInJoins) {
 			assertThat(getSelectSql(2)).contains(" left join HFJ_RES_VER_PROV mp1_0 on rht1_0.PID=mp1_0.RES_VER_PID and rht1_0.PARTITION_ID=mp1_0.PARTITION_ID where ");
 		} else {
 			assertThat(getSelectSql(2)).contains(" left join HFJ_RES_VER_PROV mp1_0 on rht1_0.PID=mp1_0.RES_VER_PID where ");
 		}
-		assertThat(getSelectSql(2)).endsWith(" where rht1_0.RES_ID='" + id + "' and rht1_0.RES_VER='1'");
+		assertThat(getSelectSql(2)).endsWith(" where rht1_0.RES_ID='" + id.getId() + "' and rht1_0.RES_VER='1'");
 		assertEquals(3, myCaptureQueriesListener.countSelectQueries());
 	}
 

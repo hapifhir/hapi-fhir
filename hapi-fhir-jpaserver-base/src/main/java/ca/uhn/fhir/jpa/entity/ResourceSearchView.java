@@ -65,6 +65,10 @@ import java.util.Date;
 		+ "               h.RES_TEXT_VC       as RES_TEXT_VC,    "
 		+ "               h.RES_ENCODING      as RES_ENCODING,   "
 		+ "               h.PARTITION_ID      as PARTITION_ID,   "
+		+ "               h.SOURCE_URI        as SOURCE_URI,   "
+		+ "               h.REQUEST_ID        as REQUEST_ID,   "
+	// FIXME: still need these? Should improve join?
+	// Provenance
 		+ "               p.SOURCE_URI        as PROV_SOURCE_URI,"
 		+ "               p.REQUEST_ID        as PROV_REQUEST_ID,"
 		+ "               r.FHIR_ID         as FHIR_ID      "
@@ -97,6 +101,12 @@ public class ResourceSearchView implements IBaseResourceEntity<JpaPid>, Serializ
 
 	@Column(name = "PROV_SOURCE_URI", length = ResourceHistoryTable.SOURCE_URI_LENGTH)
 	private String myProvenanceSourceUri;
+
+	@Column(name = "REQUEST_ID")
+	private String myRequestId;
+
+	@Column(name = "SOURCE_URI")
+	private String mySourceUri;
 
 	@Column(name = "HAS_TAGS")
 	private boolean myHasTags;
@@ -144,6 +154,14 @@ public class ResourceSearchView implements IBaseResourceEntity<JpaPid>, Serializ
 
 	public String getProvenanceSourceUri() {
 		return myProvenanceSourceUri;
+	}
+
+	public String getRequestId() {
+		return myRequestId;
+	}
+
+	public String getSourceUri() {
+		return mySourceUri;
 	}
 
 	@Override

@@ -126,7 +126,7 @@ public class RequestPartitionId implements IModelJson {
 		return RequestPartitionId.fromPartitionIds(newPartitionIds);
 	}
 
-	public static RequestPartitionId fromJson(String theJson) throws JsonProcessingException {
+    public static RequestPartitionId fromJson(String theJson) throws JsonProcessingException {
 		return ourObjectMapper.readValue(theJson, RequestPartitionId.class);
 	}
 

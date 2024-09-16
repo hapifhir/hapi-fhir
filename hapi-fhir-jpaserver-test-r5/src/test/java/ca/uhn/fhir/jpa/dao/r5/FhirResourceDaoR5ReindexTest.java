@@ -41,6 +41,7 @@ public class FhirResourceDaoR5ReindexTest extends BaseJpaR5Test {
 			assertTrue(table.isParamsUriPopulated());
 			ResourceIndexedSearchParamUri uri = new ResourceIndexedSearchParamUri(new PartitionSettings(), "SearchParameter", "url", "http://foo");
 			uri.setResource(table);
+			uri.setResourceId(table.getId().getId());
 			uri.calculateHashes();
 			myResourceIndexedSearchParamUriDao.save(uri);
 		});

@@ -228,12 +228,14 @@ public class DuplicateIndexR5Test extends BaseJpaR5Test {
 			// Create a dupe
 			ResourceIndexedSearchParamString dupe0 = new ResourceIndexedSearchParamString(myPartitionSettings, myStorageSettings, "Patient", "family", "FAMILY", "FAMILY");
 			dupe0.setResource(table);
+			dupe0.setResourceId(table.getId().getId());
 			dupe0.calculateHashes();
 			myResourceIndexedSearchParamStringDao.save(dupe0);
 
 			// Create a second dupe
 			ResourceIndexedSearchParamString dupe1 = new ResourceIndexedSearchParamString(myPartitionSettings, myStorageSettings, "Patient", "family", "FAMILY", "FAMILY");
 			dupe1.setResource(table);
+			dupe1.setResourceId(table.getId().getId());
 			dupe1.calculateHashes();
 			myResourceIndexedSearchParamStringDao.save(dupe1);
 		});

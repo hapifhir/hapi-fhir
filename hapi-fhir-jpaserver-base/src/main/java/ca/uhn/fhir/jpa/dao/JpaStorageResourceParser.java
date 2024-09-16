@@ -78,6 +78,7 @@ import java.util.List;
 
 import static ca.uhn.fhir.jpa.dao.BaseHapiFhirDao.decodeResource;
 import static java.util.Objects.nonNull;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class JpaStorageResourceParser implements IJpaStorageResourceParser {
@@ -148,7 +149,9 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 					tagList = null;
 			}
 			version = history.getVersion();
-			if (history.getProvenance() != null) {
+			provenanceSourceUri = history.getSourceUri();
+			provenanceRequestId = history.getRequestId();
+			if (isBlank(provenanceSourceUri) && isBlank(provenanceRequestId) && history.getProvenance() != null) {
 				provenanceRequestId = history.getProvenance().getRequestId();
 				provenanceSourceUri = history.getProvenance().getSourceUri();
 			}
@@ -188,7 +191,9 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 					break;
 			}
 			version = history.getVersion();
-			if (history.getProvenance() != null) {
+			provenanceSourceUri = history.getSourceUri();
+			provenanceRequestId = history.getRequestId();
+			if (isBlank(provenanceSourceUri) && isBlank(provenanceRequestId) && history.getProvenance() != null) {
 				provenanceRequestId = history.getProvenance().getRequestId();
 				provenanceSourceUri = history.getProvenance().getSourceUri();
 			}
@@ -199,8 +204,12 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 			resourceText = view.getResourceTextVc();
 			resourceEncoding = view.getEncoding();
 			version = view.getVersion();
-			provenanceRequestId = view.getProvenanceRequestId();
-			provenanceSourceUri = view.getProvenanceSourceUri();
+			provenanceRequestId = view.getRequestId();
+			provenanceSourceUri = view.getSourceUri();
+			if (isBlank(provenanceRequestId) && isBlank(provenanceSourceUri)) {
+				provenanceRequestId = view.getProvenanceRequestId();
+				provenanceSourceUri = view.getProvenanceSourceUri();
+			}
 			switch (myStorageSettings.getTagStorageMode()) {
 				case VERSIONED:
 				case NON_VERSIONED:

@@ -911,8 +911,11 @@ public class ResourceTable extends BaseHasResource<JpaPid> implements Serializab
 		b.append("fhirId", myFhirId);
 		b.append("resourceType", myResourceType);
 		b.append("version", myVersion);
-		if (myPartitionIdValue != null) {
+		if (myPartitionIdValue != null || getId().getPartitionId() != null) {
 			b.append("partitionId", myPartitionIdValue);
+			if (!Objects.equals(myPartitionIdValue, getId().getPartitionId())) {
+				b.append("id.partitionId", getId().getPartitionId());
+			}
 		}
 		b.append("lastUpdated", getUpdated().getValueAsString());
 		if (getDeleted() != null) {

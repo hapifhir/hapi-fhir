@@ -71,7 +71,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 	private IIdType myExtensionalCsId;
 	private IIdType myExtensionalVsId;
 	private IIdType myLocalValueSetId;
-	private Long myExtensionalVsIdOnResourceTable;
+	private JpaPid myExtensionalVsIdOnResourceTable;
 	private ValueSet myLocalVs;
 
 	private void loadAndPersistCodeSystemAndValueSet(HTTPVerb theVerb) throws IOException {
@@ -148,7 +148,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 			default:
 				throw new IllegalArgumentException("HTTP verb is not supported: " + theVerb);
 		}
-		myExtensionalVsIdOnResourceTable = (Long) myValueSetDao.readEntity(myExtensionalVsId, null).getPersistentId().getId();
+		myExtensionalVsIdOnResourceTable = (JpaPid) myValueSetDao.readEntity(myExtensionalVsId, null).getPersistentId();
 	}
 
 	private CodeSystem createExternalCs() {
@@ -1471,7 +1471,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		TermConcept parentB = new TermConcept(cs, "ParentB").setDisplay("Parent B");
 		cs.getConcepts().add(parentB);
 
-		theTermCodeSystemStorageSvc.storeNewCodeSystemVersion(JpaPid.fromId(table.getId()), URL_MY_CODE_SYSTEM, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
+		theTermCodeSystemStorageSvc.storeNewCodeSystemVersion(URL_MY_CODE_SYSTEM, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
 		return codeSystem;
 	}
 
