@@ -249,8 +249,6 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 				.validate(wrappedWorkerContext, theValidationCtx);
 	}
 
-
-
 	@Nonnull
 	protected VersionSpecificWorkerContextWrapper provideWorkerContext() {
 		VersionSpecificWorkerContextWrapper wrappedWorkerContext = myWrappedWorkerContext;

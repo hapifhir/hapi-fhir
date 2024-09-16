@@ -143,7 +143,6 @@ class ValidatorWrapper {
 		v.setNoBindingMsgSuppressed(myNoBindingMsgSuppressed);
 		v.setAllowXsiLocation(true);
 
-
 		List<ValidationMessage> messages = new ArrayList<>();
 
 		List<StructureDefinition> profiles = new ArrayList<>();
