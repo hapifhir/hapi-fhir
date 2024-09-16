@@ -24,6 +24,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.PersistentIdToForcedIdMap;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import jakarta.annotation.Nonnull;
@@ -63,6 +64,7 @@ public interface IIdHelperService<T extends IResourcePersistentId> {
 	 */
 	@Nonnull
 	T resolveResourcePersistentIds(
+		RequestDetails theRequestDetails,
 			@Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, String theId);
 
 	/**
@@ -73,6 +75,7 @@ public interface IIdHelperService<T extends IResourcePersistentId> {
 	 */
 	@Nonnull
 	T resolveResourcePersistentIds(
+		RequestDetails theRequestDetails,
 			@Nonnull RequestPartitionId theRequestPartitionId,
 			String theResourceType,
 			String theId,
@@ -85,6 +88,7 @@ public interface IIdHelperService<T extends IResourcePersistentId> {
 	 */
 	@Nonnull
 	Map<String, T> resolveResourcePersistentIds(
+		RequestDetails theRequestDetails,
 			@Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, List<String> theIds);
 
 	/**
@@ -94,6 +98,7 @@ public interface IIdHelperService<T extends IResourcePersistentId> {
 	 */
 	@Nonnull
 	Map<String, T> resolveResourcePersistentIds(
+		RequestDetails theRequestDetails,
 			@Nonnull RequestPartitionId theRequestPartitionId,
 			String theResourceType,
 			List<String> theIds,
@@ -113,6 +118,7 @@ public interface IIdHelperService<T extends IResourcePersistentId> {
 	 */
 	@Nonnull
 	IResourceLookup resolveResourceIdentity(
+		RequestDetails theRequestDetails,
 			@Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, String theResourceId)
 			throws ResourceNotFoundException;
 
@@ -125,6 +131,7 @@ public interface IIdHelperService<T extends IResourcePersistentId> {
 	 */
 	@Nonnull
 	IResourceLookup resolveResourceIdentity(
+			RequestDetails theRequestDetails,
 			@Nonnull RequestPartitionId theRequestPartitionId,
 			String theResourceType,
 			String theResourceId,
@@ -167,7 +174,7 @@ public interface IIdHelperService<T extends IResourcePersistentId> {
 	List<T> getPidsOrThrowException(RequestPartitionId theRequestPartitionId, List<IIdType> theIds);
 
 	@Nullable
-	T getPidOrNull(RequestPartitionId theRequestPartitionId, IBaseResource theResource);
+	T getPidOrNull(RequestDetails theRequestDetails, RequestPartitionId theRequestPartitionId, IBaseResource theResource);
 
 	@Nonnull
 	T getPidOrThrowException(RequestPartitionId theRequestPartitionId, IIdType theId);

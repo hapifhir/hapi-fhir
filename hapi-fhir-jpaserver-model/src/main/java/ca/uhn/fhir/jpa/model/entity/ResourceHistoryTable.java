@@ -82,7 +82,7 @@ public class ResourceHistoryTable extends BaseHasResource<ResourceHistoryTablePk
 	@EmbeddedId
 	private ResourceHistoryTablePk myId;
 
-	@Column(name = PartitionablePartitionId.PARTITION_ID)
+	@Column(name = PartitionablePartitionId.PARTITION_ID, nullable = true, insertable = false, updatable = false)
 	private Integer myPartitionIdValue;
 
 	@SuppressWarnings("unused")

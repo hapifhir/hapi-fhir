@@ -351,7 +351,11 @@ public class ResourceLink extends BaseResourceIndex {
 		b.append("ResourceLink[");
 		b.append("path=").append(mySourcePath);
 		b.append(", srcResId=").append(mySourceResourcePid);
+		b.append(", srcPartition=").append(myPartitionIdValue);
 		b.append(", targetResId=").append(myTargetResourcePid);
+		if (myTargetResourcePartitionId != null) {
+			b.append(", targetPartition=").append(myTargetResourcePartitionId.getPartitionId());
+		}
 		b.append(", targetResType=").append(myTargetResourceType);
 		b.append(", targetResVersion=").append(myTargetResourceVersion);
 		b.append(", targetResUrl=").append(myTargetResourceUrl);

@@ -340,7 +340,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 		IBaseResource group = myDaoRegistry
 				.getResourceDao("Group")
 				.read(new IdDt(theParams.getGroupId()), new SystemRequestDetails().setRequestPartitionId(partitionId));
-		JpaPid pidOrNull = myIdHelperService.getPidOrNull(partitionId, group);
+		JpaPid pidOrNull = myIdHelperService.getPidOrNull(null, partitionId, group);
 		LinkedHashSet<JpaPid> pids = new LinkedHashSet<>();
 		pids.add(pidOrNull);
 		return pids;
@@ -426,7 +426,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 			RequestPartitionId partitionId = theParameters.getPartitionIdOrAllPartitions();
 			SystemRequestDetails srd = new SystemRequestDetails().setRequestPartitionId(partitionId);
 			IBaseResource group = myDaoRegistry.getResourceDao("Group").read(new IdDt(theParameters.getGroupId()), srd);
-			JpaPid pidOrNull = myIdHelperService.getPidOrNull(partitionId, group);
+			JpaPid pidOrNull = myIdHelperService.getPidOrNull(null, partitionId, group);
 			List<MdmPidTuple<JpaPid>> goldenPidSourcePidTuple =
 					myMdmLinkDao.expandPidsFromGroupPidGivenMatchResult(pidOrNull, MdmMatchResultEnum.MATCH);
 			goldenPidSourcePidTuple.forEach(tuple -> {
@@ -679,7 +679,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 		SystemRequestDetails requestDetails = new SystemRequestDetails().setRequestPartitionId(partitionId);
 		IBaseResource group =
 				myDaoRegistry.getResourceDao("Group").read(new IdDt(theParams.getGroupId()), requestDetails);
-		JpaPid pidOrNull = myIdHelperService.getPidOrNull(partitionId, group);
+		JpaPid pidOrNull = myIdHelperService.getPidOrNull(null, partitionId, group);
 
 		// Attempt to perform MDM Expansion of membership
 		if (theParams.isExpandMdm()) {

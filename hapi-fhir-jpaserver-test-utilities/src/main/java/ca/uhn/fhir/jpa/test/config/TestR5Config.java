@@ -29,6 +29,7 @@ import ca.uhn.fhir.jpa.config.HapiJpaConfig;
 import ca.uhn.fhir.jpa.config.r5.JpaR5Config;
 import ca.uhn.fhir.jpa.config.util.HapiEntityManagerFactoryUtil;
 import ca.uhn.fhir.jpa.fql.provider.HfqlRestProviderCtxConfig;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicConfig;
@@ -98,6 +99,8 @@ public class TestR5Config {
 	@Value("${" + JpaConstants.HAPI_INCLUDE_PARTITION_IDS_IN_PKS + ":false}")
 	private boolean myIncludePartitionIdsInPks;
 
+	@Autowired
+	private PartitionSettings myPartitionSettings;
 	@Autowired
 	TestHSearchAddInConfig.IHSearchConfigurer hibernateSearchConfigurer;
 	@Autowired
@@ -202,6 +205,8 @@ public class TestR5Config {
 		hibernateSearchConfigurer.apply(extraProperties);
 
 		ourLog.info("jpaProperties: {}", extraProperties);
+
+		myPartitionSettings.setPartitionIdsInPrimaryKeys(myIncludePartitionIdsInPks);
 
 		return extraProperties;
 	}

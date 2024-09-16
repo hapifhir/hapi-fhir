@@ -33,8 +33,21 @@ public class PartitionSettings {
 	private Integer myDefaultPartitionId;
 	private boolean myAlwaysOpenNewTransactionForDifferentPartition;
 	private boolean myConditionalCreateDuplicateIdentifiersEnabled = false;
+	private boolean myPartitionIdsInPrimaryKeys = false;
 
-	public PartitionSettings() {}
+	public PartitionSettings() {
+	}
+
+	// FIXME: document
+	public boolean isPartitionIdsInPrimaryKeys() {
+		return myPartitionIdsInPrimaryKeys;
+	}
+
+	// FIXME: document
+	public void setPartitionIdsInPrimaryKeys(boolean thePartitionIdsInPrimaryKeys) {
+		myPartitionIdsInPrimaryKeys = thePartitionIdsInPrimaryKeys;
+	}
+
 	/**
 	 * Should we always open a new database transaction if the partition context changes
 	 *
@@ -50,7 +63,7 @@ public class PartitionSettings {
 	 * @since 6.6.0
 	 */
 	public void setAlwaysOpenNewTransactionForDifferentPartition(
-			boolean theAlwaysOpenNewTransactionForDifferentPartition) {
+		boolean theAlwaysOpenNewTransactionForDifferentPartition) {
 		myAlwaysOpenNewTransactionForDifferentPartition = theAlwaysOpenNewTransactionForDifferentPartition;
 	}
 
@@ -170,7 +183,7 @@ public class PartitionSettings {
 	 */
 	public boolean isAllowUnqualifiedCrossPartitionReference() {
 		return myAllowReferencesAcrossPartitions.equals(
-				PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
+			PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
 	}
 
 	public boolean isConditionalCreateDuplicateIdentifiersEnabled() {
@@ -178,7 +191,7 @@ public class PartitionSettings {
 	}
 
 	public void setConditionalCreateDuplicateIdentifiersEnabled(
-			boolean theConditionalCreateDuplicateIdentifiersEnabled) {
+		boolean theConditionalCreateDuplicateIdentifiersEnabled) {
 		myConditionalCreateDuplicateIdentifiersEnabled = theConditionalCreateDuplicateIdentifiersEnabled;
 	}
 

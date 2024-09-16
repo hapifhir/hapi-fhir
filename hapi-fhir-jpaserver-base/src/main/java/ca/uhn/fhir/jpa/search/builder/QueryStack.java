@@ -419,6 +419,7 @@ public class QueryStack {
 					return;
 				}
 			}
+			//noinspection fallthrough
 			case NUMBER:
 			case REFERENCE:
 			case COMPOSITE:
@@ -979,6 +980,7 @@ public class QueryStack {
 	}
 
 	private Condition createPredicateFilter(
+		RequestDetails theRequestDetails,
 			QueryStack theQueryStack3,
 			SearchFilterParser.FilterParameter theFilter,
 			String theResourceName,
@@ -992,6 +994,7 @@ public class QueryStack {
 				TokenParam param = new TokenParam();
 				param.setValueAsQueryToken(null, null, null, theFilter.getValue());
 				return theQueryStack3.createPredicateResourceId(
+					theRequestDetails,
 						null,
 						Collections.singletonList(Collections.singletonList(param)),
 						theResourceName,
@@ -1226,7 +1229,7 @@ public class QueryStack {
 					resourceLinkTableJoin.getColumnSourcePath(), mySqlBuilder.generatePlaceholders(paths));
 
 			Condition linkedPredicate =
-					searchForIdsWithAndOr(with().setSourceJoinColumn(resourceLinkTableJoin.getColumnSrcResourceId())
+					searchForIdsWithAndOr(theRequest, with().setSourceJoinColumn(resourceLinkTableJoin.getColumnSrcResourceId())
 							.setResourceName(targetResourceType)
 							.setParamName(parameterName)
 							.setAndOrParams(Collections.singletonList(orValues))
@@ -1884,6 +1887,7 @@ public class QueryStack {
 
 	@Nullable
 	public Condition createPredicateResourceId(
+		RequestDetails theRequestDetails,
 			@Nullable DbColumn theSourceJoinColumn,
 			List<List<IQueryParameterType>> theValues,
 			String theResourceName,
@@ -1891,6 +1895,7 @@ public class QueryStack {
 			RequestPartitionId theRequestPartitionId) {
 		ResourceIdPredicateBuilder builder = mySqlBuilder.newResourceIdBuilder();
 		return builder.createPredicateResourceId(
+			theRequestDetails,
 				theSourceJoinColumn, theResourceName, theValues, theOperation, theRequestPartitionId);
 	}
 
@@ -2328,7 +2333,7 @@ public class QueryStack {
 	}
 
 	@Nullable
-	public Condition searchForIdsWithAndOr(SearchForIdsParams theSearchForIdsParams) {
+	public Condition searchForIdsWithAndOr(RequestDetails theRequestDetails,SearchForIdsParams theSearchForIdsParams) {
 
 		if (theSearchForIdsParams.myAndOrParams.isEmpty()) {
 			return null;
@@ -2337,6 +2342,7 @@ public class QueryStack {
 		switch (theSearchForIdsParams.myParamName) {
 			case IAnyResource.SP_RES_ID:
 				return createPredicateResourceId(
+					theRequestDetails,
 						theSearchForIdsParams.mySourceJoinColumn,
 						theSearchForIdsParams.myAndOrParams,
 						theSearchForIdsParams.myResourceName,

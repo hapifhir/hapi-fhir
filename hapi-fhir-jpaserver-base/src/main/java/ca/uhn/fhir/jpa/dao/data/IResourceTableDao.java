@@ -135,8 +135,12 @@ public interface IResourceTableDao
 	 * is an object array, where the order matters (the array represents columns returned by the query). Be careful if you change this query in any way.
 	 */
 	@Query(
-			"SELECT t.myResourceType, t.myPid.myId, t.myDeleted, t.myPartitionIdValue, t.myPartitionDateValue FROM ResourceTable t WHERE t.myPid.myId IN (:pid)")
+		"SELECT t.myResourceType, t.myPid.myId, t.myDeleted, t.myPartitionIdValue, t.myPartitionDateValue FROM ResourceTable t WHERE t.myPid.myId IN (:pid)")
 	Collection<Object[]> findLookupFieldsByResourcePid(@Param("pid") List<Long> thePids);
+
+	@Query(
+			"SELECT t.myResourceType, t.myPid.myId, t.myDeleted, t.myPartitionIdValue, t.myPartitionDateValue FROM ResourceTable t WHERE t.myPid IN (:pid)")
+	Collection<Object[]> findLookupFieldsByResourcePidWithPartitionId(@Param("pid") List<JpaPid> thePids);
 
 	/**
 	 * This method returns a Collection where each row is an element in the collection. Each element in the collection

@@ -22,6 +22,7 @@ import ca.uhn.fhir.mdm.util.GoldenResourceHelper;
 import ca.uhn.fhir.mdm.util.MdmPartitionHelper;
 import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Patient;
@@ -176,13 +177,14 @@ public class MdmSurvivorshipSvcImplTest {
 		when(myMdmSettings.getMdmRules())
 			.thenReturn(new MdmRulesJson());
 		doReturn(sourceIdToPid).when(myIIdHelperService)
-			.resolveResourcePersistentIds(any(RequestPartitionId.class), anyString(), any(List.class));
+			.resolveResourcePersistentIds(any(), any(RequestPartitionId.class), anyString(), any(List.class));
 		// we will return a non-empty list to reduce mocking
 		when(myEIDHelper.getExternalEid(any()))
 			.thenReturn(Collections.singletonList(new CanonicalEID("example", "value", "use")));
 
 		// test
 		Patient goldenPatientRebuilt = mySvc.rebuildGoldenResourceWithSurvivorshipRules(
+			new SystemRequestDetails(),
 			goldenPatient,
 			createTransactionContext()
 		);
@@ -200,7 +202,7 @@ public class MdmSurvivorshipSvcImplTest {
 			.update(eq(goldenPatientRebuilt), any(RequestDetails.class));
 
 		ArgumentCaptor<List<String>> idsCaptor = ArgumentCaptor.forClass(List.class);
-		verify(myIIdHelperService).resolveResourcePersistentIds(any(RequestPartitionId.class), anyString(), idsCaptor.capture());
+		verify(myIIdHelperService).resolveResourcePersistentIds(any(), any(RequestPartitionId.class), anyString(), idsCaptor.capture());
 		assertNotNull(idsCaptor.getValue());
 		assertFalse(idsCaptor.getValue().isEmpty());
 		for (String id : idsCaptor.getValue()) {

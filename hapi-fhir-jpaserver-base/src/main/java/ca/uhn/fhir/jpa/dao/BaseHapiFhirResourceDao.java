@@ -1370,7 +1370,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			throw new ResourceNotFoundException(Msg.code(1993) + theResourceId);
 		}
 
-		ResourceTable latestVersion = readEntityLatestVersion(theResourceId, theRequestPartitionId, transactionDetails);
+		ResourceTable latestVersion = readEntityLatestVersion(theRequest, theResourceId, theRequestPartitionId, transactionDetails);
 		if (latestVersion.getVersion() != entity.getVersion()) {
 			doMetaAdd(theMetaAdd, entity, theRequest, transactionDetails);
 		} else {
@@ -1416,7 +1416,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			throw new ResourceNotFoundException(Msg.code(1994) + theResourceId);
 		}
 
-		ResourceTable latestVersion = readEntityLatestVersion(theResourceId, theRequestPartitionId, transactionDetails);
+		ResourceTable latestVersion = readEntityLatestVersion(theRequest, theResourceId, theRequestPartitionId, transactionDetails);
 		boolean nonVersionedTags =
 				myStorageSettings.getTagStorageMode() != JpaStorageSettings.TagStorageModeEnum.VERSIONED;
 
@@ -1738,7 +1738,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		validateResourceTypeAndThrowInvalidRequestException(theId);
 
 		BaseHasResource<?> entity;
-		JpaPid pid = myIdHelperService.resolveResourcePersistentIds(
+		JpaPid pid = myIdHelperService.resolveResourcePersistentIds(theRequest,
 				requestPartitionId, getResourceName(), theId.getIdPart());
 		Set<Integer> readPartitions = null;
 		if (requestPartitionId.isAllPartitions()) {
@@ -1852,11 +1852,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return myTransactionService
 				.withRequest(theRequestDetails)
 				.withRequestPartitionId(requestPartitionId)
-				.execute(() -> readEntityLatestVersion(theId, requestPartitionId, theTransactionDetails));
+				.execute(() -> readEntityLatestVersion(theRequestDetails, theId, requestPartitionId, theTransactionDetails));
 	}
 
 	@Nonnull
 	private ResourceTable readEntityLatestVersion(
+		RequestDetails theRequestDetails,
 			IIdType theId,
 			@Nonnull RequestPartitionId theRequestPartitionId,
 			TransactionDetails theTransactionDetails) {
@@ -1873,7 +1874,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 
 		if (persistentId == null) {
-			persistentId = myIdHelperService.resolveResourcePersistentIds(
+			persistentId = myIdHelperService.resolveResourcePersistentIds(theRequestDetails,
 					theRequestPartitionId, getResourceName(), theId.getIdPart());
 		}
 
@@ -2419,7 +2420,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 			if (!create) {
 				try {
-					entity = readEntityLatestVersion(resourceId, theRequestPartitionId, theTransactionDetails);
+					entity = readEntityLatestVersion(theRequest, resourceId, theRequestPartitionId, theTransactionDetails);
 				} catch (ResourceNotFoundException e) {
 					create = true;
 				}
@@ -2515,7 +2516,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		try {
 			currentEntity =
-					readEntityLatestVersion(resourceId.toVersionless(), theRequestPartitionId, theTransactionDetails);
+					readEntityLatestVersion(theRequest, resourceId.toVersionless(), theRequestPartitionId, theTransactionDetails);
 
 			if (!resourceId.hasVersionIdPart()) {
 				throw new InvalidRequestException(

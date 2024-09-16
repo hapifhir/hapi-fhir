@@ -123,7 +123,7 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId> implements
 		try {
 			if (persistentId == null) {
 				resolvedResource =
-						myIdHelperService.resolveResourceIdentity(theRequestPartitionId, resourceType, idPart);
+						myIdHelperService.resolveResourceIdentity(theRequest, theRequestPartitionId, resourceType, idPart);
 				ourLog.trace("Translated {}/{} to resource PID {}", type, idPart, resolvedResource);
 			} else {
 				resolvedResource = new ResourceLookupPersistentIdWrapper(persistentId);

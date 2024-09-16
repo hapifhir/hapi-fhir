@@ -475,7 +475,7 @@ public abstract class BaseJpaTest extends BaseTest {
 		});
 	}
 
-	protected void logAllResourceLinks() {
+	public void logAllResourceLinks() {
 		runInTransaction(() -> {
 			ourLog.info("Resource Links:\n * {}", myResourceLinkDao.findAll().stream().map(ResourceLink::toString).collect(Collectors.joining("\n * ")));
 		});

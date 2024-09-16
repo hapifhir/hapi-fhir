@@ -34,6 +34,7 @@ import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.model.mdmevents.MdmLinkJson;
 import ca.uhn.fhir.mdm.util.GoldenResourceHelper;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.util.TerserUtil;
@@ -105,13 +106,14 @@ public class MdmSurvivorshipSvcImpl implements IMdmSurvivorshipService {
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	@Override
 	public <T extends IBase> T rebuildGoldenResourceWithSurvivorshipRules(
+		RequestDetails theRequestDetails,
 			T theGoldenResourceBase, MdmTransactionContext theMdmTransactionContext) {
 		IBaseResource goldenResource = (IBaseResource) theGoldenResourceBase;
 
 		// we want a list of source ids linked to this
 		// golden resource id; sorted and filtered for only MATCH results
 		Stream<IBaseResource> sourceResources =
-				getMatchedSourceIdsByLinkUpdateDate(goldenResource, theMdmTransactionContext);
+				getMatchedSourceIdsByLinkUpdateDate(theRequestDetails, goldenResource, theMdmTransactionContext);
 
 		IBaseResource toSave = myGoldenResourceHelper.createGoldenResourceFromMdmSourceResource(
 				(IAnyResource) goldenResource,
@@ -142,6 +144,7 @@ public class MdmSurvivorshipSvcImpl implements IMdmSurvivorshipService {
 
 	@SuppressWarnings("rawtypes")
 	private Stream<IBaseResource> getMatchedSourceIdsByLinkUpdateDate(
+		RequestDetails theRequestDetails,
 			IBaseResource theGoldenResource, MdmTransactionContext theMdmTransactionContext) {
 		String resourceType = theGoldenResource.fhirType();
 		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resourceType);
@@ -168,6 +171,7 @@ public class MdmSurvivorshipSvcImpl implements IMdmSurvivorshipService {
 					.execute(() -> {
 						Map<String, ? extends IResourcePersistentId> ids =
 								myIIdHelperService.resolveResourcePersistentIds(
+									theRequestDetails,
 										RequestPartitionId.allPartitions(), resourceType, sourceIds);
 						sourceIdToPid.putAll(ids);
 					});

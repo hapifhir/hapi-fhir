@@ -142,7 +142,7 @@ public class JpaResourceDaoObservation<T extends IBaseResource> extends BaseHapi
 				for (IQueryParameterType nextOr : nextPatientList) {
 					if (nextOr instanceof ReferenceParam) {
 						ReferenceParam ref = (ReferenceParam) nextOr;
-						JpaPid pid = myIdHelperService.resolveResourcePersistentIds(
+						JpaPid pid = myIdHelperService.resolveResourcePersistentIds(theRequestDetails,
 								requestPartitionId, ref.getResourceType(), ref.getIdPart());
 						orderedSubjectReferenceMap.put(pid.getId(), nextOr);
 					} else {

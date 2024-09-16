@@ -7,9 +7,9 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoObservation;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.r5.BaseJpaR5Test;
-import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -41,7 +41,7 @@ public abstract class TestDefinitions implements ITestDataBuilder {
 	private final PartitionSelectorInterceptor myPartitionSelectorInterceptor;
 	private final boolean myIncludePartitionIdsInSql;
 	private final BaseJpaR5Test myParentTest;
-	private final boolean myIncludePartitionIdsInJoins;
+	private final boolean myIncludePartitionIdsInPks;
 	@Autowired
 	protected CircularQueueCaptureQueriesListener myCaptureQueriesListener;
 	@Autowired
@@ -55,11 +55,12 @@ public abstract class TestDefinitions implements ITestDataBuilder {
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 
-	public TestDefinitions(@Nonnull BaseJpaR5Test theParentTest, @Nonnull PartitionSelectorInterceptor thePartitionSelectorInterceptor, boolean theIncludePartitionIdsInSql, boolean theIncludePartitionIdsInJoins) {
+	public TestDefinitions(@Nonnull BaseJpaR5Test theParentTest, @Nonnull PartitionSelectorInterceptor thePartitionSelectorInterceptor, boolean theIncludePartitionIdsInSql, boolean theIncludePartitionIdsInPks) {
 		myParentTest = theParentTest;
 		myPartitionSelectorInterceptor = thePartitionSelectorInterceptor;
 		myIncludePartitionIdsInSql = theIncludePartitionIdsInSql;
-		myIncludePartitionIdsInJoins = theIncludePartitionIdsInJoins;
+		myIncludePartitionIdsInPks = theIncludePartitionIdsInPks;
+		assert myIncludePartitionIdsInSql && myIncludePartitionIdsInPks || myIncludePartitionIdsInSql || !myIncludePartitionIdsInPks;
 	}
 
 	@Test
@@ -82,11 +83,10 @@ public abstract class TestDefinitions implements ITestDataBuilder {
 		} else {
 			assertThat(getSelectSql(0)).endsWith(" where rt1_0.RES_ID='" + id + "'");
 		}
-		assertThat(getSelectSql(1)).endsWith(" where rht1_0.RES_ID='" + id + "' and rht1_0.RES_VER='1'");
-		if (myIncludePartitionIdsInJoins) {
-			assertThat(getSelectSql(1)).contains(" left join HFJ_RES_VER_PROV mp1_0 on rht1_0.PID=mp1_0.RES_VER_PID and rht1_0.PARTITION_ID=mp1_0.PARTITION_ID where");
+		if (myIncludePartitionIdsInPks) {
+			assertThat(getSelectSql(1)).endsWith("where (rht1_0.RES_ID,rht1_0.PARTITION_ID)=('" + id + "','1') and rht1_0.RES_VER='1'");
 		} else {
-			assertThat(getSelectSql(1)).contains(" left join HFJ_RES_VER_PROV mp1_0 on rht1_0.PID=mp1_0.RES_VER_PID where");
+			assertThat(getSelectSql(1)).endsWith(" where rht1_0.RES_ID='" + id + "' and rht1_0.RES_VER='1'");
 		}
 		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
 	}
@@ -97,7 +97,7 @@ public abstract class TestDefinitions implements ITestDataBuilder {
 		myPartitionSelectorInterceptor.setNextPartitionId(PARTITION_1);
 		createPatient(withId("A"), withActiveTrue());
 
-		JpaPid id = runInTransaction(() -> myResourceTableDao.findByTypeAndFhirId("Patient", "A").orElseThrow().getId());
+		long id = runInTransaction(() -> myResourceTableDao.findByTypeAndFhirId("Patient", "A").orElseThrow().getId().getId());
 
 		// Test
 		myCaptureQueriesListener.clear();
@@ -110,14 +110,13 @@ public abstract class TestDefinitions implements ITestDataBuilder {
 			assertThat(getSelectSql(1)).endsWith(" from HFJ_RESOURCE rt1_0 where rt1_0.PARTITION_ID='1' and rt1_0.RES_ID='" + id + "'");
 		} else {
 			assertThat(getSelectSql(0)).endsWith(" where rt1_0.RES_TYPE='Patient' and rt1_0.FHIR_ID in ('A')");
-			assertThat(getSelectSql(1)).endsWith(" from HFJ_RESOURCE rt1_0 where rt1_0.RES_ID='" + id.getId() + "'");
+			assertThat(getSelectSql(1)).endsWith(" from HFJ_RESOURCE rt1_0 where rt1_0.RES_ID='" + id + "'");
 		}
-		if (myIncludePartitionIdsInJoins) {
-			assertThat(getSelectSql(2)).contains(" left join HFJ_RES_VER_PROV mp1_0 on rht1_0.PID=mp1_0.RES_VER_PID and rht1_0.PARTITION_ID=mp1_0.PARTITION_ID where ");
+		if (myIncludePartitionIdsInPks) {
+			assertThat(getSelectSql(2)).endsWith(" where (rht1_0.RES_ID,rht1_0.PARTITION_ID)=('" + id + "','1') and rht1_0.RES_VER='1'");
 		} else {
-			assertThat(getSelectSql(2)).contains(" left join HFJ_RES_VER_PROV mp1_0 on rht1_0.PID=mp1_0.RES_VER_PID where ");
+			assertThat(getSelectSql(2)).endsWith(" where rht1_0.RES_ID='" + id + "' and rht1_0.RES_VER='1'");
 		}
-		assertThat(getSelectSql(2)).endsWith(" where rht1_0.RES_ID='" + id.getId() + "' and rht1_0.RES_VER='1'");
 		assertEquals(3, myCaptureQueriesListener.countSelectQueries());
 	}
 
@@ -144,10 +143,50 @@ public abstract class TestDefinitions implements ITestDataBuilder {
 		} else {
 			assertThat(getSelectSql(0)).endsWith(" WHERE (t0.HASH_VALUE = '7943378963388545453')");
 		}
-		assertThat(getSelectSql(1)).endsWith(" where rsv1_0.RES_ID in ('" + id + "')");
+		if (myIncludePartitionIdsInPks) {
+			assertThat(getSelectSql(1)).endsWith(" where (rt1_0.RES_ID,rt1_0.PARTITION_ID) in (('" + id + "','1'))");
+		} else {
+			assertThat(getSelectSql(1)).endsWith(" where rsv1_0.RES_ID in ('" + id + "')");
+		}
 		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
 	}
 
+
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	public void testSearch_Includes(boolean theSynchronous) {
+		// Setup
+		myPartitionSelectorInterceptor.setNextPartitionId(PARTITION_1);
+		IIdType parentOrgId = createOrganization(withName("PARENT"));
+		IIdType childOrgId = createOrganization(withName("CHILD"), withReference("partOf", parentOrgId));
+		long id = createPatient(withActiveTrue(), withOrganization(childOrgId)).getIdPartAsLong();
+
+		// Test
+		myParentTest.logAllResources();
+		myParentTest.logAllResourceLinks();
+		myCaptureQueriesListener.clear();
+		SearchParameterMap params = new SearchParameterMap();
+		params.setLoadSynchronous(theSynchronous);
+		params.addInclude(new Include("*", true));
+		IBundleProvider outcome = myPatientDao.search(params, newRequest());
+		List<String> values = toUnqualifiedVersionlessIdValues(outcome);
+		myCaptureQueriesListener.logSelectQueries();
+		assertThat(values).asList().containsExactlyInAnyOrder("Patient/" + id, "Organization/" + parentOrgId.getIdPart(), "Organization/" + childOrgId.getIdPart());
+
+		// Verify
+		myCaptureQueriesListener.logSelectQueries();
+		if (myIncludePartitionIdsInSql) {
+			assertThat(getSelectSql(0)).endsWith(" WHERE ((t0.PARTITION_ID = '1') AND (t0.HASH_VALUE = '7943378963388545453'))");
+		} else {
+			assertThat(getSelectSql(0)).endsWith(" WHERE (t0.HASH_VALUE = '7943378963388545453')");
+		}
+		if (myIncludePartitionIdsInPks) {
+			assertThat(getSelectSql(1)).endsWith(" where (rt1_0.RES_ID,rt1_0.PARTITION_ID) in (('" + id + "','1'))");
+		} else {
+			assertThat(getSelectSql(1)).endsWith(" where rsv1_0.RES_ID in ('" + id + "')");
+		}
+		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
+	}
 
 	@Test
 	public void testUpdateAsCreate() {

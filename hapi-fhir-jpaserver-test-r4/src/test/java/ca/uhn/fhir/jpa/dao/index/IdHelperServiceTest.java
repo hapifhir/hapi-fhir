@@ -65,7 +65,7 @@ public class IdHelperServiceTest {
 		patientIdsToResolve.add("456");
 
 		// test
-		Map<String, JpaPid> idToPid = myHelperService.resolveResourcePersistentIds(partitionId,
+		Map<String, JpaPid> idToPid = myHelperService.resolveResourcePersistentIds(null, partitionId,
 			resourceType,
 			patientIdsToResolve);
 
@@ -110,6 +110,7 @@ public class IdHelperServiceTest {
 
 		// test
 		Map<String, JpaPid> map = myHelperService.resolveResourcePersistentIds(
+			null,
 			partitionId,
 			resourceType,
 			patientIdsToResolve);
@@ -140,6 +141,7 @@ public class IdHelperServiceTest {
 
 		// test
 		Map<String, JpaPid> map = myHelperService.resolveResourcePersistentIds(
+			null,
 			partitionId,
 			resourceType,
 			patientIdsToResolve
@@ -171,7 +173,7 @@ public class IdHelperServiceTest {
 		testForcedIdViews.add(forcedIdView);
 		when(myResourceTableDao.findAndResolveByForcedIdWithNoTypeInPartition(any(), any(), any(), anyBoolean())).thenReturn(testForcedIdViews);
 
-		IResourceLookup<JpaPid> result = myHelperService.resolveResourceIdentity(partitionId, resourceType, resourceForcedId);
+		IResourceLookup<JpaPid> result = myHelperService.resolveResourceIdentity(null, partitionId, resourceType, resourceForcedId);
 		assertEquals(forcedIdView[0], result.getResourceType());
 		assertEquals(forcedIdView[1], result.getPersistentId().getId());
 		assertEquals(forcedIdView[3], result.getDeleted());
@@ -190,7 +192,7 @@ public class IdHelperServiceTest {
 			.thenReturn(resourcePersistentId1)
 			.thenReturn(resourcePersistentId2)
 			.thenReturn(resourcePersistentId3);
-		Map<String, JpaPid> result = myHelperService.resolveResourcePersistentIds(partitionId, resourceType, ids)
+		Map<String, JpaPid> result = myHelperService.resolveResourcePersistentIds(null, partitionId, resourceType, ids)
 			.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue()));
 		assertThat(result.keySet()).hasSize(3);
 		assertEquals(1L, result.get("A").getId());
@@ -207,7 +209,7 @@ public class IdHelperServiceTest {
 		JpaPid jpaPid1 = JpaPid.fromId(id);
 		when(myStorageSettings.getResourceClientIdStrategy()).thenReturn(JpaStorageSettings.ClientIdStrategyEnum.ANY);
 		when(myMemoryCacheService.getThenPutAfterCommit(any(), any(), any())).thenReturn(jpaPid1);
-		JpaPid result = myHelperService.resolveResourcePersistentIds(partitionId, resourceType, id.toString());
+		JpaPid result = myHelperService.resolveResourcePersistentIds(null, partitionId, resourceType, id.toString());
 		assertEquals(id, result.getId());
 	}
 }
