@@ -354,11 +354,20 @@ public final class ResourceIndexedSearchParams {
 			String theParamPath) {
 		ReferenceParam reference = (ReferenceParam) theParam;
 
-		Predicate<ResourceLink> namedParamPredicate =
-				resourceLink -> searchParameterPathMatches(theResourceName, resourceLink, theParamName, theParamPath)
-						&& resourceIdMatches(theStorageSettings, resourceLink, reference);
+		Predicate<ResourceLink> namedParamPredicate = resourceLink -> {
+			return searchParameterPathMatches(theResourceName, resourceLink, theParamName, theParamPath)
+				&& (resourceIdMatches(theStorageSettings, resourceLink, reference)
+				// || resourceCanBeFound(theStorageSettings, resourceLink, reference)
+			);
+		};
 
 		return myLinks.stream().anyMatch(namedParamPredicate);
+	}
+
+	protected boolean resourceCanBeFound(StorageSettings theStorageSettings, ResourceLink theLink, ReferenceParam theReferenceParam) {
+
+
+		return false;
 	}
 
 	private boolean resourceIdMatches(
@@ -382,6 +391,7 @@ public final class ResourceIndexedSearchParams {
 			}
 		}
 
+		// TODO - should we look at identifier?
 		if (!targetId.equals(theReference.getIdPart())) {
 			return false;
 		}

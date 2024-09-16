@@ -44,7 +44,7 @@ public class FhirQueryRuleTester implements IAuthRuleTester {
 
 	private boolean checkMatch(RuleTestRequest theRuleTestRequest) {
 		// look for a matcher
-		IAuthorizationSearchParamMatcher matcher = theRuleTestRequest.ruleApplier.getSearchParamMatcher();
+		IAuthorizationSearchParamMatcher matcher = theRuleTestRequest.getSearchParamMatcher();
 		if (matcher == null) {
 			theRuleTestRequest
 					.ruleApplier
@@ -63,8 +63,11 @@ public class FhirQueryRuleTester implements IAuthRuleTester {
 
 		// we use the target type since the rule might apply to all types, a type set, or instances, and that has
 		// already been checked.
+//		IAuthorizationSearchParamMatcher.MatchResult mr = matcher.match(
+//				theRuleTestRequest.resource.fhirType() + "?" + myQueryParameters, theRuleTestRequest.resource);
 		IAuthorizationSearchParamMatcher.MatchResult mr = matcher.match(
-				theRuleTestRequest.resource.fhirType() + "?" + myQueryParameters, theRuleTestRequest.resource);
+			new IAuthorizationSearchParamMatcher.AuthSearchMatchParameters().setQueryParameters(theRuleTestRequest.resource.fhirType() + "?" + myQueryParameters)
+				.setBaseResource(theRuleTestRequest.resource));
 
 		switch (mr.match) {
 			case MATCH:
