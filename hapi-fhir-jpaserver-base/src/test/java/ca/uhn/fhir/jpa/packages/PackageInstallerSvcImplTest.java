@@ -131,6 +131,8 @@ public class PackageInstallerSvcImplTest {
 	private ArgumentCaptor<SearchParameter> mySearchParameterCaptor;
 	@Captor
 	private ArgumentCaptor<RequestDetails> myRequestDetailsCaptor;
+	@Captor
+	private ArgumentCaptor<String> myMathcUrlCaptor;
 
 	@Test
 	public void testPackageCompatibility() {
@@ -257,7 +259,7 @@ public class PackageInstallerSvcImplTest {
 		SearchParameterMap map = mySearchParameterMapCaptor.getValue();
 		assertEquals("?url=http%3A%2F%2Fmy-code-system", map.toNormalizedQueryString(myCtx));
 
-		verify(myCodeSystemDao, times(1)).update(myCodeSystemCaptor.capture(), any(RequestDetails.class));
+		verify(myCodeSystemDao, times(1)).update(myCodeSystemCaptor.capture(), any(String.class) , any(RequestDetails.class));
 		CodeSystem codeSystem = myCodeSystemCaptor.getValue();
 		assertEquals("existingcs", codeSystem.getIdPart());
 	}
@@ -295,9 +297,9 @@ public class PackageInstallerSvcImplTest {
 		if (theInstallType == InstallType.CREATE) {
 			verify(mySearchParameterDao, times(1)).create(mySearchParameterCaptor.capture(), myRequestDetailsCaptor.capture());
 		} else if (theInstallType == InstallType.UPDATE_WITH_EXISTING){
-			verify(mySearchParameterDao, times(2)).update(mySearchParameterCaptor.capture(), myRequestDetailsCaptor.capture());
+			verify(mySearchParameterDao, times(2)).update(mySearchParameterCaptor.capture(), myMathcUrlCaptor.capture(), myRequestDetailsCaptor.capture());
 		} else {
-			verify(mySearchParameterDao, times(1)).update(mySearchParameterCaptor.capture(), myRequestDetailsCaptor.capture());
+			verify(mySearchParameterDao, times(1)).update(mySearchParameterCaptor.capture(), myMathcUrlCaptor.capture(), myRequestDetailsCaptor.capture());
 		}
 
 		Iterator<SearchParameter> iteratorSP = mySearchParameterCaptor.getAllValues().iterator();
@@ -366,6 +368,7 @@ public class PackageInstallerSvcImplTest {
 		if (theId != null) {
 			searchParameter.setId(new IdType("SearchParameter", theId));
 		}
+		searchParameter.setUrl("http://example.com/SearchParameter");
 		searchParameter.setCode("someCode");
 		theBase.forEach(base -> searchParameter.getBase().add(new CodeType(base)));
 		searchParameter.setExpression("someExpression");
