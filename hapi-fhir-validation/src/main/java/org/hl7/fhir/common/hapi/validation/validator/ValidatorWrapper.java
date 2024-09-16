@@ -47,6 +47,7 @@ class ValidatorWrapper {
 	private boolean myAssumeValidRestReferences;
 	private boolean myNoExtensibleWarnings;
 	private boolean myNoBindingMsgSuppressed;
+	private boolean myUnknownSystemsCauseErrors;
 	private Collection<? extends String> myExtensionDomains;
 	private IValidatorResourceFetcher myValidatorResourceFetcher;
 	private IValidationPolicyAdvisor myValidationPolicyAdvisor;
@@ -79,6 +80,11 @@ class ValidatorWrapper {
 
 	public ValidatorWrapper setErrorForUnknownProfiles(boolean theErrorForUnknownProfiles) {
 		myErrorForUnknownProfiles = theErrorForUnknownProfiles;
+		return this;
+	}
+
+	public ValidatorWrapper setUnknownSystemsCauseErrors(boolean theUnknownSystemsCauseErrors) {
+		myUnknownSystemsCauseErrors = theUnknownSystemsCauseErrors;
 		return this;
 	}
 
@@ -129,12 +135,14 @@ class ValidatorWrapper {
 		v.setResourceIdRule(IdStatus.OPTIONAL);
 		v.setNoTerminologyChecks(myNoTerminologyChecks);
 		v.setErrorForUnknownProfiles(myErrorForUnknownProfiles);
+		v.setUnknownCodeSystemsCauseErrors(myUnknownSystemsCauseErrors);
 		v.getExtensionDomains().addAll(myExtensionDomains);
 		v.setFetcher(myValidatorResourceFetcher);
 		v.setPolicyAdvisor(myValidationPolicyAdvisor);
 		v.setNoExtensibleWarnings(myNoExtensibleWarnings);
 		v.setNoBindingMsgSuppressed(myNoBindingMsgSuppressed);
 		v.setAllowXsiLocation(true);
+
 
 		List<ValidationMessage> messages = new ArrayList<>();
 

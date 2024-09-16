@@ -35,6 +35,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 	private boolean noBindingMsgSuppressed = false;
 	private volatile VersionSpecificWorkerContextWrapper myWrappedWorkerContext;
 	private boolean errorForUnknownProfiles = true;
+	private boolean myUnknownSystemsCauseErrors = true;
 	private boolean assumeValidRestReferences;
 	private List<String> myExtensionDomains = Collections.emptyList();
 	private IValidatorResourceFetcher validatorResourceFetcher;
@@ -130,6 +131,14 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 	public void setBestPracticeWarningLevel(BestPracticeWarningLevel theBestPracticeWarningLevel) {
 		Validate.notNull(theBestPracticeWarningLevel);
 		myBestPracticeWarningLevel = theBestPracticeWarningLevel;
+	}
+
+	public void setUnknownSystemsCauseErrors(boolean theUnknownSystemsCauseErrors) {
+		myUnknownSystemsCauseErrors = theUnknownSystemsCauseErrors;
+	}
+
+	public boolean isUnknownSystemsCauseErrors() {
+		return myUnknownSystemsCauseErrors;
 	}
 
 	/**
@@ -229,6 +238,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 				.setAnyExtensionsAllowed(isAnyExtensionsAllowed())
 				.setBestPracticeWarningLevel(getBestPracticeWarningLevel())
 				.setErrorForUnknownProfiles(isErrorForUnknownProfiles())
+				.setUnknownSystemsCauseErrors(isUnknownSystemsCauseErrors())
 				.setExtensionDomains(getExtensionDomains())
 				.setValidationPolicyAdvisor(validatorPolicyAdvisor)
 				.setNoTerminologyChecks(isNoTerminologyChecks())
@@ -238,6 +248,8 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 				.setAssumeValidRestReferences(isAssumeValidRestReferences())
 				.validate(wrappedWorkerContext, theValidationCtx);
 	}
+
+
 
 	@Nonnull
 	protected VersionSpecificWorkerContextWrapper provideWorkerContext() {
