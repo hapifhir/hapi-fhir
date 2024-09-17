@@ -18,6 +18,7 @@ import ca.uhn.fhir.jpa.searchparam.util.SearchParameterHelper;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
+import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import ca.uhn.test.util.LogbackTestExtension;
@@ -229,7 +230,43 @@ public class PackageInstallerSvcImplTest {
 		}
 	}
 
+	@Test
+	public void testDontTryToInstallDuplicateCodeSystem_CodeSystemAlreadyExistsWithSameIdButDifferentCanonicalUrl() throws IOException {
+		// Setup
 
+		// The CodeSystem that is already saved in the repository
+		CodeSystem existingCs = new CodeSystem();
+		existingCs.setId("CodeSystem/existingcs");
+		existingCs.setUrl("http://my-old-code-system");
+		existingCs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+
+		// A new code system in a package we're installing that has a
+		// different URL as the previously saved one, but the same ID.
+		CodeSystem newCs = new CodeSystem();
+		newCs.setId("CodeSystem/existingcs");
+		newCs.setUrl("http://my-new-code-system");
+		newCs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+
+		PackageInstallationSpec oldSpec = setupResourceInPackage(null, existingCs, myCodeSystemDao);
+
+		// Test
+		mySvc.install(oldSpec);
+
+
+		PackageInstallationSpec newSpec = setupResourceInPackage(null, newCs, myCodeSystemDao);
+		when(myCodeSystemDao.update(any(), any(), any())).thenThrow(new ResourceVersionConflictException("Resource already exists with that ID but with a different URL"));
+		mySvc.install(newSpec);
+
+
+		// Verify
+		verify(myCodeSystemDao, times(2)).search(mySearchParameterMapCaptor.capture(), any());
+		SearchParameterMap newMap = mySearchParameterMapCaptor.getValue();
+		assertEquals("?url=http%3A%2F%2Fmy-new-code-system", newMap.toNormalizedQueryString(myCtx));
+
+		verify(myCodeSystemDao, times(2)).update(myCodeSystemCaptor.capture(), any(String.class) , any(RequestDetails.class));
+		CodeSystem newCodeSystem = myCodeSystemCaptor.getValue();
+		assertEquals("existingcs", newCodeSystem.getIdPart());
+	}
 
 
 	@Test
