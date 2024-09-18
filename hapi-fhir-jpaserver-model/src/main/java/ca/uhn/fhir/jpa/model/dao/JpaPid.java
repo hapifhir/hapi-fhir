@@ -50,7 +50,6 @@ public class JpaPid extends BaseResourcePersistentId<Long> {
 	@Column(name = "RES_ID")
 	@GenericField(projectable = Projectable.YES)
 	private Long myId;
-
 	@ConditionalIdProperty
 	@Column(name = PartitionablePartitionId.PARTITION_ID)
 	private Integer myPartitionIdValue;
@@ -99,12 +98,51 @@ public class JpaPid extends BaseResourcePersistentId<Long> {
 		return this;
 	}
 
+	public Integer getPartitionId() {
+		return myPartitionIdValue;
+	}
+
 	public void setPartitionId(Integer thePartitionId) {
 		myPartitionIdValue = thePartitionId;
 	}
 
-	public Integer getPartitionId() {
-		return myPartitionIdValue;
+	/**
+	 * Note that equals and hashCode for this object only consider the ID and Partition ID because
+	 * this class gets used as cache keys
+	 */
+	@Override
+	public boolean equals(Object theO) {
+		if (this == theO) {
+			return true;
+		}
+		if (!(theO instanceof JpaPid)) {
+			return false;
+		}
+		JpaPid jpaPid = (JpaPid) theO;
+		return Objects.equals(myId, jpaPid.myId) && Objects.equals(myPartitionIdValue, jpaPid.myPartitionIdValue);
+	}
+
+	/**
+	 * Note that equals and hashCode for this object only consider the ID and Partition ID because
+	 * this class gets used as cache keys
+	 */
+	@Override
+	public int hashCode() {
+		return Objects.hash(myId, myPartitionIdValue);
+	}
+
+	@Override
+	public Long getId() {
+		return myId;
+	}
+
+	public void setId(Long theId) {
+		myId = theId;
+	}
+
+	@Override
+	public String toString() {
+		return myPartitionIdValue != null ? myPartitionIdValue + "/" + myId.toString() : myId.toString();
 	}
 
 	public static List<Long> toLongList(Collection<JpaPid> thePids) {
@@ -151,37 +189,6 @@ public class JpaPid extends BaseResourcePersistentId<Long> {
 
 	public static JpaPid fromIdAndVersionAndResourceType(Long theId, Long theVersion, String theResourceType) {
 		return new JpaPid(theId, theVersion, theResourceType);
-	}
-
-	/**
-	 * Note that equals and hashCode for this object only consider the ID and Partition ID because
-	 * this class gets used as cache keys
-	 */
-	@Override
-	public boolean equals(Object theO) {
-		if (this == theO){ return true;}
-		if (!(theO instanceof JpaPid)) {return false;}
-		JpaPid jpaPid = (JpaPid) theO;
-		return Objects.equals(myId, jpaPid.myId) && Objects.equals(myPartitionIdValue, jpaPid.myPartitionIdValue);
-	}
-
-	/**
-	 * Note that equals and hashCode for this object only consider the ID and Partition ID because
-	 * this class gets used as cache keys
-	 */
-	@Override
-	public int hashCode() {
-		return Objects.hash(myId, myPartitionIdValue);
-	}
-
-	@Override
-	public Long getId() {
-		return myId;
-	}
-
-	@Override
-	public String toString() {
-		return myPartitionIdValue != null ? myPartitionIdValue +"/" + myId.toString() : myId.toString();
 	}
 
 	public static JpaPid fromId(IdAndPartitionId theId) {

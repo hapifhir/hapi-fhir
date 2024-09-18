@@ -13,6 +13,7 @@ import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -33,8 +34,11 @@ import java.util.List;
 import java.util.concurrent.Callable;
 
 import static ca.uhn.fhir.jpa.dao.r5.conditionalid.ConditionalIdFilteredPartitioningEnabledTest.PARTITION_1;
+import static ca.uhn.fhir.jpa.dao.r5.conditionalid.ConditionalIdKeptPartitioningEnabledTest.PARTITION_2;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public abstract class TestDefinitions implements ITestDataBuilder {
 
@@ -62,6 +66,31 @@ public abstract class TestDefinitions implements ITestDataBuilder {
 		myIncludePartitionIdsInPks = theIncludePartitionIdsInPks;
 		assert myIncludePartitionIdsInSql && myIncludePartitionIdsInPks || myIncludePartitionIdsInSql || !myIncludePartitionIdsInPks;
 	}
+
+	@Test
+	public void testCreate_ReferenceToResourceInWrongPartition() {
+		// Setup
+		myPartitionSelectorInterceptor.setNextPartitionId(PARTITION_2);
+		IIdType patientId = createPatient(withActiveTrue());
+
+		// Test
+		myPartitionSelectorInterceptor.setNextPartitionId(PARTITION_1);
+		try {
+			IIdType obsId = createObservation(withSubject(patientId));
+			if (myIncludePartitionIdsInSql) {
+				fail();
+			} else {
+				assertNotNull(obsId);
+			}
+		} catch (InvalidRequestException e) {
+			if (myIncludePartitionIdsInSql) {
+				assertThat(e.getMessage()).contains("not found, specified in path: Observation.subject");
+			} else {
+				fail();
+			}
+		}
+	}
+
 
 	@Test
 	public void testReadServerAssignedId() {
@@ -144,23 +173,29 @@ public abstract class TestDefinitions implements ITestDataBuilder {
 			assertThat(getSelectSql(0)).endsWith(" WHERE (t0.HASH_VALUE = '7943378963388545453')");
 		}
 		if (myIncludePartitionIdsInPks) {
-			assertThat(getSelectSql(1)).endsWith(" where (rt1_0.RES_ID,rt1_0.PARTITION_ID) in (('" + id + "','1'))");
+			assertThat(getSelectSql(1)).endsWith(" where (rht1_0.RES_ID,rht1_0.PARTITION_ID) in (('" + id + "','1'))");
 		} else {
-			assertThat(getSelectSql(1)).endsWith(" where rsv1_0.RES_ID in ('" + id + "')");
+			assertThat(getSelectSql(1)).endsWith(" where (rht1_0.RES_ID) in ('" + id + "')");
 		}
 		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
 	}
 
 
 	// FIXME: add test with specific includes and add both for reverse
+	// FIXME: also add version that uses client assigned IDs
+	// FIXME: create another test container that uses null as the default partition ID
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})
 	public void testSearch_IncludesStar(boolean theSynchronous) {
 		// Setup
 		myPartitionSelectorInterceptor.setNextPartitionId(PARTITION_1);
 		IIdType parentOrgId = createOrganization(withName("PARENT"));
+		myParentTest.logAllResources();
+		myParentTest.logAllResourceLinks();
 		IIdType childOrgId = createOrganization(withName("CHILD"), withReference("partOf", parentOrgId));
-		long id = createPatient(withActiveTrue(), withOrganization(childOrgId)).getIdPartAsLong();
+		long patientPid = createPatient(withActiveTrue(), withOrganization(childOrgId)).getIdPartAsLong();
+		long childPid = childOrgId.getIdPartAsLong();
+		long parentPid = parentOrgId.getIdPartAsLong();
 
 		// Test
 		myParentTest.logAllResources();
@@ -171,21 +206,52 @@ public abstract class TestDefinitions implements ITestDataBuilder {
 		params.addInclude(new Include("*", true));
 		IBundleProvider outcome = myPatientDao.search(params, newRequest());
 		List<String> values = toUnqualifiedVersionlessIdValues(outcome);
-		assertThat(values).asList().containsExactlyInAnyOrder("Patient/" + id, "Organization/" + parentOrgId.getIdPart(), "Organization/" + childOrgId.getIdPart());
+		assertThat(values).asList().containsExactlyInAnyOrder("Patient/" + patientPid, "Organization/" + parentOrgId.getIdPart(), "Organization/" + childOrgId.getIdPart());
 
 		// Verify
 		myCaptureQueriesListener.logSelectQueries();
+
+		String sql;
+
+		sql = myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false);
 		if (myIncludePartitionIdsInSql) {
-			assertThat(getSelectSql(0)).endsWith(" WHERE ((t0.PARTITION_ID = '1') AND (t0.HASH_VALUE = '7943378963388545453'))");
+			assertThat(sql).isEqualTo("SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_RESOURCE t0 WHERE (((t0.RES_TYPE = 'Patient') AND (t0.RES_DELETED_AT IS NULL)) AND (t0.PARTITION_ID = '1'))");
 		} else {
-			assertThat(getSelectSql(0)).endsWith(" WHERE (t0.HASH_VALUE = '7943378963388545453')");
+			assertThat(sql).isEqualTo("SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_RESOURCE t0 WHERE ((t0.RES_TYPE = 'Patient') AND (t0.RES_DELETED_AT IS NULL))");
 		}
+
+		sql = myCaptureQueriesListener.getSelectQueries().get(1).getSql(true, false);
 		if (myIncludePartitionIdsInPks) {
-			assertThat(getSelectSql(1)).endsWith(" where (rt1_0.RES_ID,rt1_0.PARTITION_ID) in (('" + id + "','1'))");
+			assertThat(sql).contains("where rl1_0.PARTITION_ID='1' and rl1_0.SRC_RESOURCE_ID in ('" + patientPid + "') fetch");
 		} else {
-			assertThat(getSelectSql(1)).endsWith(" where rsv1_0.RES_ID in ('" + id + "')");
+			assertThat(sql).contains("where rl1_0.SRC_RESOURCE_ID in ('" + patientPid + "') fetch ");
 		}
-		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
+
+		sql = myCaptureQueriesListener.getSelectQueries().get(2).getSql(true, false);
+		if (myIncludePartitionIdsInPks) {
+			assertThat(sql).contains("where rl1_0.PARTITION_ID='0' and rl1_0.SRC_RESOURCE_ID in ('" + childPid + "') ");
+		} else {
+			assertThat(sql).contains("where rl1_0.SRC_RESOURCE_ID in ('" + childPid + "') fetch ");
+		}
+
+		sql = myCaptureQueriesListener.getSelectQueries().get(3).getSql(true, false);
+		if (myIncludePartitionIdsInPks) {
+			assertThat(sql).contains("where rl1_0.PARTITION_ID='0' and rl1_0.SRC_RESOURCE_ID in ('" + parentPid + "') ");
+		} else {
+			assertThat(sql).contains("where rl1_0.SRC_RESOURCE_ID in ('" + parentPid + "') fetch ");
+		}
+
+		sql = myCaptureQueriesListener.getSelectQueries().get(4).getSql(true, false);
+		assertThat(sql).contains("from HFJ_RES_VER rht1_0");
+		if (myIncludePartitionIdsInPks) {
+			assertThat(sql).contains("join HFJ_RESOURCE mrt1_0 on mrt1_0.RES_ID=rht1_0.RES_ID and mrt1_0.PARTITION_ID=rht1_0.PARTITION_ID where");
+			assertThat(sql).contains("where (rht1_0.RES_ID,rht1_0.PARTITION_ID) in");
+		} else {
+			assertThat(sql).contains("join HFJ_RESOURCE mrt1_0 on mrt1_0.RES_ID=rht1_0.RES_ID where");
+			assertThat(sql).contains("where (rht1_0.RES_ID) in");
+		}
+
+		assertEquals(5, myCaptureQueriesListener.countSelectQueries());
 	}
 
 	@Test

@@ -1,6 +1,7 @@
 package ca.uhn.hapi.fhir.sql.hibernatesvc;
 
 import ca.uhn.fhir.context.ConfigurationException;
+import com.google.common.collect.Lists;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.JoinColumn;
@@ -27,11 +28,13 @@ import org.hibernate.mapping.Value;
 import org.hibernate.type.ComponentType;
 import org.hibernate.type.CompositeType;
 import org.hibernate.type.EmbeddedComponentType;
+import org.hibernate.type.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -126,7 +129,10 @@ public class ConditionalIdMappingContributor implements org.hibernate.boot.spi.A
 
 					// We're removing it from the identifierMapper so we need to add it to the
 					// entity class itself instead
-					entityPersistentClass.addProperty(removedProperty);
+					if (getField(entityType, removedProperty.getName()) != null) {
+						entityPersistentClass.addProperty(removedProperty);
+					}
+
 //					addToCollectionUsingReflection(entityPersistentClass, "properties", removedProperty);
 //					addToCollectionUsingReflection(entityPersistentClass, "declaredProperties", removedProperty);
 
@@ -142,29 +148,10 @@ public class ConditionalIdMappingContributor implements org.hibernate.boot.spi.A
 
 			Component identifierMapper = entityPersistentClass.getIdentifierMapper();
 			if (identifierMapper != null) {
-				identifierMapper.getProperties().removeIf(t -> idRemovedProperties.contains(t.getName()));
+				List<Property> finalPropertyList = identifierMapper.getProperties();
+				finalPropertyList.removeIf(t -> idRemovedProperties.contains(t.getName()));
 				identifierMapper.getSelectables().removeIf(t -> idRemovedColumnNames.contains(t.getText()));
-				CompositeType type = identifierMapper.getType();
-				if (type instanceof ComponentType) {
-					ComponentType ect = (ComponentType) type;
-
-					Component wrapped = new Component(identifierMapper.getBuildingContext(), identifierMapper);
-					wrapped.setComponentClassName(identifierMapper.getComponentClassName());
-					identifierMapper.getProperties().forEach(wrapped::addProperty);
-
-					EmbeddedComponentType filtered = new EmbeddedComponentType(wrapped, ect.getOriginalPropertyOrder());
-					filtered.injectMappingModelPart(ect.getMappingModelPart(), null);
-					try {
-						Class<? extends Component> identifierMapperClass = identifierMapper.getClass();
-						Field field = identifierMapperClass.getDeclaredField("type");
-						field.setAccessible(true);
-						field.set(identifierMapper, filtered);
-						field.set(wrapped, filtered);
-					} catch (NoSuchFieldException | IllegalAccessException e) {
-						throw new IllegalStateException(e);
-					}
-
-				}
+				updateComponentWithNewPropertyList(identifierMapper, finalPropertyList);
 			}
 
 			PrimaryKey pk = table.getPrimaryKey();
@@ -173,22 +160,27 @@ public class ConditionalIdMappingContributor implements org.hibernate.boot.spi.A
 		}
 
 		// Adjust composites - This handles @EmbeddedId PKs like JpaPid
-		theMetadata.visitRegisteredComponents(c -> {
+		List<Component> registeredComponents = new ArrayList<>();
+		theMetadata.visitRegisteredComponents(c->registeredComponents.add(c));
+
+		for (Component c : registeredComponents) {
 			Class<?> componentType = c.getComponentClass();
 			String tableName = c.getTable().getName();
 
-			for (Property next : new ArrayList<>(c.getProperties())) {
-				Field field = getField(componentType, next.getName());
+			Set<String> removedPropertyNames = new HashSet<>();
+			for (Property property : new ArrayList<>(c.getProperties())) {
+				Field field = getField(componentType, property.getName());
 				ConditionalIdProperty annotation = field.getAnnotation(ConditionalIdProperty.class);
 				if (annotation != null) {
-					c.getProperties().remove(next);
+					c.getProperties().remove(property);
+					removedPropertyNames.add(property.getName());
 
 					jakarta.persistence.Column column = field.getAnnotation(jakarta.persistence.Column.class);
 					String columnName = column.name();
 					myQualifiedIdRemovedColumnNames.add(tableName + "#" + columnName);
 
 					PrimaryKey primaryKey = c.getTable().getPrimaryKey();
-					primaryKey.getColumns().removeIf(t->myQualifiedIdRemovedColumnNames.contains(tableName + "#" + t.getName()));
+					primaryKey.getColumns().removeIf(t -> myQualifiedIdRemovedColumnNames.contains(tableName + "#" + t.getName()));
 
 					for (Column nextColumn : c.getTable().getColumns()) {
 						if (myQualifiedIdRemovedColumnNames.contains(tableName + "#" + nextColumn.getName())) {
@@ -198,7 +190,7 @@ public class ConditionalIdMappingContributor implements org.hibernate.boot.spi.A
 
 					List<Property> properties = c.getOwner().getProperties();
 					for (Property nextProperty : properties) {
-						if (nextProperty.getName().equals(next.getName())) {
+						if (nextProperty.getName().equals(property.getName())) {
 							BasicValue value = (BasicValue) nextProperty.getValue();
 							Field insertabilityField = getField(value.getClass(), "insertability");
 							insertabilityField.setAccessible(true);
@@ -211,14 +203,64 @@ public class ConditionalIdMappingContributor implements org.hibernate.boot.spi.A
 						}
 					}
 				}
+
+
 			}
 
-			c.getColumns().removeIf(t-> {
+			Type type = c.getType();
+			if (type instanceof ComponentType) {
+
+				String[] typePropertyNames = ((ComponentType) type).getPropertyNames();
+				for (String propertyName : typePropertyNames) {
+					if (removedPropertyNames.contains(propertyName)) {
+						updateComponentWithNewPropertyList(c, c.getProperties());
+						break;
+					}
+				}
+
+//				if (!removedPropertyNames.isEmpty()) {
+//				if (tableName.equals("HFJ_RES_VER") && c.toString().contains("JpaPid")) {
+//				}
+
+
+				//				ComponentType component = (ComponentType) type;
+//				for (int i = 0; i < component.getPropertyNames().length; i++) {
+//					String propertyName = component.getPropertyNames()[i];
+//					if (removedPropertyNames.contains(propertyName)) {
+//						removeArrayFieldValueAtIndex(component, "propertyNames", i);
+//						removeArrayFieldValueAtIndex(component, "propertyTypes", i);
+//						removeArrayFieldValueAtIndex(component, "propertyNullability", i);
+//						removeArrayFieldValueAtIndex(component, "cascade", i);
+//						removeArrayFieldValueAtIndex(component, "joinedFetch", i);
+//						removeArrayFieldValueAtIndex(component, "joinedFetch", i);
+//					}
+//				}
+			}
+
+//			Value propertyValue = property.getValue();
+//			if (propertyValue instanceof Component) {
+//				type = propertyValue.getType();
+//				type = propertyValue.getType();
+//					if (type instanceof ComponentType) {
+//						ComponentType ect = (ComponentType) type;
+//						for (int i = 0; i < ect.getPropertyNames().length; i++) {
+//							String propertyName = ect.getPropertyNames()[i];
+//							Field propertyField = getField(ect.getReturnedClass(), propertyName);
+//							ConditionalIdProperty conditionalId = propertyField.getAnnotation(ConditionalIdProperty.class);
+//							if (conditionalId != null) {
+//								ect.getPropertyNames()
+//							}
+//
+//						}
+//					}
+//			}
+
+			c.getColumns().removeIf(t -> {
 				String name = tableName + "#" + t.getName();
 				return myQualifiedIdRemovedColumnNames.contains(name);
 			});
-			c.getSelectables().removeIf(t->myQualifiedIdRemovedColumnNames.contains(tableName + "#" + t.getText()));
-		});
+			c.getSelectables().removeIf(t -> myQualifiedIdRemovedColumnNames.contains(tableName + "#" + t.getText()));
+		}
 
 		// Adjust relations with local filtered columns (e.g. ManyToOne)
 		for (var nextEntry : theMetadata.getEntityBindingMap().entrySet()) {
@@ -275,6 +317,30 @@ public class ConditionalIdMappingContributor implements org.hibernate.boot.spi.A
 			}
 		}
 
+	}
+
+	private static void updateComponentWithNewPropertyList(Component identifierMapper, List<Property> finalPropertyList) {
+		CompositeType type = identifierMapper.getType();
+		if (type instanceof ComponentType) {
+			ComponentType ect = (ComponentType) type;
+
+			Component wrapped = new Component(identifierMapper.getBuildingContext(), identifierMapper);
+			wrapped.setComponentClassName(identifierMapper.getComponentClassName());
+			finalPropertyList.forEach(wrapped::addProperty);
+
+			EmbeddedComponentType filtered = new EmbeddedComponentType(wrapped, ect.getOriginalPropertyOrder());
+			filtered.injectMappingModelPart(ect.getMappingModelPart(), null);
+			try {
+				Class<? extends Component> identifierMapperClass = identifierMapper.getClass();
+				Field field = identifierMapperClass.getDeclaredField("type");
+				field.setAccessible(true);
+				field.set(identifierMapper, filtered);
+				field.set(wrapped, filtered);
+			} catch (NoSuchFieldException | IllegalAccessException e) {
+				throw new IllegalStateException(e);
+			}
+
+		}
 	}
 
 	private static void removeColumns(List<Column> theColumnList, Predicate<Column> theRemoveIfPredicate) {

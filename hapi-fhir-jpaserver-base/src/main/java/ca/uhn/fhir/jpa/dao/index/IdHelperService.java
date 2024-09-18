@@ -81,6 +81,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.search.builder.predicate.BaseJoiningPredicateBuilder.replaceDefaultPartitionIdIfNonNull;
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
@@ -657,24 +658,29 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 						pids.add(JpaPid.fromId(id.getIdPartAsLong(), partition));
 					}
 				}
-
 				lookup = myResourceTableDao.findLookupFieldsByResourcePidWithPartitionId(pids);
 			} else {
+
 				List<Long> pids = theIdsToResolve
 					.stream()
 					.map(t -> t.getIdPartAsLong())
 					.collect(Collectors.toList());
-				if (theRequestPartitionId.isAllPartitions()) {
+				if (!myPartitionSettings.isPartitioningEnabled() || theRequestPartitionId.isAllPartitions()) {
 					lookup = myResourceTableDao.findLookupFieldsByResourcePid(pids);
 				} else {
-					if (theRequestPartitionId.isDefaultPartition()) {
+					RequestPartitionId requestPartitionId = null;
+					for (IIdType id : theIdsToResolve) {
+						RequestPartitionId requestPartitionIdForId = myPartitionHelperSvc.determineReadPartitionForRequestForRead(theRequestDetails, id);
+						requestPartitionId = defaultIfNull(requestPartitionId, requestPartitionIdForId).mergeIds(requestPartitionIdForId);
+					}
+					if (requestPartitionId == null || requestPartitionId.isDefaultPartition()) {
 						lookup = myResourceTableDao.findLookupFieldsByResourcePidInPartitionNull(pids);
-					} else if (theRequestPartitionId.hasDefaultPartitionId()) {
+					} else if (requestPartitionId.hasDefaultPartitionId()) {
 						lookup = myResourceTableDao.findLookupFieldsByResourcePidInPartitionIdsOrNullPartition(
-							pids, theRequestPartitionId.getPartitionIdsWithoutDefault());
+							pids, requestPartitionId.getPartitionIdsWithoutDefault());
 					} else {
 						lookup = myResourceTableDao.findLookupFieldsByResourcePidInPartitionIds(
-							pids, theRequestPartitionId.getPartitionIds());
+							pids, requestPartitionId.getPartitionIds());
 					}
 				}
 			}
