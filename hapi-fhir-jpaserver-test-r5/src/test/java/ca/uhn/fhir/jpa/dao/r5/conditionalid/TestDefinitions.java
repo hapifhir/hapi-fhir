@@ -152,9 +152,10 @@ public abstract class TestDefinitions implements ITestDataBuilder {
 	}
 
 
+	// FIXME: add test with specific includes and add both for reverse
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})
-	public void testSearch_Includes(boolean theSynchronous) {
+	public void testSearch_IncludesStar(boolean theSynchronous) {
 		// Setup
 		myPartitionSelectorInterceptor.setNextPartitionId(PARTITION_1);
 		IIdType parentOrgId = createOrganization(withName("PARENT"));
@@ -170,7 +171,6 @@ public abstract class TestDefinitions implements ITestDataBuilder {
 		params.addInclude(new Include("*", true));
 		IBundleProvider outcome = myPatientDao.search(params, newRequest());
 		List<String> values = toUnqualifiedVersionlessIdValues(outcome);
-		myCaptureQueriesListener.logSelectQueries();
 		assertThat(values).asList().containsExactlyInAnyOrder("Patient/" + id, "Organization/" + parentOrgId.getIdPart(), "Organization/" + childOrgId.getIdPart());
 
 		// Verify

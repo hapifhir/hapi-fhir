@@ -34,7 +34,6 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IDao;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.config.HapiFhirLocalContainerEntityManagerFactoryBean;
 import ca.uhn.fhir.jpa.config.HibernatePropertiesProvider;
@@ -47,12 +46,11 @@ import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceSearchViewDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.dao.search.ResourceNotFoundInIndexException;
-import ca.uhn.fhir.jpa.entity.ResourceSearchView;
 import ca.uhn.fhir.jpa.interceptor.JpaPreResourceAccessDetails;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
-import ca.uhn.fhir.jpa.model.entity.IBaseResourceEntity;
+import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 import ca.uhn.fhir.jpa.model.search.SearchBuilderLoadIncludesParameters;
@@ -123,7 +121,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.SingleColumnRowMapper;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.ArrayList;
@@ -169,10 +166,12 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	public static final String RESOURCE_VERSION_ALIAS = "resource_version";
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchBuilder.class);
 	private static final JpaPid NO_MORE = JpaPid.fromId(-1L);
-	private static final String MY_TARGET_RESOURCE_PID = "myTargetResourcePid";
 	private static final String MY_SOURCE_RESOURCE_PID = "mySourceResourcePid";
-	private static final String MY_TARGET_RESOURCE_TYPE = "myTargetResourceType";
+	private static final String MY_SOURCE_RESOURCE_PARTITION_ID = "myPartitionIdValue";
 	private static final String MY_SOURCE_RESOURCE_TYPE = "mySourceResourceType";
+	private static final String MY_TARGET_RESOURCE_PID = "myTargetResourcePid";
+	private static final String MY_TARGET_RESOURCE_PARTITION_ID = "myTargetResourcePartitionId";
+	private static final String MY_TARGET_RESOURCE_TYPE = "myTargetResourceType";
 	private static final String MY_TARGET_RESOURCE_VERSION = "myTargetResourceVersion";
 	public static final JpaPid[] EMPTY_JPA_PID_ARRAY = new JpaPid[0];
 	public static boolean myUseMaxPageSize50ForTest = false;
@@ -1382,7 +1381,9 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			return new HashSet<>();
 		}
 		String searchPidFieldName = reverseMode ? MY_TARGET_RESOURCE_PID : MY_SOURCE_RESOURCE_PID;
+		String searchPartitionIdFieldName = reverseMode ? MY_TARGET_RESOURCE_PARTITION_ID : MY_SOURCE_RESOURCE_PARTITION_ID;
 		String findPidFieldName = reverseMode ? MY_SOURCE_RESOURCE_PID : MY_TARGET_RESOURCE_PID;
+		String findPartitionIdFieldName = reverseMode ? MY_SOURCE_RESOURCE_PARTITION_ID : MY_TARGET_RESOURCE_PARTITION_ID;
 		String findResourceTypeFieldName = reverseMode ? MY_SOURCE_RESOURCE_TYPE : MY_TARGET_RESOURCE_TYPE;
 		String findVersionFieldName = null;
 		if (!reverseMode && myStorageSettings.isRespectVersionsForSearchIncludes()) {
@@ -1424,9 +1425,11 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				if (matchAll) {
 					loadIncludesMatchAll(
 							findPidFieldName,
+							findPartitionIdFieldName,
 							findResourceTypeFieldName,
 							findVersionFieldName,
 							searchPidFieldName,
+							searchPartitionIdFieldName,
 							wantResourceType,
 							reverseMode,
 							hasDesiredResourceTypes,
@@ -1595,7 +1598,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 			String sql = localReferenceQuery + " UNION " + canonicalQuery.getLeft();
 
-			List<Collection<JpaPid>> partitions = partition(nextRoundMatches, getMaximumPageSize());
+			List<Collection<JpaPid>> partitions = partitionBySizeAndPartitionId(nextRoundMatches, getMaximumPageSize());
 			for (Collection<JpaPid> nextPartition : partitions) {
 				Query q = entityManager.createNativeQuery(sql, Tuple.class);
 				q.setParameter("target_pids", JpaPid.toLongList(nextPartition));
@@ -1624,9 +1627,11 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 	private void loadIncludesMatchAll(
 			String findPidFieldName,
+			String findPartitionFieldName,
 			String findResourceTypeFieldName,
 			String findVersionFieldName,
 			String searchPidFieldName,
+			String searchPartitionFieldName,
 			String wantResourceType,
 			boolean reverseMode,
 			boolean hasDesiredResourceTypes,
@@ -1643,10 +1648,17 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		if (findVersionFieldName != null) {
 			sqlBuilder.append(", r.").append(findVersionFieldName);
 		}
+		if (myPartitionSettings.isPartitionIdsInPrimaryKeys()) {
+			sqlBuilder.append(", r.").append(findPartitionFieldName);
+		}
 		sqlBuilder.append(" FROM ResourceLink r WHERE ");
 
-		sqlBuilder.append("r.");
-		sqlBuilder.append(searchPidFieldName); // (rev mode) target_resource_id | source_resource_id
+		if (myPartitionSettings.isPartitionIdsInPrimaryKeys()) {
+			sqlBuilder.append("r.").append(searchPartitionFieldName);
+			sqlBuilder.append(" = :target_partition_id AND ");
+		}
+
+		sqlBuilder.append("r.").append(searchPidFieldName);
 		sqlBuilder.append(" IN (:target_pids)");
 
 		/*
@@ -1686,10 +1698,13 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		}
 
 		String sql = sqlBuilder.toString();
-		List<Collection<JpaPid>> partitions = partition(nextRoundMatches, getMaximumPageSize());
+		List<Collection<JpaPid>> partitions = partitionBySizeAndPartitionId(nextRoundMatches, getMaximumPageSize());
 		for (Collection<JpaPid> nextPartition : partitions) {
 			TypedQuery<?> q = entityManager.createQuery(sql, Object[].class);
 			q.setParameter("target_pids", JpaPid.toLongList(nextPartition));
+			if (myPartitionSettings.isPartitionIdsInPrimaryKeys()) {
+				q.setParameter("target_partition_id", nextPartition.iterator().next().getPartitionId());
+			}
 			if (wantResourceType != null) {
 				q.setParameter("want_resource_type", wantResourceType);
 			}
@@ -1712,12 +1727,19 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				Long resourceId = (Long) ((Object[]) nextRow)[0];
 				String resourceType = (String) ((Object[]) nextRow)[1];
 				String resourceCanonicalUrl = (String) ((Object[]) nextRow)[2];
+				Integer partitionId = null;
+				int offset = 0;
 				if (findVersionFieldName != null) {
 					version = (Long) ((Object[]) nextRow)[3];
+					offset++;
+				}
+				if (myPartitionSettings.isPartitionIdsInPrimaryKeys()) {
+					partitionId = ((PartitionablePartitionId) ((Object[]) nextRow)[3 + offset]).getPartitionId();
 				}
 
 				if (resourceId != null) {
 					JpaPid pid = JpaPid.fromIdAndVersionAndResourceType(resourceId, version, resourceType);
+					pid.setPartitionId(partitionId);
 					pidsToInclude.add(pid);
 				} else if (resourceCanonicalUrl != null) {
 					if (canonicalUrls == null) {
@@ -1744,7 +1766,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		StringBuilder sqlBuilder;
 		Set<Long> identityHashesForTypes = calculateIndexUriIdentityHashesForResourceTypes(null, theReverse);
 		List<Collection<String>> canonicalUrlPartitions =
-				partition(theCanonicalUrls, getMaximumPageSize() - identityHashesForTypes.size());
+				partitionBySizeAndPartitionId(theCanonicalUrls, getMaximumPageSize() - identityHashesForTypes.size());
 
 		sqlBuilder = new StringBuilder();
 		sqlBuilder.append("SELECT i.myResourcePid ");
@@ -1911,7 +1933,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				.collect(Collectors.toSet());
 	}
 
-	private <T> List<Collection<T>> partition(Collection<T> theNextRoundMatches, int theMaxLoad) {
+	// FIXME: partition should include only the same partition ID in a single list - also write tests
+	private <T> List<Collection<T>> partitionBySizeAndPartitionId(Collection<T> theNextRoundMatches, int theMaxLoad) {
 		if (theNextRoundMatches.size() <= theMaxLoad) {
 			return Collections.singletonList(theNextRoundMatches);
 		} else {
