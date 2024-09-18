@@ -46,7 +46,6 @@ public class AuthorizationSearchParamMatcher implements IAuthorizationSearchPara
 	@Override
 	public MatchResult match(AuthSearchMatchParameters theParameters) {
 		try {
-			// TODO - extend search param matcher?
 			InMemoryMatchResult inMemoryMatchResult = mySearchParamMatcher.match(generateSearchMatchParameters(theParameters));
 			if (!inMemoryMatchResult.supported()) {
 				return MatchResult.buildUnsupported(inMemoryMatchResult.getUnsupportedReason());

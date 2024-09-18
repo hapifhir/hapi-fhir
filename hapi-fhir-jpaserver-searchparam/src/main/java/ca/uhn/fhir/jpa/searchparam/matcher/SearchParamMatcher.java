@@ -57,8 +57,8 @@ public class SearchParamMatcher {
 		myInMemoryResourceMatcher = theInMemoryResourceMatcher;
 	}
 
-	public void addSearchParamMatchHandler() {
-
+	public void addSearchParamMatchHandler(IParameterMatchHandler theMatchHandler) {
+		myInMemoryResourceMatcher.addSearchParameterHandler(theMatchHandler);
 	}
 
 	public InMemoryMatchResult match(SearchMatchParameters theParameters) {
