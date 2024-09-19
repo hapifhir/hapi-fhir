@@ -1,4 +1,23 @@
-package ca.uhn.fhir.cr;
+/*-
+ * #%L
+ * HAPI FHIR - Clinical Reasoning
+ * %%
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+package ca.uhn.fhir.cr.config.test;
 
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexProvider;
 import ca.uhn.fhir.context.FhirContext;
@@ -47,6 +66,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 
+/**
+ * Common hapi-fhir clinical reasoning config shared with downstream modules.
+ */
 @Configuration
 @Import({SubscriptionSubmitterConfig.class, SubscriptionChannelConfig.class})
 public class TestCrConfig {
@@ -77,7 +99,9 @@ public class TestCrConfig {
 	}
 	@Bean
 	public TestCqlProperties testCqlProperties(){
-		return new TestCqlProperties();}
+		return new TestCqlProperties();
+	}
+
 	@Bean
 	public JpaStorageSettings storageSettings() {
 		JpaStorageSettings storageSettings = new JpaStorageSettings();
@@ -87,12 +111,6 @@ public class TestCrConfig {
 		storageSettings.setResourceClientIdStrategy(JpaStorageSettings.ClientIdStrategyEnum.ANY);
 		return storageSettings;
 	}
-
-	@Bean
-	public PartitionHelper partitionHelper() {
-		return new PartitionHelper();
-	}
-
 	@Bean
 	public ModelManager modelManager(Map<ModelIdentifier, Model> theGlobalModelCache) {
 		return new ModelManager(theGlobalModelCache);
