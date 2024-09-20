@@ -16,6 +16,7 @@ import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import jakarta.annotation.Nonnull;
@@ -30,6 +31,8 @@ import org.hl7.fhir.r5.model.Reference;
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
@@ -222,6 +225,67 @@ public abstract class TestDefinitions implements ITestDataBuilder {
 	}
 
 	// FIXME: add search on tags, tags:not, and cover both versioned and unversioned tags
+
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	public void testSearch_Tags_Versioned(boolean theNegate) {
+		// Setup
+		myStorageSettings.setTagStorageMode(JpaStorageSettings.TagStorageModeEnum.VERSIONED);
+		myPartitionSelectorInterceptor.setNextPartitionId(PARTITION_1);
+		long idBar = createPatient(withActiveTrue(), withTag("http://foo", "bar")).getIdPartAsLong();
+		long idBaz = createPatient(withActiveTrue(), withTag("http://foo", "baz")).getIdPartAsLong();
+		long id = theNegate ? idBaz : idBar;
+
+		// Test
+		myCaptureQueriesListener.clear();
+		SearchParameterMap params = new SearchParameterMap();
+		params.setLoadSynchronous(true);
+		TokenParam bar = new TokenParam("http://foo", "bar");
+		if (theNegate) {
+			bar.setModifier(TokenParamModifier.NOT);
+		}
+		params.add(PARAM_TAG, bar);
+		IBundleProvider outcome = myPatientDao.search(params, newRequest());
+		List<String> values = toUnqualifiedVersionlessIdValues(outcome);
+
+		// Verify
+		myCaptureQueriesListener.logSelectQueries();
+		assertThat(values).asList().containsExactly("Patient/" + id);
+
+		if (theNegate) {
+			if (myIncludePartitionIdsInPks) {
+				assertThat(getSelectSql(0)).contains("((t0.PARTITION_ID,t0.RES_ID) NOT IN (SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_RES_TAG t0");
+			} else {
+				assertThat(getSelectSql(0)).contains("t0.RES_ID NOT IN (SELECT t0.RES_ID FROM HFJ_RES_TAG t0 ");
+			}
+			assertThat(getSelectSql(0)).contains(" INNER JOIN HFJ_TAG_DEF t1 ON (t0.TAG_ID = t1.TAG_ID) ");
+		} else {
+			if (myIncludePartitionIdsInPks) {
+				assertThat(getSelectSql(0)).contains(" INNER JOIN HFJ_RES_TAG t1 ON ((t0.PARTITION_ID = t1.PARTITION_ID) AND (t0.RES_ID = t1.RES_ID)) INNER");
+			} else {
+				assertThat(getSelectSql(0)).contains(" INNER JOIN HFJ_RES_TAG t1 ON (t0.RES_ID = t1.RES_ID) INNER");
+			}
+			assertThat(getSelectSql(0)).contains(" INNER JOIN HFJ_TAG_DEF t2 ON (t1.TAG_ID = t2.TAG_ID) ");
+		}
+
+		if (myIncludePartitionIdsInSql) {
+			assertThat(getSelectSql(0)).contains("PARTITION_ID = '1')");
+		}
+
+		// Query 1 is the HFJ_RES_VER fetch
+		assertThat(getSelectSql(1)).contains(" from HFJ_RES_VER ");
+
+		assertThat(getSelectSql(2)).contains(" from HFJ_HISTORY_TAG rht1_0 ");
+		if (myIncludePartitionIdsInPks) {
+			assertThat(getSelectSql(2)).contains(" where (rht1_0.PARTITION_ID,rht1_0.RES_VER_PID) in (('1','" + id + "'))");
+		} else {
+			assertThat(getSelectSql(2)).contains(" where (rht1_0.RES_VER_PID) in ('" + id + "')");
+		}
+
+		assertEquals(3, myCaptureQueriesListener.countSelectQueries());
+	}
+
+
 
 	@Test
 	public void testSearch_Tags_Unversioned() {

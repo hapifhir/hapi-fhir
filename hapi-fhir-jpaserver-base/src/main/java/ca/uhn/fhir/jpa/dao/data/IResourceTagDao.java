@@ -29,7 +29,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.Collection;
 
 public interface IResourceTagDao extends JpaRepository<ResourceTag, Long>, IHapiFhirJpaRepository {
-	@Query("" + "SELECT t FROM ResourceTag t " + "INNER JOIN FETCH t.myTag td " + "WHERE t.myResource.myPid in (:pids)")
+	@Query("SELECT t FROM ResourceTag t INNER JOIN FETCH t.myTag td WHERE t.myResource.myPid in (:pids)")
 	Collection<ResourceTag> findByResourceIds(@Param("pids") Collection<JpaPid> pids);
 
 	@Modifying

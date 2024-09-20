@@ -37,7 +37,7 @@ public interface IJpaStorageResourceParser extends IStorageResourceParser<JpaPid
 	<R extends IBaseResource> R toResource(
 			Class<R> theResourceType,
 			IBaseResourceEntity<?> theEntity,
-			Collection<ResourceTag> theTagList,
+			Collection<BaseTag> theTagList,
 			boolean theForHistoryOperation);
 
 	/**

@@ -75,6 +75,7 @@ import java.util.Date;
 		+ "FROM HFJ_RESOURCE r "
 		+ "    INNER JOIN HFJ_RES_VER h ON r.RES_ID = h.RES_ID and r.RES_VER = h.RES_VER"
 		+ "    LEFT OUTER JOIN HFJ_RES_VER_PROV p ON p.RES_VER_PID = h.PID ")
+// FIXME: do we still need this class at all? Or ResourceSearchViewPartitioned?
 public class ResourceSearchView implements IBaseResourceEntity<JpaPid>, Serializable {
 
 	private static final long serialVersionUID = 1L;

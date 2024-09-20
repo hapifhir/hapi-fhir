@@ -116,7 +116,7 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 	public <R extends IBaseResource> R toResource(
 			Class<R> theResourceType,
 			IBaseResourceEntity<?> theEntity,
-			Collection<ResourceTag> theTagList,
+			Collection<BaseTag> theTagList,
 			boolean theForHistoryOperation) {
 
 		// 1. get resource, it's encoding and the tags if any
@@ -133,19 +133,7 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 			resourceBytes = history.getResource();
 			resourceText = history.getResourceTextVc();
 			resourceEncoding = history.getEncoding();
-			switch (myStorageSettings.getTagStorageMode()) {
-				case VERSIONED:
-				default:
-					if (history.isHasTags()) {
-						tagList = history.getTags();
-					}
-					break;
-				case NON_VERSIONED:
-					tagList = theTagList;
-					break;
-				case INLINE:
-					tagList = null;
-			}
+			tagList = theTagList;
 			version = history.getVersion();
 			provenanceSourceUri = history.getSourceUri();
 			provenanceRequestId = history.getRequestId();

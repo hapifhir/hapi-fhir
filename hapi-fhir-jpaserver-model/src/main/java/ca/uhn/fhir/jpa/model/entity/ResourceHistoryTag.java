@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Entity;
@@ -31,6 +32,7 @@ import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinColumns;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
@@ -64,19 +66,19 @@ public class ResourceHistoryTag extends BaseTag implements Serializable {
 			name = "RES_VER_PID",
 			referencedColumnName = "PID",
 			nullable = false,
-		insertable = true,
+		insertable = false,
 		updatable = false),
 		@JoinColumn(
 			name = "PARTITION_ID",
 			referencedColumnName = "PARTITION_ID",
 			nullable = false,
-		insertable = true,
+		insertable = false,
 		updatable = false)
 			},
 			foreignKey = @ForeignKey(name = "FK_HISTORYTAG_HISTORY"))
 	private ResourceHistoryTable myResourceHistory;
 
-	@Column(name = "RES_VER_PID", insertable = false, updatable = false, nullable = false)
+	@Column(name = "RES_VER_PID", updatable = false, nullable = false)
 	private Long myResourceHistoryPid;
 
 	@Column(name = "RES_TYPE", length = ResourceTable.RESTYPE_LEN, nullable = false)
@@ -130,9 +132,22 @@ public class ResourceHistoryTag extends BaseTag implements Serializable {
 	public void setResource(ResourceHistoryTable theResourceHistory) {
 		myResourceHistory = theResourceHistory;
 		myResourceHistoryPid = theResourceHistory.getId().getId();
+		myPartitionIdValue = theResourceHistory.getResourceId().getPartitionId();
 	}
+
+	@PrePersist
+	public void prePersist() {
+		myResourceHistoryPid = myResourceHistory.getId().getId();
+		myPartitionIdValue = myResourceHistory.getResourceId().getPartitionId();
+	}
+
 
 	public Long getId() {
 		return myId;
 	}
+
+	public JpaPid getResourcePid() {
+		return JpaPid.fromId(myResourceId, myPartitionIdValue);
+	}
+
 }

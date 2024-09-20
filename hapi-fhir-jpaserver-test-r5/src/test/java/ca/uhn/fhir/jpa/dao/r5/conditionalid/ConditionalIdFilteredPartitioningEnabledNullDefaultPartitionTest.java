@@ -17,7 +17,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * This is a test verifying that we emit the right SQL when running in
- * legacy partition mode - Partition IDs are in use, but they aren't
+ * legacy partition mode with DEFAULT partition value of null (the default if
+ * not configured otherwise) - Partition IDs are in use, but they aren't
  * included in primary keys or joins.
  */
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
