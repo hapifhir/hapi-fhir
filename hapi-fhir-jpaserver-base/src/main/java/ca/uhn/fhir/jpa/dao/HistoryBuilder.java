@@ -173,7 +173,7 @@ public class HistoryBuilder {
 						resourceId = resourceId.substring(myResourceType.length() + 1);
 					}
 				} else {
-					resourceId = nextResourceId.toString();
+					resourceId = Long.toString(nextResourceId.getId());
 				}
 
 				for (ResourceHistoryTable nextHistoryTable : historyTables) {

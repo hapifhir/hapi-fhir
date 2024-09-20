@@ -1444,8 +1444,10 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 							nextInclude,
 							fhirContext,
 							findPidFieldName,
+							findPartitionIdFieldName,
 							findVersionFieldName,
 							searchPidFieldName,
+							searchPartitionIdFieldName,
 							reverseMode,
 							nextRoundMatches,
 							entityManager,
@@ -1518,8 +1520,10 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			Include nextInclude,
 			FhirContext fhirContext,
 			String findPidFieldName,
+			String findPartitionFieldName,
 			String findVersionFieldName,
 			String searchPidFieldName,
+			String searchPartitionFieldName,
 			boolean reverseMode,
 			List<JpaPid> nextRoundMatches,
 			EntityManager entityManager,
@@ -1562,6 +1566,11 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			if (findVersionFieldName != null) {
 				fieldsToLoad += ", r.target_resource_version AS " + RESOURCE_VERSION_ALIAS;
 			}
+			if (myPartitionSettings.isPartitionIdsInPrimaryKeys()) {
+				fieldsToLoad += ", r.";
+				fieldsToLoad += findPartitionFieldName.equals(MY_SOURCE_RESOURCE_PARTITION_ID) ? "partition_id" : "target_res_partition_id";
+				fieldsToLoad += " as " + PARTITION_ID_ALIAS;
+			}
 
 			// Query for includes lookup has 2 cases
 			// Case 1: Where target_resource_id is available in hfj_res_link table for local references
@@ -1574,20 +1583,23 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			String searchPidFieldSqlColumn =
 					searchPidFieldName.equals(MY_TARGET_RESOURCE_PID) ? "target_resource_id" : "src_resource_id";
 			StringBuilder localReferenceQuery = new StringBuilder("SELECT " + fieldsToLoad + " FROM hfj_res_link r "
-					+ " WHERE r.src_path = :src_path AND "
-					+ " r.target_resource_id IS NOT NULL AND "
-					+ " r."
+					+ "WHERE r.src_path = :src_path AND "
+					+ "r.target_resource_id IS NOT NULL AND "
+					+ "r."
 					+ searchPidFieldSqlColumn + " IN (:target_pids) ");
+			if (myPartitionSettings.isPartitionIdsInPrimaryKeys()) {
+				localReferenceQuery.append("AND ").append(PARTITION_ID_ALIAS).append(" = :search_partition_id ");
+			}
 			localReferenceQueryParams.put("src_path", nextPath);
 			// we loop over target_pids later.
 			if (targetResourceTypes != null) {
 				if (targetResourceTypes.size() == 1) {
-					localReferenceQuery.append(" AND r.target_resource_type = :target_resource_type ");
+					localReferenceQuery.append("AND r.target_resource_type = :target_resource_type ");
 					localReferenceQueryParams.put(
 							"target_resource_type",
 							targetResourceTypes.iterator().next());
 				} else {
-					localReferenceQuery.append(" AND r.target_resource_type in (:target_resource_types) ");
+					localReferenceQuery.append("AND r.target_resource_type in (:target_resource_types) ");
 					localReferenceQueryParams.put("target_resource_types", targetResourceTypes);
 				}
 			}
@@ -1596,12 +1608,15 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			Pair<String, Map<String, Object>> canonicalQuery =
 					buildCanonicalUrlQuery(findVersionFieldName, targetResourceTypes, reverseMode);
 
-			String sql = localReferenceQuery + " UNION " + canonicalQuery.getLeft();
+			String sql = localReferenceQuery + "UNION " + canonicalQuery.getLeft();
 
 			List<Collection<JpaPid>> partitions = partitionBySizeAndPartitionId(nextRoundMatches, getMaximumPageSize());
 			for (Collection<JpaPid> nextPartition : partitions) {
 				Query q = entityManager.createNativeQuery(sql, Tuple.class);
 				q.setParameter("target_pids", JpaPid.toLongList(nextPartition));
+				if (myPartitionSettings.isPartitionIdsInPrimaryKeys()) {
+					q.setParameter("search_partition_id", nextPartition.iterator().next().getPartitionId());
+				}
 				localReferenceQueryParams.forEach(q::setParameter);
 				canonicalQuery.getRight().forEach(q::setParameter);
 
@@ -1618,7 +1633,15 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 							resourceVersion =
 									NumberUtils.createLong(String.valueOf(result.get(RESOURCE_VERSION_ALIAS)));
 						}
-						pidsToInclude.add(JpaPid.fromIdAndVersion(resourceId, resourceVersion));
+						Integer partitionId = null;
+						if (myPartitionSettings.isPartitionIdsInPrimaryKeys()) {
+							partitionId = result.get(PARTITION_ID_ALIAS, Integer.class);
+						}
+
+
+						JpaPid pid = JpaPid.fromIdAndVersion(resourceId, resourceVersion);
+						pid.setPartitionId(partitionId);
+						pidsToInclude.add(pid);
 					}
 				}
 			}
@@ -1828,6 +1851,11 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			// canonical-uri references aren't versioned, but we need to match the column count for the UNION
 			fieldsToLoadFromSpidxUriTable += ", NULL";
 		}
+
+		if (myPartitionSettings.isPartitionIdsInPrimaryKeys()) {
+			fieldsToLoadFromSpidxUriTable += ", r.partition_id as " + PARTITION_ID_ALIAS;
+		}
+
 		// The logical join will be by hfj_spidx_uri on sp_name='uri' and sp_uri=target_resource_url.
 		// But sp_name isn't indexed, so we use hash_identity instead.
 		Set<Long> identityHashesForTypes =

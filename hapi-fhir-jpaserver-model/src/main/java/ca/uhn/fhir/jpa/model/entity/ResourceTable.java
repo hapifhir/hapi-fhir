@@ -673,6 +673,9 @@ public class ResourceTable extends BaseHasResource<JpaPid> implements Serializab
 		if (myPartitionIdValue != null) {
 			retVal.setPartitionId(myPartitionIdValue);
 		}
+		if (myPartitionDateValue != null) {
+			retVal.setPartitionDate(myPartitionDateValue);
+		}
 		return retVal;
 	}
 

@@ -56,6 +56,7 @@ import ca.uhn.fhir.jpa.search.builder.predicate.StringPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.TagPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.TokenPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.UriPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.sql.ColumnTupleObject;
 import ca.uhn.fhir.jpa.search.builder.sql.PredicateBuilderFactory;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -97,9 +98,11 @@ import com.healthmarketscience.sqlbuilder.Expression;
 import com.healthmarketscience.sqlbuilder.InCondition;
 import com.healthmarketscience.sqlbuilder.SelectQuery;
 import com.healthmarketscience.sqlbuilder.SetOperationQuery;
+import com.healthmarketscience.sqlbuilder.SqlObject;
 import com.healthmarketscience.sqlbuilder.Subquery;
 import com.healthmarketscience.sqlbuilder.UnionQuery;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
+import com.healthmarketscience.sqlbuilder.dbspec.basic.DbObject;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Triple;
@@ -1531,7 +1534,7 @@ public class QueryStack {
 			for (LeafNodeDefinition leafNodeDefinition : referenceLinks.get(nextReferenceLink)) {
 				SearchQueryBuilder builder;
 				if (wantChainedAndNormal) {
-					builder = mySqlBuilder.newChildSqlBuilder();
+					builder = mySqlBuilder.newChildSqlBuilder(mySqlBuilder.isSelectPartitionId());
 				} else {
 					builder = mySqlBuilder;
 				}
@@ -2054,7 +2057,8 @@ public class QueryStack {
 			BaseJoiningPredicateBuilder join;
 			if (paramInverted) {
 
-				SearchQueryBuilder sqlBuilder = mySqlBuilder.newChildSqlBuilder();
+				boolean selectPartitionId = myPartitionSettings.isPartitionIdsInPrimaryKeys();
+				SearchQueryBuilder sqlBuilder = mySqlBuilder.newChildSqlBuilder(selectPartitionId);
 				TagPredicateBuilder tagSelector = sqlBuilder.addTagPredicateBuilder(null);
 				sqlBuilder.addPredicate(
 						tagSelector.createPredicateTag(tagType, tokens, theParamName, theRequestPartitionId));
@@ -2062,7 +2066,14 @@ public class QueryStack {
 
 				join = mySqlBuilder.getOrCreateFirstPredicateBuilder();
 				Expression subSelect = new Subquery(sql);
-				tagPredicate = new InCondition(join.getResourceIdColumn(), subSelect).setNegate(true);
+
+				Object left;
+				if (selectPartitionId) {
+					left = new ColumnTupleObject(join.getPartitionIdColumn(), join.getResourceIdColumn());
+				} else {
+					left = join.getResourceIdColumn();
+				}
+				tagPredicate = new InCondition(left, subSelect).setNegate(true);
 
 			} else {
 				// Tag table can't be a query root because it will include deleted resources, and can't select by
@@ -2225,7 +2236,7 @@ public class QueryStack {
 		BaseJoiningPredicateBuilder join;
 
 		if (paramInverted) {
-			SearchQueryBuilder sqlBuilder = theSqlBuilder.newChildSqlBuilder();
+			SearchQueryBuilder sqlBuilder = theSqlBuilder.newChildSqlBuilder(mySqlBuilder.isSelectPartitionId());
 			TokenPredicateBuilder tokenSelector = sqlBuilder.addTokenPredicateBuilder(null);
 			sqlBuilder.addPredicate(tokenSelector.createPredicateToken(
 					tokens, theResourceName, theSpnamePrefix, theSearchParam, theRequestPartitionId));

@@ -44,7 +44,7 @@ public abstract class BasePartitionable implements Serializable {
 	Integer myPartitionIdValue;
 
 	@SuppressWarnings("unused")
-	@Column(name = PartitionablePartitionId.PARTITION_DATE, insertable = false, updatable = false, nullable = true)
+	@Column(name = PartitionablePartitionId.PARTITION_DATE, updatable = false, nullable = true)
 	private LocalDate myPartitionDateValue;
 
 	@Nullable

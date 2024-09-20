@@ -168,7 +168,7 @@ public class ResourceTag extends BaseTag {
 	@Override
 	public String toString() {
 		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
-		if (getPartitionId() != null) {
+		if (getPartitionId().getPartitionId() != null) {
 			b.append("partition", getPartitionId().getPartitionId());
 		}
 		b.append("resId", getResourceId());

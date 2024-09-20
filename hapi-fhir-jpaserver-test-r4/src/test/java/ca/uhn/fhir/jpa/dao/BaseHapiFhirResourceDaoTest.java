@@ -240,6 +240,7 @@ class BaseHapiFhirResourceDaoTest {
 			any(IIdType.class)
 		)).thenReturn(partitionId);
 		when(myIdHelperService.resolveResourcePersistentIds(
+			any(),
 			any(RequestPartitionId.class),
 			Mockito.anyString(),
 			Mockito.anyString()

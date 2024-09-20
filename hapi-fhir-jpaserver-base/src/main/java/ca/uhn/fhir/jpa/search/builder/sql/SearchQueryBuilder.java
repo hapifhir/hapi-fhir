@@ -102,6 +102,7 @@ public class SearchQueryBuilder {
 	private final SqlObjectFactory mySqlBuilderFactory;
 	private final boolean myCountQuery;
 	private final Dialect myDialect;
+	private final boolean mySelectPartitionId;
 	private boolean myMatchNothing;
 	private ResourceTablePredicateBuilder myResourceTableRoot;
 	private boolean myHaveAtLeastOnePredicate;
@@ -135,7 +136,8 @@ public class SearchQueryBuilder {
 				UUID.randomUUID() + "-",
 				theDialectProvider.getDialect(),
 				theCountQuery,
-				new ArrayList<>());
+				new ArrayList<>(),
+			true);
 	}
 
 	/**
@@ -151,7 +153,8 @@ public class SearchQueryBuilder {
 			String theBindVariableSubstitutionBase,
 			Dialect theDialect,
 			boolean theCountQuery,
-			ArrayList<Object> theBindVariableValues) {
+			ArrayList<Object> theBindVariableValues,
+			boolean theSelectPartitionId) {
 		myFhirContext = theFhirContext;
 		myStorageSettings = theStorageSettings;
 		myPartitionSettings = thePartitionSettings;
@@ -173,6 +176,7 @@ public class SearchQueryBuilder {
 
 		myBindVariableSubstitutionBase = theBindVariableSubstitutionBase;
 		myBindVariableValues = theBindVariableValues;
+		mySelectPartitionId = theSelectPartitionId;
 	}
 
 	public FhirContext getFhirContext() {
@@ -434,9 +438,14 @@ public class SearchQueryBuilder {
 					mySelect.addCustomColumns(
 							FunctionCall.count().setIsDistinct(true).addColumnParams(root.getResourceIdColumn()));
 				} else {
-					mySelectedResourceIdColumn = root.getResourceIdColumn();
-					mySelectedPartitionIdColumn = root.getPartitionIdColumn();
-					mySelect.addColumns(mySelectedPartitionIdColumn, mySelectedResourceIdColumn);
+					if (mySelectPartitionId) {
+						mySelectedResourceIdColumn = root.getResourceIdColumn();
+						mySelectedPartitionIdColumn = root.getPartitionIdColumn();
+						mySelect.addColumns(mySelectedPartitionIdColumn, mySelectedResourceIdColumn);
+					} else {
+						mySelectedResourceIdColumn = root.getResourceIdColumn();
+						mySelect.addColumns(mySelectedResourceIdColumn);
+					}
 				}
 				mySelect.addFromTable(root.getTable());
 				myFirstPredicateBuilder = root;
@@ -454,6 +463,10 @@ public class SearchQueryBuilder {
 		}
 	}
 
+	public void addJoin(DbTable theFromTable, DbTable theToTable, DbColumn theFromColumn, DbColumn theToColumn) {
+		addJoin(theFromTable, theToTable, theFromColumn, theToColumn, SelectQuery.JoinType.INNER);
+	}
+
 	public void addJoin(
 			DbTable theFromTable,
 			DbTable theToTable,
@@ -465,10 +478,8 @@ public class SearchQueryBuilder {
 		mySelect.addJoins(theJoinType, join);
 	}
 
-	public void addJoin(DbTable theFromTable, DbTable theToTable, DbColumn theFromColumn, DbColumn theToColumn) {
-		Join join = new DbJoin(
-				mySpec, theFromTable, theToTable, new DbColumn[] {theFromColumn}, new DbColumn[] {theToColumn});
-		mySelect.addJoins(SelectQuery.JoinType.INNER, join);
+	public boolean isSelectPartitionId() {
+		return mySelectPartitionId;
 	}
 
 	/**
@@ -809,7 +820,7 @@ public class SearchQueryBuilder {
 		}
 	}
 
-	public SearchQueryBuilder newChildSqlBuilder() {
+	public SearchQueryBuilder newChildSqlBuilder(boolean theSelectPartitionId) {
 		return new SearchQueryBuilder(
 				myFhirContext,
 				myStorageSettings,
@@ -820,7 +831,8 @@ public class SearchQueryBuilder {
 				myBindVariableSubstitutionBase,
 				myDialect,
 				false,
-				myBindVariableValues);
+				myBindVariableValues,
+				theSelectPartitionId);
 	}
 
 	public SelectQuery getSelect() {

@@ -406,6 +406,11 @@ public class GiantTransactionPerfTest {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
+		public List<ResourceHistoryTable> findCurrentVersionsByResourcePidsAndFetchResourceTable(List<JpaPid> theVersionlessPids) {
+			throw new UnsupportedOperationException();
+		}
+
 		@Nonnull
 		@Override
 		public List<ResourceHistoryTable> findAll() {

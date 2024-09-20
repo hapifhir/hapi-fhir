@@ -84,17 +84,17 @@ public class ResourceHistoryTable extends BaseHasResource<ResourceHistoryTablePk
 	@EmbeddedId
 	private ResourceHistoryTablePk myId;
 
-//	@Column(name = PartitionablePartitionId.PARTITION_ID, nullable = true, insertable = false, updatable = false)
-//	private Integer myPartitionIdValue;
+	@Column(name = PartitionablePartitionId.PARTITION_ID, nullable = true, insertable = false, updatable = false)
+	private Integer myPartitionIdValue;
 
 	@SuppressWarnings("unused")
-	@Column(name = PartitionablePartitionId.PARTITION_DATE, insertable = false, updatable = false, nullable = true)
+	@Column(name = PartitionablePartitionId.PARTITION_DATE, updatable = false, nullable = true)
 	private LocalDate myPartitionDateValue;
 
 	@Override
 	@Nullable
 	public PartitionablePartitionId getPartitionId() {
-		return PartitionablePartitionId.with(myResourcePid.getPartitionId(), myPartitionDateValue);
+		return PartitionablePartitionId.with(getResourceId().getPartitionId(), myPartitionDateValue);
 	}
 
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -120,8 +120,12 @@ public class ResourceHistoryTable extends BaseHasResource<ResourceHistoryTablePk
 	@AttributeOverride(name = "myPartitionIdValue", column = @Column(name = "PARTITION_ID", insertable = false, updatable = false))
 	private JpaPid myResourcePid;
 
-//	@Column(name = "RES_ID", nullable = false, updatable = false)
-//	private Long myResourceId;
+	/**
+	 * This is here for sorting only, don't get or set this value
+	 */
+	@SuppressWarnings("unused")
+	@Column(name = "RES_ID", insertable = false, nullable = false, updatable = false)
+	private Long myResourceId;
 
 	@Column(name = "RES_TYPE", length = ResourceTable.RESTYPE_LEN, nullable = false)
 	private String myResourceType;
@@ -194,8 +198,10 @@ public class ResourceHistoryTable extends BaseHasResource<ResourceHistoryTablePk
 
 	@Override
 	public String toString() {
+		JpaPid resourceId = getResourceId();
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-				.append("resourceId", myResourcePid.getId())
+				.append("resourceId", resourceId.getId())
+				.append("partitionId", resourceId.getPartitionId())
 				.append("resourceType", myResourceType)
 				.append("resourceVersion", myResourceVersion)
 				.append("pid", myId)
@@ -278,6 +284,9 @@ public class ResourceHistoryTable extends BaseHasResource<ResourceHistoryTablePk
 		}
 		myResourcePid.setVersion(myResourceVersion);
 		myResourcePid.setResourceType(myResourceType);
+		if (myResourcePid.getPartitionId() == null) {
+			myResourcePid.setPartitionId(myPartitionIdValue);
+		}
 		return myResourcePid;
 	}
 
@@ -380,10 +389,12 @@ public class ResourceHistoryTable extends BaseHasResource<ResourceHistoryTablePk
 		if (thePartitionablePartitionId != null) {
 			getId().setPartitionIdValue(thePartitionablePartitionId.getPartitionId());
 			getResourceId().setPartitionId(thePartitionablePartitionId.getPartitionId());
+			myPartitionIdValue = thePartitionablePartitionId.getPartitionId();
 			myPartitionDateValue = thePartitionablePartitionId.getPartitionDate();
 		} else {
 			getId().setPartitionIdValue(null);
 			getResourceId().setPartitionId(null);
+			myPartitionIdValue = null;
 			myPartitionDateValue = null;
 		}
 	}
