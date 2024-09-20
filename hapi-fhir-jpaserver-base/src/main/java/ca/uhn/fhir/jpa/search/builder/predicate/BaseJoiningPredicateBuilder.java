@@ -55,6 +55,14 @@ public abstract class BaseJoiningPredicateBuilder extends BasePredicateBuilder {
 		return myColumnPartitionId;
 	}
 
+	public DbColumn[] getJoinColumns() {
+		if (getSearchQueryBuilder().isSelectPartitionId()) {
+			return new DbColumn[]{getPartitionIdColumn(), getResourceIdColumn()};
+		} else {
+			return new DbColumn[]{getResourceIdColumn()};
+		}
+	}
+
 	public Condition combineWithRequestPartitionIdPredicate(
 			RequestPartitionId theRequestPartitionId, Condition theCondition) {
 		Condition partitionIdPredicate = createPartitionIdPredicate(theRequestPartitionId);

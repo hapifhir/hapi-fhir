@@ -141,9 +141,7 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 					}
 					break;
 				case NON_VERSIONED:
-					if (history.getResourceTable().isHasTags()) {
-						tagList = history.getResourceTable().getTags();
-					}
+					tagList = theTagList;
 					break;
 				case INLINE:
 					tagList = null;

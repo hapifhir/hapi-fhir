@@ -108,6 +108,9 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 	private final QueryStack myQueryStack;
 	private final boolean myReversed;
 
+	private final DbColumn myColumnTargetPartitionId;
+	private final DbColumn myColumnSrcPartitionId;
+
 	@Autowired
 	private JpaStorageSettings myStorageSettings;
 
@@ -133,9 +136,11 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 			QueryStack theQueryStack, SearchQueryBuilder theSearchSqlBuilder, boolean theReversed) {
 		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_RES_LINK"));
 		myColumnSrcResourceId = getTable().addColumn("SRC_RESOURCE_ID");
+		myColumnSrcPartitionId = getTable().addColumn("PARTITION_ID");
 		myColumnSrcType = getTable().addColumn("SOURCE_RESOURCE_TYPE");
 		myColumnSrcPath = getTable().addColumn("SRC_PATH");
 		myColumnTargetResourceId = getTable().addColumn("TARGET_RESOURCE_ID");
+		myColumnTargetPartitionId = getTable().addColumn("TARGET_RES_PARTITION_ID");
 		myColumnTargetResourceUrl = getTable().addColumn("TARGET_RESOURCE_URL");
 		myColumnTargetResourceType = getTable().addColumn("TARGET_RESOURCE_TYPE");
 
@@ -159,8 +164,33 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 		return myColumnTargetResourceId;
 	}
 
+	public DbColumn getColumnTargetPartitionId() {
+		return myColumnTargetPartitionId;
+	}
+
+	public DbColumn[] getJoinColumnsForTarget() {
+		if (getSearchQueryBuilder().isSelectPartitionId()) {
+			return new DbColumn[]{getColumnTargetPartitionId(), getColumnTargetResourceId()};
+		} else {
+			return new DbColumn[]{getColumnTargetResourceId()};
+		}
+	}
+
+	// FIXME: remove this? There's already getJoinColumns on the superclass
+	public DbColumn[] getJoinColumnsForSrc() {
+		if (getSearchQueryBuilder().isSelectPartitionId()) {
+			return new DbColumn[]{getColumnSrcPartitionId(), getColumnSrcResourceId()};
+		} else {
+			return new DbColumn[]{getColumnSrcResourceId()};
+		}
+	}
+
 	public DbColumn getColumnSrcResourceId() {
 		return myColumnSrcResourceId;
+	}
+
+	public DbColumn getColumnSrcPartitionId() {
+		return myColumnSrcPartitionId;
 	}
 
 	public DbColumn getColumnTargetResourceType() {
@@ -509,7 +539,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 
 			List<List<IQueryParameterType>> chainParamValues = Collections.singletonList(orValues);
 			andPredicates.add(
-					childQueryFactory.searchForIdsWithAndOr(theRequest, with().setSourceJoinColumn(myColumnTargetResourceId)
+					childQueryFactory.searchForIdsWithAndOr(theRequest, with().setSourceJoinColumn(getJoinColumnsForTarget())
 							.setResourceName(subResourceName)
 							.setParamName(chain)
 							.setAndOrParams(chainParamValues)

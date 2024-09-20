@@ -99,8 +99,9 @@ public interface IResourceHistoryTableDao extends JpaRepository<ResourceHistoryT
 	void updateNonInlinedContents(@Param("text") byte[] theText, @Param("pid") ResourceHistoryTablePk thePid);
 
 	@Query("SELECT v FROM ResourceHistoryTable v " +
-		"JOIN FETCH v.myResourceTable " +
-		"WHERE v.myResourcePid IN (:pids)")
+		"JOIN FETCH v.myResourceTable t " + //ON (v.myResourcePid = t.myPid) " +
+		"WHERE v.myResourcePid IN (:pids) AND " +
+		"t.myVersion = v.myResourceVersion")
 	List<ResourceHistoryTable> findCurrentVersionsByResourcePidsAndFetchResourceTable(@Param("pids") List<JpaPid> theVersionlessPids);
 
 }

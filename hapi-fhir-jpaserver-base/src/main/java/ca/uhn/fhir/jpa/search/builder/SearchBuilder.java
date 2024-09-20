@@ -1231,6 +1231,11 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		// -- get all tags for the idList
 		Collection<ResourceTag> tagList = myResourceTagDao.findByResourceIds(thePidList);
 
+		// FIXME: remove
+		if (tagList.isEmpty()) {
+			ourLog.info("EMPTY");
+		}
+
 		// -- build the map, key = resourceId, value = list of ResourceTag
 		JpaPid resourceId;
 		Collection<ResourceTag> tagCol;

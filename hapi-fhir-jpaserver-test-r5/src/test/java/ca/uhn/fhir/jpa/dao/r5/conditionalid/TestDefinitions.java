@@ -236,16 +236,33 @@ public abstract class TestDefinitions implements ITestDataBuilder {
 		params.setLoadSynchronous(true);
 		params.add(PARAM_TAG, new TokenParam("http://foo", "bar"));
 		IBundleProvider outcome = myPatientDao.search(params, newRequest());
-		assertThat(toUnqualifiedVersionlessIdValues(outcome)).asList().containsExactly("Patient/" + id);
+		List<String> values = toUnqualifiedVersionlessIdValues(outcome);
 
 		// Verify
 		myCaptureQueriesListener.logSelectQueries();
-		if (myIncludePartitionIdsInSql) {
-			assertThat(getSelectSql(0)).endsWith(" WHERE ((t0.PARTITION_ID = '1') AND (t0.HASH_VALUE = '7943378963388545453'))");
+		assertThat(values).asList().containsExactly("Patient/" + id);
+
+		if (myIncludePartitionIdsInPks) {
+			assertThat(getSelectSql(0)).contains(" INNER JOIN HFJ_RES_TAG t1 ON ((t0.PARTITION_ID = t1.PARTITION_ID) AND (t0.RES_ID = t1.RES_ID)) INNER");
 		} else {
-			assertThat(getSelectSql(0)).endsWith(" WHERE (t0.HASH_VALUE = '7943378963388545453')");
+			assertThat(getSelectSql(0)).contains(" INNER JOIN HFJ_RES_TAG t1 ON (t0.RES_ID = t1.RES_ID) INNER");
 		}
-		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
+		assertThat(getSelectSql(0)).contains(" INNER JOIN HFJ_TAG_DEF t2 ON (t1.TAG_ID = t2.TAG_ID) ");
+		if (myIncludePartitionIdsInSql) {
+			assertThat(getSelectSql(0)).contains("(t1.PARTITION_ID = '1')");
+		}
+
+		// Query 1 is the HFJ_RES_VER fetch
+		assertThat(getSelectSql(1)).contains(" from HFJ_RES_VER ");
+
+		assertThat(getSelectSql(2)).contains(" from HFJ_RES_TAG rt1_0 ");
+		if (myIncludePartitionIdsInPks) {
+			assertThat(getSelectSql(2)).contains(" where (rt1_0.RES_ID,rt1_0.PARTITION_ID) in (('" + id + "','1'))");
+		} else {
+			assertThat(getSelectSql(2)).contains(" where (rt1_0.RES_ID) in ('" + id + "')");
+		}
+
+		assertEquals(3, myCaptureQueriesListener.countSelectQueries());
 	}
 
 
@@ -271,9 +288,9 @@ public abstract class TestDefinitions implements ITestDataBuilder {
 			assertThat(getSelectSql(0)).endsWith(" WHERE (t0.HASH_VALUE = '7943378963388545453')");
 		}
 		if (myIncludePartitionIdsInPks) {
-			assertThat(getSelectSql(1)).endsWith(" where (rht1_0.RES_ID,rht1_0.PARTITION_ID) in (('" + id + "','1'))");
+			assertThat(getSelectSql(1)).endsWith(" where (rht1_0.RES_ID,rht1_0.PARTITION_ID) in (('" + id + "','1')) and mrt1_0.RES_VER=rht1_0.RES_VER");
 		} else {
-			assertThat(getSelectSql(1)).endsWith(" where (rht1_0.RES_ID) in ('" + id + "')");
+			assertThat(getSelectSql(1)).endsWith(" where (rht1_0.RES_ID) in ('" + id + "') and mrt1_0.RES_VER=rht1_0.RES_VER");
 		}
 		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
 	}
