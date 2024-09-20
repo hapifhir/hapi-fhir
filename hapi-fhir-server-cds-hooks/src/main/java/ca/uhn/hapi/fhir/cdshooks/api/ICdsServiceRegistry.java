@@ -45,7 +45,7 @@ public interface ICdsServiceRegistry {
 	 * @param theCdsServiceRequestJson the service request
 	 * @return the service response
 	 */
-	CdsServiceResponseJson callService(String theServiceId, CdsServiceRequestJson theCdsServiceRequestJson);
+	CdsServiceResponseJson callService(String theServiceId, Object theCdsServiceRequestJson);
 
 	/**
 	 * This is the REST method available at https://example.com/cds-services/{theServiceId}/feedback
