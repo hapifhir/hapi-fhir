@@ -169,20 +169,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 	}
 
 	public DbColumn[] getJoinColumnsForTarget() {
-		if (getSearchQueryBuilder().isSelectPartitionId()) {
-			return new DbColumn[]{getColumnTargetPartitionId(), getColumnTargetResourceId()};
-		} else {
-			return new DbColumn[]{getColumnTargetResourceId()};
-		}
-	}
-
-	// FIXME: remove this? There's already getJoinColumns on the superclass
-	public DbColumn[] getJoinColumnsForSrc() {
-		if (getSearchQueryBuilder().isSelectPartitionId()) {
-			return new DbColumn[]{getColumnSrcPartitionId(), getColumnSrcResourceId()};
-		} else {
-			return new DbColumn[]{getColumnSrcResourceId()};
-		}
+		return getSearchQueryBuilder().toJoinColumns(getColumnTargetPartitionId(), getColumnTargetResourceId());
 	}
 
 	public DbColumn getColumnSrcResourceId() {

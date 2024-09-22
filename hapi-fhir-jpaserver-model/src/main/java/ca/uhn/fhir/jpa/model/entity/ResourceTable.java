@@ -669,7 +669,7 @@ public class ResourceTable extends BaseHasResource<JpaPid> implements Serializab
 	@Nonnull
 	@Override
 	public PartitionablePartitionId getPartitionId() {
-		PartitionablePartitionId retVal = myPid.getPartitionablePartitionId();
+		PartitionablePartitionId retVal = getId().getPartitionablePartitionId();
 		if (myPartitionIdValue != null) {
 			retVal.setPartitionId(myPartitionIdValue);
 		}

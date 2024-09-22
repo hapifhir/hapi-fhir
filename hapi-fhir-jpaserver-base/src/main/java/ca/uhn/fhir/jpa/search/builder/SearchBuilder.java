@@ -1223,7 +1223,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				return getPidToTagMapUnversioned(theHistoryTables);
 			case INLINE:
 			default:
-				return null;
+				return Map.of();
 		}
 	}
 

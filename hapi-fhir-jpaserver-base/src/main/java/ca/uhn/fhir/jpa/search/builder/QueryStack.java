@@ -1535,7 +1535,7 @@ public class QueryStack {
 			for (LeafNodeDefinition leafNodeDefinition : referenceLinks.get(nextReferenceLink)) {
 				SearchQueryBuilder builder;
 				if (wantChainedAndNormal) {
-					builder = mySqlBuilder.newChildSqlBuilder(mySqlBuilder.isSelectPartitionId());
+					builder = mySqlBuilder.newChildSqlBuilder(mySqlBuilder.isIncludePartitionIdInJoins());
 				} else {
 					builder = mySqlBuilder;
 				}
@@ -1580,8 +1580,10 @@ public class QueryStack {
 		if (wantChainedAndNormal) {
 
 			if (theSourceJoinColumn == null) {
-				retVal = new InCondition(
-						mySqlBuilder.getOrCreateFirstPredicateBuilder(false).getResourceIdColumn(), union);
+				BaseJoiningPredicateBuilder root = mySqlBuilder.getOrCreateFirstPredicateBuilder(false);
+				DbColumn[] joinColumns = root.getJoinColumns();
+				Object joinColumnObject = ColumnTupleObject.from(joinColumns);
+				retVal = new InCondition(joinColumnObject, union);
 			} else {
 				// -- for the resource link, need join with target_resource_id
 				retVal = new InCondition(theSourceJoinColumn, union);

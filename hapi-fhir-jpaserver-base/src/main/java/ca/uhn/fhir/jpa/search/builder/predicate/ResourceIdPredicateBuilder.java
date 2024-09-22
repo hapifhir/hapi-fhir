@@ -155,9 +155,12 @@ public class ResourceIdPredicateBuilder extends BasePredicateBuilder {
 	 * join columns for SQL Search expressions. In partition key mode, there are 2 columns (partition id and resource id).
 	 * In non partition key mode, only the resource id column is used.
 	 */
-	public static DbColumn getResourceIdColumn(@Nonnull DbColumn[] theJoinColumns) {
+	@Nullable
+	public static DbColumn getResourceIdColumn(@Nullable DbColumn[] theJoinColumns) {
 		DbColumn resIdColumn;
-		if (theJoinColumns.length == 1) {
+		if (theJoinColumns == null) {
+			return null;
+		} else if (theJoinColumns.length == 1) {
 			resIdColumn = theJoinColumns[0];
 		} else {
 			assert theJoinColumns.length == 2;

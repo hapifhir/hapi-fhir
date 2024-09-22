@@ -133,7 +133,29 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 			resourceBytes = history.getResource();
 			resourceText = history.getResourceTextVc();
 			resourceEncoding = history.getEncoding();
+
+			// For search results we get the list of tags passed in because we load it
+			// in bulk for all resources we're going to return, but for read results
+			// we don't get the list passed in so we need to load it here.
 			tagList = theTagList;
+			if (tagList == null) {
+				switch (myStorageSettings.getTagStorageMode()) {
+					case VERSIONED:
+					default:
+						if (history.isHasTags()) {
+							tagList = history.getTags();
+						}
+						break;
+					case NON_VERSIONED:
+						if (history.getResourceTable().isHasTags()) {
+							tagList = history.getResourceTable().getTags();
+						}
+						break;
+					case INLINE:
+						tagList = null;
+				}
+			}
+
 			version = history.getVersion();
 			provenanceSourceUri = history.getSourceUri();
 			provenanceRequestId = history.getRequestId();

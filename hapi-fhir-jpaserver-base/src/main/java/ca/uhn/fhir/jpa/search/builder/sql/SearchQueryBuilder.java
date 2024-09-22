@@ -463,17 +463,29 @@ public class SearchQueryBuilder {
 		}
 	}
 
-	private DbColumn[] toJoinColumns(BaseJoiningPredicateBuilder theBuilder) {
-		if (mySelectPartitionId && myPartitionSettings.isPartitionIdsInPrimaryKeys()) {
+	@Nonnull
+	public DbColumn[] toJoinColumns(BaseJoiningPredicateBuilder theBuilder) {
+		DbColumn partitionIdColumn = theBuilder.getPartitionIdColumn();
+		DbColumn resourceIdColumn = theBuilder.getResourceIdColumn();
+		return toJoinColumns(partitionIdColumn, resourceIdColumn);
+	}
+
+	@Nonnull
+	public DbColumn[] toJoinColumns(DbColumn partitionIdColumn, DbColumn resourceIdColumn) {
+		if (isIncludePartitionIdInJoins()) {
 			return new DbColumn[]{
-				theBuilder.getPartitionIdColumn(),
-				theBuilder.getResourceIdColumn()
+				partitionIdColumn,
+				resourceIdColumn
 			};
 		}else {
 			return new DbColumn[]{
-				theBuilder.getResourceIdColumn()
+				resourceIdColumn
 			};
 		}
+	}
+
+	public boolean isIncludePartitionIdInJoins() {
+		return mySelectPartitionId && myPartitionSettings.isPartitionIdsInPrimaryKeys();
 	}
 
 	public void addJoin(DbTable theFromTable, DbTable theToTable, DbColumn[] theFromColumn, DbColumn[] theToColumn) {
@@ -486,6 +498,7 @@ public class SearchQueryBuilder {
 			DbColumn[] theFromColumn,
 			DbColumn[] theToColumn,
 			SelectQuery.JoinType theJoinType) {
+		assert theFromColumn.length == theToColumn.length;
 		Join join = new DbJoin(
 				mySpec, theFromTable, theToTable, theFromColumn, theToColumn);
 		mySelect.addJoins(theJoinType, join);

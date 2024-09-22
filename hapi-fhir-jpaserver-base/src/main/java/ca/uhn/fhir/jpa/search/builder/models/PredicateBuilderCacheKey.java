@@ -36,8 +36,10 @@ public class PredicateBuilderCacheKey {
 		HashCodeBuilder hashBuilder = new HashCodeBuilder()
 			.append(myType)
 			.append(myParamName);
-		for (DbColumn next : theDbColumn) {
-			hashBuilder.append(next);
+		if (theDbColumn != null) {
+			for (DbColumn next : theDbColumn) {
+				hashBuilder.append(next);
+			}
 		}
 		myHashCode = hashBuilder.toHashCode();
 	}
@@ -55,10 +57,10 @@ public class PredicateBuilderCacheKey {
 		PredicateBuilderCacheKey that = (PredicateBuilderCacheKey) theO;
 
 		return new EqualsBuilder()
-				.append(myDbColumn, that.myDbColumn)
-				.append(myType, that.myType)
-				.append(myParamName, that.myParamName)
-				.isEquals();
+			.append(myDbColumn, that.myDbColumn)
+			.append(myType, that.myType)
+			.append(myParamName, that.myParamName)
+			.isEquals();
 	}
 
 	@Override

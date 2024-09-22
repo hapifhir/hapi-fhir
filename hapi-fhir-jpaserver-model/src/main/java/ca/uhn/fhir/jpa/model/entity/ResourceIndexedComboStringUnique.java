@@ -88,7 +88,6 @@ public class ResourceIndexedComboStringUnique extends BaseResourceIndexedCombo
 
 	@ManyToOne(
 		optional = false,
-		fetch = FetchType.LAZY,
 		cascade = {})
 	@JoinColumns(value = {
 		@JoinColumn(name = "RES_ID",

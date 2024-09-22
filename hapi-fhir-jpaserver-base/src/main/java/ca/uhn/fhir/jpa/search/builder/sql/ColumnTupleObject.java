@@ -6,6 +6,7 @@ import com.healthmarketscience.sqlbuilder.SqlObject;
 import com.healthmarketscience.sqlbuilder.ValidationContext;
 import com.healthmarketscience.sqlbuilder.dbspec.Column;
 import com.healthmarketscience.sqlbuilder.dbspec.Table;
+import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -60,4 +61,11 @@ public class ColumnTupleObject extends SqlObject {
 		}
 	}
 
+	public static Object from(DbColumn[] theJoinColumns) {
+		if (theJoinColumns.length == 1) {
+			return theJoinColumns[0];
+		} else {
+			return new ColumnTupleObject(theJoinColumns);
+		}
+	}
 }
