@@ -421,9 +421,8 @@ public abstract class TestDefinitions implements ITestDataBuilder {
 		assertEquals(3, myCaptureQueriesListener.countSelectQueries());
 	}
 
-
 	@Test
-	public void testSearch_TokenParam() {
+	public void testSearch_Token() {
 		// Setup
 		myPartitionSelectorInterceptor.setNextPartitionId(PARTITION_1);
 		long id = createPatient(withActiveTrue()).getIdPartAsLong();
@@ -449,6 +448,34 @@ public abstract class TestDefinitions implements ITestDataBuilder {
 			assertThat(getSelectSql(1)).endsWith(" where (rht1_0.RES_ID) in ('" + id + "') and mrt1_0.RES_VER=rht1_0.RES_VER");
 		}
 		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
+	}
+
+
+	@Test
+	public void testSearch_Token_Not() {
+		// Setup
+
+		myPartitionSelectorInterceptor.setNextPartitionId(PARTITION_1);
+		createObservation(withId("A"), withObservationCode("http://foo", "A"));
+		createObservation(withId("B"), withObservationCode("http://foo", "B"));
+
+		// Test
+		// Test
+		myCaptureQueriesListener.clear();
+		SearchParameterMap params = new SearchParameterMap();
+		params.setLoadSynchronous(true);
+		params.add(Observation.SP_CODE, new TokenParam("http://foo", "B").setModifier(TokenParamModifier.NOT));
+		IBundleProvider outcome = myObservationDao.search(params, newRequest());
+
+		// Verify
+		myCaptureQueriesListener.logSelectQueries();
+		assertThat(toUnqualifiedVersionlessIdValues(outcome)).asList().containsExactly("Observation/A");
+		if (myIncludePartitionIdsInPks) {
+			assertThat(getSelectSql(0)).contains("((t0.PARTITION_ID,t0.RES_ID) NOT IN (SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_SPIDX_TOKEN");
+		} else {
+			assertThat(getSelectSql(0)).contains("((t0.RES_ID) NOT IN (SELECT t0.RES_ID FROM HFJ_SPIDX_TOKEN");
+		}
+		assertEquals(5, myCaptureQueriesListener.countSelectQueries());
 	}
 
 

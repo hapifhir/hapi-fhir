@@ -51,7 +51,7 @@ import ca.uhn.fhir.jpa.search.builder.predicate.ResourceIdPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceLinkPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceTablePredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.SearchParamPresentPredicateBuilder;
-import ca.uhn.fhir.jpa.search.builder.predicate.SourcePredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.ResourceHistoryPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.StringPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.TagPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.TokenPredicateBuilder;
@@ -98,11 +98,9 @@ import com.healthmarketscience.sqlbuilder.Expression;
 import com.healthmarketscience.sqlbuilder.InCondition;
 import com.healthmarketscience.sqlbuilder.SelectQuery;
 import com.healthmarketscience.sqlbuilder.SetOperationQuery;
-import com.healthmarketscience.sqlbuilder.SqlObject;
 import com.healthmarketscience.sqlbuilder.Subquery;
 import com.healthmarketscience.sqlbuilder.UnionQuery;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
-import com.healthmarketscience.sqlbuilder.dbspec.basic.DbObject;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Triple;
@@ -1933,13 +1931,13 @@ public class QueryStack {
 				.findFirst();
 
 		if (isMissingSourceOptional.isPresent()) {
-			SourcePredicateBuilder join =
+			ResourceHistoryPredicateBuilder join =
 					getSourcePredicateBuilder(theSourceJoinColumn, SelectQuery.JoinType.LEFT_OUTER);
 			orPredicates.add(join.createPredicateMissingSourceUri());
 			return toOrPredicate(orPredicates);
 		}
 		// for all other cases we use "INNER JOIN" to match search parameters
-		SourcePredicateBuilder join = getSourcePredicateBuilder(theSourceJoinColumn, SelectQuery.JoinType.INNER);
+		ResourceHistoryPredicateBuilder join = getSourcePredicateBuilder(theSourceJoinColumn, SelectQuery.JoinType.INNER);
 
 		for (IQueryParameterType nextParameter : theList) {
 			SourceParam sourceParameter = new SourceParam(nextParameter.getValueAsQueryToken(myFhirContext));
@@ -1959,7 +1957,8 @@ public class QueryStack {
 		return toOrPredicate(orPredicates);
 	}
 
-	private SourcePredicateBuilder getSourcePredicateBuilder(
+	// FIXME: rename to history from source
+	private ResourceHistoryPredicateBuilder getSourcePredicateBuilder(
 			@Nullable DbColumn[] theSourceJoinColumn, SelectQuery.JoinType theJoinType) {
 		return createOrReusePredicateBuilder(
 						PredicateBuilderTypeEnum.SOURCE,
@@ -2072,7 +2071,7 @@ public class QueryStack {
 
 				Object left;
 				if (selectPartitionId) {
-					left = new ColumnTupleObject(join.getPartitionIdColumn(), join.getResourceIdColumn());
+					left = new ColumnTupleObject(join.getJoinColumns());
 				} else {
 					left = join.getResourceIdColumn();
 				}
@@ -2239,7 +2238,8 @@ public class QueryStack {
 		BaseJoiningPredicateBuilder join;
 
 		if (paramInverted) {
-			SearchQueryBuilder sqlBuilder = theSqlBuilder.newChildSqlBuilder(mySqlBuilder.isSelectPartitionId());
+			boolean selectPartitionId = myPartitionSettings.isPartitionIdsInPrimaryKeys();
+			SearchQueryBuilder sqlBuilder = theSqlBuilder.newChildSqlBuilder(selectPartitionId);
 			TokenPredicateBuilder tokenSelector = sqlBuilder.addTokenPredicateBuilder(null);
 			sqlBuilder.addPredicate(tokenSelector.createPredicateToken(
 					tokens, theResourceName, theSpnamePrefix, theSearchParam, theRequestPartitionId));
@@ -2248,12 +2248,15 @@ public class QueryStack {
 
 			join = theSqlBuilder.getOrCreateFirstPredicateBuilder();
 
+			DbColumn[] leftColumns;
 			if (theSourceJoinColumn == null) {
-				predicate = new InCondition(join.getResourceIdColumn(), subSelect).setNegate(true);
+				leftColumns = join.getJoinColumns();
 			} else {
-				// -- for the resource link, need join with target_resource_id
-				predicate = new InCondition(theSourceJoinColumn, subSelect).setNegate(true);
+				leftColumns = theSourceJoinColumn;
 			}
+
+			Object left = new ColumnTupleObject(leftColumns);
+			predicate = new InCondition(left, subSelect).setNegate(true);
 
 		} else {
 			Boolean isMissing = theList.get(0).getMissing();

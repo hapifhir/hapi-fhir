@@ -119,6 +119,7 @@ public class StaleSearchDeletingSvcR4Test extends BaseResourceProviderR4Test {
 			search = mySearchEntityDao.save(search);
 
 			ResourceTable resource = new ResourceTable();
+			resource.getId().setPartitionId(0);
 			resource.setPublished(new Date());
 			resource.setUpdated(new Date());
 			resource.setResourceType("Patient");

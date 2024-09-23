@@ -259,7 +259,7 @@ public class HistoryBuilder {
 				.where(
 						theCriteriaBuilder.lessThanOrEqualTo(
 								subQueryResourceHistory.get("myUpdated"), myRangeStartInclusive),
-						theCriteriaBuilder.equal(subQueryResourceHistory.get("myResourceId"), myResourceId));
+						theCriteriaBuilder.equal(subQueryResourceHistory.get("myResourcePid"), myResourceId));
 
 		Predicate updatedDatePredicate =
 				theCriteriaBuilder.greaterThanOrEqualTo(theFrom.get("myUpdated"), pastDateSubQuery);

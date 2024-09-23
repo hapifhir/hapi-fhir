@@ -1454,13 +1454,13 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		if (myPartitionSettings.isPartitioningEnabled()
 				&& theRequest != null
 				&& theRequest.getTenantId() != null
-				&& entity.getPartitionId() != null) {
+				&& entity.getPartitionId().getPartitionId() != null) {
 			PartitionEntity partitionEntity = myPartitionLookupSvc.getPartitionByName(theRequest.getTenantId());
 			// partitionEntity should never be null
 			if (partitionEntity != null
 					&& !partitionEntity.getId().equals(entity.getPartitionId().getPartitionId())) {
 				throw new InvalidRequestException(Msg.code(2079) + "Resource " + entity.getResourceType() + "/"
-						+ entity.getId() + " is not known");
+						+ entity.getFhirId() + " is not known");
 			}
 		}
 	}

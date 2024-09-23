@@ -466,7 +466,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					 */
 
 					Supplier<LazyDaoMethodOutcome.EntityAndResource> entitySupplier = () -> myTxTemplate.execute(tx -> {
-						ResourceTable foundEntity = myEntityManager.find(ResourceTable.class, pid.getId());
+						ResourceTable foundEntity = myEntityManager.find(ResourceTable.class, pid);
 						IBaseResource resource = myJpaStorageResourceParser.toResource(foundEntity, false);
 						theResource.setId(resource.getIdElement().getValue());
 						return new LazyDaoMethodOutcome.EntityAndResource(foundEntity, resource);

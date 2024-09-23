@@ -39,7 +39,7 @@ import ca.uhn.fhir.jpa.search.builder.predicate.ResourceIdPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceLinkPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceTablePredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.SearchParamPresentPredicateBuilder;
-import ca.uhn.fhir.jpa.search.builder.predicate.SourcePredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.ResourceHistoryPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.StringPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.TagPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.TokenPredicateBuilder;
@@ -282,9 +282,9 @@ public class SearchQueryBuilder {
 	/**
 	 * Add and return a predicate builder (or a root query if no root query exists yet) for selecting on a <code>_source</code> search parameter
 	 */
-	public SourcePredicateBuilder addSourcePredicateBuilder(
+	public ResourceHistoryPredicateBuilder addSourcePredicateBuilder(
 			@Nullable DbColumn[] theSourceJoinColumn, SelectQuery.JoinType theJoinType) {
-		SourcePredicateBuilder retVal = mySqlBuilderFactory.newSourcePredicateBuilder(this);
+		ResourceHistoryPredicateBuilder retVal = mySqlBuilderFactory.newResourceHistoryPredicateBuilder(this);
 		addTable(retVal, theSourceJoinColumn, theJoinType);
 		return retVal;
 	}
