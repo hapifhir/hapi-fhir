@@ -1190,8 +1190,13 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					theRequest);
 		}
 
+		// Downstream code expects the version to be null in the JpaPid if we're not
+		// doing a version specific expunge
+		JpaPid resourceId = entity.getResourceId();
+		resourceId = JpaPid.fromId(resourceId.getId(), resourceId.getPartitionId());
+
 		return myExpungeService.expunge(
-				getResourceName(), entity.getResourceId(), theExpungeOptions, theRequest);
+				getResourceName(), resourceId, theExpungeOptions, theRequest);
 	}
 
 	@Override

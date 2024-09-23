@@ -1482,12 +1482,12 @@ public class QueryStack {
 
 	public void addGrouping() {
 		BaseJoiningPredicateBuilder firstPredicateBuilder = mySqlBuilder.getOrCreateFirstPredicateBuilder();
-		mySqlBuilder.getSelect().addGroupings(firstPredicateBuilder.getResourceIdColumn());
+		mySqlBuilder.getSelect().addGroupings(firstPredicateBuilder.getJoinColumns());
 	}
 
 	public void addOrdering() {
 		BaseJoiningPredicateBuilder firstPredicateBuilder = mySqlBuilder.getOrCreateFirstPredicateBuilder();
-		mySqlBuilder.getSelect().addOrderings(firstPredicateBuilder.getResourceIdColumn());
+		mySqlBuilder.getSelect().addOrderings(firstPredicateBuilder.getJoinColumns());
 	}
 
 	public Condition createPredicateReferenceForEmbeddedChainedSearchResource(

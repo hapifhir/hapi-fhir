@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoObservation;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
+import ca.uhn.fhir.jpa.api.dao.PatientEverythingParameters;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.r5.BaseJpaR5Test;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
@@ -25,6 +26,7 @@ import org.assertj.core.api.Assertions;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.DateTimeType;
+import org.hl7.fhir.r5.model.Encounter;
 import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.Observation;
 import org.hl7.fhir.r5.model.Organization;
@@ -38,9 +40,10 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Callable;
-import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.dao.r5.conditionalid.ConditionalIdFilteredPartitioningEnabledTest.PARTITION_1;
 import static ca.uhn.fhir.jpa.dao.r5.conditionalid.ConditionalIdKeptPartitioningEnabledTest.PARTITION_2;
@@ -62,6 +65,8 @@ public abstract class TestDefinitions implements ITestDataBuilder {
 	private IFhirResourceDaoPatient<Patient> myPatientDao;
 	@Autowired
 	private IFhirResourceDaoObservation<Observation> myObservationDao;
+	@Autowired
+	private IFhirResourceDao<Encounter> myEncounterDao;
 	@Autowired
 	private IFhirResourceDao<Organization> myOrganizationDao;
 	@Autowired
@@ -161,11 +166,11 @@ public abstract class TestDefinitions implements ITestDataBuilder {
 	}
 
 	private JpaPid findId(String theResourceType, String theIdPart) {
-		return myParentTest.runInTransaction(()-> myResourceTableDao
+		return myParentTest.runInTransaction(() -> myResourceTableDao
 			.findAll()
 			.stream()
-			.filter(t->t.getResourceType().equals(theResourceType))
-			.filter(t->t.getFhirId().equals(theIdPart))
+			.filter(t -> t.getResourceType().equals(theResourceType))
+			.filter(t -> t.getFhirId().equals(theIdPart))
 			.findFirst()
 			.orElseThrow()
 			.getId());
@@ -260,7 +265,7 @@ public abstract class TestDefinitions implements ITestDataBuilder {
 		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
 
 	}
-	
+
 	@Test
 	public void testSearch_Chained() {
 		// Setup
@@ -350,7 +355,6 @@ public abstract class TestDefinitions implements ITestDataBuilder {
 	}
 
 
-
 	@Test
 	public void testSearch_Tags_Unversioned() {
 		// Setup
@@ -431,7 +435,7 @@ public abstract class TestDefinitions implements ITestDataBuilder {
 	public void testSearch_IncludesStar() {
 		// Setup
 		myPartitionSelectorInterceptor.setNextPartitionId(PARTITION_1);
-		PatientWithOrganizationReferences ids = createPatientWithOrganizationReferences();
+		CreatedResourceIds ids = createPatientWithOrganizationReferences();
 
 		// Test
 		myParentTest.logAllResources();
@@ -465,16 +469,16 @@ public abstract class TestDefinitions implements ITestDataBuilder {
 
 		sql = myCaptureQueriesListener.getSelectQueries().get(2).getSql(true, false);
 		if (myIncludePartitionIdsInPks) {
-			assertThat(sql).contains("where rl1_0.PARTITION_ID='0' and rl1_0.SRC_RESOURCE_ID in ('" + ids.childPid() + "') ");
+			assertThat(sql).contains("where rl1_0.PARTITION_ID='0' and rl1_0.SRC_RESOURCE_ID in ('" + ids.childOrgPid() + "') ");
 		} else {
-			assertThat(sql).contains("where rl1_0.SRC_RESOURCE_ID in ('" + ids.childPid() + "') fetch ");
+			assertThat(sql).contains("where rl1_0.SRC_RESOURCE_ID in ('" + ids.childOrgPid() + "') fetch ");
 		}
 
 		sql = myCaptureQueriesListener.getSelectQueries().get(3).getSql(true, false);
 		if (myIncludePartitionIdsInPks) {
-			assertThat(sql).contains("where rl1_0.PARTITION_ID='0' and rl1_0.SRC_RESOURCE_ID in ('" + ids.parentPid() + "') ");
+			assertThat(sql).contains("where rl1_0.PARTITION_ID='0' and rl1_0.SRC_RESOURCE_ID in ('" + ids.parentOrgPid() + "') ");
 		} else {
-			assertThat(sql).contains("where rl1_0.SRC_RESOURCE_ID in ('" + ids.parentPid() + "') fetch ");
+			assertThat(sql).contains("where rl1_0.SRC_RESOURCE_ID in ('" + ids.parentOrgPid() + "') fetch ");
 		}
 
 		sql = myCaptureQueriesListener.getSelectQueries().get(4).getSql(true, false);
@@ -490,25 +494,48 @@ public abstract class TestDefinitions implements ITestDataBuilder {
 		assertEquals(5, myCaptureQueriesListener.countSelectQueries());
 	}
 
-	@Nonnull
-	private PatientWithOrganizationReferences createPatientWithOrganizationReferences() {
-		IIdType parentOrgId = createOrganization(withName("PARENT"));
-		IIdType childOrgId = createOrganization(withName("CHILD"), withReference("partOf", parentOrgId));
-		long patientPid = createPatient(withActiveTrue(), withOrganization(childOrgId)).getIdPartAsLong();
-		long childPid = childOrgId.getIdPartAsLong();
-		long parentPid = parentOrgId.getIdPartAsLong();
-		PatientWithOrganizationReferences result = new PatientWithOrganizationReferences(parentOrgId, childOrgId, patientPid, childPid, parentPid);
-		return result;
-	}
 
-	private record PatientWithOrganizationReferences(IIdType parentOrgId, IIdType childOrgId, long patientPid, long childPid, long parentPid) {
+	@Test
+	public void testOperation_Everything() {
+		// Setup
+		myPartitionSelectorInterceptor.setNextPartitionId(PARTITION_1);
+		CreatedResourceIds ids = createPatientWithOrganizationAndEncounterReferences();
+
+		// Test
+		myCaptureQueriesListener.clear();
+		IBundleProvider outcome = myPatientDao.patientInstanceEverything(null, new SystemRequestDetails(), new PatientEverythingParameters(), ids.patientId);
+
+		// Verify
+		myCaptureQueriesListener.logSelectQueries();
+		List<String> actualIds = toUnqualifiedVersionlessIdValues(outcome);
+		assertThat(actualIds).asList().containsExactlyInAnyOrder(ids.allIdValues().toArray(new String[0]));
+
+		assertThat(getSelectSql(0)).startsWith("SELECT DISTINCT t0.PARTITION_ID,t0.SRC_RESOURCE_ID FROM HFJ_RES_LINK");
+		if (myIncludePartitionIdsInPks) {
+			assertThat(getSelectSql(0)).contains("WHERE ((t0.TARGET_RES_PARTITION_ID,t0.TARGET_RESOURCE_ID) IN (('1','" + ids.patientPid + "')) )");
+			assertThat(getSelectSql(0)).contains("GROUP BY t0.PARTITION_ID,t0.SRC_RESOURCE_ID ");
+			assertThat(getSelectSql(0)).endsWith("ORDER BY t0.PARTITION_ID,t0.SRC_RESOURCE_ID");
+			assertThat(getSelectSql(1)).contains("from HFJ_RES_LINK rl1_0 where rl1_0.PARTITION_ID='1' and rl1_0.SRC_RESOURCE_ID in ('" + ids.patientPid() +"','" + ids.encounterPid() + "') ");
+			assertThat(getSelectSql(2)).contains("from HFJ_RES_LINK rl1_0 where rl1_0.PARTITION_ID='0' and rl1_0.SRC_RESOURCE_ID in ('" + ids.childOrgPid() + "') ");
+			assertThat(getSelectSql(3)).contains("from HFJ_RES_LINK rl1_0 where rl1_0.PARTITION_ID='0' and rl1_0.SRC_RESOURCE_ID in ('" + ids.parentOrgPid() + "') ");
+		} else {
+			assertThat(getSelectSql(0)).contains("WHERE (t0.TARGET_RESOURCE_ID = '" + ids.patientPid() + "') ");
+			assertThat(getSelectSql(0)).contains("GROUP BY t0.SRC_RESOURCE_ID ");
+			assertThat(getSelectSql(0)).endsWith("ORDER BY t0.SRC_RESOURCE_ID");
+			assertThat(getSelectSql(1)).contains("from HFJ_RES_LINK rl1_0 where rl1_0.SRC_RESOURCE_ID in ('" + ids.patientPid() +"','" + ids.encounterPid() + "') ");
+			assertThat(getSelectSql(2)).contains("from HFJ_RES_LINK rl1_0 where rl1_0.SRC_RESOURCE_ID in ('" + ids.childOrgPid() + "') ");
+			assertThat(getSelectSql(3)).contains("from HFJ_RES_LINK rl1_0 where rl1_0.SRC_RESOURCE_ID in ('" + ids.parentOrgPid() + "') ");
+		}
+
+		assertEquals(5, myCaptureQueriesListener.countSelectQueries());
+
 	}
 
 	@Test
 	public void testSearch_IncludesSpecific() {
 		// Setup
 		myPartitionSelectorInterceptor.setNextPartitionId(PARTITION_1);
-		PatientWithOrganizationReferences ids = createPatientWithOrganizationReferences();
+		CreatedResourceIds ids = createPatientWithOrganizationReferences();
 
 		// Test
 		myParentTest.logAllResources();
@@ -635,6 +662,39 @@ public abstract class TestDefinitions implements ITestDataBuilder {
 		return myParentTest.runInTransaction(theRunnable);
 	}
 
+	@Nonnull
+	private CreatedResourceIds createPatientWithOrganizationReferences() {
+		IIdType parentOrgId = createOrganization(withName("PARENT")).toUnqualifiedVersionless();
+		IIdType childOrgId = createOrganization(withName("CHILD"), withReference("partOf", parentOrgId)).toUnqualifiedVersionless();
+		IIdType patientId = createPatient(withActiveTrue(), withOrganization(childOrgId)).toUnqualifiedVersionless();
+		long patientPid = patientId.getIdPartAsLong();
+		long childPid = childOrgId.getIdPartAsLong();
+		long parentPid = parentOrgId.getIdPartAsLong();
+		CreatedResourceIds result = new CreatedResourceIds(parentOrgId, childOrgId, patientId, null, patientPid, childPid, parentPid, null);
+		return result;
+	}
+
+	@Nonnull
+	private CreatedResourceIds createPatientWithOrganizationAndEncounterReferences() {
+		CreatedResourceIds createdResourceIds = createPatientWithOrganizationReferences();
+
+		Encounter encounter = new Encounter();
+		encounter.setSubject(new Reference(createdResourceIds.patientId));
+		IIdType encounterId = myEncounterDao.create(encounter).getId().toUnqualifiedVersionless();
+		Long encounterPid = encounterId.getIdPartAsLong();
+
+		return new CreatedResourceIds(
+			createdResourceIds.parentOrgId,
+			createdResourceIds.childOrgId,
+			createdResourceIds.patientId,
+			encounterId,
+			createdResourceIds.patientPid,
+			createdResourceIds.childOrgPid,
+			createdResourceIds.parentOrgPid,
+			encounterPid
+		);
+	}
+
 	private static List<String> toUnqualifiedVersionlessIdValues(IBundleProvider theFound) {
 		int fromIndex = 0;
 		Integer toIndex = theFound.size();
@@ -656,6 +716,24 @@ public abstract class TestDefinitions implements ITestDataBuilder {
 		return retVal;
 	}
 
+	private record CreatedResourceIds(IIdType parentOrgId, IIdType childOrgId, IIdType patientId, IIdType encounterId,
+									  Long patientPid, Long childOrgPid, Long parentOrgPid, Long encounterPid) {
+
+		public Set<String> allIdValues() {
+			Set<String> retVal = new HashSet<>();
+			addIfNotNull(retVal, parentOrgId);
+			addIfNotNull(retVal, childOrgId);
+			addIfNotNull(retVal, patientId);
+			addIfNotNull(retVal, encounterId);
+			return retVal;
+		}
+
+		private static void addIfNotNull(Set<String> theList, IIdType theObject) {
+			if (theObject != null) {
+				theList.add(theObject.getValue());
+			}
+		}
+	}
 }
 
 

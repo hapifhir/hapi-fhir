@@ -23,36 +23,51 @@ import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
 import ca.uhn.hapi.fhir.sql.hibernatesvc.ConditionalIdProperty;
+import jakarta.annotation.Nonnull;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
+import org.apache.commons.collections4.ComparatorUtils;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.search.engine.backend.types.Projectable;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 /**
  * JPA implementation of IResourcePersistentId.  JPA uses a Long as the primary key.  This class should be used in any
  * context where the pid is known to be a Long.
  */
 @Embeddable
-public class JpaPid extends BaseResourcePersistentId<Long> {
+public class JpaPid extends BaseResourcePersistentId<Long> implements Comparable<JpaPid> {
 
 	@GenericGenerator(name = "SEQ_RESOURCE_ID", type = ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator.class)
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_RESOURCE_ID")
 	@Column(name = "RES_ID")
 	@GenericField(projectable = Projectable.YES)
+
 	private Long myId;
 	@ConditionalIdProperty
 	@Column(name = PartitionablePartitionId.PARTITION_ID)
 	private Integer myPartitionIdValue;
+
+	private static final Comparator<JpaPid> COMPARATOR;
+
+	static {
+		Comparator<JpaPid> partitionComparator = Comparator.comparing(t -> defaultIfNull(t.myPartitionIdValue, Integer.MIN_VALUE));
+		Comparator<JpaPid> idComparator = Comparator.comparing(t -> t.myId);
+		COMPARATOR = ComparatorUtils.chainedComparator(List.of(partitionComparator, idComparator));
+	}
 
 	/**
 	 * Constructor - Do not call this directly, only used for
@@ -143,6 +158,15 @@ public class JpaPid extends BaseResourcePersistentId<Long> {
 	@Override
 	public String toString() {
 		return myPartitionIdValue != null ? myPartitionIdValue + "/" + myId.toString() : myId.toString();
+	}
+
+	@Override
+	public int compareTo(@Nonnull JpaPid theOther) {
+		return COMPARATOR.compare(this, theOther);
+	}
+
+	public static List<Long> toLongList(JpaPid[] thePids) {
+		return toLongList(Arrays.asList(thePids));
 	}
 
 	public static List<Long> toLongList(Collection<JpaPid> thePids) {

@@ -25,7 +25,7 @@ public class ColumnTupleObject extends SqlObject {
 
 	@Override
 	protected void collectSchemaObjects(ValidationContext vContext) {
-		myColumns.forEach(t->vContext.addColumn(t));
+		myColumns.forEach(vContext::addColumn);
 	}
 
 	@Override

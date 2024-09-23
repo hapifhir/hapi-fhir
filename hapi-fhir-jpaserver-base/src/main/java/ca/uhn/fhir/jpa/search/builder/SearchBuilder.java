@@ -100,6 +100,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.StringUtil;
 import ca.uhn.fhir.util.UrlUtil;
@@ -2016,11 +2017,14 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 	// FIXME: partition should include only the same partition ID in a single list - also write tests
 	private <T> List<Collection<T>> partitionBySizeAndPartitionId(Collection<T> theNextRoundMatches, int theMaxLoad) {
+		List<Collection<T>> retVal;
 		if (theNextRoundMatches.size() <= theMaxLoad) {
-			return Collections.singletonList(theNextRoundMatches);
+
+			retVal = Collections.singletonList(theNextRoundMatches);
+
 		} else {
 
-			List<Collection<T>> retVal = new ArrayList<>();
+			retVal = new ArrayList<>();
 			Collection<T> current = null;
 			for (T next : theNextRoundMatches) {
 				if (current == null) {
@@ -2035,8 +2039,16 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				}
 			}
 
-			return retVal;
 		}
+
+		if (HapiSystemProperties.isUnitTestModeEnabled()) {
+			retVal = retVal
+				.stream()
+				.map(t->t.stream().sorted().collect(Collectors.toList()))
+				.collect(Collectors.toList());
+		}
+
+		return retVal;
 	}
 
 	private void attemptComboUniqueSpProcessing(
