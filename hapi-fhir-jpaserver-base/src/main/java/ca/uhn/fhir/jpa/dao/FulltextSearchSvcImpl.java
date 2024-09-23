@@ -32,6 +32,7 @@ import ca.uhn.fhir.jpa.dao.search.ExtendedHSearchResourceProjection;
 import ca.uhn.fhir.jpa.dao.search.ExtendedHSearchSearchBuilder;
 import ca.uhn.fhir.jpa.dao.search.IHSearchSortHelper;
 import ca.uhn.fhir.jpa.dao.search.LastNOperation;
+import ca.uhn.fhir.jpa.dao.search.SearchScrollQueryExecutorAdaptor;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.ExtendedHSearchBuilderConsumeAdvancedQueryClausesParams;
@@ -40,6 +41,7 @@ import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.search.autocomplete.ValueSetAutocompleteOptions;
 import ca.uhn.fhir.jpa.search.autocomplete.ValueSetAutocompleteSearch;
 import ca.uhn.fhir.jpa.search.builder.ISearchQueryExecutor;
+import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
 import ca.uhn.fhir.jpa.search.builder.SearchQueryExecutors;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
@@ -181,6 +183,19 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		validateHibernateSearchIsEnabled();
 
 		return doSearch(theResourceName, theParams, null, theMaxResultsToFetch, theRequestDetails);
+	}
+
+	@Transactional
+	@Override
+	public ISearchQueryExecutor searchScrolled(
+			String theResourceType, SearchParameterMap theParams, RequestDetails theRequestDetails) {
+		validateHibernateSearchIsEnabled();
+
+		SearchQueryOptionsStep<?, Long, SearchLoadingOptionsStep, ?, ?> searchQueryOptionsStep =
+				getSearchQueryOptionsStep(theResourceType, theParams, null);
+		logQuery(searchQueryOptionsStep, theRequestDetails);
+
+		return new SearchScrollQueryExecutorAdaptor(searchQueryOptionsStep.scroll(SearchBuilder.getMaximumPageSize()));
 	}
 
 	// keep this in sync with supportsSomeOf();

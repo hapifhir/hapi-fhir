@@ -56,8 +56,6 @@ public class FhirResourceDaoR4SearchLastNIT extends BaseR4SearchLastN {
 	@Mock
 	private IHSearchEventListener mySearchEventListener;
 
-
-
 	@Test
 	public void testLastNChunking() {
 
@@ -108,7 +106,6 @@ public class FhirResourceDaoR4SearchLastNIT extends BaseR4SearchLastN {
 		secondQueryPattern.append("\\).*");
 		assertThat(queries.get(1).toUpperCase().replaceAll(" , ", ",")).matches(secondQueryPattern.toString());
 		assertThat(queries.get(3).toUpperCase().replaceAll(" , ", ",")).matches(secondQueryPattern.toString());
-
 	}
 
 	@Test
