@@ -25,12 +25,14 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 public class ResourceForeignKey {
-	public final String table;
-	public final String key;
+	public final String myTable;
+	public final String myResourceIdColumn;
+	public final String myPartitionIdColumn;
 
-	public ResourceForeignKey(String theTable, String theKey) {
-		table = theTable;
-		key = theKey;
+	public ResourceForeignKey(String theTable, String thePartitionIdColumn, String theResourceIdColumn) {
+		myTable = theTable;
+		myPartitionIdColumn = thePartitionIdColumn;
+		myResourceIdColumn = theResourceIdColumn;
 	}
 
 	@Override
@@ -42,21 +44,23 @@ public class ResourceForeignKey {
 		ResourceForeignKey that = (ResourceForeignKey) theO;
 
 		return new EqualsBuilder()
-				.append(table, that.table)
-				.append(key, that.key)
+				.append(myTable, that.myTable)
+				.append(myResourceIdColumn, that.myResourceIdColumn)
+				.append(myPartitionIdColumn, that.myPartitionIdColumn)
 				.isEquals();
 	}
 
 	@Override
 	public int hashCode() {
-		return new HashCodeBuilder(17, 37).append(table).append(key).toHashCode();
+		return new HashCodeBuilder(17, 37).append(myTable).append(myPartitionIdColumn).append(myResourceIdColumn).toHashCode();
 	}
 
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-				.append("table", table)
-				.append("key", key)
+				.append("table", myTable)
+				.append("resourceIdColumn", myResourceIdColumn)
+				.append("partitionIdColumn", myPartitionIdColumn)
 				.toString();
 	}
 }

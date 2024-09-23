@@ -80,6 +80,12 @@ public class MdmLink extends AuditableBasePartitionable implements IMdmLink<JpaP
 	private static final int MATCH_RESULT_LENGTH = 16;
 	private static final int LINK_SOURCE_LENGTH = 16;
 	public static final int SOURCE_TYPE_LENGTH = 40;
+	public static final String GOLDEN_RESOURCE_PID = "GOLDEN_RESOURCE_PID";
+	public static final String GOLDEN_RESOURCE_PARTITION_ID = "GOLDEN_RESOURCE_PARTITION_ID";
+	public static final String PERSON_PID = "PERSON_PID";
+	public static final String PERSON_PARTITION_ID = "PERSON_PARTITION_ID";
+	public static final String TARGET_PID = "TARGET_PID";
+	public static final String TARGET_PARTITION_ID = "TARGET_PARTITION_ID";
 
 	@SequenceGenerator(name = "SEQ_EMPI_LINK_ID", sequenceName = "SEQ_EMPI_LINK_ID")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_EMPI_LINK_ID")
@@ -93,13 +99,13 @@ public class MdmLink extends AuditableBasePartitionable implements IMdmLink<JpaP
 			cascade = {})
 	@JoinColumns(value = {
 		@JoinColumn(
-			name = "GOLDEN_RESOURCE_PID",
+			name = GOLDEN_RESOURCE_PID,
 			referencedColumnName = "RES_ID",
 			insertable = false,
 			updatable = false,
 			nullable = false),
 		@JoinColumn(
-			name = "GOLDEN_RESOURCE_PARTITION_ID",
+			name = GOLDEN_RESOURCE_PARTITION_ID,
 			referencedColumnName = "PARTITION_ID",
 			insertable = false,
 			updatable = false,
@@ -108,10 +114,10 @@ public class MdmLink extends AuditableBasePartitionable implements IMdmLink<JpaP
 		@NotAudited
 	private ResourceTable myGoldenResource;
 
-	@Column(name = "GOLDEN_RESOURCE_PID", nullable = false)
+	@Column(name = GOLDEN_RESOURCE_PID, nullable = false)
 	private Long myGoldenResourcePid;
 
-	@Column(name = "GOLDEN_RESOURCE_PARTITION_ID", nullable = false)
+	@Column(name = GOLDEN_RESOURCE_PARTITION_ID, nullable = false)
 	private Integer myGoldenResourcePartitionId;
 
 	@Deprecated
@@ -121,13 +127,13 @@ public class MdmLink extends AuditableBasePartitionable implements IMdmLink<JpaP
 			cascade = {})
 	@JoinColumns(value = {
 		@JoinColumn(
-			name = "PERSON_PID",
+			name = PERSON_PID,
 			referencedColumnName = "RES_ID",
 			insertable = false,
 			updatable = false,
 			nullable = false),
 		@JoinColumn(
-			name = "PERSON_PARTITION_ID",
+			name = PERSON_PARTITION_ID,
 			referencedColumnName = "PARTITION_ID",
 			insertable = false,
 			updatable = false,
@@ -141,7 +147,7 @@ public class MdmLink extends AuditableBasePartitionable implements IMdmLink<JpaP
 	private Long myPersonPid;
 
 	@Deprecated
-	@Column(name = "PERSON_PARTITION_ID", nullable = true)
+	@Column(name = PERSON_PARTITION_ID, nullable = true)
 	private Integer myPersonPartitionId;
 
 	@ManyToOne(
@@ -150,13 +156,13 @@ public class MdmLink extends AuditableBasePartitionable implements IMdmLink<JpaP
 			cascade = {})
 	@JoinColumns(value = {
 		@JoinColumn(
-			name = "TARGET_PID",
+			name = TARGET_PID,
 			referencedColumnName = "RES_ID",
 			insertable = false,
 			updatable = false,
 			nullable = false),
 		@JoinColumn(
-			name = "TARGET_PARTITION_ID",
+			name = TARGET_PARTITION_ID,
 			referencedColumnName = "PARTITION_ID",
 			insertable = false,
 			updatable = false,
@@ -168,7 +174,7 @@ public class MdmLink extends AuditableBasePartitionable implements IMdmLink<JpaP
 	@Column(name = "TARGET_PID", updatable = false, nullable = false)
 	private Long mySourcePid;
 
-	@Column(name = "TARGET_PARTITION_ID", updatable = false, nullable = false)
+	@Column(name = TARGET_PARTITION_ID, updatable = false, nullable = false)
 	private Integer mySourcePartitionId;
 
 	@Column(name = "MATCH_RESULT", nullable = false)

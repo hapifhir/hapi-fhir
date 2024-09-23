@@ -67,6 +67,8 @@ public class ResourceLink extends BaseResourceIndex {
 
 	public static final int SRC_PATH_LENGTH = 500;
 	private static final long serialVersionUID = 1L;
+	public static final String TARGET_RES_PARTITION_ID = "TARGET_RES_PARTITION_ID";
+	public static final String TARGET_RESOURCE_ID = "TARGET_RESOURCE_ID";
 
 	@SequenceGenerator(name = "SEQ_RESLINK_ID", sequenceName = "SEQ_RESLINK_ID")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_RESLINK_ID")
@@ -106,13 +108,13 @@ public class ResourceLink extends BaseResourceIndex {
 	@ManyToOne(optional = true, fetch = FetchType.LAZY)
 	@JoinColumns(value = {
 		@JoinColumn(
-				name = "TARGET_RESOURCE_ID",
+				name = TARGET_RESOURCE_ID,
 				referencedColumnName = "RES_ID",
 				nullable = true,
 				insertable = false,
 				updatable = false),
 		@JoinColumn(
-				name = "TARGET_RES_PARTITION_ID",
+				name = TARGET_RES_PARTITION_ID,
 				referencedColumnName = "PARTITION_ID",
 				nullable = true,
 				insertable = false,
@@ -121,7 +123,7 @@ public class ResourceLink extends BaseResourceIndex {
 				foreignKey = @ForeignKey(name = "FK_RESLINK_TARGET"))
 	private ResourceTable myTargetResource;
 
-	@Column(name = "TARGET_RESOURCE_ID", insertable = true, updatable = true, nullable = true)
+	@Column(name = TARGET_RESOURCE_ID, insertable = true, updatable = true, nullable = true)
 	@FullTextField
 	private Long myTargetResourcePid;
 
@@ -145,7 +147,7 @@ public class ResourceLink extends BaseResourceIndex {
 	private transient String myTargetResourceId;
 
 	@Embedded
-	@AttributeOverride(name = "myPartitionId", column = @Column(name = "TARGET_RES_PARTITION_ID"))
+	@AttributeOverride(name = "myPartitionId", column = @Column(name = TARGET_RES_PARTITION_ID))
 	@AttributeOverride(name = "myPartitionDate", column = @Column(name = "TARGET_RES_PARTITION_DATE"))
 	private PartitionablePartitionId myTargetResourcePartitionId;
 

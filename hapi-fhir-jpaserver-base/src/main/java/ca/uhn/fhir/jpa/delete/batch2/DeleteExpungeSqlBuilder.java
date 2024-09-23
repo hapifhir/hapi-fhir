@@ -25,6 +25,7 @@ import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.expunge.ResourceForeignKey;
 import ca.uhn.fhir.jpa.dao.expunge.ResourceTableFKProvider;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -34,26 +35,32 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId.PARTITION_ID;
 
 public class DeleteExpungeSqlBuilder {
 	private static final Logger ourLog = LoggerFactory.getLogger(DeleteExpungeSqlBuilder.class);
 	private final ResourceTableFKProvider myResourceTableFKProvider;
 	private final JpaStorageSettings myStorageSettings;
-	private final IIdHelperService myIdHelper;
+	private final PartitionSettings myPartitionSettings;
+	private final IIdHelperService<JpaPid> myIdHelper;
 	private final IResourceLinkDao myResourceLinkDao;
 
 	public DeleteExpungeSqlBuilder(
 			ResourceTableFKProvider theResourceTableFKProvider,
 			JpaStorageSettings theStorageSettings,
-			IIdHelperService theIdHelper,
-			IResourceLinkDao theResourceLinkDao) {
+			IIdHelperService<JpaPid> theIdHelper,
+			IResourceLinkDao theResourceLinkDao,
+			PartitionSettings thePartitionSettings) {
 		myResourceTableFKProvider = theResourceTableFKProvider;
 		myStorageSettings = theStorageSettings;
 		myIdHelper = theIdHelper;
 		myResourceLinkDao = theResourceLinkDao;
+		myPartitionSettings = thePartitionSettings;
 	}
 
 	@Nonnull
@@ -65,16 +72,15 @@ public class DeleteExpungeSqlBuilder {
 
 		List<String> rawSql = new ArrayList<>();
 
-		String pidListString = pids.toString().replace("[", "(").replace("]", ")");
 		List<ResourceForeignKey> resourceForeignKeys = myResourceTableFKProvider.getResourceForeignKeys();
 
 		for (ResourceForeignKey resourceForeignKey : resourceForeignKeys) {
-			rawSql.add(deleteRecordsByColumnSql(pidListString, resourceForeignKey));
+			rawSql.add(deleteRecordsByColumnSql(pids, resourceForeignKey));
 		}
 
 		// Lastly we need to delete records from the resource table all of these other tables link to:
-		ResourceForeignKey resourceTablePk = new ResourceForeignKey("HFJ_RESOURCE", "RES_ID");
-		rawSql.add(deleteRecordsByColumnSql(pidListString, resourceTablePk));
+		ResourceForeignKey resourceTablePk = new ResourceForeignKey("HFJ_RESOURCE", PARTITION_ID, "RES_ID");
+		rawSql.add(deleteRecordsByColumnSql(pids, resourceTablePk));
 		return new DeleteExpungeSqlResult(rawSql, pids.size());
 	}
 
@@ -131,7 +137,7 @@ public class DeleteExpungeSqlBuilder {
 		// NB-GGG: We previously instantiated these ID values from firstConflict.getSourceResource().getIdDt(), but in a
 		// situation where we
 		// actually had to run delete conflict checks in multiple partitions, the executor service starts its own
-		// sessions on a per thread basis, and by the time
+		// sessions on a per-thread basis, and by the time
 		// we arrive here, those sessions are closed. So instead, we resolve them from PIDs, which are eagerly loaded.
 		String sourceResourceId = myIdHelper
 				.resourceIdFromPidOrThrowException(
@@ -171,9 +177,39 @@ public class DeleteExpungeSqlBuilder {
 		}
 	}
 
-	private String deleteRecordsByColumnSql(String thePidListString, ResourceForeignKey theResourceForeignKey) {
-		return "DELETE FROM " + theResourceForeignKey.table + " WHERE " + theResourceForeignKey.key + " IN "
-				+ thePidListString;
+	private String deleteRecordsByColumnSql(Set<JpaPid> thePids, ResourceForeignKey theResourceForeignKey) {
+		StringBuilder builder = new StringBuilder();
+		builder.append("DELETE FROM ");
+		builder.append(theResourceForeignKey.myTable);
+		builder.append(" WHERE ");
+		if (myPartitionSettings.isPartitionIdsInPrimaryKeys()) {
+			builder.append("(");
+			builder.append(theResourceForeignKey.myPartitionIdColumn);
+			builder.append(",");
+			builder.append(theResourceForeignKey.myResourceIdColumn);
+			builder.append(")");
+		} else {
+			builder.append(theResourceForeignKey.myResourceIdColumn);
+		}
+
+		builder.append(" IN (");
+		for (Iterator<JpaPid> iter = thePids.iterator(); iter.hasNext();) {
+			JpaPid pid = iter.next();
+			if (myPartitionSettings.isPartitionIdsInPrimaryKeys()) {
+				builder.append("(");
+				builder.append(pid.getPartitionId());
+				builder.append(",");
+				builder.append(pid.getId());
+				builder.append(")");
+			} else {
+				builder.append(pid.getId());
+			}
+			if (iter.hasNext()) {
+				builder.append(",");
+			}
+		}
+		builder.append(")");
+		return builder.toString();
 	}
 
 	public static class DeleteExpungeSqlResult {
@@ -181,8 +217,8 @@ public class DeleteExpungeSqlBuilder {
 		private final List<String> mySqlStatements;
 		private final int myRecordCount;
 
-		public DeleteExpungeSqlResult(List<String> theSqlStatments, int theRecordCount) {
-			mySqlStatements = theSqlStatments;
+		public DeleteExpungeSqlResult(List<String> theSqlStatements, int theRecordCount) {
+			mySqlStatements = theSqlStatements;
 			myRecordCount = theRecordCount;
 		}
 

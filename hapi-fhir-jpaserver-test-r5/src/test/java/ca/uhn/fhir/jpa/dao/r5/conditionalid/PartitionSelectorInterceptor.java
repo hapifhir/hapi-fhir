@@ -9,6 +9,8 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
+import static org.apache.commons.lang3.StringUtils.defaultString;
+
 public class PartitionSelectorInterceptor {
 	private Integer myNextPartitionId;
 
@@ -29,12 +31,12 @@ public class PartitionSelectorInterceptor {
 
 	@Nonnull
 	private RequestPartitionId selectPartition(String theResourceType) {
-		return switch (theResourceType) {
+		return switch (defaultString(theResourceType)) {
 			case "Patient", "Observation", "Encounter" -> {
 				assert myNextPartitionId != null;
 				yield RequestPartitionId.fromPartitionId(myNextPartitionId);
 			}
-			case "SearchParameter", "Organization" -> RequestPartitionId.defaultPartition();
+			case "", "SearchParameter", "Organization" -> RequestPartitionId.defaultPartition();
 			default -> throw new InternalErrorException("Don't know how to handle resource type: " + theResourceType);
 		};
 	}
