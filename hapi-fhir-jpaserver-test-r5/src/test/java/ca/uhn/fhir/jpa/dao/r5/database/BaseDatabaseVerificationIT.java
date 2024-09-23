@@ -93,6 +93,8 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
 	@Autowired
 	TestDaoSearch myTestDaoSearch;
 
+	SystemRequestDetails myRequestDetails = new SystemRequestDetails();
+
 	@RegisterExtension
 	protected RestfulServerExtension myServer = new RestfulServerExtension(FhirContext.forR5Cached());
 
@@ -114,9 +116,9 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
 		Patient patient = new Patient();
 		patient.setActive(true);
 		patient.addName().setFamily(name);
-		IIdType id = myPatientDao.create(patient, new SystemRequestDetails()).getId();
+		IIdType id = myPatientDao.create(patient, myRequestDetails).getId();
 
-		Patient actual = myPatientDao.read(id, new SystemRequestDetails());
+		Patient actual = myPatientDao.read(id, myRequestDetails);
 		assertEquals(name, actual.getName().get(0).getFamily());
 	}
 
@@ -125,11 +127,11 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
 	public void testDelete() {
 		Patient patient = new Patient();
 		patient.setActive(true);
-		IIdType id = myPatientDao.create(patient, new SystemRequestDetails()).getId().toUnqualifiedVersionless();
+		IIdType id = myPatientDao.create(patient, myRequestDetails).getId().toUnqualifiedVersionless();
 
-		myPatientDao.delete(id, new SystemRequestDetails());
+		myPatientDao.delete(id, myRequestDetails);
 
-		assertThatExceptionOfType(ResourceGoneException.class).isThrownBy(() -> myPatientDao.read(id, new SystemRequestDetails()));
+		assertThatExceptionOfType(ResourceGoneException.class).isThrownBy(() -> myPatientDao.read(id, myRequestDetails));
 	}
 
 
@@ -162,6 +164,7 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
 	@ParameterizedTest
 	@CsvSource(textBlock = """
 			query string,			Patient?name=smith
+			query multiple types,	Patient?name=smith&birthdate=2021&active=true
 			query date,				Observation?date=2021
 			query token,			Patient?active=true
 			sort string, 			Patient?_sort=name
@@ -241,13 +244,13 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
 	@SuppressWarnings("unchecked")
 	@Override
 	public IIdType doCreateResource(IBaseResource theResource) {
-		return myDaoRegistry.getResourceDao(myFhirContext.getResourceType(theResource)).create(theResource, new SystemRequestDetails()).getId();
+		return myDaoRegistry.getResourceDao(myFhirContext.getResourceType(theResource)).create(theResource, myRequestDetails).getId();
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public IIdType doUpdateResource(IBaseResource theResource) {
-		return myDaoRegistry.getResourceDao(myFhirContext.getResourceType(theResource)).update(theResource, new SystemRequestDetails()).getId();
+		return myDaoRegistry.getResourceDao(myFhirContext.getResourceType(theResource)).update(theResource, myRequestDetails).getId();
 	}
 
 	@Override

@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
@@ -75,6 +76,8 @@ public class TestDaoSearch {
 	final DaoRegistry myDaoRegistry;
 	final MatchUrlService myMatchUrlService;
 	final ISearchParamRegistry mySearchParamRegistry;
+	RequestPartitionId myRequestPartitionId;
+
 
 	public TestDaoSearch(
 			FhirContext theFhirCtx,
@@ -192,6 +195,9 @@ public class TestDaoSearch {
 		SystemRequestDetails reqDetails = theSynchronousMode
 				? fakeRequestDetailsFromUrl(theQueryUrl)
 				: fakePaginatedRequestDetailsFromUrl(theQueryUrl);
+		if (myRequestPartitionId != null) {
+			reqDetails.setRequestPartitionId(myRequestPartitionId);
+		}
 		return dao.search(map, reqDetails);
 	}
 
@@ -236,4 +242,13 @@ public class TestDaoSearch {
 		doReturn(mockPagingProvider).when(mockServerDfts).getPagingProvider();
 		return spiedReqDetails;
 	}
+
+	public RequestPartitionId getRequestPartitionId() {
+		return myRequestPartitionId;
+	}
+
+	public void setRequestPartitionId(RequestPartitionId theRequestPartitionId) {
+		myRequestPartitionId = theRequestPartitionId;
+	}
+
 }

@@ -37,7 +37,6 @@ import java.util.Map;
  */
 public class PostgresEmbeddedDatabase extends JpaContainerDatabase {
 
-
 	public PostgresEmbeddedDatabase() {
 		this(new PostgreSQLContainer<>(DockerImageName.parse("postgres:latest")));
 	}
@@ -45,10 +44,10 @@ public class PostgresEmbeddedDatabase extends JpaContainerDatabase {
 	public PostgresEmbeddedDatabase(PostgreSQLContainer<?> theContainer) {
 		super(theContainer);
 		super.initialize(
-			DriverTypeEnum.POSTGRES_9_4,
-			myContainer.getJdbcUrl(),
-			myContainer.getUsername(),
-			myContainer.getPassword());
+				DriverTypeEnum.POSTGRES_9_4,
+				myContainer.getJdbcUrl(),
+				myContainer.getUsername(),
+				myContainer.getPassword());
 	}
 
 	@Override

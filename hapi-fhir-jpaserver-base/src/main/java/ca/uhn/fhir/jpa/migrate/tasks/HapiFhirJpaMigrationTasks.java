@@ -135,9 +135,16 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		final Builder version = forVersion(VersionEnum.V7_6_0);
 
+		// WIPMB: should we do this for Sql Sever and Oracle too?
+		// wipmb - what about hfj_idx_cmp_string_uniq?  Should it be shared, or partitioned?
+		//
+		//ALTER table hfj_idx_cmp_string_uniq add CONSTRAINT hfj_idx_cmp_string_uniq_pkey PRIMARY KEY (pid, partition_id);
 		// activate citus
 		ExecuteRawSqlTask executeRawSqlTask = new ExecuteRawSqlTask(version.getRelease(), "20240909.1");
-		executeRawSqlTask.addSql(DriverTypeEnum.POSTGRES_9_4, "SELECT create_distributed_table('hfj_resource', 'partition_id');");
+
+		CitusGoop goop = new CitusGoop();
+		goop.getSqlStatements().forEach(nextSql -> executeRawSqlTask.addSql(DriverTypeEnum.POSTGRES_9_4, nextSql));
+
 		executeRawSqlTask.addFlag(TaskFlagEnum.RUN_DURING_SCHEMA_INITIALIZATION);
 		version.addTask(executeRawSqlTask);
 	}

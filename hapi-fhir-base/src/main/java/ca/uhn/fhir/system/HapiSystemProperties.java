@@ -163,12 +163,10 @@ public final class HapiSystemProperties {
 	}
 
 	public static boolean isRunAllMigrations() {
-		return Boolean.parseBoolean(System.getProperty(
-			UNIT_TEST_HAPI_RUN_ALL_MIGRATIONS, Boolean.FALSE.toString()));
+		return Boolean.parseBoolean(System.getProperty(UNIT_TEST_HAPI_RUN_ALL_MIGRATIONS, Boolean.FALSE.toString()));
 	}
 
 	public static void enableRunAllMigrations(boolean theFlag) {
 		System.setProperty(UNIT_TEST_HAPI_RUN_ALL_MIGRATIONS, Boolean.toString(theFlag));
 	}
-
 }
