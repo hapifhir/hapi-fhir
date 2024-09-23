@@ -55,8 +55,8 @@ public class JpaPid extends BaseResourcePersistentId<Long> implements Comparable
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_RESOURCE_ID")
 	@Column(name = "RES_ID")
 	@GenericField(projectable = Projectable.YES)
-
 	private Long myId;
+
 	@ConditionalIdProperty
 	@Column(name = PartitionablePartitionId.PARTITION_ID)
 	private Integer myPartitionIdValue;
@@ -113,6 +113,7 @@ public class JpaPid extends BaseResourcePersistentId<Long> implements Comparable
 		return this;
 	}
 
+	@Override
 	public Integer getPartitionId() {
 		return myPartitionIdValue;
 	}

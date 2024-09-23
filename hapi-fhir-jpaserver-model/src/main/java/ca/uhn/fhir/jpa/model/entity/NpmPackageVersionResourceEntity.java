@@ -86,7 +86,7 @@ public class NpmPackageVersionResourceEntity {
 	@Column(name = "BINARY_RES_ID", nullable = false)
 	private Long myResourcePid;
 
-	@Column(name = "PARTITION_ID", nullable = false)
+	@Column(name = "PARTITION_ID", nullable = true)
 	private Integer myPartitionId;
 
 	@Column(name = "FILE_DIR", length = 200)

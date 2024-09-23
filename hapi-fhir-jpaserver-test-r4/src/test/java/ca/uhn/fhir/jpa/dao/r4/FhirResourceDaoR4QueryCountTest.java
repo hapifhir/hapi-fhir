@@ -1043,10 +1043,10 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 			p.setManagingOrganization(new Reference(orgId));
 			myPatientDao.update(p, mySrd);
 		}
-		data.addTypedPid("Patient", patientId.getIdPartAsLong());
+		data.addTypedPidWithNullPartitionForUnitTest("Patient", patientId.getIdPartAsLong());
 		for (int i = 0; i < 9; i++) {
 			IIdType nextPatientId = createPatient(withActiveTrue());
-			data.addTypedPid("Patient", nextPatientId.getIdPartAsLong());
+			data.addTypedPidWithNullPartitionForUnitTest("Patient", nextPatientId.getIdPartAsLong());
 		}
 
 		ReindexJobParameters params = new ReindexJobParameters()
@@ -1080,7 +1080,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 			.getEntry()
 			.stream()
 			.map(t->new IdType(t.getResponse().getLocation()))
-			.forEach(t->data.addTypedPid("Observation", t.getIdPartAsLong()));
+			.forEach(t->data.addTypedPidWithNullPartitionForUnitTest("Observation", t.getIdPartAsLong()));
 
         runInTransaction(() -> {
             assertEquals(24L, myResourceTableDao.count());

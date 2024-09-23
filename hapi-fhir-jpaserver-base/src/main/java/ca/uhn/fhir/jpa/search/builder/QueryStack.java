@@ -1233,7 +1233,7 @@ public class QueryStack {
 					resourceLinkTableJoin.getColumnSourcePath(), mySqlBuilder.generatePlaceholders(paths));
 
 			Condition linkedPredicate =
-					searchForIdsWithAndOr(theRequest, with().setSourceJoinColumn(resourceLinkTableJoin.getJoinColumns())
+					searchForIdsWithAndOr(theRequest, with().setSourceJoinColumn(resourceLinkTableJoin.getJoinColumnsForSource())
 							.setResourceName(targetResourceType)
 							.setParamName(parameterName)
 							.setAndOrParams(Collections.singletonList(orValues))

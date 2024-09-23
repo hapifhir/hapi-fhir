@@ -54,8 +54,8 @@ public class ReindexStepTest extends BaseJpaR4Test {
 		Long id1 = createPatient(withActiveTrue(), withFamily("FLANDERS")).getIdPartAsLong();
 
 		ResourceIdListWorkChunkJson data = new ResourceIdListWorkChunkJson();
-		data.addTypedPid("Patient", id0);
-		data.addTypedPid("Patient", id1);
+		data.addTypedPidWithNullPartitionForUnitTest("Patient", id0);
+		data.addTypedPidWithNullPartitionForUnitTest("Patient", id1);
 
 		// Execute
 
@@ -85,8 +85,8 @@ public class ReindexStepTest extends BaseJpaR4Test {
 		Long id1 = createPatient(withActiveTrue(), withFamily("FLANDERS")).getIdPartAsLong();
 
 		ResourceIdListWorkChunkJson data = new ResourceIdListWorkChunkJson();
-		data.addTypedPid("Patient", id0);
-		data.addTypedPid("Patient", id1);
+		data.addTypedPidWithNullPartitionForUnitTest("Patient", id0);
+		data.addTypedPidWithNullPartitionForUnitTest("Patient", id1);
 
 		// Execute
 
@@ -113,8 +113,8 @@ public class ReindexStepTest extends BaseJpaR4Test {
 		Long id1 = createPatient(withActiveTrue(), withFamily("FLANDERS")).getIdPartAsLong();
 
 		ResourceIdListWorkChunkJson data = new ResourceIdListWorkChunkJson();
-		data.addTypedPid("Patient", id0);
-		data.addTypedPid("Patient", id1);
+		data.addTypedPidWithNullPartitionForUnitTest("Patient", id0);
+		data.addTypedPidWithNullPartitionForUnitTest("Patient", id1);
 
 		runInTransaction(() -> {
 			myResourceIndexedSearchParamStringDao.deleteByResourceId(JpaPid.fromId(id0));
@@ -152,8 +152,8 @@ public class ReindexStepTest extends BaseJpaR4Test {
 		Long id1 = createPatient(withActiveTrue(), withFamily("FLANDERS"), withOrganization(orgId)).getIdPartAsLong();
 
 		ResourceIdListWorkChunkJson data = new ResourceIdListWorkChunkJson();
-		data.addTypedPid("Patient", id0);
-		data.addTypedPid("Patient", id1);
+		data.addTypedPidWithNullPartitionForUnitTest("Patient", id0);
+		data.addTypedPidWithNullPartitionForUnitTest("Patient", id1);
 
 		SearchParameter sp = new SearchParameter();
 		sp.setType(Enumerations.SearchParamType.STRING);
@@ -217,10 +217,10 @@ public class ReindexStepTest extends BaseJpaR4Test {
 		Long idObservation = createObservation(withSubject(new IdType("Patient/" + idPatientToInvalidate))).getIdPartAsLong();
 
 		ResourceIdListWorkChunkJson data = new ResourceIdListWorkChunkJson();
-		data.addTypedPid("Patient", id0);
-		data.addTypedPid("Patient", id1);
-		data.addTypedPid("Patient", idPatientToInvalidate);
-		data.addTypedPid("Observation", idObservation);
+		data.addTypedPidWithNullPartitionForUnitTest("Patient", id0);
+		data.addTypedPidWithNullPartitionForUnitTest("Patient", id1);
+		data.addTypedPidWithNullPartitionForUnitTest("Patient", idPatientToInvalidate);
+		data.addTypedPidWithNullPartitionForUnitTest("Observation", idObservation);
 
 		runInTransaction(() -> {
 			// Swap in some invalid text, which will cause an error when we go to reindex

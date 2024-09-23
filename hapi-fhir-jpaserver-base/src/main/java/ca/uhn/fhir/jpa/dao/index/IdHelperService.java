@@ -873,7 +873,9 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 	}
 
 	@Override
-	public JpaPid newPidFromStringIdAndResourceName(String thePid, String theResourceName) {
-		return JpaPid.fromIdAndResourceType(Long.parseLong(thePid), theResourceName);
+	public JpaPid newPidFromStringIdAndResourceName(Integer thePartitionId, String thePid, String theResourceName) {
+		JpaPid retVal = JpaPid.fromId(Long.parseLong(thePid), thePartitionId);
+		retVal.setResourceType(theResourceName);
+		return retVal;
 	}
 }

@@ -97,7 +97,7 @@ public class NpmPackageVersionEntity {
 	@Column(name="BINARY_RES_ID", nullable = false)
 	private Long myPackageBinaryResourceId;
 
-	@Column(name="PARTITION_ID", nullable = false)
+	@Column(name="PARTITION_ID", nullable = true)
 	private Integer myPackageBinaryPartitionId;
 
 	@Temporal(TemporalType.TIMESTAMP)

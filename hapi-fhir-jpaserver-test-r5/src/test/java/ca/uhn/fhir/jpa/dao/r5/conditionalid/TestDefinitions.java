@@ -16,6 +16,7 @@ import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.param.HasParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
@@ -47,6 +48,7 @@ import java.util.concurrent.Callable;
 
 import static ca.uhn.fhir.jpa.dao.r5.conditionalid.ConditionalIdFilteredPartitioningEnabledTest.PARTITION_1;
 import static ca.uhn.fhir.jpa.dao.r5.conditionalid.ConditionalIdKeptPartitioningEnabledTest.PARTITION_2;
+import static ca.uhn.fhir.rest.api.Constants.PARAM_HAS;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_TAG;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -293,6 +295,28 @@ public abstract class TestDefinitions implements ITestDataBuilder {
 		}
 		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
 
+	}
+
+	@Test
+	public void testSearch_Has() {
+		// Setup
+		myPartitionSelectorInterceptor.setNextPartitionId(PARTITION_1);
+
+		IIdType patientId = createPatient(withActiveTrue()).toUnqualifiedVersionless();
+		IIdType observationId = createObservation(withSubject(patientId)).toUnqualifiedVersionless();
+		myParentTest.logAllResources();
+		myParentTest.logAllResourceLinks();
+
+		// Test
+		myCaptureQueriesListener.clear();
+		SearchParameterMap params = SearchParameterMap.newSynchronous();
+		params.add(PARAM_HAS, new HasParam("Observation", "patient", "_id", observationId.getValue()));
+		IBundleProvider outcome = myPatientDao.search(params, new SystemRequestDetails());
+		List<String> values = toUnqualifiedVersionlessIdValues(outcome);
+
+		// Verify
+		myCaptureQueriesListener.logSelectQueries();
+		assertThat(values).asList().containsExactly(patientId.getValue());
 	}
 
 	@ParameterizedTest

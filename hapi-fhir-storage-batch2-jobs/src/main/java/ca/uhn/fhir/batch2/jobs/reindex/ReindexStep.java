@@ -66,7 +66,7 @@ public class ReindexStep implements IJobStepWorker<ReindexJobParameters, Resourc
 	private DaoRegistry myDaoRegistry;
 
 	@Autowired
-	private IIdHelperService<IResourcePersistentId> myIdHelperService;
+	private IIdHelperService<IResourcePersistentId<?>> myIdHelperService;
 
 	@Nonnull
 	@Override
@@ -139,7 +139,7 @@ public class ReindexStep implements IJobStepWorker<ReindexJobParameters, Resourc
 		@Override
 		public Void doInTransaction(@Nonnull TransactionStatus theStatus) {
 
-			List<IResourcePersistentId> persistentIds = myData.getResourcePersistentIds(myIdHelperService);
+			List<IResourcePersistentId<?>> persistentIds = myData.getResourcePersistentIds(myIdHelperService);
 
 			ourLog.info(
 					"Starting reindex work chunk with {} resources - Instance[{}] Chunk[{}]",

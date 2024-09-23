@@ -75,8 +75,10 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 	@AfterEach
 	public void after() throws Exception {
 		super.after();
-		myStorageSettings.setDefaultSearchParamsCanBeOverridden(new JpaStorageSettings().isDefaultSearchParamsCanBeOverridden());
-		myStorageSettings.setAllowContainsSearches(new JpaStorageSettings().isAllowContainsSearches());
+		JpaStorageSettings defaults = new JpaStorageSettings();
+		myStorageSettings.setDefaultSearchParamsCanBeOverridden(defaults.isDefaultSearchParamsCanBeOverridden());
+		myStorageSettings.setAllowContainsSearches(defaults.isAllowContainsSearches());
+		myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(defaults.isMarkResourcesForReindexingUponSearchParameterChange());
 	}
 
 	@BeforeEach

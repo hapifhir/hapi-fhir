@@ -109,7 +109,7 @@ class MdmClearStepTest extends BaseMdmR4Test {
 
 	private void mdmClearGoldenResource() {
 		ResourceIdListWorkChunkJson chunk = new ResourceIdListWorkChunkJson();
-		chunk.addTypedPid("Patient", myGoldenPid);
+		chunk.addTypedPidWithNullPartitionForUnitTest("Patient", myGoldenPid);
 
 		RequestDetails requestDetails = new SystemRequestDetails();
 		TransactionDetails transactionDetails = new TransactionDetails();
