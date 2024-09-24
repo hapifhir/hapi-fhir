@@ -576,13 +576,13 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		sleepUntilTimeChange();
 
-		ResourceTable entity = new TransactionTemplate(myTxManager).execute(t -> myEntityManager.find(ResourceTable.class, id.getIdPartAsLong()));
+		ResourceTable entity = runInTransaction(()->myEntityManager.find(ResourceTable.class, JpaPid.fromId(id.getIdPartAsLong())));
 		assertEquals(Long.valueOf(1), entity.getIndexStatus());
 
 		Long jobId = myResourceReindexingSvc.markAllResourcesForReindexing();
 		myResourceReindexingSvc.forceReindexingPass();
 
-		entity = new TransactionTemplate(myTxManager).execute(t -> myEntityManager.find(ResourceTable.class, id.getIdPartAsLong()));
+		entity = runInTransaction(()->myEntityManager.find(ResourceTable.class, JpaPid.fromId(id.getIdPartAsLong())));
 		assertEquals(Long.valueOf(1), entity.getIndexStatus());
 
 		// Just make sure this doesn't cause a choke
@@ -619,7 +619,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		myResourceReindexingSvc.markAllResourcesForReindexing();
 		myResourceReindexingSvc.forceReindexingPass();
 
-		entity = new TransactionTemplate(myTxManager).execute(theStatus -> myEntityManager.find(ResourceTable.class, id.getIdPartAsLong()));
+		entity = runInTransaction(()-> myEntityManager.find(ResourceTable.class, JpaPid.fromId(id.getIdPartAsLong())));
 		assertEquals(Long.valueOf(2), entity.getIndexStatus());
 
 	}

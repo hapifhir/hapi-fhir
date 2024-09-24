@@ -986,8 +986,7 @@ public class SearchParamExtractorService {
 				.setTargetResourceId(targetResourceIdPart)
 				.setUpdated(theUpdateTime)
 				.setTargetResourceVersion(targetVersion)
-				.setTargetResourcePartitionablePartitionId(
-						targetResource.getPartitionId());
+				.setTargetResourcePartitionablePartitionId(targetResource.getPartitionId());
 
 		return forLocalReference(params);
 	}

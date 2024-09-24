@@ -438,53 +438,53 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc, IHasSc
 
 			myResourceTableDao.updateIndexStatus(theId, BaseHapiFhirDao.INDEX_STATUS_INDEXING_FAILED);
 
-			Query q = myEntityManager.createQuery("DELETE FROM ResourceTag t WHERE t.myResourceId = :id");
+			Query q = myEntityManager.createQuery("DELETE FROM ResourceTag t WHERE t.myResource.myPid = :id");
 			q.setParameter("id", theId);
 			q.executeUpdate();
 
 			q = myEntityManager.createQuery(
-					"DELETE FROM ResourceIndexedSearchParamCoords t WHERE t.myResourcePid = :id");
+					"DELETE FROM ResourceIndexedSearchParamCoords t WHERE t.myResource.myPid = :id");
 			q.setParameter("id", theId);
 			q.executeUpdate();
 
-			q = myEntityManager.createQuery("DELETE FROM ResourceIndexedSearchParamDate t WHERE t.myResourcePid = :id");
-			q.setParameter("id", theId);
-			q.executeUpdate();
-
-			q = myEntityManager.createQuery(
-					"DELETE FROM ResourceIndexedSearchParamNumber t WHERE t.myResourcePid = :id");
+			q = myEntityManager.createQuery("DELETE FROM ResourceIndexedSearchParamDate t WHERE t.myResource.myPid = :id");
 			q.setParameter("id", theId);
 			q.executeUpdate();
 
 			q = myEntityManager.createQuery(
-					"DELETE FROM ResourceIndexedSearchParamQuantity t WHERE t.myResourcePid = :id");
+					"DELETE FROM ResourceIndexedSearchParamNumber t WHERE t.myResource.myPid = :id");
 			q.setParameter("id", theId);
 			q.executeUpdate();
 
 			q = myEntityManager.createQuery(
-					"DELETE FROM ResourceIndexedSearchParamQuantityNormalized t WHERE t.myResourcePid = :id");
+					"DELETE FROM ResourceIndexedSearchParamQuantity t WHERE t.myResource.myPid = :id");
 			q.setParameter("id", theId);
 			q.executeUpdate();
 
 			q = myEntityManager.createQuery(
-					"DELETE FROM ResourceIndexedSearchParamString t WHERE t.myResourcePid = :id");
+					"DELETE FROM ResourceIndexedSearchParamQuantityNormalized t WHERE t.myResource.myPid = :id");
 			q.setParameter("id", theId);
 			q.executeUpdate();
 
 			q = myEntityManager.createQuery(
-					"DELETE FROM ResourceIndexedSearchParamToken t WHERE t.myResourcePid = :id");
+					"DELETE FROM ResourceIndexedSearchParamString t WHERE t.myResource.myPid = :id");
 			q.setParameter("id", theId);
 			q.executeUpdate();
 
-			q = myEntityManager.createQuery("DELETE FROM ResourceIndexedSearchParamUri t WHERE t.myResourcePid = :id");
+			q = myEntityManager.createQuery(
+					"DELETE FROM ResourceIndexedSearchParamToken t WHERE t.myResource.myPid = :id");
 			q.setParameter("id", theId);
 			q.executeUpdate();
 
-			q = myEntityManager.createQuery("DELETE FROM ResourceLink t WHERE t.mySourceResourcePid = :id");
+			q = myEntityManager.createQuery("DELETE FROM ResourceIndexedSearchParamUri t WHERE t.myResource.myPid = :id");
 			q.setParameter("id", theId);
 			q.executeUpdate();
 
-			q = myEntityManager.createQuery("DELETE FROM ResourceLink t WHERE t.myTargetResourcePid = :id");
+			q = myEntityManager.createQuery("DELETE FROM ResourceLink t WHERE t.mySourceResource.myPid = :id");
+			q.setParameter("id", theId);
+			q.executeUpdate();
+
+			q = myEntityManager.createQuery("DELETE FROM ResourceLink t WHERE t.myTargetResource.myPid = :id");
 			q.setParameter("id", theId);
 			q.executeUpdate();
 

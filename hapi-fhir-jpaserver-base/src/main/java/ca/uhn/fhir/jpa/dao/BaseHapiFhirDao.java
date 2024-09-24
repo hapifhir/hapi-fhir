@@ -1189,14 +1189,14 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			return entity;
 		}
 
-		if (entity.getId() != null && theUpdateVersion) {
+		if (entity.getId().getId() != null && theUpdateVersion) {
 			entity.markVersionUpdatedInCurrentTransaction();
 		}
 
 		/*
 		 * Save the resource itself
 		 */
-		if (entity.getId() == null || entity.getId().getId() == null) {
+		if (entity.getId().getId() == null) {
 			myEntityManager.persist(entity);
 
 			postPersist(entity, (T) theResource, theRequest);

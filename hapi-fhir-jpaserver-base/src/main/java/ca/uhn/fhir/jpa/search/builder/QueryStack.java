@@ -937,7 +937,7 @@ public class QueryStack {
 			RequestPartitionId theRequestPartitionId) {
 
 		if (theFilter instanceof SearchFilterParser.FilterParameter) {
-				return createPredicateFilter(
+			return createPredicateFilter(
 					theRequest,
 					theQueryStack3,
 					(SearchFilterParser.FilterParameter) theFilter,

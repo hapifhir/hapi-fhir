@@ -499,7 +499,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 		if (forcedId.isPresent()) {
 			retVal.setValue(forcedId.get());
 		} else {
-			retVal.setValue(theResourceType + '/' + theId);
+			retVal.setValue(theResourceType + '/' + theId.getId());
 		}
 
 		return retVal;

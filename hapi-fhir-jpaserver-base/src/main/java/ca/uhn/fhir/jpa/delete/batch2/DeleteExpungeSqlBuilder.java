@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -67,7 +68,7 @@ public class DeleteExpungeSqlBuilder {
 	DeleteExpungeSqlResult convertPidsToDeleteExpungeSql(
 			List<JpaPid> theJpaPids, boolean theCascade, Integer theCascadeMaxRounds) {
 
-		Set<JpaPid> pids = Set.copyOf(theJpaPids);
+		Set<JpaPid> pids = new HashSet<>(theJpaPids);
 		validateOkToDeleteAndExpunge(pids, theCascade, theCascadeMaxRounds);
 
 		List<String> rawSql = new ArrayList<>();

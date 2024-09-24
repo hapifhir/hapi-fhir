@@ -165,7 +165,8 @@ public class JpaPid extends BaseResourcePersistentId<Long> implements Comparable
 
 	@Override
 	public String toString() {
-		return myPartitionIdValue != null ? myPartitionIdValue + "/" + myId.toString() : myId.toString();
+		String retVal = myPartitionIdValue != null ? myPartitionIdValue + "/" + myId.toString() : myId.toString();
+		return retVal;
 	}
 
 	@Override
