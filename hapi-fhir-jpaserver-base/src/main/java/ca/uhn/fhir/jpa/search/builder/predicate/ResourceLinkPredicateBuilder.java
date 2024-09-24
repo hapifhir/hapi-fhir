@@ -800,14 +800,17 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 		subquery.addCustomColumns(1);
 		subquery.addFromTable(getTable());
 
+		String resourceType = theParams.getResourceTablePredicateBuilder().getResourceType();
+		RuntimeSearchParam paramDefinition =
+				mySearchParamRegistry.getRuntimeSearchParam(resourceType, theParams.getParamName());
+		String paramPath = paramDefinition.getPath();
+
 		Condition subQueryCondition = ComboCondition.and(
 				BinaryCondition.equalTo(
 						getResourceIdColumn(),
 						theParams.getResourceTablePredicateBuilder().getResourceIdColumn()),
-				BinaryCondition.equalTo(
-						getResourceTypeColumn(),
-						generatePlaceholder(
-								theParams.getResourceTablePredicateBuilder().getResourceType())));
+				BinaryCondition.equalTo(getResourceTypeColumn(), generatePlaceholder(resourceType)),
+				BinaryCondition.equalTo(getColumnSourcePath(), generatePlaceholder(paramPath)));
 
 		subquery.addCondition(subQueryCondition);
 
