@@ -12,7 +12,13 @@ public class BatchWorkChunkStatusDTO {
 	public final Double avg;
 	public final Long totalChunks;
 
-	public BatchWorkChunkStatusDTO(String theStepId, WorkChunkStatusEnum theStatus, Date theStart, Date theStop, Double theAvg, Long theTotalChunks) {
+	public BatchWorkChunkStatusDTO(
+			String theStepId,
+			WorkChunkStatusEnum theStatus,
+			Date theStart,
+			Date theStop,
+			Double theAvg,
+			Long theTotalChunks) {
 		stepId = theStepId;
 		status = theStatus;
 		start = theStart;

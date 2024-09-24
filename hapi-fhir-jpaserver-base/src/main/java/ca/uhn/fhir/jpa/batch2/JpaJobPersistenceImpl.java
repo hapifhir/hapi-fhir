@@ -264,16 +264,16 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	@Override
 	public List<BatchWorkChunkStatusDTO> fetchWorkChunkStatusForInstance(String theInstanceId) {
 		return myTransactionService
-			.withSystemRequestOnDefaultPartition()
-			.execute(() -> myWorkChunkRepository.fetchWorkChunkStatusForInstance(theInstanceId));
+				.withSystemRequestOnDefaultPartition()
+				.execute(() -> myWorkChunkRepository.fetchWorkChunkStatusForInstance(theInstanceId));
 	}
 
 	@javax.annotation.Nonnull
 	@Override
 	public BatchInstanceStatusDTO fetchBatchInstanceStatus(String theInstanceId) {
 		return myTransactionService
-			.withSystemRequestOnDefaultPartition()
-			.execute(() -> myJobInstanceRepository.fetchBatchInstanceStatus(theInstanceId));
+				.withSystemRequestOnDefaultPartition()
+				.execute(() -> myJobInstanceRepository.fetchBatchInstanceStatus(theInstanceId));
 	}
 
 	@Override

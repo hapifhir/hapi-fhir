@@ -93,6 +93,7 @@ public interface IBatch2JobInstanceRepository
 	List<Batch2JobInstanceEntity> findInstancesByJobDefinitionId(
 			@Param("jobDefinitionId") String theJobDefinitionId, Pageable thePageRequest);
 
-	@Query("SELECT new ca.uhn.fhir.batch2.api.BatchInstanceStatusDTO(e.myId, e.myStatus, e.myStartTime, e.myEndTime) FROM Batch2JobInstanceEntity e WHERE e.myId = :id")
+	@Query(
+			"SELECT new ca.uhn.fhir.batch2.api.BatchInstanceStatusDTO(e.myId, e.myStatus, e.myStartTime, e.myEndTime) FROM Batch2JobInstanceEntity e WHERE e.myId = :id")
 	BatchInstanceStatusDTO fetchBatchInstanceStatus(@Param("id") String theInstanceId);
 }
