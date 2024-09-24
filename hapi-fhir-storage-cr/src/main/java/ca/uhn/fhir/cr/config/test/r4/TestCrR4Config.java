@@ -1,9 +1,28 @@
-package ca.uhn.fhir.cr.r4;
+/*-
+ * #%L
+ * HAPI FHIR - Clinical Reasoning
+ * %%
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+package ca.uhn.fhir.cr.config.test.r4;
 
-import ca.uhn.fhir.cr.TestCqlProperties;
-import ca.uhn.fhir.cr.TestCrConfig;
 import ca.uhn.fhir.cr.common.CqlThreadFactory;
 import ca.uhn.fhir.cr.config.r4.CrR4Config;
+import ca.uhn.fhir.cr.config.test.TestCqlProperties;
+import ca.uhn.fhir.cr.config.test.TestCrConfig;
 import org.cqframework.cql.cql2elm.CqlCompilerOptions;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.cqframework.cql.cql2elm.model.Model;
@@ -30,6 +49,9 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+/**
+ * Common hapi-fhir clinical reasoning config specifically for R4 shared with downstream modules.
+ */
 @Configuration
 @Import({TestCrConfig.class, CrR4Config.class})
 public class TestCrR4Config {
