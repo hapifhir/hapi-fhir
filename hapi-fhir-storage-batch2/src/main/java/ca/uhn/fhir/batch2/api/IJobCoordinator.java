@@ -105,4 +105,8 @@ public interface IJobCoordinator {
 	 * Fetches all jobs by job definition id
 	 */
 	List<JobInstance> getJobInstancesByJobDefinitionId(String theJobDefinitionId, int theCount, int theStart);
+
+	List<BatchWorkChunkStatusDTO> getWorkChunkStatus(String theInstanceId);
+
+	BatchInstanceStatusDTO getBatchInstanceStatus(String theInstanceId);
 }

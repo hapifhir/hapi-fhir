@@ -77,6 +77,12 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	List<JobInstance> fetchInstances(
 			String theJobDefinitionId, Set<StatusEnum> theStatuses, Date theCutoff, Pageable thePageable);
 
+	@Nonnull
+	List<BatchWorkChunkStatusDTO> fetchWorkChunkStatusForInstance(String theInstanceId);
+
+	@Nonnull
+	BatchInstanceStatusDTO fetchBatchInstanceStatus(String theInstanceId);
+
 	/**
 	 * Fetches any existing jobs matching provided request parameters
 	 *

@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.jpa.batch2;
 
+import ca.uhn.fhir.batch2.api.BatchInstanceStatusDTO;
+import ca.uhn.fhir.batch2.api.BatchWorkChunkStatusDTO;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.JobOperationResultJson;
 import ca.uhn.fhir.batch2.model.FetchJobInstancesRequest;
@@ -256,6 +258,22 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		return myTransactionService
 				.withSystemRequestOnDefaultPartition()
 				.execute(() -> myJobInstanceRepository.findById(theInstanceId).map(this::toInstance));
+	}
+
+	@Nonnull
+	@Override
+	public List<BatchWorkChunkStatusDTO> fetchWorkChunkStatusForInstance(String theInstanceId) {
+		return myTransactionService
+			.withSystemRequestOnDefaultPartition()
+			.execute(() -> myWorkChunkRepository.fetchWorkChunkStatusForInstance(theInstanceId));
+	}
+
+	@javax.annotation.Nonnull
+	@Override
+	public BatchInstanceStatusDTO fetchBatchInstanceStatus(String theInstanceId) {
+		return myTransactionService
+			.withSystemRequestOnDefaultPartition()
+			.execute(() -> myJobInstanceRepository.fetchBatchInstanceStatus(theInstanceId));
 	}
 
 	@Override
