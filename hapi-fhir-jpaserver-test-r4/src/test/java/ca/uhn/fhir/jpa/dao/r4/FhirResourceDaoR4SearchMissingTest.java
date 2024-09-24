@@ -461,6 +461,17 @@ public class FhirResourceDaoR4SearchMissingTest {
 		}
 
 		@Test
+		public void testSearchWithMissingReference_searchParamMultiplePaths() {
+			IIdType encounterId = createEncounter();
+			createObservation(withEncounter(encounterId.getIdPart()));
+
+			SearchParameterMap params = new SearchParameterMap();
+			params.add(Observation.SP_ENCOUNTER, new ReferenceParam().setMissing(true));
+			IBundleProvider bundleProvider = myObservationDao.search(params, mySrd);
+			assertThat(bundleProvider.getAllResourceIds()).isEmpty();
+		}
+
+		@Test
 		public void testSearchWithMissingString() {
 			IIdType orgId = myOrganizationDao.create(new Organization(), mySrd).getId();
 			IIdType notMissing;

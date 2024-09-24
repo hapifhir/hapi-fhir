@@ -803,14 +803,16 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 		String resourceType = theParams.getResourceTablePredicateBuilder().getResourceType();
 		RuntimeSearchParam paramDefinition =
 				mySearchParamRegistry.getRuntimeSearchParam(resourceType, theParams.getParamName());
-		String paramPath = paramDefinition.getPath();
+		List<String> pathList = paramDefinition.getPathsSplitForResourceType(resourceType);
 
 		Condition subQueryCondition = ComboCondition.and(
 				BinaryCondition.equalTo(
 						getResourceIdColumn(),
 						theParams.getResourceTablePredicateBuilder().getResourceIdColumn()),
 				BinaryCondition.equalTo(getResourceTypeColumn(), generatePlaceholder(resourceType)),
-				BinaryCondition.equalTo(getColumnSourcePath(), generatePlaceholder(paramPath)));
+				ComboCondition.or(pathList.stream()
+						.map(path -> BinaryCondition.equalTo(getColumnSourcePath(), generatePlaceholder(path)))
+						.toArray(BinaryCondition[]::new)));
 
 		subquery.addCondition(subQueryCondition);
 
