@@ -88,20 +88,22 @@ public class TermValueSet implements Serializable {
 	private String myVersion;
 
 	@OneToOne()
-	@JoinColumns(value = {
-		@JoinColumn(
-			name = "RES_ID",
-			referencedColumnName = "RES_ID",
-			nullable = false,
-			insertable = false,
-			updatable = false),
-		@JoinColumn(
-			name = "PARTITION_ID",
-			referencedColumnName = "PARTITION_ID",
-			nullable = false,
-			insertable = false,
-			updatable = false)
-	}, foreignKey = @ForeignKey(name = "FK_TRMVALUESET_RES"))
+	@JoinColumns(
+			value = {
+				@JoinColumn(
+						name = "RES_ID",
+						referencedColumnName = "RES_ID",
+						nullable = false,
+						insertable = false,
+						updatable = false),
+				@JoinColumn(
+						name = "PARTITION_ID",
+						referencedColumnName = "PARTITION_ID",
+						nullable = false,
+						insertable = false,
+						updatable = false)
+			},
+			foreignKey = @ForeignKey(name = "FK_TRMVALUESET_RES"))
 	private ResourceTable myResource;
 
 	@Column(name = "RES_ID", nullable = false)

@@ -79,18 +79,21 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 			optional = false,
 			fetch = FetchType.LAZY,
 			cascade = {})
-	@JoinColumns(value = {
-		@JoinColumn(name = "RES_ID",
-			referencedColumnName = "RES_ID",
-			insertable = false,
-			updatable = false,
-			nullable = false),
-		@JoinColumn(name = "PARTITION_ID",
-			referencedColumnName = "PARTITION_ID",
-			insertable = false,
-			updatable = false,
-			nullable = false)
-	},
+	@JoinColumns(
+			value = {
+				@JoinColumn(
+						name = "RES_ID",
+						referencedColumnName = "RES_ID",
+						insertable = false,
+						updatable = false,
+						nullable = false),
+				@JoinColumn(
+						name = "PARTITION_ID",
+						referencedColumnName = "PARTITION_ID",
+						insertable = false,
+						updatable = false,
+						nullable = false)
+			},
 			foreignKey = @ForeignKey(name = "FKC97MPK37OKWU8QVTCEG2NH9VN"))
 	private ResourceTable myResource;
 
@@ -233,5 +236,4 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 		setResourceType(theResource.getResourceType());
 		return this;
 	}
-
 }

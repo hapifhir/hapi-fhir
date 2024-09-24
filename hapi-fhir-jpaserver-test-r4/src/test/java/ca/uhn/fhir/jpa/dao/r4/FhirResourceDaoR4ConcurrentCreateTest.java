@@ -7,6 +7,7 @@ import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.data.IResourceSearchUrlDao;
 import ca.uhn.fhir.jpa.interceptor.UserRequestRetryVersionConflictsInterceptor;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceSearchUrlEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.search.ResourceSearchUrlSvc;
@@ -195,6 +196,8 @@ public class FhirResourceDaoR4ConcurrentCreateTest extends BaseJpaR4Test {
 	@Nonnull
 	private static ResourceTable createResTable() {
 		final ResourceTable resourceTable = new ResourceTable();
+		resourceTable.getId();
+		resourceTable.setPartitionId(new PartitionablePartitionId(-1, null));
 		resourceTable.setResourceType("Patient");
 		resourceTable.setPublished(new Date());
 		resourceTable.setUpdated(new Date());

@@ -22,7 +22,6 @@ package ca.uhn.fhir.jpa.model.entity;
 import ca.uhn.fhir.jpa.model.util.SearchParamHash;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -87,20 +86,23 @@ public class ResourceIndexedComboStringUnique extends BaseResourceIndexedCombo
 	private Long myId;
 
 	@ManyToOne(
-		optional = false,
-		cascade = {})
-	@JoinColumns(value = {
-		@JoinColumn(name = "RES_ID",
-			referencedColumnName = "RES_ID",
-			insertable = false,
-			updatable = false,
-			nullable = false),
-		@JoinColumn(name = "PARTITION_ID",
-			referencedColumnName = "PARTITION_ID",
-			insertable = false,
-			updatable = false,
-			nullable = false)
-	},
+			optional = false,
+			cascade = {})
+	@JoinColumns(
+			value = {
+				@JoinColumn(
+						name = "RES_ID",
+						referencedColumnName = "RES_ID",
+						insertable = false,
+						updatable = false,
+						nullable = false),
+				@JoinColumn(
+						name = "PARTITION_ID",
+						referencedColumnName = "PARTITION_ID",
+						insertable = false,
+						updatable = false,
+						nullable = false)
+			},
 			foreignKey = @ForeignKey(name = "FK_IDXCMPSTRUNIQ_RES_ID"))
 	private ResourceTable myResource;
 

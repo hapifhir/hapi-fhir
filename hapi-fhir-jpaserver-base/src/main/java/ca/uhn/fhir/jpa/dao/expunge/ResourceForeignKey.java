@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.dao.expunge;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -52,7 +53,11 @@ public class ResourceForeignKey {
 
 	@Override
 	public int hashCode() {
-		return new HashCodeBuilder(17, 37).append(myTable).append(myPartitionIdColumn).append(myResourceIdColumn).toHashCode();
+		return new HashCodeBuilder(17, 37)
+				.append(myTable)
+				.append(myPartitionIdColumn)
+				.append(myResourceIdColumn)
+				.toHashCode();
 	}
 
 	@Override
@@ -62,5 +67,34 @@ public class ResourceForeignKey {
 				.append("resourceIdColumn", myResourceIdColumn)
 				.append("partitionIdColumn", myPartitionIdColumn)
 				.toString();
+	}
+
+	public static final class ResourceForeignKeyBuilder {
+		private String myTable;
+		private String myResourceIdColumn;
+		private String myPartitionIdColumn;
+
+		ResourceForeignKeyBuilder() {}
+
+		public void withTable(String myTable) {
+			this.myTable = myTable;
+		}
+
+		public void withResourceIdColumn(String myResourceIdColumn) {
+			this.myResourceIdColumn = myResourceIdColumn;
+		}
+
+		public void withPartitionIdColumn(String myPartitionIdColumn) {
+			this.myPartitionIdColumn = myPartitionIdColumn;
+		}
+
+		public ResourceForeignKey build() {
+			Validate.notBlank(myTable, "Table is required");
+			Validate.notBlank(myResourceIdColumn, "ResourceIdColumn is required");
+			Validate.notBlank(
+					myPartitionIdColumn,
+					"PartitionIdColumn is required for table " + myTable + " and resource ID: " + myResourceIdColumn);
+			return new ResourceForeignKey(this.myTable, this.myPartitionIdColumn, this.myResourceIdColumn);
+		}
 	}
 }

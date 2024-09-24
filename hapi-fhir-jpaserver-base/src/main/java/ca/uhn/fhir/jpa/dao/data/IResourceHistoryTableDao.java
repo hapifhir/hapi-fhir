@@ -31,7 +31,8 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-public interface IResourceHistoryTableDao extends JpaRepository<ResourceHistoryTable, ResourceHistoryTablePk>, IHapiFhirJpaRepository {
+public interface IResourceHistoryTableDao
+		extends JpaRepository<ResourceHistoryTable, ResourceHistoryTablePk>, IHapiFhirJpaRepository {
 
 	// FIXME: see if we can avoid the myResourceTable.myPid in this class
 
@@ -43,8 +44,7 @@ public interface IResourceHistoryTableDao extends JpaRepository<ResourceHistoryT
 	List<ResourceHistoryTable> findAllVersionsForResourceIdInOrder(@Param("resId") JpaPid theId);
 
 	// FIXME: this fetched provenance
-	@Query(
-			"SELECT t FROM ResourceHistoryTable t WHERE t.myResourcePid = :id AND t.myResourceVersion = :version")
+	@Query("SELECT t FROM ResourceHistoryTable t WHERE t.myResourcePid = :id AND t.myResourceVersion = :version")
 	ResourceHistoryTable findForIdAndVersionAndFetchProvenance(
 			@Param("id") JpaPid theId, @Param("version") long theVersion);
 
@@ -63,13 +63,15 @@ public interface IResourceHistoryTableDao extends JpaRepository<ResourceHistoryT
 			+ "LEFT OUTER JOIN ResourceTable t ON (v.myResourceTable = t) "
 			+ "WHERE v.myResourceVersion <> t.myVersion AND "
 			+ "t.myPid = :resId")
-	Slice<ResourceHistoryTablePk> findIdsOfPreviousVersionsOfResourceId(Pageable thePage, @Param("resId") JpaPid theResourceId);
+	Slice<ResourceHistoryTablePk> findIdsOfPreviousVersionsOfResourceId(
+			Pageable thePage, @Param("resId") JpaPid theResourceId);
 
 	@Query("" + "SELECT v.myId FROM ResourceHistoryTable v "
 			+ "LEFT OUTER JOIN ResourceTable t ON (v.myResourceTable = t) "
 			+ "WHERE v.myResourceVersion <> t.myVersion AND "
 			+ "t.myResourceType = :restype")
-	Slice<ResourceHistoryTablePk> findIdsOfPreviousVersionsOfResources(Pageable thePage, @Param("restype") String theResourceName);
+	Slice<ResourceHistoryTablePk> findIdsOfPreviousVersionsOfResources(
+			Pageable thePage, @Param("restype") String theResourceName);
 
 	@Query("" + "SELECT v.myId FROM ResourceHistoryTable v "
 			+ "LEFT OUTER JOIN ResourceTable t ON (v.myResourceTable = t) "
@@ -80,7 +82,9 @@ public interface IResourceHistoryTableDao extends JpaRepository<ResourceHistoryT
 	@Query(
 			"UPDATE ResourceHistoryTable r SET r.myResourceVersion = :newVersion WHERE r.myResourceTable.myPid = :id AND r.myResourceVersion = :oldVersion")
 	void updateVersion(
-			@Param("id") JpaPid theId, @Param("oldVersion") long theOldVersion, @Param("newVersion") long theNewVersion);
+			@Param("id") JpaPid theId,
+			@Param("oldVersion") long theOldVersion,
+			@Param("newVersion") long theNewVersion);
 
 	@Modifying
 	@Query("DELETE FROM ResourceHistoryTable t WHERE t.myId = :pid")
@@ -98,10 +102,10 @@ public interface IResourceHistoryTableDao extends JpaRepository<ResourceHistoryT
 			"UPDATE ResourceHistoryTable r SET r.myResourceTextVc = null, r.myResource = :text, r.myEncoding = 'JSONC' WHERE r.myId = :pid")
 	void updateNonInlinedContents(@Param("text") byte[] theText, @Param("pid") ResourceHistoryTablePk thePid);
 
-	@Query("SELECT v FROM ResourceHistoryTable v " +
-		"JOIN FETCH v.myResourceTable t " + //ON (v.myResourcePid = t.myPid) " +
-		"WHERE v.myResourcePid IN (:pids) AND " +
-		"t.myVersion = v.myResourceVersion")
-	List<ResourceHistoryTable> findCurrentVersionsByResourcePidsAndFetchResourceTable(@Param("pids") List<JpaPid> theVersionlessPids);
-
+	@Query("SELECT v FROM ResourceHistoryTable v " + "JOIN FETCH v.myResourceTable t "
+			+ // ON (v.myResourcePid = t.myPid) " +
+			"WHERE v.myResourcePid IN (:pids) AND "
+			+ "t.myVersion = v.myResourceVersion")
+	List<ResourceHistoryTable> findCurrentVersionsByResourcePidsAndFetchResourceTable(
+			@Param("pids") List<JpaPid> theVersionlessPids);
 }

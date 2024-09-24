@@ -40,6 +40,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinColumns;
 import jakarta.persistence.Lob;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
@@ -222,6 +223,7 @@ public class JpaModelScannerAndVerifier {
 			if (!isTransient) {
 				boolean hasColumn = nextField.getAnnotation(Column.class) != null;
 				boolean hasJoinColumn = nextField.getAnnotation(JoinColumn.class) != null;
+				boolean hasJoinColumns = nextField.getAnnotation(JoinColumns.class) != null;
 				boolean hasEmbeddedId = nextField.getAnnotation(EmbeddedId.class) != null;
 				boolean hasEmbedded = nextField.getAnnotation(Embedded.class) != null;
 				OneToMany oneToMany = nextField.getAnnotation(OneToMany.class);
@@ -234,6 +236,7 @@ public class JpaModelScannerAndVerifier {
 				Validate.isTrue(
 					hasEmbedded ||
 						hasColumn ||
+						hasJoinColumns ||
 						hasJoinColumn ||
 						isOtherSideOfOneToManyMapping ||
 						isOtherSideOfOneToOneMapping ||

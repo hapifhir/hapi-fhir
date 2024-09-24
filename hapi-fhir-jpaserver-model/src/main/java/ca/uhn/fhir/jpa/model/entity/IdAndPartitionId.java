@@ -51,9 +51,9 @@ public class IdAndPartitionId {
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-			.append("id", myId)
-			.append("partitionId", myPartitionIdValue)
-			.toString();
+				.append("id", myId)
+				.append("partitionId", myPartitionIdValue)
+				.toString();
 	}
 
 	@Override

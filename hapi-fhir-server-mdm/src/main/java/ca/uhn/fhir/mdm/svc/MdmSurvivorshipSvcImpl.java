@@ -106,8 +106,7 @@ public class MdmSurvivorshipSvcImpl implements IMdmSurvivorshipService {
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	@Override
 	public <T extends IBase> T rebuildGoldenResourceWithSurvivorshipRules(
-		RequestDetails theRequestDetails,
-			T theGoldenResourceBase, MdmTransactionContext theMdmTransactionContext) {
+			RequestDetails theRequestDetails, T theGoldenResourceBase, MdmTransactionContext theMdmTransactionContext) {
 		IBaseResource goldenResource = (IBaseResource) theGoldenResourceBase;
 
 		// we want a list of source ids linked to this
@@ -144,8 +143,9 @@ public class MdmSurvivorshipSvcImpl implements IMdmSurvivorshipService {
 
 	@SuppressWarnings("rawtypes")
 	private Stream<IBaseResource> getMatchedSourceIdsByLinkUpdateDate(
-		RequestDetails theRequestDetails,
-			IBaseResource theGoldenResource, MdmTransactionContext theMdmTransactionContext) {
+			RequestDetails theRequestDetails,
+			IBaseResource theGoldenResource,
+			MdmTransactionContext theMdmTransactionContext) {
 		String resourceType = theGoldenResource.fhirType();
 		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resourceType);
 
@@ -171,8 +171,7 @@ public class MdmSurvivorshipSvcImpl implements IMdmSurvivorshipService {
 					.execute(() -> {
 						Map<String, ? extends IResourcePersistentId> ids =
 								myIIdHelperService.resolveResourcePersistentIds(
-									theRequestDetails,
-										RequestPartitionId.allPartitions(), resourceType, sourceIds);
+										theRequestDetails, RequestPartitionId.allPartitions(), resourceType, sourceIds);
 						sourceIdToPid.putAll(ids);
 					});
 		}

@@ -12,7 +12,8 @@ public class JpaPidIdentifierBridge implements IdentifierBridge<JpaPid> {
 	}
 
 	@Override
-	public JpaPid fromDocumentIdentifier(String documentIdentifier, IdentifierBridgeFromDocumentIdentifierContext context) {
+	public JpaPid fromDocumentIdentifier(
+			String documentIdentifier, IdentifierBridgeFromDocumentIdentifierContext context) {
 		long pid = Long.parseLong(documentIdentifier);
 		return JpaPid.fromId(pid);
 	}

@@ -247,7 +247,7 @@ class BaseHapiFhirResourceDaoTest {
 		)).thenReturn(jpaPid);
 		when(myEntityManager.find(
 			any(Class.class),
-			anyLong()
+			any()
 		)).thenReturn(entity);
 		// we don't stub myConfig.getResourceClientIdStrategy()
 		// because even a null return isn't ANY...

@@ -69,20 +69,22 @@ public class SearchParamPresentEntity extends BasePartitionable implements Seria
 	private boolean myPresent;
 
 	@ManyToOne()
-	@JoinColumns(value = {
-		@JoinColumn(
-				name = "RES_ID",
-				referencedColumnName = "RES_ID",
-				insertable = false,
-				updatable = false,
-				nullable = false),
-		@JoinColumn(
-				name = "PARTITION_ID",
-				referencedColumnName = "PARTITION_ID",
-				insertable = false,
-				updatable = false,
-				nullable = false),
-	},foreignKey = @ForeignKey(name = "FK_RESPARMPRES_RESID"))
+	@JoinColumns(
+			value = {
+				@JoinColumn(
+						name = "RES_ID",
+						referencedColumnName = "RES_ID",
+						insertable = false,
+						updatable = false,
+						nullable = false),
+				@JoinColumn(
+						name = "PARTITION_ID",
+						referencedColumnName = "PARTITION_ID",
+						insertable = false,
+						updatable = false,
+						nullable = false),
+			},
+			foreignKey = @ForeignKey(name = "FK_RESPARMPRES_RESID"))
 	private ResourceTable myResource;
 
 	@Column(name = "RES_ID", nullable = false, updatable = false)
@@ -230,5 +232,4 @@ public class SearchParamPresentEntity extends BasePartitionable implements Seria
 		String string = thePresent != null ? Boolean.toString(thePresent) : Boolean.toString(false);
 		return hashSearchParam(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, string);
 	}
-
 }

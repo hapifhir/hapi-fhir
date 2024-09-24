@@ -22,7 +22,6 @@ public class ColumnTupleObject extends SqlObject {
 		myColumns = List.of(theColumns);
 	}
 
-
 	@Override
 	protected void collectSchemaObjects(ValidationContext vContext) {
 		myColumns.forEach(vContext::addColumn);
@@ -32,7 +31,7 @@ public class ColumnTupleObject extends SqlObject {
 	public void appendTo(AppendableExt app) throws IOException {
 		app.append('(');
 
-		for (Iterator<Column> iter = myColumns.iterator(); iter.hasNext();) {
+		for (Iterator<Column> iter = myColumns.iterator(); iter.hasNext(); ) {
 			Column column = iter.next();
 			appendTableAliasPrefix(app, column.getTable());
 			app.append(column.getColumnNameSQL());
@@ -50,12 +49,10 @@ public class ColumnTupleObject extends SqlObject {
 	 * column reference if the current SqlContext specifies table aliases should
 	 * be used (and the table has an alias), otherwise does nothing.
 	 */
-	static void appendTableAliasPrefix(AppendableExt app, Table table)
-		throws IOException
-	{
-		if(SqlContext.getContext(app).getUseTableAliases()) {
+	static void appendTableAliasPrefix(AppendableExt app, Table table) throws IOException {
+		if (SqlContext.getContext(app).getUseTableAliases()) {
 			String alias = table.getAlias();
-			if(isNotBlank(alias)) {
+			if (isNotBlank(alias)) {
 				app.append(alias).append(".");
 			}
 		}

@@ -23,7 +23,6 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
-import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTablePk;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import com.google.common.annotations.VisibleForTesting;
@@ -121,8 +120,8 @@ public class ExpungeOperation implements Callable<ExpungeOutcome> {
 
 	private void expungeOldVersions() {
 		List<?> historicalIds = getPartitionAwareSupplier()
-			.supplyInPartitionedContext(() -> myResourceExpungeService.findHistoricalVersionsOfNonDeletedResources(
-				myResourceName, myResourceId, myRemainingCount.get()));
+				.supplyInPartitionedContext(() -> myResourceExpungeService.findHistoricalVersionsOfNonDeletedResources(
+						myResourceName, myResourceId, myRemainingCount.get()));
 
 		getPartitionRunner()
 				.runInPartitionedThreads(

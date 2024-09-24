@@ -1,13 +1,11 @@
 package ca.uhn.fhir.jpa.model.entity;
 
-
 import ca.uhn.fhir.rest.api.server.storage.IResourceVersionPersistentId;
 import ca.uhn.hapi.fhir.sql.hibernatesvc.ConditionalIdProperty;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import jakarta.persistence.SequenceGenerator;
 
 import java.io.Serializable;
@@ -34,7 +32,8 @@ public class ResourceHistoryTablePk implements IResourceVersionPersistentId, Ser
 			return false;
 		}
 		ResourceHistoryTablePk that = (ResourceHistoryTablePk) theO;
-		return Objects.equals(myVersionId, that.myVersionId) && Objects.equals(myPartitionIdValue, that.myPartitionIdValue);
+		return Objects.equals(myVersionId, that.myVersionId)
+				&& Objects.equals(myPartitionIdValue, that.myPartitionIdValue);
 	}
 
 	@Override

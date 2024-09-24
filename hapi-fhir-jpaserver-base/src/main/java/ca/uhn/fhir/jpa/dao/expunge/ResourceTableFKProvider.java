@@ -98,8 +98,10 @@ public class ResourceTableFKProvider {
 		retval.add(new ResourceForeignKey("HFJ_RES_LINK", PARTITION_ID, "SRC_RESOURCE_ID"));
 		retval.add(new ResourceForeignKey("HFJ_RES_LINK", TARGET_PARTITION_ID, TARGET_RESOURCE_ID));
 		retval.add(new ResourceForeignKey("HFJ_RES_PARAM_PRESENT", PARTITION_ID, "RES_ID"));
-		retval.add(new ResourceForeignKey("HFJ_RES_TAG", PARTITION_ID, "RES_ID")); // TODO GGG: Res_ID + TAG_ID? is that enough?
-		retval.add(new ResourceForeignKey("HFJ_RES_VER", PARTITION_ID, "RES_ID")); // TODO GGG: RES_ID + updated? is that enough?
+		retval.add(new ResourceForeignKey(
+				"HFJ_RES_TAG", PARTITION_ID, "RES_ID")); // TODO GGG: Res_ID + TAG_ID? is that enough?
+		retval.add(new ResourceForeignKey(
+				"HFJ_RES_VER", PARTITION_ID, "RES_ID")); // TODO GGG: RES_ID + updated? is that enough?
 		retval.add(new ResourceForeignKey("HFJ_SPIDX_COORDS", PARTITION_ID, "RES_ID"));
 		retval.add(new ResourceForeignKey("HFJ_SPIDX_DATE", PARTITION_ID, "RES_ID"));
 		retval.add(new ResourceForeignKey("HFJ_SPIDX_NUMBER", PARTITION_ID, "RES_ID"));
@@ -110,12 +112,14 @@ public class ResourceTableFKProvider {
 		retval.add(new ResourceForeignKey("HFJ_SPIDX_URI", PARTITION_ID, "RES_ID"));
 
 		if (myMdmSettings != null && myMdmSettings.isEnabled()) {
-			retval.add(new ResourceForeignKey("MPI_LINK", GOLDEN_RESOURCE_PARTITION_ID, GOLDEN_RESOURCE_PID)); // NOT covered by index.
-			retval.add(new ResourceForeignKey("MPI_LINK", TARGET_PARTITION_ID, TARGET_PID)); // Possibly covered, partial index
 			retval.add(new ResourceForeignKey(
-				"MPI_LINK",
-				PERSON_PARTITION_ID,
-				PERSON_PID)); // TODO GGG: I don't even think we need this... this field is deprecated, and the
+					"MPI_LINK", GOLDEN_RESOURCE_PARTITION_ID, GOLDEN_RESOURCE_PID)); // NOT covered by index.
+			retval.add(new ResourceForeignKey(
+					"MPI_LINK", TARGET_PARTITION_ID, TARGET_PID)); // Possibly covered, partial index
+			retval.add(new ResourceForeignKey(
+					"MPI_LINK",
+					PERSON_PARTITION_ID,
+					PERSON_PID)); // TODO GGG: I don't even think we need this... this field is deprecated, and the
 			// deletion is covered by GOLDEN_RESOURCE_PID
 		}
 
@@ -125,7 +129,8 @@ public class ResourceTableFKProvider {
 				retval.add(new ResourceForeignKey("NPM_PACKAGE_VER_RES", PARTITION_ID, "BINARY_RES_ID")); // Not covered
 				break;
 			case "subscription":
-				retval.add(new ResourceForeignKey("HFJ_SUBSCRIPTION_STATS", PARTITION_ID, "RES_ID")); // Covered by index.
+				retval.add(
+						new ResourceForeignKey("HFJ_SUBSCRIPTION_STATS", PARTITION_ID, "RES_ID")); // Covered by index.
 				break;
 			case "codesystem":
 				retval.add(new ResourceForeignKey("TRM_CODESYSTEM_VER", PARTITION_ID, "RES_ID")); // Not covered

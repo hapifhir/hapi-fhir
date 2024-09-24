@@ -61,19 +61,20 @@ public class ResourceHistoryTag extends BaseTag implements Serializable {
 	private Long myId;
 
 	@ManyToOne()
-	@JoinColumns(value = {
-		@JoinColumn(
-			name = "RES_VER_PID",
-			referencedColumnName = "PID",
-			nullable = false,
-		insertable = false,
-		updatable = false),
-		@JoinColumn(
-			name = "PARTITION_ID",
-			referencedColumnName = "PARTITION_ID",
-			nullable = false,
-		insertable = false,
-		updatable = false)
+	@JoinColumns(
+			value = {
+				@JoinColumn(
+						name = "RES_VER_PID",
+						referencedColumnName = "PID",
+						nullable = false,
+						insertable = false,
+						updatable = false),
+				@JoinColumn(
+						name = "PARTITION_ID",
+						referencedColumnName = "PARTITION_ID",
+						nullable = false,
+						insertable = false,
+						updatable = false)
 			},
 			foreignKey = @ForeignKey(name = "FK_HISTORYTAG_HISTORY"))
 	private ResourceHistoryTable myResourceHistory;
@@ -141,7 +142,6 @@ public class ResourceHistoryTag extends BaseTag implements Serializable {
 		myPartitionIdValue = myResourceHistory.getResourceId().getPartitionId();
 	}
 
-
 	public Long getId() {
 		return myId;
 	}
@@ -149,5 +149,4 @@ public class ResourceHistoryTag extends BaseTag implements Serializable {
 	public JpaPid getResourcePid() {
 		return JpaPid.fromId(myResourceId, myPartitionIdValue);
 	}
-
 }

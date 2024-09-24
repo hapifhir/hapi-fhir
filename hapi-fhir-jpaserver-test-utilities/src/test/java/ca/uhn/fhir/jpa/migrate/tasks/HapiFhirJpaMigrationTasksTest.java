@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.ColumnMapRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.SingleColumnRowMapper;
 import org.springframework.jdbc.core.support.AbstractLobCreatingPreparedStatementCallback;
 import org.springframework.jdbc.support.lob.DefaultLobHandler;
 import org.springframework.jdbc.support.lob.LobCreator;
@@ -27,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -79,7 +81,15 @@ public class HapiFhirJpaMigrationTasksTest {
 		 */
 
 		// Remove the task we're testing from the migrator history, so it runs again
-		assertEquals(1, myJdbcTemplate.update("DELETE FROM " + MIGRATION_TABLE_NAME + " WHERE version = ?", "7.4.0.20240625.40"));
+		assertEquals(1, myJdbcTemplate.update("DELETE FROM " + MIGRATION_TABLE_NAME + " WHERE version = ?", "7.4.0.20240625.40"), ()->{
+			List<Object> results = myJdbcTemplate.query("SELECT version FROM " + MIGRATION_TABLE_NAME, new SingleColumnRowMapper<>());
+			return results.size() + " results:\n * results" +
+				results
+				.stream()
+				.map(t->t != null ? t.toString() : "(null)")
+				.sorted()
+				.collect(Collectors.joining("\n * "));
+		});
 
 		// Run the migrator
 		ourLog.info("About to run the migrator a second time");

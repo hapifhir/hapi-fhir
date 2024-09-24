@@ -97,21 +97,23 @@ public class MdmLink extends AuditableBasePartitionable implements IMdmLink<JpaP
 			optional = false,
 			fetch = FetchType.LAZY,
 			cascade = {})
-	@JoinColumns(value = {
-		@JoinColumn(
-			name = GOLDEN_RESOURCE_PID,
-			referencedColumnName = "RES_ID",
-			insertable = false,
-			updatable = false,
-			nullable = false),
-		@JoinColumn(
-			name = GOLDEN_RESOURCE_PARTITION_ID,
-			referencedColumnName = "PARTITION_ID",
-			insertable = false,
-			updatable = false,
-			nullable = false)
-	}, 			foreignKey = @ForeignKey(name = "FK_EMPI_LINK_GOLDEN_RESOURCE"))
-		@NotAudited
+	@JoinColumns(
+			value = {
+				@JoinColumn(
+						name = GOLDEN_RESOURCE_PID,
+						referencedColumnName = "RES_ID",
+						insertable = false,
+						updatable = false,
+						nullable = false),
+				@JoinColumn(
+						name = GOLDEN_RESOURCE_PARTITION_ID,
+						referencedColumnName = "PARTITION_ID",
+						insertable = false,
+						updatable = false,
+						nullable = false)
+			},
+			foreignKey = @ForeignKey(name = "FK_EMPI_LINK_GOLDEN_RESOURCE"))
+	@NotAudited
 	private ResourceTable myGoldenResource;
 
 	@Column(name = GOLDEN_RESOURCE_PID, nullable = false)
@@ -125,20 +127,22 @@ public class MdmLink extends AuditableBasePartitionable implements IMdmLink<JpaP
 			optional = false,
 			fetch = FetchType.LAZY,
 			cascade = {})
-	@JoinColumns(value = {
-		@JoinColumn(
-			name = PERSON_PID,
-			referencedColumnName = "RES_ID",
-			insertable = false,
-			updatable = false,
-			nullable = false),
-		@JoinColumn(
-			name = PERSON_PARTITION_ID,
-			referencedColumnName = "PARTITION_ID",
-			insertable = false,
-			updatable = false,
-			nullable = false)
-	}, foreignKey = @ForeignKey(name = "FK_EMPI_LINK_PERSON"))
+	@JoinColumns(
+			value = {
+				@JoinColumn(
+						name = PERSON_PID,
+						referencedColumnName = "RES_ID",
+						insertable = false,
+						updatable = false,
+						nullable = false),
+				@JoinColumn(
+						name = PERSON_PARTITION_ID,
+						referencedColumnName = "PARTITION_ID",
+						insertable = false,
+						updatable = false,
+						nullable = false)
+			},
+			foreignKey = @ForeignKey(name = "FK_EMPI_LINK_PERSON"))
 	@NotAudited
 	private ResourceTable myPerson;
 
@@ -154,20 +158,22 @@ public class MdmLink extends AuditableBasePartitionable implements IMdmLink<JpaP
 			optional = false,
 			fetch = FetchType.LAZY,
 			cascade = {})
-	@JoinColumns(value = {
-		@JoinColumn(
-			name = TARGET_PID,
-			referencedColumnName = "RES_ID",
-			insertable = false,
-			updatable = false,
-			nullable = false),
-		@JoinColumn(
-			name = TARGET_PARTITION_ID,
-			referencedColumnName = "PARTITION_ID",
-			insertable = false,
-			updatable = false,
-			nullable = false)
-	}, foreignKey = @ForeignKey(name = "FK_EMPI_LINK_TARGET"))
+	@JoinColumns(
+			value = {
+				@JoinColumn(
+						name = TARGET_PID,
+						referencedColumnName = "RES_ID",
+						insertable = false,
+						updatable = false,
+						nullable = false),
+				@JoinColumn(
+						name = TARGET_PARTITION_ID,
+						referencedColumnName = "PARTITION_ID",
+						insertable = false,
+						updatable = false,
+						nullable = false)
+			},
+			foreignKey = @ForeignKey(name = "FK_EMPI_LINK_TARGET"))
 	@NotAudited
 	private ResourceTable mySource;
 

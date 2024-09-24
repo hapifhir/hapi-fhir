@@ -78,20 +78,22 @@ public class TermConceptMap implements Serializable {
 	private Long myId;
 
 	@OneToOne()
-	@JoinColumns(value = {
-		@JoinColumn(
-			name = "RES_ID",
-			referencedColumnName = "RES_ID",
-			nullable = false,
-			insertable = false,
-			updatable = false),
-		@JoinColumn(
-			name = "PARTITION_ID",
-			referencedColumnName = "PARTITION_ID",
-			nullable = false,
-			insertable = false,
-			updatable = false)
-	}, foreignKey = @ForeignKey(name = "FK_TRMCONCEPTMAP_RES"))
+	@JoinColumns(
+			value = {
+				@JoinColumn(
+						name = "RES_ID",
+						referencedColumnName = "RES_ID",
+						nullable = false,
+						insertable = false,
+						updatable = false),
+				@JoinColumn(
+						name = "PARTITION_ID",
+						referencedColumnName = "PARTITION_ID",
+						nullable = false,
+						insertable = false,
+						updatable = false)
+			},
+			foreignKey = @ForeignKey(name = "FK_TRMCONCEPTMAP_RES"))
 	private ResourceTable myResource;
 
 	@Column(name = "RES_ID", nullable = false)

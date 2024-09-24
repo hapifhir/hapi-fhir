@@ -77,27 +77,29 @@ public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchP
 	private Long myId;
 
 	@ManyToOne(
-		optional = false,
-		fetch = FetchType.LAZY,
-		cascade = {})
-	@JoinColumns(value = {
-		@JoinColumn(name = "RES_ID",
-			referencedColumnName = "RES_ID",
-			insertable = false,
-			updatable = false,
-			nullable = false),
-		@JoinColumn(name = "PARTITION_ID",
-			referencedColumnName = "PARTITION_ID",
-			insertable = false,
-			updatable = false,
-			nullable = false)
-	},
+			optional = false,
+			fetch = FetchType.LAZY,
+			cascade = {})
+	@JoinColumns(
+			value = {
+				@JoinColumn(
+						name = "RES_ID",
+						referencedColumnName = "RES_ID",
+						insertable = false,
+						updatable = false,
+						nullable = false),
+				@JoinColumn(
+						name = "PARTITION_ID",
+						referencedColumnName = "PARTITION_ID",
+						insertable = false,
+						updatable = false,
+						nullable = false)
+			},
 			foreignKey = @ForeignKey(name = "FK_SP_NUMBER_RES"))
 	private ResourceTable myResource;
 
 	@Column(name = "RES_ID", nullable = false)
 	private Long myResourceId;
-
 
 	public ResourceIndexedSearchParamNumber() {}
 

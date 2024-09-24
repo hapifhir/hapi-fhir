@@ -40,7 +40,8 @@ public class PartitionAwareSupplier {
 
 	@Nonnull
 	public <T> T supplyInPartitionedContext(Supplier<T> theResourcePersistentIdSupplier) {
-		T retVal = myTransactionService.withRequest(myRequestDetails).execute(tx -> theResourcePersistentIdSupplier.get());
+		T retVal =
+				myTransactionService.withRequest(myRequestDetails).execute(tx -> theResourcePersistentIdSupplier.get());
 		assert retVal != null;
 		return retVal;
 	}

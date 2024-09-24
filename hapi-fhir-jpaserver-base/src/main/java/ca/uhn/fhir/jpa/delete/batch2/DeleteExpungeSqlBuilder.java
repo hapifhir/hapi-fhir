@@ -193,7 +193,7 @@ public class DeleteExpungeSqlBuilder {
 		}
 
 		builder.append(" IN (");
-		for (Iterator<JpaPid> iter = thePids.iterator(); iter.hasNext();) {
+		for (Iterator<JpaPid> iter = thePids.iterator(); iter.hasNext(); ) {
 			JpaPid pid = iter.next();
 			if (myPartitionSettings.isPartitionIdsInPrimaryKeys()) {
 				builder.append("(");

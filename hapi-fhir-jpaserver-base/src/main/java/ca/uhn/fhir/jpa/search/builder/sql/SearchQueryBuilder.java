@@ -35,11 +35,11 @@ import ca.uhn.fhir.jpa.search.builder.predicate.DatePredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.NumberPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.QuantityNormalizedPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.QuantityPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.ResourceHistoryPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceIdPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceLinkPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceTablePredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.SearchParamPresentPredicateBuilder;
-import ca.uhn.fhir.jpa.search.builder.predicate.ResourceHistoryPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.StringPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.TagPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.TokenPredicateBuilder;
@@ -137,7 +137,7 @@ public class SearchQueryBuilder {
 				theDialectProvider.getDialect(),
 				theCountQuery,
 				new ArrayList<>(),
-			true);
+				true);
 	}
 
 	/**
@@ -473,14 +473,9 @@ public class SearchQueryBuilder {
 	@Nonnull
 	public DbColumn[] toJoinColumns(DbColumn partitionIdColumn, DbColumn resourceIdColumn) {
 		if (isIncludePartitionIdInJoins()) {
-			return new DbColumn[]{
-				partitionIdColumn,
-				resourceIdColumn
-			};
-		}else {
-			return new DbColumn[]{
-				resourceIdColumn
-			};
+			return new DbColumn[] {partitionIdColumn, resourceIdColumn};
+		} else {
+			return new DbColumn[] {resourceIdColumn};
 		}
 	}
 
@@ -499,8 +494,7 @@ public class SearchQueryBuilder {
 			DbColumn[] theToColumn,
 			SelectQuery.JoinType theJoinType) {
 		assert theFromColumn.length == theToColumn.length;
-		Join join = new DbJoin(
-				mySpec, theFromTable, theToTable, theFromColumn, theToColumn);
+		Join join = new DbJoin(mySpec, theFromTable, theToTable, theFromColumn, theToColumn);
 		mySelect.addJoins(theJoinType, join);
 	}
 
@@ -801,8 +795,7 @@ public class SearchQueryBuilder {
 	public void addResourceIdsPredicate(List<JpaPid> thePidList) {
 
 		// FIXME: make this partition aware where needed
-		List<Long> pidList = thePidList
-			.stream().map(JpaPid::getId).collect(Collectors.toList());
+		List<Long> pidList = thePidList.stream().map(JpaPid::getId).collect(Collectors.toList());
 
 		DbColumn resourceIdColumn = getOrCreateFirstPredicateBuilder().getResourceIdColumn();
 		InCondition predicate = new InCondition(resourceIdColumn, generatePlaceholders(pidList));

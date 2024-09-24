@@ -24,8 +24,6 @@ import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.annotation.Nonnull;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import java.util.Objects;
 
@@ -43,8 +41,7 @@ public class TypedPidJson implements IModelJson, Comparable<TypedPidJson> {
 	@JsonProperty("id")
 	private String myPid;
 
-	public TypedPidJson() {
-	}
+	public TypedPidJson() {}
 
 	public TypedPidJson(String theResourceType, Integer thePartitionId, String theId) {
 		myResourceType = theResourceType;
@@ -92,7 +89,9 @@ public class TypedPidJson implements IModelJson, Comparable<TypedPidJson> {
 		if (this == theO) return true;
 		if (!(theO instanceof TypedPidJson)) return false;
 		TypedPidJson that = (TypedPidJson) theO;
-		return Objects.equals(myResourceType, that.myResourceType) && Objects.equals(myPartitionId, that.myPartitionId) && Objects.equals(myPid, that.myPid);
+		return Objects.equals(myResourceType, that.myResourceType)
+				&& Objects.equals(myPartitionId, that.myPartitionId)
+				&& Objects.equals(myPid, that.myPid);
 	}
 
 	@Override
@@ -110,12 +109,16 @@ public class TypedPidJson implements IModelJson, Comparable<TypedPidJson> {
 	 */
 	public int estimateSerializedSize() {
 		// 29 chars: {"id":"","type":"","part":""}
-		return 19 + defaultString(myPid).length() + defaultString(myResourceType).length() + defaultIfNull(myPartitionId, "").toString().length();
+		return 19
+				+ defaultString(myPid).length()
+				+ defaultString(myResourceType).length()
+				+ defaultIfNull(myPartitionId, "").toString().length();
 	}
 
 	@Override
 	public int compareTo(@Nonnull TypedPidJson o) {
-		int retVal = defaultIfNull(o.myPartitionId, Integer.MIN_VALUE).compareTo(defaultIfNull(myPartitionId, Integer.MIN_VALUE));
+		int retVal = defaultIfNull(o.myPartitionId, Integer.MIN_VALUE)
+				.compareTo(defaultIfNull(myPartitionId, Integer.MIN_VALUE));
 		if (retVal == 0) {
 			retVal = o.myResourceType.compareTo(myResourceType);
 		}

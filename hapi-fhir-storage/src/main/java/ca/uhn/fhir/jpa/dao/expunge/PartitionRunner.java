@@ -82,8 +82,7 @@ public class PartitionRunner {
 		myRequestDetails = theRequestDetails;
 	}
 
-	public <T> void runInPartitionedThreads(
-			List<T> theResourceIds, Consumer<List<T>> partitionConsumer) {
+	public <T> void runInPartitionedThreads(List<T> theResourceIds, Consumer<List<T>> partitionConsumer) {
 
 		List<Callable<Void>> runnableTasks = buildCallableTasks(theResourceIds, partitionConsumer);
 		if (runnableTasks.isEmpty()) {
@@ -133,8 +132,7 @@ public class PartitionRunner {
 		}
 	}
 
-	private <T> List<Callable<Void>> buildCallableTasks(
-			List<T> theResourceIds, Consumer<List<T>> partitionConsumer) {
+	private <T> List<Callable<Void>> buildCallableTasks(List<T> theResourceIds, Consumer<List<T>> partitionConsumer) {
 		List<Callable<Void>> retval = new ArrayList<>();
 
 		if (myBatchSize > theResourceIds.size()) {

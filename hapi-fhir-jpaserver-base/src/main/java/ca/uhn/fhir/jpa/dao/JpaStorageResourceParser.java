@@ -40,7 +40,6 @@ import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 import ca.uhn.fhir.jpa.model.entity.TagDefinition;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
@@ -112,6 +111,7 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 		Class<? extends IBaseResource> resourceType = type.getImplementingClass();
 		return toResource(resourceType, (IBaseResourceEntity<JpaPid>) theEntity, null, theForHistoryOperation);
 	}
+
 	@Override
 	public <R extends IBaseResource> R toResource(
 			Class<R> theResourceType,
@@ -170,7 +170,8 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 				history = resource.getCurrentVersionEntity();
 			} else {
 				version = theEntity.getVersion();
-				history = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(theEntity.getResourceId(), version);
+				history = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(
+						theEntity.getResourceId(), version);
 				((ResourceTable) theEntity).setCurrentVersionEntity(history);
 
 				while (history == null) {

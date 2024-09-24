@@ -3,19 +3,13 @@ package ca.uhn.fhir.jpa.search.builder.sql;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import com.healthmarketscience.common.util.AppendableExt;
 import com.healthmarketscience.sqlbuilder.Expression;
-import com.healthmarketscience.sqlbuilder.SqlContext;
-import com.healthmarketscience.sqlbuilder.SqlObject;
 import com.healthmarketscience.sqlbuilder.ValidationContext;
-import com.healthmarketscience.sqlbuilder.dbspec.Table;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * Outputs an SQL tuple for a collection of JpaPids, consisting of
@@ -28,7 +22,6 @@ public class JpaPidValueTupleObject extends Expression {
 	public JpaPidValueTupleObject(Collection<String> theValues) {
 		myValues = theValues;
 	}
-
 
 	@Override
 	protected void collectSchemaObjects(ValidationContext vContext) {

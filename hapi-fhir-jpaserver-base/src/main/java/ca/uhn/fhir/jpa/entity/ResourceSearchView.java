@@ -67,8 +67,8 @@ import java.util.Date;
 		+ "               h.PARTITION_ID      as PARTITION_ID,   "
 		+ "               h.SOURCE_URI        as SOURCE_URI,   "
 		+ "               h.REQUEST_ID        as REQUEST_ID,   "
-	// FIXME: still need these? Should improve join?
-	// Provenance
+		// FIXME: still need these? Should improve join?
+		// Provenance
 		+ "               p.SOURCE_URI        as PROV_SOURCE_URI,"
 		+ "               p.REQUEST_ID        as PROV_REQUEST_ID,"
 		+ "               r.FHIR_ID         as FHIR_ID      "
@@ -188,7 +188,7 @@ public class ResourceSearchView implements IBaseResourceEntity<JpaPid>, Serializ
 	}
 
 	@Nonnull
-    @Override
+	@Override
 	public JpaPid getId() {
 		return JpaPid.fromId(myResourceId, myPartitionId);
 	}

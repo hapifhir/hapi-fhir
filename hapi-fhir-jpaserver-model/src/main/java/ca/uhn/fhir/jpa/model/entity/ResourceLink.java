@@ -20,7 +20,6 @@
 package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
@@ -80,21 +79,24 @@ public class ResourceLink extends BaseResourceIndex {
 	private String mySourcePath;
 
 	@ManyToOne(
-		optional = false,
-		fetch = FetchType.LAZY,
-		cascade = {})
-	@JoinColumns(value = {
-		@JoinColumn(name = "SRC_RESOURCE_ID",
-			referencedColumnName = "RES_ID",
-			insertable = false,
-			updatable = false,
-			nullable = false),
-		@JoinColumn(name = "PARTITION_ID",
-			referencedColumnName = "PARTITION_ID",
-			insertable = false,
-			updatable = false,
-			nullable = false)
-	},
+			optional = false,
+			fetch = FetchType.LAZY,
+			cascade = {})
+	@JoinColumns(
+			value = {
+				@JoinColumn(
+						name = "SRC_RESOURCE_ID",
+						referencedColumnName = "RES_ID",
+						insertable = false,
+						updatable = false,
+						nullable = false),
+				@JoinColumn(
+						name = "PARTITION_ID",
+						referencedColumnName = "PARTITION_ID",
+						insertable = false,
+						updatable = false,
+						nullable = false)
+			},
 			foreignKey = @ForeignKey(name = "FK_RESLINK_SOURCE"))
 	private ResourceTable mySourceResource;
 
@@ -106,21 +108,22 @@ public class ResourceLink extends BaseResourceIndex {
 	private String mySourceResourceType;
 
 	@ManyToOne(optional = true, fetch = FetchType.LAZY)
-	@JoinColumns(value = {
-		@JoinColumn(
-				name = TARGET_RESOURCE_ID,
-				referencedColumnName = "RES_ID",
-				nullable = true,
-				insertable = false,
-				updatable = false),
-		@JoinColumn(
-				name = TARGET_RES_PARTITION_ID,
-				referencedColumnName = "PARTITION_ID",
-				nullable = true,
-				insertable = false,
-				updatable = false),
-	},
-				foreignKey = @ForeignKey(name = "FK_RESLINK_TARGET"))
+	@JoinColumns(
+			value = {
+				@JoinColumn(
+						name = TARGET_RESOURCE_ID,
+						referencedColumnName = "RES_ID",
+						nullable = true,
+						insertable = false,
+						updatable = false),
+				@JoinColumn(
+						name = TARGET_RES_PARTITION_ID,
+						referencedColumnName = "PARTITION_ID",
+						nullable = true,
+						insertable = false,
+						updatable = false),
+			},
+			foreignKey = @ForeignKey(name = "FK_RESLINK_TARGET"))
 	private ResourceTable myTargetResource;
 
 	@Column(name = TARGET_RESOURCE_ID, insertable = true, updatable = true, nullable = true)

@@ -87,5 +87,4 @@ public abstract class BaseResourcePersistentId<T> implements IResourcePersistent
 	public void setResourceType(String theResourceType) {
 		myResourceType = theResourceType;
 	}
-
 }

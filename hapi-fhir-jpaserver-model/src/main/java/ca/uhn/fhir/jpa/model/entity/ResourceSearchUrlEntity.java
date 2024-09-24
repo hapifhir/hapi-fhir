@@ -64,17 +64,12 @@ public class ResourceSearchUrlEntity {
 	private ResourceSearchUrlEntityPK myPk;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumns(value = {
-		@JoinColumn(
-			name = "RES_ID",
-			nullable = false,
-			updatable = false),
-		@JoinColumn(
-			name = "PARTITION_ID",
-			nullable = false,
-			updatable = false)
-	}, foreignKey = @ForeignKey(name = "FK_RES_SEARCH_URL_RESOURCE")
-	)
+	@JoinColumns(
+			value = {
+				@JoinColumn(name = "RES_ID", nullable = false, updatable = false),
+				@JoinColumn(name = "PARTITION_ID", nullable = false, updatable = false)
+			},
+			foreignKey = @ForeignKey(name = "FK_RES_SEARCH_URL_RESOURCE"))
 	private ResourceTable myResourceTable;
 
 	@Column(name = "RES_ID", updatable = false, nullable = false, insertable = false)

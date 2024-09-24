@@ -32,11 +32,12 @@ import org.springframework.data.repository.query.Param;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public interface ISearchResultDao extends JpaRepository<SearchResult, Long>, IHapiFhirJpaRepository {
 
-	@Query(value = "SELECT r.myResourcePartitionId,r.myResourcePid FROM SearchResult r WHERE r.mySearchPid = :search ORDER BY r.myOrder ASC")
+	@Query(
+			value =
+					"SELECT r.myResourcePartitionId,r.myResourcePid FROM SearchResult r WHERE r.mySearchPid = :search ORDER BY r.myOrder ASC")
 	Slice<Object[]> findWithSearchPid(@Param("search") Long theSearchPid, Pageable thePage);
 
 	@Query(value = "SELECT r.myResourcePartitionId,r.myResourcePid FROM SearchResult r WHERE r.mySearchPid = :search")
@@ -69,7 +70,6 @@ public interface ISearchResultDao extends JpaRepository<SearchResult, Long>, IHa
 			Integer partitionId = (Integer) next[0];
 			Long resourcePid = (Long) next[1];
 			retVal.add(JpaPid.fromId(resourcePid, partitionId));
-
 		}
 		return retVal;
 	}

@@ -51,7 +51,8 @@ public class TolerantJsonParser extends JsonParser {
 	 * @param theResourcePid The ID of the resource that will be parsed with this parser. It would be ok to change the
 	 *                       datatype for this param if we ever need to since it's only used for logging.
 	 */
-	public TolerantJsonParser(FhirContext theContext, IParserErrorHandler theParserErrorHandler, JpaPid theResourcePid) {
+	public TolerantJsonParser(
+			FhirContext theContext, IParserErrorHandler theParserErrorHandler, JpaPid theResourcePid) {
 		super(theContext, theParserErrorHandler);
 		myContext = theContext;
 		myResourcePid = theResourcePid;

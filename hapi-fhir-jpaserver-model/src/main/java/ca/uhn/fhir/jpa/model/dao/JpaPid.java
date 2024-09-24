@@ -64,7 +64,8 @@ public class JpaPid extends BaseResourcePersistentId<Long> implements Comparable
 	private static final Comparator<JpaPid> COMPARATOR;
 
 	static {
-		Comparator<JpaPid> partitionComparator = Comparator.comparing(t -> defaultIfNull(t.myPartitionIdValue, Integer.MIN_VALUE));
+		Comparator<JpaPid> partitionComparator =
+				Comparator.comparing(t -> defaultIfNull(t.myPartitionIdValue, Integer.MIN_VALUE));
 		Comparator<JpaPid> idComparator = Comparator.comparing(t -> t.myId);
 		COMPARATOR = ComparatorUtils.chainedComparator(List.of(partitionComparator, idComparator));
 	}
@@ -227,5 +228,4 @@ public class JpaPid extends BaseResourcePersistentId<Long> implements Comparable
 		retVal.setPartitionIdIfNotAlreadySet(theId.getPartitionIdValue());
 		return retVal;
 	}
-
 }

@@ -187,7 +187,8 @@ public class ExpandResourceAndWriteBinaryStep
 				int batchSize = Math.min(500, allIds.size());
 
 				Set<IResourcePersistentId> nextBatchOfPids = allIds.subList(0, batchSize).stream()
-						.map(t -> myIdHelperService.newPidFromStringIdAndResourceName(t.getPartitionId(), t.getPid(), resourceType))
+						.map(t -> myIdHelperService.newPidFromStringIdAndResourceName(
+								t.getPartitionId(), t.getPid(), resourceType))
 						.collect(Collectors.toSet());
 				allIds = allIds.subList(batchSize, allIds.size());
 

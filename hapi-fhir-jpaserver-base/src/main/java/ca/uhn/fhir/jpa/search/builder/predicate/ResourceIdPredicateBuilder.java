@@ -32,7 +32,6 @@ import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.healthmarketscience.sqlbuilder.Condition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
-import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.r4.model.IdType;
 import org.slf4j.Logger;
@@ -61,7 +60,7 @@ public class ResourceIdPredicateBuilder extends BasePredicateBuilder {
 
 	@Nullable
 	public Condition createPredicateResourceId(
-		RequestDetails theRequestDetails,
+			RequestDetails theRequestDetails,
 			@Nullable DbColumn[] theSourceJoinColumn,
 			String theResourceName,
 			List<List<IQueryParameterType>> theValues,
@@ -90,8 +89,11 @@ public class ResourceIdPredicateBuilder extends BasePredicateBuilder {
 					try {
 						boolean excludeDeleted = true;
 						JpaPid pid = myIdHelperService.resolveResourcePersistentIds(
-							theRequestDetails,
-								theRequestPartitionId, theResourceName, valueAsId.getIdPart(), excludeDeleted);
+								theRequestDetails,
+								theRequestPartitionId,
+								theResourceName,
+								valueAsId.getIdPart(),
+								excludeDeleted);
 						orPids.add(pid);
 					} catch (ResourceNotFoundException e) {
 						// This is not an error in a search, it just results in no matches

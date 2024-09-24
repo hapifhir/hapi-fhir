@@ -43,7 +43,7 @@ public interface IResourceTableDao
 		extends JpaRepository<ResourceTable, JpaPid>, IHapiFhirJpaRepository, IForcedIdQueries {
 
 	// FIXME: replace myPid.myId to myPid and change return types here
-	
+
 	@Query("SELECT t.myPid FROM ResourceTable t WHERE t.myDeleted IS NOT NULL")
 	Slice<JpaPid> findIdsOfDeletedResources(Pageable thePageable);
 
@@ -135,7 +135,7 @@ public interface IResourceTableDao
 	 * is an object array, where the order matters (the array represents columns returned by the query). Be careful if you change this query in any way.
 	 */
 	@Query(
-		"SELECT t.myResourceType, t.myPid.myId, t.myDeleted, t.myPartitionIdValue, t.myPartitionDateValue FROM ResourceTable t WHERE t.myPid.myId IN (:pid)")
+			"SELECT t.myResourceType, t.myPid.myId, t.myDeleted, t.myPartitionIdValue, t.myPartitionDateValue FROM ResourceTable t WHERE t.myPid.myId IN (:pid)")
 	Collection<Object[]> findLookupFieldsByResourcePid(@Param("pid") List<Long> thePids);
 
 	@Query(
@@ -204,8 +204,10 @@ public interface IResourceTableDao
 	Optional<ResourceTable> findByTypeAndFhirId(
 			@Param("restype") String theResourceName, @Param("fhirId") String theFhirId);
 
+	/**
+	 * @deprecated Use {@link #findById(Object)}
+	 */
 	default Optional<ResourceTable> findById(Long theId) {
 		return findById(JpaPid.fromId(theId));
 	}
-
 }

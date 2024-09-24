@@ -86,20 +86,22 @@ public class TermCodeSystem implements Serializable {
 	private Long myPid;
 
 	@OneToOne(fetch = FetchType.LAZY)
-	@JoinColumns(value = {
-		@JoinColumn(
-			name = "RES_ID",
-			referencedColumnName = "RES_ID",
-			nullable = false,
-			updatable = false,
-			insertable = false),
-		@JoinColumn(
-			name = "PARTITION_ID",
-			referencedColumnName = "PARTITION_ID",
-			nullable = false,
-			updatable = false,
-			insertable = false)
-	}, foreignKey = @ForeignKey(name = "FK_TRMCODESYSTEM_RES"))
+	@JoinColumns(
+			value = {
+				@JoinColumn(
+						name = "RES_ID",
+						referencedColumnName = "RES_ID",
+						nullable = false,
+						updatable = false,
+						insertable = false),
+				@JoinColumn(
+						name = "PARTITION_ID",
+						referencedColumnName = "PARTITION_ID",
+						nullable = false,
+						updatable = false,
+						insertable = false)
+			},
+			foreignKey = @ForeignKey(name = "FK_TRMCODESYSTEM_RES"))
 	private ResourceTable myResource;
 
 	@Column(name = "RES_ID", nullable = false)

@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceReindexJobDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.entity.ResourceReindexJobEntity;
@@ -435,8 +436,7 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc, IHasSc
 		txTemplate.execute((TransactionCallback<Void>) theStatus -> {
 			ourLog.info("Marking resource with PID {} as indexing_failed", theId);
 
-			// FIXME: restore
-//			myResourceTableDao.updateIndexStatus(theId, BaseHapiFhirDao.INDEX_STATUS_INDEXING_FAILED);
+			myResourceTableDao.updateIndexStatus(theId, BaseHapiFhirDao.INDEX_STATUS_INDEXING_FAILED);
 
 			Query q = myEntityManager.createQuery("DELETE FROM ResourceTag t WHERE t.myResourceId = :id");
 			q.setParameter("id", theId);
@@ -534,9 +534,8 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc, IHasSc
 		private Throwable readResourceAndReindex() {
 			Throwable reindexFailure;
 			reindexFailure = myTxTemplate.execute(t -> {
-				ResourceTable resourceTable = null; // FIXME: restore
-//				ResourceTable resourceTable =
-//						myResourceTableDao.findById(myNextId).orElseThrow(IllegalStateException::new);
+				ResourceTable resourceTable =
+						myResourceTableDao.findById(myNextId).orElseThrow(IllegalStateException::new);
 				myUpdated = resourceTable.getUpdatedDate();
 
 				try {

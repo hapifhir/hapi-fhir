@@ -150,8 +150,7 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc, IHas
 		// are,
 		// so, as code system deletion also deletes versions, we try the system first but if not present we also try
 		// versions
-		TermCodeSystem termCodeSystemToDelete =
-				myCodeSystemDao.findByResourcePid(theCodeSystemToDelete.getId());
+		TermCodeSystem termCodeSystemToDelete = myCodeSystemDao.findByResourcePid(theCodeSystemToDelete.getId());
 		if (termCodeSystemToDelete != null) {
 			termCodeSystemToDelete.setCodeSystemUri("urn:uuid:" + UUID.randomUUID());
 			myCodeSystemDao.save(termCodeSystemToDelete);

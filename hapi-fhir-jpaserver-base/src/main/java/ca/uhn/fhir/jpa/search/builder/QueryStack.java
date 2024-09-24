@@ -47,11 +47,11 @@ import ca.uhn.fhir.jpa.search.builder.predicate.DatePredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ICanMakeMissingParamPredicate;
 import ca.uhn.fhir.jpa.search.builder.predicate.NumberPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ParsedLocationParam;
+import ca.uhn.fhir.jpa.search.builder.predicate.ResourceHistoryPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceIdPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceLinkPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceTablePredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.SearchParamPresentPredicateBuilder;
-import ca.uhn.fhir.jpa.search.builder.predicate.ResourceHistoryPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.StringPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.TagPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.TokenPredicateBuilder;
@@ -421,7 +421,7 @@ public class QueryStack {
 					return;
 				}
 			}
-			//noinspection fallthrough
+				//noinspection fallthrough
 			case NUMBER:
 			case REFERENCE:
 			case COMPOSITE:
@@ -937,7 +937,8 @@ public class QueryStack {
 			RequestPartitionId theRequestPartitionId) {
 
 		if (theFilter instanceof SearchFilterParser.FilterParameter) {
-			return createPredicateFilter(
+				return createPredicateFilter(
+					theRequest,
 					theQueryStack3,
 					(SearchFilterParser.FilterParameter) theFilter,
 					theResourceName,
@@ -982,7 +983,7 @@ public class QueryStack {
 	}
 
 	private Condition createPredicateFilter(
-		RequestDetails theRequestDetails,
+			RequestDetails theRequestDetails,
 			QueryStack theQueryStack3,
 			SearchFilterParser.FilterParameter theFilter,
 			String theResourceName,
@@ -996,7 +997,7 @@ public class QueryStack {
 				TokenParam param = new TokenParam();
 				param.setValueAsQueryToken(null, null, null, theFilter.getValue());
 				return theQueryStack3.createPredicateResourceId(
-					theRequestDetails,
+						theRequestDetails,
 						null,
 						Collections.singletonList(Collections.singletonList(param)),
 						theResourceName,
@@ -1230,8 +1231,9 @@ public class QueryStack {
 			Condition pathPredicate = toEqualToOrInPredicate(
 					resourceLinkTableJoin.getColumnSourcePath(), mySqlBuilder.generatePlaceholders(paths));
 
-			Condition linkedPredicate =
-					searchForIdsWithAndOr(theRequest, with().setSourceJoinColumn(resourceLinkTableJoin.getJoinColumnsForSource())
+			Condition linkedPredicate = searchForIdsWithAndOr(
+					theRequest,
+					with().setSourceJoinColumn(resourceLinkTableJoin.getJoinColumnsForSource())
 							.setResourceName(targetResourceType)
 							.setParamName(parameterName)
 							.setAndOrParams(Collections.singletonList(orValues))
@@ -1891,7 +1893,7 @@ public class QueryStack {
 
 	@Nullable
 	public Condition createPredicateResourceId(
-		RequestDetails theRequestDetails,
+			RequestDetails theRequestDetails,
 			@Nullable DbColumn[] theSourceJoinColumn,
 			List<List<IQueryParameterType>> theValues,
 			String theResourceName,
@@ -1899,8 +1901,12 @@ public class QueryStack {
 			RequestPartitionId theRequestPartitionId) {
 		ResourceIdPredicateBuilder builder = mySqlBuilder.newResourceIdBuilder();
 		return builder.createPredicateResourceId(
-			theRequestDetails,
-				theSourceJoinColumn, theResourceName, theValues, theOperation, theRequestPartitionId);
+				theRequestDetails,
+				theSourceJoinColumn,
+				theResourceName,
+				theValues,
+				theOperation,
+				theRequestPartitionId);
 	}
 
 	private Condition createPredicateSourceForAndList(
@@ -1937,7 +1943,8 @@ public class QueryStack {
 			return toOrPredicate(orPredicates);
 		}
 		// for all other cases we use "INNER JOIN" to match search parameters
-		ResourceHistoryPredicateBuilder join = getSourcePredicateBuilder(theSourceJoinColumn, SelectQuery.JoinType.INNER);
+		ResourceHistoryPredicateBuilder join =
+				getSourcePredicateBuilder(theSourceJoinColumn, SelectQuery.JoinType.INNER);
 
 		for (IQueryParameterType nextParameter : theList) {
 			SourceParam sourceParameter = new SourceParam(nextParameter.getValueAsQueryToken(myFhirContext));
@@ -2350,7 +2357,7 @@ public class QueryStack {
 	}
 
 	@Nullable
-	public Condition searchForIdsWithAndOr(RequestDetails theRequestDetails,SearchForIdsParams theSearchForIdsParams) {
+	public Condition searchForIdsWithAndOr(RequestDetails theRequestDetails, SearchForIdsParams theSearchForIdsParams) {
 
 		if (theSearchForIdsParams.myAndOrParams.isEmpty()) {
 			return null;
@@ -2359,7 +2366,7 @@ public class QueryStack {
 		switch (theSearchForIdsParams.myParamName) {
 			case IAnyResource.SP_RES_ID:
 				return createPredicateResourceId(
-					theRequestDetails,
+						theRequestDetails,
 						theSearchForIdsParams.mySourceJoinColumn,
 						theSearchForIdsParams.myAndOrParams,
 						theSearchForIdsParams.myResourceName,

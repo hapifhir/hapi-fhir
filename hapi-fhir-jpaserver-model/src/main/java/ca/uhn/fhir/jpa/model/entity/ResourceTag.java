@@ -67,19 +67,16 @@ public class ResourceTag extends BaseTag {
 	@ManyToOne(
 			cascade = {},
 			fetch = FetchType.LAZY)
-	@JoinColumns(value = {
-		@JoinColumn(
-			name = "RES_ID",
-			referencedColumnName = "RES_ID",
-		insertable = false,
-		updatable = false),
-		@JoinColumn(
-			name = "PARTITION_ID",
-			referencedColumnName = "PARTITION_ID",
-		insertable = false,
-		updatable = false)
-	},
-		foreignKey = @ForeignKey(name = "FK_RESTAG_RESOURCE"))
+	@JoinColumns(
+			value = {
+				@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID", insertable = false, updatable = false),
+				@JoinColumn(
+						name = "PARTITION_ID",
+						referencedColumnName = "PARTITION_ID",
+						insertable = false,
+						updatable = false)
+			},
+			foreignKey = @ForeignKey(name = "FK_RESTAG_RESOURCE"))
 	private ResourceTable myResource;
 
 	@Column(name = "RES_TYPE", length = ResourceTable.RESTYPE_LEN, nullable = false)

@@ -91,27 +91,29 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 	private Long myHashUri;
 
 	@ManyToOne(
-		optional = false,
-		fetch = FetchType.LAZY,
-		cascade = {})
-	@JoinColumns(value = {
-		@JoinColumn(name = "RES_ID",
-			referencedColumnName = "RES_ID",
-			insertable = false,
-			updatable = false,
-			nullable = false),
-		@JoinColumn(name = "PARTITION_ID",
-			referencedColumnName = "PARTITION_ID",
-			insertable = false,
-			updatable = false,
-			nullable = false)
-	},
+			optional = false,
+			fetch = FetchType.LAZY,
+			cascade = {})
+	@JoinColumns(
+			value = {
+				@JoinColumn(
+						name = "RES_ID",
+						referencedColumnName = "RES_ID",
+						insertable = false,
+						updatable = false,
+						nullable = false),
+				@JoinColumn(
+						name = "PARTITION_ID",
+						referencedColumnName = "PARTITION_ID",
+						insertable = false,
+						updatable = false,
+						nullable = false)
+			},
 			foreignKey = @ForeignKey(name = "FKGXSREUTYMMFJUWDSWV3Y887DO"))
 	private ResourceTable myResource;
 
 	@Column(name = "RES_ID", nullable = false)
 	private Long myResourceId;
-
 
 	/**
 	 * Constructor

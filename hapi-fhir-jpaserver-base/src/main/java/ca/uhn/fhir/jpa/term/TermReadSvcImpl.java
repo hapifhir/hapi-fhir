@@ -2082,7 +2082,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 
 	private JpaPid getValueSetResourcePersistentId(ValueSet theValueSet) {
 		return myIdHelperService.resolveResourcePersistentIds(
-			null,
+				null,
 				RequestPartitionId.allPartitions(),
 				theValueSet.getIdElement().getResourceType(),
 				theValueSet.getIdElement().getIdPart());
@@ -2128,9 +2128,8 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			return null;
 		}
 
-		TermValueSet valueSetEntity = myTermValueSetDao
-				.findByResourcePid(valueSetResourcePid)
-				.orElseThrow(IllegalStateException::new);
+		TermValueSet valueSetEntity =
+				myTermValueSetDao.findByResourcePid(valueSetResourcePid).orElseThrow(IllegalStateException::new);
 		String timingDescription = toHumanReadableExpansionTimestamp(valueSetEntity);
 		String preExpansionMessage = myContext
 				.getLocalizer()

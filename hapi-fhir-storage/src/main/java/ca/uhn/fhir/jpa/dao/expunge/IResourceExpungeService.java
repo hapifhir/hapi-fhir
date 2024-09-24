@@ -37,13 +37,13 @@ public interface IResourceExpungeService<R extends IResourcePersistentId<?>, V e
 	List<V> findHistoricalVersionsOfNonDeletedResources(String theResourceName, R theResourceId, int theI);
 
 	void expungeHistoricalVersions(
-		RequestDetails theRequestDetails, List<V> thePartition, AtomicInteger theRemainingCount);
+			RequestDetails theRequestDetails, List<V> thePartition, AtomicInteger theRemainingCount);
 
 	void expungeCurrentVersionOfResources(
-		RequestDetails theRequestDetails, List<R> theResourceIds, AtomicInteger theRemainingCount);
+			RequestDetails theRequestDetails, List<R> theResourceIds, AtomicInteger theRemainingCount);
 
 	void expungeHistoricalVersionsOfIds(
-		RequestDetails theRequestDetails, List<R> theResourceIds, AtomicInteger theRemainingCount);
+			RequestDetails theRequestDetails, List<R> theResourceIds, AtomicInteger theRemainingCount);
 
 	void deleteAllSearchParams(R theResourceId);
 }

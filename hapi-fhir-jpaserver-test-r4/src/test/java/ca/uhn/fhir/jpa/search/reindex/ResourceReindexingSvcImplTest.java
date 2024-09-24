@@ -12,6 +12,8 @@ import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.entity.ResourceReindexJobEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Observation;
@@ -58,6 +60,10 @@ public class ResourceReindexingSvcImplTest {
 	@Mock
 	private PlatformTransactionManager myTxManager;
 
+	@Mock
+	private EntityManager myEntityManager;
+	@Mock
+	private Query myQuery;
 	@Mock
 	private DaoRegistry myDaoRegistry;
 	@Mock
@@ -256,6 +262,7 @@ public class ResourceReindexingSvcImplTest {
 	public void testReindexDeletedResource() {
 		// setup
 		when(myTxManager.getTransaction(any())).thenReturn(myTxStatus);
+		when(myEntityManager.createQuery(any(String.class))).thenReturn(myQuery);
 		mockNothingToExpunge();
 		mockSingleReindexingJob("Patient");
 		// Mock resource fetch
@@ -289,7 +296,7 @@ public class ResourceReindexingSvcImplTest {
 		mockSingleReindexingJob("Patient");
 		List<JpaPid> values = JpaPid.fromLongList(Arrays.asList(0L, 1L, 2L, 3L));
 		when(myResourceTableDao.findIdsOfResourcesWithinUpdatedRangeOrderedFromOldest(myPageRequestCaptor.capture(), myTypeCaptor.capture(), myLowCaptor.capture(), myHighCaptor.capture())).thenReturn(new SliceImpl<>(values));
-		when(myResourceTableDao.findById(anyLong())).thenThrow(new NullPointerException("A MESSAGE"));
+		when(myResourceTableDao.findById(any(JpaPid.class))).thenThrow(new NullPointerException("A MESSAGE"));
 
 		int count = mySvc.forceReindexingPass();
 		assertEquals(0, count);
@@ -304,10 +311,10 @@ public class ResourceReindexingSvcImplTest {
 	private void mockWhenResourceTableFindById(long[] theUpdatedTimes, String[] theResourceTypes) {
 		when(myResourceTableDao.findById(any(JpaPid.class))).thenAnswer(t -> {
 			ResourceTable retVal = new ResourceTable();
-			Long id = (Long) t.getArguments()[0];
-			retVal.setIdForUnitTest(id);
-			retVal.setResourceType(theResourceTypes[id.intValue()]);
-			retVal.setUpdated(new Date(theUpdatedTimes[id.intValue()]));
+			JpaPid id = (JpaPid) t.getArguments()[0];
+			retVal.setIdForUnitTest(id.getId());
+			retVal.setResourceType(theResourceTypes[id.getId().intValue()]);
+			retVal.setUpdated(new Date(theUpdatedTimes[id.getId().intValue()]));
 			return Optional.of(retVal);
 		});
 	}

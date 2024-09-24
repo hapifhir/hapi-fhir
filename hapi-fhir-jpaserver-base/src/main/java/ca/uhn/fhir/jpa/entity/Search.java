@@ -73,12 +73,12 @@ import static org.apache.commons.lang3.StringUtils.left;
 
 @Entity
 @Table(
-	name = Search.HFJ_SEARCH,
-	uniqueConstraints = {@UniqueConstraint(name = "IDX_SEARCH_UUID", columnNames = "SEARCH_UUID")},
-	indexes = {
-		@Index(name = "IDX_SEARCH_RESTYPE_HASHS", columnList = "RESOURCE_TYPE,SEARCH_QUERY_STRING_HASH,CREATED"),
-		@Index(name = "IDX_SEARCH_CREATED", columnList = "CREATED")
-	})
+		name = Search.HFJ_SEARCH,
+		uniqueConstraints = {@UniqueConstraint(name = "IDX_SEARCH_UUID", columnNames = "SEARCH_UUID")},
+		indexes = {
+			@Index(name = "IDX_SEARCH_RESTYPE_HASHS", columnList = "RESOURCE_TYPE,SEARCH_QUERY_STRING_HASH,CREATED"),
+			@Index(name = "IDX_SEARCH_CREATED", columnList = "CREATED")
+		})
 public class Search implements ICachedSearchDetails, Serializable {
 
 	/**
@@ -94,6 +94,7 @@ public class Search implements ICachedSearchDetails, Serializable {
 	private static final int FAILURE_MESSAGE_LENGTH = 500;
 	private static final long serialVersionUID = 1L;
 	private static final Logger ourLog = LoggerFactory.getLogger(Search.class);
+
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "CREATED", nullable = false, updatable = false)
 	private Date myCreated;
@@ -140,8 +141,10 @@ public class Search implements ICachedSearchDetails, Serializable {
 
 	@Column(name = "RESOURCE_ID", nullable = true)
 	private Long myResourceId;
+
 	@Column(name = "PARTITION_ID", nullable = true)
 	private Integer myPartitionId;
+
 	@Column(name = "RESOURCE_TYPE", length = 200, nullable = true)
 	private String myResourceType;
 	/**
@@ -156,28 +159,37 @@ public class Search implements ICachedSearchDetails, Serializable {
 	 */
 	@Column(name = "SEARCH_QUERY_STRING_VC", nullable = true, length = Length.LONG32)
 	private String mySearchQueryStringVc;
+
 	@Column(name = "SEARCH_QUERY_STRING_HASH", nullable = true, updatable = false)
 	private Integer mySearchQueryStringHash;
+
 	@Enumerated(EnumType.ORDINAL)
 	@Column(name = "SEARCH_TYPE", nullable = false)
 	@JdbcTypeCode(SqlTypes.INTEGER)
 	private SearchTypeEnum mySearchType;
+
 	@Enumerated(EnumType.STRING)
 	@Column(name = "SEARCH_STATUS", nullable = false, length = 10)
 	private SearchStatusEnum myStatus;
+
 	@Column(name = "TOTAL_COUNT", nullable = true)
 	private Integer myTotalCount;
+
 	@Column(name = SEARCH_UUID, length = SEARCH_UUID_COLUMN_LENGTH, nullable = false, updatable = false)
 	private String myUuid;
+
 	@SuppressWarnings("unused")
 	@Version
 	@Column(name = "OPTLOCK_VERSION", nullable = true)
 	private Integer myVersion;
+
 	@Lob // TODO: VC column added in 7.2.0 - Remove non-VC column later
 	@Column(name = "SEARCH_PARAM_MAP", nullable = true)
 	private byte[] mySearchParameterMap;
+
 	@Column(name = "SEARCH_PARAM_MAP_BIN", nullable = true, length = Length.LONG32)
 	private byte[] mySearchParameterMapBin;
+
 	@Transient
 	private transient SearchParameterMap mySearchParameterMapTransient;
 	/**
@@ -213,15 +225,15 @@ public class Search implements ICachedSearchDetails, Serializable {
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this)
-			.append("myLastUpdatedHigh", myLastUpdatedHigh)
-			.append("myLastUpdatedLow", myLastUpdatedLow)
-			.append("myNumFound", myNumFound)
-			.append("myNumBlocked", myNumBlocked)
-			.append("myStatus", myStatus)
-			.append("myTotalCount", myTotalCount)
-			.append("myUuid", myUuid)
-			.append("myVersion", myVersion)
-			.toString();
+				.append("myLastUpdatedHigh", myLastUpdatedHigh)
+				.append("myLastUpdatedLow", myLastUpdatedLow)
+				.append("myNumFound", myNumFound)
+				.append("myNumBlocked", myNumBlocked)
+				.append("myStatus", myStatus)
+				.append("myTotalCount", myTotalCount)
+				.append("myUuid", myUuid)
+				.append("myVersion", myVersion)
+				.toString();
 	}
 
 	public int getNumBlocked() {
@@ -336,8 +348,8 @@ public class Search implements ICachedSearchDetails, Serializable {
 	}
 
 	public void setResourceId(@Nullable JpaPid theResourceId) {
-			myResourceId = theResourceId != null ? theResourceId.getId() : null;
-			myPartitionId = theResourceId != null ? theResourceId.getPartitionId() : null;
+		myResourceId = theResourceId != null ? theResourceId.getId() : null;
+		myPartitionId = theResourceId != null ? theResourceId.getPartitionId() : null;
 	}
 
 	public String getResourceType() {
@@ -509,7 +521,7 @@ public class Search implements ICachedSearchDetails, Serializable {
 
 	@Nonnull
 	public static String createSearchQueryStringForStorage(
-		@Nonnull String theSearchQueryString, @Nonnull RequestPartitionId theRequestPartitionId) {
+			@Nonnull String theSearchQueryString, @Nonnull RequestPartitionId theRequestPartitionId) {
 		String searchQueryString = theSearchQueryString;
 		if (!theRequestPartitionId.isAllPartitions()) {
 			searchQueryString = RequestPartitionId.stringifyForKey(theRequestPartitionId) + " " + searchQueryString;

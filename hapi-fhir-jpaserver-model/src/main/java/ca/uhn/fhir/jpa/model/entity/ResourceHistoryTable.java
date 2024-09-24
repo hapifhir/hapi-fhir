@@ -22,7 +22,6 @@ package ca.uhn.fhir.jpa.model.entity;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.hapi.fhir.sql.hibernatesvc.ConditionalIdProperty;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.AttributeOverride;
@@ -41,7 +40,6 @@ import jakarta.persistence.JoinColumns;
 import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import jakarta.persistence.UniqueConstraint;
@@ -98,26 +96,19 @@ public class ResourceHistoryTable extends BaseHasResource<ResourceHistoryTablePk
 	}
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumns(value = {
-		@JoinColumn(
-			name = "RES_ID",
-			nullable = false,
-			insertable = false,
-			updatable = false
-		),
-		@JoinColumn(
-			name = "PARTITION_ID",
-			nullable = false,
-			insertable = false,
-			updatable = false
-		),
-	},
-		foreignKey = @ForeignKey(name = "FK_RESOURCE_HISTORY_RESOURCE"))
+	@JoinColumns(
+			value = {
+				@JoinColumn(name = "RES_ID", nullable = false, insertable = false, updatable = false),
+				@JoinColumn(name = "PARTITION_ID", nullable = false, insertable = false, updatable = false),
+			},
+			foreignKey = @ForeignKey(name = "FK_RESOURCE_HISTORY_RESOURCE"))
 	private ResourceTable myResourceTable;
 
 	@Embedded
 	@AttributeOverride(name = "myId", column = @Column(name = "RES_ID", insertable = true, updatable = false))
-	@AttributeOverride(name = "myPartitionIdValue", column = @Column(name = "PARTITION_ID", insertable = false, updatable = false))
+	@AttributeOverride(
+			name = "myPartitionIdValue",
+			column = @Column(name = "PARTITION_ID", insertable = false, updatable = false))
 	private JpaPid myResourcePid;
 
 	/**
@@ -151,9 +142,9 @@ public class ResourceHistoryTable extends BaseHasResource<ResourceHistoryTablePk
 	private ResourceEncodingEnum myEncoding;
 
 	// FIXME: implement this another way
-//	@OneToOne(
-//			mappedBy = "myResourceHistoryTable",
-//			cascade = {CascadeType.REMOVE})
+	//	@OneToOne(
+	//			mappedBy = "myResourceHistoryTable",
+	//			cascade = {CascadeType.REMOVE})
 	@Transient
 	private transient ResourceHistoryProvenanceEntity myProvenance;
 

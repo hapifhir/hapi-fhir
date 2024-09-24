@@ -30,14 +30,11 @@ import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinColumns;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.MapsId;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-import static ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId.PARTITION_ID;
 import static ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable.SOURCE_URI_LENGTH;
 
 @Table(
@@ -55,41 +52,41 @@ public class ResourceHistoryProvenanceEntity extends BasePartitionable {
 	@Column(name = "RES_VER_PID")
 	private Long myId;
 
-//	@OneToOne(fetch = FetchType.LAZY)
-//	@JoinColumns(value={
-//		@JoinColumn(
-//			name = "RES_VER_PID",
-//			referencedColumnName = "PID",
-//			nullable = false,
-//			insertable = false,
-//			updatable = false)
-//		, @JoinColumn(
-//			name = PARTITION_ID,
-//			referencedColumnName = PARTITION_ID,
-//			nullable = false,
-//			insertable = false,
-//			updatable = false)
-//		}, foreignKey = @ForeignKey(name = "FK_RESVERPROV_RESVER_PID")
-//	)
-@Transient
-private transient ResourceHistoryTable myResourceHistoryTable;
+	//	@OneToOne(fetch = FetchType.LAZY)
+	//	@JoinColumns(value={
+	//		@JoinColumn(
+	//			name = "RES_VER_PID",
+	//			referencedColumnName = "PID",
+	//			nullable = false,
+	//			insertable = false,
+	//			updatable = false)
+	//		, @JoinColumn(
+	//			name = PARTITION_ID,
+	//			referencedColumnName = PARTITION_ID,
+	//			nullable = false,
+	//			insertable = false,
+	//			updatable = false)
+	//		}, foreignKey = @ForeignKey(name = "FK_RESVERPROV_RESVER_PID")
+	//	)
+	@Transient
+	private transient ResourceHistoryTable myResourceHistoryTable;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumns(value = {
-	@JoinColumn(
-			name = "RES_PID",
-			referencedColumnName = "RES_ID",
-			insertable = false,
-			updatable = false,
-			nullable = false),
-		@JoinColumn(
-			name = "PARTITION_ID",
-			referencedColumnName = "PARTITION_ID",
-			insertable = false,
-			updatable = false,
-			nullable = false)
-	}
-		,
+	@JoinColumns(
+			value = {
+				@JoinColumn(
+						name = "RES_PID",
+						referencedColumnName = "RES_ID",
+						insertable = false,
+						updatable = false,
+						nullable = false),
+				@JoinColumn(
+						name = "PARTITION_ID",
+						referencedColumnName = "PARTITION_ID",
+						insertable = false,
+						updatable = false,
+						nullable = false)
+			},
 			foreignKey = @ForeignKey(name = "FK_RESVERPROV_RES_PID"))
 	private ResourceTable myResourceTable;
 
@@ -148,5 +145,4 @@ private transient ResourceHistoryTable myResourceHistoryTable;
 	public Long getId() {
 		return myId;
 	}
-
 }

@@ -40,7 +40,6 @@ import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Expression;
-import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.Subquery;
@@ -121,7 +120,7 @@ public class HistoryBuilder {
 		addPredicatesToQuery(cb, thePartitionId, criteriaQuery, from, theHistorySearchStyle);
 
 		// FIXME: fetched provenance
-//		from.fetch("myProvenance", JoinType.LEFT);
+		//		from.fetch("myProvenance", JoinType.LEFT);
 
 		/*
 		 * The sort on myUpdated is the important one for _history operations, but there are
@@ -198,9 +197,10 @@ public class HistoryBuilder {
 			predicates.add(theCriteriaBuilder.equal(theFrom.get("myResourceId"), myResourceId.getId()));
 			if (myPartitionSettings.isPartitioningEnabled()) {
 				if (myResourceId.getPartitionId() != null) {
-					predicates.add(theCriteriaBuilder.equal(theFrom.get("myPartitionIdValue"), myResourceId.getPartitionId()));
+					predicates.add(
+							theCriteriaBuilder.equal(theFrom.get("myPartitionIdValue"), myResourceId.getPartitionId()));
 				} else {
-					predicates.add(theCriteriaBuilder.isNull(theFrom.get("myResourceId")));
+					predicates.add(theCriteriaBuilder.isNull(theFrom.get("myPartitionIdValue")));
 				}
 			}
 
@@ -211,8 +211,8 @@ public class HistoryBuilder {
 					predicates.add(theCriteriaBuilder.isNull(theFrom.get("myPartitionIdValue")));
 				} else if (thePartitionId.hasDefaultPartitionId()) {
 					predicates.add(theCriteriaBuilder.or(
-						theCriteriaBuilder.isNull(theFrom.get("myPartitionIdValue")),
-						theFrom.get("myPartitionIdValue").in(thePartitionId.getPartitionIdsWithoutDefault())));
+							theCriteriaBuilder.isNull(theFrom.get("myPartitionIdValue")),
+							theFrom.get("myPartitionIdValue").in(thePartitionId.getPartitionIdsWithoutDefault())));
 				} else {
 					predicates.add(theFrom.get("myPartitionIdValue").in(thePartitionId.getPartitionIds()));
 				}

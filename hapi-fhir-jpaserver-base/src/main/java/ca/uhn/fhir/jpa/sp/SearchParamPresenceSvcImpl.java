@@ -53,8 +53,8 @@ public class SearchParamPresenceSvcImpl implements ISearchParamPresenceSvc {
 	public AddRemoveCount updatePresence(
 			ResourceTable theResource, Collection<SearchParamPresentEntity> thePresenceEntities) {
 
-		thePresenceEntities.forEach(t->t.setResource(theResource));
-		thePresenceEntities.forEach(t->t.calculateHashes());
+		thePresenceEntities.forEach(t -> t.setResource(theResource));
+		thePresenceEntities.forEach(t -> t.calculateHashes());
 
 		AddRemoveCount retVal = new AddRemoveCount();
 		if (myStorageSettings.getIndexMissingFields() == JpaStorageSettings.IndexEnabledEnum.DISABLED) {

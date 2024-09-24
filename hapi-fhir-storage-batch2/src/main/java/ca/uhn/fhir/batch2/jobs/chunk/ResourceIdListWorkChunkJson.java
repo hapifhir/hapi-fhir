@@ -78,14 +78,16 @@ public class ResourceIdListWorkChunkJson implements IModelJson {
 				.toString();
 	}
 
-	public <T extends IResourcePersistentId<?>> List<T> getResourcePersistentIds(IIdHelperService<T> theIdHelperService) {
+	public <T extends IResourcePersistentId<?>> List<T> getResourcePersistentIds(
+			IIdHelperService<T> theIdHelperService) {
 		if (myTypedPids.isEmpty()) {
 			return Collections.emptyList();
 		}
 
 		return myTypedPids.stream()
 				.map(t -> {
-					T retval = theIdHelperService.newPidFromStringIdAndResourceName(t.getPartitionId(), t.getPid(), t.getResourceType());
+					T retval = theIdHelperService.newPidFromStringIdAndResourceName(
+							t.getPartitionId(), t.getPid(), t.getResourceType());
 					return retval;
 				})
 				.collect(Collectors.toList());

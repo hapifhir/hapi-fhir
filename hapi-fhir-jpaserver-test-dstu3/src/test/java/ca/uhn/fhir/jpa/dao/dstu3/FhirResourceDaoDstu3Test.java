@@ -595,21 +595,21 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 			// fetch the resource from the db and verify
 			ResourceTable readBackResource = myEntityManager
-				.find(ResourceTable.class, myMethodOutcome.getPersistentId().getId());
+				.find(ResourceTable.class, myMethodOutcome.getPersistentId());
 			assertThat(readBackResource).as("found entity").isNotNull();
 			assertThat(readBackResource.getVersion()).as("first version").isEqualTo(1);
 			assertThat(readBackResource.getFhirId()).as("inline column populated on readback").isEqualTo(myExpectedId);
 
 			ResourceHistoryTable readBackHistory = myEntityManager
-				.createQuery("select h from ResourceHistoryTable h where h.myResourceId = :resId and h.myResourceVersion = 1", ResourceHistoryTable.class)
-				.setParameter("resId", myMethodOutcome.getPersistentId().getId())
+				.createQuery("select h from ResourceHistoryTable h where h.myResourcePid = :resId and h.myResourceVersion = 1", ResourceHistoryTable.class)
+				.setParameter("resId", myMethodOutcome.getPersistentId())
 				.getSingleResult();
 			assertThat(readBackHistory).as("found history").isNotNull();
 
 			// no extra history
 			long historyCount = myEntityManager
-				.createQuery("select count(h) from ResourceHistoryTable h where h.myResourceId = :resId", Long.class)
-				.setParameter("resId", myMethodOutcome.getPersistentId().getId())
+				.createQuery("select count(h) from ResourceHistoryTable h where h.myResourcePid = :resId", Long.class)
+				.setParameter("resId", myMethodOutcome.getPersistentId())
 				.getSingleResult();
 			assertThat(historyCount).as("only create one history version").isEqualTo(1);
 

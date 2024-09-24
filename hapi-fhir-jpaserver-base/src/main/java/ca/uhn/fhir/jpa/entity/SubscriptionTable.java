@@ -64,20 +64,22 @@ public class SubscriptionTable {
 	private Integer myPartitionId;
 
 	@OneToOne()
-	@JoinColumns(value = {
-	@JoinColumn(
-			name = "RES_ID",
-			insertable = false,
-			updatable = false,
-			nullable = false,
-			referencedColumnName = "RES_ID"),
-	@JoinColumn(
-			name = "PARTITION_ID",
-			insertable = false,
-			updatable = false,
-			nullable = false,
-			referencedColumnName = "PARTITION_ID")},
-		foreignKey = @ForeignKey(name = "FK_SUBSC_RESOURCE_ID"))
+	@JoinColumns(
+			value = {
+				@JoinColumn(
+						name = "RES_ID",
+						insertable = false,
+						updatable = false,
+						nullable = false,
+						referencedColumnName = "RES_ID"),
+				@JoinColumn(
+						name = "PARTITION_ID",
+						insertable = false,
+						updatable = false,
+						nullable = false,
+						referencedColumnName = "PARTITION_ID")
+			},
+			foreignKey = @ForeignKey(name = "FK_SUBSC_RESOURCE_ID"))
 	private ResourceTable mySubscriptionResource;
 
 	/**

@@ -541,8 +541,9 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 			List<Condition> andPredicates = new ArrayList<>();
 
 			List<List<IQueryParameterType>> chainParamValues = Collections.singletonList(orValues);
-			andPredicates.add(
-					childQueryFactory.searchForIdsWithAndOr(theRequest, with().setSourceJoinColumn(getJoinColumnsForTarget())
+			andPredicates.add(childQueryFactory.searchForIdsWithAndOr(
+					theRequest,
+					with().setSourceJoinColumn(getJoinColumnsForTarget())
 							.setResourceName(subResourceName)
 							.setParamName(chain)
 							.setAndOrParams(chainParamValues)
@@ -816,7 +817,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 				condition = new InCondition(left, right);
 			} else {
 				condition = QueryParameterUtils.toEqualToOrInPredicate(
-					myColumnTargetResourceId, generatePlaceholders(JpaPid.toLongList(theTargetPids)));
+						myColumnTargetResourceId, generatePlaceholders(JpaPid.toLongList(theTargetPids)));
 			}
 		} else {
 			// ... otherwise we look for resource types
@@ -867,5 +868,4 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 	void setIdHelperServiceForUnitTest(IIdHelperService theIdHelperService) {
 		myIdHelperService = theIdHelperService;
 	}
-
 }

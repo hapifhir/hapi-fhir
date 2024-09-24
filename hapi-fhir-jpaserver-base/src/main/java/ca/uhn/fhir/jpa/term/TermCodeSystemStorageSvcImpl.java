@@ -48,7 +48,6 @@ import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -87,7 +86,6 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.jpa.api.dao.IDao.RESOURCE_PID_KEY;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_LOW;
@@ -376,8 +374,8 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		// Note that this creates the TermCodeSystem and TermCodeSystemVersion entities if needed
 		IIdType csId = myTerminologyVersionAdapterSvc.createOrUpdateCodeSystem(theCodeSystemResource, theRequest);
 
-		JpaPid codeSystemResourcePid = myIdHelperService.resolveResourcePersistentIds(theRequest,
-				RequestPartitionId.defaultPartition(), csId.getResourceType(), csId.getIdPart());
+		JpaPid codeSystemResourcePid = myIdHelperService.resolveResourcePersistentIds(
+				theRequest, RequestPartitionId.defaultPartition(), csId.getResourceType(), csId.getIdPart());
 		ResourceTable resource = myResourceTableDao.getOne(codeSystemResourcePid);
 
 		ourLog.info("CodeSystem resource has ID: {}", csId.getValue());
@@ -416,10 +414,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		ValidateUtil.isNotBlankOrThrowInvalidRequest(theSystemUri, "No system URI supplied");
 
 		TermCodeSystem codeSystem = getOrCreateDistinctTermCodeSystem(
-				theSystemUri,
-				theSystemName,
-				theCodeSystemVersionId,
-				theCodeSystemResourceTable);
+				theSystemUri, theSystemName, theCodeSystemVersionId, theCodeSystemResourceTable);
 
 		List<TermCodeSystemVersion> existing =
 				myCodeSystemVersionDao.findByCodeSystemResourcePid(theCodeSystemResourceTable.getResourceId());

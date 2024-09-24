@@ -253,8 +253,7 @@ public class ExpandResourcesStep
 		return false;
 	}
 
-	private List<IBaseResource> fetchAllResources(
-		List<TypedPidJson> theIds, RequestPartitionId theRequestPartitionId) {
+	private List<IBaseResource> fetchAllResources(List<TypedPidJson> theIds, RequestPartitionId theRequestPartitionId) {
 		ArrayListMultimap<String, TypedPidJson> typeToIds = ArrayListMultimap.create();
 		theIds.forEach(t -> typeToIds.put(t.getResourceType(), t));
 
@@ -266,7 +265,8 @@ public class ExpandResourcesStep
 			List<TypedPidJson> allIds = typeToIds.get(resourceType);
 
 			Set<IResourcePersistentId> nextBatchOfPids = allIds.stream()
-					.map(t -> myIdHelperService.newPidFromStringIdAndResourceName(t.getPartitionId(), t.getPid(), resourceType))
+					.map(t -> myIdHelperService.newPidFromStringIdAndResourceName(
+							t.getPartitionId(), t.getPid(), resourceType))
 					.collect(Collectors.toSet());
 
 			PersistentIdToForcedIdMap nextBatchOfResourceIds = myTransactionService

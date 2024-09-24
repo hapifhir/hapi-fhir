@@ -158,9 +158,7 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 	}
 
 	private void submitWorkChunk(
-			List<TypedPidJson> theBatchResourceIds,
-			String theResourceType,
-			IJobDataSink<ResourceIdList> theDataSink) {
+			List<TypedPidJson> theBatchResourceIds, String theResourceType, IJobDataSink<ResourceIdList> theDataSink) {
 		ResourceIdList idList = new ResourceIdList();
 
 		idList.setIds(theBatchResourceIds);

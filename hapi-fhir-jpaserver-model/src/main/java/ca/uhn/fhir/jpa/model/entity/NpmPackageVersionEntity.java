@@ -78,26 +78,28 @@ public class NpmPackageVersionEntity {
 	private NpmPackageEntity myPackage;
 
 	@ManyToOne
-	@JoinColumns(value = {
-		@JoinColumn(
-			name = "BINARY_RES_ID",
-			referencedColumnName = "RES_ID",
-			insertable = false,
-			updatable = false,
-			nullable = false),
-		@JoinColumn(
-			name = "PARTITION_ID",
-			referencedColumnName = "PARTITION_ID",
-			insertable = false,
-			updatable = false,
-			nullable = false)
-	}, foreignKey = @ForeignKey(name = "FK_NPM_PKV_RESID"))
+	@JoinColumns(
+			value = {
+				@JoinColumn(
+						name = "BINARY_RES_ID",
+						referencedColumnName = "RES_ID",
+						insertable = false,
+						updatable = false,
+						nullable = false),
+				@JoinColumn(
+						name = "PARTITION_ID",
+						referencedColumnName = "PARTITION_ID",
+						insertable = false,
+						updatable = false,
+						nullable = false)
+			},
+			foreignKey = @ForeignKey(name = "FK_NPM_PKV_RESID"))
 	private ResourceTable myPackageBinary;
 
-	@Column(name="BINARY_RES_ID", nullable = false)
+	@Column(name = "BINARY_RES_ID", nullable = false)
 	private Long myPackageBinaryResourceId;
 
-	@Column(name="PARTITION_ID", nullable = true)
+	@Column(name = "PARTITION_ID", nullable = true)
 	private Integer myPackageBinaryPartitionId;
 
 	@Temporal(TemporalType.TIMESTAMP)

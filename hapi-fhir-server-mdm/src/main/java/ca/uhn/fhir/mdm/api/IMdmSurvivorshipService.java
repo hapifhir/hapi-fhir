@@ -79,6 +79,5 @@ public interface IMdmSurvivorshipService {
 	 * @param <T> - Resource type to apply the survivorship rules to
 	 */
 	<T extends IBase> T rebuildGoldenResourceWithSurvivorshipRules(
-		RequestDetails theRequestDetails,
-			T theGoldenResource, MdmTransactionContext theMdmTransactionContext);
+			RequestDetails theRequestDetails, T theGoldenResource, MdmTransactionContext theMdmTransactionContext);
 }

@@ -240,12 +240,12 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 
 		dispatchEvent(IHSearchEventListener.HSearchEventType.SEARCH);
 		SearchQueryOptionsStep<?, JpaPid, SearchLoadingOptionsStep, ?, ?> query = getSearchSession()
-			.search(ResourceTable.class)
-			// The document id is the PK which is pid.  We use this instead of _myId to avoid fetching the doc body.
-			.select(
-				// adapt the String docRef.id() to the Long that it really is.
-				f -> f.composite(docRef -> JpaPid.fromId(Long.valueOf(docRef.id())), f.documentReference()))
-			.where(f -> buildWhereClause(f, theResourceType, theParams, theReferencingPid));
+				.search(ResourceTable.class)
+				// The document id is the PK which is pid.  We use this instead of _myId to avoid fetching the doc body.
+				.select(
+						// adapt the String docRef.id() to the Long that it really is.
+						f -> f.composite(docRef -> JpaPid.fromId(Long.valueOf(docRef.id())), f.documentReference()))
+				.where(f -> buildWhereClause(f, theResourceType, theParams, theReferencingPid));
 
 		if (theParams.getSort() != null) {
 			query.sort(f -> myExtendedFulltextSortHelper.getSortClauses(f, theParams.getSort(), theResourceType));

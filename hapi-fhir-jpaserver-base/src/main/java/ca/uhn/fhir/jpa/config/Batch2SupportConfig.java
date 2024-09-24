@@ -62,11 +62,11 @@ public class Batch2SupportConfig {
 
 	@Bean
 	DeleteExpungeSqlBuilder deleteExpungeSqlBuilder(
-		ResourceTableFKProvider theResourceTableFKProvider,
-		JpaStorageSettings theStorageSettings,
-		IIdHelperService theIdHelper,
-		IResourceLinkDao theResourceLinkDao,
-		PartitionSettings thePartitionSettings) {
+			ResourceTableFKProvider theResourceTableFKProvider,
+			JpaStorageSettings theStorageSettings,
+			IIdHelperService theIdHelper,
+			IResourceLinkDao theResourceLinkDao,
+			PartitionSettings thePartitionSettings) {
 		return new DeleteExpungeSqlBuilder(
 				theResourceTableFKProvider, theStorageSettings, theIdHelper, theResourceLinkDao, thePartitionSettings);
 	}
