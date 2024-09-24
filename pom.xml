@@ -1028,7 +1028,7 @@
 		<swagger_version>2.2.22</swagger_version>
 		<slf4j_version>2.0.13</slf4j_version>
 		<log4j_to_slf4j_version>2.19.0</log4j_to_slf4j_version>
-		<spring_version>6.1.8</spring_version>
+		<spring_version>6.1.12</spring_version>
 		<spring_data_bom_version>2023.1.6</spring_data_bom_version>
 		<spring_batch_version>4.3.10</spring_batch_version>
 		<spring_boot_version>3.2.6</spring_boot_version>
