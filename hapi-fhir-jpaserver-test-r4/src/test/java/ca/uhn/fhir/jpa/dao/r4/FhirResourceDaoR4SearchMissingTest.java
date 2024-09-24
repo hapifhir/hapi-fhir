@@ -463,7 +463,7 @@ public class FhirResourceDaoR4SearchMissingTest {
 		@Test
 		public void testSearchWithMissingReference_searchParamMultiplePaths() {
 			IIdType encounterId = createEncounter();
-			createObservation(withEncounter(encounterId.getIdPart()));
+			createObservation(withEncounter(encounterId.getValue()));
 
 			SearchParameterMap params = new SearchParameterMap();
 			params.add(Observation.SP_ENCOUNTER, new ReferenceParam().setMissing(true));
