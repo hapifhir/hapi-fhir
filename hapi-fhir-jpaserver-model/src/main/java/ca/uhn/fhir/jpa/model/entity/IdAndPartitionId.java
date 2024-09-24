@@ -3,9 +3,10 @@ package ca.uhn.fhir.jpa.model.entity;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+import java.io.Serializable;
 import java.util.Objects;
 
-public class IdAndPartitionId {
+public class IdAndPartitionId implements Serializable {
 	private Long myId;
 	private Integer myPartitionIdValue;
 
