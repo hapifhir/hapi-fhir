@@ -20,6 +20,8 @@
 package ca.uhn.fhir.util;
 
 import ca.uhn.fhir.i18n.Msg;
+import com.google.common.base.Preconditions;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -28,11 +30,21 @@ import java.lang.ref.SoftReference;
 import java.text.ParseException;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoField;
+import java.time.temporal.TemporalAccessor;
+import java.time.temporal.TemporalAmount;
+import java.time.temporal.TemporalField;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.TimeZone;
 
 /**
@@ -92,6 +104,66 @@ public final class DateUtils {
 	 * This class should not be instantiated.
 	 */
 	private DateUtils() {}
+
+	// LUKETODO:  javadoc
+	public static String formatWithZoneAndOptionalDelta(
+			LocalDateTime localDateTime,
+			ZoneId theZoneId,
+			DateTimeFormatter theDateTimeFormatter,
+			@Nullable TemporalAmount theDelta) {
+		final ZonedDateTime zonedDateTime = localDateTime.atZone(theZoneId);
+
+		final ZonedDateTime zonedDateTimeToFormat =
+				Optional.ofNullable(theDelta).map(zonedDateTime::plus).orElse(zonedDateTime);
+
+		return zonedDateTimeToFormat.format(theDateTimeFormatter);
+	}
+
+	// LUKETODO: javadoc
+	public static Optional<LocalDateTime> extractLocalDateTimeIfValid(TemporalAccessor theTemporalAccessor) {
+		if (theTemporalAccessor.isSupported(ChronoField.YEAR)) {
+			final int year = theTemporalAccessor.get(ChronoField.YEAR);
+			final int month = getTimeUnitIfSupported(theTemporalAccessor, ChronoField.MONTH_OF_YEAR, 1);
+			final int day = getTimeUnitIfSupported(theTemporalAccessor, ChronoField.DAY_OF_MONTH, 1);
+			final int hour = getTimeUnitIfSupported(theTemporalAccessor, ChronoField.HOUR_OF_DAY, 0);
+			final int minute = getTimeUnitIfSupported(theTemporalAccessor, ChronoField.MINUTE_OF_HOUR, 0);
+			final int seconds = getTimeUnitIfSupported(theTemporalAccessor, ChronoField.SECOND_OF_MINUTE, 0);
+
+			return Optional.of(LocalDateTime.of(year, month, day, hour, minute, seconds));
+		}
+
+		return Optional.empty();
+	}
+
+	// LUKETODO: javadoc
+	public static Optional<TemporalAccessor> parseDateTimeStringIfValid(
+			String theDateTimeString, DateTimeFormatter theSupportedDateTimeFormatter) {
+		Preconditions.checkArgument(StringUtils.isNotBlank(theDateTimeString));
+
+		try {
+			return Optional.of(theSupportedDateTimeFormatter.parse(theDateTimeString));
+		} catch (Exception exception) {
+			return Optional.empty();
+		}
+	}
+
+	// LUKETODO: javadoc
+	public static Optional<ZoneOffset> getZoneOffsetIfSupported(TemporalAccessor theTemporalAccessor) {
+		if (theTemporalAccessor.isSupported(ChronoField.OFFSET_SECONDS)) {
+			return Optional.of(ZoneOffset.from(theTemporalAccessor));
+		}
+
+		return Optional.empty();
+	}
+
+	private static int getTimeUnitIfSupported(
+			TemporalAccessor theTemporalAccessor, TemporalField theTemporalField, int theDefaultValue) {
+		if (theTemporalAccessor.isSupported(theTemporalField)) {
+			return theTemporalAccessor.get(theTemporalField);
+		}
+
+		return theDefaultValue;
+	}
 
 	/**
 	 * A factory for {@link SimpleDateFormat}s. The instances are stored in a

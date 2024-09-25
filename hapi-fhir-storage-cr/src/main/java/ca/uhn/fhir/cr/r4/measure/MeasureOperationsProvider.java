@@ -34,11 +34,17 @@ import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Parameters;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
-import org.springframework.beans.factory.annotation.Autowired;
 
 public class MeasureOperationsProvider {
-	@Autowired
-	IMeasureServiceFactory myR4MeasureServiceFactory;
+	private final IMeasureServiceFactory myR4MeasureServiceFactory;
+	private final MeasureReportPeriodRequestProcessingService myMeasureReportPeriodRequestProcessingService;
+
+	public MeasureOperationsProvider(
+			IMeasureServiceFactory theR4MeasureServiceFactory,
+			MeasureReportPeriodRequestProcessingService theMeasureReportPeriodRequestProcessingService) {
+		myR4MeasureServiceFactory = theR4MeasureServiceFactory;
+		myMeasureReportPeriodRequestProcessingService = theMeasureReportPeriodRequestProcessingService;
+	}
 
 	/**
 	 * Implements the <a href=
@@ -78,12 +84,17 @@ public class MeasureOperationsProvider {
 			@OperationParam(name = "parameters") Parameters theParameters,
 			RequestDetails theRequestDetails)
 			throws InternalErrorException, FHIRException {
+
+		final MeasurePeriodForEvaluation measurePeriodForEvaluation =
+				myMeasureReportPeriodRequestProcessingService.validateAndProcessTimezone(
+						theRequestDetails, thePeriodStart, thePeriodEnd);
+
 		return myR4MeasureServiceFactory
 				.create(theRequestDetails)
 				.evaluate(
 						Eithers.forMiddle3(theId),
-						thePeriodStart,
-						thePeriodEnd,
+						measurePeriodForEvaluation.getPeriodStart(),
+						measurePeriodForEvaluation.getPeriodEnd(),
 						theReportType,
 						theSubject,
 						theLastReceivedOn,
