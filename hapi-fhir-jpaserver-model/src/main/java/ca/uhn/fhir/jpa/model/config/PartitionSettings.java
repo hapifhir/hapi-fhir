@@ -34,6 +34,7 @@ public class PartitionSettings {
 	private boolean myAlwaysOpenNewTransactionForDifferentPartition;
 	private boolean myConditionalCreateDuplicateIdentifiersEnabled = false;
 
+	public PartitionSettings() {}
 	/**
 	 * Should we always open a new database transaction if the partition context changes
 	 *

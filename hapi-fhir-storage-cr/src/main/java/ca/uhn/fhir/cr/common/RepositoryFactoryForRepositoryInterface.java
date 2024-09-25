@@ -19,12 +19,13 @@
  */
 package ca.uhn.fhir.cr.common;
 
-import ca.uhn.fhir.cr.repo.HapiFhirRepository;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import com.google.common.annotations.Beta;
+import org.opencds.cqf.fhir.api.Repository;
 
+/**
+ * Factory interface to return a {@link Repository} from a {@link RequestDetails}
+ */
 @FunctionalInterface
-@Beta
-public interface IRepositoryFactory {
-	HapiFhirRepository create(RequestDetails theRequestDetails);
+public interface RepositoryFactoryForRepositoryInterface {
+	Repository create(RequestDetails theRequestDetails);
 }
