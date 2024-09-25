@@ -399,6 +399,9 @@ public class ResourceTable extends BaseHasResource<JpaPid> implements Serializab
 	@Transient
 	private volatile String myUpdatedByMatchUrl;
 
+	@Transient
+	private transient Object myParamsForStorage;
+
 	/**
 	 * Constructor
 	 */
@@ -1041,6 +1044,26 @@ public class ResourceTable extends BaseHasResource<JpaPid> implements Serializab
 		myPid.setPartitionId(theStoragePartition.getPartitionId());
 		myPartitionIdValue = theStoragePartition.getPartitionId();
 		myPartitionDateValue = theStoragePartition.getPartitionDate();
+	}
+
+	/**
+	 * This field is used to store a copy of the various search param objects
+	 * that are about to be stored. We do this because we don't want to touch
+	 * the collections used in e.g. {@link #myParamsToken} since even though
+	 * they are marked as cascade={}, hibernate still tries to resolve
+	 * values in there and gets confused when we're merging this entity. So
+	 * instead of populating these objects, we just put a copy of the
+	 * params object here for later use.
+	 */
+	public void setParamsForStorage(Object theParamsForStorage) {
+		myParamsForStorage = theParamsForStorage;
+	}
+
+	/**
+	 * @see #setParamsForStorage(Object)
+	 */
+	public Object getParamsForStorage() {
+		return myParamsForStorage;
 	}
 
 	/**

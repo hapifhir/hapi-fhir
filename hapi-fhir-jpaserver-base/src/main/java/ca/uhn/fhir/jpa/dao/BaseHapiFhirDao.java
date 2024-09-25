@@ -58,7 +58,6 @@ import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.model.entity.BaseTag;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
@@ -1264,7 +1263,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 						myDaoSearchParamSynchronizer.synchronizeSearchParamsToDatabase(
 								newParams, entity, existingParams);
 
-				newParams.populateResourceTableParamCollections(entity);
+				// FIXME: restore?
+				//				newParams.populateResourceTableParamCollections(entity);
+				entity.setParamsForStorage(newParams);
 
 				// Interceptor broadcast: JPA_PERFTRACE_INFO
 				if (!searchParamAddRemoveCount.isEmpty()) {

@@ -26,6 +26,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceHistoryProvenanceDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.entity.ResourceSearchView;
@@ -38,6 +39,7 @@ import ca.uhn.fhir.jpa.model.entity.BaseTag;
 import ca.uhn.fhir.jpa.model.entity.IBaseResourceEntity;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
+import ca.uhn.fhir.jpa.model.entity.ResourceHistoryProvenanceEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.TagDefinition;
@@ -74,6 +76,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import static ca.uhn.fhir.jpa.dao.BaseHapiFhirDao.decodeResource;
 import static java.util.Objects.nonNull;
@@ -92,6 +95,9 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 
 	@Autowired
 	private IResourceHistoryTableDao myResourceHistoryTableDao;
+
+	@Autowired
+	private IResourceHistoryProvenanceDao myResourceHistoryProvenanceDao;
 
 	@Autowired
 	private PartitionSettings myPartitionSettings;
@@ -159,9 +165,16 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 			version = history.getVersion();
 			provenanceSourceUri = history.getSourceUri();
 			provenanceRequestId = history.getRequestId();
-			if (isBlank(provenanceSourceUri) && isBlank(provenanceRequestId) && history.getProvenance() != null) {
-				provenanceRequestId = history.getProvenance().getRequestId();
-				provenanceSourceUri = history.getProvenance().getSourceUri();
+			if (isBlank(provenanceSourceUri) && isBlank(provenanceRequestId)) {
+				// FIXME: write test if none is found
+				if (myStorageSettings.isAccessMetaSourceInformationFromProvenanceTable()) {
+					Optional<ResourceHistoryProvenanceEntity> provenanceOpt = myResourceHistoryProvenanceDao.findById(history.getId().asIdAndPartitionId());
+					if (provenanceOpt.isPresent()) {
+						ResourceHistoryProvenanceEntity provenance = provenanceOpt.get();
+						provenanceRequestId = provenance.getRequestId();
+						provenanceSourceUri = provenance.getSourceUri();
+					}
+				}
 			}
 		} else if (theEntity instanceof ResourceTable) {
 			ResourceTable resource = (ResourceTable) theEntity;
@@ -202,9 +215,16 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 			version = history.getVersion();
 			provenanceSourceUri = history.getSourceUri();
 			provenanceRequestId = history.getRequestId();
-			if (isBlank(provenanceSourceUri) && isBlank(provenanceRequestId) && history.getProvenance() != null) {
-				provenanceRequestId = history.getProvenance().getRequestId();
-				provenanceSourceUri = history.getProvenance().getSourceUri();
+			if (isBlank(provenanceSourceUri) && isBlank(provenanceRequestId)) {
+				// FIXME: write test for this if none is found
+				if (myStorageSettings.isAccessMetaSourceInformationFromProvenanceTable()) {
+					Optional<ResourceHistoryProvenanceEntity> provenanceOpt = myResourceHistoryProvenanceDao.findById(history.getId().asIdAndPartitionId());
+					if (provenanceOpt.isPresent()) {
+						ResourceHistoryProvenanceEntity provenance = provenanceOpt.get();
+						provenanceRequestId = provenance.getRequestId();
+						provenanceSourceUri = provenance.getSourceUri();
+					}
+				}
 			}
 		} else if (theEntity instanceof ResourceSearchView) {
 			// This is the search View

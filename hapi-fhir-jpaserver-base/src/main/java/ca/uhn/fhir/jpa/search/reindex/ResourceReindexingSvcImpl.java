@@ -447,7 +447,8 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc, IHasSc
 			q.setParameter("id", theId);
 			q.executeUpdate();
 
-			q = myEntityManager.createQuery("DELETE FROM ResourceIndexedSearchParamDate t WHERE t.myResource.myPid = :id");
+			q = myEntityManager.createQuery(
+					"DELETE FROM ResourceIndexedSearchParamDate t WHERE t.myResource.myPid = :id");
 			q.setParameter("id", theId);
 			q.executeUpdate();
 
@@ -476,7 +477,8 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc, IHasSc
 			q.setParameter("id", theId);
 			q.executeUpdate();
 
-			q = myEntityManager.createQuery("DELETE FROM ResourceIndexedSearchParamUri t WHERE t.myResource.myPid = :id");
+			q = myEntityManager.createQuery(
+					"DELETE FROM ResourceIndexedSearchParamUri t WHERE t.myResource.myPid = :id");
 			q.setParameter("id", theId);
 			q.executeUpdate();
 

@@ -290,13 +290,14 @@ public class GiantTransactionPerfTest {
 
 		mySystemDao.transaction(requestDetails, input);
 
+		ourLog.info("Persists:\n * " + myEntityManager.myPersistCount.stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
 		ourLog.info("Merges:\n * " + myEntityManager.myMergeCount.stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
 
-		assertThat(myEntityManager.myPersistCount.stream().map(t -> t.getClass().getSimpleName()).collect(Collectors.toList())).containsExactly("ResourceTable");
-		assertThat(myEntityManager.myMergeCount.stream().map(t -> t.getClass().getSimpleName()).collect(Collectors.toList())).containsExactlyInAnyOrder("ResourceTable", "ResourceIndexedSearchParamToken", "ResourceIndexedSearchParamToken");
+		assertThat(myEntityManager.myPersistCount.stream().map(t -> t.getClass().getSimpleName()).collect(Collectors.toList())).containsExactly("ResourceTable", "ResourceHistoryTable", "ResourceIndexedSearchParamToken", "ResourceIndexedSearchParamToken");
+		assertThat(myEntityManager.myMergeCount.stream().map(t -> t.getClass().getSimpleName()).collect(Collectors.toList())).containsExactlyInAnyOrder("ResourceTable");
 		assertEquals(1, myEntityManager.myFlushCount);
 		assertEquals(1, myResourceVersionSvc.myGetVersionMap);
-		assertEquals(1, myResourceHistoryTableDao.mySaveCount);
+		assertEquals(0, myResourceHistoryTableDao.mySaveCount);
 	}
 
 	@Test

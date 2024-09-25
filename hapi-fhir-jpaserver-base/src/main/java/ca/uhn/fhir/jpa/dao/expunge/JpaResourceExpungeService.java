@@ -43,6 +43,7 @@ import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchParamPresentDao;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.entity.ResourceHistoryProvenanceEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTablePk;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -70,6 +71,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
@@ -234,9 +236,9 @@ public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid
 
 		callHooks(theRequestDetails, theRemainingCount, version, id);
 
-		if (version.getProvenance() != null) {
-			myResourceHistoryProvenanceTableDao.deleteByPid(
-					version.getProvenance().getId());
+		if (myStorageSettings.isAccessMetaSourceInformationFromProvenanceTable()) {
+			Optional<ResourceHistoryProvenanceEntity> provenanceOpt = myResourceHistoryProvenanceTableDao.findById(theNextVersionId.asIdAndPartitionId());
+			provenanceOpt.ifPresent(entity -> myResourceHistoryProvenanceTableDao.deleteByPid(entity.getId()));
 		}
 
 		myResourceHistoryTagDao.deleteByPid(version.getId());

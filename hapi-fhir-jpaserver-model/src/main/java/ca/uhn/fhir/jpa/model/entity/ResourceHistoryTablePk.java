@@ -48,4 +48,12 @@ public class ResourceHistoryTablePk implements IResourceVersionPersistentId, Ser
 	public Long getId() {
 		return myVersionId;
 	}
+
+	public Integer getPartitionId() {
+		return myPartitionIdValue;
+	}
+
+	public IdAndPartitionId asIdAndPartitionId() {
+		return new IdAndPartitionId(getId(), getPartitionId());
+	}
 }

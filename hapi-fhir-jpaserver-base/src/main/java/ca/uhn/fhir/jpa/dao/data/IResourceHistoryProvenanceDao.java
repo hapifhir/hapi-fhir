@@ -32,4 +32,5 @@ public interface IResourceHistoryProvenanceDao
 	@Modifying
 	@Query("DELETE FROM ResourceHistoryProvenanceEntity t WHERE t.myId = :pid")
 	void deleteByPid(@Param("pid") Long theId);
+
 }

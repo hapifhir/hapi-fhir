@@ -38,7 +38,7 @@ public class PartitioningSearchCacheR4Test extends BasePartitioningR4Test {
 			List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueries();
 			String searchSql = selectQueries.get(0).getSql(true, false);
 			assertThat(StringUtils.countMatches(searchSql, "from HFJ_SEARCH ")).as(searchSql).isEqualTo(1);
-			assertThat(StringUtils.countMatches(searchSql, "PARTITION_ID")).as(searchSql).isEqualTo(0);
+			assertThat(StringUtils.countMatches(searchSql, "PARTITION_ID")).as(searchSql).isEqualTo(1);
 
 			List<IIdType> ids = toUnqualifiedVersionlessIds(outcome);
 			assertThat(ids).containsExactlyInAnyOrder(patientId11, patientId12);
@@ -55,7 +55,7 @@ public class PartitioningSearchCacheR4Test extends BasePartitioningR4Test {
 			List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueries();
 			String searchSql = selectQueries.get(0).getSql(true, false);
 			assertThat(StringUtils.countMatches(searchSql, "from HFJ_SEARCH ")).as(searchSql).isEqualTo(1);
-			assertThat(StringUtils.countMatches(searchSql, "PARTITION_ID")).as(searchSql).isEqualTo(0);
+			assertThat(StringUtils.countMatches(searchSql, "PARTITION_ID")).as(searchSql).isEqualTo(1);
 
 			List<IIdType> ids = toUnqualifiedVersionlessIds(outcome);
 			assertThat(ids).containsExactlyInAnyOrder(patientId21, patientId22);
@@ -72,7 +72,7 @@ public class PartitioningSearchCacheR4Test extends BasePartitioningR4Test {
 			List<SqlQuery> selectQueries = myCaptureQueriesListener.logSelectQueries();
 			String searchSql = selectQueries.get(0).getSql(true, false);
 			assertThat(StringUtils.countMatches(searchSql, "from HFJ_SEARCH ")).as(searchSql).isEqualTo(1);
-			assertThat(StringUtils.countMatches(searchSql, "PARTITION_ID")).as(searchSql).isEqualTo(0);
+			assertThat(StringUtils.countMatches(searchSql, "PARTITION_ID")).as(searchSql).isEqualTo(1);
 
 			List<IIdType> ids = toUnqualifiedVersionlessIds(outcome);
 			assertThat(ids).containsExactlyInAnyOrder(patientId21, patientId22);
@@ -99,7 +99,7 @@ public class PartitioningSearchCacheR4Test extends BasePartitioningR4Test {
 			List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueries();
 			String searchSql = selectQueries.get(0).getSql(true, false);
 			assertThat(StringUtils.countMatches(searchSql, "from HFJ_SEARCH ")).as(searchSql).isEqualTo(1);
-			assertThat(StringUtils.countMatches(searchSql, "PARTITION_ID")).as(searchSql).isEqualTo(0);
+			assertThat(StringUtils.countMatches(searchSql, "PARTITION_ID")).as(searchSql).isEqualTo(1);
 
 			List<IIdType> ids = toUnqualifiedVersionlessIds(outcome);
 			assertThat(ids).containsExactlyInAnyOrder(patientId11, patientId12, patientIdNull1, patientIdNull2);
@@ -116,7 +116,7 @@ public class PartitioningSearchCacheR4Test extends BasePartitioningR4Test {
 			List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueries();
 			String searchSql = selectQueries.get(0).getSql(true, false);
 			assertThat(StringUtils.countMatches(searchSql, "from HFJ_SEARCH ")).as(searchSql).isEqualTo(1);
-			assertThat(StringUtils.countMatches(searchSql, "PARTITION_ID")).as(searchSql).isEqualTo(0);
+			assertThat(StringUtils.countMatches(searchSql, "PARTITION_ID")).as(searchSql).isEqualTo(1);
 
 			List<IIdType> ids = toUnqualifiedVersionlessIds(outcome);
 			assertThat(ids).containsExactlyInAnyOrder(patientId11, patientId12, patientId21, patientId22);
@@ -133,7 +133,7 @@ public class PartitioningSearchCacheR4Test extends BasePartitioningR4Test {
 			List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueries();
 			String searchSql = selectQueries.get(0).getSql(true, false);
 			assertThat(StringUtils.countMatches(searchSql, "from HFJ_SEARCH ")).as(searchSql).isEqualTo(1);
-			assertThat(StringUtils.countMatches(searchSql, "PARTITION_ID")).as(searchSql).isEqualTo(0);
+			assertThat(StringUtils.countMatches(searchSql, "PARTITION_ID")).as(searchSql).isEqualTo(1);
 
 			List<IIdType> ids = toUnqualifiedVersionlessIds(outcome);
 			assertThat(ids).containsExactlyInAnyOrder(patientId11, patientId12, patientIdNull1, patientIdNull2);

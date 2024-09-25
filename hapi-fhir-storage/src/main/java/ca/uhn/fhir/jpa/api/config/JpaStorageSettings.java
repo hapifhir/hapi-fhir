@@ -367,6 +367,10 @@ public class JpaStorageSettings extends StorageSettings {
 	 * @since 7.2.0
 	 */
 	private boolean myWriteToLegacyLobColumns = false;
+	/**
+	 * @since 7.6.0
+	 */
+	private boolean myAccessMetaSourceInformationFromProvenanceTable = false;
 
 	/**
 	 * Constructor
@@ -1729,6 +1733,16 @@ public class JpaStorageSettings extends StorageSettings {
 	public void setStoreMetaSourceInformation(StoreMetaSourceInformationEnum theStoreMetaSourceInformation) {
 		Validate.notNull(theStoreMetaSourceInformation, "theStoreMetaSourceInformation must not be null");
 		myStoreMetaSourceInformation = theStoreMetaSourceInformation;
+	}
+
+	// FIXME: document
+	public boolean isAccessMetaSourceInformationFromProvenanceTable() {
+		return myAccessMetaSourceInformationFromProvenanceTable;
+	}
+
+	// FIXME: document
+	public void setAccessMetaSourceInformationFromProvenanceTable(boolean theAccessMetaSourceInformationFromProvenanceTable) {
+		myAccessMetaSourceInformationFromProvenanceTable = theAccessMetaSourceInformationFromProvenanceTable;
 	}
 
 	/**

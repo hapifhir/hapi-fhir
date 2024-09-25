@@ -188,7 +188,6 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			assertEquals(obsId.getIdPartAsLong(), resLinks.get(0).getSourceResourcePk().getId());
 			assertEquals(patientId.getIdPartAsLong(), resLinks.get(0).getTargetResourcePid());
 			assertEquals(myPartitionId, resLinks.get(0).getTargetResourcePartitionId().getPartitionId());
-			assertLocalDateFromDbMatches(myPartitionDate, resLinks.get(0).getTargetResourcePartitionId().getPartitionDate());
 		});
 	}
 

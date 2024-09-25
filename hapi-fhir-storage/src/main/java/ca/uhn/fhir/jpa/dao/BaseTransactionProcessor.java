@@ -1939,8 +1939,8 @@ public abstract class BaseTransactionProcessor {
 				// ResourceTable.
 				.filter(t -> t.getEntity().getDeleted() == null)
 				.filter(t -> t.getResource() != null)
-				.forEach(t -> resourceToIndexedParams.put(
-						t.getResource(), ResourceIndexedSearchParams.withLists((ResourceTable) t.getEntity())));
+				.forEach(t -> resourceToIndexedParams.put(t.getResource(), (ResourceIndexedSearchParams)
+						((ResourceTable) t.getEntity()).getParamsForStorage()));
 
 		for (Map.Entry<String, Class<? extends IBaseResource>> nextEntry : conditionalRequestUrls.entrySet()) {
 			String matchUrl = nextEntry.getKey();
