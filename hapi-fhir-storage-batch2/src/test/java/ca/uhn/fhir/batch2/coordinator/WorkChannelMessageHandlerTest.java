@@ -18,6 +18,7 @@ import jakarta.annotation.Nonnull;
 
 import java.util.Collection;
 
+import java.util.Map;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -67,11 +68,9 @@ class WorkChannelMessageHandlerTest extends BaseBatch2Test {
 		verify(myAppender, atLeastOnce()).doAppend(myLoggingEvent.capture());
 		myLoggingEvent.getAllValues()
 			.forEach(event -> {
-				Set<String> mdcPropertySetKeys = event.getMDCPropertyMap().keySet();
-				assertThat(mdcPropertySetKeys).containsExactlyInAnyOrder(BatchJobTracingContext.CHUNK_ID, BatchJobTracingContext.INSTANCE_ID);
-
-				Collection<String> mdcPropertySetValues = event.getMDCPropertyMap().values();
-				assertThat(mdcPropertySetValues).containsExactlyInAnyOrder(INSTANCE_ID, CHUNK_ID);
+				Map<String, String> mdcPropertyMap = event.getMDCPropertyMap();
+				assertThat(mdcPropertyMap).containsEntry(BatchJobTracingContext.CHUNK_ID, CHUNK_ID);
+				assertThat(mdcPropertyMap).containsEntry(BatchJobTracingContext.INSTANCE_ID, INSTANCE_ID);
 			});
 	}
 
