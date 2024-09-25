@@ -173,13 +173,12 @@ public interface IResourceTableDao
 
 	/**
 	 * This query will return rows with the following values:
-	 * Id (resource pid - long), ResourceType (Patient, etc), version (long)
+	 * Id (JpaPid), FhirId, ResourceType (Patient, etc), version (long)
 	 * Order matters!
 	 * @param pid - list of pids to get versions for
-	 * @return
 	 */
-	@Query("SELECT t.myPid.myId, t.myResourceType, t.myVersion FROM ResourceTable t WHERE t.myPid.myId IN ( :pid )")
-	Collection<Object[]> getResourceVersionsForPid(@Param("pid") List<Long> pid);
+	@Query("SELECT t.myPid, t.myResourceType, t.myFhirId, t.myVersion FROM ResourceTable t WHERE t.myPid IN ( :pid )")
+	Collection<Object[]> getResourceVersionsForPid(@Param("pid") Collection<JpaPid> pid);
 
 	@Query("SELECT t FROM ResourceTable t WHERE t.myPartitionIdValue IS NULL AND t.myPid.myId = :pid")
 	Optional<ResourceTable> readByPartitionIdNull(@Param("pid") Long theResourceId);

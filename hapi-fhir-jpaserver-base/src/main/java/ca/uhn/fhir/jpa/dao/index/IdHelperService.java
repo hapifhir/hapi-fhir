@@ -847,14 +847,14 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 	@Override
 	@Nonnull
 	public JpaPid getPidOrThrowException(@Nonnull IAnyResource theResource) {
-		Long theResourcePID = (Long) theResource.getUserData(RESOURCE_PID);
+		JpaPid theResourcePID = (JpaPid) theResource.getUserData(RESOURCE_PID);
 		if (theResourcePID == null) {
 			throw new IllegalStateException(Msg.code(2108)
 					+ String.format(
 							"Unable to find %s in the user data for %s with ID %s",
 							RESOURCE_PID, theResource, theResource.getId()));
 		}
-		return JpaPid.fromId(theResourcePID);
+		return theResourcePID;
 	}
 
 	@Override
