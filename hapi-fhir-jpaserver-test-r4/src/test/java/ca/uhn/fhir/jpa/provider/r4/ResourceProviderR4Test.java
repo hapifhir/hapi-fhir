@@ -3342,7 +3342,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
-				ResourceHistoryTable version = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(JpaPid.fromId(id1.getIdPartAsLong()), 1);
+				ResourceHistoryTable version = myResourceHistoryTableDao.findForIdAndVersion(JpaPid.fromId(id1.getIdPartAsLong()), 1);
 				myResourceHistoryTableDao.delete(version);
 			}
 		});
@@ -3367,7 +3367,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
-				ResourceHistoryTable version = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(JpaPid.fromId(id1.getIdPartAsLong()), 1);
+				ResourceHistoryTable version = myResourceHistoryTableDao.findForIdAndVersion(JpaPid.fromId(id1.getIdPartAsLong()), 1);
 				myResourceHistoryTableDao.delete(version);
 			}
 		});

@@ -52,7 +52,9 @@ public class GenerateDdlMojo extends AbstractMojo {
 		}
 
 		DdlGeneratorHibernate61 generator = new DdlGeneratorHibernate61();
-		generator.getHapiHibernateDialectSettingsService().setTrimConditionalIdsFromPrimaryKeys(trimConditionalIdsFromPrimaryKeys);
+		generator
+				.getHapiHibernateDialectSettingsService()
+				.setTrimConditionalIdsFromPrimaryKeys(trimConditionalIdsFromPrimaryKeys);
 
 		for (String packageName : packageNames) {
 			String t = trim(packageName);

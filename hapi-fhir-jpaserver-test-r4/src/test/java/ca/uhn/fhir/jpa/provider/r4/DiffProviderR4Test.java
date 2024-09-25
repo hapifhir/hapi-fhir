@@ -105,7 +105,7 @@ public class DiffProviderR4Test extends BaseResourceProviderR4Test {
 		createPatient(withId(id), withActiveTrue(), withFamily("SMITH"));
 
 		runInTransaction(() -> {
-			ResourceHistoryTable version2 = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(JpaPid.fromId(id.getIdPartAsLong()), 2);
+			ResourceHistoryTable version2 = myResourceHistoryTableDao.findForIdAndVersion(JpaPid.fromId(id.getIdPartAsLong()), 2);
 			myResourceHistoryTableDao.deleteByPid(version2.getId());
 		});
 

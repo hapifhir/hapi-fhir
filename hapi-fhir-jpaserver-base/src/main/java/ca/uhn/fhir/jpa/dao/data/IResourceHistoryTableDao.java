@@ -43,30 +43,27 @@ public interface IResourceHistoryTableDao
 	@Query("SELECT t FROM ResourceHistoryTable t WHERE t.myResourcePid = :resId ORDER BY t.myResourceVersion ASC")
 	List<ResourceHistoryTable> findAllVersionsForResourceIdInOrder(@Param("resId") JpaPid theId);
 
-	// FIXME: this fetched provenance
 	@Query("SELECT t FROM ResourceHistoryTable t WHERE t.myResourcePid = :id AND t.myResourceVersion = :version")
-	ResourceHistoryTable findForIdAndVersionAndFetchProvenance(
-			@Param("id") JpaPid theId, @Param("version") long theVersion);
+	ResourceHistoryTable findForIdAndVersion(@Param("id") JpaPid theId, @Param("version") long theVersion);
 
 	@Query(
 			"SELECT t.myId FROM ResourceHistoryTable t WHERE t.myResourcePid = :resId AND t.myResourceVersion <> :dontWantVersion")
 	Slice<ResourceHistoryTablePk> findForResourceId(
 			Pageable thePage, @Param("resId") JpaPid theId, @Param("dontWantVersion") Long theDontWantVersion);
 
-	// FIXME: this fetched provenance
 	@Query(
 			"SELECT t FROM ResourceHistoryTable t WHERE t.myResourcePid = :resId AND t.myResourceVersion <> :dontWantVersion")
-	Slice<ResourceHistoryTable> findForResourceIdAndReturnEntitiesAndFetchProvenance(
+	Slice<ResourceHistoryTable> findAllVersionsExceptSpecificForResourcePid(
 			Pageable thePage, @Param("resId") JpaPid theId, @Param("dontWantVersion") Long theDontWantVersion);
 
-	@Query("" + "SELECT v.myId FROM ResourceHistoryTable v "
+	@Query("SELECT v.myId FROM ResourceHistoryTable v "
 			+ "LEFT OUTER JOIN ResourceTable t ON (v.myResourceTable = t) "
 			+ "WHERE v.myResourceVersion <> t.myVersion AND "
 			+ "t.myPid = :resId")
 	Slice<ResourceHistoryTablePk> findIdsOfPreviousVersionsOfResourceId(
 			Pageable thePage, @Param("resId") JpaPid theResourceId);
 
-	@Query("" + "SELECT v.myId FROM ResourceHistoryTable v "
+	@Query("SELECT v.myId FROM ResourceHistoryTable v "
 			+ "LEFT OUTER JOIN ResourceTable t ON (v.myResourceTable = t) "
 			+ "WHERE v.myResourceVersion <> t.myVersion AND "
 			+ "t.myResourceType = :restype")

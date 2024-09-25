@@ -29,7 +29,7 @@ public class FhirResourceDaoR4InlineResourceModeTest extends BaseJpaR4Test {
 		relocateResourceTextToCompressedColumn(pid, 1L);
 
 		runInTransaction(()->{
-			ResourceHistoryTable historyEntity = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(pid, 1);
+			ResourceHistoryTable historyEntity = myResourceHistoryTableDao.findForIdAndVersion(pid, 1);
 			assertNotNull(historyEntity.getResource());
 			assertNull(historyEntity.getResourceTextVc());
 			assertEquals(ResourceEncodingEnum.JSONC, historyEntity.getEncoding());

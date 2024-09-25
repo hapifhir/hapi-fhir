@@ -1186,8 +1186,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				Long version = resourcePidToVersion.get(next.getResourceId());
 				resourceId.setVersion(version);
 				if (version != null && !version.equals(next.getVersion())) {
-					next = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(
-							next.getResourceId(), version);
+					next = myResourceHistoryTableDao.findForIdAndVersion(next.getResourceId(), version);
 				}
 			}
 

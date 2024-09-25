@@ -54,12 +54,12 @@ public class FhirResourceDaoR4DeleteTest extends BaseJpaR4Test {
 
 		// Current version should be marked as deleted
 		runInTransaction(() -> {
-			ResourceHistoryTable resourceTable = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(JpaPid.fromId(id.getIdPartAsLong()), 1);
+			ResourceHistoryTable resourceTable = myResourceHistoryTableDao.findForIdAndVersion(JpaPid.fromId(id.getIdPartAsLong()), 1);
 			assertNull(resourceTable.getDeleted());
 			assertNotNull(resourceTable.getPersistentId());
 		});
 		runInTransaction(() -> {
-			ResourceHistoryTable resourceTable = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(JpaPid.fromId(id.getIdPartAsLong()), 2);
+			ResourceHistoryTable resourceTable = myResourceHistoryTableDao.findForIdAndVersion(JpaPid.fromId(id.getIdPartAsLong()), 2);
 			assertNotNull(resourceTable.getDeleted());
 		});
 
@@ -196,7 +196,7 @@ public class FhirResourceDaoR4DeleteTest extends BaseJpaR4Test {
 		// Mark the current history version as not-deleted even though the actual resource
 		// table entry is marked deleted
 		runInTransaction(() -> {
-			ResourceHistoryTable resourceTable = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(JpaPid.fromId(id.getIdPartAsLong()), 2);
+			ResourceHistoryTable resourceTable = myResourceHistoryTableDao.findForIdAndVersion(JpaPid.fromId(id.getIdPartAsLong()), 2);
 			resourceTable.setDeleted(null);
 			myResourceHistoryTableDao.save(resourceTable);
 		});

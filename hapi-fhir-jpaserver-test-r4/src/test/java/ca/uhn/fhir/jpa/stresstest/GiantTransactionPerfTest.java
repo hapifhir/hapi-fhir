@@ -362,7 +362,7 @@ public class GiantTransactionPerfTest {
 		}
 
 		@Override
-		public ResourceHistoryTable findForIdAndVersionAndFetchProvenance(JpaPid theId, long theVersion) {
+		public ResourceHistoryTable findForIdAndVersion(JpaPid theId, long theVersion) {
 			throw new UnsupportedOperationException();
 
 		}
@@ -373,7 +373,7 @@ public class GiantTransactionPerfTest {
 		}
 
 		@Override
-		public Slice<ResourceHistoryTable> findForResourceIdAndReturnEntitiesAndFetchProvenance(Pageable thePage, JpaPid theId, Long theDontWantVersion) {
+		public Slice<ResourceHistoryTable> findAllVersionsExceptSpecificForResourcePid(Pageable thePage, JpaPid theId, Long theDontWantVersion) {
 			throw new UnsupportedOperationException();
 		}
 

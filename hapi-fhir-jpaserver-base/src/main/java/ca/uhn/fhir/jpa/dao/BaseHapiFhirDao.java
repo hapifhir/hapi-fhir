@@ -740,8 +740,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			} else {
 				ResourceHistoryTable currentHistoryVersion = theEntity.getCurrentVersionEntity();
 				if (currentHistoryVersion == null) {
-					currentHistoryVersion = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(
-							theEntity.getId(), theEntity.getVersion());
+					currentHistoryVersion =
+							myResourceHistoryTableDao.findForIdAndVersion(theEntity.getId(), theEntity.getVersion());
 				}
 				if (currentHistoryVersion == null || !currentHistoryVersion.hasResource()) {
 					changed = true;
@@ -1264,7 +1264,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 								newParams, entity, existingParams);
 
 				// FIXME: restore?
-				//				newParams.populateResourceTableParamCollections(entity);
+				//								newParams.populateResourceTableParamCollections(entity);
 				entity.setParamsForStorage(newParams);
 
 				// Interceptor broadcast: JPA_PERFTRACE_INFO
@@ -1481,8 +1481,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			 * this could return null if the current resourceVersion has been expunged
 			 * in which case we'll still create a new one
 			 */
-			historyEntry = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(
-					theEntity.getId(), resourceVersion - 1);
+			historyEntry = myResourceHistoryTableDao.findForIdAndVersion(theEntity.getId(), resourceVersion - 1);
 			if (historyEntry != null) {
 				reusingHistoryEntity = true;
 				theEntity.populateHistoryEntityVersionAndDates(historyEntry);

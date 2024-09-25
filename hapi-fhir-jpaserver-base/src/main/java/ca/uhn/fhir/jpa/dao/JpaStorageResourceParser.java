@@ -168,7 +168,8 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 			if (isBlank(provenanceSourceUri) && isBlank(provenanceRequestId)) {
 				// FIXME: write test if none is found
 				if (myStorageSettings.isAccessMetaSourceInformationFromProvenanceTable()) {
-					Optional<ResourceHistoryProvenanceEntity> provenanceOpt = myResourceHistoryProvenanceDao.findById(history.getId().asIdAndPartitionId());
+					Optional<ResourceHistoryProvenanceEntity> provenanceOpt = myResourceHistoryProvenanceDao.findById(
+							history.getId().asIdAndPartitionId());
 					if (provenanceOpt.isPresent()) {
 						ResourceHistoryProvenanceEntity provenance = provenanceOpt.get();
 						provenanceRequestId = provenance.getRequestId();
@@ -183,15 +184,13 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 				history = resource.getCurrentVersionEntity();
 			} else {
 				version = theEntity.getVersion();
-				history = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(
-						theEntity.getResourceId(), version);
+				history = myResourceHistoryTableDao.findForIdAndVersion(theEntity.getResourceId(), version);
 				((ResourceTable) theEntity).setCurrentVersionEntity(history);
 
 				while (history == null) {
 					if (version > 1L) {
 						version--;
-						history = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(
-								theEntity.getResourceId(), version);
+						history = myResourceHistoryTableDao.findForIdAndVersion(theEntity.getResourceId(), version);
 					} else {
 						return null;
 					}
@@ -218,7 +217,8 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 			if (isBlank(provenanceSourceUri) && isBlank(provenanceRequestId)) {
 				// FIXME: write test for this if none is found
 				if (myStorageSettings.isAccessMetaSourceInformationFromProvenanceTable()) {
-					Optional<ResourceHistoryProvenanceEntity> provenanceOpt = myResourceHistoryProvenanceDao.findById(history.getId().asIdAndPartitionId());
+					Optional<ResourceHistoryProvenanceEntity> provenanceOpt = myResourceHistoryProvenanceDao.findById(
+							history.getId().asIdAndPartitionId());
 					if (provenanceOpt.isPresent()) {
 						ResourceHistoryProvenanceEntity provenance = provenanceOpt.get();
 						provenanceRequestId = provenance.getRequestId();

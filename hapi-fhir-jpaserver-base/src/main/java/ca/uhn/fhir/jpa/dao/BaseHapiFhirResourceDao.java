@@ -1383,8 +1383,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			doMetaAdd(theMetaAdd, latestVersion, theRequest, transactionDetails);
 
 			// Also update history entry
-			ResourceHistoryTable history = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(
-					entity.getResourceId(), entity.getVersion());
+			ResourceHistoryTable history =
+					myResourceHistoryTableDao.findForIdAndVersion(entity.getResourceId(), entity.getVersion());
 			doMetaAdd(theMetaAdd, history, theRequest, transactionDetails);
 		}
 
@@ -1432,8 +1432,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		} else {
 			doMetaDelete(theMetaDel, latestVersion, theRequest, transactionDetails);
 			// Also update history entry
-			ResourceHistoryTable history = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(
-					entity.getResourceId(), entity.getVersion());
+			ResourceHistoryTable history =
+					myResourceHistoryTableDao.findForIdAndVersion(entity.getResourceId(), entity.getVersion());
 			doMetaDelete(theMetaDel, history, theRequest, transactionDetails);
 		}
 
@@ -1704,7 +1704,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				int pageSize = 100;
 				for (int page = 0; ((long) page * pageSize) < entity.getVersion(); page++) {
 					Slice<ResourceHistoryTable> historyEntities =
-							myResourceHistoryTableDao.findForResourceIdAndReturnEntitiesAndFetchProvenance(
+							myResourceHistoryTableDao.findAllVersionsExceptSpecificForResourcePid(
 									PageRequest.of(page, pageSize), entity.getId(), historyEntity.getVersion());
 					for (ResourceHistoryTable next : historyEntities) {
 						reindexOptimizeStorageHistoryEntity(entity, next);
@@ -1729,7 +1729,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		if (myStorageSettings.isAccessMetaSourceInformationFromProvenanceTable()) {
 			if (isBlank(historyEntity.getSourceUri()) && isBlank(historyEntity.getRequestId())) {
 				IdAndPartitionId id = historyEntity.getId().asIdAndPartitionId();
-				Optional<ResourceHistoryProvenanceEntity> provenanceEntityOpt = myResourceHistoryProvenanceDao.findById(id);
+				Optional<ResourceHistoryProvenanceEntity> provenanceEntityOpt =
+						myResourceHistoryProvenanceDao.findById(id);
 				if (provenanceEntityOpt.isPresent()) {
 					ResourceHistoryProvenanceEntity provenanceEntity = provenanceEntityOpt.get();
 					historyEntity.setSourceUri(provenanceEntity.getSourceUri());

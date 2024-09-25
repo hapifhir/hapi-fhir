@@ -1741,7 +1741,8 @@ public class JpaStorageSettings extends StorageSettings {
 	}
 
 	// FIXME: document
-	public void setAccessMetaSourceInformationFromProvenanceTable(boolean theAccessMetaSourceInformationFromProvenanceTable) {
+	public void setAccessMetaSourceInformationFromProvenanceTable(
+			boolean theAccessMetaSourceInformationFromProvenanceTable) {
 		myAccessMetaSourceInformationFromProvenanceTable = theAccessMetaSourceInformationFromProvenanceTable;
 	}
 

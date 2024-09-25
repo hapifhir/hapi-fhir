@@ -171,7 +171,7 @@ public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 		runInTransaction(() -> {
 			List<ResourceTable> resources = myResourceTableDao.findAll();
 			assertEquals(1, resources.size());
-			assertEquals(null, resources.get(0).getPartitionId());
+			assertEquals(null, resources.get(0).getPartitionId().getPartitionId());
 		});
 	}
 
@@ -223,7 +223,7 @@ public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 
 			String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 			ourLog.info("Search SQL:\n{}", searchSql);
-			assertEquals(0, StringUtils.countMatches(searchSql, "PARTITION_ID"));
+			assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID"));
 
 		} finally {
 			myInterceptorRegistry.unregisterInterceptor(interceptor);
@@ -258,7 +258,7 @@ public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 
 			String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 			ourLog.info("Search SQL:\n{}", searchSql);
-			assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID"));
+			assertEquals(2, StringUtils.countMatches(searchSql, "PARTITION_ID"));
 
 		} finally {
 			myInterceptorRegistry.unregisterInterceptor(interceptor);

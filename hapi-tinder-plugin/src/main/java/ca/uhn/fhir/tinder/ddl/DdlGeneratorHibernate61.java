@@ -57,7 +57,8 @@ public class DdlGeneratorHibernate61 {
 	private final List<GenerateDdlMojo.Dialect> myDialects = new ArrayList<>();
 	private File myOutputDirectory;
 	private MavenProject myProject;
-	private HapiHibernateDialectSettingsService myHapiHibernateDialectSettingsService = new HapiHibernateDialectSettingsService();
+	private HapiHibernateDialectSettingsService myHapiHibernateDialectSettingsService =
+			new HapiHibernateDialectSettingsService();
 
 	public void addPackage(String thePackage) {
 		Validate.notNull(thePackage);
@@ -94,14 +95,14 @@ public class DdlGeneratorHibernate61 {
 			String dialectClassName = nextDialect.getClassName();
 
 			StandardServiceRegistryBuilder registryBuilder =
-				new StandardServiceRegistryBuilder(bootstrapServiceRegistry);
+					new StandardServiceRegistryBuilder(bootstrapServiceRegistry);
 			registryBuilder.applySetting(SchemaToolingSettings.HBM2DDL_AUTO, "create");
 			registryBuilder.applySetting(JdbcSettings.DIALECT, dialectClassName);
 			registryBuilder.addService(ConnectionProvider.class, connectionProvider);
 			registryBuilder.addService(
-				ISequenceValueMassager.class, new ISequenceValueMassager.NoopSequenceValueMassager());
+					ISequenceValueMassager.class, new ISequenceValueMassager.NoopSequenceValueMassager());
 			registryBuilder.addService(
-				HapiHibernateDialectSettingsService.class, myHapiHibernateDialectSettingsService);
+					HapiHibernateDialectSettingsService.class, myHapiHibernateDialectSettingsService);
 			StandardServiceRegistry standardRegistry = registryBuilder.build();
 			MetadataSources metadataSources = new MetadataSources(standardRegistry);
 
@@ -166,7 +167,7 @@ public class DdlGeneratorHibernate61 {
 
 	@Nonnull
 	private Set<Class<?>> scanClasspathForEntityClasses(Set<String> thePackages, ClassLoader theClassLoader)
-		throws MojoFailureException {
+			throws MojoFailureException {
 
 		ClassPathScanningCandidateComponentProvider provider = new ClassPathScanningCandidateComponentProvider(false);
 		provider.setResourceLoader(new PathMatchingResourcePatternResolver(theClassLoader));
@@ -199,7 +200,7 @@ public class DdlGeneratorHibernate61 {
 	}
 
 	private static void writeContentsToFile(String prependFile, ClassLoader classLoader, File outputFile)
-		throws MojoFailureException {
+			throws MojoFailureException {
 		if (isNotBlank(prependFile)) {
 			ResourceLoader loader = new DefaultResourceLoader(classLoader);
 			Resource resource = loader.getResource(prependFile);
@@ -218,7 +219,7 @@ public class DdlGeneratorHibernate61 {
 	 * matter that it doesn't correlate to the specified dialect.
 	 */
 	private static class FakeConnectionConnectionProvider extends UserSuppliedConnectionProviderImpl
-		implements Closeable {
+			implements Closeable {
 		private static final long serialVersionUID = 4147495169899817244L;
 		private Connection connection;
 
@@ -237,8 +238,8 @@ public class DdlGeneratorHibernate61 {
 			try {
 				connection.setAutoCommit(true);
 				connection
-					.prepareStatement("create table all_sequences (PID bigint not null, primary key (PID))")
-					.execute();
+						.prepareStatement("create table all_sequences (PID bigint not null, primary key (PID))")
+						.execute();
 			} catch (SQLException e) {
 				ourLog.error("Failed to create sequences table", e);
 			}

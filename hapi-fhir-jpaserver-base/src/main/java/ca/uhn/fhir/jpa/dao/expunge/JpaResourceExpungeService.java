@@ -154,8 +154,7 @@ public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid
 		Slice<ResourceHistoryTablePk> ids;
 		if (theJpaPid != null && theJpaPid.getId() != null) {
 			if (theJpaPid.getVersion() != null) {
-				ids = toSlice(myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(
-						theJpaPid, theJpaPid.getVersion()));
+				ids = toSlice(myResourceHistoryTableDao.findForIdAndVersion(theJpaPid, theJpaPid.getVersion()));
 			} else {
 				ids = myResourceHistoryTableDao.findIdsOfPreviousVersionsOfResourceId(page, theJpaPid);
 			}
@@ -237,7 +236,8 @@ public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid
 		callHooks(theRequestDetails, theRemainingCount, version, id);
 
 		if (myStorageSettings.isAccessMetaSourceInformationFromProvenanceTable()) {
-			Optional<ResourceHistoryProvenanceEntity> provenanceOpt = myResourceHistoryProvenanceTableDao.findById(theNextVersionId.asIdAndPartitionId());
+			Optional<ResourceHistoryProvenanceEntity> provenanceOpt =
+					myResourceHistoryProvenanceTableDao.findById(theNextVersionId.asIdAndPartitionId());
 			provenanceOpt.ifPresent(entity -> myResourceHistoryProvenanceTableDao.deleteByPid(entity.getId()));
 		}
 
@@ -303,8 +303,8 @@ public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid
 
 		ResourceTable resource = myResourceTableDao.findById(id).orElseThrow(IllegalStateException::new);
 
-		ResourceHistoryTable currentVersion = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(
-				resource.getId(), resource.getVersion());
+		ResourceHistoryTable currentVersion =
+				myResourceHistoryTableDao.findForIdAndVersion(resource.getId(), resource.getVersion());
 		if (currentVersion != null) {
 			expungeHistoricalVersion(theRequestDetails, currentVersion.getId(), theRemainingCount);
 		}

@@ -84,7 +84,6 @@ import ca.uhn.fhir.jpa.interceptor.PerformanceTracingLoggingInterceptor;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
-import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTablePk;
 import ca.uhn.fhir.jpa.packages.IPackageInstallerSvc;
 import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
 import ca.uhn.fhir.jpa.provider.JpaSystemProvider;
@@ -711,7 +710,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 
 	protected void relocateResourceTextToCompressedColumn(JpaPid theResourcePid, Long theVersion) {
 		runInTransaction(()->{
-			ResourceHistoryTable historyEntity = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(theResourcePid, theVersion);
+			ResourceHistoryTable historyEntity = myResourceHistoryTableDao.findForIdAndVersion(theResourcePid, theVersion);
 			byte[] contents = GZipUtil.compress(historyEntity.getResourceTextVc());
 			myResourceHistoryTableDao.updateNonInlinedContents(contents, historyEntity.getId());
 		});
