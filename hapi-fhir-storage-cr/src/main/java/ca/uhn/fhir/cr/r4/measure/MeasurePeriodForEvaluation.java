@@ -29,6 +29,7 @@ import java.util.StringJoiner;
 public class MeasurePeriodForEvaluation {
 	@Nullable
 	private final String myPeriodStart;
+
 	@Nullable
 	private final String myPeriodEnd;
 

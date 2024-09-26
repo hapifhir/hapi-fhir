@@ -35,24 +35,22 @@ import java.util.Optional;
 
 // LUKETODO: changelog
 // LUKETODO: javadoc
-// LUKETODO: unit test
 public class MeasureReportPeriodRequestProcessingService {
 	private static final Logger ourLog = LoggerFactory.getLogger(MeasureReportPeriodRequestProcessingService.class);
 
 	private static final DateTimeFormatter DATE_TIME_FORMATTER_YYYY_INPUT = DateTimeFormatter.ofPattern("yyyy");
 	private static final DateTimeFormatter DATE_TIME_FORMATTER_YYYY_MM_INPUT = DateTimeFormatter.ofPattern("yyyy-MM");
 	private static final DateTimeFormatter DATE_TIME_FORMATTER_YYYY_MM_DD_INPUT = DateTimeFormatter.ISO_DATE;
-	private static final DateTimeFormatter DATE_TIME_FORMATTER_YYYY_MM_DD_HH_MM_SS_INPUT = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+	private static final DateTimeFormatter DATE_TIME_FORMATTER_YYYY_MM_DD_HH_MM_SS_INPUT =
+			DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 	private static final DateTimeFormatter DATE_TIME_FORMATTER_YYYY_MM_DD_HH_MM_SS_Z_OUTPUT =
 			DateTimeFormatter.ISO_OFFSET_DATE_TIME;
 
-	private static final Map<Integer, DateTimeFormatter> VALID_DATE_TIME_FORMATTERS_BY_FORMAT_LENGTH =
-		Map.of(
+	private static final Map<Integer, DateTimeFormatter> VALID_DATE_TIME_FORMATTERS_BY_FORMAT_LENGTH = Map.of(
 			4, DATE_TIME_FORMATTER_YYYY_INPUT,
 			7, DATE_TIME_FORMATTER_YYYY_MM_INPUT,
 			10, DATE_TIME_FORMATTER_YYYY_MM_DD_INPUT,
-			19, DATE_TIME_FORMATTER_YYYY_MM_DD_HH_MM_SS_INPUT
-		);
+			19, DATE_TIME_FORMATTER_YYYY_MM_DD_HH_MM_SS_INPUT);
 
 	private final ZoneId myFallbackTimezone;
 
@@ -84,17 +82,15 @@ public class MeasureReportPeriodRequestProcessingService {
 
 		if (dateTimeFormatterStart == null) {
 			throw new InvalidRequestException(String.format(
-					"Unsupported Date/Time format for period start: %s or end: %s",
-					thePeriodStart, thePeriodEnd)
-			);
+					"Unsupported Date/Time format for period start: %s or end: %s", thePeriodStart, thePeriodEnd));
 		}
 
-		final Optional<LocalDateTime> optLocalDateTimeStart =
-			DateUtils.parseDateTimeStringIfValid(thePeriodStart, dateTimeFormatterStart)
+		final Optional<LocalDateTime> optLocalDateTimeStart = DateUtils.parseDateTimeStringIfValid(
+						thePeriodStart, dateTimeFormatterStart)
 				.flatMap(DateUtils::extractLocalDateTimeForRangeStartOrEmpty);
 
-		final Optional<LocalDateTime> optLocalDateTimeEnd =
-			DateUtils.parseDateTimeStringIfValid(thePeriodEnd, dateTimeFormatterStart)
+		final Optional<LocalDateTime> optLocalDateTimeEnd = DateUtils.parseDateTimeStringIfValid(
+						thePeriodEnd, dateTimeFormatterStart)
 				.flatMap(DateUtils::extractLocalDateTimeForRangeEndOrEmpty);
 
 		if (optLocalDateTimeStart.isEmpty() || optLocalDateTimeEnd.isEmpty()) {
@@ -115,15 +111,11 @@ public class MeasureReportPeriodRequestProcessingService {
 		}
 
 		return new MeasurePeriodForEvaluation(
-				formatWithTimezone(localDateTimeStart, theZoneId),
-				formatWithTimezone(localDateTimeEnd, theZoneId)
-		);
+				formatWithTimezone(localDateTimeStart, theZoneId), formatWithTimezone(localDateTimeEnd, theZoneId));
 	}
 
-	private String formatWithTimezone(
-			LocalDateTime theLocalDateTime, ZoneId theZoneId) {
-		return theLocalDateTime.atZone(theZoneId)
-			.format(DATE_TIME_FORMATTER_YYYY_MM_DD_HH_MM_SS_Z_OUTPUT);
+	private String formatWithTimezone(LocalDateTime theLocalDateTime, ZoneId theZoneId) {
+		return theLocalDateTime.atZone(theZoneId).format(DATE_TIME_FORMATTER_YYYY_MM_DD_HH_MM_SS_Z_OUTPUT);
 	}
 
 	private ZoneId getClientTimezoneOrInvalidRequest(RequestDetails theRequestDetails) {

@@ -110,7 +110,8 @@ public final class DateUtils {
 	 * @param theTemporalAccessor The TemporalAccessor containing date/time information
 	 * @return A LocalDateTime or empty
 	 */
-	public static Optional<LocalDateTime> extractLocalDateTimeForRangeStartOrEmpty(TemporalAccessor theTemporalAccessor) {
+	public static Optional<LocalDateTime> extractLocalDateTimeForRangeStartOrEmpty(
+			TemporalAccessor theTemporalAccessor) {
 		if (theTemporalAccessor.isSupported(ChronoField.YEAR)) {
 			final int year = theTemporalAccessor.get(ChronoField.YEAR);
 			final Month month = Month.of(getTimeUnitIfSupported(theTemporalAccessor, ChronoField.MONTH_OF_YEAR, 1));
@@ -137,10 +138,9 @@ public final class DateUtils {
 			final int year = theTemporalAccessor.get(ChronoField.YEAR);
 			final Month month = Month.of(getTimeUnitIfSupported(theTemporalAccessor, ChronoField.MONTH_OF_YEAR, 12));
 			final int day = getTimeUnitIfSupported(
-				theTemporalAccessor,
-				ChronoField.DAY_OF_MONTH,
-				YearMonth.of(year, month).atEndOfMonth().getDayOfMonth()
-			);
+					theTemporalAccessor,
+					ChronoField.DAY_OF_MONTH,
+					YearMonth.of(year, month).atEndOfMonth().getDayOfMonth());
 			final int hour = getTimeUnitIfSupported(theTemporalAccessor, ChronoField.HOUR_OF_DAY, 23);
 			final int minute = getTimeUnitIfSupported(theTemporalAccessor, ChronoField.MINUTE_OF_HOUR, 59);
 			final int seconds = getTimeUnitIfSupported(theTemporalAccessor, ChronoField.SECOND_OF_MINUTE, 59);
@@ -150,7 +150,6 @@ public final class DateUtils {
 
 		return Optional.empty();
 	}
-
 
 	/**
 	 * With the provided DateTimeFormatter, parse a date time String or return empty if the String doesn't correspond
@@ -175,11 +174,11 @@ public final class DateUtils {
 	private static int getTimeUnitIfSupported(
 			TemporalAccessor theTemporalAccessor, TemporalField theTemporalField, int theDefaultValue) {
 		return getTimeUnitIfSupportedOrEmpty(theTemporalAccessor, theTemporalField)
-			.orElse(theDefaultValue);
+				.orElse(theDefaultValue);
 	}
 
 	private static Optional<Integer> getTimeUnitIfSupportedOrEmpty(
-		TemporalAccessor theTemporalAccessor, TemporalField theTemporalField) {
+			TemporalAccessor theTemporalAccessor, TemporalField theTemporalField) {
 		if (theTemporalAccessor.isSupported(theTemporalField)) {
 			return Optional.of(theTemporalAccessor.get(theTemporalField));
 		}
