@@ -43,8 +43,12 @@ public class MeasureReportPeriodRequestProcessingService {
 	private static final DateTimeFormatter DATE_TIME_FORMATTER_YYYY_MM_DD_INPUT = DateTimeFormatter.ISO_DATE;
 	private static final DateTimeFormatter DATE_TIME_FORMATTER_YYYY_MM_DD_HH_MM_SS_INPUT =
 			DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+	// LUKETODO:  what's the winning format here?
+	//	java.time.format.DateTimeParseException: Text '2023-01-01T00:00:00.0-0700'
 	private static final DateTimeFormatter DATE_TIME_FORMATTER_YYYY_MM_DD_HH_MM_SS_Z_OUTPUT =
-			DateTimeFormatter.ISO_OFFSET_DATE_TIME;
+			DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SXXX");
+	//			DateTimeFormatter.ISO_OFFSET_DATE_TIME;
+	//		DateTimeFormatter.ISO_ZONED_DATE_TIME;
 
 	private static final Map<Integer, DateTimeFormatter> VALID_DATE_TIME_FORMATTERS_BY_FORMAT_LENGTH = Map.of(
 			4, DATE_TIME_FORMATTER_YYYY_INPUT,
@@ -106,12 +110,19 @@ public class MeasureReportPeriodRequestProcessingService {
 		}
 
 		if (localDateTimeStart.isAfter(localDateTimeEnd)) {
-			throw new InvalidRequestException(
-					String.format("Start date: %s is after end date: %s", thePeriodStart, thePeriodEnd));
+			throw new InvalidRequestException(String.format(
+					"Invalid Interval - the ending boundary: %s must be greater than or equal to the starting boundary: %s",
+					thePeriodEnd, thePeriodStart));
 		}
 
+
+		final String periodStartFormatted = formatWithTimezone(localDateTimeStart, theZoneId);
+		final String periodEndFormatted = formatWithTimezone(localDateTimeEnd, theZoneId);
+
+		ourLog.info("6560: NEW START: {} formatted: {}, NEW END: {}, formatted: {}", localDateTimeStart, periodStartFormatted, localDateTimeEnd, periodEndFormatted);
+
 		return new MeasurePeriodForEvaluation(
-				formatWithTimezone(localDateTimeStart, theZoneId), formatWithTimezone(localDateTimeEnd, theZoneId));
+			periodStartFormatted, periodEndFormatted);
 	}
 
 	private String formatWithTimezone(LocalDateTime theLocalDateTime, ZoneId theZoneId) {
