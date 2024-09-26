@@ -23,7 +23,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.util.SearchParamHash;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
-import ca.uhn.fhir.jpa.reindex.ReindexStepTest;
+import ca.uhn.fhir.jpa.reindex.ReindexStepV1Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.param.BaseParam;
@@ -321,7 +321,7 @@ public class FhirResourceDaoR4IndexStorageOptimizedTest extends BaseJpaR4Test {
 
 	// Additional existing tests with enabled IndexStorageOptimized
 	@Nested
-	public class IndexStorageOptimizedReindexStepTest extends ReindexStepTest {
+	public class IndexStorageOptimizedReindexStepTestV1 extends ReindexStepV1Test {
 		@BeforeEach
 		void setUp() {
 			myStorageSettings.setIndexStorageOptimized(true);

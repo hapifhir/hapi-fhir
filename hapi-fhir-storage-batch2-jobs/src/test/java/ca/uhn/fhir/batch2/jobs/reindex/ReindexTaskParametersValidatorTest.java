@@ -13,7 +13,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(MockitoExtension.class)
-public class ReindexJobParametersValidatorTest {
+public class ReindexTaskParametersValidatorTest {
 
 	@Mock
 	private UrlListValidator myListValidator;

@@ -1,8 +1,8 @@
 package ca.uhn.fhir.jpa.term;
 
-import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexAppCtx;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
+import ca.uhn.fhir.batch2.jobs.reindex.ReindexUtils;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeSearchParam;
@@ -36,7 +36,6 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.util.BundleBuilder;
 import com.google.common.collect.Lists;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -54,22 +53,19 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.io.IOException;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_DELETE_JOB_NAME;
-import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME;
 import static ca.uhn.fhir.util.HapiExtensions.EXT_VALUESET_EXPANSION_MESSAGE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
@@ -2099,659 +2095,156 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 	}
 
 	@Test
-	public void expandValuesetAfterReindex() {
+	public void reindexCodeSystems_withDeferredCodeSystems_reindexesAllCodeSystems() {
 		// setup
-		IParser parser = myFhirContext.newJsonParser();
-		CodeSystem cs;
-		ValueSet vs;
-		String csStr;
-		{
-			String vsStr = """
+		int deferredIndexingDefault = myStorageSettings.getDeferIndexingForCodesystemsOfSize();
+
+		try {
+			// deferred count must be less than the number of concepts on the
+			// CodeSystem we will upload
+			myStorageSettings.setDeferIndexingForCodesystemsOfSize(3);
+			ReindexUtils.setRetryDelay(Duration.of(500, ChronoUnit.MILLIS));
+
+			IParser parser = myFhirContext.newJsonParser();
+
+			RequestDetails rq = new SystemRequestDetails();
+			CodeSystem cs;
+			ValueSet vs;
+			String csStr;
+			{
+				String vsStr = """
+						{
+						    "resourceType": "ValueSet",
+						    "id": "0447bffa-01fa-4405-828a-96192e74a5d8",
+						    "meta": {
+						        "versionId": "2",
+						        "lastUpdated": "2024-04-09T15:06:24.025+00:00",
+						        "source": "#f4491e490a6a2900"
+						    },
+						    "url": "https://health.gov.on.ca/idms/fhir/ValueSet/IDMS-Submission-Types",
+						    "version": "1.0.0",
+						    "name": "IDMS-SUBMISSION-TYPES",
+						    "title": "IDMS Submission Types",
+						    "status": "active",
+						    "experimental": false,
+						    "date": "2023-09-28",
+						    "publisher": "IDMS",
+						    "description": "List of Submission Types",
+						    "compose": {
+						        "include": [
+						            {
+						                "system": "https://health.gov.on.ca/idms/fhir/CodeSystem/Internal-Submission-Types"
+						            }
+						        ]
+						    }
+						}
+					""";
+				vs = parser.parseResource(ValueSet.class, vsStr);
+				csStr = """
 					{
-					    "resourceType": "ValueSet",
-					    "id": "0447bffa-01fa-4405-828a-96192e74a5d8",
-					    "meta": {
-					        "versionId": "2",
-					        "lastUpdated": "2024-04-09T15:06:24.025+00:00",
-					        "source": "#f4491e490a6a2900"
-					    },
-					    "url": "https://health.gov.on.ca/idms/fhir/ValueSet/IDMS-Submission-Types",
-					    "version": "1.0.0",
-					    "name": "IDMS-SUBMISSION-TYPES",
-					    "title": "IDMS Submission Types",
-					    "status": "active",
-					    "experimental": false,
-					    "date": "2023-09-28",
-					    "publisher": "IDMS",
-					    "description": "List of Submission Types",
-					    "compose": {
-					        "include": [
-					            {
-					                "system": "https://health.gov.on.ca/idms/fhir/CodeSystem/Internal-Submission-Types"
-					            }
-					        ]
-					    }
-					}
-				""";
-			vs = parser.parseResource(ValueSet.class, vsStr);
-			csStr = """
-				{
-					        "resourceType": "CodeSystem",
-					        "id": "d9acd5b8-9533-4fa1-bb70-b4380957a8c3",
-					        "meta": {
-					            "versionId": "14",
-					            "lastUpdated": "2024-06-03T17:49:56.580+00:00",
-					            "source": "#261a82258b0978a8"
-					        },
-					        "url": "https://health.gov.on.ca/idms/fhir/CodeSystem/Internal-Submission-Types",
-					        "version": "1.0.0",
-					        "name": "IDMS-Internal-Submission-Types",
-					        "status": "active",
-					        "date": "2023-09-07",
-					        "publisher": "IDMS",
-					        "description": "This contains a lists of codes Submission Type Codes.",
-					        "content": "complete",
-					        "concept": [
-					            {
-					                "code": "SUB-BRAND-PRODUCT",
-					                "display": "New Brand Product (Non-New Chemical Entity)"
-					            },
-					            {
-					                "code": "SUB-CLASSIFICATION",
-					                "display": "Classification Change"
-					            },
-					            {
-					                "code": "SUB-CLINICIAN-LED-SUBMISSIONS",
-					                "display": "Clinician-Led Submissions"
-					            },
-					            {
-					                "code": "SUB-DELISTING",
-					                "display": "Delisting"
-					            },
-					            {
-					                "code": "SUB-DIN-CHANGE",
-					                "display": "Drug Identification Number (DIN) Change"
-					            },
-					            {
-					                "code": "SUB-DISTRIBUTOR",
-					                "display": "Distributor Change"
-					            },
-					            {
-					                "code": "SUB-DRUG-PRODUCT-NAME",
-					                "display": "Drug Product Name Change"
-					            },
-					            {
-					                "code": "SUB-FORMULATION",
-					                "display": "Formulation Change"
-					            },
-					            {
-					                "code": "SUB-GENERIC-LINE",
-					                "display": "Generic Line Extension"
-					            },
-					            {
-					                "code": "SUB-GENERIC-PRODUCT",
-					                "display": "New Generic Product"
-					            },
-					            {
-					                "code": "SUB-LINE-EXTENSION",
-					                "display": "Line Extension"
-					            },
-					            {
-					                "code": "SUB-NEW-INDICATION",
-					                "display": "New Indication"
-					            },
-					            {
-					                "code": "SUB-NEW-NATURAL",
-					                "display": "New Natural Health Product"
-					            },
-					            {
-					                "code": "SUB-NEW-OVER-COUNTER",
-					                "display": "New Over the Counter (OTC) Product"
-					            },
-					            {
-					                "code": "SUB-NEW-CHEMICAL",
-					                "display": "New Chemical Entity"
-					            },
-					            {
-					                "code": "SUB-NEW-NUTRITIONAL",
-					                "display": "New Nutrition Product"
-					            },
-					            {
-					                "code": "SUB-NUTRITIONAL-LINE",
-					                "display": "Line Extension"
-					            },
-					            {
-					                "code": "SUB-NEW-BIOSIMILAR",
-					                "display": "New Biosimilar"
-					            },
-					            {
-					                "code": "SUB-BIOSIMILAR-LINE",
-					                "display": "Line Extension"
-					            },
-					            {
-					                "code": "SUB-NEW-DIABETIC",
-					                "display": "New Diabetic Testing Agent (DTA)"
-					            },
-					            {
-					                "code": "SUB-NEW-GLUCOUSE",
-					                "display": "New Flash Glucose Monitoring (FGM) Product"
-					            },
-					            {
-					                "code": "SUB-NON-FORMULARY-SINGLE",
-					                "display": "Non-Formulary Single Source"
-					            },
-					            {
-					                "code": "SUB-NON-FORMULARY-MULTIPLE",
-					                "display": "Non-Formulary Multiple Source "
-					            },
-					            {
-					                "code": "SUB-ORG-NAME",
-					                "display": "Organization Name Change"
-					            },
-					            {
-					                "code": "SUB-OTHER-TYPE-IN",
-					                "display": "Other"
-					            },
-					            {
-					                "code": "SUB-OWNERSHIP",
-					                "display": "Ownership Change"
-					            },
-					            {
-					                "code": "SUB-PRICE-CHANGE",
-					                "display": "Price Change"
-					            },
-					            {
-					                "code": "SUB-PRODUCT-DISCONTINUE",
-					                "display": "Product Discontinuation"
-					            },
-					            {
-					                "code": "SUB-PRODUCT-MONOGRAPH",
-					                "display": "Product Monograph Change"
-					            },
-					            {
-					                "code": "SUB-PRODUCT-NAME",
-					                "display": "Product Name Change"
-					            },
-					            {
-					                "code": "SUB-PRODUCT-CHANGE",
-					                "display": "Product Change"
-					            },
-					            {
-					                "code": "SUB-SPECIAL-PROJECTS",
-					                "display": "Special Projects"
-					            },
-					            {
-					                "code": "SUB-TEMPORARY-BENEFITS",
-					                "display": "Temporary Benefits"
-					            },
-					            {
-					                "code": "SUB-VALVED",
-					                "display": "New Valved Holding Chamber (VHC)"
-					            },
-					            {
-					                "code": "SUB-REDESIGNATION-BENEFITS",
-					                "display": "Re-Designation of Benefits"
-					            },
-					            {
-					                "code": "SUB-MANUFACTURER-INQUIRIES",
-					                "display": "Manufacturer Inquiries"
-					            },
-					            {
-					                "code": "SUB-CHALLENGES",
-					                "display": "Challenges"
-					            },
-					            {
-					                "code": "SUB-NEW-LINE",
-					                "display": "Line Extension"
-					            },
-					            {
-					                "code": "SUB-MULTI-DIN-CHANGE",
-					                "display": "Drug Identification Number (DIN) Change"
-					            },
-					            {
-					                "code": "SUB-MULTI-DRUG-PRODUCT-NAME",
-					                "display": "Drug Product Name Change"
-					            },
-					            {
-					                "code": "SUB-MULTI-PRODUCT-MONOGRAPH",
-					                "display": "Product Monograph Change"
-					            },
-					            {
-					                "code": "SUB-MULTI-FORMULATION",
-					                "display": "Formulation Change"
-					            },
-					            {
-					                "code": "SUB-MULTI-OWNERSHIP",
-					                "display": "Ownership Change"
-					            },
-					            {
-					                "code": "SUB-MULTI-DISTRIBUTOR",
-					                "display": "Distributor Change"
-					            },
-					            {
-					                "code": "SUB-MULTI-ORG-NAME",
-					                "display": "Organization Name Change"
-					            },
-					            {
-					                "code": "SUB-MULTI-PRODUCT-DISCONTINUE",
-					                "display": "Product Discontinuation"
-					            },
-					            {
-					                "code": "SUB-MULTI-DELISTING",
-					                "display": "Delisting"
-					            },
-					            {
-					                "code": "SUB-MULTI-PRICE-CHANGE",
-					                "display": "Price Change"
-					            },
-					            {
-					                "code": "SUB-MULTI-OTHER-TYPE-IN",
-					                "display": "Other"
-					            },
-					            {
-					                "code": "SUB-BIO-DIN-CHANGE",
-					                "display": "Drug Identification Number (DIN) Change"
-					            },
-					            {
-					                "code": "SUB-BIO-DRUG-PRODUCT-NAME",
-					                "display": "Drug Product Name Change"
-					            },
-					            {
-					                "code": "SUB-BIO-PRODUCT-MONOGRAPH",
-					                "display": "Product Monograph Change"
-					            },
-					            {
-					                "code": "SUB-BIO-FORMULATION",
-					                "display": "Formulation Change"
-					            },
-					            {
-					                "code": "SUB-BIO-OWNERSHIP",
-					                "display": "Ownership Change"
-					            },
-					            {
-					                "code": "SUB-BIO-DISTRIBUTOR",
-					                "display": "Distributor Change"
-					            },
-					            {
-					                "code": "SUB-BIO-ORG-NAME",
-					                "display": "Organization Name Change"
-					            },
-					            {
-					                "code": "SUB-BIO-PRODUCT-DISCONTINUE",
-					                "display": "Product Discontinuation"
-					            },
-					            {
-					                "code": "SUB-BIO-DELISTING",
-					                "display": "Delisting"
-					            },
-					            {
-					                "code": "SUB-BIO-PRICE-CHANGE",
-					                "display": "Price Change"
-					            },
-					            {
-					                "code": "SUB-BIO-OTHER-TYPE-IN",
-					                "display": "Other"
-					            },
-					            {
-					                "code": "SUB-OTC-DIN-CHANGE",
-					                "display": "Drug Identification Number (DIN) Change"
-					            },
-					            {
-					                "code": "SUB-OTC-DRUG-PRODUCT-NAME",
-					                "display": "Drug Product Name Change"
-					            },
-					            {
-					                "code": "SUB-OTC-PRODUCT-MONOGRAPH",
-					                "display": "Product Monograph Change"
-					            },
-					            {
-					                "code": "SUB-OTC-FORMULATION",
-					                "display": "Formulation Change"
-					            },
-					            {
-					                "code": "SUB-OTC-OWNERSHIP",
-					                "display": "Ownership Change"
-					            },
-					            {
-					                "code": "SUB-OTC-DISTRIBUTOR",
-					                "display": "Distributor Change"
-					            },
-					            {
-					                "code": "SUB-OTC-ORG-NAME",
-					                "display": "Organization Name Change"
-					            },
-					            {
-					                "code": "SUB-OTC-PRODUCT-DISCONTINUE",
-					                "display": "Product Discontinuation"
-					            },
-					            {
-					                "code": "SUB-OTC-DELISTING",
-					                "display": "Delisting"
-					            },
-					            {
-					                "code": "SUB-OTC-PRICE-CHANGE",
-					                "display": "Price Change"
-					            },
-					            {
-					                "code": "SUB-OTC-OTHER-TYPE-IN",
-					                "display": "Other"
-					            },
-					            {
-					                "code": "SUB-DIABETIC-PRODUCT-NAME",
-					                "display": "Product Name Change"
-					            },
-					            {
-					                "code": "SUB-DIABETIC-PRODUCT-CHANGE",
-					                "display": "Product Change"
-					            },
-					            {
-					                "code": "SUB-DIABETIC-OWNERSHIP",
-					                "display": "Ownership Change"
-					            },
-					            {
-					                "code": "SUB-DIABETIC-DISTRIBUTOR",
-					                "display": "Distributor Change"
-					            },
-					            {
-					                "code": "SUB-DIABETIC-ORG-NAME",
-					                "display": "Organization Name Change"
-					            },
-					            {
-					                "code": "SUB-DIABETIC-PRODUCT-DISCONTINUE",
-					                "display": "Product Discontinuation"
-					            },
-					            {
-					                "code": "SUB-DIABETIC-DELISTING",
-					                "display": "Delisting"
-					            },
-					            {
-					                "code": "SUB-DIABETIC-PRICE-CHANGE",
-					                "display": "Price Change"
-					            },
-					            {
-					                "code": "SUB-DIABETIC-OTHER-TYPE-IN",
-					                "display": "Other"
-					            },
-					            {
-					                "code": "SUB-GLUCOSE-PRODUCT-NAME",
-					                "display": "Product Name Change"
-					            },
-					            {
-					                "code": "SUB-GLUCOSE-PRODUCT-CHANGE",
-					                "display": "Product Change"
-					            },
-					            {
-					                "code": "SUB-GLUCOSE-OWNERSHIP",
-					                "display": "Ownership Change"
-					            },
-					            {
-					                "code": "SUB-GLUCOSE-DISTRIBUTOR",
-					                "display": "Distributor Change"
-					            },
-					            {
-					                "code": "SUB-GLUCOSE-ORG-NAME",
-					                "display": "Organization Name Change"
-					            },
-					            {
-					                "code": "SUB-GLUCOSE-PRODUCT-DISCONTINUE",
-					                "display": "Product Discontinuation"
-					            },
-					            {
-					                "code": "SUB-GLUCOSE-DELISTING",
-					                "display": "Delisting"
-					            },
-					            {
-					                "code": "SUB-GLUCOSE-PRICE-CHANGE",
-					                "display": "Price Change"
-					            },
-					            {
-					                "code": "SUB-GLUCOSE-OTHER-TYPE-IN",
-					                "display": "Other"
-					            },
-					            {
-					                "code": "SUB-VALVED-PRODUCT-NAME",
-					                "display": "Product Name Change"
-					            },
-					            {
-					                "code": "SUB-VALVED-PRODUCT-CHANGE",
-					                "display": "Product Change"
-					            },
-					            {
-					                "code": "SUB-VALVED-OWNERSHIP",
-					                "display": "Ownership Change"
-					            },
-					            {
-					                "code": "SUB-VALVED-DISTRIBUTOR",
-					                "display": "Distributor Change"
-					            },
-					            {
-					                "code": "SUB-VALVED-ORG-NAME",
-					                "display": "Organization Name Change"
-					            },
-					            {
-					                "code": "SUB-VALVED-PRODUCT-DISCONTINUE",
-					                "display": "Product Discontinuation"
-					            },
-					            {
-					                "code": "SUB-VALVED-DELISTING",
-					                "display": "Delisting"
-					            },
-					            {
-					                "code": "SUB-VALVED-PRICE-CHANGE",
-					                "display": "Price Change"
-					            },
-					            {
-					                "code": "SUB-VALVED-OTHER-TYPE-IN",
-					                "display": "Other"
-					            },
-					            {
-					                "code": "SUB-NATURAL-PRODUCT-NAME",
-					                "display": "Product Name Change"
-					            },
-					            {
-					                "code": "SUB-NATURAL-PRODUCT-CHANGE",
-					                "display": "Product Change"
-					            },
-					            {
-					                "code": "SUB-NATURAL-OWNERSHIP",
-					                "display": "Ownership Change"
-					            },
-					            {
-					                "code": "SUB-NATURAL-DISTRIBUTOR",
-					                "display": "Distributor Change"
-					            },
-					            {
-					                "code": "SUB-NATURAL-ORG-NAME",
-					                "display": "Organization Name Change"
-					            },
-					            {
-					                "code": "SUB-NATURAL-PRODUCT-DISCONTINUE",
-					                "display": "Product Discontinuation"
-					            },
-					            {
-					                "code": "SUB-NATURAL-DELISTING",
-					                "display": "Delisting"
-					            },
-					            {
-					                "code": "SUB-NATURAL-PRICE-CHANGE",
-					                "display": "Price Change"
-					            },
-					            {
-					                "code": "SUB-NATURAL-OTHER-TYPE-IN",
-					                "display": "Other"
-					            },
-					            {
-					                "code": "SUB-OTHER-PRODUCT-NAME",
-					                "display": "Product Name Change"
-					            },
-					            {
-					                "code": "SUB-OTHER-PRODUCT-CHANGE",
-					                "display": "Product Change"
-					            },
-					            {
-					                "code": "SUB-OTHER-OWNERSHIP",
-					                "display": "Ownership Change"
-					            },
-					            {
-					                "code": "SUB-OTHER-DISTRIBUTOR",
-					                "display": "Distributor Change"
-					            },
-					            {
-					                "code": "SUB-OTHER-ORG-NAME",
-					                "display": "Organization Name Change"
-					            },
-					            {
-					                "code": "SUB-OTHER-PRODUCT-DISCONTINUE",
-					                "display": "Product Discontinuation"
-					            },
-					            {
-					                "code": "SUB-OTHER-DELISTING",
-					                "display": "Delisting"
-					            },
-					            {
-					                "code": "SUB-OTHER-PRICE-CHANGE",
-					                "display": "Price Change"
-					            },
-					            {
-					                "code": "SUB-OTHER-OTHER-TYPE-IN",
-					                "display": "Other"
-					            },
-					            {
-					                "code": "SUB-NUTRITIONAL-PRODUCT-NAME",
-					                "display": "Product Name Change"
-					            },
-					            {
-					                "code": "SUB-NUTRITIONAL-FORMULATION",
-					                "display": "Formulation Change"
-					            },
-					            {
-					                "code": "SUB-NUTRITIONAL-DRUG-REGULATION",
-					                "display": "Change in Food and Drug Regulation Classification"
-					            },
-					            {
-					                "code": "SUB-ADVERTISING-POLICY",
-					                "display": "Change in Advertising Policy"
-					            },
-					            {
-					                "code": "SUB-NUTRITIONAL-OWNERSHIP",
-					                "display": "Ownership Change"
-					            },
-					            {
-					                "code": "SUB-NUTRITIONAL-DISTRIBUTOR",
-					                "display": "Distributor Change"
-					            },
-					            {
-					                "code": "SUB-NUTRITIONAL-ORG-NAME",
-					                "display": "Organization Name Change"
-					            },
-					            {
-					                "code": "SUB-NUTRITIONAL-PRODUCT-DISCONTINUE",
-					                "display": "Product Discontinuation"
-					            },
-					            {
-					                "code": "SUB-NUTRITIONAL-DELISTING",
-					                "display": "Delisting"
-					            },
-					            {
-					                "code": "SUB-NUTRITIONAL-PRICE-CHANGE",
-					                "display": "Price Change"
-					            },
-					            {
-					                "code": "SUB-NUTRITIONAL-OTHER-TYPE-IN",
-					                "display": "Other"
-					            }
-					        ]
-					    }
-				""";
-			cs = parser.parseResource(CodeSystem.class, csStr);
-		}
-
-		RequestDetails rq = new SystemRequestDetails();
-		int csToCreate = 1;
-
-		// create a bunch of code systems
-		myValueSetDao.update(vs, rq);
-		String csUrl = cs.getUrl();
-		BundleBuilder builder = new BundleBuilder(myFhirContext);
-//		while (cs.getConcept().size() > 90) {
-//			cs.getConcept().remove(1);
-//		}
-		for (int i = 0; i < csToCreate; i++) {
-			if (i > 0) {
+						        "resourceType": "CodeSystem",
+						        "id": "d9acd5b8-9533-4fa1-bb70-b4380957a8c3",
+						        "meta": {
+						            "versionId": "14",
+						            "lastUpdated": "2024-06-03T17:49:56.580+00:00",
+						            "source": "#261a82258b0978a8"
+						        },
+						        "url": "https://health.gov.on.ca/idms/fhir/CodeSystem/Internal-Submission-Types",
+						        "version": "1.0.0",
+						        "name": "IDMS-Internal-Submission-Types",
+						        "status": "active",
+						        "date": "2023-09-07",
+						        "publisher": "IDMS",
+						        "description": "This contains a lists of codes Submission Type Codes.",
+						        "content": "complete",
+						        "concept": [
+						            {
+						                "code": "SUB-BRAND-PRODUCT",
+						                "display": "New Brand Product (Non-New Chemical Entity)"
+						            },
+						            {
+						                "code": "SUB-CLASSIFICATION",
+						                "display": "Classification Change"
+						            },
+						            {
+						                "code": "SUB-CLINICIAN-LED-SUBMISSIONS",
+						                "display": "Clinician-Led Submissions"
+						            },
+						            {
+						                "code": "SUB-DELISTING",
+						                "display": "Delisting"
+						            },
+						            {
+						                "code": "SUB-DIN-CHANGE",
+						                "display": "Drug Identification Number (DIN) Change"
+						            },
+						            {
+						                "code": "SUB-DISTRIBUTOR",
+						                "display": "Distributor Change"
+						            }
+						        ]
+						    }
+					""";
 				cs = parser.parseResource(CodeSystem.class, csStr);
-				cs.setId("cs" + i);
-				cs.setUrl(csUrl + "-" + i);
 			}
-			builder.addTransactionUpdateEntry(cs);
-//			myCodeSystemDao.update(cs, rq);
+
+			// create our ValueSet
+			myValueSetDao.update(vs, rq);
+
+			// and the code system
+			myCodeSystemDao.update(cs, rq);
+
+			// sanity check to make sure our code system was actually created
+			SearchParameterMap spMap = new SearchParameterMap();
+			spMap.setLoadSynchronous(true);
+			IBundleProvider bp = myCodeSystemDao.search(spMap, rq);
+			assertEquals(1, bp.getAllResources().size());
+			IBaseResource baseResource = bp.getAllResources().get(0);
+			CodeSystem cssaved;
+			if (baseResource instanceof CodeSystem saved) {
+				cssaved = saved;
+			} else {
+				fail("Should be a code system");
+				return;
+			}
+			assertEquals(cs.getConcept().size(), cssaved.getConcept().size());
+
+			// test
+			// perform the reindex (we'll only target the CodeSystem here)
+			ReindexJobParameters params = new ReindexJobParameters();
+			params.addUrl("CodeSystem?");
+			JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
+			startRequest.setJobDefinitionId(ReindexAppCtx.JOB_REINDEX);
+			startRequest.setParameters(params);
+
+			// and wait for it to complete
+			Batch2JobStartResponse response = myJobCoordinator.startInstance(rq, startRequest);
+			myBatch2JobHelper.awaitJobCompletion(response);
+
+			// verify by doing the value expansion
+			ValueSetExpansionOptions options = new ValueSetExpansionOptions();
+			options.setCount(200); // this is way more than exist, so it's ok
+			ValueSet expanded = myValueSetDao.expand(vs, options);
+			assertNotNull(expanded);
+
+			/*
+			 * If the reindex was performed correctly, the expanded ValueSet
+			 * should contain all the CodeSystems that we originally
+			 * uploaded (and nothing else).
+			 */
+			HashSet<String> all = new HashSet<>();
+			for (CodeSystem.ConceptDefinitionComponent set : cs.getConcept()) {
+				all.add(set.getCode());
+			}
+			for (ValueSet.ValueSetExpansionContainsComponent v : expanded.getExpansion().getContains()) {
+				all.remove(v.getCode());
+			}
+			assertTrue(all.isEmpty(), String.join(", ", all));
+			assertEquals(cs.getConcept().size(), expanded.getExpansion().getTotal());
+		} finally {
+			// set back to standard values
+			myStorageSettings.setDeferIndexingForCodesystemsOfSize(deferredIndexingDefault);
+			ReindexUtils.setRetryDelay(null);
 		}
-		builder.setType("transaction");
-		Bundle bundle = (Bundle) builder.getBundle();
-		mySystemDao.transaction(rq, bundle);
-
-		System.out.println("XXXX " + myDeferredStorageSvc.isStorageQueueEmpty());
-		myDeferredStorageSvc.logQueueForUnitTest();
-
-
-		AtomicInteger counter = new AtomicInteger();
-		await()
-			.atMost(10, TimeUnit.SECONDS)
-			.pollDelay(500, TimeUnit.MILLISECONDS)
-				.until(() -> {
-					boolean isQueueEmpty = myDeferredStorageSvc.isStorageQueueEmpty(false);
-					if (!isQueueEmpty) {
-						myDeferredStorageSvc.saveAllDeferred();
-					}
-					return isQueueEmpty;
-				});
-		if (myDeferredStorageSvc.isJobsExecuting()) {
-			System.out.println("running jobs");
-			myDeferredStorageSvc.saveAllDeferred();
-			myBatch2JobHelper.awaitJobCompletion(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
-			myBatch2JobHelper.awaitJobCompletion(TERM_CODE_SYSTEM_DELETE_JOB_NAME);
-
-		}
-		System.out.println("XXX " + myDeferredStorageSvc.isStorageQueueEmpty() + " " + counter.get());
-		myDeferredStorageSvc.logQueueForUnitTest();
-		myDeferredStorageSvc.toString();
-
-//		myDeferredStorageSvc.saveAllDeferred();
-
-		// perform the reindex
-		ReindexJobParameters params = new ReindexJobParameters();
-		params.addUrl("CodeSystem?");
-		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
-		startRequest.setJobDefinitionId(ReindexAppCtx.JOB_REINDEX);
-		startRequest.setParameters(params);
-		System.out.println("xxxx starting reindex");
-		Batch2JobStartResponse response = myJobCoordinator.startInstance(rq, startRequest);
-		myBatch2JobHelper.awaitJobCompletion(response);
-		System.out.println("XXXX reindex done " + myDeferredStorageSvc.isStorageQueueEmpty());
-
-		// get the codes
-		SearchParameterMap spMap = new SearchParameterMap();
-		spMap.setLoadSynchronous(true);
-		IBundleProvider bp = myCodeSystemDao.search(spMap, rq);
-
-		// do value expansion
-		ValueSetExpansionOptions options = new ValueSetExpansionOptions();
-		options.setCount(200);
-		ValueSet expanded = myValueSetDao.expand(vs, options);
-		assertNotNull(expanded);
-		HashSet<String> all = new HashSet<>();
-		for (CodeSystem.ConceptDefinitionComponent set : cs.getConcept()) {
-			all.add(set.getCode());
-		}
-		for (ValueSet.ValueSetExpansionContainsComponent v : expanded.getExpansion().getContains()) {
-			all.remove(v.getCode());
-		}
-		assertTrue(all.isEmpty(), String.join(", ", all));
-		assertEquals(cs.getConcept().size(), expanded.getExpansion().getTotal());
 	}
-
-	@Autowired
-	private IJobCoordinator myJobCoordinator;
-
-	@Autowired
-	private ITermDeferredStorageSvc myDeferredStorageSvc;
 }

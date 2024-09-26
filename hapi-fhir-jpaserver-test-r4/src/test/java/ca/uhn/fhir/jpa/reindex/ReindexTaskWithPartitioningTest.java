@@ -27,7 +27,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class ReindexJobWithPartitioningTest extends BaseJpaR4Test {
+public class ReindexTaskWithPartitioningTest extends BaseJpaR4Test {
 
 	@Autowired
 	private IJobCoordinator myJobCoordinator;

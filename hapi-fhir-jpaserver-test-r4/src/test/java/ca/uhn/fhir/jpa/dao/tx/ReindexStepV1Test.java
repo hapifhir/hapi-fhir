@@ -6,7 +6,7 @@ import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrl;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
-import ca.uhn.fhir.batch2.jobs.reindex.ReindexStep;
+import ca.uhn.fhir.batch2.jobs.reindex.ReindexStepV1;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,7 +26,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class ReindexStepTest {
+public class ReindexStepV1Test {
 
 	@Mock
 	private HapiTransactionService myHapiTransactionService;
@@ -34,7 +34,7 @@ public class ReindexStepTest {
 	private IJobDataSink<VoidModel> myDataSink;
 
 	@InjectMocks
-	private ReindexStep myReindexStep;
+	private ReindexStepV1 myReindexStepV1;
 
 	@Captor
 	private ArgumentCaptor<HapiTransactionService.ExecutionBuilder> builderArgumentCaptor;
@@ -51,7 +51,7 @@ public class ReindexStepTest {
 		when(myHapiTransactionService.buildExecutionBuilder(any())).thenCallRealMethod();
 
 		// when
-		myReindexStep.doReindex(data, myDataSink, "index-id", "chunk-id", reindexJobParameters);
+		myReindexStepV1.doReindex(data, myDataSink, "index-id", "chunk-id", reindexJobParameters);
 
 		// then
 		assertMethodArgumentRequestPartitionId(expectedPartitionId);
