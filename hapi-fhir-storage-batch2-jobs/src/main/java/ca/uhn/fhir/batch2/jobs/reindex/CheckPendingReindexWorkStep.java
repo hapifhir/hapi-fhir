@@ -22,8 +22,9 @@ public class CheckPendingReindexWorkStep implements IJobStepWorker<ReindexJobPar
 	@Nonnull
 	@Override
 	public RunOutcome run(
-		@Nonnull StepExecutionDetails<ReindexJobParameters, ReindexResults> theStepExecutionDetails,
-		@Nonnull IJobDataSink<VoidModel> theDataSink) throws JobExecutionFailedException {
+			@Nonnull StepExecutionDetails<ReindexJobParameters, ReindexResults> theStepExecutionDetails,
+			@Nonnull IJobDataSink<VoidModel> theDataSink)
+			throws JobExecutionFailedException {
 
 		ReindexResults results = theStepExecutionDetails.getData();
 

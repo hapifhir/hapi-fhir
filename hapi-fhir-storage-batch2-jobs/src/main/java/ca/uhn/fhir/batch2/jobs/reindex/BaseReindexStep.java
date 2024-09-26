@@ -25,11 +25,10 @@ public class BaseReindexStep {
 	protected final IIdHelperService<IResourcePersistentId<?>> myIdHelperService;
 
 	public BaseReindexStep(
-		HapiTransactionService theHapiTransactionService,
-		IFhirSystemDao<?, ?> theSystemDao,
-		DaoRegistry theRegistry,
-		IIdHelperService<IResourcePersistentId<?>> theIdHelperService
-	) {
+			HapiTransactionService theHapiTransactionService,
+			IFhirSystemDao<?, ?> theSystemDao,
+			DaoRegistry theRegistry,
+			IIdHelperService<IResourcePersistentId<?>> theIdHelperService) {
 		myHapiTransactionService = theHapiTransactionService;
 		mySystemDao = theSystemDao;
 		myDaoRegistry = theRegistry;
@@ -37,11 +36,11 @@ public class BaseReindexStep {
 	}
 
 	public ReindexResults doReindex(
-		ResourceIdListWorkChunkJson data,
-		IJobDataSink<?> theDataSink,
-		String theInstanceId,
-		String theChunkId,
-		ReindexJobParameters theJobParameters) {
+			ResourceIdListWorkChunkJson data,
+			IJobDataSink<?> theDataSink,
+			String theInstanceId,
+			String theChunkId,
+			ReindexJobParameters theJobParameters) {
 		RequestDetails requestDetails = new SystemRequestDetails();
 		requestDetails.setRetry(true);
 		requestDetails.setMaxRetries(REINDEX_MAX_RETRIES);
@@ -49,21 +48,19 @@ public class BaseReindexStep {
 		TransactionDetails transactionDetails = new TransactionDetails();
 		ReindexTask.JobParameters jp = new ReindexTask.JobParameters();
 		jp.setData(data)
-			.setRequestDetails(requestDetails)
-			.setTransactionDetails(transactionDetails)
-			.setDataSink(theDataSink)
-			.setInstanceId(theInstanceId)
-			.setChunkId(theChunkId)
-			.setJobParameters(theJobParameters);
+				.setRequestDetails(requestDetails)
+				.setTransactionDetails(transactionDetails)
+				.setDataSink(theDataSink)
+				.setInstanceId(theInstanceId)
+				.setChunkId(theChunkId)
+				.setJobParameters(theJobParameters);
 
-		ReindexTask reindexJob = new ReindexTask(
-			jp, myDaoRegistry, mySystemDao, myIdHelperService
-		);
+		ReindexTask reindexJob = new ReindexTask(jp, myDaoRegistry, mySystemDao, myIdHelperService);
 
 		return myHapiTransactionService
-			.withRequest(requestDetails)
-			.withTransactionDetails(transactionDetails)
-			.withRequestPartitionId(data.getRequestPartitionId())
-			.execute(reindexJob);
+				.withRequest(requestDetails)
+				.withTransactionDetails(transactionDetails)
+				.withRequestPartitionId(data.getRequestPartitionId())
+				.execute(reindexJob);
 	}
 }

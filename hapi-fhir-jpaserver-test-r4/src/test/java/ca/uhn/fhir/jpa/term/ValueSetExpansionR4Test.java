@@ -61,8 +61,10 @@ import org.springframework.transaction.support.TransactionTemplate;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -2100,10 +2102,23 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 		int deferredIndexingDefault = myStorageSettings.getDeferIndexingForCodesystemsOfSize();
 
 		try {
-			// deferred count must be less than the number of concepts on the
-			// CodeSystem we will upload
+			/**
+			 * The deferred count must be less than the number of
+			 * concepts we are going to be uploading.
+			 * That way, when we do the reindex, it will defer
+			 * the additional code systems for a later job run.
+			 *
+			 * See {@link TermCodeSystemStorageSvcImpl#addConceptInHierarchy(TermCodeSystemVersion, Collection, TermConcept, UploadStatistics, Map, int)}
+			 *
+			 * Our CodeSystem below only has 6 Concepts to add.
+			 * So we'll set the deferred count to 3 (so 3 will be deferred)
+			 */
 			myStorageSettings.setDeferIndexingForCodesystemsOfSize(3);
-			ReindexUtils.setRetryDelay(Duration.of(500, ChronoUnit.MILLIS));
+			/*
+			 * We're also setting our retry delay to a short timeframe
+			 * so this test doesn't run too long.
+			 */
+			ReindexUtils.setRetryDelay(Duration.of(300, ChronoUnit.MILLIS));
 
 			IParser parser = myFhirContext.newJsonParser();
 
@@ -2229,7 +2244,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 
 			/*
 			 * If the reindex was performed correctly, the expanded ValueSet
-			 * should contain all the CodeSystems that we originally
+			 * should contain all the CodeSystem concepts that we originally
 			 * uploaded (and nothing else).
 			 */
 			HashSet<String> all = new HashSet<>();

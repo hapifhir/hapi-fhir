@@ -50,10 +50,13 @@ public class ReindexAppCtx {
 
 	@Autowired
 	private HapiTransactionService myHapiTransactionService;
+
 	@Autowired
 	private IFhirSystemDao<?, ?> mySystemDao;
+
 	@Autowired
 	private DaoRegistry myRegistry;
+
 	@Autowired
 	private IIdHelperService<IResourcePersistentId<?>> myIdHelperService;
 
@@ -77,13 +80,9 @@ public class ReindexAppCtx {
 						"Load IDs of resources to reindex",
 						ResourceIdListWorkChunkJson.class,
 						reindexLoadIdsStep(theBatch2DaoSvc))
-				.addIntermediateStep("reindex-start",
-					"Perform the resource reindex",
-					ReindexResults.class,
-					reindexStepV2())
-				.addLastStep("reindex-pending-work",
-					"Waits for reindex work to complete.",
-					pendingWorkStep())
+				.addIntermediateStep(
+						"reindex-start", "Perform the resource reindex", ReindexResults.class, reindexStepV2())
+				.addLastStep("reindex-pending-work", "Waits for reindex work to complete.", pendingWorkStep())
 				.build();
 	}
 
@@ -91,26 +90,24 @@ public class ReindexAppCtx {
 	@Bean
 	public JobDefinition<ReindexJobParameters> reindexJobDefinitionV1(IBatch2DaoSvc theBatch2DaoSvc) {
 		return JobDefinition.newBuilder()
-			.setJobDefinitionId(JOB_REINDEX)
-			.setJobDescription("Reindex resources")
-			.setJobDefinitionVersion(1)
-			.setParametersType(ReindexJobParameters.class)
-			.setParametersValidator(reindexJobParametersValidator(theBatch2DaoSvc))
-			.gatedExecution()
-			.addFirstStep(
-				"generate-ranges",
-				"Generate data ranges to reindex",
-				ChunkRangeJson.class,
-				reindexGenerateRangeChunksStep())
-			.addIntermediateStep(
-				"load-ids",
-				"Load IDs of resources to reindex",
-				ResourceIdListWorkChunkJson.class,
-				reindexLoadIdsStep(theBatch2DaoSvc))
-			.addLastStep("reindex-start",
-				"Start the resource reindex",
-				reindexStepV1())
-			.build();
+				.setJobDefinitionId(JOB_REINDEX)
+				.setJobDescription("Reindex resources")
+				.setJobDefinitionVersion(1)
+				.setParametersType(ReindexJobParameters.class)
+				.setParametersValidator(reindexJobParametersValidator(theBatch2DaoSvc))
+				.gatedExecution()
+				.addFirstStep(
+						"generate-ranges",
+						"Generate data ranges to reindex",
+						ChunkRangeJson.class,
+						reindexGenerateRangeChunksStep())
+				.addIntermediateStep(
+						"load-ids",
+						"Load IDs of resources to reindex",
+						ResourceIdListWorkChunkJson.class,
+						reindexLoadIdsStep(theBatch2DaoSvc))
+				.addLastStep("reindex-start", "Start the resource reindex", reindexStepV1())
+				.build();
 	}
 
 	@Bean
@@ -147,9 +144,9 @@ public class ReindexAppCtx {
 
 	@Bean
 	public ReindexProvider reindexProvider(
-		FhirContext theFhirContext,
-		IJobCoordinator theJobCoordinator,
-		IJobPartitionProvider theJobPartitionHandler) {
+			FhirContext theFhirContext,
+			IJobCoordinator theJobCoordinator,
+			IJobPartitionProvider theJobPartitionHandler) {
 		return new ReindexProvider(theFhirContext, theJobCoordinator, theJobPartitionHandler);
 	}
 

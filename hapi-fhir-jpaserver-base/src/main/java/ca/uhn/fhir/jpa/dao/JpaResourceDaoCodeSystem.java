@@ -195,10 +195,10 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 	@SuppressWarnings("rawtypes")
 	@Override
 	public ReindexOutcome reindex(
-		IResourcePersistentId thePid,
-		ReindexParameters theReindexParameters,
-		RequestDetails theRequest,
-		TransactionDetails theTransactionDetails) {
+			IResourcePersistentId thePid,
+			ReindexParameters theReindexParameters,
+			RequestDetails theRequest,
+			TransactionDetails theTransactionDetails) {
 		ReindexOutcome outcome = super.reindex(thePid, theReindexParameters, theRequest, theTransactionDetails);
 
 		if (outcome.getWarnings().isEmpty()) {

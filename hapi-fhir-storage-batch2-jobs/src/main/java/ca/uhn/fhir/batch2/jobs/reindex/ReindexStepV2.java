@@ -19,19 +19,27 @@ import jakarta.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ReindexStepV2 extends BaseReindexStep implements IJobStepWorker<ReindexJobParameters, ResourceIdListWorkChunkJson, ReindexResults> {
+public class ReindexStepV2 extends BaseReindexStep
+		implements IJobStepWorker<ReindexJobParameters, ResourceIdListWorkChunkJson, ReindexResults> {
 
 	private final ReindexJobService myReindexJobService;
 
-	public ReindexStepV2(ReindexJobService theJobService,
-		HapiTransactionService theHapiTransactionService, IFhirSystemDao<?, ?> theSystemDao, DaoRegistry theRegistry, IIdHelperService<IResourcePersistentId<?>> theIdHelperService) {
+	public ReindexStepV2(
+			ReindexJobService theJobService,
+			HapiTransactionService theHapiTransactionService,
+			IFhirSystemDao<?, ?> theSystemDao,
+			DaoRegistry theRegistry,
+			IIdHelperService<IResourcePersistentId<?>> theIdHelperService) {
 		super(theHapiTransactionService, theSystemDao, theRegistry, theIdHelperService);
 		myReindexJobService = theJobService;
 	}
 
 	@Nonnull
 	@Override
-	public RunOutcome run(@Nonnull StepExecutionDetails<ReindexJobParameters, ResourceIdListWorkChunkJson> theStepExecutionDetails, @Nonnull IJobDataSink<ReindexResults> theDataSink) throws JobExecutionFailedException {
+	public RunOutcome run(
+			@Nonnull StepExecutionDetails<ReindexJobParameters, ResourceIdListWorkChunkJson> theStepExecutionDetails,
+			@Nonnull IJobDataSink<ReindexResults> theDataSink)
+			throws JobExecutionFailedException {
 		ResourceIdListWorkChunkJson data = theStepExecutionDetails.getData();
 		ReindexJobParameters jobParameters = theStepExecutionDetails.getParameters();
 
@@ -41,19 +49,19 @@ public class ReindexStepV2 extends BaseReindexStep implements IJobStepWorker<Rei
 		// our reindex work here, it won't skip over that data
 		Map<String, Boolean> resourceTypesToCheckFlag = new HashMap<>();
 		data.getTypedPids().forEach(id -> {
-				// we don't really care about duplicates; we check by resource type
-				resourceTypesToCheckFlag.put(id.getResourceType(), true);
-			});
+			// we don't really care about duplicates; we check by resource type
+			resourceTypesToCheckFlag.put(id.getResourceType(), true);
+		});
 		if (myReindexJobService.anyResourceHasPendingReindexWork(resourceTypesToCheckFlag)) {
 			throw new RetryChunkLaterException(ReindexUtils.getRetryLaterDelay());
 		}
 
 		ReindexResults results = doReindex(
-			data,
-			theDataSink,
-			theStepExecutionDetails.getInstance().getInstanceId(),
-			theStepExecutionDetails.getChunkId(),
-			jobParameters);
+				data,
+				theDataSink,
+				theStepExecutionDetails.getInstance().getInstanceId(),
+				theStepExecutionDetails.getChunkId(),
+				jobParameters);
 
 		theDataSink.accept(results);
 

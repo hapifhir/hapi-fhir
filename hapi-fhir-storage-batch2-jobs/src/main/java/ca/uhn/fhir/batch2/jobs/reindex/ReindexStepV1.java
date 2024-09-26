@@ -35,11 +35,16 @@ import jakarta.annotation.Nonnull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ReindexStepV1 extends BaseReindexStep implements IJobStepWorker<ReindexJobParameters, ResourceIdListWorkChunkJson, VoidModel> {
+public class ReindexStepV1 extends BaseReindexStep
+		implements IJobStepWorker<ReindexJobParameters, ResourceIdListWorkChunkJson, VoidModel> {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ReindexStepV1.class);
 
-	public ReindexStepV1(HapiTransactionService theHapiTransactionService, IFhirSystemDao<?, ?> theSystemDao, DaoRegistry theRegistry, IIdHelperService<IResourcePersistentId<?>> theIdHelperService) {
+	public ReindexStepV1(
+			HapiTransactionService theHapiTransactionService,
+			IFhirSystemDao<?, ?> theSystemDao,
+			DaoRegistry theRegistry,
+			IIdHelperService<IResourcePersistentId<?>> theIdHelperService) {
 		super(theHapiTransactionService, theSystemDao, theRegistry, theIdHelperService);
 	}
 
@@ -53,13 +58,12 @@ public class ReindexStepV1 extends BaseReindexStep implements IJobStepWorker<Rei
 		ResourceIdListWorkChunkJson data = theStepExecutionDetails.getData();
 		ReindexJobParameters jobParameters = theStepExecutionDetails.getParameters();
 
-		 doReindex(
+		doReindex(
 				data,
 				theDataSink,
 				theStepExecutionDetails.getInstance().getInstanceId(),
 				theStepExecutionDetails.getChunkId(),
 				jobParameters);
-
 
 		return new RunOutcome(data.size());
 	}

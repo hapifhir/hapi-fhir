@@ -114,11 +114,10 @@ public class ReindexTask implements TransactionCallback<ReindexResults> {
 	private final ReindexJobParameters myJobParameters;
 
 	public ReindexTask(
-		JobParameters theJobParameters,
-		DaoRegistry theRegistry,
-		IFhirSystemDao<?, ?> theSystemDao,
-		IIdHelperService<IResourcePersistentId<?>> theIdHelperService
-	) {
+			JobParameters theJobParameters,
+			DaoRegistry theRegistry,
+			IFhirSystemDao<?, ?> theSystemDao,
+			IIdHelperService<IResourcePersistentId<?>> theIdHelperService) {
 		myDaoRegistry = theRegistry;
 		mySystemDao = theSystemDao;
 		myIdHelperService = theIdHelperService;
@@ -138,28 +137,28 @@ public class ReindexTask implements TransactionCallback<ReindexResults> {
 		List<IResourcePersistentId<?>> persistentIds = myData.getResourcePersistentIds(myIdHelperService);
 
 		ourLog.info(
-			"Starting reindex work chunk with {} resources - Instance[{}] Chunk[{}]",
-			persistentIds.size(),
-			myInstanceId,
-			myChunkId);
+				"Starting reindex work chunk with {} resources - Instance[{}] Chunk[{}]",
+				persistentIds.size(),
+				myInstanceId,
+				myChunkId);
 		StopWatch sw = new StopWatch();
 		ReindexResults reindexResults = new ReindexResults();
 
 		// Prefetch Resources from DB
 		boolean reindexSearchParameters =
-			myJobParameters.getReindexSearchParameters() != ReindexParameters.ReindexSearchParametersEnum.NONE;
+				myJobParameters.getReindexSearchParameters() != ReindexParameters.ReindexSearchParametersEnum.NONE;
 		mySystemDao.preFetchResources(persistentIds, reindexSearchParameters);
 		ourLog.info(
-			"Prefetched {} resources in {} - Instance[{}] Chunk[{}]",
-			persistentIds.size(),
-			sw,
-			myInstanceId,
-			myChunkId);
+				"Prefetched {} resources in {} - Instance[{}] Chunk[{}]",
+				persistentIds.size(),
+				sw,
+				myInstanceId,
+				myChunkId);
 
 		ReindexParameters parameters = new ReindexParameters()
-			.setReindexSearchParameters(myJobParameters.getReindexSearchParameters())
-			.setOptimizeStorage(myJobParameters.getOptimizeStorage())
-			.setOptimisticLock(myJobParameters.getOptimisticLock());
+				.setReindexSearchParameters(myJobParameters.getReindexSearchParameters())
+				.setOptimizeStorage(myJobParameters.getOptimizeStorage())
+				.setOptimisticLock(myJobParameters.getOptimisticLock());
 
 		// Reindex
 
@@ -172,16 +171,15 @@ public class ReindexTask implements TransactionCallback<ReindexResults> {
 			try {
 
 				ReindexOutcome outcome =
-					dao.reindex(resourcePersistentId, parameters, myRequestDetails, myTransactionDetails);
+						dao.reindex(resourcePersistentId, parameters, myRequestDetails, myTransactionDetails);
 
 				outcome.getWarnings().forEach(myDataSink::recoveredError);
-				reindexResults.addResourceTypeToCompletionStatus(nextResourceType,
-					outcome.isHasPendingWork());
+				reindexResults.addResourceTypeToCompletionStatus(nextResourceType, outcome.isHasPendingWork());
 
 			} catch (BaseServerResponseException | DataFormatException e) {
 				String resourceForcedId = myIdHelperService
-					.translatePidIdToForcedIdWithCache(resourcePersistentId)
-					.orElse(resourcePersistentId.toString());
+						.translatePidIdToForcedIdWithCache(resourcePersistentId)
+						.orElse(resourcePersistentId.toString());
 				String resourceId = nextResourceType + "/" + resourceForcedId;
 				ourLog.error("Failure during reindexing {}", resourceId, e);
 				myDataSink.recoveredError("Failure reindexing " + resourceId + ": " + e.getMessage());
@@ -189,12 +187,12 @@ public class ReindexTask implements TransactionCallback<ReindexResults> {
 		}
 
 		ourLog.info(
-			"Finished reindexing {} resources in {} - {}/sec - Instance[{}] Chunk[{}]",
-			persistentIds.size(),
-			sw,
-			sw.formatThroughput(persistentIds.size(), TimeUnit.SECONDS),
-			myInstanceId,
-			myChunkId);
+				"Finished reindexing {} resources in {} - {}/sec - Instance[{}] Chunk[{}]",
+				persistentIds.size(),
+				sw,
+				sw.formatThroughput(persistentIds.size(), TimeUnit.SECONDS),
+				myInstanceId,
+				myChunkId);
 
 		return reindexResults;
 	}

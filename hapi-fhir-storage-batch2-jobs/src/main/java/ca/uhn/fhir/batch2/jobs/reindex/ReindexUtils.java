@@ -21,6 +21,10 @@ public class ReindexUtils {
 		return RETRY_DELAY;
 	}
 
+	/**
+	 * Sets the retry delay to use for reindex jobs.
+	 * Do not use this in production code! Only test code.
+	 */
 	@VisibleForTesting
 	public static void setRetryDelay(Duration theDuration) {
 		myDelay = theDuration;

@@ -24,7 +24,6 @@ public class ReindexResults implements IModelJson {
 	}
 
 	public void addResourceTypeToCompletionStatus(String theResourceType, boolean theRequiresMoreWork) {
-		getResourceToHasWorkToComplete()
-			.put(theResourceType, theRequiresMoreWork);
+		getResourceToHasWorkToComplete().put(theResourceType, theRequiresMoreWork);
 	}
 }
