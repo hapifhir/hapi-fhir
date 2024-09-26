@@ -1,0 +1,5 @@
+---
+type: change
+issue: 6261
+title: "Upgrading to Jakarta had caused a problem with the version of java-simple-mail that was in use. This has been updated to be conformant
+with the Jakarta Mail APIs. Thanks to Thomas Papke(@thopap) for the contribution!"
