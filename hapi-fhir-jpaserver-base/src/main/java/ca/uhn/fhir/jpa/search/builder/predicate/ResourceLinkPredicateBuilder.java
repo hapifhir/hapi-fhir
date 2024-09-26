@@ -182,7 +182,6 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 	 * one of these, use {@link #getJoinColumnsForSource()} or {@link #getJoinColumnsForTarget()}.
 	 */
 	@Override
-	// fixme dig into this
 	public DbColumn[] getJoinColumns() {
 		return super.getJoinColumns();
 	}

@@ -55,9 +55,8 @@ import com.healthmarketscience.sqlbuilder.FunctionCall;
 import com.healthmarketscience.sqlbuilder.InCondition;
 import com.healthmarketscience.sqlbuilder.OrderObject;
 import com.healthmarketscience.sqlbuilder.SelectQuery;
-import com.healthmarketscience.sqlbuilder.dbspec.Join;
+import com.healthmarketscience.sqlbuilder.UnaryCondition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
-import com.healthmarketscience.sqlbuilder.dbspec.basic.DbJoin;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbSchema;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbSpec;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
@@ -75,6 +74,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -484,8 +484,29 @@ public class SearchQueryBuilder {
 			DbColumn[] theToColumn,
 			SelectQuery.JoinType theJoinType) {
 		assert theFromColumn.length == theToColumn.length;
-		Join join = new DbJoin(mySpec, theFromTable, theToTable, theFromColumn, theToColumn);
-		mySelect.addJoins(theJoinType, join);
+		assert theFromColumn.length > 0;
+		// create custom join condition, allowing nullable columns.
+		var onCondition = ComboCondition.and();
+		for (int i = 0; i < theFromColumn.length; ++i) {
+			boolean isNullable =
+					theFromColumn[i].getColumnNameSQL().toLowerCase(Locale.ROOT).contains("partition_id");
+			onCondition.addCondition(buildJoinColumnCondition(isNullable, theFromColumn[i], theToColumn[i]));
+		}
+		mySelect.addCustomJoin(theJoinType, theFromTable, theToTable, onCondition);
+	}
+
+	private static @Nonnull Condition buildJoinColumnCondition(
+			boolean theColumnNullability, DbColumn theFromColumn, DbColumn theToColumn) {
+		var normalEqualCondition = BinaryCondition.equalTo(theFromColumn, theToColumn);
+		if (!theColumnNullability) {
+			return normalEqualCondition;
+		} else {
+			// the column can be null
+			// we must combine raw = with IS NULL checks.
+			var orBothNullCondition =
+					ComboCondition.and(UnaryCondition.isNull(theFromColumn), UnaryCondition.isNull(theToColumn));
+			return ComboCondition.or(normalEqualCondition, orBothNullCondition);
+		}
 	}
 
 	/**
@@ -678,7 +699,7 @@ public class SearchQueryBuilder {
 	 * for its generated SQL. So we work around this by replacing our contents with a string in the SQL consisting
 	 * of <code>[random UUID]-[value index]</code> and then
 	 */
-	public String  generatePlaceholder(Object theValue) {
+	public String generatePlaceholder(Object theValue) {
 		String placeholder = myBindVariableSubstitutionBase + myBindVariableValues.size();
 		myBindVariableValues.add(theValue);
 		return placeholder;

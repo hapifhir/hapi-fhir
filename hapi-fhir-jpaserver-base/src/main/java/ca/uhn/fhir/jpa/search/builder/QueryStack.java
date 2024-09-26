@@ -1574,7 +1574,6 @@ public class QueryStack {
 		if (wantChainedAndNormal) {
 
 			if (theSourceJoinColumn == null) {
-				// fixme mb HERE!!!
 				retVal = new InCondition(
 						mySqlBuilder.getOrCreateFirstPredicateBuilder(false).getResourceIdColumn(), union);
 			} else {
