@@ -566,7 +566,8 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				for (BaseResourceIndexedSearchParam nextParam : paramsListForCompositePart) {
 					IQueryParameterType nextParamAsClientParam = nextParam.toQueryParameterType();
 
-					if (nextParamAsClientParam instanceof DateParam) {
+					if (theParam.getComboSearchParamType() == ComboSearchParamType.NON_UNIQUE
+							&& nextParamAsClientParam instanceof DateParam) {
 						DateParam date = (DateParam) nextParamAsClientParam;
 						if (date.getPrecision() != TemporalPrecisionEnum.DAY) {
 							continue;
