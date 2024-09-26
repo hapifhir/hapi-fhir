@@ -19,24 +19,30 @@
  */
 package ca.uhn.fhir.cr.r4.measure;
 
+import jakarta.annotation.Nullable;
+
 import java.util.Objects;
 import java.util.StringJoiner;
 
 // LUKETODO:  javadoc
 // TODO:  LD:  make this a record when hapi-fhir supports JDK 17
 public class MeasurePeriodForEvaluation {
+	@Nullable
 	private final String myPeriodStart;
+	@Nullable
 	private final String myPeriodEnd;
 
-	public MeasurePeriodForEvaluation(String thePeriodStart, String thePeriodEnd) {
+	public MeasurePeriodForEvaluation(@Nullable String thePeriodStart, @Nullable String thePeriodEnd) {
 		myPeriodStart = thePeriodStart;
 		myPeriodEnd = thePeriodEnd;
 	}
 
+	@Nullable
 	public String getPeriodStart() {
 		return myPeriodStart;
 	}
 
+	@Nullable
 	public String getPeriodEnd() {
 		return myPeriodEnd;
 	}
