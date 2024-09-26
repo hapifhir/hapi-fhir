@@ -7,7 +7,6 @@ import ca.uhn.fhir.batch2.api.RetryChunkLaterException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
-import ca.uhn.fhir.batch2.jobs.chunk.TypedPidJson;
 import ca.uhn.fhir.batch2.jobs.reindex.models.ReindexResults;
 import ca.uhn.fhir.batch2.jobs.reindex.svcs.ReindexJobService;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -19,12 +18,10 @@ import jakarta.annotation.Nonnull;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class ReindexStepV2 extends BaseReindexStep implements IJobStepWorker<ReindexJobParameters, ResourceIdListWorkChunkJson, ReindexResults> {
 
-
-	private ReindexJobService myReindexJobService;
+	private final ReindexJobService myReindexJobService;
 
 	public ReindexStepV2(ReindexJobService theJobService,
 		HapiTransactionService theHapiTransactionService, IFhirSystemDao<?, ?> theSystemDao, DaoRegistry theRegistry, IIdHelperService<IResourcePersistentId<?>> theIdHelperService) {
@@ -41,10 +38,10 @@ public class ReindexStepV2 extends BaseReindexStep implements IJobStepWorker<Rei
 		// This is not strictly necessary;
 		// but we'll ensure that no outstanding "reindex work"
 		// is waiting to be completed, so that when we do
-		// our reindex, it won't skip over data
+		// our reindex work here, it won't skip over that data
 		Map<String, Boolean> resourceTypesToCheckFlag = new HashMap<>();
 		data.getTypedPids().forEach(id -> {
-				// we don't really care about duplicates
+				// we don't really care about duplicates; we check by resource type
 				resourceTypesToCheckFlag.put(id.getResourceType(), true);
 			});
 		if (myReindexJobService.anyResourceHasPendingReindexWork(resourceTypesToCheckFlag)) {

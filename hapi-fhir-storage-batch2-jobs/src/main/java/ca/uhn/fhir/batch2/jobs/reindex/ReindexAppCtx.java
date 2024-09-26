@@ -142,7 +142,7 @@ public class ReindexAppCtx {
 
 	@Bean
 	public CheckPendingReindexWorkStep pendingWorkStep() {
-		return new CheckPendingReindexWorkStep();
+		return new CheckPendingReindexWorkStep(jobService());
 	}
 
 	@Bean

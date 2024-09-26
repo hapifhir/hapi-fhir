@@ -453,6 +453,9 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc, IHas
 		List<String> idsToDelete = new ArrayList<>();
 		for (String id : executions) {
 			// TODO - might want to consider a "fetch all instances"
+
+//			JobInstanceFetchRequest fetchRequest = new JobInstanceFetchRequest();
+//			myJobCoordinator.fetchAllJobInstances()
 			JobInstance instance = myJobCoordinator.getInstance(id);
 			if (StatusEnum.getEndedStatuses().contains(instance.getStatus())) {
 				idsToDelete.add(instance.getInstanceId());

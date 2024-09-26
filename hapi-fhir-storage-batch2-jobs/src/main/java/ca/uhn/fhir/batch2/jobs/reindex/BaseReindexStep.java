@@ -18,11 +18,11 @@ public class BaseReindexStep {
 
 	protected final HapiTransactionService myHapiTransactionService;
 
-	protected IFhirSystemDao<?, ?> mySystemDao;
+	protected final IFhirSystemDao<?, ?> mySystemDao;
 
-	protected DaoRegistry myDaoRegistry;
+	protected final DaoRegistry myDaoRegistry;
 
-	protected IIdHelperService<IResourcePersistentId<?>> myIdHelperService;
+	protected final IIdHelperService<IResourcePersistentId<?>> myIdHelperService;
 
 	public BaseReindexStep(
 		HapiTransactionService theHapiTransactionService,
