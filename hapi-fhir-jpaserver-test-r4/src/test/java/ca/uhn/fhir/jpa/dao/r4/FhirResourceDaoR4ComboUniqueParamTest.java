@@ -1805,7 +1805,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 			fail();
 		} catch (ResourceVersionConflictException e) {
 			assertThat(e.getMessage())
-				.contains("new unique index created by SearchParameter/observation-subject-date-code");
+				.contains("new unique index created by SearchParameter/observation-date-code");
 		}
 	}
 
