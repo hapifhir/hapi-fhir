@@ -53,9 +53,9 @@ public class SourcePredicateBuilder extends BaseJoiningPredicateBuilder {
 	 * Constructor
 	 */
 	public SourcePredicateBuilder(SearchQueryBuilder theSearchSqlBuilder) {
-		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_RES_VER_PROV"));
+		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_RES_VER"));
 
-		myResourceIdColumn = getTable().addColumn("RES_PID");
+		myResourceIdColumn = getTable().addColumn("RES_ID");
 		myColumnSourceUri = getTable().addColumn("SOURCE_URI");
 		myColumnRequestId = getTable().addColumn("REQUEST_ID");
 	}

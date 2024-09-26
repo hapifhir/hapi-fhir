@@ -65,7 +65,7 @@ public class FhirResourceDaoR4SearchSqlTest extends BaseJpaR4Test {
 		myPatientDao.search(map);
 		assertEquals(1, myCaptureQueriesListener.countSelectQueries());
 		String sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(false, false);
-		assertEquals("SELECT t1.RES_ID FROM HFJ_RESOURCE t1 INNER JOIN HFJ_SPIDX_STRING t0 ON (t1.RES_ID = t0.RES_ID) INNER JOIN HFJ_SPIDX_TOKEN t2 ON (t1.RES_ID = t2.RES_ID) WHERE (((t0.HASH_NORM_PREFIX = ?) AND (t0.SP_VALUE_NORMALIZED LIKE ?)) AND (t2.HASH_SYS_AND_VALUE = ?))", sql);
+		assertEquals("SELECT t1.RES_ID FROM HFJ_RESOURCE t1 INNER JOIN HFJ_SPIDX_STRING t0 ON (t1.RES_ID = t0.RES_ID AND ((t1.PARTITION_ID = t0.PARTITION_ID) OR (t1.PARTITION_ID is null AND t0.PARTITION_ID is null))) INNER JOIN HFJ_SPIDX_TOKEN t2 ON (t1.RES_ID = t2.RES_ID AND ((t1.PARTITION_ID = t2.PARTITION_ID) OR (t1.PARTITION_ID is null AND t2.PARTITION_ID is null)) ) WHERE (((t0.HASH_NORM_PREFIX = ?) AND (t0.SP_VALUE_NORMALIZED LIKE ?)) AND (t2.HASH_SYS_AND_VALUE = ?))", sql);
 
 
 	}

@@ -111,6 +111,7 @@ public class SearchQueryBuilder {
 	private boolean myNeedResourceTableRoot;
 	private int myNextNearnessColumnId = 0;
 	private DbColumn mySelectedResourceIdColumn;
+	private DbColumn mySelectedPartitionIdColumn;
 
 	/**
 	 * Constructor
@@ -201,7 +202,7 @@ public class SearchQueryBuilder {
 	/**
 	 * Add and return a predicate builder (or a root query if no root query exists yet) for selecting on a COORDS search parameter
 	 */
-	public CoordsPredicateBuilder addCoordsPredicateBuilder(@Nullable DbColumn theSourceJoinColumn) {
+	public CoordsPredicateBuilder addCoordsPredicateBuilder(@Nullable DbColumn[] theSourceJoinColumn) {
 		CoordsPredicateBuilder retVal = mySqlBuilderFactory.coordsPredicateBuilder(this);
 		addTable(retVal, theSourceJoinColumn);
 		return retVal;
@@ -210,7 +211,7 @@ public class SearchQueryBuilder {
 	/**
 	 * Create, add and return a predicate builder (or a root query if no root query exists yet) for selecting on a DATE search parameter
 	 */
-	public DatePredicateBuilder addDatePredicateBuilder(@Nullable DbColumn theSourceJoinColumn) {
+	public DatePredicateBuilder addDatePredicateBuilder(@Nullable DbColumn[] theSourceJoinColumn) {
 		DatePredicateBuilder retVal = mySqlBuilderFactory.dateIndexTable(this);
 		addTable(retVal, theSourceJoinColumn);
 		return retVal;
@@ -226,7 +227,7 @@ public class SearchQueryBuilder {
 	/**
 	 * Create, add and return a predicate builder (or a root query if no root query exists yet) for selecting on a NUMBER search parameter
 	 */
-	public NumberPredicateBuilder addNumberPredicateBuilder(@Nullable DbColumn theSourceJoinColumn) {
+	public NumberPredicateBuilder addNumberPredicateBuilder(@Nullable DbColumn[] theSourceJoinColumn) {
 		NumberPredicateBuilder retVal = createNumberPredicateBuilder();
 		addTable(retVal, theSourceJoinColumn);
 		return retVal;
@@ -242,7 +243,7 @@ public class SearchQueryBuilder {
 	/**
 	 * Add and return a predicate builder (or a root query if no root query exists yet) for selecting on the Resource table
 	 */
-	public ResourceTablePredicateBuilder addResourceTablePredicateBuilder(@Nullable DbColumn theSourceJoinColumn) {
+	public ResourceTablePredicateBuilder addResourceTablePredicateBuilder(@Nullable DbColumn[] theSourceJoinColumn) {
 		ResourceTablePredicateBuilder retVal = mySqlBuilderFactory.resourceTable(this);
 		addTable(retVal, theSourceJoinColumn);
 		return retVal;
@@ -251,7 +252,7 @@ public class SearchQueryBuilder {
 	/**
 	 * Create, add and return a predicate builder (or a root query if no root query exists yet) for selecting on a QUANTITY search parameter
 	 */
-	public QuantityPredicateBuilder addQuantityPredicateBuilder(@Nullable DbColumn theSourceJoinColumn) {
+	public QuantityPredicateBuilder addQuantityPredicateBuilder(@Nullable DbColumn[] theSourceJoinColumn) {
 		QuantityPredicateBuilder retVal = createQuantityPredicateBuilder();
 		addTable(retVal, theSourceJoinColumn);
 
@@ -266,7 +267,7 @@ public class SearchQueryBuilder {
 	}
 
 	public QuantityNormalizedPredicateBuilder addQuantityNormalizedPredicateBuilder(
-			@Nullable DbColumn theSourceJoinColumn) {
+			@Nullable DbColumn[] theSourceJoinColumn) {
 
 		QuantityNormalizedPredicateBuilder retVal = mySqlBuilderFactory.quantityNormalizedIndexTable(this);
 		addTable(retVal, theSourceJoinColumn);
@@ -278,7 +279,7 @@ public class SearchQueryBuilder {
 	 * Add and return a predicate builder (or a root query if no root query exists yet) for selecting on a <code>_source</code> search parameter
 	 */
 	public SourcePredicateBuilder addSourcePredicateBuilder(
-			@Nullable DbColumn theSourceJoinColumn, SelectQuery.JoinType theJoinType) {
+			@Nullable DbColumn[] theSourceJoinColumn, SelectQuery.JoinType theJoinType) {
 		SourcePredicateBuilder retVal = mySqlBuilderFactory.newSourcePredicateBuilder(this);
 		addTable(retVal, theSourceJoinColumn, theJoinType);
 		return retVal;
@@ -288,7 +289,7 @@ public class SearchQueryBuilder {
 	 * Create, add and return a predicate builder (or a root query if no root query exists yet) for selecting on a REFERENCE search parameter
 	 */
 	public ResourceLinkPredicateBuilder addReferencePredicateBuilder(
-			QueryStack theQueryStack, @Nullable DbColumn theSourceJoinColumn) {
+			QueryStack theQueryStack, @Nullable DbColumn[] theSourceJoinColumn) {
 		ResourceLinkPredicateBuilder retVal = createReferencePredicateBuilder(theQueryStack);
 		addTable(retVal, theSourceJoinColumn);
 		return retVal;
@@ -306,7 +307,7 @@ public class SearchQueryBuilder {
 	 * source and target are reversed. This is used for _has queries.
 	 */
 	public ResourceLinkPredicateBuilder addReferencePredicateBuilderReversed(
-			QueryStack theQueryStack, DbColumn theSourceJoinColumn) {
+			QueryStack theQueryStack, DbColumn[] theSourceJoinColumn) {
 		ResourceLinkPredicateBuilder retVal = mySqlBuilderFactory.referenceIndexTable(theQueryStack, this, true);
 		addTable(retVal, theSourceJoinColumn);
 		return retVal;
@@ -315,7 +316,7 @@ public class SearchQueryBuilder {
 	/**
 	 * Create, add and return a predicate builder (or a root query if no root query exists yet) for selecting on a STRING search parameter
 	 */
-	public StringPredicateBuilder addStringPredicateBuilder(@Nullable DbColumn theSourceJoinColumn) {
+	public StringPredicateBuilder addStringPredicateBuilder(@Nullable DbColumn[] theSourceJoinColumn) {
 		StringPredicateBuilder retVal = createStringPredicateBuilder();
 		addTable(retVal, theSourceJoinColumn);
 		return retVal;
@@ -331,7 +332,7 @@ public class SearchQueryBuilder {
 	/**
 	 * Add and return a predicate builder (or a root query if no root query exists yet) for selecting on a <code>_tag</code> search parameter
 	 */
-	public TagPredicateBuilder addTagPredicateBuilder(@Nullable DbColumn theSourceJoinColumn) {
+	public TagPredicateBuilder addTagPredicateBuilder(@Nullable DbColumn[] theSourceJoinColumn) {
 		TagPredicateBuilder retVal = mySqlBuilderFactory.newTagPredicateBuilder(this);
 		addTable(retVal, theSourceJoinColumn);
 		return retVal;
@@ -340,7 +341,7 @@ public class SearchQueryBuilder {
 	/**
 	 * Create, add and return a predicate builder (or a root query if no root query exists yet) for selecting on a TOKEN search parameter
 	 */
-	public TokenPredicateBuilder addTokenPredicateBuilder(@Nullable DbColumn theSourceJoinColumn) {
+	public TokenPredicateBuilder addTokenPredicateBuilder(@Nullable DbColumn[] theSourceJoinColumn) {
 		TokenPredicateBuilder retVal = createTokenPredicateBuilder();
 		addTable(retVal, theSourceJoinColumn);
 		return retVal;
@@ -369,7 +370,7 @@ public class SearchQueryBuilder {
 	 * Add and return a predicate builder (or a root query if no root query exists yet) for selecting on a <code>:missing</code> search parameter
 	 */
 	public SearchParamPresentPredicateBuilder addSearchParamPresentPredicateBuilder(
-			@Nullable DbColumn theSourceJoinColumn) {
+			@Nullable DbColumn[] theSourceJoinColumn) {
 		SearchParamPresentPredicateBuilder retVal = mySqlBuilderFactory.searchParamPresentPredicateBuilder(this);
 		addTable(retVal, theSourceJoinColumn);
 		return retVal;
@@ -378,7 +379,7 @@ public class SearchQueryBuilder {
 	/**
 	 * Create, add and return a predicate builder (or a root query if no root query exists yet) for selecting on a URI search parameter
 	 */
-	public UriPredicateBuilder addUriPredicateBuilder(@Nullable DbColumn theSourceJoinColumn) {
+	public UriPredicateBuilder addUriPredicateBuilder(@Nullable DbColumn[] theSourceJoinColumn) {
 		UriPredicateBuilder retVal = createUriPredicateBuilder();
 		addTable(retVal, theSourceJoinColumn);
 		return retVal;
@@ -402,19 +403,19 @@ public class SearchQueryBuilder {
 	/**
 	 * Add and return a predicate builder (or a root query if no root query exists yet) for an arbitrary table
 	 */
-	private void addTable(BaseJoiningPredicateBuilder thePredicateBuilder, @Nullable DbColumn theSourceJoinColumn) {
+	private void addTable(BaseJoiningPredicateBuilder thePredicateBuilder, @Nullable DbColumn[] theSourceJoinColumn) {
 		addTable(thePredicateBuilder, theSourceJoinColumn, SelectQuery.JoinType.INNER);
 	}
 
 	private void addTable(
 			BaseJoiningPredicateBuilder thePredicateBuilder,
-			@Nullable DbColumn theSourceJoinColumn,
+			@Nullable DbColumn[] theSourceJoinColumns,
 			SelectQuery.JoinType theJoinType) {
-		if (theSourceJoinColumn != null) {
-			DbTable fromTable = theSourceJoinColumn.getTable();
+		if (theSourceJoinColumns != null) {
+			DbTable fromTable = theSourceJoinColumns[0].getTable();
 			DbTable toTable = thePredicateBuilder.getTable();
-			DbColumn toColumn = thePredicateBuilder.getResourceIdColumn();
-			addJoin(fromTable, toTable, theSourceJoinColumn, toColumn, theJoinType);
+			DbColumn[] toColumn = toJoinColumns(thePredicateBuilder);
+			addJoin(fromTable, toTable, theSourceJoinColumns, toColumn, theJoinType);
 		} else {
 			if (myFirstPredicateBuilder == null) {
 
@@ -446,27 +447,45 @@ public class SearchQueryBuilder {
 
 			DbTable fromTable = myFirstPredicateBuilder.getTable();
 			DbTable toTable = thePredicateBuilder.getTable();
-			DbColumn fromColumn = myFirstPredicateBuilder.getResourceIdColumn();
-			DbColumn toColumn = thePredicateBuilder.getResourceIdColumn();
+			DbColumn[] fromColumn = toJoinColumns(myFirstPredicateBuilder);
+			DbColumn[] toColumn = toJoinColumns(thePredicateBuilder);
 			addJoin(fromTable, toTable, fromColumn, toColumn, theJoinType);
 		}
+	}
+
+	@Nonnull
+	public DbColumn[] toJoinColumns(BaseJoiningPredicateBuilder theBuilder) {
+		DbColumn partitionIdColumn = theBuilder.getPartitionIdColumn();
+		DbColumn resourceIdColumn = theBuilder.getResourceIdColumn();
+		return toJoinColumns(partitionIdColumn, resourceIdColumn);
+	}
+
+	@Nonnull
+	public DbColumn[] toJoinColumns(DbColumn partitionIdColumn, DbColumn resourceIdColumn) {
+		if (isIncludePartitionIdInJoins()) {
+			return new DbColumn[] {partitionIdColumn, resourceIdColumn};
+		} else {
+			return new DbColumn[] {resourceIdColumn};
+		}
+	}
+
+	public boolean isIncludePartitionIdInJoins() {
+		return true;
+	}
+
+	public void addJoin(DbTable theFromTable, DbTable theToTable, DbColumn[] theFromColumn, DbColumn[] theToColumn) {
+		addJoin(theFromTable, theToTable, theFromColumn, theToColumn, SelectQuery.JoinType.INNER);
 	}
 
 	public void addJoin(
 			DbTable theFromTable,
 			DbTable theToTable,
-			DbColumn theFromColumn,
-			DbColumn theToColumn,
+			DbColumn[] theFromColumn,
+			DbColumn[] theToColumn,
 			SelectQuery.JoinType theJoinType) {
-		Join join = new DbJoin(
-				mySpec, theFromTable, theToTable, new DbColumn[] {theFromColumn}, new DbColumn[] {theToColumn});
+		assert theFromColumn.length == theToColumn.length;
+		Join join = new DbJoin(mySpec, theFromTable, theToTable, theFromColumn, theToColumn);
 		mySelect.addJoins(theJoinType, join);
-	}
-
-	public void addJoin(DbTable theFromTable, DbTable theToTable, DbColumn theFromColumn, DbColumn theToColumn) {
-		Join join = new DbJoin(
-				mySpec, theFromTable, theToTable, new DbColumn[] {theFromColumn}, new DbColumn[] {theToColumn});
-		mySelect.addJoins(SelectQuery.JoinType.INNER, join);
 	}
 
 	/**
@@ -659,7 +678,7 @@ public class SearchQueryBuilder {
 	 * for its generated SQL. So we work around this by replacing our contents with a string in the SQL consisting
 	 * of <code>[random UUID]-[value index]</code> and then
 	 */
-	public String generatePlaceholder(Object theValue) {
+	public String  generatePlaceholder(Object theValue) {
 		String placeholder = myBindVariableSubstitutionBase + myBindVariableValues.size();
 		myBindVariableValues.add(theValue);
 		return placeholder;
