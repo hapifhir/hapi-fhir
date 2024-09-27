@@ -33,8 +33,27 @@ public class PartitionSettings {
 	private Integer myDefaultPartitionId;
 	private boolean myAlwaysOpenNewTransactionForDifferentPartition;
 	private boolean myConditionalCreateDuplicateIdentifiersEnabled = false;
+	private boolean myPartitionIdsInPrimaryKeys = false;
 
 	public PartitionSettings() {}
+
+	/**
+	 * Is the table partition column (usually PARTITION_ID)
+	 * participating and primary and foreign keys.
+	 * Affects sql joins, sql in() expressions, etc.
+	 */
+	public boolean isPartitionIdsInPrimaryKeys() {
+		return myPartitionIdsInPrimaryKeys;
+	}
+
+	/**
+	 * Inform the query engine if the primary and foreign keys
+	 * of the partitioned tables include the partition column.
+	 */
+	public void setPartitionIdsInPrimaryKeys(boolean thePartitionIdsInPrimaryKeys) {
+		myPartitionIdsInPrimaryKeys = thePartitionIdsInPrimaryKeys;
+	}
+
 	/**
 	 * Should we always open a new database transaction if the partition context changes
 	 *

@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.search.builder.sql;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.search.builder.ISearchQueryExecutor;
 import ca.uhn.fhir.jpa.util.ScrollableResultsIterator;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -107,14 +108,13 @@ public class SearchQueryExecutor implements ISearchQueryExecutor {
 					 * is managed by Spring has been started before this method is called.
 					 */
 					HapiTransactionService.requireTransaction();
+					ourLog.trace("About to execute SQL: {}. Parameters: {}", sql, Arrays.toString(args));
 
 					Query nativeQuery = myEntityManager.createNativeQuery(sql);
 					org.hibernate.query.Query<?> hibernateQuery = (org.hibernate.query.Query<?>) nativeQuery;
 					for (int i = 1; i <= args.length; i++) {
 						hibernateQuery.setParameter(i, args[i - 1]);
 					}
-
-					ourLog.trace("About to execute SQL: {}. Parameters: {}", sql, Arrays.toString(args));
 
 					/*
 					 * These settings help to ensure that we use a search cursor
@@ -146,13 +146,22 @@ public class SearchQueryExecutor implements ISearchQueryExecutor {
 					myNext = NO_MORE;
 				} else {
 					Object nextRow = Objects.requireNonNull(myResultSet.next());
-					Number next;
+					// We should typically get two columns back, the first is the partition ID and the second
+					// is the resource ID. But if we're doing a count query, we'll get a single column in an array
+					// or maybe even just a single non array value depending on how the platform handles it.
 					if (nextRow instanceof Number) {
-						next = (Number) nextRow;
+						myNext = ((Number) nextRow).longValue();
 					} else {
-						next = (Number) ((Object[]) nextRow)[0];
+						Object[] nextRowAsArray = (Object[]) nextRow;
+						if (nextRowAsArray.length == 1) {
+							myNext = (Long) nextRowAsArray[0];
+						} else {
+							// fixme reverse
+							Integer nextPartitionId = (Integer) nextRowAsArray[0];
+							Long nextResourceId = (Long) nextRowAsArray[1];
+							myNext = nextResourceId;
+						}
 					}
-					myNext = next.longValue();
 				}
 
 			} catch (Exception e) {

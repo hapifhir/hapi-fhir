@@ -1,10 +1,10 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -17,9 +17,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class FhirResourceDaoR4SearchSqlTest extends BaseJpaR4Test {
 
@@ -52,6 +54,19 @@ public class FhirResourceDaoR4SearchSqlTest extends BaseJpaR4Test {
 
 	}
 
+	@Test
+	public void testSortJoinIncludesPartitionId() {
+
+		myCaptureQueriesListener.clear();
+		SearchParameterMap map = SearchParameterMap.newSynchronous(Patient.SP_ACTIVE, new TokenParam("true"));
+		map.setSort(new SortSpec(Patient.SP_NAME));
+		myPatientDao.search(map);
+		assertEquals(1, myCaptureQueriesListener.countSelectQueries());
+		String sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(false, false);
+		// fixme log bug about duplicate join of string in sort when also in query
+		assertEquals("SELECT t1.RES_ID FROM HFJ_RESOURCE t1 INNER JOIN HFJ_SPIDX_TOKEN t0 ON (t1.RES_ID = t0.RES_ID) LEFT OUTER JOIN HFJ_SPIDX_STRING t2 ON ((t1.RES_ID = t2.RES_ID) AND (t2.HASH_IDENTITY = ?)) WHERE (t0.HASH_VALUE = ?) ORDER BY t2.SP_VALUE_NORMALIZED ASC NULLS LAST", sql);
+
+	}
 	/**
 	 * Two regular search params - Should use HFJ_RESOURCE as root
 	 */
@@ -65,7 +80,7 @@ public class FhirResourceDaoR4SearchSqlTest extends BaseJpaR4Test {
 		myPatientDao.search(map);
 		assertEquals(1, myCaptureQueriesListener.countSelectQueries());
 		String sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(false, false);
-		assertEquals("SELECT t1.RES_ID FROM HFJ_RESOURCE t1 INNER JOIN HFJ_SPIDX_STRING t0 ON (((t1.PARTITION_ID = t0.PARTITION_ID) OR ((t1.PARTITION_ID IS NULL) AND (t0.PARTITION_ID IS NULL))) AND (t1.RES_ID = t0.RES_ID)) INNER JOIN HFJ_SPIDX_TOKEN t2 ON (((t1.PARTITION_ID = t2.PARTITION_ID) OR ((t1.PARTITION_ID IS NULL) AND (t2.PARTITION_ID IS NULL))) AND (t1.RES_ID = t2.RES_ID)) WHERE (((t0.HASH_NORM_PREFIX = ?) AND (t0.SP_VALUE_NORMALIZED LIKE ?)) AND (t2.HASH_SYS_AND_VALUE = ?))", sql);
+		assertEquals("SELECT t1.RES_ID FROM HFJ_RESOURCE t1 INNER JOIN HFJ_SPIDX_STRING t0 ON (t1.RES_ID = t0.RES_ID) INNER JOIN HFJ_SPIDX_TOKEN t2 ON (t1.RES_ID = t2.RES_ID) WHERE (((t0.HASH_NORM_PREFIX = ?) AND (t0.SP_VALUE_NORMALIZED LIKE ?)) AND (t2.HASH_SYS_AND_VALUE = ?))", sql);
 	}
 
 	@Test
@@ -86,7 +101,7 @@ public class FhirResourceDaoR4SearchSqlTest extends BaseJpaR4Test {
 		assertEquals(3, myCaptureQueriesListener.countSelectQueries());
 		// Query 1 - Find resources: Make sure we search for tag type+system+code always
 		String sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(false, false);
-		assertEquals("SELECT t0.RES_ID FROM HFJ_RESOURCE t0 INNER JOIN HFJ_RES_TAG t1 ON (((t0.PARTITION_ID = t1.PARTITION_ID) OR ((t0.PARTITION_ID IS NULL) AND (t1.PARTITION_ID IS NULL))) AND (t0.RES_ID = t1.RES_ID)) INNER JOIN HFJ_TAG_DEF t2 ON (t1.TAG_ID = t2.TAG_ID) WHERE (((t0.RES_TYPE = ?) AND (t0.RES_DELETED_AT IS NULL)) AND ((t2.TAG_TYPE = ?) AND (t2.TAG_SYSTEM = ?) AND (t2.TAG_CODE = ?)))", sql);
+		assertEquals("SELECT t0.RES_ID FROM HFJ_RESOURCE t0 INNER JOIN HFJ_RES_TAG t1 ON (t0.RES_ID = t1.RES_ID) INNER JOIN HFJ_TAG_DEF t2 ON (t1.TAG_ID = t2.TAG_ID) WHERE (((t0.RES_TYPE = ?) AND (t0.RES_DELETED_AT IS NULL)) AND ((t2.TAG_TYPE = ?) AND (t2.TAG_SYSTEM = ?) AND (t2.TAG_CODE = ?)))", sql);
 		// Query 2 - Load resourece contents
 		sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(false, false);
 		assertThat(sql).contains("where rsv1_0.RES_ID in (?)");

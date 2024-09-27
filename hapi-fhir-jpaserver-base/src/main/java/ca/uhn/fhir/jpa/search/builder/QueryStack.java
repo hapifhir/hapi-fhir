@@ -55,6 +55,7 @@ import ca.uhn.fhir.jpa.search.builder.predicate.StringPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.TagPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.TokenPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.UriPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.sql.ColumnTupleObject;
 import ca.uhn.fhir.jpa.search.builder.sql.PredicateBuilderFactory;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -359,7 +360,8 @@ public class QueryStack {
 			case STRING:
 				StringPredicateBuilder stringPredicateBuilder = mySqlBuilder.createStringPredicateBuilder();
 				addSortCustomJoin(
-						resourceLinkPredicateBuilder.getColumnTargetResourceId(),
+					// fixme switch?
+						resourceLinkPredicateBuilder.getJoinColumnsForTarget(),
 						stringPredicateBuilder,
 						stringPredicateBuilder.createHashIdentityPredicate(targetType, theChain));
 
@@ -370,7 +372,7 @@ public class QueryStack {
 			case TOKEN:
 				TokenPredicateBuilder tokenPredicateBuilder = mySqlBuilder.createTokenPredicateBuilder();
 				addSortCustomJoin(
-						resourceLinkPredicateBuilder.getColumnTargetResourceId(),
+						resourceLinkPredicateBuilder.getJoinColumnsForTarget(),
 						tokenPredicateBuilder,
 						tokenPredicateBuilder.createHashIdentityPredicate(targetType, theChain));
 
@@ -381,7 +383,7 @@ public class QueryStack {
 			case DATE:
 				DatePredicateBuilder datePredicateBuilder = mySqlBuilder.createDatePredicateBuilder();
 				addSortCustomJoin(
-						resourceLinkPredicateBuilder.getColumnTargetResourceId(),
+						resourceLinkPredicateBuilder.getJoinColumnsForTarget(),
 						datePredicateBuilder,
 						datePredicateBuilder.createHashIdentityPredicate(targetType, theChain));
 
@@ -476,15 +478,16 @@ public class QueryStack {
 			BaseJoiningPredicateBuilder theToJoiningPredicateBuilder,
 			Condition theCondition) {
 		addSortCustomJoin(
-				theFromJoiningPredicateBuilder.getResourceIdColumn(), theToJoiningPredicateBuilder, theCondition);
+				theFromJoiningPredicateBuilder.getJoinColumns(), theToJoiningPredicateBuilder, theCondition);
 	}
 
 	private void addSortCustomJoin(
-			DbColumn theFromDbColumn,
+			DbColumn theFromDbColumn[],
 			BaseJoiningPredicateBuilder theToJoiningPredicateBuilder,
 			Condition theCondition) {
+
 		ComboCondition onCondition =
-				mySqlBuilder.createOnCondition(theFromDbColumn, theToJoiningPredicateBuilder.getResourceIdColumn());
+				mySqlBuilder.createOnCondition(theFromDbColumn, theToJoiningPredicateBuilder.getJoinColumns());
 
 		if (theCondition != null) {
 			onCondition.addCondition(theCondition);
@@ -492,7 +495,7 @@ public class QueryStack {
 
 		mySqlBuilder.addCustomJoin(
 				SelectQuery.JoinType.LEFT_OUTER,
-				theFromDbColumn.getTable(),
+				theFromDbColumn[0].getTable(),
 				theToJoiningPredicateBuilder.getTable(),
 				onCondition);
 	}
@@ -1476,12 +1479,12 @@ public class QueryStack {
 
 	public void addGrouping() {
 		BaseJoiningPredicateBuilder firstPredicateBuilder = mySqlBuilder.getOrCreateFirstPredicateBuilder();
-		mySqlBuilder.getSelect().addGroupings(firstPredicateBuilder.getResourceIdColumn());
+		mySqlBuilder.getSelect().addGroupings(firstPredicateBuilder.getJoinColumns());
 	}
 
 	public void addOrdering() {
 		BaseJoiningPredicateBuilder firstPredicateBuilder = mySqlBuilder.getOrCreateFirstPredicateBuilder();
-		mySqlBuilder.getSelect().addOrderings(firstPredicateBuilder.getResourceIdColumn());
+		mySqlBuilder.getSelect().addOrderings(firstPredicateBuilder.getJoinColumns());
 	}
 
 	public Condition createPredicateReferenceForEmbeddedChainedSearchResource(
@@ -1529,7 +1532,7 @@ public class QueryStack {
 			for (LeafNodeDefinition leafNodeDefinition : referenceLinks.get(nextReferenceLink)) {
 				SearchQueryBuilder builder;
 				if (wantChainedAndNormal) {
-					builder = mySqlBuilder.newChildSqlBuilder();
+					builder = mySqlBuilder.newChildSqlBuilder(mySqlBuilder.isIncludePartitionIdInJoins());
 				} else {
 					builder = mySqlBuilder;
 				}
@@ -1574,8 +1577,11 @@ public class QueryStack {
 		if (wantChainedAndNormal) {
 
 			if (theSourceJoinColumn == null) {
-				retVal = new InCondition(
-						mySqlBuilder.getOrCreateFirstPredicateBuilder(false).getResourceIdColumn(), union);
+				BaseJoiningPredicateBuilder root = mySqlBuilder.getOrCreateFirstPredicateBuilder(false);
+				DbColumn[] joinColumns = root.getJoinColumns();
+				// fixme check for length 1 and skip tuple wrap.
+				Object joinColumnObject = ColumnTupleObject.from(joinColumns);
+				retVal = new InCondition(joinColumnObject, union);
 			} else {
 				// -- for the resource link, need join with target_resource_id
 				retVal = new InCondition(theSourceJoinColumn, union);
@@ -2050,7 +2056,8 @@ public class QueryStack {
 			BaseJoiningPredicateBuilder join;
 			if (paramInverted) {
 
-				SearchQueryBuilder sqlBuilder = mySqlBuilder.newChildSqlBuilder();
+				boolean selectPartitionId = myPartitionSettings.isPartitionIdsInPrimaryKeys();
+				SearchQueryBuilder sqlBuilder = mySqlBuilder.newChildSqlBuilder(selectPartitionId);
 				TagPredicateBuilder tagSelector = sqlBuilder.addTagPredicateBuilder(null);
 				sqlBuilder.addPredicate(
 						tagSelector.createPredicateTag(tagType, tokens, theParamName, theRequestPartitionId));
@@ -2058,7 +2065,14 @@ public class QueryStack {
 
 				join = mySqlBuilder.getOrCreateFirstPredicateBuilder();
 				Expression subSelect = new Subquery(sql);
-				tagPredicate = new InCondition(join.getResourceIdColumn(), subSelect).setNegate(true);
+
+				Object left;
+				if (selectPartitionId) {
+					left = new ColumnTupleObject(join.getJoinColumns());
+				} else {
+					left = join.getResourceIdColumn();
+				}
+				tagPredicate = new InCondition(left, subSelect).setNegate(true);
 
 			} else {
 				// Tag table can't be a query root because it will include deleted resources, and can't select by
@@ -2221,7 +2235,8 @@ public class QueryStack {
 		BaseJoiningPredicateBuilder join;
 
 		if (paramInverted) {
-			SearchQueryBuilder sqlBuilder = theSqlBuilder.newChildSqlBuilder();
+			boolean selectPartitionId = myPartitionSettings.isPartitionIdsInPrimaryKeys();
+			SearchQueryBuilder sqlBuilder = theSqlBuilder.newChildSqlBuilder(selectPartitionId);
 			TokenPredicateBuilder tokenSelector = sqlBuilder.addTokenPredicateBuilder(null);
 			sqlBuilder.addPredicate(tokenSelector.createPredicateToken(
 					tokens, theResourceName, theSpnamePrefix, theSearchParam, theRequestPartitionId));
@@ -2230,12 +2245,15 @@ public class QueryStack {
 
 			join = theSqlBuilder.getOrCreateFirstPredicateBuilder();
 
+			DbColumn[] leftColumns;
 			if (theSourceJoinColumn == null) {
-				predicate = new InCondition(join.getResourceIdColumn(), subSelect).setNegate(true);
+				leftColumns = join.getJoinColumns();
 			} else {
-				// -- for the resource link, need join with target_resource_id
-				predicate = new InCondition(theSourceJoinColumn, subSelect).setNegate(true);
+				leftColumns = theSourceJoinColumn;
 			}
+
+			Object left = new ColumnTupleObject(leftColumns);
+			predicate = new InCondition(left, subSelect).setNegate(true);
 
 		} else {
 			Boolean isMissing = theList.get(0).getMissing();

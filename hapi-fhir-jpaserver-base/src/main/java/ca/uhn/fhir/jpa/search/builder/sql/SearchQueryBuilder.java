@@ -55,8 +55,9 @@ import com.healthmarketscience.sqlbuilder.FunctionCall;
 import com.healthmarketscience.sqlbuilder.InCondition;
 import com.healthmarketscience.sqlbuilder.OrderObject;
 import com.healthmarketscience.sqlbuilder.SelectQuery;
-import com.healthmarketscience.sqlbuilder.UnaryCondition;
+import com.healthmarketscience.sqlbuilder.dbspec.Join;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
+import com.healthmarketscience.sqlbuilder.dbspec.basic.DbJoin;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbSchema;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbSpec;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
@@ -74,7 +75,6 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -102,6 +102,7 @@ public class SearchQueryBuilder {
 	private final SqlObjectFactory mySqlBuilderFactory;
 	private final boolean myCountQuery;
 	private final Dialect myDialect;
+	private final boolean mySelectPartitionId;
 	private boolean myMatchNothing;
 	private ResourceTablePredicateBuilder myResourceTableRoot;
 	private boolean myHaveAtLeastOnePredicate;
@@ -135,7 +136,8 @@ public class SearchQueryBuilder {
 				UUID.randomUUID() + "-",
 				theDialectProvider.getDialect(),
 				theCountQuery,
-				new ArrayList<>());
+				new ArrayList<>(),
+			thePartitionSettings.isPartitionIdsInPrimaryKeys());
 	}
 
 	/**
@@ -151,7 +153,8 @@ public class SearchQueryBuilder {
 			String theBindVariableSubstitutionBase,
 			Dialect theDialect,
 			boolean theCountQuery,
-			ArrayList<Object> theBindVariableValues) {
+			ArrayList<Object> theBindVariableValues,
+			boolean theSelectPartitionId) {
 		myFhirContext = theFhirContext;
 		myStorageSettings = theStorageSettings;
 		myPartitionSettings = thePartitionSettings;
@@ -173,6 +176,7 @@ public class SearchQueryBuilder {
 
 		myBindVariableSubstitutionBase = theBindVariableSubstitutionBase;
 		myBindVariableValues = theBindVariableValues;
+		mySelectPartitionId = theSelectPartitionId;
 	}
 
 	public FhirContext getFhirContext() {
@@ -359,12 +363,14 @@ public class SearchQueryBuilder {
 		mySelect.addCustomJoin(theJoinType, theFromTable, theToTable, theCondition);
 	}
 
-	public ComboCondition createOnCondition(DbColumn theSourceColumn, DbColumn theTargetColumn) {
+	public ComboCondition createOnCondition(DbColumn[] theSourceColumn, DbColumn[] theTargetColumn) {
 		ComboCondition onCondition = ComboCondition.and();
-		onCondition.addCondition(BinaryCondition.equalTo(theSourceColumn, theTargetColumn));
-
+		for (int i = 0; i < theSourceColumn.length; i+=1) {
+			onCondition.addCondition(BinaryCondition.equalTo(theSourceColumn[0], theTargetColumn[0]));
+		}
 		return onCondition;
 	}
+
 
 	/**
 	 * Add and return a predicate builder (or a root query if no root query exists yet) for selecting on a <code>:missing</code> search parameter
@@ -434,8 +440,15 @@ public class SearchQueryBuilder {
 					mySelect.addCustomColumns(
 							FunctionCall.count().setIsDistinct(true).addColumnParams(root.getResourceIdColumn()));
 				} else {
+					if (mySelectPartitionId) {
+						mySelectedResourceIdColumn = root.getResourceIdColumn();
+						mySelectedPartitionIdColumn = root.getPartitionIdColumn();
+						// fixme reverse?
+						mySelect.addColumns(mySelectedPartitionIdColumn, mySelectedResourceIdColumn);
+				} else {
 					mySelectedResourceIdColumn = root.getResourceIdColumn();
 					mySelect.addColumns(mySelectedResourceIdColumn);
+				}
 				}
 				mySelect.addFromTable(root.getTable());
 				myFirstPredicateBuilder = root;
@@ -460,9 +473,13 @@ public class SearchQueryBuilder {
 		return toJoinColumns(partitionIdColumn, resourceIdColumn);
 	}
 
+	/**
+	 * Remove or keep partition_id columns depending on settings.
+	 */
 	@Nonnull
 	public DbColumn[] toJoinColumns(DbColumn partitionIdColumn, DbColumn resourceIdColumn) {
 		if (isIncludePartitionIdInJoins()) {
+			// fixme can we reverse these?
 			return new DbColumn[] {partitionIdColumn, resourceIdColumn};
 		} else {
 			return new DbColumn[] {resourceIdColumn};
@@ -470,7 +487,7 @@ public class SearchQueryBuilder {
 	}
 
 	public boolean isIncludePartitionIdInJoins() {
-		return true;
+		return mySelectPartitionId && myPartitionSettings.isPartitionIdsInPrimaryKeys();
 	}
 
 	public void addJoin(DbTable theFromTable, DbTable theToTable, DbColumn[] theFromColumn, DbColumn[] theToColumn) {
@@ -484,29 +501,8 @@ public class SearchQueryBuilder {
 			DbColumn[] theToColumn,
 			SelectQuery.JoinType theJoinType) {
 		assert theFromColumn.length == theToColumn.length;
-		assert theFromColumn.length > 0;
-		// create custom join condition, allowing nullable columns.
-		var onCondition = ComboCondition.and();
-		for (int i = 0; i < theFromColumn.length; ++i) {
-			boolean isNullable =
-					theFromColumn[i].getColumnNameSQL().toLowerCase(Locale.ROOT).contains("partition_id");
-			onCondition.addCondition(buildJoinColumnCondition(isNullable, theFromColumn[i], theToColumn[i]));
-		}
-		mySelect.addCustomJoin(theJoinType, theFromTable, theToTable, onCondition);
-	}
-
-	private static @Nonnull Condition buildJoinColumnCondition(
-			boolean theColumnNullability, DbColumn theFromColumn, DbColumn theToColumn) {
-		var normalEqualCondition = BinaryCondition.equalTo(theFromColumn, theToColumn);
-		if (!theColumnNullability) {
-			return normalEqualCondition;
-		} else {
-			// the column can be null
-			// we must combine raw = with IS NULL checks.
-			var orBothNullCondition =
-					ComboCondition.and(UnaryCondition.isNull(theFromColumn), UnaryCondition.isNull(theToColumn));
-			return ComboCondition.or(normalEqualCondition, orBothNullCondition);
-		}
+		Join join = new DbJoin(mySpec, theFromTable, theToTable, theFromColumn, theToColumn);
+		mySelect.addJoins(theJoinType, join);
 	}
 
 	/**
@@ -842,7 +838,7 @@ public class SearchQueryBuilder {
 		}
 	}
 
-	public SearchQueryBuilder newChildSqlBuilder() {
+	public SearchQueryBuilder newChildSqlBuilder(boolean theSelectPartitionId) {
 		return new SearchQueryBuilder(
 				myFhirContext,
 				myStorageSettings,
@@ -853,7 +849,8 @@ public class SearchQueryBuilder {
 				myBindVariableSubstitutionBase,
 				myDialect,
 				false,
-				myBindVariableValues);
+				myBindVariableValues,
+				theSelectPartitionId);
 	}
 
 	public SelectQuery getSelect() {
