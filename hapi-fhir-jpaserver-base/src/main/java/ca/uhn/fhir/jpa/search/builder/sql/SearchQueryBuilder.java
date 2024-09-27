@@ -366,7 +366,7 @@ public class SearchQueryBuilder {
 	public ComboCondition createOnCondition(DbColumn[] theSourceColumn, DbColumn[] theTargetColumn) {
 		ComboCondition onCondition = ComboCondition.and();
 		for (int i = 0; i < theSourceColumn.length; i += 1) {
-			onCondition.addCondition(BinaryCondition.equalTo(theSourceColumn[0], theTargetColumn[0]));
+			onCondition.addCondition(BinaryCondition.equalTo(theSourceColumn[i], theTargetColumn[i]));
 		}
 		return onCondition;
 	}
