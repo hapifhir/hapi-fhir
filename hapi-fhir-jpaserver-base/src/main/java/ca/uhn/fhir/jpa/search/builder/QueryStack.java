@@ -100,6 +100,7 @@ import com.healthmarketscience.sqlbuilder.SetOperationQuery;
 import com.healthmarketscience.sqlbuilder.Subquery;
 import com.healthmarketscience.sqlbuilder.UnionQuery;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
+import com.healthmarketscience.sqlbuilder.dbspec.basic.DbObject;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Triple;
@@ -360,7 +361,6 @@ public class QueryStack {
 			case STRING:
 				StringPredicateBuilder stringPredicateBuilder = mySqlBuilder.createStringPredicateBuilder();
 				addSortCustomJoin(
-						// fixme switch?
 						resourceLinkPredicateBuilder.getJoinColumnsForTarget(),
 						stringPredicateBuilder,
 						stringPredicateBuilder.createHashIdentityPredicate(targetType, theChain));
@@ -1578,8 +1578,12 @@ public class QueryStack {
 			if (theSourceJoinColumn == null) {
 				BaseJoiningPredicateBuilder root = mySqlBuilder.getOrCreateFirstPredicateBuilder(false);
 				DbColumn[] joinColumns = root.getJoinColumns();
-				// fixme check for length 1 and skip tuple wrap.
-				Object joinColumnObject = ColumnTupleObject.from(joinColumns);
+				Object joinColumnObject;
+				if (joinColumns.length == 1) {
+					joinColumnObject = joinColumns[0];
+				} else {
+					joinColumnObject = ColumnTupleObject.from(joinColumns);
+				}
 				retVal = new InCondition(joinColumnObject, union);
 			} else {
 				// -- for the resource link, need join with target_resource_id
