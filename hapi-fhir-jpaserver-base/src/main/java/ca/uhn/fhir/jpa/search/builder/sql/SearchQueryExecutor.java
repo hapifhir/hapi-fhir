@@ -155,7 +155,6 @@ public class SearchQueryExecutor implements ISearchQueryExecutor {
 						if (nextRowAsArray.length == 1) {
 							myNext = (Long) nextRowAsArray[0];
 						} else {
-							// fixme reverse
 							Integer nextPartitionId = (Integer) nextRowAsArray[0];
 							myNext = (Long) nextRowAsArray[1];
 						}

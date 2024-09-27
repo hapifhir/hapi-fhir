@@ -63,7 +63,6 @@ public class FhirResourceDaoR4SearchSqlTest extends BaseJpaR4Test {
 		myPatientDao.search(map);
 		assertEquals(1, myCaptureQueriesListener.countSelectQueries());
 		String sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(false, false);
-		// fixme log bug about duplicate join of string in sort when also in query
 		assertEquals("SELECT t1.RES_ID FROM HFJ_RESOURCE t1 INNER JOIN HFJ_SPIDX_TOKEN t0 ON (t1.RES_ID = t0.RES_ID) LEFT OUTER JOIN HFJ_SPIDX_STRING t2 ON ((t1.RES_ID = t2.RES_ID) AND (t2.HASH_IDENTITY = ?)) WHERE (t0.HASH_VALUE = ?) ORDER BY t2.SP_VALUE_NORMALIZED ASC NULLS LAST", sql);
 
 	}

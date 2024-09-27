@@ -442,7 +442,6 @@ public class SearchQueryBuilder {
 					if (mySelectPartitionId) {
 						mySelectedResourceIdColumn = root.getResourceIdColumn();
 						mySelectedPartitionIdColumn = root.getPartitionIdColumn();
-						// fixme reverse?
 						mySelect.addColumns(mySelectedPartitionIdColumn, mySelectedResourceIdColumn);
 					} else {
 						mySelectedResourceIdColumn = root.getResourceIdColumn();
@@ -478,7 +477,6 @@ public class SearchQueryBuilder {
 	@Nonnull
 	public DbColumn[] toJoinColumns(DbColumn partitionIdColumn, DbColumn resourceIdColumn) {
 		if (isIncludePartitionIdInJoins()) {
-			// fixme can we reverse these?
 			return new DbColumn[] {partitionIdColumn, resourceIdColumn};
 		} else {
 			return new DbColumn[] {resourceIdColumn};
