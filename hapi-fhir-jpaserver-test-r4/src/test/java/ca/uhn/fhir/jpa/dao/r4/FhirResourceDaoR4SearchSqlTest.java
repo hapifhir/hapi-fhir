@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.Constants;
@@ -15,13 +16,17 @@ import org.hl7.fhir.r4.model.SearchParameter;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class FhirResourceDaoR4SearchSqlTest extends BaseJpaR4Test {
 
@@ -37,6 +42,9 @@ public class FhirResourceDaoR4SearchSqlTest extends BaseJpaR4Test {
 	@AfterEach
 	public void after() {
 		myStorageSettings.setTagStorageMode(JpaStorageSettings.DEFAULT_TAG_STORAGE_MODE);
+		myPartitionSettings.setDefaultPartitionId(new PartitionSettings().getDefaultPartitionId());
+		myPartitionSettings.setPartitionIdsInPrimaryKeys(new PartitionSettings().isPartitionIdsInPrimaryKeys());
+
 	}
 
 	/**
@@ -54,18 +62,43 @@ public class FhirResourceDaoR4SearchSqlTest extends BaseJpaR4Test {
 
 	}
 
-	@Test
-	public void testSortJoinIncludesPartitionId() {
-
+	@ParameterizedTest
+	@CsvSource(textBlock = """
+		single param - no hfj_resource,	Patient?name=smith			, 'SELECT t0.RES_ID FROM HFJ_SPIDX_STRING t0 WHERE ((t0.HASH_NORM_PREFIX = ?) AND (t0.SP_VALUE_NORMALIZED LIKE ?))'
+		""")
+	public void testSqlGeneration(String theComment, String theFhirRestQuery, String theExpectedSql) {
+		// setup
 		myCaptureQueriesListener.clear();
-		SearchParameterMap map = SearchParameterMap.newSynchronous(Patient.SP_ACTIVE, new TokenParam("true"));
-		map.setSort(new SortSpec(Patient.SP_NAME));
-		myPatientDao.search(map);
+
+		// execute
+		myTestDaoSearch.searchForIds(theFhirRestQuery);
+
+		// verify
 		assertEquals(1, myCaptureQueriesListener.countSelectQueries());
 		String sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(false, false);
-		assertEquals("SELECT t1.RES_ID FROM HFJ_RESOURCE t1 INNER JOIN HFJ_SPIDX_TOKEN t0 ON (t1.RES_ID = t0.RES_ID) LEFT OUTER JOIN HFJ_SPIDX_STRING t2 ON ((t1.RES_ID = t2.RES_ID) AND (t2.HASH_IDENTITY = ?)) WHERE (t0.HASH_VALUE = ?) ORDER BY t2.SP_VALUE_NORMALIZED ASC NULLS LAST", sql);
-
+		assertEquals(theExpectedSql, sql, theComment);
 	}
+
+	@ParameterizedTest
+	@CsvSource(textBlock = """
+		single param - no hfj_resource,	Patient?name=smith				,'SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_SPIDX_STRING t0 WHERE ((t0.HASH_NORM_PREFIX = ?) AND (t0.SP_VALUE_NORMALIZED LIKE ?))'
+		single join,					Patient?name=smith&active=true	,'SELECT t1.PARTITION_ID,t1.RES_ID FROM HFJ_RESOURCE t1 INNER JOIN HFJ_SPIDX_STRING t0 ON ((t1.PARTITION_ID = t0.PARTITION_ID) AND (t1.RES_ID = t0.RES_ID)) INNER JOIN HFJ_SPIDX_TOKEN t2 ON ((t1.PARTITION_ID = t2.PARTITION_ID) AND (t1.RES_ID = t2.RES_ID)) WHERE (((t0.HASH_NORM_PREFIX = ?) AND (t0.SP_VALUE_NORMALIZED LIKE ?)) AND (t2.HASH_VALUE = ?))'
+		""")
+	public void testSqlGenerationWithPartitionJoins(String theComment, String theFhirRestQuery, String theExpectedSql) {
+		// setup
+		myPartitionSettings.setDefaultPartitionId(0);
+		myPartitionSettings.setPartitionIdsInPrimaryKeys(true);
+		myCaptureQueriesListener.clear();
+
+		// execute
+		myTestDaoSearch.searchForIds(theFhirRestQuery);
+
+		// verify
+		assertEquals(1, myCaptureQueriesListener.countSelectQueries());
+		String sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(false, false);
+		assertEquals(theExpectedSql, sql, theComment);
+	}
+
 	/**
 	 * Two regular search params - Should use HFJ_RESOURCE as root
 	 */
