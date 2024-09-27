@@ -12,7 +12,7 @@ import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 
-public class BaseReindexStep {
+public abstract class BaseReindexStep {
 
 	public static final int REINDEX_MAX_RETRIES = 10;
 

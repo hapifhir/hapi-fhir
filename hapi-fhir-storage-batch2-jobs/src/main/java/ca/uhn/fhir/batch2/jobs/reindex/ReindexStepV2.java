@@ -53,7 +53,12 @@ public class ReindexStepV2 extends BaseReindexStep
 			resourceTypesToCheckFlag.put(id.getResourceType(), true);
 		});
 		if (myReindexJobService.anyResourceHasPendingReindexWork(resourceTypesToCheckFlag)) {
+			/* CHECKSTYLE.OFF: RegexpSingleLine
+			 * This exception is never fed to users and is only part of our structure
+			 * So there's no need to use an error code
+			 */
 			throw new RetryChunkLaterException(ReindexUtils.getRetryLaterDelay());
+			/* CHECKSTYLE.ON: RegexpSingleLine */
 		}
 
 		ReindexResults results = doReindex(

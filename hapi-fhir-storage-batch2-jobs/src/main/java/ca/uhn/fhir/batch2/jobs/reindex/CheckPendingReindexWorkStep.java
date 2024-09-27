@@ -30,8 +30,12 @@ public class CheckPendingReindexWorkStep implements IJobStepWorker<ReindexJobPar
 
 		if (!results.getResourceToHasWorkToComplete().isEmpty()) {
 			if (myReindexJobService.anyResourceHasPendingReindexWork(results.getResourceToHasWorkToComplete())) {
-				// give time for reindex work to complete
+				/* CHECKSTYLE.OFF: RegexpSingleLine
+				 * This exception is never fed to users and is only part of our structure
+				 * So there's no need to use an error code
+				 */
 				throw new RetryChunkLaterException(ReindexUtils.getRetryLaterDelay());
+				/* CHECKSTYLE.ON: RegexpSingleLine */
 			}
 		}
 
