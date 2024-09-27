@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -99,6 +100,20 @@ public class FhirResourceDaoR4SearchSqlTest extends BaseJpaR4Test {
 		assertThat(toUnqualifiedVersionlessIds(outcome)).containsExactly(id);
 
 	}
+
+	@Test
+	public void testSortJoin() {
+
+		myCaptureQueriesListener.clear();
+		SearchParameterMap map = SearchParameterMap.newSynchronous(Patient.SP_ACTIVE, new TokenParam("true"));
+		map.setSort(new SortSpec(Patient.SP_NAME));
+		myPatientDao.search(map);
+		assertEquals(1, myCaptureQueriesListener.countSelectQueries());
+		String sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(false, false);
+		assertEquals("SELECT t1.RES_ID FROM HFJ_RESOURCE t1 INNER JOIN HFJ_SPIDX_TOKEN t0 ON (t1.RES_ID = t0.RES_ID) WHERE (t0.HASH_VALUE = ?) ORDER BY t0.SP_VALUE_NORMALIZED ASC NULLS LAST", sql);
+
+	}
+
 
 	@Test
 	public void testSearchByProfile_InlineMode() {
