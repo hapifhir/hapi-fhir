@@ -110,7 +110,7 @@ public class FhirResourceDaoR4SearchSqlTest extends BaseJpaR4Test {
 		myPatientDao.search(map, mySrd);
 		assertEquals(1, myCaptureQueriesListener.countSelectQueries());
 		String sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(false, false);
-		assertEquals("SELECT t1.RES_ID FROM HFJ_RESOURCE t1 INNER JOIN HFJ_SPIDX_TOKEN t0 ON (t1.RES_ID = t0.RES_ID) WHERE (t0.HASH_VALUE = ?) ORDER BY t0.SP_VALUE_NORMALIZED ASC NULLS LAST", sql);
+		assertEquals("SELECT t1.RES_ID FROM HFJ_RESOURCE t1 INNER JOIN HFJ_SPIDX_STRING t0 ON (t1.RES_ID = t0.RES_ID) WHERE ((t0.HASH_NORM_PREFIX = ?) AND (t0.SP_VALUE_NORMALIZED LIKE ?)) ORDER BY t0.SP_VALUE_NORMALIZED ASC NULLS LAST", sql);
 
 	}
 
