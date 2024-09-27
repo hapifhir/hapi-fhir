@@ -7,6 +7,13 @@ import java.time.temporal.ChronoUnit;
 
 public class ReindexUtils {
 
+	/**
+	 * The reindex job definition id
+	 */
+	public static final String JOB_REINDEX = "REINDEX";
+
+	public static final int REINDEX_MAX_RETRIES = 10;
+
 	private static final Duration RETRY_DELAY = Duration.of(30, ChronoUnit.SECONDS);
 
 	private static Duration myDelay;

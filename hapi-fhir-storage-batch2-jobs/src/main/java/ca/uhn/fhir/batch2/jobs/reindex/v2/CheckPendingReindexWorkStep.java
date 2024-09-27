@@ -1,4 +1,4 @@
-package ca.uhn.fhir.batch2.jobs.reindex;
+package ca.uhn.fhir.batch2.jobs.reindex.v2;
 
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
@@ -7,6 +7,8 @@ import ca.uhn.fhir.batch2.api.RetryChunkLaterException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
+import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
+import ca.uhn.fhir.batch2.jobs.reindex.ReindexUtils;
 import ca.uhn.fhir.batch2.jobs.reindex.models.ReindexResults;
 import ca.uhn.fhir.batch2.jobs.reindex.svcs.ReindexJobService;
 import ca.uhn.fhir.i18n.Msg;

@@ -57,6 +57,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
+import static ca.uhn.fhir.batch2.jobs.reindex.ReindexUtils.JOB_REINDEX;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -312,7 +313,7 @@ public class FhirResourceDaoR4IndexStorageOptimizedTest extends BaseJpaR4Test {
 			parameters.addUrl(url);
 		}
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
-		startRequest.setJobDefinitionId(ReindexAppCtx.JOB_REINDEX);
+		startRequest.setJobDefinitionId(JOB_REINDEX);
 		startRequest.setParameters(parameters);
 		Batch2JobStartResponse res = myJobCoordinator.startInstance(mySrd, startRequest);
 		ourLog.info("Started reindex job with id {}", res.getInstanceId());

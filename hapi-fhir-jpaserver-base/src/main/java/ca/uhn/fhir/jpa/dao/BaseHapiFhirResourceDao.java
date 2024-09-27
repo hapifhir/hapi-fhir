@@ -158,6 +158,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static ca.uhn.fhir.batch2.jobs.reindex.ReindexUtils.JOB_REINDEX;
 import static java.util.Objects.isNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -1315,7 +1316,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			myJobPartitionProvider.getPartitionedUrls(theRequestDetails, urls).forEach(params::addPartitionedUrl);
 
 			JobInstanceStartRequest request = new JobInstanceStartRequest();
-			request.setJobDefinitionId(ReindexAppCtx.JOB_REINDEX);
+			request.setJobDefinitionId(JOB_REINDEX);
 			request.setParameters(params);
 			myJobCoordinator.startInstance(theRequestDetails, request);
 

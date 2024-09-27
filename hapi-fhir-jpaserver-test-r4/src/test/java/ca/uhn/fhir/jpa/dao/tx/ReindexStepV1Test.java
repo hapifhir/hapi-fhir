@@ -6,7 +6,7 @@ import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrl;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
-import ca.uhn.fhir.batch2.jobs.reindex.ReindexStepV1;
+import ca.uhn.fhir.batch2.jobs.reindex.v1.ReindexStepV1;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

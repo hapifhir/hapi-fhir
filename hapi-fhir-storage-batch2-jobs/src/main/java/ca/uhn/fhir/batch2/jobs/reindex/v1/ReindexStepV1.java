@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.batch2.jobs.reindex;
+package ca.uhn.fhir.batch2.jobs.reindex.v1;
 
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
@@ -26,26 +26,46 @@ import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
+import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
+import ca.uhn.fhir.batch2.jobs.reindex.ReindexTask;
+import ca.uhn.fhir.batch2.jobs.reindex.models.ReindexResults;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import jakarta.annotation.Nonnull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ReindexStepV1 extends BaseReindexStep
-		implements IJobStepWorker<ReindexJobParameters, ResourceIdListWorkChunkJson, VoidModel> {
+import static ca.uhn.fhir.batch2.jobs.reindex.ReindexUtils.REINDEX_MAX_RETRIES;
+
+@Deprecated(forRemoval = true, since = "7.6.0")
+public class ReindexStepV1 implements IJobStepWorker<ReindexJobParameters, ResourceIdListWorkChunkJson, VoidModel> {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ReindexStepV1.class);
+
+	private final HapiTransactionService myHapiTransactionService;
+
+	private final IFhirSystemDao<?, ?> mySystemDao;
+
+	private final DaoRegistry myDaoRegistry;
+
+	private final IIdHelperService<IResourcePersistentId<?>> myIdHelperService;
+
 
 	public ReindexStepV1(
 			HapiTransactionService theHapiTransactionService,
 			IFhirSystemDao<?, ?> theSystemDao,
 			DaoRegistry theRegistry,
 			IIdHelperService<IResourcePersistentId<?>> theIdHelperService) {
-		super(theHapiTransactionService, theSystemDao, theRegistry, theIdHelperService);
+		myDaoRegistry = theRegistry;
+		myHapiTransactionService = theHapiTransactionService;
+		mySystemDao = theSystemDao;
+		myIdHelperService = theIdHelperService;
 	}
 
 	@Nonnull
@@ -66,5 +86,34 @@ public class ReindexStepV1 extends BaseReindexStep
 				jobParameters);
 
 		return new RunOutcome(data.size());
+	}
+
+	public ReindexResults doReindex(
+		ResourceIdListWorkChunkJson data,
+		IJobDataSink<?> theDataSink,
+		String theInstanceId,
+		String theChunkId,
+		ReindexJobParameters theJobParameters) {
+		RequestDetails requestDetails = new SystemRequestDetails();
+		requestDetails.setRetry(true);
+		requestDetails.setMaxRetries(REINDEX_MAX_RETRIES);
+
+		TransactionDetails transactionDetails = new TransactionDetails();
+		ReindexTask.JobParameters jp = new ReindexTask.JobParameters();
+		jp.setData(data)
+			.setRequestDetails(requestDetails)
+			.setTransactionDetails(transactionDetails)
+			.setDataSink(theDataSink)
+			.setInstanceId(theInstanceId)
+			.setChunkId(theChunkId)
+			.setJobParameters(theJobParameters);
+
+		ReindexTask reindexJob = new ReindexTask(jp, myDaoRegistry, mySystemDao, myIdHelperService);
+
+		return myHapiTransactionService
+			.withRequest(requestDetails)
+			.withTransactionDetails(transactionDetails)
+			.withRequestPartitionId(data.getRequestPartitionId())
+			.execute(reindexJob);
 	}
 }

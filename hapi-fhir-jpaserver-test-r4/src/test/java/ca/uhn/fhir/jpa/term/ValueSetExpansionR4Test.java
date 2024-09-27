@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.term;
 
-import ca.uhn.fhir.batch2.jobs.reindex.ReindexAppCtx;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexUtils;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
@@ -68,6 +67,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.batch2.jobs.reindex.ReindexUtils.JOB_REINDEX;
 import static ca.uhn.fhir.util.HapiExtensions.EXT_VALUESET_EXPANSION_MESSAGE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
@@ -2229,7 +2229,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 			ReindexJobParameters params = new ReindexJobParameters();
 			params.addUrl("CodeSystem?");
 			JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
-			startRequest.setJobDefinitionId(ReindexAppCtx.JOB_REINDEX);
+			startRequest.setJobDefinitionId(JOB_REINDEX);
 			startRequest.setParameters(params);
 
 			// and wait for it to complete
