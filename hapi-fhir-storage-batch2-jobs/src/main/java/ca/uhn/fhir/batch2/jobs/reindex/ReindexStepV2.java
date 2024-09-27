@@ -9,6 +9,7 @@ import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.batch2.jobs.reindex.models.ReindexResults;
 import ca.uhn.fhir.batch2.jobs.reindex.svcs.ReindexJobService;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
@@ -53,12 +54,8 @@ public class ReindexStepV2 extends BaseReindexStep
 			resourceTypesToCheckFlag.put(id.getResourceType(), true);
 		});
 		if (myReindexJobService.anyResourceHasPendingReindexWork(resourceTypesToCheckFlag)) {
-			/* CHECKSTYLE.OFF: HapiErrorCodeUniqueness
-			 * This exception is never fed to users and is only part of our structure
-			 * So there's no need to use an error code
-			 */
-			throw new RetryChunkLaterException(ReindexUtils.getRetryLaterDelay());
-			/* CHECKSTYLE.ON: HapiErrorCodeUniqueness */
+
+			throw new RetryChunkLaterException(Msg.code(2552), ReindexUtils.getRetryLaterDelay());
 		}
 
 		ReindexResults results = doReindex(
