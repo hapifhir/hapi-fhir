@@ -21,9 +21,9 @@ package ca.uhn.fhir.rest.server.mail;
 
 import jakarta.annotation.Nonnull;
 import org.simplejavamail.api.email.Email;
-import org.simplejavamail.api.mailer.AsyncResponse;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 public interface IMailSvc {
 	void sendMail(@Nonnull List<Email> theEmails);
@@ -31,7 +31,5 @@ public interface IMailSvc {
 	void sendMail(@Nonnull Email theEmail);
 
 	void sendMail(
-			@Nonnull Email theEmail,
-			@Nonnull Runnable theOnSuccess,
-			@Nonnull AsyncResponse.ExceptionConsumer theErrorHandler);
+			@Nonnull Email theEmail, @Nonnull Runnable theOnSuccess, @Nonnull Consumer<Throwable> theErrorHandler);
 }
