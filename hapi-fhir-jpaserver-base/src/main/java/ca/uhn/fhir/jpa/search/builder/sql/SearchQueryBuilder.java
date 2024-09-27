@@ -137,7 +137,7 @@ public class SearchQueryBuilder {
 				theDialectProvider.getDialect(),
 				theCountQuery,
 				new ArrayList<>(),
-			thePartitionSettings.isPartitionIdsInPrimaryKeys());
+				thePartitionSettings.isPartitionIdsInPrimaryKeys());
 	}
 
 	/**
@@ -365,12 +365,11 @@ public class SearchQueryBuilder {
 
 	public ComboCondition createOnCondition(DbColumn[] theSourceColumn, DbColumn[] theTargetColumn) {
 		ComboCondition onCondition = ComboCondition.and();
-		for (int i = 0; i < theSourceColumn.length; i+=1) {
+		for (int i = 0; i < theSourceColumn.length; i += 1) {
 			onCondition.addCondition(BinaryCondition.equalTo(theSourceColumn[0], theTargetColumn[0]));
 		}
 		return onCondition;
 	}
-
 
 	/**
 	 * Add and return a predicate builder (or a root query if no root query exists yet) for selecting on a <code>:missing</code> search parameter
@@ -445,10 +444,10 @@ public class SearchQueryBuilder {
 						mySelectedPartitionIdColumn = root.getPartitionIdColumn();
 						// fixme reverse?
 						mySelect.addColumns(mySelectedPartitionIdColumn, mySelectedResourceIdColumn);
-				} else {
-					mySelectedResourceIdColumn = root.getResourceIdColumn();
-					mySelect.addColumns(mySelectedResourceIdColumn);
-				}
+					} else {
+						mySelectedResourceIdColumn = root.getResourceIdColumn();
+						mySelect.addColumns(mySelectedResourceIdColumn);
+					}
 				}
 				mySelect.addFromTable(root.getTable());
 				myFirstPredicateBuilder = root;
