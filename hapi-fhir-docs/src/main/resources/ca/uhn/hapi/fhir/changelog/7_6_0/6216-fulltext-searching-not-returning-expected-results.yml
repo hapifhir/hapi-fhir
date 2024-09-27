@@ -1,6 +1,7 @@
 ---
 type: fix
 issue: 6216
+backport: 7.4.2
 jira: SMILE-8806
 title: "Previously, searches combining the `_text` query parameter (using Lucene/Elasticsearch) with query parameters 
 using the database (e.g. `identifier` or `date`) could miss matches when more than 500 results match the `_text` query 
