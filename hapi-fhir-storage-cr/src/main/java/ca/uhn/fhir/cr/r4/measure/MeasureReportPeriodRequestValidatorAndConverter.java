@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.cr.r4.measure;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -91,8 +92,8 @@ public class MeasureReportPeriodRequestValidatorAndConverter {
 		if ((Strings.isBlank(thePeriodStart) && !Strings.isBlank(thePeriodEnd))
 				|| (!Strings.isBlank(thePeriodStart) && Strings.isBlank(thePeriodEnd))) {
 			throw new InvalidRequestException(String.format(
-					"Either both period start: [%s] and end: [%s] must be empty or non empty",
-					thePeriodStart, thePeriodEnd));
+					"%sEither both period start: [%s] and end: [%s] must be empty or non empty",
+					Msg.code(2554), thePeriodStart, thePeriodEnd));
 		}
 
 		if (Strings.isBlank(thePeriodStart) && Strings.isBlank(thePeriodEnd)) {
@@ -101,7 +102,8 @@ public class MeasureReportPeriodRequestValidatorAndConverter {
 
 		if (thePeriodStart.length() != thePeriodEnd.length()) {
 			throw new InvalidRequestException(String.format(
-					"Period start: %s and end: %s are not the same date/time formats", thePeriodStart, thePeriodEnd));
+					"%sPeriod start: %s and end: %s are not the same date/time formats",
+					Msg.code(2555), thePeriodStart, thePeriodEnd));
 		}
 
 		final DateTimeFormatter dateTimeFormatterStart = validateAndGetDateTimeFormat(thePeriodStart, thePeriodEnd);
@@ -116,13 +118,6 @@ public class MeasureReportPeriodRequestValidatorAndConverter {
 		final String periodStartFormatted = formatWithTimezone(localDateTimeStart, theZoneId);
 		final String periodEndFormatted = formatWithTimezone(localDateTimeEnd, theZoneId);
 
-		ourLog.info(
-				"6560: NEW START: {} formatted: {}, NEW END: {}, formatted: {}",
-				localDateTimeStart,
-				periodStartFormatted,
-				localDateTimeEnd,
-				periodEndFormatted);
-
 		return new MeasurePeriodForEvaluation(periodStartFormatted, periodEndFormatted);
 	}
 
@@ -133,14 +128,15 @@ public class MeasureReportPeriodRequestValidatorAndConverter {
 			LocalDateTime theLocalDateTimeEnd) {
 		// This should probably never happen
 		if (theLocalDateTimeStart.isEqual(theLocalDateTimeEnd)) {
-			throw new InvalidRequestException(
-					String.format("Start date: %s is the same as end date: %s", theThePeriodStart, theThePeriodEnd));
+			throw new InvalidRequestException(String.format(
+					"%sStart date: %s is the same as end date: %s",
+					Msg.code(2556), theThePeriodStart, theThePeriodEnd));
 		}
 
 		if (theLocalDateTimeStart.isAfter(theLocalDateTimeEnd)) {
 			throw new InvalidRequestException(String.format(
-					"Invalid Interval - the ending boundary: %s must be greater than or equal to the starting boundary: %s",
-					theThePeriodEnd, theThePeriodStart));
+					"%sInvalid Interval - the ending boundary: %s must be greater than or equal to the starting boundary: %s",
+					Msg.code(2557), theThePeriodEnd, theThePeriodStart));
 		}
 	}
 
@@ -152,7 +148,8 @@ public class MeasureReportPeriodRequestValidatorAndConverter {
 		return DateUtils.parseDateTimeStringIfValid(thePeriod, theDateTimeFormatter)
 				.flatMap(theTemporalAccessorToLocalDateTimeConverter)
 				.orElseThrow(() -> new InvalidRequestException(String.format(
-						"Period %s: %s has an unsupported format", isStart ? "start" : "end", thePeriod)));
+						"%s Period %s: %s has an unsupported format",
+						Msg.code(2558), isStart ? "start" : "end", thePeriod)));
 	}
 
 	@Nonnull
@@ -162,8 +159,8 @@ public class MeasureReportPeriodRequestValidatorAndConverter {
 
 		if (dateTimeFormatterStart == null) {
 			throw new InvalidRequestException(String.format(
-					"Unsupported Date/Time format for period start: %s or end: %s",
-					theThePeriodStart, theThePeriodEnd));
+					"%s Unsupported Date/Time format for period start: %s or end: %s",
+					Msg.code(2559), theThePeriodStart, theThePeriodEnd));
 		}
 		return dateTimeFormatterStart;
 	}
@@ -179,7 +176,8 @@ public class MeasureReportPeriodRequestValidatorAndConverter {
 			try {
 				return ZoneId.of(clientTimezoneString);
 			} catch (Exception exception) {
-				throw new InvalidRequestException("Invalid value for Timezone header: " + clientTimezoneString);
+				throw new InvalidRequestException(
+						String.format("%sInvalid value for Timezone header: %s", Msg.code(2560), clientTimezoneString));
 			}
 		}
 
