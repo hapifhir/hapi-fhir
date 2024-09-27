@@ -105,7 +105,7 @@ public class FhirResourceDaoR4SearchSqlTest extends BaseJpaR4Test {
 	public void testSortJoin() {
 
 		myCaptureQueriesListener.clear();
-		SearchParameterMap map = SearchParameterMap.newSynchronous(Patient.SP_ACTIVE, new TokenParam("true"));
+		SearchParameterMap map = SearchParameterMap.newSynchronous(Patient.SP_NAME, new StringParam("smith"));
 		map.setSort(new SortSpec(Patient.SP_NAME));
 		myPatientDao.search(map);
 		assertEquals(1, myCaptureQueriesListener.countSelectQueries());
