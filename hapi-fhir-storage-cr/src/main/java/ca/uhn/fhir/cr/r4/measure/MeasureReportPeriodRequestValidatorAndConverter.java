@@ -53,8 +53,8 @@ import java.util.function.Function;
  *     <li>yyyy-MM-ddTHH:mm:ss</li>
  * </ol>
  */
-public class MeasureReportPeriodRequestProcessingService {
-	private static final Logger ourLog = LoggerFactory.getLogger(MeasureReportPeriodRequestProcessingService.class);
+public class MeasureReportPeriodRequestValidatorAndConverter {
+	private static final Logger ourLog = LoggerFactory.getLogger(MeasureReportPeriodRequestValidatorAndConverter.class);
 
 	private static final DateTimeFormatter DATE_TIME_FORMATTER_YYYY_INPUT = DateTimeFormatter.ofPattern("yyyy");
 	private static final DateTimeFormatter DATE_TIME_FORMATTER_YYYY_MM_INPUT = DateTimeFormatter.ofPattern("yyyy-MM");
@@ -74,7 +74,7 @@ public class MeasureReportPeriodRequestProcessingService {
 
 	private final ZoneId myFallbackTimezone;
 
-	public MeasureReportPeriodRequestProcessingService(ZoneId theFallbackTimezone) {
+	public MeasureReportPeriodRequestValidatorAndConverter(ZoneId theFallbackTimezone) {
 		myFallbackTimezone = theFallbackTimezone;
 	}
 

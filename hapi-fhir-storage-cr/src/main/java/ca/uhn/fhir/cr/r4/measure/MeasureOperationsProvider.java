@@ -37,13 +37,13 @@ import org.opencds.cqf.fhir.utility.monad.Eithers;
 
 public class MeasureOperationsProvider {
 	private final IMeasureServiceFactory myR4MeasureServiceFactory;
-	private final MeasureReportPeriodRequestProcessingService myMeasureReportPeriodRequestProcessingService;
+	private final MeasureReportPeriodRequestValidatorAndConverter myMeasureReportPeriodRequestProcessingService;
 
 	public MeasureOperationsProvider(
 			IMeasureServiceFactory theR4MeasureServiceFactory,
-			MeasureReportPeriodRequestProcessingService theMeasureReportPeriodRequestProcessingService) {
+			MeasureReportPeriodRequestValidatorAndConverter theMeasureReportPeriodRequestValidatorAndConverter) {
 		myR4MeasureServiceFactory = theR4MeasureServiceFactory;
-		myMeasureReportPeriodRequestProcessingService = theMeasureReportPeriodRequestProcessingService;
+		myMeasureReportPeriodRequestProcessingService = theMeasureReportPeriodRequestValidatorAndConverter;
 	}
 
 	/**

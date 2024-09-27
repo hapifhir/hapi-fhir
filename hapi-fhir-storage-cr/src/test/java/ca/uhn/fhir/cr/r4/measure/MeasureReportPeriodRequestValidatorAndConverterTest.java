@@ -17,11 +17,10 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-class MeasureReportPeriodRequestProcessingServiceTest {
+class MeasureReportPeriodRequestValidatorAndConverterTest {
 
-	private final MeasureReportPeriodRequestProcessingService myTestSubject = new MeasureReportPeriodRequestProcessingService(ZoneOffset.UTC);
+	private final MeasureReportPeriodRequestValidatorAndConverter myTestSubject = new MeasureReportPeriodRequestValidatorAndConverter(ZoneOffset.UTC);
 
-	// LUKETODO:  what happens if only one is null?
 	@ParameterizedTest
 	@CsvSource( nullValues = {"null"},
 		value={

@@ -23,6 +23,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.cr.common.IRepositoryFactory;
 import ca.uhn.fhir.cr.common.RepositoryFactoryForRepositoryInterface;
+import ca.uhn.fhir.cr.config.CrBaseConfig;
 import ca.uhn.fhir.cr.config.ProviderLoader;
 import ca.uhn.fhir.cr.config.ProviderSelector;
 import ca.uhn.fhir.cr.config.RepositoryConfig;
@@ -39,7 +40,7 @@ import ca.uhn.fhir.cr.r4.measure.CareGapsOperationProvider;
 import ca.uhn.fhir.cr.r4.measure.CollectDataOperationProvider;
 import ca.uhn.fhir.cr.r4.measure.DataRequirementsOperationProvider;
 import ca.uhn.fhir.cr.r4.measure.MeasureOperationsProvider;
-import ca.uhn.fhir.cr.r4.measure.MeasureReportPeriodRequestProcessingService;
+import ca.uhn.fhir.cr.r4.measure.MeasureReportPeriodRequestValidatorAndConverter;
 import ca.uhn.fhir.cr.r4.measure.SubmitDataProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
@@ -58,13 +59,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
-import java.time.ZoneOffset;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.Executor;
 
 @Configuration
-@Import({RepositoryConfig.class})
+@Import({RepositoryConfig.class, CrBaseConfig.class})
 public class CrR4Config {
 
 	@Bean
@@ -149,9 +149,9 @@ public class CrR4Config {
 	@Bean
 	MeasureOperationsProvider r4MeasureOperationsProvider(
 			IMeasureServiceFactory theR4MeasureServiceFactory,
-			MeasureReportPeriodRequestProcessingService theMeasureReportPeriodRequestProcessingService) {
+			MeasureReportPeriodRequestValidatorAndConverter theMeasureReportPeriodRequestValidatorAndConverter) {
 		return new MeasureOperationsProvider(
-				theR4MeasureServiceFactory, theMeasureReportPeriodRequestProcessingService);
+				theR4MeasureServiceFactory, theMeasureReportPeriodRequestValidatorAndConverter);
 	}
 
 	@Bean
@@ -172,10 +172,5 @@ public class CrR4Config {
 								DataRequirementsOperationProvider.class)));
 
 		return new ProviderLoader(theRestfulServer, theApplicationContext, selector);
-	}
-
-	@Bean
-	MeasureReportPeriodRequestProcessingService measureReportPeriodService() {
-		return new MeasureReportPeriodRequestProcessingService(ZoneOffset.UTC);
 	}
 }
