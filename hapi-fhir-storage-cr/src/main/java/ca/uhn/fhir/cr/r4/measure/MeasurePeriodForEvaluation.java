@@ -19,13 +19,17 @@
  */
 package ca.uhn.fhir.cr.r4.measure;
 
+import com.google.common.base.Preconditions;
 import jakarta.annotation.Nullable;
 
 import java.util.Objects;
 import java.util.StringJoiner;
 
-// LUKETODO:  javadoc
-// TODO:  LD:  make this a record when hapi-fhir supports JDK 17
+// TODO:  LD:  consider making this a record when hapi-fhir supports JDK 17
+/**
+ * Simple tuple containing post-conversion String versions of period start and end.
+ * Either both must be null or neither.
+ */
 public class MeasurePeriodForEvaluation {
 	@Nullable
 	private final String myPeriodStart;
@@ -34,6 +38,10 @@ public class MeasurePeriodForEvaluation {
 	private final String myPeriodEnd;
 
 	public MeasurePeriodForEvaluation(@Nullable String thePeriodStart, @Nullable String thePeriodEnd) {
+		// Either both are null or neither
+		Preconditions.checkArgument(
+				(thePeriodStart != null && thePeriodEnd != null) || (thePeriodStart == null && thePeriodEnd == null));
+
 		myPeriodStart = thePeriodStart;
 		myPeriodEnd = thePeriodEnd;
 	}
@@ -49,14 +57,14 @@ public class MeasurePeriodForEvaluation {
 	}
 
 	@Override
-	public boolean equals(Object theO) {
-		if (this == theO) {
+	public boolean equals(Object theOther) {
+		if (this == theOther) {
 			return true;
 		}
-		if (theO == null || getClass() != theO.getClass()) {
+		if (theOther == null || getClass() != theOther.getClass()) {
 			return false;
 		}
-		MeasurePeriodForEvaluation that = (MeasurePeriodForEvaluation) theO;
+		MeasurePeriodForEvaluation that = (MeasurePeriodForEvaluation) theOther;
 		return Objects.equals(myPeriodStart, that.myPeriodStart) && Objects.equals(myPeriodEnd, that.myPeriodEnd);
 	}
 

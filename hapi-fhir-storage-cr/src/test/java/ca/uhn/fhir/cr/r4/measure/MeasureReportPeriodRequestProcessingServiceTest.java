@@ -5,18 +5,12 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import jakarta.annotation.Nullable;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import java.time.LocalDateTime;
-import java.time.Month;
-import java.time.ZoneId;
 import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -26,17 +20,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class MeasureReportPeriodRequestProcessingServiceTest {
 
 	private final MeasureReportPeriodRequestProcessingService myTestSubject = new MeasureReportPeriodRequestProcessingService(ZoneOffset.UTC);
-
-	@Test
-	void dammit() {
-		final String expectedResult = "2020-01-01T00:00:00.0-05:00";
-		final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SXXX");
-		final ZonedDateTime input = ZonedDateTime.of(LocalDateTime.of(2020, Month.JANUARY, 1, 0, 0, 0), ZoneId.of("America/Toronto"));
-
-		final String actualResult = input.format(dateTimeFormatter);
-
-		assertThat(actualResult).isEqualTo(expectedResult);
-	}
 
 	// LUKETODO:  what happens if only one is null?
 	@ParameterizedTest
@@ -120,6 +103,8 @@ class MeasureReportPeriodRequestProcessingServiceTest {
 	private static Stream<Arguments> errorParams() {
 		return Stream.of(
 			Arguments.of(null, "2024", "2024-01", new InvalidRequestException("Period start: 2024 and end: 2024-01 are not the same date/time formats")),
+			Arguments.of(null, null, "2024-01", new InvalidRequestException("Either both period start: [null] and end: [2024-01] must be empty or non empty")),
+			Arguments.of(null, "2024-01", null, new InvalidRequestException("Either both period start: [2024-01] and end: [null] must be empty or non empty")),
 			Arguments.of(null, "2024-01-01T12", "2024-01-01T12", new InvalidRequestException("Unsupported Date/Time format for period start: 2024-01-01T12 or end: 2024-01-01T12")),
 			Arguments.of(null, "2024-01-02", "2024-01-01", new InvalidRequestException("Invalid Interval - the ending boundary: 2024-01-01 must be greater than or equal to the starting boundary: 2024-01-02")),
 			Arguments.of("Middle-Earth/Combe", "2024-01-02", "2024-01-03", new InvalidRequestException("Invalid value for Timezone header: Middle-Earth/Combe")),

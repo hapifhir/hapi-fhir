@@ -1,0 +1,6 @@
+---
+type: add
+issue: 6267
+title: "$evaluate-measure will now consider the 'Timezone' request header when computing period start and end with
+        the requested date/time offset instead of using the server timezone.  If no 'Timezone' header is provided,
+        $evaluate-measure will default to UTC."

@@ -23,6 +23,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.DateUtils;
+import jakarta.annotation.Nonnull;
 import org.apache.logging.log4j.util.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,11 +31,28 @@ import org.slf4j.LoggerFactory;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAccessor;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 
-// LUKETODO: changelog
-// LUKETODO: javadoc
+/**
+ * Used immediately after receiving a REST call by $evaluate-measure and any potential variants to validate and convert
+ * period start and end inputs to timezones with offsets.  The offset is determined from the request header a value for "Timezone".
+ * <p/>
+ * This class takes a fallback timezone that's used in case the request header does not contain a value for "Timezone".
+ * <p/>
+ * The output date/time format is the following to be compatible with clinical-reasoning: yyyy-MM-dd'T'HH:mm:ss.SXXX
+ * ex: 2023-01-01T00:00:00.0-07:00
+ * <p/>
+ * Currently, these are the date/time formats supported:
+ * <ol>
+ *     <li>yyyy</li>
+ *     <li>yyyy-MM</li>
+ *     <li>yyyy-MM-dd</li>
+ *     <li>yyyy-MM-ddTHH:mm:ss</li>
+ * </ol>
+ */
 public class MeasureReportPeriodRequestProcessingService {
 	private static final Logger ourLog = LoggerFactory.getLogger(MeasureReportPeriodRequestProcessingService.class);
 
@@ -43,12 +61,10 @@ public class MeasureReportPeriodRequestProcessingService {
 	private static final DateTimeFormatter DATE_TIME_FORMATTER_YYYY_MM_DD_INPUT = DateTimeFormatter.ISO_DATE;
 	private static final DateTimeFormatter DATE_TIME_FORMATTER_YYYY_MM_DD_HH_MM_SS_INPUT =
 			DateTimeFormatter.ISO_LOCAL_DATE_TIME;
-	// LUKETODO:  what's the winning format here?
-	//	java.time.format.DateTimeParseException: Text '2023-01-01T00:00:00.0-0700'
+	// This specific format is needed because otherwise clinical-reasoning will error out when parsing the output
+	// ex:  2023-01-01T00:00:00.0-07:00
 	private static final DateTimeFormatter DATE_TIME_FORMATTER_YYYY_MM_DD_HH_MM_SS_Z_OUTPUT =
 			DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SXXX");
-	//			DateTimeFormatter.ISO_OFFSET_DATE_TIME;
-	//		DateTimeFormatter.ISO_ZONED_DATE_TIME;
 
 	private static final Map<Integer, DateTimeFormatter> VALID_DATE_TIME_FORMATTERS_BY_FORMAT_LENGTH = Map.of(
 			4, DATE_TIME_FORMATTER_YYYY_INPUT,
@@ -72,7 +88,14 @@ public class MeasureReportPeriodRequestProcessingService {
 	private MeasurePeriodForEvaluation validateInputDates(
 			String thePeriodStart, String thePeriodEnd, ZoneId theZoneId) {
 
-		if (Strings.isBlank(thePeriodStart) || Strings.isBlank(thePeriodEnd)) {
+		if ((Strings.isBlank(thePeriodStart) && !Strings.isBlank(thePeriodEnd))
+				|| (!Strings.isBlank(thePeriodStart) && Strings.isBlank(thePeriodEnd))) {
+			throw new InvalidRequestException(String.format(
+					"Either both period start: [%s] and end: [%s] must be empty or non empty",
+					thePeriodStart, thePeriodEnd));
+		}
+
+		if (Strings.isBlank(thePeriodStart) && Strings.isBlank(thePeriodEnd)) {
 			return new MeasurePeriodForEvaluation(null, null);
 		}
 
@@ -81,48 +104,68 @@ public class MeasureReportPeriodRequestProcessingService {
 					"Period start: %s and end: %s are not the same date/time formats", thePeriodStart, thePeriodEnd));
 		}
 
-		final DateTimeFormatter dateTimeFormatterStart =
-				VALID_DATE_TIME_FORMATTERS_BY_FORMAT_LENGTH.get(thePeriodStart.length());
+		final DateTimeFormatter dateTimeFormatterStart = validateAndGetDateTimeFormat(thePeriodStart, thePeriodEnd);
 
-		if (dateTimeFormatterStart == null) {
-			throw new InvalidRequestException(String.format(
-					"Unsupported Date/Time format for period start: %s or end: %s", thePeriodStart, thePeriodEnd));
-		}
+		final LocalDateTime localDateTimeStart = validateAndGetLocalDateTime(
+				thePeriodStart, dateTimeFormatterStart, DateUtils::extractLocalDateTimeForRangeStartOrEmpty, true);
+		final LocalDateTime localDateTimeEnd = validateAndGetLocalDateTime(
+				thePeriodEnd, dateTimeFormatterStart, DateUtils::extractLocalDateTimeForRangeEndOrEmpty, false);
 
-		final Optional<LocalDateTime> optLocalDateTimeStart = DateUtils.parseDateTimeStringIfValid(
-						thePeriodStart, dateTimeFormatterStart)
-				.flatMap(DateUtils::extractLocalDateTimeForRangeStartOrEmpty);
-
-		final Optional<LocalDateTime> optLocalDateTimeEnd = DateUtils.parseDateTimeStringIfValid(
-						thePeriodEnd, dateTimeFormatterStart)
-				.flatMap(DateUtils::extractLocalDateTimeForRangeEndOrEmpty);
-
-		if (optLocalDateTimeStart.isEmpty() || optLocalDateTimeEnd.isEmpty()) {
-			throw new InvalidRequestException("Either start or end period have an unsupported format");
-		}
-
-		final LocalDateTime localDateTimeStart = optLocalDateTimeStart.get();
-		final LocalDateTime localDateTimeEnd = optLocalDateTimeEnd.get();
-
-		if (localDateTimeStart.isEqual(localDateTimeEnd)) {
-			throw new InvalidRequestException(
-					String.format("Start date: %s is the same as end date: %s", thePeriodStart, thePeriodEnd));
-		}
-
-		if (localDateTimeStart.isAfter(localDateTimeEnd)) {
-			throw new InvalidRequestException(String.format(
-					"Invalid Interval - the ending boundary: %s must be greater than or equal to the starting boundary: %s",
-					thePeriodEnd, thePeriodStart));
-		}
-
+		validateParsedPeriodStartAndEnd(thePeriodStart, thePeriodEnd, localDateTimeStart, localDateTimeEnd);
 
 		final String periodStartFormatted = formatWithTimezone(localDateTimeStart, theZoneId);
 		final String periodEndFormatted = formatWithTimezone(localDateTimeEnd, theZoneId);
 
-		ourLog.info("6560: NEW START: {} formatted: {}, NEW END: {}, formatted: {}", localDateTimeStart, periodStartFormatted, localDateTimeEnd, periodEndFormatted);
+		ourLog.info(
+				"6560: NEW START: {} formatted: {}, NEW END: {}, formatted: {}",
+				localDateTimeStart,
+				periodStartFormatted,
+				localDateTimeEnd,
+				periodEndFormatted);
 
-		return new MeasurePeriodForEvaluation(
-			periodStartFormatted, periodEndFormatted);
+		return new MeasurePeriodForEvaluation(periodStartFormatted, periodEndFormatted);
+	}
+
+	private static void validateParsedPeriodStartAndEnd(
+			String theThePeriodStart,
+			String theThePeriodEnd,
+			LocalDateTime theLocalDateTimeStart,
+			LocalDateTime theLocalDateTimeEnd) {
+		// This should probably never happen
+		if (theLocalDateTimeStart.isEqual(theLocalDateTimeEnd)) {
+			throw new InvalidRequestException(
+					String.format("Start date: %s is the same as end date: %s", theThePeriodStart, theThePeriodEnd));
+		}
+
+		if (theLocalDateTimeStart.isAfter(theLocalDateTimeEnd)) {
+			throw new InvalidRequestException(String.format(
+					"Invalid Interval - the ending boundary: %s must be greater than or equal to the starting boundary: %s",
+					theThePeriodEnd, theThePeriodStart));
+		}
+	}
+
+	private LocalDateTime validateAndGetLocalDateTime(
+			String thePeriod,
+			DateTimeFormatter theDateTimeFormatter,
+			Function<TemporalAccessor, Optional<LocalDateTime>> theTemporalAccessorToLocalDateTimeConverter,
+			boolean isStart) {
+		return DateUtils.parseDateTimeStringIfValid(thePeriod, theDateTimeFormatter)
+				.flatMap(theTemporalAccessorToLocalDateTimeConverter)
+				.orElseThrow(() -> new InvalidRequestException(String.format(
+						"Period %s: %s has an unsupported format", isStart ? "start" : "end", thePeriod)));
+	}
+
+	@Nonnull
+	private static DateTimeFormatter validateAndGetDateTimeFormat(String theThePeriodStart, String theThePeriodEnd) {
+		final DateTimeFormatter dateTimeFormatterStart =
+				VALID_DATE_TIME_FORMATTERS_BY_FORMAT_LENGTH.get(theThePeriodStart.length());
+
+		if (dateTimeFormatterStart == null) {
+			throw new InvalidRequestException(String.format(
+					"Unsupported Date/Time format for period start: %s or end: %s",
+					theThePeriodStart, theThePeriodEnd));
+		}
+		return dateTimeFormatterStart;
 	}
 
 	private String formatWithTimezone(LocalDateTime theLocalDateTime, ZoneId theZoneId) {
