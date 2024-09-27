@@ -29,6 +29,7 @@ import static ca.uhn.fhir.batch2.jobs.reindex.ReindexUtils.JOB_REINDEX;
 public class ReindexV1Config {
 	@Autowired
 	private ReindexJobService myReindexJobService;
+
 	@Autowired
 	private HapiTransactionService myHapiTransactionService;
 
@@ -56,24 +57,24 @@ public class ReindexV1Config {
 	@Bean
 	public JobDefinition<ReindexJobParameters> reindexJobDefinitionV1() {
 		return JobDefinition.newBuilder()
-			.setJobDefinitionId(JOB_REINDEX)
-			.setJobDescription("Reindex resources")
-			.setJobDefinitionVersion(1)
-			.setParametersType(ReindexJobParameters.class)
-			.setParametersValidator(myReindexJobParametersValidatorV1)
-			.gatedExecution()
-			.addFirstStep(
-				"generate-ranges",
-				"Generate data ranges to reindex",
-				ChunkRangeJson.class,
-				myReindexGenerateRangeChunkStep)
-			.addIntermediateStep(
-				"load-ids",
-				"Load IDs of resources to reindex",
-				ResourceIdListWorkChunkJson.class,
-				myReindexLoadIdsStep)
-			.addLastStep("reindex-start", "Start the resource reindex", reindexStepV1())
-			.build();
+				.setJobDefinitionId(JOB_REINDEX)
+				.setJobDescription("Reindex resources")
+				.setJobDefinitionVersion(1)
+				.setParametersType(ReindexJobParameters.class)
+				.setParametersValidator(myReindexJobParametersValidatorV1)
+				.gatedExecution()
+				.addFirstStep(
+						"generate-ranges",
+						"Generate data ranges to reindex",
+						ChunkRangeJson.class,
+						myReindexGenerateRangeChunkStep)
+				.addIntermediateStep(
+						"load-ids",
+						"Load IDs of resources to reindex",
+						ResourceIdListWorkChunkJson.class,
+						myReindexLoadIdsStep)
+				.addLastStep("reindex-start", "Start the resource reindex", reindexStepV1())
+				.build();
 	}
 
 	@Bean
@@ -88,13 +89,13 @@ public class ReindexV1Config {
 
 	@Bean("reindexLoadIdsStepV1")
 	public IJobStepWorker<ReindexJobParameters, ChunkRangeJson, ResourceIdListWorkChunkJson> reindexLoadIdsStep(
-		IBatch2DaoSvc theBatch2DaoSvc) {
+			IBatch2DaoSvc theBatch2DaoSvc) {
 		return new LoadIdsStep<>(theBatch2DaoSvc);
 	}
 
 	@Bean
 	public ReindexJobParametersValidatorV1 reindexJobParametersValidatorV1(IBatch2DaoSvc theBatch2DaoSvc) {
 		return new ReindexJobParametersValidatorV1(
-			new UrlListValidator(ProviderConstants.OPERATION_REINDEX, theBatch2DaoSvc));
+				new UrlListValidator(ProviderConstants.OPERATION_REINDEX, theBatch2DaoSvc));
 	}
 }

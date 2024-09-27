@@ -30,6 +30,7 @@ public class ReindexV2Config {
 
 	@Autowired
 	private ReindexJobService myReindexJobService;
+
 	@Autowired
 	private HapiTransactionService myHapiTransactionService;
 
@@ -53,31 +54,30 @@ public class ReindexV2Config {
 	@Autowired
 	private ReindexJobParametersValidatorV2 myReindexJobParametersValidator;
 
-
 	// Version 2
 	@Bean
 	public JobDefinition<ReindexJobParameters> reindexJobDefinitionV2() {
 		return JobDefinition.newBuilder()
-			.setJobDefinitionId(JOB_REINDEX)
-			.setJobDescription("Reindex resources")
-			.setJobDefinitionVersion(2)
-			.setParametersType(ReindexJobParameters.class)
-			.setParametersValidator(myReindexJobParametersValidator)
-			.gatedExecution()
-			.addFirstStep(
-				"generate-ranges",
-				"Generate data ranges to reindex",
-				ChunkRangeJson.class,
-				myReindexGenerateRangeChunkStep)
-			.addIntermediateStep(
-				"load-ids",
-				"Load IDs of resources to reindex",
-				ResourceIdListWorkChunkJson.class,
-				myReindexLoadIdsStep)
-			.addIntermediateStep(
-				"reindex-start", "Perform the resource reindex", ReindexResults.class, reindexStepV2())
-			.addLastStep("reindex-pending-work", "Waits for reindex work to complete.", pendingWorkStep())
-			.build();
+				.setJobDefinitionId(JOB_REINDEX)
+				.setJobDescription("Reindex resources")
+				.setJobDefinitionVersion(2)
+				.setParametersType(ReindexJobParameters.class)
+				.setParametersValidator(myReindexJobParametersValidator)
+				.gatedExecution()
+				.addFirstStep(
+						"generate-ranges",
+						"Generate data ranges to reindex",
+						ChunkRangeJson.class,
+						myReindexGenerateRangeChunkStep)
+				.addIntermediateStep(
+						"load-ids",
+						"Load IDs of resources to reindex",
+						ResourceIdListWorkChunkJson.class,
+						myReindexLoadIdsStep)
+				.addIntermediateStep(
+						"reindex-start", "Perform the resource reindex", ReindexResults.class, reindexStepV2())
+				.addLastStep("reindex-pending-work", "Waits for reindex work to complete.", pendingWorkStep())
+				.build();
 	}
 
 	@Bean
@@ -87,7 +87,8 @@ public class ReindexV2Config {
 
 	@Bean
 	public ReindexStepV2 reindexStepV2() {
-		return new ReindexStepV2(myReindexJobService, myHapiTransactionService, mySystemDao, myRegistry, myIdHelperService);
+		return new ReindexStepV2(
+				myReindexJobService, myHapiTransactionService, mySystemDao, myRegistry, myIdHelperService);
 	}
 
 	@Bean("reindexGenerateRangeChunkStepV2")
@@ -97,13 +98,13 @@ public class ReindexV2Config {
 
 	@Bean("reindexLoadIdsStepV2")
 	public IJobStepWorker<ReindexJobParameters, ChunkRangeJson, ResourceIdListWorkChunkJson> reindexLoadIdsStep(
-		IBatch2DaoSvc theBatch2DaoSvc) {
+			IBatch2DaoSvc theBatch2DaoSvc) {
 		return new LoadIdsStep<>(theBatch2DaoSvc);
 	}
 
 	@Bean
 	public ReindexJobParametersValidatorV2 reindexJobParametersValidatorV2(IBatch2DaoSvc theBatch2DaoSvc) {
 		return new ReindexJobParametersValidatorV2(
-			new UrlListValidator(ProviderConstants.OPERATION_REINDEX, theBatch2DaoSvc));
+				new UrlListValidator(ProviderConstants.OPERATION_REINDEX, theBatch2DaoSvc));
 	}
 }

@@ -21,7 +21,6 @@ package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.IJobPartitionProvider;
-import ca.uhn.fhir.batch2.jobs.reindex.ReindexAppCtx;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirVersionEnum;

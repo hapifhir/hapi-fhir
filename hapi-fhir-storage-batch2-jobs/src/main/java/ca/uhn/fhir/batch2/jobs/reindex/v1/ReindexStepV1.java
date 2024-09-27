@@ -56,7 +56,6 @@ public class ReindexStepV1 implements IJobStepWorker<ReindexJobParameters, Resou
 
 	private final IIdHelperService<IResourcePersistentId<?>> myIdHelperService;
 
-
 	public ReindexStepV1(
 			HapiTransactionService theHapiTransactionService,
 			IFhirSystemDao<?, ?> theSystemDao,
@@ -89,11 +88,11 @@ public class ReindexStepV1 implements IJobStepWorker<ReindexJobParameters, Resou
 	}
 
 	public ReindexResults doReindex(
-		ResourceIdListWorkChunkJson data,
-		IJobDataSink<?> theDataSink,
-		String theInstanceId,
-		String theChunkId,
-		ReindexJobParameters theJobParameters) {
+			ResourceIdListWorkChunkJson data,
+			IJobDataSink<?> theDataSink,
+			String theInstanceId,
+			String theChunkId,
+			ReindexJobParameters theJobParameters) {
 		RequestDetails requestDetails = new SystemRequestDetails();
 		requestDetails.setRetry(true);
 		requestDetails.setMaxRetries(REINDEX_MAX_RETRIES);
@@ -101,19 +100,19 @@ public class ReindexStepV1 implements IJobStepWorker<ReindexJobParameters, Resou
 		TransactionDetails transactionDetails = new TransactionDetails();
 		ReindexTask.JobParameters jp = new ReindexTask.JobParameters();
 		jp.setData(data)
-			.setRequestDetails(requestDetails)
-			.setTransactionDetails(transactionDetails)
-			.setDataSink(theDataSink)
-			.setInstanceId(theInstanceId)
-			.setChunkId(theChunkId)
-			.setJobParameters(theJobParameters);
+				.setRequestDetails(requestDetails)
+				.setTransactionDetails(transactionDetails)
+				.setDataSink(theDataSink)
+				.setInstanceId(theInstanceId)
+				.setChunkId(theChunkId)
+				.setJobParameters(theJobParameters);
 
 		ReindexTask reindexJob = new ReindexTask(jp, myDaoRegistry, mySystemDao, myIdHelperService);
 
 		return myHapiTransactionService
-			.withRequest(requestDetails)
-			.withTransactionDetails(transactionDetails)
-			.withRequestPartitionId(data.getRequestPartitionId())
-			.execute(reindexJob);
+				.withRequest(requestDetails)
+				.withTransactionDetails(transactionDetails)
+				.withRequestPartitionId(data.getRequestPartitionId())
+				.execute(reindexJob);
 	}
 }
