@@ -157,8 +157,7 @@ public class SearchQueryExecutor implements ISearchQueryExecutor {
 						} else {
 							// fixme reverse
 							Integer nextPartitionId = (Integer) nextRowAsArray[0];
-							Long nextResourceId = (Long) nextRowAsArray[1];
-							myNext = nextResourceId;
+							myNext = (Long) nextRowAsArray[1];
 						}
 					}
 				}

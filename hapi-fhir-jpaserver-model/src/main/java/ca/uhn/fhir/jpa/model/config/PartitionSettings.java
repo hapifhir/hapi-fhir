@@ -39,7 +39,7 @@ public class PartitionSettings {
 
 	/**
 	 * Is the table partition column (usually PARTITION_ID)
-	 * participating and primary and foreign keys.
+	 * participating in primary and foreign keys.
 	 * Affects sql joins, sql in() expressions, etc.
 	 */
 	public boolean isPartitionIdsInPrimaryKeys() {

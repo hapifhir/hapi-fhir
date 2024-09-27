@@ -1,0 +1,4 @@
+---
+type: add
+issue: 6325
+title: "Add support for including the partitioning column in search query joins."
