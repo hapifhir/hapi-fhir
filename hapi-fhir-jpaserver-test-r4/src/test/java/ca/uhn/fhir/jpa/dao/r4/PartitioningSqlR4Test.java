@@ -58,7 +58,6 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.DateTimeType;
-import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
@@ -418,7 +417,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		p.getMeta().addTag("http://system", "code", "diisplay");
 		p.addName().setFamily("FAM");
 		p.addIdentifier().setSystem("system").setValue("value");
-		p.setBirthDateElement(new DateType("2020-01-01"));
+		p.setGender(Enumerations.AdministrativeGender.MALE);
 		p.getManagingOrganization().setReferenceElement(orgId);
 		JpaPid patientId = JpaPid.fromId(myPatientDao.create(p, mySrd).getId().getIdPartAsLong());
 
@@ -503,7 +502,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		p.getMeta().addTag("http://system", "code", "diisplay");
 		p.addName().setFamily("FAM");
 		p.addIdentifier().setSystem("system").setValue("value");
-		p.setBirthDate(new Date());
+		p.setGender(Enumerations.AdministrativeGender.MALE);
 		p.getManagingOrganization().setReferenceElement(orgId);
 		JpaPid patientId = JpaPid.fromId(myPatientDao.create(p, mySrd).getId().getIdPartAsLong());
 
@@ -675,7 +674,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		p.getMeta().addTag("http://system", "code", "display");
 		p.addName().setFamily("FAM");
 		p.addIdentifier().setSystem("system").setValue("value");
-		p.setBirthDate(new Date());
+		p.setGender(Enumerations.AdministrativeGender.MALE);
 		p.getManagingOrganization().setReference(org.getId());
 		input.addEntry()
 			.setFullUrl(p.getId())
@@ -1434,6 +1433,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			assertThat(StringUtils.countMatches(searchSql, "PARTITION_DATE")).as(searchSql).isEqualTo(1);
 
 			// Second SQL performs the search
+
 			searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, false).toUpperCase();
 			ourLog.info("Search SQL:\n{}", searchSql);
 			assertThat(searchSql).as(searchSql).contains("PARTITION_ID = '1'");
@@ -2650,14 +2650,14 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 	public void testSearch_UniqueParam_SearchAllPartitions() {
 		createUniqueComboSp();
 
-		IIdType id = createPatient(withPartition(1), withBirthdate("2020-01-01"), withFamily("FAM"));
+		IIdType id = createPatient(withPartition(1), withGender("male"), withFamily("FAM"));
 
 		addReadAllPartitions();
 
 		myCaptureQueriesListener.clear();
 		SearchParameterMap map = new SearchParameterMap();
 		map.add(Patient.SP_FAMILY, new StringParam("FAM"));
-		map.add(Patient.SP_BIRTHDATE, new DateParam("2020-01-01"));
+		map.add(Patient.SP_GENDER, new TokenParam(null, "male"));
 		map.setLoadSynchronous(true);
 		IBundleProvider results = myPatientDao.search(map, mySrd);
 		List<IIdType> ids = toUnqualifiedVersionlessIds(results);
@@ -2666,7 +2666,9 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		ourLog.info("Search SQL:\n{}", searchSql);
-		assertThat(searchSql).containsOnlyOnce("IDX_STRING = 'Patient?birthdate=2020-01-01&family=FAM'");
+		assertThat(searchSql).doesNotContain("PARTITION_ID IN");
+		assertThat(searchSql).doesNotContain("PARTITION_ID =");
+		assertThat(searchSql).containsOnlyOnce("IDX_STRING = 'Patient?family=FAM&gender=male'");
 	}
 
 
@@ -2674,13 +2676,13 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 	public void testSearch_UniqueParam_SearchOnePartition() {
 		createUniqueComboSp();
 
-		IIdType id = createPatient(withPartition(1), withBirthdate("2020-01-01"), withFamily("FAM"));
+		IIdType id = createPatient(withPartition(1), withGender("male"), withFamily("FAM"));
 
 		addReadPartition(1);
 		myCaptureQueriesListener.clear();
 		SearchParameterMap map = new SearchParameterMap();
 		map.add(Patient.SP_FAMILY, new StringParam("FAM"));
-		map.add(Patient.SP_BIRTHDATE, new DateParam("2020-01-01"));
+		map.add(Patient.SP_GENDER, new TokenParam(null, "male"));
 		map.setLoadSynchronous(true);
 		IBundleProvider results = myPatientDao.search(map, mySrd);
 		List<IIdType> ids = toUnqualifiedVersionlessIds(results);
@@ -2690,13 +2692,13 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		ourLog.info("Search SQL:\n{}", searchSql);
 		assertThat(searchSql).containsOnlyOnce( "PARTITION_ID = '1'");
-		assertThat(searchSql).containsOnlyOnce("IDX_STRING = 'Patient?birthdate=2020-01-01&family=FAM'");
+		assertThat(searchSql).containsOnlyOnce("IDX_STRING = 'Patient?family=FAM&gender=male'");
 
 		// Same query, different partition
 		addReadPartition(2);
 		myCaptureQueriesListener.clear();
 		map = new SearchParameterMap();
-		map.add(Patient.SP_BIRTHDATE, new DateParam("2020-01-01"));
+		map.add(Patient.SP_GENDER, new TokenParam(null, "male"));
 		map.setLoadSynchronous(true);
 		results = myPatientDao.search(map, mySrd);
 		ids = toUnqualifiedVersionlessIds(results);
@@ -2846,7 +2848,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 	public void testSearch_RefParam_TargetForcedId_SearchOnePartition() {
 		createUniqueComboSp();
 
-		IIdType patientId = createPatient(withPartition(myPartitionId), withId("ONE"), withBirthdate("2020-01-01"));
+		IIdType patientId = createPatient(withPartition(myPartitionId), withId("ONE"), withGender("male"));
 		IIdType observationId = createObservation(withPartition(myPartitionId), withSubject(patientId));
 
 		addReadPartition(myPartitionId);
@@ -2916,7 +2918,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 	public void testSearch_RefParam_TargetForcedId_SearchDefaultPartition() {
 		createUniqueComboSp();
 
-		IIdType patientId = createPatient(withPartition(null), withId("ONE"), withBirthdate("2020-01-01"));
+		IIdType patientId = createPatient(withPartition(null), withId("ONE"), withGender("male"));
 		IIdType observationId = createObservation(withPartition(null), withSubject(patientId));
 
 		addReadDefaultPartition();

@@ -363,10 +363,11 @@ public class SearchQueryBuilder {
 		mySelect.addCustomJoin(theJoinType, theFromTable, theToTable, theCondition);
 	}
 
-	public ComboCondition createOnCondition(DbColumn theSourceColumn, DbColumn theTargetColumn) {
+	public ComboCondition createOnCondition(DbColumn[] theSourceColumn, DbColumn[] theTargetColumn) {
 		ComboCondition onCondition = ComboCondition.and();
-		onCondition.addCondition(BinaryCondition.equalTo(theSourceColumn, theTargetColumn));
-
+		for (int i = 0; i < theSourceColumn.length; i += 1) {
+			onCondition.addCondition(BinaryCondition.equalTo(theSourceColumn[i], theTargetColumn[i]));
+		}
 		return onCondition;
 	}
 
@@ -496,10 +497,6 @@ public class SearchQueryBuilder {
 		assert theFromColumn.length == theToColumn.length;
 		Join join = new DbJoin(mySpec, theFromTable, theToTable, theFromColumn, theToColumn);
 		mySelect.addJoins(theJoinType, join);
-	}
-
-	public boolean isSelectPartitionId() {
-		return mySelectPartitionId;
 	}
 
 	/**

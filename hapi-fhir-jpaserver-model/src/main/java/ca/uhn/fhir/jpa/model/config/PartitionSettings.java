@@ -37,12 +37,19 @@ public class PartitionSettings {
 
 	public PartitionSettings() {}
 
-	// FIXME: document
+	/**
+	 * Is the table partition column (usually PARTITION_ID)
+	 * participating in primary and foreign keys.
+	 * Affects sql joins, sql in() expressions, etc.
+	 */
 	public boolean isPartitionIdsInPrimaryKeys() {
 		return myPartitionIdsInPrimaryKeys;
 	}
 
-	// FIXME: document
+	/**
+	 * Inform the query engine if the primary and foreign keys
+	 * of the partitioned tables include the partition column.
+	 */
 	public void setPartitionIdsInPrimaryKeys(boolean thePartitionIdsInPrimaryKeys) {
 		myPartitionIdsInPrimaryKeys = thePartitionIdsInPrimaryKeys;
 	}
