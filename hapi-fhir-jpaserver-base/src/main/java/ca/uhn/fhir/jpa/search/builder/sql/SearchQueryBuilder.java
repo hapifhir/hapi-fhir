@@ -137,7 +137,7 @@ public class SearchQueryBuilder {
 				theDialectProvider.getDialect(),
 				theCountQuery,
 				new ArrayList<>(),
-				thePartitionSettings.isPartitionIdsInPrimaryKeys());
+				true);
 	}
 
 	/**
