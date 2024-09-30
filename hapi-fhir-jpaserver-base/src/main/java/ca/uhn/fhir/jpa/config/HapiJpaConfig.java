@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.search.HSearchSortHelperImpl;
 import ca.uhn.fhir.jpa.dao.search.IHSearchSortHelper;
 import ca.uhn.fhir.jpa.provider.DaoRegistryResourceSupportedSvc;
+import ca.uhn.fhir.jpa.provider.RehomingProvider;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.IStaleSearchDeletingSvc;
 import ca.uhn.fhir.jpa.search.StaleSearchDeletingSvcImpl;
@@ -83,5 +84,10 @@ public class HapiJpaConfig {
 	@Bean(name = "myResourceCountsCache")
 	public ResourceCountCache resourceCountsCache(IFhirSystemDao<?, ?> theSystemDao) {
 		return ResourceCountCacheUtil.newResourceCountCache(theSystemDao);
+	}
+
+	@Bean
+	public RehomingProvider rehomingProvider() {
+		return new RehomingProvider();
 	}
 }

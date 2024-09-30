@@ -1,8 +1,5 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.batch2.jobs.expunge.DeleteExpungeProvider;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
@@ -12,8 +9,11 @@ import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.IPointcut;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.provider.RehomingProvider;
+import ca.uhn.fhir.jpa.rp.r4.AppointmentResourceProvider;
 import ca.uhn.fhir.jpa.rp.r4.BinaryResourceProvider;
 import ca.uhn.fhir.jpa.rp.r4.DiagnosticReportResourceProvider;
+import ca.uhn.fhir.jpa.rp.r4.EncounterResourceProvider;
 import ca.uhn.fhir.jpa.rp.r4.LocationResourceProvider;
 import ca.uhn.fhir.jpa.rp.r4.ObservationResourceProvider;
 import ca.uhn.fhir.jpa.rp.r4.OrganizationResourceProvider;
@@ -30,6 +30,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.client.apache.ResourceEntity;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.SimpleRequestHeaderInterceptor;
@@ -59,19 +60,21 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
 import org.eclipse.jetty.ee10.servlet.ServletHolder;
+import org.eclipse.jetty.server.Server;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.hapi.rest.server.helper.BatchHelperR4;
+import org.hl7.fhir.r4.model.Appointment;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
 import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.DiagnosticReport;
+import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.IntegerType;
@@ -87,6 +90,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -95,19 +99,28 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static ca.uhn.fhir.jpa.patch.FhirPatch.OPERATION_REPLACE;
+import static ca.uhn.fhir.jpa.patch.FhirPatch.PARAMETER_OPERATION;
+import static ca.uhn.fhir.jpa.patch.FhirPatch.PARAMETER_PATH;
+import static ca.uhn.fhir.jpa.patch.FhirPatch.PARAMETER_TYPE;
+import static ca.uhn.fhir.jpa.patch.FhirPatch.PARAMETER_VALUE;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class SystemProviderR4Test extends BaseJpaR4Test {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SystemProviderR4Test.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(SystemProviderR4Test.class);
 	private static RestfulServer ourRestServer;
 	private static FhirContext ourCtx;
 	private static CloseableHttpClient ourHttpClient;
@@ -117,11 +130,14 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 	private SimpleRequestHeaderInterceptor mySimpleHeaderInterceptor;
 
 	@Autowired
+	RehomingProvider myRehomingProvider;
+
+	@Autowired
 	private DeleteExpungeProvider myDeleteExpungeProvider;
 
 	@SuppressWarnings("deprecation")
 	@AfterEach
-	public void after() {
+	void after() {
 		myClient.unregisterInterceptor(mySimpleHeaderInterceptor);
 		myStorageSettings.setAllowMultipleDelete(new JpaStorageSettings().isAllowMultipleDelete());
 		myStorageSettings.setExpungeEnabled(new JpaStorageSettings().isExpungeEnabled());
@@ -131,7 +147,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 	}
 
 	@BeforeEach
-	public void beforeStartServer() throws Exception {
+	void beforeStartServer() throws Exception {
 		if (ourRestServer == null) {
 			PatientResourceProvider patientRp = new PatientResourceProvider();
 			patientRp.setDao(myPatientDao);
@@ -159,11 +175,17 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 			PractitionerResourceProvider practitionerRp = new PractitionerResourceProvider();
 			practitionerRp.setDao(myPractitionerDao);
 
+			EncounterResourceProvider encounterRp = new EncounterResourceProvider();
+			encounterRp.setDao(myEncounterDao);
+
+			AppointmentResourceProvider appointmentRp = new AppointmentResourceProvider();
+			appointmentRp.setDao(myAppointmentDao);
+
 			PractitionerRoleResourceProvider practitionerRoleRp = new PractitionerRoleResourceProvider();
 			practitionerRoleRp.setDao(myPractitionerRoleDao);
 
 			RestfulServer restServer = new RestfulServer(ourCtx);
-			restServer.setResourceProviders(patientRp, questionnaireRp, observationRp, organizationRp, locationRp, binaryRp, diagnosticReportRp, diagnosticOrderRp, practitionerRp, practitionerRoleRp);
+			restServer.setResourceProviders(patientRp, questionnaireRp, observationRp, organizationRp, locationRp, binaryRp, diagnosticReportRp, diagnosticOrderRp, practitionerRp, practitionerRoleRp, encounterRp, appointmentRp);
 
 			restServer.registerProviders(mySystemProvider, myDeleteExpungeProvider);
 
@@ -203,7 +225,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testEverythingReturnsCorrectBundleType() throws Exception {
+	void testEverythingReturnsCorrectBundleType() throws Exception {
 		ourRestServer.setDefaultResponseEncoding(EncodingEnum.JSON);
 		ourRestServer.setPagingProvider(new FifoMemoryPagingProvider(1).setDefaultPageSize(10));
 		ResponseHighlighterInterceptor interceptor = new ResponseHighlighterInterceptor();
@@ -235,7 +257,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testEverythingReturnsCorrectFormatInPagingLink() throws Exception {
+	void testEverythingReturnsCorrectFormatInPagingLink() throws Exception {
 		ourRestServer.setDefaultResponseEncoding(EncodingEnum.JSON);
 		ourRestServer.setPagingProvider(new FifoMemoryPagingProvider(1).setDefaultPageSize(10));
 		ResponseHighlighterInterceptor interceptor = new ResponseHighlighterInterceptor();
@@ -264,7 +286,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testEverythingType() throws Exception {
+	void testEverythingType() throws Exception {
 		HttpGet get = new HttpGet(ourServerBase + "/Patient/$everything");
 		CloseableHttpResponse http = ourHttpClient.execute(get);
 		try {
@@ -275,13 +297,13 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testGetOperationDefinition() {
+	void testGetOperationDefinition() {
 		OperationDefinition op = myClient.read(OperationDefinition.class, "-s-get-resource-counts");
 		assertEquals("get-resource-counts", op.getCode());
 	}
 
 	@Test
-	public void testMarkResourcesForReindexing() throws Exception {
+	void testMarkResourcesForReindexing() throws Exception {
 		HttpRequestBase post = new HttpPost(ourServerBase + "/$mark-all-resources-for-reindexing");
 		CloseableHttpResponse http = ourHttpClient.execute(post);
 		try {
@@ -305,7 +327,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testMarkResourcesForReindexingTyped() throws Exception {
+	void testMarkResourcesForReindexingTyped() throws Exception {
 
 		HttpPost post = new HttpPost(ourServerBase + "/$mark-all-resources-for-reindexing?type=Patient");
 		post.setEntity(new ResourceEntity(myFhirContext, new Parameters().addParameter("type", new CodeType("Patient"))));
@@ -333,7 +355,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 
 	@SuppressWarnings("deprecation")
 	@Test
-	public void testResponseUsesCorrectContentType() throws Exception {
+	void testResponseUsesCorrectContentType() throws Exception {
 		ourRestServer.setDefaultResponseEncoding(EncodingEnum.JSON);
 
 		HttpGet get = new HttpGet(ourServerBase);
@@ -343,7 +365,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testTransactionCount() throws Exception {
+	void testTransactionCount() throws Exception {
 		for (int i = 0; i < 20; i++) {
 			Patient p = new Patient();
 			p.addName().setFamily("PATIENT_" + i);
@@ -363,7 +385,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testCountCache() {
+	void testCountCache() {
 		Patient patient = new Patient();
 		patient.addName().setFamily("Unique762");
 		myPatientDao.create(patient, mySrd);
@@ -376,7 +398,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testTransactionCreateWithPreferHeader() throws Exception {
+	void testTransactionCreateWithPreferHeader() throws Exception {
 
 		Patient p = new Patient();
 		p.setActive(true);
@@ -415,7 +437,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 
 
 	@Test
-	public void testTransactionReSavesPreviouslyDeletedResources() throws IOException {
+	void testTransactionReSavesPreviouslyDeletedResources() throws IOException {
 
 		for (int i = 0; i < 10; i++) {
 			ourLog.info("** Beginning pass {}", i);
@@ -463,7 +485,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testTransactionDeleteWithDuplicateDeletes() throws Exception {
+	void testTransactionDeleteWithDuplicateDeletes() throws Exception {
 		myStorageSettings.setAllowInlineMatchUrlReferences(true);
 
 		Patient p = new Patient();
@@ -509,7 +531,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 	 * Ensure that the interceptor is called an appropriate number of times
 	 */
 	@Test
-	public void testBatchWithMultipleConditionalCreates() {
+	void testBatchWithMultipleConditionalCreates() {
 
 		AtomicInteger counter0 = new AtomicInteger(0);
 		AtomicInteger counter1 = new AtomicInteger(0);
@@ -579,7 +601,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 
 
 	@Test
-	public void testTransactionWithModifyingInterceptor() {
+	void testTransactionWithModifyingInterceptor() {
 
 		BundleBuilder bb = new BundleBuilder(myFhirContext);
 		Patient pt = new Patient();
@@ -621,7 +643,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 
 
 	@Test
-	public void testTransactionFromBundle() throws Exception {
+	void testTransactionFromBundle() throws Exception {
 		InputStream bundleRes = SystemProviderR4Test.class.getResourceAsStream("/transaction_link_patient_eve.xml");
 		String bundle = IOUtils.toString(bundleRes, StandardCharsets.UTF_8);
 		String response = myClient.transaction().withBundle(bundle).prettyPrint().execute();
@@ -629,7 +651,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testTransactionFromBundle2() throws Exception {
+	void testTransactionFromBundle2() throws Exception {
 
 		InputStream bundleRes = SystemProviderR4Test.class.getResourceAsStream("/transaction_link_patient_eve_temp.xml");
 		String bundle = IOUtils.toString(bundleRes, StandardCharsets.UTF_8);
@@ -666,7 +688,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testTransactionFromBundle4() throws Exception {
+	void testTransactionFromBundle4() throws Exception {
 		InputStream bundleRes = SystemProviderR4Test.class.getResourceAsStream("/simone_bundle.xml");
 		String bundle = IOUtils.toString(bundleRes, StandardCharsets.UTF_8);
 		String response = myClient.transaction().withBundle(bundle).prettyPrint().execute();
@@ -681,7 +703,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testTransactionFromBundle5() throws Exception {
+	void testTransactionFromBundle5() throws Exception {
 		InputStream bundleRes = SystemProviderR4Test.class.getResourceAsStream("/simone_bundle2.xml");
 		String bundle = IOUtils.toString(bundleRes, StandardCharsets.UTF_8);
 		try {
@@ -696,7 +718,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 
 	@Test
 	@Disabled("Stress test only")
-	public void testTransactionWithPlaceholderIds() {
+	void testTransactionWithPlaceholderIds() {
 
 
 		for (int pass = 0; pass < 10000; pass++) {
@@ -720,7 +742,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testTransactionFromBundle6() throws Exception {
+	void testTransactionFromBundle6() throws Exception {
 		InputStream bundleRes = SystemProviderR4Test.class.getResourceAsStream("/simone_bundle3.xml");
 		String bundle = IOUtils.toString(bundleRes, StandardCharsets.UTF_8);
 		myClient.transaction().withBundle(bundle).prettyPrint().execute();
@@ -733,7 +755,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testTransactionSearch() throws Exception {
+	void testTransactionSearch() throws Exception {
 		for (int i = 0; i < 20; i++) {
 			Patient p = new Patient();
 			p.addName().setFamily("PATIENT_" + i);
@@ -757,7 +779,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testTransactionWithIncompleteBundle() throws Exception {
+	void testTransactionWithIncompleteBundle() throws Exception {
 		Patient patient = new Patient();
 		patient.setGender(AdministrativeGender.MALE);
 
@@ -774,7 +796,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testTransactionWithInlineConditionalUrl() throws Exception {
+	void testTransactionWithInlineConditionalUrl() throws Exception {
 		myStorageSettings.setAllowInlineMatchUrlReferences(true);
 
 		Patient p = new Patient();
@@ -836,7 +858,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 	 */
 	@Test
 	@Disabled("input file needs to be upgraded to R4 format")
-	public void testValidateUsingIncomingResources() throws Exception {
+	void testValidateUsingIncomingResources() throws Exception {
 		FhirInstanceValidator val = new FhirInstanceValidator(myValidationSupport);
 		RequestValidatingInterceptor interceptor = new RequestValidatingInterceptor();
 		interceptor.addValidatorModule(val);
@@ -872,7 +894,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 	}
 
 	@Test()
-	public void testEndpointInterceptorIsCalledForTransaction() {
+	void testEndpointInterceptorIsCalledForTransaction() {
 		// Just to get this out of the way
 		myClient.forceConformanceCheck();
 
@@ -891,12 +913,12 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 			p.addName().setFamily("Test");
 
 			Bundle b = new Bundle();
-			b.setType(Bundle.BundleType.TRANSACTION);
+			b.setType(BundleType.TRANSACTION);
 			b.addEntry()
 				.setResource(p)
 				.setFullUrl("Patient")
 				.getRequest()
-				.setMethod(Bundle.HTTPVerb.POST)
+				.setMethod(HTTPVerb.POST)
 				.setUrl("Patient");
 
 			myClient.transaction().withBundle(b).execute();
@@ -910,7 +932,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testDeleteExpungeOperation() {
+	void testDeleteExpungeOperation() {
 		myStorageSettings.setAllowMultipleDelete(true);
 		myStorageSettings.setExpungeEnabled(true);
 		myStorageSettings.setDeleteExpungeEnabled(true);
@@ -984,6 +1006,167 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		List<DiagnosticReport> diags = BundleUtil.toListOfResourcesOfType(myFhirContext, diagBundle, DiagnosticReport.class);
 		assertThat(diags).hasSize(1);
 		assertEquals(dKeepId, diags.get(0).getIdElement());
+	}
+
+	@Nested
+	class RehomingOperation {
+
+		@BeforeEach
+		void setUp() {
+			myStorageSettings.setAllowExternalReferences(true);
+		}
+
+		@AfterEach
+		void tearDown() {
+			myStorageSettings.setAllowExternalReferences(new JpaStorageSettings().isAllowExternalReferences());
+		}
+
+		//		fixme jm: different reference types?
+
+		/*
+			need to cover:
+				# literal reference - relative
+				"subject": {
+							"reference": "Patient/123"
+						}
+
+			need to cover: ???
+				# literal reference - absolute URL
+				"subject": {
+							"reference": "https://example.org/Patient/123"
+						}
+
+			need to cover:
+				# logical reference
+				"subject": {
+							"identifier": {
+								"system": "https://example.org/mrn",
+									"value": "12345"
+							}
+						}
+		*/
+
+		@Test
+		void testMultipleSources() {
+			List<IIdType> sourceResourceIds = new ArrayList<>();
+
+			Patient p1 = new Patient();
+			p1.setActive(true);
+			IIdType currentTargetPatientId = myClient.create().resource(p1).execute().getId();
+
+			// literal reference - relative
+			Observation obsActive = new Observation();
+			obsActive.setSubject(new Reference(currentTargetPatientId.toUnqualifiedVersionless()));
+			IIdType sourceId1 = myClient.create().resource(obsActive).execute().getId();
+			sourceResourceIds.add(sourceId1);
+
+			// literal reference - relative
+			Encounter encounter = new Encounter();
+			encounter.setSubject(new Reference(currentTargetPatientId.toUnqualifiedVersionless()));
+			IIdType sourceId2 = myClient.create().resource(encounter).execute().getId();
+			sourceResourceIds.add(sourceId2);
+
+			// literal reference - relative
+			Appointment appointment = new Appointment();
+			appointment.addParticipant().setActor(new Reference(currentTargetPatientId.toUnqualifiedVersionless()));
+			IIdType sourceId3 = myClient.create().resource(appointment).execute().getId();
+			sourceResourceIds.add(sourceId3);
+
+			Patient newTargetPatient = new Patient();
+			newTargetPatient.setActive(true);
+			IIdType newTargetPatientId = myClient.create().resource(newTargetPatient).execute().getId();
+
+			// execute
+			RequestDetails requestDetails = new SystemRequestDetails();
+			requestDetails.setResourceName("Patient");
+			Parameters result = (Parameters) myRehomingProvider.rehoming(currentTargetPatientId, newTargetPatientId, new IntegerType(100), requestDetails);
+
+			// verify
+			validateResultDiagnostics(result, sourceResourceIds);
+		}
+
+		@Test
+		void testMultipleRefsFromSameResource() {
+			Observation currentTargetObs = new Observation();
+			IIdType currentTargetObsId = myClient.create().resource(currentTargetObs).execute().getId();
+
+			Observation newTargetObs = new Observation();
+			IIdType newTargetObsId = myClient.create().resource(newTargetObs).execute().getId();
+
+			Observation sourceObs = new Observation();
+			sourceObs.setHasMember(List.of(new Reference(currentTargetObsId.toUnqualifiedVersionless())));
+			sourceObs.setDerivedFrom(List.of(new Reference(currentTargetObsId.toUnqualifiedVersionless())));
+			IIdType sourceObsId = myClient.create().resource(sourceObs).execute().getId();
+
+			// validate setup
+			assertEquals(3, getAllResourcesOfType("Observation").getTotal());
+
+			// execute
+			RequestDetails requestDetails = new SystemRequestDetails();
+			requestDetails.setResourceName("Observation");
+			Parameters result = (Parameters) myRehomingProvider.rehoming(currentTargetObsId, newTargetObsId, new IntegerType(100), requestDetails);
+
+			// verify
+			validateResultDiagnostics(result, List.of(sourceObsId));
+		}
+
+		private void validateResultDiagnostics(Parameters theResult, List<IIdType> theSourceResourceIds) {
+			List<String> resultDiagnostics = theResult.getParameter().stream()
+				.map(Parameters.ParametersParameterComponent::getResource)
+				.map(OperationOutcome.class::cast)
+				.map(OperationOutcome::getIssueFirstRep)
+				.map(OperationOutcome.OperationOutcomeIssueComponent::getDiagnostics)
+				// get rid of last variable part to allow plain comparison
+				.map(d -> d.substring(0, d.indexOf("Took")))
+				.toList();
+
+			List<String> expectedDiagnosticStarts = theSourceResourceIds.stream()
+				.map(srcId -> "Successfully patched resource \"" + srcId.toUnqualifiedVersionless().toString() + "/_history/2\". ")
+				.toList();
+
+			assertThat(resultDiagnostics).hasSameElementsAs(expectedDiagnosticStarts);
+		}
+
+		//		fixme jm: use for unit test
+		private void validatePatchParametersForSameSource(Map<IIdType, Parameters> theFhirPatchParamsMap, IIdType theSourceObsId, IIdType theNewTargetObsId) {
+			// there is only one entry in the map for the source Observation
+			assertThat(theFhirPatchParamsMap).hasSize(1).containsKey(theSourceObsId);
+
+			// there are 2 parameters which both have name = "operation"
+			List<Parameters.ParametersParameterComponent> paramComponents = theFhirPatchParamsMap.get(theSourceObsId).getParameter();
+			assertThat(paramComponents)
+				.hasSize(2)
+				.allSatisfy(pc -> assertThat(pc).returns(PARAMETER_OPERATION, Parameters.ParametersParameterComponent::getName));
+
+			// both parameter type are "replace" (type is first part)
+			assertThat(paramComponents.get(0).getPart().get(0))
+				.returns(PARAMETER_TYPE, Parameters.ParametersParameterComponent::getName)
+				.returns(OPERATION_REPLACE, pc -> pc.getValue().toString());
+
+			assertThat(paramComponents.get(1).getPart().get(0))
+				.returns(PARAMETER_TYPE, Parameters.ParametersParameterComponent::getName)
+				.returns(OPERATION_REPLACE, pc -> pc.getValue().toString());
+
+			// one parameter for each expected path (path is second part)
+			assertThat(paramComponents.get(0).getPart().get(1))
+				.returns(PARAMETER_PATH, Parameters.ParametersParameterComponent::getName)
+				.returns("Observation.hasMember", pc -> pc.getValue().toString());
+
+			assertThat(paramComponents.get(1).getPart().get(1))
+				.returns(PARAMETER_PATH, Parameters.ParametersParameterComponent::getName)
+				.returns("Observation.derivedFrom", pc -> pc.getValue().toString());
+
+			// both parameters references (value) point to new target (value is third part)
+			assertThat(paramComponents.get(0).getPart().get(2))
+				.returns(PARAMETER_VALUE, Parameters.ParametersParameterComponent::getName)
+				.returns(theNewTargetObsId.toUnqualifiedVersionless(), pc -> ((Reference) pc.getValue()).getReferenceElement());
+
+			assertThat(paramComponents.get(1).getPart().get(2))
+				.returns(PARAMETER_VALUE, Parameters.ParametersParameterComponent::getName)
+				.returns(theNewTargetObsId.toUnqualifiedVersionless(), pc -> ((Reference) pc.getValue()).getReferenceElement());
+		}
+
+
 	}
 
 	private Bundle getAllResourcesOfType(String theResourceName) {
