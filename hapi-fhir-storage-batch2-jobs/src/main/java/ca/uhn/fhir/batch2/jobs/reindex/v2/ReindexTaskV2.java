@@ -1,7 +1,9 @@
-package ca.uhn.fhir.batch2.jobs.reindex;
+package ca.uhn.fhir.batch2.jobs.reindex.v2;
 
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
+import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
+import ca.uhn.fhir.batch2.jobs.reindex.ReindexWarningProcessor;
 import ca.uhn.fhir.batch2.jobs.reindex.models.ReindexResults;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -24,8 +26,8 @@ import org.springframework.transaction.support.TransactionCallback;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-public class ReindexTask implements TransactionCallback<ReindexResults> {
-	private static final Logger ourLog = LoggerFactory.getLogger(ReindexTask.class);
+public class ReindexTaskV2 implements TransactionCallback<ReindexResults> {
+	private static final Logger ourLog = LoggerFactory.getLogger(ReindexTaskV2.class);
 
 	public static class JobParameters {
 		private ResourceIdListWorkChunkJson myData;
@@ -113,7 +115,7 @@ public class ReindexTask implements TransactionCallback<ReindexResults> {
 	private final String myInstanceId;
 	private final ReindexJobParameters myJobParameters;
 
-	public ReindexTask(
+	public ReindexTaskV2(
 			JobParameters theJobParameters,
 			DaoRegistry theRegistry,
 			IFhirSystemDao<?, ?> theSystemDao,
