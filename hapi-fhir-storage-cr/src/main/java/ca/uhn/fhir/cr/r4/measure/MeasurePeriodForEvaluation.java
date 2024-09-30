@@ -22,37 +22,51 @@ package ca.uhn.fhir.cr.r4.measure;
 import com.google.common.base.Preconditions;
 import jakarta.annotation.Nullable;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.StringJoiner;
 
 // TODO:  LD:  consider making this a record when hapi-fhir supports JDK 17
 /**
- * Simple tuple containing post-conversion String versions of period start and end.
+ * Simple tuple containing post-conversion ZoneDateTime versions of period start and end.
  * Either both must be null or neither.
  */
 public class MeasurePeriodForEvaluation {
 	@Nullable
-	private final String myPeriodStart;
+	private final ZonedDateTime myPeriodStart;
 
 	@Nullable
-	private final String myPeriodEnd;
+	private final ZonedDateTime myPeriodEnd;
 
-	public MeasurePeriodForEvaluation(@Nullable String thePeriodStart, @Nullable String thePeriodEnd) {
+	public static MeasurePeriodForEvaluation EMPTY = new MeasurePeriodForEvaluation(null, null, ZoneOffset.UTC);
+
+	public MeasurePeriodForEvaluation(@Nullable LocalDateTime thePeriodStart, @Nullable LocalDateTime thePeriodEnd, ZoneId theZoneId) {
 		// Either both are null or neither
 		Preconditions.checkArgument(
-				(thePeriodStart != null && thePeriodEnd != null) || (thePeriodStart == null && thePeriodEnd == null));
+				(thePeriodStart != null && thePeriodEnd != null) || (thePeriodStart == null && thePeriodEnd == null) && theZoneId != null);
 
-		myPeriodStart = thePeriodStart;
-		myPeriodEnd = thePeriodEnd;
+		myPeriodStart = extractZonedDateTime(thePeriodStart, theZoneId);
+		myPeriodEnd = extractZonedDateTime(thePeriodEnd, theZoneId);
 	}
 
 	@Nullable
-	public String getPeriodStart() {
+	private ZonedDateTime extractZonedDateTime(@Nullable LocalDateTime theLocalDateTime, ZoneId theZoneId) {
+		return Optional.ofNullable(theLocalDateTime)
+			.map(nonNull -> nonNull.atZone(theZoneId))
+			.orElse(null);
+	}
+
+	@Nullable
+	public ZonedDateTime getPeriodStart() {
 		return myPeriodStart;
 	}
 
 	@Nullable
-	public String getPeriodEnd() {
+	public ZonedDateTime getPeriodEnd() {
 		return myPeriodEnd;
 	}
 

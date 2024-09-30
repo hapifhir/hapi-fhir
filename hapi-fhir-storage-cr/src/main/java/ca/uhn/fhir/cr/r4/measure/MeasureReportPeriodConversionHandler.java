@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
 import java.util.Map;
@@ -43,9 +44,6 @@ import java.util.function.Function;
  * <p/>
  * This class takes a fallback timezone that's used in case the request header does not contain a value for "Timezone".
  * <p/>
- * The output date/time format is the following to be compatible with clinical-reasoning: yyyy-MM-dd'T'HH:mm:ss.SXXX
- * ex: 2023-01-01T00:00:00.0-07:00
- * <p/>
  * Currently, these are the date/time formats supported:
  * <ol>
  *     <li>yyyy</li>
@@ -53,19 +51,21 @@ import java.util.function.Function;
  *     <li>yyyy-MM-dd</li>
  *     <li>yyyy-MM-ddTHH:mm:ss</li>
  * </ol>
+ * <p/>
+ * Also used for various operations to serialize/deserialize dates to/from JSON classes.
  */
-public class MeasureReportPeriodRequestValidatorAndConverter {
-	private static final Logger ourLog = LoggerFactory.getLogger(MeasureReportPeriodRequestValidatorAndConverter.class);
+// LUKETODO:  Rename to something more "standard"
+public class MeasureReportPeriodConversionHandler {
+	private static final Logger ourLog = LoggerFactory.getLogger(MeasureReportPeriodConversionHandler.class);
 
 	private static final DateTimeFormatter DATE_TIME_FORMATTER_YYYY_INPUT = DateTimeFormatter.ofPattern("yyyy");
 	private static final DateTimeFormatter DATE_TIME_FORMATTER_YYYY_MM_INPUT = DateTimeFormatter.ofPattern("yyyy-MM");
 	private static final DateTimeFormatter DATE_TIME_FORMATTER_YYYY_MM_DD_INPUT = DateTimeFormatter.ISO_DATE;
 	private static final DateTimeFormatter DATE_TIME_FORMATTER_YYYY_MM_DD_HH_MM_SS_INPUT =
 			DateTimeFormatter.ISO_LOCAL_DATE_TIME;
-	// This specific format is needed because otherwise clinical-reasoning will error out when parsing the output
-	// ex:  2023-01-01T00:00:00.0-07:00
-	private static final DateTimeFormatter DATE_TIME_FORMATTER_YYYY_MM_DD_HH_MM_SS_Z_OUTPUT =
-			DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SXXX");
+
+	private static final DateTimeFormatter DATE_TIME_FORMATTER_JSON_SERIALIZE =
+			DateTimeFormatter.ISO_OFFSET_DATE_TIME;
 
 	private static final Map<Integer, DateTimeFormatter> VALID_DATE_TIME_FORMATTERS_BY_FORMAT_LENGTH = Map.of(
 			4, DATE_TIME_FORMATTER_YYYY_INPUT,
@@ -75,8 +75,22 @@ public class MeasureReportPeriodRequestValidatorAndConverter {
 
 	private final ZoneId myFallbackTimezone;
 
-	public MeasureReportPeriodRequestValidatorAndConverter(ZoneId theFallbackTimezone) {
+	public MeasureReportPeriodConversionHandler(ZoneId theFallbackTimezone) {
 		myFallbackTimezone = theFallbackTimezone;
+	}
+
+	/**
+	 * Meant to serialize a ZonedDateTime into a String to pass to a JSON object.
+	 */
+	public String serialize(ZonedDateTime theZoneDateTime) {
+		return DATE_TIME_FORMATTER_JSON_SERIALIZE.format(theZoneDateTime);
+	}
+
+	/**
+	 * Meant to deserialize a String from a JSON object back into a ZonedDateTime.
+	 */
+	public ZonedDateTime deSerialize(String theInputDateString) {
+		return ZonedDateTime.parse(theInputDateString, DATE_TIME_FORMATTER_JSON_SERIALIZE);
 	}
 
 	public MeasurePeriodForEvaluation validateAndProcessTimezone(
@@ -97,7 +111,7 @@ public class MeasureReportPeriodRequestValidatorAndConverter {
 		}
 
 		if (Strings.isBlank(thePeriodStart) && Strings.isBlank(thePeriodEnd)) {
-			return new MeasurePeriodForEvaluation(null, null);
+			return MeasurePeriodForEvaluation.EMPTY;
 		}
 
 		if (thePeriodStart.length() != thePeriodEnd.length()) {
@@ -115,11 +129,9 @@ public class MeasureReportPeriodRequestValidatorAndConverter {
 
 		validateParsedPeriodStartAndEnd(thePeriodStart, thePeriodEnd, localDateTimeStart, localDateTimeEnd);
 
-		final String periodStartFormatted = formatWithTimezone(localDateTimeStart, theZoneId);
-		final String periodEndFormatted = formatWithTimezone(localDateTimeEnd, theZoneId);
-
-		return new MeasurePeriodForEvaluation(periodStartFormatted, periodEndFormatted);
+		return new MeasurePeriodForEvaluation(localDateTimeStart, localDateTimeEnd, theZoneId);
 	}
+
 
 	private static void validateParsedPeriodStartAndEnd(
 			String theThePeriodStart,
@@ -148,7 +160,7 @@ public class MeasureReportPeriodRequestValidatorAndConverter {
 		return DateUtils.parseDateTimeStringIfValid(thePeriod, theDateTimeFormatter)
 				.flatMap(theTemporalAccessorToLocalDateTimeConverter)
 				.orElseThrow(() -> new InvalidRequestException(String.format(
-						"%s Period %s: %s has an unsupported format",
+						"%sPeriod %s: %s has an unsupported format",
 						Msg.code(2558), isStart ? "start" : "end", thePeriod)));
 	}
 
@@ -159,14 +171,14 @@ public class MeasureReportPeriodRequestValidatorAndConverter {
 
 		if (dateTimeFormatterStart == null) {
 			throw new InvalidRequestException(String.format(
-					"%s Unsupported Date/Time format for period start: %s or end: %s",
+					"%sUnsupported Date/Time format for period start: %s or end: %s",
 					Msg.code(2559), theThePeriodStart, theThePeriodEnd));
 		}
 		return dateTimeFormatterStart;
 	}
 
 	private String formatWithTimezone(LocalDateTime theLocalDateTime, ZoneId theZoneId) {
-		return theLocalDateTime.atZone(theZoneId).format(DATE_TIME_FORMATTER_YYYY_MM_DD_HH_MM_SS_Z_OUTPUT);
+		return theLocalDateTime.atZone(theZoneId).format(DATE_TIME_FORMATTER_JSON_SERIALIZE);
 	}
 
 	private ZoneId getClientTimezoneOrInvalidRequest(RequestDetails theRequestDetails) {

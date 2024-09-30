@@ -1,7 +1,6 @@
 package ca.uhn.fhir.cr.r4;
 
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
-import jakarta.annotation.Nullable;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.MeasureReport;
@@ -13,8 +12,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.time.temporal.ChronoUnit;
-import java.util.Date;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -72,17 +69,17 @@ class MeasureOperationProviderTest extends BaseCrR4TestServer {
 	void testHedis2022() {
 
 		runWithPatient("BCSEHEDISMY2022", "Patient/Patient-5", 0, 0, 0, 0, false,
-			"Interval[2020-10-01T00:00:00.000, 2022-12-31T23:59:59.000]");
+			"Interval[2020-10-01T00:00:00.000, 2022-12-31T23:59:59.999]");
 		runWithPatient("BCSEHEDISMY2022", "Patient/Patient-7", 1, 1, 0, 0, true,
-			"Interval[2020-10-01T00:00:00.000, 2022-12-31T23:59:59.000]");
+			"Interval[2020-10-01T00:00:00.000, 2022-12-31T23:59:59.999]");
 		runWithPatient("BCSEHEDISMY2022", "Patient/Patient-9", 0, 0, 0, 0, true,
-			"Interval[2020-10-01T00:00:00.000, 2022-12-31T23:59:59.000]");
+			"Interval[2020-10-01T00:00:00.000, 2022-12-31T23:59:59.999]");
 		runWithPatient("BCSEHEDISMY2022", "Patient/Patient-21", 1, 0, 1, 0, true,
-			"Interval[2020-10-01T00:00:00.000, 2022-12-31T23:59:59.000]");
+			"Interval[2020-10-01T00:00:00.000, 2022-12-31T23:59:59.999]");
 		runWithPatient("BCSEHEDISMY2022", "Patient/Patient-23", 1, 1, 0, 0, true,
-			"Interval[2020-10-01T00:00:00.000, 2022-12-31T23:59:59.000]");
+			"Interval[2020-10-01T00:00:00.000, 2022-12-31T23:59:59.999]");
 		runWithPatient("BCSEHEDISMY2022", "Patient/Patient-65", 1, 1, 0, 1, true,
-			"Interval[2020-10-01T00:00:00.000, 2022-12-31T23:59:59.000]");
+			"Interval[2020-10-01T00:00:00.000, 2022-12-31T23:59:59.999]");
 	}
 
 	void testClientNonPatientBasedMeasureEvaluate() {

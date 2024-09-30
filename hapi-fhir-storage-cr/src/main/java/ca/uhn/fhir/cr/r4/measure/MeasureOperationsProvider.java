@@ -34,16 +34,20 @@ import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Parameters;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MeasureOperationsProvider {
+	private static final Logger ourLog = LoggerFactory.getLogger(MeasureOperationsProvider.class);
+
 	private final IMeasureServiceFactory myR4MeasureServiceFactory;
-	private final MeasureReportPeriodRequestValidatorAndConverter myMeasureReportPeriodRequestProcessingService;
+	private final MeasureReportPeriodConversionHandler myMeasureReportPeriodRequestProcessingService;
 
 	public MeasureOperationsProvider(
 			IMeasureServiceFactory theR4MeasureServiceFactory,
-			MeasureReportPeriodRequestValidatorAndConverter theMeasureReportPeriodRequestValidatorAndConverter) {
+			MeasureReportPeriodConversionHandler theMeasureReportPeriodConversionHandler) {
 		myR4MeasureServiceFactory = theR4MeasureServiceFactory;
-		myMeasureReportPeriodRequestProcessingService = theMeasureReportPeriodRequestValidatorAndConverter;
+		myMeasureReportPeriodRequestProcessingService = theMeasureReportPeriodConversionHandler;
 	}
 
 	/**
@@ -89,12 +93,16 @@ public class MeasureOperationsProvider {
 				myMeasureReportPeriodRequestProcessingService.validateAndProcessTimezone(
 						theRequestDetails, thePeriodStart, thePeriodEnd);
 
+		ourLog.debug("Converted period: {}", measurePeriodForEvaluation);
+
+		// TODO: LD:  Once clinical-reasoning requires ZonedDateTimes for periods, pass in the MeasurePeriodForEvaluation
+		// from above
 		return myR4MeasureServiceFactory
 				.create(theRequestDetails)
 				.evaluate(
 						Eithers.forMiddle3(theId),
-						measurePeriodForEvaluation.getPeriodStart(),
-						measurePeriodForEvaluation.getPeriodEnd(),
+						thePeriodStart,
+						thePeriodEnd,
 						theReportType,
 						theSubject,
 						theLastReceivedOn,

@@ -40,7 +40,7 @@ import ca.uhn.fhir.cr.r4.measure.CareGapsOperationProvider;
 import ca.uhn.fhir.cr.r4.measure.CollectDataOperationProvider;
 import ca.uhn.fhir.cr.r4.measure.DataRequirementsOperationProvider;
 import ca.uhn.fhir.cr.r4.measure.MeasureOperationsProvider;
-import ca.uhn.fhir.cr.r4.measure.MeasureReportPeriodRequestValidatorAndConverter;
+import ca.uhn.fhir.cr.r4.measure.MeasureReportPeriodConversionHandler;
 import ca.uhn.fhir.cr.r4.measure.SubmitDataProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
@@ -149,9 +149,9 @@ public class CrR4Config {
 	@Bean
 	MeasureOperationsProvider r4MeasureOperationsProvider(
 			IMeasureServiceFactory theR4MeasureServiceFactory,
-			MeasureReportPeriodRequestValidatorAndConverter theMeasureReportPeriodRequestValidatorAndConverter) {
+			MeasureReportPeriodConversionHandler theMeasureReportPeriodConversionHandler) {
 		return new MeasureOperationsProvider(
-				theR4MeasureServiceFactory, theMeasureReportPeriodRequestValidatorAndConverter);
+				theR4MeasureServiceFactory, theMeasureReportPeriodConversionHandler);
 	}
 
 	@Bean
