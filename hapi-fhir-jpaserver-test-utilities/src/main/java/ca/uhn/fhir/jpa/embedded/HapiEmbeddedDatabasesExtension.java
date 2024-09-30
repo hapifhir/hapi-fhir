@@ -23,8 +23,6 @@ import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.util.DatabaseSupportUtil;
 import ca.uhn.fhir.test.utilities.docker.DockerRequiredCondition;
 import ca.uhn.fhir.util.VersionEnum;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.SystemUtils;
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.provider.Arguments;
@@ -145,22 +143,5 @@ public class HapiEmbeddedDatabasesExtension implements AfterAllCallback {
 
 			return arguments.stream();
 		}
-	}
-
-	private static boolean canUseOracle() {
-		if (!isMac()) {
-			return true;
-		}
-		return isColimaConfigured();
-	}
-
-	private static boolean isMac() {
-		return SystemUtils.IS_OS_MAC || SystemUtils.IS_OS_MAC_OSX;
-	}
-
-	private static boolean isColimaConfigured() {
-		return StringUtils.isNotBlank(System.getenv("TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE"))
-				&& StringUtils.isNotBlank(System.getenv("DOCKER_HOST"))
-				&& System.getenv("DOCKER_HOST").contains("colima");
 	}
 }
