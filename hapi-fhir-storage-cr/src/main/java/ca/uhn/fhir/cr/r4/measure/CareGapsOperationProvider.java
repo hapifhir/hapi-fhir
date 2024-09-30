@@ -28,6 +28,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CanonicalType;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.Parameters;
 import org.slf4j.Logger;
@@ -36,6 +37,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class CareGapsOperationProvider {
 	private static final Logger ourLog = LoggerFactory.getLogger(CareGapsOperationProvider.class);
@@ -74,14 +76,8 @@ public class CareGapsOperationProvider {
 	 *                          framework.
 	 * @param thePeriodStart       the start of the gaps through period
 	 * @param thePeriodEnd         the end of the gaps through period
-	 * @param theTopic             the category of the measures that is of interest for
-	 *                          the care gaps report
 	 * @param theSubject           a reference to either a Patient or Group for which
 	 *                          the gaps in care report(s) will be generated
-	 * @param thePractitioner      a reference to a Practitioner for which the gaps in
-	 *                          care report(s) will be generated
-	 * @param theOrganization      a reference to an Organization for which the gaps in
-	 *                          care report(s) will be generated
 	 * @param theStatus            the status code of gaps in care reports that will be
 	 *                          included in the result
 	 * @param theMeasureId         the id of Measure(s) for which the gaps in care
@@ -90,8 +86,6 @@ public class CareGapsOperationProvider {
 	 *                          care report(s) will be calculated
 	 * @param theMeasureUrl        the canonical URL of Measure(s) for which the gaps
 	 *                          in care report(s) will be calculated
-	 * @param theProgram           the program that a provider (either clinician or
-	 *                          clinical organization) participates in
 	 * @return Parameters of bundles of Care Gap Measure Reports
 	 */
 	@Description(
@@ -103,29 +97,21 @@ public class CareGapsOperationProvider {
 			RequestDetails theRequestDetails,
 			@OperationParam(name = "periodStart", typeName = "date") IPrimitiveType<Date> thePeriodStart,
 			@OperationParam(name = "periodEnd", typeName = "date") IPrimitiveType<Date> thePeriodEnd,
-			@OperationParam(name = "topic") List<String> theTopic,
 			@OperationParam(name = "subject") String theSubject,
-			@OperationParam(name = "practitioner") String thePractitioner,
-			@OperationParam(name = "organization") String theOrganization,
 			@OperationParam(name = "status") List<String> theStatus,
 			@OperationParam(name = "measureId") List<String> theMeasureId,
 			@OperationParam(name = "measureIdentifier") List<String> theMeasureIdentifier,
-			@OperationParam(name = "measureUrl") List<CanonicalType> theMeasureUrl,
-			@OperationParam(name = "program") List<String> theProgram) {
+			@OperationParam(name = "measureUrl") List<CanonicalType> theMeasureUrl) {
 
 		return myR4CareGapsProcessorFactory
 				.create(theRequestDetails)
 				.getCareGapsReport(
 						thePeriodStart,
 						thePeriodEnd,
-						theTopic,
 						theSubject,
-						thePractitioner,
-						theOrganization,
 						theStatus,
-						theMeasureId,
+						theMeasureId == null ? null : theMeasureId.stream().map(IdType::new).collect(Collectors.toList()),
 						theMeasureIdentifier,
-						theMeasureUrl,
-						theProgram);
+						theMeasureUrl);
 	}
 }
