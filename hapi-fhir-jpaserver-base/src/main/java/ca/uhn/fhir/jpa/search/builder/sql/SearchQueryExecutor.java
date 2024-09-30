@@ -162,13 +162,12 @@ public class SearchQueryExecutor implements ISearchQueryExecutor {
 		// is the resource ID. But if we're doing a count query, we'll get a single column in an array
 		// or maybe even just a single non array value depending on how the platform handles it.
 		if (nextRow instanceof Number) {
-			return ((Number) nextRow).longValue();
+			return JpaPid.fromId(((Number) nextRow).longValue());
 		} else {
 			Object[] nextRowAsArray = (Object[]) nextRow;
 			if (nextRowAsArray.length == 1) {
-				return (Long) nextRowAsArray[0];
+				return JpaPid.fromId((Long) nextRowAsArray[0]);
 			} else {
-				int i;
 				// TODO MB add a strategy object to GeneratedSql to describe the result set.
 				// or make SQE generic
 				// Comment to reviewer: this will be cleaner with the next
@@ -182,16 +181,11 @@ public class SearchQueryExecutor implements ISearchQueryExecutor {
 				// - partition_id, res_id, coord-dist
 				// Assume res_id is first Long in row, and is in first two columns
 				if (nextRowAsArray[0] instanceof Long) {
-					return (long) nextRowAsArray[0];
+					return JpaPid.fromId((Long) nextRowAsArray[0]);
 				} else {
-					if (nextRowAsArray.length == 1) {
-						Long count = (Long) nextRowAsArray[0];
-						myNext = JpaPid.fromId(count, null);
-					} else {
-						Integer nextPartitionId = (Integer) nextRowAsArray[0];
-						Long nextResourceId = (Long) nextRowAsArray[1];
-						myNext = JpaPid.fromId(nextResourceId, nextPartitionId);
-					}					return (long) nextRowAsArray[1];
+					Integer nextPartitionId = (Integer) nextRowAsArray[0];
+					Long nextResourceId = (Long) nextRowAsArray[1];
+					return JpaPid.fromId(nextResourceId, nextPartitionId);
 				}
 			}
 		}
