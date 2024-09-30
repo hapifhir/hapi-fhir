@@ -44,10 +44,11 @@ public class MeasurePeriodForEvaluation {
 
 	public static MeasurePeriodForEvaluation EMPTY = new MeasurePeriodForEvaluation(null, null, ZoneOffset.UTC);
 
-	public MeasurePeriodForEvaluation(@Nullable LocalDateTime thePeriodStart, @Nullable LocalDateTime thePeriodEnd, ZoneId theZoneId) {
+	public MeasurePeriodForEvaluation(
+			@Nullable LocalDateTime thePeriodStart, @Nullable LocalDateTime thePeriodEnd, ZoneId theZoneId) {
 		// Either both are null or neither
-		Preconditions.checkArgument(
-				(thePeriodStart != null && thePeriodEnd != null) || (thePeriodStart == null && thePeriodEnd == null) && theZoneId != null);
+		Preconditions.checkArgument((thePeriodStart != null && thePeriodEnd != null)
+				|| (thePeriodStart == null && thePeriodEnd == null) && theZoneId != null);
 
 		myPeriodStart = extractZonedDateTime(thePeriodStart, theZoneId);
 		myPeriodEnd = extractZonedDateTime(thePeriodEnd, theZoneId);
@@ -56,8 +57,8 @@ public class MeasurePeriodForEvaluation {
 	@Nullable
 	private ZonedDateTime extractZonedDateTime(@Nullable LocalDateTime theLocalDateTime, ZoneId theZoneId) {
 		return Optional.ofNullable(theLocalDateTime)
-			.map(nonNull -> nonNull.atZone(theZoneId))
-			.orElse(null);
+				.map(nonNull -> nonNull.atZone(theZoneId))
+				.orElse(null);
 	}
 
 	@Nullable

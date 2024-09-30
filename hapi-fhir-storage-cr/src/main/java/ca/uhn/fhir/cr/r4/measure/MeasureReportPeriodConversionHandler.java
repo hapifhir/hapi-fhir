@@ -64,8 +64,7 @@ public class MeasureReportPeriodConversionHandler {
 	private static final DateTimeFormatter DATE_TIME_FORMATTER_YYYY_MM_DD_HH_MM_SS_INPUT =
 			DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 
-	private static final DateTimeFormatter DATE_TIME_FORMATTER_JSON_SERIALIZE =
-			DateTimeFormatter.ISO_OFFSET_DATE_TIME;
+	private static final DateTimeFormatter DATE_TIME_FORMATTER_JSON_SERIALIZE = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
 
 	private static final Map<Integer, DateTimeFormatter> VALID_DATE_TIME_FORMATTERS_BY_FORMAT_LENGTH = Map.of(
 			4, DATE_TIME_FORMATTER_YYYY_INPUT,
@@ -131,7 +130,6 @@ public class MeasureReportPeriodConversionHandler {
 
 		return new MeasurePeriodForEvaluation(localDateTimeStart, localDateTimeEnd, theZoneId);
 	}
-
 
 	private static void validateParsedPeriodStartAndEnd(
 			String theThePeriodStart,

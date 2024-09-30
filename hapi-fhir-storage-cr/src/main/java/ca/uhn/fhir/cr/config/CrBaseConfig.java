@@ -29,7 +29,7 @@ import java.time.ZoneOffset;
 public class CrBaseConfig {
 
 	@Bean
-    MeasureReportPeriodConversionHandler measureReportPeriodService() {
+	MeasureReportPeriodConversionHandler measureReportPeriodService() {
 		return new MeasureReportPeriodConversionHandler(ZoneOffset.UTC);
 	}
 }

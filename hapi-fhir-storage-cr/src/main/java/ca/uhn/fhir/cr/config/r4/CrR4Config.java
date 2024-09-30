@@ -150,8 +150,7 @@ public class CrR4Config {
 	MeasureOperationsProvider r4MeasureOperationsProvider(
 			IMeasureServiceFactory theR4MeasureServiceFactory,
 			MeasureReportPeriodConversionHandler theMeasureReportPeriodConversionHandler) {
-		return new MeasureOperationsProvider(
-				theR4MeasureServiceFactory, theMeasureReportPeriodConversionHandler);
+		return new MeasureOperationsProvider(theR4MeasureServiceFactory, theMeasureReportPeriodConversionHandler);
 	}
 
 	@Bean

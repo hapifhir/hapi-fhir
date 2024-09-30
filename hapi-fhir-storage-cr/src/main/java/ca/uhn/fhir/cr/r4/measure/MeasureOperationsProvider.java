@@ -95,7 +95,8 @@ public class MeasureOperationsProvider {
 
 		ourLog.debug("Converted period: {}", measurePeriodForEvaluation);
 
-		// TODO: LD:  Once clinical-reasoning requires ZonedDateTimes for periods, pass in the MeasurePeriodForEvaluation
+		// TODO: LD:  Once clinical-reasoning requires ZonedDateTimes for periods, pass in the
+		// MeasurePeriodForEvaluation
 		// from above
 		return myR4MeasureServiceFactory
 				.create(theRequestDetails)
