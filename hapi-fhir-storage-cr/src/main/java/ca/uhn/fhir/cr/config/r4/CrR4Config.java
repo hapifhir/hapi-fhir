@@ -22,6 +22,7 @@ package ca.uhn.fhir.cr.config.r4;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.cr.common.IRepositoryFactory;
+import ca.uhn.fhir.cr.common.RepositoryFactoryForRepositoryInterface;
 import ca.uhn.fhir.cr.config.ProviderLoader;
 import ca.uhn.fhir.cr.config.ProviderSelector;
 import ca.uhn.fhir.cr.config.RepositoryConfig;
@@ -66,7 +67,8 @@ public class CrR4Config {
 
 	@Bean
 	IMeasureServiceFactory r4MeasureServiceFactory(
-			IRepositoryFactory theRepositoryFactory, MeasureEvaluationOptions theEvaluationOptions) {
+			RepositoryFactoryForRepositoryInterface theRepositoryFactory,
+			MeasureEvaluationOptions theEvaluationOptions) {
 		return rd -> new R4MeasureService(theRepositoryFactory.create(rd), theEvaluationOptions);
 	}
 
