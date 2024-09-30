@@ -45,7 +45,7 @@ public class SearchQueryBuilderDialectPostgresTest extends BaseSearchQueryBuilde
 		logSql(generatedSql);
 
 		String sql = generatedSql.getSql();
-		assertEquals("SELECT t0.RES_ID FROM HFJ_SPIDX_DATE t0 WHERE ((t0.HASH_IDENTITY = ?) AND ((t0.SP_VALUE_LOW_DATE_ORDINAL >= ?) AND (t0.SP_VALUE_HIGH_DATE_ORDINAL <= ?))) fetch first ? rows only", sql);
+		assertEquals("SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_SPIDX_DATE t0 WHERE ((t0.HASH_IDENTITY = ?) AND ((t0.SP_VALUE_LOW_DATE_ORDINAL >= ?) AND (t0.SP_VALUE_HIGH_DATE_ORDINAL <= ?))) fetch first ? rows only", sql);
 
 		assertEquals(4, StringUtils.countMatches(sql, "?"));
 		assertThat(generatedSql.getBindVariables()).hasSize(4);
