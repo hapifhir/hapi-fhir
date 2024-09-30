@@ -9,7 +9,7 @@ import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.IPointcut;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
-import ca.uhn.fhir.jpa.provider.RehomingProvider;
+import ca.uhn.fhir.jpa.provider.RehomeProvider;
 import ca.uhn.fhir.jpa.rp.r4.AppointmentResourceProvider;
 import ca.uhn.fhir.jpa.rp.r4.BinaryResourceProvider;
 import ca.uhn.fhir.jpa.rp.r4.DiagnosticReportResourceProvider;
@@ -130,7 +130,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 	private SimpleRequestHeaderInterceptor mySimpleHeaderInterceptor;
 
 	@Autowired
-	RehomingProvider myRehomingProvider;
+	RehomeProvider myRehomeProvider;
 
 	@Autowired
 	private DeleteExpungeProvider myDeleteExpungeProvider;
@@ -1009,7 +1009,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 	}
 
 	@Nested
-	class RehomingOperation {
+	class RehomeOperation {
 
 		@BeforeEach
 		void setUp() {
@@ -1079,7 +1079,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 			// execute
 			RequestDetails requestDetails = new SystemRequestDetails();
 			requestDetails.setResourceName("Patient");
-			Parameters result = (Parameters) myRehomingProvider.rehoming(currentTargetPatientId, newTargetPatientId, new IntegerType(100), requestDetails);
+			Parameters result = (Parameters) myRehomeProvider.rehome(currentTargetPatientId, newTargetPatientId, requestDetails);
 
 			// verify
 			validateResultDiagnostics(result, sourceResourceIds);
@@ -1104,7 +1104,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 			// execute
 			RequestDetails requestDetails = new SystemRequestDetails();
 			requestDetails.setResourceName("Observation");
-			Parameters result = (Parameters) myRehomingProvider.rehoming(currentTargetObsId, newTargetObsId, new IntegerType(100), requestDetails);
+			Parameters result = (Parameters) myRehomeProvider.rehome(currentTargetObsId, newTargetObsId, requestDetails);
 
 			// verify
 			validateResultDiagnostics(result, List.of(sourceObsId));

@@ -28,7 +28,6 @@ import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
-import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -40,7 +39,6 @@ import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Reference;
@@ -65,10 +63,9 @@ import static ca.uhn.fhir.jpa.patch.FhirPatch.PARAMETER_VALUE;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_ID;
 import static software.amazon.awssdk.utils.StringUtils.isBlank;
 
-public class RehomingProvider {
-	private static final Logger ourLog = LoggerFactory.getLogger(RehomingProvider.class);
+public class RehomeProvider {
 
-	public static final String ONLINE_REFERENCE_COUNT_LIMIT = "online-reference-count-limit";
+	public static final int BATCH_REFERENCE_COUNT_THRESHOLD = 100;
 
 	@Autowired
 	private FhirContext myFhirContext;
@@ -76,16 +73,16 @@ public class RehomingProvider {
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 
+	int myBatchReferenceCountThreshold = BATCH_REFERENCE_COUNT_THRESHOLD;
+
 	@Description(
 			value =
 					"This operation repoints referenced resources to a new target resource instance of the same previously pointed type.",
 			shortDefinition = "Repoints referencing resources to another resources instance")
-	@Operation(name = ProviderConstants.OPERATION_REHOMING, global = true)
-	public IBaseParameters rehoming(
+	@Operation(name = ProviderConstants.OPERATION_REHOME, global = true)
+	public IBaseParameters rehome(
 			@IdParam IIdType theCurrentTargetIdParam,
 			@IdParam IIdType theNewTargetIdParam,
-			@OperationParam(name = ONLINE_REFERENCE_COUNT_LIMIT, typeName = "integer")
-					IPrimitiveType<Integer> theRefCountLimit,
 			RequestDetails theRequest) {
 
 		validate(theCurrentTargetIdParam, theNewTargetIdParam, theRequest);
@@ -94,7 +91,7 @@ public class RehomingProvider {
 				findReferencingResourceIds(theCurrentTargetIdParam, theRequest);
 
 		// operation is performed online or batched depending on the number of references to patch
-		return referencingResources.size() <= theRefCountLimit.getValue()
+		return referencingResources.size() > myBatchReferenceCountThreshold
 				? rehomeInTransaction(referencingResources, theCurrentTargetIdParam, theNewTargetIdParam, theRequest)
 				: rehomingBatch(referencingResources, theCurrentTargetIdParam, theNewTargetIdParam, theRequest);
 	}

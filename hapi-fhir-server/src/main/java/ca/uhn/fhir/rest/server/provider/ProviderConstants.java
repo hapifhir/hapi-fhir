@@ -248,5 +248,6 @@ public class ProviderConstants {
 	/**
 	 * Operation name for the "$rehoming" operation
 	 */
-	public static final String OPERATION_REHOMING = "$rehoming";
+	public static final String OPERATION_REHOME = "$rehome" +
+		"";
 }
