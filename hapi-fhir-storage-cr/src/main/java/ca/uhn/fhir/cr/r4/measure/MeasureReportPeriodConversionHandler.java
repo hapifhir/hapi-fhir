@@ -54,7 +54,6 @@ import java.util.function.Function;
  * <p/>
  * Also used for various operations to serialize/deserialize dates to/from JSON classes.
  */
-// LUKETODO:  Rename to something more "standard"
 public class MeasureReportPeriodConversionHandler {
 	private static final Logger ourLog = LoggerFactory.getLogger(MeasureReportPeriodConversionHandler.class);
 
@@ -72,6 +71,7 @@ public class MeasureReportPeriodConversionHandler {
 			10, DATE_TIME_FORMATTER_YYYY_MM_DD_INPUT,
 			19, DATE_TIME_FORMATTER_YYYY_MM_DD_HH_MM_SS_INPUT);
 
+	// The default, in order to signal to clinical-reasoning that none is set
 	private final ZoneId myFallbackTimezone;
 
 	public MeasureReportPeriodConversionHandler(ZoneId theFallbackTimezone) {
