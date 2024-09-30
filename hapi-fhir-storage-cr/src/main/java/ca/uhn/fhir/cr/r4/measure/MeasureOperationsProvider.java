@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.cr.r4.measure;
 
+import ca.uhn.fhir.cr.common.StringTimePeriodHandler;
 import ca.uhn.fhir.cr.r4.IMeasureServiceFactory;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
@@ -41,13 +42,13 @@ public class MeasureOperationsProvider {
 	private static final Logger ourLog = LoggerFactory.getLogger(MeasureOperationsProvider.class);
 
 	private final IMeasureServiceFactory myR4MeasureServiceFactory;
-	private final MeasureReportPeriodConversionHandler myMeasureReportPeriodRequestProcessingService;
+	private final StringTimePeriodHandler myMeasureReportPeriodRequestProcessingService;
 
 	public MeasureOperationsProvider(
 			IMeasureServiceFactory theR4MeasureServiceFactory,
-			MeasureReportPeriodConversionHandler theMeasureReportPeriodConversionHandler) {
+			StringTimePeriodHandler theStringTimePeriodHandler) {
 		myR4MeasureServiceFactory = theR4MeasureServiceFactory;
-		myMeasureReportPeriodRequestProcessingService = theMeasureReportPeriodConversionHandler;
+		myMeasureReportPeriodRequestProcessingService = theStringTimePeriodHandler;
 	}
 
 	/**
@@ -89,15 +90,8 @@ public class MeasureOperationsProvider {
 			RequestDetails theRequestDetails)
 			throws InternalErrorException, FHIRException {
 
-		final MeasurePeriodForEvaluation measurePeriodForEvaluation =
-				myMeasureReportPeriodRequestProcessingService.validateAndProcessTimezone(
-						theRequestDetails, thePeriodStart, thePeriodEnd);
-
-		ourLog.debug("Converted period: {}", measurePeriodForEvaluation);
-
-		// TODO: LD:  Once clinical-reasoning requires ZonedDateTimes for periods, pass in the
-		// MeasurePeriodForEvaluation
-		// from above
+		// TODO: LD:  Once this API requires ZonedDateTimes for periods, pass in the
+		// results from the call to MeasureReportPeriodConversionHandler
 		return myR4MeasureServiceFactory
 				.create(theRequestDetails)
 				.evaluate(

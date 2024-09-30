@@ -19,7 +19,7 @@
  */
 package ca.uhn.fhir.cr.config;
 
-import ca.uhn.fhir.cr.r4.measure.MeasureReportPeriodConversionHandler;
+import ca.uhn.fhir.cr.common.StringTimePeriodHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -29,7 +29,7 @@ import java.time.ZoneOffset;
 public class CrBaseConfig {
 
 	@Bean
-	MeasureReportPeriodConversionHandler measureReportPeriodService() {
-		return new MeasureReportPeriodConversionHandler(ZoneOffset.UTC);
+	StringTimePeriodHandler stringTimePeriodHandler() {
+		return new StringTimePeriodHandler(ZoneOffset.UTC);
 	}
 }

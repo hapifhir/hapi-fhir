@@ -17,8 +17,9 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.cr.r4.measure;
+package ca.uhn.fhir.cr.common;
 
+import ca.uhn.fhir.cr.r4.measure.MeasurePeriodForEvaluation;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -54,8 +55,10 @@ import java.util.function.Function;
  * <p/>
  * Also used for various operations to serialize/deserialize dates to/from JSON classes.
  */
-public class MeasureReportPeriodConversionHandler {
-	private static final Logger ourLog = LoggerFactory.getLogger(MeasureReportPeriodConversionHandler.class);
+// TODO: LD:  Note that this is currently dead code and will be integrated once we change clinical-reasoning to accept
+//
+public class StringTimePeriodHandler {
+	private static final Logger ourLog = LoggerFactory.getLogger(StringTimePeriodHandler.class);
 
 	private static final DateTimeFormatter DATE_TIME_FORMATTER_YYYY_INPUT = DateTimeFormatter.ofPattern("yyyy");
 	private static final DateTimeFormatter DATE_TIME_FORMATTER_YYYY_MM_INPUT = DateTimeFormatter.ofPattern("yyyy-MM");
@@ -74,7 +77,7 @@ public class MeasureReportPeriodConversionHandler {
 	// The default, in order to signal to clinical-reasoning that none is set
 	private final ZoneId myFallbackTimezone;
 
-	public MeasureReportPeriodConversionHandler(ZoneId theFallbackTimezone) {
+	public StringTimePeriodHandler(ZoneId theFallbackTimezone) {
 		myFallbackTimezone = theFallbackTimezone;
 	}
 
@@ -173,10 +176,6 @@ public class MeasureReportPeriodConversionHandler {
 					Msg.code(2559), theThePeriodStart, theThePeriodEnd));
 		}
 		return dateTimeFormatterStart;
-	}
-
-	private String formatWithTimezone(LocalDateTime theLocalDateTime, ZoneId theZoneId) {
-		return theLocalDateTime.atZone(theZoneId).format(DATE_TIME_FORMATTER_JSON_SERIALIZE);
 	}
 
 	private ZoneId getClientTimezoneOrInvalidRequest(RequestDetails theRequestDetails) {

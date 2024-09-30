@@ -1,5 +1,6 @@
-package ca.uhn.fhir.cr.r4.measure;
+package ca.uhn.fhir.cr.common;
 
+import ca.uhn.fhir.cr.r4.measure.MeasurePeriodForEvaluation;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -22,7 +23,7 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-class MeasureReportPeriodConversionHandlerTest {
+class StringTimePeriodHandlerTest {
 
 	private static final String ZONE_ID_Z = "Z";
 	private static final String TIMEZONE_UTC = ZoneOffset.UTC.getId();
@@ -76,7 +77,7 @@ class MeasureReportPeriodConversionHandlerTest {
 	private static final LocalDateTime _2024_09_26_12_00_00 = LOCAL_DATE_2024_09_26.atTime(LOCAL_TIME_12_00_00);
 	private static final LocalDateTime _2024_09_26_23_59_59 = LOCAL_DATE_2024_09_26.atTime(LOCAL_TIME_23_59_59);
 
-	private final MeasureReportPeriodConversionHandler myTestSubject = new MeasureReportPeriodConversionHandler(ZoneOffset.UTC);
+	private final StringTimePeriodHandler myTestSubject = new StringTimePeriodHandler(ZoneOffset.UTC);
 
 	private static Stream<Arguments> validateAndProcessTimezone_happyPath_params() {
 		return Stream.of(
