@@ -26,8 +26,8 @@ import org.springframework.transaction.support.TransactionCallback;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-public class ReindexTask implements TransactionCallback<ReindexResults> {
-	private static final Logger ourLog = LoggerFactory.getLogger(ReindexTask.class);
+public class ReindexTaskV1 implements TransactionCallback<ReindexResults> {
+	private static final Logger ourLog = LoggerFactory.getLogger(ReindexTaskV1.class);
 
 	public static class JobParameters {
 		private ResourceIdListWorkChunkJson myData;
@@ -115,7 +115,7 @@ public class ReindexTask implements TransactionCallback<ReindexResults> {
 	private final String myInstanceId;
 	private final ReindexJobParameters myJobParameters;
 
-	public ReindexTask(
+	public ReindexTaskV1(
 			JobParameters theJobParameters,
 			DaoRegistry theRegistry,
 			IFhirSystemDao<?, ?> theSystemDao,

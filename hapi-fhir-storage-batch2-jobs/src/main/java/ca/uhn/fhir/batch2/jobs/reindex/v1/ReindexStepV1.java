@@ -97,7 +97,7 @@ public class ReindexStepV1 implements IJobStepWorker<ReindexJobParameters, Resou
 		requestDetails.setMaxRetries(REINDEX_MAX_RETRIES);
 
 		TransactionDetails transactionDetails = new TransactionDetails();
-		ReindexTask.JobParameters jp = new ReindexTask.JobParameters();
+		ReindexTaskV1.JobParameters jp = new ReindexTaskV1.JobParameters();
 		jp.setData(data)
 				.setRequestDetails(requestDetails)
 				.setTransactionDetails(transactionDetails)
@@ -106,7 +106,7 @@ public class ReindexStepV1 implements IJobStepWorker<ReindexJobParameters, Resou
 				.setChunkId(theChunkId)
 				.setJobParameters(theJobParameters);
 
-		ReindexTask reindexJob = new ReindexTask(jp, myDaoRegistry, mySystemDao, myIdHelperService);
+		ReindexTaskV1 reindexJob = new ReindexTaskV1(jp, myDaoRegistry, mySystemDao, myIdHelperService);
 
 		return myHapiTransactionService
 				.withRequest(requestDetails)

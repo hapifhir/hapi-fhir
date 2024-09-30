@@ -8,7 +8,6 @@ import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
-import ca.uhn.fhir.batch2.jobs.reindex.v1.ReindexTask;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexUtils;
 import ca.uhn.fhir.batch2.jobs.reindex.models.ReindexResults;
 import ca.uhn.fhir.batch2.jobs.reindex.svcs.ReindexJobService;
@@ -99,7 +98,7 @@ public class ReindexStepV2
 		requestDetails.setMaxRetries(REINDEX_MAX_RETRIES);
 
 		TransactionDetails transactionDetails = new TransactionDetails();
-		ReindexTask.JobParameters jp = new ReindexTask.JobParameters();
+		ReindexTaskV2.JobParameters jp = new ReindexTaskV2.JobParameters();
 		jp.setData(data)
 				.setRequestDetails(requestDetails)
 				.setTransactionDetails(transactionDetails)
@@ -108,7 +107,7 @@ public class ReindexStepV2
 				.setChunkId(theChunkId)
 				.setJobParameters(theJobParameters);
 
-		ReindexTask reindexJob = new ReindexTask(jp, myDaoRegistry, mySystemDao, myIdHelperService);
+		ReindexTaskV2 reindexJob = new ReindexTaskV2(jp, myDaoRegistry, mySystemDao, myIdHelperService);
 
 		return myHapiTransactionService
 				.withRequest(requestDetails)
