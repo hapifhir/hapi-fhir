@@ -20,14 +20,17 @@
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
+import com.google.common.collect.ImmutableList;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.intellij.lang.annotations.Language;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Optional;
 
 /**
  * Migration task that handles cross-database logic for dropping a primary key.
@@ -52,25 +55,11 @@ public class DropPrimaryKeyTask extends BaseTableTask {
 
 		@Nullable
 		@Language("SQL")
-		final String primaryKeyNameSql = generatePrimaryKeyNameSql();
-
-		@Nullable
-		final String primaryKeyName = primaryKeyNameSql != null
-				? newJdbcTemplate()
-						.queryForObject(primaryKeyNameSql, String.class, getTableNameWithDatabaseExpectedCase())
-				: null;
+		final String primaryKeyName = getPrimaryKeyName();
 
 		ourLog.debug("primaryKeyName: {} for driver: {}", primaryKeyName, getDriverType());
 
 		return generateDropPrimaryKeySql(primaryKeyName);
-	}
-
-	private String getTableNameWithDatabaseExpectedCase() {
-		if (DriverTypeEnum.ORACLE_12C == getDriverType()) {
-			return getTableName().toUpperCase();
-		}
-
-		return getTableName().toLowerCase();
 	}
 
 	@Override
@@ -81,56 +70,63 @@ public class DropPrimaryKeyTask extends BaseTableTask {
 	}
 
 	private String generateDropPrimaryKeySql(@Nullable String thePrimaryKeyName) {
-		switch (getDriverType()) {
-			case MARIADB_10_1:
-			case DERBY_EMBEDDED:
-			case H2_EMBEDDED:
-				@Language("SQL")
-				final String sqlH2 = "ALTER TABLE %s DROP PRIMARY KEY";
-				return String.format(sqlH2, getTableName());
-			case POSTGRES_9_4:
-			case ORACLE_12C:
-			case MSSQL_2012:
-			case MYSQL_5_7:
-				assert thePrimaryKeyName != null;
-				@Language("SQL")
-				final String sql = "ALTER TABLE %s DROP CONSTRAINT %s";
-				return String.format(sql, getTableName(), thePrimaryKeyName);
-			default:
-				throw new IllegalStateException(String.format(
+		try (Connection connection = getConnectionProperties().getDataSource().getConnection()) {
+			switch (getDriverType()) {
+				case MARIADB_10_1:
+				case DERBY_EMBEDDED:
+				case H2_EMBEDDED:
+					@Language("SQL")
+					final String sqlH2 = "ALTER TABLE %s DROP PRIMARY KEY";
+					return String.format(
+						sqlH2,
+						Optional.of(connection.getSchema())
+							.map(schema -> String.format("%s.%s", schema, getTableName()))
+							.orElse(getTableName()));
+				case POSTGRES_9_4:
+				case ORACLE_12C:
+				case MSSQL_2012:
+				case MYSQL_5_7:
+					assert thePrimaryKeyName != null;
+					@Language("SQL")
+					final String sql = "ALTER TABLE %s DROP CONSTRAINT %s";
+					return String.format(
+						sql,
+						Optional.of(connection.getSchema())
+							.map(schema -> String.format("%s.%s", schema, getTableName()))
+							.orElse(getTableName()),
+						thePrimaryKeyName);
+				default:
+					throw new IllegalStateException(String.format(
 						"%s Unknown driver type: %s.  Cannot drop primary key: %s for task %s",
 						Msg.code(2529), getDriverType(), getMigrationVersion(), getTableName()));
+			}
+
+		} catch (SQLException e) {
+			throw new IllegalStateException(e);
 		}
 	}
 
-	@Language("SQL")
+	@SuppressWarnings({"NestedTryStatement", "MethodWithMultipleLoops"})
 	@Nullable
-	private String generatePrimaryKeyNameSql() {
-		switch (getDriverType()) {
-			case MYSQL_5_7:
-			case MARIADB_10_1:
-			case DERBY_EMBEDDED:
-			case COCKROACHDB_21_1:
-			case H2_EMBEDDED:
-				return null; // Irrelevant:  We don't need to run the SQL for these databases.
-			case POSTGRES_9_4:
-				return "SELECT constraint_name " + "FROM information_schema.table_constraints "
-						+ "WHERE table_schema = 'public' "
-						+ "AND constraint_type = 'PRIMARY KEY' "
-						+ "AND table_name = ?";
-			case ORACLE_12C:
-				return "SELECT constraint_name " + "FROM user_constraints "
-						+ "WHERE constraint_type = 'P' "
-						+ "AND table_name = ?";
-			case MSSQL_2012:
-				return "SELECT tc.constraint_name " + "FROM information_schema.table_constraints tc "
-						+ "JOIN information_schema.constraint_column_usage ccu ON tc.constraint_name = ccu.constraint_name "
-						+ "WHERE tc.constraint_type = 'PRIMARY KEY' "
-						+ "AND  tc.table_name = ?";
-			default:
-				throw new IllegalStateException(String.format(
-						"%s Unknown driver type: %s  Cannot find primary key to drop for task %s",
-						Msg.code(2530), getDriverType(), getMigrationVersion()));
+	private String getPrimaryKeyName() {
+		String primaryKey = null;
+		try (Connection connection = getConnectionProperties().getDataSource().getConnection()) {
+			for (String tableName : ImmutableList.of(
+				getTableName().toLowerCase(), getTableName().toUpperCase())) {
+				try (ResultSet resultSet = connection
+					.getMetaData()
+					.getPrimaryKeys(connection.getCatalog(), connection.getSchema(), tableName)) {
+					while (resultSet.next()) {
+						primaryKey = resultSet.getString(6);
+					}
+				} catch (SQLException e) {
+					throw new IllegalStateException(e);
+				}
+			}
+		} catch (SQLException e) {
+			throw new IllegalStateException(e);
 		}
+
+		return primaryKey;
 	}
 }
