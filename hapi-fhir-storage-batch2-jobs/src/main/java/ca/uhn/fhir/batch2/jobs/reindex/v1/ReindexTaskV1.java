@@ -26,6 +26,7 @@ import org.springframework.transaction.support.TransactionCallback;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+@Deprecated(forRemoval = true, since = "7.6.0")
 public class ReindexTaskV1 implements TransactionCallback<ReindexResults> {
 	private static final Logger ourLog = LoggerFactory.getLogger(ReindexTaskV1.class);
 
