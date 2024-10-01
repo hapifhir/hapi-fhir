@@ -23,6 +23,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.cr.common.IRepositoryFactory;
 import ca.uhn.fhir.cr.common.RepositoryFactoryForRepositoryInterface;
+import ca.uhn.fhir.cr.common.StringTimePeriodHandler;
 import ca.uhn.fhir.cr.config.CrBaseConfig;
 import ca.uhn.fhir.cr.config.ProviderLoader;
 import ca.uhn.fhir.cr.config.ProviderSelector;
@@ -40,7 +41,6 @@ import ca.uhn.fhir.cr.r4.measure.CareGapsOperationProvider;
 import ca.uhn.fhir.cr.r4.measure.CollectDataOperationProvider;
 import ca.uhn.fhir.cr.r4.measure.DataRequirementsOperationProvider;
 import ca.uhn.fhir.cr.r4.measure.MeasureOperationsProvider;
-import ca.uhn.fhir.cr.common.StringTimePeriodHandler;
 import ca.uhn.fhir.cr.r4.measure.SubmitDataProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
@@ -148,8 +148,7 @@ public class CrR4Config {
 
 	@Bean
 	MeasureOperationsProvider r4MeasureOperationsProvider(
-			IMeasureServiceFactory theR4MeasureServiceFactory,
-			StringTimePeriodHandler theStringTimePeriodHandler) {
+			IMeasureServiceFactory theR4MeasureServiceFactory, StringTimePeriodHandler theStringTimePeriodHandler) {
 		return new MeasureOperationsProvider(theR4MeasureServiceFactory, theStringTimePeriodHandler);
 	}
 

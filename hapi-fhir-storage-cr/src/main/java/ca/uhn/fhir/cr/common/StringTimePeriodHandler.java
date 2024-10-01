@@ -25,7 +25,6 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.DateUtils;
-import jakarta.annotation.Nonnull;
 import org.apache.logging.log4j.util.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -95,6 +94,46 @@ public class StringTimePeriodHandler {
 		return ZonedDateTime.parse(theInputDateString, DATE_TIME_FORMATTER_JSON_SERIALIZE);
 	}
 
+	/**
+	 * Get the start period as a parsed ZoneDateTime (ex 2024 to 2024-01-01T00:00:00-07:00).
+	 *
+	 * @param theInputDateTimeString A String representation of the period start date in yyyy, yyyy-MM, YYYY-MM-dd, or yyyy-MM-ddTHH:mm:ss
+	 * @param theTimezone A 6 with which to convert the timestamp
+	 * @return the parsed start date/time with zone info
+	 */
+	public ZonedDateTime getStartZonedDateTime(String theInputDateTimeString, ZoneId theTimezone) {
+		final DateTimeFormatter dateTimeFormat = validateAndGetDateTimeFormat(theInputDateTimeString);
+
+		final LocalDateTime localDateTime = validateAndGetLocalDateTime(
+				theInputDateTimeString, dateTimeFormat, DateUtils::extractLocalDateTimeForRangeStartOrEmpty, true);
+
+		return ZonedDateTime.of(localDateTime, theTimezone);
+	}
+
+	/**
+	 * Get the end period as a parsed ZoneDateTime (ex 2024 to 2024-12-31T23:59:59-07:00).
+	 *
+	 * @param theInputDateTimeString A String representation of the period start date in yyyy, yyyy-MM, YYYY-MM-dd, or yyyy-MM-ddTHH:mm:ss
+	 * @param theTimezone A ZoneId with which to convert the timestamp
+	 * @return the parsed end date/time with zone info
+	 */
+	public ZonedDateTime getEndZonedDateTime(String theInputDateTimeString, ZoneId theTimezone) {
+		final DateTimeFormatter dateTimeFormat = validateAndGetDateTimeFormat(theInputDateTimeString);
+
+		final LocalDateTime localDateTime = validateAndGetLocalDateTime(
+				theInputDateTimeString, dateTimeFormat, DateUtils::extractLocalDateTimeForRangeEndOrEmpty, true);
+
+		return ZonedDateTime.of(localDateTime, theTimezone);
+	}
+
+	/**
+	 * Convert the String representations of both period start and end dates to their ZonedDateTime equivalents
+	 *
+	 * @param theRequestDetails RequestDetails which may or may not contain a Timezone header
+	 * @param thePeriodStart A String representation of the period start date in yyyy, yyyy-MM, YYYY-MM-dd, or yyyy-MM-ddTHH:mm:ss
+	 * @param thePeriodEnd A String representation of the period start date in yyyy, yyyy-MM, YYYY-MM-dd, or yyyy-MM-ddTHH:mm:ss
+	 * @return A MeasurePeriodForEvaluation containing both the period start and end as ZonedDateTimes
+	 */
 	public MeasurePeriodForEvaluation validateAndProcessTimezone(
 			RequestDetails theRequestDetails, String thePeriodStart, String thePeriodEnd) {
 		final ZoneId clientTimezone = getClientTimezoneOrInvalidRequest(theRequestDetails);
@@ -122,7 +161,8 @@ public class StringTimePeriodHandler {
 					Msg.code(2555), thePeriodStart, thePeriodEnd));
 		}
 
-		final DateTimeFormatter dateTimeFormatterStart = validateAndGetDateTimeFormat(thePeriodStart, thePeriodEnd);
+		final DateTimeFormatter dateTimeFormatterStart = validateAndGetDateTimeFormat(thePeriodStart);
+		validateAndGetDateTimeFormat(thePeriodEnd);
 
 		final LocalDateTime localDateTimeStart = validateAndGetLocalDateTime(
 				thePeriodStart, dateTimeFormatterStart, DateUtils::extractLocalDateTimeForRangeStartOrEmpty, true);
@@ -165,17 +205,16 @@ public class StringTimePeriodHandler {
 						Msg.code(2558), isStart ? "start" : "end", thePeriod)));
 	}
 
-	@Nonnull
-	private static DateTimeFormatter validateAndGetDateTimeFormat(String theThePeriodStart, String theThePeriodEnd) {
-		final DateTimeFormatter dateTimeFormatterStart =
-				VALID_DATE_TIME_FORMATTERS_BY_FORMAT_LENGTH.get(theThePeriodStart.length());
+	private DateTimeFormatter validateAndGetDateTimeFormat(String theInputDateTimeString) {
+		final DateTimeFormatter dateTimeFormatter =
+				VALID_DATE_TIME_FORMATTERS_BY_FORMAT_LENGTH.get(theInputDateTimeString.length());
 
-		if (dateTimeFormatterStart == null) {
+		if (dateTimeFormatter == null) {
 			throw new InvalidRequestException(String.format(
-					"%sUnsupported Date/Time format for period start: %s or end: %s",
-					Msg.code(2559), theThePeriodStart, theThePeriodEnd));
+					"%sUnsupported Date/Time format for input: %s", Msg.code(2559), theInputDateTimeString));
 		}
-		return dateTimeFormatterStart;
+
+		return dateTimeFormatter;
 	}
 
 	private ZoneId getClientTimezoneOrInvalidRequest(RequestDetails theRequestDetails) {

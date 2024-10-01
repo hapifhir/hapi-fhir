@@ -45,8 +45,7 @@ public class MeasureOperationsProvider {
 	private final StringTimePeriodHandler myMeasureReportPeriodRequestProcessingService;
 
 	public MeasureOperationsProvider(
-			IMeasureServiceFactory theR4MeasureServiceFactory,
-			StringTimePeriodHandler theStringTimePeriodHandler) {
+			IMeasureServiceFactory theR4MeasureServiceFactory, StringTimePeriodHandler theStringTimePeriodHandler) {
 		myR4MeasureServiceFactory = theR4MeasureServiceFactory;
 		myMeasureReportPeriodRequestProcessingService = theStringTimePeriodHandler;
 	}
