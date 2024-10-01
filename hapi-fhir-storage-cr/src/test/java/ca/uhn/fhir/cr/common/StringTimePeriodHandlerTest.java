@@ -79,111 +79,177 @@ class StringTimePeriodHandlerTest {
 
 	private final StringTimePeriodHandler myTestSubject = new StringTimePeriodHandler(ZoneOffset.UTC);
 
-	private static Stream<Arguments> validateAndProcessTimezone_happyPath_params() {
+	private static Stream<Arguments> getStartZonedDateTime_happyPath_params() {
 		return Stream.of(
-			Arguments.of(null, 						null, 		null, MeasurePeriodForEvaluation.EMPTY),
-			Arguments.of(ZONE_ID_Z, 							null, 		null, MeasurePeriodForEvaluation.EMPTY),
-			Arguments.of(TIMEZONE_UTC, 						null, 		null, MeasurePeriodForEvaluation.EMPTY),
-			Arguments.of(TIMEZONE_AMERICA_ST_JOHNS_ID,		null, 		null, MeasurePeriodForEvaluation.EMPTY),
-			Arguments.of(TIMEZONE_AMERICA_TORONTO_ID, 		null, 		null, MeasurePeriodForEvaluation.EMPTY),
-			Arguments.of(TIMEZONE_AMERICA_DENVER_ID, 		null, 		null, MeasurePeriodForEvaluation.EMPTY),
+			Arguments.of(null, null, null),
+			Arguments.of(ZONE_ID_Z, null, null),
+			Arguments.of(TIMEZONE_UTC, null, null),
+			Arguments.of(TIMEZONE_AMERICA_ST_JOHNS_ID, null, null),
+			Arguments.of(TIMEZONE_AMERICA_TORONTO_ID, null, null),
+			Arguments.of(TIMEZONE_AMERICA_DENVER_ID, null, null),
 
-			Arguments.of(null, 								"2020", "2021", buildPeriod(_2020_01_01_00_00_00, _2021_12_31_23_59_59, ZoneOffset.UTC)),
-			Arguments.of(ZONE_ID_Z, 							"2020", "2021", buildPeriod(_2020_01_01_00_00_00, _2021_12_31_23_59_59, ZoneOffset.UTC)),
-			Arguments.of(TIMEZONE_UTC, 						"2020", "2021", buildPeriod(_2020_01_01_00_00_00, _2021_12_31_23_59_59, ZoneOffset.UTC)),
-			Arguments.of(TIMEZONE_AMERICA_ST_JOHNS_ID, 		"2020", "2021", buildPeriod(_2020_01_01_00_00_00, _2021_12_31_23_59_59, TIMEZONE_AMERICA_ST_JOHNS)),
-			Arguments.of(TIMEZONE_AMERICA_TORONTO_ID, 		"2020", "2021", buildPeriod(_2020_01_01_00_00_00, _2021_12_31_23_59_59, TIMEZONE_AMERICA_TORONTO)),
-			Arguments.of(TIMEZONE_AMERICA_DENVER_ID, 		"2020", "2021", buildPeriod(_2020_01_01_00_00_00, _2021_12_31_23_59_59, TIMEZONE_AMERICA_DENVER)),
+			Arguments.of(null, 								"2020", _2020_01_01_00_00_00.atZone(ZoneOffset.UTC)),
+			Arguments.of(ZONE_ID_Z, 							"2020", _2020_01_01_00_00_00.atZone(ZoneOffset.UTC)),
+			Arguments.of(TIMEZONE_UTC, 						"2020", _2020_01_01_00_00_00.atZone(ZoneOffset.UTC)),
+			Arguments.of(TIMEZONE_AMERICA_ST_JOHNS_ID, 		"2020", _2020_01_01_00_00_00.atZone(TIMEZONE_AMERICA_ST_JOHNS)),
+			Arguments.of(TIMEZONE_AMERICA_TORONTO_ID, 		"2020", _2020_01_01_00_00_00.atZone(TIMEZONE_AMERICA_TORONTO)),
+			Arguments.of(TIMEZONE_AMERICA_DENVER_ID, 		"2020", _2020_01_01_00_00_00.atZone(TIMEZONE_AMERICA_DENVER)),
 
-			Arguments.of(null, 								"2022-02", "2022-08", buildPeriod(_2022_02_01_00_00_00, _2022_08_31_23_59_59, ZoneOffset.UTC)),
-			Arguments.of(ZONE_ID_Z, 							"2022-02", "2022-08", buildPeriod(_2022_02_01_00_00_00, _2022_08_31_23_59_59, ZoneOffset.UTC)),
-			Arguments.of(TIMEZONE_UTC, 						"2022-02", "2022-08", buildPeriod(_2022_02_01_00_00_00, _2022_08_31_23_59_59, ZoneOffset.UTC)),
-			Arguments.of(TIMEZONE_AMERICA_ST_JOHNS_ID, 		"2022-02", "2022-08", buildPeriod(_2022_02_01_00_00_00, _2022_08_31_23_59_59, TIMEZONE_AMERICA_ST_JOHNS)),
-			Arguments.of(TIMEZONE_AMERICA_TORONTO_ID, 		"2022-02", "2022-08", buildPeriod(_2022_02_01_00_00_00, _2022_08_31_23_59_59, TIMEZONE_AMERICA_TORONTO)),
-			Arguments.of(TIMEZONE_AMERICA_DENVER_ID, 		"2022-02", "2022-08", buildPeriod(_2022_02_01_00_00_00, _2022_08_31_23_59_59, TIMEZONE_AMERICA_DENVER)),
+			Arguments.of(null, 								"2022-02", _2022_02_01_00_00_00.atZone(ZoneOffset.UTC)),
+			Arguments.of(ZONE_ID_Z, 							"2022-02", _2022_02_01_00_00_00.atZone(ZoneOffset.UTC)),
+			Arguments.of(TIMEZONE_UTC, 						"2022-02", _2022_02_01_00_00_00.atZone(ZoneOffset.UTC)),
+			Arguments.of(TIMEZONE_AMERICA_ST_JOHNS_ID, 		"2022-02", _2022_02_01_00_00_00.atZone(TIMEZONE_AMERICA_ST_JOHNS)),
+			Arguments.of(TIMEZONE_AMERICA_TORONTO_ID, 		"2022-02", _2022_02_01_00_00_00.atZone(TIMEZONE_AMERICA_TORONTO)),
+			Arguments.of(TIMEZONE_AMERICA_DENVER_ID, 		"2022-02", _2022_02_01_00_00_00.atZone(TIMEZONE_AMERICA_DENVER)),
 
-			Arguments.of(null, 								"2022-02", "2022-02", buildPeriod(_2022_02_01_00_00_00, _2022_02_28_23_59_59, ZoneOffset.UTC)),
-			Arguments.of(ZONE_ID_Z, 							"2022-02", "2022-02", buildPeriod(_2022_02_01_00_00_00, _2022_02_28_23_59_59, ZoneOffset.UTC)),
-			Arguments.of(TIMEZONE_UTC, 						"2022-02", "2022-02", buildPeriod(_2022_02_01_00_00_00, _2022_02_28_23_59_59, ZoneOffset.UTC)),
-			Arguments.of(TIMEZONE_AMERICA_ST_JOHNS_ID, 		"2022-02", "2022-02", buildPeriod(_2022_02_01_00_00_00, _2022_02_28_23_59_59, TIMEZONE_AMERICA_ST_JOHNS)),
-			Arguments.of(TIMEZONE_AMERICA_TORONTO_ID, 		"2022-02", "2022-02", buildPeriod(_2022_02_01_00_00_00, _2022_02_28_23_59_59, TIMEZONE_AMERICA_TORONTO)),
-			Arguments.of(TIMEZONE_AMERICA_DENVER_ID, 		"2022-02", "2022-02", buildPeriod(_2022_02_01_00_00_00, _2022_02_28_23_59_59, TIMEZONE_AMERICA_DENVER)),
+			Arguments.of(null, 								"2024-02-25", _2024_02_25_00_00_00.atZone(ZoneOffset.UTC)),
+			Arguments.of(ZONE_ID_Z, 							"2024-02-25", _2024_02_25_00_00_00.atZone(ZoneOffset.UTC)),
+			Arguments.of(TIMEZONE_UTC, 						"2024-02-25", _2024_02_25_00_00_00.atZone(ZoneOffset.UTC)),
+			Arguments.of(TIMEZONE_AMERICA_ST_JOHNS_ID, 		"2024-02-25", _2024_02_25_00_00_00.atZone(TIMEZONE_AMERICA_ST_JOHNS)),
+			Arguments.of(TIMEZONE_AMERICA_TORONTO_ID, 		"2024-02-25", _2024_02_25_00_00_00.atZone(TIMEZONE_AMERICA_TORONTO)),
+			Arguments.of(TIMEZONE_AMERICA_DENVER_ID, 		"2024-02-25", _2024_02_25_00_00_00.atZone(TIMEZONE_AMERICA_DENVER)),
 
-			// Leap year
-			Arguments.of(null, 								"2024-02", "2024-02", buildPeriod(_2024_02_01_00_00_00, _2024_02_29_23_59_59, ZoneOffset.UTC)),
-			Arguments.of(ZONE_ID_Z, 							"2024-02", "2024-02", buildPeriod(_2024_02_01_00_00_00, _2024_02_29_23_59_59, ZoneOffset.UTC)),
-			Arguments.of(TIMEZONE_UTC, 						"2024-02", "2024-02", buildPeriod(_2024_02_01_00_00_00, _2024_02_29_23_59_59, ZoneOffset.UTC)),
-			Arguments.of(TIMEZONE_AMERICA_ST_JOHNS_ID, 		"2024-02", "2024-02", buildPeriod(_2024_02_01_00_00_00, _2024_02_29_23_59_59, TIMEZONE_AMERICA_ST_JOHNS)),
-			Arguments.of(TIMEZONE_AMERICA_TORONTO_ID, 		"2024-02", "2024-02", buildPeriod(_2024_02_01_00_00_00, _2024_02_29_23_59_59, TIMEZONE_AMERICA_TORONTO)),
-			Arguments.of(TIMEZONE_AMERICA_DENVER_ID, 		"2024-02", "2024-02", buildPeriod(_2024_02_01_00_00_00, _2024_02_29_23_59_59, TIMEZONE_AMERICA_DENVER)),
+			Arguments.of(null, 								"2024-09-25", _2024_09_25_00_00_00.atZone(ZoneOffset.UTC)),
+			Arguments.of(ZONE_ID_Z, 							"2024-09-25", _2024_09_25_00_00_00.atZone(ZoneOffset.UTC)),
+			Arguments.of(TIMEZONE_UTC, 						"2024-09-25", _2024_09_25_00_00_00.atZone(ZoneOffset.UTC)),
+			Arguments.of(TIMEZONE_AMERICA_ST_JOHNS_ID, 		"2024-09-25", _2024_09_25_00_00_00.atZone(TIMEZONE_AMERICA_ST_JOHNS)),
+			Arguments.of(TIMEZONE_AMERICA_TORONTO_ID, 		"2024-09-25", _2024_09_25_00_00_00.atZone(TIMEZONE_AMERICA_TORONTO)),
+			Arguments.of(TIMEZONE_AMERICA_DENVER_ID, 		"2024-09-25", _2024_09_25_00_00_00.atZone(TIMEZONE_AMERICA_DENVER)),
 
-			Arguments.of(null, 								"2024-02-25", "2024-02-26", buildPeriod(_2024_02_25_00_00_00, _2024_02_26_23_59_59, ZoneOffset.UTC)),
-			Arguments.of(ZONE_ID_Z, 							"2024-02-25", "2024-02-26", buildPeriod(_2024_02_25_00_00_00, _2024_02_26_23_59_59, ZoneOffset.UTC)),
-			Arguments.of(TIMEZONE_UTC, 						"2024-02-25", "2024-02-26", buildPeriod(_2024_02_25_00_00_00, _2024_02_26_23_59_59, ZoneOffset.UTC)),
-			Arguments.of(TIMEZONE_AMERICA_ST_JOHNS_ID, 		"2024-02-25", "2024-02-26", buildPeriod(_2024_02_25_00_00_00, _2024_02_26_23_59_59, TIMEZONE_AMERICA_ST_JOHNS)),
-			Arguments.of(TIMEZONE_AMERICA_TORONTO_ID, 		"2024-02-25", "2024-02-26", buildPeriod(_2024_02_25_00_00_00, _2024_02_26_23_59_59, TIMEZONE_AMERICA_TORONTO)),
-			Arguments.of(TIMEZONE_AMERICA_DENVER_ID, 		"2024-02-25", "2024-02-26", buildPeriod(_2024_02_25_00_00_00, _2024_02_26_23_59_59, TIMEZONE_AMERICA_DENVER)),
+			Arguments.of(null, 								"2024-01-01T12:00:00", _2024_01_01_12_00_00.atZone(ZoneOffset.UTC)),
+			Arguments.of(ZONE_ID_Z, 							"2024-01-01T12:00:00", _2024_01_01_12_00_00.atZone(ZoneOffset.UTC)),
+			Arguments.of(TIMEZONE_UTC, 						"2024-01-01T12:00:00", _2024_01_01_12_00_00.atZone(ZoneOffset.UTC)),
+			Arguments.of(TIMEZONE_AMERICA_ST_JOHNS_ID, 		"2024-01-01T12:00:00", _2024_01_01_12_00_00.atZone(TIMEZONE_AMERICA_ST_JOHNS)),
+			Arguments.of(TIMEZONE_AMERICA_TORONTO_ID, 		"2024-01-01T12:00:00", _2024_01_01_12_00_00.atZone(TIMEZONE_AMERICA_TORONTO)),
+			Arguments.of(TIMEZONE_AMERICA_DENVER_ID, 		"2024-01-01T12:00:00", _2024_01_01_12_00_00.atZone(TIMEZONE_AMERICA_DENVER)),
 
-			Arguments.of(null, 								"2024-09-25", "2024-09-26", buildPeriod(_2024_09_25_00_00_00, _2024_09_26_23_59_59, ZoneOffset.UTC)),
-			Arguments.of(ZONE_ID_Z, 							"2024-09-25", "2024-09-26", buildPeriod(_2024_09_25_00_00_00, _2024_09_26_23_59_59, ZoneOffset.UTC)),
-			Arguments.of(TIMEZONE_UTC, 						"2024-09-25", "2024-09-26", buildPeriod(_2024_09_25_00_00_00, _2024_09_26_23_59_59, ZoneOffset.UTC)),
-			Arguments.of(TIMEZONE_AMERICA_ST_JOHNS_ID, 		"2024-09-25", "2024-09-26", buildPeriod(_2024_09_25_00_00_00, _2024_09_26_23_59_59, TIMEZONE_AMERICA_ST_JOHNS)),
-			Arguments.of(TIMEZONE_AMERICA_TORONTO_ID, 		"2024-09-25", "2024-09-26", buildPeriod(_2024_09_25_00_00_00, _2024_09_26_23_59_59, TIMEZONE_AMERICA_TORONTO)),
-			Arguments.of(TIMEZONE_AMERICA_DENVER_ID, 		"2024-09-25", "2024-09-26", buildPeriod(_2024_09_25_00_00_00, _2024_09_26_23_59_59, TIMEZONE_AMERICA_DENVER)),
+			Arguments.of(null, 								"2024-09-25T12:00:00", _2024_09_25_12_00_00.atZone(ZoneOffset.UTC)),
+			Arguments.of(ZONE_ID_Z, 							"2024-09-25T12:00:00", _2024_09_25_12_00_00.atZone(ZoneOffset.UTC)),
+			Arguments.of(TIMEZONE_UTC, 						"2024-09-25T12:00:00", _2024_09_25_12_00_00.atZone(ZoneOffset.UTC)),
+			Arguments.of(TIMEZONE_AMERICA_ST_JOHNS_ID, 		"2024-09-25T12:00:00", _2024_09_25_12_00_00.atZone(TIMEZONE_AMERICA_ST_JOHNS)),
+			Arguments.of(TIMEZONE_AMERICA_TORONTO_ID, 		"2024-09-25T12:00:00", _2024_09_25_12_00_00.atZone(TIMEZONE_AMERICA_TORONTO)),
+			Arguments.of(TIMEZONE_AMERICA_DENVER_ID, 		"2024-09-25T12:00:00", _2024_09_25_12_00_00.atZone(TIMEZONE_AMERICA_DENVER))
+		);
+	}
 
-			Arguments.of(null, 								"2024-01-01T12:00:00", "2024-01-02T12:00:00", buildPeriod(_2024_01_01_12_00_00, _2024_01_02_12_00_00, ZoneOffset.UTC)),
-			Arguments.of(ZONE_ID_Z, 							"2024-01-01T12:00:00", "2024-01-02T12:00:00", buildPeriod(_2024_01_01_12_00_00, _2024_01_02_12_00_00, ZoneOffset.UTC)),
-			Arguments.of(TIMEZONE_UTC, 						"2024-01-01T12:00:00", "2024-01-02T12:00:00", buildPeriod(_2024_01_01_12_00_00, _2024_01_02_12_00_00, ZoneOffset.UTC)),
-			Arguments.of(TIMEZONE_AMERICA_ST_JOHNS_ID, 		"2024-01-01T12:00:00", "2024-01-02T12:00:00", buildPeriod(_2024_01_01_12_00_00, _2024_01_02_12_00_00, TIMEZONE_AMERICA_ST_JOHNS)),
-			Arguments.of(TIMEZONE_AMERICA_TORONTO_ID, 		"2024-01-01T12:00:00", "2024-01-02T12:00:00", buildPeriod(_2024_01_01_12_00_00, _2024_01_02_12_00_00, TIMEZONE_AMERICA_TORONTO)),
-			Arguments.of(TIMEZONE_AMERICA_DENVER_ID, 		"2024-01-01T12:00:00", "2024-01-02T12:00:00", buildPeriod(_2024_01_01_12_00_00, _2024_01_02_12_00_00, TIMEZONE_AMERICA_DENVER)),
+	private static Stream<Arguments> getEndZonedDateTime_happyPath_params() {
+		return Stream.of(
+			Arguments.of(null, null, null),
+			Arguments.of(ZONE_ID_Z, null, null),
+			Arguments.of(TIMEZONE_UTC, null, null),
+			Arguments.of(TIMEZONE_AMERICA_ST_JOHNS_ID, null, null),
+			Arguments.of(TIMEZONE_AMERICA_TORONTO_ID, null, null),
+			Arguments.of(TIMEZONE_AMERICA_DENVER_ID, null, null),
 
-			Arguments.of(null, 								"2024-09-25T12:00:00", "2024-09-26T12:00:00", buildPeriod(_2024_09_25_12_00_00, _2024_09_26_12_00_00, ZoneOffset.UTC)),
-			Arguments.of(ZONE_ID_Z, 							"2024-09-25T12:00:00", "2024-09-26T12:00:00", buildPeriod(_2024_09_25_12_00_00, _2024_09_26_12_00_00, ZoneOffset.UTC)),
-			Arguments.of(TIMEZONE_UTC, 						"2024-09-25T12:00:00", "2024-09-26T12:00:00", buildPeriod(_2024_09_25_12_00_00, _2024_09_26_12_00_00, ZoneOffset.UTC)),
-			Arguments.of(TIMEZONE_AMERICA_ST_JOHNS_ID, 		"2024-09-25T12:00:00", "2024-09-26T12:00:00", buildPeriod(_2024_09_25_12_00_00, _2024_09_26_12_00_00, TIMEZONE_AMERICA_ST_JOHNS)),
-			Arguments.of(TIMEZONE_AMERICA_TORONTO_ID, 		"2024-09-25T12:00:00", "2024-09-26T12:00:00", buildPeriod(_2024_09_25_12_00_00, _2024_09_26_12_00_00, TIMEZONE_AMERICA_TORONTO)),
-			Arguments.of(TIMEZONE_AMERICA_DENVER_ID, 		"2024-09-25T12:00:00", "2024-09-26T12:00:00", buildPeriod(_2024_09_25_12_00_00, _2024_09_26_12_00_00, TIMEZONE_AMERICA_DENVER))
+			Arguments.of(null, 								"2021", _2021_12_31_23_59_59.atZone(ZoneOffset.UTC)),
+			Arguments.of(ZONE_ID_Z, 							"2021", _2021_12_31_23_59_59.atZone(ZoneOffset.UTC)),
+			Arguments.of(TIMEZONE_UTC, 						"2021", _2021_12_31_23_59_59.atZone(ZoneOffset.UTC)),
+			Arguments.of(TIMEZONE_AMERICA_ST_JOHNS_ID, 		"2021", _2021_12_31_23_59_59.atZone(TIMEZONE_AMERICA_ST_JOHNS)),
+			Arguments.of(TIMEZONE_AMERICA_TORONTO_ID, 		"2021", _2021_12_31_23_59_59.atZone(TIMEZONE_AMERICA_TORONTO)),
+			Arguments.of(TIMEZONE_AMERICA_DENVER_ID, 		"2021", _2021_12_31_23_59_59.atZone(TIMEZONE_AMERICA_DENVER)),
+
+			Arguments.of(null, 								"2022-08", _2022_08_31_23_59_59.atZone(ZoneOffset.UTC)),
+			Arguments.of(ZONE_ID_Z, 							"2022-08", _2022_08_31_23_59_59.atZone(ZoneOffset.UTC)),
+			Arguments.of(TIMEZONE_UTC, 						"2022-08", _2022_08_31_23_59_59.atZone(ZoneOffset.UTC)),
+			Arguments.of(TIMEZONE_AMERICA_ST_JOHNS_ID, 		"2022-08", _2022_08_31_23_59_59.atZone(TIMEZONE_AMERICA_ST_JOHNS)),
+			Arguments.of(TIMEZONE_AMERICA_TORONTO_ID, 		"2022-08", _2022_08_31_23_59_59.atZone(TIMEZONE_AMERICA_TORONTO)),
+			Arguments.of(TIMEZONE_AMERICA_DENVER_ID, 		"2022-08", _2022_08_31_23_59_59.atZone(TIMEZONE_AMERICA_DENVER)),
+
+			Arguments.of(null, 								"2022-02", _2022_02_28_23_59_59.atZone(ZoneOffset.UTC)),
+			Arguments.of(ZONE_ID_Z, 							"2022-02", _2022_02_28_23_59_59.atZone(ZoneOffset.UTC)),
+			Arguments.of(TIMEZONE_UTC, 						"2022-02", _2022_02_28_23_59_59.atZone(ZoneOffset.UTC)),
+			Arguments.of(TIMEZONE_AMERICA_ST_JOHNS_ID, 		"2022-02", _2022_02_28_23_59_59.atZone(TIMEZONE_AMERICA_ST_JOHNS)),
+			Arguments.of(TIMEZONE_AMERICA_TORONTO_ID, 		"2022-02", _2022_02_28_23_59_59.atZone(TIMEZONE_AMERICA_TORONTO)),
+			Arguments.of(TIMEZONE_AMERICA_DENVER_ID, 		"2022-02", _2022_02_28_23_59_59.atZone(TIMEZONE_AMERICA_DENVER)),
+
+			Arguments.of(null, 								"2024-02", _2024_02_29_23_59_59.atZone(ZoneOffset.UTC)),
+			Arguments.of(ZONE_ID_Z, 							"2024-02", _2024_02_29_23_59_59.atZone(ZoneOffset.UTC)),
+			Arguments.of(TIMEZONE_UTC, 						"2024-02", _2024_02_29_23_59_59.atZone(ZoneOffset.UTC)),
+			Arguments.of(TIMEZONE_AMERICA_ST_JOHNS_ID, 		"2024-02", _2024_02_29_23_59_59.atZone(TIMEZONE_AMERICA_ST_JOHNS)),
+			Arguments.of(TIMEZONE_AMERICA_TORONTO_ID, 		"2024-02", _2024_02_29_23_59_59.atZone(TIMEZONE_AMERICA_TORONTO)),
+			Arguments.of(TIMEZONE_AMERICA_DENVER_ID, 		"2024-02", _2024_02_29_23_59_59.atZone(TIMEZONE_AMERICA_DENVER)),
+
+			Arguments.of(null, 								"2024-02-26", _2024_02_26_23_59_59.atZone(ZoneOffset.UTC)),
+			Arguments.of(ZONE_ID_Z, 							"2024-02-26", _2024_02_26_23_59_59.atZone(ZoneOffset.UTC)),
+			Arguments.of(TIMEZONE_UTC, 						"2024-02-26", _2024_02_26_23_59_59.atZone(ZoneOffset.UTC)),
+			Arguments.of(TIMEZONE_AMERICA_ST_JOHNS_ID, 		"2024-02-26", _2024_02_26_23_59_59.atZone(TIMEZONE_AMERICA_ST_JOHNS)),
+			Arguments.of(TIMEZONE_AMERICA_TORONTO_ID, 		"2024-02-26", _2024_02_26_23_59_59.atZone(TIMEZONE_AMERICA_TORONTO)),
+			Arguments.of(TIMEZONE_AMERICA_DENVER_ID, 		"2024-02-26", _2024_02_26_23_59_59.atZone(TIMEZONE_AMERICA_DENVER)),
+
+			Arguments.of(null, 								"2024-09-26", _2024_09_26_23_59_59.atZone(ZoneOffset.UTC)),
+			Arguments.of(ZONE_ID_Z, 							"2024-09-26", _2024_09_26_23_59_59.atZone(ZoneOffset.UTC)),
+			Arguments.of(TIMEZONE_UTC, 						"2024-09-26", _2024_09_26_23_59_59.atZone(ZoneOffset.UTC)),
+			Arguments.of(TIMEZONE_AMERICA_ST_JOHNS_ID, 		"2024-09-26", _2024_09_26_23_59_59.atZone(TIMEZONE_AMERICA_ST_JOHNS)),
+			Arguments.of(TIMEZONE_AMERICA_TORONTO_ID, 		"2024-09-26", _2024_09_26_23_59_59.atZone(TIMEZONE_AMERICA_TORONTO)),
+			Arguments.of(TIMEZONE_AMERICA_DENVER_ID, 		"2024-09-26", _2024_09_26_23_59_59.atZone(TIMEZONE_AMERICA_DENVER)),
+
+			Arguments.of(null, 								"2024-01-02T12:00:00", _2024_01_02_12_00_00.atZone(ZoneOffset.UTC)),
+			Arguments.of(ZONE_ID_Z, 							"2024-01-02T12:00:00", _2024_01_02_12_00_00.atZone(ZoneOffset.UTC)),
+			Arguments.of(TIMEZONE_UTC, 						"2024-01-02T12:00:00", _2024_01_02_12_00_00.atZone(ZoneOffset.UTC)),
+			Arguments.of(TIMEZONE_AMERICA_ST_JOHNS_ID, 		"2024-01-02T12:00:00", _2024_01_02_12_00_00.atZone(TIMEZONE_AMERICA_ST_JOHNS)),
+			Arguments.of(TIMEZONE_AMERICA_TORONTO_ID, 		"2024-01-02T12:00:00", _2024_01_02_12_00_00.atZone(TIMEZONE_AMERICA_TORONTO)),
+			Arguments.of(TIMEZONE_AMERICA_DENVER_ID, 		"2024-01-02T12:00:00", _2024_01_02_12_00_00.atZone(TIMEZONE_AMERICA_DENVER)),
+
+			Arguments.of(null, 								"2024-09-26T12:00:00", _2024_09_26_12_00_00.atZone(ZoneOffset.UTC)),
+			Arguments.of(ZONE_ID_Z, 							"2024-09-26T12:00:00", _2024_09_26_12_00_00.atZone(ZoneOffset.UTC)),
+			Arguments.of(TIMEZONE_UTC, 						"2024-09-26T12:00:00", _2024_09_26_12_00_00.atZone(ZoneOffset.UTC)),
+			Arguments.of(TIMEZONE_AMERICA_ST_JOHNS_ID, 		"2024-09-26T12:00:00", _2024_09_26_12_00_00.atZone(TIMEZONE_AMERICA_ST_JOHNS)),
+			Arguments.of(TIMEZONE_AMERICA_TORONTO_ID, 		"2024-09-26T12:00:00", _2024_09_26_12_00_00.atZone(TIMEZONE_AMERICA_TORONTO)),
+			Arguments.of(TIMEZONE_AMERICA_DENVER_ID, 		"2024-09-26T12:00:00", _2024_09_26_12_00_00.atZone(TIMEZONE_AMERICA_DENVER))
 		);
 	}
 
 	@ParameterizedTest
-	@MethodSource("validateAndProcessTimezone_happyPath_params")
-	void validateAndProcessTimezone_happyPath(@Nullable String theTimezone, String theInputPeriodStart, String theInputPeriodEnd, MeasurePeriodForEvaluation expectedResult) {
+	@MethodSource("getStartZonedDateTime_happyPath_params")
+	void getStartZonedDateTime_happyPath(@Nullable String theTimezone, String theInputPeriodStart, ZonedDateTime expectedResult) {
 
-		final MeasurePeriodForEvaluation actualResult =
-			myTestSubject.validateAndProcessTimezone(getRequestDetails(theTimezone), theInputPeriodStart, theInputPeriodEnd);
+		final ZonedDateTime actualResult =
+			myTestSubject.getStartZonedDateTime(theInputPeriodStart, getRequestDetails(theTimezone));
+
+		assertThat(actualResult).isEqualTo(expectedResult);
+	}
+
+	@ParameterizedTest
+	@MethodSource("getEndZonedDateTime_happyPath_params")
+	void getEndZonedDateTime_happyPath(@Nullable String theTimezone, String theInputPeriodEnd, ZonedDateTime expectedResult) {
+
+		final ZonedDateTime actualResult =
+			myTestSubject.getEndZonedDateTime(theInputPeriodEnd, getRequestDetails(theTimezone));
 
 		assertThat(actualResult).isEqualTo(expectedResult);
 	}
 
 	private static Stream<Arguments> errorParams() {
 		return Stream.of(
-			Arguments.of(null, "2024", "2024-01", new InvalidRequestException("HAPI-2555: Period start: 2024 and end: 2024-01 are not the same date/time formats")),
-			Arguments.of(null, null, "2024-01", new InvalidRequestException("HAPI-2554: Either both period start: [null] and end: [2024-01] must be empty or non empty")),
-			Arguments.of(null, "2024-01", null, new InvalidRequestException("HAPI-2554: Either both period start: [2024-01] and end: [null] must be empty or non empty")),
-			Arguments.of(null, "2024-01-01T12", "2024-01-01T12", new InvalidRequestException("HAPI-2559: Unsupported Date/Time format for period start: 2024-01-01T12 or end: 2024-01-01T12")),
-			Arguments.of(null, "2024-01-02", "2024-01-01", new InvalidRequestException("HAPI-2557: Invalid Interval - the ending boundary: 2024-01-01 must be greater than or equal to the starting boundary: 2024-01-02")),
-			Arguments.of("Middle-Earth/Combe", "2024-01-02", "2024-01-03", new InvalidRequestException("HAPI-2560: Invalid value for Timezone header: Middle-Earth/Combe")),
-			Arguments.of(null, "2024-01-01T12:00:00-02:30", "2024-01-02T12:00:00-04:00", new InvalidRequestException("HAPI-2559: Unsupported Date/Time format for period start: 2024-01-01T12:00:00-02:30 or end: 2024-01-02T12:00:00-04:00")),
-			Arguments.of(ZONE_ID_Z, "2024-01-01T12:00:00-02:30", "2024-01-02T12:00:00-04:00", new InvalidRequestException("HAPI-2559: Unsupported Date/Time format for period start: 2024-01-01T12:00:00-02:30 or end: 2024-01-02T12:00:00-04:00")),
-			Arguments.of("UTC", "2024-01-01T12:00:00-02:30", "2024-01-02T12:00:00-04:00", new InvalidRequestException("HAPI-2559: Unsupported Date/Time format for period start: 2024-01-01T12:00:00-02:30 or end: 2024-01-02T12:00:00-04:00")),
-			Arguments.of(TIMEZONE_AMERICA_ST_JOHNS_ID, "2024-01-01T12:00:00-02:30", "2024-01-02T12:00:00-04:00", new InvalidRequestException("HAPI-2559: Unsupported Date/Time format for period start: 2024-01-01T12:00:00-02:30 or end: 2024-01-02T12:00:00-04:00")),
-			Arguments.of(TIMEZONE_AMERICA_TORONTO_ID, "2024-01-01T12:00:00-02:30", "2024-01-02T12:00:00-04:00", new InvalidRequestException("HAPI-2559: Unsupported Date/Time format for period start: 2024-01-01T12:00:00-02:30 or end: 2024-01-02T12:00:00-04:00")),
-			Arguments.of(TIMEZONE_AMERICA_DENVER_ID, "2024-01-01T12:00:00-02:30", "2024-01-02T12:00:00-04:00", new InvalidRequestException("HAPI-2559: Unsupported Date/Time format for period start: 2024-01-01T12:00:00-02:30 or end: 2024-01-02T12:00:00-04:00")),
-			Arguments.of(null, "2024-09-25T12:00:00-06:00", "2024-09-26T12:00:00-06:00", new InvalidRequestException("HAPI-2559: Unsupported Date/Time format for period start: 2024-09-25T12:00:00-06:00 or end: 2024-09-26T12:00:00-06:00")),
-			Arguments.of(ZONE_ID_Z, "2024-09-25T12:00:00-06:00", "2024-09-26T12:00:00-06:00", new InvalidRequestException("HAPI-2559: Unsupported Date/Time format for period start: 2024-09-25T12:00:00-06:00 or end: 2024-09-26T12:00:00-06:00")),
-			Arguments.of("UTC", "2024-09-25T12:00:00-06:00", "2024-09-26T12:00:00-06:00", new InvalidRequestException("HAPI-2559: Unsupported Date/Time format for period start: 2024-09-25T12:00:00-06:00 or end: 2024-09-26T12:00:00-06:00")),
-			Arguments.of(TIMEZONE_AMERICA_ST_JOHNS_ID, "2024-09-25T12:00:00-06:00", "2024-09-26T12:00:00-06:00", new InvalidRequestException("HAPI-2559: Unsupported Date/Time format for period start: 2024-09-25T12:00:00-06:00 or end: 2024-09-26T12:00:00-06:00")),
-			Arguments.of(TIMEZONE_AMERICA_TORONTO_ID, "2024-09-25T12:00:00-06:00", "2024-09-26T12:00:00-06:00", new InvalidRequestException("HAPI-2559: Unsupported Date/Time format for period start: 2024-09-25T12:00:00-06:00 or end: 2024-09-26T12:00:00-06:00")),
-			Arguments.of(TIMEZONE_AMERICA_DENVER_ID, "2024-09-25T12:00:00-06:00", "2024-09-26T12:00:00-06:00", new InvalidRequestException("HAPI-2559: Unsupported Date/Time format for period start: 2024-09-25T12:00:00-06:00 or end: 2024-09-26T12:00:00-06:00"))
+			Arguments.of(null, "2024-01-01T12", new InvalidRequestException("HAPI-2559: Unsupported Date/Time format for input: 2024-01-01T12")),
+			Arguments.of("Middle-Earth/Combe", "2024-01-02", new InvalidRequestException("HAPI-2560: Invalid value for Timezone header: Middle-Earth/Combe")),
+			Arguments.of(null, "2024-01-01T12:00:00-02:30", new InvalidRequestException("HAPI-2559: Unsupported Date/Time format for input: 2024-01-01T12:00:00-02:30")),
+			Arguments.of(ZONE_ID_Z, "2024-01-01T12:00:00-02:30", new InvalidRequestException("HAPI-2559: Unsupported Date/Time format for input: 2024-01-01T12:00:00-02:30")),
+			Arguments.of("UTC", "2024-01-01T12:00:00-02:30", new InvalidRequestException("HAPI-2559: Unsupported Date/Time format for input: 2024-01-01T12:00:00-02:30")),
+			Arguments.of(TIMEZONE_AMERICA_ST_JOHNS_ID, "2024-01-01T12:00:00-02:30", new InvalidRequestException("HAPI-2559: Unsupported Date/Time format for input: 2024-01-01T12:00:00-02:30")),
+			Arguments.of(TIMEZONE_AMERICA_TORONTO_ID, "2024-01-01T12:00:00-02:30", new InvalidRequestException("HAPI-2559: Unsupported Date/Time format for input: 2024-01-01T12:00:00-02:30")),
+			Arguments.of(TIMEZONE_AMERICA_DENVER_ID, "2024-01-01T12:00:00-02:30", new InvalidRequestException("HAPI-2559: Unsupported Date/Time format for input: 2024-01-01T12:00:00-02:30")),
+			Arguments.of(null, "2024-09-25T12:00:00-06:00", new InvalidRequestException("HAPI-2559: Unsupported Date/Time format for input: 2024-09-25T12:00:00-06:00")),
+			Arguments.of(ZONE_ID_Z, "2024-09-25T12:00:00-06:00", new InvalidRequestException("HAPI-2559: Unsupported Date/Time format for input: 2024-09-25T12:00:00-06:00")),
+			Arguments.of("UTC", "2024-09-25T12:00:00-06:00", new InvalidRequestException("HAPI-2559: Unsupported Date/Time format for input: 2024-09-25T12:00:00-06:00")),
+			Arguments.of(TIMEZONE_AMERICA_ST_JOHNS_ID, "2024-09-25T12:00:00-06:00", new InvalidRequestException("HAPI-2559: Unsupported Date/Time format for input: 2024-09-25T12:00:00-06:00")),
+			Arguments.of(TIMEZONE_AMERICA_TORONTO_ID, "2024-09-25T12:00:00-06:00", new InvalidRequestException("HAPI-2559: Unsupported Date/Time format for input: 2024-09-25T12:00:00-06:00")),
+			Arguments.of(TIMEZONE_AMERICA_DENVER_ID, "2024-09-25T12:00:00-06:00", new InvalidRequestException("HAPI-2559: Unsupported Date/Time format for input: 2024-09-25T12:00:00-06:00"))
 		);
 	}
 
 	@ParameterizedTest
 	@MethodSource("errorParams")
-	void validateAndProcessTimezone_errorPaths(@Nullable String theTimezone, @Nullable String theInputPeriodStart, @Nullable String theInputPeriodEnd, InvalidRequestException theExpectedResult) {
-		assertThatThrownBy(() -> myTestSubject.validateAndProcessTimezone(getRequestDetails(theTimezone), theInputPeriodStart, theInputPeriodEnd))
+	void getStartZonedDateTime_errorPaths(@Nullable String theTimezone, @Nullable String theInputPeriodStart, InvalidRequestException theExpectedResult) {
+		assertThatThrownBy(() -> myTestSubject.getStartZonedDateTime(theInputPeriodStart, getRequestDetails(theTimezone)))
+			.hasMessage(theExpectedResult.getMessage())
+			.isInstanceOf(theExpectedResult.getClass());
+	}
+
+	@ParameterizedTest
+	@MethodSource("errorParams")
+	void getEndZonedDateTime_errorPaths(@Nullable String theTimezone, @Nullable String theInputPeriodEnd, InvalidRequestException theExpectedResult) {
+		assertThatThrownBy(() -> myTestSubject.getEndZonedDateTime(theInputPeriodEnd, getRequestDetails(theTimezone)))
 			.hasMessage(theExpectedResult.getMessage())
 			.isInstanceOf(theExpectedResult.getClass());
 	}

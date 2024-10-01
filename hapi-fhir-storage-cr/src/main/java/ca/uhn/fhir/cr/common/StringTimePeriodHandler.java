@@ -19,12 +19,12 @@
  */
 package ca.uhn.fhir.cr.common;
 
-import ca.uhn.fhir.cr.r4.measure.MeasurePeriodForEvaluation;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.DateUtils;
+import jakarta.annotation.Nullable;
 import org.apache.logging.log4j.util.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -98,16 +98,43 @@ public class StringTimePeriodHandler {
 	 * Get the start period as a parsed ZoneDateTime (ex 2024 to 2024-01-01T00:00:00-07:00).
 	 *
 	 * @param theInputDateTimeString A String representation of the period start date in yyyy, yyyy-MM, YYYY-MM-dd, or yyyy-MM-ddTHH:mm:ss
-	 * @param theTimezone A 6 with which to convert the timestamp
+	 * @param theRequestDetails RequestDetails that may or may not contain a Timezone header
 	 * @return the parsed start date/time with zone info
 	 */
-	public ZonedDateTime getStartZonedDateTime(String theInputDateTimeString, ZoneId theTimezone) {
-		final DateTimeFormatter dateTimeFormat = validateAndGetDateTimeFormat(theInputDateTimeString);
+	@Nullable
+	public ZonedDateTime getStartZonedDateTime(
+			@Nullable String theInputDateTimeString, RequestDetails theRequestDetails) {
+		return getStartZonedDateTime(theInputDateTimeString, getClientTimezoneOrInvalidRequest(theRequestDetails));
+	}
 
-		final LocalDateTime localDateTime = validateAndGetLocalDateTime(
-				theInputDateTimeString, dateTimeFormat, DateUtils::extractLocalDateTimeForRangeStartOrEmpty, true);
+	/**
+	 * Get the start period as a parsed ZoneDateTime (ex 2024 to 2024-01-01T00:00:00-07:00).
+	 *
+	 * @param theInputDateTimeString A String representation of the period start date in yyyy, yyyy-MM, YYYY-MM-dd, or yyyy-MM-ddTHH:mm:ss
+	 * @param theTimezone A ZoneId with which to convert the timestamp
+	 * @return the parsed start date/time with zone info
+	 */
+	@Nullable
+	public ZonedDateTime getStartZonedDateTime(@Nullable String theInputDateTimeString, ZoneId theTimezone) {
+		return getZonedDateTime(
+				theInputDateTimeString,
+				theTimezone,
+				true,
+				// start date/time
+				DateUtils::extractLocalDateTimeForRangeStartOrEmpty);
+	}
 
-		return ZonedDateTime.of(localDateTime, theTimezone);
+	/**
+	 * Get the end period as a parsed ZoneDateTime (ex 2024 to 2024-12-31T23:59:59-07:00).
+	 *
+	 * @param theInputDateTimeString A String representation of the period start date in yyyy, yyyy-MM, YYYY-MM-dd, or yyyy-MM-ddTHH:mm:ss
+	 * @param theRequestDetails RequestDetails that may or may not contain a Timezone header
+	 * @return the parsed end date/time with zone info
+	 */
+	@Nullable
+	public ZonedDateTime getEndZonedDateTime(
+			@Nullable String theInputDateTimeString, RequestDetails theRequestDetails) {
+		return getEndZonedDateTime(theInputDateTimeString, getClientTimezoneOrInvalidRequest(theRequestDetails));
 	}
 
 	/**
@@ -117,80 +144,33 @@ public class StringTimePeriodHandler {
 	 * @param theTimezone A ZoneId with which to convert the timestamp
 	 * @return the parsed end date/time with zone info
 	 */
-	public ZonedDateTime getEndZonedDateTime(String theInputDateTimeString, ZoneId theTimezone) {
+	@Nullable
+	public ZonedDateTime getEndZonedDateTime(@Nullable String theInputDateTimeString, ZoneId theTimezone) {
+		return getZonedDateTime(
+				theInputDateTimeString,
+				theTimezone,
+				false,
+				// end date/time
+				DateUtils::extractLocalDateTimeForRangeEndOrEmpty);
+	}
+
+	private ZonedDateTime getZonedDateTime(
+			String theInputDateTimeString,
+			ZoneId theTimezone,
+			boolean theIsStart,
+			Function<TemporalAccessor, Optional<LocalDateTime>> theStartOrEndExtractFunction) {
+
+		// We may pass null periods to clinical-reasoning
+		if (theInputDateTimeString == null) {
+			return null;
+		}
+
 		final DateTimeFormatter dateTimeFormat = validateAndGetDateTimeFormat(theInputDateTimeString);
 
 		final LocalDateTime localDateTime = validateAndGetLocalDateTime(
-				theInputDateTimeString, dateTimeFormat, DateUtils::extractLocalDateTimeForRangeEndOrEmpty, true);
+				theInputDateTimeString, dateTimeFormat, theStartOrEndExtractFunction, theIsStart);
 
 		return ZonedDateTime.of(localDateTime, theTimezone);
-	}
-
-	/**
-	 * Convert the String representations of both period start and end dates to their ZonedDateTime equivalents
-	 *
-	 * @param theRequestDetails RequestDetails which may or may not contain a Timezone header
-	 * @param thePeriodStart A String representation of the period start date in yyyy, yyyy-MM, YYYY-MM-dd, or yyyy-MM-ddTHH:mm:ss
-	 * @param thePeriodEnd A String representation of the period start date in yyyy, yyyy-MM, YYYY-MM-dd, or yyyy-MM-ddTHH:mm:ss
-	 * @return A MeasurePeriodForEvaluation containing both the period start and end as ZonedDateTimes
-	 */
-	public MeasurePeriodForEvaluation validateAndProcessTimezone(
-			RequestDetails theRequestDetails, String thePeriodStart, String thePeriodEnd) {
-		final ZoneId clientTimezone = getClientTimezoneOrInvalidRequest(theRequestDetails);
-
-		return validateInputDates(thePeriodStart, thePeriodEnd, clientTimezone);
-	}
-
-	private MeasurePeriodForEvaluation validateInputDates(
-			String thePeriodStart, String thePeriodEnd, ZoneId theZoneId) {
-
-		if ((Strings.isBlank(thePeriodStart) && !Strings.isBlank(thePeriodEnd))
-				|| (!Strings.isBlank(thePeriodStart) && Strings.isBlank(thePeriodEnd))) {
-			throw new InvalidRequestException(String.format(
-					"%sEither both period start: [%s] and end: [%s] must be empty or non empty",
-					Msg.code(2554), thePeriodStart, thePeriodEnd));
-		}
-
-		if (Strings.isBlank(thePeriodStart) && Strings.isBlank(thePeriodEnd)) {
-			return MeasurePeriodForEvaluation.EMPTY;
-		}
-
-		if (thePeriodStart.length() != thePeriodEnd.length()) {
-			throw new InvalidRequestException(String.format(
-					"%sPeriod start: %s and end: %s are not the same date/time formats",
-					Msg.code(2555), thePeriodStart, thePeriodEnd));
-		}
-
-		final DateTimeFormatter dateTimeFormatterStart = validateAndGetDateTimeFormat(thePeriodStart);
-		validateAndGetDateTimeFormat(thePeriodEnd);
-
-		final LocalDateTime localDateTimeStart = validateAndGetLocalDateTime(
-				thePeriodStart, dateTimeFormatterStart, DateUtils::extractLocalDateTimeForRangeStartOrEmpty, true);
-		final LocalDateTime localDateTimeEnd = validateAndGetLocalDateTime(
-				thePeriodEnd, dateTimeFormatterStart, DateUtils::extractLocalDateTimeForRangeEndOrEmpty, false);
-
-		validateParsedPeriodStartAndEnd(thePeriodStart, thePeriodEnd, localDateTimeStart, localDateTimeEnd);
-
-		return new MeasurePeriodForEvaluation(localDateTimeStart, localDateTimeEnd, theZoneId);
-	}
-
-	private static void validateParsedPeriodStartAndEnd(
-			String theThePeriodStart,
-			String theThePeriodEnd,
-			LocalDateTime theLocalDateTimeStart,
-			LocalDateTime theLocalDateTimeEnd) {
-		// This should probably never happen
-		if (theLocalDateTimeStart.isEqual(theLocalDateTimeEnd)) {
-			throw new InvalidRequestException(String.format(
-					"%sStart date: %s is the same as end date: %s",
-					Msg.code(2556), theThePeriodStart, theThePeriodEnd));
-		}
-
-		if (theLocalDateTimeStart.isAfter(theLocalDateTimeEnd)) {
-			throw new InvalidRequestException(String.format(
-					"%sInvalid Interval - the ending boundary: %s must be greater than or equal to the starting boundary: %s",
-					Msg.code(2557), theThePeriodEnd, theThePeriodStart));
-		}
 	}
 
 	private LocalDateTime validateAndGetLocalDateTime(
