@@ -68,7 +68,7 @@ public class MemoryCacheService {
 				case CONCEPT_TRANSLATION_REVERSE:
 					timeoutSeconds =
 							SECONDS.convert(myStorageSettings.getTranslationCachesExpireAfterWriteInMinutes(), MINUTES);
-					maximumSize = 10000;
+					maximumSize = 500000;
 					break;
 				case PID_TO_FORCED_ID:
 				case FORCED_ID_TO_PID:
@@ -200,6 +200,12 @@ public class MemoryCacheService {
 		 * Value type: {@literal Optional<String>}
 		 */
 		PID_TO_FORCED_ID(Long.class),
+		/**
+		 * TODO: JA this is duplicate with the CachingValidationSupport cache.
+		 * A better solution would be to drop this cache for this item, and to
+		 * create a new CachingValidationSupport implementation which uses
+		 * the MemoryCacheService for all of its caches.
+		 */
 		CONCEPT_TRANSLATION(TranslationQuery.class),
 		MATCH_URL(String.class),
 		CONCEPT_TRANSLATION_REVERSE(TranslationQuery.class),
