@@ -106,12 +106,12 @@ public class ResourceSearchUrlEntityPK implements Serializable {
 	}
 
 	private static int computePartitionIdOrNullEquivalent(
-			ResourceTable theTheResourceTable, boolean theTheSearchUrlDuplicateAcrossPartitionsEnabled) {
-		if (!theTheSearchUrlDuplicateAcrossPartitionsEnabled) {
+			ResourceTable theResourceTable, boolean theSearchUrlDuplicateAcrossPartitionsEnabled) {
+		if (!theSearchUrlDuplicateAcrossPartitionsEnabled) {
 			return PARTITION_ID_NULL_EQUIVALENT;
 		}
 
-		return Optional.ofNullable(theTheResourceTable.getPartitionId())
+		return Optional.ofNullable(theResourceTable.getPartitionId())
 				.map(PartitionablePartitionId::getPartitionId)
 				.orElse(PARTITION_ID_NULL_EQUIVALENT);
 	}

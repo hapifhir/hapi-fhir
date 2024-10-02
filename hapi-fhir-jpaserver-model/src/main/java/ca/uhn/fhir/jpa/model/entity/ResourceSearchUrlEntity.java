@@ -58,21 +58,19 @@ public class ResourceSearchUrlEntity {
 	public static final String RES_SEARCH_URL_COLUMN_NAME = "RES_SEARCH_URL";
 	public static final String PARTITION_ID = "PARTITION_ID";
 
-	public static final int RES_SEARCH_URL_LENGTH = 768;
-
 	@EmbeddedId
 	private ResourceSearchUrlEntityPK myPk;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumns(
 			value = {
-				@JoinColumn(name = "RES_ID", nullable = false, updatable = false),
-				@JoinColumn(name = "PARTITION_ID", nullable = false, updatable = false)
+				@JoinColumn(name = "RES_ID", nullable = false, insertable = false, updatable = false),
+				@JoinColumn(name = "PARTITION_ID", nullable = false, insertable = false, updatable = false)
 			},
 			foreignKey = @ForeignKey(name = "FK_RES_SEARCH_URL_RESOURCE"))
 	private ResourceTable myResourceTable;
 
-	@Column(name = "RES_ID", updatable = false, nullable = false, insertable = false)
+	@Column(name = "RES_ID", updatable = false, nullable = false, insertable = true)
 	private Long myResourcePid;
 
 	@Column(name = "PARTITION_ID", updatable = false, nullable = false, insertable = false)
@@ -123,9 +121,10 @@ public class ResourceSearchUrlEntity {
 		return myResourceTable;
 	}
 
-	public ResourceSearchUrlEntity setResourceTable(ResourceTable myResourceTable) {
-		this.myResourceTable = myResourceTable;
-		this.myPartitionIdValue = myResourceTable.getPartitionId().getPartitionId();
+	public ResourceSearchUrlEntity setResourceTable(ResourceTable theResourceTable) {
+		this.myResourceTable = theResourceTable;
+		this.myResourcePid = theResourceTable.getId().getId();
+		this.myPartitionIdValue = theResourceTable.getPartitionId().getPartitionId();
 		return this;
 	}
 

@@ -185,10 +185,15 @@ public class PartitionSettings {
 				PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
 	}
 
+	// FIXME: document - make sure to indicate that this can't be used in partition key mode
 	public boolean isConditionalCreateDuplicateIdentifiersEnabled() {
+		if (isPartitionIdsInPrimaryKeys()) {
+			return true;
+		}
 		return myConditionalCreateDuplicateIdentifiersEnabled;
 	}
 
+	// FIXME: document
 	public void setConditionalCreateDuplicateIdentifiersEnabled(
 			boolean theConditionalCreateDuplicateIdentifiersEnabled) {
 		myConditionalCreateDuplicateIdentifiersEnabled = theConditionalCreateDuplicateIdentifiersEnabled;

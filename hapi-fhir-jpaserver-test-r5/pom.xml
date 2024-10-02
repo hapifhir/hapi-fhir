@@ -54,7 +54,13 @@
             <scope>test</scope>
         </dependency>
 
-    </dependencies>
+		<dependency>
+			<groupId>com.github.jsqlparser</groupId>
+			<artifactId>jsqlparser</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+	</dependencies>
 
 	<build>
 		<plugins>

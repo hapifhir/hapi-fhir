@@ -16,6 +16,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoObservation;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
 import ca.uhn.fhir.jpa.api.dao.PatientEverythingParameters;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeEverythingService;
 import ca.uhn.fhir.jpa.dao.r5.BaseJpaR5Test;
@@ -33,7 +34,11 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
+import com.google.common.collect.ListMultimap;
 import jakarta.annotation.Nonnull;
+import net.sf.jsqlparser.JSQLParserException;
+import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import net.sf.jsqlparser.statement.insert.Insert;
 import org.assertj.core.api.Assertions;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -54,8 +59,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
@@ -66,6 +73,7 @@ import static ca.uhn.fhir.rest.api.Constants.PARAM_TAG;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public abstract class TestDefinitions implements ITestDataBuilder {
@@ -114,9 +122,15 @@ public abstract class TestDefinitions implements ITestDataBuilder {
 
 	@AfterEach
 	public void after() {
-		JpaStorageSettings defaults = new JpaStorageSettings();
-		myStorageSettings.setTagStorageMode(defaults.getTagStorageMode());
-		myStorageSettings.setIndexOnContainedResources(defaults.isIndexOnContainedResources());
+		{
+			JpaStorageSettings defaults = new JpaStorageSettings();
+			myStorageSettings.setTagStorageMode(defaults.getTagStorageMode());
+			myStorageSettings.setIndexOnContainedResources(defaults.isIndexOnContainedResources());
+		}
+		{
+			PartitionSettings defaults = new PartitionSettings();
+			myPartitionSettings.setConditionalCreateDuplicateIdentifiersEnabled(defaults.isConditionalCreateDuplicateIdentifiersEnabled());
+		}
 	}
 
 	@Test
@@ -155,6 +169,47 @@ public abstract class TestDefinitions implements ITestDataBuilder {
 		} else {
 			assertThat(getDeleteSql(0)).isEqualTo("DELETE FROM HFJ_HISTORY_TAG WHERE RES_ID IN (" + pid + ")");
 		}
+	}
+
+	@Test
+	public void testCreate_Conditional() throws JSQLParserException {
+		// Setup
+		myPartitionSelectorInterceptor.setNextPartitionId(PARTITION_2);
+		createPatient(withActiveTrue()); // Just to pre-fetch the partition details
+		myPartitionSettings.setConditionalCreateDuplicateIdentifiersEnabled(true);
+
+		// Test
+		myCaptureQueriesListener.clear();
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem("http://foo").setValue("bar");
+		DaoMethodOutcome outcome = myPatientDao.create(patient, "Patient?identifier=http://foo|bar", new SystemRequestDetails());
+		long id = outcome.getId().getIdPartAsLong();
+
+		// Verify
+		assertTrue(outcome.getCreated());
+
+		myCaptureQueriesListener.logSelectQueries();
+		if (myIncludePartitionIdsInSql) {
+			assertThat(getSelectSql(0)).startsWith("SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_SPIDX_TOKEN t0 WHERE ((t0.PARTITION_ID = '2') AND (t0.HASH_SYS_AND_VALUE = '-2780914544385068076'))");
+		} else {
+			assertThat(getSelectSql(0)).startsWith("SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_SPIDX_TOKEN t0 WHERE (t0.HASH_SYS_AND_VALUE = '-2780914544385068076')");
+		}
+		assertEquals(1, myCaptureQueriesListener.countSelectQueries());
+
+		myCaptureQueriesListener.logInsertQueries();
+		// FIXME: check insert 0
+		Map<String, String> insertColumns = parseInsertStatement(getInsertSql(1), "HFJ_RES_VER");
+		if (myIncludePartitionIdsInPks) {
+			assertEquals("'2'", insertColumns.get("PARTITION_ID"));
+			assertEquals("'" + id + "'", insertColumns.get("PID"));
+		} else {
+			assertEquals("'2'", insertColumns.get("PARTITION_ID"));
+			assertEquals("'" + id + "'", insertColumns.get("PID"));
+		}
+		assertEquals(2, myCaptureQueriesListener.countInsertQueries());
+
+		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
 	}
 
 	@Test
@@ -588,7 +643,6 @@ public abstract class TestDefinitions implements ITestDataBuilder {
 		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
 	}
 
-
 	@Test
 	public void testSearch_Token_Not() {
 		// Setup
@@ -615,11 +669,6 @@ public abstract class TestDefinitions implements ITestDataBuilder {
 		}
 		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
 	}
-
-	// FIXME: add test with specific includes and add both for reverse
-	// FIXME: also add version that uses client assigned IDs
-
-	// FIXME: create another test container that uses null as the default partition ID
 
 	@Test
 	public void testSearch_IncludesStar() {
@@ -747,6 +796,10 @@ public abstract class TestDefinitions implements ITestDataBuilder {
 		assertEquals(8, myCaptureQueriesListener.countSelectQueries());
 	}
 
+	// FIXME: add test with specific includes and add both for reverse
+	// FIXME: also add version that uses client assigned IDs
+
+	// FIXME: create another test container that uses null as the default partition ID
 
 	@Test
 	public void testUpdateAsCreate() {
@@ -775,12 +828,10 @@ public abstract class TestDefinitions implements ITestDataBuilder {
 		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
 	}
 
-
 	// FIXME: add a history test
 	private SystemRequestDetails newRequest() {
 		return new SystemRequestDetails();
 	}
-
 
 	private JpaPid findId(String theResourceType, String theIdPart) {
 		return myParentTest.runInTransaction(() -> myResourceTableDao
@@ -864,6 +915,39 @@ public abstract class TestDefinitions implements ITestDataBuilder {
 		);
 	}
 
+	@Nonnull
+	private List<SqlQuery> getSqlSelectQueriesWithString(String tableName) {
+		List<SqlQuery> selectTokenQueries = myCaptureQueriesListener.getSelectQueries()
+			.stream()
+			.filter(t -> t.getSql(false, false).contains(tableName))
+			.toList();
+		return selectTokenQueries;
+	}
+
+	@Nonnull
+	private List<SqlQuery> getSqlDeleteQueriesWithString(String tableName) {
+		List<SqlQuery> selectTokenQueries = myCaptureQueriesListener.getDeleteQueries()
+			.stream()
+			.filter(t -> t.getSql(false, false).contains(tableName))
+			.toList();
+		return selectTokenQueries;
+	}
+
+	private static Map<String, String> parseInsertStatement(String theInsertSql, String theTableName) throws JSQLParserException {
+		Insert parsedStatement = (Insert) CCJSqlParserUtil.parse(theInsertSql);
+		assertEquals(theTableName, parsedStatement.getTable().getName());
+
+		Map<String, String> retVal = new HashMap<>();
+
+		for (int i = 0; i < parsedStatement.getColumns().size(); i++) {
+			String columnName = parsedStatement.getColumns().get(i).getColumnName();
+			String columnValue = parsedStatement.getValues().getExpressions().get(i).toString();
+			retVal.put(columnName, columnValue);
+		}
+
+		return retVal;
+	}
+
 	private static List<String> toUnqualifiedVersionlessIdValues(IBundleProvider theFound) {
 		int fromIndex = 0;
 		Integer toIndex = theFound.size();
@@ -883,24 +967,6 @@ public abstract class TestDefinitions implements ITestDataBuilder {
 			retVal.add(next.getIdElement().toUnqualifiedVersionless().getValue());
 		}
 		return retVal;
-	}
-
-	@Nonnull
-	private List<SqlQuery> getSqlSelectQueriesWithString(String tableName) {
-		List<SqlQuery> selectTokenQueries = myCaptureQueriesListener.getSelectQueries()
-			.stream()
-			.filter(t -> t.getSql(false, false).contains(tableName))
-			.toList();
-		return selectTokenQueries;
-	}
-
-	@Nonnull
-	private List<SqlQuery> getSqlDeleteQueriesWithString(String tableName) {
-		List<SqlQuery> selectTokenQueries = myCaptureQueriesListener.getDeleteQueries()
-			.stream()
-			.filter(t -> t.getSql(false, false).contains(tableName))
-			.toList();
-		return selectTokenQueries;
 	}
 
 	private record CreatedResourceIds(IIdType parentOrgId, IIdType childOrgId, IIdType patientId, IIdType encounterId,
