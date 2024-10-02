@@ -64,4 +64,12 @@
 			<property name="format" value="^(Base|Abstract).+$"/>
 		</module>
 	</module>
+
+	<!-- for suppression of rules; to use, surround code to exclude with comments: -->
+	<!-- CHECKSTYLE.OFF RuleToDisable   AND   CHECKSTYLE.ON RuleToDisable -->
+	<module name="SuppressWithPlainTextCommentFilter">
+		<property name="offCommentFormat" value="CHECKSTYLE.OFF\: ([\w\|]+)" />
+		<property name="onCommentFormat" value="CHECKSTYLE.ON\: ([\w\|]+)" />
+	</module>
+
 </module>

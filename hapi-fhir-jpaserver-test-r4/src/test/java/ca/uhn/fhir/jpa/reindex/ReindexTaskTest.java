@@ -2,7 +2,6 @@ package ca.uhn.fhir.jpa.reindex;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
-import ca.uhn.fhir.batch2.jobs.reindex.ReindexAppCtx;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
@@ -39,6 +38,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static ca.uhn.fhir.batch2.jobs.reindex.ReindexUtils.JOB_REINDEX;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -47,7 +47,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @SuppressWarnings("SqlDialectInspection")
-public class ReindexJobTest extends BaseJpaR4Test {
+public class ReindexTaskTest extends BaseJpaR4Test {
 
 	@Autowired
 	private IJobCoordinator myJobCoordinator;
@@ -101,7 +101,7 @@ public class ReindexJobTest extends BaseJpaR4Test {
 
 		// execute
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
-		startRequest.setJobDefinitionId(ReindexAppCtx.JOB_REINDEX);
+		startRequest.setJobDefinitionId(JOB_REINDEX);
 		startRequest.setParameters(
 			new ReindexJobParameters()
 				.setOptimizeStorage(ReindexParameters.OptimizeStorageModeEnum.CURRENT_VERSION)
@@ -158,7 +158,7 @@ public class ReindexJobTest extends BaseJpaR4Test {
 
 		// execute
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
-		startRequest.setJobDefinitionId(ReindexAppCtx.JOB_REINDEX);
+		startRequest.setJobDefinitionId(JOB_REINDEX);
 		startRequest.setParameters(
 			new ReindexJobParameters()
 				.setOptimizeStorage(ReindexParameters.OptimizeStorageModeEnum.ALL_VERSIONS)
@@ -217,7 +217,7 @@ public class ReindexJobTest extends BaseJpaR4Test {
 
 		// execute
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
-		startRequest.setJobDefinitionId(ReindexAppCtx.JOB_REINDEX);
+		startRequest.setJobDefinitionId(JOB_REINDEX);
 		startRequest.setParameters(
 			new ReindexJobParameters()
 				.setOptimizeStorage(ReindexParameters.OptimizeStorageModeEnum.ALL_VERSIONS)
@@ -252,7 +252,7 @@ public class ReindexJobTest extends BaseJpaR4Test {
 
 		// execute
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
-		startRequest.setJobDefinitionId(ReindexAppCtx.JOB_REINDEX);
+		startRequest.setJobDefinitionId(JOB_REINDEX);
 		startRequest.setParameters(
 			new ReindexJobParameters()
 				.setOptimizeStorage(ReindexParameters.OptimizeStorageModeEnum.CURRENT_VERSION)
@@ -294,7 +294,7 @@ public class ReindexJobTest extends BaseJpaR4Test {
 
 		// execute
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
-		startRequest.setJobDefinitionId(ReindexAppCtx.JOB_REINDEX);
+		startRequest.setJobDefinitionId(JOB_REINDEX);
 		startRequest.setParameters(parameters);
 		Batch2JobStartResponse res = myJobCoordinator.startInstance(mySrd, startRequest);
 		myBatch2JobHelper.awaitJobCompletion(res);
@@ -325,7 +325,7 @@ public class ReindexJobTest extends BaseJpaR4Test {
 
 		// execute
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
-		startRequest.setJobDefinitionId(ReindexAppCtx.JOB_REINDEX);
+		startRequest.setJobDefinitionId(JOB_REINDEX);
 		startRequest.setParameters(parameters);
 		Batch2JobStartResponse res = myJobCoordinator.startInstance(startRequest);
 		JobInstance jobInstance = myBatch2JobHelper.awaitJobCompletion(res);
@@ -356,7 +356,7 @@ public class ReindexJobTest extends BaseJpaR4Test {
 		parameters.addUrl("Observation?status=final");
 
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
-		startRequest.setJobDefinitionId(ReindexAppCtx.JOB_REINDEX);
+		startRequest.setJobDefinitionId(JOB_REINDEX);
 		startRequest.setParameters(parameters);
 		Batch2JobStartResponse res = myJobCoordinator.startInstance(mySrd, startRequest);
 		myBatch2JobHelper.awaitJobCompletion(res);
@@ -387,7 +387,7 @@ public class ReindexJobTest extends BaseJpaR4Test {
 
 		// execute
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
-		startRequest.setJobDefinitionId(ReindexAppCtx.JOB_REINDEX);
+		startRequest.setJobDefinitionId(JOB_REINDEX);
 		startRequest.setParameters(new ReindexJobParameters());
 		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(mySrd, startRequest);
 		myBatch2JobHelper.awaitJobCompletion(startResponse);
@@ -406,7 +406,7 @@ public class ReindexJobTest extends BaseJpaR4Test {
 		DaoMethodOutcome searchParameter = myReindexTestHelper.createUniqueCodeSearchParameter();
 
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
-		startRequest.setJobDefinitionId(ReindexAppCtx.JOB_REINDEX);
+		startRequest.setJobDefinitionId(JOB_REINDEX);
 		startRequest.setParameters(new ReindexJobParameters());
 		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(new SystemRequestDetails(), startRequest);
 		JobInstance myJob = myBatch2JobHelper.awaitJobCompletion(startResponse);
@@ -436,7 +436,7 @@ public class ReindexJobTest extends BaseJpaR4Test {
 
 		// Run a reindex
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
-		startRequest.setJobDefinitionId(ReindexAppCtx.JOB_REINDEX);
+		startRequest.setJobDefinitionId(JOB_REINDEX);
 		startRequest.setParameters(new ReindexJobParameters());
 		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(new SystemRequestDetails(), startRequest);
 		JobInstance myJob = myBatch2JobHelper.awaitJobCompletion(startResponse.getInstanceId(), 999);
@@ -469,7 +469,7 @@ public class ReindexJobTest extends BaseJpaR4Test {
 
 		// Run a reindex
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
-		startRequest.setJobDefinitionId(ReindexAppCtx.JOB_REINDEX);
+		startRequest.setJobDefinitionId(JOB_REINDEX);
 		startRequest.setParameters(new ReindexJobParameters());
 		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(new SystemRequestDetails(), startRequest);
 		JobInstance myJob = myBatch2JobHelper.awaitJobCompletion(startResponse.getInstanceId(), 999);
@@ -500,7 +500,7 @@ public class ReindexJobTest extends BaseJpaR4Test {
 
 		// execute
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
-		startRequest.setJobDefinitionId(ReindexAppCtx.JOB_REINDEX);
+		startRequest.setJobDefinitionId(JOB_REINDEX);
 		startRequest.setParameters(new ReindexJobParameters());
 		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(mySrd, startRequest);
 		JobInstance outcome = myBatch2JobHelper.awaitJobCompletion(startResponse);
@@ -528,7 +528,7 @@ public class ReindexJobTest extends BaseJpaR4Test {
 
 		// execute
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
-		startRequest.setJobDefinitionId(ReindexAppCtx.JOB_REINDEX);
+		startRequest.setJobDefinitionId(JOB_REINDEX);
 		startRequest.setParameters(new ReindexJobParameters());
 		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(new SystemRequestDetails(), startRequest);
 		JobInstance outcome = myBatch2JobHelper.awaitJobFailure(startResponse);
@@ -541,7 +541,7 @@ public class ReindexJobTest extends BaseJpaR4Test {
 
 	@Test
 	public void testReindex_withReindexingUponSearchParameterChangeEnabled_reindexJobCompleted() {
-		List<JobInstance> jobInstances = myJobPersistence.fetchInstancesByJobDefinitionId(ReindexAppCtx.JOB_REINDEX, 10, 0);
+		List<JobInstance> jobInstances = myJobPersistence.fetchInstancesByJobDefinitionId(JOB_REINDEX, 10, 0);
 		assertThat(jobInstances).isEmpty();
 
 		// make sure the resources auto-reindex after the search parameter update is enabled
@@ -552,7 +552,7 @@ public class ReindexJobTest extends BaseJpaR4Test {
 		myReindexTestHelper.createCodeSearchParameter();
 
 		// check that reindex job was created
-		jobInstances = myJobPersistence.fetchInstancesByJobDefinitionId(ReindexAppCtx.JOB_REINDEX, 10, 0);
+		jobInstances = myJobPersistence.fetchInstancesByJobDefinitionId(JOB_REINDEX, 10, 0);
 		assertThat(jobInstances).hasSize(1);
 
 		// check that the job is completed (not stuck in QUEUED status)
