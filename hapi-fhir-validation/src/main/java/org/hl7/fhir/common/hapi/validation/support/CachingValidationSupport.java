@@ -79,7 +79,7 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 		myExpandValueSetCache = CacheFactory.build(theCacheTimeouts.getExpandValueSetMillis(), 100);
 		myValidateCodeCache = CacheFactory.build(theCacheTimeouts.getValidateCodeMillis(), 5000);
 		myLookupCodeCache = CacheFactory.build(theCacheTimeouts.getLookupCodeMillis(), 5000);
-		myTranslateCodeCache = CacheFactory.build(theCacheTimeouts.getTranslateCodeMillis(), 5000);
+		myTranslateCodeCache = CacheFactory.build(theCacheTimeouts.getTranslateCodeMillis(), 500000);
 		myCache = CacheFactory.build(theCacheTimeouts.getMiscMillis(), 5000);
 		myNonExpiringCache = Collections.synchronizedMap(new HashMap<>());
 
