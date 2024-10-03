@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 6339
+jira: SMILE-9044
+title: "Fixed a bug in migrations when using Postgres when using the non-default schema. If a migration attempted to drop a primary key, the generated SQL would only ever target the `public` schema.
+This has been corrected, and the current schema is now used, with `public` as a fallback. Thanks to Adrienne Sox for the contribution!"
