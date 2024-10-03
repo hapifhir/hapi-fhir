@@ -118,7 +118,7 @@ public class ReindexJobTest extends BaseJpaR4Test {
 		runInTransaction(()->{
 			assertEquals(20, myResourceHistoryTableDao.count());
 			ResourceHistoryTable history = myResourceHistoryTableDao.findAll().get(0);
-			if (history.getResourceId().equals(patientId.getIdPartAsLong()) && history.getVersion() < 11) {
+			if (history.getResourceId().equals(JpaPid.fromId(patientId.getIdPartAsLong())) && history.getVersion() < 11) {
 				assertNull(history.getResourceTextVc());
 				assertNotNull(history.getResource());
 			} else {
