@@ -62,7 +62,7 @@ public class ResourceIdListWorkChunkJson implements IModelJson {
 		return myRequestPartitionId;
 	}
 
-	private List<TypedPidJson> getTypedPids() {
+	public List<TypedPidJson> getTypedPids() {
 		if (myTypedPids == null) {
 			myTypedPids = new ArrayList<>();
 		}

@@ -38,6 +38,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static ca.uhn.fhir.batch2.jobs.reindex.ReindexUtils.JOB_REINDEX;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -170,7 +171,7 @@ public class PatientReindexTestHelper {
 
 	private JobInstanceStartRequest createPatientReindexRequest(int theBatchSize) {
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
-		startRequest.setJobDefinitionId(ReindexAppCtx.JOB_REINDEX);
+		startRequest.setJobDefinitionId(JOB_REINDEX);
 
 		ReindexJobParameters reindexJobParameters = new ReindexJobParameters();
 		reindexJobParameters.setBatchSize(Math.max(theBatchSize,1));
