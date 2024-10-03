@@ -33,8 +33,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 	JpaConstants.HAPI_INCLUDE_PARTITION_IDS_IN_PKS + "=true"
 })
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-class ResourceTableFKProviderTest extends BaseJpaR4Test {
-	private static final Logger ourLog = LoggerFactory.getLogger(ResourceTableFKProviderTest.class);
+class ResourceTableFKProviderIT extends BaseJpaR4Test {
+	private static final Logger ourLog = LoggerFactory.getLogger(ResourceTableFKProviderIT.class);
 
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	protected EntityManager myEntityManager;

@@ -24,6 +24,7 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import jakarta.annotation.Nonnull;
+import org.apache.commons.lang3.Validate;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -39,7 +40,7 @@ import java.util.function.Predicate;
  */
 public class LogbackTestExtension implements BeforeEachCallback, AfterEachCallback {
 	private final Logger myLogger;
-	private final Level myLevel;
+	private Level myLevel;
 	private ListAppender<ILoggingEvent> myListAppender = null;
 	private Level mySavedLevel;
 
@@ -78,6 +79,13 @@ public class LogbackTestExtension implements BeforeEachCallback, AfterEachCallba
 	}
 
 	/**
+	 * Sets the root logger to the given level
+	 */
+	public LogbackTestExtension(Level theLevel) {
+		this(org.slf4j.Logger.ROOT_LOGGER_NAME, theLevel);
+	}
+
+	/**
 	 * Returns a copy to avoid concurrent modification errors.
 	 * @return A copy of the log events so far.
 	 */
@@ -102,10 +110,17 @@ public class LogbackTestExtension implements BeforeEachCallback, AfterEachCallba
 		setUp(myLevel);
 	}
 
+	/**
+	 * @deprecated Just use the constructor here
+	 */
+	@Deprecated
 	public void setUp(Level theLevel) {
-		myListAppender = new ListAppender<>();
-		myListAppender.start();
-		myLogger.addAppender(myListAppender);
+		myLevel = theLevel;
+		if (myListAppender == null) {
+			myListAppender = new ListAppender<>();
+			myListAppender.start();
+			myLogger.addAppender(myListAppender);
+		}
 		if (theLevel != null) {
 			mySavedLevel = myLogger.getLevel();
 			myLogger.setLevel(theLevel);
@@ -118,6 +133,7 @@ public class LogbackTestExtension implements BeforeEachCallback, AfterEachCallba
 		myListAppender.stop();
 		if (myLevel != null) {
 			myLogger.setLevel(mySavedLevel);
+			myLevel = null;
 		}
 	}
 
