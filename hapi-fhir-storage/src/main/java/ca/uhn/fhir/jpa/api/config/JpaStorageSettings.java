@@ -1735,12 +1735,32 @@ public class JpaStorageSettings extends StorageSettings {
 		myStoreMetaSourceInformation = theStoreMetaSourceInformation;
 	}
 
-	// FIXME: document
+	/**
+	 * If set to <code>true</code> (default is false), the system will read
+	 * <code>Resource.meta.source</code> values from the <code>HFJ_RES_VER_PROV</code>
+	 * table. This table was replaced by dedicated columns in the <code>HFJ_RES_VER</code>
+	 * table as of HAPI FHIR 6.8.0 (Smile CDR 2023.08.R01) and as of that version
+	 * there is no need to read from the dedicated table. However, if old data still
+	 * remains and has not been migrated (using a $reindex operation) then you can
+	 * enable this setting in order to read from the old table.
+	 *
+	 * @since 8.0.0
+	 */
 	public boolean isAccessMetaSourceInformationFromProvenanceTable() {
 		return myAccessMetaSourceInformationFromProvenanceTable;
 	}
 
-	// FIXME: document
+	/**
+	 * If set to <code>true</code> (default is false), the system will read
+	 * <code>Resource.meta.source</code> values from the <code>HFJ_RES_VER_PROV</code>
+	 * table. This table was replaced by dedicated columns in the <code>HFJ_RES_VER</code>
+	 * table as of HAPI FHIR 6.8.0 (Smile CDR 2023.08.R01) and as of that version
+	 * there is no need to read from the dedicated table. However, if old data still
+	 * remains and has not been migrated (using a $reindex operation) then you can
+	 * enable this setting in order to read from the old table.
+	 *
+	 * @since 8.0.0
+	 */
 	public void setAccessMetaSourceInformationFromProvenanceTable(
 			boolean theAccessMetaSourceInformationFromProvenanceTable) {
 		myAccessMetaSourceInformationFromProvenanceTable = theAccessMetaSourceInformationFromProvenanceTable;

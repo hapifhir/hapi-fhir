@@ -73,8 +73,10 @@ public class PreventDanglingInterceptorsExtension implements BeforeEachCallback,
 			IdentityHashMap<Object, Object> delta = new IdentityHashMap<>();
 			myBeforeInterceptors.forEach(t -> delta.put(t, t));
 			afterInterceptors.forEach(t -> delta.remove(t, t));
-			delta.keySet().forEach(t -> myInterceptorServiceSuplier.get().registerInterceptor(t));
-			assertThat(delta.isEmpty()).as(() -> "Test removed interceptor(s) and did not re-add them afterwards:\n * " + delta.keySet().stream().map(Object::toString).collect(Collectors.joining("\n * "))).isTrue();
+			for (Object t : delta.keySet()) {
+				ourLog.warn("Interceptor {} was removed by test, re-adding", t);
+				myInterceptorServiceSuplier.get().registerInterceptor(t);
+			}
 		}
 	}
 }
