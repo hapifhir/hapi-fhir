@@ -44,7 +44,6 @@ import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTagDao;
-import ca.uhn.fhir.jpa.dao.data.IResourceSearchViewDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.dao.search.ResourceNotFoundInIndexException;
 import ca.uhn.fhir.jpa.interceptor.JpaPreResourceAccessDetails;
@@ -105,7 +104,9 @@ import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.StringUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.MultimapBuilder;
 import com.healthmarketscience.sqlbuilder.Condition;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -116,6 +117,7 @@ import jakarta.persistence.Query;
 import jakarta.persistence.Tuple;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
+import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -144,7 +146,7 @@ import java.util.stream.Collectors;
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.UNDESIRED_RESOURCE_LINKAGES_FOR_EVERYTHING_ON_PATIENT_INSTANCE;
 import static ca.uhn.fhir.jpa.search.builder.QueryStack.LOCATION_POSITION;
 import static ca.uhn.fhir.jpa.search.builder.QueryStack.SearchForIdsParams.with;
-import static ca.uhn.fhir.jpa.util.InClauseNormalizer.*;
+import static ca.uhn.fhir.jpa.util.InClauseNormalizer.normalizeIdListForInClause;
 import static java.util.Objects.requireNonNull;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.defaultString;
@@ -190,7 +192,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	private final ISearchParamRegistry mySearchParamRegistry;
 	private final PartitionSettings myPartitionSettings;
 	private final DaoRegistry myDaoRegistry;
-	private final IResourceSearchViewDao myResourceSearchViewDao;
 	private final FhirContext myContext;
 	private final IIdHelperService<JpaPid> myIdHelperService;
 	private final JpaStorageSettings myStorageSettings;
@@ -239,7 +240,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			IInterceptorBroadcaster theInterceptorBroadcaster,
 			IResourceTagDao theResourceTagDao,
 			DaoRegistry theDaoRegistry,
-			IResourceSearchViewDao theResourceSearchViewDao,
 			FhirContext theContext,
 			IIdHelperService theIdHelperService,
 			Class<? extends IBaseResource> theResourceType) {
@@ -256,7 +256,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		myInterceptorBroadcaster = theInterceptorBroadcaster;
 		myResourceTagDao = theResourceTagDao;
 		myDaoRegistry = theDaoRegistry;
-		myResourceSearchViewDao = theResourceSearchViewDao;
 		myContext = theContext;
 		myIdHelperService = theIdHelperService;
 	}
@@ -1857,8 +1856,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			boolean theReverse) {
 		StringBuilder sqlBuilder;
 		Set<Long> identityHashesForTypes = calculateIndexUriIdentityHashesForResourceTypes(null, theReverse);
-		List<Collection<String>> canonicalUrlPartitions =
-				partitionBySizeAndPartitionId(theCanonicalUrls, getMaximumPageSize() - identityHashesForTypes.size());
+		List<List<String>> canonicalUrlPartitions =
+			ListUtils.partition(List.copyOf(theCanonicalUrls), getMaximumPageSize() - identityHashesForTypes.size());
 
 		sqlBuilder = new StringBuilder();
 		sqlBuilder.append("SELECT i.myResourcePid ");
@@ -2031,30 +2030,35 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	}
 
 	// FIXME: partition should include only the same partition ID in a single list - also write tests
-	private <T> List<Collection<T>> partitionBySizeAndPartitionId(Collection<T> theNextRoundMatches, int theMaxLoad) {
-		List<Collection<T>> retVal;
+	static List<Collection<JpaPid>> partitionBySizeAndPartitionId(List<JpaPid> theNextRoundMatches, int theMaxLoad) {
+
 		if (theNextRoundMatches.size() <= theMaxLoad) {
-
-			retVal = Collections.singletonList(theNextRoundMatches);
-
-		} else {
-
-			retVal = new ArrayList<>();
-			Collection<T> current = null;
-			for (T next : theNextRoundMatches) {
-				if (current == null) {
-					current = new ArrayList<>(theMaxLoad);
-					retVal.add(current);
+			boolean allSamePartition = true;
+			for (int i = 1; i < theNextRoundMatches.size(); i++) {
+				if (!Objects.equals(theNextRoundMatches.get(i-1).getPartitionId(), theNextRoundMatches.get(i).getPartitionId())) {
+					allSamePartition = false;
+					break;
 				}
-
-				current.add(next);
-
-				if (current.size() >= theMaxLoad) {
-					current = null;
-				}
+			}
+			if (allSamePartition) {
+				return Collections.singletonList(theNextRoundMatches);
 			}
 		}
 
+		// Break into partitioned sublists
+		ListMultimap<String, JpaPid> lists = MultimapBuilder.hashKeys().arrayListValues().build();
+		for (JpaPid nextRoundMatch : theNextRoundMatches) {
+			String partitionId = nextRoundMatch.getPartitionId() != null ? nextRoundMatch.getPartitionId().toString() : "";
+			lists.put(partitionId, nextRoundMatch);
+		}
+
+		List<Collection<JpaPid>> retVal = new ArrayList<>();
+		for (String key : lists.keySet()) {
+			List<List<JpaPid>> nextPartition = Lists.partition(lists.get(key), theMaxLoad);
+			retVal.addAll(nextPartition);
+		}
+
+		// In unit test mode, we sort the results just for unit test predictability
 		if (HapiSystemProperties.isUnitTestModeEnabled()) {
 			retVal = retVal.stream()
 					.map(t -> t.stream().sorted().collect(Collectors.toList()))

@@ -6837,6 +6837,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertTrue(timeBetweenUpdates.after(dateV1));
 		assertTrue(timeBetweenUpdates.after(dateV2));
 		String url = myServerBase + "/Patient/" + patientId + "/_history?_at=gt" + toStr(timeBetweenUpdates);
+		myCaptureQueriesListener.clear();
 		List<String> resultIds = searchAndReturnUnqualifiedIdValues(url);
 		assertThat(resultIds).as(()->describeVersionsAndUrl(url)).hasSize(1);
 		assertThat(resultIds).contains("Patient/" + patientId + "/_history/2");
@@ -6847,6 +6848,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertTrue(timeBetweenUpdates.before(dateV1));
 		assertTrue(timeBetweenUpdates.before(dateV2));
 		String url = myServerBase + "/Patient/" + patientId + "/_history?_at=gt" + toStr(timeBetweenUpdates);
+		myCaptureQueriesListener.clear();
 		List<String> resultIds = searchAndReturnUnqualifiedIdValues(url);
 		assertThat(resultIds).as(()->describeVersionsAndUrl(url)).hasSize(2);
 		assertThat(resultIds).contains("Patient/" + patientId + "/_history/1");
@@ -6858,6 +6860,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertTrue(timeBetweenUpdates.after(dateV1));
 		assertTrue(timeBetweenUpdates.before(dateV2));
 		String url = myServerBase + "/Patient/" + patientId + "/_history?_since=" + toStr(timeBetweenUpdates);
+		myCaptureQueriesListener.clear();
 		List<String> resultIds = searchAndReturnUnqualifiedIdValues(url);
 		assertThat(resultIds).as(()->describeVersionsAndUrl(url)).hasSize(1);
 		assertThat(resultIds).contains("Patient/" + patientId + "/_history/2");
@@ -6865,8 +6868,10 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	private String describeVersionsAndUrl(String theUrl) {
 		return runInTransaction(()->{
-			return "URL: " + theUrl + "\nHistory Entries:\n * " +
-				myResourceHistoryTableDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n * "));
+			return "URL: " + theUrl + "\n\nHistory Entries:\n * " +
+				myResourceHistoryTableDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n * ")) +
+				"\n\nSQL Queries:\n * " +
+				myCaptureQueriesListener.getSelectQueries().stream().map(t->t.getSql(true, false)).collect(Collectors.joining("\n * "));
 		});
 	}
 

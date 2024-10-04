@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.search.builder;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.rest.server.util.FhirContextSearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,9 +14,14 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -65,6 +71,60 @@ class SearchBuilderTest {
 		// Revincludes are really hard to figure out the potential resource types for, so we just need to
 		// use all active resource types
 		assertThat(types).hasSize(146);
+	}
+
+	@Test
+	void testPartitionBySizeAndPartitionId_ReuseIfSmallEnoughAndAllSamePartition() {
+		List<JpaPid> input = List.of(
+			JpaPid.fromId(100L, 1),
+			JpaPid.fromId(101L, 1)
+		);
+		Iterable<Collection<JpaPid>> actual = SearchBuilder.partitionBySizeAndPartitionId(input, 3);
+		assertSame(input, actual.iterator().next());
+	}
+
+	@Test
+	void testPartitionBySizeAndPartitionId_Partitioned() {
+		List<JpaPid> input = List.of(
+			JpaPid.fromId(0L, null),
+			JpaPid.fromId(1L, null),
+			JpaPid.fromId(2L, null),
+			JpaPid.fromId(3L, null),
+			JpaPid.fromId(100L, 1),
+			JpaPid.fromId(101L, 1),
+			JpaPid.fromId(102L, 1),
+			JpaPid.fromId(103L, 1),
+			JpaPid.fromId(200L, 2),
+			JpaPid.fromId(201L, 2),
+			JpaPid.fromId(202L, 2),
+			JpaPid.fromId(203L, 2)
+		);
+
+		// Test
+		Iterable<Collection<JpaPid>> actual = SearchBuilder.partitionBySizeAndPartitionId(input, 3);
+
+		// Verify
+		assertThat(actual).asList().containsExactlyInAnyOrder(
+			List.of(
+				JpaPid.fromId(0L, null),
+				JpaPid.fromId(1L, null),
+				JpaPid.fromId(2L, null)),
+			List.of(
+				JpaPid.fromId(3L, null)),
+			List.of(
+				JpaPid.fromId(100L, 1),
+				JpaPid.fromId(101L, 1),
+				JpaPid.fromId(102L, 1)),
+			List.of(
+				JpaPid.fromId(103L, 1)),
+			List.of(
+				JpaPid.fromId(200L, 2),
+				JpaPid.fromId(201L, 2),
+				JpaPid.fromId(202L, 2)),
+			List.of(
+				JpaPid.fromId(203L, 2)
+			)
+		);
 	}
 
 }

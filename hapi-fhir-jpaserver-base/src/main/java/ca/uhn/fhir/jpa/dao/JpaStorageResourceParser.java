@@ -29,7 +29,6 @@ import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryProvenanceDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
-import ca.uhn.fhir.jpa.entity.ResourceSearchView;
 import ca.uhn.fhir.jpa.esr.ExternallyStoredResourceServiceRegistry;
 import ca.uhn.fhir.jpa.esr.IExternallyStoredResourceService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
@@ -223,30 +222,6 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 						provenanceSourceUri = provenance.getSourceUri();
 					}
 				}
-			}
-		} else if (theEntity instanceof ResourceSearchView) {
-			// This is the search View
-			ResourceSearchView view = (ResourceSearchView) theEntity;
-			resourceBytes = view.getResource();
-			resourceText = view.getResourceTextVc();
-			resourceEncoding = view.getEncoding();
-			version = view.getVersion();
-			provenanceRequestId = view.getRequestId();
-			provenanceSourceUri = view.getSourceUri();
-			if (isBlank(provenanceRequestId) && isBlank(provenanceSourceUri)) {
-				provenanceRequestId = view.getProvenanceRequestId();
-				provenanceSourceUri = view.getProvenanceSourceUri();
-			}
-			switch (myStorageSettings.getTagStorageMode()) {
-				case VERSIONED:
-				case NON_VERSIONED:
-					if (theTagList != null) {
-						tagList = theTagList;
-					}
-					break;
-				case INLINE:
-					tagList = null;
-					break;
 			}
 		} else {
 			// something wrong
