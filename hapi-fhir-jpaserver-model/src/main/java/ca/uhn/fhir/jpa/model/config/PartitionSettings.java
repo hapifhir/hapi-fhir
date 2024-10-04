@@ -201,7 +201,17 @@ public class PartitionSettings {
 				PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
 	}
 
-	// FIXME: document - make sure to indicate that this can't be used in partition key mode
+	/**
+	 * The {@link ca.uhn.fhir.jpa.model.entity.ResourceSearchUrlEntity}
+	 * table is used to prevent accidental concurrent conditional create/update operations
+	 * from creating duplicate resources by inserting a row in that table as a part
+	 * of the database transaction performing the write operation. If this setting
+	 * is set to {@literal false} (which is the default unless {@link #isIncludePartitionIdsInPKs()}
+	 * is enabled, in which case the value is always {@literal true}), the partition
+	 * ID is not written to this table, meaning that duplicates are prevented across
+	 * partitions. If this setting is set to {@literal true}, duplciates will not be
+	 * prevented if they appear on different partitions.
+	 */
 	public boolean isConditionalCreateDuplicateIdentifiersEnabled() {
 		if (isIncludePartitionIdsInPKs()) {
 			return true;
@@ -209,7 +219,17 @@ public class PartitionSettings {
 		return myConditionalCreateDuplicateIdentifiersEnabled;
 	}
 
-	// FIXME: document
+	/**
+	 * The {@link ca.uhn.fhir.jpa.model.entity.ResourceSearchUrlEntity}
+	 * table is used to prevent accidental concurrent conditional create/update operations
+	 * from creating duplicate resources by inserting a row in that table as a part
+	 * of the database transaction performing the write operation. If this setting
+	 * is set to {@literal false} (which is the default unless {@link #isIncludePartitionIdsInPKs()}
+	 * is enabled, in which case the value is always {@literal true}), the partition
+	 * ID is not written to this table, meaning that duplicates are prevented across
+	 * partitions. If this setting is set to {@literal true}, duplciates will not be
+	 * prevented if they appear on different partitions.
+	 */
 	public void setConditionalCreateDuplicateIdentifiersEnabled(
 			boolean theConditionalCreateDuplicateIdentifiersEnabled) {
 		myConditionalCreateDuplicateIdentifiersEnabled = theConditionalCreateDuplicateIdentifiersEnabled;

@@ -1152,12 +1152,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			versionlessPids = normalizeIdListForInClause(versionlessPids);
 		}
 
-		// FIXME: add ability to be partitioned here
-		List<Long> rawPids = versionlessPids.stream().map(t -> t.getId()).collect(Collectors.toList());
-
-		// -- get the resource from the searchView
-		//		Collection<ResourceSearchView> resourceSearchViewList =
-		//				myResourceSearchViewDao.findByResourceIds(rawPids);
+		// Load the resource bodies
 		Collection<ResourceHistoryTable> resourceSearchViewList =
 				myResourceHistoryTableDao.findCurrentVersionsByResourcePidsAndFetchResourceTable(versionlessPids);
 

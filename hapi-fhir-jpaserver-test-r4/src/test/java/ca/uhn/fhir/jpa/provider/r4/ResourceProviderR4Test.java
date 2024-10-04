@@ -6838,7 +6838,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertTrue(timeBetweenUpdates.after(dateV2));
 		String url = myServerBase + "/Patient/" + patientId + "/_history?_at=gt" + toStr(timeBetweenUpdates);
 		List<String> resultIds = searchAndReturnUnqualifiedIdValues(url);
-		assertThat(resultIds).hasSize(1);
+		assertThat(resultIds).as(()->describeVersionsAndUrl(url)).hasSize(1);
 		assertThat(resultIds).contains("Patient/" + patientId + "/_history/2");
 	}
 
@@ -6848,7 +6848,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertTrue(timeBetweenUpdates.before(dateV2));
 		String url = myServerBase + "/Patient/" + patientId + "/_history?_at=gt" + toStr(timeBetweenUpdates);
 		List<String> resultIds = searchAndReturnUnqualifiedIdValues(url);
-		assertThat(resultIds).hasSize(2);
+		assertThat(resultIds).as(()->describeVersionsAndUrl(url)).hasSize(2);
 		assertThat(resultIds).contains("Patient/" + patientId + "/_history/1");
 		assertThat(resultIds).contains("Patient/" + patientId + "/_history/2");
 	}

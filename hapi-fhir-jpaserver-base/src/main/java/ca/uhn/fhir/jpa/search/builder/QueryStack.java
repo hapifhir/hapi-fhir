@@ -1964,14 +1964,13 @@ public class QueryStack {
 		return toOrPredicate(orPredicates);
 	}
 
-	// FIXME: rename to history from source
 	private ResourceHistoryPredicateBuilder getSourcePredicateBuilder(
 			@Nullable DbColumn[] theSourceJoinColumn, SelectQuery.JoinType theJoinType) {
 		return createOrReusePredicateBuilder(
 						PredicateBuilderTypeEnum.SOURCE,
 						theSourceJoinColumn,
 						Constants.PARAM_SOURCE,
-						() -> mySqlBuilder.addSourcePredicateBuilder(theSourceJoinColumn, theJoinType))
+						() -> mySqlBuilder.addResourceHistoryPredicateBuilder(theSourceJoinColumn, theJoinType))
 				.getResult();
 	}
 

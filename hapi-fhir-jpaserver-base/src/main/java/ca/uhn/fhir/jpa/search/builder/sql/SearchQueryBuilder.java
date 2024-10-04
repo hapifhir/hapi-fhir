@@ -282,7 +282,7 @@ public class SearchQueryBuilder {
 	/**
 	 * Add and return a predicate builder (or a root query if no root query exists yet) for selecting on a <code>_source</code> search parameter
 	 */
-	public ResourceHistoryPredicateBuilder addSourcePredicateBuilder(
+	public ResourceHistoryPredicateBuilder addResourceHistoryPredicateBuilder(
 			@Nullable DbColumn[] theSourceJoinColumn, SelectQuery.JoinType theJoinType) {
 		ResourceHistoryPredicateBuilder retVal = mySqlBuilderFactory.newResourceHistoryPredicateBuilder(this);
 		addTable(retVal, theSourceJoinColumn, theJoinType);

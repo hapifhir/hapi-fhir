@@ -34,8 +34,6 @@ import java.util.List;
 public interface IResourceHistoryTableDao
 		extends JpaRepository<ResourceHistoryTable, ResourceHistoryTablePk>, IHapiFhirJpaRepository {
 
-	// FIXME: see if we can avoid the myResourceTable.myPid in this class
-
 	/**
 	 * This is really only intended for unit tests - There can be many versions of resources in
 	 * the real world, use a pageable query for real uses.
@@ -77,7 +75,7 @@ public interface IResourceHistoryTableDao
 
 	@Modifying
 	@Query(
-			"UPDATE ResourceHistoryTable r SET r.myResourceVersion = :newVersion WHERE r.myResourceTable.myPid = :id AND r.myResourceVersion = :oldVersion")
+			"UPDATE ResourceHistoryTable r SET r.myResourceVersion = :newVersion WHERE r.myResourcePid = :id AND r.myResourceVersion = :oldVersion")
 	void updateVersion(
 			@Param("id") JpaPid theId,
 			@Param("oldVersion") long theOldVersion,
@@ -99,10 +97,10 @@ public interface IResourceHistoryTableDao
 			"UPDATE ResourceHistoryTable r SET r.myResourceTextVc = null, r.myResource = :text, r.myEncoding = 'JSONC' WHERE r.myId = :pid")
 	void updateNonInlinedContents(@Param("text") byte[] theText, @Param("pid") ResourceHistoryTablePk thePid);
 
-	@Query("SELECT v FROM ResourceHistoryTable v " + "JOIN FETCH v.myResourceTable t "
-			+ // ON (v.myResourcePid = t.myPid) " +
-			"WHERE v.myResourcePid IN (:pids) AND "
-			+ "t.myVersion = v.myResourceVersion")
+	@Query("SELECT v FROM ResourceHistoryTable v " +
+		"JOIN FETCH v.myResourceTable t " +
+		"WHERE v.myResourcePid IN (:pids) " +
+		"AND t.myVersion = v.myResourceVersion")
 	List<ResourceHistoryTable> findCurrentVersionsByResourcePidsAndFetchResourceTable(
 			@Param("pids") List<JpaPid> theVersionlessPids);
 }

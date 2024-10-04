@@ -166,7 +166,6 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 			provenanceSourceUri = history.getSourceUri();
 			provenanceRequestId = history.getRequestId();
 			if (isBlank(provenanceSourceUri) && isBlank(provenanceRequestId)) {
-				// FIXME: write test if none is found
 				if (myStorageSettings.isAccessMetaSourceInformationFromProvenanceTable()) {
 					Optional<ResourceHistoryProvenanceEntity> provenanceOpt = myResourceHistoryProvenanceDao.findById(
 							history.getId().asIdAndPartitionId());
@@ -215,7 +214,6 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 			provenanceSourceUri = history.getSourceUri();
 			provenanceRequestId = history.getRequestId();
 			if (isBlank(provenanceSourceUri) && isBlank(provenanceRequestId)) {
-				// FIXME: write test for this if none is found
 				if (myStorageSettings.isAccessMetaSourceInformationFromProvenanceTable()) {
 					Optional<ResourceHistoryProvenanceEntity> provenanceOpt = myResourceHistoryProvenanceDao.findById(
 							history.getId().asIdAndPartitionId());

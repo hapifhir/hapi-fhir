@@ -36,7 +36,7 @@ import java.util.Collection;
 import java.util.Date;
 
 @MappedSuperclass
-public abstract class BaseHasResource<T> // FIXME: remove generic from here and IBaseResourceEntity?
+public abstract class BaseHasResource<T>
 		implements IBaseResourceEntity<T>, IBasePersistedResource<JpaPid>, Serializable {
 
 	public static final String RES_PUBLISHED = "RES_PUBLISHED";

@@ -52,7 +52,7 @@ public class JpaResourceExpungeServiceTest {
 	public void testExpungeDoesNotDeleteAllSearchParams() {
 		when(myResourceTableDao.findById(any(JpaPid.class))).thenReturn(Optional.of(resourceTable));
 		when(resourceTable.getIdDt()).thenReturn(new IdDt());
-		myService.expungeCurrentVersionOfResource(myRequestDetails, 1L, new AtomicInteger(1));
+		myService.expungeCurrentVersionOfResource(myRequestDetails, JpaPid.fromId(1L), new AtomicInteger(1));
 		verify(myService, never()).deleteAllSearchParams(any());
 	}
 }

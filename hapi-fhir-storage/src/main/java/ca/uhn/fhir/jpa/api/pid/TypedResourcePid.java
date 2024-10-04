@@ -24,7 +24,6 @@ import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 
 import java.util.Objects;
 
-// FIXME: can i replace this with TypedPidJson?
 public class TypedResourcePid {
 	public final String resourceType;
 	public final IResourcePersistentId id;

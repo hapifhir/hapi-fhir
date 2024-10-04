@@ -119,9 +119,6 @@ public class HistoryBuilder {
 
 		addPredicatesToQuery(cb, thePartitionId, criteriaQuery, from, theHistorySearchStyle);
 
-		// FIXME: fetched provenance
-		//		from.fetch("myProvenance", JoinType.LEFT);
-
 		/*
 		 * The sort on myUpdated is the important one for _history operations, but there are
 		 * cases where multiple pages of results all have the exact same myUpdated value (e.g.

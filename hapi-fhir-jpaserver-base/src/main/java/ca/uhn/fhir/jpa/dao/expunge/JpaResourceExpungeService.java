@@ -203,7 +203,7 @@ public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid
 	public void expungeCurrentVersionOfResources(
 			RequestDetails theRequestDetails, List<JpaPid> theResourceIds, AtomicInteger theRemainingCount) {
 		for (JpaPid next : theResourceIds) {
-			expungeCurrentVersionOfResource(theRequestDetails, (next).getId(), theRemainingCount);
+			expungeCurrentVersionOfResource(theRequestDetails, next, theRemainingCount);
 			if (expungeLimitReached(theRemainingCount)) {
 				return;
 			}
@@ -296,12 +296,9 @@ public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid
 	}
 
 	protected void expungeCurrentVersionOfResource(
-			RequestDetails theRequestDetails, Long theResourceId, AtomicInteger theRemainingCount) {
+			RequestDetails theRequestDetails, JpaPid theResourceId, AtomicInteger theRemainingCount) {
 
-		// FIXME: make this method take a Pid
-		JpaPid id = JpaPid.fromId(theResourceId);
-
-		ResourceTable resource = myResourceTableDao.findById(id).orElseThrow(IllegalStateException::new);
+		ResourceTable resource = myResourceTableDao.findById(theResourceId).orElseThrow(IllegalStateException::new);
 
 		ResourceHistoryTable currentVersion =
 				myResourceHistoryTableDao.findForIdAndVersion(resource.getId(), resource.getVersion());
