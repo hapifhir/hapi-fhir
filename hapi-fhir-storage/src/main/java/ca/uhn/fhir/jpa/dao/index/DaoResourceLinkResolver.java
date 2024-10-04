@@ -127,9 +127,9 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 		String idPart = targetResourceId.getIdPart();
 		try {
 			if (persistentId == null) {
-				RequestPartitionId requestPartitionId = myPartitionHelperSvc.determineReadPartitionForRequestForRead(theRequest, targetResourceId);
-				resolvedResource = myIdHelperService.resolveResourceIdentity(
-					requestPartitionId, resourceType, idPart);
+				RequestPartitionId requestPartitionId =
+						myPartitionHelperSvc.determineReadPartitionForRequestForRead(theRequest, targetResourceId);
+				resolvedResource = myIdHelperService.resolveResourceIdentity(requestPartitionId, resourceType, idPart);
 				ourLog.trace("Translated {}/{} to resource PID {}", type, idPart, resolvedResource);
 			} else {
 				resolvedResource = new ResourceLookupPersistentIdWrapper(persistentId);

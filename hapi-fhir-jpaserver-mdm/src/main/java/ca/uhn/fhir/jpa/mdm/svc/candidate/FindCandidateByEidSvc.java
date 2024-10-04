@@ -72,8 +72,8 @@ public class FindCandidateByEidSvc extends BaseCandidateFinder {
 					if (isNoMatch(foundGoldenResource, theIncomingResource)) {
 						continue;
 					}
-					IResourcePersistentId<?> pidOrNull = myIdHelperService.getPidOrNull(
-                            RequestPartitionId.allPartitions(), foundGoldenResource);
+					IResourcePersistentId<?> pidOrNull =
+							myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), foundGoldenResource);
 					MatchedGoldenResourceCandidate mpc =
 							new MatchedGoldenResourceCandidate(pidOrNull, MdmMatchOutcome.EID_MATCH);
 					ourLog.debug(

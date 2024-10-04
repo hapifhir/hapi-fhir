@@ -171,7 +171,7 @@ public class MdmSurvivorshipSvcImpl implements IMdmSurvivorshipService {
 					.execute(() -> {
 						Map<String, ? extends IResourcePersistentId> ids =
 								myIIdHelperService.resolveResourcePersistentIds(
-                                        RequestPartitionId.allPartitions(), resourceType, sourceIds);
+										RequestPartitionId.allPartitions(), resourceType, sourceIds);
 						sourceIdToPid.putAll(ids);
 					});
 		}

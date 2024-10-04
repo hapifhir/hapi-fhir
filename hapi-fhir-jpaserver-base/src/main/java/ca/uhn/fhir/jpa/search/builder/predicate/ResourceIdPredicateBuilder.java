@@ -89,10 +89,7 @@ public class ResourceIdPredicateBuilder extends BasePredicateBuilder {
 					try {
 						boolean excludeDeleted = true;
 						JpaPid pid = myIdHelperService.resolveResourcePersistentIds(
-                                theRequestPartitionId,
-								theResourceName,
-								valueAsId.getIdPart(),
-								excludeDeleted);
+								theRequestPartitionId, theResourceName, valueAsId.getIdPart(), excludeDeleted);
 						orPids.add(pid);
 					} catch (ResourceNotFoundException e) {
 						// This is not an error in a search, it just results in no matches

@@ -548,7 +548,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			}
 			return myFulltextSearchSvc.lastN(myParams, theMaximumResults).stream()
 					.map(lastNResourceId -> myIdHelperService.resolveResourcePersistentIds(
-						myRequestPartitionId, myResourceName, String.valueOf(lastNResourceId)))
+							myRequestPartitionId, myResourceName, String.valueOf(lastNResourceId)))
 					.collect(Collectors.toList());
 		} else {
 			throw new InvalidRequestException(
@@ -570,8 +570,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				idParamValue = idParm.getValue();
 			}
 
-			pid = myIdHelperService.resolveResourcePersistentIds(
-				myRequestPartitionId, myResourceName, idParamValue);
+			pid = myIdHelperService.resolveResourcePersistentIds(myRequestPartitionId, myResourceName, idParamValue);
 		}
 		return myFulltextSearchSvc.everything(myResourceName, myParams, pid, theRequestDetails);
 	}
@@ -619,7 +618,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		// fetch our target Pids
 		// this will throw if an id is not found
 		Map<String, JpaPid> idToPid = myIdHelperService.resolveResourcePersistentIds(
-                myRequestPartitionId, myResourceName, new ArrayList<>(ids));
+				myRequestPartitionId, myResourceName, new ArrayList<>(ids));
 
 		// add the pids to targetPids
 		theTargetPids.addAll(idToPid.values());

@@ -63,9 +63,7 @@ public interface IIdHelperService<T extends IResourcePersistentId<?>> {
 	 */
 	@Nonnull
 	T resolveResourcePersistentIds(
-			@Nonnull RequestPartitionId theRequestPartitionId,
-			String theResourceType,
-			String theId);
+			@Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, String theId);
 
 	/**
 	 * Given a resource type and ID, determines the internal persistent ID for a resource.
@@ -87,9 +85,7 @@ public interface IIdHelperService<T extends IResourcePersistentId<?>> {
 	 */
 	@Nonnull
 	Map<String, T> resolveResourcePersistentIds(
-			@Nonnull RequestPartitionId theRequestPartitionId,
-			String theResourceType,
-			List<String> theIds);
+			@Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, List<String> theIds);
 
 	/**
 	 * Returns a mapping of Id -> IResourcePersistentId.
@@ -117,9 +113,7 @@ public interface IIdHelperService<T extends IResourcePersistentId<?>> {
 	 */
 	@Nonnull
 	IResourceLookup resolveResourceIdentity(
-			@Nonnull RequestPartitionId theRequestPartitionId,
-			String theResourceType,
-			String theResourceId)
+			@Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, String theResourceId)
 			throws ResourceNotFoundException;
 
 	/**
@@ -173,8 +167,7 @@ public interface IIdHelperService<T extends IResourcePersistentId<?>> {
 	List<T> getPidsOrThrowException(RequestPartitionId theRequestPartitionId, List<IIdType> theIds);
 
 	@Nullable
-	T getPidOrNull(
-			RequestPartitionId theRequestPartitionId, IBaseResource theResource);
+	T getPidOrNull(RequestPartitionId theRequestPartitionId, IBaseResource theResource);
 
 	@Nonnull
 	T getPidOrThrowException(RequestPartitionId theRequestPartitionId, IIdType theId);

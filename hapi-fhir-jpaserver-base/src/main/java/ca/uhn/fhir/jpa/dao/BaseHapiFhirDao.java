@@ -46,7 +46,6 @@ import ca.uhn.fhir.jpa.dao.index.DaoSearchParamSynchronizer;
 import ca.uhn.fhir.jpa.dao.index.SearchParamWithInlineReferencesExtractor;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictService;
-import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.esr.ExternallyStoredResourceAddress;
 import ca.uhn.fhir.jpa.esr.ExternallyStoredResourceAddressMetadataKey;
 import ca.uhn.fhir.jpa.esr.ExternallyStoredResourceServiceRegistry;
@@ -1453,18 +1452,18 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	 */
 	private void failIfPartitionMismatch(RequestDetails theRequest, ResourceTable entity) {
 		// FIXME: needed?
-//		if (myPartitionSettings.isPartitioningEnabled()
-//				&& theRequest != null
-//				&& theRequest.getTenantId() != null
-//				&& entity.getPartitionId().getPartitionId() != null) {
-//			PartitionEntity partitionEntity = myPartitionLookupSvc.getPartitionByName(theRequest.getTenantId());
-//			// partitionEntity should never be null
-//			if (partitionEntity != null
-//					&& !partitionEntity.getId().equals(entity.getPartitionId().getPartitionId())) {
-//				throw new InvalidRequestException(Msg.code(2079) + "Resource " + entity.getResourceType() + "/"
-//						+ entity.getFhirId() + " is not known");
-//			}
-//		}
+		//		if (myPartitionSettings.isPartitioningEnabled()
+		//				&& theRequest != null
+		//				&& theRequest.getTenantId() != null
+		//				&& entity.getPartitionId().getPartitionId() != null) {
+		//			PartitionEntity partitionEntity = myPartitionLookupSvc.getPartitionByName(theRequest.getTenantId());
+		//			// partitionEntity should never be null
+		//			if (partitionEntity != null
+		//					&& !partitionEntity.getId().equals(entity.getPartitionId().getPartitionId())) {
+		//				throw new InvalidRequestException(Msg.code(2079) + "Resource " + entity.getResourceType() + "/"
+		//						+ entity.getFhirId() + " is not known");
+		//			}
+		//		}
 	}
 
 	private void createHistoryEntry(

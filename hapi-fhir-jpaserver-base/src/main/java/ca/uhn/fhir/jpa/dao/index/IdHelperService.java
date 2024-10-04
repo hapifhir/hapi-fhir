@@ -141,9 +141,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 	@Override
 	@Nonnull
 	public IResourceLookup<JpaPid> resolveResourceIdentity(
-			@Nonnull RequestPartitionId theRequestPartitionId,
-			String theResourceType,
-			String theResourceId)
+			@Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, String theResourceId)
 			throws ResourceNotFoundException {
 		return resolveResourceIdentity(theRequestPartitionId, theResourceType, theResourceId, false);
 	}
@@ -171,8 +169,8 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 			resourceIdToUse = theResourceId.substring(resourceIdToUse.indexOf("/") + 1);
 		}
 		IdDt id = new IdDt(theResourceType, resourceIdToUse);
-		Map<String, List<IResourceLookup<JpaPid>>> matches = translateForcedIdToPids(
-			theRequestPartitionId, Collections.singletonList(id), theExcludeDeleted);
+		Map<String, List<IResourceLookup<JpaPid>>> matches =
+				translateForcedIdToPids(theRequestPartitionId, Collections.singletonList(id), theExcludeDeleted);
 
 		// We only pass 1 input in so only 0..1 will come back
 		if (matches.isEmpty() || !matches.containsKey(resourceIdToUse)) {
@@ -199,9 +197,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 	@Override
 	@Nonnull
 	public Map<String, JpaPid> resolveResourcePersistentIds(
-			@Nonnull RequestPartitionId theRequestPartitionId,
-			String theResourceType,
-			List<String> theIds) {
+			@Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, List<String> theIds) {
 		return resolveResourcePersistentIds(theRequestPartitionId, theResourceType, theIds, false);
 	}
 
@@ -237,8 +233,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 				// is a forced id
 				// we must resolve!
 				if (myStorageSettings.isDeleteEnabled()) {
-					retVal = resolveResourceIdentity(
-						theRequestPartitionId, theResourceType, id, theExcludeDeleted)
+					retVal = resolveResourceIdentity(theRequestPartitionId, theResourceType, id, theExcludeDeleted)
 							.getPersistentId();
 					retVals.put(id, retVal);
 				} else {
@@ -271,9 +266,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 	@Override
 	@Nonnull
 	public JpaPid resolveResourcePersistentIds(
-			@Nonnull RequestPartitionId theRequestPartitionId,
-			String theResourceType,
-			String theId) {
+			@Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, String theId) {
 		return resolveResourcePersistentIds(theRequestPartitionId, theResourceType, theId, false);
 	}
 
@@ -293,10 +286,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 		Validate.notNull(theId, "theId must not be null");
 
 		Map<String, JpaPid> retVal = resolveResourcePersistentIds(
-			theRequestPartitionId,
-				theResourceType,
-				Collections.singletonList(theId),
-				theExcludeDeleted);
+				theRequestPartitionId, theResourceType, Collections.singletonList(theId), theExcludeDeleted);
 		return retVal.get(theId); // should be only one
 	}
 
@@ -531,9 +521,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 	}
 
 	private Map<String, List<IResourceLookup<JpaPid>>> translateForcedIdToPids(
-			@Nonnull RequestPartitionId theRequestPartitionId,
-			Collection<IIdType> theId,
-			boolean theExcludeDeleted) {
+			@Nonnull RequestPartitionId theRequestPartitionId, Collection<IIdType> theId, boolean theExcludeDeleted) {
 		theId.forEach(id -> Validate.isTrue(id.hasIdPart()));
 
 		if (theId.isEmpty()) {
@@ -794,17 +782,14 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 
 	@Override
 	@Nullable
-	public JpaPid getPidOrNull(
-			@Nonnull RequestPartitionId theRequestPartitionId,
-			IBaseResource theResource) {
+	public JpaPid getPidOrNull(@Nonnull RequestPartitionId theRequestPartitionId, IBaseResource theResource) {
 
 		Object resourceId = theResource.getUserData(RESOURCE_PID);
 		JpaPid retVal;
 		if (resourceId == null) {
 			IIdType id = theResource.getIdElement();
 			try {
-				retVal = resolveResourcePersistentIds(
-						theRequestPartitionId, id.getResourceType(), id.getIdPart());
+				retVal = resolveResourcePersistentIds(theRequestPartitionId, id.getResourceType(), id.getIdPart());
 			} catch (ResourceNotFoundException e) {
 				retVal = null;
 			}

@@ -168,8 +168,7 @@ public class MdmCandidateSearchSvc {
 
 		// 4.
 		resources.forEach(resource -> theMatchedPidsToResources.put(
-				myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), resource),
-				(IAnyResource) resource));
+				myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), resource), (IAnyResource) resource));
 
 		int newSize = theMatchedPidsToResources.size();
 

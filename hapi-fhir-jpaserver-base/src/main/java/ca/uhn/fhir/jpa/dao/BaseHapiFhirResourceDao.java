@@ -1756,7 +1756,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		BaseHasResource<?> entity;
 		JpaPid pid = myIdHelperService.resolveResourcePersistentIds(
-			requestPartitionId, getResourceName(), theId.getIdPart());
+				requestPartitionId, getResourceName(), theId.getIdPart());
 		Set<Integer> readPartitions = null;
 		if (requestPartitionId.isAllPartitions()) {
 			entity = myEntityManager.find(ResourceTable.class, pid);
@@ -1893,7 +1893,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		if (persistentId == null) {
 			persistentId = myIdHelperService.resolveResourcePersistentIds(
-				theRequestPartitionId, getResourceName(), theId.getIdPart());
+					theRequestPartitionId, getResourceName(), theId.getIdPart());
 		}
 
 		ResourceTable entity = myEntityManager.find(ResourceTable.class, persistentId);
