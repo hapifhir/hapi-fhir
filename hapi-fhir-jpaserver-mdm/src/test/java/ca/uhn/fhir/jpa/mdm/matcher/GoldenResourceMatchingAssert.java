@@ -33,7 +33,7 @@ public  class GoldenResourceMatchingAssert extends AbstractAssert<GoldenResource
 		myIdHelperService = theIdHelperService;
 		myMdmLinkDaoSvc = theMdmLinkDaoSvc;
 		actualGoldenResourcePid = getGoldenResourcePid(actual);
-		actualSourceResourcePid = myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), actual);
+		actualSourceResourcePid = myIdHelperService.getPidOrNull(null, RequestPartitionId.allPartitions(), actual);
 	}
 
 	public static GoldenResourceMatchingAssert assertThat(IAnyResource actual, IIdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc) {
@@ -78,7 +78,7 @@ public  class GoldenResourceMatchingAssert extends AbstractAssert<GoldenResource
 	}
 
 	private boolean hasPossibleMatchWith(IAnyResource other) {
-		IResourcePersistentId otherSourcePid = myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), other);
+		IResourcePersistentId otherSourcePid = myIdHelperService.getPidOrNull(null, RequestPartitionId.allPartitions(), other);
 		IResourcePersistentId otherGoldenPid = getGoldenResourcePid(other);
 
 		//Check for direct matches in either direction.
@@ -155,7 +155,7 @@ public  class GoldenResourceMatchingAssert extends AbstractAssert<GoldenResource
 
 		boolean isGoldenRecord = MdmResourceUtil.isMdmManaged(theResource);
 		if (isGoldenRecord) {
-			return myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), theResource);
+			return myIdHelperService.getPidOrNull(null, RequestPartitionId.allPartitions(), theResource);
 		}
 		IMdmLink matchLink = getMatchedMdmLink(theResource);
 
@@ -179,7 +179,7 @@ public  class GoldenResourceMatchingAssert extends AbstractAssert<GoldenResource
 	}
 
 	protected List<? extends IMdmLink> getMdmLinksForTarget(IAnyResource theTargetResource, MdmMatchResultEnum theMatchResult) {
-		IResourcePersistentId pidOrNull = myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), theTargetResource);
+		IResourcePersistentId pidOrNull = myIdHelperService.getPidOrNull(null, RequestPartitionId.allPartitions(), theTargetResource);
 		List<? extends IMdmLink> matchLinkForTarget = myMdmLinkDaoSvc.getMdmLinksBySourcePidAndMatchResult(pidOrNull, theMatchResult);
 		if (!matchLinkForTarget.isEmpty()) {
 			return matchLinkForTarget;

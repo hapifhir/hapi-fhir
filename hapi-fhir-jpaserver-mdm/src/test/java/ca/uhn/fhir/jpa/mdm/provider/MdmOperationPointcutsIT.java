@@ -199,8 +199,8 @@ public class MdmOperationPointcutsIT extends BaseProviderR4Test {
 			link.setLinkSource(MdmLinkSourceEnum.AUTO);
 			link.setMatchResult(MdmMatchResultEnum.POSSIBLE_MATCH);
 			link.setCreated(new Date());
-			link.setGoldenResourcePersistenceId(runInTransaction(() -> myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), gp1)));
-			link.setSourcePersistenceId(runInTransaction(() -> myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), p1)));
+			link.setGoldenResourcePersistenceId(runInTransaction(() -> myIdHelperService.getPidOrNull(null, RequestPartitionId.allPartitions(), gp1)));
+			link.setSourcePersistenceId(runInTransaction(() -> myIdHelperService.getPidOrNull(null, RequestPartitionId.allPartitions(), p1)));
 			myMdmLinkDaoSvc.save(link);
 
 			MdmMatchResultEnum toSave = MdmMatchResultEnum.MATCH;
@@ -554,8 +554,8 @@ public class MdmOperationPointcutsIT extends BaseProviderR4Test {
 			link.setLinkSource(MdmLinkSourceEnum.AUTO);
 			link.setMatchResult(MdmMatchResultEnum.POSSIBLE_MATCH);
 			link.setCreated(new Date());
-			link.setGoldenResourcePersistenceId(runInTransaction(() -> myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), gp1)));
-			link.setSourcePersistenceId(runInTransaction(() -> myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), p1)));
+			link.setGoldenResourcePersistenceId(runInTransaction(() -> myIdHelperService.getPidOrNull(null, RequestPartitionId.allPartitions(), gp1)));
+			link.setSourcePersistenceId(runInTransaction(() -> myIdHelperService.getPidOrNull(null, RequestPartitionId.allPartitions(), p1)));
 			myMdmLinkDaoSvc.save(link);
 
 			// save a change

@@ -34,7 +34,6 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
-import com.google.common.collect.ListMultimap;
 import jakarta.annotation.Nonnull;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
@@ -188,6 +187,8 @@ public abstract class TestDefinitions implements ITestDataBuilder {
 		// Verify
 		assertTrue(outcome.getCreated());
 
+		// Verify Select Queries
+
 		myCaptureQueriesListener.logSelectQueries();
 		if (myIncludePartitionIdsInSql) {
 			assertThat(getSelectSql(0)).startsWith("SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_SPIDX_TOKEN t0 WHERE ((t0.PARTITION_ID = '2') AND (t0.HASH_SYS_AND_VALUE = '-2780914544385068076'))");
@@ -196,17 +197,30 @@ public abstract class TestDefinitions implements ITestDataBuilder {
 		}
 		assertEquals(1, myCaptureQueriesListener.countSelectQueries());
 
+		// Verify Insert Queries
+
 		myCaptureQueriesListener.logInsertQueries();
-		// FIXME: check insert 0
-		Map<String, String> insertColumns = parseInsertStatement(getInsertSql(1), "HFJ_RES_VER");
-		if (myIncludePartitionIdsInPks) {
-			assertEquals("'2'", insertColumns.get("PARTITION_ID"));
-			assertEquals("'" + id + "'", insertColumns.get("PID"));
-		} else {
-			assertEquals("'2'", insertColumns.get("PARTITION_ID"));
-			assertEquals("'" + id + "'", insertColumns.get("PID"));
+		assertEquals(5, myCaptureQueriesListener.countInsertQueries());
+		assertEquals("HFJ_RESOURCE", parseInsertStatementTableName(getInsertSql(0)));
+		assertEquals("HFJ_RES_VER", parseInsertStatementTableName(getInsertSql(1)));
+		for (int i = 0; i < 4; i++) {
+			String insertSql = getInsertSql(i);
+			Map<String, String> insertColumns = parseInsertStatementParams(insertSql);
+			String tableName = parseInsertStatementTableName(getInsertSql(i));
+			if (myIncludePartitionIdsInSql) {
+				assertEquals("'2'", insertColumns.get("PARTITION_ID"), insertSql);
+				assertEquals("'" + id + "'", insertColumns.get("RES_ID"), insertSql);
+			} else {
+				if ("HFJ_RES_SEARCH_URL".equals(tableName)) {
+					assertEquals("'-1'", insertColumns.get("PARTITION_ID"), insertSql);
+				} else {
+					assertEquals("NULL", insertColumns.get("PARTITION_ID"), insertSql);
+				}
+				assertEquals("'" + id + "'", insertColumns.get("RES_ID"), insertSql);
+			}
 		}
-		assertEquals(2, myCaptureQueriesListener.countInsertQueries());
+
+		// Verify no other queries
 
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
@@ -933,9 +947,8 @@ public abstract class TestDefinitions implements ITestDataBuilder {
 		return selectTokenQueries;
 	}
 
-	private static Map<String, String> parseInsertStatement(String theInsertSql, String theTableName) throws JSQLParserException {
+	private static Map<String, String> parseInsertStatementParams(String theInsertSql) throws JSQLParserException {
 		Insert parsedStatement = (Insert) CCJSqlParserUtil.parse(theInsertSql);
-		assertEquals(theTableName, parsedStatement.getTable().getName());
 
 		Map<String, String> retVal = new HashMap<>();
 
@@ -946,6 +959,11 @@ public abstract class TestDefinitions implements ITestDataBuilder {
 		}
 
 		return retVal;
+	}
+
+	private static String parseInsertStatementTableName(String theInsertSql) throws JSQLParserException {
+		Insert parsedStatement = (Insert) CCJSqlParserUtil.parse(theInsertSql);
+		return parsedStatement.getTable().getName();
 	}
 
 	private static List<String> toUnqualifiedVersionlessIdValues(IBundleProvider theFound) {

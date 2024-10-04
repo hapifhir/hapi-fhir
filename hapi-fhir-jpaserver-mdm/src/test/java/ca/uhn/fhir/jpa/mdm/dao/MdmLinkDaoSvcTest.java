@@ -510,8 +510,8 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 		mdmLink.setMatchResult(theFirstMdmMatchResultEnum);
 		mdmLink.setCreated(new Date());
 		mdmLink.setUpdated(new Date());
-		mdmLink.setGoldenResourcePersistenceId(runInTransaction(() -> myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), theGoldenResource)));
-		mdmLink.setSourcePersistenceId(runInTransaction(() -> myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), theTargetResource)));
+		mdmLink.setGoldenResourcePersistenceId(runInTransaction(() -> myIdHelperService.getPidOrNull(null, RequestPartitionId.allPartitions(), theGoldenResource)));
+		mdmLink.setSourcePersistenceId(runInTransaction(() -> myIdHelperService.getPidOrNull(null, RequestPartitionId.allPartitions(), theTargetResource)));
 		return myMdmLinkDao.save(mdmLink);
 	}
 

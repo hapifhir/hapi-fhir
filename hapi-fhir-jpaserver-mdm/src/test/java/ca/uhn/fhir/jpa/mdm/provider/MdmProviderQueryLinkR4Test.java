@@ -69,10 +69,10 @@ public class MdmProviderQueryLinkR4Test extends BaseLinkR4Test {
 		myLinkSource = new StringType(MdmLinkSourceEnum.AUTO.name());
 		Patient sourcePatient1 = createGoldenPatient();
 		myGoldenResource1Id = new StringType(sourcePatient1.getIdElement().toVersionless().getValue());
-		JpaPid sourcePatient1Pid = runInTransaction(()->myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), sourcePatient1));
+		JpaPid sourcePatient1Pid = runInTransaction(()->myIdHelperService.getPidOrNull(null, RequestPartitionId.allPartitions(), sourcePatient1));
 		Patient sourcePatient2 = createGoldenPatient();
 		myGoldenResource2Id = new StringType(sourcePatient2.getIdElement().toVersionless().getValue());
-		JpaPid sourcePatient2Pid = runInTransaction(()->myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), sourcePatient2));
+		JpaPid sourcePatient2Pid = runInTransaction(()->myIdHelperService.getPidOrNull(null, RequestPartitionId.allPartitions(), sourcePatient2));
 
 		createPossibleDuplicateLinkByPid(sourcePatient2Pid, sourcePatient1Pid);
 	}
@@ -234,10 +234,10 @@ public class MdmProviderQueryLinkR4Test extends BaseLinkR4Test {
 		myLinkSource = new StringType(MdmLinkSourceEnum.AUTO.name());
 		Patient sourcePatient1 = createGoldenPatient();
 		myGoldenResource1Id = new StringType(sourcePatient1.getIdElement().toVersionless().getValue());
-		JpaPid sourcePatient1Pid = runInTransaction(()->myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), sourcePatient1));
+		JpaPid sourcePatient1Pid = runInTransaction(()->myIdHelperService.getPidOrNull(null, RequestPartitionId.allPartitions(), sourcePatient1));
 		Patient sourcePatient2 = createGoldenPatient();
 		myGoldenResource2Id = new StringType(sourcePatient2.getIdElement().toVersionless().getValue());
-		JpaPid sourcePatient2Pid = runInTransaction(()->myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), sourcePatient2));
+		JpaPid sourcePatient2Pid = runInTransaction(()->myIdHelperService.getPidOrNull(null, RequestPartitionId.allPartitions(), sourcePatient2));
 
 		MdmLink possibleDuplicateMdmLink = (MdmLink) myMdmLinkDaoSvc.newMdmLink();
 		possibleDuplicateMdmLink.setGoldenResourcePersistenceId(sourcePatient1Pid);

@@ -818,6 +818,9 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 			RequestDetails theRequestDetails,
 			@Nonnull RequestPartitionId theRequestPartitionId,
 			IBaseResource theResource) {
+
+		// TODO: JA2 make theRequestDetails not-nullable and add a verify.
+
 		Object resourceId = theResource.getUserData(RESOURCE_PID);
 		JpaPid retVal;
 		if (resourceId == null) {
@@ -829,7 +832,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 				retVal = null;
 			}
 		} else {
-			retVal = JpaPid.fromId(Long.parseLong(resourceId.toString()));
+			retVal = (JpaPid) resourceId;
 		}
 		return retVal;
 	}
