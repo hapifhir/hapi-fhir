@@ -110,7 +110,7 @@ public class MdmCandidateSearchSvc {
 		// so it may not have an ID yet, precluding the need to remove it.
 		if (theResource.getIdElement().getIdPart() != null) {
 			if (matchedPidsToResources.remove(
-							myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), theResource))
+							myIdHelperService.getPidOrNull(null, RequestPartitionId.allPartitions(), theResource))
 					!= null) {
 				ourLog.debug(
 						"Removing incoming resource {} from list of candidates.",
@@ -168,7 +168,8 @@ public class MdmCandidateSearchSvc {
 
 		// 4.
 		resources.forEach(resource -> theMatchedPidsToResources.put(
-				myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), resource), (IAnyResource) resource));
+				myIdHelperService.getPidOrNull(null, RequestPartitionId.allPartitions(), resource),
+				(IAnyResource) resource));
 
 		int newSize = theMatchedPidsToResources.size();
 
