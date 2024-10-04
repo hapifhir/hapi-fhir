@@ -1856,8 +1856,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			boolean theReverse) {
 		StringBuilder sqlBuilder;
 		Set<Long> identityHashesForTypes = calculateIndexUriIdentityHashesForResourceTypes(null, theReverse);
-		List<List<String>> canonicalUrlPartitions =
-			ListUtils.partition(List.copyOf(theCanonicalUrls), getMaximumPageSize() - identityHashesForTypes.size());
+		List<List<String>> canonicalUrlPartitions = ListUtils.partition(
+				List.copyOf(theCanonicalUrls), getMaximumPageSize() - identityHashesForTypes.size());
 
 		sqlBuilder = new StringBuilder();
 		sqlBuilder.append("SELECT i.myResourcePid ");
@@ -2035,7 +2035,9 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		if (theNextRoundMatches.size() <= theMaxLoad) {
 			boolean allSamePartition = true;
 			for (int i = 1; i < theNextRoundMatches.size(); i++) {
-				if (!Objects.equals(theNextRoundMatches.get(i-1).getPartitionId(), theNextRoundMatches.get(i).getPartitionId())) {
+				if (!Objects.equals(
+						theNextRoundMatches.get(i - 1).getPartitionId(),
+						theNextRoundMatches.get(i).getPartitionId())) {
 					allSamePartition = false;
 					break;
 				}
@@ -2046,9 +2048,12 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		}
 
 		// Break into partitioned sublists
-		ListMultimap<String, JpaPid> lists = MultimapBuilder.hashKeys().arrayListValues().build();
+		ListMultimap<String, JpaPid> lists =
+				MultimapBuilder.hashKeys().arrayListValues().build();
 		for (JpaPid nextRoundMatch : theNextRoundMatches) {
-			String partitionId = nextRoundMatch.getPartitionId() != null ? nextRoundMatch.getPartitionId().toString() : "";
+			String partitionId = nextRoundMatch.getPartitionId() != null
+					? nextRoundMatch.getPartitionId().toString()
+					: "";
 			lists.put(partitionId, nextRoundMatch);
 		}
 

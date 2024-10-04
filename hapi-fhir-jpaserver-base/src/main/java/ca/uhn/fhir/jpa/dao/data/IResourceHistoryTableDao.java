@@ -97,10 +97,9 @@ public interface IResourceHistoryTableDao
 			"UPDATE ResourceHistoryTable r SET r.myResourceTextVc = null, r.myResource = :text, r.myEncoding = 'JSONC' WHERE r.myId = :pid")
 	void updateNonInlinedContents(@Param("text") byte[] theText, @Param("pid") ResourceHistoryTablePk thePid);
 
-	@Query("SELECT v FROM ResourceHistoryTable v " +
-		"JOIN FETCH v.myResourceTable t " +
-		"WHERE v.myResourcePid IN (:pids) " +
-		"AND t.myVersion = v.myResourceVersion")
+	@Query("SELECT v FROM ResourceHistoryTable v " + "JOIN FETCH v.myResourceTable t "
+			+ "WHERE v.myResourcePid IN (:pids) "
+			+ "AND t.myVersion = v.myResourceVersion")
 	List<ResourceHistoryTable> findCurrentVersionsByResourcePidsAndFetchResourceTable(
 			@Param("pids") List<JpaPid> theVersionlessPids);
 }
