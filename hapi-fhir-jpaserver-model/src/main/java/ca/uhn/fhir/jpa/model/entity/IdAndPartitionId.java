@@ -31,8 +31,6 @@ public class IdAndPartitionId implements Serializable {
 
 	public IdAndPartitionId(Long theId, Integer thePartitionId) {
 		myId = theId;
-		// FIXME: rename myPartitionIdValue to myPartitionId everywhere
-		// FIXME: could we merge this into JpaPid?
 		myPartitionIdValue = thePartitionId;
 	}
 

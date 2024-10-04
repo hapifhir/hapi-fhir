@@ -23,7 +23,7 @@ import org.hibernate.search.mapper.pojo.bridge.IdentifierBridge;
 import org.hibernate.search.mapper.pojo.bridge.runtime.IdentifierBridgeFromDocumentIdentifierContext;
 import org.hibernate.search.mapper.pojo.bridge.runtime.IdentifierBridgeToDocumentIdentifierContext;
 
-// FIXME: should this be more nuanced
+// TODO: JA2 make this partition aware
 public class JpaPidIdentifierBridge implements IdentifierBridge<JpaPid> {
 	@Override
 	public String toDocumentIdentifier(JpaPid propertyValue, IdentifierBridgeToDocumentIdentifierContext context) {

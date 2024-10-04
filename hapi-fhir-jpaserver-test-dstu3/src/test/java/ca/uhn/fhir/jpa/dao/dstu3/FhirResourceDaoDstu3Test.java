@@ -17,7 +17,6 @@ import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.DaoTestUtils;
-import ca.uhn.fhir.jpa.entity.ResourceSearchView;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
@@ -613,15 +612,6 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 				.getSingleResult();
 			assertThat(historyCount).as("only create one history version").isEqualTo(1);
 
-			// make sure the search view works too
-			ResourceSearchView readBackView = myEntityManager
-				.createQuery("select v from ResourceSearchView v where v.myResourceId = :resId", ResourceSearchView.class)
-				.setParameter("resId", myMethodOutcome.getPersistentId().getId())
-				.getSingleResult();
-			assertThat(readBackView).as("found search view").isNotNull();
-
-			assertEquals(myExpectedId, readBackView.getFhirId(),
-				"fhir_id populated");
 		}
 	}
 

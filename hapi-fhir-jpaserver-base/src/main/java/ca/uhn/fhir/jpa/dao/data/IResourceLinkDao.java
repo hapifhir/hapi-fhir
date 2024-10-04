@@ -30,7 +30,6 @@ import java.util.List;
 
 public interface IResourceLinkDao extends JpaRepository<ResourceLink, Long>, IHapiFhirJpaRepository {
 
-	// FIXME: check if this is actually creating a join?
 	@Modifying
 	@Query("DELETE FROM ResourceLink t WHERE t.mySourceResource.myPid = :resId")
 	void deleteByResourceId(@Param("resId") JpaPid theResourcePid);

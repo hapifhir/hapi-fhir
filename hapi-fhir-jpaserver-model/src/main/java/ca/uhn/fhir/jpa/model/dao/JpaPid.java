@@ -114,7 +114,7 @@ public class JpaPid extends BaseResourcePersistentId<Long> implements Comparable
 	}
 
 	public JpaPid setPartitionIdIfNotAlreadySet(Integer thePartitionId) {
-		if (myPartitionIdValue == null) {
+		if (myPartitionIdValue == null && thePartitionId != null) {
 			myPartitionIdValue = thePartitionId;
 		}
 		return this;

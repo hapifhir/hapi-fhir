@@ -253,6 +253,64 @@ public abstract class TestDefinitions implements ITestDataBuilder {
 	}
 
 	@Test
+	public void testDelete() {
+		// Setup
+		myPartitionSelectorInterceptor.setNextPartitionId(PARTITION_1);
+		IIdType orgId = createOrganization(withName("ORG")).toUnqualifiedVersionless();
+		IIdType id = createPatient(withActiveTrue(), withFamily("HOMER"), withOrganization(orgId)).toUnqualifiedVersionless();
+		long idLong = id.getIdPartAsLong();
+
+		// Test
+		myCaptureQueriesListener.clear();
+		myPatientDao.delete(id, new SystemRequestDetails());
+
+		// Verify
+
+		// Verify Select
+		myCaptureQueriesListener.logSelectQueries();
+		if (myIncludePartitionIdsInPks) {
+			assertThat(getSelectSql(0)).endsWith(" from HFJ_RESOURCE rt1_0 where (rt1_0.RES_ID,rt1_0.PARTITION_ID) in (('" + idLong + "','1'))");
+		} else {
+			assertThat(getSelectSql(0)).endsWith(" from HFJ_RESOURCE rt1_0 where rt1_0.RES_ID='" + idLong + "'");
+		}
+		assertEquals(4, myCaptureQueriesListener.countSelectQueries());
+
+		// Verify Insert
+		myCaptureQueriesListener.logInsertQueries();
+		assertThat(getInsertSql(0)).startsWith("insert into HFJ_RES_VER ");
+		assertEquals(1, myCaptureQueriesListener.countInsertQueries());
+
+		// Verify Update
+		myCaptureQueriesListener.logUpdateQueries();
+		if (myIncludePartitionIdsInPks) {
+			assertThat(getUpdateSql(0)).contains("where RES_ID='" + idLong + "' and PARTITION_ID='1' and RES_VER='1'");
+		} else {
+			assertThat(getUpdateSql(0)).contains("where RES_ID='" + idLong + "' and RES_VER='1'");
+		}
+		assertEquals(1, myCaptureQueriesListener.countUpdateQueries());
+
+		// Verify Delete
+		myCaptureQueriesListener.logDeleteQueries();
+		String deleteWhere;
+		if (myIncludePartitionIdsInPks) {
+			deleteWhere = "(RES_ID,PARTITION_ID)=('" + idLong + "','1')";
+		} else {
+			deleteWhere = "RES_ID='" + idLong + "'";
+		}
+		assertEquals(getDeleteSql(0), "delete from HFJ_RES_SEARCH_URL where " + deleteWhere);
+		assertEquals(getDeleteSql(1), "delete from HFJ_SPIDX_STRING where " + deleteWhere);
+		assertEquals(getDeleteSql(2), "delete from HFJ_SPIDX_TOKEN where " + deleteWhere);
+		if (myIncludePartitionIdsInPks) {
+			assertEquals(getDeleteSql(3), "delete from HFJ_RES_LINK where (SRC_RESOURCE_ID,PARTITION_ID)=('" + idLong + "','1')");
+		} else {
+			assertEquals(getDeleteSql(3), "delete from HFJ_RES_LINK where SRC_RESOURCE_ID='" + idLong + "'");
+		}
+		assertEquals(4, myCaptureQueriesListener.countDeleteQueries());
+	}
+
+
+
+	@Test
 	public void testOperation_Everything() {
 		// Setup
 		myPartitionSelectorInterceptor.setNextPartitionId(PARTITION_1);
@@ -272,14 +330,20 @@ public abstract class TestDefinitions implements ITestDataBuilder {
 			assertThat(getSelectSql(0)).contains("WHERE ((t0.TARGET_RES_PARTITION_ID,t0.TARGET_RESOURCE_ID) IN (('1','" + ids.patientPid + "')) )");
 			assertThat(getSelectSql(0)).contains("GROUP BY t0.PARTITION_ID,t0.SRC_RESOURCE_ID ");
 			assertThat(getSelectSql(0)).endsWith("ORDER BY t0.PARTITION_ID,t0.SRC_RESOURCE_ID");
-			assertThat(getSelectSql(1)).contains("from HFJ_RES_LINK rl1_0 where rl1_0.PARTITION_ID='1' and rl1_0.SRC_RESOURCE_ID in ('" + ids.patientPid() + "','" + ids.encounterPid() + "') ");
+			assertThat(getSelectSql(1)).containsAnyOf(
+				"from HFJ_RES_LINK rl1_0 where rl1_0.PARTITION_ID='1' and rl1_0.SRC_RESOURCE_ID in ('" + ids.patientPid() + "','" + ids.encounterPid() + "') ",
+				"from HFJ_RES_LINK rl1_0 where rl1_0.PARTITION_ID='1' and rl1_0.SRC_RESOURCE_ID in ('" + ids.encounterPid() + "','" + ids.patientPid() + "') "
+			);
 			assertThat(getSelectSql(2)).contains("from HFJ_RES_LINK rl1_0 where rl1_0.PARTITION_ID='0' and rl1_0.SRC_RESOURCE_ID in ('" + ids.childOrgPid() + "') ");
 			assertThat(getSelectSql(3)).contains("from HFJ_RES_LINK rl1_0 where rl1_0.PARTITION_ID='0' and rl1_0.SRC_RESOURCE_ID in ('" + ids.parentOrgPid() + "') ");
 		} else {
 			assertThat(getSelectSql(0)).contains("WHERE (t0.TARGET_RESOURCE_ID = '" + ids.patientPid() + "') ");
 			assertThat(getSelectSql(0)).contains("GROUP BY t0.SRC_RESOURCE_ID ");
 			assertThat(getSelectSql(0)).endsWith("ORDER BY t0.SRC_RESOURCE_ID");
-			assertThat(getSelectSql(1)).contains("from HFJ_RES_LINK rl1_0 where rl1_0.SRC_RESOURCE_ID in ('" + ids.patientPid() + "','" + ids.encounterPid() + "') ");
+			assertThat(getSelectSql(1)).containsAnyOf(
+				"from HFJ_RES_LINK rl1_0 where rl1_0.SRC_RESOURCE_ID in ('" + ids.patientPid() + "','" + ids.encounterPid() + "') ",
+				"from HFJ_RES_LINK rl1_0 where rl1_0.SRC_RESOURCE_ID in ('" + ids.encounterPid() + "','" + ids.patientPid() + "') "
+			);
 			assertThat(getSelectSql(2)).contains("from HFJ_RES_LINK rl1_0 where rl1_0.SRC_RESOURCE_ID in ('" + ids.childOrgPid() + "') ");
 			assertThat(getSelectSql(3)).contains("from HFJ_RES_LINK rl1_0 where rl1_0.SRC_RESOURCE_ID in ('" + ids.parentOrgPid() + "') ");
 		}
@@ -548,11 +612,16 @@ public abstract class TestDefinitions implements ITestDataBuilder {
 		// Verify
 		myCaptureQueriesListener.logSelectQueries();
 		if (myIncludePartitionIdsInSql) {
-			assertThat(getSelectSql(0)).endsWith(" WHERE ((t0.PARTITION_ID = '1') AND (t0.HASH_VALUE = '7943378963388545453'))");
+			assertThat(getSelectSql(0)).endsWith(" where rt1_0.RES_TYPE='Patient' and rt1_0.FHIR_ID in ('A') and rt1_0.PARTITION_ID in ('1') and rt1_0.RES_DELETED_AT is null");
 		} else {
-			assertThat(getSelectSql(0)).endsWith(" WHERE (t0.HASH_VALUE = '7943378963388545453')");
+			assertThat(getSelectSql(0)).endsWith(" where rt1_0.RES_TYPE='Patient' and rt1_0.FHIR_ID in ('A') and rt1_0.RES_DELETED_AT is null");
 		}
-		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
+		if (myIncludePartitionIdsInSql) {
+			assertThat(getSelectSql(1)).contains(" WHERE (((t0.RES_TYPE = 'Patient') AND (t0.RES_DELETED_AT IS NULL)) AND ((t0.PARTITION_ID = '1') AND (t0.RES_ID IN ");
+		} else {
+			assertThat(getSelectSql(1)).contains(" WHERE (((t0.RES_TYPE = 'Patient') AND (t0.RES_DELETED_AT IS NULL)) AND (t0.RES_ID IN ");
+		}
+		assertEquals(3, myCaptureQueriesListener.countSelectQueries());
 
 	}
 
@@ -895,6 +964,11 @@ public abstract class TestDefinitions implements ITestDataBuilder {
 	@Language("SQL")
 	private String getDeleteSql(int theIndex) {
 		return myCaptureQueriesListener.getDeleteQueries().get(theIndex).getSql(true, false);
+	}
+
+	@Language("SQL")
+	private String getUpdateSql(int theIndex) {
+		return myCaptureQueriesListener.getUpdateQueries().get(theIndex).getSql(true, false);
 	}
 
 	@Language("SQL")

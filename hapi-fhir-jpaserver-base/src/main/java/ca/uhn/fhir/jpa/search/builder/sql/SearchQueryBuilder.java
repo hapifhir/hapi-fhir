@@ -793,8 +793,6 @@ public class SearchQueryBuilder {
 	}
 
 	public void addResourceIdsPredicate(List<JpaPid> thePidList) {
-
-		// FIXME: make this partition aware where needed
 		List<Long> pidList = thePidList.stream().map(JpaPid::getId).collect(Collectors.toList());
 
 		DbColumn resourceIdColumn = getOrCreateFirstPredicateBuilder().getResourceIdColumn();
