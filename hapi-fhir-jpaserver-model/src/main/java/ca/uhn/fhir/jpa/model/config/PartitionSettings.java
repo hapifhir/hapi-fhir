@@ -33,18 +33,20 @@ public class PartitionSettings {
 	private Integer myDefaultPartitionId;
 	private boolean myAlwaysOpenNewTransactionForDifferentPartition;
 	private boolean myConditionalCreateDuplicateIdentifiersEnabled = false;
-	private boolean myPartitionIdsInPrimaryKeys = false;
+	private boolean myIncludePartitionIdsInPKs = false;
 
-	public PartitionSettings() {}
-
-	// FIXME: document
-	public boolean isPartitionIdsInPrimaryKeys() {
-		return myPartitionIdsInPrimaryKeys;
+	public PartitionSettings() {
+		super();
 	}
 
 	// FIXME: document
-	public void setPartitionIdsInPrimaryKeys(boolean thePartitionIdsInPrimaryKeys) {
-		myPartitionIdsInPrimaryKeys = thePartitionIdsInPrimaryKeys;
+	public boolean isIncludePartitionIdsInPKs() {
+		return myIncludePartitionIdsInPKs;
+	}
+
+	// FIXME: document
+	public void setIncludePartitionIdsInPKs(boolean theIncludePartitionIdsInPKs) {
+		myIncludePartitionIdsInPKs = theIncludePartitionIdsInPKs;
 	}
 
 	/**
@@ -187,7 +189,7 @@ public class PartitionSettings {
 
 	// FIXME: document - make sure to indicate that this can't be used in partition key mode
 	public boolean isConditionalCreateDuplicateIdentifiersEnabled() {
-		if (isPartitionIdsInPrimaryKeys()) {
+		if (isIncludePartitionIdsInPKs()) {
 			return true;
 		}
 		return myConditionalCreateDuplicateIdentifiersEnabled;

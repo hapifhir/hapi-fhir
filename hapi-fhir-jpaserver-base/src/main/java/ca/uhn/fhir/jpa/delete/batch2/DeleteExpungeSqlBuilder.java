@@ -183,7 +183,7 @@ public class DeleteExpungeSqlBuilder {
 		builder.append("DELETE FROM ");
 		builder.append(theResourceForeignKey.myTable);
 		builder.append(" WHERE ");
-		if (myPartitionSettings.isPartitionIdsInPrimaryKeys()) {
+		if (myPartitionSettings.isIncludePartitionIdsInPKs()) {
 			builder.append("(");
 			builder.append(theResourceForeignKey.myPartitionIdColumn);
 			builder.append(",");
@@ -196,7 +196,7 @@ public class DeleteExpungeSqlBuilder {
 		builder.append(" IN (");
 		for (Iterator<JpaPid> iter = thePids.iterator(); iter.hasNext(); ) {
 			JpaPid pid = iter.next();
-			if (myPartitionSettings.isPartitionIdsInPrimaryKeys()) {
+			if (myPartitionSettings.isIncludePartitionIdsInPKs()) {
 				builder.append("(");
 				builder.append(pid.getPartitionId());
 				builder.append(",");

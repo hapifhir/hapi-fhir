@@ -115,9 +115,6 @@ public class TestR4Config {
 	@Autowired
 	private JpaStorageSettings myStorageSettings;
 
-	@Value("${" + JpaConstants.HAPI_INCLUDE_PARTITION_IDS_IN_PKS + ":false}")
-	private boolean myIncludePartitionIdsInPks;
-
 	@Bean
 	public CircularQueueCaptureQueriesListener captureQueriesListener() {
 		return new CircularQueueCaptureQueriesListener()
@@ -242,7 +239,6 @@ public class TestR4Config {
 
 	private Properties jpaProperties() {
 		Properties extraProperties = new Properties();
-		extraProperties.put(JpaConstants.HAPI_INCLUDE_PARTITION_IDS_IN_PKS, Boolean.toString(myIncludePartitionIdsInPks));
 		extraProperties.put("hibernate.format_sql", "false");
 		extraProperties.put("hibernate.show_sql", "false");
 		extraProperties.put("hibernate.hbm2ddl.auto", "update");

@@ -652,7 +652,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 		if (!theIdsToResolve.isEmpty()) {
 			Collection<Object[]> lookup;
 
-			if (myPartitionSettings.isPartitionIdsInPrimaryKeys()) {
+			if (myPartitionSettings.isIncludePartitionIdsInPKs()) {
 				List<JpaPid> pids = new ArrayList<>(theIdsToResolve.size());
 				for (IIdType id : theIdsToResolve) {
 					Set<Integer> partitions = myPartitionHelperSvc.toReadPartitions(theRequestPartitionId);

@@ -23,6 +23,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.config.HapiFhirHibernateJpaDialect;
 import ca.uhn.fhir.jpa.config.HapiFhirLocalContainerEntityManagerFactoryBean;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.util.ISequenceValueMassager;
 import ca.uhn.fhir.util.ReflectionUtil;
@@ -38,6 +39,7 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 
 import java.util.Map;
+import java.util.Properties;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 
@@ -57,6 +59,16 @@ public final class HapiEntityManagerFactoryUtil {
 				new HapiFhirLocalContainerEntityManagerFactoryBean(myConfigurableListableBeanFactory);
 
 		configureEntityManagerFactory(retVal, theFhirContext, theStorageSettings);
+
+		PartitionSettings partitionSettings = myConfigurableListableBeanFactory.getBean(PartitionSettings.class);
+		if (partitionSettings.isIncludePartitionIdsInPKs()) {
+			Properties properties = new Properties();
+			properties.put(JpaConstants.HAPI_INCLUDE_PARTITION_IDS_IN_PKS, Boolean.toString(true));
+			// Despite the setter name, the method below just merges this property in,
+			// so it won't get overwritten later or overwrite other properties
+			retVal.setJpaProperties(properties);
+		}
+
 		return retVal;
 	}
 

@@ -96,9 +96,6 @@ public class TestR5Config {
 		}
 	}
 
-	@Value("${" + JpaConstants.HAPI_INCLUDE_PARTITION_IDS_IN_PKS + ":false}")
-	private boolean myIncludePartitionIdsInPks;
-
 	@Autowired
 	private PartitionSettings myPartitionSettings;
 	@Autowired
@@ -196,7 +193,6 @@ public class TestR5Config {
 
 	protected Properties jpaProperties() {
 		Properties extraProperties = new Properties();
-		extraProperties.put(JpaConstants.HAPI_INCLUDE_PARTITION_IDS_IN_PKS, Boolean.toString(myIncludePartitionIdsInPks));
 		extraProperties.put("hibernate.format_sql", "false");
 		extraProperties.put("hibernate.show_sql", "false");
 		extraProperties.put("hibernate.hbm2ddl.auto", "update");
@@ -205,8 +201,6 @@ public class TestR5Config {
 		hibernateSearchConfigurer.apply(extraProperties);
 
 		ourLog.info("jpaProperties: {}", extraProperties);
-
-		myPartitionSettings.setPartitionIdsInPrimaryKeys(myIncludePartitionIdsInPks);
 
 		return extraProperties;
 	}

@@ -42,8 +42,6 @@ import java.util.stream.Stream;
 public interface IResourceTableDao
 		extends JpaRepository<ResourceTable, JpaPid>, IHapiFhirJpaRepository, IForcedIdQueries {
 
-	// FIXME: replace myPid.myId to myPid and change return types here
-
 	@Query("SELECT t.myPid FROM ResourceTable t WHERE t.myDeleted IS NOT NULL")
 	Slice<JpaPid> findIdsOfDeletedResources(Pageable thePageable);
 
@@ -70,49 +68,21 @@ public interface IResourceTableDao
 			Pageable thePage, @Param("low") Date theLow, @Param("high") Date theHigh);
 
 	@Query(
-			"SELECT t.myPid.myId, t.myResourceType, t.myUpdated FROM ResourceTable t WHERE t.myUpdated >= :low AND t.myUpdated <= :high ORDER BY t.myUpdated ASC")
+			"SELECT t.myPid, t.myResourceType, t.myUpdated FROM ResourceTable t WHERE t.myUpdated >= :low AND t.myUpdated <= :high ORDER BY t.myUpdated ASC")
 	Stream<Object[]> streamIdsTypesAndUpdateTimesOfResourcesWithinUpdatedRangeOrderedFromOldest(
 			@Param("low") Date theLow, @Param("high") Date theHigh);
 
-	/**
-	 * @return List of arrays containing [PID, resourceType, lastUpdated]
-	 */
 	@Query(
-			"SELECT t.myPid.myId, t.myResourceType, t.myUpdated FROM ResourceTable t WHERE t.myUpdated >= :low AND t.myUpdated <= :high AND t.myPartitionIdValue IN (:partition_ids) ORDER BY t.myUpdated ASC")
-	Slice<Object[]> findIdsTypesAndUpdateTimesOfResourcesWithinUpdatedRangeOrderedFromOldestForPartitionIds(
-			Pageable thePage,
-			@Param("low") Date theLow,
-			@Param("high") Date theHigh,
-			@Param("partition_ids") List<Integer> theRequestPartitionIds);
-
-	@Query(
-			"SELECT t.myPid.myId, t.myResourceType, t.myUpdated FROM ResourceTable t WHERE t.myUpdated >= :low AND t.myUpdated <= :high AND t.myPartitionIdValue IN (:partition_ids) ORDER BY t.myUpdated ASC")
+			"SELECT t.myPid, t.myResourceType, t.myUpdated FROM ResourceTable t WHERE t.myUpdated >= :low AND t.myUpdated <= :high AND t.myPartitionIdValue IN (:partition_ids) ORDER BY t.myUpdated ASC")
 	Stream<Object[]> streamIdsTypesAndUpdateTimesOfResourcesWithinUpdatedRangeOrderedFromOldestForPartitionIds(
 			@Param("low") Date theLow,
 			@Param("high") Date theHigh,
 			@Param("partition_ids") List<Integer> theRequestPartitionIds);
 
-	/**
-	 * @return List of arrays containing [PID, resourceType, lastUpdated]
-	 */
 	@Query(
-			"SELECT t.myPid.myId, t.myResourceType, t.myUpdated FROM ResourceTable t WHERE t.myUpdated >= :low AND t.myUpdated <= :high ORDER BY t.myUpdated ASC")
-	Slice<Object[]> findIdsTypesAndUpdateTimesOfResourcesWithinUpdatedRangeOrderedFromOldestForDefaultPartition(
-			Pageable thePage, @Param("low") Date theLow, @Param("high") Date theHigh);
-
-	@Query(
-			"SELECT t.myPid.myId, t.myResourceType, t.myUpdated FROM ResourceTable t WHERE t.myUpdated >= :low AND t.myUpdated <= :high ORDER BY t.myUpdated ASC")
+			"SELECT t.myPid, t.myResourceType, t.myUpdated FROM ResourceTable t WHERE t.myUpdated >= :low AND t.myUpdated <= :high ORDER BY t.myUpdated ASC")
 	Stream<Object[]> streamIdsTypesAndUpdateTimesOfResourcesWithinUpdatedRangeOrderedFromOldestForDefaultPartition(
 			@Param("low") Date theLow, @Param("high") Date theHigh);
-
-	// TODO in the future, consider sorting by pid as well so batch jobs process in the same order across restarts
-	@Query(
-			"SELECT t.myPid FROM ResourceTable t WHERE t.myUpdated >= :low AND t.myUpdated <= :high AND t.myPartitionIdValue = :partition_id ORDER BY t.myUpdated ASC")
-	Slice<JpaPid> findIdsOfPartitionedResourcesWithinUpdatedRangeOrderedFromOldest(
-			Pageable thePage,
-			@Param("low") Date theLow,
-			@Param("high") Date theHigh,
-			@Param("partition_id") Integer theRequestPartitionId);
 
 	@Query(
 			"SELECT t.myPid FROM ResourceTable t WHERE t.myUpdated >= :low AND t.myUpdated <= :high AND t.myResourceType = :restype ORDER BY t.myUpdated ASC")
