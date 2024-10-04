@@ -2118,7 +2118,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			 * The loop allows us to create multiple combo index joins if there
 			 * are multiple AND expressions for the related parameters.
 			 */
-			while (validateParamValuesAreValidForComboParam(theRequest, theParams, comboParamNames)) {
+			while (validateParamValuesAreValidForComboParam(theRequest, theParams, comboParamNames, comboParam)) {
 				applyComboSearchParam(theQueryStack, theParams, theRequest, comboParamNames, comboParam);
 			}
 		}
@@ -2214,7 +2214,10 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	 * (e.g. <code>?date=gt2024-02-01</code>), etc.
 	 */
 	private boolean validateParamValuesAreValidForComboParam(
-			RequestDetails theRequest, @Nonnull SearchParameterMap theParams, List<String> theComboParamNames) {
+			RequestDetails theRequest,
+			@Nonnull SearchParameterMap theParams,
+			List<String> theComboParamNames,
+			RuntimeSearchParam theComboParam) {
 		boolean paramValuesAreValidForCombo = true;
 		List<List<IQueryParameterType>> paramOrValues = new ArrayList<>(theComboParamNames.size());
 
@@ -2274,6 +2277,19 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					paramValuesAreValidForCombo = false;
 					break;
 				}
+			}
+
+			// Date params are not eligible for using composite unique index
+			// as index could contain date with different precision (e.g. DAY, SECOND)
+			if (nextParamDef.getParamType() == RestSearchParameterTypeEnum.DATE
+					&& theComboParam.getComboSearchParamType() == ComboSearchParamType.UNIQUE) {
+				ourLog.debug(
+						"Search with params {} is not a candidate for combo searching - "
+								+ "Unique combo search parameter '{}' has DATE type",
+						theComboParamNames,
+						nextParamName);
+				paramValuesAreValidForCombo = false;
+				break;
 			}
 		}
 

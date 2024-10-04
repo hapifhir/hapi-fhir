@@ -26,6 +26,7 @@ import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
 import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
+import ca.uhn.fhir.jpa.api.model.ReindexJobStatus;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -315,11 +316,23 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 * @param theResourcePersistentId The ID
 	 * @return
 	 */
+	@SuppressWarnings("rawtypes")
 	ReindexOutcome reindex(
 			IResourcePersistentId theResourcePersistentId,
 			ReindexParameters theReindexParameters,
 			RequestDetails theRequest,
 			TransactionDetails theTransactionDetails);
+
+	/**
+	 * Returns ReindexJobStatus information object that tells the caller
+	 * if a reindex job is still in progress or not.
+	 *
+	 * If the implementing DAO requires additional work during reindexing,
+	 * this is the method to override.
+	 */
+	default ReindexJobStatus getReindexJobStatus() {
+		return ReindexJobStatus.NO_WORK_NEEDED;
+	}
 
 	void removeTag(
 			IIdType theId, TagTypeEnum theTagType, String theSystem, String theCode, RequestDetails theRequestDetails);
