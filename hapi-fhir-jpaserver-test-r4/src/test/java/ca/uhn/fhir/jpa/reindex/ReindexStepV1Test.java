@@ -2,10 +2,13 @@ package ca.uhn.fhir.jpa.reindex;
 
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.RunOutcome;
+import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
-import ca.uhn.fhir.batch2.jobs.reindex.ReindexStep;
+import ca.uhn.fhir.batch2.jobs.reindex.v1.ReindexStepV1;
+import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -26,13 +29,14 @@ import static ca.uhn.fhir.jpa.dao.BaseHapiFhirDao.INDEX_STATUS_INDEXED;
 import static ca.uhn.fhir.jpa.dao.BaseHapiFhirDao.INDEX_STATUS_INDEXING_FAILED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-public class ReindexStepTest extends BaseJpaR4Test {
+public class ReindexStepV1Test extends BaseJpaR4Test {
 
 	@Autowired
-	private ReindexStep myReindexStep;
+	private ReindexStepV1 myReindexStepV1;
 
 	@Mock
 	private IJobDataSink<VoidModel> myDataSink;
@@ -47,9 +51,7 @@ public class ReindexStepTest extends BaseJpaR4Test {
 
 	@Test
 	public void testReindex_NoActionNeeded() {
-
 		// Setup
-
 		Long id0 = createPatient(withActiveTrue(), withFamily("SIMPSON")).getIdPartAsLong();
 		Long id1 = createPatient(withActiveTrue(), withFamily("FLANDERS")).getIdPartAsLong();
 
@@ -58,9 +60,19 @@ public class ReindexStepTest extends BaseJpaR4Test {
 		data.addTypedPidWithNullPartitionForUnitTest("Patient", id1);
 
 		// Execute
-
+		ReindexJobParameters params = new ReindexJobParameters();
 		myCaptureQueriesListener.clear();
-		RunOutcome outcome = myReindexStep.doReindex(data, myDataSink, "index-id", "chunk-id", new ReindexJobParameters());
+		JobInstance instance = new JobInstance();
+		instance.setInstanceId("index-id");
+		WorkChunk chunk = new WorkChunk();
+		chunk.setId("chunk-id");
+		StepExecutionDetails<ReindexJobParameters, ResourceIdListWorkChunkJson> stepExecutionDetails = new StepExecutionDetails<>(
+			params,
+			data,
+			instance,
+			chunk
+		);
+		RunOutcome outcome = myReindexStepV1.run(stepExecutionDetails, myDataSink);
 
 		// Verify
 		assertEquals(2, outcome.getRecordsProcessed());
@@ -73,12 +85,9 @@ public class ReindexStepTest extends BaseJpaR4Test {
 		assertEquals(0, myCaptureQueriesListener.getRollbackCount());
 	}
 
-
 	@Test
 	public void testReindex_NoActionNeeded_IndexMissingFieldsEnabled() {
-
 		// Setup
-
 		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
 
 		Long id0 = createPatient(withActiveTrue(), withFamily("SIMPSON")).getIdPartAsLong();
@@ -89,9 +98,16 @@ public class ReindexStepTest extends BaseJpaR4Test {
 		data.addTypedPidWithNullPartitionForUnitTest("Patient", id1);
 
 		// Execute
-
+		ReindexJobParameters params = new ReindexJobParameters();
 		myCaptureQueriesListener.clear();
-		RunOutcome outcome = myReindexStep.doReindex(data, myDataSink, "index-id", "chunk-id", new ReindexJobParameters());
+		JobInstance instance = new JobInstance();
+		StepExecutionDetails<ReindexJobParameters, ResourceIdListWorkChunkJson> stepExecutionDetails = new StepExecutionDetails<>(
+			params,
+			data,
+			instance,
+			mock(WorkChunk.class)
+		);
+		RunOutcome outcome = myReindexStepV1.run(stepExecutionDetails, myDataSink);
 
 		// Verify
 		assertEquals(2, outcome.getRecordsProcessed());
@@ -122,9 +138,16 @@ public class ReindexStepTest extends BaseJpaR4Test {
 		});
 
 		// Execute
-
+		ReindexJobParameters params = new ReindexJobParameters();
 		myCaptureQueriesListener.clear();
-		RunOutcome outcome = myReindexStep.doReindex(data, myDataSink, "index-id", "chunk-id", new ReindexJobParameters());
+		JobInstance instance = new JobInstance();
+		StepExecutionDetails<ReindexJobParameters, ResourceIdListWorkChunkJson> stepExecutionDetails = new StepExecutionDetails<>(
+			params,
+			data,
+			instance,
+			mock(WorkChunk.class)
+		);
+		RunOutcome outcome = myReindexStepV1.run(stepExecutionDetails, myDataSink);
 
 		// Verify
 		assertEquals(2, outcome.getRecordsProcessed());
@@ -137,12 +160,9 @@ public class ReindexStepTest extends BaseJpaR4Test {
 		assertEquals(0, myCaptureQueriesListener.getRollbackCount());
 	}
 
-
 	@Test
 	public void testReindex_IndexesAddedAndRemoved_IndexMissingFieldsEnabled() {
-
 		// Setup
-
 		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
 		boolean markResourcesForReindexingUponSearchParameterChange = myStorageSettings.isMarkResourcesForReindexingUponSearchParameterChange();
 		myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(false);	// if this were true, it would set up a lot of reindex jobs extraneous to the one we're trying to test
@@ -190,9 +210,16 @@ public class ReindexStepTest extends BaseJpaR4Test {
 		mySearchParamRegistry.forceRefresh();
 
 		// Execute
-
+		ReindexJobParameters params = new ReindexJobParameters();
 		myCaptureQueriesListener.clear();
-		RunOutcome outcome = myReindexStep.doReindex(data, myDataSink, "index-id", "chunk-id", new ReindexJobParameters());
+		JobInstance instance = new JobInstance();
+		StepExecutionDetails<ReindexJobParameters, ResourceIdListWorkChunkJson> stepExecutionDetails = new StepExecutionDetails<>(
+			params,
+			data,
+			instance,
+			mock(WorkChunk.class)
+		);
+		RunOutcome outcome = myReindexStepV1.run(stepExecutionDetails, myDataSink);
 
 		// Verify
 		assertEquals(2, outcome.getRecordsProcessed());
@@ -208,9 +235,7 @@ public class ReindexStepTest extends BaseJpaR4Test {
 
 	@Test
 	public void testReindex_OneResourceReindexFailedButOthersSucceeded() {
-
 		// Setup
-
 		Long id0 = createPatient(withActiveTrue(), withFamily("SIMPSON")).getIdPartAsLong();
 		Long id1 = createPatient(withActiveTrue(), withFamily("FLANDERS")).getIdPartAsLong();
 		Long idPatientToInvalidate = createPatient().getIdPartAsLong();
@@ -235,9 +260,19 @@ public class ReindexStepTest extends BaseJpaR4Test {
 		});
 
 		// Execute
-
+		ReindexJobParameters params = new ReindexJobParameters();
 		myCaptureQueriesListener.clear();
-		RunOutcome outcome = myReindexStep.doReindex(data, myDataSink, "index-id", "chunk-id", new ReindexJobParameters());
+		JobInstance instance = new JobInstance();
+		instance.setInstanceId("index-id");
+		WorkChunk workChunk = new WorkChunk();
+		workChunk.setId("workid");
+		StepExecutionDetails<ReindexJobParameters, ResourceIdListWorkChunkJson> stepExecutionDetails = new StepExecutionDetails<>(
+			params,
+			data,
+			instance,
+			workChunk
+		);
+		RunOutcome outcome = myReindexStepV1.run(stepExecutionDetails, myDataSink);
 
 		// Verify
 		assertEquals(4, outcome.getRecordsProcessed());

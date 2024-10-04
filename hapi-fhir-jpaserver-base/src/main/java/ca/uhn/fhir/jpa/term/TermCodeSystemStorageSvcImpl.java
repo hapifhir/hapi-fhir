@@ -579,7 +579,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		if (theStatisticsTracker.getUpdatedConceptCount() <= myStorageSettings.getDeferIndexingForCodesystemsOfSize()) {
 			saveConcept(conceptToAdd);
 			Long nextConceptPid = conceptToAdd.getId();
-			Validate.notNull(nextConceptPid);
+			Objects.requireNonNull(nextConceptPid);
 		} else {
 			myDeferredStorageSvc.addConceptToStorageQueue(conceptToAdd);
 		}
