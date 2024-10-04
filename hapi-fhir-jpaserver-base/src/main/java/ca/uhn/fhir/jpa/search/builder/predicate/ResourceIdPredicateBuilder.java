@@ -89,8 +89,7 @@ public class ResourceIdPredicateBuilder extends BasePredicateBuilder {
 					try {
 						boolean excludeDeleted = true;
 						JpaPid pid = myIdHelperService.resolveResourcePersistentIds(
-								theRequestDetails,
-								theRequestPartitionId,
+                                theRequestPartitionId,
 								theResourceName,
 								valueAsId.getIdPart(),
 								excludeDeleted);

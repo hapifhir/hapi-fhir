@@ -10,7 +10,6 @@ import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import ca.uhn.fhir.test.utilities.RangeTestHelper;
 import ca.uhn.fhir.util.ParametersUtil;
 import ca.uhn.fhir.util.StopWatch;
 import org.apache.commons.lang3.StringUtils;
@@ -69,10 +68,10 @@ public class MdmProviderQueryLinkR4Test extends BaseLinkR4Test {
 		myLinkSource = new StringType(MdmLinkSourceEnum.AUTO.name());
 		Patient sourcePatient1 = createGoldenPatient();
 		myGoldenResource1Id = new StringType(sourcePatient1.getIdElement().toVersionless().getValue());
-		JpaPid sourcePatient1Pid = runInTransaction(()->myIdHelperService.getPidOrNull(null, RequestPartitionId.allPartitions(), sourcePatient1));
+		JpaPid sourcePatient1Pid = runInTransaction(()->myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), sourcePatient1));
 		Patient sourcePatient2 = createGoldenPatient();
 		myGoldenResource2Id = new StringType(sourcePatient2.getIdElement().toVersionless().getValue());
-		JpaPid sourcePatient2Pid = runInTransaction(()->myIdHelperService.getPidOrNull(null, RequestPartitionId.allPartitions(), sourcePatient2));
+		JpaPid sourcePatient2Pid = runInTransaction(()->myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), sourcePatient2));
 
 		createPossibleDuplicateLinkByPid(sourcePatient2Pid, sourcePatient1Pid);
 	}
@@ -234,10 +233,10 @@ public class MdmProviderQueryLinkR4Test extends BaseLinkR4Test {
 		myLinkSource = new StringType(MdmLinkSourceEnum.AUTO.name());
 		Patient sourcePatient1 = createGoldenPatient();
 		myGoldenResource1Id = new StringType(sourcePatient1.getIdElement().toVersionless().getValue());
-		JpaPid sourcePatient1Pid = runInTransaction(()->myIdHelperService.getPidOrNull(null, RequestPartitionId.allPartitions(), sourcePatient1));
+		JpaPid sourcePatient1Pid = runInTransaction(()->myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), sourcePatient1));
 		Patient sourcePatient2 = createGoldenPatient();
 		myGoldenResource2Id = new StringType(sourcePatient2.getIdElement().toVersionless().getValue());
-		JpaPid sourcePatient2Pid = runInTransaction(()->myIdHelperService.getPidOrNull(null, RequestPartitionId.allPartitions(), sourcePatient2));
+		JpaPid sourcePatient2Pid = runInTransaction(()->myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), sourcePatient2));
 
 		MdmLink possibleDuplicateMdmLink = (MdmLink) myMdmLinkDaoSvc.newMdmLink();
 		possibleDuplicateMdmLink.setGoldenResourcePersistenceId(sourcePatient1Pid);

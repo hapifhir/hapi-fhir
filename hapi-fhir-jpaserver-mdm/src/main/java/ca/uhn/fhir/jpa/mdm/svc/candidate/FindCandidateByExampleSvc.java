@@ -96,7 +96,7 @@ public class FindCandidateByExampleSvc<P extends IResourcePersistentId<?>> exten
 		Set<String> currentIds = new HashSet<>();
 		for (MatchedTarget match : matchedCandidates) {
 			Optional<? extends IMdmLink> optionalMdmLink = myMdmLinkDaoSvc.getMatchedLinkForSourcePid(
-					myIdHelperService.getPidOrNull(null, RequestPartitionId.allPartitions(), match.getTarget()));
+					myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), match.getTarget()));
 			if (!optionalMdmLink.isPresent()) {
 				if (ourLog.isDebugEnabled()) {
 					skippedLogMessages.add(String.format(
@@ -146,7 +146,7 @@ public class FindCandidateByExampleSvc<P extends IResourcePersistentId<?>> exten
 	}
 
 	private List<P> getNoMatchGoldenResourcePids(IBaseResource theBaseResource) {
-		P targetPid = myIdHelperService.getPidOrNull(null, RequestPartitionId.allPartitions(), theBaseResource);
+		P targetPid = myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), theBaseResource);
 		return myMdmLinkDaoSvc.getMdmLinksBySourcePidAndMatchResult(targetPid, MdmMatchResultEnum.NO_MATCH).stream()
 				.map(IMdmLink::getGoldenResourcePersistenceId)
 				.collect(Collectors.toList());

@@ -46,7 +46,7 @@ public class FindCandidateByLinkSvc extends BaseCandidateFinder {
 		List<MatchedGoldenResourceCandidate> retval = new ArrayList<>();
 
 		IResourcePersistentId targetPid =
-				myIdHelperService.getPidOrNull(null, RequestPartitionId.allPartitions(), theTarget);
+				myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), theTarget);
 		if (targetPid != null) {
 			Optional<? extends IMdmLink> oLink = myMdmLinkDaoSvc.getMatchedLinkForSourcePid(targetPid);
 			if (oLink.isPresent()) {

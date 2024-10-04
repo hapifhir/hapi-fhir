@@ -236,8 +236,7 @@ public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
 		List<IMdmLink> toDelete = new ArrayList<>();
 
 		IResourcePersistentId goldenResourcePid = myIdHelperService.resolveResourcePersistentIds(
-				null,
-				getPartitionIdForResource(theToResource),
+			getPartitionIdForResource(theToResource),
 				theToResource.getIdElement().getResourceType(),
 				theToResource.getIdElement().getIdPart());
 

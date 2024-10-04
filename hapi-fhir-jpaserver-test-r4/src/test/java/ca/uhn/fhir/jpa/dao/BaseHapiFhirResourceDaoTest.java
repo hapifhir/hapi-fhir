@@ -70,7 +70,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
@@ -240,8 +239,7 @@ class BaseHapiFhirResourceDaoTest {
 			any(IIdType.class)
 		)).thenReturn(partitionId);
 		when(myIdHelperService.resolveResourcePersistentIds(
-			any(),
-			any(RequestPartitionId.class),
+                any(RequestPartitionId.class),
 			Mockito.anyString(),
 			Mockito.anyString()
 		)).thenReturn(jpaPid);

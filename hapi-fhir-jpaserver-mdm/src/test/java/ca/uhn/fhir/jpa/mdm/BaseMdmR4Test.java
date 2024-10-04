@@ -58,7 +58,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -402,7 +401,7 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 		String resourceType = theBaseResource.getIdElement().getResourceType();
 		IFhirResourceDao relevantDao = myDaoRegistry.getResourceDao(resourceType);
 
-		Optional<MdmLink> matchedLinkForTargetPid = myMdmLinkDaoSvc.getMatchedLinkForSourcePid(runInTransaction(() -> myIdHelperService.getPidOrNull(null, RequestPartitionId.allPartitions(), theBaseResource)));
+		Optional<MdmLink> matchedLinkForTargetPid = myMdmLinkDaoSvc.getMatchedLinkForSourcePid(runInTransaction(() -> myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), theBaseResource)));
 		if (matchedLinkForTargetPid.isPresent()) {
 			JpaPid jpaPid = matchedLinkForTargetPid.get().getGoldenResourcePersistenceId();
 			return (T) relevantDao.readByPid(jpaPid);
@@ -537,8 +536,8 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 		MdmLink mdmLink = (MdmLink) myMdmLinkDaoSvc.newMdmLink();
 		mdmLink.setLinkSource(MdmLinkSourceEnum.MANUAL);
 		mdmLink.setMatchResult(MdmMatchResultEnum.MATCH);
-		mdmLink.setGoldenResourcePersistenceId(runInTransaction(() -> myIdHelperService.getPidOrNull(null, RequestPartitionId.allPartitions(), sourcePatient)));
-		mdmLink.setSourcePersistenceId(runInTransaction(() -> myIdHelperService.getPidOrNull(null, RequestPartitionId.allPartitions(), patient)));
+		mdmLink.setGoldenResourcePersistenceId(runInTransaction(() -> myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), sourcePatient)));
+		mdmLink.setSourcePersistenceId(runInTransaction(() -> myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), patient)));
 		return mdmLink;
 	}
 
@@ -638,7 +637,7 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 		mdmLink.setCreated(new Date());
 		mdmLink.setUpdated(new Date());
 		mdmLink.setGoldenResourcePersistenceId(JpaPid.fromId(thePatientPid));
-		mdmLink.setSourcePersistenceId(runInTransaction(()->myIdHelperService.getPidOrNull(null, RequestPartitionId.allPartitions(), patient)));
+		mdmLink.setSourcePersistenceId(runInTransaction(()->myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), patient)));
 		return myMdmLinkDao.save(mdmLink);
 	}
 
@@ -652,8 +651,8 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 		mdmLink.setCreated(theCreateTime);
 		mdmLink.setUpdated(theUpdateTime);
 		mdmLink.setVersion(theVersion);
-		mdmLink.setGoldenResourcePersistenceId(runInTransaction(()->myIdHelperService.getPidOrNull(null, RequestPartitionId.allPartitions(), goldenPatient)));
-		mdmLink.setSourcePersistenceId(runInTransaction(()->myIdHelperService.getPidOrNull(null, RequestPartitionId.allPartitions(), sourcePatient)));
+		mdmLink.setGoldenResourcePersistenceId(runInTransaction(()->myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), goldenPatient)));
+		mdmLink.setSourcePersistenceId(runInTransaction(()->myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), sourcePatient)));
 		mdmLink.setHadToCreateNewGoldenResource(theLinkCreatedNewResource);
 		mdmLink.setVector(theVector);
 

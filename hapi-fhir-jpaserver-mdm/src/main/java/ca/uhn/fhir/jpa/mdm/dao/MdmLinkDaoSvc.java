@@ -131,9 +131,9 @@ public class MdmLinkDaoSvc<P extends IResourcePersistentId<?>, M extends IMdmLin
 	public M getOrCreateMdmLinkByGoldenResourceAndSourceResource(
 			IAnyResource theGoldenResource, IAnyResource theSourceResource) {
 		P goldenResourcePid =
-				myIdHelperService.getPidOrNull(null, RequestPartitionId.allPartitions(), theGoldenResource);
+				myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), theGoldenResource);
 		P sourceResourcePid =
-				myIdHelperService.getPidOrNull(null, RequestPartitionId.allPartitions(), theSourceResource);
+				myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), theSourceResource);
 		Optional<M> oExisting = getLinkByGoldenResourcePidAndSourceResourcePid(goldenResourcePid, sourceResourcePid);
 		if (oExisting.isPresent()) {
 			return oExisting.get();
@@ -225,7 +225,7 @@ public class MdmLinkDaoSvc<P extends IResourcePersistentId<?>, M extends IMdmLin
 
 	@Nonnull
 	private Optional<M> getMdmLinkWithMatchResult(IBaseResource theSourceResource, MdmMatchResultEnum theMatchResult) {
-		P pid = myIdHelperService.getPidOrNull(null, RequestPartitionId.allPartitions(), theSourceResource);
+		P pid = myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), theSourceResource);
 		if (pid == null) {
 			return Optional.empty();
 		}
@@ -275,7 +275,7 @@ public class MdmLinkDaoSvc<P extends IResourcePersistentId<?>, M extends IMdmLin
 
 	@Transactional
 	public Optional<M> findMdmLinkBySource(IBaseResource theSourceResource) {
-		@Nullable P pid = myIdHelperService.getPidOrNull(null, RequestPartitionId.allPartitions(), theSourceResource);
+		@Nullable P pid = myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), theSourceResource);
 		if (pid == null) {
 			return Optional.empty();
 		}
@@ -305,7 +305,7 @@ public class MdmLinkDaoSvc<P extends IResourcePersistentId<?>, M extends IMdmLin
 	 */
 	@Transactional
 	public List<M> findMdmLinksByGoldenResource(IBaseResource theGoldenResource) {
-		P pid = myIdHelperService.getPidOrNull(null, RequestPartitionId.allPartitions(), theGoldenResource);
+		P pid = myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), theGoldenResource);
 		if (pid == null) {
 			return Collections.emptyList();
 		}
@@ -349,7 +349,7 @@ public class MdmLinkDaoSvc<P extends IResourcePersistentId<?>, M extends IMdmLin
 	 */
 	@Transactional
 	public List<M> findMdmLinksBySourceResource(IBaseResource theSourceResource) {
-		P pid = myIdHelperService.getPidOrNull(null, RequestPartitionId.allPartitions(), theSourceResource);
+		P pid = myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), theSourceResource);
 		if (pid == null) {
 			return Collections.emptyList();
 		}
@@ -367,7 +367,7 @@ public class MdmLinkDaoSvc<P extends IResourcePersistentId<?>, M extends IMdmLin
 	 * @return all links for the source.
 	 */
 	public List<M> findMdmMatchLinksByGoldenResource(IBaseResource theGoldenResource) {
-		P pid = myIdHelperService.getPidOrNull(null, RequestPartitionId.allPartitions(), theGoldenResource);
+		P pid = myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), theGoldenResource);
 		if (pid == null) {
 			return Collections.emptyList();
 		}
@@ -403,8 +403,8 @@ public class MdmLinkDaoSvc<P extends IResourcePersistentId<?>, M extends IMdmLin
 			return Optional.empty();
 		}
 		return getLinkByGoldenResourcePidAndSourceResourcePid(
-				myIdHelperService.getPidOrNull(null, RequestPartitionId.allPartitions(), theGoldenResource),
-				myIdHelperService.getPidOrNull(null, RequestPartitionId.allPartitions(), theSourceResource));
+				myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), theGoldenResource),
+				myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), theSourceResource));
 	}
 
 	@Transactional(propagation = Propagation.MANDATORY)

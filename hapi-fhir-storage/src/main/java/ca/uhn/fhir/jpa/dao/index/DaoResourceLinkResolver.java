@@ -35,6 +35,7 @@ import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.extractor.IResourceLinkResolver;
 import ca.uhn.fhir.jpa.searchparam.extractor.PathAndRef;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -86,6 +87,9 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 	@Autowired
 	private IHapiTransactionService myTransactionService;
 
+	@Autowired
+	private IRequestPartitionHelperSvc myPartitionHelperSvc;
+
 	@Override
 	public IResourceLookup findTargetResource(
 			@Nonnull RequestPartitionId theRequestPartitionId,
@@ -123,8 +127,9 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 		String idPart = targetResourceId.getIdPart();
 		try {
 			if (persistentId == null) {
+				RequestPartitionId requestPartitionId = myPartitionHelperSvc.determineReadPartitionForRequestForRead(theRequest, targetResourceId);
 				resolvedResource = myIdHelperService.resolveResourceIdentity(
-						theRequest, theRequestPartitionId, resourceType, idPart);
+					requestPartitionId, resourceType, idPart);
 				ourLog.trace("Translated {}/{} to resource PID {}", type, idPart, resolvedResource);
 			} else {
 				resolvedResource = new ResourceLookupPersistentIdWrapper(persistentId);

@@ -8,7 +8,6 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Tuple;
@@ -41,7 +40,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class IdHelperServiceTest {
@@ -92,7 +90,7 @@ public class IdHelperServiceTest {
         // configure mock behaviour
 		when(myStorageSettings.isDeleteEnabled()).thenReturn(true);
 
-		final ResourceNotFoundException resourceNotFoundException = assertThrows(ResourceNotFoundException.class, () -> myHelperSvc.resolveResourcePersistentIds(new SystemRequestDetails(), requestPartitionId, resourceType, ids, theExcludeDeleted));
+		final ResourceNotFoundException resourceNotFoundException = assertThrows(ResourceNotFoundException.class, () -> myHelperSvc.resolveResourcePersistentIds(requestPartitionId, resourceType, ids, theExcludeDeleted));
 		assertEquals("HAPI-2001: Resource Patient/123 is not known", resourceNotFoundException.getMessage());
     }
 
@@ -113,7 +111,7 @@ public class IdHelperServiceTest {
         // configure mock behaviour
         when(myStorageSettings.isDeleteEnabled()).thenReturn(false);
 
-		Map<String, JpaPid> actualIds = myHelperSvc.resolveResourcePersistentIds(new SystemRequestDetails(), requestPartitionId, resourceType, ids, theExcludeDeleted);
+		Map<String, JpaPid> actualIds = myHelperSvc.resolveResourcePersistentIds(requestPartitionId, resourceType, ids, theExcludeDeleted);
 
 		//verifyResult
 		assertFalse(actualIds.isEmpty());

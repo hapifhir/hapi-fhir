@@ -73,7 +73,7 @@ public class FindCandidateByEidSvc extends BaseCandidateFinder {
 						continue;
 					}
 					IResourcePersistentId<?> pidOrNull = myIdHelperService.getPidOrNull(
-							null, RequestPartitionId.allPartitions(), foundGoldenResource);
+                            RequestPartitionId.allPartitions(), foundGoldenResource);
 					MatchedGoldenResourceCandidate mpc =
 							new MatchedGoldenResourceCandidate(pidOrNull, MdmMatchOutcome.EID_MATCH);
 					ourLog.debug(

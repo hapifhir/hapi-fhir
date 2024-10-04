@@ -2082,8 +2082,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 
 	private JpaPid getValueSetResourcePersistentId(ValueSet theValueSet) {
 		return myIdHelperService.resolveResourcePersistentIds(
-				null,
-				RequestPartitionId.allPartitions(),
+                RequestPartitionId.allPartitions(),
 				theValueSet.getIdElement().getResourceType(),
 				theValueSet.getIdElement().getIdPart());
 	}

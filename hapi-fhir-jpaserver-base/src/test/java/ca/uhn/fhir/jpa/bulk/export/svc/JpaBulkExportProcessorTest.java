@@ -331,7 +331,7 @@ public class JpaBulkExportProcessorTest {
 					}
 					return new PersistentIdToForcedIdMap<>(answer);
 				});
-			when(myIdHelperService.getPidOrNull(any(), eq(getPartitionIdFromParams(thePartitioned)), any(Group.class)))
+			when(myIdHelperService.getPidOrNull(eq(getPartitionIdFromParams(thePartitioned)), any(Group.class)))
 				.thenReturn(groupId);
 			when(myMdmLinkDao.expandPidsFromGroupPidGivenMatchResult(any(JpaPid.class), eq(MdmMatchResultEnum.MATCH)))
 				.thenReturn(Collections.singletonList(tuple));
@@ -429,7 +429,7 @@ public class JpaBulkExportProcessorTest {
 			.thenReturn(groupDao);
 		when(groupDao.read(any(IIdType.class), any(SystemRequestDetails.class)))
 			.thenReturn(groupResource);
-		when(myIdHelperService.getPidOrNull(any(), eq(getPartitionIdFromParams(thePartitioned)), eq(groupResource)))
+		when(myIdHelperService.getPidOrNull(eq(getPartitionIdFromParams(thePartitioned)), eq(groupResource)))
 			.thenReturn(groupId);
 		// getMembersFromGroupWithFilter
 		when(myDaoRegistry.getResourceDao(eq("Patient")))
@@ -573,7 +573,7 @@ public class JpaBulkExportProcessorTest {
 			.thenReturn(groupResource);
 
 		// ret
-		when(myIdHelperService.getPidOrNull(any(), eq(getPartitionIdFromParams(thePartitioned)), eq(groupResource)))
+		when(myIdHelperService.getPidOrNull(eq(getPartitionIdFromParams(thePartitioned)), eq(groupResource)))
 			.thenReturn(pid);
 
 		// test

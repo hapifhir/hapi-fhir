@@ -51,7 +51,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -177,7 +176,7 @@ public class MdmSurvivorshipSvcImplTest {
 		when(myMdmSettings.getMdmRules())
 			.thenReturn(new MdmRulesJson());
 		doReturn(sourceIdToPid).when(myIIdHelperService)
-			.resolveResourcePersistentIds(any(), any(RequestPartitionId.class), anyString(), any(List.class));
+			.resolveResourcePersistentIds(any(RequestPartitionId.class), anyString(), any(List.class));
 		// we will return a non-empty list to reduce mocking
 		when(myEIDHelper.getExternalEid(any()))
 			.thenReturn(Collections.singletonList(new CanonicalEID("example", "value", "use")));
@@ -202,7 +201,7 @@ public class MdmSurvivorshipSvcImplTest {
 			.update(eq(goldenPatientRebuilt), any(RequestDetails.class));
 
 		ArgumentCaptor<List<String>> idsCaptor = ArgumentCaptor.forClass(List.class);
-		verify(myIIdHelperService).resolveResourcePersistentIds(any(), any(RequestPartitionId.class), anyString(), idsCaptor.capture());
+		verify(myIIdHelperService).resolveResourcePersistentIds(any(RequestPartitionId.class), anyString(), idsCaptor.capture());
 		assertNotNull(idsCaptor.getValue());
 		assertFalse(idsCaptor.getValue().isEmpty());
 		for (String id : idsCaptor.getValue()) {
