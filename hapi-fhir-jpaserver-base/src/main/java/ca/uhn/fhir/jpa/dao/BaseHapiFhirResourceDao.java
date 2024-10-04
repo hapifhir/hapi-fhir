@@ -2182,11 +2182,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		Stream<JpaPid> pidStream = thePidStream;
 		// FIXME: what should we do otherwise? Can remove?
-//		if (theRequestPartitionId.hasPartitionIds()
-//				&& theRequestPartitionId.getPartitionIds().size() == 1) {
-//			pidStream = pidStream.map(t -> t.setPartitionIdIfNotAlreadySet(
-//					theRequestPartitionId.getPartitionIds().get(0)));
-//		}
+		//		if (theRequestPartitionId.hasPartitionIds()
+		//				&& theRequestPartitionId.getPartitionIds().size() == 1) {
+		//			pidStream = pidStream.map(t -> t.setPartitionIdIfNotAlreadySet(
+		//					theRequestPartitionId.getPartitionIds().get(0)));
+		//		}
 
 		@SuppressWarnings("unchecked")
 		Stream<T> resourceStream = (Stream<T>) new QueryChunker<>()

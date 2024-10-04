@@ -56,5 +56,4 @@ public class SearchQueryExecutors {
 	public static ISearchQueryExecutor from(List<JpaPid> rawPids) {
 		return new ResolvedSearchQueryExecutor(rawPids);
 	}
-
 }
