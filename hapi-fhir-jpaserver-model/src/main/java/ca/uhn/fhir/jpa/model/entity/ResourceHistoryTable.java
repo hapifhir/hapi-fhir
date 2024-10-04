@@ -189,6 +189,7 @@ public class ResourceHistoryTable extends BaseHasResource<ResourceHistoryTablePk
 				.append("resourceType", myResourceType)
 				.append("resourceVersion", myResourceVersion)
 				.append("pid", myId)
+				.append("updated", getPublished())
 				.toString();
 	}
 
