@@ -163,6 +163,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		IIdType patientId = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 
 		// Create observation in partition 2
+		addReadPartition(myPartitionId);
 		addCreatePartition(myPartitionId2, myPartitionDate2);
 		Observation obs = new Observation();
 		obs.getSubject().setReference(patientId.getValue());
@@ -175,7 +176,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		// Look up the referenced subject/patient
 		String sql = selectQueries.get(0).getSql(true, false).toLowerCase();
 		assertThat(sql).contains(" from hfj_resource ");
-		assertEquals(2, StringUtils.countMatches(selectQueries.get(0).getSql(true, false).toLowerCase(), "partition"));
+		assertEquals(3, StringUtils.countMatches(sql, "partition"), sql);
 
 		runInTransaction(() -> {
 			List<ResourceLink> resLinks = myResourceLinkDao.findAll();
@@ -224,6 +225,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		// Create observation in partition 2
 		addCreatePartition(myPartitionId2, myPartitionDate2);
+		addReadPartition(myPartitionId);
 		Observation obs = new Observation();
 		obs.getSubject().setReference(patientId.getValue());
 		IIdType obsId = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
@@ -249,6 +251,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		// Create observation in partition 2
 		addCreatePartition(myPartitionId2, myPartitionDate2);
+		addReadPartition(myPartitionId2);
 		Observation obs = new Observation();
 		obs.getSubject().setReference(patientId.getValue());
 
@@ -296,6 +299,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		// Create observation in partition NULL
 		addCreateDefaultPartition(myPartitionDate);
+		addReadDefaultPartition();
 		Observation obs = new Observation();
 		obs.getSubject().setReference(patientId.getValue());
 		IIdType obsId = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
@@ -359,6 +363,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		addCreatePartition(1, null);
 		addCreatePartition(1, null);
+		addReadPartition(1);
 		IIdType patientId1 = createPatient(withOrganization(new IdType("Organization/FOO")));
 
 		addReadPartition(1);
@@ -579,6 +584,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		org.setName("org");
 		IIdType orgId = myOrganizationDao.update(org, mySrd).getId().toUnqualifiedVersionless();
 
+		addReadPartition(myPartitionId);
 		addCreatePartition(myPartitionId, myPartitionDate);
 		Patient p = new Patient();
 		p.setId("pat");
@@ -605,6 +611,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		org.setName("org");
 		IIdType orgId = myOrganizationDao.update(org, mySrd).getId().toUnqualifiedVersionless();
 
+		addReadDefaultPartition();
 		addCreateDefaultPartition();
 		Patient p = new Patient();
 		p.setId("pat");
@@ -629,6 +636,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		org.setName("org");
 		IIdType orgId = myOrganizationDao.update(org, mySrd).getId().toUnqualifiedVersionless();
 
+		addReadDefaultPartition();
 		addCreateDefaultPartition(myPartitionDate);
 		Patient p = new Patient();
 		p.setId("pat");
@@ -2072,6 +2080,8 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		practitioner.addName().setFamily("PRACT");
 		myPractitionerDao.update(practitioner, mySrd);
 
+		addReadPartition(1);
+		addReadPartition(1);
 		addCreatePartition(1, null);
 		PractitionerRole role = new PractitionerRole();
 		role.setId("ROLE");
@@ -2714,10 +2724,10 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		IIdType orgId = createOrganization(withId("A"), withPartition(myPartitionId), withName("My Org")).toUnqualifiedVersionless();
 		IIdType orgId2 = createOrganization(withId("B"), withPartition(myPartitionId2), withName("My Org")).toUnqualifiedVersionless();
 		// Matching
-		IIdType patientId = createPatient(withPartition(myPartitionId), withFamily("FAMILY"), withOrganization(orgId));
+		IIdType patientId = createPatient(withReadWritePartitions(myPartitionId), withFamily("FAMILY"), withOrganization(orgId));
 		// Non matching
-		createPatient(withPartition(myPartitionId), withFamily("WRONG"), withOrganization(orgId));
-		createPatient(withPartition(myPartitionId2), withFamily("FAMILY"), withOrganization(orgId2));
+		createPatient(withReadWritePartitions(myPartitionId), withFamily("WRONG"), withOrganization(orgId));
+		createPatient(withReadWritePartitions(myPartitionId2), withFamily("FAMILY"), withOrganization(orgId2));
 
 		logAllNonUniqueIndexes();
 
@@ -2847,7 +2857,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		createUniqueComboSp();
 
 		IIdType patientId = createPatient(withPartition(myPartitionId), withId("ONE"), withGender("male"));
-		IIdType observationId = createObservation(withPartition(myPartitionId), withSubject(patientId));
+		IIdType observationId = createObservation(withReadWritePartitions(myPartitionId), withSubject(patientId));
 
 		addReadPartition(myPartitionId);
 		myCaptureQueriesListener.clear();
@@ -2917,7 +2927,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		createUniqueComboSp();
 
 		IIdType patientId = createPatient(withPartition(null), withId("ONE"), withGender("male"));
-		IIdType observationId = createObservation(withPartition(null), withSubject(patientId));
+		IIdType observationId = createObservation(withReadWritePartitions(null), withSubject(patientId));
 
 		addReadDefaultPartition();
 

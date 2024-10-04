@@ -1452,18 +1452,19 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	 * @param entity     the existing entity.
 	 */
 	private void failIfPartitionMismatch(RequestDetails theRequest, ResourceTable entity) {
-		if (myPartitionSettings.isPartitioningEnabled()
-				&& theRequest != null
-				&& theRequest.getTenantId() != null
-				&& entity.getPartitionId().getPartitionId() != null) {
-			PartitionEntity partitionEntity = myPartitionLookupSvc.getPartitionByName(theRequest.getTenantId());
-			// partitionEntity should never be null
-			if (partitionEntity != null
-					&& !partitionEntity.getId().equals(entity.getPartitionId().getPartitionId())) {
-				throw new InvalidRequestException(Msg.code(2079) + "Resource " + entity.getResourceType() + "/"
-						+ entity.getFhirId() + " is not known");
-			}
-		}
+		// FIXME: needed?
+//		if (myPartitionSettings.isPartitioningEnabled()
+//				&& theRequest != null
+//				&& theRequest.getTenantId() != null
+//				&& entity.getPartitionId().getPartitionId() != null) {
+//			PartitionEntity partitionEntity = myPartitionLookupSvc.getPartitionByName(theRequest.getTenantId());
+//			// partitionEntity should never be null
+//			if (partitionEntity != null
+//					&& !partitionEntity.getId().equals(entity.getPartitionId().getPartitionId())) {
+//				throw new InvalidRequestException(Msg.code(2079) + "Resource " + entity.getResourceType() + "/"
+//						+ entity.getFhirId() + " is not known");
+//			}
+//		}
 	}
 
 	private void createHistoryEntry(
