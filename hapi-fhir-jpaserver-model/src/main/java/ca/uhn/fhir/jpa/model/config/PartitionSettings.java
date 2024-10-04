@@ -39,12 +39,26 @@ public class PartitionSettings {
 		super();
 	}
 
-	// FIXME: document
+	/**
+	 * This flag activates partition IDs in PKs mode, which is newly introduced in HAPI FHIR 8.0.0.
+	 * This mode causes partition IDs to be included in all primary keys, joins, and emitted
+	 * SQL. It also affects the generated schema and migrations. This setting should not be changed
+	 * after the database has been initialized, unless you have performed an appropriate migration.
+	 *
+	 * @since 8.0.0
+	 */
 	public boolean isIncludePartitionIdsInPKs() {
 		return myIncludePartitionIdsInPKs;
 	}
 
-	// FIXME: document
+	/**
+	 * This flag activates partition IDs in PKs mode, which is newly introduced in HAPI FHIR 8.0.0.
+	 * This mode causes partition IDs to be included in all primary keys, joins, and emitted
+	 * SQL. It also affects the generated schema and migrations. This setting should not be changed
+	 * after the database has been initialized, unless you have performed an appropriate migration.
+	 *
+	 * @since 8.0.0
+	 */
 	public void setIncludePartitionIdsInPKs(boolean theIncludePartitionIdsInPKs) {
 		myIncludePartitionIdsInPKs = theIncludePartitionIdsInPKs;
 	}

@@ -1262,8 +1262,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 						myDaoSearchParamSynchronizer.synchronizeSearchParamsToDatabase(
 								newParams, entity, existingParams);
 
-				// FIXME: restore?
-				//								newParams.populateResourceTableParamCollections(entity);
 				entity.setParamsForStorage(newParams);
 
 				// Interceptor broadcast: JPA_PERFTRACE_INFO

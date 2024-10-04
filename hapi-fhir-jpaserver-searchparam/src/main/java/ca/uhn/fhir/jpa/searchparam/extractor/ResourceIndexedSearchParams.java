@@ -161,18 +161,6 @@ public final class ResourceIndexedSearchParams {
 		theEntity.setHasLinks(myLinks.isEmpty() == false);
 	}
 
-	public void populateResourceTableParamCollections(ResourceTable theEntity) {
-		theEntity.setParamsString(myStringParams);
-		theEntity.setParamsToken(myTokenParams);
-		theEntity.setParamsNumber(myNumberParams);
-		theEntity.setParamsQuantity(myQuantityParams);
-		theEntity.setParamsQuantityNormalized(myQuantityNormalizedParams);
-		theEntity.setParamsDate(myDateParams);
-		theEntity.setParamsUri(myUriParams);
-		theEntity.setParamsCoords(myCoordsParams);
-		theEntity.setResourceLinks(myLinks);
-	}
-
 	public void updateSpnamePrefixForIndexOnUpliftedChain(String theContainingType, String theSpnamePrefix) {
 		updateSpnamePrefixForIndexOnUpliftedChain(theContainingType, myNumberParams, theSpnamePrefix);
 		updateSpnamePrefixForIndexOnUpliftedChain(theContainingType, myQuantityParams, theSpnamePrefix);

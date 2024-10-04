@@ -58,11 +58,23 @@ public class PreventDanglingInterceptorsExtension implements BeforeEachCallback,
 	@Override
 	public void afterEach(ExtensionContext theExtensionContext) throws Exception {
 		List<Object> afterInterceptors = myInterceptorServiceSuplier.get().getAllRegisteredInterceptors();
-		Map<Object, Object> delta = new IdentityHashMap<>();
-		afterInterceptors.forEach(t -> delta.put(t, t));
-		myBeforeInterceptors.forEach(t -> delta.remove(t));
-		delta.keySet().forEach(t->myInterceptorServiceSuplier.get().unregisterInterceptor(t));
-		assertThat(delta.isEmpty()).as(() -> "Test added interceptor(s) and did not clean them up:\n * " + delta.keySet().stream().map(t -> t.toString()).collect(Collectors.joining("\n * "))).isTrue();
 
+		// Handle interceptors added by the test
+		{
+			Map<Object, Object> delta = new IdentityHashMap<>();
+			afterInterceptors.forEach(t -> delta.put(t, t));
+			myBeforeInterceptors.forEach(t -> delta.remove(t));
+			delta.keySet().forEach(t -> myInterceptorServiceSuplier.get().unregisterInterceptor(t));
+			assertThat(delta.isEmpty()).as(() -> "Test added interceptor(s) and did not clean them up:\n * " + delta.keySet().stream().map(Object::toString).collect(Collectors.joining("\n * "))).isTrue();
+		}
+
+		// Handle interceptors removed by the test
+		{
+			IdentityHashMap<Object, Object> delta = new IdentityHashMap<>();
+			myBeforeInterceptors.forEach(t -> delta.put(t, t));
+			afterInterceptors.forEach(t -> delta.remove(t, t));
+			delta.keySet().forEach(t -> myInterceptorServiceSuplier.get().registerInterceptor(t));
+			assertThat(delta.isEmpty()).as(() -> "Test removed interceptor(s) and did not re-add them afterwards:\n * " + delta.keySet().stream().map(Object::toString).collect(Collectors.joining("\n * "))).isTrue();
+		}
 	}
 }
