@@ -200,7 +200,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 		codeSystem.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
 		IIdType csId = myCodeSystemDao.create(codeSystem).getId().toUnqualified();
 
-		ResourceTable table = myResourceTableDao.findById(csId.getIdPartAsLong()).orElseThrow(IllegalArgumentException::new);
+		ResourceTable table = myResourceTableDao.findById(JpaPid.fromId(csId.getIdPartAsLong())).orElseThrow(IllegalArgumentException::new);
 
 		TermCodeSystemVersion termCodeSystemVersion = new TermCodeSystemVersion();
 		termCodeSystemVersion.setResource(table);
@@ -344,7 +344,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 		codeSystem.setName("SYSTEM NAME 3");
 		IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
 
-		ResourceTable table = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalArgumentException::new);
+		ResourceTable table = myResourceTableDao.findById(JpaPid.fromId(id.getIdPartAsLong())).orElseThrow(IllegalArgumentException::new);
 
 		TermCodeSystemVersion cs = new TermCodeSystemVersion();
 		cs.setResource(table);

@@ -30,6 +30,7 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.HasParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -39,6 +40,7 @@ import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.statement.insert.Insert;
 import org.assertj.core.api.Assertions;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.DateTimeType;
@@ -525,6 +527,33 @@ public abstract class TestDefinitions implements ITestDataBuilder {
 		// Verify
 		myCaptureQueriesListener.logSelectQueries();
 		assertThat(values).asList().containsExactly(patientId.getValue());
+	}
+
+	@Test
+	public void testSearch_IdParam() {
+		// Setup
+		myPartitionSelectorInterceptor.setNextPartitionId(PARTITION_1);
+
+		IIdType id0 = createPatient(withActiveTrue()).toUnqualifiedVersionless();
+		IIdType id1 = createPatient(withId("A"), withActiveFalse()).toUnqualifiedVersionless();
+
+		// Test
+		myCaptureQueriesListener.clear();
+		SearchParameterMap params = new SearchParameterMap();
+		params.setLoadSynchronous(true);
+		params.add(IAnyResource.SP_RES_ID, new TokenOrListParam().add(id0.getValue()).add(id1.getValue()));
+		IBundleProvider outcome = myPatientDao.search(params, newRequest());
+		assertThat(toUnqualifiedVersionlessIdValues(outcome)).asList().containsExactlyInAnyOrder(id0.getValue(), id1.getValue());
+
+		// Verify
+		myCaptureQueriesListener.logSelectQueries();
+		if (myIncludePartitionIdsInSql) {
+			assertThat(getSelectSql(0)).endsWith(" WHERE ((t0.PARTITION_ID = '1') AND (t0.HASH_VALUE = '7943378963388545453'))");
+		} else {
+			assertThat(getSelectSql(0)).endsWith(" WHERE (t0.HASH_VALUE = '7943378963388545453')");
+		}
+		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
+
 	}
 
 	@ParameterizedTest

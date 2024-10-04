@@ -206,7 +206,7 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 			 * However, for realistic average workloads, this should reduce the number of round trips.
 			 */
 			if (idChunk.size() >= 2) {
-				List<ResourceTable> entityChunk = prefetchResourceTableHistoryAndProvenance(idChunk);
+				List<ResourceTable> entityChunk = prefetchResourceTableAndHistory(idChunk);
 
 				if (thePreFetchIndexes) {
 
@@ -244,15 +244,13 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 	}
 
 	@Nonnull
-	private List<ResourceTable> prefetchResourceTableHistoryAndProvenance(List<JpaPid> idChunk) {
+	private List<ResourceTable> prefetchResourceTableAndHistory(List<JpaPid> idChunk) {
 		assert idChunk.size() < SearchConstants.MAX_PAGE_SIZE : "assume pre-chunked";
 
-		// FIXME: this fetched provenance
 		Query query = myEntityManager.createQuery("select r, h "
 				+ " FROM ResourceTable r "
 				+ " LEFT JOIN fetch ResourceHistoryTable h "
 				+ "      on r.myVersion = h.myResourceVersion and r = h.myResourceTable "
-				//				+ " left join fetch h.myProvenance "
 				+ " WHERE r.myPid IN ( :IDS ) ");
 		query.setParameter("IDS", idChunk);
 

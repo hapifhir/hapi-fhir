@@ -28,14 +28,11 @@ import org.hibernate.type.ComponentType;
 import org.hibernate.type.CompositeType;
 import org.hibernate.type.EmbeddedComponentType;
 import org.hibernate.type.Type;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -44,9 +41,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class ConditionalIdMappingContributor implements org.hibernate.boot.spi.AdditionalMappingContributor {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(ConditionalIdMappingContributor.class);
 	private final Set<String> myQualifiedIdRemovedColumnNames = new HashSet<>();
-	private Map<String, Class<?>> myTableNameToEntityType;
 
 	@Override
 	public String getContributorName() {
@@ -69,13 +64,7 @@ public class ConditionalIdMappingContributor implements org.hibernate.boot.spi.A
 			return;
 		}
 
-		myTableNameToEntityType = theMetadata.getEntityBindingMap().values().stream()
-				.collect(Collectors.toMap(t -> t.getTable().getName(), t -> getType(t.getClassName())));
-
 		removeConditionalIdProperties(theMetadata);
-
-		// FIXME: remove
-		theMetadata.getEntityBindingMap();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -135,10 +124,6 @@ public class ConditionalIdMappingContributor implements org.hibernate.boot.spi.A
 					if (getField(entityType, removedProperty.getName()) != null) {
 						entityPersistentClass.addProperty(removedProperty);
 					}
-
-					//					addToCollectionUsingReflection(entityPersistentClass, "properties", removedProperty);
-					//					addToCollectionUsingReflection(entityPersistentClass, "declaredProperties", removedProperty);
-
 				}
 			}
 
@@ -164,7 +149,7 @@ public class ConditionalIdMappingContributor implements org.hibernate.boot.spi.A
 
 		// Adjust composites - This handles @EmbeddedId PKs like JpaPid
 		List<Component> registeredComponents = new ArrayList<>();
-		theMetadata.visitRegisteredComponents(c -> registeredComponents.add(c));
+		theMetadata.visitRegisteredComponents(registeredComponents::add);
 
 		for (Component c : registeredComponents) {
 			Class<?> componentType = c.getComponentClass();
@@ -173,6 +158,7 @@ public class ConditionalIdMappingContributor implements org.hibernate.boot.spi.A
 			Set<String> removedPropertyNames = new HashSet<>();
 			for (Property property : new ArrayList<>(c.getProperties())) {
 				Field field = getField(componentType, property.getName());
+				assert field != null;
 				ConditionalIdProperty annotation = field.getAnnotation(ConditionalIdProperty.class);
 				if (annotation != null) {
 					c.getProperties().remove(property);
@@ -198,6 +184,7 @@ public class ConditionalIdMappingContributor implements org.hibernate.boot.spi.A
 						if (nextProperty.getName().equals(property.getName())) {
 							BasicValue value = (BasicValue) nextProperty.getValue();
 							Field insertabilityField = getField(value.getClass(), "insertability");
+							assert insertabilityField != null;
 							insertabilityField.setAccessible(true);
 							try {
 								List<Boolean> insertability = (List<Boolean>) insertabilityField.get(value);
@@ -302,10 +289,6 @@ public class ConditionalIdMappingContributor implements org.hibernate.boot.spi.A
 		// Adjust relations with remote filtered columns (e.g. OneToMany)
 		for (var nextEntry : theMetadata.getEntityBindingMap().entrySet()) {
 			PersistentClass entityPersistentClass = nextEntry.getValue();
-			Table table = entityPersistentClass.getTable();
-			if (table.getName().equals("HFJ_RESOURCE")) {
-				ourLog.trace(table.getName()); // FIXME: remove
-			}
 
 			for (Property property : entityPersistentClass.getProperties()) {
 				Value propertyValue = property.getValue();
@@ -319,11 +302,6 @@ public class ConditionalIdMappingContributor implements org.hibernate.boot.spi.A
 								.getColumns()
 								.removeIf(t -> myQualifiedIdRemovedColumnNames.contains(
 										propertyValueBag.getCollectionTable().getName() + "#" + t.getName()));
-
-						//						KeyValue wrappedValue = dependantValue.getWrappedValue();
-						//						if (wrappedValue instanceof Component) {}
-						//
-						//						dependantValue.copy(); // FIXME: remove
 					}
 				}
 			}

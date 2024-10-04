@@ -1128,8 +1128,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 					requestPartitionId = RequestPartitionId.defaultPartition();
 				}
 
-				failIfPartitionMismatch(theRequest, entity);
-
 				// Extract search params for resource
 				mySearchParamWithInlineReferencesExtractor.populateFromResource(
 						requestPartitionId,
@@ -1438,30 +1436,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		encodedResource.setResourceText(encodedResourceString);
 		encodedResource.setResourceBinary(theResourceBinary);
 		encodedResource.setEncoding(theEncoding);
-	}
-
-	/**
-	 * TODO eventually consider refactoring this to be part of an interceptor.
-	 * <p>
-	 * Throws an exception if the partition of the request, and the partition of the existing entity do not match.
-	 *
-	 * @param theRequest the request.
-	 * @param entity     the existing entity.
-	 */
-	private void failIfPartitionMismatch(RequestDetails theRequest, ResourceTable entity) {
-		// FIXME: needed?
-		//		if (myPartitionSettings.isPartitioningEnabled()
-		//				&& theRequest != null
-		//				&& theRequest.getTenantId() != null
-		//				&& entity.getPartitionId().getPartitionId() != null) {
-		//			PartitionEntity partitionEntity = myPartitionLookupSvc.getPartitionByName(theRequest.getTenantId());
-		//			// partitionEntity should never be null
-		//			if (partitionEntity != null
-		//					&& !partitionEntity.getId().equals(entity.getPartitionId().getPartitionId())) {
-		//				throw new InvalidRequestException(Msg.code(2079) + "Resource " + entity.getResourceType() + "/"
-		//						+ entity.getFhirId() + " is not known");
-		//			}
-		//		}
 	}
 
 	private void createHistoryEntry(
