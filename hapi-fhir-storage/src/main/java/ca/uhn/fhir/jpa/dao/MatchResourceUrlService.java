@@ -118,6 +118,8 @@ public class MatchResourceUrlService<T extends IResourcePersistentId> {
 		}
 
 		T resolvedInCache = processMatchUrlUsingCacheOnly(resourceType, matchUrl);
+		// FIXME: make trace
+		ourLog.info("Resolving match URL from cache {} found: {}", theMatchUrl, resolvedInCache);
 		if (resolvedInCache != null) {
 			retVal = Collections.singleton(resolvedInCache);
 		}

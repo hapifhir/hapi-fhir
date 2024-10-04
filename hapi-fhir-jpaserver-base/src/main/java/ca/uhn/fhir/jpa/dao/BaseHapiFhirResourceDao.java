@@ -420,6 +420,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		if (isNotBlank(theMatchUrl) && theProcessMatchUrl) {
 			Set<JpaPid> match = myMatchResourceUrlService.processMatchUrl(
 					theMatchUrl, myResourceType, theTransactionDetails, theRequest);
+			// FIXME: make trace
+			ourLog.info("Resolving match URL {} found: {}", theMatchUrl, match);
 			if (match.size() > 1) {
 				String msg = getContext()
 						.getLocalizer()

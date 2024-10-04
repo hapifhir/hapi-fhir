@@ -24,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -31,11 +32,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class FhirResourceDaoR4DeleteTest extends BaseJpaR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoR4DeleteTest.class);
-
-	@AfterEach
-	public void after() {
-		myStorageSettings.setDeleteEnabled(new JpaStorageSettings().isDeleteEnabled());
-	}
 
 	@Test
 	public void testDeleteMarksResourceAndVersionAsDeleted() {
@@ -226,13 +222,20 @@ public class FhirResourceDaoR4DeleteTest extends BaseJpaR4Test {
 		Observation obs = new Observation();
 		obs.addIdentifier().setValue(identifierCode);
 		IIdType firstObservationId = myObservationDao.create(obs, matchUrl, new SystemRequestDetails()).getId();
+		long originalId = firstObservationId.getIdPartAsLong();
 		assertThat(myResourceSearchUrlDao.findAll()).hasSize(1);
 
-		// when
 		myObservationDao.delete(obs.getIdElement(), mySrd);
+		logAllResources();
+		logAllResourceSearchUrls();
+
+		// when
 		DaoMethodOutcome daoMethodOutcome = myObservationDao.create(obs, matchUrl, new SystemRequestDetails());
 
 		// then
+		logAllResources();
+		logAllResourceSearchUrls();
+		assertNotEquals(originalId, daoMethodOutcome.getId().getIdPartAsLong());
 		assertTrue(daoMethodOutcome.getCreated().booleanValue());
 		assertThat(firstObservationId.getIdPart()).isNotEqualTo(daoMethodOutcome.getId());
 	}

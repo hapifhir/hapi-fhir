@@ -46,6 +46,7 @@ import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamStringDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamTokenDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamUriDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceSearchUrlDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
@@ -70,6 +71,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamNumber;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
+import ca.uhn.fhir.jpa.model.entity.ResourceSearchUrlEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
@@ -262,6 +264,8 @@ public abstract class BaseJpaTest extends BaseTest {
 	private FhirInstanceValidator myFhirInstanceValidator;
 	@Autowired
 	private IResourceTableDao myResourceTableDao;
+	@Autowired
+	private IResourceSearchUrlDao myResourceSearchUrlDao;
 	@Autowired
 	private IResourceTagDao myResourceTagDao;
 	@Autowired
@@ -485,6 +489,14 @@ public abstract class BaseJpaTest extends BaseTest {
 		return runInTransaction(() -> {
 			List<ResourceTable> resources = myResourceTableDao.findAll();
 			ourLog.info("Resources:\n * {}", resources.stream().map(ResourceTable::toString).collect(Collectors.joining("\n * ")));
+			return resources.size();
+		});
+	}
+
+	public int logAllResourceSearchUrls() {
+		return runInTransaction(() -> {
+			List<ResourceSearchUrlEntity> resources = myResourceSearchUrlDao.findAll();
+			ourLog.info("Search URLs:\n * {}", resources.stream().map(ResourceSearchUrlEntity::toString).collect(Collectors.joining("\n * ")));
 			return resources.size();
 		});
 	}

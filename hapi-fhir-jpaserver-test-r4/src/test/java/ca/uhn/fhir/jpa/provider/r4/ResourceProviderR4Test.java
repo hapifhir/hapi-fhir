@@ -4236,6 +4236,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@Test
 	public void testSearchReturnsSearchDate() throws Exception {
 		Date before = new Date();
+		sleepAtLeast(10);
 
 		//@formatter:off
 		Bundle found = myClient
@@ -4246,6 +4247,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			.execute();
 		//@formatter:on
 
+		sleepAtLeast(10);
 		Date after = new Date();
 
 		InstantType updated = found.getMeta().getLastUpdatedElement();

@@ -32,6 +32,8 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.time.LocalDate;
 import java.util.Date;
@@ -152,5 +154,14 @@ public class ResourceSearchUrlEntity {
 	public ResourceSearchUrlEntity setPartitionDate(LocalDate thePartitionDate) {
 		myPartitionDate = thePartitionDate;
 		return this;
+	}
+
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+			.append("searchUrl", getPk().getSearchUrl())
+			.append("partitionId", myPartitionIdValue)
+			.append("resourcePid", myResourcePid)
+			.toString();
 	}
 }
