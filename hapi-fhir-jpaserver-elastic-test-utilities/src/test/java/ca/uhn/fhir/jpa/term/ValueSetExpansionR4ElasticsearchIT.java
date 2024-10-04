@@ -202,7 +202,7 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest implements I
 		TermConcept parentB = new TermConcept(cs, "ParentB");
 		cs.getConcepts().add(parentB);
 
-		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(JpaPid.fromId(table.getId()), CS_URL, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
+		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(CS_URL, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
 
 	}
 
