@@ -385,7 +385,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 				if (target.resource != null) {
 					if (myClassifierType == ClassifierTypeEnum.ANY_ID) {
 						String type = theRequestDetails.getFhirContext().getResourceType(target.resource);
-						if (myAppliesToTypes.contains(type) == false) {
+						if (!myAppliesToTypes.contains(type)) {
 							return null;
 						}
 					}
@@ -395,7 +395,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 						if (nextRequestAppliesToResourceId.hasResourceType()) {
 							String nextRequestAppliesToResourceIdType =
 									nextRequestAppliesToResourceId.getResourceType();
-							if (myAppliesToTypes.contains(nextRequestAppliesToResourceIdType) == false) {
+							if (!myAppliesToTypes.contains(nextRequestAppliesToResourceIdType)) {
 								return null;
 							}
 						}

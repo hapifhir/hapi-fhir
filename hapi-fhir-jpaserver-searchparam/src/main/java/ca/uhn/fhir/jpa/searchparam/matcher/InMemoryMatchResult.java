@@ -29,6 +29,8 @@ public class InMemoryMatchResult {
 	public static final String QUALIFIER = "Qualified parameter not supported";
 	public static final String LOCATION_NEAR = "Location.position near not supported";
 
+	public static final String NO_PARAMETER_MATCH_HANDLER_FOUND = "This system does not know how to handle this search parameter";
+
 	private final boolean myMatch;
 	/**
 	 * True if it is expected that a search will be performed in-memory

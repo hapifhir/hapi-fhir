@@ -354,9 +354,11 @@ public final class ResourceIndexedSearchParams {
 			String theParamPath) {
 		ReferenceParam reference = (ReferenceParam) theParam;
 
-		Predicate<ResourceLink> namedParamPredicate =
-				resourceLink -> searchParameterPathMatches(theResourceName, resourceLink, theParamName, theParamPath)
-						&& resourceIdMatches(theStorageSettings, resourceLink, reference);
+		Predicate<ResourceLink> namedParamPredicate = resourceLink -> {
+			return searchParameterPathMatches(theResourceName, resourceLink, theParamName, theParamPath)
+				&& resourceIdMatches(theStorageSettings, resourceLink, reference
+			);
+		};
 
 		return myLinks.stream().anyMatch(namedParamPredicate);
 	}

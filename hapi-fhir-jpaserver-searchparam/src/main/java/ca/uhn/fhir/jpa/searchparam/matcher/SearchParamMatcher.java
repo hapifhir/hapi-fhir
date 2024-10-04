@@ -24,26 +24,55 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
+import ca.uhn.fhir.jpa.searchparam.models.SearchMatchParameters;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import com.google.common.collect.Sets;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
 public class SearchParamMatcher {
-	@Autowired
-	private FhirContext myFhirContext;
 
-	@Autowired
-	private IndexedSearchParamExtractor myIndexedSearchParamExtractor;
+	public static final Set<String> UNSUPPORTED_PARAMETER_NAMES = Sets.newHashSet(Constants.PARAM_HAS);
+	private static final org.slf4j.Logger ourLog = LoggerFactory.getLogger(InMemoryResourceMatcher.class);
 
-	@Autowired
-	private InMemoryResourceMatcher myInMemoryResourceMatcher;
+	private final FhirContext myFhirContext;
 
+	private final IndexedSearchParamExtractor myIndexedSearchParamExtractor;
+
+	protected final InMemoryResourceMatcher myInMemoryResourceMatcher;
+
+	public SearchParamMatcher(
+		FhirContext theFhirContext,
+		IndexedSearchParamExtractor theIndexedSearchParamExtractor,
+		InMemoryResourceMatcher theInMemoryResourceMatcher
+	) {
+		myFhirContext = theFhirContext;
+		myIndexedSearchParamExtractor = theIndexedSearchParamExtractor;
+		myInMemoryResourceMatcher = theInMemoryResourceMatcher;
+	}
+
+	public void addSearchParamMatchHandler(IParameterMatchHandler theMatchHandler) {
+		myInMemoryResourceMatcher.addSearchParameterHandler(theMatchHandler);
+	}
+
+	public InMemoryMatchResult match(SearchMatchParameters theParameters) {
+		return myInMemoryResourceMatcher.match(theParameters);
+	}
+
+	@Deprecated
 	public InMemoryMatchResult match(String theCriteria, IBaseResource theResource, RequestDetails theRequest) {
-		return myInMemoryResourceMatcher.match(theCriteria, theResource, null, theRequest);
+//		return myInMemoryResourceMatcher.match(theCriteria, theResource, null, theRequest);
+		SearchMatchParameters parameters = new SearchMatchParameters();
+		parameters.setCriteria(theCriteria);
+		parameters.setBaseResource(theResource);
+		parameters.setRequestDetails(theRequest);
+		return match(parameters);
 	}
 
 	public InMemoryMatchResult match(SearchParameterMap theSearchParameterMap, IBaseResource theResource) {
@@ -54,8 +83,14 @@ public class SearchParamMatcher {
 				myIndexedSearchParamExtractor.extractIndexedSearchParams(
 						theResource, null, getFilter(theSearchParameterMap));
 		RuntimeResourceDefinition resourceDefinition = myFhirContext.getResourceDefinition(theResource);
-		return myInMemoryResourceMatcher.match(
-				theSearchParameterMap, theResource, resourceDefinition, resourceIndexedSearchParams);
+		SearchMatchParameters searchMatchParameters = new SearchMatchParameters();
+		searchMatchParameters.setSearchParameterMap(theSearchParameterMap);
+		searchMatchParameters.setBaseResource(theResource);
+		searchMatchParameters.setRuntimeResourceDefinition(resourceDefinition);
+		searchMatchParameters.setIndexedSearchParams(resourceIndexedSearchParams);
+//		return myInMemoryResourceMatcher.match(
+//				theSearchParameterMap, theResource, resourceDefinition, resourceIndexedSearchParams);
+		return myInMemoryResourceMatcher.match(searchMatchParameters);
 	}
 
 	private ISearchParamExtractor.ISearchParamFilter getFilter(SearchParameterMap searchParameterMap) {

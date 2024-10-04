@@ -110,8 +110,12 @@ public class SearchParamConfig {
 	}
 
 	@Bean
-	public SearchParamMatcher searchParamMatcher() {
-		return new SearchParamMatcher();
+	public SearchParamMatcher searchParamMatcher(
+		FhirContext theFhirContext,
+		IndexedSearchParamExtractor theIndexedSearchParamExtractor,
+		InMemoryResourceMatcher theIResourceMatcher
+	) {
+		return new SearchParamMatcher(theFhirContext, theIndexedSearchParamExtractor, theIResourceMatcher);
 	}
 
 	@Bean

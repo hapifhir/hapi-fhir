@@ -88,6 +88,11 @@ public interface IAuthRuleTester {
 			}
 			ruleApplier = theRuleApplier;
 		}
+
+		public IAuthorizationSearchParamMatcher getSearchParamMatcher() {
+			// default
+			return ruleApplier.getSearchParamMatcher();
+		}
 	}
 
 	/**

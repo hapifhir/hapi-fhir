@@ -29,12 +29,44 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
  * has a different meaning during authorization.
  */
 public interface IAuthorizationSearchParamMatcher {
+
+	public class AuthSearchMatchParameters {
+		String myQueryParameters;
+		IBaseResource myBaseResource;
+
+
+		public String getQueryParameters() {
+			return myQueryParameters;
+		}
+
+		public AuthSearchMatchParameters setQueryParameters(String theQueryParameters) {
+			myQueryParameters = theQueryParameters;
+			return this;
+		}
+
+		public IBaseResource getBaseResource() {
+			return myBaseResource;
+		}
+
+		public AuthSearchMatchParameters setBaseResource(IBaseResource theBaseResource) {
+			myBaseResource = theBaseResource;
+			return this;
+		}
+	}
+
 	/**
 	 * Calculate if the resource would match the fhir query parameters.
 	 * @param theQueryParameters e.g. "category=laboratory"
 	 * @param theResource the target of the comparison
 	 */
-	MatchResult match(String theQueryParameters, IBaseResource theResource);
+	@Deprecated
+	default MatchResult match(String theQueryParameters, IBaseResource theResource) {
+		return match(new AuthSearchMatchParameters()
+			.setQueryParameters(theQueryParameters)
+			.setBaseResource(theResource));
+	}
+
+	MatchResult match(AuthSearchMatchParameters theParameters);
 
 	/**
 	 * Match outcomes.
