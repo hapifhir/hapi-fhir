@@ -159,9 +159,9 @@ public class ResourceSearchUrlEntity {
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-			.append("searchUrl", getPk().getSearchUrl())
-			.append("partitionId", myPartitionIdValue)
-			.append("resourcePid", myResourcePid)
-			.toString();
+				.append("searchUrl", getPk().getSearchUrl())
+				.append("partitionId", myPartitionIdValue)
+				.append("resourcePid", myResourcePid)
+				.toString();
 	}
 }

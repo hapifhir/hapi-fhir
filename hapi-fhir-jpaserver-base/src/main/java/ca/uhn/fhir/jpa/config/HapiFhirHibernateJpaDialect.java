@@ -58,8 +58,8 @@ public class HapiFhirHibernateJpaDialect extends HibernateJpaDialect {
 			return new PersistenceException(
 					convertHibernateAccessException((HibernateException) theException.getCause(), theMessageToPrepend));
 		} else if (theException instanceof HibernateException) {
-			return new PersistenceException(
-				convertHibernateAccessException((HibernateException) theException, theMessageToPrepend));
+			return new PersistenceException(theException.getMessage(),
+					convertHibernateAccessException((HibernateException) theException, theMessageToPrepend));
 		}
 		return theException;
 	}

@@ -554,7 +554,8 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 		RequestPartitionId requestPartitionId = replaceDefault(theRequestPartitionId);
 
 		if (myStorageSettings.getResourceClientIdStrategy() != JpaStorageSettings.ClientIdStrategyEnum.ANY) {
-			List<IIdType> numericIds = theId.stream().filter(IdHelperService::isValidPid).collect(Collectors.toList());
+			List<IIdType> numericIds =
+					theId.stream().filter(IdHelperService::isValidPid).collect(Collectors.toList());
 			if (!numericIds.isEmpty()) {
 				resolvePids(theRequestDetails, requestPartitionId, numericIds, retVal);
 			}
