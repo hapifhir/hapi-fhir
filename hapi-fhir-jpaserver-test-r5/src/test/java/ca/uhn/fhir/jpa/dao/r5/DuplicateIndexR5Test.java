@@ -251,12 +251,14 @@ public class DuplicateIndexR5Test extends BaseJpaR5Test {
 			// Create a dupe
 			ResourceIndexedSearchParamToken dupe0 = new ResourceIndexedSearchParamToken(myPartitionSettings, "Patient", "identifier", "http://foo", "bar");
 			dupe0.setResource(table);
+			dupe0.setResourceId(table.getId().getId());
 			dupe0.calculateHashes();
 			myResourceIndexedSearchParamTokenDao.save(dupe0);
 
 			// Create a second dupe
 			ResourceIndexedSearchParamToken dupe1 = new ResourceIndexedSearchParamToken(myPartitionSettings, "Patient", "identifier", "http://foo", "bar");
 			dupe1.setResource(table);
+			dupe1.setResourceId(table.getId().getId());
 			dupe1.calculateHashes();
 			myResourceIndexedSearchParamTokenDao.save(dupe1);
 		});
