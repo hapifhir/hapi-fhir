@@ -92,7 +92,7 @@ public class FhirResourceDaoR5ValueSetMultiVersionTest extends BaseJpaR5Test {
 		Long nullVersion_resid = ((ResourceTable)myValueSets.get(ValueSetVersions.NULL).getEntity()).getId().getId();
 		assertNotNull(nullVersion_resid);
 		assertNotNull(optionalTermValueSet.get().getResource());
-		assertEquals(nullVersion_resid, optionalTermValueSet.get().getResource().getId());
+		assertEquals(nullVersion_resid, optionalTermValueSet.get().getResource().getId().getId());
 		assertEquals("ValueSet_noVersion", optionalTermValueSet.get().getName());
 
 		optionalTermValueSet = runInTransaction(()->myTermValueSetDao.findTermValueSetByUrlAndVersion(URL_MY_VALUE_SET, "v1"));
@@ -100,7 +100,7 @@ public class FhirResourceDaoR5ValueSetMultiVersionTest extends BaseJpaR5Test {
 		Long v1Version_resid = ((ResourceTable)myValueSets.get(ValueSetVersions.V1).getEntity()).getId().getId();
 		assertNotNull(v1Version_resid);
 		assertNotNull(optionalTermValueSet.get().getResource());
-		assertEquals(v1Version_resid, optionalTermValueSet.get().getResource().getId());
+		assertEquals(v1Version_resid, optionalTermValueSet.get().getResource().getId().getId());
 		assertEquals("ValueSet_v1", optionalTermValueSet.get().getName());
 
 		optionalTermValueSet = runInTransaction(()->myTermValueSetDao.findTermValueSetByUrlAndVersion(URL_MY_VALUE_SET, "v2"));
@@ -108,7 +108,7 @@ public class FhirResourceDaoR5ValueSetMultiVersionTest extends BaseJpaR5Test {
 		Long v2Version_resid = ((ResourceTable)myValueSets.get(ValueSetVersions.V2).getEntity()).getId().getId();
 		assertNotNull(v2Version_resid);
 		assertNotNull(optionalTermValueSet.get().getResource());
-		assertEquals(v2Version_resid, optionalTermValueSet.get().getResource().getId());
+		assertEquals(v2Version_resid, optionalTermValueSet.get().getResource().getId().getId());
 		assertEquals("ValueSet_v2", optionalTermValueSet.get().getName());
 
 	}
@@ -150,19 +150,19 @@ public class FhirResourceDaoR5ValueSetMultiVersionTest extends BaseJpaR5Test {
 		termValueSet = runInTransaction(()->myTermValueSetDao.findTermValueSetByUrlAndNullVersion(URL_MY_VALUE_SET).orElseThrow(() -> new IllegalArgumentException("No TerValueSet found for " + URL_MY_VALUE_SET + " with null version")));
 		assertNotNull(nullVersion_resid);
 		assertNotNull(termValueSet.getResource());
-		assertEquals(nullVersion_resid, termValueSet.getResource().getId());
+		assertEquals(nullVersion_resid, termValueSet.getResource().getId().getId());
 		assertEquals("ValueSet_noVersion_updated", termValueSet.getName());
 
 		termValueSet = runInTransaction(()->myTermValueSetDao.findTermValueSetByUrlAndVersion(URL_MY_VALUE_SET, "v1").orElseThrow(() -> new IllegalArgumentException("No TerValueSet found for " + URL_MY_VALUE_SET + " version v1")));
 		assertNotNull(v1Version_resid);
 		assertNotNull(termValueSet.getResource());
-		assertEquals(v1Version_resid, termValueSet.getResource().getId());
+		assertEquals(v1Version_resid, termValueSet.getResource().getId().getId());
 		assertEquals("ValueSet_v1_updated", termValueSet.getName());
 
 		termValueSet = runInTransaction(()->myTermValueSetDao.findTermValueSetByUrlAndVersion(URL_MY_VALUE_SET, "v2").orElseThrow(() -> new IllegalArgumentException("No TerValueSet found for " + URL_MY_VALUE_SET + " version v2")));
 		assertNotNull(v2Version_resid);
 		assertNotNull(termValueSet.getResource());
-		assertEquals(v2Version_resid, termValueSet.getResource().getId());
+		assertEquals(v2Version_resid, termValueSet.getResource().getId().getId());
 		assertEquals("ValueSet_v2_updated", termValueSet.getName());
 
 	}

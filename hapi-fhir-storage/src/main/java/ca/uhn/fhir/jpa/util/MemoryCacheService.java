@@ -75,7 +75,8 @@ public class MemoryCacheService {
 				case PID_TO_FORCED_ID:
 				case FORCED_ID_TO_PID:
 				case MATCH_URL:
-				case RESOURCE_LOOKUP:
+				case RESOURCE_LOOKUP_BY_PID:
+				case RESOURCE_LOOKUP_BY_FORCED_ID:
 				case HISTORY_COUNT:
 				case TAG_DEFINITION:
 				case RESOURCE_CONDITIONAL_CREATE_VERSION:
@@ -199,7 +200,16 @@ public class MemoryCacheService {
 
 	public enum CacheEnum {
 		TAG_DEFINITION(TagDefinitionCacheKey.class),
-		RESOURCE_LOOKUP(String.class),
+		/**
+		 * Key type: {@literal JpaPid}
+		 * Value type: {@literal JpaResourceLookup}
+		 */
+		RESOURCE_LOOKUP_BY_PID(JpaPid.class),
+		/**
+		 * Key type: {@literal String} containing "resourceType/id"
+		 * Value type: {@literal JpaResourceLookup}
+		 */
+		RESOURCE_LOOKUP_BY_FORCED_ID(String.class),
 		FORCED_ID_TO_PID(String.class),
 		FHIRPATH_EXPRESSION(String.class),
 		/**

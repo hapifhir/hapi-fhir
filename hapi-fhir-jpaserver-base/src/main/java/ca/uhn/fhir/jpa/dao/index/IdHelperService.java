@@ -550,7 +550,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 					String nextForcedId = forcedIdIterator.next();
 					String nextKey = nextResourceType + "/" + nextForcedId;
 					IResourceLookup<JpaPid> cachedLookup =
-							myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.RESOURCE_LOOKUP, nextKey);
+							myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.RESOURCE_LOOKUP_BY_FORCED_ID, nextKey);
 					if (cachedLookup != null) {
 						forcedIdIterator.remove();
 						retVal.computeIfAbsent(nextForcedId, id -> new ArrayList<>())
@@ -599,7 +599,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 
 					if (!myStorageSettings.isDeleteEnabled()) {
 						String key = resourceType + "/" + forcedId;
-						myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.RESOURCE_LOOKUP, key, lookup);
+						myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.RESOURCE_LOOKUP_BY_FORCED_ID, key, lookup);
 					}
 				}
 			}
@@ -627,12 +627,27 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 		if (!myStorageSettings.isDeleteEnabled()) {
 			for (Iterator<IIdType> forcedIdIterator = theIdsToResolve.iterator(); forcedIdIterator.hasNext(); ) {
 				Long nextPid = forcedIdIterator.next().getIdPartAsLong();
-				String nextKey = Long.toString(nextPid);
-				IResourceLookup<JpaPid> cachedLookup =
-						myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.RESOURCE_LOOKUP, nextKey);
-				if (cachedLookup != null) {
-					forcedIdIterator.remove();
-					theTargets.computeIfAbsent(nextKey, id -> new ArrayList<>()).add(cachedLookup);
+
+				Set<Integer> potentialReadPartitions;
+				if (!myPartitionSettings.isPartitioningEnabled()) {
+					potentialReadPartitions = Collections.singleton(myPartitionSettings.getDefaultPartitionId());
+				} else if (theRequestPartitionId.isAllPartitions()) {
+					potentialReadPartitions = null;
+				} else {
+					potentialReadPartitions = myPartitionHelperSvc.toReadPartitions(theRequestPartitionId);
+				}
+
+				if (potentialReadPartitions != null) {
+					for (Integer nextPotentialReadPartition : potentialReadPartitions) {
+						JpaPid nextKey = JpaPid.fromId(nextPid, nextPotentialReadPartition);
+						IResourceLookup<JpaPid> cachedLookup =
+							myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.RESOURCE_LOOKUP_BY_PID, nextKey);
+						if (cachedLookup != null) {
+							forcedIdIterator.remove();
+							theTargets.computeIfAbsent(nextPid.toString(), id -> new ArrayList<>()).add(cachedLookup);
+							break;
+						}
+					}
 				}
 			}
 		}
@@ -680,9 +695,9 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 						}
 						theTargets.get(id).add(t);
 						if (!myStorageSettings.isDeleteEnabled()) {
-							String nextKey = t.getPersistentId().toString();
+							JpaPid nextKey = t.getPersistentId();
 							myMemoryCacheService.putAfterCommit(
-									MemoryCacheService.CacheEnum.RESOURCE_LOOKUP, nextKey, t);
+									MemoryCacheService.CacheEnum.RESOURCE_LOOKUP_BY_PID, nextKey, t);
 						}
 					});
 		}
@@ -750,8 +765,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 		if (!myStorageSettings.isDeleteEnabled()) {
 			JpaResourceLookup lookup = new JpaResourceLookup(
 					theResourceType, theJpaPid.getId(), theDeletedAt, theJpaPid.getPartitionablePartitionId());
-			String nextKey = theJpaPid.toString();
-			myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.RESOURCE_LOOKUP, nextKey, lookup);
+			myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.RESOURCE_LOOKUP_BY_PID, theJpaPid, lookup);
 		}
 	}
 
