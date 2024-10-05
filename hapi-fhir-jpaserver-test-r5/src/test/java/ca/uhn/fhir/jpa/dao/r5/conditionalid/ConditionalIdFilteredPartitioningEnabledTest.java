@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r5.conditionalid;
 
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.dao.r5.BaseJpaR5Test;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
@@ -35,6 +36,7 @@ public class ConditionalIdFilteredPartitioningEnabledTest extends BaseJpaR5Test 
 		myPartitionSettings.setPartitioningEnabled(true);
 		myPartitionSettings.setDefaultPartitionId(0);
 
+		assertFalse(myInterceptorRegistry.hasHooks(Pointcut.STORAGE_PARTITION_IDENTIFY_READ), ()->myInterceptorRegistry.getAllRegisteredInterceptors().toString());
 		myInterceptorRegistry.registerInterceptor(myPartitionSelectorInterceptor);
 
 		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(PARTITION_1).setName("Partition_1"), null);

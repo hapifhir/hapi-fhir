@@ -251,7 +251,20 @@ public class HistoryBuilder {
 		Subquery<Date> pastDateSubQuery = theQuery.subquery(Date.class);
 		Root<ResourceHistoryTable> subQueryResourceHistory = pastDateSubQuery.from(ResourceHistoryTable.class);
 		Expression myUpdatedMostRecent = theCriteriaBuilder.max(subQueryResourceHistory.get("myUpdated"));
+
+		/*
+		 * This conversion from the Date in myRangeEndInclusive into a ZonedDateTime is an experiment -
+		 * There is an intermittent test failure in testSearchHistoryWithAtAndGtParameters() that I can't
+		 * figure out. But I've added a ton of logging to the error it fails with and I noticed that
+		 * we emit SQL along the lines of
+		 *   select coalesce(max(rht2_0.RES_UPDATED), timestamp with time zone '2024-10-05 18:24:48.172000000Z')
+		 * for this date, and all other dates are in GMT so this is an expeiment. If nothing changes,
+		 * we can roll this back to
+		 *   theCriteriaBuilder.literal(myRangeStartInclusive)
+		 * JA 20241005
+		 */
 		ZonedDateTime rangeStart = ZonedDateTime.ofInstant(Instant.ofEpochMilli(myRangeStartInclusive.getTime()), ZoneId.of("GMT"));
+
 		Expression myUpdatedMostRecentOrDefault =
 				theCriteriaBuilder.coalesce(myUpdatedMostRecent, theCriteriaBuilder.literal(rangeStart));
 

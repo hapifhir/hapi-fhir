@@ -54,6 +54,7 @@ import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -228,10 +229,12 @@ public abstract class TestDefinitions implements ITestDataBuilder {
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
 	}
 
-	@Test
-	public void testCreate_ReferenceToResourceInWrongPartition() {
+	@ParameterizedTest
+	@EnumSource(PartitionSettings.CrossPartitionReferenceMode.class)
+	public void testCreate_ReferenceToResourceInOtherPartition(PartitionSettings.CrossPartitionReferenceMode theAllowReferencesToCrossPartition) {
 		// Setup
 		myPartitionSelectorInterceptor.setNextPartitionId(PARTITION_2);
+		myPartitionSettings.setAllowReferencesAcrossPartitions(theAllowReferencesToCrossPartition);
 		IIdType patientId = createPatient(withActiveTrue());
 
 		// Test

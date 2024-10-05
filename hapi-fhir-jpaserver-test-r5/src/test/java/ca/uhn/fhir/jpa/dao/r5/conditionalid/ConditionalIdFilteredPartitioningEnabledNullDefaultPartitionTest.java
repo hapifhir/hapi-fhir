@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r5.conditionalid;
 
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.dao.r5.BaseJpaR5Test;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
@@ -13,6 +14,7 @@ import org.springframework.test.annotation.DirtiesContext;
 
 import static ca.uhn.fhir.jpa.dao.r5.conditionalid.ConditionalIdKeptPartitioningEnabledTest.PARTITION_1;
 import static ca.uhn.fhir.jpa.dao.r5.conditionalid.ConditionalIdKeptPartitioningEnabledTest.PARTITION_2;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -35,6 +37,7 @@ public class ConditionalIdFilteredPartitioningEnabledNullDefaultPartitionTest ex
 		myPartitionSettings.setPartitioningEnabled(true);
 		myPartitionSettings.setDefaultPartitionId(null);
 
+		assertFalse(myInterceptorRegistry.hasHooks(Pointcut.STORAGE_PARTITION_IDENTIFY_READ), ()->myInterceptorRegistry.getAllRegisteredInterceptors().toString());
 		myInterceptorRegistry.registerInterceptor(myPartitionSelectorInterceptor);
 
 		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(PARTITION_1).setName("Partition_1"), null);
