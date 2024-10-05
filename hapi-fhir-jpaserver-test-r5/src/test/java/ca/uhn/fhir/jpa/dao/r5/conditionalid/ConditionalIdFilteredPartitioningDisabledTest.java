@@ -12,7 +12,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * This is a test verifying that we emit the right SQL for HAPI FHIR running in
  * full legacy mode - No partitioning, no partition IDs in PKs.
  */
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class ConditionalIdFilteredPartitioningDisabledTest extends BaseJpaR5Test {
 
 	@Test

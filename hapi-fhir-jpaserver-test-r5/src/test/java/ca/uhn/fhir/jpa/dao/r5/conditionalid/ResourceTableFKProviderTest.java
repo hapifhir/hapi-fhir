@@ -1,15 +1,13 @@
-package ca.uhn.fhir.jpa.dao.expunge;
+package ca.uhn.fhir.jpa.dao.r5.conditionalid;
 
+import ca.uhn.fhir.jpa.dao.expunge.ResourceForeignKey;
+import ca.uhn.fhir.jpa.dao.expunge.ResourceTableFKProvider;
+import ca.uhn.fhir.jpa.dao.r5.BaseJpaR5Test;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
-import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.PersistenceContextType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 
@@ -24,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static ca.uhn.fhir.jpa.dao.expunge.ResourceForeignKey.*;
+import static ca.uhn.fhir.jpa.dao.expunge.ResourceForeignKey.ResourceForeignKeyBuilder;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -32,12 +30,9 @@ import static org.junit.jupiter.api.Assertions.fail;
 @TestPropertySource(properties = {
 	JpaConstants.HAPI_INCLUDE_PARTITION_IDS_IN_PKS + "=true"
 })
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-class ResourceTableFKProviderIT extends BaseJpaR4Test {
-	private static final Logger ourLog = LoggerFactory.getLogger(ResourceTableFKProviderIT.class);
+class ResourceTableFKProviderTest extends BaseJpaR5Test {
+	private static final Logger ourLog = LoggerFactory.getLogger(ResourceTableFKProviderTest.class);
 
-	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
-	protected EntityManager myEntityManager;
 	@Autowired
 	ResourceTableFKProvider myResourceTableFKProvider;
 	@Autowired

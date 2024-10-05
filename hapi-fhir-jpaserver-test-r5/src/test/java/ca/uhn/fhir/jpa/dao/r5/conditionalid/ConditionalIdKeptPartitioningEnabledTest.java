@@ -23,7 +23,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 @TestPropertySource(properties = {
 	JpaConstants.HAPI_INCLUDE_PARTITION_IDS_IN_PKS + "=true"
 })
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class ConditionalIdKeptPartitioningEnabledTest extends BaseJpaR5Test {
 
 	public static final int PARTITION_1 = 1;

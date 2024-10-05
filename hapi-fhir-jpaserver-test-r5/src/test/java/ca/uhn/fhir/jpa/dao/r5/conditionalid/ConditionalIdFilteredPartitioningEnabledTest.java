@@ -19,7 +19,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * legacy partition mode - Partition IDs are in use, but they aren't
  * included in primary keys or joins.
  */
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class ConditionalIdFilteredPartitioningEnabledTest extends BaseJpaR5Test {
 
 	public static final int PARTITION_1 = 1;

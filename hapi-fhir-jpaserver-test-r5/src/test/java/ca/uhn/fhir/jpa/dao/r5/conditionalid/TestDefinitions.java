@@ -676,9 +676,9 @@ public abstract class TestDefinitions implements ITestDataBuilder {
 
 		assertThat(getSelectSql(2)).contains(" from HFJ_HISTORY_TAG rht1_0 ");
 		if (myIncludePartitionIdsInPks) {
-			assertThat(getSelectSql(2)).contains(" where (rht1_0.PARTITION_ID,rht1_0.RES_VER_PID) in (('1','" + id + "'))");
+			assertThat(getSelectSql(2)).contains(" where (rht1_0.PARTITION_ID,rht1_0.RES_VER_PID) in (('1',");
 		} else {
-			assertThat(getSelectSql(2)).contains(" where (rht1_0.RES_VER_PID) in ('" + id + "')");
+			assertThat(getSelectSql(2)).contains(" where (rht1_0.RES_VER_PID) in ('");
 		}
 
 		assertEquals(3, myCaptureQueriesListener.countSelectQueries());

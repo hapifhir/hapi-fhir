@@ -74,7 +74,7 @@ public class ResourceForeignKey {
 		private String myResourceIdColumn;
 		private String myPartitionIdColumn;
 
-		ResourceForeignKeyBuilder() {}
+		public ResourceForeignKeyBuilder() {}
 
 		public void withTable(String myTable) {
 			this.myTable = myTable;

@@ -77,6 +77,9 @@ public class TestR5Config {
 	public static final Predicate<String> SELECT_QUERY_INCLUSION_CRITERIA_EXCLUDING_SEQUENCE_QUERIES = CircularQueueCaptureQueriesListener.DEFAULT_SELECT_INCLUSION_CRITERIA.and(t -> !t.toLowerCase(Locale.US).startsWith("select next value"));
 	public static Integer ourMaxThreads;
 
+	@Value("${" + JpaConstants.HAPI_INCLUDE_PARTITION_IDS_IN_PKS + ":false}")
+	private boolean myIncludePartitionIdsInPks;
+
 	static {
 		/*
 		 * We use a randomized number of maximum threads in order to try
@@ -155,8 +158,14 @@ public class TestR5Config {
 
 		};
 
+		String connectionString = "jdbc:h2:mem:testdb_r5";
+		if (myIncludePartitionIdsInPks) {
+			// Use a separate schema for partitioned PKs
+			connectionString += "_partitioned";
+		}
+
 		retVal.setDriver(new org.h2.Driver());
-		retVal.setUrl("jdbc:h2:mem:testdb_r5");
+		retVal.setUrl(connectionString);
 		retVal.setMaxWaitMillis(10000);
 		retVal.setUsername("");
 		retVal.setPassword("");

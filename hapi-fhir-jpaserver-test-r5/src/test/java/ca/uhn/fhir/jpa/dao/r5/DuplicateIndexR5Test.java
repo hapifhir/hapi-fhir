@@ -168,6 +168,7 @@ public class DuplicateIndexR5Test extends BaseJpaR5Test {
 			ResourceIndexedComboTokenNonUnique dupe0 = new ResourceIndexedComboTokenNonUnique();
 			dupe0.setPartitionSettings(param.getPartitionSettings());
 			dupe0.setResource(param.getResource());
+			dupe0.setResourceId(table.getId().getId());
 			dupe0.setHashComplete(param.getHashComplete());
 			dupe0.setIndexString(param.getIndexString());
 			dupe0.setSearchParameterId(new IdType(SEARCH_PARAMETER_PATIENT_NAMES_AND_GENDER));
@@ -178,6 +179,7 @@ public class DuplicateIndexR5Test extends BaseJpaR5Test {
 			ResourceIndexedComboTokenNonUnique dupe1 = new ResourceIndexedComboTokenNonUnique();
 			dupe1.setPartitionSettings(param.getPartitionSettings());
 			dupe1.setResource(param.getResource());
+			dupe1.setResourceId(table.getId().getId());
 			dupe1.setHashComplete(param.getHashComplete());
 			dupe1.setIndexString(param.getIndexString());
 			dupe1.setSearchParameterId(new IdType(SEARCH_PARAMETER_PATIENT_NAMES_AND_GENDER));

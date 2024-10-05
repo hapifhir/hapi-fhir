@@ -21,7 +21,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * not configured otherwise) - Partition IDs are in use, but they aren't
  * included in primary keys or joins.
  */
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class ConditionalIdFilteredPartitioningEnabledNullDefaultPartitionTest extends BaseJpaR5Test {
 
 	private final PartitionSelectorInterceptor myPartitionSelectorInterceptor = new PartitionSelectorInterceptor();
