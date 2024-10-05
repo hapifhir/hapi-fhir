@@ -53,6 +53,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.ClasspathUtil;
 import com.google.common.collect.Lists;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.hl7.fhir.dstu3.model.Age;
 import org.hl7.fhir.dstu3.model.Attachment;
@@ -109,6 +110,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.testcontainers.shaded.org.bouncycastle.util.Arrays;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -2852,6 +2854,10 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
 		IIdType id4 = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
 
+		ArrayList<IIdType> expected = new ArrayList<>(List.of(id1, id2, id3, id4, idMethodName));
+		expected.sort(Comparator.comparing(IIdType::getIdPart));
+		IdType[] expectedArray = expected.toArray(new IdType[0]);
+
 		SearchParameterMap pm;
 		List<IIdType> actual;
 
@@ -2860,21 +2866,22 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		pm.setSort(new SortSpec(IAnyResource.SP_RES_ID));
 		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
 		assertThat(actual).hasSize(5);
-		assertThat(actual).as(actual.toString()).containsExactly(id1, id2, id3, id4, idMethodName);
+		assertThat(actual).as(actual.toString()).containsExactly(expectedArray);
 
 		pm = new SearchParameterMap();
 		pm.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", methodName));
 		pm.setSort(new SortSpec(IAnyResource.SP_RES_ID).setOrder(SortOrderEnum.ASC));
 		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
 		assertThat(actual).hasSize(5);
-		assertThat(actual).as(actual.toString()).containsExactly(id1, id2, id3, id4, idMethodName);
+		assertThat(actual).as(actual.toString()).containsExactly(expectedArray);
 
+		ArrayUtils.reverse(expectedArray);
 		pm = new SearchParameterMap();
 		pm.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", methodName));
 		pm.setSort(new SortSpec(IAnyResource.SP_RES_ID).setOrder(SortOrderEnum.DESC));
 		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
 		assertThat(actual).hasSize(5);
-		assertThat(actual).as(actual.toString()).containsExactly(idMethodName, id4, id3, id2, id1);
+		assertThat(actual).as(actual.toString()).containsExactly(expectedArray);
 	}
 
 	@Test
