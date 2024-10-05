@@ -6814,7 +6814,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		// Issue 3138 test case, verify behavior of _at
 		verifyAtBehaviourWhenQueriedDateDuringTwoUpdatedDates(patientId, delayInMs, dateV1, dateV2);
 		verifyAtBehaviourWhenQueriedDateAfterTwoUpdatedDates(patientId, delayInMs, dateV1, dateV2);
+		myCaptureQueriesListener.clear();
 		verifyAtBehaviourWhenQueriedDateBeforeTwoUpdatedDates(patientId, delayInMs, dateV1, dateV2);
+		myCaptureQueriesListener.logSelectQueries();
 		// verify behavior of _since
 		verifySinceBehaviourWhenQueriedDateDuringTwoUpdatedDates(patientId, delayInMs, dateV1, dateV2);
 		verifySinceBehaviourWhenQueriedDateAfterTwoUpdatedDates(patientId, delayInMs, dateV1, dateV2);
