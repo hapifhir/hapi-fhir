@@ -17,11 +17,14 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoObservation;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
 import ca.uhn.fhir.jpa.api.dao.PatientEverythingParameters;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeEverythingService;
 import ca.uhn.fhir.jpa.dao.r5.BaseJpaR5Test;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.entity.ResourceLink;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
@@ -67,6 +70,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.dao.r5.conditionalid.ConditionalIdFilteredPartitioningEnabledTest.PARTITION_1;
 import static ca.uhn.fhir.jpa.dao.r5.conditionalid.ConditionalIdKeptPartitioningEnabledTest.PARTITION_2;
@@ -96,6 +100,8 @@ public abstract class TestDefinitions implements ITestDataBuilder {
 	private IFhirResourceDao<Organization> myOrganizationDao;
 	@Autowired
 	private IResourceTableDao myResourceTableDao;
+	@Autowired
+	private IResourceLinkDao myResourceLinkDao;
 	@Autowired
 	private FhirContext myFhirCtx;
 	@Autowired
@@ -242,7 +248,13 @@ public abstract class TestDefinitions implements ITestDataBuilder {
 		try {
 			IIdType obsId = createObservation(withSubject(patientId));
 			if (myIncludePartitionIdsInSql) {
-				fail();
+				runInTransaction(()->{
+					List<ResourceTable> resources = myResourceTableDao.findAll();
+					String failMessage = "Resources:\n * " + resources.stream().map(ResourceTable::toString).collect(Collectors.joining("\n * "));
+					List<ResourceLink> resourceLinks = myResourceLinkDao.findAll();
+					failMessage += "\n\nResource Links:\n * " + resourceLinks.stream().map(ResourceLink::toString).collect(Collectors.joining("\n * "));
+					fail(failMessage);
+				});
 			} else {
 				assertNotNull(obsId);
 			}
@@ -998,6 +1010,9 @@ public abstract class TestDefinitions implements ITestDataBuilder {
 		return myFhirCtx;
 	}
 
+	public void runInTransaction(Runnable theRunnable) {
+		myParentTest.runInTransaction(theRunnable);
+	}
 	public <T> T runInTransaction(Callable<T> theRunnable) {
 		return myParentTest.runInTransaction(theRunnable);
 	}
