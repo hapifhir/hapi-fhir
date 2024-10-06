@@ -184,7 +184,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			assertEquals(2, resLinks.size());
 			assertEquals(obsId.getIdPartAsLong(), resLinks.get(0).getSourceResourcePk().getId());
 			assertEquals(patientId.getIdPartAsLong(), resLinks.get(0).getTargetResourcePid());
-			assertEquals(myPartitionId, resLinks.get(0).getTargetResourcePartitionId().getPartitionId());
+			assertEquals(myPartitionId, resLinks.get(0).getTargetResourcePartitionId());
 		});
 	}
 
@@ -471,8 +471,8 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			assertEquals(1, resourceLinks.size());
 			assertEquals(myPartitionId, resourceLinks.get(0).getPartitionId().getPartitionId().intValue());
 			assertLocalDateFromDbMatches(myPartitionDate, resourceLinks.get(0).getPartitionId().getPartitionDate());
-			assertEquals(myPartitionId, resourceLinks.get(0).getTargetResourcePartitionId().getPartitionId().intValue());
-			assertLocalDateFromDbMatches(myPartitionDate, resourceLinks.get(0).getTargetResourcePartitionId().getPartitionDate());
+			assertEquals(myPartitionId, resourceLinks.get(0).getTargetResourcePartitionId().intValue());
+			assertLocalDateFromDbMatches(myPartitionDate, resourceLinks.get(0).getTargetResourcePartitionDate());
 
 			// HFJ_RES_PARAM_PRESENT
 			List<SearchParamPresentEntity> presents = mySearchParamPresentDao.findAllForResource(resourceTable);

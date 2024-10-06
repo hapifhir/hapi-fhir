@@ -20,9 +20,7 @@
 package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
-import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ForeignKey;
@@ -45,6 +43,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 import org.hl7.fhir.instance.model.api.IIdType;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 @Entity
@@ -149,10 +148,11 @@ public class ResourceLink extends BaseResourceIndex {
 	@Transient
 	private transient String myTargetResourceId;
 
-	@Embedded
-	@AttributeOverride(name = "myPartitionId", column = @Column(name = TARGET_RES_PARTITION_ID))
-	@AttributeOverride(name = "myPartitionDate", column = @Column(name = "TARGET_RES_PARTITION_DATE"))
-	private PartitionablePartitionId myTargetResourcePartitionId;
+	@Column(name = TARGET_RES_PARTITION_ID, nullable = true)
+	private Integer myTargetResourcePartitionId;
+
+	@Column(name = "TARGET_RES_PARTITION_DATE", nullable = true)
+	private LocalDate myTargetResourcePartitionDate;
 
 	/**
 	 * Constructor
@@ -224,6 +224,7 @@ public class ResourceLink extends BaseResourceIndex {
 		myTargetResourceVersion = source.getTargetResourceVersion();
 		myTargetResourceUrl = source.getTargetResourceUrl();
 		myTargetResourcePartitionId = source.getTargetResourcePartitionId();
+		myTargetResourcePartitionDate = source.getTargetResourcePartitionDate();
 	}
 
 	@Override
@@ -312,12 +313,21 @@ public class ResourceLink extends BaseResourceIndex {
 		myId = theId;
 	}
 
-	public PartitionablePartitionId getTargetResourcePartitionId() {
+	public LocalDate getTargetResourcePartitionDate() {
+		return myTargetResourcePartitionDate;
+	}
+
+	public Integer getTargetResourcePartitionId() {
 		return myTargetResourcePartitionId;
 	}
 
 	public ResourceLink setTargetResourcePartitionId(PartitionablePartitionId theTargetResourcePartitionId) {
-		myTargetResourcePartitionId = theTargetResourcePartitionId;
+		myTargetResourcePartitionId = null;
+		myTargetResourcePartitionDate = null;
+		if (theTargetResourcePartitionId != null) {
+			myTargetResourcePartitionId = theTargetResourcePartitionId.getPartitionId();
+			myTargetResourcePartitionDate = theTargetResourcePartitionId.getPartitionDate();
+		}
 		return this;
 	}
 
@@ -358,9 +368,7 @@ public class ResourceLink extends BaseResourceIndex {
 		b.append(", srcResId=").append(mySourceResourcePid);
 		b.append(", srcPartition=").append(myPartitionIdValue);
 		b.append(", targetResId=").append(myTargetResourcePid);
-		if (myTargetResourcePartitionId != null) {
-			b.append(", targetPartition=").append(myTargetResourcePartitionId.getPartitionId());
-		}
+		b.append(", targetPartition=").append(myTargetResourcePartitionId);
 		b.append(", targetResType=").append(myTargetResourceType);
 		b.append(", targetResVersion=").append(myTargetResourceVersion);
 		b.append(", targetResUrl=").append(myTargetResourceUrl);

@@ -1217,7 +1217,6 @@ public class QueryStack {
 
 			ResourceLinkPredicateBuilder resourceLinkTableJoin =
 					mySqlBuilder.addReferencePredicateBuilderReversed(this, theSourceJoinColumn);
-			Condition partitionPredicate = resourceLinkTableJoin.createPartitionIdPredicate(theRequestPartitionId);
 
 			List<String> paths = resourceLinkTableJoin.createResourceLinkPaths(
 					targetResourceType, paramReference, new ArrayList<>());
@@ -1240,7 +1239,12 @@ public class QueryStack {
 							.setRequest(theRequest)
 							.setRequestPartitionId(theRequestPartitionId));
 
-			andPredicates.add(toAndPredicate(partitionPredicate, pathPredicate, typePredicate, linkedPredicate));
+			if (myPartitionSettings.isIncludePartitionIdsInPKs()) {
+				andPredicates.add(toAndPredicate(pathPredicate, typePredicate, linkedPredicate));
+			} else {
+				Condition partitionPredicate = resourceLinkTableJoin.createPartitionIdPredicate(theRequestPartitionId);
+				andPredicates.add(toAndPredicate(partitionPredicate, pathPredicate, typePredicate, linkedPredicate));
+			}
 		}
 
 		return toAndPredicate(andPredicates);
@@ -2431,7 +2435,7 @@ public class QueryStack {
 	 */
 	private Condition createPredicateResourcePID(
 			DbColumn[] theSourceJoinColumn, List<List<IQueryParameterType>> theAndOrParams) {
-
+		// FIXME: who calls this? it just assumed IDs are longs and isn't partition aware - maybe make a keep test?
 		DbColumn pidColumn = getResourceIdColumn(theSourceJoinColumn);
 
 		if (pidColumn == null) {

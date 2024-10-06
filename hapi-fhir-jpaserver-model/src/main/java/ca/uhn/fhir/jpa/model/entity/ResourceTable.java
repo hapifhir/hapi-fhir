@@ -912,7 +912,7 @@ public class ResourceTable extends BaseHasResource<JpaPid> implements Serializab
 	@Override
 	public String toString() {
 		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
-		b.append("part/pid", getPartitionId().getPartitionId() + "/" + myPid);
+		b.append("part/pid", getPartitionId().getPartitionId() + "/" + getId().getId());
 		b.append("fhirId", myFhirId);
 		b.append("resourceType", myResourceType);
 		b.append("version", myVersion);

@@ -32,7 +32,7 @@ public class PartitionSelectorInterceptor {
 	@Nonnull
 	private RequestPartitionId selectPartition(String theResourceType) {
 		return switch (defaultString(theResourceType)) {
-			case "Patient", "Observation", "Encounter" -> {
+			case "Patient", "Observation", "Encounter", "List" -> {
 				assert myNextPartitionId != null;
 				yield RequestPartitionId.fromPartitionId(myNextPartitionId);
 			}

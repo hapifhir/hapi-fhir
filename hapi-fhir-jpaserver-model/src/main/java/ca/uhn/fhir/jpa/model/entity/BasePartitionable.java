@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.hapi.fhir.sql.hibernatesvc.ConditionalIdProperty;
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.Column;
 import jakarta.persistence.Id;
@@ -46,7 +47,7 @@ public abstract class BasePartitionable implements Serializable {
 	@Column(name = PartitionablePartitionId.PARTITION_DATE, updatable = false, nullable = true)
 	private LocalDate myPartitionDateValue;
 
-	@Nullable
+	@Nonnull
 	public PartitionablePartitionId getPartitionId() {
 		return PartitionablePartitionId.with(myPartitionIdValue, myPartitionDateValue);
 	}

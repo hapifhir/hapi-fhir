@@ -26,6 +26,7 @@ import com.healthmarketscience.sqlbuilder.ValidationContext;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -72,7 +73,11 @@ public class JpaPidValueTupleObject extends Expression {
 	}
 
 	public static JpaPidValueTupleObject from(SearchQueryBuilder theSearchQueryBuilder, JpaPid[] thePids) {
-		List<String> placeholders = new ArrayList<>(thePids.length * 2);
+		return from(theSearchQueryBuilder, Arrays.asList(thePids));
+	}
+
+	public static JpaPidValueTupleObject from(SearchQueryBuilder theSearchQueryBuilder, Collection<JpaPid> thePids) {
+		List<String> placeholders = new ArrayList<>(thePids.size() * 2);
 		for (JpaPid next : thePids) {
 			placeholders.add(theSearchQueryBuilder.generatePlaceholder(next.getPartitionId()));
 			placeholders.add(theSearchQueryBuilder.generatePlaceholder(next.getId()));

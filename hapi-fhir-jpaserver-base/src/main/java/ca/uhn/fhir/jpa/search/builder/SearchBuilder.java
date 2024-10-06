@@ -1648,13 +1648,19 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 			String searchPidFieldSqlColumn =
 					searchPidFieldName.equals(MY_TARGET_RESOURCE_PID) ? "target_resource_id" : "src_resource_id";
-			StringBuilder localReferenceQuery = new StringBuilder("SELECT " + fieldsToLoad + " FROM hfj_res_link r "
-					+ "WHERE r.src_path = :src_path AND "
-					+ "r.target_resource_id IS NOT NULL AND "
-					+ "r."
-					+ searchPidFieldSqlColumn + " IN (:target_pids) ");
+			StringBuilder localReferenceQuery = new StringBuilder();
+			localReferenceQuery.append("SELECT ").append(fieldsToLoad);
+			localReferenceQuery.append(" FROM hfj_res_link r ");
+			localReferenceQuery.append("WHERE r.src_path = :src_path");
+			if (!"target_resource_id".equals(searchPidFieldSqlColumn)) {
+				localReferenceQuery.append(" AND r.target_resource_id IS NOT NULL");
+			}
+			localReferenceQuery.append(" AND r.").append(searchPidFieldSqlColumn).append(" IN (:target_pids) ");
 			if (myPartitionSettings.isIncludePartitionIdsInPKs()) {
-				localReferenceQuery.append("AND ").append(PARTITION_ID_ALIAS).append(" = :search_partition_id ");
+				String partitionFieldToSearch = findPartitionFieldName.equals(MY_SOURCE_RESOURCE_PARTITION_ID)
+					? "target_res_partition_id"
+					: "partition_id";
+				localReferenceQuery.append("AND r.").append(partitionFieldToSearch).append(" = :search_partition_id ");
 			}
 			localReferenceQueryParams.put("src_path", nextPath);
 			// we loop over target_pids later.
@@ -1825,7 +1831,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					offset++;
 				}
 				if (myPartitionSettings.isIncludePartitionIdsInPKs()) {
-					partitionId = ((PartitionablePartitionId) ((Object[]) nextRow)[3 + offset]).getPartitionId();
+					partitionId = ((Integer) ((Object[]) nextRow)[3 + offset]);
 				}
 
 				if (resourceId != null) {
@@ -1930,9 +1936,12 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				calculateIndexUriIdentityHashesForResourceTypes(theTargetResourceTypes, theReverse);
 
 		Map<String, Object> canonicalUriQueryParams = new HashMap<>();
-		StringBuilder canonicalUrlQuery = new StringBuilder(
-				"SELECT " + fieldsToLoadFromSpidxUriTable + " FROM hfj_res_link r " + " JOIN hfj_spidx_uri rUri ON ( ");
+		StringBuilder canonicalUrlQuery = new StringBuilder();
+		canonicalUrlQuery.append("SELECT ").append(fieldsToLoadFromSpidxUriTable).append(' ');
+		canonicalUrlQuery.append("FROM hfj_res_link r ");
+
 		// join on hash_identity and sp_uri - indexed in IDX_SP_URI_HASH_IDENTITY_V2
+		canonicalUrlQuery.append("JOIN hfj_spidx_uri rUri ON ( ");
 		if (theTargetResourceTypes != null && theTargetResourceTypes.size() == 1) {
 			canonicalUrlQuery.append("   rUri.hash_identity = :uri_identity_hash ");
 			canonicalUriQueryParams.put(
@@ -1941,11 +1950,24 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			canonicalUrlQuery.append("   rUri.hash_identity in (:uri_identity_hashes) ");
 			canonicalUriQueryParams.put("uri_identity_hashes", identityHashesForTypes);
 		}
+		if (myPartitionSettings.isIncludePartitionIdsInPKs()) {
+			canonicalUrlQuery.append(" AND r.target_res_partition_id = rUri.partition_id ");
+		}
+		canonicalUrlQuery.append(" AND r.target_resource_url = rUri.sp_uri");
+		canonicalUrlQuery.append(")");
 
-		canonicalUrlQuery.append(" AND r.target_resource_url = rUri.sp_uri  )");
 		canonicalUrlQuery.append(" WHERE r.src_path = :src_path AND ");
 		canonicalUrlQuery.append(" r.target_resource_id IS NULL ");
 		canonicalUrlQuery.append(" AND ");
+		if (myPartitionSettings.isIncludePartitionIdsInPKs()) {
+			if (theReverse) {
+				canonicalUrlQuery.append("rUri.partition_id");
+			} else {
+				canonicalUrlQuery.append("r.partition_id");
+			}
+			canonicalUrlQuery.append(" = :search_partition_id");
+			canonicalUrlQuery.append(" AND ");
+		}
 		if (theReverse) {
 			canonicalUrlQuery.append("rUri.res_id");
 		} else {
