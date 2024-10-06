@@ -143,16 +143,14 @@ public class ResourceIdPredicateBuilder extends BasePredicateBuilder {
 					ColumnTupleObject left = new ColumnTupleObject(theSourceJoinColumn);
 					JpaPidValueTupleObject right = JpaPidValueTupleObject.from(getSearchQueryBuilder(), allOrPids);
 					return QueryParameterUtils.toInPredicate(
-						left,
-						right,
-						operation == SearchFilterParser.CompareOperation.ne);
+							left, right, operation == SearchFilterParser.CompareOperation.ne);
 				} else {
 					DbColumn resIdColumn = getResourceIdColumn(theSourceJoinColumn);
 					List<Long> resourceIds = JpaPid.toLongList(allOrPids);
 					return QueryParameterUtils.toEqualToOrInPredicate(
-						resIdColumn,
-						generatePlaceholders(resourceIds),
-						operation == SearchFilterParser.CompareOperation.ne);
+							resIdColumn,
+							generatePlaceholders(resourceIds),
+							operation == SearchFilterParser.CompareOperation.ne);
 				}
 			}
 		}

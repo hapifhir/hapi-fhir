@@ -263,7 +263,8 @@ public class HistoryBuilder {
 		 *   theCriteriaBuilder.literal(myRangeStartInclusive)
 		 * JA 20241005
 		 */
-		ZonedDateTime rangeStart = ZonedDateTime.ofInstant(Instant.ofEpochMilli(myRangeStartInclusive.getTime()), ZoneId.of("GMT"));
+		ZonedDateTime rangeStart =
+				ZonedDateTime.ofInstant(Instant.ofEpochMilli(myRangeStartInclusive.getTime()), ZoneId.of("GMT"));
 
 		Expression myUpdatedMostRecentOrDefault =
 				theCriteriaBuilder.coalesce(myUpdatedMostRecent, theCriteriaBuilder.literal(rangeStart));

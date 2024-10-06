@@ -51,7 +51,6 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.BaseTag;
-import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTablePk;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTag;
@@ -1655,12 +1654,18 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			if (!"target_resource_id".equals(searchPidFieldSqlColumn)) {
 				localReferenceQuery.append(" AND r.target_resource_id IS NOT NULL");
 			}
-			localReferenceQuery.append(" AND r.").append(searchPidFieldSqlColumn).append(" IN (:target_pids) ");
+			localReferenceQuery
+					.append(" AND r.")
+					.append(searchPidFieldSqlColumn)
+					.append(" IN (:target_pids) ");
 			if (myPartitionSettings.isIncludePartitionIdsInPKs()) {
 				String partitionFieldToSearch = findPartitionFieldName.equals(MY_SOURCE_RESOURCE_PARTITION_ID)
-					? "target_res_partition_id"
-					: "partition_id";
-				localReferenceQuery.append("AND r.").append(partitionFieldToSearch).append(" = :search_partition_id ");
+						? "target_res_partition_id"
+						: "partition_id";
+				localReferenceQuery
+						.append("AND r.")
+						.append(partitionFieldToSearch)
+						.append(" = :search_partition_id ");
 			}
 			localReferenceQueryParams.put("src_path", nextPath);
 			// we loop over target_pids later.
@@ -1937,7 +1942,10 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 		Map<String, Object> canonicalUriQueryParams = new HashMap<>();
 		StringBuilder canonicalUrlQuery = new StringBuilder();
-		canonicalUrlQuery.append("SELECT ").append(fieldsToLoadFromSpidxUriTable).append(' ');
+		canonicalUrlQuery
+				.append("SELECT ")
+				.append(fieldsToLoadFromSpidxUriTable)
+				.append(' ');
 		canonicalUrlQuery.append("FROM hfj_res_link r ");
 
 		// join on hash_identity and sp_uri - indexed in IDX_SP_URI_HASH_IDENTITY_V2

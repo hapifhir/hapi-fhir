@@ -549,8 +549,8 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 				for (Iterator<String> forcedIdIterator = nextIds.iterator(); forcedIdIterator.hasNext(); ) {
 					String nextForcedId = forcedIdIterator.next();
 					String nextKey = nextResourceType + "/" + nextForcedId;
-					IResourceLookup<JpaPid> cachedLookup =
-							myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.RESOURCE_LOOKUP_BY_FORCED_ID, nextKey);
+					IResourceLookup<JpaPid> cachedLookup = myMemoryCacheService.getIfPresent(
+							MemoryCacheService.CacheEnum.RESOURCE_LOOKUP_BY_FORCED_ID, nextKey);
 					if (cachedLookup != null) {
 						forcedIdIterator.remove();
 						retVal.computeIfAbsent(nextForcedId, id -> new ArrayList<>())
@@ -599,7 +599,8 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 
 					if (!myStorageSettings.isDeleteEnabled()) {
 						String key = resourceType + "/" + forcedId;
-						myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.RESOURCE_LOOKUP_BY_FORCED_ID, key, lookup);
+						myMemoryCacheService.putAfterCommit(
+								MemoryCacheService.CacheEnum.RESOURCE_LOOKUP_BY_FORCED_ID, key, lookup);
 					}
 				}
 			}
@@ -640,11 +641,13 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 				if (potentialReadPartitions != null) {
 					for (Integer nextPotentialReadPartition : potentialReadPartitions) {
 						JpaPid nextKey = JpaPid.fromId(nextPid, nextPotentialReadPartition);
-						IResourceLookup<JpaPid> cachedLookup =
-							myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.RESOURCE_LOOKUP_BY_PID, nextKey);
+						IResourceLookup<JpaPid> cachedLookup = myMemoryCacheService.getIfPresent(
+								MemoryCacheService.CacheEnum.RESOURCE_LOOKUP_BY_PID, nextKey);
 						if (cachedLookup != null) {
 							forcedIdIterator.remove();
-							theTargets.computeIfAbsent(nextPid.toString(), id -> new ArrayList<>()).add(cachedLookup);
+							theTargets
+									.computeIfAbsent(nextPid.toString(), id -> new ArrayList<>())
+									.add(cachedLookup);
 							break;
 						}
 					}

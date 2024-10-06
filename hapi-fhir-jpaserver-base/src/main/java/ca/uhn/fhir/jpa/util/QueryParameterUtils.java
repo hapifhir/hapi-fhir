@@ -122,7 +122,7 @@ public class QueryParameterUtils {
 
 	@Nonnull
 	public static Condition toInPredicate(
-		ColumnTupleObject theColumns, JpaPidValueTupleObject theValues, boolean theInverse) {
+			ColumnTupleObject theColumns, JpaPidValueTupleObject theValues, boolean theInverse) {
 		return new InCondition(theColumns, theValues).setNegate(theInverse);
 	}
 
