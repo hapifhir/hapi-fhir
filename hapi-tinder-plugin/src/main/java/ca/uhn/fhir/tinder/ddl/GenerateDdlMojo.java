@@ -36,7 +36,7 @@ public class GenerateDdlMojo extends AbstractMojo {
 	@Parameter
 	String outputDirectory;
 
-	@Parameter(defaultValue = "false")
+	@Parameter(defaultValue = "true")
 	boolean trimConditionalIdsFromPrimaryKeys;
 
 	@Parameter(defaultValue = "${project}", readonly = true)

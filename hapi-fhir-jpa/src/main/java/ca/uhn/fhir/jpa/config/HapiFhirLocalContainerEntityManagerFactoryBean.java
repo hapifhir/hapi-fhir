@@ -19,8 +19,15 @@
  */
 package ca.uhn.fhir.jpa.config;
 
+import ca.uhn.hapi.fhir.sql.hibernatesvc.ConditionalIdMappingContributor;
 import com.google.common.base.Strings;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.spi.PersistenceUnitInfo;
+import org.apache.commons.lang3.Validate;
+import org.hibernate.boot.registry.classloading.spi.ClassLoaderService;
+import org.hibernate.boot.spi.AdditionalMappingContributor;
 import org.hibernate.cfg.AvailableSettings;
+import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.query.criteria.ValueHandlingMode;
 import org.hibernate.resource.jdbc.spi.PhysicalConnectionHandlingMode;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -29,6 +36,7 @@ import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -111,5 +119,29 @@ public class HapiFhirLocalContainerEntityManagerFactoryBean extends LocalContain
 			listeners.add(theHookFQCN);
 			retVal.put(thePropertyName, String.join(",", listeners));
 		}
+	}
+
+	@Override
+	protected void postProcessEntityManagerFactory(
+			EntityManagerFactory theEntityManagerFactory, PersistenceUnitInfo thePersistenceUnitInfo) {
+		super.postProcessEntityManagerFactory(theEntityManagerFactory, thePersistenceUnitInfo);
+
+		/*
+		 * Verify that the ConditionalIdMappingContributor is on the classpath. If this
+		 * isn't present, we won't filter the partition IDs from PKs which means we
+		 * won't be backward compatible with previous releases.
+		 */
+		SessionFactoryImplementor sessionFactory = (SessionFactoryImplementor) theEntityManagerFactory;
+		ClassLoaderService classLoaderService =
+				sessionFactory.getServiceRegistry().getService(ClassLoaderService.class);
+		assert classLoaderService != null;
+		Collection<AdditionalMappingContributor> additionalMappingContributors =
+				classLoaderService.loadJavaServices(AdditionalMappingContributor.class);
+		boolean haveConditionalMappingContributor =
+				additionalMappingContributors.stream().anyMatch(t -> t instanceof ConditionalIdMappingContributor);
+		Validate.isTrue(
+				haveConditionalMappingContributor,
+				"No " + ConditionalIdMappingContributor.class.getSimpleName()
+						+ " found registered with Hibernate. Verify that hapi-fhir-jpa-hibernate-services is on your classpath. Can not start.");
 	}
 }

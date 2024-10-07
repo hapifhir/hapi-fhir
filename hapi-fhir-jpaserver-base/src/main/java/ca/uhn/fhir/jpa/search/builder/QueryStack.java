@@ -2839,6 +2839,15 @@ public class QueryStack {
 				table.createEverythingPredicate(theResourceName, theTypeSourceResourceNames, theTargetPids);
 		mySqlBuilder.addPredicate(predicate);
 		mySqlBuilder.getSelect().setIsDistinct(true);
+
+		/*
+		 * Postgres and Oracle don't like it if we are doing a SELECT DISTINCT
+		 * with multiple selected columns but no GROUP BY clause.
+		 */
+		if (mySqlBuilder.isSelectPartitionId()) {
+			BaseJoiningPredicateBuilder firstPredicateBuilder = mySqlBuilder.getOrCreateFirstPredicateBuilder();
+			mySqlBuilder.getSelect().addGroupings(firstPredicateBuilder.getPartitionIdColumn(), firstPredicateBuilder.getResourceIdColumn());
+		}
 	}
 
 	public IQueryParameterType newParameterInstance(
