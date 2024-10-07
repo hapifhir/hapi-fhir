@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 6297
+title: "When an MDM link is updated to be `NO_MATCH`, it is possible that other links will be updated as well. Previously, the `MDM_POST_UPDATE_LINK` pointcut only received the `NO_MATCH` event. This has been corrected, and that pointcut will now receive all links that were changed as a result of the `NO_MATCH`."
