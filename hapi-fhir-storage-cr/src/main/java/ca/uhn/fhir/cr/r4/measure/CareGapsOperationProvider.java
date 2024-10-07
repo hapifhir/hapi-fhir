@@ -122,6 +122,7 @@ public class CareGapsOperationProvider {
 								? null
 								: theMeasureId.stream().map(IdType::new).collect(Collectors.toList()),
 						theMeasureIdentifier,
-						theMeasureUrl);
+						theMeasureUrl,
+						false);
 	}
 }
