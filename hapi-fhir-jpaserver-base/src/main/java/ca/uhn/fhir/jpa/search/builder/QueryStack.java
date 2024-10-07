@@ -356,6 +356,7 @@ public class QueryStack {
 		// add a left-outer join to a predicate for the target type, then sort on value columns(s).
 		switch (targetSearchParameter.getParamType()) {
 			case STRING:
+				// LUKETODO:  presentation:  https://github.com/hapifhir/hapi-fhir/pull/5917
 				StringPredicateBuilder stringPredicateBuilder = mySqlBuilder.createStringPredicateBuilder();
 				addSortCustomJoin(
 						resourceLinkPredicateBuilder.getColumnTargetResourceId(),
@@ -1110,6 +1111,16 @@ public class QueryStack {
 			List<List<IQueryParameterType>> theHasParameters,
 			RequestDetails theRequest,
 			RequestPartitionId theRequestPartitionId) {
+		ourLog.info(
+				"PRESENTATION: createPredicateHas(): theSourceJoinColumn: {}, theResourceType: {},  theHasParameters: {}",
+				theSourceJoinColumn,
+				theResourceType,
+				theHasParameters.stream()
+					.flatMap(Collection::stream)
+					.filter(HasParam.class::isInstance)
+					.map(HasParam.class::cast)
+					.map(hasParam -> String.format("\nparamName: %s, paramValue: %s, refFieldName: %s, targetResType: %s", hasParam.getParameterName(), hasParam.getParameterValue(), hasParam.getReferenceFieldName(), hasParam.getTargetResourceType()))
+					.collect(Collectors.toList()));
 
 		List<Condition> andPredicates = new ArrayList<>();
 		for (List<? extends IQueryParameterType> nextOrList : theHasParameters) {
@@ -1182,6 +1193,7 @@ public class QueryStack {
 
 			// Handle internal chain inside the has.
 			if (parameterName.contains(".")) {
+				// LUKETODO:  presentation  THIS IS WHERE THE BUG WAS FIXED
 				// Previously, for some unknown reason, we were calling getChainedPart() twice.  This broke the _has
 				// then chain, then _has use case by effectively cutting off the second part of the chain and
 				// missing one iteration of the recursive call to build the query.
@@ -1193,12 +1205,15 @@ public class QueryStack {
 				// However, after running the pipeline,  I've concluded there's no use case at all for the
 				// double call to "getChainedPart()", which is why there's no conditional logic at all to make a double
 				// call to getChainedPart().
-				final String chainedPart = getChainedPart(parameterName);
+//				final String chainedPart = getChainedPart(parameterName); // GOOD
+								final String chainedPart = getChainedPart(getChainedPart(parameterName)); // BAD
 
 				orValues.stream()
 						.filter(qp -> qp instanceof ReferenceParam)
 						.map(qp -> (ReferenceParam) qp)
 						.forEach(rp -> rp.setChain(chainedPart));
+
+				ourLog.info("PRESENTATION: createPredicateHas(): chainedPart: {}, orValues: {}", chainedPart, orValues);
 
 				parameterName = parameterName.substring(0, parameterName.indexOf('.'));
 			}
@@ -2697,6 +2712,7 @@ public class QueryStack {
 			RequestPartitionId theRequestPartitionId,
 			List<Condition> andPredicates,
 			List<? extends IQueryParameterType> nextAnd) {
+		ourLog.info("PRESENTATION: handleFullyChainedParameter(): theSourceJoinColumn: {}, theResourceName: {}, theParamName: {}, andPredicates: {}", theSourceJoinColumn, theResourceName, theParamName, andPredicates);
 		if (!nextAnd.isEmpty() && nextAnd.get(0) instanceof ReferenceParam) {
 			ReferenceParam param = (ReferenceParam) nextAnd.get(0);
 			if (isNotBlank(param.getChain())) {
