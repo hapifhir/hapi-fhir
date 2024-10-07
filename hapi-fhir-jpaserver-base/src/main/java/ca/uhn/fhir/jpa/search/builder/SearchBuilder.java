@@ -1932,7 +1932,11 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		}
 
 		if (myPartitionSettings.isIncludePartitionIdsInPKs()) {
-			fieldsToLoadFromSpidxUriTable += ", r.partition_id as " + PARTITION_ID_ALIAS;
+			if (theReverse) {
+				fieldsToLoadFromSpidxUriTable += ", r.partition_id as " + PARTITION_ID_ALIAS;
+			} else {
+				fieldsToLoadFromSpidxUriTable += ", rUri.partition_id as " + PARTITION_ID_ALIAS;
+			}
 		}
 
 		// The logical join will be by hfj_spidx_uri on sp_name='uri' and sp_uri=target_resource_url.
@@ -1957,9 +1961,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		} else {
 			canonicalUrlQuery.append("   rUri.hash_identity in (:uri_identity_hashes) ");
 			canonicalUriQueryParams.put("uri_identity_hashes", identityHashesForTypes);
-		}
-		if (myPartitionSettings.isIncludePartitionIdsInPKs()) {
-			canonicalUrlQuery.append(" AND r.target_res_partition_id = rUri.partition_id ");
 		}
 		canonicalUrlQuery.append(" AND r.target_resource_url = rUri.sp_uri");
 		canonicalUrlQuery.append(")");

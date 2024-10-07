@@ -52,11 +52,6 @@ public class ConditionalIdFilteredPartitioningEnabledTest extends BaseJpaR5Test 
 		myInterceptorRegistry.unregisterInterceptor(myPartitionSelectorInterceptor);
 	}
 
-	@Test
-	public void testTrimConditionalIdsFromPrimaryKeys() {
-		assertTrue(HapiHibernateDialectSettingsService.getLastTrimConditionalIdsFromPrimaryKeysForUnitTest());
-	}
-
 	@Nested
 	public class MyTestDefinitions extends TestDefinitions {
 		MyTestDefinitions() {

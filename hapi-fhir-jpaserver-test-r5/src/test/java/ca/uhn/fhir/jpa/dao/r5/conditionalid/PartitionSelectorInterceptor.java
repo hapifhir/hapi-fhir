@@ -32,11 +32,11 @@ public class PartitionSelectorInterceptor {
 	@Nonnull
 	private RequestPartitionId selectPartition(String theResourceType) {
 		return switch (defaultString(theResourceType)) {
-			case "Patient", "Observation", "Encounter", "List" -> {
+			case "Patient", "Observation", "Encounter", "List", "QuestionnaireResponse" -> {
 				assert myNextPartitionId != null;
 				yield RequestPartitionId.fromPartitionId(myNextPartitionId);
 			}
-			case "", "SearchParameter", "Organization" -> RequestPartitionId.defaultPartition();
+			case "", "SearchParameter", "Organization", "Questionnaire" -> RequestPartitionId.defaultPartition();
 			default -> throw new InternalErrorException("Don't know how to handle resource type: " + theResourceType);
 		};
 	}

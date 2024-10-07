@@ -9,6 +9,7 @@ import ca.uhn.fhir.batch2.jobs.expunge.DeleteExpungeJobParameters;
 import ca.uhn.fhir.batch2.jobs.expunge.DeleteExpungeStep;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -53,6 +54,8 @@ import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.Observation;
 import org.hl7.fhir.r5.model.Organization;
 import org.hl7.fhir.r5.model.Patient;
+import org.hl7.fhir.r5.model.Questionnaire;
+import org.hl7.fhir.r5.model.QuestionnaireResponse;
 import org.hl7.fhir.r5.model.Reference;
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.AfterEach;
@@ -90,6 +93,8 @@ public abstract class TestDefinitions implements ITestDataBuilder {
 	private final BaseJpaR5Test myParentTest;
 	private final boolean myIncludePartitionIdsInPks;
 	@Autowired
+	private InterceptorService myInterceptorService;
+	@Autowired
 	protected CircularQueueCaptureQueriesListener myCaptureQueriesListener;
 	@Autowired
 	private IFhirResourceDaoPatient<Patient> myPatientDao;
@@ -99,6 +104,10 @@ public abstract class TestDefinitions implements ITestDataBuilder {
 	private IFhirResourceDao<Encounter> myEncounterDao;
 	@Autowired
 	private IFhirResourceDao<Organization> myOrganizationDao;
+	@Autowired
+	private IFhirResourceDao<Questionnaire> myQuestionnaireDao;
+	@Autowired
+	private IFhirResourceDao<QuestionnaireResponse> myQuestionnaireResponseDao;
 	@Autowired
 	private IResourceTableDao myResourceTableDao;
 	@Autowired
@@ -254,6 +263,7 @@ public abstract class TestDefinitions implements ITestDataBuilder {
 					String failMessage = "Resources:\n * " + resources.stream().map(ResourceTable::toString).collect(Collectors.joining("\n * "));
 					List<ResourceLink> resourceLinks = myResourceLinkDao.findAll();
 					failMessage += "\n\nResource Links:\n * " + resourceLinks.stream().map(ResourceLink::toString).collect(Collectors.joining("\n * "));
+					failMessage += "\n\nRegistered Interceptors:\n * " + myInterceptorService.getAllRegisteredInterceptors().stream().map(Object::toString).collect(Collectors.joining("\n * "));
 					fail(failMessage);
 				});
 			} else {
@@ -957,6 +967,88 @@ public abstract class TestDefinitions implements ITestDataBuilder {
 		}
 
 		assertEquals(8, myCaptureQueriesListener.countSelectQueries());
+	}
+
+	@Test
+	public void testSearch_Includes_Forward_Specific_UsingCanonicalUrl() {
+		// Setup
+		myPartitionSelectorInterceptor.setNextPartitionId(PARTITION_1);
+		CreatedQuestionnaireAndResponseIds result = createQuestionnaireAndQuestionnaireResponseWithCanonicalUrlLink();
+
+		// Test
+		myParentTest.logAllResources();
+		myParentTest.logAllResourceLinks();
+		myParentTest.logAllUriIndexes();
+		myCaptureQueriesListener.clear();
+		SearchParameterMap params = SearchParameterMap.newSynchronous();
+		params.addInclude(QuestionnaireResponse.INCLUDE_QUESTIONNAIRE);
+		IBundleProvider outcome = myQuestionnaireResponseDao.search(params, newRequest());
+		List<String> values = toUnqualifiedVersionlessIdValues(outcome);
+
+		// Verify
+		myCaptureQueriesListener.logSelectQueries();
+		assertThat(values).asList().containsExactlyInAnyOrder(result.qrId().getValue(), result.qId().getValue());
+
+		String sql;
+
+		sql = myCaptureQueriesListener.getSelectQueries().get(1).getSql(true, false);
+		sql = sql.substring(sql.indexOf("UNION"));
+		if (myIncludePartitionIdsInPks) {
+			assertEquals("UNION SELECT rUri.res_id, rUri.partition_id as partition_id FROM hfj_res_link r JOIN hfj_spidx_uri rUri ON (    rUri.hash_identity = '-600769180185160063'  AND r.target_resource_url = rUri.sp_uri) WHERE r.src_path = 'QuestionnaireResponse.questionnaire' AND  r.target_resource_id IS NULL  AND r.partition_id = '1' AND r.src_resource_id IN ('" + result.qrId().getIdPart() + "') fetch first '1000' rows only", sql);
+		} else {
+			assertEquals("UNION SELECT rUri.res_id FROM hfj_res_link r JOIN hfj_spidx_uri rUri ON (    rUri.hash_identity = '-600769180185160063'  AND r.target_resource_url = rUri.sp_uri) WHERE r.src_path = 'QuestionnaireResponse.questionnaire' AND  r.target_resource_id IS NULL  AND r.src_resource_id IN ('" + result.qrId().getIdPart() + "') fetch first '1000' rows only", sql);
+		}
+
+		assertEquals(3, myCaptureQueriesListener.countSelectQueries());
+	}
+
+	@Test
+	public void testSearch_Includes_Reverse_Specific_UsingCanonicalUrl() {
+		// Setup
+		myPartitionSelectorInterceptor.setNextPartitionId(PARTITION_1);
+		CreatedQuestionnaireAndResponseIds result = createQuestionnaireAndQuestionnaireResponseWithCanonicalUrlLink();
+
+		// Test
+		myParentTest.logAllResources();
+		myParentTest.logAllResourceLinks();
+		myParentTest.logAllUriIndexes();
+		myCaptureQueriesListener.clear();
+		SearchParameterMap params = SearchParameterMap.newSynchronous();
+		params.addRevInclude(QuestionnaireResponse.INCLUDE_QUESTIONNAIRE);
+		IBundleProvider outcome = myQuestionnaireDao.search(params, newRequest());
+		List<String> values = toUnqualifiedVersionlessIdValues(outcome);
+
+		// Verify
+		myCaptureQueriesListener.logSelectQueries();
+		assertThat(values).asList().containsExactlyInAnyOrder(result.qrId().getValue(), result.qId().getValue());
+
+		String sql;
+
+		sql = myCaptureQueriesListener.getSelectQueries().get(1).getSql(true, false);
+		sql = sql.substring(sql.indexOf("UNION"));
+		if (myIncludePartitionIdsInPks) {
+			assertEquals("UNION SELECT r.src_resource_id, r.partition_id as partition_id FROM hfj_res_link r JOIN hfj_spidx_uri rUri ON (    rUri.hash_identity = '-600769180185160063'  AND r.target_resource_url = rUri.sp_uri) WHERE r.src_path = 'QuestionnaireResponse.questionnaire' AND  r.target_resource_id IS NULL  AND rUri.partition_id = '0' AND rUri.res_id IN ('" + result.qId().getIdPart() + "') fetch first '1000' rows only", sql);
+		} else {
+			assertEquals("UNION SELECT r.src_resource_id FROM hfj_res_link r JOIN hfj_spidx_uri rUri ON (    rUri.hash_identity = '-600769180185160063'  AND r.target_resource_url = rUri.sp_uri) WHERE r.src_path = 'QuestionnaireResponse.questionnaire' AND  r.target_resource_id IS NULL  AND rUri.res_id IN ('" + result.qId().getIdPart() + "') fetch first '1000' rows only", sql);
+		}
+
+		assertEquals(3, myCaptureQueriesListener.countSelectQueries());
+	}
+
+	@Nonnull
+	private CreatedQuestionnaireAndResponseIds createQuestionnaireAndQuestionnaireResponseWithCanonicalUrlLink() {
+		Questionnaire q = new Questionnaire();
+		q.setUrl("http://foo");
+		IIdType qId = myQuestionnaireDao.create(q, newRequest()).getId().toUnqualifiedVersionless();
+
+		QuestionnaireResponse qr = new QuestionnaireResponse();
+		qr.setQuestionnaire("http://foo");
+		IIdType qrId = myQuestionnaireResponseDao.create(qr, newRequest()).getId().toUnqualifiedVersionless();
+		CreatedQuestionnaireAndResponseIds result = new CreatedQuestionnaireAndResponseIds(qId, qrId);
+		return result;
+	}
+
+	private record CreatedQuestionnaireAndResponseIds(IIdType qId, IIdType qrId) {
 	}
 
 	@Test

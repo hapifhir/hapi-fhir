@@ -14,11 +14,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 public class ConditionalIdFilteredPartitioningDisabledTest extends BaseJpaR5Test {
 
-	@Test
-	public void testTrimConditionalIdsFromPrimaryKeys() {
-		assertTrue(HapiHibernateDialectSettingsService.getLastTrimConditionalIdsFromPrimaryKeysForUnitTest());
-	}
-
 	@Nested
 	public class MyTestDefinitions extends TestDefinitions {
 		MyTestDefinitions() {

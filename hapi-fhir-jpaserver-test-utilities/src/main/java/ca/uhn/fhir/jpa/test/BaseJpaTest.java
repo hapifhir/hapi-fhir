@@ -577,7 +577,7 @@ public abstract class BaseJpaTest extends BaseTest {
 		});
 	}
 
-	protected void logAllUriIndexes() {
+	public void logAllUriIndexes() {
 		runInTransaction(() -> {
 			ourLog.info("URI indexes:\n * {}", myResourceIndexedSearchParamUriDao.findAll().stream().map(ResourceIndexedSearchParamUri::toString).collect(Collectors.joining("\n * ")));
 		});
