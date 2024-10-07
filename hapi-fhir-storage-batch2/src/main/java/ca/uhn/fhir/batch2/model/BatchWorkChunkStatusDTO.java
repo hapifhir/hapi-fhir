@@ -1,6 +1,4 @@
-package ca.uhn.fhir.batch2.api;
-
-import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
+package ca.uhn.fhir.batch2.model;
 
 import java.util.Date;
 

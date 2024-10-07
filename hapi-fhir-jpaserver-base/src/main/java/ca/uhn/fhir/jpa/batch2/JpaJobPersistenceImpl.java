@@ -19,10 +19,10 @@
  */
 package ca.uhn.fhir.jpa.batch2;
 
-import ca.uhn.fhir.batch2.api.BatchInstanceStatusDTO;
-import ca.uhn.fhir.batch2.api.BatchWorkChunkStatusDTO;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.JobOperationResultJson;
+import ca.uhn.fhir.batch2.model.BatchInstanceStatusDTO;
+import ca.uhn.fhir.batch2.model.BatchWorkChunkStatusDTO;
 import ca.uhn.fhir.batch2.model.FetchJobInstancesRequest;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;

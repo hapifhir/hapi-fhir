@@ -19,7 +19,7 @@
  */
 package ca.uhn.fhir.jpa.dao.data;
 
-import ca.uhn.fhir.batch2.api.BatchWorkChunkStatusDTO;
+import ca.uhn.fhir.batch2.model.BatchWorkChunkStatusDTO;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
 import org.springframework.data.domain.Pageable;
@@ -150,6 +150,6 @@ public interface IBatch2WorkChunkRepository
 			@Param("status") WorkChunkStatusEnum theStatus);
 
 	@Query(
-			"SELECT new ca.uhn.fhir.batch2.api.BatchWorkChunkStatusDTO(e.myTargetStepId, e.myStatus, min(e.myStartTime), max(e.myEndTime), avg(e.myEndTime - e.myStartTime), count(*)) FROM Batch2WorkChunkEntity e WHERE e.myInstanceId=:instanceId GROUP BY e.myTargetStepId, e.myStatus")
+			"SELECT new ca.uhn.fhir.batch2.model.BatchWorkChunkStatusDTO(e.myTargetStepId, e.myStatus, min(e.myStartTime), max(e.myEndTime), avg(e.myEndTime - e.myStartTime), count(*)) FROM Batch2WorkChunkEntity e WHERE e.myInstanceId=:instanceId GROUP BY e.myTargetStepId, e.myStatus")
 	List<BatchWorkChunkStatusDTO> fetchWorkChunkStatusForInstance(@Param("instanceId") String theInstanceId);
 }
