@@ -111,7 +111,7 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 				case GREATERTHAN_OR_EQUALS:
 					if (theDateParam.getPrecision().ordinal() <= TemporalPrecisionEnum.MONTH.ordinal()) {
 						theDateParam.setValueAsString(DateUtils.getCompletedDate(theDateParam.getValueAsString())
-							.getRight());
+								.getRight());
 					}
 					if (theDateParam.hasAdditionalConstraints()) {
 						validateAndRangeWithConstraints(theDateParam);
@@ -126,7 +126,7 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 				case LESSTHAN_OR_EQUALS:
 					if (theDateParam.getPrecision().ordinal() <= TemporalPrecisionEnum.MONTH.ordinal()) {
 						theDateParam.setValueAsString(DateUtils.getCompletedDate(theDateParam.getValueAsString())
-							.getLeft());
+								.getLeft());
 					}
 					if (theDateParam.hasAdditionalConstraints()) {
 						validateAndRangeWithConstraints(theDateParam);
@@ -139,7 +139,7 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 				default:
 					// Should not happen
 					throw new InvalidRequestException(Msg.code(1921) + "Invalid comparator for date range parameter:"
-						+ theDateParam.getPrefix() + ". This is a bug.");
+							+ theDateParam.getPrefix() + ". This is a bug.");
 			}
 		}
 	}
@@ -162,7 +162,9 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 		DateTimeDt higher = new DateTimeDt();
 		higher.setValue(dates.get(dates.size() - 1), precisionEnum);
 		// greater than low bound, less than high bound
-		validateAndSet(new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, lower), new DateParam(ParamPrefixEnum.LESSTHAN_OR_EQUALS, higher));
+		validateAndSet(
+				new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, lower),
+				new DateParam(ParamPrefixEnum.LESSTHAN_OR_EQUALS, higher));
 	}
 
 	/**
@@ -689,9 +691,9 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 			Date upperBoundAsInstant = getUpperBoundAsInstant(upperBound);
 			if (lowerBoundAsInstant.after(upperBoundAsInstant)) {
 				throw new DataFormatException(Msg.code(1932)
-					+ format(
-					"Lower bound of %s is after upper bound of %s",
-					lowerBound.getValueAsString(), upperBound.getValueAsString()));
+						+ format(
+								"Lower bound of %s is after upper bound of %s",
+								lowerBound.getValueAsString(), upperBound.getValueAsString()));
 			}
 		}
 
@@ -707,7 +709,7 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 				case LESSTHAN:
 				case LESSTHAN_OR_EQUALS:
 					throw new DataFormatException(Msg.code(1933) + "Lower bound comparator must be > or >=, can not be "
-						+ lowerBound.getPrefix().getValue());
+							+ lowerBound.getPrefix().getValue());
 			}
 		}
 
@@ -723,7 +725,7 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 				case GREATERTHAN:
 				case GREATERTHAN_OR_EQUALS:
 					throw new DataFormatException(Msg.code(1934) + "Upper bound comparator must be < or <=, can not be "
-						+ upperBound.getPrefix().getValue());
+							+ upperBound.getPrefix().getValue());
 			}
 		}
 
