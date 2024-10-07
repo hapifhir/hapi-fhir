@@ -30,23 +30,20 @@ import org.springframework.context.annotation.Bean;
 import java.util.Arrays;
 import java.util.Map;
 
-public class QuestionnaireOperationConfig {
+public class EvaluateOperationConfig {
 	@Bean
-	ca.uhn.fhir.cr.dstu3.structuredefinition.StructureDefinitionQuestionnaireProvider
-			dstu3StructureDefinitionQuestionnaireProvider() {
-		return new ca.uhn.fhir.cr.dstu3.structuredefinition.StructureDefinitionQuestionnaireProvider();
+	ca.uhn.fhir.cr.dstu3.library.LibraryEvaluateProvider dstu3LibraryEvaluateProvider() {
+		return new ca.uhn.fhir.cr.dstu3.library.LibraryEvaluateProvider();
 	}
 
-	@Bean(name = "questionnaireOperationLoader")
-	public ProviderLoader questionnaireOperationLoader(
+	@Bean(name = "evaluateOperationLoader")
+	public ProviderLoader evaluateOperationLoader(
 			ApplicationContext theApplicationContext, FhirContext theFhirContext, RestfulServer theRestfulServer) {
 		var selector = new ProviderSelector(
 				theFhirContext,
 				Map.of(
 						FhirVersionEnum.DSTU3,
-						Arrays.asList(
-								ca.uhn.fhir.cr.dstu3.structuredefinition.StructureDefinitionQuestionnaireProvider
-										.class)));
+						Arrays.asList(ca.uhn.fhir.cr.dstu3.library.LibraryEvaluateProvider.class)));
 
 		return new ProviderLoader(theRestfulServer, theApplicationContext, selector);
 	}

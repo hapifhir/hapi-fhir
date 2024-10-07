@@ -21,6 +21,12 @@ package ca.uhn.fhir.cr.config;
 
 import ca.uhn.fhir.cr.common.IRepositoryFactory;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
+import org.opencds.cqf.fhir.cr.activitydefinition.ActivityDefinitionProcessor;
+import org.opencds.cqf.fhir.cr.library.LibraryProcessor;
+import org.opencds.cqf.fhir.cr.plandefinition.PlanDefinitionProcessor;
+import org.opencds.cqf.fhir.cr.questionnaire.QuestionnaireProcessor;
+import org.opencds.cqf.fhir.cr.questionnaireresponse.QuestionnaireResponseProcessor;
+import org.opencds.cqf.fhir.cr.valueset.ValueSetProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -29,28 +35,36 @@ public class CrProcessorConfig {
 	@Bean
 	ca.uhn.fhir.cr.common.IActivityDefinitionProcessorFactory activityDefinitionProcessorFactory(
 			IRepositoryFactory theRepositoryFactory, EvaluationSettings theEvaluationSettings) {
-		return rd -> new org.opencds.cqf.fhir.cr.activitydefinition.ActivityDefinitionProcessor(
-				theRepositoryFactory.create(rd), theEvaluationSettings);
+		return rd -> new ActivityDefinitionProcessor(theRepositoryFactory.create(rd), theEvaluationSettings);
 	}
 
 	@Bean
 	ca.uhn.fhir.cr.common.IPlanDefinitionProcessorFactory planDefinitionProcessorFactory(
 			IRepositoryFactory theRepositoryFactory, EvaluationSettings theEvaluationSettings) {
-		return rd -> new org.opencds.cqf.fhir.cr.plandefinition.PlanDefinitionProcessor(
-				theRepositoryFactory.create(rd), theEvaluationSettings);
+		return rd -> new PlanDefinitionProcessor(theRepositoryFactory.create(rd), theEvaluationSettings);
 	}
 
 	@Bean
 	ca.uhn.fhir.cr.common.IQuestionnaireProcessorFactory questionnaireProcessorFactory(
 			IRepositoryFactory theRepositoryFactory, EvaluationSettings theEvaluationSettings) {
-		return rd -> new org.opencds.cqf.fhir.cr.questionnaire.QuestionnaireProcessor(
-				theRepositoryFactory.create(rd), theEvaluationSettings);
+		return rd -> new QuestionnaireProcessor(theRepositoryFactory.create(rd), theEvaluationSettings);
 	}
 
 	@Bean
 	ca.uhn.fhir.cr.common.IQuestionnaireResponseProcessorFactory questionnaireResponseProcessorFactory(
 			IRepositoryFactory theRepositoryFactory, EvaluationSettings theEvaluationSettings) {
-		return rd -> new org.opencds.cqf.fhir.cr.questionnaireresponse.QuestionnaireResponseProcessor(
-				theRepositoryFactory.create(rd), theEvaluationSettings);
+		return rd -> new QuestionnaireResponseProcessor(theRepositoryFactory.create(rd), theEvaluationSettings);
+	}
+
+	@Bean
+	ca.uhn.fhir.cr.common.ILibraryProcessorFactory libraryProcessorFactory(
+			IRepositoryFactory theRepositoryFactory, EvaluationSettings theEvaluationSettings) {
+		return rd -> new LibraryProcessor(theRepositoryFactory.create(rd), theEvaluationSettings);
+	}
+
+	@Bean
+	ca.uhn.fhir.cr.common.IValueSetProcessorFactory valueSetProcessorFactory(
+			IRepositoryFactory theRepositoryFactory, EvaluationSettings theEvaluationSettings) {
+		return rd -> new ValueSetProcessor(theRepositoryFactory.create(rd), theEvaluationSettings);
 	}
 }

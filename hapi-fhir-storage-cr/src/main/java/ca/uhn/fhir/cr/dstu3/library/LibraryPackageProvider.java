@@ -17,66 +17,63 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.cr.dstu3.questionnaire;
+package ca.uhn.fhir.cr.dstu3.library;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.cr.common.IQuestionnaireProcessorFactory;
+import ca.uhn.fhir.cr.common.ILibraryProcessorFactory;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
-import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.BooleanType;
+import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.Library;
+import org.hl7.fhir.dstu3.model.StringType;
+import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static ca.uhn.fhir.cr.common.CanonicalHelper.getCanonicalType;
 
-public class QuestionnairePackageProvider {
+public class LibraryPackageProvider {
 	@Autowired
-	IQuestionnaireProcessorFactory myQuestionnaireProcessorFactory;
+	ILibraryProcessorFactory myLibraryProcessorFactory;
 
-	/**
-	 * Implements a $package operation following the <a href=
-	 * "https://build.fhir.org/ig/HL7/crmi-ig/branches/master/packaging.html">CRMI IG</a>.
-	 *
-	 * @param theId             The id of the Questionnaire.
-	 * @param theCanonical      The canonical identifier for the Questionnaire (optionally version-specific).
-	 * @param theUrl            Canonical URL of the Questionnaire when invoked at the resource type level. This is exclusive with the questionnaire and canonical parameters.
-	 * @param theVersion        Version of the Questionnaire when invoked at the resource type level. This is exclusive with the questionnaire and canonical parameters.
-	 * @Param theIsPut			A boolean value to determine if the Bundle returned uses PUT or POST request methods.  Defaults to false.
-	 * @param theRequestDetails The details (such as tenant) of this request. Usually
-	 *                          autopopulated by HAPI.
-	 * @return A Bundle containing the Questionnaire and all related Library, CodeSystem and ValueSet resources
-	 */
-	@Operation(name = ProviderConstants.CR_OPERATION_PACKAGE, idempotent = true, type = Questionnaire.class)
-	public Bundle packageQuestionnaire(
+	@Operation(name = ProviderConstants.CR_OPERATION_PACKAGE, idempotent = true, type = Library.class)
+	public IBaseBundle packagePlanDefinition(
 			@IdParam IdType theId,
 			@OperationParam(name = "canonical") String theCanonical,
 			@OperationParam(name = "url") String theUrl,
 			@OperationParam(name = "version") String theVersion,
 			@OperationParam(name = "usePut") BooleanType theIsPut,
-			RequestDetails theRequestDetails) {
+			RequestDetails theRequestDetails)
+			throws InternalErrorException, FHIRException {
 		StringType canonicalType = getCanonicalType(FhirVersionEnum.DSTU3, theCanonical, theUrl, theVersion);
-		return (Bundle) myQuestionnaireProcessorFactory
+		return myLibraryProcessorFactory
 				.create(theRequestDetails)
-				.packageQuestionnaire(
+				.packageLibrary(
 						Eithers.for3(canonicalType, theId, null),
 						theIsPut == null ? Boolean.FALSE : theIsPut.booleanValue());
 	}
 
-	@Operation(name = ProviderConstants.CR_OPERATION_PACKAGE, idempotent = true, type = Questionnaire.class)
-	public Bundle packageQuestionnaire(
+	@Operation(name = ProviderConstants.CR_OPERATION_PACKAGE, idempotent = true, type = Library.class)
+	public IBaseBundle packagePlanDefinition(
+			@OperationParam(name = "id") String theId,
 			@OperationParam(name = "canonical") String theCanonical,
 			@OperationParam(name = "url") String theUrl,
 			@OperationParam(name = "version") String theVersion,
 			@OperationParam(name = "usePut") BooleanType theIsPut,
-			RequestDetails theRequestDetails) {
+			RequestDetails theRequestDetails)
+			throws InternalErrorException, FHIRException {
+		IdType id = theId == null ? null : new IdType("PlanDefinition", theId);
 		StringType canonicalType = getCanonicalType(FhirVersionEnum.DSTU3, theCanonical, theUrl, theVersion);
-		return (Bundle) myQuestionnaireProcessorFactory
+		return myLibraryProcessorFactory
 				.create(theRequestDetails)
-				.packageQuestionnaire(
-						Eithers.for3(canonicalType, null, null),
+				.packageLibrary(
+						Eithers.for3(canonicalType, id, null),
 						theIsPut == null ? Boolean.FALSE : theIsPut.booleanValue());
 	}
 }

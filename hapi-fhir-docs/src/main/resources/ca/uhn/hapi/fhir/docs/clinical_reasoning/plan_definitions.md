@@ -19,6 +19,7 @@ HAPI implements the following operations for PlanDefinitions:
 
 * [$apply](/docs/clinical_reasoning/plan_definitions.html#apply)
 * [$package](/docs/clinical_reasoning/plan_definitions.html#package)
+* [$data-requirements](/docs/clinical_reasoning/plan_definitions.html#datarequirements)
 
 ## Apply
 
@@ -79,6 +80,13 @@ The following parameters are supported for the `PlanDefinition/$package` operati
 | version   | string    | The version of the Resource. This is exclusive with the canonical parameter. | 
 | usePut    | boolean   | Determines the type of method returned in the Bundle Entries: POST if False (the default), PUT if True. | 
 
+## DataRequirements
+
+The `PlanDefinition/$data-requirements` [operation](https://build.fhir.org/ig/HL7/crmi-ig/branches/master/OperationDefinition-crmi-data-requirements.html) for PlanDefinition will generate a Library of type `module-definition` that returns the computed effective requirements of the artifact.
+
+### Parameters
+
+The following parameters are supported for the `PlanDefinition/$data-requirements` operation:
 
 ## Example PlanDefinition
 

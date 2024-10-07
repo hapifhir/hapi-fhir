@@ -1050,7 +1050,7 @@
 		<ucum_version>1.0.8</ucum_version>
 
 		<!-- Clinical Reasoning & CQL Support -->
-		<clinical-reasoning.version>3.12.0</clinical-reasoning.version>
+		<clinical-reasoning.version>3.13.0-SNAPSHOT</clinical-reasoning.version>
 
 		<!-- Site properties -->
 		<fontawesomeVersion>5.4.1</fontawesomeVersion>

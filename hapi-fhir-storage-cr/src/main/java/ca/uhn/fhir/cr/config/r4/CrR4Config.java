@@ -46,6 +46,7 @@ import org.opencds.cqf.fhir.cr.cpg.r4.R4CqlExecutionService;
 import org.opencds.cqf.fhir.cr.cpg.r4.R4LibraryEvaluationService;
 import org.opencds.cqf.fhir.cr.measure.CareGapsProperties;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
+import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.r4.R4CareGapsService;
 import org.opencds.cqf.fhir.cr.measure.r4.R4CollectDataService;
 import org.opencds.cqf.fhir.cr.measure.r4.R4DataRequirementsService;
@@ -69,7 +70,8 @@ public class CrR4Config {
 	IMeasureServiceFactory r4MeasureServiceFactory(
 			RepositoryFactoryForRepositoryInterface theRepositoryFactory,
 			MeasureEvaluationOptions theEvaluationOptions) {
-		return rd -> new R4MeasureService(theRepositoryFactory.create(rd), theEvaluationOptions);
+		return rd -> new R4MeasureService(
+				theRepositoryFactory.create(rd), theEvaluationOptions, new MeasurePeriodValidator());
 	}
 
 	@Bean
@@ -131,7 +133,8 @@ public class CrR4Config {
 				theCareGapsProperties,
 				theRepositoryFactory.create(rd),
 				theMeasureEvaluationOptions,
-				rd.getFhirServerBase());
+				rd.getFhirServerBase(),
+				new MeasurePeriodValidator());
 	}
 
 	@Bean

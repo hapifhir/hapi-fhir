@@ -36,6 +36,10 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+
 public class MeasureOperationsProvider {
 	@Autowired
 	IMeasureServiceFactory myR4MeasureServiceFactory;
@@ -82,8 +86,10 @@ public class MeasureOperationsProvider {
 				.create(theRequestDetails)
 				.evaluate(
 						Eithers.forMiddle3(theId),
-						thePeriodStart,
-						thePeriodEnd,
+						LocalDate.parse(thePeriodStart, DateTimeFormatter.ISO_LOCAL_DATE)
+								.atStartOfDay(ZoneId.systemDefault()),
+						LocalDate.parse(thePeriodEnd, DateTimeFormatter.ISO_LOCAL_DATE)
+								.atStartOfDay(ZoneId.systemDefault()),
 						theReportType,
 						theSubject,
 						theLastReceivedOn,

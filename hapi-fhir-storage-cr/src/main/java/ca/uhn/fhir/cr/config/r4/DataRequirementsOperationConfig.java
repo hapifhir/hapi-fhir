@@ -35,39 +35,39 @@ import java.util.Map;
 
 @Configuration
 @Import(CrProcessorConfig.class)
-public class PackageOperationConfig {
+public class DataRequirementsOperationConfig {
 	@Bean
-	ca.uhn.fhir.cr.r4.plandefinition.PlanDefinitionPackageProvider r4PlanDefinitionPackageProvider() {
-		return new ca.uhn.fhir.cr.r4.plandefinition.PlanDefinitionPackageProvider();
+	ca.uhn.fhir.cr.r4.library.LibraryDataRequirementsProvider r4LibraryDataRequirementsProvider() {
+		return new ca.uhn.fhir.cr.r4.library.LibraryDataRequirementsProvider();
 	}
 
 	@Bean
-	ca.uhn.fhir.cr.r4.questionnaire.QuestionnairePackageProvider r4QuestionnairePackageProvider() {
-		return new ca.uhn.fhir.cr.r4.questionnaire.QuestionnairePackageProvider();
+	ca.uhn.fhir.cr.r4.plandefinition.PlanDefinitionDataRequirementsProvider r4PlanDefinitionDataRequirementsProvider() {
+		return new ca.uhn.fhir.cr.r4.plandefinition.PlanDefinitionDataRequirementsProvider();
 	}
 
 	@Bean
-	ca.uhn.fhir.cr.r4.library.LibraryPackageProvider r4LibraryPackageProvider() {
-		return new ca.uhn.fhir.cr.r4.library.LibraryPackageProvider();
+	ca.uhn.fhir.cr.r4.questionnaire.QuestionnaireDataRequirementsProvider r4QuestionnaireDataRequirementsProvider() {
+		return new ca.uhn.fhir.cr.r4.questionnaire.QuestionnaireDataRequirementsProvider();
 	}
 
 	@Bean
-	ca.uhn.fhir.cr.r4.valueset.ValueSetPackageProvider r4ValueSetPackageProvider() {
-		return new ca.uhn.fhir.cr.r4.valueset.ValueSetPackageProvider();
+	ca.uhn.fhir.cr.r4.valueset.ValueSetDataRequirementsProvider r4ValueSetDataRequirementsProvider() {
+		return new ca.uhn.fhir.cr.r4.valueset.ValueSetDataRequirementsProvider();
 	}
 
-	@Bean(name = "packageOperationLoader")
-	public ProviderLoader packageOperationLoader(
+	@Bean(name = "dataRequirementsOperationLoader")
+	public ProviderLoader dataRequirementsOperationLoader(
 			ApplicationContext theApplicationContext, FhirContext theFhirContext, RestfulServer theRestfulServer) {
 		var selector = new ProviderSelector(
 				theFhirContext,
 				Map.of(
 						FhirVersionEnum.R4,
 						Arrays.asList(
-								ca.uhn.fhir.cr.r4.library.LibraryPackageProvider.class,
-								ca.uhn.fhir.cr.r4.questionnaire.QuestionnairePackageProvider.class,
-								ca.uhn.fhir.cr.r4.plandefinition.PlanDefinitionPackageProvider.class,
-								ca.uhn.fhir.cr.r4.valueset.ValueSetPackageProvider.class)));
+								ca.uhn.fhir.cr.r4.library.LibraryDataRequirementsProvider.class,
+								ca.uhn.fhir.cr.r4.plandefinition.PlanDefinitionDataRequirementsProvider.class,
+								ca.uhn.fhir.cr.r4.questionnaire.QuestionnaireDataRequirementsProvider.class,
+								ca.uhn.fhir.cr.r4.valueset.ValueSetDataRequirementsProvider.class)));
 
 		return new ProviderLoader(theRestfulServer, theApplicationContext, selector);
 	}

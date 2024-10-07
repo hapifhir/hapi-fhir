@@ -58,12 +58,14 @@
 							{
 								"url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-itemPopulationContext",
 								"valueExpression": {
+									"name": "SleepStudy",
 									"language": "text/cql-identifier",
 									"expression": "Sleep Study"
 								}
 							}
 						],
 						"linkId": "0",
+						"definition": "http://example.org/sdh/dtr/aslp/StructureDefinition/aslp-sleep-study-order",
 						"text": "A sleep study procedure being ordered",
 						"type": "group",
 						"repeats": true,

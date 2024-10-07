@@ -35,6 +35,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -106,11 +109,18 @@ public class CareGapsOperationProvider {
 		return myR4CareGapsProcessorFactory
 				.create(theRequestDetails)
 				.getCareGapsReport(
-						thePeriodStart,
-						thePeriodEnd,
+						ZonedDateTime.of(
+								LocalDateTime.ofInstant(
+										thePeriodStart.getValue().toInstant(), ZoneId.systemDefault()),
+								ZoneId.systemDefault()),
+						ZonedDateTime.of(
+								LocalDateTime.ofInstant(thePeriodEnd.getValue().toInstant(), ZoneId.systemDefault()),
+								ZoneId.systemDefault()),
 						theSubject,
 						theStatus,
-						theMeasureId == null ? null : theMeasureId.stream().map(IdType::new).collect(Collectors.toList()),
+						theMeasureId == null
+								? null
+								: theMeasureId.stream().map(IdType::new).collect(Collectors.toList()),
 						theMeasureIdentifier,
 						theMeasureUrl);
 	}

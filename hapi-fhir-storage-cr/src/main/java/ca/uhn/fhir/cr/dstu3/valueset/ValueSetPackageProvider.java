@@ -17,40 +17,44 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.cr.dstu3.questionnaire;
+package ca.uhn.fhir.cr.dstu3.valueset;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.cr.common.IQuestionnaireProcessorFactory;
+import ca.uhn.fhir.cr.common.IValueSetProcessorFactory;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
-import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.BooleanType;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.StringType;
+import org.hl7.fhir.dstu3.model.ValueSet;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static ca.uhn.fhir.cr.common.CanonicalHelper.getCanonicalType;
 
-public class QuestionnairePackageProvider {
+public class ValueSetPackageProvider {
 	@Autowired
-	IQuestionnaireProcessorFactory myQuestionnaireProcessorFactory;
+	IValueSetProcessorFactory myValueSetProcessorFactory;
 
 	/**
 	 * Implements a $package operation following the <a href=
 	 * "https://build.fhir.org/ig/HL7/crmi-ig/branches/master/packaging.html">CRMI IG</a>.
 	 *
-	 * @param theId             The id of the Questionnaire.
-	 * @param theCanonical      The canonical identifier for the Questionnaire (optionally version-specific).
-	 * @param theUrl            Canonical URL of the Questionnaire when invoked at the resource type level. This is exclusive with the questionnaire and canonical parameters.
-	 * @param theVersion        Version of the Questionnaire when invoked at the resource type level. This is exclusive with the questionnaire and canonical parameters.
+	 * @param theId             The id of the ValueSet.
+	 * @param theCanonical      The canonical identifier for the ValueSet (optionally version-specific).
+	 * @param theUrl            Canonical URL of the ValueSet when invoked at the resource type level. This is exclusive with the ValueSet and canonical parameters.
+	 * @param theVersion        Version of the ValueSet when invoked at the resource type level. This is exclusive with the ValueSet and canonical parameters.
 	 * @Param theIsPut			A boolean value to determine if the Bundle returned uses PUT or POST request methods.  Defaults to false.
 	 * @param theRequestDetails The details (such as tenant) of this request. Usually
 	 *                          autopopulated by HAPI.
-	 * @return A Bundle containing the Questionnaire and all related Library, CodeSystem and ValueSet resources
+	 * @return A Bundle containing the ValueSet and all related CodeSystem and ValueSet resources
 	 */
-	@Operation(name = ProviderConstants.CR_OPERATION_PACKAGE, idempotent = true, type = Questionnaire.class)
-	public Bundle packageQuestionnaire(
+	@Operation(name = ProviderConstants.CR_OPERATION_PACKAGE, idempotent = true, type = ValueSet.class)
+	public Bundle packageValueSet(
 			@IdParam IdType theId,
 			@OperationParam(name = "canonical") String theCanonical,
 			@OperationParam(name = "url") String theUrl,
@@ -58,24 +62,24 @@ public class QuestionnairePackageProvider {
 			@OperationParam(name = "usePut") BooleanType theIsPut,
 			RequestDetails theRequestDetails) {
 		StringType canonicalType = getCanonicalType(FhirVersionEnum.DSTU3, theCanonical, theUrl, theVersion);
-		return (Bundle) myQuestionnaireProcessorFactory
+		return (Bundle) myValueSetProcessorFactory
 				.create(theRequestDetails)
-				.packageQuestionnaire(
+				.packageValueSet(
 						Eithers.for3(canonicalType, theId, null),
 						theIsPut == null ? Boolean.FALSE : theIsPut.booleanValue());
 	}
 
-	@Operation(name = ProviderConstants.CR_OPERATION_PACKAGE, idempotent = true, type = Questionnaire.class)
-	public Bundle packageQuestionnaire(
+	@Operation(name = ProviderConstants.CR_OPERATION_PACKAGE, idempotent = true, type = ValueSet.class)
+	public Bundle packageValueSet(
 			@OperationParam(name = "canonical") String theCanonical,
 			@OperationParam(name = "url") String theUrl,
 			@OperationParam(name = "version") String theVersion,
 			@OperationParam(name = "usePut") BooleanType theIsPut,
 			RequestDetails theRequestDetails) {
 		StringType canonicalType = getCanonicalType(FhirVersionEnum.DSTU3, theCanonical, theUrl, theVersion);
-		return (Bundle) myQuestionnaireProcessorFactory
+		return (Bundle) myValueSetProcessorFactory
 				.create(theRequestDetails)
-				.packageQuestionnaire(
+				.packageValueSet(
 						Eithers.for3(canonicalType, null, null),
 						theIsPut == null ? Boolean.FALSE : theIsPut.booleanValue());
 	}
