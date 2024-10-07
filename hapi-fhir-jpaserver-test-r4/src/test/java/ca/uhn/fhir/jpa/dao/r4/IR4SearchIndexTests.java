@@ -67,7 +67,7 @@ public interface IR4SearchIndexTests {
 		IFhirResourceDao<Observation> observationDao = getResourceDao("Observation");
 
 		// create some patients (a few so we have a few to scan through)
-		for (int i = 0; i < 10; i++) {
+		for (int i = 0; i < 100; i++) {
 			Patient patient = new Patient();
 			patient.setActive(true);
 			patient.addName()
@@ -77,7 +77,8 @@ public interface IR4SearchIndexTests {
 				patient.setBirthDate(birthdayDateTime.getValue());
 			} else {
 				Date d = birthdayDateTime.getValue();
-				d.setMonth(i);
+//				d.setMonth(i);
+				d.setYear(2000 - i);
 				patient.setBirthDate(d);
 			}
 			patientDao.create(patient, rd);
@@ -85,7 +86,7 @@ public interface IR4SearchIndexTests {
 
 		// add a bunch of things with recent dates
 		Date now = new Date();
-		for (int i = 0; i < 100; i++) {
+		for (int i = 0; i < 200; i++) {
 			Observation obs = new Observation();
 			now.setDate(i % 28); // 28 because that's the shortest month
 			obs.setIssued(now);
