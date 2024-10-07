@@ -123,42 +123,28 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 			}
 		}
 
-		// FIXME: make trace
-		ourLog.info("For reference {} at path {} haqve resolved: {}", targetReference, sourcePath, persistentId);
-
 		IResourceLookup<?> resolvedResource;
 		String idPart = targetResourceId.getIdPart();
 		try {
 			if (persistentId == null) {
 				RequestPartitionId requestPartitionId =
 						myPartitionHelperSvc.determineReadPartitionForRequestForRead(theRequest, targetResourceId);
-				// FIXME: make trace
-				ourLog.info(
+				ourLog.trace(
 						"Searching for candidate target {}/{} in partition: {}",
 						resourceType,
 						idPart,
 						requestPartitionId);
 				resolvedResource = myIdHelperService.resolveResourceIdentity(requestPartitionId, resourceType, idPart);
-				// FIXME: make trace
-				ourLog.info("Translated {}/{} to resource PID {}", type, idPart, resolvedResource);
+				ourLog.trace("Translated {}/{} to resource PID {}", type, idPart, resolvedResource);
 			} else {
 				resolvedResource = new ResourceLookupPersistentIdWrapper(persistentId);
 			}
 		} catch (ResourceNotFoundException e) {
 
-			// FIXME: remove
-			ourLog.info("Failed to find candidate target {}/{}", resourceType, idPart);
-
 			Optional<IBasePersistedResource> createdTableOpt = createPlaceholderTargetIfConfiguredToDoSo(
 					type, targetReference, idPart, theRequest, theTransactionDetails);
 			if (!createdTableOpt.isPresent()) {
-
-				// FIXME: remove
-				ourLog.info("Did not create placeholder target {}/{}", resourceType, idPart);
-
 				if (!myStorageSettings.isEnforceReferentialIntegrityOnWrite()) {
-					// FIXME: remove
-					ourLog.info("Not enforcing referential integrity for target {}/{}", resourceType, idPart);
 					return null;
 				}
 
@@ -169,9 +155,6 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 			}
 
 			resolvedResource = createdTableOpt.get();
-
-			// FIXME: remove
-			ourLog.info("Created placeholder target {}/{}: {}", resourceType, idPart, resolvedResource);
 		}
 
 		ourLog.trace(

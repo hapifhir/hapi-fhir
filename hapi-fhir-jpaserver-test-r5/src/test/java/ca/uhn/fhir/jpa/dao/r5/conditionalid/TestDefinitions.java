@@ -16,6 +16,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoObservation;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
+import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.dao.PatientEverythingParameters;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
@@ -34,6 +35,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.HasParam;
+import ca.uhn.fhir.rest.param.HistorySearchDateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -48,9 +50,11 @@ import org.assertj.core.api.Assertions;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.DateTimeType;
 import org.hl7.fhir.r5.model.Encounter;
 import org.hl7.fhir.r5.model.IdType;
+import org.hl7.fhir.r5.model.Meta;
 import org.hl7.fhir.r5.model.Observation;
 import org.hl7.fhir.r5.model.Organization;
 import org.hl7.fhir.r5.model.Patient;
@@ -108,6 +112,8 @@ public abstract class TestDefinitions implements ITestDataBuilder {
 	private IFhirResourceDao<Questionnaire> myQuestionnaireDao;
 	@Autowired
 	private IFhirResourceDao<QuestionnaireResponse> myQuestionnaireResponseDao;
+	@Autowired
+	private IFhirSystemDao<Bundle, Meta> mySystemDao;
 	@Autowired
 	private IResourceTableDao myResourceTableDao;
 	@Autowired
@@ -335,6 +341,141 @@ public abstract class TestDefinitions implements ITestDataBuilder {
 		assertEquals(4, myCaptureQueriesListener.countDeleteQueries());
 	}
 
+	@Test
+	public void testHistory_Instance() {
+		// Setup
+		myPartitionSelectorInterceptor.setNextPartitionId(PARTITION_1);
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("http://foo").setValue("1");
+		IIdType id = myPatientDao.create(p, newRequest()).getId();
+		assertEquals("1", id.getVersionIdPart());
+
+		p.getIdentifierFirstRep().setValue("2");
+		id = myPatientDao.update(p, newRequest()).getId();
+		assertEquals("2", id.getVersionIdPart());
+
+		p.getIdentifierFirstRep().setValue("3");
+		id = myPatientDao.update(p, newRequest()).getId();
+		assertEquals("3", id.getVersionIdPart());
+		id = id.toUnqualifiedVersionless();
+
+		// Test
+		myCaptureQueriesListener.clear();
+		IBundleProvider outcome;
+		outcome = myPatientDao.history(id, new HistorySearchDateRangeParam(), newRequest());
+
+		// Verify
+		List<String> actualIds = toUnqualifiedIdValues(outcome);
+		myCaptureQueriesListener.logSelectQueries();
+		assertThat(actualIds).asList().containsExactlyInAnyOrder("Patient/" + id.getIdPart() + "/_history/3", "Patient/" + id.getIdPart() + "/_history/2", "Patient/" + id.getIdPart() + "/_history/1");
+
+		if (myIncludePartitionIdsInSql) {
+			assertThat(getSelectSql(0)).endsWith("from HFJ_RESOURCE rt1_0 where rt1_0.PARTITION_ID='1' and rt1_0.RES_ID='" + id.getIdPartAsLong() + "'");
+		} else {
+			assertThat(getSelectSql(0)).endsWith("from HFJ_RESOURCE rt1_0 where rt1_0.RES_ID='" + id.getIdPartAsLong() + "'");
+		}
+
+		if (myIncludePartitionIdsInSql) {
+			assertEquals("select count(*) from HFJ_RES_VER rht1_0 where rht1_0.RES_ID='" + id.getIdPartAsLong() + "' and rht1_0.PARTITION_ID='1'", getSelectSql(1));
+		} else {
+			assertEquals("select count(*) from HFJ_RES_VER rht1_0 where rht1_0.RES_ID='" + id.getIdPartAsLong() + "'", getSelectSql(1));
+		}
+
+		if (myIncludePartitionIdsInSql) {
+			assertThat(getSelectSql(2)).contains(" from HFJ_RES_VER rht1_0 where rht1_0.RES_ID='" + id.getIdPartAsLong() + "' and rht1_0.PARTITION_ID='1' ");
+		} else {
+			assertThat(getSelectSql(2)).contains(" from HFJ_RES_VER rht1_0 where rht1_0.RES_ID='" + id.getIdPartAsLong() + "' ");
+		}
+
+		assertEquals(3, myCaptureQueriesListener.countSelectQueries());
+	}
+
+	@Test
+	public void testHistory_Type() {
+		// Setup
+		myPartitionSelectorInterceptor.setNextPartitionId(PARTITION_1);
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("http://foo").setValue("1");
+		IIdType id = myPatientDao.create(p, newRequest()).getId();
+		assertEquals("1", id.getVersionIdPart());
+
+		p.getIdentifierFirstRep().setValue("2");
+		id = myPatientDao.update(p, newRequest()).getId();
+		assertEquals("2", id.getVersionIdPart());
+
+		p.getIdentifierFirstRep().setValue("3");
+		id = myPatientDao.update(p, newRequest()).getId();
+		assertEquals("3", id.getVersionIdPart());
+		id = id.toUnqualifiedVersionless();
+
+		// Test
+		myCaptureQueriesListener.clear();
+		IBundleProvider outcome;
+		outcome = myPatientDao.history(null, null, null, newRequest());
+
+		// Verify
+		List<String> actualIds = toUnqualifiedIdValues(outcome);
+		myCaptureQueriesListener.logSelectQueries();
+		assertThat(actualIds).asList().containsExactlyInAnyOrder("Patient/" + id.getIdPart() + "/_history/3", "Patient/" + id.getIdPart() + "/_history/2", "Patient/" + id.getIdPart() + "/_history/1");
+
+		if (myIncludePartitionIdsInSql) {
+			assertEquals("select count(*) from HFJ_RES_VER rht1_0 where rht1_0.PARTITION_ID in ('1') and rht1_0.RES_TYPE='Patient'", getSelectSql(0));
+		} else {
+			assertEquals("select count(*) from HFJ_RES_VER rht1_0 where rht1_0.RES_TYPE='Patient'", getSelectSql(0));
+		}
+
+		if (myIncludePartitionIdsInSql) {
+			assertThat(getSelectSql(1)).contains(" from HFJ_RES_VER rht1_0 where rht1_0.PARTITION_ID in ('1') and rht1_0.RES_TYPE='Patient' ");
+		} else {
+			assertThat(getSelectSql(1)).contains(" from HFJ_RES_VER rht1_0 where rht1_0.RES_TYPE='Patient' ");
+		}
+
+		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
+	}
+
+	@Test
+	public void testHistory_Server() {
+		// Setup
+		myPartitionSelectorInterceptor.setNextPartitionId(PARTITION_1);
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("http://foo").setValue("1");
+		IIdType id = myPatientDao.create(p, newRequest()).getId();
+		assertEquals("1", id.getVersionIdPart());
+
+		p.getIdentifierFirstRep().setValue("2");
+		id = myPatientDao.update(p, newRequest()).getId();
+		assertEquals("2", id.getVersionIdPart());
+
+		p.getIdentifierFirstRep().setValue("3");
+		id = myPatientDao.update(p, newRequest()).getId();
+		assertEquals("3", id.getVersionIdPart());
+		id = id.toUnqualifiedVersionless();
+
+		// Test
+		myCaptureQueriesListener.clear();
+		IBundleProvider outcome;
+		outcome = mySystemDao.history(null, null, null, newRequest());
+
+		// Verify
+		List<String> actualIds = toUnqualifiedIdValues(outcome);
+		myCaptureQueriesListener.logSelectQueries();
+		assertThat(actualIds).asList().containsExactlyInAnyOrder("Patient/" + id.getIdPart() + "/_history/3", "Patient/" + id.getIdPart() + "/_history/2", "Patient/" + id.getIdPart() + "/_history/1");
+
+		if (myIncludePartitionIdsInSql) {
+			assertEquals("select count(*) from HFJ_RES_VER rht1_0 where rht1_0.PARTITION_ID in ('1')", getSelectSql(0));
+		} else {
+			assertEquals("select count(*) from HFJ_RES_VER rht1_0", getSelectSql(0));
+		}
+
+		assertThat(getSelectSql(1)).contains(" from HFJ_RES_VER rht1_0 ");
+		if (myIncludePartitionIdsInSql) {
+			assertThat(getSelectSql(1)).contains(" where rht1_0.PARTITION_ID in ('1') ");
+		} else {
+			assertThat(getSelectSql(1)).doesNotContain(" where ");
+		}
+
+		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
+	}
 
 
 	@Test
@@ -1351,17 +1492,30 @@ public abstract class TestDefinitions implements ITestDataBuilder {
 		return toUnqualifiedVersionlessIdValues(theFound, fromIndex, toIndex, true);
 	}
 
-	private static List<String> toUnqualifiedVersionlessIdValues(IBundleProvider theFound, int theFromIndex, Integer theToIndex, boolean theFirstCall) {
-		theToIndex = 99999;
+	private static List<String> toUnqualifiedIdValues(IBundleProvider theFound) {
+		return toIdValues(theFound, false);
+	}
 
+	private static List<String> toUnqualifiedVersionlessIdValues(IBundleProvider theFound, int theFromIndex, Integer theToIndex, boolean theFirstCall) {
+		return toIdValues(theFound, true);
+	}
+
+	@Nonnull
+	private static List<String> toIdValues(IBundleProvider theFound, boolean theVersionless) {
 		List<String> retVal = new ArrayList<>();
 
 		IBundleProvider bundleProvider;
 		bundleProvider = theFound;
 
-		List<IBaseResource> resources = bundleProvider.getResources(theFromIndex, theToIndex);
+		List<IBaseResource> resources = bundleProvider.getResources(0, 99999);
 		for (IBaseResource next : resources) {
-			retVal.add(next.getIdElement().toUnqualifiedVersionless().getValue());
+			IIdType id = next.getIdElement();
+			if (theVersionless) {
+				id = id.toUnqualifiedVersionless();
+			} else {
+				id = id.toUnqualified();
+			}
+			retVal.add(id.getValue());
 		}
 		return retVal;
 	}

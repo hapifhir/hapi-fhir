@@ -440,7 +440,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		List<ExtendedHSearchResourceProjection> rawResourceDataList = session.search(ResourceTable.class)
 				.select(this::buildResourceSelectClause)
 				.where(
-						f -> f.id().matchingAny(thePids) // matches '_id' from resource index
+						f -> f.id().matchingAny(JpaPid.fromLongList(thePids)) // matches '_id' from resource index
 						)
 				.fetchAllHits();
 
@@ -464,7 +464,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 			SearchProjectionFactory<EntityReference, ResourceTable> f) {
 		return f.composite(
 				ExtendedHSearchResourceProjection::new,
-				f.field("myId", Long.class),
+				f.field("myId", JpaPid.class),
 				f.field("myForcedId", String.class),
 				f.field("myRawResource", String.class));
 	}
