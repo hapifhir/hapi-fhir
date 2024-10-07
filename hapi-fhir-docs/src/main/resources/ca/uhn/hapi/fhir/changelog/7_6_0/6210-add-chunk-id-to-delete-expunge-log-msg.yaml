@@ -2,5 +2,5 @@
 type: add
 issue: 6210
 jira: SMILE-8428
-title: "The batch instance and chunk IDs have been added to the logging MDC so that the IDs can be automatically added to 
+title: "Batch instance ID and chunk ID have been added to the logging context so that they can be automatically added to
 batch-related messages in the log."
