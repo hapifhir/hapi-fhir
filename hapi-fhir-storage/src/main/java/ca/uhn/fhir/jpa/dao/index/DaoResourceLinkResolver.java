@@ -133,7 +133,11 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 				RequestPartitionId requestPartitionId =
 						myPartitionHelperSvc.determineReadPartitionForRequestForRead(theRequest, targetResourceId);
 				// FIXME: make trace
-				ourLog.info("Searching for candidate target {}/{} in partition: {}", resourceType, idPart, requestPartitionId);
+				ourLog.info(
+						"Searching for candidate target {}/{} in partition: {}",
+						resourceType,
+						idPart,
+						requestPartitionId);
 				resolvedResource = myIdHelperService.resolveResourceIdentity(requestPartitionId, resourceType, idPart);
 				// FIXME: make trace
 				ourLog.info("Translated {}/{} to resource PID {}", type, idPart, resolvedResource);
@@ -142,11 +146,19 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 			}
 		} catch (ResourceNotFoundException e) {
 
+			// FIXME: remove
+			ourLog.info("Failed to find candidate target {}/{}", resourceType, idPart);
+
 			Optional<IBasePersistedResource> createdTableOpt = createPlaceholderTargetIfConfiguredToDoSo(
 					type, targetReference, idPart, theRequest, theTransactionDetails);
 			if (!createdTableOpt.isPresent()) {
 
+				// FIXME: remove
+				ourLog.info("Did not create placeholder target {}/{}", resourceType, idPart);
+
 				if (!myStorageSettings.isEnforceReferentialIntegrityOnWrite()) {
+					// FIXME: remove
+					ourLog.info("Not enforcing referential integrity for target {}/{}", resourceType, idPart);
 					return null;
 				}
 
@@ -155,7 +167,11 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 				throw new InvalidRequestException(Msg.code(1094) + "Resource " + resName + "/" + idPart
 						+ " not found, specified in path: " + sourcePath);
 			}
+
 			resolvedResource = createdTableOpt.get();
+
+			// FIXME: remove
+			ourLog.info("Created placeholder target {}/{}: {}", resourceType, idPart, resolvedResource);
 		}
 
 		ourLog.trace(
