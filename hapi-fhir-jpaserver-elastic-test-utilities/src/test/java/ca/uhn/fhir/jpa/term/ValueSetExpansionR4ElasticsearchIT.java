@@ -162,7 +162,7 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest implements I
 		codeSystem.setVersion("SYSTEM VERSION");
 		IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
 
-		ResourceTable table = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalArgumentException::new);
+		ResourceTable table = myResourceTableDao.findById(JpaPid.fromId(id.getIdPartAsLong())).orElseThrow(IllegalArgumentException::new);
 
 		TermCodeSystemVersion cs = new TermCodeSystemVersion();
 		cs.setResource(table);
@@ -264,7 +264,7 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest implements I
 		codeSystem.setName("SYSTEM NAME");
 		codeSystem.setVersion("SYSTEM VERSION");
 		IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
-		ResourceTable csResource = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalArgumentException::new);
+		ResourceTable csResource = myResourceTableDao.findById(JpaPid.fromId(id.getIdPartAsLong())).orElseThrow(IllegalArgumentException::new);
 
 		TermCodeSystemVersion codeSystemVersion = new TermCodeSystemVersion();
 		codeSystemVersion.setResource(csResource);
@@ -321,7 +321,7 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest implements I
 		codeSystem.setName("SYSTEM NAME");
 		codeSystem.setVersion("SYSTEM VERSION");
 		IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
-		ResourceTable csResource = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalArgumentException::new);
+		ResourceTable csResource = myResourceTableDao.findById(JpaPid.fromId(id.getIdPartAsLong())).orElseThrow(IllegalArgumentException::new);
 
 		TermCodeSystemVersion codeSystemVersion = new TermCodeSystemVersion();
 		codeSystemVersion.setResource(csResource);
