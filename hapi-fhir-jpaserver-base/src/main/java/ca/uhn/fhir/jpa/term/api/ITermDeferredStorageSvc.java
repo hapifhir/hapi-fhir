@@ -78,6 +78,8 @@ public interface ITermDeferredStorageSvc {
 
 	void logQueueForUnitTest();
 
+	boolean isJobsExecuting();
+
 	/**
 	 * Only to be used from tests - Disallow test timeouts on deferred tasks
 	 */

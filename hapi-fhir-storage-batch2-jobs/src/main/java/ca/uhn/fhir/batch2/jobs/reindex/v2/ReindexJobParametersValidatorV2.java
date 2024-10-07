@@ -17,10 +17,11 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.batch2.jobs.reindex;
+package ca.uhn.fhir.batch2.jobs.reindex.v2;
 
 import ca.uhn.fhir.batch2.api.IJobParametersValidator;
 import ca.uhn.fhir.batch2.jobs.parameters.IUrlListValidator;
+import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -28,11 +29,11 @@ import jakarta.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ReindexJobParametersValidator implements IJobParametersValidator<ReindexJobParameters> {
+public class ReindexJobParametersValidatorV2 implements IJobParametersValidator<ReindexJobParameters> {
 
 	private final IUrlListValidator myUrlListValidator;
 
-	public ReindexJobParametersValidator(IUrlListValidator theUrlListValidator) {
+	public ReindexJobParametersValidatorV2(IUrlListValidator theUrlListValidator) {
 		myUrlListValidator = theUrlListValidator;
 	}
 
