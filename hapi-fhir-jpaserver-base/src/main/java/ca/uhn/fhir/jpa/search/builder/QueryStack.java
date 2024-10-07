@@ -1477,7 +1477,6 @@ public class QueryStack {
 
 	public void addGrouping() {
 		BaseJoiningPredicateBuilder firstPredicateBuilder = mySqlBuilder.getOrCreateFirstPredicateBuilder();
-		// mySqlBuilder.getSelect().addGroupings(firstPredicateBuilder.getJoinColumns());
 		// we always select partition_id, even if not joining.
 		mySqlBuilder.getSelect().addGroupings(new DbColumn[] {
 			firstPredicateBuilder.getPartitionIdColumn(), firstPredicateBuilder.getResourceIdColumn()
