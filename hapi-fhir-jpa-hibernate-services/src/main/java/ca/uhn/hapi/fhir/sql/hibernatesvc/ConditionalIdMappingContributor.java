@@ -59,15 +59,15 @@ public class ConditionalIdMappingContributor implements org.hibernate.boot.spi.A
 
 	@Override
 	public void contribute(
-		AdditionalMappingContributions theContributions,
-		InFlightMetadataCollector theMetadata,
-		ResourceStreamLocator theResourceStreamLocator,
-		MetadataBuildingContext theBuildingContext) {
+			AdditionalMappingContributions theContributions,
+			InFlightMetadataCollector theMetadata,
+			ResourceStreamLocator theResourceStreamLocator,
+			MetadataBuildingContext theBuildingContext) {
 
-		StandardServiceRegistry serviceRegistry = theMetadata
-			.getBootstrapContext()
-			.getServiceRegistry();
-		HapiHibernateDialectSettingsService hapiSettingsSvc = serviceRegistry.getService(HapiHibernateDialectSettingsService.class);
+		StandardServiceRegistry serviceRegistry =
+				theMetadata.getBootstrapContext().getServiceRegistry();
+		HapiHibernateDialectSettingsService hapiSettingsSvc =
+				serviceRegistry.getService(HapiHibernateDialectSettingsService.class);
 		assert hapiSettingsSvc != null;
 		if (!hapiSettingsSvc.isTrimConditionalIdsFromPrimaryKeys()) {
 			return;
@@ -79,7 +79,8 @@ public class ConditionalIdMappingContributor implements org.hibernate.boot.spi.A
 	}
 
 	@SuppressWarnings("unchecked")
-	private void removeConditionalIdProperties(ClassLoaderService theClassLoaderService, InFlightMetadataCollector theMetadata) {
+	private void removeConditionalIdProperties(
+			ClassLoaderService theClassLoaderService, InFlightMetadataCollector theMetadata) {
 
 		// Adjust primary keys - this handles @IdClass PKs, which are the
 		// ones we use in most places
@@ -108,7 +109,7 @@ public class ConditionalIdMappingContributor implements org.hibernate.boot.spi.A
 				}
 				if (field == null) {
 					throw new ConfigurationException(
-						"Failed to find field " + fieldName + " on type: " + entityType.getName());
+							"Failed to find field " + fieldName + " on type: " + entityType.getName());
 				}
 
 				ConditionalIdProperty remove = field.getAnnotation(ConditionalIdProperty.class);
@@ -116,11 +117,11 @@ public class ConditionalIdMappingContributor implements org.hibernate.boot.spi.A
 					Property removedProperty = properties.remove(i);
 					idRemovedColumns.addAll(removedProperty.getColumns());
 					idRemovedColumnNames.addAll(removedProperty.getColumns().stream()
-						.map(Column::getName)
-						.collect(Collectors.toSet()));
+							.map(Column::getName)
+							.collect(Collectors.toSet()));
 					removedProperty.getColumns().stream()
-						.map(theColumn -> table.getName() + "#" + theColumn.getName())
-						.forEach(myQualifiedIdRemovedColumnNames::add);
+							.map(theColumn -> table.getName() + "#" + theColumn.getName())
+							.forEach(myQualifiedIdRemovedColumnNames::add);
 					idRemovedProperties.add(removedProperty.getName());
 					i--;
 
@@ -181,8 +182,8 @@ public class ConditionalIdMappingContributor implements org.hibernate.boot.spi.A
 
 					PrimaryKey primaryKey = c.getTable().getPrimaryKey();
 					primaryKey
-						.getColumns()
-						.removeIf(t -> myQualifiedIdRemovedColumnNames.contains(tableName + "#" + t.getName()));
+							.getColumns()
+							.removeIf(t -> myQualifiedIdRemovedColumnNames.contains(tableName + "#" + t.getName()));
 
 					for (Column nextColumn : c.getTable().getColumns()) {
 						if (myQualifiedIdRemovedColumnNames.contains(tableName + "#" + nextColumn.getName())) {
@@ -272,27 +273,27 @@ public class ConditionalIdMappingContributor implements org.hibernate.boot.spi.A
 					ToOne manyToOne = (ToOne) value;
 
 					String targetTableName = theMetadata
-						.getEntityBindingMap()
-						.get(manyToOne.getReferencedEntityName())
-						.getTable()
-						.getName();
+							.getEntityBindingMap()
+							.get(manyToOne.getReferencedEntityName())
+							.getTable()
+							.getName();
 					Class<?> entityType = getType(theClassLoaderService, nextEntry.getKey());
 					String propertyName = manyToOne.getPropertyName();
 					Set<String> columnNamesToRemoveFromFks =
-						determineFilteredColumnNamesInForeignKey(entityType, propertyName, targetTableName);
+							determineFilteredColumnNamesInForeignKey(entityType, propertyName, targetTableName);
 
 					removeColumns(manyToOne.getColumns(), t1 -> columnNamesToRemoveFromFks.contains(t1.getName()));
 					removeColumns(foreignKey.getColumns(), t1 -> columnNamesToRemoveFromFks.contains(t1.getName()));
 
 					columnNamesToRemoveFromFks.forEach(
-						t -> myQualifiedIdRemovedColumnNames.add(table.getName() + "#" + t));
+							t -> myQualifiedIdRemovedColumnNames.add(table.getName() + "#" + t));
 
 				} else {
 
 					foreignKey
-						.getColumns()
-						.removeIf(t -> myQualifiedIdRemovedColumnNames.contains(
-							foreignKey.getReferencedTable().getName() + "#" + t.getName()));
+							.getColumns()
+							.removeIf(t -> myQualifiedIdRemovedColumnNames.contains(
+									foreignKey.getReferencedTable().getName() + "#" + t.getName()));
 				}
 			}
 		}
@@ -310,9 +311,9 @@ public class ConditionalIdMappingContributor implements org.hibernate.boot.spi.A
 						DependantValue dependantValue = (DependantValue) propertyKey;
 
 						dependantValue
-							.getColumns()
-							.removeIf(t -> myQualifiedIdRemovedColumnNames.contains(
-								propertyValueBag.getCollectionTable().getName() + "#" + t.getName()));
+								.getColumns()
+								.removeIf(t -> myQualifiedIdRemovedColumnNames.contains(
+										propertyValueBag.getCollectionTable().getName() + "#" + t.getName()));
 					}
 				}
 			}
@@ -321,7 +322,7 @@ public class ConditionalIdMappingContributor implements org.hibernate.boot.spi.A
 
 	@Nonnull
 	private Set<String> determineFilteredColumnNamesInForeignKey(
-		Class<?> theEntityType, String thePropertyName, String theTargetTableName) {
+			Class<?> theEntityType, String thePropertyName, String theTargetTableName) {
 		Field field = getField(theEntityType, thePropertyName);
 		Validate.notNull(field, "Unable to find field %s on entity %s", thePropertyName, theEntityType.getName());
 		JoinColumns joinColumns = field.getAnnotation(JoinColumns.class);
@@ -343,7 +344,7 @@ public class ConditionalIdMappingContributor implements org.hibernate.boot.spi.A
 	}
 
 	private static void updateComponentWithNewPropertyList(
-		Component identifierMapper, List<Property> finalPropertyList) {
+			Component identifierMapper, List<Property> finalPropertyList) {
 		CompositeType type = identifierMapper.getType();
 		if (type instanceof ComponentType) {
 			ComponentType ect = (ComponentType) type;

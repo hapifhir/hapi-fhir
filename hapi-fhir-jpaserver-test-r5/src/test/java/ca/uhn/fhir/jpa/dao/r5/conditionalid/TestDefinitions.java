@@ -365,8 +365,8 @@ public abstract class TestDefinitions implements ITestDataBuilder {
 			assertThat(getSelectSql(3)).contains("from HFJ_RES_LINK rl1_0 where rl1_0.PARTITION_ID='0' and rl1_0.SRC_RESOURCE_ID in ('" + ids.parentOrgPid() + "') ");
 		} else {
 			assertThat(getSelectSql(0)).contains("WHERE (t0.TARGET_RESOURCE_ID = '" + ids.patientPid() + "') ");
-			assertThat(getSelectSql(0)).contains("GROUP BY t0.SRC_RESOURCE_ID ");
-			assertThat(getSelectSql(0)).endsWith("ORDER BY t0.SRC_RESOURCE_ID");
+			assertThat(getSelectSql(0)).contains(" GROUP BY t0.PARTITION_ID,t0.SRC_RESOURCE_ID ");
+			assertThat(getSelectSql(0)).endsWith(" ORDER BY t0.SRC_RESOURCE_ID");
 			assertThat(getSelectSql(1)).containsAnyOf(
 				"from HFJ_RES_LINK rl1_0 where rl1_0.SRC_RESOURCE_ID in ('" + ids.patientPid() + "','" + ids.encounterPid() + "') ",
 				"from HFJ_RES_LINK rl1_0 where rl1_0.SRC_RESOURCE_ID in ('" + ids.encounterPid() + "','" + ids.patientPid() + "') "
