@@ -23,7 +23,6 @@ import org.hibernate.search.mapper.pojo.bridge.ValueBridge;
 import org.hibernate.search.mapper.pojo.bridge.runtime.ValueBridgeFromIndexedValueContext;
 import org.hibernate.search.mapper.pojo.bridge.runtime.ValueBridgeToIndexedValueContext;
 
-// FIXME: still needed?
 // TODO: JA2 make this partition aware
 public class JpaPidValueBridge implements ValueBridge<JpaPid, Long> {
 
@@ -36,17 +35,4 @@ public class JpaPidValueBridge implements ValueBridge<JpaPid, Long> {
 	public JpaPid fromIndexedValue(Long value, ValueBridgeFromIndexedValueContext context) {
 		return JpaPid.fromId(value);
 	}
-
-	//	@Override
-	//	public String toDocumentIdentifier(JpaPid propertyValue, IdentifierBridgeToDocumentIdentifierContext context) {
-	//		return propertyValue.getId().toString();
-	//	}
-	//
-	//	@Override
-	//	public JpaPid fromDocumentIdentifier(
-	//			String documentIdentifier, IdentifierBridgeFromDocumentIdentifierContext context) {
-	//		long pid = Long.parseLong(documentIdentifier);
-	//		return JpaPid.fromId(pid);
-	//	}
-
 }

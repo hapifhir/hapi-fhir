@@ -2452,7 +2452,6 @@ public class QueryStack {
 	 */
 	private Condition createPredicateResourcePID(
 			DbColumn[] theSourceJoinColumn, List<List<IQueryParameterType>> theAndOrParams) {
-		// FIXME: who calls this? it just assumed IDs are longs and isn't partition aware - maybe make a keep test?
 		DbColumn pidColumn = getResourceIdColumn(theSourceJoinColumn);
 
 		if (pidColumn == null) {

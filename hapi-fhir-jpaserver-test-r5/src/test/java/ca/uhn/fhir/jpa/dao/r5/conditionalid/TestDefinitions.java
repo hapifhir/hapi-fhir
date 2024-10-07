@@ -1325,8 +1325,6 @@ public abstract class TestDefinitions implements ITestDataBuilder {
 		assertEquals(8, myCaptureQueriesListener.countSelectQueries());
 	}
 
-	// FIXME: add test with includes and revincludes with canonical URL
-
 	@Test
 	public void testUpdateAsCreate() {
 		// Setup
@@ -1354,7 +1352,6 @@ public abstract class TestDefinitions implements ITestDataBuilder {
 		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
 	}
 
-	// FIXME: add a history test
 	private SystemRequestDetails newRequest() {
 		return new SystemRequestDetails();
 	}

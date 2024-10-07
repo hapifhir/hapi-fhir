@@ -124,7 +124,6 @@ public class ResourceIdPredicateBuilder extends BasePredicateBuilder {
 			assert operation == SearchFilterParser.CompareOperation.eq
 					|| operation == SearchFilterParser.CompareOperation.ne;
 
-			// FIXME: needed?
 			if (theSourceJoinColumn == null) {
 				BaseJoiningPredicateBuilder queryRootTable = super.getOrCreateQueryRootTable(!allIdsAreForcedIds);
 				Condition predicate;
