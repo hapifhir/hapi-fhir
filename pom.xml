@@ -922,6 +922,11 @@
 			<organization>Galileo, Inc.</organization>
 		</developer>
 		<developer>
+			<id>Jake-Gillberg</id>
+			<name>Jake Gillberg</name>
+			<organization>Galileo, Inc.</organization>
+		</developer>
+		<developer>
 			<id>melihaydogd</id>
 			<name>Ahmet Melih Aydoğdu</name>
 		</developer>
@@ -949,7 +954,7 @@
 	</licenses>
 
 	<properties>
-		<fhir_core_version>6.3.23</fhir_core_version>
+		<fhir_core_version>6.3.25</fhir_core_version>
 		<spotless_version>2.41.1</spotless_version>
 		<surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx2048m</surefire_jvm_args>
 
@@ -1015,8 +1020,7 @@
 		<maven_assembly_plugin_version>3.3.0</maven_assembly_plugin_version>
 		<maven_license_plugin_version>1.8</maven_license_plugin_version>
 		<okhttp_version>4.12.0</okhttp_version>
-		<otel.version>1.38.0</otel.version> <!-- BOM Version -->
-		<otel_instrumentation.version>2.4.0</otel_instrumentation.version>
+		<otel_instrumentation.version>2.8.0</otel_instrumentation.version>
 		<poi_version>4.1.2</poi_version>
 		<poi_ooxml_schemas_version>1.4</poi_ooxml_schemas_version>
 		<resteasy_version>6.2.9.Final</resteasy_version>
@@ -2280,19 +2284,16 @@
 				<scope>provided</scope>
 				<optional>true</optional>
 			</dependency>
+
 			<!-- OpenTelemetry -->
 			<dependency>
-				<groupId>io.opentelemetry</groupId>
-				<artifactId>opentelemetry-bom</artifactId>
-				<version>${otel.version}</version>
+				<groupId>io.opentelemetry.instrumentation</groupId>
+				<artifactId>opentelemetry-instrumentation-bom</artifactId>
+				<version>${otel_instrumentation.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
-			<dependency>
-				<groupId>io.opentelemetry.instrumentation</groupId>
-				<artifactId>opentelemetry-instrumentation-annotations</artifactId>
-				<version>${otel_instrumentation.version}</version>
-			</dependency>
+
 			<dependency>
 				<groupId>org.assertj</groupId>
 				<artifactId>assertj-core</artifactId>

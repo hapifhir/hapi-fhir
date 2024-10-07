@@ -44,6 +44,7 @@ import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters.OPTIMIZE_STORAGE;
 import static ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters.REINDEX_SEARCH_PARAMETERS;
+import static ca.uhn.fhir.batch2.jobs.reindex.ReindexUtils.JOB_REINDEX;
 
 public class ReindexProvider {
 
@@ -127,7 +128,7 @@ public class ReindexProvider {
 		myJobPartitionProvider.getPartitionedUrls(theRequestDetails, urls).forEach(params::addPartitionedUrl);
 
 		JobInstanceStartRequest request = new JobInstanceStartRequest();
-		request.setJobDefinitionId(ReindexAppCtx.JOB_REINDEX);
+		request.setJobDefinitionId(JOB_REINDEX);
 		request.setParameters(params);
 		Batch2JobStartResponse response = myJobCoordinator.startInstance(theRequestDetails, request);
 

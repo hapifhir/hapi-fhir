@@ -22,7 +22,6 @@ package ca.uhn.fhir.jpa.term;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
-import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
@@ -79,6 +78,8 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc, IHas
 	private static final long SAVE_ALL_DEFERRED_WARN_MINUTES = 1;
 	private static final long SAVE_ALL_DEFERRED_ERROR_MINUTES = 5;
 	private boolean myAllowDeferredTasksTimeout = true;
+	private static final List<String> BATCH_JOBS_TO_CARE_ABOUT =
+			List.of(TERM_CODE_SYSTEM_DELETE_JOB_NAME, TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
 	private final List<TermCodeSystem> myDeferredCodeSystemsDeletions = Collections.synchronizedList(new ArrayList<>());
 	private final Queue<TermCodeSystemVersion> myDeferredCodeSystemVersionsDeletions = new ConcurrentLinkedQueue<>();
 	private final List<TermConcept> myDeferredConcepts = Collections.synchronizedList(new ArrayList<>());
@@ -436,7 +437,7 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc, IHas
 		return retVal;
 	}
 
-	private boolean isJobsExecuting() {
+	public boolean isJobsExecuting() {
 		cleanseEndedJobs();
 
 		return !myJobExecutions.isEmpty();
@@ -448,15 +449,18 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc, IHas
 		 * This is mostly a fail-safe
 		 * because "cancelled" jobs are never removed.
 		 */
-		List<String> executions = new ArrayList<>(myJobExecutions);
 		List<String> idsToDelete = new ArrayList<>();
-		for (String id : executions) {
-			// TODO - might want to consider a "fetch all instances"
-			JobInstance instance = myJobCoordinator.getInstance(id);
-			if (StatusEnum.getEndedStatuses().contains(instance.getStatus())) {
+		for (String jobId : BATCH_JOBS_TO_CARE_ABOUT) {
+			List<JobInstance> jobInstanceInEndedState = myJobCoordinator.getInstancesbyJobDefinitionIdAndEndedStatus(
+					jobId,
+					true, // ended = true (COMPLETED, FAILED, CANCELLED jobs only)
+					Math.max(myJobExecutions.size(), 1), // at most this many
+					0);
+			for (JobInstance instance : jobInstanceInEndedState) {
 				idsToDelete.add(instance.getInstanceId());
 			}
 		}
+
 		for (String id : idsToDelete) {
 			myJobExecutions.remove(id);
 		}
