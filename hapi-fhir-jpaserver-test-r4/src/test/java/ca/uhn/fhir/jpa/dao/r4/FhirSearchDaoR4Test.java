@@ -17,9 +17,12 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.storage.test.BaseDateSearchDaoTests;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -33,6 +36,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class FhirSearchDaoR4Test extends BaseJpaR4Test implements IR4SearchIndexTests {
 
+	private static final Logger ourLog = LoggerFactory.getLogger(FhirSearchDaoR4Test.class);
+
 	@Autowired
 	private IFulltextSearchSvc mySearchDao;
 
@@ -42,6 +47,11 @@ public class FhirSearchDaoR4Test extends BaseJpaR4Test implements IR4SearchIndex
 	@Override
 	public IInterceptorService getInterceptorService() {
 		return myInterceptorRegistry;
+	}
+
+	@Override
+	public Logger getLogger() {
+		return ourLog;
 	}
 
 	@Override

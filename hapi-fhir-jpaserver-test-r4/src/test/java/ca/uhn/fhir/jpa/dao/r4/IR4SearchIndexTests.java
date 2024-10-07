@@ -21,6 +21,7 @@ import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.slf4j.Logger;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -28,7 +29,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Date;
-import java.util.regex.Pattern;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -40,6 +40,8 @@ public interface IR4SearchIndexTests {
 	DaoRegistry getDaoRegistry();
 
 	DataSource getDataSource();
+
+	Logger getLogger();
 
 	@SuppressWarnings("unchecked")
 	private <T extends IBaseResource> IFhirResourceDao<T> getResourceDao(String theResourceType) {
@@ -54,11 +56,9 @@ public interface IR4SearchIndexTests {
 		"1999-12-31,1999-01-01,",
 		"1999-12-31,,2000-12-31",
 		"1999-12-31,1999-12-31,1999-12-31"
-		// TODO - add times; not realistic for bdays, but the same issue arises
 	})
 	default void search_dateValues_usesWhereToHelpQueryPlans(String theBirthdate, String theLowerBound, String theUpperBound) {
 		// setup
-		Pattern pattern = Pattern.compile("(\\(\\w+\\.\\w+\\s*(?:\\Q>=\\E|\\Q<=\\E)\\s*\\'[0-9-]*\\s\\d{2}:\\d{2}:\\d{2}\\.\\d+\\'\\))");
 		RequestDetails rd = new SystemRequestDetails();
 		DateTimeType birthdayDateTime = new DateTimeType();
 		birthdayDateTime.setValueAsString(theBirthdate);
@@ -77,7 +77,6 @@ public interface IR4SearchIndexTests {
 				patient.setBirthDate(birthdayDateTime.getValue());
 			} else {
 				Date d = birthdayDateTime.getValue();
-//				d.setMonth(i);
 				d.setYear(2000 - i);
 				patient.setBirthDate(d);
 			}
@@ -115,30 +114,19 @@ public interface IR4SearchIndexTests {
 			public void captureSql(ServletRequestDetails theRequestDetails, SqlQueryList theQueries) {
 				for (SqlQuery q : theQueries) {
 					String sql = q.getSql(true, false);
-//					log(theRequestDetails, sql);
-//					Matcher matcher = pattern.matcher(sql);
-//					List<String> whereClauseParts = new ArrayList<>();
-//					while (matcher.find()) {
-//						whereClauseParts.add(matcher.group());
-//					}
-//
-//					// it has date param calcs means it's a date query
-//					if (!whereClauseParts.isEmpty()) {
+
+					StringBuilder sb = new StringBuilder();
 					try (Connection connection = getDataSource().getConnection()) {
 						try (Statement stmt = connection.createStatement()) {
 							ResultSet results = stmt.executeQuery("explain analyze " + sql);
-							System.out.println("hi");
 							while (results.next()) {
-								System.out.println(results.getString(1));
+								sb.append(results.getString(1));
 							}
-							System.out.println("----");
 						}
 					} catch (SQLException theE) {
 						throw new RuntimeException(theE);
 					}
-//					} else {
-//						System.out.println("blah");
-//					}
+					log(theRequestDetails, sb.toString());
 				}
 			}
 
@@ -158,12 +146,14 @@ public interface IR4SearchIndexTests {
 			}
 
 			private void log(ServletRequestDetails theRequestDetails, String theMsg) {
-				System.out.println(theMsg);
+				getLogger().info(theMsg);
 			}
 		};
+
 		try {
 			getInterceptorService().registerInterceptor(interceptor);
 
+			// test
 			IBundleProvider results = patientDao.search(searchParameterMap, rd);
 
 			// verify
