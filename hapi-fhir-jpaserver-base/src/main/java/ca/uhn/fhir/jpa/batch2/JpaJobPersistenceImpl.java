@@ -268,7 +268,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 				.execute(() -> myWorkChunkRepository.fetchWorkChunkStatusForInstance(theInstanceId));
 	}
 
-	@javax.annotation.Nonnull
+	@Nonnull
 	@Override
 	public BatchInstanceStatusDTO fetchBatchInstanceStatus(String theInstanceId) {
 		return myTransactionService
