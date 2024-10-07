@@ -601,5 +601,55 @@ public class MdmOperationPointcutsIT extends BaseProviderR4Test {
 			assertFalse(retval.isEmpty());
 		}
 
+		@Test
+		public void updateLink_NoMatch_LinkEvent_allUpdates() {
+			// When a Link is set to "NO_MATCH", it can cause other link updates.
+			// If a source record would be left unlinked to any
+			// golden record, a new link / golden record would be created.
+
+			// setup
+			String inputState = """
+				GP1, AUTO, MATCH, P1
+			""";
+			MDMState<Patient, JpaPid> state = new MDMState<>();
+			state.setInputState(inputState);
+
+			// we won't use for validation, just setup
+			myMdmLinkHelper.setup(state);
+
+			Patient patient = state.getParameter("P1");
+			Patient originalPatientGolden = state.getParameter("GP1");
+
+			AtomicBoolean called = new AtomicBoolean(false);
+
+			Object interceptor = new Object() {
+				@Hook(Pointcut.MDM_POST_UPDATE_LINK)
+				void onUpdate(RequestDetails theDetails, MdmLinkEvent theEvent) {
+					called.getAndSet(true);
+					assertThat(theEvent.getMdmLinks()).hasSize(2);
+
+					MdmLinkJson originalLink = theEvent.getMdmLinks().get(0);
+					MdmLinkJson newLink = theEvent.getMdmLinks().get(1);
+					String original_target = "Patient/" + originalPatientGolden.getIdPart();
+
+					assertThat(originalLink.getGoldenResourceId()).isEqualTo(original_target);
+					assertThat(newLink.getGoldenResourceId()).isNotEqualTo(original_target);
+				}
+			};
+			myInterceptors.add(interceptor);
+			myInterceptorService.registerInterceptor(interceptor);
+
+			// test
+			myMdmProvider.updateLink(
+				new StringType("Patient/" + originalPatientGolden.getIdPart()),
+				new StringType("Patient/" + patient.getIdPart()),
+				new StringType("NO_MATCH"),
+				new ServletRequestDetails()
+			);
+
+			// verify
+			assertTrue(called.get());
+		}
+
 
 }
