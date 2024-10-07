@@ -254,6 +254,7 @@ public abstract class TestDefinitions implements ITestDataBuilder {
 		IIdType patientId = createPatient(withActiveTrue());
 
 		// Test
+		ourLog.info("Starting to test testCreate_ReferenceToResourceInOtherPartition");
 		myPartitionSelectorInterceptor.setNextPartitionId(PARTITION_1);
 		try {
 			IIdType obsId = createObservation(withSubject(patientId));

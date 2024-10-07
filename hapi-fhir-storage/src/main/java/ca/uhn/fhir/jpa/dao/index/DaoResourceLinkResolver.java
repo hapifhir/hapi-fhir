@@ -123,14 +123,20 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 			}
 		}
 
-		IResourceLookup resolvedResource;
+		// FIXME: make trace
+		ourLog.info("For reference {} at path {} haqve resolved: {}", targetReference, sourcePath, persistentId);
+
+		IResourceLookup<?> resolvedResource;
 		String idPart = targetResourceId.getIdPart();
 		try {
 			if (persistentId == null) {
 				RequestPartitionId requestPartitionId =
 						myPartitionHelperSvc.determineReadPartitionForRequestForRead(theRequest, targetResourceId);
+				// FIXME: make trace
+				ourLog.info("Searching for candidate target {}/{} in partition: {}", resourceType, idPart, requestPartitionId);
 				resolvedResource = myIdHelperService.resolveResourceIdentity(requestPartitionId, resourceType, idPart);
-				ourLog.trace("Translated {}/{} to resource PID {}", type, idPart, resolvedResource);
+				// FIXME: make trace
+				ourLog.info("Translated {}/{} to resource PID {}", type, idPart, resolvedResource);
 			} else {
 				resolvedResource = new ResourceLookupPersistentIdWrapper(persistentId);
 			}
