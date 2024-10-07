@@ -33,6 +33,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -46,6 +47,8 @@ public class DateParam extends BaseParamWithPrefix<DateParam>
 	private static final long serialVersionUID = 1L;
 
 	private final DateParamDateTimeHolder myValue = new DateParamDateTimeHolder();
+
+	private final List<Constraint<Date>> myConstraints = new ArrayList<>();
 
 	/**
 	 * Constructor
@@ -103,6 +106,18 @@ public class DateParam extends BaseParamWithPrefix<DateParam>
 	 */
 	public DateParam(String theString) {
 		setValueAsQueryToken(null, null, null, theString);
+	}
+
+	public void addConstraint(Constraint<Date> theConstraint) {
+		myConstraints.add(theConstraint);
+	}
+
+	public boolean hasAdditionalConstraints() {
+		return !myConstraints.isEmpty();
+	}
+
+	public List<Constraint<Date>> getConstraints() {
+		return myConstraints;
 	}
 
 	@Override

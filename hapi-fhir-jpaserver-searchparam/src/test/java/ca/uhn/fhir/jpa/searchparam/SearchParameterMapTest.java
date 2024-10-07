@@ -6,12 +6,17 @@ import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.SearchContainedModeEnum;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import java.sql.Date;
 import java.time.Instant;
@@ -20,9 +25,11 @@ import java.util.List;
 
 import static ca.uhn.fhir.jpa.searchparam.SearchParameterMap.compare;
 import static ca.uhn.fhir.rest.param.TokenParamModifier.TEXT;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class SearchParameterMapTest {
 	static FhirContext ourFhirContext = FhirContext.forR4Cached();
@@ -198,6 +205,52 @@ class SearchParameterMapTest {
 		assertEquals(orig.get("int"), clone.get("int"));
 	}
 
+	@ParameterizedTest
+	@CsvSource(value = {
+//		"2000-01-01,2000-12-31",
+		"2000-01-01,",
+//		",2000-12-31",
+//		"2000-01-01,2000-01-01"
+	})
+	public void add_dateRangeParam_spreadsParamsAcrossBothHighAndLow(String theLow, String theHigh) {
+		// setup
+		SearchParameterMap map = new SearchParameterMap();
+		boolean hasLowerBound = isNotBlank(theLow);
+		boolean hasUpperBound = isNotBlank(theHigh);
+
+		// test
+		DateRangeParam dp = new DateRangeParam();
+		if (hasLowerBound) {
+			dp.setLowerBound(theLow);
+		}
+		if (hasUpperBound) {
+			dp.setUpperBound(theHigh);
+		}
+		map.add("birthdate", dp);
+
+		// verify
+		List<List<IQueryParameterType>> params = map.get("birthdate");
+		assertEquals(1, params.size());
+		List<IQueryParameterType> sublist = params.get(0);
+
+		Multimap<String, String> countsOfPrefixes = HashMultimap.create();
+		if (hasLowerBound && hasUpperBound) {
+			assertEquals(4, sublist.size());
+			for (IQueryParameterType pt : sublist) {
+				assertTrue(pt instanceof DateParam);
+				DateParam d = (DateParam) pt;
+				countsOfPrefixes.put(d.getValueAsString(), d.getPrefix().getValue());
+			}
+		} else {
+			assertEquals(2, sublist.size());
+			for (IQueryParameterType pt : sublist) {
+				assertTrue(pt instanceof DateParam);
+				DateParam d = (DateParam) pt;
+				countsOfPrefixes.put(d.getValueAsString(), d.getPrefix().getValue());
+			}
+		}
+		System.out.println("hi");
+	}
 
 	@Test
 	public void testCompareParameters() {

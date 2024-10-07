@@ -30,6 +30,7 @@ import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.SummaryEnum;
+import ca.uhn.fhir.rest.param.Constraint;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
@@ -158,6 +159,7 @@ public class SearchParameterMap implements Serializable {
 		return this;
 	}
 
+	@SuppressWarnings("unchecked")
 	public SearchParameterMap add(String theName, IQueryParameterAnd<?> theAnd) {
 		if (theAnd == null) {
 			return this;
@@ -166,11 +168,50 @@ public class SearchParameterMap implements Serializable {
 			put(theName, new ArrayList<>());
 		}
 
-		for (IQueryParameterOr<?> next : theAnd.getValuesAsQueryTokens()) {
-			if (next == null) {
-				continue;
+		List<List<IQueryParameterType>> paramList = get(theName);
+
+		if (theAnd instanceof DateRangeParam) {
+			/*
+			 * We handle DateRange parameters differently.
+			 * All of our date-range fields have a high_field and a low_field;
+			 * in all cases, our high_field > low_field.
+			 * But the db/query planner doesn't know this, so it makes
+			 * bad decisions and looks at all values of low_field >= lowerbound
+			 * (including low_field >= upperbound).
+			 * Because this is inefficient, we need to add additional constraints
+			 * to these DateParam values.
+			 *
+			 * ie, we want low_field >= lowerbound && high_field >= lowerbound (trivially always true)
+			 * and high_field <= upperbound && low_field <= upperbound (trivially always true)
+			 * in order to 'help' the query planner be more efficient
+			 */
+			DateRangeParam dp = (DateRangeParam) theAnd;
+			DateParam lower = dp.getLowerBound();
+			DateParam upper = dp.getUpperBound();
+			if (lower != null && upper != null && lower.getValue().equals(upper.getValue())) {
+				lower.setPrefix(ParamPrefixEnum.EQUAL);
+				paramList.add(List.of(lower));
+			} else {
+				if (lower != null) {
+					if (upper != null && !upper.getValue().equals(lower.getValue())) {
+						lower.addConstraint(new Constraint<>(upper.getValue(), Constraint.Type.UPPER));
+					}
+					paramList.add(List.of(lower));
+				}
+				if (upper != null) {
+					if (lower != null && !upper.getValue().equals(lower.getValue())) {
+						upper.addConstraint(new Constraint<>(lower.getValue(), Constraint.Type.LOWER));
+					}
+					paramList.add(List.of(upper));
+				}
 			}
-			get(theName).add((List<IQueryParameterType>) next.getValuesAsQueryTokens());
+		} else {
+			for (IQueryParameterOr<?> next : theAnd.getValuesAsQueryTokens()) {
+				if (next == null) {
+					continue;
+				}
+				paramList.add((List<IQueryParameterType>) next.getValuesAsQueryTokens());
+			}
 		}
 		return this;
 	}

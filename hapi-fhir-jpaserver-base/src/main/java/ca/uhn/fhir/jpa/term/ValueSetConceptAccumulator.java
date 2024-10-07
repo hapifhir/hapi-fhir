@@ -190,6 +190,7 @@ public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 			concept.clearSourceConceptDirectParentPidsLob();
 		}
 
+		// TODO - saveing the concept
 		myValueSetConceptDao.save(concept);
 		myValueSetDao.save(myTermValueSet.incrementTotalConcepts());
 

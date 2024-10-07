@@ -25,6 +25,7 @@ import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.rest.param.Constraint;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
@@ -39,6 +40,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
+import java.util.List;
 
 public class DatePredicateBuilder extends BaseSearchParamPredicateBuilder {
 
@@ -76,7 +78,11 @@ public class DatePredicateBuilder extends BaseSearchParamPredicateBuilder {
 			DateParam date = (DateParam) theParam;
 			if (!date.isEmpty()) {
 				if (theOperation == SearchFilterParser.CompareOperation.ne) {
+					List<Constraint<Date>> constraints = date.getConstraints();
 					date = new DateParam(ParamPrefixEnum.EQUAL, date.getValueAsString());
+					for (Constraint<Date> constraint : constraints) {
+						date.addConstraint(constraint);
+					}
 				}
 				DateRangeParam range = new DateRangeParam(date);
 				p = createPredicateDateFromRange(range, theOperation);
@@ -97,152 +103,9 @@ public class DatePredicateBuilder extends BaseSearchParamPredicateBuilder {
 	private Condition createPredicateDateFromRange(
 			DateRangeParam theRange, SearchFilterParser.CompareOperation theOperation) {
 
-		Date lowerBoundInstant = theRange.getLowerBoundAsInstant();
-		Date upperBoundInstant = theRange.getUpperBoundAsInstant();
+		DatePredicateBounds datePredicateBounds = new DatePredicateBounds(theRange);
 
-		DateParam lowerBound = theRange.getLowerBound();
-		DateParam upperBound = theRange.getUpperBound();
-		Integer lowerBoundAsOrdinal = theRange.getLowerBoundAsDateInteger();
-		Integer upperBoundAsOrdinal = theRange.getUpperBoundAsDateInteger();
-		Comparable<?> genericLowerBound;
-		Comparable<?> genericUpperBound;
-
-		/*
-		 * If all present search parameters are of DAY precision, and {@link ca.uhn.fhir.jpa.model.entity.StorageSettings#getUseOrdinalDatesForDayPrecisionSearches()} is true,
-		 * then we attempt to use the ordinal field for date comparisons instead of the date field.
-		 */
-		boolean isOrdinalComparison = isNullOrDatePrecision(lowerBound)
-				&& isNullOrDatePrecision(upperBound)
-				&& myStorageSettings.getUseOrdinalDatesForDayPrecisionSearches();
-
-		Condition lt;
-		Condition gt;
-		Condition lb = null;
-		Condition ub = null;
-		DatePredicateBuilder.ColumnEnum lowValueField;
-		DatePredicateBuilder.ColumnEnum highValueField;
-
-		if (isOrdinalComparison) {
-			lowValueField = DatePredicateBuilder.ColumnEnum.LOW_DATE_ORDINAL;
-			highValueField = DatePredicateBuilder.ColumnEnum.HIGH_DATE_ORDINAL;
-			genericLowerBound = lowerBoundAsOrdinal;
-			genericUpperBound = upperBoundAsOrdinal;
-			if (upperBound != null && upperBound.getPrecision().ordinal() <= TemporalPrecisionEnum.MONTH.ordinal()) {
-				genericUpperBound = Integer.parseInt(DateUtils.getCompletedDate(upperBound.getValueAsString())
-						.getRight()
-						.replace("-", ""));
-			}
-		} else {
-			lowValueField = DatePredicateBuilder.ColumnEnum.LOW;
-			highValueField = DatePredicateBuilder.ColumnEnum.HIGH;
-			genericLowerBound = lowerBoundInstant;
-			genericUpperBound = upperBoundInstant;
-			if (upperBound != null && upperBound.getPrecision().ordinal() <= TemporalPrecisionEnum.MONTH.ordinal()) {
-				String theCompleteDateStr = DateUtils.getCompletedDate(upperBound.getValueAsString())
-						.getRight()
-						.replace("-", "");
-				genericUpperBound = DateUtils.parseDate(theCompleteDateStr);
-			}
-		}
-
-		if (theOperation == SearchFilterParser.CompareOperation.lt
-				|| theOperation == SearchFilterParser.CompareOperation.le) {
-			// use lower bound first
-			if (lowerBoundInstant != null) {
-				lb = this.createPredicate(lowValueField, ParamPrefixEnum.LESSTHAN_OR_EQUALS, genericLowerBound);
-				if (myStorageSettings.isAccountForDateIndexNulls()) {
-					lb = ComboCondition.or(
-							lb,
-							this.createPredicate(
-									highValueField, ParamPrefixEnum.LESSTHAN_OR_EQUALS, genericLowerBound));
-				}
-			} else if (upperBoundInstant != null) {
-				ub = this.createPredicate(lowValueField, ParamPrefixEnum.LESSTHAN_OR_EQUALS, genericUpperBound);
-				if (myStorageSettings.isAccountForDateIndexNulls()) {
-					ub = ComboCondition.or(
-							ub,
-							this.createPredicate(
-									highValueField, ParamPrefixEnum.LESSTHAN_OR_EQUALS, genericUpperBound));
-				}
-			} else {
-				throw new InvalidRequestException(Msg.code(1252)
-						+ "lowerBound and upperBound value not correctly specified for comparing " + theOperation);
-			}
-		} else if (theOperation == SearchFilterParser.CompareOperation.gt
-				|| theOperation == SearchFilterParser.CompareOperation.ge) {
-			// use upper bound first, e.g value between 6 and 10
-			if (upperBoundInstant != null) {
-				ub = this.createPredicate(highValueField, ParamPrefixEnum.GREATERTHAN_OR_EQUALS, genericUpperBound);
-				if (myStorageSettings.isAccountForDateIndexNulls()) {
-					ub = ComboCondition.or(
-							ub,
-							this.createPredicate(
-									lowValueField, ParamPrefixEnum.GREATERTHAN_OR_EQUALS, genericUpperBound));
-				}
-			} else if (lowerBoundInstant != null) {
-				lb = this.createPredicate(highValueField, ParamPrefixEnum.GREATERTHAN_OR_EQUALS, genericLowerBound);
-				if (myStorageSettings.isAccountForDateIndexNulls()) {
-					lb = ComboCondition.or(
-							lb,
-							this.createPredicate(
-									lowValueField, ParamPrefixEnum.GREATERTHAN_OR_EQUALS, genericLowerBound));
-				}
-			} else {
-				throw new InvalidRequestException(Msg.code(1253)
-						+ "upperBound and lowerBound value not correctly specified for compare theOperation");
-			}
-		} else if (theOperation == SearchFilterParser.CompareOperation.ne) {
-			if ((lowerBoundInstant == null) || (upperBoundInstant == null)) {
-				throw new InvalidRequestException(Msg.code(1254)
-						+ "lowerBound and/or upperBound value not correctly specified for compare theOperation");
-			}
-			lt = this.createPredicate(lowValueField, ParamPrefixEnum.LESSTHAN, genericLowerBound);
-			gt = this.createPredicate(highValueField, ParamPrefixEnum.GREATERTHAN, genericUpperBound);
-			lb = ComboCondition.or(lt, gt);
-		} else if ((theOperation == SearchFilterParser.CompareOperation.eq)
-				|| (theOperation == SearchFilterParser.CompareOperation.sa)
-				|| (theOperation == SearchFilterParser.CompareOperation.eb)
-				|| (theOperation == null)) {
-			if (lowerBoundInstant != null) {
-				gt = this.createPredicate(lowValueField, ParamPrefixEnum.GREATERTHAN_OR_EQUALS, genericLowerBound);
-				lt = this.createPredicate(highValueField, ParamPrefixEnum.GREATERTHAN_OR_EQUALS, genericLowerBound);
-
-				if (lowerBound.getPrefix() == ParamPrefixEnum.STARTS_AFTER
-						|| lowerBound.getPrefix() == ParamPrefixEnum.EQUAL) {
-					lb = gt;
-				} else {
-					lb = ComboCondition.or(gt, lt);
-				}
-			}
-
-			if (upperBoundInstant != null) {
-				gt = this.createPredicate(lowValueField, ParamPrefixEnum.LESSTHAN_OR_EQUALS, genericUpperBound);
-				lt = this.createPredicate(highValueField, ParamPrefixEnum.LESSTHAN_OR_EQUALS, genericUpperBound);
-
-				if (theRange.getUpperBound().getPrefix() == ParamPrefixEnum.ENDS_BEFORE
-						|| theRange.getUpperBound().getPrefix() == ParamPrefixEnum.EQUAL) {
-					ub = lt;
-				} else {
-					ub = ComboCondition.or(gt, lt);
-				}
-			}
-		} else {
-			throw new InvalidRequestException(
-					Msg.code(1255) + String.format("Unsupported operator specified, operator=%s", theOperation.name()));
-		}
-		if (isOrdinalComparison) {
-			ourLog.trace("Ordinal date range is {} - {} ", lowerBoundAsOrdinal, upperBoundAsOrdinal);
-		} else {
-			ourLog.trace("Date range is {} - {}", lowerBoundInstant, upperBoundInstant);
-		}
-
-		if (lb != null && ub != null) {
-			return (ComboCondition.and(lb, ub));
-		} else if (lb != null) {
-			return (lb);
-		} else {
-			return (ub);
-		}
+		return datePredicateBounds.calculate(theOperation);
 	}
 
 	public DbColumn getColumnValueLow() {
@@ -281,5 +144,241 @@ public class DatePredicateBuilder extends BaseSearchParamPredicateBuilder {
 		LOW_DATE_ORDINAL,
 		HIGH,
 		HIGH_DATE_ORDINAL
+	}
+
+	public class DatePredicateBounds {
+		DatePredicateBuilder.ColumnEnum lowValueField;
+		DatePredicateBuilder.ColumnEnum highValueField;
+
+		Condition lessThan;
+		Condition greaterThan;
+		Condition lowerBoundCondition = null;
+		Condition upperBoundCondition = null;
+
+		Date lowerBoundInstant;
+		Date upperBoundInstant;
+
+		DateParam lowerBound;
+		DateParam upperBound;
+
+		Integer lowerBoundAsOrdinal;
+		Integer upperBoundAsOrdinal;
+		Comparable<?> genericLowerBound;
+		Comparable<?> genericUpperBound;
+
+		public DatePredicateBounds(DateRangeParam theRange) {
+			lowerBoundInstant = theRange.getLowerBoundAsInstant();
+			upperBoundInstant = theRange.getUpperBoundAsInstant();
+
+			lowerBound = theRange.getLowerBound();
+			upperBound = theRange.getUpperBound();
+			lowerBoundAsOrdinal = theRange.getLowerBoundAsDateInteger();
+			upperBoundAsOrdinal = theRange.getUpperBoundAsDateInteger();
+
+			init();
+		}
+
+		public Condition calculate(SearchFilterParser.CompareOperation theOperation) {
+			if (theOperation == SearchFilterParser.CompareOperation.lt
+				|| theOperation == SearchFilterParser.CompareOperation.le) {
+				// use lower bound first
+				handleLessThanAndLessThanOrEqualTo();
+			} else if (theOperation == SearchFilterParser.CompareOperation.gt
+				|| theOperation == SearchFilterParser.CompareOperation.ge) {
+				// use upper bound first, e.g value between 6 and 10
+				handleGreaterThanAndGreaterThanOrEqualTo();
+			} else if (theOperation == SearchFilterParser.CompareOperation.ne) {
+				if ((lowerBoundInstant == null) || (upperBoundInstant == null)) {
+					throw new InvalidRequestException(Msg.code(1254)
+						+ "lowerBound and/or upperBound value not correctly specified for compare theOperation");
+				}
+				lessThan = DatePredicateBuilder.this.createPredicate(lowValueField, ParamPrefixEnum.LESSTHAN, genericLowerBound);
+				greaterThan = DatePredicateBuilder.this.createPredicate(highValueField, ParamPrefixEnum.GREATERTHAN, genericUpperBound);
+				lowerBoundCondition = ComboCondition.or(lessThan, greaterThan);
+			} else if ((theOperation == SearchFilterParser.CompareOperation.eq)
+				|| (theOperation == SearchFilterParser.CompareOperation.sa)
+				|| (theOperation == SearchFilterParser.CompareOperation.eb)
+				|| (theOperation == null)) {
+
+				handleEqualToCompareOperator();
+			} else {
+				throw new InvalidRequestException(
+					Msg.code(1255) + String.format("Unsupported operator specified, operator=%s", theOperation.name()));
+			}
+
+			if (isOrdinalComparison()) {
+				ourLog.trace("Ordinal date range is {} - {} ", lowerBoundAsOrdinal, upperBoundAsOrdinal);
+			} else {
+				ourLog.trace("Date range is {} - {}", lowerBoundInstant, upperBoundInstant);
+			}
+
+			if (lowerBoundCondition != null && upperBoundCondition != null) {
+				return (ComboCondition.and(lowerBoundCondition, upperBoundCondition));
+			} else if (lowerBoundCondition != null) {
+				return (lowerBoundCondition);
+			} else {
+				return (upperBoundCondition);
+			}
+		}
+
+		private void handleEqualToCompareOperator() {
+//			if (lowerBoundInstant != null && upperBoundInstant != null) {
+//				/*
+//				 * Upper and Lower bounds provided.
+//				 * We do some additional redundancies to help the query analyzer.
+//				 *
+//				 * We know our tables low_value fields are always <= high_value fields.
+//				 * But the Query Planner doesn't know that. So we'll force it to only
+//				 * look for lowerBounds <= high_value and upperBounds >= low_value
+//				 * (which is always true).
+//				 */
+//				// lowerBound <= lowValueField <= upperBound
+//				Condition lowerBoundGE = DatePredicateBuilder.this.createPredicate(lowValueField, ParamPrefixEnum.GREATERTHAN_OR_EQUALS, genericLowerBound);
+//				Condition lowerBoundLE = DatePredicateBuilder.this.createPredicate(lowValueField, ParamPrefixEnum.LESSTHAN_OR_EQUALS, genericUpperBound);
+//
+//				lowerBoundCondition = ComboCondition.and(lowerBoundGE, lowerBoundLE);
+//
+//				// lowerBound <= highValueField <= upperBound
+//				Condition upperBoundLE = DatePredicateBuilder.this.createPredicate(highValueField, ParamPrefixEnum.LESSTHAN_OR_EQUALS, genericUpperBound);
+//				Condition upperBoundGE = DatePredicateBuilder.this.createPredicate(highValueField, ParamPrefixEnum.GREATERTHAN_OR_EQUALS, genericLowerBound);
+//
+//				upperBoundCondition = ComboCondition.and(upperBoundGE, upperBoundLE);
+//			} else if (lowerBoundInstant != null) {
+//				// only lower bound provided
+//				greaterThan = DatePredicateBuilder.this.createPredicate(lowValueField, ParamPrefixEnum.GREATERTHAN_OR_EQUALS, genericLowerBound);
+//				lessThan = DatePredicateBuilder.this.createPredicate(highValueField, ParamPrefixEnum.GREATERTHAN_OR_EQUALS, genericLowerBound);
+//
+//				if (lowerBound.getPrefix() == ParamPrefixEnum.STARTS_AFTER
+//					|| lowerBound.getPrefix() == ParamPrefixEnum.EQUAL) {
+//					lowerBoundCondition = greaterThan;
+//				} else {
+//					lowerBoundCondition = ComboCondition.or(greaterThan, lessThan);
+//				}
+//			} else if (upperBoundInstant != null) {
+//				// only upper bound provided
+//				greaterThan = DatePredicateBuilder.this.createPredicate(lowValueField, ParamPrefixEnum.LESSTHAN_OR_EQUALS, genericUpperBound);
+//				lessThan = DatePredicateBuilder.this.createPredicate(highValueField, ParamPrefixEnum.LESSTHAN_OR_EQUALS, genericUpperBound);
+//
+//				if (upperBound.getPrefix() == ParamPrefixEnum.ENDS_BEFORE
+//					|| upperBound.getPrefix() == ParamPrefixEnum.EQUAL) {
+//					upperBoundCondition = lessThan;
+//				} else {
+//					upperBoundCondition = ComboCondition.or(greaterThan, lessThan);
+//				}
+//			} else {
+//				// TODO - throw
+//			}
+
+			if (lowerBoundInstant != null) {
+				lowerBoundCondition = ComboCondition.or(
+					DatePredicateBuilder.this.createPredicate(highValueField, ParamPrefixEnum.EQUAL, genericLowerBound),
+					DatePredicateBuilder.this.createPredicate(lowValueField, ParamPrefixEnum.EQUAL, genericLowerBound)
+				);
+			} else {
+				upperBoundCondition = ComboCondition.or(
+					DatePredicateBuilder.this.createPredicate(highValueField, ParamPrefixEnum.EQUAL, genericUpperBound),
+					DatePredicateBuilder.this.createPredicate(lowValueField, ParamPrefixEnum.EQUAL, genericUpperBound)
+				);
+			}
+		}
+
+		private void handleGreaterThanAndGreaterThanOrEqualTo() {
+			if (upperBoundInstant != null && lowerBoundInstant != null) {
+				// both - we have a range
+				// t0.SP_VALUE_LOW >= :rangeLow AND t0.SP_VALUE_LOW <= : rangeHigh
+				lowerBoundCondition = DatePredicateBuilder.this.createPredicate(lowValueField, ParamPrefixEnum.GREATERTHAN_OR_EQUALS, genericLowerBound);
+				upperBoundCondition = DatePredicateBuilder.this.createPredicate(lowValueField, ParamPrefixEnum.LESSTHAN_OR_EQUALS, genericUpperBound);
+			} else if (upperBoundInstant != null) {
+				// upper bound only
+				upperBoundCondition = DatePredicateBuilder.this.createPredicate(highValueField, ParamPrefixEnum.GREATERTHAN_OR_EQUALS, genericUpperBound);
+				if (myStorageSettings.isAccountForDateIndexNulls()) {
+					upperBoundCondition = ComboCondition.or(
+						upperBoundCondition,
+						DatePredicateBuilder.this.createPredicate(
+							lowValueField, ParamPrefixEnum.GREATERTHAN_OR_EQUALS, genericUpperBound));
+				}
+			} else if (lowerBoundInstant != null) {
+				// lower bound only
+				lowerBoundCondition = DatePredicateBuilder.this.createPredicate(highValueField, ParamPrefixEnum.GREATERTHAN_OR_EQUALS, genericLowerBound);
+				if (myStorageSettings.isAccountForDateIndexNulls()) {
+					lowerBoundCondition = ComboCondition.or(
+						lowerBoundCondition,
+						DatePredicateBuilder.this.createPredicate(
+							lowValueField, ParamPrefixEnum.GREATERTHAN_OR_EQUALS, genericLowerBound));
+				}
+			} else {
+				throw new InvalidRequestException(Msg.code(1253)
+					+ "upperBound and lowerBound value not correctly specified for greater than (or equal to) compare operator");
+			}
+		}
+
+		/**
+		 * Handle (LOW|HIGH)_FIELD <(=) value
+		 */
+		private void handleLessThanAndLessThanOrEqualTo() {
+			if (lowerBoundInstant != null && upperBoundInstant != null) {
+				// we have a range of values
+				// t0.SP_VALUE_HIGH >= :rangeLow AND t0.SP_VALUE_HIGH <= :rangeHigh
+				lowerBoundCondition = DatePredicateBuilder.this.createPredicate(highValueField, ParamPrefixEnum.GREATERTHAN_OR_EQUALS, genericLowerBound);
+				upperBoundCondition = DatePredicateBuilder.this.createPredicate(highValueField, ParamPrefixEnum.LESSTHAN_OR_EQUALS, genericUpperBound);
+			} else if (lowerBoundInstant != null) {
+				// lower bound only provided
+				lowerBoundCondition = DatePredicateBuilder.this.createPredicate(lowValueField, ParamPrefixEnum.LESSTHAN_OR_EQUALS, genericLowerBound);
+
+				if (myStorageSettings.isAccountForDateIndexNulls()) {
+					lowerBoundCondition = ComboCondition.or(
+						lowerBoundCondition,
+						DatePredicateBuilder.this.createPredicate(
+							highValueField, ParamPrefixEnum.LESSTHAN_OR_EQUALS, genericLowerBound));
+				}
+			} else if (upperBoundInstant != null) {
+				// upper bound only provided
+				upperBoundCondition = DatePredicateBuilder.this.createPredicate(lowValueField, ParamPrefixEnum.LESSTHAN_OR_EQUALS, genericUpperBound);
+				if (myStorageSettings.isAccountForDateIndexNulls()) {
+					upperBoundCondition = ComboCondition.or(
+						upperBoundCondition,
+						DatePredicateBuilder.this.createPredicate(
+							highValueField, ParamPrefixEnum.LESSTHAN_OR_EQUALS, genericUpperBound));
+				}
+			} else {
+				throw new InvalidRequestException(Msg.code(1252)
+					+ "lowerBound and upperBound value not correctly specified for comparing using lower than (or equal to) compare operator");
+			}
+		}
+
+		private void init() {
+			if (isOrdinalComparison()) {
+				lowValueField = DatePredicateBuilder.ColumnEnum.LOW_DATE_ORDINAL;
+				highValueField = DatePredicateBuilder.ColumnEnum.HIGH_DATE_ORDINAL;
+				genericLowerBound = lowerBoundAsOrdinal;
+				genericUpperBound = upperBoundAsOrdinal;
+				if (upperBound != null && upperBound.getPrecision().ordinal() <= TemporalPrecisionEnum.MONTH.ordinal()) {
+					genericUpperBound = Integer.parseInt(DateUtils.getCompletedDate(upperBound.getValueAsString())
+						.getRight()
+						.replace("-", ""));
+				}
+			} else {
+				lowValueField = DatePredicateBuilder.ColumnEnum.LOW;
+				highValueField = DatePredicateBuilder.ColumnEnum.HIGH;
+				genericLowerBound = lowerBoundInstant;
+				genericUpperBound = upperBoundInstant;
+				if (upperBound != null && upperBound.getPrecision().ordinal() <= TemporalPrecisionEnum.MONTH.ordinal()) {
+					String theCompleteDateStr = DateUtils.getCompletedDate(upperBound.getValueAsString())
+						.getRight()
+						.replace("-", "");
+					genericUpperBound = DateUtils.parseDate(theCompleteDateStr);
+				}
+			}
+		}
+
+		/**
+		 * If all present search parameters are of DAY precision, and {@link ca.uhn.fhir.jpa.model.entity.StorageSettings#getUseOrdinalDatesForDayPrecisionSearches()} is true,
+		 * then we attempt to use the ordinal field for date comparisons instead of the date field.
+		 */
+		private boolean isOrdinalComparison() {
+			return isNullOrDatePrecision(lowerBound)
+				&& isNullOrDatePrecision(upperBound)
+				&& myStorageSettings.getUseOrdinalDatesForDayPrecisionSearches();
+		}
 	}
 }
