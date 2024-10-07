@@ -249,7 +249,6 @@ class SearchParameterMapTest {
 				countsOfPrefixes.put(d.getValueAsString(), d.getPrefix().getValue());
 			}
 		}
-		System.out.println("hi");
 	}
 
 	@Test
