@@ -130,7 +130,7 @@ public class FhirResourceDaoR4SearchLastNAsyncIT extends BaseR4SearchLastN {
 		assertThat(queries).hasSize(6);
 
 		// The first chunked query should have a full complement of PIDs
-		StringBuilder firstQueryPattern = new StringBuilder(".*RES_ID in \\('[0-9]+'");
+		StringBuilder firstQueryPattern = new StringBuilder(".*RES_ID\\) in \\('[0-9]+'");
 		for (int pidIndex = 1; pidIndex < 50; pidIndex++) {
 			firstQueryPattern.append(",'[0-9]+'");
 		}
@@ -138,7 +138,7 @@ public class FhirResourceDaoR4SearchLastNAsyncIT extends BaseR4SearchLastN {
 		assertThat(queries.get(4)).matches(firstQueryPattern.toString());
 
 		// the second chunked query should be padded with "-1".
-		StringBuilder secondQueryPattern = new StringBuilder(".*RES_ID in \\('[0-9]+'");
+		StringBuilder secondQueryPattern = new StringBuilder(".*RES_ID\\) in \\('[0-9]+'");
 		for (int pidIndex = 1; pidIndex < 25; pidIndex++) {
 			secondQueryPattern.append(",'[0-9]+'");
 		}
