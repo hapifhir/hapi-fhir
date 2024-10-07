@@ -297,11 +297,14 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				continue;
 			}
 			List<List<IQueryParameterType>> andOrParams = myParams.get(nextParamName);
-			Condition predicate = theQueryStack.searchForIdsWithAndOr(with().setResourceName(myResourceName)
+			final QueryStack.SearchForIdsParams searchForIdsParams = with().setResourceName(myResourceName)
 					.setParamName(nextParamName)
 					.setAndOrParams(andOrParams)
 					.setRequest(theRequest)
-					.setRequestPartitionId(myRequestPartitionId));
+					//				.setSourceJoinColumn(theQueryStack.) ????
+					.setRequestPartitionId(myRequestPartitionId);
+			// LUKETODO:  setResourceName appears NOT to work here?!?!?!??!??!?!
+			Condition predicate = theQueryStack.searchForIdsWithAndOr(searchForIdsParams);
 			if (predicate != null) {
 				theSearchSqlBuilder.addPredicate(predicate);
 			}
@@ -677,14 +680,26 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 		// If we haven't added any predicates yet, we're doing a search for all resources. Make sure we add the
 		// partition ID predicate in that case.
-		if (!sqlBuilder.haveAtLeastOnePredicate()) {
-			Condition partitionIdPredicate = sqlBuilder
-					.getOrCreateResourceTablePredicateBuilder()
-					.createPartitionIdPredicate(myRequestPartitionId);
-			if (partitionIdPredicate != null) {
-				sqlBuilder.addPredicate(partitionIdPredicate);
-			}
+		// LUKETODO:  commenting this out seems to fix the problem
+		//		if (!sqlBuilder.haveAtLeastOnePredicate()) {
+		// LUKETODO: this is where we add the RES_TYPE clause
+		// LUKETODO: we skip this in the failing case because there's no predicate??????
+		Condition partitionIdPredicate =
+				sqlBuilder.getOrCreateResourceTablePredicateBuilder().createPartitionIdPredicate(myRequestPartitionId);
+		if (partitionIdPredicate != null) {
+			sqlBuilder.addPredicate(partitionIdPredicate);
 		}
+		//		}
+		//		// If we haven't added any predicates yet, we're doing a search for all resources. Make sure we add the
+
+		//		// partition ID predicate in that case.
+		//		if (!sqlBuilder.haveAtLeastOnePredicate()) {
+		//			Condition partitionIdPredicate =
+		// sqlBuilder.getOrCreateResourceTablePredicateBuilder().createPartitionIdPredicate(myRequestPartitionId);
+		//			if (partitionIdPredicate != null) {
+		//				sqlBuilder.addPredicate(partitionIdPredicate);
+		//			}
+		//		}
 
 		// Add PID list predicate for full text search and/or lastn operation
 		addPidListPredicate(thePidList, sqlBuilder);
@@ -743,6 +758,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	private void executeSearch(
 			Integer theOffset, List<ISearchQueryExecutor> theSearchQueryExecutors, SearchQueryBuilder sqlBuilder) {
 		GeneratedSql generatedSql = sqlBuilder.generate(theOffset, myMaxResultsToFetch);
+		ourLog.info("6086: generatedSql:\n{}\nparams:\n{}", generatedSql.getSql(), generatedSql.getBindVariables());
 		if (!generatedSql.isMatchNothing()) {
 			SearchQueryExecutor executor =
 					mySqlBuilderFactory.newSearchQueryExecutor(generatedSql, myMaxResultsToFetch);
