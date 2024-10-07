@@ -119,7 +119,7 @@ public class MdmLink extends AuditableBasePartitionable implements IMdmLink<JpaP
 	@Column(name = GOLDEN_RESOURCE_PID, nullable = false)
 	private Long myGoldenResourcePid;
 
-	@Column(name = GOLDEN_RESOURCE_PARTITION_ID, nullable = false)
+	@Column(name = GOLDEN_RESOURCE_PARTITION_ID, nullable = true)
 	private Integer myGoldenResourcePartitionId;
 
 	@Deprecated
@@ -180,7 +180,7 @@ public class MdmLink extends AuditableBasePartitionable implements IMdmLink<JpaP
 	@Column(name = "TARGET_PID", updatable = false, nullable = false)
 	private Long mySourcePid;
 
-	@Column(name = TARGET_PARTITION_ID, updatable = false, nullable = false)
+	@Column(name = TARGET_PARTITION_ID, updatable = false, nullable = true)
 	private Integer mySourcePartitionId;
 
 	@Column(name = "MATCH_RESULT", nullable = false)
