@@ -159,6 +159,21 @@ public class SearchParameterMap implements Serializable {
 		return this;
 	}
 
+	private boolean requiresDateConstraints(IQueryParameterAnd<?> theParam) {
+		if (theParam instanceof DateRangeParam) {
+			DateRangeParam range = (DateRangeParam) theParam;
+			// if we have any "missing" queries, we'll not handle this as a bounded date query
+			return range.getLowerBound() != null && range.getLowerBound().getMissing() == null
+				|| range.getUpperBound() != null && range.getUpperBound().getMissing() == null;
+		}
+
+		return false;
+	}
+
+	private boolean hasBound(DateParam theParam) {
+		return theParam != null && !theParam.isEmpty();
+	}
+
 	@SuppressWarnings("unchecked")
 	public SearchParameterMap add(String theName, IQueryParameterAnd<?> theAnd) {
 		if (theAnd == null) {
@@ -170,7 +185,7 @@ public class SearchParameterMap implements Serializable {
 
 		List<List<IQueryParameterType>> paramList = get(theName);
 
-		if (theAnd instanceof DateRangeParam) {
+		if (requiresDateConstraints(theAnd)) {
 			/*
 			 * We handle DateRange parameters differently.
 			 * All of our date-range fields have a high_field and a low_field;
@@ -188,18 +203,20 @@ public class SearchParameterMap implements Serializable {
 			DateRangeParam dp = (DateRangeParam) theAnd;
 			DateParam lower = dp.getLowerBound();
 			DateParam upper = dp.getUpperBound();
-			if (lower != null && upper != null && lower.getValue().equals(upper.getValue())) {
+			boolean hasLowerBound = hasBound(lower);
+			boolean hasUpperBound = hasBound(upper);
+			if (hasUpperBound && hasLowerBound && lower.getValue().equals(upper.getValue())) {
 				lower.setPrefix(ParamPrefixEnum.EQUAL);
 				paramList.add(List.of(lower));
 			} else {
-				if (lower != null) {
-					if (upper != null && !upper.getValue().equals(lower.getValue())) {
+				if (hasLowerBound) {
+					if (hasUpperBound && !upper.getValue().equals(lower.getValue())) {
 						lower.addConstraint(new Constraint<>(upper.getValue(), Constraint.Type.UPPER));
 					}
 					paramList.add(List.of(lower));
 				}
-				if (upper != null) {
-					if (lower != null && !upper.getValue().equals(lower.getValue())) {
+				if (hasUpperBound) {
+					if (hasLowerBound && !upper.getValue().equals(lower.getValue())) {
 						upper.addConstraint(new Constraint<>(lower.getValue(), Constraint.Type.LOWER));
 					}
 					paramList.add(List.of(upper));

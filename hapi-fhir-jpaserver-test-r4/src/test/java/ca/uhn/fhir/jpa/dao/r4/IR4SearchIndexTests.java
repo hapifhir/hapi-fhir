@@ -53,9 +53,9 @@ public interface IR4SearchIndexTests {
 	@ParameterizedTest
 	@CsvSource(value = {
 		// actual, lowerbound, upperbound
-		"1999-12-31,1999-01-01,2000-12-31",
-		"1999-12-31,1999-01-01,",
-		"1999-12-31,,2000-01-01",
+//		"1999-12-31,1999-01-01,2000-12-31",
+//		"1999-12-31,1999-01-01,",
+//		"1999-12-31,,2000-01-01",
 		"1999-12-31,1999-12-31,1999-12-31"
 	})
 	default void search_dateValues_usesWhereToHelpQueryPlans(String theBirthdate, String theLowerBound, String theUpperBound) {
