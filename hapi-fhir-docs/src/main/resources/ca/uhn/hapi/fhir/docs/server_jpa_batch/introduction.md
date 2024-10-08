@@ -70,3 +70,7 @@ If a Job Definition is set to having Gated Execution, then all work chunks for a
 ### Job Instance Completion
 
 A Batch Job Maintenance Service runs every minute to monitor the status of all Job Instances and the Job Instance is transitioned to either `COMPLETED`, `ERRORED` or `FAILED` according to the status of all outstanding work chunks for that job instance. If the job instance is still `IN_PROGRESS` this maintenance service also estimates the time remaining to complete the job.
+
+## Logging
+
+The job instance ID and work chunk ID are both available through the logback MDC and can be accessed using the `%X` specifier in a `logback.xml` file. See [Logging](/docs/appendix/logging.html#logging) for more details about logging in HAPI. 

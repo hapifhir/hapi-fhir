@@ -1,0 +1,6 @@
+---
+type: add
+issue: 6210
+jira: SMILE-8428
+title: "Batch instance ID and chunk ID have been added to the logging context so that they can be automatically added to
+batch-related messages in the log."
