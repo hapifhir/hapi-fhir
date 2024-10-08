@@ -26,16 +26,16 @@ The `StructureDefinition/$questionnaire` [operation]() generates a [Questionnair
 
 The following parameters are supported for the `StructureDefinition/$questionnaire` operation:
 
-| Parameter | Type | Description                                                                                                                                    |
-|-----------|------|------------------------------------------------------------------------------------------------------------------------------------------------|
-| profile          | StructureDefinition      | The StructureDefinition to base the Questionnaire on. Used when the operation is invoked at the 'type' level.                                  |
-| canonical | canonical | The canonical identifier for the StructureDefinition (optionally version-specific).                                                            |
-| url | uri | Canonical URL of the StructureDefinition when invoked at the resource type level. This is exclusive with the profile and canonical parameters. |
-| version | string | Version of the StructureDefinition when invoked at the resource type level. This is exclusive with the profile and canonical parameters.       |
-| supportedOnly | boolean | If true (default: false), the questionnaire will only include those elements marked as "mustSupport='true'" in the StructureDefinition.        |
-| requiredOnly | boolean | If true (default: false), the questionnaire will only include those elements marked as "min>0" in the StructureDefinition.                     |
-| contentEndpoint | Endpoint | An endpoint to use to access content (i.e. libraries) referenced by the StructureDefinition.                                                   |
-| terminologyEndpoint | Endpoint | An endpoint to use to access terminology (i.e. valuesets, codesystems, and membership testing) referenced by the StructureDefinition.          |
+| Parameter           | Type                 | Description |
+|---------------------|----------------------|-------------|
+| profile             | StructureDefinition  | The StructureDefinition to base the Questionnaire on. Used when the operation is invoked at the 'type' level.                                  |
+| canonical           | canonical            | The canonical identifier for the StructureDefinition (optionally version-specific).                                                            |
+| url                 | uri                  | Canonical URL of the StructureDefinition when invoked at the resource type level. This is exclusive with the profile and canonical parameters. |
+| version             | string               | Version of the StructureDefinition when invoked at the resource type level. This is exclusive with the profile and canonical parameters.       |
+| supportedOnly       | boolean              | If true (default: false), the questionnaire will only include those elements marked as "mustSupport='true'" in the StructureDefinition.        |
+| requiredOnly        | boolean              | If true (default: false), the questionnaire will only include those elements marked as "min>0" in the StructureDefinition.                     |
+| contentEndpoint     | Endpoint             | An endpoint to use to access content (i.e. libraries) referenced by the StructureDefinition.                                                   |
+| terminologyEndpoint | Endpoint             | An endpoint to use to access terminology (i.e. valuesets, codesystems, and membership testing) referenced by the StructureDefinition.          |
 
 ## Populate
 
