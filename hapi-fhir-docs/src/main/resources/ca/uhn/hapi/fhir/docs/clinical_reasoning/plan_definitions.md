@@ -88,6 +88,14 @@ The `PlanDefinition/$data-requirements` [operation](https://build.fhir.org/ig/HL
 
 The following parameters are supported for the `PlanDefinition/$data-requirements` operation:
 
+| Parameter | Type      | Description                                                                                                    |
+|-----------|-----------|----------------------------------------------------------------------------------------------------------------|
+| id        | string    | The logical id of the canonical or artifact resource to analyze.                                               |
+| canonical | canonical | A canonical url (optionally version specific) to a canonical resource.                                         |
+| url       | uri       | A canonical or artifact reference to a canonical resource. This is exclusive with the canonical parameter.     |
+| version   | string    | The version of the canonical or artifact resource to analyze. This is exclusive with the canonical parameter.  |
+
+
 ## Example PlanDefinition
 
 ```json
