@@ -1236,7 +1236,6 @@ public class QueryStack {
 							.setRequest(theRequest)
 							.setRequestPartitionId(theRequestPartitionId));
 
-			// fixme pk?
 			andPredicates.add(toAndPredicate(partitionPredicate, pathPredicate, typePredicate, linkedPredicate));
 		}
 
