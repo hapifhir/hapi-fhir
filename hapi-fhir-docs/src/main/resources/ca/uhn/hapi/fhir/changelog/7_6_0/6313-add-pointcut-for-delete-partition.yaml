@@ -1,0 +1,6 @@
+---
+type: add
+issue: 6313
+jira: SMILE-8847
+title: "The `STORAGE_PARTITION_DELETED` pointcut has been added and will be called upon deleting a partition 
+using the `$partition-management-delete-partition` operation."

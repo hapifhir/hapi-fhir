@@ -203,6 +203,12 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 
 		myPartitionDao.delete(partition.get());
 
+		if (myInterceptorService.hasHooks(Pointcut.STORAGE_PARTITION_DELETED)) {
+			HookParams params = new HookParams()
+					.add(RequestPartitionId.class, partition.get().toRequestPartitionId());
+			myInterceptorService.callHooks(Pointcut.STORAGE_PARTITION_DELETED, params);
+		}
+
 		invalidateCaches();
 	}
 

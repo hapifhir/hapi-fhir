@@ -1,5 +1,16 @@
 package ca.uhn.fhir.jpa.partition;
 
+import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
+
+import ca.uhn.fhir.interceptor.api.Interceptor;
+
+import ca.uhn.fhir.interceptor.api.Pointcut;
+
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+
+import java.util.ArrayList;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.i18n.Msg;
@@ -16,7 +27,11 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 public class PartitionSettingsSvcImplTest extends BaseJpaR4Test {
+	@Autowired
+	IInterceptorService myInterceptorService;
 
 	@AfterEach
 	public void after() {
@@ -56,6 +71,8 @@ public class PartitionSettingsSvcImplTest extends BaseJpaR4Test {
 
 	@Test
 	public void testDeletePartition() {
+		DeletedPartitionsInterceptor deletedPartitionsInterceptor = new DeletedPartitionsInterceptor();
+		myInterceptorService.registerInterceptor(deletedPartitionsInterceptor);
 
 		PartitionEntity partition = new PartitionEntity();
 		partition.setId(123);
@@ -67,6 +84,8 @@ public class PartitionSettingsSvcImplTest extends BaseJpaR4Test {
 		assertEquals("NAME123", partition.getName());
 
 		myPartitionConfigSvc.deletePartition(123);
+		assertEquals(1, deletedPartitionsInterceptor.getDeletedPartitions().size());
+		assertThat(deletedPartitionsInterceptor.getDeletedPartitions().get(0).getFirstPartitionIdOrNull().intValue()).isEqualTo(123);
 
 		try {
 			myPartitionConfigSvc.getPartitionById(123);
@@ -75,6 +94,21 @@ public class PartitionSettingsSvcImplTest extends BaseJpaR4Test {
 			assertEquals("No partition exists with ID 123", e.getMessage());
 		}
 
+		myInterceptorService.unregisterInterceptor(deletedPartitionsInterceptor);
+	}
+
+	@Interceptor
+	public static class DeletedPartitionsInterceptor {
+		private List<RequestPartitionId> myDeletedPartitions = new ArrayList<>();
+
+		@Hook(Pointcut.STORAGE_PARTITION_DELETED)
+		public void partitionDeleted(RequestPartitionId partitionId) {
+			myDeletedPartitions.add(partitionId);
+		}
+
+		public List<RequestPartitionId> getDeletedPartitions() {
+			return myDeletedPartitions;
+		}
 	}
 
 	@Test
