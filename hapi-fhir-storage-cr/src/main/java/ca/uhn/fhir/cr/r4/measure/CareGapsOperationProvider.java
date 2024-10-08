@@ -42,7 +42,8 @@ public class CareGapsOperationProvider {
 	private final ICareGapsServiceFactory myR4CareGapsProcessorFactory;
 	private final StringTimePeriodHandler myStringTimePeriodHandler;
 
-	public CareGapsOperationProvider(ICareGapsServiceFactory theR4CareGapsProcessorFactory, StringTimePeriodHandler theStringTimePeriodHandler) {
+	public CareGapsOperationProvider(
+			ICareGapsServiceFactory theR4CareGapsProcessorFactory, StringTimePeriodHandler theStringTimePeriodHandler) {
 		myR4CareGapsProcessorFactory = theR4CareGapsProcessorFactory;
 		myStringTimePeriodHandler = theStringTimePeriodHandler;
 	}
@@ -105,8 +106,8 @@ public class CareGapsOperationProvider {
 		return myR4CareGapsProcessorFactory
 				.create(theRequestDetails)
 				.getCareGapsReport(
-					myStringTimePeriodHandler.getStartZonedDateTime(thePeriodStart, theRequestDetails),
-					myStringTimePeriodHandler.getEndZonedDateTime(thePeriodEnd, theRequestDetails),
+						myStringTimePeriodHandler.getStartZonedDateTime(thePeriodStart, theRequestDetails),
+						myStringTimePeriodHandler.getEndZonedDateTime(thePeriodEnd, theRequestDetails),
 						theSubject,
 						theStatus,
 						theMeasureId == null

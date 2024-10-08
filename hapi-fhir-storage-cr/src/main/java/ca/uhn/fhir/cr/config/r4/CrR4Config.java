@@ -32,11 +32,9 @@ import ca.uhn.fhir.cr.r4.ICareGapsServiceFactory;
 import ca.uhn.fhir.cr.r4.ICollectDataServiceFactory;
 import ca.uhn.fhir.cr.r4.ICqlExecutionServiceFactory;
 import ca.uhn.fhir.cr.r4.IDataRequirementsServiceFactory;
-import ca.uhn.fhir.cr.r4.ILibraryEvaluationServiceFactory;
 import ca.uhn.fhir.cr.r4.IMeasureServiceFactory;
 import ca.uhn.fhir.cr.r4.ISubmitDataProcessorFactory;
 import ca.uhn.fhir.cr.r4.cpg.CqlExecutionOperationProvider;
-import ca.uhn.fhir.cr.r4.cpg.LibraryEvaluationOperationProvider;
 import ca.uhn.fhir.cr.r4.measure.CareGapsOperationProvider;
 import ca.uhn.fhir.cr.r4.measure.CollectDataOperationProvider;
 import ca.uhn.fhir.cr.r4.measure.DataRequirementsOperationProvider;
@@ -45,7 +43,6 @@ import ca.uhn.fhir.cr.r4.measure.SubmitDataProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cr.cpg.r4.R4CqlExecutionService;
-import org.opencds.cqf.fhir.cr.cpg.r4.R4LibraryEvaluationService;
 import org.opencds.cqf.fhir.cr.measure.CareGapsProperties;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
@@ -86,12 +83,6 @@ public class CrR4Config {
 	}
 
 	@Bean
-	ILibraryEvaluationServiceFactory r4LibraryEvaluationServiceFactory(
-			IRepositoryFactory theRepositoryFactory, EvaluationSettings theEvaluationSettings) {
-		return rd -> new R4LibraryEvaluationService(theRepositoryFactory.create(rd), theEvaluationSettings);
-	}
-
-	@Bean
 	CqlExecutionOperationProvider r4CqlExecutionOperationProvider() {
 		return new CqlExecutionOperationProvider();
 	}
@@ -119,11 +110,6 @@ public class CrR4Config {
 	}
 
 	@Bean
-	LibraryEvaluationOperationProvider r4LibraryEvaluationOperationProvider() {
-		return new LibraryEvaluationOperationProvider();
-	}
-
-	@Bean
 	ICareGapsServiceFactory careGapsServiceFactory(
 			IRepositoryFactory theRepositoryFactory,
 			CareGapsProperties theCareGapsProperties,
@@ -139,8 +125,7 @@ public class CrR4Config {
 
 	@Bean
 	CareGapsOperationProvider r4CareGapsOperationProvider(
-			ICareGapsServiceFactory theR4CareGapsProcessorFactory,
-			StringTimePeriodHandler theStringTimePeriodHandler) {
+			ICareGapsServiceFactory theR4CareGapsProcessorFactory, StringTimePeriodHandler theStringTimePeriodHandler) {
 		return new CareGapsOperationProvider(theR4CareGapsProcessorFactory, theStringTimePeriodHandler);
 	}
 
@@ -168,7 +153,6 @@ public class CrR4Config {
 								SubmitDataProvider.class,
 								CareGapsOperationProvider.class,
 								CqlExecutionOperationProvider.class,
-								LibraryEvaluationOperationProvider.class,
 								CollectDataOperationProvider.class,
 								DataRequirementsOperationProvider.class)));
 

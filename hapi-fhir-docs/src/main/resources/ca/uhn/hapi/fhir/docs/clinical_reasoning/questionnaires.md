@@ -34,11 +34,6 @@ The following parameters are supported for the `StructureDefinition/$questionnai
 | version | string | Version of the StructureDefinition when invoked at the resource type level. This is exclusive with the profile and canonical parameters.       |
 | supportedOnly | boolean | If true (default: false), the questionnaire will only include those elements marked as "mustSupport='true'" in the StructureDefinition.        |
 | requiredOnly | boolean | If true (default: false), the questionnaire will only include those elements marked as "min>0" in the StructureDefinition.                     |
-| subject | string | The subject(s) that is/are the target of the Questionnaire.                                                                                    |
-| parameters | Parameters | Any input parameters defined in libraries referenced by the StructureDefinition.                                                               |
-| useServerData | boolean | Whether to use data from the server performing the evaluation.                                                                                 |
-| data | Bundle | Data to be made available during CQL evaluation.                                                                                               |
-| dataEndpoint | Endpoint | An endpoint to use to access data referenced by retrieve operations in libraries referenced by the StructureDefinition.                        |
 | contentEndpoint | Endpoint | An endpoint to use to access content (i.e. libraries) referenced by the StructureDefinition.                                                   |
 | terminologyEndpoint | Endpoint | An endpoint to use to access terminology (i.e. valuesets, codesystems, and membership testing) referenced by the StructureDefinition.          |
 
@@ -59,7 +54,7 @@ The following parameters are supported for the `Questionnaire/$populate` operati
 | canonical           | canonical     | The canonical identifier for the Questionnaire (optionally version-specific). |
 | url                 | uri           | Canonical URL of the Questionnaire when invoked at the resource type level. This is exclusive with the questionnaire and canonical parameters. |
 | version             | string        | Version of the Questionnaire when invoked at the resource type level. This is exclusive with the questionnaire and canonical parameters. |
-| subject             | string        | The subject(s) that is/are the target of the Questionnaire. |
+| subject             | Reference     | The resource that is to be the QuestionnaireResponse.subject. The QuestionnaireResponse instance will reference the provided subject. |
 | context             |               | Resources containing information to be used to help populate the QuestionnaireResponse. | 
 | context.name        | string        | The name of the launchContext or root Questionnaire variable the passed content should be used as for population purposes. The name SHALL correspond to a launchContext or variable delared at the root of the Questionnaire. | 
 | context.reference   | Reference     | The actual resource (or resources) to use as the value of the launchContext or variable. | 

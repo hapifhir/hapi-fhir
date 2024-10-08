@@ -38,5 +38,4 @@ public class CrBaseConfig {
 	MeasurePeriodValidator measurePeriodValidator() {
 		return new MeasurePeriodValidator();
 	}
-
 }
