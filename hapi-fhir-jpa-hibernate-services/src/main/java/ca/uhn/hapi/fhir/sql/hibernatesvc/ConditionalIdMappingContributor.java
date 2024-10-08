@@ -26,6 +26,7 @@ import org.hibernate.mapping.Property;
 import org.hibernate.mapping.Table;
 import org.hibernate.mapping.ToOne;
 import org.hibernate.mapping.Value;
+import org.hibernate.service.UnknownServiceException;
 import org.hibernate.type.ComponentType;
 import org.hibernate.type.CompositeType;
 import org.hibernate.type.EmbeddedComponentType;
@@ -66,8 +67,13 @@ public class ConditionalIdMappingContributor implements org.hibernate.boot.spi.A
 
 		StandardServiceRegistry serviceRegistry =
 				theMetadata.getBootstrapContext().getServiceRegistry();
-		HapiHibernateDialectSettingsService hapiSettingsSvc =
-				serviceRegistry.getService(HapiHibernateDialectSettingsService.class);
+		HapiHibernateDialectSettingsService hapiSettingsSvc;
+		try {
+			hapiSettingsSvc = serviceRegistry.getService(HapiHibernateDialectSettingsService.class);
+		} catch (UnknownServiceException e) {
+			return;
+		}
+
 		assert hapiSettingsSvc != null;
 		if (!hapiSettingsSvc.isTrimConditionalIdsFromPrimaryKeys()) {
 			return;
