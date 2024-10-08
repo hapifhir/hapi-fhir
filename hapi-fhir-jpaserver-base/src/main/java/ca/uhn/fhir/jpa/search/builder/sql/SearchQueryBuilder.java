@@ -484,7 +484,7 @@ public class SearchQueryBuilder {
 	}
 
 	public boolean isIncludePartitionIdInJoins() {
-		return mySelectPartitionId && myPartitionSettings.isPartitionIdsInPrimaryKeys();
+		return mySelectPartitionId && myPartitionSettings.isIncludePartitionIdsInPKs();
 	}
 
 	public void addJoin(DbTable theFromTable, DbTable theToTable, DbColumn[] theFromColumn, DbColumn[] theToColumn) {
@@ -500,6 +500,10 @@ public class SearchQueryBuilder {
 		assert theFromColumn.length == theToColumn.length;
 		Join join = new DbJoin(mySpec, theFromTable, theToTable, theFromColumn, theToColumn);
 		mySelect.addJoins(theJoinType, join);
+	}
+
+	public boolean isSelectPartitionId() {
+		return mySelectPartitionId;
 	}
 
 	/**

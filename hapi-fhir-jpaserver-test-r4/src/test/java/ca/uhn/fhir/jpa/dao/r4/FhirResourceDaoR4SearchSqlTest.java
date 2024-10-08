@@ -40,7 +40,7 @@ public class FhirResourceDaoR4SearchSqlTest extends BaseJpaR4Test {
 	public void after() {
 		myStorageSettings.setTagStorageMode(JpaStorageSettings.DEFAULT_TAG_STORAGE_MODE);
 		myPartitionSettings.setDefaultPartitionId(new PartitionSettings().getDefaultPartitionId());
-		myPartitionSettings.setPartitionIdsInPrimaryKeys(new PartitionSettings().isPartitionIdsInPrimaryKeys());
+		myPartitionSettings.setIncludePartitionIdsInPKs(new PartitionSettings().isIncludePartitionIdsInPKs());
 
 	}
 
@@ -119,7 +119,7 @@ public class FhirResourceDaoR4SearchSqlTest extends BaseJpaR4Test {
 	void testSqlGeneration_WithPartitionJoins(SqlGenerationTestCase theTestCase) {
 		// include partition_id in joins
 		myPartitionSettings.setDefaultPartitionId(0);
-		myPartitionSettings.setPartitionIdsInPrimaryKeys(true);
+		myPartitionSettings.setIncludePartitionIdsInPKs(true);
 
 		String sql = getSqlForRestQuery(theTestCase.restQuery);
 

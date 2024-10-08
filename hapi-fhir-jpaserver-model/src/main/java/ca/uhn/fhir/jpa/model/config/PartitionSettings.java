@@ -33,25 +33,34 @@ public class PartitionSettings {
 	private Integer myDefaultPartitionId;
 	private boolean myAlwaysOpenNewTransactionForDifferentPartition;
 	private boolean myConditionalCreateDuplicateIdentifiersEnabled = false;
-	private boolean myPartitionIdsInPrimaryKeys = false;
+	private boolean myIncludePartitionIdsInPKs = false;
 
-	public PartitionSettings() {}
-
-	/**
-	 * Is the table partition column (usually PARTITION_ID)
-	 * participating in primary and foreign keys.
-	 * Affects sql joins, sql in() expressions, etc.
-	 */
-	public boolean isPartitionIdsInPrimaryKeys() {
-		return myPartitionIdsInPrimaryKeys;
+	public PartitionSettings() {
+		super();
 	}
 
 	/**
-	 * Inform the query engine if the primary and foreign keys
-	 * of the partitioned tables include the partition column.
+	 * This flag activates partition IDs in PKs mode, which is newly introduced in HAPI FHIR 8.0.0.
+	 * This mode causes partition IDs to be included in all primary keys, joins, and emitted
+	 * SQL. It also affects the generated schema and migrations. This setting should not be changed
+	 * after the database has been initialized, unless you have performed an appropriate migration.
+	 *
+	 * @since 8.0.0
 	 */
-	public void setPartitionIdsInPrimaryKeys(boolean thePartitionIdsInPrimaryKeys) {
-		myPartitionIdsInPrimaryKeys = thePartitionIdsInPrimaryKeys;
+	public boolean isIncludePartitionIdsInPKs() {
+		return myIncludePartitionIdsInPKs;
+	}
+
+	/**
+	 * This flag activates partition IDs in PKs mode, which is newly introduced in HAPI FHIR 8.0.0.
+	 * This mode causes partition IDs to be included in all primary keys, joins, and emitted
+	 * SQL. It also affects the generated schema and migrations. This setting should not be changed
+	 * after the database has been initialized, unless you have performed an appropriate migration.
+	 *
+	 * @since 8.0.0
+	 */
+	public void setIncludePartitionIdsInPKs(boolean theIncludePartitionIdsInPKs) {
+		myIncludePartitionIdsInPKs = theIncludePartitionIdsInPKs;
 	}
 
 	/**

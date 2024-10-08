@@ -155,6 +155,7 @@ public class QueryStack {
 	private Map<String, BaseJoiningPredicateBuilder> myParamNameToPredicateBuilderMap;
 	// used for _offset queries with sort, should be removed once the fix is applied to the async path too.
 	private boolean myUseAggregate;
+	private boolean myGroupingAdded;
 
 	/**
 	 * Constructor
@@ -1235,6 +1236,7 @@ public class QueryStack {
 							.setRequest(theRequest)
 							.setRequestPartitionId(theRequestPartitionId));
 
+			// fixme pk?
 			andPredicates.add(toAndPredicate(partitionPredicate, pathPredicate, typePredicate, linkedPredicate));
 		}
 
@@ -1476,11 +1478,24 @@ public class QueryStack {
 	}
 
 	public void addGrouping() {
-		BaseJoiningPredicateBuilder firstPredicateBuilder = mySqlBuilder.getOrCreateFirstPredicateBuilder();
-		// we always select partition_id, even if not joining.
-		mySqlBuilder.getSelect().addGroupings(new DbColumn[] {
-			firstPredicateBuilder.getPartitionIdColumn(), firstPredicateBuilder.getResourceIdColumn()
-		});
+		if (!myGroupingAdded) {
+			BaseJoiningPredicateBuilder firstPredicateBuilder = mySqlBuilder.getOrCreateFirstPredicateBuilder();
+
+			/*
+			 * Postgres and Oracle don't like it if we are doing a SELECT DISTINCT
+			 * with multiple selected columns but no GROUP BY clause.
+			 */
+			if (mySqlBuilder.isSelectPartitionId()) {
+				mySqlBuilder
+						.getSelect()
+						.addGroupings(
+								firstPredicateBuilder.getPartitionIdColumn(),
+								firstPredicateBuilder.getResourceIdColumn());
+			} else {
+				mySqlBuilder.getSelect().addGroupings(firstPredicateBuilder.getJoinColumns());
+			}
+			myGroupingAdded = true;
+		}
 	}
 
 	public void addOrdering() {
@@ -2061,7 +2076,7 @@ public class QueryStack {
 			BaseJoiningPredicateBuilder join;
 			if (paramInverted) {
 
-				boolean selectPartitionId = myPartitionSettings.isPartitionIdsInPrimaryKeys();
+				boolean selectPartitionId = myPartitionSettings.isIncludePartitionIdsInPKs();
 				SearchQueryBuilder sqlBuilder = mySqlBuilder.newChildSqlBuilder(selectPartitionId);
 				TagPredicateBuilder tagSelector = sqlBuilder.addTagPredicateBuilder(null);
 				sqlBuilder.addPredicate(
@@ -2240,7 +2255,7 @@ public class QueryStack {
 		BaseJoiningPredicateBuilder join;
 
 		if (paramInverted) {
-			boolean selectPartitionId = myPartitionSettings.isPartitionIdsInPrimaryKeys();
+			boolean selectPartitionId = myPartitionSettings.isIncludePartitionIdsInPKs();
 			SearchQueryBuilder sqlBuilder = theSqlBuilder.newChildSqlBuilder(selectPartitionId);
 			TokenPredicateBuilder tokenSelector = sqlBuilder.addTokenPredicateBuilder(null);
 			sqlBuilder.addPredicate(tokenSelector.createPredicateToken(
