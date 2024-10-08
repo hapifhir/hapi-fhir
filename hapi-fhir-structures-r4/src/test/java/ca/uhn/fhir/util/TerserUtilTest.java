@@ -7,13 +7,16 @@ import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Claim;
+import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DateType;
+import org.hl7.fhir.r4.model.Enumeration;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
@@ -21,9 +24,13 @@ import org.hl7.fhir.r4.model.PrimitiveType;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.Date;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -415,6 +422,52 @@ class TerserUtilTest {
 		TerserUtil.mergeField(ourFhirContext, "recorder", c1, c2);
 
 		assertThat(c2.getRecorder().getResource()).isSameAs(practitioner);
+	}
+
+	@ParameterizedTest
+	@MethodSource("singleCardinalityArguments")
+	public void testMergeWithDataAbsentReason_singleCardinality(
+		 Enumeration<Observation.ObservationStatus> fromStatus,
+		 Enumeration<Observation.ObservationStatus> toStatus,
+		 Enumeration<Observation.ObservationStatus> expectedStatus) {
+		Observation fromObservation = new Observation();
+		fromObservation.setStatusElement(fromStatus);
+
+		Observation toObservation = new Observation();
+		toObservation.setStatusElement(toStatus);
+
+		TerserUtil.mergeField(ourFhirContext, "status", fromObservation, toObservation);
+
+		if (expectedStatus == null) {
+			assertThat(toObservation.hasStatus()).isFalse();
+		} else {
+			assertThat(toObservation.getStatusElement().getCode()).isEqualTo(expectedStatus.getCode());
+		}
+	}
+
+	private static Stream<Arguments> singleCardinalityArguments() {
+		return Stream.of(
+			 Arguments.of(null, null, null),
+			 Arguments.of(fromEnum(Observation.ObservationStatus.FINAL), null, fromEnum(Observation.ObservationStatus.FINAL)),
+			 Arguments.of(null, fromEnum(Observation.ObservationStatus.FINAL), fromEnum(Observation.ObservationStatus.FINAL)),
+			 Arguments.of(fromEnum(Observation.ObservationStatus.FINAL), fromEnum(Observation.ObservationStatus.PRELIMINARY), fromEnum(Observation.ObservationStatus.FINAL)),
+			 Arguments.of(withDataAbsentReason(), null, withDataAbsentReason()),
+			 Arguments.of(null, withDataAbsentReason(), withDataAbsentReason()),
+			 Arguments.of(withDataAbsentReason(), withDataAbsentReason(), withDataAbsentReason()),
+			 Arguments.of(fromEnum(Observation.ObservationStatus.FINAL), withDataAbsentReason(), fromEnum(Observation.ObservationStatus.FINAL)),
+			 Arguments.of(withDataAbsentReason(), fromEnum(Observation.ObservationStatus.FINAL), fromEnum(Observation.ObservationStatus.FINAL))
+		);
+	}
+
+	private static Enumeration<Observation.ObservationStatus> fromEnum(Observation.ObservationStatus fromStatus) {
+		return new Enumeration<>(new Observation.ObservationStatusEnumFactory(), fromStatus);
+	}
+
+	private static Enumeration<Observation.ObservationStatus> withDataAbsentReason() {
+		Enumeration<Observation.ObservationStatus> enumeration = new Enumeration<>(new Observation.ObservationStatusEnumFactory());
+		Enumeration<Enumerations.DataAbsentReason> extension = new Enumeration<>(new Enumerations.DataAbsentReasonEnumFactory(), Enumerations.DataAbsentReason.UNKNOWN);
+		enumeration.addExtension("http://hl7.org/fhir/StructureDefinition/data-absent-reason", extension);
+		return enumeration;
 	}
 
 	@Test
