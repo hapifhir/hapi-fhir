@@ -19,37 +19,33 @@
  */
 package ca.uhn.fhir.cr.r4.measure;
 
-import ca.uhn.fhir.cr.common.IRepositoryFactory;
+import ca.uhn.fhir.cr.common.StringTimePeriodHandler;
 import ca.uhn.fhir.cr.r4.ICareGapsServiceFactory;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.Parameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class CareGapsOperationProvider {
 	private static final Logger ourLog = LoggerFactory.getLogger(CareGapsOperationProvider.class);
 
-	@Autowired
-	IRepositoryFactory myRepositoryFactory;
+	private final ICareGapsServiceFactory myR4CareGapsProcessorFactory;
+	private final StringTimePeriodHandler myStringTimePeriodHandler;
 
-	@Autowired
-	ICareGapsServiceFactory myR4CareGapsProcessorFactory;
+	public CareGapsOperationProvider(ICareGapsServiceFactory theR4CareGapsProcessorFactory, StringTimePeriodHandler theStringTimePeriodHandler) {
+		myR4CareGapsProcessorFactory = theR4CareGapsProcessorFactory;
+		myStringTimePeriodHandler = theStringTimePeriodHandler;
+	}
 
 	/**
 	 * Implements the <a href=
@@ -98,8 +94,8 @@ public class CareGapsOperationProvider {
 	@Operation(name = ProviderConstants.CR_OPERATION_CARE_GAPS, idempotent = true, type = Measure.class)
 	public Parameters careGapsReport(
 			RequestDetails theRequestDetails,
-			@OperationParam(name = "periodStart", typeName = "date") IPrimitiveType<Date> thePeriodStart,
-			@OperationParam(name = "periodEnd", typeName = "date") IPrimitiveType<Date> thePeriodEnd,
+			@OperationParam(name = "periodStart") String thePeriodStart,
+			@OperationParam(name = "periodEnd") String thePeriodEnd,
 			@OperationParam(name = "subject") String theSubject,
 			@OperationParam(name = "status") List<String> theStatus,
 			@OperationParam(name = "measureId") List<String> theMeasureId,
@@ -109,13 +105,8 @@ public class CareGapsOperationProvider {
 		return myR4CareGapsProcessorFactory
 				.create(theRequestDetails)
 				.getCareGapsReport(
-						ZonedDateTime.of(
-								LocalDateTime.ofInstant(
-										thePeriodStart.getValue().toInstant(), ZoneId.systemDefault()),
-								ZoneId.systemDefault()),
-						ZonedDateTime.of(
-								LocalDateTime.ofInstant(thePeriodEnd.getValue().toInstant(), ZoneId.systemDefault()),
-								ZoneId.systemDefault()),
+					myStringTimePeriodHandler.getStartZonedDateTime(thePeriodStart, theRequestDetails),
+					myStringTimePeriodHandler.getEndZonedDateTime(thePeriodEnd, theRequestDetails),
 						theSubject,
 						theStatus,
 						theMeasureId == null

@@ -23,6 +23,8 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.cr.common.IRepositoryFactory;
 import ca.uhn.fhir.cr.common.RepositoryFactoryForRepositoryInterface;
+import ca.uhn.fhir.cr.common.StringTimePeriodHandler;
+import ca.uhn.fhir.cr.config.CrBaseConfig;
 import ca.uhn.fhir.cr.config.ProviderLoader;
 import ca.uhn.fhir.cr.config.ProviderSelector;
 import ca.uhn.fhir.cr.config.RepositoryConfig;
@@ -52,7 +54,6 @@ import org.opencds.cqf.fhir.cr.measure.r4.R4CollectDataService;
 import org.opencds.cqf.fhir.cr.measure.r4.R4DataRequirementsService;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureService;
 import org.opencds.cqf.fhir.cr.measure.r4.R4SubmitDataService;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -60,10 +61,9 @@ import org.springframework.context.annotation.Import;
 
 import java.util.Arrays;
 import java.util.Map;
-import java.util.concurrent.Executor;
 
 @Configuration
-@Import({RepositoryConfig.class})
+@Import({RepositoryConfig.class, CrBaseConfig.class})
 public class CrR4Config {
 
 	@Bean
@@ -128,18 +128,20 @@ public class CrR4Config {
 			IRepositoryFactory theRepositoryFactory,
 			CareGapsProperties theCareGapsProperties,
 			MeasureEvaluationOptions theMeasureEvaluationOptions,
-			@Qualifier("cqlExecutor") Executor theExecutor) {
+			MeasurePeriodValidator theMeasurePeriodValidator) {
 		return rd -> new R4CareGapsService(
 				theCareGapsProperties,
 				theRepositoryFactory.create(rd),
 				theMeasureEvaluationOptions,
 				rd.getFhirServerBase(),
-				new MeasurePeriodValidator());
+				theMeasurePeriodValidator);
 	}
 
 	@Bean
-	CareGapsOperationProvider r4CareGapsOperationProvider() {
-		return new CareGapsOperationProvider();
+	CareGapsOperationProvider r4CareGapsOperationProvider(
+			ICareGapsServiceFactory theR4CareGapsProcessorFactory,
+			StringTimePeriodHandler theStringTimePeriodHandler) {
+		return new CareGapsOperationProvider(theR4CareGapsProcessorFactory, theStringTimePeriodHandler);
 	}
 
 	@Bean
@@ -148,8 +150,9 @@ public class CrR4Config {
 	}
 
 	@Bean
-	MeasureOperationsProvider r4MeasureOperationsProvider() {
-		return new MeasureOperationsProvider();
+	MeasureOperationsProvider r4MeasureOperationsProvider(
+			IMeasureServiceFactory theR4MeasureServiceFactory, StringTimePeriodHandler theStringTimePeriodHandler) {
+		return new MeasureOperationsProvider(theR4MeasureServiceFactory, theStringTimePeriodHandler);
 	}
 
 	@Bean
