@@ -227,40 +227,42 @@ public class DatePredicateBuilder extends BaseSearchParamPredicateBuilder {
 			if (lowerBoundInstant != null && upperBoundInstant != null) {
 				// both upper and lower bound
 				// lowerbound; :lowerbound <= low_field <= :upperbound
-				greaterThan = ComboCondition.and(DatePredicateBuilder.this.createPredicate(lowValueField,
-					ParamPrefixEnum.GREATERTHAN_OR_EQUALS, genericLowerBound),
-					DatePredicateBuilder.this.createPredicate(lowValueField, ParamPrefixEnum.LESSTHAN_OR_EQUALS, genericUpperBound)
-				);
+				greaterThan = ComboCondition.and(
+						DatePredicateBuilder.this.createPredicate(
+								lowValueField, ParamPrefixEnum.GREATERTHAN_OR_EQUALS, genericLowerBound),
+						DatePredicateBuilder.this.createPredicate(
+								lowValueField, ParamPrefixEnum.LESSTHAN_OR_EQUALS, genericUpperBound));
 				// upperbound; :lowerbound <= high_field <= :upperbound
-				lessThan = ComboCondition.and(DatePredicateBuilder.this.createPredicate(highValueField,
-					ParamPrefixEnum.LESSTHAN_OR_EQUALS, genericUpperBound),
-					DatePredicateBuilder.this.createPredicate(highValueField, ParamPrefixEnum.GREATERTHAN_OR_EQUALS, genericLowerBound)
-				);
+				lessThan = ComboCondition.and(
+						DatePredicateBuilder.this.createPredicate(
+								highValueField, ParamPrefixEnum.LESSTHAN_OR_EQUALS, genericUpperBound),
+						DatePredicateBuilder.this.createPredicate(
+								highValueField, ParamPrefixEnum.GREATERTHAN_OR_EQUALS, genericLowerBound));
 
 				lowerBoundCondition = greaterThan;
 				upperBoundCondition = lessThan;
 			} else if (lowerBoundInstant != null) {
 				// lower bound only
-				greaterThan = DatePredicateBuilder.this.createPredicate(lowValueField,
-					ParamPrefixEnum.GREATERTHAN_OR_EQUALS, genericLowerBound);
-				lessThan = DatePredicateBuilder.this.createPredicate(highValueField,
-					ParamPrefixEnum.GREATERTHAN_OR_EQUALS, genericLowerBound);
+				greaterThan = DatePredicateBuilder.this.createPredicate(
+						lowValueField, ParamPrefixEnum.GREATERTHAN_OR_EQUALS, genericLowerBound);
+				lessThan = DatePredicateBuilder.this.createPredicate(
+						highValueField, ParamPrefixEnum.GREATERTHAN_OR_EQUALS, genericLowerBound);
 
 				if (lowerBound.getPrefix() == ParamPrefixEnum.STARTS_AFTER
-					|| lowerBound.getPrefix() == ParamPrefixEnum.EQUAL) {
+						|| lowerBound.getPrefix() == ParamPrefixEnum.EQUAL) {
 					lowerBoundCondition = greaterThan;
 				} else {
 					lowerBoundCondition = ComboCondition.or(greaterThan, lessThan);
 				}
 			} else {
 				// only upper bound provided
-				greaterThan = DatePredicateBuilder.this.createPredicate(lowValueField,
-					ParamPrefixEnum.LESSTHAN_OR_EQUALS, genericUpperBound);
-				lessThan = DatePredicateBuilder.this.createPredicate(highValueField,
-					ParamPrefixEnum.LESSTHAN_OR_EQUALS, genericUpperBound);
+				greaterThan = DatePredicateBuilder.this.createPredicate(
+						lowValueField, ParamPrefixEnum.LESSTHAN_OR_EQUALS, genericUpperBound);
+				lessThan = DatePredicateBuilder.this.createPredicate(
+						highValueField, ParamPrefixEnum.LESSTHAN_OR_EQUALS, genericUpperBound);
 
 				if (upperBound.getPrefix() == ParamPrefixEnum.ENDS_BEFORE
-					|| upperBound.getPrefix() == ParamPrefixEnum.EQUAL) {
+						|| upperBound.getPrefix() == ParamPrefixEnum.EQUAL) {
 					upperBoundCondition = lessThan;
 				} else {
 					upperBoundCondition = ComboCondition.or(greaterThan, lessThan);
