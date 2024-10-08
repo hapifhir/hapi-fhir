@@ -2047,7 +2047,6 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		createPatient(withPartition(2), withBirthdate("2021-04-20"));
 
 		// Date param
-
 		addReadDefaultPartition();
 		myCaptureQueriesListener.clear();
 		SearchParameterMap map = new SearchParameterMap();

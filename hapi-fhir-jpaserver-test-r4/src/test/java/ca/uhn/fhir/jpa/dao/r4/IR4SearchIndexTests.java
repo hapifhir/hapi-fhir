@@ -31,6 +31,7 @@ import java.sql.Statement;
 import java.util.Date;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public interface IR4SearchIndexTests {
@@ -54,7 +55,7 @@ public interface IR4SearchIndexTests {
 		// actual, lowerbound, upperbound
 		"1999-12-31,1999-01-01,2000-12-31",
 		"1999-12-31,1999-01-01,",
-		"1999-12-31,,2000-12-31",
+		"1999-12-31,,2000-01-01",
 		"1999-12-31,1999-12-31,1999-12-31"
 	})
 	default void search_dateValues_usesWhereToHelpQueryPlans(String theBirthdate, String theLowerBound, String theUpperBound) {
@@ -63,23 +64,27 @@ public interface IR4SearchIndexTests {
 		DateTimeType birthdayDateTime = new DateTimeType();
 		birthdayDateTime.setValueAsString(theBirthdate);
 
+		boolean hasUpperBound = isNotBlank(theUpperBound);
+		boolean hasLowerBound = isNotBlank(theLowerBound);
+
 		IFhirResourceDao<Patient> patientDao = getResourceDao("Patient");
 		IFhirResourceDao<Observation> observationDao = getResourceDao("Observation");
 
 		// create some patients (a few so we have a few to scan through)
-		for (int i = 0; i < 100; i++) {
+		int birthYear = birthdayDateTime.getYear();
+		for (int i = 0; i < 10; i++) {
 			Patient patient = new Patient();
 			patient.setActive(true);
 			patient.addName()
 				.setFamily("simpson")
 				.addGiven("homer" + i);
-			if (i < 5) {
-				patient.setBirthDate(birthdayDateTime.getValue());
-			} else {
-				Date d = birthdayDateTime.getValue();
-				d.setYear(2000 - i);
-				patient.setBirthDate(d);
-			}
+			// i = 0 will give us the resource we're looking for
+			// all other dates will be a new resource
+			Date d = birthdayDateTime.getValue();
+			int adjustment = (hasUpperBound && !hasLowerBound) ? i : -i;
+			d.setYear((birthYear + adjustment) - 1900);
+			patient.setBirthDate(d);
+
 			patientDao.create(patient, rd);
 		}
 
@@ -97,10 +102,10 @@ public interface IR4SearchIndexTests {
 		searchParameterMap.setLoadSynchronous(true);
 
 		DateRangeParam birthdayParamRange = new DateRangeParam();
-		if (isNotBlank(theLowerBound)) {
+		if (hasLowerBound) {
 			birthdayParamRange.setLowerBound(new DateParam(theLowerBound));
 		}
-		if (isNotBlank(theUpperBound)) {
+		if (hasUpperBound) {
 			birthdayParamRange.setUpperBound(new DateParam(theUpperBound));
 		}
 		searchParameterMap.add("birthdate", birthdayParamRange);
@@ -151,6 +156,8 @@ public interface IR4SearchIndexTests {
 		};
 
 		try {
+			IBundleProvider all = patientDao.search(new SearchParameterMap().setLoadSynchronous(true), rd);
+
 			getInterceptorService().registerInterceptor(interceptor);
 
 			// test
@@ -158,6 +165,7 @@ public interface IR4SearchIndexTests {
 
 			// verify
 			assertNotNull(results);
+			assertEquals(1, results.size());
 		} finally {
 			// remove the interceptor
 			getInterceptorService().unregisterInterceptor(interceptor);
