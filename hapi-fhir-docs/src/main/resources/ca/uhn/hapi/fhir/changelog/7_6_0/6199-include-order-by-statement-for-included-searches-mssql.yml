@@ -1,0 +1,3 @@
+type: fix
+issue: 6199
+title: "Fix for an mssql runtime error when searching for resources with the _include clause."

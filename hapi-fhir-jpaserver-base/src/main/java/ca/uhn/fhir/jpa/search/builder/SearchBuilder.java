@@ -115,6 +115,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.hibernate.dialect.SQLServerDialect;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
@@ -1583,6 +1584,10 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					buildCanonicalUrlQuery(findVersionFieldName, targetResourceTypes, reverseMode);
 
 			String sql = localReferenceQuery + " UNION " + canonicalQuery.getLeft();
+
+			if (myDialectProvider.getDialect() instanceof SQLServerDialect) {
+				sql += " order by r." + findPidFieldSqlColumn;
+			}
 
 			List<Collection<JpaPid>> partitions = partition(nextRoundMatches, getMaximumPageSize());
 			for (Collection<JpaPid> nextPartition : partitions) {
