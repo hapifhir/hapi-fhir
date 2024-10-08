@@ -29,6 +29,7 @@ import ca.uhn.fhir.rest.client.api.IHttpClient;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.client.method.MethodUtil;
+import ca.uhn.fhir.rest.param.HttpClientRequestParameters;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.client.Invocation.Builder;
@@ -37,8 +38,11 @@ import jakarta.ws.rs.core.MultivaluedHashMap;
 import jakarta.ws.rs.core.MultivaluedMap;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * A Http Request based on JaxRs. This is an adapter around the class
@@ -83,7 +87,15 @@ public class JaxRsHttpClient implements IHttpClient {
 	@Override
 	public IHttpRequest createParamRequest(
 			FhirContext theContext, Map<String, List<String>> theParams, EncodingEnum theEncoding) {
-		MultivaluedMap<String, String> map = new MultivaluedHashMap<String, String>();
+		Entity<Form> entity = getFormEntity(theParams);
+		myRequestType = RequestTypeEnum.POST;
+		JaxRsHttpRequest retVal = createHttpRequest(entity);
+		addHeadersToRequest(retVal, theEncoding, theContext);
+		return retVal;
+	}
+
+	private static Entity<Form> getFormEntity(Map<String, List<String>> theParams) {
+		MultivaluedMap<String, String> map = new MultivaluedHashMap<>();
 		for (Map.Entry<String, List<String>> nextParam : theParams.entrySet()) {
 			List<String> value = nextParam.getValue();
 			for (String s : value) {
@@ -91,9 +103,7 @@ public class JaxRsHttpClient implements IHttpClient {
 			}
 		}
 		Entity<Form> entity = Entity.form(map);
-		JaxRsHttpRequest retVal = createHttpRequest(entity);
-		addHeadersToRequest(retVal, theEncoding, theContext);
-		return retVal;
+		return entity;
 	}
 
 	@Override
@@ -109,6 +119,60 @@ public class JaxRsHttpClient implements IHttpClient {
 		JaxRsHttpRequest result = createHttpRequest(null);
 		addHeadersToRequest(result, theEncoding, theContext);
 		return result;
+	}
+
+	@Override
+	public IHttpRequest createRequest(HttpClientRequestParameters theParameters) {
+		Map<String, String> additionalHeaders = new HashMap<>();
+		Entity<?> entity;
+		myRequestType = theParameters.getRequestTypeEnum();
+		switch (theParameters.getRequestTypeEnum()) {
+			case POST:
+			case PUT:
+				if (theParameters.getBaseBinary() != null) {
+					entity = Entity.entity(
+							theParameters.getBaseBinary().getContentAsBase64(),
+							theParameters.getBaseBinary().getContentType());
+				} else if (theParameters.getByteContents() != null) {
+					entity = Entity.entity(
+							theParameters.getByteContents(),
+							theParameters.getContentType() + Constants.HEADER_SUFFIX_CT_UTF_8);
+					additionalHeaders.put(
+							Constants.HEADER_CONTENT_TYPE,
+							theParameters.getContentType() + Constants.HEADER_SUFFIX_CT_UTF_8);
+				} else if (isNotBlank(theParameters.getContents())) {
+					entity = Entity.entity(
+							theParameters.getContents(),
+							theParameters.getContentType() + Constants.HEADER_SUFFIX_CT_UTF_8);
+					additionalHeaders.put(
+							Constants.HEADER_CONTENT_TYPE,
+							theParameters.getContentType() + Constants.HEADER_SUFFIX_CT_UTF_8);
+				} else {
+					entity = getFormEntity(theParameters.getFormParams());
+				}
+				break;
+			default:
+				entity = null;
+		}
+		JaxRsHttpRequest request = createHttpRequest(entity);
+		for (Map.Entry<String, String> entrySet : additionalHeaders.entrySet()) {
+			request.addHeader(entrySet.getKey(), entrySet.getValue());
+		}
+		addHeadersToRequest(request, theParameters.getEncodingEnum(), theParameters.getFhirContext());
+		return request;
+	}
+
+	@Override
+	public void addHeadersToRequest(IHttpRequest theRequest, EncodingEnum theEncodingEnum, FhirContext theContext) {
+		// nothing to do for this client
+	}
+
+	@Override
+	public void setNewUrl(
+			StringBuilder theUrl, String theIfNoneExistString, Map<String, List<String>> theIfNoneExistParams) {
+		myUrl = theUrl;
+		myIfNoneExistString = theIfNoneExistString;
+		myIfNoneExistParams = theIfNoneExistParams;
 	}
 
 	public void addHeadersToRequest(JaxRsHttpRequest theHttpRequest, EncodingEnum theEncoding, FhirContext theContext) {
