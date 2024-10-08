@@ -101,6 +101,7 @@ public class CareGapsOperationProvider {
 	@Operation(name = ProviderConstants.CR_OPERATION_CARE_GAPS, idempotent = true, type = Measure.class)
 	public Parameters careGapsReport(
 			RequestDetails theRequestDetails,
+			// TODO: LD:  make these Strings instead of FHIR dates and use new conversion code
 			@OperationParam(name = "periodStart", typeName = "date") IPrimitiveType<Date> thePeriodStart,
 			@OperationParam(name = "periodEnd", typeName = "date") IPrimitiveType<Date> thePeriodEnd,
 			@OperationParam(name = "topic") List<String> theTopic,

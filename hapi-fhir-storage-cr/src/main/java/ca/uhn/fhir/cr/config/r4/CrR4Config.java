@@ -23,6 +23,8 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.cr.common.IRepositoryFactory;
 import ca.uhn.fhir.cr.common.RepositoryFactoryForRepositoryInterface;
+import ca.uhn.fhir.cr.common.StringTimePeriodHandler;
+import ca.uhn.fhir.cr.config.CrBaseConfig;
 import ca.uhn.fhir.cr.config.ProviderLoader;
 import ca.uhn.fhir.cr.config.ProviderSelector;
 import ca.uhn.fhir.cr.config.RepositoryConfig;
@@ -62,7 +64,7 @@ import java.util.Map;
 import java.util.concurrent.Executor;
 
 @Configuration
-@Import({RepositoryConfig.class})
+@Import({RepositoryConfig.class, CrBaseConfig.class})
 public class CrR4Config {
 
 	@Bean
@@ -145,8 +147,9 @@ public class CrR4Config {
 	}
 
 	@Bean
-	MeasureOperationsProvider r4MeasureOperationsProvider() {
-		return new MeasureOperationsProvider();
+	MeasureOperationsProvider r4MeasureOperationsProvider(
+			IMeasureServiceFactory theR4MeasureServiceFactory, StringTimePeriodHandler theStringTimePeriodHandler) {
+		return new MeasureOperationsProvider(theR4MeasureServiceFactory, theStringTimePeriodHandler);
 	}
 
 	@Bean

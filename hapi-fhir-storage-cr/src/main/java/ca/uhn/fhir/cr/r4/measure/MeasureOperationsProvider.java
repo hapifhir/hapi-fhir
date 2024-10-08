@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.cr.r4.measure;
 
+import ca.uhn.fhir.cr.common.StringTimePeriodHandler;
 import ca.uhn.fhir.cr.r4.IMeasureServiceFactory;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
@@ -34,11 +35,20 @@ import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Parameters;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MeasureOperationsProvider {
-	@Autowired
-	IMeasureServiceFactory myR4MeasureServiceFactory;
+	private static final Logger ourLog = LoggerFactory.getLogger(MeasureOperationsProvider.class);
+
+	private final IMeasureServiceFactory myR4MeasureServiceFactory;
+	private final StringTimePeriodHandler myMeasureReportPeriodRequestProcessingService;
+
+	public MeasureOperationsProvider(
+			IMeasureServiceFactory theR4MeasureServiceFactory, StringTimePeriodHandler theStringTimePeriodHandler) {
+		myR4MeasureServiceFactory = theR4MeasureServiceFactory;
+		myMeasureReportPeriodRequestProcessingService = theStringTimePeriodHandler;
+	}
 
 	/**
 	 * Implements the <a href=
@@ -78,6 +88,9 @@ public class MeasureOperationsProvider {
 			@OperationParam(name = "parameters") Parameters theParameters,
 			RequestDetails theRequestDetails)
 			throws InternalErrorException, FHIRException {
+
+		// TODO: LD:  Once this API requires ZonedDateTimes for periods, pass in the
+		// results from the call to MeasureReportPeriodConversionHandler
 		return myR4MeasureServiceFactory
 				.create(theRequestDetails)
 				.evaluate(
