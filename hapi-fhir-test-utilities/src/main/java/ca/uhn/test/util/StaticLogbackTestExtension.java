@@ -43,7 +43,7 @@ public class StaticLogbackTestExtension implements BeforeAllCallback, AfterAllCa
 
 	public static StaticLogbackTestExtension withThreshold(Level theLevel) {
 		LogbackTestExtension logbackTestExtension = new LogbackTestExtension();
-		logbackTestExtension.setUp(theLevel);
+		logbackTestExtension.setLoggerLevel(theLevel);
 		ThresholdFilter thresholdFilter = new ThresholdFilter();
 		thresholdFilter.setLevel(theLevel.levelStr);
 		logbackTestExtension.getAppender().addFilter(thresholdFilter);

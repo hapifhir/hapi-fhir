@@ -24,7 +24,6 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import jakarta.annotation.Nonnull;
-import org.apache.commons.lang3.Validate;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -115,10 +114,9 @@ public class LogbackTestExtension implements BeforeEachCallback, AfterEachCallba
 	}
 
 	/**
-	 * @deprecated Just use the constructor of this class to pick the logger and level. Ad-hoc config of this class leads to test weirdness and resource leaks
+	 * Temporarily set the logger level - It will be reset after the current test method is done
 	 */
-	@Deprecated
-	public void setUp(Level theLevel) {
+	public void setLoggerLevel(Level theLevel) {
 		if (theLevel != null) {
 			myLogger.setLevel(theLevel);
 		}
@@ -133,7 +131,6 @@ public class LogbackTestExtension implements BeforeEachCallback, AfterEachCallba
 		}
 		if (myLevel != null) {
 			myLogger.setLevel(mySavedLevel);
-			myLevel = null;
 		}
 	}
 
@@ -146,4 +143,8 @@ public class LogbackTestExtension implements BeforeEachCallback, AfterEachCallba
 		return getLogEvents().stream().map(ILoggingEvent::getMessage).toList();
 	}
 
+	public void reRegister() throws Exception {
+		afterEach(null);
+		beforeEach(null);
+	}
 }
