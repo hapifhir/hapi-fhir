@@ -71,7 +71,6 @@ public class TestCrR4Config {
 		var careGapsProperties = new CareGapsProperties();
 		careGapsProperties.setCareGapsReporter("alphora");
 		careGapsProperties.setCareGapsCompositionSectionAuthor("alphora-author");
-		careGapsProperties.setMyFhirBaseUrl("http://localhost");
 		return careGapsProperties;
 	}
 
