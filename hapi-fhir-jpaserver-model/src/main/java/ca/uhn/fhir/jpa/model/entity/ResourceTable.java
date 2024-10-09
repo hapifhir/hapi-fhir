@@ -484,9 +484,13 @@ public class ResourceTable extends BaseHasResource<JpaPid> implements Serializab
 		return retVal;
 	}
 
+	public void setId(JpaPid thePid) {
+		myPid = thePid;
+	}
+
 	@VisibleForTesting
 	public void setIdForUnitTest(Long theId) {
-		myPid = JpaPid.fromId(theId);
+		setId(JpaPid.fromId(theId));
 	}
 
 	public Long getIndexStatus() {

@@ -12,6 +12,7 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
 import org.hibernate.boot.Metadata;
 import org.hibernate.boot.MetadataSources;
+import org.hibernate.boot.internal.MetadataImpl;
 import org.hibernate.boot.registry.BootstrapServiceRegistry;
 import org.hibernate.boot.registry.BootstrapServiceRegistryBuilder;
 import org.hibernate.boot.registry.StandardServiceRegistry;
@@ -111,6 +112,14 @@ public class DdlGeneratorHibernate61 {
 			}
 
 			Metadata metadata = metadataSources.buildMetadata();
+
+			/*
+			 * This is not actually necessary for schema exporting, but we validate
+			 * in order to ensure that various tests fail if the
+			 * ConditionalIdMappingContributor leaves the model in an
+			 * inconsistent state.
+			 */
+			((MetadataImpl) metadata).validate();
 
 			EnumSet<TargetType> targetTypes = EnumSet.of(TargetType.SCRIPT);
 			SchemaExport.Action action = SchemaExport.Action.CREATE;

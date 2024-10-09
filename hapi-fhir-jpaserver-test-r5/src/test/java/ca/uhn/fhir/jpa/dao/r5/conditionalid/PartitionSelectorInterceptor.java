@@ -12,10 +12,21 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 
 public class PartitionSelectorInterceptor {
-	private Integer myNextPartitionId;
+	private RequestPartitionId myNextPartition;
+
+	/**
+	 * Constructor
+	 */
+	public PartitionSelectorInterceptor() {
+		super();
+	}
 
 	public void setNextPartitionId(Integer theNextPartitionId) {
-		myNextPartitionId = theNextPartitionId;
+		myNextPartition = RequestPartitionId.fromPartitionId(theNextPartitionId);
+	}
+
+	public void setNextPartition(RequestPartitionId theNextPartition) {
+		myNextPartition = theNextPartition;
 	}
 
 	@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE)
@@ -33,8 +44,8 @@ public class PartitionSelectorInterceptor {
 	private RequestPartitionId selectPartition(String theResourceType) {
 		return switch (defaultString(theResourceType)) {
 			case "", "Patient", "Observation", "Encounter", "List", "QuestionnaireResponse" -> {
-				assert myNextPartitionId != null;
-				yield RequestPartitionId.fromPartitionId(myNextPartitionId);
+				assert myNextPartition != null;
+				yield myNextPartition;
 			}
 			case "SearchParameter", "Organization", "Questionnaire" -> RequestPartitionId.defaultPartition();
 			default -> throw new InternalErrorException("Don't know how to handle resource type: " + theResourceType);

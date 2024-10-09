@@ -1629,7 +1629,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			if (findVersionFieldName != null) {
 				fieldsToLoad += ", r.target_resource_version AS " + RESOURCE_VERSION_ALIAS;
 			}
-			if (myPartitionSettings.isIncludePartitionIdsInPKs()) {
+			if (myPartitionSettings.isPartitionIdsInPrimaryKeys()) {
 				fieldsToLoad += ", r.";
 				fieldsToLoad += findPartitionFieldName.equals(MY_SOURCE_RESOURCE_PARTITION_ID)
 						? "partition_id"
@@ -1658,7 +1658,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					.append(" AND r.")
 					.append(searchPidFieldSqlColumn)
 					.append(" IN (:target_pids) ");
-			if (myPartitionSettings.isIncludePartitionIdsInPKs()) {
+			if (myPartitionSettings.isPartitionIdsInPrimaryKeys()) {
 				String partitionFieldToSearch = findPartitionFieldName.equals(MY_SOURCE_RESOURCE_PARTITION_ID)
 						? "target_res_partition_id"
 						: "partition_id";
@@ -1691,7 +1691,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			for (Collection<JpaPid> nextPartition : partitions) {
 				Query q = entityManager.createNativeQuery(sql, Tuple.class);
 				q.setParameter("target_pids", JpaPid.toLongList(nextPartition));
-				if (myPartitionSettings.isIncludePartitionIdsInPKs()) {
+				if (myPartitionSettings.isPartitionIdsInPrimaryKeys()) {
 					q.setParameter(
 							"search_partition_id",
 							nextPartition.iterator().next().getPartitionId());
@@ -1713,7 +1713,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 									NumberUtils.createLong(String.valueOf(result.get(RESOURCE_VERSION_ALIAS)));
 						}
 						Integer partitionId = null;
-						if (myPartitionSettings.isIncludePartitionIdsInPKs()) {
+						if (myPartitionSettings.isPartitionIdsInPrimaryKeys()) {
 							partitionId = result.get(PARTITION_ID_ALIAS, Integer.class);
 						}
 
@@ -1749,12 +1749,12 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		if (findVersionFieldName != null) {
 			sqlBuilder.append(", r.").append(findVersionFieldName);
 		}
-		if (myPartitionSettings.isIncludePartitionIdsInPKs()) {
+		if (myPartitionSettings.isPartitionIdsInPrimaryKeys()) {
 			sqlBuilder.append(", r.").append(findPartitionFieldName);
 		}
 		sqlBuilder.append(" FROM ResourceLink r WHERE ");
 
-		if (myPartitionSettings.isIncludePartitionIdsInPKs()) {
+		if (myPartitionSettings.isPartitionIdsInPrimaryKeys()) {
 			sqlBuilder.append("r.").append(searchPartitionFieldName);
 			sqlBuilder.append(" = :target_partition_id AND ");
 		}
@@ -1803,7 +1803,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		for (Collection<JpaPid> nextPartition : partitions) {
 			TypedQuery<?> q = entityManager.createQuery(sql, Object[].class);
 			q.setParameter("target_pids", JpaPid.toLongList(nextPartition));
-			if (myPartitionSettings.isIncludePartitionIdsInPKs()) {
+			if (myPartitionSettings.isPartitionIdsInPrimaryKeys()) {
 				q.setParameter(
 						"target_partition_id", nextPartition.iterator().next().getPartitionId());
 			}
@@ -1835,7 +1835,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					version = (Long) ((Object[]) nextRow)[3];
 					offset++;
 				}
-				if (myPartitionSettings.isIncludePartitionIdsInPKs()) {
+				if (myPartitionSettings.isPartitionIdsInPrimaryKeys()) {
 					partitionId = ((Integer) ((Object[]) nextRow)[3 + offset]);
 				}
 
@@ -1931,7 +1931,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			fieldsToLoadFromSpidxUriTable += ", NULL";
 		}
 
-		if (myPartitionSettings.isIncludePartitionIdsInPKs()) {
+		if (myPartitionSettings.isPartitionIdsInPrimaryKeys()) {
 			if (theReverse) {
 				fieldsToLoadFromSpidxUriTable += ", r.partition_id as " + PARTITION_ID_ALIAS;
 			} else {
@@ -1968,7 +1968,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		canonicalUrlQuery.append(" WHERE r.src_path = :src_path AND ");
 		canonicalUrlQuery.append(" r.target_resource_id IS NULL ");
 		canonicalUrlQuery.append(" AND ");
-		if (myPartitionSettings.isIncludePartitionIdsInPKs()) {
+		if (myPartitionSettings.isPartitionIdsInPrimaryKeys()) {
 			if (theReverse) {
 				canonicalUrlQuery.append("rUri.partition_id");
 			} else {

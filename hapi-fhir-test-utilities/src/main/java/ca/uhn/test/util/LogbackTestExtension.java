@@ -103,34 +103,34 @@ public class LogbackTestExtension implements BeforeEachCallback, AfterEachCallba
 
 	@Override
 	public void beforeEach(ExtensionContext context) throws Exception {
-		setUp();
-	}
+		assert myListAppender == null;
+		myListAppender = new ListAppender<>();
+		myListAppender.start();
+		myLogger.addAppender(myListAppender);
 
-	public void setUp() {
-		setUp(myLevel);
+		if (myLevel != null) {
+			mySavedLevel = myLogger.getLevel();
+			myLogger.setLevel(myLevel);
+		}
 	}
 
 	/**
-	 * @deprecated Just use the constructor here
+	 * @deprecated Just use the constructor of this class to pick the logger and level. Ad-hoc config of this class leads to test weirdness and resource leaks
 	 */
 	@Deprecated
 	public void setUp(Level theLevel) {
-		myLevel = theLevel;
-		if (myListAppender == null) {
-			myListAppender = new ListAppender<>();
-			myListAppender.start();
-			myLogger.addAppender(myListAppender);
-		}
 		if (theLevel != null) {
-			mySavedLevel = myLogger.getLevel();
 			myLogger.setLevel(theLevel);
 		}
 	}
 
 	@Override
 	public void afterEach(ExtensionContext context) throws Exception {
-		myLogger.detachAppender(myListAppender);
-		myListAppender.stop();
+		if (myListAppender != null) {
+			myLogger.detachAppender(myListAppender);
+			myListAppender.stop();
+			myListAppender = null;
+		}
 		if (myLevel != null) {
 			myLogger.setLevel(mySavedLevel);
 			myLevel = null;

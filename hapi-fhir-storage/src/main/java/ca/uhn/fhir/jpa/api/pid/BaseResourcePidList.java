@@ -30,7 +30,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-public abstract class BaseResourcePidList<T extends IResourcePersistentId<T>> implements IResourcePidList<T> {
+public abstract class BaseResourcePidList<T extends IResourcePersistentId<?>> implements IResourcePidList<T> {
 
 	final List<T> myIds = new ArrayList<>();
 

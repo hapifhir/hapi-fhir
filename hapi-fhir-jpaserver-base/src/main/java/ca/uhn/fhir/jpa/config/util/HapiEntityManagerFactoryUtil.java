@@ -61,7 +61,7 @@ public final class HapiEntityManagerFactoryUtil {
 		configureEntityManagerFactory(retVal, theFhirContext, theStorageSettings);
 
 		PartitionSettings partitionSettings = myConfigurableListableBeanFactory.getBean(PartitionSettings.class);
-		if (partitionSettings.isIncludePartitionIdsInPKs()) {
+		if (partitionSettings.isPartitionIdsInPrimaryKeys()) {
 			Properties properties = new Properties();
 			properties.put(JpaConstants.HAPI_INCLUDE_PARTITION_IDS_IN_PKS, Boolean.toString(true));
 			// Despite the setter name, the method below just merges this property in,

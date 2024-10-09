@@ -23,12 +23,7 @@ import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.ForeignKey;
 import jakarta.persistence.Index;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinColumns;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
@@ -63,14 +58,16 @@ public class ResourceSearchUrlEntity {
 	@EmbeddedId
 	private ResourceSearchUrlEntityPK myPk;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumns(
-			value = {
-				@JoinColumn(name = "RES_ID", nullable = false, insertable = false, updatable = false),
-				@JoinColumn(name = "PARTITION_ID", nullable = false, insertable = false, updatable = false)
-			},
-			foreignKey = @ForeignKey(name = "FK_RES_SEARCH_URL_RESOURCE"))
-	private ResourceTable myResourceTable;
+	/*
+	 * Note: We previously had a foreign key here, but it's just not possible for this to still
+	 * work with partition IDs in the PKs since non-partitioned mode currently depends on the
+	 * partition ID being a part of the PK and it necessarily has to be stripped out if we're
+	 * stripping out others. So we'll leave this without a FK relationship, which does increase
+	 * the possibility of dangling records in this table but that's probably an ok compromise.
+	 *
+	 * Ultimately records in this table get cleaned up based on their CREATED_TIME anyhow, so
+	 * it's really not a big deal to not have a FK relationship here.
+	 */
 
 	@Column(name = "RES_ID", updatable = false, nullable = false, insertable = true)
 	private Long myResourcePid;
@@ -108,10 +105,7 @@ public class ResourceSearchUrlEntity {
 	}
 
 	public JpaPid getResourcePid() {
-		if (myResourcePid != null) {
-			return JpaPid.fromId(myResourcePid, myPartitionIdValue);
-		}
-		return myResourceTable.getResourceId();
+		return JpaPid.fromId(myResourcePid, myPartitionIdValue);
 	}
 
 	public ResourceSearchUrlEntity setResourcePid(Long theResourcePid) {
@@ -119,12 +113,7 @@ public class ResourceSearchUrlEntity {
 		return this;
 	}
 
-	public ResourceTable getResourceTable() {
-		return myResourceTable;
-	}
-
 	public ResourceSearchUrlEntity setResourceTable(ResourceTable theResourceTable) {
-		this.myResourceTable = theResourceTable;
 		this.myResourcePid = theResourceTable.getId().getId();
 		this.myPartitionIdValue = theResourceTable.getPartitionId().getPartitionId();
 		return this;

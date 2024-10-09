@@ -29,7 +29,7 @@ import java.util.List;
 /**
  * List of IResourcePersistentId along with a resource type each id
  */
-public interface IResourcePidList<T extends IResourcePersistentId<T>> {
+public interface IResourcePidList<T extends IResourcePersistentId<?>> {
 
 	RequestPartitionId getRequestPartitionId();
 

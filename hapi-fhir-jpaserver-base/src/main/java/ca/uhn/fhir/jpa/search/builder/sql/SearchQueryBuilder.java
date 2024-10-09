@@ -363,10 +363,11 @@ public class SearchQueryBuilder {
 		mySelect.addCustomJoin(theJoinType, theFromTable, theToTable, theCondition);
 	}
 
-	public ComboCondition createOnCondition(DbColumn theSourceColumn, DbColumn theTargetColumn) {
+	public ComboCondition createOnCondition(DbColumn[] theSourceColumn, DbColumn[] theTargetColumn) {
 		ComboCondition onCondition = ComboCondition.and();
-		onCondition.addCondition(BinaryCondition.equalTo(theSourceColumn, theTargetColumn));
-
+		for (int i = 0; i < theSourceColumn.length; i += 1) {
+			onCondition.addCondition(BinaryCondition.equalTo(theSourceColumn[i], theTargetColumn[i]));
+		}
 		return onCondition;
 	}
 
@@ -470,6 +471,9 @@ public class SearchQueryBuilder {
 		return toJoinColumns(partitionIdColumn, resourceIdColumn);
 	}
 
+	/**
+	 * Remove or keep partition_id columns depending on settings.
+	 */
 	@Nonnull
 	public DbColumn[] toJoinColumns(DbColumn partitionIdColumn, DbColumn resourceIdColumn) {
 		if (isIncludePartitionIdInJoins()) {
@@ -480,7 +484,7 @@ public class SearchQueryBuilder {
 	}
 
 	public boolean isIncludePartitionIdInJoins() {
-		return mySelectPartitionId && myPartitionSettings.isIncludePartitionIdsInPKs();
+		return mySelectPartitionId && myPartitionSettings.isPartitionIdsInPrimaryKeys();
 	}
 
 	public void addJoin(DbTable theFromTable, DbTable theToTable, DbColumn[] theFromColumn, DbColumn[] theToColumn) {

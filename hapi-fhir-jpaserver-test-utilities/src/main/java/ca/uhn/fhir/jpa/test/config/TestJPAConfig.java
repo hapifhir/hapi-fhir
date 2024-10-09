@@ -83,7 +83,7 @@ public class TestJPAConfig {
 	@Bean
 	public PartitionSettings partitionSettings() {
 		PartitionSettings retVal = new PartitionSettings();
-		retVal.setIncludePartitionIdsInPKs(myIncludePartitionIdsInPks);
+		retVal.setPartitionIdsInPrimaryKeys(myIncludePartitionIdsInPks);
 		return retVal;
 	}
 

@@ -48,7 +48,7 @@ class GenerateDdlMojoTest {
 	public void testPruneComplexId_Enabled() throws MojoExecutionException, MojoFailureException, IOException {
 
 		GenerateDdlMojo m = new GenerateDdlMojo();
-		m.packageNames = List.of("ca.uhn.fhir.tinder.ddl.test");
+		m.packageNames = List.of("ca.uhn.fhir.tinder.ddl.test.pks");
 		m.outputDirectory = "target/generate-ddl-plugin-test/";
 		m.dialects = List.of(
 			new GenerateDdlMojo.Dialect("ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgresDialect", "postgres.sql")
@@ -76,7 +76,7 @@ class GenerateDdlMojoTest {
 	public void testPruneComplexId_Disabled() throws MojoExecutionException, MojoFailureException, IOException {
 
 		GenerateDdlMojo m = new GenerateDdlMojo();
-		m.packageNames = List.of("ca.uhn.fhir.tinder.ddl.test");
+		m.packageNames = List.of("ca.uhn.fhir.tinder.ddl.test.pks");
 		m.outputDirectory = "target/generate-ddl-plugin-test/";
 		m.dialects = List.of(
 			new GenerateDdlMojo.Dialect("ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgresDialect", "postgres.sql")
@@ -99,6 +99,49 @@ class GenerateDdlMojoTest {
 		// Part of the PK, should be NOT NULL
 		assertThat(sqlStatements).anyMatch(substring("PARTITION_ID INTEGER NOT NULL,"));
 	}
+
+	@Test
+	public void testPruneNonPks_Enabled() throws MojoExecutionException, MojoFailureException, IOException {
+
+		GenerateDdlMojo m = new GenerateDdlMojo();
+		m.packageNames = List.of("ca.uhn.fhir.tinder.ddl.test.nonpks");
+		m.outputDirectory = "target/generate-ddl-plugin-test/";
+		m.dialects = List.of(
+			new GenerateDdlMojo.Dialect("ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgresDialect", "postgres.sql")
+		);
+		m.trimConditionalIdsFromPrimaryKeys = true;
+		m.execute();
+
+		String contents = FileUtils.readFileToString(new File("target/generate-ddl-plugin-test/postgres.sql"), StandardCharsets.UTF_8).toUpperCase(Locale.ROOT);
+		ourLog.info("SQL: {}", contents);
+
+		String[] sqlStatements = contents.replaceAll("\\s+", " ").split(";");
+		assertThat(sqlStatements).anyMatch(regex("LB_RES_ID BIGINT,"));
+		assertThat(sqlStatements).anyMatch(regex("LB_RES_PARTITION_ID INTEGER,"));
+
+	}
+
+	@Test
+	public void testEmbeddedPks_Enabled() throws MojoExecutionException, MojoFailureException, IOException {
+
+		GenerateDdlMojo m = new GenerateDdlMojo();
+		m.packageNames = List.of("ca.uhn.fhir.tinder.ddl.test.embeddedpk");
+		m.outputDirectory = "target/generate-ddl-plugin-test/";
+		m.dialects = List.of(
+			new GenerateDdlMojo.Dialect("ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgresDialect", "postgres.sql")
+		);
+		m.trimConditionalIdsFromPrimaryKeys = true;
+		m.execute();
+
+		String contents = FileUtils.readFileToString(new File("target/generate-ddl-plugin-test/postgres.sql"), StandardCharsets.UTF_8).toUpperCase(Locale.ROOT);
+		ourLog.info("SQL: {}", contents);
+
+		String[] sqlStatements = contents.replaceAll("\\s+", " ").split(";");
+		assertThat(sqlStatements).anyMatch(t->t.contains("CREATE TABLE HFJ_RES_SEARCH_URL ( RES_SEARCH_URL VARCHAR(768) NOT NULL, PARTITION_ID INTEGER NOT NULL, CREATED_TIME TIMESTAMP(6) NOT NULL, PARTITION_DATE DATE, RES_ID BIGINT NOT NULL, PRIMARY KEY (RES_SEARCH_URL, PARTITION_ID) )"));
+		assertThat(sqlStatements).anyMatch(t->t.contains("CREATE TABLE HFJ_RESOURCE ( RES_ID BIGINT NOT NULL, PARTITION_ID INTEGER, PRIMARY KEY (RES_ID), CONSTRAINT IDX_RES_TYPE_FHIR_ID UNIQUE (RES_TYPE, FHIR_ID) )"));
+
+	}
+
 
 	@Nonnull
 	private static Predicate<String> regex(@Language("Regexp") String theRegex) {

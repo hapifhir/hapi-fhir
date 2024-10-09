@@ -266,12 +266,15 @@ public class JpaModelScannerAndVerifier {
 				}
 
 				if (columnName != null) {
-					if (nextField.getType().isAssignableFrom(String.class)) {
-						// MySQL treats each char as the max possible byte count in UTF-8 for its calculations
-						columnLength = columnLength * 4;
-					}
+					addColumnName(columnNameToLength, nextField, columnLength, columnName);
+				}
 
-					columnNameToLength.put(columnName, columnLength);
+				if (hasJoinColumns) {
+					JoinColumns joinColumns = nextField.getAnnotation(JoinColumns.class);
+					for (JoinColumn joinColumn : joinColumns.value()) {
+						columnName = joinColumn.name();
+						addColumnName(columnNameToLength, nextField, columnLength, columnName);
+					}
 				}
 
 			}
@@ -292,6 +295,15 @@ public class JpaModelScannerAndVerifier {
 		}
 
 		scanClassOrSuperclass(theNames, theClazz.getSuperclass(), true, columnNameToLength);
+	}
+
+	private static void addColumnName(Map<String, Integer> columnNameToLength, Field nextField, int columnLength, String columnName) {
+		if (nextField.getType().isAssignableFrom(String.class)) {
+			// MySQL treats each char as the max possible byte count in UTF-8 for its calculations
+			columnLength = columnLength * 4;
+		}
+
+		columnNameToLength.put(columnName, columnLength);
 	}
 
 	private void scan(AnnotatedElement theAnnotatedElement, Set<String> theNames, boolean theIsSuperClass, boolean theIsView) {

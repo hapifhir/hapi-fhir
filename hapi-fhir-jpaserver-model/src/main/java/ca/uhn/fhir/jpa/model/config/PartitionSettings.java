@@ -33,7 +33,7 @@ public class PartitionSettings {
 	private Integer myDefaultPartitionId;
 	private boolean myAlwaysOpenNewTransactionForDifferentPartition;
 	private boolean myConditionalCreateDuplicateIdentifiersEnabled = false;
-	private boolean myIncludePartitionIdsInPKs = false;
+	private boolean myPartitionIdsInPrimaryKeys = false;
 
 	public PartitionSettings() {
 		super();
@@ -47,8 +47,8 @@ public class PartitionSettings {
 	 *
 	 * @since 8.0.0
 	 */
-	public boolean isIncludePartitionIdsInPKs() {
-		return myIncludePartitionIdsInPKs;
+	public boolean isPartitionIdsInPrimaryKeys() {
+		return myPartitionIdsInPrimaryKeys;
 	}
 
 	/**
@@ -59,8 +59,8 @@ public class PartitionSettings {
 	 *
 	 * @since 8.0.0
 	 */
-	public void setIncludePartitionIdsInPKs(boolean theIncludePartitionIdsInPKs) {
-		myIncludePartitionIdsInPKs = theIncludePartitionIdsInPKs;
+	public void setPartitionIdsInPrimaryKeys(boolean thePartitionIdsInPrimaryKeys) {
+		myPartitionIdsInPrimaryKeys = thePartitionIdsInPrimaryKeys;
 	}
 
 	/**
@@ -206,16 +206,12 @@ public class PartitionSettings {
 	 * table is used to prevent accidental concurrent conditional create/update operations
 	 * from creating duplicate resources by inserting a row in that table as a part
 	 * of the database transaction performing the write operation. If this setting
-	 * is set to {@literal false} (which is the default unless {@link #isIncludePartitionIdsInPKs()}
-	 * is enabled, in which case the value is always {@literal true}), the partition
+	 * is set to {@literal false} (which is the default), the partition
 	 * ID is not written to this table, meaning that duplicates are prevented across
-	 * partitions. If this setting is set to {@literal true}, duplciates will not be
+	 * partitions. If this setting is {@literal true}, duplicates will not be
 	 * prevented if they appear on different partitions.
 	 */
 	public boolean isConditionalCreateDuplicateIdentifiersEnabled() {
-		if (isIncludePartitionIdsInPKs()) {
-			return true;
-		}
 		return myConditionalCreateDuplicateIdentifiersEnabled;
 	}
 
@@ -224,10 +220,9 @@ public class PartitionSettings {
 	 * table is used to prevent accidental concurrent conditional create/update operations
 	 * from creating duplicate resources by inserting a row in that table as a part
 	 * of the database transaction performing the write operation. If this setting
-	 * is set to {@literal false} (which is the default unless {@link #isIncludePartitionIdsInPKs()}
-	 * is enabled, in which case the value is always {@literal true}), the partition
+	 * is set to {@literal false} (which is the default), the partition
 	 * ID is not written to this table, meaning that duplicates are prevented across
-	 * partitions. If this setting is set to {@literal true}, duplciates will not be
+	 * partitions. If this setting is {@literal true}, duplicates will not be
 	 * prevented if they appear on different partitions.
 	 */
 	public void setConditionalCreateDuplicateIdentifiersEnabled(

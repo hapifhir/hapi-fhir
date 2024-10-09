@@ -31,6 +31,8 @@ import org.hibernate.type.ComponentType;
 import org.hibernate.type.CompositeType;
 import org.hibernate.type.EmbeddedComponentType;
 import org.hibernate.type.Type;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -44,6 +46,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class ConditionalIdMappingContributor implements org.hibernate.boot.spi.AdditionalMappingContributor {
 
+	private static final Logger ourLog = LoggerFactory.getLogger(ConditionalIdMappingContributor.class);
 	private final Set<String> myQualifiedIdRemovedColumnNames = new HashSet<>();
 
 	/**
@@ -225,48 +228,7 @@ public class ConditionalIdMappingContributor implements org.hibernate.boot.spi.A
 						break;
 					}
 				}
-
-				//				if (!removedPropertyNames.isEmpty()) {
-				//				if (tableName.equals("HFJ_RES_VER") && c.toString().contains("JpaPid")) {
-				//				}
-
-				//				ComponentType component = (ComponentType) type;
-				//				for (int i = 0; i < component.getPropertyNames().length; i++) {
-				//					String propertyName = component.getPropertyNames()[i];
-				//					if (removedPropertyNames.contains(propertyName)) {
-				//						removeArrayFieldValueAtIndex(component, "propertyNames", i);
-				//						removeArrayFieldValueAtIndex(component, "propertyTypes", i);
-				//						removeArrayFieldValueAtIndex(component, "propertyNullability", i);
-				//						removeArrayFieldValueAtIndex(component, "cascade", i);
-				//						removeArrayFieldValueAtIndex(component, "joinedFetch", i);
-				//						removeArrayFieldValueAtIndex(component, "joinedFetch", i);
-				//					}
-				//				}
 			}
-
-			//			Value propertyValue = property.getValue();
-			//			if (propertyValue instanceof Component) {
-			//				type = propertyValue.getType();
-			//				type = propertyValue.getType();
-			//					if (type instanceof ComponentType) {
-			//						ComponentType ect = (ComponentType) type;
-			//						for (int i = 0; i < ect.getPropertyNames().length; i++) {
-			//							String propertyName = ect.getPropertyNames()[i];
-			//							Field propertyField = getField(ect.getReturnedClass(), propertyName);
-			//							ConditionalIdProperty conditionalId = propertyField.getAnnotation(ConditionalIdProperty.class);
-			//							if (conditionalId != null) {
-			//								ect.getPropertyNames()
-			//							}
-			//
-			//						}
-			//					}
-			//			}
-
-			c.getColumns().removeIf(t -> {
-				String name = tableName + "#" + t.getName();
-				return myQualifiedIdRemovedColumnNames.contains(name);
-			});
-			c.getSelectables().removeIf(t -> myQualifiedIdRemovedColumnNames.contains(tableName + "#" + t.getText()));
 		}
 
 		// Adjust relations with local filtered columns (e.g. ManyToOne)
@@ -304,6 +266,16 @@ public class ConditionalIdMappingContributor implements org.hibernate.boot.spi.A
 			}
 		}
 
+		for (Component c : registeredComponents) {
+			String tableName = c.getTable().getName();
+
+			c.getColumns().removeIf(t -> {
+				String name = tableName + "#" + t.getName();
+				return myQualifiedIdRemovedColumnNames.contains(name);
+			});
+			c.getSelectables().removeIf(t -> myQualifiedIdRemovedColumnNames.contains(tableName + "#" + t.getText()));
+		}
+
 		// Adjust relations with remote filtered columns (e.g. OneToMany)
 		for (var nextEntry : theMetadata.getEntityBindingMap().entrySet()) {
 			PersistentClass entityPersistentClass = nextEntry.getValue();
@@ -321,6 +293,16 @@ public class ConditionalIdMappingContributor implements org.hibernate.boot.spi.A
 								.removeIf(t -> myQualifiedIdRemovedColumnNames.contains(
 										propertyValueBag.getCollectionTable().getName() + "#" + t.getName()));
 					}
+				} else if (propertyValue instanceof Component) {
+					// Adjust properties, which accounts for things like @Nested properties with
+					// filtered subproperties
+					Component component = (Component) propertyValue;
+					Set<String> columnNames = component.getColumns().stream()
+							.map(t -> t.getName())
+							.collect(Collectors.toSet());
+					component
+							.getSelectables()
+							.removeIf(t -> (t instanceof Column) && !columnNames.contains(t.getText()));
 				}
 			}
 		}

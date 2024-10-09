@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.jpa.dao.expunge;
 
-import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.IResourceVersionPersistentId;
@@ -32,7 +31,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @param <V> The resource version PID type
  */
 public interface IResourceExpungeService<R extends IResourcePersistentId<?>, V extends IResourceVersionPersistentId> {
-	List<JpaPid> findHistoricalVersionsOfDeletedResources(String theResourceName, R theResourceId, int theI);
+	List<R> findHistoricalVersionsOfDeletedResources(String theResourceName, R theResourceId, int theI);
 
 	List<V> findHistoricalVersionsOfNonDeletedResources(String theResourceName, R theResourceId, int theI);
 

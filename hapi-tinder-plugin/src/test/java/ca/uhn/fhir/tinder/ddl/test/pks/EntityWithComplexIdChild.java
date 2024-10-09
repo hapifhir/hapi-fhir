@@ -1,4 +1,4 @@
-package ca.uhn.fhir.tinder.ddl.test;
+package ca.uhn.fhir.tinder.ddl.test.pks;
 
 import ca.uhn.hapi.fhir.sql.hibernatesvc.ConditionalIdProperty;
 import jakarta.persistence.Column;

@@ -28,16 +28,16 @@ public class GenerateDdlMojo extends AbstractMojo {
 	private static final Logger ourLog = LoggerFactory.getLogger(GenerateDdlMojo.class);
 
 	@Parameter
-	List<String> packageNames;
+	public List<String> packageNames;
 
 	@Parameter
-	List<Dialect> dialects;
+	public List<Dialect> dialects;
 
 	@Parameter
-	String outputDirectory;
+	public String outputDirectory;
 
 	@Parameter(defaultValue = "true")
-	boolean trimConditionalIdsFromPrimaryKeys;
+	public boolean trimConditionalIdsFromPrimaryKeys;
 
 	@Parameter(defaultValue = "${project}", readonly = true)
 	private transient MavenProject project;

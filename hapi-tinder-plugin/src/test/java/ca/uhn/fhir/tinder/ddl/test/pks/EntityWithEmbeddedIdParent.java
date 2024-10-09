@@ -1,9 +1,8 @@
-package ca.uhn.fhir.tinder.ddl.test;
+package ca.uhn.fhir.tinder.ddl.test.pks;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
-import jakarta.persistence.IdClass;
 import jakarta.persistence.Table;
 
 @Entity
