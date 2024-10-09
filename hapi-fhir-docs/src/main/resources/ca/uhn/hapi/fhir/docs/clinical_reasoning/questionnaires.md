@@ -77,11 +77,13 @@ This implementation allows for both [Observation based](https://hl7.org/fhir/uv/
 
 The following parameters are supported for the `QuestionnaireResponse/$extract` operation:
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
+| Parameter              | Type                  | Description |
+|------------------------|-----------------------|-------------|
 | questionnaire-response | QuestionnaireResponse | The QuestionnaireResponse to extract data from. Used when the operation is invoked at the 'type' level. |
-| parameters | Parameters | Any input parameters defined in libraries referenced by the Questionnaire. |
-| data | Bundle | Data to be made available during CQL evaluation. |
+| questionnaire          | Questionnaire         | The Questionnaire the QuestionnaireResponse is answering.  Used when the server does not have access to the Questionnaire. |
+| parameters             | Parameters            | Any input parameters defined in libraries referenced by the Questionnaire. |
+| useServerData          | boolean               | Whether to use data from the server performing the evaluation. |
+| data                   | Bundle                | Data to be made available during CQL evaluation. |
 
 
 ## Package
