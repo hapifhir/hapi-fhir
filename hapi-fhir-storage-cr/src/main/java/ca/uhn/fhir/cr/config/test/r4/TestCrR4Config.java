@@ -69,8 +69,9 @@ public class TestCrR4Config {
 	@Bean
 	CareGapsProperties careGapsProperties()  {
 		var careGapsProperties = new CareGapsProperties();
-		careGapsProperties.setCareGapsReporter("Organization/alphora");
-		careGapsProperties.setCareGapsCompositionSectionAuthor("Organization/alphora-author");
+		careGapsProperties.setCareGapsReporter("alphora");
+		careGapsProperties.setCareGapsCompositionSectionAuthor("alphora-author");
+		careGapsProperties.setMyFhirBaseUrl("http://localhost");
 		return careGapsProperties;
 	}
 

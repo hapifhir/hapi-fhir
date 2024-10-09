@@ -39,7 +39,7 @@ public class TestCqlProperties {
 	private Boolean cql_runtime_enable_expression_caching = true;
 	private Boolean cql_compiler_validate_units = true;
 	private Boolean cql_compiler_verify_only = false;
-	private String cql_compiler_compatibility_level = "1.3";
+	private String cql_compiler_compatibility_level = "1.5";
 	private CqlCompilerException.ErrorSeverity cql_compiler_error_level = CqlCompilerException.ErrorSeverity.Info;
 	private LibraryBuilder.SignatureLevel cql_compiler_signature_level = LibraryBuilder.SignatureLevel.All;
 	private Boolean cql_compiler_analyze_data_requirements = false;
