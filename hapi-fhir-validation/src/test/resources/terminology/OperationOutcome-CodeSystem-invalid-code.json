@@ -1,0 +1,24 @@
+{
+  "resourceType": "OperationOutcome",
+  "issue": [
+    {
+      "severity": "error",
+      "code": "code-invalid",
+      "details": {
+        "coding": [
+          {
+            "system": "http://hl7.org/fhir/tools/CodeSystem/tx-issue-type",
+            "code": "invalid-code"
+          }
+        ],
+        "text": "Unknown code 'CODE' in the CodeSystem 'http://code.system/url' version '1.0.0'"
+      },
+      "location": [
+        "code"
+      ],
+      "expression": [
+        "code"
+      ]
+    }
+  ]
+}
