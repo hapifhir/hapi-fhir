@@ -2,12 +2,12 @@ package ca.uhn.fhir.util;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Claim;
-import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DateType;
@@ -29,6 +29,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -125,6 +126,7 @@ class TerserUtilTest {
 			            ]
 			      }
 			  	""";
+	public static final String DATA_ABSENT_REASON_EXTENSION_URI = "http://hl7.org/fhir/StructureDefinition/data-absent-reason";
 
 	@Test
 	void cloneIdentifierIntoResource() {
@@ -427,47 +429,97 @@ class TerserUtilTest {
 	@ParameterizedTest
 	@MethodSource("singleCardinalityArguments")
 	public void testMergeWithDataAbsentReason_singleCardinality(
-		 Enumeration<Observation.ObservationStatus> fromStatus,
-		 Enumeration<Observation.ObservationStatus> toStatus,
-		 Enumeration<Observation.ObservationStatus> expectedStatus) {
+		 Enumeration<Observation.ObservationStatus> theFromStatus,
+		 Enumeration<Observation.ObservationStatus> theToStatus,
+		 Enumeration<Observation.ObservationStatus> theExpectedStatus) {
 		Observation fromObservation = new Observation();
-		fromObservation.setStatusElement(fromStatus);
+		fromObservation.setStatusElement(theFromStatus);
 
 		Observation toObservation = new Observation();
-		toObservation.setStatusElement(toStatus);
+		toObservation.setStatusElement(theToStatus);
 
 		TerserUtil.mergeField(ourFhirContext, "status", fromObservation, toObservation);
 
-		if (expectedStatus == null) {
+		if (theExpectedStatus == null) {
 			assertThat(toObservation.hasStatus()).isFalse();
 		} else {
-			assertThat(toObservation.getStatusElement().getCode()).isEqualTo(expectedStatus.getCode());
+			assertThat(toObservation.getStatusElement().getCode()).isEqualTo(theExpectedStatus.getCode());
 		}
 	}
 
 	private static Stream<Arguments> singleCardinalityArguments() {
 		return Stream.of(
 			 Arguments.of(null, null, null),
-			 Arguments.of(fromEnum(Observation.ObservationStatus.FINAL), null, fromEnum(Observation.ObservationStatus.FINAL)),
-			 Arguments.of(null, fromEnum(Observation.ObservationStatus.FINAL), fromEnum(Observation.ObservationStatus.FINAL)),
-			 Arguments.of(fromEnum(Observation.ObservationStatus.FINAL), fromEnum(Observation.ObservationStatus.PRELIMINARY), fromEnum(Observation.ObservationStatus.FINAL)),
-			 Arguments.of(withDataAbsentReason(), null, withDataAbsentReason()),
-			 Arguments.of(null, withDataAbsentReason(), withDataAbsentReason()),
-			 Arguments.of(withDataAbsentReason(), withDataAbsentReason(), withDataAbsentReason()),
-			 Arguments.of(fromEnum(Observation.ObservationStatus.FINAL), withDataAbsentReason(), fromEnum(Observation.ObservationStatus.FINAL)),
-			 Arguments.of(withDataAbsentReason(), fromEnum(Observation.ObservationStatus.FINAL), fromEnum(Observation.ObservationStatus.FINAL))
+			 Arguments.of(statusFromEnum(Observation.ObservationStatus.FINAL), null, statusFromEnum(Observation.ObservationStatus.FINAL)),
+			 Arguments.of(null, statusFromEnum(Observation.ObservationStatus.FINAL), statusFromEnum(Observation.ObservationStatus.FINAL)),
+			 Arguments.of(statusFromEnum(Observation.ObservationStatus.FINAL), statusFromEnum(Observation.ObservationStatus.PRELIMINARY), statusFromEnum(Observation.ObservationStatus.FINAL)),
+			 Arguments.of(statusWithDataAbsentReason(), null, statusWithDataAbsentReason()),
+			 Arguments.of(null, statusWithDataAbsentReason(), statusWithDataAbsentReason()),
+			 Arguments.of(statusWithDataAbsentReason(), statusWithDataAbsentReason(), statusWithDataAbsentReason()),
+			 Arguments.of(statusFromEnum(Observation.ObservationStatus.FINAL), statusWithDataAbsentReason(), statusFromEnum(Observation.ObservationStatus.FINAL)),
+			 Arguments.of(statusWithDataAbsentReason(), statusFromEnum(Observation.ObservationStatus.FINAL), statusFromEnum(Observation.ObservationStatus.FINAL))
 		);
 	}
 
-	private static Enumeration<Observation.ObservationStatus> fromEnum(Observation.ObservationStatus fromStatus) {
-		return new Enumeration<>(new Observation.ObservationStatusEnumFactory(), fromStatus);
+	private static Enumeration<Observation.ObservationStatus> statusFromEnum(Observation.ObservationStatus theStatus) {
+		return new Enumeration<>(new Observation.ObservationStatusEnumFactory(), theStatus);
 	}
 
-	private static Enumeration<Observation.ObservationStatus> withDataAbsentReason() {
+	private static Enumeration<Observation.ObservationStatus> statusWithDataAbsentReason() {
 		Enumeration<Observation.ObservationStatus> enumeration = new Enumeration<>(new Observation.ObservationStatusEnumFactory());
 		Enumeration<Enumerations.DataAbsentReason> extension = new Enumeration<>(new Enumerations.DataAbsentReasonEnumFactory(), Enumerations.DataAbsentReason.UNKNOWN);
-		enumeration.addExtension("http://hl7.org/fhir/StructureDefinition/data-absent-reason", extension);
+		enumeration.addExtension(DATA_ABSENT_REASON_EXTENSION_URI, extension);
 		return enumeration;
+	}
+
+	@ParameterizedTest
+	@MethodSource("multipleCardinalityArguments")
+	public void testMergeWithDataAbsentReason_multipleCardinality(
+		 List<Identifier> theFromIdentifiers, List<Identifier> theToIdentifiers, List<Identifier> theExpectedIdentifiers) {
+		Observation fromObservation = new Observation();
+		theFromIdentifiers.forEach(fromObservation::addIdentifier);
+
+		Observation toObservation = new Observation();
+		theToIdentifiers.forEach(toObservation::addIdentifier);
+
+		TerserUtil.mergeField(ourFhirContext, "identifier", fromObservation, toObservation);
+
+		assertThat(toObservation.getIdentifier()).hasSize(theExpectedIdentifiers.size());
+		assertThat(toObservation.getIdentifier()).allMatch(t -> {
+			if (t.hasValue()) {
+				return theExpectedIdentifiers.stream().anyMatch(s -> StringUtils.equals(t.getValue(), s.getValue()));
+			} else if (t.hasExtension(DATA_ABSENT_REASON_EXTENSION_URI)) {
+				return theExpectedIdentifiers.stream().anyMatch(s -> s.hasExtension(DATA_ABSENT_REASON_EXTENSION_URI));
+			}
+			return false;
+		});
+	}
+
+	private static Stream<Arguments> multipleCardinalityArguments() {
+		return Stream.of(
+			 Arguments.of(List.of(), List.of(), List.of()),
+			 Arguments.of(List.of(identifierFromValue("identifier1")), List.of(), List.of(identifierFromValue("identifier1"))),
+			 Arguments.of(List.of(), List.of(identifierFromValue("identifier1")), List.of(identifierFromValue("identifier1"))),
+			 Arguments.of(List.of(identifierFromValue("identifier1")), List.of(identifierFromValue("identifier2")), List.of(identifierFromValue("identifier1"), identifierFromValue("identifier2"))),
+			 Arguments.of(List.of(identifierWithDataAbsentReason()), List.of(), List.of(identifierWithDataAbsentReason())),
+			 Arguments.of(List.of(), List.of(identifierWithDataAbsentReason()), List.of(identifierWithDataAbsentReason())),
+			 Arguments.of(List.of(identifierWithDataAbsentReason()), List.of(identifierWithDataAbsentReason()), List.of(identifierWithDataAbsentReason())),
+			 Arguments.of(List.of(identifierFromValue("identifier1")), List.of(identifierWithDataAbsentReason()), List.of(identifierFromValue("identifier1"))),
+			 Arguments.of(List.of(identifierWithDataAbsentReason()), List.of(identifierFromValue("identifier1")), List.of(identifierFromValue("identifier1"))),
+			 Arguments.of(List.of(identifierFromValue("identifier1"), identifierFromValue("identifier2")), List.of(identifierWithDataAbsentReason()), List.of(identifierFromValue("identifier1"), identifierFromValue("identifier2"))),
+			 Arguments.of(List.of(identifierWithDataAbsentReason()), List.of(identifierFromValue("identifier1"), identifierFromValue("identifier2")), List.of(identifierFromValue("identifier1"), identifierFromValue("identifier2")))
+		);
+	}
+
+	private static Identifier identifierFromValue(String theValue) {
+		return new Identifier().setValue(theValue);
+	}
+
+	private static Identifier identifierWithDataAbsentReason() {
+		Identifier identifier = new Identifier();
+		Enumeration<Enumerations.DataAbsentReason> extension = new Enumeration<>(new Enumerations.DataAbsentReasonEnumFactory(), Enumerations.DataAbsentReason.UNKNOWN);
+		identifier.addExtension(DATA_ABSENT_REASON_EXTENSION_URI, extension);
+		return identifier;
 	}
 
 	@Test
