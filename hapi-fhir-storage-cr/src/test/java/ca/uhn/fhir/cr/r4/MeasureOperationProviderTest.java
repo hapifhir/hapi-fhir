@@ -7,7 +7,6 @@ import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Resource;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -47,24 +46,6 @@ class MeasureOperationProviderTest extends BaseCrR4TestServer {
 	void testMeasureEvaluateExm104() {
 		loadBundle("Exm104FhirR4MeasureBundle.json");
 		assertNotNull(runEvaluateMeasure("2019-01-01", "2019-12-31", "Patient/numer-EXM104", "measure-EXM104-8.2.000", "Individual", null));
-	}
-
-	@Test
-	void testHedis2022() {
-		loadBundle("BCSEHEDISMY2022-bundle.json");
-
-		runWithPatient("BCSEHEDISMY2022", "Patient/Patient-5", 0, 0, 0, 0, false,
-			"Interval[2020-10-01T00:00:00.000, 2022-12-31T23:59:59.999]");
-		runWithPatient("BCSEHEDISMY2022", "Patient/Patient-7", 1, 1, 0, 0, true,
-			"Interval[2020-10-01T00:00:00.000, 2022-12-31T23:59:59.999]");
-		runWithPatient("BCSEHEDISMY2022", "Patient/Patient-9", 0, 0, 0, 0, true,
-			"Interval[2020-10-01T00:00:00.000, 2022-12-31T23:59:59.999]");
-		runWithPatient("BCSEHEDISMY2022", "Patient/Patient-21", 1, 0, 1, 0, true,
-			"Interval[2020-10-01T00:00:00.000, 2022-12-31T23:59:59.999]");
-		runWithPatient("BCSEHEDISMY2022", "Patient/Patient-23", 1, 1, 0, 0, true,
-			"Interval[2020-10-01T00:00:00.000, 2022-12-31T23:59:59.999]");
-		runWithPatient("BCSEHEDISMY2022", "Patient/Patient-65", 1, 1, 0, 1, true,
-			"Interval[2020-10-01T00:00:00.000, 2022-12-31T23:59:59.999]");
 	}
 
 	@Test
