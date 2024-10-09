@@ -110,7 +110,7 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 				case GREATERTHAN_OR_EQUALS:
 					if (theDateParam.getPrecision().ordinal() <= TemporalPrecisionEnum.MONTH.ordinal()) {
 						theDateParam.setValueAsString(DateUtils.getCompletedDate(theDateParam.getValueAsString())
-							.getRight());
+								.getRight());
 					}
 					// there is only one value; we will set it as the lower bound
 					// as a >= operation
@@ -121,7 +121,7 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 				case LESSTHAN_OR_EQUALS:
 					if (theDateParam.getPrecision().ordinal() <= TemporalPrecisionEnum.MONTH.ordinal()) {
 						theDateParam.setValueAsString(DateUtils.getCompletedDate(theDateParam.getValueAsString())
-							.getLeft());
+								.getLeft());
 					}
 
 					// there is only one value; we will set it as the upper bound
@@ -131,7 +131,7 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 				default:
 					// Should not happen
 					throw new InvalidRequestException(Msg.code(1921) + "Invalid comparator for date range parameter:"
-						+ theDateParam.getPrefix() + ". This is a bug.");
+							+ theDateParam.getPrefix() + ". This is a bug.");
 			}
 		}
 	}
