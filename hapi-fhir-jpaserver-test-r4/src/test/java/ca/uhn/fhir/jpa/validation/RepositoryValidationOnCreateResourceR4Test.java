@@ -56,7 +56,7 @@ public class RepositoryValidationOnCreateResourceR4Test extends BaseResourceProv
 	}
 
 	@Test
-	public void testCreatePatient_withValidationRuleWithVersion_unknownProfile() {
+	public void testCreatePatient_withValidationRuleWithVersion_validatesUsingLatestVersionOfProfile() {
 		createProfile("1", "Patient.identifier");
 		createProfile("2", "Patient.name");
 
@@ -66,8 +66,7 @@ public class RepositoryValidationOnCreateResourceR4Test extends BaseResourceProv
 			createPatient(withProfile(myProfile + "|1"));
 			fail();
 		} catch (PreconditionFailedException e) {
-			assertEquals(Msg.code(574) + "Profile reference '" + myProfile
-				+ "|1' has not been checked because it is unknown, and the validator is set to not fetch unknown profiles", e.getMessage());
+			assertEquals(Msg.code(574) + "Patient.name: minimum required = 1, but only found 0 (from " + myProfile + "|2)", e.getMessage());
 		}
 	}
 

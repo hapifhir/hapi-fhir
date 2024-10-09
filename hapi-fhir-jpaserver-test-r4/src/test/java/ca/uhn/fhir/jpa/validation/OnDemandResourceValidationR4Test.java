@@ -17,12 +17,12 @@ import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.StructureDefinition;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.Iterator;
+import java.util.List;
 
+import static ca.uhn.fhir.jpa.validation.ValidationTestUtils.filterValidationMessages;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -62,7 +62,7 @@ public class OnDemandResourceValidationR4Test extends BaseResourceProviderR4Test
 	}
 
 	@Test
-	public void testValidatePatient_withProfileNotRegistered_unknownProfile() {
+	public void testValidatePatient_withProfileNotRegistered_profileNotFound() {
 		createProfile(myProfile, "1", "Patient.identifier");
 
 		IIdType idType = createPatient(withProfile(myProfile));
@@ -70,10 +70,10 @@ public class OnDemandResourceValidationR4Test extends BaseResourceProviderR4Test
 
 		ValidationResult validationResult = myFhirValidator.validateWithResult(patient);
 		assertFalse(validationResult.isSuccessful());
-		assertEquals(1, validationResult.getMessages().size());
 
-		SingleValidationMessage message = validationResult.getMessages().iterator().next();
-		assertEquals("Profile reference '" + myProfile + "' has not been checked because it is unknown", message.getMessage());
+		List<SingleValidationMessage> messages = filterValidationMessages(validationResult);
+		assertEquals(1, messages.size());
+		assertEquals("Profile reference '" + myProfile + "' has not been checked because it could not be found", messages.get(0).getMessage());
 	}
 
 	@Test
@@ -86,14 +86,14 @@ public class OnDemandResourceValidationR4Test extends BaseResourceProviderR4Test
 
 		ValidationResult validationResult = myFhirValidator.validateWithResult(patient);
 		assertFalse(validationResult.isSuccessful());
-		assertEquals(1, validationResult.getMessages().size());
 
-		SingleValidationMessage message = validationResult.getMessages().iterator().next();
-		assertEquals("Patient.name: minimum required = 1, but only found 0 (from " + myProfile + "|2)", message.getMessage());
+		List<SingleValidationMessage> messages = filterValidationMessages(validationResult);
+		assertEquals(1, messages.size());
+		assertEquals("Patient.name: minimum required = 1, but only found 0 (from " + myProfile + "|2)", messages.get(0).getMessage());
 	}
 
 	@Test
-	public void testValidatePatient_withProfileWithVersion_shouldUseSpecifiedVersion() {
+	public void testValidatePatient_withProfileWithVersion_willUseLatestVersion() {
 
 		createAndRegisterProfile(myProfile, "1", "Patient.identifier");
 		createAndRegisterProfile(myProfile, "2", "Patient.name");
@@ -103,10 +103,10 @@ public class OnDemandResourceValidationR4Test extends BaseResourceProviderR4Test
 
 		ValidationResult validationResult = myFhirValidator.validateWithResult(patient);
 		assertFalse(validationResult.isSuccessful());
-		assertEquals(1, validationResult.getMessages().size());
 
-		SingleValidationMessage message = validationResult.getMessages().iterator().next();
-		assertEquals("Patient.identifier: minimum required = 1, but only found 0 (from " + myProfile + "|1)", message.getMessage());
+		List<SingleValidationMessage> messages = filterValidationMessages(validationResult);
+		assertEquals(1, messages.size());
+		assertEquals("Patient.name: minimum required = 1, but only found 0 (from " + myProfile + "|2)", messages.get(0).getMessage());
 	}
 
 	@Test
@@ -122,31 +122,31 @@ public class OnDemandResourceValidationR4Test extends BaseResourceProviderR4Test
 
 		ValidationResult validationResult = myFhirValidator.validateWithResult(patient);
 		assertFalse(validationResult.isSuccessful());
-		assertEquals(2, validationResult.getMessages().size());
 
-		Iterator<SingleValidationMessage> messageIterator = validationResult.getMessages().iterator();
-		assertEquals("Patient.identifier: minimum required = 1, but only found 0 (from " + myProfile + "-identifier|1)", messageIterator.next().getMessage());
-		assertEquals("Patient.name: minimum required = 1, but only found 0 (from " + myProfile + "-name|1)", messageIterator.next().getMessage());
+		List<SingleValidationMessage> messages = filterValidationMessages(validationResult);
+		assertEquals(2, messages.size());
+		assertEquals("Patient.identifier: minimum required = 1, but only found 0 (from " + myProfile + "-identifier|1)", messages.get(0).getMessage());
+		assertEquals("Patient.name: minimum required = 1, but only found 0 (from " + myProfile + "-name|1)", messages.get(1).getMessage());
 	}
 
 	@Test
-	public void testValidatePatient_withMultipleVersions_validatesAgainstFirstVersion() {
+	public void testValidatePatient_withMultipleVersions_validatesAgainstLatestVersion() {
 		createAndRegisterProfile(myProfile, "1", "Patient.identifier");
 		createAndRegisterProfile(myProfile, "2", "Patient.name");
 		createAndRegisterProfile(myProfile, "3", "Patient.birthDate");
 
 		IIdType idType = createPatient(
 			withProfile(myProfile + "|2"),
-			withProfile(myProfile + "|1"),
-			withProfile(myProfile + "|3"));
+			withProfile(myProfile + "|3"),
+			withProfile(myProfile + "|1"));
 		Patient patient = myPatientDao.read(idType, mySrd);
 
 		ValidationResult validationResult = myFhirValidator.validateWithResult(patient);
 		assertFalse(validationResult.isSuccessful());
-		assertEquals(1, validationResult.getMessages().size());
 
-		SingleValidationMessage message = validationResult.getMessages().iterator().next();
-		assertEquals("Patient.identifier: minimum required = 1, but only found 0 (from " + myProfile + "|1)", message.getMessage());
+		List<SingleValidationMessage> messages = filterValidationMessages(validationResult);
+		assertEquals(1, messages.size());
+		assertEquals("Patient.birthDate: minimum required = 1, but only found 0 (from " + myProfile + "|3)", messages.get(0).getMessage());
 	}
 
 	private void createAndRegisterProfile(String theUrl, String theVersion, String thePath) {

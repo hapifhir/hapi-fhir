@@ -15,12 +15,15 @@ import org.hl7.fhir.common.hapi.validation.support.SnapshotGeneratingValidationS
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.r4.model.Meta;
+import org.hl7.fhir.r4.model.Narrative;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import javax.annotation.Nonnull;
+
+import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -55,17 +58,23 @@ public class EndpointResourceValidationR4Test extends BaseResourceProviderR4Test
 	}
 
 	@Test
-	public void testCreatePatientRequest_withProfileNotRegistered_unknownProfile() {
+	public void testCreatePatientRequest_withProfileNotRegistered_profileCouldNotBeFound() {
 		createProfile(myProfile, "1", "Patient.identifier");
 
+		// add narrative to remove best practice info validation message
+		Narrative narrative = new Narrative();
+		narrative.setDivAsString("<div>Some Text</div>");
+		narrative.setStatus(Narrative.NarrativeStatus.GENERATED);
+
 		final Patient patient = new Patient();
+		patient.setText(narrative);
 		patient.setMeta(new Meta().addProfile(myProfile));
 
 		try {
 			myClient.create().resource(patient).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("HTTP 422 Unprocessable Entity: Profile reference '" + myProfile + "' has not been checked because it is unknown", e.getMessage());
+			assertEquals("HTTP 422 Unprocessable Entity: Profile reference '" + myProfile + "' has not been checked because it could not be found", e.getMessage());
 		}
 	}
 
@@ -86,7 +95,7 @@ public class EndpointResourceValidationR4Test extends BaseResourceProviderR4Test
 	}
 
 	@Test
-	public void testCreatePatientRequest_withProfileWithVersion_throwsExceptionWithSpecifiedVersion() {
+	public void testCreatePatientRequest_withProfileWithVersion_throwsExceptionWithLatestVersionOfProfile() {
 		createAndRegisterProfile("1", "Patient.identifier");
 		createAndRegisterProfile("2", "Patient.name");
 
@@ -97,8 +106,21 @@ public class EndpointResourceValidationR4Test extends BaseResourceProviderR4Test
 			myClient.create().resource(patient).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("HTTP 422 Unprocessable Entity: Patient.identifier: minimum required = 1, but only found 0 (from " + myProfile + "|1)", e.getMessage());
+			assertEquals("HTTP 422 Unprocessable Entity: Patient.name: minimum required = 1, but only found 0 (from " + myProfile + "|2)", e.getMessage());
 		}
+	}
+
+	@Test
+	public void testCreatePatientRequest_withProfileWithVersion_onlyValidatesUsingLatestProfile() {
+		createAndRegisterProfile("1", "Patient.identifier");
+		createAndRegisterProfile("2", "Patient.name");
+
+		final Patient patient = new Patient();
+		patient.getNameFirstRep().addGiven("John").setFamily("Smith");
+		patient.setMeta(new Meta().addProfile(myProfile + "|1"));
+
+		// patient.identifier is not validated from profile 1
+		myClient.create().resource(patient).execute();
 	}
 
 	@Test
@@ -121,7 +143,7 @@ public class EndpointResourceValidationR4Test extends BaseResourceProviderR4Test
 	}
 
 	@Test
-	public void testCreatePatientRequest_withMultipleVersions_throwsExceptionWithFirstDeclaredProfile() {
+	public void testCreatePatientRequest_withMultipleVersions_throwsExceptionWithLatestProfile() {
 		createAndRegisterProfile(myProfile, "1", "Patient.identifier");
 		createAndRegisterProfile(myProfile, "2", "Patient.name");
 		createAndRegisterProfile(myProfile, "3", "Patient.birthDate");
@@ -129,15 +151,20 @@ public class EndpointResourceValidationR4Test extends BaseResourceProviderR4Test
 		final Patient patient = new Patient();
 		patient.setMeta(new Meta()
 			.addProfile(myProfile + "|2")
-			.addProfile(myProfile + "|1")
-			.addProfile(myProfile + "|3"));
+			.addProfile(myProfile + "|3")
+			.addProfile(myProfile + "|1"));
 
 		try {
 			myClient.create().resource(patient).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("HTTP 422 Unprocessable Entity: Patient.name: minimum required = 1, but only found 0 (from " + myProfile + "|2)", e.getMessage());
+			assertEquals("HTTP 422 Unprocessable Entity: Patient.birthDate: minimum required = 1, but only found 0 (from " + myProfile + "|3)", e.getMessage());
 		}
+
+		// only populated field from version 3 profile
+		patient.setBirthDate(new Date());
+		// patient.identifier or patient.name are not validated from the version 1 or 2 profile
+		myClient.create().resource(patient).execute();
 	}
 
 	private void createAndRegisterProfile(String theVersion, String thePath) {
