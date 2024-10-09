@@ -5,14 +5,11 @@ import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mockito;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -126,31 +123,6 @@ public class DateRangeParamTest {
 		assertEquals("1965-11-23", dateRangeParam.getUpperBound().getValueAsString());
 		assertEquals(ParamPrefixEnum.NOT_EQUAL, dateRangeParam.getLowerBound().getPrefix());
 		assertEquals(ParamPrefixEnum.NOT_EQUAL, dateRangeParam.getUpperBound().getPrefix());
-	}
-
-
-	@ParameterizedTest
-	@CsvSource(value = {
-		"2000-01-01,2000-12-31",
-		"2000-01-01,",
-		",2000-12-31"
-	})
-	public void add_dateRangeParam_spreadsParamsAcrossBothHighAndLow(String theLow, String theHigh) {
-		// setup
-		DateRangeParam dp = new DateRangeParam();
-		boolean hasLowerBound = isNotBlank(theLow);
-		boolean hasUpperBound = isNotBlank(theHigh);
-
-		// test
-		if (hasLowerBound) {
-			dp.setLowerBound(theLow);
-		}
-		if (hasUpperBound) {
-			dp.setUpperBound(theHigh);
-		}
-
-		// verify
-
 	}
 
 	@Test

@@ -23,7 +23,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
-import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -111,60 +110,30 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 				case GREATERTHAN_OR_EQUALS:
 					if (theDateParam.getPrecision().ordinal() <= TemporalPrecisionEnum.MONTH.ordinal()) {
 						theDateParam.setValueAsString(DateUtils.getCompletedDate(theDateParam.getValueAsString())
-								.getRight());
+							.getRight());
 					}
-					if (theDateParam.hasAdditionalConstraints()) {
-						validateAndRangeWithConstraints(theDateParam);
-					} else {
-						// there is only one value; we will set it as the lower bound
-						// as a >= operation
-						validateAndSet(theDateParam, null);
-					}
+					// there is only one value; we will set it as the lower bound
+					// as a >= operation
+					validateAndSet(theDateParam, null);
 					break;
 				case ENDS_BEFORE:
 				case LESSTHAN:
 				case LESSTHAN_OR_EQUALS:
 					if (theDateParam.getPrecision().ordinal() <= TemporalPrecisionEnum.MONTH.ordinal()) {
 						theDateParam.setValueAsString(DateUtils.getCompletedDate(theDateParam.getValueAsString())
-								.getLeft());
+							.getLeft());
 					}
-					if (theDateParam.hasAdditionalConstraints()) {
-						validateAndRangeWithConstraints(theDateParam);
-					} else {
-						// there is only one value; we will set it as the upper bound
-						// as a <= operation
-						validateAndSet(null, theDateParam);
-					}
+
+					// there is only one value; we will set it as the upper bound
+					// as a <= operation
+					validateAndSet(null, theDateParam);
 					break;
 				default:
 					// Should not happen
 					throw new InvalidRequestException(Msg.code(1921) + "Invalid comparator for date range parameter:"
-							+ theDateParam.getPrefix() + ". This is a bug.");
+						+ theDateParam.getPrefix() + ". This is a bug.");
 			}
 		}
-	}
-
-	/**
-	 * If the date parameter we build this range off of has constraints,
-	 * we will use these to find the lowvalue <= param <= highvalue
-	 */
-	private void validateAndRangeWithConstraints(DateParam theDateParam) {
-		// we need to ensure we use the same precision
-		TemporalPrecisionEnum precisionEnum = theDateParam.getPrecision();
-		List<Date> dates = new ArrayList<>();
-		dates.add(theDateParam.getValue());
-		theDateParam.getConstraints().forEach(c -> {
-			dates.add(c.getConstraintValue());
-		});
-		dates.sort(Date::compareTo);
-		DateTimeDt lower = new DateTimeDt();
-		lower.setValue(dates.get(0), precisionEnum);
-		DateTimeDt higher = new DateTimeDt();
-		higher.setValue(dates.get(dates.size() - 1), precisionEnum);
-		// greater than low bound, less than high bound
-		validateAndSet(
-				new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, lower),
-				new DateParam(ParamPrefixEnum.LESSTHAN_OR_EQUALS, higher));
 	}
 
 	/**

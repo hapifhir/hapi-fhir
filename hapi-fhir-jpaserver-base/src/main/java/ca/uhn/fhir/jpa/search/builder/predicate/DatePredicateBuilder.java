@@ -25,7 +25,6 @@ import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
-import ca.uhn.fhir.rest.param.Constraint;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
@@ -40,7 +39,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
-import java.util.List;
 
 public class DatePredicateBuilder extends BaseSearchParamPredicateBuilder {
 
@@ -78,11 +76,7 @@ public class DatePredicateBuilder extends BaseSearchParamPredicateBuilder {
 			DateParam date = (DateParam) theParam;
 			if (!date.isEmpty()) {
 				if (theOperation == SearchFilterParser.CompareOperation.ne) {
-					List<Constraint<Date>> constraints = date.getConstraints();
 					date = new DateParam(ParamPrefixEnum.EQUAL, date.getValueAsString());
-					for (Constraint<Date> constraint : constraints) {
-						date.addConstraint(constraint);
-					}
 				}
 				DateRangeParam range = new DateRangeParam(date);
 				p = createPredicateDateFromRange(range, theOperation);
@@ -271,14 +265,7 @@ public class DatePredicateBuilder extends BaseSearchParamPredicateBuilder {
 		}
 
 		private void handleGreaterThanAndGreaterThanOrEqualTo() {
-			if (upperBoundInstant != null && lowerBoundInstant != null) {
-				// both - we have a range
-				// t0.SP_VALUE_LOW >= :rangeLow AND t0.SP_VALUE_LOW <= : rangeHigh
-				lowerBoundCondition = DatePredicateBuilder.this.createPredicate(
-						lowValueField, ParamPrefixEnum.GREATERTHAN_OR_EQUALS, genericLowerBound);
-				upperBoundCondition = DatePredicateBuilder.this.createPredicate(
-						lowValueField, ParamPrefixEnum.LESSTHAN_OR_EQUALS, genericUpperBound);
-			} else if (upperBoundInstant != null) {
+			if (upperBoundInstant != null) {
 				// upper bound only
 				upperBoundCondition = DatePredicateBuilder.this.createPredicate(
 						highValueField, ParamPrefixEnum.GREATERTHAN_OR_EQUALS, genericUpperBound);
@@ -309,14 +296,7 @@ public class DatePredicateBuilder extends BaseSearchParamPredicateBuilder {
 		 * Handle (LOW|HIGH)_FIELD <(=) value
 		 */
 		private void handleLessThanAndLessThanOrEqualTo() {
-			if (lowerBoundInstant != null && upperBoundInstant != null) {
-				// we have a range of values
-				// t0.SP_VALUE_HIGH >= :rangeLow AND t0.SP_VALUE_HIGH <= :rangeHigh
-				lowerBoundCondition = DatePredicateBuilder.this.createPredicate(
-						highValueField, ParamPrefixEnum.GREATERTHAN_OR_EQUALS, genericLowerBound);
-				upperBoundCondition = DatePredicateBuilder.this.createPredicate(
-						highValueField, ParamPrefixEnum.LESSTHAN_OR_EQUALS, genericUpperBound);
-			} else if (lowerBoundInstant != null) {
+			if (lowerBoundInstant != null) {
 				// lower bound only provided
 				lowerBoundCondition = DatePredicateBuilder.this.createPredicate(
 						lowValueField, ParamPrefixEnum.LESSTHAN_OR_EQUALS, genericLowerBound);

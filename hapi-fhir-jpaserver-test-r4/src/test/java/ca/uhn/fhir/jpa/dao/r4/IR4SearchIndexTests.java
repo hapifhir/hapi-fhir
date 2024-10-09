@@ -13,14 +13,12 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.DateParam;
-import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 
 import javax.sql.DataSource;
@@ -30,7 +28,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Date;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -50,22 +47,12 @@ public interface IR4SearchIndexTests {
 			.getResourceDao(theResourceType);
 	}
 
-	@ParameterizedTest
-	@CsvSource(value = {
-		// actual, lowerbound, upperbound
-//		"1999-12-31,1999-01-01,2000-12-31",
-//		"1999-12-31,1999-01-01,",
-//		"1999-12-31,,2000-01-01",
-		"1999-12-31,1999-12-31,1999-12-31"
-	})
-	default void search_dateValues_usesWhereToHelpQueryPlans(String theBirthdate, String theLowerBound, String theUpperBound) {
+	@Test
+	default void search_dateValue_withEquals() {
 		// setup
 		RequestDetails rd = new SystemRequestDetails();
 		DateTimeType birthdayDateTime = new DateTimeType();
-		birthdayDateTime.setValueAsString(theBirthdate);
-
-		boolean hasUpperBound = isNotBlank(theUpperBound);
-		boolean hasLowerBound = isNotBlank(theLowerBound);
+		birthdayDateTime.setValueAsString("1999-12-31");
 
 		IFhirResourceDao<Patient> patientDao = getResourceDao("Patient");
 		IFhirResourceDao<Observation> observationDao = getResourceDao("Observation");
@@ -81,7 +68,7 @@ public interface IR4SearchIndexTests {
 			// i = 0 will give us the resource we're looking for
 			// all other dates will be a new resource
 			Date d = birthdayDateTime.getValue();
-			int adjustment = (hasUpperBound && !hasLowerBound) ? i : -i;
+			int adjustment = -i;
 			d.setYear((birthYear + adjustment) - 1900);
 			patient.setBirthDate(d);
 
@@ -101,14 +88,9 @@ public interface IR4SearchIndexTests {
 		SearchParameterMap searchParameterMap = new SearchParameterMap();
 		searchParameterMap.setLoadSynchronous(true);
 
-		DateRangeParam birthdayParamRange = new DateRangeParam();
-		if (hasLowerBound) {
-			birthdayParamRange.setLowerBound(new DateParam(theLowerBound));
-		}
-		if (hasUpperBound) {
-			birthdayParamRange.setUpperBound(new DateParam(theUpperBound));
-		}
-		searchParameterMap.add("birthdate", birthdayParamRange);
+		DateParam birthdayParam = new DateParam();
+		birthdayParam.setValueAsString("1999-12-31");
+		searchParameterMap.add("birthdate", birthdayParam);
 
 		/*
 		 * the searches are very fast, regardless.
@@ -156,8 +138,6 @@ public interface IR4SearchIndexTests {
 		};
 
 		try {
-			IBundleProvider all = patientDao.search(new SearchParameterMap().setLoadSynchronous(true), rd);
-
 			getInterceptorService().registerInterceptor(interceptor);
 
 			// test
