@@ -82,7 +82,7 @@ public class ResourceSearchUrlSvc {
 	 * The use of the constraint table is done, and we can delete it to keep the table small.
 	 */
 	public void deleteByResId(JpaPid theResId) {
-		myResourceSearchUrlDao.deleteByResId(theResId);
+		myResourceSearchUrlDao.deleteByResId(theResId.getId());
 	}
 
 	/**
