@@ -81,4 +81,9 @@ public class ProfileKnowledgeWorkerR5 implements ProfileKnowledgeProvider {
 	public String getLinkForUrl(String corePath, String url) {
 		throw new UnsupportedOperationException(Msg.code(693));
 	}
+
+	@Override
+	public String getCanonicalForDefaultContext() {
+		return null;
+	}
 }
