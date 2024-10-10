@@ -40,13 +40,6 @@ public class FhirResourceDaoSubscriptionR5 extends BaseHapiFhirResourceDao<Subsc
 	@Autowired
 	private ISubscriptionTableDao mySubscriptionTableDao;
 
-	private void createSubscriptionTable(ResourceTable theEntity, Subscription theSubscription) {
-		SubscriptionTable subscriptionEntity = new SubscriptionTable();
-		subscriptionEntity.setCreated(new Date());
-		subscriptionEntity.setSubscriptionResource(theEntity);
-		myEntityManager.persist(subscriptionEntity);
-	}
-
 	@Override
 	public Long getSubscriptionTablePidForSubscriptionResource(
 			IIdType theId, RequestDetails theRequest, TransactionDetails theTransactionDetails) {
@@ -56,14 +49,6 @@ public class FhirResourceDaoSubscriptionR5 extends BaseHapiFhirResourceDao<Subsc
 			return null;
 		}
 		return table.getId();
-	}
-
-	@Override
-	protected void postPersist(
-			ResourceTable theEntity, Subscription theSubscription, RequestDetails theRequestDetails) {
-		super.postPersist(theEntity, theSubscription, theRequestDetails);
-
-		createSubscriptionTable(theEntity, theSubscription);
 	}
 
 	@Override

@@ -28,6 +28,8 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+// TODO: We deprecated this entity in 8.0.0 and stopped writing it - Eventually delete it
+@Deprecated
 public interface ISubscriptionTableDao
 		extends JpaRepository<SubscriptionTable, IdAndPartitionId>, IHapiFhirJpaRepository {
 
