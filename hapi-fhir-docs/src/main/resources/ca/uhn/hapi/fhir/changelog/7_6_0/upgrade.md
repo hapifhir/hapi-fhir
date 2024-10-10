@@ -8,14 +8,14 @@ UTC.
 
 ## CareGaps Operation Parameters
 
-Care Gaps operation parameters have dropped, because they are not used or likely to be implemented
+`$care-gaps` operation parameters have dropped, because they are not used or likely to be implemented
 * topic
 * practitioner: is now callable via 'subject' parameter
 * organization
 * program
 
 Care Gaps Operation parameters added:
-* nonDocument is a new optional parameter that defaults to 'false' which returns standard 'document' bundle for caregaps. 
+* nonDocument is a new optional parameter that defaults to 'false' which returns standard 'document' bundle for `$care-gaps`. 
 If 'true', this will return summarized subject bundle with only detectedIssue.
 
 # SDC $populate operation
