@@ -69,12 +69,18 @@ public class ResourceTag extends BaseTag {
 			fetch = FetchType.LAZY)
 	@JoinColumns(
 			value = {
-				@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID", insertable = false, updatable = false),
+				@JoinColumn(
+						name = "RES_ID",
+						referencedColumnName = "RES_ID",
+						insertable = false,
+						updatable = false,
+						nullable = true),
 				@JoinColumn(
 						name = "PARTITION_ID",
 						referencedColumnName = "PARTITION_ID",
 						insertable = false,
-						updatable = false)
+						updatable = false,
+						nullable = true)
 			},
 			foreignKey = @ForeignKey(name = "FK_RESTAG_RESOURCE"))
 	private ResourceTable myResource;
@@ -82,7 +88,7 @@ public class ResourceTag extends BaseTag {
 	@Column(name = "RES_TYPE", length = ResourceTable.RESTYPE_LEN, nullable = false)
 	private String myResourceType;
 
-	@Column(name = "RES_ID", updatable = false, nullable = false)
+	@Column(name = "RES_ID", updatable = false, nullable = true)
 	private Long myResourceId;
 
 	/**

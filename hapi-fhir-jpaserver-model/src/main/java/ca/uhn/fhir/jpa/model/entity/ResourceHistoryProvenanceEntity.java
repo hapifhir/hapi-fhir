@@ -70,7 +70,7 @@ public class ResourceHistoryProvenanceEntity extends BasePartitionable {
 			foreignKey = @ForeignKey(name = "FK_RESVERPROV_RES_PID"))
 	private ResourceTable myResourceTable;
 
-	@Column(name = "RES_PID")
+	@Column(name = "RES_PID", nullable = false)
 	private Long myResourceId;
 
 	@Column(name = "SOURCE_URI", length = SOURCE_URI_LENGTH, nullable = true)

@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.jpa.entity;
 
+import ca.uhn.fhir.jpa.model.entity.BasePartitionable;
+import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -26,6 +28,7 @@ import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.IdClass;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinColumns;
 import jakarta.persistence.OneToOne;
@@ -45,7 +48,8 @@ import java.util.Date;
 					name = "IDX_SUBSC_RESID",
 					columnNames = {"RES_ID"}),
 		})
-public class SubscriptionTable {
+@IdClass(IdAndPartitionId.class)
+public class SubscriptionTable extends BasePartitionable {
 
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "CREATED_TIME", nullable = false, insertable = true, updatable = false)
@@ -57,11 +61,8 @@ public class SubscriptionTable {
 	@Column(name = "PID", insertable = false, updatable = false)
 	private Long myId;
 
-	@Column(name = "RES_ID", nullable = false)
+	@Column(name = "RES_ID", nullable = true)
 	private Long myResId;
-
-	@Column(name = "PARTITION_ID")
-	private Integer myPartitionId;
 
 	@OneToOne()
 	@JoinColumns(
@@ -70,13 +71,13 @@ public class SubscriptionTable {
 						name = "RES_ID",
 						insertable = false,
 						updatable = false,
-						nullable = false,
+						nullable = true,
 						referencedColumnName = "RES_ID"),
 				@JoinColumn(
 						name = "PARTITION_ID",
 						insertable = false,
 						updatable = false,
-						nullable = false,
+						nullable = true,
 						referencedColumnName = "PARTITION_ID")
 			},
 			foreignKey = @ForeignKey(name = "FK_SUBSC_RESOURCE_ID"))
@@ -108,6 +109,6 @@ public class SubscriptionTable {
 	public void setSubscriptionResource(ResourceTable theSubscriptionResource) {
 		mySubscriptionResource = theSubscriptionResource;
 		myResId = theSubscriptionResource.getId().getId();
-		myPartitionId = theSubscriptionResource.getPartitionId().getPartitionId();
+		setPartitionId(theSubscriptionResource.getPartitionId());
 	}
 }

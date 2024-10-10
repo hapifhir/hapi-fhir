@@ -98,10 +98,7 @@ public class TermCodeSystemVersion implements Serializable {
 	private Long myResourcePid;
 
 	@Column(name = "PARTITION_ID", nullable = true, insertable = false, updatable = false)
-	private Long myPartitionId;
-
-	@Column(name = "RES_PARTITION_ID", nullable = true)
-	private Integer myResourcePartitionId;
+	private Integer myPartitionIdValue;
 
 	@Column(name = "CS_VERSION_ID", nullable = true, updatable = true, length = MAX_VERSION_LENGTH)
 	private String myCodeSystemVersionId;
@@ -175,7 +172,7 @@ public class TermCodeSystemVersion implements Serializable {
 	public TermCodeSystemVersion setResource(ResourceTable theResource) {
 		myResource = theResource;
 		myResourcePid = theResource.getId().getId();
-		myResourcePartitionId = theResource.getPersistentId().getPartitionId();
+		myPartitionIdValue = theResource.getPersistentId().getPartitionId();
 		return this;
 	}
 

@@ -125,6 +125,94 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init700();
 		init720();
 		init740();
+		init800();
+	}
+
+	protected void init800() {
+		// FIXME: change to 8.0.0 when that enum constant is available
+		Builder version = forVersion(VersionEnum.V7_6_0);
+
+		version.onTable("HFJ_RES_SEARCH_URL")
+				.dropForeignKey("20241008.1", "FK_RES_SEARCH_URL_RESOURCE", "HFJ_RESOURCE");
+
+		version.onTable("HFJ_RES_VER_PROV").dropForeignKey("20241008.2", "FK_RESVERPROV_RESVER_PID", "HFJ_RES_VER");
+
+		version.onTable("HFJ_SEARCH")
+				.addColumn("20241008.3", "PARTITION_ID")
+				.nullable()
+				.type(ColumnTypeEnum.INT);
+
+		version.onTable("HFJ_SEARCH_RESULT")
+				.addColumn("20241008.4", "RESOURCE_PARTITION_ID")
+				.nullable()
+				.type(ColumnTypeEnum.INT);
+
+		version.onTable("HFJ_SUBSCRIPTION_STATS")
+				.addColumn("20241008.5", "PARTITION_ID")
+				.nullable()
+				.type(ColumnTypeEnum.INT);
+		version.onTable("HFJ_SUBSCRIPTION_STATS")
+				.addColumn("20241008.6", "PARTITION_DATE")
+				.nullable()
+				.type(ColumnTypeEnum.DATE_ONLY);
+
+		version.onTable("MPI_LINK")
+				.addColumn("20241008.7", "GOLDEN_RESOURCE_PARTITION_ID")
+				.nullable()
+				.type(ColumnTypeEnum.INT);
+		version.onTable("MPI_LINK")
+				.addColumn("20241008.8", "PERSON_PARTITION_ID")
+				.nullable()
+				.type(ColumnTypeEnum.INT);
+		version.onTable("MPI_LINK")
+				.addColumn("20241008.9", "TARGET_PARTITION_ID")
+				.nullable()
+				.type(ColumnTypeEnum.INT);
+
+		version.onTable("NPM_PACKAGE_VER")
+				.addColumn("20241008.10", "PARTITION_ID")
+				.nullable()
+				.type(ColumnTypeEnum.INT);
+
+		version.onTable("NPM_PACKAGE_VER_RES")
+				.addColumn("20241008.11", "PARTITION_ID")
+				.nullable()
+				.type(ColumnTypeEnum.INT);
+
+		version.onTable("TRM_CODESYSTEM")
+				.addColumn("20241008.12", "PARTITION_ID")
+				.nullable()
+				.type(ColumnTypeEnum.INT);
+		version.onTable("TRM_CODESYSTEM")
+				.modifyColumn("20241008.13", "RES_ID")
+				.nonNullable()
+				.withType(ColumnTypeEnum.LONG)
+				.failureAllowed();
+
+		version.onTable("TRM_CODESYSTEM_VER")
+				.addColumn("20241008.14", "PARTITION_ID")
+				.nullable()
+				.type(ColumnTypeEnum.INT);
+
+		version.onTable("TRM_CONCEPT_MAP")
+				.addColumn("20241008.15", "PARTITION_ID")
+				.nullable()
+				.type(ColumnTypeEnum.INT);
+		version.onTable("TRM_CONCEPT_MAP")
+				.modifyColumn("20241008.16", "RES_ID")
+				.nonNullable()
+				.withType(ColumnTypeEnum.LONG)
+				.failureAllowed();
+
+		version.onTable("TRM_VALUESET")
+				.addColumn("20241008.17", "PARTITION_ID")
+				.nullable()
+				.type(ColumnTypeEnum.INT);
+		version.onTable("TRM_VALUESET")
+				.modifyColumn("20241008.18", "RES_ID")
+				.nonNullable()
+				.withType(ColumnTypeEnum.LONG)
+				.failureAllowed();
 	}
 
 	protected void init740() {

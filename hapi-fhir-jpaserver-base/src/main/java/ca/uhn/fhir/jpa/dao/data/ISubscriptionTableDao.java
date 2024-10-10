@@ -21,13 +21,15 @@ package ca.uhn.fhir.jpa.dao.data;
 
 import ca.uhn.fhir.jpa.entity.SubscriptionTable;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface ISubscriptionTableDao extends JpaRepository<SubscriptionTable, Long>, IHapiFhirJpaRepository {
+public interface ISubscriptionTableDao
+		extends JpaRepository<SubscriptionTable, IdAndPartitionId>, IHapiFhirJpaRepository {
 
 	@Modifying
 	@Query("DELETE FROM SubscriptionTable t WHERE t.mySubscriptionResource = :subscription ")

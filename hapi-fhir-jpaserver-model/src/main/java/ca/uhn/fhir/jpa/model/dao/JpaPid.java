@@ -53,12 +53,12 @@ public class JpaPid extends BaseResourcePersistentId<Long> implements Comparable
 
 	@GenericGenerator(name = "SEQ_RESOURCE_ID", type = ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator.class)
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_RESOURCE_ID")
-	@Column(name = "RES_ID")
+	@Column(name = "RES_ID", nullable = false)
 	@GenericField(projectable = Projectable.YES)
 	private Long myId;
 
 	@ConditionalIdProperty
-	@Column(name = PartitionablePartitionId.PARTITION_ID)
+	@Column(name = PartitionablePartitionId.PARTITION_ID, nullable = false)
 	private Integer myPartitionIdValue;
 
 	private static final Comparator<JpaPid> COMPARATOR;
