@@ -198,10 +198,8 @@ class SearchParameterMapTest {
 		assertEquals(orig.get("int"), clone.get("int"));
 	}
 
-
 	@Test
 	public void testCompareParameters() {
-
 		// Missing
 		assertEquals(0, compare(ourFhirContext, new StringParam().setMissing(true), new StringParam().setMissing(true)));
 		assertEquals(-1, compare(ourFhirContext, new StringParam("A"), new StringParam().setMissing(true)));

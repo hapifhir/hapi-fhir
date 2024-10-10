@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
@@ -15,23 +17,52 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.storage.test.BaseDateSearchDaoTests;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import javax.sql.DataSource;
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class FhirSearchDaoR4Test extends BaseJpaR4Test {
+public class FhirSearchDaoR4Test extends BaseJpaR4Test implements IR4SearchIndexTests {
+
+	private static final Logger ourLog = LoggerFactory.getLogger(FhirSearchDaoR4Test.class);
 
 	@Autowired
 	private IFulltextSearchSvc mySearchDao;
+
+	@Autowired
+	private DataSource myDataSource;
+
+	@Override
+	public IInterceptorService getInterceptorService() {
+		return myInterceptorRegistry;
+	}
+
+	@Override
+	public Logger getLogger() {
+		return ourLog;
+	}
+
+	@Override
+	public DaoRegistry getDaoRegistry() {
+		return myDaoRegistry;
+	}
+
+	@Override
+	public DataSource getDataSource() {
+		return myDataSource;
+	}
 
 	@Test
 	public void testDaoCallRequiresTransaction() {
@@ -267,8 +298,7 @@ public class FhirSearchDaoR4Test extends BaseJpaR4Test {
 		final int numberOfPatientsToCreate = SearchBuilder.getMaximumPageSize() + 10;
 		List<String> expectedActivePatientIds = new ArrayList<>(numberOfPatientsToCreate);
 
-		for (int i = 0; i < numberOfPatientsToCreate; i++)
-		{
+		for (int i = 0; i < numberOfPatientsToCreate; i++) {
 			Patient patient = new Patient();
 			patient.getText().setDivAsString("<div>AAAS<p>FOO</p> CCC    </div>");
 			expectedActivePatientIds.add(myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless().getIdPart());
@@ -300,8 +330,7 @@ public class FhirSearchDaoR4Test extends BaseJpaR4Test {
 		List<String> expectedActivePatientIds = new ArrayList<>(numberOfPatientsToCreate);
 
 		// create active and non-active patients with the same narrative
-		for (int i = 0; i < numberOfPatientsToCreate; i++)
-		{
+		for (int i = 0; i < numberOfPatientsToCreate; i++) {
 			Patient activePatient = new Patient();
 			activePatient.getText().setDivAsString("<div>AAAS<p>FOO</p> CCC    </div>");
 			activePatient.setActive(true);
@@ -335,8 +364,7 @@ public class FhirSearchDaoR4Test extends BaseJpaR4Test {
 		List<String> expectedActivePatientIds = new ArrayList<>(numberOfPatientsToCreate);
 
 		// create active and non-active patients with the same narrative
-		for (int i = 0; i < numberOfPatientsToCreate; i++)
-		{
+		for (int i = 0; i < numberOfPatientsToCreate; i++) {
 			Patient activePatient = new Patient();
 			activePatient.addName().setFamily(patientFamilyName);
 			activePatient.setActive(true);
@@ -362,5 +390,4 @@ public class FhirSearchDaoR4Test extends BaseJpaR4Test {
 
 		assertThat(resourceIdsFromSearchResult).containsExactlyInAnyOrderElementsOf(expectedActivePatientIds);
 	}
-
 }

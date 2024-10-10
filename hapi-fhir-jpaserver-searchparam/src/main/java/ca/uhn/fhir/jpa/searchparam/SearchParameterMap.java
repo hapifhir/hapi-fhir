@@ -158,6 +158,7 @@ public class SearchParameterMap implements Serializable {
 		return this;
 	}
 
+	@SuppressWarnings("unchecked")
 	public SearchParameterMap add(String theName, IQueryParameterAnd<?> theAnd) {
 		if (theAnd == null) {
 			return this;
@@ -166,12 +167,14 @@ public class SearchParameterMap implements Serializable {
 			put(theName, new ArrayList<>());
 		}
 
+		List<List<IQueryParameterType>> paramList = get(theName);
 		for (IQueryParameterOr<?> next : theAnd.getValuesAsQueryTokens()) {
 			if (next == null) {
 				continue;
 			}
-			get(theName).add((List<IQueryParameterType>) next.getValuesAsQueryTokens());
+			paramList.add((List<IQueryParameterType>) next.getValuesAsQueryTokens());
 		}
+
 		return this;
 	}
 
