@@ -23,6 +23,7 @@ import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -64,6 +65,10 @@ public class JpaPid extends BaseResourcePersistentId<Long> {
 	public JpaPid setPartitionablePartitionId(PartitionablePartitionId thePartitionablePartitionId) {
 		myPartitionablePartitionId = thePartitionablePartitionId;
 		return this;
+	}
+
+	public static List<Long> toLongList(JpaPid[] thePids) {
+		return toLongList(Arrays.asList(thePids));
 	}
 
 	public static List<Long> toLongList(Collection<JpaPid> thePids) {
@@ -128,5 +133,11 @@ public class JpaPid extends BaseResourcePersistentId<Long> {
 	@Override
 	public String toString() {
 		return myId.toString();
+	}
+
+	public Integer getPartitionId() {
+		// wipmb should we return null instead?
+		assert getPartitionablePartitionId() != null;
+		return getPartitionablePartitionId().getPartitionId();
 	}
 }

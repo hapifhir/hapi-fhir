@@ -107,14 +107,13 @@ public class SearchQueryExecutor implements ISearchQueryExecutor {
 					 * is managed by Spring has been started before this method is called.
 					 */
 					HapiTransactionService.requireTransaction();
+					ourLog.trace("About to execute SQL: {}. Parameters: {}", sql, Arrays.toString(args));
 
 					Query nativeQuery = myEntityManager.createNativeQuery(sql);
 					org.hibernate.query.Query<?> hibernateQuery = (org.hibernate.query.Query<?>) nativeQuery;
 					for (int i = 1; i <= args.length; i++) {
 						hibernateQuery.setParameter(i, args[i - 1]);
 					}
-
-					ourLog.trace("About to execute SQL: {}. Parameters: {}", sql, Arrays.toString(args));
 
 					/*
 					 * These settings help to ensure that we use a search cursor
@@ -145,20 +144,47 @@ public class SearchQueryExecutor implements ISearchQueryExecutor {
 				if (myResultSet == null || !myResultSet.hasNext()) {
 					myNext = NO_MORE;
 				} else {
-					Object nextRow = Objects.requireNonNull(myResultSet.next());
-					Number next;
-					if (nextRow instanceof Number) {
-						next = (Number) nextRow;
-					} else {
-						next = (Number) ((Object[]) nextRow)[0];
-					}
-					myNext = next.longValue();
+					myNext = getNextPid(myResultSet);
 				}
 
 			} catch (Exception e) {
 				ourLog.error("Failed to create or execute SQL query", e);
 				close();
 				throw new InternalErrorException(Msg.code(1262) + e, e);
+			}
+		}
+	}
+
+	private long getNextPid(ScrollableResultsIterator<Object> theResultSet) {
+		Object nextRow = Objects.requireNonNull(theResultSet.next());
+		// We should typically get two columns back, the first is the partition ID and the second
+		// is the resource ID. But if we're doing a count query, we'll get a single column in an array
+		// or maybe even just a single non array value depending on how the platform handles it.
+		if (nextRow instanceof Number) {
+			return ((Number) nextRow).longValue();
+		} else {
+			Object[] nextRowAsArray = (Object[]) nextRow;
+			if (nextRowAsArray.length == 1) {
+				return (Long) nextRowAsArray[0];
+			} else {
+				int i;
+				// TODO MB add a strategy object to GeneratedSql to describe the result set.
+				// or make SQE generic
+				// Comment to reviewer: this will be cleaner with the next
+				// merge from ja_20240718_pk_schema_selector
+
+				// We have some cases to distinguish:
+				// - res_id
+				// - count
+				// - partition_id, res_id
+				// - res_id, coord-dist
+				// - partition_id, res_id, coord-dist
+				// Assume res_id is first Long in row, and is in first two columns
+				if (nextRowAsArray[0] instanceof Long) {
+					return (long) nextRowAsArray[0];
+				} else {
+					return (long) nextRowAsArray[1];
+				}
 			}
 		}
 	}

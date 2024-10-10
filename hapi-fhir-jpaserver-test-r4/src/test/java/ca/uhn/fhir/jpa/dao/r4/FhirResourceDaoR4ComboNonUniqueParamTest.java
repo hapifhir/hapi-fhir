@@ -165,7 +165,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		assertThat(actual).containsExactlyInAnyOrder(id1.toUnqualifiedVersionless().getValue());
 
 		assertThat(myCaptureQueriesListener.getSelectQueries().stream().map(t -> t.getSql(true, false)).toList()).contains(
-			"SELECT t0.RES_ID FROM HFJ_IDX_CMB_TOK_NU t0 WHERE (t0.HASH_COMPLETE = '-2634469377090377342')"
+			"SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_IDX_CMB_TOK_NU t0 WHERE (t0.HASH_COMPLETE = '-2634469377090377342')"
 		);
 
 		logCapturedMessages();
@@ -291,8 +291,8 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		assertThat(actual).containsExactlyInAnyOrder(id1.toUnqualifiedVersionless().getValue());
 
 		String sql = myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false);
-		String expected = "SELECT t1.RES_ID FROM HFJ_RESOURCE t1 INNER JOIN HFJ_IDX_CMB_TOK_NU t0 ON (t1.RES_ID = t0.RES_ID) INNER JOIN HFJ_SPIDX_DATE t2 ON (t1.RES_ID = t2.RES_ID) WHERE ((t0.HASH_COMPLETE = '-2634469377090377342') AND ((t2.HASH_IDENTITY = '5247847184787287691') AND ((t2.SP_VALUE_LOW_DATE_ORDINAL >= '20210202') AND (t2.SP_VALUE_HIGH_DATE_ORDINAL <= '20210202'))))";
-		assertEquals(expected, sql);
+		String expected = "SELECT t1.PARTITION_ID,t1.RES_ID FROM HFJ_RESOURCE t1 INNER JOIN HFJ_IDX_CMB_TOK_NU t0 ON (t1.RES_ID = t0.RES_ID) INNER JOIN HFJ_SPIDX_DATE t2 ON (t1.RES_ID = t2.RES_ID) WHERE ((t0.HASH_COMPLETE = '-2634469377090377342') AND ((t2.HASH_IDENTITY = '5247847184787287691') AND ((t2.SP_VALUE_LOW_DATE_ORDINAL >= '20210202') AND (t2.SP_VALUE_HIGH_DATE_ORDINAL <= '20210202'))))";
+ 		assertEquals(expected, sql);
 
 		logCapturedMessages();
 		assertThat(myMessages.toString()).contains("[INFO Using NON_UNIQUE index(es) for query for search: Patient?family=FAMILY1&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale&given=GIVEN1]");
@@ -323,7 +323,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		assertThat(actual).containsExactlyInAnyOrder(id1.toUnqualifiedVersionless().getValue());
 
 		String sql = myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false);
-		String expected = "SELECT t0.RES_ID FROM HFJ_IDX_CMB_TOK_NU t0 INNER JOIN HFJ_SPIDX_STRING t1 ON (t0.RES_ID = t1.RES_ID) WHERE ((t0.HASH_COMPLETE = '7545664593829342272') AND ((t1.HASH_NORM_PREFIX = '6206712800146298788') AND (t1.SP_VALUE_NORMALIZED LIKE 'JAY%')))";
+		String expected = "SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_IDX_CMB_TOK_NU t0 INNER JOIN HFJ_SPIDX_STRING t1 ON (t0.RES_ID = t1.RES_ID) WHERE ((t0.HASH_COMPLETE = '7545664593829342272') AND ((t1.HASH_NORM_PREFIX = '6206712800146298788') AND (t1.SP_VALUE_NORMALIZED LIKE 'JAY%')))";
 		assertEquals(expected, sql);
 
 		logCapturedMessages();
@@ -363,7 +363,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		myCaptureQueriesListener.logSelectQueries();
 		assertThat(actual).contains(id1.toUnqualifiedVersionless().getValue());
 
-		String expected = "SELECT t0.RES_ID FROM HFJ_IDX_CMB_TOK_NU t0 WHERE (t0.HASH_COMPLETE = '7196518367857292879')";
+		String expected = "SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_IDX_CMB_TOK_NU t0 WHERE (t0.HASH_COMPLETE = '7196518367857292879')";
 		assertEquals(expected, myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false));
 
 		logCapturedMessages();
@@ -398,7 +398,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		myCaptureQueriesListener.logSelectQueries();
 		assertThat(actual).contains(id1.toUnqualifiedVersionless().getValue());
 
-		String expected = "SELECT t0.RES_ID FROM HFJ_IDX_CMB_TOK_NU t0 WHERE (t0.HASH_COMPLETE = '2591238402961312979')";
+		String expected = "SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_IDX_CMB_TOK_NU t0 WHERE (t0.HASH_COMPLETE = '2591238402961312979')";
 		assertEquals(expected, myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false));
 	}
 
@@ -461,7 +461,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		myCaptureQueriesListener.logSelectQueries();
 		assertThat(actual).contains("Patient/A");
 
-		String expected = "SELECT t0.RES_ID FROM HFJ_IDX_CMB_TOK_NU t0 INNER JOIN HFJ_IDX_CMB_TOK_NU t1 ON (t0.RES_ID = t1.RES_ID) WHERE ((t0.HASH_COMPLETE = '822090206952728926') AND (t1.HASH_COMPLETE = '-8088946700286918311'))";
+		String expected = "SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_IDX_CMB_TOK_NU t0 INNER JOIN HFJ_IDX_CMB_TOK_NU t1 ON (t0.RES_ID = t1.RES_ID) WHERE ((t0.HASH_COMPLETE = '822090206952728926') AND (t1.HASH_COMPLETE = '-8088946700286918311'))";
 		assertEquals(expected, myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false));
 
 	}
@@ -497,7 +497,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		myCaptureQueriesListener.logSelectQueries();
 		assertThat(actual).contains("Patient/A");
 
-		String expected = "SELECT t0.RES_ID FROM HFJ_IDX_CMB_TOK_NU t0 INNER JOIN HFJ_SPIDX_STRING t1 ON (t0.RES_ID = t1.RES_ID) WHERE ((t0.HASH_COMPLETE = '822090206952728926') AND ((t1.HASH_NORM_PREFIX = '-3664262414674370905') AND (t1.SP_VALUE_NORMALIZED LIKE 'JONES%')))";
+		String expected = "SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_IDX_CMB_TOK_NU t0 INNER JOIN HFJ_SPIDX_STRING t1 ON (t0.RES_ID = t1.RES_ID) WHERE ((t0.HASH_COMPLETE = '822090206952728926') AND ((t1.HASH_NORM_PREFIX = '-3664262414674370905') AND (t1.SP_VALUE_NORMALIZED LIKE 'JONES%')))";
 		assertEquals(expected, myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false));
 
 	}
@@ -520,7 +520,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		myCaptureQueriesListener.logSelectQueries();
 		assertThat(actual).contains("Observation/O1");
 
-		String expected = "SELECT t0.RES_ID FROM HFJ_IDX_CMB_TOK_NU t0 WHERE (t0.HASH_COMPLETE IN ('2445648980345828396','-6884698528022589694','-8034948665712960724') )";
+		String expected = "SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_IDX_CMB_TOK_NU t0 WHERE (t0.HASH_COMPLETE IN ('2445648980345828396','-6884698528022589694','-8034948665712960724') )";
 		assertEquals(expected, myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false));
 
 		logCapturedMessages();

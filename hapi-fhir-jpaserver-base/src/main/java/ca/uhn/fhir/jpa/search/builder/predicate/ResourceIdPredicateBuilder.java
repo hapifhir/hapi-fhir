@@ -59,7 +59,7 @@ public class ResourceIdPredicateBuilder extends BasePredicateBuilder {
 
 	@Nullable
 	public Condition createPredicateResourceId(
-			@Nullable DbColumn theSourceJoinColumn,
+			@Nullable DbColumn[] theSourceJoinColumn,
 			String theResourceName,
 			List<List<IQueryParameterType>> theValues,
 			SearchFilterParser.CompareOperation theOperation,
@@ -134,13 +134,33 @@ public class ResourceIdPredicateBuilder extends BasePredicateBuilder {
 						return queryRootTable.combineWithRequestPartitionIdPredicate(theRequestPartitionId, predicate);
 				}
 			} else {
+				DbColumn resIdColumn = getResourceIdColumn(theSourceJoinColumn);
 				return QueryParameterUtils.toEqualToOrInPredicate(
-						theSourceJoinColumn,
+						resIdColumn,
 						generatePlaceholders(resourceIds),
 						operation == SearchFilterParser.CompareOperation.ne);
 			}
 		}
 
 		return null;
+	}
+
+	/**
+	 * This method takes 1-2 columns and returns the last one. This is useful where the input is an array of
+	 * join columns for SQL Search expressions. In partition key mode, there are 2 columns (partition id and resource id).
+	 * In non partition key mode, only the resource id column is used.
+	 */
+	@Nullable
+	public static DbColumn getResourceIdColumn(@Nullable DbColumn[] theJoinColumns) {
+		DbColumn resIdColumn;
+		if (theJoinColumns == null) {
+			return null;
+		} else if (theJoinColumns.length == 1) {
+			resIdColumn = theJoinColumns[0];
+		} else {
+			assert theJoinColumns.length == 2;
+			resIdColumn = theJoinColumns[1];
+		}
+		return resIdColumn;
 	}
 }

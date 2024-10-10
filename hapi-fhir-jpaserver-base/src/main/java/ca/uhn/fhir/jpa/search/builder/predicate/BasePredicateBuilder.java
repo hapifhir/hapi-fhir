@@ -41,6 +41,10 @@ public abstract class BasePredicateBuilder {
 		mySearchSqlBuilder = theSearchSqlBuilder;
 	}
 
+	protected SearchQueryBuilder getSearchQueryBuilder() {
+		return mySearchSqlBuilder;
+	}
+
 	PartitionSettings getPartitionSettings() {
 		return mySearchSqlBuilder.getPartitionSettings();
 	}
@@ -84,7 +88,7 @@ public abstract class BasePredicateBuilder {
 		return mySearchSqlBuilder.getOrCreateFirstPredicateBuilder(theIncludeResourceTypeAndNonDeletedFlag);
 	}
 
-	public void addJoin(DbTable theFromTable, DbTable theToTable, DbColumn theFromColumn, DbColumn theToColumn) {
+	public void addJoin(DbTable theFromTable, DbTable theToTable, DbColumn[] theFromColumn, DbColumn[] theToColumn) {
 		mySearchSqlBuilder.addJoin(theFromTable, theToTable, theFromColumn, theToColumn);
 	}
 }

@@ -543,7 +543,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 		myCaptureQueriesListener.logFirstSelectQueryForCurrentThread();
 		assertThat(toUnqualifiedVersionlessIdValues(outcome)).containsExactlyInAnyOrder(id1);
 		String unformattedSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
-		assertEquals("SELECT t0.RES_ID FROM HFJ_IDX_CMP_STRING_UNIQ t0 WHERE (t0.IDX_STRING IN ('Patient?identifier=urn%7C111','Patient?identifier=urn%7C222') )", unformattedSql);
+		assertEquals("SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_IDX_CMP_STRING_UNIQ t0 WHERE (t0.IDX_STRING IN ('Patient?identifier=urn%7C111','Patient?identifier=urn%7C222') )", unformattedSql);
 
 	}
 
@@ -576,7 +576,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 		myCaptureQueriesListener.logFirstSelectQueryForCurrentThread();
 		assertThat(toUnqualifiedVersionlessIdValues(outcome)).containsExactlyInAnyOrder(id1);
 		String unformattedSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
-		assertEquals("SELECT t0.RES_ID FROM HFJ_IDX_CMP_STRING_UNIQ t0 WHERE (t0.IDX_STRING IN (" +
+		assertEquals("SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_IDX_CMP_STRING_UNIQ t0 WHERE (t0.IDX_STRING IN (" +
 			"'Patient?family=Family1&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cfemale'," +
 			"'Patient?family=Family1&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale'," +
 			"'Patient?family=Family2&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cfemale'," +
@@ -1278,7 +1278,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 		assertThat(toUnqualifiedVersionlessIdValues(results)).containsExactlyInAnyOrder(id1.getValue(), id2.getValue());
 
 		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false))
-			.contains("SELECT t0.RES_ID FROM HFJ_IDX_CMP_STRING_UNIQ t0 WHERE (t0.IDX_STRING IN " +
+			.contains("SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_IDX_CMP_STRING_UNIQ t0 WHERE (t0.IDX_STRING IN " +
 				"('Patient?family=Family1&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale'," +
 				"'Patient?family=Family2&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale') )");
 		logCapturedMessages();

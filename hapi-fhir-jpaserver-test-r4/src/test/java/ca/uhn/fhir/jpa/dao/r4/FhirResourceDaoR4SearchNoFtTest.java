@@ -4264,7 +4264,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 		String searchQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		assertThat(countMatches(searchQuery.toLowerCase(), "join")).as(searchQuery).isEqualTo(0);
-		assertThat(countMatches(searchQuery.toLowerCase(), "partition")).as(searchQuery).isEqualTo(0);
+		assertThat(countMatches(searchQuery.toLowerCase(), "partition")).as(searchQuery).isEqualTo(1);
 		assertThat(countMatches(searchQuery.toLowerCase(), "hash_identity")).as(searchQuery).isEqualTo(1);
 		assertThat(countMatches(searchQuery.toLowerCase(), "sp_value")).as(searchQuery).isEqualTo(1);
 
@@ -4557,7 +4557,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			assertThat(patients).as(patients.toString()).containsExactly(obsId1);
 			String searchQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 			ourLog.info("Search query:\n{}", searchQuery);
-			assertThat(countMatches(searchQuery.toLowerCase(), "partition")).as(searchQuery).isEqualTo(0);
+			assertThat(countMatches(searchQuery.toLowerCase(), "partition")).as(searchQuery).isEqualTo(1);
 			assertThat(countMatches(searchQuery.toLowerCase(), "join")).as(searchQuery).isEqualTo(2);
 			assertThat(countMatches(searchQuery.toLowerCase(), "hash_identity")).as(searchQuery).isEqualTo(2);
 			// - query is changed 'or' is removed

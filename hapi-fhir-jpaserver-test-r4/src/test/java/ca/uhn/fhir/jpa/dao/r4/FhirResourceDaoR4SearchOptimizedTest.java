@@ -892,7 +892,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 			assertThat(StringUtils.countMatches(selectQuery.toLowerCase(), "rt1_0.fhir_id in ('a')")).as(selectQuery).isEqualTo(1);
 
 			selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, false);
-			assertThat(StringUtils.countMatches(selectQuery.toLowerCase(), "select t1.res_id from hfj_resource t1")).as(selectQuery).isEqualTo(1);
+			assertThat(StringUtils.countMatches(selectQuery.toLowerCase(), "select t1.partition_id,t1.res_id from hfj_resource t1")).as(selectQuery).isEqualTo(1);
 			assertThat(StringUtils.countMatches(selectQuery.toLowerCase(), "t1.res_type='observation'")).as(selectQuery).isEqualTo(0);
 			assertThat(StringUtils.countMatches(selectQuery.toLowerCase(), "t1.res_deleted_at is null")).as(selectQuery).isEqualTo(0);
 		}
@@ -907,7 +907,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 			assertThat(outcome.getResources(0, 999)).hasSize(2);
 			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 			String selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, false);
-			assertThat(StringUtils.countMatches(selectQuery.toLowerCase(), "select t0.res_id from hfj_resource t0")).as(selectQuery).isEqualTo(1);
+			assertThat(StringUtils.countMatches(selectQuery.toLowerCase(), "select t0.partition_id,t0.res_id from hfj_resource t0")).as(selectQuery).isEqualTo(1);
 			// Because we included a non-forced ID, we need to verify the type
 			assertThat(StringUtils.countMatches(selectQuery.toLowerCase(), "t0.res_type = 'observation'")).as(selectQuery).isEqualTo(1);
 			assertThat(StringUtils.countMatches(selectQuery.toLowerCase(), "t0.res_deleted_at is null")).as(selectQuery).isEqualTo(1);
@@ -944,7 +944,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 			assertThat(outcome.getResources(0, 999)).isEmpty();
 			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 			String selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, false);
-			assertThat(StringUtils.countMatches(selectQuery.toLowerCase(), "select t0.res_id from hfj_resource t0")).as(selectQuery).isEqualTo(1);
+			assertThat(StringUtils.countMatches(selectQuery.toLowerCase(), "select t0.partition_id,t0.res_id from hfj_resource t0")).as(selectQuery).isEqualTo(1);
 			// Because we included a non-forced ID, we need to verify the type
 			assertThat(StringUtils.countMatches(selectQuery.toLowerCase(), "t0.res_type = 'observation'")).as(selectQuery).isEqualTo(1);
 			assertThat(StringUtils.countMatches(selectQuery.toLowerCase(), "t0.res_deleted_at is null")).as(selectQuery).isEqualTo(1);
@@ -978,7 +978,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 
 			String selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
-			assertThat(StringUtils.countMatches(selectQuery.toLowerCase(), "select t0.res_id from hfj_resource t0")).as(selectQuery).isEqualTo(1);
+			assertThat(StringUtils.countMatches(selectQuery.toLowerCase(), "select t0.partition_id,t0.res_id from hfj_resource t0")).as(selectQuery).isEqualTo(1);
 			assertThat(StringUtils.countMatches(selectQuery.toLowerCase(), "t0.res_type = 'observation'")).as(selectQuery).isEqualTo(1);
 			assertThat(StringUtils.countMatches(selectQuery.toLowerCase(), "t0.res_deleted_at is null")).as(selectQuery).isEqualTo(1);
 		}

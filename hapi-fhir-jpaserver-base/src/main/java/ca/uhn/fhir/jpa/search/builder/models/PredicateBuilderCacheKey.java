@@ -24,20 +24,22 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 public class PredicateBuilderCacheKey {
-	private final DbColumn myDbColumn;
+	private final DbColumn[] myDbColumn;
 	private final PredicateBuilderTypeEnum myType;
 	private final String myParamName;
 	private final int myHashCode;
 
-	public PredicateBuilderCacheKey(DbColumn theDbColumn, PredicateBuilderTypeEnum theType, String theParamName) {
+	public PredicateBuilderCacheKey(DbColumn[] theDbColumn, PredicateBuilderTypeEnum theType, String theParamName) {
 		myDbColumn = theDbColumn;
 		myType = theType;
 		myParamName = theParamName;
-		myHashCode = new HashCodeBuilder()
-				.append(myDbColumn)
-				.append(myType)
-				.append(myParamName)
-				.toHashCode();
+		HashCodeBuilder hashBuilder = new HashCodeBuilder().append(myType).append(myParamName);
+		if (theDbColumn != null) {
+			for (DbColumn next : theDbColumn) {
+				hashBuilder.append(next);
+			}
+		}
+		myHashCode = hashBuilder.toHashCode();
 	}
 
 	@Override

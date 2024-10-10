@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.ResourceSearch;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -16,7 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Collections;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ResourceProviderSearchModifierDstu3Test extends BaseResourceProviderDstu3Test{
 	@Autowired
