@@ -15,6 +15,7 @@ UTC.
 * program
 
 Care Gaps Operation parameters added:
+* measureIdentifier now is available to resolve measure resources for evaluation
 * nonDocument is a new optional parameter that defaults to 'false' which returns standard 'document' bundle for `$care-gaps`. 
 If 'true', this will return summarized subject bundle with only detectedIssue.
 
