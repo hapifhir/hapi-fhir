@@ -22,6 +22,7 @@ package ca.uhn.fhir.cr.config.dstu3;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.cr.common.IRepositoryFactory;
+import ca.uhn.fhir.cr.config.CrBaseConfig;
 import ca.uhn.fhir.cr.config.ProviderLoader;
 import ca.uhn.fhir.cr.config.ProviderSelector;
 import ca.uhn.fhir.cr.config.RepositoryConfig;
@@ -39,7 +40,7 @@ import java.util.Arrays;
 import java.util.Map;
 
 @Configuration
-@Import({RepositoryConfig.class})
+@Import({RepositoryConfig.class, CrBaseConfig.class})
 public class CrDstu3Config {
 
 	@Bean

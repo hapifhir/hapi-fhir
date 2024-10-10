@@ -2,6 +2,7 @@
 	"resourceType": "Library",
 	"id": "SimpleR4Library",
 	"name": "SimpleR4Library",
+	"url": "http://fhir.org/test/Library/SimpleR4Library",
 	"version": "0.0.1",
 	"status": "active",
 	"experimental": false,

@@ -3,6 +3,7 @@ package ca.uhn.fhir.cr.dstu3;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.cr.IResourceLoader;
 import ca.uhn.fhir.cr.config.dstu3.ApplyOperationConfig;
+import ca.uhn.fhir.cr.config.dstu3.EvaluateOperationConfig;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
@@ -31,7 +32,7 @@ import org.springframework.test.context.ContextConfiguration;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-@ContextConfiguration(classes = {TestCrDstu3Config.class, ApplyOperationConfig.class})
+@ContextConfiguration(classes = {TestCrDstu3Config.class, ApplyOperationConfig.class, EvaluateOperationConfig.class})
 public abstract class BaseCrDstu3TestServer extends BaseJpaDstu3Test implements IResourceLoader {
 
 	public static IGenericClient ourClient;

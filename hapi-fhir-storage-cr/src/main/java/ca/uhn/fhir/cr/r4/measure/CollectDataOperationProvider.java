@@ -31,6 +31,10 @@ import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.Parameters;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+
 public class CollectDataOperationProvider {
 	@Autowired
 	ICollectDataServiceFactory myR4CollectDataServiceFactory;
@@ -70,6 +74,13 @@ public class CollectDataOperationProvider {
 			RequestDetails theRequestDetails) {
 		return myR4CollectDataServiceFactory
 				.create(theRequestDetails)
-				.collectData(theId, thePeriodStart, thePeriodEnd, theSubject, thePractitioner);
+				.collectData(
+						theId,
+						LocalDate.parse(thePeriodStart, DateTimeFormatter.ISO_LOCAL_DATE)
+								.atStartOfDay(ZoneId.systemDefault()),
+						LocalDate.parse(thePeriodEnd, DateTimeFormatter.ISO_LOCAL_DATE)
+								.atStartOfDay(ZoneId.systemDefault()),
+						theSubject,
+						thePractitioner);
 	}
 }

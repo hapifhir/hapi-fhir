@@ -115,6 +115,7 @@ public class Constants {
 	public static final String HEADER_AUTHORIZATION_VALPREFIX_BASIC = "Basic ";
 	public static final String HEADER_AUTHORIZATION_VALPREFIX_BEARER = "Bearer ";
 	public static final String HEADER_CACHE_CONTROL = "Cache-Control";
+	public static final String HEADER_CLIENT_TIMEZONE = "Timezone";
 	public static final String HEADER_CONTENT_DISPOSITION = "Content-Disposition";
 	public static final String HEADER_CONTENT_ENCODING = "Content-Encoding";
 	public static final String HEADER_CONTENT_LOCATION = "Content-Location";

@@ -127,7 +127,7 @@ public class TestCrDstu3Config {
 			cqlCompilerOptions.setOptions(CqlCompilerOptions.Options.DisableDefaultModelInfoLoad);
 		}
 		cqlCompilerOptions.setSignatureLevel(theCqlProperties.getCqlCompilerSignatureLevel());
-		cqlCompilerOptions.setCompatibilityLevel(theCqlProperties.getCqlCompilerCompatibilityLevel());
+		cqlCompilerOptions.setCompatibilityLevel("1.3");
 		cqlCompilerOptions.setAnalyzeDataRequirements(theCqlProperties.isCqlCompilerAnalyzeDataRequirements());
 		cqlCompilerOptions.setCollapseDataRequirements(theCqlProperties.isCqlCompilerCollapseDataRequirements());
 
