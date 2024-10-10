@@ -22,12 +22,8 @@ import ca.uhn.fhir.rest.server.util.ICachedSearchDetails;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import com.google.common.base.Charsets;
-import com.helger.commons.collection.iterate.EmptyEnumeration;
-import jakarta.servlet.ReadListener;
-import jakarta.servlet.ServletInputStream;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.apache.commons.collections4.iterators.IteratorEnumeration;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -50,13 +46,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.util.Assert;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.PrintWriter;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -78,34 +70,29 @@ public class ConsentInterceptorTest {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ConsentInterceptorTest.class);
 	@RegisterExtension
-	private final HttpClientExtension myClient = new HttpClientExtension();
-	private static final FhirContext ourCtx = FhirContext.forR4Cached();
-	private int myPort;
-	private static final DummyPatientResourceProvider ourPatientProvider = new DummyPatientResourceProvider(ourCtx);
+	protected final HttpClientExtension myClient = new HttpClientExtension();
+	protected static final FhirContext ourCtx = FhirContext.forR4Cached();
+	protected int myPort;
+	protected static final DummyPatientResourceProvider ourPatientProvider = new DummyPatientResourceProvider(ourCtx);
 	private static final DummySystemProvider ourSystemProvider = new DummySystemProvider();
-	private static final HashMapResourceProvider<Bundle> ourBundleProvider =
+	protected static final HashMapResourceProvider<Bundle> ourBundleProvider =
 		 new HashMapResourceProvider<>(ourCtx, Bundle.class);
 
 	@RegisterExtension
-	static final RestfulServerExtension ourServer = new RestfulServerExtension(ourCtx)
+	protected static final RestfulServerExtension ourServer = new RestfulServerExtension(ourCtx)
 		.registerProvider(ourPatientProvider)
 		.registerProvider(ourSystemProvider)
 		.registerProvider(ourBundleProvider)
 		.withPagingProvider(new FifoMemoryPagingProvider(10));
 
 	@Mock(answer = Answers.CALLS_REAL_METHODS)
-	private IConsentService myConsentSvc;
+	protected IConsentService myConsentSvc;
 	@Mock(answer = Answers.CALLS_REAL_METHODS)
 	private IConsentService myConsentSvc2;
-	private ConsentInterceptor myInterceptor;
+	protected ConsentInterceptor myInterceptor;
 	@Captor
 	private ArgumentCaptor<BaseServerResponseException> myExceptionCaptor;
 	private IGenericClient myFhirClient;
-
-	@AfterEach
-	public void after() {
-		ourServer.unregisterInterceptor(myInterceptor);
-	}
 
 	@BeforeEach
 	public void before() {
@@ -113,8 +100,12 @@ public class ConsentInterceptorTest {
 		myFhirClient = ourServer.getFhirClient();
 
 		myInterceptor = new ConsentInterceptor(myConsentSvc);
-
 		ourServer.registerInterceptor(myInterceptor);
+	}
+
+	@AfterEach
+	public void after() {
+		ourServer.unregisterInterceptor(myInterceptor);
 		ourPatientProvider.clear();
 		ourBundleProvider.clear();
 	}
@@ -502,7 +493,7 @@ public class ConsentInterceptorTest {
 		verifyNoMoreInteractions(myConsentSvc);
 	}
 
-	private Bundle createDocumentBundle() {
+	protected Bundle createDocumentBundle() {
 		Bundle bundle = new Bundle();
 		bundle.setType(Bundle.BundleType.DOCUMENT);
 		bundle.setId("test-bundle-id");
@@ -639,7 +630,6 @@ public class ConsentInterceptorTest {
 		when(myConsentSvc.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
 		when(myConsentSvc.willSeeResource(any(RequestDetails.class), any(IBaseResource.class), any())).thenAnswer(t->{
 			IBaseResource resource = (IBaseResource) t.getArguments()[1];
-			ourLog.info(resource.getIdElement().getIdPart() + " == PTB");
 			if (resource.getIdElement().getIdPart().equals("PTB")) {
 				Patient replacement = new Patient();
 				replacement.setId("PTB");
@@ -872,88 +862,6 @@ public class ConsentInterceptorTest {
 	private HttpServletResponse myResponse;
 	@Mock
 	private PrintWriter myWriter;
-	private HashMap<String, String> myHeaders;
-
-	private void initRequestMocks() {
-		myHeaders = new HashMap<>();
-		myHeaders.put(Constants.HEADER_CONTENT_TYPE, Constants.CT_FHIR_JSON_NEW);
-
-		when(myRequest.getRequestURI()).thenReturn("/Patient");
-		when(myRequest.getRequestURL()).thenReturn(new StringBuffer(ourServer.getBaseUrl() + "/Patient"));
-		when(myRequest.getHeader(any())).thenAnswer(t -> {
-			String header = t.getArgument(0, String.class);
-			String value = myHeaders.get(header);
-			ourLog.info("Request for header '{}' produced: {}", header, value);
-			return value;
-		});
-		when(myRequest.getHeaders(any())).thenAnswer(t -> {
-			String header = t.getArgument(0, String.class);
-			String value = myHeaders.get(header);
-			ourLog.info("Request for header '{}' produced: {}", header, value);
-			if (value != null) {
-				return new IteratorEnumeration<>(Collections.singleton(value).iterator());
-			}
-			return new EmptyEnumeration<>();
-		});
-	}
-
-	/**
-	 * Based on the class from Spring Test with the same name
-	 */
-	public static class DelegatingServletInputStream extends ServletInputStream {
-		private final InputStream mySourceStream;
-		private boolean myFinished = false;
-
-		public void setExceptionOnClose(boolean theExceptionOnClose) {
-			myExceptionOnClose = theExceptionOnClose;
-		}
-
-		private boolean myExceptionOnClose = false;
-
-		public DelegatingServletInputStream(InputStream sourceStream) {
-			Assert.notNull(sourceStream, "Source InputStream must not be null");
-			this.mySourceStream = sourceStream;
-		}
-
-		@Override
-		public int read() throws IOException {
-			int data = this.mySourceStream.read();
-			if (data == -1) {
-				this.myFinished = true;
-			}
-
-			return data;
-		}
-
-		@Override
-		public int available() throws IOException {
-			return this.mySourceStream.available();
-		}
-
-		@Override
-		public void close() throws IOException {
-			super.close();
-			this.mySourceStream.close();
-			if (myExceptionOnClose) {
-				throw new IOException("Failed!");
-			}
-		}
-
-		@Override
-		public boolean isFinished() {
-			return this.myFinished;
-		}
-
-		@Override
-		public boolean isReady() {
-			return true;
-		}
-
-		@Override
-		public void setReadListener(ReadListener readListener) {
-			throw new UnsupportedOperationException();
-		}
-	}
 
 	@Test
 	public void testOutcomeException() throws IOException {
@@ -1022,7 +930,6 @@ public class ConsentInterceptorTest {
 			when(myConsentSvc.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
 			when(myConsentSvc.shouldProcessCanSeeResource(any(), any())).thenReturn(true);
 			when(myConsentSvc2.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
-			when(myConsentSvc2.shouldProcessCanSeeResource(any(), any())).thenReturn(false);
 			myInterceptor.registerConsentService(myConsentSvc2);
 			myInterceptor.interceptPreHandled(myRequestDetails);
 
