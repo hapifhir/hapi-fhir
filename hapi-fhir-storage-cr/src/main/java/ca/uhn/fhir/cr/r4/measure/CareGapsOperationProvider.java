@@ -101,7 +101,8 @@ public class CareGapsOperationProvider {
 			@OperationParam(name = "status") List<String> theStatus,
 			@OperationParam(name = "measureId") List<String> theMeasureId,
 			@OperationParam(name = "measureIdentifier") List<String> theMeasureIdentifier,
-			@OperationParam(name = "measureUrl") List<CanonicalType> theMeasureUrl) {
+			@OperationParam(name = "measureUrl") List<CanonicalType> theMeasureUrl,
+			@OperationParam(name = "nonDocument") boolean theNonDocument) {
 
 		return myR4CareGapsProcessorFactory
 				.create(theRequestDetails)
@@ -115,6 +116,6 @@ public class CareGapsOperationProvider {
 								: theMeasureId.stream().map(IdType::new).collect(Collectors.toList()),
 						theMeasureIdentifier,
 						theMeasureUrl,
-						false);
+						theNonDocument);
 	}
 }
