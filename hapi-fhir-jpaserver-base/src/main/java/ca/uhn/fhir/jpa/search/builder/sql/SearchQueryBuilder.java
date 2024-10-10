@@ -523,16 +523,19 @@ public class SearchQueryBuilder {
 				 * happens in SQLServer2012LimitHandler.
 				 *
 				 * But, SQL Server also pukes if you include an ORDER BY on a column that you
-				 * aren't also SELECTing, if the select statement is DISTINCT. Who knows why SQL
-				 * Server is so picky.. but anyhow, this causes an issue, so we manually replace
+				 * aren't also SELECTing, if the select statement contains a UNION, INTERSECT or EXCEPT operator.
+				 * Who knows why SQL Server is so picky.. but anyhow, this causes an issue, so we manually replace
 				 * the pseudo-column with an actual selected column.
 				 */
-				if (sql.startsWith("SELECT DISTINCT ")) {
-					if (sql.contains("order by @@version")) {
-						if (mySelectedResourceIdColumn != null) {
-							sql = sql.replace(
-									"order by @@version", "order by " + mySelectedResourceIdColumn.getColumnNameSQL());
-						}
+				if (sql.contains("order by @@version")) {
+					if (mySelectedResourceIdColumn != null) {
+						sql = sql.replace(
+								"order by @@version", "order by " + mySelectedResourceIdColumn.getColumnNameSQL());
+					} else {
+						// not certain if this case can happen, but ordering by the ordinal first column should always
+						// be syntactically valid
+						// and seems like a better option than ordering by a static value regardless
+						sql = sql.replace("order by @@version", "order by 1");
 					}
 				}
 
