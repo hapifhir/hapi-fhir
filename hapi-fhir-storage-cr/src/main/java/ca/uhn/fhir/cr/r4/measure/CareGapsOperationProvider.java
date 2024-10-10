@@ -26,12 +26,14 @@ import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.Parameters;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class CareGapsOperationProvider {
@@ -100,7 +102,7 @@ public class CareGapsOperationProvider {
 			@OperationParam(name = "measureId") List<String> theMeasureId,
 			@OperationParam(name = "measureIdentifier") List<String> theMeasureIdentifier,
 			@OperationParam(name = "measureUrl") List<CanonicalType> theMeasureUrl,
-			@OperationParam(name = "nonDocument") boolean theNonDocument) {
+			@OperationParam(name = "nonDocument") BooleanType theNonDocument) {
 
 		return myR4CareGapsProcessorFactory
 				.create(theRequestDetails)
@@ -114,6 +116,8 @@ public class CareGapsOperationProvider {
 								: theMeasureId.stream().map(IdType::new).collect(Collectors.toList()),
 						theMeasureIdentifier,
 						theMeasureUrl,
-						theNonDocument);
+					Optional.ofNullable(theNonDocument)
+						.map(BooleanType::getValue)
+						.orElse(false));
 	}
 }
