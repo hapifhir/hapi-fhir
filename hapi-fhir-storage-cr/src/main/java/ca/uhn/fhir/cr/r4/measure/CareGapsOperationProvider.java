@@ -37,8 +37,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class CareGapsOperationProvider {
-	private static final Logger ourLog = LoggerFactory.getLogger(CareGapsOperationProvider.class);
-
 	private final ICareGapsServiceFactory myR4CareGapsProcessorFactory;
 	private final StringTimePeriodHandler myStringTimePeriodHandler;
 
@@ -86,6 +84,8 @@ public class CareGapsOperationProvider {
 	 *                          care report(s) will be calculated
 	 * @param theMeasureUrl        the canonical URL of Measure(s) for which the gaps
 	 *                          in care report(s) will be calculated
+	 * @param theNonDocument    defaults to 'false' which returns standard 'document' bundle for `$care-gaps`.
+	 *   If 'true', this will return summarized subject bundle with only detectedIssue resource.
 	 * @return Parameters of bundles of Care Gap Measure Reports
 	 */
 	@Description(
