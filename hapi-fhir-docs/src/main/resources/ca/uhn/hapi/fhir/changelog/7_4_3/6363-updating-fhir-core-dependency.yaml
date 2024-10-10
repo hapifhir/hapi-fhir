@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 6363
+title: "Updating fhir_core dependency to fix vulnerability."
