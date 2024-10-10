@@ -54,8 +54,6 @@ import java.util.function.Function;
  * <p/>
  * Also used for various operations to serialize/deserialize dates to/from JSON classes.
  */
-// TODO: LD:  Note that this is currently dead code and will be integrated once we change clinical-reasoning to accept
-//
 public class StringTimePeriodHandler {
 	private static final Logger ourLog = LoggerFactory.getLogger(StringTimePeriodHandler.class);
 
