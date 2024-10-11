@@ -89,8 +89,8 @@ public class CrR4Config {
 	}
 
 	@Bean
-	CollectDataOperationProvider r4CollectDataOperationProvider() {
-		return new CollectDataOperationProvider();
+	CollectDataOperationProvider r4CollectDataOperationProvider(ICollectDataServiceFactory theR4CollectDataServiceFactory, StringTimePeriodHandler theStringTimePeriodHandler) {
+		return new CollectDataOperationProvider(theR4CollectDataServiceFactory, theStringTimePeriodHandler);
 	}
 
 	@Bean
