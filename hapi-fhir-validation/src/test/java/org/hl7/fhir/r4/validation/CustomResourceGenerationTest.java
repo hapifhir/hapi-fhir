@@ -45,7 +45,7 @@ public class CustomResourceGenerationTest extends BaseValidationTestWithInlineMo
 
 		assertThat(result.getMessages()).hasSize(3);
 		assertEquals("Error parsing JSON: the primitive value must be a boolean", result.getMessages().get(0).getMessage());
-		assertEquals("The property name  must be a JSON Array, not a Primitive property (at CustomResource)", result.getMessages().get(1).getMessage());
+		assertEquals("The property name must be a JSON Array, not a Primitive property (at CustomResource)", result.getMessages().get(1).getMessage());
 		assertEquals("Unrecognized property 'id1'", result.getMessages().get(2).getMessage());
 
 	}

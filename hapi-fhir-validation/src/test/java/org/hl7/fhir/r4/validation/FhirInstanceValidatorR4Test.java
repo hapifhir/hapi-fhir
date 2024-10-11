@@ -464,7 +464,7 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 		ValidationResult result = val.validateWithResult(operationDefinition);
 		List<SingleValidationMessage> all = logResultsAndReturnAll(result);
 		assertFalse(result.isSuccessful());
-		assertEquals("The property resource  must be a JSON Array, not a Primitive property (at OperationDefinition)", all.get(0).getMessage());
+		assertEquals("The property resource must be a JSON Array, not a Primitive property (at OperationDefinition)", all.get(0).getMessage());
 	}
 
 	@Test
