@@ -314,8 +314,8 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc, IHas
 		if (myAllowDeferredTasksTimeout) {
 			timeoutManager = new TimeoutManager(
 					TermDeferredStorageSvcImpl.class.getName() + ".saveAllDeferred()",
-					Duration.of(SAVE_ALL_DEFERRED_WARN_MINUTES, ChronoUnit.SECONDS),
-					Duration.of(SAVE_ALL_DEFERRED_ERROR_MINUTES, ChronoUnit.SECONDS));
+					Duration.of(SAVE_ALL_DEFERRED_WARN_MINUTES, ChronoUnit.MINUTES),
+					Duration.of(SAVE_ALL_DEFERRED_ERROR_MINUTES, ChronoUnit.MINUTES));
 		}
 
 		// Don't include executing jobs here since there's no point in thrashing over and over
