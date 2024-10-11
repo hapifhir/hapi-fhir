@@ -35,7 +35,9 @@ public class CollectDataOperationProvider {
 	private final ICollectDataServiceFactory myR4CollectDataServiceFactory;
 	private final StringTimePeriodHandler myStringTimePeriodHandler;
 
-	public CollectDataOperationProvider(ICollectDataServiceFactory theR4CollectDataServiceFactory, StringTimePeriodHandler theStringTimePeriodHandler) {
+	public CollectDataOperationProvider(
+			ICollectDataServiceFactory theR4CollectDataServiceFactory,
+			StringTimePeriodHandler theStringTimePeriodHandler) {
 		myR4CollectDataServiceFactory = theR4CollectDataServiceFactory;
 		myStringTimePeriodHandler = theStringTimePeriodHandler;
 	}
