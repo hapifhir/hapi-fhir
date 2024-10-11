@@ -17,11 +17,15 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
+import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_DELETE_JOB_NAME;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.times;
@@ -67,8 +71,15 @@ public class TermDeferredStorageSvcImplTest {
 
 		ReflectionTestUtils.setField(mySvc, "myJobExecutions", mockExecutions);
 
-		when(myJobCoordinator.getInstance(eq(jobId)))
-			.thenReturn(instance);
+		when(myJobCoordinator.getInstancesbyJobDefinitionIdAndEndedStatus(
+			eq(TERM_CODE_SYSTEM_DELETE_JOB_NAME),
+			eq(true),
+			anyInt(),
+			eq(0)
+		))
+			.thenReturn(List.of()) // first nothing
+			.thenReturn(List.of(instance)); // then the list with the instance
+
 		assertFalse(mySvc.isStorageQueueEmpty(true));
 		instance.setStatus(StatusEnum.COMPLETED);
 		assertTrue(mySvc.isStorageQueueEmpty(true));

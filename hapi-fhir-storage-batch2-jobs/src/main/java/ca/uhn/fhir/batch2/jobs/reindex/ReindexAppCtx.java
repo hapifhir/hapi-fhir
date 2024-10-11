@@ -21,69 +21,37 @@ package ca.uhn.fhir.batch2.jobs.reindex;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.IJobPartitionProvider;
-import ca.uhn.fhir.batch2.api.IJobStepWorker;
-import ca.uhn.fhir.batch2.api.VoidModel;
-import ca.uhn.fhir.batch2.jobs.chunk.ChunkRangeJson;
-import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
-import ca.uhn.fhir.batch2.jobs.parameters.UrlListValidator;
-import ca.uhn.fhir.batch2.jobs.step.GenerateRangeChunksStep;
-import ca.uhn.fhir.batch2.jobs.step.LoadIdsStep;
-import ca.uhn.fhir.batch2.model.JobDefinition;
+import ca.uhn.fhir.batch2.jobs.reindex.svcs.ReindexJobService;
+import ca.uhn.fhir.batch2.jobs.reindex.v1.ReindexV1Config;
+import ca.uhn.fhir.batch2.jobs.reindex.v2.ReindexV2Config;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
-import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
 @Configuration
+@Import({ReindexV1Config.class, ReindexV2Config.class})
 public class ReindexAppCtx {
 
-	public static final String JOB_REINDEX = "REINDEX";
+	@Autowired
+	private HapiTransactionService myHapiTransactionService;
 
-	@Bean
-	public JobDefinition<ReindexJobParameters> reindexJobDefinition(IBatch2DaoSvc theBatch2DaoSvc) {
-		return JobDefinition.newBuilder()
-				.setJobDefinitionId(JOB_REINDEX)
-				.setJobDescription("Reindex resources")
-				.setJobDefinitionVersion(1)
-				.setParametersType(ReindexJobParameters.class)
-				.setParametersValidator(reindexJobParametersValidator(theBatch2DaoSvc))
-				.gatedExecution()
-				.addFirstStep(
-						"generate-ranges",
-						"Generate data ranges to reindex",
-						ChunkRangeJson.class,
-						reindexGenerateRangeChunksStep())
-				.addIntermediateStep(
-						"load-ids",
-						"Load IDs of resources to reindex",
-						ResourceIdListWorkChunkJson.class,
-						reindexLoadIdsStep(theBatch2DaoSvc))
-				.addLastStep("reindex", "Perform the resource reindex", reindexStep())
-				.build();
-	}
+	@Autowired
+	private IFhirSystemDao<?, ?> mySystemDao;
 
-	@Bean
-	public IJobStepWorker<ReindexJobParameters, VoidModel, ChunkRangeJson> reindexGenerateRangeChunksStep() {
-		return new GenerateRangeChunksStep<>();
-	}
+	@Autowired
+	private DaoRegistry myRegistry;
 
-	@Bean
-	public IJobStepWorker<ReindexJobParameters, ChunkRangeJson, ResourceIdListWorkChunkJson> reindexLoadIdsStep(
-			IBatch2DaoSvc theBatch2DaoSvc) {
-		return new LoadIdsStep<>(theBatch2DaoSvc);
-	}
+	@Autowired
+	private IIdHelperService<IResourcePersistentId<?>> myIdHelperService;
 
-	@Bean
-	public ReindexJobParametersValidator reindexJobParametersValidator(IBatch2DaoSvc theBatch2DaoSvc) {
-		return new ReindexJobParametersValidator(
-				new UrlListValidator(ProviderConstants.OPERATION_REINDEX, theBatch2DaoSvc));
-	}
-
-	@Bean
-	public ReindexStep reindexStep() {
-		return new ReindexStep();
-	}
+	/* Shared services */
 
 	@Bean
 	public ReindexProvider reindexProvider(
@@ -91,5 +59,10 @@ public class ReindexAppCtx {
 			IJobCoordinator theJobCoordinator,
 			IJobPartitionProvider theJobPartitionHandler) {
 		return new ReindexProvider(theFhirContext, theJobCoordinator, theJobPartitionHandler);
+	}
+
+	@Bean
+	public ReindexJobService jobService() {
+		return new ReindexJobService(myRegistry);
 	}
 }
