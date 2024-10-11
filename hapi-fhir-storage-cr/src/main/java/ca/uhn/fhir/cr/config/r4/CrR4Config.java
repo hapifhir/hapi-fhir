@@ -68,8 +68,8 @@ public class CrR4Config {
 			RepositoryFactoryForRepositoryInterface theRepositoryFactory,
 			MeasureEvaluationOptions theEvaluationOptions,
 			MeasurePeriodValidator theMeasurePeriodValidator) {
-		return rd -> new R4MeasureService(
-				theRepositoryFactory.create(rd), theEvaluationOptions, theMeasurePeriodValidator);
+		return rd ->
+				new R4MeasureService(theRepositoryFactory.create(rd), theEvaluationOptions, theMeasurePeriodValidator);
 	}
 
 	@Bean
