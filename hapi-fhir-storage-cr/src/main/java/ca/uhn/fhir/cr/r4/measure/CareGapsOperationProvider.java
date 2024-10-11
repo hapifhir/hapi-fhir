@@ -116,8 +116,8 @@ public class CareGapsOperationProvider {
 								: theMeasureId.stream().map(IdType::new).collect(Collectors.toList()),
 						theMeasureIdentifier,
 						theMeasureUrl,
-					Optional.ofNullable(theNonDocument)
-						.map(BooleanType::getValue)
-						.orElse(false));
+						Optional.ofNullable(theNonDocument)
+								.map(BooleanType::getValue)
+								.orElse(false));
 	}
 }
