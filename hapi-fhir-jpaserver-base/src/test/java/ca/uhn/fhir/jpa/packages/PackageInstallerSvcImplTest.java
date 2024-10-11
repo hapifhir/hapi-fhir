@@ -154,17 +154,17 @@ public class PackageInstallerSvcImplTest {
 			spWithNullStatus.setStatus(null);
 
 			return Stream.of(
-//					arguments(resourceWithNoStatusElementInSpec, true),
-//					arguments(spWithActiveStatus, true),
-//					arguments(spWithNullStatus, false),
-//					arguments(spWithDraftStatus, false),
-//					arguments(createSubscription(Subscription.SubscriptionStatus.REQUESTED), true),
-//					arguments(createSubscription(Subscription.SubscriptionStatus.ERROR), false),
-//					arguments(createSubscription(Subscription.SubscriptionStatus.ACTIVE), false),
-//					arguments(createDocumentReference(Enumerations.DocumentReferenceStatus.ENTEREDINERROR), true),
+					arguments(resourceWithNoStatusElementInSpec, true),
+					arguments(spWithActiveStatus, true),
+					arguments(spWithNullStatus, false),
+					arguments(spWithDraftStatus, false),
+					arguments(createSubscription(Subscription.SubscriptionStatus.REQUESTED), true),
+					arguments(createSubscription(Subscription.SubscriptionStatus.ERROR), false),
+					arguments(createSubscription(Subscription.SubscriptionStatus.ACTIVE), false),
+					arguments(createDocumentReference(Enumerations.DocumentReferenceStatus.ENTEREDINERROR), true),
 					arguments(createDocumentReference(Enumerations.DocumentReferenceStatus.NULL), false),
-//					arguments(createDocumentReference(null), false),
-//					arguments(createCommunication(Communication.CommunicationStatus.NOTDONE), true),
+					arguments(createDocumentReference(null), false),
+					arguments(createCommunication(Communication.CommunicationStatus.NOTDONE), true),
 					arguments(createCommunication(Communication.CommunicationStatus.NULL), false),
 					arguments(createCommunication(null), false));
 		}
