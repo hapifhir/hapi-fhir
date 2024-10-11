@@ -55,11 +55,15 @@ import org.slf4j.LoggerFactory;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
+import static java.util.stream.Collectors.collectingAndThen;
+import static java.util.stream.Collectors.toSet;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -69,6 +73,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	private final VersionCanonicalizer myVersionCanonicalizer;
 	private final LoadingCache<ResourceKey, IBaseResource> myFetchResourceCache;
 	private volatile List<StructureDefinition> myAllStructures;
+	private volatile Set<String> myAllPrimitiveTypes;
 	private Parameters myExpansionProfile;
 
 	public VersionSpecificWorkerContextWrapper(
@@ -617,11 +622,23 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 	@Override
 	public boolean isPrimitiveType(String theType) {
-		List<StructureDefinition> allStructures = new ArrayList<>(allStructures());
-		return allStructures.stream()
-				.filter(structureDefinition ->
-						structureDefinition.getKind() == StructureDefinition.StructureDefinitionKind.PRIMITIVETYPE)
-				.anyMatch(structureDefinition -> theType.equals(structureDefinition.getName()));
+		return allPrimitiveTypes().contains(theType);
+	}
+
+	private Set<String> allPrimitiveTypes() {
+		Set<String> retVal = myAllPrimitiveTypes;
+		if (retVal == null) {
+			// Collector may be changed to Collectors.toUnmodifiableSet() when switching to Android API level >= 33
+			retVal = allStructures().stream()
+					.filter(structureDefinition ->
+							structureDefinition.getKind() == StructureDefinition.StructureDefinitionKind.PRIMITIVETYPE)
+					.map(StructureDefinition::getName)
+					.filter(Objects::nonNull)
+					.collect(collectingAndThen(toSet(), Collections::unmodifiableSet));
+			myAllPrimitiveTypes = retVal;
+		}
+
+		return retVal;
 	}
 
 	@Override

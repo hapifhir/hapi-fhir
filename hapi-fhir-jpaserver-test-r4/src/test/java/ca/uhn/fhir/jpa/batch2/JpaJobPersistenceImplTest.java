@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.batch2;
 
+import ca.uhn.fhir.batch2.model.BatchInstanceStatusDTO;
+import ca.uhn.fhir.batch2.model.BatchWorkChunkStatusDTO;
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.JobOperationResultJson;
@@ -873,6 +875,38 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 			myInterceptorRegistry.unregisterInterceptor(prestorageBatchJobCreateInterceptor);
 		}
 
+	}
+
+	@Test
+	public void testFetchInstanceAndWorkChunkStatus() {
+		// Setup
+
+		List<String> chunkIds = new ArrayList<>();
+		JobInstance instance = createInstance();
+		String instanceId = mySvc.storeNewInstance(instance);
+		for (int i = 0; i < 5; i++) {
+			chunkIds.add(storeWorkChunk(JOB_DEFINITION_ID, FIRST_STEP_ID, instanceId, i, JsonUtil.serialize(new NdJsonFileJson().setNdJsonText("{}")), false));
+		}
+
+		runInTransaction(() -> {
+				myWorkChunkRepository.updateChunkStatus(chunkIds.get(0), WorkChunkStatusEnum.READY, WorkChunkStatusEnum.COMPLETED);
+				myWorkChunkRepository.updateChunkStatus(chunkIds.get(1), WorkChunkStatusEnum.READY, WorkChunkStatusEnum.COMPLETED);
+			});
+
+		// Execute
+		BatchInstanceStatusDTO istatus = mySvc.fetchBatchInstanceStatus(instanceId);
+		assertEquals(instanceId, istatus.id);
+		assertEquals(StatusEnum.QUEUED, istatus.status);
+
+		List<BatchWorkChunkStatusDTO> result = mySvc.fetchWorkChunkStatusForInstance(instanceId);
+		assertThat(result).hasSize(2);
+		BatchWorkChunkStatusDTO result0 = result.get(0);
+		assertEquals(WorkChunkStatusEnum.COMPLETED, result0.status);
+		assertEquals(2, result0.totalChunks);
+
+		BatchWorkChunkStatusDTO result1 = result.get(1);
+		assertEquals(WorkChunkStatusEnum.READY, result1.status);
+		assertEquals(3, result1.totalChunks);
 	}
 
 	private WorkChunk freshFetchWorkChunk(String chunkId) {
