@@ -1,4 +1,4 @@
 ---
 type: fix
 issue: 6363
-title: "Updating fhir_core dependency to fix vulnerability."
+title: "This release bumps the org.hl7.fhir core dependency up to 6.3.23, which includes vulnerability fixes."
