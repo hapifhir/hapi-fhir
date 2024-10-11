@@ -1,7 +1,7 @@
 ---
 type: fix
 issue: 6317
-backport: 7.4.5
+backport: 7.4.4
 title: "Previously, defining a unique combo Search Parameter with the DateTime component and submitting multiple 
 resources with the same dateTime element (e.g. Observation.effectiveDateTime) resulted in duplicate resource creation. 
 This has been fixed."
