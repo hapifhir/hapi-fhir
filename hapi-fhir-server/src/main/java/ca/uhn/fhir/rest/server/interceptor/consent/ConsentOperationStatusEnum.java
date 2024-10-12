@@ -65,7 +65,10 @@ public enum ConsentOperationStatusEnum {
 	 * @return the first decisive verdict, or PROCEED when empty or all PROCEED.
 	 */
 	public static ConsentOperationStatusEnum serialEvaluate(Stream<ConsentOperationStatusEnum> theVoteStream) {
-		return theVoteStream.filter(verdict -> PROCEED != verdict).findFirst().orElse(PROCEED);
+		return theVoteStream
+				.filter(ConsentOperationStatusEnum::isActiveVote)
+				.findFirst()
+				.orElse(PROCEED);
 	}
 
 	/**
@@ -75,10 +78,10 @@ public enum ConsentOperationStatusEnum {
 	 * @return the combined verdict
 	 */
 	public ConsentOperationStatusEnum serialReduce(ConsentOperationStatusEnum theNextVerdict) {
-		if (this != PROCEED) {
-			return this;
-		} else {
+		if (isAbstain()) {
 			return theNextVerdict;
+		} else {
+			return this;
 		}
 	}
 
@@ -107,5 +110,23 @@ public enum ConsentOperationStatusEnum {
 		} else {
 			return this;
 		}
+	}
+
+	/**
+	 * Does this vote abstain from the verdict?
+	 * I.e. this == PROCEED
+	 * @return false if this vote can be ignored
+	 */
+	boolean isAbstain() {
+		return this == PROCEED;
+	}
+
+	/**
+	 * Does this vote participate from the verdict?
+	 * I.e. this != PROCEED
+	 * @return false if this vote can be ignored
+	 */
+	boolean isActiveVote() {
+		return this != PROCEED;
 	}
 }
