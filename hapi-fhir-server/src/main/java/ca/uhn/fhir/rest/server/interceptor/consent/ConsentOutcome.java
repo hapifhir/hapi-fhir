@@ -69,10 +69,25 @@ public class ConsentOutcome implements IConsentVoter {
 		myResource = theResource;
 	}
 
+	/**
+	 * Evaluate all verdicts together, allowing any to veto (i.e. REJECT) the operation.
+	 * <ul>
+	 * <li>If any vote is REJECT, then the result is a REJECT vote.
+	 * <li>If no vote is REJECT, and any vote is AUTHORIZED, then the result is one of the AUTHORIZED votes.
+	 * <li>If no vote is REJECT or AUTHORIZED, the result is a PROCEED vote.
+	 * </ul>
+	 *
+	 * @return REJECT if any reject, AUTHORIZED if no REJECT and some AUTHORIZED, PROCEED if empty or all PROCEED
+	 */
 	public static ConsentOutcome parallelReduce(Stream<ConsentOutcome> theOutcomes) {
 		return IConsentVoter.parallelReduce(ConsentOutcome.PROCEED, theOutcomes);
 	}
 
+	/**
+	 * Evaluate verdicts in order, taking the first "decision" (i.e. first non-PROCEED) verdict.
+	 *
+	 * @return the first decisive verdict, or theSeed when empty or all PROCEED.
+	 */
 	public static ConsentOutcome serialReduce(Stream<ConsentOutcome> theStream) {
 		return IConsentVoter.serialReduce(ConsentOutcome.PROCEED, theStream);
 	}

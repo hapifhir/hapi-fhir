@@ -2,6 +2,10 @@ package ca.uhn.fhir.rest.server.interceptor.consent;
 
 import java.util.stream.Stream;
 
+/**
+ * Something that produces a vote, along with static
+ * tools for combining votes.
+ */
 public interface IConsentVoter {
 	/**
 	 * Get the vote

@@ -5,6 +5,9 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import javax.annotation.Nonnull;
 
+/**
+ * Consent Service that returns a fixed verdict.
+ */
 public class ConstantConsentService implements IConsentService {
 	final ConsentOperationStatusEnum myResult;
 
