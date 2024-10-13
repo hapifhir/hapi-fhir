@@ -95,4 +95,16 @@ public enum ConsentOperationStatusEnum implements IConsentVoter {
 	public static ConsentOperationStatusEnum parallelReduce(Stream<ConsentOperationStatusEnum> theVoteStream) {
 		return IConsentVoter.parallelReduce(PROCEED, theVoteStream);
 	}
+
+	/** @deprecated for rename */
+	@Deprecated(forRemoval = true)
+	public static ConsentOperationStatusEnum serialEvaluate(Stream<ConsentOperationStatusEnum> theVoteStream) {
+		return serialReduce(theVoteStream);
+	}
+
+	/** @deprecated for rename */
+	@Deprecated(forRemoval = true)
+	public static ConsentOperationStatusEnum parallelEvaluate(Stream<ConsentOperationStatusEnum> theVoteStream) {
+		return parallelReduce(theVoteStream);
+	}
 }
