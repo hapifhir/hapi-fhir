@@ -1,9 +1,8 @@
 package ca.uhn.fhir.rest.server.interceptor.consent;
 
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
 import jakarta.annotation.Nonnull;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 /**
  * Consent Service that returns a fixed verdict.
