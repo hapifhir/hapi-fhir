@@ -945,6 +945,10 @@
 			<id>plchldr</id>
 			<name>Jonas Beyer</name>
 		</developer>
+		<developer>
+			<id>Boereck</id>
+			<name>Max Bureck</name>
+		</developer>
 	</developers>
 
 	<licenses>
