@@ -8,27 +8,19 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
  * Consent Service that returns a fixed verdict.
  */
 public class ConstantConsentService implements IConsentService {
-	final ConsentOperationStatusEnum myResult;
+	@Nonnull
+	final ConsentOutcome myResult;
 
 	public static ConstantConsentService constantService(ConsentOperationStatusEnum theResult) {
-		return new ConstantConsentService(theResult);
+		return new ConstantConsentService(new ConsentOutcome(theResult));
 	}
 
-	public ConstantConsentService(ConsentOperationStatusEnum theResult) {
+	public ConstantConsentService(@Nonnull ConsentOutcome theResult) {
 		myResult = theResult;
 	}
 
 	private @Nonnull ConsentOutcome getOutcome() {
-		switch (myResult) {
-			case REJECT:
-				return ConsentOutcome.REJECT;
-			case PROCEED:
-				return ConsentOutcome.PROCEED;
-			case AUTHORIZED:
-				return ConsentOutcome.AUTHORIZED;
-			default:
-				return new ConsentOutcome(myResult);
-		}
+		return myResult;
 	}
 
 	@Override
@@ -39,7 +31,7 @@ public class ConstantConsentService implements IConsentService {
 	@Override
 	public boolean shouldProcessCanSeeResource(
 			RequestDetails theRequestDetails, IConsentContextServices theContextServices) {
-		return myResult.isActiveVote();
+		return myResult.getStatus().isActiveVote();
 	}
 
 	@Override

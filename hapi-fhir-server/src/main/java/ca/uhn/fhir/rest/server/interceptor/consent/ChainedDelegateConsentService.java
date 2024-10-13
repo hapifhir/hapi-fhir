@@ -14,7 +14,7 @@ import java.util.stream.Stream;
  */
 public class ChainedDelegateConsentService implements IConsentService {
 	private final Collection<IConsentService> myDelegates;
-	private final Function<Stream<ConsentOutcome>, ConsentOutcome> myReducer;
+	private final Function<Stream<ConsentOutcome>, ConsentOutcome> myVoteCombiner;
 
 	/**
 	 * Combine several consent services allowing any to veto.
@@ -33,14 +33,15 @@ public class ChainedDelegateConsentService implements IConsentService {
 	}
 
 	private ChainedDelegateConsentService(
-			Function<Stream<ConsentOutcome>, ConsentOutcome> theReducer, Collection<IConsentService> theDelegates) {
-		myReducer = theReducer;
+			Function<Stream<ConsentOutcome>, ConsentOutcome> theVoteCombiner,
+			Collection<IConsentService> theDelegates) {
+		myVoteCombiner = theVoteCombiner;
 		myDelegates = theDelegates;
 	}
 
 	@Override
 	public ConsentOutcome startOperation(RequestDetails theRequestDetails, IConsentContextServices theContextServices) {
-		return myReducer.apply(myDelegates.stream()
+		return myVoteCombiner.apply(myDelegates.stream()
 				.map(nextDelegate -> nextDelegate.startOperation(theRequestDetails, theContextServices)));
 	}
 
@@ -57,14 +58,14 @@ public class ChainedDelegateConsentService implements IConsentService {
 	@Override
 	public ConsentOutcome canSeeResource(
 			RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
-		return myReducer.apply(myDelegates.stream()
+		return myVoteCombiner.apply(myDelegates.stream()
 				.map(nextDelegate -> nextDelegate.canSeeResource(theRequestDetails, theResource, theContextServices)));
 	}
 
 	@Override
 	public ConsentOutcome willSeeResource(
 			RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
-		return myReducer.apply(myDelegates.stream()
+		return myVoteCombiner.apply(myDelegates.stream()
 				.map(nextDelegate -> nextDelegate.willSeeResource(theRequestDetails, theResource, theContextServices)));
 	}
 }
