@@ -3,7 +3,7 @@ package ca.uhn.fhir.rest.server.interceptor.consent;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
