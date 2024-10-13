@@ -138,10 +138,10 @@ public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 					concept.getCode(),
 					myTermValueSet.getUrl());
 			for (TermValueSetConceptDesignation designation : concept.getDesignations()) {
-				myValueSetConceptDesignationDao.deleteById(designation.getId());
+				myValueSetConceptDesignationDao.deleteById(designation.getPartitionedId());
 				myTermValueSet.decrementTotalConceptDesignations();
 			}
-			myValueSetConceptDao.deleteById(concept.getId());
+			myValueSetConceptDao.deleteById(concept.getPartitionedId());
 			myTermValueSet.decrementTotalConcepts();
 			myValueSetDao.save(myTermValueSet);
 			ourLog.debug(

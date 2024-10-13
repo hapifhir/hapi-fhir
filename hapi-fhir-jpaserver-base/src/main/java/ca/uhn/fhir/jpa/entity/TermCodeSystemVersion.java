@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.jpa.entity;
 
+import ca.uhn.fhir.jpa.model.entity.BasePartitionable;
+import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.util.ValidateUtil;
 import jakarta.persistence.Column;
@@ -28,6 +30,7 @@ import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.IdClass;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinColumns;
@@ -61,7 +64,8 @@ import static org.apache.commons.lang3.StringUtils.length;
 			@Index(name = "FK_CODESYSVER_CS_ID", columnList = "CODESYSTEM_PID")
 		})
 @Entity()
-public class TermCodeSystemVersion implements Serializable {
+@IdClass(IdAndPartitionId.class)
+public class TermCodeSystemVersion extends BasePartitionable implements Serializable {
 	public static final String IDX_CODESYSTEM_AND_VER = "IDX_CODESYSTEM_AND_VER";
 	public static final int MAX_VERSION_LENGTH = 200;
 	private static final long serialVersionUID = 1L;
@@ -69,11 +73,15 @@ public class TermCodeSystemVersion implements Serializable {
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "myCodeSystem")
 	private Collection<TermConcept> myConcepts;
 
-	@Id()
+	@Id
 	@SequenceGenerator(name = "SEQ_CODESYSTEMVER_PID", sequenceName = "SEQ_CODESYSTEMVER_PID")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_CODESYSTEMVER_PID")
 	@Column(name = "PID")
+	//	@EmbeddedId
 	private Long myId;
+
+	//	@Column(name = PartitionablePartitionId.PARTITION_ID, nullable = true, insertable = false, updatable = false)
+	//	private Integer myPartitionIdValue;
 
 	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumns(
@@ -97,9 +105,6 @@ public class TermCodeSystemVersion implements Serializable {
 	@Column(name = "RES_ID", nullable = false)
 	private Long myResourcePid;
 
-	@Column(name = "PARTITION_ID", nullable = true, insertable = false, updatable = false)
-	private Integer myPartitionIdValue;
-
 	@Column(name = "CS_VERSION_ID", nullable = true, updatable = true, length = MAX_VERSION_LENGTH)
 	private String myCodeSystemVersionId;
 
@@ -108,10 +113,21 @@ public class TermCodeSystemVersion implements Serializable {
 	 * issued. It should be made non-nullable at some point.
 	 */
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(
-			name = "CODESYSTEM_PID",
-			referencedColumnName = "PID",
-			nullable = true,
+	@JoinColumns(
+			value = {
+				@JoinColumn(
+						name = "CODESYSTEM_PID",
+						referencedColumnName = "PID",
+						insertable = true,
+						updatable = false,
+						nullable = false),
+				@JoinColumn(
+						name = "PARTITION_ID",
+						referencedColumnName = "PARTITION_ID",
+						insertable = true,
+						nullable = false,
+						updatable = false)
+			},
 			foreignKey = @ForeignKey(name = "FK_CODESYSVER_CS_ID"))
 	private TermCodeSystem myCodeSystem;
 
@@ -165,6 +181,10 @@ public class TermCodeSystemVersion implements Serializable {
 		return myId;
 	}
 
+	public IdAndPartitionId getId() {
+		return IdAndPartitionId.forId(myId, this);
+	}
+
 	public ResourceTable getResource() {
 		return myResource;
 	}
@@ -172,7 +192,8 @@ public class TermCodeSystemVersion implements Serializable {
 	public TermCodeSystemVersion setResource(ResourceTable theResource) {
 		myResource = theResource;
 		myResourcePid = theResource.getId().getId();
-		myPartitionIdValue = theResource.getPersistentId().getPartitionId();
+		setPartitionId(theResource.getPartitionId());
+		//		myPartitionIdValue = theResource.getPartitionId().getPartitionId();
 		return this;
 	}
 
@@ -241,4 +262,31 @@ public class TermCodeSystemVersion implements Serializable {
 		myCodeSystemPid = theCodeSystemPid;
 		return this;
 	}
+
+	//	@Embeddable
+	//	public static class TermCodeSystemVersionPk implements Serializable {
+	//
+	//		@SequenceGenerator(name = "SEQ_CODESYSTEMVER_PID", sequenceName = "SEQ_CODESYSTEMVER_PID")
+	//		@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_CODESYSTEMVER_PID")
+	//		@Column(name = "PID", nullable = false)
+	//		private Long myId;
+	//
+	//		@ConditionalIdProperty
+	//		@Column(name = PartitionablePartitionId.PARTITION_ID, nullable = false)
+	//		private Integer myPartitionIdValue;
+	//
+	//		@Override
+	//		public boolean equals(Object theO) {
+	//			if (this == theO) return true;
+	//			if (!(theO instanceof TermCodeSystemVersionPk)) return false;
+	//			TermCodeSystemVersionPk that = (TermCodeSystemVersionPk) theO;
+	//			return Objects.equals(myId, that.myId) && Objects.equals(myPartitionIdValue, that.myPartitionIdValue);
+	//		}
+	//
+	//		@Override
+	//		public int hashCode() {
+	//			return Objects.hash(myId, myPartitionIdValue);
+	//		}
+	//	}
+
 }

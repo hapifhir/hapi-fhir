@@ -60,6 +60,7 @@ import java.sql.SQLException;
 				+ "       vscd.VAL                           AS DESIGNATION_VAL "
 				+ "FROM TRM_VALUESET_CONCEPT vsc "
 				+ "LEFT OUTER JOIN TRM_VALUESET_C_DESIGNATION vscd ON vsc.PID = vscd.VALUESET_CONCEPT_PID")
+// FIXME: need a keep test for this
 public class TermValueSetConceptView implements Serializable, ITermValueSetConceptView {
 	private static final long serialVersionUID = 1L;
 

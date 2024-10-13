@@ -232,25 +232,25 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 		for (TermConceptParentChildLink nextParent : theConcept.getParents()) {
 			nextParent.getParent().getChildren().remove(nextParent);
-			myConceptParentChildLinkDao.deleteById(nextParent.getId());
+			myConceptParentChildLinkDao.deleteById(nextParent.getPartitionedId());
 		}
 		for (TermConceptParentChildLink nextChild : theConcept.getChildren()) {
 			nextChild.getChild().getParents().remove(nextChild);
-			myConceptParentChildLinkDao.deleteById(nextChild.getId());
+			myConceptParentChildLinkDao.deleteById(nextChild.getPartitionedId());
 		}
 
 		for (TermConceptDesignation next : theConcept.getDesignations()) {
-			myConceptDesignationDao.deleteById(next.getPid());
+			myConceptDesignationDao.deleteById(next.getPartitionedId());
 		}
 		theConcept.getDesignations().clear();
 		for (TermConceptProperty next : theConcept.getProperties()) {
-			myConceptPropertyDao.deleteById(next.getPid());
+			myConceptPropertyDao.deleteById(next.getPartitionedId());
 		}
 		theConcept.getProperties().clear();
 
 		ourLog.info("Deleting concept {} - Code {}", theConcept.getId(), theConcept.getCode());
 
-		myConceptDao.deleteById(theConcept.getId());
+		myConceptDao.deleteById(theConcept.getPartitionedId());
 		//		myEntityManager.remove(theConcept);
 
 		theRemoveCounter.incrementAndGet();
@@ -465,7 +465,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 		ourLog.debug("Saving version containing {} concepts", totalCodeCount);
 		if (codeSystemToStore.getPid() == null) {
-			codeSystemToStore = myCodeSystemVersionDao.saveAndFlush(codeSystemToStore);
+			myEntityManager.persist(codeSystemToStore);
 		}
 
 		boolean isMakeVersionCurrent = ITermCodeSystemStorageSvc.isMakeVersionCurrent(theRequestDetails);

@@ -78,4 +78,11 @@ public class IdAndPartitionId implements Serializable {
 	public int hashCode() {
 		return Objects.hash(myId, myPartitionIdValue);
 	}
+
+	public static IdAndPartitionId forId(Long theId, BasePartitionable thePartitionable) {
+		IdAndPartitionId retVal = new IdAndPartitionId();
+		retVal.setId(theId);
+		retVal.setPartitionIdValue(thePartitionable.getPartitionId().getPartitionId());
+		return retVal;
+	}
 }

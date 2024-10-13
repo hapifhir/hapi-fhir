@@ -44,7 +44,8 @@ public class FhirResourceDaoSubscriptionR5 extends BaseHapiFhirResourceDao<Subsc
 	public Long getSubscriptionTablePidForSubscriptionResource(
 			IIdType theId, RequestDetails theRequest, TransactionDetails theTransactionDetails) {
 		ResourceTable entity = readEntityLatestVersion(theId, theRequest, theTransactionDetails);
-		SubscriptionTable table = mySubscriptionTableDao.findOneByResourcePid(entity.getId());
+		SubscriptionTable table =
+				mySubscriptionTableDao.findOneByResourcePid(entity.getId().getId());
 		if (table == null) {
 			return null;
 		}
@@ -77,7 +78,8 @@ public class FhirResourceDaoSubscriptionR5 extends BaseHapiFhirResourceDao<Subsc
 			Long subscriptionId = getSubscriptionTablePidForSubscriptionResource(
 					theEntity.getIdDt(), theRequest, theTransactionDetails);
 			if (subscriptionId != null) {
-				mySubscriptionTableDao.deleteAllForSubscription(retVal);
+				mySubscriptionTableDao.deleteAllForSubscription(
+						retVal.getResourceId().getId());
 			}
 		}
 

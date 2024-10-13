@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.jpa.entity;
 
+import ca.uhn.fhir.jpa.model.entity.BasePartitionable;
+import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
 import ca.uhn.fhir.util.ValidateUtil;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
@@ -31,8 +33,10 @@ import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.IdClass;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinColumns;
 import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
@@ -68,15 +72,28 @@ import static org.apache.commons.lang3.StringUtils.length;
 			@Index(name = "FK_CONCEPTPROP_CONCEPT", columnList = "CONCEPT_PID", unique = false),
 			@Index(name = "FK_CONCEPTPROP_CSV", columnList = "CS_VER_PID")
 		})
-public class TermConceptProperty implements Serializable {
+@IdClass(IdAndPartitionId.class)
+public class TermConceptProperty extends BasePartitionable implements Serializable {
 	public static final int MAX_PROPTYPE_ENUM_LENGTH = 6;
 	private static final long serialVersionUID = 1L;
 	public static final int MAX_LENGTH = 500;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(
-			name = "CONCEPT_PID",
-			referencedColumnName = "PID",
+	@JoinColumns(
+			value = {
+				@JoinColumn(
+						name = "CONCEPT_PID",
+						referencedColumnName = "PID",
+						insertable = true,
+						updatable = false,
+						nullable = false),
+				@JoinColumn(
+						name = "PARTITION_ID",
+						referencedColumnName = "PARTITION_ID",
+						insertable = true,
+						updatable = false,
+						nullable = false)
+			},
 			foreignKey = @ForeignKey(name = "FK_CONCEPTPROP_CONCEPT"))
 	private TermConcept myConcept;
 
@@ -86,10 +103,21 @@ public class TermConceptProperty implements Serializable {
 	 * @since 3.5.0
 	 */
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(
-			name = "CS_VER_PID",
-			nullable = true,
-			referencedColumnName = "PID",
+	@JoinColumns(
+			value = {
+				@JoinColumn(
+						name = "CS_VER_PID",
+						insertable = true,
+						updatable = false,
+						nullable = false,
+						referencedColumnName = "PID"),
+				@JoinColumn(
+						name = "PARTITION_ID",
+						referencedColumnName = "PARTITION_ID",
+						insertable = true,
+						updatable = false,
+						nullable = false)
+			},
 			foreignKey = @ForeignKey(name = "FK_CONCEPTPROP_CSV"))
 	private TermCodeSystemVersion myCodeSystemVersion;
 
@@ -260,6 +288,7 @@ public class TermConceptProperty implements Serializable {
 
 	public TermConceptProperty setConcept(TermConcept theConcept) {
 		myConcept = theConcept;
+		setPartitionId(theConcept.getPartitionId());
 		return this;
 	}
 
@@ -306,6 +335,10 @@ public class TermConceptProperty implements Serializable {
 
 	public Long getPid() {
 		return myId;
+	}
+
+	public IdAndPartitionId getPartitionedId() {
+		return IdAndPartitionId.forId(myId, this);
 	}
 
 	public void performLegacyLobSupport(boolean theSupportLegacyLob) {

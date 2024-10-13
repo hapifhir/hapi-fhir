@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.jpa.entity;
 
+import ca.uhn.fhir.jpa.model.entity.BasePartitionable;
+import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.util.ValidateUtil;
 import jakarta.annotation.Nonnull;
@@ -31,6 +33,7 @@ import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.IdClass;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinColumns;
@@ -68,7 +71,8 @@ import static org.apache.commons.lang3.StringUtils.length;
 			@Index(name = "FK_TRMVALUESET_RES", columnList = "RES_ID")
 		})
 @Entity()
-public class TermValueSet implements Serializable {
+@IdClass(IdAndPartitionId.class)
+public class TermValueSet extends BasePartitionable implements Serializable {
 	public static final int MAX_EXPANSION_STATUS_LENGTH = 50;
 	public static final int MAX_NAME_LENGTH = 200;
 	public static final int MAX_URL_LENGTH = 200;
@@ -108,9 +112,6 @@ public class TermValueSet implements Serializable {
 
 	@Column(name = "RES_ID", nullable = false)
 	private Long myResourcePid;
-
-	@Column(name = "PARTITION_ID", nullable = true)
-	private Integer myPartitionId;
 
 	@Column(name = "VSNAME", nullable = true, length = MAX_NAME_LENGTH)
 	private String myName;
@@ -156,6 +157,10 @@ public class TermValueSet implements Serializable {
 		return myId;
 	}
 
+	public IdAndPartitionId getPartitionedId() {
+		return IdAndPartitionId.forId(myId, this);
+	}
+
 	public String getUrl() {
 		return myUrl;
 	}
@@ -175,7 +180,7 @@ public class TermValueSet implements Serializable {
 	public TermValueSet setResource(ResourceTable theResource) {
 		myResource = theResource;
 		myResourcePid = theResource.getId().getId();
-		myPartitionId = theResource.getPersistentId().getPartitionId();
+		setPartitionId(theResource.getPartitionId());
 		return this;
 	}
 

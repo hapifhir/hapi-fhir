@@ -192,7 +192,7 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc, IHas
 		while (codeCount < count && myDeferredConcepts.size() > 0) {
 			TermConcept next = myDeferredConcepts.remove(0);
 			if (myCodeSystemVersionDao
-					.findById(next.getCodeSystemVersion().getPid())
+					.findById(next.getCodeSystemVersion().getId())
 					.isPresent()) {
 				try {
 					codeCount += myTermConceptDaoSvc.saveConcept(next);
@@ -232,11 +232,11 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc, IHas
 
 				if ((next.getChild().getId() == null
 								|| !myConceptDao
-										.findById(next.getChild().getId())
+										.findById(next.getChild().getPartitionedId())
 										.isPresent())
 						|| (next.getParent().getId() == null
 								|| !myConceptDao
-										.findById(next.getParent().getId())
+										.findById(next.getParent().getPartitionedId())
 										.isPresent())) {
 					ourLog.warn(
 							"Not inserting link from child {} to parent {} because it appears to have been deleted",
@@ -436,6 +436,7 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc, IHas
 		return retVal;
 	}
 
+	@Override
 	public boolean isJobsExecuting() {
 		cleanseEndedJobs();
 

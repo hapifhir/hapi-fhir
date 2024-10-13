@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.jpa.entity;
 
+import ca.uhn.fhir.jpa.model.entity.BasePartitionable;
+import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.util.ValidateUtil;
 import jakarta.annotation.Nonnull;
@@ -28,6 +30,7 @@ import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.IdClass;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinColumns;
@@ -58,7 +61,8 @@ import static org.apache.commons.lang3.StringUtils.length;
 			// automatically
 			@Index(name = "FK_TRMCONCEPTMAP_RES", columnList = "RES_ID")
 		})
-public class TermConceptMap implements Serializable {
+@IdClass(IdAndPartitionId.class)
+public class TermConceptMap extends BasePartitionable implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	static final int MAX_URL_LENGTH = 200;
@@ -99,9 +103,6 @@ public class TermConceptMap implements Serializable {
 	@Column(name = "RES_ID", nullable = false)
 	private Long myResourcePid;
 
-	@Column(name = "PARTITION_ID")
-	private Integer myPartitionId;
-
 	@Column(name = "SOURCE_URL", nullable = true, length = TermValueSet.MAX_URL_LENGTH)
 	private String mySource;
 
@@ -136,7 +137,7 @@ public class TermConceptMap implements Serializable {
 	public TermConceptMap setResource(ResourceTable theResource) {
 		myResource = theResource;
 		myResourcePid = theResource.getId().getId();
-		myPartitionId = theResource.getPersistentId().getPartitionId();
+		setPartitionId(theResource.getPartitionId());
 		return this;
 	}
 
