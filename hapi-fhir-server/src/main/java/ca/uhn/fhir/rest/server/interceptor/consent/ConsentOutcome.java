@@ -23,7 +23,9 @@ import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-public class ConsentOutcome {
+import java.util.stream.Stream;
+
+public class ConsentOutcome implements IConsentVoter {
 
 	/**
 	 * Convenience constant containing <code>new ConsentOutcome(ConsentOperationStatusEnum.PROCEED)</code>
@@ -65,6 +67,14 @@ public class ConsentOutcome {
 		myStatus = theStatus;
 		myOperationOutcome = theOperationOutcome;
 		myResource = theResource;
+	}
+
+	public static ConsentOutcome parallelReduce(Stream<ConsentOutcome> theOutcomes) {
+		return IConsentVoter.parallelReduce(ConsentOutcome.PROCEED, theOutcomes);
+	}
+
+	public static ConsentOutcome serialReduce(Stream<ConsentOutcome> theStream) {
+		return IConsentVoter.serialReduce(ConsentOutcome.PROCEED, theStream);
 	}
 
 	public ConsentOperationStatusEnum getStatus() {
