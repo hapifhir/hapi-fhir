@@ -10,15 +10,15 @@ import jakarta.annotation.Nonnull;
 import java.util.Arrays;
 import java.util.List;
 
-import static ca.uhn.fhir.rest.server.interceptor.consent.ChainedDelegateConsentService.withParallelVoting;
-import static ca.uhn.fhir.rest.server.interceptor.consent.ChainedDelegateConsentService.withSerialVoting;
+import static ca.uhn.fhir.rest.server.interceptor.consent.MultiDelegateConsentService.withParallelVoting;
+import static ca.uhn.fhir.rest.server.interceptor.consent.MultiDelegateConsentService.withSerialVoting;
 import static ca.uhn.fhir.rest.server.interceptor.consent.IConsentVoteTest.PARALLEL_STREAM_EXPECTATION;
 import static ca.uhn.fhir.rest.server.interceptor.consent.IConsentVoteTest.SERIAL_STREAM_EXPECTATION;
 import static ca.uhn.fhir.rest.server.interceptor.consent.IConsentVoteTest.splitEnumsToStream;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class ChainedDelegateConsentServiceTest {
+class MultiDelegateConsentServiceTest {
 	SystemRequestDetails mySrd = new SystemRequestDetails();
 
 	/**
@@ -26,7 +26,7 @@ class ChainedDelegateConsentServiceTest {
 	 */
 	@Nested
 	class ParallelEvaluation {
-		ChainedDelegateConsentService myService;
+		MultiDelegateConsentService myService;
 
 		@ParameterizedTest
 		@CsvSource(textBlock = PARALLEL_STREAM_EXPECTATION)
@@ -54,7 +54,7 @@ class ChainedDelegateConsentServiceTest {
 			List<IConsentService> consentServices = Arrays.stream(defaultString(theInput).split(" +"))
 				.map(String::trim)
 				.map(Boolean::valueOf)
-				.map(ChainedDelegateConsentServiceTest::buildConsentShouldProcessCanSee)
+				.map(MultiDelegateConsentServiceTest::buildConsentShouldProcessCanSee)
 				.toList();
 			myService = withParallelVoting(consentServices);
 
@@ -93,7 +93,7 @@ class ChainedDelegateConsentServiceTest {
 	 */
 	@Nested
 	class SerialEvaluation {
-		ChainedDelegateConsentService myService;
+		MultiDelegateConsentService myService;
 
 		@ParameterizedTest
 		@CsvSource(textBlock = SERIAL_STREAM_EXPECTATION)
@@ -120,7 +120,7 @@ class ChainedDelegateConsentServiceTest {
 			List<IConsentService> consentServices = Arrays.stream(defaultString(theInput).split(" +"))
 				.map(String::trim)
 				.map(Boolean::valueOf)
-				.map(ChainedDelegateConsentServiceTest::buildConsentShouldProcessCanSee)
+				.map(MultiDelegateConsentServiceTest::buildConsentShouldProcessCanSee)
 				.toList();
 			myService = withSerialVoting(consentServices);
 

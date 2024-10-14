@@ -12,27 +12,27 @@ import java.util.stream.Stream;
 /**
  * IConsentService combiner over several delegates with pluggable combination strategy
  */
-public class ChainedDelegateConsentService implements IConsentService {
+public class MultiDelegateConsentService implements IConsentService {
 	private final Collection<IConsentService> myDelegates;
 	private final Function<Stream<ConsentOutcome>, ConsentOutcome> myVoteCombiner;
 
 	/**
 	 * Combine several consent services allowing any to veto.
 	 */
-	public static @Nonnull ChainedDelegateConsentService withParallelVoting(
+	public static @Nonnull MultiDelegateConsentService withParallelVoting(
 			@Nonnull List<IConsentService> theDelegateConsentServices) {
-		return new ChainedDelegateConsentService(ConsentOutcome::parallelReduce, theDelegateConsentServices);
+		return new MultiDelegateConsentService(ConsentOutcome::parallelReduce, theDelegateConsentServices);
 	}
 
 	/**
 	 * Combine several consent services with first non-PROCEED vote win.
 	 */
-	public static @Nonnull ChainedDelegateConsentService withSerialVoting(
+	public static @Nonnull MultiDelegateConsentService withSerialVoting(
 			@Nonnull List<IConsentService> theDelegateConsentServices) {
-		return new ChainedDelegateConsentService(ConsentOutcome::serialReduce, theDelegateConsentServices);
+		return new MultiDelegateConsentService(ConsentOutcome::serialReduce, theDelegateConsentServices);
 	}
 
-	private ChainedDelegateConsentService(
+	private MultiDelegateConsentService(
 			Function<Stream<ConsentOutcome>, ConsentOutcome> theVoteCombiner,
 			Collection<IConsentService> theDelegates) {
 		myVoteCombiner = theVoteCombiner;
@@ -45,6 +45,9 @@ public class ChainedDelegateConsentService implements IConsentService {
 				.map(nextDelegate -> nextDelegate.startOperation(theRequestDetails, theContextServices)));
 	}
 
+	/**
+	 * @return true if any of the delegates return true.
+	 */
 	@Override
 	public boolean shouldProcessCanSeeResource(
 			RequestDetails theRequestDetails, IConsentContextServices theContextServices) {

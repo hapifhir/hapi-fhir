@@ -63,7 +63,7 @@ public enum ConsentOperationStatusEnum implements IConsentVote {
 	/**
 	 * Does this vote abstain from the verdict?
 	 * I.e. this == PROCEED
-	 * @return false if this vote can be ignored
+	 * @return true if this vote can be ignored
 	 */
 	boolean isAbstain() {
 		return this == PROCEED;
