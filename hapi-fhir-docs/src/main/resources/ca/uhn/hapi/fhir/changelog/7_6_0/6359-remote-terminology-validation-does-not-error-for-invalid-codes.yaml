@@ -1,5 +1,5 @@
 ---
 type: fix
 issue: 6359
-title: "Previously, since upgrading org.hl7.fhir.core to from 6.1.2.2 to 6.3.11, the $validate-code operation 
-will no longer returns an error for invalid codes against remote terminology. This has been fixed."
+title: "After upgrading org.hl7.fhir.core from 6.1.2.2 to 6.3.11, the $validate-code operation stopped returning an 
+error for invalid codes using remote terminology. This has been fixed."

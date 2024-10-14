@@ -31,7 +31,7 @@ public interface IRemoteTerminologyLookupCodeTest extends ILookupCodeTest {
 				.setSearchedForCode(codeNotFound)
 				.setSearchedForSystem(system)
 				.setErrorMessage("Unknown code \"" + codeAndSystem + "\". The Remote Terminology server " + baseUrl + " returned HTTP 404 Not Found: " + exceptionMessage);
-		getCodeSystemProvider2().setLookupCodeResult(result);
+		getLookupCodeProvider().setLookupCodeResult(result);
 
 		LookupCodeRequest request =  new LookupCodeRequest(system, codeNotFound, null, null);
 		verifyLookupCodeResult(request, result);
@@ -49,7 +49,7 @@ public interface IRemoteTerminologyLookupCodeTest extends ILookupCodeTest {
 				.setSearchedForCode(codeNotFound)
 				.setSearchedForSystem(system)
 				.setErrorMessage("Unknown code \"" + codeAndSystem + "\". The Remote Terminology server " + baseUrl + " returned HTTP 400 Bad Request: " + exceptionMessage);
-		getCodeSystemProvider2().setLookupCodeResult(result);
+		getLookupCodeProvider().setLookupCodeResult(result);
 
 		LookupCodeRequest request =  new LookupCodeRequest(system, codeNotFound, null, null);
 		verifyLookupCodeResult(request, result);

@@ -23,7 +23,7 @@ public interface IValidationProviders {
 		void setReturnParams(IBaseParameters theParameters);
 	}
 
-	interface IMyCodeSystemProvider2 extends IResourceProvider {
+	interface IMyLookupCodeProvider extends IResourceProvider {
 		String getCode();
 		String getSystem();
 		void setLookupCodeResult(IValidationSupport.LookupCodeResult theLookupCodeResult);

@@ -1,5 +1,5 @@
 ---
 type: add
 issue: 6359
-title: "Remote Terminology validation has been enhanced to support output parameter `issues` for $validate-code 
+title: "Remote Terminology validation has been enhanced to support output parameter `issues` for the $validate-code 
 operation."

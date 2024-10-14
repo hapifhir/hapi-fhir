@@ -45,7 +45,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.util.ParametersUtil.getNamedParameterResource;
+import static ca.uhn.fhir.util.ParametersUtil.getNamedParameterValueAsResource;
 import static ca.uhn.fhir.util.ParametersUtil.getNamedParameterValueAsString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -669,7 +669,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 		Optional<String> messageValue = getNamedParameterValueAsString(fhirContext, theOutput, "message");
 		messageValue.ifPresent(value -> result.setMessage(theMessageBuilder.buildErrorMessage(value)));
 
-		Optional<IBaseResource> issuesValue = getNamedParameterResource(fhirContext, theOutput, "issues");
+		Optional<IBaseResource> issuesValue = getNamedParameterValueAsResource(fhirContext, theOutput, "issues");
 		if (issuesValue.isPresent()) {
 			// it seems to be safe to cast to IBaseOperationOutcome as any other type would not reach this point
 			createCodeValidationIssues(

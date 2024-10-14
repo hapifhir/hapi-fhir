@@ -51,25 +51,25 @@ public class RemoteTerminologyLookupCodeDstu3Test implements IRemoteTerminologyL
 	@RegisterExtension
 	public static RestfulServerExtension ourRestfulServerExtension = new RestfulServerExtension(ourCtx);
 	private final RemoteTerminologyServiceValidationSupport mySvc = new RemoteTerminologyServiceValidationSupport(ourCtx);
-	private IValidationProviders.IMyCodeSystemProvider2 myCodeSystemProvider;
+	private IValidationProviders.IMyLookupCodeProvider myLookupCodeProvider;
 
 	@BeforeEach
 	public void before() {
 		String baseUrl = "http://localhost:" + ourRestfulServerExtension.getPort();
 		mySvc.setBaseUrl(baseUrl);
 		mySvc.addClientInterceptor(new LoggingInterceptor(true));
-		myCodeSystemProvider = new MyCodeSystemProviderDstu3();
-		ourRestfulServerExtension.getRestfulServer().registerProvider(myCodeSystemProvider);
+		myLookupCodeProvider = new MyLookupCodeProviderDstu3();
+		ourRestfulServerExtension.getRestfulServer().registerProvider(myLookupCodeProvider);
 	}
 
 	@AfterEach
 	public void after() {
-		ourRestfulServerExtension.getRestfulServer().unregisterProvider(myCodeSystemProvider);
+		ourRestfulServerExtension.getRestfulServer().unregisterProvider(myLookupCodeProvider);
 	}
 
 	@Override
-	public IValidationProviders.IMyCodeSystemProvider2 getCodeSystemProvider2() {
-		return myCodeSystemProvider;
+	public IValidationProviders.IMyLookupCodeProvider getLookupCodeProvider() {
+		return myLookupCodeProvider;
 	}
 
 	@Override
@@ -163,7 +163,7 @@ public class RemoteTerminologyLookupCodeDstu3Test implements IRemoteTerminologyL
 	}
 
 	@SuppressWarnings("unused")
-	static class MyCodeSystemProviderDstu3 implements IValidationProviders.IMyCodeSystemProvider2 {
+	static class MyLookupCodeProviderDstu3 implements IValidationProviders.IMyLookupCodeProvider {
 		private UriType mySystemUrl;
 		private CodeType myCode;
 		private LookupCodeResult myLookupCodeResult;

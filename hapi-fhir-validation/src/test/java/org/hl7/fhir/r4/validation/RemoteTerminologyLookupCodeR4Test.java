@@ -53,7 +53,7 @@ public class RemoteTerminologyLookupCodeR4Test implements IRemoteTerminologyLook
 	public static RestfulServerExtension ourRestfulServerExtension = new RestfulServerExtension(ourCtx);
 	private final RemoteTerminologyServiceValidationSupport mySvc = new RemoteTerminologyServiceValidationSupport(ourCtx);
 	private IValidateCodeProvidersR4.MyCodeSystemProviderR4 myCodeSystemProvider;
-	private MyCodeSystemProviderR4 myCodeSystemProvider2;
+	private MyLookupCodeProviderR4 myLookupCodeProviderR4;
 
 	@BeforeEach
 	public void before() {
@@ -61,18 +61,18 @@ public class RemoteTerminologyLookupCodeR4Test implements IRemoteTerminologyLook
 		mySvc.setBaseUrl(baseUrl);
 		mySvc.addClientInterceptor(new LoggingInterceptor(true));
 		myCodeSystemProvider = new IValidateCodeProvidersR4.MyCodeSystemProviderR4();
-		myCodeSystemProvider2 = new MyCodeSystemProviderR4();
-		ourRestfulServerExtension.getRestfulServer().registerProviders(myCodeSystemProvider, myCodeSystemProvider2);
+		myLookupCodeProviderR4 = new MyLookupCodeProviderR4();
+		ourRestfulServerExtension.getRestfulServer().registerProviders(myCodeSystemProvider, myLookupCodeProviderR4);
 	}
 
 	@AfterEach
 	public void after() {
-		ourRestfulServerExtension.getRestfulServer().unregisterProvider(List.of(myCodeSystemProvider, myCodeSystemProvider2));
+		ourRestfulServerExtension.getRestfulServer().unregisterProvider(List.of(myCodeSystemProvider, myLookupCodeProviderR4));
 	}
 
 	@Override
-	public IValidationProviders.IMyCodeSystemProvider2 getCodeSystemProvider2() {
-		return myCodeSystemProvider2;
+	public IValidationProviders.IMyLookupCodeProvider getLookupCodeProvider() {
+		return myLookupCodeProviderR4;
 	}
 
 	@Override
@@ -165,7 +165,7 @@ public class RemoteTerminologyLookupCodeR4Test implements IRemoteTerminologyLook
 	}
 
 	@SuppressWarnings("unused")
-	static class MyCodeSystemProviderR4 implements IValidationProviders.IMyCodeSystemProvider2 {
+	static class MyLookupCodeProviderR4 implements IValidationProviders.IMyLookupCodeProvider {
 		private UriType mySystemUrl;
 		private CodeType myCode;
 		private LookupCodeResult myLookupCodeResult;

@@ -88,7 +88,7 @@ public class ParametersUtil {
 	 * @param theParameterName the parameter name
 	 * @return the resource
 	 */
-	public static Optional<IBaseResource> getNamedParameterResource(
+	public static Optional<IBaseResource> getNamedParameterValueAsResource(
 			FhirContext theCtx, IBaseParameters theParameters, String theParameterName) {
 		return extractNamedParameterResources(theCtx, theParameters, theParameterName).stream()
 				.findFirst();
