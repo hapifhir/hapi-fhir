@@ -53,11 +53,13 @@ import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptDesignationDao;
+import ca.uhn.fhir.jpa.dao.data.ITermConceptParentChildLinkDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptPropertyDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetDao;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptDesignation;
+import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import ca.uhn.fhir.jpa.entity.TermConceptProperty;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
@@ -245,6 +247,8 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected Batch2JobHelper myBatch2JobHelper;
 	@Autowired
 	protected ITermConceptDao myTermConceptDao;
+	@Autowired
+	protected ITermConceptParentChildLinkDao myTermConceptParentChildLinkDao;
 	@Autowired
 	protected ITermValueSetConceptDao myTermValueSetConceptDao;
 	@Autowired
@@ -512,7 +516,7 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected int logAllConceptProperties() {
 		return runInTransaction(() -> {
 			List<TermConceptProperty> resources = myTermConceptPropertyDao.findAll();
-			ourLog.info("Concept Designations:\n * {}", resources.stream().map(TermConceptProperty::toString).collect(Collectors.joining("\n * ")));
+			ourLog.info("Concept Properties:\n * {}", resources.stream().map(TermConceptProperty::toString).collect(Collectors.joining("\n * ")));
 			return resources.size();
 		});
 	}
@@ -521,6 +525,14 @@ public abstract class BaseJpaTest extends BaseTest {
 		return runInTransaction(() -> {
 			List<TermConcept> resources = myTermConceptDao.findAll();
 			ourLog.info("Concepts:\n * {}", resources.stream().map(TermConcept::toString).collect(Collectors.joining("\n * ")));
+			return resources.size();
+		});
+	}
+
+	protected int logAllConceptParentChildLinks() {
+		return runInTransaction(() -> {
+			List<TermConceptParentChildLink> resources = myTermConceptParentChildLinkDao.findAll();
+			ourLog.info("Concept Parent/Child Links:\n * {}", resources.stream().map(TermConceptParentChildLink::toString).collect(Collectors.joining("\n * ")));
 			return resources.size();
 		});
 	}

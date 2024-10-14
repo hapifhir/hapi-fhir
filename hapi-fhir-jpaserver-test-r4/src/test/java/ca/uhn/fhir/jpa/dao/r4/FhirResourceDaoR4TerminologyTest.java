@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptDesignation;
@@ -1379,13 +1380,21 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 
 	@Test
 	void termConceptDesignationOver2000CharVal() {
+		createExternalCsDogs();
+
 		final String stringWith8000Chars = IntStream.range(0, 8000)
 			.mapToObj(anInt -> "B")
 			.collect(Collectors.joining());
 
-		final TermConceptDesignation termConceptDesignation8000Chars = new TermConceptDesignation()
-			.setValue(stringWith8000Chars);
-		myTermConceptDesignationDao.save(termConceptDesignation8000Chars);
+		runInTransaction(()->{
+			assertThat(myTermConceptDesignationDao.findAll()).asList().isEmpty();
+			TermConcept concept = myTermConceptDao.findAll().iterator().next();
+			final TermConceptDesignation termConceptDesignation8000Chars = new TermConceptDesignation();
+			termConceptDesignation8000Chars.setConcept(concept);
+			termConceptDesignation8000Chars.setCodeSystemVersion(concept.getCodeSystemVersion());
+			termConceptDesignation8000Chars.setValue(stringWith8000Chars);
+			myTermConceptDesignationDao.save(termConceptDesignation8000Chars);
+		});
 
 		final List<TermConceptDesignation> allTermConceptDesignations  = myTermConceptDesignationDao.findAll();
 

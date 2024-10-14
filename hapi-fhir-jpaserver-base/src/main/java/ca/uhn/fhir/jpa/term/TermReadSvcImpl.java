@@ -2039,7 +2039,9 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 
 		termValueSet.setExpansionStatus(TermValueSetPreExpansionStatusEnum.NOT_EXPANDED);
 		termValueSet.setExpansionTimestamp(null);
-		myTermValueSetDao.save(termValueSet);
+
+		assert termValueSet.getId() != null;
+		myEntityManager.merge(termValueSet);
 
 		afterValueSetExpansionStatusChange();
 
@@ -2435,7 +2437,9 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 				termValueSet.setTotalConcepts(0L);
 				termValueSet.setTotalConceptDesignations(0L);
 				termValueSet.setExpansionStatus(TermValueSetPreExpansionStatusEnum.EXPANSION_IN_PROGRESS);
-				return myTermValueSetDao.saveAndFlush(termValueSet);
+				TermValueSet retVal = myEntityManager.merge(termValueSet);
+				myEntityManager.flush();
+				return retVal;
 			});
 			if (valueSetToExpand == null) {
 				return;
@@ -2462,7 +2466,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 				txTemplate.executeWithoutResult(t -> {
 					valueSetToExpand.setExpansionStatus(TermValueSetPreExpansionStatusEnum.EXPANDED);
 					valueSetToExpand.setExpansionTimestamp(new Date());
-					myTermValueSetDao.saveAndFlush(valueSetToExpand);
+					myEntityManager.merge(valueSetToExpand);
 				});
 
 				afterValueSetExpansionStatusChange();
@@ -2479,7 +2483,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 						"Failed to pre-expand ValueSet with URL[{}]: {}", valueSetToExpand.getUrl(), e.getMessage(), e);
 				txTemplate.executeWithoutResult(t -> {
 					valueSetToExpand.setExpansionStatus(TermValueSetPreExpansionStatusEnum.FAILED_TO_EXPAND);
-					myTermValueSetDao.saveAndFlush(valueSetToExpand);
+					myEntityManager.merge(valueSetToExpand);
 				});
 
 			} finally {
@@ -2566,7 +2570,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		}
 		if (optionalExistingTermValueSetByUrl.isEmpty()) {
 
-			myTermValueSetDao.save(termValueSet);
+			myEntityManager.persist(termValueSet);
 
 		} else {
 			TermValueSet existingTermValueSet = optionalExistingTermValueSetByUrl.get();
@@ -3321,6 +3325,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		termConcept.setCode(theConceptDefinition.getCode());
 		termConcept.setCodeSystemVersion(theCodeSystemVersion);
 		termConcept.setDisplay(theConceptDefinition.getDisplay());
+
 		termConcept.addChildren(
 				toPersistedConcepts(theConceptDefinition.getConcept(), theCodeSystemVersion), RelationshipTypeEnum.ISA);
 

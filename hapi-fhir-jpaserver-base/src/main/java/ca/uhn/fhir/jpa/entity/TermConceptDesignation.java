@@ -35,6 +35,7 @@ import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinColumns;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -70,18 +71,21 @@ public class TermConceptDesignation extends BasePartitionable implements Seriali
 				@JoinColumn(
 						name = "CONCEPT_PID",
 						referencedColumnName = "PID",
-						insertable = true,
+						insertable = false,
 						updatable = false,
 						nullable = false),
 				@JoinColumn(
 						name = "PARTITION_ID",
 						referencedColumnName = "PARTITION_ID",
-						insertable = true,
+						insertable = false,
 						updatable = false,
 						nullable = false)
 			},
 			foreignKey = @ForeignKey(name = "FK_CONCEPTDESIG_CONCEPT"))
 	private TermConcept myConcept;
+
+	@Column(name = "CONCEPT_PID", insertable = true, updatable = true, nullable = false)
+	private Long myConceptPid;
 
 	@Id()
 	@SequenceGenerator(name = "SEQ_CONCEPT_DESIG_PID", sequenceName = "SEQ_CONCEPT_DESIG_PID")
@@ -192,8 +196,17 @@ public class TermConceptDesignation extends BasePartitionable implements Seriali
 
 	public TermConceptDesignation setConcept(TermConcept theConcept) {
 		myConcept = theConcept;
+		myConceptPid = theConcept.getId();
 		setPartitionId(theConcept.getPartitionId());
 		return this;
+	}
+
+	@PrePersist
+	public void prePersist() {
+		if (myConceptPid == null) {
+			myConceptPid = myConcept.getId();
+			assert myConceptPid != null;
+		}
 	}
 
 	public Long getPid() {
@@ -215,5 +228,9 @@ public class TermConceptDesignation extends BasePartitionable implements Seriali
 				.append("useDisplay", myUseDisplay)
 				.append("value", myValue)
 				.toString();
+	}
+
+	public Long getId() {
+		return myId;
 	}
 }

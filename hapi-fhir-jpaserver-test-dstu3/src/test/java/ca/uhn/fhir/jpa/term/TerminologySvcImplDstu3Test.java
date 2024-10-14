@@ -34,6 +34,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import jakarta.annotation.Nonnull;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -110,6 +111,9 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(CS_URL, "SYSTEM NAME", null, cs, table);
 
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
+
+		logAllConcepts();
+		logAllConceptParentChildLinks();
 
 		return id;
 	}
@@ -1867,32 +1871,11 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 				assertEquals(9, codeSystemVersion.getConcepts().size());
 
 				List<TermConcept> concepts = myTermConceptDao.findByCodeSystemVersion(codeSystemVersion);
+				concepts.sort(Comparator.comparing(TermConcept::getCode));
+				assertEquals(9, concepts.size());
 
-				TermConcept parentWithNoChildrenA = concepts.get(0);
-				assertEquals("ParentWithNoChildrenA", parentWithNoChildrenA.getCode());
-				assertNull(parentWithNoChildrenA.getDisplay());
-				assertEquals(0, parentWithNoChildrenA.getChildren().size());
-				assertEquals(0, parentWithNoChildrenA.getParents().size());
-				assertEquals(0, parentWithNoChildrenA.getDesignations().size());
-				assertEquals(0, parentWithNoChildrenA.getProperties().size());
-
-				TermConcept parentWithNoChildrenB = concepts.get(1);
-				assertEquals("ParentWithNoChildrenB", parentWithNoChildrenB.getCode());
-				assertNull(parentWithNoChildrenB.getDisplay());
-				assertEquals(0, parentWithNoChildrenB.getChildren().size());
-				assertEquals(0, parentWithNoChildrenB.getParents().size());
-				assertEquals(0, parentWithNoChildrenB.getDesignations().size());
-				assertEquals(0, parentWithNoChildrenB.getProperties().size());
-
-				TermConcept parentWithNoChildrenC = concepts.get(2);
-				assertEquals("ParentWithNoChildrenC", parentWithNoChildrenC.getCode());
-				assertNull(parentWithNoChildrenC.getDisplay());
-				assertEquals(0, parentWithNoChildrenC.getChildren().size());
-				assertEquals(0, parentWithNoChildrenC.getParents().size());
-				assertEquals(0, parentWithNoChildrenC.getDesignations().size());
-				assertEquals(0, parentWithNoChildrenC.getProperties().size());
-
-				TermConcept parentA = concepts.get(3);
+				int index = 0;
+				TermConcept parentA = concepts.get(index++);
 				assertEquals("ParentA", parentA.getCode());
 				assertNull(parentA.getDisplay());
 				assertEquals(2, parentA.getChildren().size());
@@ -1900,7 +1883,39 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 				assertEquals(0, parentA.getDesignations().size());
 				assertEquals(0, parentA.getProperties().size());
 
-				TermConcept childAA = concepts.get(4);
+				TermConcept parentB = concepts.get(index++);
+				assertEquals("ParentB", parentB.getCode());
+				assertNull(parentB.getDisplay());
+				assertEquals(0, parentB.getChildren().size());
+				assertEquals(0, parentB.getParents().size());
+				assertEquals(0, parentB.getDesignations().size());
+				assertEquals(0, parentB.getProperties().size());
+
+				TermConcept parentWithNoChildrenA = concepts.get(index++);
+				assertEquals("ParentWithNoChildrenA", parentWithNoChildrenA.getCode());
+				assertNull(parentWithNoChildrenA.getDisplay());
+				assertEquals(0, parentWithNoChildrenA.getChildren().size());
+				assertEquals(0, parentWithNoChildrenA.getParents().size());
+				assertEquals(0, parentWithNoChildrenA.getDesignations().size());
+				assertEquals(0, parentWithNoChildrenA.getProperties().size());
+
+				TermConcept parentWithNoChildrenB = concepts.get(index++);
+				assertEquals("ParentWithNoChildrenB", parentWithNoChildrenB.getCode());
+				assertNull(parentWithNoChildrenB.getDisplay());
+				assertEquals(0, parentWithNoChildrenB.getChildren().size());
+				assertEquals(0, parentWithNoChildrenB.getParents().size());
+				assertEquals(0, parentWithNoChildrenB.getDesignations().size());
+				assertEquals(0, parentWithNoChildrenB.getProperties().size());
+
+				TermConcept parentWithNoChildrenC = concepts.get(index++);
+				assertEquals("ParentWithNoChildrenC", parentWithNoChildrenC.getCode());
+				assertNull(parentWithNoChildrenC.getDisplay());
+				assertEquals(0, parentWithNoChildrenC.getChildren().size());
+				assertEquals(0, parentWithNoChildrenC.getParents().size());
+				assertEquals(0, parentWithNoChildrenC.getDesignations().size());
+				assertEquals(0, parentWithNoChildrenC.getProperties().size());
+
+				TermConcept childAA = concepts.get(index++);
 				assertEquals("childAA", childAA.getCode());
 				assertNull(childAA.getDisplay());
 				assertEquals(2, childAA.getChildren().size());
@@ -1909,7 +1924,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 				assertEquals(0, childAA.getDesignations().size());
 				assertEquals(0, childAA.getProperties().size());
 
-				TermConcept childAAA = concepts.get(5);
+				TermConcept childAAA = concepts.get(index++);
 				assertEquals("childAAA", childAAA.getCode());
 				assertNull(childAAA.getDisplay());
 				assertEquals(0, childAAA.getChildren().size());
@@ -1918,7 +1933,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 				assertEquals(0, childAAA.getDesignations().size());
 				assertEquals(2, childAAA.getProperties().size());
 
-				TermConcept childAAB = concepts.get(6);
+				TermConcept childAAB = concepts.get(index++);
 				assertEquals("childAAB", childAAB.getCode());
 				assertNull(childAAB.getDisplay());
 				assertEquals(0, childAAB.getChildren().size());
@@ -1927,7 +1942,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 				assertEquals(1, childAAB.getDesignations().size());
 				assertEquals(2, childAAB.getProperties().size());
 
-				TermConcept childAB = concepts.get(7);
+				TermConcept childAB = concepts.get(index++);
 				assertEquals("childAB", childAB.getCode());
 				assertNull(childAB.getDisplay());
 				assertEquals(0, childAB.getChildren().size());
@@ -1935,14 +1950,6 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 				assertSame(parentA, childAB.getParents().iterator().next().getParent());
 				assertEquals(0, childAB.getDesignations().size());
 				assertEquals(0, childAB.getProperties().size());
-
-				TermConcept parentB = concepts.get(8);
-				assertEquals("ParentB", parentB.getCode());
-				assertNull(parentB.getDisplay());
-				assertEquals(0, parentB.getChildren().size());
-				assertEquals(0, parentB.getParents().size());
-				assertEquals(0, parentB.getDesignations().size());
-				assertEquals(0, parentB.getProperties().size());
 			}
 		});
 	}

@@ -65,12 +65,21 @@ public class HapiFhirJpaMigrationTasksTest {
 				"HAPI FHIR", "/jpa_h2_schema_720", "HFJ_RESOURCE", true)));
 
 		migrator.createMigrationTableIfRequired();
-		migrator.migrate();
+		MigrationResult outcome = migrator.migrate();
+		assertEquals(0, outcome.changes);
+		assertEquals(1, outcome.succeededTasks.size());
+		assertEquals("7.2.0.20180115.0", outcome.succeededTasks.get(0).getMigrationVersion());
+		assertEquals(0, outcome.failedTasks.size());
 
 		// Run a second time to run the 7.4.0 migrations
 		MigrationTaskList allTasks = tasks.getAllTasks(VersionEnum.V7_3_0, VersionEnum.V7_4_0);
-		migrator.addTasks(allTasks);
-		migrator.migrate();
+		allTasks.forEach(t->migrator.addTask(t));
+		assertEquals(61, allTasks.size());
+		ourLog.info("About to perform second migration");
+		outcome = migrator.migrate();
+		assertEquals(0, outcome.changes);
+		assertEquals(43, outcome.succeededTasks.size());
+		assertEquals(0, outcome.failedTasks.size());
 
 		// Create a unique index row with no hashes populated
 		insertRow_ResourceTable();
@@ -83,7 +92,7 @@ public class HapiFhirJpaMigrationTasksTest {
 		// Remove the task we're testing from the migrator history, so it runs again
 		assertEquals(1, myJdbcTemplate.update("DELETE FROM " + MIGRATION_TABLE_NAME + " WHERE version = ?", "7.4.0.20240625.40"), ()->{
 			List<Object> results = myJdbcTemplate.query("SELECT version FROM " + MIGRATION_TABLE_NAME, new SingleColumnRowMapper<>());
-			return results.size() + " results:\n * results" +
+			return results.size() + " results:\n * " +
 				results
 				.stream()
 				.map(t->t != null ? t.toString() : "(null)")

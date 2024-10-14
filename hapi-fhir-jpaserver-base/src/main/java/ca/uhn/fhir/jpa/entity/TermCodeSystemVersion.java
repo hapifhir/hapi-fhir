@@ -23,6 +23,8 @@ import ca.uhn.fhir.jpa.model.entity.BasePartitionable;
 import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.util.ValidateUtil;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -118,20 +120,20 @@ public class TermCodeSystemVersion extends BasePartitionable implements Serializ
 				@JoinColumn(
 						name = "CODESYSTEM_PID",
 						referencedColumnName = "PID",
-						insertable = true,
+						insertable = false,
 						updatable = false,
-						nullable = false),
+						nullable = true),
 				@JoinColumn(
 						name = "PARTITION_ID",
 						referencedColumnName = "PARTITION_ID",
-						insertable = true,
-						nullable = false,
+						insertable = false,
+						nullable = true,
 						updatable = false)
 			},
 			foreignKey = @ForeignKey(name = "FK_CODESYSVER_CS_ID"))
 	private TermCodeSystem myCodeSystem;
 
-	@Column(name = "CODESYSTEM_PID", insertable = false, updatable = false)
+	@Column(name = "CODESYSTEM_PID", insertable = true, updatable = true, nullable = true)
 	private Long myCodeSystemPid;
 
 	@SuppressWarnings("unused")
@@ -154,6 +156,8 @@ public class TermCodeSystemVersion extends BasePartitionable implements Serializ
 
 	public TermCodeSystemVersion setCodeSystem(TermCodeSystem theCodeSystem) {
 		myCodeSystem = theCodeSystem;
+		myCodeSystemPid = theCodeSystem.getPid();
+		assert myCodeSystemPid != null;
 		return this;
 	}
 
@@ -177,10 +181,12 @@ public class TermCodeSystemVersion extends BasePartitionable implements Serializ
 		return myConcepts;
 	}
 
+	@Nullable
 	public Long getPid() {
 		return myId;
 	}
 
+	@Nonnull
 	public IdAndPartitionId getId() {
 		return IdAndPartitionId.forId(myId, this);
 	}

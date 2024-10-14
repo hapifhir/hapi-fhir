@@ -74,6 +74,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
@@ -319,8 +320,8 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 				}
 
 				TermCodeSystemVersion persCs = new TermCodeSystemVersion();
-
 				populateCodeSystemVersionProperties(persCs, theCodeSystem, theResourceEntity);
+				myEntityManager.persist(persCs);
 
 				persCs.getConcepts().addAll(TermReadSvcImpl.toPersistedConcepts(theCodeSystem.getConcept(), persCs));
 				ourLog.debug("Code system has {} concepts", persCs.getConcepts().size());
@@ -408,6 +409,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		assert TransactionSynchronizationManager.isActualTransactionActive();
 
 		ourLog.debug("Storing code system");
+		Date updated = new Date();
 
 		TermCodeSystemVersion codeSystemToStore = theCodeSystemVersion;
 		ValidateUtil.isTrueOrThrowInvalidRequest(codeSystemToStore.getResource() != null, "No resource supplied");
@@ -424,7 +426,14 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 				/*
 				 * If we already have a CodeSystemVersion that matches the version we're storing, we
-				 * can reuse it.
+				 * can reuse it. Note that we only reuse if there are no concepts attached to the
+				 * existing codesystem because we always write a completely fresh set of concepts
+				 * and mark the old one for deletion. Theoretically we could optimize this by
+				 * figuring out a delta and only writing that, but that is fairly involved
+				 * since concepts have parents and children and properties and designations and
+				 * all that - so it's safer to just always assume changes and write everything
+				 * fresh. Also, this isn't the kind of thing that's expected to happen often
+				 * so we aren't particularly performance sensitive here.
 				 */
 				next.setCodeSystemDisplayName(theSystemName);
 				codeSystemToStore = next;
@@ -452,6 +461,10 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		codeSystemToStore.setCodeSystemDisplayName(theSystemName);
 		codeSystemToStore.setCodeSystemVersionId(theCodeSystemVersionId);
 
+		if (codeSystemToStore.getPid() == null) {
+			myEntityManager.persist(codeSystemToStore);
+		}
+
 		ourLog.debug("Validating all codes in CodeSystem for storage (this can take some time for large sets)");
 
 		// Validate the code system
@@ -461,12 +474,28 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		Collection<TermConcept> conceptsToSave = theCodeSystemVersion.getConcepts();
 		for (TermConcept next : conceptsToSave) {
 			totalCodeCount += validateConceptForStorage(next, codeSystemToStore, conceptsStack, allConcepts);
+			assert next.getId() == null;
+			assert codeSystemToStore.getPid() != null;
+
+			next.setCodeSystemVersion(codeSystemToStore);
+			next.setUpdated(updated);
+
+			myEntityManager.persist(next);
+			for (var property : next.getProperties()) {
+				assert property.getId() == null;
+				property.setCodeSystemVersion(codeSystemToStore);
+				myEntityManager.persist(property);
+			}
+			for (var designation : next.getDesignations()) {
+				assert designation.getId() == null;
+				designation.setCodeSystemVersion(codeSystemToStore);
+				myEntityManager.persist(designation);
+			}
 		}
 
 		ourLog.debug("Saving version containing {} concepts", totalCodeCount);
-		if (codeSystemToStore.getPid() == null) {
-			myEntityManager.persist(codeSystemToStore);
-		}
+		Validate.notNull(codeSystemToStore.getPid(), "Code system not saved");
+		codeSystemToStore = myEntityManager.merge(codeSystemToStore);
 
 		boolean isMakeVersionCurrent = ITermCodeSystemStorageSvc.isMakeVersionCurrent(theRequestDetails);
 		if (isMakeVersionCurrent) {

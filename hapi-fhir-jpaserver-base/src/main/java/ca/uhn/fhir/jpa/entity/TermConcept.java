@@ -125,23 +125,23 @@ public class TermConcept extends BasePartitionable implements Serializable {
 			value = {
 				@JoinColumn(
 						name = "CODESYSTEM_PID",
-						insertable = true,
+						insertable = false,
 						updatable = false,
 						nullable = false,
 						referencedColumnName = "PID"),
 				@JoinColumn(
 						name = "PARTITION_ID",
 						referencedColumnName = "PARTITION_ID",
-						insertable = true,
+						insertable = false,
 						updatable = false,
 						nullable = false)
 			},
 			foreignKey = @ForeignKey(name = "FK_CONCEPT_PID_CS_PID"))
 	private TermCodeSystemVersion myCodeSystem;
 
-	@Column(name = "CODESYSTEM_PID", insertable = false, updatable = false, nullable = false)
+	@Column(name = "CODESYSTEM_PID", insertable = true, updatable = false, nullable = false)
 	@GenericField(name = "myCodeSystemVersionPid")
-	private long myCodeSystemVersionPid;
+	private Long myCodeSystemVersionPid;
 
 	@Column(name = "DISPLAY", nullable = true, length = MAX_DESC_LENGTH)
 	@FullTextField(
@@ -333,6 +333,7 @@ public class TermConcept extends BasePartitionable implements Serializable {
 		myCodeSystem = theCodeSystemVersion;
 		if (theCodeSystemVersion != null && theCodeSystemVersion.getPid() != null) {
 			myCodeSystemVersionPid = theCodeSystemVersion.getPid();
+			assert myCodeSystemVersionPid != null;
 			setPartitionId(theCodeSystemVersion.getPartitionId());
 		}
 		return this;

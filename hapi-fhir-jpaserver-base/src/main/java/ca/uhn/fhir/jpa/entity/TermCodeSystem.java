@@ -89,7 +89,7 @@ public class TermCodeSystem extends BasePartitionable implements Serializable {
 			foreignKey = @ForeignKey(name = "FK_TRMCODESYSTEM_CURVER"))
 	private TermCodeSystemVersion myCurrentVersion;
 
-	@Column(name = "CURRENT_VERSION_PID", nullable = true, insertable = false, updatable = false)
+	@Column(name = "CURRENT_VERSION_PID", nullable = true, insertable = true, updatable = true)
 	private Long myCurrentVersionPid;
 
 	@Id()
@@ -182,7 +182,14 @@ public class TermCodeSystem extends BasePartitionable implements Serializable {
 	}
 
 	public TermCodeSystem setCurrentVersion(TermCodeSystemVersion theCurrentVersion) {
-		myCurrentVersion = theCurrentVersion;
+		if (theCurrentVersion == null) {
+			myCurrentVersion = null;
+			myCurrentVersionPid = null;
+		} else {
+			myCurrentVersion = theCurrentVersion;
+			myCurrentVersionPid = theCurrentVersion.getPid();
+			assert myCurrentVersionPid != null;
+		}
 		return this;
 	}
 

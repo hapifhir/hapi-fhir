@@ -35,8 +35,11 @@ import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinColumns;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 import org.hibernate.type.SqlTypes;
@@ -62,21 +65,21 @@ public class TermConceptParentChildLink extends BasePartitionable implements Ser
 			value = {
 				@JoinColumn(
 						name = "CHILD_PID",
-						insertable = true,
+						insertable = false,
 						updatable = false,
 						nullable = false,
 						referencedColumnName = "PID"),
 				@JoinColumn(
 						name = "PARTITION_ID",
 						referencedColumnName = "PARTITION_ID",
-						insertable = true,
+						insertable = false,
 						updatable = false,
 						nullable = false)
 			},
 			foreignKey = @ForeignKey(name = "FK_TERM_CONCEPTPC_CHILD"))
 	private TermConcept myChild;
 
-	@Column(name = "CHILD_PID", insertable = false, updatable = false)
+	@Column(name = "CHILD_PID", insertable = true, updatable = true, nullable = false)
 	private Long myChildPid;
 
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -85,22 +88,22 @@ public class TermConceptParentChildLink extends BasePartitionable implements Ser
 				@JoinColumn(
 						name = "CODESYSTEM_PID",
 						referencedColumnName = "PID",
-						insertable = true,
+						insertable = false,
 						updatable = false,
 						nullable = false),
 				@JoinColumn(
 						name = "PARTITION_ID",
 						referencedColumnName = "PARTITION_ID",
-						insertable = true,
+						insertable = false,
 						updatable = false,
 						nullable = false)
 			},
 			foreignKey = @ForeignKey(name = "FK_TERM_CONCEPTPC_CS"))
 	private TermCodeSystemVersion myCodeSystem;
 
-	@Column(name = "CODESYSTEM_PID", insertable = false, updatable = false, nullable = false)
+	@Column(name = "CODESYSTEM_PID", insertable = true, updatable = true, nullable = false)
 	@FullTextField(name = "myCodeSystemVersionPid")
-	private long myCodeSystemVersionPid;
+	private Long myCodeSystemVersionPid;
 
 	@ManyToOne(
 			fetch = FetchType.LAZY,
@@ -109,21 +112,21 @@ public class TermConceptParentChildLink extends BasePartitionable implements Ser
 			value = {
 				@JoinColumn(
 						name = "PARENT_PID",
-						insertable = true,
+						insertable = false,
 						updatable = false,
 						nullable = false,
 						referencedColumnName = "PID"),
 				@JoinColumn(
 						name = "PARTITION_ID",
 						referencedColumnName = "PARTITION_ID",
-						insertable = true,
+						insertable = false,
 						updatable = false,
 						nullable = false)
 			},
 			foreignKey = @ForeignKey(name = "FK_TERM_CONCEPTPC_PARENT"))
 	private TermConcept myParent;
 
-	@Column(name = "PARENT_PID", insertable = false, updatable = false)
+	@Column(name = "PARENT_PID", insertable = true, updatable = true, nullable = false)
 	private Long myParentPid;
 
 	@Id()
@@ -188,6 +191,22 @@ public class TermConceptParentChildLink extends BasePartitionable implements Ser
 		return myRelationshipType;
 	}
 
+	@PrePersist
+	public void prePersist() {
+		if (myChildPid == null) {
+			myChildPid = myChild.getId();
+			assert myChildPid != null;
+		}
+		if (myParentPid == null) {
+			myParentPid = myParent.getId();
+			assert myParentPid != null;
+		}
+		if (myCodeSystemVersionPid == null) {
+			myCodeSystemVersionPid = myCodeSystem.getPid();
+			assert myCodeSystemVersionPid != null;
+		}
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -201,16 +220,19 @@ public class TermConceptParentChildLink extends BasePartitionable implements Ser
 
 	public TermConceptParentChildLink setChild(TermConcept theChild) {
 		myChild = theChild;
+		myChildPid = theChild.getId();
 		return this;
 	}
 
-	public TermConceptParentChildLink setCodeSystem(TermCodeSystemVersion theCodeSystem) {
-		myCodeSystem = theCodeSystem;
+	public TermConceptParentChildLink setCodeSystem(TermCodeSystemVersion theCodeSystemVersion) {
+		myCodeSystem = theCodeSystemVersion;
+		myCodeSystemVersionPid = theCodeSystemVersion.getPid();
 		return this;
 	}
 
 	public TermConceptParentChildLink setParent(TermConcept theParent) {
 		myParent = theParent;
+		myParentPid = theParent.getId();
 		setPartitionId(theParent.getPartitionId());
 		return this;
 	}
@@ -218,6 +240,17 @@ public class TermConceptParentChildLink extends BasePartitionable implements Ser
 	public TermConceptParentChildLink setRelationshipType(RelationshipTypeEnum theRelationshipType) {
 		myRelationshipType = theRelationshipType;
 		return this;
+	}
+
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+				.append("pid", myId)
+				.append("csvPid", myCodeSystemVersionPid)
+				.append("parentPid", myParentPid)
+				.append("childPid", myChildPid)
+				.append("rel", myRelationshipType)
+				.toString();
 	}
 
 	public enum RelationshipTypeEnum {

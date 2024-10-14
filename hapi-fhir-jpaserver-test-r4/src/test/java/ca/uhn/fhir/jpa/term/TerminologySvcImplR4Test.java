@@ -12,6 +12,7 @@ import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -171,7 +172,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 				assertEquals(0, myTermValueSetConceptDesignationDao.countByTermValueSetId(termValueSetId).intValue());
 				myTermValueSetConceptDao.deleteByTermValueSetId(termValueSetId);
 				assertEquals(0, myTermValueSetConceptDao.countByTermValueSetId(termValueSetId).intValue());
-				myTermValueSetDao.deleteById(termValueSetId);
+				myTermValueSetDao.deleteById(new IdAndPartitionId(termValueSetId));
 				assertFalse(myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable).isPresent());
 			}
 		});
@@ -211,7 +212,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 				assertEquals(0, myTermValueSetConceptDesignationDao.countByTermValueSetId(termValueSetId).intValue());
 				myTermValueSetConceptDao.deleteByTermValueSetId(termValueSetId);
 				assertEquals(0, myTermValueSetConceptDao.countByTermValueSetId(termValueSetId).intValue());
-				myTermValueSetDao.deleteById(termValueSetId);
+				myTermValueSetDao.deleteById(new IdAndPartitionId(termValueSetId));
 				assertFalse(myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable).isPresent());
 			}
 		});

@@ -61,6 +61,11 @@ import static org.apache.commons.lang3.StringUtils.length;
 public class TermValueSetConceptDesignation extends BasePartitionable implements Serializable {
 	private static final long serialVersionUID = 1L;
 
+	/** Constructor */
+	public TermValueSetConceptDesignation() {
+		super();
+	}
+
 	@Id()
 	@SequenceGenerator(name = "SEQ_VALUESET_C_DSGNTN_PID", sequenceName = "SEQ_VALUESET_C_DSGNTN_PID")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_VALUESET_C_DSGNTN_PID")
@@ -90,14 +95,25 @@ public class TermValueSetConceptDesignation extends BasePartitionable implements
 	private Long myConceptPid;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(
-			name = "VALUESET_PID",
-			referencedColumnName = "PID",
-			nullable = false,
+	@JoinColumns(
+			value = {
+				@JoinColumn(
+						name = "VALUESET_PID",
+						referencedColumnName = "PID",
+						insertable = false,
+						updatable = false,
+						nullable = false),
+				@JoinColumn(
+						name = "PARTITION_ID",
+						referencedColumnName = "PARTITION_ID",
+						insertable = false,
+						updatable = false,
+						nullable = false)
+			},
 			foreignKey = @ForeignKey(name = "FK_TRM_VSCD_VS_PID"))
 	private TermValueSet myValueSet;
 
-	@Column(name = "VALUESET_PID", insertable = false, updatable = false, nullable = false)
+	@Column(name = "VALUESET_PID", insertable = true, updatable = true, nullable = false)
 	private Long myValueSetPid;
 
 	@Transient
@@ -148,6 +164,8 @@ public class TermValueSetConceptDesignation extends BasePartitionable implements
 
 	public TermValueSetConceptDesignation setValueSet(TermValueSet theValueSet) {
 		myValueSet = theValueSet;
+		myValueSetPid = theValueSet.getId();
+		assert myValueSetPid != null;
 		return this;
 	}
 
