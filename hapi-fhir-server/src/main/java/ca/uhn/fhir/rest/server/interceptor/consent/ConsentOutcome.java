@@ -25,7 +25,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.stream.Stream;
 
-public class ConsentOutcome implements IConsentVoter {
+public class ConsentOutcome implements IConsentVote {
 
 	/**
 	 * Convenience constant containing <code>new ConsentOutcome(ConsentOperationStatusEnum.PROCEED)</code>
@@ -80,7 +80,7 @@ public class ConsentOutcome implements IConsentVoter {
 	 * @return REJECT if any reject, AUTHORIZED if no REJECT and some AUTHORIZED, PROCEED if empty or all PROCEED
 	 */
 	public static ConsentOutcome parallelReduce(Stream<ConsentOutcome> theOutcomes) {
-		return IConsentVoter.parallelReduce(ConsentOutcome.PROCEED, theOutcomes);
+		return IConsentVote.parallelReduce(ConsentOutcome.PROCEED, theOutcomes);
 	}
 
 	/**
@@ -89,7 +89,7 @@ public class ConsentOutcome implements IConsentVoter {
 	 * @return the first decisive verdict, or theSeed when empty or all PROCEED.
 	 */
 	public static ConsentOutcome serialReduce(Stream<ConsentOutcome> theStream) {
-		return IConsentVoter.serialReduce(ConsentOutcome.PROCEED, theStream);
+		return IConsentVote.serialReduce(ConsentOutcome.PROCEED, theStream);
 	}
 
 	public ConsentOperationStatusEnum getStatus() {

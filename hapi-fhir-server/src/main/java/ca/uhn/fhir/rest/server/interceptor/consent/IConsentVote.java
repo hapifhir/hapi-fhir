@@ -6,7 +6,7 @@ import java.util.stream.Stream;
  * Something that produces a vote, along with static
  * tools for combining votes.
  */
-public interface IConsentVoter {
+public interface IConsentVote {
 	/**
 	 * Get the vote
 	 * @return the vote
@@ -23,8 +23,8 @@ public interface IConsentVoter {
 	 *
 	 * @return REJECT if any reject, AUTHORIZED if no REJECT and some AUTHORIZED, PROCEED if empty or all PROCEED
 	 */
-	static <T extends IConsentVoter> T parallelReduce(T theSeed, Stream<T> theVoteStream) {
-		return theVoteStream.reduce(theSeed, IConsentVoter::parallelReduce);
+	static <T extends IConsentVote> T parallelReduce(T theSeed, Stream<T> theVoteStream) {
+		return theVoteStream.reduce(theSeed, IConsentVote::parallelReduce);
 	}
 
 	/**
@@ -32,7 +32,7 @@ public interface IConsentVoter {
 	 *
 	 * @return REJECT if either reject, AUTHORIZED if no REJECT and some AUTHORIZED, PROCEED otherwise
 	 */
-	static <T extends IConsentVoter> T parallelReduce(T theAccumulator, T theNextVoter) {
+	static <T extends IConsentVote> T parallelReduce(T theAccumulator, T theNextVoter) {
 		if (theNextVoter.getStatus().getPrecedence()
 				< theAccumulator.getStatus().getPrecedence()) {
 			return theAccumulator;
@@ -46,8 +46,8 @@ public interface IConsentVoter {
 	 *
 	 * @return the first decisive verdict, or theSeed when empty or all PROCEED.
 	 */
-	static <T extends IConsentVoter> T serialReduce(T theSeed, Stream<T> theVoterStream) {
-		return theVoterStream.filter(IConsentVoter::isActiveVote).findFirst().orElse(theSeed);
+	static <T extends IConsentVote> T serialReduce(T theSeed, Stream<T> theVoterStream) {
+		return theVoterStream.filter(IConsentVote::isActiveVote).findFirst().orElse(theSeed);
 	}
 
 	/**
@@ -57,7 +57,7 @@ public interface IConsentVoter {
 	 * @param theNextVoter the next verdict to consider
 	 * @return the combined verdict
 	 */
-	static <T extends IConsentVoter> T serialReduce(T theAccumulator, T theNextVoter) {
+	static <T extends IConsentVote> T serialReduce(T theAccumulator, T theNextVoter) {
 		if (theAccumulator.getStatus().isAbstain()) {
 			return theNextVoter;
 		} else {
@@ -65,7 +65,7 @@ public interface IConsentVoter {
 		}
 	}
 
-	private static <T extends IConsentVoter> boolean isActiveVote(T nextVoter) {
+	private static <T extends IConsentVote> boolean isActiveVote(T nextVoter) {
 		return nextVoter.getStatus().isActiveVote();
 	}
 }

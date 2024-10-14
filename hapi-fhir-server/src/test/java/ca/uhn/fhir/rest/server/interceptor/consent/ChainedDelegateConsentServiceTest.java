@@ -12,9 +12,9 @@ import java.util.List;
 
 import static ca.uhn.fhir.rest.server.interceptor.consent.ChainedDelegateConsentService.withParallelVoting;
 import static ca.uhn.fhir.rest.server.interceptor.consent.ChainedDelegateConsentService.withSerialVoting;
-import static ca.uhn.fhir.rest.server.interceptor.consent.IConsentVoterTest.PARALLEL_STREAM_EXPECTATION;
-import static ca.uhn.fhir.rest.server.interceptor.consent.IConsentVoterTest.SERIAL_STREAM_EXPECTATION;
-import static ca.uhn.fhir.rest.server.interceptor.consent.IConsentVoterTest.splitEnumsToStream;
+import static ca.uhn.fhir.rest.server.interceptor.consent.IConsentVoteTest.PARALLEL_STREAM_EXPECTATION;
+import static ca.uhn.fhir.rest.server.interceptor.consent.IConsentVoteTest.SERIAL_STREAM_EXPECTATION;
+import static ca.uhn.fhir.rest.server.interceptor.consent.IConsentVoteTest.splitEnumsToStream;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

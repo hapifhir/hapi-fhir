@@ -21,7 +21,7 @@ package ca.uhn.fhir.rest.server.interceptor.consent;
 
 import java.util.stream.Stream;
 
-public enum ConsentOperationStatusEnum implements IConsentVoter {
+public enum ConsentOperationStatusEnum implements IConsentVote {
 
 	/**
 	 * The requested operation cannot proceed, and an operation outcome suitable for
@@ -89,11 +89,11 @@ public enum ConsentOperationStatusEnum implements IConsentVoter {
 	 * @return the first decisive verdict, or PROCEED when empty or all PROCEED.
 	 */
 	public static ConsentOperationStatusEnum serialReduce(Stream<ConsentOperationStatusEnum> theVoteStream) {
-		return IConsentVoter.serialReduce(PROCEED, theVoteStream);
+		return IConsentVote.serialReduce(PROCEED, theVoteStream);
 	}
 
 	public static ConsentOperationStatusEnum parallelReduce(Stream<ConsentOperationStatusEnum> theVoteStream) {
-		return IConsentVoter.parallelReduce(PROCEED, theVoteStream);
+		return IConsentVote.parallelReduce(PROCEED, theVoteStream);
 	}
 
 	/** @deprecated for rename */

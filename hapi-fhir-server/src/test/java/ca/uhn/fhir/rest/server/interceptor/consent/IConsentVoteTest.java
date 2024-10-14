@@ -9,7 +9,7 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class IConsentVoterTest {
+class IConsentVoteTest {
 
 	/** col1: stream of votes, col2: expected verdict */
 	public static final String SERIAL_STREAM_EXPECTATION = """
@@ -88,7 +88,7 @@ class IConsentVoterTest {
 	void testSerialReduction_choosesFirstVerdict(ConsentOperationStatusEnum theFirst, ConsentOperationStatusEnum theSecond, ConsentOperationStatusEnum theExpectedResult) {
 
 		// when
-		ConsentOperationStatusEnum result = IConsentVoter.serialReduce(theFirst, theSecond);
+		ConsentOperationStatusEnum result = IConsentVote.serialReduce(theFirst, theSecond);
 
 		assertEquals(theExpectedResult, result);
 	}
@@ -131,7 +131,7 @@ class IConsentVoterTest {
 	void testParallelReduction_choosesStrongestVerdict(ConsentOperationStatusEnum theFirst, ConsentOperationStatusEnum theSecond, ConsentOperationStatusEnum theExpectedResult) {
 
 		// when
-		ConsentOperationStatusEnum result = IConsentVoter.parallelReduce(theFirst, theSecond);
+		ConsentOperationStatusEnum result = IConsentVote.parallelReduce(theFirst, theSecond);
 
 		assertEquals(theExpectedResult, result);
 	}
