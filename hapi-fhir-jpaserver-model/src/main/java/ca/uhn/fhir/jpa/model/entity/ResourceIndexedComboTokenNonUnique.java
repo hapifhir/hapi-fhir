@@ -41,7 +41,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 
 @Entity
 @Table(
-		name = "HFJ_IDX_CMB_TOK_NU",
+		name = ResourceIndexedComboTokenNonUnique.HFJ_IDX_CMB_TOK_NU,
 		indexes = {
 			// TODO: The hash index was added in 7.4.0 - In 7.6.0 we should drop the string index
 			@Index(name = "IDX_IDXCMBTOKNU_STR", columnList = "IDX_STRING", unique = false),
@@ -50,6 +50,8 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 		})
 public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndexedCombo
 		implements Comparable<ResourceIndexedComboTokenNonUnique>, IResourceIndexComboSearchParameter {
+
+	public static final String HFJ_IDX_CMB_TOK_NU = "HFJ_IDX_CMB_TOK_NU";
 
 	@SequenceGenerator(name = "SEQ_IDXCMBTOKNU_ID", sequenceName = "SEQ_IDXCMBTOKNU_ID")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_IDXCMBTOKNU_ID")

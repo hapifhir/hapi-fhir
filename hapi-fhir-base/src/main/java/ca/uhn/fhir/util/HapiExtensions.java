@@ -111,6 +111,12 @@ public class HapiExtensions {
 	public static final String EXT_SP_UNIQUE = "http://hapifhir.io/fhir/StructureDefinition/sp-unique";
 
 	/**
+	 * URL for extension on a Search Parameter which determines whether it should be enabled for searching for resources
+	 */
+	public static final String EXT_SEARCHPARAM_ENABLED_FOR_SEARCHING =
+			"http://hapifhir.io/fhir/StructureDefinition/searchparameter-enabled-for-searching";
+
+	/**
 	 * URL for extension on a Phonetic String SearchParameter indicating that text values should be phonetically indexed with the named encoder
 	 */
 	public static final String EXT_SEARCHPARAM_PHONETIC_ENCODER =

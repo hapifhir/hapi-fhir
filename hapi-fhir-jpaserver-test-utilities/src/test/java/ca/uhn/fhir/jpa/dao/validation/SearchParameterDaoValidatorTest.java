@@ -40,6 +40,7 @@ import static org.hl7.fhir.r5.model.Enumerations.SearchParamType.URI;
 import static org.hl7.fhir.r5.model.Enumerations.VersionIndependentResourceTypesAll.OBSERVATION;
 import static org.hl7.fhir.r5.model.Enumerations.VersionIndependentResourceTypesAll.PATIENT;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 
@@ -78,7 +79,7 @@ public class SearchParameterDaoValidatorTest {
     private void createAndMockSearchParameter(Enumerations.SearchParamType theType, String theDefinition, String theCodeValue, String theExpression) {
         SearchParameter observationCodeSp = createSearchParameter(theType, theDefinition, theCodeValue, theExpression);
         RuntimeSearchParam observationCodeRuntimeSearchParam = mySearchParameterCanonicalizer.canonicalizeSearchParameter(observationCodeSp);
-        lenient().when(mySearchParamRegistry.getActiveSearchParamByUrl(eq(theDefinition))).thenReturn(observationCodeRuntimeSearchParam);
+        lenient().when(mySearchParamRegistry.getActiveSearchParamByUrl(eq(theDefinition), any())).thenReturn(observationCodeRuntimeSearchParam);
     }
     
     @Test

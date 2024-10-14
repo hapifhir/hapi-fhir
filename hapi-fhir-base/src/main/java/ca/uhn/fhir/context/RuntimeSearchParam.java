@@ -60,6 +60,7 @@ public class RuntimeSearchParam {
 	private final List<Component> myComponents;
 	private final IIdType myIdUnqualifiedVersionless;
 	private IPhoneticEncoder myPhoneticEncoder;
+	private boolean myEnabledForSearching = true;
 
 	/**
 	 * Constructor
@@ -164,6 +165,24 @@ public class RuntimeSearchParam {
 		} else {
 			myComponents = Collections.emptyList();
 		}
+	}
+
+	/**
+	 * Is this search parameter actually enabled for being used in searches (as opposed to only being used for
+	 * generating indexes, which might be desired while the search parameter is still being indexed). This
+	 * setting defaults to {@literal true} if it isn't set otherwise.
+	 */
+	public boolean isEnabledForSearching() {
+		return myEnabledForSearching;
+	}
+
+	/**
+	 * Is this search parameter actually enabled for being used in searches (as opposed to only being used for
+	 * generating indexes, which might be desired while the search parameter is still being indexed). This
+	 * setting defaults to {@literal true} if it isn't set otherwise.
+	 */
+	public void setEnabledForSearching(boolean theEnabledForSearching) {
+		myEnabledForSearching = theEnabledForSearching;
 	}
 
 	public List<Component> getComponents() {
@@ -361,13 +380,6 @@ public class RuntimeSearchParam {
 		return !myUpliftRefchains.isEmpty();
 	}
 
-	public enum RuntimeSearchParamStatusEnum {
-		ACTIVE,
-		DRAFT,
-		RETIRED,
-		UNKNOWN
-	}
-
 	/**
 	 * This method tests whether a given FHIRPath expression <i>could</i>
 	 * possibly apply to the given resource type.
@@ -411,6 +423,13 @@ public class RuntimeSearchParam {
 			}
 		}
 		return false;
+	}
+
+	public enum RuntimeSearchParamStatusEnum {
+		ACTIVE,
+		DRAFT,
+		RETIRED,
+		UNKNOWN
 	}
 
 	public static class Component {

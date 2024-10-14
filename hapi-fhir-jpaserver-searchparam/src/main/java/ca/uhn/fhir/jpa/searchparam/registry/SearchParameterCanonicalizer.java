@@ -469,9 +469,19 @@ public class SearchParameterCanonicalizer {
 						setEncoder(theRuntimeSearchParam, next.getValue());
 					} else if (HapiExtensions.EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN.equals(nextUrl)) {
 						addUpliftRefchain(theRuntimeSearchParam, next);
+					} else if (HapiExtensions.EXT_SEARCHPARAM_ENABLED_FOR_SEARCHING.equals(nextUrl)) {
+						addEnabledForSearching(theRuntimeSearchParam, next.getValue());
 					}
 				}
 			}
+		}
+	}
+
+	private void addEnabledForSearching(RuntimeSearchParam theRuntimeSearchParam, IBaseDatatype theValue) {
+		if (theValue instanceof IPrimitiveType) {
+			String stringValue = ((IPrimitiveType<?>) theValue).getValueAsString();
+			boolean enabledForSearching = Boolean.parseBoolean(stringValue);
+			theRuntimeSearchParam.setEnabledForSearching(enabledForSearching);
 		}
 	}
 

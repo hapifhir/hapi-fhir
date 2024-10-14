@@ -1,0 +1,6 @@
+---
+type: add
+issue: 6107
+title: "A new extension has been created for use on SearchParameter resources in the JPA server. This extension causes
+   a SearchParameter to be indexed, but to not be available for use in searches. This can be set when a new SP is created
+   in order to prevent it from being used before an index has been completed."
