@@ -599,7 +599,7 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 			ourLog.info("Result {}: {} - {} - {}", index, next.getSeverity(), next.getLocationString(), next.getMessage());
 			index++;
 
-			if (next.getSeverity() == ResultSeverityEnum.ERROR) {
+			if (next.getSeverity() != ResultSeverityEnum.INFORMATION) {
 				retVal.add(next);
 			}
 		}
