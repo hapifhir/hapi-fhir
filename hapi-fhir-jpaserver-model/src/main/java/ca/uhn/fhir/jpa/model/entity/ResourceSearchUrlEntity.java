@@ -42,6 +42,13 @@ import java.util.Optional;
  * in this table. The URL is the PK of the table, so the database
  * ensures that two concurrent threads don't accidentally create two
  * resources with the same conditional URL.
+ * <p>
+ * Note that this entity is partitioned, but does not always respect the
+ * partition ID of the parent resource entity (it may just use a
+ * hardcoded partition ID of -1 depending on configuration). As a result
+ * we don't have a FK relationship. This table only contains short-lived
+ * rows that get cleaned up and purged periodically, so it should never
+ * grow terribly large anyhow.
  */
 @Entity
 @Table(

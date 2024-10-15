@@ -81,7 +81,6 @@ public class ResourceTableFKProvider {
 		retval.add(new ResourceForeignKey("NPM_PACKAGE_VER", PARTITION_ID, "BINARY_RES_ID"));
 		retval.add(new ResourceForeignKey("NPM_PACKAGE_VER_RES", PARTITION_ID, "BINARY_RES_ID"));
 
-		retval.add(new ResourceForeignKey("HFJ_SUBSCRIPTION_STATS", PARTITION_ID, "RES_ID"));
 		retval.add(new ResourceForeignKey("HFJ_RES_SEARCH_URL", PARTITION_ID, "RES_ID"));
 
 		return retval;

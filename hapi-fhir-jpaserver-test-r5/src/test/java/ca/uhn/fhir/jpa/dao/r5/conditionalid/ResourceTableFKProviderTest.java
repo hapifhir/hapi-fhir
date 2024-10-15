@@ -89,6 +89,7 @@ class ResourceTableFKProviderTest extends BaseJpaR5Test {
 
 		// Add the extra FKs that are not available in the CROSS_REFERENCES table
 		expected.add(new ResourceForeignKey("HFJ_HISTORY_TAG", "PARTITION_ID", "RES_ID"));
+		expected.add(new ResourceForeignKey("HFJ_RES_SEARCH_URL", "PARTITION_ID", "RES_ID"));
 
 		// If this assertion fails, it means hapi-fhir has added a new foreign-key dependency to HFJ_RESOURCE.  To fix
 		// the test, add the missing key to myResourceTableFKProvider.getResourceForeignKeys()
