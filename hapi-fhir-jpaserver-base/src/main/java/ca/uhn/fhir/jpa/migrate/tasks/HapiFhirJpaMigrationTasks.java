@@ -217,11 +217,13 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		version.onTable("TRM_CONCEPT_PC_LINK")
 				.modifyColumn("20241008.1400", "CHILD_PID")
 				.nonNullable()
-				.withType(ColumnTypeEnum.LONG);
+				.withType(ColumnTypeEnum.LONG)
+				.failureAllowed();
 		version.onTable("TRM_CONCEPT_PC_LINK")
 				.modifyColumn("20241008.1401", "PARENT_PID")
 				.nonNullable()
-				.withType(ColumnTypeEnum.LONG);
+				.withType(ColumnTypeEnum.LONG)
+				.failureAllowed();
 		version.onTable("TRM_CONCEPT_PC_LINK")
 				.addColumn("20241008.1402", "PARTITION_ID")
 				.nullable()
@@ -238,11 +240,13 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		version.onTable("TRM_CONCEPT_DESIG")
 				.modifyColumn("20241008.1502", "CONCEPT_PID")
 				.nonNullable()
-				.withType(ColumnTypeEnum.LONG);
+				.withType(ColumnTypeEnum.LONG)
+				.failureAllowed();
 		version.onTable("TRM_CONCEPT_DESIG")
 				.modifyColumn("20241008.1503", "CS_VER_PID")
 				.nonNullable()
-				.withType(ColumnTypeEnum.LONG);
+				.withType(ColumnTypeEnum.LONG)
+				.failureAllowed();
 
 		version.onTable("TRM_CONCEPT_PROPERTY")
 				.addColumn("20241008.1600", "PARTITION_ID")
@@ -255,7 +259,8 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		version.onTable("TRM_CONCEPT_PROPERTY")
 				.modifyColumn("20241008.1602", "CONCEPT_PID")
 				.nonNullable()
-				.withType(ColumnTypeEnum.LONG);
+				.withType(ColumnTypeEnum.LONG)
+				.failureAllowed();
 
 		version.onTable("TRM_CONCEPT_MAP")
 				.addColumn("20241008.1700", "PARTITION_ID")
