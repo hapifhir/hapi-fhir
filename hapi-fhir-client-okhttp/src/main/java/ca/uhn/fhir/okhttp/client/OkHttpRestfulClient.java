@@ -29,6 +29,7 @@ import ca.uhn.fhir.rest.client.api.IHttpClient;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.client.method.MethodUtil;
+import ca.uhn.fhir.rest.param.HttpClientRequestParameters;
 import okhttp3.Call;
 import okhttp3.FormBody;
 import okhttp3.MediaType;
@@ -44,6 +45,7 @@ import static ca.uhn.fhir.okhttp.utils.UrlStringUtils.endsWith;
 import static ca.uhn.fhir.okhttp.utils.UrlStringUtils.everythingAfterFirstQuestionMark;
 import static ca.uhn.fhir.okhttp.utils.UrlStringUtils.hasQuestionMark;
 import static ca.uhn.fhir.okhttp.utils.UrlStringUtils.withTrailingQuestionMarkRemoved;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * A Http Request based on OkHttp. This is an adapter around the class
@@ -52,6 +54,7 @@ import static ca.uhn.fhir.okhttp.utils.UrlStringUtils.withTrailingQuestionMarkRe
  * @author Matthew Clarke | matthew.clarke@orionhealth.com | Orion Health
  */
 public class OkHttpRestfulClient implements IHttpClient {
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(OkHttpRestfulClient.class);
 
 	private Call.Factory myClient;
 	private StringBuilder myUrl;
@@ -79,13 +82,15 @@ public class OkHttpRestfulClient implements IHttpClient {
 	@Override
 	public IHttpRequest createByteRequest(
 			FhirContext theContext, String theContents, String theContentType, EncodingEnum theEncoding) {
-		initBaseRequest(theContext, theEncoding, createPostBody(theContents, theContentType));
+		initBaseRequest(theContext, theEncoding, createPostBody(theContents, theContentType), RequestTypeEnum.POST);
 		return myRequest;
 	}
 
-	private void initBaseRequest(FhirContext theContext, EncodingEnum theEncoding, RequestBody body) {
+	private void initBaseRequest(
+			FhirContext theContext, EncodingEnum theEncoding, RequestBody body, RequestTypeEnum theRequestType) {
+		RequestTypeEnum requestType = theRequestType != null ? theRequestType : myRequestType;
 		String sanitisedUrl = withTrailingQuestionMarkRemoved(myUrl.toString());
-		myRequest = new OkHttpRestfulRequest(myClient, sanitisedUrl, myRequestType, body);
+		myRequest = new OkHttpRestfulRequest(myClient, sanitisedUrl, requestType, body);
 		addHeadersToRequest(myRequest, theEncoding, theContext);
 	}
 
@@ -96,7 +101,7 @@ public class OkHttpRestfulClient implements IHttpClient {
 	@Override
 	public IHttpRequest createParamRequest(
 			FhirContext theContext, Map<String, List<String>> theParams, EncodingEnum theEncoding) {
-		initBaseRequest(theContext, theEncoding, getFormBodyFromParams(theParams));
+		initBaseRequest(theContext, theEncoding, getFormBodyFromParams(theParams), RequestTypeEnum.POST);
 		return myRequest;
 	}
 
@@ -113,7 +118,11 @@ public class OkHttpRestfulClient implements IHttpClient {
 
 	@Override
 	public IHttpRequest createBinaryRequest(FhirContext theContext, IBaseBinary theBinary) {
-		initBaseRequest(theContext, null, createPostBody(theBinary.getContent(), theBinary.getContentType()));
+		initBaseRequest(
+				theContext,
+				null,
+				createPostBody(theBinary.getContent(), theBinary.getContentType()),
+				RequestTypeEnum.POST);
 		return myRequest;
 	}
 
@@ -123,8 +132,53 @@ public class OkHttpRestfulClient implements IHttpClient {
 
 	@Override
 	public IHttpRequest createGetRequest(FhirContext theContext, EncodingEnum theEncoding) {
-		initBaseRequest(theContext, theEncoding, null);
+		initBaseRequest(theContext, theEncoding, null, RequestTypeEnum.GET);
 		return myRequest;
+	}
+
+	@Override
+	public IHttpRequest createRequest(HttpClientRequestParameters theParameters) {
+		RequestBody requestBody = null;
+		switch (theParameters.getRequestTypeEnum()) {
+			case POST:
+			case PUT:
+				if (theParameters.getFormParams() != null
+						&& !theParameters.getFormParams().isEmpty()) {
+					requestBody = getFormBodyFromParams(theParameters.getFormParams());
+				} else if (theParameters.getByteContents() != null) {
+					requestBody = createPostBody(theParameters.getByteContents(), theParameters.getContentType());
+				} else if (isNotBlank(theParameters.getContents())) {
+					requestBody = createPostBody(theParameters.getContents(), theParameters.getContentType());
+				} else if (theParameters.getBaseBinary() != null) {
+					requestBody =
+							createPostBody(theParameters.getBaseBinary().getContent(), theParameters.getContentType());
+				} else {
+					ourLog.debug(
+							"No body contents found for HTTP-{}",
+							theParameters.getRequestTypeEnum().name());
+				}
+
+				break;
+		}
+		initBaseRequest(
+				theParameters.getFhirContext(),
+				theParameters.getEncodingEnum(),
+				requestBody,
+				theParameters.getRequestTypeEnum());
+		return myRequest;
+	}
+
+	@Override
+	public void addHeadersToRequest(IHttpRequest theRequest, EncodingEnum theEncodingEnum, FhirContext theContext) {
+		// not needed for this client
+	}
+
+	@Override
+	public void setNewUrl(
+			StringBuilder theUrl, String theIfNoneExistString, Map<String, List<String>> theIfNoneExistParams) {
+		myUrl = theUrl;
+		myIfNoneExistString = theIfNoneExistString;
+		myIfNoneExistParams = theIfNoneExistParams;
 	}
 
 	private void addHeadersToRequest(

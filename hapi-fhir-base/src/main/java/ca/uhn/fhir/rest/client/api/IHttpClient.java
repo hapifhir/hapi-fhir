@@ -21,6 +21,7 @@ package ca.uhn.fhir.rest.client.api;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.param.HttpClientRequestParameters;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 
 import java.util.List;
@@ -60,11 +61,27 @@ public interface IHttpClient {
 	 */
 	IHttpRequest createBinaryRequest(FhirContext theContext, IBaseBinary theBinary);
 
+	@Deprecated
+	IHttpRequest createGetRequest(FhirContext theContext, EncodingEnum theEncoding);
+
 	/**
-	 * Create a normal http get request
-	 * @param theContext TODO
-	 * @param theEncoding the request encoding
+	 * Create a normal http request. The RequestType in the parameters will determine the type.
 	 * @return the http request to be executed
 	 */
-	IHttpRequest createGetRequest(FhirContext theContext, EncodingEnum theEncoding);
+	IHttpRequest createRequest(HttpClientRequestParameters theParameters);
+
+	void addHeadersToRequest(IHttpRequest theRequest, EncodingEnum theEncodingEnum, FhirContext theContext);
+
+	/**
+	 * Updates the client's url, as well as the conditional create/update strings/params
+	 * (ie, the "if None Exists" stuff)
+	 *
+	 * This is used when we reuse a client for multiple different requests
+	 * (ex, searches, or fetching the /metadata endpoint followed by whatever
+	 * the actual endpoint is, etc).
+	 *
+	 * Deprecated / Legacy clients do not use this (they create new clients for
+	 * every request)
+	 */
+	void setNewUrl(StringBuilder theUrl, String theIfNoneExistsString, Map<String, List<String>> theIfNoneExistsParams);
 }
