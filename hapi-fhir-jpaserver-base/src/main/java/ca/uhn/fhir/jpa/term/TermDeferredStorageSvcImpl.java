@@ -232,11 +232,11 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc, IHas
 
 				if ((next.getChild().getId() == null
 								|| !myConceptDao
-										.findById(next.getChild().getPartitionedId())
+										.findById(next.getChild().getPid())
 										.isPresent())
 						|| (next.getParent().getId() == null
 								|| !myConceptDao
-										.findById(next.getParent().getPartitionedId())
+										.findById(next.getParent().getPid())
 										.isPresent())) {
 					ourLog.warn(
 							"Not inserting link from child {} to parent {} because it appears to have been deleted",

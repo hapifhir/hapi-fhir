@@ -20,13 +20,11 @@
 package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
-import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
-import ca.uhn.fhir.jpa.dao.data.ITermConceptDesignationDao;
-import ca.uhn.fhir.jpa.dao.data.ITermConceptPropertyDao;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptDesignation;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import ca.uhn.fhir.jpa.entity.TermConceptProperty;
+import jakarta.persistence.EntityManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,16 +33,10 @@ import java.util.Collection;
 import java.util.Date;
 
 public class TermConceptDaoSvc {
-	private static final Logger ourLog = LoggerFactory.getLogger(TermCodeSystemStorageSvcImpl.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(TermConceptDaoSvc.class);
 
 	@Autowired
-	protected ITermConceptPropertyDao myConceptPropertyDao;
-
-	@Autowired
-	protected ITermConceptDao myConceptDao;
-
-	@Autowired
-	protected ITermConceptDesignationDao myConceptDesignationDao;
+	private EntityManager myEntityManager;
 
 	private boolean mySupportLegacyLob = false;
 
@@ -73,15 +65,15 @@ public class TermConceptDaoSvc {
 			theConcept.setIndexStatus(BaseHapiFhirDao.INDEX_STATUS_INDEXED);
 			theConcept.setUpdated(new Date());
 			theConcept.flagForLegacyLobSupport(mySupportLegacyLob);
-			myConceptDao.save(theConcept);
+			myEntityManager.persist(theConcept);
 
 			for (TermConceptProperty next : theConcept.getProperties()) {
 				next.performLegacyLobSupport(mySupportLegacyLob);
-				myConceptPropertyDao.save(next);
+				myEntityManager.persist(next);
 			}
 
 			for (TermConceptDesignation next : theConcept.getDesignations()) {
-				myConceptDesignationDao.save(next);
+				myEntityManager.persist(next);
 			}
 		}
 
@@ -105,7 +97,7 @@ public class TermConceptDaoSvc {
 				if (nextParent.getId() == null) {
 					nextParent.setUpdated(new Date());
 					nextParent.flagForLegacyLobSupport(mySupportLegacyLob);
-					myConceptDao.saveAndFlush(nextParent);
+					myEntityManager.persist(nextParent);
 					retVal++;
 					ourLog.debug("Saved parent code {} and got id {}", nextParent.getCode(), nextParent.getId());
 				}

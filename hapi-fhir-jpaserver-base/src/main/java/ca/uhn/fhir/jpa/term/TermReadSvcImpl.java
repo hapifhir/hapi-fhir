@@ -1173,8 +1173,9 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 						chunk = scroll.next()) {
 					int countForBatch = 0;
 
-					List<Long> pids =
-							chunk.hits().stream().map(t -> (Long) t.id()).collect(Collectors.toList());
+					List<TermConcept.TermConceptPk> pids = chunk.hits().stream()
+							.map(t -> (TermConcept.TermConceptPk) t.id())
+							.collect(Collectors.toList());
 
 					List<TermConcept> termConcepts = myTermConceptDao.fetchConceptsAndDesignationsByPid(pids);
 

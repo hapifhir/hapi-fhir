@@ -21,7 +21,6 @@ package ca.uhn.fhir.jpa.dao.data;
 
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
-import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -32,10 +31,10 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
 
-public interface ITermConceptDao extends JpaRepository<TermConcept, IdAndPartitionId>, IHapiFhirJpaRepository {
+public interface ITermConceptDao extends JpaRepository<TermConcept, TermConcept.TermConceptPk>, IHapiFhirJpaRepository {
 
 	@Query("SELECT t FROM TermConcept t " + "LEFT JOIN FETCH t.myDesignations d " + "WHERE t.myId IN :pids")
-	List<TermConcept> fetchConceptsAndDesignationsByPid(@Param("pids") List<Long> thePids);
+	List<TermConcept> fetchConceptsAndDesignationsByPid(@Param("pids") List<TermConcept.TermConceptPk> thePids);
 
 	@Query("SELECT t FROM TermConcept t " + "LEFT JOIN FETCH t.myDesignations d "
 			+ "WHERE t.myCodeSystemVersionPid = :pid")

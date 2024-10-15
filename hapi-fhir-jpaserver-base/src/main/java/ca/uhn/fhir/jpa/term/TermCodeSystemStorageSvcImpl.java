@@ -233,11 +233,11 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 		for (TermConceptParentChildLink nextParent : theConcept.getParents()) {
 			nextParent.getParent().getChildren().remove(nextParent);
-			myConceptParentChildLinkDao.deleteById(nextParent.getPartitionedId());
+			myConceptParentChildLinkDao.deleteById(nextParent.getPid());
 		}
 		for (TermConceptParentChildLink nextChild : theConcept.getChildren()) {
 			nextChild.getChild().getParents().remove(nextChild);
-			myConceptParentChildLinkDao.deleteById(nextChild.getPartitionedId());
+			myConceptParentChildLinkDao.deleteById(nextChild.getPid());
 		}
 
 		for (TermConceptDesignation next : theConcept.getDesignations()) {
@@ -251,7 +251,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 		ourLog.info("Deleting concept {} - Code {}", theConcept.getId(), theConcept.getCode());
 
-		myConceptDao.deleteById(theConcept.getPartitionedId());
+		myConceptDao.deleteById(theConcept.getPid());
 		//		myEntityManager.remove(theConcept);
 
 		theRemoveCounter.incrementAndGet();

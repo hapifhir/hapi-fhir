@@ -19,9 +19,11 @@
  */
 package ca.uhn.fhir.jpa.entity;
 
-import ca.uhn.fhir.jpa.model.entity.BasePartitionable;
-import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
+import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
+import ca.uhn.hapi.fhir.sql.hibernatesvc.ConditionalIdProperty;
 import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -29,8 +31,6 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.IdClass;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinColumns;
@@ -45,6 +45,7 @@ import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextFi
 import org.hibernate.type.SqlTypes;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 @Entity
 @Table(
@@ -56,8 +57,7 @@ import java.io.Serializable;
 			@Index(name = "FK_TERM_CONCEPTPC_PARENT", columnList = "PARENT_PID", unique = false),
 			@Index(name = "FK_TERM_CONCEPTPC_CS", columnList = "CODESYSTEM_PID")
 		})
-@IdClass(IdAndPartitionId.class)
-public class TermConceptParentChildLink extends BasePartitionable implements Serializable {
+public class TermConceptParentChildLink implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -129,11 +129,16 @@ public class TermConceptParentChildLink extends BasePartitionable implements Ser
 	@Column(name = "PARENT_PID", insertable = true, updatable = true, nullable = false)
 	private Long myParentPid;
 
-	@Id()
-	@SequenceGenerator(name = "SEQ_CONCEPT_PC_PID", sequenceName = "SEQ_CONCEPT_PC_PID")
-	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_CONCEPT_PC_PID")
-	@Column(name = "PID")
-	private Long myId;
+	// FIXME: cleanup
+	//	@Id()
+	//	@SequenceGenerator(name = "SEQ_CONCEPT_PC_PID", sequenceName = "SEQ_CONCEPT_PC_PID")
+	//	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_CONCEPT_PC_PID")
+	//	@Column(name = "PID")
+	@EmbeddedId
+	private TermConceptParentChildLinkPk myId;
+
+	@Column(name = PartitionablePartitionId.PARTITION_ID, nullable = true, insertable = false, updatable = false)
+	private Integer myPartitionIdValue;
 
 	@Enumerated(EnumType.ORDINAL)
 	@Column(name = "REL_TYPE", length = 5, nullable = true)
@@ -171,12 +176,15 @@ public class TermConceptParentChildLink extends BasePartitionable implements Ser
 		return myCodeSystem;
 	}
 
-	public Long getId() {
+	public TermConceptParentChildLinkPk getPid() {
+		if (myId == null) {
+			myId = new TermConceptParentChildLinkPk();
+		}
 		return myId;
 	}
 
-	public IdAndPartitionId getPartitionedId() {
-		return IdAndPartitionId.forId(myId, this);
+	public Long getId() {
+		return getPid().myId;
 	}
 
 	public TermConcept getParent() {
@@ -233,7 +241,8 @@ public class TermConceptParentChildLink extends BasePartitionable implements Ser
 	public TermConceptParentChildLink setParent(TermConcept theParent) {
 		myParent = theParent;
 		myParentPid = theParent.getId();
-		setPartitionId(theParent.getPartitionId());
+		myPartitionIdValue = theParent.getPartitionId().getPartitionId();
+		getPid().myPartitionIdValue = myPartitionIdValue;
 		return this;
 	}
 
@@ -257,5 +266,31 @@ public class TermConceptParentChildLink extends BasePartitionable implements Ser
 		// ********************************************
 		// IF YOU ADD HERE MAKE SURE ORDER IS PRESERVED
 		ISA
+	}
+
+	@Embeddable
+	public static class TermConceptParentChildLinkPk {
+
+		@Override
+		public boolean equals(Object theO) {
+			if (this == theO) return true;
+			if (!(theO instanceof TermConceptParentChildLinkPk)) return false;
+			TermConceptParentChildLinkPk that = (TermConceptParentChildLinkPk) theO;
+			return Objects.equals(myId, that.myId) && Objects.equals(myPartitionIdValue, that.myPartitionIdValue);
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(myId, myPartitionIdValue);
+		}
+
+		@SequenceGenerator(name = "SEQ_CONCEPT_PC_PID", sequenceName = "SEQ_CONCEPT_PC_PID")
+		@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_CONCEPT_PC_PID")
+		@Column(name = "PID")
+		private Long myId;
+
+		@ConditionalIdProperty
+		@Column(name = PartitionablePartitionId.PARTITION_ID, nullable = false)
+		private Integer myPartitionIdValue;
 	}
 }
