@@ -140,7 +140,7 @@ import java.util.stream.Collectors;
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.UNDESIRED_RESOURCE_LINKAGES_FOR_EVERYTHING_ON_PATIENT_INSTANCE;
 import static ca.uhn.fhir.jpa.search.builder.QueryStack.LOCATION_POSITION;
 import static ca.uhn.fhir.jpa.search.builder.QueryStack.SearchForIdsParams.with;
-import static ca.uhn.fhir.jpa.util.InClauseNormalizer.*;
+import static ca.uhn.fhir.jpa.util.InClauseNormalizer.normalizeIdListForInClause;
 import static java.util.Objects.requireNonNull;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.defaultString;
@@ -464,6 +464,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 						.chunk(
 								fulltextExecutor,
 								SearchBuilder.getMaximumPageSize(),
+								// for each list of (SearchBuilder.getMaximumPageSize())
+								// we create a chunked query and add it to 'queries'
 								t -> doCreateChunkedQueries(
 										theParams, t, theOffset, sort, theCountOnlyFlag, theRequest, queries));
 			}
@@ -2343,15 +2345,9 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				if (myNext == null) {
 					// no next means we need a new query (if one is available)
 					while (myResultsIterator.hasNext() || !myQueryList.isEmpty()) {
-						// Update iterator with next chunk if necessary.
-						if (!myResultsIterator.hasNext()) {
+						// Iterate through our results iterators until we find a match
+						while (!myResultsIterator.hasNext()) {
 							retrieveNextIteratorQuery();
-
-							// if our new results iterator is also empty
-							// we're done here
-							if (!myResultsIterator.hasNext()) {
-								break;
-							}
 						}
 
 						Long nextLong = myResultsIterator.next();
