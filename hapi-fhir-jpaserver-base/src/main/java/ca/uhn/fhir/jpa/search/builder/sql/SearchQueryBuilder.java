@@ -533,8 +533,7 @@ public class SearchQueryBuilder {
 								"order by @@version", "order by " + mySelectedResourceIdColumn.getColumnNameSQL());
 					} else {
 						// not certain if this case can happen, but ordering by the ordinal first column should always
-						// be syntactically valid
-						// and seems like a better option than ordering by a static value regardless
+						// be syntactically valid and seems like a better option than ordering by a static value regardless
 						sql = sql.replace("order by @@version", "order by 1");
 					}
 				}
