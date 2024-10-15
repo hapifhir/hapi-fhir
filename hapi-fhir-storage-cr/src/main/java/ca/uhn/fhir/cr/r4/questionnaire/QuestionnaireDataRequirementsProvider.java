@@ -29,6 +29,7 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Questionnaire;
@@ -36,6 +37,7 @@ import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static ca.uhn.fhir.cr.common.CanonicalHelper.getCanonicalType;
+import static ca.uhn.fhir.cr.common.IdHelper.getIdType;
 
 public class QuestionnaireDataRequirementsProvider {
 	@Autowired
@@ -63,7 +65,7 @@ public class QuestionnaireDataRequirementsProvider {
 			@OperationParam(name = "version") String theVersion,
 			RequestDetails theRequestDetails)
 			throws InternalErrorException, FHIRException {
-		IdType id = theId == null ? null : new IdType("Questionnaire", theId);
+		IIdType id = getIdType(FhirVersionEnum.R4, "Questionnaire", theId);
 		CanonicalType canonicalType = getCanonicalType(FhirVersionEnum.R4, theCanonical, theUrl, theVersion);
 		return myQuestionnaireFactory
 				.create(theRequestDetails)

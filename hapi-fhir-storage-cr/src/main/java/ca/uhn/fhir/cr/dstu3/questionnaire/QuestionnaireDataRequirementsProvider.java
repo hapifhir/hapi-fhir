@@ -32,10 +32,12 @@ import org.hl7.fhir.dstu3.model.Questionnaire;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static ca.uhn.fhir.cr.common.CanonicalHelper.getCanonicalType;
+import static ca.uhn.fhir.cr.common.IdHelper.getIdType;
 
 public class QuestionnaireDataRequirementsProvider {
 	@Autowired
@@ -63,7 +65,7 @@ public class QuestionnaireDataRequirementsProvider {
 			@OperationParam(name = "version") String theVersion,
 			RequestDetails theRequestDetails)
 			throws InternalErrorException, FHIRException {
-		IdType id = theId == null ? null : new IdType("Questionnaire", theId);
+		IIdType id = getIdType(FhirVersionEnum.DSTU3, "Questionnaire", theId);
 		StringType canonicalType = getCanonicalType(FhirVersionEnum.DSTU3, theCanonical, theUrl, theVersion);
 		return myQuestionnaireFactory
 				.create(theRequestDetails)

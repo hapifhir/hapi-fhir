@@ -69,7 +69,7 @@ public class QuestionnaireResponseExtractProvider {
 				.create(theRequestDetails)
 				.extract(
 						Eithers.for2(theId, theQuestionnaireResponse),
-						theQuestionnaire == null ? null : Eithers.for2(null, theQuestionnaire),
+						theQuestionnaire == null ? null : Eithers.forRight(theQuestionnaire),
 						theParameters,
 						theData,
 						theUseServerData == null ? Boolean.TRUE : theUseServerData.booleanValue());
@@ -87,7 +87,7 @@ public class QuestionnaireResponseExtractProvider {
 		return myQuestionnaireResponseProcessorFactory
 				.create(theRequestDetails)
 				.extract(
-						Eithers.for2(null, theQuestionnaireResponse),
+						Eithers.forRight(theQuestionnaireResponse),
 						theQuestionnaire == null ? null : Eithers.for2(null, theQuestionnaire),
 						theParameters,
 						theData,

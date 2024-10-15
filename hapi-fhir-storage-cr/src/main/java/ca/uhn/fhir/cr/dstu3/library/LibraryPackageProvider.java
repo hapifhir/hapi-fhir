@@ -33,10 +33,12 @@ import org.hl7.fhir.dstu3.model.Library;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static ca.uhn.fhir.cr.common.CanonicalHelper.getCanonicalType;
+import static ca.uhn.fhir.cr.common.IdHelper.getIdType;
 
 public class LibraryPackageProvider {
 	@Autowired
@@ -68,7 +70,7 @@ public class LibraryPackageProvider {
 			@OperationParam(name = "usePut") BooleanType theIsPut,
 			RequestDetails theRequestDetails)
 			throws InternalErrorException, FHIRException {
-		IdType id = theId == null ? null : new IdType("PlanDefinition", theId);
+		IIdType id = getIdType(FhirVersionEnum.DSTU3, "Library", theId);
 		StringType canonicalType = getCanonicalType(FhirVersionEnum.DSTU3, theCanonical, theUrl, theVersion);
 		return myLibraryProcessorFactory
 				.create(theRequestDetails)

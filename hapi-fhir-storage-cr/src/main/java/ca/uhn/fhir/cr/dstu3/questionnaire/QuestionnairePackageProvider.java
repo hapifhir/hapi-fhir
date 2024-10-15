@@ -27,10 +27,12 @@ import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static ca.uhn.fhir.cr.common.CanonicalHelper.getCanonicalType;
+import static ca.uhn.fhir.cr.common.IdHelper.getIdType;
 
 public class QuestionnairePackageProvider {
 	@Autowired
@@ -67,16 +69,18 @@ public class QuestionnairePackageProvider {
 
 	@Operation(name = ProviderConstants.CR_OPERATION_PACKAGE, idempotent = true, type = Questionnaire.class)
 	public Bundle packageQuestionnaire(
+			@OperationParam(name = "id") String theId,
 			@OperationParam(name = "canonical") String theCanonical,
 			@OperationParam(name = "url") String theUrl,
 			@OperationParam(name = "version") String theVersion,
 			@OperationParam(name = "usePut") BooleanType theIsPut,
 			RequestDetails theRequestDetails) {
+		IIdType id = getIdType(FhirVersionEnum.DSTU3, "Questionnaire", theId);
 		StringType canonicalType = getCanonicalType(FhirVersionEnum.DSTU3, theCanonical, theUrl, theVersion);
 		return (Bundle) myQuestionnaireProcessorFactory
 				.create(theRequestDetails)
 				.packageQuestionnaire(
-						Eithers.for3(canonicalType, null, null),
+						Eithers.for3(canonicalType, id, null),
 						theIsPut == null ? Boolean.FALSE : theIsPut.booleanValue());
 	}
 }
