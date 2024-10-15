@@ -12,7 +12,6 @@ public interface IValidationProviders {
 	String VALUE_SET_URL = "http://value.set/url";
 	String DISPLAY = "Explanation for code TestCode.";
 	String LANGUAGE = "en";
-	String SAMPLE_MESSAGE = "This is a sample message";
 	String ERROR_MESSAGE = "This is an error message";
 
 	interface IMyCodeSystemProvider extends IResourceProvider {

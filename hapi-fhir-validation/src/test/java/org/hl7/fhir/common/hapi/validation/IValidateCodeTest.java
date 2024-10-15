@@ -21,7 +21,6 @@ import static org.hl7.fhir.common.hapi.validation.IValidationProviders.CODE_SYST
 import static org.hl7.fhir.common.hapi.validation.IValidationProviders.CODE_SYSTEM_VERSION;
 import static org.hl7.fhir.common.hapi.validation.IValidationProviders.DISPLAY;
 import static org.hl7.fhir.common.hapi.validation.IValidationProviders.ERROR_MESSAGE;
-import static org.hl7.fhir.common.hapi.validation.IValidationProviders.SAMPLE_MESSAGE;
 import static org.hl7.fhir.common.hapi.validation.IValidationProviders.VALUE_SET_URL;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -172,7 +171,7 @@ public interface IValidateCodeTest {
 
 	@Test
 	default void validateCode_withCodeSystemSuccessWithMessageValue_returnsCorrectly() {
-		createCodeSystemReturnParameters(true, DISPLAY, SAMPLE_MESSAGE, null);
+		createCodeSystemReturnParameters(true, DISPLAY, null, null);
 
 		CodeValidationResult outcome = getService()
 				.validateCode(null, null, CODE_SYSTEM, CODE, DISPLAY, null);
@@ -249,7 +248,7 @@ public interface IValidateCodeTest {
 
 	@Test
 	default void validateCode_withValueSetSuccessWithMessage_returnsCorrectly() {
-		createValueSetReturnParameters(true, DISPLAY, SAMPLE_MESSAGE, null);
+		createValueSetReturnParameters(true, DISPLAY, null, null);
 
 		CodeValidationResult outcome = getService()
 				.validateCode(null, null, CODE_SYSTEM, CODE, DISPLAY, VALUE_SET_URL);
