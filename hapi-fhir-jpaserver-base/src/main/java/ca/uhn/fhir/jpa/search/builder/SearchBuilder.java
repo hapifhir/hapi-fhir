@@ -1589,7 +1589,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			if (maxCount != null) {
 				LinkedList<Object> bindVariables = new LinkedList<>();
 				sql = SearchQueryBuilder.applyLimitToSql(
-						myDialectProvider.getDialect(), 0, maxCount, sql, null, bindVariables);
+						myDialectProvider.getDialect(), null, maxCount, sql, null, bindVariables);
 
 				// The dialect SQL limiter uses positional params, but we're using
 				// named params here, so we need to replace the positional params
