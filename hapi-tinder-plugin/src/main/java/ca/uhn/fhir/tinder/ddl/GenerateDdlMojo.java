@@ -36,11 +36,18 @@ public class GenerateDdlMojo extends AbstractMojo {
 	@Parameter
 	String outputDirectory;
 
+	@Parameter(defaultValue = "false")
+	boolean skip;
+
 	@Parameter(defaultValue = "${project}", readonly = true)
 	private transient MavenProject project;
 
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
+		if (skip) {
+			return;
+		}
+
 		ourLog.info("Going to generate DDL files in directory: {}", outputDirectory);
 
 		File outputDirectoryFile = new File(outputDirectory);
