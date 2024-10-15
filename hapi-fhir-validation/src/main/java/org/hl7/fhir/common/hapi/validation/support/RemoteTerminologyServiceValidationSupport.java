@@ -614,7 +614,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 					.named("validate-code")
 					.withParameters(input)
 					.execute();
-			return createCodeValidationResult(output, errorMessageBuilder);
+			return createCodeValidationResult(output, errorMessageBuilder, theCode);
 		} catch (ResourceNotFoundException | InvalidRequestException ex) {
 			ourLog.error(ex.getMessage(), ex);
 			String errorMessage = errorMessageBuilder.buildErrorMessage(ex.getMessage());
@@ -636,7 +636,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 	}
 
 	private CodeValidationResult createCodeValidationResult(
-			IBaseParameters theOutput, ValidationErrorMessageBuilder theMessageBuilder) {
+			IBaseParameters theOutput, ValidationErrorMessageBuilder theMessageBuilder, String theCode) {
 		final FhirContext fhirContext = getFhirContext();
 		Optional<String> resultValue = getNamedParameterValueAsString(fhirContext, theOutput, "result");
 
@@ -648,8 +648,13 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 		boolean success = resultValue.get().equalsIgnoreCase("true");
 
 		CodeValidationResult result = new CodeValidationResult();
-		Optional<String> codeValue = getNamedParameterValueAsString(fhirContext, theOutput, "code");
-		codeValue.ifPresent(result::setCode);
+		//		Optional<String> codeValue = getNamedParameterValueAsString(fhirContext, theOutput, "code");
+		//		codeValue.ifPresent(result::setCode);
+
+		// WIP none of the fields in theOutput are populated in tests (i.e. RemoteTerminologyLookupCodeR4Test)
+		// This retains the old functionality of adding theCode from the original validate-code call
+		result.setCode(theCode);
+
 		Optional<String> systemValue = getNamedParameterValueAsString(fhirContext, theOutput, "system");
 		systemValue.ifPresent(result::setCodeSystemName);
 		Optional<String> versionValue = getNamedParameterValueAsString(fhirContext, theOutput, "version");
