@@ -287,8 +287,12 @@ public class TermConceptParentChildLink implements Serializable {
 
 		@Override
 		public boolean equals(Object theO) {
-			if (this == theO){ return true;}
-			if (!(theO instanceof TermConceptParentChildLinkPk)){ return false;}
+			if (this == theO) {
+				return true;
+			}
+			if (!(theO instanceof TermConceptParentChildLinkPk)) {
+				return false;
+			}
 			TermConceptParentChildLinkPk that = (TermConceptParentChildLinkPk) theO;
 			return Objects.equals(myId, that.myId) && Objects.equals(myPartitionIdValue, that.myPartitionIdValue);
 		}
@@ -297,6 +301,5 @@ public class TermConceptParentChildLink implements Serializable {
 		public String toString() {
 			return myPartitionIdValue + "/" + myId;
 		}
-
 	}
 }

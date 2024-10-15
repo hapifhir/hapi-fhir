@@ -640,8 +640,12 @@ public class TermConcept implements Serializable {
 
 		@Override
 		public boolean equals(Object theO) {
-			if (this == theO){ return true;}
-			if (!(theO instanceof TermConceptPk)){ return false;}
+			if (this == theO) {
+				return true;
+			}
+			if (!(theO instanceof TermConceptPk)) {
+				return false;
+			}
 			TermConceptPk that = (TermConceptPk) theO;
 			return Objects.equals(myId, that.myId) && Objects.equals(myPartitionIdValue, that.myPartitionIdValue);
 		}
