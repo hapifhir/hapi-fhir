@@ -103,11 +103,11 @@ public class ParametersUtilR4Test {
 		p.addParameter().setName("foo").setResource(outcome);
 		p.addParameter().setName("bar").setValue(new StringType("value1"));
 
-		Optional<IBaseResource> fooResource = ParametersUtil.getNamedParameterValueAsResource(ourFhirContext,p, "foo");
+		Optional<IBaseResource> fooResource = ParametersUtil.getNamedParameterResource(ourFhirContext,p, "foo");
 		assertThat(fooResource).isPresent();
 		assertThat(fooResource.get()).isEqualTo(outcome);
 
-		Optional<IBaseResource> barResource = ParametersUtil.getNamedParameterValueAsResource(ourFhirContext,p, "bar");
+		Optional<IBaseResource> barResource = ParametersUtil.getNamedParameterResource(ourFhirContext,p, "bar");
 		assertThat(barResource).isEmpty();
 	}
 }
