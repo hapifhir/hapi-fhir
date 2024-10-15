@@ -220,12 +220,11 @@ public class TermConcept implements Serializable {
 	@Column(name = "PARENT_PIDS_VC", nullable = true, length = Length.LONG32)
 	private String myParentPidsVc;
 
-	//	@OneToMany(
-	//			cascade = {},
-	//			fetch = FetchType.LAZY,
-	//			mappedBy = "myChild")
-	@Transient
-	private transient List<TermConceptParentChildLink> myParents;
+	@OneToMany(
+			cascade = {},
+			fetch = FetchType.LAZY,
+			mappedBy = "myChild")
+	private List<TermConceptParentChildLink> myParents;
 
 	@Column(name = "CODE_SEQUENCE", nullable = true)
 	private Integer mySequence;
@@ -624,10 +623,25 @@ public class TermConcept implements Serializable {
 		@Column(name = PartitionablePartitionId.PARTITION_ID, nullable = false)
 		private Integer myPartitionIdValue;
 
+		/**
+		 * Constructor
+		 */
+		public TermConceptPk() {
+			super();
+		}
+
+		/**
+		 * Constructor
+		 */
+		public TermConceptPk(Long theId, Integer thePartitionId) {
+			myId = theId;
+			myPartitionIdValue = thePartitionId;
+		}
+
 		@Override
 		public boolean equals(Object theO) {
-			if (this == theO) return true;
-			if (!(theO instanceof TermConceptPk)) return false;
+			if (this == theO){ return true;}
+			if (!(theO instanceof TermConceptPk)){ return false;}
 			TermConceptPk that = (TermConceptPk) theO;
 			return Objects.equals(myId, that.myId) && Objects.equals(myPartitionIdValue, that.myPartitionIdValue);
 		}
@@ -635,6 +649,11 @@ public class TermConcept implements Serializable {
 		@Override
 		public int hashCode() {
 			return Objects.hash(myId, myPartitionIdValue);
+		}
+
+		@Override
+		public String toString() {
+			return myPartitionIdValue + "/" + myId;
 		}
 	}
 }

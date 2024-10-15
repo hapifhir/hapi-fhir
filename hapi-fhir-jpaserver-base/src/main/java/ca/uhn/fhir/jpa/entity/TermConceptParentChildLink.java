@@ -271,19 +271,6 @@ public class TermConceptParentChildLink implements Serializable {
 	@Embeddable
 	public static class TermConceptParentChildLinkPk {
 
-		@Override
-		public boolean equals(Object theO) {
-			if (this == theO) return true;
-			if (!(theO instanceof TermConceptParentChildLinkPk)) return false;
-			TermConceptParentChildLinkPk that = (TermConceptParentChildLinkPk) theO;
-			return Objects.equals(myId, that.myId) && Objects.equals(myPartitionIdValue, that.myPartitionIdValue);
-		}
-
-		@Override
-		public int hashCode() {
-			return Objects.hash(myId, myPartitionIdValue);
-		}
-
 		@SequenceGenerator(name = "SEQ_CONCEPT_PC_PID", sequenceName = "SEQ_CONCEPT_PC_PID")
 		@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_CONCEPT_PC_PID")
 		@Column(name = "PID")
@@ -292,5 +279,24 @@ public class TermConceptParentChildLink implements Serializable {
 		@ConditionalIdProperty
 		@Column(name = PartitionablePartitionId.PARTITION_ID, nullable = false)
 		private Integer myPartitionIdValue;
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(myId, myPartitionIdValue);
+		}
+
+		@Override
+		public boolean equals(Object theO) {
+			if (this == theO){ return true;}
+			if (!(theO instanceof TermConceptParentChildLinkPk)){ return false;}
+			TermConceptParentChildLinkPk that = (TermConceptParentChildLinkPk) theO;
+			return Objects.equals(myId, that.myId) && Objects.equals(myPartitionIdValue, that.myPartitionIdValue);
+		}
+
+		@Override
+		public String toString() {
+			return myPartitionIdValue + "/" + myId;
+		}
+
 	}
 }

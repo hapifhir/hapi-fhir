@@ -61,6 +61,7 @@ import ca.uhn.fhir.jpa.entity.TermConceptPropertyTypeEnum;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
@@ -297,6 +298,9 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 
 	@Autowired
 	private ValueSetConceptAccumulatorFactory myValueSetConceptAccumulatorFactory;
+
+	@Autowired
+	private PartitionSettings myPartitionSettings;
 
 	@Override
 	public boolean isCodeSystemSupported(ValidationSupportContext theValidationSupportContext, String theSystem) {
@@ -1768,7 +1772,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			BooleanPredicateClausesStep<?> b,
 			ValueSet.ConceptSetFilterComponent theFilter) {
 
-		List<Long> parentPids = getCodeParentPids(theSystem, theFilter.getProperty(), theFilter.getValue());
+		List<TermConcept.TermConceptPk> parentPids = getCodeParentPids(theSystem, theFilter.getProperty(), theFilter.getValue());
 		if (parentPids.isEmpty()) {
 			// Can't return empty must, because it wil match according to other predicates.
 			// Some day there will be a 'matchNone' predicate
@@ -1799,7 +1803,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			throw new InvalidRequestException(Msg.code(2062) + "Invalid filter criteria - no codes specified");
 		}
 
-		List<Long> descendantCodePidList = getMultipleCodeParentPids(theSystem, theFilter.getProperty(), values);
+		List<TermConcept.TermConceptPk> descendantCodePidList = getMultipleCodeParentPids(theSystem, theFilter.getProperty(), values);
 
 		b.must(f.bool(innerB -> descendantCodePidList.forEach(
 				pId -> innerB.should(f.match().field("myId").matching(pId)))));
@@ -1808,15 +1812,16 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	/**
 	 * Returns the list of parentId(s) of the TermConcept representing theValue as a code
 	 */
-	private List<Long> getCodeParentPids(String theSystem, String theProperty, String theValue) {
+	private List<TermConcept.TermConceptPk> getCodeParentPids(String theSystem, String theProperty, String theValue) {
 		TermConcept code = findCode(theSystem, theValue)
 				.orElseThrow(() -> new InvalidRequestException("Invalid filter criteria - code does not exist: {"
 						+ Constants.codeSystemWithDefaultDescription(theSystem) + "}" + theValue));
 
 		String[] parentPids = code.getParentPidsAsString().split(" ");
-		List<Long> retVal = Arrays.stream(parentPids)
+		List<TermConcept.TermConceptPk> retVal = Arrays.stream(parentPids)
 				.filter(pid -> !StringUtils.equals(pid, "NONE"))
 				.map(Long::parseLong)
+				.map(t->new TermConcept.TermConceptPk(t, myPartitionSettings.getDefaultPartitionId()))
 				.collect(Collectors.toList());
 		logFilteringValueOnProperty(theValue, theProperty);
 		return retVal;
@@ -1825,7 +1830,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	/**
 	 * Returns the list of parentId(s) of the TermConcept representing theValue as a code
 	 */
-	private List<Long> getMultipleCodeParentPids(String theSystem, String theProperty, String[] theValues) {
+	private List<TermConcept.TermConceptPk> getMultipleCodeParentPids(String theSystem, String theProperty, String[] theValues) {
 		List<String> valuesList = Arrays.asList(theValues);
 		List<TermConcept> termConcepts = findCodes(theSystem, valuesList);
 		if (valuesList.size() != termConcepts.size()) {
@@ -1834,10 +1839,11 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 					+ Constants.codeSystemWithDefaultDescription(theSystem) + "}: " + exMsg);
 		}
 
-		List<Long> retVal = termConcepts.stream()
+		List<TermConcept.TermConceptPk> retVal = termConcepts.stream()
 				.flatMap(tc -> Arrays.stream(tc.getParentPidsAsString().split(" ")))
 				.filter(pid -> !StringUtils.equals(pid, "NONE"))
 				.map(Long::parseLong)
+				.map(t->new TermConcept.TermConceptPk(t, myPartitionSettings.getDefaultPartitionId()))
 				.collect(Collectors.toList());
 
 		logFilteringValueOnProperties(valuesList, theProperty);
