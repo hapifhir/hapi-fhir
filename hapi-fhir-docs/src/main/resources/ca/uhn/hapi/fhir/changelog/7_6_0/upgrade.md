@@ -8,7 +8,7 @@ UTC.
 
 ## CareGaps Operation Parameters
 
-`$care-gaps` operation parameters have dropped, because they are not used or likely to be implemented
+Certain `$care-gaps` operation parameters have been dropped, because they are not used or likely to be implemented
 * topic
 * practitioner: is now callable via 'subject' parameter
 * organization
