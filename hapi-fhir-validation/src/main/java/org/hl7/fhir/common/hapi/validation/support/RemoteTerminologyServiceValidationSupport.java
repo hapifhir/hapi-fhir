@@ -45,7 +45,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.util.ParametersUtil.getNamedParameterValueAsResource;
+import static ca.uhn.fhir.util.ParametersUtil.getNamedParameterResource;
 import static ca.uhn.fhir.util.ParametersUtil.getNamedParameterValueAsString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -614,7 +614,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 					.named("validate-code")
 					.withParameters(input)
 					.execute();
-			return createCodeValidationResult(output, errorMessageBuilder, theCode);
+			return createCodeValidationResult(output, errorMessageBuilder);
 		} catch (ResourceNotFoundException | InvalidRequestException ex) {
 			ourLog.error(ex.getMessage(), ex);
 			String errorMessage = errorMessageBuilder.buildErrorMessage(ex.getMessage());
@@ -636,7 +636,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 	}
 
 	private CodeValidationResult createCodeValidationResult(
-			IBaseParameters theOutput, ValidationErrorMessageBuilder theMessageBuilder, String theCode) {
+			IBaseParameters theOutput, ValidationErrorMessageBuilder theMessageBuilder) {
 		final FhirContext fhirContext = getFhirContext();
 		Optional<String> resultValue = getNamedParameterValueAsString(fhirContext, theOutput, "result");
 
@@ -648,13 +648,8 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 		boolean success = resultValue.get().equalsIgnoreCase("true");
 
 		CodeValidationResult result = new CodeValidationResult();
-		//		Optional<String> codeValue = getNamedParameterValueAsString(fhirContext, theOutput, "code");
-		//		codeValue.ifPresent(result::setCode);
-
-		// WIP none of the fields in theOutput are populated in tests (i.e. RemoteTerminologyLookupCodeR4Test)
-		// This retains the old functionality of adding theCode from the original validate-code call
-		result.setCode(theCode);
-
+		Optional<String> codeValue = getNamedParameterValueAsString(fhirContext, theOutput, "code");
+		codeValue.ifPresent(result::setCode);
 		Optional<String> systemValue = getNamedParameterValueAsString(fhirContext, theOutput, "system");
 		systemValue.ifPresent(result::setCodeSystemName);
 		Optional<String> versionValue = getNamedParameterValueAsString(fhirContext, theOutput, "version");
@@ -674,7 +669,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 		Optional<String> messageValue = getNamedParameterValueAsString(fhirContext, theOutput, "message");
 		messageValue.ifPresent(value -> result.setMessage(theMessageBuilder.buildErrorMessage(value)));
 
-		Optional<IBaseResource> issuesValue = getNamedParameterValueAsResource(fhirContext, theOutput, "issues");
+		Optional<IBaseResource> issuesValue = getNamedParameterResource(fhirContext, theOutput, "issues");
 		if (issuesValue.isPresent()) {
 			// it seems to be safe to cast to IBaseOperationOutcome as any other type would not reach this point
 			createCodeValidationIssues(
