@@ -35,7 +35,7 @@ import jakarta.persistence.IdClass;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinColumns;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
@@ -70,7 +70,7 @@ public class TermCodeSystem extends BasePartitionable implements Serializable {
 	@Column(name = "CODE_SYSTEM_URI", nullable = false, length = MAX_URL_LENGTH)
 	private String myCodeSystemUri;
 
-	@OneToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumns(
 			value = {
 				@JoinColumn(
@@ -98,7 +98,7 @@ public class TermCodeSystem extends BasePartitionable implements Serializable {
 	@Column(name = "PID")
 	private Long myId;
 
-	@OneToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumns(
 			value = {
 				@JoinColumn(

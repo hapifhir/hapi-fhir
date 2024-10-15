@@ -37,8 +37,8 @@ import jakarta.persistence.IdClass;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinColumns;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
@@ -91,7 +91,7 @@ public class TermValueSet extends BasePartitionable implements Serializable {
 	@Column(name = "VER", nullable = true, length = MAX_VER_LENGTH)
 	private String myVersion;
 
-	@OneToOne()
+	@ManyToOne()
 	@JoinColumns(
 			value = {
 				@JoinColumn(

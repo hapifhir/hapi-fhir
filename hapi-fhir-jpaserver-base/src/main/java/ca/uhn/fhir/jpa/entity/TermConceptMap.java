@@ -34,8 +34,8 @@ import jakarta.persistence.IdClass;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinColumns;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
@@ -81,7 +81,7 @@ public class TermConceptMap extends BasePartitionable implements Serializable {
 	@Column(name = "PID")
 	private Long myId;
 
-	@OneToOne()
+	@ManyToOne()
 	@JoinColumns(
 			value = {
 				@JoinColumn(

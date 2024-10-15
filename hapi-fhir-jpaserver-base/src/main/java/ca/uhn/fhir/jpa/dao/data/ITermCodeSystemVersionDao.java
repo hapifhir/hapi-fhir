@@ -64,8 +64,8 @@ public interface ITermCodeSystemVersionDao
 	@Query("SELECT cs FROM TermCodeSystemVersion cs WHERE cs.myResource.myPid = :resource_id")
 	List<TermCodeSystemVersion> findByCodeSystemResourcePid(@Param("resource_id") JpaPid theCodeSystemResourcePid);
 
-	@Query(
-			"SELECT cs FROM TermCodeSystemVersion cs WHERE cs.myCodeSystemHavingThisVersionAsCurrentVersionIfAny.myResource.myPid.myId = :resource_id")
+	@Query("SELECT csv FROM TermCodeSystemVersion csv " + "JOIN TermCodeSystem cs ON (cs.myCurrentVersion = csv) "
+			+ "WHERE cs.myResource.myPid.myId = :resource_id")
 	TermCodeSystemVersion findCurrentVersionForCodeSystemResourcePid(
 			@Param("resource_id") Long theCodeSystemResourcePid);
 

@@ -25,6 +25,7 @@ import org.hibernate.mapping.PrimaryKey;
 import org.hibernate.mapping.Property;
 import org.hibernate.mapping.Table;
 import org.hibernate.mapping.ToOne;
+import org.hibernate.mapping.UniqueKey;
 import org.hibernate.mapping.Value;
 import org.hibernate.service.UnknownServiceException;
 import org.hibernate.type.ComponentType;
@@ -263,6 +264,12 @@ public class ConditionalIdMappingContributor implements org.hibernate.boot.spi.A
 							.removeIf(t -> myQualifiedIdRemovedColumnNames.contains(
 									foreignKey.getReferencedTable().getName() + "#" + t.getName()));
 				}
+			}
+
+			for (UniqueKey uniqueKey : table.getUniqueKeys().values()) {
+				uniqueKey
+						.getColumns()
+						.removeIf(t -> myQualifiedIdRemovedColumnNames.contains(table.getName() + "#" + t.getName()));
 			}
 		}
 

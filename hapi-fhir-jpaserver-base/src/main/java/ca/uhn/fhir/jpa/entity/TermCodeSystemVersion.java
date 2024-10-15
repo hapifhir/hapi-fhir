@@ -38,7 +38,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinColumns;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
@@ -85,7 +84,7 @@ public class TermCodeSystemVersion extends BasePartitionable implements Serializ
 	//	@Column(name = PartitionablePartitionId.PARTITION_ID, nullable = true, insertable = false, updatable = false)
 	//	private Integer myPartitionIdValue;
 
-	@OneToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumns(
 			value = {
 				@JoinColumn(
@@ -135,10 +134,6 @@ public class TermCodeSystemVersion extends BasePartitionable implements Serializ
 
 	@Column(name = "CODESYSTEM_PID", insertable = true, updatable = true, nullable = true)
 	private Long myCodeSystemPid;
-
-	@SuppressWarnings("unused")
-	@OneToOne(mappedBy = "myCurrentVersion", optional = true, fetch = FetchType.LAZY)
-	private TermCodeSystem myCodeSystemHavingThisVersionAsCurrentVersionIfAny;
 
 	@Column(name = "CS_DISPLAY", nullable = true, updatable = true, length = MAX_VERSION_LENGTH)
 	private String myCodeSystemDisplayName;
