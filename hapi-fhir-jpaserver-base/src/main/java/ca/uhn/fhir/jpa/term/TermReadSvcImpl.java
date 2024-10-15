@@ -1658,7 +1658,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 
 			b.must(f.bool()
 					.should(f.match().field("myParentPids").matching("" + code.getId()))
-					.should(f.match().field("myId").matching(code.getId())));
+					.should(f.match().field("myId").matching(code.getPid())));
 		} else if (theFilter.getOp() == ValueSet.FilterOperator.DESCENDENTOF) {
 			ourLog.debug(
 					" * Filtering on codes with a parent of {}/{}/{}", code.getId(), code.getCode(), code.getDisplay());
@@ -2736,7 +2736,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		List<TermConcept> fetch = theSearchSession
 				.search(TermConcept.class)
 				.where(f -> f.bool()
-						.must(f.match().field("myId").matching(theRight.getId()))
+						.must(f.match().field("myId").matching(theRight.getPid()))
 						.must(f.match().field("myParentPids").matching(Long.toString(theLeft.getId()))))
 				.fetchHits(1);
 
