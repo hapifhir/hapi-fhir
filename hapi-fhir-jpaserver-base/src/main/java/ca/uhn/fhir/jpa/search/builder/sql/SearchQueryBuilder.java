@@ -832,10 +832,12 @@ public class SearchQueryBuilder {
 				return BinaryCondition.greaterThanOrEq(theColumn, generatePlaceholder(theValue));
 			case NOT_EQUAL:
 				return BinaryCondition.notEqualTo(theColumn, generatePlaceholder(theValue));
+			case EQUAL:
+				// NB: fhir searches are always range searches;
+				// which is why we do not use "EQUAL"
 			case STARTS_AFTER:
 			case APPROXIMATE:
 			case ENDS_BEFORE:
-			case EQUAL:
 			default:
 				throw new IllegalArgumentException(Msg.code(1263));
 		}
