@@ -31,6 +31,9 @@ import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.Parameters;
 import org.hl7.fhir.r5.model.Patient;
+import org.hl7.fhir.r5.model.Practitioner;
+import org.hl7.fhir.r5.model.PractitionerRole;
+import org.hl7.fhir.r5.model.Reference;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -158,6 +161,36 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
 
 		assertThat(values).as(values.toString()).containsExactlyInAnyOrder(expectedIds.toArray(new String[0]));
     }
+
+	/**
+	 * See #6199
+	 */
+	@Test
+	public void testSearchWithInclude() {
+		// Setup
+		IGenericClient client = myServer.getFhirClient();
+
+		Practitioner p = new Practitioner();
+		p.setActive(true);
+		IIdType pId = client.create().resource(p).execute().getId().toUnqualifiedVersionless();
+
+		PractitionerRole practitionerRole = new PractitionerRole();
+		practitionerRole.setPractitioner(new Reference(pId));
+		IIdType prId = client.create().resource(practitionerRole).execute().getId().toUnqualifiedVersionless();
+
+		// Test
+		Bundle results = client
+			.search()
+			.forResource(PractitionerRole.class)
+			.include(PractitionerRole.INCLUDE_PRACTITIONER)
+			.returnBundle(Bundle.class)
+			.execute();
+
+		// Verify
+		List<String> actualIds = toUnqualifiedVersionlessIdValues(results);
+		assertThat(actualIds).asList().containsExactly(prId.getValue(), pId.getValue());
+	}
+
 
 	@ParameterizedTest
 	@CsvSource(textBlock = """

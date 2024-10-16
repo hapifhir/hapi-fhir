@@ -540,90 +540,117 @@ public class SearchQueryBuilder {
 		if (maxResultsToFetch != null || offset != null) {
 
 			maxResultsToFetch = defaultIfNull(maxResultsToFetch, 10000);
+			String selectedResourceIdColumn = mySelectedResourceIdColumn.getColumnNameSQL();
 
-			AbstractLimitHandler limitHandler = (AbstractLimitHandler) myDialect.getLimitHandler();
-			Limit selection = new Limit();
-			selection.setFirstRow(offset);
-			selection.setMaxRows(maxResultsToFetch);
-			QueryOptions queryOptions = new QueryOptionsImpl();
-			sql = limitHandler.processSql(sql, selection, queryOptions);
-
-			int startOfQueryParameterIndex = 0;
-
-			boolean isSqlServer = (myDialect instanceof SQLServerDialect);
-			if (isSqlServer) {
-
-				/*
-				 * SQL server requires an ORDER BY clause to be present in the SQL if there is
-				 * an OFFSET/FETCH FIRST clause, so if there isn't already an ORDER BY clause,
-				 * the dialect will automatically add an order by with a pseudo-column name. This
-				 * happens in SQLServer2012LimitHandler.
-				 *
-				 * But, SQL Server also pukes if you include an ORDER BY on a column that you
-				 * aren't also SELECTing, if the select statement is DISTINCT. Who knows why SQL
-				 * Server is so picky.. but anyhow, this causes an issue, so we manually replace
-				 * the pseudo-column with an actual selected column.
-				 */
-				if (sql.startsWith("SELECT DISTINCT ")) {
-					if (sql.contains("order by @@version")) {
-						if (mySelectedResourceIdColumn != null) {
-							sql = sql.replace(
-									"order by @@version", "order by " + mySelectedResourceIdColumn.getColumnNameSQL());
-						}
-					}
-				}
-
-				// The SQLServerDialect has a bunch of one-off processing to deal with rules on when
-				// a limit can be used, so we can't rely on the flags that the limithandler exposes since
-				// the exact structure of the query depends on the parameters
-				if (sql.contains("top(?)")) {
-					bindVariables.add(0, maxResultsToFetch);
-				}
-				if (sql.contains("offset 0 rows fetch first ? rows only")) {
-					bindVariables.add(maxResultsToFetch);
-				}
-				if (sql.contains("offset ? rows fetch next ? rows only")) {
-					bindVariables.add(theOffset);
-					bindVariables.add(maxResultsToFetch);
-				}
-				if (offset != null && sql.contains("rownumber_")) {
-					bindVariables.add(theOffset + 1);
-					bindVariables.add(theOffset + maxResultsToFetch + 1);
-				}
-
-			} else if (limitHandler.supportsVariableLimit()) {
-
-				boolean bindLimitParametersFirst = limitHandler.bindLimitParametersFirst();
-				if (limitHandler.useMaxForLimit() && offset != null) {
-					maxResultsToFetch = maxResultsToFetch + offset;
-				}
-
-				if (limitHandler.bindLimitParametersInReverseOrder()) {
-					startOfQueryParameterIndex = bindCountParameter(
-							bindVariables,
-							maxResultsToFetch,
-							limitHandler,
-							startOfQueryParameterIndex,
-							bindLimitParametersFirst);
-					bindOffsetParameter(
-							bindVariables, offset, limitHandler, startOfQueryParameterIndex, bindLimitParametersFirst);
-				} else {
-					startOfQueryParameterIndex = bindOffsetParameter(
-							bindVariables, offset, limitHandler, startOfQueryParameterIndex, bindLimitParametersFirst);
-					bindCountParameter(
-							bindVariables,
-							maxResultsToFetch,
-							limitHandler,
-							startOfQueryParameterIndex,
-							bindLimitParametersFirst);
-				}
-			}
+			sql = applyLimitToSql(myDialect, offset, maxResultsToFetch, sql, selectedResourceIdColumn, bindVariables);
 		}
 
 		return new GeneratedSql(myMatchNothing, sql, bindVariables);
 	}
 
-	private int bindCountParameter(
+	/**
+	 * This method applies the theDialect limiter (select first NNN offset MMM etc etc..) to
+	 * a SQL string. It enhances the built-in Hibernate dialect version with some additional
+	 * enhancements.
+	 */
+	public static String applyLimitToSql(
+			Dialect theDialect,
+			Integer theOffset,
+			Integer theMaxResultsToFetch,
+			String theInputSql,
+			@Nullable String theSelectedColumnOrNull,
+			List<Object> theBindVariables) {
+		AbstractLimitHandler limitHandler = (AbstractLimitHandler) theDialect.getLimitHandler();
+		Limit selection = new Limit();
+		selection.setFirstRow(theOffset);
+		selection.setMaxRows(theMaxResultsToFetch);
+		QueryOptions queryOptions = new QueryOptionsImpl();
+		theInputSql = limitHandler.processSql(theInputSql, selection, queryOptions);
+
+		int startOfQueryParameterIndex = 0;
+
+		boolean isSqlServer = (theDialect instanceof SQLServerDialect);
+		if (isSqlServer) {
+
+			/*
+			 * SQL server requires an ORDER BY clause to be present in the SQL if there is
+			 * an OFFSET/FETCH FIRST clause, so if there isn't already an ORDER BY clause,
+			 * the theDialect will automatically add an order by with a pseudo-column name. This
+			 * happens in SQLServer2012LimitHandler.
+			 *
+			 * But, SQL Server also pukes if you include an ORDER BY on a column that you
+			 * aren't also SELECTing, if the select statement contains a UNION, INTERSECT or EXCEPT operator.
+			 * Who knows why SQL Server is so picky.. but anyhow, this causes an issue, so we manually replace
+			 * the pseudo-column with an actual selected column.
+			 */
+			if (theInputSql.contains("order by @@version")) {
+				if (theSelectedColumnOrNull != null) {
+					theInputSql = theInputSql.replace("order by @@version", "order by " + theSelectedColumnOrNull);
+				} else {
+					// not certain if this case can happen, but ordering by the ordinal first column should always
+					// be syntactically valid and seems like a better option than ordering by a static value
+					// regardless
+					theInputSql = theInputSql.replace("order by @@version", "order by 1");
+				}
+			}
+
+			// The SQLServerDialect has a bunch of one-off processing to deal with rules on when
+			// a limit can be used, so we can't rely on the flags that the limithandler exposes since
+			// the exact structure of the query depends on the parameters
+			if (theInputSql.contains("top(?)")) {
+				theBindVariables.add(0, theMaxResultsToFetch);
+			}
+			if (theInputSql.contains("offset 0 rows fetch first ? rows only")) {
+				theBindVariables.add(theMaxResultsToFetch);
+			}
+			if (theInputSql.contains("offset ? rows fetch next ? rows only")) {
+				theBindVariables.add(theOffset);
+				theBindVariables.add(theMaxResultsToFetch);
+			}
+			if (theOffset != null && theInputSql.contains("rownumber_")) {
+				theBindVariables.add(theOffset + 1);
+				theBindVariables.add(theOffset + theMaxResultsToFetch + 1);
+			}
+
+		} else if (limitHandler.supportsVariableLimit()) {
+
+			boolean bindLimitParametersFirst = limitHandler.bindLimitParametersFirst();
+			if (limitHandler.useMaxForLimit() && theOffset != null) {
+				theMaxResultsToFetch = theMaxResultsToFetch + theOffset;
+			}
+
+			if (limitHandler.bindLimitParametersInReverseOrder()) {
+				startOfQueryParameterIndex = bindCountParameter(
+						theBindVariables,
+						theMaxResultsToFetch,
+						limitHandler,
+						startOfQueryParameterIndex,
+						bindLimitParametersFirst);
+				bindOffsetParameter(
+						theBindVariables,
+						theOffset,
+						limitHandler,
+						startOfQueryParameterIndex,
+						bindLimitParametersFirst);
+			} else {
+				startOfQueryParameterIndex = bindOffsetParameter(
+						theBindVariables,
+						theOffset,
+						limitHandler,
+						startOfQueryParameterIndex,
+						bindLimitParametersFirst);
+				bindCountParameter(
+						theBindVariables,
+						theMaxResultsToFetch,
+						limitHandler,
+						startOfQueryParameterIndex,
+						bindLimitParametersFirst);
+			}
+		}
+		return theInputSql;
+	}
+
+	private static int bindCountParameter(
 			List<Object> bindVariables,
 			Integer maxResultsToFetch,
 			AbstractLimitHandler limitHandler,
@@ -639,7 +666,7 @@ public class SearchQueryBuilder {
 		return startOfQueryParameterIndex;
 	}
 
-	public int bindOffsetParameter(
+	public static int bindOffsetParameter(
 			List<Object> theBindVariables,
 			@Nullable Integer theOffset,
 			AbstractLimitHandler theLimitHandler,
