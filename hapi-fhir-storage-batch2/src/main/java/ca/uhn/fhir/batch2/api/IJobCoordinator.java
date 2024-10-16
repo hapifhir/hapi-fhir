@@ -19,9 +19,7 @@
  */
 package ca.uhn.fhir.batch2.api;
 
-import ca.uhn.fhir.batch2.model.JobInstance;
-import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
-import ca.uhn.fhir.batch2.model.StatusEnum;
+import ca.uhn.fhir.batch2.model.*;
 import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -105,4 +103,8 @@ public interface IJobCoordinator {
 	 * Fetches all jobs by job definition id
 	 */
 	List<JobInstance> getJobInstancesByJobDefinitionId(String theJobDefinitionId, int theCount, int theStart);
+
+	List<BatchWorkChunkStatusDTO> getWorkChunkStatus(String theInstanceId);
+
+	BatchInstanceStatusDTO getBatchInstanceStatus(String theInstanceId);
 }

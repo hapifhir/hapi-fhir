@@ -115,7 +115,7 @@ public class DropPrimaryKeyTask extends BaseTableTask {
 				return null; // Irrelevant:  We don't need to run the SQL for these databases.
 			case POSTGRES_9_4:
 				return "SELECT constraint_name " + "FROM information_schema.table_constraints "
-						+ "WHERE table_schema = 'public' "
+						+ "WHERE table_schema = coalesce(current_schema(), 'public') "
 						+ "AND constraint_type = 'PRIMARY KEY' "
 						+ "AND table_name = ?";
 			case ORACLE_12C:

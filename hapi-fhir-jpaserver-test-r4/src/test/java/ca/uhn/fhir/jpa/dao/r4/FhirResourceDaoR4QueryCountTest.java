@@ -2,12 +2,15 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.RunOutcome;
+import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.batch2.jobs.chunk.TypedPidJson;
 import ca.uhn.fhir.batch2.jobs.expunge.DeleteExpungeStep;
+import ca.uhn.fhir.batch2.jobs.reindex.v1.ReindexStepV1;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
-import ca.uhn.fhir.batch2.jobs.reindex.ReindexStep;
+import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
@@ -18,13 +21,13 @@ import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
 import ca.uhn.fhir.jpa.dao.data.ISearchParamPresentDao;
-import ca.uhn.fhir.jpa.reindex.ReindexTestHelper;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
 import ca.uhn.fhir.jpa.interceptor.ForceOffsetSearchModeInterceptor;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
+import ca.uhn.fhir.jpa.reindex.ReindexTestHelper;
 import ca.uhn.fhir.jpa.search.PersistedJpaSearchFirstPageBundleProvider;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.subscription.triggering.ISubscriptionTriggeringSvc;
@@ -146,7 +149,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	@Autowired
 	private ISubscriptionTriggeringSvc mySubscriptionTriggeringSvc;
 	@Autowired
-	private ReindexStep myReindexStep;
+	private ReindexStepV1 myReindexStepV1;
 	@Autowired
 	private DeleteExpungeStep myDeleteExpungeStep;
 	@Autowired
@@ -1018,7 +1021,6 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		// insert to: HFJ_RESOURCE, HFJ_RES_VER, HFJ_RES_LINK
 		assertEquals(4, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
-
 	}
 
 	@ParameterizedTest
@@ -1031,7 +1033,6 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	})
 	public void testReindexJob_OptimizeStorage(boolean theOptimisticLock, ReindexParameters.OptimizeStorageModeEnum theOptimizeStorageModeEnum, int theExpectedSelectCount, int theExpectedUpdateCount) {
 		// Setup
-
 		ResourceIdListWorkChunkJson data = new ResourceIdListWorkChunkJson();
 		IIdType patientId = createPatient(withActiveTrue());
 		IIdType orgId = createOrganization(withName("MY ORG"));
@@ -1056,7 +1057,14 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		// execute
 		myCaptureQueriesListener.clear();
-		RunOutcome outcome = myReindexStep.doReindex(data, mock(IJobDataSink.class), "123", "456", params);
+		JobInstance instance = new JobInstance();
+		StepExecutionDetails<ReindexJobParameters, ResourceIdListWorkChunkJson> stepExecutionDetails = new StepExecutionDetails<>(
+			params,
+			data,
+			instance,
+			mock(WorkChunk.class)
+		);
+		RunOutcome outcome = myReindexStepV1.run(stepExecutionDetails, mock(IJobDataSink.class));
 
 		// validate
 		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread()).hasSize(theExpectedSelectCount);
@@ -1064,7 +1072,6 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertThat(myCaptureQueriesListener.getInsertQueriesForCurrentThread()).isEmpty();
 		assertThat(myCaptureQueriesListener.getDeleteQueriesForCurrentThread()).isEmpty();
 		assertEquals(10, outcome.getRecordsProcessed());
-
 	}
 
 	@Test
@@ -1095,7 +1102,14 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
         // execute
         myCaptureQueriesListener.clear();
-		RunOutcome outcome = myReindexStep.doReindex(data, mock(IJobDataSink.class), "123", "456", params);
+		JobInstance instance = new JobInstance();
+		StepExecutionDetails<ReindexJobParameters, ResourceIdListWorkChunkJson> stepExecutionDetails = new StepExecutionDetails<>(
+			params,
+			data,
+			instance,
+			mock(WorkChunk.class)
+		);
+		RunOutcome outcome = myReindexStepV1.run(stepExecutionDetails, mock(IJobDataSink.class));
 		assertEquals(20, outcome.getRecordsProcessed());
 
         // validate
@@ -1103,9 +1117,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
         assertEquals(0, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
         assertEquals(0, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
         assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
-
     }
-
 
 	public void assertNoPartitionSelectors() {
 		List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueriesForCurrentThread();
