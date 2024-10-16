@@ -58,7 +58,6 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.DateTimeType;
-import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
@@ -1442,6 +1441,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			assertThat(StringUtils.countMatches(searchSql, "PARTITION_DATE")).as(searchSql).isEqualTo(1);
 
 			// Second SQL performs the search
+
 			searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, false).toUpperCase();
 			ourLog.info("Search SQL:\n{}", searchSql);
 			assertThat(searchSql).as(searchSql).contains("PARTITION_ID = '1'");
@@ -2675,6 +2675,8 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		ourLog.info("Search SQL:\n{}", searchSql);
+		assertThat(searchSql).doesNotContain("PARTITION_ID IN");
+		assertThat(searchSql).doesNotContain("PARTITION_ID =");
 		assertThat(searchSql).containsOnlyOnce("IDX_STRING = 'Patient?family=FAM&gender=male'");
 	}
 

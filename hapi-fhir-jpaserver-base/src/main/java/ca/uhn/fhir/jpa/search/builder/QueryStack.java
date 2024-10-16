@@ -1603,7 +1603,12 @@ public class QueryStack {
 			if (theSourceJoinColumn == null) {
 				BaseJoiningPredicateBuilder root = mySqlBuilder.getOrCreateFirstPredicateBuilder(false);
 				DbColumn[] joinColumns = root.getJoinColumns();
-				Object joinColumnObject = ColumnTupleObject.from(joinColumns);
+				Object joinColumnObject;
+				if (joinColumns.length == 1) {
+					joinColumnObject = joinColumns[0];
+				} else {
+					joinColumnObject = ColumnTupleObject.from(joinColumns);
+				}
 				retVal = new InCondition(joinColumnObject, union);
 			} else {
 				// -- for the resource link, need join with target_resource_id
