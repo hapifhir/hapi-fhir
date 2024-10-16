@@ -43,6 +43,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -58,25 +59,38 @@ public class ParametersUtil {
 	public static Optional<String> getNamedParameterValueAsString(
 			FhirContext theCtx, IBaseParameters theParameters, String theParameterName) {
 		Function<IPrimitiveType<?>, String> mapper = t -> defaultIfBlank(t.getValueAsString(), null);
-		return extractNamedParameters(theCtx, theParameters, theParameterName, mapper).stream()
+		return extractNamedParameterValues(theCtx, theParameters, theParameterName, mapper).stream()
 				.findFirst();
 	}
 
 	public static List<String> getNamedParameterValuesAsString(
 			FhirContext theCtx, IBaseParameters theParameters, String theParameterName) {
 		Function<IPrimitiveType<?>, String> mapper = t -> defaultIfBlank(t.getValueAsString(), null);
-		return extractNamedParameters(theCtx, theParameters, theParameterName, mapper);
+		return extractNamedParameterValues(theCtx, theParameters, theParameterName, mapper);
 	}
 
 	public static List<Integer> getNamedParameterValuesAsInteger(
 			FhirContext theCtx, IBaseParameters theParameters, String theParameterName) {
 		Function<IPrimitiveType<?>, Integer> mapper = t -> (Integer) t.getValue();
-		return extractNamedParameters(theCtx, theParameters, theParameterName, mapper);
+		return extractNamedParameterValues(theCtx, theParameters, theParameterName, mapper);
 	}
 
 	public static Optional<Integer> getNamedParameterValueAsInteger(
 			FhirContext theCtx, IBaseParameters theParameters, String theParameterName) {
 		return getNamedParameterValuesAsInteger(theCtx, theParameters, theParameterName).stream()
+				.findFirst();
+	}
+
+	/**
+	 * Returns the resource within a parameter.
+	 * @param theCtx thr FHIR context
+	 * @param theParameters the parameters instance where to look for the resource
+	 * @param theParameterName the parameter name
+	 * @return the resource
+	 */
+	public static Optional<IBaseResource> getNamedParameterResource(
+			FhirContext theCtx, IBaseParameters theParameters, String theParameterName) {
+		return extractNamedParameterResources(theCtx, theParameters, theParameterName).stream()
 				.findFirst();
 	}
 
@@ -153,7 +167,7 @@ public class ParametersUtil {
 				.map(t -> (Integer) t);
 	}
 
-	private static <T> List<T> extractNamedParameters(
+	private static <T> List<T> extractNamedParameterValues(
 			FhirContext theCtx,
 			IBaseParameters theParameters,
 			String theParameterName,
@@ -170,7 +184,25 @@ public class ParametersUtil {
 					.filter(t -> t instanceof IPrimitiveType<?>)
 					.map(t -> ((IPrimitiveType<?>) t))
 					.map(theMapper)
-					.filter(t -> t != null)
+					.filter(Objects::nonNull)
+					.forEach(retVal::add);
+		}
+		return retVal;
+	}
+
+	private static List<IBaseResource> extractNamedParameterResources(
+			FhirContext theCtx, IBaseParameters theParameters, String theParameterName) {
+		List<IBaseResource> retVal = new ArrayList<>();
+
+		List<IBase> namedParameters = getNamedParameters(theCtx, theParameters, theParameterName);
+		for (IBase nextParameter : namedParameters) {
+			BaseRuntimeElementCompositeDefinition<?> nextParameterDef =
+					(BaseRuntimeElementCompositeDefinition<?>) theCtx.getElementDefinition(nextParameter.getClass());
+			BaseRuntimeChildDefinition resourceChild = nextParameterDef.getChildByName("resource");
+			List<IBase> resourceValues = resourceChild.getAccessor().getValues(nextParameter);
+			resourceValues.stream()
+					.filter(IBaseResource.class::isInstance)
+					.map(t -> ((IBaseResource) t))
 					.forEach(retVal::add);
 		}
 		return retVal;
