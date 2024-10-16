@@ -121,7 +121,7 @@ Accepted values for this header are documented on the [Wikipedia timezones page]
 
 ex:  `Timezone`:`America/Denver` will set the timezone to Mountain Time.
 
-If the client provides nothing in this header, the timezone will default to UTC.
+If the client omits this header, the timezone will default to UTC.
 
 Please consult the below table for examples of various combinations of start, end, and timezone, as well as the resulting queried periods:
 
