@@ -137,7 +137,7 @@ public class SearchQueryBuilder {
 				theDialectProvider.getDialect(),
 				theCountQuery,
 				new ArrayList<>(),
-				true);
+				thePartitionSettings.isPartitioningEnabled());
 	}
 
 	/**
@@ -484,7 +484,7 @@ public class SearchQueryBuilder {
 	}
 
 	public boolean isIncludePartitionIdInJoins() {
-		return mySelectPartitionId && myPartitionSettings.isIncludePartitionIdsInPKs();
+		return mySelectPartitionId && myPartitionSettings.isPartitionIdsInPrimaryKeys();
 	}
 
 	public void addJoin(DbTable theFromTable, DbTable theToTable, DbColumn[] theFromColumn, DbColumn[] theToColumn) {

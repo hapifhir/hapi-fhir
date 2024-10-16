@@ -2075,7 +2075,7 @@ public class QueryStack {
 			BaseJoiningPredicateBuilder join;
 			if (paramInverted) {
 
-				boolean selectPartitionId = myPartitionSettings.isIncludePartitionIdsInPKs();
+				boolean selectPartitionId = myPartitionSettings.isPartitionIdsInPrimaryKeys();
 				SearchQueryBuilder sqlBuilder = mySqlBuilder.newChildSqlBuilder(selectPartitionId);
 				TagPredicateBuilder tagSelector = sqlBuilder.addTagPredicateBuilder(null);
 				sqlBuilder.addPredicate(
@@ -2254,7 +2254,7 @@ public class QueryStack {
 		BaseJoiningPredicateBuilder join;
 
 		if (paramInverted) {
-			boolean selectPartitionId = myPartitionSettings.isIncludePartitionIdsInPKs();
+			boolean selectPartitionId = myPartitionSettings.isPartitionIdsInPrimaryKeys();
 			SearchQueryBuilder sqlBuilder = theSqlBuilder.newChildSqlBuilder(selectPartitionId);
 			TokenPredicateBuilder tokenSelector = sqlBuilder.addTokenPredicateBuilder(null);
 			sqlBuilder.addPredicate(tokenSelector.createPredicateToken(

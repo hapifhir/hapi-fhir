@@ -804,7 +804,11 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			List<Long> output = jdbcTemplate.query(sql, args, new RowMapper<Long>() {
 				@Override
 				public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
-					return rs.getLong(2);
+					if (myPartitionSettings.isPartitioningEnabled()) {
+						return rs.getLong(2);
+					} else {
+						return rs.getLong(1);
+					}
 				}
 			});
 
