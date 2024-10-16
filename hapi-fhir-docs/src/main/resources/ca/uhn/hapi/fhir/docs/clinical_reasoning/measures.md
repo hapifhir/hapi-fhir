@@ -117,7 +117,7 @@ GET fhir/Measure/<MeasureId>/$evaluate-measure?periodStart=2019-01-01&periodEnd=
 
 The behaviour of both `periodStart` and `periodEnd` depend on the value of the `Timezone` header.  The measure report will be queried according to the period range, as denoted by that timezone, NOT, the server timezone.
 
-Accepted values for this header are documented here:  https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+Accepted values for this header are documented on the [Wikipedia timezones page](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)
 
 ex:  `Timezone`:`American/Denver` will set the timezone to Mountain Time.
 
