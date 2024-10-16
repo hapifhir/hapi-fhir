@@ -96,7 +96,7 @@ public class ParametersUtilR4Test {
 	}
 
 	@Test
-	public void testGetNamedParameterValueAsResource() {
+	public void testGetNamedParameterResource() {
 		OperationOutcome outcome = new OperationOutcome();
 		outcome.addIssue().setSeverity(OperationOutcome.IssueSeverity.ERROR).setDiagnostics("An error was found.");
 		Parameters p = new Parameters();

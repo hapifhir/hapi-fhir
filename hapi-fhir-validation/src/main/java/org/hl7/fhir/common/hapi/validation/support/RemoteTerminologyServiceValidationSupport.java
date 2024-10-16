@@ -614,7 +614,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 					.named("validate-code")
 					.withParameters(input)
 					.execute();
-			return createCodeValidationResult(output, errorMessageBuilder);
+			return createCodeValidationResult(output, errorMessageBuilder, theCode);
 		} catch (ResourceNotFoundException | InvalidRequestException ex) {
 			ourLog.error(ex.getMessage(), ex);
 			String errorMessage = errorMessageBuilder.buildErrorMessage(ex.getMessage());
@@ -636,7 +636,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 	}
 
 	private CodeValidationResult createCodeValidationResult(
-			IBaseParameters theOutput, ValidationErrorMessageBuilder theMessageBuilder) {
+			IBaseParameters theOutput, ValidationErrorMessageBuilder theMessageBuilder, String theCode) {
 		final FhirContext fhirContext = getFhirContext();
 		Optional<String> resultValue = getNamedParameterValueAsString(fhirContext, theOutput, "result");
 
@@ -648,13 +648,18 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 		boolean success = resultValue.get().equalsIgnoreCase("true");
 
 		CodeValidationResult result = new CodeValidationResult();
-		Optional<String> codeValue = getNamedParameterValueAsString(fhirContext, theOutput, "code");
-		codeValue.ifPresent(result::setCode);
+
+		// TODO MM: avoid passing the code and only retrieve it from the response
+		// that implies larger changes, like adding the result boolean to CodeValidationResult
+		// since CodeValidationResult#isOk() relies on code being populated to determine the result/success
+		if (success) {
+			result.setCode(theCode);
+		}
+
 		Optional<String> systemValue = getNamedParameterValueAsString(fhirContext, theOutput, "system");
 		systemValue.ifPresent(result::setCodeSystemName);
 		Optional<String> versionValue = getNamedParameterValueAsString(fhirContext, theOutput, "version");
 		versionValue.ifPresent(result::setCodeSystemVersion);
-
 		Optional<String> displayValue = getNamedParameterValueAsString(fhirContext, theOutput, "display");
 		displayValue.ifPresent(result::setDisplay);
 
