@@ -78,16 +78,13 @@ public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 	private final DbColumn myColumnHashValue;
 	private final DbColumn myColumnSystem;
 	private final DbColumn myColumnValue;
-
+	private final DbColumn myColumnHashIdentity;
 	@Autowired
 	private IValidationSupport myValidationSupport;
-
 	@Autowired
 	private ITermReadSvc myTerminologySvc;
-
 	@Autowired
 	private FhirContext myContext;
-
 	@Autowired
 	private JpaStorageSettings myStorageSettings;
 
@@ -97,6 +94,7 @@ public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 	public TokenPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder) {
 		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_SPIDX_TOKEN"));
 		myColumnResId = getTable().addColumn("RES_ID");
+		myColumnHashIdentity = getTable().addColumn("HASH_IDENTITY");
 		myColumnHashSystem = getTable().addColumn("HASH_SYS");
 		myColumnHashSystemAndValue = getTable().addColumn("HASH_SYS_AND_VALUE");
 		myColumnHashValue = getTable().addColumn("HASH_VALUE");
@@ -105,27 +103,32 @@ public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 	}
 
 	@Override
+	public DbColumn getColumnHashIdentity() {
+		return myColumnHashIdentity;
+	}
+
+	@Override
 	public DbColumn getResourceIdColumn() {
 		return myColumnResId;
 	}
 
 	public Condition createPredicateToken(
-			Collection<IQueryParameterType> theParameters,
-			String theResourceName,
-			String theSpnamePrefix,
-			RuntimeSearchParam theSearchParam,
-			RequestPartitionId theRequestPartitionId) {
+		Collection<IQueryParameterType> theParameters,
+		String theResourceName,
+		String theSpnamePrefix,
+		RuntimeSearchParam theSearchParam,
+		RequestPartitionId theRequestPartitionId) {
 		return createPredicateToken(
-				theParameters, theResourceName, theSpnamePrefix, theSearchParam, null, theRequestPartitionId);
+			theParameters, theResourceName, theSpnamePrefix, theSearchParam, null, theRequestPartitionId);
 	}
 
 	public Condition createPredicateToken(
-			Collection<IQueryParameterType> theParameters,
-			String theResourceName,
-			String theSpnamePrefix,
-			RuntimeSearchParam theSearchParam,
-			SearchFilterParser.CompareOperation theOperation,
-			RequestPartitionId theRequestPartitionId) {
+		Collection<IQueryParameterType> theParameters,
+		String theResourceName,
+		String theSpnamePrefix,
+		RuntimeSearchParam theSearchParam,
+		SearchFilterParser.CompareOperation theOperation,
+		RequestPartitionId theRequestPartitionId) {
 
 		final List<FhirVersionIndependentConcept> codes = new ArrayList<>();
 
@@ -161,20 +164,20 @@ public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 
 			if (system != null && system.length() > ResourceIndexedSearchParamToken.MAX_LENGTH) {
 				ourLog.info(
-						"Parameter[{}] has system ({}) that is longer than maximum ({}) so will truncate: {} ",
-						paramName,
-						system.length(),
-						ResourceIndexedSearchParamToken.MAX_LENGTH,
-						system);
+					"Parameter[{}] has system ({}) that is longer than maximum ({}) so will truncate: {} ",
+					paramName,
+					system.length(),
+					ResourceIndexedSearchParamToken.MAX_LENGTH,
+					system);
 			}
 
 			if (code != null && code.length() > ResourceIndexedSearchParamToken.MAX_LENGTH) {
 				ourLog.info(
-						"Parameter[{}] has code ({}) that is longer than maximum ({}) so will truncate: {} ",
-						paramName,
-						code.length(),
-						ResourceIndexedSearchParamToken.MAX_LENGTH,
-						code);
+					"Parameter[{}] has code ({}) that is longer than maximum ({}) so will truncate: {} ",
+					paramName,
+					code.length(),
+					ResourceIndexedSearchParamToken.MAX_LENGTH,
+					code);
 			}
 
 			/*
@@ -186,7 +189,7 @@ public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 					ValueSetExpansionOptions valueSetExpansionOptions = new ValueSetExpansionOptions();
 					valueSetExpansionOptions.setCount(myStorageSettings.getMaximumExpansionSize());
 					IValidationSupport.ValueSetExpansionOutcome expanded = myValidationSupport.expandValueSet(
-							new ValidationSupportContext(myValidationSupport), valueSetExpansionOptions, code);
+						new ValidationSupportContext(myValidationSupport), valueSetExpansionOptions, code);
 
 					codes.addAll(extractValueSetCodes(expanded.getValueSet()));
 				} else {
@@ -206,7 +209,7 @@ public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 			} else if (modifier == TokenParamModifier.OF_TYPE) {
 				if (!myStorageSettings.isIndexIdentifierOfType()) {
 					throw new MethodNotAllowedException(
-							Msg.code(2012) + "The :of-type modifier is not enabled on this server");
+						Msg.code(2012) + "The :of-type modifier is not enabled on this server");
 				}
 				if (isBlank(system) || isBlank(code)) {
 					throw new InvalidRequestException(Msg.code(2013) + "Invalid parameter value for :of-type query");
@@ -227,10 +230,10 @@ public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 		}
 
 		List<FhirVersionIndependentConcept> sortedCodesList = codes.stream()
-				.filter(t -> t.getCode() != null || t.getSystem() != null)
-				.sorted()
-				.distinct()
-				.collect(Collectors.toList());
+			.filter(t -> t.getCode() != null || t.getSystem() != null)
+			.sorted()
+			.distinct()
+			.collect(Collectors.toList());
 
 		if (codes.isEmpty()) {
 			// This will never match anything
@@ -247,9 +250,9 @@ public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 			 */
 
 			long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(
-					getPartitionSettings(), theRequestPartitionId, theResourceName, paramName);
+				getPartitionSettings(), theRequestPartitionId, theResourceName, paramName);
 			Condition hashIdentityPredicate =
-					BinaryCondition.equalTo(getColumnHashIdentity(), generatePlaceholder(hashIdentity));
+				BinaryCondition.equalTo(getColumnHashIdentity(), generatePlaceholder(hashIdentity));
 
 			Condition hashValuePredicate = createPredicateOrList(theResourceName, paramName, sortedCodesList, false);
 			predicate = QueryParameterUtils.toAndPredicate(hashIdentityPredicate, hashValuePredicate);
@@ -257,6 +260,14 @@ public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 		} else {
 
 			predicate = createPredicateOrList(theResourceName, paramName, sortedCodesList, true);
+
+			if (myStorageSettings.isIncludeHashIdentityForTokenSearches()) {
+				long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(
+					getPartitionSettings(), theRequestPartitionId, theResourceName, paramName);
+				Condition hashIdentityPredicate =
+					BinaryCondition.equalTo(getColumnHashIdentity(), generatePlaceholder(hashIdentity));
+				predicate = QueryParameterUtils.toAndPredicate(hashIdentityPredicate, predicate);
+			}
 		}
 
 		return predicate;
@@ -271,7 +282,7 @@ public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 		if (expansionOpt.isPresent()) {
 			IBase expansion = expansionOpt.get();
 			BaseRuntimeElementCompositeDefinition<?> expansionDef =
-					(BaseRuntimeElementCompositeDefinition<?>) myContext.getElementDefinition(expansion.getClass());
+				(BaseRuntimeElementCompositeDefinition<?>) myContext.getElementDefinition(expansion.getClass());
 			BaseRuntimeChildDefinition containsChild = expansionDef.getChildByName("contains");
 			List<IBase> contains = containsChild.getAccessor().getValues(expansion);
 
@@ -280,26 +291,26 @@ public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 			for (IBase nextContains : contains) {
 				if (systemAccessor == null) {
 					systemAccessor = myContext
-							.getElementDefinition(nextContains.getClass())
-							.getChildByName("system")
-							.getAccessor();
+						.getElementDefinition(nextContains.getClass())
+						.getChildByName("system")
+						.getAccessor();
 				}
 				if (codeAccessor == null) {
 					codeAccessor = myContext
-							.getElementDefinition(nextContains.getClass())
-							.getChildByName("code")
-							.getAccessor();
+						.getElementDefinition(nextContains.getClass())
+						.getChildByName("code")
+						.getAccessor();
 				}
 				String system = systemAccessor
-						.getFirstValueOrNull(nextContains)
-						.map(t -> (IPrimitiveType<?>) t)
-						.map(t -> t.getValueAsString())
-						.orElse(null);
+					.getFirstValueOrNull(nextContains)
+					.map(t -> (IPrimitiveType<?>) t)
+					.map(t -> t.getValueAsString())
+					.orElse(null);
 				String code = codeAccessor
-						.getFirstValueOrNull(nextContains)
-						.map(t -> (IPrimitiveType<?>) t)
-						.map(t -> t.getValueAsString())
-						.orElse(null);
+					.getFirstValueOrNull(nextContains)
+					.map(t -> (IPrimitiveType<?>) t)
+					.map(t -> t.getValueAsString())
+					.orElse(null);
 				if (isNotBlank(system) && isNotBlank(code)) {
 					retVal.add(new FhirVersionIndependentConcept(system, code));
 				}
@@ -316,10 +327,10 @@ public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 				Set<String> valueSetUris = Sets.newHashSet();
 				for (String nextPath : theSearchParam.getPathsSplitForResourceType(getResourceType())) {
 					Class<? extends IBaseResource> type = getFhirContext()
-							.getResourceDefinition(getResourceType())
-							.getImplementingClass();
+						.getResourceDefinition(getResourceType())
+						.getImplementingClass();
 					BaseRuntimeChildDefinition def =
-							getFhirContext().newTerser().getDefinition(type, nextPath);
+						getFhirContext().newTerser().getDefinition(type, nextPath);
 					if (def instanceof BaseRuntimeDeclaredChildDefinition) {
 						String valueSet = ((BaseRuntimeDeclaredChildDefinition) def).getBindingValueSet();
 						if (isNotBlank(valueSet)) {
@@ -331,7 +342,7 @@ public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 					String valueSet = valueSetUris.iterator().next();
 					ValueSetExpansionOptions options = new ValueSetExpansionOptions().setFailOnMissingCodeSystem(false);
 					List<FhirVersionIndependentConcept> candidateCodes =
-							myTerminologySvc.expandValueSetIntoConceptList(options, valueSet);
+						myTerminologySvc.expandValueSetIntoConceptList(options, valueSet);
 					for (FhirVersionIndependentConcept nextCandidate : candidateCodes) {
 						if (nextCandidate.getCode().equals(code)) {
 							retVal = nextCandidate.getSystem();
@@ -357,29 +368,29 @@ public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 		String codeDesc = defaultIfBlank(theCode, "(missing)");
 		if (isBlank(theCode)) {
 			String msg = getFhirContext()
-					.getLocalizer()
-					.getMessage(
-							TokenPredicateBuilder.class,
-							"invalidCodeMissingSystem",
-							theParamName,
-							systemDesc,
-							codeDesc);
+				.getLocalizer()
+				.getMessage(
+					TokenPredicateBuilder.class,
+					"invalidCodeMissingSystem",
+					theParamName,
+					systemDesc,
+					codeDesc);
 			throw new InvalidRequestException(Msg.code(1239) + msg);
 		}
 		if (isBlank(theSystem)) {
 			String msg = getFhirContext()
-					.getLocalizer()
-					.getMessage(
-							TokenPredicateBuilder.class, "invalidCodeMissingCode", theParamName, systemDesc, codeDesc);
+				.getLocalizer()
+				.getMessage(
+					TokenPredicateBuilder.class, "invalidCodeMissingCode", theParamName, systemDesc, codeDesc);
 			throw new InvalidRequestException(Msg.code(1240) + msg);
 		}
 	}
 
 	private Condition createPredicateOrList(
-			String theResourceType,
-			String theSearchParamName,
-			List<FhirVersionIndependentConcept> theCodes,
-			boolean theWantEquals) {
+		String theResourceType,
+		String theSearchParamName,
+		List<FhirVersionIndependentConcept> theCodes,
+		boolean theWantEquals) {
 		Condition[] conditions = new Condition[theCodes.size()];
 
 		Long[] hashes = new Long[theCodes.size()];
@@ -392,28 +403,28 @@ public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 			DbColumn column;
 			if (nextToken.getSystem() == null) {
 				hash = ResourceIndexedSearchParamToken.calculateHashValue(
-						getPartitionSettings(),
-						getRequestPartitionId(),
-						theResourceType,
-						theSearchParamName,
-						nextToken.getCode());
+					getPartitionSettings(),
+					getRequestPartitionId(),
+					theResourceType,
+					theSearchParamName,
+					nextToken.getCode());
 				column = myColumnHashValue;
 			} else if (isBlank(nextToken.getCode())) {
 				hash = ResourceIndexedSearchParamToken.calculateHashSystem(
-						getPartitionSettings(),
-						getRequestPartitionId(),
-						theResourceType,
-						theSearchParamName,
-						nextToken.getSystem());
+					getPartitionSettings(),
+					getRequestPartitionId(),
+					theResourceType,
+					theSearchParamName,
+					nextToken.getSystem());
 				column = myColumnHashSystem;
 			} else {
 				hash = ResourceIndexedSearchParamToken.calculateHashSystemAndValue(
-						getPartitionSettings(),
-						getRequestPartitionId(),
-						theResourceType,
-						theSearchParamName,
-						nextToken.getSystem(),
-						nextToken.getCode());
+					getPartitionSettings(),
+					getRequestPartitionId(),
+					theResourceType,
+					theSearchParamName,
+					nextToken.getSystem(),
+					nextToken.getCode());
 				column = myColumnHashSystemAndValue;
 			}
 			hashes[i] = hash;

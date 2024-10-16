@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
+import ca.uhn.fhir.rest.annotation.Validate;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.StringParam;
@@ -15,6 +16,8 @@ import org.hl7.fhir.r4.model.SearchParameter;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.UUID;
@@ -135,6 +138,27 @@ public class FhirResourceDaoR4SearchSqlTest extends BaseJpaR4Test {
 		assertThat(toUnqualifiedVersionlessIds(outcome)).containsExactly(id);
 
 		myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(reindexParamCache);
+	}
+
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	public void testSearchByToken_IncludeHashIdentity(boolean theIncludeHashIdentity) {
+		// Setup
+		myStorageSettings.setIncludeHashIdentityForTokenSearches(theIncludeHashIdentity);
+
+		// Test
+		myCaptureQueriesListener.clear();
+		SearchParameterMap params = SearchParameterMap.newSynchronous(Patient.SP_IDENTIFIER, new TokenParam("http://foo", "bar"));
+		IBundleProvider outcome = myPatientDao.search(params, mySrd);
+		assertEquals(0, outcome.sizeOrThrowNpe());
+
+		// Verify
+		if (theIncludeHashIdentity) {
+			assertEquals("SELECT t0.RES_ID FROM HFJ_SPIDX_TOKEN t0 WHERE ((t0.HASH_IDENTITY = '7001889285610424179') AND (t0.HASH_SYS_AND_VALUE = '-2780914544385068076'))", myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false));
+		} else {
+			assertEquals("SELECT t0.RES_ID FROM HFJ_SPIDX_TOKEN t0 WHERE (t0.HASH_SYS_AND_VALUE = '-2780914544385068076')", myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false));
+		}
+
 	}
 
 
