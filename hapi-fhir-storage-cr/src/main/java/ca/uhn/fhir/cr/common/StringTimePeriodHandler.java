@@ -172,7 +172,8 @@ public class StringTimePeriodHandler {
 
 		final ZonedDateTime zonedDateTime = ZonedDateTime.of(localDateTime, theTimezone);
 
-		ourLog.debug("successfully transformed String date: {} to ZonedDateTime: {}", theInputDateTimeString, zonedDateTime);
+		ourLog.debug(
+				"successfully transformed String date: {} to ZonedDateTime: {}", theInputDateTimeString, zonedDateTime);
 
 		return zonedDateTime;
 	}
