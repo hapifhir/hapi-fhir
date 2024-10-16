@@ -33,8 +33,36 @@ public class PartitionSettings {
 	private Integer myDefaultPartitionId;
 	private boolean myAlwaysOpenNewTransactionForDifferentPartition;
 	private boolean myConditionalCreateDuplicateIdentifiersEnabled = false;
+	private boolean myPartitionIdsInPrimaryKeys = false;
 
-	public PartitionSettings() {}
+	public PartitionSettings() {
+		super();
+	}
+
+	/**
+	 * This flag activates partition IDs in PKs mode, which is newly introduced in HAPI FHIR 8.0.0.
+	 * This mode causes partition IDs to be included in all primary keys, joins, and emitted
+	 * SQL. It also affects the generated schema and migrations. This setting should not be changed
+	 * after the database has been initialized, unless you have performed an appropriate migration.
+	 *
+	 * @since 8.0.0
+	 */
+	public boolean isPartitionIdsInPrimaryKeys() {
+		return myPartitionIdsInPrimaryKeys;
+	}
+
+	/**
+	 * This flag activates partition IDs in PKs mode, which is newly introduced in HAPI FHIR 8.0.0.
+	 * This mode causes partition IDs to be included in all primary keys, joins, and emitted
+	 * SQL. It also affects the generated schema and migrations. This setting should not be changed
+	 * after the database has been initialized, unless you have performed an appropriate migration.
+	 *
+	 * @since 8.0.0
+	 */
+	public void setPartitionIdsInPrimaryKeys(boolean thePartitionIdsInPrimaryKeys) {
+		myPartitionIdsInPrimaryKeys = thePartitionIdsInPrimaryKeys;
+	}
+
 	/**
 	 * Should we always open a new database transaction if the partition context changes
 	 *

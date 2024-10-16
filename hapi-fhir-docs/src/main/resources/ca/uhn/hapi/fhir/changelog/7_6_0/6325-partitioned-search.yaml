@@ -1,0 +1,5 @@
+---
+type: add
+issue: 6325
+title: "A new configuration option, `PartitionSettings#setPartitionIdsInPrimaryKeys(boolean)` configures the query engine
+   to include the partitioning column in search query joins."

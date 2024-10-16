@@ -63,7 +63,7 @@ public class MissingParameterQueryParams {
 	/**
 	 * The column on which to join.
 	 */
-	private final DbColumn mySourceJoinColumn;
+	private final DbColumn[] mySourceJoinColumn;
 
 	/**
 	 * The partition id
@@ -76,7 +76,7 @@ public class MissingParameterQueryParams {
 			List<? extends IQueryParameterType> theList,
 			String theParamName,
 			String theResourceType,
-			DbColumn theSourceJoinColumn,
+			DbColumn[] theSourceJoinColumn,
 			RequestPartitionId theRequestPartitionId) {
 		mySqlBuilder = theSqlBuilder;
 		myParamType = theParamType;
@@ -116,7 +116,7 @@ public class MissingParameterQueryParams {
 		return myResourceType;
 	}
 
-	public DbColumn getSourceJoinColumn() {
+	public DbColumn[] getSourceJoinColumn() {
 		return mySourceJoinColumn;
 	}
 
