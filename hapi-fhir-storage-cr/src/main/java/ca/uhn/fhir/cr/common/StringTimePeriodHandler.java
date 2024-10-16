@@ -219,9 +219,9 @@ public class StringTimePeriodHandler {
 			try {
 				return ZoneId.of(clientTimezoneString);
 			} catch (Exception exception) {
-				ourLog.warn("{}Invalid value for Timezone header: {}", Msg.code(2560), clientTimezoneString);
+				ourLog.warn("{}Invalid value for Timezone header: {}", Msg.code(2561), clientTimezoneString);
 				throw new InvalidRequestException(
-						String.format("%sInvalid value for Timezone header: %s", Msg.code(2560), clientTimezoneString));
+						String.format("%sInvalid value for Timezone header: %s", Msg.code(2561), clientTimezoneString));
 			}
 		}
 
