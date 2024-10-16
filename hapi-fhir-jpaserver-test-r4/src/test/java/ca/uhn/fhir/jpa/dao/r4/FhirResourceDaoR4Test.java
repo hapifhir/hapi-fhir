@@ -235,6 +235,25 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testUpdateResourceTwiceInSameTransaction() {
+		runInTransaction(()->{
+			createOrganization(withId("A"), withName("1"));
+			createOrganization(withId("A"), withName("2"));
+		});
+
+		assertEquals("2", myOrganizationDao.read(new IdType("Organization/A"), mySrd).getName());
+
+		runInTransaction(()->{
+			createOrganization(withId("A"), withName("3"));
+			createOrganization(withId("A"), withName("4"));
+		});
+
+		assertEquals("4", myOrganizationDao.read(new IdType("Organization/A"), mySrd).getName());
+	}
+
+
+
+	@Test
 	public void testUpdateResource_whenTokenPropertyAssignedTooLargeValue_willTruncateLargeValueOnUpdate(){
 		// given
 		final String modifiedEmailPrefix = "modified";

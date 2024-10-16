@@ -26,10 +26,22 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class JpaPidRowMapper implements RowMapper<JpaPid> {
+
+	private final boolean mySelectPartitionId;
+
+	public JpaPidRowMapper(boolean theSelectPartitionId) {
+		mySelectPartitionId = theSelectPartitionId;
+	}
+
 	@Override
-	public JpaPid mapRow(ResultSet rs, int rowNum) throws SQLException {
-		Integer partitionId = rs.getObject(1, Integer.class);
-		Long resourceId = rs.getLong(2);
-		return JpaPid.fromId(resourceId, partitionId);
+	public JpaPid mapRow(ResultSet theResultSet, int theRowNum) throws SQLException {
+		if (mySelectPartitionId) {
+			Integer partitionId = theResultSet.getObject(1, Integer.class);
+			Long resourceId = theResultSet.getLong(2);
+			return JpaPid.fromId(resourceId, partitionId);
+		} else {
+			Long resourceId = theResultSet.getLong(1);
+			return JpaPid.fromId(resourceId);
+		}
 	}
 }

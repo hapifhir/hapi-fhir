@@ -95,6 +95,9 @@ public class HapiFhirRepository implements Repository {
 	@Override
 	public <T extends IBaseResource> MethodOutcome update(T theResource, Map<String, String> theHeaders) {
 		var details = startWith(myRequestDetails).addHeaders(theHeaders).create();
+		// FIXME: remove
+		String value = theResource.getIdElement().toUnqualifiedVersionless().getValue();
+		ourLog.info("Updating resource with ID: {}", value);
 
 		return myDaoRegistry.getResourceDao(theResource).update(theResource, details);
 	}

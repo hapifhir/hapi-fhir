@@ -156,17 +156,17 @@ public class SearchQueryExecutor implements ISearchQueryExecutor {
 		}
 	}
 
-	private long getNextPid(ScrollableResultsIterator<Object> theResultSet) {
+	private JpaPid getNextPid(ScrollableResultsIterator<Object> theResultSet) {
 		Object nextRow = Objects.requireNonNull(theResultSet.next());
 		// We should typically get two columns back, the first is the partition ID and the second
 		// is the resource ID. But if we're doing a count query, we'll get a single column in an array
 		// or maybe even just a single non array value depending on how the platform handles it.
 		if (nextRow instanceof Number) {
-			return ((Number) nextRow).longValue();
+			return JpaPid.fromId(((Number) nextRow).longValue());
 		} else {
 			Object[] nextRowAsArray = (Object[]) nextRow;
 			if (nextRowAsArray.length == 1) {
-				return (Long) nextRowAsArray[0];
+				return JpaPid.fromId((Long) nextRowAsArray[0]);
 			} else {
 				int i;
 				// TODO MB add a strategy object to GeneratedSql to describe the result set.
@@ -182,9 +182,11 @@ public class SearchQueryExecutor implements ISearchQueryExecutor {
 				// - partition_id, res_id, coord-dist
 				// Assume res_id is first Long in row, and is in first two columns
 				if (nextRowAsArray[0] instanceof Long) {
-					return (long) nextRowAsArray[0];
+					return JpaPid.fromId((Long) nextRowAsArray[0]);
 				} else {
-					return (long) nextRowAsArray[1];
+					Integer partitionId = (Integer) nextRowAsArray[0];
+					Long pid = (Long) nextRowAsArray[1];
+					return JpaPid.fromId(pid, partitionId);
 				}
 			}
 		}

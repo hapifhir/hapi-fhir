@@ -178,10 +178,6 @@ public class JpaPid extends BaseResourcePersistentId<Long> implements Comparable
 		return toLongList(Arrays.asList(thePids));
 	}
 
-	public static List<Long> toLongList(JpaPid[] thePids) {
-		return toLongList(Arrays.asList(thePids));
-	}
-
 	public static List<Long> toLongList(Collection<JpaPid> thePids) {
 		List<Long> retVal = new ArrayList<>(thePids.size());
 		for (JpaPid next : thePids) {
@@ -232,11 +228,5 @@ public class JpaPid extends BaseResourcePersistentId<Long> implements Comparable
 		JpaPid retVal = new JpaPid(theId.getId());
 		retVal.setPartitionIdIfNotAlreadySet(theId.getPartitionIdValue());
 		return retVal;
-	}
-
-	public Integer getPartitionId() {
-		// wipmb should we return null instead?
-		assert getPartitionablePartitionId() != null;
-		return getPartitionablePartitionId().getPartitionId();
 	}
 }
