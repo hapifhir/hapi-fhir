@@ -147,4 +147,12 @@ public class LogbackTestExtension implements BeforeEachCallback, AfterEachCallba
 		afterEach(null);
 		beforeEach(null);
 	}
+
+	/**
+	 * Predicate for passing to {@link #getLogEvents(Predicate)}
+	 */
+	public static Predicate<ILoggingEvent> atLeastLevel(Level theLevel) {
+		return e -> e.getLevel().isGreaterOrEqual(theLevel);
+	}
+
 }
