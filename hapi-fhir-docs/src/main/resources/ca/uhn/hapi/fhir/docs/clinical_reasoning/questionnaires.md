@@ -41,7 +41,7 @@ The following parameters are supported for the `StructureDefinition/$questionnai
 
 The `Questionnaire/$populate` [operation](https://hl7.org/fhir/uv/sdc/OperationDefinition-Questionnaire-populate.html) generates a [QuestionnaireResponse](https://www.hl7.org/fhir/questionnaireresponse.html) based on a specific [Questionnaire](https://www.hl7.org/fhir/questionnaire.html), filling in answers to questions where possible based on information provided as part of the operation or already known by the server about the subject of the Questionnaire.  
 
-This implementation only allows for [Expression based](https://build.fhir.org/ig/HL7/sdc/populate.html#expression-based-population) population.
+This implementation only allows for [Expression-based](https://hl7.org/fhir/uv/sdc/populate.html#expression-based-population) population.
 Additional parameters have been added to support CQL evaluation.
 
 ### Parameters
@@ -59,7 +59,7 @@ The following parameters are supported for the `Questionnaire/$populate` operati
 | context.name        | string        | The name of the launchContext or root Questionnaire variable the passed content should be used as for population purposes. The name SHALL correspond to a launchContext or variable delared at the root of the Questionnaire. | 
 | context.reference   | Reference     | The actual resource (or resources) to use as the value of the launchContext or variable. | 
 | local               | boolean       | Whether the server should use what resources and other knowledge it has about the referenced subject when pre-populating answers to questions. |
-| launchContext       | Extension     | The [Questionnaire Launch Context](https://build.fhir.org/ig/HL7/sdc/StructureDefinition-sdc-questionnaire-launchContext.html) extension containing Resources that provide context for form processing logic (pre-population) when creating/displaying/editing a QuestionnaireResponse. |
+| launchContext       | Extension     | The [Questionnaire Launch Context](https://hl7.org/fhir/uv/sdc/StructureDefinition-sdc-questionnaire-launchContext.html) extension containing Resources that provide context for form processing logic (pre-population) when creating/displaying/editing a QuestionnaireResponse. |
 | parameters          | Parameters    | Any input parameters defined in libraries referenced by the Questionnaire. |
 | useServerData       | boolean       | Whether to use data from the server performing the evaluation. |
 | data                | Bundle        | Data to be made available during CQL evaluation. |
@@ -71,7 +71,7 @@ The following parameters are supported for the `Questionnaire/$populate` operati
 
 The `QuestionnaireResponse/$extract` [operation](http://hl7.org/fhir/uv/sdc/OperationDefinition-QuestionnaireResponse-extract.html) takes a completed [QuestionnaireResponse](https://www.hl7.org/fhir/questionnaireresponse.html) and converts it to a Bundle of resources by using metadata embedded in the [Questionnaire](https://www.hl7.org/fhir/questionnaire.html) the QuestionnaireResponse is based on. The extracted resources might include Observations, MedicationStatements and other standard FHIR resources which can then be shared and manipulated. When invoking the $extract operation, care should be taken that the submitted QuestionnaireResponse is itself valid. If not, the extract operation could fail (with appropriate OperationOutcomes) or, more problematic, might succeed but provide incorrect output.
 
-This implementation allows for both [Observation based](https://hl7.org/fhir/uv/sdc/extraction.html#observation-based-extraction) and [Definition based](https://hl7.org/fhir/uv/sdc/extraction.html#definition-based-extraction) extraction.
+This implementation allows for both [Observation-based](https://hl7.org/fhir/uv/sdc/extraction.html#observation-based-extraction) and [Definition-based](https://hl7.org/fhir/uv/sdc/extraction.html#definition-based-extraction) extraction.
 
 ### Parameters
 
@@ -88,7 +88,7 @@ The following parameters are supported for the `QuestionnaireResponse/$extract` 
 
 ## Package
 
-The `Questionnaire/$package` [operation](https://build.fhir.org/ig/HL7/crmi-ig/OperationDefinition-crmi-package.html) for [Questionnaire](https://www.hl7.org/fhir/questionnaire.html) will generate a Bundle of resources that includes the Questionnaire as well as any related Library or ValueSet resources which can then be shared. This implementation follows the [CRMI IG](https://build.fhir.org/ig/HL7/crmi-ig/branches/master/index.html) guidance for [packaging artifacts](https://build.fhir.org/ig/HL7/crmi-ig/branches/master/packaging.html).
+The `Questionnaire/$package` [operation](https://hl7.org/fhir/uv/crmi/OperationDefinition-crmi-package.html) for [Questionnaire](https://www.hl7.org/fhir/questionnaire.html) will generate a Bundle of resources that includes the Questionnaire as well as any related Library or ValueSet resources which can then be shared. This implementation follows the [CRMI IG](https://hl7.org/fhir/uv/crmi/index.html) guidance for [packaging artifacts](https://hl7.org/fhir/uv/crmi/packaging.html).
 
 ### Parameters
 
@@ -105,7 +105,7 @@ The following parameters are supported for the `Questionnaire/$package` operatio
 
 ## DataRequirements
 
-The `Questionnaire/$data-requirements` [operation](https://build.fhir.org/ig/HL7/crmi-ig/branches/master/OperationDefinition-crmi-data-requirements.html) for Questionnaire will generate a Library of type `module-definition` that returns the computed effective requirements of the artifact.
+The `Questionnaire/$data-requirements` [operation](https://hl7.org/fhir/uv/crmi/OperationDefinition-crmi-data-requirements.html) for Questionnaire will generate a Library of type `module-definition` that returns the computed effective requirements of the artifact.
 
 ### Parameters
 

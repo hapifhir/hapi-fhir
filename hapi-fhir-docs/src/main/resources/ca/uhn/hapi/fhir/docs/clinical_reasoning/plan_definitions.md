@@ -70,7 +70,7 @@ The following parameters are supported for the `PlanDefinition/$apply` and `Plan
 
 ## Package
 
-The `PlanDefinition/$package` [operation](https://build.fhir.org/ig/HL7/crmi-ig/OperationDefinition-crmi-package.html) for PlanDefinition will generate a Bundle of resources that includes the PlanDefinition as well as any related resources which can then be shared. This implementation follows the [CRMI IG](https://build.fhir.org/ig/HL7/crmi-ig/branches/master/index.html) guidance for [packaging artifacts](https://build.fhir.org/ig/HL7/crmi-ig/branches/master/packaging.html).
+The `PlanDefinition/$package` [operation](https://hl7.org/fhir/uv/crmi/OperationDefinition-crmi-package.html) for PlanDefinition will generate a Bundle of resources that includes the PlanDefinition as well as any related resources which can then be shared. This implementation follows the [CRMI IG](https://hl7.org/fhir/uv/crmi/index.html) guidance for [packaging artifacts](https://hl7.org/fhir/uv/crmi/packaging.html).
 
 ### Parameters
 
@@ -87,7 +87,7 @@ The following parameters are supported for the `PlanDefinition/$package` operati
 
 ## DataRequirements
 
-The `PlanDefinition/$data-requirements` [operation](https://build.fhir.org/ig/HL7/crmi-ig/branches/master/OperationDefinition-crmi-data-requirements.html) for PlanDefinition will generate a Library of type `module-definition` that returns the computed effective requirements of the artifact.
+The `PlanDefinition/$data-requirements` [operation](https://hl7.org/fhir/uv/crmi/OperationDefinition-crmi-data-requirements.html) for PlanDefinition will generate a Library of type `module-definition` that returns the computed effective requirements of the artifact.
 
 ### Parameters
 
