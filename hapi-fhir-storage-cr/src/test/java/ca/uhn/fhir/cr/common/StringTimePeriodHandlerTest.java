@@ -221,7 +221,7 @@ class StringTimePeriodHandlerTest {
 	private static Stream<Arguments> errorParams() {
 		return Stream.of(
 			Arguments.of(null, "2024-01-01T12", new InvalidRequestException("HAPI-2559: Unsupported Date/Time format for input: 2024-01-01T12")),
-			Arguments.of("Middle-Earth/Combe", "2024-01-02", new InvalidRequestException("HAPI-2560: Invalid value for Timezone header: Middle-Earth/Combe")),
+			Arguments.of("Middle-Earth/Combe", "2024-01-02", new InvalidRequestException("HAPI-2561: Invalid value for Timezone header: Middle-Earth/Combe")),
 			Arguments.of(null, "2024-01-01T12:00:00-02:30", new InvalidRequestException("HAPI-2559: Unsupported Date/Time format for input: 2024-01-01T12:00:00-02:30")),
 			Arguments.of(ZONE_ID_Z, "2024-01-01T12:00:00-02:30", new InvalidRequestException("HAPI-2559: Unsupported Date/Time format for input: 2024-01-01T12:00:00-02:30")),
 			Arguments.of("UTC", "2024-01-01T12:00:00-02:30", new InvalidRequestException("HAPI-2559: Unsupported Date/Time format for input: 2024-01-01T12:00:00-02:30")),
