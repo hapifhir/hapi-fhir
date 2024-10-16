@@ -51,7 +51,9 @@ import org.hibernate.annotations.GenericGenerator;
 public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndexedCombo
 		implements Comparable<ResourceIndexedComboTokenNonUnique>, IResourceIndexComboSearchParameter {
 
-	@GenericGenerator(name = "SEQ_IDXCMBTOKNU_ID", type = ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator.class)
+	@GenericGenerator(
+			name = "SEQ_IDXCMBTOKNU_ID",
+			type = ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator.class)
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_IDXCMBTOKNU_ID")
 	@Id
 	@Column(name = "PID")

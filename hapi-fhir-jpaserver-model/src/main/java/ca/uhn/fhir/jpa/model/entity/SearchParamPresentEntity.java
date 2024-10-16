@@ -57,7 +57,9 @@ public class SearchParamPresentEntity extends BasePartitionable implements Seria
 	private static final long serialVersionUID = 1L;
 
 	@Id
-	@GenericGenerator(name = "SEQ_RESPARMPRESENT_ID", type = ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator.class)
+	@GenericGenerator(
+			name = "SEQ_RESPARMPRESENT_ID",
+			type = ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator.class)
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_RESPARMPRESENT_ID")
 	@Column(name = "PID")
 	private Long myId;

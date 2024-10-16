@@ -80,7 +80,9 @@ public class ResourceIndexedSearchParamQuantityNormalized extends BaseResourceIn
 	private static final long serialVersionUID = 1L;
 
 	@Id
-	@GenericGenerator(name = "SEQ_SPIDX_QUANTITY_NRML", type = ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator.class)
+	@GenericGenerator(
+			name = "SEQ_SPIDX_QUANTITY_NRML",
+			type = ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator.class)
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SPIDX_QUANTITY_NRML")
 	@Column(name = "SP_ID")
 	private Long myId;

@@ -76,7 +76,9 @@ public class ResourceIndexedComboStringUnique extends BaseResourceIndexedCombo
 	public static final String IDX_IDXCMPSTRUNIQ_STRING = "IDX_IDXCMPSTRUNIQ_STRING";
 	public static final String IDX_IDXCMPSTRUNIQ_RESOURCE = "IDX_IDXCMPSTRUNIQ_RESOURCE";
 
-	@GenericGenerator(name = "SEQ_IDXCMPSTRUNIQ_ID", type = ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator.class)
+	@GenericGenerator(
+			name = "SEQ_IDXCMPSTRUNIQ_ID",
+			type = ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator.class)
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_IDXCMPSTRUNIQ_ID")
 	@Id
 	@Column(name = "PID")

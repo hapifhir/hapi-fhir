@@ -78,7 +78,9 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	private static final long serialVersionUID = 1L;
 
 	@Id
-	@GenericGenerator(name = "SEQ_RESOURCE_HISTORY_ID", type = ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator.class)
+	@GenericGenerator(
+			name = "SEQ_RESOURCE_HISTORY_ID",
+			type = ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator.class)
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_RESOURCE_HISTORY_ID")
 	@Column(name = "PID")
 	private Long myId;
