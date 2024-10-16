@@ -3,7 +3,9 @@ package ca.uhn.fhir.util;
 import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.IntegerType;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Test;
@@ -17,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ParametersUtilR4Test {
 	private static final String TEST_PERSON_ID = "Person/32768";
-	private static FhirContext ourFhirContext = FhirContext.forR4();
+	private static final FhirContext ourFhirContext = FhirContext.forR4Cached();
 
 	@Test
 	public void testCreateParameters() {
@@ -47,7 +49,7 @@ public class ParametersUtilR4Test {
 		p.addParameter()
 			.setValue(new StringType("VALUE4"));
 
-		List<String> values = ParametersUtil.getNamedParameterValuesAsString(FhirContext.forR4(), p, "foo");
+		List<String> values = ParametersUtil.getNamedParameterValuesAsString(ourFhirContext, p, "foo");
 		assertThat(values).containsExactly("VALUE1", "VALUE2");
 	}
 
@@ -58,7 +60,7 @@ public class ParametersUtilR4Test {
 			.setName("foo")
 			.setValue(new IntegerType(123));
 
-		Optional<Integer> value = ParametersUtil.getNamedParameterValueAsInteger(FhirContext.forR4(), p, "foo");
+		Optional<Integer> value = ParametersUtil.getNamedParameterValueAsInteger(ourFhirContext, p, "foo");
 		assertThat(value).isPresent();
 		assertEquals(123, value.get().intValue());
 	}
@@ -80,7 +82,7 @@ public class ParametersUtilR4Test {
 	@Test
 	public void testAddPartDecimalNoScientificNotation() {
 		// setup
-		Double decimalValue = Double.valueOf("10000000");
+		double decimalValue = 10000000;
 		IBaseParameters parameters = ParametersUtil.newInstance(ourFhirContext);
 		IBase resultPart = ParametersUtil.addParameterToParameters(ourFhirContext, parameters, "link");
 
@@ -91,5 +93,21 @@ public class ParametersUtilR4Test {
 		String expected = BigDecimal.valueOf(decimalValue).toPlainString();
 		List<String> results = ParametersUtil.getNamedParameterPartAsString(ourFhirContext, parameters, "link", "linkCreated");
 		assertEquals(expected, results.get(0));
+	}
+
+	@Test
+	public void testGetNamedParameterResource() {
+		OperationOutcome outcome = new OperationOutcome();
+		outcome.addIssue().setSeverity(OperationOutcome.IssueSeverity.ERROR).setDiagnostics("An error was found.");
+		Parameters p = new Parameters();
+		p.addParameter().setName("foo").setResource(outcome);
+		p.addParameter().setName("bar").setValue(new StringType("value1"));
+
+		Optional<IBaseResource> fooResource = ParametersUtil.getNamedParameterResource(ourFhirContext,p, "foo");
+		assertThat(fooResource).isPresent();
+		assertThat(fooResource.get()).isEqualTo(outcome);
+
+		Optional<IBaseResource> barResource = ParametersUtil.getNamedParameterResource(ourFhirContext,p, "bar");
+		assertThat(barResource).isEmpty();
 	}
 }
