@@ -119,7 +119,7 @@ The behaviour of the  `periodStart` and `periodEnd` parameters depends on the va
 
 Accepted values for this header are documented on the [Wikipedia timezones page](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)
 
-ex:  `Timezone`:`American/Denver` will set the timezone to Mountain Time.
+ex:  `Timezone`:`America/Denver` will set the timezone to Mountain Time.
 
 If the client provides nothing in this header, the timezone will default to UTC.
 
