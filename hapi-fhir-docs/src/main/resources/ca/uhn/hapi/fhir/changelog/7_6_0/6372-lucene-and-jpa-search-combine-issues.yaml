@@ -1,0 +1,10 @@
+---
+type: fix
+issue: 6372
+title: "When Lucene (fulltext search) is combined with jpa search,
+        where Lucene would match more results and require jpa search
+        to narrow these down based on additional filters, sometimes
+        no results would be returned due to a bug in how we combined
+        search results from jpa and search results from Lucene.
+        This has now been fixed.
+"

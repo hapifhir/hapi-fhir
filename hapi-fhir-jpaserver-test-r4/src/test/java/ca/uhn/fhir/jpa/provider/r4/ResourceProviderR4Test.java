@@ -3924,8 +3924,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		myClient.update().resource(enc).execute().getId().toUnqualifiedVersionless();
 
 		HttpGet get = new HttpGet(myServerBase + "/Encounter?patient=P2&date=ge2017-01-01&_include:recurse=Encounter:practitioner&_lastUpdated=ge2017-11-10");
-		CloseableHttpResponse response = ourHttpClient.execute(get);
-		try {
+		try (CloseableHttpResponse response = ourHttpClient.execute(get)) {
 			assertEquals(200, response.getStatusLine().getStatusCode());
 			String output = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			response.getEntity().getContent().close();
@@ -3933,13 +3932,10 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			List<String> ids = toUnqualifiedVersionlessIdValues(myFhirContext.newXmlParser().parseResource(Bundle.class, output));
 			ourLog.info(ids.toString());
 			assertThat(ids).containsExactlyInAnyOrder("Practitioner/PRAC", "Encounter/E2");
-		} finally {
-			response.close();
 		}
 
 		get = new HttpGet(myServerBase + "/Encounter?patient=P2&date=ge2017-01-01&_include:recurse=Encounter:practitioner&_lastUpdated=ge2099-11-10");
-		response = ourHttpClient.execute(get);
-		try {
+		try (CloseableHttpResponse response = ourHttpClient.execute(get)) {
 			assertEquals(200, response.getStatusLine().getStatusCode());
 			String output = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			response.getEntity().getContent().close();
@@ -3947,10 +3943,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			List<String> ids = toUnqualifiedVersionlessIdValues(myFhirContext.newXmlParser().parseResource(Bundle.class, output));
 			ourLog.info(ids.toString());
 			assertThat(ids).isEmpty();
-		} finally {
-			response.close();
 		}
-
 	}
 
 	@Test

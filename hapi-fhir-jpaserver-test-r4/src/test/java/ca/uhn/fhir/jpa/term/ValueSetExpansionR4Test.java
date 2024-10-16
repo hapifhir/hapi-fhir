@@ -87,7 +87,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 
 	@AfterEach
 	public void afterEach() {
-		SearchBuilder.setMaxPageSize50ForTest(false);
+		SearchBuilder.setMaxPageSizeForTest(null);
 	}
 
 	@Override
@@ -235,7 +235,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 
 	@Test
 	public void testExpandHugeValueSet_FilterOnDisplay_LeftMatch_SelectAll() {
-		SearchBuilder.setMaxPageSize50ForTest(true);
+		SearchBuilder.setMaxPageSizeForTest(50);
 		myStorageSettings.setPreExpandValueSets(true);
 		IIdType vsId = createConceptsCodeSystemAndValueSet(1005);
 
