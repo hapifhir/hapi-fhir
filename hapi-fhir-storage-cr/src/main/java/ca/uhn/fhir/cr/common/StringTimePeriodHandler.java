@@ -102,6 +102,7 @@ public class StringTimePeriodHandler {
 	@Nullable
 	public ZonedDateTime getStartZonedDateTime(
 			@Nullable String theInputDateTimeString, RequestDetails theRequestDetails) {
+		ourLog.debug("transforming String start date: {} to ZonedDateTime", theInputDateTimeString);
 		return getStartZonedDateTime(theInputDateTimeString, getClientTimezoneOrInvalidRequest(theRequestDetails));
 	}
 
@@ -132,6 +133,7 @@ public class StringTimePeriodHandler {
 	@Nullable
 	public ZonedDateTime getEndZonedDateTime(
 			@Nullable String theInputDateTimeString, RequestDetails theRequestDetails) {
+		ourLog.debug("transforming String end date: {} to ZonedDateTime", theInputDateTimeString);
 		return getEndZonedDateTime(theInputDateTimeString, getClientTimezoneOrInvalidRequest(theRequestDetails));
 	}
 
@@ -168,7 +170,11 @@ public class StringTimePeriodHandler {
 		final LocalDateTime localDateTime = validateAndGetLocalDateTime(
 				theInputDateTimeString, dateTimeFormat, theStartOrEndExtractFunction, theIsStart);
 
-		return ZonedDateTime.of(localDateTime, theTimezone);
+		final ZonedDateTime zonedDateTime = ZonedDateTime.of(localDateTime, theTimezone);
+
+		ourLog.debug("successfully transformed String date: {} to ZonedDateTime: {}", theInputDateTimeString, zonedDateTime);
+
+		return zonedDateTime;
 	}
 
 	private LocalDateTime validateAndGetLocalDateTime(
@@ -178,9 +184,17 @@ public class StringTimePeriodHandler {
 			boolean isStart) {
 		return DateUtils.parseDateTimeStringIfValid(thePeriod, theDateTimeFormatter)
 				.flatMap(theTemporalAccessorToLocalDateTimeConverter)
-				.orElseThrow(() -> new InvalidRequestException(String.format(
-						"%sPeriod %s: %s has an unsupported format",
-						Msg.code(2558), isStart ? "start" : "end", thePeriod)));
+				.orElseThrow(() -> {
+					ourLog.warn(
+							"{}Period {}: {} has an unsupported format",
+							Msg.code(2558),
+							isStart ? "start" : "end",
+							thePeriod);
+
+					return new InvalidRequestException(String.format(
+							"%sPeriod %s: %s has an unsupported format",
+							Msg.code(2558), isStart ? "start" : "end", thePeriod));
+				});
 	}
 
 	private DateTimeFormatter validateAndGetDateTimeFormat(String theInputDateTimeString) {
@@ -188,6 +202,8 @@ public class StringTimePeriodHandler {
 				VALID_DATE_TIME_FORMATTERS_BY_FORMAT_LENGTH.get(theInputDateTimeString.length());
 
 		if (dateTimeFormatter == null) {
+			ourLog.warn("{}Unsupported Date/Time format for input: {}", Msg.code(2559), theInputDateTimeString);
+
 			throw new InvalidRequestException(String.format(
 					"%sUnsupported Date/Time format for input: %s", Msg.code(2559), theInputDateTimeString));
 		}
@@ -202,6 +218,7 @@ public class StringTimePeriodHandler {
 			try {
 				return ZoneId.of(clientTimezoneString);
 			} catch (Exception exception) {
+				ourLog.warn("{}Invalid value for Timezone header: {}", Msg.code(2560), clientTimezoneString);
 				throw new InvalidRequestException(
 						String.format("%sInvalid value for Timezone header: %s", Msg.code(2560), clientTimezoneString));
 			}
