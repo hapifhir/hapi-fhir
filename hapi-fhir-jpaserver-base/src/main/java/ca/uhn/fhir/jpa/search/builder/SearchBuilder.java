@@ -131,6 +131,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -1584,16 +1585,38 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 			String sql = localReferenceQuery + " UNION " + canonicalQuery.getLeft();
 
+			Map<String, Object> limitParams = null;
+			if (maxCount != null) {
+				LinkedList<Object> bindVariables = new LinkedList<>();
+				sql = SearchQueryBuilder.applyLimitToSql(
+						myDialectProvider.getDialect(), null, maxCount, sql, null, bindVariables);
+
+				// The dialect SQL limiter uses positional params, but we're using
+				// named params here, so we need to replace the positional params
+				// with equivalent named ones
+				limitParams = new HashMap<>(bindVariables.size());
+				StringBuilder sb = new StringBuilder();
+				for (int i = 0; i < sql.length(); i++) {
+					char nextChar = sql.charAt(i);
+					if (nextChar == '?') {
+						String nextName = "limit" + i;
+						sb.append(':').append(nextName);
+						limitParams.put(nextName, bindVariables.removeFirst());
+					} else {
+						sb.append(nextChar);
+					}
+				}
+				sql = sb.toString();
+			}
+
 			List<Collection<JpaPid>> partitions = partition(nextRoundMatches, getMaximumPageSize());
 			for (Collection<JpaPid> nextPartition : partitions) {
 				Query q = entityManager.createNativeQuery(sql, Tuple.class);
 				q.setParameter("target_pids", JpaPid.toLongList(nextPartition));
 				localReferenceQueryParams.forEach(q::setParameter);
 				canonicalQuery.getRight().forEach(q::setParameter);
+				limitParams.forEach(q::setParameter);
 
-				if (maxCount != null) {
-					q.setMaxResults(maxCount);
-				}
 				@SuppressWarnings("unchecked")
 				List<Tuple> results = q.getResultList();
 				for (Tuple result : results) {
