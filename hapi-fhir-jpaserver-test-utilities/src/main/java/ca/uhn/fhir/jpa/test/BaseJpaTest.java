@@ -397,6 +397,7 @@ public abstract class BaseJpaTest extends BaseTest {
 		JpaStorageSettings defaultConfig = new JpaStorageSettings();
 		myStorageSettings.setAdvancedHSearchIndexing(defaultConfig.isAdvancedHSearchIndexing());
 		myStorageSettings.setAllowContainsSearches(defaultConfig.isAllowContainsSearches());
+		myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(defaultConfig.isMarkResourcesForReindexingUponSearchParameterChange());
 	}
 
 	@AfterEach

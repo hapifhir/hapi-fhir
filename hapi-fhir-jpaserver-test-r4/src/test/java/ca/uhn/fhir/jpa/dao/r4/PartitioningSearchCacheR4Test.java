@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -27,13 +28,16 @@ public class PartitioningSearchCacheR4Test extends BasePartitioningR4Test {
 		IIdType patientId12 = createPatient(withPartition(1), withActiveFalse());
 		IIdType patientId21 = createPatient(withPartition(2), withActiveTrue());
 		IIdType patientId22 = createPatient(withPartition(2), withActiveFalse());
+		logAllResources();
 
 		{
 			myCaptureQueriesListener.clear();
 			addReadPartition(1);
 			PersistedJpaBundleProvider outcome = (PersistedJpaBundleProvider) myPatientDao.search(new SearchParameterMap(), mySrd);
 			assertEquals(SearchCacheStatusEnum.MISS, outcome.getCacheStatus());
-			assertEquals(2, outcome.sizeOrThrowNpe());
+			assertEquals(2, outcome.sizeOrThrowNpe(), ()-> "Resources:\n * " + runInTransaction(()->myResourceTableDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n * "))) +
+				"\n\nActual IDs: " + toUnqualifiedVersionlessIdValues(outcome) +
+				"\n\nSQL Queries: " + myCaptureQueriesListener.getSelectQueries().stream().map(t->t.getSql(true, false)).collect(Collectors.joining("\n * ")));
 
 			List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueries();
 			String searchSql = selectQueries.get(0).getSql(true, false);

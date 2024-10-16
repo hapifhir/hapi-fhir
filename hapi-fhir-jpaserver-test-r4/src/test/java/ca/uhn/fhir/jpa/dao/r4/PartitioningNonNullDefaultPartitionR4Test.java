@@ -34,7 +34,7 @@ public class PartitioningNonNullDefaultPartitionR4Test extends BasePartitioningR
 
 		myPartitionSettings.setDefaultPartitionId(1);
 
-		// This test relies on this interceptor alreafy being in place, which it should be unless
+		// This test relies on this interceptor already being in place, which it should be unless
 		// another test misbehaved
 		assertEquals(1, myInterceptorRegistry.getAllRegisteredInterceptors().stream().filter(t->t instanceof SearchParamValidatingInterceptor).count());
 	}
