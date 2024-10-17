@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.model.dialect;
 
+import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import org.hibernate.dialect.MySQLDialect;
 import org.hibernate.engine.jdbc.dialect.spi.DialectResolutionInfo;
 
@@ -26,7 +27,7 @@ import org.hibernate.engine.jdbc.dialect.spi.DialectResolutionInfo;
  * Dialect for MySQL database.
  * Minimum version: 5.7
  */
-public class HapiFhirMySQLDialect extends MySQLDialect {
+public class HapiFhirMySQLDialect extends MySQLDialect implements IHapiFhirDialect {
 
 	public HapiFhirMySQLDialect() {
 		super();
@@ -42,5 +43,10 @@ public class HapiFhirMySQLDialect extends MySQLDialect {
 	@Override
 	public boolean supportsColumnCheck() {
 		return false;
+	}
+
+	@Override
+	public DriverTypeEnum getDriverType() {
+		return DriverTypeEnum.MYSQL_5_7;
 	}
 }

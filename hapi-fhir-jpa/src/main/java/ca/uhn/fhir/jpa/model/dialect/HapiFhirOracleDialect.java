@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.model.dialect;
 
+import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import org.hibernate.dialect.OracleDialect;
 import org.hibernate.engine.jdbc.dialect.spi.DialectResolutionInfo;
 
@@ -26,7 +27,7 @@ import org.hibernate.engine.jdbc.dialect.spi.DialectResolutionInfo;
  * Dialect for Oracle database.
  * Minimum version: 12.2 (Oracle 12c R2)
  */
-public class HapiFhirOracleDialect extends OracleDialect {
+public class HapiFhirOracleDialect extends OracleDialect implements IHapiFhirDialect {
 
 	public HapiFhirOracleDialect() {
 		super();
@@ -42,5 +43,10 @@ public class HapiFhirOracleDialect extends OracleDialect {
 	@Override
 	public boolean supportsColumnCheck() {
 		return false;
+	}
+
+	@Override
+	public DriverTypeEnum getDriverType() {
+		return DriverTypeEnum.ORACLE_12C;
 	}
 }

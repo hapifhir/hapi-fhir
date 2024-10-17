@@ -2,12 +2,13 @@ package ca.uhn.fhir.jpa.migrate.tasks;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.HapiMigrator;
+import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import ca.uhn.fhir.jpa.migrate.MigrationResult;
 import ca.uhn.fhir.jpa.migrate.MigrationTaskList;
 import ca.uhn.fhir.jpa.migrate.taskdef.InitializeSchemaTask;
+import ca.uhn.fhir.jpa.util.DatabaseSupportUtil;
 import ca.uhn.fhir.util.VersionEnum;
 import jakarta.annotation.Nonnull;
-import org.apache.commons.dbcp2.BasicDataSource;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,16 +19,16 @@ import org.springframework.jdbc.core.support.AbstractLobCreatingPreparedStatemen
 import org.springframework.jdbc.support.lob.DefaultLobHandler;
 import org.springframework.jdbc.support.lob.LobCreator;
 
+import javax.sql.DataSource;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
-import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -37,12 +38,51 @@ public class HapiFhirJpaMigrationTasksTest {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(HapiFhirJpaMigrationTasksTest.class);
 	private static final String MIGRATION_TABLE_NAME = "HFJ_FLY_MIGRATOR";
-	private final BasicDataSource myDataSource = newDataSource();
-	private final JdbcTemplate myJdbcTemplate = new JdbcTemplate(myDataSource);
+	private final DriverTypeEnum.ConnectionProperties myConnection;
+	private final JdbcTemplate myJdbcTemplate;
+	private final DataSource myDataSource;
+
+	/**
+	 * Constructor
+	 */
+	public HapiFhirJpaMigrationTasksTest() {
+		myConnection = DatabaseSupportUtil.newConnection();
+		myDataSource = myConnection.getDataSource();
+		myJdbcTemplate = new JdbcTemplate(myDataSource);
+	}
 
 	@Test
-	public void testCreate() {
-		new HapiFhirJpaMigrationTasks(Collections.emptySet());
+	public void testCreate_NonPartitionedIds() throws SQLException {
+		HapiFhirJpaMigrationTasks tasks = new HapiFhirJpaMigrationTasks(Collections.emptySet());
+
+		HapiMigrator migrator = new HapiMigrator(MIGRATION_TABLE_NAME, myDataSource, DriverTypeEnum.H2_EMBEDDED);
+		migrator.addTasks(tasks.getAllTasks(VersionEnum.values()));
+		migrator.createMigrationTableIfRequired();
+
+		MigrationResult outcome = migrator.migrate();
+		assertEquals(0, outcome.changes);
+		assertEquals(3, outcome.succeededTasks.size());
+		assertEquals(0, outcome.failedTasks.size());
+
+		Set<String> columns = JdbcUtils.getPrimaryKeyColumns(myConnection, "HFJ_RESOURCE");
+		assertThat(new ArrayList<>(columns)).asList().containsExactlyInAnyOrder("RES_ID");
+	}
+
+	@Test
+	public void testCreate_PartitionedIds() throws SQLException {
+		HapiFhirJpaMigrationTasks tasks = new HapiFhirJpaMigrationTasks(Set.of(HapiFhirJpaMigrationTasks.FlagEnum.PARTITIONED_ID_MODE.getCommandLineValue()));
+
+		HapiMigrator migrator = new HapiMigrator(MIGRATION_TABLE_NAME, myDataSource, DriverTypeEnum.H2_EMBEDDED);
+		migrator.addTasks(tasks.getAllTasks(VersionEnum.values()));
+		migrator.createMigrationTableIfRequired();
+
+		MigrationResult outcome = migrator.migrate();
+		assertEquals(0, outcome.changes);
+		assertEquals(3, outcome.succeededTasks.size());
+		assertEquals(0, outcome.failedTasks.size());
+
+		Set<String> columns = JdbcUtils.getPrimaryKeyColumns(myConnection, "HFJ_RESOURCE");
+		assertThat(new ArrayList<>(columns)).asList().containsExactlyInAnyOrder("RES_ID", "PARTITION_ID");
 	}
 
 	/**
@@ -186,18 +226,6 @@ public class HapiFhirJpaMigrationTasksTest {
 					thePs.setLong(i, 1L); // RES_ID
 				}
 			});
-	}
-
-	static BasicDataSource newDataSource() {
-		BasicDataSource retVal = new BasicDataSource();
-		retVal.setDriver(new org.h2.Driver());
-		retVal.setUrl("jdbc:h2:mem:test_migration-" + UUID.randomUUID() + ";CASE_INSENSITIVE_IDENTIFIERS=TRUE;");
-		retVal.setMaxWait(Duration.ofMillis(30000));
-		retVal.setUsername("");
-		retVal.setPassword("");
-		retVal.setMaxTotal(5);
-
-		return retVal;
 	}
 
 }

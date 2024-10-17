@@ -19,10 +19,11 @@
  */
 package ca.uhn.fhir.jpa.model.dialect;
 
+import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import org.hibernate.dialect.PostgreSQLDialect;
 import org.hibernate.engine.jdbc.dialect.spi.DialectResolutionInfo;
 
-public class HapiFhirPostgresDialect extends PostgreSQLDialect {
+public class HapiFhirPostgresDialect extends PostgreSQLDialect implements IHapiFhirDialect {
 
 	public HapiFhirPostgresDialect() {
 		super();
@@ -38,5 +39,10 @@ public class HapiFhirPostgresDialect extends PostgreSQLDialect {
 	@Override
 	public boolean supportsColumnCheck() {
 		return false;
+	}
+
+	@Override
+	public DriverTypeEnum getDriverType() {
+		return DriverTypeEnum.POSTGRES_9_4;
 	}
 }

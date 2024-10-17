@@ -4201,10 +4201,12 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 	protected void init330() { // 20180114 - 20180329
 		Builder version = forVersion(VersionEnum.V3_3_0);
 
+		String schemaPath = "/ca/uhn/hapi/fhir/jpa/docs/database/nonpartitioned";
+		if (myFlags.contains(FlagEnum.PARTITIONED_ID_MODE)) {
+			schemaPath = "/ca/uhn/hapi/fhir/jpa/docs/database/partitioned";
+		}
 		version.initializeSchema(
-				"20180115.0",
-				new SchemaInitializationProvider(
-						"HAPI FHIR", "/ca/uhn/hapi/fhir/jpa/docs/database", "HFJ_RESOURCE", true));
+				"20180115.0", new SchemaInitializationProvider("HAPI FHIR", schemaPath, "HFJ_RESOURCE", true));
 
 		Builder.BuilderWithTableName hfjResource = version.onTable("HFJ_RESOURCE");
 		version.startSectionWithMessage("Starting work on table: " + hfjResource.getTableName());
@@ -4218,12 +4220,18 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 	}
 
 	public enum FlagEnum {
+		PARTITIONED_ID_MODE("partitioned-id-mode"),
+
 		NO_MIGRATE_HASHES("no-migrate-350-hashes");
 
 		private final String myCommandLineValue;
 
 		FlagEnum(String theCommandLineValue) {
 			myCommandLineValue = theCommandLineValue;
+		}
+
+		public String getCommandLineValue() {
+			return myCommandLineValue;
 		}
 
 		public static FlagEnum fromCommandLineValue(String theCommandLineValue) {

@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.model.dialect;
 
+import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import org.hibernate.dialect.DerbyDialect;
 import org.hibernate.engine.jdbc.dialect.spi.DialectResolutionInfo;
 
@@ -26,7 +27,7 @@ import org.hibernate.engine.jdbc.dialect.spi.DialectResolutionInfo;
  * Dialect for Derby database.
  * Minimum version: 10.14.2
  */
-public class HapiFhirDerbyDialect extends DerbyDialect {
+public class HapiFhirDerbyDialect extends DerbyDialect implements IHapiFhirDialect {
 
 	public HapiFhirDerbyDialect() {
 		super();
@@ -42,5 +43,10 @@ public class HapiFhirDerbyDialect extends DerbyDialect {
 	@Override
 	public boolean supportsColumnCheck() {
 		return false;
+	}
+
+	@Override
+	public DriverTypeEnum getDriverType() {
+		return DriverTypeEnum.DERBY_EMBEDDED;
 	}
 }

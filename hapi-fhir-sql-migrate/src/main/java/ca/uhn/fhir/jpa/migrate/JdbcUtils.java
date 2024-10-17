@@ -71,6 +71,35 @@ public class JdbcUtils {
 	/**
 	 * Retrieve all index names
 	 */
+	public static Set<String> getPrimaryKeyColumns(
+			DriverTypeEnum.ConnectionProperties theConnectionProperties, String theTableName) throws SQLException {
+
+		DataSource dataSource = Objects.requireNonNull(theConnectionProperties.getDataSource());
+		try (Connection connection = dataSource.getConnection()) {
+			return theConnectionProperties.getTxTemplate().execute(t -> {
+				DatabaseMetaData metadata;
+				Set<String> retVal = new HashSet<>();
+				try {
+					metadata = connection.getMetaData();
+
+					try (ResultSet results = metadata.getPrimaryKeys(connection.getCatalog(), connection.getSchema(), theTableName)) {
+						while (results.next()) {
+							String columnName = results.getString("COLUMN_NAME");
+							retVal.add(columnName);
+						}
+					}
+
+				} catch (SQLException e) {
+					throw new InternalErrorException(Msg.code(2562) + e);
+				}
+				return retVal;
+			});
+		}
+	}
+
+	/**
+	 * Retrieve all index names
+	 */
 	public static Set<String> getIndexNames(
 			DriverTypeEnum.ConnectionProperties theConnectionProperties, String theTableName) throws SQLException {
 
