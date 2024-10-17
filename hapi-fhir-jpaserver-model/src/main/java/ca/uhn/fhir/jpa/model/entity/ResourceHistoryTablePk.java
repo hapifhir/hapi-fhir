@@ -33,7 +33,9 @@ import java.util.Objects;
 @Embeddable
 public class ResourceHistoryTablePk implements IResourceVersionPersistentId, Serializable {
 
-	@SequenceGenerator(name = "SEQ_RESOURCE_HISTORY_ID", sequenceName = "SEQ_RESOURCE_HISTORY_ID")
+@GenericGenerator(
+			name = "SEQ_RESOURCE_HISTORY_ID",
+			type = ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator.class)
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_RESOURCE_HISTORY_ID")
 	@Column(name = "PID")
 	private Long myVersionId;
