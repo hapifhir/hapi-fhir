@@ -164,7 +164,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	@Deprecated
 	public static final int MAXIMUM_PAGE_SIZE = SearchConstants.MAX_PAGE_SIZE;
 
-	public static final int MAXIMUM_PAGE_SIZE_FOR_TESTING = 50;
 	public static final String RESOURCE_ID_ALIAS = "resource_id";
 	public static final String RESOURCE_VERSION_ALIAS = "resource_version";
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchBuilder.class);
@@ -174,7 +173,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	private static final String MY_TARGET_RESOURCE_TYPE = "myTargetResourceType";
 	private static final String MY_SOURCE_RESOURCE_TYPE = "mySourceResourceType";
 	private static final String MY_TARGET_RESOURCE_VERSION = "myTargetResourceVersion";
-	public static boolean myUseMaxPageSize50ForTest = false;
+	public static Integer myMaxPageSizeForTests = null;
 	protected final IInterceptorBroadcaster myInterceptorBroadcaster;
 	protected final IResourceTagDao myResourceTagDao;
 	private String myResourceName;
@@ -467,6 +466,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 						.chunk(
 								fulltextExecutor,
 								SearchBuilder.getMaximumPageSize(),
+								// for each list of (SearchBuilder.getMaximumPageSize())
+								// we create a chunked query and add it to 'queries'
 								t -> doCreateChunkedQueries(
 										theParams, t, theOffset, sort, theCountOnlyFlag, theRequest, queries));
 			}
@@ -2376,15 +2377,23 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				if (myNext == null) {
 					// no next means we need a new query (if one is available)
 					while (myResultsIterator.hasNext() || !myQueryList.isEmpty()) {
-						// Update iterator with next chunk if necessary.
-						if (!myResultsIterator.hasNext()) {
+						/*
+						 * Because we combine our DB searches with Lucene
+						 * sometimes we can have multiple results iterators
+						 * (with only some having data in them to extract).
+						 *
+						 * We'll iterate our results iterators until we
+						 * either run out of results iterators, or we
+						 * have one that actually has data in it.
+						 */
+						while (!myResultsIterator.hasNext() && !myQueryList.isEmpty()) {
 							retrieveNextIteratorQuery();
+						}
 
-							// if our new results iterator is also empty
+						if (!myResultsIterator.hasNext()) {
+							// we couldn't find a results iterator;
 							// we're done here
-							if (!myResultsIterator.hasNext()) {
-								break;
-							}
+							break;
 						}
 
 						Long nextLong = myResultsIterator.next();
@@ -2604,14 +2613,13 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	}
 
 	public static int getMaximumPageSize() {
-		if (myUseMaxPageSize50ForTest) {
-			return MAXIMUM_PAGE_SIZE_FOR_TESTING;
-		} else {
-			return MAXIMUM_PAGE_SIZE;
+		if (myMaxPageSizeForTests != null) {
+			return myMaxPageSizeForTests;
 		}
+		return MAXIMUM_PAGE_SIZE;
 	}
 
-	public static void setMaxPageSize50ForTest(boolean theIsTest) {
-		myUseMaxPageSize50ForTest = theIsTest;
+	public static void setMaxPageSizeForTest(Integer theTestSize) {
+		myMaxPageSizeForTests = theTestSize;
 	}
 }
