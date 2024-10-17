@@ -33,108 +33,22 @@ import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Endpoint;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
+import org.hl7.fhir.r4.model.Reference;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.List;
 
 import static ca.uhn.fhir.cr.common.CanonicalHelper.getCanonicalType;
 
 public class QuestionnairePopulateProvider {
 	@Autowired
 	IQuestionnaireProcessorFactory myQuestionnaireProcessorFactory;
-
-	/**
-	 * Implements a modified version of the <a href=
-	 * "http://build.fhir.org/ig/HL7/sdc/OperationDefinition-Questionnaire-populate.html">$populate</a>
-	 * operation found in the
-	 * <a href="http://build.fhir.org/ig/HL7/sdc/index.html">Structured Data Capture (SDC) IG</a>.
-	 * This implementation will return a Questionnaire resource with the initialValues set rather
-	 * than a QuestionnaireResponse with the answers filled out.
-	 *
-	 * @param theId                  The id of the Questionnaire to populate.
-	 * @param theQuestionnaire       The Questionnaire to populate. Used when the operation is invoked at the 'type' level.
-	 * @param theCanonical           The canonical identifier for the questionnaire (optionally version-specific).
-	 * @param theUrl             	 Canonical URL of the Questionnaire when invoked at the resource type level. This is exclusive with the questionnaire and canonical parameters.
-	 * @param theVersion             Version of the Questionnaire when invoked at the resource type level. This is exclusive with the questionnaire and canonical parameters.
-	 * @param theSubject             The subject(s) that is/are the target of the Questionnaire.
-	 * @param theParameters          Any input parameters defined in libraries referenced by the Questionnaire.
-	 * @param theUseServerData       Whether to use data from the server performing the evaluation.
-	 * @param theData                Data to be made available during CQL evaluation.
-	 * @param theBundle              Legacy support for data parameter.
-	 * @param theDataEndpoint        An endpoint to use to access data referenced by retrieve operations in libraries
-	 *                               referenced by the Questionnaire.
-	 * @param theContentEndpoint     An endpoint to use to access content (i.e. libraries) referenced by the Questionnaire.
-	 * @param theTerminologyEndpoint An endpoint to use to access terminology (i.e. valuesets, codesystems, and membership testing)
-	 *                               referenced by the Questionnaire.
-	 * @param theRequestDetails      The details (such as tenant) of this request. Usually
-	 *                               autopopulated HAPI.
-	 * @return The partially (or fully)-populated set of answers for the specified Questionnaire.
-	 */
-	@Operation(name = ProviderConstants.CR_OPERATION_PREPOPULATE, idempotent = true, type = Questionnaire.class)
-	public Questionnaire prepopulate(
-			@IdParam IdType theId,
-			@OperationParam(name = "questionnaire") Questionnaire theQuestionnaire,
-			@OperationParam(name = "canonical") String theCanonical,
-			@OperationParam(name = "url") String theUrl,
-			@OperationParam(name = "version") String theVersion,
-			@OperationParam(name = "subject") String theSubject,
-			@OperationParam(name = "parameters") Parameters theParameters,
-			@OperationParam(name = "useServerData") BooleanType theUseServerData,
-			@OperationParam(name = "data") Bundle theData,
-			@OperationParam(name = "bundle") Bundle theBundle,
-			@OperationParam(name = "dataEndpoint") Endpoint theDataEndpoint,
-			@OperationParam(name = "contentEndpoint") Endpoint theContentEndpoint,
-			@OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
-			RequestDetails theRequestDetails)
-			throws InternalErrorException, FHIRException {
-		CanonicalType canonicalType = getCanonicalType(FhirVersionEnum.R4, theCanonical, theUrl, theVersion);
-		Bundle data = theData == null ? theBundle : theData;
-		return myQuestionnaireProcessorFactory
-				.create(theRequestDetails)
-				.prePopulate(
-						Eithers.for3(canonicalType, theId, theQuestionnaire),
-						theSubject,
-						theParameters,
-						data,
-						theUseServerData == null ? Boolean.TRUE : theUseServerData.booleanValue(),
-						theDataEndpoint,
-						theContentEndpoint,
-						theTerminologyEndpoint);
-	}
-
-	@Operation(name = ProviderConstants.CR_OPERATION_PREPOPULATE, idempotent = true, type = Questionnaire.class)
-	public Questionnaire prepopulate(
-			@OperationParam(name = "questionnaire") Questionnaire theQuestionnaire,
-			@OperationParam(name = "canonical") String theCanonical,
-			@OperationParam(name = "url") String theUrl,
-			@OperationParam(name = "version") String theVersion,
-			@OperationParam(name = "subject") String theSubject,
-			@OperationParam(name = "parameters") Parameters theParameters,
-			@OperationParam(name = "useServerData") BooleanType theUseServerData,
-			@OperationParam(name = "data") Bundle theData,
-			@OperationParam(name = "bundle") Bundle theBundle,
-			@OperationParam(name = "dataEndpoint") Endpoint theDataEndpoint,
-			@OperationParam(name = "contentEndpoint") Endpoint theContentEndpoint,
-			@OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
-			RequestDetails theRequestDetails)
-			throws InternalErrorException, FHIRException {
-		CanonicalType canonicalType = getCanonicalType(FhirVersionEnum.R4, theCanonical, theUrl, theVersion);
-		Bundle data = theData == null ? theBundle : theData;
-		return myQuestionnaireProcessorFactory
-				.create(theRequestDetails)
-				.prePopulate(
-						Eithers.for3(canonicalType, null, theQuestionnaire),
-						theSubject,
-						theParameters,
-						data,
-						theUseServerData == null ? Boolean.TRUE : theUseServerData.booleanValue(),
-						theDataEndpoint,
-						theContentEndpoint,
-						theTerminologyEndpoint);
-	}
 
 	/**
 	 * Implements the <a href=
@@ -148,6 +62,10 @@ public class QuestionnairePopulateProvider {
 	 * @param theUrl             	 Canonical URL of the Questionnaire when invoked at the resource type level. This is exclusive with the questionnaire and canonical parameters.
 	 * @param theVersion             Version of the Questionnaire when invoked at the resource type level. This is exclusive with the questionnaire and canonical parameters.
 	 * @param theSubject             The subject(s) that is/are the target of the Questionnaire.
+	 * @param theContext			 Resources containing information to be used to help populate the QuestionnaireResponse.
+	 * @param theLaunchContext       The Questionnaire Launch Context extension containing Resources that provide context for form processing logic (pre-population) when creating/displaying/editing a QuestionnaireResponse.
+	 * @param theParameters			 Any input parameters defined in libraries referenced by the Questionnaire.
+	 * @param theLocal				 Whether the server should use what resources and other knowledge it has about the referenced subject when pre-populating answers to questions.
 	 * @param theUseServerData       Whether to use data from the server performing the evaluation.
 	 * @param theData                Data to be made available during CQL evaluation.
 	 * @param theBundle              Legacy support for data parameter.
@@ -167,8 +85,11 @@ public class QuestionnairePopulateProvider {
 			@OperationParam(name = "canonical") String theCanonical,
 			@OperationParam(name = "url") String theUrl,
 			@OperationParam(name = "version") String theVersion,
-			@OperationParam(name = "subject") String theSubject,
+			@OperationParam(name = "subject") Reference theSubject,
+			@OperationParam(name = "context") List<Parameters.ParametersParameterComponent> theContext,
+			@OperationParam(name = "launchContext") Extension theLaunchContext,
 			@OperationParam(name = "parameters") Parameters theParameters,
+			@OperationParam(name = "local") BooleanType theLocal,
 			@OperationParam(name = "useServerData") BooleanType theUseServerData,
 			@OperationParam(name = "data") Bundle theData,
 			@OperationParam(name = "bundle") Bundle theBundle,
@@ -183,10 +104,12 @@ public class QuestionnairePopulateProvider {
 				.create(theRequestDetails)
 				.populate(
 						Eithers.for3(canonicalType, theId, theQuestionnaire),
-						theSubject,
+						theSubject.getReference(),
+						theContext,
+						theLaunchContext,
 						theParameters,
 						data,
-						theUseServerData == null ? Boolean.TRUE : theUseServerData.booleanValue(),
+						isUseServerData(theLocal, theUseServerData),
 						theDataEndpoint,
 						theContentEndpoint,
 						theTerminologyEndpoint);
@@ -198,8 +121,11 @@ public class QuestionnairePopulateProvider {
 			@OperationParam(name = "canonical") String theCanonical,
 			@OperationParam(name = "url") String theUrl,
 			@OperationParam(name = "version") String theVersion,
-			@OperationParam(name = "subject") String theSubject,
+			@OperationParam(name = "subject") Reference theSubject,
+			@OperationParam(name = "context") List<Parameters.ParametersParameterComponent> theContext,
+			@OperationParam(name = "launchContext") Extension theLaunchContext,
 			@OperationParam(name = "parameters") Parameters theParameters,
+			@OperationParam(name = "local") BooleanType theLocal,
 			@OperationParam(name = "useServerData") BooleanType theUseServerData,
 			@OperationParam(name = "data") Bundle theData,
 			@OperationParam(name = "bundle") Bundle theBundle,
@@ -214,12 +140,20 @@ public class QuestionnairePopulateProvider {
 				.create(theRequestDetails)
 				.populate(
 						Eithers.for3(canonicalType, null, theQuestionnaire),
-						theSubject,
+						theSubject.getReference(),
+						theContext,
+						theLaunchContext,
 						theParameters,
 						data,
-						theUseServerData == null ? Boolean.TRUE : theUseServerData.booleanValue(),
+						isUseServerData(theLocal, theUseServerData),
 						theDataEndpoint,
 						theContentEndpoint,
 						theTerminologyEndpoint);
+	}
+
+	private boolean isUseServerData(BooleanType theLocal, BooleanType theUseServerData) {
+		return theLocal != null
+				? theLocal.booleanValue()
+				: theUseServerData == null ? Boolean.TRUE : theUseServerData.booleanValue();
 	}
 }

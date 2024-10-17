@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.cr.r4.measure;
 
+import ca.uhn.fhir.cr.common.StringTimePeriodHandler;
 import ca.uhn.fhir.cr.r4.ICollectDataServiceFactory;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -29,11 +30,18 @@ import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.Parameters;
-import org.springframework.beans.factory.annotation.Autowired;
 
 public class CollectDataOperationProvider {
-	@Autowired
-	ICollectDataServiceFactory myR4CollectDataServiceFactory;
+	private final ICollectDataServiceFactory myR4CollectDataServiceFactory;
+	private final StringTimePeriodHandler myStringTimePeriodHandler;
+
+	public CollectDataOperationProvider(
+			ICollectDataServiceFactory theR4CollectDataServiceFactory,
+			StringTimePeriodHandler theStringTimePeriodHandler) {
+		myR4CollectDataServiceFactory = theR4CollectDataServiceFactory;
+		myStringTimePeriodHandler = theStringTimePeriodHandler;
+	}
+
 	/**
 	 * Implements the <a href=
 	 * "http://hl7.org/fhir/R4/measure-operation-collect-data.html">$collect-data</a>
@@ -70,6 +78,11 @@ public class CollectDataOperationProvider {
 			RequestDetails theRequestDetails) {
 		return myR4CollectDataServiceFactory
 				.create(theRequestDetails)
-				.collectData(theId, thePeriodStart, thePeriodEnd, theSubject, thePractitioner);
+				.collectData(
+						theId,
+						myStringTimePeriodHandler.getStartZonedDateTime(thePeriodStart, theRequestDetails),
+						myStringTimePeriodHandler.getEndZonedDateTime(thePeriodEnd, theRequestDetails),
+						theSubject,
+						thePractitioner);
 	}
 }
