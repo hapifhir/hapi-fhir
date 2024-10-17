@@ -43,6 +43,7 @@ import ca.uhn.fhir.jpa.bulk.imprt.api.IBulkDataImportSvc;
 import ca.uhn.fhir.jpa.bulk.imprt.svc.BulkDataImportSvcImpl;
 import ca.uhn.fhir.jpa.cache.IResourceVersionSvc;
 import ca.uhn.fhir.jpa.cache.ResourceVersionSvcDaoImpl;
+import ca.uhn.fhir.jpa.dao.CacheTagDefinitionDao;
 import ca.uhn.fhir.jpa.dao.DaoSearchParamProvider;
 import ca.uhn.fhir.jpa.dao.HistoryBuilder;
 import ca.uhn.fhir.jpa.dao.HistoryBuilderFactory;
@@ -56,6 +57,7 @@ import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.dao.TransactionProcessor;
 import ca.uhn.fhir.jpa.dao.data.IResourceModifiedDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceSearchUrlDao;
+import ca.uhn.fhir.jpa.dao.data.ITagDefinitionDao;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeEverythingService;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeOperation;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeService;
@@ -377,17 +379,17 @@ public class JpaConfig {
 
 	@Bean
 	public TaskScheduler taskScheduler() {
-		ConcurrentTaskScheduler retVal = new ConcurrentTaskScheduler();
-		retVal.setConcurrentExecutor(scheduledExecutorService().getObject());
-		retVal.setScheduledExecutor(scheduledExecutorService().getObject());
+		ConcurrentTaskScheduler retVal = new ConcurrentTaskScheduler(
+				scheduledExecutorService().getObject(),
+				scheduledExecutorService().getObject());
 		return retVal;
 	}
 
 	@Bean(name = TASK_EXECUTOR_NAME)
 	public AsyncTaskExecutor taskExecutor() {
-		ConcurrentTaskScheduler retVal = new ConcurrentTaskScheduler();
-		retVal.setConcurrentExecutor(scheduledExecutorService().getObject());
-		retVal.setScheduledExecutor(scheduledExecutorService().getObject());
+		ConcurrentTaskScheduler retVal = new ConcurrentTaskScheduler(
+				scheduledExecutorService().getObject(),
+				scheduledExecutorService().getObject());
 		return retVal;
 	}
 
@@ -892,5 +894,11 @@ public class JpaConfig {
 	public ResourceHistoryCalculator resourceHistoryCalculator(
 			FhirContext theFhirContext, HibernatePropertiesProvider theHibernatePropertiesProvider) {
 		return new ResourceHistoryCalculator(theFhirContext, theHibernatePropertiesProvider.isOracleDialect());
+	}
+
+	@Bean
+	public CacheTagDefinitionDao tagDefinitionDao(
+			ITagDefinitionDao tagDefinitionDao, MemoryCacheService memoryCacheService) {
+		return new CacheTagDefinitionDao(tagDefinitionDao, memoryCacheService);
 	}
 }
