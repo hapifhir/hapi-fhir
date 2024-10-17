@@ -23,6 +23,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.i18n.Msg;
 import org.apache.commons.cli.CommandLine;
+import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.LocalFileValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.SnapshotGeneratingValidationSupport;
@@ -52,7 +53,7 @@ public class ValidationSupportChainCreator {
 		if (commandLine.hasOption("r")) {
 			chain.addValidationSupport(new LoadingValidationSupportDstu3());
 		}
-
+		chain.addValidationSupport(new CommonCodeSystemsTerminologyService(ctx));
 		return chain;
 	}
 
