@@ -396,6 +396,7 @@ public abstract class BaseJpaTest extends BaseTest {
 			myFhirInstanceValidator.invalidateCaches();
 		}
 		JpaStorageSettings defaultConfig = new JpaStorageSettings();
+		myStorageSettings.setPreExpandValueSets(defaultConfig.isPreExpandValueSets());
 		myStorageSettings.setAdvancedHSearchIndexing(defaultConfig.isAdvancedHSearchIndexing());
 		myStorageSettings.setAllowContainsSearches(defaultConfig.isAllowContainsSearches());
 		myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(defaultConfig.isMarkResourcesForReindexingUponSearchParameterChange());
@@ -472,7 +473,7 @@ public abstract class BaseJpaTest extends BaseTest {
 
 	protected abstract PlatformTransactionManager getTxManager();
 
-	protected void logAllCodeSystemsAndVersionsCodeSystemsAndVersions() {
+	public void logAllCodeSystemsAndVersionsCodeSystemsAndVersions() {
 		runInTransaction(() -> {
 			ourLog.info("CodeSystems:\n * " + myTermCodeSystemDao.findAll()
 				.stream()
@@ -523,7 +524,7 @@ public abstract class BaseJpaTest extends BaseTest {
 		});
 	}
 
-	protected int logAllConcepts() {
+	public int logAllConcepts() {
 		return runInTransaction(() -> {
 			List<TermConcept> resources = myTermConceptDao.findAll();
 			ourLog.info("Concepts:\n * {}", resources.stream().map(TermConcept::toString).collect(Collectors.joining("\n * ")));
@@ -539,10 +540,10 @@ public abstract class BaseJpaTest extends BaseTest {
 		});
 	}
 
-	protected int logAllValueSetConcepts() {
+	public int logAllValueSetConcepts() {
 		return runInTransaction(() -> {
 			List<TermValueSetConcept> resources = myTermValueSetConceptDao.findAll();
-			ourLog.info("Concepts:\n * {}", resources.stream().map(TermValueSetConcept::toString).collect(Collectors.joining("\n * ")));
+			ourLog.info("ValueSet Concepts:\n * {}", resources.stream().map(TermValueSetConcept::toString).collect(Collectors.joining("\n * ")));
 			return resources.size();
 		});
 	}

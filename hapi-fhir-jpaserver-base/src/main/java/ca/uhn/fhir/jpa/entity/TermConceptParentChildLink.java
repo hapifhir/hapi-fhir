@@ -129,11 +129,6 @@ public class TermConceptParentChildLink implements Serializable {
 	@Column(name = "PARENT_PID", insertable = true, updatable = true, nullable = false)
 	private Long myParentPid;
 
-	// FIXME: cleanup
-	//	@Id()
-	//	@SequenceGenerator(name = "SEQ_CONCEPT_PC_PID", sequenceName = "SEQ_CONCEPT_PC_PID")
-	//	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_CONCEPT_PC_PID")
-	//	@Column(name = "PID")
 	@EmbeddedId
 	private TermConceptParentChildLinkPk myId;
 

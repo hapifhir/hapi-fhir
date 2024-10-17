@@ -185,12 +185,7 @@ public class InstanceReindexServiceImpl implements IInstanceReindexService {
 			messages.add("WARNING: " + next);
 		}
 
-		ResourceIndexedSearchParams newParamsToPopulate;
-		// FIXME: remove?
-		//				newParamsToPopulate = (ResourceIndexedSearchParams) entity.getParamsForStorage();
-		//				if (newParamsToPopulate == null) {
-		newParamsToPopulate = ResourceIndexedSearchParams.withLists(entity);
-		//				}
+		ResourceIndexedSearchParams newParamsToPopulate = ResourceIndexedSearchParams.withLists(entity);
 		newParamsToPopulate.mySearchParamPresentEntities.addAll(entity.getSearchParamPresents());
 
 		return buildIndexResponse(existingParamsToPopulate, newParamsToPopulate, true, messages);

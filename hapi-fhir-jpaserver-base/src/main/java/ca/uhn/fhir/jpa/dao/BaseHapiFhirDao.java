@@ -1089,10 +1089,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 			// CREATE or UPDATE
 
-			IdentityHashMap<ResourceTable, ResourceIndexedSearchParams> existingSearchParams =
-					theTransactionDetails.getOrCreateUserData(
-							HapiTransactionService.XACT_USERDATA_KEY_EXISTING_SEARCH_PARAMS,
-							() -> new IdentityHashMap<>());
+			IdentityHashMap<ResourceTable, ResourceIndexedSearchParams> existingSearchParams = getSearchParamsMapFromTransaction(theTransactionDetails);
 			existingParams = existingSearchParams.get(entity);
 			if (existingParams == null) {
 				existingParams = ResourceIndexedSearchParams.withLists(entity);
@@ -1279,6 +1276,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 								myInterceptorBroadcaster, theRequest, Pointcut.JPA_PERFTRACE_INFO, params);
 					}
 				}
+
+				// Put the final set of search params into the transaction
+				getSearchParamsMapFromTransaction(theTransactionDetails).put(entity, newParams);
 			}
 		}
 
@@ -1287,6 +1287,12 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		}
 
 		return entity;
+	}
+
+	private static IdentityHashMap<ResourceTable, ResourceIndexedSearchParams> getSearchParamsMapFromTransaction(TransactionDetails theTransactionDetails) {
+		return theTransactionDetails.getOrCreateUserData(
+			HapiTransactionService.XACT_USERDATA_KEY_EXISTING_SEARCH_PARAMS,
+			IdentityHashMap::new);
 	}
 
 	/**

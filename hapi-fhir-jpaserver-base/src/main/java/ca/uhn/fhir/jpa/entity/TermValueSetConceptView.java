@@ -20,8 +20,11 @@
 package ca.uhn.fhir.jpa.entity;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Lob;
@@ -60,7 +63,6 @@ import java.sql.SQLException;
 				+ "       vscd.VAL                           AS DESIGNATION_VAL "
 				+ "FROM TRM_VALUESET_CONCEPT vsc "
 				+ "LEFT OUTER JOIN TRM_VALUESET_C_DESIGNATION vscd ON vsc.PID = vscd.VALUESET_CONCEPT_PID")
-// FIXME: need a keep test for this
 public class TermValueSetConceptView implements Serializable, ITermValueSetConceptView {
 	private static final long serialVersionUID = 1L;
 

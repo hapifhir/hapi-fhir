@@ -9,6 +9,7 @@ import ca.uhn.fhir.batch2.jobs.expunge.DeleteExpungeJobParameters;
 import ca.uhn.fhir.batch2.jobs.expunge.DeleteExpungeStep;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
@@ -28,7 +29,12 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
+import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
+import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
+import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.util.SqlQuery;
@@ -45,6 +51,9 @@ import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import jakarta.annotation.Nonnull;
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.statement.insert.Insert;
@@ -53,8 +62,10 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.Bundle;
+import org.hl7.fhir.r5.model.CodeSystem;
 import org.hl7.fhir.r5.model.DateTimeType;
 import org.hl7.fhir.r5.model.Encounter;
+import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.Meta;
 import org.hl7.fhir.r5.model.Observation;
@@ -63,6 +74,7 @@ import org.hl7.fhir.r5.model.Patient;
 import org.hl7.fhir.r5.model.Questionnaire;
 import org.hl7.fhir.r5.model.QuestionnaireResponse;
 import org.hl7.fhir.r5.model.Reference;
+import org.hl7.fhir.r5.model.ValueSet;
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -101,6 +113,12 @@ public abstract class TestDefinitions implements ITestDataBuilder {
 	private final BaseJpaR5Test myParentTest;
 	private final boolean myIncludePartitionIdsInPks;
 	@Autowired
+	protected ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
+	@Autowired
+	protected ITermDeferredStorageSvc myTerminologyDeferredStorageSvc;
+	@Autowired
+	protected ITermReadSvc myTermSvc;
+	@Autowired
 	private TestDaoSearch myTestDaoSearch;
 	@Autowired
 	private InterceptorService myInterceptorService;
@@ -110,6 +128,10 @@ public abstract class TestDefinitions implements ITestDataBuilder {
 	private IFhirResourceDaoPatient<Patient> myPatientDao;
 	@Autowired
 	private IFhirResourceDaoObservation<Observation> myObservationDao;
+	@Autowired
+	private IFhirResourceDao<CodeSystem> myCodeSystemDao;
+	@Autowired
+	private IFhirResourceDao<ValueSet> myValueSetDao;
 	@Autowired
 	private IFhirResourceDao<Encounter> myEncounterDao;
 	@Autowired
@@ -849,6 +871,9 @@ public abstract class TestDefinitions implements ITestDataBuilder {
 		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
 	}
 
+	/**
+	 * Perform a search where the request partition ID includes multiple partitions
+	 */
 	@Test
 	public void testSearch_MultiPartition() {
 		// Setup
@@ -867,14 +892,17 @@ public abstract class TestDefinitions implements ITestDataBuilder {
 
 		// Verify
 		myCaptureQueriesListener.logSelectQueries();
-		if (myIncludePartitionIdsInSql) {
-			assertEquals("SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_RESOURCE t0 WHERE (((t0.RES_TYPE = 'Patient') AND (t0.RES_DELETED_AT IS NULL)) AND (t0.PARTITION_ID IN ('1','2') ))", getSelectSql(0));
-			assertThat(getSelectSql(1)).contains(" where (rht1_0.RES_ID) in ('" + id0.getIdPartAsLong() + "','" + id1.getIdPartAsLong() + "','-1','-1','-1','-1','-1','-1','-1','-1') and mrt1_0.RES_VER=rht1_0.RES_VER");
-		} else {
+		if (myIncludePartitionIdsInPks) {
+			assertEquals("SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_RESOURCE t0 LEFT OUTER JOIN HFJ_SPIDX_STRING t1 ON ((t0.PARTITION_ID = t1.PARTITION_ID) AND (t0.RES_ID = t1.RES_ID) AND (t1.HASH_IDENTITY = '-9208284524139093953')) WHERE (((t0.RES_TYPE = 'Patient') AND (t0.RES_DELETED_AT IS NULL)) AND (t0.PARTITION_ID IN ('1','2') )) ORDER BY t1.SP_VALUE_NORMALIZED ASC NULLS LAST", getSelectSql(0));
+			assertThat(getSelectSql(1)).contains(" where (rht1_0.RES_ID,rht1_0.PARTITION_ID) in (('" + id0.getIdPartAsLong() + "','1'),('" + id1.getIdPartAsLong() + "','2'),('-1',NULL),('-1',NULL),('-1',NULL),('-1',NULL),('-1',NULL),('-1',NULL),('-1',NULL),('-1',NULL)) and mrt1_0.RES_VER=rht1_0.RES_VER");
+		} else if (myIncludePartitionIdsInSql) {
 			assertEquals("SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_RESOURCE t0 LEFT OUTER JOIN HFJ_SPIDX_STRING t1 ON ((t0.RES_ID = t1.RES_ID) AND (t1.HASH_IDENTITY = '-9208284524139093953')) WHERE (((t0.RES_TYPE = 'Patient') AND (t0.RES_DELETED_AT IS NULL)) AND (t0.PARTITION_ID IN ('1','2') )) ORDER BY t1.SP_VALUE_NORMALIZED ASC NULLS LAST", getSelectSql(0));
 			assertThat(getSelectSql(1)).contains(" where (rht1_0.RES_ID) in ('" + id0.getIdPartAsLong() + "','" + id1.getIdPartAsLong() + "','-1','-1','-1','-1','-1','-1','-1','-1') and mrt1_0.RES_VER=rht1_0.RES_VER");
+		} else {
+			assertEquals("SELECT t0.RES_ID FROM HFJ_RESOURCE t0 LEFT OUTER JOIN HFJ_SPIDX_STRING t1 ON ((t0.RES_ID = t1.RES_ID) AND (t1.HASH_IDENTITY = '-9208284524139093953')) WHERE ((t0.RES_TYPE = 'Patient') AND (t0.RES_DELETED_AT IS NULL)) ORDER BY t1.SP_VALUE_NORMALIZED ASC NULLS LAST", getSelectSql(0));
+			assertThat(getSelectSql(1)).contains(" where (rht1_0.RES_ID) in ('" + id0.getIdPartAsLong() + "','" + id1.getIdPartAsLong() + "','-1','-1','-1','-1','-1','-1','-1','-1') and mrt1_0.RES_VER=rht1_0.RES_VER");
 		}
-		assertEquals(99, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
 	}
 
 	@ParameterizedTest
@@ -1409,6 +1437,54 @@ public abstract class TestDefinitions implements ITestDataBuilder {
 		} else {
 			assertEquals(theTestCase.expectedSql, sql, theTestCase.comment);
 		}
+	}
+
+
+	@Test
+	public void testValuesetExpansion_IncludePreExpandedVsWithFilter() {
+		// Setup
+		myStorageSettings.setPreExpandValueSets(true);
+
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl("http://cs");
+		cs.setContent(Enumerations.CodeSystemContentMode.NOTPRESENT);
+		myCodeSystemDao.create(cs, newRequest());
+
+		CustomTerminologySet additions = new CustomTerminologySet();
+		additions.addRootConcept("A", "HELLO");
+		additions.addRootConcept("B", "HELLO");
+		additions.addRootConcept("C", "GOODBYE");
+		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://cs", additions);
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+
+		ValueSet valueSet = new ValueSet();
+		valueSet.setUrl("http://vs");
+		valueSet
+			.getCompose()
+				.addInclude().setSystem("http://cs");
+		myValueSetDao.create(valueSet, newRequest());
+
+		myCaptureQueriesListener.clear();
+		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+
+		myParentTest.logAllCodeSystemsAndVersionsCodeSystemsAndVersions();
+		myParentTest.logAllConcepts();
+		myParentTest.logAllValueSetConcepts();
+
+		// Test
+		ValueSet input = new ValueSet();
+		input.getCompose()
+			.addInclude()
+			.addValueSet("http://vs");
+
+		ValueSetExpansionOptions expansionOptions = new ValueSetExpansionOptions();
+		expansionOptions.setFilter("HELLO");
+		myCaptureQueriesListener.clear();
+		ValueSet outcome = (ValueSet) myTermSvc.expandValueSet(expansionOptions, valueSet);
+
+		// Verify
+		myCaptureQueriesListener.logSelectQueries();
+		assertThat(outcome.getExpansion().getContains().stream().map(ValueSet.ValueSetExpansionContainsComponent::getCode).toList()).asList().containsExactly("A", "B");
 	}
 
 

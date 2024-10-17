@@ -47,7 +47,7 @@ public class PartitionSelectorInterceptor {
 				assert myNextPartition != null;
 				yield myNextPartition;
 			}
-			case "SearchParameter", "Organization", "Questionnaire" -> RequestPartitionId.defaultPartition();
+			case "SearchParameter", "Organization", "Questionnaire", "CodeSystem", "ValueSet" -> RequestPartitionId.defaultPartition();
 			default -> throw new InternalErrorException("Don't know how to handle resource type: " + theResourceType);
 		};
 	}

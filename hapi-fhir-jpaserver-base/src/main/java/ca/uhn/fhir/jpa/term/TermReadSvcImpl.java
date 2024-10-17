@@ -1181,6 +1181,19 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 							.map(t -> (TermConcept.TermConceptPk) t.id())
 							.collect(Collectors.toList());
 
+					/*
+					 * This is a (hopefully) temporary hack - we are pulling concepts
+					 * out of ElasticSearch here and ES concepts aren't yet partition
+					 * aware. So we'll assume that they meant the default partition. This
+					 * will always work for now since terminology stuff is non-partitionable
+					 * but that could change in the future.
+					 */
+					for (var pid : pids) {
+						if (pid.getPartitionIdValue() == null) {
+							pid.setPartitionIdValue(myPartitionSettings.getDefaultPartitionId());
+						}
+					}
+
 					List<TermConcept> termConcepts = myTermConceptDao.fetchConceptsAndDesignationsByPid(pids);
 
 					// If the include section had multiple codes, return the codes in the same order
