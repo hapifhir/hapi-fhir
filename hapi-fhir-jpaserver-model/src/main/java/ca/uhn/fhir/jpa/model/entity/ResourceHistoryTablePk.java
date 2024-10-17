@@ -25,7 +25,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
-import jakarta.persistence.SequenceGenerator;
+import org.hibernate.annotations.GenericGenerator;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -33,7 +33,7 @@ import java.util.Objects;
 @Embeddable
 public class ResourceHistoryTablePk implements IResourceVersionPersistentId, Serializable {
 
-@GenericGenerator(
+	@GenericGenerator(
 			name = "SEQ_RESOURCE_HISTORY_ID",
 			type = ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator.class)
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_RESOURCE_HISTORY_ID")

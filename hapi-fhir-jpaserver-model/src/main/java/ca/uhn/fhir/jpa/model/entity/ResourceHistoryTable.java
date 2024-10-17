@@ -46,7 +46,6 @@ import jakarta.persistence.UniqueConstraint;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.Length;
-import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.OptimisticLock;
 
 import java.io.Serializable;
