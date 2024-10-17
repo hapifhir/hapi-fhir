@@ -1596,7 +1596,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 			String sql = localReferenceQuery + " UNION " + canonicalQuery.getLeft();
 
-			Map<String, Object> limitParams = null;
+			Map<String, Object> limitParams = new HashMap<>();
 			if (maxCount != null) {
 				LinkedList<Object> bindVariables = new LinkedList<>();
 				sql = SearchQueryBuilder.applyLimitToSql(
@@ -1605,7 +1605,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				// The dialect SQL limiter uses positional params, but we're using
 				// named params here, so we need to replace the positional params
 				// with equivalent named ones
-				limitParams = new HashMap<>(bindVariables.size());
 				StringBuilder sb = new StringBuilder();
 				for (int i = 0; i < sql.length(); i++) {
 					char nextChar = sql.charAt(i);
