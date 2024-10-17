@@ -199,6 +199,10 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 				.nonNullable()
 				.withType(ColumnTypeEnum.LONG)
 				.failureAllowed();
+		version.onTable("TRM_CODESYSTEM")
+				.addColumn("20241008.1003", "CURRENT_VERSION_PARTITION_ID")
+				.nullable()
+				.type(ColumnTypeEnum.INT);
 
 		version.onTable("TRM_CODESYSTEM_VER")
 				.addColumn("20241008.1100", "PARTITION_ID")

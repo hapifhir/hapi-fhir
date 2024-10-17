@@ -70,6 +70,11 @@ public class TermCodeSystem extends BasePartitionable implements Serializable {
 	@Column(name = "CODE_SYSTEM_URI", nullable = false, length = MAX_URL_LENGTH)
 	private String myCodeSystemUri;
 
+	/**
+	 * Note that this uses a separate partition_id column because it needs
+	 * to be nullable, unlike the PK one which has to be non-nullable
+	 * when we're including partition IDs in PKs.
+	 */
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumns(
 			value = {
@@ -80,7 +85,7 @@ public class TermCodeSystem extends BasePartitionable implements Serializable {
 						updatable = false,
 						nullable = true),
 				@JoinColumn(
-						name = "PARTITION_ID",
+						name = "CURRENT_VERSION_PARTITION_ID",
 						referencedColumnName = "PARTITION_ID",
 						insertable = false,
 						updatable = false,
@@ -91,6 +96,9 @@ public class TermCodeSystem extends BasePartitionable implements Serializable {
 
 	@Column(name = "CURRENT_VERSION_PID", nullable = true, insertable = true, updatable = true)
 	private Long myCurrentVersionPid;
+
+	@Column(name = "CURRENT_VERSION_PARTITION_ID", nullable = true, insertable = true, updatable = true)
+	private Integer myCurrentVersionPartitionId;
 
 	@Id()
 	@SequenceGenerator(name = "SEQ_CODESYSTEM_PID", sequenceName = "SEQ_CODESYSTEM_PID")
@@ -185,10 +193,12 @@ public class TermCodeSystem extends BasePartitionable implements Serializable {
 		if (theCurrentVersion == null) {
 			myCurrentVersion = null;
 			myCurrentVersionPid = null;
+			myCurrentVersionPartitionId = null;
 		} else {
 			myCurrentVersion = theCurrentVersion;
 			myCurrentVersionPid = theCurrentVersion.getPid();
 			assert myCurrentVersionPid != null;
+			myCurrentVersionPartitionId = theCurrentVersion.getPartitionId().getPartitionId();
 		}
 		return this;
 	}
