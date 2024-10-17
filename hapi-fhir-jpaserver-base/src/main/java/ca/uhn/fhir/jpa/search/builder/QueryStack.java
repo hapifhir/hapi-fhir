@@ -2714,6 +2714,7 @@ public class QueryStack {
 			}
 		}
 
+		// LUKETODO:  we already have the HASH_SYS WHERE SQL here and nothing else
 		return toAndPredicate(andPredicates);
 	}
 
