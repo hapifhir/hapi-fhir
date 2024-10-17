@@ -236,21 +236,42 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testUpdateResourceTwiceInSameTransaction() {
+		// Update with a string param that changes, and a token param that does not
 		runInTransaction(()->{
-			createOrganization(withId("A"), withName("1"));
-			createOrganization(withId("A"), withName("2"));
+			createOrganization(withId("A"), withName("1"), withActiveTrue());
+			createOrganization(withId("A"), withName("2"), withActiveTrue());
 		});
 
 		assertEquals("2", myOrganizationDao.read(new IdType("Organization/A"), mySrd).getName());
+		assertTrue(myOrganizationDao.read(new IdType("Organization/A"), mySrd).getActive());
+
+		logAllStringIndexes();
+		runInTransaction(()->{
+			List<String> stringIndexes = getAllStringIndexes("name")
+				.stream().map(ResourceIndexedSearchParamString::getValueExact).toList();
+			assertThat(stringIndexes).asList().containsExactly("2");
+			List<String> tokenIndexes = getAllTokenIndexes("active")
+				.stream().map(ResourceIndexedSearchParamToken::getValue).toList();
+			assertThat(tokenIndexes).asList().containsExactly("true");
+		});
 
 		runInTransaction(()->{
-			createOrganization(withId("A"), withName("3"));
-			createOrganization(withId("A"), withName("4"));
+			createOrganization(withId("A"), withName("3"), withActiveTrue());
+			createOrganization(withId("A"), withName("4"), withActiveTrue());
 		});
 
 		assertEquals("4", myOrganizationDao.read(new IdType("Organization/A"), mySrd).getName());
-	}
+		assertTrue(myOrganizationDao.read(new IdType("Organization/A"), mySrd).getActive());
 
+		runInTransaction(()->{
+			List<String> stringIndexes = getAllStringIndexes("name")
+				.stream().map(ResourceIndexedSearchParamString::getValueExact).toList();
+			assertThat(stringIndexes).asList().containsExactly("4");
+			List<String> tokenIndexes = getAllTokenIndexes("active")
+				.stream().map(ResourceIndexedSearchParamToken::getValue).toList();
+			assertThat(tokenIndexes).asList().containsExactly("true");
+		});
+	}
 
 
 	@Test

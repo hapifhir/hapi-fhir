@@ -180,6 +180,14 @@ public class DaoSearchParamSynchronizer {
 		// TODO:  are there any unintended consequences to fixing this bug?
 		theAddRemoveCount.addToAddCount(paramsToAdd.size());
 		theAddRemoveCount.addToRemoveCount(paramsToRemove.size());
+
+		// Replace the existing "new set" with the set of params we should be adding.
+		// We're going to add them back into the entity just in case it gets updated
+		// a second time within the same transaction
+		theNewParams.clear();
+		theNewParams.addAll(theExistingParams);
+		theNewParams.addAll(paramsToAdd);
+		theNewParams.removeAll(paramsToRemove);
 	}
 
 	/**

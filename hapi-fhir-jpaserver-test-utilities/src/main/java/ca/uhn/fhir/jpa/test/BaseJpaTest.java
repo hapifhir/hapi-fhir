@@ -70,6 +70,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboTokenNonUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamCoords;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamNumber;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
@@ -572,10 +573,24 @@ public abstract class BaseJpaTest extends BaseTest {
 		});
 	}
 
-	protected void logAllTokenIndexes() {
+	protected void logAllTokenIndexes(String... theParamNames) {
+		String messageSuffix = theParamNames.length > 0 ? " containing " + Arrays.asList(theParamNames) : "";
 		runInTransaction(() -> {
-			ourLog.info("Token indexes:\n * {}", myResourceIndexedSearchParamTokenDao.findAll().stream().map(ResourceIndexedSearchParamToken::toString).collect(Collectors.joining("\n * ")));
+			String message = getAllTokenIndexes(theParamNames)
+				.stream()
+				.map(ResourceIndexedSearchParamToken::toString)
+				.collect(Collectors.joining("\n * "));
+			ourLog.info("Token indexes{}:\n * {}", messageSuffix, message);
 		});
+	}
+
+	@Nonnull
+	protected List<ResourceIndexedSearchParamToken> getAllTokenIndexes(String... theParamNames) {
+		return runInTransaction(()->myResourceIndexedSearchParamTokenDao
+			.findAll()
+			.stream()
+			.filter(t -> theParamNames.length == 0 || Arrays.asList(theParamNames).contains(t.getParamName()))
+			.toList());
 	}
 
 	protected void logAllCoordsIndexes() {
@@ -599,15 +614,23 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected void logAllStringIndexes(String... theParamNames) {
 		String messageSuffix = theParamNames.length > 0 ? " containing " + Arrays.asList(theParamNames) : "";
 		runInTransaction(() -> {
-			String message = myResourceIndexedSearchParamStringDao
-				.findAll()
+			String message = getAllStringIndexes(theParamNames)
 				.stream()
-				.filter(t -> theParamNames.length == 0 ? true : Arrays.asList(theParamNames).contains(t.getParamName()))
-				.map(t -> t.toString())
+				.map(ResourceIndexedSearchParamString::toString)
 				.collect(Collectors.joining("\n * "));
 			ourLog.info("String indexes{}:\n * {}", messageSuffix, message);
 		});
 	}
+
+	@Nonnull
+	protected List<ResourceIndexedSearchParamString> getAllStringIndexes(String... theParamNames) {
+		return runInTransaction(()->myResourceIndexedSearchParamStringDao
+			.findAll()
+			.stream()
+			.filter(t -> theParamNames.length == 0 || Arrays.asList(theParamNames).contains(t.getParamName()))
+			.toList());
+	}
+
 
 	protected void logAllResourceTags() {
 		runInTransaction(() -> {

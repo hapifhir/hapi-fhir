@@ -33,6 +33,7 @@ import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.HasParam;
@@ -87,6 +88,7 @@ import static ca.uhn.fhir.jpa.dao.r5.conditionalid.ConditionalIdKeptPartitioning
 import static ca.uhn.fhir.rest.api.Constants.PARAM_HAS;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_TAG;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.hl7.fhir.instance.model.api.IAnyResource.SP_RES_ID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -792,7 +794,7 @@ public abstract class TestDefinitions implements ITestDataBuilder {
 		myCaptureQueriesListener.clear();
 		SearchParameterMap params = new SearchParameterMap();
 		params.setLoadSynchronous(true);
-		params.add(IAnyResource.SP_RES_ID, new TokenOrListParam().add(id0.getValue()).add(id1.getValue()));
+		params.add(SP_RES_ID, new TokenOrListParam().add(id0.getValue()).add(id1.getValue()));
 		IBundleProvider outcome = myPatientDao.search(params, newRequest());
 		assertThat(toUnqualifiedVersionlessIdValues(outcome)).asList().containsExactlyInAnyOrder(id0.getValue(), id1.getValue());
 
@@ -845,6 +847,34 @@ public abstract class TestDefinitions implements ITestDataBuilder {
 		}
 
 		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
+	}
+
+	@Test
+	public void testSearch_MultiPartition() {
+		// Setup
+		myPartitionSelectorInterceptor.setNextPartitionId(PARTITION_1);
+		IIdType id0 = createPatient(withActiveTrue(), withFamily("A")).toUnqualifiedVersionless();
+		myPartitionSelectorInterceptor.setNextPartitionId(PARTITION_2);
+		IIdType id1 = createPatient(withActiveFalse(), withFamily("B")).toUnqualifiedVersionless();
+
+		// Test
+		myPartitionSelectorInterceptor.setNextPartition(RequestPartitionId.fromPartitionIds(PARTITION_1, PARTITION_2));
+		myCaptureQueriesListener.clear();
+		SearchParameterMap params = SearchParameterMap.newSynchronous()
+			.setSort(new SortSpec(Patient.SP_FAMILY));
+		IBundleProvider outcome = myPatientDao.search(params, newRequest());
+		assertThat(toUnqualifiedVersionlessIdValues(outcome)).asList().containsExactlyInAnyOrder(id0.getValue(), id1.getValue());
+
+		// Verify
+		myCaptureQueriesListener.logSelectQueries();
+		if (myIncludePartitionIdsInSql) {
+			assertEquals("SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_RESOURCE t0 WHERE (((t0.RES_TYPE = 'Patient') AND (t0.RES_DELETED_AT IS NULL)) AND (t0.PARTITION_ID IN ('1','2') ))", getSelectSql(0));
+			assertThat(getSelectSql(1)).contains(" where (rht1_0.RES_ID) in ('" + id0.getIdPartAsLong() + "','" + id1.getIdPartAsLong() + "','-1','-1','-1','-1','-1','-1','-1','-1') and mrt1_0.RES_VER=rht1_0.RES_VER");
+		} else {
+			assertEquals("SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_RESOURCE t0 LEFT OUTER JOIN HFJ_SPIDX_STRING t1 ON ((t0.RES_ID = t1.RES_ID) AND (t1.HASH_IDENTITY = '-9208284524139093953')) WHERE (((t0.RES_TYPE = 'Patient') AND (t0.RES_DELETED_AT IS NULL)) AND (t0.PARTITION_ID IN ('1','2') )) ORDER BY t1.SP_VALUE_NORMALIZED ASC NULLS LAST", getSelectSql(0));
+			assertThat(getSelectSql(1)).contains(" where (rht1_0.RES_ID) in ('" + id0.getIdPartAsLong() + "','" + id1.getIdPartAsLong() + "','-1','-1','-1','-1','-1','-1','-1','-1') and mrt1_0.RES_VER=rht1_0.RES_VER");
+		}
+		assertEquals(99, myCaptureQueriesListener.countSelectQueries());
 	}
 
 	@ParameterizedTest
@@ -1223,7 +1253,7 @@ public abstract class TestDefinitions implements ITestDataBuilder {
 		myParentTest.logAllResourceLinks();
 		myCaptureQueriesListener.clear();
 		SearchParameterMap params = new SearchParameterMap();
-		params.add(IAnyResource.SP_RES_ID, new TokenParam("Organization/" + ids.parentOrgPid()));
+		params.add(SP_RES_ID, new TokenParam("Organization/" + ids.parentOrgPid()));
 		params.setLoadSynchronous(true);
 		params.addRevInclude(IBaseResource.INCLUDE_ALL.asRecursive());
 		IBundleProvider outcome = myOrganizationDao.search(params, newRequest());
@@ -1289,7 +1319,7 @@ public abstract class TestDefinitions implements ITestDataBuilder {
 		myParentTest.logAllResourceLinks();
 		myCaptureQueriesListener.clear();
 		SearchParameterMap params = new SearchParameterMap();
-		params.add(IAnyResource.SP_RES_ID, new TokenParam("Organization/" + ids.parentOrgPid()));
+		params.add(SP_RES_ID, new TokenParam("Organization/" + ids.parentOrgPid()));
 		params.setLoadSynchronous(true);
 		params.addRevInclude(Patient.INCLUDE_ORGANIZATION.asRecursive());
 		params.addRevInclude(Organization.INCLUDE_PARTOF.asRecursive());

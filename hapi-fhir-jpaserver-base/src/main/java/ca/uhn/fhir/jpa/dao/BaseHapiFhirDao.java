@@ -1102,11 +1102,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				 * old set later on
 				 */
 				if (existingParams.getResourceLinks().size() >= 10) {
-					List<Long> pids = existingParams.getResourceLinks().stream()
-							.map(t -> t.getId())
+					List<Long> allPids = existingParams.getResourceLinks().stream()
+							.map(ResourceLink::getId)
 							.collect(Collectors.toList());
-					new QueryChunker<Long>().chunk(pids, t -> {
-						List<ResourceLink> targets = myResourceLinkDao.findByPidAndFetchTargetDetails(t);
+					new QueryChunker<Long>().chunk(allPids, chunkPids -> {
+						List<ResourceLink> targets = myResourceLinkDao.findByPidAndFetchTargetDetails(chunkPids);
 						ourLog.trace("Prefetched targets: {}", targets);
 					});
 				}
@@ -1259,8 +1259,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				AddRemoveCount searchParamAddRemoveCount =
 						myDaoSearchParamSynchronizer.synchronizeSearchParamsToDatabase(
 								newParams, entity, existingParams);
-
-				entity.setParamsForStorage(newParams);
+				newParams.applyToEntity(entity);
 
 				// Interceptor broadcast: JPA_PERFTRACE_INFO
 				if (!searchParamAddRemoveCount.isEmpty()) {
