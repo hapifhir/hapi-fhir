@@ -206,6 +206,7 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
 			sort chained token, 	Observation?_sort=patient.active
 			""")
 	void testSyntaxForVariousQueries(String theMessage, String theQuery) {
+		// LUKETODO:  presentation
 		assertDoesNotThrow(()->myTestDaoSearch.searchForBundleProvider(theQuery), theMessage);
 	}
 
