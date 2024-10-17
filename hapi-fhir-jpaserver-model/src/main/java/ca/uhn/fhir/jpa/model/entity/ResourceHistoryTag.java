@@ -32,10 +32,9 @@ import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinColumns;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import org.hibernate.annotations.GenericGenerator;
 
 import java.io.Serializable;
 
@@ -54,7 +53,7 @@ public class ResourceHistoryTag extends BaseTag implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	@SequenceGenerator(name = "SEQ_HISTORYTAG_ID", sequenceName = "SEQ_HISTORYTAG_ID")
+	@GenericGenerator(name = "SEQ_HISTORYTAG_ID", type = ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator.class)
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_HISTORYTAG_ID")
 	@Id
 	@Column(name = "PID")

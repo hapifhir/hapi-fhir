@@ -1,0 +1,6 @@
+---
+type: add
+issue: 6375
+title: "A new experimental JPA setting has been added to JpaStorageSettings which
+  causes searches for token SearchParameters to include a predicate on the
+  HASH_IDENTITY column even if it is not needed because other hashes are in use."

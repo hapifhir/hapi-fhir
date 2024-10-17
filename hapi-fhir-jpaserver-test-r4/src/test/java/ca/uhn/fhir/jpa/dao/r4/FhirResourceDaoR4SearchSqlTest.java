@@ -19,6 +19,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -238,6 +239,27 @@ public class FhirResourceDaoR4SearchSqlTest extends BaseJpaR4Test {
 		assertThat(toUnqualifiedVersionlessIds(outcome)).containsExactly(id);
 
 		myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(reindexParamCache);
+	}
+
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	public void testSearchByToken_IncludeHashIdentity(boolean theIncludeHashIdentity) {
+		// Setup
+		myStorageSettings.setIncludeHashIdentityForTokenSearches(theIncludeHashIdentity);
+
+		// Test
+		myCaptureQueriesListener.clear();
+		SearchParameterMap params = SearchParameterMap.newSynchronous(Patient.SP_IDENTIFIER, new TokenParam("http://foo", "bar"));
+		IBundleProvider outcome = myPatientDao.search(params, mySrd);
+		assertEquals(0, outcome.sizeOrThrowNpe());
+
+		// Verify
+		if (theIncludeHashIdentity) {
+			assertEquals("SELECT t0.RES_ID FROM HFJ_SPIDX_TOKEN t0 WHERE ((t0.HASH_IDENTITY = '7001889285610424179') AND (t0.HASH_SYS_AND_VALUE = '-2780914544385068076'))", myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false));
+		} else {
+			assertEquals("SELECT t0.RES_ID FROM HFJ_SPIDX_TOKEN t0 WHERE (t0.HASH_SYS_AND_VALUE = '-2780914544385068076')", myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false));
+		}
+
 	}
 
 	public static class MyPartitionInterceptor {

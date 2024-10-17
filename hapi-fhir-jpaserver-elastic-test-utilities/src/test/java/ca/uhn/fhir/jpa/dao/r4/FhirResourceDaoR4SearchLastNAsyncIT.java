@@ -66,21 +66,19 @@ public class FhirResourceDaoR4SearchLastNAsyncIT extends BaseR4SearchLastN {
 		mySmallerPreFetchThresholds.add(-1);
 		myStorageSettings.setSearchPreFetchThresholds(mySmallerPreFetchThresholds);
 
-		SearchBuilder.setMaxPageSize50ForTest(true);
+		SearchBuilder.setMaxPageSizeForTest(50);
 
 		myStorageSettings.setLastNEnabled(true);
-
 	}
 
 	@AfterEach
 	public void after() {
 		myStorageSettings.setSearchPreFetchThresholds(originalPreFetchThresholds);
-		SearchBuilder.setMaxPageSize50ForTest(false);
+		SearchBuilder.setMaxPageSizeForTest(null);
 	}
 
 	@Test
 	public void testLastNChunking() {
-
 		runInTransaction(() -> {
 			Set<Long> all = mySearchDao.findAll().stream().map(Search::getId).collect(Collectors.toSet());
 
@@ -102,9 +100,6 @@ public class FhirResourceDaoR4SearchLastNAsyncIT extends BaseR4SearchLastN {
 
 		Map<String, String[]> requestParameters = new HashMap<>();
 		when(mySrd.getParameters()).thenReturn(requestParameters);
-
-		// Set chunk size to 50
-		SearchBuilder.setMaxPageSize50ForTest(true);
 
 		// Expand default fetch sizes to ensure all observations are returned in first page:
 		List<Integer> myBiggerPreFetchThresholds = new ArrayList<>();

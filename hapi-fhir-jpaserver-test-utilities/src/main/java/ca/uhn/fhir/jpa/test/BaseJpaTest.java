@@ -400,6 +400,9 @@ public abstract class BaseJpaTest extends BaseTest {
 		myStorageSettings.setAdvancedHSearchIndexing(defaultConfig.isAdvancedHSearchIndexing());
 		myStorageSettings.setAllowContainsSearches(defaultConfig.isAllowContainsSearches());
 		myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(defaultConfig.isMarkResourcesForReindexingUponSearchParameterChange());
+		myStorageSettings.setIncludeHashIdentityForTokenSearches(defaultConfig.isIncludeHashIdentityForTokenSearches());
+		myStorageSettings.setMaximumIncludesToLoadPerPage(defaultConfig.getMaximumIncludesToLoadPerPage());
+
 	}
 
 	@AfterEach

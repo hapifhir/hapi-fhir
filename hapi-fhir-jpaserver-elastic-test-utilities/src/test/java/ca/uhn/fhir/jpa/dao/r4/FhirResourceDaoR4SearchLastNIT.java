@@ -45,7 +45,7 @@ public class FhirResourceDaoR4SearchLastNIT extends BaseR4SearchLastN {
 
 	@AfterEach
 	public void reset() {
-		SearchBuilder.setMaxPageSize50ForTest(false);
+		SearchBuilder.setMaxPageSizeForTest(null);
 		myStorageSettings.setStoreResourceInHSearchIndex(new JpaStorageSettings().isStoreResourceInHSearchIndex());
 		myStorageSettings.setAdvancedHSearchIndexing(new JpaStorageSettings().isAdvancedHSearchIndexing());
 	}
@@ -77,7 +77,7 @@ public class FhirResourceDaoR4SearchLastNIT extends BaseR4SearchLastN {
 		when(mySrd.getParameters()).thenReturn(requestParameters);
 
 		// Set chunk size to 50
-		SearchBuilder.setMaxPageSize50ForTest(true);
+		SearchBuilder.setMaxPageSizeForTest(50);
 
 		myCaptureQueriesListener.clear();
 		List<String> results = toUnqualifiedVersionlessIdValues(myObservationDao.observationsLastN(params, mockSrd(), null));

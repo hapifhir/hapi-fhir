@@ -2985,6 +2985,32 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
+	public void testIncludeWithNullMaxIncludesToLoad() {
+		myStorageSettings.setMaximumIncludesToLoadPerPage(null);
+		Organization org = new Organization();
+		org.setName("ORG");
+		IIdType orgId = myOrganizationDao.create(org, mySrd).getId().toUnqualifiedVersionless();
+
+		Patient pt = new Patient();
+		pt.getManagingOrganization().setReference(orgId.getValue());
+		pt.addName().setFamily("FAM");
+		myPatientDao.create(pt, mySrd);
+
+		Bundle bundle = myClient
+			.search()
+			.forResource(Patient.class)
+			.include(Patient.INCLUDE_ORGANIZATION)
+			.returnBundle(Bundle.class)
+			.execute();
+
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+
+		assertThat(bundle.getEntry()).hasSize(2);
+		assertEquals("Patient", bundle.getEntry().get(0).getResource().getIdElement().getResourceType());
+		assertEquals("Organization", bundle.getEntry().get(1).getResource().getIdElement().getResourceType());
+	}
+
+	@Test
 	public void testIncludeWithExternalReferences() {
 		myStorageSettings.setAllowExternalReferences(true);
 
