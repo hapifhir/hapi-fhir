@@ -57,8 +57,8 @@ public final class DatabaseSupportUtil {
 	/**
 	 * Create a new connection to a randomized H2 database for testing
 	 */
-    public static DriverTypeEnum.ConnectionProperties newConnection() {
-        String url = "jdbc:h2:mem:test_migration-" + UUID.randomUUID() + ";CASE_INSENSITIVE_IDENTIFIERS=TRUE;";
-        return DriverTypeEnum.H2_EMBEDDED.newConnectionProperties(url, "SA", "SA");
-    }
+	public static DriverTypeEnum.ConnectionProperties newConnection() {
+		String url = "jdbc:h2:mem:test_migration-" + UUID.randomUUID() + ";CASE_INSENSITIVE_IDENTIFIERS=TRUE;";
+		return DriverTypeEnum.H2_EMBEDDED.newConnectionProperties(url, "SA", "SA");
+	}
 }
