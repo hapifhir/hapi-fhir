@@ -90,16 +90,16 @@ import static org.apache.commons.lang3.StringUtils.length;
 @Entity
 @Indexed(routingBinder = @RoutingBinderRef(type = DeferConceptIndexingRoutingBinder.class))
 @Table(
-	name = "TRM_CONCEPT",
-	uniqueConstraints = {
-		@UniqueConstraint(
-			name = "IDX_CONCEPT_CS_CODE",
-			columnNames = {"CODESYSTEM_PID", "CODEVAL"})
-	},
-	indexes = {
-		@Index(name = "IDX_CONCEPT_INDEXSTATUS", columnList = "INDEX_STATUS"),
-		@Index(name = "IDX_CONCEPT_UPDATED", columnList = "CONCEPT_UPDATED")
-	})
+		name = "TRM_CONCEPT",
+		uniqueConstraints = {
+			@UniqueConstraint(
+					name = "IDX_CONCEPT_CS_CODE",
+					columnNames = {"CODESYSTEM_PID", "CODEVAL"})
+		},
+		indexes = {
+			@Index(name = "IDX_CONCEPT_INDEXSTATUS", columnList = "INDEX_STATUS"),
+			@Index(name = "IDX_CONCEPT_UPDATED", columnList = "CONCEPT_UPDATED")
+		})
 public class TermConcept implements Serializable {
 	public static final int MAX_CODE_LENGTH = 500;
 	public static final int MAX_DESC_LENGTH = 400;
@@ -108,17 +108,17 @@ public class TermConcept implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@OneToMany(
-		fetch = FetchType.LAZY,
-		mappedBy = "myParent",
-		cascade = {})
+			fetch = FetchType.LAZY,
+			mappedBy = "myParent",
+			cascade = {})
 	private List<TermConceptParentChildLink> myChildren;
 
 	@Column(name = "CODEVAL", nullable = false, length = MAX_CODE_LENGTH)
 	@FullTextField(
-		name = "myCode",
-		searchable = Searchable.YES,
-		projectable = Projectable.YES,
-		analyzer = "exactAnalyzer")
+			name = "myCode",
+			searchable = Searchable.YES,
+			projectable = Projectable.YES,
+			analyzer = "exactAnalyzer")
 	private String myCode;
 
 	@Temporal(TemporalType.TIMESTAMP)
@@ -127,21 +127,21 @@ public class TermConcept implements Serializable {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumns(
-		value = {
-			@JoinColumn(
-				name = "CODESYSTEM_PID",
-				insertable = false,
-				updatable = false,
-				nullable = false,
-				referencedColumnName = "PID"),
-			@JoinColumn(
-				name = "PARTITION_ID",
-				referencedColumnName = "PARTITION_ID",
-				insertable = false,
-				updatable = false,
-				nullable = false)
-		},
-		foreignKey = @ForeignKey(name = "FK_CONCEPT_PID_CS_PID"))
+			value = {
+				@JoinColumn(
+						name = "CODESYSTEM_PID",
+						insertable = false,
+						updatable = false,
+						nullable = false,
+						referencedColumnName = "PID"),
+				@JoinColumn(
+						name = "PARTITION_ID",
+						referencedColumnName = "PARTITION_ID",
+						insertable = false,
+						updatable = false,
+						nullable = false)
+			},
+			foreignKey = @ForeignKey(name = "FK_CONCEPT_PID_CS_PID"))
 	private TermCodeSystemVersion myCodeSystem;
 
 	@Column(name = "CODESYSTEM_PID", insertable = true, updatable = false, nullable = false)
@@ -150,30 +150,30 @@ public class TermConcept implements Serializable {
 
 	@Column(name = "DISPLAY", nullable = true, length = MAX_DESC_LENGTH)
 	@FullTextField(
-		name = "myDisplay",
-		searchable = Searchable.YES,
-		projectable = Projectable.YES,
-		analyzer = "standardAnalyzer")
+			name = "myDisplay",
+			searchable = Searchable.YES,
+			projectable = Projectable.YES,
+			analyzer = "standardAnalyzer")
 	@FullTextField(
-		name = "myDisplayEdgeNGram",
-		searchable = Searchable.YES,
-		projectable = Projectable.NO,
-		analyzer = "autocompleteEdgeAnalyzer")
+			name = "myDisplayEdgeNGram",
+			searchable = Searchable.YES,
+			projectable = Projectable.NO,
+			analyzer = "autocompleteEdgeAnalyzer")
 	@FullTextField(
-		name = "myDisplayWordEdgeNGram",
-		searchable = Searchable.YES,
-		projectable = Projectable.NO,
-		analyzer = "autocompleteWordEdgeAnalyzer")
+			name = "myDisplayWordEdgeNGram",
+			searchable = Searchable.YES,
+			projectable = Projectable.NO,
+			analyzer = "autocompleteWordEdgeAnalyzer")
 	@FullTextField(
-		name = "myDisplayNGram",
-		searchable = Searchable.YES,
-		projectable = Projectable.NO,
-		analyzer = "autocompleteNGramAnalyzer")
+			name = "myDisplayNGram",
+			searchable = Searchable.YES,
+			projectable = Projectable.NO,
+			analyzer = "autocompleteNGramAnalyzer")
 	@FullTextField(
-		name = "myDisplayPhonetic",
-		searchable = Searchable.YES,
-		projectable = Projectable.NO,
-		analyzer = "autocompletePhoneticAnalyzer")
+			name = "myDisplayPhonetic",
+			searchable = Searchable.YES,
+			projectable = Projectable.NO,
+			analyzer = "autocompletePhoneticAnalyzer")
 	private String myDisplay;
 
 	@OneToMany(mappedBy = "myConcept", orphanRemoval = false, fetch = FetchType.LAZY)
@@ -186,9 +186,9 @@ public class TermConcept implements Serializable {
 	@EmbeddedId
 	@DocumentId(identifierBridge = @IdentifierBridgeRef(type = TermConceptPkIdentifierBridge.class))
 	@GenericField(
-		name = "myId",
-		projectable = Projectable.YES,
-		valueBridge = @ValueBridgeRef(type = TermConceptPkValueBridge.class))
+			name = "myId",
+			projectable = Projectable.YES,
+			valueBridge = @ValueBridgeRef(type = TermConceptPkValueBridge.class))
 	private TermConceptPk myId;
 
 	@Column(name = PartitionablePartitionId.PARTITION_ID, nullable = true, insertable = false, updatable = false)
@@ -203,17 +203,17 @@ public class TermConcept implements Serializable {
 	private String myParentPids;
 
 	@FullTextField(
-		name = "myParentPids",
-		searchable = Searchable.YES,
-		projectable = Projectable.YES,
-		analyzer = "conceptParentPidsAnalyzer")
+			name = "myParentPids",
+			searchable = Searchable.YES,
+			projectable = Projectable.YES,
+			analyzer = "conceptParentPidsAnalyzer")
 	@Column(name = "PARENT_PIDS_VC", nullable = true, length = Length.LONG32)
 	private String myParentPidsVc;
 
 	@OneToMany(
-		cascade = {},
-		fetch = FetchType.LAZY,
-		mappedBy = "myChild")
+			cascade = {},
+			fetch = FetchType.LAZY,
+			mappedBy = "myChild")
 	private List<TermConceptParentChildLink> myParents;
 
 	@Column(name = "CODE_SEQUENCE", nullable = true)
@@ -265,9 +265,9 @@ public class TermConcept implements Serializable {
 	}
 
 	private TermConceptProperty addProperty(
-		@Nonnull TermConceptPropertyTypeEnum thePropertyType,
-		@Nonnull String thePropertyName,
-		@Nonnull String thePropertyValue) {
+			@Nonnull TermConceptPropertyTypeEnum thePropertyType,
+			@Nonnull String thePropertyName,
+			@Nonnull String thePropertyValue) {
 		Validate.notBlank(thePropertyName);
 
 		TermConceptProperty property = new TermConceptProperty();
@@ -284,13 +284,13 @@ public class TermConcept implements Serializable {
 	}
 
 	public TermConceptProperty addPropertyCoding(
-		@Nonnull String thePropertyName,
-		@Nonnull String thePropertyCodeSystem,
-		@Nonnull String thePropertyCode,
-		String theDisplayName) {
+			@Nonnull String thePropertyName,
+			@Nonnull String thePropertyCodeSystem,
+			@Nonnull String thePropertyCode,
+			String theDisplayName) {
 		return addProperty(TermConceptPropertyTypeEnum.CODING, thePropertyName, thePropertyCode)
-			.setCodeSystem(thePropertyCodeSystem)
-			.setDisplay(theDisplayName);
+				.setCodeSystem(thePropertyCodeSystem)
+				.setDisplay(theDisplayName);
 	}
 
 	public TermConceptProperty addPropertyString(@Nonnull String thePropertyName, @Nonnull String thePropertyValue) {
@@ -328,7 +328,7 @@ public class TermConcept implements Serializable {
 	public TermConcept setCode(@Nonnull String theCode) {
 		ValidateUtil.isNotBlankOrThrowIllegalArgument(theCode, "theCode must not be null or empty");
 		ValidateUtil.isNotTooLongOrThrowIllegalArgument(
-			theCode, MAX_CODE_LENGTH, "Code exceeds maximum length (" + MAX_CODE_LENGTH + "): " + length(theCode));
+				theCode, MAX_CODE_LENGTH, "Code exceeds maximum length (" + MAX_CODE_LENGTH + "): " + length(theCode));
 		myCode = theCode;
 		return this;
 	}
@@ -569,13 +569,13 @@ public class TermConcept implements Serializable {
 	public static class TermConceptPkIdentifierBridge implements IdentifierBridge<TermConceptPk> {
 		@Override
 		public String toDocumentIdentifier(
-			TermConceptPk propertyValue, IdentifierBridgeToDocumentIdentifierContext context) {
+				TermConceptPk propertyValue, IdentifierBridgeToDocumentIdentifierContext context) {
 			return Long.toString(propertyValue.myId);
 		}
 
 		@Override
 		public TermConceptPk fromDocumentIdentifier(
-			String documentIdentifier, IdentifierBridgeFromDocumentIdentifierContext context) {
+				String documentIdentifier, IdentifierBridgeFromDocumentIdentifierContext context) {
 			TermConceptPk retVal = new TermConceptPk();
 			retVal.myId = Long.parseLong(documentIdentifier);
 			return retVal;
@@ -589,6 +589,7 @@ public class TermConcept implements Serializable {
 		@Column(name = "PID")
 		@GenericField(projectable = Projectable.YES)
 		private Long myId;
+
 		@ConditionalIdProperty
 		@Column(name = PartitionablePartitionId.PARTITION_ID, nullable = false)
 		private Integer myPartitionIdValue;

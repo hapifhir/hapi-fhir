@@ -1089,7 +1089,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 			// CREATE or UPDATE
 
-			IdentityHashMap<ResourceTable, ResourceIndexedSearchParams> existingSearchParams = getSearchParamsMapFromTransaction(theTransactionDetails);
+			IdentityHashMap<ResourceTable, ResourceIndexedSearchParams> existingSearchParams =
+					getSearchParamsMapFromTransaction(theTransactionDetails);
 			existingParams = existingSearchParams.get(entity);
 			if (existingParams == null) {
 				existingParams = ResourceIndexedSearchParams.withLists(entity);
@@ -1289,10 +1290,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		return entity;
 	}
 
-	private static IdentityHashMap<ResourceTable, ResourceIndexedSearchParams> getSearchParamsMapFromTransaction(TransactionDetails theTransactionDetails) {
+	private static IdentityHashMap<ResourceTable, ResourceIndexedSearchParams> getSearchParamsMapFromTransaction(
+			TransactionDetails theTransactionDetails) {
 		return theTransactionDetails.getOrCreateUserData(
-			HapiTransactionService.XACT_USERDATA_KEY_EXISTING_SEARCH_PARAMS,
-			IdentityHashMap::new);
+				HapiTransactionService.XACT_USERDATA_KEY_EXISTING_SEARCH_PARAMS, IdentityHashMap::new);
 	}
 
 	/**

@@ -20,11 +20,8 @@
 package ca.uhn.fhir.jpa.entity;
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
-import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Lob;
