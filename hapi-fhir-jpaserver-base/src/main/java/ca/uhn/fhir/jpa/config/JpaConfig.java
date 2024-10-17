@@ -896,8 +896,10 @@ public class JpaConfig {
 	}
 
 	@Bean
-	public PartitionedIdModeVerificationSvc partitionedIdModeVerificationSvc(PartitionSettings thePartitionSettings, HibernatePropertiesProvider theHibernatePropertiesProvider, PlatformTransactionManager theTxManager) {
+	public PartitionedIdModeVerificationSvc partitionedIdModeVerificationSvc(
+			PartitionSettings thePartitionSettings,
+			HibernatePropertiesProvider theHibernatePropertiesProvider,
+			PlatformTransactionManager theTxManager) {
 		return new PartitionedIdModeVerificationSvc(thePartitionSettings, theHibernatePropertiesProvider, theTxManager);
 	}
-
 }

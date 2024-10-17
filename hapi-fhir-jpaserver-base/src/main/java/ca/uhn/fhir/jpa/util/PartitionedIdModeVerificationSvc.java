@@ -16,10 +16,10 @@ import org.springframework.context.event.EventListener;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.util.Set;
 import java.util.TreeSet;
+import javax.sql.DataSource;
 
 /**
  * This bean simply performs a startup check that the database schema is
@@ -38,12 +38,14 @@ public class PartitionedIdModeVerificationSvc {
 	/**
 	 * Constructor
 	 */
-	public PartitionedIdModeVerificationSvc(PartitionSettings thePartitionSettings, HibernatePropertiesProvider theHibernatePropertiesProvider, PlatformTransactionManager theTxManager) {
+	public PartitionedIdModeVerificationSvc(
+			PartitionSettings thePartitionSettings,
+			HibernatePropertiesProvider theHibernatePropertiesProvider,
+			PlatformTransactionManager theTxManager) {
 		myPartitionSettings = thePartitionSettings;
 		myHibernatePropertiesProvider = theHibernatePropertiesProvider;
 		myTxManager = theTxManager;
 	}
-
 
 	@EventListener(classes = {ContextRefreshedEvent.class})
 	public void verifyPartitionedIdMode() throws SQLException {
@@ -58,7 +60,8 @@ public class PartitionedIdModeVerificationSvc {
 
 		DriverTypeEnum driverType = ((IHapiFhirDialect) dialect).getDriverType();
 		TransactionTemplate transactionTemplate = new TransactionTemplate(myTxManager);
-		DriverTypeEnum.ConnectionProperties cp = new DriverTypeEnum.ConnectionProperties(dataSource, transactionTemplate, driverType);
+		DriverTypeEnum.ConnectionProperties cp =
+				new DriverTypeEnum.ConnectionProperties(dataSource, transactionTemplate, driverType);
 		Set<String> pkColumns = JdbcUtils.getPrimaryKeyColumns(cp, "HFJ_RESOURCE");
 		if (pkColumns.isEmpty()) {
 			return;
@@ -66,11 +69,15 @@ public class PartitionedIdModeVerificationSvc {
 
 		if (!myPartitionSettings.isPartitionIdsInPrimaryKeys()) {
 			if (!SetUtils.isEqualSet(pkColumns, Set.of("RES_ID"))) {
-				throw new ConfigurationException(Msg.code(2563) + "System is configured in Partitioned ID mode but the database schema is not correct for this. Found HFJ_RESOURCE PK: " + new TreeSet<>(pkColumns));
+				throw new ConfigurationException(Msg.code(2563)
+						+ "System is configured in Partitioned ID mode but the database schema is not correct for this. Found HFJ_RESOURCE PK: "
+						+ new TreeSet<>(pkColumns));
 			}
 		} else {
 			if (!SetUtils.isEqualSet(pkColumns, Set.of("RES_ID", "PARTITION_ID"))) {
-				throw new ConfigurationException(Msg.code(2564) + "System is configured in Partitioned ID mode but the database schema is not correct for this. Found HFJ_RESOURCE PK: " + new TreeSet<>(pkColumns));
+				throw new ConfigurationException(Msg.code(2564)
+						+ "System is configured in Partitioned ID mode but the database schema is not correct for this. Found HFJ_RESOURCE PK: "
+						+ new TreeSet<>(pkColumns));
 			}
 		}
 	}

@@ -89,6 +89,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			+ "WHERE EXISTS (SELECT 1\n"
 			+ "	FROM collation_by_column\n"
 			+ "	WHERE my_collation != 'C')";
+
 	private final Set<FlagEnum> myFlags;
 
 	/**
@@ -126,6 +127,10 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init720();
 		init740();
 		init800();
+	}
+
+	protected Set<FlagEnum> getFlags() {
+		return myFlags;
 	}
 
 	protected void init800() {

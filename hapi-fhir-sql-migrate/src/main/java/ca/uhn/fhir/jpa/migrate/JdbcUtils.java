@@ -82,7 +82,8 @@ public class JdbcUtils {
 				try {
 					metadata = connection.getMetaData();
 
-					try (ResultSet results = metadata.getPrimaryKeys(connection.getCatalog(), connection.getSchema(), theTableName)) {
+					try (ResultSet results =
+							metadata.getPrimaryKeys(connection.getCatalog(), connection.getSchema(), theTableName)) {
 						while (results.next()) {
 							String columnName = results.getString("COLUMN_NAME");
 							retVal.add(columnName);
