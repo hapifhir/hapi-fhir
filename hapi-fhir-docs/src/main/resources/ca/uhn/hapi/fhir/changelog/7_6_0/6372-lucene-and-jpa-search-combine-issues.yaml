@@ -1,14 +1,8 @@
 ---
 type: fix
 issue: 6372
-title: "Sometimes when combining fulltext search filters
-        with jpa search filters, no data would be returned,
-        even though data matching these filters definitely exists.
-        
-        This happened because we break up large queries
-        into sets of 800 and check these for results.
-        If none are found in the first one, or the second,
-        we would abandon the search claiming it's a failure.
-        
-        This has now been fixed.
+title: "Searches that combined full-text searching (i.e. `_text` or `_content`)
+    with other search parameters could fail to return all results if we encountered
+    1600 matches against the full-text index where none of them match the rest of the query.
+    This has now been fixed.
 "
