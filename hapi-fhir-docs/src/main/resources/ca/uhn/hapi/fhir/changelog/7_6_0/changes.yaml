@@ -4,6 +4,7 @@
       title: "The version of a few dependencies have been bumped to more recent versions
       (dependent HAPI modules listed in brackets):
       <ul>
+      <li>org.hl7.fhir.core (Base): 6.3.18 -&gt; 6.3.23</li>
       <li>Bower/Moment.js (hapi-fhir-testpage-overlay): 2.27.0 -&gt; 2.29.4</li>
       <li>htmlunit (Base): 3.9.0 -&gt; 3.11.0</li>
       <li>Elasticsearch (Base): 8.11.1 -&gt; 8.14.3</li>

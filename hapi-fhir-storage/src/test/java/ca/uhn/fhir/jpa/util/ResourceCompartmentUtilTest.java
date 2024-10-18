@@ -48,7 +48,7 @@ class ResourceCompartmentUtilTest {
 		when(mySearchParamExtractor.getPathValueExtractor(myResource, "Observation.subject"))
 			.thenReturn(() -> List.of(new Reference("Patient/P01")));
 
-		Optional<String> oCompartment = ResourceCompartmentUtil.getResourceCompartment(
+		Optional<String> oCompartment = ResourceCompartmentUtil.getResourceCompartment("Patient",
 			myResource, myCompartmentSearchParams, mySearchParamExtractor);
 
 		assertThat(oCompartment).isPresent();

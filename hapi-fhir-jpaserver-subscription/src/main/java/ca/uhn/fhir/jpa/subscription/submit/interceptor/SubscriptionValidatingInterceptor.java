@@ -36,8 +36,10 @@ import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyE
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
+import ca.uhn.fhir.jpa.subscription.submit.interceptor.validator.IChannelTypeValidator;
+import ca.uhn.fhir.jpa.subscription.submit.interceptor.validator.SubscriptionChannelTypeValidatorFactory;
+import ca.uhn.fhir.jpa.subscription.submit.interceptor.validator.SubscriptionQueryValidator;
 import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -86,6 +88,9 @@ public class SubscriptionValidatingInterceptor {
 
 	@Autowired
 	private SubscriptionQueryValidator mySubscriptionQueryValidator;
+
+	@Autowired
+	private SubscriptionChannelTypeValidatorFactory mySubscriptionChannelTypeValidatorFactory;
 
 	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED)
 	public void resourcePreCreate(
@@ -149,7 +154,7 @@ public class SubscriptionValidatingInterceptor {
 				break;
 		}
 
-		validatePermissions(theSubscription, subscription, theRequestDetails, theRequestPartitionId, thePointcut);
+		validatePermissions(theSubscription, theRequestDetails, theRequestPartitionId, thePointcut);
 
 		mySubscriptionCanonicalizer.setMatchingStrategyTag(theSubscription, null);
 
@@ -167,7 +172,7 @@ public class SubscriptionValidatingInterceptor {
 
 			try {
 				SubscriptionMatchingStrategy strategy = mySubscriptionStrategyEvaluator.determineStrategy(subscription);
-				if (!(SubscriptionMatchingStrategy.IN_MEMORY == strategy)
+				if (SubscriptionMatchingStrategy.IN_MEMORY != strategy
 						&& mySubscriptionSettings.isOnlyAllowInMemorySubscriptions()) {
 					throw new InvalidRequestException(
 							Msg.code(2367)
@@ -236,7 +241,6 @@ public class SubscriptionValidatingInterceptor {
 
 	protected void validatePermissions(
 			IBaseResource theSubscription,
-			CanonicalSubscription theCanonicalSubscription,
 			RequestDetails theRequestDetails,
 			RequestPartitionId theRequestPartitionId,
 			Pointcut thePointcut) {
@@ -319,27 +323,11 @@ public class SubscriptionValidatingInterceptor {
 	protected void validateChannelType(CanonicalSubscription theSubscription) {
 		if (theSubscription.getChannelType() == null) {
 			throw new UnprocessableEntityException(Msg.code(20) + "Subscription.channel.type must be populated");
-		} else if (theSubscription.getChannelType() == CanonicalSubscriptionChannelType.RESTHOOK) {
-			validateChannelPayload(theSubscription);
-			validateChannelEndpoint(theSubscription);
 		}
-	}
 
-	@SuppressWarnings("WeakerAccess")
-	protected void validateChannelEndpoint(CanonicalSubscription theResource) {
-		if (isBlank(theResource.getEndpointUrl())) {
-			throw new UnprocessableEntityException(
-					Msg.code(21) + "Rest-hook subscriptions must have Subscription.channel.endpoint defined");
-		}
-	}
-
-	@SuppressWarnings("WeakerAccess")
-	protected void validateChannelPayload(CanonicalSubscription theResource) {
-		if (!isBlank(theResource.getPayloadString())
-				&& EncodingEnum.forContentType(theResource.getPayloadString()) == null) {
-			throw new UnprocessableEntityException(Msg.code(1985) + "Invalid value for Subscription.channel.payload: "
-					+ theResource.getPayloadString());
-		}
+		IChannelTypeValidator iChannelTypeValidator =
+				mySubscriptionChannelTypeValidatorFactory.getValidatorForChannelType(theSubscription.getChannelType());
+		iChannelTypeValidator.validateChannelType(theSubscription);
 	}
 
 	@SuppressWarnings("WeakerAccess")
@@ -370,5 +358,11 @@ public class SubscriptionValidatingInterceptor {
 			SubscriptionStrategyEvaluator theSubscriptionStrategyEvaluator) {
 		mySubscriptionStrategyEvaluator = theSubscriptionStrategyEvaluator;
 		mySubscriptionQueryValidator = new SubscriptionQueryValidator(myDaoRegistry, theSubscriptionStrategyEvaluator);
+	}
+
+	@VisibleForTesting
+	public void setSubscriptionChannelTypeValidatorFactoryForUnitTest(
+			SubscriptionChannelTypeValidatorFactory theSubscriptionChannelTypeValidatorFactory) {
+		mySubscriptionChannelTypeValidatorFactory = theSubscriptionChannelTypeValidatorFactory;
 	}
 }

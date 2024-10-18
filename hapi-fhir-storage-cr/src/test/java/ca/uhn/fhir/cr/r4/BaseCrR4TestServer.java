@@ -2,10 +2,14 @@ package ca.uhn.fhir.cr.r4;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.cr.IResourceLoader;
+import ca.uhn.fhir.cr.TestHapiFhirCrPartitionConfig;
 import ca.uhn.fhir.cr.config.r4.ApplyOperationConfig;
+import ca.uhn.fhir.cr.config.r4.DataRequirementsOperationConfig;
+import ca.uhn.fhir.cr.config.r4.EvaluateOperationConfig;
 import ca.uhn.fhir.cr.config.r4.ExtractOperationConfig;
 import ca.uhn.fhir.cr.config.r4.PackageOperationConfig;
 import ca.uhn.fhir.cr.config.r4.PopulateOperationConfig;
+import ca.uhn.fhir.cr.config.test.r4.TestCrR4Config;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
@@ -38,8 +42,11 @@ import java.util.concurrent.TimeUnit;
 
 
 @ContextConfiguration(classes = {
+	TestHapiFhirCrPartitionConfig.class,
 	TestCrR4Config.class,
 	ApplyOperationConfig.class,
+	DataRequirementsOperationConfig.class,
+	EvaluateOperationConfig.class,
 	ExtractOperationConfig.class,
 	PackageOperationConfig.class,
 	PopulateOperationConfig.class

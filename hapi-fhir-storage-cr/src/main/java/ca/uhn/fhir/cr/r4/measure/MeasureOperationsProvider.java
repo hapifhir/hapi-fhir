@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.cr.r4.measure;
 
+import ca.uhn.fhir.cr.common.StringTimePeriodHandler;
 import ca.uhn.fhir.cr.r4.IMeasureServiceFactory;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
@@ -34,11 +35,17 @@ import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Parameters;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
-import org.springframework.beans.factory.annotation.Autowired;
 
 public class MeasureOperationsProvider {
-	@Autowired
-	IMeasureServiceFactory myR4MeasureServiceFactory;
+
+	private final IMeasureServiceFactory myR4MeasureServiceFactory;
+	private final StringTimePeriodHandler myStringTimePeriodHandler;
+
+	public MeasureOperationsProvider(
+			IMeasureServiceFactory theR4MeasureServiceFactory, StringTimePeriodHandler theStringTimePeriodHandler) {
+		myR4MeasureServiceFactory = theR4MeasureServiceFactory;
+		myStringTimePeriodHandler = theStringTimePeriodHandler;
+	}
 
 	/**
 	 * Implements the <a href=
@@ -82,8 +89,8 @@ public class MeasureOperationsProvider {
 				.create(theRequestDetails)
 				.evaluate(
 						Eithers.forMiddle3(theId),
-						thePeriodStart,
-						thePeriodEnd,
+						myStringTimePeriodHandler.getStartZonedDateTime(thePeriodStart, theRequestDetails),
+						myStringTimePeriodHandler.getEndZonedDateTime(thePeriodEnd, theRequestDetails),
 						theReportType,
 						theSubject,
 						theLastReceivedOn,

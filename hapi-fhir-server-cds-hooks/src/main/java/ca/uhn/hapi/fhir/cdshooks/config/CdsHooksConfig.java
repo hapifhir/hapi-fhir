@@ -31,6 +31,7 @@ import ca.uhn.hapi.fhir.cdshooks.api.ICdsConfigService;
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsHooksDaoAuthorizationSvc;
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsServiceRegistry;
 import ca.uhn.hapi.fhir.cdshooks.module.CdsHooksObjectMapperFactory;
+import ca.uhn.hapi.fhir.cdshooks.serializer.CdsServiceRequestJsonDeserializer;
 import ca.uhn.hapi.fhir.cdshooks.svc.CdsConfigServiceImpl;
 import ca.uhn.hapi.fhir.cdshooks.svc.CdsHooksContextBooter;
 import ca.uhn.hapi.fhir.cdshooks.svc.CdsServiceRegistryImpl;
@@ -100,13 +101,15 @@ public class CdsHooksConfig {
 			ICdsCrServiceFactory theCdsCrServiceFactory,
 			ICrDiscoveryServiceFactory theCrDiscoveryServiceFactory,
 			FhirContext theFhirContext) {
+		final CdsServiceRequestJsonDeserializer cdsServiceRequestJsonDeserializer =
+				new CdsServiceRequestJsonDeserializer(theFhirContext, theObjectMapper);
 		return new CdsServiceRegistryImpl(
 				theCdsHooksContextBooter,
 				theCdsPrefetchSvc,
 				theObjectMapper,
 				theCdsCrServiceFactory,
 				theCrDiscoveryServiceFactory,
-				theFhirContext);
+				cdsServiceRequestJsonDeserializer);
 	}
 
 	@Bean

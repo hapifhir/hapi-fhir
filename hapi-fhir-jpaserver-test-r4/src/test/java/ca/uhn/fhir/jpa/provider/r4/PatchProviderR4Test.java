@@ -529,7 +529,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 			assertEquals(412, response.getStatusLine().getStatusCode());
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			assertThat(responseString).contains("<OperationOutcome");
-			assertThat(responseString).contains("Failed to PATCH resource with match URL &quot;Patient?active=true&quot; because this search matched 2 resources");
+			assertThat(responseString).contains("Failed to PATCH Patient with match URL &quot;Patient?active=true&quot; because this search matched 2 resources");
 		}
 
 	}

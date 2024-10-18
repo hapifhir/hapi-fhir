@@ -1862,7 +1862,9 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 			SearchParameterMap params = new SearchParameterMap();
 			params.add(Organization.SP_RES_ID, new StringDt(orgId.getIdPart()));
 			params.addInclude(Organization.INCLUDE_PARTOF.asRecursive());
+			myCaptureQueriesListener.clear();
 			List<IIdType> resources = toUnqualifiedVersionlessIds(myOrganizationDao.search(params));
+			myCaptureQueriesListener.logSelectQueries();
 			ourLog.info(resources.toString());
 			assertThat(resources).containsExactlyInAnyOrder(orgId, parentOrgId, parentParentOrgId);
 		}
