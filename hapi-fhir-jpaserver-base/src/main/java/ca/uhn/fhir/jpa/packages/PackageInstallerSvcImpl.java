@@ -598,7 +598,8 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 				return (statusTypes.get(0).getValueAsString().equals("requested"));
 			case "DocumentReference":
 			case "Communication":
-				return (!statusTypes.get(0).getValueAsString().equals("?"));
+				return (statusTypes.get(0).isEmpty()
+						|| !statusTypes.get(0).getValueAsString().equals("?"));
 			default:
 				return (statusTypes.get(0).getValueAsString().equals("active"));
 		}
