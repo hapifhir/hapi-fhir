@@ -87,13 +87,10 @@ public class ApacheRestfulClientFactory extends RestfulClientFactory {
 
 	public HttpClient getNativeHttpClient() {
 		if (myHttpClient == null) {
-
-			// TODO: Use of a deprecated method should be resolved.
 			RequestConfig defaultRequestConfig = RequestConfig.custom()
 					.setSocketTimeout(getSocketTimeout())
 					.setConnectTimeout(getConnectTimeout())
 					.setConnectionRequestTimeout(getConnectionRequestTimeout())
-					.setStaleConnectionCheckEnabled(true)
 					.setProxy(myProxy)
 					.build();
 
@@ -106,6 +103,10 @@ public class ApacheRestfulClientFactory extends RestfulClientFactory {
 					new PoolingHttpClientConnectionManager(getConnectionTimeToLive(), TimeUnit.MILLISECONDS);
 			connectionManager.setMaxTotal(getPoolMaxTotal());
 			connectionManager.setDefaultMaxPerRoute(getPoolMaxPerRoute());
+			// default value for stale connection check
+			// this can be disabled (with a -ve value) if performance is bad
+			// but currently we are using the default for whatever reason
+			connectionManager.setValidateAfterInactivity(2000);
 			builder.setConnectionManager(connectionManager);
 
 			if (myProxy != null && isNotBlank(getProxyUsername()) && isNotBlank(getProxyPassword())) {
