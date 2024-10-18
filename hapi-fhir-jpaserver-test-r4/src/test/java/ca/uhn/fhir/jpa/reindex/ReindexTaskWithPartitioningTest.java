@@ -1,17 +1,8 @@
 package ca.uhn.fhir.jpa.reindex;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
-<<<<<<<< HEAD:hapi-fhir-jpaserver-test-r4/src/test/java/ca/uhn/fhir/jpa/reindex/ReindexTaskWithPartitioningTest.java
 import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrl;
 import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrlJobParameters;
-|||||||| 39cbec8aa42:hapi-fhir-jpaserver-test-r4/src/test/java/ca/uhn/fhir/jpa/delete/job/ReindexJobWithPartitioningTest.java
-import ca.uhn.fhir.batch2.jobs.parameters.JobParameters;
-import ca.uhn.fhir.batch2.jobs.reindex.ReindexAppCtx;
-========
-import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrlJobParameters;
-import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrl;
-import ca.uhn.fhir.batch2.jobs.reindex.ReindexAppCtx;
->>>>>>>> rel_7_4:hapi-fhir-jpaserver-test-r4/src/test/java/ca/uhn/fhir/jpa/reindex/ReindexJobWithPartitioningTest.java
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
@@ -36,15 +27,7 @@ import java.util.stream.Stream;
 import static ca.uhn.fhir.batch2.jobs.reindex.ReindexUtils.JOB_REINDEX;
 import static org.assertj.core.api.Assertions.assertThat;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-<<<<<<<< HEAD:hapi-fhir-jpaserver-test-r4/src/test/java/ca/uhn/fhir/jpa/reindex/ReindexTaskWithPartitioningTest.java
 public class ReindexTaskWithPartitioningTest extends BaseJpaR4Test {
-
-|||||||| 39cbec8aa42:hapi-fhir-jpaserver-test-r4/src/test/java/ca/uhn/fhir/jpa/delete/job/ReindexJobWithPartitioningTest.java
-public class ReindexJobWithPartitioningTest extends BaseJpaR4Test {
-========
-public class ReindexJobWithPartitioningTest extends BaseJpaR4Test {
-
->>>>>>>> rel_7_4:hapi-fhir-jpaserver-test-r4/src/test/java/ca/uhn/fhir/jpa/reindex/ReindexJobWithPartitioningTest.java
 	@Autowired
 	private IJobCoordinator myJobCoordinator;
 
