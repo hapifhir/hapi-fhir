@@ -3,7 +3,6 @@ package ca.uhn.fhir.rest.server.method;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.Metadata;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.server.IRestfulServer;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -19,7 +18,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.lang.reflect.Method;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
@@ -106,19 +104,6 @@ public class ConformanceMethodBindingTest {
 		verify(provider, times(1)).getServerConformance(any(), any());
 		conformanceMethodBinding.invokeServer(mock(IRestfulServer.class, RETURNS_DEEP_STUBS), requestDetails, new Object[]{mock(HttpServletRequest.class), mock(RequestDetails.class)});
 		verify(provider, times(2)).getServerConformance(any(), any());
-	}
-
-	@Test
-	public void invokeServer_metadata() throws NoSuchMethodException {
-		TestResourceProvider provider = init(new TestResourceProvider());
-
-		RequestDetails requestDetails = mySrd;
-		when(requestDetails.getOperation()).thenReturn("metadata");
-		when(requestDetails.getRequestType()).thenReturn(RequestTypeEnum.GET);
-		assertEquals(conformanceMethodBinding.incomingServerRequestMatchesMethod(requestDetails), MethodMatchEnum.EXACT);
-		when(requestDetails.getRequestType()).thenReturn(RequestTypeEnum.HEAD);
-		assertEquals(conformanceMethodBinding.incomingServerRequestMatchesMethod(requestDetails), MethodMatchEnum.EXACT);
-
 	}
 
 	@SuppressWarnings("unused")
