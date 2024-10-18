@@ -2974,7 +2974,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		assertEquals(6189, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(418, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
-		assertEquals(2, myCaptureQueriesListener.countCommits());
+		assertEquals(1, myCaptureQueriesListener.countCommits());
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 
 		assertThat(output.getEntry()).hasSize(input.getEntry().size());
