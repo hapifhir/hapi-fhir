@@ -32,6 +32,8 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import static ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcherR5Test.newRequest;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -59,7 +61,7 @@ public class InMemoryResourceMatcherConfigurationR5Test {
 	@BeforeEach
 	public void before() {
 		RuntimeSearchParam codeSearchParam = new RuntimeSearchParam(null, null, null, null, "Observation.code", RestSearchParameterTypeEnum.TOKEN, null, null, RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, null, null, null);
-		when(mySearchParamRegistry.getActiveSearchParam("Observation", "code")).thenReturn(codeSearchParam);
+		when(mySearchParamRegistry.getActiveSearchParam(eq("Observation"), eq("code"), any())).thenReturn(codeSearchParam);
 
 		myObservation = new Observation();
 		CodeableConcept codeableConcept = new CodeableConcept();
