@@ -14,6 +14,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import jakarta.servlet.http.HttpServletRequest;
 import org.hl7.fhir.common.hapi.validation.IRemoteTerminologyLookupCodeTest;
+import org.hl7.fhir.common.hapi.validation.IValidationProviders;
 import org.hl7.fhir.common.hapi.validation.support.RemoteTerminologyServiceValidationSupport;
 import org.hl7.fhir.dstu3.model.BooleanType;
 import org.hl7.fhir.dstu3.model.CodeSystem;
@@ -29,6 +30,7 @@ import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.IntegerType;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -49,20 +51,25 @@ public class RemoteTerminologyLookupCodeDstu3Test implements IRemoteTerminologyL
 	@RegisterExtension
 	public static RestfulServerExtension ourRestfulServerExtension = new RestfulServerExtension(ourCtx);
 	private final RemoteTerminologyServiceValidationSupport mySvc = new RemoteTerminologyServiceValidationSupport(ourCtx);
+	private IValidationProviders.IMyLookupCodeProvider myLookupCodeProvider;
 
 	@BeforeEach
 	public void before() {
 		String baseUrl = "http://localhost:" + ourRestfulServerExtension.getPort();
 		mySvc.setBaseUrl(baseUrl);
 		mySvc.addClientInterceptor(new LoggingInterceptor(true));
-		ourRestfulServerExtension.getRestfulServer().registerProvider(myCodeSystemProvider);
+		myLookupCodeProvider = new MyLookupCodeProviderDstu3();
+		ourRestfulServerExtension.getRestfulServer().registerProvider(myLookupCodeProvider);
 	}
 
-	private final MyCodeSystemProviderDstu3 myCodeSystemProvider = new MyCodeSystemProviderDstu3();
+	@AfterEach
+	public void after() {
+		ourRestfulServerExtension.getRestfulServer().unregisterProvider(myLookupCodeProvider);
+	}
 
 	@Override
-	public IMyCodeSystemProvider getCodeSystemProvider() {
-		return myCodeSystemProvider;
+	public IValidationProviders.IMyLookupCodeProvider getLookupCodeProvider() {
+		return myLookupCodeProvider;
 	}
 
 	@Override
@@ -83,7 +90,7 @@ public class RemoteTerminologyLookupCodeDstu3Test implements IRemoteTerminologyL
 
 	@ParameterizedTest
 	@MethodSource(value = "getEmptyPropertyValues")
-	public void lookupCode_forCodeSystemWithPropertyEmptyValue_returnsCorrectParameters(IBaseDatatype thePropertyValue) {
+	void lookupCode_forCodeSystemWithPropertyEmptyValue_returnsCorrectParameters(IBaseDatatype thePropertyValue) {
 		verifyLookupWithEmptyPropertyValue(thePropertyValue);
 	}
 
@@ -122,20 +129,20 @@ public class RemoteTerminologyLookupCodeDstu3Test implements IRemoteTerminologyL
 
 	@ParameterizedTest
 	@MethodSource(value = "getPropertyValueArguments")
-	public void lookupCode_forCodeSystemWithProperty_returnsCorrectProperty(IBaseDatatype thePropertyValue) {
+	void lookupCode_forCodeSystemWithProperty_returnsCorrectProperty(IBaseDatatype thePropertyValue) {
 		verifyLookupWithProperty(List.of(thePropertyValue), List.of());
 	}
 
 	@ParameterizedTest
 	@MethodSource(value = "getPropertyValueListArguments")
-	public void lookupCode_forCodeSystemWithPropertyFilter_returnsCorrectProperty(List<IBaseDatatype> thePropertyValues) {
+	void lookupCode_forCodeSystemWithPropertyFilter_returnsCorrectProperty(List<IBaseDatatype> thePropertyValues) {
 		verifyLookupWithProperty(thePropertyValues, List.of());
 		verifyLookupWithProperty(thePropertyValues, List.of(thePropertyValues.size() - 1));
 	}
 
 	@ParameterizedTest
 	@MethodSource(value = "getPropertyValueListArguments")
-	public void lookupCode_forCodeSystemWithPropertyGroup_returnsCorrectProperty(List<IBaseDatatype> thePropertyValues) {
+	void lookupCode_forCodeSystemWithPropertyGroup_returnsCorrectProperty(List<IBaseDatatype> thePropertyValues) {
 		verifyLookupWithSubProperties(thePropertyValues);
 	}
 
@@ -155,7 +162,8 @@ public class RemoteTerminologyLookupCodeDstu3Test implements IRemoteTerminologyL
 		verifyLookupWithConceptDesignation(theConceptDesignation);
 	}
 
-	static class MyCodeSystemProviderDstu3 implements IMyCodeSystemProvider {
+	@SuppressWarnings("unused")
+	static class MyLookupCodeProviderDstu3 implements IValidationProviders.IMyLookupCodeProvider {
 		private UriType mySystemUrl;
 		private CodeType myCode;
 		private LookupCodeResult myLookupCodeResult;

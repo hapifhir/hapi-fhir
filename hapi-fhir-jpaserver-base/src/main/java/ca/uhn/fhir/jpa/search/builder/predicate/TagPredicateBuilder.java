@@ -66,7 +66,9 @@ public class TagPredicateBuilder extends BaseJoiningPredicateBuilder {
 			List<Triple<String, String, String>> theTokens,
 			String theParamName,
 			RequestPartitionId theRequestPartitionId) {
-		addJoin(getTable(), myTagDefinitionTable, myColumnTagId, myTagDefinitionColumnTagId);
+		addJoin(getTable(), myTagDefinitionTable, new DbColumn[] {myColumnTagId}, new DbColumn[] {
+			myTagDefinitionColumnTagId
+		});
 		return createPredicateTagList(theTagType, theTokens);
 	}
 

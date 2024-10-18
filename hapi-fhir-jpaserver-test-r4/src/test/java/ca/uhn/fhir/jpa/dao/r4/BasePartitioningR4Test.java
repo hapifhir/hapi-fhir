@@ -135,10 +135,10 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		addCreateDefaultPartition();
 		addReadDefaultPartition(); // one for search param validation
 		SearchParameter sp = new SearchParameter();
-		sp.setId("SearchParameter/patient-birthdate");
-		sp.setType(Enumerations.SearchParamType.DATE);
-		sp.setCode("birthdate");
-		sp.setExpression("Patient.birthDate");
+		sp.setId("SearchParameter/patient-gender");
+		sp.setType(Enumerations.SearchParamType.TOKEN);
+		sp.setCode("gender");
+		sp.setExpression("Patient.gender");
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		sp.addBase("Patient");
 		mySearchParameterDao.update(sp, mySrd);
@@ -156,13 +156,13 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 
 		addCreateDefaultPartition();
 		sp = new SearchParameter();
-		sp.setId("SearchParameter/patient-birthdate-unique");
+		sp.setId("SearchParameter/patient-gender-family-unique");
 		sp.setType(Enumerations.SearchParamType.COMPOSITE);
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		sp.addBase("Patient");
 		sp.addComponent()
 			.setExpression("Patient")
-			.setDefinition("SearchParameter/patient-birthdate");
+			.setDefinition("SearchParameter/patient-gender");
 		sp.addComponent()
 			.setExpression("Patient")
 			.setDefinition("SearchParameter/patient-family");

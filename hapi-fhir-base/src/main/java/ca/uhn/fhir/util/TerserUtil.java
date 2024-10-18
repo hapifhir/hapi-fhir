@@ -26,10 +26,12 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeChildChoiceDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.tuple.Triple;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.slf4j.Logger;
@@ -93,6 +95,8 @@ public final class TerserUtil {
 
 	private static final Logger ourLog = getLogger(TerserUtil.class);
 	private static final String EQUALS_DEEP = "equalsDeep";
+	public static final String DATA_ABSENT_REASON_EXTENSION_URI =
+			"http://hl7.org/fhir/StructureDefinition/data-absent-reason";
 
 	private TerserUtil() {}
 
@@ -264,6 +268,15 @@ public final class TerserUtil {
 	private static boolean contains(IBase theItem, List<IBase> theItems) {
 		final Method method = getMethod(theItem, EQUALS_DEEP);
 		return theItems.stream().anyMatch(i -> equals(i, theItem, method));
+	}
+
+	private static boolean hasDataAbsentReason(IBase theItem) {
+		if (theItem instanceof IBaseHasExtensions) {
+			IBaseHasExtensions hasExtensions = (IBaseHasExtensions) theItem;
+			return hasExtensions.getExtension().stream()
+					.anyMatch(t -> StringUtils.equals(t.getUrl(), DATA_ABSENT_REASON_EXTENSION_URI));
+		}
+		return false;
 	}
 
 	/**
@@ -695,24 +708,36 @@ public final class TerserUtil {
 			BaseRuntimeChildDefinition childDefinition,
 			List<IBase> theFromFieldValues,
 			List<IBase> theToFieldValues) {
-		for (IBase theFromFieldValue : theFromFieldValues) {
-			if (contains(theFromFieldValue, theToFieldValues)) {
+		if (!theFromFieldValues.isEmpty() && theToFieldValues.stream().anyMatch(TerserUtil::hasDataAbsentReason)) {
+			// If the to resource has a data absent reason, and there is potentially real data incoming
+			// in the from resource, we should clear the data absent reason because it won't be absent anymore.
+			theToFieldValues = removeDataAbsentReason(theTo, childDefinition, theToFieldValues);
+		}
+
+		for (IBase fromFieldValue : theFromFieldValues) {
+			if (contains(fromFieldValue, theToFieldValues)) {
 				continue;
 			}
 
-			IBase newFieldValue = newElement(theTerser, childDefinition, theFromFieldValue, null);
-			if (theFromFieldValue instanceof IPrimitiveType) {
+			if (hasDataAbsentReason(fromFieldValue) && !theToFieldValues.isEmpty()) {
+				// if the from field value asserts a reason the field isn't populated, but the to field is populated,
+				// we don't want to overwrite real data with the extension
+				continue;
+			}
+
+			IBase newFieldValue = newElement(theTerser, childDefinition, fromFieldValue, null);
+			if (fromFieldValue instanceof IPrimitiveType) {
 				try {
-					Method copyMethod = getMethod(theFromFieldValue, "copy");
+					Method copyMethod = getMethod(fromFieldValue, "copy");
 					if (copyMethod != null) {
-						newFieldValue = (IBase) copyMethod.invoke(theFromFieldValue, new Object[] {});
+						newFieldValue = (IBase) copyMethod.invoke(fromFieldValue, new Object[] {});
 					}
 				} catch (Throwable t) {
-					((IPrimitiveType) newFieldValue)
-							.setValueAsString(((IPrimitiveType) theFromFieldValue).getValueAsString());
+					((IPrimitiveType<?>) newFieldValue)
+							.setValueAsString(((IPrimitiveType<?>) fromFieldValue).getValueAsString());
 				}
 			} else {
-				theTerser.cloneInto(theFromFieldValue, newFieldValue, true);
+				theTerser.cloneInto(fromFieldValue, newFieldValue, true);
 			}
 
 			try {
@@ -722,6 +747,21 @@ public final class TerserUtil {
 				theToFieldValues = childDefinition.getAccessor().getValues(theTo);
 			}
 		}
+	}
+
+	private static List<IBase> removeDataAbsentReason(
+			IBaseResource theResource, BaseRuntimeChildDefinition theFieldDefinition, List<IBase> theFieldValues) {
+		for (int i = 0; i < theFieldValues.size(); i++) {
+			if (hasDataAbsentReason(theFieldValues.get(i))) {
+				try {
+					theFieldDefinition.getMutator().remove(theResource, i);
+				} catch (UnsupportedOperationException e) {
+					// the field must be single-valued, just clear it
+					theFieldDefinition.getMutator().setValue(theResource, null);
+				}
+			}
+		}
+		return theFieldDefinition.getAccessor().getValues(theResource);
 	}
 
 	/**

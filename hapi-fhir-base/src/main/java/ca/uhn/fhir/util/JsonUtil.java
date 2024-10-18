@@ -34,6 +34,7 @@ import com.fasterxml.jackson.databind.ser.FilterProvider;
 import com.fasterxml.jackson.databind.ser.PropertyWriter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.annotation.Nonnull;
 
 import java.io.IOException;
@@ -60,16 +61,22 @@ public class JsonUtil {
 		ourMapperPrettyPrint.setSerializationInclusion(JsonInclude.Include.NON_NULL);
 		ourMapperPrettyPrint.setFilterProvider(SENSITIVE_DATA_FILTER_PROVIDER);
 		ourMapperPrettyPrint.enable(SerializationFeature.INDENT_OUTPUT);
+		// Needed to handle ZonedDateTime
+		ourMapperPrettyPrint.registerModule(new JavaTimeModule());
 
 		ourMapperNonPrettyPrint = new ObjectMapper();
 		ourMapperNonPrettyPrint.setSerializationInclusion(JsonInclude.Include.NON_NULL);
 		ourMapperNonPrettyPrint.setFilterProvider(SENSITIVE_DATA_FILTER_PROVIDER);
 		ourMapperNonPrettyPrint.disable(SerializationFeature.INDENT_OUTPUT);
+		// Needed to handle ZonedDateTime
+		ourMapperNonPrettyPrint.registerModule(new JavaTimeModule());
 
 		ourMapperIncludeSensitive = new ObjectMapper();
 		ourMapperIncludeSensitive.setFilterProvider(SHOW_ALL_DATA_FILTER_PROVIDER);
 		ourMapperIncludeSensitive.setSerializationInclusion(JsonInclude.Include.NON_NULL);
 		ourMapperIncludeSensitive.disable(SerializationFeature.INDENT_OUTPUT);
+		// Needed to handle ZonedDateTime
+		ourMapperIncludeSensitive.registerModule(new JavaTimeModule());
 	}
 
 	/**

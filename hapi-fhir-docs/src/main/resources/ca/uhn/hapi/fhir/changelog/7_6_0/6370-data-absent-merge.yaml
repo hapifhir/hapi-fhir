@@ -1,0 +1,6 @@
+---
+type: add
+issue: 6370
+title: "When using the FHIR `TerserUtil` to merge two resource, if one resource has real data in a particular field,
+and the other resource has a `data-absent-reason` extension in the same field, the real data will be given
+precedence in the merged resource, and the extension will be ignored."

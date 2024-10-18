@@ -28,7 +28,7 @@ import static org.opencds.cqf.fhir.utility.r4.Parameters.parameters;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.part;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.stringPart;
 
-public class CpgOperationProviderTest extends BaseCrR4TestServer{
+public class CpgOperationProviderTest extends BaseCrR4TestServer {
 	@BeforeEach
 	void setup() {
 		var requestDetails = setupRequestDetails();

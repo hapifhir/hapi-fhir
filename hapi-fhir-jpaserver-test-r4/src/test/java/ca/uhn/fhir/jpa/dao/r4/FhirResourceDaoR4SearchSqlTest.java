@@ -1,7 +1,9 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.Constants;
@@ -15,11 +17,18 @@ import org.hl7.fhir.r4.model.SearchParameter;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
 import java.util.UUID;
 
+import static ca.uhn.fhir.interceptor.api.Pointcut.STORAGE_PARTITION_IDENTIFY_ANY;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class FhirResourceDaoR4SearchSqlTest extends BaseJpaR4Test {
 
@@ -30,11 +39,107 @@ public class FhirResourceDaoR4SearchSqlTest extends BaseJpaR4Test {
 	public void before() throws Exception {
 		super.before();
 		myStorageSettings.setAdvancedHSearchIndexing(false);
+
+		myInterceptorRegistry.registerInterceptor(new MyPartitionInterceptor());
 	}
 
 	@AfterEach
 	public void after() {
 		myStorageSettings.setTagStorageMode(JpaStorageSettings.DEFAULT_TAG_STORAGE_MODE);
+		myPartitionSettings.setDefaultPartitionId(new PartitionSettings().getDefaultPartitionId());
+		myPartitionSettings.setPartitionIdsInPrimaryKeys(new PartitionSettings().isPartitionIdsInPrimaryKeys());
+
+		myInterceptorRegistry.unregisterInterceptorsIf(t->t instanceof MyPartitionInterceptor);
+	}
+
+	record SqlGenerationTestCase(String comment, String restQuery, String expectedSql, String expectedPartitionedSql) {
+		@Override
+		public String toString() {
+			return comment;
+		}
+	}
+
+	static List<SqlGenerationTestCase> sqlGenerationTestCases() {
+		return List.of(
+			new SqlGenerationTestCase(
+				"single string - no hfj_resource root",
+				"Patient?name=FOO",
+				"SELECT t0.RES_ID FROM HFJ_SPIDX_STRING t0 WHERE ((t0.HASH_NORM_PREFIX = ?) AND (t0.SP_VALUE_NORMALIZED LIKE ?))",
+				"SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_SPIDX_STRING t0 WHERE ((t0.PARTITION_ID = ?) AND ((t0.HASH_NORM_PREFIX = ?) AND (t0.SP_VALUE_NORMALIZED LIKE ?)))"
+			)
+			, new SqlGenerationTestCase(
+				"two regular params - should use hfj_resource as root",
+				"Patient?name=smith&active=true",
+				"SELECT t1.RES_ID FROM HFJ_RESOURCE t1 INNER JOIN HFJ_SPIDX_STRING t0 ON (t1.RES_ID = t0.RES_ID) INNER JOIN HFJ_SPIDX_TOKEN t2 ON (t1.RES_ID = t2.RES_ID) WHERE (((t0.HASH_NORM_PREFIX = ?) AND (t0.SP_VALUE_NORMALIZED LIKE ?)) AND (t2.HASH_VALUE = ?))",
+				"SELECT t1.PARTITION_ID,t1.RES_ID FROM HFJ_RESOURCE t1 INNER JOIN HFJ_SPIDX_STRING t0 ON ((t1.PARTITION_ID = t0.PARTITION_ID) AND (t1.RES_ID = t0.RES_ID)) INNER JOIN HFJ_SPIDX_TOKEN t2 ON ((t1.PARTITION_ID = t2.PARTITION_ID) AND (t1.RES_ID = t2.RES_ID)) WHERE (((t0.PARTITION_ID = ?) AND ((t0.HASH_NORM_PREFIX = ?) AND (t0.SP_VALUE_NORMALIZED LIKE ?))) AND ((t2.PARTITION_ID = ?) AND (t2.HASH_VALUE = ?)))"
+			)
+			, new SqlGenerationTestCase(
+				"token not as a NOT IN subselect",
+				"Encounter?class:not=not-there",
+				"SELECT t0.RES_ID FROM HFJ_RESOURCE t0 WHERE (((t0.RES_TYPE = ?) AND (t0.RES_DELETED_AT IS NULL)) AND ((t0.RES_ID) NOT IN (SELECT t0.RES_ID FROM HFJ_SPIDX_TOKEN t0 WHERE (t0.HASH_VALUE = ?)) ))",
+				"SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_RESOURCE t0 WHERE (((t0.RES_TYPE = ?) AND (t0.RES_DELETED_AT IS NULL)) AND ((t0.PARTITION_ID = ?) AND ((t0.PARTITION_ID,t0.RES_ID) NOT IN (SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_SPIDX_TOKEN t0 WHERE (t0.HASH_VALUE = ?)) )))"
+			)
+			, new SqlGenerationTestCase(
+				"token not on chain join - NOT IN from hfj_res_link target columns",
+				"Observation?encounter.class:not=not-there",
+				"SELECT t0.SRC_RESOURCE_ID FROM HFJ_RES_LINK t0 WHERE ((t0.SRC_PATH = ?) AND ((t0.TARGET_RESOURCE_ID) NOT IN (SELECT t0.RES_ID FROM HFJ_SPIDX_TOKEN t0 WHERE (t0.HASH_VALUE = ?)) ))",
+				"SELECT t0.PARTITION_ID,t0.SRC_RESOURCE_ID FROM HFJ_RES_LINK t0 WHERE ((t0.SRC_PATH = ?) AND ((t0.PARTITION_ID = ?) AND ((t0.TARGET_RES_PARTITION_ID,t0.TARGET_RESOURCE_ID) NOT IN (SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_SPIDX_TOKEN t0 WHERE (t0.HASH_VALUE = ?)) )))"
+			)
+			, new SqlGenerationTestCase(
+				"bare sort",
+				"Patient?_sort=name",
+				"SELECT t0.RES_ID FROM HFJ_RESOURCE t0 LEFT OUTER JOIN HFJ_SPIDX_STRING t1 ON ((t0.RES_ID = t1.RES_ID) AND (t1.HASH_IDENTITY = ?)) WHERE ((t0.RES_TYPE = ?) AND (t0.RES_DELETED_AT IS NULL)) ORDER BY t1.SP_VALUE_NORMALIZED ASC NULLS LAST",
+				"SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_RESOURCE t0 LEFT OUTER JOIN HFJ_SPIDX_STRING t1 ON ((t0.PARTITION_ID = t1.PARTITION_ID) AND (t0.RES_ID = t1.RES_ID) AND (t1.HASH_IDENTITY = ?)) WHERE (((t0.RES_TYPE = ?) AND (t0.RES_DELETED_AT IS NULL)) AND (t0.PARTITION_ID = ?)) ORDER BY t1.SP_VALUE_NORMALIZED ASC NULLS LAST"
+			)
+			, new SqlGenerationTestCase(
+				"sort with predicate",
+				"Patient?active=true&_sort=name",
+				"SELECT t1.RES_ID FROM HFJ_RESOURCE t1 INNER JOIN HFJ_SPIDX_TOKEN t0 ON (t1.RES_ID = t0.RES_ID) LEFT OUTER JOIN HFJ_SPIDX_STRING t2 ON ((t1.RES_ID = t2.RES_ID) AND (t2.HASH_IDENTITY = ?)) WHERE (t0.HASH_VALUE = ?) ORDER BY t2.SP_VALUE_NORMALIZED ASC NULLS LAST",
+				"SELECT t1.PARTITION_ID,t1.RES_ID FROM HFJ_RESOURCE t1 INNER JOIN HFJ_SPIDX_TOKEN t0 ON ((t1.PARTITION_ID = t0.PARTITION_ID) AND (t1.RES_ID = t0.RES_ID)) LEFT OUTER JOIN HFJ_SPIDX_STRING t2 ON ((t1.PARTITION_ID = t2.PARTITION_ID) AND (t1.RES_ID = t2.RES_ID) AND (t2.HASH_IDENTITY = ?)) WHERE ((t0.PARTITION_ID = ?) AND (t0.HASH_VALUE = ?)) ORDER BY t2.SP_VALUE_NORMALIZED ASC NULLS LAST"
+			)
+			, new SqlGenerationTestCase(
+				"chained sort",
+				"Patient?_sort=Practitioner:general-practitioner.name",
+				"SELECT t0.RES_ID FROM HFJ_RESOURCE t0 LEFT OUTER JOIN HFJ_RES_LINK t1 ON ((t0.RES_ID = t1.SRC_RESOURCE_ID) AND (t1.SRC_PATH = ?)) LEFT OUTER JOIN HFJ_SPIDX_STRING t2 ON ((t1.TARGET_RESOURCE_ID = t2.RES_ID) AND (t2.HASH_IDENTITY = ?)) WHERE ((t0.RES_TYPE = ?) AND (t0.RES_DELETED_AT IS NULL)) ORDER BY t2.SP_VALUE_NORMALIZED ASC NULLS LAST",
+				"SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_RESOURCE t0 LEFT OUTER JOIN HFJ_RES_LINK t1 ON ((t0.PARTITION_ID = t1.PARTITION_ID) AND (t0.RES_ID = t1.SRC_RESOURCE_ID) AND (t1.SRC_PATH = ?)) LEFT OUTER JOIN HFJ_SPIDX_STRING t2 ON ((t1.TARGET_RES_PARTITION_ID = t2.PARTITION_ID) AND (t1.TARGET_RESOURCE_ID = t2.RES_ID) AND (t2.HASH_IDENTITY = ?)) WHERE (((t0.RES_TYPE = ?) AND (t0.RES_DELETED_AT IS NULL)) AND (t0.PARTITION_ID = ?)) ORDER BY t2.SP_VALUE_NORMALIZED ASC NULLS LAST"
+			)
+		);
+	}
+
+	/**
+	 * Test SQL generation with RES_ID joins.
+	 */
+	@ParameterizedTest(name = "[{index}] -  {0}")
+	@MethodSource("sqlGenerationTestCases")
+	void testSqlGeneration_DefaultNoPartitionJoin(SqlGenerationTestCase theTestCase) {
+		// default config
+
+		String sql = getSqlForRestQuery(theTestCase.restQuery);
+
+		assertEquals(theTestCase.expectedSql, sql, theTestCase.comment);
+	}
+
+	/**
+	 * Test SQL generation with joins including RES_ID, and PARTITION_ID
+	 */
+	@ParameterizedTest(name = "[{index}] -  {0}")
+	@MethodSource("sqlGenerationTestCases")
+	void testSqlGeneration_WithPartitionJoins(SqlGenerationTestCase theTestCase) {
+		// include partition_id in joins
+		myPartitionSettings.setDefaultPartitionId(0);
+		myPartitionSettings.setPartitionIdsInPrimaryKeys(true);
+		myPartitionSettings.setPartitioningEnabled(true);
+
+		String sql = getSqlForRestQuery(theTestCase.restQuery);
+
+		assertEquals(theTestCase.expectedPartitionedSql, sql, theTestCase.comment);
+	}
+
+	private String getSqlForRestQuery(String theFhirRestQuery) {
+		myCaptureQueriesListener.clear();
+		myTestDaoSearch.searchForIds(theFhirRestQuery);
+		assertEquals(1, myCaptureQueriesListener.countSelectQueries());
+		return myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(false, false);
 	}
 
 	/**
@@ -77,14 +182,14 @@ public class FhirResourceDaoR4SearchSqlTest extends BaseJpaR4Test {
 		String code = "http://" + UUID.randomUUID();
 		Patient p = new Patient();
 		p.getMeta().addProfile(code);
-		IIdType id = myPatientDao.create(p).getId().toUnqualifiedVersionless();
+		IIdType id = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
 		myMemoryCacheService.invalidateAllCaches();
 
 		// Search
 		myCaptureQueriesListener.clear();
 		SearchParameterMap map = SearchParameterMap.newSynchronous()
 			.add(Constants.PARAM_PROFILE, new TokenParam(code));
-		IBundleProvider outcome = myPatientDao.search(map);
+		IBundleProvider outcome = myPatientDao.search(map, mySrd);
 		assertEquals(3, myCaptureQueriesListener.countSelectQueries());
 		// Query 1 - Find resources: Make sure we search for tag type+system+code always
 		String sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(false, false);
@@ -106,7 +211,6 @@ public class FhirResourceDaoR4SearchSqlTest extends BaseJpaR4Test {
 		boolean reindexParamCache = myStorageSettings.isMarkResourcesForReindexingUponSearchParameterChange();
 		myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(false);
 
-// 		SearchParameter searchParameter = FhirResourceDaoR4TagsTest.createSearchParamForInlineResourceProfile();
 		SearchParameter searchParameter = FhirResourceDaoR4TagsInlineTest.createSearchParameterForInlineProfile();
 		ourLog.debug("SearchParam:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(searchParameter));
 		mySearchParameterDao.update(searchParameter, mySrd);
@@ -116,14 +220,14 @@ public class FhirResourceDaoR4SearchSqlTest extends BaseJpaR4Test {
 		String code = "http://" + UUID.randomUUID();
 		Patient p = new Patient();
 		p.getMeta().addProfile(code);
-		IIdType id = myPatientDao.create(p).getId().toUnqualifiedVersionless();
+		IIdType id = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
 		myMemoryCacheService.invalidateAllCaches();
 
 		// Search
 		myCaptureQueriesListener.clear();
 		SearchParameterMap map = SearchParameterMap.newSynchronous()
 			.add(Constants.PARAM_PROFILE, new UriParam(code));
-		IBundleProvider outcome = myPatientDao.search(map);
+		IBundleProvider outcome = myPatientDao.search(map, mySrd);
 		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
 		// Query 1 - Find resources: Just a standard token search in this mode
 		String sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(false, false);
@@ -137,5 +241,34 @@ public class FhirResourceDaoR4SearchSqlTest extends BaseJpaR4Test {
 		myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(reindexParamCache);
 	}
 
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	public void testSearchByToken_IncludeHashIdentity(boolean theIncludeHashIdentity) {
+		// Setup
+		myStorageSettings.setIncludeHashIdentityForTokenSearches(theIncludeHashIdentity);
+
+		// Test
+		myCaptureQueriesListener.clear();
+		SearchParameterMap params = SearchParameterMap.newSynchronous(Patient.SP_IDENTIFIER, new TokenParam("http://foo", "bar"));
+		IBundleProvider outcome = myPatientDao.search(params, mySrd);
+		assertEquals(0, outcome.sizeOrThrowNpe());
+
+		// Verify
+		if (theIncludeHashIdentity) {
+			assertEquals("SELECT t0.RES_ID FROM HFJ_SPIDX_TOKEN t0 WHERE ((t0.HASH_IDENTITY = '7001889285610424179') AND (t0.HASH_SYS_AND_VALUE = '-2780914544385068076'))", myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false));
+		} else {
+			assertEquals("SELECT t0.RES_ID FROM HFJ_SPIDX_TOKEN t0 WHERE (t0.HASH_SYS_AND_VALUE = '-2780914544385068076')", myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false));
+		}
+
+	}
+
+	public static class MyPartitionInterceptor {
+
+		@Hook(STORAGE_PARTITION_IDENTIFY_ANY)
+		public RequestPartitionId partition() {
+			return RequestPartitionId.defaultPartition();
+		}
+
+	}
 
 }

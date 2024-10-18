@@ -22,12 +22,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Base;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r4.model.Property;
@@ -37,9 +39,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.util.ParametersUtil.getNamedParameterResource;
+import static ca.uhn.fhir.util.ParametersUtil.getNamedParameterValueAsString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -51,6 +58,9 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  */
 public class RemoteTerminologyServiceValidationSupport extends BaseValidationSupport implements IValidationSupport {
 	private static final Logger ourLog = LoggerFactory.getLogger(RemoteTerminologyServiceValidationSupport.class);
+
+	public static final String ERROR_CODE_UNKNOWN_CODE_IN_CODE_SYSTEM = "unknownCodeInSystem";
+	public static final String ERROR_CODE_UNKNOWN_CODE_IN_VALUE_SET = "unknownCodeInValueSet";
 
 	private String myBaseUrl;
 	private final List<Object> myClientInterceptors = new ArrayList<>();
@@ -192,8 +202,8 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 			// e.g. ClientResponseInterceptorModificationTemplate
 			ourLog.error(e.getMessage(), e);
 			LookupCodeResult result = LookupCodeResult.notFound(system, code);
-			result.setErrorMessage(
-					getErrorMessage("unknownCodeInSystem", system, code, client.getServerBase(), e.getMessage()));
+			result.setErrorMessage(getErrorMessage(
+					ERROR_CODE_UNKNOWN_CODE_IN_CODE_SYSTEM, system, code, getBaseUrl(), e.getMessage()));
 			return result;
 		}
 		if (outcome != null && !outcome.isEmpty()) {
@@ -575,6 +585,21 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 
 		IGenericClient client = provideClient();
 
+		// this message builder can be removed once we introduce a parameter object like CodeValidationRequest
+		ValidationErrorMessageBuilder errorMessageBuilder = theServerMessage -> {
+			if (theValueSetUrl == null && theValueSet == null) {
+				return getErrorMessage(
+						ERROR_CODE_UNKNOWN_CODE_IN_CODE_SYSTEM, theCodeSystem, theCode, getBaseUrl(), theServerMessage);
+			}
+			return getErrorMessage(
+					ERROR_CODE_UNKNOWN_CODE_IN_VALUE_SET,
+					theCodeSystem,
+					theCode,
+					theValueSetUrl,
+					getBaseUrl(),
+					theServerMessage);
+		};
+
 		IBaseParameters input =
 				buildValidateCodeInputParameters(theCodeSystem, theCode, theDisplay, theValueSetUrl, theValueSet);
 
@@ -583,93 +608,167 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 			resourceType = "CodeSystem";
 		}
 
-		IBaseParameters output;
 		try {
-			output = client.operation()
+			IBaseParameters output = client.operation()
 					.onType(resourceType)
 					.named("validate-code")
 					.withParameters(input)
 					.execute();
+			return createCodeValidationResult(output, errorMessageBuilder, theCode);
 		} catch (ResourceNotFoundException | InvalidRequestException ex) {
 			ourLog.error(ex.getMessage(), ex);
-			CodeValidationResult result = new CodeValidationResult();
-			result.setSeverity(IssueSeverity.ERROR);
-			String errorMessage = buildErrorMessage(
-					theCodeSystem, theCode, theValueSetUrl, theValueSet, client.getServerBase(), ex.getMessage());
-			result.setMessage(errorMessage);
+			String errorMessage = errorMessageBuilder.buildErrorMessage(ex.getMessage());
+			CodeValidationIssueCode issueCode = ex instanceof ResourceNotFoundException
+					? CodeValidationIssueCode.NOT_FOUND
+					: CodeValidationIssueCode.CODE_INVALID;
+			return createErrorCodeValidationResult(issueCode, errorMessage);
+		}
+	}
+
+	private CodeValidationResult createErrorCodeValidationResult(
+			CodeValidationIssueCode theIssueCode, String theMessage) {
+		IssueSeverity severity = IssueSeverity.ERROR;
+		return new CodeValidationResult()
+				.setSeverity(severity)
+				.setMessage(theMessage)
+				.addCodeValidationIssue(new CodeValidationIssue(
+						theMessage, severity, theIssueCode, CodeValidationIssueCoding.INVALID_CODE));
+	}
+
+	private CodeValidationResult createCodeValidationResult(
+			IBaseParameters theOutput, ValidationErrorMessageBuilder theMessageBuilder, String theCode) {
+		final FhirContext fhirContext = getFhirContext();
+		Optional<String> resultValue = getNamedParameterValueAsString(fhirContext, theOutput, "result");
+
+		if (!resultValue.isPresent()) {
+			throw new IllegalArgumentException(
+					Msg.code(2560) + "Parameter `result` is missing from the $validate-code response.");
+		}
+
+		boolean success = resultValue.get().equalsIgnoreCase("true");
+
+		CodeValidationResult result = new CodeValidationResult();
+
+		// TODO MM: avoid passing the code and only retrieve it from the response
+		// that implies larger changes, like adding the result boolean to CodeValidationResult
+		// since CodeValidationResult#isOk() relies on code being populated to determine the result/success
+		if (success) {
+			result.setCode(theCode);
+		}
+
+		Optional<String> systemValue = getNamedParameterValueAsString(fhirContext, theOutput, "system");
+		systemValue.ifPresent(result::setCodeSystemName);
+		Optional<String> versionValue = getNamedParameterValueAsString(fhirContext, theOutput, "version");
+		versionValue.ifPresent(result::setCodeSystemVersion);
+		Optional<String> displayValue = getNamedParameterValueAsString(fhirContext, theOutput, "display");
+		displayValue.ifPresent(result::setDisplay);
+
+		// in theory the message and the issues should not be populated when result=false
+		if (success) {
 			return result;
 		}
 
-		List<String> resultValues = ParametersUtil.getNamedParameterValuesAsString(getFhirContext(), output, "result");
-		if (resultValues.isEmpty() || isBlank(resultValues.get(0))) {
-			return null;
-		}
-		Validate.isTrue(resultValues.size() == 1, "Response contained %d 'result' values", resultValues.size());
+		// for now assume severity ERROR, we may need to process the following for success cases as well
+		result.setSeverity(IssueSeverity.ERROR);
 
-		boolean success = "true".equalsIgnoreCase(resultValues.get(0));
+		Optional<String> messageValue = getNamedParameterValueAsString(fhirContext, theOutput, "message");
+		messageValue.ifPresent(value -> result.setMessage(theMessageBuilder.buildErrorMessage(value)));
 
-		CodeValidationResult retVal = new CodeValidationResult();
-		if (success) {
-
-			retVal.setCode(theCode);
-			List<String> displayValues =
-					ParametersUtil.getNamedParameterValuesAsString(getFhirContext(), output, "display");
-			if (!displayValues.isEmpty()) {
-				retVal.setDisplay(displayValues.get(0));
-			}
-
+		Optional<IBaseResource> issuesValue = getNamedParameterResource(fhirContext, theOutput, "issues");
+		if (issuesValue.isPresent()) {
+			// it seems to be safe to cast to IBaseOperationOutcome as any other type would not reach this point
+			createCodeValidationIssues(
+							(IBaseOperationOutcome) issuesValue.get(),
+							fhirContext.getVersion().getVersion())
+					.ifPresent(i -> i.forEach(result::addCodeValidationIssue));
 		} else {
-
-			retVal.setSeverity(IssueSeverity.ERROR);
-			List<String> messageValues =
-					ParametersUtil.getNamedParameterValuesAsString(getFhirContext(), output, "message");
-			if (!messageValues.isEmpty()) {
-				retVal.setMessage(messageValues.get(0));
-			}
+			// create a validation issue out of the message
+			// this is a workaround to overcome an issue in the FHIR Validator library
+			// where ValueSet bindings are only reading issues but not messages
+			// @see https://github.com/hapifhir/org.hl7.fhir.core/issues/1766
+			result.addCodeValidationIssue(createCodeValidationIssue(result.getMessage()));
 		}
-		return retVal;
+		return result;
 	}
 
-	private String buildErrorMessage(
-			String theCodeSystem,
-			String theCode,
-			String theValueSetUrl,
-			IBaseResource theValueSet,
-			String theServerUrl,
-			String theServerMessage) {
-		if (theValueSetUrl == null && theValueSet == null) {
-			return getErrorMessage("unknownCodeInSystem", theCodeSystem, theCode, theServerUrl, theServerMessage);
-		} else {
-			return getErrorMessage(
-					"unknownCodeInValueSet", theCodeSystem, theCode, theValueSetUrl, theServerUrl, theServerMessage);
+	/**
+	 * Creates a list of {@link ca.uhn.fhir.context.support.IValidationSupport.CodeValidationIssue} from the issues
+	 * returned by the $validate-code operation.
+	 * Please note that this method should only be used for Remote Terminology for now as it only translates
+	 * issues text/message and assumes all other fields.
+	 * When issues will be supported across all validators in hapi-fhir, a proper generic conversion method should
+	 * be available and this method will be deleted.
+	 *
+	 * @param theOperationOutcome the outcome of the $validate-code operation
+	 * @param theFhirVersion the FHIR version
+	 * @return the list of {@link ca.uhn.fhir.context.support.IValidationSupport.CodeValidationIssue}
+	 */
+	public static Optional<Collection<CodeValidationIssue>> createCodeValidationIssues(
+			IBaseOperationOutcome theOperationOutcome, FhirVersionEnum theFhirVersion) {
+		if (theFhirVersion == FhirVersionEnum.R4) {
+			return Optional.of(createCodeValidationIssuesR4((OperationOutcome) theOperationOutcome));
 		}
+		if (theFhirVersion == FhirVersionEnum.DSTU3) {
+			return Optional.of(
+					createCodeValidationIssuesDstu3((org.hl7.fhir.dstu3.model.OperationOutcome) theOperationOutcome));
+		}
+		return Optional.empty();
+	}
+
+	private static Collection<CodeValidationIssue> createCodeValidationIssuesR4(OperationOutcome theOperationOutcome) {
+		return theOperationOutcome.getIssue().stream()
+				.map(issueComponent ->
+						createCodeValidationIssue(issueComponent.getDetails().getText()))
+				.collect(Collectors.toList());
+	}
+
+	private static Collection<CodeValidationIssue> createCodeValidationIssuesDstu3(
+			org.hl7.fhir.dstu3.model.OperationOutcome theOperationOutcome) {
+		return theOperationOutcome.getIssue().stream()
+				.map(issueComponent ->
+						createCodeValidationIssue(issueComponent.getDetails().getText()))
+				.collect(Collectors.toList());
+	}
+
+	private static CodeValidationIssue createCodeValidationIssue(String theMessage) {
+		return new CodeValidationIssue(
+				theMessage,
+				// assume issue type is OperationOutcome.IssueType#CODEINVALID as it is the only match
+				IssueSeverity.ERROR,
+				CodeValidationIssueCode.INVALID,
+				CodeValidationIssueCoding.INVALID_CODE);
+	}
+
+	public interface ValidationErrorMessageBuilder {
+		String buildErrorMessage(String theServerMessage);
 	}
 
 	protected IBaseParameters buildValidateCodeInputParameters(
 			String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl, IBaseResource theValueSet) {
-		IBaseParameters params = ParametersUtil.newInstance(getFhirContext());
+		final FhirContext fhirContext = getFhirContext();
+		IBaseParameters params = ParametersUtil.newInstance(fhirContext);
 
 		if (theValueSet == null && theValueSetUrl == null) {
-			ParametersUtil.addParameterToParametersUri(getFhirContext(), params, "url", theCodeSystem);
-			ParametersUtil.addParameterToParametersString(getFhirContext(), params, "code", theCode);
+			ParametersUtil.addParameterToParametersUri(fhirContext, params, "url", theCodeSystem);
+			ParametersUtil.addParameterToParametersString(fhirContext, params, "code", theCode);
 			if (isNotBlank(theDisplay)) {
-				ParametersUtil.addParameterToParametersString(getFhirContext(), params, "display", theDisplay);
+				ParametersUtil.addParameterToParametersString(fhirContext, params, "display", theDisplay);
 			}
 			return params;
 		}
 
 		if (isNotBlank(theValueSetUrl)) {
-			ParametersUtil.addParameterToParametersUri(getFhirContext(), params, "url", theValueSetUrl);
+			ParametersUtil.addParameterToParametersUri(fhirContext, params, "url", theValueSetUrl);
 		}
-		ParametersUtil.addParameterToParametersString(getFhirContext(), params, "code", theCode);
+		ParametersUtil.addParameterToParametersString(fhirContext, params, "code", theCode);
 		if (isNotBlank(theCodeSystem)) {
-			ParametersUtil.addParameterToParametersUri(getFhirContext(), params, "system", theCodeSystem);
+			ParametersUtil.addParameterToParametersUri(fhirContext, params, "system", theCodeSystem);
 		}
 		if (isNotBlank(theDisplay)) {
-			ParametersUtil.addParameterToParametersString(getFhirContext(), params, "display", theDisplay);
+			ParametersUtil.addParameterToParametersString(fhirContext, params, "display", theDisplay);
 		}
 		if (theValueSet != null) {
-			ParametersUtil.addParameterToParameters(getFhirContext(), params, "valueSet", theValueSet);
+			ParametersUtil.addParameterToParameters(fhirContext, params, "valueSet", theValueSet);
 		}
 		return params;
 	}

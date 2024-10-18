@@ -16,7 +16,7 @@ HAPI implements the following operations for Questionnaires and QuestionnaireRes
 * [$populate](/docs/clinical_reasoning/questionnaires.html#populate)
 * [$extract](/docs/clinical_reasoning/questionnaires.html#extract)
 * [$package](/docs/clinical_reasoning/questionnaires.html#package)
-
+* [$data-requirements](/docs/clinical_reasoning/questionnaires.html#datarequirements)
 
 ## Questionnaire
 
@@ -26,65 +26,69 @@ The `StructureDefinition/$questionnaire` [operation]() generates a [Questionnair
 
 The following parameters are supported for the `StructureDefinition/$questionnaire` operation:
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| profile          | StructureDefinition      | The StructureDefinition to base the Questionnaire on. Used when the operation is invoked at the 'type' level. |
-| canonical | canonical | The canonical identifier for the StructureDefinition (optionally version-specific). |
-| url | uri | Canonical URL of the StructureDefinition when invoked at the resource type level. This is exclusive with the profile and canonical parameters. |
-| version | string | Version of the StructureDefinition when invoked at the resource type level. This is exclusive with the profile and canonical parameters. |
-| supportedOnly | boolean | If true (default: false), the questionnaire will only include those elements marked as "mustSupport='true'" in the StructureDefinition. |
-| requiredOnly | boolean | If true (default: false), the questionnaire will only include those elements marked as "min>0" in the StructureDefinition. |
-| subject | string | The subject(s) that is/are the target of the Questionnaire. |
-| parameters | Parameters | Any input parameters defined in libraries referenced by the StructureDefinition. |
-| useServerData | boolean Whether to use data from the server performing the evaluation. |
-| data | Bundle | Data to be made available during CQL evaluation. |
-| dataEndpoint | Endpoint | An endpoint to use to access data referenced by retrieve operations in libraries referenced by the StructureDefinition. |
-| contentEndpoint | Endpoint | An endpoint to use to access content (i.e. libraries) referenced by the StructureDefinition. |
-| terminologyEndpoint | Endpoint | An endpoint to use to access terminology (i.e. valuesets, codesystems, and membership testing) referenced by the StructureDefinition. |
+| Parameter           | Type                 | Description |
+|---------------------|----------------------|-------------|
+| profile             | StructureDefinition  | The StructureDefinition to base the Questionnaire on. Used when the operation is invoked at the 'type' level.                                  |
+| canonical           | canonical            | The canonical identifier for the StructureDefinition (optionally version-specific).                                                            |
+| url                 | uri                  | Canonical URL of the StructureDefinition when invoked at the resource type level. This is exclusive with the profile and canonical parameters. |
+| version             | string               | Version of the StructureDefinition when invoked at the resource type level. This is exclusive with the profile and canonical parameters.       |
+| supportedOnly       | boolean              | If true (default: false), the questionnaire will only include those elements marked as "mustSupport='true'" in the StructureDefinition.        |
+| requiredOnly        | boolean              | If true (default: false), the questionnaire will only include those elements marked as "min>0" in the StructureDefinition.                     |
+| contentEndpoint     | Endpoint             | An endpoint to use to access content (i.e. libraries) referenced by the StructureDefinition.                                                   |
+| terminologyEndpoint | Endpoint             | An endpoint to use to access terminology (i.e. valuesets, codesystems, and membership testing) referenced by the StructureDefinition.          |
 
 ## Populate
 
-The `Questionnaire/$populate` [operation](https://hl7.org/fhir/uv/sdc/OperationDefinition-Questionnaire-populate.html) generates a [QuestionnaireResponse](https://www.hl7.org/fhir/questionnaireresponse.html) based on a specific [Questionnaire](https://www.hl7.org/fhir/questionnaire.html), filling in answers to questions where possible based on information provided as part of the operation or already known by the server about the subject of the Questionnaire. 
+The `Questionnaire/$populate` [operation](https://hl7.org/fhir/uv/sdc/OperationDefinition-Questionnaire-populate.html) generates a [QuestionnaireResponse](https://www.hl7.org/fhir/questionnaireresponse.html) based on a specific [Questionnaire](https://www.hl7.org/fhir/questionnaire.html), filling in answers to questions where possible based on information provided as part of the operation or already known by the server about the subject of the Questionnaire.  
+
+This implementation only allows for [Expression-based](https://hl7.org/fhir/uv/sdc/populate.html#expression-based-population) population.
+Additional parameters have been added to support CQL evaluation.
 
 ### Parameters
 
 The following parameters are supported for the `Questionnaire/$populate` operation:
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| questionnaire | Questionnaire | The Questionnaire to populate. Used when the operation is invoked at the 'type' level. |
-| canonical | canonical | The canonical identifier for the Questionnaire (optionally version-specific). |
-| url | uri | Canonical URL of the Questionnaire when invoked at the resource type level. This is exclusive with the questionnaire and canonical parameters. |
-| version | string | Version of the Questionnaire when invoked at the resource type level. This is exclusive with the questionnaire and canonical parameters. |
-| subject | string | The subject(s) that is/are the target of the Questionnaire. |
-| parameters | Parameters | Any input parameters defined in libraries referenced by the Questionnaire. |
-| useServerData | boolean | Whether to use data from the server performing the evaluation. |
-| data | Bundle | Data to be made available during CQL evaluation. |
-| dataEndpoint | Endpoint | An endpoint to use to access data referenced by retrieve operations in libraries referenced by the Questionnaire. |
-| contentEndpoint | Endpoint | An endpoint to use to access content (i.e. libraries) referenced by the Questionnaire. |
-| terminologyEndpoint | Endpoint | An endpoint to use to access terminology (i.e. valuesets, codesystems, and membership testing) referenced by the Questionnaire. |
-
-
+| Parameter           | Type          | Description |
+|---------------------|---------------|-------------|
+| questionnaire       | Questionnaire | The Questionnaire to populate. Used when the operation is invoked at the 'type' level. |
+| canonical           | canonical     | The canonical identifier for the Questionnaire (optionally version-specific). |
+| url                 | uri           | Canonical URL of the Questionnaire when invoked at the resource type level. This is exclusive with the questionnaire and canonical parameters. |
+| version             | string        | Version of the Questionnaire when invoked at the resource type level. This is exclusive with the questionnaire and canonical parameters. |
+| subject             | Reference     | The resource that is to be the QuestionnaireResponse.subject. The QuestionnaireResponse instance will reference the provided subject. |
+| context             |               | Resources containing information to be used to help populate the QuestionnaireResponse. | 
+| context.name        | string        | The name of the launchContext or root Questionnaire variable the passed content should be used as for population purposes. The name SHALL correspond to a launchContext or variable delared at the root of the Questionnaire. | 
+| context.reference   | Reference     | The actual resource (or resources) to use as the value of the launchContext or variable. | 
+| local               | boolean       | Whether the server should use what resources and other knowledge it has about the referenced subject when pre-populating answers to questions. |
+| launchContext       | Extension     | The [Questionnaire Launch Context](https://hl7.org/fhir/uv/sdc/StructureDefinition-sdc-questionnaire-launchContext.html) extension containing Resources that provide context for form processing logic (pre-population) when creating/displaying/editing a QuestionnaireResponse. |
+| parameters          | Parameters    | Any input parameters defined in libraries referenced by the Questionnaire. |
+| useServerData       | boolean       | Whether to use data from the server performing the evaluation. |
+| data                | Bundle        | Data to be made available during CQL evaluation. |
+| dataEndpoint        | Endpoint      | An endpoint to use to access data referenced by retrieve operations in libraries referenced by the Questionnaire. |
+| contentEndpoint     | Endpoint      | An endpoint to use to access content (i.e. libraries) referenced by the Questionnaire. |
+| terminologyEndpoint | Endpoint      | An endpoint to use to access terminology (i.e. valuesets, codesystems, and membership testing) referenced by the Questionnaire. |
+ 
 ## Extract
 
 The `QuestionnaireResponse/$extract` [operation](http://hl7.org/fhir/uv/sdc/OperationDefinition-QuestionnaireResponse-extract.html) takes a completed [QuestionnaireResponse](https://www.hl7.org/fhir/questionnaireresponse.html) and converts it to a Bundle of resources by using metadata embedded in the [Questionnaire](https://www.hl7.org/fhir/questionnaire.html) the QuestionnaireResponse is based on. The extracted resources might include Observations, MedicationStatements and other standard FHIR resources which can then be shared and manipulated. When invoking the $extract operation, care should be taken that the submitted QuestionnaireResponse is itself valid. If not, the extract operation could fail (with appropriate OperationOutcomes) or, more problematic, might succeed but provide incorrect output.
 
-This implementation allows for both [Observation based](https://hl7.org/fhir/uv/sdc/extraction.html#observation-based-extraction) and [Definition based](https://hl7.org/fhir/uv/sdc/extraction.html#definition-based-extraction) extraction.
+This implementation allows for both [Observation-based](https://hl7.org/fhir/uv/sdc/extraction.html#observation-based-extraction) and [Definition-based](https://hl7.org/fhir/uv/sdc/extraction.html#definition-based-extraction) extraction.
 
 ### Parameters
 
 The following parameters are supported for the `QuestionnaireResponse/$extract` operation:
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
+| Parameter              | Type                  | Description |
+|------------------------|-----------------------|-------------|
 | questionnaire-response | QuestionnaireResponse | The QuestionnaireResponse to extract data from. Used when the operation is invoked at the 'type' level. |
-| parameters | Parameters | Any input parameters defined in libraries referenced by the Questionnaire. |
-| data | Bundle | Data to be made available during CQL evaluation. |
+| questionnaire          | Questionnaire         | The Questionnaire the QuestionnaireResponse is answering.  Used when the server does not have access to the Questionnaire. |
+| parameters             | Parameters            | Any input parameters defined in libraries referenced by the Questionnaire. |
+| useServerData          | boolean               | Whether to use data from the server performing the evaluation. |
+| data                   | Bundle                | Data to be made available during CQL evaluation. |
 
 
 ## Package
 
-The `Questionnaire/$package` [operation](https://build.fhir.org/ig/HL7/crmi-ig/OperationDefinition-crmi-package.html) for [Questionnaire](https://www.hl7.org/fhir/questionnaire.html) will generate a Bundle of resources that includes the Questionnaire as well as any related Library or ValueSet resources which can then be shared. This implementation follows the [CRMI IG](https://build.fhir.org/ig/HL7/crmi-ig/branches/master/index.html) guidance for [packaging artifacts](https://build.fhir.org/ig/HL7/crmi-ig/branches/master/packaging.html).
+The `Questionnaire/$package` [operation](https://hl7.org/fhir/uv/crmi/OperationDefinition-crmi-package.html) for [Questionnaire](https://www.hl7.org/fhir/questionnaire.html) will generate a Bundle of resources that includes the Questionnaire as well as any related Library or ValueSet resources which can then be shared. This implementation follows the [CRMI IG](https://hl7.org/fhir/uv/crmi/index.html) guidance for [packaging artifacts](https://hl7.org/fhir/uv/crmi/packaging.html).
 
 ### Parameters
 
@@ -97,6 +101,22 @@ The following parameters are supported for the `Questionnaire/$package` operatio
 | url       | uri       | A canonical or artifact reference to a Resource to package on the server. This is exclusive with the canonical parameter. |
 | version   | string    | The version of the Resource. This is exclusive with the canonical parameter. | 
 | usePut    | boolean   | Determines the type of method returned in the Bundle Entries: POST if False (the default), PUT if True. | 
+
+
+## DataRequirements
+
+The `Questionnaire/$data-requirements` [operation](https://hl7.org/fhir/uv/crmi/OperationDefinition-crmi-data-requirements.html) for Questionnaire will generate a Library of type `module-definition` that returns the computed effective requirements of the artifact.
+
+### Parameters
+
+The following parameters are supported for the `Questionnaire/$data-requirements` operation:
+
+| Parameter | Type      | Description                                                                                                    |
+|-----------|-----------|----------------------------------------------------------------------------------------------------------------|
+| id        | string    | The logical id of the canonical or artifact resource to analyze.                                               |
+| canonical | canonical | A canonical url (optionally version specific) to a canonical resource.                                         |
+| url       | uri       | A canonical or artifact reference to a canonical resource. This is exclusive with the canonical parameter.     |
+| version   | string    | The version of the canonical or artifact resource to analyze. This is exclusive with the canonical parameter.  |
 
 
 ## Example Questionnaire

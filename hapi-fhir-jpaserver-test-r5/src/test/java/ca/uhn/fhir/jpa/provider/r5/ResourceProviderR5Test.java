@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r5;
 
 import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrl;
-import ca.uhn.fhir.batch2.jobs.reindex.ReindexAppCtx;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
@@ -67,6 +66,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.batch2.jobs.reindex.ReindexUtils.JOB_REINDEX;
 import static org.apache.commons.lang3.StringUtils.leftPad;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -374,7 +374,7 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 			ReindexJobParameters jobParameters = new ReindexJobParameters();
 			jobParameters.addPartitionedUrl(new PartitionedUrl().setRequestPartitionId(RequestPartitionId.allPartitions()));
 			JobInstanceStartRequest request = new JobInstanceStartRequest();
-			request.setJobDefinitionId(ReindexAppCtx.JOB_REINDEX);
+			request.setJobDefinitionId(JOB_REINDEX);
 			request.setParameters(jobParameters);
 			Batch2JobStartResponse response = myJobCoordinator.startInstance(new SystemRequestDetails(), request);
 

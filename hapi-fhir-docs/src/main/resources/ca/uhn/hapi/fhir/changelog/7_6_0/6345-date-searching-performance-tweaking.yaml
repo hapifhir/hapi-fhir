@@ -1,0 +1,8 @@
+---
+type: perf
+issue: 6345
+title: "Date searches using equality would perform badly as the query planner
+        does not know that our LOW_VALUE columns are always < HIGH_VALUE
+        columns, and HIGH_VALUE is always > LOW_VALUE columns.
+        These queries have been fixed to account for this.
+"
