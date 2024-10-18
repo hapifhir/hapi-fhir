@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 6363
+title: "This release updates the org.hl7.fhir core dependency up to 6.3.23, in order to patch [CVE-2024-45294](https://nvd.nist.gov/vuln/detail/CVE-2024-45294)."
