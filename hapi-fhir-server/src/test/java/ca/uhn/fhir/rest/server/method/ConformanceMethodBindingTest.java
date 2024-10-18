@@ -109,8 +109,9 @@ public class ConformanceMethodBindingTest {
 	}
 
 	@Test
-	public void invokeServer_metadata() {
+	public void invokeServer_metadata() throws Exception{
 
+		init(new TestResourceProvider());
 		RequestDetails requestDetails = mySrd;
 		when(requestDetails.getOperation()).thenReturn("metadata");
 		when(requestDetails.getRequestType()).thenReturn(RequestTypeEnum.GET);
