@@ -77,5 +77,4 @@ public class TaskChunkerTest {
 			Arguments.of(List.of(1,2,3,4,5,6,7,8,9), List.of(List.of(1,2,3), List.of(4,5,6), List.of(7,8,9)))
 		);
 	}
-
 }

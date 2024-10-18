@@ -17,6 +17,8 @@ import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
@@ -32,6 +34,17 @@ public class FhirSearchDaoR4Test extends BaseJpaR4Test {
 
 	@Autowired
 	private IFulltextSearchSvc mySearchDao;
+
+	@BeforeEach
+	public void before() throws Exception {
+		super.before();
+		SearchBuilder.setMaxPageSizeForTest(10);
+	}
+
+	@AfterEach
+	public void after() {
+		SearchBuilder.setMaxPageSizeForTest(null);
+	}
 
 	@Test
 	public void testDaoCallRequiresTransaction() {
@@ -267,8 +280,7 @@ public class FhirSearchDaoR4Test extends BaseJpaR4Test {
 		final int numberOfPatientsToCreate = SearchBuilder.getMaximumPageSize() + 10;
 		List<String> expectedActivePatientIds = new ArrayList<>(numberOfPatientsToCreate);
 
-		for (int i = 0; i < numberOfPatientsToCreate; i++)
-		{
+		for (int i = 0; i < numberOfPatientsToCreate; i++) {
 			Patient patient = new Patient();
 			patient.getText().setDivAsString("<div>AAAS<p>FOO</p> CCC    </div>");
 			expectedActivePatientIds.add(myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless().getIdPart());
@@ -295,13 +307,81 @@ public class FhirSearchDaoR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void searchLuceneAndJPA_withLuceneMatchingButJpaNot_returnsNothing() {
+		// setup
+		int numToCreate = 2 * SearchBuilder.getMaximumPageSize() + 10;
+
+		// create resources
+		for (int i = 0; i < numToCreate; i++) {
+			Patient patient = new Patient();
+			patient.setActive(true);
+			patient.addIdentifier()
+				.setSystem("http://fhir.com")
+				.setValue("ZYX");
+			patient.getText().setDivAsString("<div>ABC</div>");
+			myPatientDao.create(patient, mySrd);
+		}
+
+		// test
+		SearchParameterMap map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.setSearchTotalMode(SearchTotalModeEnum.ACCURATE);
+		TokenAndListParam tokenAndListParam = new TokenAndListParam();
+		tokenAndListParam.addAnd(new TokenOrListParam().addOr(new TokenParam().setValue("true")));
+		map.add("active", tokenAndListParam);
+		map.add(Constants.PARAM_TEXT, new StringParam("ABC"));
+		map.add("identifier", new TokenParam(null, "not found"));
+		IBundleProvider provider = myPatientDao.search(map, mySrd);
+
+		// verify
+		assertEquals(0, provider.getAllResources().size());
+	}
+
+	@Test
+	public void searchLuceneAndJPA_withLuceneBroadAndJPASearchNarrow_returnsFoundResults() {
+		// setup
+		int numToCreate = 2 * SearchBuilder.getMaximumPageSize() + 10;
+		String identifierToFind = "bcde";
+
+		// create patients
+		for (int i = 0; i < numToCreate; i++) {
+			Patient patient = new Patient();
+			patient.setActive(true);
+			String identifierVal = i == numToCreate - 10 ? identifierToFind:
+			"abcd";
+			patient.addIdentifier()
+				.setSystem("http://fhir.com")
+				.setValue(identifierVal);
+
+			patient.getText().setDivAsString(
+				"<div>FINDME</div>"
+			);
+			myPatientDao.create(patient, mySrd);
+		}
+
+		// test
+		SearchParameterMap map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.setSearchTotalMode(SearchTotalModeEnum.ACCURATE);
+		TokenAndListParam tokenAndListParam = new TokenAndListParam();
+		tokenAndListParam.addAnd(new TokenOrListParam().addOr(new TokenParam().setValue("true")));
+		map.add("active", tokenAndListParam);
+		map.add(Constants.PARAM_TEXT, new StringParam("FINDME"));
+		map.add("identifier", new TokenParam(null, identifierToFind));
+		IBundleProvider provider = myPatientDao.search(map, mySrd);
+
+		// verify
+		List<String> ids = provider.getAllResourceIds();
+		assertEquals(1, ids.size());
+	}
+
+	@Test
 	public void testLuceneNarrativeSearchQueryIntersectingJpaQuery() {
 		final int numberOfPatientsToCreate = SearchBuilder.getMaximumPageSize() + 10;
 		List<String> expectedActivePatientIds = new ArrayList<>(numberOfPatientsToCreate);
 
 		// create active and non-active patients with the same narrative
-		for (int i = 0; i < numberOfPatientsToCreate; i++)
-		{
+		for (int i = 0; i < numberOfPatientsToCreate; i++) {
 			Patient activePatient = new Patient();
 			activePatient.getText().setDivAsString("<div>AAAS<p>FOO</p> CCC    </div>");
 			activePatient.setActive(true);
@@ -335,8 +415,7 @@ public class FhirSearchDaoR4Test extends BaseJpaR4Test {
 		List<String> expectedActivePatientIds = new ArrayList<>(numberOfPatientsToCreate);
 
 		// create active and non-active patients with the same narrative
-		for (int i = 0; i < numberOfPatientsToCreate; i++)
-		{
+		for (int i = 0; i < numberOfPatientsToCreate; i++) {
 			Patient activePatient = new Patient();
 			activePatient.addName().setFamily(patientFamilyName);
 			activePatient.setActive(true);
@@ -350,10 +429,8 @@ public class FhirSearchDaoR4Test extends BaseJpaR4Test {
 		}
 
 		SearchParameterMap map = new SearchParameterMap().setLoadSynchronous(true);
-
 		TokenAndListParam tokenAndListParam = new TokenAndListParam();
 		tokenAndListParam.addAnd(new TokenOrListParam().addOr(new TokenParam().setValue("true")));
-
 		map.add("active", tokenAndListParam);
 		map.add(Constants.PARAM_CONTENT, new StringParam(patientFamilyName));
 
@@ -362,5 +439,4 @@ public class FhirSearchDaoR4Test extends BaseJpaR4Test {
 
 		assertThat(resourceIdsFromSearchResult).containsExactlyInAnyOrderElementsOf(expectedActivePatientIds);
 	}
-
 }

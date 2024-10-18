@@ -1,0 +1,10 @@
+---
+type: fix
+issue: 6372
+jira: SMILE-9073
+backport: 7.4.5
+title: "Searches that combined full-text searching (i.e. `_text` or `_content`)
+    with other search parameters could fail to return all results if we encountered
+    1600 matches against the full-text index where none of them match the rest of the query.
+    This has now been fixed.
+"
