@@ -1938,7 +1938,7 @@
 			<dependency>
 				<groupId>org.elasticsearch</groupId>
 				<artifactId>elasticsearch</artifactId>
-				<version>8.9.2</version>
+				<version>8.15.3</version>
 			</dependency>
 			<dependency>
 				<groupId>org.hibernate.search</groupId>
