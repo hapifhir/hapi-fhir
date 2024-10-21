@@ -58,6 +58,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 import ca.uhn.fhir.jpa.model.search.SearchBuilderLoadIncludesParameters;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.search.SearchConstants;
 import ca.uhn.fhir.jpa.search.builder.models.ResolvedSearchQueryExecutor;
 import ca.uhn.fhir.jpa.search.builder.sql.GeneratedSql;
@@ -223,6 +224,9 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 	@Autowired
 	private IResourceHistoryTagDao myResourceHistoryTagDao;
+
+	@Autowired
+	private IRequestPartitionHelperSvc myPartitionHelperSvc;
 
 	/**
 	 * Constructor
@@ -1519,7 +1523,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 							nextRoundMatches,
 							entityManager,
 							maxCount,
-							pidsToInclude);
+							pidsToInclude,
+							request);
 				}
 			}
 
@@ -1584,18 +1589,19 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	}
 
 	private void loadIncludesMatchSpecific(
-			Include nextInclude,
-			FhirContext fhirContext,
-			String findPidFieldName,
-			String findPartitionFieldName,
-			String findVersionFieldName,
-			String searchPidFieldName,
-			String searchPartitionFieldName,
-			boolean reverseMode,
-			List<JpaPid> nextRoundMatches,
-			EntityManager entityManager,
-			Integer maxCount,
-			HashSet<JpaPid> pidsToInclude) {
+		Include nextInclude,
+		FhirContext fhirContext,
+		String findPidFieldName,
+		String findPartitionFieldName,
+		String findVersionFieldName,
+		String searchPidFieldName,
+		String searchPartitionFieldName,
+		boolean reverseMode,
+		List<JpaPid> nextRoundMatches,
+		EntityManager entityManager,
+		Integer maxCount,
+		HashSet<JpaPid> pidsToInclude,
+		RequestDetails theRequest) {
 		List<String> paths;
 
 		// Start replace
@@ -1687,7 +1693,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 			// Case 2:
 			Pair<String, Map<String, Object>> canonicalQuery =
-					buildCanonicalUrlQuery(findVersionFieldName, targetResourceTypes, reverseMode);
+					buildCanonicalUrlQuery(findVersionFieldName, targetResourceTypes, reverseMode, theRequest);
 
 			String sql = localReferenceQuery + "UNION " + canonicalQuery.getLeft();
 
@@ -1880,23 +1886,31 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				String message =
 						"Search with _include=* can be inefficient when references using canonical URLs are detected. Use more specific _include values instead.";
 				firePerformanceWarning(request, message);
-				loadCanonicalUrls(canonicalUrls, entityManager, pidsToInclude, reverseMode);
+				loadCanonicalUrls(request, canonicalUrls, entityManager, pidsToInclude, reverseMode);
 			}
 		}
 	}
 
 	private void loadCanonicalUrls(
+			RequestDetails theRequestDetails,
 			Set<String> theCanonicalUrls,
 			EntityManager theEntityManager,
 			HashSet<JpaPid> thePidsToInclude,
 			boolean theReverse) {
+		// FIXME: what calls this? Need a keep test? Should include partition ID?
 		StringBuilder sqlBuilder;
-		Set<Long> identityHashesForTypes = calculateIndexUriIdentityHashesForResourceTypes(null, theReverse);
+		CanonicalUrlTargets canonicalUrlTargets = calculateIndexUriIdentityHashesForResourceTypes(theRequestDetails, null, theReverse);
 		List<List<String>> canonicalUrlPartitions = ListUtils.partition(
-				List.copyOf(theCanonicalUrls), getMaximumPageSize() - identityHashesForTypes.size());
+				List.copyOf(theCanonicalUrls), getMaximumPageSize() - canonicalUrlTargets.myHashIdentityValues.size());
 
 		sqlBuilder = new StringBuilder();
-		sqlBuilder.append("SELECT i.myResourcePid ");
+		sqlBuilder.append("SELECT ");
+		if (myPartitionSettings.isPartitioningEnabled()) {
+			sqlBuilder.append("i.myPartitionIdValue, ");
+		}
+		sqlBuilder.append("i.myResourcePid ");
+
+
 		sqlBuilder.append("FROM ResourceIndexedSearchParamUri i ");
 		sqlBuilder.append("WHERE i.myHashIdentity IN (:hash_identity) ");
 		sqlBuilder.append("AND i.myUri IN (:uris)");
@@ -1904,13 +1918,23 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		String canonicalResSql = sqlBuilder.toString();
 
 		for (Collection<String> nextCanonicalUrlList : canonicalUrlPartitions) {
-			TypedQuery<Long> canonicalResIdQuery = theEntityManager.createQuery(canonicalResSql, Long.class);
-			canonicalResIdQuery.setParameter("hash_identity", identityHashesForTypes);
+			TypedQuery<Object[]> canonicalResIdQuery = theEntityManager.createQuery(canonicalResSql, Object[].class);
+			canonicalResIdQuery.setParameter("hash_identity", canonicalUrlTargets.myHashIdentityValues);
 			canonicalResIdQuery.setParameter("uris", nextCanonicalUrlList);
-			List<Long> resIds = canonicalResIdQuery.getResultList();
-			for (var next : resIds) {
+			List<Object[]> results = canonicalResIdQuery.getResultList();
+			for (var next : results) {
 				if (next != null) {
-					thePidsToInclude.add(JpaPid.fromId(next));
+					Integer partitionId = null;
+					Long pid;
+					if (next.length == 1) {
+						pid = (Long) next[0];
+					} else {
+						partitionId = (Integer) ((Object[]) next)[0];
+						pid = (Long) ((Object[]) next)[1];
+					}
+					if (pid != null) {
+						thePidsToInclude.add(JpaPid.fromId(pid, partitionId));
+					}
 				}
 			}
 		}
@@ -1949,7 +1973,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 	@Nonnull
 	private Pair<String, Map<String, Object>> buildCanonicalUrlQuery(
-			String theVersionFieldName, Set<String> theTargetResourceTypes, boolean theReverse) {
+		String theVersionFieldName, Set<String> theTargetResourceTypes, boolean theReverse, RequestDetails theRequest) {
 		String fieldsToLoadFromSpidxUriTable = theReverse ? "r.src_resource_id" : "rUri.res_id";
 		if (theVersionFieldName != null) {
 			// canonical-uri references aren't versioned, but we need to match the column count for the UNION
@@ -1966,8 +1990,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 		// The logical join will be by hfj_spidx_uri on sp_name='uri' and sp_uri=target_resource_url.
 		// But sp_name isn't indexed, so we use hash_identity instead.
-		Set<Long> identityHashesForTypes =
-				calculateIndexUriIdentityHashesForResourceTypes(theTargetResourceTypes, theReverse);
+		CanonicalUrlTargets canonicalUrlTargets = calculateIndexUriIdentityHashesForResourceTypes(theRequest, theTargetResourceTypes, theReverse);
 
 		Map<String, Object> canonicalUriQueryParams = new HashMap<>();
 		StringBuilder canonicalUrlQuery = new StringBuilder();
@@ -1978,42 +2001,46 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		canonicalUrlQuery.append("FROM hfj_res_link r ");
 
 		// join on hash_identity and sp_uri - indexed in IDX_SP_URI_HASH_IDENTITY_V2
-		canonicalUrlQuery.append("JOIN hfj_spidx_uri rUri ON ( ");
-		if (theTargetResourceTypes != null && theTargetResourceTypes.size() == 1) {
-			canonicalUrlQuery.append("   rUri.hash_identity = :uri_identity_hash ");
+		canonicalUrlQuery.append("JOIN hfj_spidx_uri rUri ON (");
+		if (myPartitionSettings.isPartitionIdsInPrimaryKeys()) {
+			canonicalUrlQuery.append("rUri.partition_id IN (:uri_partition_id) AND ");
+			canonicalUriQueryParams.put("uri_partition_id", canonicalUrlTargets.myPartitionIds);
+		}
+		if (canonicalUrlTargets.myHashIdentityValues.size() == 1) {
+			canonicalUrlQuery.append("rUri.hash_identity = :uri_identity_hash");
 			canonicalUriQueryParams.put(
-					"uri_identity_hash", identityHashesForTypes.iterator().next());
+					"uri_identity_hash", canonicalUrlTargets.myHashIdentityValues.iterator().next());
 		} else {
-			canonicalUrlQuery.append("   rUri.hash_identity in (:uri_identity_hashes) ");
-			canonicalUriQueryParams.put("uri_identity_hashes", identityHashesForTypes);
+			canonicalUrlQuery.append("rUri.hash_identity in (:uri_identity_hashes)");
+			canonicalUriQueryParams.put("uri_identity_hashes", canonicalUrlTargets.myHashIdentityValues);
 		}
 		canonicalUrlQuery.append(" AND r.target_resource_url = rUri.sp_uri");
 		canonicalUrlQuery.append(")");
 
-		canonicalUrlQuery.append(" WHERE r.src_path = :src_path AND ");
-		canonicalUrlQuery.append(" r.target_resource_id IS NULL ");
-		canonicalUrlQuery.append(" AND ");
+		canonicalUrlQuery.append(" WHERE r.src_path = :src_path AND");
+		canonicalUrlQuery.append(" r.target_resource_id IS NULL");
+		canonicalUrlQuery.append(" AND");
 		if (myPartitionSettings.isPartitionIdsInPrimaryKeys()) {
 			if (theReverse) {
-				canonicalUrlQuery.append("rUri.partition_id");
+				canonicalUrlQuery.append(" rUri.partition_id");
 			} else {
-				canonicalUrlQuery.append("r.partition_id");
+				canonicalUrlQuery.append(" r.partition_id");
 			}
 			canonicalUrlQuery.append(" = :search_partition_id");
-			canonicalUrlQuery.append(" AND ");
+			canonicalUrlQuery.append(" AND");
 		}
 		if (theReverse) {
-			canonicalUrlQuery.append("rUri.res_id");
+			canonicalUrlQuery.append(" rUri.res_id");
 		} else {
-			canonicalUrlQuery.append("r.src_resource_id");
+			canonicalUrlQuery.append(" r.src_resource_id");
 		}
-		canonicalUrlQuery.append(" IN (:target_pids) ");
+		canonicalUrlQuery.append(" IN (:target_pids)");
 
 		return Pair.of(canonicalUrlQuery.toString(), canonicalUriQueryParams);
 	}
 
 	@Nonnull
-	Set<Long> calculateIndexUriIdentityHashesForResourceTypes(Set<String> theTargetResourceTypes, boolean theReverse) {
+	CanonicalUrlTargets calculateIndexUriIdentityHashesForResourceTypes(RequestDetails theRequestDetails, Set<String> theTargetResourceTypes, boolean theReverse) {
 		Set<String> targetResourceTypes = theTargetResourceTypes;
 		if (targetResourceTypes == null) {
 			/*
@@ -2079,10 +2106,39 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		}
 		assert !targetResourceTypes.isEmpty();
 
-		return targetResourceTypes.stream()
-				.map(type -> BaseResourceIndexedSearchParam.calculateHashIdentity(
-						myPartitionSettings, myRequestPartitionId, type, "url"))
-				.collect(Collectors.toSet());
+		Set<Long> hashIdentityValues = new HashSet<>();
+		Set<Integer> partitionIds = new HashSet<>();
+		for (String type : targetResourceTypes) {
+
+			RequestPartitionId readPartition;
+			if (myPartitionSettings.isPartitioningEnabled()) {
+				readPartition = myPartitionHelperSvc.determineReadPartitionForRequestForSearchType(theRequestDetails, type);
+			} else {
+				readPartition = RequestPartitionId.defaultPartition();
+			}
+			if (readPartition.hasPartitionIds()) {
+				partitionIds.addAll(readPartition.getPartitionIds());
+			}
+
+			Long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(
+				myPartitionSettings, readPartition, type, "url");
+			hashIdentityValues.add(hashIdentity);
+		}
+
+		return new CanonicalUrlTargets(hashIdentityValues, partitionIds);
+	}
+
+	static class CanonicalUrlTargets {
+
+		@Nonnull
+		final Set<Long> myHashIdentityValues;
+		@Nonnull
+		final Set<Integer> myPartitionIds;
+
+		public CanonicalUrlTargets(@Nonnull Set<Long> theHashIdentityValues, @Nonnull Set<Integer> thePartitionIds) {
+			myHashIdentityValues = theHashIdentityValues;
+			myPartitionIds = thePartitionIds;
+		}
 	}
 
 	/**

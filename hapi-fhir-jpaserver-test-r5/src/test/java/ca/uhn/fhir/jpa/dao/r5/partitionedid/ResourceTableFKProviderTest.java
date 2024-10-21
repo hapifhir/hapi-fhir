@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.dao.r5.conditionalid;
+package ca.uhn.fhir.jpa.dao.r5.partitionedid;
 
 import ca.uhn.fhir.jpa.dao.expunge.ResourceForeignKey;
 import ca.uhn.fhir.jpa.dao.expunge.ResourceTableFKProvider;
@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 
 import javax.sql.DataSource;

@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.dao.r5.conditionalid;
+package ca.uhn.fhir.jpa.dao.r5.partitionedid;
 
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,7 +13,7 @@ import org.springframework.test.context.TestPropertySource;
 @TestPropertySource(properties = {
 	JpaConstants.HAPI_INCLUDE_PARTITION_IDS_IN_PKS + "=true"
 })
-public class ConditionalIdKeptPartitioningEnabledTest extends BaseConditionalIdJpaR5Test {
+public class PartitionedIdTest extends BasePartitionedIdJpaR5Test {
 
 	@Override
 	@BeforeEach
@@ -29,7 +29,7 @@ public class ConditionalIdKeptPartitioningEnabledTest extends BaseConditionalIdJ
 	@Nested
 	public class MyTestDefinitions extends TestDefinitions {
 		MyTestDefinitions() {
-			super(ConditionalIdKeptPartitioningEnabledTest.this, myPartitionSelectorInterceptor, true, true);
+			super(PartitionedIdTest.this, myPartitionSelectorInterceptor, true, true);
 		}
 	}
 

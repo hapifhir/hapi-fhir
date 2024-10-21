@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.dao.r5.conditionalid;
+package ca.uhn.fhir.jpa.dao.r5.partitionedid;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.Hook;
@@ -43,12 +43,11 @@ public class PartitionSelectorInterceptor {
 	@Nonnull
 	private RequestPartitionId selectPartition(String theResourceType) {
 		return switch (defaultString(theResourceType)) {
-			case "", "Patient", "Observation", "Encounter", "List", "QuestionnaireResponse" -> {
+			case "SearchParameter", "Organization", "Questionnaire", "CodeSystem", "ValueSet" -> RequestPartitionId.defaultPartition();
+			default -> {
 				assert myNextPartition != null;
 				yield myNextPartition;
 			}
-			case "SearchParameter", "Organization", "Questionnaire", "CodeSystem", "ValueSet" -> RequestPartitionId.defaultPartition();
-			default -> throw new InternalErrorException("Don't know how to handle resource type: " + theResourceType);
 		};
 	}
 

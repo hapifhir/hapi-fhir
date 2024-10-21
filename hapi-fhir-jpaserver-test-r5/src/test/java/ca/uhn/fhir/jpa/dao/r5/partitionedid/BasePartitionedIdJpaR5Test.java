@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.dao.r5.conditionalid;
+package ca.uhn.fhir.jpa.dao.r5.partitionedid;
 
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.dao.r5.BaseJpaR5Test;
@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
-public class BaseConditionalIdJpaR5Test extends BaseJpaR5Test {
+public class BasePartitionedIdJpaR5Test extends BaseJpaR5Test {
 
 	public static final String PARTITION_NAME_1 = "Partition_1";
 	public static final String PARTITION_NAME_2 = "Partition_2";
