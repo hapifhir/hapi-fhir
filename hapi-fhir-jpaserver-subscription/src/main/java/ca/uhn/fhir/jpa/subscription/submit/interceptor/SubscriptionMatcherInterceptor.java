@@ -97,7 +97,7 @@ public class SubscriptionMatcherInterceptor {
 	@Hook(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED)
 	public void resourceUpdated(IBaseResource theOldResource, IBaseResource theNewResource, RequestDetails theRequest) {
 		boolean dontTriggerSubscriptionWhenVersionsAreTheSame =
-			!mySubscriptionSettings.isTriggerSubscriptionsForNonVersioningChanges();
+				!mySubscriptionSettings.isTriggerSubscriptionsForNonVersioningChanges();
 		boolean resourceVersionsAreTheSame = isSameResourceVersion(theOldResource, theNewResource);
 
 		if (dontTriggerSubscriptionWhenVersionsAreTheSame && resourceVersionsAreTheSame) {
@@ -115,16 +115,16 @@ public class SubscriptionMatcherInterceptor {
 	 * in the event where submission would fail.
 	 */
 	protected void processResourceModifiedEvent(
-		IBaseResource theNewResource,
-		ResourceModifiedMessage.OperationTypeEnum theOperationType,
-		RequestDetails theRequest) {
+			IBaseResource theNewResource,
+			ResourceModifiedMessage.OperationTypeEnum theOperationType,
+			RequestDetails theRequest) {
 
 		ResourceModifiedMessage msg = createResourceModifiedMessage(theNewResource, theOperationType, theRequest);
 
 		// Interceptor call: SUBSCRIPTION_RESOURCE_MODIFIED
 		HookParams params = new HookParams().add(ResourceModifiedMessage.class, msg);
 		boolean outcome = CompositeInterceptorBroadcaster.doCallHooks(
-			myInterceptorBroadcaster, theRequest, Pointcut.SUBSCRIPTION_RESOURCE_MODIFIED, params);
+				myInterceptorBroadcaster, theRequest, Pointcut.SUBSCRIPTION_RESOURCE_MODIFIED, params);
 
 		if (!outcome) {
 			return;
@@ -138,7 +138,8 @@ public class SubscriptionMatcherInterceptor {
 		// see {@link AsyncResourceModifiedProcessingSchedulerSvc}
 		// If enabled in {@link JpaStorageSettings} the subscription will be handled immediately.
 
-		if(myStorageSettings.isSubscriptionChangeQueuedImmediately() && theResourceModifiedMessage.hasPayloadType(myFhirContext, "Subscription")) {
+		if (myStorageSettings.isSubscriptionChangeQueuedImmediately()
+				&& theResourceModifiedMessage.hasPayloadType(myFhirContext, "Subscription")) {
 			try {
 				myResourceModifiedConsumer.submitResourceModified(theResourceModifiedMessage);
 				return;
@@ -146,27 +147,27 @@ public class SubscriptionMatcherInterceptor {
 				String payloadId = theResourceModifiedMessage.getPayloadId();
 				String subscriptionId = theResourceModifiedMessage.getSubscriptionId();
 				ourLog.error(
-					"Channel submission failed for resource with id {} matching subscription with id {}.  Further attempts will be performed at later time.",
-					payloadId,
-					subscriptionId,
-					exception);
+						"Channel submission failed for resource with id {} matching subscription with id {}.  Further attempts will be performed at later time.",
+						payloadId,
+						subscriptionId,
+						exception);
 			}
 		}
 
 		IPersistedResourceModifiedMessage persistedResourceModifiedMessage =
-			myResourceModifiedMessagePersistenceSvc.persist(theResourceModifiedMessage);
+				myResourceModifiedMessagePersistenceSvc.persist(theResourceModifiedMessage);
 	}
 
 	protected ResourceModifiedMessage createResourceModifiedMessage(
-		IBaseResource theNewResource,
-		BaseResourceMessage.OperationTypeEnum theOperationType,
-		RequestDetails theRequest) {
+			IBaseResource theNewResource,
+			BaseResourceMessage.OperationTypeEnum theOperationType,
+			RequestDetails theRequest) {
 		// Even though the resource is being written, the subscription will be interacting with it by effectively
 		// "reading" it so we set the RequestPartitionId as a read request
 		RequestPartitionId requestPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequestForRead(
-			theRequest, theNewResource.getIdElement());
+				theRequest, theNewResource.getIdElement());
 		return new ResourceModifiedMessage(
-			myFhirContext, theNewResource, theOperationType, theRequest, requestPartitionId);
+				myFhirContext, theNewResource, theOperationType, theRequest, requestPartitionId);
 	}
 
 	private boolean isSameResourceVersion(IBaseResource theOldResource, IBaseResource theNewResource) {
