@@ -10,8 +10,6 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class HapiHibernateDialectSettingsService implements Service {
 
-	private static final AtomicReference<Boolean> myLastTrimConditionalIdsFromPrimaryKeysForUnitTest =
-			new AtomicReference<>();
 	private boolean myTrimConditionalIdsFromPrimaryKeys;
 
 	public boolean isTrimConditionalIdsFromPrimaryKeys() {
@@ -20,7 +18,6 @@ public class HapiHibernateDialectSettingsService implements Service {
 
 	public void setTrimConditionalIdsFromPrimaryKeys(boolean theTrimConditionalIdsFromPrimaryKeys) {
 		myTrimConditionalIdsFromPrimaryKeys = theTrimConditionalIdsFromPrimaryKeys;
-		myLastTrimConditionalIdsFromPrimaryKeysForUnitTest.set(theTrimConditionalIdsFromPrimaryKeys);
 	}
 
 	@VisibleForTesting

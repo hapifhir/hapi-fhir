@@ -46,7 +46,7 @@ import java.io.Serializable;
 		uniqueConstraints = {
 			@UniqueConstraint(
 					name = "IDX_RESHISTTAG_TAGID",
-					columnNames = {"RES_VER_PID", "TAG_ID"}),
+					columnNames = {"PARTITION_ID", "RES_VER_PID", "TAG_ID"}),
 		},
 		indexes = {@Index(name = "IDX_RESHISTTAG_RESID", columnList = "RES_ID")})
 @IdClass(IdAndPartitionId.class)

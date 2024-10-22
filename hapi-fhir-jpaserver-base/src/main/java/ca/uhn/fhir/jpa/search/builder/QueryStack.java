@@ -45,6 +45,7 @@ import ca.uhn.fhir.jpa.search.builder.predicate.ComboUniqueSearchParameterPredic
 import ca.uhn.fhir.jpa.search.builder.predicate.CoordsPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.DatePredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ICanMakeMissingParamPredicate;
+import ca.uhn.fhir.jpa.search.builder.predicate.ISourcePredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.NumberPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ParsedLocationParam;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceHistoryPredicateBuilder;
@@ -1963,13 +1964,13 @@ public class QueryStack {
 				.findFirst();
 
 		if (isMissingSourceOptional.isPresent()) {
-			ResourceHistoryPredicateBuilder join =
+			ISourcePredicateBuilder join =
 					getSourcePredicateBuilder(theSourceJoinColumn, SelectQuery.JoinType.LEFT_OUTER);
 			orPredicates.add(join.createPredicateMissingSourceUri());
 			return toOrPredicate(orPredicates);
 		}
 		// for all other cases we use "INNER JOIN" to match search parameters
-		ResourceHistoryPredicateBuilder join =
+		ISourcePredicateBuilder join =
 				getSourcePredicateBuilder(theSourceJoinColumn, SelectQuery.JoinType.INNER);
 
 		for (IQueryParameterType nextParameter : theList) {
@@ -1990,8 +1991,16 @@ public class QueryStack {
 		return toOrPredicate(orPredicates);
 	}
 
-	private ResourceHistoryPredicateBuilder getSourcePredicateBuilder(
+	private ISourcePredicateBuilder getSourcePredicateBuilder(
 			@Nullable DbColumn[] theSourceJoinColumn, SelectQuery.JoinType theJoinType) {
+		if (myStorageSettings.isAccessMetaSourceInformationFromProvenanceTable()) {
+			return createOrReusePredicateBuilder(
+				PredicateBuilderTypeEnum.SOURCE,
+				theSourceJoinColumn,
+				Constants.PARAM_SOURCE,
+				() -> mySqlBuilder.addResourceHistoryProvenancePredicateBuilder(theSourceJoinColumn, theJoinType))
+				.getResult();
+		}
 		return createOrReusePredicateBuilder(
 						PredicateBuilderTypeEnum.SOURCE,
 						theSourceJoinColumn,

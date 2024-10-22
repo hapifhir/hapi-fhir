@@ -59,7 +59,7 @@ import java.util.Collection;
 		uniqueConstraints = {
 			@UniqueConstraint(
 					name = ResourceHistoryTable.IDX_RESVER_ID_VER,
-					columnNames = {"RES_ID", "RES_VER"})
+					columnNames = {"PARTITION_ID", "RES_ID", "RES_VER"})
 		},
 		indexes = {
 			@Index(name = "IDX_RESVER_TYPE_DATE", columnList = "RES_TYPE,RES_UPDATED,RES_ID"),

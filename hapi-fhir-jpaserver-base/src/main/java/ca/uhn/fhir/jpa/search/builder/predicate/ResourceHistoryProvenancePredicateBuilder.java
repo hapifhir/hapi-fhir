@@ -40,7 +40,7 @@ import java.util.List;
 import static ca.uhn.fhir.jpa.search.builder.predicate.StringPredicateBuilder.createLeftAndRightMatchLikeExpression;
 import static ca.uhn.fhir.jpa.search.builder.predicate.StringPredicateBuilder.createLeftMatchLikeExpression;
 
-public class ResourceHistoryPredicateBuilder extends BaseJoiningPredicateBuilder implements ISourcePredicateBuilder {
+public class ResourceHistoryProvenancePredicateBuilder extends BaseJoiningPredicateBuilder implements ISourcePredicateBuilder {
 
 	private final DbColumn myColumnSourceUri;
 	private final DbColumn myColumnRequestId;
@@ -49,10 +49,10 @@ public class ResourceHistoryPredicateBuilder extends BaseJoiningPredicateBuilder
 	/**
 	 * Constructor
 	 */
-	public ResourceHistoryPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder) {
-		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_RES_VER"));
+	public ResourceHistoryProvenancePredicateBuilder(SearchQueryBuilder theSearchSqlBuilder) {
+		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_RES_VER_PROV"));
 
-		myResourceIdColumn = getTable().addColumn("RES_ID");
+		myResourceIdColumn = getTable().addColumn("RES_PID");
 		myColumnSourceUri = getTable().addColumn("SOURCE_URI");
 		myColumnRequestId = getTable().addColumn("REQUEST_ID");
 	}

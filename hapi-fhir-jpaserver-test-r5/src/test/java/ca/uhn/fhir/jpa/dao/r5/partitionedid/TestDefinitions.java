@@ -21,12 +21,15 @@ import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.dao.PatientEverythingParameters;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.TestDaoSearch;
+import ca.uhn.fhir.jpa.dao.data.IResourceHistoryProvenanceDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeEverythingService;
 import ca.uhn.fhir.jpa.dao.r5.BaseJpaR5Test;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.entity.ResourceHistoryProvenanceEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -93,6 +96,7 @@ import java.util.stream.Collectors;
 import static ca.uhn.fhir.jpa.dao.r5.partitionedid.NonPartitionedIdPartitioningEnabledTest.PARTITION_1;
 import static ca.uhn.fhir.jpa.dao.r5.partitionedid.PartitionedIdTest.PARTITION_2;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_HAS;
+import static ca.uhn.fhir.rest.api.Constants.PARAM_SOURCE;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_TAG;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.hl7.fhir.instance.model.api.IAnyResource.SP_RES_ID;
@@ -101,6 +105,12 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+/**
+ * This class is a set of test that are run as {@literal @Nested} by several
+ * test classes. It verifies that we emit appropriate SQL for various
+ * scenarios including non-partitioned mode, partitioned mode, and
+ * partitioned mode with Partitioned IDs.
+ */
 abstract class TestDefinitions implements ITestDataBuilder {
 
 	private final PartitionSelectorInterceptor myPartitionSelectorInterceptor;
@@ -139,6 +149,10 @@ abstract class TestDefinitions implements ITestDataBuilder {
 	private IFhirSystemDao<Bundle, Meta> mySystemDao;
 	@Autowired
 	private IResourceTableDao myResourceTableDao;
+	@Autowired
+	private IResourceHistoryTableDao myResourceHistoryTableDao;
+	@Autowired
+	private IResourceHistoryProvenanceDao myResourceHistoryProvenanceTableDao;
 	@Autowired
 	private IResourceLinkDao myResourceLinkDao;
 	@Autowired
@@ -901,6 +915,66 @@ abstract class TestDefinitions implements ITestDataBuilder {
 	}
 
 	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	public void testSearch_Source(boolean theAccessMetaSourceInformationFromProvenanceTable) {
+		// Setup
+		myStorageSettings.setAccessMetaSourceInformationFromProvenanceTable(theAccessMetaSourceInformationFromProvenanceTable);
+		myStorageSettings.setStoreMetaSourceInformation(JpaStorageSettings.StoreMetaSourceInformationEnum.SOURCE_URI_AND_REQUEST_ID);
+		myPartitionSelectorInterceptor.setNextPartitionId(PARTITION_1);
+		long idFoo = createPatient(withActiveTrue(), withSource("http://foo")).getIdPartAsLong();
+		long idBar = createPatient(withActiveTrue(), withSource("http://bar")).getIdPartAsLong();
+
+		runInTransaction(()->{
+			ResourceTable table = myResourceTableDao.getReferenceById(JpaPid.fromId(idFoo, 1));
+			ResourceHistoryProvenanceEntity prov = new ResourceHistoryProvenanceEntity();
+			prov.setResourceTable(table);
+			prov.setResourceHistoryTable(myResourceHistoryTableDao.findForIdAndVersion(table.getResourceId(), 1));
+			prov.setSourceUri("http://foo");
+			myResourceHistoryProvenanceTableDao.save(prov);
+
+			table = myResourceTableDao.getReferenceById(JpaPid.fromId(idBar, 1));
+			prov = new ResourceHistoryProvenanceEntity();
+			prov.setResourceTable(table);
+			prov.setResourceHistoryTable(myResourceHistoryTableDao.findForIdAndVersion(table.getResourceId(), 1));
+			prov.setSourceUri("http://bar");
+			myResourceHistoryProvenanceTableDao.save(prov);
+		});
+
+		// Test
+		myCaptureQueriesListener.clear();
+		SearchParameterMap params = SearchParameterMap.newSynchronous();
+		params.add(PARAM_SOURCE, new TokenParam("http://foo"));
+		IBundleProvider outcome = myPatientDao.search(params, newRequest());
+		List<String> values = toUnqualifiedVersionlessIdValues(outcome);
+
+		// Verify
+		myCaptureQueriesListener.logSelectQueries();
+		assertThat(values).asList().containsExactly("Patient/" + idFoo);
+
+		if (myIncludePartitionIdsInPks) {
+			if (theAccessMetaSourceInformationFromProvenanceTable) {
+				assertEquals("SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_RESOURCE t0 INNER JOIN HFJ_RES_VER_PROV t1 ON ((t0.PARTITION_ID = t1.PARTITION_ID) AND (t0.RES_ID = t1.RES_PID)) WHERE (((t0.RES_TYPE = 'Patient') AND (t0.RES_DELETED_AT IS NULL)) AND (t1.SOURCE_URI = 'http://foo'))", getSelectSql(0));
+			} else {
+				assertEquals("SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_RESOURCE t0 INNER JOIN HFJ_RES_VER t1 ON ((t0.PARTITION_ID = t1.PARTITION_ID) AND (t0.RES_ID = t1.RES_ID)) WHERE (((t0.RES_TYPE = 'Patient') AND (t0.RES_DELETED_AT IS NULL)) AND (t1.SOURCE_URI = 'http://foo'))", getSelectSql(0));
+			}
+		} else if (myIncludePartitionIdsInSql) {
+			if (theAccessMetaSourceInformationFromProvenanceTable) {
+				assertEquals("SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_RESOURCE t0 INNER JOIN HFJ_RES_VER_PROV t1 ON (t0.RES_ID = t1.RES_PID) WHERE (((t0.RES_TYPE = 'Patient') AND (t0.RES_DELETED_AT IS NULL)) AND (t1.SOURCE_URI = 'http://foo'))", getSelectSql(0));
+			} else {
+				assertEquals("SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_RESOURCE t0 INNER JOIN HFJ_RES_VER t1 ON (t0.RES_ID = t1.RES_ID) WHERE (((t0.RES_TYPE = 'Patient') AND (t0.RES_DELETED_AT IS NULL)) AND (t1.SOURCE_URI = 'http://foo'))", getSelectSql(0));
+			}
+		} else {
+			if (theAccessMetaSourceInformationFromProvenanceTable) {
+				assertEquals("SELECT t0.RES_ID FROM HFJ_RESOURCE t0 INNER JOIN HFJ_RES_VER_PROV t1 ON (t0.RES_ID = t1.RES_PID) WHERE (((t0.RES_TYPE = 'Patient') AND (t0.RES_DELETED_AT IS NULL)) AND (t1.SOURCE_URI = 'http://foo'))", getSelectSql(0));
+			} else {
+				assertEquals("SELECT t0.RES_ID FROM HFJ_RESOURCE t0 INNER JOIN HFJ_RES_VER t1 ON (t0.RES_ID = t1.RES_ID) WHERE (((t0.RES_TYPE = 'Patient') AND (t0.RES_DELETED_AT IS NULL)) AND (t1.SOURCE_URI = 'http://foo'))", getSelectSql(0));
+			}
+		}
+
+		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
+	}
+
+		@ParameterizedTest
 	@ValueSource(booleans = {true, false})
 	public void testSearch_Tags_Versioned(boolean theNegate) {
 		// Setup

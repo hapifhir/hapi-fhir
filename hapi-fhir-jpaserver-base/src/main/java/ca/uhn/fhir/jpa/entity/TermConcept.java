@@ -23,7 +23,7 @@ import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.search.DeferConceptIndexingRoutingBinder;
 import ca.uhn.fhir.util.ValidateUtil;
-import ca.uhn.hapi.fhir.sql.hibernatesvc.ConditionalIdProperty;
+import ca.uhn.hapi.fhir.sql.hibernatesvc.PartitionedIdProperty;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import jakarta.persistence.Column;
@@ -590,7 +590,7 @@ public class TermConcept implements Serializable {
 		@GenericField(projectable = Projectable.YES)
 		private Long myId;
 
-		@ConditionalIdProperty
+		@PartitionedIdProperty
 		@Column(name = PartitionablePartitionId.PARTITION_ID, nullable = false)
 		private Integer myPartitionIdValue;
 

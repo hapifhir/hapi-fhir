@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.search.builder.predicate.NumberPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.QuantityNormalizedPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.QuantityPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceHistoryPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.ResourceHistoryProvenancePredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceIdPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceLinkPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceTablePredicateBuilder;
@@ -111,6 +112,10 @@ public class SqlObjectFactory {
 
 	public ResourceHistoryPredicateBuilder newResourceHistoryPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder) {
 		return myApplicationContext.getBean(ResourceHistoryPredicateBuilder.class, theSearchSqlBuilder);
+	}
+
+	public ResourceHistoryProvenancePredicateBuilder newResourceHistoryProvenancePredicateBuilder(SearchQueryBuilder theSearchSqlBuilder) {
+		return myApplicationContext.getBean(ResourceHistoryProvenancePredicateBuilder.class, theSearchSqlBuilder);
 	}
 
 	public SearchQueryExecutor newSearchQueryExecutor(GeneratedSql theGeneratedSql, Integer theMaxResultsToFetch) {

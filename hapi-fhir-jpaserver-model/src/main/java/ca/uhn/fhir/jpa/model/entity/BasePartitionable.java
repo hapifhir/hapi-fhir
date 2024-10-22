@@ -19,7 +19,7 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
-import ca.uhn.hapi.fhir.sql.hibernatesvc.ConditionalIdProperty;
+import ca.uhn.hapi.fhir.sql.hibernatesvc.PartitionedIdProperty;
 import jakarta.annotation.Nonnull;
 import jakarta.persistence.Column;
 import jakarta.persistence.Id;
@@ -38,7 +38,7 @@ public abstract class BasePartitionable implements Serializable {
 
 	@SuppressWarnings("unused")
 	@Id
-	@ConditionalIdProperty
+	@PartitionedIdProperty
 	@Column(name = PartitionablePartitionId.PARTITION_ID)
 	Integer myPartitionIdValue;
 

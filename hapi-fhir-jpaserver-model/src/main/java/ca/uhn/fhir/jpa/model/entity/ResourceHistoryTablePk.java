@@ -20,7 +20,7 @@
 package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.rest.api.server.storage.IResourceVersionPersistentId;
-import ca.uhn.hapi.fhir.sql.hibernatesvc.ConditionalIdProperty;
+import ca.uhn.hapi.fhir.sql.hibernatesvc.PartitionedIdProperty;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.GeneratedValue;
@@ -40,7 +40,7 @@ public class ResourceHistoryTablePk implements IResourceVersionPersistentId, Ser
 	@Column(name = "PID")
 	private Long myVersionId;
 
-	@ConditionalIdProperty
+	@PartitionedIdProperty
 	@Column(name = PartitionablePartitionId.PARTITION_ID)
 	private Integer myPartitionIdValue;
 

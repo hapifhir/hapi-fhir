@@ -51,7 +51,7 @@ import org.hibernate.annotations.GenericGenerator;
 		uniqueConstraints = {
 			@UniqueConstraint(
 					name = "IDX_RESTAG_TAGID",
-					columnNames = {"RES_ID", "TAG_ID"})
+					columnNames = {"PARTITION_ID", "RES_ID", "TAG_ID"})
 		})
 @IdClass(IdAndPartitionId.class)
 public class ResourceTag extends BaseTag {

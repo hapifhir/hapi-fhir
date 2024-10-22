@@ -1,6 +1,6 @@
 package ca.uhn.fhir.tinder.ddl.test.pks;
 
-import ca.uhn.hapi.fhir.sql.hibernatesvc.ConditionalIdProperty;
+import ca.uhn.hapi.fhir.sql.hibernatesvc.PartitionedIdProperty;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ForeignKey;
@@ -27,7 +27,7 @@ public class EntityWithComplexIdChild {
 
 	@Column(name = "PARTITION_ID")
 	@Id
-	@ConditionalIdProperty
+	@PartitionedIdProperty
 	private Integer myPartitionId;
 
 	@ManyToOne

@@ -22,7 +22,7 @@ package ca.uhn.fhir.jpa.model.dao;
 import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
-import ca.uhn.hapi.fhir.sql.hibernatesvc.ConditionalIdProperty;
+import ca.uhn.hapi.fhir.sql.hibernatesvc.PartitionedIdProperty;
 import jakarta.annotation.Nonnull;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
@@ -57,7 +57,7 @@ public class JpaPid extends BaseResourcePersistentId<Long> implements Comparable
 	@GenericField(projectable = Projectable.YES)
 	private Long myId;
 
-	@ConditionalIdProperty
+	@PartitionedIdProperty
 	@Column(name = PartitionablePartitionId.PARTITION_ID, nullable = false)
 	private Integer myPartitionIdValue;
 

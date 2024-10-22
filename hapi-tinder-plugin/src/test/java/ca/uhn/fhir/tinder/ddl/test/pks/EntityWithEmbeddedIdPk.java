@@ -1,6 +1,6 @@
 package ca.uhn.fhir.tinder.ddl.test.pks;
 
-import ca.uhn.hapi.fhir.sql.hibernatesvc.ConditionalIdProperty;
+import ca.uhn.hapi.fhir.sql.hibernatesvc.PartitionedIdProperty;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.GeneratedValue;
@@ -17,7 +17,7 @@ public class EntityWithEmbeddedIdPk {
 	private Long myId;
 
 	@Column(name = "PARTITION_ID")
-	@ConditionalIdProperty
+	@PartitionedIdProperty
 	private Integer myPartitionId;
 
 }

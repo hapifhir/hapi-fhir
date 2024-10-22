@@ -20,7 +20,7 @@
 package ca.uhn.fhir.jpa.entity;
 
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
-import ca.uhn.hapi.fhir.sql.hibernatesvc.ConditionalIdProperty;
+import ca.uhn.hapi.fhir.sql.hibernatesvc.PartitionedIdProperty;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.EmbeddedId;
@@ -271,7 +271,7 @@ public class TermConceptParentChildLink implements Serializable {
 		@Column(name = "PID")
 		private Long myId;
 
-		@ConditionalIdProperty
+		@PartitionedIdProperty
 		@Column(name = PartitionablePartitionId.PARTITION_ID, nullable = false)
 		private Integer myPartitionIdValue;
 
