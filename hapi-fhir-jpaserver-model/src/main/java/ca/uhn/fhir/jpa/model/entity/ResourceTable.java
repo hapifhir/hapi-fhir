@@ -88,7 +88,7 @@ import static ca.uhn.fhir.jpa.model.entity.ResourceTable.IDX_RES_TYPE_FHIR_ID;
 		uniqueConstraints = {
 			@UniqueConstraint(
 					name = IDX_RES_TYPE_FHIR_ID,
-					columnNames = {"RES_TYPE", "FHIR_ID"})
+					columnNames = {"PARTITON_ID", "RES_TYPE", "FHIR_ID"})
 		},
 		indexes = {
 			// Do not reuse previously used index name: IDX_INDEXSTATUS, IDX_RES_TYPE

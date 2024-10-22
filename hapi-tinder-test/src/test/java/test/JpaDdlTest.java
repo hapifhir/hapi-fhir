@@ -42,7 +42,16 @@ public class JpaDdlTest {
 		// Verify
 		List<String> sqlStatements = loadDdlAndExtractStatements("target/schema/postgres.sql");
 
-		String sql = findCreateTable(sqlStatements, "HFJ_RES_VER");
+		String sql = findCreateTable(sqlStatements, "HFJ_RESOURCE");
+		if (theTrimConditionalIdsFromPrimaryKeys) {
+			assertThat(sql).contains("primary key (RES_ID)");
+			assertThat(sql).contains("constraint IDX_RES_TYPE_FHIR_ID unique (RES_TYPE, FHIR_ID)");
+		} else {
+			assertThat(sql).contains("primary key (PARTITION_ID, RES_ID)");
+			assertThat(sql).contains("constraint IDX_RES_TYPE_FHIR_ID unique (PARTITION_ID, RES_TYPE, FHIR_ID)");
+		}
+
+		sql = findCreateTable(sqlStatements, "HFJ_RES_VER");
 		if (theTrimConditionalIdsFromPrimaryKeys) {
 			assertThat(sql).contains("primary key (PID)");
 			assertThat(sql).contains("constraint IDX_RESVER_ID_VER unique (RES_ID, RES_VER)");
