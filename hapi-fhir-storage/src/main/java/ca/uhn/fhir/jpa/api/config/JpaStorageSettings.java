@@ -380,6 +380,14 @@ public class JpaStorageSettings extends StorageSettings {
 	private boolean myIncludeHashIdentityForTokenSearches = false;
 
 	/**
+	 * If this is enabled (default is {@literal false}), changes to Subscription resource would be put on queue immediately.
+	 * Reducing delay between creation of the Subscription and Activation.
+	 *
+	 * @since 7.6.0
+	 */
+	private boolean mySubscriptionChangeQueuedImmediately = false;
+
+	/**
 	 * Constructor
 	 */
 	public JpaStorageSettings() {
@@ -2548,6 +2556,26 @@ public class JpaStorageSettings extends StorageSettings {
 
 	public void setRestDeleteByUrlResourceIdThreshold(long theRestDeleteByUrlResourceIdThreshold) {
 		myRestDeleteByUrlResourceIdThreshold = theRestDeleteByUrlResourceIdThreshold;
+	}
+
+	/**
+	 * If this is enabled (default is {@literal false}), changes to Subscription resource would be put on queue immediately.
+	 * Reducing delay between creation of the Subscription and Activation.
+	 *
+	 * @since 7.6.0
+	 */
+	public boolean isSubscriptionChangeQueuedImmediately() {
+		return mySubscriptionChangeQueuedImmediately;
+	}
+
+	/**
+	 * If this is enabled (default is {@literal false}), changes to Subscription resource would be put on queue immediately.
+	 * Reducing delay between creation of the Subscription and Activation.
+	 *
+	 * @since 7.6.0
+	 */
+	public void setSubscriptionChangeQueuedImmediately(boolean theSubscriptionChangeQueuedImmediately) {
+		mySubscriptionChangeQueuedImmediately = theSubscriptionChangeQueuedImmediately;
 	}
 
 	public enum StoreMetaSourceInformationEnum {

@@ -26,6 +26,7 @@ import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.model.entity.IPersistedResourceModifiedMessage;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
@@ -67,6 +68,9 @@ public class SubscriptionMatcherInterceptor {
 
 	@Autowired
 	private IResourceModifiedMessagePersistenceSvc myResourceModifiedMessagePersistenceSvc;
+
+	@Autowired
+	private JpaStorageSettings myStorageSettings;
 
 	@Autowired
 	private IResourceModifiedConsumer myResourceModifiedConsumer;
@@ -130,26 +134,27 @@ public class SubscriptionMatcherInterceptor {
 	}
 
 	protected void processResourceModifiedMessage(ResourceModifiedMessage theResourceModifiedMessage) {
-		// Attempt to submit immediately or persist the message for async submission to the processing pipeline. see
-		// {@link
-		// AsyncResourceModifiedProcessingSchedulerSvc}
-		try {
-			myResourceModifiedConsumer.submitResourceModified(theResourceModifiedMessage);
-		} catch (MessageDeliveryException exception) {
-			String payloadId = "[unknown]";
-			String subscriptionId = "[unknown]";
-			if (theResourceModifiedMessage != null) {
-				payloadId = theResourceModifiedMessage.getPayloadId();
-				subscriptionId = theResourceModifiedMessage.getSubscriptionId();
+		// Persist the message for async submission to the processing pipeline.
+		// see {@link AsyncResourceModifiedProcessingSchedulerSvc}
+		// If enabled in {@link JpaStorageSettings} the subscription will be handled immediately.
+
+		if(myStorageSettings.isSubscriptionChangeQueuedImmediately() && theResourceModifiedMessage.hasPayloadType(myFhirContext, "Subscription")) {
+			try {
+				myResourceModifiedConsumer.submitResourceModified(theResourceModifiedMessage);
+				return;
+			} catch (MessageDeliveryException exception) {
+				String payloadId = theResourceModifiedMessage.getPayloadId();
+				String subscriptionId = theResourceModifiedMessage.getSubscriptionId();
+				ourLog.error(
+					"Channel submission failed for resource with id {} matching subscription with id {}.  Further attempts will be performed at later time.",
+					payloadId,
+					subscriptionId,
+					exception);
 			}
-			ourLog.error(
-				"Channel submission failed for resource with id {} matching subscription with id {}.  Further attempts will be performed at later time.",
-				payloadId,
-				subscriptionId,
-				exception);
-			IPersistedResourceModifiedMessage persistedResourceModifiedMessage =
-				myResourceModifiedMessagePersistenceSvc.persist(theResourceModifiedMessage);
 		}
+
+		IPersistedResourceModifiedMessage persistedResourceModifiedMessage =
+			myResourceModifiedMessagePersistenceSvc.persist(theResourceModifiedMessage);
 	}
 
 	protected ResourceModifiedMessage createResourceModifiedMessage(
