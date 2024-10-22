@@ -489,8 +489,13 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 			}
 
 			if (!Constants.INCLUDE_STAR.equals(paramName)
-					&& mySearchParamRegistry.getActiveSearchParam(paramType, paramName) == null) {
-				List<String> validNames = mySearchParamRegistry.getActiveSearchParams(paramType).values().stream()
+					&& mySearchParamRegistry.getActiveSearchParam(
+									paramType, paramName, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH)
+							== null) {
+				List<String> validNames = mySearchParamRegistry
+						.getActiveSearchParams(paramType, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH)
+						.values()
+						.stream()
 						.filter(t -> t.getParamType() == RestSearchParameterTypeEnum.REFERENCE)
 						.map(t -> UrlUtil.sanitizeUrlPart(t.getName()))
 						.sorted()

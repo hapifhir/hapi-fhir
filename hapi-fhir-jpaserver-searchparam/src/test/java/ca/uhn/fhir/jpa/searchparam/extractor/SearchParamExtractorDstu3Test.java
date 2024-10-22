@@ -263,7 +263,7 @@ public class SearchParamExtractorDstu3Test {
 		}
 
 		@Override
-		public RuntimeSearchParam getActiveSearchParam(String theResourceName, String theParamName) {
+		public RuntimeSearchParam getActiveSearchParam(String theResourceName, String theParamName, SearchParamLookupContextEnum theContext) {
 			throw new UnsupportedOperationException();
 		}
 
@@ -278,7 +278,7 @@ public class SearchParamExtractorDstu3Test {
 		}
 
 		@Override
-		public ResourceSearchParams getActiveSearchParams(String theResourceName) {
+		public ResourceSearchParams getActiveSearchParams(String theResourceName, SearchParamLookupContextEnum theContext) {
 			RuntimeResourceDefinition nextResDef = ourCtx.getResourceDefinition(theResourceName);
 			ResourceSearchParams retval = new ResourceSearchParams(theResourceName);
 			for (RuntimeSearchParam nextSp : nextResDef.getSearchParams()) {
@@ -291,23 +291,23 @@ public class SearchParamExtractorDstu3Test {
 		}
 
 		@Override
-		public List<RuntimeSearchParam> getActiveComboSearchParams(String theResourceName, Set<String> theParamNames) {
+		public List<RuntimeSearchParam> getActiveComboSearchParams(String theResourceName, Set<String> theParamNames, SearchParamLookupContextEnum theContext) {
 			throw new UnsupportedOperationException();
 		}
 
 		@Nullable
 		@Override
-		public RuntimeSearchParam getActiveSearchParamByUrl(String theUrl) {
+		public RuntimeSearchParam getActiveSearchParamByUrl(String theUrl, SearchParamLookupContextEnum theContext) {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
-		public List<RuntimeSearchParam> getActiveComboSearchParams(String theResourceName) {
+		public List<RuntimeSearchParam> getActiveComboSearchParams(String theResourceName, SearchParamLookupContextEnum theContext) {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
-		public List<RuntimeSearchParam> getActiveComboSearchParams(String theResourceName, ComboSearchParamType theParamType) {
+		public List<RuntimeSearchParam> getActiveComboSearchParams(String theResourceName, ComboSearchParamType theParamType, SearchParamLookupContextEnum theContext) {
 			throw new UnsupportedOperationException(Msg.code(2210));
 		}
 
