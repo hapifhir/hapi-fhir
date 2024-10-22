@@ -175,7 +175,8 @@ public class PartitionedIdMappingContributor implements org.hibernate.boot.spi.A
 		}
 	}
 
-	private void filterPartitionedIdsFromIdClassPks(ClassLoaderService theClassLoaderService, Map.Entry<String, PersistentClass> nextEntry) {
+	private void filterPartitionedIdsFromIdClassPks(
+			ClassLoaderService theClassLoaderService, Map.Entry<String, PersistentClass> nextEntry) {
 		IdentitySet<Column> idRemovedColumns = new IdentitySet<>();
 		Set<String> idRemovedColumnNames = new HashSet<>();
 		Set<String> idRemovedProperties = new HashSet<>();
@@ -200,7 +201,7 @@ public class PartitionedIdMappingContributor implements org.hibernate.boot.spi.A
 			}
 			if (field == null) {
 				throw new ConfigurationException(
-					"Failed to find field " + fieldName + " on type: " + entityType.getName());
+						"Failed to find field " + fieldName + " on type: " + entityType.getName());
 			}
 
 			PartitionedIdProperty remove = field.getAnnotation(PartitionedIdProperty.class);
@@ -208,11 +209,11 @@ public class PartitionedIdMappingContributor implements org.hibernate.boot.spi.A
 				Property removedProperty = properties.remove(i);
 				idRemovedColumns.addAll(removedProperty.getColumns());
 				idRemovedColumnNames.addAll(removedProperty.getColumns().stream()
-					.map(Column::getName)
-					.collect(Collectors.toSet()));
+						.map(Column::getName)
+						.collect(Collectors.toSet()));
 				removedProperty.getColumns().stream()
-					.map(theColumn -> table.getName() + "#" + theColumn.getName())
-					.forEach(myQualifiedIdRemovedColumnNames::add);
+						.map(theColumn -> table.getName() + "#" + theColumn.getName())
+						.forEach(myQualifiedIdRemovedColumnNames::add);
 				idRemovedProperties.add(removedProperty.getName());
 				i--;
 
@@ -269,8 +270,8 @@ public class PartitionedIdMappingContributor implements org.hibernate.boot.spi.A
 
 				PrimaryKey primaryKey = c.getTable().getPrimaryKey();
 				primaryKey
-					.getColumns()
-					.removeIf(t -> myQualifiedIdRemovedColumnNames.contains(tableName + "#" + t.getName()));
+						.getColumns()
+						.removeIf(t -> myQualifiedIdRemovedColumnNames.contains(tableName + "#" + t.getName()));
 
 				for (Column nextColumn : c.getTable().getColumns()) {
 					if (myQualifiedIdRemovedColumnNames.contains(tableName + "#" + nextColumn.getName())) {
@@ -309,7 +310,12 @@ public class PartitionedIdMappingContributor implements org.hibernate.boot.spi.A
 		}
 	}
 
-	private void filterPartitionedIdsFromLocalFks(ClassLoaderService theClassLoaderService, InFlightMetadataCollector theMetadata, Map.Entry<String, PersistentClass> nextEntry, ForeignKey foreignKey, Table table) {
+	private void filterPartitionedIdsFromLocalFks(
+			ClassLoaderService theClassLoaderService,
+			InFlightMetadataCollector theMetadata,
+			Map.Entry<String, PersistentClass> nextEntry,
+			ForeignKey foreignKey,
+			Table table) {
 		Value value = foreignKey.getColumn(0).getValue();
 		if (value instanceof ToOne) {
 			ToOne manyToOne = (ToOne) value;
@@ -327,8 +333,7 @@ public class PartitionedIdMappingContributor implements org.hibernate.boot.spi.A
 			removeColumns(manyToOne.getColumns(), t1 -> columnNamesToRemoveFromFks.contains(t1.getName()));
 			removeColumns(foreignKey.getColumns(), t1 -> columnNamesToRemoveFromFks.contains(t1.getName()));
 
-			columnNamesToRemoveFromFks.forEach(
-					t -> myQualifiedIdRemovedColumnNames.add(table.getName() + "#" + t));
+			columnNamesToRemoveFromFks.forEach(t -> myQualifiedIdRemovedColumnNames.add(table.getName() + "#" + t));
 
 		} else {
 
@@ -341,8 +346,8 @@ public class PartitionedIdMappingContributor implements org.hibernate.boot.spi.A
 
 	private void filterPartitionedIdsFromUniqueConstraints(UniqueKey uniqueKey, Table table) {
 		uniqueKey
-			.getColumns()
-			.removeIf(t -> myQualifiedIdRemovedColumnNames.contains(table.getName() + "#" + t.getName()));
+				.getColumns()
+				.removeIf(t -> myQualifiedIdRemovedColumnNames.contains(table.getName() + "#" + t.getName()));
 	}
 
 	private void filterPartitionedIdsFromRemoteFks(PersistentClass entityPersistentClass) {
@@ -355,20 +360,17 @@ public class PartitionedIdMappingContributor implements org.hibernate.boot.spi.A
 					DependantValue dependantValue = (DependantValue) propertyKey;
 
 					dependantValue
-						.getColumns()
-						.removeIf(t -> myQualifiedIdRemovedColumnNames.contains(
-							propertyValueBag.getCollectionTable().getName() + "#" + t.getName()));
+							.getColumns()
+							.removeIf(t -> myQualifiedIdRemovedColumnNames.contains(
+									propertyValueBag.getCollectionTable().getName() + "#" + t.getName()));
 				}
 			} else if (propertyValue instanceof Component) {
 				// Adjust properties, which accounts for things like @Nested properties with
 				// filtered subproperties
 				Component component = (Component) propertyValue;
-				Set<String> columnNames = component.getColumns().stream()
-					.map(Column::getName)
-					.collect(Collectors.toSet());
-				component
-					.getSelectables()
-					.removeIf(t -> (t instanceof Column) && !columnNames.contains(t.getText()));
+				Set<String> columnNames =
+						component.getColumns().stream().map(Column::getName).collect(Collectors.toSet());
+				component.getSelectables().removeIf(t -> (t instanceof Column) && !columnNames.contains(t.getText()));
 			}
 		}
 	}

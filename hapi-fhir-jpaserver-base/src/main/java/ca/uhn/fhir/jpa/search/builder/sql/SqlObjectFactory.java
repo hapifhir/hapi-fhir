@@ -114,7 +114,8 @@ public class SqlObjectFactory {
 		return myApplicationContext.getBean(ResourceHistoryPredicateBuilder.class, theSearchSqlBuilder);
 	}
 
-	public ResourceHistoryProvenancePredicateBuilder newResourceHistoryProvenancePredicateBuilder(SearchQueryBuilder theSearchSqlBuilder) {
+	public ResourceHistoryProvenancePredicateBuilder newResourceHistoryProvenancePredicateBuilder(
+			SearchQueryBuilder theSearchSqlBuilder) {
 		return myApplicationContext.getBean(ResourceHistoryProvenancePredicateBuilder.class, theSearchSqlBuilder);
 	}
 

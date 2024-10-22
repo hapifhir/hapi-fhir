@@ -12,5 +12,6 @@ public interface ISourcePredicateBuilder {
 
 	Condition createPredicateRequestId(String theRequestId);
 
-	Condition createPredicateSourceUriWithModifiers(IQueryParameterType theQueryParameter, JpaStorageSettings theStorageSetting, String theSourceUri);
+	Condition createPredicateSourceUriWithModifiers(
+			IQueryParameterType theQueryParameter, JpaStorageSettings theStorageSetting, String theSourceUri);
 }

@@ -48,7 +48,6 @@ import ca.uhn.fhir.jpa.search.builder.predicate.ICanMakeMissingParamPredicate;
 import ca.uhn.fhir.jpa.search.builder.predicate.ISourcePredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.NumberPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ParsedLocationParam;
-import ca.uhn.fhir.jpa.search.builder.predicate.ResourceHistoryPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceIdPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceLinkPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceTablePredicateBuilder;
@@ -1970,8 +1969,7 @@ public class QueryStack {
 			return toOrPredicate(orPredicates);
 		}
 		// for all other cases we use "INNER JOIN" to match search parameters
-		ISourcePredicateBuilder join =
-				getSourcePredicateBuilder(theSourceJoinColumn, SelectQuery.JoinType.INNER);
+		ISourcePredicateBuilder join = getSourcePredicateBuilder(theSourceJoinColumn, SelectQuery.JoinType.INNER);
 
 		for (IQueryParameterType nextParameter : theList) {
 			SourceParam sourceParameter = new SourceParam(nextParameter.getValueAsQueryToken(myFhirContext));
@@ -1995,11 +1993,12 @@ public class QueryStack {
 			@Nullable DbColumn[] theSourceJoinColumn, SelectQuery.JoinType theJoinType) {
 		if (myStorageSettings.isAccessMetaSourceInformationFromProvenanceTable()) {
 			return createOrReusePredicateBuilder(
-				PredicateBuilderTypeEnum.SOURCE,
-				theSourceJoinColumn,
-				Constants.PARAM_SOURCE,
-				() -> mySqlBuilder.addResourceHistoryProvenancePredicateBuilder(theSourceJoinColumn, theJoinType))
-				.getResult();
+							PredicateBuilderTypeEnum.SOURCE,
+							theSourceJoinColumn,
+							Constants.PARAM_SOURCE,
+							() -> mySqlBuilder.addResourceHistoryProvenancePredicateBuilder(
+									theSourceJoinColumn, theJoinType))
+					.getResult();
 		}
 		return createOrReusePredicateBuilder(
 						PredicateBuilderTypeEnum.SOURCE,

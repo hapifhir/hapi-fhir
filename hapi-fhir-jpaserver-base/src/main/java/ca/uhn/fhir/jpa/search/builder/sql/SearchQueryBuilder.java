@@ -285,7 +285,8 @@ public class SearchQueryBuilder {
 	 */
 	public ResourceHistoryProvenancePredicateBuilder addResourceHistoryProvenancePredicateBuilder(
 			@Nullable DbColumn[] theSourceJoinColumn, SelectQuery.JoinType theJoinType) {
-		ResourceHistoryProvenancePredicateBuilder retVal = mySqlBuilderFactory.newResourceHistoryProvenancePredicateBuilder(this);
+		ResourceHistoryProvenancePredicateBuilder retVal =
+				mySqlBuilderFactory.newResourceHistoryProvenancePredicateBuilder(this);
 		addTable(retVal, theSourceJoinColumn, theJoinType);
 		return retVal;
 	}

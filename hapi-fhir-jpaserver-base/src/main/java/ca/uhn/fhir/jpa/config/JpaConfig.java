@@ -688,7 +688,8 @@ public class JpaConfig {
 
 	@Bean
 	@Scope("prototype")
-	public ResourceHistoryProvenancePredicateBuilder newResourceHistoryProvenancePredicateBuilder(SearchQueryBuilder theSearchBuilder) {
+	public ResourceHistoryProvenancePredicateBuilder newResourceHistoryProvenancePredicateBuilder(
+			SearchQueryBuilder theSearchBuilder) {
 		return new ResourceHistoryProvenancePredicateBuilder(theSearchBuilder);
 	}
 

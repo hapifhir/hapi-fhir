@@ -16,5 +16,4 @@ public class HapiHibernateDialectSettingsService implements Service {
 	public void setTrimConditionalIdsFromPrimaryKeys(boolean theTrimConditionalIdsFromPrimaryKeys) {
 		myTrimConditionalIdsFromPrimaryKeys = theTrimConditionalIdsFromPrimaryKeys;
 	}
-
 }

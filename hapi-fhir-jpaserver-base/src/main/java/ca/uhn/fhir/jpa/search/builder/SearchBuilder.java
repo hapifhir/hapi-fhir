@@ -1589,19 +1589,19 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	}
 
 	private void loadIncludesMatchSpecific(
-		Include nextInclude,
-		FhirContext fhirContext,
-		String findPidFieldName,
-		String findPartitionFieldName,
-		String findVersionFieldName,
-		String searchPidFieldName,
-		String searchPartitionFieldName,
-		boolean reverseMode,
-		List<JpaPid> nextRoundMatches,
-		EntityManager entityManager,
-		Integer maxCount,
-		HashSet<JpaPid> pidsToInclude,
-		RequestDetails theRequest) {
+			Include nextInclude,
+			FhirContext fhirContext,
+			String findPidFieldName,
+			String findPartitionFieldName,
+			String findVersionFieldName,
+			String searchPidFieldName,
+			String searchPartitionFieldName,
+			boolean reverseMode,
+			List<JpaPid> nextRoundMatches,
+			EntityManager entityManager,
+			Integer maxCount,
+			HashSet<JpaPid> pidsToInclude,
+			RequestDetails theRequest) {
 		List<String> paths;
 
 		// Start replace
@@ -1899,7 +1899,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			boolean theReverse) {
 		// FIXME: what calls this? Need a keep test? Should include partition ID?
 		StringBuilder sqlBuilder;
-		CanonicalUrlTargets canonicalUrlTargets = calculateIndexUriIdentityHashesForResourceTypes(theRequestDetails, null, theReverse);
+		CanonicalUrlTargets canonicalUrlTargets =
+				calculateIndexUriIdentityHashesForResourceTypes(theRequestDetails, null, theReverse);
 		List<List<String>> canonicalUrlPartitions = ListUtils.partition(
 				List.copyOf(theCanonicalUrls), getMaximumPageSize() - canonicalUrlTargets.myHashIdentityValues.size());
 
@@ -1909,7 +1910,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			sqlBuilder.append("i.myPartitionIdValue, ");
 		}
 		sqlBuilder.append("i.myResourcePid ");
-
 
 		sqlBuilder.append("FROM ResourceIndexedSearchParamUri i ");
 		sqlBuilder.append("WHERE i.myHashIdentity IN (:hash_identity) ");
@@ -1973,7 +1973,10 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 	@Nonnull
 	private Pair<String, Map<String, Object>> buildCanonicalUrlQuery(
-		String theVersionFieldName, Set<String> theTargetResourceTypes, boolean theReverse, RequestDetails theRequest) {
+			String theVersionFieldName,
+			Set<String> theTargetResourceTypes,
+			boolean theReverse,
+			RequestDetails theRequest) {
 		String fieldsToLoadFromSpidxUriTable = theReverse ? "r.src_resource_id" : "rUri.res_id";
 		if (theVersionFieldName != null) {
 			// canonical-uri references aren't versioned, but we need to match the column count for the UNION
@@ -1990,7 +1993,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 		// The logical join will be by hfj_spidx_uri on sp_name='uri' and sp_uri=target_resource_url.
 		// But sp_name isn't indexed, so we use hash_identity instead.
-		CanonicalUrlTargets canonicalUrlTargets = calculateIndexUriIdentityHashesForResourceTypes(theRequest, theTargetResourceTypes, theReverse);
+		CanonicalUrlTargets canonicalUrlTargets =
+				calculateIndexUriIdentityHashesForResourceTypes(theRequest, theTargetResourceTypes, theReverse);
 
 		Map<String, Object> canonicalUriQueryParams = new HashMap<>();
 		StringBuilder canonicalUrlQuery = new StringBuilder();
@@ -2009,7 +2013,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		if (canonicalUrlTargets.myHashIdentityValues.size() == 1) {
 			canonicalUrlQuery.append("rUri.hash_identity = :uri_identity_hash");
 			canonicalUriQueryParams.put(
-					"uri_identity_hash", canonicalUrlTargets.myHashIdentityValues.iterator().next());
+					"uri_identity_hash",
+					canonicalUrlTargets.myHashIdentityValues.iterator().next());
 		} else {
 			canonicalUrlQuery.append("rUri.hash_identity in (:uri_identity_hashes)");
 			canonicalUriQueryParams.put("uri_identity_hashes", canonicalUrlTargets.myHashIdentityValues);
@@ -2040,7 +2045,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	}
 
 	@Nonnull
-	CanonicalUrlTargets calculateIndexUriIdentityHashesForResourceTypes(RequestDetails theRequestDetails, Set<String> theTargetResourceTypes, boolean theReverse) {
+	CanonicalUrlTargets calculateIndexUriIdentityHashesForResourceTypes(
+			RequestDetails theRequestDetails, Set<String> theTargetResourceTypes, boolean theReverse) {
 		Set<String> targetResourceTypes = theTargetResourceTypes;
 		if (targetResourceTypes == null) {
 			/*
@@ -2112,7 +2118,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 			RequestPartitionId readPartition;
 			if (myPartitionSettings.isPartitioningEnabled()) {
-				readPartition = myPartitionHelperSvc.determineReadPartitionForRequestForSearchType(theRequestDetails, type);
+				readPartition =
+						myPartitionHelperSvc.determineReadPartitionForRequestForSearchType(theRequestDetails, type);
 			} else {
 				readPartition = RequestPartitionId.defaultPartition();
 			}
@@ -2121,7 +2128,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			}
 
 			Long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(
-				myPartitionSettings, readPartition, type, "url");
+					myPartitionSettings, readPartition, type, "url");
 			hashIdentityValues.add(hashIdentity);
 		}
 
@@ -2132,6 +2139,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 		@Nonnull
 		final Set<Long> myHashIdentityValues;
+
 		@Nonnull
 		final Set<Integer> myPartitionIds;
 
