@@ -85,12 +85,12 @@ public class OperationParameter implements IParameter {
 	private Class<? extends Collection> myInnerCollectionType;
 
 	private int myMax;
-	private int myMin;
+	private final int myMin;
 	private Class<?> myParameterType;
 	private String myParamType;
 	private SearchParameter mySearchParameterBinding;
-	private String myDescription;
-	private List<String> myExampleValues;
+	private final String myDescription;
+	private final List<String> myExampleValues;
 
 	OperationParameter(
 			FhirContext theCtx,
@@ -117,7 +117,7 @@ public class OperationParameter implements IParameter {
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	private void addValueToList(List<Object> matchingParamValues, Object values) {
 		if (values != null) {
-			if (BaseAndListParam.class.isAssignableFrom(myParameterType) && matchingParamValues.size() > 0) {
+			if (BaseAndListParam.class.isAssignableFrom(myParameterType) && !matchingParamValues.isEmpty()) {
 				BaseAndListParam existing = (BaseAndListParam<?>) matchingParamValues.get(0);
 				BaseAndListParam<?> newAndList = (BaseAndListParam<?>) values;
 				for (IQueryParameterOr nextAnd : newAndList.getValuesAsQueryTokens()) {
@@ -258,7 +258,7 @@ public class OperationParameter implements IParameter {
 		}
 	}
 
-	public OperationParameter setConverter(IOperationParamConverter theConverter) {
+	OperationParameter setConverter(IOperationParamConverter theConverter) {
 		myConverter = theConverter;
 		return this;
 	}
@@ -302,7 +302,7 @@ public class OperationParameter implements IParameter {
 			RequestDetails theRequest, List<Object> matchingParamValues) {
 		if (mySearchParameterBinding != null) {
 
-			List<QualifiedParamList> params = new ArrayList<QualifiedParamList>();
+			List<QualifiedParamList> params = new ArrayList<>();
 			String nameWithQualifierColon = myName + ":";
 
 			for (String nextParamName : theRequest.getParameters().keySet()) {
@@ -438,7 +438,7 @@ public class OperationParameter implements IParameter {
 				List<IBase> values = paramChildAccessor.getValues(requestContents);
 				for (IBase nextParameter : values) {
 					List<IBase> nextNames = nameChild.getAccessor().getValues(nextParameter);
-					if (nextNames != null && nextNames.size() > 0) {
+					if (nextNames != null && !nextNames.isEmpty()) {
 						IPrimitiveType<?> nextName = (IPrimitiveType<?>) nextNames.get(0);
 						if (myName.equals(nextName.getValueAsString())) {
 
@@ -449,9 +449,9 @@ public class OperationParameter implements IParameter {
 										valueChild.getAccessor().getValues(nextParameter);
 								List<IBase> paramResources =
 										resourceChild.getAccessor().getValues(nextParameter);
-								if (paramValues != null && paramValues.size() > 0) {
+								if (paramValues != null && !paramValues.isEmpty()) {
 									tryToAddValues(paramValues, matchingParamValues);
-								} else if (paramResources != null && paramResources.size() > 0) {
+								} else if (paramResources != null && !paramResources.isEmpty()) {
 									tryToAddValues(paramResources, matchingParamValues);
 								}
 							}

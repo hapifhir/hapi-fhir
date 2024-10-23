@@ -27,6 +27,7 @@ import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import org.hl7.fhir.OperationOutcome;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Endpoint;
@@ -34,6 +35,7 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Quantity;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 
 public class MeasureOperationsProvider {
@@ -78,7 +80,7 @@ public class MeasureOperationsProvider {
 			@OperationParam(name = "reportType") String theReportType,
 			@OperationParam(name = "subject") String theSubject,
 			@OperationParam(name = "practitioner") String thePractitioner,
-			@OperationParam(name = "lastReceivedOn") String theLastReceivedOn,
+			@OperationPar:am(name = "lastReceivedOn") String theLastReceivedOn,
 			@OperationParam(name = "productLine") String theProductLine,
 			@OperationParam(name = "additionalData") Bundle theAdditionalData,
 			@OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
@@ -102,4 +104,67 @@ public class MeasureOperationsProvider {
 						theProductLine,
 						thePractitioner);
 	}
+
+	/**
+	 *  {
+	 *      "resourceType": "OperationDefinition",
+	 *      "name": "fooBar",
+	 *      "url": "http://foo.bar",
+	 *      "parameters": [
+	 *         {
+	 *             "name": "doFoo",
+	 *             "type: "boolean",
+	 *             "use": "in"
+	 *         },
+	 *         {
+	 *         		"name": "count",
+	 *         	 	"type: "integer",
+	 *         	    "use": "in"
+	 *         },
+	 *         {
+	 *             "name": "return",
+	 *             "use": "out",
+	 *             "type": "OperationOutcome"
+	 *         }
+	 *      ]
+	 *  }
+	 **/
+
+
+	@Operation(name = "fooBar")
+	OperationOutcome fooBar(FooBarParams theParams) {
+		return new OperationOutcome();
+	}
+
+
+
+
+   void example() {
+	   fooBar(new FooBarParams());
+   }
+
+   @OperationParam
+   class FooBarParams {
+
+		@OperationParam(name = "doFoo")
+		private Boolean myDoFoo;
+		@OperationParam(name = "quanity")
+	   private Quantity quantity;
+
+	   public Boolean getDoFoo() {
+		   return myDoFoo;
+	   }
+
+	   public void setDoFoo(Boolean theDoFoo) {
+		   myDoFoo = theDoFoo;
+	   }
+
+	   public Integer getCount() {
+		   return myCount;
+	   }
+
+	   public void setCount(Integer theCount) {
+		   myCount = theCount;
+	   }
+   }
 }

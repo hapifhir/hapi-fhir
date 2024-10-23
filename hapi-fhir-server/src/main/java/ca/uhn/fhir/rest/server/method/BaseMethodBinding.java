@@ -110,6 +110,7 @@ public abstract class BaseMethodBinding {
 		return myQueryParameters;
 	}
 
+	// JP TODO: Alternatively, do the mapping here?
 	protected Object[] createMethodParams(RequestDetails theRequest) {
 		Object[] params = new Object[getParameters().size()];
 		for (int i = 0; i < getParameters().size(); i++) {
@@ -117,18 +118,6 @@ public abstract class BaseMethodBinding {
 			if (param != null) {
 				params[i] = param.translateQueryParametersIntoServerArgument(theRequest, this);
 			}
-		}
-		return params;
-	}
-
-	protected Object[] createParametersForServerRequest(RequestDetails theRequest) {
-		Object[] params = new Object[getParameters().size()];
-		for (int i = 0; i < getParameters().size(); i++) {
-			IParameter param = getParameters().get(i);
-			if (param == null) {
-				continue;
-			}
-			params[i] = param.translateQueryParametersIntoServerArgument(theRequest, this);
 		}
 		return params;
 	}
@@ -260,6 +249,8 @@ public abstract class BaseMethodBinding {
 
 		// Actually invoke the method
 		try {
+			// JP - TODO: check to see if we have a single
+			// class, bind to the fields, then invoke.
 			Method method = getMethod();
 			return method.invoke(getProvider(), theMethodParams);
 		} catch (InvocationTargetException e) {

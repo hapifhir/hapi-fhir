@@ -184,6 +184,8 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 		} else {
 			myOtherOperationType = RestOperationTypeEnum.EXTENDED_OPERATION_INSTANCE;
 			myCanOperateAtInstanceLevel = true;
+
+			// JP TODO: Here, we need to check the operation's parameters class for the Id.
 			for (Annotation next : theMethod.getParameterAnnotations()[myIdParamIndex]) {
 				if (next instanceof IdParam) {
 					myCanOperateAtTypeLevel = ((IdParam) next).optional() == true;
