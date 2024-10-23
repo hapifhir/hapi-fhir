@@ -70,9 +70,6 @@ public class SubscriptionMatcherInterceptor {
 	private IResourceModifiedMessagePersistenceSvc myResourceModifiedMessagePersistenceSvc;
 
 	@Autowired
-	private JpaStorageSettings myStorageSettings;
-
-	@Autowired
 	private IResourceModifiedConsumer myResourceModifiedConsumer;
 
 	/**
@@ -138,7 +135,7 @@ public class SubscriptionMatcherInterceptor {
 		// see {@link AsyncResourceModifiedProcessingSchedulerSvc}
 		// If enabled in {@link JpaStorageSettings} the subscription will be handled immediately.
 
-		if (myStorageSettings.isSubscriptionChangeQueuedImmediately()
+		if (mySubscriptionSettings.isSubscriptionChangeQueuedImmediately()
 				&& theResourceModifiedMessage.hasPayloadType(myFhirContext, "Subscription")) {
 			try {
 				myResourceModifiedConsumer.submitResourceModified(theResourceModifiedMessage);

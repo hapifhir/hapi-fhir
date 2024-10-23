@@ -39,6 +39,7 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.r4.model.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Configuration;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -378,14 +379,6 @@ public class JpaStorageSettings extends StorageSettings {
 	 */
 	@Beta
 	private boolean myIncludeHashIdentityForTokenSearches = false;
-
-	/**
-	 * If this is enabled (default is {@literal false}), changes to Subscription resource would be put on queue immediately.
-	 * Reducing delay between creation of the Subscription and Activation.
-	 *
-	 * @since 7.6.0
-	 */
-	private boolean mySubscriptionChangeQueuedImmediately = false;
 
 	/**
 	 * Constructor
@@ -2556,26 +2549,6 @@ public class JpaStorageSettings extends StorageSettings {
 
 	public void setRestDeleteByUrlResourceIdThreshold(long theRestDeleteByUrlResourceIdThreshold) {
 		myRestDeleteByUrlResourceIdThreshold = theRestDeleteByUrlResourceIdThreshold;
-	}
-
-	/**
-	 * If this is enabled (default is {@literal false}), changes to Subscription resource would be put on queue immediately.
-	 * Reducing delay between creation of the Subscription and Activation.
-	 *
-	 * @since 7.6.0
-	 */
-	public boolean isSubscriptionChangeQueuedImmediately() {
-		return mySubscriptionChangeQueuedImmediately;
-	}
-
-	/**
-	 * If this is enabled (default is {@literal false}), changes to Subscription resource would be put on queue immediately.
-	 * Reducing delay between creation of the Subscription and Activation.
-	 *
-	 * @since 7.6.0
-	 */
-	public void setSubscriptionChangeQueuedImmediately(boolean theSubscriptionChangeQueuedImmediately) {
-		mySubscriptionChangeQueuedImmediately = theSubscriptionChangeQueuedImmediately;
 	}
 
 	public enum StoreMetaSourceInformationEnum {
