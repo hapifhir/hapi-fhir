@@ -100,8 +100,9 @@ public class SubscriptionSubmitterConfig {
 	}
 
 	@Bean
-	public AsyncResourceModifiedProcessingSchedulerSvc asyncResourceModifiedProcessingSchedulerSvc() {
-		return new AsyncResourceModifiedProcessingSchedulerSvc();
+	public AsyncResourceModifiedProcessingSchedulerSvc asyncResourceModifiedProcessingSchedulerSvc(
+			SubscriptionConfig subscriptionConfig, SubscriptionSettings theSubscriptionSettings) {
+		return new AsyncResourceModifiedProcessingSchedulerSvc(theSubscriptionSettings.getSubscriptionIntervalInMs());
 	}
 
 	@Bean
