@@ -125,6 +125,20 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init700();
 		init720();
 		init740();
+		init780();
+	}
+
+	protected void init780() {
+		final Builder version = forVersion(VersionEnum.V7_8_0);
+
+		version.onTable("NPM_PACKAGE_VER")
+				.addColumn("20241023.10", "PKG_AUTHOR")
+				.nullable()
+				.type(ColumnTypeEnum.STRING, 200);
+		version.onTable("NPM_PACKAGE_VER")
+				.addColumn("20241023.20", "AUTHOR_UPPER")
+				.nullable()
+				.type(ColumnTypeEnum.STRING, 200);
 	}
 
 	protected void init740() {
