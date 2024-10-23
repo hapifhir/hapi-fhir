@@ -20,6 +20,7 @@
 package ca.uhn.fhir.util;
 
 import ca.uhn.fhir.i18n.Msg;
+import com.google.common.base.Preconditions;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -28,11 +29,20 @@ import java.lang.ref.SoftReference;
 import java.text.ParseException;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.Month;
+import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoField;
+import java.time.temporal.TemporalAccessor;
+import java.time.temporal.TemporalField;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.TimeZone;
 
 /**
@@ -92,6 +102,89 @@ public final class DateUtils {
 	 * This class should not be instantiated.
 	 */
 	private DateUtils() {}
+
+	/**
+	 * Calculate a LocalDateTime with any missing date/time data points defaulting to the earliest values (ex 0 for hour)
+	 * from a TemporalAccessor or empty if it doesn't contain a year.
+	 *
+	 * @param theTemporalAccessor The TemporalAccessor containing date/time information
+	 * @return A LocalDateTime or empty
+	 */
+	public static Optional<LocalDateTime> extractLocalDateTimeForRangeStartOrEmpty(
+			TemporalAccessor theTemporalAccessor) {
+		if (theTemporalAccessor.isSupported(ChronoField.YEAR)) {
+			final int year = theTemporalAccessor.get(ChronoField.YEAR);
+			final Month month = Month.of(getTimeUnitIfSupported(theTemporalAccessor, ChronoField.MONTH_OF_YEAR, 1));
+			final int day = getTimeUnitIfSupported(theTemporalAccessor, ChronoField.DAY_OF_MONTH, 1);
+			final int hour = getTimeUnitIfSupported(theTemporalAccessor, ChronoField.HOUR_OF_DAY, 0);
+			final int minute = getTimeUnitIfSupported(theTemporalAccessor, ChronoField.MINUTE_OF_HOUR, 0);
+			final int seconds = getTimeUnitIfSupported(theTemporalAccessor, ChronoField.SECOND_OF_MINUTE, 0);
+
+			return Optional.of(LocalDateTime.of(year, month, day, hour, minute, seconds));
+		}
+
+		return Optional.empty();
+	}
+
+	/**
+	 * Calculate a LocalDateTime with any missing date/time data points defaulting to the latest values (ex 23 for hour)
+	 * from a TemporalAccessor or empty if it doesn't contain a year.
+	 *
+	 * @param theTemporalAccessor The TemporalAccessor containing date/time information
+	 * @return A LocalDateTime or empty
+	 */
+	public static Optional<LocalDateTime> extractLocalDateTimeForRangeEndOrEmpty(TemporalAccessor theTemporalAccessor) {
+		if (theTemporalAccessor.isSupported(ChronoField.YEAR)) {
+			final int year = theTemporalAccessor.get(ChronoField.YEAR);
+			final Month month = Month.of(getTimeUnitIfSupported(theTemporalAccessor, ChronoField.MONTH_OF_YEAR, 12));
+			final int day = getTimeUnitIfSupported(
+					theTemporalAccessor,
+					ChronoField.DAY_OF_MONTH,
+					YearMonth.of(year, month).atEndOfMonth().getDayOfMonth());
+			final int hour = getTimeUnitIfSupported(theTemporalAccessor, ChronoField.HOUR_OF_DAY, 23);
+			final int minute = getTimeUnitIfSupported(theTemporalAccessor, ChronoField.MINUTE_OF_HOUR, 59);
+			final int seconds = getTimeUnitIfSupported(theTemporalAccessor, ChronoField.SECOND_OF_MINUTE, 59);
+
+			return Optional.of(LocalDateTime.of(year, month, day, hour, minute, seconds));
+		}
+
+		return Optional.empty();
+	}
+
+	/**
+	 * With the provided DateTimeFormatter, parse a date time String or return empty if the String doesn't correspond
+	 * to the formatter.
+	 *
+	 * @param theDateTimeString A date/time String in some date format
+	 * @param theSupportedDateTimeFormatter The DateTimeFormatter we expect corresponds to the String
+	 * @return The parsed TemporalAccessor or empty
+	 */
+	public static Optional<TemporalAccessor> parseDateTimeStringIfValid(
+			String theDateTimeString, DateTimeFormatter theSupportedDateTimeFormatter) {
+		Objects.requireNonNull(theSupportedDateTimeFormatter);
+		Preconditions.checkArgument(StringUtils.isNotBlank(theDateTimeString));
+
+		try {
+			return Optional.of(theSupportedDateTimeFormatter.parse(theDateTimeString));
+		} catch (Exception exception) {
+			return Optional.empty();
+		}
+	}
+
+	private static int getTimeUnitIfSupported(
+			TemporalAccessor theTemporalAccessor, TemporalField theTemporalField, int theDefaultValue) {
+		return getTimeUnitIfSupportedOrEmpty(theTemporalAccessor, theTemporalField)
+				.orElse(theDefaultValue);
+	}
+
+	private static Optional<Integer> getTimeUnitIfSupportedOrEmpty(
+			TemporalAccessor theTemporalAccessor, TemporalField theTemporalField) {
+		if (theTemporalAccessor.isSupported(theTemporalField)) {
+			return Optional.of(theTemporalAccessor.get(theTemporalField));
+		}
+
+		return Optional.empty();
+	}
 
 	/**
 	 * A factory for {@link SimpleDateFormat}s. The instances are stored in a

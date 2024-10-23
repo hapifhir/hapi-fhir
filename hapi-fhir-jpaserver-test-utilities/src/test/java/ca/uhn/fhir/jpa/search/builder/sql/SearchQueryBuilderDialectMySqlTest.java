@@ -63,7 +63,7 @@ public class SearchQueryBuilderDialectMySqlTest extends BaseSearchQueryBuilderDi
 		when(mySqlObjectFactory.stringIndexTable(any())).thenReturn(new StringPredicateBuilder(searchQueryBuilder));
 
 		BaseJoiningPredicateBuilder firstPredicateBuilder = searchQueryBuilder.getOrCreateFirstPredicateBuilder();
-		StringPredicateBuilder sortPredicateBuilder = searchQueryBuilder.addStringPredicateBuilder(firstPredicateBuilder.getResourceIdColumn());
+		StringPredicateBuilder sortPredicateBuilder = searchQueryBuilder.addStringPredicateBuilder(firstPredicateBuilder.getJoinColumns());
 
 		Condition hashIdentityPredicate = sortPredicateBuilder.createHashIdentityPredicate("patient", "family");
 		searchQueryBuilder.addPredicate(hashIdentityPredicate);
@@ -112,7 +112,7 @@ public class SearchQueryBuilderDialectMySqlTest extends BaseSearchQueryBuilderDi
 		when(mySqlObjectFactory.dateIndexTable(any())).thenReturn(new DatePredicateBuilder(searchQueryBuilder));
 
 		BaseJoiningPredicateBuilder firstPredicateBuilder = searchQueryBuilder.getOrCreateFirstPredicateBuilder();
-		DatePredicateBuilder sortPredicateBuilder = searchQueryBuilder.addDatePredicateBuilder(firstPredicateBuilder.getResourceIdColumn());
+		DatePredicateBuilder sortPredicateBuilder = searchQueryBuilder.addDatePredicateBuilder(firstPredicateBuilder.getJoinColumns());
 
 		Condition hashIdentityPredicate = sortPredicateBuilder.createHashIdentityPredicate("patient", "birthdate");
 		searchQueryBuilder.addPredicate(hashIdentityPredicate);

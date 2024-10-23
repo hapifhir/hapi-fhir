@@ -8,7 +8,6 @@ import ca.uhn.fhir.context.support.IValidationSupport.GroupConceptProperty;
 import ca.uhn.fhir.context.support.IValidationSupport.LookupCodeResult;
 import ca.uhn.fhir.context.support.IValidationSupport.StringConceptProperty;
 import ca.uhn.fhir.context.support.LookupCodeRequest;
-import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.junit.jupiter.api.Test;
@@ -22,6 +21,12 @@ import static ca.uhn.fhir.context.support.IValidationSupport.TYPE_GROUP;
 import static ca.uhn.fhir.context.support.IValidationSupport.TYPE_STRING;
 import static java.util.stream.IntStream.range;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hl7.fhir.common.hapi.validation.IValidationProviders.CODE;
+import static org.hl7.fhir.common.hapi.validation.IValidationProviders.CODE_SYSTEM;
+import static org.hl7.fhir.common.hapi.validation.IValidationProviders.CODE_SYSTEM_NAME;
+import static org.hl7.fhir.common.hapi.validation.IValidationProviders.CODE_SYSTEM_VERSION;
+import static org.hl7.fhir.common.hapi.validation.IValidationProviders.DISPLAY;
+import static org.hl7.fhir.common.hapi.validation.IValidationProviders.LANGUAGE;
 import static org.hl7.fhir.common.hapi.validation.support.RemoteTerminologyServiceValidationSupport.createConceptProperty;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -40,20 +45,15 @@ import static org.junit.jupiter.api.Assertions.fail;
  * e.g. assertEqualConceptProperty
  */
 public interface ILookupCodeTest {
-	String DISPLAY = "DISPLAY";
-	String LANGUAGE = "en";
-	String CODE_SYSTEM = "CODE_SYS";
-	String CODE_SYSTEM_VERSION = "CODE_SYS_VERSION";
-	String CODE_SYSTEM_NAME = "Code System";
-	String CODE = "CODE";
-
 	IValidationSupport getService();
-	IMyCodeSystemProvider getCodeSystemProvider();
+	IValidationProviders.IMyLookupCodeProvider getLookupCodeProvider();
 
 	@Test
 	default void lookupCode_forCodeSystemWithBlankCode_throwsException() {
+		IValidationSupport service = getService();
+		LookupCodeRequest request = new LookupCodeRequest(CODE_SYSTEM, "");
 		try {
-			getService().lookupCode(null, new LookupCodeRequest(CODE_SYSTEM, ""));
+			service.lookupCode(null, request);
 			fail();
 		} catch (IllegalArgumentException e) {
 			assertEquals("theCode must be provided", e.getMessage());
@@ -70,11 +70,14 @@ public interface ILookupCodeTest {
 				return "someUnsupportedType";
 			}
 		});
-		getCodeSystemProvider().setLookupCodeResult(result);
+		getLookupCodeProvider().setLookupCodeResult(result);
+
+		IValidationSupport service = getService();
+		LookupCodeRequest request = new LookupCodeRequest(CODE_SYSTEM, CODE, LANGUAGE, null);
 
 		// test and verify
 		try {
-			getService().lookupCode(null, new LookupCodeRequest(CODE_SYSTEM, CODE, LANGUAGE, null));
+			service.lookupCode(null, request);
 			fail();
 		} catch (InternalErrorException e) {
 			assertThat(e.getMessage()).contains("HAPI-1739: Don't know how to handle ");
@@ -88,7 +91,7 @@ public interface ILookupCodeTest {
 		result.setCodeSystemVersion(CODE_SYSTEM_VERSION);
 		result.setCodeSystemDisplayName(CODE_SYSTEM_NAME);
 		result.setCodeDisplay(DISPLAY);
-		getCodeSystemProvider().setLookupCodeResult(result);
+		getLookupCodeProvider().setLookupCodeResult(result);
 
 		// test and verify
 		LookupCodeRequest request =  new LookupCodeRequest(CODE_SYSTEM, CODE, LANGUAGE, null);
@@ -107,7 +110,7 @@ public interface ILookupCodeTest {
 		result.setFound(true);
 		result.getDesignations().add(designation1);
 		result.getDesignations().add(designation2);
-		getCodeSystemProvider().setLookupCodeResult(result);
+		getLookupCodeProvider().setLookupCodeResult(result);
 
 		// test and verify
 		LookupCodeRequest request = new LookupCodeRequest(CODE_SYSTEM, CODE, LANGUAGE, null);
@@ -120,7 +123,7 @@ public interface ILookupCodeTest {
 		BaseConceptProperty property = createConceptProperty(propertyName, thePropertyValue);
 		LookupCodeResult result = new LookupCodeResult();
 		result.getProperties().add(property);
-		getCodeSystemProvider().setLookupCodeResult(result);
+		getLookupCodeProvider().setLookupCodeResult(result);
 
 		// test
 		LookupCodeRequest request = new LookupCodeRequest(CODE_SYSTEM, CODE, LANGUAGE, List.of(propertyName));
@@ -148,7 +151,7 @@ public interface ILookupCodeTest {
 				propertyNamesToFilter.add(currentPropertyName);
 			}
 		}
-		getCodeSystemProvider().setLookupCodeResult(result);
+		getLookupCodeProvider().setLookupCodeResult(result);
 
 		// test
 		LookupCodeRequest request = new LookupCodeRequest(CODE_SYSTEM, CODE, LANGUAGE, propertyNamesToFilter);
@@ -172,7 +175,7 @@ public interface ILookupCodeTest {
 			group.addSubProperty(createConceptProperty(subPropertyName + i, thePropertyValues.get(i)));
 		}
 		result.getProperties().add(group);
-		getCodeSystemProvider().setLookupCodeResult(result);
+		getLookupCodeProvider().setLookupCodeResult(result);
 
 		// test and verify
 		LookupCodeRequest request = new LookupCodeRequest(CODE_SYSTEM, CODE, LANGUAGE, List.of(groupName));
@@ -186,8 +189,8 @@ public interface ILookupCodeTest {
 
 		// verify
 		assertNotNull(outcome);
-		assertEquals(theRequest.getCode(), getCodeSystemProvider().getCode());
-		assertEquals(theRequest.getSystem(), getCodeSystemProvider().getSystem());
+		assertEquals(theRequest.getCode(), getLookupCodeProvider().getCode());
+		assertEquals(theRequest.getSystem(), getLookupCodeProvider().getSystem());
 		assertEquals(theExpectedResult.isFound(), outcome.isFound());
 		assertEquals(theExpectedResult.getErrorMessage(), outcome.getErrorMessage());
 		assertEquals(theExpectedResult.getCodeSystemDisplayName(), outcome.getCodeSystemDisplayName());
@@ -207,7 +210,7 @@ public interface ILookupCodeTest {
 		LookupCodeResult result = new LookupCodeResult();
 		result.setFound(true);
 		result.getDesignations().add(theConceptDesignation);
-		getCodeSystemProvider().setLookupCodeResult(result);
+		getLookupCodeProvider().setLookupCodeResult(result);
 
 		// test and verify
 		LookupCodeRequest request = new LookupCodeRequest(CODE_SYSTEM, CODE, LANGUAGE, null);
@@ -246,12 +249,5 @@ public interface ILookupCodeTest {
 		assertEquals(theActualDesignation.getUseCode(), theExpectedDesignation.getUseCode());
 		assertEquals(theActualDesignation.getUseSystem(), theExpectedDesignation.getUseSystem());
 		assertEquals(theActualDesignation.getUseDisplay(), theExpectedDesignation.getUseDisplay());
-	}
-
-	interface IMyCodeSystemProvider extends IResourceProvider {
-		String getCode();
-		String getSystem();
-
-		void setLookupCodeResult(LookupCodeResult theLookupCodeResult);
 	}
 }
