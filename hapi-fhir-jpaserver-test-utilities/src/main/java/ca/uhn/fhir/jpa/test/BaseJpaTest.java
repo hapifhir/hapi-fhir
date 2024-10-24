@@ -46,30 +46,36 @@ import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamStringDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamTokenDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamUriDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceSearchUrlDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptDesignationDao;
+import ca.uhn.fhir.jpa.dao.data.ITermConceptParentChildLinkDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptPropertyDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetDao;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptDesignation;
+import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import ca.uhn.fhir.jpa.entity.TermConceptProperty;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSetConceptDesignation;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboTokenNonUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamCoords;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamNumber;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
+import ca.uhn.fhir.jpa.model.entity.ResourceSearchUrlEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
@@ -208,6 +214,8 @@ public abstract class BaseJpaTest extends BaseTest {
 	@Autowired
 	protected ISearchResultCacheSvc mySearchResultCacheSvc;
 	@Autowired
+	protected PartitionSettings myPartitionSettings;
+	@Autowired
 	protected ITermCodeSystemDao myTermCodeSystemDao;
 	@Autowired
 	protected ITermCodeSystemVersionDao myTermCodeSystemVersionDao;
@@ -244,6 +252,8 @@ public abstract class BaseJpaTest extends BaseTest {
 	@Autowired
 	protected ITermConceptDao myTermConceptDao;
 	@Autowired
+	protected ITermConceptParentChildLinkDao myTermConceptParentChildLinkDao;
+	@Autowired
 	protected ITermValueSetConceptDao myTermValueSetConceptDao;
 	@Autowired
 	protected ITermValueSetDao myTermValueSetDao;
@@ -262,6 +272,8 @@ public abstract class BaseJpaTest extends BaseTest {
 	private FhirInstanceValidator myFhirInstanceValidator;
 	@Autowired
 	private IResourceTableDao myResourceTableDao;
+	@Autowired
+	private IResourceSearchUrlDao myResourceSearchUrlDao;
 	@Autowired
 	private IResourceTagDao myResourceTagDao;
 	@Autowired
@@ -386,12 +398,18 @@ public abstract class BaseJpaTest extends BaseTest {
 		if (myFhirInstanceValidator != null) {
 			myFhirInstanceValidator.invalidateCaches();
 		}
-		JpaStorageSettings defaultConfig = new JpaStorageSettings();
-		myStorageSettings.setAdvancedHSearchIndexing(defaultConfig.isAdvancedHSearchIndexing());
-		myStorageSettings.setAllowContainsSearches(defaultConfig.isAllowContainsSearches());
-		myStorageSettings.setIncludeHashIdentityForTokenSearches(defaultConfig.isIncludeHashIdentityForTokenSearches());
-		myStorageSettings.setMaximumIncludesToLoadPerPage(defaultConfig.getMaximumIncludesToLoadPerPage());
 
+		JpaStorageSettings defaultStorageConfig = new JpaStorageSettings();
+		myStorageSettings.setAccessMetaSourceInformationFromProvenanceTable(defaultStorageConfig.isAccessMetaSourceInformationFromProvenanceTable());
+		myStorageSettings.setAdvancedHSearchIndexing(defaultStorageConfig.isAdvancedHSearchIndexing());
+		myStorageSettings.setAllowContainsSearches(defaultStorageConfig.isAllowContainsSearches());
+		myStorageSettings.setIncludeHashIdentityForTokenSearches(defaultStorageConfig.isIncludeHashIdentityForTokenSearches());
+		myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(defaultStorageConfig.isMarkResourcesForReindexingUponSearchParameterChange());
+		myStorageSettings.setMaximumIncludesToLoadPerPage(defaultStorageConfig.getMaximumIncludesToLoadPerPage());
+		myStorageSettings.setPreExpandValueSets(defaultStorageConfig.isPreExpandValueSets());
+
+		PartitionSettings defaultPartConfig = new PartitionSettings();
+		myPartitionSettings.setIncludePartitionInSearchHashes(defaultPartConfig.isIncludePartitionInSearchHashes());
 	}
 
 	@AfterEach
@@ -465,7 +483,7 @@ public abstract class BaseJpaTest extends BaseTest {
 
 	protected abstract PlatformTransactionManager getTxManager();
 
-	protected void logAllCodeSystemsAndVersionsCodeSystemsAndVersions() {
+	public void logAllCodeSystemsAndVersionsCodeSystemsAndVersions() {
 		runInTransaction(() -> {
 			ourLog.info("CodeSystems:\n * " + myTermCodeSystemDao.findAll()
 				.stream()
@@ -478,16 +496,24 @@ public abstract class BaseJpaTest extends BaseTest {
 		});
 	}
 
-	protected void logAllResourceLinks() {
+	public void logAllResourceLinks() {
 		runInTransaction(() -> {
 			ourLog.info("Resource Links:\n * {}", myResourceLinkDao.findAll().stream().map(ResourceLink::toString).collect(Collectors.joining("\n * ")));
 		});
 	}
 
-	protected int logAllResources() {
+	public int logAllResources() {
 		return runInTransaction(() -> {
 			List<ResourceTable> resources = myResourceTableDao.findAll();
 			ourLog.info("Resources:\n * {}", resources.stream().map(ResourceTable::toString).collect(Collectors.joining("\n * ")));
+			return resources.size();
+		});
+	}
+
+	public int logAllResourceSearchUrls() {
+		return runInTransaction(() -> {
+			List<ResourceSearchUrlEntity> resources = myResourceSearchUrlDao.findAll();
+			ourLog.info("Search URLs:\n * {}", resources.stream().map(ResourceSearchUrlEntity::toString).collect(Collectors.joining("\n * ")));
 			return resources.size();
 		});
 	}
@@ -503,12 +529,12 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected int logAllConceptProperties() {
 		return runInTransaction(() -> {
 			List<TermConceptProperty> resources = myTermConceptPropertyDao.findAll();
-			ourLog.info("Concept Designations:\n * {}", resources.stream().map(TermConceptProperty::toString).collect(Collectors.joining("\n * ")));
+			ourLog.info("Concept Properties:\n * {}", resources.stream().map(TermConceptProperty::toString).collect(Collectors.joining("\n * ")));
 			return resources.size();
 		});
 	}
 
-	protected int logAllConcepts() {
+	public int logAllConcepts() {
 		return runInTransaction(() -> {
 			List<TermConcept> resources = myTermConceptDao.findAll();
 			ourLog.info("Concepts:\n * {}", resources.stream().map(TermConcept::toString).collect(Collectors.joining("\n * ")));
@@ -516,10 +542,18 @@ public abstract class BaseJpaTest extends BaseTest {
 		});
 	}
 
-	protected int logAllValueSetConcepts() {
+	protected int logAllConceptParentChildLinks() {
+		return runInTransaction(() -> {
+			List<TermConceptParentChildLink> resources = myTermConceptParentChildLinkDao.findAll();
+			ourLog.info("Concept Parent/Child Links:\n * {}", resources.stream().map(TermConceptParentChildLink::toString).collect(Collectors.joining("\n * ")));
+			return resources.size();
+		});
+	}
+
+	public int logAllValueSetConcepts() {
 		return runInTransaction(() -> {
 			List<TermValueSetConcept> resources = myTermValueSetConceptDao.findAll();
-			ourLog.info("Concepts:\n * {}", resources.stream().map(TermValueSetConcept::toString).collect(Collectors.joining("\n * ")));
+			ourLog.info("ValueSet Concepts:\n * {}", resources.stream().map(TermValueSetConcept::toString).collect(Collectors.joining("\n * ")));
 			return resources.size();
 		});
 	}
@@ -550,10 +584,24 @@ public abstract class BaseJpaTest extends BaseTest {
 		});
 	}
 
-	protected void logAllTokenIndexes() {
+	protected void logAllTokenIndexes(String... theParamNames) {
+		String messageSuffix = theParamNames.length > 0 ? " containing " + Arrays.asList(theParamNames) : "";
 		runInTransaction(() -> {
-			ourLog.info("Token indexes:\n * {}", myResourceIndexedSearchParamTokenDao.findAll().stream().map(ResourceIndexedSearchParamToken::toString).collect(Collectors.joining("\n * ")));
+			String message = getAllTokenIndexes(theParamNames)
+				.stream()
+				.map(ResourceIndexedSearchParamToken::toString)
+				.collect(Collectors.joining("\n * "));
+			ourLog.info("Token indexes{}:\n * {}", messageSuffix, message);
 		});
+	}
+
+	@Nonnull
+	protected List<ResourceIndexedSearchParamToken> getAllTokenIndexes(String... theParamNames) {
+		return runInTransaction(()->myResourceIndexedSearchParamTokenDao
+			.findAll()
+			.stream()
+			.filter(t -> theParamNames.length == 0 || Arrays.asList(theParamNames).contains(t.getParamName()))
+			.toList());
 	}
 
 	protected void logAllCoordsIndexes() {
@@ -568,7 +616,7 @@ public abstract class BaseJpaTest extends BaseTest {
 		});
 	}
 
-	protected void logAllUriIndexes() {
+	public void logAllUriIndexes() {
 		runInTransaction(() -> {
 			ourLog.info("URI indexes:\n * {}", myResourceIndexedSearchParamUriDao.findAll().stream().map(ResourceIndexedSearchParamUri::toString).collect(Collectors.joining("\n * ")));
 		});
@@ -577,15 +625,23 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected void logAllStringIndexes(String... theParamNames) {
 		String messageSuffix = theParamNames.length > 0 ? " containing " + Arrays.asList(theParamNames) : "";
 		runInTransaction(() -> {
-			String message = myResourceIndexedSearchParamStringDao
-				.findAll()
+			String message = getAllStringIndexes(theParamNames)
 				.stream()
-				.filter(t -> theParamNames.length == 0 ? true : Arrays.asList(theParamNames).contains(t.getParamName()))
-				.map(t -> t.toString())
+				.map(ResourceIndexedSearchParamString::toString)
 				.collect(Collectors.joining("\n * "));
 			ourLog.info("String indexes{}:\n * {}", messageSuffix, message);
 		});
 	}
+
+	@Nonnull
+	protected List<ResourceIndexedSearchParamString> getAllStringIndexes(String... theParamNames) {
+		return runInTransaction(()->myResourceIndexedSearchParamStringDao
+			.findAll()
+			.stream()
+			.filter(t -> theParamNames.length == 0 || Arrays.asList(theParamNames).contains(t.getParamName()))
+			.toList());
+	}
+
 
 	protected void logAllResourceTags() {
 		runInTransaction(() -> {
