@@ -85,6 +85,7 @@ class OperationRule extends BaseRule implements IAuthRule {
 		myAppliesToTypes = theAppliesToTypes;
 	}
 
+	@SuppressWarnings("EnumSwitchStatementWhichMissesCases")
 	@Override
 	public Verdict applyRule(
 			RestOperationTypeEnum theOperation,
@@ -97,23 +98,8 @@ class OperationRule extends BaseRule implements IAuthRule {
 			Pointcut thePointcut) {
 		FhirContext ctx = theRequestDetails.getServer().getFhirContext();
 
-		// Operation rules apply to the execution of the operation itself, not to side effects like
-		// loading resources (that will presumably be reflected in the response). Those loads need
-		// to be explicitly authorized
-		if (!myAllowAllResourcesAccess && isResourceAccess(thePointcut)) {
-			return null;
-		}
-
 		boolean applies = false;
 		switch (theOperation) {
-			case ADD_TAGS:
-			case DELETE_TAGS:
-			case GET_TAGS:
-			case GET_PAGE:
-			case GRAPHQL_REQUEST:
-				// These things can't be tracked by the AuthorizationInterceptor
-				// at this time
-				return null;
 			case EXTENDED_OPERATION_SERVER:
 				if (myAppliesToServer || myAppliesAtAnyLevel) {
 					applies = true;
@@ -138,10 +124,7 @@ class OperationRule extends BaseRule implements IAuthRule {
 					applies = true;
 				} else {
 					IIdType requestResourceId = null;
-					if (theInputResourceId != null) {
-						requestResourceId = theInputResourceId;
-					}
-					if (requestResourceId == null && myAllowAllResponses) {
+					if (theRequestDetails.getId() != null) {
 						requestResourceId = theRequestDetails.getId();
 					}
 					if (requestResourceId != null) {
@@ -168,40 +151,6 @@ class OperationRule extends BaseRule implements IAuthRule {
 					}
 				}
 				break;
-			case CREATE:
-				break;
-			case DELETE:
-				break;
-			case HISTORY_INSTANCE:
-				break;
-			case HISTORY_SYSTEM:
-				break;
-			case HISTORY_TYPE:
-				break;
-			case READ:
-				break;
-			case SEARCH_SYSTEM:
-				break;
-			case SEARCH_TYPE:
-				break;
-			case TRANSACTION:
-				break;
-			case UPDATE:
-				break;
-			case VALIDATE:
-				break;
-			case VREAD:
-				break;
-			case METADATA:
-				break;
-			case META_ADD:
-				break;
-			case META:
-				break;
-			case META_DELETE:
-				break;
-			case PATCH:
-				break;
 			default:
 				return null;
 		}
@@ -214,13 +163,33 @@ class OperationRule extends BaseRule implements IAuthRule {
 			return null;
 		}
 
-		return newVerdict(
-				theOperation,
-				theRequestDetails,
-				theInputResource,
-				theInputResourceId,
-				theOutputResource,
-				theRuleApplier);
+		if (theOutputResource == null) {
+			// This is the request part
+			return newVerdict(
+					theOperation,
+					theRequestDetails,
+					theInputResource,
+					theInputResourceId,
+					theOutputResource,
+					theRuleApplier);
+		} else {
+			// This is the response part, so we might want to check all of the
+			// resources in the response
+			if (myAllowAllResponses) {
+				return newVerdict(
+						theOperation,
+						theRequestDetails,
+						theInputResource,
+						theInputResourceId,
+						theOutputResource,
+						theRuleApplier);
+			} else {
+				List<IBaseResource> outputResources = AuthorizationInterceptor.toListOfResourcesAndExcludeContainer(
+						theOutputResource, theRequestDetails.getFhirContext());
+				return RuleImplOp.applyRulesToResponseResources(
+						theRequestDetails, theRuleApplier, thePointcut, outputResources);
+			}
+		}
 	}
 
 	/**
