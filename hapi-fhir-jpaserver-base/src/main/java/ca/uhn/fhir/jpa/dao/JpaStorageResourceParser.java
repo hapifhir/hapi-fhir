@@ -165,8 +165,8 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 			provenanceRequestId = history.getRequestId();
 			if (isBlank(provenanceSourceUri) && isBlank(provenanceRequestId)) {
 				if (myStorageSettings.isAccessMetaSourceInformationFromProvenanceTable()) {
-					Optional<ResourceHistoryProvenanceEntity> provenanceOpt = myResourceHistoryProvenanceDao.findById(
-							history.getId());
+					Optional<ResourceHistoryProvenanceEntity> provenanceOpt =
+							myResourceHistoryProvenanceDao.findById(history.getId());
 					if (provenanceOpt.isPresent()) {
 						ResourceHistoryProvenanceEntity provenance = provenanceOpt.get();
 						provenanceRequestId = provenance.getRequestId();
@@ -213,8 +213,8 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 			provenanceRequestId = history.getRequestId();
 			if (isBlank(provenanceSourceUri) && isBlank(provenanceRequestId)) {
 				if (myStorageSettings.isAccessMetaSourceInformationFromProvenanceTable()) {
-					Optional<ResourceHistoryProvenanceEntity> provenanceOpt = myResourceHistoryProvenanceDao.findById(
-							history.getId());
+					Optional<ResourceHistoryProvenanceEntity> provenanceOpt =
+							myResourceHistoryProvenanceDao.findById(history.getId());
 					if (provenanceOpt.isPresent()) {
 						ResourceHistoryProvenanceEntity provenance = provenanceOpt.get();
 						provenanceRequestId = provenance.getRequestId();

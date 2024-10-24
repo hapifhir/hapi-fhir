@@ -38,10 +38,8 @@ public interface IResourceHistoryTableDao extends JpaRepository<ResourceHistoryT
 	@Query("SELECT t FROM ResourceHistoryTable t WHERE t.myResourceId = :resId ORDER BY t.myResourceVersion ASC")
 	List<ResourceHistoryTable> findAllVersionsForResourceIdInOrder(@Param("resId") Long theId);
 
-	@Query(
-			"SELECT t FROM ResourceHistoryTable t WHERE t.myResourceId = :id AND t.myResourceVersion = :version")
-	ResourceHistoryTable findForIdAndVersion(
-			@Param("id") long theId, @Param("version") long theVersion);
+	@Query("SELECT t FROM ResourceHistoryTable t WHERE t.myResourceId = :id AND t.myResourceVersion = :version")
+	ResourceHistoryTable findForIdAndVersion(@Param("id") long theId, @Param("version") long theVersion);
 
 	@Query(
 			"SELECT t.myId FROM ResourceHistoryTable t WHERE t.myResourceId = :resId AND t.myResourceVersion <> :dontWantVersion")

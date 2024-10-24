@@ -159,8 +159,7 @@ public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid
 		Slice<Long> ids;
 		if (theJpaPid != null && theJpaPid.getId() != null) {
 			if (theJpaPid.getVersion() != null) {
-				ids = toSlice(myResourceHistoryTableDao.findForIdAndVersion(
-						theJpaPid.getId(), theJpaPid.getVersion()));
+				ids = toSlice(myResourceHistoryTableDao.findForIdAndVersion(theJpaPid.getId(), theJpaPid.getVersion()));
 			} else {
 				ids = myResourceHistoryTableDao.findIdsOfPreviousVersionsOfResourceId(page, theJpaPid.getId());
 			}
@@ -302,8 +301,8 @@ public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid
 			RequestDetails theRequestDetails, Long theResourceId, AtomicInteger theRemainingCount) {
 		ResourceTable resource = myResourceTableDao.findById(theResourceId).orElseThrow(IllegalStateException::new);
 
-		ResourceHistoryTable currentVersion = myResourceHistoryTableDao.findForIdAndVersion(
-				resource.getId(), resource.getVersion());
+		ResourceHistoryTable currentVersion =
+				myResourceHistoryTableDao.findForIdAndVersion(resource.getId(), resource.getVersion());
 		if (currentVersion != null) {
 			expungeHistoricalVersion(theRequestDetails, currentVersion.getId(), theRemainingCount);
 		}

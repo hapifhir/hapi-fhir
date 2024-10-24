@@ -1375,8 +1375,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			doMetaAdd(theMetaAdd, latestVersion, theRequest, transactionDetails);
 
 			// Also update history entry
-			ResourceHistoryTable history = myResourceHistoryTableDao.findForIdAndVersion(
-					entity.getId(), entity.getVersion());
+			ResourceHistoryTable history =
+					myResourceHistoryTableDao.findForIdAndVersion(entity.getId(), entity.getVersion());
 			doMetaAdd(theMetaAdd, history, theRequest, transactionDetails);
 		}
 
@@ -1423,8 +1423,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		} else {
 			doMetaDelete(theMetaDel, latestVersion, theRequest, transactionDetails);
 			// Also update history entry
-			ResourceHistoryTable history = myResourceHistoryTableDao.findForIdAndVersion(
-					entity.getId(), entity.getVersion());
+			ResourceHistoryTable history =
+					myResourceHistoryTableDao.findForIdAndVersion(entity.getId(), entity.getVersion());
 			doMetaDelete(theMetaDel, history, theRequest, transactionDetails);
 		}
 

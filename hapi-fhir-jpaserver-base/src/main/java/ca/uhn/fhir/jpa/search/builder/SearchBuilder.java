@@ -1160,7 +1160,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 		// Load the resource bodies
 		Collection<ResourceHistoryTable> resourceSearchViewList =
-				myResourceHistoryTableDao.findCurrentVersionsByResourcePidsAndFetchResourceTable(JpaPid.toLongList(versionlessPids));
+				myResourceHistoryTableDao.findCurrentVersionsByResourcePidsAndFetchResourceTable(
+						JpaPid.toLongList(versionlessPids));
 
 		// -- preload all tags with tag definition if any
 		Map<JpaPid, Collection<BaseTag>> tagMap = getResourceTagMap(resourceSearchViewList);

@@ -17,7 +17,6 @@ import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.DaoTestUtils;
-import ca.uhn.fhir.jpa.entity.ResourceSearchView;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
@@ -54,6 +53,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.ClasspathUtil;
 import com.google.common.collect.Lists;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.hl7.fhir.dstu3.model.Age;
 import org.hl7.fhir.dstu3.model.Attachment;
@@ -110,6 +110,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.testcontainers.shaded.org.bouncycastle.util.Arrays;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -613,15 +614,6 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 				.getSingleResult();
 			assertThat(historyCount).as("only create one history version").isEqualTo(1);
 
-			// make sure the search view works too
-			ResourceSearchView readBackView = myEntityManager
-				.createQuery("select v from ResourceSearchView v where v.myResourceId = :resId", ResourceSearchView.class)
-				.setParameter("resId", myMethodOutcome.getPersistentId().getId())
-				.getSingleResult();
-			assertThat(readBackView).as("found search view").isNotNull();
-
-			assertEquals(myExpectedId, readBackView.getFhirId(),
-				"fhir_id populated");
 		}
 	}
 

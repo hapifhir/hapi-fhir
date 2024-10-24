@@ -1480,8 +1480,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			 * this could return null if the current resourceVersion has been expunged
 			 * in which case we'll still create a new one
 			 */
-			historyEntry = myResourceHistoryTableDao.findForIdAndVersion(
-					theEntity.getResourceId(), resourceVersion - 1);
+			historyEntry =
+					myResourceHistoryTableDao.findForIdAndVersion(theEntity.getResourceId(), resourceVersion - 1);
 			if (historyEntry != null) {
 				reusingHistoryEntity = true;
 				theEntity.populateHistoryEntityVersionAndDates(historyEntry);

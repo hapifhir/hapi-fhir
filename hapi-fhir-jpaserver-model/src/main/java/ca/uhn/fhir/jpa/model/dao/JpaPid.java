@@ -149,8 +149,9 @@ public class JpaPid extends BaseResourcePersistentId<Long> {
 	}
 
 	public Integer getPartitionId() {
-		// wipmb should we return null instead?
-		assert getPartitionablePartitionId() != null;
+		if (getPartitionablePartitionId() == null) {
+			return null;
+		}
 		return getPartitionablePartitionId().getPartitionId();
 	}
 }
