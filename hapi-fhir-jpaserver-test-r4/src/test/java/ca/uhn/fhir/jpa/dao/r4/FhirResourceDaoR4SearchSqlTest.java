@@ -7,6 +7,7 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -150,7 +151,7 @@ public class FhirResourceDaoR4SearchSqlTest extends BaseJpaR4Test {
 
 		myCaptureQueriesListener.clear();
 		SearchParameterMap map = SearchParameterMap.newSynchronous(Patient.SP_NAME, new StringParam("FOO"));
-		myPatientDao.search(map);
+		myPatientDao.search(map, mySrd);
 		assertEquals(1, myCaptureQueriesListener.countSelectQueries());
 		String sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(false, false);
 		assertEquals("SELECT t0.RES_ID FROM HFJ_SPIDX_STRING t0 WHERE ((t0.HASH_NORM_PREFIX = ?) AND (t0.SP_VALUE_NORMALIZED LIKE ?))", sql);
@@ -167,7 +168,7 @@ public class FhirResourceDaoR4SearchSqlTest extends BaseJpaR4Test {
 		SearchParameterMap map = SearchParameterMap.newSynchronous()
 			.add(Patient.SP_NAME, new StringParam("FOO"))
 			.add(Patient.SP_GENDER, new TokenParam("a", "b"));
-		myPatientDao.search(map);
+		myPatientDao.search(map, mySrd);
 		assertEquals(1, myCaptureQueriesListener.countSelectQueries());
 		String sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(false, false);
 		assertEquals("SELECT t1.RES_ID FROM HFJ_RESOURCE t1 INNER JOIN HFJ_SPIDX_STRING t0 ON (t1.RES_ID = t0.RES_ID) INNER JOIN HFJ_SPIDX_TOKEN t2 ON (t1.RES_ID = t2.RES_ID) WHERE (((t0.HASH_NORM_PREFIX = ?) AND (t0.SP_VALUE_NORMALIZED LIKE ?)) AND (t2.HASH_SYS_AND_VALUE = ?))", sql);
@@ -204,6 +205,20 @@ public class FhirResourceDaoR4SearchSqlTest extends BaseJpaR4Test {
 		assertThat(toUnqualifiedVersionlessIds(outcome)).containsExactly(id);
 
 	}
+
+	@Test
+	public void testSortJoin() {
+
+		myCaptureQueriesListener.clear();
+		SearchParameterMap map = SearchParameterMap.newSynchronous(Patient.SP_NAME, new StringParam("smith"));
+		map.setSort(new SortSpec(Patient.SP_NAME));
+		myPatientDao.search(map, mySrd);
+		assertEquals(1, myCaptureQueriesListener.countSelectQueries());
+		String sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(false, false);
+		assertEquals("SELECT t1.RES_ID FROM HFJ_RESOURCE t1 INNER JOIN HFJ_SPIDX_STRING t0 ON (t1.RES_ID = t0.RES_ID) WHERE ((t0.HASH_NORM_PREFIX = ?) AND (t0.SP_VALUE_NORMALIZED LIKE ?)) ORDER BY t0.SP_VALUE_NORMALIZED ASC NULLS LAST", sql);
+
+	}
+
 
 	@Test
 	public void testSearchByProfile_InlineMode() {
