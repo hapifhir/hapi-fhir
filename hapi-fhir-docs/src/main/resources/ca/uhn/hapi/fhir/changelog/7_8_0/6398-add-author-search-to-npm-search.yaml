@@ -2,4 +2,4 @@
 type: add
 issue: 6398
 title: "The NPM package search module has been enhanced to support searching by
-  the package author attribute."
+  the package author and the package version attributes."

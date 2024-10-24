@@ -56,7 +56,7 @@ import java.util.List;
 public class NpmPackageVersionEntity {
 
 	public static final int VERSION_ID_LENGTH = 200;
-	public static final int PACKAGE_DESC_LENGTH = 200;
+	public static final int PACKAGE_DESC_LENGTH = 512;
 	public static final int FHIR_VERSION_LENGTH = 10;
 	public static final int FHIR_VERSION_ID_LENGTH = 20;
 

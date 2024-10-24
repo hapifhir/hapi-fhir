@@ -797,7 +797,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 		if (isNotBlank(thePackageSearchSpec.getDescription())) {
 			String searchTerm = "%" + thePackageSearchSpec.getDescription() + "%";
 			searchTerm = StringUtil.normalizeStringForSearchIndexing(searchTerm);
-			predicates.add(theCb.like(theRoot.get("myDescriptionUpper"), searchTerm));
+			predicates.add(theCb.like(theCb.upper(theRoot.get("myDescriptionUpper")), searchTerm));
 		}
 
 		if (isNotBlank(thePackageSearchSpec.getAuthor())) {

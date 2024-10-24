@@ -134,11 +134,19 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		version.onTable("NPM_PACKAGE_VER")
 				.addColumn("20241023.10", "PKG_AUTHOR")
 				.nullable()
-				.type(ColumnTypeEnum.STRING, 200);
+				.type(ColumnTypeEnum.STRING, 512);
 		version.onTable("NPM_PACKAGE_VER")
 				.addColumn("20241023.20", "AUTHOR_UPPER")
 				.nullable()
-				.type(ColumnTypeEnum.STRING, 200);
+				.type(ColumnTypeEnum.STRING, 512);
+		version.onTable("NPM_PACKAGE_VER")
+				.modifyColumn("20241023.30", "PKG_DESC")
+				.nullable()
+				.withType(ColumnTypeEnum.STRING, 512);
+		version.onTable("NPM_PACKAGE_VER")
+				.modifyColumn("20241023.30", "DESC_UPPER")
+				.nullable()
+				.withType(ColumnTypeEnum.STRING, 512);
 	}
 
 	protected void init740() {
