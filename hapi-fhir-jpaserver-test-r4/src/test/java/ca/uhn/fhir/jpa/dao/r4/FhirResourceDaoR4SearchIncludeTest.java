@@ -411,7 +411,7 @@ public class FhirResourceDaoR4SearchIncludeTest extends BaseJpaR4Test {
 		// backdate the Group and CareTeam
 		int updatedCount = new TransactionTemplate(myTxManager).execute((status)->
 			myEntityManager
-				.createQuery("update ResourceTable set myUpdated = :new_updated where myId in (:target_ids)")
+				.createQuery("update ResourceTable set myUpdated = :new_updated where myPid.myId in (:target_ids)")
 				.setParameter("new_updated", Date.from(now.minus(1, ChronoUnit.HOURS)))
 				.setParameter("target_ids", List.of(groupId.getIdPartAsLong(), careTeam.getIdPartAsLong(), org.getIdPartAsLong()))
 				.executeUpdate());

@@ -744,7 +744,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			ourLog.info("Resources:\n * {}", myResourceTableDao
 				.findAll()
 				.stream()
-				.sorted(((o1, o2) -> (int) (o1.getId() - o2.getId())))
+				.sorted(((o1, o2) -> (int) (o1.getId().getId() - o2.getId().getId())))
 				.map(t->t.getId() + " - " + t.getIdDt().toUnqualifiedVersionless().getValue())
 				.collect(Collectors.joining("\n * ")));
 		});

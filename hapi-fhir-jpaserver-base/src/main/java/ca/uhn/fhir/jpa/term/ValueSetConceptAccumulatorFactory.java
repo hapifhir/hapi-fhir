@@ -24,6 +24,7 @@ import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDesignationDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetDao;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
+import jakarta.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class ValueSetConceptAccumulatorFactory {
@@ -40,9 +41,12 @@ public class ValueSetConceptAccumulatorFactory {
 	@Autowired
 	private JpaStorageSettings myStorageSettings;
 
+	@Autowired
+	private EntityManager myEntityManager;
+
 	public ValueSetConceptAccumulator create(TermValueSet theTermValueSet) {
 		ValueSetConceptAccumulator valueSetConceptAccumulator = new ValueSetConceptAccumulator(
-				theTermValueSet, myValueSetDao, myValueSetConceptDao, myValueSetConceptDesignationDao);
+				theTermValueSet, myEntityManager, myValueSetConceptDao, myValueSetConceptDesignationDao);
 
 		valueSetConceptAccumulator.setSupportLegacyLob(myStorageSettings.isWriteToLegacyLobColumns());
 

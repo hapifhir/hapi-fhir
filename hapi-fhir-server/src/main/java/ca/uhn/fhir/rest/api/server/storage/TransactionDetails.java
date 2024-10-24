@@ -242,9 +242,9 @@ public class TransactionDetails {
 	 * the TransactionDetails if they are known to exist and be valid targets for other resources to link to.
 	 */
 	public void addResolvedMatchUrl(
-			FhirContext theFhirContext, String theConditionalUrl, @Nonnull IResourcePersistentId thePersistentId) {
-		Validate.notBlank(theConditionalUrl);
-		Validate.notNull(thePersistentId);
+			FhirContext theFhirContext, String theConditionalUrl, @Nonnull IResourcePersistentId<?> thePersistentId) {
+		Validate.notBlank(theConditionalUrl, "theConditionalUrl must not be blank");
+		Validate.notNull(thePersistentId, "thePersistentId must not be null");
 
 		if (myResolvedMatchUrls.isEmpty()) {
 			myResolvedMatchUrls = new HashMap<>();

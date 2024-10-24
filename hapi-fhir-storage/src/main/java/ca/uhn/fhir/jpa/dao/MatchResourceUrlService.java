@@ -118,6 +118,7 @@ public class MatchResourceUrlService<T extends IResourcePersistentId> {
 		}
 
 		T resolvedInCache = processMatchUrlUsingCacheOnly(resourceType, matchUrl);
+		ourLog.debug("Resolving match URL from cache {} found: {}", theMatchUrl, resolvedInCache);
 		if (resolvedInCache != null) {
 			retVal = Collections.singleton(resolvedInCache);
 		}

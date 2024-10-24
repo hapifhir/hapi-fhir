@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.term;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
@@ -115,7 +116,7 @@ public class TermCodeSystemStorageSvcTest extends BaseJpaR4Test {
 		validateCodeSystemUpdates(expectedCnt + 1);
 
 		// Try duplicating the CodeSystem
-		Long originalResId = codeSystemResourceEntity.getId();
+		JpaPid originalResId = codeSystemResourceEntity.getId();
 		try {
 			myCodeSystemDao.create(theDuplicate, mySrd);
 			fail();

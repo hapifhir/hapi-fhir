@@ -35,7 +35,7 @@ import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 
-import jakarta.annotation.Nonnull;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -98,28 +98,28 @@ public class CrossPartitionReferencesTest extends BaseJpaR5Test {
 		Patient p1 = new Patient();
 		p1.setActive(true);
 		IIdType patient1Id = myPatientDao.create(p1, mySrd).getId().toUnqualifiedVersionless();
-
 		initializeCrossReferencesInterceptor();
+		logAllResources();
 
+		// Test
 		myCaptureQueriesListener.clear();
 		Patient p2 = new Patient();
 		p2.setActive(true);
 		p2.addLink().setOther(new Reference(patient1Id));
-
-		// Test
-		myCaptureQueriesListener.clear();
 		IIdType patient2Id = myPatientDao.create(p2, mySrd).getId().toUnqualifiedVersionless();
 
 		// Verify
-		myCaptureQueriesListener.logSelectQueries();
 		assertEquals(1, myCaptureQueriesListener.countCommits());
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 
+		myCaptureQueriesListener.clear();
 		SearchParameterMap params = SearchParameterMap
 			.newSynchronous(Constants.PARAM_ID, new TokenParam(patient2Id.getValue()))
 			.addInclude(Patient.INCLUDE_LINK);
 		IBundleProvider search = myPatientDao.search(params, mySrd);
-		assertThat(toUnqualifiedVersionlessIdValues(search)).containsExactly(patient2Id.getValue(), patient1Id.getValue());
+		List<String> values = toUnqualifiedVersionlessIdValues(search);
+		myCaptureQueriesListener.logSelectQueries();
+		assertThat(values).containsExactly(patient2Id.getValue(), patient1Id.getValue());
 		assertThat(search.getAllResources()).hasSize(2);
 		search.getAllResources().forEach(p -> assertTrue(((Patient) p).getActive()));
 	}

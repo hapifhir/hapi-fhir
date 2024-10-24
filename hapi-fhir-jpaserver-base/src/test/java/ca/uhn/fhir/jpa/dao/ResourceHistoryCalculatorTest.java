@@ -124,7 +124,7 @@ class ResourceHistoryCalculatorTest {
 	@MethodSource("conditionallyAlterHistoryEntityArguments")
 	void conditionallyAlterHistoryEntity_usesVarcharForOracle(boolean theIsOracle, ResourceEncodingEnum theResourceEncoding, String theResourceText) {
 		final ResourceTable resourceTable = new ResourceTable();
-		resourceTable.setId(123L);
+		resourceTable.setIdForUnitTest(123L);
 
 		final ResourceHistoryTable resourceHistoryTable = new ResourceHistoryTable();
 		resourceHistoryTable.setVersion(1);

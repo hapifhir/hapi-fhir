@@ -23,8 +23,11 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.config.HapiFhirHibernateJpaDialect;
 import ca.uhn.fhir.jpa.config.HapiFhirLocalContainerEntityManagerFactoryBean;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.util.ISequenceValueMassager;
 import ca.uhn.fhir.util.ReflectionUtil;
+import ca.uhn.hapi.fhir.sql.hibernatesvc.HapiHibernateDialectSettingsService;
 import jakarta.persistence.spi.PersistenceUnitInfo;
 import org.hibernate.boot.registry.BootstrapServiceRegistry;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
@@ -36,6 +39,9 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 
 import java.util.Map;
+import java.util.Properties;
+
+import static org.apache.commons.lang3.StringUtils.defaultString;
 
 public final class HapiEntityManagerFactoryUtil {
 	private HapiEntityManagerFactoryUtil() {}
@@ -53,6 +59,16 @@ public final class HapiEntityManagerFactoryUtil {
 				new HapiFhirLocalContainerEntityManagerFactoryBean(myConfigurableListableBeanFactory);
 
 		configureEntityManagerFactory(retVal, theFhirContext, theStorageSettings);
+
+		PartitionSettings partitionSettings = myConfigurableListableBeanFactory.getBean(PartitionSettings.class);
+		if (partitionSettings.isPartitionIdsInPrimaryKeys()) {
+			Properties properties = new Properties();
+			properties.put(JpaConstants.HAPI_INCLUDE_PARTITION_IDS_IN_PKS, Boolean.toString(true));
+			// Despite the setter name, the method below just merges this property in,
+			// so it won't get overwritten later or overwrite other properties
+			retVal.setJpaProperties(properties);
+		}
+
 		return retVal;
 	}
 
@@ -78,8 +94,20 @@ public final class HapiEntityManagerFactoryUtil {
 		 */
 		@Override
 		protected EntityManagerFactoryBuilder getEntityManagerFactoryBuilder(
-				PersistenceUnitInfo info, Map<?, ?> integration) {
-			return new MyEntityManagerFactoryBuilderImpl(info, integration);
+				PersistenceUnitInfo info, Map<?, ?> theIntegration) {
+
+			String includePartitionIdsInPksString =
+					(String) theIntegration.get(JpaConstants.HAPI_INCLUDE_PARTITION_IDS_IN_PKS);
+			includePartitionIdsInPksString = defaultString(
+					includePartitionIdsInPksString, JpaConstants.HAPI_INCLUDE_PARTITION_IDS_IN_PKS_DEFAULT);
+			boolean includePartitionIdsInPks = Boolean.parseBoolean(includePartitionIdsInPksString);
+
+			return new MyEntityManagerFactoryBuilderImpl(info, theIntegration) {
+				@Override
+				protected boolean isIncludePartitionIdsInPks() {
+					return includePartitionIdsInPks;
+				}
+			};
 		}
 
 		/**
@@ -92,17 +120,29 @@ public final class HapiEntityManagerFactoryUtil {
 		 * seems to work in Hibernate 6, so we now have to manually register it.
 		 */
 		private class MyEntityManagerFactoryBuilderImpl extends EntityManagerFactoryBuilderImpl {
-			public MyEntityManagerFactoryBuilderImpl(PersistenceUnitInfo theInfo, Map<?, ?> theIntegration) {
+
+			@SuppressWarnings({"unchecked", "rawtypes"})
+			private MyEntityManagerFactoryBuilderImpl(PersistenceUnitInfo theInfo, Map<?, ?> theIntegration) {
 				super(new PersistenceUnitInfoDescriptor(theInfo), (Map) theIntegration);
 			}
 
 			@Override
-			protected StandardServiceRegistryBuilder getStandardServiceRegistryBuilder(BootstrapServiceRegistry bsr) {
-				StandardServiceRegistryBuilder retVal = super.getStandardServiceRegistryBuilder(bsr);
+			protected StandardServiceRegistryBuilder getStandardServiceRegistryBuilder(
+					BootstrapServiceRegistry theBootstrapServiceRegistry) {
+				HapiHibernateDialectSettingsService service = new HapiHibernateDialectSettingsService();
+				service.setTrimConditionalIdsFromPrimaryKeys(!isIncludePartitionIdsInPks());
+
+				StandardServiceRegistryBuilder retVal =
+						super.getStandardServiceRegistryBuilder(theBootstrapServiceRegistry);
 				ISequenceValueMassager sequenceValueMassager =
 						ReflectionUtil.newInstance(myStorageSettings.getSequenceValueMassagerClass());
 				retVal.addService(ISequenceValueMassager.class, sequenceValueMassager);
+				retVal.addService(HapiHibernateDialectSettingsService.class, service);
 				return retVal;
+			}
+
+			protected boolean isIncludePartitionIdsInPks() {
+				return false;
 			}
 		}
 	}

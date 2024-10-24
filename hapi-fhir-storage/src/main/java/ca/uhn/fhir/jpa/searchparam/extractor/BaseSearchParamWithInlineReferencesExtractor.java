@@ -48,7 +48,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-public abstract class BaseSearchParamWithInlineReferencesExtractor<T extends IResourcePersistentId>
+public abstract class BaseSearchParamWithInlineReferencesExtractor<T extends IResourcePersistentId<?>>
 		implements ISearchParamWithInlineReferencesExtractor {
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseSearchParamWithInlineReferencesExtractor.class);
 

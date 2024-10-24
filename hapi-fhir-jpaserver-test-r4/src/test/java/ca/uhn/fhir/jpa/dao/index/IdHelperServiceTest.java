@@ -110,7 +110,7 @@ public class IdHelperServiceTest {
 
 		// test
 		Map<String, JpaPid> map = myHelperService.resolveResourcePersistentIds(
-			partitionId,
+                partitionId,
 			resourceType,
 			patientIdsToResolve);
 
@@ -140,7 +140,7 @@ public class IdHelperServiceTest {
 
 		// test
 		Map<String, JpaPid> map = myHelperService.resolveResourcePersistentIds(
-			partitionId,
+                partitionId,
 			resourceType,
 			patientIdsToResolve
 		);

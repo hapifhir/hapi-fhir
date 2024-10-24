@@ -151,8 +151,7 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc, IHas
 		// are,
 		// so, as code system deletion also deletes versions, we try the system first but if not present we also try
 		// versions
-		TermCodeSystem termCodeSystemToDelete =
-				myCodeSystemDao.findByResourcePid(theCodeSystemToDelete.getResourceId());
+		TermCodeSystem termCodeSystemToDelete = myCodeSystemDao.findByResourcePid(theCodeSystemToDelete.getId());
 		if (termCodeSystemToDelete != null) {
 			termCodeSystemToDelete.setCodeSystemUri("urn:uuid:" + UUID.randomUUID());
 			myCodeSystemDao.save(termCodeSystemToDelete);
@@ -161,7 +160,7 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc, IHas
 		}
 
 		List<TermCodeSystemVersion> codeSystemVersionsToDelete =
-				myCodeSystemVersionDao.findByCodeSystemResourcePid(theCodeSystemToDelete.getResourceId());
+				myCodeSystemVersionDao.findByCodeSystemResourcePid(theCodeSystemToDelete.getId());
 		for (TermCodeSystemVersion codeSystemVersionToDelete : codeSystemVersionsToDelete) {
 			if (codeSystemVersionToDelete != null) {
 				myDeferredCodeSystemVersionsDeletions.add(codeSystemVersionToDelete);
@@ -193,7 +192,7 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc, IHas
 		while (codeCount < count && myDeferredConcepts.size() > 0) {
 			TermConcept next = myDeferredConcepts.remove(0);
 			if (myCodeSystemVersionDao
-					.findById(next.getCodeSystemVersion().getPid())
+					.findById(next.getCodeSystemVersion().getId())
 					.isPresent()) {
 				try {
 					codeCount += myTermConceptDaoSvc.saveConcept(next);
@@ -233,11 +232,11 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc, IHas
 
 				if ((next.getChild().getId() == null
 								|| !myConceptDao
-										.findById(next.getChild().getId())
+										.findById(next.getChild().getPid())
 										.isPresent())
 						|| (next.getParent().getId() == null
 								|| !myConceptDao
-										.findById(next.getParent().getId())
+										.findById(next.getParent().getPid())
 										.isPresent())) {
 					ourLog.warn(
 							"Not inserting link from child {} to parent {} because it appears to have been deleted",
@@ -437,6 +436,7 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc, IHas
 		return retVal;
 	}
 
+	@Override
 	public boolean isJobsExecuting() {
 		cleanseEndedJobs();
 

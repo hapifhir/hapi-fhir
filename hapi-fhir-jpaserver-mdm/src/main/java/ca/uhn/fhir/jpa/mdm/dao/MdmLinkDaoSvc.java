@@ -53,7 +53,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-public class MdmLinkDaoSvc<P extends IResourcePersistentId, M extends IMdmLink<P>> {
+public class MdmLinkDaoSvc<P extends IResourcePersistentId<?>, M extends IMdmLink<P>> {
 
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
 

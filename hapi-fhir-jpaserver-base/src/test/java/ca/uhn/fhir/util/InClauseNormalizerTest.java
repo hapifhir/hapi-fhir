@@ -1,5 +1,6 @@
 package ca.uhn.fhir.util;
 
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.util.InClauseNormalizer;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -14,16 +15,16 @@ import static java.util.Collections.unmodifiableList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class InClauseNormalizerTest {
-	private static final Long ourResourceId = 1L;
-	private static final Long ourPaddingValue = -1L;
+	private static final JpaPid ourResourceId = JpaPid.fromId(1L);
+	private static final JpaPid ourPaddingValue = JpaPid.fromId(-1L);
 
 	@ParameterizedTest
 	@MethodSource("arguments")
 	public void testNormalizeUnmodifiableList_willCreateNewListAndPadToSize(int theInitialListSize, int theExpectedNormalizedListSize) {
-		List<Long> initialList = new ArrayList<>(nCopies(theInitialListSize, ourResourceId));
+		List<JpaPid> initialList = new ArrayList<>(nCopies(theInitialListSize, ourResourceId));
 		initialList = unmodifiableList(initialList);
 
-		List<Long> normalizedList = InClauseNormalizer.normalizeIdListForInClause(initialList);
+		List<JpaPid> normalizedList = InClauseNormalizer.normalizeIdListForInClause(initialList);
 
 		assertNormalizedList(initialList, normalizedList, theInitialListSize, theExpectedNormalizedListSize);
 	}
@@ -31,23 +32,23 @@ public class InClauseNormalizerTest {
 	@ParameterizedTest
 	@MethodSource("arguments")
 	public void testNormalizeListToSizeAndPad(int theInitialListSize, int theExpectedNormalizedListSize) {
-		List<Long> initialList = new ArrayList<>(nCopies(theInitialListSize, ourResourceId));
+		List<JpaPid> initialList = new ArrayList<>(nCopies(theInitialListSize, ourResourceId));
 
-		List<Long> normalizedList = InClauseNormalizer.normalizeIdListForInClause(initialList);
+		List<JpaPid> normalizedList = InClauseNormalizer.normalizeIdListForInClause(initialList);
 
 		assertNormalizedList(initialList, normalizedList, theInitialListSize, theExpectedNormalizedListSize);
 	}
 
-	private void assertNormalizedList(List<Long> theInitialList, List<Long> theNormalizedList, int theInitialListSize, int theExpectedNormalizedListSize) {
-		List<Long> expectedPaddedSubList = new ArrayList<>(nCopies(theExpectedNormalizedListSize - theInitialListSize, ourPaddingValue));
+	private void assertNormalizedList(List<JpaPid> theInitialList, List<JpaPid> theNormalizedList, int theInitialListSize, int theExpectedNormalizedListSize) {
+		List<JpaPid> expectedPaddedSubList = new ArrayList<>(nCopies(theExpectedNormalizedListSize - theInitialListSize, ourPaddingValue));
 
 		assertThat(theNormalizedList).startsWith(listToArray(theInitialList));
 		assertThat(theNormalizedList).hasSize(theExpectedNormalizedListSize);
 		assertThat(theNormalizedList).endsWith(listToArray(expectedPaddedSubList));
 	}
 
-	static Long[] listToArray(List<Long> theList) {
-		return theList.toArray(new Long[0]);
+	static JpaPid[] listToArray(List<JpaPid> theList) {
+		return theList.toArray(new JpaPid[0]);
 	}
 
 	private static Stream<Arguments> arguments(){

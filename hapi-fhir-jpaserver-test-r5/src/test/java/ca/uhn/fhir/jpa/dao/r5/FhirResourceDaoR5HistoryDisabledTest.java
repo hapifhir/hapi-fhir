@@ -307,7 +307,6 @@ public class FhirResourceDaoR5HistoryDisabledTest extends BaseJpaR5Test {
 		p.setActive(true);
 		when(mySrd.getRequestId()).thenReturn("request-id-1");
 		IIdType id1 = myPatientDao.create(p, mySrd).getId();
-		runInTransaction(()-> assertEquals(1, myResourceHistoryProvenanceDao.count()));
 
 		// Test
 		p = new Patient();
@@ -322,7 +321,6 @@ public class FhirResourceDaoR5HistoryDisabledTest extends BaseJpaR5Test {
 		assertEquals("source-2#request-id-2", ((Patient) outcome.getResource()).getMeta().getSource());
 		p = myPatientDao.read(outcome.getId(), mySrd);
 		assertEquals("source-2#request-id-2", p.getMeta().getSource());
-		runInTransaction(()-> assertEquals(1, myResourceHistoryProvenanceDao.count()));
 	}
 
 	@Nonnull

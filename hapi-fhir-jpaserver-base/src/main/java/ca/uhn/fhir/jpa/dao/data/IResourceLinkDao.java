@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.dao.data;
 
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -30,14 +31,14 @@ import java.util.List;
 public interface IResourceLinkDao extends JpaRepository<ResourceLink, Long>, IHapiFhirJpaRepository {
 
 	@Modifying
-	@Query("DELETE FROM ResourceLink t WHERE t.mySourceResourcePid = :resId")
-	void deleteByResourceId(@Param("resId") Long theResourcePid);
+	@Query("DELETE FROM ResourceLink t WHERE t.mySourceResource.myPid = :resId")
+	void deleteByResourceId(@Param("resId") JpaPid theResourcePid);
 
-	@Query("SELECT t FROM ResourceLink t WHERE t.mySourceResourcePid = :resId")
-	List<ResourceLink> findAllForSourceResourceId(@Param("resId") Long thePatientId);
+	@Query("SELECT t FROM ResourceLink t WHERE t.mySourceResource.myPid = :resId")
+	List<ResourceLink> findAllForSourceResourceId(@Param("resId") JpaPid thePatientId);
 
-	@Query("SELECT t FROM ResourceLink t WHERE t.myTargetResourcePid in :resIds")
-	List<ResourceLink> findWithTargetPidIn(@Param("resIds") List<Long> thePids);
+	@Query("SELECT t FROM ResourceLink t WHERE t.myTargetResource.myPid in :resIds")
+	List<ResourceLink> findWithTargetPidIn(@Param("resIds") List<JpaPid> thePids);
 
 	/**
 	 * Loads a collection of ResourceLink entities by PID, but also  eagerly fetches

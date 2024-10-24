@@ -37,7 +37,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -118,47 +119,33 @@ public class ResourceVersionSvcDaoImpl implements IResourceVersionSvc {
 	private ResourcePersistentIdMap getIdsOfExistingResources(
 			RequestPartitionId thePartitionId, Collection<IIdType> theIds) {
 		// these are the found Ids that were in the db
-		ResourcePersistentIdMap retval = new ResourcePersistentIdMap();
+		ResourcePersistentIdMap retVal = new ResourcePersistentIdMap();
 
 		if (theIds == null || theIds.isEmpty()) {
-			return retval;
+			return retVal;
 		}
+
+		Map<String, IIdType> idValueToId = theIds.stream()
+				.collect(Collectors.toMap(t -> t.toUnqualifiedVersionless().getValue(), t -> t));
 
 		List<JpaPid> jpaPids =
 				myIdHelperService.resolveResourcePersistentIdsWithCache(thePartitionId, new ArrayList<>(theIds));
 
-		// we'll use this map to fetch pids that require versions
-		HashMap<Long, JpaPid> pidsToVersionToResourcePid = new HashMap<>();
+		Collection<Object[]> resourceEntries = myResourceTableDao.getResourceVersionsForPid(jpaPids);
 
-		// fill in our map
-		for (JpaPid pid : jpaPids) {
-			if (pid.getVersion() == null) {
-				pidsToVersionToResourcePid.put(pid.getId(), pid);
-			}
-			Optional<IIdType> idOp = theIds.stream()
-					.filter(i ->
-							i.getIdPart().equals(pid.getAssociatedResourceId().getIdPart()))
-					.findFirst();
-			// this should always be present
-			// since it was passed in.
-			// but land of optionals...
-			idOp.ifPresent(id -> retval.put(id, pid));
+		for (Object[] nextRecord : resourceEntries) {
+			// order matters!
+			JpaPid retPid = (JpaPid) nextRecord[0];
+			String resType = (String) nextRecord[1];
+			String fhirId = (String) nextRecord[2];
+			Long version = (Long) nextRecord[3];
+
+			retPid.setVersion(version);
+
+			IIdType originalId = idValueToId.get(resType + "/" + fhirId);
+			retVal.put(originalId, retPid);
 		}
 
-		// set any versions we don't already have
-		if (!pidsToVersionToResourcePid.isEmpty()) {
-			Collection<Object[]> resourceEntries =
-					myResourceTableDao.getResourceVersionsForPid(new ArrayList<>(pidsToVersionToResourcePid.keySet()));
-
-			for (Object[] nextRecord : resourceEntries) {
-				// order matters!
-				Long retPid = (Long) nextRecord[0];
-				String resType = (String) nextRecord[1];
-				Long version = (Long) nextRecord[2];
-				pidsToVersionToResourcePid.get(retPid).setVersion(version);
-			}
-		}
-
-		return retval;
+		return retVal;
 	}
 }

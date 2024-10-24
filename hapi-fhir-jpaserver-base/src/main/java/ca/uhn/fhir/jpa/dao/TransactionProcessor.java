@@ -358,7 +358,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			CriteriaBuilder cb = myEntityManager.getCriteriaBuilder();
 			CriteriaQuery<Tuple> cq = cb.createTupleQuery();
 			Root<ResourceIndexedSearchParamToken> from = cq.from(ResourceIndexedSearchParamToken.class);
-			cq.multiselect(from.get("myResourcePid"), from.get(theIndexColumnName));
+			cq.multiselect(from.get("myPartitionIdValue"), from.get("myResourcePid"), from.get(theIndexColumnName));
 
 			Predicate masterPredicate;
 			if (theHashesForIndexColumn.size() == 1) {
@@ -402,21 +402,20 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			List<Tuple> results = query.getResultList();
 
 			for (Tuple nextResult : results) {
-				Long nextResourcePid = nextResult.get(0, Long.class);
-				Long nextHash = nextResult.get(1, Long.class);
+				Integer nextPartitionId = nextResult.get(0, Integer.class);
+				Long nextResourcePid = nextResult.get(1, Long.class);
+				Long nextHash = nextResult.get(2, Long.class);
+
 				List<MatchUrlToResolve> matchedSearch = hashToSearchMap.get(nextHash);
 				matchedSearch.forEach(matchUrl -> {
 					ourLog.debug("Matched url {} from database", matchUrl.myRequestUrl);
 					if (matchUrl.myShouldPreFetchResourceBody) {
 						theOutputPidsToLoadFully.add(nextResourcePid);
 					}
+					JpaPid pid = JpaPid.fromId(nextResourcePid, nextPartitionId);
 					myMatchResourceUrlService.matchUrlResolved(
-							theTransactionDetails,
-							matchUrl.myResourceDefinition.getName(),
-							matchUrl.myRequestUrl,
-							JpaPid.fromId(nextResourcePid));
-					theTransactionDetails.addResolvedMatchUrl(
-							myFhirContext, matchUrl.myRequestUrl, JpaPid.fromId(nextResourcePid));
+							theTransactionDetails, matchUrl.myResourceDefinition.getName(), matchUrl.myRequestUrl, pid);
+					theTransactionDetails.addResolvedMatchUrl(myFhirContext, matchUrl.myRequestUrl, pid);
 					matchUrl.setResolved(true);
 				});
 			}

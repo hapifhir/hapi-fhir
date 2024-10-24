@@ -41,28 +41,42 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class PreventDanglingInterceptorsExtension implements BeforeEachCallback, AfterEachCallback {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(PreventDanglingInterceptorsExtension.class);
-	private final Supplier<IInterceptorService> myInterceptorServiceSuplier;
+	private final Supplier<IInterceptorService> myIInterceptorServiceSupplier;
 	private List<Object> myBeforeInterceptors;
 
-	public PreventDanglingInterceptorsExtension(Supplier<IInterceptorService> theInterceptorServiceSuplier) {
-		myInterceptorServiceSuplier = theInterceptorServiceSuplier;
+	public PreventDanglingInterceptorsExtension(Supplier<IInterceptorService> theIInterceptorServiceSupplier) {
+		myIInterceptorServiceSupplier = theIInterceptorServiceSupplier;
 	}
 
 	@Override
 	public void beforeEach(ExtensionContext theExtensionContext) throws Exception {
-		myBeforeInterceptors = myInterceptorServiceSuplier.get().getAllRegisteredInterceptors();
+		myBeforeInterceptors = myIInterceptorServiceSupplier.get().getAllRegisteredInterceptors();
 
-		ourLog.info("Registered interceptors:\n * " + myBeforeInterceptors.stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
+		ourLog.info("Registered interceptors:\n * {}", myBeforeInterceptors.stream().map(Object::toString).collect(Collectors.joining("\n * ")));
 	}
 
 	@Override
 	public void afterEach(ExtensionContext theExtensionContext) throws Exception {
-		List<Object> afterInterceptors = myInterceptorServiceSuplier.get().getAllRegisteredInterceptors();
-		Map<Object, Object> delta = new IdentityHashMap<>();
-		afterInterceptors.forEach(t -> delta.put(t, t));
-		myBeforeInterceptors.forEach(t -> delta.remove(t));
-		delta.keySet().forEach(t->myInterceptorServiceSuplier.get().unregisterInterceptor(t));
-		assertThat(delta.isEmpty()).as(() -> "Test added interceptor(s) and did not clean them up:\n * " + delta.keySet().stream().map(t -> t.toString()).collect(Collectors.joining("\n * "))).isTrue();
+		List<Object> afterInterceptors = myIInterceptorServiceSupplier.get().getAllRegisteredInterceptors();
 
+		// Handle interceptors added by the test
+		{
+			Map<Object, Object> delta = new IdentityHashMap<>();
+			afterInterceptors.forEach(t -> delta.put(t, t));
+			myBeforeInterceptors.forEach(delta::remove);
+			delta.keySet().forEach(t -> myIInterceptorServiceSupplier.get().unregisterInterceptor(t));
+			assertThat(delta.isEmpty()).as(() -> "Test added interceptor(s) and did not clean them up:\n * " + delta.keySet().stream().map(Object::toString).collect(Collectors.joining("\n * "))).isTrue();
+		}
+
+		// Handle interceptors removed by the test
+		{
+			IdentityHashMap<Object, Object> delta = new IdentityHashMap<>();
+			myBeforeInterceptors.forEach(t -> delta.put(t, t));
+			afterInterceptors.forEach(t -> delta.remove(t, t));
+			for (Object t : delta.keySet()) {
+				ourLog.warn("Interceptor {} was removed by test, re-adding", t);
+				myIInterceptorServiceSupplier.get().registerInterceptor(t);
+			}
+		}
 	}
 }

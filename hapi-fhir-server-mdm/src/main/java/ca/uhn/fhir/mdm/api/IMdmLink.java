@@ -24,7 +24,7 @@ import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 
 import java.util.Date;
 
-public interface IMdmLink<T extends IResourcePersistentId> {
+public interface IMdmLink<T extends IResourcePersistentId<?>> {
 	T getId();
 
 	IMdmLink<T> setId(T theId);

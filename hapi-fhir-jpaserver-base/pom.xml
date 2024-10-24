@@ -80,6 +80,11 @@
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-jpa-hibernate-services</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-jpaserver-model</artifactId>
 			<version>${project.version}</version>
 		</dependency>
@@ -406,7 +411,7 @@
 			<groupId>com.jayway.jsonpath</groupId>
 			<artifactId>json-path</artifactId>
 		</dependency>
-	</dependencies>
+    </dependencies>
 
 	<build>
 		<plugins>
@@ -528,9 +533,24 @@
 				<version>${project.version}</version>
 				<executions>
 					<execution>
+						<id>non-partitioned-ids</id>
 						<goals>
 							<goal>generate-ddl</goal>
 						</goals>
+						<configuration>
+							<trimConditionalIdsFromPrimaryKeys>true</trimConditionalIdsFromPrimaryKeys>
+							<outputDirectory>${project.build.directory}/classes/ca/uhn/hapi/fhir/jpa/docs/database/nonpartitioned</outputDirectory>
+						</configuration>
+					</execution>
+					<execution>
+						<id>partitioned-ids</id>
+						<goals>
+							<goal>generate-ddl</goal>
+						</goals>
+						<configuration>
+							<trimConditionalIdsFromPrimaryKeys>false</trimConditionalIdsFromPrimaryKeys>
+							<outputDirectory>${project.build.directory}/classes/ca/uhn/hapi/fhir/jpa/docs/database/partitioned</outputDirectory>
+						</configuration>
 					</execution>
 				</executions>
 				<configuration>
@@ -573,7 +593,6 @@
 							<appendFile>classpath:ca/uhn/fhir/jpa/docs/database/hapifhirpostgres94-init01.sql</appendFile>
 						</dialect>
 					</dialects>
-					<outputDirectory>${project.build.directory}/classes/ca/uhn/hapi/fhir/jpa/docs/database</outputDirectory>
 				</configuration>
 				<dependencies>
 					<dependency>

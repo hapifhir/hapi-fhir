@@ -42,6 +42,8 @@ import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.search.builder.QueryStack;
 import ca.uhn.fhir.jpa.search.builder.models.MissingQueryParameterPredicateParams;
+import ca.uhn.fhir.jpa.search.builder.sql.ColumnTupleObject;
+import ca.uhn.fhir.jpa.search.builder.sql.JpaPidValueTupleObject;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.ResourceMetaParams;
@@ -64,6 +66,7 @@ import com.google.common.collect.Lists;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
+import com.healthmarketscience.sqlbuilder.InCondition;
 import com.healthmarketscience.sqlbuilder.NotCondition;
 import com.healthmarketscience.sqlbuilder.SelectQuery;
 import com.healthmarketscience.sqlbuilder.UnaryCondition;
@@ -78,7 +81,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -539,8 +541,9 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 			List<Condition> andPredicates = new ArrayList<>();
 
 			List<List<IQueryParameterType>> chainParamValues = Collections.singletonList(orValues);
-			andPredicates.add(
-					childQueryFactory.searchForIdsWithAndOr(with().setSourceJoinColumn(getJoinColumnsForTarget())
+			andPredicates.add(childQueryFactory.searchForIdsWithAndOr(
+					theRequest,
+					with().setSourceJoinColumn(getJoinColumnsForTarget())
 							.setResourceName(subResourceName)
 							.setParamName(chain)
 							.setAndOrParams(chainParamValues)
@@ -802,14 +805,20 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 
 	@Nonnull
 	public Condition createEverythingPredicate(
-			String theResourceName, List<String> theSourceResourceNames, Long... theTargetPids) {
+			String theResourceName, List<String> theSourceResourceNames, JpaPid... theTargetPids) {
 		Condition condition;
 
 		if (theTargetPids != null && theTargetPids.length >= 1) {
 			// if resource ids are provided, we'll create the predicate
 			// with ids in or equal to this value
-			condition = QueryParameterUtils.toEqualToOrInPredicate(
-					myColumnTargetResourceId, generatePlaceholders(Arrays.asList(theTargetPids)));
+			if (getSearchQueryBuilder().isIncludePartitionIdInJoins()) {
+				Object left = ColumnTupleObject.from(getJoinColumnsForTarget());
+				JpaPidValueTupleObject right = JpaPidValueTupleObject.from(getSearchQueryBuilder(), theTargetPids);
+				condition = new InCondition(left, right);
+			} else {
+				condition = QueryParameterUtils.toEqualToOrInPredicate(
+						myColumnTargetResourceId, generatePlaceholders(JpaPid.toLongList(theTargetPids)));
+			}
 		} else {
 			// ... otherwise we look for resource types
 			condition = BinaryCondition.equalTo(myColumnTargetResourceType, generatePlaceholder(theResourceName));

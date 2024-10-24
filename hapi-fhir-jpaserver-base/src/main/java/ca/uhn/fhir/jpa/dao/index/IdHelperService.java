@@ -32,6 +32,7 @@ import ca.uhn.fhir.jpa.model.cross.JpaResourceLookup;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.util.QueryChunker;
@@ -120,6 +121,9 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 
 	@Autowired
 	private PartitionSettings myPartitionSettings;
+
+	@Autowired
+	private IRequestPartitionHelperSvc myPartitionHelperSvc;
 
 	private boolean myDontCheckActiveTransactionForUnitTest;
 
@@ -219,6 +223,11 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 			if (!idRequiresForcedId(id)) {
 				// is already a PID
 				retVal = JpaPid.fromId(Long.parseLong(id));
+				if (theRequestPartitionId.hasPartitionIds()
+						&& !theRequestPartitionId.getPartitionIds().isEmpty()) {
+					retVal.setPartitionId(
+							theRequestPartitionId.getPartitionIds().get(0));
+				}
 				retVals.put(id, retVal);
 			} else {
 				// is a forced id
@@ -380,7 +389,8 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 		 * Only PG, and MSSql support INCLUDE COLUMNS.
 		 * @see AddIndexTask.generateSql
 		 */
-		criteriaQuery.multiselect(from.get("myId"), from.get("myResourceType"), from.get("myFhirId"));
+		criteriaQuery.multiselect(
+				from.get("myPid"), from.get("myPartitionIdValue"), from.get("myResourceType"), from.get("myFhirId"));
 
 		// one create one clause per id.
 		List<Predicate> predicates = new ArrayList<>(theIds.size());
@@ -406,16 +416,17 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 		List<Tuple> results = query.getResultList();
 		for (Tuple nextId : results) {
 			// Check if the nextId has a resource ID. It may have a null resource ID if a commit is still pending.
-			Long resourceId = nextId.get(0, Long.class);
-			String resourceType = nextId.get(1, String.class);
-			String forcedId = nextId.get(2, String.class);
-			if (resourceId != null) {
-				JpaPid jpaPid = JpaPid.fromId(resourceId);
-				populateAssociatedResourceId(resourceType, forcedId, jpaPid);
-				theOutputListToPopulate.add(jpaPid);
+			JpaPid pid = nextId.get(0, JpaPid.class);
+			Integer partitionId = nextId.get(1, Integer.class);
+			String resourceType = nextId.get(2, String.class);
+			String forcedId = nextId.get(3, String.class);
+			if (pid != null && pid.getId() != null) {
+				pid.setPartitionId(partitionId);
+				populateAssociatedResourceId(resourceType, forcedId, pid);
+				theOutputListToPopulate.add(pid);
 
 				String key = toForcedIdToPidKey(theRequestPartitionId, resourceType, forcedId);
-				myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.FORCED_ID_TO_PID, key, jpaPid);
+				myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.FORCED_ID_TO_PID, key, pid);
 			}
 		}
 	}
@@ -469,24 +480,25 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 		if (forcedId.isPresent()) {
 			retVal.setValue(forcedId.get());
 		} else {
-			retVal.setValue(theResourceType + '/' + theId);
+			retVal.setValue(theResourceType + '/' + theId.getId());
 		}
 
 		return retVal;
 	}
 
+	@SuppressWarnings("OptionalAssignedToNull")
 	@Override
 	public Optional<String> translatePidIdToForcedIdWithCache(JpaPid theId) {
 		// do getIfPresent and then put to avoid doing I/O inside the cache.
 		Optional<String> forcedId =
-				myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.PID_TO_FORCED_ID, theId.getId());
+				myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.PID_TO_FORCED_ID, theId);
 
 		if (forcedId == null) {
 			// This is only called when we know the resource exists.
 			// So this optional is only empty when there is no hfj_forced_id table
 			// note: this is obsolete with the new fhir_id column, and will go away.
-			forcedId = myResourceTableDao.findById(theId.getId()).map(ResourceTable::asTypedFhirResourceId);
-			myMemoryCacheService.put(MemoryCacheService.CacheEnum.PID_TO_FORCED_ID, theId.getId(), forcedId);
+			forcedId = myResourceTableDao.findById(theId).map(ResourceTable::asTypedFhirResourceId);
+			myMemoryCacheService.put(MemoryCacheService.CacheEnum.PID_TO_FORCED_ID, theId, forcedId);
 		}
 
 		return forcedId;
@@ -520,12 +532,10 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 		RequestPartitionId requestPartitionId = replaceDefault(theRequestPartitionId);
 
 		if (myStorageSettings.getResourceClientIdStrategy() != JpaStorageSettings.ClientIdStrategyEnum.ANY) {
-			List<Long> pids = theId.stream()
-					.filter(t -> isValidPid(t))
-					.map(IIdType::getIdPartAsLong)
-					.collect(Collectors.toList());
-			if (!pids.isEmpty()) {
-				resolvePids(requestPartitionId, pids, retVal);
+			List<IIdType> numericIds =
+					theId.stream().filter(IdHelperService::isValidPid).collect(Collectors.toList());
+			if (!numericIds.isEmpty()) {
+				resolvePids(requestPartitionId, numericIds, retVal);
 			}
 		}
 
@@ -539,8 +549,8 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 				for (Iterator<String> forcedIdIterator = nextIds.iterator(); forcedIdIterator.hasNext(); ) {
 					String nextForcedId = forcedIdIterator.next();
 					String nextKey = nextResourceType + "/" + nextForcedId;
-					IResourceLookup<JpaPid> cachedLookup =
-							myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.RESOURCE_LOOKUP, nextKey);
+					IResourceLookup<JpaPid> cachedLookup = myMemoryCacheService.getIfPresent(
+							MemoryCacheService.CacheEnum.RESOURCE_LOOKUP_BY_FORCED_ID, nextKey);
 					if (cachedLookup != null) {
 						forcedIdIterator.remove();
 						retVal.computeIfAbsent(nextForcedId, id -> new ArrayList<>())
@@ -589,7 +599,8 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 
 					if (!myStorageSettings.isDeleteEnabled()) {
 						String key = resourceType + "/" + forcedId;
-						myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.RESOURCE_LOOKUP, key, lookup);
+						myMemoryCacheService.putAfterCommit(
+								MemoryCacheService.CacheEnum.RESOURCE_LOOKUP_BY_FORCED_ID, key, lookup);
 					}
 				}
 			}
@@ -612,34 +623,66 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 
 	private void resolvePids(
 			@Nonnull RequestPartitionId theRequestPartitionId,
-			List<Long> thePidsToResolve,
+			List<IIdType> theIdsToResolve,
 			Map<String, List<IResourceLookup<JpaPid>>> theTargets) {
 		if (!myStorageSettings.isDeleteEnabled()) {
-			for (Iterator<Long> forcedIdIterator = thePidsToResolve.iterator(); forcedIdIterator.hasNext(); ) {
-				Long nextPid = forcedIdIterator.next();
-				String nextKey = Long.toString(nextPid);
-				IResourceLookup<JpaPid> cachedLookup =
-						myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.RESOURCE_LOOKUP, nextKey);
-				if (cachedLookup != null) {
-					forcedIdIterator.remove();
-					theTargets.computeIfAbsent(nextKey, id -> new ArrayList<>()).add(cachedLookup);
+			for (Iterator<IIdType> forcedIdIterator = theIdsToResolve.iterator(); forcedIdIterator.hasNext(); ) {
+				Long nextPid = forcedIdIterator.next().getIdPartAsLong();
+
+				Set<Integer> potentialReadPartitions;
+				if (!myPartitionSettings.isPartitioningEnabled()) {
+					potentialReadPartitions = Collections.singleton(myPartitionSettings.getDefaultPartitionId());
+				} else if (theRequestPartitionId.isAllPartitions()) {
+					potentialReadPartitions = null;
+				} else {
+					potentialReadPartitions = myPartitionHelperSvc.toReadPartitions(theRequestPartitionId);
+				}
+
+				if (potentialReadPartitions != null) {
+					for (Integer nextPotentialReadPartition : potentialReadPartitions) {
+						JpaPid nextKey = JpaPid.fromId(nextPid, nextPotentialReadPartition);
+						IResourceLookup<JpaPid> cachedLookup = myMemoryCacheService.getIfPresent(
+								MemoryCacheService.CacheEnum.RESOURCE_LOOKUP_BY_PID, nextKey);
+						if (cachedLookup != null) {
+							forcedIdIterator.remove();
+							theTargets
+									.computeIfAbsent(nextPid.toString(), id -> new ArrayList<>())
+									.add(cachedLookup);
+							break;
+						}
+					}
 				}
 			}
 		}
 
-		if (!thePidsToResolve.isEmpty()) {
+		if (!theIdsToResolve.isEmpty()) {
 			Collection<Object[]> lookup;
-			if (theRequestPartitionId.isAllPartitions()) {
-				lookup = myResourceTableDao.findLookupFieldsByResourcePid(thePidsToResolve);
+
+			if (myPartitionSettings.isPartitionIdsInPrimaryKeys()) {
+				List<JpaPid> pids = new ArrayList<>(theIdsToResolve.size());
+				for (IIdType id : theIdsToResolve) {
+					Set<Integer> partitions = myPartitionHelperSvc.toReadPartitions(theRequestPartitionId);
+					for (Integer partition : partitions) {
+						pids.add(JpaPid.fromId(id.getIdPartAsLong(), partition));
+					}
+				}
+				lookup = myResourceTableDao.findLookupFieldsByResourcePidWithPartitionId(pids);
 			} else {
-				if (theRequestPartitionId.isDefaultPartition()) {
-					lookup = myResourceTableDao.findLookupFieldsByResourcePidInPartitionNull(thePidsToResolve);
-				} else if (theRequestPartitionId.hasDefaultPartitionId()) {
-					lookup = myResourceTableDao.findLookupFieldsByResourcePidInPartitionIdsOrNullPartition(
-							thePidsToResolve, theRequestPartitionId.getPartitionIdsWithoutDefault());
+
+				List<Long> pids =
+						theIdsToResolve.stream().map(IIdType::getIdPartAsLong).collect(Collectors.toList());
+				if (!myPartitionSettings.isPartitioningEnabled() || theRequestPartitionId.isAllPartitions()) {
+					lookup = myResourceTableDao.findLookupFieldsByResourcePid(pids);
 				} else {
-					lookup = myResourceTableDao.findLookupFieldsByResourcePidInPartitionIds(
-							thePidsToResolve, theRequestPartitionId.getPartitionIds());
+					if (theRequestPartitionId.isDefaultPartition()) {
+						lookup = myResourceTableDao.findLookupFieldsByResourcePidInPartitionNull(pids);
+					} else if (theRequestPartitionId.hasDefaultPartitionId()) {
+						lookup = myResourceTableDao.findLookupFieldsByResourcePidInPartitionIdsOrNullPartition(
+								pids, theRequestPartitionId.getPartitionIdsWithoutDefault());
+					} else {
+						lookup = myResourceTableDao.findLookupFieldsByResourcePidInPartitionIds(
+								pids, theRequestPartitionId.getPartitionIds());
+					}
 				}
 			}
 			lookup.stream()
@@ -649,15 +692,15 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 							(Date) t[2],
 							PartitionablePartitionId.with((Integer) t[3], (LocalDate) t[4])))
 					.forEach(t -> {
-						String id = t.getPersistentId().toString();
+						String id = t.getPersistentId().getId().toString();
 						if (!theTargets.containsKey(id)) {
 							theTargets.put(id, new ArrayList<>());
 						}
 						theTargets.get(id).add(t);
 						if (!myStorageSettings.isDeleteEnabled()) {
-							String nextKey = t.getPersistentId().toString();
+							JpaPid nextKey = t.getPersistentId();
 							myMemoryCacheService.putAfterCommit(
-									MemoryCacheService.CacheEnum.RESOURCE_LOOKUP, nextKey, t);
+									MemoryCacheService.CacheEnum.RESOURCE_LOOKUP_BY_PID, nextKey, t);
 						}
 					});
 		}
@@ -666,18 +709,17 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 	@Override
 	public PersistentIdToForcedIdMap<JpaPid> translatePidsToForcedIds(Set<JpaPid> theResourceIds) {
 		assert myDontCheckActiveTransactionForUnitTest || TransactionSynchronizationManager.isSynchronizationActive();
-		Set<Long> thePids = theResourceIds.stream().map(JpaPid::getId).collect(Collectors.toSet());
-		Map<Long, Optional<String>> retVal = new HashMap<>(
-				myMemoryCacheService.getAllPresent(MemoryCacheService.CacheEnum.PID_TO_FORCED_ID, thePids));
+		HashMap<JpaPid, Optional<String>> retVal = new HashMap<>(
+				myMemoryCacheService.getAllPresent(MemoryCacheService.CacheEnum.PID_TO_FORCED_ID, theResourceIds));
 
-		List<Long> remainingPids =
-				thePids.stream().filter(t -> !retVal.containsKey(t)).collect(Collectors.toList());
+		List<JpaPid> remainingPids =
+				theResourceIds.stream().filter(t -> !retVal.containsKey(t)).collect(Collectors.toList());
 
-		new QueryChunker<Long>().chunk(remainingPids, t -> {
+		new QueryChunker<JpaPid>().chunk(remainingPids, t -> {
 			List<ResourceTable> resourceEntities = myResourceTableDao.findAllById(t);
 
 			for (ResourceTable nextResourceEntity : resourceEntities) {
-				Long nextResourcePid = nextResourceEntity.getId();
+				JpaPid nextResourcePid = nextResourceEntity.getPersistentId();
 				Optional<String> nextForcedId = Optional.of(nextResourceEntity.asTypedFhirResourceId());
 				retVal.put(nextResourcePid, nextForcedId);
 				myMemoryCacheService.putAfterCommit(
@@ -685,14 +727,14 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 			}
 		});
 
-		remainingPids = thePids.stream().filter(t -> !retVal.containsKey(t)).collect(Collectors.toList());
-		for (Long nextResourcePid : remainingPids) {
+		remainingPids =
+				theResourceIds.stream().filter(t -> !retVal.containsKey(t)).collect(Collectors.toList());
+		for (JpaPid nextResourcePid : remainingPids) {
 			retVal.put(nextResourcePid, Optional.empty());
 			myMemoryCacheService.putAfterCommit(
 					MemoryCacheService.CacheEnum.PID_TO_FORCED_ID, nextResourcePid, Optional.empty());
 		}
-		Map<JpaPid, Optional<String>> convertRetVal = new HashMap<>();
-		retVal.forEach((k, v) -> convertRetVal.put(JpaPid.fromId(k), v));
+		Map<JpaPid, Optional<String>> convertRetVal = new HashMap<>(retVal);
 
 		return new PersistentIdToForcedIdMap<>(convertRetVal);
 	}
@@ -714,20 +756,19 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 
 			myMemoryCacheService.putAfterCommit(
 					MemoryCacheService.CacheEnum.PID_TO_FORCED_ID,
-					theJpaPid.getId(),
+					theJpaPid,
 					Optional.of(theResourceType + "/" + theForcedId));
 			String key = toForcedIdToPidKey(theRequestPartitionId, theResourceType, theForcedId);
 			myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.FORCED_ID_TO_PID, key, theJpaPid);
 		} else {
 			myMemoryCacheService.putAfterCommit(
-					MemoryCacheService.CacheEnum.PID_TO_FORCED_ID, theJpaPid.getId(), Optional.empty());
+					MemoryCacheService.CacheEnum.PID_TO_FORCED_ID, theJpaPid, Optional.empty());
 		}
 
 		if (!myStorageSettings.isDeleteEnabled()) {
 			JpaResourceLookup lookup = new JpaResourceLookup(
 					theResourceType, theJpaPid.getId(), theDeletedAt, theJpaPid.getPartitionablePartitionId());
-			String nextKey = theJpaPid.toString();
-			myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.RESOURCE_LOOKUP, nextKey, lookup);
+			myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.RESOURCE_LOOKUP_BY_PID, theJpaPid, lookup);
 		}
 	}
 
@@ -759,6 +800,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 	@Override
 	@Nullable
 	public JpaPid getPidOrNull(@Nonnull RequestPartitionId theRequestPartitionId, IBaseResource theResource) {
+
 		Object resourceId = theResource.getUserData(RESOURCE_PID);
 		JpaPid retVal;
 		if (resourceId == null) {
@@ -769,7 +811,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 				retVal = null;
 			}
 		} else {
-			retVal = JpaPid.fromId(Long.parseLong(resourceId.toString()));
+			retVal = (JpaPid) resourceId;
 		}
 		return retVal;
 	}
@@ -788,19 +830,19 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 	@Override
 	@Nonnull
 	public JpaPid getPidOrThrowException(@Nonnull IAnyResource theResource) {
-		Long theResourcePID = (Long) theResource.getUserData(RESOURCE_PID);
+		JpaPid theResourcePID = (JpaPid) theResource.getUserData(RESOURCE_PID);
 		if (theResourcePID == null) {
 			throw new IllegalStateException(Msg.code(2108)
 					+ String.format(
 							"Unable to find %s in the user data for %s with ID %s",
 							RESOURCE_PID, theResource, theResource.getId()));
 		}
-		return JpaPid.fromId(theResourcePID);
+		return theResourcePID;
 	}
 
 	@Override
 	public IIdType resourceIdFromPidOrThrowException(JpaPid thePid, String theResourceType) {
-		Optional<ResourceTable> optionalResource = myResourceTableDao.findById(thePid.getId());
+		Optional<ResourceTable> optionalResource = myResourceTableDao.findById(thePid);
 		if (optionalResource.isEmpty()) {
 			throw new ResourceNotFoundException(Msg.code(2124) + "Requested resource not found");
 		}
@@ -833,7 +875,9 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 	}
 
 	@Override
-	public JpaPid newPidFromStringIdAndResourceName(String thePid, String theResourceName) {
-		return JpaPid.fromIdAndResourceType(Long.parseLong(thePid), theResourceName);
+	public JpaPid newPidFromStringIdAndResourceName(Integer thePartitionId, String thePid, String theResourceName) {
+		JpaPid retVal = JpaPid.fromId(Long.parseLong(thePid), thePartitionId);
+		retVal.setResourceType(theResourceName);
+		return retVal;
 	}
 }

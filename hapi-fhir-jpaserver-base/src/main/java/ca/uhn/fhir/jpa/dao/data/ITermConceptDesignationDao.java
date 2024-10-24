@@ -20,13 +20,14 @@
 package ca.uhn.fhir.jpa.dao.data;
 
 import ca.uhn.fhir.jpa.entity.TermConceptDesignation;
+import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface ITermConceptDesignationDao
-		extends JpaRepository<TermConceptDesignation, Long>, IHapiFhirJpaRepository {
+		extends JpaRepository<TermConceptDesignation, IdAndPartitionId>, IHapiFhirJpaRepository {
 
 	@Modifying
 	@Query("DELETE FROM TermConceptDesignation WHERE myCodeSystemVersion.myId = :csv_pid")

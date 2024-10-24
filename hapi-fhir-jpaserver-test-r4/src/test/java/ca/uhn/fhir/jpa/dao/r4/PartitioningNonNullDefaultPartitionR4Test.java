@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.submit.interceptor.SearchParamValidatingInterceptor;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -32,6 +33,10 @@ public class PartitioningNonNullDefaultPartitionR4Test extends BasePartitioningR
 		super.before();
 
 		myPartitionSettings.setDefaultPartitionId(1);
+
+		// This test relies on this interceptor already being in place, which it should be unless
+		// another test misbehaved
+		assertEquals(1, myInterceptorRegistry.getAllRegisteredInterceptors().stream().filter(t->t instanceof SearchParamValidatingInterceptor).count());
 	}
 
 	@AfterEach

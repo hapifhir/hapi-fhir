@@ -26,8 +26,10 @@ import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.IdClass;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinColumns;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import org.apache.commons.lang3.Validate;
@@ -69,6 +71,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 					columnList = "RES_ID",
 					unique = false)
 		})
+@IdClass(IdAndPartitionId.class)
 public class ResourceIndexedComboStringUnique extends BaseResourceIndexedCombo
 		implements Comparable<ResourceIndexedComboStringUnique>, IResourceIndexComboSearchParameter {
 
@@ -84,14 +87,28 @@ public class ResourceIndexedComboStringUnique extends BaseResourceIndexedCombo
 	@Column(name = "PID")
 	private Long myId;
 
-	@ManyToOne
-	@JoinColumn(
-			name = "RES_ID",
-			referencedColumnName = "RES_ID",
+	@ManyToOne(
+			optional = false,
+			cascade = {})
+	@JoinColumns(
+			value = {
+				@JoinColumn(
+						name = "RES_ID",
+						referencedColumnName = "RES_ID",
+						insertable = false,
+						updatable = false,
+						nullable = true),
+				@JoinColumn(
+						name = "PARTITION_ID",
+						referencedColumnName = "PARTITION_ID",
+						insertable = false,
+						updatable = false,
+						nullable = true)
+			},
 			foreignKey = @ForeignKey(name = "FK_IDXCMPSTRUNIQ_RES_ID"))
 	private ResourceTable myResource;
 
-	@Column(name = "RES_ID", insertable = false, updatable = false)
+	@Column(name = "RES_ID", updatable = false, nullable = true)
 	private Long myResourceId;
 
 	// TODO: These hashes were added in 7.4.0 - They aren't used or indexed yet, but
@@ -129,13 +146,6 @@ public class ResourceIndexedComboStringUnique extends BaseResourceIndexedCombo
 
 	@Column(name = "IDX_STRING", nullable = false, length = MAX_STRING_LENGTH)
 	private String myIndexString;
-
-	/**
-	 * This is here to support queries only, do not set this field directly
-	 */
-	@SuppressWarnings("unused")
-	@Column(name = PartitionablePartitionId.PARTITION_ID, insertable = false, updatable = false, nullable = true)
-	private Integer myPartitionIdValue;
 
 	/**
 	 * Constructor
@@ -186,6 +196,11 @@ public class ResourceIndexedComboStringUnique extends BaseResourceIndexedCombo
 		myIndexString = source.myIndexString;
 		myHashComplete = source.myHashComplete;
 		myHashComplete2 = source.myHashComplete2;
+	}
+
+	@Override
+	public void setResourceId(Long theResourceId) {
+		myResourceId = theResourceId;
 	}
 
 	@Override

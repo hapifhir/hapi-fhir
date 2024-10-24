@@ -25,7 +25,6 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.UploadStatistics;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ValueSet;
@@ -49,7 +48,6 @@ public interface ITermCodeSystemStorageSvc {
 	}
 
 	void storeNewCodeSystemVersion(
-			IResourcePersistentId theCodeSystemResourcePid,
 			String theSystemUri,
 			String theSystemName,
 			String theSystemVersionId,
@@ -62,7 +60,6 @@ public interface ITermCodeSystemStorageSvc {
 	 */
 	@Transactional
 	default void storeNewCodeSystemVersion(
-			IResourcePersistentId theCodeSystemResourcePid,
 			String theSystemUri,
 			String theSystemName,
 			String theSystemVersionId,
@@ -70,7 +67,6 @@ public interface ITermCodeSystemStorageSvc {
 			ResourceTable theCodeSystemResourceTable) {
 
 		storeNewCodeSystemVersion(
-				theCodeSystemResourcePid,
 				theSystemUri,
 				theSystemName,
 				theSystemVersionId,

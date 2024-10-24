@@ -33,6 +33,7 @@ import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.BasePartitionable;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.IResourceIndexComboSearchParameter;
+import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboTokenNonUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
@@ -735,7 +736,8 @@ public class SearchParamExtractorService {
 			} else {
 				// Cache the outcome in the current transaction in case there are more references
 				JpaPid persistentId = JpaPid.fromId(resourceLink.getTargetResourcePid());
-				persistentId.setPartitionablePartitionId(resourceLink.getTargetResourcePartitionId());
+				persistentId.setPartitionablePartitionId(PartitionablePartitionId.with(
+						resourceLink.getTargetResourcePartitionId(), resourceLink.getTargetResourcePartitionDate()));
 				theTransactionDetails.addResolvedResourceId(referenceElement, persistentId);
 			}
 
@@ -986,8 +988,7 @@ public class SearchParamExtractorService {
 				.setTargetResourceId(targetResourceIdPart)
 				.setUpdated(theUpdateTime)
 				.setTargetResourceVersion(targetVersion)
-				.setTargetResourcePartitionablePartitionId(
-						targetResource.getPersistentId().getPartitionablePartitionId());
+				.setTargetResourcePartitionablePartitionId(targetResource.getPartitionId());
 
 		return forLocalReference(params);
 	}

@@ -43,14 +43,18 @@ import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
 import ca.uhn.fhir.jpa.api.model.LazyDaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.dao.data.IResourceHistoryProvenanceDao;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictUtil;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.model.entity.BaseTag;
+import ca.uhn.fhir.jpa.model.entity.IBaseResourceEntity;
+import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
+import ca.uhn.fhir.jpa.model.entity.ResourceHistoryProvenanceEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.TagDefinition;
@@ -122,6 +126,7 @@ import jakarta.persistence.NoResultException;
 import jakarta.persistence.TypedQuery;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.function.TriFunction;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseMetaType;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
@@ -152,7 +157,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
-import java.util.function.BiFunction;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -203,6 +207,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	@Autowired
 	private IJobCoordinator myJobCoordinator;
+
+	@Autowired
+	private IResourceHistoryProvenanceDao myResourceHistoryProvenanceDao;
 
 	private IInstanceValidatorModule myInstanceValidator;
 	private String myResourceName;
@@ -413,6 +420,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		if (isNotBlank(theMatchUrl) && theProcessMatchUrl) {
 			Set<JpaPid> match = myMatchResourceUrlService.processMatchUrl(
 					theMatchUrl, myResourceType, theTransactionDetails, theRequest);
+			ourLog.trace("Resolving match URL {} found: {}", theMatchUrl, match);
 			if (match.size() > 1) {
 				String msg = getContext()
 						.getLocalizer()
@@ -464,7 +472,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					 */
 
 					Supplier<LazyDaoMethodOutcome.EntityAndResource> entitySupplier = () -> myTxTemplate.execute(tx -> {
-						ResourceTable foundEntity = myEntityManager.find(ResourceTable.class, pid.getId());
+						ResourceTable foundEntity = myEntityManager.find(ResourceTable.class, pid);
 						IBaseResource resource = myJpaStorageResourceParser.toResource(foundEntity, false);
 						theResource.setId(resource.getIdElement().getValue());
 						return new LazyDaoMethodOutcome.EntityAndResource(foundEntity, resource);
@@ -475,7 +483,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 							Long version = myMemoryCacheService.getIfPresent(
 									MemoryCacheService.CacheEnum.RESOURCE_CONDITIONAL_CREATE_VERSION, pid.getId());
 							if (version == null) {
-								version = myResourceTableDao.findCurrentVersionByPid(pid.getId());
+								version = myResourceTableDao.findCurrentVersionByPid(pid);
 								if (version != null) {
 									myMemoryCacheService.putAfterCommit(
 											MemoryCacheService.CacheEnum.RESOURCE_CONDITIONAL_CREATE_VERSION,
@@ -560,7 +568,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				thePerformIndexing);
 
 		// Store the resource forced ID if necessary
-		JpaPid jpaPid = JpaPid.fromId(updatedEntity.getResourceId());
+		JpaPid jpaPid = updatedEntity.getId();
 
 		// Populate the resource with its actual final stored ID from the entity
 		theResource.setId(entity.getIdDt());
@@ -737,7 +745,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					Msg.code(961) + "Trying to delete " + theId + " but this is not the current version");
 		}
 
-		JpaPid persistentId = JpaPid.fromId(entity.getResourceId());
+		JpaPid persistentId = entity.getId();
 		theTransactionDetails.addDeletedResourceId(persistentId);
 
 		// Don't delete again if it's already deleted
@@ -921,7 +929,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			JpaPid jpaPid = (JpaPid) pid;
 
 			// This shouldn't actually need to hit the DB because we pre-fetch above
-			ResourceTable entity = myEntityManager.find(ResourceTable.class, jpaPid.getId());
+			ResourceTable entity = myEntityManager.find(ResourceTable.class, jpaPid);
 			deletedResources.add(entity);
 
 			T resourceToDelete = myJpaStorageResourceParser.toResource(myResourceType, entity, null, false);
@@ -1020,7 +1028,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	private <MT extends IBaseMetaType> void doMetaAdd(
 			MT theMetaAdd,
-			BaseHasResource theEntity,
+			BaseHasResource<?> theEntity,
 			RequestDetails theRequestDetails,
 			TransactionDetails theTransactionDetails) {
 		IBaseResource oldVersion = myJpaStorageResourceParser.toResource(theEntity, false);
@@ -1029,7 +1037,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		for (TagDefinition nextDef : tags) {
 
 			boolean entityHasTag = false;
-			for (BaseTag next : new ArrayList<>(theEntity.getTags())) {
+			for (BaseTag next : theEntity.getTags()) {
 				if (Objects.equals(next.getTag().getTagType(), nextDef.getTagType())
 						&& Objects.equals(next.getTag().getSystem(), nextDef.getSystem())
 						&& Objects.equals(next.getTag().getCode(), nextDef.getCode())
@@ -1164,11 +1172,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			IIdType theId, ExpungeOptions theExpungeOptions, RequestDetails theRequest) {
 		TransactionTemplate txTemplate = new TransactionTemplate(myPlatformTransactionManager);
 
-		BaseHasResource entity = txTemplate.execute(t -> readEntity(theId, theRequest));
+		BaseHasResource<?> entity = txTemplate.execute(t -> readEntity(theId, theRequest));
 		Validate.notNull(entity, "Resource with ID %s not found in database", theId);
 
 		if (theId.hasVersionIdPart()) {
-			BaseHasResource currentVersion;
+			BaseHasResource<?> currentVersion;
 			currentVersion = txTemplate.execute(t -> readEntity(theId.toVersionless(), theRequest));
 			Validate.notNull(
 					currentVersion,
@@ -1181,15 +1189,15 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 								+ theId.toUnqualified().getValue() + " as this is the current version");
 			}
 
-			return myExpungeService.expunge(
-					getResourceName(),
-					JpaPid.fromIdAndVersion(entity.getResourceId(), entity.getVersion()),
-					theExpungeOptions,
-					theRequest);
+			return myExpungeService.expunge(getResourceName(), entity.getResourceId(), theExpungeOptions, theRequest);
 		}
 
-		return myExpungeService.expunge(
-				getResourceName(), JpaPid.fromId(entity.getResourceId()), theExpungeOptions, theRequest);
+		// Downstream code expects the version to be null in the JpaPid if we're not
+		// doing a version specific expunge
+		JpaPid resourceId = entity.getResourceId();
+		resourceId = JpaPid.fromId(resourceId.getId(), resourceId.getPartitionId());
+
+		return myExpungeService.expunge(getResourceName(), resourceId, theExpungeOptions, theRequest);
 	}
 
 	@Override
@@ -1245,7 +1253,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					return myPersistedJpaBundleProviderFactory.history(
 							theRequest,
 							myResourceName,
-							entity.getId(),
+							entity.getResourceId(),
 							theSince,
 							theUntil,
 							theOffset,
@@ -1275,7 +1283,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					return myPersistedJpaBundleProviderFactory.history(
 							theRequest,
 							myResourceName,
-							entity.getId(),
+							entity.getResourceId(),
 							theHistorySearchDateRangeParam.getLowerBoundAsInstant(),
 							theHistorySearchDateRangeParam.getUpperBoundAsInstant(),
 							theHistorySearchDateRangeParam.getOffset(),
@@ -1368,15 +1376,16 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			throw new ResourceNotFoundException(Msg.code(1993) + theResourceId);
 		}
 
-		ResourceTable latestVersion = readEntityLatestVersion(theResourceId, theRequestPartitionId, transactionDetails);
+		ResourceTable latestVersion =
+				readEntityLatestVersion(theRequest, theResourceId, theRequestPartitionId, transactionDetails);
 		if (latestVersion.getVersion() != entity.getVersion()) {
 			doMetaAdd(theMetaAdd, entity, theRequest, transactionDetails);
 		} else {
 			doMetaAdd(theMetaAdd, latestVersion, theRequest, transactionDetails);
 
 			// Also update history entry
-			ResourceHistoryTable history = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(
-					entity.getId(), entity.getVersion());
+			ResourceHistoryTable history =
+					myResourceHistoryTableDao.findForIdAndVersion(entity.getResourceId(), entity.getVersion());
 			doMetaAdd(theMetaAdd, history, theRequest, transactionDetails);
 		}
 
@@ -1414,7 +1423,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			throw new ResourceNotFoundException(Msg.code(1994) + theResourceId);
 		}
 
-		ResourceTable latestVersion = readEntityLatestVersion(theResourceId, theRequestPartitionId, transactionDetails);
+		ResourceTable latestVersion =
+				readEntityLatestVersion(theRequest, theResourceId, theRequestPartitionId, transactionDetails);
 		boolean nonVersionedTags =
 				myStorageSettings.getTagStorageMode() != JpaStorageSettings.TagStorageModeEnum.VERSIONED;
 
@@ -1423,8 +1433,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		} else {
 			doMetaDelete(theMetaDel, latestVersion, theRequest, transactionDetails);
 			// Also update history entry
-			ResourceHistoryTable history = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(
-					entity.getId(), entity.getVersion());
+			ResourceHistoryTable history =
+					myResourceHistoryTableDao.findForIdAndVersion(entity.getResourceId(), entity.getVersion());
 			doMetaDelete(theMetaDel, history, theRequest, transactionDetails);
 		}
 
@@ -1435,7 +1445,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	public <MT extends IBaseMetaType> MT metaGetOperation(Class<MT> theType, IIdType theId, RequestDetails theRequest) {
 		return myTransactionService.withRequest(theRequest).execute(() -> {
 			Set<TagDefinition> tagDefs = new HashSet<>();
-			BaseHasResource entity = readEntity(theId, theRequest);
+			BaseHasResource<?> entity = readEntity(theId, theRequest);
 			for (BaseTag next : entity.getTags()) {
 				tagDefs.add(next.getTag());
 			}
@@ -1502,7 +1512,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		StopWatch w = new StopWatch();
 		JpaPid jpaPid = (JpaPid) thePid;
 
-		Optional<ResourceTable> entity = myResourceTableDao.findById(jpaPid.getId());
+		Optional<ResourceTable> entity = myResourceTableDao.findById(jpaPid);
 		if (entity.isEmpty()) {
 			throw new ResourceNotFoundException(Msg.code(975) + "No resource found with PID " + jpaPid);
 		}
@@ -1549,10 +1559,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		assert TransactionSynchronizationManager.isActualTransactionActive();
 
 		StopWatch w = new StopWatch();
-		BaseHasResource entity = readEntity(theId, true, theRequest, theRequestPartitionId);
+		BaseHasResource<?> entity = readEntity(theId, true, theRequest, theRequestPartitionId);
 		validateResourceType(entity);
 
-		T retVal = myJpaStorageResourceParser.toResource(myResourceType, entity, null, false);
+		T retVal = myJpaStorageResourceParser.toResource(
+				myResourceType, (IBaseResourceEntity<JpaPid>) entity, null, false);
 
 		if (!theDeletedOk) {
 			if (isDeleted(entity)) {
@@ -1622,9 +1633,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		// We use the main entity as the lock object since all the index rows hang off it.
 		ResourceTable entity;
 		if (theReindexParameters.isOptimisticLock()) {
-			entity = myEntityManager.find(ResourceTable.class, jpaPid.getId(), LockModeType.OPTIMISTIC);
+			entity = myEntityManager.find(ResourceTable.class, jpaPid, LockModeType.OPTIMISTIC);
 		} else {
-			entity = myEntityManager.find(ResourceTable.class, jpaPid.getId());
+			entity = myEntityManager.find(ResourceTable.class, jpaPid);
 		}
 
 		if (entity == null) {
@@ -1694,7 +1705,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				int pageSize = 100;
 				for (int page = 0; ((long) page * pageSize) < entity.getVersion(); page++) {
 					Slice<ResourceHistoryTable> historyEntities =
-							myResourceHistoryTableDao.findForResourceIdAndReturnEntitiesAndFetchProvenance(
+							myResourceHistoryTableDao.findAllVersionsExceptSpecificForResourcePid(
 									PageRequest.of(page, pageSize), entity.getId(), historyEntity.getVersion());
 					for (ResourceHistoryTable next : historyEntities) {
 						reindexOptimizeStorageHistoryEntity(entity, next);
@@ -1716,11 +1727,18 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				}
 			}
 		}
-		if (isBlank(historyEntity.getSourceUri()) && isBlank(historyEntity.getRequestId())) {
-			if (historyEntity.getProvenance() != null) {
-				historyEntity.setSourceUri(historyEntity.getProvenance().getSourceUri());
-				historyEntity.setRequestId(historyEntity.getProvenance().getRequestId());
-				changed = true;
+		if (myStorageSettings.isAccessMetaSourceInformationFromProvenanceTable()) {
+			if (isBlank(historyEntity.getSourceUri()) && isBlank(historyEntity.getRequestId())) {
+				IdAndPartitionId id = historyEntity.getId().asIdAndPartitionId();
+				Optional<ResourceHistoryProvenanceEntity> provenanceEntityOpt =
+						myResourceHistoryProvenanceDao.findById(id);
+				if (provenanceEntityOpt.isPresent()) {
+					ResourceHistoryProvenanceEntity provenanceEntity = provenanceEntityOpt.get();
+					historyEntity.setSourceUri(provenanceEntity.getSourceUri());
+					historyEntity.setRequestId(provenanceEntity.getRequestId());
+					myResourceHistoryProvenanceDao.delete(provenanceEntity);
+					changed = true;
+				}
 			}
 		}
 		if (changed) {
@@ -1728,19 +1746,19 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 	}
 
-	private BaseHasResource readEntity(
+	private BaseHasResource<?> readEntity(
 			IIdType theId,
 			boolean theCheckForForcedId,
 			RequestDetails theRequest,
 			RequestPartitionId requestPartitionId) {
 		validateResourceTypeAndThrowInvalidRequestException(theId);
 
-		BaseHasResource entity;
+		BaseHasResource<?> entity;
 		JpaPid pid = myIdHelperService.resolveResourcePersistentIds(
 				requestPartitionId, getResourceName(), theId.getIdPart());
 		Set<Integer> readPartitions = null;
 		if (requestPartitionId.isAllPartitions()) {
-			entity = myEntityManager.find(ResourceTable.class, pid.getId());
+			entity = myEntityManager.find(ResourceTable.class, pid);
 		} else {
 			readPartitions = myRequestPartitionHelperService.toReadPartitions(requestPartitionId);
 			if (readPartitions.size() == 1) {
@@ -1837,7 +1855,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			RequestDetails theRequestDetails,
 			TransactionDetails theTransactionDetails) {
 		JpaPid jpaPid = (JpaPid) thePersistentId;
-		return myEntityManager.find(ResourceTable.class, jpaPid.getId());
+		return myEntityManager.find(ResourceTable.class, jpaPid);
 	}
 
 	@Override
@@ -1850,11 +1868,13 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return myTransactionService
 				.withRequest(theRequestDetails)
 				.withRequestPartitionId(requestPartitionId)
-				.execute(() -> readEntityLatestVersion(theId, requestPartitionId, theTransactionDetails));
+				.execute(() ->
+						readEntityLatestVersion(theRequestDetails, theId, requestPartitionId, theTransactionDetails));
 	}
 
 	@Nonnull
 	private ResourceTable readEntityLatestVersion(
+			RequestDetails theRequestDetails,
 			IIdType theId,
 			@Nonnull RequestPartitionId theRequestPartitionId,
 			TransactionDetails theTransactionDetails) {
@@ -1875,7 +1895,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					theRequestPartitionId, getResourceName(), theId.getIdPart());
 		}
 
-		ResourceTable entity = myEntityManager.find(ResourceTable.class, persistentId.getId());
+		ResourceTable entity = myEntityManager.find(ResourceTable.class, persistentId);
 		if (entity == null) {
 			throw new ResourceNotFoundException(Msg.code(1998) + theId);
 		}
@@ -1894,7 +1914,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	public void removeTag(
 			IIdType theId, TagTypeEnum theTagType, String theScheme, String theTerm, RequestDetails theRequest) {
 		StopWatch w = new StopWatch();
-		BaseHasResource entity = readEntity(theId, theRequest);
+		BaseHasResource<?> entity = readEntity(theId, theRequest);
 		if (entity == null) {
 			throw new ResourceNotFoundException(Msg.code(1999) + theId);
 		}
@@ -2128,7 +2148,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	private <V> List<V> searchForTransformedIds(
 			SearchParameterMap theParams,
 			RequestDetails theRequest,
-			BiFunction<RequestDetails, Stream<JpaPid>, Stream<V>> transform) {
+			TriFunction<RequestDetails, Stream<JpaPid>, RequestPartitionId, Stream<V>> transform) {
 		RequestPartitionId requestPartitionId =
 				myRequestPartitionHelperService.determineReadPartitionForRequestForSearchType(
 						theRequest, myResourceName, theParams);
@@ -2145,7 +2165,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					Stream<JpaPid> pidStream =
 							builder.createQueryStream(theParams, searchRuntimeDetails, theRequest, requestPartitionId);
 
-					Stream<V> transformedStream = transform.apply(theRequest, pidStream);
+					Stream<V> transformedStream = transform.apply(theRequest, pidStream, requestPartitionId);
 
 					return transformedStream.collect(Collectors.toList());
 				});
@@ -2155,12 +2175,14 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	 * Fetch the resources in chunks and apply PreAccess/PreShow interceptors.
 	 */
 	@Nonnull
-	private Stream<T> pidsToResource(RequestDetails theRequest, Stream<JpaPid> pidStream) {
+	private Stream<T> pidsToResource(
+			RequestDetails theRequest, Stream<JpaPid> thePidStream, RequestPartitionId theRequestPartitionId) {
 		ISearchBuilder<JpaPid> searchBuilder =
 				mySearchBuilderFactory.newSearchBuilder(this, getResourceName(), getResourceType());
+
 		@SuppressWarnings("unchecked")
 		Stream<T> resourceStream = (Stream<T>) new QueryChunker<>()
-				.chunk(pidStream, SearchBuilder.getMaximumPageSize())
+				.chunk(thePidStream, SearchBuilder.getMaximumPageSize())
 				.flatMap(pidChunk -> searchBuilder.loadResourcesByPid(pidChunk, theRequest).stream());
 		// apply interceptors
 		return resourceStream
@@ -2172,11 +2194,19 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	 * get the Ids from the ResourceTable entities in chunks.
 	 */
 	@Nonnull
-	private Stream<IIdType> pidsToIds(RequestDetails theRequestDetails, Stream<JpaPid> thePidStream) {
-		Stream<Long> longStream = thePidStream.map(JpaPid::getId);
+	private Stream<IIdType> pidsToIds(
+			RequestDetails theRequestDetails, Stream<JpaPid> thePidStream, RequestPartitionId theRequestPartitionId) {
+
+		Stream<JpaPid> pidStream = thePidStream;
+
+		if (!theRequestPartitionId.isAllPartitions()
+				&& theRequestPartitionId.getPartitionIds().size() == 1) {
+			pidStream = pidStream.map(t -> t.setPartitionIdIfNotAlreadySet(
+					theRequestPartitionId.getPartitionIds().get(0)));
+		}
 
 		return new QueryChunker<>()
-				.chunk(longStream, SearchBuilder.getMaximumPageSize())
+				.chunk(pidStream, SearchBuilder.getMaximumPageSize())
 				.flatMap(ids -> myResourceTableDao.findAllById(ids).stream())
 				.map(ResourceTable::getIdDt);
 	}
@@ -2343,7 +2373,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				throw new PreconditionFailedException(Msg.code(988) + msg);
 			} else if (match.size() == 1) {
 				JpaPid pid = match.iterator().next();
-				entity = myEntityManager.find(ResourceTable.class, pid.getId());
+				entity = myEntityManager.find(ResourceTable.class, pid);
 				resourceId = entity.getIdDt();
 				if (myFhirContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.R4)
 						&& theResource.getIdElement().getIdPart() != null) {
@@ -2405,7 +2435,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 			if (!create) {
 				try {
-					entity = readEntityLatestVersion(resourceId, theRequestPartitionId, theTransactionDetails);
+					entity = readEntityLatestVersion(
+							theRequest, resourceId, theRequestPartitionId, theTransactionDetails);
 				} catch (ResourceNotFoundException e) {
 					create = true;
 				}
@@ -2456,8 +2487,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		 */
 		ResourceTable entity = (ResourceTable) theEntity;
 		if (entity.isSearchUrlPresent()) {
-			myResourceSearchUrlSvc.deleteByResId(
-					(Long) theEntity.getPersistentId().getId());
+			myResourceSearchUrlSvc.deleteByResId(entity.getPersistentId());
 			entity.setSearchUrlPresent(false);
 		}
 
@@ -2501,8 +2531,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		assert resourceId.hasIdPart();
 
 		try {
-			currentEntity =
-					readEntityLatestVersion(resourceId.toVersionless(), theRequestPartitionId, theTransactionDetails);
+			currentEntity = readEntityLatestVersion(
+					theRequest, resourceId.toVersionless(), theRequestPartitionId, theTransactionDetails);
 
 			if (!resourceId.hasVersionIdPart()) {
 				throw new InvalidRequestException(
@@ -2636,7 +2666,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 	}
 
-	private void validateResourceType(BaseHasResource entity) {
+	private void validateResourceType(IBasePersistedResource<?> entity) {
 		validateResourceType(entity, myResourceName);
 	}
 

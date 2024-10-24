@@ -20,25 +20,31 @@
 package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
 import java.util.Date;
 
-public interface IBaseResourceEntity {
+/**
+ * @param <T> The resource PID type
+ */
+public interface IBaseResourceEntity<T> {
 
 	Date getDeleted();
 
 	FhirVersionEnum getFhirVersion();
 
-	Long getId();
+	@Nonnull
+	T getId();
 
 	IdDt getIdDt();
 
 	InstantDt getPublished();
 
-	Long getResourceId();
+	JpaPid getResourceId();
 
 	String getResourceType();
 

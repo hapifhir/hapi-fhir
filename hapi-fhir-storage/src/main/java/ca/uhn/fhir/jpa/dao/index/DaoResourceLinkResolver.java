@@ -34,6 +34,8 @@ import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
+import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.extractor.IResourceLinkResolver;
 import ca.uhn.fhir.jpa.searchparam.extractor.PathAndRef;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -64,7 +66,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-public class DaoResourceLinkResolver<T extends IResourcePersistentId> implements IResourceLinkResolver {
+public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> implements IResourceLinkResolver {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DaoResourceLinkResolver.class);
 
 	@Autowired
@@ -84,6 +86,9 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId> implements
 
 	@Autowired
 	private IHapiTransactionService myTransactionService;
+
+	@Autowired
+	private IRequestPartitionHelperSvc myPartitionHelperSvc;
 
 	@Override
 	public IResourceLookup findTargetResource(
@@ -118,12 +123,18 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId> implements
 			}
 		}
 
-		IResourceLookup resolvedResource;
+		IResourceLookup<?> resolvedResource;
 		String idPart = targetResourceId.getIdPart();
 		try {
 			if (persistentId == null) {
-				resolvedResource =
-						myIdHelperService.resolveResourceIdentity(theRequestPartitionId, resourceType, idPart);
+				RequestPartitionId requestPartitionId =
+						myPartitionHelperSvc.determineReadPartitionForRequestForRead(theRequest, targetResourceId);
+				ourLog.trace(
+						"Searching for candidate target {}/{} in partition: {}",
+						resourceType,
+						idPart,
+						requestPartitionId);
+				resolvedResource = myIdHelperService.resolveResourceIdentity(requestPartitionId, resourceType, idPart);
 				ourLog.trace("Translated {}/{} to resource PID {}", type, idPart, resolvedResource);
 			} else {
 				resolvedResource = new ResourceLookupPersistentIdWrapper(persistentId);
@@ -133,7 +144,6 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId> implements
 			Optional<IBasePersistedResource> createdTableOpt = createPlaceholderTargetIfConfiguredToDoSo(
 					type, targetReference, idPart, theRequest, theTransactionDetails);
 			if (!createdTableOpt.isPresent()) {
-
 				if (!myStorageSettings.isEnforceReferentialIntegrityOnWrite()) {
 					return null;
 				}
@@ -143,6 +153,7 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId> implements
 				throw new InvalidRequestException(Msg.code(1094) + "Resource " + resName + "/" + idPart
 						+ " not found, specified in path: " + sourcePath);
 			}
+
 			resolvedResource = createdTableOpt.get();
 		}
 
@@ -433,6 +444,11 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId> implements
 		@Override
 		public P getPersistentId() {
 			return myPersistentId;
+		}
+
+		@Override
+		public PartitionablePartitionId getPartitionId() {
+			return new PartitionablePartitionId(myPersistentId.getPartitionId(), null);
 		}
 	}
 }

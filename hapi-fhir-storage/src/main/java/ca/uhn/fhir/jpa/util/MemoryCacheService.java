@@ -21,10 +21,12 @@ package ca.uhn.fhir.jpa.util;
 
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.TranslationQuery;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.sl.cache.Cache;
 import ca.uhn.fhir.sl.cache.CacheFactory;
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.springframework.transaction.support.TransactionSynchronization;
@@ -73,7 +75,8 @@ public class MemoryCacheService {
 				case PID_TO_FORCED_ID:
 				case FORCED_ID_TO_PID:
 				case MATCH_URL:
-				case RESOURCE_LOOKUP:
+				case RESOURCE_LOOKUP_BY_PID:
+				case RESOURCE_LOOKUP_BY_FORCED_ID:
 				case HISTORY_COUNT:
 				case TAG_DEFINITION:
 				case RESOURCE_CONDITIONAL_CREATE_VERSION:
@@ -130,7 +133,9 @@ public class MemoryCacheService {
 	}
 
 	public <K, V> void put(CacheEnum theCache, K theKey, V theValue) {
-		assert theCache.getKeyType().isAssignableFrom(theKey.getClass());
+		assert theCache.getKeyType().isAssignableFrom(theKey.getClass())
+				: "Key type " + theKey.getClass() + " doesn't match expected " + theCache.getKeyType() + " for cache "
+						+ theCache;
 		doPut(theCache, theKey, theValue);
 	}
 
@@ -150,6 +155,9 @@ public class MemoryCacheService {
 	 * in order to avoid cache poisoning.
 	 */
 	public <K, V> void putAfterCommit(CacheEnum theCache, K theKey, V theValue) {
+		assert theCache.getKeyType().isAssignableFrom(theKey.getClass())
+				: "Key type " + theKey.getClass() + " doesn't match expected " + theCache.getKeyType() + " for cache "
+						+ theCache;
 		if (TransactionSynchronizationManager.isSynchronizationActive()) {
 			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
 				@Override
@@ -192,14 +200,23 @@ public class MemoryCacheService {
 
 	public enum CacheEnum {
 		TAG_DEFINITION(TagDefinitionCacheKey.class),
-		RESOURCE_LOOKUP(String.class),
+		/**
+		 * Key type: {@literal JpaPid}
+		 * Value type: {@literal JpaResourceLookup}
+		 */
+		RESOURCE_LOOKUP_BY_PID(JpaPid.class),
+		/**
+		 * Key type: {@literal String} containing "resourceType/id"
+		 * Value type: {@literal JpaResourceLookup}
+		 */
+		RESOURCE_LOOKUP_BY_FORCED_ID(String.class),
 		FORCED_ID_TO_PID(String.class),
 		FHIRPATH_EXPRESSION(String.class),
 		/**
 		 * Key type: {@literal Long}
 		 * Value type: {@literal Optional<String>}
 		 */
-		PID_TO_FORCED_ID(Long.class),
+		PID_TO_FORCED_ID(JpaPid.class),
 		/**
 		 * TODO: JA this is duplicate with the CachingValidationSupport cache.
 		 * A better solution would be to drop this cache for this item, and to
@@ -274,14 +291,22 @@ public class MemoryCacheService {
 	public static class HistoryCountKey {
 		private final String myTypeName;
 		private final Long myInstanceId;
+		private final Integer myPartitionId;
 		private final int myHashCode;
 
-		private HistoryCountKey(String theTypeName, Long theInstanceId) {
+		private HistoryCountKey(@Nullable String theTypeName, @Nullable JpaPid theInstanceId) {
 			myTypeName = theTypeName;
-			myInstanceId = theInstanceId;
+			if (theInstanceId != null) {
+				myInstanceId = theInstanceId.getId();
+				myPartitionId = theInstanceId.getPartitionId();
+			} else {
+				myInstanceId = null;
+				myPartitionId = null;
+			}
 			myHashCode = new HashCodeBuilder()
 					.append(myTypeName)
 					.append(myInstanceId)
+					.append(myPartitionId)
 					.toHashCode();
 		}
 
@@ -294,8 +319,7 @@ public class MemoryCacheService {
 			return new HistoryCountKey(theType, null);
 		}
 
-		public static HistoryCountKey forInstance(@Nonnull Long theInstanceId) {
-			assert theInstanceId != null;
+		public static HistoryCountKey forInstance(@Nonnull JpaPid theInstanceId) {
 			return new HistoryCountKey(null, theInstanceId);
 		}
 

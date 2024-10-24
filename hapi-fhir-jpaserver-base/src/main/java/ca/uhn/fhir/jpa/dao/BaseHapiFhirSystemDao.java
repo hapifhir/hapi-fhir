@@ -190,9 +190,9 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 	public <P extends IResourcePersistentId> void preFetchResources(
 			List<P> theResolvedIds, boolean thePreFetchIndexes) {
 		HapiTransactionService.requireTransaction();
-		List<Long> pids = theResolvedIds.stream().map(t -> ((JpaPid) t).getId()).collect(Collectors.toList());
+		List<JpaPid> pids = theResolvedIds.stream().map(t -> ((JpaPid) t)).collect(Collectors.toList());
 
-		new QueryChunker<Long>().chunk(pids, idChunk -> {
+		new QueryChunker<JpaPid>().chunk(pids, idChunk -> {
 
 			/*
 			 * Pre-fetch the resources we're touching in this transaction in mass - this reduced the
@@ -206,7 +206,7 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 			 * However, for realistic average workloads, this should reduce the number of round trips.
 			 */
 			if (idChunk.size() >= 2) {
-				List<ResourceTable> entityChunk = prefetchResourceTableHistoryAndProvenance(idChunk);
+				List<ResourceTable> entityChunk = prefetchResourceTableAndHistory(idChunk);
 
 				if (thePreFetchIndexes) {
 
@@ -244,15 +244,14 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 	}
 
 	@Nonnull
-	private List<ResourceTable> prefetchResourceTableHistoryAndProvenance(List<Long> idChunk) {
+	private List<ResourceTable> prefetchResourceTableAndHistory(List<JpaPid> idChunk) {
 		assert idChunk.size() < SearchConstants.MAX_PAGE_SIZE : "assume pre-chunked";
 
 		Query query = myEntityManager.createQuery("select r, h "
 				+ " FROM ResourceTable r "
 				+ " LEFT JOIN fetch ResourceHistoryTable h "
-				+ "      on r.myVersion = h.myResourceVersion and r.id = h.myResourceId "
-				+ " left join fetch h.myProvenance "
-				+ " WHERE r.myId IN ( :IDS ) ");
+				+ "      on r.myVersion = h.myResourceVersion and r = h.myResourceTable "
+				+ " WHERE r.myPid IN ( :IDS ) ");
 		query.setParameter("IDS", idChunk);
 
 		@SuppressWarnings("unchecked")
@@ -303,7 +302,7 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 			List<ResourceTable> theEntities) {
 
 		// Which entities need this prefetch?
-		List<Long> idSubset = theEntities.stream()
+		List<JpaPid> idSubset = theEntities.stream()
 				.filter(theEntityPredicate)
 				.map(ResourceTable::getId)
 				.collect(Collectors.toList());
@@ -313,7 +312,7 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 			return;
 		}
 
-		String jqlQuery = "FROM ResourceTable r " + theJoinClause + " WHERE r.myId IN ( :IDS )";
+		String jqlQuery = "FROM ResourceTable r " + theJoinClause + " WHERE r.myPid IN ( :IDS )";
 
 		TypedQuery<ResourceTable> query = myEntityManager.createQuery(jqlQuery, ResourceTable.class);
 		query.setParameter("IDS", idSubset);

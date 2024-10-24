@@ -59,4 +59,9 @@ public class JpaResourceLookup implements IResourceLookup<JpaPid> {
 
 		return jpaPid;
 	}
+
+	@Override
+	public PartitionablePartitionId getPartitionId() {
+		return myPartitionablePartitionId;
+	}
 }

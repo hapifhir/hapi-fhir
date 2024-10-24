@@ -1,6 +1,6 @@
-/*
+/*-
  * #%L
- * HAPI FHIR JPA Server
+ * HAPI FHIR JPA Model
  * %%
  * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
@@ -17,17 +17,10 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.dao.data;
+package ca.uhn.fhir.jpa.model.dialect;
 
-import ca.uhn.fhir.jpa.entity.ResourceSearchView;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
+import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 
-import java.util.Collection;
-
-public interface IResourceSearchViewDao extends JpaRepository<ResourceSearchView, Long>, IHapiFhirJpaRepository {
-
-	@Query("SELECT v FROM ResourceSearchView v WHERE v.myResourceId in (:pids)")
-	Collection<ResourceSearchView> findByResourceIds(@Param("pids") Collection<Long> pids);
+public interface IHapiFhirDialect {
+	DriverTypeEnum getDriverType();
 }

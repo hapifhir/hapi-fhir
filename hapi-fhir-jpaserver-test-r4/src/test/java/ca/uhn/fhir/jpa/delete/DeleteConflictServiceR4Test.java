@@ -47,7 +47,7 @@ public class DeleteConflictServiceR4Test extends BaseJpaR4Test {
 
 	@AfterEach
 	public void afterUnregisterInterceptor() {
-		myInterceptorRegistry.unregisterAllInterceptors();
+		myInterceptorRegistry.unregisterInterceptor(myDeleteInterceptor);
 	}
 
 	@Test

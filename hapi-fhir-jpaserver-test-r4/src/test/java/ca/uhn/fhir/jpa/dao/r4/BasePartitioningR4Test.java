@@ -155,6 +155,8 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		mySearchParameterDao.update(sp, mySrd);
 
 		addCreateDefaultPartition();
+		addReadDefaultPartition();
+		addReadDefaultPartition();
 		sp = new SearchParameter();
 		sp.setId("SearchParameter/patient-gender-family-unique");
 		sp.setType(Enumerations.SearchParamType.COMPOSITE);
@@ -198,6 +200,8 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		mySearchParameterDao.update(sp, mySrd);
 
 		addCreateDefaultPartition();
+		addReadDefaultPartition();
+		addReadDefaultPartition();
 		sp = new SearchParameter();
 		sp.setId("SearchParameter/patient-family-and-org");
 		sp.setType(Enumerations.SearchParamType.COMPOSITE);
@@ -271,6 +275,18 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 			if (thePartitionId != null) {
 				addCreatePartition(thePartitionId, null);
 			} else {
+				addCreateDefaultPartition();
+			}
+		};
+	}
+
+	protected ICreationArgument withReadWritePartitions(Integer thePartitionId) {
+		return t -> {
+			if (thePartitionId != null) {
+				addReadPartition(thePartitionId);
+				addCreatePartition(thePartitionId, null);
+			} else {
+				addReadDefaultPartition();
 				addCreateDefaultPartition();
 			}
 		};

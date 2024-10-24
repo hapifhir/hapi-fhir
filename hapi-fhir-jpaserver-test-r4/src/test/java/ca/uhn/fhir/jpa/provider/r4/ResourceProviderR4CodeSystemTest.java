@@ -1,10 +1,8 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
@@ -36,12 +34,11 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test {
@@ -50,7 +47,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 	private static final String SYSTEM_PARENTCHILD = "http://parentchild";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderR4CodeSystemTest.class);
 	private static final String CS_ACME_URL = "http://acme.org";
-	private Long parentChildCsId;
+	private JpaPid parentChildCsId;
 	private IIdType myCsId;
 
 	@Autowired
@@ -490,7 +487,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 	@Test
 	public void testUpdateCodeSystemById() throws IOException {
 
-		CodeSystem initialCodeSystem = myClient.read().resource(CodeSystem.class).withId(parentChildCsId).execute();
+		CodeSystem initialCodeSystem = myClient.read().resource(CodeSystem.class).withId(parentChildCsId.getId()).execute();
 		assertEquals("Parent Child CodeSystem", initialCodeSystem.getName());
 		initialCodeSystem.setName("Updated Parent Child CodeSystem");
 		String encoded = myFhirContext.newJsonParser().encodeResourceToString(initialCodeSystem);
@@ -503,7 +500,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 			IOUtils.closeQuietly(resp);
 		}
 
-		CodeSystem updatedCodeSystem = myClient.read().resource(CodeSystem.class).withId(parentChildCsId).execute();
+		CodeSystem updatedCodeSystem = myClient.read().resource(CodeSystem.class).withId(parentChildCsId.getId()).execute();
 		assertEquals("Updated Parent Child CodeSystem", updatedCodeSystem.getName());
 	}
 

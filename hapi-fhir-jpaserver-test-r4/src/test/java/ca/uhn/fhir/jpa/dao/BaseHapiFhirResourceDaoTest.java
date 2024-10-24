@@ -70,7 +70,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
@@ -227,7 +226,7 @@ class BaseHapiFhirResourceDaoTest {
 		RequestPartitionId partitionId = Mockito.mock(RequestPartitionId.class);
 		JpaPid jpaPid = JpaPid.fromIdAndVersion(123L, 1L);
 		ResourceTable entity = new ResourceTable();
-		entity.setId(123L);
+		entity.setIdForUnitTest(123L);
 		entity.setFhirId("456");
 
 		// set a transactionService that will actually execute the callback
@@ -240,13 +239,13 @@ class BaseHapiFhirResourceDaoTest {
 			any(IIdType.class)
 		)).thenReturn(partitionId);
 		when(myIdHelperService.resolveResourcePersistentIds(
-			any(RequestPartitionId.class),
+                any(RequestPartitionId.class),
 			Mockito.anyString(),
 			Mockito.anyString()
 		)).thenReturn(jpaPid);
 		when(myEntityManager.find(
 			any(Class.class),
-			anyLong()
+			any()
 		)).thenReturn(entity);
 		// we don't stub myConfig.getResourceClientIdStrategy()
 		// because even a null return isn't ANY...

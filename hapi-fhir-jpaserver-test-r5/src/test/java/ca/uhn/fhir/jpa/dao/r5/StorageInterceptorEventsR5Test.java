@@ -123,7 +123,7 @@ public class StorageInterceptorEventsR5Test extends BaseJpaR5Test {
 
 	@AfterEach
 	public void after() {
-		myInterceptorRegistry.unregisterAllInterceptors();
+		myInterceptorRegistry.unregisterAllAnonymousInterceptors();
 		myStorageSettings.setExpungeEnabled(new JpaStorageSettings().isExpungeEnabled());
 	}
 

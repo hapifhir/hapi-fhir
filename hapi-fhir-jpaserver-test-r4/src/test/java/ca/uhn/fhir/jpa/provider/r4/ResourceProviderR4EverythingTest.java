@@ -2,6 +2,8 @@ package ca.uhn.fhir.jpa.provider.r4;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+
+import ca.uhn.fhir.jpa.entity.SearchResult;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
@@ -1437,6 +1439,7 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 		}
 
 		private List<IIdType> validateAndGetIdListFromBundle(Bundle theBundle, int theSize) {
+			ourLog.info("Resource IDs: {}", theBundle.getEntry().stream().map(t->t.getResource().getIdElement().toUnqualifiedVersionless().getValue()).toList());
 			assertEquals(Bundle.BundleType.SEARCHSET, theBundle.getType());
 			assertThat(theBundle.getEntry()).hasSize(theSize);
 			return toUnqualifiedVersionlessIds(theBundle);

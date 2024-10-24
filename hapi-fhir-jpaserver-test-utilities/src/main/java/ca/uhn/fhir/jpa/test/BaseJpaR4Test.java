@@ -566,9 +566,6 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	@RegisterExtension
 	private final PreventDanglingInterceptorsExtension myPreventDanglingInterceptorsExtension = new PreventDanglingInterceptorsExtension(()-> myInterceptorRegistry);
 
-	@RegisterExtension
-	public LogbackTestExtension myLogbackTestExtension = new LogbackTestExtension();
-
 	@AfterEach()
 	@Order(0)
 	public void afterCleanupDao() {
@@ -584,6 +581,9 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(new JpaStorageSettings().isAutoCreatePlaceholderReferenceTargets());
 		myStorageSettings.setTagStorageMode(new JpaStorageSettings().getTagStorageMode());
 		myStorageSettings.setInlineResourceTextBelowSize(new JpaStorageSettings().getInlineResourceTextBelowSize());
+		myStorageSettings.setDeleteEnabled(new JpaStorageSettings().isDeleteEnabled());
+		myStorageSettings.setMatchUrlCacheEnabled(new JpaStorageSettings().isMatchUrlCacheEnabled());
+		myStorageSettings.setStoreMetaSourceInformation(new JpaStorageSettings().getStoreMetaSourceInformation());
 
 		myPagingProvider.setDefaultPageSize(BasePagingProvider.DEFAULT_DEFAULT_PAGE_SIZE);
 		myPagingProvider.setMaximumPageSize(BasePagingProvider.DEFAULT_MAX_PAGE_SIZE);
@@ -711,9 +711,9 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		return myTxManager;
 	}
 
-	protected void relocateResourceTextToCompressedColumn(Long theResourcePid, Long theVersion) {
+	protected void relocateResourceTextToCompressedColumn(JpaPid theResourcePid, Long theVersion) {
 		runInTransaction(()->{
-			ResourceHistoryTable historyEntity = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(theResourcePid, theVersion);
+			ResourceHistoryTable historyEntity = myResourceHistoryTableDao.findForIdAndVersion(theResourcePid, theVersion);
 			byte[] contents = GZipUtil.compress(historyEntity.getResourceTextVc());
 			myResourceHistoryTableDao.updateNonInlinedContents(contents, historyEntity.getId());
 		});

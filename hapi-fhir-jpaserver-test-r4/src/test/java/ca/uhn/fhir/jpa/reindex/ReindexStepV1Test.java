@@ -10,6 +10,7 @@ import ca.uhn.fhir.batch2.jobs.reindex.v1.ReindexStepV1;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -55,8 +56,8 @@ public class ReindexStepV1Test extends BaseJpaR4Test {
 		Long id1 = createPatient(withActiveTrue(), withFamily("FLANDERS")).getIdPartAsLong();
 
 		ResourceIdListWorkChunkJson data = new ResourceIdListWorkChunkJson();
-		data.addTypedPid("Patient", id0);
-		data.addTypedPid("Patient", id1);
+		data.addTypedPidWithNullPartitionForUnitTest("Patient", id0);
+		data.addTypedPidWithNullPartitionForUnitTest("Patient", id1);
 
 		// Execute
 		ReindexJobParameters params = new ReindexJobParameters();
@@ -93,8 +94,8 @@ public class ReindexStepV1Test extends BaseJpaR4Test {
 		Long id1 = createPatient(withActiveTrue(), withFamily("FLANDERS")).getIdPartAsLong();
 
 		ResourceIdListWorkChunkJson data = new ResourceIdListWorkChunkJson();
-		data.addTypedPid("Patient", id0);
-		data.addTypedPid("Patient", id1);
+		data.addTypedPidWithNullPartitionForUnitTest("Patient", id0);
+		data.addTypedPidWithNullPartitionForUnitTest("Patient", id1);
 
 		// Execute
 		ReindexJobParameters params = new ReindexJobParameters();
@@ -128,12 +129,12 @@ public class ReindexStepV1Test extends BaseJpaR4Test {
 		Long id1 = createPatient(withActiveTrue(), withFamily("FLANDERS")).getIdPartAsLong();
 
 		ResourceIdListWorkChunkJson data = new ResourceIdListWorkChunkJson();
-		data.addTypedPid("Patient", id0);
-		data.addTypedPid("Patient", id1);
+		data.addTypedPidWithNullPartitionForUnitTest("Patient", id0);
+		data.addTypedPidWithNullPartitionForUnitTest("Patient", id1);
 
 		runInTransaction(() -> {
-			myResourceIndexedSearchParamStringDao.deleteByResourceId(id0);
-			myResourceIndexedSearchParamTokenDao.deleteByResourceId(id0);
+			myResourceIndexedSearchParamStringDao.deleteByResourceId(JpaPid.fromId(id0));
+			myResourceIndexedSearchParamTokenDao.deleteByResourceId(JpaPid.fromId(id0));
 		});
 
 		// Execute
@@ -171,8 +172,8 @@ public class ReindexStepV1Test extends BaseJpaR4Test {
 		Long id1 = createPatient(withActiveTrue(), withFamily("FLANDERS"), withOrganization(orgId)).getIdPartAsLong();
 
 		ResourceIdListWorkChunkJson data = new ResourceIdListWorkChunkJson();
-		data.addTypedPid("Patient", id0);
-		data.addTypedPid("Patient", id1);
+		data.addTypedPidWithNullPartitionForUnitTest("Patient", id0);
+		data.addTypedPidWithNullPartitionForUnitTest("Patient", id1);
 
 		SearchParameter sp = new SearchParameter();
 		sp.setType(Enumerations.SearchParamType.STRING);
@@ -241,10 +242,10 @@ public class ReindexStepV1Test extends BaseJpaR4Test {
 		Long idObservation = createObservation(withSubject(new IdType("Patient/" + idPatientToInvalidate))).getIdPartAsLong();
 
 		ResourceIdListWorkChunkJson data = new ResourceIdListWorkChunkJson();
-		data.addTypedPid("Patient", id0);
-		data.addTypedPid("Patient", id1);
-		data.addTypedPid("Patient", idPatientToInvalidate);
-		data.addTypedPid("Observation", idObservation);
+		data.addTypedPidWithNullPartitionForUnitTest("Patient", id0);
+		data.addTypedPidWithNullPartitionForUnitTest("Patient", id1);
+		data.addTypedPidWithNullPartitionForUnitTest("Patient", idPatientToInvalidate);
+		data.addTypedPidWithNullPartitionForUnitTest("Observation", idObservation);
 
 		runInTransaction(() -> {
 			// Swap in some invalid text, which will cause an error when we go to reindex
@@ -254,8 +255,8 @@ public class ReindexStepV1Test extends BaseJpaR4Test {
 			// Also set the current index status to errored on one, so it can be reset
 			assertEquals(1, myEntityManager.createNativeQuery("UPDATE HFJ_RESOURCE SET SP_INDEX_STATUS = 2 WHERE RES_ID = " + id0).executeUpdate());
 
-			myResourceIndexedSearchParamStringDao.deleteByResourceId(id0);
-			myResourceIndexedSearchParamTokenDao.deleteByResourceId(id0);
+			myResourceIndexedSearchParamStringDao.deleteByResourceId(JpaPid.fromId(id0));
+			myResourceIndexedSearchParamTokenDao.deleteByResourceId(JpaPid.fromId(id0));
 		});
 
 		// Execute
