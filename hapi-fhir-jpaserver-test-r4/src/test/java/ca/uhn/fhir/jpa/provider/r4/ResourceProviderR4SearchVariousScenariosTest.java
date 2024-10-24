@@ -39,6 +39,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 
+// LUKETODO:  presentation
 public class ResourceProviderR4SearchVariousScenariosTest extends BaseResourceProviderR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderR4SearchVariousScenariosTest.class);
 
@@ -204,6 +205,9 @@ public class ResourceProviderR4SearchVariousScenariosTest extends BaseResourcePr
 			"Practitioner?_has:ExplanationOfBenefit:care-team:coverage.payor:Organization._has:List:item:_id="+LIST_ID  // same thing
 		})
 		void hasThenChainThenHas(String theQueryString) {
+			// LUKETODO:  presentation:  THIS IS WHERE THE BUG HAPPENED
+			// https://gitlab.com/simpatico.ai/cdr/-/issues/5351
+			// Fix:  https://github.com/hapifhir/hapi-fhir/pull/5735
 			runAndAssert(theQueryString);
 		}
 
@@ -346,6 +350,64 @@ public class ResourceProviderR4SearchVariousScenariosTest extends BaseResourcePr
 			"Practitioner?_has:ExplanationOfBenefit:care-team:coverage.payor:Organization._has:Group:value-reference:_id="+GROUP_ID,
 		})
 		void hasThenChainThenHas(String theQueryString) {
+			// LUKETODO:  presentation:  THIS IS WHERE THE BUG HAPPENED
+			/*
+			BAD:
+
+			3 JOINS, broken link at the point where the chain was supposed to happen: namely at coverage.payor:Organization, which wrongly loses "coverage." and effectively becomes:  Practitioner?_has:ExplanationOfBenefit:care-team:payor:Organization._has:Group:value-reference:_id="+GROUP_ID
+
+			SELECT t1.RES_ID
+			FROM HFJ_RESOURCE t1
+				INNER JOIN HFJ_RES_LINK t0 ON (t1.RES_ID = t0.TARGET_RESOURCE_ID)
+				INNER JOIN HFJ_RES_LINK t2 ON (t0.SRC_RESOURCE_ID = t2.SRC_RESOURCE_ID)
+				INNER JOIN HFJ_RES_LINK t3 ON (t2.TARGET_RESOURCE_ID = t3.TARGET_RESOURCE_ID)
+			WHERE (
+				(t0.SRC_PATH = ?) AND
+				(t0.TARGET_RESOURCE_TYPE = ?)
+				AND
+				(
+					(t2.SRC_PATH = ?)
+					AND (
+						(t3.SRC_PATH = ?) AND
+						(t3.TARGET_RESOURCE_TYPE = ?) AND
+						(t3.SRC_RESOURCE_ID = ?)
+					)
+				)
+			)
+			fetch first ? rows only
+
+[ExplanationOfBenefit.careTeam.provider, Practitioner, ExplanationOfBenefit.insurance.coverage, Group.characteristic.value.as(Reference), Coverage, 6, 14]
+			 */
+
+			/*
+			GOOD:
+
+			4 JOINS, each link from ExplanationOfBenefit to Group is properly captured:
+
+			SELECT t1.RES_ID
+			FROM HFJ_RESOURCE t1
+				INNER JOIN HFJ_RES_LINK t0 ON (t1.RES_ID = t0.TARGET_RESOURCE_ID)
+				INNER JOIN HFJ_RES_LINK t2 ON (t0.SRC_RESOURCE_ID = t2.SRC_RESOURCE_ID)
+				INNER JOIN HFJ_RES_LINK t3 ON (t2.TARGET_RESOURCE_ID = t3.SRC_RESOURCE_ID)
+				INNER JOIN HFJ_RES_LINK t4 ON (t3.TARGET_RESOURCE_ID = t4.TARGET_RESOURCE_ID)
+			WHERE (
+				(t0.SRC_PATH = ?) AND
+				(t0.TARGET_RESOURCE_TYPE = ?)
+				AND
+				(
+					(t2.SRC_PATH = ?)
+					AND (
+						(t3.SRC_PATH = ?)
+						AND (
+							(t4.SRC_PATH = ?) AND
+							(t4.TARGET_RESOURCE_TYPE = ?) AND
+							(t4.SRC_RESOURCE_ID = ?)
+						)
+					)
+				)
+			)
+			[ExplanationOfBenefit.careTeam.provider, Practitioner, ExplanationOfBenefit.insurance.coverage, Coverage.payor, Group.characteristic.value.as(Reference), Organization, 6, 14]
+			 */
 			runAndAssert(theQueryString);
 		}
 
