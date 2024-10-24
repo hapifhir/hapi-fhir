@@ -1439,6 +1439,7 @@ public class FhirTerser {
 				if (resource.getIdElement().isEmpty() || resource.getIdElement().isLocal()) {
 					if (theContained.getResourceId(resource) != null) {
 						// Prevent infinite recursion if there are circular loops in the contained resources
+						//TODO GGG: Here is where we drop out of processing the specimen, as the same object that was processed in the previous DR had already placed this specimen in the
 						continue;
 					}
 					IIdType id = theContained.addContained(resource);
@@ -1796,6 +1797,7 @@ public class FhirTerser {
 				if (substring(idPart, 0, 1).equals("#")) {
 					idPart = idPart.substring(1);
 					if (StringUtils.isNumeric(idPart)) {
+						//FIXME GGG START HERE AND TRY TO PRE_PARSE OUT THE STUPID LIST OF CONTAINEDS.
 						myNextContainedId = Long.parseLong(idPart) + 1;
 					}
 				}
