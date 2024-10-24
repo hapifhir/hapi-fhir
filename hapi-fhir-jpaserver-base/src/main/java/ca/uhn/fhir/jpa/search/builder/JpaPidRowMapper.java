@@ -20,14 +20,28 @@
 package ca.uhn.fhir.jpa.search.builder;
 
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import org.springframework.jdbc.core.RowMapper;
 
-import java.io.Closeable;
-import java.util.Iterator;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
-public interface ISearchQueryExecutor extends Iterator<JpaPid>, Closeable {
-	/**
-	 * Narrow the signature - no IOException allowed.
-	 */
+public class JpaPidRowMapper implements RowMapper<JpaPid> {
+
+	private final boolean mySelectPartitionId;
+
+	public JpaPidRowMapper(boolean theSelectPartitionId) {
+		mySelectPartitionId = theSelectPartitionId;
+	}
+
 	@Override
-	void close();
+	public JpaPid mapRow(ResultSet theResultSet, int theRowNum) throws SQLException {
+		if (mySelectPartitionId) {
+			Integer partitionId = theResultSet.getObject(1, Integer.class);
+			Long resourceId = theResultSet.getLong(2);
+			return JpaPid.fromId(resourceId, partitionId);
+		} else {
+			Long resourceId = theResultSet.getLong(1);
+			return JpaPid.fromId(resourceId);
+		}
+	}
 }

@@ -360,7 +360,7 @@ public class GiantTransactionPerfTest {
 		}
 
 		@Override
-		public ResourceHistoryTable findForIdAndVersionAndFetchProvenance(long theId, long theVersion) {
+		public ResourceHistoryTable findForIdAndVersion(long theId, long theVersion) {
 			throw new UnsupportedOperationException();
 		}
 
@@ -401,6 +401,11 @@ public class GiantTransactionPerfTest {
 
 		@Override
 		public void updateNonInlinedContents(byte[] theText, long thePid) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public List<ResourceHistoryTable> findCurrentVersionsByResourcePidsAndFetchResourceTable(List<Long> theVersionlessPids) {
 			throw new UnsupportedOperationException();
 		}
 

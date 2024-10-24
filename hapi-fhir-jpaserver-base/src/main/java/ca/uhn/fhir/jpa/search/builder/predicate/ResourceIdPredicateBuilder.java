@@ -23,9 +23,12 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.search.builder.sql.ColumnTupleObject;
+import ca.uhn.fhir.jpa.search.builder.sql.JpaPidValueTupleObject;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -59,6 +62,7 @@ public class ResourceIdPredicateBuilder extends BasePredicateBuilder {
 
 	@Nullable
 	public Condition createPredicateResourceId(
+			RequestDetails theRequestDetails,
 			@Nullable DbColumn[] theSourceJoinColumn,
 			String theResourceName,
 			List<List<IQueryParameterType>> theValues,
@@ -120,25 +124,33 @@ public class ResourceIdPredicateBuilder extends BasePredicateBuilder {
 			assert operation == SearchFilterParser.CompareOperation.eq
 					|| operation == SearchFilterParser.CompareOperation.ne;
 
-			List<Long> resourceIds = JpaPid.toLongList(allOrPids);
 			if (theSourceJoinColumn == null) {
 				BaseJoiningPredicateBuilder queryRootTable = super.getOrCreateQueryRootTable(!allIdsAreForcedIds);
 				Condition predicate;
 				switch (operation) {
 					default:
 					case eq:
-						predicate = queryRootTable.createPredicateResourceIds(false, resourceIds);
-						return queryRootTable.combineWithRequestPartitionIdPredicate(theRequestPartitionId, predicate);
+						predicate = queryRootTable.createPredicateResourceIds(false, allOrPids);
+						break;
 					case ne:
-						predicate = queryRootTable.createPredicateResourceIds(true, resourceIds);
-						return queryRootTable.combineWithRequestPartitionIdPredicate(theRequestPartitionId, predicate);
+						predicate = queryRootTable.createPredicateResourceIds(true, allOrPids);
+						break;
 				}
+				return queryRootTable.combineWithRequestPartitionIdPredicate(theRequestPartitionId, predicate);
 			} else {
-				DbColumn resIdColumn = getResourceIdColumn(theSourceJoinColumn);
-				return QueryParameterUtils.toEqualToOrInPredicate(
-						resIdColumn,
-						generatePlaceholders(resourceIds),
-						operation == SearchFilterParser.CompareOperation.ne);
+				if (getSearchQueryBuilder().isIncludePartitionIdInJoins()) {
+					ColumnTupleObject left = new ColumnTupleObject(theSourceJoinColumn);
+					JpaPidValueTupleObject right = JpaPidValueTupleObject.from(getSearchQueryBuilder(), allOrPids);
+					return QueryParameterUtils.toInPredicate(
+							left, right, operation == SearchFilterParser.CompareOperation.ne);
+				} else {
+					DbColumn resIdColumn = getResourceIdColumn(theSourceJoinColumn);
+					List<Long> resourceIds = JpaPid.toLongList(allOrPids);
+					return QueryParameterUtils.toEqualToOrInPredicate(
+							resIdColumn,
+							generatePlaceholders(resourceIds),
+							operation == SearchFilterParser.CompareOperation.ne);
+				}
 			}
 		}
 

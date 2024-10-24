@@ -1000,7 +1000,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	protected ResourceTable updateEntityForDelete(
 			RequestDetails theRequest, TransactionDetails theTransactionDetails, ResourceTable theEntity) {
-		myResourceSearchUrlSvc.deleteByResId(theEntity.getId());
+		myResourceSearchUrlSvc.deleteByResId(JpaPid.fromId(theEntity.getId()));
 		Date updateTime = new Date();
 		return updateEntity(theRequest, null, theEntity, updateTime, true, true, theTransactionDetails, false, true);
 	}
@@ -1245,7 +1245,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					return myPersistedJpaBundleProviderFactory.history(
 							theRequest,
 							myResourceName,
-							entity.getId(),
+							JpaPid.fromId(entity.getId()),
 							theSince,
 							theUntil,
 							theOffset,
@@ -1275,7 +1275,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					return myPersistedJpaBundleProviderFactory.history(
 							theRequest,
 							myResourceName,
-							entity.getId(),
+							JpaPid.fromId(entity.getId()),
 							theHistorySearchDateRangeParam.getLowerBoundAsInstant(),
 							theHistorySearchDateRangeParam.getUpperBoundAsInstant(),
 							theHistorySearchDateRangeParam.getOffset(),
@@ -1375,7 +1375,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			doMetaAdd(theMetaAdd, latestVersion, theRequest, transactionDetails);
 
 			// Also update history entry
-			ResourceHistoryTable history = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(
+			ResourceHistoryTable history = myResourceHistoryTableDao.findForIdAndVersion(
 					entity.getId(), entity.getVersion());
 			doMetaAdd(theMetaAdd, history, theRequest, transactionDetails);
 		}
@@ -1423,7 +1423,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		} else {
 			doMetaDelete(theMetaDel, latestVersion, theRequest, transactionDetails);
 			// Also update history entry
-			ResourceHistoryTable history = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(
+			ResourceHistoryTable history = myResourceHistoryTableDao.findForIdAndVersion(
 					entity.getId(), entity.getVersion());
 			doMetaDelete(theMetaDel, history, theRequest, transactionDetails);
 		}
@@ -2457,7 +2457,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		ResourceTable entity = (ResourceTable) theEntity;
 		if (entity.isSearchUrlPresent()) {
 			myResourceSearchUrlSvc.deleteByResId(
-					(Long) theEntity.getPersistentId().getId());
+					JpaPid.fromId((Long) theEntity.getPersistentId().getId()));
 			entity.setSearchUrlPresent(false);
 		}
 

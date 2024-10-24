@@ -67,6 +67,13 @@ public class JpaPid extends BaseResourcePersistentId<Long> {
 		return this;
 	}
 
+	public void setPartitionId(Integer thePartitionId) {
+		if (myPartitionablePartitionId == null) {
+			myPartitionablePartitionId = new PartitionablePartitionId();
+		}
+		myPartitionablePartitionId.setPartitionId(thePartitionId);
+	}
+
 	public static List<Long> toLongList(JpaPid[] thePids) {
 		return toLongList(Arrays.asList(thePids));
 	}
@@ -97,6 +104,12 @@ public class JpaPid extends BaseResourcePersistentId<Long> {
 
 	public static JpaPid fromId(Long theId) {
 		return new JpaPid(theId);
+	}
+
+	public static JpaPid fromId(Long theId, Integer thePartitionId) {
+		JpaPid retVal = new JpaPid(theId);
+		retVal.setPartitionablePartitionId(PartitionablePartitionId.with(thePartitionId, null));
+		return retVal;
 	}
 
 	public static JpaPid fromIdAndVersion(Long theId, Long theVersion) {

@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.BaseStorageDao;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
@@ -44,13 +45,13 @@ import ca.uhn.fhir.jpa.search.builder.predicate.ComboUniqueSearchParameterPredic
 import ca.uhn.fhir.jpa.search.builder.predicate.CoordsPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.DatePredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ICanMakeMissingParamPredicate;
+import ca.uhn.fhir.jpa.search.builder.predicate.ISourcePredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.NumberPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ParsedLocationParam;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceIdPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceLinkPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceTablePredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.SearchParamPresentPredicateBuilder;
-import ca.uhn.fhir.jpa.search.builder.predicate.SourcePredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.StringPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.TagPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.TokenPredicateBuilder;
@@ -938,6 +939,7 @@ public class QueryStack {
 
 		if (theFilter instanceof SearchFilterParser.FilterParameter) {
 			return createPredicateFilter(
+					theRequest,
 					theQueryStack3,
 					(SearchFilterParser.FilterParameter) theFilter,
 					theResourceName,
@@ -982,6 +984,7 @@ public class QueryStack {
 	}
 
 	private Condition createPredicateFilter(
+			RequestDetails theRequestDetails,
 			QueryStack theQueryStack3,
 			SearchFilterParser.FilterParameter theFilter,
 			String theResourceName,
@@ -995,6 +998,7 @@ public class QueryStack {
 				TokenParam param = new TokenParam();
 				param.setValueAsQueryToken(null, null, null, theFilter.getValue());
 				return theQueryStack3.createPredicateResourceId(
+						theRequestDetails,
 						null,
 						Collections.singletonList(Collections.singletonList(param)),
 						theResourceName,
@@ -1214,7 +1218,6 @@ public class QueryStack {
 
 			ResourceLinkPredicateBuilder resourceLinkTableJoin =
 					mySqlBuilder.addReferencePredicateBuilderReversed(this, theSourceJoinColumn);
-			Condition partitionPredicate = resourceLinkTableJoin.createPartitionIdPredicate(theRequestPartitionId);
 
 			List<String> paths = resourceLinkTableJoin.createResourceLinkPaths(
 					targetResourceType, paramReference, new ArrayList<>());
@@ -1228,15 +1231,21 @@ public class QueryStack {
 			Condition pathPredicate = toEqualToOrInPredicate(
 					resourceLinkTableJoin.getColumnSourcePath(), mySqlBuilder.generatePlaceholders(paths));
 
-			Condition linkedPredicate =
-					searchForIdsWithAndOr(with().setSourceJoinColumn(resourceLinkTableJoin.getJoinColumnsForSource())
+			Condition linkedPredicate = searchForIdsWithAndOr(
+					theRequest,
+					with().setSourceJoinColumn(resourceLinkTableJoin.getJoinColumnsForSource())
 							.setResourceName(targetResourceType)
 							.setParamName(parameterName)
 							.setAndOrParams(Collections.singletonList(orValues))
 							.setRequest(theRequest)
 							.setRequestPartitionId(theRequestPartitionId));
 
-			andPredicates.add(toAndPredicate(partitionPredicate, pathPredicate, typePredicate, linkedPredicate));
+			if (myPartitionSettings.isPartitionIdsInPrimaryKeys()) {
+				andPredicates.add(toAndPredicate(pathPredicate, typePredicate, linkedPredicate));
+			} else {
+				Condition partitionPredicate = resourceLinkTableJoin.createPartitionIdPredicate(theRequestPartitionId);
+				andPredicates.add(toAndPredicate(partitionPredicate, pathPredicate, typePredicate, linkedPredicate));
+			}
 		}
 
 		return toAndPredicate(andPredicates);
@@ -1910,6 +1919,7 @@ public class QueryStack {
 
 	@Nullable
 	public Condition createPredicateResourceId(
+			RequestDetails theRequestDetails,
 			@Nullable DbColumn[] theSourceJoinColumn,
 			List<List<IQueryParameterType>> theValues,
 			String theResourceName,
@@ -1917,7 +1927,12 @@ public class QueryStack {
 			RequestPartitionId theRequestPartitionId) {
 		ResourceIdPredicateBuilder builder = mySqlBuilder.newResourceIdBuilder();
 		return builder.createPredicateResourceId(
-				theSourceJoinColumn, theResourceName, theValues, theOperation, theRequestPartitionId);
+				theRequestDetails,
+				theSourceJoinColumn,
+				theResourceName,
+				theValues,
+				theOperation,
+				theRequestPartitionId);
 	}
 
 	private Condition createPredicateSourceForAndList(
@@ -1948,13 +1963,13 @@ public class QueryStack {
 				.findFirst();
 
 		if (isMissingSourceOptional.isPresent()) {
-			SourcePredicateBuilder join =
+			ISourcePredicateBuilder join =
 					getSourcePredicateBuilder(theSourceJoinColumn, SelectQuery.JoinType.LEFT_OUTER);
 			orPredicates.add(join.createPredicateMissingSourceUri());
 			return toOrPredicate(orPredicates);
 		}
 		// for all other cases we use "INNER JOIN" to match search parameters
-		SourcePredicateBuilder join = getSourcePredicateBuilder(theSourceJoinColumn, SelectQuery.JoinType.INNER);
+		ISourcePredicateBuilder join = getSourcePredicateBuilder(theSourceJoinColumn, SelectQuery.JoinType.INNER);
 
 		for (IQueryParameterType nextParameter : theList) {
 			SourceParam sourceParameter = new SourceParam(nextParameter.getValueAsQueryToken(myFhirContext));
@@ -1974,13 +1989,22 @@ public class QueryStack {
 		return toOrPredicate(orPredicates);
 	}
 
-	private SourcePredicateBuilder getSourcePredicateBuilder(
+	private ISourcePredicateBuilder getSourcePredicateBuilder(
 			@Nullable DbColumn[] theSourceJoinColumn, SelectQuery.JoinType theJoinType) {
+		if (myStorageSettings.isAccessMetaSourceInformationFromProvenanceTable()) {
+			return createOrReusePredicateBuilder(
+							PredicateBuilderTypeEnum.SOURCE,
+							theSourceJoinColumn,
+							Constants.PARAM_SOURCE,
+							() -> mySqlBuilder.addResourceHistoryProvenancePredicateBuilder(
+									theSourceJoinColumn, theJoinType))
+					.getResult();
+		}
 		return createOrReusePredicateBuilder(
 						PredicateBuilderTypeEnum.SOURCE,
 						theSourceJoinColumn,
 						Constants.PARAM_SOURCE,
-						() -> mySqlBuilder.addSourcePredicateBuilder(theSourceJoinColumn, theJoinType))
+						() -> mySqlBuilder.addResourceHistoryPredicateBuilder(theSourceJoinColumn, theJoinType))
 				.getResult();
 	}
 
@@ -2366,7 +2390,7 @@ public class QueryStack {
 	}
 
 	@Nullable
-	public Condition searchForIdsWithAndOr(SearchForIdsParams theSearchForIdsParams) {
+	public Condition searchForIdsWithAndOr(RequestDetails theRequestDetails, SearchForIdsParams theSearchForIdsParams) {
 
 		if (theSearchForIdsParams.myAndOrParams.isEmpty()) {
 			return null;
@@ -2375,6 +2399,7 @@ public class QueryStack {
 		switch (theSearchForIdsParams.myParamName) {
 			case IAnyResource.SP_RES_ID:
 				return createPredicateResourceId(
+						theRequestDetails,
 						theSearchForIdsParams.mySourceJoinColumn,
 						theSearchForIdsParams.myAndOrParams,
 						theSearchForIdsParams.myResourceName,
@@ -2440,7 +2465,6 @@ public class QueryStack {
 	 */
 	private Condition createPredicateResourcePID(
 			DbColumn[] theSourceJoinColumn, List<List<IQueryParameterType>> theAndOrParams) {
-
 		DbColumn pidColumn = getResourceIdColumn(theSourceJoinColumn);
 
 		if (pidColumn == null) {
@@ -2838,12 +2862,13 @@ public class QueryStack {
 
 	// expand out the pids
 	public void addPredicateEverythingOperation(
-			String theResourceName, List<String> theTypeSourceResourceNames, Long... theTargetPids) {
+			String theResourceName, List<String> theTypeSourceResourceNames, JpaPid... theTargetPids) {
 		ResourceLinkPredicateBuilder table = mySqlBuilder.addReferencePredicateBuilder(this, null);
 		Condition predicate =
 				table.createEverythingPredicate(theResourceName, theTypeSourceResourceNames, theTargetPids);
 		mySqlBuilder.addPredicate(predicate);
 		mySqlBuilder.getSelect().setIsDistinct(true);
+		addGrouping();
 	}
 
 	public IQueryParameterType newParameterInstance(

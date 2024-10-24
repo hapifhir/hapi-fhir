@@ -741,8 +741,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			} else {
 				ResourceHistoryTable currentHistoryVersion = theEntity.getCurrentVersionEntity();
 				if (currentHistoryVersion == null) {
-					currentHistoryVersion = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(
-							theEntity.getId(), theEntity.getVersion());
+					currentHistoryVersion =
+							myResourceHistoryTableDao.findForIdAndVersion(theEntity.getId(), theEntity.getVersion());
 				}
 				if (currentHistoryVersion == null || !currentHistoryVersion.hasResource()) {
 					changed = true;
@@ -1480,7 +1480,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			 * this could return null if the current resourceVersion has been expunged
 			 * in which case we'll still create a new one
 			 */
-			historyEntry = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(
+			historyEntry = myResourceHistoryTableDao.findForIdAndVersion(
 					theEntity.getResourceId(), resourceVersion - 1);
 			if (historyEntry != null) {
 				reusingHistoryEntity = true;
