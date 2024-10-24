@@ -53,6 +53,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
+import static org.junit.Assert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -1546,7 +1547,9 @@ public class GenericJaxRsClientDstu3Test {
 			.execute();
 		//@formatter:on
 
-		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/_search?_elements=identifier%2Cname", MY_SERVLET.ourRequestUri);
+		assertThat(MY_SERVLET.ourRequestUri).isIn(
+			ourServer.getBaseUrl() + "/fhir/Patient/_search?_elements=identifier%2Cname",
+			ourServer.getBaseUrl() + "/fhir/Patient/_search?_elements=name%2Cidentifier");
 
 		//		assertThat(MY_SERVLET.ourRequestUri,
 		//				either(equalTo(ourServer.getBaseUrl() + "/fhir/Patient?name=james&_elements=name%2Cidentifier")).or(equalTo(ourServer.getBaseUrl() + "/fhir/Patient?name=james&_elements=identifier%2Cname")));
@@ -1583,7 +1586,10 @@ public class GenericJaxRsClientDstu3Test {
 		//@formatter:on
 
 		assertThat(MY_SERVLET.ourRequestUri).contains(ourServer.getBaseUrl() + "/fhir/Patient/_search?");
-		assertThat(MY_SERVLET.ourRequestUri).contains("_elements=identifier%2Cname");
+		assertThat(MY_SERVLET.ourRequestUri).satisfiesAnyOf(
+			s -> assertThat(s).contains("_elements=identifier%2Cname"),
+			s -> assertThat(s).contains("_elements=name%2Cidentifier")
+		);
 
 		//		assertThat(MY_SERVLET.ourRequestUri,
 		//				either(equalTo(ourServer.getBaseUrl() + "/fhir/Patient?name=james&_elements=name%2Cidentifier")).or(equalTo(ourServer.getBaseUrl() + "/fhir/Patient?name=james&_elements=identifier%2Cname")));
