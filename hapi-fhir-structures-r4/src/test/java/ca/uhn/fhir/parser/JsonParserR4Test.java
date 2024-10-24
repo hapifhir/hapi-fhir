@@ -23,6 +23,7 @@ import org.hl7.fhir.r4.model.Composition;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Device;
+import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Extension;
@@ -43,6 +44,7 @@ import org.hl7.fhir.r4.model.PrimitiveType;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Specimen;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Type;
 import org.hl7.fhir.r4.model.codesystems.DataAbsentReason;
@@ -55,6 +57,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jakarta.annotation.Nonnull;
+import org.testcontainers.shaded.com.trilead.ssh2.packets.PacketDisconnect;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -261,7 +265,25 @@ public class JsonParserR4Test extends BaseTest {
 
 		idx = encoded.indexOf("\"Medication\"", idx + 1);
 		assertEquals(-1, idx);
+	}
 
+	@Test
+	public void testDuplicateContainedResourcesAcrossABundleAreReplicated() {
+		Bundle b = new Bundle();
+		Specimen specimen = new Specimen();
+		Practitioner practitioner = new Practitioner();
+		DiagnosticReport report = new DiagnosticReport();
+		report.addSpecimen(new Reference(specimen));
+		b.addEntry().setResource(report).getRequest().setMethod(Bundle.HTTPVerb.POST).setUrl("/DiagnosticReport");
+
+		Observation obs = new Observation();
+		obs.addPerformer(new Reference(practitioner));
+		obs.setSpecimen(new Reference(specimen));
+
+		b.addEntry().setResource(obs).getRequest().setMethod(Bundle.HTTPVerb.POST).setUrl("/Observation");
+
+		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(b);
+		ourLog.info(encoded);
 	}
 
 	@Test
