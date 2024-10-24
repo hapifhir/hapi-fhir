@@ -56,7 +56,7 @@ import java.util.List;
 public class NpmPackageVersionEntity {
 
 	public static final int VERSION_ID_LENGTH = 200;
-	public static final int PACKAGE_DESC_LENGTH = 200;
+	public static final int PACKAGE_DESC_LENGTH = 512;
 	public static final int FHIR_VERSION_LENGTH = 10;
 	public static final int FHIR_VERSION_ID_LENGTH = 20;
 
@@ -93,6 +93,12 @@ public class NpmPackageVersionEntity {
 
 	@Column(name = "DESC_UPPER", nullable = true, length = PACKAGE_DESC_LENGTH)
 	private String myDescriptionUpper;
+
+	@Column(name = "PKG_AUTHOR", nullable = true, length = PACKAGE_DESC_LENGTH)
+	private String myAuthor;
+
+	@Column(name = "AUTHOR_UPPER", nullable = true, length = PACKAGE_DESC_LENGTH)
+	private String myAuthorUpper;
 
 	@Column(name = "CURRENT_VERSION", nullable = false)
 	private boolean myCurrentVersion;
@@ -194,6 +200,15 @@ public class NpmPackageVersionEntity {
 	public void setDescription(String theDescription) {
 		myDescription = theDescription;
 		myDescriptionUpper = StringUtil.normalizeStringForSearchIndexing(theDescription);
+	}
+
+	public String getAuthor() {
+		return myAuthor;
+	}
+
+	public void setAuthor(String theAuthor) {
+		myAuthor = theAuthor;
+		myAuthorUpper = StringUtil.normalizeStringForSearchIndexing(theAuthor);
 	}
 
 	@Override

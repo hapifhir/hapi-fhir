@@ -111,6 +111,9 @@ public class NpmPackageSearchResultJson {
 		@JsonProperty("version")
 		private String myVersion;
 
+		@JsonProperty("author")
+		private String myAuthor;
+
 		@JsonProperty("description")
 		private String myDescription;
 
@@ -169,6 +172,15 @@ public class NpmPackageSearchResultJson {
 				getFhirVersion().add(theFhirVersionId);
 				getFhirVersion().sort(PackageVersionComparator.INSTANCE);
 			}
+			return this;
+		}
+
+		public String getAuthor() {
+			return myAuthor;
+		}
+
+		public Package setAuthor(String theAuthor) {
+			myAuthor = theAuthor;
 			return this;
 		}
 	}
