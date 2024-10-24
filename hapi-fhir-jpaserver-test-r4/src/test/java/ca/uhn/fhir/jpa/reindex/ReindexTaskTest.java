@@ -352,7 +352,7 @@ public class ReindexTaskTest extends BaseJpaR4Test {
 		IIdType obsId = myReindexTestHelper.createObservationWithAlleleExtension(Observation.ObservationStatus.FINAL);
 
 		runInTransaction(() -> {
-			int entriesInSpIndexTokenTable = myResourceIndexedSearchParamTokenDao.countForResourceId(JpaPid.fromId(obsId.getIdPartAsLong()));
+			int entriesInSpIndexTokenTable = myResourceIndexedSearchParamTokenDao.countForResourceId(obsId.getIdPartAsLong());
 			assertEquals(1, entriesInSpIndexTokenTable);
 
 			// simulate resource deletion
@@ -377,7 +377,7 @@ public class ReindexTaskTest extends BaseJpaR4Test {
 
 		// then
 		runInTransaction(() -> {
-			int entriesInSpIndexTokenTablePostReindexing = myResourceIndexedSearchParamTokenDao.countForResourceId(JpaPid.fromId(obsId.getIdPartAsLong()));
+			int entriesInSpIndexTokenTablePostReindexing = myResourceIndexedSearchParamTokenDao.countForResourceId(obsId.getIdPartAsLong());
 			assertEquals(0, entriesInSpIndexTokenTablePostReindexing);
 		});
 	}
