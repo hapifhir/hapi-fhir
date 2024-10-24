@@ -190,7 +190,7 @@ public class CrossPartitionReferencesTest extends BaseJpaR5Test {
 	}
 
 	private void initializeCrossReferencesInterceptor() {
-		when(myCrossPartitionReferencesDetectedInterceptor.handle(any(),any())).thenAnswer(t->{
+		when(myCrossPartitionReferencesDetectedInterceptor.handle(any(), any())).thenAnswer(t -> {
 			CrossPartitionReferenceDetails theDetails = t.getArgument(1, CrossPartitionReferenceDetails.class);
 			IIdType targetId = theDetails.getPathAndRef().getRef().getReferenceElement();
 			RequestPartitionId referenceTargetPartition = myPartitionHelperSvc.determineReadPartitionForRequestForRead(theDetails.getRequestDetails(), targetId.getResourceType(), targetId);
@@ -232,11 +232,12 @@ public class CrossPartitionReferencesTest extends BaseJpaR5Test {
 		private static RequestPartitionId selectPartition(String resourceType) {
 			switch (resourceType) {
 				case "Patient":
+				case "RelatedPerson":
 					return PARTITION_PATIENT;
 				case "Observation":
 					return PARTITION_OBSERVATION;
 				default:
-					throw new InternalErrorException("Don't know how to handle resource type");
+					throw new InternalErrorException("Don't know how to handle resource type: " + resourceType);
 			}
 		}
 
