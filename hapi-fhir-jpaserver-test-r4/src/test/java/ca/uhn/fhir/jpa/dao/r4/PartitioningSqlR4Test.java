@@ -439,11 +439,6 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			assertEquals(myPartitionId, historyTags.get(0).getPartitionId().getPartitionId().intValue());
 			assertLocalDateFromDbMatches(myPartitionDate, historyTags.get(0).getPartitionId().getPartitionDate());
 
-			// HFJ_RES_VER_PROV
-			assertNotNull(version.getProvenance());
-			assertEquals(myPartitionId, version.getProvenance().getPartitionId().getPartitionId().intValue());
-			assertLocalDateFromDbMatches(myPartitionDate, version.getProvenance().getPartitionId().getPartitionDate());
-
 			// HFJ_SPIDX_STRING
 			List<ResourceIndexedSearchParamString> strings = myResourceIndexedSearchParamStringDao.findAllForResourceId(patientId);
 			ourLog.info("\n * {}", strings.stream().map(ResourceIndexedSearchParamString::toString).collect(Collectors.joining("\n * ")));
@@ -527,11 +522,6 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			assertEquals(1, historyTags.size());
             assertNull(historyTags.get(0).getPartitionId().getPartitionId());
 			assertLocalDateFromDbMatches(myPartitionDate, historyTags.get(0).getPartitionId().getPartitionDate());
-
-			// HFJ_RES_VER_PROV
-			assertNotNull(version.getProvenance());
-            assertNull(version.getProvenance().getPartitionId().getPartitionId());
-			assertLocalDateFromDbMatches(myPartitionDate, version.getProvenance().getPartitionId().getPartitionDate());
 
 			// HFJ_SPIDX_STRING
 			List<ResourceIndexedSearchParamString> strings = myResourceIndexedSearchParamStringDao.findAllForResourceId(patientId);
@@ -790,12 +780,6 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			assertLocalDateFromDbMatches(myPartitionDate, historyTags.get(0).getPartitionId().getPartitionDate());
 			assertEquals(myPartitionId, historyTags.get(1).getPartitionId().getPartitionId().intValue());
 			assertLocalDateFromDbMatches(myPartitionDate, historyTags.get(1).getPartitionId().getPartitionDate());
-
-			// HFJ_RES_VER_PROV
-			assertNotNull(resVer.getProvenance());
-			assertNotNull(resVer.getPartitionId());
-			assertEquals(myPartitionId, resVer.getProvenance().getPartitionId().getPartitionId().intValue());
-			assertLocalDateFromDbMatches(myPartitionDate, resVer.getProvenance().getPartitionId().getPartitionDate());
 
 			// HFJ_SPIDX_STRING
 			List<ResourceIndexedSearchParamString> strings = myResourceIndexedSearchParamStringDao.findAllForResourceId(patientId);

@@ -194,12 +194,12 @@ public class FhirResourceDaoR4SearchSqlTest extends BaseJpaR4Test {
 		// Query 1 - Find resources: Make sure we search for tag type+system+code always
 		String sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(false, false);
 		assertEquals("SELECT t0.RES_ID FROM HFJ_RESOURCE t0 INNER JOIN HFJ_RES_TAG t1 ON (t0.RES_ID = t1.RES_ID) INNER JOIN HFJ_TAG_DEF t2 ON (t1.TAG_ID = t2.TAG_ID) WHERE (((t0.RES_TYPE = ?) AND (t0.RES_DELETED_AT IS NULL)) AND ((t2.TAG_TYPE = ?) AND (t2.TAG_SYSTEM = ?) AND (t2.TAG_CODE = ?)))", sql);
-		// Query 2 - Load resourece contents
+		// Query 2 - Load resource contents
 		sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(false, false);
-		assertThat(sql).contains("where rsv1_0.RES_ID in (?)");
+		assertThat(sql).contains("where rht1_0.RES_ID in (?)");
 		// Query 3 - Load tags and defintions
 		sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(2).getSql(false, false);
-		assertThat(sql).contains("from HFJ_RES_TAG rt1_0 join HFJ_TAG_DEF");
+		assertThat(sql).contains("from HFJ_HISTORY_TAG rht1_0 join HFJ_TAG_DEF");
 
 		assertThat(toUnqualifiedVersionlessIds(outcome)).containsExactly(id);
 
@@ -234,7 +234,7 @@ public class FhirResourceDaoR4SearchSqlTest extends BaseJpaR4Test {
 		assertEquals("SELECT t0.RES_ID FROM HFJ_SPIDX_URI t0 WHERE (t0.HASH_URI = ?)", sql);
 		// Query 2 - Load resourece contents
 		sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(false, false);
-		assertThat(sql).contains("where rsv1_0.RES_ID in (?)");
+		assertThat(sql).contains("where rht1_0.RES_ID in (?)");
 
 		assertThat(toUnqualifiedVersionlessIds(outcome)).containsExactly(id);
 

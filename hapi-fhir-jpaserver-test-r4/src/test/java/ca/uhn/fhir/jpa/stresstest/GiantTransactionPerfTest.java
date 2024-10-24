@@ -370,7 +370,7 @@ public class GiantTransactionPerfTest {
 		}
 
 		@Override
-		public Slice<ResourceHistoryTable> findForResourceIdAndReturnEntitiesAndFetchProvenance(Pageable thePage, Long theId, Long theDontWantVersion) {
+		public Slice<ResourceHistoryTable> findAllVersionsExceptSpecificForResourcePid(Pageable thePage, Long theId, Long theDontWantVersion) {
 			throw new UnsupportedOperationException();
 		}
 

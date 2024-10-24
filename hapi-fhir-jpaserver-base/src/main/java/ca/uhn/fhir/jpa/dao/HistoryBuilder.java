@@ -40,7 +40,6 @@ import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Expression;
-import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.Subquery;
@@ -121,8 +120,6 @@ public class HistoryBuilder {
 		Root<ResourceHistoryTable> from = criteriaQuery.from(ResourceHistoryTable.class);
 
 		addPredicatesToQuery(cb, thePartitionId, criteriaQuery, from, theHistorySearchStyle);
-
-		from.fetch("myProvenance", JoinType.LEFT);
 
 		/*
 		 * The sort on myUpdated is the important one for _history operations, but there are

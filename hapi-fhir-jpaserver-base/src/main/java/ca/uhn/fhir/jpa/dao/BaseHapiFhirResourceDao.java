@@ -43,6 +43,7 @@ import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
 import ca.uhn.fhir.jpa.api.model.LazyDaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.dao.data.IResourceHistoryProvenanceDao;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictUtil;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
@@ -51,6 +52,7 @@ import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.model.entity.BaseTag;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
+import ca.uhn.fhir.jpa.model.entity.ResourceHistoryProvenanceEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.TagDefinition;
@@ -203,6 +205,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	@Autowired
 	private IJobCoordinator myJobCoordinator;
+
+	@Autowired
+	private IResourceHistoryProvenanceDao myResourceHistoryProvenanceDao;
 
 	private IInstanceValidatorModule myInstanceValidator;
 	private String myResourceName;
@@ -1694,7 +1699,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				int pageSize = 100;
 				for (int page = 0; ((long) page * pageSize) < entity.getVersion(); page++) {
 					Slice<ResourceHistoryTable> historyEntities =
-							myResourceHistoryTableDao.findForResourceIdAndReturnEntitiesAndFetchProvenance(
+							myResourceHistoryTableDao.findAllVersionsExceptSpecificForResourcePid(
 									PageRequest.of(page, pageSize), entity.getId(), historyEntity.getVersion());
 					for (ResourceHistoryTable next : historyEntities) {
 						reindexOptimizeStorageHistoryEntity(entity, next);
@@ -1716,11 +1721,18 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				}
 			}
 		}
-		if (isBlank(historyEntity.getSourceUri()) && isBlank(historyEntity.getRequestId())) {
-			if (historyEntity.getProvenance() != null) {
-				historyEntity.setSourceUri(historyEntity.getProvenance().getSourceUri());
-				historyEntity.setRequestId(historyEntity.getProvenance().getRequestId());
-				changed = true;
+		if (myStorageSettings.isAccessMetaSourceInformationFromProvenanceTable()) {
+			if (isBlank(historyEntity.getSourceUri()) && isBlank(historyEntity.getRequestId())) {
+				Long id = historyEntity.getId();
+				Optional<ResourceHistoryProvenanceEntity> provenanceEntityOpt =
+						myResourceHistoryProvenanceDao.findById(id);
+				if (provenanceEntityOpt.isPresent()) {
+					ResourceHistoryProvenanceEntity provenanceEntity = provenanceEntityOpt.get();
+					historyEntity.setSourceUri(provenanceEntity.getSourceUri());
+					historyEntity.setRequestId(provenanceEntity.getRequestId());
+					myResourceHistoryProvenanceDao.delete(provenanceEntity);
+					changed = true;
+				}
 			}
 		}
 		if (changed) {

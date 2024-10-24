@@ -709,6 +709,8 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		observation.getSubject().setReference(patientId.withVersion("1").getValue());
 		IIdType observationId = myObservationDao.create(observation).getId().toUnqualified();
 
+		logAllResourceLinks();
+
 		// Search - Non Synchronous for *
 		{
 			IBundleProvider outcome = myObservationDao.search(new SearchParameterMap().addInclude(IBaseResource.INCLUDE_ALL));

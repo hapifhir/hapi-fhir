@@ -47,8 +47,8 @@ public interface IResourceHistoryTableDao extends JpaRepository<ResourceHistoryT
 			Pageable thePage, @Param("resId") Long theId, @Param("dontWantVersion") Long theDontWantVersion);
 
 	@Query(
-			"SELECT t FROM ResourceHistoryTable t LEFT OUTER JOIN FETCH t.myProvenance WHERE t.myResourceId = :resId AND t.myResourceVersion <> :dontWantVersion")
-	Slice<ResourceHistoryTable> findForResourceIdAndReturnEntitiesAndFetchProvenance(
+			"SELECT t FROM ResourceHistoryTable t WHERE t.myResourceId = :resId AND t.myResourceVersion <> :dontWantVersion")
+	Slice<ResourceHistoryTable> findAllVersionsExceptSpecificForResourcePid(
 			Pageable thePage, @Param("resId") Long theId, @Param("dontWantVersion") Long theDontWantVersion);
 
 	@Query("" + "SELECT v.myId FROM ResourceHistoryTable v "
