@@ -84,20 +84,22 @@ public class FhirTerser {
 
 	private static final Pattern COMPARTMENT_MATCHER_PATH =
 			Pattern.compile("([a-zA-Z.]+)\\.where\\(resolve\\(\\) is ([a-zA-Z]+)\\)");
+
 	private static final String USER_DATA_KEY_CONTAIN_RESOURCES_COMPLETED =
 			FhirTerser.class.getName() + "_CONTAIN_RESOURCES_COMPLETED";
+
 	private final FhirContext myContext;
 
 	/**
 	 * This comparator sorts IBaseReferences, and places any that are missing an ID at the end. Those with an ID go to the front.
 	 */
 	private static final Comparator<IBaseReference> REFERENCES_WITH_IDS_FIRST =
-		Comparator.nullsLast(Comparator.comparing(ref -> {
-			if (ref.getResource() == null) return true;
-			if (ref.getResource().getIdElement() == null) return true;
-			if (ref.getResource().getIdElement().getValue() == null) return true;
-			return false;
-		}));
+			Comparator.nullsLast(Comparator.comparing(ref -> {
+				if (ref.getResource() == null) return true;
+				if (ref.getResource().getIdElement() == null) return true;
+				if (ref.getResource().getIdElement().getValue() == null) return true;
+				return false;
+			}));
 
 	public FhirTerser(FhirContext theContext) {
 		super();
