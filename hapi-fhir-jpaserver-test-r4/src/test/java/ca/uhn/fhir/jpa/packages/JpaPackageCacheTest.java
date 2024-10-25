@@ -162,9 +162,15 @@ public class JpaPackageCacheTest extends BaseJpaR4Test {
 		pkg = myPackageCacheManager.loadPackage("hl7.fhir.us.davinci-cdex", null);
 		assertEquals("0.2.0", pkg.version());
 
+		String expected = "This IG provides detailed guidance that helps implementers use FHIR-based interactions and resources relevant to support specific exchanges of clinical information between provider and payers (or other providers).  What is unique about this guide is that is provides additional technical guidance on two FHIR transaction approaches for requesting information:\n" +
+			"\n" +
+			" - Direct Query\n" +
+			" - Task Based Approach:\n" +
+			"\n" +
+			"The types of clinical data is not limited to FHIR resources, but includes C-CDA documents, pdfs, text file...";
 		runInTransaction(()-> {
-			assertEquals("This IG provides detailed guidance that helps implementers use FHIR-based interactions and resources relevant to support specific exchanges of clinical information between provider and payers (or ...", myPackageDao.findByPackageId("hl7.fhir.us.davinci-cdex").get().getDescription());
-			assertEquals("This IG provides detailed guidance that helps implementers use FHIR-based interactions and resources relevant to support specific exchanges of clinical information between provider and payers (or ...", myPackageVersionDao.findByPackageIdAndVersion("hl7.fhir.us.davinci-cdex", "0.2.0").get().getDescription());
+			assertEquals(expected, myPackageDao.findByPackageId("hl7.fhir.us.davinci-cdex").get().getDescription());
+			assertEquals(expected, myPackageVersionDao.findByPackageIdAndVersion("hl7.fhir.us.davinci-cdex", "0.2.0").get().getDescription());
 		});
 	}
 
