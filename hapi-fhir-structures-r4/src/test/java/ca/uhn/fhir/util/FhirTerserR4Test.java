@@ -1549,7 +1549,7 @@ public class FhirTerserR4Test {
 	}
 
 	@Test
-	void copyingAndParsingCreatesDuplicateContainedResources() throws JsonProcessingException {
+	void copyingAndParsingCreatesDuplicateContainedResources() {
 		var library = new Library();
 		var params = new Parameters();
 		var id = "#expansion-parameters-ecr";
@@ -1571,59 +1571,7 @@ public class FhirTerserR4Test {
 		assertEquals(1, copy.getContained().size());
 
 		String stringifiedCopy = FhirContext.forR4Cached().newJsonParser().encodeResourceToString(copy);
-		String original = FhirContext.forR4Cached().newJsonParser().encodeResourceToString(parsed);
-		//FIXME GGG WTF IS WRONG WITH COPY!?
-		System.out.println("ORIGINAL PARSE RESULT");
-		System.out.print(original);
-		System.out.println("*********");
-		System.out.println("COPIED PARSE RESULT");
-		System.out.println(stringifiedCopy);
-		System.out.println("*********");
-
 		Library parsedCopy = (Library) parser.parseResource(stringifiedCopy);
-		assertEquals(1, parsedCopy.getContained().size());
-	}
-
-	@Test
-	public void minimalWeirdCopyTest() {
-		Library library = new Library();
-		var params = new Parameters();
-
-		String id = "#expansion-parameters-ecr";
-		params.setId(id);
-		params.addParameter("system-version", new StringType("test2"));
-		Extension paramsExt = new Extension();
-
-		paramsExt.setUrl("test").setValue(new Reference(id));
-		library.addContained(params);
-		library.addExtension(paramsExt);
-
-		assertEquals(1, library.getContained().size());
-		assertEquals(1, library.copy().getContained().size());
-
-		IParser parser = FhirContext.forR4Cached().newJsonParser();
-
-		String stringLibrary = parser.encodeResourceToString(library);
-		Library originalLibrary = parser.parseResource(Library.class, stringLibrary);
-		Library copiedLibrary = originalLibrary.copy();
-
-		assertEquals(1, originalLibrary.getContained().size());
-		assertEquals(1, copiedLibrary.getContained().size());
-
-		String stringifiedOriginal = parser.encodeResourceToString(originalLibrary);
-		String stringifiedCopy = parser.encodeResourceToString(copiedLibrary);
-
-		System.out.println("ORIGINAL PARSE RESULT");
-		System.out.print(stringifiedOriginal);
-		System.out.println("*********");
-
-		System.out.println("COPIED PARSE RESULT");
-		System.out.println(stringifiedCopy);
-		System.out.println("*********");
-
-		Library parsedOriginal = parser.parseResource(Library.class, stringifiedOriginal);
-		Library parsedCopy = parser.parseResource(Library.class, stringifiedCopy);
-		assertEquals(1, parsedOriginal.getContained().size());
 		assertEquals(1, parsedCopy.getContained().size());
 	}
 

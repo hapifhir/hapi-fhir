@@ -1439,16 +1439,21 @@ public class FhirTerser {
 		// See: https://github.com/hapifhir/hapi-fhir/issues/6403
 		allReferences.sort(REFERENCES_WITH_IDS_FIRST);
 
-		processContainedReferenceElements(theContained, theModifyResource, allReferences);
+		for (IBaseReference next : allReferences) {
+			IBaseResource resource = next.getResource();
+			if (resource == null && next.getReferenceElement().isLocal()) {
+				if (theContained.hasExistingIdToContainedResource()) {
+					IBaseResource potentialTarget = theContained
+							.getExistingIdToContainedResource()
+							.remove(next.getReferenceElement().getValue());
+					if (potentialTarget != null) {
+						theContained.addContained(next.getReferenceElement(), potentialTarget);
+						containResourcesForEncoding(theContained, potentialTarget, theModifyResource);
+					}
+				}
+			}
+		}
 
-		processContainedResourceElements(theContained, theResource, theModifyResource, allReferences);
-	}
-
-	private void processContainedResourceElements(
-			ContainedResources theContained,
-			IBaseResource theResource,
-			boolean theModifyResource,
-			List<IBaseReference> allReferences) {
 		for (IBaseReference next : allReferences) {
 			IBaseResource resource = next.getResource();
 			if (resource != null) {
@@ -1466,24 +1471,6 @@ public class FhirTerser {
 						theContained
 								.getExistingIdToContainedResource()
 								.remove(resource.getIdElement().getValue());
-					}
-				}
-			}
-		}
-	}
-
-	private void processContainedReferenceElements(
-			ContainedResources theContained, boolean theModifyResource, List<IBaseReference> allReferences) {
-		for (IBaseReference next : allReferences) {
-			IBaseResource resource = next.getResource();
-			if (resource == null && next.getReferenceElement().isLocal()) {
-				if (theContained.hasExistingIdToContainedResource()) {
-					IBaseResource potentialTarget = theContained
-							.getExistingIdToContainedResource()
-							.remove(next.getReferenceElement().getValue());
-					if (potentialTarget != null) {
-						theContained.addContained(next.getReferenceElement(), potentialTarget);
-						containResourcesForEncoding(theContained, potentialTarget, theModifyResource);
 					}
 				}
 			}
@@ -1817,9 +1804,7 @@ public class FhirTerser {
 		public IIdType addContained(IBaseResource theResource) {
 			if (this.getResourceId(theResource) != null) {
 				// Prevent infinite recursion if there are circular loops in the contained resources
-				if (this.getResourceToIdMap().get(theResource) == theResource) {
 					return null;
-				}
 			}
 
 			IIdType existing = getResourceToIdMap().get(theResource);
