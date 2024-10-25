@@ -1560,6 +1560,7 @@ public class FhirTerserR4Test {
 		var copy = ((Library) parsed).copy();
 		assertEquals(1, copy.getContained().size());
 		var stringifiedCopy = parser.encodeResourceToString(copy);
+		System.out.print(stringifiedCopy);
 		var parsedCopy = parser.parseResource(stringifiedCopy);
 		assertEquals(1, ((Library) parsedCopy).getContained().size());
 	}
