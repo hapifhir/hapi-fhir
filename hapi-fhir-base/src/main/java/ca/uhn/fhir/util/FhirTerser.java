@@ -93,10 +93,10 @@ public class FhirTerser {
 	 */
 	private static final Comparator<IBaseReference> REFERENCES_WITH_IDS_FIRST =
 		Comparator.nullsLast(Comparator.comparing(ref -> {
-			if (ref.getResource() == null) return 1;
-			if (ref.getResource().getIdElement() == null) return 1;
-			if (ref.getResource().getIdElement().getValue() == null) return 1;
-			return 0;
+			if (ref.getResource() == null) return true;
+			if (ref.getResource().getIdElement() == null) return true;
+			if (ref.getResource().getIdElement().getValue() == null) return true;
+			return false;
 		}));
 
 	public FhirTerser(FhirContext theContext) {
@@ -1425,13 +1425,6 @@ public class FhirTerser {
 				return true;
 			}
 		});
-	}
-
-	private static Integer hasId(IBaseReference theReference) {
-		if (theReference.getResource() == null) return 1;
-		if (theReference.getResource().getIdElement() == null) return 1;
-		if (theReference.getResource().getIdElement().getValue() == null) return 1;
-		return 0;
 	}
 
 	private void containResourcesForEncoding(
