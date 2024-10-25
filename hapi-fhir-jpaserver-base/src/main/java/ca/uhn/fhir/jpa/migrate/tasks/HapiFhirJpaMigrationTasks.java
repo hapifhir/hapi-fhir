@@ -144,7 +144,12 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 				.nullable()
 				.withType(ColumnTypeEnum.STRING, 512);
 		version.onTable("NPM_PACKAGE_VER")
-				.modifyColumn("20241023.30", "DESC_UPPER")
+				.modifyColumn("20241023.40", "DESC_UPPER")
+				.nullable()
+				.withType(ColumnTypeEnum.STRING, 512);
+
+		version.onTable("NPM_PACKAGE")
+				.modifyColumn("20241023.50", "PACKAGE_DESC")
 				.nullable()
 				.withType(ColumnTypeEnum.STRING, 512);
 	}
