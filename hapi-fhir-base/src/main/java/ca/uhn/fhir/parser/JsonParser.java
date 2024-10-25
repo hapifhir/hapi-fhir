@@ -387,12 +387,14 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 			}
 			case CONTAINED_RESOURCE_LIST:
 			case CONTAINED_RESOURCES: {
-				List<IBaseResource> containedResources = theEncodeContext.getContainedResources().getContainedResources();
+				List<IBaseResource> containedResources =
+						theEncodeContext.getContainedResources().getContainedResources();
 				if (containedResources.size() > 0) {
 					beginArray(theEventWriter, theChildName);
 
 					for (IBaseResource next : containedResources) {
-						IIdType resourceId = theEncodeContext.getContainedResources().getResourceId(next);
+						IIdType resourceId =
+								theEncodeContext.getContainedResources().getResourceId(next);
 						String value = resourceId.getValue();
 						encodeResourceToJsonStreamWriter(
 								theResDef,
@@ -555,7 +557,8 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 
 				if (nextValue == null || nextValue.isEmpty()) {
 					if (nextValue instanceof BaseContainedDt) {
-						if (theContainedResource || theEncodeContext.getContainedResources().isEmpty()) {
+						if (theContainedResource
+								|| theEncodeContext.getContainedResources().isEmpty()) {
 							continue;
 						}
 					} else {
@@ -839,7 +842,8 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 					+ theResource.getStructureFhirVersionEnum());
 		}
 
-		EncodeContext encodeContext = new EncodeContext(this, getContext().getParserOptions(), new FhirTerser.ContainedResources());
+		EncodeContext encodeContext =
+				new EncodeContext(this, getContext().getParserOptions(), new FhirTerser.ContainedResources());
 		String resourceName = getContext().getResourceType(theResource);
 		encodeContext.pushPath(resourceName, true);
 		doEncodeResourceToJsonLikeWriter(theResource, theJsonLikeWriter, encodeContext);

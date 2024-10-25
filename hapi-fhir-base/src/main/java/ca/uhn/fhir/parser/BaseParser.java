@@ -182,7 +182,10 @@ public abstract class BaseParser implements IParser {
 	}
 
 	private String determineReferenceText(
-			IBaseReference theRef, CompositeChildElement theCompositeChildElement, IBaseResource theResource, EncodeContext theContext) {
+			IBaseReference theRef,
+			CompositeChildElement theCompositeChildElement,
+			IBaseResource theResource,
+			EncodeContext theContext) {
 		IIdType ref = theRef.getReferenceElement();
 		if (isBlank(ref.getIdPart())) {
 			String reference = ref.getValue();
@@ -261,7 +264,8 @@ public abstract class BaseParser implements IParser {
 	@Override
 	public final void encodeResourceToWriter(IBaseResource theResource, Writer theWriter)
 			throws IOException, DataFormatException {
-		EncodeContext encodeContext = new EncodeContext(this, myContext.getParserOptions(), new FhirTerser.ContainedResources());
+		EncodeContext encodeContext =
+				new EncodeContext(this, myContext.getParserOptions(), new FhirTerser.ContainedResources());
 		encodeResourceToWriter(theResource, theWriter, encodeContext);
 	}
 
@@ -284,7 +288,8 @@ public abstract class BaseParser implements IParser {
 		} else if (theElement instanceof IPrimitiveType) {
 			theWriter.write(((IPrimitiveType<?>) theElement).getValueAsString());
 		} else {
-			EncodeContext encodeContext = new EncodeContext(this, myContext.getParserOptions(), new FhirTerser.ContainedResources());
+			EncodeContext encodeContext =
+					new EncodeContext(this, myContext.getParserOptions(), new FhirTerser.ContainedResources());
 			encodeToWriter(theElement, theWriter, encodeContext);
 		}
 	}
@@ -402,7 +407,6 @@ public abstract class BaseParser implements IParser {
 		}
 		return elementId;
 	}
-
 
 	@Override
 	public Set<String> getDontStripVersionsFromReferencesAtPaths() {
@@ -535,10 +539,11 @@ public abstract class BaseParser implements IParser {
 		return mySuppressNarratives;
 	}
 
-	protected boolean isChildContained(BaseRuntimeElementDefinition<?> childDef, boolean theIncludedResource, EncodeContext theContext) {
+	protected boolean isChildContained(
+			BaseRuntimeElementDefinition<?> childDef, boolean theIncludedResource, EncodeContext theContext) {
 		return (childDef.getChildType() == ChildTypeEnum.CONTAINED_RESOURCES
 						|| childDef.getChildType() == ChildTypeEnum.CONTAINED_RESOURCE_LIST)
-				&&  theContext.getContainedResources().isEmpty() == false
+				&& theContext.getContainedResources().isEmpty() == false
 				&& theIncludedResource == false;
 	}
 
@@ -784,7 +789,8 @@ public abstract class BaseParser implements IParser {
 			 */
 			if (next instanceof IBaseReference) {
 				IBaseReference nextRef = (IBaseReference) next;
-				String refText = determineReferenceText(nextRef, theCompositeChildElement, theResource, theEncodeContext);
+				String refText =
+						determineReferenceText(nextRef, theCompositeChildElement, theResource, theEncodeContext);
 				if (!StringUtils.equals(refText, nextRef.getReferenceElement().getValue())) {
 
 					if (retVal == theValues) {
@@ -999,7 +1005,7 @@ public abstract class BaseParser implements IParser {
 			}
 		}
 
-		 theContext.setContainedResources(getContext().newTerser().containResources(theResource));
+		theContext.setContainedResources(getContext().newTerser().containResources(theResource));
 	}
 
 	static class ChildNameAndDef {
@@ -1032,7 +1038,10 @@ public abstract class BaseParser implements IParser {
 		private final List<EncodeContextPath> myDontEncodeElementPaths;
 		private FhirTerser.ContainedResources myContainedResources;
 
-		public EncodeContext(BaseParser theParser, ParserOptions theParserOptions, FhirTerser.ContainedResources theContainedResources) {
+		public EncodeContext(
+				BaseParser theParser,
+				ParserOptions theParserOptions,
+				FhirTerser.ContainedResources theContainedResources) {
 			Collection<String> encodeElements = theParser.myEncodeElements;
 			Collection<String> dontEncodeElements = theParser.myDontEncodeElements;
 			if (isSummaryMode()) {
@@ -1068,6 +1077,7 @@ public abstract class BaseParser implements IParser {
 		public FhirTerser.ContainedResources getContainedResources() {
 			return myContainedResources;
 		}
+
 		public void setContainedResources(FhirTerser.ContainedResources theContainedResources) {
 			myContainedResources = theContainedResources;
 		}

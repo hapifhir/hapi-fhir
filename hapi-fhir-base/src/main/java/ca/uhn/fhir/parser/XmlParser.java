@@ -359,8 +359,10 @@ public class XmlParser extends BaseParser {
 					 * theEventWriter.writeStartElement("contained"); encodeResourceToXmlStreamWriter(next, theEventWriter, true, fixContainedResourceId(next.getId().getValue()));
 					 * theEventWriter.writeEndElement(); }
 					 */
-					for (IBaseResource next : theEncodeContext.getContainedResources().getContainedResources()) {
-						IIdType resourceId = theEncodeContext.getContainedResources().getResourceId(next);
+					for (IBaseResource next :
+							theEncodeContext.getContainedResources().getContainedResources()) {
+						IIdType resourceId =
+								theEncodeContext.getContainedResources().getResourceId(next);
 						theEventWriter.writeStartElement("contained");
 						String value = resourceId.getValue();
 						encodeResourceToXmlStreamWriter(

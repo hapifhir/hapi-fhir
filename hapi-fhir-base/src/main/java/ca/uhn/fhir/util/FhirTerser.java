@@ -1804,7 +1804,7 @@ public class FhirTerser {
 		public IIdType addContained(IBaseResource theResource) {
 			if (this.getResourceId(theResource) != null) {
 				// Prevent infinite recursion if there are circular loops in the contained resources
-					return null;
+				return null;
 			}
 
 			IIdType existing = getResourceToIdMap().get(theResource);
