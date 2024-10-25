@@ -285,6 +285,45 @@ public class JsonParserR4Test extends BaseTest {
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(b);
 		ourLog.info(encoded);
 	}
+	@Test
+	public void testAutoAssignedContainedCollision() {
+		Bundle b = new Bundle();
+		Specimen specimen = new Specimen();
+		Practitioner practitioner = new Practitioner();
+		DiagnosticReport report = new DiagnosticReport();
+		report.addSpecimen(new Reference(specimen));
+		b.addEntry().setResource(report).getRequest().setMethod(Bundle.HTTPVerb.POST).setUrl("/DiagnosticReport");
+
+		Observation obs = new Observation();
+		specimen.setId("#1");
+//		practitioner.setId("#1");
+		obs.addPerformer(new Reference(practitioner));
+		obs.setSpecimen(new Reference(specimen));
+
+
+		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs);
+		ourLog.info(encoded);
+	}
+
+
+	@Test
+	public void testDuplicate() {
+		Bundle b = new Bundle();
+		Specimen specimen = new Specimen();
+		Practitioner practitioner = new Practitioner();
+		DiagnosticReport report = new DiagnosticReport();
+		report.addSpecimen(new Reference(specimen));
+		b.addEntry().setResource(report).getRequest().setMethod(Bundle.HTTPVerb.POST).setUrl("/DiagnosticReport");
+
+		Observation obs = new Observation();
+		obs.setSpecimen(new Reference(specimen));
+		obs.addPerformer(new Reference(practitioner));
+
+		b.addEntry().setResource(obs).getRequest().setMethod(Bundle.HTTPVerb.POST).setUrl("/Observation");
+
+		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(b);
+		ourLog.info(encoded);
+	}
 
 	@Test
 	public void testContainedResourcesNotAutoContainedWhenConfiguredNotToDoSo() {

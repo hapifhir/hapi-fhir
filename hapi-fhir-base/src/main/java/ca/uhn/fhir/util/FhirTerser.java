@@ -1437,12 +1437,11 @@ public class FhirTerser {
 			IBaseResource resource = next.getResource();
 			if (resource != null) {
 				if (resource.getIdElement().isEmpty() || resource.getIdElement().isLocal()) {
-					if (theContained.getResourceId(resource) != null) {
-						// Prevent infinite recursion if there are circular loops in the contained resources
-						//TODO GGG: Here is where we drop out of processing the specimen, as the same object that was processed in the previous DR had already placed this specimen in the
+
+					IIdType id = theContained.addContained(resource);
+					if (id == null) {
 						continue;
 					}
-					IIdType id = theContained.addContained(resource);
 					if (theModifyResource) {
 						getContainedResourceList(theResource).add(resource);
 						next.setReference(id.getValue());
@@ -1783,6 +1782,14 @@ public class FhirTerser {
 		}
 
 		public IIdType addContained(IBaseResource theResource) {
+			if (this.getResourceId(theResource) != null) {
+				// Prevent infinite recursion if there are circular loops in the contained resources
+				if( this.getResourceToIdMap().get(theResource) == theResource) {
+					System.out.println("WE ARE IN AN INFINITE LOOP, TIME TO DROP OUT!");
+					return null;
+				}
+			}
+
 			IIdType existing = getResourceToIdMap().get(theResource);
 			if (existing != null) {
 				return existing;
