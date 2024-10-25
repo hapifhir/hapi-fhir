@@ -1868,18 +1868,17 @@ public class FhirTerser {
 				return null;
 			}
 
-			return getResourceToIdMap().get(theNext);
-//			var idFromMap = getResourceToIdMap().get(theNext);
-//			if (idFromMap != null) {
-//				return idFromMap;
-//			} else if (theNext.getIdElement().getIdPart() != null) {
-//				return getResourceToIdMap().values().stream()
-//						.filter(id -> theNext.getIdElement().getIdPart().equals(id.getIdPart()))
-//						.findAny()
-//						.orElse(null);
-//			} else {
-//				return null;
-//			}
+			var idFromMap = getResourceToIdMap().get(theNext);
+			if (idFromMap != null) {
+				return idFromMap;
+			} else if (theNext.getIdElement().getIdPart() != null) {
+				return getResourceToIdMap().values().stream()
+						.filter(id -> theNext.getIdElement().getIdPart().equals(id.getIdPart()))
+						.findAny()
+						.orElse(null);
+			} else {
+				return null;
+			}
 		}
 
 		private List<IBaseResource> getOrCreateResourceList() {

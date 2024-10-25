@@ -6,7 +6,10 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.parser.JsonParser;
 import com.google.common.collect.Lists;
+import org.apache.jena.base.Sys;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseReference;
@@ -47,6 +50,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testcontainers.shaded.com.fasterxml.jackson.core.JsonProcessingException;
+import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -1544,7 +1549,7 @@ public class FhirTerserR4Test {
 	}
 
 	@Test
-	void copyingAndParsingCreatesDuplicateContainedResources() {
+	void copyingAndParsingCreatesDuplicateContainedResources() throws JsonProcessingException {
 		var library = new Library();
 		var params = new Parameters();
 		var id = "#expansion-parameters-ecr";
@@ -1558,16 +1563,67 @@ public class FhirTerserR4Test {
 
 		final var parser = FhirContext.forR4Cached().newJsonParser();
 		var stringified = parser.encodeResourceToString(library);
+
+
 		var parsed = parser.parseResource(stringified);
 		var copy = ((Library) parsed).copy();
 
 		assertEquals(1, copy.getContained().size());
 
-		var stringifiedCopy = parser.encodeResourceToString(copy);
-
-		System.out.print(stringifiedCopy);
-		Library parsedCopy = (Library) parser.parseResource(stringifiedCopy);
+		String stringifiedCopy = FhirContext.forR4Cached().newJsonParser().encodeResourceToString(copy);
+		String original = FhirContext.forR4Cached().newJsonParser().encodeResourceToString(parsed);
+		//FIXME GGG WTF IS WRONG WITH COPY!?
+		System.out.println("ORIGINAL PARSE RESULT");
+		System.out.print(original);
+		System.out.println("*********");
+		System.out.println("COPIED PARSE RESULT");
 		System.out.println(stringifiedCopy);
+		System.out.println("*********");
+
+		Library parsedCopy = (Library) parser.parseResource(stringifiedCopy);
+		assertEquals(1, parsedCopy.getContained().size());
+	}
+
+	@Test
+	public void minimalWeirdCopyTest() {
+		Library library = new Library();
+		var params = new Parameters();
+
+		String id = "#expansion-parameters-ecr";
+		params.setId(id);
+		params.addParameter("system-version", new StringType("test2"));
+		Extension paramsExt = new Extension();
+
+		paramsExt.setUrl("test").setValue(new Reference(id));
+		library.addContained(params);
+		library.addExtension(paramsExt);
+
+		assertEquals(1, library.getContained().size());
+		assertEquals(1, library.copy().getContained().size());
+
+		IParser parser = FhirContext.forR4Cached().newJsonParser();
+
+		String stringLibrary = parser.encodeResourceToString(library);
+		Library originalLibrary = parser.parseResource(Library.class, stringLibrary);
+		Library copiedLibrary = originalLibrary.copy();
+
+		assertEquals(1, originalLibrary.getContained().size());
+		assertEquals(1, copiedLibrary.getContained().size());
+
+		String stringifiedOriginal = parser.encodeResourceToString(originalLibrary);
+		String stringifiedCopy = parser.encodeResourceToString(copiedLibrary);
+
+		System.out.println("ORIGINAL PARSE RESULT");
+		System.out.print(stringifiedOriginal);
+		System.out.println("*********");
+
+		System.out.println("COPIED PARSE RESULT");
+		System.out.println(stringifiedCopy);
+		System.out.println("*********");
+
+		Library parsedOriginal = parser.parseResource(Library.class, stringifiedOriginal);
+		Library parsedCopy = parser.parseResource(Library.class, stringifiedCopy);
+		assertEquals(1, parsedOriginal.getContained().size());
 		assertEquals(1, parsedCopy.getContained().size());
 	}
 
