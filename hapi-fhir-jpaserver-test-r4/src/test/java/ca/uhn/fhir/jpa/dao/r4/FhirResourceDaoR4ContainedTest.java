@@ -49,33 +49,6 @@ public class FhirResourceDaoR4ContainedTest extends BaseJpaR4Test {
 		myStorageSettings.setIndexOnContainedResources(false);
 	}
 
-
-	@Test
-	public void testContainedResourcesGeUniqueIds() {
-		Patient patient = new Patient();
-		patient.setId("Patient/test-patient");
-		myPatientDao.update(patient, mySrd);
-
-		Observation observation = new Observation();
-		Practitioner containedPractitioner = new Practitioner();
-		containedPractitioner.getNameFirstRep().setFamily("zoop").addGiven("woop");
-		Specimen containedSpecimen = new Specimen();
-		containedSpecimen.getType().getCodingFirstRep().setSystem("HL70396").setCode("99UNK").setDisplay("Unknown");
-
-		observation.addContained(containedPractitioner);
-		observation.addContained(containedSpecimen);
-		observation.getPerformerFirstRep().setReference("#1");
-		observation.getSpecimen().setReference("#2");
-		observation.setSubject(new Reference("Patient/test-patient"));
-
-		observation.getCode().getCodingFirstRep().setSystem("LN").setCode("NV");
-		observation.setValue(new StringType("abc123"));
-
-		System.out.println(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(observation));
-		DaoMethodOutcome daoMethodOutcome = myObservationDao.create(observation, mySrd);
-
-		System.out.println(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(daoMethodOutcome.getResource()));
-	}
 	@Test
 	public void testCreateSimpleContainedResourceIndexWithGeneratedId() {
 
