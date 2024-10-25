@@ -1551,10 +1551,9 @@ public class FhirTerserR4Test {
 		params.setId(id);
 		params.addParameter("system-version", new StringType("test2"));
 		var paramsExt = new Extension();
+
 		paramsExt.setUrl("test").setValue(new Reference(id));
-
 		library.addContained(params);
-
 		library.addExtension(paramsExt);
 
 		final var parser = FhirContext.forR4Cached().newJsonParser();
@@ -1565,10 +1564,11 @@ public class FhirTerserR4Test {
 		assertEquals(1, copy.getContained().size());
 
 		var stringifiedCopy = parser.encodeResourceToString(copy);
+
 		System.out.print(stringifiedCopy);
-		var parsedCopy = parser.parseResource(stringifiedCopy);
+		Library parsedCopy = (Library) parser.parseResource(stringifiedCopy);
 		System.out.println(stringifiedCopy);
-		assertEquals(1, ((Library) parsedCopy).getContained().size());
+		assertEquals(1, parsedCopy.getContained().size());
 	}
 
 	/**
