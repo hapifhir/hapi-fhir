@@ -1803,7 +1803,6 @@ public class FhirTerser {
 
 	public static class ContainedResources {
 		private long myNextContainedId = 1;
-
 		private List<IBaseResource> myResourceList;
 		private IdentityHashMap<IBaseResource, IIdType> myResourceToIdMap;
 		private Map<String, IBaseResource> myExistingIdToContainedResourceMap;
@@ -1869,17 +1868,18 @@ public class FhirTerser {
 				return null;
 			}
 
-			var idFromMap = getResourceToIdMap().get(theNext);
-			if (idFromMap != null) {
-				return idFromMap;
-			} else if (theNext.getIdElement().getIdPart() != null) {
-				return getResourceToIdMap().values().stream()
-						.filter(id -> theNext.getIdElement().getIdPart().equals(id.getIdPart()))
-						.findAny()
-						.orElse(null);
-			} else {
-				return null;
-			}
+			return getResourceToIdMap().get(theNext);
+//			var idFromMap = getResourceToIdMap().get(theNext);
+//			if (idFromMap != null) {
+//				return idFromMap;
+//			} else if (theNext.getIdElement().getIdPart() != null) {
+//				return getResourceToIdMap().values().stream()
+//						.filter(id -> theNext.getIdElement().getIdPart().equals(id.getIdPart()))
+//						.findAny()
+//						.orElse(null);
+//			} else {
+//				return null;
+//			}
 		}
 
 		private List<IBaseResource> getOrCreateResourceList() {
