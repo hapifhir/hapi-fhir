@@ -282,47 +282,64 @@ public class JsonParserR4Test extends BaseTest {
 
 		b.addEntry().setResource(obs).getRequest().setMethod(Bundle.HTTPVerb.POST).setUrl("/Observation");
 
-		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(b);
-		ourLog.info(encoded);
-	}
-	@Test
-	public void testAutoAssignedContainedCollision() {
-		Bundle b = new Bundle();
-		Specimen specimen = new Specimen();
-		Practitioner practitioner = new Practitioner();
-		DiagnosticReport report = new DiagnosticReport();
-		report.addSpecimen(new Reference(specimen));
-		b.addEntry().setResource(report).getRequest().setMethod(Bundle.HTTPVerb.POST).setUrl("/DiagnosticReport");
+		String encoded = ourCtx.newJsonParser().setPrettyPrint(false).encodeResourceToString(b);
+		//Then: Diag should contain one local contained specimen
+		assertThat(encoded).contains("[{\"resource\":{\"resourceType\":\"DiagnosticReport\",\"contained\":[{\"resourceType\":\"Specimen\",\"id\":\"1\"}]");
+		//Then: Obs should contain one local contained specimen, and one local contained pract
+		assertThat(encoded).contains("\"resource\":{\"resourceType\":\"Observation\",\"contained\":[{\"resourceType\":\"Specimen\",\"id\":\"1\"},{\"resourceType\":\"Practitioner\",\"id\":\"2\"}]");
+		assertThat(encoded).contains("\"performer\":[{\"reference\":\"#2\"}],\"specimen\":{\"reference\":\"#1\"}");
 
-		Observation obs = new Observation();
-		specimen.setId("#1");
-//		practitioner.setId("#1");
-		obs.addPerformer(new Reference(practitioner));
-		obs.setSpecimen(new Reference(specimen));
+		//Also, reverting the operation should work too!
+		Bundle bundle = ourCtx.newJsonParser().parseResource(Bundle.class, encoded);
+		IBaseResource resource1 = ((DiagnosticReport) bundle.getEntry().get(0).getResource()).getSpecimenFirstRep().getResource();
+		IBaseResource resource = ((Observation) bundle.getEntry().get(1).getResource()).getSpecimen().getResource();
+		assertThat(resource1.getIdElement().getIdPart()).isEqualTo(resource.getIdElement().getIdPart());
+		assertThat(resource1).isNotSameAs(resource);
 
-
-		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs);
-		ourLog.info(encoded);
 	}
 
-
 	@Test
-	public void testDuplicate() {
-		Bundle b = new Bundle();
-		Specimen specimen = new Specimen();
-		Practitioner practitioner = new Practitioner();
-		DiagnosticReport report = new DiagnosticReport();
-		report.addSpecimen(new Reference(specimen));
-		b.addEntry().setResource(report).getRequest().setMethod(Bundle.HTTPVerb.POST).setUrl("/DiagnosticReport");
+	public void testAutoAssignedContainedCollisionOrderDependent() {
+		{
+			Specimen specimen = new Specimen();
+			Practitioner practitioner = new Practitioner();
+			DiagnosticReport report = new DiagnosticReport();
+			report.addSpecimen(new Reference(specimen));
 
-		Observation obs = new Observation();
-		obs.setSpecimen(new Reference(specimen));
-		obs.addPerformer(new Reference(practitioner));
+			Observation obs = new Observation();
+			//When: The practitioner (which is parsed first, has an assigned id that will collide with auto-assigned
+			practitioner.setId("#1");
+			obs.addPerformer(new Reference(practitioner));
+			obs.setSpecimen(new Reference(specimen));
 
-		b.addEntry().setResource(obs).getRequest().setMethod(Bundle.HTTPVerb.POST).setUrl("/Observation");
 
-		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(b);
-		ourLog.info(encoded);
+			String encoded = ourCtx.newJsonParser().setPrettyPrint(false).encodeResourceToString(obs);
+			assertThat(encoded).contains("\"contained\":[{\"resourceType\":\"Practitioner\",\"id\":\"1\"},{\"resourceType\":\"Specimen\",\"id\":\"2\"}]");
+			assertThat(encoded).contains("\"performer\":[{\"reference\":\"#1\"}]");
+			assertThat(encoded).contains("\"specimen\":{\"reference\":\"#2\"}}");
+			ourLog.info(encoded);
+		}
+
+		{
+			Specimen specimen = new Specimen();
+			Practitioner practitioner = new Practitioner();
+			DiagnosticReport report = new DiagnosticReport();
+			report.addSpecimen(new Reference(specimen));
+
+			Observation obs = new Observation();
+
+			//When: The specimen (which is parsed second, has an assigned id that will collide with auto-assigned practitioner
+			specimen.setId("#1");
+			obs.addPerformer(new Reference(practitioner));
+			obs.setSpecimen(new Reference(specimen));
+
+
+			String encoded = ourCtx.newJsonParser().setPrettyPrint(false).encodeResourceToString(obs);
+			assertThat(encoded).contains("\"contained\":[{\"resourceType\":\"Specimen\",\"id\":\"1\"},{\"resourceType\":\"Practitioner\",\"id\":\"2\"}]");
+			assertThat(encoded).contains("\"performer\":[{\"reference\":\"#2\"}]");
+			assertThat(encoded).contains("\"specimen\":{\"reference\":\"#1\"}}");
+			ourLog.info(encoded);
+		}
 	}
 
 	@Test

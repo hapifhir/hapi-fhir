@@ -61,6 +61,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
@@ -1415,24 +1416,32 @@ public class FhirTerser {
 		});
 	}
 
+	private Integer hasId(IBaseReference ref) {
+		if (ref.getResource() == null) return 1;
+		if (ref.getResource().getIdElement() == null) return 1;
+		if (ref.getResource().getIdElement().getValue() == null) return 1;
+		return 0;
+	}
+
 	private void containResourcesForEncoding(
 			ContainedResources theContained, IBaseResource theResource, boolean theModifyResource) {
 		List<IBaseReference> allReferences = getAllPopulatedChildElementsOfType(theResource, IBaseReference.class);
-		for (IBaseReference next : allReferences) {
-			IBaseResource resource = next.getResource();
-			if (resource == null && next.getReferenceElement().isLocal()) {
-				if (theContained.hasExistingIdToContainedResource()) {
-					IBaseResource potentialTarget = theContained
-							.getExistingIdToContainedResource()
-							.remove(next.getReferenceElement().getValue());
-					if (potentialTarget != null) {
-						theContained.addContained(next.getReferenceElement(), potentialTarget);
-						containResourcesForEncoding(theContained, potentialTarget, theModifyResource);
-					}
-				}
-			}
-		}
 
+		//Note that we process all contained resources that have arrived here with an ID contained resources first, so that we dont accidentally auto-assign an ID
+		//which may collide with a resource we have yet to process.
+		allReferences = allReferences.stream()
+			.sorted(Comparator.nullsLast(
+				Comparator.comparing(this::hasId)
+			))
+			.collect(Collectors.toList());
+
+
+		processContainedReferenceElements(theContained, theModifyResource, allReferences);
+
+		processContainedResourceElements(theContained, theResource, theModifyResource, allReferences);
+	}
+
+	private void processContainedResourceElements(ContainedResources theContained, IBaseResource theResource, boolean theModifyResource, List<IBaseReference> allReferences) {
 		for (IBaseReference next : allReferences) {
 			IBaseResource resource = next.getResource();
 			if (resource != null) {
@@ -1450,6 +1459,23 @@ public class FhirTerser {
 						theContained
 								.getExistingIdToContainedResource()
 								.remove(resource.getIdElement().getValue());
+					}
+				}
+			}
+		}
+	}
+
+	private void processContainedReferenceElements(ContainedResources theContained, boolean theModifyResource, List<IBaseReference> allReferences) {
+		for (IBaseReference next : allReferences) {
+			IBaseResource resource = next.getResource();
+			if (resource == null && next.getReferenceElement().isLocal()) {
+				if (theContained.hasExistingIdToContainedResource()) {
+					IBaseResource potentialTarget = theContained
+							.getExistingIdToContainedResource()
+							.remove(next.getReferenceElement().getValue());
+					if (potentialTarget != null) {
+						theContained.addContained(next.getReferenceElement(), potentialTarget);
+						containResourcesForEncoding(theContained, potentialTarget, theModifyResource);
 					}
 				}
 			}
@@ -1785,7 +1811,6 @@ public class FhirTerser {
 			if (this.getResourceId(theResource) != null) {
 				// Prevent infinite recursion if there are circular loops in the contained resources
 				if( this.getResourceToIdMap().get(theResource) == theResource) {
-					System.out.println("WE ARE IN AN INFINITE LOOP, TIME TO DROP OUT!");
 					return null;
 				}
 			}
@@ -1804,8 +1829,9 @@ public class FhirTerser {
 				if (substring(idPart, 0, 1).equals("#")) {
 					idPart = idPart.substring(1);
 					if (StringUtils.isNumeric(idPart)) {
-						//FIXME GGG START HERE AND TRY TO PRE_PARSE OUT THE STUPID LIST OF CONTAINEDS.
-						myNextContainedId = Long.parseLong(idPart) + 1;
+						//If there is a user-supplied numeric contained ID, our auto-assigned IDs should exceed the largest
+						//client-assigned contained ID.
+						myNextContainedId = Math.max(myNextContainedId, Long.parseLong(idPart) + 1);
 					}
 				}
 			}
@@ -1873,6 +1899,7 @@ public class FhirTerser {
 		}
 
 		public void assignIdsToContainedResources() {
+			//TODO JA: Dead code?
 
 			if (!getContainedResources().isEmpty()) {
 
