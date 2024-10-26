@@ -1,0 +1,6 @@
+---
+type: perf
+issue: 6253
+title: "A cache has been added to the validation services layer which results
+  in improved validation performance. Thanks to Max Bureck for the
+  contribution!"

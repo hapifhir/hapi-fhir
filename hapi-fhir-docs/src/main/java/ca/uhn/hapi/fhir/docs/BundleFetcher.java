@@ -39,7 +39,7 @@ public class BundleFetcher {
 		// START SNIPPET: loadAll
 		// Create a context and a client
 		FhirContext ctx = FhirContext.forR4();
-		String serverBase = "http://hapi.fhr.org/baseR4";
+		String serverBase = "http://hapi.fhir.org/baseR4";
 		IGenericClient client = ctx.newRestfulGenericClient(serverBase);
 
 		// We'll populate this list

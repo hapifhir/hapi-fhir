@@ -103,7 +103,7 @@ public class ApacheRestfulClientFactory extends RestfulClientFactory {
 					.disableCookieManagement();
 
 			PoolingHttpClientConnectionManager connectionManager =
-					new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+					new PoolingHttpClientConnectionManager(getConnectionTimeToLive(), TimeUnit.MILLISECONDS);
 			connectionManager.setMaxTotal(getPoolMaxTotal());
 			connectionManager.setDefaultMaxPerRoute(getPoolMaxPerRoute());
 			builder.setConnectionManager(connectionManager);

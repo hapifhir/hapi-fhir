@@ -28,6 +28,7 @@ import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.validation.FhirValidator;
+import com.google.common.annotations.Beta;
 import com.google.common.collect.Sets;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -369,6 +370,16 @@ public class JpaStorageSettings extends StorageSettings {
 	private boolean myWriteToLegacyLobColumns = false;
 
 	/**
+	 * If this is enabled (default is {@literal false}), searches on token indexes will
+	 * include the {@literal HASH_IDENTITY} column on all generated FHIR search query SQL.
+	 * This is an experimental flag that may be changed or removed in a future release.
+	 *
+	 * @since 7.6.0
+	 */
+	@Beta
+	private boolean myIncludeHashIdentityForTokenSearches = false;
+
+	/**
 	 * Constructor
 	 */
 	public JpaStorageSettings() {
@@ -394,6 +405,28 @@ public class JpaStorageSettings extends StorageSettings {
 		if (HapiSystemProperties.isPreventInvalidatingConditionalMatchCriteria()) {
 			setPreventInvalidatingConditionalMatchCriteria(true);
 		}
+	}
+
+	/**
+	 * If this is enabled (default is {@literal false}), searches on token indexes will
+	 * include the {@literal HASH_IDENTITY} column on all generated FHIR search query SQL.
+	 * This is an experimental flag that may be changed or removed in a future release.
+	 *
+	 * @since 7.6.0
+	 */
+	public boolean isIncludeHashIdentityForTokenSearches() {
+		return myIncludeHashIdentityForTokenSearches;
+	}
+
+	/**
+	 * If this is enabled (default is {@literal false}), searches on token indexes will
+	 * include the {@literal HASH_IDENTITY} column on all generated FHIR search query SQL.
+	 * This is an experimental flag that may be changed or removed in a future release.
+	 *
+	 * @since 7.6.0
+	 */
+	public void setIncludeHashIdentityForTokenSearches(boolean theIncludeHashIdentityForTokenSearches) {
+		myIncludeHashIdentityForTokenSearches = theIncludeHashIdentityForTokenSearches;
 	}
 
 	/**

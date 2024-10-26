@@ -19,6 +19,7 @@ HAPI implements the following operations for PlanDefinitions:
 
 * [$apply](/docs/clinical_reasoning/plan_definitions.html#apply)
 * [$package](/docs/clinical_reasoning/plan_definitions.html#package)
+* [$data-requirements](/docs/clinical_reasoning/plan_definitions.html#datarequirements)
 
 ## Apply
 
@@ -40,32 +41,36 @@ GET http://your-server-base/fhir/PlanDefinition/opioidcds-10-patient-view/$apply
 
 The following parameters are supported for the `PlanDefinition/$apply` and `PlanDefinition/$r5.apply` operation:
 
-| Parameter           | Type                      | Description |
-|---------------------|---------------------------|-------------|
-| planDefinition      | PlanDefinition            | The plan definition to be applied. If the operation is invoked at the instance level, this parameter is not allowed; if the operation is invoked at the type level, this parameter is required, or a url (and optionally version) must be supplied. |
-| canonical           | canonical(PlanDefinition) | The canonical url of the plan definition to be applied. If the operation is invoked at the instance level, this parameter is not allowed; if the operation is invoked at the type level, this parameter (and optionally the version), or the planDefinition parameter must be supplied. |
-| url                 | uri                       | Canonical URL of the PlanDefinition when invoked at the resource type level. This is exclusive with the planDefinition and canonical parameters. |
-| version             | string                    | Version of the PlanDefinition when invoked at the resource type level. This is exclusive with the planDefinition and canonical parameters. |
-| subject             | string(reference)         | The subject(s) that is/are the target of the plan definition to be applied. |
-| encounter           | string(reference)         | The encounter in context, if any. |
-| practitioner        | string(reference)         | The practitioner applying the plan definition. |
-| organization        | string(reference)         | The organization applying the plan definition. |
-| userType            | CodeableConcept           | The type of user initiating the request, e.g. patient, healthcare provider, or specific type of healthcare provider (physician, nurse, etc.) |
-| userLanguage        | CodeableConcept           | Preferred language of the person using the system |
-| userTaskContext     | CodeableConcept           | The task the system user is performing, e.g. laboratory results review, medication list review, etc. This information can be used to tailor decision support outputs, such as recommended information resources. |
-| setting             | CodeableConcept           | The current setting of the request (inpatient, outpatient, etc.). |
-| settingContext      | CodeableConcept           | Additional detail about the setting of the request, if any |
-| parameters          | Parameters                | Any input parameters defined in libraries referenced by the PlanDefinition. |
-| useServerData       | boolean                   | Whether to use data from the server performing the evaluation. If this parameter is true (the default), then the operation will use data first from any bundles provided as parameters (through the data and prefetch parameters), second data from the server performing the operation, and third, data from the dataEndpoint parameter (if provided). If this parameter is false, the operation will use data first from the bundles provided in the data or prefetch parameters, and second from the dataEndpoint parameter (if provided). |
-| data                | Bundle                    | Data to be made available to the PlanDefinition evaluation. |
-| dataEndpoint        | Endpoint                  | An endpoint to use to access data referenced by retrieve operations in libraries referenced by the PlanDefinition. |
-| contentEndpoint     | Endpoint                  | An endpoint to use to access content (i.e. libraries) referenced by the PlanDefinition. |
-| terminologyEndpoint | Endpoint                  | An endpoint to use to access terminology (i.e. valuesets, codesystems, and membership testing) referenced by the PlanDefinition. |
+| Parameter               | Type                      | Description |
+|-------------------------|---------------------------|-------------|
+| planDefinition          | PlanDefinition            | The plan definition to be applied. If the operation is invoked at the instance level, this parameter is not allowed; if the operation is invoked at the type level, this parameter is required, or a url (and optionally version) must be supplied. |
+| canonical               | canonical(PlanDefinition) | The canonical url of the plan definition to be applied. If the operation is invoked at the instance level, this parameter is not allowed; if the operation is invoked at the type level, this parameter (and optionally the version), or the planDefinition parameter must be supplied. |
+| url                     | uri                       | Canonical URL of the PlanDefinition when invoked at the resource type level. This is exclusive with the planDefinition and canonical parameters. |
+| version                 | string                    | Version of the PlanDefinition when invoked at the resource type level. This is exclusive with the planDefinition and canonical parameters. |
+| subject                 | string(reference)         | The subject(s) that is/are the target of the plan definition to be applied. |
+| encounter               | string(reference)         | The encounter in context, if any. |
+| practitioner            | string(reference)         | The practitioner applying the plan definition. |
+| organization            | string(reference)         | The organization applying the plan definition. |
+| userType                | CodeableConcept           | The type of user initiating the request, e.g. patient, healthcare provider, or specific type of healthcare provider (physician, nurse, etc.) |
+| userLanguage            | CodeableConcept           | Preferred language of the person using the system |
+| userTaskContext         | CodeableConcept           | The task the system user is performing, e.g. laboratory results review, medication list review, etc. This information can be used to tailor decision support outputs, such as recommended information resources. |
+| setting                 | CodeableConcept           | The current setting of the request (inpatient, outpatient, etc.). |
+| settingContext          | CodeableConcept           | Additional detail about the setting of the request, if any |
+| parameters              | Parameters                | Any input parameters defined in libraries referenced by the PlanDefinition. |
+| useServerData           | boolean                   | Whether to use data from the server performing the evaluation. If this parameter is true (the default), then the operation will use data first from any bundles provided as parameters (through the data and prefetch parameters), second data from the server performing the operation, and third, data from the dataEndpoint parameter (if provided). If this parameter is false, the operation will use data first from the bundles provided in the data or prefetch parameters, and second from the dataEndpoint parameter (if provided). |
+| data                    | Bundle                    | Data to be made available to the PlanDefinition evaluation. |
+| prefetchData            |                           | Data to be made available to the PlanDefinition evaluation, organized as prefetch response bundles. Each prefetchData parameter specifies either the name of the prefetchKey it is satisfying, a DataRequirement describing the prefetch, or both. |
+| prefetchData.key        | string                    | The key of the prefetch item. This typically corresponds to the name of a parameter in a library, or the name of a prefetch item in a CDS Hooks discovery response. |
+| prefetchData.descriptor | DataRequirement           | A DataRequirement describing the content of the prefetch item. |
+| prefetchData.data       | Bundle                    | The prefetch data as a Bundle. If the prefetchData has no data part, it indicates there is no data associated with this prefetch item. |
+| dataEndpoint            | Endpoint                  | An endpoint to use to access data referenced by retrieve operations in libraries referenced by the PlanDefinition. |
+| contentEndpoint         | Endpoint                  | An endpoint to use to access content (i.e. libraries) referenced by the PlanDefinition. |
+| terminologyEndpoint     | Endpoint                  | An endpoint to use to access terminology (i.e. valuesets, codesystems, and membership testing) referenced by the PlanDefinition. |
 
 
 ## Package
 
-The `PlanDefinition/$package` [operation](https://build.fhir.org/ig/HL7/crmi-ig/OperationDefinition-crmi-package.html) for PlanDefinition will generate a Bundle of resources that includes the PlanDefinition as well as any related resources which can then be shared. This implementation follows the [CRMI IG](https://build.fhir.org/ig/HL7/crmi-ig/branches/master/index.html) guidance for [packaging artifacts](https://build.fhir.org/ig/HL7/crmi-ig/branches/master/packaging.html).
+The `PlanDefinition/$package` [operation](https://hl7.org/fhir/uv/crmi/OperationDefinition-crmi-package.html) for PlanDefinition will generate a Bundle of resources that includes the PlanDefinition as well as any related resources which can then be shared. This implementation follows the [CRMI IG](https://hl7.org/fhir/uv/crmi/index.html) guidance for [packaging artifacts](https://hl7.org/fhir/uv/crmi/packaging.html).
 
 ### Parameters
 
@@ -78,6 +83,22 @@ The following parameters are supported for the `PlanDefinition/$package` operati
 | url       | uri       | A canonical or artifact reference to a Resource to package on the server. This is exclusive with the canonical parameter. |
 | version   | string    | The version of the Resource. This is exclusive with the canonical parameter. | 
 | usePut    | boolean   | Determines the type of method returned in the Bundle Entries: POST if False (the default), PUT if True. | 
+
+
+## DataRequirements
+
+The `PlanDefinition/$data-requirements` [operation](https://hl7.org/fhir/uv/crmi/OperationDefinition-crmi-data-requirements.html) for PlanDefinition will generate a Library of type `module-definition` that returns the computed effective requirements of the artifact.
+
+### Parameters
+
+The following parameters are supported for the `PlanDefinition/$data-requirements` operation:
+
+| Parameter | Type      | Description                                                                                                    |
+|-----------|-----------|----------------------------------------------------------------------------------------------------------------|
+| id        | string    | The logical id of the canonical or artifact resource to analyze.                                               |
+| canonical | canonical | A canonical url (optionally version specific) to a canonical resource.                                         |
+| url       | uri       | A canonical or artifact reference to a canonical resource. This is exclusive with the canonical parameter.     |
+| version   | string    | The version of the canonical or artifact resource to analyze. This is exclusive with the canonical parameter.  |
 
 
 ## Example PlanDefinition

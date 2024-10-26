@@ -1,8 +1,9 @@
 package ca.uhn.fhir.cr.dstu3;
 
-import ca.uhn.fhir.cr.TestCqlProperties;
-import ca.uhn.fhir.cr.TestCrConfig;
+import ca.uhn.fhir.cr.TestHapiFhirCrPartitionConfig;
+import ca.uhn.fhir.cr.config.test.TestCqlProperties;
 import ca.uhn.fhir.cr.config.dstu3.CrDstu3Config;
+import ca.uhn.fhir.cr.config.test.TestCrConfig;
 import org.cqframework.cql.cql2elm.CqlCompilerOptions;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.cqframework.cql.cql2elm.model.Model;
@@ -26,6 +27,7 @@ import java.util.Set;
 
 @Configuration
 @Import({
+	TestHapiFhirCrPartitionConfig.class,
 	TestCrConfig.class,
 	CrDstu3Config.class
 })
@@ -125,7 +127,7 @@ public class TestCrDstu3Config {
 			cqlCompilerOptions.setOptions(CqlCompilerOptions.Options.DisableDefaultModelInfoLoad);
 		}
 		cqlCompilerOptions.setSignatureLevel(theCqlProperties.getCqlCompilerSignatureLevel());
-		cqlCompilerOptions.setCompatibilityLevel(theCqlProperties.getCqlCompilerCompatibilityLevel());
+		cqlCompilerOptions.setCompatibilityLevel("1.3");
 		cqlCompilerOptions.setAnalyzeDataRequirements(theCqlProperties.isCqlCompilerAnalyzeDataRequirements());
 		cqlCompilerOptions.setCollapseDataRequirements(theCqlProperties.isCqlCompilerCollapseDataRequirements());
 

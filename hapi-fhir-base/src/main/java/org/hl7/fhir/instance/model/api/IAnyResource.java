@@ -56,7 +56,7 @@ public interface IAnyResource extends IBaseResource {
 	@SearchParamDefinition(
 			name = SP_RES_LAST_UPDATED,
 			path = "Resource.meta.lastUpdated",
-			description = "The last updated date of the resource",
+			description = "Only return resources which were last updated as specified by the given range",
 			type = "date")
 
 	/**

@@ -34,8 +34,6 @@ import com.healthmarketscience.sqlbuilder.Condition;
 import com.healthmarketscience.sqlbuilder.FunctionCall;
 import com.healthmarketscience.sqlbuilder.UnaryCondition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
@@ -44,7 +42,6 @@ import static ca.uhn.fhir.jpa.search.builder.predicate.StringPredicateBuilder.cr
 
 public class SourcePredicateBuilder extends BaseJoiningPredicateBuilder {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(SourcePredicateBuilder.class);
 	private final DbColumn myColumnSourceUri;
 	private final DbColumn myColumnRequestId;
 	private final DbColumn myResourceIdColumn;

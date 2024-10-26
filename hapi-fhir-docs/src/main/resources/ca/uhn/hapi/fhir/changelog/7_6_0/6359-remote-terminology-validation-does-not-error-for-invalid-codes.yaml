@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 6359
+backport: 7.4.4
+title: "After upgrading org.hl7.fhir.core from 6.1.2.2 to 6.3.11, the $validate-code operation stopped returning an 
+error for invalid codes using remote terminology. This has been fixed."

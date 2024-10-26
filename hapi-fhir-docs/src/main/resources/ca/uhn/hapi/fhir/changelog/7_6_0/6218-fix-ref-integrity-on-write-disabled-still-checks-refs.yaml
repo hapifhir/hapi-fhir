@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 6218
+jira: SMILE-8370
+title: "Previously, when disabling the 'Enforce Referential Integrity on Write' setting, referential integrity was still 
+partially enforced when posting a resource with an invalid reference. This has now been fixed."

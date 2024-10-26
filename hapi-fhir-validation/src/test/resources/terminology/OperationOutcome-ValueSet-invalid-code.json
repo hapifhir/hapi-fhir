@@ -1,0 +1,43 @@
+{
+  "resourceType": "OperationOutcome",
+  "issue": [
+    {
+      "severity": "error",
+      "code": "code-invalid",
+      "details": {
+        "coding": [
+          {
+            "system": "http://hl7.org/fhir/tools/CodeSystem/tx-issue-type",
+            "code": "not-in-vs"
+          }
+        ],
+        "text": "The provided code 'http://code.system/url#CODE' was not found in the value set 'http://value.set/url%7C1.0.0'"
+      },
+      "location": [
+        "code"
+      ],
+      "expression": [
+        "code"
+      ]
+    },
+    {
+      "severity": "error",
+      "code": "code-invalid",
+      "details": {
+        "coding": [
+          {
+            "system": "http://hl7.org/fhir/tools/CodeSystem/tx-issue-type",
+            "code": "invalid-code"
+          }
+        ],
+        "text": "Unknown code 'CODE' in the CodeSystem 'http://code.system/url' version '1.0.0'"
+      },
+      "location": [
+        "code"
+      ],
+      "expression": [
+        "code"
+      ]
+    }
+  ]
+}

@@ -92,9 +92,7 @@ public interface IHapiTransactionService {
 			@Nonnull ICallable<T> theCallback);
 
 	/**
-	 * Returns {@literal true} if this transaction service will open a new
-	 * transaction when the request partition is for a different partition than
-	 * the currently executing partition.
+	 * Are two RequestPartitionId values compatible within the same transaction?
 	 * <p>
 	 * This is an experimental API, subject to change in a future release.
 	 * </p>
@@ -102,7 +100,10 @@ public interface IHapiTransactionService {
 	 * @since 7.4.0
 	 */
 	@Beta
-	boolean isRequiresNewTransactionWhenChangingPartitions();
+	default boolean isCompatiblePartition(
+			RequestPartitionId theRequestPartitionId, RequestPartitionId theOtherRequestPartitionId) {
+		return true;
+	}
 
 	interface IExecutionBuilder extends TransactionOperations {
 

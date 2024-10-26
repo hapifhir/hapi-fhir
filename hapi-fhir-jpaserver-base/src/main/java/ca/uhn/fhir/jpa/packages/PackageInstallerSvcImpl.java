@@ -588,8 +588,8 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		if (statusTypes.isEmpty()) {
 			return true;
 		}
-		// Resource has a null status field
-		if (statusTypes.get(0).getValue() == null) {
+		// Resource has no status field, or an explicitly null one
+		if (!statusTypes.get(0).hasValue() || statusTypes.get(0).getValue() == null) {
 			return false;
 		}
 		// Resource has a status, and we need to check based on type
@@ -598,7 +598,8 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 				return (statusTypes.get(0).getValueAsString().equals("requested"));
 			case "DocumentReference":
 			case "Communication":
-				return (!statusTypes.get(0).getValueAsString().equals("?"));
+				return (statusTypes.get(0).isEmpty()
+						|| !statusTypes.get(0).getValueAsString().equals("?"));
 			default:
 				return (statusTypes.get(0).getValueAsString().equals("active"));
 		}

@@ -1,17 +1,19 @@
 package ca.uhn.fhir.jpa.subscription;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionMatchingStrategy;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyEvaluator;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
-import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionValidatingInterceptor;
+import ca.uhn.fhir.jpa.subscription.submit.interceptor.validator.RegexEndpointUrlValidationStrategy;
+import ca.uhn.fhir.jpa.subscription.submit.interceptor.validator.RestHookChannelValidator;
+import ca.uhn.fhir.jpa.subscription.submit.interceptor.validator.SubscriptionChannelTypeValidatorFactory;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -29,9 +31,13 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
+
+import static ca.uhn.fhir.jpa.subscription.submit.interceptor.validator.RestHookChannelValidator.IEndpointUrlValidationStrategy;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
@@ -57,6 +63,9 @@ public class SubscriptionValidatingInterceptorTest {
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 	@Mock
 	private SubscriptionSettings mySubscriptionSettings;
+
+	private SubscriptionChannelTypeValidatorFactory mySubscriptionChannelTypeValidatorFactory;
+
 	private SubscriptionCanonicalizer mySubscriptionCanonicalizer;
 
 	@BeforeEach
@@ -69,6 +78,11 @@ public class SubscriptionValidatingInterceptorTest {
 		mySvc.setFhirContext(myCtx);
 		mySvc.setSubscriptionSettingsForUnitTest(mySubscriptionSettings);
 		mySvc.setRequestPartitionHelperSvcForUnitTest(myRequestPartitionHelperSvc);
+
+		IEndpointUrlValidationStrategy iEndpointUrlValidationStrategy = new RegexEndpointUrlValidationStrategy(SubscriptionSettings.DEFAULT_RESTHOOK_ENDPOINTURL_VALIDATION_REGEX);
+		mySubscriptionChannelTypeValidatorFactory = new SubscriptionChannelTypeValidatorFactory(List.of(new RestHookChannelValidator(iEndpointUrlValidationStrategy)));
+
+		mySvc.setSubscriptionChannelTypeValidatorFactoryForUnitTest(mySubscriptionChannelTypeValidatorFactory);
 	}
 
 	@Test
@@ -85,7 +99,7 @@ public class SubscriptionValidatingInterceptorTest {
 
 	@Test
 	public void testValidate_RestHook_Populated() {
-		when(myDaoRegistry.isResourceTypeSupported(eq("Patient"))).thenReturn(true);
+		when(myDaoRegistry.isResourceTypeSupported("Patient")).thenReturn(true);
 
 		Subscription subscription = new Subscription();
 		subscription.setStatus(Subscription.SubscriptionStatus.ACTIVE);
@@ -99,7 +113,7 @@ public class SubscriptionValidatingInterceptorTest {
 
 	@Test
 	public void testValidate_RestHook_ResourceTypeNotSupported() {
-		when(myDaoRegistry.isResourceTypeSupported(eq("Patient"))).thenReturn(false);
+		when(myDaoRegistry.isResourceTypeSupported("Patient")).thenReturn(false);
 
 		Subscription subscription = new Subscription();
 		subscription.setStatus(Subscription.SubscriptionStatus.ACTIVE);
@@ -118,7 +132,7 @@ public class SubscriptionValidatingInterceptorTest {
 
 	@Test
 	public void testValidate_RestHook_MultitypeResourceTypeNotSupported() {
-		when(myDaoRegistry.isResourceTypeSupported(eq("Patient"))).thenReturn(false);
+		when(myDaoRegistry.isResourceTypeSupported("Patient")).thenReturn(false);
 
 		Subscription subscription = new Subscription();
 		subscription.setStatus(Subscription.SubscriptionStatus.ACTIVE);
@@ -137,7 +151,7 @@ public class SubscriptionValidatingInterceptorTest {
 
 	@Test
 	public void testValidate_RestHook_NoEndpoint() {
-		when(myDaoRegistry.isResourceTypeSupported(eq("Patient"))).thenReturn(true);
+		when(myDaoRegistry.isResourceTypeSupported("Patient")).thenReturn(true);
 
 		Subscription subscription = new Subscription();
 		subscription.setStatus(Subscription.SubscriptionStatus.ACTIVE);
@@ -156,7 +170,7 @@ public class SubscriptionValidatingInterceptorTest {
 
 	@Test
 	public void testValidate_RestHook_NoType() {
-		when(myDaoRegistry.isResourceTypeSupported(eq("Patient"))).thenReturn(true);
+		when(myDaoRegistry.isResourceTypeSupported("Patient")).thenReturn(true);
 
 		Subscription subscription = new Subscription();
 		subscription.setStatus(Subscription.SubscriptionStatus.ACTIVE);
@@ -174,7 +188,7 @@ public class SubscriptionValidatingInterceptorTest {
 
 	@Test
 	public void testValidate_RestHook_NoPayload() {
-		when(myDaoRegistry.isResourceTypeSupported(eq("Patient"))).thenReturn(true);
+		when(myDaoRegistry.isResourceTypeSupported("Patient")).thenReturn(true);
 
 		Subscription subscription = new Subscription();
 		subscription.setStatus(Subscription.SubscriptionStatus.ACTIVE);
@@ -203,7 +217,7 @@ public class SubscriptionValidatingInterceptorTest {
 
 	@Test
 	public void testValidate_Cross_Partition_Subscription() {
-		when(myDaoRegistry.isResourceTypeSupported(eq("Patient"))).thenReturn(true);
+		when(myDaoRegistry.isResourceTypeSupported("Patient")).thenReturn(true);
 		when(mySubscriptionSettings.isCrossPartitionSubscriptionEnabled()).thenReturn(true);
 		when(myRequestPartitionHelperSvc.determineCreatePartitionForRequest(isA(RequestDetails.class), isA(Subscription.class), eq("Subscription"))).thenReturn(RequestPartitionId.defaultPartition());
 
@@ -222,8 +236,8 @@ public class SubscriptionValidatingInterceptorTest {
 		// is invalid
 		assertDoesNotThrow(() -> mySvc.resourcePreCreate(subscription, requestDetails, null));
 		Mockito.verify(mySubscriptionSettings, times(1)).isCrossPartitionSubscriptionEnabled();
-		Mockito.verify(myDaoRegistry, times(1)).isResourceTypeSupported(eq("Patient"));
-		Mockito.verify(myRequestPartitionHelperSvc, times(1)).determineCreatePartitionForRequest(isA(RequestDetails.class), isA(Subscription.class), eq("Subscription"));
+		Mockito.verify(myDaoRegistry, times(1)).isResourceTypeSupported("Patient");
+		Mockito.verify(myRequestPartitionHelperSvc, times(1)).determineCreatePartitionForRequest(isA(RequestDetails.class), isA(Subscription.class),eq("Subscription"));
 	}
 
 	@Test
@@ -275,7 +289,7 @@ public class SubscriptionValidatingInterceptorTest {
 
 	@Test
 	public void testValidate_Cross_Partition_System_Subscription_Without_Setting() {
-		when(myDaoRegistry.isResourceTypeSupported(eq("Patient"))).thenReturn(true);
+		when(myDaoRegistry.isResourceTypeSupported("Patient")).thenReturn(true);
 
 		Subscription subscription = new Subscription();
 		subscription.setStatus(Subscription.SubscriptionStatus.ACTIVE);
@@ -292,14 +306,14 @@ public class SubscriptionValidatingInterceptorTest {
 		// is invalid
 		mySvc.resourcePreCreate(subscription, requestDetails, null);
 		Mockito.verify(mySubscriptionSettings, never()).isCrossPartitionSubscriptionEnabled();
-		Mockito.verify(myDaoRegistry, times(1)).isResourceTypeSupported(eq("Patient"));
-		Mockito.verify(myRequestPartitionHelperSvc, never()).determineCreatePartitionForRequest(isA(RequestDetails.class), isA(Patient.class), eq("Patient"));
+		Mockito.verify(myDaoRegistry, times(1)).isResourceTypeSupported("Patient");
+		Mockito.verify(myRequestPartitionHelperSvc, never()).determineCreatePartitionForRequest(isA(RequestDetails.class), isA(Patient.class),eq("Patient"));
 	}
 
 	@Test
 	public void testSubscriptionUpdate() {
 		// setup
-		when(myDaoRegistry.isResourceTypeSupported(eq("Patient"))).thenReturn(true);
+		when(myDaoRegistry.isResourceTypeSupported("Patient")).thenReturn(true);
 		when(mySubscriptionSettings.isCrossPartitionSubscriptionEnabled()).thenReturn(true);
 		lenient()
 			.when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForRead(isA(RequestDetails.class), isA(String.class), isA(IIdType.class)))

@@ -44,13 +44,13 @@ public interface ISearchParamExtractor {
 
 	/**
 	 * Constant for the {@literal theSearchParamFilter} parameters on this interface
-	 * indicating that all search parameters should be indexed.
+	 * indicating that all search parameters should be extracted.
 	 */
 	ISearchParamFilter ALL_PARAMS = t -> t;
 
 	/**
 	 * Constant for the {@literal theSearchParamFilter} parameters on this interface
-	 * indicating that no search parameters should be indexed.
+	 * indicating that no search parameters should be extracted.
 	 */
 	ISearchParamFilter NO_PARAMS = t -> Collections.emptyList();
 
@@ -155,7 +155,7 @@ public interface ISearchParamExtractor {
 	interface ISearchParamFilter {
 
 		/**
-		 * Given the list of search parameters for indexing, an implementation of this
+		 * Given the list of search parameters for extracting, an implementation of this
 		 * interface may selectively remove any that it wants to remove (or can add if desired).
 		 * <p>
 		 * Implementations must not modify the list that is passed in. If changes are

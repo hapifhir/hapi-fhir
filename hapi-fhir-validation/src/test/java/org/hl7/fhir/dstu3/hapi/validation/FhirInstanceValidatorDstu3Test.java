@@ -21,8 +21,8 @@ import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerVali
 import org.hl7.fhir.common.hapi.validation.support.SnapshotGeneratingValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
-import org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.dstu3.fhirpath.FHIRPathEngine;
+import org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.dstu3.model.Base;
 import org.hl7.fhir.dstu3.model.BooleanType;
 import org.hl7.fhir.dstu3.model.Bundle;
@@ -55,7 +55,6 @@ import org.hl7.fhir.dstu3.model.StructureDefinition.StructureDefinitionKind;
 import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-
 import org.hl7.fhir.r5.utils.validation.IValidationPolicyAdvisor;
 import org.hl7.fhir.r5.utils.validation.IValidatorResourceFetcher;
 import org.hl7.fhir.r5.utils.validation.constants.ReferenceValidationPolicy;
@@ -65,6 +64,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.quality.Strictness;
 import org.mockito.stubbing.Answer;
@@ -110,6 +111,7 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 	private FhirValidator myVal;
 	private ArrayList<String> myValidConcepts;
 	private Set<String> myValidSystems = new HashSet<>();
+	private Set<String> myValidSystemsNotReturningIssues = new HashSet<>();
 	private HashMap<String, StructureDefinition> myStructureDefinitions;
 	private HashMap<String, CodeSystem> myCodeSystems;
 	private HashMap<String, ValueSet> myValueSets;
@@ -117,7 +119,15 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 	private CachingValidationSupport myValidationSupport;
 
 	private void addValidConcept(String theSystem, String theCode) {
-		myValidSystems.add(theSystem);
+		addValidConcept(theSystem, theCode, true);
+	}
+
+	private void addValidConcept(String theSystem, String theCode, boolean theShouldSystemReturnIssuesForInvalidCode) {
+		if (theShouldSystemReturnIssuesForInvalidCode) {
+			myValidSystems.add(theSystem);
+		} else {
+			myValidSystemsNotReturningIssues.add(theSystem);
+		}
 		myValidConcepts.add(theSystem + "___" + theCode);
 	}
 
@@ -219,9 +229,10 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 					retVal = new IValidationSupport.CodeValidationResult().setCode(code);
 				} else if (myValidSystems.contains(system)) {
 					final String message = "Unknown code (for '" + system + "#" + code + "')";
-
-					return new IValidationSupport.CodeValidationResult().setSeverityCode(ValidationMessage.IssueSeverity.ERROR.toCode()).setMessage(message).setCodeValidationIssues(Collections.singletonList(new IValidationSupport.CodeValidationIssue(message, IValidationSupport.IssueSeverity.ERROR, IValidationSupport.CodeValidationIssueCode.CODE_INVALID, IValidationSupport.CodeValidationIssueCoding.INVALID_CODE)));
-
+					retVal = new IValidationSupport.CodeValidationResult().setSeverityCode(ValidationMessage.IssueSeverity.ERROR.toCode()).setMessage(message).setCodeValidationIssues(Collections.singletonList(new IValidationSupport.CodeValidationIssue(message, IValidationSupport.IssueSeverity.ERROR, IValidationSupport.CodeValidationIssueCode.CODE_INVALID, IValidationSupport.CodeValidationIssueCoding.INVALID_CODE)));
+				} else if (myValidSystemsNotReturningIssues.contains(system)) {
+					final String message = "Unknown code (for '" + system + "#" + code + "')";
+					retVal = new IValidationSupport.CodeValidationResult().setSeverityCode(ValidationMessage.IssueSeverity.ERROR.toCode()).setMessage(message);
 				} else if (myCodeSystems.containsKey(system)) {
 					CodeSystem cs = myCodeSystems.get(system);
 					Optional<ConceptDefinitionComponent> found = cs.getConcept().stream().filter(t -> t.getCode().equals(code)).findFirst();
@@ -1161,9 +1172,11 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 
 	}
 
-	@Test
-	public void testValidateResourceContainingLoincCode() {
-		addValidConcept("http://loinc.org", "1234567");
+	// TODO: uncomment value false when https://github.com/hapifhir/org.hl7.fhir.core/issues/1766 is fixed
+	@ParameterizedTest
+	@ValueSource(booleans = {true, /*false*/})
+	public void testValidateResourceContainingLoincCode(boolean theShouldSystemReturnIssuesForInvalidCode) {
+		addValidConcept("http://loinc.org", "1234567", theShouldSystemReturnIssuesForInvalidCode);
 
 		Observation input = new Observation();
 		// input.getMeta().addProfile("http://hl7.org/fhir/StructureDefinition/devicemetricobservation");

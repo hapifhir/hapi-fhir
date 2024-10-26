@@ -2548,7 +2548,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			mySystemDao.transaction(mySrd, request);
 			fail();
 		} catch (PreconditionFailedException e) {
-			assertThat(e.getMessage()).contains("resource with match URL \"Patient?");
+			assertThat(e.getMessage()).contains("Patient with match URL \"Patient?");
 		}
 	}
 

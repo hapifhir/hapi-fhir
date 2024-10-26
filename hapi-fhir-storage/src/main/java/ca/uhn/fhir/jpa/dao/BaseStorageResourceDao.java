@@ -122,6 +122,7 @@ public abstract class BaseStorageResourceDao<T extends IBaseResource> extends Ba
 								BaseStorageDao.class,
 								"transactionOperationWithMultipleMatchFailure",
 								"PATCH",
+								getResourceName(),
 								theConditionalUrl,
 								match.size());
 				throw new PreconditionFailedException(Msg.code(972) + msg);
