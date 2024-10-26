@@ -23,6 +23,7 @@ import org.hl7.fhir.r4.model.Composition;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Device;
+import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Extension;
@@ -43,6 +44,7 @@ import org.hl7.fhir.r4.model.PrimitiveType;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Specimen;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Type;
 import org.hl7.fhir.r4.model.codesystems.DataAbsentReason;
@@ -55,6 +57,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jakarta.annotation.Nonnull;
+import org.testcontainers.shaded.com.trilead.ssh2.packets.PacketDisconnect;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -261,7 +265,81 @@ public class JsonParserR4Test extends BaseTest {
 
 		idx = encoded.indexOf("\"Medication\"", idx + 1);
 		assertEquals(-1, idx);
+	}
 
+	@Test
+	public void testDuplicateContainedResourcesAcrossABundleAreReplicated() {
+		Bundle b = new Bundle();
+		Specimen specimen = new Specimen();
+		Practitioner practitioner = new Practitioner();
+		DiagnosticReport report = new DiagnosticReport();
+		report.addSpecimen(new Reference(specimen));
+		b.addEntry().setResource(report).getRequest().setMethod(Bundle.HTTPVerb.POST).setUrl("/DiagnosticReport");
+
+		Observation obs = new Observation();
+		obs.addPerformer(new Reference(practitioner));
+		obs.setSpecimen(new Reference(specimen));
+
+		b.addEntry().setResource(obs).getRequest().setMethod(Bundle.HTTPVerb.POST).setUrl("/Observation");
+
+		String encoded = ourCtx.newJsonParser().setPrettyPrint(false).encodeResourceToString(b);
+		//Then: Diag should contain one local contained specimen
+		assertThat(encoded).contains("[{\"resource\":{\"resourceType\":\"DiagnosticReport\",\"contained\":[{\"resourceType\":\"Specimen\",\"id\":\"1\"}]");
+		//Then: Obs should contain one local contained specimen, and one local contained pract
+		assertThat(encoded).contains("\"resource\":{\"resourceType\":\"Observation\",\"contained\":[{\"resourceType\":\"Specimen\",\"id\":\"1\"},{\"resourceType\":\"Practitioner\",\"id\":\"2\"}]");
+		assertThat(encoded).contains("\"performer\":[{\"reference\":\"#2\"}],\"specimen\":{\"reference\":\"#1\"}");
+
+		//Also, reverting the operation should work too!
+		Bundle bundle = ourCtx.newJsonParser().parseResource(Bundle.class, encoded);
+		IBaseResource resource1 = ((DiagnosticReport) bundle.getEntry().get(0).getResource()).getSpecimenFirstRep().getResource();
+		IBaseResource resource = ((Observation) bundle.getEntry().get(1).getResource()).getSpecimen().getResource();
+		assertThat(resource1.getIdElement().getIdPart()).isEqualTo(resource.getIdElement().getIdPart());
+		assertThat(resource1).isNotSameAs(resource);
+
+	}
+
+	@Test
+	public void testAutoAssignedContainedCollisionOrderDependent() {
+		{
+			Specimen specimen = new Specimen();
+			Practitioner practitioner = new Practitioner();
+			DiagnosticReport report = new DiagnosticReport();
+			report.addSpecimen(new Reference(specimen));
+
+			Observation obs = new Observation();
+			//When: The practitioner (which is parsed first, has an assigned id that will collide with auto-assigned
+			practitioner.setId("#1");
+			obs.addPerformer(new Reference(practitioner));
+			obs.setSpecimen(new Reference(specimen));
+
+
+			String encoded = ourCtx.newJsonParser().setPrettyPrint(false).encodeResourceToString(obs);
+			assertThat(encoded).contains("\"contained\":[{\"resourceType\":\"Practitioner\",\"id\":\"1\"},{\"resourceType\":\"Specimen\",\"id\":\"2\"}]");
+			assertThat(encoded).contains("\"performer\":[{\"reference\":\"#1\"}]");
+			assertThat(encoded).contains("\"specimen\":{\"reference\":\"#2\"}}");
+			ourLog.info(encoded);
+		}
+
+		{
+			Specimen specimen = new Specimen();
+			Practitioner practitioner = new Practitioner();
+			DiagnosticReport report = new DiagnosticReport();
+			report.addSpecimen(new Reference(specimen));
+
+			Observation obs = new Observation();
+
+			//When: The specimen (which is parsed second, has an assigned id that will collide with auto-assigned practitioner
+			specimen.setId("#1");
+			obs.addPerformer(new Reference(practitioner));
+			obs.setSpecimen(new Reference(specimen));
+
+
+			String encoded = ourCtx.newJsonParser().setPrettyPrint(false).encodeResourceToString(obs);
+			assertThat(encoded).contains("\"contained\":[{\"resourceType\":\"Specimen\",\"id\":\"1\"},{\"resourceType\":\"Practitioner\",\"id\":\"2\"}]");
+			assertThat(encoded).contains("\"performer\":[{\"reference\":\"#2\"}]");
+			assertThat(encoded).contains("\"specimen\":{\"reference\":\"#1\"}}");
+			ourLog.info(encoded);
+		}
 	}
 
 	@Test
