@@ -109,7 +109,8 @@ public class ConformanceMethodBindingTest {
 	}
 
 	@Test
-	public void invokeServer_metadata() {
+	public void invokeServer_metadata() throws NoSuchMethodException {
+		init(new TestResourceProvider());
 
 		RequestDetails requestDetails = mySrd;
 		when(requestDetails.getOperation()).thenReturn("metadata");
