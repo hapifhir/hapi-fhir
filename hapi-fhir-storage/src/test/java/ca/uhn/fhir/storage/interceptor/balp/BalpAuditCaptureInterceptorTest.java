@@ -840,7 +840,7 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 		myPatientProvider.store(p1);
 		myPatientProvider.store(p2);
 
-		Bundle outcome = myClient
+		myClient
 			.search()
 			.forResource(Patient.class)
 			.returnBundle(Bundle.class)
